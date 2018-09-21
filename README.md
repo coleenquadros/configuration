@@ -36,6 +36,7 @@ None
   - Mutations
   - Removal
 - Integrations are triggered based on the schemas that are declared via the `$schema` property in the instances
+- Integrations should include a dry run mode which will generate a plan that can be reviewed by service delivery when a PR is created
 
 ### Existing Integrations
 
@@ -49,8 +50,23 @@ None
 - Management of OLM catalog entries for managing service operators: `schemas/olm`
 - Ownership of OpenShift Kubernetes namespace resources: `schemas/opensfhit`
 - Management of cluster monitoring, such as zabbix, prometheus, and alert manager: `schemas/monitoring`
+- Cloud (AWS) resource provisioning: `schemas/cloud`
 
 ## Integration Notes
+
+### Open questions:
+
+- Should we protect against poorly performing upstream services with heuristics against the magnitude of the change and the service API responses?
+
+  - Unknown
+
+- Is it actually possible to run a full rectification loop that is declarative and idempotent against all of our required services? Are we going to run into rate limits against the upstream services?
+
+  - Unknown
+
+- Will we have the "list" permissions required for running a rectification loop against a running service for each required integration?
+
+  - Unknown
 
 ### Vault notes:
 
