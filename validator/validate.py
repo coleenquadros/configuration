@@ -4,13 +4,17 @@ import glob
 import re
 import os
 import sys
+import logging
 
 import pdb
 import anymarkup
+import json
 import jsonschema
 import requests
 
 APP_ROOT = os.environ['APP_ROOT']
+
+logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 
 
 class MissingSchemaFile(Exception):
@@ -34,6 +38,14 @@ class ValidationResultOK(ValidationResult):
         self.filename = filename
         self.schema_url = schema_url
 
+    def dump_obj(self):
+        return {
+            self.filename: {
+                "status": "OK",
+                "schema_url": self.schema_url,
+            }
+        }
+
 
 class ValidationResultError(ValidationResult):
     status = False
@@ -51,6 +63,16 @@ class ValidationResultError(ValidationResult):
             msg = self.reason
 
         return msg
+
+    def dump_obj(self):
+        return {
+            self.filename: {
+                "status": "ERROR",
+                "schema_url": self.schema_url,
+                "reason": self.reason,
+                "error": self.error.message
+            }
+        }
 
 
 class ValidateFile(object):
@@ -119,12 +141,12 @@ class ValidateFile(object):
 
 
 def main():
-    results = []
-
     filenames = []
     for arg in sys.argv[1:]:
         filenames.extend(glob.glob(arg))
 
+    results = []
+    results_error_output = []
     for filename in filenames:
         is_file = os.path.isfile(filename)
         is_markup = re.search("\.(json|ya?ml)$", filename)
@@ -132,22 +154,16 @@ def main():
         if is_file and is_markup:
             v = ValidateFile(filename)
             validation_result = v.validate()
+            logging.info(validation_result.summary())
             results.append(validation_result)
 
-    success = True
-    for result in results:
-        print result.summary()
+            if not validation_result.status:
+                results_error_output.append(validation_result.dump_obj())
 
-        if not result.status:
-            # this is an error
-            print result.error_info()
-            success = False
-
-        print '--'
-
-    if success:
+    if len(results_error_output) == 0:
         sys.exit(0)
     else:
+        print json.dumps(results_error_output)
         sys.exit(1)
 
 
