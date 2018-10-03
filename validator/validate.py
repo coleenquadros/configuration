@@ -10,7 +10,7 @@ import anymarkup
 import jsonschema
 import requests
 
-SCHEMAS_ROOT = os.environ['SCHEMAS_ROOT']
+APP_ROOT = os.environ['APP_ROOT']
 
 
 class MissingSchemaFile(Exception):
@@ -94,7 +94,7 @@ class ValidateFile(object):
     def get_schema(self):
         if self.schema_url[0] == '/':
             schema_url = self.schema_url[1:]
-            schema_file = os.path.join(SCHEMAS_ROOT, schema_url)
+            schema_file = os.path.join(APP_ROOT, schema_url)
 
             if not os.path.isfile(schema_file):
                 raise MissingSchemaFile()
