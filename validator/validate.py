@@ -6,11 +6,11 @@ import os
 import re
 import sys
 
+
 import anymarkup
 import json
 import jsonschema
 import requests
-
 
 APP_ROOT = os.environ['APP_ROOT']
 
