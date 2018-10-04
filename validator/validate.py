@@ -120,10 +120,7 @@ def fetch_schema(schema_url):
 
 
 def fetch_schema_file(schema_url):
-    if schema_url[0] == '/':
-        schema_url = schema_url[1:]
-
-    schema_file = os.path.join(APP_ROOT, schema_url)
+    schema_file = os.path.join(APP_ROOT, schema_url.lstrip('/'))
 
     if not os.path.isfile(schema_file):
         raise MissingSchemaFile(schema_file)
