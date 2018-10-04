@@ -39,9 +39,12 @@ class ValidationOK(ValidationResult):
 
     def dump(self):
         return {
-            "summary": self.summary(),
-            "status": "OK",
-            "schema_url": self.schema_url,
+            "filename": self.filename,
+            "result": {
+                "summary": self.summary(),
+                "status": "OK",
+                "schema_url": self.schema_url,
+            }
         }
 
 
@@ -56,11 +59,14 @@ class ValidationError(ValidationResult):
 
     def dump(self):
         return {
-            "summary": self.summary(),
-            "status": "ERROR",
-            "schema_url": self.schema_url,
-            "reason": self.reason,
-            "error": self.error.message
+            "filename": self.filename,
+            "result": {
+                "summary": self.summary(),
+                "status": "ERROR",
+                "schema_url": self.schema_url,
+                "reason": self.reason,
+                "error": self.error.message
+            }
         }
 
     def error_info(self):
@@ -129,17 +135,17 @@ def fetch_schema_file(schema_url):
 
 
 def main():
-    results = {
-        path: validate_file(path).dump()
+    results = [
+        validate_file(path).dump()
         for arg in sys.argv[1:]
         for path in glob.glob(arg)
         if os.path.isfile(path) and re.search("\.(json|ya?ml)$", path)
-    }
+    ]
 
     errors = [
-        r['status']
-        for _, r in results.items()
-        if r['status'] == 'ERROR'
+        r
+        for r in results
+        if r['result']['status'] == 'ERROR'
     ]
 
     print json.dumps(results)
