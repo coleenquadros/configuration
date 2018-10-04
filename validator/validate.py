@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 
 import glob
-import re
-import os
-import sys
 import logging
+import os
+import re
+import sys
 
-import pdb
 import anymarkup
 import json
 import jsonschema
 import requests
+
 
 APP_ROOT = os.environ['APP_ROOT']
 
