@@ -65,7 +65,7 @@ class ValidationError(ValidationResult):
                 "status": "ERROR",
                 "schema_url": self.schema_url,
                 "reason": self.reason,
-                "error": self.error.message
+                "error": self.error.__str__()
             }
         }
 
@@ -104,6 +104,8 @@ def validate_file(filename):
         jsonschema.validate(data, schema)
     except jsonschema.ValidationError as e:
         return ValidationError(filename, "VALIDATION_ERROR", e, schema_url)
+    except jsonschema.SchemaError as e:
+        return ValidationError(filename, "SCHEMA_ERROR", e, schema_url)
 
     return ValidationOK(filename, schema_url)
 
