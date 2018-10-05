@@ -102,7 +102,9 @@ def validate_file(filename):
         return ValidationError(filename, "SCHEMA_PARSE_ERROR", e, schema_url)
 
     try:
-        jsonschema.validate(data, schema)
+        schema_path = "file://" + os.path.abspath(SCHEMAS_ROOT) + '/'
+        resolver = jsonschema.RefResolver(schema_path, schema)
+        jsonschema.Draft4Validator(schema, resolver=resolver).validate(data)
     except jsonschema.ValidationError as e:
         return ValidationError(filename, "VALIDATION_ERROR", e, schema_url)
     except jsonschema.SchemaError as e:
