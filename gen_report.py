@@ -13,9 +13,9 @@ REPORT_TEMPLATE = """
     <link rel='stylesheet' href='main.css'>
 </head>
 <body>
-<h1>App-Interface Schema Validator</h1>
+<h2>App-Interface Schema Validator</h2>
 <p>Raw results: <a href='results.json'>results.json</a></p>
-<p>Summary:</p>
+<h3>Summary:</h3>
 <ul>
 <li>Checked files: {{ results | length }}</li>
 <li>Errors: {{ errors | length }}</li>
