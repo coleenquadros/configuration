@@ -1,5 +1,7 @@
 #!/bin/bash
 
+env > env.txt
+
 rm -rf venv
 virtualenv venv
 source venv/bin/activate
