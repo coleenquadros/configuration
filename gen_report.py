@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import json
+import os
 import sys
 
 import jinja2
@@ -16,6 +17,9 @@ REPORT_TEMPLATE = """
 <ul>
 <li><strong>Checked files</strong>: {{ results | length }}</li>
 <li><strong>Errors</strong>: {{ errors | length }}</li>
+{% if description %}
+<li><strong>MR</strong>: <a href="{{ description }}">{{ description }}</a></li>
+{% endif %}
 <li><a href='results.json'>results.json</a></li>
 </ul>
 
@@ -51,6 +55,7 @@ def main():
     print template.render(
         results=results,
         errors=errors,
+        description=os.environ.get('DESCRIPTION')
     )
 
 

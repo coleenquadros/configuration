@@ -1,6 +1,10 @@
 #!/bin/bash
 
-env > env.txt
+export DESCRIPTION=$(
+    curl -sk "$BUILD_URL/api/json" | \
+    jq .description | \
+    grep -o 'http[^\\]\+'
+)
 
 rm -rf venv
 virtualenv venv
