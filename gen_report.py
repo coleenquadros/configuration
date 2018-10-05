@@ -13,14 +13,15 @@ REPORT_TEMPLATE = """
     <link rel='stylesheet' href='main.css'>
 </head>
 <body>
-<h1>App-interface schema validator</h1>
+<h1>App-Interface Schema Validator</h1>
+<p>Raw results: <a href='results.json'>results.json</a></p>
+<p>Summary:</p>
 <ul>
-<li><strong>Checked files</strong>: {{ results | length }}</li>
-<li><strong>Errors</strong>: {{ errors | length }}</li>
+<li>Checked files: {{ results | length }}</li>
+<li>Errors: {{ errors | length }}</li>
 {% if description %}
-<li><strong>MR</strong>: <a href="{{ description }}">{{ description }}</a></li>
+<li>MR: <a href="{{ description }}">{{ description }}</a></li>
 {% endif %}
-<li><a href='results.json'>results.json</a></li>
 </ul>
 
 {% if errors | length > 0 %}
@@ -28,8 +29,8 @@ REPORT_TEMPLATE = """
 {% for error in errors %}
     <h3>{{ error.filename }}</h3>
     <ul>
-        <li><strong>REASON</strong>: <code>{{ error.result.reason }}</code></li>
-        <li><strong>SCHEMA_URL</strong>: <code>{{ error.result.schema_url }}</code></li>
+        <li>REASON: <code>{{ error.result.reason }}</code></li>
+        <li>SCHEMA_URL: <code>{{ error.result.schema_url }}</code></li>
     </ul>
     <pre><code>{{ error.result.error | e }}</code></pre>
 {% endfor %}
