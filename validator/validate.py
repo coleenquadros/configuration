@@ -6,13 +6,14 @@ import os
 import re
 import sys
 
-
 import anymarkup
 import json
 import jsonschema
 import requests
 
-APP_ROOT = os.environ['APP_ROOT']
+
+SCHEMAS_ROOT = os.environ.get('SCHEMAS_ROOT') or \
+    os.path.join(os.environ['APP_ROOT'], 'schemas')
 
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 
@@ -122,7 +123,7 @@ def fetch_schema(schema_url):
 
 
 def fetch_schema_file(schema_url):
-    schema_file = os.path.join(APP_ROOT, schema_url.lstrip('/'))
+    schema_file = os.path.join(SCHEMAS_ROOT, schema_url)
 
     if not os.path.isfile(schema_file):
         raise MissingSchemaFile(schema_file)
