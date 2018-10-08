@@ -17,16 +17,29 @@ REPORT_TEMPLATE = """
 <p>Raw results: <a href='results.json'>results.json</a></p>
 <h3>Summary:</h3>
 <ul>
-<li>Checked files: {{ results | length }}</li>
-<li>Errors: {{ errors | length }}</li>
+<li>Checked schemas: {{ results_schemas | length }}</li>
+<li>Schema errors: {{ errors_schemas | length }}</li>
+<li>Checked files: {{ results_files | length }}</li>
+<li>File validation errors: {{ errors_files | length }}</li>
 {% if description %}
 <li>MR: <a href="{{ description }}">{{ description }}</a></li>
 {% endif %}
 </ul>
 
-{% if errors | length > 0 %}
-<h2>Validation Errors</h2>
-{% for error in errors %}
+{% if errors_schemas | length > 0 %}
+<h2>Schema Errors</h2>
+{% for error in errors_schemas %}
+    <h3>{{ error.filename }}</h3>
+    <ul>
+        <li>REASON: <code>{{ error.result.reason }}</code></li>
+    </ul>
+    <pre><code>{{ error.result.error | e }}</code></pre>
+{% endfor %}
+{% endif %}
+
+{% if errors_files | length > 0 %}
+<h2>File Validation Errors</h2>
+{% for error in errors_files %}
     <h3>{{ error.filename }}</h3>
     <ul>
         <li>REASON: <code>{{ error.result.reason }}</code></li>
@@ -45,17 +58,33 @@ def main():
     with open(sys.argv[1], 'r') as f:
         results = json.load(f)
 
-    errors = [
-        i
-        for i in results
+    results_schemas = [
+        i for i in results
+        if i["kind"] == "SCHEMA"
+    ]
+
+    errors_schemas = [
+        i for i in results_schemas
+        if i["result"]["status"] == "ERROR"
+    ]
+
+    results_files = [
+        i for i in results
+        if i["kind"] == "FILE"
+    ]
+
+    errors_files = [
+        i for i in results_files
         if i["result"]["status"] == "ERROR"
     ]
 
     template = jinja2.Template(REPORT_TEMPLATE)
 
     print template.render(
-        results=results,
-        errors=errors,
+        results_schemas=results_schemas,
+        errors_schemas=errors_schemas,
+        results_files=results_files,
+        errors_files=errors_files,
         description=os.environ.get('DESCRIPTION')
     )
 

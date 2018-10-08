@@ -32,13 +32,15 @@ class ValidationResult(object):
 class ValidationOK(ValidationResult):
     status = True
 
-    def __init__(self, filename, schema_url):
+    def __init__(self, kind, filename, schema_url):
+        self.kind = kind
         self.filename = filename
         self.schema_url = schema_url
 
     def dump(self):
         return {
             "filename": self.filename,
+            "kind": self.kind,
             "result": {
                 "summary": self.summary(),
                 "status": "OK",
@@ -50,7 +52,8 @@ class ValidationOK(ValidationResult):
 class ValidationError(ValidationResult):
     status = False
 
-    def __init__(self, filename, reason, error, schema_url=None):
+    def __init__(self, kind, filename, reason, error, schema_url=None):
+        self.kind = kind
         self.filename = filename
         self.reason = reason
         self.error = error
@@ -59,6 +62,7 @@ class ValidationError(ValidationResult):
     def dump(self):
         return {
             "filename": self.filename,
+            "kind": self.kind,
             "result": {
                 "summary": self.summary(),
                 "status": "ERROR",
@@ -77,42 +81,66 @@ class ValidationError(ValidationResult):
         return msg
 
 
-def validate_file(schemas_root, filename, metaschema=None):
-    logging.info('validating: {}'.format(filename))
+def validate_schema(schemas_root, filename, metaschema):
+    kind = "SCHEMA"
+
+    logging.info('validating schema: {}'.format(filename))
+
+    schema_url = 'META_SCHEMA'
 
     try:
         data = anymarkup.parse_file(filename)
     except anymarkup.AnyMarkupError as e:
-        return ValidationError(filename, "FILE_PARSE_ERROR", e)
+        return ValidationError(kind, filename, "FILE_PARSE_ERROR", e)
+
+    try:
+        jsonschema.Draft4Validator.check_schema(data)
+        jsonschema.Draft4Validator(metaschema).validate(data)
+    except jsonschema.ValidationError as e:
+        return ValidationError(kind, filename, "VALIDATION_ERROR", e,
+                               schema_url)
+    except jsonschema.SchemaError as e:
+        return ValidationError(kind, filename, "SCHEMA_ERROR", e, schema_url)
+
+    return ValidationOK(kind, filename, schema_url)
+
+
+def validate_file(schemas_root, filename):
+    kind = "FILE"
+
+    logging.info('validating file: {}'.format(filename))
+
+    try:
+        data = anymarkup.parse_file(filename)
+    except anymarkup.AnyMarkupError as e:
+        return ValidationError(kind, filename, "FILE_PARSE_ERROR", e)
 
     try:
         schema_url = data[u'$schema']
     except KeyError as e:
-        return ValidationError(filename, "MISSING_SCHEMA_URL", e)
+        return ValidationError(kind, filename, "MISSING_SCHEMA_URL", e)
 
     try:
         schema = fetch_schema(schemas_root, schema_url)
     except MissingSchemaFile as e:
-        return ValidationError(filename, "MISSING_SCHEMA_FILE", e, schema_url)
+        return ValidationError(kind, filename, "MISSING_SCHEMA_FILE", e,
+                               schema_url)
     except requests.HTTPError as e:
-        return ValidationError(filename, "HTTP_ERROR", e, schema_url)
+        return ValidationError(kind, filename, "HTTP_ERROR", e, schema_url)
     except anymarkup.AnyMarkupError as e:
-        return ValidationError(filename, "SCHEMA_PARSE_ERROR", e, schema_url)
+        return ValidationError(kind, filename, "SCHEMA_PARSE_ERROR", e,
+                               schema_url)
 
     try:
         schema_path = "file://" + os.path.abspath(schemas_root) + '/'
-
         resolver = jsonschema.RefResolver(schema_path, schema)
-
-        jsonschema.Draft4Validator(metaschema).validate(schema)
-        jsonschema.Draft4Validator.check_schema(schema)
         jsonschema.Draft4Validator(schema, resolver=resolver).validate(data)
     except jsonschema.ValidationError as e:
-        return ValidationError(filename, "VALIDATION_ERROR", e, schema_url)
+        return ValidationError(kind, filename, "VALIDATION_ERROR", e, schema_url)
     except jsonschema.SchemaError as e:
-        return ValidationError(filename, "SCHEMA_ERROR", e, schema_url)
+        return ValidationError(kind, filename, "SCHEMA_ERROR", e, schema_url)
 
-    return ValidationOK(filename, schema_url)
+    return ValidationOK(kind, filename, schema_url)
 
 
 def fetch_schema(schemas_root, schema_url):
@@ -155,18 +183,36 @@ def main():
     args = parser.parse_args()
 
     # Metaschema
-    metaschema = fetch_schema(args.schemas_root, args.metaschema)
+    schemas_root = args.schemas_root
+    metaschema = fetch_schema(schemas_root, args.metaschema)
     jsonschema.Draft4Validator.check_schema(metaschema)
 
+    # Find schemas
+    schemas = [
+        os.path.join(dirpath, filename)
+        for dirpath, dirnames, filenames in os.walk(schemas_root)
+        for filename in filenames
+        if re.search("\.(json|ya?ml)$", filename)
+    ]
+
+    # Validate schemas
+    results_schemas = [
+        validate_schema(schemas_root, path, metaschema).dump()
+        for path in schemas
+        if os.path.isfile(path) and re.search("\.(json|ya?ml)$", path)
+    ]
+
     # Validate files
-    results = [
-        validate_file(args.schemas_root, path, metaschema).dump()
+    results_files = [
+        validate_file(schemas_root, path).dump()
         for arg in args.files
         for path in glob.glob(arg)
         if os.path.isfile(path) and re.search("\.(json|ya?ml)$", path)
     ]
 
     # Calculate errors
+    results = results_schemas + results_files
+
     errors = [
         r
         for r in results
