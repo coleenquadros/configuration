@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import argparse
 import glob
 import logging
 import os
@@ -79,7 +80,7 @@ class ValidationError(ValidationResult):
         return msg
 
 
-def validate_file(filename):
+def validate_file(filename, metaschema=None):
     logging.info('validating: {}'.format(filename))
 
     try:
@@ -103,7 +104,11 @@ def validate_file(filename):
 
     try:
         schema_path = "file://" + os.path.abspath(SCHEMAS_ROOT) + '/'
+
         resolver = jsonschema.RefResolver(schema_path, schema)
+
+        jsonschema.Draft4Validator(metaschema).validate(schema)
+        jsonschema.Draft4Validator.check_schema(schema)
         jsonschema.Draft4Validator(schema, resolver=resolver).validate(data)
     except jsonschema.ValidationError as e:
         return ValidationError(filename, "VALIDATION_ERROR", e, schema_url)
@@ -137,19 +142,38 @@ def fetch_schema_file(schema_url):
 
 
 def main():
+    # Parser
+    parser = argparse.ArgumentParser(
+        description='App-Interface Schema Validator')
+
+    parser.add_argument('--metaschema', required=True,
+                        help='Path to the metaschema file')
+
+    parser.add_argument('glob_files', nargs='+',
+                        help='List files to validate. Supports globbing.')
+
+    args = parser.parse_args()
+
+    # Metaschema
+    metaschema = fetch_schema(args.metaschema)
+    jsonschema.Draft4Validator.check_schema(metaschema)
+
+    # Validate files
     results = [
-        validate_file(path).dump()
-        for arg in sys.argv[1:]
+        validate_file(path, metaschema).dump()
+        for arg in args.glob_files
         for path in glob.glob(arg)
         if os.path.isfile(path) and re.search("\.(json|ya?ml)$", path)
     ]
 
+    # Calculate errors
     errors = [
         r
         for r in results
         if r['result']['status'] == 'ERROR'
     ]
 
+    # Output
     print json.dumps(results)
 
     if len(errors) > 0:
