@@ -13,9 +13,6 @@ import jsonschema
 import requests
 
 
-SCHEMAS_ROOT = os.environ.get('SCHEMAS_ROOT') or \
-    os.path.join(os.environ['APP_ROOT'], 'schemas')
-
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 
 
@@ -80,7 +77,7 @@ class ValidationError(ValidationResult):
         return msg
 
 
-def validate_file(filename, metaschema=None):
+def validate_file(schemas_root, filename, metaschema=None):
     logging.info('validating: {}'.format(filename))
 
     try:
@@ -94,7 +91,7 @@ def validate_file(filename, metaschema=None):
         return ValidationError(filename, "MISSING_SCHEMA_URL", e)
 
     try:
-        schema = fetch_schema(schema_url)
+        schema = fetch_schema(schemas_root, schema_url)
     except MissingSchemaFile as e:
         return ValidationError(filename, "MISSING_SCHEMA_FILE", e, schema_url)
     except requests.HTTPError as e:
@@ -103,7 +100,7 @@ def validate_file(filename, metaschema=None):
         return ValidationError(filename, "SCHEMA_PARSE_ERROR", e, schema_url)
 
     try:
-        schema_path = "file://" + os.path.abspath(SCHEMAS_ROOT) + '/'
+        schema_path = "file://" + os.path.abspath(schemas_root) + '/'
 
         resolver = jsonschema.RefResolver(schema_path, schema)
 
@@ -118,19 +115,19 @@ def validate_file(filename, metaschema=None):
     return ValidationOK(filename, schema_url)
 
 
-def fetch_schema(schema_url):
+def fetch_schema(schemas_root, schema_url):
     if schema_url.startswith('http'):
         r = requests.get(schema_url)
         r.raise_for_status()
         schema = r.text
     else:
-        schema = fetch_schema_file(schema_url)
+        schema = fetch_schema_file(schemas_root, schema_url)
 
     return anymarkup.parse(schema)
 
 
-def fetch_schema_file(schema_url):
-    schema_file = os.path.join(SCHEMAS_ROOT, schema_url)
+def fetch_schema_file(schemas_root, schema_url):
+    schema_file = os.path.join(schemas_root, schema_url)
 
     if not os.path.isfile(schema_file):
         raise MissingSchemaFile(schema_file)
@@ -149,19 +146,22 @@ def main():
     parser.add_argument('--metaschema', required=True,
                         help='Path to the metaschema file')
 
-    parser.add_argument('glob_files', nargs='+',
+    parser.add_argument('--schemas-root', required=True,
+                        help='Root directory of the schemas')
+
+    parser.add_argument('files', nargs='+',
                         help='List files to validate. Supports globbing.')
 
     args = parser.parse_args()
 
     # Metaschema
-    metaschema = fetch_schema(args.metaschema)
+    metaschema = fetch_schema(args.schemas_root, args.metaschema)
     jsonschema.Draft4Validator.check_schema(metaschema)
 
     # Validate files
     results = [
-        validate_file(path, metaschema).dump()
-        for arg in args.glob_files
+        validate_file(args.schemas_root, path, metaschema).dump()
+        for arg in args.files
         for path in glob.glob(arg)
         if os.path.isfile(path) and re.search("\.(json|ya?ml)$", path)
     ]
