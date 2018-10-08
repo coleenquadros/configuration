@@ -136,7 +136,8 @@ def validate_file(schemas_root, filename):
         resolver = jsonschema.RefResolver(schema_path, schema)
         jsonschema.Draft4Validator(schema, resolver=resolver).validate(data)
     except jsonschema.ValidationError as e:
-        return ValidationError(kind, filename, "VALIDATION_ERROR", e, schema_url)
+        return ValidationError(kind, filename, "VALIDATION_ERROR", e,
+                               schema_url)
     except jsonschema.SchemaError as e:
         return ValidationError(kind, filename, "SCHEMA_ERROR", e, schema_url)
 
