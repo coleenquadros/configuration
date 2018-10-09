@@ -178,8 +178,8 @@ def main():
     parser.add_argument('--schemas-root', required=True,
                         help='Root directory of the schemas')
 
-    parser.add_argument('files', nargs='+',
-                        help='List files to validate. Supports globbing.')
+    parser.add_argument('--data-root', required=True,
+                        help='Data directory')
 
     args = parser.parse_args()
 
@@ -204,10 +204,15 @@ def main():
     ]
 
     # Validate files
+    files = [
+        os.path.join(root, filename)
+        for root, dirs, files in os.walk(args.data_root)
+        for filename in files
+    ]
+
     results_files = [
         validate_file(schemas_root, path).dump()
-        for arg in args.files
-        for path in glob.glob(arg)
+        for path in files
         if os.path.isfile(path) and re.search("\.(json|ya?ml)$", path)
     ]
 

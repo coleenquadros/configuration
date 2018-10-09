@@ -11,10 +11,10 @@ virtualenv venv
 source venv/bin/activate
 pip install -r requirements.txt
 
-APP_ROOT=$(pwd) python validator/validate.py \
+python validator/validate.py \
     --metaschema metaschema.json \
     --schemas-root schemas \
-    'services/**/*' > reports/results.json
+    --data-root data > reports/results.json
 
 exit_status=$?
 
