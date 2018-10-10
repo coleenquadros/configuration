@@ -20,7 +20,7 @@ const resolvers = {
       var instances;
       var items = [];
 
-      if (typeof (args.instance != 'undefined')) {
+      if (typeof (args.instance) != 'undefined') {
         instances = [root["data"][args.instance]];
       } else {
         instances = Object.keys(root["data"]).map(i => root["data"][i]);
