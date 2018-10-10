@@ -29,11 +29,7 @@ const resolvers = {
       for (var instance of instances) {
         for (var item in instance["data"]) {
           var item = instance["data"][item];
-          if (typeof (args.schema) != 'undefined') {
-            if (item._info.schema == args.schema) {
-              items.push(item);
-            }
-          } else {
+          if (typeof (args.schema) == 'undefined' || args.schema == item._info.schema) {
             items.push(item);
           }
         }
