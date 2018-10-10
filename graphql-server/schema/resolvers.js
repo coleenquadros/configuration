@@ -1,4 +1,4 @@
-var data = require('../models/data');
+const data = require('../models/data');
 
 const resolvers = {
   Query: {
