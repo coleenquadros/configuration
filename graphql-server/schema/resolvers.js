@@ -1,5 +1,14 @@
 const data = require('../models/data');
 
+var interfaceItem = function (additionalResolvers = {}) {
+  return Object.assign({
+    name(root, args) { return resolvers.Item.name(root, args) },
+    namespace(root, args) { return resolvers.Item.namespace(root, args) },
+    instance(root, args) { return resolvers.Item.instance(root, args) },
+    schema(root, args) { return resolvers.Item.schema(root, args) },
+  }, additionalResolvers);
+}
+
 const resolvers = {
   Query: {
     namespace(root, args) {
@@ -50,11 +59,15 @@ const resolvers = {
     }
   },
   Item: {
-    __resolveType(obj) {
-      return "Users";
-    }
-  },
-  Users: {
+    __resolveType(root, context) {
+      context.item = root;
+      switch (root._info.schema) {
+        case "users/users.yml":
+          return "Users";
+          break;
+      }
+      return null;
+    },
     name(root, args) {
       return root._info.name;
     },
@@ -67,7 +80,39 @@ const resolvers = {
     schema(root, args) {
       return root._info.schema;
     }
-  }
+  },
+  // users/users.yml
+  Users: interfaceItem({
+    teams(root, args) {
+      return root["data"]["teams"];
+    },
+    roles(root, args) {
+      return root["data"]["roles"];
+    }
+  }),
+  UsersTeam: {
+    roles(root, arg, context) {
+      var roles = [];
+      for (role of context.item["data"]["roles"]) {
+        if (root.roles.includes(role.name)) {
+          roles.push(role);
+        }
+      }
+      return roles;
+    }
+  },
+  UsersRole: {},
+  UsersPermissions: {
+    __resolveType(root) {
+      switch (root.service) {
+        case "github":
+          return "UsersPermissionsGithub";
+          break;
+      }
+      return null;
+    },
+  },
+  UsersPermissionsGithub: {}
 }
 
 module.exports = resolvers;

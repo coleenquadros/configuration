@@ -28,6 +28,29 @@ const typeDefs = `
     namespace: Namespace!
     instance: Instance!
     schema: String!
+    teams: [UsersTeam]!
+    roles: [UsersRole]!
+  }
+
+  type UsersTeam {
+    name: String!
+    members: [String]!
+    roles: [UsersRole]!
+  }
+
+  type UsersRole {
+    name: String!
+    permissions: [UsersPermissions]!
+  }
+
+  interface UsersPermissions {
+    service: String!
+  }
+
+  type UsersPermissionsGithub implements UsersPermissions {
+    service: String!
+    access_type: String!
+    repo: String!
   }
 `
 
