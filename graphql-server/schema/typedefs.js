@@ -16,7 +16,14 @@ const typeDefs = `
     items: [Item]!
   }
 
-  type Item {
+  interface Item {
+    name: String!
+    namespace: Namespace!
+    instance: Instance!
+    schema: String!
+  }
+
+  type Users implements Item {
     name: String!
     namespace: Namespace!
     instance: Instance!

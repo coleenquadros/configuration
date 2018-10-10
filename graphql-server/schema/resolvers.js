@@ -50,6 +50,11 @@ const resolvers = {
     }
   },
   Item: {
+    __resolveType(obj) {
+      return "Users";
+    }
+  },
+  Users: {
     name(root, args) {
       return root._info.name;
     },
