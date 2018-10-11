@@ -81,7 +81,7 @@ class ValidationError(ValidationResult):
         return msg
 
 
-def validate_schema(schemas_root, filename, metaschema):
+def validate_schema(filename, metaschema):
     kind = "SCHEMA"
 
     logging.info('validating schema: {}'.format(filename))
@@ -140,6 +140,9 @@ def validate_file(schemas_root, filename):
                                schema_url)
     except jsonschema.SchemaError as e:
         return ValidationError(kind, filename, "SCHEMA_ERROR", e, schema_url)
+    except TypeError as e:
+        return ValidationError(kind, filename, "SCHEMA_TYPE_ERROR", e,
+                               schema_url)
 
     return ValidationOK(kind, filename, schema_url)
 
@@ -186,6 +189,8 @@ def main():
     # Metaschema
     schemas_root = args.schemas_root
     metaschema = fetch_schema(schemas_root, args.metaschema)
+    metaschema_path = os.path.join(schemas_root, args.metaschema)
+
     jsonschema.Draft4Validator.check_schema(metaschema)
 
     # Find schemas
@@ -198,9 +203,11 @@ def main():
 
     # Validate schemas
     results_schemas = [
-        validate_schema(schemas_root, path, metaschema).dump()
-        for path in schemas
-        if os.path.isfile(path) and re.search("\.(json|ya?ml)$", path)
+        validate_schema(filename, metaschema).dump()
+        for filename in schemas
+        if filename != metaschema_path
+        if re.search("\.(json|ya?ml)$", filename)
+        if os.path.isfile(filename)
     ]
 
     # Validate files
@@ -211,9 +218,10 @@ def main():
     ]
 
     results_files = [
-        validate_file(schemas_root, path).dump()
-        for path in files
-        if os.path.isfile(path) and re.search("\.(json|ya?ml)$", path)
+        validate_file(schemas_root, filename).dump()
+        for filename in files
+        if re.search("\.(json|ya?ml)$", filename)
+        if os.path.isfile(filename)
     ]
 
     # Calculate errors
