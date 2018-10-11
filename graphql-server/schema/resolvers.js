@@ -1,107 +1,40 @@
-const data = require('../models/data');
+const db = require('../models/db');
 
-var interfaceItem = function (additionalResolvers = {}) {
+var dataFile = function (additionalResolvers = {}) {
   return Object.assign({
-    name(root, args) { return resolvers.Item.name(root, args) },
-    namespace(root, args) { return resolvers.Item.namespace(root, args) },
-    instance(root, args) { return resolvers.Item.instance(root, args) },
-    schema(root, args) { return resolvers.Item.schema(root, args) },
+    schema(root, args) { return resolvers.DataFile.schema(root, args) },
   }, additionalResolvers);
 }
 
 const resolvers = {
   Query: {
-    namespace(root, args) {
-      return data[args.name];
-    },
-    allNamespaces(root, args) {
-      return Object.keys(data).map(n => data[n]);
-    },
-  },
-  Namespace: {
-    name(root, args) {
-      return root._info.name;
-    },
-    instances(root, args) {
-      return Object.keys(root["data"]).map(i => root["data"][i]);
-    },
-    items(root, args) {
-      var instances;
-      var items = [];
+    datafile(root, args, context, info) {
+      var datafiles = db.datafiles;
 
-      if (typeof (args.instance) != 'undefined') {
-        instances = [root["data"][args.instance]];
-      } else {
-        instances = Object.keys(root["data"]).map(i => root["data"][i]);
+      if (args.label) {
+        datafiles = db.labelFilter(args.label, datafiles);
       }
 
-      for (var instance of instances) {
-        for (var item in instance["data"]) {
-          var item = instance["data"][item];
-          if (typeof (args.schema) == 'undefined' || args.schema == item._info.schema) {
-            items.push(item);
-          }
-        }
+      if (args.schemaIn) {
+        datafiles = db.schemaInFilter(args.schemaIn, datafiles);
       }
 
-      return items;
+      return datafiles;
     }
   },
-  Instance: {
-    name(root, args) {
-      return root._info.name;
-    },
-    namespace(root, args) {
-      return data[root._info.namespace];
-    },
-    items(root, args) {
-      return Object.keys(root["data"]).map(i => root["data"][i]);
-    }
-  },
-  Item: {
+  DataFile: {
     __resolveType(root, context) {
-      context.item = root;
-      switch (root._info.schema) {
+      switch (root['$schema']) {
         case "users/users.yml":
           return "Users";
           break;
       }
-      return null;
+      return "DataFileGeneric";
     },
-    name(root, args) {
-      return root._info.name;
-    },
-    namespace(root, args) {
-      return data[root._info.namespace];
-    },
-    instance(root, args) {
-      return data[root._info.namespace]["data"][root._info.instance];
-    },
-    schema(root, args) {
-      return root._info.schema;
-    }
+    schema(root) { return root["$schema"]; }
   },
-  // users/users.yml
-  Users: interfaceItem({
-    teams(root, args) {
-      return root["data"]["teams"];
-    },
-    roles(root, args) {
-      return root["data"]["roles"];
-    }
-  }),
-  UsersTeam: {
-    roles(root, arg, context) {
-      var roles = [];
-      for (role of context.item["data"]["roles"]) {
-        if (root.roles.includes(role.name)) {
-          roles.push(role);
-        }
-      }
-      return roles;
-    }
-  },
-  UsersRole: {},
+  DataFileGeneric: dataFile(),
+  Users: dataFile(),
   UsersPermissions: {
     __resolveType(root) {
       switch (root.service) {
@@ -112,7 +45,6 @@ const resolvers = {
       return null;
     },
   },
-  UsersPermissionsGithub: {}
 }
 
 module.exports = resolvers;

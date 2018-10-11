@@ -1,33 +1,23 @@
 const typeDefs = `
+  scalar JSON
+
   type Query {
-    namespace(name: String!): Namespace
-    allNamespaces: [Namespace]!
+    datafile(label: JSON, schemaIn: [String]): [DataFile]
   }
 
-  type Namespace {
-    name: String!
-    instances: [Instance]!
-    items(instance: String, schema: String): [Item]!
-  }
-
-  type Instance {
-    name: String!
-    namespace: Namespace!
-    items: [Item]!
-  }
-
-  interface Item {
-    name: String!
-    namespace: Namespace!
-    instance: Instance!
+  interface DataFile {
     schema: String!
+    labels: JSON
   }
 
-  type Users implements Item {
-    name: String!
-    namespace: Namespace!
-    instance: Instance!
+  type DataFileGeneric implements DataFile {
     schema: String!
+    labels: JSON
+  }
+
+  type Users implements DataFile {
+    schema: String!
+    labels: JSON
     teams: [UsersTeam]!
     roles: [UsersRole]!
   }
