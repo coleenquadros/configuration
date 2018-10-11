@@ -6,10 +6,12 @@ export DESCRIPTION=$(
     grep -o 'http[^\\]\+'
 )
 
-rm -rf venv
-virtualenv venv
-source venv/bin/activate
-pip install -r requirements.txt
+if [ -z "$SKIP_VIRTUALENV" ]; then
+    rm -rf venv
+    virtualenv venv
+    source venv/bin/activate
+    pip install -r requirements.txt
+fi
 
 python validator/validate.py \
     --metaschema metaschema.json \
