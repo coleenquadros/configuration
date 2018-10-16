@@ -7,11 +7,22 @@ Many or all of the portions of the contract defined herein will be handled throu
 
 A service exists as one or more subdirectories to this repository, containing instances of the [JSON-Schemas](https://json-schema.org/) defined in the `schemas` subdirectory of this repository.
 
+## Quickstart
+
+### Validating Your Service Definition or Schema
+
+The following command will validate all service definitions and schemas:
+
+```console
+make build && make validate
+```
+
 ## Features
 
 ### Existing Features
 
-None
+- Ability to validate all schemas as valid JSON-Schema and compliant with the integration metaschema
+- Ability to validate all service definitions that implement a schema
 
 ### Planned Features
 
@@ -67,6 +78,20 @@ None
 - Will we have the "list" permissions required for running a rectification loop against a running service for each required integration?
 
   - Unknown
+
+- Why don't we just use terraform? It already collects errors and has tons of integrations?
+
+  - The state file is a potential failure point for terraform. If it gets out of sync then the proper actions against the upstream services can't be generated.
+  - It's possible that we can not use the state file, or code against a synthetic state file, or fix the state file, and then use terraform.
+  - It's also possible that we can just use the providers without the plan/execution engine.
+    - Providers that terraform has that we may utilize:
+      - IaaS: AWS, Azure, GCP, Kubernetes
+      - PaaS: Kubernetes
+      - SaaS: Vault, Github, Gitlab
+      - Databases: MySQL, Postgres
+    - Missing providers:
+      - Monitoring: zabbix, prometheus, alertmanager
+      - SaaS: Quay
 
 ### Vault notes:
 

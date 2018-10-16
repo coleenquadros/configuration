@@ -5,10 +5,12 @@ IMAGE_NAME := app-interface-validator
 
 validate:
 	@docker run \
-		-v ${PWD}/services:$(APP_ROOT)/services:z \
 		-v ${PWD}/schemas:$(APP_ROOT)/schemas:z \
+		-v ${PWD}/data:$(APP_ROOT)/data:z \
 		$(IMAGE_NAME) \
-		'$(APP_ROOT)/services/**/*'
+		--metaschema metaschema.json \
+		--schemas-root $(APP_ROOT)/schemas \
+		--data-root $(APP_ROOT)/data
 
 build:
 	@docker build -t $(IMAGE_NAME) .
