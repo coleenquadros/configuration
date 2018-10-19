@@ -80,6 +80,8 @@ const filteredTree = dirTree(rootDir, { extensions: /\.(ya?ml|json)$/ }, functio
     data = JSON.parse(raw);
   }
 
+  data['path'] = relativePath;
+
   db.datafiles.push(data);
   db.datafile[relativePath] = data;
 });
