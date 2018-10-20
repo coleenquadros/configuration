@@ -15,6 +15,14 @@ const typeDefs = `
     labels: JSON
   }
 
+  type User implements DataFile {
+    schema: String!
+    labels: JSON
+    name: String!
+    redhat_username: String!
+    github_username: String!
+  }
+
   type Users implements DataFile {
     schema: String!
     labels: JSON
@@ -24,7 +32,7 @@ const typeDefs = `
 
   type UsersTeam {
     name: String!
-    members: [String]!
+    members: [User]!
     roles: [UsersRole]!
   }
 

@@ -7,6 +7,7 @@ const rootDir = '../data/';
 var db = {
   "datafiles": [],
   "datafile": {},
+  // TODO: get_datafile (return error if datafile is not found)
   "labelFilter": function (label_filter, input_set) {
     var datafiles;
 
