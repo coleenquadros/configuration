@@ -1,7 +1,8 @@
 .PHONY: validate build
 
 APP_ROOT := /validator
-IMAGE_NAME := app-interface-validator
+IMAGE_NAME_VALIDATOR := app-interface-validator:latest
+IMAGE_NAME_APP_INTERFACE := quay.io/app-sre/app-interface:latest
 
 validate:
 	@docker run \
@@ -11,5 +12,7 @@ validate:
 		--schemas-root $(APP_ROOT)/schemas \
 		--data-root $(APP_ROOT)/data
 
-build:
-	@docker build -t $(IMAGE_NAME) .
+build-validator:
+	@docker build -t $(IMAGE_NAME_VALIDATOR) -f dockerfiles/Dockerfile.validator .
+build-app-interface:
+	@docker build -t $(IMAGE_NAME_APP_INTERFACE) -f dockerfiles/Dockerfile.app-interface .
