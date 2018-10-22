@@ -11,7 +11,7 @@ var typeDefs = [];
 var resolvers = {};
 
 for (schema of schemaFiles) {
-    var schemaItem = require(`./schema/${schema}`);
+    var schemaItem = require(`./schemas/${schema}`);
     typeDefs.push(schemaItem.typeDefs);
     resolvers = merge(resolvers, schemaItem.resolvers)
 }
