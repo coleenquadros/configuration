@@ -6,17 +6,8 @@ export DESCRIPTION=$(
     grep -o 'http[^\\]\+'
 )
 
-if [ -z "$SKIP_VIRTUALENV" ]; then
-    rm -rf venv
-    virtualenv venv
-    source venv/bin/activate
-    pip install -r requirements.txt
-fi
-
-python validator/validate.py \
-    --metaschema metaschema.json \
-    --schemas-root schemas \
-    --data-root data > reports/results.json
+make build
+make validate > reports/results.json
 
 exit_status=$?
 
