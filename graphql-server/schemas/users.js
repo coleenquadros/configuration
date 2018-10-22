@@ -2,29 +2,29 @@ const db = require('../models/db');
 const base = require('./base');
 
 var typeDefs = `
-  type Users implements DataFile {
+  type Access implements DataFile {
     schema: String!
     labels: JSON
-    teams: [UsersTeam]!
-    roles: [UsersRole]!
+    teams: [AccessTeam]!
+    roles: [AccessRole]!
   }
 
-  type UsersTeam {
+  type AccessTeam {
     name: String!
     members: [User]!
-    roles: [UsersRole]!
+    roles: [AccessRole]!
   }
 
-  type UsersRole {
+  type AccessRole {
     name: String!
-    permissions: [UsersPermissions]!
+    permissions: [AccessPermissions]!
   }
 
-  interface UsersPermissions {
+  interface AccessPermissions {
     service: String!
   }
 
-  type UsersPermissionsGithub implements UsersPermissions {
+  type AccessPermissionsGithub implements AccessPermissions {
     service: String!
     access_type: String!
     repo: String!
@@ -32,8 +32,8 @@ var typeDefs = `
 `
 
 var resolvers = {
-  Users: base.dataFile(),
-  UsersTeam: {
+  Access: base.dataFile(),
+  AccessTeam: {
     roles(root, args, context, info) {
       var roles = [];
 
@@ -55,11 +55,11 @@ var resolvers = {
       return members;
     }
   },
-  UsersPermissions: {
+  AccessPermissions: {
     __resolveType(root) {
       switch (root.service) {
         case "github":
-          return "UsersPermissionsGithub";
+          return "AccessPermissionsGithub";
           break;
       }
       return null;

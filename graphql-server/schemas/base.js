@@ -137,8 +137,8 @@ const resolvers = {
       context.datafile_path = root['path'];
 
       switch (root['$schema']) {
-        case "users/users.yml":
-          return "Users";
+        case "users/access.yml":
+          return "Access";
           break;
       }
       return "DataFileGeneric";
