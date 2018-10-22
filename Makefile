@@ -1,4 +1,4 @@
-.PHONY: validate build
+.PHONY: validate build build-app-interface
 
 APP_ROOT := /validator
 IMAGE_NAME_VALIDATOR := app-interface-validator:latest
@@ -12,7 +12,7 @@ validate:
 		--schemas-root $(APP_ROOT)/schemas \
 		--data-root $(APP_ROOT)/data
 
-build-validator:
+build:
 	@docker build -t $(IMAGE_NAME_VALIDATOR) -f dockerfiles/Dockerfile.validator .
 build-app-interface:
 	@docker build -t $(IMAGE_NAME_APP_INTERFACE) -f dockerfiles/Dockerfile.app-interface .
