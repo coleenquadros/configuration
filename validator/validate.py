@@ -11,9 +11,16 @@ import anymarkup
 import json
 import jsonschema
 import requests
+import cachetools.func
 
+from enum import Enum
 
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
+
+
+class ValidatedFileKind(Enum):
+    SCHEMA = "SCHEMA"
+    DATA_FILE = "FILE"
 
 
 class MissingSchemaFile(Exception):
@@ -40,7 +47,7 @@ class ValidationOK(ValidationResult):
     def dump(self):
         return {
             "filename": self.filename,
-            "kind": self.kind,
+            "kind": self.kind.value,
             "result": {
                 "summary": self.summary(),
                 "status": "OK",
@@ -62,7 +69,7 @@ class ValidationError(ValidationResult):
     def dump(self):
         return {
             "filename": self.filename,
-            "kind": self.kind,
+            "kind": self.kind.value,
             "result": {
                 "summary": self.summary(),
                 "status": "ERROR",
@@ -81,32 +88,41 @@ class ValidationError(ValidationResult):
         return msg
 
 
-def validate_schema(filename, metaschema):
-    kind = "SCHEMA"
+def get_resolver(schemas_root, schema):
+    schema_path = "file://" + os.path.abspath(schemas_root) + '/'
+    return jsonschema.RefResolver(schema_path, schema)
+
+
+def validate_schema(schemas_root, filename, schema_data):
+    kind = ValidatedFileKind.SCHEMA
 
     logging.info('validating schema: {}'.format(filename))
 
-    schema_url = 'META_SCHEMA'
+    try:
+        meta_schema_url = schema_data[u'$schema']
+    except KeyError as e:
+        return ValidationError(kind, filename, "MISSING_SCHEMA_URL", e)
+
+    meta_schema = fetch_schema(schemas_root, meta_schema_url)
 
     try:
-        data = anymarkup.parse_file(filename)
-    except anymarkup.AnyMarkupError as e:
-        return ValidationError(kind, filename, "FILE_PARSE_ERROR", e)
-
-    try:
-        jsonschema.Draft4Validator.check_schema(data)
-        jsonschema.Draft4Validator(metaschema).validate(data)
+        jsonschema.Draft4Validator.check_schema(schema_data)
+        resolver = get_resolver(schemas_root, schema_data)
+        validator = jsonschema.Draft4Validator(meta_schema, resolver=resolver)
+        validator.validate(schema_data)
     except jsonschema.ValidationError as e:
         return ValidationError(kind, filename, "VALIDATION_ERROR", e,
-                               schema_url)
-    except jsonschema.SchemaError as e:
-        return ValidationError(kind, filename, "SCHEMA_ERROR", e, schema_url)
+                               meta_schema_url)
+    except (jsonschema.SchemaError, jsonschema.exceptions.RefResolutionError) as e:
+        return ValidationError(kind, filename, "SCHEMA_ERROR", e,
+                               meta_schema_url)
 
-    return ValidationOK(kind, filename, schema_url)
+
+    return ValidationOK(kind, filename, meta_schema_url)
 
 
 def validate_file(schemas_root, filename):
-    kind = "FILE"
+    kind = ValidatedFileKind.DATA_FILE
 
     logging.info('validating file: {}'.format(filename))
 
@@ -132,8 +148,7 @@ def validate_file(schemas_root, filename):
                                schema_url)
 
     try:
-        schema_path = "file://" + os.path.abspath(schemas_root) + '/'
-        resolver = jsonschema.RefResolver(schema_path, schema)
+        resolver = get_resolver(schemas_root, schema)
         jsonschema.Draft4Validator(schema, resolver=resolver).validate(data)
     except jsonschema.ValidationError as e:
         return ValidationError(kind, filename, "VALIDATION_ERROR", e,
@@ -147,6 +162,7 @@ def validate_file(schemas_root, filename):
     return ValidationOK(kind, filename, schema_url)
 
 
+@cachetools.func.lru_cache()
 def fetch_schema(schemas_root, schema_url):
     if schema_url.startswith('http'):
         r = requests.get(schema_url)
@@ -156,7 +172,6 @@ def fetch_schema(schemas_root, schema_url):
         schema = fetch_schema_file(schemas_root, schema_url)
 
     return anymarkup.parse(schema)
-
 
 def fetch_schema_file(schemas_root, schema_url):
     schema_file = os.path.join(schemas_root, schema_url)
@@ -175,9 +190,6 @@ def main():
     parser = argparse.ArgumentParser(
         description='App-Interface Schema Validator')
 
-    parser.add_argument('--metaschema', required=True,
-                        help='Path to the metaschema file')
-
     parser.add_argument('--schemas-root', required=True,
                         help='Root directory of the schemas')
 
@@ -188,14 +200,10 @@ def main():
 
     # Metaschema
     schemas_root = args.schemas_root
-    metaschema = fetch_schema(schemas_root, args.metaschema)
-    metaschema_path = os.path.join(schemas_root, args.metaschema)
-
-    jsonschema.Draft4Validator.check_schema(metaschema)
 
     # Find schemas
     schemas = [
-        os.path.join(dirpath, filename)
+        (filename, fetch_schema(schemas_root, os.path.join(dirpath, filename)))
         for dirpath, dirnames, filenames in os.walk(schemas_root)
         for filename in filenames
         if re.search("\.(json|ya?ml)$", filename)
@@ -203,11 +211,8 @@ def main():
 
     # Validate schemas
     results_schemas = [
-        validate_schema(filename, metaschema).dump()
-        for filename in schemas
-        if filename != metaschema_path
-        if re.search("\.(json|ya?ml)$", filename)
-        if os.path.isfile(filename)
+        validate_schema(schemas_root, filename, schema_data).dump()
+        for filename, schema_data in schemas
     ]
 
     # Validate files
