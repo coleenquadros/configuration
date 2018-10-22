@@ -8,7 +8,7 @@ validate:
 	@docker run \
 		-v ${PWD}/schemas:$(APP_ROOT)/schemas:z \
 		-v ${PWD}/data:$(APP_ROOT)/data:z \
-		$(IMAGE_NAME) \
+		$(IMAGE_NAME_VALIDATOR) \
 		--schemas-root $(APP_ROOT)/schemas \
 		--data-root $(APP_ROOT)/data
 
