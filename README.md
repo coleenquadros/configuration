@@ -21,6 +21,7 @@ make build && make validate
 
 ### Existing Features
 
+- [GraphQL API](graphql-server/README.md)
 - Ability to validate all schemas as valid JSON-Schema and compliant with the integration metaschema
 - Ability to validate all service definitions that implement a schema
 
