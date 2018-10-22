@@ -4,7 +4,7 @@ const merge = require('lodash/merge');
 var schemaFiles = [
     'base',
     'user',
-    'users',
+    'access',
 ]
 
 var typeDefs = [];
