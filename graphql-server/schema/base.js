@@ -1,7 +1,6 @@
-var path = require('path');
-
 const db = require('../models/db');
 
+var path = require('path');
 const { JSONPath } = require('jsonpath-plus');
 var jsonpointer = require('jsonpointer');
 
@@ -97,6 +96,24 @@ var resolve_ref = function(item_ref, datafile_path) {
   return jsonpointer.get(datafile, s.jsonpointer);
 }
 
+const typeDefs = `
+  scalar JSON
+
+  type Query {
+    datafile(label: JSON, schemaIn: [String]): [DataFile]
+  }
+
+  interface DataFile {
+    schema: String!
+    labels: JSON
+  }
+
+  type DataFileGeneric implements DataFile {
+    schema: String!
+    labels: JSON
+  }
+`
+
 const resolvers = {
   Query: {
     datafile(root, args, context, info) {
@@ -115,6 +132,8 @@ const resolvers = {
   },
   DataFile: {
     __resolveType(root, context) {
+      // TODO: return based on the schema or some `x-...` attr.
+
       context.datafile_path = root['path'];
 
       switch (root['$schema']) {
@@ -127,39 +146,12 @@ const resolvers = {
     schema(root) { return root["$schema"]; }
   },
   DataFileGeneric: dataFile(),
-  Users: dataFile(),
-  UsersTeam: {
-    roles(root, args, context, info) {
-      var roles = [];
-
-      for (role_ref of root["roles"]) {
-        var role = resolve_jsonpathref(role_ref, context.datafile_path);
-        roles.push(role);
-      }
-
-      return roles;
-    },
-    members(root, args, context, info) {
-      var members = []
-
-      for (member_ref of root["members"]) {
-        var member = resolve_ref(member_ref, context.datafile_path);
-        members.push(member);
-      }
-
-      return members;
-    }
-  },
-  UsersPermissions: {
-    __resolveType(root) {
-      switch (root.service) {
-        case "github":
-          return "UsersPermissionsGithub";
-          break;
-      }
-      return null;
-    },
-  },
 }
 
-module.exports = resolvers;
+module.exports = {
+  "typeDefs": typeDefs,
+  "resolvers": resolvers,
+  "dataFile": dataFile,
+  "resolve_jsonpathref": resolve_jsonpathref,
+  "resolve_ref": resolve_ref,
+};
