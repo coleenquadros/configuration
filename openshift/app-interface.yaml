@@ -1,0 +1,88 @@
+---
+apiVersion: v1
+kind: Template
+metadata:
+  name: app-interface
+objects:
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: app-interface
+    name: app-interface
+  spec:
+    replicas: 1
+    selector:
+      app: app-interface
+      deploymentconfig: app-interface
+    strategy:
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: app-interface
+          deploymentconfig: app-interface
+      spec:
+        containers:
+        - image: ${IMAGE}:${IMAGE_TAG}
+          imagePullPolicy: Always
+          name: app-interface
+          ports:
+          - containerPort: 4000
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 4000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 4000
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            timeoutSeconds: 3
+          resources:
+            limits:
+              memory: ${MEMORY_LIMIT}
+    triggers:
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: app-interface
+  spec:
+    ports:
+      - protocol: TCP
+        port: 80
+        targetPort: 4000
+    selector:
+      deploymentconfig: app-interface
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: app-interface
+  spec:
+    to:
+      kind: Service
+      name: app-interface
+parameters:
+- name: IMAGE
+  value: quay.io/app-sre/app-interface
+  displayName: App interface image
+  description: App interface docker image. Defaults to quay.io/app-sre/app-interface
+- name: IMAGE_TAG
+  value: latest
+  displayName: App interface version
+  description: App interface version which defaults to latest
+- name: MEMORY_LIMIT
+  value: 512Mi
+  displayName: Memory Limit
+  description: Maximum amount of memory the container can use. Defaults 512Mi
