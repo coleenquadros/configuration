@@ -3,19 +3,11 @@ FROM centos:7
 # enable scl with nodejs8
 RUN yum install centos-release-scl-rh rh-nodejs8 -y && yum install rh-nodejs8 -y
 
-# enable scl with nodejs8
-RUN scl enable rh-nodejs8 bash
-
 # Set PATH, because "scl enable" does not have any effects to "docker build"
 ENV PATH $PATH:/opt/rh/rh-nodejs8/root/usr/bin
 
-# since we can't use root user on openshift we need to create and use regualr user
-RUN useradd -ms /bin/bash  app-interface
-
-USER app-interface
-
-ADD --chown=app-interface graphql-server /service/app-sre
-ADD --chown=app-interface data /service/app-sre
+ADD graphql-server /service/app-sre
+ADD data /service/app-sre
 
 WORKDIR /service/app-sre
 
