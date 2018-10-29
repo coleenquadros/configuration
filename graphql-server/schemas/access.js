@@ -24,10 +24,15 @@ var typeDefs = `
     service: String!
   }
 
-  type AccessPermissionsGithub implements AccessPermissions {
+  type AccessPermissionsGithubOrg implements AccessPermissions {
     service: String!
-    access_type: String!
-    repo: String!
+    org: String!
+  }
+
+  type AccessPermissionsGithubOrgTeam implements AccessPermissions {
+    service: String!
+    org: String!
+    team: String!
   }
 `
 
@@ -58,8 +63,11 @@ var resolvers = {
   AccessPermissions: {
     __resolveType(root) {
       switch (root.service) {
-        case "github":
-          return "AccessPermissionsGithub";
+        case "github_org":
+          return "AccessPermissionsGithubOrg";
+          break;
+        case "github_org_team":
+          return "AccessPermissionsGithubOrgTeam";
           break;
       }
       return null;
