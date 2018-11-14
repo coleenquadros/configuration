@@ -1,9 +1,11 @@
 const db = require('../models/db');
 const base = require('./base');
+const _ = require('lodash');
 
 var typeDefs = `
   type Access implements DataFile {
     schema: String!
+    path: String!
     labels: JSON
     teams: [AccessTeam]!
     roles: [AccessRole]!
@@ -11,25 +13,25 @@ var typeDefs = `
 
   type AccessTeam {
     name: String!
-    members: [User]!
-    roles: [AccessRole]!
+    members: [User]
+    permissions: [AccessPermission]!
   }
 
   type AccessRole {
     name: String!
-    permissions: [AccessPermissions]!
+    permissions: [AccessPermission]!
   }
 
-  interface AccessPermissions {
+  interface AccessPermission {
     service: String!
   }
 
-  type AccessPermissionsGithubOrg implements AccessPermissions {
+  type AccessPermissionGithubOrg implements AccessPermission {
     service: String!
     org: String!
   }
 
-  type AccessPermissionsGithubOrgTeam implements AccessPermissions {
+  type AccessPermissionGithubOrgTeam implements AccessPermission {
     service: String!
     org: String!
     team: String!
@@ -37,42 +39,24 @@ var typeDefs = `
 `
 
 var resolvers = {
-  Access: base.dataFile(),
-  AccessTeam: {
-    roles(root, args, context, info) {
-      var roles = [];
-
-      for (role_ref of root["roles"]) {
-        var role = base.resolve_jsonpathref(role_ref, context.datafile_path);
-        roles.push(role);
+  AccessPermission: {
+    __resolveType(root, context) {
+      if (db.isRef(root)) {
+        root = db.resolveRef(root, context.datafilePath);
       }
-
-      return roles;
-    },
-    members(root, args, context, info) {
-      var members = []
-
-      for (member_ref of root["members"]) {
-        var member = base.resolve_ref(member_ref, context.datafile_path);
-        members.push(member);
-      }
-
-      return members;
-    }
-  },
-  AccessPermissions: {
-    __resolveType(root) {
+      // TODO: autogenerate for all permission types (json-schema enum?)
       switch (root.service) {
-        case "github_org":
-          return "AccessPermissionsGithubOrg";
+        case "github-org":
+          return "AccessPermissionGithubOrg";
           break;
-        case "github_org_team":
-          return "AccessPermissionsGithubOrgTeam";
+        case "github-org-team":
+          return "AccessPermissionGithubOrgTeam";
           break;
+        default:
+          throw "Unknown service";
       }
-      return null;
     },
-  },
+  }
 }
 
 module.exports = {
