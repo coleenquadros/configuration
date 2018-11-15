@@ -23,5 +23,5 @@ build-app-interface:
 build-nginx-gate:
 	@docker build -t $(IMAGE_NAME_NGINX_GATE) -f dockerfiles/nginx-gate/Dockerfile dockerfiles/nginx-gate/
 
-run-app-interface:
+run-app-interface: build-app-interface
 	@docker run -p 4000:4000 $(IMAGE_NAME_APP_INTERFACE)
