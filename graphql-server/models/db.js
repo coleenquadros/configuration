@@ -149,6 +149,8 @@ var db = {
       data['path'] = relativePath;
 
       db.datafiles.push(data);
+      console.log(`Loaded: ${item.path}`);
+
       db.datafile[relativePath] = data;
     });
   }

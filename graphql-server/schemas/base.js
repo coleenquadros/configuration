@@ -50,8 +50,9 @@ var typeDefs = `
     datafile(label: JSON, schemaIn: [String]): [DataFile]
 
     # TODO: autogenerate for all types that implement DataFile
-    access(label: JSON): [Access]
+    entity(label: JSON): [Entity]
     user(label: JSON): [User]
+    bot(label: JSON): [Bot]
     role(label: JSON): [Role]
   }
 
@@ -85,16 +86,20 @@ var resolvers = {
     },
 
     // TODO: autogenerate for all types that implement DataFile
-    access(root, args, context, info) {
-      args.schemaIn = ["users/access.yml"];
+    entity(root, args, context, info) {
+      args.schemaIn = ["access/user.yml", "access/bot.yml"];
       return resolvers.Query.datafile(root, args, context, info);
     },
     user(root, args, context, info) {
-      args.schemaIn = ["users/user.yml"];
+      args.schemaIn = ["access/user.yml"];
+      return resolvers.Query.datafile(root, args, context, info);
+    },
+    bot(root, args, context, info) {
+      args.schemaIn = ["access/bot.yml"];
       return resolvers.Query.datafile(root, args, context, info);
     },
     role(root, args, context, info) {
-      args.schemaIn = ["users/role.yml"];
+      args.schemaIn = ["access/role.yml"];
       return resolvers.Query.datafile(root, args, context, info);
     }
   },
@@ -102,19 +107,19 @@ var resolvers = {
     __resolveType(root, context) {
       // TODO: autogenerate for all types that implement DataFile
       switch (root['$schema']) {
-        case "users/access.yml":
-          return "Access";
-          break;
-        case "users/user.yml":
+        case "access/user.yml":
           return "User";
           break;
-        case "users/role.yml":
+        case "access/bot.yml":
+          return "Bot";
+          break;
+        case "access/role.yml":
           return "Role";
           break;
       }
       return "DataFileGeneric";
     }
-  }
+  },
 }
 
 module.exports = {

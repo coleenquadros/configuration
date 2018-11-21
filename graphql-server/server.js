@@ -10,9 +10,11 @@ db.load();
 
 var schemaFiles = [
     'base',
-    'role',
+    'entity',
+    'bot',
     'user',
-    'access',
+    'permission',
+    'role',
 ];
 
 var typeDefs = [];

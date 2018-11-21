@@ -8,21 +8,22 @@ const typeDefs = `
     schema: String!
     path: String!
     labels: JSON
-    id: String!
-    members: [User]!
+    name: String!
+    members: [Entity]!
+    permissions: [Permission]!
   }
 `
 const resolvers = {
-    Role: {
-        members(root, args, context, info) {
-            let jsonpath = `$.roles[?(@["$ref"]=="${root.path}")]`;
-            let users = db.schemaInFilter(["users/user.yml"]);
-            return _.filter(users, user => JSONPath({ json: user, path: jsonpath }).length > 0);
-        },
-    }
+  Role: {
+    members(root, args, context, info) {
+      let jsonpath = `$.roles[?(@["$ref"]=="${root.path}")]`;
+      let users = db.schemaInFilter(["access/user.yml", "access/bot.yml"]);
+      return _.filter(users, user => JSONPath({ json: user, path: jsonpath }).length > 0);
+    },
+  },
 }
 
 module.exports = {
-    "typeDefs": typeDefs,
-    "resolvers": resolvers
+  "typeDefs": typeDefs,
+  "resolvers": resolvers
 };
