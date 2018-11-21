@@ -52,6 +52,7 @@ var typeDefs = `
     # TODO: autogenerate for all types that implement DataFile
     access(label: JSON): [Access]
     user(label: JSON): [User]
+    role(label: JSON): [Role]
   }
 
   interface DataFile {
@@ -91,6 +92,10 @@ var resolvers = {
     user(root, args, context, info) {
       args.schemaIn = ["users/user.yml"];
       return resolvers.Query.datafile(root, args, context, info);
+    },
+    role(root, args, context, info) {
+      args.schemaIn = ["users/role.yml"];
+      return resolvers.Query.datafile(root, args, context, info);
     }
   },
   DataFile: {
@@ -102,6 +107,9 @@ var resolvers = {
           break;
         case "users/user.yml":
           return "User";
+          break;
+        case "users/role.yml":
+          return "Role";
           break;
       }
       return "DataFileGeneric";

@@ -10,6 +10,7 @@ db.load();
 
 var schemaFiles = [
     'base',
+    'role',
     'user',
     'access',
 ];
