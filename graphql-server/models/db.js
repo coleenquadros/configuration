@@ -147,7 +147,7 @@ var db = {
     db.datafile = {};
     db.datafiles = [];
     dirTree(rootDir, { extensions: /\.(ya?ml|json)$/ }, function (item, PATH) {
-      var relativePath = item.path.slice(rootDir.length);
+      var dataPath = item.path.slice(rootDir.length - 1);
       var raw = fs.readFileSync(item.path);
       var data;
 
@@ -157,12 +157,12 @@ var db = {
         data = JSON.parse(raw);
       }
 
-      data['path'] = relativePath;
+      data['path'] = dataPath;
 
       db.datafiles.push(data);
       console.log(`Loaded: ${item.path}`);
 
-      db.datafile[relativePath] = data;
+      db.datafile[dataPath] = data;
     });
   }
 };

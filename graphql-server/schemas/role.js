@@ -16,6 +16,7 @@ const typeDefs = `
 const resolvers = {
   Role: {
     members(root, args, context, info) {
+      // TODO: this only works with absolute paths. It should resolve relative paths
       let jsonpath = `$.roles[?(@["$ref"]=="${root.path}")]`;
       let users = db.schemaInFilter(["access/user.yml", "access/bot.yml"]);
       return _.filter(users, user => JSONPath({ json: user, path: jsonpath }).length > 0);
