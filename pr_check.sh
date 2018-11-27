@@ -8,7 +8,6 @@ export DESCRIPTION=$(
     grep -o 'http[^\\]\+'
 )
 
-make build
 make validate > reports/results.json
 
 exit_status=$?
