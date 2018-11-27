@@ -129,7 +129,18 @@ var db = {
 
     let targetDatafilePath = resolvePath(path, datafilePath);
     let datafile = db.datafile[targetDatafilePath];
-    return resolveFunc(datafile, expr);
+
+    if (typeof (datafile) == "undefined") {
+      console.log(`Error retrieving datafile '${targetDatafilePath}'.`);
+    }
+
+    let resolvedData = resolveFunc(datafile, expr)
+
+    if (typeof (resolvedData) == "undefined") {
+      console.log(`Error resolving ref: datafile: '${JSON.stringify(datafile)}', expr: '${expr}'.`);
+    }
+
+    return resolvedData;
   },
   "isRef": isRef,
   "load": () => {
