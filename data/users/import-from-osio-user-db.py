@@ -15,9 +15,8 @@ $schema: access/user.yml
 labels: {}
 
 name: {{ name }}
-{% if github_username %}
+redhat_username: {{ redhat_username }}
 github_username: {{ github_username }}
-{% endif %}
 
 roles:
 {% for role in roles %}
@@ -49,54 +48,77 @@ toggles_prod = ["aknutsen", "xcoulon",
                 "cvogt", "pbergene"]
 
 
+
 user_template = Template(TPL, trim_blocks=True, lstrip_blocks=True)
 
 keys = []
 for user in users:
     bot_account = user.get('bot_account')
-    if not bot_account:
+    if bot_account:
         continue
 
     keys.extend(user.keys())
 
     name = user.get('name')
-    # redhat_username = user.get('redhat_user')
+    redhat_username = user['redhat_user']
     github_username = user.get('github_user')
-    # quay_username = user.get('quay_user')
+    if not github_username:
+        print "Skipping %s because no github_username." % (redhat_username,)
+        continue
+
+    quay_username = user.get('quay_user')
 
     roles = []
 
-    github_orgs = user.get('github_orgs', {})
-    if 'rhdt-dev' in github_orgs:
-        roles.append('base')
+    # github_orgs = user.get('github_orgs', {})
+    # if 'rhdt-dev' in github_orgs:
+    #     roles.append('base')
 
-    # vault = user.get('vault', {})
-    # if 'devtools-osio' in vault:
-    #     roles.append('vault-devtools-osio')
+    vault = user.get('vault', {})
+    if 'devtools-osio' in vault:
+        roles.append('lead')
 
-    # if user.get('aws'):
-    #     roles.append('aws-analytics')
+    if user.get('aws'):
+        roles.append('bayesian-dev')
 
-    # if quay_username:
-    #     roles.append('quay-org-openshiftio')
+    if quay_username:
+        roles.append('quay-org-openshiftio')
 
-    # clusters = user.get('clusters', {})
-    # for key, namespaces in clusters.items():
-    #     for namespace in namespaces:
-    #         if key == 'dsaas':
-    #             key = 'production-view'
-    #         else:
-    #             key = 'staging-edit'
+    clusters = [i for l in user.get('clusters', {}).values() for i in l]
+    print([redhat_username, clusters])
 
-    #         roles.append("openshift/{}-{}".format(key, namespace))
+    if 'dsaas-production' in clusters or 'dsaas-preview' in clusters:
+        roles.append('dsaas-dev')
+
+    if 'dsaas-keycloak' in clusters or 'dsaas-keycloak-preview' in clusters:
+        roles.append('dsaas-keycloak-dev')
+
+    if 'bayesian-production' in clusters or 'bayesian-preview' in clusters:
+        if 'bayesian-dev' not in roles:
+            roles.append('bayesian-dev')
+
+    if 'launchpad-production' in clusters or 'launchpad-dev' in clusters:
+        roles.append('launchpad-dev')
+
+    if 'hdd-preview' in clusters or 'hdd-production' in clusters:
+        roles.append('hdd-dev')
+
+    if redhat_username in toggles_prod:
+        roles.append('toggles-production')
+
+    if redhat_username in toggles_staging:
+        roles.append('toggles-staging')
 
     if not roles:
+        print "Skipping %s because no roles." % (redhat_username,)
         continue
 
     try:
         user_yaml = user_template.render(
             name=name,
             github_username=github_username,
+            redhat_username=redhat_username,
+            quay_username=quay_username,
             roles=roles
         )
     except KeyError:
@@ -104,7 +126,7 @@ for user in users:
         print user
         sys.exit(1)
 
-    with codecs.open("../bots/{}.yml".format(name), "w", "utf-8") as f:
+    with codecs.open("{}.yml".format(redhat_username), "w", "utf-8") as f:
         f.write(user_yaml)
 
     # print(user_yaml)
