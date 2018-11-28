@@ -1,11 +1,21 @@
-const { GraphQLServer } = require('graphql-yoga')
+
+const { ApolloServer, gql } = require("apollo-server-express");
+const express = require("express");
 const merge = require('lodash/merge');
+
+const db = require('./models/db');
+const base = require('./schemas/base');
+
+db.load();
 
 var schemaFiles = [
     'base',
+    'entity',
+    'bot',
     'user',
-    'access',
-]
+    'permission',
+    'role',
+];
 
 var typeDefs = [];
 var resolvers = {};
@@ -13,12 +23,20 @@ var resolvers = {};
 for (schema of schemaFiles) {
     var schemaItem = require(`./schemas/${schema}`);
     typeDefs.push(schemaItem.typeDefs);
-    resolvers = merge(resolvers, schemaItem.resolvers)
+    resolvers = merge(resolvers, schemaItem.resolvers);
 }
 
-const server = new GraphQLServer({
-    typeDefs: typeDefs,
-    resolvers: resolvers,
+const app = express();
+
+const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    fieldResolver: base.defaultResolver
 });
 
-server.start(() => console.log('Server is running on localhost:4000'))
+server.applyMiddleware({ app });
+
+app.get('/reload', (req, res) => { db.load(); res.send() });
+
+app.listen({ port: 4000 }, () =>
+    console.log(`Running at http://localhost:4000${server.graphqlPath}`));

@@ -4,6 +4,7 @@ const base = require('./base');
 const typeDefs = `
   type User implements DataFile {
     schema: String!
+    path: String!
     labels: JSON
     name: String!
     redhat_username: String!

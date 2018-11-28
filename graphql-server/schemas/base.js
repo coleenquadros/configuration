@@ -1,120 +1,75 @@
 const db = require('../models/db');
+const hash = require('object-hash');
+const _ = require('lodash');
 
-var path = require('path');
-const { JSONPath } = require('jsonpath-plus');
-var jsonpointer = require('jsonpointer');
+var defaultResolver = function (root, args, context, info) {
+  let datafileImplementations = info.schema._implementations.DataFile;
+  let parentType = info.parentType;
 
-var dataFile = function (additionalResolvers = {}) {
-  return Object.assign({
-    schema(root, args) { return resolvers.DataFile.schema(root, args) },
-  }, additionalResolvers);
-}
+  if (datafileImplementations.includes(parentType)) {
+    // TODO: This `if` is a temporary hack. We need to define
+    // `context.datafilePath = root.path;` but we must not reassign it every
+    // time we shift to another datafile, because it will not revert back to the
+    // previous value once we exit a nested field. This means that with the
+    // current implementation would be able to resolve one `resolveRef` going to
+    // another datafile, but not a second one.
+    if (typeof (context.datafilePath) == "undefined") {
+      context.datafilePath = root.path;
+    }
 
-/**
- * Splits a $jsonpathref in the path and jsonpath components
- *
- * @param {string} jsonpathref The jsonpathref as specified in the datafile
- * @returns {Object} Object with two elements: path and jsonpath
- */
-var split_jsonpathref = function (jsonpathref) {
-  var datafile_path = /^[^$]*/.exec(jsonpathref)[0];
-  var jsonpath = /\$.+$/.exec(jsonpathref)[0];
-
-  // canonicalize the path: '' => '.'
-  datafile_path = path.join(datafile_path);
-
-  return { path: datafile_path, jsonpath: jsonpath };
-}
-
-/**
- * Splits a $ref in the path and jsonpointer/\#.+$/.exec(ref)
- *
- * @param {string} ref The ref as specified in the datafile
- * @returns {Object} Object with two elements: path and jsonpointer
- */
-var split_ref = function (ref) {
-  var datafile_path = /^[^#]*/.exec(ref)[0];
-
-  try {
-    var jsonpointer = /#(.+)$/.exec(ref)[1];
-  } catch(err) {
-    var jsonpointer = '';
+    if (info.fieldName == "schema") {
+      return root["$schema"];
+    }
   }
 
-  // canonicalize the path: '' => '.'
-  datafile_path = path.join(datafile_path);
+  let val = root[info.fieldName];
 
-  return { path: datafile_path, jsonpointer: jsonpointer };
-}
+  if (val.constructor === Array && val.length > 0) {
+    if (!(_.map(val, (e) => db.isRef(e)).includes(false))) {
+      let arrayResolve = _.map(val, (e) => db.resolveRef(e, context.datafilePath));
+      if (String(info.returnType)[0]=="[") {
+        return _.flattenDepth(arrayResolve, 1);
+      }
+      return arrayResolve;
+    }
 
-/**
- * Returns the data pointed by a jsonpathref
- *
- * @param {Object} item_ref The item that holds the reference. Must have a
- * `$jsonpathref` key
- * @param {string}  datafile_path The path of the source datafile
- * @returns {Object} Resolved data
- */
-var resolve_jsonpathref = function(item_ref, datafile_path) {
-  var target_datafile_path;
-  var s = split_jsonpathref(item_ref['$jsonpathref']);
-
-  if (s.path == '.') {
-    target_datafile_path = datafile_path;
-  } else if (s.path[0] == '/') {
-    target_datafile_path = s.path.substr(1);
-  } else {
-    target_datafile_path = path.join(path.dirname(datafile_path), s.path);
+    return val;
   }
 
-  var datafile = db.datafile[target_datafile_path];
-  return JSONPath({ path: s.jsonpath, json: datafile })[0];
-}
-
-/**
- * Returns the data pointed by a ref
- *
- * @param {Object} item_ref The item that holds the reference. Must have a
- * `$ref` key
- * @param {string}  datafile_path The path of the source datafile
- * @returns {Object} Resolved data
- */
-var resolve_ref = function(item_ref, datafile_path) {
-  var target_datafile_path;
-  var s = split_ref(item_ref['$ref']);
-
-  if (s.path == '.') {
-    target_datafile_path = datafile_path;
-  } else if (s.path[0] == '/') {
-    target_datafile_path = s.path.substr(1);
-  } else {
-    target_datafile_path = path.join(path.dirname(datafile_path), s.path);
+  if (db.isRef(val)) {
+    val = db.resolveRef(itemRef, context.datafilePath);
   }
 
-  var datafile = db.datafile[target_datafile_path];
-
-  return jsonpointer.get(datafile, s.jsonpointer);
+  return val;
 }
 
-const typeDefs = `
+var typeDefs = `
   scalar JSON
 
   type Query {
     datafile(label: JSON, schemaIn: [String]): [DataFile]
+
+    # TODO: autogenerate for all types that implement DataFile
+    entity(label: JSON): [Entity]
+    user(label: JSON): [User]
+    bot(label: JSON): [Bot]
+    role(label: JSON): [Role]
   }
 
   interface DataFile {
     schema: String!
+    path: String!
     labels: JSON
   }
 
   type DataFileGeneric implements DataFile {
     schema: String!
+    path: String!
     labels: JSON
   }
 `
 
-const resolvers = {
+var resolvers = {
   Query: {
     datafile(root, args, context, info) {
       var datafiles = db.datafiles;
@@ -128,30 +83,47 @@ const resolvers = {
       }
 
       return datafiles;
+    },
+
+    // TODO: autogenerate for all types that implement DataFile
+    entity(root, args, context, info) {
+      args.schemaIn = ["access/user.yml", "access/bot.yml"];
+      return resolvers.Query.datafile(root, args, context, info);
+    },
+    user(root, args, context, info) {
+      args.schemaIn = ["access/user.yml"];
+      return resolvers.Query.datafile(root, args, context, info);
+    },
+    bot(root, args, context, info) {
+      args.schemaIn = ["access/bot.yml"];
+      return resolvers.Query.datafile(root, args, context, info);
+    },
+    role(root, args, context, info) {
+      args.schemaIn = ["access/role.yml"];
+      return resolvers.Query.datafile(root, args, context, info);
     }
   },
   DataFile: {
     __resolveType(root, context) {
-      // TODO: return based on the schema or some `x-...` attr.
-
-      context.datafile_path = root['path'];
-
+      // TODO: autogenerate for all types that implement DataFile
       switch (root['$schema']) {
-        case "users/access.yml":
-          return "Access";
+        case "access/user.yml":
+          return "User";
+          break;
+        case "access/bot.yml":
+          return "Bot";
+          break;
+        case "access/role.yml":
+          return "Role";
           break;
       }
       return "DataFileGeneric";
-    },
-    schema(root) { return root["$schema"]; }
+    }
   },
-  DataFileGeneric: dataFile(),
 }
 
 module.exports = {
   "typeDefs": typeDefs,
   "resolvers": resolvers,
-  "dataFile": dataFile,
-  "resolve_jsonpathref": resolve_jsonpathref,
-  "resolve_ref": resolve_ref,
+  "defaultResolver": defaultResolver,
 };

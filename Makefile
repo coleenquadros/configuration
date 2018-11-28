@@ -8,7 +8,7 @@ IMAGE_NAME_NGINX_GATE := quay.io/app-sre/app-interface-nginx-gate:latest
 build:
 	@docker build -t $(IMAGE_NAME_VALIDATOR) -f dockerfiles/Dockerfile.validator .
 
-validate: build
+validate:
 	@docker run \
 		-v ${PWD}/schemas:$(APP_ROOT)/schemas:z \
 		-v ${PWD}/data:$(APP_ROOT)/data:z \
