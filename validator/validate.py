@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import argparse
-import glob
 import logging
 import os
 import re
@@ -117,7 +116,6 @@ def validate_schema(schemas_root, filename, schema_data):
         return ValidationError(kind, filename, "SCHEMA_ERROR", e,
                                meta_schema_url)
 
-
     return ValidationOK(kind, filename, meta_schema_url)
 
 
@@ -127,7 +125,7 @@ def validate_file(schemas_root, filename):
     logging.info('validating file: {}'.format(filename))
 
     try:
-        data = anymarkup.parse_file(filename)
+        data = anymarkup.parse_file(filename, force_types=None)
     except anymarkup.AnyMarkupError as e:
         return ValidationError(kind, filename, "FILE_PARSE_ERROR", e)
 
@@ -171,7 +169,8 @@ def fetch_schema(schemas_root, schema_url):
     else:
         schema = fetch_schema_file(schemas_root, schema_url)
 
-    return anymarkup.parse(schema)
+    return anymarkup.parse(schema, force_types=None)
+
 
 def fetch_schema_file(schemas_root, schema_url):
     schema_file = os.path.join(schemas_root, schema_url)
