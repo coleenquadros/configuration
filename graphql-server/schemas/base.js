@@ -87,19 +87,19 @@ var resolvers = {
 
     // TODO: autogenerate for all types that implement DataFile
     entity(root, args, context, info) {
-      args.schemaIn = ["access/user.yml", "access/bot.yml"];
+      args.schemaIn = ["access/user-1.yml", "access/bot-1.yml"];
       return resolvers.Query.datafile(root, args, context, info);
     },
     user(root, args, context, info) {
-      args.schemaIn = ["access/user.yml"];
+      args.schemaIn = ["access/user-1.yml"];
       return resolvers.Query.datafile(root, args, context, info);
     },
     bot(root, args, context, info) {
-      args.schemaIn = ["access/bot.yml"];
+      args.schemaIn = ["access/bot-1.yml"];
       return resolvers.Query.datafile(root, args, context, info);
     },
     role(root, args, context, info) {
-      args.schemaIn = ["access/role.yml"];
+      args.schemaIn = ["access/role-1.yml"];
       return resolvers.Query.datafile(root, args, context, info);
     }
   },
@@ -107,13 +107,13 @@ var resolvers = {
     __resolveType(root, context) {
       // TODO: autogenerate for all types that implement DataFile
       switch (root['$schema']) {
-        case "access/user.yml":
+        case "access/user-1.yml":
           return "User_v1";
           break;
-        case "access/bot.yml":
+        case "access/bot-1.yml":
           return "Bot_v1";
           break;
-        case "access/role.yml":
+        case "access/role-1.yml":
           return "Role_v1";
           break;
       }

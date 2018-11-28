@@ -10,7 +10,7 @@ users_db = '/home/jmelis/work/git/userdb/osio/users.yaml'
 users = yaml.load(io.open(users_db, 'r', encoding="utf-8").read())
 
 TPL = """---
-$schema: access/user.yml
+$schema: access/user-1.yml
 
 labels: {}
 
