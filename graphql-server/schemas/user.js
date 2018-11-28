@@ -2,7 +2,7 @@ const db = require('../models/db');
 const base = require('./base');
 
 const typeDefs = `
-  type User implements DataFile {
+  type User_v1 implements DataFile_v1 {
     schema: String!
     path: String!
     labels: JSON

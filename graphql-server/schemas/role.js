@@ -4,21 +4,21 @@ const { JSONPath } = require('jsonpath-plus');
 const _ = require('lodash');
 
 const typeDefs = `
-  type Role implements DataFile {
+  type Role_v1 implements DataFile_v1 {
     schema: String!
     path: String!
     labels: JSON
     name: String!
-    members: [Entity]!
-    permissions: [Permission]!
+    members: [Entity_v1]!
+    permissions: [Permission_v1]!
   }
 `
 const resolvers = {
-  Role: {
+  Role_v1: {
     members(root, args, context, info) {
       // TODO: this is not acceptable, it requires absolute paths
       let jsonpath = `$.roles[?(@["$ref"]=="/${root.path}")]`;
-      let users = db.schemaInFilter(["access/user.yml", "access/bot.yml"]);
+      let users = db.schemaInFilter(["access/user-1.yml", "access/bot-1.yml"]);
       return _.filter(users, user => JSONPath({ json: user, path: jsonpath }).length > 0);
     },
   },

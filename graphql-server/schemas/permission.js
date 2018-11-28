@@ -2,55 +2,55 @@ const db = require('../models/db');
 const base = require('./base');
 
 const typeDefs = `
-  interface Permission {
+  interface Permission_v1 {
     service: String!
   }
 
-  type PermissionAWSAnalytics implements Permission {
+  type PermissionAWSAnalytics_v1 implements Permission_v1 {
     service: String!
   }
 
-  type PermissionGithubOrg implements Permission {
+  type PermissionGithubOrg_v1 implements Permission_v1 {
     service: String!
     org: String!
   }
 
-  type PermissionGithubOrgTeam implements Permission {
+  type PermissionGithubOrgTeam_v1 implements Permission_v1 {
     service: String!
     org: String!
     team: String!
   }
 
-  type PermissionOpenshiftRolebinding implements Permission {
+  type PermissionOpenshiftRolebinding_v1 implements Permission_v1 {
     service: String!
     cluster: String!
     namespace: String!
     permission: String!
   }
 
-  type PermissionQuayOrg implements Permission {
+  type PermissionQuayOrg_v1 implements Permission_v1 {
     service: String!
     org: String!
   }
 `
 const resolvers = {
-    Permission: {
+    Permission_v1: {
       __resolveType(root, context) {
         switch (root['service']) {
           case "aws-analytics":
-            return "PermissionAWSAnalytics";
+            return "PermissionAWSAnalytics_v1";
             break;
           case "github-org":
-            return "PermissionGithubOrg";
+            return "PermissionGithubOrg_v1";
             break;
           case "github-org-team":
-            return "PermissionGithubOrgTeam";
+            return "PermissionGithubOrgTeam_v1";
             break;
           case "openshift-rolebinding":
-            return "PermissionOpenshiftRolebinding";
+            return "PermissionOpenshiftRolebinding_v1";
             break;
           case "quay-org":
-            return "PermissionQuayOrg";
+            return "PermissionQuayOrg_v1";
             break;
         }
       }

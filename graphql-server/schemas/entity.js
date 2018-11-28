@@ -2,17 +2,17 @@ const db = require('../models/db');
 const base = require('./base');
 
 const typeDefs = `
-  union Entity = User | Bot
+  union Entity_v1 = User_v1 | Bot_v1
 `
 const resolvers = {
-  Entity: {
+  Entity_v1: {
     __resolveType(root, context) {
       switch (root['$schema']) {
-        case "access/user.yml":
-          return "User";
+        case "access/user-1.yml":
+          return "User_v1";
           break;
-        case "access/bot.yml":
-          return "Bot";
+        case "access/bot-1.yml":
+          return "Bot_v1";
           break;
       }
     }

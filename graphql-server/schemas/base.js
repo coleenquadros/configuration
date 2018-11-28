@@ -3,7 +3,7 @@ const hash = require('object-hash');
 const _ = require('lodash');
 
 var defaultResolver = function (root, args, context, info) {
-  let datafileImplementations = info.schema._implementations.DataFile;
+  let datafileImplementations = info.schema._implementations.DataFile_v1;
   let parentType = info.parentType;
 
   if (datafileImplementations.includes(parentType)) {
@@ -47,22 +47,22 @@ var typeDefs = `
   scalar JSON
 
   type Query {
-    datafile(label: JSON, schemaIn: [String]): [DataFile]
+    datafile(label: JSON, schemaIn: [String]): [DataFile_v1]
 
     # TODO: autogenerate for all types that implement DataFile
-    entity(label: JSON): [Entity]
-    user(label: JSON): [User]
-    bot(label: JSON): [Bot]
-    role(label: JSON): [Role]
+    entity(label: JSON): [Entity_v1]
+    user(label: JSON): [User_v1]
+    bot(label: JSON): [Bot_v1]
+    role(label: JSON): [Role_v1]
   }
 
-  interface DataFile {
+  interface DataFile_v1 {
     schema: String!
     path: String!
     labels: JSON
   }
 
-  type DataFileGeneric implements DataFile {
+  type DataFileGeneric_v1 implements DataFile_v1 {
     schema: String!
     path: String!
     labels: JSON
@@ -87,37 +87,37 @@ var resolvers = {
 
     // TODO: autogenerate for all types that implement DataFile
     entity(root, args, context, info) {
-      args.schemaIn = ["access/user.yml", "access/bot.yml"];
+      args.schemaIn = ["access/user-1.yml", "access/bot-1.yml"];
       return resolvers.Query.datafile(root, args, context, info);
     },
     user(root, args, context, info) {
-      args.schemaIn = ["access/user.yml"];
+      args.schemaIn = ["access/user-1.yml"];
       return resolvers.Query.datafile(root, args, context, info);
     },
     bot(root, args, context, info) {
-      args.schemaIn = ["access/bot.yml"];
+      args.schemaIn = ["access/bot-1.yml"];
       return resolvers.Query.datafile(root, args, context, info);
     },
     role(root, args, context, info) {
-      args.schemaIn = ["access/role.yml"];
+      args.schemaIn = ["access/role-1.yml"];
       return resolvers.Query.datafile(root, args, context, info);
     }
   },
-  DataFile: {
+  DataFile_v1: {
     __resolveType(root, context) {
       // TODO: autogenerate for all types that implement DataFile
       switch (root['$schema']) {
-        case "access/user.yml":
-          return "User";
+        case "access/user-1.yml":
+          return "User_v1";
           break;
-        case "access/bot.yml":
-          return "Bot";
+        case "access/bot-1.yml":
+          return "Bot_v1";
           break;
-        case "access/role.yml":
-          return "Role";
+        case "access/role-1.yml":
+          return "Role_v1";
           break;
       }
-      return "DataFileGeneric";
+      return "DataFileGeneric_v1";
     }
   },
 }
