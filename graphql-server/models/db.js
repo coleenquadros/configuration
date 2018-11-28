@@ -1,12 +1,20 @@
-const dirTree = require('directory-tree');
 const fs = require('fs');
-const yaml = require('js-yaml');
 const path = require('path');
 const jsonpointer = require('jsonpointer');
 const { JSONPath } = require('jsonpath-plus');
 const _ = require('lodash');
+var AWS = require('aws-sdk');
 
-const rootDir = '../data/';
+var s3 = new AWS.S3({
+  'AccessKeyID': process.env.AWS_ACCESS_KEY_ID,
+  'SecretAccessKey': process.env.AWS_SECRET_ACCESS_KEY,
+  'Region': process.env.AWS_REGION,
+});
+
+var s3params = {
+  Bucket: process.env.AWS_S3_BUCKET,
+  Key: process.env.AWS_S3_KEY,
+};
 
 // utils
 
@@ -144,25 +152,35 @@ var db = {
   },
   "isRef": isRef,
   "load": () => {
-    db.datafile = {};
-    db.datafiles = [];
-    dirTree(rootDir, { extensions: /\.(ya?ml|json)$/ }, function (item, PATH) {
-      var relativePath = item.path.slice(rootDir.length);
-      var raw = fs.readFileSync(item.path);
-      var data;
+    console.log(`Start datafile reload: ${new Date()}`);
 
-      if (item.path.match(/\.ya?ml$/)) {
-        data = yaml.safeLoad(raw);
-      } else if (item.path.match(/\.json$/)) {
-        data = JSON.parse(raw);
+    s3.getObject(s3params, function (err, data) {
+      if (err) {
+        console.log(err, err.stack);
+      } else {
+        let dbDatafileNew = {};
+        let dbDatafilesNew = [];
+
+        let raw = data.Body.toString('utf-8');
+        let datafilePack = JSON.parse(raw);
+
+        for (d of datafilePack) {
+          let datafilePath = d[0];
+          let datafileData = d[1];
+
+          datafileData['path'] = datafilePath;
+
+          dbDatafilesNew.push(datafileData);
+          dbDatafileNew[datafilePath] = datafileData;
+
+          console.log(`Load: ${datafilePath}`);
+        }
+
+        db.datafile = dbDatafileNew;
+        db.datafiles = dbDatafilesNew;
+
+        console.log(`End datafile reload: ${new Date()}`);
       }
-
-      data['path'] = relativePath;
-
-      db.datafiles.push(data);
-      console.log(`Loaded: ${item.path}`);
-
-      db.datafile[relativePath] = data;
     });
   }
 };
