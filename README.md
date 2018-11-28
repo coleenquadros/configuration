@@ -60,7 +60,7 @@ None
 - GitHub team syncing with lists of Red Hat users: `schemas/users/`
 - Automatically managing a Vault installation and federating access: `schemas/vault`
 - Management of OLM catalog entries for managing service operators: `schemas/olm`
-- Ownership of OpenShift Kubernetes namespace resources: `schemas/opensfhit`
+- Ownership of OpenShift Kubernetes namespace resources: `schemas/openshift`
 - Management of cluster monitoring, such as zabbix, prometheus, and alert manager: `schemas/monitoring`
 - Cloud (AWS) resource provisioning: `schemas/cloud`
 
