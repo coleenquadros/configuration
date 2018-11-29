@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -xv
+
 # Required secrets:
 #
 # - AWS_ACCESS_KEY_ID
