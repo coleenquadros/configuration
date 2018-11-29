@@ -70,7 +70,6 @@ EOF
 # start graphql-server locally
 qontract_server=$(
   docker run --rm -d \
-    -p 4000 \
     --env-file=.env \
     quay.io/app-sre/qontract-server:latest
 )
@@ -79,12 +78,11 @@ qontract_server=$(
 IP=$(docker inspect \
       -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' \
       ${qontract_server})
-PORT=$(docker port ${qontract_server} | cut -d: -f2)
 
 # Write config.toml for reconcile tools
 mkdir -p config
 echo "$CONFIG_TOML" | base64 -d | \
-  sed "s/localhost:4000/${IP}:$PORT/" > config/config.toml
+  sed -i "s/localhost/${IP}/" config/config.toml > config/config.toml
 
 # run integrations
 sleep 20
