@@ -1,26 +1,20 @@
 #!/bin/bash
 
-docker_push() {
-    docker --config="$DOCKER_CONF" push $1
-}
+# Required secrets:
+#
+# - AWS_ACCESS_KEY_ID: key to upload file to s3 bucket
+# - AWS_SECRET_ACCESS_KEY: secret key to upload file to s3 bucket
+# - USERNAME: username for app-interface.devshift.net
+# - PASSWORD: password for app-interface.devshift.net
 
-IMAGE_NAME_APP_INTERFACE="quay.io/app-sre/app-interface"
-IMAGE_NAME_NGINX_GATE="quay.io/app-sre/app-interface-nginx-gate"
-IMAGE_TAG=$(git rev-parse --short=7 HEAD)
+# https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/app-interface-s3-production
+# https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/app-interface-basic-auth-prod
 
-DOCKER_CONF="$PWD/.docker"
-mkdir -p "$DOCKER_CONF"
-docker --config="$DOCKER_CONF" login -u="$QUAY_USER" -p="$QUAY_TOKEN" quay.io
+BUCKET=app-interface-production
+FILE=data.json
 
-# build images
-make build-app-interface build-nginx-gate
+aws s3 cp ${FILE} s3://${BUCKET}/${FILE}
 
-# tag images
-docker --config="$DOCKER_CONF" tag $IMAGE_NAME_APP_INTERFACE:latest $IMAGE_NAME_APP_INTERFACE:$IMAGE_TAG
-docker --config="$DOCKER_CONF" tag $IMAGE_NAME_NGINX_GATE:latest $IMAGE_NAME_NGINX_GATE:$IMAGE_TAG
+curl https://${USERNAME}:${PASSWORD}/app-interface.devshift.net/reload
 
-# push images
-docker_push "$IMAGE_NAME_APP_INTERFACE:latest"
-docker_push "$IMAGE_NAME_APP_INTERFACE:$IMAGE_TAG"
-docker_push "$IMAGE_NAME_NGINX_GATE:latest"
-docker_push "$IMAGE_NAME_NGINX_GATE:$IMAGE_TAG"
+exit 0
