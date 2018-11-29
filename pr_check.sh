@@ -75,12 +75,16 @@ qontract_server=$(
     quay.io/app-sre/qontract-server:latest
 )
 
-# get dynamic port
+# get network conf
+IP=$(docker inspect \
+      -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' \
+      ${qontract_server})
 PORT=$(docker port ${qontract_server} | cut -d: -f2)
 
 # Write config.toml for reconcile tools
 mkdir -p config
-echo "$CONFIG_TOML" | base64 -d | sed "s/:4000/:$PORT/" > config/config.toml
+echo "$CONFIG_TOML" | base64 -d | \
+  sed "s/localhost:4000/${IP}:$PORT/" > config/config.toml
 
 # run integrations
 docker run --rm \
