@@ -90,7 +90,8 @@ sleep 20
 docker run --rm \
   -v `pwd`/config:/config:z \
   ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
-  reconcile --config /config/config.toml github --dry-run
+  reconcile --config /config/config.toml github --dry-run \
+  | tee reports/reconcile-github.txt
 
 # stop qontract-server
 docker stop ${qontract_server}
