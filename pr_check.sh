@@ -82,7 +82,7 @@ IP=$(docker inspect \
 # Write config.toml for reconcile tools
 mkdir -p config
 echo "$CONFIG_TOML" | base64 -d | \
-  sed -i "s/localhost/${IP}/" config/config.toml > config/config.toml
+  sed "s/localhost/${IP}/" > config/config.toml
 
 # run integrations
 sleep 20
