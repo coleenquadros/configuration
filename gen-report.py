@@ -48,7 +48,10 @@ REPORT_TEMPLATE = """
     <pre><code>{{ error.result.error | e }}</code></pre>
 {% endfor %}
 {% endif %}
-
+<h2>Reconcile Reports</h2>
+<ul>
+<li><a href='reconcile-github.txt'>reconcile-github.txt</a></li>
+</ul>
 </body>
 </html>
 """
