@@ -52,6 +52,8 @@ if [ "$exit_status" != "0" ]; then
   exit $exit_status
 fi
 
+set -e
+
 # pack the datafiles and upload to s3
 ./pack-datafiles.py data > ${DATA_JSON}
 aws s3 cp ${DATA_JSON} s3://${AWS_S3_BUCKET}
