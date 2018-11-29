@@ -87,6 +87,8 @@ echo "$CONFIG_TOML" | base64 -d | \
   sed "s/localhost:4000/${IP}:$PORT/" > config/config.toml
 
 # run integrations
+sleep 20
+
 docker run --rm \
   -v `pwd`/config:/config:z \
   ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
