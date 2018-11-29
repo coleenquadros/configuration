@@ -12,7 +12,7 @@ set -xv
 # https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-int/qontract-reconcile-toml
 
 SCHEMAS_REPO=https://github.com/app-sre/qontract-server
-SCHEMAS_REPO_COMMIT=6617977
+SCHEMAS_REPO_COMMIT=beb70a6
 
 VALIDATOR_IMAGE=quay.io/app-sre/qontract-validator
 VALIDATOR_IMAGE_TAG=a54b466
