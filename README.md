@@ -171,8 +171,8 @@ are:
 In any case, you typically won't need to modify the roles, just find the role
 you want the user to belong to. Roles can be associated with the services:
 `service/<name>/roles/<rolename>.yml`, or to teams:
-`teams/<name>/roles/<rolename>.yml`. Check out the currently defined ones to
-know what role to include.
+`teams/<name>/roles/<rolename>.yml`. Check out the currently defined roles to
+know which one to add.
 
 ## Design
 
