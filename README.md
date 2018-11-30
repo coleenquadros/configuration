@@ -16,7 +16,7 @@ Whatever is present inside that folder constitutes the App-SRE contract.
 These files can be `yaml` or `json` files, and they must validate against the some
 [well-defined json schemas][schemas].
 
-The path of the files do not have any effect on the integrations (automation components that feed off the contract), but the contents of the files do. They all will contain:
+The path of the files do not have any effect on the integrations (automation components that feed off the contract), but the contents of the files do. They will all contain:
 
 - `$schema`: which maps to a well defined schema [schema][schemas].
 - `labels`: arbitrary labels that can be used to perform queries, etc.
@@ -162,11 +162,11 @@ The `$ref` property points to another file, in this case it must be a
 `service` which indicate what kind of permission they are. The possible values
 are:
 
-- aws-analytics
-- github-org
-- github-org-team
-- openshift-rolebinding
-- quay-org
+- `aws-analytics`
+- `github-org`
+- `github-org-team`
+- `openshift-rolebinding`
+- `quay-org`
 
 In any case, you typically won't need to modify the roles, just find the role
 you want the user to belong to. Roles can be associated with the services:
