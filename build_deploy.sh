@@ -14,7 +14,6 @@ BUCKET=app-interface-production
 FILE=data.json
 
 aws s3 cp ${FILE} s3://${BUCKET}/${FILE}
-
-curl https://${USERNAME}:${PASSWORD}/app-interface.devshift.net/reload
+curl -u "${USERNAME}:${PASSWORD}" https://app-interface.devshift.net/reload
 
 exit 0
