@@ -66,6 +66,7 @@ suffering from backwards compatibility changes.
 
 ## TODO
 
+- ref resolver in PR check
 - sleep 20 in pr_check.sh => better to implement a call that says that
   everything is loaded?
 - heuristics to determine when not to execute the action - example,
