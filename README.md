@@ -1,124 +1,188 @@
-# Hosted Services
+# App-Interface
 
-This repository serves as a central coordination point for hosted services being run by the Application SRE team.
-Many or all of the portions of the contract defined herein will be handled through automation after changes are accepted to this repository by the appropriate parties.
+This repository serves as a central coordination point for hosted services being
+run by the Application SRE team. Many or all of the portions of the contract
+defined herein will be handled through automation after changes are accepted to
+this repository by the appropriate parties.
 
-## Hosted Services Contract
+The Application SRE team is responsible of fulfilling the contract defined in
+this repository.
 
-A service exists as one or more subdirectories to this repository, containing instances of the [JSON-Schemas](https://json-schema.org/) defined in the `schemas` subdirectory of this repository.
+## Overview
 
-## Quickstart
+This repository contains of a collection of files under the `data` folder.
+Whatever is present inside that folder constitutes the App-SRE contract.
 
-### Validating Your Service Definition or Schema
+These files can be `yaml` or `json` files, and they must validate against the some
+[well-defined json schemas][schemas].
 
-The following command will validate all service definitions and schemas:
+The path of the files do not have any effect on the integrations (automation components that feed off the contract), but the contents of the files do. They will all contain:
 
-```console
-make build && make validate
-```
+- `$schema`: which maps to a well defined schema [schema][schemas].
+- `labels`: arbitrary labels that can be used to perform queries, etc.
+- Additional data specific to the resource in question.
+
+## Components
+
+Main App-Interface contract components:
+
+- <https://gitlab.cee.redhat.com/service/app-interface>: datafiles (schema
+  implementations) that define the contract.
+- <https://github.com/app-sre/qontract-server>: json schemas of the datafiles
+  submitted to the `app-interface` repository. The GraphQL component developed
+  in this repository will make the datafiles queryable.
+
+Additional components and tools:
+
+- <https://github.com/app-sre/qontract-validator>: Python script that validates
+  the datafiles against the json schemas hosted in `qontract-server`.
+- <https://github.com/app-sre/qontract-reconcile>: automation component that
+  reconciles the state of third-party services like `github`, with the contract
+  definition.
+
+The word _qontract_ comes from _queryable-contract_.
+
+## Workflow
+
+The main use case happens when an interested party wants to submit a contract
+amendment. Some examples would be:
+
+- Adding a new user and granting access to certain teams / services.
+- Submitting a new application to be hosted by the Application SRE team.
+- Modifying the SLO of an application.
+- etc.
+
+All contract amendments must be formally defined. Formal definitions are expressed as json
+schemas. You can find the supported schemas here:
+[schemas][schemas].
+
+1. The interested party will:
+
+- Fork the [app-interface](<https://gitlab.cee.redhat.com/service/app-interface>
+) repository.
+- Submit a MR with the desired contract amendment.
+
+2. Automation will validate the amendment and generate a report of the desired
+   changes, including changes that would be applied to third-party services like
+   `OpenShift`, `Github`, etc, as a consequence of the amendment.
+
+3. The Application-SRE team will review the amendment and will determine whether
+   to accept it by merging the MR.
+
+4. From the moment the MR is accepted, the amended contract will enter into
+   effect.
+
+## Querying the App-interface
+
+The contract can be queried programmatically using a
+[GraphQL](<https://graphql.org/learn/>) API.
+
+The GraphQL endpoint is reachable here:
+<https://app-interface.devshift.net/graphql>.
+
+You need to authenticate to access the service. Please request the credentials
+to the App-SRE team.
+
+**IMPORTANT**: in order to use the GraphQL UI you need to click on the Settings
+wheel icon (top-right corner) and replace `omit` with `include` in
+`request.credentials`.
 
 ## Features
 
 ### Existing Features
 
-- [GraphQL API](graphql-server/README.md)
-- Ability to validate all schemas as valid JSON-Schema and compliant with the integration metaschema
-- Ability to validate all service definitions that implement a schema
+- [GraphQL API](<https://github.com/app-sre/qontract-server>).
+- Ability to validate all schemas as valid JSON-Schema and compliant with the
+  integration metaschema.
+- Ability to validate all datafile (schema implementations) that implement a
+  schema.
+- Validation of datafiles on MRs to the `app-interface` repository.
+- Simulation of third-party service changes on MRs to `app-interface`
+  repository.
+- Automated deployment of the new contract to the production GraphQL endpoint.
+- Automated execution of the supported integration components to reconcile other
+  services with the desired state as represented in the contract.
 
 ### Planned Features
 
-- Walk the tree of service definitions and execute any and all matching integrations against schema instance
-- Automatically generate JSON schema docs from the set of schemas provided: [CloudFlare JSON-Schema tools](https://github.com/cloudflare/json-schema-tools)
-- Self-hosted automation, devshift.net tooling is described and conforms to this contract
-- Unify common patterns like machine readable indentifiers when [draft-08](https://github.com/json-schema-org/json-schema-spec/milestone/6) is ratified
-- (stretch) Provide a full platform which can help in onboarding a new service and do the Git PR workflow against the source of truth repository
-  - https://github.com/mozilla-services/react-jsonschema-form
-  - [Libgit2 MySQL backend](https://www.perforce.com/blog/your-git-repository-database-pluggable-backends-libgit2)
+- Local verification of datafiles, so interested parties can validate their
+  contract amendments before submitting a MR to the `app-interface` repo.
+- Automatically generate GraphQL schemas from the JSON schemas.
+- Automated reporting based on the contract via GraphQL API.
+- Auditability and traceability. Being able to easily track down when and why an
+  amendment was submitted.
 
 ## Integrations
 
-### Requirements for any integration
+### Existing integrations
 
-- Idempotent, and integration should result in the same thing if run multiple times with same input
-- Runnable as a script or as a component of an application
-- Schema definitions must predictably be able to determine what an operation to a map property name, or array item will do in the integration
-  - stableIndexList, stableIdentifierList, and stableMapName are provided schema fragments and strategies for signaling this to the schema validated config writer (i.e. service owner)
-- Full rectification loop between things that are declared in the management plane and the running systems
-  - Creation
-  - Mutations
-  - Removal
-- Integrations are triggered based on the schemas that are declared via the `$schema` property in the instances
-- Integrations should include a dry run mode which will generate a plan that can be reviewed by service delivery when a PR is created
-
-### Existing Integrations
-
-None
+- GitHub org and team syncing. With this integration we can leverage any service
+  that is configured to use GitHub as the authentication platform. For example:
+  - <https://ci.int.devshift.net/>
+  - <https://ci.ext.devshift.net/>
+  - <https://vault.devshift.net/ui/>
+  - Many openshift.com clusters:
+    - `dsaas`, `dsaas-stg`, `evg`, `app-sre`, `app-sre-dev`.
+  - OpenShift.io Feature Toggles
 
 ### Planned integrations
 
-- Top level tracking of managed services, their contact points, and work streams: `schemas/app-sre`
-- GitHub team syncing with lists of Red Hat users: `schemas/users/`
-- Automatically managing a Vault installation and federating access: `schemas/vault`
-- Management of OLM catalog entries for managing service operators: `schemas/olm`
-- Ownership of OpenShift Kubernetes namespace resources: `schemas/openshift`
-- Management of cluster monitoring, such as zabbix, prometheus, and alert manager: `schemas/monitoring`
-- Cloud (AWS) resource provisioning: `schemas/cloud`
+- Top level tracking of managed services, their contact points, and work
+  streams.
+- Automatically managing a Vault installation and federating access.
+- Management of OLM catalog entries for managing service operators.
+- Ownership of OpenShift Kubernetes namespace resources.
+- Management of cluster monitoring, such as zabbix, prometheus, and alert
+  manager.
+- Management of Quay repos.
+- Management of Quay organisation members.
+- Cloud (AWS) resource provisioning.
 
-## Integration Notes
+## Howto
 
-### Open questions:
+### Add / modify a user (`access/users-1.yml`)
 
-- Should we protect against poorly performing upstream services with heuristics against the magnitude of the change and the service API responses?
+You will want to do this when you want to add a user or grant / revoke
+permissions for that user.
 
-  - Unknown
+Users are typically stored in the `teams/<name>/users` folder. Note that the
+actual file path will not condition the integrations, you can consider the
+directory structure as something that is only useful for human consumption.
 
-- Is it actually possible to run a full rectification loop that is declarative and idempotent against all of our required services? Are we going to run into rate limits against the upstream services?
+Write the file in yaml format with `.yml` extension. The contents must validate
+against the current [user schema][userschema].
 
-  - Unknown
+Make sure you define `$schema: access/users-1.yml` inside the file.
 
-- Will we have the "list" permissions required for running a rectification loop against a running service for each required integration?
+The `roles` property is the most complex property to understand. If you look at
+the `access/users-1.yml` you will see that it's a list of [crossrefs][crossref].
+The `$ref` property points to another file, in this case it must be a
+[role][role]. The role file is essentially a collection of
+[permissions][permission]. Permissions contain a mandatory property called
+`service` which indicate what kind of permission they are. The possible values
+are:
 
-  - Unknown
+- `aws-analytics`
+- `github-org`
+- `github-org-team`
+- `openshift-rolebinding`
+- `quay-org`
 
-- Why don't we just use terraform? It already collects errors and has tons of integrations?
+In any case, you typically won't need to modify the roles, just find the role
+you want the user to belong to. Roles can be associated with the services:
+`service/<name>/roles/<rolename>.yml`, or to teams:
+`teams/<name>/roles/<rolename>.yml`. Check out the currently defined roles to
+know which one to add.
 
-  - The state file is a potential failure point for terraform. If it gets out of sync then the proper actions against the upstream services can't be generated.
-  - It's possible that we can not use the state file, or code against a synthetic state file, or fix the state file, and then use terraform.
-  - It's also possible that we can just use the providers without the plan/execution engine.
-    - Providers that terraform has that we may utilize:
-      - IaaS: AWS, Azure, GCP, Kubernetes
-      - PaaS: Kubernetes
-      - SaaS: Vault, Github, Gitlab
-      - Databases: MySQL, Postgres
-    - Missing providers:
-      - Monitoring: zabbix, prometheus, alertmanager
-      - SaaS: Quay
+## Design
 
-### Vault notes:
+Additional design information: [here](docs/design.md).
 
-```
-Authenticate users in vault against github with a github token
-2 ways to map policies to github entities
-Team or individual members of team
-Avoid having individuals
-app-sre organization and osio-dev team
-have an ansible role that is managing policies and mappings
-api calls
-if you remove a policy it stays in the vault install
-present in the DB
-need a destructor
-need to pick the policy name, and pick the policy mapping in github
-going to rewrite in go in order to do full rectification loop
-```
-
-### Service index:
-
-```
-schema for openshift projects that we deploy
-List of all of the things we own, even with no automation
-Link to JIRA filtered by service label
-Link to source control filtered to repo
-Responsible parties
-Enum for [user facing, red hat facing, automation]
-Enum for status [extenrally manager, managed by automation, partially managed]
-```
+[schemas]:
+<https://github.com/app-sre/qontract-server/tree/master/schemas/app-sre>
+[userschema]:
+<https://github.com/app-sre/qontract-server/blob/master/schemas/access/user-1.yml>
+[crossref]:
+<https://github.com/app-sre/qontract-server/blob/beb70a68334f49581c3656e2a223998965ee19c1/schemas/common-1.json#L58-L86>
+[role]: <https://github.com/app-sre/qontract-server/blob/master/schemas/access/role-1.yml>
+[permission]: <https://github.com/app-sre/qontract-server/blob/master/schemas/access/permission-1.yml>
