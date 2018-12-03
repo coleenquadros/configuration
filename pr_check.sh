@@ -11,7 +11,7 @@ set -xv
 # https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/app-interface-s3-staging
 # https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-int/qontract-reconcile-toml
 
-source env
+source ./.env
 
 # variables
 RESULTS=reports/results.json
