@@ -14,6 +14,8 @@ set -e
 # https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/app-interface-s3-production
 # https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/app-interface-basic-auth-prod
 
+source env
+
 # Install required pip modules
 rm -rf venv
 virtualenv venv
