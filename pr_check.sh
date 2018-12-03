@@ -11,14 +11,7 @@ set -xv
 # https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/app-interface-s3-staging
 # https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-int/qontract-reconcile-toml
 
-SCHEMAS_REPO=https://github.com/app-sre/qontract-server
-SCHEMAS_REPO_COMMIT=5693462
-
-VALIDATOR_IMAGE=quay.io/app-sre/qontract-validator
-VALIDATOR_IMAGE_TAG=a54b466
-
-RECONCILE_IMAGE=quay.io/app-sre/qontract-reconcile
-RECONCILE_IMAGE_TAG=850e38c
+source ./.env
 
 # variables
 RESULTS=reports/results.json
