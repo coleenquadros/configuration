@@ -18,6 +18,8 @@ for root, dirs, files in os.walk(datadir, topdown=False):
     for name in files:
         if re.search(r'\.(ya?ml|json)$', name):
             path = os.path.join(root, name)
+            sys.stderr.write("Processing: {}\n".format(path))
+
             data = anymarkup.parse_file(path)
 
             datafile = path[len(datadir):]
