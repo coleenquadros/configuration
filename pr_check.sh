@@ -64,7 +64,7 @@ EOF
 qontract_server=$(
   docker run --rm -d \
     --env-file=.env \
-    quay.io/app-sre/qontract-server:latest
+    quay.io/app-sre/qontract-server:$SCHEMAS_REPO_COMMIT
 )
 
 # get network conf
