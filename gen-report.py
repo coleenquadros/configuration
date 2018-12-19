@@ -4,6 +4,8 @@ import json
 import os
 import sys
 
+from glob import glob
+
 import jinja2
 
 REPORT_TEMPLATE = """
@@ -21,6 +23,7 @@ REPORT_TEMPLATE = """
 <li>Schema errors: {{ errors_schemas | length }}</li>
 <li>Checked files: {{ results_files | length }}</li>
 <li>File validation errors: {{ errors_files | length }}</li>
+<li>Ref validation errors: {{ errors_refs | length }}</li>
 {% if description %}
 <li>MR: <a href="{{ description }}">{{ description }}</a></li>
 {% endif %}
@@ -48,13 +51,50 @@ REPORT_TEMPLATE = """
     <pre><code>{{ error.result.error | e }}</code></pre>
 {% endfor %}
 {% endif %}
-<h2>Reconcile Reports</h2>
-<ul>
-<li><a href='reconcile-github.txt'>reconcile-github.txt</a></li>
-</ul>
+
+{% if errors_refs | length > 0 %}
+<h2>Ref Validation Errors</h2>
+{% for error in errors_refs %}
+    <h3>{{ error.filename }}</h3>
+    <ul>
+        <li>REASON: <code>{{ error.result.reason }}</code></li>
+        <li>REF: <code>{{ error.result.ref }}</code></li>
+    </ul>
+    <pre><code>{{ error.result.error | e }}</code></pre>
+{% endfor %}
+{% endif %}
+
+{% if reconcile_success | length > 0 %}
+<h2>Successful Reconcile Integrations</h2>
+{% for report in reconcile_success %}
+<h3>{{ report[0] }}</h3>
+<pre><code>{{ report[1] }}</pre></code>
+{% endfor %}
+{% endif %}
+
+{% if reconcile_fail | length > 0 %}
+<h2>Failed Reconcile Integrations</h2>
+{% for report in reconcile_fail %}
+<h3>{{ report[0] }}</h3>
+<pre><code>{{ report[1] }}</pre></code>
+{% endfor %}
+{% endif %}
+
 </body>
 </html>
 """
+
+
+def report_tuple(path):
+    """
+    returns a tuple: (report_name, content)
+    """
+
+    report_name = os.path.basename(path)
+    with open(path, 'r') as f:
+        content = f.read()
+
+    return (report_name, content)
 
 
 def main():
@@ -81,13 +121,36 @@ def main():
         if i["result"]["status"] == "ERROR"
     ]
 
+    results_refs = [
+        i for i in results
+        if i["kind"] == "REF"
+    ]
+
+    errors_refs = [
+        i for i in results_refs
+        if i["result"]["status"] == "ERROR"
+    ]
+
     template = jinja2.Template(REPORT_TEMPLATE)
+
+    reconcile_success = map(
+        report_tuple,
+        glob('reports/reconcile_reports_success/*.txt')
+    )
+
+    reconcile_fail = map(
+        report_tuple,
+        glob('reports/reconcile_reports_fail/*.txt')
+    )
 
     print template.render(
         results_schemas=results_schemas,
         errors_schemas=errors_schemas,
         results_files=results_files,
         errors_files=errors_files,
+        errors_refs=errors_refs,
+        reconcile_success=reconcile_success,
+        reconcile_fail=reconcile_fail,
         description=os.environ.get('DESCRIPTION')
     )
 
