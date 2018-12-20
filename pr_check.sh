@@ -1,15 +1,6 @@
 #!/bin/bash
 
-set -xv
-
-# Required secrets:
-#
-# - AWS_ACCESS_KEY_ID
-# - AWS_SECRET_ACCESS_KEY
-# - CONFIG_TOML
-
-# https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/app-interface-s3-staging
-# https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-int/qontract-reconcile-toml
+set -xvo pipefail
 
 source ./.env
 
@@ -17,55 +8,59 @@ source ./.env
 RESULTS=reports/results.json
 REPORT=reports/index.html
 
-AWS_S3_BUCKET=app-interface-staging
-DATA_JSON=data-`date +%s`.json
-AWS_REGION=us-east-2
-
 # Download schemas
 rm -rf schemas
-curl -sL ${SCHEMAS_REPO}/archive/${SCHEMAS_REPO_COMMIT}.tar.gz | \
+curl -sL ${QONTRACT_SERVER_REPO}/archive/${QONTRACT_SERVER_IMAGE_TAG}.tar.gz | \
   tar -xz --strip-components=1 -f - '*/schemas'
 
 # Run validation and generate report
-docker run --rm \
-  -v `pwd`:/data:z \
-  ${VALIDATOR_IMAGE}:${VALIDATOR_IMAGE_TAG} > ${RESULTS}
+mkdir -p validate
+
+docker run --rm -v `pwd`/data:/data:z \
+  ${VALIDATOR_IMAGE}:${VALIDATOR_IMAGE_TAG} \
+  qontract-bundler /data > validate/data.json
+
+docker run --rm -v `pwd`/schemas:/schemas:z \
+  ${VALIDATOR_IMAGE}:${VALIDATOR_IMAGE_TAG} \
+  qontract-bundler /schemas > validate/schemas.json
+
+docker run --rm -v `pwd`/validate:/validate:z \
+  ${VALIDATOR_IMAGE}:${VALIDATOR_IMAGE_TAG} \
+  qontract-validator /validate/schemas.json /validate/data.json \
+  > ${RESULTS}
 
 exit_status=$?
 
-# Install required pip modules
-rm -rf venv
-virtualenv venv
-source venv/bin/activate
-pip install -r requirements.txt
-
-# generate report
+# Write report
 python gen-report.py ${RESULTS} > ${REPORT}
 echo "Report written to: ${REPORT}"
 
-if [ "$exit_status" != "0" ]; then
-  exit $exit_status
-fi
+# Exit if there was a validation error
+[ "$exit_status" != "0" ] && exit $exit_status
 
-# pack the datafiles and upload to s3
-./pack-datafiles.py data > ${DATA_JSON}
-aws s3 cp ${DATA_JSON} s3://${AWS_S3_BUCKET}
+# Validation worked, so we are good to run the integrations
 
 # write .env file
 cat <<EOF > .env
-AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-AWS_REGION=${AWS_REGION}
-AWS_S3_BUCKET=${AWS_S3_BUCKET}
-AWS_S3_KEY=${DATA_JSON}
+LOAD_METHOD=fs
+DATAFILES_FILE=/validate/data.json
 EOF
 
 # start graphql-server locally
 qontract_server=$(
   docker run --rm -d \
+    -v `pwd`/validate:/validate:z \
     --env-file=.env \
-    quay.io/app-sre/qontract-server:$SCHEMAS_REPO_COMMIT
+    ${QONTRACT_SERVER_IMAGE}:${QONTRACT_SERVER_IMAGE_TAG}
 )
+
+if [ -z "$qontract_server" ]; then
+  echo "Could not start qontract server" >&2
+  exit 1
+fi
+
+# Setup trap to execute after the script exits
+trap "docker stop $qontract_server" EXIT
 
 # get network conf
 IP=$(docker inspect \
@@ -74,20 +69,65 @@ IP=$(docker inspect \
 
 # Write config.toml for reconcile tools
 mkdir -p config
-echo "$CONFIG_TOML" | base64 -d | \
-  sed "s/localhost/${IP}/" > config/config.toml
+echo "$CONFIG_TOML" | base64 -d | sed "s/localhost/$IP/" > config/config.toml
+
+# wait until the service loads the data
+count=0
+max=10
+SHA256=$(sha256sum validate/data.json | awk '{print $1}')
+while [[ ${count} -lt ${max} ]]; do
+    let count++
+    DEPLOYED_SHA256=$(curl -sf http://${IP}:4000/sha256)
+    [[ "$DEPLOYED_SHA256" == "$SHA256" ]] && break || sleep 10
+done
+
+if [[ "$DEPLOYED_SHA256" != "$SHA256" ]]; then
+  echo "Invalid SHA256" >&2
+  exit 1
+fi
 
 # run integrations
-sleep 20
+
+SUCCESS_DIR=reports/reconcile_reports_success
+FAIL_DIR=reports/reconcile_reports_fail
+
+RECONCILE_SUCCESS=true
+
+rm -rf ${SUCCESS_DIR} ${FAIL_DIR}; mkdir -p ${SUCCESS_DIR} ${FAIL_DIR}
+
+# GITHUB
 
 docker run --rm \
   -v `pwd`/config:/config:z \
   ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
-  reconcile --config /config/config.toml github --dry-run \
-  |& tee reports/reconcile-github.txt
+  qontract-reconcile --config /config/config.toml github --dry-run \
+  |& tee ${SUCCESS_DIR}/reconcile-github.txt
 
-# stop qontract-server
-docker stop ${qontract_server}
+if [ "$?" != "0" ]; then
+  mv ${SUCCESS_DIR}/reconcile-github.txt ${FAIL_DIR}/reconcile-github.txt
+  RECONCILE_SUCCESS=false
+fi
 
-# remove file from s3
-aws s3 rm s3://${AWS_S3_BUCKET}/${DATA_JSON}
+# OPENSHIFT-ROLEBINDING
+
+docker run --rm \
+  -v `pwd`/config:/config:z \
+  ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
+  qontract-reconcile --config /config/config.toml openshift-rolebinding --dry-run \
+  |& tee ${SUCCESS_DIR}/reconcile-openshift-rolebinding.txt
+
+if [ "$?" != "0" ]; then
+  mv ${SUCCESS_DIR}/reconcile-openshift-rolebinding.txt ${FAIL_DIR}/reconcile-openshift-rolebinding.txt
+  RECONCILE_SUCCESS=false
+fi
+
+# Rewrite report with the generated reconcile reports
+python gen-report.py ${RESULTS} > ${REPORT}
+echo "Report written to: ${REPORT}"
+
+if [ "$RECONCILE_SUCCESS" != "true" ]; then
+  echo "Some reconcile jobs failed" >&2
+  exit 1
+fi
+
+exit 0
