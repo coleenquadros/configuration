@@ -70,7 +70,7 @@ IP=$(docker inspect \
 # Write config.toml for reconcile tools
 mkdir -p config
 echo "$CONFIG_TOML" | base64 -d \
-  | sed 's|^server.*|server = "http://localhost:4000/graphql"|' \
+  | sed "s|^server.*|server = \"http://$IP:4000/graphql\"|" \
   > config/config.toml
 
 # wait until the service loads the data
