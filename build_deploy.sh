@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -exv
 
 source ./.env
 
@@ -12,8 +12,8 @@ wait_response() {
     EXPECTED_RESPONSE=$2
 
     while [[ ${count} -lt ${max} ]]; do
-        let count++
-        RESPONSE=$(curl -sf $URL)
+        let count++ || :
+        RESPONSE=$(curl -s $URL)
         [[ "$EXPECTED_RESPONSE" == "$RESPONSE" ]] && break || sleep 10
     done
 
