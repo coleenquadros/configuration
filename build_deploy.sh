@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -exv
+set -exvo pipefail
 
 source ./.env
 
@@ -26,12 +26,13 @@ wait_response() {
 }
 
 # Create data bundle
+mkdir -p validate
 
 docker run --rm -v `pwd`/data:/data:z \
   ${VALIDATOR_IMAGE}:${VALIDATOR_IMAGE_TAG} \
-  qontract-bundler /data > data.json
+  qontract-bundler /data > validate/data.json
 
-SHA256=$(sha256sum data.json | awk '{print $1}')
+SHA256=$(sha256sum validate/data.json | awk '{print $1}')
 
 # Upload to staging and reload
 
@@ -44,7 +45,7 @@ export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_STAGING
 export USERNAME=$USERNAME_STAGING
 export PASSWORD=$PASSWORD_STAGING
 
-aws s3 cp data.json s3://${AWS_S3_BUCKET}/${AWS_S3_KEY}
+aws s3 cp validate/data.json s3://${AWS_S3_BUCKET}/${AWS_S3_KEY}
 
 curl "https://${USERNAME}:${PASSWORD}@app-interface.staging.devshift.net/reload"
 
@@ -63,12 +64,48 @@ export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_PRODUCTION
 export USERNAME=$USERNAME_PRODUCTION
 export PASSWORD=$PASSWORD_PRODUCTION
 
-aws s3 cp data.json s3://${AWS_S3_BUCKET}/${AWS_S3_KEY}
+aws s3 cp validate/data.json s3://${AWS_S3_BUCKET}/${AWS_S3_KEY}
 
 curl "https://${USERNAME}:${PASSWORD}@app-interface.devshift.net/reload"
 
 wait_response \
     "https://${USERNAME}:${PASSWORD}@app-interface.devshift.net/sha256" \
     "$SHA256"
+
+# Run integrations
+
+# Write config.toml for reconcile tools
+mkdir -p config
+echo "$CONFIG_TOML" | base64 -d > config/config.toml
+
+SUCCESS_DIR=reports/reconcile_reports_success
+FAIL_DIR=reports/reconcile_reports_fail
+rm -rf ${SUCCESS_DIR} ${FAIL_DIR}; mkdir -p ${SUCCESS_DIR} ${FAIL_DIR}
+
+set +e
+
+docker run --rm \
+  -v `pwd`/config:/config:z \
+  ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
+  qontract-reconcile --config /config/config.toml github --dry-run \
+  |& tee ${SUCCESS_DIR}/reconcile-github.txt
+
+if [ "$?" != "0" ]; then
+  mv ${SUCCESS_DIR}/reconcile-github.txt ${FAIL_DIR}/reconcile-github.txt
+  exit 1
+fi
+
+# OPENSHIFT-ROLEBINDING
+
+docker run --rm \
+  -v `pwd`/config:/config:z \
+  ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
+  qontract-reconcile --config /config/config.toml openshift-rolebinding --dry-run \
+  |& tee ${SUCCESS_DIR}/reconcile-openshift-rolebinding.txt
+
+if [ "$?" != "0" ]; then
+  mv ${SUCCESS_DIR}/reconcile-openshift-rolebinding.txt ${FAIL_DIR}/reconcile-openshift-rolebinding.txt
+  exit 1
+fi
 
 exit 0
