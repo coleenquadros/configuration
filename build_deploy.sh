@@ -87,7 +87,7 @@ set +e
 docker run --rm \
   -v `pwd`/config:/config:z \
   ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
-  qontract-reconcile --config /config/config.toml github --dry-run \
+  qontract-reconcile --config /config/config.toml github \
   |& tee ${SUCCESS_DIR}/reconcile-github.txt
 
 if [ "$?" != "0" ]; then
@@ -100,7 +100,7 @@ fi
 docker run --rm \
   -v `pwd`/config:/config:z \
   ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
-  qontract-reconcile --config /config/config.toml openshift-rolebinding --dry-run \
+  qontract-reconcile --config /config/config.toml openshift-rolebinding \
   |& tee ${SUCCESS_DIR}/reconcile-openshift-rolebinding.txt
 
 if [ "$?" != "0" ]; then
