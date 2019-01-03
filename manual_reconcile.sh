@@ -7,8 +7,8 @@ usage() {
     exit 1
 }
 
-# Mac OS X does not have `sha256sum` binary
-command -v sha256sum || alias sha256sum='shasum -a 256'
+# Mac OS X does not have `sha256sum` binary. Wrap around `shasum` if present
+command -v sha256sum || command -v shasum && alias sha256sum='shasum -a 256'
 
 TEMP_DIR=${TEMP_DIR:-./temp}
 TEMP_DIR=$(realpath -s $TEMP_DIR)
