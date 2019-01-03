@@ -98,7 +98,14 @@ def report_tuple(path):
 
 
 def main():
-    with open(sys.argv[1], 'r') as f:
+    results_json = sys.argv[1]
+
+    try:
+        reports_dir = sys.argv[2]
+    except IndexError:
+        reports_dir = None
+
+    with open(results_json, 'r') as f:
         results = json.load(f)
 
     results_schemas = [
@@ -133,15 +140,14 @@ def main():
 
     template = jinja2.Template(REPORT_TEMPLATE)
 
-    reconcile_success = map(
-        report_tuple,
-        glob('reports/reconcile_reports_success/*.txt')
-    )
-
-    reconcile_fail = map(
-        report_tuple,
-        glob('reports/reconcile_reports_fail/*.txt')
-    )
+    if reports_dir:
+        success_glob = glob(reports_dir + '/reconcile_reports_success/*.txt')
+        fail_glob = glob(reports_dir + '/reconcile_reports_fail/*.txt')
+        reconcile_success = map(report_tuple, success_glob)
+        reconcile_fail = map(report_tuple, fail_glob)
+    else:
+        reconcile_success = []
+        reconcile_fail = []
 
     print template.render(
         results_schemas=results_schemas,
