@@ -95,29 +95,18 @@ Instructions to perform JSON schema validation on changes to the datafiles.
 - docker
 - git
 
-**Steps**:
+**Instructions**:
 
-The first step is to checkout a local copy of the schemas:
-
-```sh
-# make sure you are in the top dir of the `app-interface` git repo
-source .env
-git clone $QONTRACT_SERVER_REPO qontract-server
-cd qontract-server
-git checkout $QONTRACT_SERVER_IMAGE_TAG
-```
-
-The next step is to run the actual validator:
+Run the actual validator by executing:
 
 ```sh
 # make sure you are in the top dir of the `app-interface` git repo
 source .env
-./manual_schema_validator.sh qontract-server/schemas data
+./manual_schema_validator.sh data
 ```
 
-The output of the `./manual_schema_validator.sh` is JSON document, so you can
-pipe it with `jq`: `./manual_schema_validator.sh qontract-server/schemas data |
-jq .`
+The output will be JSON document, so you can pipe it with `jq`, example:
+`./manual_schema_validator.sh data | jq .`
 
 ### Running integrations locally with `--dry-run`
 
@@ -134,7 +123,7 @@ vault secret: `app-sre/ci-int/qontract-reconcile-toml`.
 - docker
 - git
 
-**Steps**:
+**Instructions**:
 
 Obtain the `config.toml` file required to run the integrations.
 
@@ -150,10 +139,9 @@ Now you can run the integrations by executing:
 ./manual_reconcile.sh temp/validate/data.json config.toml
 ```
 
-The output of the integrations will be displayed in-line, but it will also be saved in files: they can be located with `find temp/reports/reconcile_reports_* -type f`.
-
-
-
+The output of the integrations will be displayed in-line, but it will also be
+saved in files: they can be located with `find temp/reports/reconcile_reports_*
+-type f`.
 
 ## Querying the App-interface
 

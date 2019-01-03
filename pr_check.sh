@@ -11,14 +11,9 @@ source ./.env
 RESULTS=$TEMP_DIR/reports/results.json
 REPORT=$TEMP_DIR/reports/index.html
 
-# Download schemas
-rm -rf $TEMP_DIR/schemas
-curl -sL ${QONTRACT_SERVER_REPO}/archive/${QONTRACT_SERVER_IMAGE_TAG}.tar.gz | \
-  tar -xz --strip-components=1 -C $TEMP_DIR/ -f - '*/schemas'
-
 # Run validator
 mkdir -p $(dirname $RESULTS)
-VALIDATOR_OPTS="" ./manual_schema_validator.sh $TEMP_DIR/schemas data $RESULTS
+VALIDATOR_OPTS="" ./manual_schema_validator.sh data $RESULTS
 exit_status=$?
 
 # Write report
