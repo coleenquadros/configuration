@@ -12,7 +12,7 @@ REPORT_TEMPLATE = """
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel='stylesheet' href='main.css'>
+    <link rel='stylesheet' href='reports-main.css'>
 </head>
 <body>
 <h2>App-Interface Schema Validator</h2>
