@@ -8,7 +8,7 @@ usage() {
 }
 
 # Mac OS X does not have `sha256sum` binary. Wrap around `shasum` if present
-if command -v sha256sum || command -v shasum; then
+if command -v sha256sum >/dev/null  || command -v shasum >/dev/null; then
   sha256sum() { shasum -a 256 "$@" ; }
 fi
 
