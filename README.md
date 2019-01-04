@@ -74,6 +74,75 @@ expressed as json schemas. You can find the supported schemas here:
 4. From the moment the MR is accepted, the amended contract will enter into
    effect.
 
+## Local validation of datafile modifications / contract amendment
+
+Before submitting a MR with a datafile modification / contract amendment, the
+user has the option to validate the changes locally.
+
+Two things can be checked: (1) JSON schema validation (2) run integrations with
+`--dry-run` option.
+
+Both scripts rely on a temporary directory which defaults to `temp/`, but can be
+overridden with the env var `TEMP_DIR`. The contents of this directory will
+contain the results of the manual pr check.
+
+### JSON schema validation
+
+Instructions to perform JSON schema validation on changes to the datafiles.
+
+**Requirements**:
+
+- docker
+- git
+
+**Instructions**:
+
+Run the actual validator by executing:
+
+```sh
+# make sure you are in the top dir of the `app-interface` git repo
+source .env
+./manual_schema_validator.sh data
+```
+
+The output will be JSON document, so you can pipe it with `jq`, example:
+`./manual_schema_validator.sh data | jq .`
+
+### Running integrations locally with `--dry-run`
+
+Instructions to run the integrations locally to simulate what would happen if it
+was merged into the app-interface repo.
+
+**NOTE**: This is only available to the SD team, as it requires access to this
+vault secret: `app-sre/ci-int/qontract-reconcile-toml`.
+
+**Requirements**:
+
+- Having executed `manual_schema_validator.sh` previously as explained in the
+  previous section.
+- docker
+- git
+
+**Instructions**:
+
+Obtain the `config.toml` file required to run the integrations.
+
+```sh
+# make sure you are in the top dir of the `app-interface` git repo
+vault read -field=data_base64 app-sre/ci-int/qontract-reconcile-toml | base64 -d > config.toml
+```
+
+Now you can run the integrations by executing:
+
+```sh
+# make sure you are in the top dir of the `app-interface` git repo
+./manual_reconcile.sh temp/validate/data.json config.toml
+```
+
+The output of the integrations will be displayed in-line, but it will also be
+saved in files: they can be located with `find temp/reports/reconcile_reports_*
+-type f`.
+
 ## Querying the App-interface
 
 The contract can be queried programmatically using a
@@ -107,8 +176,6 @@ wheel icon (top-right corner) and replace `omit` with `include` in
 
 ### Planned Features
 
-- Local verification of datafiles, so interested parties can validate their
-  contract amendments before submitting a MR to the `app-interface` repo.
 - Automatically generate GraphQL schemas from the JSON schemas.
 - Automated reporting based on the contract via GraphQL API.
 - Auditability and traceability. Being able to easily track down when and why an
@@ -126,6 +193,7 @@ wheel icon (top-right corner) and replace `omit` with `include` in
   - Many openshift.com clusters:
     - `dsaas`, `dsaas-stg`, `evg`, `app-sre`, `app-sre-dev`.
   - OpenShift.io Feature Toggles
+- Management of OpenShift rolebindings
 
 ### Planned integrations
 
