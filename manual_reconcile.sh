@@ -8,7 +8,7 @@ usage() {
 }
 
 if [ `uname -s` = "Darwin" ]; then
-  sha256sum() { shasum -a 256 ; }
+  sha256sum() { shasum -a 256 "$@" ; }
   QONTRACT_SERVER_DOCKER_OPTS="-p 4000:4000"
 fi
 
