@@ -39,7 +39,7 @@ if [ -z "$qontract_server" ]; then
 fi
 
 # Setup trap to execute after the script exits
-trap "docker stop $qontract_server" EXIT
+trap "docker stop $qontract_server >/dev/null" EXIT
 
 # get network conf
 IP=$(docker inspect \
