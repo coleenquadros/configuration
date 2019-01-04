@@ -4,7 +4,7 @@
 # - SCHEMAS_DIR: overrides the path the checked out schemas. If not defined it
 #   will download the schemas from GitHub.
 
-set -e
+set -eo pipefail
 
 usage() {
     echo "$0 DATA_DIR [RESULTS_FILE]" >&1
