@@ -7,6 +7,11 @@ usage() {
     exit 1
 }
 
+if [ `uname -s` = "Darwin" ]; then
+  sha256sum() { shasum -a 256; }
+  QONTRACT_SERVER_DOCKER_OPTS="-p 4000:4000"
+fi
+
 TEMP_DIR=${TEMP_DIR:-./temp}
 TEMP_DIR=$(realpath -s $TEMP_DIR)
 
@@ -27,7 +32,7 @@ EOF
 
 # start graphql-server locally
 qontract_server=$(
-  docker run --rm -d \
+  docker run --rm -d $QONTRACT_SERVER_DOCKER_OPTS \
     -v ${DATAFILES_BUNDLE_DIR}:/validate:z \
     --env-file=${TEMP_DIR}/.qontract-server-env \
     ${QONTRACT_SERVER_IMAGE}:${QONTRACT_SERVER_IMAGE_TAG}
@@ -46,6 +51,12 @@ IP=$(docker inspect \
       -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' \
       ${qontract_server})
 
+if [ `uname -s` = 'Darwin' ]; then
+  CURL_IP=localhost
+else
+  CURL_IP=$IP
+fi
+
 # Write config.toml for reconcile tools
 mkdir -p ${TEMP_DIR}/config
 cat "$CONFIG_TOML" \
@@ -56,7 +67,7 @@ cat "$CONFIG_TOML" \
 SHA256=$(sha256sum ${DATAFILES_BUNDLE} | awk '{print $1}')
 while [[ ${count} -lt 20 ]]; do
     let count++
-    DEPLOYED_SHA256=$(curl -sf http://${IP}:4000/sha256)
+    DEPLOYED_SHA256=$(curl -sf http://${CURL_IP}:4000/sha256)
     [[ "$DEPLOYED_SHA256" == "$SHA256" ]] && break || sleep 1
 done
 
@@ -80,7 +91,7 @@ run_int() {
     -v ${TEMP_DIR}/config:/config:z \
     ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
     qontract-reconcile --config /config/config.toml $1 --dry-run \
-    |& tee ${SUCCESS_DIR}/reconcile-${1}.txt
+    2>&1 | tee ${SUCCESS_DIR}/reconcile-${1}.txt
 
   status="$?"
 
