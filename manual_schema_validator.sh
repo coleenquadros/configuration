@@ -47,7 +47,6 @@ docker run --rm -v ${TEMP_DIR}/validate:/validate:z \
   qontract-validator $VALIDATOR_OPTS /validate/schemas.json /validate/data.json \
   | tee $RESULTS_FILE
 
-if [ "$?" = "0" ]; then
-    echo "No validation errors found." >&2
-    exit 1
-fi
+echo "No validation errors found." >&2
+
+exit 0
