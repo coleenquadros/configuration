@@ -84,28 +84,25 @@ rm -rf ${SUCCESS_DIR} ${FAIL_DIR}; mkdir -p ${SUCCESS_DIR} ${FAIL_DIR}
 
 set +e
 
-docker run --rm \
-  -v `pwd`/config:/config:z \
-  ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
-  qontract-reconcile --config /config/config.toml github \
-  |& tee ${SUCCESS_DIR}/reconcile-github.txt
+run_int() {
+  echo "INTEGRATION $1" >&2
 
-if [ "$?" != "0" ]; then
-  mv ${SUCCESS_DIR}/reconcile-github.txt ${FAIL_DIR}/reconcile-github.txt
-  exit 1
-fi
+  docker run --rm \
+    -v `pwd`/config:/config:z \
+    ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
+    qontract-reconcile --config /config/config.toml $1 \
+    |& tee ${SUCCESS_DIR}/reconcile-${1}.txt
 
-# OPENSHIFT-ROLEBINDING
+  if [ "$?" != "0" ]; then
+    mv ${SUCCESS_DIR}/reconcile-${1}.txt ${FAIL_DIR}/reconcile-${1}.txt
+    return 1
+  fi
 
-docker run --rm \
-  -v `pwd`/config:/config:z \
-  ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
-  qontract-reconcile --config /config/config.toml openshift-rolebinding \
-  |& tee ${SUCCESS_DIR}/reconcile-openshift-rolebinding.txt
+  return 0
+}
 
-if [ "$?" != "0" ]; then
-  mv ${SUCCESS_DIR}/reconcile-openshift-rolebinding.txt ${FAIL_DIR}/reconcile-openshift-rolebinding.txt
-  exit 1
-fi
+run_int github
+run_int openshift-rolebinding
+run_int quay-membership
 
 exit 0
