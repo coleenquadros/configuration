@@ -236,7 +236,7 @@ are:
 - `github-org`
 - `github-org-team`
 - `openshift-rolebinding`
-- `quay-org`
+- `quay-org-team`
 
 In any case, you typically won't need to modify the roles, just find the role
 you want the user to belong to. Roles can be associated with the services:
