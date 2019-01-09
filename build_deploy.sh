@@ -101,8 +101,9 @@ run_int() {
   return 0
 }
 
-run_int github
-run_int openshift-rolebinding
-run_int quay-membership
+integration_status=0
+run_int github || integration_status=1
+run_int openshift-rolebinding || integration_status=1
+run_int quay-membership || integration_status=1
 
-exit 0
+exit $integration_status

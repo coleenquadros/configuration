@@ -106,7 +106,6 @@ run_int() {
 docker pull ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG}
 
 integration_status=0
-
 run_int github || integration_status=1
 run_int openshift-rolebinding || integration_status=1
 run_int quay-membership || integration_status=1
