@@ -210,7 +210,7 @@ wheel icon (top-right corner) and replace `omit` with `include` in
 
 ## Howto
 
-### Add / modify a user (`access/users-1.yml`)
+### Add / modify a user (`/access/users-1.yml`)
 
 You will want to do this when you want to add a user or grant / revoke
 permissions for that user.
@@ -222,10 +222,10 @@ directory structure as something that is only useful for human consumption.
 Write the file in yaml format with `.yml` extension. The contents must validate
 against the current [user schema][userschema].
 
-Make sure you define `$schema: access/users-1.yml` inside the file.
+Make sure you define `$schema: /access/users-1.yml` inside the file.
 
 The `roles` property is the most complex property to understand. If you look at
-the `access/users-1.yml` you will see that it's a list of [crossrefs][crossref].
+the `/access/users-1.yml` you will see that it's a list of [crossrefs][crossref].
 The `$ref` property points to another file, in this case it must be a
 [role][role]. The role file is essentially a collection of
 [permissions][permission]. Permissions contain a mandatory property called
