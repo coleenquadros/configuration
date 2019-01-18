@@ -91,7 +91,7 @@ run_int() {
     -v `pwd`/config:/config:z \
     ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
     qontract-reconcile --config /config/config.toml $1 \
-    |& tee ${SUCCESS_DIR}/reconcile-${1}.txt
+    2>&1 | tee ${SUCCESS_DIR}/reconcile-${1}.txt
 
   if [ "$?" != "0" ]; then
     mv ${SUCCESS_DIR}/reconcile-${1}.txt ${FAIL_DIR}/reconcile-${1}.txt
