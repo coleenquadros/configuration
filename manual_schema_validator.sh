@@ -26,8 +26,9 @@ if [ -z "$SCHEMAS_DIR" ]; then
     # Download schemas
     rm -rf $TEMP_DIR/schemas
     curl -sL ${QONTRACT_SERVER_REPO}/archive/${QONTRACT_SERVER_IMAGE_TAG}.tar.gz | \
-        tar -xz --strip-components=1 -C $TEMP_DIR/ -f - '*/schemas'
-    SCHEMAS_DIR=$TEMP_DIR/schemas
+        tar -xz --strip-components=1 -C $TEMP_DIR/ -f - '*/assets/schemas'
+    SCHEMAS_DIR=$TEMP_DIR/assets/schemas
+
 fi
 
 SCHEMAS_DIR=$(realpath -s $SCHEMAS_DIR)
