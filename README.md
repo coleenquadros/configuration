@@ -194,6 +194,8 @@ wheel icon (top-right corner) and replace `omit` with `include` in
     - `dsaas`, `dsaas-stg`, `evg`, `app-sre`, `app-sre-dev`.
   - OpenShift.io Feature Toggles
 - Management of OpenShift rolebindings
+- Management of Quay repos.
+- Management of Quay organisation members.
 
 ### Planned integrations
 
@@ -204,13 +206,11 @@ wheel icon (top-right corner) and replace `omit` with `include` in
 - Ownership of OpenShift Kubernetes namespace resources.
 - Management of cluster monitoring, such as zabbix, prometheus, and alert
   manager.
-- Management of Quay repos.
-- Management of Quay organisation members.
 - Cloud (AWS) resource provisioning.
 
 ## Howto
 
-### Add / modify a user (`/access/users-1.yml`)
+### Add or modify a user (`/access/users-1.yml`)
 
 You will want to do this when you want to add a user or grant / revoke
 permissions for that user.
@@ -243,6 +243,37 @@ you want the user to belong to. Roles can be associated with the services:
 `service/<name>/roles/<rolename>.yml`, or to teams:
 `teams/<name>/roles/<rolename>.yml`. Check out the currently defined roles to
 know which one to add.
+
+### Create a Quay Repository for an onboarded App (`/app-sre/app-1.yml`)
+
+Onboarded applications are modelled using the schema `/app-sre/app-1.yml`. This schema allows any application to optionally define a list required Quay repositories.
+
+The structure of this parameter is the following:
+
+```yaml
+quayRepos:
+- org:
+    $ref: <quay org datafile (`/dependencies/quay-org-1.yml`), for example `/dependencies/quay/openshiftio.yml`>
+  items:
+  - name: <name of the repo>
+    description: <description>
+    public: <true | false>
+  - ...
+```
+
+In order to add or remove a Quay repo, a MR must be sent to the appropriate App datafile and add the repo to the `items` array.
+
+**NOTE**: If the App or the releveant Quay org are not modelled in the App-Interface repository, please seek the assistance of the App-SRE team.
+
+Examples as of 2019-01-30:
+
+- An example of a MR: https://gitlab.cee.redhat.com/service/app-interface/merge_requests/75/diffs
+- [/services/uhc/app.yml](https://gitlab.cee.redhat.com/service/app-interface/blob/c22670e84ef19c5ce1192ea7c62948b1db69036a/data/services/uhc/app.yml#L21): `uhc` application, including `quayRepos` parameter.
+- [/services/openshift.io/app.yml](https://gitlab.cee.redhat.com/service/app-interface/blob/c22670e84ef19c5ce1192ea7c62948b1db69036a/data/services/openshift.io/app.yml#L20): `openshiftio` application, including `quayRepos` parameter.
+- [/dependencies/quay/app-sre.yml](https://gitlab.cee.redhat.com/service/app-interface/blob/c22670e84ef19c5ce1192ea7c62948b1db69036a/data/dependencies/quay/app-sre.yml): `app-sre` Quay org.
+- [/dependencies/quay/openshiftio](https://gitlab.cee.redhat.com/service/app-interface/blob/c22670e84ef19c5ce1192ea7c62948b1db69036a/data/dependencies/quay/openshiftio.yml): `Openshifio` Quay org.
+- [/app-sre/app-1.yml](https://github.com/app-sre/qontract-server/blob/8fafb7c24188645c099c0ee7a9f6806b178158dd/assets/schemas/app-sre/app-1.yml): JSON schema for App modelling.
+- [/dependencies/quay-org-1.yml](https://github.com/app-sre/qontract-server/blob/8fafb7c24188645c099c0ee7a9f6806b178158dd/assets/schemas/dependencies/quay-org-1.yml): JSON schema for Quay organization.
 
 ## Design
 
