@@ -263,7 +263,7 @@ quayRepos:
 
 In order to add or remove a Quay repo, a MR must be sent to the appropriate App datafile and add the repo to the `items` array.
 
-**NOTE**: If the App or the releveant Quay org are not modelled in the App-Interface repository, please seek the assistance of the App-SRE team.
+**NOTE**: If the App or the relevant Quay org are not modelled in the App-Interface repository, please seek the assistance from the App-SRE team.
 
 Examples as of 2019-01-30:
 
