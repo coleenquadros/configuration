@@ -287,3 +287,7 @@ Additional design information: [here](docs/design.md).
 <https://github.com/app-sre/qontract-server/blob/beb70a68334f49581c3656e2a223998965ee19c1/schemas/common-1.json#L58-L86>
 [role]: <https://github.com/app-sre/qontract-server/blob/master/schemas/access/role-1.yml>
 [permission]: <https://github.com/app-sre/qontract-server/blob/master/schemas/access/permission-1.yml>
+
+## Developer Guide
+
+More information [here](docs/developer.md).
