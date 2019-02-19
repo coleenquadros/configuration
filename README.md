@@ -280,13 +280,13 @@ Examples as of 2019-01-30:
 Additional design information: [here](docs/design.md).
 
 [schemas]:
-<https://github.com/app-sre/qontract-server/tree/master/schemas/app-sre>
+<https://github.com/app-sre/qontract-server/tree/master/assets/schemas>
 [userschema]:
-<https://github.com/app-sre/qontract-server/blob/master/schemas/access/user-1.yml>
+<https://github.com/app-sre/qontract-server/blob/master/assets/schemas/access/user-1.yml>
 [crossref]:
 <https://github.com/app-sre/qontract-server/blob/beb70a68334f49581c3656e2a223998965ee19c1/schemas/common-1.json#L58-L86>
-[role]: <https://github.com/app-sre/qontract-server/blob/master/schemas/access/role-1.yml>
-[permission]: <https://github.com/app-sre/qontract-server/blob/master/schemas/access/permission-1.yml>
+[role]: <https://github.com/app-sre/qontract-server/blob/master/assets/schemas/access/role-1.yml>
+[permission]: <https://github.com/app-sre/qontract-server/blob/master/assets/schemas/access/permission-1.yml>
 
 ## Developer Guide
 
