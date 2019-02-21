@@ -12,40 +12,40 @@ usage() {
 }
 
 DATA_DIR="$1"
-[ -z "${DATA_DIR}" ] && usage
+RESOURCES_DIR="$2"
+RESULTS_FILE="$3"
 
-RESULTS_FILE="$2"
+[ -z "${DATA_DIR}" ] && usage
+[ -z "${RESOURCES_DIR}" ] && usage
 
 VALIDATOR_OPTS=${VALIDATOR_OPTS---only-errors}
 TEMP_DIR=$(realpath -s ${TEMP_DIR:-./temp})
 DATA_DIR=$(realpath -s $DATA_DIR)
+RESOURCES_DIR=$(realpath -s $RESOURCES_DIR)
 
 mkdir -p $TEMP_DIR
 
+# Download schemas
 if [ -z "$SCHEMAS_DIR" ]; then
-    # Download schemas
     rm -rf $TEMP_DIR/schemas
     curl -sL ${QONTRACT_SERVER_REPO}/archive/${QONTRACT_SERVER_IMAGE_TAG}.tar.gz | \
         tar -xz --strip-components=1 -C $TEMP_DIR/ -f - '*/assets/schemas'
     SCHEMAS_DIR=$TEMP_DIR/assets/schemas
-
 fi
-
 SCHEMAS_DIR=$(realpath -s $SCHEMAS_DIR)
 
 mkdir -p $TEMP_DIR/validate
 
-docker run --rm -v ${DATA_DIR}:/data:z \
+docker run --rm \
+  -v ${SCHEMAS_DIR}:/schemas:z \
+  -v ${DATA_DIR}:/data:z \
+  -v ${RESOURCES_DIR}:/resources:z \
   ${VALIDATOR_IMAGE}:${VALIDATOR_IMAGE_TAG} \
-  qontract-bundler /data > $TEMP_DIR/validate/data.json
-
-docker run --rm -v ${SCHEMAS_DIR}:/schemas:z \
-  ${VALIDATOR_IMAGE}:${VALIDATOR_IMAGE_TAG} \
-  qontract-bundler /schemas > $TEMP_DIR/validate/schemas.json
+  qontract-bundler /schemas /data /resources > $TEMP_DIR/validate/data.json
 
 docker run --rm -v ${TEMP_DIR}/validate:/validate:z \
   ${VALIDATOR_IMAGE}:${VALIDATOR_IMAGE_TAG} \
-  qontract-validator $VALIDATOR_OPTS /validate/schemas.json /validate/data.json \
+  qontract-validator $VALIDATOR_OPTS /validate/data.json \
   | tee $RESULTS_FILE
 
 echo "No validation errors found." >&2
