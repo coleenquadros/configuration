@@ -25,12 +25,23 @@ wait_response() {
     fi
 }
 
+# Download schemas
+TEMP_DIR=$(realpath -s ${TEMP_DIR:-./temp})
+mkdir -p $TEMP_DIR
+rm -rf $TEMP_DIR/schemas
+curl -sL ${QONTRACT_SERVER_REPO}/archive/${QONTRACT_SERVER_IMAGE_TAG}.tar.gz | \
+    tar -xz --strip-components=1 -C $TEMP_DIR/ -f - '*/assets/schemas'
+SCHEMAS_DIR=$TEMP_DIR/assets/schemas
+
 # Create data bundle
 mkdir -p validate
 
-docker run --rm -v `pwd`/data:/data:z \
+docker run --rm \
+  -v ${SCHEMAS_DIR}:/schemas:z \
+  -v `pwd`/data:/data:z \
+  -v `pwd`/resources:/resources:z \
   ${VALIDATOR_IMAGE}:${VALIDATOR_IMAGE_TAG} \
-  qontract-bundler /data > validate/data.json
+  qontract-bundler /schemas /data /resources > validate/data.json
 
 SHA256=$(sha256sum validate/data.json | awk '{print $1}')
 

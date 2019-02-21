@@ -13,7 +13,7 @@ REPORT=$TEMP_DIR/reports/index.html
 
 # Run validator
 mkdir -p $(dirname $RESULTS)
-VALIDATOR_OPTS="" ./manual_schema_validator.sh data $RESULTS
+VALIDATOR_OPTS="" ./manual_schema_validator.sh data resources $RESULTS
 exit_status=$?
 
 # Write report
