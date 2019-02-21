@@ -7,7 +7,7 @@
 set -eo pipefail
 
 usage() {
-    echo "$0 DATA_DIR [RESULTS_FILE]" >&1
+    echo "$0 DATA_DIR RESOURCES_DIR [RESULTS_FILE]" >&1
     exit 1
 }
 

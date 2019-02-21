@@ -106,7 +106,7 @@ source .env
 ```
 
 The output will be JSON document, so you can pipe it with `jq`, example:
-`./manual_schema_validator.sh data | jq .`
+`./manual_schema_validator.sh data resources | jq .`
 
 ### Running integrations locally with `--dry-run`
 
