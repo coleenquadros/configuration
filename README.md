@@ -297,7 +297,7 @@ Note: if the ConfigMap already exists in the namespace, the PR check will fail. 
 
 ## Design
 
-Additional design information: [here](docs/design.md).
+Additional design information: [here](docs/app-interface/design.md).
 
 [schemas]:
 <https://github.com/app-sre/qontract-server/tree/master/assets/schemas>
@@ -310,4 +310,4 @@ Additional design information: [here](docs/design.md).
 
 ## Developer Guide
 
-More information [here](docs/developer.md).
+More information [here](docs/app-interface/developer.md).
