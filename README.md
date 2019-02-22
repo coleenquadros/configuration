@@ -196,6 +196,7 @@ wheel icon (top-right corner) and replace `omit` with `include` in
 - Management of OpenShift rolebindings
 - Management of Quay repos.
 - Management of Quay organisation members.
+- Management of OpenShift ConfigMaps.
 
 ### Planned integrations
 
@@ -274,6 +275,25 @@ Examples as of 2019-01-30:
 - [/dependencies/quay/openshiftio](https://gitlab.cee.redhat.com/service/app-interface/blob/c22670e84ef19c5ce1192ea7c62948b1db69036a/data/dependencies/quay/openshiftio.yml): `Openshifio` Quay org.
 - [/app-sre/app-1.yml](https://github.com/app-sre/qontract-server/blob/8fafb7c24188645c099c0ee7a9f6806b178158dd/assets/schemas/app-sre/app-1.yml): JSON schema for App modelling.
 - [/dependencies/quay-org-1.yml](https://github.com/app-sre/qontract-server/blob/8fafb7c24188645c099c0ee7a9f6806b178158dd/assets/schemas/dependencies/quay-org-1.yml): JSON schema for Quay organization.
+
+### Manage ConfigMaps via App-Interface (`/openshift/namespace-1.yml`)
+
+ConfigMaps can be entirely self-serviced via App-Interface.
+
+[services](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/services) contains all the services that are being run by the App-SRE team. Inside of those directories, there is a `namespaces` folder that lists all the `namespaces` that are linked to that service.
+
+Namespaces declaration enforce [this JSON schema](https://github.com/app-sre/qontract-server/blob/master/assets/schemas/openshift/namespace-1.yml). Note that it contains a reference to the cluster in which the namespace exists.
+
+In order to add ConfigMaps to a namespace, you need to add them to the `openshiftResources` field.
+
+- `provider`: must be `resource`
+- `path`: path relative to [resources](https://gitlab.cee.redhat.com/service/app-interface/tree/master/resources). Note that it starts with `/`.
+
+The object itself must be stored under the `resources` path, and by convention it should be named: `resources/<cluster_name>/<namespace>/<configmap_name>.configmap.yml`.
+
+In order to change the values of a ConfigMap, send a PR modifying the ConfigMap in the `resources` directory, and upon merge it will be applied.
+
+Note: if the ConfigMap already exists in the namespace, the PR check will fail. Please get in contact with App-SRE team to import ConfigMaps to be under the control of App-Interface.
 
 ## Design
 
