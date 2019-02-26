@@ -197,6 +197,7 @@ wheel icon (top-right corner) and replace `omit` with `include` in
 - Management of Quay repos.
 - Management of Quay organisation members.
 - Management of OpenShift ConfigMaps.
+- Management of OpenShift Secrets using Vault.
 
 ### Planned integrations
 
@@ -276,13 +277,17 @@ Examples as of 2019-01-30:
 - [/app-sre/app-1.yml](https://github.com/app-sre/qontract-server/blob/8fafb7c24188645c099c0ee7a9f6806b178158dd/assets/schemas/app-sre/app-1.yml): JSON schema for App modelling.
 - [/dependencies/quay-org-1.yml](https://github.com/app-sre/qontract-server/blob/8fafb7c24188645c099c0ee7a9f6806b178158dd/assets/schemas/dependencies/quay-org-1.yml): JSON schema for Quay organization.
 
-### Manage ConfigMaps via App-Interface (`/openshift/namespace-1.yml`)
-
-ConfigMaps can be entirely self-serviced via App-Interface.
+### Manage Openshift resources via App-Interface (`/openshift/namespace-1.yml`)
 
 [services](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/services) contains all the services that are being run by the App-SRE team. Inside of those directories, there is a `namespaces` folder that lists all the `namespaces` that are linked to that service.
 
 Namespaces declaration enforce [this JSON schema](https://github.com/app-sre/qontract-server/blob/master/assets/schemas/openshift/namespace-1.yml). Note that it contains a reference to the cluster in which the namespace exists.
+
+Note: if the resource already exists in the namespace, the PR check will fail. Please get in contact with App-SRE team to import resources to be under the control of App-Interface.
+
+#### Manage ConfigMaps via App-Interface (`/openshift/namespace-1.yml`)
+
+ConfigMaps can be entirely self-serviced via App-Interface.
 
 In order to add ConfigMaps to a namespace, you need to add them to the `openshiftResources` field.
 
@@ -293,7 +298,32 @@ The object itself must be stored under the `resources` path, and by convention i
 
 In order to change the values of a ConfigMap, send a PR modifying the ConfigMap in the `resources` directory, and upon merge it will be applied.
 
-Note: if the ConfigMap already exists in the namespace, the PR check will fail. Please get in contact with App-SRE team to import ConfigMaps to be under the control of App-Interface.
+#### Manage Secrets via App-Interface (`/openshift/namespace-1.yml`) using Vault
+
+TODO: This is still WIP. Please do not use this feature yet.
+
+Secrets can be entirely self-serviced via App-Interface.
+
+In order to add Secrets to a namespace, you need to add them to the `openshiftResources` field.
+
+- `provider`: must be `vault-secret`
+- `path`: absolute path in [vault](https://vault.devshift.net). Note that it should **NOT** start with `/`.
+- `name`: (optional) name of the secret to be created. Overrides the name of the secret in Vault.
+- `labels`: (optional) labels to add to the Secret.
+- `annotations`: (optional) annotations to add to the Secret.
+
+The object itself must be stored as a secret in Vault. The values should **NOT** be base64 encoded in Vault.
+If you wish to have the value base64 encoded in Vault, the field key should be of the form `<key_name>_qb64`.
+
+The secrets in Vault should be stored under the `app-interface` engine, in the following path:
+```
+app-interface/<cluster>/<namespace>/<secret_name>
+```
+If you wish to use a different secrets engine, please get in contact with the App-SRE team.
+
+In order to change the values of a Secret, change the secret in Vault first and trigger a new [build master](https://ci.int.devshift.net/job/service-app-interface-gl-build-master/) job. For assistance, get in contact with the App-SRE team.
+
+Note: [Secret](https://kubernetes.io/docs/concepts/configuration/secret/) with fields of type `stringData` are not supported.
 
 ## Design
 
