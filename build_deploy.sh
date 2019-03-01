@@ -112,6 +112,26 @@ run_int() {
   return 0
 }
 
+run_vault_reconcile_integration() {
+  docker run --rm -t \
+    -e GRAPHQL_SERVER=https://app-interface.devshift.net/graphql \
+    -e GRAPHQL_USERNAME=$USERNAME_PRODUCTION \
+    -e GRAPHQL_PASSWORD=$PASSWORD_PRODUCTION \
+    -e VAULT_ADDR=https://vault.devshift.net \
+    -e VAULT_AUTHTYPE=approle \
+    -e VAULT_ROLE_ID=${VAULT_MANAGER_ROLE_ID} \
+    -e VAULT_SECRET_ID=${VAULT_MANAGER_SECRET_ID} \
+    ${VAULT_RECONCILE_IMAGE}:${VAULT_RECONCILE_IMAGE_TAG} \
+    2>&1 | tee ${SUCCESS_DIR}/reconcile-vault.txt
+
+  if [ "$?" != "0" ]; then
+    mv ${SUCCESS_DIR}/reconcile-${1}.txt ${FAIL_DIR}/reconcile-vault.txt
+    return 1
+  fi
+
+  return 0
+}
+
 integration_status=0
 run_int github || integration_status=1
 run_int openshift-rolebinding || integration_status=1
@@ -119,5 +139,6 @@ run_int openshift-resources || integration_status=1
 run_int quay-membership || integration_status=1
 run_int quay-repos || integration_status=1
 run_int ldap-users || integration_status=1
+run_vault_reconcile_integration || integration_status=1
 
 exit $integration_status
