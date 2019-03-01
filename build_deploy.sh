@@ -113,6 +113,8 @@ run_int() {
 }
 
 run_vault_reconcile_integration() {
+  echo "INTEGRATION vault" >&2
+
   docker run --rm -t \
     -e GRAPHQL_SERVER=https://app-interface.devshift.net/graphql \
     -e GRAPHQL_USERNAME=$USERNAME_PRODUCTION \

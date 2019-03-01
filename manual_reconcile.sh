@@ -104,6 +104,10 @@ run_int() {
 }
 
 run_vault_reconcile_integration() {
+  local status
+
+  echo "INTEGRATION vault" >&2
+
   docker run --rm -t \
     -e GRAPHQL_SERVER=http://$IP:4000/graphql \
     -e VAULT_ADDR=https://vault.devshift.net \
@@ -113,12 +117,14 @@ run_vault_reconcile_integration() {
     ${VAULT_RECONCILE_IMAGE}:${VAULT_RECONCILE_IMAGE_TAG} -dry-run \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-vault.txt
 
-  if [ "$?" != "0" ]; then
-    mv ${SUCCESS_DIR}/reconcile-${1}.txt ${FAIL_DIR}/reconcile-vault.txt
-    return 1
+  status="$?"
+
+  if [ "$status" != "0" ]; then
+    echo "INTEGRATION FAILED: vault" >&2
+    mv ${SUCCESS_DIR}/reconcile-vault.txt ${FAIL_DIR}/reconcile-vault.txt
   fi
 
-  return 0
+  return $status
 }
 
 docker pull ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG}
