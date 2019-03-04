@@ -51,6 +51,6 @@ This is an example of a PR that creates a new subcommand of `qontract-reconcile`
 
 ## Running the App-Interface components locally
 
-- [Create the data and schema bundles](https://github.com/app-sre/qontract-server#creating-the-data-and-schema-bundles).
+- [Create the data, schema and resource bundles](https://github.com/app-sre/qontract-server#creating-the-schema-data-and-resources-bundle).
 - [qontract-server](https://github.com/app-sre/qontract-server#development-environment).
 - [qontract-reconcile](https://github.com/app-sre/qontract-reconcile/tree/master#installation)
