@@ -130,13 +130,20 @@ run_vault_reconcile_integration() {
 docker pull ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG}
 docker pull ${VAULT_RECONCILE_IMAGE}:${VAULT_RECONCILE_IMAGE_TAG}
 
-integration_status=0
-run_int github || integration_status=1
-run_int openshift-rolebinding || integration_status=1
-run_int openshift-resources || integration_status=1
-run_int quay-membership || integration_status=1
-run_int quay-repos || integration_status=1
-run_int ldap-users || integration_status=1
-run_vault_reconcile_integration || integration_status=1
+run_int github &
+run_int openshift-rolebinding &
+run_int openshift-resources &
+run_int quay-membership &
+run_int quay-repos &
+run_int ldap-users &
+run_vault_reconcile_integration &
 
-exit $integration_status
+wait
+
+FAILED_INTEGRATIONS=$(ls ${FAIL_DIR} | wc -l)
+
+if [ "$FAILED_INTEGRATIONS" != "0" ]; then
+  exit 1
+fi
+
+exit 0
