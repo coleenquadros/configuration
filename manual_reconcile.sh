@@ -79,7 +79,7 @@ fi
 # run integrations
 
 SUCCESS_DIR=${TEMP_DIR}/reports/reconcile_reports_success
-https://github.com/app-sre/vault-manager=${TEMP_DIR}/reports/reconcile_reports_fail
+FAIL_DIR=${TEMP_DIR}/reports/reconcile_reports_fail
 rm -rf ${SUCCESS_DIR} ${FAIL_DIR}; mkdir -p ${SUCCESS_DIR} ${FAIL_DIR}
 
 run_int() {
@@ -147,3 +147,5 @@ if [ "$FAILED_INTEGRATIONS" != "0" ]; then
 fi
 
 exit 0
+exit
+exit $integration_status
