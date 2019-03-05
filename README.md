@@ -327,7 +327,7 @@ Note: [Secret](https://kubernetes.io/docs/concepts/configuration/secret/) with f
 
 ## Design
 
-Additional design information: [here](docs/design.md).
+Additional design information: [here](docs/app-interface/design.md).
 
 [schemas]:
 <https://github.com/app-sre/qontract-server/tree/master/assets/schemas>
@@ -340,4 +340,4 @@ Additional design information: [here](docs/design.md).
 
 ## Developer Guide
 
-More information [here](docs/developer.md).
+More information [here](docs/app-interface/developer.md).
