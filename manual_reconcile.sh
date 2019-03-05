@@ -147,5 +147,3 @@ if [ "$FAILED_INTEGRATIONS" != "0" ]; then
 fi
 
 exit 0
-exit
-exit $integration_status
