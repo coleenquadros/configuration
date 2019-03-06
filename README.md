@@ -324,7 +324,10 @@ If you wish to use a different secrets engine, please get in contact with the Ap
 
 In order to change the values of a Secret, change the secret in Vault first and submit a new MR with the updated `version` field.
 
-Note: [Secret](https://kubernetes.io/docs/concepts/configuration/secret/) with fields of type `stringData` is not supported.
+Notes:
+* [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) with fields of type `stringData` are not supported.
+* When creating a new secret in Vault, be sure to set the `Maximum Number of Versions` field to `0` (unlimited).
+* If you want to delete a secret from Vault, please get in contact with the App-SRE team.
 
 ## Design
 
