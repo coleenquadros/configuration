@@ -339,8 +339,7 @@ This secret in Vault:
 }
 ```
 Would generate this Kubernetes Secret:
-```
-...
+```yaml
 apiVersion: v1
 kind: Secret
 data:
