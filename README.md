@@ -304,30 +304,49 @@ In order to change the values of a ConfigMap, send a PR modifying the ConfigMap 
 
 Secrets can be entirely self-serviced via App-Interface.
 
-In order to add Secrets to a namespace, you need to add them to the `openshiftResources` field.
+Instructions:
+
+1. Create a secret in Vault with the data (key-value pairs) that should be applied to the cluster.
+  * The secret in Vault should be stored in the following path: `app-interface/<cluster>/<namespace>/<secret_name>`
+  * The value of each key in the secret in Vault should **NOT** be base64 encoded.
+  * If you wish to have the value base64 encoded in Vault, the field key should be of the form `<key_name>_qb64`.
+2. Add a reference to the secret in Vault under the `openshiftResources` field with the following attributes:
 
 - `provider`: must be `vault-secret`.
-- `path`: absolute path in [Vault](https://vault.devshift.net). Note that it should **NOT** start with `/`.
+- `path`: absolute path to secret in [Vault](https://vault.devshift.net). Note that it should **NOT** start with `/`.
 - `version`: version of secret in Vault.
-- `name`: (optional) name of the secret to be created. Overrides the name of the secret in Vault.
+- `name`: (optional) name of the Kubernetes Secret object to be created. Overrides the name of the secret in Vault.
 - `labels`: (optional) labels to add to the Secret.
 - `annotations`: (optional) annotations to add to the Secret.
 
-The object itself must be stored as a secret in Vault. The values should **NOT** be base64 encoded in Vault.
-If you wish to have the value base64 encoded in Vault, the field key should be of the form `<key_name>_qb64`.
-
-The secrets in Vault should be stored under the `app-interface` engine, in the following path:
-```
-app-interface/<cluster>/<namespace>/<secret_name>
-```
-If you wish to use a different secrets engine, please get in contact with the App-SRE team.
-
-In order to change the values of a Secret, change the secret in Vault first and submit a new MR with the updated `version` field.
+3. In order to change one or more values in a Kubernetes Secret, update the secret in Vault first and submit a new MR with the updated `version` field.
+  * The current version can be found in Vault on the top-right of the list of values for your secret.
 
 Notes:
+
 * [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) with fields of type `stringData` are not supported.
 * When creating a new secret in Vault, be sure to set the `Maximum Number of Versions` field to `0` (unlimited).
 * If you want to delete a secret from Vault, please get in contact with the App-SRE team.
+* If you wish to use a different secrets engine, please get in contact with the App-SRE team.
+
+Example:
+
+This secret in Vault:
+```
+{
+  "key": "value",
+  "otherkey_qb64": "dmFsdWUy"
+}
+```
+Would generate this Kubernetes Secret:
+```yaml
+apiVersion: v1
+kind: Secret
+data:
+  key: dmFsdWU=
+  otherkey: dmFsdWUy
+type: Opaque
+```
 
 ## Design
 
