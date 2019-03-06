@@ -319,7 +319,8 @@ Instructions:
 - `labels`: (optional) labels to add to the Secret.
 - `annotations`: (optional) annotations to add to the Secret.
 
-3. In order to change the values of a Secret, change the secret in Vault first and submit a new MR with the updated `version` field.
+3. In order to change one or more values in a Kubernetes Secret, update the secret in Vault first and submit a new MR with the updated `version` field.
+  * The current version can be found in Vault on the top-right of the list of values for your secret.
 
 Notes:
 
