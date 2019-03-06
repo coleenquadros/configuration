@@ -315,7 +315,7 @@ Instructions:
 - `provider`: must be `vault-secret`.
 - `path`: absolute path to secret in [Vault](https://vault.devshift.net). Note that it should **NOT** start with `/`.
 - `version`: version of secret in Vault.
-- `name`: (optional) name of the Secret object to be created. Overrides the name of the secret in Vault.
+- `name`: (optional) name of the Kubernetes Secret object to be created. Overrides the name of the secret in Vault.
 - `labels`: (optional) labels to add to the Secret.
 - `annotations`: (optional) annotations to add to the Secret.
 
