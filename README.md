@@ -283,7 +283,9 @@ Examples as of 2019-01-30:
 
 Namespaces declaration enforce [this JSON schema](https://github.com/app-sre/qontract-server/blob/master/assets/schemas/openshift/namespace-1.yml). Note that it contains a reference to the cluster in which the namespace exists.
 
-Note: if the resource already exists in the namespace, the PR check will fail. Please get in contact with App-SRE team to import resources to be under the control of App-Interface.
+Notes:
+* If the resource already exists in the namespace, the PR check will fail. Please get in contact with App-SRE team to import resources to be under the control of App-Interface.
+* Manual changes to ConfigMaps or Secrets will be overridden by App-Interface in each run.
 
 #### Manage ConfigMaps via App-Interface (`/openshift/namespace-1.yml`)
 
