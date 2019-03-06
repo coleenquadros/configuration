@@ -283,7 +283,9 @@ Examples as of 2019-01-30:
 
 Namespaces declaration enforce [this JSON schema](https://github.com/app-sre/qontract-server/blob/master/assets/schemas/openshift/namespace-1.yml). Note that it contains a reference to the cluster in which the namespace exists.
 
-Note: if the resource already exists in the namespace, the PR check will fail. Please get in contact with App-SRE team to import resources to be under the control of App-Interface.
+Notes:
+* If the resource already exists in the namespace, the PR check will fail. Please get in contact with App-SRE team to import resources to be under the control of App-Interface.
+* Manual changes to ConfigMaps or Secrets will be overridden by App-Interface in each run.
 
 #### Manage ConfigMaps via App-Interface (`/openshift/namespace-1.yml`)
 
@@ -300,14 +302,13 @@ In order to change the values of a ConfigMap, send a PR modifying the ConfigMap 
 
 #### Manage Secrets via App-Interface (`/openshift/namespace-1.yml`) using Vault
 
-TODO: This is still WIP. Please do not use this feature yet.
-
 Secrets can be entirely self-serviced via App-Interface.
 
 In order to add Secrets to a namespace, you need to add them to the `openshiftResources` field.
 
-- `provider`: must be `vault-secret`
-- `path`: absolute path in [vault](https://vault.devshift.net). Note that it should **NOT** start with `/`.
+- `provider`: must be `vault-secret`.
+- `path`: absolute path in [Vault](https://vault.devshift.net). Note that it should **NOT** start with `/`.
+- `version`: version of secret in Vault.
 - `name`: (optional) name of the secret to be created. Overrides the name of the secret in Vault.
 - `labels`: (optional) labels to add to the Secret.
 - `annotations`: (optional) annotations to add to the Secret.
@@ -321,9 +322,12 @@ app-interface/<cluster>/<namespace>/<secret_name>
 ```
 If you wish to use a different secrets engine, please get in contact with the App-SRE team.
 
-In order to change the values of a Secret, change the secret in Vault first and trigger a new [build master](https://ci.int.devshift.net/job/service-app-interface-gl-build-master/) job. For assistance, get in contact with the App-SRE team.
+In order to change the values of a Secret, change the secret in Vault first and submit a new MR with the updated `version` field.
 
-Note: [Secret](https://kubernetes.io/docs/concepts/configuration/secret/) with fields of type `stringData` are not supported.
+Notes:
+* [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) with fields of type `stringData` are not supported.
+* When creating a new secret in Vault, be sure to set the `Maximum Number of Versions` field to `0` (unlimited).
+* If you want to delete a secret from Vault, please get in contact with the App-SRE team.
 
 ## Design
 
