@@ -334,7 +334,7 @@ Example:
 This secret in Vault:
 ```
 {
-  "key": "value"
+  "key": "value",
   "otherkey_qb64": "dmFsdWUy"
 }
 ```
