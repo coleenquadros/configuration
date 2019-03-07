@@ -97,7 +97,7 @@ run_int() {
   status="$?"
   ENDTIME=$(date +%s)
   
-  echo "$1 $(($ENDTIME - $STARTTIME))" >> ${SUCCESS_DIR}/run_int_execution_times.txt
+  echo "$1 $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/run_int_execution_times.txt"
   
   if [ "$status" != "0" ]; then
     echo "INTEGRATION FAILED: $1" >&2
@@ -144,8 +144,13 @@ run_vault_reconcile_integration &
 
 wait
 
+echo
 echo "Execution times for integrations that were executed"
-sort -n -k2 ${SUCCESS_DIR}/run_int_execution_times.txt
+(
+  echo "Integration Seconds"
+  sort -nr -k2 "${SUCCESS_DIR}/run_int_execution_times.txt"
+) | column -t
+echo
 
 FAILED_INTEGRATIONS=$(ls ${FAIL_DIR} | wc -l)
 

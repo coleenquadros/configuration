@@ -106,7 +106,7 @@ run_int() {
     2>&1 | tee ${SUCCESS_DIR}/reconcile-${1}.txt
   ENDTIME=$(date +%s)
   
-  echo "$1 $(($ENDTIME - $STARTTIME))" >> ${SUCCESS_DIR}/run_int_execution_times.txt
+  echo "$1 $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/run_int_execution_times.txt"
 
   if [ "$?" != "0" ]; then
     mv ${SUCCESS_DIR}/reconcile-${1}.txt ${FAIL_DIR}/reconcile-${1}.txt
@@ -148,8 +148,13 @@ run_vault_reconcile_integration &
 
 wait
 
+echo
 echo "Execution times for integrations that were executed"
-sort -n -k2 ${SUCCESS_DIR}/run_int_execution_times.txt
+(
+  echo "Integration Seconds"
+  sort -nr -k2 "${SUCCESS_DIR}/run_int_execution_times.txt"
+) | column -t
+echo
 
 FAILED_INTEGRATIONS=$(ls ${FAIL_DIR} | wc -l)
 
