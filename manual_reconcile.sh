@@ -87,6 +87,7 @@ run_int() {
 
   echo "INTEGRATION $1" >&2
 
+  STARTTIME=$(date +%s)
   docker run --rm \
     -v ${TEMP_DIR}/config:/config:z \
     ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
@@ -94,7 +95,10 @@ run_int() {
     2>&1 | tee ${SUCCESS_DIR}/reconcile-${1}.txt
 
   status="$?"
-
+  ENDTIME=$(date +%s)
+  
+  echo "$1 $(($ENDTIME - $STARTTIME))" >> ${SUCCESS_DIR}/run_int_execution_times.txt
+  
   if [ "$status" != "0" ]; then
     echo "INTEGRATION FAILED: $1" >&2
     mv ${SUCCESS_DIR}/reconcile-${1}.txt ${FAIL_DIR}/reconcile-${1}.txt
@@ -139,6 +143,9 @@ run_int ldap-users &
 run_vault_reconcile_integration &
 
 wait
+
+echo "Execution times for integrations that were executed"
+sort -n -k2 ${SUCCESS_DIR}/run_int_execution_times.txt
 
 FAILED_INTEGRATIONS=$(ls ${FAIL_DIR} | wc -l)
 
