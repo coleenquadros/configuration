@@ -98,11 +98,15 @@ set +e
 run_int() {
   echo "INTEGRATION $1" >&2
 
+  STARTTIME=$(date +%s)
   docker run --rm \
     -v `pwd`/config:/config:z \
     ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
     qontract-reconcile --config /config/config.toml $1 \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-${1}.txt
+  ENDTIME=$(date +%s)
+  
+  echo "$1 $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/run_int_execution_times.txt"
 
   if [ "$?" != "0" ]; then
     mv ${SUCCESS_DIR}/reconcile-${1}.txt ${FAIL_DIR}/reconcile-${1}.txt
@@ -143,6 +147,14 @@ run_int ldap-users &
 run_vault_reconcile_integration &
 
 wait
+
+echo
+echo "Execution times for integrations that were executed"
+(
+  echo "Integration Seconds"
+  sort -nr -k2 "${SUCCESS_DIR}/run_int_execution_times.txt"
+) | column -t
+echo
 
 FAILED_INTEGRATIONS=$(ls ${FAIL_DIR} | wc -l)
 
