@@ -380,7 +380,7 @@ Current audit backends configurations can be found [here](https://gitlab.cee.red
 For more information please see [vault audit backends documentation](https://www.vaultproject.io/docs/audit/index.html)
 
 #### Manage vault auth backends (`/vault-config/auth-1.yml`)
-Auth methods are the components in Vault that perform authentication and are responsible for assigning identity and a set of policies to a user.
+Auth backends are the components in Vault that perform authentication and are responsible for assigning identity and a set of policies to a user.
 
 Example:
 ```yaml
@@ -484,7 +484,7 @@ $schema: /vault-config/secret-engine-1.yml
 labels:
   service: vault.devshift.net
 
-_path: "<SECRETS_ENGINE_MOUNT_PATH"
+_path: "<SECRETS_ENGINE_MOUNT_PATH>"
 type: "kv"
 description: "new kv secrets engine"
 options:
