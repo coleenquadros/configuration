@@ -121,10 +121,12 @@ run_vault_reconcile_integration() {
     -e VAULT_SECRET_ID=${VAULT_MANAGER_SECRET_ID} \
     ${VAULT_RECONCILE_IMAGE}:${VAULT_RECONCILE_IMAGE_TAG} -dry-run \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-vault.txt
+  
+  status="$?"
   ENDTIME=$(date +%s)
 
-echo "$1 $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/run_int_execution_times.txt"
-  status="$?"
+  echo "vault $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/run_int_execution_times.txt"
+
 
   if [ "$status" != "0" ]; then
     echo "INTEGRATION FAILED: vault" >&2
