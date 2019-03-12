@@ -198,12 +198,12 @@ wheel icon (top-right corner) and replace `omit` with `include` in
 - Management of Quay organisation members.
 - Management of OpenShift ConfigMaps.
 - Management of OpenShift Secrets using Vault.
+- Management of Vault configurations.
 
 ### Planned integrations
 
 - Top level tracking of managed services, their contact points, and work
   streams.
-- Automatically managing a Vault installation and federating access.
 - Management of OLM catalog entries for managing service operators.
 - Ownership of OpenShift Kubernetes namespace resources.
 - Management of cluster monitoring, such as zabbix, prometheus, and alert
@@ -347,6 +347,153 @@ data:
   otherkey: dmFsdWUy
 type: Opaque
 ```
+
+### Manage Vault configurations via App-Interface
+
+https://vault.devshift.net is entirely managed via App-Interface and its configuration can be found in [config](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/services/vault.devshift.net/config) folder of ` vault.devshift.net` service
+
+#### Manage vault audit backends (`/vault-config/audit-1.yml`)
+Audit devices are the components in Vault that keep a detailed log of all requests and response to Vault
+
+Example:
+```yaml
+---
+$schema: /vault-config/audit-1.yml
+
+labels:
+  service: vault.devshift.net
+
+_path: "file/"
+type: "file"
+description: ""
+options:
+  _type: "file"
+  file_path: "/var/log/vault/vault_audit.log"
+  format: "json"
+  log_raw: "false"
+  hmac_accessor: "true"
+  mode: "0600"
+  prefix: ""
+```
+Current audit backends configurations can be found [here](https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/vault.devshift.net/config/audit-backends/)
+
+For more information please see [vault audit backends documentation](https://www.vaultproject.io/docs/audit/index.html)
+
+#### Manage vault auth backends (`/vault-config/auth-1.yml`)
+Auth backends are the components in Vault that perform authentication and are responsible for assigning identity and a set of policies to a user.
+
+Example:
+```yaml
+---
+$schema: /vault-config/auth-1.yml
+
+labels:
+  service: vault.devshift.net
+
+_path: "github/"
+type: "github"
+description: "github auth backend"
+settings:
+  config:
+    _type: "github"
+    organization: "app-sre"
+    base_url: ""
+    max_ttl: "360h"
+    ttl: "120h"
+policy_mappings:
+  - github_team:
+      $ref: <github team datafile (`/access/permission-1.yml`), for example: /dependencies/vault/permissions/app-sre.yml>
+    policies:
+      - $ref: <vault policy datafile (`/vault-config/policy-1.yml`), for example: /services/vault.devshift.net/config/policies/app-sre-policy.yml>
+```
+**Note**: some auth backends like github support policy mappings. Policy mapping can be applied to auth backed entity, for example in case with github auth currently allowed entity is a `team`.
+To apply vault policy on auth entity `policy_mappings` key should be used.
+
+Current auth backends configurations can be found [here](https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/vault.devshift.net/config/auth-backends)
+
+For more information please see [vault auth backends documentation](https://www.vaultproject.io/docs/auth/index.html)
+
+#### Manage vault policies (`/vault-config/policy-1.yml`)
+Policies provide a declarative way to grant or forbid access to certain paths and operations in Vault
+
+Exmaple:
+```yaml
+---
+$schema: /vault-config/policy-1.yml
+
+labels:
+  service: vault.devshift.net
+
+name: "<POLICY_NAME>"
+rules: |
+  path "<SECRETS_ENGINE>/PATH/*" {
+    capabilities = ["create","read","update","delete","list"]
+  }
+```
+Current vault policies can be found [here](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/services/vault.devshift.net/config/policies)
+
+For more information please see [vault policies documentation](https://www.vaultproject.io/docs/concepts/policies.html)
+
+#### Manage vault roles (`/vault-config/role-1.yml`)
+Roles represents a set of Vault policies and login constraints that must be met to receive a token with those policies.
+The scope can be as narrow or broad as desired. Role can be created for a particular machine, or even a particular user on that machine,
+or a service spread across machines. The credentials required for successful login depend upon the constraints set on the Role associated with the credentials.
+Currently we support only AppRole.
+
+AppRole Example:
+```yaml
+---
+$schema: /vault-config/role-1.yml
+
+labels:
+  service: vault.devshift.net
+
+name: "<ROLE_NAME>"
+type: "approle"
+mount: "approle/"
+options:
+  _type: "approle"
+  bind_secret_id: "true"
+  local_secret_ids: "false"
+  period: "0s"
+  secret_id_num_uses: "0"
+  secret_id_ttl: "0s"
+  token_max_ttl: "30m"
+  token_num_uses: "1"
+  token_ttl: "30m"
+  token_type: "default"
+  bound_cidr_list: []
+  policies:
+    - <VAULT_POLICY>
+  secret_id_bound_cidrs: []
+  token_bound_cidrs: []
+```
+Current vault roles can be found [here](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/services/vault.devshift.net/config/roles)
+
+For more information please see [vault AppRole documentation](https://www.vaultproject.io/docs/auth/approle.html)
+
+#### Manage vault secret-engines (`/vault-config/secret-engine-1.yml`)
+Secrets engines are components which store, generate, or encrypt data. Secrets engines are incredibly flexible, so it is easiest to think about them in terms of their function.
+Secrets engines are provided some set of data, they take some action on that data, and they return a result.
+
+KV Secrets engine Example:
+```yaml
+---
+$schema: /vault-config/secret-engine-1.yml
+
+labels:
+  service: vault.devshift.net
+
+_path: "<SECRETS_ENGINE_MOUNT_PATH>"
+type: "kv"
+description: "new kv secrets engine"
+options:
+  _type: "kv"
+  version: "2"
+```
+Current secrets engines can be found [here](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/services/vault.devshift.net/config/secret-engines)
+
+For more information please see [vault secrets engines documentation](https://www.vaultproject.io/docs/secrets/index.html)
 
 ## Design
 
