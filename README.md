@@ -348,6 +348,22 @@ data:
 type: Opaque
 ```
 
+#### Manage Routes via App-Interface (`/openshift/namespace-1.yml`) using Vault
+
+Routes can be entirely self-serviced via App-Interface.
+
+In order to add Routes to a namespace, you need to add them to the `openshiftResources` field.
+
+- `provider`: must be `route`
+- `path`: path relative to [resources](https://gitlab.cee.redhat.com/service/app-interface/tree/master/resources). Note that it starts with `/`.
+- `vault_tls_secret_path`: (optional) absolute path to secret in [Vault](https://vault.devshift.net) which contains sensitive data to be added to the `.spec.tls` section.
+- `vault_tls_secret_version`: (optional, mandatory if `vault_tls_secret_path` is defined) version of secret in Vault.
+
+Notes:
+* The secret in Vault should be stored in the following path: `app-interface/<cluster>/<namespace>/routes/<secret_name>`.
+* In case the Route contains no sensitive information, a secret in Vault is not required (hence the fields are optional).
+* It is recommended to read through the instructions for [Secrets](#manage-secrets-via-app-interface-openshiftnamespace-1yml-using-vault) before using Routes.
+
 ### Manage Vault configurations via App-Interface
 
 https://vault.devshift.net is entirely managed via App-Interface and its configuration can be found in [config](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/services/vault.devshift.net/config) folder of ` vault.devshift.net` service
