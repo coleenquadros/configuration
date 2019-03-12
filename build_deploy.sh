@@ -104,7 +104,6 @@ run_int() {
     ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
     qontract-reconcile --config /config/config.toml $1 \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-${1}.txt
-  # capture exit code despite tee
   EXIT_STATUS=$?
   ENDTIME=$(date +%s)
   
