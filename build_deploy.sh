@@ -105,12 +105,12 @@ run_int() {
     qontract-reconcile --config /config/config.toml $1 \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-${1}.txt
   # capture exit code despite tee
-  EXIT_CODE=${PIPESTATUS[0]}
+  EXIT_STATUS=$?
   ENDTIME=$(date +%s)
   
   echo "$1 $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/run_int_execution_times.txt"
 
-  if [ "$EXIT_CODE" != "0" ]; then
+  if [ "$EXIT_STATUS" != "0" ]; then
     mv ${SUCCESS_DIR}/reconcile-${1}.txt ${FAIL_DIR}/reconcile-${1}.txt
     return 1
   fi
@@ -132,12 +132,12 @@ run_vault_reconcile_integration() {
     -e VAULT_SECRET_ID=${VAULT_MANAGER_SECRET_ID} \
     ${VAULT_RECONCILE_IMAGE}:${VAULT_RECONCILE_IMAGE_TAG} \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-vault.txt
-  EXIT_CODE=${PIPESTATUS[0]}
+  EXIT_STATUS=$?
   ENDTIME=$(date +%s)
 
   echo "vault $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/run_int_execution_times.txt"
 
-  if [ "$EXIT_CODE" != "0" ]; then
+  if [ "$EXIT_STATUS" != "0" ]; then
     mv ${SUCCESS_DIR}/reconcile-${1}.txt ${FAIL_DIR}/reconcile-vault.txt
     return 1
   fi
