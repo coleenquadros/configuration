@@ -112,6 +112,7 @@ run_vault_reconcile_integration() {
 
   echo "INTEGRATION vault" >&2
 
+  STARTTIME=$(date +%s)
   docker run --rm -t \
     -e GRAPHQL_SERVER=http://$IP:4000/graphql \
     -e VAULT_ADDR=https://vault.devshift.net \
@@ -120,7 +121,9 @@ run_vault_reconcile_integration() {
     -e VAULT_SECRET_ID=${VAULT_MANAGER_SECRET_ID} \
     ${VAULT_RECONCILE_IMAGE}:${VAULT_RECONCILE_IMAGE_TAG} -dry-run \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-vault.txt
+  ENDTIME=$(date +%s)
 
+echo "$1 $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/run_int_execution_times.txt"
   status="$?"
 
   if [ "$status" != "0" ]; then
