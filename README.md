@@ -357,7 +357,7 @@ In order to add Routes to a namespace, you need to add them to the `openshiftRes
 - `provider`: must be `route`
 - `path`: path relative to [resources](https://gitlab.cee.redhat.com/service/app-interface/tree/master/resources). Note that it starts with `/`.
 - `vault_tls_secret_path`: (optional) absolute path to secret in [Vault](https://vault.devshift.net) which contains sensitive data to be added to the `.spec.tls` section.
-- `vault_tls_secret_version`: (optional) version of secret in Vault.
+- `vault_tls_secret_version`: (optional, mandatory if `vault_tls_secret_path` is defined) version of secret in Vault.
 
 Notes:
 * The secret in Vault should be stored in the following path: `app-interface/<cluster>/<namespace>/routes/<secret_name>`.
