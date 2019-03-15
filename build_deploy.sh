@@ -25,23 +25,18 @@ wait_response() {
     fi
 }
 
-# Download schemas
-TEMP_DIR=$(realpath -s ${TEMP_DIR:-./temp})
-mkdir -p $TEMP_DIR
-rm -rf $TEMP_DIR/schemas
-curl -sL ${QONTRACT_SERVER_REPO}/archive/${QONTRACT_SERVER_IMAGE_TAG}.tar.gz | \
-    tar -xz --strip-components=1 -C $TEMP_DIR/ -f - '*/assets/schemas'
-SCHEMAS_DIR=$TEMP_DIR/assets/schemas
+SCHEMAS_DIR=schemas
 
 # Create data bundle
 mkdir -p validate
 
 docker run --rm \
-  -v ${SCHEMAS_DIR}:/schemas:z \
+  -v `pwd`/schemas:/schemas:z \
+  -v `pwd`/graphql-schemas:/graphql-schemas:z \
   -v `pwd`/data:/data:z \
   -v `pwd`/resources:/resources:z \
   ${VALIDATOR_IMAGE}:${VALIDATOR_IMAGE_TAG} \
-  qontract-bundler /schemas /data /resources > validate/data.json
+  qontract-bundler /schemas /graphql-schemas/schema.yml /data /resources > validate/data.json
 
 SHA256=$(sha256sum validate/data.json | awk '{print $1}')
 
@@ -106,7 +101,7 @@ run_int() {
     2>&1 | tee ${SUCCESS_DIR}/reconcile-${1}.txt
   EXIT_STATUS=$?
   ENDTIME=$(date +%s)
-  
+
   echo "$1 $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/run_int_execution_times.txt"
 
   if [ "$EXIT_STATUS" != "0" ]; then
