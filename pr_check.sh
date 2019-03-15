@@ -13,7 +13,7 @@ REPORT=$TEMP_DIR/reports/index.html
 
 # Run validator
 mkdir -p $(dirname $RESULTS)
-VALIDATOR_OPTS="" ./manual_schema_validator.sh data resources $RESULTS
+./manual_schema_validator.sh schemas graphql-schemas data resources $RESULTS
 exit_status=$?
 
 # Write report
