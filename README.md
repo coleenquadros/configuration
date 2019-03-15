@@ -102,11 +102,11 @@ Run the actual validator by executing:
 ```sh
 # make sure you are in the top dir of the `app-interface` git repo
 source .env
-./manual_schema_validator.sh data
+./manual_schema_validator.sh schemas graphql-schemas data resources
 ```
 
 The output will be JSON document, so you can pipe it with `jq`, example:
-`./manual_schema_validator.sh data resources | jq .`
+`./manual_schema_validator.sh schemas graphql-schemas data resources | jq .`
 
 ### Running integrations locally with `--dry-run`
 
