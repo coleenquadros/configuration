@@ -309,6 +309,7 @@ Instructions:
 - `name`: (optional) name of the Kubernetes Secret object to be created. Overrides the name of the secret in Vault.
 - `labels`: (optional) labels to add to the Secret.
 - `annotations`: (optional) annotations to add to the Secret.
+- `type`: (optional) type of the Kubernetes Secret to be created. Defaults to `Opaque` if not specified.
 
 3. In order to change one or more values in a Kubernetes Secret, update the secret in Vault first and submit a new MR with the updated `version` field.
   * The current version can be found in Vault on the top-right of the list of values for your secret.
