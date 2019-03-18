@@ -29,9 +29,8 @@ will all contain:
 Main App-Interface contract components:
 
 - <https://gitlab.cee.redhat.com/service/app-interface>: datafiles (schema
-  implementations) that define the contract.
-- <https://github.com/app-sre/qontract-server>: json schemas of the datafiles
-  submitted to the `app-interface` repository. The GraphQL component developed
+  implementations) that define the contract. JSON and GraphQL schemas of the datafiles.
+- <https://github.com/app-sre/qontract-server>: The GraphQL component developed
   in this repository will make the datafiles queryable.
 
 Additional components and tools:
@@ -267,21 +266,13 @@ In order to add or remove a Quay repo, a MR must be sent to the appropriate App 
 
 **NOTE**: If the App or the relevant Quay org are not modelled in the App-Interface repository, please seek the assistance from the App-SRE team.
 
-Examples as of 2019-01-30:
 
-- An example of a MR: https://gitlab.cee.redhat.com/service/app-interface/merge_requests/75/diffs
-- [/services/uhc/app.yml](https://gitlab.cee.redhat.com/service/app-interface/blob/c22670e84ef19c5ce1192ea7c62948b1db69036a/data/services/uhc/app.yml#L21): `uhc` application, including `quayRepos` parameter.
-- [/services/openshift.io/app.yml](https://gitlab.cee.redhat.com/service/app-interface/blob/c22670e84ef19c5ce1192ea7c62948b1db69036a/data/services/openshift.io/app.yml#L20): `openshiftio` application, including `quayRepos` parameter.
-- [/dependencies/quay/app-sre.yml](https://gitlab.cee.redhat.com/service/app-interface/blob/c22670e84ef19c5ce1192ea7c62948b1db69036a/data/dependencies/quay/app-sre.yml): `app-sre` Quay org.
-- [/dependencies/quay/openshiftio](https://gitlab.cee.redhat.com/service/app-interface/blob/c22670e84ef19c5ce1192ea7c62948b1db69036a/data/dependencies/quay/openshiftio.yml): `Openshifio` Quay org.
-- [/app-sre/app-1.yml](https://github.com/app-sre/qontract-server/blob/8fafb7c24188645c099c0ee7a9f6806b178158dd/assets/schemas/app-sre/app-1.yml): JSON schema for App modelling.
-- [/dependencies/quay-org-1.yml](https://github.com/app-sre/qontract-server/blob/8fafb7c24188645c099c0ee7a9f6806b178158dd/assets/schemas/dependencies/quay-org-1.yml): JSON schema for Quay organization.
 
 ### Manage Openshift resources via App-Interface (`/openshift/namespace-1.yml`)
 
 [services](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/services) contains all the services that are being run by the App-SRE team. Inside of those directories, there is a `namespaces` folder that lists all the `namespaces` that are linked to that service.
 
-Namespaces declaration enforce [this JSON schema](https://github.com/app-sre/qontract-server/blob/master/assets/schemas/openshift/namespace-1.yml). Note that it contains a reference to the cluster in which the namespace exists.
+Namespaces declaration enforce [this JSON schema](https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/openshift/namespace-1.yml). Note that it contains a reference to the cluster in which the namespace exists.
 
 Notes:
 * If the resource already exists in the namespace, the PR check will fail. Please get in contact with App-SRE team to import resources to be under the control of App-Interface.
@@ -515,14 +506,11 @@ For more information please see [vault secrets engines documentation](https://ww
 
 Additional design information: [here](docs/app-interface/design.md).
 
-[schemas]:
-<https://github.com/app-sre/qontract-server/tree/master/assets/schemas>
-[userschema]:
-<https://github.com/app-sre/qontract-server/blob/master/assets/schemas/access/user-1.yml>
-[crossref]:
-<https://github.com/app-sre/qontract-server/blob/beb70a68334f49581c3656e2a223998965ee19c1/schemas/common-1.json#L58-L86>
-[role]: <https://github.com/app-sre/qontract-server/blob/master/assets/schemas/access/role-1.yml>
-[permission]: <https://github.com/app-sre/qontract-server/blob/master/assets/schemas/access/permission-1.yml>
+[schemas]: <https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas>
+[userschema]: <https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/access/user-1.yml>
+[crossref]: <https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/common-1.json#L58-L86>
+[role]: <https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/access/role-1.yml>
+[permission]: <https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/access/permission-1.yml>
 
 ## Developer Guide
 

@@ -30,7 +30,7 @@ qontract-server/schemas/app-sre/app-1.yml
 ```
 
 Note that the version **MUST** be a string (see
-[here](<https://github.com/app-sre/qontract-server/blob/beb70a68334f49581c3656e2a223998965ee19c1/schemas/common-1.json#L16-L19>)).
+[here](<https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/common-1.json#L16-L19>)).
 
 Additionally **all** the resources created in the GraphQL schemas will have the
 `_v<number>` suffix. Example:

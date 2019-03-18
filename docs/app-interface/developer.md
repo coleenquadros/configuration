@@ -4,8 +4,8 @@
 
 App-Interface is composed by the following repositories:
 
-- https://gitlab.cee.redhat.com/service/app-interface - contains the actual data (YAML).
-- https://github.com/app-sre/qontract-server - GraphQL Server, JSON schemas and GraphQL Schemas (NodeJS / JSON / YAML).
+- https://gitlab.cee.redhat.com/service/app-interface - contains the actual data (YAML) and JSON schemas and GraphQL Schemas (NodeJS / JSON / YAML).
+- https://github.com/app-sre/qontract-server - GraphQL Server.
 - https://github.com/app-sre/qontract-reconcile - Python based integration framework (Python 2 and Python 3).
 - https://github.com/app-sre/qontract-validator - Checks the data against the JSON schemas (Python 2 and Python 3).
 
@@ -16,9 +16,8 @@ When someone submits MR to change the data in `service/app-interface` this is wh
 - MR sent to `service/app-interface` with some kind of modification to the datafiles.
 - [PR check Jenkins job](https://ci.int.devshift.net/view/app-interface/job/service-app-interface-gl-pr-check/) runs executing [pr_check.sh], which in turn does the following:(https://gitlab.cee.redhat.com/service/app-interface/blob/master/pr_check.sh).
   - Runs [manual_schema_validator.sh](https://gitlab.cee.redhat.com/service/app-interface/blob/master/manual_schema_validator.sh)
-    - Downloads the schemas.
     - [Bundles](https://github.com/app-sre/qontract-validator/blob/master/validator/bundler.py) the app-interface into a single JSON file. Also bundles the schemas into a separate JSON file. These bundled resources will be used by the `qontract-validator` and by the `qontract-server`.
-    - Runs `qontract-validator schemas graphql-schemas data resources`, which returns an error if the data or the schemas have an error.
+    - Runs `qontract-validator`, which returns an error if the data or the schemas have an error.
   - Generates a report.
   - Runs [manual_reconcile.sh](https://gitlab.cee.redhat.com/service/app-interface/blob/master/manual_reconcile.sh):
     - Starts a local qontract-server (which allows using a tag newer than the one in production by specifying it in the [service/app-interface/.env](https://gitlab.cee.redhat.com/service/app-interface/blob/master/.env) file).
