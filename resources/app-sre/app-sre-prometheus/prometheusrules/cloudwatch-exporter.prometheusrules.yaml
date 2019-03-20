@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  creationTimestamp: null
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: cloudwatch-exporter
+spec:
+  groups:
+  - name: cloudwatch-exporter
+    rules:
+    - alert: CloudWatchScrapeError
+      labels:
+        severity: medium
+      expr: cloudwatch_exporter_scrape_error{job="cloudwatch-exporter"}	!= 0
+      annotations:
+        summary: 'Failed to scrape cloudwatch exporter'
+        identifier: '{{ $labels.instance }}'
+        description: 'There was an error scraping metrics from the cloudwatch exporter.'

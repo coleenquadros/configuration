@@ -1,0 +1,122 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  creationTimestamp: null
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: ci-ext-alertrules
+spec:
+  groups:
+  - name: ci-ext
+    rules:
+    - alert: JobFail
+      labels:
+        severity: medium
+        service: vault
+      expr: default_jenkins_builds_last_build_result{instance="ci.ext.devshift.net:80",jenkins_job="please-job-do-not-fail",job="jenkins_ext"} == 0
+      annotations:
+        summary: '{{ $labels.instance }} :'
+        identifier: '{{ $labels.instance }}'
+        description: '{{ $labels.jenkins_job }} Jenkins job latest build has failed. \n Job URL: http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}/'
+    
+    # Cincinnati
+    - alert: JenkinsLastBuildFailed
+      expr: "default_jenkins_builds_last_build_result{jenkins_job=~'openshift-cincinnati-gh-build-master',job='jenkins_ext'}  == 0"
+      labels:
+        severity: medium
+        service: cincinnati
+      annotations:
+        summary: '{% raw %} {{ $labels.instance }} :{% endraw %} '
+        identifier: '{% raw %} {{ $labels.instance }} {% endraw %} '
+        description: '{% raw %} {{ $labels.jenkins_job }} Jenkins job latest build has failed. Job URL: https://{{ $labels.instance }}/job/{{ $labels.jenkins_job }} {% endraw %} '
+    - alert: JenkinsLastBuildFailed
+      expr: "default_jenkins_builds_last_build_result{jenkins_job=~'app-sre-saas-cincinnati-cincinnati-saas-deploy',job='jenkins_ext'}  == 0"
+      labels:
+        severity: medium
+        service: cincinnati
+      annotations:
+        summary: '{% raw %} {{ $labels.instance }} :{% endraw %} '
+        identifier: '{% raw %} {{ $labels.instance }} {% endraw %} '
+        description: '{% raw %} {{ $labels.jenkins_job }} Jenkins job latest build has failed. Job URL: https://{{ $labels.instance }}/job/{{ $labels.jenkins_job }} {% endraw %} '
+    
+    # Hive
+    - alert: JenkinsLastBuildFailed
+      expr: "default_jenkins_builds_last_build_result{jenkins_job=~'openshift-hive-gh-build-master',job='jenkins_ext'}  == 0"
+      labels:
+        severity: medium
+        service: hive
+      annotations:
+        summary: '{% raw %} {{ $labels.instance }} :{% endraw %} '
+        identifier: '{% raw %} {{ $labels.instance }} {% endraw %} '
+        description: '{% raw %} {{ $labels.jenkins_job }} Jenkins job latest build has failed. Job URL: https://{{ $labels.instance }}/job/{{ $labels.jenkins_job }} {% endraw %} '
+
+    # Telemeter
+    - alert: JenkinsLastBuildFailed
+      expr: "default_jenkins_builds_last_build_result{jenkins_job=~'openshift-telemeter-gh-build-master',job='jenkins_ext'}  == 0"
+      labels:
+        severity: medium
+        service: telemeter
+      annotations:
+        summary: '{% raw %} {{ $labels.instance }} :{% endraw %} '
+        identifier: '{% raw %} {{ $labels.instance }} {% endraw %} '
+        description: '{% raw %} {{ $labels.jenkins_job }} Jenkins job latest build has failed. Job URL: https://{{ $labels.instance }}/job/{{ $labels.jenkins_job }} {% endraw %} '
+    - alert: JenkinsLastBuildFailed
+      expr: "default_jenkins_builds_last_build_result{jenkins_job=~'app-sre-saas-telemeter-telemeter-saas-deploy',job='jenkins_ext'}  == 0"
+      labels:
+        severity: medium
+        service: telemeter
+      annotations:
+        summary: '{% raw %} {{ $labels.instance }} :{% endraw %} '
+        identifier: '{% raw %} {{ $labels.instance }} {% endraw %} '
+        description: '{% raw %} {{ $labels.jenkins_job }} Jenkins job latest build has failed. Job URL: https://{{ $labels.instance }}/job/{{ $labels.jenkins_job }} {% endraw %} '
+
+    # App-interface
+    - alert: JenkinsLastBuildFailed
+      expr: "default_jenkins_builds_last_build_result{jenkins_job=~'app-sre-qontract-validator-gh-build-master',job='jenkins_ext'}  == 0"
+      labels:
+        severity: medium
+        service: app-interface
+      annotations:
+        summary: '{% raw %} {{ $labels.instance }} :{% endraw %} '
+        identifier: '{% raw %} {{ $labels.instance }} {% endraw %} '
+        description: '{% raw %} {{ $labels.jenkins_job }} Jenkins job latest build has failed. Job URL: https://{{ $labels.instance }}/job/{{ $labels.jenkins_job }} {% endraw %} '
+    - alert: JenkinsLastBuildFailed
+      expr: "default_jenkins_builds_last_build_result{jenkins_job=~'app-sre-qontract-server-gh-build-master',job='jenkins_ext'}  == 0"
+      labels:
+        severity: medium
+        service: app-interface
+      annotations:
+        summary: '{% raw %} {{ $labels.instance }} :{% endraw %} '
+        identifier: '{% raw %} {{ $labels.instance }} {% endraw %} '
+        description: '{% raw %} {{ $labels.jenkins_job }} Jenkins job latest build has failed. Job URL: https://{{ $labels.instance }}/job/{{ $labels.jenkins_job }} {% endraw %} '
+    - alert: JenkinsLastBuildFailed
+      expr: "default_jenkins_builds_last_build_result{jenkins_job=~'app-sre-qontract-reconcile-gh-build-master',job='jenkins_ext'}  == 0"
+      labels:
+        severity: medium
+        service: app-interface
+      annotations:
+        summary: '{% raw %} {{ $labels.instance }} :{% endraw %} '
+        identifier: '{% raw %} {{ $labels.instance }} {% endraw %} '
+        description: '{% raw %} {{ $labels.jenkins_job }} Jenkins job latest build has failed. Job URL: https://{{ $labels.instance }}/job/{{ $labels.jenkins_job }} {% endraw %} '
+
+
+    # Vault
+    - alert: JenkinsLastBuildFailed
+      expr: "default_jenkins_builds_last_build_result{jenkins_job=~'app-sre-vault-manager-gh-build-master',job='jenkins_ext'}  == 0"
+      labels:
+        severity: medium
+        service: vault
+      annotations:
+        summary: '{% raw %} {{ $labels.instance }} :{% endraw %} '
+        identifier: '{% raw %} {{ $labels.instance }} {% endraw %} '
+        description: '{% raw %} {{ $labels.jenkins_job }} Jenkins job latest build has failed. Job URL: https://{{ $labels.instance }}/job/{{ $labels.jenkins_job }} {% endraw %} '
+    - alert: JenkinsLastBuildFailed
+      expr: "default_jenkins_builds_last_build_result{jenkins_job=~'app-sre-fluentd-gh-build-master',job='jenkins_ext'}  == 0"
+      labels:
+        severity: medium
+        service: vault
+      annotations:
+        summary: '{% raw %} {{ $labels.instance }} :{% endraw %} '
+        identifier: '{% raw %} {{ $labels.instance }} {% endraw %} '
+        description: '{% raw %} {{ $labels.jenkins_job }} Jenkins job latest build has failed. Job URL: https://{{ $labels.instance }}/job/{{ $labels.jenkins_job }} {% endraw %} '
