@@ -1,0 +1,86 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    prometheus: app-sre
+  name: federate-cluster-app-sre
+spec:
+  endpoints:
+  - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+    honorLabels: true
+    interval: 60s
+    metricRelabelings:
+    - separator: ;
+      regex: prometheus_replica
+      replacement: $1
+      action: labeldrop
+    params:
+      match[]:
+      - '{__name__=~"kube_.*"}'
+      - '{__name__=~"kubelet_volume_stats_.*"}'
+      - '{__name__=~"container_cpu_usage_seconds_total"}'
+      - '{__name__=~"container_memory_rss"}'
+      - '{__name__=~"container_network_receive_bytes_total"}'
+      - '{__name__=~"container_network_transmit_bytes_total"}'
+      # Recorded metrics
+      - '{__name__=~":kube_pod_info_node_count:"}'
+      - '{__name__=~":node_cpu_saturation_load1:"}'
+      - '{__name__=~":node_cpu_utilisation:avg1m"}'
+      - '{__name__=~":node_disk_saturation:avg_irate"}'
+      - '{__name__=~":node_disk_utilisation:avg_irate"}'
+      - '{__name__=~":node_memory_MemFreeCachedBuffers:sum"}'
+      - '{__name__=~":node_memory_MemTotal:sum"}'
+      - '{__name__=~":node_memory_swap_io_bytes:sum_rate"}'
+      - '{__name__=~":node_memory_utilisation:"}'
+      - '{__name__=~"cluster:container_cpu_usage:ratio"}'
+      - '{__name__=~"cluster:container_spec_cpu_shares:ratio"}'
+      - '{__name__=~"cluster:memory_usage:ratio"}'
+      - '{__name__=~"cluster:node_cpu:sum_rate5m"}'
+      - '{__name__=~"cluster_quantile:apiserver_request_latencies:histogram_quantile"}'
+      - '{__name__=~"cluster_quantile:scheduler_binding_latency:histogram_quantile"}'
+      - '{__name__=~"cluster_quantile:scheduler_e2e_scheduling_latency:histogram_quantile"}'
+      - '{__name__=~"cluster_quantile:scheduler_scheduling_algorithm_latency:histogram_quantile"}'
+      - '{__name__=~"instance:node_cpu:rate:sum"}'
+      - '{__name__=~"instance:node_cpu:ratio"}'
+      - '{__name__=~"instance:node_filesystem_usage:sum"}'
+      - '{__name__=~"instance:node_network_receive_bytes:rate:sum"}'
+      - '{__name__=~"instance:node_network_transmit_bytes:rate:sum"}'
+      - '{__name__=~"namespace:container_cpu_usage:sum"}'
+      - '{__name__=~"namespace:container_cpu_usage_seconds_total:sum_rate"}'
+      - '{__name__=~"namespace:container_memory_usage_bytes:sum"}'
+      - '{__name__=~"namespace:container_spec_cpu_shares:sum"}'
+      - '{__name__=~"namespace_name:container_cpu_usage_seconds_total:sum_rate"}'
+      - '{__name__=~"namespace_name:container_memory_usage_bytes:sum"}'
+      - '{__name__=~"namespace_name:kube_pod_container_resource_requests_cpu_cores:sum"}'
+      - '{__name__=~"namespace_name:kube_pod_container_resource_requests_memory_bytes:sum"}'
+      - '{__name__=~"namespace_pod_name_container_name:container_cpu_usage_seconds_total:sum_rate"}'
+      - '{__name__=~"node:node_cpu_saturation_load1:"}'
+      - '{__name__=~"node:node_cpu_utilisation:avg1m"}'
+      - '{__name__=~"node:node_disk_saturation:avg_irate"}'
+      - '{__name__=~"node:node_disk_utilisation:avg_irate"}'
+      - '{__name__=~"node:node_filesystem_avail:"}'
+      - '{__name__=~"node:node_filesystem_usage:"}'
+      - '{__name__=~"node:node_memory_bytes_available:sum"}'
+      - '{__name__=~"node:node_memory_bytes_total:sum"}'
+      - '{__name__=~"node:node_memory_swap_io_bytes:sum_rate"}'
+      - '{__name__=~"node:node_memory_utilisation:"}'
+      - '{__name__=~"node:node_memory_utilisation:ratio"}'
+      - '{__name__=~"node:node_memory_utilisation_2:"}'
+      - '{__name__=~"node:node_num_cpu:sum"}'
+      - '{__name__=~"node_namespace_pod:kube_pod_info:"}'
+      - '{__name__=~"pod_name:container_cpu_usage:sum"}'
+      - '{__name__=~"pod_name:container_fs_usage_bytes:sum"}'
+      - '{__name__=~"pod_name:container_memory_usage_bytes:sum"}'
+      - '{__name__=~"pod_name:container_spec_cpu_shares:sum"}'
+    path: /federate
+    port: web
+    scheme: https
+    tlsConfig:
+      caFile: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
+      serverName: prometheus-k8s.openshift-monitoring.svc
+  namespaceSelector:
+    matchNames:
+    - openshift-monitoring
+  selector:
+    matchLabels:
+      prometheus: k8s
