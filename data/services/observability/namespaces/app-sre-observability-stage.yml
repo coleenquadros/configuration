@@ -1,0 +1,145 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: app-sre-observability-stage
+description: staging namespace for the app-sre observability stack
+
+cluster:
+  $ref: /openshift/app-sre/cluster.yml
+
+managedResourceTypes:
+- ConfigMap
+- Secret
+- ServiceMonitor
+- PrometheusRule
+
+openshiftResources:
+# ConfigMaps
+## Grafana Dashboards
+- provider: resource
+  path: /app-sre/app-sre-prometheus/grafana/grafana-dashboard-appsre-grafana.configmap.yaml
+- provider: resource
+  path: /app-sre/app-sre-prometheus/grafana/grafana-dashboard-appsre-rds.configmap.yaml
+- provider: resource
+  path: /app-sre/app-sre-prometheus/grafana/grafana-dashboard-appsre-vault.configmap.yaml
+- provider: resource
+  path: /app-sre/app-sre-prometheus/grafana/grafana-dashboard-blackbox-exporter.configmap.yaml
+- provider: resource
+  path: /app-sre/app-sre-prometheus/grafana/grafana-dashboard-playground.configmap.yaml
+- provider: resource
+  path: /app-sre/app-sre-prometheus/grafana/grafana-dashboards.configmap.yaml
+
+# Secrets
+## Common
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-prometheus/app-sre-observability-htpasswd
+  version: 2
+
+## Alertmanager
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-prometheus/alertmanager/alertmanager-app-sre
+  version: 8
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-prometheus/alertmanager/alertmanager-proxy-config
+  version: 1
+
+## Grafana
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-prometheus/grafana/grafana-config
+  version: 6
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-prometheus/grafana/grafana-datasources
+  version: 1
+
+## Prometheus
+#- provider: vault-secret
+#  path: app-interface/app-sre/app-sre-prometheus/prometheus/prometheus-app-sre
+#  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-prometheus/prometheus/prometheus-app-sre-additional-scrapeconfig
+  version: 6
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-prometheus/prometheus/prometheus-proxy-config
+  version: 1
+
+
+## ServiceMonitors
+### App-SRE AlertManager
+- provider: resource
+  path: /app-sre/app-sre-prometheus/servicemonitors/alertmanager.servicemonitor.yaml
+### App-SRE exporters
+- provider: resource
+  path: /app-sre/app-sre-prometheus/servicemonitors/cloudwatch-exporter.servicemonitor.yaml
+### Cincinnati- Policy Engine
+- provider: resource
+  path: /app-sre/app-sre-prometheus/servicemonitors/cincinnati-policy-engine-production.servicemonitor.yaml
+- provider: resource
+  path: /app-sre/app-sre-prometheus/servicemonitors/cincinnati-policy-engine-stage.servicemonitor.yaml
+#### Cincinnati- Graph Builder
+- provider: resource
+  path: /app-sre/app-sre-prometheus/servicemonitors/cincinnati-graph-builder-production.servicemonitor.yaml
+- provider: resource
+  path: /app-sre/app-sre-prometheus/servicemonitors/cincinnati-graph-builder-stage.servicemonitor.yaml
+### App-SRE Prometheus
+- provider: resource
+  path: /app-sre/app-sre-prometheus/servicemonitors/prometheus-app-sre.servicemonitor.yaml
+### App-SRE Prometheus Operator
+- provider: resource
+  path: /app-sre/app-sre-prometheus/servicemonitors/prometheus-operator.servicemonitor.yaml
+### Telemeter-Cache
+- provider: resource
+  path: /app-sre/app-sre-prometheus/servicemonitors/telemeter-cache-production.servicemonitor.yaml
+- provider: resource
+  path: /app-sre/app-sre-prometheus/servicemonitors/telemeter-cache-stage.servicemonitor.yaml
+### Telemeter
+- provider: resource
+  path: /app-sre/app-sre-prometheus/servicemonitors/telemeter-production.servicemonitor.yaml
+- provider: resource
+  path: /app-sre/app-sre-prometheus/servicemonitors/telemeter-stage.servicemonitor.yaml
+### UHC
+#### UHC- Clusters Service
+- provider: resource
+  path: /app-sre/app-sre-prometheus/servicemonitors/uhc-clusters-service-production.servicemonitor.yaml
+- provider: resource
+  path: /app-sre/app-sre-prometheus/servicemonitors/uhc-clusters-service-staging.servicemonitor.yaml
+#### UHC- Gateway Server
+- provider: resource
+  path: /app-sre/app-sre-prometheus/servicemonitors/uhc-gateway-server-production.servicemonitor.yaml
+- provider: resource
+  path: /app-sre/app-sre-prometheus/servicemonitors/uhc-gateway-server-staging.servicemonitor.yaml
+#### UHC- Portal Server
+- provider: resource
+  path: /app-sre/app-sre-prometheus/servicemonitors/uhc-portal-server-production.servicemonitor.yaml
+- provider: resource
+  path: /app-sre/app-sre-prometheus/servicemonitors/uhc-portal-server-staging.servicemonitor.yaml
+### Vault 
+- provider: resource
+  path: /app-sre/app-sre-prometheus/servicemonitors/vault-prod.servicemonitor.yaml
+- provider: resource
+  path: /app-sre/app-sre-prometheus/servicemonitors/vault-stage.servicemonitor.yaml
+### Grafana
+- provider: resource
+  path: /app-sre/app-sre-prometheus/servicemonitors/grafana.servicemonitor.yaml
+
+## Alerting and Recording Rules
+### ci.ext.devshift.net
+- provider: resource
+  path: /app-sre/app-sre-prometheus/prometheusrules/ci-ext.prometheusrules.yaml
+### Cincinnati
+- provider: resource
+  path: /app-sre/app-sre-prometheus/prometheusrules/cincinnati-prod.prometheusrules.yaml
+- provider: resource
+  path: /app-sre/app-sre-prometheus/prometheusrules/cincinnati-stage.prometheusrules.yaml
+### AWS Cloudwatch exporter
+- provider: resource
+  path: /app-sre/app-sre-prometheus/prometheusrules/cloudwatch-exporter.prometheusrules.yaml
+### Federated Kubernetes metrics
+- provider: resource
+  path: /app-sre/app-sre-prometheus/prometheusrules/kube-metrics.prometheusrules.yaml
+### Vault
+- provider: resource
+  path: /app-sre/app-sre-prometheus/prometheusrules/vault-prod.prometheusrules.yaml
+- provider: resource
+  path: /app-sre/app-sre-prometheus/prometheusrules/vault-stage.prometheusrules.yaml
