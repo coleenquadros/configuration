@@ -12,8 +12,17 @@ properties:
   labels:
     "$ref": "/common-1.json#/definitions/labels"
 
-  title:
+  name:
     type: string
+
+  description:
+    type: string
+
+  dependencies:
+    type: array
+    items:
+      "$ref": "/common-1.json#/definitions/crossref"
+      "$schemaRef": "/dependencies/service-1.yml"
 
   serviceDocs:
     description: List of service docs
@@ -50,44 +59,6 @@ properties:
     required:
     - SLO
 
-  dependencies:
-    type: array
-    items:
-      type: object
-      additionalProperties: false
-      properties:
-        name:
-          type: string
-        statefulness:
-          type: string
-          enum:
-          - Durable
-          - Cache
-          - Stateless
-        opsModel:
-          type: string
-          enum:
-          - Hosted
-          - External
-        statusPage:
-          type: string
-          format: uri
-        SLA:
-          "$ref": "/common-1.json#/definitions/serviceLevel"
-        dependencyFailureImpact:
-          type: string
-          enum:
-          - No Impact
-          - Partial Outage
-          - Major Outage
-          - Complete Outage
-      required:
-      - name
-      - statefulness
-      - opsModel
-      - SLA
-      - dependencyFailureImpact
-
   quayRepos:
     type: array
     items:
@@ -116,6 +87,7 @@ properties:
       required:
       - org
       - items
+
   escalations:
     type: object
     additionalProperties: false
@@ -147,7 +119,9 @@ properties:
     - critical
 
 required:
-- title
-- serviceOwner
 - "$schema"
-- "labels"
+- labels
+- name
+- serviceOwner
+- description
+- performanceParameters
