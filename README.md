@@ -503,6 +503,41 @@ Current secrets engines can be found [here](https://gitlab.cee.redhat.com/servic
 
 For more information please see [vault secrets engines documentation](https://www.vaultproject.io/docs/secrets/index.html)
 
+
+### Manage AWS resources via App-Interface (`/openshift/namespace-1.yml`) using Terraform
+
+[services](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/services) contains all the services that are being run by the App-SRE team. Inside of those directories, there is a `namespaces` folder that lists all the `namespaces` that are linked to that service.
+
+Namespaces declaration enforce [this JSON schema](https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/openshift/namespace-1.yml). Note that it contains a reference to the cluster in which the namespace exists.
+
+Notes:
+* Manual changes to AWS resources will be overridden by App-Interface in each run.
+
+#### Manage RDS databases via App-Interface (`/openshift/namespace-1.yml`)
+
+RDS datanases can be entirely self-serviced via App-Interface.
+
+In order to add or update an RDS database, you need to add them to the `terraformResources` field.
+
+- `provider`: must be `rds`
+- `account`: must be one of the AWS account names we manage. Current options:
+  - `app-sre`
+  - `osio`
+- `identifier` - name of resource to create (or update)
+- `defaults`: path relative to [resources](https://gitlab.cee.redhat.com/service/app-interface/tree/master/resources) to a file with default values. Note that it starts with `/`. Current options:
+  - [rds](https://gitlab.cee.redhat.com/service/app-interface/tree/master/resources/terraform/rds.yml) - `/terraform/rds.yml`
+- `overrides`: list of values from `defaults` you wish to override, with the override values. For example: `engine: mysql`.
+
+Once the changes are merged, the RDS instance will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
+The name of the secret will be `<identifier>-<provider>`. For example, for a resource with `identifier` "my-instance" and `provider` "rds", the created Secret will be called `my-instance-rds`.
+The Secret will contain the following fields:
+- `db.host` - The hostname of the RDS instance.
+- `db.port` - The database port.
+- `db.name` - The database name.
+- `db.user` - The master username for the database.
+- `db.password` - Password for the master DB user.
+
+
 ## Design
 
 Additional design information: [here](docs/app-interface/design.md).
