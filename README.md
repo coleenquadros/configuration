@@ -512,6 +512,7 @@ Namespaces declaration enforce [this JSON schema](https://gitlab.cee.redhat.com/
 
 Notes:
 * Manual changes to AWS resources will be overridden by App-Interface in each run.
+* To be able to use this feature, the `managedResourceTypes` section must exist and include `Secret`.
 
 #### Manage RDS databases via App-Interface (`/openshift/namespace-1.yml`)
 
@@ -536,6 +537,28 @@ The Secret will contain the following fields:
 - `db.name` - The database name.
 - `db.user` - The master username for the database.
 - `db.password` - Password for the master DB user.
+
+#### Manage S3 buckets via App-Interface (`/openshift/namespace-1.yml`)
+
+S3 buckets can be entirely self-serviced via App-Interface.
+
+In order to add or update an S3 bucket, you need to add them to the `terraformResources` field.
+
+- `provider`: must be `s3`
+- `account`: must be one of the AWS account names we manage. Current options:
+  - `app-sre`
+  - `osio`
+- `identifier` - name of resource to create (or update)
+- `defaults`: path relative to [resources](https://gitlab.cee.redhat.com/service/app-interface/tree/master/resources) to a file with default values. Note that it starts with `/`. Current options:
+  - [s3](https://gitlab.cee.redhat.com/service/app-interface/tree/master/resources/terraform/s3.yml) - `/terraform/s3.yml`
+- `overrides`: list of values from `defaults` you wish to override, with the override values. For example: `acl: public`.
+
+Once the changes are merged, the S3 bucket will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
+The name of the secret will be `<identifier>-<provider>`. For example, for a resource with `identifier` "my-bucket" and `provider` "s3", the created Secret will be called `my-bucket-s3`.
+The Secret will contain the following fields:
+- `bucket` - The name of the bucket.
+- `aws_access_key_id` - The access key ID.
+- `aws_secret_access_key` - The secret access key.
 
 
 ## Design
