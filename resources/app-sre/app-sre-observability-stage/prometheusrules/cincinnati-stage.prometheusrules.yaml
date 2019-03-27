@@ -1,0 +1,27 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: cincinnati-stage
+spec:
+  groups:
+  - name: cincinnati-stage
+    rules:
+    - alert: Cincinnati Graph Builder - No targets found - stage
+      annotations:
+        description: No valid targets found for Cincinnati Graph builder. This means that either has no pods running or prometheus was not able to scrape them
+        summary: No valid targets found for Cincinnati Graph builder
+      expr: count(up{job="cincinnati-graph-builder", namespace="cincinnati-staging"}) == 0
+      for: 30s
+      labels:
+        severity: medium
+    - alert: Cincinnati Policy Engine - No targets found - stage
+      annotations:
+        description: No valid targets found for Cincinnati Policy engine. This means that either has no pods running or prometheus was not able to scrape them
+        summary: No valid targets found for Cincinnati Graph builder
+      expr: count(up{job="cincinnati-policy-engine", namespace="cincinnati-staging"}) == 0
+      for: 30s
+      labels:
+        severity: medium
