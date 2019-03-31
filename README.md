@@ -512,11 +512,11 @@ Namespaces declaration enforce [this JSON schema](https://gitlab.cee.redhat.com/
 
 Notes:
 * Manual changes to AWS resources will be overridden by App-Interface in each run.
-* To be able to use this feature, the `managedResourceTypes` section must exist and include `Secret`.
+* To be able to use this feature, the `managedTerrraformResources` field must exist and equal to `true`.
 
 #### Manage RDS databases via App-Interface (`/openshift/namespace-1.yml`)
 
-RDS datanases can be entirely self-serviced via App-Interface.
+RDS instances can be entirely self-serviced via App-Interface.
 
 In order to add or update an RDS database, you need to add them to the `terraformResources` field.
 
