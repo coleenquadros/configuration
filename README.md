@@ -505,6 +505,39 @@ Current secrets engines can be found [here](https://gitlab.cee.redhat.com/servic
 For more information please see [vault secrets engines documentation](https://www.vaultproject.io/docs/secrets/index.html)
 
 
+### Manage AWS access via App-Interface (`/aws/group-1.yml`) using Terraform
+
+[teams](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/teams) contains all the teams that are being services by the App-SRE team. Inside of those directories, there is a `users` folder that lists all the `users` that are linked to that team. Each `user` has a list of assiciated `roles`. A `role` can be used to grant AWS access to a user, by adding the `user` to an AWS `group`.
+
+Groups declaration enforce [this JSON schema](https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/aws/group-1.yml). Note that it contains a reference to the AWS account in which the group exists.
+
+Notes:
+* Manual changes to AWS resources will be overridden by App-Interface in each run.
+* A group without associated users will not be created.
+
+#### Manage AWS users via App-Interface (`/aws/group-1.yml`) using Terraform
+
+AWS users can be entirely self-services via App-Interface.
+
+In order to get access to an AWS account, a user has to have:
+* A `role` that includes an `aws_groups` section, with a reference to an AWS group file.
+* A public binary GPG key, which will be used to encrypt the generated password to send by mail.
+
+Once a user is created, an email invitation to join the account will be sent with all relevant information.
+
+## Adding your public GPG key
+A base64 encoded binary GPG key should be added to the user file.
+To export your key:
+```
+gpg --export <redhat_username>@redhat.com | base64
+```
+
+To get your base64 encoded binary GPG key from an [ascii armored output](https://www.gnupg.org/gph/en/manual/x56.html):
+```
+cat <redhat_username>.gpg.asc | gpg --dearmor | base64
+```
+
+
 ### Manage AWS resources via App-Interface (`/openshift/namespace-1.yml`) using Terraform
 
 [services](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/services) contains all the services that are being run by the App-SRE team. Inside of those directories, there is a `namespaces` folder that lists all the `namespaces` that are linked to that service.
