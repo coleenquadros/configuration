@@ -78,6 +78,58 @@ spec:
     # We need this recording rule until someone works on https://github.com/jenkinsci/prometheus-plugin/issues/100
     - record: jenkins:http_responseCodes_total
       expr: sum({__name__=~"http_responseCodes_.*"}) by (instance)
+    - alert: JenkinsWebForbidden
+      labels:
+        severity: medium
+      expr: |
+        sum(rate(http_responseCodes_forbidden_total{instance="ci.ext.devshift.net:80"}[5m]))
+        /
+        sum(rate(jenkins:http_responseCodes_total{instance="ci.ext.devshift.net:80"}[5m])) * 100 > 10
+      for: 5m
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "{{ $labels.instance }}: Jenkins server is returning 403 for {{ $value }}% of requests"
+        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"
+    - alert: JenkinsWebNotFound
+      labels:
+        severity: medium
+      expr: |
+        sum(rate(http_responseCodes_notFound_total{instance="ci.ext.devshift.net:80"}[5m]))
+        /
+        sum(rate(jenkins:http_responseCodes_total{instance="ci.ext.devshift.net:80"}[5m])) * 100 > 10
+      for: 5m
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "{{ $labels.instance }}: Jenkins server is returning 404 for {{ $value }}% of requests"
+        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"
+    - alert: JenkinsWebServerError
+      labels:
+        severity: critical
+      expr: |
+        sum(rate(http_responseCodes_serverError_total{instance="ci.ext.devshift.net:80"}[5m]))
+        /
+        sum(rate(jenkins:http_responseCodes_total{instance="ci.ext.devshift.net:80"}[5m])) * 100 > 5
+      for: 2m
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "{{ $labels.instance }}: Jenkins server is returning serverError for {{ $value }}% of requests"
+        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"
+    - alert: JenkinsWebServiceUnavailable
+      labels:
+        severity: critical
+      expr: |
+        sum(rate(http_responseCodes_serviceUnavailable_total{instance="ci.ext.devshift.net:80"}[5m]))
+        /
+        sum(rate(jenkins:http_responseCodes_total{instance="ci.ext.devshift.net:80"}[5m])) * 100 > 5
+      for: 2m
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "{{ $labels.instance }}: Jenkins server is returning serviceUnavailable for {{ $value }}% of requests"
+        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"
 
   # Alerting for Jenkins jobs
   - name: jenkins-jobs.rules
