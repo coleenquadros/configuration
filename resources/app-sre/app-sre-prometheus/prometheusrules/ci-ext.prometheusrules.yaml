@@ -8,7 +8,82 @@ metadata:
   name: ci-ext-alertrules
 spec:
   groups:
-  - name: ci-ext
+  # Alerting on health of Jenkins system
+  - name: jenkins-system.rules
+    rules:
+    - alert: JenkinsHealthCheck
+      labels:
+        severity: critical
+      expr: jenkins_health_check_score < 1
+      for: 5m
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "{{ $labels.instance }}: Jenkins health degraded"
+        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"
+    - alert: JenkinsNodeOffline
+      labels:
+        severity: critical
+      expr: jenkins_node_offline_value > 1
+      for: 5m
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "{{ $labels.instance }}: One or more Jenkins nodes are offline"
+        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"
+    - alert: JenkinsJvmMemoryStarvation
+      labels:
+        severity: critical
+      expr: (vm_memory_total_max{job="jenkins_ext"} - vm_memory_total_used{job="jenkins_ext"}) / vm_memory_total_max{job="jenkins_ext"} * 100.0 < 10
+      for: 5m
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "{{ $labels.instance }}: Less than 10% memory available more than 5 minutes"
+        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"
+    - alert: JenkinsExecutorSaturation
+      labels:
+        severity: medium
+      expr: 100 * (jenkins_executor_free_value / jenkins_executor_count_value) < 50
+      for: 10m
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "{{ $labels.instance }}: Less than 50% executors available more than 10 minutes"
+        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"
+    - alert: JenkinsJvmMemoryStarvation
+      labels:
+        severity: medium
+      expr: (vm_memory_total_max{job="jenkins_ext"} - vm_memory_total_used{job="jenkins_ext"}) / vm_memory_total_max{job="jenkins_ext"} * 100.0 < 25
+      for: 5m
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "{{ $labels.instance }}: Less than 25% memory available more than 5 minutes"
+        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"
+    - alert: JenkinsJvmCPUStarvation
+      labels:
+        severity: medium
+      expr: vm_cpu_load{job="jenkins_ext"} * 100 > 75
+      for: 5m
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "{{ $labels.instance }}: CPU Load > 75% for more than 5 minutes"
+        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"
+    - alert: JenkinsHighQueueRate
+      labels:
+        severity: medium
+      expr: rate(jenkins_job_queuing_duration_count[1m])
+      for: 5m
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "{{ $labels.instance }}: CPU Load > 75% for more than 5 minutes"
+        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"
+
+  # Alerting for Jenkins jobs
+  - name: jenkins-jobs.rules
     rules:
     - alert: JobFailTest
       labels:
@@ -18,7 +93,7 @@ spec:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
         dashboard: "https://grafana.app-sre.devshift.net"
         message: "{{ $labels.jenkins_job }} Jenkins job latest build has failed."
-        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"    
+        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"
 
     # Cincinnati
     - alert: JenkinsLastBuildFailed
@@ -30,7 +105,7 @@ spec:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
         dashboard: "https://grafana.app-sre.devshift.net"
         message: "{{ $labels.jenkins_job }} Jenkins job latest build has failed."
-        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"    
+        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"
     - alert: JenkinsLastBuildFailed
       expr: "default_jenkins_builds_last_build_result_ordinal{jenkins_job=~'app-sre-saas-cincinnati-cincinnati-saas-deploy',job='jenkins_ext'} == 2 and default_jenkins_builds_last_build_result_ordinal{jenkins_job=~'app-sre-saas-cincinnati-cincinnati-saas-deploy',job='jenkins_ext'} != -1"
       labels:
@@ -40,11 +115,11 @@ spec:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
         dashboard: "https://grafana.app-sre.devshift.net"
         message: "{{ $labels.jenkins_job }} Jenkins job latest build has failed."
-        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"    
+        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"
     
     # Hive
     - alert: JenkinsLastBuildFailed
-      expr: "default_jenkins_builds_last_build_result_ordinal{jenkins_job=~'openshift-hive-gh-build-master',job='jenkins_ext'} == 2 and default_jenkins_builds_last_build_result_ordinal{jenkins_job=~'openshift-hive-gh-build-master',job='jenkins_ext'} != -1"
+      expr: "default_jenkins_builds_last_build_result_ordinal{jenkins_job=~'openshift-hive-ghs-build-master',job='jenkins_ext'} == 2 and default_jenkins_builds_last_build_result_ordinal{jenkins_job=~'openshift-hive-gh-build-master',job='jenkins_ext'} != -1"
       labels:
         severity: medium
         service: hive
@@ -52,7 +127,7 @@ spec:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
         dashboard: "https://grafana.app-sre.devshift.net"
         message: "{{ $labels.jenkins_job }} Jenkins job latest build has failed."
-        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"    
+        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"
 
     # Telemeter
     - alert: JenkinsLastBuildFailed
@@ -64,7 +139,7 @@ spec:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
         dashboard: "https://grafana.app-sre.devshift.net"
         message: "{{ $labels.jenkins_job }} Jenkins job latest build has failed."
-        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"    
+        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"
     - alert: JenkinsLastBuildFailed
       expr: "default_jenkins_builds_last_build_result_ordinal{jenkins_job=~'app-sre-saas-telemeter-telemeter-saas-deploy',job='jenkins_ext'} == 2 and default_jenkins_builds_last_build_result_ordinal{jenkins_job=~'app-sre-saas-telemeter-telemeter-saas-deploy',job='jenkins_ext'} != -1"
       labels:
@@ -74,7 +149,7 @@ spec:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
         dashboard: "https://grafana.app-sre.devshift.net"
         message: "{{ $labels.jenkins_job }} Jenkins job latest build has failed."
-        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"    
+        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"
 
     # App-interface
     - alert: JenkinsLastBuildFailed
@@ -86,7 +161,7 @@ spec:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
         dashboard: "https://grafana.app-sre.devshift.net"
         message: "{{ $labels.jenkins_job }} Jenkins job latest build has failed."
-        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"    
+        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"
     - alert: JenkinsLastBuildFailed
       expr: "default_jenkins_builds_last_build_result_ordinal{jenkins_job=~'app-sre-qontract-server-gh-build-master',job='jenkins_ext'} == 2 and default_jenkins_builds_last_build_result_ordinal{jenkins_job=~'app-sre-qontract-server-gh-build-master',job='jenkins_ext'} != -1"
       labels:
@@ -96,7 +171,7 @@ spec:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
         dashboard: "https://grafana.app-sre.devshift.net"
         message: "{{ $labels.jenkins_job }} Jenkins job latest build has failed."
-        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"    
+        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"
     - alert: JenkinsLastBuildFailed
       expr: "default_jenkins_builds_last_build_result_ordinal{jenkins_job=~'app-sre-qontract-reconcile-gh-build-master',job='jenkins_ext'} == 2 and default_jenkins_builds_last_build_result_ordinal{jenkins_job=~'app-sre-qontract-reconcile-gh-build-master',job='jenkins_ext'} != -1"
       labels:
@@ -106,7 +181,7 @@ spec:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
         dashboard: "https://grafana.app-sre.devshift.net"
         message: "{{ $labels.jenkins_job }} Jenkins job latest build has failed."
-        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"    
+        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"
 
     # Vault
     - alert: JenkinsLastBuildFailed
@@ -118,7 +193,7 @@ spec:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
         dashboard: "https://grafana.app-sre.devshift.net"
         message: "{{ $labels.jenkins_job }} Jenkins job latest build has failed."
-        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"    
+        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"
     - alert: JenkinsLastBuildFailed
       expr: "default_jenkins_builds_last_build_result_ordinal{jenkins_job=~'app-sre-fluentd-gh-build-master',job='jenkins_ext'} == 2 and default_jenkins_builds_last_build_result_ordinal{jenkins_job=~'app-sre-fluentd-gh-build-master',job='jenkins_ext'} != -1"
       labels:
@@ -128,4 +203,4 @@ spec:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
         dashboard: "https://grafana.app-sre.devshift.net"
         message: "{{ $labels.jenkins_job }} Jenkins job latest build has failed."
-        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"    
+        link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"
