@@ -33,6 +33,10 @@ Axiom: *a statement or proposition which is regarded as being established, accep
     - [1.11. Contacts](#111-contacts)
         - [1.11.1. Acknowledgements](#1111-acknowledgements)
     - [1.12. Services](#112-services)
+- [2. Glossary](#2-glossary)
+    - [PnT](#pnt)
+    - [PnT Ops](#pnt-ops)
+    - [PnT DevOps](#pnt-devops)
 
 <!-- /TOC -->
 
@@ -51,10 +55,11 @@ Additionally there is a contact section near the end which details the escalatio
 The goal is to move this to the app-interface itself as it matures.
 
 ## 1.3. Changes
+
 - This document was created and maintained using vscode, using Markdown ToC plugin
 - Merge requests are accepted but require team lead signoff
-- As it is important to communicate and gain common aknowledgement of process captured within, this document will be reviewed every sprint retro when there are changes.  If you can not attend a sprint retro, make sure you review this document before going on call. 
-- Prior to each 
+- As it is important to communicate and gain common aknowledgement of process captured within, this document will be reviewed every sprint retro when there are changes.  If you can not attend a sprint retro, make sure you review this document before going on call.
+- Prior to each
 
 ## 1.4. Other sources of documentation you might be looking for:
 
@@ -118,7 +123,7 @@ The goal is to move this to the app-interface itself as it matures.
             - Added to team tracking sheets
         - ACCESS: Jira: https://coreos.jira.com -> email openshift-jira-admin@redhat.com
 
-    - Openshift github onboarding (access to private repositories in openshift github org): 
+    - Openshift github onboarding (access to private repositories in openshift github org):
         - ACCESS: https://mojo.redhat.com/docs/DOC-1081313#jive_content_id_Github_Access
 
     - AWS
@@ -132,11 +137,11 @@ The goal is to move this to the app-interface itself as it matures.
         - ACCESS: Ensure you have private access to bugzilla via https://maitai-bpms.engineering.redhat.com/
             - Login with kerberos credentials
             - Start a process -> Bugzilla account creation
- 
+
     - Zabbix: https://zabbix.devshift.net:9443/zabbix/zabbix.php?action=dashboard.view
         - ACCESS: Admin access, can be granted by any App-sre member
 
-    - Dedicated admin on openshift clusters 
+    - Dedicated admin on openshift clusters
         - See app-interface/data/openshift/ - only applies to OSD clusters
         ACCESS: oc adm groups add-users dedicated-admins <USER> [<USER> ...]
         - Can be granted by any dedicated admin (oc get group dedicated-admins)
@@ -145,7 +150,7 @@ The goal is to move this to the app-interface itself as it matures.
         ACCESS: Reach out to team lead and manager for PD access
 
     - App-sre team drive
-        ACESS: Reach out to pbergene@redhat.com for 
+        ACESS: Reach out to pbergene@redhat.com for
 
     - Bangalore (BLR) infrastructure
         - In BLR we have 4 nodes of RHEV infrastructure, this is further documented on the App-sre index (available to app-sre team members)
@@ -156,13 +161,18 @@ The goal is to move this to the app-interface itself as it matures.
         - In BLR we have 4 nodes of RHEV infrastructure, this is further documented on the App-sre index (available to app-sre team members)
     -  Access is managed adding ssh keys to ansible and IPMI users
 
- 
+    - OpenStack Project infrastructure
+        - We have our ci-int infrastructure deployed here: https://rhos-d.infra.prod.upshift.rdu2.redhat.com/dashboard/project/
+        - More info here: https://gitlab.cee.redhat.com/dtsd/housekeeping/blob/master/docs/openstack-ci-int.md
+
+
  ## Primary on-call + interrupt catching
+
   - include interrupt catching doc and on-call specifics
 
 ### 1.5.1. On call
 
-The App-sre on call schedule is a rotation to ensure handling of service outages and incidents for our application owners. 
+The App-sre on call schedule is a rotation to ensure handling of service outages and incidents for our application owners.
 Schedule of past, current and future on call rotation can be viewed @ pagerduty: https://openshift.pagerduty.com/
 
 The on call includes three tiers of response, detailed below.
@@ -185,24 +195,26 @@ For notification troubleshooting see: https://support.pagerduty.com/docs/notific
 #### 1.5.1.6. Notification
 
 #### 1.5.1.7. Incident procedure
-- App-sre 
+
+- App-sre
 
 #### 1.5.1.8. RCA
 
-Root Cause Analysis must be published after incidents to ensure that corrective actions are followed up.  Any incidents in a sprint will be reviewed on the following sprint retro, with the exception. 
+Root Cause Analysis must be published after incidents to ensure that corrective actions are followed up.  Any incidents in a sprint will be reviewed on the following sprint retro, with the exception.
 
-The person who is the first responder or aknowledges the alert is responsible for 
+The person who is the first responder or aknowledges the alert is responsible for
 
 - Description
 - Outage
 - Timeline
 - Corrective actions with references
-- Location 
+- Location
 
 Distribute to sd-org@ and app-interface serviceOwner in app.yml
 
 ## 1.6. Standard operating procedures
-- SOPs related to engineering tasks are to be stored in the app-interface/docs/app-sre/docs folder.  
+
+- SOPs related to engineering tasks are to be stored in the app-interface/docs/app-sre/docs folder.
 - A SOP should have the following filename format: [CATEGORY]-[SHORT_DESCRIPTION].md
     - Where category is 'OSD', [servicename] or other relevant category
 - A SOP should contain the following information:
@@ -211,7 +223,7 @@ Distribute to sd-org@ and app-interface serviceOwner in app.yml
     - Access required
     - Detailed procedure
 
-## 1.7. App oboarding / app acceptance criteria 
+## 1.7. App oboarding / app acceptance criteria
 
 ### 1.7.1. In the app-interface
 
@@ -222,25 +234,38 @@ Distribute to sd-org@ and app-interface serviceOwner in app.yml
 
 ## 1.8. Git process
 
-
 ## 1.9. App-sre escalation to external teams
 
 ## 1.10. Escalation procedures
 
 ## 1.11. Contacts
+
 - OSD SRE
     - #libra-ops on irc.devel.redhat.com - Shift lead and on-call listed in /topic
     - #sd-osd-sre on slack.coreos.org
     - Openshift SRE Servicenow direct form: https://url.corp.redhat.com/OpenShift-SRE-Service-Request-Form
 
-- BLR infrastructure -> PnT Devops irc -> Mattermost: sureshn, snandago@redhat.com -> PnT Devops 
+- BLR infrastructure -> PnT Devops irc -> Mattermost: sureshn, snandago@redhat.com -> PnT Devops
 - RDU infrastructure ->
+- OpenStack project -> Pnt Devops https://mojo.redhat.com/docs/DOC-1049381
 
 <!- ## 1.13. Query app-interface
 - https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/app-interface-basic-auth-prod ->
 
 ### 1.11.1. Acknowledgements
 
-
-
 ## 1.12. Services
+
+# 2. Glossary
+
+## PnT
+
+Products & Technolgies, essentially Paul Cormier’s entire 7000 person org.
+
+## PnT Ops
+
+Product & Technologies Business Operations lead by VP Katrinka McCallum (non-technical team).  This is where all the Program Managers and metrics people hangout.
+
+## PnT DevOps
+
+Old Jay Ferrandini's team, made up of 5 pillars (SysOps, Labs, RCM, DevTools, AutomationQE).  This team handles hundreds of tools ranging from Jira & Bugzilla to platforms like CentralCI and UpShift. The SysOps pillar is most likely working on whatever is happening as they also maintain a huge pile of Jenkins boxes.  That team is lead by David Mair.
