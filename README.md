@@ -512,7 +512,7 @@ Namespaces declaration enforce [this JSON schema](https://gitlab.cee.redhat.com/
 
 Notes:
 * Manual changes to AWS resources will be overridden by App-Interface in each run.
-* To be able to use this feature, the `managedTerrraformResources` field must exist and equal to `true`.
+* To be able to use this feature, the `managedTerraformResources` field must exist and equal to `true`.
 
 #### Manage RDS databases via App-Interface (`/openshift/namespace-1.yml`)
 
