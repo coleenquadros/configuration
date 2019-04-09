@@ -18,7 +18,7 @@ spec:
       expr: absent(up{job="cincinnati-graph-builder", namespace="cincinnati-production"} == 1)
       for: 1m
       labels:
-        severity: medium
+        severity: critical
     - alert: Cincinnati Policy Engine - No targets found - production
       annotations:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
@@ -28,7 +28,7 @@ spec:
       expr: absent(up{job="cincinnati-policy-engine", namespace="cincinnati-production"} == 1)
       for: 1m
       labels:
-        severity: medium
+        severity: critical
     - alert: UpstreamScrapesHalted
       annotations:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
@@ -38,7 +38,7 @@ spec:
       expr: rate(cincinnati_gb_graph_upstream_scrapes_total{job="cincinnati-graph-builder",namespace="cincinnati-production"}[5m]) == 0
       for: 15m
       labels:
-        severity: medium
+        severity: high
     - alert: UpstreamScrapeErrors
       annotations:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
@@ -48,14 +48,4 @@ spec:
       expr: rate(cincinnati_gb_graph_upstream_errors_total{job="cincinnati-graph-builder",namespace="cincinnati-production"}[5m]) != 0
       for: 15m
       labels:
-        severity: medium
-    - alert: CincinnatiReleaseCountDrift
-      annotations:
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
-        dashboard: "https://grafana.app-sre.devshift.net"
-        message: "Cincinnati: Number of releases fetched from upstream does not match number of final releases in graph"
-        link_url: "https://console.app-sre.openshift.com/console/project/cincinnati-production/browse/pods"
-      expr: cincinnati_gb_graph_upstream_raw_releases{job="cincinnati-policy-engine", namespace="cincinnati-production"} != cincinnati_gb_graph_final_releases{job="cincinnati-policy-engine", namespace="cincinnati-production"}
-      for: 1d
-      labels:
-        severity: medium
+        severity: high
