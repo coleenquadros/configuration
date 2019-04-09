@@ -11,17 +11,41 @@ spec:
     rules:
     - alert: Cincinnati Graph Builder - No targets found - production
       annotations:
-        description: No valid targets found for Cincinnati Graph builder. This means that either has no pods running or prometheus was not able to scrape them
-        summary: No valid targets found for Cincinnati Graph builder
-      expr: count(up{job="cincinnati-graph-builder", namespace="cincinnati-production"}) == 0
-      for: 30s
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "No valid targets found for Cincinnati Graph builder. Either no pods are running or Prometheus was not able to scrape them"
+        link_url: "https://console.app-sre.openshift.com/console/project/cincinnati-production/browse/pods"
+      expr: absent(up{job="cincinnati-graph-builder", namespace="cincinnati-production"} == 1)
+      for: 1m
       labels:
-        severity: medium
+        severity: critical
     - alert: Cincinnati Policy Engine - No targets found - production
       annotations:
-        description: No valid targets found for Cincinnati Policy engine. This means that either has no pods running or prometheus was not able to scrape them
-        summary: No valid targets found for Cincinnati Graph builder
-      expr: count(up{job="cincinnati-policy-engine", namespace="cincinnati-production"}) == 0
-      for: 30s
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "No valid targets found for Cincinnati Policy engine. Either no pods are running or Prometheus was not able to scrape them"
+        link_url: "https://console.app-sre.openshift.com/console/project/cincinnati-production/browse/pods"
+      expr: absent(up{job="cincinnati-policy-engine", namespace="cincinnati-production"} == 1)
+      for: 1m
       labels:
-        severity: medium
+        severity: critical
+    - alert: UpstreamScrapesHalted
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "Graph builder upstream scrapes are not functioning"
+        link_url: "https://console.app-sre.openshift.com/console/project/cincinnati-production/browse/pods"
+      expr: rate(cincinnati_gb_graph_upstream_scrapes_total{job="cincinnati-graph-builder",namespace="cincinnati-production"}[5m]) == 0
+      for: 15m
+      labels:
+        severity: high
+    - alert: UpstreamScrapeErrors
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "High error rate for Cincinnati Graph builder scrapes"
+        link_url: "https://console.app-sre.openshift.com/console/project/cincinnati-production/browse/pods"
+      expr: rate(cincinnati_gb_graph_upstream_errors_total{job="cincinnati-graph-builder",namespace="cincinnati-production"}[5m]) != 0
+      for: 15m
+      labels:
+        severity: high
