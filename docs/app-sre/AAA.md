@@ -165,9 +165,10 @@ Every app-sre engineer should have access to the following
     - We have our ci-int infrastructure deployed here: https://rhos-d.infra.prod.upshift.rdu2.redhat.com/dashboard/project/
     - More info here: https://gitlab.cee.redhat.com/dtsd/housekeeping/blob/master/docs/openstack-ci-int.md
 
-- Bastion access:
+- Tier 1 Bastion access:
     - This is necessary to access some clusters that are not publicly exposed (for example hive-production)
     - Access process is documented here: https://mojo.redhat.com/docs/DOC-1144200
+    - You should request Tier1
 
  ## Primary on-call + interrupt catching
 
