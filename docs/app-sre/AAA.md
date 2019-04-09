@@ -69,7 +69,7 @@ The goal is to move this to the app-interface itself as it matures.
 
 ## 1.5. Access and surfaces list
 
-* Every app-sre engineer should have access to the following
+Every app-sre engineer should have access to the following
 
 * Github / LDAP username
 * https://password.corp.redhat.com/changepassword/
@@ -78,7 +78,7 @@ The goal is to move this to the app-interface itself as it matures.
     * Channels: devtools-sd, devtools-servicedel
 
 * Slack: coreos.slack.com
-    * Channels sd-org, sd-osd-sre, 4-dev-triage
+    * Channels sd-org, sd-osd-sre, 4-dev-triage, sd-app-sre
 
 * Internal IRC (irc.devel.redhat.com):
     - #MIM: Major incident management
@@ -90,81 +90,84 @@ The goal is to move this to the app-interface itself as it matures.
     - SD-org calendar: https://calendar.google.com/calendar?cid=cmVkaGF0LmNvbV9hZzdoNG5kMnIydGlrM2dqZWxhaGRmbGhkOEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t
     - SD-org PTO / OOO: https://calendar.google.com/calendar?cid=cmVkaGF0LmNvbV8xN2piaHNtYmR2MTdhMTJhaHBvcDc5cWJ0a0Bncm91cC5jYWxlbmRhci5nb29nbGUuY29t
 
-    - Invite to sprint kickoffs, coordination sessions
-    - Install bluejeans client
-    - Mailing lists:
-        - Many people just use the web email client, other thunderbird.
-        - Recommended to sort into folders
-        - https://post-office.corp.redhat.com/mailman/listinfo is the mailing list central
-            - ACCESS: sd-app-sre -> speak to @jake or @paul
-            - ACCESS: sd-org -> subscribe from UI
-            - ACCESS: devtools-saas -> subscribe from UI
-            - ACCESS: devtools-team -> subscribe from UI
-            - ACCESS: outage-list -> subscribe from UI
-            - ACCESS: aos-devel -> subscribe from UI
+- Invite to sprint kickoffs, coordination sessions
+- Install bluejeans client
+- Mailing lists:
+    - Many people just use the web email client, other thunderbird.
+    - Recommended to sort into folders
+    - https://post-office.corp.redhat.com/mailman/listinfo is the mailing list central
+        - ACCESS: sd-app-sre -> speak to @jake or @paul
+        - ACCESS: sd-org -> subscribe from UI
+        - ACCESS: devtools-saas -> subscribe from UI
+        - ACCESS: devtools-team -> subscribe from UI
+        - ACCESS: outage-list -> subscribe from UI
+        - ACCESS: aos-devel -> subscribe from UI
 
-    - Gitlab:
-        - https://gitlab.cee.redhat.com/dtsd/
-            - Housekeeping: Keeps all our bits and bobs, Ansible, terraform, python, scripts etc
-            - ACCESS: App-sre DTSD -> Owner access
-            - Issue tracker tracks incoming developers request
-        - https://gitlab.cee.redhat.com/service/
-            - ACCESS: app-interface - Master access
-            - ACCESS: jjb - Master access
-            - ACCESS: vault-devshift-net Master access
+- Gitlab:
+    - https://gitlab.cee.redhat.com/dtsd/
+        - Housekeeping: Keeps all our bits and bobs, Ansible, terraform, python, scripts etc
+        - ACCESS: App-sre DTSD -> Owner access
+        - Issue tracker tracks incoming developers request
+    - https://gitlab.cee.redhat.com/service/
+        - ACCESS: app-interface - Master access
+        - ACCESS: jjb - Master access
+        - ACCESS: vault-devshift-net Master access
 
-    - GPG key:
-        - Generate one and put in https://gitlab.cee.redhat.com/dtsd/housekeeping/tree/master/gpg/SD
-        - Use a passphrase!
+- GPG key:
+    - Generate one and put in https://gitlab.cee.redhat.com/dtsd/housekeeping/tree/master/gpg/SD
+    - Use a passphrase!
 
-    - Sd-org onboarding
-        - ACCESS Contact Meghna Gala (mgala@redhat.com) re Sd-org onboarding
-            - Added to sd-org mailing list
-            - Added to team tracking sheets
-        - ACCESS: Jira: https://coreos.jira.com -> email openshift-jira-admin@redhat.com
+- Sd-org onboarding
+    - ACCESS Contact Meghna Gala (mgala@redhat.com) re Sd-org onboarding
+        - Added to sd-org mailing list
+        - Added to team tracking sheets
+    - ACCESS: Jira: https://coreos.jira.com -> email openshift-jira-admin@redhat.com
 
-    - Openshift github onboarding (access to private repositories in openshift github org):
-        - ACCESS: https://mojo.redhat.com/docs/DOC-1081313#jive_content_id_Github_Access
+- Openshift github onboarding (access to private repositories in openshift github org):
+    - ACCESS: https://mojo.redhat.com/docs/DOC-1081313#jive_content_id_Github_Access
 
-    - AWS
-        - Access managed through terraform
-        - Reach out to Serhii or Paul for accounts on:
-            - ACCESS: OSIO AWS account # 386414299200
-            - ACCESS: App-sre AWS account # 950916221866
-        - Automated process pending
+- AWS
+    - Access managed through terraform
+    - Reach out to Serhii or Paul for accounts on:
+        - ACCESS: OSIO AWS account # 386414299200
+        - ACCESS: App-sre AWS account # 950916221866
+    - Automated process pending
 
-    - Bugzilla
-        - ACCESS: Ensure you have private access to bugzilla via https://maitai-bpms.engineering.redhat.com/
-            - Login with kerberos credentials
-            - Start a process -> Bugzilla account creation
+- Bugzilla
+    - ACCESS: Ensure you have private access to bugzilla via https://maitai-bpms.engineering.redhat.com/
+        - Login with kerberos credentials
+        - Start a process -> Bugzilla account creation
 
-    - Zabbix: https://zabbix.devshift.net:9443/zabbix/zabbix.php?action=dashboard.view
-        - ACCESS: Admin access, can be granted by any App-sre member
+- Zabbix: https://zabbix.devshift.net:9443/zabbix/zabbix.php?action=dashboard.view
+    - ACCESS: Admin access, can be granted by any App-sre member
 
-    - Dedicated admin on openshift clusters
-        - See app-interface/data/openshift/ - only applies to OSD clusters
-        ACCESS: oc adm groups add-users dedicated-admins <USER> [<USER> ...]
-        - Can be granted by any dedicated admin (oc get group dedicated-admins)
+- Dedicated admin on openshift clusters
+    - See app-interface/data/openshift/ - only applies to OSD clusters
+    ACCESS: oc adm groups add-users dedicated-admins <USER> [<USER> ...]
+    - Can be granted by any dedicated admin (oc get group dedicated-admins)
 
-    - Pagerduty
-        ACCESS: Reach out to team lead and manager for PD access
+- Pagerduty
+    ACCESS: Reach out to team lead and manager for PD access
 
-    - App-sre team drive
-        ACESS: Reach out to pbergene@redhat.com for
+- App-sre team drive
+    ACESS: Reach out to pbergene@redhat.com for
 
-    - Bangalore (BLR) infrastructure
-        - In BLR we have 4 nodes of RHEV infrastructure, this is further documented on the App-sre index (available to app-sre team members)
-        - Access is managed adding ssh keys to ansible and users via the RHEV console
-        - ACCESS:
+- Bangalore (BLR) infrastructure
+    - In BLR we have 4 nodes of RHEV infrastructure, this is further documented on the App-sre index (available to app-sre team members)
+    - Access is managed adding ssh keys to ansible and users via the RHEV console
+    - ACCESS:
 
-    - Raleigh (infrastructure)
-        - In BLR we have 4 nodes of RHEV infrastructure, this is further documented on the App-sre index (available to app-sre team members)
-    -  Access is managed adding ssh keys to ansible and IPMI users
+- Raleigh (infrastructure)
+    - In BLR we have 4 nodes of RHEV infrastructure, this is further documented on the App-sre index (available to app-sre team members)
+-  Access is managed adding ssh keys to ansible and IPMI users
 
-    - OpenStack Project infrastructure
-        - We have our ci-int infrastructure deployed here: https://rhos-d.infra.prod.upshift.rdu2.redhat.com/dashboard/project/
-        - More info here: https://gitlab.cee.redhat.com/dtsd/housekeeping/blob/master/docs/openstack-ci-int.md
+- OpenStack Project infrastructure
+    - We have our ci-int infrastructure deployed here: https://rhos-d.infra.prod.upshift.rdu2.redhat.com/dashboard/project/
+    - More info here: https://gitlab.cee.redhat.com/dtsd/housekeeping/blob/master/docs/openstack-ci-int.md
 
+- Bastion access:
+    - This is necessary to access some clusters that are not publicly exposed (for example hive-production)
+    - Access process is documented here: https://mojo.redhat.com/docs/DOC-1144200
 
  ## Primary on-call + interrupt catching
 
