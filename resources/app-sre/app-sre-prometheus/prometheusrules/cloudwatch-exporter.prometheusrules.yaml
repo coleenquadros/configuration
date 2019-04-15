@@ -17,3 +17,13 @@ spec:
         summary: 'Failed to scrape cloudwatch exporter'
         identifier: '{{ $labels.instance }}'
         description: 'There was an error scraping metrics from the cloudwatch exporter.'
+  - name: cloudwatch-exporter-s3.rules
+    rules:
+    - alert: SuddenIncreaseBytesUsed
+      labels:
+        severity: warning
+      expr: delta(aws_s3_bucket_size_bytes_average{job="cloudwatch-exporter"}[1h]) > 1073741824 # 1GB delta
+      annotations:
+        summary: 'Bucket size has grown by over 200% within the last hour'
+        identifier: '{{ $labels.instance }}'
+        description: 'Bucket size has grown by over 200% within the last hour'
