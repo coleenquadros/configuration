@@ -11,6 +11,13 @@ source ./.env
 RESULTS=$TEMP_DIR/reports/results.json
 REPORT=$TEMP_DIR/reports/index.html
 
+# Check that app-sre group has permissions on fork
+./gitlab_fork_membership.sh
+exit_status=$?
+
+# Exit if project is not in app-sre group projects
+[ "$exit_status" != "0" ] && exit $exit_status
+
 # Run validator
 mkdir -p $(dirname $RESULTS)
 ./manual_schema_validator.sh schemas graphql-schemas data resources $RESULTS
