@@ -23,7 +23,7 @@ done
 
 if [[ "$exit_status" != "0" ]]; then
     # '!' stands for new line
-    NOTE="@$gitlabSourceNamespace, This fork of 'app-interface' is not shared with the [app-sre]($GITLAB_URL/app-sre) group as 'Master'.!!Please [share the project with the group](https://docs.gitlab.com/ee/user/project/members/share_project_with_groups.html#sharing-a-project-with-a-group-of-users) and retest by commenting '[test]' on the merge request."
+    NOTE="@$gitlabSourceNamespace, this fork of 'app-interface' is not shared with the [app-sre]($GITLAB_URL/app-sre) group as 'Master'.!!Please [share the project with the group](https://docs.gitlab.com/ee/user/project/members/share_project_with_groups.html#sharing-a-project-with-a-group-of-users) and retest by commenting '[test]' on the merge request."
     URL_NOTE=$(echo $NOTE | sed -e "s| |%20|g" -e "s|!|%0A|g" -e "s|'|%60|g" -e "s|\[|%5B|g" -e "s|\]|%5D|g" -e "s|(|%28|g" -e "s|)|%29|g" -e "s|#|%23|g" -e "s|@|%40|g" -e "s|,|%2C|g")
     curl -s --request POST --header "PRIVATE-TOKEN: $GITLAB_TOKEN" $GITLAB_PROJECTS_URL/$gitlabMergeRequestTargetProjectId/merge_requests/$gitlabMergeRequestIid/notes?body=$URL_NOTE
 fi
