@@ -1,0 +1,38 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: vault-prod
+
+cluster:
+  $ref: /openshift/app-sre/cluster.yml
+
+app:
+  $ref: /services/vault.devshift.net/app.yml
+
+description: production namespace for vault
+
+managedResourceTypes:
+- ConfigMap
+- Secret
+- Route
+
+openshiftResources:
+- provider: resource
+  path: /app-sre/vault-prod/vault.configmap.yaml
+- provider: vault-secret
+  path: app-interface/app-sre/vault-prod/acme-account
+  version: 1
+  labels:
+    kubernetes.io/acme.type: account
+- provider: vault-secret
+  path: app-interface/app-sre/vault-prod/vault
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre/vault-prod/vault-tls
+  version: 1
+- provider: route
+  path: /app-sre/vault-prod/vault.route.yaml
+  vault_tls_secret_path: app-interface/app-sre/vault-prod/routes/vault-prod
+  vault_tls_secret_version: 1
