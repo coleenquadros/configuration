@@ -9,24 +9,42 @@ spec:
   groups:
   - name: cloudwatch-exporter.rules
     rules:
+    - alert: CloudWatchDown
+      labels:
+        severity: critical
+      expr: up{job="cloudwatch-exporter"} == 0
+      for: 5m
+      annotations:
+        summary: 'Cloudwatch exporter is down'
+        identifier: '{{ $labels.job }}'
+        description: 'Cloudwatch exporter instances have been down for 5m+.'
     - alert: CloudWatchScrapeError
       labels:
         severity: medium
       expr: cloudwatch_exporter_scrape_error{job="cloudwatch-exporter"} != 0
+      for: 5m
       annotations:
         summary: 'Failed to scrape cloudwatch exporter'
-        identifier: '{{ $labels.instance }}'
+        identifier: '{{ $labels.job }}'
         description: 'There was an error scraping metrics from the cloudwatch exporter.'
+    - alert: CloudWatchScrapeDuration
+      labels:
+        severity: warning
+      expr: cloudwatch_exporter_scrape_duration_seconds{job="cloudwatch-exporter"} >= 5
+      annotations:
+        summary: 'Cloudwatch exporter scrape duration is over 5s'
+        identifier: '{{ $labels.job }}'
+        description: 'Cloudwatch exporter took more than 5 seconds to scrape AWS Cloudwatch.'
   - name: cloudwatch-exporter-s3.rules
     rules:
     - alert: SuddenIncreaseBytesUsed
       labels:
         severity: warning
-      expr: delta(aws_s3_bucket_size_bytes_average{job="cloudwatch-exporter"}[1h]) > 1073741824 # 1GB delta
+      expr: (avg_over_time(aws_s3_bucket_size_bytes_average{job="cloudwatch-exporter"}[1d]) / avg_over_time(aws_s3_bucket_size_bytes_average{job="cloudwatch-exporter"}[1d] offset 1d) -1) * 100 > 10
       annotations:
-        summary: 'Bucket size has grown by over 200% within the last hour'
-        identifier: '{{ $labels.instance }}'
-        description: 'Bucket size has grown by over 200% within the last hour'
+        summary: 'Bucket {{$labels.bucket_name}} size has grown by over 10% within the last day'
+        identifier: '{{$labels.bucket_name}}'
+        description: 'Bucket {{$labels.bucket_name}} size has grown by over 10% within the last day'
   - name: cloudwatch-exporter-rds.rules
     rules:
     - alert: HighCPUUtilization
@@ -35,5 +53,56 @@ spec:
       expr: aws_rds_cpuutilization_average{job="cloudwatch-exporter"} offset 10m > 85
       annotations:
         summary: 'CPU utilization above 85%'
-        identifier: '{{ $labels.instance }}'
-        description: 'The average CPU utilization is above 85%.'
+        identifier: '{{ $labels.dbinstance_identifier }}'
+        description: 'The average CPU utilization of instance {{$labels.dbinstance_identifier}} is above 85%.'
+    - alert: LowFreeMemory
+      labels:
+        severity: warning
+      expr: aws_rds_freeable_memory_sum{job="cloudwatch-exporter"} offset 10m < (500 * 1024^2)
+      annotations:
+        summary: 'Freeable memory under 500 MB'
+        identifier: '{{ $labels.dbinstance_identifier }}'
+        description: 'The current free(able) memory of DB instance {{ $labels.dbinstance_identifier }} is under 500 MB.'
+    - alert: LowStorageSpace
+      labels:
+        severity: warning
+      expr: aws_rds_free_storage_space_sum{job="cloudwatch-exporter"} offset 10m < (1 * 1024^3)
+      annotations:
+        summary: 'Free storage space under 1 GB'
+        identifier: '{{ $labels.dbinstance_identifier }}'
+        description: 'The current free storage space of DB instance {{ $labels.dbinstance_identifier }} is under 1 GB.'
+    - alert: PredictOutOfStorage
+      labels:
+        severity: critical
+      expr: aws_rds_free_storage_space_sum{job="cloudwatch-exporter"} offset 10m < (1 * 1024^3)
+      for: 1h
+      annotations:
+        summary: 'Running out of storage'
+        identifier: '{{ $labels.dbinstance_identifier }}'
+        description: 'DB instance {{ $labels.dbinstance_identifier }} storage will be full within 7 days.'
+    - alert: HighAverageReadLatency
+      labels:
+        severity: warning
+      expr: aws_rds_read_latency_average{job="cloudwatch-exporter"} offset 10m >= 1
+      annotations:
+        summary: 'Average read latency over 1s'
+        identifier: '{{ $labels.dbinstance_identifier }}'
+        description: 'The average read latency of DB instance {{ $labels.dbinstance_identifier }} is over 1s.'
+    - alert: HighAverageWriteLatency
+      labels:
+        severity: warning
+      expr: aws_rds_write_latency_average{job="cloudwatch-exporter"} offset 10m >= 1
+      annotations:
+        summary: 'Average write latency over 1s'
+        identifier: '{{ $labels.dbinstance_identifier }}'
+        description: 'The average write latency of DB instance {{ $labels.dbinstance_identifier }} is over 1s.'
+  - name: cloudwatch-exporter-ec2.rules
+    rules:
+    - alert: HighCPUUtilization
+      labels:
+        severity: warning
+      expr: aws_ec2_cpuutilization_average{job="cloudwatch-exporter"} offset 10m > 85
+      annotations:
+        summary: 'CPU utilization above 85%'
+        identifier: '{{ $labels.instance_id }}'
+        description: 'The average CPU utilization of EC2 instance {{ $labels.instance_id }} is above 85%.'
