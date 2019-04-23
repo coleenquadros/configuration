@@ -61,6 +61,7 @@ expressed as json schemas. You can find the supported schemas here:
 
 - Fork the [app-interface](<https://gitlab.cee.redhat.com/service/app-interface>
 ) repository.
+- [Share your fork](https://docs.gitlab.com/ee/user/project/members/share_project_with_groups.html#sharing-a-project-with-a-group-of-users) with the [app-sre](https://gitlab.cee.redhat.com/app-sre) group as `Master`.
 - Submit a MR with the desired contract amendment.
 
 2. Automation will validate the amendment and generate a report of the desired
