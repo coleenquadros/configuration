@@ -76,7 +76,7 @@ spec:
     - alert: PredictOutOfStorage
       labels:
         severity: critical
-      expr: aws_rds_free_storage_space_sum{job="cloudwatch-exporter"} offset 10m < (1 * 1024^3)
+      expr: predict_linear(aws_rds_free_storage_space_sum[1h], 3600 * 24 * 8) < 0
       for: 1h
       annotations:
         message: 'DB instance {{ $labels.dbinstance_identifier }} storage will be full within 7 days.'
