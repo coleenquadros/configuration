@@ -517,10 +517,11 @@ Notes:
 
 #### Manage AWS users via App-Interface (`/aws/group-1.yml`) using Terraform
 
-AWS users can be entirely self-services via App-Interface.
+AWS users can be entirely self-serviced via App-Interface.
 
 In order to get access to an AWS account, a user has to have:
 * A `role` that includes an `aws_groups` section, with a reference to an AWS group file.
+  * Example: [sre-aws](/data/teams/app-sre/roles/sre-aws.yml) role.
 * A public binary GPG key, which will be used to encrypt the generated password to send by mail.
 
 Once a user is created, an email invitation to join the account will be sent with all relevant information.
