@@ -9,6 +9,23 @@ Their IRC channel at irc.devel.redhat.com is #iso (on-call can be pinged for urg
 # 2. Process
 
 1. Generate a CSR/KEY (if a new certificate is requested)
+
+        ~ $ openssl req -new -newkey rsa:2048 -nodes -keyout FQDN.key -out FQDN.csr
+        
+        Country Name (2 letter code) [AU]: US
+        State or Province Name (full name) [Some-State]: North Carolina
+        Locality Name (eg, city) []: Raleigh
+        Organization Name (eg, company) [Internet Widgits Pty Ltd]: Red Hat, Inc.
+        Organizational Unit Name (eg, section) []: <NONE>
+        Common Name (e.g. server FQDN or YOUR name) []: <FQDN>
+        Email Address []: <NONE>
+        
+        Please enter the following 'extra' attributes
+        to be sent with your certificate request
+        A challenge password []: <NONE>
+        An optional company name []: <NONE>
+        
+
 2. Open a ticket with IT Operations at https://redhat.service-now.com/help
 
         - New request
