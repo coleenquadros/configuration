@@ -35,11 +35,4 @@ Their IRC channel at irc.devel.redhat.com is #iso (on-call can be pinged for urg
         - Attach CSR to the request if a new certificate is requested
 
 3. The certificate will be attached to the ticket once it is created. Optionally you can request that you want the certificate to be sent via email.
-4. (Optionally) If the certificate is to be used for an OpenShift route, it should be added to vault along with the corresponding key
-    
-    Ex:
-        
-        > app-interface/app-sre/routes/try.openshift.com
-            caCertificate: <cacert>
-            certificate: <crt>
-            key: <key>
+4. (Optionally) If the certificate is to be used for an OpenShift route, it should be added to vault along with the corresponding key. See documentation here: https://gitlab.cee.redhat.com/service/app-interface/#manage-routes-via-app-interface-openshiftnamespace-1yml-using-vault
