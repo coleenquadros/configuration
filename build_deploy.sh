@@ -146,6 +146,7 @@ run_int quay-membership &
 run_int quay-repos &
 run_int ldap-users &
 run_int terraform-users &
+run_int github-repo-invites &
 run_vault_reconcile_integration &
 
 wait

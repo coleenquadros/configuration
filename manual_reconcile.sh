@@ -96,9 +96,9 @@ run_int() {
 
   status="$?"
   ENDTIME=$(date +%s)
-  
+
   echo "$1 $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/run_int_execution_times.txt"
-  
+
   if [ "$status" != "0" ]; then
     echo "INTEGRATION FAILED: $1" >&2
     mv ${SUCCESS_DIR}/reconcile-${1}.txt ${FAIL_DIR}/reconcile-${1}.txt
@@ -121,7 +121,7 @@ run_vault_reconcile_integration() {
     -e VAULT_SECRET_ID=${VAULT_MANAGER_SECRET_ID} \
     ${VAULT_RECONCILE_IMAGE}:${VAULT_RECONCILE_IMAGE_TAG} -dry-run \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-vault.txt
-  
+
   status="$?"
   ENDTIME=$(date +%s)
 
@@ -147,6 +147,7 @@ run_int quay-repos &
 run_int ldap-users &
 run_int terraform-resources &
 run_int terraform-users &
+run_int github-repo-invites &
 run_vault_reconcile_integration &
 
 wait
