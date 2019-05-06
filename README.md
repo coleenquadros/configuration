@@ -520,9 +520,14 @@ Notes:
 AWS users can be entirely self-serviced via App-Interface.
 
 In order to get access to an AWS account, a user has to have:
-* A `role` that includes an `aws_groups` section, with a reference to an AWS group file.
-  * Example: [sre-aws](/data/teams/app-sre/roles/sre-aws.yml) role.
 * A public binary GPG key, which will be used to encrypt the generated password to send by mail.
+* A `role` that includes (at least) one of the following:
+  * An `aws_groups` section, with a reference to an AWS group file.
+    * Example: [sre-aws](/data/teams/app-sre/roles/sre-aws.yml) role.
+  * A `user_policies` section, with a reference to a policy json document.
+    * Example: [f8a-dev-aws.yml](/data/teams/devtools/roles/f8a-dev-aws.yml)
+    * Supported terraform-like templates (will be replaced with correct values at run time):
+      * `${aws:username}`
 
 Once a user is created, an email invitation to join the account will be sent with all relevant information.
 
