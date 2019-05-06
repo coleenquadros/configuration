@@ -561,7 +561,7 @@ In order to add or update an RDS database, you need to add them to the `terrafor
   - `osio`
 - `identifier` - name of resource to create (or update)
 - `defaults`: path relative to [resources](https://gitlab.cee.redhat.com/service/app-interface/tree/master/resources) to a file with default values. Note that it starts with `/`. Current options:
-  - [rds](https://gitlab.cee.redhat.com/service/app-interface/tree/master/resources/terraform/rds-1.yml) - `/terraform/rds-1.yml`
+  - [rds](https://gitlab.cee.redhat.com/service/app-interface/tree/master/resources/terraform/resources/rds-1.yml) - `/terraform/resources/rds-1.yml`
 - `overrides`: list of values from `defaults` you wish to override, with the override values. For example: `engine: mysql`.
 
 Once the changes are merged, the RDS instance will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
@@ -585,7 +585,7 @@ In order to add or update an S3 bucket, you need to add them to the `terraformRe
   - `osio`
 - `identifier` - name of resource to create (or update)
 - `defaults`: path relative to [resources](https://gitlab.cee.redhat.com/service/app-interface/tree/master/resources) to a file with default values. Note that it starts with `/`. Current options:
-  - [s3](https://gitlab.cee.redhat.com/service/app-interface/tree/master/resources/terraform/s3-1.yml) - `/terraform/s3-1.yml`
+  - [s3](https://gitlab.cee.redhat.com/service/app-interface/tree/master/resources/terraform/resources/s3-1.yml) - `/terraform/resources/s3-1.yml`
 - `overrides`: list of values from `defaults` you wish to override, with the override values. For example: `acl: public`.
 
 Once the changes are merged, the S3 bucket will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
