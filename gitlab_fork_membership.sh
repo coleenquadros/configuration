@@ -27,7 +27,7 @@ done
 # if bot is not a maintainer on the fork - add error note on merge request and exit
 if [[ "$exit_status" != "0" ]]; then
     # '!' stands for new line
-    NOTE="@$gitlabSourceNamespace, this fork of 'app-interface' is not shared with the [app-sre bot]($GITLAB_URL/devtools-bot) user as 'Maintainer'.!!Please [add the user to the project](https://docs.gitlab.com/ee/user/project/members/#add-a-user) and retest by commenting '[test]' on the merge request."
+    NOTE="@$gitlabSourceNamespace, this fork of 'app-interface' is not shared with [devtools-bot]($GITLAB_URL/devtools-bot) as 'Maintainer'.!!Please [add the user to the project](https://docs.gitlab.com/ee/user/project/members/#add-a-user) and retest by commenting '[test]' on the merge request."
     URL_NOTE=$(echo $NOTE | sed -e "s| |%20|g" -e "s|!|%0A|g" -e "s|'|%60|g" -e "s|\[|%5B|g" -e "s|\]|%5D|g" -e "s|(|%28|g" -e "s|)|%29|g" -e "s|#|%23|g" -e "s|@|%40|g" -e "s|,|%2C|g")
     curl -s --request POST --header "PRIVATE-TOKEN: $GITLAB_TOKEN" $GITLAB_PROJECTS_URL/$gitlabMergeRequestTargetProjectId/merge_requests/$gitlabMergeRequestIid/notes?body=$URL_NOTE
     exit $exit_status
