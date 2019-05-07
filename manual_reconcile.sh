@@ -140,15 +140,18 @@ docker pull ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG}
 docker pull ${VAULT_RECONCILE_IMAGE}:${VAULT_RECONCILE_IMAGE_TAG}
 
 run_int github &
-run_int openshift-rolebinding &
-run_int openshift-resources &
+run_int github-repo-invites &
 run_int quay-membership &
 run_int quay-repos &
 run_int ldap-users &
-run_int terraform-resources &
 run_int terraform-users &
-run_int github-repo-invites &
 run_vault_reconcile_integration &
+
+run_int openshift-namespaces
+
+run_int openshift-rolebinding &
+run_int openshift-resources &
+run_int terraform-resources &
 
 wait
 
