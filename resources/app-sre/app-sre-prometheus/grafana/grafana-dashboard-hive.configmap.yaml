@@ -82,7 +82,7 @@ data:
       "gnetId": null,
       "graphTooltip": 0,
       "id": null,
-      "iteration": 1557238356527,
+      "iteration": 1557313382994,
       "links": [],
       "panels": [
         {
@@ -443,13 +443,188 @@ data:
           }
         },
         {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "description": "Average number of restarts across all install jobs.",
+          "fill": 1,
+          "gridPos": {
+            "h": 7,
+            "w": 5,
+            "x": 0,
+            "y": 26
+          },
+          "id": 38,
+          "interval": "",
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "paceLength": 10,
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "rate(hive_cluster_deployment_completed_install_restart_sum[48h]) / rate(hive_cluster_deployment_completed_install_restart_count[48h])",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Avg Install Restarts",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "description": "Time to install job for 90% of clusters installed over last 48 hours.",
+          "fill": 1,
+          "gridPos": {
+            "h": 7,
+            "w": 5,
+            "x": 5,
+            "y": 26
+          },
+          "id": 40,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "paceLength": 10,
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.9, rate(hive_cluster_deployment_install_job_delay_seconds_bucket{job=\"$instance\"}[48h]))",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "90% Time to Install Job",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
           "columns": [],
           "datasource": "$datasource",
           "fontSize": "100%",
           "gridPos": {
-            "h": 15,
-            "w": 11,
-            "x": 0,
+            "h": 7,
+            "w": 8,
+            "x": 10,
             "y": 26
           },
           "id": 34,
@@ -486,15 +661,16 @@ data:
           ],
           "targets": [
             {
-              "expr": "hive_cluster_deployments_uninstalled{job=\"$instance\"}",
+              "expr": "sum without(instance,job)(hive_cluster_deployments_uninstalled{job=\"$instance\",age_lt=\"48h\"})",
               "format": "table",
+              "instant": true,
               "intervalFactor": 1,
               "refId": "A"
             }
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Uninstalled Clusters",
+          "title": "Uninstalled Clusters Created in Last 48h",
           "transform": "table",
           "type": "table"
         },
@@ -503,10 +679,10 @@ data:
           "datasource": "$datasource",
           "fontSize": "100%",
           "gridPos": {
-            "h": 15,
-            "w": 7,
-            "x": 11,
-            "y": 26
+            "h": 8,
+            "w": 6,
+            "x": 0,
+            "y": 33
           },
           "id": 36,
           "links": [],
@@ -550,6 +726,62 @@ data:
           ],
           "timeFrom": null,
           "title": "Cluster Installs Restarting",
+          "transform": "table",
+          "type": "table"
+        },
+        {
+          "columns": [],
+          "datasource": "$datasource",
+          "description": "Clusters which have been deleted for more than one hour.",
+          "fontSize": "100%",
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 6,
+            "y": 33
+          },
+          "id": 33,
+          "links": [],
+          "pageSize": null,
+          "scroll": true,
+          "showHeader": true,
+          "sort": {
+            "col": 0,
+            "desc": true
+          },
+          "styles": [
+            {
+              "alias": "Time",
+              "dateFormat": "YYYY-MM-DD HH:mm:ss",
+              "pattern": "Time",
+              "type": "date"
+            },
+            {
+              "alias": "",
+              "colorMode": null,
+              "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+              ],
+              "decimals": 2,
+              "pattern": "/.*/",
+              "thresholds": [],
+              "type": "number",
+              "unit": "short"
+            }
+          ],
+          "targets": [
+            {
+              "expr": "sum without(instance,age_lt)(hive_cluster_deployments_deprovisioning{job=\"$instance\",deprovisioning_gt=\"1h\"})\n",
+              "format": "table",
+              "instant": true,
+              "intervalFactor": 1,
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "title": "Clusters Stuck Deprovisioning",
           "transform": "table",
           "type": "table"
         },
@@ -645,60 +877,96 @@ data:
           }
         },
         {
-          "columns": [],
+          "aliasColors": {
+            "error": "dark-red",
+            "success": "dark-green"
+          },
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
           "datasource": "$datasource",
-          "description": "Clusters which have been deleted for more than one hour.",
-          "fontSize": "100%",
+          "description": "Rate of success/error from the cluster deployment controller reconcile loop.",
+          "fill": 0,
           "gridPos": {
-            "h": 8,
-            "w": 13,
+            "h": 14,
+            "w": 14,
             "x": 0,
             "y": 55
           },
-          "id": 33,
-          "links": [],
-          "pageSize": null,
-          "scroll": true,
-          "showHeader": true,
-          "sort": {
-            "col": 0,
-            "desc": true
+          "hideTimeOverride": false,
+          "id": 37,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
           },
-          "styles": [
-            {
-              "alias": "Time",
-              "dateFormat": "YYYY-MM-DD HH:mm:ss",
-              "pattern": "Time",
-              "type": "date"
-            },
-            {
-              "alias": "",
-              "colorMode": null,
-              "colors": [
-                "rgba(245, 54, 54, 0.9)",
-                "rgba(237, 129, 40, 0.89)",
-                "rgba(50, 172, 45, 0.97)"
-              ],
-              "decimals": 2,
-              "pattern": "/.*/",
-              "thresholds": [],
-              "type": "number",
-              "unit": "short"
-            }
-          ],
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "paceLength": 10,
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
           "targets": [
             {
-              "expr": "sum without(instance,age_lt)(hive_cluster_deployments_deprovisioning{job=\"$instance\",deprovisioning_gt=\"1h\"})\n",
-              "format": "table",
-              "instant": true,
+              "expr": "rate(controller_runtime_reconcile_total{result=~\"success|error\",job=\"$instance\"}[2h])",
+              "format": "time_series",
+              "instant": false,
               "intervalFactor": 1,
-              "refId": "A"
+              "legendFormat": "{{controller}} {{result}}",
+              "refId": "B"
             }
           ],
-          "timeFrom": null,
-          "title": "Clusters Stuck Deprovisioning",
-          "transform": "table",
-          "type": "table"
+          "thresholds": [],
+          "timeFrom": "7d",
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "All Controller Reconciles",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
         },
         {
           "collapsed": true,
@@ -706,7 +974,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 63
+            "y": 69
           },
           "id": 4,
           "panels": [
@@ -716,7 +984,7 @@ data:
                 "h": 9,
                 "w": 20,
                 "x": 0,
-                "y": 64
+                "y": 70
               },
               "id": 28,
               "links": [],
@@ -734,7 +1002,7 @@ data:
                 "h": 7,
                 "w": 5,
                 "x": 0,
-                "y": 73
+                "y": 79
               },
               "id": 2,
               "legend": {
@@ -821,7 +1089,7 @@ data:
                 "h": 7,
                 "w": 5,
                 "x": 5,
-                "y": 73
+                "y": 79
               },
               "id": 6,
               "interval": null,
@@ -878,7 +1146,7 @@ data:
                 "h": 7,
                 "w": 5,
                 "x": 10,
-                "y": 73
+                "y": 79
               },
               "id": 8,
               "links": [],
@@ -921,7 +1189,7 @@ data:
                 "h": 7,
                 "w": 5,
                 "x": 15,
-                "y": 73
+                "y": 79
               },
               "id": 10,
               "links": [],
@@ -946,7 +1214,7 @@ data:
                 "h": 7,
                 "w": 5,
                 "x": 0,
-                "y": 80
+                "y": 86
               },
               "heatmap": {},
               "hideZeroBuckets": false,
@@ -988,7 +1256,7 @@ data:
                 "h": 7,
                 "w": 5,
                 "x": 5,
-                "y": 80
+                "y": 86
               },
               "id": 14,
               "limit": 10,
@@ -1007,7 +1275,7 @@ data:
                 "h": 7,
                 "w": 5,
                 "x": 10,
-                "y": 80
+                "y": 86
               },
               "headings": true,
               "id": 16,
@@ -1026,7 +1294,7 @@ data:
                 "h": 7,
                 "w": 5,
                 "x": 15,
-                "y": 80
+                "y": 86
               },
               "id": 20,
               "links": [],
@@ -1043,7 +1311,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 64
+            "y": 70
           },
           "id": 22,
           "panels": [],
@@ -1056,7 +1324,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 65
+            "y": 71
           },
           "id": 24,
           "panels": [],
@@ -1069,7 +1337,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 66
+            "y": 72
           },
           "id": 26,
           "panels": [],
@@ -1126,7 +1394,7 @@ data:
         ]
       },
       "time": {
-        "from": "now-24h",
+        "from": "now-7d",
         "to": "now"
       },
       "timepicker": {
