@@ -151,6 +151,7 @@ run_int openshift-namespaces
 
 run_int openshift-rolebinding &
 run_int openshift-resources &
+run_int terraform-resources &
 
 wait
 
