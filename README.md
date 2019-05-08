@@ -525,7 +525,7 @@ In order to get access to an AWS account, a user has to have:
   * An `aws_groups` section, with a reference to an AWS group file.
     * Example: [sre-aws](/data/teams/app-sre/roles/sre-aws.yml) role.
   * A `user_policies` section, with a reference to a policy json document.
-    * Example: [f8a-dev-aws.yml](/data/teams/devtools/roles/f8a-dev-aws.yml)
+    * Example: [f8a-dev-osio-dev.yml](/data/teams/devtools/roles/f8a-dev-osio-dev.yml)
     * Supported terraform-like templates (will be replaced with correct values at run time):
       * `${aws:username}`
 
