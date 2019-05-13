@@ -82,7 +82,7 @@ data:
       "gnetId": null,
       "graphTooltip": 0,
       "id": null,
-      "iteration": 1557507291779,
+      "iteration": 1557749726758,
       "links": [],
       "panels": [
         {
@@ -127,7 +127,7 @@ data:
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "Age less than {{age_lt}}",
+              "legendFormat": "{{cluster_type}} Age less than {{age_lt}}",
               "refId": "A"
             },
             {
@@ -224,8 +224,9 @@ data:
             {
               "expr": "hive_install_jobs{job=\"$instance\"}",
               "format": "time_series",
+              "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "{{state}}",
+              "legendFormat": "{{cluster_type}} {{state}}",
               "refId": "A"
             }
           ],
@@ -482,11 +483,11 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(hive_cluster_deployment_completed_install_restart_sum[48h]) / rate(hive_cluster_deployment_completed_install_restart_count[48h])",
+              "expr": "rate(hive_cluster_deployment_completed_install_restart_sum{job=\"$instance\"}[48h]) / rate(hive_cluster_deployment_completed_install_restart_count{job=\"$instance\"}[48h])",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "",
+              "legendFormat": "{{cluster_type}}",
               "refId": "A"
             }
           ],
@@ -735,13 +736,15 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum without(time,instance,job)(increase(hive_cluster_deployments_created_total{job=\"$instance\"}[24h]))",
+              "expr": "(increase(hive_cluster_deployments_created_total{cluster_type=\"unspecified\",job=\"$instance\"}[24h]))",
               "format": "time_series",
+              "instant": true,
               "intervalFactor": 1,
               "refId": "A"
             }
           ],
           "thresholds": "",
+          "timeFrom": null,
           "title": "Clusters Created (24h)",
           "type": "singlestat",
           "valueFontSize": "80%",
@@ -764,6 +767,7 @@ data:
             "#d44a3a"
           ],
           "datasource": "$datasource",
+          "decimals": 0,
           "format": "none",
           "gauge": {
             "maxValue": 100,
@@ -815,8 +819,9 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum without(time,instance,job)(increase(hive_cluster_deployments_installed_total{job=\"$instance\"}[24h]))",
+              "expr": "sum without(time,instance,job)(increase(hive_cluster_deployments_installed_total{cluster_type=\"unspecified\",job=\"$instance\"}[24h]))",
               "format": "time_series",
+              "instant": true,
               "intervalFactor": 1,
               "refId": "A"
             }
@@ -895,8 +900,10 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum without(time,instance,job)(increase(hive_cluster_deployments_deleted_total{job=\"$instance\"}[24h]))",
+              "expr": "sum without(time,instance,job)(increase(hive_cluster_deployments_deleted_total{cluster_type=\"unspecified\",job=\"$instance\"}[24h]))",
               "format": "time_series",
+              "instant": true,
+              "interval": "",
               "intervalFactor": 1,
               "refId": "A"
             }
