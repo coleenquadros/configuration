@@ -7,11 +7,11 @@ metadata:
   name: hive-prod
 spec:
   groups:
-  - name: telemeter-stage
+  - name: hive-prod
     rules:
     - alert: HiveDown - prod
       annotations:
-        message: "No targets found for Telemeter in namespace {{ $labels.namespace }}. Telemeter is down."
+        message: "No targets found for Hive in namespace {{ $labels.namespace }}. Hive is down."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
         dashboard: "https://grafana.app-sre.devshift.net"
       expr: |
@@ -20,16 +20,51 @@ spec:
       labels:
         service: hive
         severity: critical
-    # - alert: UploadHandlerErrorsHigh - prod
-    #   annotations:
-    #     message: "{{ $label.client }} is returning errors for {{ $value }}% of requests."
-    #     runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
-    #     dashboard: "https://grafana.app-sre.devshift.net"
-    #   expr: |
-    #     sum(http_requests_total{handler="upload",service="telemeter-server",job="telemeter-server",namespace="telemeter-stage",code=~"^(?:5..)$"}) without (instance,pod,job,code)
-    #     /
-    #     sum(http_requests_total{handler="upload",service="telemeter-server",job="telemeter-server",namespace="telemeter-stage"}) without (instance,pod,job,code) * 100 > 10
-    #   for: 10m
-    #   labels:
-    #     service: telemeter
-    #     severity: critical
+    - alert: InstallJobHighDuration - prod
+      annotations:
+        message: "Time to start an install job is taking greater than 5 minutes"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/hive/sop"
+        dashboard: "https://grafana.app-sre.devshift.net"
+      expr: |
+        rate(hive_cluster_deployment_install_job_delay_seconds_sum{job="hive-controllers-production"}[48h]) 
+        / 
+        rate(hive_cluster_deployment_install_job_delay_seconds_count{job="hive-controllers-production"}[48h]) > 300
+      for: 10m
+      labels:
+        service: hive
+        severity: medium
+    - alert: ClusterProvisioningTimeout - prod
+      annotations:
+        message: "Cluster installs taking taking greater than the SLO of 2 hours"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
+        dashboard: "https://grafana.app-sre.devshift.net"
+      expr: |
+        (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers-production",cluster_type="unspecified"}/3600) > 2
+      for: 10m
+      labels:
+        service: hive
+        severity: high
+    - alert: ClusterDeprovisioningTimeout - prod
+      annotations:
+        message: "{{ $labels.cluster_deployment }}Cluster uninstalls taking {{ $value }} hours on average. SLO: 2 hours"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
+        dashboard: "https://grafana.app-sre.devshift.net"
+      expr: |
+        (hive_cluster_deployment_deprovision_underway_seconds{job="hive-controllers-production"} / 3600 ) > 2
+      for: 10m
+      labels:
+        service: hive
+        severity: medium
+    - alert: ControllerErrorsHigh - prod
+      annotations:
+        message: "Controller :{{ $value }} is reporting a high error rate"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
+        dashboard: "https://grafana.app-sre.devshift.net"
+      expr: |
+        sum(http_requests_total{handler="upload",service="telemeter-server",job="telemeter-server",namespace="telemeter-stage",code=~"^(?:5..)$"}) without (instance,pod,job,code)
+        /
+        sum(http_requests_total{handler="upload",service="telemeter-server",job="telemeter-server",namespace="telemeter-stage"}) without (instance,pod,job,code) * 100 > 10
+      for: 10m
+      labels:
+        service: hive
+        severity: critical
