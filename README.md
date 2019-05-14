@@ -61,7 +61,7 @@ expressed as json schemas. You can find the supported schemas here:
 
 - Fork the [app-interface](<https://gitlab.cee.redhat.com/service/app-interface>
 ) repository.
-- [Share your fork](https://docs.gitlab.com/ee/user/project/members/share_project_with_groups.html#sharing-a-project-with-a-group-of-users) with the [app-sre](https://gitlab.cee.redhat.com/app-sre) group as `Master`.
+- [Share their fork](https://docs.gitlab.com/ee/user/project/members/share_project_with_groups.html#sharing-a-project-with-a-group-of-users) of the `app-interface` repository with the [devtools-bot](https://gitlab.cee.redhat.com/devtools-bot) user as `Maintainer`.
 - Submit a MR with the desired contract amendment.
 
 2. Automation will validate the amendment and generate a report of the desired
@@ -196,19 +196,20 @@ wheel icon (top-right corner) and replace `omit` with `include` in
 - Management of OpenShift rolebindings
 - Management of Quay repos.
 - Management of Quay organisation members.
-- Management of OpenShift ConfigMaps.
+- Management of OpenShift Namespaces.
+- Management of OpenShift resources.
 - Management of OpenShift Secrets using Vault.
+- Management of OpenShift Routes using Vault.
 - Management of Vault configurations.
+- Management of cluster monitoring, such as prometheus and alert manager.
+- Management of AWS resources.
+- Management of AWS users.
 
 ### Planned integrations
 
 - Top level tracking of managed services, their contact points, and work
   streams.
 - Management of OLM catalog entries for managing service operators.
-- Ownership of OpenShift Kubernetes namespace resources.
-- Management of cluster monitoring, such as zabbix, prometheus, and alert
-  manager.
-- Cloud (AWS) resource provisioning.
 
 ## Howto
 
@@ -273,11 +274,17 @@ In order to add or remove a Quay repo, a MR must be sent to the appropriate App 
 
 [services](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/services) contains all the services that are being run by the App-SRE team. Inside of those directories, there is a `namespaces` folder that lists all the `namespaces` that are linked to that service.
 
-Namespaces declaration enforce [this JSON schema](https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/openshift/namespace-1.yml). Note that it contains a reference to the cluster in which the namespace exists.
+Namespaces declaration enforce [this JSON schema](/schemas/openshift/namespace-1.yml). Note that it contains a reference to the cluster in which the namespace exists.
 
 Notes:
 * If the resource already exists in the namespace, the PR check will fail. Please get in contact with App-SRE team to import resources to be under the control of App-Interface.
-* Manual changes to ConfigMaps or Secrets will be overridden by App-Interface in each run.
+* Manual changes to resources will be overridden by App-Interface in each run.
+
+OpenShift resources can be entirely self-serviced via App-Interface.
+
+A list of supported resource types can be found [here](/schemas/openshift/namespace-1.yml#L46). The next section demonstrates how to manage the different resources through an example - `ConfigMaps`.
+
+In addition, `Secrets` and `Routes` are also supported (see specific sections below).
 
 #### Manage ConfigMaps via App-Interface (`/openshift/namespace-1.yml`)
 
@@ -302,7 +309,7 @@ Instructions:
   * The secret in Vault should be stored in the following path: `app-interface/<cluster>/<namespace>/<secret_name>`
   * The value of each key in the secret in Vault should **NOT** be base64 encoded.
   * If you wish to have the value base64 encoded in Vault, the field key should be of the form `<key_name>_qb64`.
-2. Add a reference to the secret in Vault under the `openshiftResources` field with the following attributes:
+2. Add a reference to the secret in Vault under the `openshiftResources` field ([example](/data/services/openshift.io/namespaces/bayesian-preview.yml#L43))with the following attributes:
 
 - `provider`: must be `vault-secret`.
 - `path`: absolute path to secret in [Vault](https://vault.devshift.net). Note that it should **NOT** start with `/`.
@@ -321,6 +328,7 @@ Notes:
 * When creating a new secret in Vault, be sure to set the `Maximum Number of Versions` field to `0` (unlimited).
 * If you want to delete a secret from Vault, please get in contact with the App-SRE team.
 * If you wish to use a different secrets engine, please get in contact with the App-SRE team.
+* To create a secret in a `production` environment, please get in contact with the App-SRE team.
 
 Example:
 
@@ -384,7 +392,7 @@ options:
   mode: "0600"
   prefix: ""
 ```
-Current audit backends configurations can be found [here](https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/vault.devshift.net/config/audit-backends/)
+Current audit backends configurations can be found [here](/data/services/vault.devshift.net/config/audit-backends/)
 
 For more information please see [vault audit backends documentation](https://www.vaultproject.io/docs/audit/index.html)
 
@@ -418,7 +426,7 @@ policy_mappings:
 **Note**: some auth backends like github support policy mappings. Policy mapping can be applied to auth backed entity, for example in case with github auth currently allowed entity is a `team`.
 To apply vault policy on auth entity `policy_mappings` key should be used.
 
-Current auth backends configurations can be found [here](https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/vault.devshift.net/config/auth-backends)
+Current auth backends configurations can be found [here](/data/services/vault.devshift.net/config/auth-backends)
 
 For more information please see [vault auth backends documentation](https://www.vaultproject.io/docs/auth/index.html)
 
@@ -509,7 +517,7 @@ For more information please see [vault secrets engines documentation](https://ww
 
 [teams](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/teams) contains all the teams that are being services by the App-SRE team. Inside of those directories, there is a `users` folder that lists all the `users` that are linked to that team. Each `user` has a list of assiciated `roles`. A `role` can be used to grant AWS access to a user, by adding the `user` to an AWS `group`.
 
-Groups declaration enforce [this JSON schema](https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/aws/group-1.yml). Note that it contains a reference to the AWS account in which the group exists.
+Groups declaration enforce [this JSON schema](/schemas/aws/group-1.yml). Note that it contains a reference to the AWS account in which the group exists.
 
 Notes:
 * Manual changes to AWS resources will be overridden by App-Interface in each run.
@@ -527,11 +535,12 @@ In order to get access to an AWS account, a user has to have:
   * A `user_policies` section, with a reference to a policy json document.
     * Example: [f8a-dev-osio-dev.yml](/data/teams/devtools/roles/f8a-dev-osio-dev.yml)
     * Supported terraform-like templates (will be replaced with correct values at run time):
+      * `${aws:accountid}`
       * `${aws:username}`
 
 Once a user is created, an email invitation to join the account will be sent with all relevant information.
 
-## Adding your public GPG key
+#### Adding your public GPG key
 A base64 encoded binary GPG key should be added to the user file.
 To export your key:
 ```
@@ -543,12 +552,23 @@ To get your base64 encoded binary GPG key from an [ascii armored output](https:/
 cat <redhat_username>.gpg.asc | gpg --dearmor | base64
 ```
 
+#### How to determine my AWS permissions
+
+Your user file contains a list of `roles`. Each AWS related role contains a list of AWS groups and/or AWS user policies.
+To determine what are your permissions, follow the `$ref` to the AWS group or user policy, and read the description field.
+
+For example:
+
+The role `/teams/devtools/roles/f8a-dev-osio-dev.yml` leads to the [corresponding role file](/data/teams/devtools/roles/f8a-dev-osio-dev.yml).
+This role file has the user policy `/aws/osio-dev/policies/OwnResourcesFullAccess.yml`, which leads to the [corresponding user policy file](/data/aws/osio-dev/policies/OwnResourcesFullAccess.yml).
+This user policy file a description, which explains the permissions allowed by this user policy.
+
 
 ### Manage AWS resources via App-Interface (`/openshift/namespace-1.yml`) using Terraform
 
 [services](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/services) contains all the services that are being run by the App-SRE team. Inside of those directories, there is a `namespaces` folder that lists all the `namespaces` that are linked to that service.
 
-Namespaces declaration enforce [this JSON schema](https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/openshift/namespace-1.yml). Note that it contains a reference to the cluster in which the namespace exists.
+Namespaces declaration enforce [this JSON schema](/schemas/openshift/namespace-1.yml). Note that it contains a reference to the cluster in which the namespace exists.
 
 Notes:
 * Manual changes to AWS resources will be overridden by App-Interface in each run.
@@ -605,11 +625,11 @@ The Secret will contain the following fields:
 
 Additional design information: [here](docs/app-interface/design.md).
 
-[schemas]: <https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas>
-[userschema]: <https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/access/user-1.yml>
-[crossref]: <https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/common-1.json#L58-L86>
-[role]: <https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/access/role-1.yml>
-[permission]: <https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/access/permission-1.yml>
+[schemas]: </schemas>
+[userschema]: </schemas/access/user-1.yml>
+[crossref]: </schemas/common-1.json#L58-L86>
+[role]: </schemas/access/role-1.yml>
+[permission]: </schemas/access/permission-1.yml>
 
 ## Developer Guide
 
