@@ -46,7 +46,7 @@ spec:
         severity: high
     - alert: ClusterDeprovisioningTimeout - prod
       annotations:
-        message: "{{ $labels.cluster_deployment }}Cluster uninstalls taking {{ $value }} hours on average. SLO: 2 hours"
+        message: "{{ $labels.cluster_deployment }} Cluster uninstalls taking {{ $value }} hours on average. SLO: 2 hours"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
         dashboard: "https://grafana.app-sre.devshift.net"
       expr: |
@@ -61,9 +61,7 @@ spec:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
         dashboard: "https://grafana.app-sre.devshift.net"
       expr: |
-        sum(http_requests_total{handler="upload",service="telemeter-server",job="telemeter-server",namespace="telemeter-stage",code=~"^(?:5..)$"}) without (instance,pod,job,code)
-        /
-        sum(http_requests_total{handler="upload",service="telemeter-server",job="telemeter-server",namespace="telemeter-stage"}) without (instance,pod,job,code) * 100 > 10
+        rate(controller_runtime_reconcile_errors_total{job="hive-controllers-production"}[15m]) > 1
       for: 10m
       labels:
         service: hive
