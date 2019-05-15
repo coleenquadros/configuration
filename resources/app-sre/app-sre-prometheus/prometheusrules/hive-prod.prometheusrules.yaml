@@ -12,7 +12,7 @@ spec:
     - alert: HiveDown - prod
       annotations:
         message: "No targets found for Hive in namespace {{ $labels.namespace }}. Hive is down."
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/hive/sop"
         dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-production"
       expr: |
         absent(up{job="hive-controllers-production"} == 1)
@@ -26,28 +26,28 @@ spec:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/hive/sop"
         dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-production"
       expr: |
-        rate(hive_cluster_deployment_install_job_delay_seconds_sum{job="hive-controllers-production"}[48h]) 
-        / 
+        rate(hive_cluster_deployment_install_job_delay_seconds_sum{job="hive-controllers-production"}[48h])
+        /
         rate(hive_cluster_deployment_install_job_delay_seconds_count{job="hive-controllers-production"}[48h]) > 300
       for: 10m
       labels:
         service: hive
         severity: medium
-    - alert: ClusterProvisioningTimeout - prod
+    - alert: ClusterProvisioningDelay - prod
       annotations:
-        message: "Cluster installs taking taking greater than the SLO of 2 hours"
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
+        message: "{{ $labels.cluster_deployment }} cluster install taking over 2 hours"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/hive/sop"
         dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-production"
       expr: |
-        (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers-production",cluster_type="unspecified"}/3600) > 2
+        (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers-production",cluster_type="managed"}/3600) > 2
       for: 10m
       labels:
         service: hive
         severity: high
-    - alert: ClusterDeprovisioningTimeout - prod
+    - alert: ClusterDeprovisioningDelay - prod
       annotations:
-        message: "{{ $labels.cluster_deployment }} Cluster uninstalls taking {{ $value }} hours on average. SLO: 2 hours"
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
+        message: "{{ $labels.cluster_deployment }} cluster uninstall taking over 2 hours"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/hive/sop"
         dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-production"
       expr: |
         (hive_cluster_deployment_deprovision_underway_seconds{job="hive-controllers-production"} / 3600 ) > 2
@@ -58,7 +58,7 @@ spec:
     - alert: ControllerErrorsHigh - prod
       annotations:
         message: "Controller :{{ $value }} is reporting a high error rate"
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/hive/sop"
         dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-production"
       expr: |
         rate(controller_runtime_reconcile_errors_total{job="hive-controllers-production"}[15m]) > 1
