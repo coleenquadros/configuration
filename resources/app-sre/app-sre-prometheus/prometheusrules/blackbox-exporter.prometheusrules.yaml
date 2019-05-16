@@ -8,19 +8,31 @@ metadata:
   name: blackbox-exporter
 spec:
   groups:
+  # Pingdom-style 2xx checks
   - name: 2xx.blackbox.rules
     interval: 1m
     rules:
     - alert: 2xxProbeFailing
       labels:
         severity: critical
-      expr: up{job=~"blackbox_exporter.*"} == 0 or probe_success{job=~"blackbox_exporter.*"} == 0
+      expr: up{job="blackbox_2xx_prod"} == 0 or probe_success{job="blackbox_2xx_prod"} == 0
       for: 5m
       annotations:
         runbook: "https://www.robustperception.io/debugging-blackbox-exporter-failures"
         dashboard: "https://grafana.app-sre.devshift.net"
         message: "{{ $labels.instance }} has been unreachable for 5 minutes."
         link_url: "{{ $labels.instance }}"
+    - alert: 2xxProbeFailing
+      labels:
+        severity: high
+      expr: up{job="blackbox_2xx_stage"} == 0 or probe_success{job="blackbox_2xx_stage"} == 0
+      for: 5m
+      annotations:
+        runbook: "https://www.robustperception.io/debugging-blackbox-exporter-failures"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "{{ $labels.instance }} has been unreachable for 5 minutes."
+        link_url: "{{ $labels.instance }}"
+  # SSL cert expiry rules, independant of stage or prod
   - name: ssl.blackbox.rules
     interval: 5m
     rules:
