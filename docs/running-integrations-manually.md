@@ -22,3 +22,9 @@ qontract-reconcile --config config.debug.toml --dry-run terraform-resources
 # if a manual reconciliation is required - run the integration again without --dry-run
 qontract-reconcile --config config.debug.toml terraform-resources
 ```
+
+
+**Note: If you're using python3 by default, you must create a virtualenv specifying
+the use of the python2 executable path. The command to create it would then be:**
+ 
+`virtualenv --python=/usr/bin/python2 venv`
