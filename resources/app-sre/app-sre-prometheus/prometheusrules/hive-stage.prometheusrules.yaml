@@ -20,22 +20,22 @@ spec:
       labels:
         service: hive
         severity: high
-    - alert: InstallJobHighDuration - stage
+    - alert: InstallJobDelayHigh - stage
       annotations:
         message: "Time to start an install job is taking greater than 5 minutes"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/hive/sop"
         dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-stage"
       expr: |
-        rate(hive_cluster_deployment_install_job_delay_seconds_sum{job="hive-controllers-stage"}[48h])
+        rate(hive_cluster_deployment_install_job_delay_seconds_sum{job="hive-controllers-stage"}[6h])
         /
-        rate(hive_cluster_deployment_install_job_delay_seconds_count{job="hive-controllers-stage"}[48h]) > 300
+        rate(hive_cluster_deployment_install_job_delay_seconds_count{job="hive-controllers-stage"}[6h]) > 300
       for: 10m
       labels:
         service: hive
         severity: medium
     - alert: ClusterProvisioningDelay - stage
       annotations:
-        message: "{{ $labels.cluster_deployment }} cluster install taking over 2 hours"
+        message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.namespace }} provisioning taking over 2 hours"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/hive/sop"
         dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-stage"
       expr: |
@@ -46,7 +46,7 @@ spec:
         severity: medium
     - alert: ClusterDeprovisioningDelay - stage
       annotations:
-        message: "{{ $labels.cluster_deployment }} cluster uninstall taking over 2 hours"
+        message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.namespace }} deprovisioning taking over 2 hours"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/hive/sop"
         dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-stage"
       expr: |
