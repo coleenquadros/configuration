@@ -197,6 +197,7 @@ wheel icon (top-right corner) and replace `omit` with `include` in
 - Management of Quay repos.
 - Management of Quay organisation members.
 - Management of OpenShift Namespaces.
+- Management of OpenShift Groups.
 - Management of OpenShift resources.
 - Management of OpenShift Secrets using Vault.
 - Management of OpenShift Routes using Vault.
@@ -272,7 +273,7 @@ In order to add or remove a Quay repo, a MR must be sent to the appropriate App 
 
 ### Manage Openshift resources via App-Interface (`/openshift/namespace-1.yml`)
 
-[services](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/services) contains all the services that are being run by the App-SRE team. Inside of those directories, there is a `namespaces` folder that lists all the `namespaces` that are linked to that service.
+[services](/data/services) contains all the services that are being run by the App-SRE team. Inside of those directories, there is a `namespaces` folder that lists all the `namespaces` that are linked to that service.
 
 Namespaces declaration enforce [this JSON schema](/schemas/openshift/namespace-1.yml). Note that it contains a reference to the cluster in which the namespace exists.
 
@@ -293,7 +294,7 @@ ConfigMaps can be entirely self-serviced via App-Interface.
 In order to add ConfigMaps to a namespace, you need to add them to the `openshiftResources` field.
 
 - `provider`: must be `resource`
-- `path`: path relative to [resources](https://gitlab.cee.redhat.com/service/app-interface/tree/master/resources). Note that it starts with `/`.
+- `path`: path relative to [resources](/resources). Note that it starts with `/`.
 
 The object itself must be stored under the `resources` path, and by convention it should be named: `resources/<cluster_name>/<namespace>/<configmap_name>.configmap.yml`.
 
@@ -356,7 +357,7 @@ Routes can be entirely self-serviced via App-Interface.
 In order to add Routes to a namespace, you need to add them to the `openshiftResources` field.
 
 - `provider`: must be `route`
-- `path`: path relative to [resources](https://gitlab.cee.redhat.com/service/app-interface/tree/master/resources). Note that it starts with `/`.
+- `path`: path relative to [resources](/resources). Note that it starts with `/`.
 - `vault_tls_secret_path`: (optional) absolute path to secret in [Vault](https://vault.devshift.net) which contains sensitive data to be added to the `.spec.tls` section.
 - `vault_tls_secret_version`: (optional, mandatory if `vault_tls_secret_path` is defined) version of secret in Vault.
 
@@ -365,9 +366,22 @@ Notes:
 * In case the Route contains no sensitive information, a secret in Vault is not required (hence the fields are optional).
 * It is recommended to read through the instructions for [Secrets](#manage-secrets-via-app-interface-openshiftnamespace-1yml-using-vault) before using Routes.
 
+
+### Manage OpenShift Groups association via App-Interface (`/openshift/cluster-1.yml`)
+
+[openshift](/data/openshift) contains all the clusters that are managed by the App-SRE team. Inside of those directories, there is a `cluster.yml` file that describes the cluster.
+
+Clusters declaration enforce [this JSON schema](/schemas/openshift/cluster-1.yml).
+
+OpenShift group association can be self-serviced via App-Interface.
+
+Groups should be defined under the `managedGroups` section in the cluster file. This is a list of group names that are managed. To associate a user to a group, the user has to be associated to a role that has a permission file that associates them to an OpenShift group.
+
+An example of a role can be found [here](/data/teams/hive/roles/dev.yml) and an example of a permission can be found [here](/data/openshift/hive-stage/permissions/hive-stage-hive-admins.yml).
+
 ### Manage Vault configurations via App-Interface
 
-https://vault.devshift.net is entirely managed via App-Interface and its configuration can be found in [config](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/services/vault.devshift.net/config) folder of ` vault.devshift.net` service
+https://vault.devshift.net is entirely managed via App-Interface and its configuration can be found in [config](/data/services/vault.devshift.net/config) folder of ` vault.devshift.net` service
 
 #### Manage vault audit backends (`/vault-config/audit-1.yml`)
 Audit devices are the components in Vault that keep a detailed log of all requests and response to Vault
@@ -447,7 +461,7 @@ rules: |
     capabilities = ["create","read","update","delete","list"]
   }
 ```
-Current vault policies can be found [here](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/services/vault.devshift.net/config/policies)
+Current vault policies can be found [here](/data/services/vault.devshift.net/config/policies)
 
 For more information please see [vault policies documentation](https://www.vaultproject.io/docs/concepts/policies.html)
 
@@ -485,7 +499,7 @@ options:
   secret_id_bound_cidrs: []
   token_bound_cidrs: []
 ```
-Current vault roles can be found [here](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/services/vault.devshift.net/config/roles)
+Current vault roles can be found [here](/data/services/vault.devshift.net/config/roles)
 
 For more information please see [vault AppRole documentation](https://www.vaultproject.io/docs/auth/approle.html)
 
@@ -508,14 +522,14 @@ options:
   _type: "kv"
   version: "2"
 ```
-Current secrets engines can be found [here](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/services/vault.devshift.net/config/secret-engines)
+Current secrets engines can be found [here](/data/services/vault.devshift.net/config/secret-engines)
 
 For more information please see [vault secrets engines documentation](https://www.vaultproject.io/docs/secrets/index.html)
 
 
 ### Manage AWS access via App-Interface (`/aws/group-1.yml`) using Terraform
 
-[teams](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/teams) contains all the teams that are being services by the App-SRE team. Inside of those directories, there is a `users` folder that lists all the `users` that are linked to that team. Each `user` has a list of assiciated `roles`. A `role` can be used to grant AWS access to a user, by adding the `user` to an AWS `group`.
+[teams](/data/teams) contains all the teams that are being services by the App-SRE team. Inside of those directories, there is a `users` folder that lists all the `users` that are linked to that team. Each `user` has a list of assiciated `roles`. A `role` can be used to grant AWS access to a user, by adding the `user` to an AWS `group`.
 
 Groups declaration enforce [this JSON schema](/schemas/aws/group-1.yml). Note that it contains a reference to the AWS account in which the group exists.
 
@@ -566,7 +580,7 @@ This user policy file a description, which explains the permissions allowed by t
 
 ### Manage AWS resources via App-Interface (`/openshift/namespace-1.yml`) using Terraform
 
-[services](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/services) contains all the services that are being run by the App-SRE team. Inside of those directories, there is a `namespaces` folder that lists all the `namespaces` that are linked to that service.
+[services](/data/services) contains all the services that are being run by the App-SRE team. Inside of those directories, there is a `namespaces` folder that lists all the `namespaces` that are linked to that service.
 
 Namespaces declaration enforce [this JSON schema](/schemas/openshift/namespace-1.yml). Note that it contains a reference to the cluster in which the namespace exists.
 
@@ -585,8 +599,8 @@ In order to add or update an RDS database, you need to add them to the `terrafor
   - `app-sre`
   - `osio`
 - `identifier` - name of resource to create (or update)
-- `defaults`: path relative to [resources](https://gitlab.cee.redhat.com/service/app-interface/tree/master/resources) to a file with default values. Note that it starts with `/`. Current options:
-  - [rds](https://gitlab.cee.redhat.com/service/app-interface/tree/master/resources/terraform/resources/rds-1.yml) - `/terraform/resources/rds-1.yml`
+- `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. Current options:
+  - [rds](/resources/terraform/resources/rds-1.yml) - `/terraform/resources/rds-1.yml`
 - `overrides`: list of values from `defaults` you wish to override, with the override values. For example: `engine: mysql`.
 
 Once the changes are merged, the RDS instance will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
@@ -609,8 +623,8 @@ In order to add or update an S3 bucket, you need to add them to the `terraformRe
   - `app-sre`
   - `osio`
 - `identifier` - name of resource to create (or update)
-- `defaults`: path relative to [resources](https://gitlab.cee.redhat.com/service/app-interface/tree/master/resources) to a file with default values. Note that it starts with `/`. Current options:
-  - [s3](https://gitlab.cee.redhat.com/service/app-interface/tree/master/resources/terraform/resources/s3-1.yml) - `/terraform/resources/s3-1.yml`
+- `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. Current options:
+  - [s3](/resources/terraform/resources/s3-1.yml) - `/terraform/resources/s3-1.yml`
 - `overrides`: list of values from `defaults` you wish to override, with the override values. For example: `acl: public`.
 
 Once the changes are merged, the S3 bucket will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
