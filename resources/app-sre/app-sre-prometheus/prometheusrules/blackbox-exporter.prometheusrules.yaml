@@ -36,23 +36,33 @@ spec:
   - name: ssl.blackbox.rules
     interval: 5m
     rules:
-    - alert: SSLCertExpiry10d
+    - alert: SSLCertExpiry20d
       labels:
         severity: medium
-      expr: probe_ssl_earliest_cert_expiry{job=~"blackbox_exporter.*"} - time() < 86400 * 10
+      expr: floor((probe_ssl_earliest_cert_expiry - time()) / 86400) < 20
       for: 15m
       annotations:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
         dashboard: "https://grafana.app-sre.devshift.net"
-        message: "The SSL Certificate for {{ $labels.instance }} will expire in {{ printf `probe_ssl_earliest_cert_expiry{job=~'blackbox_exporter.*', instance='%s'}` $labels.instance | query | first | value }} days"
+        message: "The SSL Certificate for {{ $labels.instance }} will expire in {{ $value }} days"
+        link_url: "{{ $labels.instance }}"
+    - alert: SSLCertExpiry10d
+      labels:
+        severity: medium
+      expr: floor((probe_ssl_earliest_cert_expiry - time()) / 86400) < 10
+      for: 15m
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "The SSL Certificate for {{ $labels.instance }} will expire in {{ $value }} days"
         link_url: "{{ $labels.instance }}"
     - alert: SSLCertExpiry3d
       labels:
         severity: critical
-      expr: probe_ssl_earliest_cert_expiry{job=~"blackbox_exporter.*"} - time() < 86400 * 3
+      expr: floor((probe_ssl_earliest_cert_expiry - time()) / 86400) < 3
       for: 15m
       annotations:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
         dashboard: "https://grafana.app-sre.devshift.net"
-        message: "The SSL Certificate for {{ $labels.instance }} will expire in {{ printf `probe_ssl_earliest_cert_expiry{job=~'blackbox_exporter.*', instance='%s'}` $labels.instance | query | first | value }} days"
+        message: "The SSL Certificate for {{ $labels.instance }} will expire in {{ $value }} days"
         link_url: "{{ $labels.instance }}"
