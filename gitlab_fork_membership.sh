@@ -7,6 +7,7 @@ GITLAB_API="$GITLAB_URL/api/v4"
 GITLAB_PROJECTS_URL="$GITLAB_API/projects"
 SOURCE_PROJECT_ID=$(curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" $GITLAB_PROJECTS_URL/$gitlabMergeRequestTargetProjectId/merge_requests/$gitlabMergeRequestIid | jq .source_project_id)
 PROJECT_MEMBERS=$(curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" $GITLAB_PROJECTS_URL/$SOURCE_PROJECT_ID/members)
+BLOCKED_LABEL="blocked/devtools-bot-access"
 
 APP_SRE_BOT_ID=3889
 
@@ -26,10 +27,17 @@ done
 
 # if bot is not a maintainer on the fork - add error note on merge request and exit
 if [[ "$exit_status" != "0" ]]; then
+
     # '!' stands for new line
     NOTE="@$gitlabSourceNamespace, this fork of 'app-interface' is not shared with [devtools-bot]($GITLAB_URL/devtools-bot) as 'Maintainer'.!!Please [add the user to the project](https://docs.gitlab.com/ee/user/project/members/#add-a-user) and retest by commenting '[test]' on the merge request."
     URL_NOTE=$(echo $NOTE | sed -e "s| |%20|g" -e "s|!|%0A|g" -e "s|'|%60|g" -e "s|\[|%5B|g" -e "s|\]|%5D|g" -e "s|(|%28|g" -e "s|)|%29|g" -e "s|#|%23|g" -e "s|@|%40|g" -e "s|,|%2C|g")
     curl -s --request POST --header "PRIVATE-TOKEN: $GITLAB_TOKEN" $GITLAB_PROJECTS_URL/$gitlabMergeRequestTargetProjectId/merge_requests/$gitlabMergeRequestIid/notes?body=$URL_NOTE
+
+    # add blocked label on the merge request
+    LABELS=$(curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" $GITLAB_PROJECTS_URL/$gitlabMergeRequestTargetProjectId/merge_requests/$gitlabMergeRequestIid | jq -r .labels[] | grep -v $BLOCKED_LABEL && echo $BLOCKED_LABEL)
+    NEW_LABELS=""
+    for l in $LABELS; do NEW_LABELS="${NEW_LABELS}${NEW_LABELS:+,}$l"; done
+    curl -s --request PUT --header "PRIVATE-TOKEN: $GITLAB_TOKEN" $GITLAB_PROJECTS_URL/$gitlabMergeRequestTargetProjectId/merge_requests/$gitlabMergeRequestIid?labels=$NEW_LABELS
     exit $exit_status
 fi
 
@@ -50,3 +58,9 @@ for u in $USERS; do
     fi
     curl -s --request POST --header "PRIVATE-TOKEN: $GITLAB_TOKEN" --data "user_id=$USER_ID&access_level=40" $GITLAB_PROJECTS_URL/$SOURCE_PROJECT_ID/members > /dev/null
 done
+
+# remove blocked label from the merge request
+LABELS=$(curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" $GITLAB_PROJECTS_URL/$gitlabMergeRequestTargetProjectId/merge_requests/$gitlabMergeRequestIid | jq -r .labels[] | grep -v $BLOCKED_LABEL)
+NEW_LABELS=""
+for l in $LABELS; do NEW_LABELS="${NEW_LABELS}${NEW_LABELS:+,}$l"; done
+curl -s --request PUT --header "PRIVATE-TOKEN: $GITLAB_TOKEN" $GITLAB_PROJECTS_URL/$gitlabMergeRequestTargetProjectId/merge_requests/$gitlabMergeRequestIid?labels=$NEW_LABELS
