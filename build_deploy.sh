@@ -147,6 +147,7 @@ run_int ldap-users &
 run_int terraform-users &
 run_vault_reconcile_integration &
 run_int openshift-groups &
+run_int jenkins-plugins &
 run_int jenkins-roles &
 
 run_int openshift-namespaces
