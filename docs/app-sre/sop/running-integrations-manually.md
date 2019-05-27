@@ -24,8 +24,10 @@ export VAULT_ADDR=https://vault.devshift.net
 export TOKEN=$(cat ~/path/to/github/token)
 vault login -method=github token=$TOKEN
 
-# get the config file from vault
+# get the config file from vault using the CLI:
 vault kv get -field=data_base64 app-sre/ci-int/qontract-reconcile-toml | base64 -d > config.debug.toml
+
+You can also get the file directly from: https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-int/qontract-reconcile-toml
 
 # run the integration with --dry-run (in this example - terraform-resources)
 qontract-reconcile --config config.debug.toml --dry-run terraform-resources
