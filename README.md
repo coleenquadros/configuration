@@ -205,6 +205,8 @@ wheel icon (top-right corner) and replace `omit` with `include` in
 - Management of cluster monitoring, such as prometheus and alert manager.
 - Management of AWS resources.
 - Management of AWS users.
+- Management of Jenkins roles association.
+- Management of Jenkins plugins installation.
 
 ### Planned integrations
 
