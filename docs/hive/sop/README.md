@@ -4,6 +4,7 @@
 
 - [SOP : OpenShift Telemeter](#sop--openshift-telemeter)
     - [ControllerErrorsHigh](#controllererrorshigh)
+    - [InstallJobDelayHigh](InstallJobDelayHigh.md)
     - [InstallJobHighDuration](#installjobhighduration)
     - [HiveDown](#hivedown)
     - [Escalations](#escalations)
