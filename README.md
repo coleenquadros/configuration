@@ -638,6 +638,16 @@ The Secret will contain the following fields:
 - `aws_secret_access_key` - The secret access key.
 
 
+### Delete AWS IAM access keys via App-Interface
+
+AWS IAM keys deletion can be entirely self-services via App-Interface.
+
+In order to delete a key from an AWS account, add the Access key ID to the `deleteKeys` list in the AWS Account file.
+For example, merging [this](/data/aws/osio/account.yml#L11) line will delete the Access key with ID `AKIAVT6AWJBAILFXBV4A` from the `osio` account.
+
+One use case this is useful for is leaked keys.
+
+
 ## Design
 
 Additional design information: [here](docs/app-interface/design.md).
