@@ -203,10 +203,11 @@ wheel icon (top-right corner) and replace `omit` with `include` in
 - Management of OpenShift Routes using Vault.
 - Management of Vault configurations.
 - Management of cluster monitoring, such as prometheus and alert manager.
-- Management of AWS resources.
-- Management of AWS users.
 - Management of Jenkins roles association.
 - Management of Jenkins plugins installation.
+- Management of AWS resources.
+- Management of AWS users.
+- Deletion of AWS keys per AWS account.
 
 ### Planned integrations
 
