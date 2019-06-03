@@ -149,6 +149,8 @@ run_vault_reconcile_integration &
 run_int openshift-groups &
 run_int jenkins-plugins &
 run_int jenkins-roles &
+run_int aws-garbage-collector &
+run_int aws-iam-keys &
 
 run_int openshift-namespaces
 
