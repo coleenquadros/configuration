@@ -207,6 +207,7 @@ wheel icon (top-right corner) and replace `omit` with `include` in
 - Management of Jenkins plugins installation.
 - Management of AWS resources.
 - Management of AWS users.
+- Deletion of orphan AWS resources.
 - Deletion of AWS keys per AWS account.
 
 ### Planned integrations
