@@ -649,6 +649,27 @@ For example, merging [this](/data/aws/osio/account.yml#L11) line will delete the
 One use case this is useful for is leaked keys.
 
 
+### AWS garbage collection
+
+AWS resources which do NOT have one of the following are continuously garbage collected:
+
+* the resource name starts with the name of an existing IAM user
+* The resource name has "stage" or "prod" in it
+* The resource has one of these tags:
+  * `managed_by_integration` - resources managed by the `terraform-resources` or `terraform-users` integrations
+  * `owner` - resources managed by `app-sre` team terraform configurations in [housekeeping](https://gitlab.cee.redhat.com/dtsd/housekeeping/tree/master/terraform)
+  * `aws_gc_hands_off` - resources created manually, if tag is set to `true`
+
+Supported resource types are:
+* S3
+* SQS
+* RDS
+* DynamoDB
+
+Notes:
+* This integration does not actually delete resources currently (disabled by default), but it will still list resources that would have otherwise been deleted in every PR check.
+
+
 ## Design
 
 Additional design information: [here](docs/app-interface/design.md).
