@@ -651,14 +651,15 @@ One use case this is useful for is leaked keys.
 
 ### AWS garbage collection
 
-AWS resources which do NOT have one of the following are continuously garbage collected:
+AWS resources which do *NOT* have one of the following properties are continuously garbage collected:
 
-* the resource name starts with the name of an existing IAM user
-* The resource name has "stage" or "prod" in it
+* The resource name starts with the name of an existing IAM user
+* The resource name has `stage` or `prod` in it
 * The resource has one of these tags:
   * `managed_by_integration` - resources managed by the `terraform-resources` or `terraform-users` integrations
   * `owner` - resources managed by `app-sre` team terraform configurations in [housekeeping](https://gitlab.cee.redhat.com/dtsd/housekeeping/tree/master/terraform)
   * `aws_gc_hands_off` - resources created manually, if tag is set to `true`
+  * `ENV`/`environment` - resources which are related to `stage` or `prod`
 
 Supported resource types are:
 * S3
