@@ -570,6 +570,12 @@ To get your base64 encoded binary GPG key from an [ascii armored output](https:/
 cat <redhat_username>.gpg.asc | gpg --dearmor | base64
 ```
 
+To test if your binary base64 encoded GPG key in MR is good You may put part of MR containing key to some file (f.e. FILENAME) and use command:
+```
+cat FILENAME | sed -e 's/\ //g'| base64 -d | gpg
+```
+
+
 #### How to determine my AWS permissions
 
 Your user file contains a list of `roles`. Each AWS related role contains a list of AWS groups and/or AWS user policies.
