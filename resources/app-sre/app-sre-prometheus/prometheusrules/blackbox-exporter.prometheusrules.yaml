@@ -31,6 +31,20 @@ spec:
         runbook: "https://www.robustperception.io/debugging-blackbox-exporter-failures"
         dashboard: "https://grafana.app-sre.devshift.net"
         message: "{{ $labels.instance }} has been unreachable for 5 minutes."
+        link_url: "{{ $labels.instance }}
+  # Check for 3xx redirects
+  - name: 3xx.blackbox.rules
+    interval: 1m
+    rules:
+    - alert: 3xxProbeFailing - Production
+      labels:
+        severity: test
+      expr: up{job="blackbox_3xx_prod"} == 0 or probe_success{job="blackbox_3xx_prod"} == 0
+      for: 5m
+      annotations:
+        runbook: "https://www.robustperception.io/debugging-blackbox-exporter-failures"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "{{ $labels.instance }} failing to redirect as expected"
         link_url: "{{ $labels.instance }}"
   # SSL cert expiry rules, independant of stage or prod
   - name: ssl.blackbox.rules
