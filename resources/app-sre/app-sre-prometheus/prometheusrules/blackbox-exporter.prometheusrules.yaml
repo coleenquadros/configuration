@@ -46,6 +46,20 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net"
         message: "{{ $labels.instance }} failing to redirect as expected"
         link_url: "{{ $labels.instance }}"
+  # Site-specific content checks
+  - name: http_body_content_try_openshift_com.blackbox.rules
+    interval: 1m
+    rules:
+    - alert: ContentCheck - Production
+      labels:
+        severity: medium
+      expr: up{job="blackbox_http_body_content_try_openshift_com"} == 0 or probe_success{job="blackbox_http_body_content_try_openshift_com"} == 0
+      for: 5m
+      annotations:
+        runbook: "https://www.robustperception.io/debugging-blackbox-exporter-failures"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "{{ $labels.instance }} content didn't match what was expected"
+        link_url: "{{ $labels.instance }}"
   # SSL cert expiry rules, independant of stage or prod
   - name: ssl.blackbox.rules
     interval: 5m
