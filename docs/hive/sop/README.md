@@ -1,57 +1,9 @@
-# SOP : OpenShift Telemeter
+# SOP : OpenShift Hive
 
 <!-- TOC depthTo:2 -->
 
-- [SOP : OpenShift Telemeter](#sop--openshift-telemeter)
-    - [ControllerErrorsHigh](#controllererrorshigh)
+- [SOP : OpenShift Hive](#sop--openshift-hive)
     - [InstallJobDelayHigh](InstallJobDelayHigh.md)
-    - [InstallJobHighDuration](#installjobhighduration)
-    - [HiveDown](#hivedown)
-    - [Escalations](#escalations)
+    - [ClusterProvisioningDelay](ClusterProvisioningDelay.md)
 
 <!-- /TOC -->
-
----
-
-## ControllerErrorsHigh
-
-### Impact: 
-
-### Summary: 
-
-### Access required:
-
-### Steps: 
-
----
-
-## InstallJobHighDuration
-
-### Impact: 
-
-### Summary: 
-
-### Access required:
-
-### Relevant secrets:
-
-### Steps: 
-
----
-
-## HiveDown 
-
-### Impact: 
-
-### Summary: 
-
-### Access required:
-
-### Relevant secrets:
-
-### Steps: 
-
----
-
-## Escalations
-We want a link to app-interface here, but okay to just contacts here for now. 
