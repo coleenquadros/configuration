@@ -84,6 +84,9 @@ wait_response \
 mkdir -p config
 echo "$CONFIG_TOML" | base64 -d > config/config.toml
 
+# Create directory for throughput between integrations
+mkdir -p throughput
+
 SUCCESS_DIR=reports/reconcile_reports_success
 FAIL_DIR=reports/reconcile_reports_fail
 rm -rf ${SUCCESS_DIR} ${FAIL_DIR}; mkdir -p ${SUCCESS_DIR} ${FAIL_DIR}
@@ -96,6 +99,8 @@ run_int() {
   STARTTIME=$(date +%s)
   docker run --rm \
     -v `pwd`/config:/config:z \
+    -v `pwd`/throughput:/throughput:z \
+    -w / \
     ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
     qontract-reconcile --config /config/config.toml $1 \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-${1}.txt
