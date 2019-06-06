@@ -614,8 +614,9 @@ In order to add or update an RDS database, you need to add them to the `terrafor
   - [rds](/resources/terraform/resources/rds-1.yml) - `/terraform/resources/rds-1.yml`
 - `overrides`: list of values from `defaults` you wish to override, with the override values. For example: `engine: mysql`.
 - `output_resource_name`: name of Kubernetes Secret to be created.
+  - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
-  - For example, for a resource with `identifier` "my-instance" and `provider` "rds", the created Secret will be called `my-instance-rds`.
+    - For example, for a resource with `identifier` "my-instance" and `provider` "rds", the created Secret will be called `my-instance-rds`.
 
 Once the changes are merged, the RDS instance will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
@@ -642,7 +643,9 @@ In order to add or update an S3 bucket, you need to add them to the `terraformRe
   - [s3](/resources/terraform/resources/s3-1.yml) - `/terraform/resources/s3-1.yml`
 - `overrides`: list of values from `defaults` you wish to override, with the override values. For example: `acl: public`.
 - `output_resource_name`: name of Kubernetes Secret to be created.
-  - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`. For example, for a resource with `identifier` "my-bucket" and `provider` "s3", the created Secret will be called `my-bucket-s3`.
+  - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
+  - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
+    - For example, for a resource with `identifier` "my-bucket" and `provider` "s3", the created Secret will be called `my-bucket-s3`.
 
 Once the changes are merged, the RDS instance will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
