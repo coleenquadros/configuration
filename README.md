@@ -608,13 +608,17 @@ In order to add or update an RDS database, you need to add them to the `terrafor
 - `account`: must be one of the AWS account names we manage. Current options:
   - `app-sre`
   - `osio`
+  - `osio-dev`
 - `identifier` - name of resource to create (or update)
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. Current options:
   - [rds](/resources/terraform/resources/rds-1.yml) - `/terraform/resources/rds-1.yml`
 - `overrides`: list of values from `defaults` you wish to override, with the override values. For example: `engine: mysql`.
+- `output_resource_name`: name of Kubernetes Secret to be created.
+  - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
+  - For example, for a resource with `identifier` "my-instance" and `provider` "rds", the created Secret will be called `my-instance-rds`.
 
 Once the changes are merged, the RDS instance will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
-The name of the secret will be `<identifier>-<provider>`. For example, for a resource with `identifier` "my-instance" and `provider` "rds", the created Secret will be called `my-instance-rds`.
+
 The Secret will contain the following fields:
 - `db.host` - The hostname of the RDS instance.
 - `db.port` - The database port.
@@ -632,13 +636,16 @@ In order to add or update an S3 bucket, you need to add them to the `terraformRe
 - `account`: must be one of the AWS account names we manage. Current options:
   - `app-sre`
   - `osio`
+  - `osio-dev`
 - `identifier` - name of resource to create (or update)
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. Current options:
   - [s3](/resources/terraform/resources/s3-1.yml) - `/terraform/resources/s3-1.yml`
 - `overrides`: list of values from `defaults` you wish to override, with the override values. For example: `acl: public`.
+- `output_resource_name`: name of Kubernetes Secret to be created.
+  - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`. For example, for a resource with `identifier` "my-bucket" and `provider` "s3", the created Secret will be called `my-bucket-s3`.
 
-Once the changes are merged, the S3 bucket will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
-The name of the secret will be `<identifier>-<provider>`. For example, for a resource with `identifier` "my-bucket" and `provider` "s3", the created Secret will be called `my-bucket-s3`.
+Once the changes are merged, the RDS instance will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
+
 The Secret will contain the following fields:
 - `bucket` - The name of the bucket.
 - `aws_access_key_id` - The access key ID.
