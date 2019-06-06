@@ -90,6 +90,7 @@ run_int() {
   STARTTIME=$(date +%s)
   docker run --rm \
     -v ${TEMP_DIR}/config:/config:z \
+    -v ${TEMP_DIR}/throughput:/throughput:z \
     ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
     qontract-reconcile --config /config/config.toml --dry-run $1 \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-${1}.txt
