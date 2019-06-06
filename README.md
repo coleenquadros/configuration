@@ -210,6 +210,8 @@ wheel icon (top-right corner) and replace `omit` with `include` in
 - Deletion of orphan AWS resources.
 - Deletion of AWS keys per AWS account.
 
+* A dependency matrix between the integrations can be found [here](/integrations_dependencies.md).
+
 ### Planned integrations
 
 - Top level tracking of managed services, their contact points, and work
