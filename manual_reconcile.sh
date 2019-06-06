@@ -63,6 +63,9 @@ cat "$CONFIG_TOML" \
   | sed "s|https://app-interface.devshift.net/graphql|http://$IP:4000/graphql|" \
   > ${TEMP_DIR}/config/config.toml
 
+# Create directory for throughput between integrations
+mkdir -p ${TEMP_DIR}/throughput
+
 # wait until the service loads the data
 SHA256=$(sha256sum ${DATAFILES_BUNDLE} | awk '{print $1}')
 while [[ ${count} -lt 20 ]]; do
@@ -91,6 +94,7 @@ run_int() {
   docker run --rm \
     -v ${TEMP_DIR}/config:/config:z \
     -v ${TEMP_DIR}/throughput:/throughput:z \
+    -w / \
     ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
     qontract-reconcile --config /config/config.toml --dry-run $1 \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-${1}.txt
