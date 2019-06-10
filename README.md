@@ -612,8 +612,7 @@ In order to add or update an RDS database, you need to add them to the `terrafor
   - `osio`
   - `osio-dev`
 - `identifier` - name of resource to create (or update)
-- `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. Current options:
-  - [rds](/resources/terraform/resources/rds-1.yml) - `/terraform/resources/rds-1.yml`
+- `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options](/resources/terraform/resources/)
 - `overrides`: list of values from `defaults` you wish to override, with the override values. For example: `engine: mysql`.
 - `output_resource_name`: name of Kubernetes Secret to be created.
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
@@ -641,8 +640,7 @@ In order to add or update an S3 bucket, you need to add them to the `terraformRe
   - `osio`
   - `osio-dev`
 - `identifier` - name of resource to create (or update)
-- `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. Current options:
-  - [s3](/resources/terraform/resources/s3-1.yml) - `/terraform/resources/s3-1.yml`
+- `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options:](/resources/terraform/resources/)
 - `overrides`: list of values from `defaults` you wish to override, with the override values. For example: `acl: public`.
 - `output_resource_name`: name of Kubernetes Secret to be created.
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
