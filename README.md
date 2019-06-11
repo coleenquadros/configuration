@@ -207,6 +207,7 @@ wheel icon (top-right corner) and replace `omit` with `include` in
 - Management of Jenkins plugins installation.
 - Management of AWS resources.
 - Management of AWS users.
+- Management of Slack User Groups.
 - Deletion of orphan AWS resources.
 - Deletion of AWS keys per AWS account.
 
@@ -653,7 +654,6 @@ The Secret will contain the following fields:
 - `bucket` - The name of the bucket.
 - `aws_access_key_id` - The access key ID.
 - `aws_secret_access_key` - The secret access key.
-
 
 ### Delete AWS IAM access keys via App-Interface
 
