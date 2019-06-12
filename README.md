@@ -655,6 +655,28 @@ The Secret will contain the following fields:
 - `aws_access_key_id` - The access key ID.
 - `aws_secret_access_key` - The secret access key.
 
+### Manage Slack User groups via App-Interface
+
+Slack User groups can be self-services via App-Interface.
+
+To manage a User group via App-Interface, add a `permission` file with the following details:
+
+- `name`: name for the permission
+- `description`: description of the User group (currently not automated)
+- `service`: `slack-usergroup`
+- `handle`: the handle of the User group
+- `workspace`: a reference to a file representing the Slack Workspace
+- `channels`: a list of channels to add to the User group
+
+Add this permission to the desired `roles`.
+
+An example for the `app-sre-team` User group permission can be found [here](/data/teams/app-sre/permissions/app-sre-team-coreos-slack.yml)
+An example for a role that has this permission can be found [here](/data/teams/app-sre/roles/app-sre-slack.yml)
+
+Notes:
+* Creating new User groups is currently not supported (User group has to pre-exist).
+
+
 ### Delete AWS IAM access keys via App-Interface
 
 AWS IAM keys deletion can be entirely self-services via App-Interface.
