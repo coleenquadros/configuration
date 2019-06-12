@@ -7,7 +7,7 @@
 **Impact:** Prometheus will stop reporting the OSIO clusters capacity. Graphs and dashboards are affected as well as all some alerts around OSIO cluster capacity.
 
 **Troubleshooting:**
-- Verify that the exporter deployment in the `app-sre-observability` namespace of the `app-sre` cluster.
+- Verify that the exporter deployment in the `app-sre-prometheus` namespace of the `app-sre` cluster.
 - Manually run prometheus queries to see if there is data
     - `onlinereg_subscriber_limit`
     - `onlinereg_hidden`
