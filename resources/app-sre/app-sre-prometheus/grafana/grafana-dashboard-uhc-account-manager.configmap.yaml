@@ -2,8 +2,23 @@ apiVersion: v1
 data:
   grafana-dashboard-uhc-account-manager.json: |-
     {
-      "__inputs": [],
+      "__inputs": [
+        {
+          "name": "DS_AWS_APP-SRE",
+          "label": "AWS app-sre",
+          "description": "",
+          "type": "datasource",
+          "pluginId": "cloudwatch",
+          "pluginName": "CloudWatch"
+        }
+      ],
       "__requires": [
+        {
+          "type": "datasource",
+          "id": "cloudwatch",
+          "name": "CloudWatch",
+          "version": "1.0.0"
+        },
         {
           "type": "grafana",
           "id": "grafana",
@@ -46,9 +61,122 @@ data:
       "gnetId": null,
       "graphTooltip": 1,
       "id": null,
-      "iteration": 1558699334336,
+      "iteration": 1560373196132,
       "links": [],
       "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "${DS_AWS_APP-SRE}",
+          "description": "Select rdsDB name above",
+          "fill": 1,
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 36,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "dimensions": {
+                "DBInstanceIdentifier": "$rdsDB"
+              },
+              "expression": "",
+              "highResolution": false,
+              "id": "",
+              "metricName": "DatabaseConnections",
+              "namespace": "AWS/RDS",
+              "period": "",
+              "refId": "A",
+              "region": "us-east-1",
+              "returnData": false,
+              "statistics": [
+                "Average"
+              ]
+            }
+          ],
+          "thresholds": [
+            {
+              "colorMode": "critical",
+              "fill": true,
+              "line": true,
+              "op": "gt",
+              "value": 170,
+              "yaxis": "left"
+            },
+            {
+              "colorMode": "warning",
+              "fill": true,
+              "line": true,
+              "op": "gt",
+              "value": 120,
+              "yaxis": "left"
+            }
+          ],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Database connections",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "none",
+              "label": null,
+              "logBase": 1,
+              "max": "200",
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
         {
           "aliasColors": {},
           "bars": false,
@@ -60,7 +188,7 @@ data:
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 0
+            "y": 8
           },
           "id": 29,
           "legend": {
@@ -154,7 +282,7 @@ data:
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 8
+            "y": 16
           },
           "id": 33,
           "legend": {
@@ -242,7 +370,7 @@ data:
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 16
+            "y": 24
           },
           "id": 32,
           "legend": {
@@ -330,7 +458,7 @@ data:
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 24
+            "y": 32
           },
           "id": 30,
           "legend": {
@@ -432,7 +560,7 @@ data:
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 32
+            "y": 40
           },
           "heatmap": {},
           "hideZeroBuckets": false,
@@ -498,7 +626,7 @@ data:
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 40
+            "y": 48
           },
           "heatmap": {},
           "hideZeroBuckets": false,
@@ -572,8 +700,8 @@ data:
             "allValue": null,
             "current": {
               "tags": [],
-              "text": "uhc-staging",
-              "value": "uhc-staging"
+              "text": "uhc-production",
+              "value": "uhc-production"
             },
             "hide": 0,
             "includeAll": false,
@@ -582,12 +710,12 @@ data:
             "name": "namespace",
             "options": [
               {
-                "selected": true,
+                "selected": false,
                 "text": "uhc-staging",
                 "value": "uhc-staging"
               },
               {
-                "selected": false,
+                "selected": true,
                 "text": "uhc-production",
                 "value": "uhc-production"
               }
@@ -595,6 +723,28 @@ data:
             "query": "uhc-staging,uhc-production",
             "skipUrlSync": false,
             "type": "custom"
+          },
+          {
+            "allValue": null,
+            "current": {},
+            "datasource": "${DS_AWS_APP-SRE}",
+            "definition": "dimension_values(us-east-1, AWS/RDS, DatabaseConnections, DBInstanceIdentifier)",
+            "hide": 0,
+            "includeAll": false,
+            "label": null,
+            "multi": false,
+            "name": "rdsDB",
+            "options": [],
+            "query": "dimension_values(us-east-1, AWS/RDS, DatabaseConnections, DBInstanceIdentifier)",
+            "refresh": 1,
+            "regex": ".*uhc-acct-mngr.*",
+            "skipUrlSync": false,
+            "sort": 1,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
           }
         ]
       },
