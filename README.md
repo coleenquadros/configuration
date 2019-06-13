@@ -659,22 +659,28 @@ The Secret will contain the following fields:
 
 Slack User groups can be self-services via App-Interface.
 
-To manage a User group via App-Interface, add a `permission` file with the following details:
+To manage a User group via App-Interface:
+
+1. Add a `permission` file with the following details:
 
 - `name`: name for the permission
 - `description`: description of the User group (currently not automated)
 - `service`: `slack-usergroup`
 - `handle`: the handle of the User group
 - `workspace`: a reference to a file representing the Slack Workspace
+- `pagerduty`: a reference to a file representing a PagerDuty schedule.
+  * Adding this attribute will add the PagerDuty schedule as an additional "source of truth", and will add the final schedule user to the Slack user group (in addition to any references from user files).
 - `channels`: a list of channels to add to the User group
 
-Add this permission to the desired `roles`.
+2. Add this permission to the desired `roles`, or create a new `role` with this permission only (mandatory).
 
 An example for the `app-sre-team` User group permission can be found [here](/data/teams/app-sre/permissions/app-sre-team-coreos-slack.yml)
 An example for a role that has this permission can be found [here](/data/teams/app-sre/roles/app-sre-slack.yml)
+An example for the `app-sre-ic` User group permission which is also synced with a PagerDuty schedule can be found [here](/data/teams/app-sre/permissions/app-sre-ic-coreos-slack.yml)
 
 Notes:
 * Creating new User groups is currently not supported (User group has to pre-exist).
+* In order to be able to use the `pagerduty` attribute of a `permission`, the relevant users (ones from that PagerDuty schedule) should have the `slack_username` and `pagerduty_name` attributes in their `user` files.
 
 
 ### Delete AWS IAM access keys via App-Interface
