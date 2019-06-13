@@ -674,9 +674,11 @@ To manage a User group via App-Interface:
 
 2. Add this permission to the desired `roles`, or create a new `role` with this permission only (mandatory).
 
-An example for the `app-sre-team` User group permission can be found [here](/data/teams/app-sre/permissions/app-sre-team-coreos-slack.yml)
-An example for a role that has this permission can be found [here](/data/teams/app-sre/roles/app-sre-slack.yml)
-An example for the `app-sre-ic` User group permission which is also synced with a PagerDuty schedule can be found [here](/data/teams/app-sre/permissions/app-sre-ic-coreos-slack.yml)
+Examples:
+* An example for the `app-sre-team` User group permission can be found [here](/data/teams/app-sre/permissions/app-sre-team-coreos-slack.yml)
+* An example for a role that has this permission can be found [here](/data/teams/app-sre/roles/app-sre-slack.yml)
+* An example for the `app-sre-ic` User group permission which is also synced with a PagerDuty schedule can be found [here](/data/teams/app-sre/permissions/app-sre-ic-coreos-slack.yml)
+* An example for a PagerDuty schedule file can be found [here](/data/dependencies/pagerduty/app-sre-primary.yml).
 
 Notes:
 * Creating new User groups is currently not supported (User group has to pre-exist).
