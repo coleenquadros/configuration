@@ -1,0 +1,33 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: dh-stage-prometheus-lts
+description: stage namespace for Telemeter global view dashboards
+
+cluster:
+  $ref: /openshift/datahub-psi/cluster.yml
+
+app:
+  $ref: /services/telemeter-ocp-dashboards/app.yml
+
+managedRoles:
+- view
+
+managedResourceTypes:
+- Secret
+- ConfigMap
+
+## Grafana
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-prometheus/grafana/grafana-config
+  version: 7
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-prometheus/grafana/grafana-datasources
+  version: 4
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-prometheus/grafana/grafana-proxy-config
+  version: 1
+- provider: resource
+  path: /app-sre/app-sre-prometheus/grafana/grafana-dashboard-appsre-grafana.configmap.yaml
