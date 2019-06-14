@@ -3,6 +3,7 @@
 <!-- TOC depthTo:2 -->
 
 - [SOP : OpenShift Telemeter](#sop--openshift-telemeter)
+    - [Verify it's working](#verify-its-working)
     - [AuthorizeClientErrorsHigh](#authorizeclienterrorshigh)
     - [OAuthClientErrorsHigh](#oauthclienterrorshigh)
     - [TelemeterDown](#telemeterdown)
@@ -13,21 +14,27 @@
 
 ---
 
+## Verify it's working
+
+- `telemeter-server` targets are UP in info-gw: https://infogw-data.api.openshift.com/targets#job-telemeter-server
+- `telemeter-server` targets are UP in app-sre prom: https://prometheus.app-sre.devshift.net/targets#job-telemeter-server
+- `Upload Handler` is returning 200s: https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&from=now-6h&to=now
+
 ## AuthorizeClientErrorsHigh
 
-### Impact: 
+### Impact:
 
 New clusters are not able to fetch an authorization token.
 We are lucky if clusters are already authorized.
 We issue clusters inside telemeter a JWT token for 12 hours.
 All existing clusters will be okay for 12h window since last authorized.
 
-The error is related to clusters which are either: 
+The error is related to clusters which are either:
 - New clusters trying to authorize.
 - Existing clusters who already have authorized,
 but the 12h window for the token has expired
 
-### Summary: 
+### Summary:
 
 Telemeter is recieving errors at a high rate from Tollbooth
 
@@ -38,7 +45,7 @@ Telemeter is recieving errors at a high rate from Tollbooth
     - telemeter-stage
     - telemeter-production
 
-### Steps: 
+### Steps:
 
 - Contact Tollbooth team, investigate why Tollbooth is failing to authorize cluster IDs.
 
@@ -46,11 +53,11 @@ Telemeter is recieving errors at a high rate from Tollbooth
 
 ## OAuthClientErrorsHigh
 
-### Impact: 
+### Impact:
 
 Clusters are not able to fetch a new authorization token or renew it.
 
-### Summary: 
+### Summary:
 
 Telemeter server itself uses OAuth to authorize against tollbooth.
 It uses an access token, issued by RedHat's OAuth server (Keycloak).
@@ -66,19 +73,19 @@ at a high rate from Keycloak.
 
 ### Relevant secrets:
 
-### Steps: 
+### Steps:
 
 - Contact Keycloak team, investigate why Keycloack is failing to authorize Telemeter server.
 
 ---
 
-## TelemeterDown 
+## TelemeterDown
 
 ### Impact:
 
 Clusters are not able to push metrics.
 
-### Summary: 
+### Summary:
 
 Telemeter Server is down and not serving any requests.
 
@@ -97,13 +104,13 @@ Telemeter Server is down and not serving any requests.
 
 ---
 
-## UploadHandlerErrorsHigh 
+## UploadHandlerErrorsHigh
 
-### Impact: 
+### Impact:
 
 Clusters are not able to push metrics.
 
-### Summary: 
+### Summary:
 
 Upload errors happen, when metrics data is malformed or validation of metrics fails.
 Most likely the metrics payload is broken and thus possibly the telemeter metrics client.
@@ -135,4 +142,4 @@ Note that the above steps should be performed on a throw-away cluster, as the op
 ---
 
 ## Escalations
-We want a link to app-interface here, but okay to just contacts here for now. 
+We want a link to app-interface here, but okay to just contacts here for now.
