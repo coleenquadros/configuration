@@ -93,6 +93,7 @@ run_int() {
   STARTTIME=$(date +%s)
   docker run --rm \
     -v ${TEMP_DIR}/config:/config:z \
+    -v /etc/pki:/etc/pki:z \
     -v ${TEMP_DIR}/throughput:/throughput:z \
     -w / \
     ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
