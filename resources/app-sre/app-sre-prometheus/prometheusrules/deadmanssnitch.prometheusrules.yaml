@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: deadmanssnitch
+spec:
+  groups:
+  - name: deadmanssnitch
+    rules:
+    - alert: SnitchHeartBeat
+      interval: 1m
+      annotations:
+        message: SnitchHeartBeat
+      expr: vector(1)
+      labels:
+        severity: deadman
+        message: "{{ $labels.instance }} has not reported to Deadmanssnitch"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/sop/prometheus-deadmanssnitch.md"
