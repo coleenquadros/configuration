@@ -94,6 +94,7 @@ run_int() {
   docker run --rm \
     -v ${TEMP_DIR}/config:/config:z \
     -v /etc/pki:/etc/pki:z \
+    -e REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem \
     -v ${TEMP_DIR}/throughput:/throughput:z \
     -w / \
     ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
