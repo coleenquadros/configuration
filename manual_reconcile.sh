@@ -158,13 +158,13 @@ run_int jenkins-roles &
 run_int aws-iam-keys &
 run_int slack-usergroups &
 run_int gitlab-permissions &
-
-run_int openshift-namespaces
-
+run_int openshift-namespaces &
 run_int openshift-rolebinding &
 run_int openshift-resources &
 run_int terraform-resources &
-run_int terraform-users
+run_int terraform-users &
+
+wait
 
 run_int aws-garbage-collector &
 
