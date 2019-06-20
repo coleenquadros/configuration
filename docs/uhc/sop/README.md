@@ -173,11 +173,38 @@ Clusters service API is returning an abnormally high number of 5xx Error request
 
 ---
 
+## Gateway Down
+
+### Impact:
+
+UHC users will not be able to access any service (including the accounts
+management service, the clusters management service and the upgrades information
+service) and therefore they will not be able to use the UI or the API.
+
+### Summary:
+
+Gateway is down
+
+### Access required:
+
+- Console access to the cluster that runs the gateway (app-sre)
+- Edit access to the uhc namespaces:
+  - uhc-staging
+  - uhc-production
+
+### Steps:
+
+- Check `deployment/gateway-server` logs to determine why pods are down.
+- Contact Service Development A team on #service-delivery, sd-mp-devel@redhat.com.
+- Inform the greater service delivery team.
+
+---
+
 ## Escalations
 We want a link to app-interface here, but okay to just contacts here for now.
 
 ### Contacts:
 
-Juan Hernandes (jhernand@redhat.com)
+Juan Hernandez (jhernand@redhat.com)
 Oved Ourfali (oourfali@redhat.com)
 Nimrod Shneor (nshneor@redhat.com)
