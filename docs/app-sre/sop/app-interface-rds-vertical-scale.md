@@ -14,14 +14,19 @@ This document explains how to vertically scale an RDS instance managed through a
 
 1. Find the RDS instance you want to scale in the appropriate namespace file.
     * Example - RDS instance defition: [uhc-production/cluster-service](/data/services/uhc/namespaces/uhc-production.yml#L56)
-2. Add an `overrides` section if one does not exist. Each attribute in this section will override the defaults in the file specified in the `defaults` section.
+2. Take a snapshot of the RDS instance
+    * Find the actual RDS instance in AWS [RDS console](https://console.aws.amazon.com/rds/home?region=us-east-1#databases:)
+    * Select the instance and select `Actions` -> `Take snapshot`.
+    * The snapshot name should be of the form `<instance-identifier>-<YYYYMMDDHHmm>`.
+        * Example: `clusters-service-production-201906241126`.
+3. Add an `overrides` section if one does not exist. Each attribute in this section will override the defaults in the file specified in the `defaults` section.
     * Example - defaults file: [app-sre/production/rds defaults](/resources/terraform/resources/app-sre/production/rds-1.yml)
-3. To vertically scale, you can change one of the following attributes under `overrides`:
+4. To vertically scale, you can change one of the following attributes under `overrides`:
     * `instance_class` - select a supported instance class.
     > Note: instance class selection is limited in [app-interface schema](/schemas/openshift/namespace-1.yml#L193).
     * `allocated_storage` - increase allocated storage for the instance.
-4. Create a Merge Request to app-interface with these changes.
-5. Verify in the `terraform-resources` integration output that the change that is about to happen is of type `update` and not `replace`.
+5. Create a Merge Request to app-interface with these changes.
+6. Verify in the `terraform-resources` integration output that the change that is about to happen is of type `update` and not `replace`.
 
 ## References
 
