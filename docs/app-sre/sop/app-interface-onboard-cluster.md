@@ -1,4 +1,4 @@
-# Onboard a new cluster to app-itnerface
+# Onboard a new cluster to app-interface
 
 To on-board a new cluster to app-interface, perform the following operations:
 
