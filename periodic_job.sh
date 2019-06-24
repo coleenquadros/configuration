@@ -41,6 +41,7 @@ run_int() {
 
 run_int slack-usergroups &
 run_int ldap-users &
+run_int aws-garbage-collector &
 
 wait
 

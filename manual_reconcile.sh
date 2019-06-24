@@ -166,10 +166,6 @@ run_int terraform-users &
 
 wait
 
-run_int aws-garbage-collector &
-
-wait
-
 echo
 echo "Execution times for integrations that were executed"
 (

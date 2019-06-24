@@ -164,9 +164,7 @@ run_int openshift-namespaces
 run_int openshift-rolebinding &
 run_int openshift-resources &
 run_int terraform-resources &
-run_int terraform-users
-
-run_int aws-garbage-collector &
+run_int terraform-users &
 
 wait
 
