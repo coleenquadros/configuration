@@ -150,7 +150,6 @@ run_int github &
 run_int github-repo-invites &
 run_int quay-membership &
 run_int quay-repos &
-run_int ldap-users &
 run_vault_reconcile_integration &
 run_int openshift-groups &
 run_int jenkins-plugins &
