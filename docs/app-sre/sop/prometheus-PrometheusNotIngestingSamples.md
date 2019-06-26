@@ -22,5 +22,4 @@ Currently unknown, checking with upstream
 
 - Ping more team members in #sd-app-sre-teamchat
 - If its the prometheus operator in `openshift-monitoring`, escalate to SRE-P
-
 - An additional resource is #forum-monitoring on slack where monitoring engineering team hangs out

@@ -9,7 +9,7 @@
 
 ## Summary
 
-Prometheus Operator is seeing a high error rate on its reconcile function. This may be caused due to an invalid CR or incorrect configuration
+Prometheus failing to compact the metrics in TSDB. This alert need more investigation with upstream 
 
 ## Access required
 

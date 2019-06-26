@@ -1,4 +1,4 @@
-# Prometheus Config Reload Failed
+# Prometheus Notification queue running full
 
 ## Severity: High
 
@@ -8,7 +8,7 @@
 
 ## Summary
 
-Prometheus Operator is seeing a high error rate on its reconcile function. This may be caused due to an invalid CR or incorrect configuration
+Prometheus has too many alerts queued in its queue
 
 ## Access required
 
@@ -16,10 +16,11 @@ Prometheus Operator is seeing a high error rate on its reconcile function. This 
 
 ## Steps
 
-- Check logs for the prometheus operator in the said namespace
-- Check if there were any recent changes to the CR's in the namespace
+Currently unknown, checking with upstream
 
 ## Escalations
 
 - Ping more team members in #sd-app-sre-teamchat
 - If its the prometheus operator in `openshift-monitoring`, escalate to SRE-P
+
+- An additional resource is #forum-monitoring on slack where monitoring engineering team hangs out
