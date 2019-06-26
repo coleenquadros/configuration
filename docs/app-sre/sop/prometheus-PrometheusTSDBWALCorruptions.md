@@ -1,15 +1,14 @@
-# Prometheus TSDB reloads failing
+# Prometheus TSDB WAL corruptions
 
 ## Severity: High
 
 ## Impact
 
-- Prometheus PV/Disk will fill up rapidly
-- Risk running out of storage and taking system down
+- Unknown
 
 ## Summary
 
-Prometheus Operator is seeing a high error rate on its reconcile function. This may be caused due to an invalid CR or incorrect configuration
+Prometheus TSDB write ahead log is corrupted. Needs more investigation with upstream
 
 ## Access required
 
