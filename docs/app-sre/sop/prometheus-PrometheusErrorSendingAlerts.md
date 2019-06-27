@@ -1,6 +1,6 @@
 # Prometheus Failed to send alerts
 
-## Severity: Critical
+## Severity: High
 
 ## Impact
 
@@ -8,10 +8,12 @@
 
 ## Summary
 
-*This alert is only visible on the UI, and won't be delivered to slack/Pagerduty*
+> This alert is only visible on the UI, and won't be delivered to slack/Pagerduty
 
 Prometheus is unable to send alerts to alertmanager
 
-Note that this is also covered by deadmanssnitch, where we get a Page in case alertmanager hasn't heard from any of our prometheus. 
+This alert means Prometheus has at least one Alertmanager instance discovered and at least for one of those alerts are failing to be sent.
+
+Note that this is also covered by Deadmanssnitch, where we get a Page in case alertmanager hasn't heard from any of our Prometheus instances 
 
 Please follow the SOP for prometheus-deadmanssnitch

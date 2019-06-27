@@ -4,11 +4,11 @@
 
 ## Impact
 
-- New data will not be persisted in prometheus
+- Prometheus may not be scraping any data from the desired target list
 
 ## Summary
 
-Prometheus is not ingesting samples. New data will not be persisted in prometheus
+Prometheus is not ingesting any new data from its target. This may mean that the targets have disappeared, target discovery is broken or all the network requests are failing
 
 ## Access required
 
@@ -16,7 +16,8 @@ Prometheus is not ingesting samples. New data will not be persisted in prometheu
 
 ## Steps
 
-Currently unknown, checking with upstream
+- Take a look at the /targets page on the Prometheus isntance to understand if there are still targets attempted to be scraped or no targets are being discovered
+- If the targets exist and this alert is still firing, check for the possbility of networking issues
 
 ## Escalations
 

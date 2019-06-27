@@ -8,9 +8,12 @@
 
 ## Summary
 
-*This alert is only visible on the UI, and won't be delivered to slack/Pagerduty*
+> This alert is only visible on the UI, and won't be delivered to slack/Pagerduty
 
-Prometheus is not connected to any alertmanager
+This alert will fire in either of the following cases:
+
+- The discovery for Alertmanager in Prometheus is broken
+- The Alertmanager cluster doesn't exist anymore
 
 ## Access required
 

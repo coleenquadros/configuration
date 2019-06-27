@@ -16,7 +16,8 @@ Prometheus TSDB write ahead log is corrupted. Needs more investigation with upst
 
 ## Steps
 
-Currently unknown, checking with upstream
+- Stop Prometheus, delete WAL, continue
+- Take a volume snapshot and report upstream
 
 ## Escalations
 

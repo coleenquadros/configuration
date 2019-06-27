@@ -9,7 +9,7 @@
 
 ## Summary
 
-Prometheus failing to compact the metrics in TSDB. This alert need more investigation with upstream 
+This is most critical if it happens to the head block, as the write ahead log will continue to grow, and this is what eats disk space quickly
 
 ## Access required
 
@@ -17,7 +17,8 @@ Prometheus failing to compact the metrics in TSDB. This alert need more investig
 
 ## Steps
 
-Currently unknown, checking with upstream
+- Check Prometheus logs, troubleshoot forward from the error seen in logs
+- Worst case: Stop Prometheus and deleting the WAL if the head chunk can't be compacted
 
 ## Escalations
 

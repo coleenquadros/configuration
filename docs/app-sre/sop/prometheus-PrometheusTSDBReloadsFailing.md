@@ -8,7 +8,7 @@
 
 ## Summary
 
-Prometheus TSDB reloads failing, need to check with upstream
+Prometheus TSDB reloads failing, typically this is because of some sort of malformed config
 
 ## Access required
 
@@ -16,7 +16,10 @@ Prometheus TSDB reloads failing, need to check with upstream
 
 ## Steps
 
-Currently unknown, checking with upstream
+- Check Prometheus' logs, they should say the reason why reloads failed
+- Check the config for prometheus to see if it is malformed:
+`kubectl -n <namespace> get secret prometheus-<name-of-prometheus> -ojson | jq -r '.data["prometheus.yaml"]' | base64 -d | vim -`
+
 
 ## Escalations
 

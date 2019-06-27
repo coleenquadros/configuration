@@ -8,7 +8,9 @@
 
 ## Summary
 
-Prometheus has too many alerts queued in its queue
+This pretty much always means back-pressure from Alertmanager
+
+Most likely this means that the Prometheus in question is sending a lot of alerts
 
 ## Access required
 
@@ -16,7 +18,10 @@ Prometheus has too many alerts queued in its queue
 
 ## Steps
 
-Currently unknown, checking with upstream
+- Check Prometheus queue length: `prometheus_notifications_queue_length`
+- Check if the rate of the alerts sent per second has been high recently: `sum(rate(prometheus_notifications_sent_total[10m]))` (adjust the range as required)
+- Check which alerts were the first to enter firing state to start troubleshooting
+- Count the alerts by alertname `topk(10, count(ALERTS{alertstate="firing"}) by(alertname))` to find alerts with high cardinality
 
 ## Escalations
 
