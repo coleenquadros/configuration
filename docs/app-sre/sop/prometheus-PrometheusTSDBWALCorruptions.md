@@ -16,8 +16,9 @@ Prometheus TSDB write ahead log is corrupted. Needs more investigation with upst
 
 ## Steps
 
-- Stop Prometheus, delete WAL, continue
-- Take a volume snapshot and report upstream
+- Take a volume snapshot for the Prometheus PV for reporting upstream
+- Delete the WAL `rm -rf wal/` 
+- Restart Prometheus by killing the pod or restarting the systemd service as relevant
 
 ## Escalations
 

@@ -18,7 +18,7 @@ This is most critical if it happens to the head block, as the write ahead log wi
 ## Steps
 
 - Check Prometheus logs, troubleshoot forward from the error seen in logs
-- Worst case: Stop Prometheus and deleting the WAL if the head chunk can't be compacted
+- Worst case: Deleting the WAL `rm -rf wal/` and restart Prometheus Pod or Systemd Service if the head chunk can't be compacted
 
 ## Escalations
 
