@@ -682,7 +682,9 @@ Examples:
 
 Notes:
 * Creating new User groups is currently not supported (User group has to pre-exist).
-* In order to be able to use the `pagerduty` attribute of a `permission`, the relevant users (ones from that PagerDuty schedule) should have the `slack_username` and `pagerduty_name` attributes in their `user` files.
+* In order to be able to use the `pagerduty` attribute of a `permission`, the relevant users (ones from that PagerDuty schedule) should have the following attributes in their user files:
+  * `slack_username` - if it is different from `redhat_username`
+  * `pagerduty_name` - if it is different from `name`
 
 
 ### Delete AWS IAM access keys via App-Interface
