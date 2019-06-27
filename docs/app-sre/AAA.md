@@ -204,17 +204,17 @@ For notification troubleshooting see: https://support.pagerduty.com/docs/notific
 
 #### 1.5.1.8. RCA
 
-Root Cause Analysis must be published after incidents to ensure that corrective actions are followed up.  Any incidents in a sprint will be reviewed on the following sprint retro, with the exception.
+Root Cause Analysis must be published after incidents to ensure that corrective actions are followed up.  Any incidents in a sprint will be reviewed on the following sprint retro.
 
-The person who is the first responder or aknowledges the alert is responsible for
+All incidents must have a tracking JIRA card with label `type/incident` so that they can be tracked per sprint
 
-- Description
-- Outage
-- Timeline
-- Corrective actions with references
-- Location
+Make a copy of the following template for each incident and make sure its in the RCA directory: https://docs.google.com/document/d/12ZVT35yApp7D-uT4p29cEhS9mpzin4Z-Ufh9eOiiaKU/edit#heading=h.58p9cj2ccgos
 
-Distribute to sd-org@ and app-interface serviceOwner in app.yml
+The format for incident report file names is `[YYYY-MM-DD] [ServiceName] [Optional highlights]`
+
+Guidelines on how to write the incident report are available at: https://docs.google.com/document/d/165eDunz6yy9uIi2XXxWaEpODCVFp9tYhnBF607qVexg/edit
+
+Distribute the incident report to sd-org@ and app-interface serviceOwner in app.yml, note the incident report in the JIRA tracking issue
 
 ## 1.6. Standard operating procedures
 
