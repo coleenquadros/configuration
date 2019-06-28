@@ -156,8 +156,9 @@ spec:
       annotations:
         description: Reloading Prometheus' configuration has failed for {{$labels.namespace}}/{{$labels.pod}}
         summary: Reloading Prometheus' configuration failed
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-PrometheusConfigReloadFailed.md"
       expr: |
-        prometheus_config_last_reload_successful{job="prometheus-app-sre",namespace="app-sre-prometheus"} == 0
+        prometheus_config_last_reload_successful == 0
       for: 10m
       labels:
         severity: warning
@@ -166,8 +167,9 @@ spec:
         description: Prometheus' alert notification queue is running full for {{$labels.namespace}}/{{
           $labels.pod}}
         summary: Prometheus' alert notification queue is running full
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-PrometheusNotificationQueueRunningFull.md"
       expr: |
-        predict_linear(prometheus_notifications_queue_length{job="prometheus-app-sre",namespace="app-sre-prometheus"}[5m], 60 * 30) > prometheus_notifications_queue_capacity{job="prometheus-app-sre",namespace="app-sre-prometheus"}
+        predict_linear(prometheus_notifications_queue_length[5m], 60 * 30) > prometheus_notifications_queue_capacity
       for: 10m
       labels:
         severity: warning
@@ -176,8 +178,9 @@ spec:
         description: Errors while sending alerts from Prometheus {{$labels.namespace}}/{{
           $labels.pod}} to Alertmanager {{$labels.Alertmanager}}
         summary: Errors while sending alert from Prometheus
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-PrometheusErrorSendingAlerts.md"
       expr: |
-        rate(prometheus_notifications_errors_total{job="prometheus-app-sre",namespace="app-sre-prometheus"}[5m]) / rate(prometheus_notifications_sent_total{job="prometheus-app-sre",namespace="app-sre-prometheus"}[5m]) > 0.01
+        rate(prometheus_notifications_errors_total[5m]) / rate(prometheus_notifications_sent_total[5m]) > 0.01
       for: 10m
       labels:
         severity: warning
@@ -186,18 +189,21 @@ spec:
         description: Errors while sending alerts from Prometheus {{$labels.namespace}}/{{
           $labels.pod}} to Alertmanager {{$labels.Alertmanager}}
         summary: Errors while sending alerts from Prometheus
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-PrometheusErrorSendingAlerts.md"
       expr: |
-        rate(prometheus_notifications_errors_total{job="prometheus-app-sre",namespace="app-sre-prometheus"}[5m]) / rate(prometheus_notifications_sent_total{job="prometheus-app-sre",namespace="app-sre-prometheus"}[5m]) > 0.03
+        rate(prometheus_notifications_errors_total[5m]) / rate(prometheus_notifications_sent_total[5m]) > 0.03
       for: 10m
       labels:
         severity: critical
+    # This is currently only the app-sre prometheus instance
     - alert: PrometheusNotConnectedToAlertmanagers
       annotations:
         description: Prometheus {{ $labels.namespace }}/{{ $labels.pod}} is not connected
           to any Alertmanagers
         summary: Prometheus is not connected to any Alertmanagers
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-PrometheusNotConnectedToAlertmanagers.md"
       expr: |
-        prometheus_notifications_alertmanagers_discovered{job="prometheus-app-sre",namespace="app-sre-prometheus"} < 1
+        prometheus_notifications_alertmanagers_discovered{namespace="app-sre-prometheus"} < 1
       for: 10m
       labels:
         severity: warning
@@ -206,8 +212,9 @@ spec:
         description: '{{$labels.job}} at {{$labels.instance}} had {{$value | humanize}}
           reload failures over the last four hours.'
         summary: Prometheus has issues reloading data blocks from disk
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-PrometheusTSDBReloadsFailing.md"
       expr: |
-        increase(prometheus_tsdb_reloads_failures_total{job="prometheus-app-sre",namespace="app-sre-prometheus"}[2h]) > 0
+        increase(prometheus_tsdb_reloads_failures_total[2h]) > 0
       for: 12h
       labels:
         severity: warning
@@ -216,8 +223,9 @@ spec:
         description: '{{$labels.job}} at {{$labels.instance}} had {{$value | humanize}}
           compaction failures over the last four hours.'
         summary: Prometheus has issues compacting sample blocks
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-PrometheusTSDBCompactionsFailing.md"
       expr: |
-        increase(prometheus_tsdb_compactions_failed_total{job="prometheus-app-sre",namespace="app-sre-prometheus"}[2h]) > 0
+        increase(prometheus_tsdb_compactions_failed_total[2h]) > 0
       for: 12h
       labels:
         severity: warning
@@ -226,8 +234,9 @@ spec:
         description: '{{$labels.job}} at {{$labels.instance}} has a corrupted write-ahead
           log (WAL).'
         summary: Prometheus write-ahead log is corrupted
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-PrometheusTSDBWALCorruptions.md"
       expr: |
-        tsdb_wal_corruptions_total{job="prometheus-app-sre",namespace="app-sre-prometheus"} > 0
+        tsdb_wal_corruptions_total > 0
       for: 4h
       labels:
         severity: warning
@@ -236,8 +245,9 @@ spec:
         description: Prometheus {{ $labels.namespace }}/{{ $labels.pod}} isn't ingesting
           samples.
         summary: Prometheus isn't ingesting samples
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-PrometheusNotIngestingSamples.md"
       expr: |
-        rate(prometheus_tsdb_head_samples_appended_total{job="prometheus-app-sre",namespace="app-sre-prometheus"}[5m]) <= 0
+        rate(prometheus_tsdb_head_samples_appended_total[5m]) <= 0
       for: 10m
       labels:
         severity: warning
@@ -246,8 +256,9 @@ spec:
         description: '{{$labels.namespace}}/{{$labels.pod}} has many samples rejected
           due to duplicate timestamps but different values'
         summary: Prometheus has many samples rejected
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-PrometheusTargetScrapesDuplicate.md"
       expr: |
-        increase(prometheus_target_scrapes_sample_duplicate_timestamp_total{job="prometheus-app-sre",namespace="app-sre-prometheus"}[5m]) > 0
+        increase(prometheus_target_scrapes_sample_duplicate_timestamp_total[5m]) > 0
       for: 10m
       labels:
         severity: warning
@@ -258,16 +269,18 @@ spec:
       annotations:
         message: Errors while reconciling {{ $labels.controller }} in {{ $labels.namespace
           }} Namespace.
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-operator-PrometheusOperatorReconcileErrors.md"
       expr: |
-        rate(prometheus_operator_reconcile_errors_total{job="prometheus-operator",namespace="app-sre-prometheus"}[5m]) > 0.1
+        rate(prometheus_operator_reconcile_errors_total[5m]) > 0.1
       for: 10m
       labels:
         severity: medium
     - alert: PrometheusOperatorNodeLookupErrors
       annotations:
         message: Errors while reconciling Prometheus in {{ $labels.namespace }} Namespace.
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-operator-PrometheusOperatorNodeLookupErrors.md"
       expr: |
-        rate(prometheus_operator_node_address_lookup_errors_total{job="prometheus-operator",namespace="app-sre-prometheus"}[5m]) > 0.1
+        rate(prometheus_operator_node_address_lookup_errors_total[5m]) > 0.1
       for: 10m
       labels:
         severity: warning

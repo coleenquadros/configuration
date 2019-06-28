@@ -1,0 +1,79 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: hive-stage
+spec:
+  groups:
+  - name: hive-stage
+    rules:
+    - alert: HiveDown - stage
+      annotations:
+        message: "No targets found for Hive in namespace {{ $labels.namespace }}. Hive is down."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/hive/sop"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-stage"
+      expr: |
+        absent(up{job="hive-controllers-stage"} == 1)
+      for: 5m
+      labels:
+        service: hive
+        severity: high
+    - alert: InstallJobDelayHigh - stage
+      annotations:
+        message: "Time to start an install job is taking greater than 5 minutes"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/hive/sop/InstallJobDelayHigh.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-stage"
+      expr: |
+        rate(hive_cluster_deployment_install_job_delay_seconds_sum{job="hive-controllers-stage"}[6h])
+        /
+        rate(hive_cluster_deployment_install_job_delay_seconds_count{job="hive-controllers-stage"}[6h]) > 300
+      for: 10m
+      labels:
+        service: hive
+        severity: medium
+    - alert: ClusterProvisioningDelay - stage
+      annotations:
+        message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.namespace }} provisioning taking over 2 hours"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/hive/sop/ClusterProvisioningDelay.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-stage"
+      expr: |
+        (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers-stage",cluster_type="managed"}/3600) > 2
+      for: 10m
+      labels:
+        service: hive
+        severity: medium
+    - alert: ClusterDeprovisioningDelay - stage
+      annotations:
+        message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.namespace }} deprovisioning taking over 6 hours"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/hive/sop/ClusterDeprovisioningDelay.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-stage"
+      expr: |
+        (hive_cluster_deployment_deprovision_underway_seconds{job="hive-controllers-stage"} / 3600 ) > 6
+      for: 10m
+      labels:
+        service: hive
+        severity: medium
+    - alert: ControllerErrorsHigh - stage
+      annotations:
+        message: "Controller :{{ $value }} is reporting a high error rate"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/hive/sop"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-stage"
+      expr: |
+        rate(controller_runtime_reconcile_errors_total{job="hive-controllers-stage"}[15m]) > 1
+      for: 10m
+      labels:
+        service: hive
+        severity: high
+    - alert: AWSAccountLimit - stage
+      annotations:
+        message: "AWS Account Operator is about to reach account limit"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/hive/sop/AWSAccountLimit.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-stage"
+      expr: |
+        (aws_account_operator_total_aws_accounts{job="hive-controllers-stage"}) > 700
+      labels:
+        severity: high
+
+        
