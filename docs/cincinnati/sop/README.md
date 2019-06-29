@@ -16,6 +16,7 @@
 ## Verify it's working
 
 - At least one `cincinnati` pod is marked as UP in Prometheus.
+- Additional details on expected behaviour are available in the Cincinnati production deployment doc: https://docs.google.com/document/d/1oT9wueEB01god-gICg0DsGFJzuA-E-TPn88ViWTMr-A/edit
 
 ## PEIncomingRequestsHalted
 
