@@ -2,28 +2,23 @@
 
 set -eo pipefail
 
+BLOCKED_LABEL="blocked/devtools-bot-access"
 GITLAB_URL="https://gitlab.cee.redhat.com"
 GITLAB_API="$GITLAB_URL/api/v4"
 GITLAB_PROJECTS_URL="$GITLAB_API/projects"
+GITLAB_GROUPS_URL="$GITLAB_API/groups"
 SOURCE_PROJECT_ID=$(curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" $GITLAB_PROJECTS_URL/$gitlabMergeRequestTargetProjectId/merge_requests/$gitlabMergeRequestIid | jq .source_project_id)
 PROJECT_MEMBERS=$(curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" $GITLAB_PROJECTS_URL/$SOURCE_PROJECT_ID/members)
-BLOCKED_LABEL="blocked/devtools-bot-access"
-
-APP_SRE_BOT_ID=3889
-
-# check if bot is a maintainer on the fork
-exit_status=1
 MEMBER_IDS=$(echo $PROJECT_MEMBERS | jq -c '.[] | .id')
-for MEMBER_ID in $MEMBER_IDS; do
-    if [[ "$MEMBER_ID" != "$APP_SRE_BOT_ID" ]]; then
-        continue
-    fi
-    MEMBER_ACCESS_LEVEL=$(curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" $GITLAB_PROJECTS_URL/$SOURCE_PROJECT_ID/members/$MEMBER_ID | jq .access_level)
-    if [[ "$MEMBER_ACCESS_LEVEL" == "40" ]]; then
-        exit_status=0
-    fi
-    break
-done
+
+BOT_ID=3889
+BOT_ACCESS_LEVEL=$(echo $PROJECT_MEMBERS | jq -c ".[] | select(.id == $BOT_ID) | .access_level")
+# check if bot is a maintainer on the fork
+exit_status=0
+# check if bot is a maintainer on the fork
+if [[ "$BOT_ACCESS_LEVEL" != "40" ]]; then
+    exit_status=1
+fi
 
 # if bot is not a maintainer on the fork - add error note on merge request and exit
 if [[ "$exit_status" != "0" ]]; then
@@ -42,10 +37,10 @@ if [[ "$exit_status" != "0" ]]; then
     exit $exit_status
 fi
 
-# Add app-sre team to fork
-USERS=$(ls data/teams/app-sre/users | sed 's/.yml//g')
-for u in $USERS; do
-    USER_ID=$(curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" $GITLAB_API/users?username=$u | jq '.[] | .id')
+# Add app-sre gitlab group members to fork
+APP_SRE_GROUP_ID=6887
+USER_IDS=$(curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" $GITLAB_GROUPS_URL/$APP_SRE_GROUP_ID/members | jq -c '.[] | .id')
+for USER_ID in $USER_IDS; do
     FOUND=false
     for MEMBER_ID in $MEMBER_IDS; do
         if [[ "$MEMBER_ID" != "$USER_ID" ]]; then
