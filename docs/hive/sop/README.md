@@ -4,6 +4,7 @@
 
 - [SOP : OpenShift Hive](#sop--openshift-hive)
     - [Access and Environments](AccessAndEnvironments.md)
+    - [Hive Monitor](HiveMonitor.md)
     - [InstallJobDelayHigh](InstallJobDelayHigh.md)
     - [ClusterProvisioningDelay](ClusterProvisioningDelay.md)
 
