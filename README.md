@@ -210,6 +210,8 @@ wheel icon (top-right corner) and replace `omit` with `include` in
 - Management of Slack User Groups.
 - Deletion of orphan AWS resources.
 - Deletion of AWS keys per AWS account.
+- House keeping of GitLab issues.
+- Compliance validation of GitHub user profiles.
 
 * A dependency matrix between the integrations can be found [here](/integrations_dependencies.md).
 
@@ -668,8 +670,8 @@ To manage a User group via App-Interface:
 - `service`: `slack-usergroup`
 - `handle`: the handle of the User group
 - `workspace`: a reference to a file representing the Slack Workspace
-- `pagerduty`: a reference to a file representing a PagerDuty schedule.
-  * Adding this attribute will add the PagerDuty schedule as an additional "source of truth", and will add the final schedule user to the Slack user group (in addition to any references from user files).
+- `pagerduty`: a reference to a file representing a PagerDuty target (Schedule or Escalation Policy).
+  * Adding this attribute will add the PagerDuty target as an additional "source of truth", and will add the final schedule user to the Slack user group (in addition to any references from user files).
 - `channels`: a list of channels to add to the User group
 
 2. Add this permission to the desired `roles`, or create a new `role` with this permission only (mandatory).
@@ -679,9 +681,10 @@ Examples:
 * An example for a role that has this permission can be found [here](/data/teams/app-sre/roles/app-sre-slack.yml)
 * An example for the `app-sre-ic` User group permission which is also synced with a PagerDuty schedule can be found [here](/data/teams/app-sre/permissions/app-sre-ic-coreos-slack.yml)
 * An example for a PagerDuty schedule file can be found [here](/data/dependencies/pagerduty/app-sre-primary.yml).
+* An example for a PagerDuty escalation policy file can be found [here](/data/dependencies/pagerduty/app-sre-escalation-policy.yml).
 
 Notes:
-* Creating new User groups is currently not supported (User group has to pre-exist).
+* Creating new User groups is not supported (User group has to pre-exist).
 * In order to be able to use the `pagerduty` attribute of a `permission`, the relevant users (ones from that PagerDuty schedule) should have the following attributes in their user files:
   * `slack_username` - if it is different from `redhat_username`
   * `pagerduty_name` - if it is different from `name`
@@ -718,6 +721,11 @@ Supported resource types are:
 Notes:
 * This integration does not actually delete resources currently (disabled by default), but it will still list resources that would have otherwise been deleted in every PR check.
 
+### GitHub user profile compliance
+
+App-Interface users must define a `github_username` field in their user file. This profile must comply with the following requirements:
+
+* The profile `Company` field must contain `Red Hat` (regex expression: `^.*[Rr]ed ?[Hh]at.*$`)
 
 ## Design
 
