@@ -82,6 +82,15 @@ spec:
         message: 'DB instance {{ $labels.dbinstance_identifier }} storage will be full within 7 days.'
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
         dashboard: "https://grafana.app-sre.devshift.net"
+    - alert: PredictOutOfStorage
+      labels:
+        severity: critical
+      expr: predict_linear(aws_rds_free_storage_space_sum[1h], 3600 * 24 * 3) < 0
+      for: 1h
+      annotations:
+        message: 'DB instance {{ $labels.dbinstance_identifier }} storage will be full within 2 days.'
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
+        dashboard: "https://grafana.app-sre.devshift.net"
     - alert: HighAverageReadLatency
       labels:
         severity: warning
