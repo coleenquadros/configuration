@@ -147,7 +147,6 @@ docker pull ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG}
 docker pull ${VAULT_RECONCILE_IMAGE}:${VAULT_RECONCILE_IMAGE_TAG}
 
 run_int github &
-run_int github-users &
 run_int github-repo-invites &
 run_int quay-membership &
 run_int quay-repos &
