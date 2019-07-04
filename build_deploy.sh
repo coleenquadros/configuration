@@ -147,7 +147,6 @@ run_vault_reconcile_integration() {
 }
 
 run_int github &
-run_int github-users &
 run_int github-repo-invites &
 run_int quay-membership &
 run_int quay-repos &
