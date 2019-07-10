@@ -104,7 +104,7 @@ run_int() {
     -e REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem \
     -w / \
     ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
-    qontract-reconcile --config /config/config.toml $1 \
+    qontract-reconcile --config /config/config.toml $@ \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-${1}.txt
   EXIT_STATUS=$?
   ENDTIME=$(date +%s)

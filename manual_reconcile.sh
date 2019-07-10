@@ -57,34 +57,6 @@ else
   CURL_IP=$IP
 fi
 
-# Write config.toml for reconcile tools
-mkdir -p ${TEMP_DIR}/config
-cat "$CONFIG_TOML" \
-  | sed "s|https://app-interface.devshift.net/graphql|http://$IP:4000/graphql|" \
-  > ${TEMP_DIR}/config/config.toml
-
-# Create directory for throughput between integrations
-mkdir -p ${TEMP_DIR}/throughput
-
-# wait until the service loads the data
-SHA256=$(sha256sum ${DATAFILES_BUNDLE} | awk '{print $1}')
-while [[ ${count} -lt 20 ]]; do
-    let count++
-    DEPLOYED_SHA256=$(curl -sf http://${CURL_IP}:4000/sha256)
-    [[ "$DEPLOYED_SHA256" == "$SHA256" ]] && break || sleep 1
-done
-
-if [[ "$DEPLOYED_SHA256" != "$SHA256" ]]; then
-  echo "Invalid SHA256" >&2
-  exit 1
-fi
-
-# run integrations
-
-SUCCESS_DIR=${TEMP_DIR}/reports/reconcile_reports_success
-FAIL_DIR=${TEMP_DIR}/reports/reconcile_reports_fail
-rm -rf ${SUCCESS_DIR} ${FAIL_DIR}; mkdir -p ${SUCCESS_DIR} ${FAIL_DIR}
-
 run_int() {
   local status
 
@@ -98,7 +70,7 @@ run_int() {
     -v ${TEMP_DIR}/throughput:/throughput:z \
     -w / \
     ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
-    qontract-reconcile --config /config/config.toml --dry-run $1 \
+    qontract-reconcile --config /config/config.toml --dry-run $@ \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-${1}.txt
 
   status="$?"
@@ -143,8 +115,52 @@ run_vault_reconcile_integration() {
   return $status
 }
 
+# Run integrations
+
+## Create directories for integrations
+mkdir -p ${TEMP_DIR}/config
+mkdir -p ${TEMP_DIR}/throughput
+SUCCESS_DIR=${TEMP_DIR}/reports/reconcile_reports_success
+FAIL_DIR=${TEMP_DIR}/reports/reconcile_reports_fail
+rm -rf ${SUCCESS_DIR} ${FAIL_DIR}; mkdir -p ${SUCCESS_DIR} ${FAIL_DIR}
+
 docker pull ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG}
 docker pull ${VAULT_RECONCILE_IMAGE}:${VAULT_RECONCILE_IMAGE_TAG}
+
+# Prepare to run integrations on production
+
+## Write config.toml for reconcile tools
+cat "$CONFIG_TOML" > ${TEMP_DIR}/config/config.toml
+
+## Run integrations on production
+# run_int jenkins-job-builder --no-compare &
+
+
+# Prepare to run integrations on local server
+
+## Wait until the service loads the data
+SHA256=$(sha256sum ${DATAFILES_BUNDLE} | awk '{print $1}')
+while [[ ${count} -lt 20 ]]; do
+    let count++
+    DEPLOYED_SHA256=$(curl -sf http://${CURL_IP}:4000/sha256)
+    [[ "$DEPLOYED_SHA256" == "$SHA256" ]] && break || sleep 1
+done
+
+if [[ "$DEPLOYED_SHA256" != "$SHA256" ]]; then
+  echo "Invalid SHA256" >&2
+  exit 1
+fi
+
+## Wait for production integrations to complete
+
+wait
+
+## Write config.toml for reconcile tools
+cat "$CONFIG_TOML" \
+  | sed "s|https://app-interface.devshift.net/graphql|http://$IP:4000/graphql|" \
+  > ${TEMP_DIR}/config/config.toml
+
+## Run integrations on local server
 
 run_int github &
 run_int github-repo-invites &
