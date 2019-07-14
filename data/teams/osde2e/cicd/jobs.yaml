@@ -36,32 +36,42 @@ config:
     gh_org: openshift
     gh_repo: osde2e
     jobs:
-    # Periodically test defaults in stage and prod
+    # Periodically test defaults across environments
+    - 'gh-run-tests-osd-e2e-{environment}-{version}':
+        display_name: "osde2e {environment} {version}"
+        environment: "int"
+        version: "4.1"
+        cron_expression: 'H */4 * * *'
+        ci_cmd: 'OSD_ENV={environment} TESTGRID_PREFIX=logs/osd-{environment}-{version} ./ci/run_tests.sh'
     - 'gh-run-tests-osd-e2e-{environment}-{version}':
         display_name: "osde2e {environment} {version}"
         environment: "stage"
         version: "4.1"
         cron_expression: 'H */4 * * *'
-        ci_cmd: 'TESTGRID_PREFIX=logs/osd-{environment}-{version} ./ci/run_tests.sh'
+        ci_cmd: 'OSD_ENV={environment} TESTGRID_PREFIX=logs/osd-{environment}-{version} ./ci/run_tests.sh'
     - 'gh-run-tests-osd-e2e-{environment}-{version}':
         display_name: "osde2e {environment} {version}"
         environment: "prod"
         version: "4.1"
         cron_expression: 'H */4 * * *'
-        ci_cmd: 'USE_PROD=1 TESTGRID_PREFIX=logs/osd-{environment}-{version} ./ci/run_tests.sh'
+        ci_cmd: 'OSD_ENV={environment} TESTGRID_PREFIX=logs/osd-{environment}-{version} ./ci/run_tests.sh'
 
     # Test upgrades as new versions to target appear
     - 'gh-run-tests-osd-e2e-{environment}-{version}':
         display_name: "osde2e upgrade {environment} {version}"
+        environment: "int"
+        version: "4.1-4.1"
+        cron_expression: 'H/15 * * * *'
+        ci_cmd: 'OSD_ENV={environment} UPGRADE_RELEASE_STREAM=4-stable TESTGRID_PREFIX=logs/osd-upgrade-{environment}-{version} ./ci/upgrade_events.sh'
+    - 'gh-run-tests-osd-e2e-{environment}-{version}':
+        display_name: "osde2e upgrade {environment} {version}"
         environment: "stage"
         version: "4.1-4.1"
         cron_expression: 'H/15 * * * *'
-        ci_cmd: 'UPGRADE_RELEASE_STREAM=4-stable TESTGRID_PREFIX=logs/osd-upgrade-{environment}-{version} ./ci/upgrade_events.sh'
+        ci_cmd: 'OSD_ENV={environment} UPGRADE_RELEASE_STREAM=4-stable TESTGRID_PREFIX=logs/osd-upgrade-{environment}-{version} ./ci/upgrade_events.sh'
     - 'gh-run-tests-osd-e2e-{environment}-{version}':
         display_name: "osde2e upgrade {environment} {version}"
         environment: "prod"
         version: "4.1-4.1"
         cron_expression: 'H/15 * * * *'
-        ci_cmd: 'USE_PROD=1 UPGRADE_RELEASE_STREAM=4-stable TESTGRID_PREFIX=logs/osd-upgrade-{environment}-{version} ./ci/upgrade_events.sh'
-
-
+        ci_cmd: 'OSD_ENV={environment} UPGRADE_RELEASE_STREAM=4-stable TESTGRID_PREFIX=logs/osd-upgrade-{environment}-{version} ./ci/upgrade_events.sh'
