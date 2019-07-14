@@ -133,7 +133,7 @@ docker pull ${VAULT_RECONCILE_IMAGE}:${VAULT_RECONCILE_IMAGE_TAG}
 cat "$CONFIG_TOML" > ${TEMP_DIR}/config/config.toml
 
 ## Run integrations on production
-run_int jenkins-job-builder --no-compare &
+# run_int jenkins-job-builder --no-compare &
 
 
 # Prepare to run integrations on local server
@@ -162,7 +162,7 @@ cat "$CONFIG_TOML" \
 
 ## Run integrations on local server
 
-run_int jenkins-job-builder &
+# run_int jenkins-job-builder &
 run_int github &
 run_int github-repo-invites &
 run_int quay-membership &
