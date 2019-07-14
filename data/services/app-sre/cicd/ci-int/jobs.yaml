@@ -1,0 +1,71 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+labels:
+  service: app-interface
+
+name: ci-int-app-interface-jobs
+
+description: ''
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+type: jobs
+
+config:
+- project:
+    name: ci-int
+    label: app-sre
+    node: app-sre
+    jobs:
+    - 'gl-build-master-jjb':
+        display_name: JJB service build master
+        gl_group: service
+        gl_project: jjb
+        branch: master
+
+    - 'gl-pr-check-jjb':
+        display_name: JJB PR check
+        gl_group: service
+        gl_project: jjb
+
+    - 'gl-job-sos-report':
+        display_name: SOS Report
+        gl_group: dtsd
+        gl_project: housekeeping
+
+    - 'gl-build-master-osio-scan':
+        display_name: Report generator for OSIO scanner
+        gl_group: dtsd
+        gl_project: osio-scan
+
+    - 'pagerditty':
+        display_name: pagerditty
+
+    - 'jenkins-slaves-cleanup':
+        display_name: jenkins-slaves-cleanup
+        gl_group: dtsd
+        gl_project: housekeeping
+
+- project:
+    name: clusterimagesets
+    label: app-sre
+    node: app-sre
+
+    jobs:
+    # generates new clusterimagesets and pushes back to staging repo
+    - 'clusterimageset-run':
+        display_name: clusterimageset-run
+        gl_group: service
+        gl_project: clusterimagesets
+
+    - 'gl-build-master-clusterimagesets-apply':
+        display_name: clusterimagesets apply
+        gl_group: service
+        gl_project: clusterimagesets
+
+    - 'gl-pr-check-clusterimagesets':
+        display_name: clusterimagesets prcheck
+        gl_group: service
+        gl_project: clusterimagesets

@@ -1,0 +1,25 @@
+- job-template:
+    id: 'gh-build-master-release-controller'
+    name: '{gh_org}-{gh_repo}-gh-build-master-release-controller'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *kube_config
+        - *quay_secret_push
+    builders:
+    - shell: |
+        DOCKER_CONF="$PWD/.docker"
+        mkdir -p "$DOCKER_CONF"
+        docker --config="$DOCKER_CONF" login -u="$QUAY_USER" -p="$QUAY_TOKEN" quay.io
+        GIT_REV="$(git rev-parse --short=7 HEAD)"
+        #build
+        docker build -t quay.io/app-sre/release-controller:latest .
+        docker tag quay.io/app-sre/release-controller:latest quay.io/app-sre/release-controller:${{GIT_REV}}
+        #push
+        docker --config=${{DOCKER_CONF}} push quay.io/app-sre/release-controller:latest
+        docker --config=${{DOCKER_CONF}} push quay.io/app-sre/release-controller:${{GIT_REV}}
+    <<: *gh_build_master

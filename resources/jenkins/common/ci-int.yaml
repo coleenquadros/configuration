@@ -1,0 +1,602 @@
+- defaults:
+    name: global
+    label: none
+    display-name: '[{label}] {display_name}'
+    image_pattern: ''
+    saasherder_image: "quay.io/openshiftio/saasherder:2f9194e"
+    saasherder_options: "--rm --user $(id -u) -v $(pwd):/saas:z -v /etc/pki:/etc/pki:z -e REQUESTS_CA_BUNDLE=$REQUESTS_CA_BUNDLE"
+    saasherder_docker: "docker run {saasherder_options} {saasherder_image}"
+    saasherder_check_image: "docker run {saasherder_options} -e SKOPEO_USER=$QUAY_USER -e SKOPEO_PASS=$QUAY_TOKEN --entrypoint '' {saasherder_image} python /scripts/check_image.py"
+    saasherder_object_blacklist: 'Route,Secret,ConfigMap,ServiceAccount'
+    description: |
+        [{label}] {display_name}
+        Managed by JJB https://gitlab.cee.redhat.com/service/jjb
+    timeout: 30
+    gitlab_ssh_credentials: 'f4718b82-0cb2-47ef-aea2-dadae3f050a5'
+    concurrent_build: false
+    ssh_ci_ext_cmd: 'ssh -T -i /var/lib/jenkins/.ssh/app-sre-bot-id_rsa -l app-sre-bot ci.ext.devshift.net'
+
+- wrapper:
+    name: timeout_wrapper
+    wrappers:
+      - timeout:
+          timeout: '{timeout}'
+          timeout-var: 'BUILD_TIMEOUT'
+          fail: true
+          type: no-activity
+
+- vault_defaults: &vault_defaults
+    name: 'vault_defaults'
+    vault-url: 'https://vault.devshift.net'
+    credentials-id: 'vault-creds'
+
+- publisher:
+    name: "gitlab_message"
+    publishers:
+    - gitlab-message:
+        success-note: true
+        success-note-text: "Build success, build url: ${BUILD_URL}"
+        failure-note: true
+        failure-note-text: "Build failed, build url: ${BUILD_URL}"
+        unstable-note: true
+        unstable-note-text: "The build is unstable, build url: ${BUILD_URL}"
+
+- kube_config: &kube_config
+    name: "kube_config"
+    secret-path: 'app-sre/ci-int/kube-configs/{kube_cluster}'
+    secret-values:
+      - env-var: 'KUBE_SERVER'
+        vault-key: 'server'
+      - env-var: 'KUBE_TOKEN'
+        vault-key: 'token'
+
+- quay_secret_push: &quay_secret_push
+    name: "quay_secret_push"
+    secret-path: 'app-sre/quay/{quay_org}-push'
+    secret-values:
+      - env-var: 'QUAY_USER'
+        vault-key: 'user'
+      - env-var: 'QUAY_TOKEN'
+        vault-key: 'token'
+      - env-var: 'QUAY_DOCKER_CONFIG_JSON'
+        vault-key: 'config.json'
+
+- quay_secret_pull: &quay_secret_pull
+    name: "quay_secret_pull"
+    secret-path: 'app-sre/quay/{quay_org}-pull'
+    secret-values:
+      - env-var: 'QUAY_USER'
+        vault-key: 'user'
+      - env-var: 'QUAY_TOKEN'
+        vault-key: 'token'
+      - env-var: 'QUAY_DOCKER_CONFIG_JSON'
+        vault-key: 'config.json'
+
+- app_sre_bot_push_token: &app_sre_bot_push_token
+    name: "app_sre_bot_push_token"
+    secret-path: 'app-sre/ci-int/gitlab-token'
+    secret-values:
+    - env-var: 'APP_SRE_BOT_PUSH_TOKEN'
+      vault-key: 'gitlab-token'
+
+- base_templates:
+    name: base-templates
+
+    gl_checkout: &gl_checkout
+        branch: "master"
+        node: '{node}'
+        properties:
+        - github:
+            url: 'https://gitlab.cee.redhat.com/{gl_group}/{gl_project}.git'
+        - gitlab:
+            connection: 'gitlab cee'
+        scm:
+        - git:
+            url: 'git@gitlab.cee.redhat.com:{gl_group}/{gl_project}.git'
+            credentials-id: '{gitlab_ssh_credentials}'
+            shallow_clone: true
+            branches:
+            - '{branch}'
+
+    build_master_builder: &build_master_builder
+        ssh_ci_ext: ''
+        saas_env: 'staging'
+        builders:
+        - shell: |
+            #!/bin/bash
+            set -e
+
+            {build_deploy_script_path}
+
+            if [[ ! -z "{kube_cluster}" && ! -z "{saasherder_context}" && \
+                ! -z "{saas_git}" && ! -z "{saasherder_services}" ]]; then
+
+                export REQUESTS_CA_BUNDLE=/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+                git clone --depth 1 {saas_git} saas.git
+
+                #Deploy preview
+                SAAS_ENV={saas_env}
+                cd saas.git
+                for service in {saasherder_services}; do
+                    {saasherder_docker} --context "{saasherder_context}" --environment $SAAS_ENV update hash ${{service}} $GIT_COMMIT
+                    {saasherder_docker} --context "{saasherder_context}" --environment $SAAS_ENV pull ${{service}}
+                    {saasherder_docker} --context "{saasherder_context}" --environment $SAAS_ENV template --filter {saasherder_object_blacklist} --output-dir {saasherder_context}-processed --local tag ${{service}}
+
+                    if [ -n "{ssh_ci_ext}" ]; then
+                        cat {saasherder_context}-processed/${{service}}.yaml | {ssh_ci_ext_cmd} oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" apply -f - -n {kube_namespace}
+                    else
+                        oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" apply -f {saasherder_context}-processed/${{service}}.yaml -n {kube_namespace}
+                    fi
+                done
+                cd ..
+            fi
+
+    gl_build_master_template: &gl_build_master_template
+        kube_cluster: ""
+        kube_namespace: "error_no_ns"
+        saasherder_context: ""
+        saasherder_services: ""
+        saas_git: ""
+        build_deploy_script_path: "./build_deploy.sh"
+        branch: "master"
+        node: '{node}'
+        properties:
+        - github:
+            url: 'https://gitlab.cee.redhat.com/{gl_group}/{gl_project}.git'
+        - gitlab:
+            connection: 'gitlab cee'
+        scm:
+        - git:
+            url: 'git@gitlab.cee.redhat.com:{gl_group}/{gl_project}.git'
+            credentials-id: '{gitlab_ssh_credentials}'
+            shallow_clone: true
+            branches:
+            - '{branch}'
+        triggers:
+        - gitlab:
+            trigger-push: true
+            trigger-merge-request: false
+            trigger-open-merge-request-push: never
+            add-note-merge-request: false
+            add-ci-message: false
+            set-build-description: true
+            add-vote-merge-request: false
+            trigger-note: false
+            ci-skip: false
+            wip-skip: false
+            branch-filter-type: "NameBasedFilter"
+            include-branches:
+            - '{branch}'
+        wrappers:
+        - timeout_wrapper:
+            timeout: '{timeout}'
+        <<: *build_master_builder
+
+    gh_build_master: &gh_build_master
+        pollscm_cron: "* * * * *"
+        kube_cluster: ""
+        kube_namespace: "error_no_ns"
+        saasherder_context: ""
+        saasherder_services: ""
+        saas_git: ""
+        build_deploy_script_path: "./build_deploy.sh"
+        branch: "master"
+        node: '{node}'
+        properties:
+        - github:
+            url: 'https://github.com/{gh_org}/{gh_repo}/'
+        scm:
+        - git:
+            url: 'https://github.com/{gh_org}/{gh_repo}'
+            branches:
+                - '{branch}'
+        triggers:
+        - pollscm:
+            cron: '{pollscm_cron}'
+        wrappers:
+        - timeout_wrapper:
+            timeout: '{timeout}'
+        <<: *build_master_builder
+
+    gh_pr_check: &gh_pr_check
+        node: '{node}'
+        concurrent: '{concurrent_build}'
+        pr_check_script_path: "./pr_check.sh"
+        status_context: "ci-int PR build"
+        properties:
+        - github:
+            url: 'https://github.com/{gh_org}/{gh_repo}/'
+        triggers:
+          - github-pull-request:
+              cron: '* * * * *'
+              github-hooks: true
+              permit-all: false
+              trigger-phrase: '^(\[test\]|\/retest).*'
+              org-list:
+              - app-sre
+              - openshift
+              allow-whitelist-orgs-as-admins: true
+              status-context: '{status_context}'
+        wrappers:
+        - timeout_wrapper:
+            timeout: '{timeout}'
+        scm:
+        - git:
+            url: 'https://github.com/{gh_org}/{gh_repo}.git'
+            skip-tag: true
+            refspec: '+refs/pull/*:refs/remotes/origin/pr/*'
+            branches:
+                - '${{ghprbActualCommit}}'
+            merge:
+                remote: origin
+                branch: master
+        builders:
+        - shell: |
+            {pr_check_script_path}
+
+    gl_pr_check_template: &gl_pr_check_template
+        node: '{node}'
+        pr_check_script_path: "./pr_check.sh"
+        properties:
+        - github:
+            url: 'https://gitlab.cee.redhat.com/{gl_group}/{gl_project}.git'
+        - gitlab:
+            connection: 'gitlab cee'
+        scm:
+        - git:
+            remotes:
+            - 'origin':
+                url: 'https://gitlab.cee.redhat.com/{gl_group}/{gl_project}.git'
+                credentials-id: '{gitlab_ssh_credentials}'
+                refspec: '+refs/heads/*:refs/remotes/origin/* +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*'
+            branches:
+            - 'merge-requests/${{gitlabMergeRequestIid}}'
+            merge:
+                remote: 'origin'
+                branch: '${{gitlabTargetBranch}}'
+        triggers:
+        - gitlab:
+            trigger-push: true
+            trigger-merge-request: true
+            trigger-open-merge-request-push: source
+            note-regex: '^(\[test\]|\/retest)'
+            set-build-description: true
+            add-note-merge-request: true
+            add-vote-merge-request: true
+            add-ci-message: true
+            allow-all-branches: true
+            ci-skip: true
+            wip-skip: true
+        wrappers:
+        - timeout_wrapper:
+            timeout: '{timeout}'
+        publishers:
+        - gitlab_message
+        concurrent: '{concurrent_build}'
+        builders:
+        - shell: |
+            {pr_check_script_path}
+
+    gl_timed_template: &gl_timed_template
+        ci_cmd: ./run.sh
+        wrappers:
+        - timeout_wrapper:
+            timeout: '{timeout}'
+        builders:
+        - shell: |
+            {ci_cmd}
+        triggers:
+        - timed: |
+            {cron_expression}
+        <<: *gl_checkout
+
+    # This template is intended to create jobs that run the pipeline described
+    # in the 'Jenkinsfile' of the project when changes are merged to the master
+    # branch.
+    gl_build_pipeline_template: &gl_build_pipeline_template
+        project-type: pipeline
+        branch: "master"
+        node: '{node}'
+        properties:
+        - github:
+            url: 'https://gitlab.cee.redhat.com/{gl_group}/{gl_project}.git'
+        - gitlab:
+            connection: 'gitlab cee'
+        scm:
+        - git:
+            url: 'git@gitlab.cee.redhat.com/{gl_group}/{gl_project}.git'
+            credentials-id: '{gitlab_ssh_credentials}'
+            shallow_clone: true
+            branches:
+            - '{branch}'
+        pipeline-scm:
+          scm:
+          - git:
+              url: 'git@gitlab.cee.redhat.com/{gl_group}/{gl_project}.git'
+              credentials-id: '{gitlab_ssh_credentials}'
+              shallow_clone: true
+              branches:
+              - '{branch}'
+        triggers:
+        - pollscm:
+            cron: '* * * * *'
+        wrappers:
+        - timeout_wrapper:
+            timeout: '{timeout}'
+
+    # Defines the saasherder shell build script that implements CD
+    #
+    # Arguments:
+    #
+    # saasherder_context:
+    #    The name of the context in the saasherder repo, as defined in the
+    #    config.yaml file.
+    # dry_run:
+    #   If `yes` => it will not perform the deployment.
+    # image_pattern:
+    #   Enforce that the images reference by the deployment files
+    #   match this regexp. Example: '^quay\.io/app-sre/'. If empty, any image url
+    #   will be valid.
+    # kube_namespace:
+    #   Namespace to deploy to.
+    #
+    # Additionally, any job or job-template that includes this definition must
+    # define secrets which export:
+    # - KUBE_SERVER
+    # - KUBE_TOKEN
+    saasherder: &saasherder
+        kube_namespace: "error_no_ns"
+        ssh_ci_ext: ''
+        saas_env: 'production'
+        builders:
+        - shell: |
+            #!/bin/bash
+            set -e
+
+            # Ensure $KUBE_SERVER and $KUBE_TOKEN are defined
+            if [[ -z "$KUBE_SERVER" || -z "$KUBE_TOKEN" ]]; then
+                echo 'Missing secret that defines $KUBE_SERVER and $KUBE_TOKEN'
+                exit 1
+            fi
+
+            if [[ -z "{saasherder_context}" ]]; then
+                echo '{{saasherder_context}} not defined'
+                exit 1
+            fi
+
+            export REQUESTS_CA_BUNDLE=/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+
+            SAAS_ENV={saas_env}
+            PROCESSED_DIR="{saasherder_context}-processed"
+
+            {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" pull
+            {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" template --filter {saasherder_object_blacklist} --output-dir "$PROCESSED_DIR" --local tag
+
+            find $PROCESSED_DIR -type f | while read f; do
+                if [ -n "{ssh_ci_ext}" ]; then
+                    cat $f | {ssh_ci_ext_cmd} oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" -n {kube_namespace} apply --dry-run --validate -f -
+                else
+                    oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" -n {kube_namespace} apply --dry-run --validate -f $f
+                fi
+
+                {saasherder_check_image} $f '{image_pattern}'
+
+                if [ "{dry_run}" != "yes" ]; then
+                    if [ -n "{ssh_ci_ext}" ]; then
+                        cat $f | {ssh_ci_ext_cmd} oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" -n {kube_namespace} apply -f -
+                    else
+                        oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" -n {kube_namespace} apply -f $f
+                    fi
+                fi
+            done
+
+# Runs build_deploy.sh and deploys to staging
+#
+# vars required in the job definition:
+# - gl_group: GitLab group
+# - gl_project: GitLab repo
+#
+# optional vars
+# - kube_cluster: cluster name
+# - kube_namespace: Namespace to deploy to
+# - saasherder_context: saasherder context declared in config.yaml
+# - saasherder_services: space separated list of saasherder service names
+# - saas_git: saas herder repo uri, should be public
+# - image_pattern: Regex of the image path to check against
+# - quay_org: name of the quay organisation
+#
+# optional secrets:
+# The secret 'app-sre/ci-ext/kube-configs/{kube_cluster}' must exist.
+# The secret 'app-sre/quay/{quay_org}-push' must exist, with `user`, `token` and `config.json` keys.
+- job-template:
+    id: 'gl-build-master'
+    name: '{gl_group}-{gl_project}-gl-build-{branch}'
+    wrappers:
+      - timeout_wrapper:
+          timeout: '{timeout}'
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+          - *kube_config
+          - *quay_secret_push
+    <<: *gl_build_master_template
+
+- job-template:
+    id: 'gl-pr-check'
+    name: '{gl_group}-{gl_project}-gl-pr-check'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    <<: *gl_pr_check_template
+
+- job-template:
+    id: gl-build-master-with-upstream
+    name: '{gl_group}-{gl_project}-gl-build-{branch}-upstream-{upstream}'
+    branch: master
+    upstream: ''
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *kube_config
+        - *quay_secret_push
+        - *app_sre_bot_push_token
+    triggers:
+    - reverse:
+        jobs: '{upstream}'
+        results: 'success'
+    <<: *gl_build_master_template
+
+# Runs build_deploy.sh from a GH repo (polling) and deploys to staging
+#
+# vars required in the job definition:
+# - gh_org: GitHub org
+# - gh_repo: GitHub repo
+#
+# optional vars
+# - kube_cluster: cluster name
+# - kube_namespace: Namespace to deploy to
+# - saasherder_context: saasherder context declared in config.yaml
+# - saasherder_services: space separated list of saasherder service names
+# - saas_git: saas herder repo uri, should be public
+# - image_pattern: Regex of the image path to check against
+# - quay_org: name of the quay organisation
+#
+# optional secrets:
+# The secret 'app-sre/ci-ext/kube-configs/{kube_cluster}' must exist.
+# The secret 'app-sre/quay/{quay_org}-push' must exist, with `user`, `token` and `config.json` keys.
+- job-template:
+    id: 'gh-build-master'
+    name: '{gh_org}-{gh_repo}-gh-build-{branch}'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *kube_config
+        - *quay_secret_push
+    <<: *gh_build_master
+
+- job-template:
+    id: 'gh-pr-check'
+    name: '{gh_org}-{gh_repo}-gh-pr-check'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    <<: *gh_pr_check
+
+- job-template:
+    id: 'gh-build-master-github-push'
+    name: '{gh_org}-{gh_repo}-gh-build-{branch}'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *kube_config
+        - *quay_secret_push
+        - *app_sre_bot_push_token
+    <<: *gh_build_master
+
+- job-template:
+    id: gh-build-master-with-upstream
+    name: '{gh_org}-{gh_repo}-gh-build-{branch}-upstream-{upstream}'
+    upstream: ''
+    branch: master
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *kube_config
+        - *quay_secret_push
+        - *app_sre_bot_push_token
+    triggers:
+    - reverse:
+        jobs: '{upstream}'
+        results: 'success'
+    <<: *gh_build_master
+
+# Deploys all the services defined in the saas repo
+#
+# vars required in the job definition:
+# - gl_group: GitLab group
+# - gl_project: GitLab repo
+# - kube_cluster: cluster name
+# - kube_namespace: Namespace to deploy to
+# - image_pattern: Regex of the image path to check against
+# - quay_org: name of the quay organisation
+#
+# Required secrets:
+# The secret 'app-sre/ci-ext/kube-configs/{kube_cluster}' must exist.
+# The secret 'app-sre/quay/{quay_org}-pull' must exist, with `user`, `token` and `config.json` keys.
+- job-template:
+    id: 'saas-deploy'
+    name: '{gl_group}-{gl_project}-{saasherder_context}-saas-deploy'
+    dry_run: "no"
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - workspace-cleanup
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *kube_config
+        - *quay_secret_pull
+    <<: *gl_build_master_template
+    <<: *saasherder
+
+# PR check for saas repos
+#
+# vars required in the job definition:
+# - gl_group: GitLab group
+# - gl_project: GitLab repo
+# - kube_cluster: cluster name
+# - kube_namespace: Namespace to deploy to
+# - image_pattern: Regex of the image path to check against
+#
+# Required secrets:
+# The secret 'app-sre/ci-ext/kube-configs/{kube_cluster}' must exist.
+# The secret 'app-sre/quay/{quay_org}-pull' must exist, with `user`, `token` and `config.json` keys.
+- job-template:
+    id: 'saas-pr-check'
+    name: '{gl_group}-{gl_project}-{saasherder_context}-saas-pr-check'
+    dry_run: "yes"
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - workspace-cleanup
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *kube_config
+        - *quay_secret_pull
+    <<: *gl_pr_check_template
+    <<: *saasherder
+
+# Timed Job
+#
+# required vars:
+# - gl_group: GitLab group
+# - gl_project: GitLab repo
+# - cron_expression: cron expression
+#
+# optional vars:
+# - ci_cmd: the command to run. Defaults to `./run.sh`
+- job-template:
+    id: 'gl-timed'
+    name: '{gl_group}-{gl_project}-timed'
+    <<: *gl_timed_template

@@ -1,0 +1,76 @@
+- job-template:
+    id: 'uhc-integration-tests'
+    name: 'uhc-integration-tests-{environment}'
+    node: '{label}'
+    scm:
+    - git:
+        url: 'https://gitlab.cee.redhat.com/service/uhc-clusters-service.git'
+        shallow_clone: true
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *uhc_integration_tests
+    builders:
+    - shell: |
+        ./run_integration_tests.sh
+    triggers:
+    - timed: |
+        0 10,22 * * *
+
+    publishers:
+    - junit:
+        results: '**/**/junit.xml'
+        test-stability: true
+        claim-build: true
+        measurement-plots: true
+        flaky-test-reports: true
+        junit-attachments: true
+
+- job-template:
+    id: 'uhc-cluster-cleaner'
+    name: 'uhc-cluster-cleaner-{environment}'
+    wrappers:
+      - timeout_wrapper:
+          timeout: '{timeout}'
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *uhc_integration_tests
+    <<: *gl_timed_template
+
+
+- job-template:
+    id: 'uhc-cloud-stage-openshift-com-build'
+    name: '{gl_group}-{gl_project}-gl-build-master'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *kube_config
+        - *quay_secret_push
+        - *uhc_insights_platform
+    <<: *gl_build_master_template
+
+- job-template:
+    id: 'uhc-cloud-redhat-com-push-insights'
+    name: '{gl_group}-{gl_project}-gl-cloud-redhat-com-push-insights-{mode}'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *kube_config
+        - *quay_secret_push
+        - *uhc_insights_platform
+    builders:
+    - shell: |
+        #!/bin/bash
+        set -e
+        ./push_to_insights.sh {mode}
+    <<: *gl_build_master_template

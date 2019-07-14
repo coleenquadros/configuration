@@ -1,0 +1,27 @@
+- job-template:
+    id: 'gh-pr-check-vault-manager'
+    name: '{gh_org}-{gh_repo}-gh-pr-check'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *app_interface_basic_auth_prod
+    <<: *gh_pr_check
+
+- job-template:
+    id: 'gh-build-master-vault-manager'
+    name: '{gh_org}-{gh_repo}-gh-build-master'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *kube_config
+        - *quay_secret_push
+        - *app_interface_basic_auth_prod
+    <<: *gh_build_master

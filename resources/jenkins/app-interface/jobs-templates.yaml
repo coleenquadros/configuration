@@ -1,0 +1,57 @@
+- job-template:
+    id: 'gl-pr-check-app-interface'
+    name: '{gl_group}-{gl_project}-gl-pr-check'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *reconcile_toml
+        - *gitlab_token
+        - *vault_manager_creds
+    publishers:
+    - gitlab_message
+    - archive:
+        artifacts: 'temp/reports/**'
+    - html-publisher:
+        name: "app-interface JSON validation"
+        dir: "temp/reports/"
+        files: "index.html"
+        keep-all: true
+        allow-missing: true
+        link-to-last-build: true
+    <<: *gl_pr_check_template
+
+- job-template:
+    id: 'gl-build-master-app-interface'
+    name: '{gl_group}-{gl_project}-gl-build-master'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *reconcile_toml
+        - *app_interface_s3_staging
+        - *app_interface_basic_auth_staging
+        - *app_interface_s3_production
+        - *app_interface_basic_auth_prod
+        - *vault_manager_creds
+    publishers:
+    - archive:
+        artifacts: 'reports/**'
+    <<: *gl_build_master_template
+
+- job-template:
+    id: 'gl-periodic-job-app-interface'
+    name: '{gl_group}-{gl_project}-gl-periodic-job'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *reconcile_toml
+    <<: *gl_timed_template

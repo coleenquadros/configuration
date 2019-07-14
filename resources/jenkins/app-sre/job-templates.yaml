@@ -1,0 +1,239 @@
+- job-template:
+    id: 'gl-job-sos-report'
+    name: '{gl_group}-{gl_project}-job-sos-report'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *hsd_gitlab_token
+    publishers:
+    - archive:
+        artifacts: 'scripts/sos-report.html'
+    builders:
+    - shell: |
+        cd scripts
+        ./sos-issues.sh
+        md=$(ls -rt sos-issues*md|tail -n1)
+        pandoc sos-issues*md -o sos-report.html
+    triggers:
+    - timed: |
+        0 9 * * 3
+    <<: *gl_checkout
+
+- job-template:
+    id: 'gl-build-master-jjb'
+    name: '{gl_group}-{gl_project}-gl-build-master-jjb'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *jjb_ini
+        - *jjb_ini_ext
+    <<: *gl_build_master_template
+
+- job-template:
+    id: 'gl-build-master-osio-scan'
+    name: '{gl_group}-{gl_project}-gl-build-master'
+    publishers:
+    - archive:
+        artifacts: 'reports/**'
+    <<: *gl_build_master_template
+
+- job-template:
+    id: 'gl-pr-check-jjb'
+    name: '{gl_group}-{gl_project}-gl-pr-check'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    publishers:
+    - gitlab_message
+    - archive:
+        artifacts: 'reports/**'
+        allow-empty: yes
+    <<: *gl_pr_check_template
+
+- job-template:
+    id: pagerditty
+    name: pagerditty
+    node: '{node}'
+    wrappers:
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *pd_api_key
+    publishers:
+    - archive:
+        artifacts: 'report.txt'
+        allow-empty: false
+    parameters:
+    - choice:
+        name: USERNAME
+        choices:
+        - akonarde
+        - jfchevrette
+        - jmelis
+        - jmoshenk
+        - jzelinskie
+        - maorfr
+        - mmclane
+        - pbergene
+        - skryzhnii
+    - bool:
+        name: SCHEDULE_PRIMARY
+        default: true
+    - bool:
+        name: SCHEDULE_SECONDARY
+        default: true
+    - string:
+        name: START
+        description: Format YYYY-MM-DD (needs leading zeroes)
+    - string:
+        name: DURATION
+        default: "1"
+        description: Duration (in duration units)
+    - choice:
+        name: DURATION_UNITS
+        description: Unit of measure for the DURATION argument
+        choices:
+        - months
+        - days
+        - years
+    builders:
+    - shell: |
+        #!/bin/bash
+
+        if [[ $SCHEDULE_PRIMARY == false && $SCHEDULE_SECONDARY == false ]]; then
+            echo "No schedule selected" >&2
+            exit 1
+        fi
+
+        if ! echo "$START" | grep -qE "^20[0-9]{{2}}-[0-9]{{2}}-[0-9]{{2}}$"; then
+            echo "Invalid START" >&2
+            exit 1
+        fi
+
+        case $USERNAME in
+            akonarde) PD_ID=PT28Z07 ;;
+            jfchevrette) PD_ID=PW01TAV ;;
+            jmelis) PD_ID=PD8AV28 ;;
+            jmoshenk) PD_ID=PPACECK ;;
+            jzelinskie) PD_ID=PSQDSL5 ;;
+            maorfr) PD_ID=PYPZ9FP ;;
+            mmclane) PD_ID=P0JVQ4C ;;
+            pbergene) PD_ID=PG6TPCW ;;
+            skryzhnii) PD_ID=PYKHONG ;;
+            *) echo "Invalid username" >&2 ; exit 1;;
+        esac
+
+        pd_schedule=""
+        if $SCHEDULE_PRIMARY; then
+            pd_schedule="--pd_schedule_id PHS3079"
+        fi
+
+        if $SCHEDULE_SECONDARY; then
+            pd_schedule="$pd_schedule --pd_schedule_id PSTVSQD"
+        fi
+
+        docker run --rm quay.io/jakedt/pagerditty \
+            --pd_api_key $PD_API_KEY \
+            --pd_id $PD_ID \
+            $pd_schedule \
+            --start $START \
+            --duration $DURATION \
+            --durationunits $DURATION_UNITS > report.txt
+
+- job-template:
+    id: 'jenkins-slaves-cleanup'
+    name: 'jenkins-slaves-cleanup'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *app_sre_bot_key
+    builders:
+    - shell: |
+        trap "rm -f ${{WORKSPACE}}/ansible/app-sre-bot.key" EXIT SIGINT
+        cd ansible
+        echo ${{APP_SRE_BOT_KEY}} | base64 --decode > app-sre-bot.key
+        chmod 0600 app-sre-bot.key
+        eval `ssh-agent -s`
+        ssh-add app-sre-bot.key
+        ansible -u ${{APP_SRE_BOT_USERNAME}} --key-file app-sre-bot.key -m shell -a 'sudo /opt/clean-up-scripts/prune-docker-images.sh' ci-int-jenkins-slave,ci-ext-jenkins-slave,ci-ext-jenkins
+    triggers:
+    - timed: |
+        H 0 */3 * *
+    <<: *gl_checkout
+
+- job-template:
+    id: 'clusterimageset-run'
+    name: 'clusterimageset-run'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    builders:
+    - shell: |
+        ./run.sh
+    triggers:
+    - timed: |
+        H 0 * * *
+    publishers:
+    - git:
+        push-merge: false
+        push-only-if-success: true
+        branches:
+        - branch:
+            name: "master"
+    <<: *gl_checkout
+
+- job-template:
+    id: 'gl-build-master-clusterimagesets-apply'
+    name: '{gl_group}-{gl_project}-gl-build-master-clusterimagesets-apply'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *app_sre_bot_key
+        - *kube_config_hive_stage
+        - *kube_config_hive_int
+        - *kube_config_hive_prod
+        - *slack_hook_url
+    builders:
+    - shell: |
+        export JUMPHOST="ci.ext.devshift.net"
+        export JUMPHOST_USER="$APP_SRE_BOT_USERNAME"
+        export SSH_PRIVATE_KEY_B64="$APP_SRE_BOT_KEY"
+
+        ./build_deploy.sh
+    <<: *gl_build_master_template
+
+- job-template:
+    id: 'gl-pr-check-clusterimagesets'
+    name: '{gl_group}-{gl_project}-gl-pr-check'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *app_sre_bot_key
+        - *kube_config_hive_stage
+        - *kube_config_hive_prod
+        - *slack_hook_url
+    builders:
+    - shell: |
+        export JUMPHOST="ci.ext.devshift.net"
+        export JUMPHOST_USER="$APP_SRE_BOT_USERNAME"
+        export SSH_PRIVATE_KEY_B64="$APP_SRE_BOT_KEY"
+
+        ./pr_check.sh
+    <<: *gl_pr_check_template

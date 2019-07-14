@@ -1,0 +1,104 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+labels:
+  service: telemeter
+
+name: ci-int-telemeter-jobs
+
+description: ''
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+type: jobs
+
+config:
+- project:
+    name: telemeter-ci
+    label: telemeter
+    node: app-sre
+    gh_org: openshift
+    gh_repo: telemeter
+    quay_org: app-sre
+    kube_cluster: app-sre
+    kube_namespace: telemeter-stage
+    saasherder_context: telemeter
+    saasherder_services: prometheus-operator prometheus-telemeter telemeter-server
+    saasherder_object_blacklist: 'Route,Secret,ConfigMap,ClusterRole,ClusterRoleBinding' # Default: Route,Secret,ConfigMap,ServiceAccount
+    saas_git: https://gitlab.cee.redhat.com/service/saas-telemeter.git
+    jobs:
+    - 'gh-build-master':
+        display_name: build master
+
+- project:
+    name: telemeter-thanos-ci
+    label: telemeter
+    node: app-sre
+    gh_org: observatorium
+    gh_repo: configuration
+    image_pattern: ""
+    quay_org: app-sre
+    kube_cluster: app-sre
+    kube_namespace: telemeter-stage
+    saasherder_context: telemeter
+    saasherder_services: thanos
+    saasherder_object_blacklist: 'Route,Secret,ConfigMap,ClusterRole,ClusterRoleBinding' # Default: Route,Secret,ConfigMap,ServiceAccount
+    saas_git: https://gitlab.cee.redhat.com/service/saas-telemeter.git
+    jobs:
+    - 'gh-build-master':
+        display_name: build master
+
+- project:
+    name: telemeter-saas
+    label: telemeter
+    node: app-sre
+    gl_group: service
+    gl_project: saas-telemeter
+    kube_cluster: app-sre
+    kube_namespace: telemeter-production
+    saasherder_context: telemeter
+    saasherder_services: prometheus-operator prometheus-telemeter telemeter-server
+    saasherder_object_blacklist: 'Route,Secret,ConfigMap,ClusterRole,ClusterRoleBinding' # Default: Route,Secret,ConfigMap,ServiceAccount
+    image_pattern: ''
+    quay_org: app-sre
+    jobs:
+    - 'saas-deploy':
+        display_name: saas deploy
+    - 'saas-pr-check':
+        display_name: saas pr check
+
+- project:
+    name: telemeter-cache-ci
+    label: telemeter-cache
+    node: app-sre
+    gl_group: service
+    gl_project: saas-telemeter-cache-manifests
+    quay_org: app-sre
+    kube_cluster: app-sre
+    kube_namespace: telemeter-cache-stage
+    saasherder_context: telemeter-cache
+    saasherder_services: prometheus-operator prometheus-telemeter-cache
+    saasherder_object_blacklist: 'Route,Secret,ConfigMap,ClusterRole,ClusterRoleBinding' # Default: Route,Secret,ConfigMap,ServiceAccount
+    saas_git: https://gitlab.cee.redhat.com/service/saas-telemeter-cache.git
+    jobs:
+    - 'gl-build-master':
+        display_name: build master
+
+- project:
+    name: telemeter-cache-saas
+    label: telemeter-cache
+    node: app-sre
+    gl_group: service
+    gl_project: saas-telemeter-cache
+    quay_org: app-sre
+    kube_cluster: app-sre
+    kube_namespace: telemeter-cache-production
+    saasherder_context: telemeter-cache
+    saasherder_services: prometheus-operator prometheus-telemeter-cache
+    saasherder_object_blacklist: 'Route,Secret,ConfigMap,ClusterRole,ClusterRoleBinding' # Default: Route,Secret,ConfigMap,ServiceAccount
+    jobs:
+    - 'saas-deploy':
+        display_name: saas deploy
+    - 'saas-pr-check':
+        display_name: saas pr check
