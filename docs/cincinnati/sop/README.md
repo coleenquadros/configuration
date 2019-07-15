@@ -4,6 +4,8 @@
 
 - [SOP : OpenShift Cincinnati](#sop--openshift-cincinnati)
     - [Verify it's working](#verify-its-working)
+    - [GBUpstreamScrapesHalted](#gbupstreamscrapeshalted)
+    - [GBUpstreamScrapeErrors](#gbupstreamscrapeerrors)
     - [PEIncomingRequestsHalted](#peincomingrequestshalted)
     - [PEUpstreamErrors](#peupstreamerrors)
     - [PEGraphResponseErrors](#pegraphresponseerrors)
@@ -17,6 +19,57 @@
 
 - At least one `cincinnati` pod is marked as UP in Prometheus.
 - Additional details on expected behaviour are available in the Cincinnati production deployment doc: https://docs.google.com/document/d/1oT9wueEB01god-gICg0DsGFJzuA-E-TPn88ViWTMr-A/edit
+
+---
+
+## GBUpstreamScrapesHalted
+
+### Summary:
+
+Graph-builder scraping logic is not making progresses.
+
+### Impact:
+
+New releases will not appear in the update graph (the latest cached graph will be kept serving).
+Updated releases and transition-edges will not be reflected in the update graph.
+
+### Access required:
+
+- Access to the cluster that runs Cincinnati, namespaces:
+    - cincinnati-staging
+    - cincinnati-production
+
+### Steps:
+
+- Contact Cincinnati team, investigate why graph-builder got blocked.
+
+---
+
+## GBUpstreamScrapeErrors
+
+### Summary:
+
+Graph-builder is failing to scrape release metadata from quay.io.
+
+### Impact:
+
+New releases will not appear in the update graph (the latest cached graph will be kept serving).
+Updated releases and transition-edges will not be reflected in the update graph.
+
+### Access required:
+
+- Access to the cluster that runs Cincinnati, namespaces:
+    - cincinnati-staging
+    - cincinnati-production
+
+### Steps:
+
+- Check quay.io outage status: https://status.quay.io/
+- Look at the logs for the 'graph-builder' container to pinpoint what is failing.
+- If logs contain service errors from quay.io, check #forum-quay-oncall and contact quay.io ops.
+- Contact Cincinnati team, investigate why graph-builder is experiencing scapre errors.
+
+---
 
 ## PEIncomingRequestsHalted
 
