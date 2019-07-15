@@ -36,4 +36,34 @@ Production Logs: 	https://logs.hive-production.openshift.com/
 
 Or you can use the oc CLI access to investigate the various objects related to the cluster in the namespace.
 
+### Common failures:
+#### No API token found for service account "default", retry after the token is automatically created and added to the service account 
+This issue has been seen more than once. The deprovision job cannot get started, and running 'oc describe' on the job shows:
 
+```
+Events:
+  Type     Reason        Age                 From            Message
+  ----     ------        ----                ----            -------
+  Warning  FailedCreate  2m (x1235 over 2d)  job-controller  Error creating: No API token found for service account "default", retry after the token is automatically created and added to the service account
+```
+
+The default service account in the namespace for the job appears to have lost its reference to the token secret. 'oc get sa' on the default service account would show:
+
+```
+apiVersion: v1
+imagePullSecrets:
+- name: default-dockercfg-7jd6q
+kind: ServiceAccount
+metadata:
+  creationTimestamp: 2019-07-05T03:23:14Z
+  name: default
+  namespace: uhc-staging-16m7987hm2ilb29d48mgk0kfvpogb2cu
+  resourceVersion: "49843847"
+  selfLink: /api/v1/namespaces/uhc-staging-16m7987hm2ilb29d48mgk0kfvpogb2cu/serviceaccounts/default
+  uid: 391d82be-9ed4-11e9-aa89-0e3666d6b70e
+secrets:
+- name: default-token-xtrmz # <----- ***this secret reference missing in a "bad" SA***
+- name: default-dockercfg-7jd6q
+```
+
+Update the service account secret list to add an entry for the existing token secret, and hive will eventually re-try the uninstall, and it should work.
