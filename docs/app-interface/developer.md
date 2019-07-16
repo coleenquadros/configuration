@@ -25,7 +25,7 @@ When someone submits MR to change the data in `service/app-interface` this is wh
   - Runs the reporting engine again to append to the previous report the output of integrations.
 - The AppSRE engineer looks at the report and decided whether to merge.
 - If merged, [production app-interface Jenkins Job](https://ci-int-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/view/app-interface/job/service-app-interface-gl-pr-check/view/app-interface/job/service-app-interface-gl-build-master/) is executed, which runs [build_deploy.sh](https://gitlab.cee.redhat.com/service/app-interface/blob/master/build_deploy.sh)
-  - Bundles the data and uploads to `app-interface.staging.devshift.net` and reloads the service.
+  - Bundles the data and uploads to `app-interface.stage.devshift.net` and reloads the service.
   - Bundles the data and uploads to `app-interface.devshift.net` and reloads the service.
   - It waits and ensures that the data was correctly loaded (by looking at the sha256)
   - Runs the [defined integrations](https://gitlab.cee.redhat.com/service/app-interface/blob/7f8a15444fab01fbd3467e32e8d4ff00a4d61032/build_deploy.sh#L105-108).

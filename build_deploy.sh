@@ -53,10 +53,10 @@ export PASSWORD=$PASSWORD_STAGING
 
 aws s3 cp validate/data.json s3://${AWS_S3_BUCKET}/${AWS_S3_KEY}
 
-curl "https://${USERNAME}:${PASSWORD}@app-interface.staging.devshift.net/reload"
+curl "https://${USERNAME}:${PASSWORD}@app-interface.stage.devshift.net/reload"
 
 wait_response \
-    "https://${USERNAME}:${PASSWORD}@app-interface.staging.devshift.net/sha256" \
+    "https://${USERNAME}:${PASSWORD}@app-interface.stage.devshift.net/sha256" \
     "$SHA256"
 
 # Upload to prodution and reload
