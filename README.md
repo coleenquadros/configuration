@@ -203,11 +203,12 @@ wheel icon (top-right corner) and replace `omit` with `include` in
 - Management of OpenShift Routes using Vault.
 - Management of Vault configurations.
 - Management of cluster monitoring, such as prometheus and alert manager.
-- Management of Jenkins roles association.
-- Management of Jenkins plugins installation.
 - Management of AWS resources.
 - Management of AWS users.
 - Management of Slack User Groups.
+- Management of Jenkins jobs configurations.
+- Management of Jenkins roles association.
+- Management of Jenkins plugins installation.
 - Deletion of orphan AWS resources.
 - Deletion of AWS keys per AWS account.
 - House keeping of GitLab issues.
@@ -691,10 +692,46 @@ Notes:
   * `slack_username` - if it is different from `redhat_username`
   * `pagerduty_name` - if it is different from `name`
 
+### Manage Jenkins jobs configurations using jenkins-jobs
+
+Jenkins jobs configurations can be entirely self-serviced via App-Interface, and allows to define JJB Manifests to be used to bring up CI/CD/Automation pipelines or adhoc jobs in the internal and external Jenkins instance.
+
+Note: This used to be managed in the [JJB](https://gitlab.cee.redhat.com/service/jjb) repository.
+
+To add a configuration to a Jenkins instance, add a `jenkins-config` object with the following details:
+- `instance` - reference to a jenkins instance
+- `type` - one of the following JJB entities:
+  - `views`
+  - `secrets`
+  - `job-templates`
+  - `jobs`
+- `config` - a list of configurations of type `view` or `project` (use `config` for `views` and `jobs` types)
+- `config_path` - a path to a resource containing configuration (use `config_path` for `secrets` and `job-templates` types, which tend to be have a "complex" yaml)
+
+Examples:
+- `views` - [object](/data/services/app-interface/cicd/ci-int/views.yaml)
+- `secrets` - [object](/data/services/app-interface/cicd/ci-int/secrets.yaml), [resource](/resources/jenkins/app-interface/secrets.yaml)
+- `job-templates` - [object](/data/services/app-interface/cicd/ci-int/job-templates.yaml), [resource](/resources/jenkins/app-interface/jobs-templates.yaml)
+- `jobs` - [object](/data/services/app-interface/cicd/ci-int/jobs.yaml)
+
+All JJB configurations rely on a JJB entity of type `common` for the corresponding Jenkins intance:
+- `ci-int` - [object](/data/services/common/cicd/ci-int.yaml), [resource](/resources/jenkins/common/ci-int.yaml)
+- `ci-ext` - [object](/data/services/common/cicd/ci-ext.yaml), [resource](/resources/jenkins/common/ci-ext.yaml)
+
+The final JJB configrations will be sorted in the following order:
+- `common`
+- `views`
+- `secrets`
+- `job-templates`
+- `jobs`
+
+External reference:
+- [Jenkins Job Builder](https://docs.openstack.org/infra/jenkins-job-builder/)
+
 
 ### Delete AWS IAM access keys via App-Interface
 
-AWS IAM keys deletion can be entirely self-services via App-Interface.
+AWS IAM keys deletion can be entirely self-serviced via App-Interface.
 
 In order to delete a key from an AWS account, add the Access key ID to the `deleteKeys` list in the AWS Account file.
 For example, merging [this](/data/aws/osio/account.yml#L11) line will delete the Access key with ID `AKIAVT6AWJBAILFXBV4A` from the `osio` account.
