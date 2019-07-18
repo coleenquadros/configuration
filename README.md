@@ -672,6 +672,7 @@ To manage a User group via App-Interface:
 - `workspace`: a reference to a file representing the Slack Workspace
 - `pagerduty`: a reference to a file representing a PagerDuty target (Schedule or Escalation Policy).
   * Adding this attribute will add the PagerDuty target as an additional "source of truth", and will add the final schedule user to the Slack user group (in addition to any references from user files).
+- `github_owners`: a list of urls of raw github OWNERS files to extract `approvers` from
 - `channels`: a list of channels to add to the User group
 
 2. Add this permission to the desired `roles`, or create a new `role` with this permission only (mandatory).
@@ -682,6 +683,7 @@ Examples:
 * An example for the `app-sre-ic` User group permission which is also synced with a PagerDuty schedule can be found [here](/data/teams/app-sre/permissions/app-sre-ic-coreos-slack.yml)
 * An example for a PagerDuty schedule file can be found [here](/data/dependencies/pagerduty/app-sre-primary.yml).
 * An example for a PagerDuty escalation policy file can be found [here](/data/dependencies/pagerduty/app-sre-escalation-policy.yml).
+* An example for a GitHub OWNERS file can be found [here](/data/teams/sd-sre/permissions/aws-account-operator-coreos-slack.yml).
 
 Notes:
 * Creating new User groups is not supported (User group has to pre-exist).
