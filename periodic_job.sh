@@ -41,6 +41,7 @@ run_int() {
 
 run_int slack-usergroups &
 run_int github-users &
+run_int github-repo-invites &
 run_int gitlab-housekeeping &
 run_int ldap-users &
 run_int aws-garbage-collector &
