@@ -180,6 +180,7 @@ run_int openshift-rolebinding &
 run_int openshift-resources &
 run_int terraform-resources &
 run_int terraform-users &
+run_int gitlab-members &
 
 wait
 
