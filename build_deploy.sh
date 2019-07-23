@@ -112,8 +112,8 @@ run_int() {
   # Add integration run durations to a file
   echo "$1 $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
   # Send integration run durations to pushgateway
-  echo "app_interface_int_execution_duration_seconds{integration=\"$1\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSH_GATEWAY_CREDENTIALS_PROD}" --data-binary @- https://$PUSHGATEWAY_URL_PROD/metrics/job/$JOB_NAME
-  echo "app_interface_int_execution_duration_seconds{integration=\"$1\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSH_GATEWAY_CREDENTIALS_STAGE}" --data-binary @- https://$PUSHGATEWAY_URL_STAGE/metrics/job/$JOB_NAME
+  echo "app_interface_int_execution_duration_seconds{integration=\"$1\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSH_GATEWAY_CREDENTIALS_PROD}" --data-binary @- https://$PUSH_GATEWAY_URL_PROD/metrics/job/$JOB_NAME
+  echo "app_interface_int_execution_duration_seconds{integration=\"$1\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSH_GATEWAY_CREDENTIALS_STAGE}" --data-binary @- https://$PUSH_GATEWAY_URL_STAGE/metrics/job/$JOB_NAME
 
   if [ "$EXIT_STATUS" != "0" ]; then
     mv ${SUCCESS_DIR}/reconcile-${1}.txt ${FAIL_DIR}/reconcile-${1}.txt
@@ -143,8 +143,8 @@ run_vault_reconcile_integration() {
   # Add integration run durations to a file
   echo "vault $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
   # Send integration run durations to pushgateway
-  echo "app_interface_int_execution_duration_seconds{integration=\"vault\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSH_GATEWAY_CREDENTIALS_PROD}" --data-binary @- https://$PUSHGATEWAY_URL_PROD/metrics/job/$JOB_NAME
-  echo "app_interface_int_execution_duration_seconds{integration=\"vault\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSH_GATEWAY_CREDENTIALS_STAGE}" --data-binary @- https://$PUSHGATEWAY_URL_STAGE/metrics/job/$JOB_NAME
+  echo "app_interface_int_execution_duration_seconds{integration=\"vault\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSH_GATEWAY_CREDENTIALS_PROD}" --data-binary @- https://$PUSH_GATEWAY_URL_PROD/metrics/job/$JOB_NAME
+  echo "app_interface_int_execution_duration_seconds{integration=\"vault\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSH_GATEWAY_CREDENTIALS_STAGE}" --data-binary @- https://$PUSH_GATEWAY_URL_STAGE/metrics/job/$JOB_NAME
 
   if [ "$EXIT_STATUS" != "0" ]; then
     mv ${SUCCESS_DIR}/reconcile-${1}.txt ${FAIL_DIR}/reconcile-vault.txt
