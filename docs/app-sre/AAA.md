@@ -74,11 +74,22 @@ Every app-sre engineer should have access to the following
 * Github / LDAP username
 * https://password.corp.redhat.com/changepassword/
 
-* Mattermost: chat.openshift.io
-    * Channels: devtools-sd, devtools-servicedel
+
+* Gitlab:
+    - https://gitlab.cee.redhat.com/service/app-interface
+        * create a user file under the [app-sre team](/data/teams/app-sre/users) directory via a merge request off a fork of app-interface
+            * Pro tip: Copy the user file of the newest team member
+    - https://gitlab.cee.redhat.com/dtsd/housekeeping
+        * Keeps all our bits and bobs, Ansible, terraform, python, scripts etc
+        * Issue tracker tracks incoming interrupt catching requests
+    - https://gitlab.cee.redhat.com/app-sre
+        * Access to all repositories is managed via this group -> reach out to any team member to be added
+        * automation pending
 
 * Slack: coreos.slack.com
-    * Channels sd-org, sd-osd-sre, 4-dev-triage, sd-app-sre
+    * Private channels: sd-app-sre-teamchat -> speak to any team member to get an invitation
+    * User groups: @app-sre-team -> obtained via a [role](/data/teams/app-sre/roles/app-sre-slack.yml)
+    * Channels: as stated [here](/data/teams/app-sre/permissions/app-sre-team-coreos-slack.yml) -> obtained via the @app-sre-team user group membership
 
 * Internal IRC (irc.devel.redhat.com):
     - #MIM: Major incident management
@@ -96,26 +107,19 @@ Every app-sre engineer should have access to the following
     - Many people just use the web email client, other thunderbird.
     - Recommended to sort into folders
     - https://post-office.corp.redhat.com/mailman/listinfo is the mailing list central
-        - ACCESS: sd-app-sre -> speak to @jake or @paul
+        - ACCESS: sd-app-sre -> speak to @jake or @paul on slack
         - ACCESS: sd-org -> subscribe from UI
         - ACCESS: devtools-saas -> subscribe from UI
         - ACCESS: devtools-team -> subscribe from UI
         - ACCESS: outage-list -> subscribe from UI
         - ACCESS: aos-devel -> subscribe from UI
 
-- Gitlab:
-    - https://gitlab.cee.redhat.com/dtsd/
-        - Housekeeping: Keeps all our bits and bobs, Ansible, terraform, python, scripts etc
-        - ACCESS: App-sre DTSD -> Owner access
-        - Issue tracker tracks incoming developers request
-    - https://gitlab.cee.redhat.com/service/
-        - ACCESS: app-interface - Master access
-        - ACCESS: jjb - Master access
-        - ACCESS: vault-devshift-net Master access
-
 - GPG key:
-    - Generate one and put in https://gitlab.cee.redhat.com/dtsd/housekeeping/tree/master/gpg/SD
+    - Generate one and put in:
+        - ascii armored in https://gitlab.cee.redhat.com/dtsd/housekeeping/tree/master/gpg/SD
+        - base64 encoded binary in your app-interface user file -> [instructions](#adding-your-public-gpg-key)
     - Use a passphrase!
+    - External reference: https://www.gnupg.org/gph/en/manual/x56.html
 
 - Sd-org onboarding
     - ACCESS Contact Meghna Gala (mgala@redhat.com) re Sd-org onboarding
@@ -127,11 +131,13 @@ Every app-sre engineer should have access to the following
     - ACCESS: https://mojo.redhat.com/docs/DOC-1081313#jive_content_id_Github_Access
 
 - AWS
-    - Access managed through terraform
-    - Reach out to Serhii or Paul for accounts on:
-        - ACCESS: OSIO AWS account # 386414299200
-        - ACCESS: App-sre AWS account # 950916221866
-    - Automated process pending
+    * Obtained via a [role](/data/teams/app-sre/roles/sre-aws.yml)
+
+- Vault
+    * Obtained via a [role](/data/teams/app-sre/roles/sre.yml) -> [instructions](https://gitlab.cee.redhat.com/service/dev-guidelines/blob/master/vault.md)
+
+- Quay
+    * Obtained via a [role](/data/teams/app-sre/roles/sre.yml) -> need to have a quay user and specify `quay_username` in the user file
 
 - Bugzilla
     - ACCESS: Ensure you have private access to bugzilla via https://maitai-bpms.engineering.redhat.com/
@@ -142,24 +148,16 @@ Every app-sre engineer should have access to the following
     - ACCESS: Admin access, can be granted by any App-sre member
 
 - Dedicated admin on openshift clusters
-    - See app-interface/data/openshift/ - only applies to OSD clusters
-    ACCESS: oc adm groups add-users dedicated-admins <USER> [<USER> ...]
-    - Can be granted by any dedicated admin (oc get group dedicated-admins)
+    * Obtained via a [role](data/teams/app-sre/roles/app-sre-dedicated-admins.yml)
 
 - Pagerduty
     ACCESS: Reach out to team lead and manager for PD access
 
 - App-sre team drive
-    ACESS: Reach out to pbergene@redhat.com for
+    ACCESS: Reach out to pbergene@redhat.com
 
-- Bangalore (BLR) infrastructure
-    - In BLR we have 4 nodes of RHEV infrastructure, this is further documented on the App-sre index (available to app-sre team members)
-    - Access is managed adding ssh keys to ansible and users via the RHEV console
-    - ACCESS:
-
-- Raleigh (infrastructure)
-    - In BLR we have 4 nodes of RHEV infrastructure, this is further documented on the App-sre index (available to app-sre team members)
--  Access is managed adding ssh keys to ansible and IPMI users
+- App SRE infrastructure managed by ansible
+    - Access is managed by adding ssh keys to the [admin-list](https://gitlab.cee.redhat.com/dtsd/housekeeping/blob/master/ansible/hosts/group_vars/all#L4) and applying the `baseline` role to all hosts.
 
 - OpenStack Project infrastructure
     - We have our ci-int infrastructure deployed here: https://rhos-d.infra.prod.upshift.rdu2.redhat.com/dashboard/project/
@@ -172,7 +170,8 @@ Every app-sre engineer should have access to the following
 
  ## Primary on-call + interrupt catching
 
-  - include interrupt catching doc and on-call specifics
+  - Interrupt catching is detailed in this [document](https://gitlab.cee.redhat.com/dtsd/housekeeping/blob/master/docs/interrupt-catching.md)
+  - include on-call specifics
 
 ### 1.5.1. On call
 
