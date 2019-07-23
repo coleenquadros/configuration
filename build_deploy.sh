@@ -147,7 +147,6 @@ run_vault_reconcile_integration() {
 }
 
 run_int github &
-run_int github-repo-invites &
 run_int quay-membership &
 run_int quay-repos &
 run_vault_reconcile_integration &
@@ -158,8 +157,8 @@ run_int jenkins-job-builder &
 run_int jenkins-webhooks &
 run_int aws-iam-keys &
 run_int slack-usergroups &
-run_int gitlab-permissions &
 run_int gitlab-members &
+run_int gitlab-permissions &
 
 run_int openshift-namespaces
 

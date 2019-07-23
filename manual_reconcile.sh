@@ -163,7 +163,6 @@ cat "$CONFIG_TOML" \
 ## Run integrations on local server
 
 run_int github &
-run_int github-repo-invites &
 run_int quay-membership &
 run_int quay-repos &
 run_vault_reconcile_integration &
@@ -174,13 +173,13 @@ run_int jenkins-job-builder &
 run_int jenkins-webhooks &
 run_int aws-iam-keys &
 run_int slack-usergroups &
+run_int gitlab-members &
 run_int gitlab-permissions &
 run_int openshift-namespaces &
 run_int openshift-rolebinding &
 run_int openshift-resources &
 run_int terraform-resources &
 run_int terraform-users &
-run_int gitlab-members &
 
 wait
 
