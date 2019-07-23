@@ -59,7 +59,7 @@ wait_response \
     "https://${USERNAME}:${PASSWORD}@app-interface.stage.devshift.net/sha256" \
     "$SHA256"
 
-# Upload to prodution and reload
+# Upload to production and reload
 
 export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID_PRODUCTION
 export AWS_REGION=$AWS_REGION_PRODUCTION
@@ -109,7 +109,11 @@ run_int() {
   EXIT_STATUS=$?
   ENDTIME=$(date +%s)
 
-  echo "$1 $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/run_int_execution_times.txt"
+  # Add integration run durations to a file
+  echo "$1 $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
+  # Send integration run durations to pushgateway
+  echo "app_interface_int_execution_duration_seconds{integration=\"$1\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSH_GATEWAY_CREDENTIALS_PROD}" --data-binary @- https://$PUSHGATEWAY_URL_PROD/metrics/job/$JOB_NAME
+  echo "app_interface_int_execution_duration_seconds{integration=\"$1\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSH_GATEWAY_CREDENTIALS_STAGE}" --data-binary @- https://$PUSHGATEWAY_URL_STAGE/metrics/job/$JOB_NAME
 
   if [ "$EXIT_STATUS" != "0" ]; then
     mv ${SUCCESS_DIR}/reconcile-${1}.txt ${FAIL_DIR}/reconcile-${1}.txt
@@ -136,7 +140,11 @@ run_vault_reconcile_integration() {
   EXIT_STATUS=$?
   ENDTIME=$(date +%s)
 
-  echo "vault $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/run_int_execution_times.txt"
+  # Add integration run durations to a file
+  echo "vault $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
+  # Send integration run durations to pushgateway
+  echo "app_interface_int_execution_duration_seconds{integration=\"vault\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSH_GATEWAY_CREDENTIALS_PROD}" --data-binary @- https://$PUSHGATEWAY_URL_PROD/metrics/job/$JOB_NAME
+  echo "app_interface_int_execution_duration_seconds{integration=\"vault\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSH_GATEWAY_CREDENTIALS_STAGE}" --data-binary @- https://$PUSHGATEWAY_URL_STAGE/metrics/job/$JOB_NAME
 
   if [ "$EXIT_STATUS" != "0" ]; then
     mv ${SUCCESS_DIR}/reconcile-${1}.txt ${FAIL_DIR}/reconcile-vault.txt
@@ -173,7 +181,7 @@ echo
 echo "Execution times for integrations that were executed"
 (
   echo "Integration Seconds"
-  sort -nr -k2 "${SUCCESS_DIR}/run_int_execution_times.txt"
+  sort -nr -k2 "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
 ) | column -t
 echo
 

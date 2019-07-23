@@ -76,7 +76,10 @@ run_int() {
   status="$?"
   ENDTIME=$(date +%s)
 
-  echo "$1 $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/run_int_execution_times.txt"
+  echo "$1 $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
+  # Send integration run durations to pushgateway
+  echo "app_interface_int_execution_duration_seconds{integration=\"$1\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSH_GATEWAY_CREDENTIALS_PROD}" --data-binary @- https://${PUSHGATEWAY_URL_PROD}/metrics/job/${JOB_NAME}
+  echo "app_interface_int_execution_duration_seconds{integration=\"$1\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSH_GATEWAY_CREDENTIALS_STAGE}" --data-binary @- https://${PUSHGATEWAY_URL_STAGE}/metrics/job/${JOB_NAME}
 
   if [ "$status" != "0" ]; then
     echo "INTEGRATION FAILED: $1" >&2
@@ -104,7 +107,11 @@ run_vault_reconcile_integration() {
   status="$?"
   ENDTIME=$(date +%s)
 
-  echo "vault $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/run_int_execution_times.txt"
+  # Add integration run durations to a file
+  echo "vault $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
+  # Send integration run durations to pushgateway
+  echo "app_interface_int_execution_duration_seconds{integration=\"vault\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSH_GATEWAY_CREDENTIALS_PROD}" --data-binary @- https://${PUSHGATEWAY_URL_PROD}/metrics/job/${JOB_NAME}
+  echo "app_interface_int_execution_duration_seconds{integration=\"vault\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSH_GATEWAY_CREDENTIALS_STAGE}" --data-binary @- https://${PUSHGATEWAY_URL_STAGE}/metrics/job/${JOB_NAME}
 
 
   if [ "$status" != "0" ]; then
@@ -187,7 +194,7 @@ echo
 echo "Execution times for integrations that were executed"
 (
   echo "Integration Seconds"
-  sort -nr -k2 "${SUCCESS_DIR}/run_int_execution_times.txt"
+  sort -nr -k2 "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
 ) | column -t
 echo
 

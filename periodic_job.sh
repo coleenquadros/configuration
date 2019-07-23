@@ -29,7 +29,7 @@ run_int() {
   EXIT_STATUS=$?
   ENDTIME=$(date +%s)
 
-  echo "$1 $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/run_int_execution_times.txt"
+  echo "$1 $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
 
   if [ "$EXIT_STATUS" != "0" ]; then
     mv ${SUCCESS_DIR}/reconcile-${1}.txt ${FAIL_DIR}/reconcile-${1}.txt
@@ -53,7 +53,7 @@ echo
 echo "Execution times for integrations that were executed"
 (
   echo "Integration Seconds"
-  sort -nr -k2 "${SUCCESS_DIR}/run_int_execution_times.txt"
+  sort -nr -k2 "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
 ) | column -t
 echo
 
