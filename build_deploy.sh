@@ -70,6 +70,12 @@ export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_PRODUCTION
 export USERNAME=$USERNAME_PRODUCTION
 export PASSWORD=$PASSWORD_PRODUCTION
 
+# Set Pushgateway credentials
+export PUSHGW_CREDS_PROD=$PUSH_GATEWAY_CREDENTIALS_PROD
+export PUSHGW_URL_PROD=$PUSH_GATEWAY_URL_PROD
+export PUSHGW_CREDS_STAGE=$PUSH_GATEWAY_CREDENTIALS_STAGE
+export PUSHGW_URL_STAGE=$PUSH_GATEWAY_URL_STAGE
+
 aws s3 cp validate/data.json s3://${AWS_S3_BUCKET}/${AWS_S3_KEY}
 
 curl "https://${USERNAME}:${PASSWORD}@app-interface.devshift.net/reload"
@@ -112,8 +118,8 @@ run_int() {
   # Add integration run durations to a file
   echo "$1 $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
   # Send integration run durations to pushgateway
-  echo "app_interface_int_execution_duration_seconds{integration=\"$1\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSH_GATEWAY_CREDENTIALS_PROD}" --data-binary @- https://$PUSH_GATEWAY_URL_PROD/metrics/job/$JOB_NAME
-  echo "app_interface_int_execution_duration_seconds{integration=\"$1\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSH_GATEWAY_CREDENTIALS_STAGE}" --data-binary @- https://$PUSH_GATEWAY_URL_STAGE/metrics/job/$JOB_NAME
+  echo "app_interface_int_execution_duration_seconds{integration=\"$1\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSHGW_CREDS_PROD}" --data-binary @- https://$PUSHGW_URL_PROD/metrics/job/$JOB_NAME
+  echo "app_interface_int_execution_duration_seconds{integration=\"$1\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSHGW_CREDS_STAGE}" --data-binary @- https://$PUSHGW_URL_STAGE/metrics/job/$JOB_NAME
 
   if [ "$EXIT_STATUS" != "0" ]; then
     mv ${SUCCESS_DIR}/reconcile-${1}.txt ${FAIL_DIR}/reconcile-${1}.txt
@@ -143,8 +149,8 @@ run_vault_reconcile_integration() {
   # Add integration run durations to a file
   echo "vault $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
   # Send integration run durations to pushgateway
-  echo "app_interface_int_execution_duration_seconds{integration=\"vault\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSH_GATEWAY_CREDENTIALS_PROD}" --data-binary @- https://$PUSH_GATEWAY_URL_PROD/metrics/job/$JOB_NAME
-  echo "app_interface_int_execution_duration_seconds{integration=\"vault\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSH_GATEWAY_CREDENTIALS_STAGE}" --data-binary @- https://$PUSH_GATEWAY_URL_STAGE/metrics/job/$JOB_NAME
+  echo "app_interface_int_execution_duration_seconds{integration=\"vault\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSHGW_CREDS_PROD}" --data-binary @- https://$PUSHGW_URL_PROD/metrics/job/$JOB_NAME
+  echo "app_interface_int_execution_duration_seconds{integration=\"vault\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSHGW_CREDS_STAGE}" --data-binary @- https://$PUSHGW_URL_STAGE/metrics/job/$JOB_NAME
 
   if [ "$EXIT_STATUS" != "0" ]; then
     mv ${SUCCESS_DIR}/reconcile-${1}.txt ${FAIL_DIR}/reconcile-vault.txt
