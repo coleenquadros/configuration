@@ -28,6 +28,14 @@ Accessing logging or prometheus services via github auth in stage and production
 
 We assume the use of “[sshuttle](https://github.com/sshuttle/sshuttle)” for reaching the clusters which are not on the public internet. On Fedora, install with `dnf install sshuttle`.
 
+On macOS sshuttle does not work by default if you are on the VPN.
+
+As per [this bug](https://github.com/sshuttle/sshuttle/issues/102/) to the sshuttle project you will need to manually add a route.
+
+An example on how to do so:
+
+`sudo route add -net <range_to_go_through_sshuttle> -interface lo0`
+
 ## Stage
 
 To access monitoring services for the stage environment, open a `sshuttle` connection to stage:
