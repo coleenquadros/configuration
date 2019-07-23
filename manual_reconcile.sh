@@ -57,11 +57,11 @@ else
   CURL_IP=$IP
 fi
 
-# Set Pushgateway credentials
-export PUSHGW_CREDS_PROD=$PUSH_GATEWAY_CREDENTIALS_PROD
-export PUSHGW_URL_PROD=$PUSH_GATEWAY_URL_PROD
-export PUSHGW_CREDS_STAGE=$PUSH_GATEWAY_CREDENTIALS_STAGE
-export PUSHGW_URL_STAGE=$PUSH_GATEWAY_URL_STAGE
+# Initialize metric durations file
+cat <<EOT >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
+  # TYPE app_interface_int_execution_duration_seconds gauge
+  # HELP app_interface_int_execution_duration_seconds App-interface integration run times in seconds
+EOT
 
 run_int() {
   local status
@@ -82,10 +82,7 @@ run_int() {
   status="$?"
   ENDTIME=$(date +%s)
 
-  echo "$1 $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
-  # Send integration run durations to pushgateway
-  echo "app_interface_int_execution_duration_seconds{integration=\"$1\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSHGW_CREDS_PROD}" --data-binary @- https://$PUSHGW_URL_PROD/metrics/job/$JOB_NAME
-  echo "app_interface_int_execution_duration_seconds{integration=\"$1\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSHGW_CREDS_STAGE}" --data-binary @- https://$PUSHGW_URL_STAGE/metrics/job/$JOB_NAME
+  echo "app_interface_int_execution_duration_seconds{integration=\"$1\"} $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
 
   if [ "$status" != "0" ]; then
     echo "INTEGRATION FAILED: $1" >&2
@@ -114,11 +111,7 @@ run_vault_reconcile_integration() {
   ENDTIME=$(date +%s)
 
   # Add integration run durations to a file
-  echo "vault $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
-  # Send integration run durations to pushgateway
-  echo "app_interface_int_execution_duration_seconds{integration=\"vault\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSHGW_CREDS_PROD}" --data-binary @- https://$PUSHGW_URL_PROD/metrics/job/$JOB_NAME
-  echo "app_interface_int_execution_duration_seconds{integration=\"vault\"} $((ENDTIME - STARTTIME))" | curl -H "Authorization: Basic ${PUSHGW_CREDS_STAGE}" --data-binary @- https://$PUSHGW_URL_STAGE/metrics/job/$JOB_NAME
-
+  echo "app_interface_int_execution_duration_seconds{integration=\"vault\"} $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
 
   if [ "$status" != "0" ]; then
     echo "INTEGRATION FAILED: vault" >&2
@@ -202,6 +195,16 @@ echo "Execution times for integrations that were executed"
   echo "Integration Seconds"
   sort -nr -k2 "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
 ) | column -t
+echo
+
+# Set Pushgateway credentials
+export PUSHGW_CREDS_PROD=$PUSH_GATEWAY_CREDENTIALS_PROD
+export PUSHGW_URL_PROD=$PUSH_GATEWAY_URL_PROD
+export PUSHGW_CREDS_STAGE=$PUSH_GATEWAY_CREDENTIALS_STAGE
+export PUSHGW_URL_STAGE=$PUSH_GATEWAY_URL_STAGE
+
+echo "Sending Integration execution times to Push Gateway"
+cat ${SUCCESS_DIR}/int_execution_duration_seconds.txt | tee >(curl -X POST -s -H "Authorization: Basic ${PUSHGW_CREDS_PROD}" --data-binary @- https://$PUSHGW_URL_PROD/metrics/job/$JOB_NAME) >(curl -X POST -s -H "Authorization: Basic ${PUSHGW_CREDS_STAGE}" --data-binary @- https://$PUSHGW_URL_STAGE/metrics/job/$JOB_NAME)
 echo
 
 FAILED_INTEGRATIONS=$(ls ${FAIL_DIR} | wc -l)
