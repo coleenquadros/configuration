@@ -250,9 +250,23 @@
         <<: *vault_defaults
         secrets:
         - *reconcile_toml
+        - *gitlab_token
     builders:
     - shell: |
-        docker run --rm -e CONFIG_TOML="$CONFIG_TOML" quay.io/app-sre/push-saas-metrics:latest
+        mkdir -p $PWD/.cache $PWD/.home
+
+        cat <<EOF > $PWD/.home/.netrc
+        machine gitlab.cee.redhat.com
+        password $GITLAB_TOKEN
+        EOF
+
+        docker run --rm \
+            -e CONFIG_TOML="$CONFIG_TOML" \
+            -e CACHE_DIR=/cache \
+            -v /etc/pki:/etc/pki:z \
+            -v $PWD/.cache:/cache:z \
+            -v $PWD/.home:/root:z \
+            quay.io/app-sre/push-saas-metrics:latest
     triggers:
     - timed: |
         H * * * *
