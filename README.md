@@ -213,6 +213,7 @@ wheel icon (top-right corner) and replace `omit` with `include` in
 - Deletion of AWS keys per AWS account.
 - House keeping of GitLab issues.
 - Compliance validation of GitHub user profiles.
+- Management of GitLab groups.
 
 * A dependency matrix between the integrations can be found [here](/integrations_dependencies.md).
 
@@ -765,6 +766,33 @@ Notes:
 App-Interface users must define a `github_username` field in their user file. This profile must comply with the following requirements:
 
 * The profile `Company` field must contain `Red Hat` (regex expression: `^.*[Rr]ed ?[Hh]at.*$`)
+
+### Manage GitLab group members
+
+Adding, removing, and changing access levels of gitlab group members can be self-serviced via App-Interface
+
+To manage a GitLab group via App-Interface:
+1. Add a `permission` file with the following details:
+
+- `name`: name for the permission
+- `description`: description 
+- `service`: `gitlab-group-membership`
+- `group`: name of GitLab Group
+- `access`: access level this permission gives (owner/maintainer/developer/reporter/guest)
+
+2. Add this permission to the desired `roles`, or create a new `role` with this permission only.
+
+3. Add this permission to the GitLab bot role which can be found [here](/data/teams/app-sre/roles/app-sre-gitlab-bot.yml)
+
+4. Make sure that ever member of the group has a role giving them permission to the group otherwise the integration will remove them.
+
+Examples:
+* An example for the `app-sre` group permission can be found [here](/data/dependencies/gitlab/permissions/app-sre-member.yml)
+* An example for a role that has this permission can be found [here](/data/teams/app-sre/roles/app-sre-gitlab-member.yml)
+
+Notes:
+* Creating new GitLab groups is not supported (GitLab group has to pre-exist).
+
 
 ## Design
 
