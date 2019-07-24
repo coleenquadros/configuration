@@ -18,8 +18,8 @@ Axiom: *a statement or proposition which is regarded as being established, accep
         - [1.5.1. On call](#151-on-call)
             - [1.5.1.1. Pagerduty set up](#1511-pagerduty-set-up)
             - [1.5.1.2. Follow the sun](#1512-follow-the-sun)
-            - [1.5.1.3. Primary on call](#1513-primary-on-call)
-            - [1.5.1.4. Secondary on call](#1514-secondary-on-call)
+            - [1.5.1.3. Primary on-call](#1513-primary-on-call)
+            - [1.5.1.4. Secondary on-call](#1514-secondary-on-call)
             - [1.5.1.5. Escalation](#1515-escalation)
             - [1.5.1.6. Notification](#1516-notification)
             - [1.5.1.7. Incident procedure](#1517-incident-procedure)
@@ -34,9 +34,9 @@ Axiom: *a statement or proposition which is regarded as being established, accep
         - [1.11.1. Acknowledgements](#1111-acknowledgements)
     - [1.12. Services](#112-services)
 - [2. Glossary](#2-glossary)
-    - [PnT](#pnt)
-    - [PnT Ops](#pnt-ops)
-    - [PnT DevOps](#pnt-devops)
+    - [2.1. PnT](#21-pnt)
+    - [2.2. PnT Ops](#22-pnt-ops)
+    - [2.3. PnT DevOps](#23-pnt-devops)
 
 <!-- /TOC -->
 
@@ -113,6 +113,7 @@ Every app-sre engineer should have access to the following
         - ACCESS: devtools-team -> subscribe from UI
         - ACCESS: outage-list -> subscribe from UI
         - ACCESS: aos-devel -> subscribe from UI
+        - ACCESS: it-iam-announce-list -> subscribe from UI
 
 - GPG key:
     - Generate one and put in:
@@ -188,10 +189,17 @@ The recommended setup includes the pagerduty app on your mobile phone.  From the
 For notification troubleshooting see: https://support.pagerduty.com/docs/notification-troubleshooting
 
 #### 1.5.1.2. Follow the sun
+The follow the sun cycle (FTS) is an on-call rotation to ensure that the first page triggered by an alert goes to an engineer who, at the time, is within regular working hours. This is to prevent direct pages to the primary on-call within the regular hours of others. If there is no engineer available within their regular hours the page will go directly to the primary on-call. 
 
-#### 1.5.1.3. Primary on call
+#### 1.5.1.3. Primary on-call
+The primary on-call is a 24/7 on-call rotation assigned on a weekly basis.  The engineer assigned is responsible for being available for responding and resolving alerts within 30 minutes of the page. 
 
-#### 1.5.1.4. Secondary on call
+Pages for primary on-calls should be be kept at a minimum and are reserved for critical issues in production environments which need immediate attention.
+
+The primary on-call also acts as the interrupt-catcher during their work hours that cycle.
+
+#### 1.5.1.4. Secondary on-call
+The secondary on-call is a 24/7 on-call rotation that serves as backup and support function for the primary on-call. The secondary on-call will be paged if the primary on-call does not aknowledge the incident via Pagerduty (via app, slack integration or other means).
 
 #### 1.5.1.5. Escalation
 
@@ -261,14 +269,14 @@ Distribute the incident report to sd-org@ and app-interface serviceOwner in app
 
 # 2. Glossary
 
-## PnT
+## 2.1. PnT
 
 Products & Technolgies, essentially Paul Cormier’s entire 7000 person org.
 
-## PnT Ops
+## 2.2. PnT Ops
 
 Product & Technologies Business Operations lead by VP Katrinka McCallum (non-technical team).  This is where all the Program Managers and metrics people hangout.
 
-## PnT DevOps
+## 2.3. PnT DevOps
 
 Old Jay Ferrandini's team, made up of 5 pillars (SysOps, Labs, RCM, DevTools, AutomationQE).  This team handles hundreds of tools ranging from Jira & Bugzilla to platforms like CentralCI and UpShift. The SysOps pillar is most likely working on whatever is happening as they also maintain a huge pile of Jenkins boxes.  That team is lead by David Mair.
