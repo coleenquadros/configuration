@@ -40,7 +40,7 @@ data:
       "gnetId": null,
       "graphTooltip": 1,
       "id": null,
-      "iteration": 1563884931299,
+      "iteration": 1563959902971,
       "links": [],
       "panels": [
         {
@@ -96,10 +96,10 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(up{job=\"cincinnati-graph-builder\", namespace=\"$namespace\"}) by (pod, job)",
+              "expr": "sum(up{job=\"cincinnati-graph-builder\", namespace=\"$namespace\", pod=~\"$pod\"}) by (pod, job)",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "",
+              "legendFormat": "{{pod}}",
               "refId": "A"
             }
           ],
@@ -182,10 +182,10 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(up{job=\"cincinnati-policy-engine\", namespace=\"$namespace\"}) by (pod, job)",
+              "expr": "sum(up{job=\"cincinnati-policy-engine\", namespace=\"$namespace\", pod=~\"$pod\"}) by (pod, job)",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "",
+              "legendFormat": "{{pod}}",
               "refId": "A"
             }
           ],
@@ -269,10 +269,10 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by (kind) (rate(cincinnati_pe_v1_graph_response_errors_total{namespace=\"$namespace\"}[5m]))",
+              "expr": "sum by (kind) (rate(cincinnati_pe_v1_graph_response_errors_total{namespace=\"$namespace\", pod=~\"$pod\"}[5m]))",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "",
+              "legendFormat": "{{kind}}",
               "refId": "A"
             }
           ],
@@ -356,10 +356,10 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(cincinnati_pe_http_upstream_errors_total{namespace=\"$namespace\"}[5m])) by (pod)",
+              "expr": "sum(rate(cincinnati_pe_http_upstream_errors_total{namespace=\"$namespace\", pod=~\"$pod\"}[5m])) by (pod)",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "",
+              "legendFormat": "{{pod}}",
               "refId": "A"
             }
           ],
@@ -387,7 +387,7 @@ data:
               "label": null,
               "logBase": 1,
               "max": null,
-              "min": null,
+              "min": "0",
               "show": true
             },
             {
@@ -443,11 +443,11 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(cincinnati_pe_v1_graph_serve_duration_seconds_bucket{job=\"cincinnati-policy-engine\",namespace=\"$namespace\"}[1m])) by (le))",
+              "expr": "histogram_quantile(0.99, sum(rate(cincinnati_pe_v1_graph_serve_duration_seconds_bucket{job=\"cincinnati-policy-engine\",namespace=\"$namespace\",pod=~\"$pod\"}[1m])) by (pod, le))",
               "format": "time_series",
               "instant": false,
               "intervalFactor": 1,
-              "legendFormat": "p99",
+              "legendFormat": "p99 - {{pod}}",
               "refId": "A"
             }
           ],
@@ -543,10 +543,10 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(cincinnati_gb_graph_upstream_scrapes_total{job=\"cincinnati-graph-builder\",namespace=\"$namespace\"}[5m])) by (job)",
+              "expr": "sum(rate(cincinnati_gb_graph_upstream_scrapes_total{job=\"cincinnati-graph-builder\",namespace=\"$namespace\",pod=~\"$pod\"}[5m])) by (pod)",
               "format": "time_series",
               "intervalFactor": 1,
-              "legendFormat": "{{job}}",
+              "legendFormat": "{{pod}}",
               "refId": "A"
             }
           ],
@@ -629,9 +629,10 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(cincinnati_gb_graph_upstream_errors_total{job=\"cincinnati-graph-builder\",namespace=\"$namespace\"}[5m]))",
+              "expr": "sum(rate(cincinnati_gb_graph_upstream_errors_total{job=\"cincinnati-graph-builder\",namespace=\"$namespace\",pod=~\"$pod\"}[5m])) by (pod)",
               "format": "time_series",
               "intervalFactor": 1,
+              "legendFormat": "{{pod}}",
               "refId": "A"
             }
           ],
@@ -713,10 +714,10 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(namespace_pod_name_container_name:container_cpu_usage_seconds_total:sum_rate{namespace=\"$namespace\", container_name=\"cincinnati-graph-builder\"}) by (pod)",
+              "expr": "sum(namespace_pod_name_container_name:container_cpu_usage_seconds_total:sum_rate{pod_name=~\"$pod\", namespace=\"$namespace\", container_name=\"cincinnati-graph-builder\"}) by (pod_name)",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "{{$pod}}",
+              "legendFormat": "{{pod_name}}",
               "legendLink": null,
               "refId": "A",
               "step": 10
@@ -764,7 +765,7 @@ data:
           }
         },
         {
-          "collapsed": true,
+          "collapsed": false,
           "gridPos": {
             "h": 1,
             "w": 24,
@@ -813,10 +814,10 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(namespace_pod_name_container_name:container_cpu_usage_seconds_total:sum_rate{namespace=\"$namespace\", container_name=\"cincinnati-policy-engine\"}) by (pod)",
+              "expr": "sum(namespace_pod_name_container_name:container_cpu_usage_seconds_total:sum_rate{namespace=\"$namespace\", pod_name=~\"$pod\", container_name=\"cincinnati-policy-engine\"}) by (pod_name)",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "{{$pod}}",
+              "legendFormat": "{{pod_name}}",
               "legendLink": null,
               "refId": "A",
               "step": 10
@@ -883,7 +884,7 @@ data:
             "options": [],
             "query": "prometheus",
             "refresh": 1,
-            "regex": "",
+            "regex": "/^app-sre/",
             "skipUrlSync": false,
             "type": "datasource"
           },
@@ -892,7 +893,7 @@ data:
             "current": {},
             "datasource": "$datasource",
             "definition": "label_values(kube_pod_info, cluster)",
-            "hide": 0,
+            "hide": 2,
             "includeAll": false,
             "label": "cluster",
             "multi": false,
@@ -924,7 +925,7 @@ data:
             "refresh": 1,
             "regex": "^cincinnati.*",
             "skipUrlSync": false,
-            "sort": 2,
+            "sort": 0,
             "tagValuesQuery": "",
             "tags": [],
             "tagsQuery": "",
@@ -932,12 +933,12 @@ data:
             "useTags": false
           },
           {
-            "allValue": null,
+            "allValue": ".*",
             "current": {},
             "datasource": "$datasource",
             "definition": "label_values(kube_pod_info{cluster=\"$cluster\", namespace=\"$namespace\"}, pod)",
             "hide": 0,
-            "includeAll": false,
+            "includeAll": true,
             "label": "pod",
             "multi": false,
             "name": "pod",
@@ -987,7 +988,7 @@ data:
       "timezone": "utc",
       "title": "Cincinnati",
       "uid": "cincinnati",
-      "version": 2
+      "version": 3
     }
 kind: ConfigMap
 metadata:
