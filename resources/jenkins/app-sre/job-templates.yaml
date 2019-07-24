@@ -238,3 +238,21 @@
 
         ./pr_check.sh
     <<: *gl_pr_check_template
+
+- job-template:
+    id: 'push-saas-metrics'
+    name: 'push-saas-metrics'
+    node: '{node}'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *reconcile_toml
+    builders:
+    - shell: |
+        docker run --rm -e CONFIG_TOML="$CONFIG_TOML" quay.io/app-sre/push-saas-metrics:latest
+    triggers:
+    - timed: |
+        H * * * *
