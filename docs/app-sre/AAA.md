@@ -192,7 +192,7 @@ For notification troubleshooting see: https://support.pagerduty.com/docs/notific
 The follow the sun cycle (FTS) is an on-call rotation to ensure that the first page triggered by an alert goes to an engineer who, at the time, is within regular working hours. This is to prevent direct pages to the primary on-call within the regular hours of others. If there is no engineer available within their regular hours the page will go directly to the primary on-call. 
 
 #### 1.5.1.3. Primary on-call
-The primary on-call is a 24/7 on-call rotation assigned on a weekly basis.  The engineer assigned is responsible for being available for responding and resolving alerts within 30 minutes of the page. 
+The primary on-call is a 24/7 on-call rotation assigned on a weekly basis.  The engineer assigned is required to be available for the initial response within 30 minutes of the page. 
 
 Pages for primary on-calls should be be kept at a minimum and are reserved for critical issues in production environments which need immediate attention.
 
