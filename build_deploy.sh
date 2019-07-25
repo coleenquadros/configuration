@@ -191,8 +191,8 @@ echo "Sending Integration execution times to Push Gateway"
 (echo '# TYPE app_interface_int_execution_duration_seconds gauge'; \
   echo '# HELP app_interface_int_execution_duration_seconds App-interface integration run times in seconds'; \
   cat ${SUCCESS_DIR}/int_execution_duration_seconds.txt) | \
-  tee >(curl -X POST -s -H "Authorization: Basic ${PUSHGW_CREDS_PROD}" --data-binary @- https://$PUSHGW_URL_PROD/metrics/job/$JOB_NAME) \
-      >(curl -X POST -s -H "Authorization: Basic ${PUSHGW_CREDS_STAGE}" --data-binary @- https://$PUSHGW_URL_STAGE/metrics/job/$JOB_NAME)
+  tee >(curl -X POST -s -H "Authorization: Basic ${PUSHGW_CREDS_PROD}" --data-binary @- $PUSHGW_URL_PROD/metrics/job/$JOB_NAME) \
+      >(curl -X POST -s -H "Authorization: Basic ${PUSHGW_CREDS_STAGE}" --data-binary @- $PUSHGW_URL_STAGE/metrics/job/$JOB_NAME)
 
 FAILED_INTEGRATIONS=$(ls ${FAIL_DIR} | wc -l)
 
