@@ -93,14 +93,9 @@ rm -rf ${SUCCESS_DIR} ${FAIL_DIR}; mkdir -p ${SUCCESS_DIR} ${FAIL_DIR}
 
 set +e
 
-# Initialize metric durations file
-cat <<EOT >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
-  # TYPE app_interface_int_execution_duration_seconds gauge
-  # HELP app_interface_int_execution_duration_seconds App-interface integration run times in seconds
-EOT
-
 run_int() {
-  echo "INTEGRATION $1" >&2
+  INTEGRATION_NAME="${ALIAS:-$1}"
+  echo "INTEGRATION $INTEGRATION_NAME" >&2
 
   STARTTIME=$(date +%s)
   docker run --rm \
@@ -111,15 +106,15 @@ run_int() {
     -w / \
     ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
     qontract-reconcile --config /config/config.toml $@ \
-    2>&1 | tee ${SUCCESS_DIR}/reconcile-${1}.txt
+    2>&1 | tee ${SUCCESS_DIR}/reconcile-${INTEGRATION_NAME}.txt
   EXIT_STATUS=$?
   ENDTIME=$(date +%s)
 
   # Add integration run durations to a file
-  echo "app_interface_int_execution_duration_seconds{integration=\"$1\"} $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
+  echo "app_interface_int_execution_duration_seconds{integration=\"$INTEGRATION_NAME\"} $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
 
   if [ "$EXIT_STATUS" != "0" ]; then
-    mv ${SUCCESS_DIR}/reconcile-${1}.txt ${FAIL_DIR}/reconcile-${1}.txt
+    mv ${SUCCESS_DIR}/reconcile-${INTEGRATION_NAME}.txt ${FAIL_DIR}/reconcile-${INTEGRATION_NAME}.txt
     return 1
   fi
 

@@ -57,16 +57,12 @@ else
   CURL_IP=$IP
 fi
 
-# Initialize metric durations file
-cat <<EOT >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
-  # TYPE app_interface_int_execution_duration_seconds gauge
-  # HELP app_interface_int_execution_duration_seconds App-interface integration run times in seconds
-EOT
-
 run_int() {
   local status
 
-  echo "INTEGRATION $1" >&2
+  INTEGRATION_NAME="${ALIAS:-$1}"
+
+  echo "INTEGRATION $INTEGRATION_NAME" >&2
 
   STARTTIME=$(date +%s)
   docker run --rm \
@@ -77,16 +73,16 @@ run_int() {
     -w / \
     ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
     qontract-reconcile --config /config/config.toml --dry-run $@ \
-    2>&1 | tee ${SUCCESS_DIR}/reconcile-${1}.txt
+    2>&1 | tee ${SUCCESS_DIR}/reconcile-${INTEGRATION_NAME}.txt
 
   status="$?"
   ENDTIME=$(date +%s)
 
-  echo "app_interface_int_execution_duration_seconds{integration=\"$1\"} $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
+  echo "app_interface_int_execution_duration_seconds{integration=\"$INTEGRATION_NAME\"} $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
 
   if [ "$status" != "0" ]; then
     echo "INTEGRATION FAILED: $1" >&2
-    mv ${SUCCESS_DIR}/reconcile-${1}.txt ${FAIL_DIR}/reconcile-${1}.txt
+    mv ${SUCCESS_DIR}/reconcile-${INTEGRATION_NAME}.txt ${FAIL_DIR}/reconcile-${INTEGRATION_NAME}.txt
   fi
 
   return $status
@@ -139,8 +135,7 @@ docker pull ${VAULT_RECONCILE_IMAGE}:${VAULT_RECONCILE_IMAGE_TAG}
 cat "$CONFIG_TOML" > ${TEMP_DIR}/config/config.toml
 
 ## Run integrations on production
-run_int jenkins-job-builder --no-compare &
-
+ALIAS=jenkins-job-builder-no-compare run_int jenkins-job-builder --no-compare &
 
 # Prepare to run integrations on local server
 
@@ -205,7 +200,9 @@ export PUSHGW_URL_STAGE=$PUSH_GATEWAY_URL_STAGE
 
 echo "Sending Integration execution times to Push Gateway"
 
-(echo '# TYPE app_interface_int_execution_duration_seconds gauge'; cat ${SUCCESS_DIR}/int_execution_duration_seconds.txt) | \
+(echo '# TYPE app_interface_int_execution_duration_seconds gauge'; \
+  echo '# HELP app_interface_int_execution_duration_seconds App-interface integration run times in seconds'; \
+  cat ${SUCCESS_DIR}/int_execution_duration_seconds.txt) | \
   tee >(curl -X POST -s -H "Authorization: Basic ${PUSHGW_CREDS_PROD}" --data-binary @- https://$PUSHGW_URL_PROD/metrics/job/$JOB_NAME) \
       >(curl -X POST -s -H "Authorization: Basic ${PUSHGW_CREDS_STAGE}" --data-binary @- https://$PUSHGW_URL_STAGE/metrics/job/$JOB_NAME)
 
