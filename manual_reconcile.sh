@@ -204,8 +204,10 @@ export PUSHGW_CREDS_STAGE=$PUSH_GATEWAY_CREDENTIALS_STAGE
 export PUSHGW_URL_STAGE=$PUSH_GATEWAY_URL_STAGE
 
 echo "Sending Integration execution times to Push Gateway"
-cat ${SUCCESS_DIR}/int_execution_duration_seconds.txt | tee >(curl -X POST -s -H "Authorization: Basic ${PUSHGW_CREDS_PROD}" --data-binary @- https://$PUSHGW_URL_PROD/metrics/job/$JOB_NAME) >(curl -X POST -s -H "Authorization: Basic ${PUSHGW_CREDS_STAGE}" --data-binary @- https://$PUSHGW_URL_STAGE/metrics/job/$JOB_NAME)
-echo
+
+(echo '# TYPE app_interface_int_execution_duration_seconds gauge'; cat ${SUCCESS_DIR}/int_execution_duration_seconds.txt) | \
+  tee >(curl -X POST -s -H "Authorization: Basic ${PUSHGW_CREDS_PROD}" --data-binary @- https://$PUSHGW_URL_PROD/metrics/job/$JOB_NAME) \
+      >(curl -X POST -s -H "Authorization: Basic ${PUSHGW_CREDS_STAGE}" --data-binary @- https://$PUSHGW_URL_STAGE/metrics/job/$JOB_NAME)
 
 FAILED_INTEGRATIONS=$(ls ${FAIL_DIR} | wc -l)
 
