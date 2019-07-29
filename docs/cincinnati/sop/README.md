@@ -35,9 +35,9 @@ Updated releases and transition-edges will not be reflected in the update graph.
 
 ### Access required:
 
-- Access to the cluster that runs Cincinnati, namespaces:
-    - cincinnati-staging
-    - cincinnati-production
+- Access to the clusters that run Cincinnati, namespaces:
+    - cincinnati-stage (app-sre-stage)
+    - cincinnati-production (app-sre)
 
 ### Steps:
 
@@ -58,9 +58,9 @@ Updated releases and transition-edges will not be reflected in the update graph.
 
 ### Access required:
 
-- Access to the cluster that runs Cincinnati, namespaces:
-    - cincinnati-staging
-    - cincinnati-production
+- Access to the clusters that run Cincinnati, namespaces:
+    - cincinnati-stage (app-sre-stage)
+    - cincinnati-production (app-sre)
 
 ### Steps:
 
@@ -84,9 +84,9 @@ Cluster-Version-Operator (CVO) could be hanging or showing errors on clusters co
 
 ### Access required:
 
-- Access to the cluster that runs Cincinnati, namespaces:
-    - cincinnati-staging
-    - cincinnati-production
+- Access to the clusters that run Cincinnati, namespaces:
+    - cincinnati-stage (app-sre-stage)
+    - cincinnati-production (app-sre)
 
 ### Steps:
 
@@ -108,9 +108,9 @@ Cluster-Version-Operator (CVO) is showing errors on clusters console.
 
 ### Access required:
 
-- Access to the cluster that runs Cincinnati, namespaces:
-    - cincinnati-staging
-    - cincinnati-production
+- Access to the clusters that run Cincinnati, namespaces:
+    - cincinnati-stage (app-sre-stage)
+    - cincinnati-production (app-sre)
 
 ### Steps:
 
@@ -131,9 +131,9 @@ Cluster-Version-Operator (CVO) is showing errors on clusters console.
 
 ### Access required:
 
-- Access to the cluster that runs Cincinnati, namespaces:
-    - cincinnati-staging
-    - cincinnati-production
+- Access to the clusters that run Cincinnati, namespaces:
+    - cincinnati-stage (app-sre-stage)
+    - cincinnati-production (app-sre)
 
 ### Steps:
 
