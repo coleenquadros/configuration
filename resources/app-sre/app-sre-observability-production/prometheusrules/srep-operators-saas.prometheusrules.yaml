@@ -11,19 +11,19 @@ spec:
     rules:
     - alert: SaasNumberCommits
       annotations:
-        message: "The number of commits between prod and upstream for {{ $labels.service }} has exceeded the threshold (5)."
+        message: "The number of commits between prod and upstream for {{ $labels.saas_service }} has exceeded the threshold (5)."
       expr: |
-        saas_upstream_commits{namespace="app-sre-observability-production", service="aws-account-operator"}
+        saas_upstream_commits{namespace="app-sre-observability-production", saas_service="aws-account-operator"}
         -
-        saas_commit_index{namespace="app-sre-observability-production", service="aws-account-operator"} > 10
+        saas_commit_index{namespace="app-sre-observability-production", saas_service="aws-account-operator"} > 10
       labels:
         service: srep
         severity: medium
   - alert: SaasProdTimestamp
     annotations:
-      message: "The production commit for {{ $service }} is very old."
+      message: "The production commit for {{ $labels.saas_service }} is very old."
     expr: |
-      time() - saas_commit_ts{namespace="app-sre-observability-production", service="aws-account-operator"} > 60*60*24*365.25/12
+      time() - saas_commit_ts{namespace="app-sre-observability-production", saas_service="aws-account-operator"} > 60*60*24*365.25/12
     labels:
       service: srep
       severity: medium
