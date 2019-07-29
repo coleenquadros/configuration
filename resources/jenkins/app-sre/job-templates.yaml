@@ -255,17 +255,21 @@
     - shell: |
         mkdir -p $PWD/.cache $PWD/.home
 
-        # remove files that ensure only one pull per process
-        # since in docker they will always start with the same
-        # process this would always match unless pruned.
-        find $PWD/.cache -name git_metrics_ts_pull -delete
-
         cat <<EOF > $PWD/.home/.netrc
         machine gitlab.cee.redhat.com
         password $GITLAB_TOKEN
         EOF
 
         docker pull quay.io/app-sre/push-saas-metrics:latest
+
+        # remove files that ensure only one pull per process
+        # since in docker they will always start with the same
+        # process this would always match unless pruned.
+        docker run --rm \
+            -e CACHE_DIR=/cache \
+            -v $PWD/.cache:/cache:z \
+            quay.io/app-sre/push-saas-metrics:latest \
+            find /cache -name git_metrics_ts_pull -delete
 
         docker run --rm \
             -e CONFIG_TOML="$CONFIG_TOML" \
