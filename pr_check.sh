@@ -12,7 +12,8 @@ RESULTS=$TEMP_DIR/reports/results.json
 REPORT=$TEMP_DIR/reports/index.html
 
 # Check that app-sre bot has permissions on fork
-./gitlab_fork_membership.sh
+# and that the PR's source branch is not master (unable to rebase)
+./test_fork.sh
 exit_status=$?
 
 # Exit if app-sre bot is not a member
