@@ -190,8 +190,7 @@ wheel icon (top-right corner) and replace `omit` with `include` in
   - <https://ci-int-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/>
   - <https://ci.ext.devshift.net/>
   - <https://vault.devshift.net/ui/>
-  - Many openshift.com clusters:
-    - `dsaas`, `dsaas-stg`, `evg`, `app-sre`, `app-sre-dev`.
+  - Many OpenShift [clusters](/data/openshift)
   - OpenShift.io Feature Toggles
 - Management of OpenShift rolebindings
 - Management of Quay repos.
