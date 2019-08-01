@@ -2,10 +2,7 @@
 
 ## Background
 
-The app-interface periodic job is executing the following integrations:
-
-* `slack-usergroups`
-* `ldap-users`
+The app-interface periodic job is executing the following integrations: [link](/periodic_job.sh#L42)
 
 ## Purpose
 
