@@ -2,8 +2,10 @@
 
 <!-- TOC depthTo:2 -->
 
-- [SOP : Responsibilities](#Responsibilities)
-- [SOP : Enhance the SOPs in app-interface repository](#Enhance-the-SOPs-in-app-interface-repository)
+- [SOP : Hive Monitor](#SOP--Hive-Monitor)
+- [Responsibilities](#Responsibilities)
+- [Enhance the SOPs in app-interface repository](#Enhance-the-SOPs-in-app-interface-repository)
+- [Contact information for SRE team](#Contact-information-for-SRE-team)
 
 <!-- /TOC -->
 
@@ -16,8 +18,9 @@ Responsibilities:
 2. Add a new alert document SOP if a doc does not exist for the alert in [https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/hive/sop](https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/hive/sop)
     - For details refer to the section on [Enhance the SOPs in app-interface repository](#Enhance-the-SOPs-in-app-interface-repository)
 3. If investigation yields a new a Hive bug, create a card in Jira under the `SRE Platform (SREP)` project. For production issues, ensure that priority is set to High.
-4. Monitor general Hive cluster health and error rates on the [Hive dashboard](https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1).
-5. Ideally Hive monitor is only part time responsibility and able to continue normal work.
+4. Contact SRE team if required. For details refer section on [Contact information for SRE team](#Contact-information-for-SRE-team)
+5. Monitor general Hive cluster health and error rates on the [Hive dashboard](https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1).
+6. Ideally Hive monitor is only part time responsibility and able to continue normal work.
 
 # Enhance the SOPs in app-interface repository
 The SOPs(runbook) for specific alerts in `#team-hive-alert` slack channel are present in [https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/hive/sop](https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/hive/sop).
@@ -30,3 +33,8 @@ Sending a PR to app-interface repository:
     - This is required for PR tests.
 - Add content to your branch and send the PR.
 - Example commit for adding a new runbook https://gitlab.cee.redhat.com/service/app-interface/commit/befca4e32e39f94b68e01a79d3abc1a23feab34c
+
+# Contact information for SRE team
+
+- You can raise an alert in pager duty or ping @sre-primary or @sre-secondary alias in #team-hive-alert slack channel depending on priority to get whoever is on-call at that moment.
+- For escalations ping SRE interrupt catcher i.e. alias @app-sre-ic in slack #sd-app-sre channel.
