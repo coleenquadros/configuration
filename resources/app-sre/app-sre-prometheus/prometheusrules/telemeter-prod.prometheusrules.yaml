@@ -98,3 +98,36 @@ spec:
       labels:
         service: telemeter
         severity: medium
+    # NOTICE: This is the current capacity that we are guaranteed to handle (enforced via our benchmark CI test on the Telemeter repo). We should bump this number ONLY following a bump in the telemeter benchmark CI test.
+    - record: telemeter:capacity
+      expr: sum(telemeter_partitions{namespace="telemeter-production"}) / 5000
+    - alert: TelemeterCapacityMedium - prod
+      annotations:
+        message: "Telemeter reached {{ $value | humanizePercentage}}% of capacity in namespace {{ $labels.namespace }}."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
+        dashboard: "https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-prometheus&var-cluster=app-sre&var-namespace=telemeter-prod"
+      expr: telemeter:capacity >= 0.5
+      for: 5m
+      labels:
+        service: telemeter
+        severity: medium
+    - alert: TelemeterCapacityHigh - prod
+      annotations:
+        message: "Telemeter reached {{ $value | humanizePercentage}}% of capacity in namespace {{ $labels.namespace }}."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
+        dashboard: "https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-prometheus&var-cluster=app-sre&var-namespace=telemeter-prod"
+      expr: telemeter:capacity >= 0.7
+      for: 5m
+      labels:
+        service: telemeter
+        severity: high
+    - alert: TelemeterCapacityCritical - prod
+      annotations:
+        message: "Telemeter reached {{ $value | humanizePercentage}}% of capacity in namespace {{ $labels.namespace }}."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
+        dashboard: "https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-prometheus&var-cluster=app-sre&var-namespace=telemeter-prod"
+      expr: telemeter:capacity >= 0.9
+      for: 5m
+      labels:
+        service: telemeter
+        severity: critical

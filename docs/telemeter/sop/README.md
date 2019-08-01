@@ -141,5 +141,30 @@ Note that the above steps should be performed on a throw-away cluster, as the op
 
 ---
 
+## TelemeterCapacity[Medium | High | Critical]
+
+### Impact:
+
+Telemeter Prometheus may not be able to handle the total number of active timeseries and may crash.
+
+### Summary:
+
+Telemeter Prometheus is reaching to its limit of active timeseries and will be unable to handle the load. Soon Telemeter Prometheus may crash.
+
+### Access required:
+
+- Console access to the cluster that runs telemeter (Currently app-sre OSD)
+- Edit access to the Telemeter namespaces:
+    - telemeter-stage
+    - telemeter-production### Severity: Critical
+
+### Steps:
+
+- Contact monitoring engineering team for help.
+- Inspect Telemeter Prometheus logs and metrics.
+- Reduce the whitelisted metrics and labels on telemeter-server so that fewer metrics are accepted and Prometheus can handle the load.
+
+---
+
 ## Escalations
 We want a link to app-interface here, but okay to just contacts here for now.
