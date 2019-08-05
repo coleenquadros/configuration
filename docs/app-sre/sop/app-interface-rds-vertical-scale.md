@@ -17,8 +17,8 @@ This document explains how to vertically scale an RDS instance managed through a
 2. Take a snapshot of the RDS instance
     * Find the actual RDS instance in AWS [RDS console](https://console.aws.amazon.com/rds/home?region=us-east-1#databases:)
     * Select the instance and select `Actions` -> `Take snapshot`.
-    * The snapshot name should be of the form `<instance-identifier>-<YYYYMMDDHHmm>`.
-        * Example: `clusters-service-production-201906241126`.
+    * The snapshot name should be of the form `<instance-identifier>-<YYYYMMDDHHmmZzzz>`.  Z000 = UTC, Z700 = UTC+7, etc.
+        * Example: `clusters-service-production-201906241126Z000`.
 3. Add an `overrides` section if one does not exist. Each attribute in this section will override the defaults in the file specified in the `defaults` section.
     * Example - defaults file: [app-sre/production/rds defaults](/resources/terraform/resources/app-sre/production/rds-1.yml)
 4. To vertically scale, you can change one of the following attributes under `overrides`:
