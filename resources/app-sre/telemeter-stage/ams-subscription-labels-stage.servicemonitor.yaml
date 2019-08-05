@@ -1,0 +1,28 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    k8s-app: telemeter-server
+    endpoint: federate
+  name: ams-subscription-labels
+spec:
+  endpoints:
+  - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+    honorLabels: true
+    interval: 30s
+    path: /labels
+    port: metrics
+    scheme: http
+    metricRelabelings:
+      - sourceLabels: [id]
+        targetLabel: _id
+        regex: (.*)
+        replacement: ${1}
+        action: replace
+  namespaceSelector:
+    matchNames:
+    - uhc-staging
+  selector:
+    matchLabels:
+      app: uhc-acct-mngr
+      port: metrics
