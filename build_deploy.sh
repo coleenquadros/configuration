@@ -102,6 +102,7 @@ run_int() {
     -v `pwd`/config:/config:z \
     -v /etc/pki:/etc/pki:z \
     -v `pwd`/throughput:/throughput:z \
+    -v /var/tmp/.cache:/root/.cache:z \
     -e REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem \
     -w / \
     ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
