@@ -651,12 +651,38 @@ In order to add or update an S3 bucket, you need to add them to the `terraformRe
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-bucket" and `provider` "s3", the created Secret will be called `my-bucket-s3`.
 
-Once the changes are merged, the RDS instance will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
+Once the changes are merged, the S3 bucket will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
 The Secret will contain the following fields:
 - `bucket` - The name of the bucket.
 - `aws_access_key_id` - The access key ID.
 - `aws_secret_access_key` - The secret access key.
+
+#### Manage ElastiCache databases via App-Interface (`/openshift/namespace-1.yml`)
+
+ElastiCache (HA) clusters can be entirely self-serviced via App-Interface.
+
+In order to add or update an ElastiCache database, you need to add them to the `terraformResources` field.
+
+- `provider`: must be `elasticache`
+- `account`: must be one of the AWS account names we manage. Current options:
+  - `app-sre`
+  - `osio`
+  - `osio-dev`
+- `identifier` - name of resource to create (or update)
+- `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options](/resources/terraform/resources/)
+- `overrides`: list of values from `defaults` you wish to override, with the override values. For example: `engine_version: 5.0.3`.
+- `output_resource_name`: name of Kubernetes Secret to be created.
+  - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
+  - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
+    - For example, for a resource with `identifier` "my-cluster" and `provider` "elasticache", the created Secret will be called `my-cluster-elasticache`.
+
+Once the changes are merged, the ElastiCache clusters will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
+
+The Secret will contain the following fields:
+- `db.endpoint` - The configuration endpoint of the ElastiCache cluster.
+- `db.port` - The database port.
+- `db.auth_token` - Authentication token for the configuration endpoint.
 
 ### Manage Slack User groups via App-Interface
 
