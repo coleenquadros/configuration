@@ -40,7 +40,7 @@ spec:
     - alert: SuddenIncreaseBytesUsed
       labels:
         severity: warning
-      expr: (avg_over_time(aws_s3_bucket_size_bytes_average{job="cloudwatch-exporter"}[1d]) / avg_over_time(aws_s3_bucket_size_bytes_average{job="cloudwatch-exporter"}[1d] offset 1d) -1) * 100 > 20
+      expr: (avg_over_time(aws_s3_bucket_size_bytes_average{job="cloudwatch-exporter"}[1d]) / avg_over_time(aws_s3_bucket_size_bytes_average{job="cloudwatch-exporter"}[1d] offset 1d) -1) * 100 > 20 and (aws_s3_bucket_size_bytes_average{job="cloudwatch-exporter"} - aws_s3_bucket_size_bytes_average{job="cloudwatch-exporter"} offset 1d) / 1000 / 1000 > 1000
       annotations:
         message: 'Bucket {{$labels.bucket_name}} size has grown by {{ $value }}% within the last day'
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
