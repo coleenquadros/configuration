@@ -783,12 +783,12 @@ data:
           },
           "datasource": "$datasource",
           "decimals": 0,
-          "description": "Count of all clusters by their type.  Uses a number code due to a workaround, should be fixed in 4.1.3 or 4.1.4\n\n1 = UPI\n2 = AWS\n3 = Azure\n4 = GCP",
+          "description": "Clusters grouped by their infrastructure provider.",
           "fontSize": "80%",
           "format": "short",
           "gridPos": {
             "h": 6,
-            "w": 6,
+            "w": 3,
             "x": 0,
             "y": 6
           },
@@ -796,12 +796,12 @@ data:
           "interval": "",
           "legend": {
             "header": "",
-            "percentage": true,
+            "percentage": false,
             "percentageDecimals": 1,
             "show": true,
             "values": true
           },
-          "legendType": "Right side",
+          "legendType": "Under graph",
           "links": [],
           "maxDataPoints": 3,
           "nullPointMode": "connected",
@@ -809,7 +809,7 @@ data:
           "strokeWidth": 1,
           "targets": [
             {
-              "expr": "count_values(\"type\",4 * (count by (_id) (count by (_id) (cluster:node_instance_type_count:sum{label_beta_kubernetes_io_instance_type=~\"(n|m|f|g|c)\\\\d+-\\\\w+-\\\\d+\"}))) OR 3 * (count by (_id) (count by (_id) (cluster:node_instance_type_count:sum{label_beta_kubernetes_io_instance_type=~\"Standard_.*\"}))) OR 2 * (count by (_id) (count by (_id) (cluster:node_instance_type_count:sum{label_beta_kubernetes_io_instance_type=~\"[ipmtrc]\\\\d(\\\\w)?\\\\.(\\\\w+)?(large|medium)\"}))) OR count by (_id) (count by (_id) (cluster:node_instance_type_count:sum{label_beta_kubernetes_io_instance_type=\"\"})))",
+              "expr": "count(cluster_infrastructure_provider) by(type)",
               "format": "time_series",
               "instant": true,
               "intervalFactor": 1,
@@ -819,7 +819,57 @@ data:
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Clusters by Type  (all)",
+          "title": "Infrastructure Types",
+          "type": "grafana-piechart-panel",
+          "valueName": "current"
+        },
+        {
+          "aliasColors": {},
+          "breakPoint": "50%",
+          "cacheTimeout": null,
+          "combine": {
+            "label": "Others",
+            "threshold": 0
+          },
+          "datasource": "$datasource",
+          "decimals": 0,
+          "description": "Cluster installations grouped by their type. Clusters created before 4.1.10 are unable to accurately report their type so they are unknown.",
+          "fontSize": "80%",
+          "format": "short",
+          "gridPos": {
+            "h": 6,
+            "w": 3,
+            "x": 3,
+            "y": 6
+          },
+          "id": 17,
+          "interval": "",
+          "legend": {
+            "header": "",
+            "percentage": false,
+            "percentageDecimals": 1,
+            "show": true,
+            "values": true
+          },
+          "legendType": "Under graph",
+          "links": [],
+          "maxDataPoints": 3,
+          "nullPointMode": "connected",
+          "pieType": "donut",
+          "strokeWidth": 1,
+          "targets": [
+            {
+              "expr": "count(label_replace(label_replace(cluster_installer and on(_id) cluster_version{type=\"initial\", version!~\"4\\\\.1\\\\.[0-9]-.*\"}, \"type\", \"UPI\", \"type\", \"\"), \"type\", \"IPI\", \"type\", \"openshift-install\") or on(_id) label_replace(cluster_installer and on(_id) cluster_version{type=\"initial\", version=~\"4\\\\.1\\\\.[0-9]-.*\"}, \"type\", \"Unknown\", \"type\", \".*\")) by(type)",
+              "format": "time_series",
+              "instant": true,
+              "intervalFactor": 1,
+              "legendFormat": "{{type}}",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Install Types",
           "type": "grafana-piechart-panel",
           "valueName": "current"
         },
