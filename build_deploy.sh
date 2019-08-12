@@ -155,6 +155,7 @@ run_int quay-membership &
 run_int quay-repos &
 run_vault_reconcile_integration &
 run_int openshift-groups &
+run_int openshift-users &
 run_int jenkins-plugins &
 run_int jenkins-roles &
 run_int jenkins-job-builder &

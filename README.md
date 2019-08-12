@@ -213,6 +213,7 @@ wheel icon (top-right corner) and replace `omit` with `include` in
 - House keeping of GitLab issues.
 - Compliance validation of GitHub user profiles.
 - Management of GitLab groups.
+- Deletion of OpenShift users.
 
 * A dependency matrix between the integrations can be found [here](/integrations_dependencies.md).
 
