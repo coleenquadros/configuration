@@ -75,6 +75,7 @@ spec:
         (aws_account_operator_total_aws_accounts{job="hive-controllers-stage"}) > 700
       labels:
         severity: high
+        service: srep
     - alert: AWSAccountsPendingVerification - stage
       annotations:
         message: "AWS Account Operator - all unclaimed accounts are Pending Verification"
@@ -82,6 +83,50 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-stage"
       expr: |
         aws_account_operator_total_aws_account_pending_verification{job="hive-aws-account-operator-stage"} / aws_account_operator_total_accounts_crs_unclaimed{job="hive-aws-account-operator-stage"} >= 0.9
+      for: 15m
+      labels:
+        severity: high
+        service: srep
+    - alert: AWSAccountOperator Target Down - stage
+      annotations:
+        message: "No targets found for AWS Account Operator on hive-stage"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/hive/sop/SREOperators.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-stage"
+      expr: |
+        absent(up{job="hive-aws-account-operator-stage"} == 1)
+      for: 15m
+      labels:
+        severity: high
+        service: srep      
+    - alert: CertmanOperator Target Down - stage
+      annotations:
+        message: "No targets found for Certman Operator on hive-stage"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/hive/sop/SREOperators.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-stage"
+      expr: |
+        absent(up{job="hive-certman-operator-stage"} == 1)
+      for: 15m
+      labels:
+        severity: high
+        service: srep      
+    - alert: DeadMansSnitchOperator Target Down - stage
+      annotations:
+        message: "No targets found for Dead Mans Snitch Operator on hive-stage"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/hive/sop/SREOperators.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-stage"
+      expr: |
+        absent(up{job="hive-deadmanssnitch-operator-stage"} == 1)
+      for: 15m
+      labels:
+        severity: high
+        service: srep      
+    - alert: PagerDutyOperator Target Down - stage
+      annotations:
+        message: "No targets found for PagerDuty Operator on hive-stage"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/hive/sop/SREOperators.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-stage"
+      expr: |
+        absent(up{job="hive-pagerduty-operator-stage"} == 1)
       for: 15m
       labels:
         severity: high
