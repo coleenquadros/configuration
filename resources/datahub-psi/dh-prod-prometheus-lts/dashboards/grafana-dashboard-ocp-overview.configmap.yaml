@@ -1150,7 +1150,7 @@ data:
           "scroll": true,
           "showHeader": true,
           "sort": {
-            "col": 3,
+            "col": 4,
             "desc": true
           },
           "styles": [
@@ -1185,6 +1185,22 @@ data:
               "unit": "short"
             },
             {
+              "alias": "from",
+              "colorMode": null,
+              "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+              ],
+              "dateFormat": "YYYY-MM-DD HH:mm:ss",
+              "decimals": 2,
+              "mappingType": 1,
+              "pattern": "from_version",
+              "thresholds": [],
+              "type": "number",
+              "unit": "short"
+            },
+            {
               "alias": "",
               "colorMode": null,
               "colors": [
@@ -1195,7 +1211,7 @@ data:
               "dateFormat": "YYYY-MM-DD HH:mm:ss",
               "decimals": 2,
               "mappingType": 1,
-              "pattern": "",
+              "pattern": "version",
               "thresholds": [],
               "type": "number",
               "unit": "short"
@@ -1223,7 +1239,7 @@ data:
           ],
           "targets": [
             {
-              "expr": "max by (_id,version) (time() - max by (_id,version) (cluster_version{type=\"updating\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) < 3 * 60 * 60",
+              "expr": "max by (_id,from_version,version) (time() - max by (_id,from_version,version) (cluster_version{type=\"updating\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) < 3 * 60 * 60",
               "format": "table",
               "instant": true,
               "intervalFactor": 1,
@@ -1327,7 +1343,7 @@ data:
           ],
           "targets": [
             {
-              "expr": "count by (_id,version) (cluster_operator_conditions{condition=\"Degraded\"} + on (_id) group_left(version) ( 0 * max by (_id, version) (cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"} )) == 1)",
+              "expr": "topk by (_id) (1, 0 * cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"}) +\non (_id) group_right(version) count by (_id) (cluster_operator_conditions{condition=\"Degraded\"} == 1 or cluster_operator_conditions{condition=\"Available\"} == 0)",
               "format": "table",
               "instant": true,
               "intervalFactor": 1,
@@ -1358,7 +1374,7 @@ data:
           "scroll": true,
           "showHeader": true,
           "sort": {
-            "col": 2,
+            "col": 4,
             "desc": true
           },
           "styles": [
@@ -1393,7 +1409,23 @@ data:
               "unit": "short"
             },
             {
-              "alias": "From",
+              "alias": "from",
+              "colorMode": null,
+              "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+              ],
+              "dateFormat": "YYYY-MM-DD HH:mm:ss",
+              "decimals": 2,
+              "mappingType": 1,
+              "pattern": "from_version",
+              "thresholds": [],
+              "type": "number",
+              "unit": "short"
+            },
+            {
+              "alias": "",
               "colorMode": null,
               "colors": [
                 "rgba(245, 54, 54, 0.9)",
@@ -1431,7 +1463,7 @@ data:
           ],
           "targets": [
             {
-              "expr": "max by (_id,version) (time() - cluster_version{type=\"updating\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"}) >= 3 * 60 * 60",
+              "expr": "max by (_id,from_version,version) (time() - cluster_version{type=\"updating\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"}) >= 3 * 60 * 60",
               "format": "table",
               "instant": true,
               "intervalFactor": 1,
