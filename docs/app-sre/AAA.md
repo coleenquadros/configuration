@@ -107,7 +107,7 @@ Every app-sre engineer should have access to the following
     - Many people just use the web email client, other thunderbird.
     - Recommended to sort into folders
     - https://post-office.corp.redhat.com/mailman/listinfo is the mailing list central
-        - ACCESS: sd-app-sre -> speak to @jake or @paul on slack
+        - ACCESS: sd-app-sre -> speak to @jake, @jonathan beakley or @paul on slack
         - ACCESS: sd-org -> subscribe from UI
         - ACCESS: devtools-saas -> subscribe from UI
         - ACCESS: devtools-team -> subscribe from UI
