@@ -30,9 +30,9 @@ More info here: https://github.com/openshift/telemeter/
 ### telemeter-cache
 | Resource | Location |
 |---|---|
-| Upstream | https://github.com/app-sre/saas-telemeter-cache-manifests/ |
-| CI/CD | https://ci.ext.devshift.net/view/telemeter-cache/ |
-| saas repo | https://github.com/app-sre/saas-telemeter-cache/ |
+| Config | https://gitlab.cee.redhat.com/service/saas-telemeter-cache-manifests |
+| CI/CD | https://ci-int-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/view/telemeter/ |
+| saas repo | https://gitlab.cee.redhat.com/service/saas-telemeter-cache |
 
 ## Dependencies
 | Dependency | Description |
