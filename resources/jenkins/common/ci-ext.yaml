@@ -112,6 +112,7 @@
                     {saasherder_docker} --context "{saasherder_context}" --environment $SAAS_ENV pull ${{service}}
                     {saasherder_docker} --context "{saasherder_context}" --environment $SAAS_ENV template --filter {saasherder_object_blacklist} --output-dir {saasherder_context}-processed --local tag ${{service}}
 
+                    oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" apply -f {saasherder_context}-processed/${{service}}.yaml -n {kube_namespace} --dry-run --validate
                     oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" apply -f {saasherder_context}-processed/${{service}}.yaml -n {kube_namespace}
                 done
                 cd ..

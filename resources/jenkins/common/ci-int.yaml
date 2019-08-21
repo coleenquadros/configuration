@@ -137,8 +137,10 @@
                     {saasherder_docker} --context "{saasherder_context}" --environment $SAAS_ENV template --filter {saasherder_object_blacklist} --output-dir {saasherder_context}-processed --local tag ${{service}}
 
                     if [ -n "{ssh_ci_ext}" ]; then
+                        cat {saasherder_context}-processed/${{service}}.yaml | {ssh_ci_ext_cmd} oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" apply -f - -n {kube_namespace} --dry-run --validate
                         cat {saasherder_context}-processed/${{service}}.yaml | {ssh_ci_ext_cmd} oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" apply -f - -n {kube_namespace}
                     else
+                        oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" apply -f {saasherder_context}-processed/${{service}}.yaml -n {kube_namespace} --dry-run --validate
                         oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" apply -f {saasherder_context}-processed/${{service}}.yaml -n {kube_namespace}
                     fi
                 done
