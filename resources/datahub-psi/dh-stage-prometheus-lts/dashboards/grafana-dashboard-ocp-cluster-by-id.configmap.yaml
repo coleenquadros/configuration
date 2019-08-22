@@ -87,8 +87,9 @@ data:
               "expr": "cluster_infrastructure_provider{_id=\"$_id\"}",
               "format": "time_series",
               "instant": true,
+              "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "",
+              "legendFormat": "{{type}}",
               "refId": "A"
             }
           ],
@@ -713,6 +714,7 @@ data:
             "#d44a3a"
           ],
           "datasource": "$datasource",
+          "description": "",
           "format": "none",
           "gauge": {
             "maxValue": 100,
@@ -727,8 +729,8 @@ data:
             "x": 6,
             "y": 4
           },
-          "id": 12,
-          "interval": null,
+          "id": 24,
+          "interval": "",
           "links": [],
           "mappingType": 1,
           "mappingTypes": [
@@ -759,14 +761,15 @@ data:
             "fillColor": "rgba(31, 118, 189, 0.18)",
             "full": false,
             "lineColor": "rgb(31, 120, 193)",
-            "show": true
+            "show": false
           },
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(cluster:node_instance_type_count:sum{_id=\"$_id\"})",
+              "expr": "(\n  (max by (_id) (absent(subscription_labels{_id=\"$_id\",support=~\"Standard|Premium\",email_domain!=\"redhat.com\"}) or max by (_id) (subscription_labels{_id=\"$_id\",support=~\"Standard|Premium\",email_domain!=\"redhat.com\"}*5))) * \n  clamp_max(clamp_min((((time() - max by (_id) (cluster_version{_id=\"$_id\",type=\"cluster\"})) / 3600 / 24)) / 7, 1), 10) *\n  clamp_max(clamp_min( (max by (_id) (instance:etcd_object_counts:sum{_id=\"$_id\"}) - 3200)/1000 + 1, 1), 10) * \n  clamp_max(clamp_min( (max by (_id) (cluster:capacity_cpu_cores:sum{_id=\"$_id\"}) - 12)/20 + 1, 1), 10)\n) ^ (1/4)\n",
               "format": "time_series",
-              "instant": false,
+              "instant": true,
+              "interval": "",
               "intervalFactor": 1,
               "legendFormat": "",
               "refId": "A"
@@ -775,7 +778,7 @@ data:
           "thresholds": "3600,10000",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Nodes",
+          "title": "Interest Score",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1125,8 +1128,8 @@ data:
             "x": 3,
             "y": 8
           },
-          "id": 24,
-          "interval": "",
+          "id": 27,
+          "interval": null,
           "links": [],
           "mappingType": 1,
           "mappingTypes": [
@@ -1162,19 +1165,19 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "(\n  (max by (_id) (absent(subscription_labels{_id=\"$_id\",support=~\"Standard|Premium\",email_domain!=\"redhat.com\"}) or max by (_id) (subscription_labels{_id=\"$_id\",support=~\"Standard|Premium\",email_domain!=\"redhat.com\"}*5))) * \n  clamp_max(clamp_min((((time() - max by (_id) (cluster_version{_id=\"$_id\",type=\"cluster\"})) / 3600 / 24)) / 7, 1), 10) *\n  clamp_max(clamp_min( (max by (_id) (instance:etcd_object_counts:sum{_id=\"$_id\"}) - 3200)/1000 + 1, 1), 10) * \n  clamp_max(clamp_min( (max by (_id) (cluster:capacity_cpu_cores:sum{_id=\"$_id\"}) - 12)/20 + 1, 1), 10)\n) ^ (1/4)\n",
+              "expr": "topk(1,subscription_labels{_id=\"$_id\"})",
               "format": "time_series",
               "instant": true,
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "",
+              "legendFormat": "{{ebs_account}}",
               "refId": "A"
             }
           ],
           "thresholds": "3600,10000",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Interest Score",
+          "title": "EBS Account",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1184,7 +1187,7 @@ data:
               "value": "null"
             }
           ],
-          "valueName": "current"
+          "valueName": "name"
         },
         {
           "cacheTimeout": null,
@@ -1210,7 +1213,7 @@ data:
             "x": 6,
             "y": 8
           },
-          "id": 20,
+          "id": 12,
           "interval": null,
           "links": [],
           "mappingType": 1,
@@ -1247,9 +1250,9 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(cluster:node_instance_type_count:sum{label_node_role_kubernetes_io=\"master\",_id=\"$_id\"})",
+              "expr": "sum(cluster:node_instance_type_count:sum{_id=\"$_id\"})",
               "format": "time_series",
-              "instant": true,
+              "instant": false,
               "intervalFactor": 1,
               "legendFormat": "",
               "refId": "A"
@@ -1258,7 +1261,7 @@ data:
           "thresholds": "3600,10000",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Masters",
+          "title": "Nodes",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1656,7 +1659,7 @@ data:
             "x": 6,
             "y": 12
           },
-          "id": 13,
+          "id": 20,
           "interval": null,
           "links": [],
           "mappingType": 1,
@@ -1688,21 +1691,23 @@ data:
             "fillColor": "rgba(31, 118, 189, 0.18)",
             "full": false,
             "lineColor": "rgb(31, 120, 193)",
-            "show": false
+            "show": true
           },
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(cluster:capacity_cpu_cores:sum{_id='$_id'})",
+              "expr": "sum(cluster:node_instance_type_count:sum{label_node_role_kubernetes_io=\"master\",_id=\"$_id\"})",
               "format": "time_series",
+              "instant": true,
               "intervalFactor": 1,
+              "legendFormat": "",
               "refId": "A"
             }
           ],
           "thresholds": "3600,10000",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Cores",
+          "title": "Masters",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1817,6 +1822,88 @@ data:
           "title": "Down Services",
           "transform": "table",
           "type": "table"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": false,
+          "colors": [
+            "#299c46",
+            "rgba(237, 129, 40, 0.89)",
+            "#d44a3a"
+          ],
+          "datasource": "$datasource",
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 2,
+            "x": 6,
+            "y": 16
+          },
+          "id": 13,
+          "interval": null,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "sum(cluster:capacity_cpu_cores:sum{_id='$_id'})",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "refId": "A"
+            }
+          ],
+          "thresholds": "3600,10000",
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Cores",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "",
+              "value": "null"
+            }
+          ],
+          "valueName": "current"
         },
         {
           "aliasColors": {},
