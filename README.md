@@ -685,6 +685,30 @@ The Secret will contain the following fields:
 - `db.port` - The database port.
 - `db.auth_token` - Authentication token for the configuration endpoint.
 
+#### Manage Service account IAM Users via App-Interface (`/openshift/namespace-1.yml`)
+
+IAM users to be used as service accounts can be entirely self-serviced via App-Interface.
+
+In order to add or update a service account, you need to add them to the `terraformResources` field.
+
+- `provider`: must be `service-account`
+- `account`: must be one of the AWS account names we manage. Current options:
+  - `app-sre`
+  - `osio`
+  - `osio-dev`
+- `identifier` - name of resource to create (or update)
+- `policies`: list of AWS policies you wish to attach to the service account user.
+- `output_resource_name`: name of Kubernetes Secret to be created.
+  - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
+  - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
+    - For example, for a resource with `identifier` "my-user" and `provider` "service-account", the created Secret will be called `my-user-service-account`.
+
+Once the changes are merged, the IAM resources will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
+
+The Secret will contain the following fields:
+- `aws_access_key_id` - The access key ID.
+- `aws_secret_access_key` - The secret access key.
+
 ### Manage Slack User groups via App-Interface
 
 Slack User groups can be self-services via App-Interface.
