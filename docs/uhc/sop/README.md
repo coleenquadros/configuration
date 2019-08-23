@@ -6,6 +6,7 @@
     - [AccountManagerDown](#account-manager-down)
     - [UHCAccountManager5xxErrorsHigh](#account-manager-5xx)
     - [UHCAccountManager4xxErrorsHigh](#account-manager-4xx)
+    - [UHCAccountManagerBannedUsersHigh](#account-manager-banned-users)
     - [Escalations](#escalations)
 
 <!-- /TOC -->
@@ -100,6 +101,33 @@ Account manager API is returning an abnormally high number of 4xx Error requests
 
 ---
 
+## Account Manager Banned Users
+
+### Impact:
+
+There is an abnormal increase of banned users during the past 24 hours.
+All banned users see unauthorizated errors and are unable to use UHC portal.
+
+### Summary:
+
+More than 5 users have been banned during the last 24 hours.
+
+### Access required:
+
+- Console access to the cluster that runs account-manager (app-sre)
+- Edit access to the uhc namespaces:
+  - uhc-staging
+  - uhc-production
+
+### Relevant secrets:
+- secrets/uhc-acct-mngr
+
+### Steps:
+
+- Contact Service Delivery B team, inform the greater service delivery team.
+
+---
+
 ## Escalations
 We want a link to app-interface here, but okay to just contacts here for now.
 
@@ -108,7 +136,7 @@ We want a link to app-interface here, but okay to just contacts here for now.
 Abhishek Gupta (agupta@redhat.com)
 Timothy Williams (tiwillia@redhat.com)
 Mark Turansky (mturansk@redhat.com)
-
+Eric Himmelreich ehimmelr@redhat.com
 
 ---
 
