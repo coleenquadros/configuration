@@ -219,13 +219,12 @@
                 fi
             done
     
-            label_selectors=$(cat label_selectors)
-            for label_selector in $label_selectors; do
+            while IFS= read -r label_selector; do
                 resources_to_delete=$(oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" get {saasherder_object_whitelist} -o name -l "$label_selector" -n {kube_namespace})
                 for r in $resources_to_delete; do
                     echo DRY-RUN oc delete $r
                 done
-            done
+            done < label_selectors
 
     gh_timed: &gh_timed
         branch: "master"
