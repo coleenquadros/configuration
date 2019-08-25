@@ -3,11 +3,12 @@
     label: none
     display-name: '[{label}] {display_name}'
     image_pattern: ''
-    saasherder_image: "quay.io/openshiftio/saasherder:ab216ac"
+    saasherder_image: "quay.io/openshiftio/saasherder:c61e22e"
     saasherder_options: "--rm --user $(id -u) -v $(pwd):/saas:z -v /etc/pki:/etc/pki:z -e REQUESTS_CA_BUNDLE=$REQUESTS_CA_BUNDLE"
     saasherder_docker: "docker run {saasherder_options} {saasherder_image}"
     saasherder_check_image: "docker run {saasherder_options} -e SKOPEO_USER=$QUAY_USER -e SKOPEO_PASS=$QUAY_TOKEN --entrypoint '' {saasherder_image} python /scripts/check_image.py"
     saasherder_object_blacklist: 'Route,Secret,ConfigMap,ServiceAccount'
+    saasherder_object_whitelist: 'Deployment,DeploymentConfig,Service,ConfigMap,Role,RoleBinding,ServiceAccount'
     description: |
         [{label}] {display_name}
         Managed by JJB https://gitlab.cee.redhat.com/service/jjb
@@ -135,14 +136,22 @@
                     {saasherder_docker} --context "{saasherder_context}" --environment $SAAS_ENV update hash ${{service}} $GIT_COMMIT
                     {saasherder_docker} --context "{saasherder_context}" --environment $SAAS_ENV pull ${{service}}
                     {saasherder_docker} --context "{saasherder_context}" --environment $SAAS_ENV template --filter {saasherder_object_blacklist} --output-dir {saasherder_context}-processed --local tag ${{service}}
+                    {saasherder_docker} --context "{saasherder_context}" --environment $SAAS_ENV label --output-dir {saasherder_context}-processed --saas-repo-url {saas_git} ${{service}} > label_selector
 
+                    label_selector=$(cat label_selector)
                     if [ -n "{ssh_ci_ext}" ]; then
                         cat {saasherder_context}-processed/${{service}}.yaml | {ssh_ci_ext_cmd} oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" apply -f - -n {kube_namespace} --dry-run --validate
                         cat {saasherder_context}-processed/${{service}}.yaml | {ssh_ci_ext_cmd} oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" apply -f - -n {kube_namespace}
+                        resources_to_delete=$({ssh_ci_ext_cmd} oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" get {saasherder_object_whitelist} -o name -l "$label_selector" -n {kube_namespace})
                     else
                         oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" apply -f {saasherder_context}-processed/${{service}}.yaml -n {kube_namespace} --dry-run --validate
                         oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" apply -f {saasherder_context}-processed/${{service}}.yaml -n {kube_namespace}
+                        resources_to_delete=$(oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" get {saasherder_object_whitelist} -o name -l "$label_selector" -n {kube_namespace})
                     fi
+
+                    for r in $resources_to_delete; do
+                        echo DRY-RUN oc delete $r
+                    done
                 done
                 cd ..
             fi
@@ -388,6 +397,7 @@
 
             {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" pull
             {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" template --filter {saasherder_object_blacklist} --output-dir "$PROCESSED_DIR" --local tag
+            {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" label --output-dir "$PROCESSED_DIR" --saas-repo-url "$gitlabSourceRepoHomepage" > label_selectors
 
             find $PROCESSED_DIR -type f | while read f; do
                 if [ -n "{ssh_ci_ext}" ]; then
@@ -405,6 +415,18 @@
                         oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" -n {kube_namespace} apply -f $f
                     fi
                 fi
+            done
+
+            label_selectors=$(cat label_selectors)
+            for label_selector in $label_selectors; do
+                if [ -n "{ssh_ci_ext}" ]; then
+                    resources_to_delete=$({ssh_ci_ext_cmd} oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" get {saasherder_object_whitelist} -o name -l "$label_selector" -n {kube_namespace})
+                else
+                    resources_to_delete=$(oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" get {saasherder_object_whitelist} -o name -l "$label_selector" -n {kube_namespace})
+                fi
+                for r in $resources_to_delete; do
+                    echo DRY-RUN oc delete $r
+                done
             done
 
 # Runs build_deploy.sh and deploys to staging
