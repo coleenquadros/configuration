@@ -374,7 +374,6 @@
         kube_namespace: "error_no_ns"
         ssh_ci_ext: ''
         saas_env: 'production'
-        saas_git: ''
         builders:
         - shell: |
             #!/bin/bash
@@ -398,7 +397,7 @@
 
             {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" pull
             {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" template --filter {saasherder_object_blacklist} --output-dir "$PROCESSED_DIR" --local tag
-            {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" label --output-dir "$PROCESSED_DIR" --saas-repo-url {saas_git} > label_selectors
+            {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" label --output-dir "$PROCESSED_DIR" --saas-repo-url https://gitlab.cee.redhat.com/{gl_group}/{gl_project}.git > label_selectors
 
             find $PROCESSED_DIR -type f | while read f; do
                 if [ -n "{ssh_ci_ext}" ]; then
@@ -584,7 +583,6 @@
     id: 'saas-deploy'
     name: '{gl_group}-{gl_project}-{saasherder_context}-saas-deploy'
     dry_run: "no"
-    saas_git: 'https://gitlab.cee.redhat.com/{gl_group}/{gl_project}.git'
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'

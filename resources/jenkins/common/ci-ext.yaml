@@ -186,7 +186,6 @@
     saasherder: &saasherder
         kube_namespace: "error_no_ns"
         saas_env: "production"
-        saas_git: ""
         builders:
         - shell: |
             #!/bin/bash
@@ -208,7 +207,7 @@
 
             {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" pull
             {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" template --filter {saasherder_object_blacklist} --output-dir "$PROCESSED_DIR" --local tag
-            {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" label --output-dir "$PROCESSED_DIR" --saas-repo-url {saas_git} > label_selectors
+            {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" label --output-dir "$PROCESSED_DIR" --saas-repo-url https://github.com/{gh_org}/{gh_repo}.git > label_selectors
 
             find $PROCESSED_DIR -type f | while read f; do
                 oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" -n {kube_namespace} apply --dry-run --validate -f $f
@@ -324,7 +323,6 @@
     id: 'saas-deploy'
     name: '{gh_org}-{gh_repo}-{saasherder_context}-saas-deploy'
     dry_run: "no"
-    saas_git: 'https://github.com/{gh_org}/{gh_repo}.git'
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'
