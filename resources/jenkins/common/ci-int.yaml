@@ -5,7 +5,8 @@
     image_pattern: ''
     saasherder_image: "quay.io/openshiftio/saasherder:c61e22e"
     saasherder_options: "--rm --user $(id -u) -v $(pwd):/saas:z -v /etc/pki:/etc/pki:z -e REQUESTS_CA_BUNDLE=$REQUESTS_CA_BUNDLE"
-    saasherder_docker: "docker run {saasherder_options} {saasherder_image}"
+    saasherder_additional_options: ""
+    saasherder_docker: "docker run {saasherder_options} {saasherder_additional_options} {saasherder_image}"
     saasherder_check_image: "docker run {saasherder_options} -e SKOPEO_USER=$QUAY_USER -e SKOPEO_PASS=$QUAY_TOKEN --entrypoint '' {saasherder_image} python /scripts/check_image.py"
     saasherder_object_blacklist: 'Route,Secret,ConfigMap,ServiceAccount'
     saasherder_object_whitelist: 'Deployment,DeploymentConfig,Service,ConfigMap,Role,RoleBinding,ServiceAccount'
@@ -374,6 +375,7 @@
         kube_namespace: "error_no_ns"
         ssh_ci_ext: ''
         saas_env: 'production'
+        saasherder_additional_options: "-e SAAS_GIT=$gitlabSourceRepoHomepage"
         builders:
         - shell: |
             #!/bin/bash
@@ -397,7 +399,7 @@
 
             {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" pull
             {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" template --filter {saasherder_object_blacklist} --output-dir "$PROCESSED_DIR" --local tag
-            {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" label --output-dir "$PROCESSED_DIR" --saas-repo-url "$gitlabSourceRepoHomepage" > label_selectors
+            {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" label --output-dir "$PROCESSED_DIR" --saas-repo-url "$SAAS_GIT" > label_selectors
 
             find $PROCESSED_DIR -type f | while read f; do
                 if [ -n "{ssh_ci_ext}" ]; then
