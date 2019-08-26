@@ -1,0 +1,57 @@
+# Runs build_deploy.sh (polling if required) and deploys to staging
+#
+# vars required in the job definition:
+# - gh_org: GitHub org
+# - gh_repo: GitHub repo
+#
+# optional vars
+# - kube_cluster: cluster name
+# - kube_namespace: Namespace to deploy to
+# - saasherder_context: saasherder context declared in config.yaml
+# - saasherder_services: space separated list of saasherder service names
+# - saas_git: saas herder repo uri, should be public
+# - image_pattern: Regex of the image path to check against
+# - quay_org: name of the quay organisation
+#
+# optional secrets:
+# The secret 'app-sre/creds/kube-configs/{kube_cluster}' must exist.
+# The secret 'app-sre/quay/{quay_org}-push' must exist, with `user`, `token` and `config.json` keys.
+- job-template:
+    id: 'gh-build-master'
+    name: '{gh_org}-{gh_repo}-gh-build-{branch}'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *kube_config
+        - *quay_secret_push
+    <<: *gh_build_master
+
+# Variation of the above job that includes the push token to publish image to
+# app-sre quay org
+- job-template:
+    id: 'gh-build-master-github-push'
+    name: '{gh_org}-{gh_repo}-gh-build-{branch}'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *kube_config
+        - *quay_secret_push
+        - *app_sre_bot_push_token
+    <<: *gh_build_master
+
+- job-template:
+    id: 'gh-pr-check'
+    name: '{gh_org}-{gh_repo}-gh-pr-check'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    <<: *gh_pr_check

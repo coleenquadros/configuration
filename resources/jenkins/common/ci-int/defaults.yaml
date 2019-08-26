@@ -1,0 +1,29 @@
+- defaults:
+    name: global
+    label: none
+    display-name: '[{label}] {display_name}'
+    image_pattern: ''
+    saasherder_image: "quay.io/openshiftio/saasherder:c61e22e"
+    saasherder_options: "--rm --user $(id -u) -v $(pwd):/saas:z -v /etc/pki:/etc/pki:z -e REQUESTS_CA_BUNDLE=$REQUESTS_CA_BUNDLE"
+    saasherder_docker: "docker run {saasherder_options} {saasherder_image}"
+    saasherder_check_image: "docker run {saasherder_options} -e SKOPEO_USER=$QUAY_USER -e SKOPEO_PASS=$QUAY_TOKEN --entrypoint '' {saasherder_image} python /scripts/check_image.py"
+    saasherder_object_blacklist: 'Route,Secret,ConfigMap,ServiceAccount'
+    saasherder_object_whitelist: 'Deployment,DeploymentConfig,Service,ConfigMap,Role,RoleBinding,ServiceAccount,CronJob'
+    description: |
+        [{label}] {display_name}
+        Managed by App-Interface https://gitlab.cee.redhat.com/service/app-interface
+    timeout: 30
+    concurrent_build: false
+    gitlab_ssh_credentials: 'f4718b82-0cb2-47ef-aea2-dadae3f050a5'
+    ssh_ci_ext_cmd: 'ssh -T -i /var/lib/jenkins/.ssh/app-sre-bot-id_rsa -l app-sre-bot ci.ext.devshift.net'
+
+- publisher:
+    name: "gitlab_message"
+    publishers:
+    - gitlab-message:
+        success-note: true
+        success-note-text: "Build success, build url: ${BUILD_URL}"
+        failure-note: true
+        failure-note-text: "Build failed, build url: ${BUILD_URL}"
+        unstable-note: true
+        unstable-note-text: "The build is unstable, build url: ${BUILD_URL}"

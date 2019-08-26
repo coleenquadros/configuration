@@ -1,0 +1,52 @@
+- base_templates:
+    name: base-templates
+
+    gh_pr_check: &gh_pr_check
+        node: '{node}'
+        concurrent: '{concurrent_build}'
+        pr_check_script_path: "./pr_check.sh"
+        status_context: "ci.ext.devshift.net PR build"
+        properties:
+        - github:
+            url: 'https://github.com/{gh_org}/{gh_repo}/'
+        triggers:
+          - github-pull-request:
+              cron: '* * * * *'
+              github-hooks: true
+              permit-all: false
+              trigger-phrase: '(?ms).*^(\[test\]|\/retest)\s*$.*'
+              org-list:
+              - app-sre
+              - openshift
+              allow-whitelist-orgs-as-admins: true
+              status-context: '{status_context}'
+        wrappers:
+        - timeout_wrapper:
+            timeout: '{timeout}'
+        scm:
+        - git:
+            url: 'https://github.com/{gh_org}/{gh_repo}.git'
+            skip-tag: true
+            refspec: '+refs/pull/*:refs/remotes/origin/pr/*'
+            branches:
+                - '${{ghprbActualCommit}}'
+            merge:
+                remote: origin
+                branch: master
+            git-config-name: "AppSRE"
+            git-config-email: "sd-app-sre@redhat.com"
+        builders:
+        - shell: |
+            {pr_check_script_path}
+
+    gh_checkout: &gh_checkout
+        branch: "master"
+        node: '{node}'
+        properties:
+        - github:
+            url: 'https://github.com/{gh_org}/{gh_repo}/'
+        scm:
+        - git:
+            url: 'https://github.com/{gh_org}/{gh_repo}.git'
+            branches:
+                - '{branch}'

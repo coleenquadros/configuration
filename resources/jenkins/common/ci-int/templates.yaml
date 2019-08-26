@@ -1,101 +1,5 @@
-- defaults:
-    name: global
-    label: none
-    display-name: '[{label}] {display_name}'
-    image_pattern: ''
-    saasherder_image: "quay.io/openshiftio/saasherder:c61e22e"
-    saasherder_options: "--rm --user $(id -u) -v $(pwd):/saas:z -v /etc/pki:/etc/pki:z -e REQUESTS_CA_BUNDLE=$REQUESTS_CA_BUNDLE"
-    saasherder_docker: "docker run {saasherder_options} {saasherder_image}"
-    saasherder_check_image: "docker run {saasherder_options} -e SKOPEO_USER=$QUAY_USER -e SKOPEO_PASS=$QUAY_TOKEN --entrypoint '' {saasherder_image} python /scripts/check_image.py"
-    saasherder_object_blacklist: 'Route,Secret,ConfigMap,ServiceAccount'
-    saasherder_object_whitelist: 'Deployment,DeploymentConfig,Service,ConfigMap,Role,RoleBinding,ServiceAccount,CronJob'
-    description: |
-        [{label}] {display_name}
-        Managed by JJB https://gitlab.cee.redhat.com/service/jjb
-    timeout: 30
-    gitlab_ssh_credentials: 'f4718b82-0cb2-47ef-aea2-dadae3f050a5'
-    concurrent_build: false
-    ssh_ci_ext_cmd: 'ssh -T -i /var/lib/jenkins/.ssh/app-sre-bot-id_rsa -l app-sre-bot ci.ext.devshift.net'
-
-- wrapper:
-    name: timeout_wrapper
-    wrappers:
-      - timeout:
-          timeout: '{timeout}'
-          timeout-var: 'BUILD_TIMEOUT'
-          fail: true
-          type: no-activity
-
-- vault_defaults: &vault_defaults
-    name: 'vault_defaults'
-    vault-url: 'https://vault.devshift.net'
-    credentials-id: 'vault-creds'
-
-- publisher:
-    name: "gitlab_message"
-    publishers:
-    - gitlab-message:
-        success-note: true
-        success-note-text: "Build success, build url: ${BUILD_URL}"
-        failure-note: true
-        failure-note-text: "Build failed, build url: ${BUILD_URL}"
-        unstable-note: true
-        unstable-note-text: "The build is unstable, build url: ${BUILD_URL}"
-
-- kube_config: &kube_config
-    name: "kube_config"
-    secret-path: 'app-sre/creds/kube-configs/{kube_cluster}'
-    secret-values:
-      - env-var: 'KUBE_SERVER'
-        vault-key: 'server'
-      - env-var: 'KUBE_TOKEN'
-        vault-key: 'token'
-
-- quay_secret_push: &quay_secret_push
-    name: "quay_secret_push"
-    secret-path: 'app-sre/quay/{quay_org}-push'
-    secret-values:
-      - env-var: 'QUAY_USER'
-        vault-key: 'user'
-      - env-var: 'QUAY_TOKEN'
-        vault-key: 'token'
-      - env-var: 'QUAY_DOCKER_CONFIG_JSON'
-        vault-key: 'config.json'
-
-- quay_secret_pull: &quay_secret_pull
-    name: "quay_secret_pull"
-    secret-path: 'app-sre/quay/{quay_org}-pull'
-    secret-values:
-      - env-var: 'QUAY_USER'
-        vault-key: 'user'
-      - env-var: 'QUAY_TOKEN'
-        vault-key: 'token'
-      - env-var: 'QUAY_DOCKER_CONFIG_JSON'
-        vault-key: 'config.json'
-
-- app_sre_bot_push_token: &app_sre_bot_push_token
-    name: "app_sre_bot_push_token"
-    secret-path: 'app-sre/ci-int/gitlab-token'
-    secret-values:
-    - env-var: 'APP_SRE_BOT_PUSH_TOKEN'
-      vault-key: 'gitlab-token'
-
-- reconcile_toml: &reconcile_toml
-    name: "reconcile_toml"
-    secret-path: 'app-sre/ci-int/qontract-reconcile-toml'
-    secret-values:
-    - env-var: CONFIG_TOML
-      vault-key: 'data_base64'
-
-- gitlab_token: &gitlab_token
-    name: "gitlab_token"
-    secret-path: 'app-sre/ci-int/gitlab-token'
-    secret-values:
-    - env-var: GITLAB_TOKEN
-      vault-key: 'gitlab-token'
-
 - base_templates:
-    name: base-templates
+    name: ci-int-base-templates
 
     gl_checkout: &gl_checkout
         branch: "master"
@@ -163,20 +67,6 @@
         saasherder_services: ""
         saas_git: ""
         build_deploy_script_path: "./build_deploy.sh"
-        branch: "master"
-        node: '{node}'
-        properties:
-        - github:
-            url: 'https://gitlab.cee.redhat.com/{gl_group}/{gl_project}.git'
-        - gitlab:
-            connection: 'gitlab cee'
-        scm:
-        - git:
-            url: 'git@gitlab.cee.redhat.com:{gl_group}/{gl_project}.git'
-            credentials-id: '{gitlab_ssh_credentials}'
-            shallow_clone: true
-            branches:
-            - '{branch}'
         triggers:
         - gitlab:
             trigger-push: true
@@ -195,6 +85,7 @@
         wrappers:
         - timeout_wrapper:
             timeout: '{timeout}'
+        <<: *gl_checkout
         <<: *build_master_builder
 
     gh_build_master: &gh_build_master
@@ -205,59 +96,14 @@
         saasherder_services: ""
         saas_git: ""
         build_deploy_script_path: "./build_deploy.sh"
-        branch: "master"
-        node: '{node}'
-        properties:
-        - github:
-            url: 'https://github.com/{gh_org}/{gh_repo}/'
-        scm:
-        - git:
-            url: 'https://github.com/{gh_org}/{gh_repo}'
-            branches:
-                - '{branch}'
         triggers:
         - pollscm:
             cron: '{pollscm_cron}'
         wrappers:
         - timeout_wrapper:
             timeout: '{timeout}'
+        <<: *gh_checkout
         <<: *build_master_builder
-
-    gh_pr_check: &gh_pr_check
-        node: '{node}'
-        concurrent: '{concurrent_build}'
-        pr_check_script_path: "./pr_check.sh"
-        status_context: "ci-int PR build"
-        properties:
-        - github:
-            url: 'https://github.com/{gh_org}/{gh_repo}/'
-        triggers:
-          - github-pull-request:
-              cron: '* * * * *'
-              github-hooks: true
-              permit-all: false
-              trigger-phrase: '(?ms).*^(\[test\]|\/retest)\s*$.*'
-              org-list:
-              - app-sre
-              - openshift
-              allow-whitelist-orgs-as-admins: true
-              status-context: '{status_context}'
-        wrappers:
-        - timeout_wrapper:
-            timeout: '{timeout}'
-        scm:
-        - git:
-            url: 'https://github.com/{gh_org}/{gh_repo}.git'
-            skip-tag: true
-            refspec: '+refs/pull/*:refs/remotes/origin/pr/*'
-            branches:
-                - '${{ghprbActualCommit}}'
-            merge:
-                remote: origin
-                branch: master
-        builders:
-        - shell: |
-            {pr_check_script_path}
 
     gl_pr_check_template: &gl_pr_check_template
         node: '{node}'
@@ -321,20 +167,6 @@
     # branch.
     gl_build_pipeline_template: &gl_build_pipeline_template
         project-type: pipeline
-        branch: "master"
-        node: '{node}'
-        properties:
-        - github:
-            url: 'https://gitlab.cee.redhat.com/{gl_group}/{gl_project}.git'
-        - gitlab:
-            connection: 'gitlab cee'
-        scm:
-        - git:
-            url: 'git@gitlab.cee.redhat.com/{gl_group}/{gl_project}.git'
-            credentials-id: '{gitlab_ssh_credentials}'
-            shallow_clone: true
-            branches:
-            - '{branch}'
         pipeline-scm:
           scm:
           - git:
@@ -349,6 +181,7 @@
         wrappers:
         - timeout_wrapper:
             timeout: '{timeout}'
+        <<: *gl_checkout
 
     # Defines the saasherder shell build script that implements CD
     #
@@ -488,62 +321,6 @@
         jobs: '{upstream}'
         results: 'success'
     <<: *gl_build_master_template
-
-# Runs build_deploy.sh from a GH repo (polling) and deploys to staging
-#
-# vars required in the job definition:
-# - gh_org: GitHub org
-# - gh_repo: GitHub repo
-#
-# optional vars
-# - kube_cluster: cluster name
-# - kube_namespace: Namespace to deploy to
-# - saasherder_context: saasherder context declared in config.yaml
-# - saasherder_services: space separated list of saasherder service names
-# - saas_git: saas herder repo uri, should be public
-# - image_pattern: Regex of the image path to check against
-# - quay_org: name of the quay organisation
-#
-# optional secrets:
-# The secret 'app-sre/creds/kube-configs/{kube_cluster}' must exist.
-# The secret 'app-sre/quay/{quay_org}-push' must exist, with `user`, `token` and `config.json` keys.
-- job-template:
-    id: 'gh-build-master'
-    name: '{gh_org}-{gh_repo}-gh-build-{branch}'
-    wrappers:
-    - timeout_wrapper:
-        timeout: '{timeout}'
-    - ansicolor
-    - vault-secrets:
-        <<: *vault_defaults
-        secrets:
-        - *kube_config
-        - *quay_secret_push
-    <<: *gh_build_master
-
-- job-template:
-    id: 'gh-pr-check'
-    name: '{gh_org}-{gh_repo}-gh-pr-check'
-    wrappers:
-    - timeout_wrapper:
-        timeout: '{timeout}'
-    - ansicolor
-    <<: *gh_pr_check
-
-- job-template:
-    id: 'gh-build-master-github-push'
-    name: '{gh_org}-{gh_repo}-gh-build-{branch}'
-    wrappers:
-    - timeout_wrapper:
-        timeout: '{timeout}'
-    - ansicolor
-    - vault-secrets:
-        <<: *vault_defaults
-        secrets:
-        - *kube_config
-        - *quay_secret_push
-        - *app_sre_bot_push_token
-    <<: *gh_build_master
 
 - job-template:
     id: gh-build-master-with-upstream

@@ -754,6 +754,7 @@ To add a configuration to a Jenkins instance, add a `jenkins-config` object with
 - `type` - one of the following JJB entities:
   - `views`
   - `secrets`
+  - `base-templates`
   - `job-templates`
   - `jobs`
 - `config` - a list of configurations of type `view` or `project` (use `config` for `views` and `jobs` types)
@@ -765,14 +766,16 @@ Examples:
 - `job-templates` - [object](/data/services/app-interface/cicd/ci-int/job-templates.yaml), [resource](/resources/jenkins/app-interface/jobs-templates.yaml)
 - `jobs` - [object](/data/services/app-interface/cicd/ci-int/jobs.yaml)
 
-All JJB configurations rely on a JJB entity of type `common` for the corresponding Jenkins intance:
-- `ci-int` - [object](/data/services/common/cicd/ci-int.yaml), [resource](/resources/jenkins/common/ci-int.yaml)
-- `ci-ext` - [object](/data/services/common/cicd/ci-ext.yaml), [resource](/resources/jenkins/common/ci-ext.yaml)
+All JJB configurations rely on a set of JJB entities for the corresponding Jenkins intance:
+- `global` - [resources](/resources/jenkins/common/)
+- `ci-int` - [object](/data/services/jenkins/cicd/ci-int/), [resources](/resources/jenkins/common/ci-int/)
+- `ci-ext` - [object](/data/services/jenkins/cicd/ci-ext/), [resources](/resources/jenkins/common/ci-ext/)
 
 The final JJB configrations will be sorted in the following order:
-- `common`
+- `defaults`
 - `views`
 - `secrets`
+- `base-templates`
 - `job-templates`
 - `jobs`
 
