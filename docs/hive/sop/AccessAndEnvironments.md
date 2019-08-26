@@ -2,12 +2,13 @@
 
 <!-- TOC depthTo:2 -->
 
-- [SOP : Access](#Access)
-- [SOP : Environments](#Environments)
-    - [Stage](##Stage)
-    - [Production](##Production)
-- [SOP : Metrics](#Metrics)
-    - [Updating the Grafana Dashboard](##Updating-the-Grafana-Dashboard)
+- [SOP : Access and Environments](#sop--access-and-environments)
+- [Access](#access)
+- [Environments](#environments)
+  - [Stage](#stage)
+  - [Production](#production)
+- [Metrics](#metrics)
+  - [Updating the Grafana Dashboard](#updating-the-grafana-dashboard)
 
 <!-- /TOC -->
 
@@ -98,7 +99,9 @@ To persist dashboard changes:
 3. Clone or fork: [https://gitlab.cee.redhat.com/service/app-interface](https://gitlab.cee.redhat.com/service/app-interface)
 4. Create a branch.
 5. Update the dashboard configmap with your exported changes. 
+   1. Config map location: resources/app-sre/app-sre-observability-production/grafana/grafana-dashboard-hive.configmap.yaml
+
    ```
-   oc create configmap grafana-dashboard-hive --from-file=hive.json -o yaml --dry-run > resources/app-sre/app-sre-prometheus/grafana/grafana-dashboard-hive.configmap.yaml
+   oc create configmap grafana-dashboard-hive --from-file=hive.json -o yaml --dry-run > resources/app-sre/app-sre-observability-production/grafana/grafana-dashboard-hive.configmap.yaml
    ```
 6. Submit a PR with the resulting change.
