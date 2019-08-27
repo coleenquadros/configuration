@@ -164,6 +164,7 @@ cat "$CONFIG_TOML" \
 ## Run integrations on local server
 
 run_int github &
+run_int github-repo-invites &
 run_int quay-membership &
 run_int quay-repos &
 run_vault_reconcile_integration &
