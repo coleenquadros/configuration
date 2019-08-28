@@ -782,6 +782,10 @@ The final JJB configrations will be sorted in the following order:
 External reference:
 - [Jenkins Job Builder](https://docs.openstack.org/infra/jenkins-job-builder/)
 
+Notes:
+- To use a KV v1 secret engine in a secret, the `secret-path` should be `<secret_engine>/<path_to_secret>`.
+- To use a KV v2 secret engine in a secret, the `secret-path` should be `<secret_engine>/data/<path_to_secret>`.
+
 
 ### Delete AWS IAM access keys via App-Interface
 
