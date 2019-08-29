@@ -110,7 +110,7 @@ All banned users see unauthorizated errors and are unable to use UHC portal.
 
 ### Summary:
 
-More than 5 users have been banned during the last 24 hours.
+The number of banned users has abnormally increased during the last 24 hours.
 
 ### Access required:
 
