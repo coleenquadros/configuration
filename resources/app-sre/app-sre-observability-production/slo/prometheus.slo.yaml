@@ -1,0 +1,104 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+    type: slo-rules
+  name: prometheus-slo
+spec:
+  groups:
+  
+  # Specifying error budgets for Prometheus
+  - record: component:slo_availability:percent
+    labels:
+      component: prometheus
+      service: observability    
+    expr: 0.1
+
+  - name: prometheus.sli.rules
+    interval: 10m
+    rules:
+    # Rate of non-5xx responses on the query handler over 1 day
+    - record: component:slo_availability:ratio_rate_5m
+      expr: |
+        sum(rate(prometheus_http_requests_total{handler="/api/v1/query", status!~"5.."}[5m]))
+        /
+        sum(rate(prometheus_http_requests_total{handler="/api/v1/query"}[1d]))
+      labels:
+        component: prometheus
+        service: observability
+
+    - record: component:slo_availability:ratio_rate_1h
+      expr: |
+        sum(rate(prometheus_http_requests_total{handler="/api/v1/query", status!~"5.."}[1h]))
+        /
+        sum(rate(prometheus_http_requests_total{handler="/api/v1/query"}[1d]))
+      labels:
+        component: prometheus
+        service: observability
+
+    - record: component:slo_availability:ratio_rate_1d
+      expr: |
+        sum(rate(prometheus_http_requests_total{handler="/api/v1/query", status!~"5.."}[1d]))
+        /
+        sum(rate(prometheus_http_requests_total{handler="/api/v1/query"}[1d]))
+      labels:
+        component: prometheus
+        service: observability
+
+    - record: component:slo_availability:ratio_rate_1d
+      expr: |
+        sum(rate(prometheus_http_requests_total{handler="/api/v1/query", status!~"5.."}[1d]))
+        /
+        sum(rate(prometheus_http_requests_total{handler="/api/v1/query"}[1d]))
+      labels:
+        component: prometheus
+        service: observability
+
+
+    # P90 latency
+    - record: component:slo_latency_p90:ratio_rate_1d
+      expr: |
+          sum by (pod) (
+            histogram_quantile(
+              0.9, rate(
+                prometheus_http_request_duration_seconds_bucket{handler="/api/v1/query"}[7d])
+                )
+              )
+      labels:
+        component: prometheus
+        service: observability
+
+    - record: component:slo_latency_p99:ratio_rate_7d
+      expr: |
+        histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[7d]))
+      labels:
+        component: prometheus
+        service: observability
+
+  - name: prometheus.slo.alerts
+    rules:
+    - alert: PrometheusErrorBudgetBurn
+      expr: |2
+          (
+            100 * component:slo_availability:ratio_rate_1h
+          > on (component)
+            14.4 * component:slo_availability:percent{}
+          )
+        and
+          (
+            100 * component:slo_availability:ratio_rate_5m
+          > on (component)
+            14.4 * component:slo_availability:percent{}
+          )
+      for: 2m
+      labels:
+        component: "{{$labels.component}}"
+        severity: test
+      annotations:
+        message: "Component {{$labels.component}} has returned {{ $value | printf `%.2f` }}% 5xx over the last hour."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/sop"
+        dashboard: "https://grafana.app-sre.devshift.net/"
+        link_url: ""
+

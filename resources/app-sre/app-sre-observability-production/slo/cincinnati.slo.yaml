@@ -1,0 +1,26 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+    type: slo-rules
+  name: cincinnati-slo
+spec:
+  groups:
+  - name: cincinnati-graphbuilder.slo.rules
+    interval: 10m
+    rules:
+    - record: component:slo_availability:30d
+      expr: sum(up{namespace="cincinnati-production",job="cincinnati-graph-builder"})
+      labels:
+        component: graphbuilder
+        service: cincinnati
+  - name: cincinnati-policyengine.slo.rules
+    interval: 10m
+    rules:
+    - record: component:slo_availability:30d
+      expr: sum(up{namespace="cincinnati-production",job="cincinnati-policy-engine"})
+      labels:
+        component: graphbuilder
+        service: cincinnati
