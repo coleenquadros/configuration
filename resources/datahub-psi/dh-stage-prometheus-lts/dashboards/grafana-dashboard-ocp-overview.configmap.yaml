@@ -47,7 +47,7 @@ data:
             "y": 0
           },
           "id": 5,
-          "interval": null,
+          "interval": "",
           "links": [],
           "mappingType": 1,
           "mappingTypes": [
@@ -83,8 +83,9 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "count(count by (_id) (cluster_version{type=\"updating\"}))",
+              "expr": "count(count by (_id) (cluster_version{type=\"updating\"} $source ))",
               "format": "time_series",
+              "instant": true,
               "intervalFactor": 1,
               "refId": "A"
             }
@@ -129,7 +130,7 @@ data:
             "y": 0
           },
           "id": 7,
-          "interval": null,
+          "interval": "",
           "links": [],
           "mappingType": 1,
           "mappingTypes": [
@@ -165,8 +166,9 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "count(count by (_id) (time() - cluster_version{type=\"updating\"} < 60 * 60 * 3))",
+              "expr": "count(count by (_id) ((time() - cluster_version{type=\"updating\"} < 60 * 60 * 3) $source))",
               "format": "time_series",
+              "instant": true,
               "intervalFactor": 1,
               "refId": "A"
             }
@@ -211,7 +213,7 @@ data:
             "y": 0
           },
           "id": 6,
-          "interval": null,
+          "interval": "",
           "links": [],
           "mappingType": 1,
           "mappingTypes": [
@@ -247,8 +249,9 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "count(count by (_id) (time() - cluster_version{type=\"updating\"} > 60 * 60 * 3))",
+              "expr": "count(count by (_id) ((time() - cluster_version{type=\"updating\"} > 60 * 60 * 3) $source ))",
               "format": "time_series",
+              "instant": true,
               "intervalFactor": 1,
               "refId": "A"
             }
@@ -257,90 +260,6 @@ data:
           "timeFrom": null,
           "timeShift": null,
           "title": "Clusters (updating > 3h)",
-          "type": "singlestat",
-          "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "op": "=",
-              "text": "N/A",
-              "value": "null"
-            }
-          ],
-          "valueName": "current"
-        },
-        {
-          "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": false,
-          "colors": [
-            "#299c46",
-            "rgba(237, 129, 40, 0.89)",
-            "#d44a3a"
-          ],
-          "datasource": "$datasource",
-          "description": "Count of clusters that have less than five nodes, and are generally not considered \"supportable for production\" because you don't have HA masters or HA ingress.",
-          "format": "none",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": false,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
-          },
-          "gridPos": {
-            "h": 3,
-            "w": 3,
-            "x": 9,
-            "y": 0
-          },
-          "id": 20,
-          "interval": null,
-          "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": "",
-          "postfixFontSize": "50%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "sparkline": {
-            "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "show": false
-          },
-          "tableColumn": "",
-          "targets": [
-            {
-              "expr": "count(sort_desc(sum by (_id) (cluster:node_instance_type_count:sum{}) < 5))",
-              "format": "time_series",
-              "instant": true,
-              "intervalFactor": 1,
-              "refId": "A"
-            }
-          ],
-          "thresholds": "",
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "Clusters with < 5 nodes",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -362,11 +281,12 @@ data:
           "fill": 1,
           "gridPos": {
             "h": 6,
-            "w": 12,
-            "x": 12,
+            "w": 15,
+            "x": 9,
             "y": 0
           },
           "id": 9,
+          "interval": "",
           "legend": {
             "avg": false,
             "current": false,
@@ -390,7 +310,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "count by (version) ((time() - cluster_version{type=\"failure\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"}) > 10 * 60)",
+              "expr": "count by (version) (((time() - cluster_version{type=\"failure\"}) > 10 * 60) $source )",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 10,
@@ -464,7 +384,7 @@ data:
             "y": 3
           },
           "id": 2,
-          "interval": null,
+          "interval": "",
           "links": [],
           "mappingType": 1,
           "mappingTypes": [
@@ -500,9 +420,9 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "count(count by (_id) (cluster_version{type=\"current\"}))",
+              "expr": "count(count by (_id) (cluster_version{type=\"current\"} $source))",
               "format": "time_series",
-              "instant": false,
+              "instant": true,
               "intervalFactor": 1,
               "refId": "A"
             }
@@ -532,89 +452,6 @@ data:
             "#d44a3a"
           ],
           "datasource": "$datasource",
-          "description": "Count of clusters that have installed an official 4.y.z version, vs CI or nightly builds.",
-          "format": "none",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": false,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
-          },
-          "gridPos": {
-            "h": 3,
-            "w": 3,
-            "x": 3,
-            "y": 3
-          },
-          "id": 4,
-          "interval": null,
-          "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": "",
-          "postfixFontSize": "50%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "sparkline": {
-            "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "show": true
-          },
-          "tableColumn": "",
-          "targets": [
-            {
-              "expr": "count(count by (_id) (cluster_version{type=\"current\",version=~\"4.\\\\d+.\\\\d+\"}))",
-              "format": "time_series",
-              "intervalFactor": 1,
-              "refId": "A"
-            }
-          ],
-          "thresholds": "",
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "Clusters (4.y.z)",
-          "type": "singlestat",
-          "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "op": "=",
-              "text": "N/A",
-              "value": "null"
-            }
-          ],
-          "valueName": "current"
-        },
-        {
-          "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": false,
-          "colors": [
-            "#299c46",
-            "rgba(237, 129, 40, 0.89)",
-            "#d44a3a"
-          ],
-          "datasource": "$datasource",
           "description": "All clusters older than 24h, which generally excludes them from CI or automation launched clusters",
           "format": "none",
           "gauge": {
@@ -627,7 +464,7 @@ data:
           "gridPos": {
             "h": 3,
             "w": 3,
-            "x": 6,
+            "x": 3,
             "y": 3
           },
           "id": 8,
@@ -667,7 +504,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "count(time() - cluster_version{type=\"cluster\"} > 24*60*60)",
+              "expr": "count((time() - cluster_version{type=\"cluster\"} > 24*60*60) $source )",
               "format": "time_series",
               "instant": true,
               "intervalFactor": 1,
@@ -699,190 +536,6 @@ data:
             "#d44a3a"
           ],
           "datasource": "$datasource",
-          "description": "Count of clusters that have less than five nodes, and are generally not considered \"supportable for production\" because you don't have HA masters or HA ingress.",
-          "format": "none",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": false,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
-          },
-          "gridPos": {
-            "h": 3,
-            "w": 3,
-            "x": 9,
-            "y": 3
-          },
-          "id": 24,
-          "interval": null,
-          "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": "",
-          "postfixFontSize": "50%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "sparkline": {
-            "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "show": false
-          },
-          "tableColumn": "",
-          "targets": [
-            {
-              "expr": "count(sort_desc(sum by (_id) (cluster:node_instance_type_count:sum{}) > 8))",
-              "format": "time_series",
-              "instant": true,
-              "intervalFactor": 1,
-              "refId": "A"
-            }
-          ],
-          "thresholds": "",
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "Clusters with > 8 nodes",
-          "type": "singlestat",
-          "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "op": "=",
-              "text": "N/A",
-              "value": "null"
-            }
-          ],
-          "valueName": "current"
-        },
-        {
-          "aliasColors": {},
-          "breakPoint": "50%",
-          "cacheTimeout": null,
-          "combine": {
-            "label": "Others",
-            "threshold": 0
-          },
-          "datasource": "$datasource",
-          "decimals": 0,
-          "description": "Clusters grouped by their infrastructure provider.",
-          "fontSize": "80%",
-          "format": "short",
-          "gridPos": {
-            "h": 6,
-            "w": 3,
-            "x": 0,
-            "y": 6
-          },
-          "id": 16,
-          "interval": "",
-          "legend": {
-            "header": "",
-            "percentage": false,
-            "percentageDecimals": 1,
-            "show": true,
-            "values": true
-          },
-          "legendType": "Under graph",
-          "links": [],
-          "maxDataPoints": 3,
-          "nullPointMode": "connected",
-          "pieType": "donut",
-          "strokeWidth": 1,
-          "targets": [
-            {
-              "expr": "count(cluster_infrastructure_provider) by(type)",
-              "format": "time_series",
-              "instant": true,
-              "intervalFactor": 1,
-              "legendFormat": "{{type}}",
-              "refId": "A"
-            }
-          ],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "Infrastructure Types",
-          "type": "grafana-piechart-panel",
-          "valueName": "current"
-        },
-        {
-          "aliasColors": {},
-          "breakPoint": "50%",
-          "cacheTimeout": null,
-          "combine": {
-            "label": "Others",
-            "threshold": 0
-          },
-          "datasource": "$datasource",
-          "decimals": 0,
-          "description": "Cluster installations grouped by their type. Clusters created before 4.1.10 are unable to accurately report their type, so they are unknown.",
-          "fontSize": "80%",
-          "format": "short",
-          "gridPos": {
-            "h": 6,
-            "w": 3,
-            "x": 3,
-            "y": 6
-          },
-          "id": 17,
-          "interval": "",
-          "legend": {
-            "header": "",
-            "percentage": false,
-            "percentageDecimals": 1,
-            "show": true,
-            "values": true
-          },
-          "legendType": "Under graph",
-          "links": [],
-          "maxDataPoints": 3,
-          "nullPointMode": "connected",
-          "pieType": "donut",
-          "strokeWidth": 1,
-          "targets": [
-            {
-              "expr": "count(label_replace(label_replace(cluster_installer and on(_id) cluster_version{type=\"initial\", version!~\"4\\\\.1\\\\.[0-9]-.*\"}, \"type\", \"UPI\", \"type\", \"\"), \"type\", \"IPI\", \"type\", \"openshift-install\") or on(_id) label_replace(cluster_installer and on(_id) cluster_version{type=\"initial\", version=~\"4\\\\.1\\\\.[0-9]-.*\"}, \"type\", \"Unknown\", \"type\", \".*\")) by(type)",
-              "format": "time_series",
-              "instant": true,
-              "intervalFactor": 1,
-              "legendFormat": "{{type}}",
-              "refId": "A"
-            }
-          ],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "Install Types",
-          "type": "grafana-piechart-panel",
-          "valueName": "current"
-        },
-        {
-          "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": false,
-          "colors": [
-            "#299c46",
-            "rgba(237, 129, 40, 0.89)",
-            "#d44a3a"
-          ],
-          "datasource": "$datasource",
           "description": "Count of clusters that have installed an official 4.y.z version, vs CI or nightly builds.",
           "format": "none",
           "gauge": {
@@ -896,7 +549,7 @@ data:
             "h": 3,
             "w": 3,
             "x": 6,
-            "y": 6
+            "y": 3
           },
           "id": 21,
           "interval": "",
@@ -935,7 +588,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "count (max by (_id) (cluster_operator_conditions{condition=\"Degraded\"} == 1))",
+              "expr": "count (max by (_id) ((cluster_operator_conditions{condition=\"Degraded\"} == 1) $source))",
               "format": "time_series",
               "instant": true,
               "intervalFactor": 1,
@@ -956,6 +609,110 @@ data:
               "value": "null"
             }
           ],
+          "valueName": "current"
+        },
+        {
+          "aliasColors": {},
+          "breakPoint": "50%",
+          "cacheTimeout": null,
+          "combine": {
+            "label": "Others",
+            "threshold": 0
+          },
+          "datasource": "$datasource",
+          "decimals": 0,
+          "description": "Clusters grouped by their infrastructure provider.",
+          "fontSize": "80%",
+          "format": "short",
+          "gridPos": {
+            "h": 6,
+            "w": 5,
+            "x": 0,
+            "y": 6
+          },
+          "id": 16,
+          "interval": "",
+          "legend": {
+            "header": "",
+            "percentage": false,
+            "percentageDecimals": 1,
+            "show": true,
+            "sort": "current",
+            "sortDesc": true,
+            "values": true
+          },
+          "legendType": "Under graph",
+          "links": [],
+          "maxDataPoints": 3,
+          "nullPointMode": "connected",
+          "pieType": "donut",
+          "strokeWidth": 1,
+          "targets": [
+            {
+              "expr": "count by(type) (cluster_infrastructure_provider $source)",
+              "format": "time_series",
+              "instant": true,
+              "intervalFactor": 1,
+              "legendFormat": "{{type}}",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Infrastructure Types",
+          "type": "grafana-piechart-panel",
+          "valueName": "current"
+        },
+        {
+          "aliasColors": {},
+          "breakPoint": "50%",
+          "cacheTimeout": null,
+          "combine": {
+            "label": "Others",
+            "threshold": 0
+          },
+          "datasource": "$datasource",
+          "decimals": 0,
+          "description": "Cluster installations grouped by their type. Clusters created before 4.1.10 are unable to accurately report their type, so they are unknown.",
+          "fontSize": "80%",
+          "format": "short",
+          "gridPos": {
+            "h": 6,
+            "w": 4,
+            "x": 5,
+            "y": 6
+          },
+          "id": 17,
+          "interval": "",
+          "legend": {
+            "header": "",
+            "percentage": false,
+            "percentageDecimals": 1,
+            "show": true,
+            "sort": "current",
+            "sortDesc": true,
+            "values": true
+          },
+          "legendType": "Under graph",
+          "links": [],
+          "maxDataPoints": 3,
+          "nullPointMode": "connected",
+          "pieType": "donut",
+          "strokeWidth": 1,
+          "targets": [
+            {
+              "expr": "count by(type) (label_replace(label_replace(cluster_installer and on(_id) cluster_version{type=\"initial\", version!~\"4\\\\.1\\\\.[0-9]-.*\"} $source, \"type\", \"UPI\", \"type\", \"\"), \"type\", \"IPI\", \"type\", \"openshift-install\") or on(_id) label_replace(cluster_installer and on(_id) cluster_version{type=\"initial\", version=~\"4\\\\.1\\\\.[0-9]-.*\"} $source, \"type\", \"Unknown\", \"type\", \".*\"))",
+              "format": "time_series",
+              "instant": true,
+              "intervalFactor": 1,
+              "legendFormat": "{{type}}",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Install Types",
+          "type": "grafana-piechart-panel",
           "valueName": "current"
         },
         {
@@ -998,7 +755,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "count by (name) (cluster_operator_conditions{condition=\"Degraded\"} == 1)",
+              "expr": "count by (name) ((cluster_operator_conditions{condition=\"Degraded\"} == 1))",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -1048,90 +805,6 @@ data:
             "align": false,
             "alignLevel": null
           }
-        },
-        {
-          "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": false,
-          "colors": [
-            "#299c46",
-            "rgba(237, 129, 40, 0.89)",
-            "#d44a3a"
-          ],
-          "datasource": "$datasource",
-          "description": "All clusters older than 24h, which generally excludes them from CI or automation launched clusters",
-          "format": "none",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": false,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
-          },
-          "gridPos": {
-            "h": 3,
-            "w": 3,
-            "x": 6,
-            "y": 9
-          },
-          "id": 23,
-          "interval": "",
-          "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": "",
-          "postfixFontSize": "50%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "sparkline": {
-            "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "show": false
-          },
-          "tableColumn": "",
-          "targets": [
-            {
-              "expr": "count (cluster_version{type=\"failure\"} + on (_id) group_left(other) (0 * count by (_id) (cluster:node_instance_type_count:sum{label_beta_kubernetes_io_instance_type=\"\"})))",
-              "format": "time_series",
-              "instant": true,
-              "intervalFactor": 1,
-              "refId": "A"
-            }
-          ],
-          "thresholds": "",
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "Failing UPI Clusters (all)",
-          "type": "singlestat",
-          "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "op": "=",
-              "text": "N/A",
-              "value": "null"
-            }
-          ],
-          "valueName": "current"
         },
         {
           "columns": [],
@@ -1239,7 +912,7 @@ data:
           ],
           "targets": [
             {
-              "expr": "max by (_id,from_version,version) (time() - max by (_id,from_version,version) (cluster_version{type=\"updating\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) < 3 * 60 * 60",
+              "expr": "max by (_id,from_version,version) (time() - max by (_id,from_version,version) (cluster_version{type=\"updating\"} $source)) < 3 * 60 * 60",
               "format": "table",
               "instant": true,
               "intervalFactor": 1,
@@ -1249,7 +922,7 @@ data:
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "In-progress Updates (4.y.z, <3h)",
+          "title": "In-progress Updates (<3h)",
           "transform": "table",
           "type": "table"
         },
@@ -1343,7 +1016,7 @@ data:
           ],
           "targets": [
             {
-              "expr": "topk by (_id) (1, 0 * cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"}) +\non (_id) group_right(version) count by (_id) (cluster_operator_conditions{condition=\"Degraded\"} == 1 or cluster_operator_conditions{condition=\"Available\"} == 0)",
+              "expr": "topk by (_id) (1, 0 * cluster_version{type=\"current\"}) $source +\non (_id) group_right(version) count by (_id) (cluster_operator_conditions{condition=\"Degraded\"} == 1 or cluster_operator_conditions{condition=\"Available\"} == 0)",
               "format": "table",
               "instant": true,
               "intervalFactor": 1,
@@ -1353,7 +1026,7 @@ data:
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Degraded Operators (4.y.z)",
+          "title": "Degraded Operators",
           "transform": "table",
           "type": "table"
         },
@@ -1463,7 +1136,7 @@ data:
           ],
           "targets": [
             {
-              "expr": "max by (_id,from_version,version) (time() - cluster_version{type=\"updating\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"}) >= 3 * 60 * 60",
+              "expr": "max by (_id,from_version,version) ((time() - cluster_version{type=\"updating\"}) $source) >= 3 * 60 * 60",
               "format": "table",
               "instant": true,
               "intervalFactor": 1,
@@ -1473,7 +1146,7 @@ data:
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Stuck Updates (4.y.z, >3h)",
+          "title": "Stuck Updates (>3h)",
           "transform": "table",
           "type": "table"
         },
@@ -1567,7 +1240,7 @@ data:
           ],
           "targets": [
             {
-              "expr": "max by (_id,version) ((time() - cluster_version{type=\"failure\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) > 3 * 60 * 60",
+              "expr": "max by (_id,version) ((time() - cluster_version{type=\"failure\"}) $source) > 3 * 60 * 60",
               "format": "table",
               "instant": true,
               "intervalFactor": 1,
@@ -1577,7 +1250,7 @@ data:
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Clusters Failing (4.y.z)",
+          "title": "Clusters Failing",
           "transform": "table",
           "type": "table"
         },
@@ -1671,7 +1344,7 @@ data:
           ],
           "targets": [
             {
-              "expr": "sort_desc(max by (_id,code) (code:apiserver_request_count:rate:sum{code=~\"(4|5)\\\\d\\\\d\"}) > 0.5) + on (_id) group_left(version) (0 * max by (_id,version) (cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"}))",
+              "expr": "sort_desc(max by (_id,code) (code:apiserver_request_count:rate:sum{code=~\"(4|5)\\\\d\\\\d\"} $source) > 0.5)",
               "format": "table",
               "instant": true,
               "intervalFactor": 1,
@@ -1681,7 +1354,7 @@ data:
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "High API Error Rates (4.y.z)",
+          "title": "High API Error Rates",
           "transform": "table",
           "type": "table"
         },
@@ -1759,24 +1432,17 @@ data:
           ],
           "targets": [
             {
-              "expr": "count by (_id,version,alertname) (alerts{alertstate=\"firing\",alertname!=\"Watchdog\"} + on (_id) group_left(version) ( 0 * max by (_id,version) (cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"} )))",
+              "expr": "count by (_id,alertname) (alerts{alertstate=\"firing\",alertname!=\"Watchdog\"} $source)",
               "format": "table",
               "instant": true,
               "intervalFactor": 1,
               "legendFormat": "",
               "refId": "A"
-            },
-            {
-              "expr": "",
-              "format": "table",
-              "intervalFactor": 1,
-              "legendFormat": "",
-              "refId": "B"
             }
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Firing Alerts (4.y.z)",
+          "title": "Firing Alerts",
           "transform": "table",
           "type": "table"
         },
@@ -1870,7 +1536,7 @@ data:
           ],
           "targets": [
             {
-              "expr": "max by (_id,version) (time() - max by (_id,version) (cluster_version{type=\"updating\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) < 3 * 60 * 60",
+              "expr": "max by (_id,version) (time() - max by (_id,version) (cluster_version{type=\"updating\"} $source)) < 3 * 60 * 60",
               "format": "table",
               "instant": true,
               "intervalFactor": 1,
@@ -1880,7 +1546,7 @@ data:
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "In-progress Installs (4.y.z, <3h)",
+          "title": "In-progress Installs (<3h)",
           "transform": "table",
           "type": "table"
         },
@@ -1943,7 +1609,7 @@ data:
           ],
           "targets": [
             {
-              "expr": "count by (_id,version) (max by (_id,node,instance) (alerts{alertstate=\"firing\",alertname=\"KubeNodeNotReady\"}) + on (_id) group_left(version) ( 0 * max by (_id,version) (cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"} )))",
+              "expr": "count by (_id) (max by (_id,node,instance) (alerts{alertstate=\"firing\",alertname=\"KubeNodeNotReady\"} $source))",
               "format": "table",
               "instant": true,
               "intervalFactor": 1,
@@ -1953,7 +1619,7 @@ data:
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Down Nodes (4.y.z)",
+          "title": "Down Nodes",
           "transform": "table",
           "type": "table"
         }
@@ -1988,6 +1654,49 @@ data:
             "regex": "",
             "skipUrlSync": false,
             "type": "datasource"
+          },
+          {
+            "allValue": null,
+            "current": {
+              "tags": [],
+              "text": "+ 0",
+              "value": "+ 0"
+            },
+            "hide": 0,
+            "includeAll": false,
+            "label": null,
+            "multi": false,
+            "name": "source",
+            "options": [
+              {
+                "selected": true,
+                "text": "+ 0",
+                "value": "+ 0"
+              },
+              {
+                "selected": false,
+                "text": "+ on (_id) group_left(_blah) (topk by (_id) (1, cluster_version{version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"}))",
+                "value": "+ on (_id) group_left(_blah) (topk by (_id) (1, cluster_version{version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"}))"
+              },
+              {
+                "selected": false,
+                "text": "+ on (_id) group_left(_blah) (topk by (_id) (1, subscription_labels{email_domain!=\"redhat.com\"}))",
+                "value": "+ on (_id) group_left(_blah) (topk by (_id) (1, subscription_labels{email_domain!=\"redhat.com\"}))"
+              },
+              {
+                "selected": false,
+                "text": "+ on (_id) group_left(_blah) (topk by (_id) (1, subscription_labels{support=~\"Premium|Standard\",email_domain!=\"redhat.com\"}))",
+                "value": "+ on (_id) group_left(_blah) (topk by (_id) (1, subscription_labels{support=~\"Premium|Standard\",email_domain!=\"redhat.com\"}))"
+              },
+              {
+                "selected": false,
+                "text": "+ on (_id) group_left(_blah) (topk by (_id) (1, cluster_version{version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) + on (_id) group_left(_blah) (topk by (_id) (1, subscription_labels{email_domain!=\"redhat.com\"}))",
+                "value": "+ on (_id) group_left(_blah) (topk by (_id) (1, cluster_version{version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) + on (_id) group_left(_blah) (topk by (_id) (1, subscription_labels{email_domain!=\"redhat.com\"}))"
+              }
+            ],
+            "query": "+ 0, + on (_id) group_left(_blah) (topk by (_id) (1\\, cluster_version{version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})), + on (_id) group_left(_blah) (topk by (_id) (1\\, subscription_labels{email_domain!=\"redhat.com\"})), + on (_id) group_left(_blah) (topk by (_id) (1\\, subscription_labels{support=~\"Premium|Standard\"\\,email_domain!=\"redhat.com\"})),  + on (_id) group_left(_blah) (topk by (_id) (1\\, cluster_version{version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) + on (_id) group_left(_blah) (topk by (_id) (1\\, subscription_labels{email_domain!=\"redhat.com\"}))",
+            "skipUrlSync": false,
+            "type": "custom"
           }
         ]
       },
