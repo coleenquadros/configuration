@@ -32,20 +32,22 @@ Access to stg/prod hive cluster (for access to Kibana and potentiall oc CLI acce
    ```
 
 #### Troubleshooting using logs
-Hive stores the installer log entries from the previous run in a config map in the namespace. 
+Hive stores the non-debug installer log entries in `clusterprovision` objects in the same namespace as the cluster deployment.
 
-1. Get a list of install logs:
+1. Get a list of `clusterprovision` objects:
    ```
-   oc get configmap -n $NAMESPACE | grep install-log
+   oc get clusterprovision -n $NAMESPACE
    ```
-1. Set a variable for the name of the configmap:
+1. Hive keeps around the first attempted cluster provision object (`*-0-*`) as well as the most recent 3 cluster provision objects.
+   Choose which attempt you'd like to look at the logs and set a variable. This example uses the first attempted cluster provision object.
    ```
-   export ILCM=clstr-24jul-c52x-install-log
+   export CLSTRPROV=sreusr-clstr-0-bkhnd
    ```
-1. View the installer log data:
+1. View the installer log data
    ```
-   oc get configmap -n $NAMESPACE -o json $ILCM | jq -r .data.log
+   oc get clusterprovision -n $NAMESPACE -o json $CLSTRPROV | jq -r '.spec.installLog'
    ```
+1. If the output for that command is `null`, this means that the `installLog` part of the spec was not filled out for some reason.
 
 #### Troubleshoot using pod status
 1. Look at the pods in the namespace to see what STATUS they have:
@@ -82,3 +84,32 @@ Hive stores the installer log entries from the previous run in a config map in t
    ```
 1. The output from ClusterDeployment Conditions can say a lot about the cluster.
 1. TODO: Add specific conditions from alerts that are firing and state how to troubleshoot them.
+
+#### Determined That it's Not a Hive issue
+As described in the [Hive SLA document](https://docs.google.com/document/d/1_kAbsz28XpVzzkya1XsSnuAH-dF4vj7MonMotp1pwhQ/edit#heading=h.hklz0i1jef0m), the Hive team's responsibility is to ensure that Hive is correctly launching the installer.
+
+This means that if the Hive cop has determined that the installer failed in a way that is unrelated to Hive, then the Hive cop is not responsible to investigate further.
+
+Instead, as a courtesy, we should e-mail the owner of the cluster to notify them to the fact that their cluster is alerting.
+
+Example e-mail (manually substitute the variables):
+```
+To: $USER
+CC: dgoodwin@redhat.com
+Subject: Cluster $CLUSTER failing to provision...
+Body:
+Hey $USER,
+   Just letting you know that your cluster "$CLUSTER" in namespace "$NAMESPACE"  is failing to provision in ocm / hive $ENVIRONMENT. This is alerting on the Hive alert slack channel "team-hive-alert" (which is why I'm e-mailing you). 
+
+Your cluster is failing to provision and as far as I can tell it's not Hive related. In other words, it seems that Hive is correctly launching the installer.
+
+The installer (non-debug) log is:
+"$INSTALLER_FAILURE_LOG"
+
+For failures, Hive attempts to gather the full installer logs. If available, you can access them by following the instructions here:
+
+https://github.com/openshift/hive/blob/master/docs/troubleshooting.md#cluster-install-failure-logs
+
+Thanks,
+Hive Cop
+```
