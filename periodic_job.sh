@@ -39,12 +39,16 @@ run_int() {
   return 0
 }
 
+APP_INTERFACE_PROJECT_ID=13582
+HOUSEKEEPING_PROJECT_ID=4713
+
 run_int slack-usergroups &
-run_int github-users &
+run_int github-users $APP_INTERFACE_PROJECT_ID &
 run_int github-repo-invites &
-run_int gitlab-housekeeping &
+run_int gitlab-housekeeping $APP_INTERFACE_PROJECT_ID &
+run_int gitlab-housekeeping $HOUSEKEEPING_PROJECT_ID &
 run_int gitlab-permissions &
-run_int ldap-users &
+run_int ldap-users $APP_INTERFACE_PROJECT_ID &
 run_int aws-garbage-collector &
 
 wait
