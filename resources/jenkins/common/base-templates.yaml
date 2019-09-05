@@ -53,7 +53,6 @@
 
     build_master_builder: &build_master_builder
         ssh_ci_ext: ''
-        ssh_ci_ext_cmd: ''
         saas_env: 'staging'
         builders:
         - shell: |
@@ -67,7 +66,7 @@
 
                 git clone --depth 1 {saas_git} saas.git
 
-                [ -n "{ssh_ci_ext}" ] && SSH_CMD={ssh_ci_ext_cmd} || SSH_CMD=""
+                [ -n "{ssh_ci_ext}" ] && SSH_CMD="{ssh_ci_ext_cmd}" || SSH_CMD=""
 
                 #Deploy preview
                 SAAS_ENV={saas_env}
@@ -129,7 +128,6 @@
     saasherder: &saasherder
         kube_namespace: "error_no_ns"
         ssh_ci_ext: ''
-        ssh_ci_ext_cmd: ''
         saas_env: 'production'
         repo_url: ''
         builders:
@@ -155,7 +153,7 @@
             {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" template --filter {saasherder_object_blacklist} --output-dir "$PROCESSED_DIR" --local tag
             {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" label --output-dir "$PROCESSED_DIR" --saas-repo-url {repo_url} > label_selectors
 
-            [ -n "{ssh_ci_ext}" ] && SSH_CMD={ssh_ci_ext_cmd} || SSH_CMD=""
+            [ -n "{ssh_ci_ext}" ] && SSH_CMD="{ssh_ci_ext_cmd}" || SSH_CMD=""
 
             find $PROCESSED_DIR -type f | while read f; do
                 cat $f | $SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" -n {kube_namespace} apply --dry-run --validate -f -
