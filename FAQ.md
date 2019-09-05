@@ -7,8 +7,9 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
 ## ToC
 
 - [How can I get access to X](#how-can-i-get-access-to-x)
-- [Jenkins is going to shut down](#jenkins-is-going-to-shutdown)
 - [I can not access ci-ext](#i-can-not-access-ci-ext)
+- [Jenkins is going to shut down](#jenkins-is-going-to-shutdown)
+- [How can I make my PR check job run concurrently](#how-can-i-make-my-pr-check-job-run-concurrently)
 - [How can I see who has access to a service](#how-can-i-see-who-has-access-to-a-service)
 - [How to determine my AWS permissions](#how-to-determine-my-aws-permissions)
 
@@ -53,6 +54,12 @@ Reason:
 Jenkins is configured to perform a [Thin backup](https://plugins.jenkins.io/thinBackup) periodically. It is recommended to perform the backup when no jobs are running. Jenkins will not schedule jobs during the waiting period (waiting for all running jobs to complete). No manual intervention is required, this is expected.
 
 If a job is pending and need to be rushed, contact the App SRE team for assitance (canceling the current restart will get pending jobs to run, but will not cancel the backup).
+
+
+### How can I make my PR check job run concurrently
+
+Add `concurrent_build: true` to your job definition. [example](/data/services/uhc/cicd/ci-int/jobs.yaml#L143)
+
 
 ### How can I see who has access to a service
 
