@@ -50,3 +50,144 @@
             url: 'https://github.com/{gh_org}/{gh_repo}.git'
             branches:
                 - '{branch}'
+
+    build_master_builder: &build_master_builder
+        ssh_ci_ext: ''
+        ssh_ci_ext_cmd: ''
+        saas_env: 'staging'
+        builders:
+        - shell: |
+            #!/bin/bash
+            set -e
+
+            {build_deploy_script_path}
+
+            if [[ ! -z "{kube_cluster}" && ! -z "{saasherder_context}" && \
+                ! -z "{saas_git}" && ! -z "{saasherder_services}" ]]; then
+
+                git clone --depth 1 {saas_git} saas.git
+
+                [ -n "{ssh_ci_ext}" ] && SSH_CMD={ssh_ci_ext_cmd} || SSH_CMD=""
+
+                #Deploy preview
+                SAAS_ENV={saas_env}
+                cd saas.git
+                for service in {saasherder_services}; do
+                    {saasherder_docker} --context "{saasherder_context}" --environment $SAAS_ENV update hash ${{service}} $GIT_COMMIT
+                    {saasherder_docker} --context "{saasherder_context}" --environment $SAAS_ENV pull ${{service}}
+                    {saasherder_docker} --context "{saasherder_context}" --environment $SAAS_ENV template --filter {saasherder_object_blacklist} --output-dir {saasherder_context}-processed --local tag ${{service}}
+                    {saasherder_docker} --context "{saasherder_context}" --environment $SAAS_ENV label --output-dir {saasherder_context}-processed --saas-repo-url {saas_git} ${{service}} > label_selector
+
+                    cat {saasherder_context}-processed/${{service}}.yaml | $SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" apply -f - -n {kube_namespace} --dry-run --validate
+                    cat {saasherder_context}-processed/${{service}}.yaml | $SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" apply -f - -n {kube_namespace}
+
+                    label_selector=$(cat label_selector)
+                    resources_to_delete=$($SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" get {saasherder_object_whitelist} -o name -l "$label_selector" -n {kube_namespace})
+
+                    for r in $resources_to_delete; do
+                        echo DRY-RUN oc delete $r -n {kube_namespace}
+                    done
+                done
+                cd ..
+            fi
+
+    gh_build_master: &gh_build_master
+        kube_cluster: ""
+        kube_namespace: "error_no_ns"
+        saasherder_context: ""
+        saasherder_services: ""
+        saas_git: ""
+        build_deploy_script_path: "./build_deploy.sh"
+        triggers:
+        - github
+        wrappers:
+        - timeout_wrapper:
+            timeout: '{timeout}'
+        <<: *gh_checkout
+        <<: *build_master_builder
+
+    # Defines the saasherder shell build script that implements CD
+    #
+    # Arguments:
+    #
+    # saasherder_context:
+    #    The name of the context in the saasherder repo, as defined in the
+    #    config.yaml file.
+    # dry_run:
+    #   If `yes` => it will not perform the deployment.
+    # image_pattern:
+    #   Enforce that the images reference by the deployment files
+    #   match this regexp. Example: '^quay\.io/app-sre/'. If empty, any image url
+    #   will be valid.
+    # kube_namespace:
+    #   Namespace to deploy to.
+    #
+    # Additionally, any job or job-template that includes this definition must
+    # define secrets which export:
+    # - KUBE_SERVER
+    # - KUBE_TOKEN
+    saasherder: &saasherder
+        kube_namespace: "error_no_ns"
+        ssh_ci_ext: ''
+        ssh_ci_ext_cmd: ''
+        saas_env: 'production'
+        repo_url: ''
+        builders:
+        - shell: |
+            #!/bin/bash
+            set -e
+
+            # Ensure $KUBE_SERVER and $KUBE_TOKEN are defined
+            if [[ -z "$KUBE_SERVER" || -z "$KUBE_TOKEN" ]]; then
+                echo 'Missing secret that defines $KUBE_SERVER and $KUBE_TOKEN'
+                exit 1
+            fi
+
+            if [[ -z "{saasherder_context}" ]]; then
+                echo '{{saasherder_context}} not defined'
+                exit 1
+            fi
+
+            SAAS_ENV={saas_env}
+            PROCESSED_DIR="{saasherder_context}-processed"
+
+            {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" pull
+            {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" template --filter {saasherder_object_blacklist} --output-dir "$PROCESSED_DIR" --local tag
+            {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" label --output-dir "$PROCESSED_DIR" --saas-repo-url {repo_url} > label_selectors
+
+            [ -n "{ssh_ci_ext}" ] && SSH_CMD={ssh_ci_ext_cmd} || SSH_CMD=""
+
+            find $PROCESSED_DIR -type f | while read f; do
+                cat $f | $SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" -n {kube_namespace} apply --dry-run --validate -f -
+
+                {saasherder_check_image} $f '{image_pattern}'
+
+                if [ "{dry_run}" != "yes" ]; then
+                    cat $f | $SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" -n {kube_namespace} apply -f -
+                fi
+            done
+
+            if [[ "{dry_run}" == "yes" ]]; then
+                exit
+            fi
+
+            while IFS= read -r label_selector; do
+                resources_to_delete=$($SSH_CMD oc --server="$KUBE_SERVER --token="$KUBE_TOKEN" get {saasherder_object_whitelist} -o name -l "$label_selector" -n {kube_namespace})
+
+                for r in $resources_to_delete; do
+                    echo DRY-RUN oc delete $r -n {kube_namespace}
+                done
+            done < label_selectors
+
+    gh_timed: &gh_timed
+        ci_cmd: ./run.sh
+        wrappers:
+        - timeout_wrapper:
+            timeout: '{timeout}'
+        builders:
+        - shell: |
+            {ci_cmd}
+        triggers:
+        - timed: |
+            {cron_expression}
+        <<: *gh_checkout

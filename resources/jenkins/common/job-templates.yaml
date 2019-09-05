@@ -28,6 +28,7 @@
         secrets:
         - *kube_config
         - *quay_secret_push
+    <<: *gh_triggers
     <<: *gh_build_master
 
 # Variation of the above job that includes the push token to publish image to
@@ -45,6 +46,7 @@
         - *kube_config
         - *quay_secret_push
         - *app_sre_bot_push_token
+    <<: *gh_triggers
     <<: *gh_build_master
 
 - job-template:
@@ -55,3 +57,25 @@
         timeout: '{timeout}'
     - ansicolor
     <<: *gh_pr_check
+
+- job-template:
+    id: gh-build-master-with-upstream
+    name: '{gh_org}-{gh_repo}-gh-build-{branch}-upstream-{upstream}'
+    upstream: ''
+    branch: master
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *kube_config
+        - *quay_secret_push
+        - *app_sre_bot_push_token
+    triggers:
+    - reverse:
+        jobs: '{upstream}'
+        results: 'success'
+    <<: *gh_triggers
+    <<: *gh_build_master

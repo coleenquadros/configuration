@@ -17,49 +17,6 @@
             branches:
             - '{branch}'
 
-    build_master_builder: &build_master_builder
-        ssh_ci_ext: ''
-        saas_env: 'staging'
-        builders:
-        - shell: |
-            #!/bin/bash
-            set -e
-
-            {build_deploy_script_path}
-
-            if [[ ! -z "{kube_cluster}" && ! -z "{saasherder_context}" && \
-                ! -z "{saas_git}" && ! -z "{saasherder_services}" ]]; then
-
-                export REQUESTS_CA_BUNDLE=/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
-                git clone --depth 1 {saas_git} saas.git
-
-                #Deploy preview
-                SAAS_ENV={saas_env}
-                cd saas.git
-                for service in {saasherder_services}; do
-                    {saasherder_docker} --context "{saasherder_context}" --environment $SAAS_ENV update hash ${{service}} $GIT_COMMIT
-                    {saasherder_docker} --context "{saasherder_context}" --environment $SAAS_ENV pull ${{service}}
-                    {saasherder_docker} --context "{saasherder_context}" --environment $SAAS_ENV template --filter {saasherder_object_blacklist} --output-dir {saasherder_context}-processed --local tag ${{service}}
-                    {saasherder_docker} --context "{saasherder_context}" --environment $SAAS_ENV label --output-dir {saasherder_context}-processed --saas-repo-url {saas_git} ${{service}} > label_selector
-
-                    label_selector=$(cat label_selector)
-                    if [ -n "{ssh_ci_ext}" ]; then
-                        cat {saasherder_context}-processed/${{service}}.yaml | {ssh_ci_ext_cmd} oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" apply -f - -n {kube_namespace} --dry-run --validate
-                        cat {saasherder_context}-processed/${{service}}.yaml | {ssh_ci_ext_cmd} oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" apply -f - -n {kube_namespace}
-                        resources_to_delete=$({ssh_ci_ext_cmd} oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" get {saasherder_object_whitelist} -o name -l "$label_selector" -n {kube_namespace})
-                    else
-                        oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" apply -f {saasherder_context}-processed/${{service}}.yaml -n {kube_namespace} --dry-run --validate
-                        oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" apply -f {saasherder_context}-processed/${{service}}.yaml -n {kube_namespace}
-                        resources_to_delete=$(oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" get {saasherder_object_whitelist} -o name -l "$label_selector" -n {kube_namespace})
-                    fi
-
-                    for r in $resources_to_delete; do
-                        echo DRY-RUN oc delete $r
-                    done
-                done
-                cd ..
-            fi
-
     gl_build_master_template: &gl_build_master_template
         kube_cluster: ""
         kube_namespace: "error_no_ns"
@@ -88,22 +45,11 @@
         <<: *gl_checkout
         <<: *build_master_builder
 
-    gh_build_master: &gh_build_master
+    gh_triggers: &gh_triggers
         pollscm_cron: "* * * * *"
-        kube_cluster: ""
-        kube_namespace: "error_no_ns"
-        saasherder_context: ""
-        saasherder_services: ""
-        saas_git: ""
-        build_deploy_script_path: "./build_deploy.sh"
         triggers:
         - pollscm:
             cron: '{pollscm_cron}'
-        wrappers:
-        - timeout_wrapper:
-            timeout: '{timeout}'
-        <<: *gh_checkout
-        <<: *build_master_builder
 
     gl_pr_check_template: &gl_pr_check_template
         node: '{node}'
@@ -183,84 +129,6 @@
             timeout: '{timeout}'
         <<: *gl_checkout
 
-    # Defines the saasherder shell build script that implements CD
-    #
-    # Arguments:
-    #
-    # saasherder_context:
-    #    The name of the context in the saasherder repo, as defined in the
-    #    config.yaml file.
-    # dry_run:
-    #   If `yes` => it will not perform the deployment.
-    # image_pattern:
-    #   Enforce that the images reference by the deployment files
-    #   match this regexp. Example: '^quay\.io/app-sre/'. If empty, any image url
-    #   will be valid.
-    # kube_namespace:
-    #   Namespace to deploy to.
-    #
-    # Additionally, any job or job-template that includes this definition must
-    # define secrets which export:
-    # - KUBE_SERVER
-    # - KUBE_TOKEN
-    saasherder: &saasherder
-        kube_namespace: "error_no_ns"
-        ssh_ci_ext: ''
-        saas_env: 'production'
-        builders:
-        - shell: |
-            #!/bin/bash
-            set -e
-
-            # Ensure $KUBE_SERVER and $KUBE_TOKEN are defined
-            if [[ -z "$KUBE_SERVER" || -z "$KUBE_TOKEN" ]]; then
-                echo 'Missing secret that defines $KUBE_SERVER and $KUBE_TOKEN'
-                exit 1
-            fi
-
-            if [[ -z "{saasherder_context}" ]]; then
-                echo '{{saasherder_context}} not defined'
-                exit 1
-            fi
-
-            export REQUESTS_CA_BUNDLE=/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
-
-            SAAS_ENV={saas_env}
-            PROCESSED_DIR="{saasherder_context}-processed"
-
-            {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" pull
-            {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" template --filter {saasherder_object_blacklist} --output-dir "$PROCESSED_DIR" --local tag
-            {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" label --output-dir "$PROCESSED_DIR" --saas-repo-url https://gitlab.cee.redhat.com/{gl_group}/{gl_project}.git > label_selectors
-
-            find $PROCESSED_DIR -type f | while read f; do
-                if [ -n "{ssh_ci_ext}" ]; then
-                    cat $f | {ssh_ci_ext_cmd} oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" -n {kube_namespace} apply --dry-run --validate -f -
-                else
-                    oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" -n {kube_namespace} apply --dry-run --validate -f $f
-                fi
-
-                {saasherder_check_image} $f '{image_pattern}'
-
-                if [ "{dry_run}" != "yes" ]; then
-                    if [ -n "{ssh_ci_ext}" ]; then
-                        cat $f | {ssh_ci_ext_cmd} oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" -n {kube_namespace} apply -f -
-                    else
-                        oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" -n {kube_namespace} apply -f $f
-                    fi
-                fi
-            done
-
-            while IFS= read -r label_selector; do
-                if [ -n "{ssh_ci_ext}" ]; then
-                    resources_to_delete=$({ssh_ci_ext_cmd} oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" get {saasherder_object_whitelist} -o name -l "$label_selector" -n {kube_namespace})
-                else
-                    resources_to_delete=$(oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" get {saasherder_object_whitelist} -o name -l "$label_selector" -n {kube_namespace})
-                fi
-                for r in $resources_to_delete; do
-                    echo DRY-RUN oc delete $r
-                done
-            done < label_selectors
-
 # Runs build_deploy.sh and deploys to staging
 #
 # vars required in the job definition:
@@ -322,27 +190,6 @@
         results: 'success'
     <<: *gl_build_master_template
 
-- job-template:
-    id: gh-build-master-with-upstream
-    name: '{gh_org}-{gh_repo}-gh-build-{branch}-upstream-{upstream}'
-    upstream: ''
-    branch: master
-    wrappers:
-    - timeout_wrapper:
-        timeout: '{timeout}'
-    - ansicolor
-    - vault-secrets:
-        <<: *vault_defaults
-        secrets:
-        - *kube_config
-        - *quay_secret_push
-        - *app_sre_bot_push_token
-    triggers:
-    - reverse:
-        jobs: '{upstream}'
-        results: 'success'
-    <<: *gh_build_master
-
 # Deploys all the services defined in the saas repo
 #
 # vars required in the job definition:
@@ -360,6 +207,7 @@
     id: 'saas-deploy'
     name: '{gl_group}-{gl_project}-{saasherder_context}-saas-deploy'
     dry_run: "no"
+    repo_url: 'https://gitlab.cee.redhat.com/{gl_group}/{gl_project}'
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'
@@ -389,6 +237,7 @@
     id: 'saas-pr-check'
     name: '{gl_group}-{gl_project}-{saasherder_context}-saas-pr-check'
     dry_run: "yes"
+    repo_url: 'https://gitlab.cee.redhat.com/{gl_group}/{gl_project}'
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'
