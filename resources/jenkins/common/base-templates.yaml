@@ -66,7 +66,7 @@
 
                 git clone --depth 1 {saas_git} saas.git
 
-                [ -n "{ssh_ci_ext}" ] && SSH_CMD="{ssh_ci_ext_cmd}" || SSH_CMD=""
+                if [ -n "{ssh_ci_ext}" ]; then SSH_CMD="{ssh_ci_ext_cmd}"; else SSH_CMD=""; fi
 
                 #Deploy preview
                 SAAS_ENV={saas_env}
@@ -151,7 +151,7 @@
             {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" template --filter {saasherder_object_blacklist} --output-dir "$PROCESSED_DIR" --local tag
             {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" label --output-dir "$PROCESSED_DIR" --saas-repo-url {repo_url} > label_selectors
 
-            [ -n "{ssh_ci_ext}" ] && SSH_CMD="{ssh_ci_ext_cmd}" || SSH_CMD=""
+            if [ -n "{ssh_ci_ext}" ]; then SSH_CMD="{ssh_ci_ext_cmd}"; else SSH_CMD=""; fi
 
             find $PROCESSED_DIR -type f | while read f; do
                 cat $f | $SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" -n {kube_namespace} apply --dry-run --validate -f -
@@ -163,9 +163,7 @@
                 fi
             done
 
-            if [[ "{dry_run}" == "yes" ]]; then
-                exit
-            fi
+            if [[ "{dry_run}" == "yes" ]]; then exit; fi
 
             while IFS= read -r label_selector; do
                 resources_to_delete=$($SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" get {saasherder_object_whitelist} -o name -l "$label_selector" -n {kube_namespace})
