@@ -15,3 +15,24 @@
     timeout: 30
     concurrent_build: false
     ssh_ci_ext_cmd: ''
+
+# these base templates are required for common base templates
+# so we need them to be added first.
+# note: this is a workaround to avoid setting order on the same resource type
+- base_templates:
+    name: ci-ext-base-templates
+
+    gh_triggers: &gh_triggers
+        triggers:
+        - github
+
+    saasherder_create_pr: &saasherder_create_pr
+        shell: |
+            #!/bin/bash
+            set -e
+
+            SAAS_REPO_PATH="$(echo {saas_git} | sed -e 's/\.git//g' -e 's|https://github.com/||g')"
+            SOURCE_BRANCH="promote-$GIT_COMMIT"
+            curl -X POST -H "Authorization: token $APP_SRE_BOT_PUSH_TOKEN" \
+            --data '{{ "head": "'$SOURCE_BRANCH'", "base": "{branch}", "title": "'promote $GIT_COMMIT'", "maintainer_can_modify": true }}' \
+            https://api.github.com/repos/$SAAS_REPO_PATH/pulls

@@ -27,3 +27,26 @@
         failure-note-text: "Build failed, build url: ${BUILD_URL}"
         unstable-note: true
         unstable-note-text: "The build is unstable, build url: ${BUILD_URL}"
+
+# these base templates are required for common base templates
+# so we need them to be added first.
+# note: this is a workaround to avoid setting order on the same resource type
+- base_templates:
+    name: ci-int-github-base-templates
+
+    gh_triggers: &gh_triggers
+        pollscm_cron: "* * * * *"
+        triggers:
+        - pollscm:
+            cron: '{pollscm_cron}'
+
+    saasherder_create_pr: &saasherder_create_pr
+        shell: |
+            #!/bin/bash
+            set -e
+
+            SAAS_PROJECT_ID="$(echo {saas_git} | sed -e 's/\.git//g' -e 's|https://gitlab.cee.redhat.com/||g' -e 's|/|%2F|g')"
+            SOURCE_BRANCH="promote-$GIT_COMMIT"
+            curl -X POST -H "PRIVATE-TOKEN: $APP_SRE_BOT_PUSH_TOKEN" -H "Content-Type: application/json" \
+            --data '{{ "source_branch": "'$SOURCE_BRANCH'", "target_branch": "{branch}", "title": "'promote $GIT_COMMIT'", "remove_source_branch": true }}' \
+            https://gitlab.cee.redhat.com/api/v4/projects/$SAAS_PROJECT_ID/merge_requests

@@ -51,15 +51,14 @@
             branches:
                 - '{branch}'
 
-    build_master_builder: &build_master_builder
-        ssh_ci_ext: ''
-        saas_env: 'staging'
-        builders:
-        - shell: |
+    build_deploy: &build_deploy
+        shell: |
+            {build_deploy_script_path}
+
+    saasherder_apply: &saasherder_apply
+        shell: |
             #!/bin/bash
             set -e
-
-            {build_deploy_script_path}
 
             if [[ ! -z "{kube_cluster}" && ! -z "{saasherder_context}" && \
                 ! -z "{saas_git}" && ! -z "{saasherder_services}" ]]; then
@@ -89,6 +88,39 @@
                 done
                 cd ..
             fi
+
+    saasherder_promote: &saasherder_promote
+        shell: |
+            #!/bin/bash
+            set -e
+
+            if [ ! -n "{auto_promote}" ]; then exit; fi
+
+            BRANCH="promote-$GIT_COMMIT"
+            if [ "$(git ls-remote --heads {saas_git} $BRANCH | wc -l)" != "0" ]; then
+                echo remote branch promote-$GIT_COMMIT exists, exiting.
+                exit
+            fi
+
+            cd saas.git
+            git config --global user.email "$APP_SRE_BOT_EMAIL"
+            git config --global user.name "$APP_SRE_BOT_USER"
+            git checkout -b $BRANCH
+            git add {saasherder_context}-services
+            git commit -m "promote $GIT_COMMIT"
+            git remote add auth $(echo {saas_git} | sed "s|//|//$APP_SRE_BOT_USER:$APP_SRE_BOT_PUSH_TOKEN@|g")
+            git push auth $BRANCH
+            cd ..
+
+    build_master_builder: &build_master_builder
+        ssh_ci_ext: ''
+        auto_promote: ''
+        saas_env: 'staging'
+        builders:
+        - *build_deploy
+        - *saasherder_apply
+        - *saasherder_promote
+        - *saasherder_create_pr
 
     gh_build_master: &gh_build_master
         kube_cluster: ""
