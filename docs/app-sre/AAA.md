@@ -83,8 +83,8 @@ Every app-sre engineer should have access to the following
         * Keeps all our bits and bobs, Ansible, terraform, python, scripts etc
         * Issue tracker tracks incoming interrupt catching requests
     - https://gitlab.cee.redhat.com/app-sre
-        * Access to all repositories is managed via this group -> reach out to any team member to be added
-        * automation pending
+        * Access to all repositories is managed via this group
+        * Obtained via a [role](/data/teams/app-sre/roles/app-sre-gitlab-member.yml)
 
 * Slack: coreos.slack.com
     * Private channels: sd-app-sre-teamchat -> speak to any team member to get an invitation
@@ -101,8 +101,11 @@ Every app-sre engineer should have access to the following
     - SD-org calendar: https://calendar.google.com/calendar?cid=cmVkaGF0LmNvbV9hZzdoNG5kMnIydGlrM2dqZWxhaGRmbGhkOEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t
     - SD-org PTO / OOO: https://calendar.google.com/calendar?cid=cmVkaGF0LmNvbV8xN2piaHNtYmR2MTdhMTJhaHBvcDc5cWJ0a0Bncm91cC5jYWxlbmRhci5nb29nbGUuY29t
 
+* BlueJeans:
+    * Install bluejeans client
+    * App SRE bridge: https://bluejeans.com/994349364/8531
+
 - Invite to sprint kickoffs, coordination sessions
-- Install bluejeans client
 - Mailing lists:
     - Many people just use the web email client, other thunderbird.
     - Recommended to sort into folders
