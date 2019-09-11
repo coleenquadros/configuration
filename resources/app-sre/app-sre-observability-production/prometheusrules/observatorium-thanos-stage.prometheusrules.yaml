@@ -9,39 +9,55 @@ spec:
   groups:
   - name: thanos-querier.rules
     rules:
-    - alert: ThanosQuerierGrpcErrorRate
+    - alert: ThanosQuerierGrpcServerErrorRate
       annotations:
-        message: Thanos Querier is returning Internal/Unavailable errors.
+        message: Thanos Querier {{$labels.job}} is failing to handle {{ $value | humanize
+          }}% of requests.
       expr: |
         sum(
           rate(grpc_server_handled_total{grpc_code=~"Unknown|ResourceExhausted|Internal|Unavailable", job="thanos-querier", namespace="telemeter-stage"}[5m])
           /
           rate(grpc_server_started_total{job="thanos-querier", namespace="telemeter-stage"}[5m])
-        ) > 0.05
+        ) by (job) * 100 > 5
+      for: 5m
+      labels:
+        severity: medium
+        service: telemeter
+    - alert: ThanosQuerierGrpcClientErrorRate
+      annotations:
+        message: Thanos Querier {{$labels.job}} is failing to send {{ $value | humanize
+          }}% of requests.
+      expr: |
+        sum(
+          rate(grpc_client_handled_total{grpc_code!="OK", job="thanos-querier", namespace="telemeter-stage"}[5m])
+          /
+          rate(grpc_client_started_total{job="thanos-querier", namespace="telemeter-stage"}[5m])
+        ) by (job) * 100 > 5
       for: 5m
       labels:
         severity: medium
         service: telemeter
     - alert: ThanosQuerierHighDNSFailures
       annotations:
-        message: Thanos Queriers have {{ $value }} of failing DNS queries.
+        message: Thanos Queriers {{$labels.job}} have {{ $value }} of failing DNS
+          queries.
       expr: |
         sum(
           rate(thanos_querier_store_apis_dns_failures_total{job="thanos-querier", namespace="telemeter-stage"}[5m])
         /
           rate(thanos_querier_store_apis_dns_lookups_total{job="thanos-querier", namespace="telemeter-stage"}[5m])
-        ) > 1
+        ) by (job) > 1
       for: 15m
       labels:
         severity: medium
         service: telemeter
     - alert: ThanosQuerierInstantLatencyHigh
       annotations:
-        message: Thanos Querier has a 99th percentile latency of {{ $value }} seconds
-          for instant queries.
+        message: Thanos Querier {{$labels.job}} has a 99th percentile latency of {{
+          $value }} seconds for instant queries.
       expr: |
         histogram_quantile(0.99,
-          sum(thanos_query_api_instant_query_duration_seconds_bucket{job="thanos-querier", namespace="telemeter-stage"}) by (le)
+          sum(thanos_query_api_instant_query_duration_seconds_bucket{job="thanos-querier", namespace="telemeter-stage"}) by (job, le)
         ) > 10
       for: 10m
       labels:
@@ -49,11 +65,11 @@ spec:
         service: telemeter
     - alert: ThanosQuerierRangeLatencyHigh
       annotations:
-        message: Thanos Querier has a 99th percentile latency of {{ $value }} seconds
-          for instant queries.
+        message: Thanos Querier {{$labels.job}} has a 99th percentile latency of {{
+          $value }} seconds for instant queries.
       expr: |
         histogram_quantile(0.99,
-          sum(thanos_query_api_range_query_duration_seconds_bucket{job="thanos-querier", namespace="telemeter-stage"}) by (le)
+          sum(thanos_query_api_range_query_duration_seconds_bucket{job="thanos-querier", namespace="telemeter-stage"}) by (job, le)
         ) > 10
       for: 10m
       labels:
@@ -63,11 +79,11 @@ spec:
     rules:
     - alert: ThanosReceiveHttpRequestLatencyHigh
       annotations:
-        message: Thanos Receive has a 99th percentile latency of {{ $value }} seconds
-          for HTTP requests.
+        message: Thanos Receive {{$labels.job}} has a 99th percentile latency of {{
+          $value }} seconds for HTTP requests.
       expr: |
         histogram_quantile(0.99,
-          sum(thanos_http_request_duration_seconds_bucket{job="thanos-receive", namespace="telemeter-stage"}) by (le)
+          sum(thanos_http_request_duration_seconds_bucket{job="thanos-receive", namespace="telemeter-stage"}) by (job, le)
         ) > 10
       for: 10m
       labels:
@@ -75,27 +91,39 @@ spec:
         service: telemeter
     - alert: ThanosReceiveHighForwardRequestFailures
       annotations:
-        message: Thanos Receive has {{ $value }} of failing forward requests.
+        message: Thanos Receive {{$labels.job}} is failing to forward {{ $value |
+          humanize }}% of requests.
       expr: |
         sum(
           rate(thanos_receive_forward_requests_total{result="error", job="thanos-receive", namespace="telemeter-stage"}[5m])
         /
           rate(thanos_receive_forward_requests_total{job="thanos-receive", namespace="telemeter-stage"}[5m])
-        ) > 0.05
+        ) by (job) * 100 > 5
       for: 15m
       labels:
         severity: medium
         service: telemeter
     - alert: ThanosReceiveHighHashringFileRefreshFailures
       annotations:
-        message: Thanos Receive has {{ $value }} of failing hashring file refreshes.
+        message: Thanos Receive {{$labels.job}} is failing to refresh hashring file,
+          {{ $value | humanize }} of attempts failed.
       expr: |
         sum(
           rate(thanos_receive_hashrings_file_errors_total{job="thanos-receive", namespace="telemeter-stage"}[5m])
         /
           rate(thanos_receive_hashrings_file_refreshes_total{job="thanos-receive", namespace="telemeter-stage"}[5m])
-        ) > 0
+        ) by (job) > 0
       for: 15m
+      labels:
+        severity: medium
+        service: telemeter
+    - alert: ThanosReceiveConfigReloadFailure
+      annotations:
+        message: Thanos Receive {{$labels.job}} has not been able to reload hashring
+          configurations.
+      expr: avg(thanos_receive_config_last_reload_successful{job="thanos-receive",
+        namespace="telemeter-stage"}) by (job) != 1
+      for: 5m
       labels:
         severity: medium
         service: telemeter
@@ -103,24 +131,25 @@ spec:
     rules:
     - alert: ThanosStoreGrpcErrorRate
       annotations:
-        message: Thanos Store is returning Internal/Unavailable errors.
+        message: Thanos Store {{$labels.job}} is failing to handle {{ $value | humanize
+          }}% of requests.
       expr: |
         sum(
           rate(grpc_server_handled_total{grpc_code=~"Unknown|ResourceExhausted|Internal|Unavailable", job="thanos-store", namespace="telemeter-stage"}[5m])
           /
           rate(grpc_server_started_total{job="thanos-store", namespace="telemeter-stage"}[5m])
-        ) > 0.05
+        ) by (job) * 100 > 5
       for: 5m
       labels:
         severity: medium
         service: telemeter
     - alert: ThanosStoreSeriesGateLatencyHigh
       annotations:
-        message: Thanos Store has a 99th percentile latency of {{ $value }} seconds
-          for store series gate requests.
+        message: Thanos Store {{$labels.job}} has a 99th percentile latency of {{
+          $value }} seconds for store series gate requests.
       expr: |
         histogram_quantile(0.99,
-          sum(thanos_bucket_store_series_gate_duration_seconds_bucket{job="thanos-store", namespace="telemeter-stage"}) by (le)
+          sum(thanos_bucket_store_series_gate_duration_seconds_bucket{job="thanos-store", namespace="telemeter-stage"}) by (job, le)
         ) > 2
       for: 10m
       labels:
@@ -128,26 +157,87 @@ spec:
         service: telemeter
     - alert: ThanosStoreBucketHighOperationFailures
       annotations:
-        message: Thanos Store Bucket has {{ $value }} of failing operations.
+        message: Thanos Store {{$labels.job}} Bucket is failing to execute {{ $value
+          | humanize }}% of operations.
       expr: |
         sum(
           rate(thanos_objstore_bucket_operation_failures_total{job="thanos-store", namespace="telemeter-stage"}[5m])
         /
           rate(thanos_objstore_bucket_operations_total{job="thanos-store", namespace="telemeter-stage"}[5m])
-        ) > 0.05
+        ) by (job) * 100 > 5
       for: 15m
       labels:
         severity: medium
         service: telemeter
     - alert: ThanosStoreObjstoreOperationLatencyHigh
       annotations:
-        message: Thanos Store Bucket has a 99th percentile latency of {{ $value }}
-          seconds for bucket operations.
+        message: Thanos Store {{$labels.job}} Bucket has a 99th percentile latency
+          of {{ $value }} seconds for bucket operations.
       expr: |
         histogram_quantile(0.99,
-          sum(thanos_objstore_bucket_operation_duration_seconds_bucket{job="thanos-store", namespace="telemeter-stage"}) by (le)
+          sum(thanos_objstore_bucket_operation_duration_seconds_bucket{job="thanos-store", namespace="telemeter-stage"}) by (job, le)
         ) > 15
       for: 10m
+      labels:
+        severity: medium
+        service: telemeter
+  - name: thanos-receive-controller.rules
+    rules:
+    - alert: ThanosReceiveControllerReconcileErrorRate
+      annotations:
+        message: Thanos Receive Controller failing to reconcile changes, {{ $value
+          | humanize }}% of attempts failed.
+      expr: |
+        sum(
+          rate(thanos_receive_controller_reconcile_errors_total{job="thanos-receive-controller", namespace="telemeter-stage"}[5m])
+          /
+          on (namespace)
+          rate(thanos_receive_controller_reconcile_attempts_total{job="thanos-receive-controller", namespace="telemeter-stage"}[5m])
+        ) * 100 >= 10
+      for: 5m
+      labels:
+        severity: medium
+        service: telemeter
+    - alert: ThanosReceiveControllerConfigmapChangeErrorRate
+      annotations:
+        message: Thanos Receive Controller failing to refresh configmap, {{ $value
+          | humanize }}% of attempts failed.
+      expr: |
+        sum(
+          rate(thanos_receive_controller_configmap_change_errors_total{job="thanos-receive-controller", namespace="telemeter-stage"}[5m])
+          /
+          on (namespace)
+          rate(thanos_receive_controller_configmap_change_attempts_total{job="thanos-receive-controller", namespace="telemeter-stage"}[5m])
+        ) * 100 >= 10
+      for: 5m
+      labels:
+        severity: medium
+        service: telemeter
+    - alert: ThanosReceiveConfigStale
+      annotations:
+        message: The configuration of the instances of Thanos Receive are stale compare
+          to controller.
+      expr: |
+        avg(thanos_receive_config_last_reload_success_timestamp_seconds{job="thanos-receive", namespace="telemeter-stage"}) by (namespace, job)
+          <
+        on(namespace)
+        thanos_receive_controller_configmap_last_reload_success_timestamp_seconds{job="thanos-receive-controller", namespace="telemeter-stage"}
+      for: 5m
+      labels:
+        severity: medium
+        service: telemeter
+    - alert: ThanosReceiveConfigInconsistent
+      annotations:
+        message: The configuration of the instances of Thanos Receive `{{$labels.job}}`
+          are out of sync.
+      expr: |
+        avg(thanos_receive_config_hash{job="thanos-receive", namespace="telemeter-stage"}) BY (namespace, job)
+          /
+        on (namespace)
+        group_left
+        thanos_receive_controller_configmap_hash{job="thanos-receive-controller", namespace="telemeter-stage"}
+        != 1
+      for: 5m
       labels:
         severity: medium
         service: telemeter
