@@ -63,7 +63,8 @@
             if [[ ! -z "{kube_cluster}" && ! -z "{saasherder_context}" && \
                 ! -z "{saas_git}" && ! -z "{saasherder_services}" ]]; then
 
-                git clone --depth 1 {saas_git} saas.git
+                SAAS_GIT="$(echo {saas_git} | sed "s|//|//$APP_SRE_BOT_USER:$APP_SRE_BOT_PUSH_TOKEN@|g")"
+                git clone --depth 1 $SAAS_GIT saas.git
 
                 if [ -n "{ssh_ci_ext}" ]; then SSH_CMD="{ssh_ci_ext_cmd}"; else SSH_CMD=""; fi
 
@@ -113,9 +114,19 @@
             cd ..
 
     build_master_builder: &build_master_builder
+        kube_cluster: ''
+        kube_namespace: 'error_no_ns'
+        saasherder_context: ''
+        saasherder_services: ''
+        build_deploy_script_path: './build_deploy.sh'
         ssh_ci_ext: ''
         auto_promote: ''
+        saas_git: ''
+        saas_git_private: ''
         saas_env: 'staging'
+        wrappers:
+        - timeout_wrapper:
+            timeout: '{timeout}'
         builders:
         - *build_deploy
         - *saasherder_apply
@@ -123,15 +134,6 @@
         - *saasherder_create_pr
 
     gh_build_master: &gh_build_master
-        kube_cluster: ""
-        kube_namespace: "error_no_ns"
-        saasherder_context: ""
-        saasherder_services: ""
-        saas_git: ""
-        build_deploy_script_path: "./build_deploy.sh"
-        wrappers:
-        - timeout_wrapper:
-            timeout: '{timeout}'
         <<: *gh_checkout
         <<: *build_master_builder
 
