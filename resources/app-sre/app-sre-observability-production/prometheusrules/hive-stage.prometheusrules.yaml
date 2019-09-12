@@ -66,6 +66,28 @@ spec:
       labels:
         service: hive
         severity: high
+    - alert: LocalKubeClientRequestsHigh - prod
+      annotations:
+        message: "detected {{ $value }} {{ $labels.resource }} local API requests per second from controller {{ $labels.controller }}"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/hive/sop"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-production"
+      expr: |
+        rate(hive_kube_client_requests_total{job="hive-controllers-stage",remote="false"}[10m]) > 5
+      for: 1m
+      labels:
+        service: hive
+        severity: high
+    - alert: RemoteKubeClientRequestsHigh - prod
+      annotations:
+        message: "detected {{ $value }} {{ $labels.resource }} remote API requests per second from controller {{ $labels.controller }}"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/hive/sop"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-production"
+      expr: |
+        rate(hive_kube_client_requests_total{job="hive-controllers-stage",remote="true"}[10m]) > 2
+      for: 1m
+      labels:
+        service: hive
+        severity: high
     - alert: AWSAccountLimit - stage
       annotations:
         message: "AWS Account Operator is about to reach account limit"
@@ -97,7 +119,7 @@ spec:
       for: 15m
       labels:
         severity: high
-        service: srep      
+        service: srep
     - alert: CertmanOperator Target Down - stage
       annotations:
         message: "No targets found for Certman Operator on hive-stage"
@@ -119,7 +141,7 @@ spec:
       for: 15m
       labels:
         severity: high
-        service: srep      
+        service: srep
     - alert: PagerDutyOperator Target Down - stage
       annotations:
         message: "No targets found for PagerDuty Operator on hive-stage"
