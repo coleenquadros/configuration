@@ -189,7 +189,7 @@ data:
           "strokeWidth": 1,
           "targets": [
             {
-              "expr": "sort_desc(count by (email_domain) ((max by (_id, account, email_domain, organization, external_organization) (subscription_labels{email_domain!=\"redhat.com\"})) + on (_id) group_left (version) (0 * max by (_id,version) (cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"}))))",
+              "expr": "sort_desc(count by (email_domain) ((max by (_id, account, email_domain, organization, external_organization) (subscription_labels{email_domain!=\"redhat.com\"})) + on (_id) group_left (version) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"}))))",
               "format": "time_series",
               "instant": true,
               "interval": "",
@@ -515,7 +515,7 @@ data:
           "tableColumn": "Value",
           "targets": [
             {
-              "expr": "count((max by (_id, account, email_domain, organization, external_organization) (subscription_labels{email_domain!=\"redhat.com\"})) + on (_id) group_left (version) (0 * max by (_id,version) (cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})))",
+              "expr": "count((max by (_id, account, email_domain, organization, external_organization) (subscription_labels{email_domain!=\"redhat.com\"})) + on (_id) group_left (version) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})))",
               "format": "table",
               "instant": true,
               "interval": "",
@@ -749,7 +749,7 @@ data:
               "expr": "count by (version) (\n   ((time() - topk by (_id) (1,cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"}))) +\n   on (_id) group_right (version) (0 * count by (_id) (subscription_labels{email_domain!=\"redhat.com\"}))\n)",
               "format": "time_series",
               "instant": false,
-              "interval": "1h",
+              "interval": "4h",
               "intervalFactor": 1,
               "legendFormat": "{{version}}",
               "refId": "A"
@@ -906,10 +906,10 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "count by (version) (\n   ((time() - topk by (_id) (1,cluster_version{type=\"cluster\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"}) < 1 * 60 * 60)) +\n   on (_id) group_right (version) (0 * count by (_id) (subscription_labels{email_domain!=\"redhat.com\"}))\n)",
+              "expr": "count by (version) (\n   ((time() - topk by (_id) (1,cluster_version{type=\"cluster\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"}) < 4 * 60 * 60)) +\n   on (_id) group_right (version) (0 * count by (_id) (subscription_labels{email_domain!=\"redhat.com\"}))\n)",
               "format": "time_series",
               "instant": false,
-              "interval": "1h",
+              "interval": "4h",
               "intervalFactor": 1,
               "legendFormat": "{{version}}",
               "refId": "A"
@@ -919,7 +919,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "New clusters by hour (4.y.z, non-RH)",
+          "title": "New clusters every 4h (4.y.z, non-RH)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -1000,7 +1000,7 @@ data:
               "format": "time_series",
               "instant": false,
               "interval": "",
-              "intervalFactor": 1,
+              "intervalFactor": 10,
               "legendFormat": "",
               "refId": "A"
             }
@@ -1086,10 +1086,10 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "count by (version) (\n   ((time() - topk by (_id) (1,cluster_version{type=\"updating\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"}) < 1 * 60 * 60)) +\n   on (_id) group_right (version) (0 * count by (_id) (subscription_labels{email_domain!=\"redhat.com\"}))\n)",
+              "expr": "count by (version) (\n   ((time() - topk by (_id) (1,cluster_version{type=\"updating\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"}) < 4 * 60 * 60)) +\n   on (_id) group_right (version) (0 * count by (_id) (subscription_labels{email_domain!=\"redhat.com\"}))\n)",
               "format": "time_series",
               "instant": false,
-              "interval": "1h",
+              "interval": "4h",
               "intervalFactor": 1,
               "legendFormat": "{{version}}",
               "refId": "A"
@@ -1099,7 +1099,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Upgrades by hour (4.y.z, non-RH)",
+          "title": "Upgrades every 4h (4.y.z, non-RH)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -1181,7 +1181,7 @@ data:
               "hide": false,
               "instant": false,
               "interval": "",
-              "intervalFactor": 1,
+              "intervalFactor": 10,
               "legendFormat": "",
               "refId": "A"
             }
