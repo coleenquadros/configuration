@@ -42,7 +42,6 @@ run_int() {
 APP_INTERFACE_PROJECT_ID=13582
 HOUSEKEEPING_PROJECT_ID=4713
 
-run_int slack-usergroups &
 run_int github-users $APP_INTERFACE_PROJECT_ID &
 run_int github-repo-invites &
 run_int gitlab-housekeeping $APP_INTERFACE_PROJECT_ID &
