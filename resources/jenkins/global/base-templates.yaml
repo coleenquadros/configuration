@@ -1,56 +1,6 @@
 - base_templates:
     name: base-templates
 
-    gh_pr_check: &gh_pr_check
-        node: '{node}'
-        concurrent: '{concurrent_build}'
-        pr_check_script_path: "./pr_check.sh"
-        status_context: "ci.ext.devshift.net PR build"
-        properties:
-        - github:
-            url: 'https://github.com/{gh_org}/{gh_repo}/'
-        triggers:
-          - github-pull-request:
-              cron: '* * * * *'
-              github-hooks: true
-              permit-all: false
-              trigger-phrase: '(?ms).*^(\[test\]|\/retest)\s*$.*'
-              org-list:
-              - app-sre
-              - openshift
-              allow-whitelist-orgs-as-admins: true
-              status-context: '{status_context}'
-        wrappers:
-        - timeout_wrapper:
-            timeout: '{timeout}'
-        scm:
-        - git:
-            url: 'https://github.com/{gh_org}/{gh_repo}.git'
-            skip-tag: true
-            refspec: '+refs/pull/*:refs/remotes/origin/pr/*'
-            branches:
-                - '${{ghprbActualCommit}}'
-            merge:
-                remote: origin
-                branch: master
-            git-config-name: "AppSRE"
-            git-config-email: "sd-app-sre@redhat.com"
-        builders:
-        - shell: |
-            {pr_check_script_path}
-
-    gh_checkout: &gh_checkout
-        branch: "master"
-        node: '{node}'
-        properties:
-        - github:
-            url: 'https://github.com/{gh_org}/{gh_repo}/'
-        scm:
-        - git:
-            url: 'https://github.com/{gh_org}/{gh_repo}.git'
-            branches:
-                - '{branch}'
-
     build_deploy: &build_deploy
         shell: |
             {build_deploy_script_path}
@@ -134,10 +84,6 @@
         - *saasherder_promote
         - *saasherder_create_pr
 
-    gh_build_master: &gh_build_master
-        <<: *gh_checkout
-        <<: *build_master_builder
-
     # Defines the saasherder shell build script that implements CD
     #
     # Arguments:
@@ -209,6 +155,63 @@
                 done
             done < label_selectors
 
+- base_templates:
+    name: github-base-templates
+
+    gh_checkout: &gh_checkout
+        branch: "master"
+        node: '{node}'
+        properties:
+        - github:
+            url: 'https://github.com/{gh_org}/{gh_repo}/'
+        scm:
+        - git:
+            url: 'https://github.com/{gh_org}/{gh_repo}.git'
+            branches:
+                - '{branch}'
+
+    gh_build_master: &gh_build_master
+        <<: *gh_checkout
+        <<: *build_master_builder
+
+    gh_pr_check: &gh_pr_check
+        node: '{node}'
+        concurrent: '{concurrent_build}'
+        pr_check_script_path: "./pr_check.sh"
+        status_context: "ci.ext.devshift.net PR build"
+        properties:
+        - github:
+            url: 'https://github.com/{gh_org}/{gh_repo}/'
+        triggers:
+          - github-pull-request:
+              cron: '* * * * *'
+              github-hooks: true
+              permit-all: false
+              trigger-phrase: '(?ms).*^(\[test\]|\/retest)\s*$.*'
+              org-list:
+              - app-sre
+              - openshift
+              allow-whitelist-orgs-as-admins: true
+              status-context: '{status_context}'
+        wrappers:
+        - timeout_wrapper:
+            timeout: '{timeout}'
+        scm:
+        - git:
+            url: 'https://github.com/{gh_org}/{gh_repo}.git'
+            skip-tag: true
+            refspec: '+refs/pull/*:refs/remotes/origin/pr/*'
+            branches:
+                - '${{ghprbActualCommit}}'
+            merge:
+                remote: origin
+                branch: master
+            git-config-name: "AppSRE"
+            git-config-email: "sd-app-sre@redhat.com"
+        builders:
+        - shell: |
+            {pr_check_script_path}
+
     gh_timed: &gh_timed
         ci_cmd: ./run.sh
         wrappers:
@@ -221,3 +224,119 @@
         - timed: |
             {cron_expression}
         <<: *gh_checkout
+
+- base_templates:
+    name: gitlab-base-templates
+
+    gl_checkout: &gl_checkout
+        branch: "master"
+        node: '{node}'
+        properties:
+        - github:
+            url: 'https://gitlab.cee.redhat.com/{gl_group}/{gl_project}.git'
+        - gitlab:
+            connection: 'gitlab cee'
+        scm:
+        - git:
+            url: 'git@gitlab.cee.redhat.com:{gl_group}/{gl_project}.git'
+            credentials-id: '{gitlab_ssh_credentials}'
+            shallow_clone: true
+            branches:
+            - '{branch}'
+
+    gl_build_master_template: &gl_build_master_template
+        triggers:
+        - gitlab:
+            trigger-push: true
+            trigger-merge-request: false
+            trigger-open-merge-request-push: never
+            add-note-merge-request: false
+            add-ci-message: false
+            set-build-description: true
+            add-vote-merge-request: false
+            trigger-note: false
+            ci-skip: false
+            wip-skip: false
+            branch-filter-type: "NameBasedFilter"
+            include-branches:
+            - '{branch}'
+        <<: *gl_checkout
+        <<: *build_master_builder
+
+    gl_pr_check_template: &gl_pr_check_template
+        node: '{node}'
+        pr_check_script_path: "./pr_check.sh"
+        properties:
+        - github:
+            url: 'https://gitlab.cee.redhat.com/{gl_group}/{gl_project}.git'
+        - gitlab:
+            connection: 'gitlab cee'
+        scm:
+        - git:
+            remotes:
+            - 'origin':
+                url: 'https://gitlab.cee.redhat.com/{gl_group}/{gl_project}.git'
+                credentials-id: '{gitlab_ssh_credentials}'
+                refspec: '+refs/heads/*:refs/remotes/origin/* +refs/merge-requests/*/head:refs/remotes/origin/merge-requests/*'
+            branches:
+            - 'merge-requests/${{gitlabMergeRequestIid}}'
+            merge:
+                remote: 'origin'
+                branch: '${{gitlabTargetBranch}}'
+        triggers:
+        - gitlab:
+            trigger-push: true
+            trigger-merge-request: true
+            trigger-open-merge-request-push: source
+            note-regex: '(?ms).*^(\[test\]|\/retest)\s*$.*'
+            set-build-description: true
+            add-note-merge-request: true
+            add-vote-merge-request: true
+            add-ci-message: true
+            allow-all-branches: true
+            ci-skip: true
+            wip-skip: true
+        wrappers:
+        - timeout_wrapper:
+            timeout: '{timeout}'
+        publishers:
+        - gitlab_message
+        - gitlab-notifier
+        concurrent: '{concurrent_build}'
+        builders:
+        - shell: |
+            {pr_check_script_path}
+
+    gl_timed_template: &gl_timed_template
+        ci_cmd: ./run.sh
+        wrappers:
+        - timeout_wrapper:
+            timeout: '{timeout}'
+        builders:
+        - shell: |
+            {ci_cmd}
+        triggers:
+        - timed: |
+            {cron_expression}
+        <<: *gl_checkout
+
+    # This template is intended to create jobs that run the pipeline described
+    # in the 'Jenkinsfile' of the project when changes are merged to the master
+    # branch.
+    gl_build_pipeline_template: &gl_build_pipeline_template
+        project-type: pipeline
+        pipeline-scm:
+          scm:
+          - git:
+              url: 'git@gitlab.cee.redhat.com/{gl_group}/{gl_project}.git'
+              credentials-id: '{gitlab_ssh_credentials}'
+              shallow_clone: true
+              branches:
+              - '{branch}'
+        triggers:
+        - pollscm:
+            cron: '* * * * *'
+        wrappers:
+        - timeout_wrapper:
+            timeout: '{timeout}'
+        <<: *gl_checkout
