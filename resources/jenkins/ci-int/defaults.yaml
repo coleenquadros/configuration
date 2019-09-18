@@ -1,0 +1,15 @@
+local_defaults: &local_defaults
+    saasherder_options: "--rm --user $(id -u) -v $(pwd):/saas:z -v /etc/pki:/etc/pki:z -e REQUESTS_CA_BUNDLE=/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
+    gitlab_ssh_credentials: 'f4718b82-0cb2-47ef-aea2-dadae3f050a5'
+    ssh_ci_ext_cmd: 'ssh -T -i /var/lib/jenkins/.ssh/app-sre-bot-id_rsa -l app-sre-bot ci.ext.devshift.net'
+
+- publisher:
+    name: "gitlab_message"
+    publishers:
+    - gitlab-message:
+        success-note: true
+        success-note-text: "Build success, build url: ${BUILD_URL}"
+        failure-note: true
+        failure-note-text: "Build failed, build url: ${BUILD_URL}"
+        unstable-note: true
+        unstable-note-text: "The build is unstable, build url: ${BUILD_URL}"

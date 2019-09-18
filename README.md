@@ -761,9 +761,11 @@ All JJB configurations rely on a set of JJB entities for the corresponding Jenki
 
 The final JJB configrations will be sorted in the following order:
 - `defaults`
+- `global-defaults`
 - `views`
 - `secrets`
 - `base-templates`
+- `global-base-templates`
 - `job-templates`
 - `jobs`
 

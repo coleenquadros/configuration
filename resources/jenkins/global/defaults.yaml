@@ -1,11 +1,11 @@
 - defaults:
+    <<: *local_defaults
     name: global
     label: none
     disable: 'false'
     display-name: '[{label}] {display_name}'
     image_pattern: ''
     saasherder_image: "quay.io/openshiftio/saasherder:238a508"
-    saasherder_options: "--rm --user $(id -u) -v $(pwd):/saas:z"
     saasherder_docker: "docker run {saasherder_options} {saasherder_image}"
     saasherder_check_image: "docker run {saasherder_options} -e SKOPEO_USER=$QUAY_USER -e SKOPEO_PASS=$QUAY_TOKEN --entrypoint '' {saasherder_image} python /scripts/check_image.py"
     saasherder_object_blacklist: 'Route,Secret,ConfigMap,ServiceAccount'
@@ -15,29 +15,19 @@
         Managed by App-Interface https://gitlab.cee.redhat.com/service/app-interface
     timeout: 30
     concurrent_build: false
-    ssh_ci_ext_cmd: ''
     manifest_bouncer_options: '--warn-only'
     manifest_bouncer_cmd: 'docker run --rm -i quay.io/app-sre/manifest-bouncer:d21c96f {manifest_bouncer_options} -'
 
-# these base templates are required for common base templates
-# so we need them to be added first.
-# note: this is a workaround to avoid setting order on the same resource type
-- base_templates:
-    name: ci-ext-base-templates
+- wrapper:
+    name: timeout_wrapper
+    wrappers:
+      - timeout:
+          timeout: '{timeout}'
+          timeout-var: 'BUILD_TIMEOUT'
+          fail: true
+          type: no-activity
 
-    gh_triggers: &gh_triggers
-        triggers:
-        - github
-
-    saasherder_create_pr: &saasherder_create_pr
-        shell: |
-            #!/bin/bash
-            set -e
-
-            if [ ! -n "{auto_promote}" ]; then exit; fi
-
-            SAAS_REPO_PATH="$(echo {saas_git} | sed -e 's/\.git//g' -e 's|https://github.com/||g')"
-            SOURCE_BRANCH="promote-$GIT_COMMIT"
-            curl -X POST -H "Authorization: token $APP_SRE_BOT_PUSH_TOKEN" \
-            --data '{{ "head": "'$SOURCE_BRANCH'", "base": "{branch}", "title": "promote '$GIT_COMMIT'", "maintainer_can_modify": true }}' \
-            https://api.github.com/repos/$SAAS_REPO_PATH/pulls
+- vault_defaults: &vault_defaults
+    name: 'vault_defaults'
+    vault-url: 'https://vault.devshift.net'
+    credentials-id: 'vault-creds'
