@@ -30,6 +30,9 @@
                     cat {saasherder_context}-processed/${{service}}.yaml | $SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" apply -f - -n {kube_namespace} --dry-run --validate
                     cat {saasherder_context}-processed/${{service}}.yaml | $SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" apply -f - -n {kube_namespace}
 
+                    if [ "{kube_namespace}" == "error_no_ns" ]; then continue; fi
+                    if [ -n "{disable_saasherder_delete}" ]; then continue; fi
+
                     label_selector=$(cat label_selector)
                     resources_to_delete=$($SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" get {saasherder_object_whitelist} -o name -l "$label_selector" -n {kube_namespace})
 
@@ -72,6 +75,7 @@
         build_deploy_script_path: './build_deploy.sh'
         ssh_ci_ext: ''
         auto_promote: ''
+        disable_saasherder_delete: ''
         saas_git: ''
         saas_git_private: ''
         saas_env: 'staging'
@@ -107,6 +111,7 @@
     saasherder: &saasherder
         kube_namespace: "error_no_ns"
         ssh_ci_ext: ''
+        disable_saasherder_delete: ''
         saas_env: 'production'
         repo_url: ''
         builders:
@@ -145,7 +150,9 @@
                 fi
             done
 
-            if [[ "{dry_run}" == "yes" ]]; then exit; fi
+            if [ "{dry_run}" == "yes" ]; then exit; fi
+            if [ "{kube_namespace}" == "error_no_ns" ]; then exit; fi
+            if [ -n "{disable_saasherder_delete}" ]; then exit; fi
 
             while IFS= read -r label_selector; do
                 resources_to_delete=$($SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" get {saasherder_object_whitelist} -o name -l "$label_selector" -n {kube_namespace})
