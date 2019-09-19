@@ -31,14 +31,44 @@
                     cat {saasherder_context}-processed/${{service}}.yaml | $SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" apply -f - -n {kube_namespace}
 
                     if [ "{kube_namespace}" == "error_no_ns" ]; then continue; fi
-                    if [ -n "{disable_saasherder_delete}" ]; then continue; fi
 
                     label_selector=$(cat label_selector)
-                    resources_to_delete=$($SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" get {saasherder_object_whitelist} -o name -l "$label_selector" -n {kube_namespace})
 
-                    for r in $resources_to_delete; do
-                        echo DRY-RUN oc delete $r -n {kube_namespace}
-                    done
+                    # validate that the number of replicas matches the number of ready replicas
+                    if [ -z "{disable_saasherder_validate}" ]; then
+                        current_label_selector=$(echo $label_selector | sed 's/!=/==/g')
+                        resources_to_validate=$($SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" get {saasherder_object_validate} -o name -l "$current_label_selector" -n {kube_namespace})
+
+                        STATUS=invalid
+                        ATTEMPT=0
+                        MAX_ATTEMPTS={saasherder_validate_max_attempts} # total sleep time is (( MAX_ATTEMPTS * (MAX_ATTEMPTS+1) ) / 2)
+                        until [[ "$STATUS" == "valid" || $ATTEMPT -ge $MAX_ATTEMPTS ]]; do
+                            STATUS=valid
+                            sleep $(( ATTEMPT++ )) # first sleep is 0
+                            for r in $resources_to_validate; do
+                                echo "validating $r"
+                                replicas_status=$($SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" -n {kube_namespace} get $r -o jsonpath="{{['status.replicas', 'status.readyReplicas']}}")
+                                replicas=$(echo $replicas_status | cut -d' ' -f1)
+                                ready_replicas=$(echo $replicas_status | cut -d' ' -f2)
+
+                                if [ "$replicas" != "$ready_replicas" ]; then
+                                    echo "$replicas replicas != $ready_replicas ready replicas, status is invalid"
+                                    STATUS=invalid
+                                fi
+                            done
+                        done
+
+                        if [ "$STATUS" == "invalid" ]; then exit 1; fi
+                    fi
+
+                    # delete resources from previous deployments that are no longer deployed
+                    if [ -z "{disable_saasherder_delete}" ]; then
+                        resources_to_delete=$($SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" get {saasherder_object_whitelist} -o name -l "$label_selector" -n {kube_namespace})
+
+                        for r in $resources_to_delete; do
+                            echo DRY-RUN oc delete $r -n {kube_namespace}
+                        done
+                    fi
                 done
                 cd ..
             fi
@@ -48,7 +78,7 @@
             #!/bin/bash
             set -e
 
-            if [ ! -n "{auto_promote}" ]; then exit; fi
+            if [ -z "{auto_promote}" ]; then exit; fi
 
             BRANCH="promote-$GIT_COMMIT"
             if [ "$(git ls-remote --heads {saas_git} $BRANCH | wc -l)" != "0" ]; then
@@ -75,6 +105,7 @@
         build_deploy_script_path: './build_deploy.sh'
         ssh_ci_ext: ''
         auto_promote: ''
+        disable_saasherder_validate: ''
         disable_saasherder_delete: ''
         saas_git: ''
         saas_git_private: ''
@@ -111,6 +142,7 @@
     saasherder: &saasherder
         kube_namespace: "error_no_ns"
         ssh_ci_ext: ''
+        disable_saasherder_validate: ''
         disable_saasherder_delete: ''
         saas_env: 'production'
         repo_url: ''
@@ -152,15 +184,46 @@
 
             if [ "{dry_run}" == "yes" ]; then exit; fi
             if [ "{kube_namespace}" == "error_no_ns" ]; then exit; fi
-            if [ -n "{disable_saasherder_delete}" ]; then exit; fi
 
-            while IFS= read -r label_selector; do
-                resources_to_delete=$($SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" get {saasherder_object_whitelist} -o name -l "$label_selector" -n {kube_namespace})
+            # validate that the number of replicas matches the number of ready replicas
+            if [ -z "{disable_saasherder_validate}" ]; then
+                STATUS=invalid
+                ATTEMPT=0
+                MAX_ATTEMPTS={saasherder_validate_max_attempts} # total sleep time is (( MAX_ATTEMPTS * (MAX_ATTEMPTS+1) ) / 2)
+                until [[ "$STATUS" == "valid" || $ATTEMPT -ge $MAX_ATTEMPTS ]]; do
+                    STATUS=valid
+                    sleep $(( ATTEMPT++ )) # first sleep is 0
+                    while IFS= read -r label_selector; do
+                        current_label_selector=$(echo $label_selector | sed 's/!=/==/g')
+                        resources_to_validate=$($SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" get {saasherder_object_validate} -o name -l "$current_label_selector" -n {kube_namespace})
 
-                for r in $resources_to_delete; do
-                    echo DRY-RUN oc delete $r -n {kube_namespace}
+                        for r in $resources_to_validate; do
+                            echo "validating $r"
+                            replicas_status=$($SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" -n {kube_namespace} get $r -o jsonpath="{{['status.replicas', 'status.readyReplicas']}}")
+                            replicas=$(echo $replicas_status | cut -d' ' -f1)
+                            ready_replicas=$(echo $replicas_status | cut -d' ' -f2)
+
+                            if [ "$replicas" != "$ready_replicas" ]; then
+                                echo "$replicas replicas != $ready_replicas ready replicas, status is invalid"
+                                STATUS=invalid
+                            fi
+                        done
+                    done < label_selectors
                 done
-            done < label_selectors
+
+                if [ "$STATUS" == "invalid" ]; then exit 1; fi
+            fi
+
+            # delete resources from previous deployments that are no longer deployed
+            if [ -z "{disable_saasherder_delete}" ]; then
+                while IFS= read -r label_selector; do
+                    resources_to_delete=$($SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" get {saasherder_object_whitelist} -o name -l "$label_selector" -n {kube_namespace})
+
+                    for r in $resources_to_delete; do
+                        echo DRY-RUN oc delete $r -n {kube_namespace}
+                    done
+                done < label_selectors
+            fi
 
 - base_templates:
     name: github-base-templates
