@@ -48,12 +48,20 @@
                             for r in $resources_to_validate; do
                                 echo "validating $r"
                                 replicas_status=$($SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" -n {kube_namespace} get $r -o jsonpath="{{['status.replicas', 'status.readyReplicas']}}")
+
+                                if [ "$(echo $replicas_status | wc -w)" != "2" ]; then
+                                    echo "replica status invalid, status is invalid"
+                                    STATUS=invalid
+                                    continue
+                                fi
+
                                 replicas=$(echo $replicas_status | cut -d' ' -f1)
                                 ready_replicas=$(echo $replicas_status | cut -d' ' -f2)
 
                                 if [ "$replicas" != "$ready_replicas" ]; then
                                     echo "$replicas replicas != $ready_replicas ready replicas, status is invalid"
                                     STATUS=invalid
+                                    continue
                                 fi
                             done
                         done
@@ -200,12 +208,20 @@
                         for r in $resources_to_validate; do
                             echo "validating $r"
                             replicas_status=$($SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" -n {kube_namespace} get $r -o jsonpath="{{['status.replicas', 'status.readyReplicas']}}")
+
+                            if [ "$(echo $replicas_status | wc -w)" != "2" ]; then
+                                echo "replica status invalid, status is invalid"
+                                STATUS=invalid
+                                continue
+                            fi
+
                             replicas=$(echo $replicas_status | cut -d' ' -f1)
                             ready_replicas=$(echo $replicas_status | cut -d' ' -f2)
 
                             if [ "$replicas" != "$ready_replicas" ]; then
                                 echo "$replicas replicas != $ready_replicas ready replicas, status is invalid"
                                 STATUS=invalid
+                                continue
                             fi
                         done
                     done < label_selectors
