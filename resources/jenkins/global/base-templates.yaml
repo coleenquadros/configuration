@@ -47,9 +47,9 @@
                             sleep $(( ATTEMPT++ )) # first sleep is 0
                             for r in $resources_to_validate; do
                                 echo "validating $r"
-                                replicas_status=$($SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" -n {kube_namespace} get $r -o jsonpath="{{['status.replicas', 'status.readyReplicas', 'status.updatedReplicas', 'status.unavailableReplicas']}}")
+                                replicas_status=$($SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" -n {kube_namespace} get $r -o jsonpath="{{['status.replicas', 'status.readyReplicas', 'status.updatedReplicas']}}")
 
-                                if [ "$(echo $replicas_status | wc -w)" != "4" ]; then
+                                if [ "$(echo $replicas_status | wc -w)" != "3" ]; then
                                     echo "replica status invalid, status is invalid"
                                     STATUS=invalid
                                     continue
@@ -58,9 +58,8 @@
                                 replicas=$(echo $replicas_status | cut -d' ' -f1)
                                 ready_replicas=$(echo $replicas_status | cut -d' ' -f2)
                                 updated_replicas=$(echo $replicas_status | cut -d' ' -f3)
-                                unavailable_replicas=$(echo $replicas_status | cut -d' ' -f4)
 
-                                if [[ "$replicas" != "$ready_replicas" || "$replicas" != "$updated_replicas" || "$unavailable_replicas" != "0" ]]; then
+                                if [[ "$replicas" != "$ready_replicas" || "$replicas" != "$updated_replicas" ]]; then
                                     echo "new replicas not ready, status is invalid"
                                     STATUS=invalid
                                     continue
@@ -209,9 +208,9 @@
 
                         for r in $resources_to_validate; do
                             echo "validating $r"
-                            replicas_status=$($SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" -n {kube_namespace} get $r -o jsonpath="{{['status.replicas', 'status.readyReplicas']}}")
+                            replicas_status=$($SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" -n {kube_namespace} get $r -o jsonpath="{{['status.replicas', 'status.readyReplicas', 'status.updatedReplicas']}}")
 
-                            if [ "$(echo $replicas_status | wc -w)" != "2" ]; then
+                            if [ "$(echo $replicas_status | wc -w)" != "3" ]; then
                                 echo "replica status invalid, status is invalid"
                                 STATUS=invalid
                                 continue
@@ -220,9 +219,8 @@
                             replicas=$(echo $replicas_status | cut -d' ' -f1)
                             ready_replicas=$(echo $replicas_status | cut -d' ' -f2)
                             updated_replicas=$(echo $replicas_status | cut -d' ' -f3)
-                            unavailable_replicas=$(echo $replicas_status | cut -d' ' -f4)
 
-                            if [[ "$replicas" != "$ready_replicas" || "$replicas" != "$updated_replicas" || "$unavailable_replicas" != "0" ]]; then
+                            if [[ "$replicas" != "$ready_replicas" || "$replicas" != "$updated_replicas" ]]; then
                                 echo "new replicas not ready, status is invalid"
                                 STATUS=invalid
                                 continue
