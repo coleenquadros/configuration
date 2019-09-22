@@ -1,6 +1,11 @@
 - base_templates:
     name: base-templates
 
+    feature_defaults: &feature_defaults
+        ssh_ci_ext: ''
+        disable_saasherder_validate: ''
+        disable_saasherder_delete: ''
+
     build_deploy: &build_deploy
         shell: |
             {build_deploy_script_path}
@@ -104,15 +109,13 @@
             git push auth $BRANCH
             cd ..
 
-    build_master_builder: &build_master_builder
+    build_master: &build_master_template
+        <<: *feature_defaults
         disabled: '{disable}'
         kube_cluster: ''
         saasherder_services: ''
         build_deploy_script_path: './build_deploy.sh'
-        ssh_ci_ext: ''
         auto_promote: ''
-        disable_saasherder_validate: ''
-        disable_saasherder_delete: ''
         saas_git: ''
         saas_env: 'staging'
         wrappers:
@@ -123,6 +126,17 @@
         - *saasherder_apply
         - *saasherder_promote
         - *saasherder_create_pr
+
+    pr_check_template: &pr_check_template
+        node: '{node}'
+        concurrent: '{concurrent_build}'
+        pr_check_script_path: "./pr_check.sh"
+        wrappers:
+        - timeout_wrapper:
+            timeout: '{timeout}'
+        builders:
+        - shell: |
+            {pr_check_script_path}
 
     timed_template: &timed_template
         ci_cmd: ./run.sh
@@ -156,10 +170,8 @@
     # define secrets which export:
     # - KUBE_SERVER
     # - KUBE_TOKEN
-    saasherder: &saasherder
-        ssh_ci_ext: ''
-        disable_saasherder_validate: ''
-        disable_saasherder_delete: ''
+    saas_deploy: &saas_deploy
+        <<: *feature_defaults
         saas_env: 'production'
         repo_url: ''
         wrappers:
@@ -278,29 +290,13 @@
                 - '{branch}'
 
     gh_build_master: &gh_build_master
+        <<: *gh_triggers # these are different on ci.int and ci.ext
         <<: *gh_checkout
-        <<: *build_master_builder
+        <<: *build_master_template
 
     gh_pr_check: &gh_pr_check
-        node: '{node}'
-        concurrent: '{concurrent_build}'
-        pr_check_script_path: "./pr_check.sh"
-        status_context: "ci.ext.devshift.net PR build"
         <<: *gh_properties
-        triggers:
-          - github-pull-request:
-              cron: '* * * * *'
-              github-hooks: true
-              permit-all: false
-              trigger-phrase: '(?ms).*^(\[test\]|\/retest)\s*$.*'
-              org-list:
-              - app-sre
-              - openshift
-              allow-whitelist-orgs-as-admins: true
-              status-context: '{status_context}'
-        wrappers:
-        - timeout_wrapper:
-            timeout: '{timeout}'
+        status_context: "ci.ext.devshift.net PR build"
         scm:
         - git:
             url: 'https://github.com/{gh_org}/{gh_repo}.git'
@@ -313,9 +309,18 @@
                 branch: master
             git-config-name: "AppSRE"
             git-config-email: "sd-app-sre@redhat.com"
-        builders:
-        - shell: |
-            {pr_check_script_path}
+        triggers:
+          - github-pull-request:
+              cron: '* * * * *'
+              github-hooks: true
+              permit-all: false
+              trigger-phrase: '(?ms).*^(\[test\]|\/retest)\s*$.*'
+              org-list:
+              - app-sre
+              - openshift
+              allow-whitelist-orgs-as-admins: true
+              status-context: '{status_context}'
+        <<: *pr_check_template
 
     gh_timed: &gh_timed
         <<: *timed_template
@@ -343,7 +348,7 @@
             branches:
             - '{branch}'
 
-    gl_build_master_template: &gl_build_master_template
+    gl_build_master: &gl_build_master
         triggers:
         - gitlab:
             trigger-push: true
@@ -360,11 +365,9 @@
             include-branches:
             - '{branch}'
         <<: *gl_checkout
-        <<: *build_master_builder
+        <<: *build_master_template
 
-    gl_pr_check_template: &gl_pr_check_template
-        node: '{node}'
-        pr_check_script_path: "./pr_check.sh"
+    gl_pr_check: &gl_pr_check
         <<: *gl_properties
         scm:
         - git:
@@ -391,18 +394,12 @@
             allow-all-branches: true
             ci-skip: true
             wip-skip: true
-        wrappers:
-        - timeout_wrapper:
-            timeout: '{timeout}'
         publishers:
         - gitlab_message
         - gitlab-notifier
-        concurrent: '{concurrent_build}'
-        builders:
-        - shell: |
-            {pr_check_script_path}
+        <<: *pr_check_template
 
-    gl_timed_template: &gl_timed_template
+    gl_timed: &gl_timed
         <<: *timed_template
         <<: *gl_checkout
 

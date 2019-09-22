@@ -17,10 +17,8 @@
         ./sos-issues.sh
         md=$(ls -rt sos-issues*md|tail -n1)
         pandoc sos-issues*md -o sos-report.html
-    triggers:
-    - timed: |
-        0 9 * * 3
-    <<: *gl_checkout
+    cron_expression: 0 9 * * 3
+    <<: *gl_timed
 
 - job-template:
     id: 'gl-build-master-jjb'
@@ -33,7 +31,7 @@
         secrets:
         - *jjb_ini
         - *jjb_ini_ext
-    <<: *gl_build_master_template
+    <<: *gl_build_master
 
 - job-template:
     id: 'gl-build-master-osio-scan'
@@ -41,7 +39,7 @@
     publishers:
     - archive:
         artifacts: 'reports/**'
-    <<: *gl_build_master_template
+    <<: *gl_build_master
 
 - job-template:
     id: 'gl-pr-check-jjb'
@@ -56,7 +54,7 @@
     - archive:
         artifacts: 'reports/**'
         allow-empty: yes
-    <<: *gl_pr_check_template
+    <<: *gl_pr_check
 
 - job-template:
     id: pagerditty
@@ -167,23 +165,12 @@
         eval `ssh-agent -s`
         ssh-add app-sre-bot.key
         ansible -u ${{APP_SRE_BOT_USERNAME}} --key-file app-sre-bot.key -m shell -a 'sudo /opt/clean-up-scripts/prune-docker-images.sh' ci-int-jenkins-slave,ci-ext-jenkins-slave,ci-ext-jenkins
-    triggers:
-    - timed: |
-        H 0 */3 * *
-    <<: *gl_checkout
+    cron_expression: H 0 */3 * *
+    <<: *gl_timed
 
 - job-template:
     id: 'clusterimageset-run'
     name: 'clusterimageset-run'
-    wrappers:
-    - timeout_wrapper:
-        timeout: '{timeout}'
-    builders:
-    - shell: |
-        ./run.sh
-    triggers:
-    - timed: |
-        H 0 * * *
     publishers:
     - git:
         push-merge: false
@@ -191,7 +178,8 @@
         branches:
         - branch:
             name: "master"
-    <<: *gl_checkout
+    cron_expression: H 0 * * *
+    <<: *gl_timed
 
 - job-template:
     id: 'gl-build-master-clusterimagesets-apply'
@@ -214,7 +202,7 @@
         export SSH_PRIVATE_KEY_B64="$APP_SRE_BOT_KEY"
 
         ./build_deploy.sh
-    <<: *gl_build_master_template
+    <<: *gl_build_master
 
 - job-template:
     id: 'gl-pr-check-clusterimagesets'
@@ -238,7 +226,7 @@
         export SSH_PRIVATE_KEY_B64="$APP_SRE_BOT_KEY"
 
         ./pr_check.sh
-    <<: *gl_pr_check_template
+    <<: *gl_pr_check
 
 - job-template:
     id: 'push-saas-metrics'
@@ -279,6 +267,5 @@
             -v $PWD/.cache:/cache:z \
             -v $PWD/.home:/root:z \
             quay.io/app-sre/push-saas-metrics:latest
-    triggers:
-    - timed: |
-        H * * * *
+    cron_expression: H * * * *
+    <<: *timed_template
