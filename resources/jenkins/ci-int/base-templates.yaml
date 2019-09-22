@@ -14,8 +14,14 @@
 
             if [ -z "{auto_promote}" ]; then exit; fi
 
+            BRANCH="promote-$GIT_COMMIT"
+            if [ "$(git ls-remote --heads {saas_git} $BRANCH | wc -l)" != "0" ]; then
+                echo remote branch promote-$GIT_COMMIT exists, exiting.
+                exit
+            fi
+
             SAAS_PROJECT_ID="$(echo {saas_git} | sed -e 's/\.git//g' -e 's|https://gitlab.cee.redhat.com/||g' -e 's|/|%2F|g')"
             SOURCE_BRANCH="promote-$GIT_COMMIT"
-            curl -X POST -H "PRIVATE-TOKEN: $APP_SRE_BOT_PUSH_TOKEN" -H "Content-Type: application/json" \
+            curl -s -X POST -H "PRIVATE-TOKEN: $APP_SRE_BOT_PUSH_TOKEN" -H "Content-Type: application/json" \
             --data '{{ "source_branch": "'$SOURCE_BRANCH'", "target_branch": "{branch}", "title": "[{saasherder_context}] promote '$GIT_COMMIT'", "remove_source_branch": true }}' \
-            https://gitlab.cee.redhat.com/api/v4/projects/$SAAS_PROJECT_ID/merge_requests
+            https://gitlab.cee.redhat.com/api/v4/projects/$SAAS_PROJECT_ID/merge_requests | echo MR created - $(jq -r .web_url)
