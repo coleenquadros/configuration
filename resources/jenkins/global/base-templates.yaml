@@ -124,6 +124,18 @@
         - *saasherder_promote
         - *saasherder_create_pr
 
+    timed_template: &timed_template
+        ci_cmd: ./run.sh
+        wrappers:
+        - timeout_wrapper:
+            timeout: '{timeout}'
+        builders:
+        - shell: |
+            {ci_cmd}
+        triggers:
+        - timed: |
+            {cron_expression}
+
     # Defines the saasherder shell build script that implements CD
     #
     # Arguments:
@@ -250,12 +262,15 @@
 - base_templates:
     name: github-base-templates
 
-    gh_checkout: &gh_checkout
-        branch: "master"
-        node: '{node}'
+    gh_properties: &gh_properties
         properties:
         - github:
             url: 'https://github.com/{gh_org}/{gh_repo}/'
+
+    gh_checkout: &gh_checkout
+        branch: "master"
+        node: '{node}'
+        <<: *gh_properties
         scm:
         - git:
             url: 'https://github.com/{gh_org}/{gh_repo}.git'
@@ -271,9 +286,7 @@
         concurrent: '{concurrent_build}'
         pr_check_script_path: "./pr_check.sh"
         status_context: "ci.ext.devshift.net PR build"
-        properties:
-        - github:
-            url: 'https://github.com/{gh_org}/{gh_repo}/'
+        <<: *gh_properties
         triggers:
           - github-pull-request:
               cron: '* * * * *'
@@ -305,29 +318,23 @@
             {pr_check_script_path}
 
     gh_timed: &gh_timed
-        ci_cmd: ./run.sh
-        wrappers:
-        - timeout_wrapper:
-            timeout: '{timeout}'
-        builders:
-        - shell: |
-            {ci_cmd}
-        triggers:
-        - timed: |
-            {cron_expression}
+        <<: *timed_template
         <<: *gh_checkout
 
 - base_templates:
     name: gitlab-base-templates
 
-    gl_checkout: &gl_checkout
-        branch: "master"
-        node: '{node}'
+    gl_properties: &gl_properties
         properties:
         - github:
             url: 'https://gitlab.cee.redhat.com/{gl_group}/{gl_project}.git'
         - gitlab:
             connection: 'gitlab cee'
+
+    gl_checkout: &gl_checkout
+        branch: "master"
+        node: '{node}'
+        <<: *gl_properties
         scm:
         - git:
             url: 'git@gitlab.cee.redhat.com:{gl_group}/{gl_project}.git'
@@ -358,11 +365,7 @@
     gl_pr_check_template: &gl_pr_check_template
         node: '{node}'
         pr_check_script_path: "./pr_check.sh"
-        properties:
-        - github:
-            url: 'https://gitlab.cee.redhat.com/{gl_group}/{gl_project}.git'
-        - gitlab:
-            connection: 'gitlab cee'
+        <<: *gl_properties
         scm:
         - git:
             remotes:
@@ -400,16 +403,7 @@
             {pr_check_script_path}
 
     gl_timed_template: &gl_timed_template
-        ci_cmd: ./run.sh
-        wrappers:
-        - timeout_wrapper:
-            timeout: '{timeout}'
-        builders:
-        - shell: |
-            {ci_cmd}
-        triggers:
-        - timed: |
-            {cron_expression}
+        <<: *timed_template
         <<: *gl_checkout
 
     # This template is intended to create jobs that run the pipeline described

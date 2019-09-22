@@ -1,8 +1,12 @@
 # Runs build_deploy.sh (polling if required) and deploys to staging
 #
-# vars required in the job definition:
+# vars required in the GitHub job definition:
 # - gh_org: GitHub org
 # - gh_repo: GitHub repo
+#
+# vars required in the GitLab job definition:
+# - gl_group: GitLab group
+# - gl_project: GitLab repo
 #
 # optional vars
 # - kube_cluster: cluster name
@@ -32,32 +36,19 @@
     <<: *gh_triggers
     <<: *gh_build_master
 
-# Variation of the above job that includes the push token to publish image to
-# app-sre quay org
 - job-template:
-    id: 'gh-build-master-github-push'
-    name: '{gh_org}-{gh_repo}-gh-build-{branch}'
+    id: 'gl-build-master'
+    name: '{gl_group}-{gl_project}-gl-build-{branch}'
     wrappers:
-    - timeout_wrapper:
-        timeout: '{timeout}'
-    - ansicolor
-    - vault-secrets:
-        <<: *vault_defaults
-        secrets:
-        - *kube_config
-        - *quay_secret_push
-        - *app_sre_bot_push_token
-    <<: *gh_triggers
-    <<: *gh_build_master
-
-- job-template:
-    id: 'gh-pr-check'
-    name: '{gh_org}-{gh_repo}-gh-pr-check'
-    wrappers:
-    - timeout_wrapper:
-        timeout: '{timeout}'
-    - ansicolor
-    <<: *gh_pr_check
+      - timeout_wrapper:
+          timeout: '{timeout}'
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+          - *kube_config
+          - *quay_secret_push
+          - *app_sre_bot_push_token
+    <<: *gl_build_master_template
 
 - job-template:
     id: gh-build-master-with-upstream
@@ -80,3 +71,81 @@
         results: 'success'
     <<: *gh_triggers
     <<: *gh_build_master
+
+- job-template:
+    id: gl-build-master-with-upstream
+    name: '{gl_group}-{gl_project}-gl-build-{branch}-upstream-{upstream}'
+    upstream: ''
+    branch: master
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *kube_config
+        - *quay_secret_push
+        - *app_sre_bot_push_token
+    triggers:
+    - reverse:
+        jobs: '{upstream}'
+        results: 'success'
+    <<: *gl_build_master_template
+
+# PR check job
+#
+# vars required in the GitHub job definition:
+# - gh_org: GitHub org
+# - gh_repo: GitHub repo
+#
+# vars required in the GitLab job definition:
+# - gl_group: GitLab group
+# - gl_project: GitLab repo
+#
+# optional vars:
+# - pr_check_script_path: the command to run. Defaults to `./pr_check.sh`
+
+- job-template:
+    id: 'gh-pr-check'
+    name: '{gh_org}-{gh_repo}-gh-pr-check'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    <<: *gh_pr_check
+
+- job-template:
+    id: 'gl-pr-check'
+    name: '{gl_group}-{gl_project}-gl-pr-check'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    <<: *gl_pr_check_template
+
+
+# Timed Job
+#
+# required vars:
+# - cron_expression: cron expression
+#
+# vars required in the GitHub job definition:
+# - gh_org: GitHub org
+# - gh_repo: GitHub repo
+#
+# vars required in the GitLab job definition:
+# - gl_group: GitLab group
+# - gl_project: GitLab repo
+#
+# optional vars:
+# - ci_cmd: the command to run. Defaults to `./run.sh`
+- job-template:
+    id: 'gh-timed'
+    name: '{gh_org}-{gh_repo}-timed'
+    <<: *gh_timed
+
+- job-template:
+    id: 'gl-timed'
+    name: '{gl_group}-{gl_project}-timed'
+    <<: *gl_timed_template
