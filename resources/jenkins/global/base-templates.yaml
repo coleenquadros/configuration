@@ -19,25 +19,24 @@
                 if [ -n "{ssh_ci_ext}" ]; then SSH_CMD="{ssh_ci_ext_cmd}"; else SSH_CMD=""; fi
 
                 #Deploy preview
-                SAAS_ENV={saas_env}
                 cd saas.git
                 for service in {saasherder_services}; do
-                    {saasherder_docker} --context "{saasherder_context}" --environment $SAAS_ENV update hash ${{service}} $GIT_COMMIT
-                    {saasherder_docker} --context "{saasherder_context}" --environment $SAAS_ENV pull ${{service}}
-                    {saasherder_docker} --context "{saasherder_context}" --environment $SAAS_ENV template --filter {saasherder_object_blacklist} --output-dir {saasherder_context}-processed --local tag ${{service}}
-                    {saasherder_docker} --context "{saasherder_context}" --environment $SAAS_ENV label --output-dir {saasherder_context}-processed --saas-repo-url {saas_git} ${{service}} > label_selector
+                    {saasherder} update hash ${{service}} $GIT_COMMIT
+                    {saasherder} pull ${{service}}
+                    {saasherder} template --filter {saasherder_object_blacklist} --output-dir {saasherder_context}-processed --local tag ${{service}}
+                    {saasherder} label --output-dir {saasherder_context}-processed --saas-repo-url {saas_git} ${{service}} > label_selector
 
-                    cat {saasherder_context}-processed/${{service}}.yaml | $SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" apply -f - -n {kube_namespace} --dry-run --validate
-                    cat {saasherder_context}-processed/${{service}}.yaml | $SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" apply -f - -n {kube_namespace}
+                    cat {saasherder_context}-processed/${{service}}.yaml | {oc} apply -f - --dry-run --validate
+                    cat {saasherder_context}-processed/${{service}}.yaml | {oc} apply -f -
 
-                    if [ "{kube_namespace}" == "error_no_ns" ]; then continue; fi
+                    if [ "{kube_namespace}" == "{kube_namespace_error}" ]; then continue; fi
 
                     label_selector=$(cat label_selector)
 
                     # validate that the number of replicas matches the number of ready replicas
                     if [ -z "{disable_saasherder_validate}" ]; then
                         current_label_selector=$(echo $label_selector | sed 's/!=/==/g')
-                        resources_to_validate=$($SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" get {saasherder_object_validate} -o name -l "$current_label_selector" -n {kube_namespace})
+                        resources_to_validate=$({oc} get {saasherder_object_validate} -o name -l "$current_label_selector")
 
                         STATUS=invalid
                         ATTEMPT=0
@@ -47,7 +46,7 @@
                             sleep $(( ATTEMPT++ )) # first sleep is 0
                             for r in $resources_to_validate; do
                                 echo "validating $r"
-                                replicas_status=$($SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" -n {kube_namespace} get $r -o jsonpath="{{['status.replicas', 'status.readyReplicas', 'status.updatedReplicas']}}")
+                                replicas_status=$({oc} get $r -o jsonpath="{{['status.replicas', 'status.readyReplicas', 'status.updatedReplicas']}}")
 
                                 if [ "$(echo $replicas_status | wc -w)" != "3" ]; then
                                     echo "replica status invalid, status is invalid"
@@ -72,10 +71,10 @@
 
                     # delete resources from previous deployments that are no longer deployed
                     if [ -z "{disable_saasherder_delete}" ]; then
-                        resources_to_delete=$($SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" get {saasherder_object_whitelist} -o name -l "$label_selector" -n {kube_namespace})
+                        resources_to_delete=$({oc} get {saasherder_object_whitelist} -o name -l "$label_selector")
 
                         for r in $resources_to_delete; do
-                            echo DRY-RUN oc delete $r -n {kube_namespace}
+                            echo DRY-RUN oc delete $r
                         done
                     fi
                 done
@@ -108,8 +107,6 @@
     build_master_builder: &build_master_builder
         disabled: '{disable}'
         kube_cluster: ''
-        kube_namespace: 'error_no_ns'
-        saasherder_context: ''
         saasherder_services: ''
         build_deploy_script_path: './build_deploy.sh'
         ssh_ci_ext: ''
@@ -117,7 +114,6 @@
         disable_saasherder_validate: ''
         disable_saasherder_delete: ''
         saas_git: ''
-        saas_git_private: ''
         saas_env: 'staging'
         wrappers:
         - timeout_wrapper:
@@ -149,7 +145,6 @@
     # - KUBE_SERVER
     # - KUBE_TOKEN
     saasherder: &saasherder
-        kube_namespace: "error_no_ns"
         ssh_ci_ext: ''
         disable_saasherder_validate: ''
         disable_saasherder_delete: ''
@@ -171,28 +166,27 @@
                 exit 1
             fi
 
-            SAAS_ENV={saas_env}
             PROCESSED_DIR="{saasherder_context}-processed"
 
-            {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" pull
-            {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" template --filter {saasherder_object_blacklist} --output-dir "$PROCESSED_DIR" --local tag
-            {saasherder_docker} --context "{saasherder_context}" --environment "$SAAS_ENV" label --output-dir "$PROCESSED_DIR" --saas-repo-url {repo_url} > label_selectors
+            {saasherder} pull
+            {saasherder} template --filter {saasherder_object_blacklist} --output-dir "$PROCESSED_DIR" --local tag
+            {saasherder} label --output-dir "$PROCESSED_DIR" --saas-repo-url {repo_url} > label_selectors
 
             if [ -n "{ssh_ci_ext}" ]; then SSH_CMD="{ssh_ci_ext_cmd}"; else SSH_CMD=""; fi
 
             find $PROCESSED_DIR -type f | while read f; do
-                cat $f | $SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" -n {kube_namespace} apply --dry-run --validate -f -
+                cat $f | {oc} apply -f - --dry-run --validate
 
                 {saasherder_check_image} $f '{image_pattern}'
                 cat $f | {manifest_bouncer_cmd}
 
                 if [ "{dry_run}" != "yes" ]; then
-                    cat $f | $SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" -n {kube_namespace} apply -f -
+                    cat $f | {oc} apply -f -
                 fi
             done
 
             if [ "{dry_run}" == "yes" ]; then exit; fi
-            if [ "{kube_namespace}" == "error_no_ns" ]; then exit; fi
+            if [ "{kube_namespace}" == "{kube_namespace_error}" ]; then exit; fi
 
             # validate that the number of replicas matches the number of ready replicas
             if [ -z "{disable_saasherder_validate}" ]; then
@@ -204,11 +198,11 @@
                     sleep $(( ATTEMPT++ )) # first sleep is 0
                     while IFS= read -r label_selector; do
                         current_label_selector=$(echo $label_selector | sed 's/!=/==/g')
-                        resources_to_validate=$($SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" get {saasherder_object_validate} -o name -l "$current_label_selector" -n {kube_namespace})
+                        resources_to_validate=$({oc} get {saasherder_object_validate} -o name -l "$current_label_selector")
 
                         for r in $resources_to_validate; do
                             echo "validating $r"
-                            replicas_status=$($SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" -n {kube_namespace} get $r -o jsonpath="{{['status.replicas', 'status.readyReplicas', 'status.updatedReplicas']}}")
+                            replicas_status=$({oc} get $r -o jsonpath="{{['status.replicas', 'status.readyReplicas', 'status.updatedReplicas']}}")
 
                             if [ "$(echo $replicas_status | wc -w)" != "3" ]; then
                                 echo "replica status invalid, status is invalid"
@@ -235,10 +229,10 @@
             # delete resources from previous deployments that are no longer deployed
             if [ -z "{disable_saasherder_delete}" ]; then
                 while IFS= read -r label_selector; do
-                    resources_to_delete=$($SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" get {saasherder_object_whitelist} -o name -l "$label_selector" -n {kube_namespace})
+                    resources_to_delete=$({oc} get {saasherder_object_whitelist} -o name -l "$label_selector")
 
                     for r in $resources_to_delete; do
-                        echo DRY-RUN oc delete $r -n {kube_namespace}
+                        echo DRY-RUN oc delete $r
                     done
                 done < label_selectors
             fi
