@@ -150,9 +150,6 @@ run_vault_reconcile_integration() {
   return 0
 }
 
-run_int github &
-run_int github-repo-invites &
-run_int quay-membership &
 run_int quay-repos &
 run_vault_reconcile_integration &
 run_int openshift-groups &
@@ -161,7 +158,6 @@ run_int jenkins-plugins &
 run_int jenkins-roles &
 run_int jenkins-job-builder &
 run_int jenkins-webhooks &
-run_int aws-iam-keys &
 run_int gitlab-members &
 run_int gitlab-permissions &
 
