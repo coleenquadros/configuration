@@ -250,7 +250,31 @@ Distribute the incident report to sd-org@ and app-interface serviceOwner in app
 
 ## 1.9. App-sre escalation to external teams
 
-- PnT Devops: https://mojo.redhat.com/docs/DOC-1049381. For things like GitLab CEE.
+### PnT Devops
+
+* [PnT DevOps - Issue Escalation Procedure](https://mojo.redhat.com/docs/DOC-1049381) - Mojo
+
+1. Create a case: https://redhat.service-now.com/help?id=sc_cat_item&sys_id=b86bfc10133ce200dce03ff18144b028
+
+    1.1 For CEE GitLab:
+
+        * Category: `Application`
+
+        * Item: `Gerrit/Git`
+
+        * Hostname Affected: `https://gitlab.cee.redhat.com`
+
+    1.2 For CentralCI Jenkins:
+
+        * Category: `Virtualization/Cloud`
+
+        * Item: `CI-RHOS`
+
+        * Hostname Affected: `https://ci-int-jenkins.rhev-ci-vms.eng.rdu2.redhat.com`
+
+2. If this is a weekend (Saturday / Sunday), find the `PNQ On Call` from the [SysOps On Call calendar](https://calendar.google.com/calendar?cid=cmVkaGF0LmNvbV84ajE4YzFkOTFkZHFkYXQ4bDlxdDk0djFoY0Bncm91cC5jYWxlbmRhci5nb29nbGUuY29t).
+
+3. Ping the On Call in #ops-escalation in the Red Hat Internal IRC Server - irc.devel.redhat.com.
 
 ## 1.10. Escalation procedures
 
