@@ -192,10 +192,10 @@ The recommended setup includes the pagerduty app on your mobile phone.  From the
 For notification troubleshooting see: https://support.pagerduty.com/docs/notification-troubleshooting
 
 #### 1.5.1.2. Follow the sun
-The follow the sun cycle (FTS) is an on-call rotation to ensure that the first page triggered by an alert goes to an engineer who, at the time, is within regular working hours. This is to prevent direct pages to the primary on-call within the regular hours of others. If there is no engineer available within their regular hours the page will go directly to the primary on-call. 
+The follow the sun cycle (FTS) is an on-call rotation to ensure that the first page triggered by an alert goes to an engineer who, at the time, is within regular working hours. This is to prevent direct pages to the primary on-call within the regular hours of others. If there is no engineer available within their regular hours the page will go directly to the primary on-call.
 
 #### 1.5.1.3. Primary on-call
-The primary on-call is a 24/7 on-call rotation assigned on a weekly basis.  The engineer assigned is required to be available for the initial response within 30 minutes of the page. 
+The primary on-call is a 24/7 on-call rotation assigned on a weekly basis.  The engineer assigned is required to be available for the initial response within 30 minutes of the page.
 
 Pages for primary on-calls should be be kept at a minimum and are reserved for critical issues in production environments which need immediate attention.
 
@@ -249,6 +249,8 @@ Distribute the incident report to sd-org@ and app-interface serviceOwner in app
 ## 1.8. Git process
 
 ## 1.9. App-sre escalation to external teams
+
+- PnT Devops: https://mojo.redhat.com/docs/DOC-1049381. For things like GitLab CEE.
 
 ## 1.10. Escalation procedures
 
