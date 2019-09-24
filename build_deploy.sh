@@ -150,9 +150,6 @@ run_vault_reconcile_integration() {
   return 0
 }
 
-APP_INTERFACE_PROJECT_ID=13582
-
-run_int gitlab-housekeeping $APP_INTERFACE_PROJECT_ID &
 run_int quay-repos &
 run_vault_reconcile_integration &
 run_int openshift-groups &
