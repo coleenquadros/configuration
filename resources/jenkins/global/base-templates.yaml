@@ -51,17 +51,15 @@
                             sleep $(( ATTEMPT++ )) # first sleep is 0
                             for r in $resources_to_validate; do
                                 echo "validating $r"
-                                replicas_status=$({oc} get $r -o jsonpath="{{['status.replicas', 'status.readyReplicas', 'status.updatedReplicas']}}")
-
-                                if [ "$(echo $replicas_status | wc -w)" != "3" ]; then
-                                    echo "replica status invalid, status is invalid"
-                                    STATUS=invalid
-                                    continue
-                                fi
+                                replicas_status=$({oc} get $r -o jsonpath="{{['status.replicas', 'status.updatedReplicas', 'status.readyReplicas']}}")
 
                                 replicas=$(echo $replicas_status | cut -d' ' -f1)
-                                ready_replicas=$(echo $replicas_status | cut -d' ' -f2)
-                                updated_replicas=$(echo $replicas_status | cut -d' ' -f3)
+                                updated_replicas=$(echo $replicas_status | cut -d' ' -f2)
+                                ready_replicas=$(echo $replicas_status | cut -d' ' -f3)
+
+                                if [ "$replicas" == "0" ]; then
+                                    continue
+                                fi
 
                                 if [[ "$replicas" != "$ready_replicas" || "$replicas" != "$updated_replicas" ]]; then
                                     echo "new replicas not ready, status is invalid"
@@ -236,17 +234,13 @@
 
                         for r in $resources_to_validate; do
                             echo "validating $r"
-                            replicas_status=$({oc} get $r -o jsonpath="{{['status.replicas', 'status.readyReplicas', 'status.updatedReplicas']}}")
-
-                            if [ "$(echo $replicas_status | wc -w)" != "3" ]; then
-                                echo "replica status invalid, status is invalid"
-                                STATUS=invalid
-                                continue
-                            fi
+                            replicas_status=$({oc} get $r -o jsonpath="{{['status.replicas', 'status.updatedReplicas', 'status.readyReplicas']}}")
 
                             replicas=$(echo $replicas_status | cut -d' ' -f1)
-                            ready_replicas=$(echo $replicas_status | cut -d' ' -f2)
-                            updated_replicas=$(echo $replicas_status | cut -d' ' -f3)
+                            updated_replicas=$(echo $replicas_status | cut -d' ' -f2)
+                            ready_replicas=$(echo $replicas_status | cut -d' ' -f3)
+
+                            if [ "$replicas" == "0" ]; then continue; fi
 
                             if [[ "$replicas" != "$ready_replicas" || "$replicas" != "$updated_replicas" ]]; then
                                 echo "new replicas not ready, status is invalid"
