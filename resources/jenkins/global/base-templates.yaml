@@ -162,6 +162,15 @@
         - timed: |
             {cron_expression}
 
+    build_tag_template: &build_tag_template
+        build_tag_script_path: './build_tag.sh'
+        wrappers:
+        - timeout_wrapper:
+            timeout: '{timeout}'
+        builders:
+        - shell: |
+            {build_tag_script_path}
+
     # Defines the saasherder shell build script that implements CD
     #
     # Arguments:
@@ -340,6 +349,12 @@
     gh_timed: &gh_timed
         <<: *timed_template
         <<: *gh_checkout
+
+    gh_build_tag: &gh_build_tag
+        branch: "refs/tags/*"
+        <<: *gh_triggers # these are different on ci.int and ci.ext
+        <<: *gh_checkout
+        <<: *build_tag_template
 
 - base_templates:
     name: gitlab-base-templates
