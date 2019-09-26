@@ -1,0 +1,21 @@
+ operator_curator: &operator_curator
+    ci_cmd: ./curator.py --app-token ${{BASIC_QUAY}} --oauth-token ${{CURATOR_OAUTH}}
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    builders:
+        - shell: |
+            {ci_cmd}
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *curator-oauth
+        - *basic_quay
+    triggers:
+        - timed: |
+            '{cron_expression}'
+    <<: *gh_checkout
