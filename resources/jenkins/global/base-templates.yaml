@@ -10,6 +10,19 @@
         shell: |
             {build_deploy_script_path}
 
+    pr_check: &pr_check
+        shell: |
+            {pr_check_script_path}
+
+    stack_analysis: &stack_analysis
+        shell: |
+            if [ -z "{run_stack_analysis_path}" ]; then exit; fi
+            tmp_dir=$(mktemp -d -t sa-XXXXXXXXXX)
+            cp {run_stack_analysis_path} $tmp_dir
+            docker run --rm -v $tmp_dir:/coreapi/repo -e API_GATEWAY_URL=$API_GATEWAY_URL -e API_GATEWAY_USER_KEY=$API_GATEWAY_USER_KEY quay.io/openshiftio/fabric8-analytics-stack-analyzer-image:latest
+            cat $tmp_dir/response.json > response.json
+            cat response.json
+
     saasherder_apply: &saasherder_apply
         shell: |
             #!/bin/bash
@@ -134,15 +147,8 @@
         - timeout_wrapper:
             timeout: '{timeout}'
         builders:
-        - shell: |
-            {pr_check_script_path}
-        - shell: |
-            if [ -z "{run_stack_analysis_path}" ]; then exit; fi
-            tmp_dir=$(mktemp -d -t sa-XXXXXXXXXX)
-            cp {run_stack_analysis_path} $tmp_dir
-            docker run --rm -v $tmp_dir:/coreapi/repo -e API_GATEWAY_URL=$API_GATEWAY_URL -e API_GATEWAY_USER_KEY=$API_GATEWAY_USER_KEY quay.io/openshiftio/fabric8-analytics-stack-analyzer-image:latest
-            cat $tmp_dir/response.json > response.json
-            cat response.json
+        - *pr_check
+        - *stack_analysis
 
     timed_template: &timed_template
         ci_cmd: ./run.sh
