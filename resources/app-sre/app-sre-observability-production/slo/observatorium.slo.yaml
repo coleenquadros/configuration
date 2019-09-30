@@ -52,7 +52,7 @@ spec:
         namespace: telemeter-stage
       record: status_code:http_requests_total:rate3d:sum
     - expr: |
-        status_code:http_requests_total:rate5m:sum{job="thanos-querier",namespace="telemeter-stage",status_code="5xx"}
+        sum(status_code:http_requests_total:rate5m:sum{job="thanos-querier",namespace="telemeter-stage",status_code="5xx"})
         /
         sum(status_code:http_requests_total:rate5m:sum{job="thanos-querier",namespace="telemeter-stage"})
       labels:
@@ -60,7 +60,7 @@ spec:
         namespace: telemeter-stage
       record: errors:status_code:http_requests_total:rate5m:sum
     - expr: |
-        status_code:http_requests_total:rate30m:sum{job="thanos-querier",namespace="telemeter-stage",status_code="5xx"}
+        sum(status_code:http_requests_total:rate30m:sum{job="thanos-querier",namespace="telemeter-stage",status_code="5xx"})
         /
         sum(status_code:http_requests_total:rate30m:sum{job="thanos-querier",namespace="telemeter-stage"})
       labels:
@@ -68,7 +68,7 @@ spec:
         namespace: telemeter-stage
       record: errors:status_code:http_requests_total:rate30m:sum
     - expr: |
-        status_code:http_requests_total:rate1h:sum{job="thanos-querier",namespace="telemeter-stage",status_code="5xx"}
+        sum(status_code:http_requests_total:rate1h:sum{job="thanos-querier",namespace="telemeter-stage",status_code="5xx"})
         /
         sum(status_code:http_requests_total:rate1h:sum{job="thanos-querier",namespace="telemeter-stage"})
       labels:
@@ -76,7 +76,7 @@ spec:
         namespace: telemeter-stage
       record: errors:status_code:http_requests_total:rate1h:sum
     - expr: |
-        status_code:http_requests_total:rate2h:sum{job="thanos-querier",namespace="telemeter-stage",status_code="5xx"}
+        sum(status_code:http_requests_total:rate2h:sum{job="thanos-querier",namespace="telemeter-stage",status_code="5xx"})
         /
         sum(status_code:http_requests_total:rate2h:sum{job="thanos-querier",namespace="telemeter-stage"})
       labels:
@@ -84,7 +84,7 @@ spec:
         namespace: telemeter-stage
       record: errors:status_code:http_requests_total:rate2h:sum
     - expr: |
-        status_code:http_requests_total:rate6h:sum{job="thanos-querier",namespace="telemeter-stage",status_code="5xx"}
+        sum(status_code:http_requests_total:rate6h:sum{job="thanos-querier",namespace="telemeter-stage",status_code="5xx"})
         /
         sum(status_code:http_requests_total:rate6h:sum{job="thanos-querier",namespace="telemeter-stage"})
       labels:
@@ -92,7 +92,7 @@ spec:
         namespace: telemeter-stage
       record: errors:status_code:http_requests_total:rate6h:sum
     - expr: |
-        status_code:http_requests_total:rate1d:sum{job="thanos-querier",namespace="telemeter-stage",status_code="5xx"}
+        sum(status_code:http_requests_total:rate1d:sum{job="thanos-querier",namespace="telemeter-stage",status_code="5xx"})
         /
         sum(status_code:http_requests_total:rate1d:sum{job="thanos-querier",namespace="telemeter-stage"})
       labels:
@@ -100,14 +100,15 @@ spec:
         namespace: telemeter-stage
       record: errors:status_code:http_requests_total:rate1d:sum
     - expr: |
-        status_code:http_requests_total:rate3d:sum{job="thanos-querier",namespace="telemeter-stage",status_code="5xx"}
+        sum(status_code:http_requests_total:rate3d:sum{job="thanos-querier",namespace="telemeter-stage",status_code="5xx"})
         /
         sum(status_code:http_requests_total:rate3d:sum{job="thanos-querier",namespace="telemeter-stage"})
       labels:
         job: thanos-querier
         namespace: telemeter-stage
       record: errors:status_code:http_requests_total:rate3d:sum
-    - expr: |
+    - alert: ErrorBudgetBurn
+      expr: |
         (
           errors:status_code:http_requests_total:rate1h:sum{job="thanos-querier",namespace="telemeter-stage"} > (14.4*0.010000)
           and
@@ -122,6 +123,5 @@ spec:
       labels:
         job: thanos-querier
         namespace: telemeter-stage
-        window: 30d
         severity: info
-      alert: ObservatoriumErrorBudgetBurn
+        window: 30d
