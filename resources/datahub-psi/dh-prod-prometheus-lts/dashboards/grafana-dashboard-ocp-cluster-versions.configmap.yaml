@@ -140,7 +140,7 @@ data:
           "strokeWidth": 1,
           "targets": [
             {
-              "expr": "count by (version) (cluster_version{type=\"current\"})",
+              "expr": "count by (version) (cluster_version{type=\"current\"} $source)",
               "format": "time_series",
               "instant": true,
               "interval": "",
@@ -189,7 +189,7 @@ data:
           "strokeWidth": 1,
           "targets": [
             {
-              "expr": "sort_desc(count by (email_domain) ((max by (_id, account, email_domain, organization, external_organization) (subscription_labels{email_domain!=\"redhat.com\"})) + on (_id) group_left (version) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"}))))",
+              "expr": "sort_desc(\n  count by (email_domain) (\n    (max by (_id, account, email_domain, organization, external_organization) (\n      subscription_labels\n    )) + on (_id) group_left (version) (0 * topk by (_id) (1, \n      cluster_version{type=\"current\"}\n    ))\n    $source\n  )\n)",
               "format": "time_series",
               "instant": true,
               "interval": "",
@@ -200,7 +200,7 @@ data:
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Non Red-Hat Clusters",
+          "title": "By Email Domain",
           "type": "grafana-piechart-panel",
           "valueName": "current"
         },
@@ -265,7 +265,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "count(count by (_id) (cluster_version{type=\"current\"}))",
+              "expr": "count(count by (_id) (cluster_version{type=\"current\"} $source))",
               "format": "time_series",
               "instant": true,
               "intervalFactor": 1,
@@ -348,7 +348,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "count((time() - cluster_version{type=\"cluster\"}) > 7 * 24 * 60 * 60)",
+              "expr": "count((time() - cluster_version{type=\"cluster\"} $source) > 7 * 24 * 60 * 60)",
               "format": "time_series",
               "instant": true,
               "intervalFactor": 1,
@@ -432,7 +432,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "count((time() - cluster_version{type=\"cluster\"}) < 24 * 60 * 60)",
+              "expr": "count((time() - (cluster_version{type=\"cluster\"} $source)) < 24 * 60 * 60)",
               "format": "time_series",
               "instant": true,
               "intervalFactor": 1,
@@ -515,8 +515,9 @@ data:
           "tableColumn": "Value",
           "targets": [
             {
-              "expr": "count((max by (_id, account, email_domain, organization, external_organization) (subscription_labels{email_domain!=\"redhat.com\"})) + on (_id) group_left (version) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})))",
+              "expr": "count(count by (_id) ((time() - max_over_time(cluster_version{type=\"updating\",from_version!=\"\"}[7d])) < (7 * 24 * 60 * 60)) $source)",
               "format": "table",
+              "hide": false,
               "instant": true,
               "interval": "",
               "intervalFactor": 1,
@@ -527,7 +528,7 @@ data:
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "External Clusters (4.y.z)",
+          "title": "Updated recently",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -746,7 +747,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "count by (version) (\n   ((time() - topk by (_id) (1,cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"}))) +\n   on (_id) group_right (version) (0 * count by (_id) (subscription_labels{email_domain!=\"redhat.com\"}))\n)",
+              "expr": "count by (version) (\n   ((time() - topk by (_id) (1,cluster_version{type=\"current\"})))\n   $source\n)",
               "format": "time_series",
               "instant": false,
               "interval": "4h",
@@ -830,7 +831,7 @@ data:
           "reverseYBuckets": false,
           "targets": [
             {
-              "expr": "max by (_id) (time() - cluster_version{type=\"cluster\"}) / 60 / 60 / 24",
+              "expr": "max by (_id) (time() - (cluster_version{type=\"cluster\"} $source)) / (60 * 60 * 24)",
               "format": "time_series",
               "instant": false,
               "interval": "12h",
@@ -906,7 +907,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "count by (version) (\n   ((time() - topk by (_id) (1,cluster_version{type=\"cluster\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"}) < 4 * 60 * 60)) +\n   on (_id) group_right (version) (0 * count by (_id) (subscription_labels{email_domain!=\"redhat.com\"}))\n)",
+              "expr": "count by (version) (\n   ((time() - topk by (_id) (1,cluster_version{type=\"cluster\"} $source) < (4 * 60 * 60)))\n)",
               "format": "time_series",
               "instant": false,
               "interval": "4h",
@@ -919,7 +920,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "New clusters every 4h (4.y.z, non-RH)",
+          "title": "New clusters every 4h",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -996,7 +997,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(sum by (_id) (time() - cluster_version{type=\"cluster\"})) / 60 / 60 / 24",
+              "expr": "sum(sum by (_id) (time() - (cluster_version{type=\"cluster\"} $source))) / (60 * 60 * 24)",
               "format": "time_series",
               "instant": false,
               "interval": "",
@@ -1086,7 +1087,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "count by (version) (\n   ((time() - topk by (_id) (1,cluster_version{type=\"updating\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"}) < 4 * 60 * 60)) +\n   on (_id) group_right (version) (0 * count by (_id) (subscription_labels{email_domain!=\"redhat.com\"}))\n)",
+              "expr": "count by (version) (\n   ((time() - topk by (_id) (1,cluster_version{type=\"updating\"} $source) < 4 * 60 * 60))\n)",
               "format": "time_series",
               "instant": false,
               "interval": "4h",
@@ -1099,7 +1100,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Upgrades every 4h (4.y.z, non-RH)",
+          "title": "Upgrades every 4h",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -1176,7 +1177,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by (version) ((time() - cluster_version{type=\"cluster\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"}) / (60 * 60 * 24))",
+              "expr": "sum by (version) ((time() - (cluster_version{type=\"cluster\"} $source)) / (60 * 60 * 24))",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -1198,7 +1199,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Cluster-days by current version (4.y.z)",
+          "title": "Cluster-days by current version",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -1258,6 +1259,59 @@ data:
             "regex": "",
             "skipUrlSync": false,
             "type": "datasource"
+          },
+          {
+            "allValue": null,
+            "current": {
+              "tags": [],
+              "text": "+ 0",
+              "value": "+ 0"
+            },
+            "hide": 0,
+            "includeAll": false,
+            "label": null,
+            "multi": false,
+            "name": "source",
+            "options": [
+              {
+                "selected": true,
+                "text": "+ 0",
+                "value": "+ 0"
+              },
+              {
+                "selected": false,
+                "text": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"}))",
+                "value": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"}))"
+              },
+              {
+                "selected": false,
+                "text": "+ on (_id) group_left(_blah) (0 * ((time() - topk by (_id) (1, cluster_version{type=\"completed\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) < (21 * 24 * 60 * 60))) + on (_id) group_left(_blah) (0 * ((time() - topk by (_id) (1, cluster_version{type=\"initial\"})) > (7 * 24 * 60 * 60)))",
+                "value": "+ on (_id) group_left(_blah) (0 * ((time() - topk by (_id) (1, cluster_version{type=\"completed\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) < (21 * 24 * 60 * 60))) + on (_id) group_left(_blah) (0 * ((time() - topk by (_id) (1, cluster_version{type=\"initial\"})) > (7 * 24 * 60 * 60)))"
+              },
+              {
+                "selected": false,
+                "text": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{email_domain!~\"redhat.com|(^|.*\\\\.)ibm.com\"}))",
+                "value": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{email_domain!~\"redhat.com|(^|.*\\\\.)ibm.com\"}))"
+              },
+              {
+                "selected": false,
+                "text": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{support=~\"Premium|Standard\"}))",
+                "value": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{support=~\"Premium|Standard\"}))"
+              },
+              {
+                "selected": false,
+                "text": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) + on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{email_domain!=\"redhat.com\"}))",
+                "value": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) + on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{email_domain!=\"redhat.com\"}))"
+              },
+              {
+                "selected": false,
+                "text": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+-0\\\\.nightly.+\"})) + on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{email_domain!=\"redhat.com\"}))",
+                "value": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+-0\\\\.nightly.+\"})) + on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{email_domain!=\"redhat.com\"}))"
+              }
+            ],
+            "query": "+ 0, + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, cluster_version{type=\"current\"\\,version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})), + on (_id) group_left(_blah) (0 * ((time() - topk by (_id) (1\\, cluster_version{type=\"completed\"\\,version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) < (21 * 24 * 60 * 60))) + on (_id) group_left(_blah) (0 * ((time() - topk by (_id) (1\\, cluster_version{type=\"initial\"})) > (7 * 24 * 60 * 60))), + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, subscription_labels{email_domain!~\"redhat.com|(^|.*\\\\.)ibm.com\"})), + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, subscription_labels{support=~\"Premium|Standard\"})),  + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, cluster_version{type=\"current\"\\,version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, subscription_labels{email_domain!=\"redhat.com\"})),  + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, cluster_version{type=\"current\"\\,version=~\"4\\\\.\\\\d+\\\\.\\\\d+-0\\\\.nightly.+\"})) + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, subscription_labels{email_domain!=\"redhat.com\"}))",
+            "skipUrlSync": false,
+            "type": "custom"
           }
         ]
       },
