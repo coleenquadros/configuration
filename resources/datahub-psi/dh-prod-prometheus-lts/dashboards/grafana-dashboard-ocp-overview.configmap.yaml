@@ -1214,7 +1214,7 @@ data:
           "datasource": "$datasource",
           "fontSize": "100%",
           "gridPos": {
-            "h": 3,
+            "h": 5,
             "w": 9,
             "x": 0,
             "y": 25
@@ -1299,7 +1299,7 @@ data:
           ],
           "targets": [
             {
-              "expr": "(time() - topk by (_id) (1, cluster_version{type=\"updating\",from_version=\"\"} $source)) > 1 * 60 * 60",
+              "expr": "max by (_id, version) ((time() - topk by (_id) (1, cluster_version{type=\"updating\",from_version=\"\"} $source)) > 1 * 60 * 60)",
               "format": "table",
               "instant": true,
               "intervalFactor": 1,
@@ -1318,10 +1318,98 @@ data:
           "datasource": "$datasource",
           "fontSize": "100%",
           "gridPos": {
-            "h": 22,
+            "h": 11,
+            "w": 15,
+            "x": 9,
+            "y": 28
+          },
+          "id": 13,
+          "interval": "",
+          "links": [],
+          "pageSize": 15,
+          "scroll": true,
+          "showHeader": true,
+          "sort": {
+            "col": 2,
+            "desc": true
+          },
+          "styles": [
+            {
+              "alias": "",
+              "colorMode": null,
+              "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+              ],
+              "decimals": 2,
+              "pattern": "Time",
+              "thresholds": [],
+              "type": "hidden",
+              "unit": "short"
+            },
+            {
+              "alias": "",
+              "colorMode": null,
+              "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+              ],
+              "dateFormat": "YYYY-MM-DD HH:mm:ss",
+              "decimals": 2,
+              "mappingType": 1,
+              "pattern": "Value",
+              "thresholds": [],
+              "type": "hidden",
+              "unit": "short"
+            },
+            {
+              "alias": "",
+              "colorMode": null,
+              "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+              ],
+              "dateFormat": "YYYY-MM-DD HH:mm:ss",
+              "decimals": 2,
+              "link": true,
+              "linkTargetBlank": true,
+              "linkTooltip": "See cluster dashboard",
+              "linkUrl": "/d/kSomLV7Wk/ocp-4-cluster-by-id?orgId=1&var-_id=${__cell}",
+              "mappingType": 1,
+              "pattern": "_id",
+              "thresholds": [],
+              "type": "number",
+              "unit": "short"
+            }
+          ],
+          "targets": [
+            {
+              "expr": "count by (_id,alertname) (alerts{alertstate=\"firing\",alertname!=\"Watchdog\"} $source)",
+              "format": "table",
+              "instant": true,
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Firing Alerts",
+          "transform": "table",
+          "type": "table"
+        },
+        {
+          "columns": [],
+          "datasource": "$datasource",
+          "fontSize": "100%",
+          "gridPos": {
+            "h": 20,
             "w": 9,
             "x": 0,
-            "y": 28
+            "y": 30
           },
           "id": 11,
           "interval": "",
@@ -1414,94 +1502,6 @@ data:
           "timeFrom": null,
           "timeShift": null,
           "title": "Clusters Failing",
-          "transform": "table",
-          "type": "table"
-        },
-        {
-          "columns": [],
-          "datasource": "$datasource",
-          "fontSize": "100%",
-          "gridPos": {
-            "h": 11,
-            "w": 15,
-            "x": 9,
-            "y": 28
-          },
-          "id": 13,
-          "interval": "",
-          "links": [],
-          "pageSize": 15,
-          "scroll": true,
-          "showHeader": true,
-          "sort": {
-            "col": 2,
-            "desc": true
-          },
-          "styles": [
-            {
-              "alias": "",
-              "colorMode": null,
-              "colors": [
-                "rgba(245, 54, 54, 0.9)",
-                "rgba(237, 129, 40, 0.89)",
-                "rgba(50, 172, 45, 0.97)"
-              ],
-              "decimals": 2,
-              "pattern": "Time",
-              "thresholds": [],
-              "type": "hidden",
-              "unit": "short"
-            },
-            {
-              "alias": "",
-              "colorMode": null,
-              "colors": [
-                "rgba(245, 54, 54, 0.9)",
-                "rgba(237, 129, 40, 0.89)",
-                "rgba(50, 172, 45, 0.97)"
-              ],
-              "dateFormat": "YYYY-MM-DD HH:mm:ss",
-              "decimals": 2,
-              "mappingType": 1,
-              "pattern": "Value",
-              "thresholds": [],
-              "type": "hidden",
-              "unit": "short"
-            },
-            {
-              "alias": "",
-              "colorMode": null,
-              "colors": [
-                "rgba(245, 54, 54, 0.9)",
-                "rgba(237, 129, 40, 0.89)",
-                "rgba(50, 172, 45, 0.97)"
-              ],
-              "dateFormat": "YYYY-MM-DD HH:mm:ss",
-              "decimals": 2,
-              "link": true,
-              "linkTargetBlank": true,
-              "linkTooltip": "See cluster dashboard",
-              "linkUrl": "/d/kSomLV7Wk/ocp-4-cluster-by-id?orgId=1&var-_id=${__cell}",
-              "mappingType": 1,
-              "pattern": "_id",
-              "thresholds": [],
-              "type": "number",
-              "unit": "short"
-            }
-          ],
-          "targets": [
-            {
-              "expr": "count by (_id,alertname) (alerts{alertstate=\"firing\",alertname!=\"Watchdog\"} $source)",
-              "format": "table",
-              "instant": true,
-              "intervalFactor": 1,
-              "legendFormat": "",
-              "refId": "A"
-            }
-          ],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "Firing Alerts",
           "transform": "table",
           "type": "table"
         },
@@ -1635,18 +1635,18 @@ data:
               },
               {
                 "selected": false,
-                "text": "+ on (_id) group_left(_blah) (0 * ((time() - topk by (_id) (1, cluster_version{type=\"completed\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) < (21 * 24 * 60 * 60)))",
-                "value": "+ on (_id) group_left(_blah) (0 * ((time() - topk by (_id) (1, cluster_version{type=\"completed\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) < (21 * 24 * 60 * 60)))"
+                "text": "+ on (_id) group_left(_blah) (0 * ((time() - topk by (_id) (1, cluster_version{type=\"completed\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) < (21 * 24 * 60 * 60))) + on (_id) group_left(_blah) (0 * ((time() - topk by (_id) (1, cluster_version{type=\"initial\"})) > (7 * 24 * 60 * 60)))",
+                "value": "+ on (_id) group_left(_blah) (0 * ((time() - topk by (_id) (1, cluster_version{type=\"completed\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) < (21 * 24 * 60 * 60))) + on (_id) group_left(_blah) (0 * ((time() - topk by (_id) (1, cluster_version{type=\"initial\"})) > (7 * 24 * 60 * 60)))"
               },
               {
                 "selected": false,
-                "text": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{email_domain!=\"redhat.com\"}))",
-                "value": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{email_domain!=\"redhat.com\"}))"
+                "text": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{email_domain!~\"redhat.com|(^|.*\\\\.)ibm.com\"}))",
+                "value": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{email_domain!~\"redhat.com|(^|.*\\\\.)ibm.com\"}))"
               },
               {
                 "selected": false,
-                "text": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{support=~\"Premium|Standard\",email_domain!=\"redhat.com\"}))",
-                "value": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{support=~\"Premium|Standard\",email_domain!=\"redhat.com\"}))"
+                "text": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{support=~\"Premium|Standard\"}))",
+                "value": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{support=~\"Premium|Standard\"}))"
               },
               {
                 "selected": false,
@@ -1659,7 +1659,7 @@ data:
                 "value": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+-0\\\\.nightly.+\"})) + on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{email_domain!=\"redhat.com\"}))"
               }
             ],
-            "query": "+ 0, + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, cluster_version{type=\"current\"\\,version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})), + on (_id) group_left(_blah) (0 * ((time() - topk by (_id) (1\\, cluster_version{type=\"completed\"\\,version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) < (21 * 24 * 60 * 60))), + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, subscription_labels{email_domain!=\"redhat.com\"})), + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, subscription_labels{support=~\"Premium|Standard\"\\,email_domain!=\"redhat.com\"})),  + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, cluster_version{type=\"current\"\\,version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, subscription_labels{email_domain!=\"redhat.com\"})),  + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, cluster_version{type=\"current\"\\,version=~\"4\\\\.\\\\d+\\\\.\\\\d+-0\\\\.nightly.+\"})) + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, subscription_labels{email_domain!=\"redhat.com\"}))",
+            "query": "+ 0, + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, cluster_version{type=\"current\"\\,version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})), + on (_id) group_left(_blah) (0 * ((time() - topk by (_id) (1\\, cluster_version{type=\"completed\"\\,version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) < (21 * 24 * 60 * 60))) + on (_id) group_left(_blah) (0 * ((time() - topk by (_id) (1\\, cluster_version{type=\"initial\"})) > (7 * 24 * 60 * 60))), + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, subscription_labels{email_domain!~\"redhat.com|(^|.*\\\\.)ibm.com\"})), + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, subscription_labels{support=~\"Premium|Standard\"})),  + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, cluster_version{type=\"current\"\\,version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, subscription_labels{email_domain!=\"redhat.com\"})),  + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, cluster_version{type=\"current\"\\,version=~\"4\\\\.\\\\d+\\\\.\\\\d+-0\\\\.nightly.+\"})) + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, subscription_labels{email_domain!=\"redhat.com\"}))",
             "skipUrlSync": false,
             "type": "custom"
           }
