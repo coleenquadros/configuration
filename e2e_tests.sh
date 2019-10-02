@@ -44,6 +44,8 @@ run_test() {
 
 run_test create-namespace &
 run_test dedicated-admin-rolebindings &
+run_test default-project-labels &
+run_test default-network-policies &
 
 wait
 
