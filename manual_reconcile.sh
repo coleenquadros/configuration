@@ -180,6 +180,7 @@ run_int gitlab-permissions &
 run_int openshift-namespaces &
 run_int openshift-rolebinding &
 run_int openshift-resources &
+run_int openshift-network-policies &
 run_int terraform-resources &
 run_int terraform-users &
 
