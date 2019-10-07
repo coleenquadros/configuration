@@ -62,6 +62,8 @@ source $CURRENT_DIR/runners.sh
 
 # Run integrations
 
+DRY_RUN=true
+
 ## Create directories for integrations
 mkdir -p ${WORK_DIR}/config
 mkdir -p ${WORK_DIR}/throughput

@@ -4,6 +4,7 @@ run_int() {
   local status
 
   INTEGRATION_NAME="${ALIAS:-$1}"
+  $DRY_RUN && $DRY_RUN_FLAG="--dry-run"
 
   echo "INTEGRATION $INTEGRATION_NAME" >&2
 
@@ -16,7 +17,7 @@ run_int() {
     -e REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem \
     -w / \
     ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
-    qontract-reconcile --config /config/config.toml --dry-run $@ \
+    qontract-reconcile --config /config/config.toml $DRY_RUN_FLAG $@ \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-${INTEGRATION_NAME}.txt
 
   status="$?"
@@ -61,6 +62,7 @@ run_test() {
 run_vault_reconcile_integration() {
   local status
 
+  $DRY_RUN && $DRY_RUN_FLAG="-dry-run"
   echo "INTEGRATION vault" >&2
 
   STARTTIME=$(date +%s)
@@ -72,7 +74,7 @@ run_vault_reconcile_integration() {
     -e VAULT_AUTHTYPE=approle \
     -e VAULT_ROLE_ID=${VAULT_MANAGER_ROLE_ID} \
     -e VAULT_SECRET_ID=${VAULT_MANAGER_SECRET_ID} \
-    ${VAULT_RECONCILE_IMAGE}:${VAULT_RECONCILE_IMAGE_TAG} -dry-run \
+    ${VAULT_RECONCILE_IMAGE}:${VAULT_RECONCILE_IMAGE_TAG} $DRY_RUN_FLAG \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-vault.txt
 
   status="$?"
