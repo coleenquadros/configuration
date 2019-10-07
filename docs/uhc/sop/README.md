@@ -30,7 +30,7 @@ Account manager API is down
 
 - Console access to the cluster that runs account-manager (app-sre)
 - Edit access to the uhc namespaces:
-  - uhc-staging
+  - uhc-stage
   - uhc-production
 
 ### Relevant secrets:
@@ -59,7 +59,7 @@ Account manager API is returning an abnormally high number of 5xx Error requests
 
 - Console access to the cluster that runs account-manager (app-sre)
 - Edit access to the uhc namespaces:
-  - uhc-staging
+  - uhc-stage
   - uhc-production
 
 ### Relevant secrets:
@@ -88,7 +88,7 @@ Account manager API is returning an abnormally high number of 4xx Error requests
 
 - Console access to the cluster that runs account-manager (app-sre)
 - Edit access to the uhc namespaces:
-  - uhc-staging
+  - uhc-stage
   - uhc-production
 
 ### Relevant secrets:
@@ -116,7 +116,7 @@ The number of banned users has abnormally increased during the last 24 hours.
 
 - Console access to the cluster that runs account-manager (app-sre)
 - Edit access to the uhc namespaces:
-  - uhc-staging
+  - uhc-stage
   - uhc-production
 
 ### Relevant secrets:
@@ -155,12 +155,12 @@ Clusters service API is down
 
 - Console access to the cluster that runs clusters-service (app-sre)
 - Edit access to the uhc namespaces:
-  - uhc-staging
+  - uhc-stage
   - uhc-production
 
 ### Relevant secrets:
 - secrets/app-interface/app-sre/uhc-production/clusters-service
-- secrets/app-interface/app-sre/uhc-staging/clusters-service
+- secrets/app-interface/app-sre/uhc-stage/clusters-service
 
 ### Steps:
 
@@ -186,12 +186,12 @@ Clusters service API is returning an abnormally high number of 5xx Error request
 
 - Console access to the cluster that runs clusters-service (app-sre)
 - Edit access to the uhc namespaces:
-  - uhc-staging
+  - uhc-stage
   - uhc-production
 
 ### Relevant secrets:
 - secrets/app-interface/app-sre/uhc-production/clusters-service
-- secrets/app-interface/app-sre/uhc-staging/clusters-service
+- secrets/app-interface/app-sre/uhc-stage/clusters-service
 
 ### Steps:
 
@@ -217,7 +217,7 @@ Gateway is down
 
 - Console access to the cluster that runs the gateway (app-sre)
 - Edit access to the uhc namespaces:
-  - uhc-staging
+  - uhc-stage
   - uhc-production
 
 ### Steps:

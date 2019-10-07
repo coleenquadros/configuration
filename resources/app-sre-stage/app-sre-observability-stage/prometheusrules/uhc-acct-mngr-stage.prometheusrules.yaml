@@ -14,7 +14,7 @@ spec:
         message: "No targets found for UHC Account Manager in namespace {{ $labels.namespace }}. Account Manager is down."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
       expr: |
-        absent(up{job="uhc-acct-mngr-metrics",namespace="uhc-staging"} == 1)
+        absent(up{job="uhc-acct-mngr-metrics",namespace="uhc-stage"} == 1)
       for: 5m
       labels:
         service: uhc-acct-mngr
@@ -24,9 +24,9 @@ spec:
         message: "UHC Account Manager in namespace {{ $labels.namespace }} is returning 5xx errors for {{ $value | humanize }}% of requests."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
       expr: |
-        sum without(instance, pod, job, code) (rate(api_inbound_request_count{code=~"^(?:5..)$",namespace="uhc-staging",service="uhc-acct-mngr-metrics"}[5m]))
+        sum without(instance, pod, job, code) (rate(api_inbound_request_count{code=~"^(?:5..)$",namespace="uhc-stage",service="uhc-acct-mngr-metrics"}[5m]))
         /
-        sum without(instance, pod, job, code) (rate(api_inbound_request_count{namespace="uhc-staging",service="uhc-acct-mngr-metrics"}[5m])) * 100 > 5
+        sum without(instance, pod, job, code) (rate(api_inbound_request_count{namespace="uhc-stage",service="uhc-acct-mngr-metrics"}[5m])) * 100 > 5
       for: 10m
       labels:
         service: uhc-acct-mngr
@@ -36,9 +36,9 @@ spec:
         message: "UHC Account Manager in namespace {{ $labels.namespace }} is returning 4xx errors for {{ $value | humanize }}% of requests."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
       expr: |
-        sum without(instance, pod, job, code) (rate(api_inbound_request_count{code=~"^(?:4..)$",namespace="uhc-staging",service="uhc-acct-mngr-metrics"}[5m]))
+        sum without(instance, pod, job, code) (rate(api_inbound_request_count{code=~"^(?:4..)$",namespace="uhc-stage",service="uhc-acct-mngr-metrics"}[5m]))
         /
-        sum without(instance, pod, job, code) (rate(api_inbound_request_count{namespace="uhc-staging",service="uhc-acct-mngr-metrics"}[5m])) * 100 > 5
+        sum without(instance, pod, job, code) (rate(api_inbound_request_count{namespace="uhc-stage",service="uhc-acct-mngr-metrics"}[5m])) * 100 > 5
       for: 10m
       labels:
         service: uhc-acct-mngr
@@ -48,7 +48,7 @@ spec:
         message: "UHC Account Manager in namespace {{ $labels.namespace }} 50th percentile latency is greater than 2s. Current value: {{ $value | humanize }}"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
       expr: |
-        histogram_quantile(0.50, sum(rate(api_inbound_request_duration_bucket{namespace="uhc-staging",service="uhc-acct-mngr-metrics"}[1m])) by (le)) > 2
+        histogram_quantile(0.50, sum(rate(api_inbound_request_duration_bucket{namespace="uhc-stage",service="uhc-acct-mngr-metrics"}[1m])) by (le)) > 2
       for: 10m
       labels:
         service: uhc-acct-mngr
@@ -58,7 +58,7 @@ spec:
         message: "UHC Account Manager in namespace {{ $labels.namespace }} has banned {{ $value | humanize }} users in 24 hours"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
       expr: |
-        sum(delta(banned_users{namespace="uhc-staging",service="uhc-acct-mngr-metrics"}[24h])) > 25
+        sum(delta(banned_users{namespace="uhc-stage",service="uhc-acct-mngr-metrics"}[24h])) > 25
       for: 10m
       labels:
         service: uhc-acct-mngr

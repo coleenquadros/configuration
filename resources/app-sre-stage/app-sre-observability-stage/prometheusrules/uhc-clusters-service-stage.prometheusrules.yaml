@@ -14,7 +14,7 @@ spec:
         message: "No targets found for UHC clusters service in namespace {{ $labels.namespace }}. clusters service is down."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
       expr: |
-        absent(up{job="clusters-service-metrics",namespace="uhc-staging"} == 1)
+        absent(up{job="clusters-service-metrics",namespace="uhc-stage"} == 1)
       for: 5m
       labels:
         service: uhc-clusters-service
@@ -25,9 +25,9 @@ spec:
         message: "UHC clusters service is returning errors for {{ $labels.code }} for {{ $value | humanize }}% of requests."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
       expr: |
-        sum without(instance, pod, job, code) (rate(api_inbound_request_count{code=~"^(?:5..)$",namespace="uhc-staging",service="clusters-service-metrics"}[5m]))
+        sum without(instance, pod, job, code) (rate(api_inbound_request_count{code=~"^(?:5..)$",namespace="uhc-stage",service="clusters-service-metrics"}[5m]))
         /
-        sum without(instance, pod, job, code) (rate(api_inbound_request_count{namespace="uhc-staging",service="clusters-service-metrics"}[5m])) * 100 > 5
+        sum without(instance, pod, job, code) (rate(api_inbound_request_count{namespace="uhc-stage",service="clusters-service-metrics"}[5m])) * 100 > 5
       for: 10m
       labels:
         service: uhc-clusters-service
@@ -38,7 +38,7 @@ spec:
         message: "UHC clusters service 50th percentile latency is greater than 2s. Current value: {{ $value | humanize }}"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
       expr: |
-        histogram_quantile(0.50, sum(rate(api_inbound_request_duration_bucket{namespace="uhc-staging",service="clusters-service-metrics"}[1m])) by (le)) > 2
+        histogram_quantile(0.50, sum(rate(api_inbound_request_duration_bucket{namespace="uhc-stage",service="clusters-service-metrics"}[1m])) by (le)) > 2
       for: 10m
       labels:
         service: uhc-clusters-service
