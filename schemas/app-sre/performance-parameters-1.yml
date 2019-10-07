@@ -1,0 +1,192 @@
+---
+"$schema": /metaschema-1.json
+version: '1.0'
+
+type: object
+additionalProperties: false
+
+properties:
+  "$schema":
+    type: string
+    enum:
+    - /app-sre/performance-parameters-1.yml
+
+  labels:
+    "$ref": "/common-1.json#/definitions/labels"
+
+  name:
+    "$ref": "/common-1.json#/definitions/identifier"
+
+  app:
+    "$ref": "/common-1.json#/definitions/crossref"
+    "$schemaRef": "/app-sre/app-1.yml"
+
+  component:
+    description: "generates prometheusRuleName: <component>-slos-<ns>"
+    "$ref": "/common-1.json#/definitions/identifier"
+
+  prometheusLabels:
+    description: "labels that Prometheus uses to select this rules file"
+    type: object
+
+  selectorJob:
+    description: "prometheus job"
+    "$ref": "/common-1.json#/definitions/identifier"
+
+  additionalSelectors:
+    description: "additional selectors to be used in Prometheus rule"
+    type: object
+
+  namespaces:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+
+      properties:
+        namespace:
+          "$ref": "/common-1.json#/definitions/crossref"
+          "$schemaRef": "/openshift/namespace-1.yml"
+
+        overrideSelectorJob:
+          description: "override prometheus job"
+          type: string
+
+        overrideAdditionalSelectors:
+          description: "override additional selectors to be used in Prometheus rule"
+          type: object
+
+      required:
+      - namespace
+
+  availability:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+
+      properties:
+        kind:
+          type: string
+          enum: ['SLO']
+
+        metric:
+          type: string
+          pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
+
+        errorBudget:
+          type: number
+
+      required:
+      - kind
+      - metric
+      - errorBudget
+
+  latency:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+
+      properties:
+        kind:
+          type: string
+          enum: ['SLO']
+
+        metric:
+          type: string
+          pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
+
+        threshold:
+          description: "threshold in seconds"
+          type: number
+
+        percentile:
+          type: number
+
+      required:
+      - kind
+      - metric
+      - threshold
+      - percentile
+
+  rawRecording:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+
+      properties:
+        record:
+          type: string
+
+        expr:
+          type: string
+
+        labels:
+          type: object
+
+    required:
+    - record
+    - expr
+    - labels
+
+  rawAlerting:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+
+      properties:
+        alert:
+          type: string
+
+        expr:
+          type: string
+
+        for:
+          type: string
+
+        labels:
+          type: object
+
+        annotations:
+          type: object
+          additionalProperties: false
+
+          properties:
+            message:
+              type: string
+
+            runbook:
+              type: string
+              pattern: "^https?://"
+
+            dashboard:
+              type: string
+              pattern: "^https?://"
+
+            link_url:
+              type: string
+              pattern: "https?://"
+
+          required:
+          - message
+          - runbook
+          - dashboard
+
+      required:
+      - alert
+      - expr
+      - for
+      - labels
+
+required:
+- labels
+- name
+- app
+- component
+- prometheusLabels
+- selectorJob
+- additionalSelectors
+- namespaces

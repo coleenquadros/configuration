@@ -1,0 +1,63 @@
+---
+$schema: /app-sre/performance-parameters-1.yml
+
+labels:
+  service: telemeter
+
+name: telemeter-server
+
+app:
+  $ref: /services/telemeter/app.yml
+
+component: telemeter-server
+
+prometheusLabels: # Dictionary, a bunch of labels that Prometheus uses to select this rules file
+  prometheus: app-sre
+  role: alert-rules
+  type: slo-rules
+
+selectorJob: telemeter-server # namespace level
+additionalSelectors: # List of additional selectors to be used in Prometheus rule
+  handler: upload
+
+namespaces:
+- namespace:
+    $ref: /services/telemeter/namespaces/telemeter-stage.yml
+  #overrideSelectorJob: STRING # optional
+  #overrideAdditionalSelectors: LIST # optional
+
+- namespace:
+    $ref: /services/telemeter/namespaces/telemeter-production.yml
+  #overrideSelectorJob: STRING # optional
+  #overrideAdditionalSelectors: LIST # optional
+
+availability:
+- kind: SLO
+  metric: http_requests_total
+  errorBudget: 0.01
+
+latency:
+- kind: SLO
+  metric: latency_bucket
+  threshold: 3
+  percentile: 90
+
+rawRecording:
+- record: component:slo_availability:ratio_rate_5m
+  expr: sum(rate(something{selector="value"}[5m]))
+  labels:
+    # inferred: component: prometheus
+    # inferred: namespace
+    service: telemeter
+
+rawAlerting:
+- alert: PrometheusErrorBudgetBurn
+  expr: something > 0
+  for: 2m
+  labels:
+    severity: test
+  annotations:
+    message: "Component {{$labels.component}} has returned {{ $value | printf `%.2f` }}% 5xx over the last hour."
+    runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/sop"
+    dashboard: "https://grafana.app-sre.devshift.net/"
+    # link_url: ""
