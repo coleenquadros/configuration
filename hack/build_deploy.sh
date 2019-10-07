@@ -2,28 +2,10 @@
 
 set -exvo pipefail
 
+WORK_DIR=`pwd`
+CURRENT_DIR=$(dirname "$0")
 source ./.env
-
-wait_response() {
-    local count=0
-    local max=10
-
-    URL=$1
-    EXPECTED_RESPONSE=$2
-
-    while [[ ${count} -lt ${max} ]]; do
-        let count++ || :
-        RESPONSE=$(curl -s $URL)
-        [[ "$EXPECTED_RESPONSE" == "$RESPONSE" ]] && break || sleep 10
-    done
-
-    if [[ "$EXPECTED_RESPONSE" != "$RESPONSE" ]]; then
-      echo "Invalid response." >&2
-      echo "Expecting:\n$EXPECTED_RESPONSE" >&2
-      echo "Got:\n$RESPONSE" >&2
-      exit 1
-    fi
-}
+source $CURRENT_DIR/runners.sh
 
 SCHEMAS_DIR=schemas
 
@@ -48,15 +30,16 @@ export AWS_S3_BUCKET=$AWS_S3_BUCKET_STAGING
 export AWS_S3_KEY=$AWS_S3_KEY_STAGING
 export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_STAGING
 
-export USERNAME=$USERNAME_STAGING
-export PASSWORD=$PASSWORD_STAGING
+export GRAPHQL_SERVER_BASE=app-interface.stage.devshift.net
+export GRAPHQL_USERNAME=$USERNAME_STAGING
+export GRAPHQL_PASSWORD=$PASSWORD_STAGING
 
 aws s3 cp validate/data.json s3://${AWS_S3_BUCKET}/${AWS_S3_KEY}
 
-curl "https://${USERNAME}:${PASSWORD}@app-interface.stage.devshift.net/reload"
+curl "https://${GRAPHQL_USERNAME}:${GRAPHQL_PASSWORD}@${GRAPHQL_SERVER_BASE}/reload"
 
 wait_response \
-    "https://${USERNAME}:${PASSWORD}@app-interface.stage.devshift.net/sha256" \
+    "https://${GRAPHQL_USERNAME}:${GRAPHQL_PASSWORD}@${GRAPHQL_SERVER_BASE}/sha256" \
     "$SHA256"
 
 # Upload to production and reload
@@ -67,15 +50,16 @@ export AWS_S3_BUCKET=$AWS_S3_BUCKET_PRODUCTION
 export AWS_S3_KEY=$AWS_S3_KEY_PRODUCTION
 export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_PRODUCTION
 
-export USERNAME=$USERNAME_PRODUCTION
-export PASSWORD=$PASSWORD_PRODUCTION
+export GRAPHQL_SERVER_BASE=app-interface.devshift.net
+export GRAPHQL_USERNAME=$USERNAME_PRODUCTION
+export GRAPHQL_PASSWORD=$PASSWORD_PRODUCTION
 
 aws s3 cp validate/data.json s3://${AWS_S3_BUCKET}/${AWS_S3_KEY}
 
-curl "https://${USERNAME}:${PASSWORD}@app-interface.devshift.net/reload"
+curl "https://${GRAPHQL_USERNAME}:${GRAPHQL_PASSWORD}@${GRAPHQL_SERVER_BASE}/reload"
 
 wait_response \
-    "https://${USERNAME}:${PASSWORD}@app-interface.devshift.net/sha256" \
+    "https://${GRAPHQL_USERNAME}:${GRAPHQL_PASSWORD}@${GRAPHQL_SERVER_BASE}/sha256" \
     "$SHA256"
 
 # Run integrations
@@ -93,11 +77,7 @@ rm -rf ${SUCCESS_DIR} ${FAIL_DIR}; mkdir -p ${SUCCESS_DIR} ${FAIL_DIR}
 
 set +e
 
-GRAPHQL_SERVER=https://app-interface.devshift.net/graphql
-
-WORK_DIR=`pwd`
-CURRENT_DIR=$(dirname "$0")
-source $CURRENT_DIR/runners.sh
+GRAPHQL_SERVER=https://${GRAPHQL_SERVER_BASE}/graphql
 
 run_int quay-repos &
 run_vault_reconcile_integration &

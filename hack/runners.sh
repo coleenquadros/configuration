@@ -66,6 +66,8 @@ run_vault_reconcile_integration() {
   STARTTIME=$(date +%s)
   docker run --rm -t \
     -e GRAPHQL_SERVER=${GRAPHQL_SERVER} \
+    -e GRAPHQL_USERNAME=${GRAPHQL_USERNAME} \
+    -e GRAPHQL_PASSWORD=${GRAPHQL_PASSWORD} \
     -e VAULT_ADDR=https://vault.devshift.net \
     -e VAULT_AUTHTYPE=approle \
     -e VAULT_ROLE_ID=${VAULT_MANAGER_ROLE_ID} \
@@ -85,4 +87,25 @@ run_vault_reconcile_integration() {
   fi
 
   return $status
+}
+
+wait_response() {
+    local count=0
+    local max=10
+
+    URL=$1
+    EXPECTED_RESPONSE=$2
+
+    while [[ ${count} -lt ${max} ]]; do
+        let count++ || :
+        RESPONSE=$(curl -s $URL)
+        [[ "$EXPECTED_RESPONSE" == "$RESPONSE" ]] && break || sleep 10
+    done
+
+    if [[ "$EXPECTED_RESPONSE" != "$RESPONSE" ]]; then
+      echo "Invalid response." >&2
+      echo "Expecting:\n$EXPECTED_RESPONSE" >&2
+      echo "Got:\n$RESPONSE" >&2
+      exit 1
+    fi
 }
