@@ -11,8 +11,9 @@ run_int() {
   docker run --rm \
     -v ${WORK_DIR}/config:/config:z \
     -v /etc/pki:/etc/pki:z \
-    -e REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem \
     -v ${WORK_DIR}/throughput:/throughput:z \
+    -v /var/tmp/.cache:/root/.cache:z \
+    -e REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem \
     -w / \
     ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
     qontract-reconcile --config /config/config.toml --dry-run $@ \
@@ -64,7 +65,7 @@ run_vault_reconcile_integration() {
 
   STARTTIME=$(date +%s)
   docker run --rm -t \
-    -e GRAPHQL_SERVER=http://$IP:4000/graphql \
+    -e GRAPHQL_SERVER=${GRAPHQL_SERVER} \
     -e VAULT_ADDR=https://vault.devshift.net \
     -e VAULT_AUTHTYPE=approle \
     -e VAULT_ROLE_ID=${VAULT_MANAGER_ROLE_ID} \

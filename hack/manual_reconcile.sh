@@ -100,8 +100,9 @@ fi
 wait
 
 ## Write config.toml for reconcile tools
+GRAPHQL_SERVER=http://$IP:4000/graphql
 cat "$CONFIG_TOML" \
-  | sed "s|https://app-interface.devshift.net/graphql|http://$IP:4000/graphql|" \
+  | sed "s|https://app-interface.devshift.net/graphql|$GRAPHQL_SERVER|" \
   > ${WORK_DIR}/config/config.toml
 
 ## Run integrations on local server

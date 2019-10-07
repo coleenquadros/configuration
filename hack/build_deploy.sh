@@ -93,6 +93,8 @@ rm -rf ${SUCCESS_DIR} ${FAIL_DIR}; mkdir -p ${SUCCESS_DIR} ${FAIL_DIR}
 
 set +e
 
+GRAPHQL_SERVER=https://app-interface.devshift.net/graphql
+
 WORK_DIR=`pwd`
 CURRENT_DIR=$(dirname "$0")
 source $CURRENT_DIR/runners.sh
