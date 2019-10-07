@@ -4,7 +4,7 @@ run_int() {
   local status
 
   INTEGRATION_NAME="${ALIAS:-$1}"
-  $DRY_RUN && $DRY_RUN_FLAG="--dry-run"
+  $DRY_RUN && DRY_RUN_FLAG="--dry-run"
 
   echo "INTEGRATION $INTEGRATION_NAME" >&2
 
@@ -62,7 +62,7 @@ run_test() {
 run_vault_reconcile_integration() {
   local status
 
-  $DRY_RUN && $DRY_RUN_FLAG="-dry-run"
+  $DRY_RUN && DRY_RUN_FLAG="-dry-run"
   echo "INTEGRATION vault" >&2
 
   STARTTIME=$(date +%s)
