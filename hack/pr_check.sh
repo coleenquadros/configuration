@@ -5,7 +5,7 @@ CURRENT_DIR=$(dirname "$0")
 # Setup vars and clean files
 export TEMP_DIR=$(realpath -s temp)
 rm -rf $TEMP_DIR; mkdir -p $TEMP_DIR $TEMP_DIR/reports
-cp reports-main.css $TEMP_DIR/reports
+cp ./$CURRENT_DIR/reports-main.css $TEMP_DIR/reports
 
 source ./.env
 
@@ -27,7 +27,7 @@ mkdir -p $(dirname $RESULTS)
 exit_status=$?
 
 # Write report
-python gen-report.py ${RESULTS} > ${REPORT}
+python ./$CURRENT_DIR/gen-report.py ${RESULTS} > ${REPORT}
 echo "Report written to: ${REPORT}"
 
 # Exit if there was a validation error
@@ -40,7 +40,7 @@ echo "$CONFIG_TOML" | base64 -d > ${TEMP_DIR}/config.toml
 exit_status=$?
 
 # Write report
-python gen-report.py ${RESULTS} $TEMP_DIR/reports > ${REPORT}
+python ./$CURRENT_DIR/gen-report.py ${RESULTS} $TEMP_DIR/reports > ${REPORT}
 echo "Report written to: ${REPORT}"
 
 exit $exit_status

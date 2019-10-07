@@ -93,62 +93,9 @@ rm -rf ${SUCCESS_DIR} ${FAIL_DIR}; mkdir -p ${SUCCESS_DIR} ${FAIL_DIR}
 
 set +e
 
-run_int() {
-  INTEGRATION_NAME="${ALIAS:-$1}"
-  echo "INTEGRATION $INTEGRATION_NAME" >&2
-
-  STARTTIME=$(date +%s)
-  docker run --rm \
-    -v `pwd`/config:/config:z \
-    -v /etc/pki:/etc/pki:z \
-    -v `pwd`/throughput:/throughput:z \
-    -v /var/tmp/.cache:/root/.cache:z \
-    -e REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem \
-    -w / \
-    ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
-    qontract-reconcile --config /config/config.toml $@ \
-    2>&1 | tee ${SUCCESS_DIR}/reconcile-${INTEGRATION_NAME}.txt
-  EXIT_STATUS=$?
-  ENDTIME=$(date +%s)
-
-  # Add integration run durations to a file
-  echo "app_interface_int_execution_duration_seconds{integration=\"$INTEGRATION_NAME\"} $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
-
-  if [ "$EXIT_STATUS" != "0" ]; then
-    mv ${SUCCESS_DIR}/reconcile-${INTEGRATION_NAME}.txt ${FAIL_DIR}/reconcile-${INTEGRATION_NAME}.txt
-    return 1
-  fi
-
-  return 0
-}
-
-run_vault_reconcile_integration() {
-  echo "INTEGRATION vault" >&2
-
-  STARTTIME=$(date +%s)
-  docker run --rm -t \
-    -e GRAPHQL_SERVER=https://app-interface.devshift.net/graphql \
-    -e GRAPHQL_USERNAME=$USERNAME_PRODUCTION \
-    -e GRAPHQL_PASSWORD=$PASSWORD_PRODUCTION \
-    -e VAULT_ADDR=https://vault.devshift.net \
-    -e VAULT_AUTHTYPE=approle \
-    -e VAULT_ROLE_ID=${VAULT_MANAGER_ROLE_ID} \
-    -e VAULT_SECRET_ID=${VAULT_MANAGER_SECRET_ID} \
-    ${VAULT_RECONCILE_IMAGE}:${VAULT_RECONCILE_IMAGE_TAG} \
-    2>&1 | tee ${SUCCESS_DIR}/reconcile-vault.txt
-  EXIT_STATUS=$?
-  ENDTIME=$(date +%s)
-
-  # Add integration run durations to a file
-  echo "app_interface_int_execution_duration_seconds{integration=\"vault\"} $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
-
-  if [ "$EXIT_STATUS" != "0" ]; then
-    mv ${SUCCESS_DIR}/reconcile-${1}.txt ${FAIL_DIR}/reconcile-vault.txt
-    return 1
-  fi
-
-  return 0
-}
+WORK_DIR=`pwd`
+CURRENT_DIR=$(dirname "$0")
+source $CURRENT_DIR/runners.sh
 
 run_int quay-repos &
 run_vault_reconcile_integration &

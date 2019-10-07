@@ -16,31 +16,9 @@ rm -rf ${SUCCESS_DIR} ${FAIL_DIR}; mkdir -p ${SUCCESS_DIR} ${FAIL_DIR}
 
 set +e
 
-run_test() {
-  echo "TEST $1" >&2
-
-  STARTTIME=$(date +%s)
-  docker run --rm \
-    -v `pwd`/config:/config:z \
-    -v /etc/pki:/etc/pki:z \
-    -v `pwd`/throughput:/throughput:z \
-    -w / \
-    -e REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem \
-    ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
-    e2e-tests --config /config/config.toml $@ \
-    2>&1 | tee ${SUCCESS_DIR}/e2e-test-${1}.txt
-  EXIT_STATUS=$?
-  ENDTIME=$(date +%s)
-
-  echo "$1 $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/test_execution_duration_seconds.txt"
-
-  if [ "$EXIT_STATUS" != "0" ]; then
-    mv ${SUCCESS_DIR}/e2e-test-${1}.txt ${FAIL_DIR}/e2e-test-${1}.txt
-    return 1
-  fi
-
-  return 0
-}
+WORK_DIR=`pwd`
+CURRENT_DIR=$(dirname "$0")
+source $CURRENT_DIR/runners.sh
 
 run_test create-namespace &
 run_test dedicated-admin-rolebindings &

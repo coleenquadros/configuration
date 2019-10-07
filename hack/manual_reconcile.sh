@@ -12,8 +12,9 @@ if [ `uname -s` = "Darwin" ]; then
   QONTRACT_SERVER_DOCKER_OPTS="-p 4000:4000"
 fi
 
+CURRENT_DIR=${CURRENT_DIR:-./hack}
 TEMP_DIR=${TEMP_DIR:-./temp}
-TEMP_DIR=$(realpath -s $TEMP_DIR)
+WORK_DIR=$(realpath -s $TEMP_DIR)
 
 DATAFILES_BUNDLE="$1"
 [ -z "${DATAFILES_BUNDLE}" ] && usage
@@ -25,7 +26,7 @@ DATAFILES_BUNDLE_BASENAME=$(basename ${DATAFILES_BUNDLE})
 DATAFILES_BUNDLE_DIR=$(dirname $(realpath -s ${DATAFILES_BUNDLE}))
 
 # write .env file
-cat <<EOF >${TEMP_DIR}/.qontract-server-env
+cat <<EOF >${WORK_DIR}/.qontract-server-env
 LOAD_METHOD=fs
 DATAFILES_FILE=/validate/${DATAFILES_BUNDLE_BASENAME}
 EOF
@@ -34,7 +35,7 @@ EOF
 qontract_server=$(
   docker run --rm -d $QONTRACT_SERVER_DOCKER_OPTS \
     -v ${DATAFILES_BUNDLE_DIR}:/validate:z \
-    --env-file=${TEMP_DIR}/.qontract-server-env \
+    --env-file=${WORK_DIR}/.qontract-server-env \
     ${QONTRACT_SERVER_IMAGE}:${QONTRACT_SERVER_IMAGE_TAG}
 )
 
@@ -57,73 +58,15 @@ else
   CURL_IP=$IP
 fi
 
-run_int() {
-  local status
-
-  INTEGRATION_NAME="${ALIAS:-$1}"
-
-  echo "INTEGRATION $INTEGRATION_NAME" >&2
-
-  STARTTIME=$(date +%s)
-  docker run --rm \
-    -v ${TEMP_DIR}/config:/config:z \
-    -v /etc/pki:/etc/pki:z \
-    -e REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem \
-    -v ${TEMP_DIR}/throughput:/throughput:z \
-    -w / \
-    ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
-    qontract-reconcile --config /config/config.toml --dry-run $@ \
-    2>&1 | tee ${SUCCESS_DIR}/reconcile-${INTEGRATION_NAME}.txt
-
-  status="$?"
-  ENDTIME=$(date +%s)
-
-  echo "app_interface_int_execution_duration_seconds{integration=\"$INTEGRATION_NAME\"} $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
-
-  if [ "$status" != "0" ]; then
-    echo "INTEGRATION FAILED: $1" >&2
-    mv ${SUCCESS_DIR}/reconcile-${INTEGRATION_NAME}.txt ${FAIL_DIR}/reconcile-${INTEGRATION_NAME}.txt
-  fi
-
-  return $status
-}
-
-run_vault_reconcile_integration() {
-  local status
-
-  echo "INTEGRATION vault" >&2
-
-  STARTTIME=$(date +%s)
-  docker run --rm -t \
-    -e GRAPHQL_SERVER=http://$IP:4000/graphql \
-    -e VAULT_ADDR=https://vault.devshift.net \
-    -e VAULT_AUTHTYPE=approle \
-    -e VAULT_ROLE_ID=${VAULT_MANAGER_ROLE_ID} \
-    -e VAULT_SECRET_ID=${VAULT_MANAGER_SECRET_ID} \
-    ${VAULT_RECONCILE_IMAGE}:${VAULT_RECONCILE_IMAGE_TAG} -dry-run \
-    2>&1 | tee ${SUCCESS_DIR}/reconcile-vault.txt
-
-  status="$?"
-  ENDTIME=$(date +%s)
-
-  # Add integration run durations to a file
-  echo "app_interface_int_execution_duration_seconds{integration=\"vault\"} $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
-
-  if [ "$status" != "0" ]; then
-    echo "INTEGRATION FAILED: vault" >&2
-    mv ${SUCCESS_DIR}/reconcile-vault.txt ${FAIL_DIR}/reconcile-vault.txt
-  fi
-
-  return $status
-}
+source $CURRENT_DIR/runners.sh
 
 # Run integrations
 
 ## Create directories for integrations
-mkdir -p ${TEMP_DIR}/config
-mkdir -p ${TEMP_DIR}/throughput
-SUCCESS_DIR=${TEMP_DIR}/reports/reconcile_reports_success
-FAIL_DIR=${TEMP_DIR}/reports/reconcile_reports_fail
+mkdir -p ${WORK_DIR}/config
+mkdir -p ${WORK_DIR}/throughput
+SUCCESS_DIR=${WORK_DIR}/reports/reconcile_reports_success
+FAIL_DIR=${WORK_DIR}/reports/reconcile_reports_fail
 rm -rf ${SUCCESS_DIR} ${FAIL_DIR}; mkdir -p ${SUCCESS_DIR} ${FAIL_DIR}
 
 docker pull ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG}
@@ -132,7 +75,7 @@ docker pull ${VAULT_RECONCILE_IMAGE}:${VAULT_RECONCILE_IMAGE_TAG}
 # Prepare to run integrations on production
 
 ## Write config.toml for reconcile tools
-cat "$CONFIG_TOML" > ${TEMP_DIR}/config/config.toml
+cat "$CONFIG_TOML" > ${WORK_DIR}/config/config.toml
 
 ## Run integrations on production
 ALIAS=jenkins-job-builder-no-compare run_int jenkins-job-builder --no-compare &
@@ -159,7 +102,7 @@ wait
 ## Write config.toml for reconcile tools
 cat "$CONFIG_TOML" \
   | sed "s|https://app-interface.devshift.net/graphql|http://$IP:4000/graphql|" \
-  > ${TEMP_DIR}/config/config.toml
+  > ${WORK_DIR}/config/config.toml
 
 ## Run integrations on local server
 
