@@ -16,6 +16,7 @@ rm -rf ${SUCCESS_DIR} ${FAIL_DIR}; mkdir -p ${SUCCESS_DIR} ${FAIL_DIR}
 
 set +e
 
+WORK_DIR=`pwd`
 CURRENT_DIR=$(dirname "$0")
 source $CURRENT_DIR/runners.sh
 
