@@ -7,136 +7,347 @@ metadata:
   name: observatorium-thanos-stage
 spec:
   groups:
-  - name: thanos-querier.rules
+  - name: thanos-compact.rules
     rules:
-    - alert: ThanosQuerierGrpcErrorRate
+    - alert: ThanosCompactMultipleCompactsAreRunning
       annotations:
-        message: Thanos Querier is returning Internal/Unavailable errors.
-      expr: |
-        sum(
-          rate(grpc_server_handled_total{grpc_code=~"Unknown|ResourceExhausted|Internal|Unavailable", job="thanos-querier", namespace="telemeter-stage"}[5m])
-          /
-          rate(grpc_server_started_total{job="thanos-querier", namespace="telemeter-stage"}[5m])
-        ) > 0.05
+        message: You should never run more than one Thanos Compact at once. You have
+          {{ $value }}
+        runbook:  https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/observatorium/README.md#thanoscompactmultiplecompactsarerunning
+        dashboard: https://grafana.app-sre.devshift.net/d/651943d05a8123e32867b4673963f42b/thanos-compact?orgId=1&refresh=10s&var-datasource=app-sre-prometheus&var-namespace=telemeter-stage&var-job=All&var-pod=All&var-interval=5m
+      expr: sum(up{job=~"thanos-compactor.*", namespace="telemeter-stage"}) > 1
       for: 5m
       labels:
-        severity: warning
-    - alert: ThanosQuerierHighDNSFailures
+        severity: medium
+        service: telemeter
+    - alert: ThanosCompactIsNotRunning
       annotations:
-        message: Thanos Queriers have {{ $value }} of failing DNS queries.
+        message: Thanos Compaction is not running or just not scraped yet.
+        runbook:  https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/observatorium/README.md#thanoscompactisnotrunning
+        dashboard: https://grafana.app-sre.devshift.net/d/651943d05a8123e32867b4673963f42b/thanos-compact?orgId=1&refresh=10s&var-datasource=app-sre-prometheus&var-namespace=telemeter-stage&var-job=All&var-pod=All&var-interval=5m
+      expr: up{job=~"thanos-compactor.*", namespace="telemeter-stage"} == 0 or absent({job=~"thanos-compactor.*",
+        namespace="telemeter-stage"})
+      for: 5m
+      labels:
+        severity: medium
+        service: telemeter
+    - alert: ThanosCompactHalted
+      annotations:
+        message: Thanos Compact {{$labels.job}} has failed to run and now is halted.
+        runbook:  https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/observatorium/README.md#thanoscompacthalted
+        dashboard: https://grafana.app-sre.devshift.net/d/651943d05a8123e32867b4673963f42b/thanos-compact?orgId=1&refresh=10s&var-datasource=app-sre-prometheus&var-namespace=telemeter-stage&var-job=All&var-pod=All&var-interval=5m
+      expr: thanos_compactor_halted{job=~"thanos-compactor.*", namespace="telemeter-stage"}
+        == 1
+      for: 5m
+      labels:
+        severity: medium
+        service: telemeter
+    - alert: ThanosCompactHighCompactionFailures
+      annotations:
+        message: Thanos Compact {{$labels.job}} is failing to execute {{ $value |
+          humanize }}% of compactions.
+        runbook:  https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/observatorium/README.md#thanoscompacthighcompactionfailures
+        dashboard: https://grafana.app-sre.devshift.net/d/651943d05a8123e32867b4673963f42b/thanos-compact?orgId=1&refresh=10s&var-datasource=app-sre-prometheus&var-namespace=telemeter-stage&var-job=All&var-pod=All&var-interval=5m
       expr: |
         sum(
-          rate(thanos_querier_store_apis_dns_failures_total{job="thanos-querier", namespace="telemeter-stage"}[5m])
+          rate(prometheus_tsdb_compactions_failed_total{job=~"thanos-compactor.*", namespace="telemeter-stage"}[5m])
         /
-          rate(thanos_querier_store_apis_dns_lookups_total{job="thanos-querier", namespace="telemeter-stage"}[5m])
-        ) > 1
+          rate(prometheus_tsdb_compactions_total{job=~"thanos-compactor.*", namespace="telemeter-stage"}[5m])
+        ) by (job) * 100 > 5
       for: 15m
       labels:
-        severity: warning
+        severity: medium
+        service: telemeter
+    - alert: ThanosCompactBucketHighOperationFailures
+      annotations:
+        message: Thanos Compact {{$labels.job}} Bucket is failing to execute {{ $value
+          | humanize }}% of operations.
+        runbook:  https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/observatorium/README.md#thanoscompactbuckethighoperationfailures
+        dashboard: https://grafana.app-sre.devshift.net/d/651943d05a8123e32867b4673963f42b/thanos-compact?orgId=1&refresh=10s&var-datasource=app-sre-prometheus&var-namespace=telemeter-stage&var-job=All&var-pod=All&var-interval=5m
+      expr: |
+        sum(
+          rate(thanos_objstore_bucket_operation_failures_total{job=~"thanos-compactor.*", namespace="telemeter-stage"}[5m])
+        /
+          rate(thanos_objstore_bucket_operations_total{job=~"thanos-compactor.*", namespace="telemeter-stage"}[5m])
+        ) by (job) * 100 > 5
+      for: 15m
+      labels:
+        severity: medium
+    - alert: ThanosCompactHasNotRun
+      annotations:
+        message: Thanos Compact {{$labels.job}} has not uploaded anything for 24 hours.
+        runbook:  https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/observatorium/README.md#thanoscompacthasnotrun
+        dashboard: https://grafana.app-sre.devshift.net/d/651943d05a8123e32867b4673963f42b/thanos-compact?orgId=1&refresh=10s&var-datasource=app-sre-prometheus&var-namespace=telemeter-stage&var-job=All&var-pod=All&var-interval=5m
+      expr: (time() - max(thanos_objstore_bucket_last_successful_upload_time{job=~"thanos-compactor.*",
+        namespace="telemeter-stage"})) / 60 / 60 > 24
+      labels:
+        severity: medium
+        service: telemeter
+  - name: thanos-querier.rules
+    rules:
+    - alert: ThanosQuerierGrpcServerErrorRate
+      annotations:
+        message: Thanos Querier {{$labels.job}} is failing to handle {{ $value | humanize
+          }}% of requests.
+        runbook:  https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/observatorium/README.md#thanosqueriergrpcservererrorrate
+        dashboard: https://grafana.app-sre.devshift.net/d/98fde97ddeaf2981041745f1f2ba68c2/thanos-querier?orgId=1&var-datasource=app-sre-prometheus&var-namespace=telemeter-stage&var-job=All&var-pod=All&var-interval=5m&refresh=10s
+      expr: |
+        sum(
+          rate(grpc_server_handled_total{grpc_code=~"Unknown|ResourceExhausted|Internal|Unavailable", job=~"thanos-querier.*", namespace="telemeter-stage"}[5m])
+          /
+          rate(grpc_server_started_total{job=~"thanos-querier.*", namespace="telemeter-stage"}[5m])
+        ) by (job) * 100 > 5
+      for: 5m
+      labels:
+        severity: medium
+        service: telemeter
+    - alert: ThanosQuerierGrpcClientErrorRate
+      annotations:
+        message: Thanos Querier {{$labels.job}} is failing to send {{ $value | humanize
+          }}% of requests.
+        runbook:  https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/observatorium/README.md#thanosqueriergrpcclienterrorrate
+        dashboard: https://grafana.app-sre.devshift.net/d/98fde97ddeaf2981041745f1f2ba68c2/thanos-querier?orgId=1&var-datasource=app-sre-prometheus&var-namespace=telemeter-stage&var-job=All&var-pod=All&var-interval=5m&refresh=10s
+      expr: |
+        sum(
+          rate(grpc_client_handled_total{grpc_code!="OK", job=~"thanos-querier.*", namespace="telemeter-stage"}[5m])
+          /
+          rate(grpc_client_started_total{job=~"thanos-querier.*", namespace="telemeter-stage"}[5m])
+        ) by (job) * 100 > 5
+      for: 5m
+      labels:
+        severity: medium
+        service: telemeter
+    - alert: ThanosQuerierHighDNSFailures
+      annotations:
+        message: Thanos Queriers {{$labels.job}} have {{ $value }} of failing DNS
+          queries.
+        runbook:  https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/observatorium/README.md#thanosquerierhighdnsfailures
+        dashboard: https://grafana.app-sre.devshift.net/d/98fde97ddeaf2981041745f1f2ba68c2/thanos-querier?orgId=1&var-datasource=app-sre-prometheus&var-namespace=telemeter-stage&var-job=All&var-pod=All&var-interval=15m&refresh=10s
+      expr: |
+        sum(
+          rate(thanos_querier_store_apis_dns_failures_total{job=~"thanos-querier.*", namespace="telemeter-stage"}[5m])
+        /
+          rate(thanos_querier_store_apis_dns_lookups_total{job=~"thanos-querier.*", namespace="telemeter-stage"}[5m])
+        ) by (job) > 1
+      for: 15m
+      labels:
+        severity: medium
+        service: telemeter
     - alert: ThanosQuerierInstantLatencyHigh
       annotations:
-        message: Thanos Querier has a 99th percentile latency of {{ $value }} seconds
-          for instant queries.
+        message: Thanos Querier {{$labels.job}} has a 99th percentile latency of {{
+          $value }} seconds for instant queries.
+        runbook:  https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/observatorium/README.md#thanosquerierinstantlatencyhigh
+        dashboard: https://grafana.app-sre.devshift.net/d/98fde97ddeaf2981041745f1f2ba68c2/thanos-querier?orgId=1&var-datasource=app-sre-prometheus&var-namespace=telemeter-stage&var-job=All&var-pod=All&var-interval=10m&refresh=10s
       expr: |
         histogram_quantile(0.99,
-          sum(thanos_query_api_instant_query_duration_seconds_bucket{job="thanos-querier", namespace="telemeter-stage"}) by (le)
+          sum(http_request_duration_seconds_bucket{job=~"thanos-querier.*", namespace="telemeter-stage", handler="query"}) by (job, le)
         ) > 10
       for: 10m
       labels:
-        severity: warning
+        severity: medium
+        service: telemeter
     - alert: ThanosQuerierRangeLatencyHigh
       annotations:
-        message: Thanos Querier has a 99th percentile latency of {{ $value }} seconds
-          for instant queries.
+        message: Thanos Querier {{$labels.job}} has a 99th percentile latency of {{
+          $value }} seconds for instant queries.
+        runbook:  https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/observatorium/README.md#thanosquerierrangelatencyhigh
+        dashboard: https://grafana.app-sre.devshift.net/d/98fde97ddeaf2981041745f1f2ba68c2/thanos-querier?orgId=1&var-datasource=app-sre-prometheus&var-namespace=telemeter-stage&var-job=All&var-pod=All&var-interval=10m&refresh=10s
       expr: |
         histogram_quantile(0.99,
-          sum(thanos_query_api_range_query_duration_seconds_bucket{job="thanos-querier", namespace="telemeter-stage"}) by (le)
+          sum(http_request_duration_seconds_bucket{job=~"thanos-querier.*", namespace="telemeter-stage", handler="query_range"}) by (job, le)
         ) > 10
       for: 10m
       labels:
-        severity: warning
+        severity: medium
+        service: telemeter
   - name: thanos-receive.rules
     rules:
     - alert: ThanosReceiveHttpRequestLatencyHigh
       annotations:
-        message: Thanos Receive has a 99th percentile latency of {{ $value }} seconds
-          for HTTP requests.
+        message: Thanos Receive {{$labels.job}} has a 99th percentile latency of {{
+          $value }} seconds for HTTP requests.
+        runbook:  https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/observatorium/README.md#thanosreceivehttprequestlatencyhigh
+        dashboard: https://grafana.app-sre.devshift.net/d/916a852b00ccc5ed81056644718fa4fb/thanos-receive?orgId=1&refresh=10s&var-datasource=app-sre-prometheus&var-namespace=telemeter-stage&var-job=All&var-pod=All&var-interval=10m
       expr: |
         histogram_quantile(0.99,
-          sum(thanos_http_request_duration_seconds_bucket{job="thanos-receive", namespace="telemeter-stage"}) by (le)
+          sum(http_request_duration_seconds_bucket{job=~"thanos-receive.*", namespace="telemeter-stage", handler="receive"}) by (job, le)
         ) > 10
       for: 10m
       labels:
-        severity: warning
+        severity: medium
+        service: telemeter
     - alert: ThanosReceiveHighForwardRequestFailures
       annotations:
-        message: Thanos Receive has {{ $value }} of failing forward requests.
+        message: Thanos Receive {{$labels.job}} is failing to forward {{ $value |
+          humanize }}% of requests.
+        runbook:  https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/observatorium/README.md#thanosreceivehighforwardrequestfailures
+        dashboard: https://grafana.app-sre.devshift.net/d/916a852b00ccc5ed81056644718fa4fb/thanos-receive?orgId=1&refresh=10s&var-datasource=app-sre-prometheus&var-namespace=telemeter-stage&var-job=All&var-pod=All&var-interval=15m
       expr: |
         sum(
-          rate(thanos_receive_forward_requests_total{result="error", job="thanos-receive", namespace="telemeter-stage"}[5m])
+          rate(thanos_receive_forward_requests_total{result="error", job=~"thanos-receive.*", namespace="telemeter-stage"}[5m])
         /
-          rate(thanos_receive_forward_requests_total{job="thanos-receive", namespace="telemeter-stage"}[5m])
-        ) > 0.05
+          rate(thanos_receive_forward_requests_total{job=~"thanos-receive.*", namespace="telemeter-stage"}[5m])
+        ) by (job) * 100 > 5
       for: 15m
       labels:
-        severity: warning
+        severity: medium
+        service: telemeter
     - alert: ThanosReceiveHighHashringFileRefreshFailures
       annotations:
-        message: Thanos Receive has {{ $value }} of failing hashring file refreshes.
+        message: Thanos Receive {{$labels.job}} is failing to refresh hashring file,
+          {{ $value | humanize }} of attempts failed.
+        runbook:  https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/observatorium/README.md#thanosreceivehighhashringfilerefreshfailures
+        dashboard: https://grafana.app-sre.devshift.net/d/916a852b00ccc5ed81056644718fa4fb/thanos-receive?orgId=1&refresh=10s&var-datasource=app-sre-prometheus&var-namespace=telemeter-stage&var-job=All&var-pod=All&var-interval=15m
       expr: |
         sum(
-          rate(thanos_receive_hashrings_file_errors_total{job="thanos-receive", namespace="telemeter-stage"}[5m])
+          rate(thanos_receive_hashrings_file_errors_total{job=~"thanos-receive.*", namespace="telemeter-stage"}[5m])
         /
-          rate(thanos_receive_hashrings_file_refreshes_total{job="thanos-receive", namespace="telemeter-stage"}[5m])
-        ) > 0
+          rate(thanos_receive_hashrings_file_refreshes_total{job=~"thanos-receive.*", namespace="telemeter-stage"}[5m])
+        ) by (job) > 0
       for: 15m
       labels:
-        severity: warning
+        severity: medium
+        service: telemeter
+    - alert: ThanosReceiveConfigReloadFailure
+      annotations:
+        message: Thanos Receive {{$labels.job}} has not been able to reload hashring
+          configurations.
+        runbook:  https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/observatorium/README.md#thanosreceiveconfigreloadfailure
+        dashboard: https://grafana.app-sre.devshift.net/d/916a852b00ccc5ed81056644718fa4fb/thanos-receive?orgId=1&refresh=10s&var-datasource=app-sre-prometheus&var-namespace=telemeter-stage&var-job=All&var-pod=All&var-interval=5m
+      expr: avg(thanos_receive_config_last_reload_successful{job=~"thanos-receive.*",
+        namespace="telemeter-stage"}) by (job) != 1
+      for: 5m
+      labels:
+        severity: medium
+        service: telemeter
   - name: thanos-store.rules
     rules:
     - alert: ThanosStoreGrpcErrorRate
       annotations:
-        message: Thanos Store is returning Internal/Unavailable errors.
+        message: Thanos Store {{$labels.job}} is failing to handle {{ $value | humanize
+          }}% of requests.
+        runbook:  https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/observatorium/README.md#thanosstoregrpcerrorrate
+        dashboard: https://grafana.app-sre.devshift.net/d/e832e8f26403d95fac0ea1c59837588b/thanos-store?orgId=1&var-datasource=app-sre-prometheus&var-namespace=telemeter-stage&var-job=All&var-pod=All&var-interval=5m
       expr: |
         sum(
-          rate(grpc_server_handled_total{grpc_code=~"Unknown|ResourceExhausted|Internal|Unavailable", job="thanos-store", namespace="telemeter-stage"}[5m])
+          rate(grpc_server_handled_total{grpc_code=~"Unknown|ResourceExhausted|Internal|Unavailable", job=~"thanos-store.*", namespace="telemeter-stage"}[5m])
           /
-          rate(grpc_server_started_total{job="thanos-store", namespace="telemeter-stage"}[5m])
-        ) > 0.05
+          rate(grpc_server_started_total{job=~"thanos-store.*", namespace="telemeter-stage"}[5m])
+        ) by (job) * 100 > 5
       for: 5m
       labels:
-        severity: warning
+        severity: medium
+        service: telemeter
     - alert: ThanosStoreSeriesGateLatencyHigh
       annotations:
-        message: Thanos Store has a 99th percentile latency of {{ $value }} seconds
-          for store series gate requests.
+        message: Thanos Store {{$labels.job}} has a 99th percentile latency of {{
+          $value }} seconds for store series gate requests.
+        runbook:  https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/observatorium/README.md#thanosstoreseriesgatelatencyhigh
+        dashboard: https://grafana.app-sre.devshift.net/d/e832e8f26403d95fac0ea1c59837588b/thanos-store?orgId=1&var-datasource=app-sre-prometheus&var-namespace=telemeter-stage&var-job=All&var-pod=All&var-interval=10m
       expr: |
         histogram_quantile(0.99,
-          sum(thanos_bucket_store_series_gate_duration_seconds_bucket{job="thanos-store", namespace="telemeter-stage"}) by (le)
+          sum(thanos_bucket_store_series_gate_duration_seconds_bucket{job=~"thanos-store.*", namespace="telemeter-stage"}) by (job, le)
         ) > 2
       for: 10m
       labels:
-        severity: warning
+        severity: medium
+        service: telemeter
     - alert: ThanosStoreBucketHighOperationFailures
       annotations:
-        message: Thanos Store Bucket has {{ $value }} of failing operations.
+        message: Thanos Store {{$labels.job}} Bucket is failing to execute {{ $value
+          | humanize }}% of operations.
+        runbook:  https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/observatorium/README.md#thanosstorebuckethighoperationfailures
+        dashboard: https://grafana.app-sre.devshift.net/d/e832e8f26403d95fac0ea1c59837588b/thanos-store?orgId=1&var-datasource=app-sre-prometheus&var-namespace=telemeter-stage&var-job=All&var-pod=All&var-interval=15m
       expr: |
         sum(
-          rate(thanos_objstore_bucket_operation_failures_total{job="thanos-store", namespace="telemeter-stage"}[5m])
+          rate(thanos_objstore_bucket_operation_failures_total{job=~"thanos-store.*", namespace="telemeter-stage"}[5m])
         /
-          rate(thanos_objstore_bucket_operations_total{job="thanos-store", namespace="telemeter-stage"}[5m])
-        ) > 0.05
+          rate(thanos_objstore_bucket_operations_total{job=~"thanos-store.*", namespace="telemeter-stage"}[5m])
+        ) by (job) * 100 > 5
       for: 15m
       labels:
-        severity: warning
+        severity: medium
+        service: telemeter
     - alert: ThanosStoreObjstoreOperationLatencyHigh
       annotations:
-        message: Thanos Store Bucket has a 99th percentile latency of {{ $value }}
-          seconds for bucket operations.
+        message: Thanos Store {{$labels.job}} Bucket has a 99th percentile latency
+          of {{ $value }} seconds for bucket operations.
+        runbook:  https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/observatorium/README.md#thanosstoreobjstoreoperationlatencyhigh
+        dashboard: https://grafana.app-sre.devshift.net/d/e832e8f26403d95fac0ea1c59837588b/thanos-store?orgId=1&var-datasource=app-sre-prometheus&var-namespace=telemeter-stage&var-job=All&var-pod=All&var-interval=10m
       expr: |
         histogram_quantile(0.99,
-          sum(thanos_objstore_bucket_operation_duration_seconds_bucket{job="thanos-store", namespace="telemeter-stage"}) by (le)
+          sum(thanos_objstore_bucket_operation_duration_seconds_bucket{job=~"thanos-store.*", namespace="telemeter-stage"}) by (job, le)
         ) > 15
       for: 10m
       labels:
-        severity: warning
+        severity: medium
+        service: telemeter
+  - name: thanos-receive-controller.rules
+    rules:
+    - alert: ThanosReceiveControllerReconcileErrorRate
+      annotations:
+        message: Thanos Receive Controller failing to reconcile changes, {{ $value
+          | humanize }}% of attempts failed.
+        runbook:  https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/observatorium/README.md#thanosreceivecontrollerreconcileerrorrate
+        dashboard: https://grafana.app-sre.devshift.net/d/858503cdeb29690fd8946e038f01ba85/thanos-receive-controller?orgId=1&var-datasource=app-sre-prometheus&var-namespace=telemeter-stage&var-job=All&var-pod=All&var-interval=5m
+      expr: |
+        sum(
+          rate(thanos_receive_controller_reconcile_errors_total{job=~"thanos-receive-controller.*",namespace="telemeter-stage"}[5m])
+          /
+          on (namespace) group_left
+          rate(thanos_receive_controller_reconcile_attempts_total{job=~"thanos-receive-controller.*",namespace="telemeter-stage"}[5m])
+        ) * 100 >= 10
+      for: 5m
+      labels:
+        severity: medium
+        service: telemeter
+    - alert: ThanosReceiveControllerConfigmapChangeErrorRate
+      annotations:
+        message: Thanos Receive Controller failing to refresh configmap, {{ $value
+          | humanize }}% of attempts failed.
+        runbook:  https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/observatorium/README.md#thanosreceivecontrollerconfigmapchangeerrorrate
+        dashboard: https://grafana.app-sre.devshift.net/d/858503cdeb29690fd8946e038f01ba85/thanos-receive-controller?orgId=1&var-datasource=app-sre-prometheus&var-namespace=telemeter-stage&var-job=All&var-pod=All&var-interval=5m
+      expr: |
+        sum(
+          rate(thanos_receive_controller_configmap_change_errors_total{job=~"thanos-receive-controller.*",namespace="telemeter-stage"}[5m])
+          /
+          on (namespace) group_left
+          rate(thanos_receive_controller_configmap_change_attempts_total{job=~"thanos-receive-controller.*",namespace="telemeter-stage"}[5m])
+        ) * 100 >= 10
+      for: 5m
+      labels:
+        severity: medium
+        service: telemeter
+    - alert: ThanosReceiveConfigStale
+      annotations:
+        message: The configuration of the instances of Thanos Receive are stale compare
+          to controller.
+        runbook:  https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/observatorium/README.md#thanosreceiveconfigstale
+        dashboard: https://grafana.app-sre.devshift.net/d/858503cdeb29690fd8946e038f01ba85/thanos-receive-controller?orgId=1&var-datasource=app-sre-prometheus&var-namespace=telemeter-stage&var-job=All&var-pod=All&var-interval=5m
+      expr: |
+        avg(thanos_receive_config_last_reload_success_timestamp_seconds{job=~"thanos-receive.*", namespace="telemeter-stage"}) by (namespace, job)
+          <
+        on(namespace)
+        thanos_receive_controller_configmap_last_reload_success_timestamp_seconds{job=~"thanos-receive-controller.*",namespace="telemeter-stage"}
+      for: 5m
+      labels:
+        severity: medium
+        service: telemeter
+    - alert: ThanosReceiveConfigInconsistent
+      annotations:
+        message: The configuration of the instances of Thanos Receive `{{$labels.job}}`
+          are out of sync.
+        runbook:  https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/observatorium/README.md#thanosreceiveconfiginconsistent
+        dashboard: https://grafana.app-sre.devshift.net/d/858503cdeb29690fd8946e038f01ba85/thanos-receive-controller?orgId=1&var-datasource=app-sre-prometheus&var-namespace=telemeter-stage&var-job=All&var-pod=All&var-interval=5m
+      expr: |
+        avg(thanos_receive_config_hash{job=~"thanos-receive.*", namespace="telemeter-stage"}) BY (namespace, job)
+          /
+        on (namespace)
+        group_left
+        thanos_receive_controller_configmap_hash{job=~"thanos-receive-controller.*",namespace="telemeter-stage"}
+        != 1
+      for: 5m
+      labels:
+        severity: medium
+        service: telemeter

@@ -98,3 +98,35 @@ spec:
       labels:
         service: telemeter
         severity: medium
+    - record: telemeter:capacity
+      expr: sum(telemeter_partitions{namespace="telemeter-stage"}) / 5000
+    - alert: TelemeterCapacityMedium - stage
+      annotations:
+        message: "Telemeter reached {{ $value | humanize }}% of capacity in namespace {{ $labels.namespace }}."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
+        dashboard: "https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-prometheus&var-cluster=app-sre&var-namespace=telemeter-stage"
+      expr: telemeter:capacity >= 0.5
+      for: 5m
+      labels:
+        service: telemeter
+        severity: medium
+    - alert: TelemeterCapacityHigh - stage
+      annotations:
+        message: "Telemeter reached {{ $value | humanize }}% of capacity in namespace {{ $labels.namespace }}."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
+        dashboard: "https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-prometheus&var-cluster=app-sre&var-namespace=telemeter-stage"
+      expr: telemeter:capacity >= 0.7
+      for: 5m
+      labels:
+        service: telemeter
+        severity: high
+    - alert: TelemeterCapacityCritical - stage
+      annotations:
+        message: "Telemeter reached {{ $value | humanize }}% of capacity in namespace {{ $labels.namespace }}."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
+        dashboard: "https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-prometheus&var-cluster=app-sre&var-namespace=telemeter-stage"
+      expr: telemeter:capacity >= 0.9
+      for: 5m
+      labels:
+        service: telemeter
+        severity: critical
