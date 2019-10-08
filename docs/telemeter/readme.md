@@ -6,6 +6,8 @@ In the context of OCP 4, telemeter is used to push cluster metrics to the 'infog
 
 More info here: https://github.com/openshift/telemeter/
 
+The observatorium project (telemeter v2) is the new generation telemetry system. It's [documentation andcan be found on github](https://github.com/observatorium/docs)
+
 ![schema](telemeter.png)
 
 # Resources
@@ -16,7 +18,7 @@ More info here: https://github.com/openshift/telemeter/
 |---|---|---|
 | infogw | telemeter-server | https://infogw.api.openshift.com/ |
 | infogw-data | prometheus | https://infogw-data.api.openshift.com/ |
-| infogw-cache | prometheus (cache) | https://infogw-cache.api.openshift.com/ |
+| infogw-proxy | cortex proxy | https://infogw-proxy.api.openshift.com/ |
 
 ## Code
 
@@ -24,17 +26,18 @@ More info here: https://github.com/openshift/telemeter/
 | Resource | Location |
 |---|---|
 | Upstream | https://github.com/openshift/telemeter |
-| CI/CD | https://ci.ext.devshift.net/view/telemeter/ |
-| saas repo | https://github.com/app-sre/saas-telemeter/ |
+| CI/CD | https://ci-int-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/view/telemeter/ |
+| saas repo | https://gitlab.cee.redhat.com/service/saas-telemeter |
 
-### telemeter-cache
+### telemeter-proxy
 | Resource | Location |
 |---|---|
-| Config | https://gitlab.cee.redhat.com/service/saas-telemeter-cache-manifests |
+| Config | https://github.com/observatorium/configuration |
 | CI/CD | https://ci-int-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/view/telemeter/ |
-| saas repo | https://gitlab.cee.redhat.com/service/saas-telemeter-cache |
+| saas repo | https://gitlab.cee.redhat.com/service/saas-telemeter |
 
 ## Dependencies
 | Dependency | Description |
 |---|---|
 | UHC | Authorization of client uploads |
+| UHC | UHC prometheus for subscription_labels federation |
