@@ -83,7 +83,27 @@ Hive stores the non-debug installer log entries in `clusterprovision` objects in
    $ oc get clusterdeployment -n $NAMESPACE -o json | jq '.items[].status.conditions'
    ```
 1. The output from ClusterDeployment Conditions can say a lot about the cluster.
-1. TODO: Add specific conditions from alerts that are firing and state how to troubleshoot them.
+
+##### Previously observed conditions:
+
+###### DNSNotReady
+
+1. The ClusterDeployment is showing a DNS not ready condition (literally condition type 'DNSNotReady').
+1. Looking at the logs for the hive controllers ('oc logs' in the hive namespace), you might see:
+   ```
+   time="2019-10-08T15:40:13Z" level=info msg="looking up domain SOA record" controller=dnszone dnszone=jsica-testing-zone namespace=uhc-production-18l35214uc8rva7471atoi75huenv3q4 servers="[10.121.19.148:53]"
+   
+   time="2019-10-08T15:40:13Z" level=info msg="no answer for SOA record returned" controller=dnszone dnszone=jsica-testing-zone namespace=uhc-production-18l35214uc8rva7471atoi75huenv3q4 server="10.121.19.148:53"
+   
+   time="2019-10-08T15:40:13Z" level=info msg="SOA record for DNS zone not available" controller=dnszone dnszone=jsica-testing-zone namespace=uhc-production-18l35214uc8rva7471atoi75huenv3q4
+   ```
+1. The external-dns pod (runs in the hive namespace) is responsible for making DNS entries for hive. Check the logs on the external-dns pod.
+1. If the pod's most recent log messages are the following repeated every minute (Kibana query 'kubernetes.container_name=external-dns AND kubernetes.namesapce_name=hive'):
+   ```
+   time=\"2019-10-08T18:27:21Z\" level=error msg=Unauthorized
+   ```
+   The external-dns pod has hit an unresolved state (still not root-caused as this is intermittent). Being tracked in [Jira](https://jira.coreos.com/browse/CO-590).
+1. Deleting the external-dns pod will cause it to relaunch and things should return to a working state.
 
 #### Determined That it's Not a Hive issue
 As described in the [Hive SLA document](https://docs.google.com/document/d/1_kAbsz28XpVzzkya1XsSnuAH-dF4vj7MonMotp1pwhQ/edit#heading=h.hklz0i1jef0m), the Hive team's responsibility is to ensure that Hive is correctly launching the installer.
