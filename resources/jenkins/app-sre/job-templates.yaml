@@ -269,3 +269,18 @@
             quay.io/app-sre/push-saas-metrics:latest
     cron_expression: H * * * *
     <<: *timed_template
+
+- job-template:
+    id: 'gitkeeper-run'
+    name: 'gitkeeper-run'
+    node: '{node}'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *gitkeeper_toml
+        - *gitlab_token
+    cron_expression: H 4 * * *
+    <<: *gh_timed
