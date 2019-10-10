@@ -1,0 +1,50 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: vault-stage
+spec:
+  groups:
+  - name: vault-stage
+    rules:
+    - alert: VaultUp - stage
+      annotations:
+        description: Vault exporter for '{{ $labels.instance }}' cannot talk to Vault
+          - stage.
+        message: Vault exporter for '{{ $labels.instance }}' cannot talk to Vault
+          - stage.
+        summary: Vault exporter for '{{ $labels.instance }}' cannot talk to Vault
+          - stage.
+      expr: vault_up{job="vault", namespace="vault-stage"} != 1
+      for: 5m
+      labels:
+        severity: medium
+    - alert: VaultUninitialized - stage
+      annotations:
+        description: Vault '{{ $labels.instance }}' is uninitialized - stage.
+        message: Vault '{{ $labels.instance }}' is uninitialized - stage.
+        summary: Vault '{{ $labels.instance }}' is uninitialized - stage.
+      expr: vault_initialized{job="vault", namespace="vault-stage"} != 1
+      for: 5m
+      labels:
+        severity: medium
+    - alert: VaultSealed - stage
+      annotations:
+        description: Vault '{{ $labels.instance }}' is sealed - stage.
+        message: Vault '{{ $labels.instance }}' is sealed - stage.
+        summary: Vault '{{ $labels.instance }}' is sealed - stage.
+      expr: vault_sealed{job="vault", namespace="vault-stage"} != 0
+      for: 5m
+      labels:
+        severity: medium
+    - alert: VaultStandby - stage
+      annotations:
+        description: There are {{ $value }} active Vault instance(s) - stage.
+        message: There are {{ $value }} active Vault instance(s) - stage.
+        summary: There are {{ $value }} active Vault instance(s) - stage.
+      expr: count(vault_standby{job="vault", namespace="vault-stage"} == 0) != 1
+      for: 5m
+      labels:
+        severity: medium
