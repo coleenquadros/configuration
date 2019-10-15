@@ -41,7 +41,7 @@ wait_response \
     "https://${GRAPHQL_USERNAME}:${GRAPHQL_PASSWORD}@${GRAPHQL_SERVER_BASE}/sha256" \
     "$SHA256"
 
-# Upload to production and reload
+# Upload to production
 
 export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID_PRODUCTION
 export AWS_REGION=$AWS_REGION_PRODUCTION
@@ -55,8 +55,7 @@ export GRAPHQL_PASSWORD=$PASSWORD_PRODUCTION
 
 aws s3 cp validate/data.json s3://${AWS_S3_BUCKET}/${AWS_S3_KEY}
 
-curl "https://${GRAPHQL_USERNAME}:${GRAPHQL_PASSWORD}@${GRAPHQL_SERVER_BASE}/reload"
-
+# wait for data to reload
 wait_response \
     "https://${GRAPHQL_USERNAME}:${GRAPHQL_PASSWORD}@${GRAPHQL_SERVER_BASE}/sha256" \
     "$SHA256"
