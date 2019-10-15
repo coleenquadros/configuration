@@ -75,33 +75,6 @@ Multiple replicas of Thanos Compact shouldn't be running. This leads data corrup
 - Inspect logs and events of failing jobs, using [OpenShift console](https://admin-console.app-sre.openshift.com/k8s/ns/telemeter-production/statefulsets/thanos-compactor/pods).
 - Reach out to Observability Team (team-observability-platform@redhat.com), [`#forum-telemetry`](https://slack.com/app_redirect?channel=forum-telemetry) at CoreOS Slack, to get help in the investigation.
 
-## ThanosCompactIsNotRunning
-
-### Impact
-
-Consumers are waiting too long to get long term storage metrics.
-
-### Summary
-
-Thanos Compaction is not running or just not scraped yet.
-
-### Severity
-
-`medium`
-
-### Access Required
-
-- Console access to the cluster that runs Observatorium (Currently [app-sre OSD](https://admin-console.app-sre.openshift.com/status/ns/telemeter-production))
-- Edit access to the Telemeter namespaces (Observatorium uses Telemeter namespaces):
-  - `telemeter-stage`
-  - `telemeter-production`
-
-### Steps
-
-- Inspect metrics of failing job using [dashboards](https://grafana.app-sre.devshift.net/d/651943d05a8123e32867b4673963f42b/thanos-compact?orgId=1&refresh=10s&var-datasource=app-sre-prometheus&var-namespace=&var-job=All&var-pod=All&var-interval=5m) or [Prometheus](https://prometheus.app-sre.devshift.net/graph?g0.range_input=1h&g0.expr=up%7Bjob%3D~%22thanos-compactor.*%22%2Cnamespace%3D%22telemeter-production%22%7D%20%3D%3D%200%20or%20absent(%7Bjob%3D~%22thanos-compactor.*%22%2Cnamespace%3D%22telemeter-production%22%7D)&g0.tab=0).
-- Inspect logs and events of failing jobs, using [OpenShift console](https://admin-console.app-sre.openshift.com/k8s/ns/telemeter-production/statefulsets/thanos-compactor/pods).
-- Reach out to Observability Team (team-observability-platform@redhat.com), [`#forum-telemetry`](https://slack.com/app_redirect?channel=forum-telemetry) at CoreOS Slack, to get help in the investigation.
-
 ## ThanosCompactHalted
 
 ### Impact
