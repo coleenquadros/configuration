@@ -22,7 +22,7 @@ docker run --rm \
 
 SHA256=$(sha256sum validate/data.json | awk '{print $1}')
 
-# Upload to staging and reload
+# Upload to staging
 
 export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID_STAGING
 export AWS_REGION=$AWS_REGION_STAGING
@@ -36,8 +36,7 @@ export GRAPHQL_PASSWORD=$PASSWORD_STAGING
 
 aws s3 cp validate/data.json s3://${AWS_S3_BUCKET}/${AWS_S3_KEY}
 
-curl "https://${GRAPHQL_USERNAME}:${GRAPHQL_PASSWORD}@${GRAPHQL_SERVER_BASE}/reload"
-
+# wait for data to reload
 wait_response \
     "https://${GRAPHQL_USERNAME}:${GRAPHQL_PASSWORD}@${GRAPHQL_SERVER_BASE}/sha256" \
     "$SHA256"
