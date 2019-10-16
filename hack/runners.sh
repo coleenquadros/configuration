@@ -91,6 +91,16 @@ run_vault_reconcile_integration() {
   return $status
 }
 
+print_execution_times() {
+    echo
+    echo "Execution times for integrations that were executed"
+    (
+      echo "Integration Seconds"
+      sort -nr -k2 "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
+    ) | column -t
+    echo
+}
+
 wait_response() {
     local count=0
     local max=10
@@ -110,4 +120,13 @@ wait_response() {
       echo "Got:\n$RESPONSE" >&2
       exit 1
     fi
+}
+
+update_pushgateway() {
+    echo "Sending Integration execution times to Push Gateway"
+
+    (echo '# TYPE app_interface_int_execution_duration_seconds gauge'; \
+      echo '# HELP app_interface_int_execution_duration_seconds App-interface integration run times in seconds'; \
+      cat ${SUCCESS_DIR}/int_execution_duration_seconds.txt) | \
+      curl -v -X POST -s -H "Authorization: Basic ${PUSHGW_CREDS}" --data-binary @- $PUSHGW_URL/metrics/job/$JOB_NAME
 }

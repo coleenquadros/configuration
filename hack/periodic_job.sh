@@ -31,18 +31,9 @@ run_int ldap-users $APP_INTERFACE_PROJECT_ID &
 
 wait
 
-echo
-echo "Execution times for integrations that were executed"
-(
-  echo "Integration Seconds"
-  sort -nr -k2 "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
-) | column -t
-echo
+print_execution_times
 
 FAILED_INTEGRATIONS=$(ls ${FAIL_DIR} | wc -l)
-
 if [ "$FAILED_INTEGRATIONS" != "0" ]; then
   exit 1
 fi
-
-exit 0

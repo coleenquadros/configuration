@@ -104,7 +104,7 @@ wait
 ## Write config.toml for reconcile tools
 GRAPHQL_SERVER=http://$IP:4000/graphql
 cat "$CONFIG_TOML" \
-  | sed "s|https://app-interface.devshift.net/graphql|$GRAPHQL_SERVER|" \
+  | sed "s|$GRAPHQL_SERVER_BASE_URL/graphql|$GRAPHQL_SERVER|" \
   > ${WORK_DIR}/config/config.toml
 
 ## Run integrations on local server
@@ -132,36 +132,10 @@ run_int terraform-users &
 
 wait
 
-echo
-echo "Execution times for integrations that were executed"
-(
-  echo "Integration Seconds"
-  sort -nr -k2 "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
-) | column -t
-echo
-
-# Set Pushgateway credentials
-export PUSHGW_CREDS_PROD=$PUSH_GATEWAY_CREDENTIALS_PROD
-export PUSHGW_URL_PROD=$PUSH_GATEWAY_URL_PROD
-export PUSHGW_CREDS_STAGE=$PUSH_GATEWAY_CREDENTIALS_STAGE
-export PUSHGW_URL_STAGE=$PUSH_GATEWAY_URL_STAGE
-
-echo "Sending Integration execution times to Push Gateway"
-
-(echo '# TYPE app_interface_int_execution_duration_seconds gauge'; \
-  echo '# HELP app_interface_int_execution_duration_seconds App-interface integration run times in seconds'; \
-  cat ${SUCCESS_DIR}/int_execution_duration_seconds.txt) | \
-  curl -v -X POST -s -H "Authorization: Basic ${PUSHGW_CREDS_PROD}" --data-binary @- $PUSHGW_URL_PROD/metrics/job/$JOB_NAME
-
-(echo '# TYPE app_interface_int_execution_duration_seconds gauge'; \
-  echo '# HELP app_interface_int_execution_duration_seconds App-interface integration run times in seconds'; \
-  cat ${SUCCESS_DIR}/int_execution_duration_seconds.txt) | \
-  curl -v -X POST -s -H "Authorization: Basic ${PUSHGW_CREDS_STAGE}" --data-binary @- $PUSHGW_URL_STAGE/metrics/job/$JOB_NAME
+print_execution_times
+update_pushgateway
 
 FAILED_INTEGRATIONS=$(ls ${FAIL_DIR} | wc -l)
-
 if [ "$FAILED_INTEGRATIONS" != "0" ]; then
   exit 1
 fi
-
-exit 0

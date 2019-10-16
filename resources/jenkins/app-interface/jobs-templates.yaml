@@ -11,9 +11,7 @@
         - *reconcile_toml
         - *gitlab_token
         - *vault_manager_creds
-        - *push_gateway_basic_auth_prod
-        - *push_gateway_basic_auth_stage
-
+        - *push_gateway_basic_auth
     publishers:
     - gitlab_message
     - gitlab-notifier
@@ -30,7 +28,7 @@
 
 - job-template:
     id: 'gl-build-master-app-interface'
-    name: '{gl_group}-{gl_project}-gl-build-master'
+    name: '{gl_group}-{gl_project}-gl-build-master{job_type}'
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'
@@ -38,13 +36,10 @@
         <<: *vault_defaults
         secrets:
         - *reconcile_toml
-        - *app_interface_s3_staging
-        - *app_interface_basic_auth_staging
-        - *app_interface_s3_production
-        - *app_interface_basic_auth_prod
+        - *app_interface_s3
+        - *app_interface_basic_auth
         - *vault_manager_creds
-        - *push_gateway_basic_auth_prod
-        - *push_gateway_basic_auth_stage
+        - *push_gateway_basic_auth
     publishers:
     - archive:
         artifacts: 'reports/**'
