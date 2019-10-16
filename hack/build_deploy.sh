@@ -9,8 +9,10 @@ source $CURRENT_DIR/runners.sh
 
 SCHEMAS_DIR=schemas
 
+# Setup
+mkdir -p validate config throughput reports
+
 # Create data bundle
-mkdir -p validate
 
 docker run --rm \
   -v `pwd`/schemas:/schemas:z \
@@ -22,16 +24,13 @@ docker run --rm \
 
 upload_s3 validate/data.json
 
-if [ "$ENVIRONMENT" != "production" ]; then exit 0; fi
+if [ "$ENVIRONMENT" != "production" ]; then echo "bundle uploaded to $ENVIRONMENT" > reports/report; exit 0; fi
 
 # Run integrations
 
 # Write config.toml for reconcile tools
-mkdir -p config
-echo "$CONFIG_TOML" | base64 -d > config/config.toml
 
-# Create directory for throughput between integrations
-mkdir -p throughput
+echo "$CONFIG_TOML" | base64 -d > config/config.toml
 
 SUCCESS_DIR=reports/reconcile_reports_success
 FAIL_DIR=reports/reconcile_reports_fail
@@ -64,8 +63,4 @@ wait
 
 print_execution_times
 update_pushgateway
-
-FAILED_INTEGRATIONS=$(ls ${FAIL_DIR} | wc -l)
-if [ "$FAILED_INTEGRATIONS" != "0" ]; then
-  exit 1
-fi
+check_integration_results

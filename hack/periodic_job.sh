@@ -32,8 +32,4 @@ run_int ldap-users $APP_INTERFACE_PROJECT_ID &
 wait
 
 print_execution_times
-
-FAILED_INTEGRATIONS=$(ls ${FAIL_DIR} | wc -l)
-if [ "$FAILED_INTEGRATIONS" != "0" ]; then
-  exit 1
-fi
+check_integration_results

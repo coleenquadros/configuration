@@ -134,8 +134,4 @@ wait
 
 print_execution_times
 update_pushgateway
-
-FAILED_INTEGRATIONS=$(ls ${FAIL_DIR} | wc -l)
-if [ "$FAILED_INTEGRATIONS" != "0" ]; then
-  exit 1
-fi
+check_integration_results

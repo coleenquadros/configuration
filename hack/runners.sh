@@ -101,6 +101,13 @@ print_execution_times() {
     echo
 }
 
+check_integration_results() {
+    FAILED_INTEGRATIONS=$(ls ${FAIL_DIR} | wc -l)
+    if [ "$FAILED_INTEGRATIONS" != "0" ]; then
+      exit 1
+    fi
+}
+
 wait_response() {
     local count=0
     local max=10
