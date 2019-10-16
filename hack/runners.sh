@@ -122,6 +122,16 @@ wait_response() {
     fi
 }
 
+upload_s3() {
+    INPUT_FILE=$1
+
+    SHA256=$(sha256sum $INPUT_FILE | awk '{print $1}')
+    aws s3 cp $INPUT_FILE s3://${AWS_S3_BUCKET}/${AWS_S3_KEY}
+    wait_response \
+        "https://${GRAPHQL_USERNAME}:${GRAPHQL_PASSWORD}@${GRAPHQL_SERVER_BASE_URL}/sha256" \
+        "$SHA256"
+}
+
 update_pushgateway() {
     echo "Sending Integration execution times to Push Gateway"
 

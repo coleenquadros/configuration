@@ -20,16 +20,7 @@ docker run --rm \
   ${VALIDATOR_IMAGE}:${VALIDATOR_IMAGE_TAG} \
   qontract-bundler /schemas /graphql-schemas/schema.yml /data /resources > validate/data.json
 
-SHA256=$(sha256sum validate/data.json | awk '{print $1}')
-
-# Upload to s3
-
-aws s3 cp validate/data.json s3://${AWS_S3_BUCKET}/${AWS_S3_KEY}
-
-# wait for data to reload
-wait_response \
-    "https://${GRAPHQL_USERNAME}:${GRAPHQL_PASSWORD}@${GRAPHQL_SERVER_BASE_URL}/sha256" \
-    "$SHA256"
+upload_s3 validate/data.json
 
 if [ "$ENVIRONMENT" != "production" ]; then exit 0; fi
 
