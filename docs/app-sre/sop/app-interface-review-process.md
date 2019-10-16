@@ -24,3 +24,8 @@ Insights cluster access:
 ```
 @klape @gavin @bturner
 ```
+
+Datahub PSI dashboards:
+```
+@ccoleman
+```
