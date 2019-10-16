@@ -5,6 +5,7 @@
 - [SOP : Access and Environments](#sop--access-and-environments)
 - [Access](#access)
 - [Environments](#environments)
+  - [Integration](#integration)
   - [Stage](#stage)
   - [Production](#production)
 - [Metrics](#metrics)
@@ -36,6 +37,22 @@ As per [this bug](https://github.com/sshuttle/sshuttle/issues/102/) to the sshut
 An example on how to do so:
 
 `sudo route add -net <range_to_go_through_sshuttle> -interface lo0`
+
+## Integration
+
+To access monitoring services for the integration environment, there's no need to run `sshuttle` as the integration environment is open to the world.
+
+Login to the API via `oc` by obtaining a token from [https://api.hive-integration.openshift.com/oauth/token/request](https://api.hive-integration.openshift.com/oauth/token/request)
+
+```
+oc login --token=TOKEN --server=https://api.hive-integration.openshift.com
+```
+
+| Service    | URL |
+| ---------- | --- |
+| Console    | [https://console.hive-integration.openshift.com/console/project/hive/overview](https://console.hive-integration.openshift.com/console/project/hive/overview) |
+| Logs       | [https://logs.hive-integration.openshift.com/](https://logs.hive-integration.openshift.com/) |
+| Prometheus | [https://prometheus-k8s-openshift-monitoring.c39b.hive-integration.openshiftapps.com/](https://prometheus-k8s-openshift-monitoring.c39b.hive-integration.openshiftapps.com/) |
 
 ## Stage
 
