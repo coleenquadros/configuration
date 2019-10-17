@@ -565,7 +565,9 @@ In order to get access to an AWS account, a user has to have:
 Once a user is created, an email invitation to join the account will be sent with all relevant information.
 
 #### Adding your public GPG key
-A base64 encoded binary GPG key should be added to the user file.
+
+A base64 encoded binary GPG key should be added to the user file, under the `public_gpg_key` parameter.
+
 To export your key:
 ```
 gpg --export <redhat_username>@redhat.com | base64
@@ -580,6 +582,8 @@ To test if your binary base64 encoded GPG key in MR is good You may put part of 
 ```
 cat FILENAME | sed -e 's/\ //g'| base64 -d | gpg
 ```
+
+Example: https://gitlab.cee.redhat.com/service/app-interface/blob/f40e0f27eacf5510a954c034292e937632caecc7/data/teams/app-sre/users/jmelisba.yml#L27
 
 
 ### Manage AWS resources via App-Interface (`/openshift/namespace-1.yml`) using Terraform
@@ -821,7 +825,7 @@ To manage a GitLab group via App-Interface:
 1. Add a `permission` file with the following details:
 
 - `name`: name for the permission
-- `description`: description 
+- `description`: description
 - `service`: `gitlab-group-membership`
 - `group`: name of GitLab Group
 - `access`: access level this permission gives (owner/maintainer/developer/reporter/guest)
