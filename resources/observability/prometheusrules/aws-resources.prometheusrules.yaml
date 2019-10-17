@@ -1,0 +1,54 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  creationTimestamp: null
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: aws-resources
+spec:
+  groups:
+  - name: aws.aws-resources-exporter.rules
+    interval: 5m
+    rules:
+    - alert: RDSMaxConnectionsMapping
+      labels:
+        severity: medium
+      expr: aws_resources_exporter_rds_maxconnections_errors > 0
+      for: 5m
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/aws-resources.md"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "No mapping found for RDS instance type for instance {{ $labels.dbinstance_identifier }}"
+        link_url: "{{ $labels.instance }}"
+  - name: aws.aws-resources.rules
+    interval: 5m
+    rules:
+    - alert: RDSMaxConnections
+      labels:
+        severity: medium
+      expr: |
+        sum (aws_rds_database_connections_sum offset 10m) by (dbinstance_identifier)
+        /
+        sum (aws_resources_exporter_rds_maxconnections) by (dbinstance_identifier)
+        > 0.90
+      for: 5m
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/aws-resources.md"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "Database {{ $labels.dbinstance_identifier }} is within 90% of it's max_connections"
+        link_url: "{{ $labels.instance }}"
+    - alert: RDSStorageLow
+      labels:
+        severity: medium
+      expr: |
+        sum (aws_rds_free_storage_space_sum offset 10m) by (dbinstance_identifier)
+        /
+        sum (aws_resources_exporter_rds_allocatedstorage) by (dbinstance_identifier)
+        < 0.10
+      for: 5m
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/aws-resources.md"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "Database {{ $labels.dbinstance_identifier }} has less than 10% of free space"
+        link_url: "{{ $labels.instance }}"
