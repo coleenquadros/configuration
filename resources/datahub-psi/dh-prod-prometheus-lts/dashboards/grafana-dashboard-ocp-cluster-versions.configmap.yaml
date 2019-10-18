@@ -747,7 +747,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "count by (version) (\n  ((time() - topk by (_id) (1,\n    label_replace(cluster_version{type=\"current\"}, \"version\", \"4.$1-0.$2\", \"version\", \"4\\\\.(\\\\d+\\\\.\\\\d+)-0.(ci|nightly|okd).*\")\n  )))\n  $source $source_version\n)",
+              "expr": "count by (version) (\n  ((time() - topk by (_id) (1,\n    label_replace(\n      label_replace(cluster_version{type=\"current\"}, \"version\", \"4.$1-0.$2\", \"version\", \"4\\\\.(\\\\d+\\\\.\\\\d+)-0.(ci|nightly|okd).*\"),\n      \"version\",\n      \"ci-pull-requests\",\n      \"version\",\n      \"0.0.1-.*\"\n    )\n  )))\n  $source $source_version\n)",
               "format": "time_series",
               "instant": false,
               "interval": "4h",
@@ -760,7 +760,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Version Breakdown (4.y.z, non-RH)",
+          "title": "Version Breakdown",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -907,7 +907,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "count by (version) (\n   ((time() - topk by (_id) (1,cluster_version{type=\"cluster\"} $source $source_version) < (4 * 60 * 60)))\n)",
+              "expr": "count by (version) (\n   ((time() - topk by (_id) (1,\n    label_replace(\n      label_replace(cluster_version{type=\"current\"}, \"version\", \"4.$1-0.$2\", \"version\", \"4\\\\.(\\\\d+\\\\.\\\\d+)-0.(ci|nightly|okd).*\"),\n      \"version\",\n      \"ci-pull-requests\",\n      \"version\",\n      \"0.0.1-.*\"\n    )\n   ) < (4 * 60 * 60)))\n)",
               "format": "time_series",
               "instant": false,
               "interval": "4h",
@@ -1087,7 +1087,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "count by (version) (\n   ((time() - topk by (_id) (1,cluster_version{type=\"updating\"} $source $source_version) < 4 * 60 * 60))\n)",
+              "expr": "count by (version) (\n  ((time() - topk by (_id) (1,\n    label_replace(\n      label_replace(cluster_version{type=\"current\"}, \"version\", \"4.$1-0.$2\", \"version\", \"4\\\\.(\\\\d+\\\\.\\\\d+)-0.(ci|nightly|okd).*\"),\n      \"version\",\n      \"ci-pull-requests\",\n      \"version\",\n      \"0.0.1-.*\"\n    )\n  ) < 4 * 60 * 60))\n)",
               "format": "time_series",
               "instant": false,
               "interval": "4h",
@@ -1177,13 +1177,13 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by (version) ((time() - (cluster_version{type=\"cluster\"} $source $source_version)) / (60 * 60 * 24))",
+              "expr": "sum by (version) ((time() - (\n  label_replace(\n    label_replace(cluster_version{type=\"current\"}, \"version\", \"4.$1-0.$2\", \"version\", \"4\\\\.(\\\\d+\\\\.\\\\d+)-0.(ci|nightly|okd).*\"),\n    \"version\",\n    \"ci-pull-requests\",\n    \"version\",\n    \"0.0.1-.*\"\n  )\n)) / (60 * 60 * 24))",
               "format": "time_series",
               "hide": false,
               "instant": false,
               "interval": "",
               "intervalFactor": 10,
-              "legendFormat": "",
+              "legendFormat": "{{version}}",
               "refId": "A"
             }
           ],
