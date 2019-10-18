@@ -83,7 +83,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "count(count by (_id) (cluster_version{type=\"updating\",from_version!=\"\"} $source ))",
+              "expr": "count(count by (_id) (cluster_version{type=\"updating\",from_version!=\"\"} $source $source_version ))",
               "format": "time_series",
               "instant": true,
               "intervalFactor": 1,
@@ -166,7 +166,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "count(count by (_id) ((time() - cluster_version{type=\"updating\",from_version!=\"\"} < 60 * 60 * 3) $source))",
+              "expr": "count(count by (_id) ((time() - cluster_version{type=\"updating\",from_version!=\"\"} < 60 * 60 * 3) $source $source_version))",
               "format": "time_series",
               "instant": true,
               "intervalFactor": 1,
@@ -249,7 +249,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "count(count by (_id) ((time() - cluster_version{type=\"updating\",from_version!=\"\"} > 60 * 60 * 3) $source ))",
+              "expr": "count(count by (_id) ((time() - cluster_version{type=\"updating\",from_version!=\"\"} > 60 * 60 * 3) $source $source_version ))",
               "format": "time_series",
               "instant": true,
               "intervalFactor": 1,
@@ -310,7 +310,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "count by (version) (((time() - cluster_version{type=\"failure\"}) > 10 * 60) $source )",
+              "expr": "count by (version) (((time() - cluster_version{type=\"failure\"}) > 10 * 60) $source $source_version )",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 10,
@@ -420,7 +420,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "count(count by (_id) (cluster_version{type=\"current\"} $source))",
+              "expr": "count(count by (_id) (cluster_version{type=\"current\"} $source $source_version))",
               "format": "time_series",
               "instant": true,
               "intervalFactor": 1,
@@ -504,7 +504,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "count((time() - cluster_version{type=\"cluster\"} > 24*60*60) $source )",
+              "expr": "count((time() - cluster_version{type=\"cluster\"} > 24*60*60) $source $source_version )",
               "format": "time_series",
               "instant": true,
               "intervalFactor": 1,
@@ -588,7 +588,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "count (max by (_id) ((cluster_operator_conditions{condition=\"Degraded\"} == 1) $source))",
+              "expr": "count (max by (_id) ((cluster_operator_conditions{condition=\"Degraded\"} == 1) $source $source_version))",
               "format": "time_series",
               "instant": true,
               "intervalFactor": 1,
@@ -626,7 +626,7 @@ data:
           "format": "short",
           "gridPos": {
             "h": 6,
-            "w": 9,
+            "w": 6,
             "x": 0,
             "y": 6
           },
@@ -649,7 +649,7 @@ data:
           "strokeWidth": 1,
           "targets": [
             {
-              "expr": "(count by (cloud_type, type) ((topk by (_id) (1, label_replace(label_replace(cluster_installer $source, \"type\", \"UPI\", \"type\", \"\"), \"type\", \"IPI\", \"type\", \"openshift-install\") or on (_id) label_replace(cluster_installer, \"type\", \"Unknown\", \"type\", \".*\"))) + on (_id) group_left(cloud_type) (topk by (_id) (1, 0 * label_replace(label_replace((cluster_infrastructure_provider $source) or label_replace(cluster_installer $source, \"type\", \"\", \"type\", \".*\"), \"type\", \"Unknown\", \"type\", \"\"), \"cloud_type\", \"$1\", \"type\", \"(.*)\")))))",
+              "expr": "(count by (cloud_type, type) ((topk by (_id) (1, label_replace(label_replace(cluster_installer $source $source_version, \"type\", \"UPI\", \"type\", \"\"), \"type\", \"IPI\", \"type\", \"openshift-install\") or on (_id) label_replace(cluster_installer, \"type\", \"Unknown\", \"type\", \".*\"))) + on (_id) group_left(cloud_type) (topk by (_id) (1, 0 * label_replace(label_replace((cluster_infrastructure_provider $source $source_version) or label_replace(cluster_installer $source $source_version, \"type\", \"\", \"type\", \".*\"), \"type\", \"Unknown\", \"type\", \"\"), \"cloud_type\", \"$1\", \"type\", \"(.*)\")))))",
               "format": "time_series",
               "instant": true,
               "interval": "",
@@ -665,6 +665,91 @@ data:
           "valueName": "current"
         },
         {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": false,
+          "colors": [
+            "#299c46",
+            "rgba(237, 129, 40, 0.89)",
+            "#d44a3a"
+          ],
+          "datasource": "$datasource",
+          "description": "Count of clusters that have a down node",
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 3,
+            "x": 6,
+            "y": 6
+          },
+          "id": 26,
+          "interval": "",
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "count(count by (_id) (alerts{alertstate=\"firing\",alertname=\"KubeNodeNotReady\"} $source $source_version))",
+              "format": "time_series",
+              "instant": true,
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "thresholds": "",
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Clusters with Down Nodes",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "current"
+        },
+        {
           "aliasColors": {},
           "bars": false,
           "cacheTimeout": null,
@@ -674,7 +759,7 @@ data:
           "description": "",
           "fill": 1,
           "gridPos": {
-            "h": 6,
+            "h": 11,
             "w": 15,
             "x": 9,
             "y": 6
@@ -710,7 +795,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "count by (name,reason) ((cluster_operator_conditions{condition=\"Degraded\"} == 1) $source)",
+              "expr": "count by (name,reason) ((cluster_operator_conditions{condition=\"Degraded\"} == 1) $source $source_version)",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -760,6 +845,91 @@ data:
             "align": false,
             "alignLevel": null
           }
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": false,
+          "colors": [
+            "#299c46",
+            "rgba(237, 129, 40, 0.89)",
+            "#d44a3a"
+          ],
+          "datasource": "$datasource",
+          "description": "Percentage of all nodes that are down",
+          "format": "percentunit",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 3,
+            "x": 6,
+            "y": 9
+          },
+          "id": 27,
+          "interval": "",
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "sum(sum by (_id) (max by (_id,node,instance) (alerts{alertstate=\"firing\",alertname=\"KubeNodeNotReady\"} $source $source_version))) / sum(sum by (_id) (max without (endpoint,job,monitor,namespace,pod,prometheus,prometheus_replica,replica,service) (cluster:node_instance_type_count:sum $source $source_version)))",
+              "format": "time_series",
+              "instant": true,
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "thresholds": "",
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Nodes Down",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "current"
         },
         {
           "columns": [],
@@ -867,7 +1037,7 @@ data:
           ],
           "targets": [
             {
-              "expr": "max by (_id,from_version,version) (time() - max by (_id,from_version,version) (cluster_version{type=\"updating\",from_version!=\"\"} $source)) < 3 * 60 * 60",
+              "expr": "max by (_id,from_version,version) (time() - max by (_id,from_version,version) (cluster_version{type=\"updating\",from_version!=\"\"} $source $source_version)) < 3 * 60 * 60",
               "format": "table",
               "instant": true,
               "intervalFactor": 1,
@@ -878,110 +1048,6 @@ data:
           "timeFrom": null,
           "timeShift": null,
           "title": "In-progress Updates (<3h)",
-          "transform": "table",
-          "type": "table"
-        },
-        {
-          "columns": [],
-          "datasource": "$datasource",
-          "fontSize": "100%",
-          "gridPos": {
-            "h": 8,
-            "w": 15,
-            "x": 9,
-            "y": 12
-          },
-          "id": 12,
-          "interval": "",
-          "links": [],
-          "pageSize": 15,
-          "scroll": true,
-          "showHeader": true,
-          "sort": {
-            "col": 3,
-            "desc": false
-          },
-          "styles": [
-            {
-              "alias": "Count",
-              "colorMode": null,
-              "colors": [
-                "rgba(245, 54, 54, 0.9)",
-                "rgba(237, 129, 40, 0.89)",
-                "rgba(50, 172, 45, 0.97)"
-              ],
-              "dateFormat": "YYYY-MM-DD HH:mm:ss",
-              "decimals": 0,
-              "mappingType": 1,
-              "pattern": "Value",
-              "thresholds": [],
-              "type": "hidden",
-              "unit": "short"
-            },
-            {
-              "alias": "",
-              "colorMode": null,
-              "colors": [
-                "rgba(245, 54, 54, 0.9)",
-                "rgba(237, 129, 40, 0.89)",
-                "rgba(50, 172, 45, 0.97)"
-              ],
-              "decimals": 2,
-              "pattern": "Time",
-              "thresholds": [],
-              "type": "hidden",
-              "unit": "short"
-            },
-            {
-              "alias": "",
-              "colorMode": null,
-              "colors": [
-                "rgba(245, 54, 54, 0.9)",
-                "rgba(237, 129, 40, 0.89)",
-                "rgba(50, 172, 45, 0.97)"
-              ],
-              "dateFormat": "YYYY-MM-DD HH:mm:ss",
-              "decimals": 2,
-              "mappingType": 1,
-              "pattern": "",
-              "thresholds": [],
-              "type": "number",
-              "unit": "short"
-            },
-            {
-              "alias": "",
-              "colorMode": null,
-              "colors": [
-                "rgba(245, 54, 54, 0.9)",
-                "rgba(237, 129, 40, 0.89)",
-                "rgba(50, 172, 45, 0.97)"
-              ],
-              "dateFormat": "YYYY-MM-DD HH:mm:ss",
-              "decimals": 2,
-              "link": true,
-              "linkTargetBlank": true,
-              "linkTooltip": "See cluster dashboard",
-              "linkUrl": "/d/kSomLV7Wk/ocp-4-cluster-by-id?orgId=1&var-_id=${__cell}",
-              "mappingType": 1,
-              "pattern": "_id",
-              "thresholds": [],
-              "type": "number",
-              "unit": "short"
-            }
-          ],
-          "targets": [
-            {
-              "expr": "topk by (_id) (1, 0 * cluster_version{type=\"current\"}) $source +\non (_id) group_right(version) count by (_id,name,condition,reason) (cluster_operator_conditions{condition=\"Degraded\"} == 1 or cluster_operator_conditions{condition=\"Available\"} == 0)",
-              "format": "table",
-              "instant": true,
-              "intervalFactor": 1,
-              "legendFormat": "",
-              "refId": "A"
-            }
-          ],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "Degraded Operators",
           "transform": "table",
           "type": "table"
         },
@@ -1091,7 +1157,7 @@ data:
           ],
           "targets": [
             {
-              "expr": "max by (_id,from_version,version) ((time() - cluster_version{type=\"updating\",from_version!=\"\"}) $source) >= 3 * 60 * 60",
+              "expr": "max by (_id,from_version,version) ((time() - cluster_version{type=\"updating\",from_version!=\"\"}) $source $source_version) >= 3 * 60 * 60",
               "format": "table",
               "instant": true,
               "intervalFactor": 1,
@@ -1113,9 +1179,9 @@ data:
             "h": 8,
             "w": 15,
             "x": 9,
-            "y": 20
+            "y": 17
           },
-          "id": 22,
+          "id": 12,
           "interval": "",
           "links": [],
           "pageSize": 15,
@@ -1123,7 +1189,7 @@ data:
           "showHeader": true,
           "sort": {
             "col": 3,
-            "desc": true
+            "desc": false
           },
           "styles": [
             {
@@ -1139,7 +1205,7 @@ data:
               "mappingType": 1,
               "pattern": "Value",
               "thresholds": [],
-              "type": "number",
+              "type": "hidden",
               "unit": "short"
             },
             {
@@ -1195,7 +1261,7 @@ data:
           ],
           "targets": [
             {
-              "expr": "sort_desc(max by (_id,code) (code:apiserver_request_count:rate:sum{code=~\"(4|5)\\\\d\\\\d\"} $source) > 0.5)",
+              "expr": "topk by (_id) (1, 0 * cluster_version{type=\"current\"}) $source $source_version +\non (_id) group_right(version) count by (_id,name,condition,reason) (cluster_operator_conditions{condition=\"Degraded\"} == 1 or cluster_operator_conditions{condition=\"Available\"} == 0)",
               "format": "table",
               "instant": true,
               "intervalFactor": 1,
@@ -1205,7 +1271,7 @@ data:
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "High API Error Rates",
+          "title": "Degraded Operators",
           "transform": "table",
           "type": "table"
         },
@@ -1299,7 +1365,7 @@ data:
           ],
           "targets": [
             {
-              "expr": "max by (_id, version) ((time() - topk by (_id) (1, cluster_version{type=\"updating\",from_version=\"\"} $source)) > 1 * 60 * 60)",
+              "expr": "max by (_id, version) ((time() - topk by (_id) (1, cluster_version{type=\"updating\",from_version=\"\"} $source $source_version)) > 1 * 60 * 60)",
               "format": "table",
               "instant": true,
               "intervalFactor": 1,
@@ -1318,22 +1384,38 @@ data:
           "datasource": "$datasource",
           "fontSize": "100%",
           "gridPos": {
-            "h": 11,
+            "h": 8,
             "w": 15,
             "x": 9,
-            "y": 28
+            "y": 25
           },
-          "id": 13,
+          "id": 22,
           "interval": "",
           "links": [],
           "pageSize": 15,
           "scroll": true,
           "showHeader": true,
           "sort": {
-            "col": 2,
-            "desc": false
+            "col": 3,
+            "desc": true
           },
           "styles": [
+            {
+              "alias": "Count",
+              "colorMode": null,
+              "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+              ],
+              "dateFormat": "YYYY-MM-DD HH:mm:ss",
+              "decimals": 0,
+              "mappingType": 1,
+              "pattern": "Value",
+              "thresholds": [],
+              "type": "number",
+              "unit": "short"
+            },
             {
               "alias": "",
               "colorMode": null,
@@ -1359,9 +1441,9 @@ data:
               "dateFormat": "YYYY-MM-DD HH:mm:ss",
               "decimals": 2,
               "mappingType": 1,
-              "pattern": "Value",
+              "pattern": "",
               "thresholds": [],
-              "type": "hidden",
+              "type": "number",
               "unit": "short"
             },
             {
@@ -1387,7 +1469,7 @@ data:
           ],
           "targets": [
             {
-              "expr": "count by (_id,alertname) (alerts{alertstate=\"firing\",alertname!=\"Watchdog\"} $source)",
+              "expr": "sort_desc(max by (_id,code) (code:apiserver_request_count:rate:sum{code=~\"(4|5)\\\\d\\\\d\"} $source $source_version) > 0.5)",
               "format": "table",
               "instant": true,
               "intervalFactor": 1,
@@ -1397,7 +1479,7 @@ data:
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Firing Alerts",
+          "title": "High API Error Rates",
           "transform": "table",
           "type": "table"
         },
@@ -1491,7 +1573,7 @@ data:
           ],
           "targets": [
             {
-              "expr": "max by (_id,version) ((time() - cluster_version{type=\"failure\"}) $source) > 3 * 60 * 60",
+              "expr": "max by (_id,version) ((time() - cluster_version{type=\"failure\"}) $source $source_version) > 3 * 60 * 60",
               "format": "table",
               "instant": true,
               "intervalFactor": 1,
@@ -1508,13 +1590,101 @@ data:
         {
           "columns": [],
           "datasource": "$datasource",
+          "fontSize": "100%",
+          "gridPos": {
+            "h": 11,
+            "w": 15,
+            "x": 9,
+            "y": 33
+          },
+          "id": 13,
+          "interval": "",
+          "links": [],
+          "pageSize": 15,
+          "scroll": true,
+          "showHeader": true,
+          "sort": {
+            "col": 2,
+            "desc": false
+          },
+          "styles": [
+            {
+              "alias": "",
+              "colorMode": null,
+              "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+              ],
+              "decimals": 2,
+              "pattern": "Time",
+              "thresholds": [],
+              "type": "hidden",
+              "unit": "short"
+            },
+            {
+              "alias": "",
+              "colorMode": null,
+              "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+              ],
+              "dateFormat": "YYYY-MM-DD HH:mm:ss",
+              "decimals": 2,
+              "mappingType": 1,
+              "pattern": "Value",
+              "thresholds": [],
+              "type": "hidden",
+              "unit": "short"
+            },
+            {
+              "alias": "",
+              "colorMode": null,
+              "colors": [
+                "rgba(245, 54, 54, 0.9)",
+                "rgba(237, 129, 40, 0.89)",
+                "rgba(50, 172, 45, 0.97)"
+              ],
+              "dateFormat": "YYYY-MM-DD HH:mm:ss",
+              "decimals": 2,
+              "link": true,
+              "linkTargetBlank": true,
+              "linkTooltip": "See cluster dashboard",
+              "linkUrl": "/d/kSomLV7Wk/ocp-4-cluster-by-id?orgId=1&var-_id=${__cell}",
+              "mappingType": 1,
+              "pattern": "_id",
+              "thresholds": [],
+              "type": "number",
+              "unit": "short"
+            }
+          ],
+          "targets": [
+            {
+              "expr": "count by (_id,alertname) (alerts{alertstate=\"firing\",alertname!=\"Watchdog\"} $source $source_version)",
+              "format": "table",
+              "instant": true,
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Firing Alerts",
+          "transform": "table",
+          "type": "table"
+        },
+        {
+          "columns": [],
+          "datasource": "$datasource",
           "description": "Clusters with nodes that are reporting NotReady (are not contacting the API server to report healthy).",
           "fontSize": "100%",
           "gridPos": {
             "h": 11,
             "w": 15,
             "x": 9,
-            "y": 39
+            "y": 44
           },
           "id": 18,
           "interval": "",
@@ -1564,7 +1734,7 @@ data:
           ],
           "targets": [
             {
-              "expr": "count by (_id) (max by (_id,node,instance) (alerts{alertstate=\"firing\",alertname=\"KubeNodeNotReady\"} $source))",
+              "expr": "count by (_id) (max by (_id,node,instance) (alerts{alertstate=\"firing\",alertname=\"KubeNodeNotReady\"} $source $source_version))",
               "format": "table",
               "instant": true,
               "intervalFactor": 1,
@@ -1630,6 +1800,39 @@ data:
               },
               {
                 "selected": false,
+                "text": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{email_domain!~\"redhat.com|(^|.*\\\\.)ibm.com\"}))",
+                "value": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{email_domain!~\"redhat.com|(^|.*\\\\.)ibm.com\"}))"
+              },
+              {
+                "selected": false,
+                "text": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{support=~\"Premium|Standard\"}))",
+                "value": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{support=~\"Premium|Standard\"}))"
+              }
+            ],
+            "query": "+ 0, + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, subscription_labels{email_domain!~\"redhat.com|(^|.*\\\\.)ibm.com\"})), + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, subscription_labels{support=~\"Premium|Standard\"}))",
+            "skipUrlSync": false,
+            "type": "custom"
+          },
+          {
+            "allValue": null,
+            "current": {
+              "tags": [],
+              "text": "+ 0",
+              "value": "+ 0"
+            },
+            "hide": 0,
+            "includeAll": false,
+            "label": null,
+            "multi": false,
+            "name": "source_version",
+            "options": [
+              {
+                "selected": true,
+                "text": "+ 0",
+                "value": "+ 0"
+              },
+              {
+                "selected": false,
                 "text": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.1\\\\.\\\\d+\"}))",
                 "value": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.1\\\\.\\\\d+\"}))"
               },
@@ -1640,31 +1843,21 @@ data:
               },
               {
                 "selected": false,
+                "text": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.3\\\\.\\\\d+.*\"}))",
+                "value": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.3\\\\.\\\\d+.*\"}))"
+              },
+              {
+                "selected": false,
                 "text": "+ on (_id) group_left(_blah) (0 * ((time() - topk by (_id) (1, cluster_version{type=\"completed\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) < (21 * 24 * 60 * 60))) + on (_id) group_left(_blah) (0 * ((time() - topk by (_id) (1, cluster_version{type=\"initial\"})) > (7 * 24 * 60 * 60)))",
                 "value": "+ on (_id) group_left(_blah) (0 * ((time() - topk by (_id) (1, cluster_version{type=\"completed\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) < (21 * 24 * 60 * 60))) + on (_id) group_left(_blah) (0 * ((time() - topk by (_id) (1, cluster_version{type=\"initial\"})) > (7 * 24 * 60 * 60)))"
               },
               {
                 "selected": false,
-                "text": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{email_domain!~\"redhat.com|(^|.*\\\\.)ibm.com\"}))",
-                "value": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{email_domain!~\"redhat.com|(^|.*\\\\.)ibm.com\"}))"
-              },
-              {
-                "selected": false,
-                "text": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{support=~\"Premium|Standard\"}))",
-                "value": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{support=~\"Premium|Standard\"}))"
-              },
-              {
-                "selected": false,
-                "text": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) + on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{email_domain!=\"redhat.com\"}))",
-                "value": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) + on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{email_domain!=\"redhat.com\"}))"
-              },
-              {
-                "selected": false,
-                "text": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+-0\\\\.nightly.+\"})) + on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{email_domain!=\"redhat.com\"}))",
-                "value": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+-0\\\\.nightly.+\"})) + on (_id) group_left(_blah) (0 * topk by (_id) (1, subscription_labels{email_domain!=\"redhat.com\"}))"
+                "text": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+-0\\\\.nightly.+\"}))",
+                "value": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+-0\\\\.nightly.+\"}))"
               }
             ],
-            "query": "+ 0, + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, cluster_version{type=\"current\"\\,version=~\"4\\\\.1\\\\.\\\\d+\"})),  + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, cluster_version{type=\"current\"\\,version=~\"4\\\\.2\\\\.\\\\d+\"})), + on (_id) group_left(_blah) (0 * ((time() - topk by (_id) (1\\, cluster_version{type=\"completed\"\\,version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) < (21 * 24 * 60 * 60))) + on (_id) group_left(_blah) (0 * ((time() - topk by (_id) (1\\, cluster_version{type=\"initial\"})) > (7 * 24 * 60 * 60))), + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, subscription_labels{email_domain!~\"redhat.com|(^|.*\\\\.)ibm.com\"})), + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, subscription_labels{support=~\"Premium|Standard\"})),  + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, cluster_version{type=\"current\"\\,version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, subscription_labels{email_domain!=\"redhat.com\"})),  + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, cluster_version{type=\"current\"\\,version=~\"4\\\\.\\\\d+\\\\.\\\\d+-0\\\\.nightly.+\"})) + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, subscription_labels{email_domain!=\"redhat.com\"}))",
+            "query": "+ 0, + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, cluster_version{type=\"current\"\\,version=~\"4\\\\.1\\\\.\\\\d+\"})),  + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, cluster_version{type=\"current\"\\,version=~\"4\\\\.2\\\\.\\\\d+\"})), + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, cluster_version{type=\"current\"\\,version=~\"4\\\\.3\\\\.\\\\d+.*\"})),  + on (_id) group_left(_blah) (0 * ((time() - topk by (_id) (1\\, cluster_version{type=\"completed\"\\,version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) < (21 * 24 * 60 * 60))) + on (_id) group_left(_blah) (0 * ((time() - topk by (_id) (1\\, cluster_version{type=\"initial\"})) > (7 * 24 * 60 * 60))), + on (_id) group_left(_blah) (0 * topk by (_id) (1\\, cluster_version{type=\"current\"\\,version=~\"4\\\\.\\\\d+\\\\.\\\\d+-0\\\\.nightly.+\"}))",
             "skipUrlSync": false,
             "type": "custom"
           }
