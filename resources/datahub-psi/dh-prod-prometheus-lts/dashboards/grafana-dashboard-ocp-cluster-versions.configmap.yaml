@@ -907,7 +907,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "count by (version) (\n   ((time() - topk by (_id) (1,\n    label_replace(\n      label_replace(cluster_version{type=\"current\"}, \"version\", \"4.$1-0.$2\", \"version\", \"4\\\\.(\\\\d+\\\\.\\\\d+)-0.(ci|nightly|okd).*\"),\n      \"version\",\n      \"ci-pull-requests\",\n      \"version\",\n      \"0.0.1-.*\"\n    )\n   ) < (4 * 60 * 60)))\n)",
+              "expr": "count by (version) (\n   ((time() - topk by (_id) (1,\n    label_replace(\n      label_replace(cluster_version{type=\"initial\"} $source $source_version, \"version\", \"4.$1-0.$2\", \"version\", \"4\\\\.(\\\\d+\\\\.\\\\d+)-0.(ci|nightly|okd).*\"),\n      \"version\",\n      \"ci-pull-requests\",\n      \"version\",\n      \"0.0.1-.*\"\n    )\n   ) < (4 * 60 * 60)))\n)",
               "format": "time_series",
               "instant": false,
               "interval": "4h",
@@ -1087,7 +1087,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "count by (version) (\n  ((time() - topk by (_id) (1,\n    label_replace(\n      label_replace(cluster_version{type=\"current\"}, \"version\", \"4.$1-0.$2\", \"version\", \"4\\\\.(\\\\d+\\\\.\\\\d+)-0.(ci|nightly|okd).*\"),\n      \"version\",\n      \"ci-pull-requests\",\n      \"version\",\n      \"0.0.1-.*\"\n    )\n  ) < 4 * 60 * 60))\n)",
+              "expr": "count by (version) (\n  ((time() - topk by (_id) (1,\n    label_replace(\n      label_replace(cluster_version{type=\"updating\"} $source $source_version, \"version\", \"4.$1-0.$2\", \"version\", \"4\\\\.(\\\\d+\\\\.\\\\d+)-0.(ci|nightly|okd).*\"),\n      \"version\",\n      \"ci-pull-requests\",\n      \"version\",\n      \"0.0.1-.*\"\n    )\n  ) < 4 * 60 * 60))\n)",
               "format": "time_series",
               "instant": false,
               "interval": "4h",
@@ -1177,7 +1177,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by (version) ((time() - (\n  label_replace(\n    label_replace(cluster_version{type=\"current\"}, \"version\", \"4.$1-0.$2\", \"version\", \"4\\\\.(\\\\d+\\\\.\\\\d+)-0.(ci|nightly|okd).*\"),\n    \"version\",\n    \"ci-pull-requests\",\n    \"version\",\n    \"0.0.1-.*\"\n  )\n)) / (60 * 60 * 24))",
+              "expr": "sum by (version) ((time() - (\n  label_replace(\n    label_replace(cluster_version{type=\"initial\"} $source $source_version, \"version\", \"4.$1-0.$2\", \"version\", \"4\\\\.(\\\\d+\\\\.\\\\d+)-0.(ci|nightly|okd).*\"),\n    \"version\",\n    \"ci-pull-requests\",\n    \"version\",\n    \"0.0.1-.*\"\n  )\n)) / (60 * 60 * 24))",
               "format": "time_series",
               "hide": false,
               "instant": false,
@@ -1313,27 +1313,32 @@ data:
               },
               {
                 "selected": false,
-                "text": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.1\\\\.\\\\d+\"}))",
+                "text": "All 4.y.z versions",
+                "value": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"}))"
+              },
+              {
+                "selected": false,
+                "text": "All 4.1.z versions",
                 "value": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.1\\\\.\\\\d+\"}))"
               },
               {
                 "selected": false,
-                "text": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.2\\\\.\\\\d+\"}))",
+                "text": "All 4.2.z versions",
                 "value": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.2\\\\.\\\\d+\"}))"
               },
               {
                 "selected": false,
-                "text": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.3\\\\.\\\\d+.*\"}))",
+                "text": "All 4.3.0-* versions",
                 "value": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.3\\\\.\\\\d+.*\"}))"
               },
               {
                 "selected": false,
-                "text": "+ on (_id) group_left(_blah) (0 * ((time() - topk by (_id) (1, cluster_version{type=\"completed\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) < (21 * 24 * 60 * 60))) + on (_id) group_left(_blah) (0 * ((time() - topk by (_id) (1, cluster_version{type=\"initial\"})) > (7 * 24 * 60 * 60)))",
+                "text": "All 3w clusters updated in the last 1w",
                 "value": "+ on (_id) group_left(_blah) (0 * ((time() - topk by (_id) (1, cluster_version{type=\"completed\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+\"})) < (21 * 24 * 60 * 60))) + on (_id) group_left(_blah) (0 * ((time() - topk by (_id) (1, cluster_version{type=\"initial\"})) > (7 * 24 * 60 * 60)))"
               },
               {
                 "selected": false,
-                "text": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+-0\\\\.nightly.+\"}))",
+                "text": "All nightly versions",
                 "value": "+ on (_id) group_left(_blah) (0 * topk by (_id) (1, cluster_version{type=\"current\",version=~\"4\\\\.\\\\d+\\\\.\\\\d+-0\\\\.nightly.+\"}))"
               }
             ],
