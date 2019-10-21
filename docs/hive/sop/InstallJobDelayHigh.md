@@ -36,9 +36,9 @@ This section steps through how to gather that information.
 1. Open a browser to the appropriate (eg stg or prod) logs URL.
 1. Ensure that the drop down in the upper left says `project.hive.<uuid>`
 1. Change the `Time Range` in the upper right to appropriate value e.g. `Last 24 hours`.
-1. Search for "calculated time to install job". 
+1. Search for "calculated time to first provision seconds".
    ```
-   message:("msg=calculated time to install job")
+   message:("msg=calculated time to first provision seconds")
    ```
 1. From the results find log entries where the `elapsed` field is abnormally large (greater than 600 seconds) and note down the `elapsed` and `namespace` values.
 
