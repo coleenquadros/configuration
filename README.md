@@ -279,8 +279,6 @@ In order to add or remove a Quay repo, a MR must be sent to the appropriate App 
 
 **NOTE**: If the App or the relevant Quay org are not modelled in the App-Interface repository, please seek the assistance from the App-SRE team.
 
-
-
 ### Manage Openshift resources via App-Interface (`/openshift/namespace-1.yml`)
 
 [services](/data/services) contains all the services that are being run by the App-SRE team. Inside of those directories, there is a `namespaces` folder that lists all the `namespaces` that are linked to that service.
@@ -291,15 +289,49 @@ Notes:
 * If the resource already exists in the namespace, the PR check will fail. Please get in contact with App-SRE team to import resources to be under the control of App-Interface.
 * Manual changes to resources will be overridden by App-Interface in each run.
 
-OpenShift resources can be entirely self-serviced via App-Interface.
+OpenShift resources can be entirely self-serviced via App-Interface. A list of supported resource types can be found [here](/schemas/openshift/namespace-1.yml#L46).
 
-A list of supported resource types can be found [here](/schemas/openshift/namespace-1.yml#L46). The next section demonstrates how to manage the different resources through an example - `ConfigMaps`.
+Some resources have special caracteristics and are described further below. These have a specific `provider` value.
+- `Secret`
+- `Route`
 
-In addition, `Secrets` and `Routes` are also supported (see specific sections below).
+For other resources, two `provider` options are available:
+- `resource`
+- `resource-template`
 
-#### Manage ConfigMaps via App-Interface (`/openshift/namespace-1.yml`)
+The `resource-template` provider supports using the `Jinja2` template language to extend the capabilities of the integration. In addition to the [standard Jinja2 language](https://jinja.palletsprojects.com/en/2.10.x/), the following additional capabilities are supported:
+- Fetch a secret from vault
 
-ConfigMaps can be entirely self-serviced via App-Interface.
+    ```jinja
+    {{ vault('app-sre/creds/smtp', 'username') }}
+    ```
+
+- Base64 encode a block of data
+
+    ```jinja
+    {% b64encode %}
+    My data
+    {% endb64encode %}
+    ```
+
+- Reference the resource & namespace metadata from app-interface
+
+  The `resource` variable is passed to Jinja2 and contains all the resource/namespace metadata as returned by the integration at the point of processing the resource
+
+  ```yaml
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: {{ resource.name }}
+  data:
+    foo: bar
+  ```
+
+> **Warning**: The Jinja2 delimiters (`{{ }}` and `{% %}`) conflicts with other templating languages such as go's text/template. To remedy that, the `type` `extracurlyjinja2` can be used to add an extra curly brace to the standard Jinja2 delimiters (resulting in `{{{ }}}` and `{{% %}}`
+
+The next section demonstrates how to manage a `ConfigMap` resource via two examples showing both the `resource` and `resource-template` providers:
+
+#### Example: Manage a ConfigMap via App-Interface (`/openshift/namespace-1.yml`)
 
 In order to add ConfigMaps to a namespace, you need to add them to the `openshiftResources` field.
 
@@ -310,9 +342,26 @@ The object itself must be stored under the `resources` path, and by convention i
 
 In order to change the values of a ConfigMap, send a PR modifying the ConfigMap in the `resources` directory, and upon merge it will be applied.
 
-#### Manage Secrets via App-Interface (`/openshift/namespace-1.yml`) using Vault
+#### Example: Manage a templated ConfigMap via App-Interface (`/openshift/namespace-1.yml`)
 
-Secrets can be entirely self-serviced via App-Interface.
+A templated opensource resource is configured the same way as a standard resource, with the following changes:
+
+- `provider`: must be `resource-template`
+- `type`: can be `jinja2` or `extracurlyjinja2` (default is `jinja2`)
+
+An example of the file content could be:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-configmap
+type: Opaque
+data:
+  not_so_secret_value: {{{ vault('app-interface/my-cluster/my-namespace/my-not-so-secret-secret', 'the-key') }}}
+```
+
+#### Manage Secrets via App-Interface (`/openshift/namespace-1.yml`) using Vault
 
 Instructions:
 
