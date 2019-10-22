@@ -9,6 +9,7 @@ name: telemeter-server
 app:
   $ref: /services/telemeter/app.yml
 
+# The specific component of the app/service above ^
 component: telemeter-server
 
 prometheusLabels: # Dictionary, a bunch of labels that Prometheus uses to select this rules file
@@ -16,48 +17,52 @@ prometheusLabels: # Dictionary, a bunch of labels that Prometheus uses to select
   role: alert-rules
   type: slo-rules
 
-selectorJob: telemeter-server # namespace level
-additionalSelectors: # List of additional selectors to be used in Prometheus rule
-  handler: upload
-
+# Namespaces where the application lives
 namespaces:
 - namespace:
     $ref: /services/telemeter/namespaces/telemeter-stage.yml
-  #overrideSelectorJob: STRING # optional
-  #overrideAdditionalSelectors: LIST # optional
-
 - namespace:
     $ref: /services/telemeter/namespaces/telemeter-production.yml
-  #overrideSelectorJob: STRING # optional
-  #overrideAdditionalSelectors: LIST # optional
 
 availability:
 - kind: SLO
   metric: http_requests_total
   errorBudget: 0.01
+  selectors:
+    job: telemeter-server
+    handler: upload
+
+- kind: SLA
+  metric: http_requests_total
+  errorBudget: 5
+  selectors:
+    job: telemeter-server
+    handler: upload
 
 latency:
 - kind: SLO
   metric: latency_bucket
   threshold: 3
   percentile: 90
+  selectors:
+    job: telemeter-server
+    handler: upload
 
 rawRecording:
-- record: component:slo_availability:ratio_rate_5m
-  expr: sum(rate(something{selector="value"}[5m]))
+- record: telemeter:capacity
+  expr: (sum(telemeter_partitions{namespace="telemeter-production"}) / 5000) * 100
   labels:
-    # inferred: component: prometheus
-    # inferred: namespace
-    service: telemeter
+    component: telemeter-server
 
 rawAlerting:
-- alert: PrometheusErrorBudgetBurn
-  expr: something > 0
-  for: 2m
-  labels:
-    severity: test
+- alert: SLO - TelemeterCapacityReached
   annotations:
-    message: "Component {{$labels.component}} has returned {{ $value | printf `%.2f` }}% 5xx over the last hour."
-    runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/sop"
-    dashboard: "https://grafana.app-sre.devshift.net/"
-    # link_url: ""
+    message: "Telemeter reached {{ $value }}% of capacity in namespace {{ $labels.namespace }}."
+    runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
+    dashboard: "https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-prometheus&var-cluster=app-sre&var-namespace=telemeter-prod"
+  expr: telemeter:capacity >= 50
+  for: 5m
+  labels:
+    service: telemeter
+    severity: medium
+    component: telemeter-server

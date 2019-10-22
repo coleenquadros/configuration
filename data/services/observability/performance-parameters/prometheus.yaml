@@ -1,0 +1,86 @@
+---
+$schema: /app-sre/performance-parameters-1.yml
+
+# Labels for this file in app-interface
+# Not related to generated manifests
+labels:
+  service: observability
+
+name: prometheus
+
+app:
+  $ref: /services/observability/app.yml
+
+component: prometheus
+
+# Labels that Prometheus uses to select this rules file
+# These labels are added to the generated Manifest's metadata.labels
+prometheusLabels:
+  prometheus: app-sre
+  role: alert-rules
+  type: slo-rules
+
+# Namespaces that this app lives in
+namespaces:
+- namespace:
+    $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+  #overrideSelectors:
+  #  handler: /api/v2/query
+
+- namespace:
+    $ref: /services/observability/namespaces/app-sre-observability-production.yml
+  #overrideSelectors:
+  #  handler: /api/v2/query
+
+availability:
+# Defines a 99.99% SLO and 99% SLA
+- kind: SLO
+  metric: prometheus_http_requests_total
+  errorBudget: 0.01
+  selectors:
+    handler: /api/v1/query
+    job: prometheus-app-sre
+
+- kind: SLO
+  metric: prometheus_http_requests_total
+  errorBudget: 0.01
+  selectors:
+    handler: /api/v1/query_range
+    job: prometheus-app-sre
+
+- kind: SLA
+  metric: prometheus_http_requests_total
+  errorBudget: 1
+  selectors:
+    handler: /api/v1/query
+    job: prometheus-app-sre
+
+latency:
+- kind: SLO
+  metric: latency_bucket
+  threshold: 3
+  percentile: 90
+  selectors:
+    handler: /api/v1/query
+    job: prometheus-app-sre
+
+rawRecording:
+- record: component:slo_availability:ratio_rate_5m
+  expr: sum(rate(something{selector="value"}[5m]))
+  labels:
+    # inferred: component: prometheus
+    # inferred: namespace
+    service: prometheus
+
+rawAlerting:
+- alert: PrometheusErrorSendingAlerts
+  expr: |
+    rate(prometheus_notifications_errors_total[5m])
+    / rate(prometheus_notifications_sent_total[5m]) > 0.03
+  for: 10m
+  labels:
+    severity: high
+  annotations:
+    message: "Errors while sending alerts from Prometheus {{$labels.namespace}}/{{$labels.pod}} to Alertmanager {{$labels.Alertmanager}}"
+    runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-PrometheusErrorSendingAlerts.md
+    dashboard: "https://grafana.app-sre.devshift.net/"
