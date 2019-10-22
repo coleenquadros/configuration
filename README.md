@@ -736,8 +736,10 @@ In order to add or update a service account, you need to add them to the `terraf
   - `app-sre`
   - `osio`
   - `osio-dev`
-- `identifier` - name of resource to create (or update)
+- `identifier`: name of resource to create (or update)
+- `variables`: list of key-value pairs to use for templating of `user_policy`. these pairs will also be added to the output resource.
 - `policies`: list of AWS policies you wish to attach to the service account user.
+- `user_policy`: an AWS user policy to create and attach to the service account user.
 - `output_resource_name`: name of Kubernetes Secret to be created.
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
@@ -748,6 +750,8 @@ Once the changes are merged, the IAM resources will be created (or updated) and 
 The Secret will contain the following fields:
 - `aws_access_key_id` - The access key ID.
 - `aws_secret_access_key` - The secret access key.
+
+In addition, any additional key-value pairs defined under `variables` will be added to the Secret.
 
 ### Manage Slack User groups via App-Interface
 

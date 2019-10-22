@@ -1,0 +1,42 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: dh-stage-telemetry
+description: stage namespace for datahub telemetry
+
+cluster:
+  $ref: /openshift/paas-stage-psi/cluster.yml
+
+app:
+  $ref: /services/telemeter/app.yml
+
+managedResourceTypes:
+- Secret
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: service-account
+  account: app-sre
+  identifier: telemeter-thanos-stage-s3-reader
+  variables:
+    bucket: telemeter-thanos-stage
+  user_policy:
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": ["s3:ListBucket"],
+          "Resource": ["arn:aws:s3:::${bucket}"]
+        },
+        {
+          "Effect": "Allow",
+          "Action": ["s3:GetObject"],
+          "Resource": ["arn:aws:s3:::${bucket}/*"]
+        }
+      ]
+    }
+  output_resource_name: telemeter-thanos-s3-reader
