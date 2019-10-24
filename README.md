@@ -195,6 +195,7 @@ wheel icon (top-right corner) and replace `omit` with `include` in
 - Management of OpenShift rolebindings
 - Management of Quay repos.
 - Management of Quay organisation members.
+- Management of openshift-acme deployments.
 - Management of OpenShift Namespaces.
 - Management of OpenShift Groups.
 - Management of OpenShift resources.
@@ -425,6 +426,20 @@ Notes:
 * In case the Route contains no sensitive information, a secret in Vault is not required (hence the fields are optional).
 * It is recommended to read through the instructions for [Secrets](#manage-secrets-via-app-interface-openshiftnamespace-1yml-using-vault) before using Routes.
 
+### Manage openshift-acme deployments via App-Interface (`/openshift/acme-1.yml`)
+
+This integration allows namespace owners to deploy openshift-acme to their namespaces.
+
+To deploy and manage an openshift-acme instance, a user must add the following to a namespace declaration:
+
+```yaml
+openshiftAcme:
+  $ref: /dependencies/openshift/acme/default.yml
+```
+
+The openshift-acme deployment can be customized by creating a new file alongside the default one.
+
+The default definition (as shown above) is self-documented and shows how to tweak the openshift-acme deployment.
 
 ### Manage OpenShift Groups association via App-Interface (`/openshift/cluster-1.yml`)
 
