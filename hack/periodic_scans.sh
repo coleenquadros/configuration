@@ -22,7 +22,7 @@ source $CURRENT_DIR/runners.sh
 
 APP_INTERFACE_PROJECT_ID=13582
 
-run_int github-scanner $APP_INTERFACE_PROJECT_ID --thread-pool-size 1 &
+run_int github-scanner $APP_INTERFACE_PROJECT_ID &
 run_int aws-support-cases-sos $APP_INTERFACE_PROJECT_ID &
 
 wait
