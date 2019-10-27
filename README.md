@@ -800,13 +800,13 @@ The key is the queue name with dashes (`-`) replaced by underscores (`_`), in lo
 For example, if the sqs definitions contains the following queues:
 ```
 queues:
-- my-AWESOME-queue
-- test-quEUE
+- this-queue-is-AWESOME
+- STAGE_hello-World
 ```
 will result in a Secret with the AWS credentials and 2 additional keys:
 ```
-my_awesome_queue: <queue_url>
-test_queue: <queue_url>
+this_queue_is_awesome_queue_url: <queue_url>
+stage_hello_world_queue_url: <queue_url>
 ```
 
 ### Manage Slack User groups via App-Interface
