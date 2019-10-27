@@ -768,6 +768,47 @@ The Secret will contain the following fields:
 
 In addition, any additional key-value pairs defined under `variables` will be added to the Secret.
 
+#### Manage SQS queues via App-Interface (`/openshift/namespace-1.yml`)
+
+SQS queues can be entirely self-serviced via App-Interface.
+
+In order to add or update an SQS queue, you need to add them to the `terraformResources` field.
+
+- `provider`: must be `sqs`
+- `account`: must be one of the AWS account names we manage. Current options:
+  - `app-sre`
+  - `osio`
+  - `osio-dev`
+- `identifier` - a name of the group of resources to create (or update)
+  - Does not affect names of queues.
+  - Will be used as the name of the IAM user that will be created.
+- `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options:](/resources/terraform/resources/)
+- `overrides`: list of values from `defaults` you wish to override, with the override values.
+- `output_resource_name`: name of Kubernetes Secret to be created.
+  - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
+  - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
+    - For example, for a resource with `identifier` "my-queue" and `provider` "sqs", the created Secret will be called `my-queue-sqs`.
+- `queues`: list of queues to create.
+
+Once the changes are merged, the SQS queue will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
+
+The Secret will contain the following fields:
+- `aws_access_key_id` - The access key ID.
+- `aws_secret_access_key` - The secret access key.
+In addition, for each queue defined under `queues`, a key will be created and will contain the queue url.
+The key is the queue name with dashes (`-`) replaced by underscores (`_`), in lower case.
+For example, if the sqs definitions contains the following queues:
+```
+queues:
+- my-AWESOME-queue
+- test-quEUE
+```
+will result in a Secret with the AWS credentials and 2 additional keys:
+```
+my_awesome_queue: <queue_url>
+test_queue: <queue_url>
+```
+
 ### Manage Slack User groups via App-Interface
 
 Slack User groups can be self-services via App-Interface.
