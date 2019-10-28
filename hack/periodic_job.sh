@@ -23,7 +23,7 @@ source $CURRENT_DIR/runners.sh
 APP_INTERFACE_PROJECT_ID=13582
 HOUSEKEEPING_PROJECT_ID=4713
 
-run_int github-users $APP_INTERFACE_PROJECT_ID &
+run_int gitlab-pr-submitter $APP_INTERFACE_PROJECT_ID &
 run_int gitlab-housekeeping $APP_INTERFACE_PROJECT_ID &
 run_int gitlab-housekeeping $HOUSEKEEPING_PROJECT_ID &
 run_int gitlab-permissions &
