@@ -711,6 +711,8 @@ Once the changes are merged, the S3 bucket will be created (or updated) and a Ku
 
 The Secret will contain the following fields:
 - `bucket` - The name of the bucket.
+- `aws_region` - The name of the bucket's AWS region.
+- `endpoint` - The url of the region's S3 endpoint.
 - `aws_access_key_id` - The access key ID.
 - `aws_secret_access_key` - The secret access key.
 
@@ -788,26 +790,17 @@ In order to add or update an SQS queue, you need to add them to the `terraformRe
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-queue" and `provider` "sqs", the created Secret will be called `my-queue-sqs`.
-- `queues`: list of queues to create.
+- `queues`: list of queues to create:
+  - `key` is the key to be added to the Secret
+  - `value` is the name of the queue to create
 
 Once the changes are merged, the SQS queue will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
 The Secret will contain the following fields:
 - `aws_access_key_id` - The access key ID.
 - `aws_secret_access_key` - The secret access key.
-In addition, for each queue defined under `queues`, a key will be created and will contain the queue url.
-The key is the queue name with dashes (`-`) replaced by underscores (`_`), in lower case.
-For example, if the sqs definitions contains the following queues:
-```
-queues:
-- this-queue-is-AWESOME
-- STAGE_hello-World
-```
-will result in a Secret with the AWS credentials and 2 additional keys:
-```
-this_queue_is_awesome_queue_url: <queue_url>
-stage_hello_world_queue_url: <queue_url>
-```
+- `aws_region` - The name of the queue's AWS region.
+In addition, for each queue defined under `queues`, a key will be created and will contain the queue url. The key is the value defined in `key`.
 
 ### Manage Slack User groups via App-Interface
 
