@@ -55,3 +55,23 @@ openshiftResources:
 - provider: vault-secret
   path: app-interface/app-sre-stage/app-interface-stage/qontract-reconcile-toml
   version: 2
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: service-account
+  account: app-sre
+  identifier: app-interface-sqs-reader
+  variables:
+    aws_region: us-east-1
+    gitlab_pr_submitter_queue_url: https://sqs.us-east-1.amazonaws.com/950916221866/app-interface-gitlab-pr-submitter
+  user_policy:
+    {
+      "Version": "2012-10-17",
+      "Statement": [{
+          "Effect": "Allow",
+          "Action": "sqs:ReceiveMessage",
+          "Resource": "arn:aws:sqs:*:950916221866:app-interface-gitlab-pr-submitter"
+      }]
+    }
+  output_resource_name: app-interface-sqs
