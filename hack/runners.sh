@@ -5,7 +5,7 @@ run_int() {
 
   INTEGRATION_NAME="${ALIAS:-$1}"
   [ -n "$DRY_RUN" ] && DRY_RUN_FLAG="--dry-run"
-  [ -n "$SQS_GATEWAY" ] && AWS_ENVIRONMENT_VARIABLES="-e aws_access_key_id=$aws_access_key_id -e aws_secret_access_key=$aws_secret_access_key -e aws_region=$aws_region -e gitlab_pr_submitter_queue_url=$gitlab_pr_submitter_queue_url"
+  [ -n "$SQS_GATEWAY" ] && GITLAB_PR_SUBMITTER_QUEUE_URL_ENV="-e gitlab_pr_submitter_queue_url=$gitlab_pr_submitter_queue_url"
 
   echo "INTEGRATION $INTEGRATION_NAME" >&2
 
@@ -16,7 +16,7 @@ run_int() {
     -v ${WORK_DIR}/throughput:/throughput:z \
     -v /var/tmp/.cache:/root/.cache:z \
     -e REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem \
-    $AWS_ENVIRONMENT_VARIABLES \
+    $GITLAB_PR_SUBMITTER_QUEUE_URL_ENV \
     -w / \
     ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
     qontract-reconcile --config /config/config.toml $DRY_RUN_FLAG $@ \

@@ -28,8 +28,7 @@ run_int gitlab-housekeeping $HOUSEKEEPING_PROJECT_ID &
 run_int gitlab-permissions &
 run_int ldap-users $APP_INTERFACE_PROJECT_ID &
 
-SQS_GATEWAY=true
-run_int gitlab-pr-submitter $APP_INTERFACE_PROJECT_ID &
+SQS_GATEWAY=true run_int gitlab-pr-submitter $APP_INTERFACE_PROJECT_ID &
 
 wait
 
