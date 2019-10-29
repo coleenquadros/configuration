@@ -10,33 +10,38 @@ Axiom: *a statement or proposition which is regarded as being established, accep
 <!-- TOC -->
 
 - [1. Anthology of App-SRE Axioms](#1-anthology-of-app-sre-axioms)
-    - [1.1. Index](#11-index)
-    - [1.2. Preface](#12-preface)
-    - [1.3. Changes](#13-changes)
-    - [1.4. Other sources of documentation you might be looking for:](#14-other-sources-of-documentation-you-might-be-looking-for)
-    - [1.5. Access and surfaces list](#15-access-and-surfaces-list)
-        - [1.5.1. On call](#151-on-call)
-            - [1.5.1.1. Pagerduty set up](#1511-pagerduty-set-up)
-            - [1.5.1.2. Follow the sun](#1512-follow-the-sun)
-            - [1.5.1.3. Primary on-call](#1513-primary-on-call)
-            - [1.5.1.4. Secondary on-call](#1514-secondary-on-call)
-            - [1.5.1.5. Escalation](#1515-escalation)
-            - [1.5.1.6. Notification](#1516-notification)
-            - [1.5.1.7. Incident procedure](#1517-incident-procedure)
-            - [1.5.1.8. RCA](#1518-rca)
-    - [1.6. Standard operating procedures](#16-standard-operating-procedures)
-    - [1.7. App oboarding / app acceptance criteria](#17-app-oboarding--app-acceptance-criteria)
-        - [1.7.1. In the app-interface](#171-in-the-app-interface)
-    - [1.8. Git process](#18-git-process)
-    - [1.9. App-sre escalation to external teams](#19-app-sre-escalation-to-external-teams)
-    - [1.10. Escalation procedures](#110-escalation-procedures)
-    - [1.11. Contacts](#111-contacts)
-        - [1.11.1. Acknowledgements](#1111-acknowledgements)
-    - [1.12. Services](#112-services)
+  - [Anthology: *a published collection of poems or other pieces of writing*](#anthology-a-published-collection-of-poems-or-other-pieces-of-writing)
+  - [Axiom: *a statement or proposition which is regarded as being established, accepted, or self-evidently true.*](#axiom-a-statement-or-proposition-which-is-regarded-as-being-established-accepted-or-self-evidently-true)
+  - [1.1. Index](#11-index)
+  - [1.2. Preface](#12-preface)
+  - [1.3. Changes](#13-changes)
+  - [1.4. Other sources of documentation you might be looking for:](#14-other-sources-of-documentation-you-might-be-looking-for)
+  - [1.5. Access and surfaces list](#15-access-and-surfaces-list)
+    - [1.5.1 Returning Red Hat Employee Gotchas](#151-returning-red-hat-employee-gotchas)
+  - [1.6 On call](#16-on-call)
+    - [1.6.1 Primary on-call + interrupt catching](#161-primary-on-call--interrupt-catching)
+    - [1.6.2. Pagerduty set up](#162-pagerduty-set-up)
+    - [1.6.3. Follow the sun](#163-follow-the-sun)
+    - [1.6.4. Primary on-call](#164-primary-on-call)
+    - [1.6.5. Secondary on-call](#165-secondary-on-call)
+    - [1.5.6. Escalation](#156-escalation)
+    - [1.6.7. Notification](#167-notification)
+    - [1.6.8. Incident procedure](#168-incident-procedure)
+    - [1.6.9. RCA](#169-rca)
+  - [1.7. Standard operating procedures](#17-standard-operating-procedures)
+  - [1.8. App oboarding / app acceptance criteria](#18-app-oboarding--app-acceptance-criteria)
+    - [1.8.1. In the app-interface](#181-in-the-app-interface)
+  - [1.9. Git process](#19-git-process)
+  - [1.10. App-sre escalation to external teams](#110-app-sre-escalation-to-external-teams)
+    - [1.10.1 PnT Devops](#1101-pnt-devops)
+  - [1.11. Escalation procedures](#111-escalation-procedures)
+  - [1.12. Contacts](#112-contacts)
+    - [1.12.1. Acknowledgements](#1121-acknowledgements)
+  - [1.13. Services](#113-services)
 - [2. Glossary](#2-glossary)
-    - [2.1. PnT](#21-pnt)
-    - [2.2. PnT Ops](#22-pnt-ops)
-    - [2.3. PnT DevOps](#23-pnt-devops)
+  - [2.1. PnT](#21-pnt)
+  - [2.2. PnT Ops](#22-pnt-ops)
+  - [2.3. PnT DevOps](#23-pnt-devops)
 
 <!-- /TOC -->
 
@@ -63,159 +68,184 @@ The goal is to move this to the app-interface itself as it matures.
 
 ## 1.4. Other sources of documentation you might be looking for:
 
-* The app-interface: https://gitlab.cee.redhat.com/service/app-interface
-* The developers guide: https://gitlab.cee.redhat.com/service/dev-guidelines
-* App-sre team drive: https://drive.google.com/drive/u/0/folders/0B9akCOYRTJW_TFAxOUtEaWtRZWs
+- The app-interface: https://gitlab.cee.redhat.com/service/app-interface
+- The developers guide: https://gitlab.cee.redhat.com/service/dev-guidelines
+- App-sre team drive: https://drive.google.com/drive/u/0/folders/0B9akCOYRTJW_TFAxOUtEaWtRZWs
 
 ## 1.5. Access and surfaces list
 
 Every app-sre engineer should have access to the following
 
-* Github / LDAP username
-* https://password.corp.redhat.com/changepassword/
+- Github / LDAP username
+  - If needed can reset KRB password [here](https://password.corp.redhat.com/changepassword)
+  - Verify inclusion in all github orgs listed [here](https://visual-app-interface.devshift.net/githuborgs)
 
+- Gitlab:
+  - https://gitlab.cee.redhat.com/service/app-interface
+    - create a user file under the [app-sre team](/data/teams/app-sre/users) directory via a merge request off a fork of app-interface
+      - Pro tip: Copy the user file of the newest team member
+  - https://gitlab.cee.redhat.com/dtsd/housekeeping
+    - Keeps all our bits and bobs, Ansible, terraform, python, scripts etc
+    - Issue tracker tracks incoming interrupt catching requests
+  - https://gitlab.cee.redhat.com/app-sre
+    - Access to all repositories is managed via this group
+    - Obtained via a [role](/data/teams/app-sre/roles/app-sre-gitlab-member.yml)
 
-* Gitlab:
-    - https://gitlab.cee.redhat.com/service/app-interface
-        * create a user file under the [app-sre team](/data/teams/app-sre/users) directory via a merge request off a fork of app-interface
-            * Pro tip: Copy the user file of the newest team member
-    - https://gitlab.cee.redhat.com/dtsd/housekeeping
-        * Keeps all our bits and bobs, Ansible, terraform, python, scripts etc
-        * Issue tracker tracks incoming interrupt catching requests
-    - https://gitlab.cee.redhat.com/app-sre
-        * Access to all repositories is managed via this group
-        * Obtained via a [role](/data/teams/app-sre/roles/app-sre-gitlab-member.yml)
+- Slack: coreos.slack.com
+  - Private channels: sd-app-sre-teamchat -> speak to any team member to get an invitation
+  - User groups: @app-sre-team -> obtained via a [role](/data/teams/app-sre/roles/app-sre-slack.yml)
+  - Channels: as stated [here](/data/teams/app-sre/permissions/app-sre-team-coreos-slack.yml) -> obtained via the @app-sre-team user group membership
 
-* Slack: coreos.slack.com
-    * Private channels: sd-app-sre-teamchat -> speak to any team member to get an invitation
-    * User groups: @app-sre-team -> obtained via a [role](/data/teams/app-sre/roles/app-sre-slack.yml)
-    * Channels: as stated [here](/data/teams/app-sre/permissions/app-sre-team-coreos-slack.yml) -> obtained via the @app-sre-team user group membership
+- Internal IRC (irc.devel.redhat.com):
+  - #MIM: Major incident management
+  - #aos: Openshift
+  - #libra-ops: Openshift SD SRE-ops
+  - #libra-noc: Openshift SD SRE
 
-* Internal IRC (irc.devel.redhat.com):
-    - #MIM: Major incident management
-    - #aos: Openshift
-    - #libra-ops: Openshift SD SRE-ops
-    - #libra-noc: Openshift SD SRE
+- Calendar:
 
-* Calendar:
-    - SD-org calendar: https://calendar.google.com/calendar?cid=cmVkaGF0LmNvbV9hZzdoNG5kMnIydGlrM2dqZWxhaGRmbGhkOEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t
-    - SD-org PTO / OOO: https://calendar.google.com/calendar?cid=cmVkaGF0LmNvbV8xN2piaHNtYmR2MTdhMTJhaHBvcDc5cWJ0a0Bncm91cC5jYWxlbmRhci5nb29nbGUuY29t
+  - [SD-org calendar](https://calendar.google.com/calendar?cid=cmVkaGF0LmNvbV9hZzdoNG5kMnIydGlrM2dqZWxhaGRmbGhkOEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t)
+  - [SD-org PTO / OOO](https://calendar.google.com/calendar?cid=cmVkaGF0LmNvbV8xN2piaHNtYmR2MTdhMTJhaHBvcDc5cWJ0a0Bncm91cC5jYWxlbmRhci5nb29nbGUuY29t)
 
-* BlueJeans:
-    * Install bluejeans client
-    * App SRE bridge: https://bluejeans.com/994349364/8531
+- BlueJeans:
+
+  - Install bluejeans client
+  - App SRE bridge: https://bluejeans.com/994349364/8531
 
 - Invite to sprint kickoffs, coordination sessions
 - Mailing lists:
-    - Many people just use the web email client, other thunderbird.
-    - Recommended to sort into folders
-    - https://post-office.corp.redhat.com/mailman/listinfo is the mailing list central
-        - ACCESS: sd-app-sre -> speak to @jake, @jonathan beakley or @paul on slack
-        - ACCESS: sd-org -> subscribe from UI
-        - ACCESS: devtools-saas -> subscribe from UI
-        - ACCESS: devtools-team -> subscribe from UI
-        - ACCESS: outage-list -> subscribe from UI
-        - ACCESS: aos-devel -> subscribe from UI
-        - ACCESS: it-iam-announce-list -> subscribe from UI
+  - Many people just use the web email client, other thunderbird.
+  - Recommended to sort into folders
+  - https://post-office.corp.redhat.com/mailman/listinfo is the mailing list central
+    - ACCESS: sd-app-sre -> speak to @jake, @jonathan beakley or @paul on slack
+    - ACCESS: sd-org -> subscribe from UI
+    - ACCESS: devtools-saas -> subscribe from UI
+    - ACCESS: devtools-team -> subscribe from UI
+    - ACCESS: outage-list -> subscribe from UI
+    - ACCESS: aos-devel -> subscribe from UI
+    - ACCESS: it-iam-announce-list -> subscribe from UI
 
 - GPG key:
-    - Generate one and put in:
-        - ascii armored in https://gitlab.cee.redhat.com/dtsd/housekeeping/tree/master/gpg/SD
-        - base64 encoded binary in your app-interface user file -> [instructions](#adding-your-public-gpg-key)
-    - Use a passphrase!
-    - External reference: https://www.gnupg.org/gph/en/manual/x56.html
+  - Generate one and put in:
+    - ascii armored in [housekeeping repo](https://gitlab.cee.redhat.com/dtsd/housekeeping/tree/master/gpg/SD)
+    - base64 encoded binary in your app-interface user file -> [instructions](/README#adding-your-public-gpg-key)
+      - User file located in [app-interface repo](/data/teams/app-sre/users)
+  - Use a passphrase!
+  - External reference for [generating](https://www.gnupg.org/gph/en/manual/c14.html) and [exporting](https://www.gnupg.org/gph/en/manual/x56.html)
 
 - Sd-org onboarding
-    - ACCESS Contact Meghna Gala (mgala@redhat.com) re Sd-org onboarding
-        - Added to sd-org mailing list
-        - Added to team tracking sheets
-    - ACCESS: Jira: https://coreos.jira.com -> email openshift-jira-admin@redhat.com
+  - ACCESS Contact Meghna Gala (mgala@redhat.com) re Sd-org onboarding (may not be needed)
+    - Added to sd-org mailing list
+    - Added to team tracking sheets (?)
+  - ACCESS: [Jira](https://jira.coreos.com)
+    - Email openshift-jira-admin@redhat.com for any issues
+    - Jira boards [Incidents Board](https://jira.coreos.com/secure/RapidBoard.jspa?rapidView=92&projectKey=HSD) & [SD Epics](https://jira.coreos.com/secure/RapidBoard.jspa?rapidView=140)
 
 - Openshift github onboarding (access to private repositories in openshift github org):
-    - ACCESS: https://mojo.redhat.com/docs/DOC-1081313#jive_content_id_Github_Access
-    - Submit PRs to be added to OWNERS once access is granted:
-        - https://github.com/openshift/telemeter/blob/master/OWNERS
-        - https://github.com/openshift/cincinnati/blob/master/OWNERS_ALIASES
+  - ACCESS: https://mojo.redhat.com/docs/DOC-1081313#jive_content_id_Github_Access
+  - Submit PRs to be added to OWNERS once access is granted:
+    - https://github.com/openshift/telemeter/blob/master/OWNERS
+    - https://github.com/openshift/cincinnati/blob/master/OWNERS_ALIASES
+  - e-mail Jake Moshenko or ping on slack for access to quay github group
 
 - AWS
-    * Obtained via a [role](/data/teams/app-sre/roles/sre-aws.yml)
+  - Nothing to do. Access obtained via a [role](/data/teams/app-sre/roles/sre-aws.yml)
 
 - Vault
-    * Obtained via a [role](/data/teams/app-sre/roles/sre.yml) -> [instructions](https://gitlab.cee.redhat.com/service/dev-guidelines/blob/master/vault.md)
+  - Access obtained via a [role](/data/teams/app-sre/roles/sre.yml)
+    - [setup instructions](https://gitlab.cee.redhat.com/service/dev-guidelines/blob/master/vault.md)
 
 - Quay
-    * Obtained via a [role](/data/teams/app-sre/roles/sre.yml) -> need to have a quay user and specify `quay_username` in the user file
+  - Login to/Create account at https://quay.io
+    - Can use github account for simplicity
+  - Access obtained via a [role](/data/teams/app-sre/roles/sre.yml)
+  - Create `quay_username` in the [user file](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/teams/app-sre/users) and populate with quay user
 
 - Bugzilla
-    - ACCESS: Ensure you have private access to bugzilla via https://maitai-bpms.engineering.redhat.com/
-        - Login with kerberos credentials
-        - Start a process -> Bugzilla account creation
+  - ACCESS: Ensure you have access to [bugzilla](https://bugzilla.redhat.com)
+    - Login as Red Hat Associate with kerberos credentials
+  - Verify you have permissions to view private and private_comment.  This should be provided as part of the redhat group.  See [here](https://mojo.redhat.com/docs/DOC-1197751) for group information.
 
-- Zabbix: https://zabbix.devshift.net:9443/zabbix/zabbix.php?action=dashboard.view
-    - ACCESS: Admin access, can be granted by any App-sre member
+- Zabbix (Being deprecated by 31 Dec 2019):
+  - ACCESS: Ask an app-sre member to create an account with Admin access
+  - Once account is created login [here](https://zabbix.devshift.net:9443/zabbix/zabbix.php?action=dashboard.view)
 
 - Dedicated admin on openshift clusters
-    * Obtained via a [role](data/teams/app-sre/roles/app-sre-dedicated-admins.yml)
+  - Nothing to do. Obtained via a [role](data/teams/app-sre/roles/app-sre-dedicated-admins.yml)
 
 - Pagerduty
-    ACCESS: Reach out to team lead and manager for PD access
+  - ACCESS: Create a [SNOW ticket](https://redhat.service-now.com) to request access to PagerDuty and then reach out to [Bill Montgomery](mailto:bmontgom@redhat.com) with the ticket number
 
-- App-sre team drive
-    ACCESS: Reach out to pbergene@redhat.com
+- App-sre shared folder
+  - ACCESS: Reach out to [Paul Bargene](mailto:pbergene@redhat.com)
 
 - App SRE infrastructure managed by ansible
-    - Access is managed by adding ssh keys to the [admin-list](https://gitlab.cee.redhat.com/dtsd/housekeeping/blob/master/ansible/hosts/group_vars/all#L4) and applying the `baseline` role to all hosts.
+  - Access is managed by adding ssh keys to the [admin-list](https://gitlab.cee.redhat.com/dtsd/housekeeping/blob/master/ansible/hosts/group_vars/all#L4) and applying the `baseline` role to all hosts.
 
 - OpenStack Project infrastructure
-    - We have our ci-int infrastructure deployed here: https://rhos-d.infra.prod.upshift.rdu2.redhat.com/dashboard/project/
-    - More info here: https://gitlab.cee.redhat.com/dtsd/housekeeping/blob/master/docs/openstack-ci-int.md
+  - We have our ci-int infrastructure deployed [here](https://rhos-d.infra.prod.upshift.rdu2.redhat.com/dashboard/project)
+    - Domain: redhat.com
+    - Kerberos login and password
+  - Detailed info [here](https://gitlab.cee.redhat.com/dtsd/housekeeping/blob/master/docs/openstack-ci-int.md)
 
 - Tier 1 Bastion access:
-    - This is necessary to access some clusters that are not publicly exposed (for example hive-production)
-    - Access process is documented here: https://mojo.redhat.com/docs/DOC-1144200
+  - This is necessary to access some clusters that are not publicly exposed (for example hive-production)
+  - Access process is documented [here](https://mojo.redhat.com/docs/DOC-1144200)
     - You should request Tier1
 
- ## Primary on-call + interrupt catching
+### 1.5.1 Returning Red Hat Employee Gotchas
 
-  - Interrupt catching is detailed in this [document](https://gitlab.cee.redhat.com/dtsd/housekeeping/blob/master/docs/interrupt-catching.md)
-  - include on-call specifics
+- Accounts need to be re-enabled
+  - Bugzilla
+    - Send e-mail to bugzilla-owner@redhat.com or create ticket at the [Help Portal](https://help.redhat.com/)
+    - It is likely the re-activated account will not have the needed permissions.  Request access to the devel group by following the directions [here](https://mojo.redhat.com/docs/DOC-1197751)
+  - Bluejeans
+    - Create an IT ticket
 
-### 1.5.1. On call
+## 1.6 On call
 
 The App-sre on call schedule is a rotation to ensure handling of service outages and incidents for our application owners.
 Schedule of past, current and future on call rotation can be viewed @ pagerduty: https://openshift.pagerduty.com/
 
 The on call includes three tiers of response, detailed below.
 
-#### 1.5.1.1. Pagerduty set up
+### 1.6.1 Primary on-call + interrupt catching
+
+- Interrupt catching is detailed in this [document](https://gitlab.cee.redhat.com/dtsd/housekeeping/blob/master/docs/interrupt-catching.md)
+  - include on-call specifics
+
+### 1.6.2. Pagerduty set up
 
 Ensure you are listed with the appropriate contact detail in your Pagerduty profile.
 The recommended setup includes the pagerduty app on your mobile phone.  From the website you can test notifications to ensure that you have correctly set up the application to override any do not disturb settings.
 
 For notification troubleshooting see: https://support.pagerduty.com/docs/notification-troubleshooting
 
-#### 1.5.1.2. Follow the sun
+### 1.6.3. Follow the sun
+
 The follow the sun cycle (FTS) is an on-call rotation to ensure that the first page triggered by an alert goes to an engineer who, at the time, is within regular working hours. This is to prevent direct pages to the primary on-call within the regular hours of others. If there is no engineer available within their regular hours the page will go directly to the primary on-call.
 
-#### 1.5.1.3. Primary on-call
+### 1.6.4. Primary on-call
+
 The primary on-call is a 24/7 on-call rotation assigned on a weekly basis.  The engineer assigned is required to be available for the initial response within 30 minutes of the page.
 
 Pages for primary on-calls should be be kept at a minimum and are reserved for critical issues in production environments which need immediate attention.
 
 The primary on-call also acts as the interrupt-catcher during their work hours that cycle.
 
-#### 1.5.1.4. Secondary on-call
+### 1.6.5. Secondary on-call
+
 The secondary on-call is a 24/7 on-call rotation that serves as backup and support function for the primary on-call. The secondary on-call will be paged if the primary on-call does not aknowledge the incident via Pagerduty (via app, slack integration or other means).
 
-#### 1.5.1.5. Escalation
+### 1.5.6. Escalation
 
-#### 1.5.1.6. Notification
+### 1.6.7. Notification
 
-#### 1.5.1.7. Incident procedure
+### 1.6.8. Incident procedure
 
 - App-sre
 
-#### 1.5.1.8. RCA
+### 1.6.9. RCA
 
 Root Cause Analysis must be published after incidents to ensure that corrective actions are followed up.  Any incidents in a sprint will be reviewed on the following sprint retro.
 
@@ -229,7 +259,7 @@ Guidelines on how to write the incident report are available at: https://docs.go
 
 Distribute the incident report to sd-org@ and app-interface serviceOwner in app.yml, note the incident report in the JIRA tracking issue
 
-## 1.6. Standard operating procedures
+## 1.7. Standard operating procedures
 
 - SOPs related to engineering tasks are to be stored in the app-interface/docs/app-sre/docs folder.
 - A SOP should have the following filename format: [CATEGORY]-[SHORT_DESCRIPTION].md
@@ -240,20 +270,20 @@ Distribute the incident report to sd-org@ and app-interface serviceOwner in app
     - Access required
     - Detailed procedure
 
-## 1.7. App oboarding / app acceptance criteria
+## 1.8. App oboarding / app acceptance criteria
 
-### 1.7.1. In the app-interface
+### 1.8.1. In the app-interface
 
 * Must contain the following fields
     * Service owner
     * Incident contact
     * Continuity plan reference
 
-## 1.8. Git process
+## 1.9. Git process
 
-## 1.9. App-sre escalation to external teams
+## 1.10. App-sre escalation to external teams
 
-### PnT Devops
+### 1.10.1 PnT Devops
 
 * [PnT DevOps - Issue Escalation Procedure](https://mojo.redhat.com/docs/DOC-1049381) - Mojo
 
@@ -279,9 +309,9 @@ Distribute the incident report to sd-org@ and app-interface serviceOwner in app
 
 3. Ping the On Call in #ops-escalation in the Red Hat Internal IRC Server - irc.devel.redhat.com.
 
-## 1.10. Escalation procedures
+## 1.11. Escalation procedures
 
-## 1.11. Contacts
+## 1.12. Contacts
 
 - OSD SRE
     - #libra-ops on irc.devel.redhat.com - Shift lead and on-call listed in /topic
@@ -295,9 +325,9 @@ Distribute the incident report to sd-org@ and app-interface serviceOwner in app
 <!- ## 1.13. Query app-interface
 - https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/app-interface-basic-auth-prod ->
 
-### 1.11.1. Acknowledgements
+### 1.12.1. Acknowledgements
 
-## 1.12. Services
+## 1.13. Services
 
 # 2. Glossary
 
