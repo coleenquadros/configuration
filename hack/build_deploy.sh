@@ -50,6 +50,7 @@ run_int jenkins-job-builder &
 run_int jenkins-webhooks &
 run_int gitlab-members &
 run_int gitlab-permissions &
+run_int aws-iam-keys &
 
 run_int openshift-namespaces
 
@@ -57,8 +58,14 @@ run_int openshift-rolebindings &
 run_int openshift-resources &
 run_int openshift-network-policies &
 run_int openshift-acme &
-run_int terraform-resources &
 run_int terraform-users &
+
+run_int terraform-resources
+
+# 2nd run is to delete disabled keys,
+# has to run after terraform-resources is complete.
+# can be removed once this goes back to running on the cluster.
+run_int aws-iam-keys &
 
 wait
 
