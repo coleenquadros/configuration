@@ -65,7 +65,7 @@ run_int terraform-resources
 # 2nd run is to delete disabled keys,
 # has to run after terraform-resources is complete.
 # can be removed once this goes back to running on the cluster.
-run_int aws-iam-keys &
+ALIAS=aws-iam-keys-delete-service-account-tokens run_int aws-iam-keys &
 
 wait
 
