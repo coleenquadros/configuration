@@ -109,6 +109,8 @@ cat "$CONFIG_TOML" \
 
 ## Run integrations on local server
 
+APP_INTERFACE_PROJECT_ID=13582
+
 run_int github &
 run_int github-repo-invites &
 run_int quay-membership &
@@ -130,6 +132,7 @@ run_int openshift-network-policies &
 run_int openshift-acme &
 run_int terraform-resources &
 run_int terraform-users &
+run_int ldap-users $APP_INTERFACE_PROJECT_ID &
 
 wait
 
