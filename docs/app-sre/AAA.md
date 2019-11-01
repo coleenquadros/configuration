@@ -27,7 +27,6 @@ Axiom: *a statement or proposition which is regarded as being established, accep
     - [1.5.6. Escalation](#156-escalation)
     - [1.6.7. Notification](#167-notification)
     - [1.6.8. Incident procedure](#168-incident-procedure)
-    - [1.6.9. RCA](#169-rca)
   - [1.7. Standard operating procedures](#17-standard-operating-procedures)
   - [1.8. App oboarding / app acceptance criteria](#18-app-oboarding--app-acceptance-criteria)
     - [1.8.1. In the app-interface](#181-in-the-app-interface)
@@ -245,21 +244,75 @@ The secondary on-call is a 24/7 on-call rotation that serves as backup and suppo
 
 ### 1.6.8. Incident procedure
 
-- App-sre
+What constitutes an incident:
 
-### 1.6.9. RCA
+If any of the following is true, the event is an incident:
 
-Root Cause Analysis must be published after incidents to ensure that corrective actions are followed up.  Any incidents in a sprint will be reviewed on the following sprint retro.
+- Is the outage visible to customers (internal or external)?
+- Do you need to involve a second team in fixing the problem?
+- Does the outage result in breach of Service SLO's?
 
-All incidents must have a tracking JIRA card with label `type/incident` so that they can be tracked per sprint
+Incident Response:
 
-Make a copy of the following template for each incident and make sure its in the RCA directory: https://docs.google.com/document/d/12ZVT35yApp7D-uT4p29cEhS9mpzin4Z-Ufh9eOiiaKU/edit#heading=h.58p9cj2ccgos
+Tracking:
 
-The format for incident report file names is `[YYYY-MM-DD] [ServiceName] [Optional highlights]`
+- Start off by creating a JIRA issue for the incident on the [incidents board](https://jira.coreos.com/secure/RapidBoard.jspa?rapidView=145)
+  - Issue type: `Task`
+  - Labels: `type/incident`
 
-Guidelines on how to write the incident report are available at: https://docs.google.com/document/d/165eDunz6yy9uIi2XXxWaEpODCVFp9tYhnBF607qVexg/edit
+- Create a Google doc for live incident status and RCA:
+  - Clone the [incident RCA template](https://docs.google.com/document/d/12ZVT35yApp7D-uT4p29cEhS9mpzin4Z-Ufh9eOiiaKU/edit)
+  - Add Incident title and JIRA link
+  - Post the doc link back into the JIRA ticket
+  - Guidelines on how to write the incident report are available in the [Google Doc](https://docs.google.com/document/d/165eDunz6yy9uIi2XXxWaEpODCVFp9tYhnBF607qVexg/edit)
 
-Distribute the incident report to sd-org@ and app-interface serviceOwner in app.yml, note the incident report in the JIRA tracking issue
+Initiate incident communications:
+
+> It is crucial to involve all the stakeholders on the initial email communications. When in doubt, include a wider audience rather than a narrow list
+
+- Send an email to the service owners and in case of major outage, send an email to the sd-org@redhat.com mailing list
+
+Please use the following Email template for consistency:
+
+Subject: `<YYYY-MM-DD> Incident: <ServiceName> <Optional highlights>`
+
+Body:
+
+```text
+
+Hello team,
+
+We are investigating an ongoing incident affecting <ServiceName>.
+
+Impacted users: <Internal/External>
+
+App-SRE tracking JIRA: <Link for JIRA ticket created above>
+
+A live RCA is available at: <Google Doc link>
+
+We will provide updates via this email thread as the incident progresses.
+
+```
+
+During the incident:
+
+
+- Join the [App-SRE Bluejeans Bridge](https://bluejeans.com/994349364/8531)
+  - If the incident investigation needs assistance from the developer teams, also send them the link and ask to join in
+
+
+
+Post incident comms, followups:
+
+- After the incident has been confirmed as resolved, send an email to the original mail thread with the content:
+
+```text
+This incident has now been resolved and the service functionality has been restored. We will send out a detailed RCA once we've finished the post-incident documentation.
+```
+
+- Create issues from the action items on the respective team JIRA boards, link them back to the incident tracker
+- Send a PDF snapshot of the completed RCA to the mail thread
+
 
 ## 1.7. Standard operating procedures
 
