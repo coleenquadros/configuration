@@ -248,7 +248,6 @@ The `$ref` property points to another file, in this case it must be a
 `service` which indicate what kind of permission they are. The possible values
 are:
 
-- `aws-analytics`
 - `github-org`
 - `github-org-team`
 - `quay-org-team`
@@ -449,9 +448,9 @@ Clusters declaration enforce [this JSON schema](/schemas/openshift/cluster-1.yml
 
 OpenShift group association can be self-serviced via App-Interface.
 
-Groups should be defined under the `managedGroups` section in the cluster file. This is a list of group names that are managed. To associate a user to a group, the user has to be associated to a role that has a permission file that associates them to an OpenShift group.
+Groups should be defined under the `managedGroups` section in the cluster file. This is a list of group names that are managed. To associate a user to a group, the user has to be associated to a role that has `access` to the OpenShift group.
 
-An example of a role can be found [here](/data/teams/hive/roles/dev.yml) and an example of a permission can be found [here](/data/openshift/hive-stage/permissions/hive-stage-hive-admins.yml).
+An example of a role can be found [here](/data/teams/hive/roles/dev.yml).
 
 ### Manage Vault configurations via App-Interface
 
