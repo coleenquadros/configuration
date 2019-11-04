@@ -669,7 +669,6 @@ In order to add or update an RDS database, you need to add them to the `terrafor
 - `account`: must be one of the AWS account names we manage. Current options:
   - `app-sre`
   - `osio`
-  - `osio-dev`
 - `identifier` - name of resource to create (or update)
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options](/resources/terraform/resources/)
 - `overrides`: list of values from `defaults` you wish to override, with the override values. For example: `engine: mysql`.
@@ -697,7 +696,6 @@ In order to add or update an S3 bucket, you need to add them to the `terraformRe
 - `account`: must be one of the AWS account names we manage. Current options:
   - `app-sre`
   - `osio`
-  - `osio-dev`
 - `identifier` - name of resource to create (or update)
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options:](/resources/terraform/resources/)
 - `overrides`: list of values from `defaults` you wish to override, with the override values. For example: `acl: public`.
@@ -725,7 +723,6 @@ In order to add or update an ElastiCache database, you need to add them to the `
 - `account`: must be one of the AWS account names we manage. Current options:
   - `app-sre`
   - `osio`
-  - `osio-dev`
 - `identifier` - name of resource to create (or update)
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options](/resources/terraform/resources/)
 - `overrides`: list of values from `defaults` you wish to override, with the override values. For example: `engine_version: 5.0.3`.
@@ -751,7 +748,6 @@ In order to add or update a service account, you need to add them to the `terraf
 - `account`: must be one of the AWS account names we manage. Current options:
   - `app-sre`
   - `osio`
-  - `osio-dev`
 - `identifier`: name of resource to create (or update)
 - `variables`: list of key-value pairs to use for templating of `user_policy`. these pairs will also be added to the output resource.
 - `policies`: list of AWS policies you wish to attach to the service account user.
@@ -779,7 +775,6 @@ In order to add or update an SQS queue, you need to add them to the `terraformRe
 - `account`: must be one of the AWS account names we manage. Current options:
   - `app-sre`
   - `osio`
-  - `osio-dev`
 - `identifier` - a name of the group of resources to create (or update)
   - Does not affect names of queues.
   - Will be used as the name of the IAM user that will be created.
@@ -800,6 +795,37 @@ The Secret will contain the following fields:
 - `aws_secret_access_key` - The secret access key.
 - `aws_region` - The name of the queue's AWS region.
 In addition, for each queue defined under `queues`, a key will be created and will contain the queue url. The key is the value defined in `key`.
+
+#### Manage DynamoDB tables via App-Interface (`/openshift/namespace-1.yml`)
+
+DynamoDB tables can be entirely self-serviced via App-Interface.
+
+In order to add or update a DynamoDB table, you need to add them to the `terraformResources` field.
+
+- `provider`: must be `dynamodb`
+- `account`: must be one of the AWS account names we manage. Current options:
+  - `app-sre`
+  - `osio`
+- `identifier` - a name of the group of resources to create (or update)
+  - Does not affect names of tables.
+  - Will be used as the name of the IAM user that will be created.
+- `output_resource_name`: name of Kubernetes Secret to be created.
+  - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
+  - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
+    - For example, for a resource with `identifier` "my-table" and `provider` "dynamodb", the created Secret will be called `my-table-dynamodb`.
+- `specs`: list of table specifications to create:
+  - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options:](/resources/terraform/resources/)
+  - `tables`: list of tables to create according to the defined defaults:
+    - `key` is the key to be added to the Secret
+    - `value` is the name of the table to create
+
+Once the changes are merged, the DynamoDB table will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
+
+The Secret will contain the following fields:
+- `aws_access_key_id` - The access key ID.
+- `aws_secret_access_key` - The secret access key.
+- `aws_region` - The name of the queue's AWS region.
+In addition, for each table defined under `tables`, a key will be created and will contain the table name. The key is the value defined in `key`.
 
 ### Manage Slack User groups via App-Interface
 
