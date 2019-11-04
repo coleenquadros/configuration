@@ -8,7 +8,7 @@ To restore git repo you need to have:
 
 All APP-SRE team members should have access to [Prod S3 bucket](https://s3.console.aws.amazon.com/s3/buckets/git-keeper-production/)
 
-We are doing backups every day but depending of date backups are going to different folders with different retention policies.
+We are doing backups every day but they are stored for different period of time because of different retention policies.
 If you can't find needed backup in daily folder please look at weekly or monthly folder.
 
 ## Obtaining GPG key for decrypting
