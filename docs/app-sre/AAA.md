@@ -30,7 +30,9 @@ Axiom: *a statement or proposition which is regarded as being established, accep
   - [1.7. Standard operating procedures](#17-standard-operating-procedures)
   - [1.8. App oboarding / app acceptance criteria](#18-app-oboarding--app-acceptance-criteria)
     - [1.8.1. In the app-interface](#181-in-the-app-interface)
-  - [1.9. Git process](#19-git-process)
+  - [1.9. Additional team process](#19-additional-team-process)
+    - [1.9.1 Git Process](#19-git-process)
+    - [1.9.2 Sprint Process](#19-sprint-process)
   - [1.10. App-sre escalation to external teams](#110-app-sre-escalation-to-external-teams)
     - [1.10.1 PnT Devops](#1101-pnt-devops)
   - [1.11. Escalation procedures](#111-escalation-procedures)
@@ -334,7 +336,12 @@ This incident has now been resolved and the service functionality has been resto
     * Incident contact
     * Continuity plan reference
 
-## 1.9. Git process
+## 1.9. Additional team process
+
+### 1.9.1 Git process
+
+### 1.9.2 Sprint process
+* [see process/sprint.md](process/sprint.md)
 
 ## 1.10. App-sre escalation to external teams
 
