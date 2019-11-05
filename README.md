@@ -725,6 +725,7 @@ In order to add or update an ElastiCache database, you need to add them to the `
   - `osio`
 - `identifier` - name of resource to create (or update)
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options](/resources/terraform/resources/)
+- `parameter_group`: path relative to [resources](/resources) to a file with parameter group values. Note that it starts with `/`. [Current options](/resources/terraform/resources/)
 - `overrides`: list of values from `defaults` you wish to override, with the override values. For example: `engine_version: 5.0.3`.
 - `output_resource_name`: name of Kubernetes Secret to be created.
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
