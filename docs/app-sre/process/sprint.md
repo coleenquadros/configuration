@@ -13,7 +13,7 @@ These are the team values and standards we adhere to throughout this set of guid
 ## Sprint Cadence
 - Sprints follow a repeating cycle of: **Planning|Estimation** --> **Start|Commit** -->  **Demo|Review|Retro**
 - Sprint activity dates will be maintained by the team manager on the [App-SRE Sprints](TODO) calendar
-- Sprint activity dates will be maintained by the team manager on the [App-SRE](https://calendar.google.com/calendar/embed?src=redhat.com_0pjkkmnhjs9e4b0h09st36rspc%40group.calendar.google.com&ctz=Europe%2FMadrid) calendar.
+- Sprint activity dates will be maintained by the team manager on the [App-SRE](https://calendar.google.com/calendar/embed?src=redhat.com_0pjkkmnhjs9e4b0h09st36rspc%40group.calendar.google.com) calendar.
   - Events that fall on days where the greater part of the team is unavailable will be moved to accommodate
 
 ### Start (First Monday)
