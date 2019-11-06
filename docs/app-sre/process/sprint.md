@@ -1,5 +1,17 @@
 # Sprint Guidelines
 
+|       | S | M                                                             | T | W                             | T                                                      | F                                | S |
+|-------|---|---------------------------------------------------------------|---|-------------------------------|--------------------------------------------------------|----------------------------------|---|
+| Week1 |   | S-1 end<br>S start<br>Scoring spreadsheet for S+1<br>JIRA S+1 |   |                               |                                                        |                                  |   |
+| Week2 |   |                                                               |   |                               |                                                        |                                  |   |
+| Week3 |   |                                                               |   | Planning S+1 Deadline (async) | Demo SX<br>Retro S<br><br>Scoring S+1 Deadline (async) | Assign Scores to JIRA issues S+1 |   |
+
+Legend:
+
+- `S-1`: Previous sprint
+- `S`: Current sprint
+- `S+1`: Next sprint
+
 ## Sprint Warranty
 
 These are the team values and standards we adhere to throughout this set of guidelines:
@@ -43,11 +55,15 @@ These are the team values and standards we adhere to throughout this set of guid
 
 - Final Thursday EOB is the deadline for stories to be scored
 - Scoring values:
-  - **1** (SMALLINT) regular task / simple well-known work
-  - **3** (INT) light complexity, maybe some unknowns
-  - **5** (BIGINT) very complex, very involved, lots of unknowns
-  - **13** (E_TOOBIG) needs to be broken down or significant further research is needed
+  - **1**: regular task / simple well-known work
+  - **3**: light complexity, maybe some unknowns
+  - **5**: quite a bit of uncertainty where a change needs to be made or what needs to be done, some technical risk exists
+  - **8**: significant technical risk is present
+  - **13**: needs to be broken down or significant further research is needed
 - Questions/discussions about each story can be surfaced in the comments of each story
+
+#### Assing Scores (Final Friday)
+
 - The manager will record rounded-up-average estimation scores into each story, as well as unestimated stories into the [estimation sheet](https://docs.google.com/spreadsheets/d/1FEsF60JY-advVvqe9CNCN7NlncR-ExnZeC9c-7V3Gq8/edit?usp=sharing)
 
 ### During the sprint
