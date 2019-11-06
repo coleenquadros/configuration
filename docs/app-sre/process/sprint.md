@@ -60,21 +60,10 @@ These are the team values and standards we adhere to throughout this set of guid
 - Hosted by the team manager
   - Retro will be summarized and documented as a [Google doc](https://docs.google.com/document/d/1LFwp5KDmwVKzi3Ht8aMjL5jQr-aSS-J3ivkzjLtM44w/edit?usp=sharing)
 - Each team member will review their sprint burndown chart: accomplishments vs what they weren't able to complete. 2 min per person.
-- Total points committed vs completed
-  - Review velocity, as a team are we trending up or down
-    - Team should commit to improving expectations: such as commit to less up front, deflect blockers, make changes to processes, add features to reduce toil, etc.
-- Total stories committed/completed
-  - Review how to reduce incompletes (ex: over-committed, blocked, pto, too beefy, etc)
-- Total stories added/removed
-  - Review where we can improve on future planning
-    - Removed, how to better prevent false-commits?
-    - Added, how to better capture prior to sprint start?
-- Team will provide feedback on the sprint via  http://www.ideaboardz.com, hosted by the team manager.
+- The team manager will review key metrics for the sprint: velocity, total stories, etc.
+- The team manager create host an http://www.ideaboardz.com sync session in which team members can provide feedback for the sprint:
   - What worked? What didn't? What do we need to do differently?
-  - Team should strive to capture activities that they find fulfilling or define us a team as well as raise items that do not bring joy/value
-  - As a result of retro feedback, we should be capturing Jira stories into the backlog to action improvements
-    - If the team decides to immediately take action on a retro-derived story in the next sprint
-      - The story can be staged into the next sprint and then estimated immediately
+- As a result of retro feedback, we should be capturing Jira stories into the backlog to action improvements
 
 # TODO subjects for future discussion/MR:
 - Async-friendly retro process, ex: git issues?
