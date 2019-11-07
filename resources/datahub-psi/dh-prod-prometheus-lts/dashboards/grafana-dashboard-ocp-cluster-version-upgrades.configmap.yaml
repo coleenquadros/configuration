@@ -25,9 +25,10 @@ data:
         {
           "columns": [],
           "datasource": "$datasource",
+          "description": "",
           "fontSize": "100%",
           "gridPos": {
-            "h": 10,
+            "h": 24,
             "w": 11,
             "x": 0,
             "y": 0
@@ -39,7 +40,7 @@ data:
           "scroll": true,
           "showHeader": true,
           "sort": {
-            "col": 4,
+            "col": null,
             "desc": false
           },
           "styles": [
@@ -50,7 +51,7 @@ data:
               "type": "hidden"
             },
             {
-              "alias": "Failing Since",
+              "alias": "Failed For",
               "colorMode": null,
               "colors": [
                 "rgba(245, 54, 54, 0.9)",
@@ -86,7 +87,7 @@ data:
           ],
           "targets": [
             {
-              "expr": "min by (_id, version, from_version) ((bottomk by (_id) (1,((time() - max_over_time(cluster_version{type=\"failure\",version=~\"$version\\\\.\\\\d+($|-rc.\\\\d+)\",from_version=~\"$previous_version\\\\..*\"}[7d])))) and on (_id) (topk by (_id) (1, cluster_version{type=\"current\"}))))",
+              "expr": "sort_desc((sum_over_time(sum by (_id,version,from_version) (max by (_id,version,from_version) (cluster_version{type=\"failure\",version=~\"$version\\\\.\\\\d+($|-rc.\\\\d+)\",from_version=~\"$previous_version\\\\..*\"} * 0 + 1))[7d:5m]) > 1) \n+ on (_id) group_left(email_domain) topk by (_id) (1, 0 * max_over_time(subscription_labels{email_domain!~\"redhat.com|(^|.*\\\\.)ibm.com\"}[7d]))) * (5 * 60)",
               "format": "table",
               "instant": true,
               "intervalFactor": 1,
@@ -96,7 +97,7 @@ data:
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Running clusters that reported upgrade errors over 7 days",
+          "title": "Clusters that reported upgrade errors over 7 days",
           "transform": "table",
           "type": "table"
         },
@@ -162,7 +163,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "count(count by (_id) (max_over_time(cluster_version{type=\"failure\",version=~\"$version\\\\.\\\\d+($|-rc.\\\\d+)\",from_version=~\"$previous_version\\\\..*\"}[7d]))) / count(count by (_id) (max_over_time(cluster_version{type=\"updating\",version=~\"$version\\\\.\\\\d+($|-rc.\\\\d+)\",from_version=~\"$previous_version\\\\..*\"}[7d])))",
+              "expr": "count(count by (_id) (count_over_time(cluster_version{type=\"failure\",version=~\"$version\\\\.\\\\d+($|-rc.\\\\d+)\",from_version=~\"$previous_version\\\\..*\"}[7d:5m]) > 3) * (5 * 60)) / count(count by (_id) (max_over_time(cluster_version{type=\"updating\",version=~\"$version\\\\.\\\\d+($|-rc.\\\\d+)\",from_version=~\"$previous_version\\\\..*\"}[7d])))",
               "format": "time_series",
               "instant": true,
               "intervalFactor": 1,
@@ -172,7 +173,7 @@ data:
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Failed upgrades over 7 days",
+          "title": "Upgrades that failed more than 15m over 7 days",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -528,84 +529,6 @@ data:
             }
           ],
           "valueName": "current"
-        },
-        {
-          "columns": [],
-          "datasource": "$datasource",
-          "fontSize": "100%",
-          "gridPos": {
-            "h": 14,
-            "w": 11,
-            "x": 0,
-            "y": 10
-          },
-          "id": 19,
-          "interval": "",
-          "links": [],
-          "pageSize": null,
-          "scroll": true,
-          "showHeader": true,
-          "sort": {
-            "col": 4,
-            "desc": false
-          },
-          "styles": [
-            {
-              "alias": "Time",
-              "dateFormat": "YYYY-MM-DD HH:mm:ss",
-              "pattern": "Time",
-              "type": "hidden"
-            },
-            {
-              "alias": "Failing Since",
-              "colorMode": null,
-              "colors": [
-                "rgba(245, 54, 54, 0.9)",
-                "rgba(237, 129, 40, 0.89)",
-                "rgba(50, 172, 45, 0.97)"
-              ],
-              "decimals": null,
-              "pattern": "Value",
-              "thresholds": [],
-              "type": "number",
-              "unit": "s"
-            },
-            {
-              "alias": "",
-              "colorMode": null,
-              "colors": [
-                "rgba(245, 54, 54, 0.9)",
-                "rgba(237, 129, 40, 0.89)",
-                "rgba(50, 172, 45, 0.97)"
-              ],
-              "dateFormat": "YYYY-MM-DD HH:mm:ss",
-              "decimals": 2,
-              "link": true,
-              "linkTargetBlank": true,
-              "linkTooltip": "See cluster dashboard",
-              "linkUrl": "/d/kSomLV7Wk/ocp-4-cluster-by-id?orgId=1&var-_id=${__cell}",
-              "mappingType": 1,
-              "pattern": "_id",
-              "thresholds": [],
-              "type": "number",
-              "unit": "short"
-            }
-          ],
-          "targets": [
-            {
-              "expr": "min by (_id, version, from_version) ((bottomk by (_id) (1,((time() - max_over_time(cluster_version{type=\"failure\",version=~\"$version\\\\.\\\\d+($|-rc.\\\\d+)\",from_version=~\"$previous_version\\\\..*\"}[7d]))) )))",
-              "format": "table",
-              "instant": true,
-              "intervalFactor": 1,
-              "legendFormat": "",
-              "refId": "A"
-            }
-          ],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "All clusters that reported upgrade errors over 7 days",
-          "transform": "table",
-          "type": "table"
         },
         {
           "cacheTimeout": null,
