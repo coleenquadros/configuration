@@ -58,6 +58,7 @@ run_int openshift-rolebindings &
 run_int openshift-resources &
 run_int openshift-network-policies &
 run_int openshift-acme &
+run_int openshift-limitranges &
 run_int terraform-users &
 
 run_int terraform-resources

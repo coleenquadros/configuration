@@ -198,6 +198,7 @@ wheel icon (top-right corner) and replace `omit` with `include` in
 - Management of openshift-acme deployments.
 - Management of OpenShift Namespaces.
 - Management of OpenShift Groups.
+- Management of OpenShift LimitRanges.
 - Management of OpenShift resources.
 - Management of OpenShift Secrets using Vault.
 - Management of OpenShift Routes using Vault.
@@ -451,6 +452,21 @@ OpenShift group association can be self-serviced via App-Interface.
 Groups should be defined under the `managedGroups` section in the cluster file. This is a list of group names that are managed. To associate a user to a group, the user has to be associated to a role that has `access` to the OpenShift group.
 
 An example of a role can be found [here](/data/teams/hive/roles/dev.yml).
+
+### Manage OpenShift LimitRanges via App-Interface (`/openshift/limitrange-1.yml`)
+
+This integration allows namespace owners to manage LimitRanges objects on their namespaces
+
+To deploy and manage LimitRanges on a namespace, a user must add the following to a namespace declaration:
+
+```yaml
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/<some-name>.yml
+```
+
+The LimitRange limits can be customized by creating a new file and referencing the new file in the namespace declaration
+
+The `/openshift/limitrange-1.yml` schema maps to the LimitRanges specs.
 
 ### Manage Vault configurations via App-Interface
 
