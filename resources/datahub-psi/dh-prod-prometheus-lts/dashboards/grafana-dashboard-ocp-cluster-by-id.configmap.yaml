@@ -211,6 +211,7 @@ data:
             "#d44a3a"
           ],
           "datasource": "$datasource",
+          "description": "",
           "format": "none",
           "gauge": {
             "maxValue": 100,
@@ -225,7 +226,7 @@ data:
             "x": 6,
             "y": 0
           },
-          "id": 16,
+          "id": 24,
           "interval": "",
           "links": [],
           "mappingType": 1,
@@ -262,9 +263,10 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "3 * (count by (_id) (count by (_id) (cluster:node_instance_type_count:sum{_id=\"$_id\",label_beta_kubernetes_io_instance_type=~\"Standard_.*\"}))) OR 2 * (count by (_id) (count by (_id) (cluster:node_instance_type_count:sum{_id=\"$_id\",label_beta_kubernetes_io_instance_type=~\"[ipmtrc]\\\\d(\\\\w)?\\\\.(\\\\w+)?(large|medium)\"}))) OR count by (_id) (count by (_id) (cluster:node_instance_type_count:sum{_id=\"$_id\",label_beta_kubernetes_io_instance_type=\"\"}))",
+              "expr": "(\n  (max by (_id) (absent(subscription_labels{_id=\"$_id\",support=~\"Standard|Premium\",email_domain!=\"redhat.com\"}) or max by (_id) (subscription_labels{_id=\"$_id\",support=~\"Standard|Premium\",email_domain!=\"redhat.com\"}*5))) * \n  clamp_max(clamp_min((((time() - max by (_id) (cluster_version{_id=\"$_id\",type=\"cluster\"})) / 3600 / 24)) / 7, 1), 10) *\n  clamp_max(clamp_min( (max by (_id) (instance:etcd_object_counts:sum{_id=\"$_id\"}) - 3200)/1000 + 1, 1), 10) * \n  clamp_max(clamp_min( (max by (_id) (cluster:capacity_cpu_cores:sum{_id=\"$_id\"}) - 12)/20 + 1, 1), 10)\n) ^ (1/4)\n",
               "format": "time_series",
               "instant": true,
+              "interval": "",
               "intervalFactor": 1,
               "legendFormat": "",
               "refId": "A"
@@ -273,29 +275,99 @@ data:
           "thresholds": "3600,10000",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Legacy Type",
+          "title": "Interest Score",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
             {
               "op": "=",
-              "text": "Unknown",
+              "text": "",
               "value": "null"
+            }
+          ],
+          "valueName": "current"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": true,
+          "colors": [
+            "#d44a3a",
+            "rgba(237, 129, 40, 0.89)",
+            "#299c46"
+          ],
+          "datasource": "$datasource",
+          "description": "The percentage of the current range (upper right) the cluster has been reported as available - no CVO failure conditions.",
+          "format": "percentunit",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 2,
+            "x": 8,
+            "y": 0
+          },
+          "id": 33,
+          "interval": "",
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
             },
             {
-              "op": "=",
-              "text": "UPI",
-              "value": "1"
-            },
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "1 - (sum_over_time(max by (_id) (cluster_version{type=\"failure\",_id=\"$_id\"} * 0 + 1)[${__range_s}s:10m])) / (sum_over_time(max by (_id) (cluster_version{type=\"current\",_id=\"$_id\"} * 0 + 1)[${__range_s}s:10m]))",
+              "format": "time_series",
+              "instant": true,
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "thresholds": "90,95",
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Availability",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
             {
               "op": "=",
-              "text": "AWS",
-              "value": "2"
-            },
-            {
-              "op": "=",
-              "text": "Azure",
-              "value": "3"
+              "text": "installing",
+              "value": "null"
             }
           ],
           "valueName": "current"
@@ -320,8 +392,8 @@ data:
           },
           "gridPos": {
             "h": 4,
-            "w": 3,
-            "x": 8,
+            "w": 2,
+            "x": 10,
             "y": 0
           },
           "id": 9,
@@ -404,8 +476,8 @@ data:
           },
           "gridPos": {
             "h": 4,
-            "w": 3,
-            "x": 11,
+            "w": 2,
+            "x": 12,
             "y": 0
           },
           "id": 8,
@@ -744,7 +816,6 @@ data:
             "#d44a3a"
           ],
           "datasource": "$datasource",
-          "description": "",
           "format": "none",
           "gauge": {
             "maxValue": 100,
@@ -759,7 +830,90 @@ data:
             "x": 6,
             "y": 4
           },
-          "id": 24,
+          "id": 13,
+          "interval": null,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "sum(cluster:capacity_cpu_cores:sum{_id='$_id'})",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "refId": "A"
+            }
+          ],
+          "thresholds": "3600,10000",
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Cores",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "",
+              "value": "null"
+            }
+          ],
+          "valueName": "current"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": true,
+          "colors": [
+            "#d44a3a",
+            "rgba(237, 129, 40, 0.89)",
+            "#299c46"
+          ],
+          "datasource": "$datasource",
+          "description": "The percentage of the last 7 days the cluster has been reported as available - no CVO failure conditions.",
+          "format": "percentunit",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 2,
+            "x": 8,
+            "y": 4
+          },
+          "id": 34,
           "interval": "",
           "links": [],
           "mappingType": 1,
@@ -796,25 +950,24 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "(\n  (max by (_id) (absent(subscription_labels{_id=\"$_id\",support=~\"Standard|Premium\",email_domain!=\"redhat.com\"}) or max by (_id) (subscription_labels{_id=\"$_id\",support=~\"Standard|Premium\",email_domain!=\"redhat.com\"}*5))) * \n  clamp_max(clamp_min((((time() - max by (_id) (cluster_version{_id=\"$_id\",type=\"cluster\"})) / 3600 / 24)) / 7, 1), 10) *\n  clamp_max(clamp_min( (max by (_id) (instance:etcd_object_counts:sum{_id=\"$_id\"}) - 3200)/1000 + 1, 1), 10) * \n  clamp_max(clamp_min( (max by (_id) (cluster:capacity_cpu_cores:sum{_id=\"$_id\"}) - 12)/20 + 1, 1), 10)\n) ^ (1/4)\n",
+              "expr": "1 - (sum_over_time(max by (_id) (cluster_version{type=\"failure\",_id=\"$_id\"} * 0 + 1)[7d:10m])) / (sum_over_time(max by (_id) (cluster_version{type=\"current\",_id=\"$_id\"} * 0 + 1)[7d:10m]))",
               "format": "time_series",
               "instant": true,
-              "interval": "",
               "intervalFactor": 1,
               "legendFormat": "",
               "refId": "A"
             }
           ],
-          "thresholds": "3600,10000",
+          "thresholds": "90,95",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Interest Score",
+          "title": "Availability (7d)",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
             {
               "op": "=",
-              "text": "",
+              "text": "installing",
               "value": "null"
             }
           ],
@@ -840,8 +993,8 @@ data:
           },
           "gridPos": {
             "h": 4,
-            "w": 3,
-            "x": 8,
+            "w": 2,
+            "x": 10,
             "y": 4
           },
           "id": 6,
@@ -923,8 +1076,8 @@ data:
           },
           "gridPos": {
             "h": 4,
-            "w": 3,
-            "x": 11,
+            "w": 2,
+            "x": 12,
             "y": 4
           },
           "id": 7,
@@ -2117,6 +2270,7 @@ data:
             "#d44a3a"
           ],
           "datasource": "$datasource",
+          "description": "Dominant cluster architecture",
           "format": "none",
           "gauge": {
             "maxValue": 100,
@@ -2126,13 +2280,13 @@ data:
             "thresholdMarkers": true
           },
           "gridPos": {
-            "h": 4,
+            "h": 3,
             "w": 2,
             "x": 6,
             "y": 20
           },
-          "id": 13,
-          "interval": null,
+          "id": 35,
+          "interval": "",
           "links": [],
           "mappingType": 1,
           "mappingTypes": [
@@ -2168,16 +2322,17 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(cluster:capacity_cpu_cores:sum{_id='$_id'})",
+              "expr": "max by (label_kubernetes_io_arch) (node_role_os_version_machine:cpu_capacity_cores:sum{_id=\"$_id\"})",
               "format": "time_series",
               "intervalFactor": 1,
+              "legendFormat": "{{label_kubernetes_io_arch}}",
               "refId": "A"
             }
           ],
-          "thresholds": "3600,10000",
+          "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Cores",
+          "title": "Architecture",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2187,7 +2342,7 @@ data:
               "value": "null"
             }
           ],
-          "valueName": "current"
+          "valueName": "name"
         },
         {
           "aliasColors": {},
@@ -2400,10 +2555,10 @@ data:
             "thresholdMarkers": true
           },
           "gridPos": {
-            "h": 3,
+            "h": 4,
             "w": 2,
             "x": 6,
-            "y": 24
+            "y": 23
           },
           "id": 30,
           "interval": "",
