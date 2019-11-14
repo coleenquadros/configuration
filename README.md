@@ -554,6 +554,8 @@ Current vault policies can be found [here](/data/services/vault.devshift.net/con
 
 For more information please see [vault policies documentation](https://www.vaultproject.io/docs/concepts/policies.html)
 
+For an example on adding team access to manage Vault app-interface secrets see [this PR](https://gitlab.cee.redhat.com/service/app-interface/merge_requests/2097).
+
 #### Manage vault roles (`/vault-config/role-1.yml`)
 Roles represents a set of Vault policies and login constraints that must be met to receive a token with those policies.
 The scope can be as narrow or broad as desired. Role can be created for a particular machine, or even a particular user on that machine,
