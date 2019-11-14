@@ -349,7 +349,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "1 - (sum_over_time(max by (_id) (cluster_version{type=\"failure\",_id=\"$_id\"} * 0 + 1)[${__range_s}s:10m])) / (sum_over_time(max by (_id) (cluster_version{type=\"current\",_id=\"$_id\"} * 0 + 1)[${__range_s}s:10m]))",
+              "expr": "1 - (sum_over_time(max by (_id) ((cluster_version{type=\"failure\",_id=\"$_id\"} * 0 + 1) or (cluster_version{type=\"current\",_id=\"$_id\"}*0))[${__range_s}s:10m])) / (sum_over_time(max by (_id) (cluster_version{type=\"current\",_id=\"$_id\"} * 0 + 1)[${__range_s}s:10m]))",
               "format": "time_series",
               "instant": true,
               "intervalFactor": 1,
@@ -357,7 +357,7 @@ data:
               "refId": "A"
             }
           ],
-          "thresholds": "90,95",
+          "thresholds": "0.90,0.95",
           "timeFrom": null,
           "timeShift": null,
           "title": "Availability",
@@ -366,7 +366,7 @@ data:
           "valueMaps": [
             {
               "op": "=",
-              "text": "installing",
+              "text": "",
               "value": "null"
             }
           ],
@@ -950,7 +950,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "1 - (sum_over_time(max by (_id) (cluster_version{type=\"failure\",_id=\"$_id\"} * 0 + 1)[7d:10m])) / (sum_over_time(max by (_id) (cluster_version{type=\"current\",_id=\"$_id\"} * 0 + 1)[7d:10m]))",
+              "expr": "1 - (sum_over_time(max by (_id) ((cluster_version{type=\"failure\",_id=\"$_id\"} * 0 + 1) or (cluster_version{type=\"current\",_id=\"$_id\"}*0))[7d:10m])) / (sum_over_time(max by (_id) (cluster_version{type=\"current\",_id=\"$_id\"} * 0 + 1)[7d:10m]))",
               "format": "time_series",
               "instant": true,
               "intervalFactor": 1,
@@ -958,19 +958,13 @@ data:
               "refId": "A"
             }
           ],
-          "thresholds": "90,95",
+          "thresholds": "0.90,0.95",
           "timeFrom": null,
           "timeShift": null,
           "title": "Availability (7d)",
           "type": "singlestat",
           "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "op": "=",
-              "text": "installing",
-              "value": "null"
-            }
-          ],
+          "valueMaps": [],
           "valueName": "current"
         },
         {
@@ -1975,7 +1969,7 @@ data:
             "thresholdMarkers": true
           },
           "gridPos": {
-            "h": 5,
+            "h": 7,
             "w": 6,
             "x": 0,
             "y": 16
@@ -2324,6 +2318,8 @@ data:
             {
               "expr": "max by (label_kubernetes_io_arch) (node_role_os_version_machine:cpu_capacity_cores:sum{_id=\"$_id\"})",
               "format": "time_series",
+              "instant": true,
+              "interval": "",
               "intervalFactor": 1,
               "legendFormat": "{{label_kubernetes_io_arch}}",
               "refId": "A"
@@ -2338,8 +2334,13 @@ data:
           "valueMaps": [
             {
               "op": "=",
-              "text": "",
-              "value": "null"
+              "text": "Unknown",
+              "value": "label_kubernetes_io_arch"
+            },
+            {
+              "op": "=",
+              "text": "Unknown",
+              "value": ""
             }
           ],
           "valueName": "name"
