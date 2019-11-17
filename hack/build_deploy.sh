@@ -14,6 +14,7 @@ mkdir -p validate config throughput reports
 
 # Create data bundle
 
+cp -r docs/ resources/ && find resources/docs/ -type f -exec file {} \; | grep text -v | cut -d: -f1 | xargs rm
 docker run --rm \
   -v `pwd`/schemas:/schemas:z \
   -v `pwd`/graphql-schemas:/graphql-schemas:z \

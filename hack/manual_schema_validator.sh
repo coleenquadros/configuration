@@ -13,12 +13,14 @@ SCHEMAS_DIR="$1"
 GRAPHQL_DIR="$2"
 DATA_DIR="$3"
 RESOURCES_DIR="$4"
-RESULTS_FILE="$5"
+DOCS_DIR="$5"
+RESULTS_FILE="$6"
 
 [ -z "${SCHEMAS_DIR}" ] && usage
 [ -z "${GRAPHQL_DIR}" ] && usage
 [ -z "${DATA_DIR}" ] && usage
 [ -z "${RESOURCES_DIR}" ] && usage
+[ -z "${DOCS_DIR}" ] && usage
 
 
 TEMP_DIR=$(realpath -s ${TEMP_DIR:-./temp})
@@ -26,9 +28,11 @@ SCHEMAS_DIR=$(realpath -s $SCHEMAS_DIR)
 GRAPHQL_DIR=$(realpath -s $GRAPHQL_DIR)
 DATA_DIR=$(realpath -s $DATA_DIR)
 RESOURCES_DIR=$(realpath -s $RESOURCES_DIR)
+DOCS_DIR=$(realpath -s $DOCS_DIR)
 
 mkdir -p $TEMP_DIR/validate
 
+cp -r $DOCS_DIR $RESOURCES_DIR && find $RESOURCES_DIR/$(basename $DOCS_DIR)/ -type f -exec file {} \; | grep text -v | cut -d: -f1 | xargs rm
 docker run --rm \
   -v ${SCHEMAS_DIR}:/schemas:z \
   -v ${GRAPHQL_DIR}:/graphql-schemas:z \

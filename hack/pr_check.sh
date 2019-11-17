@@ -23,7 +23,7 @@ exit_status=$?
 
 # Run validator
 mkdir -p $(dirname $RESULTS)
-./$CURRENT_DIR/manual_schema_validator.sh schemas graphql-schemas data resources $RESULTS
+./$CURRENT_DIR/manual_schema_validator.sh schemas graphql-schemas data resources docs $RESULTS
 exit_status=$?
 
 # Write report
