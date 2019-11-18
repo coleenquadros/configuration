@@ -314,6 +314,7 @@
         secrets:
         - *app_sre_bot_key
         - *kube_config_hive_stage
+        - *quay_secret_push
     builders:
     - shell: |
         export JUMPHOST="ci.ext.devshift.net"
@@ -327,6 +328,9 @@
 
         export SSH_KEY_FILE="$TMP_DIR/id_rsa"
         echo "$SSH_PRIVATE_KEY_B64" | base64 -d > "$SSH_KEY_FILE"
+
+        export DOCKER_CONF=$PWD/config.json
+        echo "$QUAY_DOCKER_CONFIG_JSON" | base64 -d > $DOCKER_CONF
 
         ./build_deploy.sh
     <<: *gl_build_master
