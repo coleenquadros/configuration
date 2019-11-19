@@ -62,7 +62,9 @@ run_int openshift-acme &
 run_int openshift-limitranges &
 run_int terraform-users &
 
-run_int terraform-resources
+# disabling due to error with elasticache
+# TODO: uncomment this
+# run_int terraform-resources
 
 # 2nd run is to delete disabled keys,
 # has to run after terraform-resources is complete.
