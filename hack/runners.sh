@@ -11,6 +11,7 @@ run_int() {
 
   STARTTIME=$(date +%s)
   docker run --rm \
+    -u root \
     -v ${WORK_DIR}/config:/config:z \
     -v /etc/pki:/etc/pki:z \
     -v ${WORK_DIR}/throughput:/throughput:z \
@@ -40,6 +41,7 @@ run_test() {
 
   STARTTIME=$(date +%s)
   docker run --rm \
+    -u root \
     -v ${WORK_DIR}/config:/config:z \
     -v /etc/pki:/etc/pki:z \
     -v ${WORK_DIR}/throughput:/throughput:z \
