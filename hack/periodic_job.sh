@@ -23,6 +23,8 @@ source $CURRENT_DIR/runners.sh
 APP_INTERFACE_PROJECT_ID=13582
 HOUSEKEEPING_PROJECT_ID=4713
 
+GRAPHQL_SERVER=https://${GRAPHQL_SERVER_BASE_URL}/graphql
+
 # TODO: move vault integration to run in a pod
 run_vault_reconcile_integration &
 
