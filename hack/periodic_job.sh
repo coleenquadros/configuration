@@ -34,4 +34,5 @@ SQS_GATEWAY=true run_int gitlab-pr-submitter $APP_INTERFACE_PROJECT_ID &
 wait
 
 print_execution_times
+update_pushgateway
 check_integration_results
