@@ -23,11 +23,20 @@ source $CURRENT_DIR/runners.sh
 APP_INTERFACE_PROJECT_ID=13582
 HOUSEKEEPING_PROJECT_ID=4713
 
+# TODO: move vault integration to run in a pod
+run_vault_reconcile_integration &
+
+run_int jenkins-plugins &
+run_int jenkins-roles &
+run_int jenkins-job-builder &
+run_int jenkins-webhooks &
+run_int gitlab-members &
 run_int gitlab-housekeeping $APP_INTERFACE_PROJECT_ID &
 run_int gitlab-housekeeping $HOUSEKEEPING_PROJECT_ID &
 run_int gitlab-permissions &
 run_int ldap-users $APP_INTERFACE_PROJECT_ID &
 run_int slack-usergroups &
+run_int openshift-resources --internal &
 
 SQS_GATEWAY=true run_int gitlab-pr-submitter $APP_INTERFACE_PROJECT_ID &
 
