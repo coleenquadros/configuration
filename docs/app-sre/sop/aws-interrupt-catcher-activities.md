@@ -104,7 +104,7 @@ Good luck!
 
 #### Design
 
-If a user needs a reset of his AWS password, this will be done manually.
+If a user needs a reset of their AWS password, this will be done manually.
 
 #### Process
 
@@ -122,9 +122,9 @@ If a user needs a reset of his AWS password, this will be done manually.
 
 #### Design
 
-If a user needs a reset of his AWS password, this will be done using automated processes via App-Interface.
+If a user needs a reset of their AWS password, this will be done using automated processes via App-Interface.
 
-Since a User is an (almost) idempotent entity in AWS, in order to reset a user password, we will remove his role for that AWS account, and restore that role afterwords. This will delete the user (without deleting any additional resources, apart for the users's access keys) and create a new user with the same ID, with a new randomly generated password.
+Since a User is an (almost) idempotent entity in AWS, in order to reset a user password, we will remove their role for that AWS account, and restore that role afterwords. This will delete the user (without deleting any additional resources, apart for the users's access keys) and create a new user with the same ID, with a new randomly generated password.
 
 #### Process
 
