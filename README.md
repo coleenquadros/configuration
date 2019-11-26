@@ -798,15 +798,15 @@ In order to add or update an SQS queue, you need to add them to the `terraformRe
 - `identifier` - a name of the group of resources to create (or update)
   - Does not affect names of queues.
   - Will be used as the name of the IAM user that will be created.
-- `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options:](/resources/terraform/resources/)
-- `overrides`: list of values from `defaults` you wish to override, with the override values.
 - `output_resource_name`: name of Kubernetes Secret to be created.
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-queue" and `provider` "sqs", the created Secret will be called `my-queue-sqs`.
-- `queues`: list of queues to create:
-  - `key` is the key to be added to the Secret
-  - `value` is the name of the queue to create
+- `specs`: list of queue specifications to create:
+  - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options:](/resources/terraform/resources/)
+  - `queues`: list of queues to create according to the defined defaults:
+    - `key` is the key to be added to the Secret
+    - `value` is the name of the table to create
 
 Once the changes are merged, the SQS queue will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
@@ -814,6 +814,7 @@ The Secret will contain the following fields:
 - `aws_access_key_id` - The access key ID.
 - `aws_secret_access_key` - The secret access key.
 - `aws_region` - The name of the queue's AWS region.
+
 In addition, for each queue defined under `queues`, a key will be created and will contain the queue url. The key is the value defined in `key`.
 
 #### Manage DynamoDB tables via App-Interface (`/openshift/namespace-1.yml`)
@@ -845,6 +846,7 @@ The Secret will contain the following fields:
 - `aws_access_key_id` - The access key ID.
 - `aws_secret_access_key` - The secret access key.
 - `aws_region` - The name of the queue's AWS region.
+
 In addition, for each table defined under `tables`, a key will be created and will contain the table name. The key is the value defined in `key`.
 
 ### Manage Slack User groups via App-Interface
