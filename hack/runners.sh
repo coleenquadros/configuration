@@ -103,10 +103,13 @@ print_execution_times() {
     echo
 }
 
-check_integration_results() {
-    FAILED_INTEGRATIONS=$(ls ${FAIL_DIR} | wc -l)
-    if [ "$FAILED_INTEGRATIONS" != "0" ]; then
-      exit 1
+check_results() {
+    FAILED_COUNT=$(ls ${FAIL_DIR} | wc -l)
+
+    if [ "$FAILED_COUNT" != "0" ]; then
+      CONFLICT=$(find ${FAIL_DIR} -type f -exec cat {} + | grep "409: Conflict" | wc -l)
+      [ "$CONFLICT" == "0" ] && FAIL_EXIT_STATUS=1 || FAIL_EXIT_STATUS=80
+      exit $FAIL_EXIT_STATUS
     fi
 }
 

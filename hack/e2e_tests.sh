@@ -35,10 +35,4 @@ echo "Execution times for tests that were executed"
 ) | column -t
 echo
 
-FAILED_TESTS=$(ls ${FAIL_DIR} | wc -l)
-
-if [ "$FAILED_TESTS" != "0" ]; then
-  exit 1
-fi
-
-exit 0
+check_results

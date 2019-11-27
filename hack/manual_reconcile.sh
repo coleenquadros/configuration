@@ -140,4 +140,4 @@ wait
 
 print_execution_times
 update_pushgateway
-check_integration_results
+check_results
