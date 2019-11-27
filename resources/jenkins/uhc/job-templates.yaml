@@ -99,6 +99,23 @@
     <<: *gl_pr_check
 
 - job-template:
+    id: 'ocm-build-master'
+    name: '{gl_group}-{gl_project}-ocm-build-master'
+    environment: production
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *app_interface_basic_auth
+        - *ocm_sandbox
+        - *quay_secret_ocm_clusters_service_sandbox_admin
+        - *ocm_resources_job_secret
+        - *api_tests_oc_login_token
+    <<: *gl_build_master
+
+- job-template:
     id: 'ocm-api-tests-timed'
     name: 'ocm-api-tests-{environment}'
     node: '{label}'
