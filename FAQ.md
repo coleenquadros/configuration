@@ -13,13 +13,11 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
 - [How can I see who has access to a service](#how-can-i-see-who-has-access-to-a-service)
 - [How to determine my AWS permissions](#how-to-determine-my-aws-permissions)
 
-
 ## Useful links
+
 - [Visual App-Interface](https://visual-app-interface.devshift.net)
 
-
 ## Topics
-
 
 ### How can I get access to X
 
@@ -29,6 +27,9 @@ Find a permission that matches the access you require. For this example, choose 
 
 choosing a permission will take you to the Permission's page, in which you can view a list of `Roles` who grant this permission.  Choose the role that best matches your requirement and submit a merge request to app-interface adding that role to your user file.
 
+### Accessing DataHub
+
+DataHub is not managed by the AppSRE team, but you can find the process to request access here: https://help.datahub.redhat.com/docs/interacting-with-telemetry-data
 
 ### I can not access ci-ext
 
@@ -44,7 +45,6 @@ Managed to log in but having issues? Maybe even seeing this error message? `"Acc
 1. Log out and log in again.
 2. Revoke the `jenkins-ci-ext` Authorized OAuth app in [GitHub settings](https://github.com/settings/applications) and log in again.
 
-
 ### Jenkins is going to shutdown
 
 Problem:
@@ -55,11 +55,9 @@ Jenkins is configured to perform a [Thin backup](https://plugins.jenkins.io/thin
 
 If a job is pending and need to be rushed, contact the App SRE team for assitance (canceling the current restart will get pending jobs to run, but will not cancel the backup).
 
-
 ### How can I make my PR check job run concurrently
 
 Add `concurrent_build: true` to your job definition. [example](/data/services/uhc/cicd/ci-int/jobs.yaml#L143)
-
 
 ### How can I see who has access to a service
 
@@ -80,7 +78,6 @@ Choosing the namespace will take you to the namespace's page, in which you can v
 Choosing a role will take you to the Role's page, in which you can view a list of `Users` who have this role associated to them, and the namespace access granted through this role.  To finalize this example, choose the [dev](https://visual-app-interface.devshift.net/roles#/teams/telemeter/roles/dev.yml) role to see a list of users who has this role.
 
 The users in this page are granted a `view` permission in the `telemeter-production` namespace through the `dev` role..
-
 
 ### How to determine my AWS permissions
 
