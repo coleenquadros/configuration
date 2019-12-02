@@ -300,6 +300,11 @@ Controller manager is down.
   of these service accounts are stored in the `hive.kubeconfig` and
   `aws_account_operator.kubeconfig` keys of the `clusters-service`
   secret.
+  
+  Note:
+  Soon this will be changed - both hive and AWS account operator configs will be stored
+  in `external_cluster_services.config`. This file contains the complete _kubeconfig_ of
+  those services.
 
   The OCM clusters service needs full permissions on configuration maps
   and permissions to create events inside the `uhc-leaderhsip` namespace.
