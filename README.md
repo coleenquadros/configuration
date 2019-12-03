@@ -846,6 +846,7 @@ The Secret will contain the following fields:
 - `aws_access_key_id` - The access key ID.
 - `aws_secret_access_key` - The secret access key.
 - `aws_region` - The name of the queue's AWS region.
+- `endpoint` - The DynamoDB endpoint URL.
 
 In addition, for each table defined under `tables`, a key will be created and will contain the table name. The key is the value defined in `key`.
 
