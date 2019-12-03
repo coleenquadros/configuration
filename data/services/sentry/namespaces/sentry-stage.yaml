@@ -1,0 +1,50 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: sentry-stage
+description: staging namespace for sentry
+
+cluster:
+  $ref: /openshift/app-sre-stage/cluster.yml
+
+app:
+  $ref: /services/sentry/app.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ConfigMap
+- Secret
+- Route
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: app-sre
+  identifier: sentry-stage
+  defaults: /terraform/resources/app-sre/staging/rds-1.yml
+  overrides:
+    username: dbadmin
+
+openshiftResources:
+- provider: vault-secret
+  path: app-interface/app-sre-stage/sentry-stage/sentry-init
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre-stage/sentry-stage/sentry-general
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre-stage/sentry-stage/sentry-github-oauth
+  version: 1
+- provider: vault-secret
+  path: app-sre/creds/smtp
+  version: 1
+- provider: route
+  path: /sentry-stage/sentry/sentry.route.yaml
+  vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.stage.openshift.com
+  vault_tls_secret_version: 3
+- provider: resource
+  path: /sentry-stage/sentry/sentry.configmap.yaml
