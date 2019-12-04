@@ -22,8 +22,8 @@ exit_status=$?
 [ "$exit_status" != "0" ] && exit $exit_status
 
 # Run validator
-mkdir -p $(dirname $RESULTS)
-./$CURRENT_DIR/manual_schema_validator.sh schemas graphql-schemas data resources docs $RESULTS
+OUTPUT_DIR=${TEMP_DIR}/validate make bundle
+OUTPUT_DIR=${TEMP_DIR}/validate make validate | tee ${RESULTS}
 exit_status=$?
 
 # Write report

@@ -102,46 +102,15 @@ Run the actual validator by executing:
 ```sh
 # make sure you are in the top dir of the `app-interface` git repo
 source .env
-./manual_schema_validator.sh schemas graphql-schemas data resources docs
+make bundle validate # output is data.json
 ```
 
 The output will be JSON document, so you can pipe it with `jq`, example:
-`./manual_schema_validator.sh schemas graphql-schemas data resources docs | jq .`
+`cat data.json | jq .`
 
 ### Running integrations locally with `--dry-run`
 
-Instructions to run the integrations locally to simulate what would happen if it
-was merged into the app-interface repo.
-
-**NOTE**: This is only available to the SD team, as it requires access to this
-vault secret: `app-sre/ci-int/qontract-reconcile-toml`.
-
-**Requirements**:
-
-- Having executed `manual_schema_validator.sh` previously as explained in the
-  previous section.
-- docker
-- git
-
-**Instructions**:
-
-Obtain the `config.toml` file required to run the integrations.
-
-```sh
-# make sure you are in the top dir of the `app-interface` git repo
-vault read -field=data_base64 app-sre/ci-int/qontract-reconcile-toml | base64 -d > config.toml
-```
-
-Now you can run the integrations by executing:
-
-```sh
-# make sure you are in the top dir of the `app-interface` git repo
-./manual_reconcile.sh temp/validate/data.json config.toml
-```
-
-The output of the integrations will be displayed in-line, but it will also be
-saved in files: they can be located with `find temp/reports/reconcile_reports_*
--type f`.
+Instructions in [this document](/docs/app-sre/sop/running-integrations-manually.md).
 
 ## Querying the App-interface
 
