@@ -208,7 +208,7 @@ Every app-sre engineer should have access to the following
 ## 1.6 On call
 
 The App-sre on call schedule is a rotation to ensure handling of service outages and incidents for our application owners.
-Schedule of past, current and future on call rotation can be viewed @ pagerduty: https://openshift.pagerduty.com/
+Schedule of past, current and future on call rotation can be viewed @ pagerduty: https://redhat.pagerduty.com/
 
 The on call includes three tiers of response, detailed below.
 
