@@ -127,6 +127,7 @@ run_int gitlab-members &
 run_int gitlab-permissions &
 run_int slack-usergroups &
 run_int openshift-namespaces &
+run_int openshift-clusterrolebindings &
 run_int openshift-rolebindings &
 run_int openshift-resources &
 run_int openshift-network-policies &
