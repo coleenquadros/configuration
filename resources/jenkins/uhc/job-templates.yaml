@@ -116,6 +116,26 @@
     <<: *gl_build_master
 
 - job-template:
+    id: 'ocm-build-master-timed'
+    name: '{gl_group}-{gl_project}-ocm-build-master-timed-{environment}'
+    environment: stage
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *app_interface_basic_auth
+        - *ocm_sandbox
+        - *quay_secret_ocm_clusters_service_sandbox_admin
+        - *ocm_resources_job_secret
+    ci_cmd: ./build_deploy.sh uhc-stage
+    cron_expression: '0 */12 * * *'
+    <<: *gl_build_master
+    <<: *gl_timed
+
+
+- job-template:
     id: 'ocm-api-tests-timed'
     name: 'ocm-api-tests-{environment}'
     node: '{label}'
