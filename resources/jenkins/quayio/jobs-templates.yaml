@@ -21,3 +21,18 @@
     <<: *gl_pr_check
     <<: *saas_deploy
 
+- job-template:
+    id: 'saas-deploy-with-upstream'
+    name: '{gl_group}-{gl_project}-{saasherder_context}-saas-deploy-with-upstream-{upstream}-{saas_env}'
+    repo_url: 'https://gitlab.cee.redhat.com/{gl_group}/{gl_project}'
+    upstream: ''
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    triggers:
+    - reverse:
+        jobs: '{upstream}'
+        results: 'success'
+    <<: *gl_build_master
+    <<: *saas_deploy
+    <<: *saas_notify
