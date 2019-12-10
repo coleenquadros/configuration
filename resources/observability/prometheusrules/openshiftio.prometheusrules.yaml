@@ -39,4 +39,33 @@ spec:
         message: 'No capacity available on OSIO starter clusters.'
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/openshiftio/sop/index.md#osioclustercapacitylow"
         dashboard: "https://grafana.app-sre.devshift.net/d/osio_capacity/osio-capacity?orgId=1"
+    - alert: OSIOClusterResourceCapacityCPUHigh
+      labels:
+        severity: warning
+      expr: |
+        1 - avg by (cluster) (
+          rate(node_cpu{cluster=~"starter-us-east-(2|2a|1a|1b)", mode="idle"}[5m])
+        ) > 80/100
+      for: 30m
+      annotations:
+        message: 'CPU resource usage is high'
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/openshiftio/sop/index.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/osio_capacity/osio-capacity?orgId=1"
+    - alert: OSIOClusterResourceCapacityMemoryHigh
+      labels:
+        severity: warning
+      expr: |
+        1 - (
+          sum by (cluster) (
+            :node_memory_MemFreeCachedBuffers:sum{cluster=~"starter-us-east-(2|2a|1a|1b)"})
+          /
+          sum by (cluster) (
+            :node_memory_MemTotal:sum{cluster=~"starter-us-east-(2|2a|1a|1b)"})
+        ) > 80/100
+      for: 30m
+      annotations:
+        message: 'Memory resource usage is high'
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/openshiftio/sop/index.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/osio_capacity/osio-capacity?orgId=1"
+
 
