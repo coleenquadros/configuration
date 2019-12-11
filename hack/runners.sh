@@ -108,7 +108,8 @@ check_results() {
 
     if [ "$FAILED_COUNT" != "0" ]; then
       CONFLICT=$(find ${FAIL_DIR} -type f -exec cat {} + | grep "409: Conflict" | wc -l)
-      [ "$CONFLICT" == "0" ] && FAIL_EXIT_STATUS=1 || FAIL_EXIT_STATUS=80
+      RATE_LIMITED=$(find ${FAIL_DIR} -type f -exec cat {} + | grep "ratelimited" | wc -l)
+      [ "$CONFLICT" == "0" ] && [ "$RATE_LIMITED" == "0" ] && FAIL_EXIT_STATUS=1 || FAIL_EXIT_STATUS=80
       exit $FAIL_EXIT_STATUS
     fi
 }
