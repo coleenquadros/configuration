@@ -116,7 +116,7 @@
     <<: *gl_build_master
 
 - job-template:
-    id: 'ocm-build-master-timed'
+    id: 'ocm-build-master-timed-stage'
     name: '{gl_group}-{gl_project}-ocm-build-master-timed-{environment}'
     environment: stage
     wrappers:
@@ -130,6 +130,24 @@
         - *quay_secret_ocm_clusters_service_sandbox_admin
         - *ocm_resources_job_secret
     ci_cmd: ./periodic_check.sh uhc-stage
+    cron_expression: '0 */12 * * *'
+    <<: *gl_timed
+
+- job-template:
+    id: 'ocm-build-master-timed-production'
+    name: '{gl_group}-{gl_project}-ocm-build-master-timed-{environment}'
+    environment: production
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *app_interface_basic_auth
+        - *ocm_sandbox
+        - *quay_secret_ocm_clusters_service_sandbox_admin
+        - *ocm_resources_job_secret
+    ci_cmd: ./periodic_check.sh uhc-production
     cron_expression: '0 */12 * * *'
     <<: *gl_timed
 
