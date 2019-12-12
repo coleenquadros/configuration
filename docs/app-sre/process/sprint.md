@@ -1,10 +1,10 @@
 # Sprint Guidelines
 
-|       | S | M                                                             | T | W                             | T                                                      | F                                | S |
-|-------|---|---------------------------------------------------------------|---|-------------------------------|--------------------------------------------------------|----------------------------------|---|
-| Week1 |   | S-1 end<br>S start<br>Scoring spreadsheet for S+1<br>JIRA S+1 |   |                               |                                                        |                                  |   |
-| Week2 |   |                                                               |   |                               |                                                        |                                  |   |
-| Week3 |   |                                                               |   | Planning S+1 Deadline (async) | Demo SX<br>Retro S<br><br>Scoring S+1 Deadline (async) | Assign Scores to JIRA issues S+1 |   |
+|       | S | M                  | T | W | T                      | F | S |
+|-------|---|--------------------|---|---|------------------------|---|---|
+| Week1 |   | S-1 end<br>S start |   |   |                        |   |   |
+| Week2 |   |                    |   |   |                        |   |   |
+| Week3 |   |                    |   |   | Demo SX<br>Retro S<br> |   |   |
 
 Legend:
 
@@ -35,7 +35,13 @@ These are the team values and standards we adhere to throughout this set of guid
 
 #### Planning (~60m BJN)
 
-- We do a final review of stories on the staged sprint, pruning, adding, and scoring any unexpected last minute changes on a Bluejeans call
+- We do a final review of stories on the staged sprint, pruning, adding, and scoring.
+- Each story should be scored by the assignee during the planning session. These are the scoring values:
+  - **1**: regular task / simple well-known work
+  - **3**: light complexity, maybe some unknowns
+  - **5**: quite a bit of uncertainty where a change needs to be made or what needs to be done, some technical risk exists
+  - **8**: significant technical risk is present
+  - **13**: needs to be broken down or significant further research is needed
 
 #### Kick-off!
 
@@ -43,28 +49,12 @@ These are the team values and standards we adhere to throughout this set of guid
   - Upon pressing the start button, a fanfare of trumpets followed by a shower of confetti and balloons appears.
     - Just kidding, but keep this to yourself. This may be a trivia question to just see if you read this. Read words, win prizes!
 - The team manager creates the future sprint so issues can be assigned to the future sprint throught the whole current sprint.
-- The team manager creates a new sheet for the future sprint in the [estimation sheet](https://docs.google.com/spreadsheets/d/1FEsF60JY-advVvqe9CNCN7NlncR-ExnZeC9c-7V3Gq8/edit?usp=sharing).
 
 ### Prep and Review
 
-#### Planning (Final Wednesday EOB, Async)
-
-- Final Wednesday EOB is the deadline for stories to be staged for the next sprint. Note that throughout the sprint team members should watch the next sprint and score all the issues.
-
 #### Estimation (Final Thursday EOB, Async)
 
-- Final Thursday EOB is the deadline for stories to be scored
-- Scoring values:
-  - **1**: regular task / simple well-known work
-  - **3**: light complexity, maybe some unknowns
-  - **5**: quite a bit of uncertainty where a change needs to be made or what needs to be done, some technical risk exists
-  - **8**: significant technical risk is present
-  - **13**: needs to be broken down or significant further research is needed
 - Questions/discussions about each story can be surfaced in the comments of each story
-
-#### Assing Scores (Final Friday)
-
-- The manager will record rounded-up-average estimation scores into each story, as well as unestimated stories into the [estimation sheet](https://docs.google.com/spreadsheets/d/1FEsF60JY-advVvqe9CNCN7NlncR-ExnZeC9c-7V3Gq8/edit?usp=sharing)
 
 ### During the sprint
 
@@ -77,6 +67,7 @@ These are the team values and standards we adhere to throughout this set of guid
   - Stories that should likely see movement in the next sprint should be re-positioned toward the top section of the backlog
 - Assign stories you consider of importance to the future sprint
 - Score all stories in the future sprint
+- Unassign stories if they are at risk of not being delivered. These stories will be discussed in the weekly tech sync (wednesdays).
 
 #### Demo (Final Thursday, ~60m BJN)
 
@@ -89,7 +80,6 @@ These are the team values and standards we adhere to throughout this set of guid
 - Hosted by the team manager
 - Immediately follows demos
 - Will be summarized and documented as a [Google doc](https://docs.google.com/document/d/1LFwp5KDmwVKzi3Ht8aMjL5jQr-aSS-J3ivkzjLtM44w/edit?usp=sharing)
-- Each team member will review their sprint burndown chart: accomplishments vs what they weren't able to complete. 2 min per person.
 - The team manager will review key metrics for the sprint: velocity, total stories, etc.
 - The team manager create host an http://www.ideaboardz.com sync session in which team members can provide feedback for the sprint:
   - What worked? What didn't? What do we need to do differently?
