@@ -4,35 +4,44 @@ metadata:
   name: "instance"
   namespace: "openshift-logging"
 spec:
-  managementState: "Managed"
-  logStore:
-    type: "elasticsearch"
-    elasticsearch:
-      nodeCount: 3
-      storage:
-        storageClassName: "gp2"
-        size: "200Gi"
-      redundancyPolicy: "SingleRedundancy"
+  collection:
+    logs:
+      fluentd:
+        resources: null
       nodeSelector:
         node-role.kubernetes.io/worker: ""
+      rsyslog:
+        resources: null
+      type: "fluentd"
+  curation:
+    curator:
+      nodeSelector:
+        kubernetes.io/os: "linux"
+        node-role.kubernetes.io/worker: ""
+      resources: null
+      schedule: "30 3 * * *"
+    type: "curator"
+  logStore:
+    elasticsearch:
+      nodeCount: 3
+      nodeSelector:
+        node-role.kubernetes.io/worker: ""
+      redundancyPolicy: "SingleRedundancy"
       resources:
         request:
           memory: 8G
+      storage:
+        storageClassName: "gp2"
+        size: "200Gi"
+    type: "elasticsearch"
+  managementState: "Managed"
   visualization:
-    type: "kibana"
     kibana:
+      nodeSelector:
+        kubernetes.io/os: "linux"
+        node-role.kubernetes.io/worker: ""
+      proxy:
+        resources: null
       replicas: 1
-      nodeSelector:
-        node-role.kubernetes.io/worker: ""
-  curation:
-    type: "curator"
-    curator:
-      schedule: "30 3 * * *"
-      nodeSelector:
-        node-role.kubernetes.io/worker: ""
-  collection:
-    logs:
-      type: "fluentd"
-      fluentd: {}
-      nodeSelector:
-        node-role.kubernetes.io/worker: ""
+      resources: null
+    type: "kibana"
