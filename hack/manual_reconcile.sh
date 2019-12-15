@@ -125,7 +125,6 @@ run_int jenkins-webhooks &
 run_int aws-iam-keys &
 run_int gitlab-members &
 run_int gitlab-permissions &
-run_int slack-usergroups &
 run_int openshift-namespaces &
 run_int openshift-clusterrolebindings &
 run_int openshift-rolebindings &
@@ -136,6 +135,8 @@ run_int openshift-limitranges &
 run_int terraform-resources &
 run_int terraform-users &
 run_int ldap-users $APP_INTERFACE_PROJECT_ID &
+# Run slack-usergroups only if MR title has the word slack in it
+[[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"slack"* ]] && run_int slack-usergroups &
 
 wait
 
