@@ -102,7 +102,7 @@ Hive stores the non-debug installer log entries in `clusterprovision` objects in
    ```
    time=\"2019-10-08T18:27:21Z\" level=error msg=Unauthorized
    ```
-   The external-dns pod has hit an unresolved state (still not root-caused as this is intermittent). Being tracked in [Jira](https://jira.coreos.com/browse/CO-590).
+   The external-dns pod has hit an unresolved state (still not root-caused as this is intermittent). Being tracked in [Jira](https://issues.redhat.com/browse/CO-590).
 1. Deleting the external-dns pod will cause it to relaunch and things should return to a working state.
 
 #### Determined That it's Not a Hive issue

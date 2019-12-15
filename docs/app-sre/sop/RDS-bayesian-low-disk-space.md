@@ -36,4 +36,4 @@ Don't use `DELETE FROM THATTABLE;` - it very slow and all transactions will go t
 - Check if alarm goes off and space are reclaimed. It might take some time so __check in 30 minutes or so__.
 
 ## Tracking
-- This issue: https://jira.coreos.com/browse/APPAI-572 should prevent that specific reason for filling disk space from occurrence in the future. If it still happens - please bump prio/severity of this issue.
+- This issue: https://issues.redhat.com/browse/APPAI-572 should prevent that specific reason for filling disk space from occurrence in the future. If it still happens - please bump prio/severity of this issue.

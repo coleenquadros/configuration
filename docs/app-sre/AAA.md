@@ -140,9 +140,9 @@ Every app-sre engineer should have access to the following
   - ACCESS Contact Meghna Gala (mgala@redhat.com) re Sd-org onboarding (may not be needed)
     - Added to sd-org mailing list
     - Added to team tracking sheets (?)
-  - ACCESS: [Jira](https://jira.coreos.com)
+  - ACCESS: [Jira](https://issues.redhat.com)
     - Email openshift-jira-admin@redhat.com for any issues
-    - Jira boards [Incidents Board](https://jira.coreos.com/secure/RapidBoard.jspa?rapidView=92&projectKey=HSD) & [SD Epics](https://jira.coreos.com/secure/RapidBoard.jspa?rapidView=140)
+    - Jira boards [Sprint Board](https://issues.redhat.com/secure/RapidBoard.jspa?rapidView=5536) & [SD Epics](https://issues.redhat.com/projects/SDE)
 
 - Openshift github onboarding (access to private repositories in openshift github org):
   - ACCESS: https://mojo.redhat.com/docs/DOC-1081313#jive_content_id_Github_Access
@@ -258,7 +258,7 @@ Incident Response:
 
 Tracking:
 
-- Start off by creating a JIRA issue for the incident on the [incidents board](https://jira.coreos.com/secure/RapidBoard.jspa?rapidView=145)
+- Start off by creating a JIRA issue for the incident on the [Sprint board](https://issues.redhat.com/secure/RapidBoard.jspa?rapidView=5536)
   - Issue type: `Task`
   - Labels: `type/incident`
 

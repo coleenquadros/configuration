@@ -11,7 +11,7 @@ To on-board a new GitHub org to app-interface, perform the following operations:
 2. Accept the invitation as `app-sre-bot`, by either:
     * Contact Jaime Melis to accept the invitation.
     * Sign in to GitHub using the `app-sre-bot` [credentials](https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/github-app-sre-bot) and a Recovery code.
-    * Add the GitHub org to app-interface (pending automation - https://jira.coreos.com/browse/APPSRE-936).
+    * Add the GitHub org to app-interface (pending automation - https://issues.redhat.com/browse/APPSRE-936).
 
 3. To add the GitHub org to app-interface, submit a merge request:
     * Add the GitHub org to app-interface:

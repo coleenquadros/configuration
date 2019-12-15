@@ -16,7 +16,7 @@ Legend:
 
 These are the team values and standards we adhere to throughout this set of guidelines:
 
-- We will keep track of all deliverable work in [Jira](https://jira.coreos.com)
+- We will keep track of all deliverable work in [Jira](https://issues.redhat.com)
 - For large stories, design notes can be stored in the shared [gdocs](https://drive.google.com/drive/u/1/folders/186ExLmi--buOzMLaiUnCkzzRYfwX_y9L) folder (reference to these from Jira)
 - We will continuously evaluate and refine our delivery process via the end-of-sprint retro
 - We will commit to work that has been scoped and prioritized with respect to the needs of:
