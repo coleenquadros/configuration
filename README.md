@@ -403,12 +403,25 @@ To deploy and manage an openshift-acme instance, a user must add the following t
 
 ```yaml
 openshiftAcme:
-  $ref: /dependencies/openshift/acme/default.yml
+  config:
+    $ref: /dependencies/openshift/acme/default.yml
 ```
 
 The openshift-acme deployment can be customized by creating a new file alongside the default one.
 
 The default definition (as shown above) is self-documented and shows how to tweak the openshift-acme deployment.
+
+An optional acme-account secret in Vault can be declared in the following way:
+
+```yaml
+openshiftAcme:
+  config:
+    $ref: /dependencies/openshift/acme/default.yml
+  accountSecret:
+    provider: vault-secret
+    path: vault/path/to/acme-account
+    version: 1
+```
 
 ### Manage OpenShift Groups association via App-Interface (`/openshift/cluster-1.yml`)
 
