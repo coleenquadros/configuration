@@ -4,16 +4,17 @@ metadata:
   labels:
     prometheus: app-sre
     role: alert-rules
-  name: quayio-stage
+  name: quay-stage
 spec:
   groups:
-  - name: quayio
+  - name: quay
     rules:
     - alert: Build Capacity Shortage
       expr: max(quay_queue_items_available_unlocked{queue_name="dockerfilebuild"}) > 15
       for: 15m
       labels:
         severity: critical
+        service: quay
       annotations:
         summary: More than 15 builds are queued and not yet consumed.
     - alert: CPU Greater Than 40%
@@ -21,6 +22,7 @@ spec:
       for: 5m
       labels:
         severity: high
+        service: quay
       annotations:
         summary: CPU usage has been greater than 40% for 5 minutes.
     - alert: Memory Greater Than 32GB
@@ -28,5 +30,6 @@ spec:
       for: 5m
       labels:
         severity: high
+        service: quay
       annotations:
         summary: Memory usage has been greater than 32GB for 5 minutes.
