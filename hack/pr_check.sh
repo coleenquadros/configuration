@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -exvo pipefail
+
 CURRENT_DIR=$(dirname "$0")
 
 # Setup vars and clean files
