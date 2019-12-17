@@ -87,7 +87,7 @@ data:
           ],
           "targets": [
             {
-              "expr": "sort_desc((sum_over_time(sum by (_id,version,from_version) (max by (_id,version,from_version) (cluster_version{type=\"failure\",version=~\"$version\\\\.\\\\d+($|-rc.\\\\d+)\",from_version=~\"$previous_version\\\\..*\"} * 0 + 1))[7d:5m]) > 1) \n+ on (_id) group_left(email_domain) topk by (_id) (1, 0 * max_over_time(subscription_labels{email_domain!~\"redhat.com|(^|.*\\\\.)ibm.com\"}[7d]))) * (5 * 60)",
+              "expr": "sort_desc(\n   sum_over_time(\n     (\n       max by (_id,from_version,version) (1 + 0 * (cluster_version{type=\"failure\",version=~\"$version\",from_version=~\"$previous_version\"} \n       unless on (_id,version) (max by (_id,version) (topk by (_id) (1, label_replace(cluster_version{type=\"failure\",from_version=~\"$previous_version\"}, \"version\", \"$1\", \"from_version\", \"(.*)\"))))))\n     )[7d:5m]\n   ) > 1\n)\n",
               "format": "table",
               "instant": true,
               "intervalFactor": 1,
@@ -163,7 +163,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "count(count by (_id) (count_over_time(cluster_version{type=\"failure\",version=~\"$version\\\\.\\\\d+($|-rc.\\\\d+)\",from_version=~\"$previous_version\\\\..*\"}[7d:5m]) > 3) * (5 * 60)) / count(count by (_id) (max_over_time(cluster_version{type=\"updating\",version=~\"$version\\\\.\\\\d+($|-rc.\\\\d+)\",from_version=~\"$previous_version\\\\..*\"}[7d])))",
+              "expr": "count(\n  count by (_id) (\n    count_over_time(\n      (\n        cluster_version{type=\"failure\",version=~\"$version\",from_version=~\"$previous_version\"} \n        unless on (_id,version) (\n          max by (_id,version) (\n            topk by (_id) (\n              1, label_replace(cluster_version{type=\"failure\",versionfrom_version=~\"$previous_version($|\\\\..*)\"}, \"version\", \"$1\", \"from_version\", \"(.*)\")\n            )\n          )\n        )\n      )[7d:5m]\n    ) > 3) * (5 * 60)) \n/ count(count by (_id) (max_over_time(cluster_version{type=\"updating\",version=~\"$version\",from_version=~\"$previous_version\"}[7d])))",
               "format": "time_series",
               "instant": true,
               "intervalFactor": 1,
@@ -217,7 +217,7 @@ data:
           "strokeWidth": 1,
           "targets": [
             {
-              "expr": "count by (from_version) (topk by (_id) (1, (max_over_time(cluster_version{type=\"updating\",version=~\"4.2.0($|-rc.\\\\d+)\",from_version=~\"4\\\\.1\\\\..*\"}[7d]))))",
+              "expr": "count by (from_version) (topk by (_id) (1, (max_over_time(cluster_version{type=\"updating\",version=~\"$version\",from_version=~\"$previous_version\"}[7d]))))",
               "format": "time_series",
               "instant": true,
               "intervalFactor": 1,
@@ -263,7 +263,7 @@ data:
           "strokeWidth": 1,
           "targets": [
             {
-              "expr": "count by (version) (topk by (_id) (1, (max_over_time(cluster_version{type=\"updating\",version=~\"4.2.0($|-rc.\\\\d+)\",from_version=~\"4\\\\.1\\\\..*\"}[7d]))))",
+              "expr": "count by (version) (topk by (_id) (1, (max_over_time(cluster_version{type=\"updating\",version=~\"$version\",from_version=~\"$previous_version\"}[7d]))))",
               "format": "time_series",
               "instant": true,
               "intervalFactor": 1,
@@ -338,7 +338,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "count(count by (_id) (max_over_time(cluster_version{type=\"updating\",version=~\"$version\\\\.\\\\d+($|-rc.\\\\d+)\",from_version=~\"$previous_version\\\\..*\"}[7d])))",
+              "expr": "count(count by (_id) (max_over_time(cluster_version{type=\"updating\",version=~\"$version\",from_version=~\"$previous_version\"}[7d])))",
               "format": "time_series",
               "instant": true,
               "intervalFactor": 1,
@@ -423,7 +423,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "time() - topk(1, cluster_version{type=\"current\",version=~\"$version\\\\.\\\\d+($|-rc.\\\\d+)\"})",
+              "expr": "time() - topk(1, cluster_version{type=\"current\",version=~\"$version\"})",
               "format": "time_series",
               "instant": true,
               "intervalFactor": 1,
@@ -508,7 +508,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "time() - topk(1, cluster_version{type=\"current\",version=~\"$previous_version\\\\.\\\\d+($|-rc.\\\\d+)\"})",
+              "expr": "time() - topk(1, cluster_version{type=\"current\",version=~\"$previous_version\"})",
               "format": "time_series",
               "instant": true,
               "intervalFactor": 1,
@@ -575,7 +575,7 @@ data:
           ],
           "targets": [
             {
-              "expr": "count by (from_version,version) (topk by (_id) (1, (max_over_time(cluster_version{type=\"updating\",version=~\"4.2.0($|-rc.\\\\d+)\",from_version=~\"4\\\\.1\\\\..*\"}[7d]))))",
+              "expr": "count by (from_version,version) (topk by (_id) (1, (max_over_time(cluster_version{type=\"updating\",version=~\"$version\",from_version=~\"$previous_version\"}[7d]))))",
               "format": "table",
               "instant": true,
               "intervalFactor": 1,
@@ -694,7 +694,7 @@ data:
           ],
           "targets": [
             {
-              "expr": "count by (from_version,version) (topk by (_id) (1, (max_over_time(cluster_version{type=\"failure\",version=~\"4.2.0($|-rc.\\\\d+)\",from_version=~\"4\\\\.1\\\\..*\"}[7d]))))",
+              "expr": "count by (from_version,version) (topk by (_id) (1, (max_over_time(cluster_version{type=\"failure\",version=~\"$version\",from_version=~\"$previous_version\"}[7d]))))",
               "format": "table",
               "instant": true,
               "intervalFactor": 1,
@@ -732,32 +732,86 @@ data:
             "type": "datasource"
           },
           {
+            "allValue": null,
             "current": {
               "text": "4.2",
-              "value": "4.2"
+              "value": "4\\.2\\.\\d+"
             },
             "hide": 0,
             "includeAll": false,
             "label": null,
             "multi": false,
             "name": "version",
-            "options": [],
-            "query": "prometheus",
+            "options": [
+              {
+                "selected": false,
+                "text": "4.4 (and nightlies)",
+                "value": "4\\.4\\.\\d+($|-rc.\\d+.*)|-0\\.nightly.*)"
+              },
+              {
+                "selected": false,
+                "text": "4.3 (and rc)",
+                "value": "4\\.3\\.\\d+(-rc.\\d+)?"
+              },
+              {
+                "selected": false,
+                "text": "4.3 (and nightlies)",
+                "value": "4\\.3\\.\\d+($|-rc.\\d+.*)|-0\\.nightly.*)"
+              },
+              {
+                "selected": true,
+                "text": "4.2",
+                "value": "4\\.2\\.\\d+"
+              },
+              {
+                "selected": false,
+                "text": "4.1",
+                "value": "4\\.1\\.\\d+"
+              }
+            ],
+            "query": "",
             "skipUrlSync": false,
             "type": "custom"
           },
           {
+            "allValue": null,
             "current": {
               "text": "4.1",
-              "value": "4.1"
+              "value": "4\\.1\\.\\d+"
             },
             "hide": 0,
             "includeAll": false,
             "label": null,
             "multi": false,
-            "name": "previous_version",
-            "options": [],
-            "query": "prometheus",
+            "name": "version",
+            "options": [
+              {
+                "selected": false,
+                "text": "4.4 (and nightlies)",
+                "value": "4\\.4\\.\\d+($|-rc.\\d+.*)|-0\\.nightly.*)"
+              },
+              {
+                "selected": false,
+                "text": "4.3 (and rc)",
+                "value": "4\\.3\\.\\d+(-rc.\\d+)?"
+              },
+              {
+                "selected": false,
+                "text": "4.3 (and nightlies)",
+                "value": "4\\.3\\.\\d+($|-rc.\\d+.*)|-0\\.nightly.*)"
+              },
+              {
+                "selected": false,
+                "text": "4.2",
+                "value": "4\\.2\\.\\d+"
+              },
+              {
+                "selected": true,
+                "text": "4.1",
+                "value": "4\\.1\\.\\d+"
+              }
+            ],
+            "query": "",
             "skipUrlSync": false,
             "type": "custom"
           }
