@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metdata:
+  name: configuration
+data:
+  config.yaml: |
+    plugins:
+        default_component_enabled: true
+        packages:
+            - insights.specs.default
+            - insights.specs.insights_archive
+            - telemetry.rules.plugins
+            - prodsec.rules
+            - insights_kafka_service.rules
+    configs: []
+    service:
+        extract_timeout: 10
+        extract_tmp_dir:
+        format: insights.formats._json.JsonFormat
+        target_components: []
+        consumer:
+            name: insights_kafka_service.consumer.InsightsKafkaConsumer
+            kwargs:
+              services:
+                - "advisor"
+              incoming_topic: "platform.upload.available"
+              group_id: "insights-core-kafka"
+              bootstrap_servers:
+                - "kafka:29092"
+        publisher:
+            name: insights_kafka_service.publisher.InsightsKafkaProducer
+            kwargs:
+              topic: "platform.engine.results"
+              bootstrap_servers:
+                - "kafka:29092"
+        downloader:
+            name: insights_messaging.downloaders.httpfs.Http
+        watchers:
+          - insights_kafka_service.metrics.Watcher
