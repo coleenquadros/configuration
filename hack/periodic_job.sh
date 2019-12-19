@@ -25,6 +25,8 @@ HOUSEKEEPING_PROJECT_ID=4713
 
 GRAPHQL_SERVER=https://${GRAPHQL_SERVER_BASE_URL}/graphql
 
+run_int gitlab-projects
+
 # TODO: move vault integration to run in a pod
 run_vault_reconcile_integration &
 

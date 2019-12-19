@@ -124,6 +124,7 @@ run_int jenkins-job-builder &
 run_int jenkins-webhooks &
 run_int aws-iam-keys &
 run_int gitlab-members &
+run_int gitlab-projects &
 run_int gitlab-permissions &
 run_int openshift-namespaces &
 run_int openshift-clusterrolebindings &

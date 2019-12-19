@@ -184,6 +184,7 @@ wheel icon (top-right corner) and replace `omit` with `include` in
 - House keeping of GitLab issues.
 - Compliance validation of GitHub user profiles.
 - Management of GitLab groups.
+- Creation of GitLab projects.
 - Deletion of OpenShift users.
 
 * A dependency matrix between the integrations can be found [here](/integrations_dependencies.md).
@@ -997,6 +998,15 @@ Examples:
 
 Notes:
 * Creating new GitLab groups is not supported (GitLab group has to pre-exist).
+
+
+### Create GitLab projects
+
+Creating a new project in gitlab can be self-serviced via App-Interface.
+
+To request the creation of a new project, submit a PR adding the new project under the desired group [here](/data/dependencies/gitlab/gitlab.yml). The project will be created on merge.
+
+To get access to the project, if required, contact the App SRE team.
 
 
 ## Design
