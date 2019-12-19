@@ -143,14 +143,10 @@ Cluster-Version-Operator (CVO) is showing errors on clusters console.
 
 ## Escalations
 
-Slack: #forum-auto-updates
+Slack: `#forum-auto-updates`
 
-Developers:
- * @steveej
- * @luca.bruno
- * @shiywang
+Developers: `@over-the-air-updates`
 
-Slack alerts: #team-cincinnati-alerts
+Slack alerts: `#team-cincinnati-alert`
 
-Team email: aos-team-cincinnati@redhat.com 
-
+Team email: aos-team-ota@redhat.com
