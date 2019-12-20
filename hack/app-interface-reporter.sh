@@ -6,4 +6,5 @@ docker run --rm -v $PWD/config.toml:/config.toml \
     quay.io/app-sre/qontract-reconcile:latest \
     app-interface-reporter \
     --config /config.toml \
-    --gitlab-project-id 13582
+    --gitlab-project-id 13582 \
+    --reports-path reports
