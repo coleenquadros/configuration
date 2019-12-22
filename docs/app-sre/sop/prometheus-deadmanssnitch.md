@@ -19,8 +19,10 @@ Prometheus SnitchHeartBeat is an always-firing alert. It's used as an end-to-end
 ## Steps
 
 - Make sure the SnitchHeartBeat alert is not silenced.
+- If the firing alerts are for all Prometheus instances - this is likely a problem with Alert Manager.
 - Check the Prometheus and Alertmanager logs to make sure they are communicating properly with https://deadmanssnitch.com/.
-- Check that the Pods/VM running the concerned Prometheus instance is available
+- Check that the Pods/VM running the concerned Prometheus instance is available.
+- Check recent changes to observability saas deployment jobs.
 
 ## Escalations
 
