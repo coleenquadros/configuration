@@ -6,6 +6,7 @@ run_int() {
   INTEGRATION_NAME="${ALIAS:-$1}"
   [ -n "$DRY_RUN" ] && DRY_RUN_FLAG="--dry-run"
   [ -n "$SQS_GATEWAY" ] && GITLAB_PR_SUBMITTER_QUEUE_URL_ENV="-e gitlab_pr_submitter_queue_url=$gitlab_pr_submitter_queue_url"
+  [ -n "$STATE" ] && APP_INTERFACE_STATE_ENV="-e APP_INTERFACE_STATE_BUCKET=$app_interface_state_bucket -e APP_INTERFACE_STATE_BUCKET_ACCOUNT=$app_interface_state_bucket_account"
 
   echo "INTEGRATION $INTEGRATION_NAME" >&2
 
@@ -17,6 +18,7 @@ run_int() {
     -v /var/tmp/.cache:/root/.cache:z \
     -e REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem \
     $GITLAB_PR_SUBMITTER_QUEUE_URL_ENV \
+    $APP_INTERFACE_STATE_ENV \
     -w / \
     ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
     qontract-reconcile --config /config/config.toml $DRY_RUN_FLAG $@ \

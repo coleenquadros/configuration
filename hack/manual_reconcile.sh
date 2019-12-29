@@ -139,6 +139,8 @@ run_int terraform-users &
 run_int ldap-users $APP_INTERFACE_PROJECT_ID &
 # Run slack-usergroups only if MR title has the word slack in it
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"slack"* ]] && run_int slack-usergroups &
+# Add STATE=true to integrations that interact with a state
+STATE=true run_int email-sender &
 
 wait
 
