@@ -7,11 +7,14 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
 ## ToC
 
 - [How can I get access to X](#how-can-i-get-access-to-x)
+- [I can not access X](#i-can-not-access-x)
 - [I can not access ci-ext](#i-can-not-access-ci-ext)
+- [What is the Console or Kibana URL for a service](#what-is-the-console-or-kibana-url-for-a-service)
 - [Jenkins is going to shut down](#jenkins-is-going-to-shutdown)
 - [How can I make my PR check job run concurrently](#how-can-i-make-my-pr-check-job-run-concurrently)
 - [How can I see who has access to a service](#how-can-i-see-who-has-access-to-a-service)
 - [How to determine my AWS permissions](#how-to-determine-my-aws-permissions)
+- [Accessing DataHub](#accessing-datahub)
 
 ## Useful links
 
@@ -27,23 +30,39 @@ Find a permission that matches the access you require. For this example, choose 
 
 choosing a permission will take you to the Permission's page, in which you can view a list of `Roles` who grant this permission.  Choose the role that best matches your requirement and submit a merge request to app-interface adding that role to your user file.
 
-### Accessing DataHub
-
-DataHub is not managed by the AppSRE team, but you can find the process to request access here: https://help.datahub.redhat.com/docs/interacting-with-telemetry-data
-
-### I can not access ci-ext
-
-Problem: I Can not log in to https://ci.ext.devshift.net.
+### I can not access X
 
 This may be caused due to several reasons. Follow this procedure:
 
-1. Follow the "How can I get access to X" story and make sure you are assigned a role that enables access to ci-ext.
+1. Follow the "How can I get access to X" story and make sure you are assigned a role that enables the desired access.
 2. Be sure to accept the GitHub invitation at https://github.com/app-sre
+
+### I can not access ci-ext
+
+Start by following [I can not access X](#i-can-not-access-x)
+
+Problem: I Can not log in to https://ci.ext.devshift.net.
 
 Managed to log in but having issues? Maybe even seeing this error message? `"Access denied: <your-github-username> is missing the Overall/Read permission"`
 
 1. Log out and log in again.
 2. Revoke the `jenkins-ci-ext` Authorized OAuth app in [GitHub settings](https://github.com/settings/applications) and log in again.
+
+### What is the Console or Kibana URL for a service
+
+Start by accessing the Visual App-Interface at https://visual-app-interface.devshift.net.  Using the side bar, navigate to the [Services](https://visual-app-interface.devshift.net/services) section.
+
+Choose the relevant service from the list. For example, [cincinnati](https://visual-app-interface.devshift.net/services#/services/cincinnati/app.yml).
+
+Choosing the service will take you to the the service's page, in which you can view a list of `Namespaces` which are related to this service.  In this example the namespaces are:
+- `cincinnati-production`
+- `cincinnati-stage`
+
+Choose the namespace for which you would like to find the Console/Kibana URL. For this example, choose [cincinnati-stage](https://visual-app-interface.devshift.net/namespaces#/services/cincinnati/namespaces/cincinnati-stage.yml).
+
+Choosing the namespace will take you to the namespace's page, in which you can find a link to the cluster running this namespace.
+
+In the Cluster page, you can find links to the cluster's Console and to the cluster's Kibana. 
 
 ### Jenkins is going to shutdown
 
@@ -77,7 +96,7 @@ Choosing the namespace will take you to the namespace's page, in which you can v
 
 Choosing a role will take you to the Role's page, in which you can view a list of `Users` who have this role associated to them, and the namespace access granted through this role.  To finalize this example, choose the [dev](https://visual-app-interface.devshift.net/roles#/teams/telemeter/roles/dev.yml) role to see a list of users who has this role.
 
-The users in this page are granted a `view` permission in the `telemeter-production` namespace through the `dev` role..
+The users in this page are granted a `view` permission in the `telemeter-production` namespace through the `dev` role.
 
 ### How to determine my AWS permissions
 
@@ -89,3 +108,7 @@ For example:
 The role `/teams/devtools/roles/f8a-dev-osio-dev.yml` leads to the [corresponding role file](/data/teams/devtools/roles/f8a-dev-osio-dev.yml).
 This role file has the user policy `/aws/osio-dev/policies/OwnResourcesFullAccess.yml`, which leads to the [corresponding user policy file](/data/aws/osio-dev/policies/OwnResourcesFullAccess.yml).
 This user policy file a description, which explains the permissions allowed by this user policy.
+
+### Accessing DataHub
+
+DataHub is not managed by the AppSRE team, but you can find the process to request access here: https://help.datahub.redhat.com/docs/interacting-with-telemetry-data
