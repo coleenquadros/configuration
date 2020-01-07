@@ -240,9 +240,10 @@ quayRepos:
 - org:
     $ref: <quay org datafile (`/dependencies/quay-org-1.yml`), for example `/dependencies/quay/openshiftio.yml`>
   items:
-  - name: <name of the repo>
+  - name: <name of the repo, e.g. 'centos'>
     description: <description>
     public: <true | false>
+    mirror: (optional) <upstream repository to sync the Quay repo from, e.g. 'docker.io/centos'>
   - ...
 ```
 
