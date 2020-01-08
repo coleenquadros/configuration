@@ -1,0 +1,23 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: hive-int
+spec:
+  groups:
+  - name: hive-int
+    rules:
+    - alert: AWSAccountLimit - int
+      annotations:
+        message: "AWS Account Operator is about to reach account limit"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/hive/sop/AWSAccountLimit.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-stage"
+      expr: |
+        aws_account_operator_total_aws_accounts{job="hive-aws-account-operator-integration"} > 4900
+      labels:
+        severity: high
+        service: srep
