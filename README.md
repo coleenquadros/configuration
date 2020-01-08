@@ -164,6 +164,9 @@ wheel icon (top-right corner) and replace `omit` with `include` in
 - Management of OpenShift rolebindings
 - Management of Quay repos.
 - Management of Quay organisation members.
+- Management of Sentry users.
+- Management of Sentry teams.
+- Management of Sentry projects.
 - Management of openshift-acme deployments.
 - Management of OpenShift Namespaces.
 - Management of OpenShift Groups.
@@ -250,6 +253,66 @@ quayRepos:
 In order to add or remove a Quay repo, a MR must be sent to the appropriate App datafile and add the repo to the `items` array.
 
 **NOTE**: If the App or the relevant Quay org are not modelled in the App-Interface repository, please seek the assistance from the App-SRE team.
+
+### Create a Sentry Project for an onboarded App (`/app-sre/app-1.yml`)
+
+The structure of this parameter is the following:
+
+```yaml
+sentryProjects:
+- team:
+    $ref: <sentry team datafile (`/dependencies/sentry-team-1.yml`), for example `/dependencies/sentry/teams/app-sre-stage.yml`>
+  projects:
+  - name: <name of the project>
+    description: <description of the project>
+    email_prefix: <email prefix for emails about the project>
+    platform: <project language>
+    sensitive_fields:
+    -  <sensitive field for the project>
+       ...
+    safe_fields:
+    -  <safe field for the project>
+       ...
+    auto_resolve_age: <integer for auto resolving>
+    allowed_domains:
+    - <allowed domain for the project>
+      ...
+  - ...
+- ...
+```
+
+The name, description, email-prefix, and platform fields are required, whereas the other fields are optional.
+
+In order to add or remove a Sentry project, a MR must be sent to the appropriate App datafile and the project needs to be added to or remoted from the projects array.
+
+### Create a Sentry Team (`/dependencies/sentry-team-1.yml`)
+
+Sentry projects are associated to sentry teams, with only the members of the team able to view the issues of the associated projects.
+
+To define a sentry team create a file in /data/dependencies/sentry/teams with a structure like the following:
+
+```yaml
+---
+$schema: /dependencies/sentry-team-1.yml
+
+labels:
+  service: app-sre
+
+name: app-sre
+description: App-SRE official sentry-stage team
+instance: 
+  $ref: /dependencies/sentry/sentry-stage.yml
+```
+
+The instance is a reference to a sentry instance.  This is the sentry instance where the team will be created.
+
+### Manage Sentry team membership via App-Interface (`/access/role-1.yml`)
+
+Sentry users and team membership can be entirely self-serviced via App-Interface.
+
+In order to get access to Sentry, a user has to have:
+* A `role` that includes a `sentry_groups` section, with one or more references to sentry team file(s).
+    * Example: [sre](/data/teams/app-sre/roles/sre.yml) role.
 
 ### Manage Openshift resources via App-Interface (`/openshift/namespace-1.yml`)
 
