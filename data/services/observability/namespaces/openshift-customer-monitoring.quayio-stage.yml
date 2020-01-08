@@ -29,8 +29,35 @@ managedResourceTypes:
 - Secret
 - PrometheusRule
 - Route
+- Service
+- OperatorGroup
+- Subscription
+- Prometheus
 
 openshiftResources:
+# Prometheus operator
+- provider: resource-template
+  type: jinja2
+  path: /observability/prometheus/v4/app-sre.prometheus.yaml
+  variables:
+    clusterLabel: quayio-stage
+    environment: staging
+    externalUrl: https://prometheus.quayio-stage.devshift.net
+    version: v2.14.0
+    retention: 10d
+    pvSize: 50Gi
+    walCompression: false
+- provider: resource
+  path: /observability/prometheus/v4/openshift-customer-monitoring.operatorgroup.yaml
+- provider: resource
+  path: /observability/prometheus/v4/prometheus-app-sre.service.yaml
+- provider: resource
+  path: /observability/prometheus/v4/prometheus-operator.service.yml
+- provider: resource
+  path: /observability/prometheus/v4/prometheus-proxy.service.yaml
+- provider: resource
+  path: /observability/prometheus/v4/prometheus.subscription.yaml
+
 # Secrets
 ## Observability
 ### Prometheus additional alertmanager config
