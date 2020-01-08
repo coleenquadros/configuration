@@ -593,6 +593,7 @@ data:
           "cacheTimeout": null,
           "columns": [],
           "datasource": "$datasource",
+          "description": "Configured channel for clusters currently running the previous version.",
           "fontSize": "100%",
           "gridPos": {
             "h": 12,
@@ -634,7 +635,7 @@ data:
           ],
           "targets": [
             {
-              "expr": "count by (channel) (topk by (_id) (1, cluster_version_available_updates))",
+              "expr": "count by (channel) (\n  topk by (_id) (1, cluster_version_available_updates)\n  + on(_id) group_left(version)\n  topk by (_id, version) (1, 0 * cluster_version{type=\"current\",version=~\"$previous_version\"})\n)",
               "format": "table",
               "instant": true,
               "intervalFactor": 1,
