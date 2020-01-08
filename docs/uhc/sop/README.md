@@ -287,7 +287,7 @@ Controller manager is down.
 
   The OCM clusters service will automatically restart this leader election
   mechanism when it fails, after waiting a minute. But this will repeatedly
-  fail if communications are lost or if permissions aren't correct.
+  fail if communications are lost or if permissions arn't correct.
 
 - Check the communications between the between the cluster where the OCM
   services run (the `app-sre` or `app-sre-stage` cluster) and the cluster
@@ -297,14 +297,8 @@ Controller manager is down.
 - Check that the service account used by the OCM clusters service to talk
   to the _Hive_ and AWS account operator exists and has the required
   permissions. The complete _kubeconfig_ files containing the details
-  of these service accounts are stored in the `hive.kubeconfig` and
-  `aws_account_operator.kubeconfig` keys of the `clusters-service`
-  secret.
-  
-  Note:
-  Soon this will be changed - both hive and AWS account operator configs will be stored
-  in `external_cluster_services.config`. This file contains the complete _kubeconfig_ of
-  those services.
+  of these service accounts are stored in `external_cluster_services.config`.
+  This file contains the complete _kubeconfig_ of those services.
 
   The OCM clusters service needs full permissions on configuration maps
   and permissions to create events inside the `uhc-leaderhsip` namespace.
