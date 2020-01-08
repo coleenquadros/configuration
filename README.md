@@ -857,6 +857,36 @@ The Secret will contain the following fields:
 - `aws_access_key_id` - The access key ID.
 - `aws_secret_access_key` - The secret access key.
 
+#### Manage stacks of S3 bucket and CloudFront distribution via App-Interface (`/openshift/namespace-1.yml`)
+
+Stacks of an S3 bucket with a CloudFront distribution can be entirely self-serviced via App-Interface.
+
+In order to add or update an S3+CloudFront stack, you need to add them to the `terraformResources` field.
+
+- `provider`: must be `s3-cloudrfont`
+- `account`: must be one of the AWS account names we manage. Current options:
+  - `quayio-stage`
+  - `quayio-prod`
+- `identifier` - name of resource to create (or update)
+- `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options:](/resources/terraform/resources/)
+- `output_resource_name`: name of Kubernetes Secret to be created.
+  - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
+  - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
+    - For example, for a resource with `identifier` "my-s3-cf-stack" and `provider` "s3-cloudfront", the created Secret will be called `my-s3-cf-stack-s3-cloudfront`.
+
+Once the changes are merged, the resources will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
+
+The Secret will contain the following fields:
+- `bucket` - The name of the bucket.
+- `aws_region` - The name of the bucket's AWS region.
+- `endpoint` - The url of the region's S3 endpoint.
+- `aws_access_key_id` - The access key ID.
+- `aws_secret_access_key` - The secret access key.
+- `cloud_front_origin_access_identity_id` - The identifier for the distribution.
+- `s3_canonical_user_id` - The Amazon S3 canonical user ID for the origin access identity.
+- `distribution_domain` - The domain name corresponding to the distribution.
+- `origin_access_identity` - The origin access identity in the form of `origin-access-identity/cloudfront/<cloud_front_origin_access_identity_id>`.
+
 ### Manage Slack User groups via App-Interface
 
 Slack User groups can be self-services via App-Interface.
