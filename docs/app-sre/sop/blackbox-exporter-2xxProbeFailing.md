@@ -22,7 +22,7 @@ Prometheus blackbox exporter scrapes checking for a `2xx` response from a web UR
 - Get the labels from `probe_success` and list all other metrics
 - Find the metric that's failing the probe
 - For further troubleshooting, blackbox exporter logs the probes at its url, for example:
-    - https://blackbox-exporter-app-sre-exporters.1061.app-sre.openshiftapps.com/
+    - https://blackbox-exporter.devshift.net/
     - http://10.0.132.216:9115/ (CentralCI)
 
 ## Escalations

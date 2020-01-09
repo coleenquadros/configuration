@@ -20,7 +20,7 @@ This check ensures that a webpage is serving the expected content, beyond a regu
 - Get the labels from `probe_success` and list all other metrics
 - Find the metric that's failing the probe
 - For further troubleshooting, blackbox exporter logs the probes at its url, for example:
-    - https://blackbox-exporter-app-sre-exporters.1061.app-sre.openshiftapps.com/
+    - https://blackbox-exporter.devshift.net/
     - http://10.0.132.216:9115/ (CentralCI)
 
 ## Escalations
