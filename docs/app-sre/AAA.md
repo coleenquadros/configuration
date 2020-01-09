@@ -90,11 +90,11 @@ Every app-sre engineer should have access to the following
     - Issue tracker tracks incoming interrupt catching requests
   - https://gitlab.cee.redhat.com/app-sre
     - Access to all repositories is managed via this group
-    - Obtained via a [role](/data/teams/app-sre/roles/app-sre-gitlab-member.yml)
+    - Obtained via a [role](/data/teams/app-sre/roles/app-sre.yml)
 
 - Slack: coreos.slack.com
   - Private channels: sd-app-sre-teamchat -> speak to any team member to get an invitation
-  - User groups: @app-sre-team -> obtained via a [role](/data/teams/app-sre/roles/app-sre-slack.yml)
+  - User groups: @app-sre-team -> obtained via a [role](/data/teams/app-sre/roles/app-sre.yml)
   - Channels: as stated [here](/data/teams/app-sre/permissions/app-sre-team-coreos-slack.yml) -> obtained via the @app-sre-team user group membership
 
 - Internal IRC (irc.devel.redhat.com):
@@ -152,16 +152,16 @@ Every app-sre engineer should have access to the following
   - e-mail Jake Moshenko or ping on slack for access to quay github group
 
 - AWS
-  - Nothing to do. Access obtained via a [role](/data/teams/app-sre/roles/sre-aws.yml)
+  - Nothing to do. Access obtained via a [role](/data/teams/app-sre/roles/app-sre.yml)
 
 - Vault
-  - Access obtained via a [role](/data/teams/app-sre/roles/sre.yml)
+  - Access obtained via a [role](/data/teams/app-sre/roles/app-sre.yml)
     - [setup instructions](https://gitlab.cee.redhat.com/service/dev-guidelines/blob/master/vault.md)
 
 - Quay
   - Login to/Create account at https://quay.io
     - Can use github account for simplicity
-  - Access obtained via a [role](/data/teams/app-sre/roles/sre.yml)
+  - Access obtained via a [role](/data/teams/app-sre/roles/app-sre.yml)
   - Create `quay_username` in the [user file](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/teams/app-sre/users) and populate with quay user
 
 - Bugzilla
@@ -174,7 +174,7 @@ Every app-sre engineer should have access to the following
   - Once account is created login [here](https://zabbix.devshift.net:9443/zabbix/zabbix.php?action=dashboard.view)
 
 - Dedicated admin on openshift clusters
-  - Nothing to do. Obtained via a [role](data/teams/app-sre/roles/app-sre-dedicated-admins.yml)
+  - Nothing to do. Obtained via a [role](data/teams/app-sre/roles/app-sre.yml)
 
 - Pagerduty
   - ACCESS: Create a [SNOW ticket](https://redhat.service-now.com) to request access to PagerDuty and then reach out to [Bill Montgomery](mailto:bmontgom@redhat.com) with the ticket number

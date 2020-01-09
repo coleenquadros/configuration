@@ -312,7 +312,7 @@ Sentry users and team membership can be entirely self-serviced via App-Interface
 
 In order to get access to Sentry, a user has to have:
 * A `role` that includes a `sentry_groups` section, with one or more references to sentry team file(s).
-    * Example: [sre](/data/teams/app-sre/roles/sre.yml) role.
+    * Example: [sre](/data/teams/app-sre/roles/app-sre.yml) role.
 
 ### Manage Openshift resources via App-Interface (`/openshift/namespace-1.yml`)
 
@@ -683,7 +683,7 @@ In order to get access to an AWS account, a user has to have:
 * A public binary GPG key, which will be used to encrypt the generated password to send by mail.
 * A `role` that includes (at least) one of the following:
   * An `aws_groups` section, with a reference to an AWS group file.
-    * Example: [sre-aws](/data/teams/app-sre/roles/sre-aws.yml) role.
+    * Example: [sre-aws](/data/teams/app-sre/roles/app-sre.yml) role.
   * A `user_policies` section, with a reference to a policy json document.
     * Example: [f8a-dev-osio-dev.yml](/data/teams/devtools/roles/f8a-dev-osio-dev.yml)
     * Supported terraform-like templates (will be replaced with correct values at run time):
@@ -972,7 +972,7 @@ To manage a User group via App-Interface:
 
 Examples:
 * An example for the `app-sre-team` User group permission can be found [here](/data/teams/app-sre/permissions/app-sre-team-coreos-slack.yml)
-* An example for a role that has this permission can be found [here](/data/teams/app-sre/roles/app-sre-slack.yml)
+* An example for a role that has this permission can be found [here](/data/teams/app-sre/roles/app-sre.yml)
 * An example for the `app-sre-ic` User group permission which is also synced with a PagerDuty schedule can be found [here](/data/teams/app-sre/permissions/app-sre-ic-coreos-slack.yml)
 * An example for a PagerDuty schedule file can be found [here](/data/dependencies/pagerduty/app-sre-primary.yml).
 * An example for a PagerDuty escalation policy file can be found [here](/data/dependencies/pagerduty/app-sre-escalation-policy.yml).
@@ -1088,7 +1088,7 @@ To manage a GitLab group via App-Interface:
 
 Examples:
 * An example for the `app-sre` group permission can be found [here](/data/dependencies/gitlab/permissions/app-sre-member.yml)
-* An example for a role that has this permission can be found [here](/data/teams/app-sre/roles/app-sre-gitlab-member.yml)
+* An example for a role that has this permission can be found [here](/data/teams/app-sre/roles/app-sre.yml)
 
 Notes:
 * Creating new GitLab groups is not supported (GitLab group has to pre-exist).
