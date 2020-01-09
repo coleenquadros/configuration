@@ -10,6 +10,7 @@ rm -rf reports; mkdir -p reports
 # run reporter
 docker run --rm \
     -u $(id -u):$(id -g) \
+    -e XDG_CACHE_HOME=/var/tmp \
     -v $PWD/config.toml:/config.toml \
     -v $PWD/reports:/reports \
     $RECONCILE_IMAGE:$RECONCILE_IMAGE_TAG \
