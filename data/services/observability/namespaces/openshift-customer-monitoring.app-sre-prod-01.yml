@@ -13,10 +13,23 @@ app:
   $ref: /services/observability/app.yml
 
 managedResourceTypes:
+- Secret
 - Route
 - Service
 - Subscription
 - Prometheus
+
+managedResourceNames:
+# https://github.com/openshift/managed-cluster-config/blob/master/deploy/osd-customer-monitoring/05-role.yaml#L24-L37
+- resource: Secret
+  resourceNames:
+    - alertmanager-auth-proxy
+    - alertmanager-config
+    - alertmanager-main
+    - alertmanager-main-proxy
+    - prometheus-additional-alertmanager-config
+    - prometheus-additional-scrape-config
+    - prometheus-auth-proxy
 
 openshiftResources:
 # Prometheus operator
@@ -48,3 +61,21 @@ openshiftResources:
   variables:
     environment: ''
     host: prometheus.app-sre-prod-01.devshift.net
+
+# Secrets
+## Observability
+### Prometheus additional alertmanager config
+### Defines what alertmanager Prometheus fires alerts to
+- provider: vault-secret
+  path: app-interface/global/observability/prometheus-additional-alertmanager-config
+  version: 1
+# TODO: replace this
+### Prometheus additional scrape config
+### Defines any additional jobs that don't fit into the servicemonitor model
+- provider: vault-secret
+  path: app-interface/quayio-stage/openshift-customer-monitoring/prometheus-additional-scrape-config
+  version: 3
+### Prometheus oauth proxy configuration
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-observability-production/prometheus/prometheus-auth-proxy
+  version: 1
