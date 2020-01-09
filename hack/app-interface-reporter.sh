@@ -5,7 +5,7 @@ source ./.env
 echo "$CONFIG_TOML" | base64 -d > config.toml
 
 # clean reports
-mkdir -p reports; rm -rf reports
+rm -rf reports; mkdir -p reports
 
 # run reporter
 docker run --rm \
