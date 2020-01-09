@@ -5,11 +5,11 @@ source ./.env
 echo "$CONFIG_TOML" | base64 -d > config.toml
 
 # clean reports
-mkdir -p reports
-docker run --rm -v $PWD/reports:/reports busybox find /reports -mindepth 1 -delete
+mkdir -p reports; rm -rf reports
 
 # run reporter
 docker run --rm \
+    -u $(id -u):$(id -g) \
     -v $PWD/config.toml:/config.toml \
     -v $PWD/reports:/reports \
     $RECONCILE_IMAGE:$RECONCILE_IMAGE_TAG \
