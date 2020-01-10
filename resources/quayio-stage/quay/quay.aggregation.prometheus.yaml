@@ -1,0 +1,33 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  name: quay-aggregation
+spec:
+  baseImage: quay.io/prometheus/prometheus
+  externalLabels:
+    cluster: {{clusterLabel}}
+    environment: {{environment}}
+  replicas: 2
+  retention: {{retention}}
+  walCompression: {{walCompression}}
+  ruleSelector:
+    matchLabels:
+      prometheus: quay-aggregation
+  securityContext: {}
+  serviceAccountName: prometheus-k8s
+  serviceMonitorSelector:
+    matchLabels:
+      prometheus: quay-aggregation
+  storage:
+    volumeClaimTemplate:
+      apiVersion: v1
+      kind: PersistentVolumeClaim
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{pvSize}}
+        storageClassName: gp2
+  version: {{version}}

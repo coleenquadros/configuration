@@ -1,0 +1,21 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    prometheus: app-sre
+  name: quay-aggregation-federation-service-monitor
+spec:
+  endpoints:
+  - interval: 30s
+    path: /federate
+    port: metrics
+    params:
+      'match[]':
+      - '{exported_job=~"quay.*",__name__=~"aggregated:.*"}'
+  namespaceSelector:
+    matchNames:
+    - openshift-customer-monitoring
+  selector:
+    matchLabels:
+      quay-component: metrics-aggregation

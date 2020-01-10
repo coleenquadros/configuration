@@ -1,0 +1,22 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    prometheus: quay-aggregation
+  name: quay-aggregation-service-monitor
+spec:
+  endpoints:
+  - interval: 30s
+    path: /metrics
+    port: metrics
+    metricRelabelings:
+    - source_labels: [ __name__ ]
+      regex: '^(?!quay_request_duration_seconds).*'
+      action: drop
+  namespaceSelector:
+    matchNames:
+    - quayio-stage
+  selector:
+    matchLabels:
+      quay-component: app
