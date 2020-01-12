@@ -2,9 +2,9 @@
 $schema: /dependencies/jenkins-config-1.yml
 
 labels:
-  service: app-interface
+  service: app-sre
 
-name: ci-int-app-interface-jobs
+name: ci-int-app-sre-jobs
 
 description: ''
 
@@ -91,3 +91,23 @@ config:
         display_name: managed-tenants pr-check
     - 'gl-build-master-managed-tenants':
         display_name: managed-tenants build master
+
+- project:
+    name: cvexporter-saas
+    label: app-sre
+    node: app-sre
+    gl_group: service
+    gl_project: saas-cvexporter
+    saasherder_context: cvexporter
+    saasherder_services: cvexporter
+    image_pattern: '^quay\.io/app-sre/cvexporter'
+    quay_org: app-sre
+    kube_cluster: app-sre-stage-01                                              
+    kube_namespace: app-interface-stage                                         
+    jobs:
+    - 'saas-deploy':
+        saas_env: stage
+        display_name: cvexporter saas deploy
+    - 'saas-pr-check':
+        saas_env: stage
+        display_name: cvexporter saas pr check
