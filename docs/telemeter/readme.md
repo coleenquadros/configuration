@@ -6,7 +6,7 @@ In the context of OCP 4, telemeter is used to push cluster metrics to the 'infog
 
 More info here: https://github.com/openshift/telemeter/
 
-The observatorium project (telemeter v2) is the new generation telemetry system. It's [documentation andcan be found on github](https://github.com/observatorium/docs)
+Telemeter v2 motivaations and high-level design doc can be found [here](https://docs.google.com/document/d/1A9BUogtU3aNTV8hiTKbmn_kR-C2jSwo-07OyT3nm9bU). It is itself built on Observatorium, which is a general-purpose, scalable, multi-tenant, observability platform for ingesting and querying metrics and other observability signals. Its [documentation can be found on github](https://github.com/observatorium/docs)
 
 ![schema](telemeter.png)
 
