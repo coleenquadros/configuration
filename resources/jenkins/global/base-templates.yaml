@@ -327,7 +327,9 @@
         - git:
             url: 'https://github.com/{gh_org}/{gh_repo}.git'
             branches:
-                - '{branch}'
+            - '{branch}'
+            included-regions:
+            - '{include_path}'
 
     gh_build_master: &gh_build_master
         <<: *gh_triggers # these are different on ci.int and ci.ext
@@ -343,12 +345,14 @@
             skip-tag: true
             refspec: '+refs/pull/*:refs/remotes/origin/pr/*'
             branches:
-                - '${{ghprbActualCommit}}'
+            - '${{ghprbActualCommit}}'
             merge:
                 remote: origin
                 branch: master
             git-config-name: "AppSRE"
             git-config-email: "sd-app-sre@redhat.com"
+            included-regions:
+            - '{include_path}'
         triggers:
           - github-pull-request:
               cron: '* * * * *'
@@ -398,6 +402,8 @@
             shallow_clone: true
             branches:
             - '{branch}'
+            included-regions:
+            - '{include_path}'
 
     gl_build_master: &gl_build_master
         triggers:
@@ -432,6 +438,8 @@
             merge:
                 remote: 'origin'
                 branch: '${{gitlabTargetBranch}}'
+            included-regions:
+            - '{include_path}'
         triggers:
         - gitlab:
             trigger-push: true
