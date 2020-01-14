@@ -1,0 +1,69 @@
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineSet
+metadata:
+  labels:
+    machine.openshift.io/cluster-api-cluster: c1-gjlfl
+  name: c1-gjlfl-builder-worker-us-east-1d
+  namespace: openshift-machine-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      machine.openshift.io/cluster-api-cluster: c1-gjlfl
+      machine.openshift.io/cluster-api-machine-role: worker
+      machine.openshift.io/cluster-api-machine-type: worker
+      machine.openshift.io/cluster-api-machineset: c1-gjlfl-builder-worker-us-east-1d
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        machine.openshift.io/cluster-api-cluster: c1-gjlfl
+        machine.openshift.io/cluster-api-machine-role: worker
+        machine.openshift.io/cluster-api-machine-type: worker
+        machine.openshift.io/cluster-api-machineset: c1-gjlfl-builder-worker-us-east-1d
+    spec:
+      metadata:
+        creationTimestamp: null
+        labels:
+          node-role.kubernetes.io/worker: "builder"
+      providerSpec:
+        value:
+          userDataSecret:
+            name: worker-user-data
+          placement:
+            availabilityZone: us-east-1d
+            region: us-east-1
+          credentialsSecret:
+            name: aws-cloud-credentials
+          instanceType: m5.metal
+          metadata:
+            creationTimestamp: null
+          publicIp: null
+          blockDevices:
+            - ebs:
+                volumeSize: 5000
+                volumeType: gp2
+          securityGroups:
+            - filters:
+                - name: 'tag:Name'
+                  values:
+                    - c1-gjlfl-worker-sg
+          kind: AWSMachineProviderConfig
+          tags:
+            - name: kubernetes.io/cluster/c1-gjlfl
+              value: owned
+          deviceIndex: 0
+          ami:
+            id: ami-046fe691f52a953f9
+          subnet:
+            filters:
+              - name: 'tag:Name'
+                values:
+                  - c1-gjlfl-private-us-east-1d
+          apiVersion: awsproviderconfig.openshift.io/v1beta1
+          iamInstanceProfile:
+            id: c1-gjlfl-worker-profile
+
+
+# `oc get csr` shows you certificate requests
+# `oc adm certificate approve [name]` approves them

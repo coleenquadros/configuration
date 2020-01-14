@@ -1,0 +1,83 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: kubernetesrules
+  namespace: app-sre-observability
+spec:
+  groups:
+  - name: kubernetes.rules
+    rules:
+    - alert: KubeNodeUnschedulable
+      annotations:
+        message: Kubernetes node {{ $labels.node }} has been marked as unschedulable
+        runbook: runbook
+      expr: kube_node_spec_unschedulable > 0
+      interval: 5s
+      labels:
+        service: quay
+        severity: critical
+    - alert: KubePersistentVolumeFullInFourDays
+      annotations:
+        message: Based on recent sampling, the PersistentVolume claimed by {{ $labels.persistentvolumeclaim
+          }} in Namespace {{ $labels.namespace }} is expected to fill up within four
+          days. Currently {{ printf "%0.2f" $value }}% is available.
+      expr: 100 * (kubelet_volume_stats_available_bytes{job="kubelet"} / kubelet_volume_stats_capacity_bytes{job="kubelet"})
+        < 15 and predict_linear(kubelet_volume_stats_available_bytes{job="kubelet"}[6h],
+        4 * 24 * 3600) < 0
+      for: 5m
+      labels:
+        severity: medium
+        service: quay
+    - alert: QuayBuilderJobsRunning
+      annotations:
+        message: "Builder jobs running: {{ $value }}"
+      expr: sum(kube_pod_status_phase{namespace="builder", phase="Running"})
+      interval: 5m
+      labels:
+        service: quay
+        severity: info
+    - alert: QuayBuilderJobsPending
+      annotations:
+        message: "Builder jobs pending: {{ $value }}"
+      expr: sum(kube_pod_status_phase{namespace="builder", phase="Pending"})
+      interval: 5m
+      labels:
+        service: quay
+        severity: info
+    - alert: QuayBuilderJobsPendingHighSev
+      annotations:
+        message: "Builder jobs pending: {{ $value }}"
+      expr: sum(kube_pod_status_phase{namespace="builder", phase="Pending"}) > 40
+      interval: 5m
+      labels:
+        service: quay
+        severity: high
+    - alert: QuayBuilderNodeMemoryUtilization
+      annotations:
+        message: "Builder Node Memory Utilisation: {{ printf \"%0.2f\" $value }}%"
+      expr: node:node_memory_utilisation:ratio{node="ip-10-0-140-20.ec2.internal"} * 100
+      interval: 5m
+      labels:
+        service: quay
+        severity: info
+    - alert: QuayBuilderNodeCpuUtilisation
+      annotations:
+        message: "Builder Node CPU Utilisation: {{ printf \"%0.2f\" $value }}%"
+      expr: instance:node_cpu:ratio{instance="10.0.140.20:9100"} * 100
+      interval: 5m
+      labels:
+        service: quay
+        severity: info
+    - alert: ClusterUpgradeAvailable
+      annotations:
+        message: "An update is available for the cluster."
+      expr: cluster_version_available_updates > 0
+      interval: 24h
+      labels:
+        service: quay
+        severity: medium
+
+
