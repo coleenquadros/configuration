@@ -30,7 +30,7 @@ Base domain must be managed in the same AWS account where OpenShift cluster will
 
 ### SSH Key
 
-For production OpenShift Container Platform clusters on which you want to perform installation debugging or disaster recovery, you must provide an SSH key that your `ssh-agent` process uses to the installer. You can use this key to SSH into the master nodes as the user core. When you deploy the cluster, the key is added to the core user’s `~/.ssh/authorized_keys` list.
+For production OpenShift Container Platform clusters on which you want to perform installation debugging or disaster recovery, you must provide an SSH key that your `ssh-agent` process uses to the installer. You can use this key to SSH into the master nodes as the user `core`. When you deploy the cluster, the key is added to the `core` user’s `~/.ssh/authorized_keys` list.
 
 SSH key used for current cluster can be found in [Vault](https://vault.devshift.net/ui/vault/secrets/quay/show/quay-builder/ssh-key).
 
@@ -174,7 +174,7 @@ openssl req -new -newkey rsa:2048 -nodes \
  -subj "/C=US/ST=North Carolina/L=Raleigh/O=Red Hat, Inc./OU=Service Delivery - APP SRE/CN=*.apps.c1.ocp4-builder.quay.io"
 ```
 
-Request a wildcard certificate from Digicert with 2 year validity. In your request, you should include all the subject alt names for the certificate. A cluster with base domain `subdomain.example.com` must have following subject alt names in the certificate request:
+Request a wildcard certificate from [DigiCert](https://www.digicert.com/) with 2 year validity. In your request, you should include all the subject alt names for the certificate. A cluster with base domain `subdomain.example.com` must have following subject alt names in the certificate request:
 
 - `*.cluster-name.subdomain.example.com`
 - `*.apps.cluster-name.subdomain.example.com`
