@@ -80,6 +80,7 @@ graph TD
 
   H["Quay"];
   I["PagerDuty"];
+  J["Grafana"];
 
   A --> C;
   A --> E;
@@ -90,4 +91,5 @@ graph TD
   F --> H;
   G --> H;
   C --> I;
+  A --> J;
 ```
