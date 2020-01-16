@@ -176,7 +176,7 @@ Every app-sre engineer should have access to the following
   - Nothing to do. Obtained via a [role](data/teams/app-sre/roles/app-sre.yml)
 
 - Pagerduty
-  - ACCESS: Create a [SNOW ticket](https://redhat.service-now.com) to request access to PagerDuty and then reach out to [Bill Montgomery](mailto:bmontgom@redhat.com) with the ticket number
+  - ACCESS: Create a [SNOW ticket](https://redhat.service-now.com/help?id=sc_cat_item&sys_id=200813d513e3f600dce03ff18144b0fd) to request access to PagerDuty and then reach out to [Bill Montgomery](mailto:bmontgom@redhat.com) with the ticket number
 
 - App-sre shared folder
   - ACCESS: Reach out to [Paul Bargene](mailto:pbergene@redhat.com)
