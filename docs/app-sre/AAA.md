@@ -182,7 +182,7 @@ Every app-sre engineer should have access to the following
   - ACCESS: Reach out to [Paul Bargene](mailto:pbergene@redhat.com)
 
 - App SRE infrastructure managed by ansible
-  - Access is managed by adding ssh keys to the [admin-list](https://gitlab.cee.redhat.com/dtsd/housekeeping/blob/master/ansible/hosts/group_vars/all#L4) and applying the `baseline` role to all hosts.
+  - Access is managed by adding ssh keys to the [admin-list](https://gitlab.cee.redhat.com/dtsd/housekeeping/blob/master/ansible/hosts/group_vars/all#L4) and applying the `baseline` role to all hosts. It is recommended that ssh key is RSA, 4096-sized and password-protected as those are the [requirements for Tier 1 Bastion keys](https://mojo.redhat.com/docs/DOC-1144200#jive_content_id_Tier_1)
 
 - OpenStack Project infrastructure
   - We have our ci-int infrastructure deployed [here](https://rhos-d.infra.prod.upshift.rdu2.redhat.com/dashboard/project)
