@@ -118,7 +118,7 @@ run_int quay-membership &
 run_int quay-mirror &
 run_int quay-repos &
 run_vault_reconcile_integration &
-#run_int ocm-groups &
+run_int ocm-groups &
 run_int openshift-groups &
 run_int openshift-users &
 run_int jenkins-plugins &
