@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Required environment variables:
+# - AWS_ACCESS_KEY_ID
+# - AWS_SECRET_ACCESS_KEY
+# - AWS_REGION
+# - AWS_S3_BUCKET
+# - AWS_S3_KEY
+
 set -exvo pipefail
 
 CURRENT_DIR=$(dirname "$0")
