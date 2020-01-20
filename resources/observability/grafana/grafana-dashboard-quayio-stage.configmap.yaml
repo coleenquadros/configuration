@@ -1,8 +1,8 @@
-apiVersion: v1
 kind: ConfigMap
+apiVersion: v1
 metadata:
-    creationTimestamp: null
-    name: grafana-dashboard-quayio-stage
+  creationTimestamp: null
+  name: quayio-stage
 data:
   quayio-stage.json: |-
     {
@@ -23,6 +23,7 @@ data:
       "gnetId": null,
       "graphTooltip": 0,
       "id": 1,
+      "iteration": 1579550690089,
       "links": [],
       "panels": [
         {
@@ -31,11 +32,11 @@ data:
           "cacheTimeout": null,
           "dashLength": 10,
           "dashes": false,
-          "datasource": null,
+          "datasource": "quayio-stage-prometheus",
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
-            "h": 5,
+            "h": 6,
             "w": 12,
             "x": 0,
             "y": 0
@@ -69,10 +70,10 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "max(irate(process_cpu_seconds_total[5m]) * 100) by (process_name)",
+              "expr": "sum(rate(process_cpu_seconds_total[$rate])) by (pod) * 100",
               "format": "time_series",
               "instant": false,
-              "legendFormat": "{{process_name}}",
+              "legendFormat": "{{pod}}",
               "refId": "A"
             }
           ],
@@ -122,11 +123,11 @@ data:
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": null,
+          "datasource": "quayio-stage-prometheus",
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
-            "h": 5,
+            "h": 6,
             "w": 12,
             "x": 12,
             "y": 0
@@ -167,7 +168,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Memory Usage",
+          "title": "Max Memory Usage",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -209,14 +210,14 @@ data:
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": null,
+          "datasource": "quayio-stage-prometheus",
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
-            "h": 5,
+            "h": 6,
             "w": 12,
             "x": 0,
-            "y": 5
+            "y": 6
           },
           "hiddenSeries": false,
           "id": 18,
@@ -245,8 +246,8 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, max(rate(quay_request_duration_seconds_bucket[5m])) by (le, endpoint, method))",
-              "legendFormat": "{{method}} {{endpoint}}",
+              "expr": "histogram_quantile(0.95, aggregation:quay_request_duration_seconds_bucket:rate5m:sum)",
+              "legendFormat": "{{method}} {{route}} {{status}}",
               "refId": "A"
             }
           ],
@@ -299,14 +300,14 @@ data:
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": null,
+          "datasource": "quayio-stage-prometheus",
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
-            "h": 5,
+            "h": 6,
             "w": 12,
             "x": 12,
-            "y": 5
+            "y": 6
           },
           "hiddenSeries": false,
           "id": 2,
@@ -335,7 +336,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, max(rate(greenlet_duration_seconds_bucket[5m])) by (le, process_name))",
+              "expr": "histogram_quantile(0.95, max(rate(greenlet_duration_seconds_bucket[$rate])) by (le, process_name))",
               "hide": false,
               "instant": false,
               "legendFormat": "{{process_name}}",
@@ -385,17 +386,194 @@ data:
         },
         {
           "aliasColors": {},
-          "bars": true,
+          "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": null,
+          "datasource": "quayio-stage-prometheus",
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
-            "h": 5,
+            "h": 6,
             "w": 12,
             "x": 0,
-            "y": 10
+            "y": 12
+          },
+          "hiddenSeries": false,
+          "id": 22,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": false,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(quay_authentication_attempts_total[$rate]))",
+              "legendFormat": "auth attempts",
+              "refId": "A"
+            },
+            {
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Authentication",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "quayio-stage-prometheus",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 12
+          },
+          "hiddenSeries": false,
+          "id": 16,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": false,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "rate(pushgateway_http_push_duration_seconds_sum[$rate]) / rate(pushgateway_http_push_duration_seconds_count[5m])",
+              "legendFormat": "{{instance}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "PushGateway Push Duration",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "s",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": true,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "quayio-stage-prometheus",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 18
           },
           "hiddenSeries": false,
           "id": 20,
@@ -424,18 +602,18 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "max(quay_queue_items_available_unlocked) by (queue_name)",
-              "legendFormat": "available unlocked {{queue_name}}",
+              "expr": "max(quay_queue_items_available_unlocked{queue_name=\"dockerfilebuildstaging\"})",
+              "legendFormat": "available unlocked",
               "refId": "A"
             },
             {
-              "expr": "max(quay_queue_items_available) by (queue_name)",
-              "legendFormat": "available locked {{queue_name}}",
+              "expr": "max(quay_queue_items_available{queue_name=\"dockerfilebuildstaging\"})",
+              "legendFormat": "available locked",
               "refId": "B"
             },
             {
-              "expr": "max(quay_queue_items_locked) by (queue_name)",
-              "legendFormat": "locked {{queue_name}}",
+              "expr": "max(quay_queue_items_locked{queue_name=\"dockerfilebuildstaging\"})",
+              "legendFormat": "locked",
               "refId": "C"
             }
           ],
@@ -443,7 +621,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Queue Availability",
+          "title": "Build Queue",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -486,14 +664,14 @@ data:
           "cacheTimeout": null,
           "dashLength": 10,
           "dashes": false,
-          "datasource": null,
+          "datasource": "quayio-stage-prometheus",
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 10
+            "y": 18
           },
           "hiddenSeries": false,
           "id": 12,
@@ -524,21 +702,21 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "ceil(sum(rate(quay_queue_item_gets_total[1m])) by (queue_name))",
+              "expr": "ceil(sum(rate(quay_queue_item_gets_total[$rate])) by (queue_name))",
               "hide": false,
               "instant": false,
               "legendFormat": "gets {{queue_name}}",
               "refId": "B"
             },
             {
-              "expr": "ceil(sum(rate(quay_queue_item_deletes_total[1m])) by (queue_name))",
+              "expr": "ceil(sum(rate(quay_queue_item_deletes_total[$rate])) by (queue_name))",
               "hide": false,
               "instant": false,
               "legendFormat": "deletes {{queue_name}}",
               "refId": "C"
             },
             {
-              "expr": "ceil(sum(rate(quay_queue_item_puts_total[1m])) by (queue_name))",
+              "expr": "ceil(sum(rate(quay_queue_item_puts_total[$rate])) by (queue_name))",
               "legendFormat": "puts {{queue_name}}",
               "refId": "A"
             }
@@ -586,100 +764,13 @@ data:
           }
         },
         {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": null,
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 6,
-            "w": 12,
-            "x": 0,
-            "y": 15
-          },
-          "hiddenSeries": false,
-          "id": 16,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": false,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "dataLinks": []
-          },
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "rate(pushgateway_http_push_duration_seconds_sum[5m]) / rate(pushgateway_http_push_duration_seconds_count[5m])",
-              "legendFormat": "{{instance}}",
-              "refId": "A"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "PushGateway Push Duration",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "s",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
           "cacheTimeout": null,
-          "datasource": null,
+          "datasource": "quayio-stage-prometheus",
           "gridPos": {
             "h": 4,
             "w": 12,
-            "x": 12,
-            "y": 16
+            "x": 0,
+            "y": 24
           },
           "id": 14,
           "links": [],
@@ -765,14 +856,14 @@ data:
           "cacheTimeout": null,
           "dashLength": 10,
           "dashes": false,
-          "datasource": null,
+          "datasource": "quayio-stage-prometheus",
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
             "h": 4,
             "w": 12,
-            "x": 0,
-            "y": 21
+            "x": 12,
+            "y": 24
           },
           "hiddenSeries": false,
           "id": 10,
@@ -818,7 +909,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Open File Descriptors",
+          "title": "Max Open File Descriptors",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -860,10 +951,80 @@ data:
       "style": "dark",
       "tags": [],
       "templating": {
-        "list": []
+        "list": [
+          {
+            "auto": false,
+            "auto_count": 30,
+            "auto_min": "10s",
+            "current": {
+              "selected": false,
+              "text": "1m",
+              "value": "1m"
+            },
+            "hide": 0,
+            "label": "",
+            "name": "rate",
+            "options": [
+              {
+                "selected": true,
+                "text": "1m",
+                "value": "1m"
+              },
+              {
+                "selected": false,
+                "text": "10m",
+                "value": "10m"
+              },
+              {
+                "selected": false,
+                "text": "30m",
+                "value": "30m"
+              },
+              {
+                "selected": false,
+                "text": "1h",
+                "value": "1h"
+              },
+              {
+                "selected": false,
+                "text": "6h",
+                "value": "6h"
+              },
+              {
+                "selected": false,
+                "text": "12h",
+                "value": "12h"
+              },
+              {
+                "selected": false,
+                "text": "1d",
+                "value": "1d"
+              },
+              {
+                "selected": false,
+                "text": "7d",
+                "value": "7d"
+              },
+              {
+                "selected": false,
+                "text": "14d",
+                "value": "14d"
+              },
+              {
+                "selected": false,
+                "text": "30d",
+                "value": "30d"
+              }
+            ],
+            "query": "1m,10m,30m,1h,6h,12h,1d,7d,14d,30d",
+            "refresh": 2,
+            "skipUrlSync": false,
+            "type": "interval"
+          }
+        ]
       },
       "time": {
-        "from": "now-30m",
+        "from": "now-15m",
         "to": "now"
       },
       "timepicker": {
@@ -881,7 +1042,7 @@ data:
         ]
       },
       "timezone": "",
-      "title": "Quay Runtime",
+      "title": "Quay.io Stage Runtime",
       "uid": "_BkydJaWz",
-      "version": 13
+      "version": 8
     }
