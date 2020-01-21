@@ -139,9 +139,9 @@ run_int openshift-limitranges &
 run_int terraform-resources &
 run_int terraform-users &
 run_int ldap-users $APP_INTERFACE_PROJECT_ID &
-run_int sentry-config &
-# Run slack-usergroups only if MR title has the word slack in it
+# Conditionally run integrations according to MR title
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"slack"* ]] && run_int slack-usergroups &
+[[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"sentry"* ]] && run_int sentry-config &
 # Add STATE=true to integrations that interact with a state
 STATE=true run_int email-sender &
 
