@@ -32,6 +32,7 @@ managedResourceTypes:
 - Service
 - Subscription
 - Prometheus
+- Service
 
 openshiftResources:
 # Prometheus operator
@@ -76,12 +77,36 @@ openshiftResources:
 # ServiceMonitor
 ## Quay
 - provider: resource
-  path: /quayio-prod-us-east-1/quay/quay.servicemonitor.yml
+  path: /quayio-prod-us-east-1/quay/quay.app-sre.servicemonitor.yaml
+- provider: resource
+  path: /quayio-prod-us-east-1/quay/quay.aggregation.servicemonitor.yaml
+- provider: resource
+  path: /quayio-prod-us-east-1/quay/quay.aggregation.federation.servicemonitor.yaml
 
 # PrometheusRule
 ## Quayio
 - provider: resource
-  path: /quayio-prod-us-east-1/quay/quay.prometheusrules.yaml
+  path: /quayio-prod-us-east-1/quay/quay.alerts.prometheusrules.yaml
+- provider: resource
+  path: /quayio-prod-us-east-1/quay/quay.aggregation.prometheusrules.yaml
+
+# Prometheus
+## Quay Aggregation Prometheus
+- provider: resource-template
+  type: jinja2
+  path: /quayio-prod-us-east-1/quay/quay.aggregation.prometheus.yaml
+  variables:
+    version: v2.14.0
+    retention: 30m
+    tempfsSize: 10Gi
+    walCompression: true
+
+# Service
+## Quay Aggregation Prometheus
+- provider: resource
+  path: /quayio-stage/quay/quay.aggregation.service.yaml
+
+
 ### Prometheus Deadmanssnitch
 - provider: resource
   path: /observability/prometheusrules/deadmanssnitch.prometheusrules.yaml

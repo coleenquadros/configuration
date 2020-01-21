@@ -1,0 +1,25 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  name: quay-aggregation
+  labels:
+    quay-component: metrics-aggregation
+spec:
+  baseImage: quay.io/prometheus/prometheus
+  replicas: 2
+  retention: {{retention}}
+  walCompression: {{walCompression}}
+  ruleSelector:
+    matchLabels:
+      prometheus: quay-aggregation
+  securityContext: {}
+  serviceAccountName: prometheus-k8s
+  serviceMonitorSelector:
+    matchLabels:
+      prometheus: quay-aggregation
+  storage:
+    emptyDir:
+      medium: Memory
+      sizeLimit: {{tempfsSize}}
+  version: {{version}}
