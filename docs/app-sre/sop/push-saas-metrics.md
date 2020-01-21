@@ -1,6 +1,7 @@
 # Push Saas Metrics
 
 Jenkins job: https://ci-int-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/job/push-saas-metrics/
+Repo: https://github.com/app-sre/push-saas-metrics.git
 
 ## Fixing Cache corruption
 
@@ -21,7 +22,6 @@ $ git rev-list 15483d1631fc3650c0675899db93a961d016ffdc..818e3331ca4456cc81934db
 If the above command works, it is indeed a cache corruption issue.
 
 In order to fix this, first manually disable the project in Jenkins and cancel any running jobs. Then ssh into the Jenkins slave that is running the job, and delete the specific cache folder (with sudo). For example:
-
 
 ```
 $ ssh ci-int-jenkins-slave-05-app-sre
