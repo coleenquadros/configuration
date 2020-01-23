@@ -10,18 +10,18 @@ https://statuspage.io
 
 Credentials: https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/status.redhat.com
 
-# New Relic Synthetic tests
+# New Relic tests
 
-NR Synthetic tests allow us to automatically display incidents in the status page by configuring periodic checks on the services we run.
+NR tests allow us to automatically display incidents in the status page by configuring periodic checks on the services we run.
 
 ## Login to New Relic
 
 Direct login page:
 https://synthetics.newrelic.com/accounts/2409290/monitors
 
-You need to request an account from Jared Sprague <jsprague@redhat.com> to access it.
-
 Ensure your account is part of the `RH Cloud Platform Prod` account.
+
+JF and Jaime currently have admin on the project so access can be requested through them.
 
 ## Adding a Monitor
 
