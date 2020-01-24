@@ -312,7 +312,7 @@ Sentry users and team membership can be entirely self-serviced via App-Interface
 
 In order to get access to Sentry, a user has to have:
 * A `role` that includes a `sentry_teams` section, with one or more references to sentry team file(s).
-    * Example: [sre](/data/teams/app-sre/roles/app-sre.yml) role.
+    * Example: [dev](/data/teams/sd-uhc/roles/dev.yml) role.
 
 ### Manage Openshift resources via App-Interface (`/openshift/namespace-1.yml`)
 
