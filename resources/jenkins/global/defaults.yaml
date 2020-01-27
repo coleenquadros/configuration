@@ -54,3 +54,24 @@
     success_note_url_path: '{success_note_url_path}'
     failure_note_url_path: '{failure_note_url_path}'
     unstable_note_url_path: '{unstable_note_url_path}'
+
+#### Macros
+
+# The 'retry' macro takes a 'cmd' parameter and will
+# run that command 'n' times or until it is successful
+# 'n' defaults to 5
+- builder:
+    name: retry
+    builders:
+     - shell: |
+        attempt=1
+        max_attempts={n}
+        while [ $attempt -le $max_attempts ]; do
+            {cmd} && break
+            if [ $attempt -lt $max_attempts ]; then
+                sleep $attempt
+                attempt=$[$attempt+1]
+            else
+                exit 1
+            fi
+        done
