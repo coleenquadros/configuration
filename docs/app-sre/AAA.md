@@ -376,7 +376,7 @@ This incident has now been resolved and the service functionality has been resto
 
 - OSD SRE
     - #libra-ops on irc.devel.redhat.com - Shift lead and on-call listed in /topic
-    - #sd-osd-sre on slack.coreos.org
+    - #sd-sre-platform on slack.coreos.org
     - Openshift SRE Servicenow direct form: https://url.corp.redhat.com/OpenShift-SRE-Service-Request-Form
 
 - BLR infrastructure -> PnT Devops irc -> Mattermost: sureshn, snandago@redhat.com -> PnT Devops
