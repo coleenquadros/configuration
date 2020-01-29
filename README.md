@@ -1009,8 +1009,9 @@ Examples:
 
 All JJB configurations rely on a set of JJB entities for the corresponding Jenkins intance:
 - `global` - [resources](/resources/jenkins/common/)
-- `ci-int` - [object](/data/services/jenkins/cicd/ci-int/), [resources](/resources/jenkins/common/ci-int/)
-- `ci-ext` - [object](/data/services/jenkins/cicd/ci-ext/), [resources](/resources/jenkins/common/ci-ext/)
+- `ci-int` - [object](/data/services/jenkins/cicd/ci-int/), [resources](/resources/jenkins/ci-int/)
+- `ci-ext` - [object](/data/services/jenkins/cicd/ci-ext/), [resources](/resources/jenkins/ci-ext/)
+- `ci-centos` - [object](/data/services/jenkins/cicd/ci-centos/), [resources](/resources/jenkins/ci-centos/)
 
 The final JJB configrations will be sorted in the following order:
 - `defaults`
