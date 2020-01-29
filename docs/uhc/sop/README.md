@@ -1,8 +1,9 @@
-# SOP : UHC
+# SOP : UHC / AMS / OCM
 
 <!-- TOC depthTo:2 -->
 
 - [SOP : UHC](#sop--uhc)
+    - [Things to verify is Hive is not working](#things-to-verify-if-hive-is-not-working)  
     - [AccountManagerDown](#account-manager-down)
     - [UHCAccountManager5xxErrorsHigh](#account-manager-5xx)
     - [UHCAccountManager4xxErrorsHigh](#account-manager-4xx)
@@ -12,6 +13,55 @@
 <!-- /TOC -->
 
 ---
+
+## Things to verify if hive is not working
+
+Below is a list of things to verify in case Hive is misbehaving or not working
+
+### ServiceAccounts
+
+OCM uses serviceaccounts to communicate with the hive clusters. These serviceaccounts may get rotated for some reasons (olm bug, etc) and so they have to be updated
+
+The secret `external_cluster_services.config` (https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre-stage/uhc-stage/clusters-service) must contain a valid kubeconfig as well as serviceaccount token matching the ones on the cluster
+
+- aws-account-operator (for AWS account creation)
+- hive-frontend (for frontend communication)
+
+### hive-admission
+
+hive-admission uses the API to create ClusterProvision objects. Sometimes the hive-admission ServiceAccount token is rotated and the pods don't pick up the new token automatically. Deleting the pods will ensure they are re-created with the proper token mount
+
+`oc -n hive delete pods -l app=hiveadmission --grace-period=0 --force`
+
+### hive-operator CSV
+
+hive-operator CSV may get in a bad (Pending) state. This is due to an OLM bug. The following are observed:
+- hive-operator deployment is absent
+- hive-operator pods are gone
+- hive-operator serviceaccount is absent
+
+The above indicate that we have likely hit a known bug in OLM / kube GC. The workaround is to get a copy of the Subscription and then delete the CSV and re-create the Subscription 
+
+```
+# Observe current state
+oc -n hive get subscription,installplan,csv
+
+# Get copy of subscription
+oc -n hive get subscription hive-operator -oyaml --export > /tmp/hive-operator.subscription.yaml
+
+# Delete csv and subscription
+oc -n hive delete csv hive-operator.vx.y.z-sha
+oc -n hive delete subscription hive-operator
+
+# Observe subscription, csv and installplans have been deleted
+oc -n hive get subscription,installplan,csv
+
+# Re-create subscription
+oc -n hive create -f /tmp/hive-operator.subscription.yaml
+
+# Observe subscription, csv and installplans have been re-created. Deployment and pods should also be created
+oc -n hive get subscription,installplan,csv,deployment,pods
+```
 
 ## Account Manager Down
 
