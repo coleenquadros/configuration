@@ -3051,6 +3051,28 @@
                       vault-key: 'email'
     <<: *saas_prcheck_rhche_template
 
+- job-template:
+    name: '{ci_project}-{git_repo}-build-push-woopra-telemetry-image'
+    scm:
+        - git-scm:
+            git_url: https://{github_user}@github.com/{git_organization}/{git_repo}.git
+            git_basedir: '{git_repo}'
+        - git:
+            url: https://github.com/redhat-developer/rh-che/
+            shallow_clone: true
+            branches:
+                - master
+            basedir: rhche
+    wrappers:
+        - vault-secrets:
+            <<: *vault_defaults
+            secrets:
+                - secret-path: 'devtools-osio-ci/rh-che-compatibility-github-push-token'
+                  secret-values:
+                    - env-var: 'GITHUB_PASSWORD'
+                      vault-key: 'PASSWORD'
+                    - env-var: 'GITHUB_USERNAME'
+                      vault-key: 'TOKEN'
 
 - project:
     name: devtools
@@ -4965,3 +4987,8 @@
             ci_cmd: '/bin/bash build_deploy.sh'
             saas_git: saas-openshiftio
             svc_name: che-monitoring
+        - '{ci_project}-{git_repo}-build-master':
+            git_organization: redhat-developer
+            git_repo: che-workspace-telemetry-woopra-backend
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash cico_build_ci.sh
