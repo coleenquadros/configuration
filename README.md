@@ -163,6 +163,7 @@ wheel icon (top-right corner) and replace `omit` with `include` in
   - OpenShift.io Feature Toggles
 - Management of OpenShift rolebindings
 - Management of Quay repos.
+- Management of Quay mirrors.
 - Management of Quay organisation members.
 - Management of Sentry users.
 - Management of Sentry teams.
@@ -189,8 +190,7 @@ wheel icon (top-right corner) and replace `omit` with `include` in
 - Management of GitLab groups.
 - Creation of GitLab projects.
 - Deletion of OpenShift users.
-
-* A dependency matrix between the integrations can be found [here](/integrations_dependencies.md).
+- Management of notification e-mails.
 
 ### Planned integrations
 
