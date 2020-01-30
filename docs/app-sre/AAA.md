@@ -299,7 +299,7 @@ During the incident:
 
 Post incident comms, followups:
 
-- After the incident has been confirmed as resolved, send an emails indicating that the incident has been resolved / mitigated
+- After the incident has been confirmed as resolved, send an email indicating that the incident has been resolved / mitigated
 - Create issues from the action items on the respective team JIRA boards, link them back to the incident tracker
 
 Post RCA comms, followups:
