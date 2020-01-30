@@ -119,6 +119,7 @@ Every app-sre engineer should have access to the following
   - Recommended to sort into folders
   - https://post-office.corp.redhat.com/mailman/listinfo is the mailing list central
     - ACCESS: sd-app-sre -> speak to @jake, @jonathan beakley or @paul on slack
+    - ACCESS: sd-notifications -> subscribe from UI
     - ACCESS: sd-org -> subscribe from UI
     - ACCESS: sres -> subscribe from UI
     - ACCESS: devtools-saas -> subscribe from UI
@@ -253,11 +254,9 @@ If any of the following is true, the event is an incident:
 - Do you need to involve a second team in fixing the problem?
 - Does the outage result in breach of Service SLO's?
 
-Incident Response:
-
 Tracking:
 
-- Start off by creating a JIRA issue for the incident on the [Sprint board](https://issues.redhat.com/secure/RapidBoard.jspa?rapidView=5536)
+- Start off by creating a JIRA issue for the incident on the [Incident board](https://issues.redhat.com/secure/RapidBoard.jspa?rapidView=5146)
   - Issue type: `Task`
   - Labels: `type/incident`
 
@@ -269,17 +268,18 @@ Tracking:
 
 Initiate incident communications:
 
-> It is crucial to involve all the stakeholders on the initial email communications. When in doubt, include a wider audience rather than a narrow list
+- Send message to the #sd-org slack channel. Keep it updated with the incident progress.
+- If deemed appropriate, a new channel can be created in slack: #incident-app-sre-<JIRAID>. This channel should be linked from #sd-org.
+- Send email to:
+  - [serviceOwners](https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/app-sre/app-1.yml)
+  - [serviceNotifications](https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/app-sre/app-1.yml)
+  - sd-notifications@redhat.com
+  - sd-org@redhat.com (major outage)
 
-- Send an email to the service owners and in case of major outage, send an email to the sd-org@redhat.com mailing list
-
-Please use the following Email template for consistency:
-
-Subject: `<YYYY-MM-DD> Incident: <ServiceName> <Optional highlights>`
-
-Body:
+Email template:
 
 ```text
+Subject: `<YYYY-MM-DD> Incident: <ServiceName> <Optional highlights>`
 
 Hello team,
 
@@ -289,31 +289,22 @@ Impacted users: <Internal/External>
 
 App-SRE tracking JIRA: <Link for JIRA ticket created above>
 
-A live RCA is available at: <Google Doc link>
-
-We will provide updates via this email thread as the incident progresses.
-
+We will provide updates in the #sd-org slack channel as the incident progresses.
 ```
 
 During the incident:
 
-
 - Join the [App-SRE Bluejeans Bridge](https://bluejeans.com/994349364/8531)
   - If the incident investigation needs assistance from the developer teams, also send them the link and ask to join in
 
-
-
 Post incident comms, followups:
 
-- After the incident has been confirmed as resolved, send an email to the original mail thread with the content:
-
-```text
-This incident has now been resolved and the service functionality has been restored. We will send out a detailed RCA once we've finished the post-incident documentation.
-```
-
+- After the incident has been confirmed as resolved, send an emails indicating that the incident has been resolved / mitigated
 - Create issues from the action items on the respective team JIRA boards, link them back to the incident tracker
-- Send a PDF snapshot of the completed RCA to the mail thread
 
+Post RCA comms, followups:
+
+- After the RCA is finished, post a link to it in #sd-org, and emails to the `serviceOwners` (and to `sd-org` in case of a major outage).
 
 ## 1.7. Standard operating procedures
 
