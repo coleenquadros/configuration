@@ -191,6 +191,7 @@ wheel icon (top-right corner) and replace `omit` with `include` in
 - Creation of GitLab projects.
 - Deletion of OpenShift users.
 - Management of notification e-mails.
+- Management of SQL Queries.
 
 ### Planned integrations
 
@@ -1120,6 +1121,122 @@ To get access to the project, if required, contact the App SRE team.
 
 7. Once the template changes are merged, the saas-repo hash for the grafana service need to be bumped so the changes are deployed. This can be done on [the saas-app-sre-observability repo](https://gitlab.cee.redhat.com/service/saas-app-sre-observability/)
 
+### Execute a SQL Query on an App Interface controlled RDS instance
+
+To execute an SQL Query, you you have to commit to the app-interface an YAML
+file with the following content:
+
+```yaml
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+name: <sql query unique name>
+namespace:
+  $ref: /services/<service>/namespaces/<namespace>.yml
+identifier: <RDS resource identifier (same as defined in the namespace)>
+output: <filesystem or stdout>
+query: <sql query>
+```
+
+Example:
+
+```yaml
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2020-01-30-account-manager-registries-stage
+namespace:
+  $ref: /services/uhc/namespaces/uhc-stage.yml
+identifier: uhc-acct-mngr-staging
+output: filesystem
+query: |
+  SELECT id, name, deleted_at from registries;
+```
+
+When that SQL Query specification is merged, the integration will create a
+Job in the namespace provided:
+
+```bash
+$ oc get pods | grep 2020-01-30-account-manager-registries-stage
+2020-01-30-account-manager-registries-stage-7pl6v              0/1     Completed   0          4h32m
+```
+
+That Job will execute the SQL query and place the result to the requested
+location:
+
+- `stdout`: the pod created by the Job will have the SQL query result printed
+  to the stdout. Example:
+
+```bash
+$ oc logs 2020-01-28-account-manager-registries-stage-7pl6v
+             id              |            name             |          deleted_at
+-----------------------------+-----------------------------+-------------------------------
+ 1HPiQ7VattP4WXgGRMvANMIxAuJ | registry.redhat.io          |
+ 1HPgUBbu7A5ATEa9pVgderCnaBw | registry.connect.redhat.com |
+ 1Aabcdoseqrawn1t994qf3ny3ec | quay.io                     |
+ 1VTLMg1uEFgznKiLVh7szZHQcnU | aaa                         | 2019-12-25 11:08:22.886628+00
+ 1VTMLJRMxUMjOLYczcmPU7GKnZN | aaa                         | 2019-12-25 11:18:12.000539+00
+ 1VTMJoJgSGW6EnuwsxLrrstdB7k | aaa                         | 2020-01-13 08:24:12.635462+00
+ 1VTMKAJ9orhfiB5Us7VQSobmjfW | aaa                         | 2020-01-13 08:24:25.324837+00
+ 1VTMKSKYsDPugCUFKhdg91PMVpL | aaa                         | 2020-01-13 08:24:37.888744+00
+ 1VTMKZvvoazsHM8Qt58bLsOD8Yk | aaa                         | 2020-01-13 08:25:31.468072+00
+ 1VTMKj0RZU4VflvpWFabCkq14ji | aaa                         | 2020-01-13 08:26:03.942181+00
+ 1VTMKyagkV8EqDBAQPyoWuv1cmI | aaa                         | 2020-01-13 08:26:14.51152+00
+ 1VTML5RK1eqsWKZAke0fC3FEgWY | aaa                         | 2020-01-13 08:26:28.173743+00
+ 1VTN6U2ClGNWn3uAqBSUkaZ8DGJ | aaa                         | 2020-01-13 08:26:36.128141+00
+ 1VVB7O0E9GqJ9tJJJ8Cz34mbCfd | aaa                         | 2020-01-13 08:26:50.414377+00
+ 1VVB7nTNwEABvhhrY7bAEoUysLW | aaa                         | 2020-01-13 08:26:58.086477+00
+ 1VVB7q4PPEH3R1tsuPTLjabYqId | aaa                         | 2020-01-13 08:27:12.184195+00
+ 1VVBSyT1eblnOXm5fsQirKdzHxu | aaa                         | 2020-01-13 08:27:20.478724+00
+ 1VVBUGCglzmE98l9zLeqljWKZdV | aaa                         | 2020-01-13 08:27:34.340959+00
+ 1VVBUV6rcZ9jsqo2vUuBpw21gbP | aaa                         | 2020-01-13 08:27:41.733607+00
+(19 rows)
+```
+
+- `filesystem`: the pod created by the Job will have the SQL query result
+  written to the pod filesystem. In the pod stdout you will see the `oc`
+  command to retrieve the SQL query results.
+
+```bash
+$ oc logs 2020-01-30-account-manager-registries-stage-cjh82
+Get the sql-query results with:
+
+oc rsh --shell=/bin/bash 2020-01-30-account-manager-registries-stage-cjh82 cat /tmp/query-result.txt
+
+Sleeping 3600s...
+```
+
+Notice that, in this case, the pod will be kept sleeping for 1 hour so you can
+retrieve the query results.
+
+Using that command:
+
+```bash
+$ oc rsh --shell=/bin/bash 2020-01-30-account-manager-registries-stage-cjh82 cat /tmp/query-result.txt
+             id              |            name             |          deleted_at
+-----------------------------+-----------------------------+-------------------------------
+ 1HPiQ7VattP4WXgGRMvANMIxAuJ | registry.redhat.io          |
+ 1HPgUBbu7A5ATEa9pVgderCnaBw | registry.connect.redhat.com |
+ 1Aabcdoseqrawn1t994qf3ny3ec | quay.io                     |
+ 1VTLMg1uEFgznKiLVh7szZHQcnU | aaa                         | 2019-12-25 11:08:22.886628+00
+ 1VTMLJRMxUMjOLYczcmPU7GKnZN | aaa                         | 2019-12-25 11:18:12.000539+00
+ 1VTMJoJgSGW6EnuwsxLrrstdB7k | aaa                         | 2020-01-13 08:24:12.635462+00
+ 1VTMKAJ9orhfiB5Us7VQSobmjfW | aaa                         | 2020-01-13 08:24:25.324837+00
+ 1VTMKSKYsDPugCUFKhdg91PMVpL | aaa                         | 2020-01-13 08:24:37.888744+00
+ 1VTMKZvvoazsHM8Qt58bLsOD8Yk | aaa                         | 2020-01-13 08:25:31.468072+00
+ 1VTMKj0RZU4VflvpWFabCkq14ji | aaa                         | 2020-01-13 08:26:03.942181+00
+ 1VTMKyagkV8EqDBAQPyoWuv1cmI | aaa                         | 2020-01-13 08:26:14.51152+00
+ 1VTML5RK1eqsWKZAke0fC3FEgWY | aaa                         | 2020-01-13 08:26:28.173743+00
+ 1VTN6U2ClGNWn3uAqBSUkaZ8DGJ | aaa                         | 2020-01-13 08:26:36.128141+00
+ 1VVB7O0E9GqJ9tJJJ8Cz34mbCfd | aaa                         | 2020-01-13 08:26:50.414377+00
+ 1VVB7nTNwEABvhhrY7bAEoUysLW | aaa                         | 2020-01-13 08:26:58.086477+00
+ 1VVB7q4PPEH3R1tsuPTLjabYqId | aaa                         | 2020-01-13 08:27:12.184195+00
+ 1VVBSyT1eblnOXm5fsQirKdzHxu | aaa                         | 2020-01-13 08:27:20.478724+00
+ 1VVBUGCglzmE98l9zLeqljWKZdV | aaa                         | 2020-01-13 08:27:34.340959+00
+ 1VVBUV6rcZ9jsqo2vUuBpw21gbP | aaa                         | 2020-01-13 08:27:41.733607+00
+(19 rows)
+```
+
+Each Job will be automatically deleted after 7 days.
 
 ## Design
 
