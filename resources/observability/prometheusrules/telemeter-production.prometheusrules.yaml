@@ -102,41 +102,34 @@ spec:
         severity: medium
     # NOTICE: 5000 is the current capacity that we are guaranteed to handle (enforced via our benchmark CI test on the Telemeter repo). 
     # Bump this number ONLY following a bump in the telemeter benchmark CI test.
-    # Calculation is as follows:
-    # - take the avarage current load from the last 1 day to see what is the remaining budget
-    # - based on the last 7 week predict what would be he value tomorrow - this is the growth rate per day
-    # - devide the remaining budget to the growth rate to get the number of days remaining to 100% capacity
-    - record: telemeter:capacity:remaining:days
-      expr: |
-      (100-(sum(avg_over_time(telemeter_partitions{namespace="telemeter-production"}[1d])/ 5000 * 100)))
-      / 
-      ((predict_linear((sum(telemeter_partitions{namespace="telemeter-production"}))[7d:],60*60*48)/ 5000 * 100)-(predict_linear((sum(telemeter_partitions{namespace="telemeter-production"}))[7d:],60*60*24)/ 5000 * 100))
+    # TODO use jsonnet to generate and avoid hard coding the days count in the message.
+    # Hard coded days in the message is error prone - changing the exp and forgetting to update the message.
     - alert: TelemeterCapacityMedium - prod
       annotations:
-        message: "Telemeter will reach full capacity in the next {{ $value }}% days in namespace {{ $labels.namespace }}."
+        message: "Telemeter will reach full capacity in the next 15 days in namespace {{ $labels.namespace }}. Predicted clusters count is {{ $value }}"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
         dashboard: "https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-prometheus&var-cluster=app-sre&var-namespace=telemeter-prod"
-      expr: telemeter:capacity:remaining:days < 15
+      expr: predict_linear((sum(telemeter_partitions{namespace="telemeter-production"}))[7d:],60*60*24*15) > 5000
       for: 6h
       labels:
         service: telemeter
         severity: info
     - alert: TelemeterCapacityHigh - prod
       annotations:
-        message: "Telemeter will reach full capacity in the next {{ $value }}% days in namespace {{ $labels.namespace }}."
+        message: "Telemeter will reach full capacity in the next 5 days in namespace {{ $labels.namespace }}. Predicted clusters count is {{ $value }}"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
         dashboard: "https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-prometheus&var-cluster=app-sre&var-namespace=telemeter-prod"
-      expr: telemeter:capacity:remaining:days < 5
+      expr: predict_linear((sum(telemeter_partitions{namespace="telemeter-production"}))[7d:],60*60*24*5) > 5000
       for: 3h
       labels:
         service: telemeter
         severity: medium
     - alert: TelemeterCapacityCritical - prod
       annotations:
-        message: "Telemeter will reach full capacity in the next {{ $value }}% days in namespace {{ $labels.namespace }}."
+        message: "Telemeter will reach full capacity in the next 1 days in namespace {{ $labels.namespace }}. Predicted clusters count is {{ $value }}"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
         dashboard: "https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-prometheus&var-cluster=app-sre&var-namespace=telemeter-prod"
-      expr: telemeter:capacity:remaining:days < 1
+      expr: predict_linear((sum(telemeter_partitions{namespace="telemeter-production"}))[7d:],60*60*24*1) > 5000
       for: 1h
       labels:
         service: telemeter
