@@ -35,7 +35,7 @@ As of 2020-01-30 the quota files in the ocm-resources repo are:
 
 In order to request more quota, a PR must be sent to those files requesting more SKUs. This request must be approved by Tim Williams and/or Abhishek Gupta, as well as Jonathan Beakley from the AppSRE side.
 
-For more information look at [How to request quota for creating OpenShift Dedicated cluster](https://mojo.redhat.com/docs/DOC-1199606). Not that as AppSRE is part of SD, we do not need to create a PO.
+For more information look at [How to request quota for creating OpenShift Dedicated cluster](https://mojo.redhat.com/docs/DOC-1199606). Note that as AppSRE is part of SD, we do not need to create a PO.
 
 ## OCM CLI
 
