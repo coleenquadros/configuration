@@ -25,7 +25,7 @@ In order to fix this, first manually disable the project in Jenkins and cancel a
 
 ```
 $ ssh ci-int-jenkins-slave-05-app-sre
-$ sudo rm -rf /var/lib/jenkins/workspace/.cache/github-eclipse-che-plugin-registry/
+$ sudo rm -rf /var/lib/jenkins/workspace/push-saas-metrics/.cache/github-eclipse-che-plugin-registry/
 ```
 
 Re-enable the project and run a job again.
