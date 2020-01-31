@@ -1,7 +1,7 @@
 - defaults:
     name: global
     timeout: '15m'
-    jobdescription: "Managed by Jenkins Job Builder, do not edit manually! Update via https://github.com/openshiftio/openshiftio-cico-jobs"
+    jobdescription: "Managed by Jenkins Job Builder, do not edit manually! Update via https://gitlab.cee.redhat.com/service/app-interface"
     git_organization: fabric8-services
     github_user: almighty-bot
     github_hooks: true
@@ -107,6 +107,12 @@
     triggers:
       - github-pull-request:
           <<: *github_pull_request_defaults
+
+- trigger:
+    name: che_githubprb
+    triggers:
+      - github-pull-request:
+          <<: *che_github_pull_request_defaults
 
 - scm:
     name: git-scm
@@ -1660,14 +1666,9 @@
         secrets: 
             - *quay-eclipse-che-credentials
             - *eclipse-che-oss-sonatype
-    scm:
-        - git:
-            url: https://github.com/{git_organization}/{git_repo}.git
-            shallow_clone: true
-            branches:
-                - cico-pr-test
     triggers:
-        - github
+        - che_githubprb:
+            github_hooks: '{github_hooks}'
 
     <<: *eclipse-che-automation-template
 
