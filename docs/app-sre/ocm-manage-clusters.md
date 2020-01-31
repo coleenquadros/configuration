@@ -9,7 +9,7 @@ OSDv4 clusters are managed via OCM.
 
 All AppSRE OSDv4 clusters are created in the `sd-app-sre <sd-app-sre@redhat.com>` organization.
 
-Each AppSRE member will need to have an account in that account in order to be able to view and managed the clusters within that organization.
+Each AppSRE member will need to have an account in that organization in order to be able to view and managed the clusters within that organization.
 
 Accounts must be created by other team members who are already in that organization. This is done via this portal:
 https://www.redhat.com/wapps/ugc/protected/usermgt/userList.html
@@ -33,7 +33,7 @@ As of 2020-01-30 the quota files in the ocm-resources repo are:
 - [uhc-production/orgs/12147054.yaml](https://gitlab.cee.redhat.com/service/ocm-resources/blob/a867f1ad9e567db8ff99d4a1836515c47073a822/data/uhc-production/orgs/12147054.yaml)
 - [uhc-stage/orgs/12147054.yaml](https://gitlab.cee.redhat.com/service/ocm-resources/blob/a867f1ad9e567db8ff99d4a1836515c47073a822/data/uhc-stage/orgs/12147054.yaml)
 
-In order to request more quota, a PR must be sent to those files requesting more SKUs. This request must be approved by Tim Williams and/or Abhishek Gupta, as well as Jonathan Beakly from the AppSRE side.
+In order to request more quota, a PR must be sent to those files requesting more SKUs. This request must be approved by Tim Williams and/or Abhishek Gupta, as well as Jonathan Beakley from the AppSRE side.
 
 For more information look at [How to request quota for creating OpenShift Dedicated cluster](https://mojo.redhat.com/docs/DOC-1199606). Not that as AppSRE is part of SD, we do not need to create a PO.
 
