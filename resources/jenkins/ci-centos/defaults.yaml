@@ -1664,15 +1664,7 @@
     <<: *job_template_defaults
 
 - job-template:
-    name: '{ci_project}-{git_repo}-nightly-test-master-happy-path'
-    
-    scm:
-        - git:
-            url: https://github.com/{git_organization}/{git_repo}.git
-            shallow_clone: true
-            branches:
-                - cico-nightly-test
-
+    name: '{ci_project}-{git_repo}-nightly-{test_type}'
     triggers:
         - build-result:
             cron: '* * * * *'
@@ -1681,7 +1673,14 @@
                     - 'devtools-rh-che-build-che-credentials-master'
                 results:
                     - success
+    scm:
+        - git:
+            url: https://github.com/{git_organization}/{git_repo}.git
+            shallow_clone: true
+            branches:
+                - master
 
+    <<: *job_template_defaults
 
 - job-template:
     name: '{ci_project}-{git_repo}-che-pullrequests-test-temporary'
@@ -1700,44 +1699,6 @@
         - che_githubprb:
             github_hooks: '{github_hooks}'
 
-    <<: *eclipse-che-automation-template
-
-- job-template:
-    name: '{ci_project}-{git_repo}-che-multiuser-stable-test-temporary'
-    wrappers:
-    - vault-secrets:
-        <<: *vault_defaults
-        secrets: 
-            - *quay-eclipse-che-credentials
-            - *eclipse-che-oss-sonatype
-    scm:
-        - git:
-            url: https://github.com/{git_organization}/{git_repo}.git
-            shallow_clone: true
-            branches:
-                - cico-multiuser-stable
-    triggers:
-        - github
-
-    <<: *eclipse-che-automation-template
-
-- job-template:
-    name: '{ci_project}-{git_repo}-che-multiuser-all-test-temporary'
-
-    wrappers:
-    - vault-secrets:
-        <<: *vault_defaults
-        secrets: 
-            - *quay-eclipse-che-credentials
-            - *eclipse-che-oss-sonatype
-    scm:
-        - git:
-            url: https://github.com/{git_organization}/{git_repo}.git
-            shallow_clone: true
-            branches:
-                - cico-multiuser-all-test
-    triggers:
-        - github
 
     <<: *eclipse-che-automation-template
 
@@ -4649,32 +4610,68 @@
             ci_project: 'devtools'
             ci_cmd: '/bin/bash cico_build_release.sh'
             timeout: '2h'
-        - '{ci_project}-{git_repo}-nightly-test-master-happy-path':
+        # Eclipse Che Nightly jobs
+        - '{ci_project}-{git_repo}-nightly-{test_type}':
             git_organization: eclipse
             git_repo: che
             ci_project: 'devtools'
+            test_type: "happy-path-test"
             ci_cmd: '/bin/bash tests/.infra/centos-ci/nightly-happypath-test.sh'
             branch: 'cico-nightly-test'
             build_branch: 'cico-nightly-test'
-            timeout: '3h'       
+            timeout: '3h'
+        - '{ci_project}-{git_repo}-nightly-{test_type}':
+            git_organization: eclipse
+            git_repo: che
+            ci_project: 'devtools'
+            test_type: "multiuser-stable-test"
+            ci_cmd: '/bin/bash tests/.infra/centos-ci/cico-multiuser-stable-selenium-tests.sh'
+            branch: 'cico-nightly-test'
+            build_branch: 'cico-nightly-test'
+            timeout: '3h'
+        - '{ci_project}-{git_repo}-nightly-{test_type}':
+            git_organization: eclipse
+            git_repo: che
+            ci_project: 'devtools'
+            test_type: "multiuser-all-test"
+            ci_cmd: '/bin/bash tests/.infra/centos-ci/cico-multiuser-all-tests.sh'
+            branch: 'cico-nightly-test'
+            build_branch: 'cico-nightly-test'
+            timeout: '3h'
+        - '{ci_project}-{git_repo}-nightly-{test_type}':
+            git_organization: eclipse
+            git_repo: che
+            ci_project: 'devtools'
+            test_type: "multiuser-hot-update-test"
+            ci_cmd: '/bin/bash tests/.infra/centos-ci/cico-multiuser-hot-update-tests.sh'
+            branch: 'cico-nightly-test'
+            build_branch: 'cico-nightly-test'
+            timeout: '3h'
+        - '{ci_project}-{git_repo}-nightly-{test_type}':
+            git_organization: eclipse
+            git_repo: che
+            ci_project: 'devtools'
+            test_type: "devfiles-test"
+            ci_cmd: '/bin/bash tests/.infra/centos-ci/cico-devfiles-test.sh'
+            branch: 'cico-nightly-test'
+            build_branch: 'cico-nightly-test'
+            timeout: '3h'
+        - '{ci_project}-{git_repo}-nightly-{test_type}':
+            git_organization: eclipse
+            git_repo: che
+            ci_project: 'devtools'
+            test_type: "oauth-test"
+            ci_cmd: '/bin/bash tests/.infra/centos-ci/ocp-oauth-test.sh'
+            branch: 'cico-nightly-test'
+            build_branch: 'cico-nightly-test'
+            timeout: '3h'
+        # End of Eclipse Che nightly tests
         - '{ci_project}-{git_repo}-che-pullrequests-test-temporary':
             git_organization: eclipse
             git_repo: che
             ci_project: 'devtools'
             ci_cmd: '/bin/bash tests/.infra/centos-ci/cico_pr_test.sh'
             timeout: '3h'
-        - '{ci_project}-{git_repo}-che-multiuser-stable-test-temporary':
-            git_organization: eclipse
-            git_repo: che
-            ci_project: 'devtools'
-            ci_cmd: '/bin/bash tests/.infra/centos-ci/cico-multiuser-stable-selenium-tests.sh'
-            timeout: '2h'
-        - '{ci_project}-{git_repo}-che-multiuser-all-test-temporary':
-            git_organization: eclipse
-            git_repo: che
-            ci_project: 'devtools'
-            ci_cmd: '/bin/bash tests/.infra/centos-ci/cico-multiuser-all-tests.sh'
-            timeout: '2h'
         - '{ci_project}-{git_repo}-rc-integration-tests':
             git_organization: eclipse
             git_repo: che
