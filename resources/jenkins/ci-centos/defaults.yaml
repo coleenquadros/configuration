@@ -259,6 +259,15 @@
       - env-var: 'QUAY_ECLIPSE_CHE_PASSWORD'
         vault-key: 'quay_eclipse_che_password'
 
+- eclipse-che-github-packages-credentials: &eclipse-che-github-packages-credentials
+    name: "eclipse-che-github-packages-credentials"
+    secret-path: 'devtools-osio-ci/github-packages-token'
+    secret-values:
+      - env-var: 'GITHUB_USERNAME'
+        vault-key: 'username'
+      - env-var: 'GITHUB_TOKEN'
+        vault-key: 'token'
+
 - che-bot-github-credentials: &che-bot-github-credentials
     name: "che-bot-github-credentials"
     secret-path: "devtools-osio-ci/che-bot-github-token"
@@ -1033,6 +1042,7 @@
             - *quay-credentials
             - *quay-eclipse-che-credentials
             - *registry-devshift-credentials
+            - *eclipse-che-github-packages-credentials
     scm:
         - git:
             url: https://github.com/{git_organization}/{git_repo}.git
@@ -3011,27 +3021,6 @@
                     - env-var: 'EMAIL'
                       vault-key: 'email'
     <<: *saas_prcheck_rhche_template
-
-- job-template:
-    name: '{ci_project}-{git_repo}-build-push-woopra-telemetry-image'
-    scm:
-        - git:
-            git_url: https://{github_user}@github.com/{git_organization}/{git_repo}.git
-            git_basedir: '{git_repo}'
-            branches:
-                - master
-    wrappers:
-        - vault-secrets:
-            <<: *vault_defaults
-            secrets:
-                - secret-path: 'devtools-osio-ci/rh-che-compatibility-github-push-token'
-                  secret-values:
-                    - env-var: 'GITHUB_PASSWORD'
-                      vault-key: 'PASSWORD'
-                    - env-var: 'GITHUB_USERNAME'
-                      vault-key: 'TOKEN'
-
-    <<: *eclipse-che-automation-template
 
 - project:
     name: devtools
