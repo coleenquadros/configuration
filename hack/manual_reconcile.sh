@@ -137,8 +137,7 @@ run_int openshift-network-policies &
 run_int openshift-acme &
 run_int openshift-limitranges &
 run_int openshift-serviceaccount-tokens &
-# adding --external to pass even though internal cluster is unavailable
-run_int terraform-resources --external &
+run_int terraform-resources &
 run_int terraform-users &
 run_int ldap-users $APP_INTERFACE_PROJECT_ID &
 # Conditionally run integrations according to MR title
