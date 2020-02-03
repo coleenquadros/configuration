@@ -18,6 +18,7 @@ managedResourceTypes:
 - Service
 - Subscription
 - Prometheus
+- Alertmanager
 - PrometheusRule
 - ServiceMonitor
 
@@ -56,6 +57,24 @@ openshiftResources:
 - provider: resource
   path: /observability/prometheus/v4/prometheus.subscription.yaml
 
+# AlertManager
+- provider: resource-template
+  type: jinja2
+  path: /observability/alertmanager/app-sre.alertmanager.yaml
+  variables:
+    replicas: 1
+    version: v0.20.0
+    environment: production
+    externalUrl: https://alertmanager.app-sre-prod-01.devshift.net
+    oauthProxySecretName: alertmanager-auth-proxy
+    storageClassName: gp2
+    logLevel: info
+    alertmanagerName: config
+- provider: resource
+  path: /observability/alertmanager/alertmanager-app-sre.service.yaml
+- provider: resource
+  path: /observability/alertmanager/alertmanager-proxy.service.yaml
+
 # Route
 ## Prometheus
 - provider: resource-template
@@ -81,6 +100,13 @@ openshiftResources:
 - provider: vault-secret
   path: app-interface/app-sre/app-sre-observability-production/prometheus/prometheus-auth-proxy
   version: 2
+### Alertmanager oauth proxy configuration
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-observability-production/alertmanager/alertmanager-auth-proxy
+  version: 1
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/alertmanager/alertmanager-config.secret.yaml
 
 ## Prometheus Rules
 ### Prometheus Deadmanssnitch
