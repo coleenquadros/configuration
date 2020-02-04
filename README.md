@@ -516,6 +516,23 @@ The LimitRange limits can be customized by creating a new file and referencing t
 
 The `/openshift/limitrange-1.yml` schema maps to the LimitRanges specs.
 
+### Self-Service OpenShift ServiceAccount tokens via App-Interface (`/openshift/limitrange-1.yml`)
+
+This integration allows namespace owners to get ServiceAccount tokens from a different cluster/namespace in to their namespace for consumption.
+
+To add a Secret to a namespace, containing the token of a ServiceAccount from another namespace, a user must add the following to a namespace declaration:
+
+```yaml
+openshiftServiceAccountTokens:
+- namespace:
+    $ref: /services/<service>/namespaces/<namespace>.yml
+  serviceAccountName: <serviceAccountName>
+```
+
+The integration will get the token belonging to that ServiceAccount and add it into a Secret called:
+`<clusterName>-<namespaceName>-<ServiceAccountName>`.
+The Secret will have a single key called `token`, containing a token of that ServiceAccount.
+
 ### Manage Vault configurations via App-Interface
 
 https://vault.devshift.net is entirely managed via App-Interface and its configuration can be found in [config](/data/services/vault.devshift.net/config) folder of ` vault.devshift.net` service
