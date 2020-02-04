@@ -1713,18 +1713,18 @@
     <<: *eclipse-che-automation-template
 
 - job-template:
-    name: '{ci_project}-{git_repo}-rc-integration-tests'
+    name: '{ci_project}-{git_repo}-rc-{test_type}'
 
     scm:
-        - git:
-            url: https://github.com/{git_organization}/{git_repo}.git
-            shallow_clone: true
-            branches:
-                - cico-rc-test
+      - git:
+          url: https://github.com/{git_organization}/{git_repo}.git
+          shallow_clone: true
+          branches:
+            - cico-rc-test
     triggers:
-        - github
+      - github
 
-    <<: *eclipse-che-automation-template
+    <<: *job_template_defaults
 
 - job-template:
     name: '{ci_project}-{git_repo}-che-nightly'
@@ -4661,12 +4661,43 @@
             ci_project: 'devtools'
             ci_cmd: '/bin/bash tests/.infra/centos-ci/cico_pr_test.sh'
             timeout: '3h'
-        - '{ci_project}-{git_repo}-rc-integration-tests':
+        # Eclipse Che RC jobs
+        - '{ci_project}-{git_repo}-rc-{test_type}':
             git_organization: eclipse
             git_repo: che
             ci_project: 'devtools'
-            ci_cmd: '/bin/bash tests/.infra/centos-ci/cico_rc_test.sh'
+            test_type: "multiuser-integration-tests"
+            ci_cmd: '/bin/bash tests/.infra/centos-ci/cico-rc-multiuser-integration-tests.sh'
+            timeout: '2h'
+        - '{ci_project}-{git_repo}-rc-{test_type}':
+            git_organization: eclipse
+            git_repo: che
+            ci_project: 'devtools'
+            test_type: "ocp-oauth-test"
+            ci_cmd: '/bin/bash tests/.infra/centos-ci/cico-rc-ocp-oauth-test.sh'
             timeout: '1h'
+        - '{ci_project}-{git_repo}-rc-{test_type}':
+            git_organization: eclipse
+            git_repo: che
+            ci_project: 'devtools'
+            test_type: "recreate-strategy-test"
+            ci_cmd: '/bin/bash tests/.infra/centos-ci/cico-rc-recreate-strategy-test.sh'
+            timeout: '1h'
+        - '{ci_project}-{git_repo}-rc-{test_type}':
+            git_organization: eclipse
+            git_repo: che
+            ci_project: 'devtools'
+            test_type: "rolling-strategy-test"
+            ci_cmd: '/bin/bash tests/.infra/centos-ci/cico-rc-rolling-strategy-test.sh'
+            timeout: '1h'
+        - '{ci_project}-{git_repo}-rc-{test_type}':
+            git_organization: eclipse
+            git_repo: che
+            ci_project: 'devtools'
+            test_type: "multiuser-happy-path-test"
+            ci_cmd: '/bin/bash tests/.infra/centos-ci/cico-rc-multiuser-happy-path-test.sh'
+            timeout: '2h'
+        # End of Eclipse Che RC jobs
         - '{ci_project}-{git_repo}':
             git_organization: fabric8-analytics
             git_repo: fabric8-analytics-lsp-server
