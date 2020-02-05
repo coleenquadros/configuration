@@ -153,6 +153,19 @@
                 - '${{ghprbActualCommit}}'
             basedir: '{git_basedir}'
 
+- scm:
+    name: che-git-scm
+    scm:
+        - git:
+            credentials-id: "fa7e8bab-9c2d-45cb-9880-42b1acd82cd7"
+            url: "{git_url}"
+            skip-tag: True
+            git-tool: ci-git
+            refspec: '+refs/pull/*:refs/remotes/origin/pr/*'
+            branches:
+                - '${{ghprbActualCommit}}'
+            basedir: '{git_basedir}'
+
 - vault_defaults: &vault_defaults
     name: 'vault_defaults'
     vault-url: 'https://vault.devshift.net'
@@ -1699,16 +1712,17 @@
         - throttle:
             option: project
             max-total: 3
-    wrappers:
-    - vault-secrets:
-        <<: *vault_defaults
-        secrets: 
-            - *quay-eclipse-che-credentials
-            - *eclipse-che-oss-sonatype
+        - github:
+            url: https://github.com/{git_organization}/{git_repo}/
+        - build-discarder:
+            days-to-keep: '{discarder_days}'
+            num-to-keep: '{discarder_num}'
     triggers:
         - che_githubprb
-
-
+    scm:
+        - che-git-scm:
+            git_url: https://che-bot@github.com/{git_organization}/{git_repo}.git
+            git_basedir: ''
     <<: *eclipse-che-automation-template
 
 - job-template:
