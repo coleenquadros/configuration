@@ -61,18 +61,19 @@ openshiftResources:
   path: /observability/prometheus/v4/prometheus.subscription.yaml
 
 # AlertManager
-- provider: resource-template
-  type: jinja2
-  path: /observability/alertmanager/app-sre.alertmanager.yaml
-  variables:
-    replicas: 3
-    version: v0.20.0
-    environment: production
-    externalUrl: https://alertmanager.app-sre-prod-01.devshift.net
-    oauthProxySecretName: alertmanager-auth-proxy
-    storageClassName: gp2
-    logLevel: info
-    alertmanagerName: instance
+# Commented out until https://redhat.service-now.com/surl.do?n=INC1165575 is resolved
+# - provider: resource-template
+#   type: jinja2
+#   path: /observability/alertmanager/app-sre.alertmanager.yaml
+#   variables:
+#     replicas: 3
+#     version: v0.20.0
+#     environment: production
+#     externalUrl: https://alertmanager.app-sre-prod-01.devshift.net
+#     oauthProxySecretName: alertmanager-auth-proxy
+#     storageClassName: gp2
+#     logLevel: info
+#     alertmanagerName: instance
 - provider: resource
   path: /observability/alertmanager/alertmanager-app-sre.service.yaml
 - provider: resource
@@ -243,4 +244,16 @@ openshiftResources:
   path: /observability/servicemonitors/uhc-gateway-server.servicemonitor.yaml
   variables:
     environment: production
+    namespace: uhc-production
+
+# Temporary Prometheus and ServiceMonitor for AMS as part of https://issues.redhat.com/browse/APPSRE-1491
+- provider: resource-template
+  type: jinja2
+  path: /observability/prometheus/v4/ams.prometheus.yaml
+  variables:
+    remoteWriteUrl: https://remote-write-proxy-telemeter-production.1061.app-sre.openshiftapps.com/api/v1/receive
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/ams-subscription-labels.servicemonitor.yaml
+  variables:
     namespace: uhc-production

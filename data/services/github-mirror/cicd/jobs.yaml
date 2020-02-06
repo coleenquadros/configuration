@@ -1,0 +1,51 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+labels:
+  service: github-mirror
+
+name: ci-ext-github-mirror-jobs
+
+description: ''
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+type: jobs
+
+config:
+- project:
+    name: github-mirror
+    label: github-mirror
+    node: app-sre
+    gh_org: app-sre
+    gh_repo: github-mirror
+    quay_org: app-sre
+    kube_cluster: app-sre-stage-01
+    kube_namespace: github-mirror-stage
+    saasherder_context: github-mirror
+    saasherder_services: github-mirror
+    saas_git: https://github.com/app-sre/saas-github-mirror.git
+    jobs:
+    - 'gh-build-master':
+        display_name: github-mirror build master
+        auto_promote: true
+    - 'gh-pr-check':
+        display_name: github-mirror pr-check
+
+- project:
+    name: github-mirror-saas
+    label: github-mirror
+    node: app-sre
+    gh_org: app-sre
+    gh_repo: saas-github-mirror
+    kube_cluster: app-sre-prod-01
+    kube_namespace: github-mirror-production
+    saasherder_context: github-mirror
+    image_pattern: '^(quay\.io/app-sre/)'
+    quay_org: app-sre
+    jobs:
+    - 'saas-deploy':
+        display_name: saas deploy
+    - 'saas-pr-check':
+        display_name: saas pr check
