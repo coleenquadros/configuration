@@ -31,7 +31,7 @@ To adjust cluster capacity limits, a user must:
 - Login to the [OpenShift Online Registration portal](https://manage.openshift.com/admin/)
 - Click the `Admin Panel` button on the top right of the page
 - Go to `Plans`
-- Search for `Description` = `OpenShift.io`
+- Search for `Display Name` = `OpenShift.io`
 - Edit the clusters as needed
     - Raise or lower the limit so that there is less or more capacity available
     - Hide or unhide the clusters
