@@ -139,7 +139,7 @@ This instance gathers the following metrics:
 
 - Node metrics for RDU nodes, via node exporter
 
-#### <a name='BLR'></a>BLR
+#### <a name='CentralCI'></a> CentralCI
 
 The BLR lab has a Prometheus instance on a virtual machine on top of the RHV setup. It can be accessed through http://10.70.49.219:9090
 
@@ -167,15 +167,17 @@ The cluster prometheus also have predefined alerting rules for cluster failures,
 
 #### <a name='App-SREprometheus'></a>App-SRE prometheus
 
-The app-sre prometheus currently runs in the app-sre-prometheus namespace on the app-sre cluster. This is our primary prometheus instance for gathering application metrics and alerting them within the cluster.
+OpenShift v3: 
 
-Along with the application metrics, the app-sre prometheus also monitors any exporters that we run on the app-sre cluster.
+The app-sre prometheus currently runs in the app-sre-observability-production namespace on the app-sre cluster. This is our primary prometheus instance for gathering application metrics and alerting them within the cluster.
 
 Overall, the Prometheus deployment on the app-sre cluster monitors the following:
 
 - Application metrics
 - External endpoints via Blackbox exporter
 - Cloudwatch metrics via cloudwatch exporter
+
+> Note: Please see the [openshift-customer-monitoring](https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/osdv4-openshift-customer-monitoring.md) documentation for details on how the monitoring stack is deployed on OSD v4.
 
 #### <a name='Addinganapplicationtomonitoring'></a>Adding an application to monitoring
 
