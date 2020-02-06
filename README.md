@@ -237,7 +237,7 @@ know which one to add.
 
 There are three ways a user or group can get notified of service events (e.g. planned maintenance, outages):
 
-* `serviceOwner`:  This is generally the development team lead individual, or development team mailing list.  This field is Required.
+* `serviceOwner`:  Point of contact for communications from Service Delivery to service owners.  Where possible, this should be a development team mailing list (rather than an individual developer).  This field is Required.
 * `serviceNotifications`:  This is a list of additional email addresses of employees who would like to receive notifications about a service.  This field is Optional.
 * Subscribe to the `sd-notifications@redhat.com` [mailing list](https://post-office.corp.redhat.com/mailman/listinfo/sd-notifications). This list receives all event communications.
 
