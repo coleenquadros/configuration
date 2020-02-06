@@ -233,6 +233,28 @@ you want the user to belong to. Roles can be associated with the services:
 `teams/<name>/roles/<rolename>.yml`. Check out the currently defined roles to
 know which one to add.
 
+### Get notified of events involving a service, or it's dependencies
+
+There are three ways a user or group can get notified of service events (e.g. planned maintenance, outages):
+
+* `serviceOwner`:  This is generally the development team lead individual, or development team mailing list.  This field is Required.
+* `serviceNotifications`:  This is a list of additional email addresses of employees who would like to receive notifications about a service.  This field is Optional.
+* Subscribe to the `sd-notifications@redhat.com` [mailing list](https://post-office.corp.redhat.com/mailman/listinfo/sd-notifications). This list receives all event communications.
+
+Find out more about App-SRE Incident Procedures [here](https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/AAA.md#168-incident-procedure).
+
+Example usage for [Hive](https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/hive/app.yml):
+
+```
+serviceOwners:
+- name: Devan Goodwin
+  email: dgoodwin@redhat.com
+
+serviceNotifications:
+- name: Hive Mailing list
+  email:  aos-hive@redhat.com
+```
+
 ### Create a Quay Repository for an onboarded App (`/app-sre/app-1.yml`)
 
 Onboarded applications are modelled using the schema `/app-sre/app-1.yml`. This schema allows any application to optionally define a list required Quay repositories.
