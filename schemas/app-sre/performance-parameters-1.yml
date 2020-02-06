@@ -35,6 +35,35 @@ properties:
       "$ref": "/common-1.json#/definitions/crossref"
       "$schemaRef": "/openshift/namespace-1.yml"
 
+  volume:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+
+      properties:
+        kind:
+          type: string
+          enum: ['SLO','SLA']
+
+        metric:
+          type: string
+          pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
+
+        selectors:
+          description: "Metric selectors to be used in Prometheus rule"
+          type: object
+
+        peak:
+          description: "peak requests per second"
+          type: number
+
+      required:
+      - kind
+      - metric
+      - selectors
+      - peak
+
   availability:
     type: array
     items:
@@ -60,6 +89,7 @@ properties:
       required:
       - kind
       - metric
+      - selectors
       - errorBudget
 
   latency:
@@ -91,8 +121,37 @@ properties:
       required:
       - kind
       - metric
+      - selectors
       - threshold
       - percentile
+
+  errors:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+
+      properties:
+        kind:
+          type: string
+          enum: ['SLO','SLA']
+
+        metric:
+          type: string
+          pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
+
+        selectors:
+          description: "Metric selectors to be used in Prometheus rule"
+          type: object
+
+        errorBudget:
+          type: number
+
+      required:
+      - kind
+      - metric
+      - selectors
+      - errorBudget
 
   rawRecording:
     type: array
