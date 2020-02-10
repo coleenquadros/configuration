@@ -14,7 +14,7 @@ spec:
     - alert: CloudWatchDown
       labels:
         severity: critical
-      expr: absent(up{job="cloudwatch-exporter"} == 1)
+      expr: absent(up{job=~"cloudwatch-exporter.*"} == 1)
       for: 5m
       annotations:
         message: 'Cloudwatch exporter instances have been down for 5m+.'
@@ -23,7 +23,7 @@ spec:
     - alert: CloudWatchScrapeError
       labels:
         severity: medium
-      expr: cloudwatch_exporter_scrape_error{job="cloudwatch-exporter"} != 0
+      expr: cloudwatch_exporter_scrape_error{job=~"cloudwatch-exporter.*"} != 0
       for: 5m
       annotations:
         message: 'There was an error scraping metrics from the cloudwatch exporter.'
@@ -32,7 +32,7 @@ spec:
     - alert: CloudWatchScrapeDuration
       labels:
         severity: warning
-      expr: cloudwatch_exporter_scrape_duration_seconds{job="cloudwatch-exporter"} >= 15
+      expr: cloudwatch_exporter_scrape_duration_seconds{job=~"cloudwatch-exporter.*"} >= 15
       annotations:
         message: 'Cloudwatch exporter took more than 15 seconds to scrape AWS Cloudwatch.'
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
@@ -42,7 +42,7 @@ spec:
     - alert: SuddenIncreaseBytesUsed
       labels:
         severity: warning
-      expr: (avg_over_time(aws_s3_bucket_size_bytes_average{job="cloudwatch-exporter"}[1d]) / avg_over_time(aws_s3_bucket_size_bytes_average{job="cloudwatch-exporter"}[1d] offset 1d) -1) * 100 > 20 and (aws_s3_bucket_size_bytes_average{job="cloudwatch-exporter"} - aws_s3_bucket_size_bytes_average{job="cloudwatch-exporter"} offset 1d) / 1000 / 1000 > 1000
+      expr: (avg_over_time(aws_s3_bucket_size_bytes_average{job=~"cloudwatch-exporter.*"}[1d]) / avg_over_time(aws_s3_bucket_size_bytes_average{job=~"cloudwatch-exporter.*"}[1d] offset 1d) -1) * 100 > 20 and (aws_s3_bucket_size_bytes_average{job=~"cloudwatch-exporter.*"} - aws_s3_bucket_size_bytes_average{job=~"cloudwatch-exporter.*"} offset 1d) / 1000 / 1000 > 1000
       annotations:
         message: 'Bucket {{$labels.bucket_name}} size has grown by {{ $value }}% within the last day'
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
@@ -52,7 +52,7 @@ spec:
     - alert: HighCPUUtilization
       labels:
         severity: warning
-      expr: aws_rds_cpuutilization_average{job="cloudwatch-exporter"} offset 10m > 85
+      expr: aws_rds_cpuutilization_average{job=~"cloudwatch-exporter.*"} offset 10m > 85
       for: 5m
       annotations:
         message: 'Average CPU utilization of RDS instance {{$labels.dbinstance_identifier}} above 85% for the past 5 minutes.'
@@ -61,7 +61,7 @@ spec:
     - alert: LowFreeMemory
       labels:
         severity: warning
-      expr: aws_rds_freeable_memory_sum{job="cloudwatch-exporter"} offset 10m < (500 * 1024^2)
+      expr: aws_rds_freeable_memory_sum{job=~"cloudwatch-exporter.*"} offset 10m < (500 * 1024^2)
       annotations:
         message: 'The current free(able) memory of DB instance {{ $labels.dbinstance_identifier }} is under 500 MB.'
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
@@ -69,7 +69,7 @@ spec:
     - alert: LowStorageSpace
       labels:
         severity: warning
-      expr: aws_rds_free_storage_space_sum{job="cloudwatch-exporter"} offset 10m < (1 * 1024^3)
+      expr: aws_rds_free_storage_space_sum{job=~"cloudwatch-exporter.*"} offset 10m < (1 * 1024^3)
       for: 30m
       annotations:
         message: 'The current free storage space of DB instance {{ $labels.dbinstance_identifier }} is under 1 GB.'
@@ -96,7 +96,7 @@ spec:
     - alert: HighAverageReadLatency
       labels:
         severity: warning
-      expr: aws_rds_read_latency_average{job="cloudwatch-exporter"} offset 10m >= 1
+      expr: aws_rds_read_latency_average{job=~"cloudwatch-exporter.*"} offset 10m >= 1
       annotations:
         message: 'The average read latency of DB instance {{ $labels.dbinstance_identifier }} is over 1s.'
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
@@ -104,7 +104,7 @@ spec:
     - alert: HighAverageWriteLatency
       labels:
         severity: warning
-      expr: aws_rds_write_latency_average{job="cloudwatch-exporter"} offset 10m >= 1
+      expr: aws_rds_write_latency_average{job=~"cloudwatch-exporter.*"} offset 10m >= 1
       annotations:
         message: 'The average write latency of DB instance {{ $labels.dbinstance_identifier }} is over 1s.'
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
@@ -114,7 +114,7 @@ spec:
     - alert: HighCPUUtilization
       labels:
         severity: warning
-      expr: aws_ec2_cpuutilization_average{job="cloudwatch-exporter"} offset 10m > 85
+      expr: aws_ec2_cpuutilization_average{job=~"cloudwatch-exporter.*"} offset 10m > 85
       for: 60m
       annotations:
         message: 'Average CPU utilization of EC2 instance {{ $labels.instance_id }} above 85% for over 1 hour.'
