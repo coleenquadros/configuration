@@ -13,6 +13,17 @@ In the event of a complete loss of Quay, please see the [disaster recovery guide
 
 - [Action logs pipeline: ElasticSearch, LogStash and Kinesis](services/action-logs/overview.md)
 
+# Quay Deployment
+
+## Staging
+
+![](images/quayio-stage.png)
+
+## Production
+
+![](images/quayio-prod.png)
+
+
 # Debugging Quay issues
 
 See [Debugging Quay](issues/overview.md) for the general guide.
