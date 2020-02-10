@@ -57,6 +57,24 @@ openshiftResources:
 - provider: resource
   path: /observability/prometheus/v4/prometheus.subscription.yaml
 
+# AlertManager
+- provider: resource-template
+  type: jinja2
+  path: /observability/alertmanager/app-sre.alertmanager.yaml
+  variables:
+    replicas: 3
+    version: v0.20.0
+    environment: production
+    externalUrl: https://alertmanager.quayio-prod-us-east-1.devshift.net
+    oauthProxySecretName: alertmanager-auth-proxy
+    storageClassName: gp2
+    logLevel: info
+    alertmanagerName: instance
+- provider: resource
+  path: /observability/alertmanager/alertmanager-app-sre.service.yaml
+- provider: resource
+  path: /observability/alertmanager/alertmanager-proxy.service.yaml
+
 # Secrets
 ## Observability
 ### Prometheus additional alertmanager config
@@ -74,6 +92,14 @@ openshiftResources:
 - provider: vault-secret
   path: app-interface/quayio-prod-us-east-1/openshift-customer-monitoring/prometheus-auth-proxy
   version: 3
+### Alertmanager oauth proxy configuration
+- provider: vault-secret
+  path: app-interface/quayio-prod-us-east-1/openshift-customer-monitoring/alertmanager/alertmanager-auth-proxy
+  version: 1
+### Alertmanager configuration
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/alertmanager/alertmanager-instance.secret.yaml
 
 # ServiceMonitor
 ## Quay
