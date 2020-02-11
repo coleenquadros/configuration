@@ -1,0 +1,72 @@
+---
+"$schema": /metaschema-1.json
+version: '1.0'
+type: object
+
+additionalProperties: false
+
+properties:
+  "$schema":
+    type: string
+    enum:
+    - /app-sre/saas-file-1.yml
+  labels:
+    "$ref": "/common-1.json#/definitions/labels"
+  name:
+    type: string
+  description:
+    type: string
+  app:
+    "$ref": "/common-1.json#/definitions/crossref"
+    "$schemaRef": "/app-sre/app-1.yml"
+  managedResourceTypes:
+    type: array
+    items:
+      type: string
+      enum:
+      - Deployment
+      - Service
+      - CronJob
+  resourceTemplates:
+    type: array
+    items:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+        path:
+          type: string
+        hash_length:
+          type: integer
+        parameters:
+          type: object
+        targets:
+          type: array
+          items:
+            type: object
+            properties:
+              namespace:
+                "$ref": "/common-1.json#/definitions/crossref"
+                "$schemaRef": "/openshift/namespace-1.yml"
+              hash:
+                type: string
+                pattern: '^([0-9a-f]{40}|master)$'
+              parameters:
+                type: object
+            required:
+            - namespace
+            - hash
+      required:
+      - url
+      - path
+      - hash_length
+      - targets
+required:
+- "$schema"
+- labels
+- name
+- description
+- app
+- managedResourceTypes
+- resourceTemplates
