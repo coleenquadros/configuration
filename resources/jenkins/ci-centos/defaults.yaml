@@ -275,6 +275,15 @@
       - env-var: 'QUAY_ECLIPSE_CHE_PASSWORD'
         vault-key: 'quay_eclipse_che_password'
 
+- quay-che-incubator-credentials: &quay-che-incubator-credentials
+    name: "quay-che-incubator-credentials"
+    secret-path: 'devtools-osio-ci/quay-che-incubator-credentials'
+    secret-values:
+      - env-var: 'QUAY_CHE_INCUBATOR_USERNAME'
+        vault-key: 'quay_che_incubator_username'
+      - env-var: 'QUAY_CHE_INCUBATOR_PASSWORD'
+        vault-key: 'quay_che_incubator_password'
+
 - eclipse-che-github-packages-credentials: &eclipse-che-github-packages-credentials
     name: "eclipse-che-github-packages-credentials"
     secret-path: 'devtools-osio-ci/github-packages-token'
@@ -1057,6 +1066,7 @@
             - *kube-config-dsaas-stg
             - *quay-credentials
             - *quay-eclipse-che-credentials
+            - *quay-che-incubator-credentials
             - *registry-devshift-credentials
             - *eclipse-che-github-packages-credentials
     scm:
@@ -2301,6 +2311,7 @@
           <<: *vault_defaults
           secrets:
             - *quay-eclipse-che-credentials
+            - *quay-che-incubator-credentials
     triggers:
         - timed: '0 0 * * *'
     publishers:
@@ -2328,6 +2339,7 @@
           secrets:
             - *quay-credentials
             - *quay-eclipse-che-credentials
+            - *quay-che-incubator-credentials
     publishers:
         - email:
             recipients: ibuziuk@redhat.com mloriedo@redhat.com amisevsk@redhat.com vparfono@redhat.com
@@ -4559,13 +4571,13 @@
             timeout: '10m'
         - '{ci_project}-{git_repo}-build-master':
             git_organization: che-incubator
-            git_repo: che-workspace-crd-operator
+            git_repo: che-workspace-operator
             ci_project: 'devtools'
             ci_cmd: '/bin/bash .cico/cico_build_master.sh'
             timeout: '10m'
         - '{ci_project}-{git_repo}-nightly':
             git_organization: che-incubator
-            git_repo: che-workspace-crd-operator
+            git_repo: che-workspace-operator
             ci_project: 'devtools'
             ci_cmd: '/bin/bash .cico/cico_build_nightly.sh'
             timeout: '10m'
