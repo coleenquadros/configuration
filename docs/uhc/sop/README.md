@@ -24,8 +24,13 @@ OCM uses serviceaccounts to communicate with the hive clusters. These serviceacc
 
 The secret `external_cluster_services.config` (https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre-stage/uhc-stage/clusters-service) must contain a valid kubeconfig as well as serviceaccount token matching the ones on the cluster
 
-- aws-account-operator (for AWS account creation)
+- aws-account-operator-client (for AWS account creation)
 - hive-frontend (for frontend communication)
+
+The secret is automatically updated by a combination of the openshift-resources and openshift-serviceaccount-tokens integrations:
+- [uhc-integration](/resources/hive-integration/uhc-integration/clusters-service.secret.yaml)
+- [uhc-stage](/resources/app-sre-stage/uhc-stage/clusters-service.secret.yaml)
+- [uhc-production](/resources/app-sre/uhc-production/clusters-service.secret.yaml)
 
 ### hive-admission
 
