@@ -10,6 +10,7 @@
     discarder_num: -1
     build_branch: master
     manifest_bouncer_tag: d21c96f
+    trigger_phrase: '.*\[test\].*'
 
 - admin_list_defaults: &admin_list_defaults
     name: 'admin_list_defaults'
@@ -116,7 +117,7 @@
     github-hooks: true
     auth-id: "a3927836-8e6e-400a-ae13-058325ac6c0c"
     permit-all: false
-    trigger-phrase: '.*\[test\].*'
+    trigger-phrase: '{trigger_phrase}'
     allow-whitelist-orgs-as-admins: false
     status-context: "ci.centos.org PR build"
 
@@ -126,8 +127,8 @@
     <<: *admin_list_defaults
     cron: '* * * * *'
     github-hooks: '{github_hooks}'
-    permit-all: false
     trigger-phrase: '.*\[test\].*'
+    permit-all: false
     allow-whitelist-orgs-as-admins: true
     status-context: "ci.centos.org PR build"
 
@@ -1718,7 +1719,7 @@
     <<: *eclipse-che-automation-template
 
 - job-template:
-    name: '{ci_project}-{git_repo}-che-pullrequests-test-temporary'
+    name: '{ci_project}-{git_repo}-che-pullrequests-{job_type}'
     concurrent: true
     properties:
         - throttle:
@@ -1730,7 +1731,8 @@
             days-to-keep: '{discarder_days}'
             num-to-keep: '{discarder_num}'
     triggers:
-        - che_githubprb
+        - che_githubprb:
+            trigger_phrase: '{trigger_phrase}'
     scm:
         - che-git-scm:
             git_url: https://che-bot@github.com/{git_organization}/{git_repo}.git
@@ -2326,7 +2328,8 @@
 - job-template:
     name: '{ci_project}-{git_repo}-pr-check'
     triggers:
-        - che_githubprb
+        - che_githubprb:
+            trigger_phrase: '{trigger_phrase}'
     <<: *job_template_defaults
 
 - job-template:
@@ -4695,12 +4698,22 @@
             ci_cmd: '/bin/bash tests/.infra/centos-ci/nightly/ocp-oauth-test.sh'
             timeout: '3h'
         # End of Eclipse Che nightly tests
-        - '{ci_project}-{git_repo}-che-pullrequests-test-temporary':
+        - '{ci_project}-{git_repo}-che-pullrequests-{job_type}':
             git_organization: eclipse
             git_repo: che
             ci_project: 'devtools'
+            job_type: 'test-temporary'
             ci_cmd: '/bin/bash tests/.infra/centos-ci/cico_pr_test.sh'
             timeout: '3h'
+            trigger_phrase: '.*\[ci-test\].*'
+        - '{ci_project}-{git_repo}-che-pullrequests-{job_type}':
+            git_organization: eclipse
+            git_repo: che
+            ci_project: 'devtools'
+            job_type: 'build'
+            ci_cmd: '/bin/bash .ci/cico_build_pullrequest.sh'
+            timeout: '3h'
+            trigger_phrase: '.*\[ci-build\].*'
         # Eclipse Che RC jobs
         - '{ci_project}-{git_repo}-rc-{test_type}':
             git_organization: eclipse
