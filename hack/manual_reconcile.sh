@@ -150,5 +150,4 @@ wait
 
 print_execution_times
 update_pushgateway
-
-exit $(ls ${FAIL_DIR} | wc -l)
+check_results
