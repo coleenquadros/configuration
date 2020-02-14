@@ -6,7 +6,9 @@ Sentry is an error tracking/management service.  Applications import a sentry SD
 
 Sentry projects are associated to a team in sentry, and members of a team are able to access all data in all projects associated with that sentry team.  We have sentry configured such that users are only able to see projects that are associated to the teams where they have membership.  This is done to keep team/project data isolated from other teams since we are managing a shared instance used by multiple teams.
 
-Creation of sentry teams, projects, and users are all handled through app-interface.  If a user attempts to log into sentry using SSO without creating a necessary configuration in app-interface they will be deleted the next time the integration is run.
+Creation of sentry teams, projects, and users are all handled through app-interface.  If a user attempts to log into sentry without creating a necessary configuration in app-interface then their account will be deleted the next time the integration is run.
+
+Sentry is configured to use Single Sign-On via Github OAuth.  Any mention of SSO in this document refers to this type of setup and only this setup.
 
 ## URLs
 
@@ -24,7 +26,7 @@ Creation of sentry teams, projects, and users are all handled through app-interf
 
 ## User management
 
-Sentry is configured to use SSO with github as the authentication source.  Anyone who is part of the app-sre team in github is able to log into sentry, and sentry will create an account for them.  This actually causes a number of annoying problems stemming from either a lack of an app-interface controlled account to duplicate accounts.
+Sentry is configured to use Single Sign-On via Github OAuth.  Anyone who is part of the app-sre team in github is able to log into sentry, and sentry will create an account for them.  This actually causes a number of annoying problems stemming from either a lack of an app-interface controlled account to duplicate accounts.
 
 ### Lack of sentry account
 
