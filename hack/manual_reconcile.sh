@@ -115,7 +115,6 @@ run_int github &
 run_int github-repo-invites &
 run_int service-dependencies &
 run_int quay-membership &
-run_int quay-mirror &
 run_int quay-repos &
 run_vault_reconcile_integration &
 run_int ocm-groups &
@@ -143,6 +142,7 @@ run_int ldap-users $APP_INTERFACE_PROJECT_ID &
 # Conditionally run integrations according to MR title
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"slack"* ]] && run_int slack-usergroups &
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"sentry"* ]] && run_int sentry-config &
+[[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"mirror"* ]] && run_int quay-mirror &
 # Add STATE=true to integrations that interact with a state
 STATE=true run_int email-sender &
 
