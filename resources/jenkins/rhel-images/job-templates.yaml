@@ -1,0 +1,31 @@
+- job-template:
+    id: 'base-rhel'
+    name: 'rhel-{image_name}-{branch_name}'
+    display-name: 'rhel-{image_name}-{branch_name}'
+    description: 'Do not edit this job through the web!'
+    concurrent: false
+    scm:
+      - git:
+          url: https://github.com/rhdt/EL-Dockerfiles.git
+          shallow_clone: true
+          branches:
+            - '{branch_name}'
+          sparse-checkout:
+            paths:
+              - 'base/{image_name}'
+          included-regions:
+            - 'base/{image_name}/.*'
+    wrappers:
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *quay_secret_openshiftio_push
+    builders:
+      - shell: |
+          if [ ! -f build_push.sh ]; then
+            git show HEAD:build_push.sh > build_push.sh
+            chmod +x build_push.sh
+          fi
+          ./build_push.sh {image_name}
+    triggers:
+      - timed: "H H * * *"
