@@ -45,9 +45,9 @@ For an account to actually be created, the user must have a public e-mail addres
 
 This occurs because sentry isn't great about always associating a new login with an account we have already created through the integration.  What happens is a user attempts to log into sentry, but sentry doesn't associate the existing account with the user logging in and creates a new account for them.  This account won't be part of any of the teams in sentry and thus can't really do anything.
 
-The integration doesn't currently handle multiple accounts with the same e-mail properly, so it continues to manage the account it created while ignoring the account that sentry created on its own.  The solution is to delete the account created by the integration.  The next time the integration runs it will find the account with the expected e-mail address and set the permissions and team membership correctly.
+The integration should handle this situation without any intervention.  However, if for some reason the integration doesn't fix this situation then what is happening is that then integration is managing the account it created while ignoring the account that sentry created on its own.  The solution is to delete the account created by the integration.  The next time the integration runs it will find the account with the expected e-mail address and set the permissions and team membership correctly and manage that account as if it had created it.
 
-You can identify the account that has NOT been logged into because it will usually be only the e-mail address (instead of the user's name and e-mail) and be in the `Invited` state with a link to `Resend Invite`.
+You can identify the account that has NOT been logged into because it will usually be only the e-mail address (instead of the user's name and e-mail) and will have `Invited` text with a link to `Resend Invite` or `Expired` text next to it.
 
 ## Requests to join a team
 
@@ -66,3 +66,7 @@ This should probably never happen to most people, but it is possible for your gi
 The fix for this is 2 fold.  First you log into the admin interface and go to the list of users.  Find the e-mail address/account in sentry you are logging in as, and click on it for details.  Scroll to the bottom and there should be an `Auth identitys` section with an entry for github.  Check the box on the far right and click save to delete it.  Then log out of the admin interface and clear all the cookies in your browser.  In theory you can probably clear only the sentry cookies.  Make sure you delete ALL the cookies, not just ones created recently.  Then, log back into sentry via SSO and it should associate with the correct account.  If not, you probably have a new accounted created and will need to go into the admin interface again to delete the excess account and let the integration fix the permissions.
 
 The duplicate account will be the account with your e-mail address but will NOT have the github auth provider configured.
+
+## How do I find the DSN?
+
+The DSN is a unique string used by the sentry SDK to direct events to a specific project in sentry.  It is located in the settings of the sentry project under the `SDK Setup` section.  There is a link named `Client Keys (DSN)`.  You want the value listed as `DSN` not the `DSN (Deprecated)` one.
