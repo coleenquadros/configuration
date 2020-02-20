@@ -513,6 +513,8 @@ openshiftAcme:
     version: 1
 ```
 
+For namespaces in which the secret names are restricted, we can specify which secret names the `openshift-acme` service account via the `acmeSecrets` array
+
 ### Manage OpenShift Groups association via App-Interface (`/openshift/cluster-1.yml`)
 
 [openshift](/data/openshift) contains all the clusters that are managed by the App-SRE team. Inside of those directories, there is a `cluster.yml` file that describes the cluster.
