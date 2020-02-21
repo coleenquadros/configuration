@@ -39,7 +39,7 @@ In these cases the user will still be able to log into sentry, but will not have
 
 The solution is to solve the lack of app-interface controlled sentry account.  The user needs to have a role that includes sentry_teams in it for the integration to know about the user.
 
-For an account to actually be created, the user must have a public e-mail address set on their github account.  This public e-mail should be their primary e-mail address as that is the e-mail that will be used by the SSO system.
+For an account to actually be created, the user must have a public e-mail address set on their github account.  This public e-mail should be their primary e-mail address as that is the e-mail that will be used by the SSO system.  The user needs to have the the primary e-mail set as their public email in their profile (settings->proflile) and be visible (settings->emails).
 
 ### Duplicate accounts
 
@@ -67,6 +67,10 @@ The fix for this is 2 fold.  First you log into the admin interface and go to th
 
 The duplicate account will be the account with your e-mail address but will NOT have the github auth provider configured.
 
-## How do I find the DSN?
+## How to find the DSN
 
 The DSN is a unique string used by the sentry SDK to direct events to a specific project in sentry.  It is located in the settings of the sentry project under the `SDK Setup` section.  There is a link named `Client Keys (DSN)`.  You want the value listed as `DSN` not the `DSN (Deprecated)` one.
+
+## How to solve events not appearing
+
+This is likely because the sentry-cron and/or sentry-worker pods had a problem contacting the DB.  It seems when this happens the print a traceback in their log files and then continue running.  There's no external indication that there is a problem other than that events aren't getting recorded.  This can be discovered by looking the pod logs and searching for a traceback.  The error will likely report a problem contacting/resolving the DB.  The fix is just to delete the pod and let it be restarted.  If one of th pods has the error it is likely the other one does as well so it's probably best to just delete both pods.
