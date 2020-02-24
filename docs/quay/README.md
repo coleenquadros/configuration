@@ -2,7 +2,7 @@
 
 In the event of a complete loss of Quay, please see the [disaster recovery guide](disaster-recovery.md)
 
-# Quay Services
+## Quay Services
 
 - [RDS (Database)](services/database.md)
 - [Redis](services/redis.md)
@@ -12,25 +12,29 @@ In the event of a complete loss of Quay, please see the [disaster recovery guide
 - Apostille (currently managed by the Quay engineering team)
 - [Action logs pipeline: ElasticSearch, LogStash and Kinesis](services/action-logs/overview.md)
 
-# Quay Deployment
+## Quay Deployment
 
-## Staging
+### Staging
 
 ![](images/quayio-stage.png)
 
-## Production
+### Production
 
 ![](images/quayio-prod.png)
 
-# Debugging Quay issues
+## Debugging Quay issues
 
 See [Debugging Quay](issues/overview.md) for the general guide.
 
-# Quay SOPs
+## Quay SOPs
 
 - [Quay Application SOPs](quayio.md)
 - [Quay Builder Cluster Access & Setup](quay-builder-ocp-cluster-setup/README.md)
 - [Quay Builder Cluster SOPs](builder.md)
 
+## Quay AWS Accounts
 
-
+| Environment | Namespace |
+| --- | --- |
+|Stage|[AWS Console](https://quayio-stage.signin.aws.amazon.com/console)|
+|Production|[AWS Console]()|
