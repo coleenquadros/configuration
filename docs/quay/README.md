@@ -10,7 +10,6 @@ In the event of a complete loss of Quay, please see the [disaster recovery guide
 - [Quay Build Cluster](builder.md)
 - Clair (currently managed by the Quay engineering team)
 - Apostille (currently managed by the Quay engineering team)
-
 - [Action logs pipeline: ElasticSearch, LogStash and Kinesis](services/action-logs/overview.md)
 
 # Quay Deployment
@@ -23,15 +22,15 @@ In the event of a complete loss of Quay, please see the [disaster recovery guide
 
 ![](images/quayio-prod.png)
 
-
 # Debugging Quay issues
 
 See [Debugging Quay](issues/overview.md) for the general guide.
 
 # Quay SOPs
 
+- [Quay Application SOPs](quayio.md)
 - [Quay Builder Cluster Access & Setup](quay-builder-ocp-cluster-setup/README.md)
 - [Quay Builder Cluster SOPs](builder.md)
-- [Quay Application SOPs](quayio.md)
+
 
 

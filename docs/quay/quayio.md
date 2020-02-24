@@ -24,6 +24,23 @@
 |Production (us-east-1)|[Prometheus](https://prometheus.quayio-prod-us-east-1.devshift.net/graph)|
 |Production (us-east-2)|[Prometheus](https://prometheus.quayio-prod-us-east-2.devshift.net/graph)|
 
+
+## Quay Runtime Grafana Dashboard
+
+| Environment | Namespace |
+| --- | --- |
+|Stage|[Grafana](https://grafana.stage.devshift.net/d/_BkydJaWz/quay-io-runtime?orgId=1&var-rate=1m&var-datasource=quayio-stage-prometheus)|
+|Production (us-east-1)|[Grafana](https://grafana.app-sre.devshift.net/d/_BkydJaWz/quay-io-runtime?orgId=1&var-rate=1m&var-datasource=quayio-prod-us-east-1-prometheus)|
+|Production (us-east-2)|[Grafana](https://grafana.app-sre.devshift.net/d/_BkydJaWz/quay-io-runtime?orgId=1&var-rate=1m&var-datasource=quayio-prod-us-east-2-prometheus)|
+
+## Quay AWS Resources Grafana Dashboard
+
+| Environment | Namespace |
+| --- | --- |
+|Stage|[Grafana](https://grafana.stage.devshift.net/d/_BkydJaW123/quay-stage-aws-resources-us-east-1?orgId=1&refresh=1m)|
+|Production (us-east-1)|[Grafana]()|
+|Production (us-east-2)|N/A|
+
 ## Jenkins Jobs
 
 Quay Jenkins jobs can be found [here](https://ci-int-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/view/quayio/). Following Jenkins configured for Quay right now:
