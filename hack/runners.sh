@@ -16,6 +16,7 @@ run_int() {
     -v /etc/pki:/etc/pki:z \
     -v ${WORK_DIR}/throughput:/throughput:z \
     -v /var/tmp/.cache:/root/.cache:z \
+    -e GITHUB_API=$GITHUB_API \
     -e REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem \
     $GITLAB_PR_SUBMITTER_QUEUE_URL_ENV \
     $APP_INTERFACE_STATE_ENV \
