@@ -11,6 +11,9 @@
     build_branch: master
     manifest_bouncer_tag: d21c96f
     trigger_phrase: '.*\[test\].*'
+    che-success-message: ""
+    che-failure-message: ""
+    che-error-message: ""
 
 - admin_list_defaults: &admin_list_defaults
     name: 'admin_list_defaults'
@@ -160,6 +163,9 @@
     trigger-phrase: '{trigger_phrase}'
     allow-whitelist-orgs-as-admins: false
     status-context: "ci.centos.org PR check ({job_type})"
+    success-comment: "{che-success-message}"
+    failure-comment: "{che-failure-message}"
+    error-comment: "{che-error-message}"
 
 
 - github_pull_request_defaults: &github_pull_request_defaults
@@ -1758,9 +1764,9 @@
 
     <<: *eclipse-che-automation-template
 
-- job-template:
-    name: '{ci_project}-{git_repo}-pullrequests-{job_type}'
+- job-template: &che-pullrequest-template
     concurrent: true
+    defaults: global
     properties:
         - throttle:
             option: project
@@ -1771,14 +1777,34 @@
             days-to-keep: '{discarder_days}'
             num-to-keep: '{discarder_num}'
     triggers:
-        - che_githubprb:
+        - github-pull-request:
             trigger_phrase: '{trigger_phrase}'
             job_type: '{job_type}'
+            <<: *che_github_pull_request_defaults
     scm:
         - che-git-scm:
             git_url: https://che-bot@github.com/{git_organization}/{git_repo}.git
             git_basedir: ''
     <<: *eclipse-che-automation-template
+
+- job-template:
+    name: '{ci_project}-{git_repo}-pullrequests-build'
+    <<: *che-pullrequest-template
+
+- job-template:
+    name: '{ci_project}-{git_repo}-pullrequests-{job_type}'
+    che-success-message: "E2E tests of Eclipse Che Multiuser on OCP has been successful:\n
+    - [Build details](https://ci.centos.org/view/Devtools/job/devtools-che-pullrequests-java-selenium-tests.xml/$BUILD_NUMBER/) \n
+    - [Test report](http://artifacts.ci.centos.org/devtools/che/che-pullrequests-java-selenium-tests/$BUILD_NUMBER/report/site/failsafe-report.html) "
+    che-failure-message: "E2E tests of Eclipse Che Multiuser on OCP has failed:\n
+    - [Build details](https://ci.centos.org/view/Devtools/job/devtools-che-pullrequests-java-selenium-tests.xml/$BUILD_NUMBER/) \n
+    - [Test report](http://artifacts.ci.centos.org/devtools/che/che-pullrequests-java-selenium-tests/$BUILD_NUMBER/report/site/failsafe-report.html) \n \n
+    Use command [ci-test] to rerun the test. "
+    che-error-message: "E2E tests of Eclipse Che Multiuser on OCP has failed:\n
+    - [Build details](https://ci.centos.org/view/Devtools/job/devtools-che-pullrequests-java-selenium-tests.xml/$BUILD_NUMBER/) \n
+    - [Test report](http://artifacts.ci.centos.org/devtools/che/che-pullrequests-java-selenium-tests/$BUILD_NUMBER/report/site/failsafe-report.html) \n \n
+    Use command [ci-test] to rerun the test. "
+    <<: *che-pullrequest-template
 
 - job-template:
     name: '{ci_project}-{git_repo}-rc-{test_type}'
@@ -2368,10 +2394,14 @@
 
 - job-template:
     name: '{ci_project}-{git_repo}-pr-check'
+    defaults: global
     triggers:
         - che_githubprb:
             trigger_phrase: '{trigger_phrase}'
             job_type: '{job_type}'
+            che-success-message: '{che-success-message}'
+            che-failure-message: '{che-failure-message}'
+            che-error-message: '{che-error-message}'
     <<: *job_template_defaults
 
 - job-template:
@@ -4749,7 +4779,7 @@
             ci_cmd: '/bin/bash tests/.infra/centos-ci/cico_pr_test.sh'
             timeout: '3h'
             trigger_phrase: '.*\[ci-test\].*'
-        - '{ci_project}-{git_repo}-pullrequests-{job_type}':
+        - '{ci_project}-{git_repo}-pullrequests-build':
             git_organization: eclipse
             git_repo: che
             ci_project: 'devtools'
@@ -4757,7 +4787,7 @@
             ci_cmd: '/bin/bash .ci/cico_build_pullrequest.sh'
             timeout: '3h'
             trigger_phrase: '.*\[ci-build\].*'
-        - '{ci_project}-{git_repo}-pullrequests-{job_type}':
+        - '{ci_project}-{git_repo}-pullrequests-build':
             git_organization: eclipse
             git_repo: che-theia
             ci_project: 'devtools'
