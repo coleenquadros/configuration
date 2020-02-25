@@ -38,7 +38,7 @@
 | Environment | Namespace |
 | --- | --- |
 |Stage|[Grafana](https://grafana.stage.devshift.net/d/_BkydJaW123/quay-stage-aws-resources-us-east-1?orgId=1&refresh=1m)|
-|Production (us-east-1)|[Grafana]()|
+|Production (us-east-1)|[Grafana](https://grafana.app-sre.devshift.net/d/_BkydJaWqprod1234/quay-production-aws-resources-us-east-1?orgId=1&refresh=1m)|
 |Production (us-east-2)|N/A|
 
 ## Jenkins Jobs
