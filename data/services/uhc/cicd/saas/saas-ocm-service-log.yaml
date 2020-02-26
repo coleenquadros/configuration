@@ -1,0 +1,50 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: ocm
+
+name: saas-ocm-service-log
+description: 'SaaS tracking file for OCM Service Log'
+
+app:
+  $ref: /services/uhc/app.yml
+
+managedResourceTypes:
+- Deployment
+- Service
+
+resourceTemplates:
+- name: ocm-service-log
+  url: https://gitlab.cee.redhat.com/service/ocm-service-log
+  path: /templates/service-template.yml
+  image_authentication:
+    path: app-sre/quay/app-sre-push
+    field: all
+  hash_length: 7
+  parameters:
+    ENVIRONMENT: production
+    IMAGE_REGISTRY: quay.io
+    IMAGE_REPOSITORY: app-sre/ocm-service-log
+    JWKS_URL: https://api.openshift.com/.well-known/jwks.json
+    REPLICAS: 3
+  targets:
+  - namespace:
+      $ref: /services/uhc/namespaces/uhc-stage.yml
+    hash: master
+    parameters:
+      OCM_BASE_URL: https://api.stage.openshift.com
+      GLOG_V: 5
+  - namespace:
+      $ref: /services/uhc/namespaces/uhc-integration.yml
+    hash: master
+    parameters:
+      OCM_BASE_URL: https://api-integration.6943.hive-integration.openshiftapps.com
+      GLOG_V: 5
+      OCM_DEBUG: true
+  - namespace:
+      $ref: /services/uhc/namespaces/uhc-production.yml
+    hash: 05172b7dc25a503b51114e33ea10ba6697528adc
+    parameters:
+      OCM_BASE_URL: https://api.openshift.com
+      GLOG_V: 1
