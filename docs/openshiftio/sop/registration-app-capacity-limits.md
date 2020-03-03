@@ -25,7 +25,7 @@ The App-SRE member need to have access to the [OpenShift Online Registration por
 
 # Adjusting cluster capacity
 
-A dashboard is available in [Zabbix](https://zabbix.devshift.net:9443/zabbix/screens.php?elementid=63) and [Prometheus](https://grafana.app-sre.devshift.net/d/osio_capacity/osio-capacity?orgId=1&from=now-1h&to=now) (WIP)
+A dashboard is available here  [Prometheus](https://grafana.app-sre.devshift.net/d/osio_capacity/osio-capacity?orgId=1&from=now-1h&to=now)
 
 To adjust cluster capacity limits, a user must:
 - Login to the [OpenShift Online Registration portal](https://manage.openshift.com/admin/)

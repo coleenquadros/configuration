@@ -169,10 +169,6 @@ Every app-sre engineer should have access to the following
     - Login as Red Hat Associate with kerberos credentials
   - Verify you have permissions to view private and private_comment.  This should be provided as part of the redhat group.  See [here](https://mojo.redhat.com/docs/DOC-1197751) for group information.
 
-- Zabbix (Being deprecated by 31 Dec 2019):
-  - ACCESS: Ask an app-sre member to create an account with Admin access
-  - Once account is created login [here](https://zabbix.devshift.net:9443/zabbix/zabbix.php?action=dashboard.view)
-
 - Dedicated admin on openshift clusters
   - Nothing to do. Obtained via a [role](data/teams/app-sre/roles/app-sre.yml)
 

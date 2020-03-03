@@ -27,18 +27,6 @@
 		* [Prequisites:](#Prequisites:)
 		* [Process:](#Process:)
 		* [App-Interface Performance Parameters Schema:](#App-InterfacePerformanceParametersSchema:)
-* [Zabbix](#Zabbix)
-	* [Access](#Access-1)
-		* [Create a user group](#Createausergroup)
-		* [Create a user](#Createauser)
-	* [Monitoring](#Monitoring)
-		* [Zabbix agent](#Zabbixagent)
-		* [Zabbix proxy:](#Zabbixproxy:)
-	* [Alerting](#Alerting)
-		* [Create an action](#Createanaction)
-		* [Supported alerting channels](#Supportedalertingchannels)
-	* [Visualization](#Visualization)
-		* [Graphs](#Graphs)
 * [Monitor a persistent volume's filesystem used/available space](#Monitorapersistentvolumesfilesystemusedavailablespace)
 	* [Meta: Comparing the capabilities of the two stacks](#Meta:Comparingthecapabilitiesofthetwostacks)
 	* [Which one is right for you](#Whichoneisrightforyou)
@@ -386,10 +374,6 @@ Currently added datasources:
 - Cluster-prometheus for dsaas, dsaas-stg, app-sre
 - Graphite on dsaas
 
-ToDo datasources:
-
-- App-sre Zabbix (We may not add this because of https://github.com/alexanderzobnin/grafana-zabbix/issues/684)
-- RDU prometheus
 
 #### <a name='Addingdashboards'></a>Adding dashboards
 
@@ -511,140 +495,6 @@ To make sure we are consistent across the stack for our alerts, we enforce a few
 Once you have specified your SLX rules in the Performance Parameters schema format and the PR gets merged into app-interface, our integrations will make sure that the rules are added to prometheus and we start recording SLX metrics. 
 
 The story around how we can consume these to create a report is still WIP. 
-
-## <a name='Zabbix'></a>Zabbix
-
-Zabbix has been our primary monitoring system, and monitors many of the critical web endpoints, and almost all of the metrics related to the OpenShift.io service.
-
-While we transition to a prometheus based model, Zabbix continues to monitor for critical endpoints and clusters, and serves as a safety net.
-
-### <a name='Access-1'></a>Access
-
-Access to the Zabbix instance is currently managed manually. In case you require access, please add a ticket to the App-SRE Jira board, and ping #sd-app-sre for access.
-
-#### <a name='Createausergroup'></a>Create a user group
-
-**Adminsitration>Users groups**
-
-    Group Name: Bayesian
-    In Group: (users that should be part of that group initially)
-    Frontend access: System default
-    Enabled: yes
-
-**Permissions tab**
-
-    Host group: Bayesian - Readonly
-
-#### <a name='Createauser'></a>Create a user
-
-**Adminsitration>Users**
-
-    Alias: jfchevrette
-    Name: Jean-Francois
-    Last: Chevrette
-    Groups: Bayesian
-    Password: <Long, randomly generated string>
-
-**Media tab**
-
-    Type: Email
-    Sent to: someone@redhat.com
-    When active: 1-7,00:00-24:00
-    Use if severity: <ALL>
-
-**Permissions tab**
-
-    Type: Zabbix user
-
-Once the user is created, use the user's GPG public key to send them the credentials. Best practice is that they rotate the keys on first login, but we cannot enforce this via zabbix.
-
-Send an email with the following template, encrypted with the GPG public key of the user:
-
-**Subject:**
-
-`Access to the App-SRE Zabbix Instance`
-
-**Body:**
-
-```yaml
-Hello,
-
-We have added you with Read access to the App-SRE Zabbix Instance
-
-Please use the following credentials to sign in.
-
-Username: <username>
-Password: <password>
-
-Once you are signed in, please make sure that you change your password.
-
-The Zabbix web console can be accessed at: https://zabbix.devshift.net:9443/zabbix/
-
-Happy monitoring!
-```
-
-GPG public keys can be found here: https://gitlab.cee.redhat.com/dtsd/housekeeping/tree/master/gpg
-
-### <a name='Monitoring'></a>Monitoring
-
-#### <a name='Zabbixagent'></a>Zabbix agent
-
-Zabbix agent runs on each of our hosts and collects node metrics. The agent can be in an active or passive configuration, meaning it may be scraped by the zabbix server/proxy or optionally send the metrics actively to the server/proxy without being scraped.
-
-#### <a name='Zabbixproxy:'></a>Zabbix proxy:
-
-We run a zabbix proxy in active mode in BLR lab. This is because the BLR lab is inside the VPN, and Zabbix server cannot initiate a connection to it from outside the VPN.
-
-The Zabbix proxy monitoring all the Bangalore lab nodes, along with ci.int and other scripts running in BLR.
-
-### <a name='Alerting'></a>Alerting
-
-#### <a name='Createanaction'></a>Create an action
-
-Notifications in zabbix are handled by **actions**. Actions are global objects (as opposed to per-host, etc..) that only **Zabbix Administrators** can change. Because of this, notifications have to be configured by the App-Sre team.
-
-1. Go to https://zabbix.devshift.net:9443/zabbix/actionconf.php
-
-1. Create a new action, enter a name, a message subject and body and optionally a recovery message.
-
-    ![action1](images/action1.png)
-
-1. Enter one or more conditions. Typically you at least want the following
-    - Maintenance status not in maintenance
-    - Trigger value = PROBLEM
-    - Host = myhost
-
-    ![action2](images/action2.png)
-
-1. Set up operations, or in other words what will happen when the conditions are met. Typical settings are:
-    - Step duration: 3600
-    - Operation
-        - Step: 1 - 0 (infinity)
-        - Type: Send message
-        - Send to user groups / Sent to users
-            - For mattermost notifications, you want to select the mattermost-* user that matches the channel you want to sent alerts to
-        - Send only to: Mattermost alerts (or email for email alerts)
-
-    ![action3](images/action3.png)
-
-1. The [action log](https://zabbix.devshift.net:9443/zabbix/auditacts.php) can be used to verify if notifications are sent properly
-
-#### <a name='Supportedalertingchannels'></a>Supported alerting channels
-
-Zabbix has been configured to support the following alerting channels:
-
-- Mattermost
-- Slack
-- Pagerduty
-- Email
-
-Notification channels can be added either via Zabbix-native functionality, or via Alertscripts.
-
-For example, we use AlertScripts for Mattermost and Slack notifications, they can be found in the Zabbix configuration here: https://gitlab.cee.redhat.com/dtsd/housekeeping/tree/master/ansible/playbooks/roles/zabbix-server/files/alertscripts
-
-### <a name='Visualization'></a>Visualization
-
-#### <a name='Graphs'></a>Graphs
 
 # Getting started
 
