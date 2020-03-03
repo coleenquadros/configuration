@@ -2403,6 +2403,18 @@
     <<: *job_template_defaults
 
 - job-template:
+    name: '{ci_project}-{git_repo}-pr-check-chectl'
+    defaults: global
+    triggers:
+        - che_githubprb:
+            trigger_phrase: '{trigger_phrase}'
+            job_type: '{job_type}'
+            che-success-message: '{che-success-message}'
+            che-failure-message: '{che-failure-message}'
+            che-error-message: '{che-error-message}'
+    <<: *job_template_defaults
+
+- job-template:
     name: '{ci_project}-{git_repo}-release'
     concurrent: false
     wrappers:
@@ -4707,6 +4719,12 @@
             ci_cmd: '/bin/bash .ci/cico_operator_prcheck.sh'
             timeout: '1h'
             job_type: "e2e tests"
+        - '{ci_project}-{git_repo}-pr-check-chectl':
+            git_organization: che-incubator
+            git_repo: chectl
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash .ci/cico_chectl_prcheck.sh'
+            timeout: '1h'
         - '{ci_project}-{git_repo}-che-nightly':
             git_organization: eclipse
             git_repo: che-theia
