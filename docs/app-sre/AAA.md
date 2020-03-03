@@ -360,6 +360,15 @@ Post RCA comms, followups:
 3. Ping the On Call in #ops-escalation in the Red Hat Internal IRC Server - irc.devel.redhat.com.
 
 ## 1.11. Escalation procedures
+### 1.11.1 Telemeter incidents 
+
+The telemetry-dev team has an oncall rotation and engineers are ready to be triggered.
+It's a temporary status with the short term goal to improve incident-runbooks, stability and availability.
+
+- Telemeter incidents are first handled by the AppSRE team.
+- After *30 min* at most or before, incident impacting telemetry should be reassigned to the the telemetry-dev team [PagerDuty delegate](https://support.pagerduty.com/docs/reassigning-and-delegating-incidents#section-delegating-an-incident).
+- Reassignement isn't the end of the AppSRE oncall shift, they should continue to work on the incident and peer with the oncall developer.
+
 
 AppSRE on-call may be assigned PagerDuty incidents that were triggered by our tenants from Slack using the steps documented [here](paging-appsre-oncall.md). As these incidents are manually triggered, they may not be very detailed. Oncall should check slack messages for incident details.
 
