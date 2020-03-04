@@ -1,0 +1,50 @@
+get_object_enable_dirs: ["sharedimages", "sha256", "logarchive", "cnr", "userfiles"]
+acl: private
+versioning: true
+storage_class: intelligent_tiering
+cors_rules:
+- allowed_origins: ["*"]
+  allowed_methods: ["GET"]
+  allowed_headers: ["Authorization"]
+  max_age_seconds: 3000
+- allowed_origins: ["*"]
+  allowed_methods: ["PUT"]
+  allowed_headers: ["Content-Type", "x-amz-acl", "origin"]
+  max_age_seconds: 3000
+lifecycle_rules:
+- id: abort_incomplete_multipart_upload
+  enabled: true
+  prefix: uploads/
+  expiration:
+    days: 2
+  abort_incomplete_multipart_upload_days: 2
+distribution_config:
+  default_cache_behavior:
+    cached_methods: ["GET", "HEAD"]
+    allowed_methods: ["GET", "HEAD", "OPTIONS"]
+    default_ttl: 31536000 # 1 year
+    min_ttl: 31536000 # 1 year
+    max_ttl: 31536000 # 1 year
+    forwarded_values:
+      query_string: false
+      cookies:
+        forward: "none"
+    # an origin will be created automatically
+    # to match the taget_origin_id
+    target_origin_id: S3-blob-bucket
+    trusted_signers: ["self"]
+    viewer_protocol_policy: https-only
+  enabled: true
+  http_version: http2
+  is_ipv6_enabled: false
+  restrictions:
+    geo_restriction:
+      restriction_type: "none"
+  viewer_certificate:
+    cloudfront_default_certificate: true
+replication_configurations:
+- rule_name: test
+  status: enabled
+  destination_bucket_identifier: test
+  storage_class: onezone_ia
+
