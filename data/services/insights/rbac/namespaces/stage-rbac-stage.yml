@@ -17,6 +17,7 @@ managedRoles: true
 
 
 managedResourceTypes:
+- Secret
 - ConfigMap
 
 openshiftResources:
@@ -26,3 +27,23 @@ openshiftResources:
   path: /insights-stage/rbac-stage/rbac-env.configmap.yml
 - provider: resource
   path: /insights-stage/rbac-stage/redis-config.configmap.yml
+- provider: vault-secret
+  path: insights/secrets/insights-stage/rbac-stage/rbac-secret
+  version: 1
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights/shared/rds-ca-cert.secret.yaml
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-stage
+  identifier: rbac-stage
+  defaults: /terraform/resources/insights/staging/rds-1.yml
+  output_resource_name: rbac-db
