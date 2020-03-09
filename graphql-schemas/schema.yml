@@ -337,6 +337,7 @@
   - { name: automationToken, type: VaultSecret_v1 }
   - { name: internal, type: boolean }
   - { name: disable, type: DisableClusterAutomations_v1 }
+  - { name: awsInfrastructureAccess, type: AWSInfrastructureAccess_v1, isList: true }
   - { name: prometheus, type: ClusterPrometheus_v1}
   - name: namespaces
     type: Namespace_v1
@@ -363,6 +364,11 @@
       schema: /openshift/cluster-1.yml
       subAttr: cluster
 
+- name: AWSInfrastructureAccess_v1
+  fields:
+  - { name: awsGroup, type: AWSGroup_v1, isRequired: true }
+  - { name: accessLevel, type: string, isRequired: true }
+
 - name: AWSAccount_v1
   fields:
   - { name: schema, type: string, isRequired: true }
@@ -374,6 +380,7 @@
   - { name: uid, type: string, isRequired: true }
   - { name: resourcesDefaultRegion, type: string, isRequired: true }
   - { name: supportedDeploymentRegions, type: string, isList: true }
+  - { name: terraformUsername, type: string }
   - { name: accountOwners, type: Owner_v1, isList: true, isRequired: true }
   - { name: automationToken, type: VaultSecret_v1, isRequired: true }
   - { name: disable, type: DisableClusterAutomations_v1 }
@@ -388,6 +395,12 @@
   - { name: name, type: string, isRequired: true }
   - { name: description, type: string }
   - { name: policies, type: string, isList: true }
+  - name: roles
+    type: Role_v1
+    isList: true
+    synthetic:
+      schema: /access/role-1.yml
+      subAttr: aws_groups
 
 - name: AWSUserPolicy_v1
   fields:

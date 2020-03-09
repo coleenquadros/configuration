@@ -118,6 +118,7 @@ run_int quay-repos &
 run_vault_reconcile_integration &
 run_int ocm-clusters &
 run_int ocm-groups &
+run_int ocm-aws-infrastructure-access &
 run_int openshift-groups &
 run_int openshift-users &
 run_int jenkins-plugins &
