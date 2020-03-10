@@ -323,7 +323,7 @@ labels:
 
 name: app-sre
 description: App-SRE official sentry-stage team
-instance: 
+instance:
   $ref: /dependencies/sentry/sentry-stage.yml
 ```
 
@@ -351,7 +351,7 @@ Notes:
 
 OpenShift resources can be entirely self-serviced via App-Interface. A list of supported resource types can be found [here](/schemas/openshift/namespace-1.yml#L46).
 
-Some resources have special caracteristics and are described further below. These have a specific `provider` value.
+Some resources have special characteristics and are described further below. These have a specific `provider` value.
 - `Secret`
 - `Route`
 
@@ -420,6 +420,7 @@ type: Opaque
 data:
   not_so_secret_value: {{{ vault('app-interface/my-cluster/my-namespace/my-not-so-secret-secret', 'the-key') }}}
 ```
+
 
 #### Manage Secrets via App-Interface (`/openshift/namespace-1.yml`) using Vault
 
