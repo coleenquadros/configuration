@@ -15,3 +15,45 @@ app:
 
 managedRoles: true
 
+managedResourceTypes:
+  - Secret
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/insights-stage/system-baseline/cloudwatch
+  version: 1
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-stage
+  identifier: system-baseline-stage
+  defaults: /terraform/resources/insights/staging/rds-1.yml
+  output_resource_name: system-baseline-prod-db
+- provider: service-account
+  account: insights-stage
+  identifier: insights-system-baseline-stage-cloudwatch
+  variables:
+    aws_region: us-east-1
+  user_policy:
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "logs:CreateLogStream",
+            "logs:PutLogEvents"
+          ],
+          "Resource": [
+            "arn:aws:logs:*:*:*"
+          ]
+        }
+      ]
+    }
