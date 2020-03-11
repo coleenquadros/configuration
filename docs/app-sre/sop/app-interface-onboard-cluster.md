@@ -68,7 +68,7 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
     $schema: /openshift/cluster-1.yml
 
     labels:
-    service: <cluster>
+      service: <cluster>
 
     name: <cluster>
     description: <cluster> cluster
@@ -78,19 +78,19 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
     serverUrl: "https://api.cluster..."
 
     auth:
-    service: github-org-team
-    org: app-sre
-    team: <cluster>-cluster
+      service: github-org-team
+      org: app-sre
+      team: <cluster>-cluster
 
     ocm:
-    $ref: /dependencies/ocm/production.yml
+      $ref: /dependencies/ocm/production.yml
 
     managedGroups:
     - dedicated-admins
 
     automationToken:
-    path: app-sre/creds/kube-configs/<cluster>
-    field: token
+      path: app-sre/creds/kube-configs/<cluster>
+      field: token
 
     internal: false
     ```
