@@ -129,7 +129,6 @@ run_int aws-iam-keys &
 run_int gitlab-members &
 run_int gitlab-projects &
 run_int gitlab-permissions &
-run_int sql-query &
 run_int openshift-namespaces &
 run_int openshift-clusterrolebindings &
 run_int openshift-rolebindings &
@@ -148,6 +147,7 @@ run_int owner-approvals $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIi
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"sentry"* ]] && run_int sentry-config &
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"mirror"* ]] && run_int quay-mirror &
 # Add STATE=true to integrations that interact with a state
+STATE=true run_int sql-query &
 STATE=true run_int email-sender &
 
 wait
