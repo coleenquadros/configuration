@@ -21,10 +21,7 @@ managedResourceTypes:
 
 openshiftResources:
 - provider: vault-secret
-  path: insights/secrets/insights-stage/advisor/classic-creds
-  version: 1
-- provider: vault-secret
-  path: insights/secrets/insights-stage/advisor/cloudwatch
+  path: insights/secrets/insights-stage/advisor-stage/classic-creds
   version: 1
 - provider: vault-secret
   path: insights/quay/quay.io
@@ -32,7 +29,7 @@ openshiftResources:
   type: kubernetes.io/dockerconfigjson
   name: quay-cloudservices-pull
 - provider: resource
-  path: /insights-stage/advisor/platform-config.configmap.yml
+  path: /insights-stage/advisor-stage/platform-config.configmap.yml
 - provider: resource-template
   type: extracurlyjinja2
   path: /insights/shared/rds-ca-cert.secret.yaml
@@ -48,25 +45,3 @@ terraformResources:
   identifier: advisor-stage
   defaults: /terraform/resources/insights/staging/rds-1.yml
   output_resource_name: advisor-db
-- provider: service-account
-  account: insights-stage
-  identifier: insights-advisor-stage-service
-  variables:
-    aws_region: us-east-1
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [
-        {
-          "Effect": "Allow",
-          "Action": [
-            "logs:CreateLogStream",
-            "logs:PutLogEvents"
-          ],
-          "Resource": [
-            "arn:aws:logs:*:*:*"
-          ]
-        }
-      ]
-    }
-  output_resource_name: aws-user
