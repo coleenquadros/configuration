@@ -129,6 +129,7 @@ run_int aws-iam-keys &
 run_int gitlab-members &
 run_int gitlab-projects &
 run_int gitlab-permissions &
+run_int sql-query &
 run_int openshift-namespaces &
 run_int openshift-clusterrolebindings &
 run_int openshift-rolebindings &
