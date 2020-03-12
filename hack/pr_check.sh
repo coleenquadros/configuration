@@ -15,14 +15,6 @@ source ./.env
 RESULTS=$TEMP_DIR/reports/results.json
 REPORT=$TEMP_DIR/reports/index.html
 
-# Check that app-sre bot has permissions on fork
-# and that the PR's source branch is not master (unable to rebase)
-./$CURRENT_DIR/test_fork.sh
-exit_status=$?
-
-# Exit if app-sre bot is not a member
-[ "$exit_status" != "0" ] && exit $exit_status
-
 # Run validator
 OUTPUT_DIR=${TEMP_DIR}/validate make bundle
 OUTPUT_DIR=${TEMP_DIR}/validate make validate | tee ${RESULTS}
