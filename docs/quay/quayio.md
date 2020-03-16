@@ -94,6 +94,12 @@ Access to the [saas-quay](https://gitlab.cee.redhat.com/service/saas-quay) repos
 
 Deployments are managed by the development team themselves. AppSRE review or approval are not needed on merge requests to the [saas-quay](https://gitlab.cee.redhat.com/service/saas-quay).
 
+### Deploying Read-Only
+
+Quay can be deployed in a read-only state, which will allow for pulls but disable all write operations. This is typically used during infrastructure migrations, such as moving the database.
+
+See [Deploying Quay Read-Only](services/read-only.md) for more information.
+
 ### Trigger Deployment on Code Change
 To promote changes to production, you need to update the commit hash in the [saas-quay](https://gitlab.cee.redhat.com/service/saas-quay) repository. Once you have raised a merge request, you need to work with Quay developers who have permission to merge. Once the merge request is merged, deployment pipeline will be automatically triggered to perform new deployment. Here's an [example](https://gitlab.cee.redhat.com/service/saas-quay/merge_requests/25/diffs).
 
