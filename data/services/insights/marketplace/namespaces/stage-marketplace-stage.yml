@@ -13,6 +13,21 @@ cluster:
 app:
   $ref: /services/insights/marketplace/app.yml
 
+managedRoles: true
+
+managedResourceTypes:
+- Secret
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/insights-stage/marketplace-stage/marketplace-secret
+  version: 2
+
 managedTerraformResources: true
 
 terraformResources:
@@ -21,3 +36,8 @@ terraformResources:
   identifier: open-marketplace-stage
   defaults: /terraform/resources/s3-private-1.yml
   output_resource_name: marketplace-s3
+- provider: rds
+  account: insights-stage
+  identifier: marketplace-stage
+  defaults: /terraform/resources/insights/staging/rds-1.yml
+  output_resource_name: marketplace-db
