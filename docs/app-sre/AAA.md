@@ -98,6 +98,8 @@ Every app-sre engineer should have access to the following
   - Channels: as stated [here](/data/teams/app-sre/permissions/app-sre-team-coreos-slack.yml) -> obtained via the @app-sre-team user group membership
 
 - Internal IRC (irc.devel.redhat.com):
+  - #appsre: backup channel if Slack is down or if sensitive content must be addressed.
+  - #servicedelivery: backup channel for service delivery org if Slack is down.
   - #MIM: Major incident management
   - #aos: Openshift
   - #libra-ops: Openshift SD SRE-ops
