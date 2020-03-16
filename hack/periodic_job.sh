@@ -21,8 +21,6 @@ CURRENT_DIR=$(dirname "$0")
 source $CURRENT_DIR/runners.sh
 
 APP_INTERFACE_PROJECT_ID=13582
-HOUSEKEEPING_PROJECT_ID=4713
-MANAGED_TENANTS_PROJECT_ID=23836
 
 GRAPHQL_SERVER=https://${GRAPHQL_SERVER_BASE_URL}/graphql
 
@@ -36,10 +34,8 @@ run_int jenkins-roles &
 run_int jenkins-job-builder &
 run_int jenkins-webhooks &
 run_int gitlab-members &
-run_int gitlab-housekeeping $APP_INTERFACE_PROJECT_ID &
-run_int gitlab-housekeeping $HOUSEKEEPING_PROJECT_ID &
+run_int gitlab-housekeeping  &
 run_int gitlab-owners &
-run_int gitlab-housekeeping $MANAGED_TENANTS_PROJECT_ID --no-enable-rebase &
 run_int gitlab-permissions &
 run_int ldap-users $APP_INTERFACE_PROJECT_ID &
 run_int slack-usergroups &
