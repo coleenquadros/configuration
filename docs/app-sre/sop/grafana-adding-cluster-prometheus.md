@@ -15,3 +15,13 @@ Adding a cluster-prometheus instance to our grafana setup allows us to have a ce
 - Once the secret is updated, we need to bump the secret version in app-interface for the corresponding namespace. For example, the grafana-datasources secret is referenced here [Link](https://gitlab.cee.redhat.com/service/app-interface/blob/49771fdb03749dfeed871d05cb447438232bfb50/data/services/observability/namespaces/app-sre-prometheus.yml#L56-58)
 
 - Once the PR to app-interface is merged, check for the availability of the new datasource in Grafana
+
+# Adding a workload monitoring prometheus
+
+Go to https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/grafana/datasources
+
+Add a new key with name {clustername}-prometheus
+
+The value should be coming from the original htpasswd string (not the hash) for the oauth proxy container. For example see: https://vault.devshift.net/ui/vault/secrets/app-interface/show/quayio-prod-us-east-1/openshift-customer-monitoring/prometheus-auth-proxy
+
+Bump the secret version in app-interface for the corresponding namespace. 
