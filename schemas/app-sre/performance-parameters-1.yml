@@ -29,11 +29,29 @@ properties:
     description: "labels that Prometheus uses to select this rules file"
     type: object
 
-  namespaces:
+  namespace:
+    "$ref": "/common-1.json#/definitions/crossref"
+    "$schemaRef": "/openshift/namespace-1.yml"
+
+  sloReports:
     type: array
     items:
-      "$ref": "/common-1.json#/definitions/crossref"
-      "$schemaRef": "/openshift/namespace-1.yml"
+      type: object
+      additionalProperties: false
+
+      properties:
+        date:
+          type: string
+          pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+
+        url:
+          type: string
+          format: uri
+          description: "Link this to some proof of where SLO's are coming from. Not a JIRA ticket"
+
+      required:
+      - date
+      - url
 
   volume:
     type: array
@@ -42,9 +60,12 @@ properties:
       additionalProperties: false
 
       properties:
+        description:
+          type: string
+
         kind:
           type: string
-          enum: ['SLO','SLA']
+          enum: ['SLO']
 
         metric:
           type: string
@@ -54,15 +75,25 @@ properties:
           description: "Metric selectors to be used in Prometheus rule"
           type: object
 
-        peak:
-          description: "peak requests per second"
+        threshold:
+          description: "Maximum value of the metric"
           type: number
+
+        target:
+          description: "SLO target percentage"
+          type: number
+
+        httpStatusLabel:
+          description: "Name of the label that contains the http status code"
+          type: string
+          pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
 
       required:
       - kind
       - metric
       - selectors
-      - peak
+      - threshold
+      - target
 
   availability:
     type: array
@@ -71,9 +102,12 @@ properties:
       additionalProperties: false
 
       properties:
+        description:
+          type: string
+
         kind:
           type: string
-          enum: ['SLO','SLA']
+          enum: ['SLO']
 
         metric:
           type: string
@@ -83,14 +117,20 @@ properties:
           description: "Metric selectors to be used in Prometheus rule"
           type: object
 
-        errorBudget:
+        target:
+          description: "SLO target percentage"
           type: number
+
+        httpStatusLabel:
+          description: "Name of the label that contains the http status code"
+          type: string
+          pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
 
       required:
       - kind
       - metric
       - selectors
-      - errorBudget
+      - target
 
   latency:
     type: array
@@ -99,9 +139,12 @@ properties:
       additionalProperties: false
 
       properties:
+        description:
+          type: string
+
         kind:
           type: string
-          enum: ['SLO','SLA']
+          enum: ['SLO']
 
         metric:
           type: string
@@ -118,12 +161,37 @@ properties:
         percentile:
           type: number
 
+        target:
+          description: "SLO target percentage"
+          type: number
+
+        httpStatusLabel:
+          description: "Name of the label that contains the http status code"
+          type: string
+          pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
+
+        handler:
+          type: object
+          description: "Defines a selector that will be used in availability calculations"
+          additionalProperties: false
+          properties:
+            name:
+              type: string
+              description: "handler name"
+            value:
+              type: string
+              description: "handler value"
+          required:
+          - name
+          - value
+
       required:
       - kind
       - metric
       - selectors
       - threshold
       - percentile
+      - target
 
   errors:
     type: array
@@ -132,9 +200,12 @@ properties:
       additionalProperties: false
 
       properties:
+        description:
+          type: string
+
         kind:
           type: string
-          enum: ['SLO','SLA']
+          enum: ['SLO']
 
         metric:
           type: string
@@ -144,14 +215,35 @@ properties:
           description: "Metric selectors to be used in Prometheus rule"
           type: object
 
-        errorBudget:
+        target:
+          description: "SLO target percentage"
           type: number
+
+        httpStatusLabel:
+          description: "Name of the label that contains the http status code"
+          type: string
+          pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
+
+        handler:
+          type: object
+          description: "Defines a selector that will be used in availability calculations"
+          additionalProperties: false
+          properties:
+            name:
+              type: string
+              description: "handler name"
+            value:
+              type: string
+              description: "handler value"
+          required:
+          - name
+          - value
 
       required:
       - kind
       - metric
       - selectors
-      - errorBudget
+      - target
 
   rawRecording:
     type: array
@@ -230,4 +322,4 @@ required:
 - app
 - component
 - prometheusLabels
-- namespaces
+- namespace

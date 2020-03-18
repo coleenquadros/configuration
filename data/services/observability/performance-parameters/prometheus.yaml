@@ -20,34 +20,30 @@ prometheusLabels:
   role: alert-rules
   type: slo-rules
 
-# Namespaces that this app lives in
-namespaces:
-- $ref: /services/observability/namespaces/app-sre-observability-production.yml
+# Namespace that this app lives in
+namespace:
+  $ref: /services/observability/namespaces/app-sre-observability-production.yml
 
 availability:
-# Defines a 99.99% SLO and 99% SLA
+# Defines a 99.99% SLO
 - kind: SLO
   metric: prometheus_http_requests_total
-  errorBudget: 1
   selectors:
-    handler: /api/v1/query
     job: prometheus-app-sre
-
-- kind: SLO
-  metric: prometheus_http_requests_total
-  errorBudget: 1
-  selectors:
-    handler: /api/v1/query_range
-    job: prometheus-app-sre
+  target: 99.99
 
 latency:
+# 99% of the requests' p90 under three seconds
 - kind: SLO
   metric: prometheus_http_request_duration_seconds_bucket
+  selectors:
+    job: prometheus-app-sre
   threshold: 3
   percentile: 90
-  selectors:
-    handler: /api/v1/query
-    job: prometheus-app-sre
+  target: 99
+  handler:
+    name: handler
+    value: /api/v1/query
 
 rawRecording:
 - record: component:slo_availability:ratio_rate_5m

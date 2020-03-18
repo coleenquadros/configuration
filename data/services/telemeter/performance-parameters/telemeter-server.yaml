@@ -17,34 +17,28 @@ prometheusLabels: # Dictionary, a bunch of labels that Prometheus uses to select
   role: alert-rules
   type: slo-rules
 
-# Namespaces where the application lives
-namespaces:
-- $ref: /services/telemeter/namespaces/telemeter-stage.yml
-- $ref: /services/telemeter/namespaces/telemeter-production.yml
+# Namespace where the application lives
+namespace:
+  $ref: /services/telemeter/namespaces/telemeter-production.yml
 
 availability:
 - kind: SLO
   metric: http_requests_total
-  errorBudget: 10
   selectors:
     job: telemeter-server
-    handler: upload
-
-- kind: SLA
-  metric: http_requests_total
-  errorBudget: 5
-  selectors:
-    job: telemeter-server
-    handler: upload
+  target: 90
 
 latency:
 - kind: SLO
   metric: http_request_duration_seconds_bucket
-  threshold: 2.5
-  percentile: 90
   selectors:
     job: telemeter-server
-    handler: upload
+  threshold: 2.5
+  percentile: 90
+  target: 99
+  handler:
+    name: handler
+    value: upload
 
 rawRecording:
 - record: telemeter:capacity

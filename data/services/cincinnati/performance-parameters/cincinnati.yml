@@ -19,29 +19,32 @@ prometheusLabels:
   service: cincinnati
 
 # Namespaces that this app lives in
-namespaces:
-- $ref: /services/cincinnati/namespaces/cincinnati-stage.yml
-- $ref: /services/cincinnati/namespaces/cincinnati-production.yml
+namespace:
+  $ref: /services/cincinnati/namespaces/cincinnati-production.yml
 
 availability:
 # Defines a 95% SLO
 # See docs/app-sre/monitoring.md, errorBudget sets availability target of (100-x)%
-- kind: SLO
+- description: Graph builder availability SLO
+  kind: SLO
   metric: up
-  errorBudget: 5
   selectors:
     job: cincinnati-graph-builder
+  target: 95
 
-- kind: SLO
+- description: Policy engine builder availability SLO
+  kind: SLO
   metric: up
-  errorBudget: 5
   selectors:
     job: cincinnati-policy-engine
+  target: 95
 
 latency:
-- kind: SLO
+- description: p90 under three seconds 99% of the time
+  kind: SLO
   metric: cincinnati_pe_v1_graph_serve_duration_seconds_bucket
-  threshold: 3
-  percentile: 90
   selectors:
     job: cincinnati-policy-engine
+  threshold: 3
+  percentile: 90
+  target: 99
