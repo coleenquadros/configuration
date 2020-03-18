@@ -41,7 +41,7 @@
                 for service in {saasherder_services}; do
                     {saasherder} update hash ${{service}} $GIT_COMMIT
                     {saasherder} pull ${{service}}
-                    {saasherder} template --filter {saasherder_object_blacklist} --output-dir {saasherder_context}-processed --local tag ${{service}}
+                    {saasherder} template --filter {saasherder_object_blacklist} --output-dir {saasherder_context}-processed --local --ignore-unknown-parameters tag ${{service}}
                     {saasherder} label --output-dir {saasherder_context}-processed --saas-repo-url {saas_git} ${{service}} > label_selector
 
                     cat {saasherder_context}-processed/${{service}}.yaml | {oc} apply -f - --dry-run --validate
@@ -237,7 +237,7 @@
             PROCESSED_DIR="{saasherder_context}-processed"
 
             {saasherder} pull
-            {saasherder} template --filter {saasherder_object_blacklist} --output-dir "$PROCESSED_DIR" --local tag
+            {saasherder} template --filter {saasherder_object_blacklist} --output-dir "$PROCESSED_DIR" --local --ignore-unknown-parameters tag
             {saasherder} label --output-dir "$PROCESSED_DIR" --saas-repo-url {repo_url} > label_selectors
 
             if [ -n "{ssh_ci_ext}" ]; then SSH_CMD="{ssh_ci_ext_cmd}"; else SSH_CMD=""; fi
