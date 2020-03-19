@@ -1,7 +1,7 @@
 # SOP : Cycling OSIO tenant cluster tokens
 
 ## Alert: 
-> Zabbix: starter-us-east-xx.openshift.com    openshift.token.valid[devtools-sre] - Token invalid or expired
+> Not yet, maybe after [this issue](https://issues.redhat.com/browse/APPSRE-1647) is done
 
 ## Severity: High
 
@@ -48,28 +48,21 @@ On dsaas/dsaas-stg OSD clusters:
 
 ### Validating that the token has actually expired
 
-1. Get the current token used in Zabbix  
-    - `ssh n3.c1.rdu2c.fabric8.io`
-    - `cd /usr/lib/zabbix/externalscripts`
-    - Each cluster has a `starter-us-east-xx.cfg` file with the token, find `openshift_devtools_sre_token` corresponding to the cluster you're troubleshooting
-
-2. Log in to OSD staging/preview depending on what cluster token has expired: 
+1. Log in to OSD staging/preview depending on what cluster token has expired: 
 - east-2a has both staging and preview environments
 - All other starter clusters are production only, so look at dsaas OSD.
 
-3. Find `auth.token.key` and `service-account-token` as described in the Relevant secrets section above.
+2. Find `auth.token.key` and `service-account-token` as described in the Relevant secrets section above.
 
-4. Decrypt the `service-account-token` to get the actual user token, using the command: 
+3. Decrypt the `service-account-token` to get the actual user token, using the command: 
 
     `echo -n <encrypted string> | base64 -d | gpg -d`
 
-5. Check if you obtained from Zabbix matches the token obtained in the last step
-
-6. If token matches the one in Zabbix, try to login using the token: 
+4. Try to login using the token: 
 
 `oc login --token=<token> api.starter-us-east-xx.openshift.com`
 
-7. Once you have confirmed that login fails, proceed further. 
+5. Once you have confirmed that login fails, proceed further. 
 
 ### Generating a new token and updating the Secret
 
@@ -104,13 +97,8 @@ In the end, you get a token that is encrypted and base64 encoded.
 
     `echo -n <encrypted string> | base64 -d | gpg -d`
 
-5. Update the token in Vault, in the corresponding secret
+5. Update the token in Vault, in the corresponding secret. For pathes, [consult](#relevant-secrets)
 
-6. Send a merge request to app-interface to bump the version of the secret
+6. Send a merge request to app-interface to bump the version of the secret 
 
 7. Merge app-interface PR.
-
-8. Update the token in Zabbix, so that the token expiry checks still work.
-    - `ssh n3.c1.rdu2c.fabric8.io`
-    - `cd /usr/lib/zabbix/externalscripts`
-    - Each cluster has a `starter-us-east-xx.cfg` file with the token, you need to update the value for `openshift_devtools_sre_token` corresponding to the cluster you're updating the token for

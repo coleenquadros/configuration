@@ -8,7 +8,7 @@ name: sources-stage
 description: Insights sources-stage on the Stage cluster under e2e-deploy/ocdeployer management
 
 cluster:
-  $ref: /openshift/insights/cluster-insights-stage.yml
+  $ref: /openshift/insights/osdv4-cluster-insights-stage.yml
 
 app:
   $ref: /services/insights/sources/app.yml
@@ -17,22 +17,19 @@ managedRoles: true
 
 managedResourceTypes:
 - Secret
-  
+
 openshiftResources:
 - provider: vault-secret
-  path: insights/secrets/insights-stage/sources/sources-api-secrets
-  version: 1
-- provider: vault-secret
-  path: insights/secrets/insights-stage/sources/cloudwatch
+  path: insights/secrets/insights-stage/sources-stage/sources-api-secrets
   version: 1
 - provider: vault-secret
   path: insights/quay/quay.io
   version: 3
   type: kubernetes.io/dockerconfigjson
   name: quay-cloudservices-pull
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /insights/shared/rds-ca-cert.secret.yaml
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
 
 managedTerraformResources: true
 
@@ -42,24 +39,3 @@ terraformResources:
   identifier: sources-stage
   defaults: /terraform/resources/insights/staging/rds-1.yml
   output_resource_name: sources-db
-- provider: service-account
-  account: insights-stage
-  identifier: insights-sources-stage-cloudwatch
-  variables:
-    aws_region: us-east-1
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [
-        {
-          "Effect": "Allow",
-          "Action": [
-            "logs:CreateLogStream",
-            "logs:PutLogEvents"
-          ],
-          "Resource": [
-            "arn:aws:logs:*:*:*"
-          ]
-        }
-      ]
-    }

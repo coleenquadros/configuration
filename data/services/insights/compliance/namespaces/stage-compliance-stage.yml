@@ -8,10 +8,26 @@ name: compliance-stage
 description: Insights compliance-stage on the Stage cluster under e2e-deploy/ocdeployer management
 
 cluster:
-  $ref: /openshift/insights/cluster-insights-stage.yml
+  $ref: /openshift/insights/osdv4-cluster-insights-stage.yml
 
 app:
   $ref: /services/insights/compliance/app.yml
 
 managedRoles: true
 
+managedResourceTypes:
+- Secret
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/insights-stage/compliance-stage/compliance-backend
+  version: 2
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-stage
+  identifier: compliance-stage
+  defaults: /terraform/resources/insights/staging/rds-1.yml
+  output_resource_name: compliance-db

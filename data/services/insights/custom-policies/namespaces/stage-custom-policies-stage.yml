@@ -8,10 +8,31 @@ name: custom-policies-stage
 description: Insights custom-policies-stage on the Stage cluster under e2e-deploy/ocdeployer management
 
 cluster:
-  $ref: /openshift/insights/cluster-insights-stage.yml
+  $ref: /openshift/insights/osdv4-cluster-insights-stage.yml
 
 app:
-  $ref: /services/insights/compliance/app.yml
+  $ref: /services/insights/custom-policies/app.yml
 
 managedRoles: true
 
+managedResourceTypes:
+  - Secret
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-stage
+  identifier: custom-policies-stage
+  defaults: /terraform/resources/insights/staging/rds-1.yml
+  output_resource_name: custom-policies-db

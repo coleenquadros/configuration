@@ -9,7 +9,7 @@ OSDv4 clusters are managed via OCM.
 
 All AppSRE OSDv4 clusters are created in the `sd-app-sre <sd-app-sre@redhat.com>` organization.
 
-Each AppSRE member will need to have an account in that organization in order to be able to view and managed the clusters within that organization.
+Each AppSRE member will need to have an account in that organization in order to be able to view and managed the clusters within that organization. All the accounts must be marked as "Organization Administrator" (Access Permissions - Account Roles).
 
 Accounts must be created by other team members who are already in that organization. This is done via this portal:
 https://www.redhat.com/wapps/ugc/protected/usermgt/userList.html

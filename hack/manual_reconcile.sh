@@ -79,6 +79,9 @@ docker pull ${VAULT_RECONCILE_IMAGE}:${VAULT_RECONCILE_IMAGE_TAG}
 ## Write config.toml for reconcile tools
 cat "$CONFIG_TOML" > ${WORK_DIR}/config/config.toml
 
+# Gatekeeper. If this fails, we skip all the integrations.
+run_int gitlab-fork-compliance $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid app-sre && {
+
 ## Run integrations on production
 ALIAS=jenkins-job-builder-no-compare run_int jenkins-job-builder --no-compare &
 ALIAS=owner-approvals-no-compare run_int owner-approvals $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid --no-compare &
@@ -109,7 +112,6 @@ cat "$CONFIG_TOML" \
   > ${WORK_DIR}/config/config.toml
 
 ## Run integrations on local server
-
 run_int github &
 run_int github-repo-invites &
 run_int service-dependencies &
@@ -140,6 +142,7 @@ run_int openshift-serviceaccount-tokens &
 run_int openshift-saas-deploy &
 run_int terraform-resources &
 run_int terraform-users &
+run_int terraform-vpc-peerings &
 run_int ldap-users $gitlabMergeRequestTargetProjectId &
 run_int owner-approvals $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid &
 # Conditionally run integrations according to MR title
@@ -147,9 +150,11 @@ run_int owner-approvals $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIi
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"sentry"* ]] && run_int sentry-config &
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"mirror"* ]] && run_int quay-mirror &
 # Add STATE=true to integrations that interact with a state
+STATE=true run_int sql-query &
 STATE=true run_int email-sender &
 
 wait
+}
 
 print_execution_times
 update_pushgateway

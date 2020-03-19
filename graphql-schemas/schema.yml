@@ -309,6 +309,16 @@
   - { name: service, type: string, isRequired: true }
   - { name: pod, type: string, isRequired: true }
 
+- name: ClusterPeeringConnection_v1
+  fields:
+  - { name: name, type: string, isRequired: true }
+  - { name: vpc, type: AWSVPC_v1, isRequired: true }
+
+- name: ClusterPeering_v1
+  fields:
+  - { name: vpc_id, type: string, isRequired: true }
+  - { name: connections, type: ClusterPeeringConnection_v1, isRequired: true, isList: true }
+
 - name: ClusterPrometheus_v1
   fields:
   - { name: url, type: string, isRequired: true }
@@ -333,6 +343,7 @@
   - { name: ocm, type: OpenShiftClusterManager_v1 }
   - { name: spec, type: ClusterSpec_v1 }
   - { name: network, type: ClusterNetwork_v1 }
+  - { name: peering, type: ClusterPeering_v1 }
   - { name: jumpHost, type: ClusterJumpHost_v1 }
   - { name: automationToken, type: VaultSecret_v1 }
   - { name: internal, type: boolean }
@@ -411,6 +422,18 @@
   - { name: name, type: string, isRequired: true }
   - { name: description, type: string }
   - { name: policy, type: json, isRequired: true }
+
+- name: AWSVPC_v1
+  fields:
+  - { name: schema, type: string, isRequired: true }
+  - { name: path, type: string, isRequired: true }
+  - { name: labels, type: json }
+  - { name: account, type: AWSAccount_v1, isRequired: true }
+  - { name: name, type: string, isRequired: true }
+  - { name: description, type: string }
+  - { name: vpc_id, type: string, isRequired: true }
+  - { name: cidr_block, type: string, isRequired: true }
+  - { name: region, type: string, isRequired: true }
 
 - name: NamespaceOpenshiftResource_v1
   isInterface: true
@@ -501,6 +524,7 @@
   - { name: defaults, type: string, isRequired: true }
   - { name: overrides, type: json }
   - { name: output_resource_name, type: string }
+  - { name: storage_class, type: string }
 
 - name: NamespaceTerraformResourceServiceAccount_v1
   interface: NamespaceTerraformResource_v1
@@ -572,6 +596,7 @@
   - { name: identifier, type: string, isRequired: true }
   - { name: defaults, type: string, isRequired: true }
   - { name: output_resource_name, type: string }
+  - { name: storage_class, type: string }
 
 - name: OpenshiftAcmeOverrides_v1
   fields:
@@ -710,12 +735,18 @@
   - { name: description, type: string, isRequired: true }
   - { name: url, type: string, isRequired: true }
 
+- name: CodeComponentGitlabHousekeeping_v1
+  fields:
+  - { name: enabled, type: boolean, isRequired: true }
+  - { name: rebase, type: boolean, isRequired: true }
+
 - name: AppCodeComponents_v1
   fields:
   - { name: name, type: string, isRequired: true }
   - { name: resource, type: string, isRequired: true }
   - { name: url, type: string, isRequired: true }
   - { name: gitlabRepoOwners, type: boolean, isRequired: false }
+  - { name: gitlabHousekeeping, type: CodeComponentGitlabHousekeeping_v1 }
 
 - name: App_v1
   fields:
@@ -751,6 +782,7 @@
   - { name: description, type: string, isRequired: true }
   - { name: app, type: App_v1, isRequired: true }
   - { name: managedResourceTypes, type: string, isRequired: true, isList: true }
+  - { name: authentication, type: SaasFileAuthentication_v1 }
   - { name: resourceTemplates, type: SaasResourceTemplate_v1, isRequired: true, isList: true }
   - name: roles
     type: Role_v1
@@ -759,12 +791,16 @@
       schema: /access/role-1.yml
       subAttr: owned_saas_files
 
+- name: SaasFileAuthentication_v1
+  fields:
+  - { name: code, type: VaultSecret_v1 }
+  - { name: image, type: VaultSecret_v1 }
+
 - name: SaasResourceTemplate_v1
   fields:
   - { name: name, type: string, isRequired: true }
   - { name: url, type: string, isRequired: true }
   - { name: path, type: string, isRequired: true }
-  - { name: image_authentication, type: VaultSecret_v1 }
   - { name: hash_length, type: int, isRequired: true }
   - { name: parameters, type: json }
   - { name: targets, type: SaasResourceTemplateTarget_v1, isRequired: true, isList: true }

@@ -735,7 +735,31 @@ In order to get access to an AWS account, a user has to have:
 
 Once a user is created, an email invitation to join the account will be sent with all relevant information.
 
+#### Generating a GPG key
+
+Note: If terminal cannot find `gpg` after install, your executable may be named `gpg2`.
+
+1. Download and install the GPG command line tools for your operating system. We generally recommend installing the latest version for your operating system.
+2. Open Terminal.
+3. Generate a GPG key pair. Your key must use RSA.
+```
+$ gpg --full-generate-key
+```
+4. A series of prompts directs you through the process. Press the Enter key to assign a default value if desired.
+      1. The first prompt asks you to select what kind of key you prefer. Select `RSA and RSA (default)`.  An RSA/RSA key allows you not only to sign communications, but also to encrypt files.
+      2. Choose the key size: `4096`.
+      3. Choose when the key will expire. You may set this to  `0 = key does not expire`.
+      4. Before the gpg application asks for signature information, the following prompt appears: `Is this correct (y/N)?`. Review and enter `y`.
+      5. Enter your name and email address for your GPG key. Remember this process is about authenticating you as a real individual. For this reason, include your real name.
+      6. At the confirmation prompt, enter the letter O to continue if all entries are correct, or use the other options to fix any problems.
+      7. Finally, enter a passphrase for your secret key. The gpg program asks you to enter your passphrase twice to ensure you made no typing errors.
+5. Use the `gpg --list-secret-keys --keyid-format LONG` command to list GPG keys for which you have both a public and private key.
+6. Export the public key using the command `gpg --armor --export YOUR_KEY_ID`.
+7. Copy your GPG key, beginning with `-----BEGIN PGP PUBLIC KEY BLOCK-----` and ending with `-----END PGP PUBLIC KEY BLOCK-----` and publish the  key on [pgp.mit.edu](https://pgp.mit.edu/).
+
 #### Adding your public GPG key
+
+Note: If terminal cannot find `gpg` after install, your executable may be named `gpg2`.
 
 A base64 encoded binary GPG key should be added to the user file, under the `public_gpg_key` parameter.
 

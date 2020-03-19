@@ -8,7 +8,7 @@ name: advisor-stage
 description: Insights Advisor Stage on Stage cluster under e2e-deploy/ocdeployer management
 
 cluster:
-  $ref: /openshift/insights/cluster-insights-stage.yml
+  $ref: /openshift/insights/osdv4-cluster-insights-stage.yml
 
 app:
   $ref: /services/insights/advisor/app.yml
@@ -21,10 +21,10 @@ managedResourceTypes:
 
 openshiftResources:
 - provider: vault-secret
-  path: insights/secrets/insights-stage/advisor/classic-creds
+  path: insights/secrets/insights-stage/advisor-stage/classic-creds
   version: 1
 - provider: vault-secret
-  path: insights/secrets/insights-stage/advisor/cloudwatch
+  path: insights/secrets/global/nachobot
   version: 1
 - provider: vault-secret
   path: insights/quay/quay.io
@@ -32,13 +32,13 @@ openshiftResources:
   type: kubernetes.io/dockerconfigjson
   name: quay-cloudservices-pull
 - provider: resource
-  path: /insights-stage/advisor/platform-config.configmap.yml
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /insights/shared/rds-ca-cert.secret.yaml
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /insights/shared/backoffice.secret.yaml
+  path: /insights-stage/advisor-stage/platform-config.configmap.yml
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+- provider: vault-secret
+  path: insights/secrets/global/backoffice
+  version: 2
 
 managedTerraformResources: true
 
@@ -48,25 +48,8 @@ terraformResources:
   identifier: advisor-stage
   defaults: /terraform/resources/insights/staging/rds-1.yml
   output_resource_name: advisor-db
-- provider: service-account
+- provider: rds
   account: insights-stage
-  identifier: insights-advisor-stage-service
-  variables:
-    aws_region: us-east-1
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [
-        {
-          "Effect": "Allow",
-          "Action": [
-            "logs:CreateLogStream",
-            "logs:PutLogEvents"
-          ],
-          "Resource": [
-            "arn:aws:logs:*:*:*"
-          ]
-        }
-      ]
-    }
-  output_resource_name: aws-user
+  identifier: advisor-stage-readonly
+  availability_zone: us-east-1d
+  defaults: /terraform/resources/insights/staging/advisor-stage-rds-read-replica-us-east-1.yml

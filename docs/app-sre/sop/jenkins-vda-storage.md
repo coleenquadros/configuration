@@ -61,12 +61,28 @@ quay.io/app-sre/ocm-clusters-service-sandbox   227      9f05f5b02d4c   11 minute
   to a running container or "dangling" (images un-associated with any defined
   container).
 - Active/In-use images can only be purged with --force parameters
+
 ```
 $ podman image prune -a
 {snip: many image hashes, after several seconds}
 ```
-- If there hasnt been a clean up in a while, this can take several seconds.
+- If there hasn't been a clean up in a while, this can take several seconds.
   - Relax. Brew some tea. Work on crafting a new SOP doc! etc.
+- If you get following error
+
+```
+$ podman image prune -a
+Error: failed to prune image: Image used by 90b9fa5820c4f1a050ce1bd00f937a5cc63a5e3e4b08a52cf0333a8d9eb45f94: image is in use by a container
+```
+
+then you need to use `buildah` for cleanup.
+
+```
+$ buildah containers -a
+$ buildah images -a
+$ buildah rm -a && buildah rmi -a
+$ podman system prune -a && podman image prune -a
+```
 
 ## Verify cleanup
 - Check image list and disk usage

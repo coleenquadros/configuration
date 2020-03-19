@@ -1,0 +1,11 @@
+# Debugging high memory usage
+
+## The application is exceeding the resident memory alarm
+
+- Check the [Grafana memory graph] to determine if multiple pods are using higher than normal memory usage or if it's only a single pod.
+- Obtain a shell in the `quay-app` container of aforementioned pod to determine if there's a particular process leaking the memory. This can be done in the OpenShift Console or by executing `kubectl -n quay exec -ti $POD -c quay-app bash`.
+- Use standard tools like `ps` to inspect processes to determine which processes are consuming the memory within the pod.
+- File a [JIRA](https://issues.redhat.com/projects/PROJQUAY/issues) ticket for the Quay development team with as much information as possible.
+- Perform a rolling update of Quay application deployment. Instructions to do so can be found [here](../quayio.md#trigger-deployment-when-secret-or-config-has-changed). Verify that deployment message is posted in the `#oncall-quay` slack channel. If it is not, please post a message in the channel so support and Quay on-call developer is aware of changes to production.
+
+[Grafana memory graph]: https://grafana.app-sre.devshift.net/d/_BkydJaWz/quay-io-runtime?orgId=1&fullscreen&panelId=4

@@ -8,10 +8,28 @@ name: system-baseline-stage
 description: Insights system-baseline-stage on the Stage cluster under e2e-deploy/ocdeployer management
 
 cluster:
-  $ref: /openshift/insights/cluster-insights-stage.yml
+  $ref: /openshift/insights/osdv4-cluster-insights-stage.yml
 
 app:
   $ref: /services/insights/system-baseline/app.yml
 
 managedRoles: true
 
+managedResourceTypes:
+  - Secret
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-stage
+  identifier: system-baseline-stage
+  defaults: /terraform/resources/insights/staging/rds-1.yml
+  output_resource_name: system-baseline-db
