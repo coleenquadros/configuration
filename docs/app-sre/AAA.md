@@ -362,13 +362,15 @@ Post RCA comms, followups:
 ## 1.11. Escalation procedures
 ### 1.11.1 Telemeter incidents 
 
-The telemetry-dev team has an oncall rotation and engineers are ready to be triggered.
-It's a temporary status with the short term goal to improve incident-runbooks, stability and availability.
+The telemetry-dev team has an oncall rotation that must be used to escalate incidents to the development team under the following conditions:
 
-- Telemeter incidents are first handled by the AppSRE team.
-- After *30 min* at most or before, incident impacting telemetry should be reassigned to the the telemetry-dev team [PagerDuty delegate](https://support.pagerduty.com/docs/reassigning-and-delegating-incidents#section-delegating-an-incident).
-- Reassignement isn't the end of the AppSRE oncall shift, they should continue to work on the incident and peer with the oncall developer.
+- App-SRE will remain the first responder for telemetry incidents
+- Every alert with severity `critical` on telemetry will engage both the App-SRE and telemeter-dev escalation policies
+- The telemeter-dev escalation policy only pages a developer on call after *30 min* since the incident was triggered
+- If determined by the app-sre oncall, the telemeter-dev can be engaged earlier than 30 minutes into the incident with a manual page to the telemeter-dev oncall *via pagerduty*
+- The app-sre oncall should continue to work on the incident and peer with the oncall developer.
 
+Note: This escalation policy is a temporary status with the short term goal to improve incident-runbooks, stability and availability.
 
 AppSRE on-call may be assigned PagerDuty incidents that were triggered by our tenants from Slack using the steps documented [here](paging-appsre-oncall.md). As these incidents are manually triggered, they may not be very detailed. Oncall should check slack messages for incident details.
 
