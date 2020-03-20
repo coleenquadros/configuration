@@ -15,13 +15,13 @@ type: jobs
 
 config:
 - project:
-    name: insights-mnm
+    name: insights-mnm-stage
     label: insights-mnm
     node: insights
     gl_group: insights-platform
     gl_project: insights-mnm-sre
     quay_org: cloudservices
-    kube_cluster: insights-dev
+    kube_cluster: insights-stage
     kube_namespace: mnm-sre
     saasherder_context: insights-mnm
     saasherder_services: insights-mnm
@@ -31,10 +31,10 @@ config:
     - 'gl-pr-check':
         display_name: pr check
     - 'gl-build-master':
-        display_name: build master
+        display_name: build master to stage
 
 - project:
-    name: insights-mnm-saas
+    name: insights-mnm-saas-prod
     label: insights-mnm
     node: insights
     gl_group: insights-platform
@@ -47,18 +47,36 @@ config:
     manifest_bouncer_options: '--warn-only'
     jobs:
     - 'saas-pr-check':
-        display_name: saas pr check
+        display_name: saas pr check to prod
     - 'saas-deploy':
-        display_name: saas deploy
+        display_name: saas deploy to prod
 
 - project:
-    name: insights-mnm-grafana
+    name: insights-mnm-saas-dev
+    label: insights-mnm
+    node: insights
+    gl_group: insights-platform
+    gl_project: saas-insights-mnm-sre
+    quay_org: cloudservices
+    kube_cluster: insights-dev
+    kube_namespace: mnm-sre
+    saasherder_context: insights-mnm-dev
+    saasherder_object_blacklist: 'ClusterRole,ClusterRoleBinding' # Default: Route,Secret,ConfigMap,ServiceAccount
+    manifest_bouncer_options: '--warn-only'
+    jobs:
+    - 'saas-pr-check':
+        display_name: saas pr check to dev
+    - 'saas-deploy':
+        display_name: saas deploy to dev
+
+- project:
+    name: insights-mnm-grafana-stage
     label: insights-mnm-grafana
     node: insights
     gl_group: insights-platform
     gl_project: insights-mnm-grafana
     quay_org: cloudservices
-    kube_cluster: insights-dev
+    kube_cluster: insights-stage
     kube_namespace: mnm-sre
     saasherder_context: insights-mnm-grafana
     saasherder_services: insights-mnm-grafana
@@ -66,12 +84,12 @@ config:
     saas_git: https://gitlab.cee.redhat.com/insights-platform/saas-insights-mnm-grafana.git
     jobs:
     - 'gl-pr-check':
-        display_name: pr check
+        display_name: pr check to stage
     - 'gl-build-master':
-        display_name: build master
+        display_name: build master to stage
 
 - project:
-    name: insights-mnm-grafana-saas
+    name: insights-mnm-grafana-saas-prod
     label: insights-mnm-grafana
     node: insights
     gl_group: insights-platform
@@ -84,6 +102,24 @@ config:
     manifest_bouncer_options: '--warn-only'
     jobs:
     - 'saas-pr-check':
-        display_name: saas pr check
+        display_name: saas pr check to prod
     - 'saas-deploy':
-        display_name: saas deploy
+        display_name: saas deploy to prod
+
+- project:
+    name: insights-mnm-grafana-saas-dev
+    label: insights-mnm-grafana
+    node: insights
+    gl_group: insights-platform
+    gl_project: saas-insights-mnm-grafana
+    quay_org: cloudservices
+    kube_cluster: insights-dev
+    kube_namespace: mnm-sre
+    saasherder_context: insights-mnm-grafana-dev
+    saasherder_object_blacklist: 'ClusterRole,ClusterRoleBinding' # Default: Route,Secret,ConfigMap,ServiceAccount
+    manifest_bouncer_options: '--warn-only'
+    jobs:
+    - 'saas-pr-check':
+        display_name: saas pr check to dev
+    - 'saas-deploy':
+        display_name: saas deploy to dev
