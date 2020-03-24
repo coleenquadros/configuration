@@ -57,6 +57,19 @@ spec:
       labels:
         service: hive
         severity: medium
+        team: srep
+    - alert: SyncsetApplyFailures - stage
+      annotations:
+        message: "The Syncset {{ $labels.name }} has more than 1 unapplied instances for 15 minutes"
+        runbook: "https://github.com/openshift/ops-sop/tree/master/v4/alerts/SyncsetApplyFailures.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-production"
+      expr: |
+        hive_selectorsyncset_clusters_unapplied_total{job="hive-controllers-production"} > 0
+      for: 15m
+      labels:
+        service: hive
+        severity: medium
+        team: srep
     - alert: ControllerErrorsHigh - stage
       annotations:
         message: "{{ $labels.controller }} controller is reporting a high error rate: {{ $value }}/s"
