@@ -11,8 +11,18 @@ spec:
   groups:
   - name: hive-prod
     rules:
-
-    # Alerts going only to the Hive team
+    - alert: HiveDown - prod
+      annotations:
+        message: "No targets found for Hive in namespace {{ $labels.namespace }}. Hive is down."
+        runbook: "https://github.com/openshift/hive-sops/blob/master/sop"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-production"
+      expr: |
+        absent(up{job="hive-controllers-production"} == 1)
+      for: 5m
+      labels:
+        service: hive
+        severity: critical
+        team: appsre
     - alert: InstallJobDelayHigh - prod
       annotations:
         message: "Time to start an install job is taking greater than 5 minutes"
@@ -26,20 +36,6 @@ spec:
       labels:
         service: hive
         severity: high
-
-    # Alerts going to the Hive team and the App-SRE team
-    - alert: HiveDown - prod
-      annotations:
-        message: "No targets found for Hive in namespace {{ $labels.namespace }}. Hive is down."
-        runbook: "https://github.com/openshift/hive-sops/blob/master/sop"
-        dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-production"
-      expr: |
-        absent(up{job="hive-controllers-production"} == 1)
-      for: 5m
-      labels:
-        service: hive
-        severity: critical
-        team: appsre
     - alert: ControllerErrorsHigh - prod
       annotations:
         message: "{{ $labels.controller }} controller is reporting a high error rate: {{ $value }}/s"
@@ -54,7 +50,7 @@ spec:
         team: appsre
     - alert: LocalKubeClientRequestsHigh - prod
       annotations:
-        message: "Hive: detected {{ $value }} {{ $labels.resource }} local API requests per second from controller {{ $labels.controller }}"
+        message: "detected {{ $value }} {{ $labels.resource }} local API requests per second from controller {{ $labels.controller }}"
         runbook: "https://github.com/openshift/hive-sops/blob/master/sop"
         dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-production"
       expr: |
@@ -66,7 +62,7 @@ spec:
         team: appsre
     - alert: RemoteKubeClientRequestsHigh - prod
       annotations:
-        message: "Hive: detected {{ $value }} {{ $labels.resource }} remote API requests per second from controller {{ $labels.controller }}"
+        message: "detected {{ $value }} {{ $labels.resource }} remote API requests per second from controller {{ $labels.controller }}"
         runbook: "https://github.com/openshift/hive-sops/blob/master/sop"
         dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-production"
       expr: |
@@ -76,8 +72,6 @@ spec:
         service: hive
         severity: critical
         team: appsre
-
-    # Alerts going to the Hive team and the SREP team
     - alert: ClusterProvisioningDelay - prod
       annotations:
         message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.namespace }} provisioning taking over 2 hours"

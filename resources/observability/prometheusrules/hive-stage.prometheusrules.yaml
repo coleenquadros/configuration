@@ -35,41 +35,6 @@ spec:
       labels:
         service: hive
         severity: medium
-    - alert: ClusterProvisioningDelay - stage
-      annotations:
-        message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.namespace }} provisioning taking over 2 hours"
-        runbook: "https://github.com/openshift/hive-sops/blob/master/sop/ClusterProvisioningDelay.md"
-        dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-stage"
-      expr: |
-        (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers-stage",cluster_type="managed"}/3600) > 2
-      for: 10m
-      labels:
-        service: hive
-        severity: medium
-    - alert: ClusterDeprovisioningDelay - stage
-      annotations:
-        message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.namespace }} deprovisioning taking over 6 hours"
-        runbook: "https://github.com/openshift/hive-sops/blob/master/sop/ClusterDeprovisioningDelay.md"
-        dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-stage"
-      expr: |
-        (hive_cluster_deployment_deprovision_underway_seconds{job="hive-controllers-stage"} / 3600 ) > 6
-      for: 10m
-      labels:
-        service: hive
-        severity: medium
-        team: srep
-    - alert: SyncsetApplyFailures - stage
-      annotations:
-        message: "The Syncset {{ $labels.name }} has more than 1 unapplied instances for 15 minutes"
-        runbook: "https://github.com/openshift/ops-sop/tree/master/v4/alerts/SyncsetApplyFailures.md"
-        dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-production"
-      expr: |
-        hive_selectorsyncset_clusters_unapplied_total{job="hive-controllers-production"} > 0
-      for: 15m
-      labels:
-        service: hive
-        severity: medium
-        team: srep
     - alert: ControllerErrorsHigh - stage
       annotations:
         message: "{{ $labels.controller }} controller is reporting a high error rate: {{ $value }}/s"
@@ -103,6 +68,41 @@ spec:
       labels:
         service: hive
         severity: high
+    - alert: ClusterProvisioningDelay - stage
+      annotations:
+        message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.namespace }} provisioning taking over 2 hours"
+        runbook: "https://github.com/openshift/hive-sops/blob/master/sop/ClusterProvisioningDelay.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-stage"
+      expr: |
+        (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers-stage",cluster_type="managed"}/3600) > 2
+      for: 10m
+      labels:
+        service: hive
+        severity: medium
+    - alert: ClusterDeprovisioningDelay - stage
+      annotations:
+        message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.namespace }} deprovisioning taking over 6 hours"
+        runbook: "https://github.com/openshift/hive-sops/blob/master/sop/ClusterDeprovisioningDelay.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-stage"
+      expr: |
+        (hive_cluster_deployment_deprovision_underway_seconds{job="hive-controllers-stage"} / 3600 ) > 6
+      for: 10m
+      labels:
+        severity: medium
+        service: hive
+        team: srep
+    - alert: SyncsetApplyFailures - stage
+      annotations:
+        message: "The Syncset {{ $labels.name }} has more than 1 unapplied instances for 15 minutes"
+        runbook: "https://github.com/openshift/ops-sop/tree/master/v4/alerts/SyncsetApplyFailures.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-stage"
+      expr: |
+        hive_selectorsyncset_clusters_unapplied_total{job="hive-controllers-stage"} > 0
+      for: 15m
+      labels:
+        service: hive
+        severity: medium
+        team: srep
     - alert: AWSAccountLimit - stage
       annotations:
         message: "AWS Account Operator is about to reach account limit"
