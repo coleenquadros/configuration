@@ -139,7 +139,6 @@ run_int openshift-network-policies &
 run_int openshift-acme &
 run_int openshift-limitranges &
 run_int openshift-serviceaccount-tokens &
-run_int openshift-saas-deploy &
 run_int terraform-resources &
 run_int terraform-users &
 run_int terraform-vpc-peerings &
@@ -152,6 +151,7 @@ run_int owner-approvals $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIi
 # Add STATE=true to integrations that interact with a state
 STATE=true run_int sql-query &
 STATE=true run_int email-sender &
+STATE=true run_int openshift-saas-deploy &
 
 wait
 }

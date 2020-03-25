@@ -39,11 +39,11 @@ run_int gitlab-owners &
 run_int gitlab-permissions &
 run_int ldap-users $APP_INTERFACE_PROJECT_ID &
 run_int slack-usergroups &
-run_int openshift-saas-deploy &
 run_int openshift-resources --internal &
 run_int terraform-resources --internal --light --vault-output-path app-sre/integrations-output &
 
 SQS_GATEWAY=true run_int gitlab-pr-submitter $APP_INTERFACE_PROJECT_ID &
+STATE=true run_int openshift-saas-deploy &
 
 wait
 
