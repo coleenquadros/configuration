@@ -103,6 +103,10 @@ You can self service this access by sending a pull request to the app-interface 
 
 An example PR for granting access is: https://gitlab.cee.redhat.com/service/app-interface/merge_requests/130
 
+Access to Grafana is also available for anyone is the OpenShift GitHub organization by using the following URL:
+
+https://grafana.openshift-app-sre.devshift.net
+
 ### <a name='MonitoringusingPrometheus'></a>Monitoring using Prometheus
 
 #### <a name='Deploymentstructure'></a>Deployment structure
