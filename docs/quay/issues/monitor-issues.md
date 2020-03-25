@@ -2,6 +2,15 @@
 
 If the registry monitor is showing consistently slow and/or failing operations, it may indicate a problem with either the database or with S3.
 
+## Initial confirmation
+
+Confirm that registry operations are slow or failing outside of the monitor deployment.
+This means using docker pull/push from your local machine and additionally a remote machine to rule out your current location.
+Determine if only one of push/pull is affected; this eliminates some suspects as pushes do not go through the CDN.
+Visit the Quay [status endpoint] and see if `storage` returns true.
+
+[status endpoint]: https://quay.io/status
+
 ## Database connections are hanging
 
 If the database has recently performed failover, connections from older machines may be hanging.
