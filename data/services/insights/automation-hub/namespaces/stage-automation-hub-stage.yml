@@ -14,3 +14,33 @@ app:
   $ref: /services/insights/automation-hub/app.yml
 
 managedRoles: true
+
+managedResourceTypes:
+- ConfigMap
+- Secret
+
+openshiftResources:
+- provider: resource
+  path: /insights-stage/automation-hub-stage/galaxy-api-config.configmap.yml
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/insights-stage/automation-hub-stage/automation-hub-pulp
+  version: 1
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-stage
+  identifier: automation-hub-stage
+  defaults: /terraform/resources/insights/staging/rds-1.yml
+  output_resource_name: automation-hub-db
+- provider: s3
+  account: insights-stage
+  identifier: automation-hub-stage
+  defaults: /terraform/resources/s3-private-1.yml
+  output_resource_name: automation-hub-s3
