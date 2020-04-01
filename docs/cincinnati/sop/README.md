@@ -4,6 +4,7 @@
 
 - [SOP : OpenShift Cincinnati](#sop--openshift-cincinnati)
     - [Verify it's working](#verify-its-working)
+    - [Reporting analysis](#reporting-analysis)
     - [GBUpstreamScrapesHalted](#gbupstreamscrapeshalted)
     - [GBUpstreamScrapeErrors](#gbupstreamscrapeerrors)
     - [PEIncomingRequestsHalted](#peincomingrequestshalted)
@@ -19,6 +20,13 @@
 
 - At least one `cincinnati` pod is marked as UP in Prometheus.
 - Additional details on expected behaviour are available in the Cincinnati production deployment doc: https://docs.google.com/document/d/1oT9wueEB01god-gICg0DsGFJzuA-E-TPn88ViWTMr-A/edit
+
+---
+
+## Reporting analysis
+
+Analysis of alerts should be reported on Slack in `#team-cincinnati-alert`, mentioning both `@app-sre-ic` and `@over-the-air-updates` and.
+In cases where that analysis is "this alert is too sensitive; this is nothing we need to worry about in the short term", the mentions are still worthwhile because they make it less likely that either team invests duplicate time in re-analyzing the same alert.
 
 ---
 
