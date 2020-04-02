@@ -1331,6 +1331,62 @@ $ oc rsh --shell=/bin/bash 2020-01-30-account-manager-registries-stage-cjh82 cat
 
 Each Job will be automatically deleted after 7 days.
 
+### Enable Gitlab Features on an App Interface Controlled Gitlab Repository
+
+To manage a Gitlab repository via App Interface, you have to add an `upstream`
+resource to the `codeComponents` section in your App. Example:
+
+```yaml
+---
+$schema: /app-sre/app-1.yml
+
+labels:
+  service: app-sre
+
+name: App-SRE
+
+...
+
+codeComponents:
+...
+- name: managed-tenants
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/service/managed-tenants
+...
+```
+
+App Interface has several features that can be enabled for the Gitlab
+repositories:
+- `gitlabRepoOwners`: Value `true` will enable the `gitlab-repo-owners`,
+  integration, that evaluates the `OWNERS`/`OWNERS_ALIASES` files in that
+  repository to post comments to the Merge Requests reporting the required
+  approvals, ultimately labeling the Merge Request, making it up for
+  auto-merge.
+- `gitlabHousekeeping`:  Value `enabled: true` will enable the
+  `gitlab-housekeeping` integration, that auto-merges Merge Requests that are
+  labelled as such. It also rebases the Merge Requests that are not rebased
+  (you can disable the rebase feature with `rebase: false`).
+- `jira`: Value as `$ref: /path/to/jira-server.yaml` will enable the
+  Gitlab/JIRA integration, that links Merge Requests mentioning JIRA tickets
+  to the mentioned JIRA ticket.
+
+Example:
+
+```yaml
+codeComponents:
+...
+- name: managed-tenants
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/service/managed-tenants
+  gitlabRepoOwners: true
+  gitlabHousekeeping:
+    enabled: true
+    rebase: false
+  jira:
+    $ref: /dependencies/jira/issues-redhat-com.yaml
+...
+```
+
 ## Design
 
 Additional design information: [here](docs/app-interface/design.md).
