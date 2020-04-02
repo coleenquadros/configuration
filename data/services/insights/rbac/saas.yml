@@ -1,0 +1,75 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: rbac
+  platform: insights
+
+name: rbac
+description: rbac app on the Insights Platform
+
+app:
+  $ref: /services/insights/rbac/app.yml
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: redis
+  path: /templates/rbac/redis.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  hash_length: 7
+  parameters:
+    VOLUME_CAPACITY: 10Gi
+  targets:
+  - namespace:
+      $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
+    hash: master
+- name: rbac
+  path: /templates/rbac/rbac.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  hash_length: 7
+  parameters:
+    CPU_LIMIT: '1'
+    MAX_REPLICAS: 10
+    MEMORY_LIMIT: 1Gi
+    MIN_REPLICAS: 1
+    PGSSLMODE: verify-full
+  targets:
+  - namespace:
+      $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
+    hash: master
+    parameters:
+      IMAGE_TAG: 6918055
+- name: scheduler
+  path: /templates/rbac/scheduler.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  hash_length: 7
+  parameters: {}
+  targets:
+  - namespace:
+      $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
+    hash: master
+    parameters:
+      IMAGE_TAG: 6918055
+- name: worker
+  path: /templates/rbac/worker.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  hash_length: 7
+  parameters:
+    PGSSLMODE: verify-full
+  targets:
+  - namespace:
+      $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
+    hash: master
+    parameters:
+      IMAGE_TAG: 6918055
