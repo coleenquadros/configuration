@@ -1,0 +1,40 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: engine
+  platform: insights
+
+name: engine
+description: engine app on the Insights Platform
+
+app:
+  $ref: /services/insights/engine/app.yml
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: insights-engine
+  path: /templates/engine/insights-engine.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  hash_length: 7
+  parameters:
+    CLOUD_WATCH_LOG_GROUP: platform
+    KAFKA_BOOTSTRAP_PORT: '9092'
+  targets:
+  - namespace:
+      $ref: /services/insights/engine/namespaces/stage-engine-stage.yml
+    hash: master
+    parameters:
+      KAFKA_BOOTSTRAP_HOST: platform-mq-stage-kafka-bootstrap.platform-mq-stage.svc
+      IMAGE_TAG: 8b6e2bc
