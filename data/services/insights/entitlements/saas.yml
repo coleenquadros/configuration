@@ -1,0 +1,39 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: entitlements
+  platform: insights
+
+name: entitlements
+description: entitlements app on the Insights Platform
+
+app:
+  $ref: /services/insights/entitlements/app.yml
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: entitlements-api-go
+  path: /templates/entitlements/entitlements-api-go.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  hash_length: 7
+  parameters:
+    CW_LOG_GROUP: platform
+    SUBS_HOST: https://subscription.api.redhat.com
+  targets:
+  - namespace:
+      $ref: /services/insights/entitlements/namespaces/stage-entitlements-stage.yml
+    hash: master
+    parameters:
+      IMAGE_TAG: abcdeff
