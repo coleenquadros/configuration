@@ -2,4 +2,4 @@
 
 <!-- TOC depthTo:2 -->
 
-Observatorium SOP moved [here](/docs/telemeter/sop/observatorium.md)
+Observatorium SOP moved [here](https://gitlab.cee.redhat.com/observatorium/configuration/tree/master/docs)
