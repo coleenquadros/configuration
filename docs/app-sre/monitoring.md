@@ -447,58 +447,7 @@ References:
 
 #### <a name='App-InterfacePerformanceParametersSchema:'></a>App-Interface Performance Parameters Schema: 
 
-The App-SRE team has created a schema that allows service owners to define their application's SLX in app-interface. 
-
-The schema is available for reference here: https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/app-sre/performance-parameters-1.yml
-
-An example Performance Parameters file for one of our services can be found here: https://gitlab.cee.redhat.com/service/app-interface/blob/bd4b561a5739af376ff91176aefab4d57282c59d/data/services/telemeter/performance-parameters/telemeter-server.yaml
-
-Diving deeper into the file, we support specifying SLX rules in 4 configurations.
-
-The availability and latency parameters, if specified, will generate the required recording rules according to known SRE best practices. 
-
-The service owners only need to define the metric name and the thresholds
-
-```
-availability: 
-- kind: SLO
-  metric: http_requests_total # Metric of type counter, should have a `code` label to partition return code values
-  errorBudget: x # to get an availability target of (100-x)%
-
-latency:
-- kind: SLO
-  metric: latency_bucket
-  threshold: 3
-  percentile: 90
-```
-
-In case the availability and latency SLO's are not sufficient for your application, you may define raw recording and alerting rules in the Prometheus format.
-```
-rawRecording:
-- record: component:slo_availability:ratio_rate_5m
-  expr: sum(rate(something{selector="value"}[5m]))
-  labels:
-    # inferred: component: prometheus
-    # inferred: namespace
-    service: telemeter
-
-rawAlerting:
-- alert: PrometheusErrorBudgetBurn
-  expr: something > 0
-  for: 2m
-  labels:
-    severity: test
-  annotations:
-    message: "Component {{$labels.component}} has returned {{ $value | printf `%.2f` }}% 5xx over the last hour."
-    runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/sop"
-    dashboard: "https://grafana.app-sre.devshift.net/"
-```
-
-To make sure we are consistent across the stack for our alerts, we enforce a few fields like the annotations in alerting rules. 
-
-Once you have specified your SLX rules in the Performance Parameters schema format and the PR gets merged into app-interface, our integrations will make sure that the rules are added to prometheus and we start recording SLX metrics. 
-
-The story around how we can consume these to create a report is still WIP. 
+The App-SRE team has created a schema that allows service owners to define their application's SLX in app-interface.  See this [doc](/docs/app-sre/sli-recording-rules-via-performance-parameters.md) for further information.
 
 # Getting started
 

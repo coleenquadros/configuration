@@ -145,6 +145,7 @@ run_int terraform-users &
 run_int terraform-vpc-peerings &
 run_int ldap-users $gitlabMergeRequestTargetProjectId &
 run_int owner-approvals $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid &
+run_int openshift-performance-parameters &
 # Conditionally run integrations according to MR title
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"slack"* ]] && run_int slack-usergroups &
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"sentry"* ]] && run_int sentry-config &

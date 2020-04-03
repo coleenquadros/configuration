@@ -1,0 +1,442 @@
+# SLI recording rules generation via openshift-performance-parameters integration
+
+The `openshift-performance-parameters` integration creates Prometheus recording rules for a defined set of SLI for each namespace in which a service is running. The SLIs currently supported are:
+
+* volume
+* availability
+* latency
+* errors
+
+SLOs are about time. We will be recording if the service meets the criteria established in the performance parameters file for each of the SLIs considered. Then we will be able to query from Prometheus to show how those SLIs have been met over time, e.g in a VALET dashboard or from Alert Manager.
+
+SLI recording rules are defined in the service performance parameters files that follow the [`/app-sre/performance-parameters-1.yml`](/schemas/app-sre/performance-parameters-1.yml) schema. In this document we're going to see the different sections of that schema and how they are used to generate the different rules. It is important to know that if your service has multiple components and/or multiple namespace, you should create separate performance parameter files per component and per namespace.
+
+To make things easier to follow, we will go through the performance parameters of the `yak-shaver` component of the `yolo` service running in a certain namespace of one of the `app-sre`clusters. That component has a `read` and a `write` handler for which we will define different SLOs.
+
+This document is not a substitute for the schema. Please read it to understand which of the fields of the examples are mandatory and how to go beyond the example proposed with the additional fields described in the performance parameters schema.
+
+## General service description
+
+### Unique name of the performance parameter rules
+
+``` yaml
+name: yolo-yak-shaver-production
+```
+
+### Labels
+
+They will be used in all the recording rules to be able to query them.
+
+```yaml
+labels:
+  service: yolo
+  component: yak-shaver
+```
+
+### Reports
+
+They link the documentation explaining how the SLOs have been determined (load tests, business requirements, etc). Please don't link here a JIRA issue
+
+```yaml
+reports:
+  date: 2020-05-07
+  url: https://docs.google.com/document/d/yolo-yak-shaver-performance-doc
+```
+
+### Application
+
+Cross reference to the application yaml file
+
+```yaml
+app:
+  $ref: /services/yolo/app.yml
+```
+
+and name of the component
+
+```yaml
+component: yak-shaver
+```
+
+### Prometheus Labels
+
+Labels that Prometheus uses to select this rules file. These labels are added to the generated Manifest's metadata.labels.
+
+```yaml
+prometheusLabels:
+  prometheus: app-sre
+  role: alert-rules
+  type: slo-rules
+```
+
+### Namespace
+
+Namespace that this app lives in
+
+```yaml
+namespace:
+  $ref: /services/yolo/namespaces/yolo-production.yml
+```
+
+## SLI base recording rules
+
+In order to create the final recording rules for our SLIs we need to start with existing base metrics that give us an idea of:
+
+* Amount of requests dispatched.
+* how long are those requests taking
+
+The `SLIRecordingRules` section of the performance schema defines these base recording rules for the different handlers of our `yak-shaver` component.
+
+* The `http_metric_handler_requests_total` metric will give us request and errors ratio rates. It is necessary that it is a metric that has HTTP status codes.
+* The `http_request_duration_seconds_bucket` will be used to measure latencies. It is convenient that it supports HTTP status codes as we will have more control over what we measure.
+
+Our example defines 4 base SLI recording rules using the above metrics for our two handlers. The generated recording rules only show the `5m` range to keep things short, but we will generate rates for `5m, 30m, 1h, 2h, 6h, 1d` ranges
+
+Names MUST be unique.
+
+### Request rates
+
+These are defined using the `http_rate` kind.
+
+```yaml
+- name: read_http_rates
+  kind: http_rate
+  metric: http_metric_handler_requests_total
+  selectors:
+    handler: read
+
+- name: write_http_rates
+  kind: http_rate
+  metric: http_metric_handler_requests_total
+  selectors:
+    handler: write
+```
+
+They will generate the following recording rules for the `5m` range:
+
+```yaml
+- expr: |
+    sum by (status_class) (
+      label_replace(
+        rate(http_metric_handler_requests_total{handler="read"}[5m]
+      ), "status_class", "${1}xx", "code", "([0-9])..")
+    )
+  labels:
+    component: yak-shaver
+    handler: read
+    service: yolo
+  record: status_class:http_requests_total:rate5m
+- expr: |
+    sum by (status_class) (
+      label_replace(
+        rate(http_metric_handler_requests_total{handler="write"}[5m]
+      ), "status_class", "${1}xx", "code", "([0-9])..")
+    )
+  labels:
+    component: yak-shaver
+    handler: write
+    service: yolo
+  record: status_class:http_requests_total:rate5m
+- expr: |
+    sum(status_class:http_requests_total:rate5m{handler="read",status_class="5xx"})
+    /
+    sum(status_class:http_requests_total:rate5m{handler="read"})
+  labels:
+    component: yak-shaver
+    handler: read
+    service: yolo
+  record: status_class_5xx:http_requests_total:ratio_rate5m
+- expr: |
+    sum(status_class:http_requests_total:rate5m{handler="write",status_class="5xx"})
+    /
+    sum(status_class:http_requests_total:rate5m{handler="write"})
+  labels:
+    component: yak-shaver
+    handler: write
+    service: yolo
+  record: status_class_5xx:http_requests_total:ratio_rate5m
+```
+
+### Latency rates
+
+These are defined using the `http_rate` kind for the p95 of the latency.
+
+```yaml
+- name: read_latency_p95
+  kind: latency_rate
+  percentile: 95
+  metric: http_request_duration_seconds_bucket
+  selectors:
+    handler: read
+
+- name: write_latency_p95
+  kind: latency_rate
+  percentile: 95
+  metric: http_request_duration_seconds_bucket
+  selectors:
+    handler: write
+```
+
+They will generate the following recording rules for the `5m` range:
+
+```yaml
+- expr: |
+    histogram_quantile(
+      0.95,
+      sum(rate(http_request_duration_seconds_bucket{handler="read"}[5m])) by (le)
+    )
+  labels:
+    component: yak-shaver
+    handler: read
+    service: yolo
+  record: component:latency:p95_rate5m
+- expr: |
+    histogram_quantile(
+      0.95,
+      sum(rate(http_request_duration_seconds_bucket{handler="write"}[5m])) by (le)
+    )
+  labels:
+    component: yak-shaver
+    handler: write
+    service: yolo
+  record: component:latency:p95_rate5m
+```
+
+## Volume, Errors, Latency and Availability SLOs
+
+The following sections are going to be used to define two things for each SLI:
+
+* A boolean metric using one of the above base recording rules and a threshold
+* An SLO target that we can incorporate into a higher level element, as a dashboard or an alarm
+
+Boolean metrics have been chosen as they make easy to query if a certain SLO has been met over time.
+
+### Volume
+
+We define two SLOs for volume using the `http_rate` rules created above, we will refer to them using the name we gave them. It could be argued that SLO volume is difficult to justify, but it will serve us as a way of knowing if we are going above the peak capacity we have determined for our service.
+
+* Read handler SLO definition expresses that requests per second have to be under 1000 the 99% of the time
+* Write handler SLO definition expresses that requests per second have to be under 1000 the 99% of the time
+
+```yaml
+volume:
+- name: read_volume_slo
+  kind: SLO
+  rules: read_http_rates
+  threshold: 1000
+  target: 99
+
+- name: write_volume_slo
+  kind: SLO
+  rules: write_http_rates
+  threshold: 200
+  target: 99
+```
+
+They will generate the following recording rules for the `5m` range:
+
+
+```yaml
+- expr: |
+    status_class:http_requests_total:rate5m{component="yak-shaver",handler="read",service="yolo"}
+    < bool(1000)
+  labels:
+    component: yak-shaver
+    handler: read
+    service: yolo
+  record: component:volume:slo_ok_5m
+- expr: |
+    status_class:http_requests_total:rate5m{component="yak-shaver",handler="write",service="yolo"}
+    < bool(200)
+  labels:
+    component: yak-shaver
+    handler: write
+    service: yolo
+  record: component:volume:slo_ok_5m
+```
+
+Then if we want to calculate if your the read volume SLO has been met in the last day we could use the following PromQL query to compare with:
+
+```promql
+avg_over_time(component:volume:slo_ok_5m{
+  component="yak-shaver",
+  handler="read",
+  service="yolo"
+}[1d]) * 100
+```
+
+### Errors
+
+We define two SLOs for volume using the `http_rate` errors ratio rate rules created above, we will refer to them using the name we gave them. It should be noted that errors refer to HTTP 5xx status errors, not to 4xx errors. While it is important to track 4xx errors we cannot create SLOs on top of them as we don't have full control over them.
+
+* Read handler SLO definition expresses that errors ratio should be under 1% percent the 99% of the time
+* Write handler SLO definition expresses that errors ratio should be under 5% percent the 95% of the time
+
+```yaml
+errors:
+- name: read_errors_slo
+  kind: SLO
+  rules: read_http_rates
+  target: 99
+
+- name: write_errors_slo
+  kind: SLO
+  rules: write_http_rates
+  target: 95
+```
+
+They will generate the following recording rules for the `5m` range:
+
+```yaml
+- expr: |
+    status_class_5xx:http_requests_total:ratio_rate5m{component="yak-shaver",handler="read",service="yolo"}
+    < bool(1)
+  labels:
+    component: yak-shaver
+    handler: read
+    service: yolo
+  record: component:errors:slo_ok_5m
+- expr: |
+    status_class_5xx:http_requests_total:ratio_rate5m{component="yak-shaver",handler="write",service="yolo"}
+    < bool(5)
+  labels:
+    component: yak-shaver
+    handler: write
+    service: yolo
+  record: component:errors:slo_ok_5m
+```
+
+### Latency
+
+We define two SLOs for volume using `latency_rate` rules above.
+
+* Read handler SLO definition expresses that the p95 of the latency should be under 0.5 seconds the 99.9% of the time
+* Write handler SLO definition expresses that the p95 of the latency should be under 1 seconds the 99.9% of the time
+
+```yaml
+latency:
+- name: read_latency_slo
+  kind: SLO
+  rules: read_latency_p95
+  threshold: 0.5
+  target: 99.9
+
+- name: write_latency_slo
+  kind: SLO
+  rules: write_latency_p95
+  threshold: 1
+  target: 99.9
+```
+
+They will generate the following recording rules for the `5m` range:
+
+```yaml
+- expr: |
+    component:latency:p95_rate5m{component="yak-shaver",handler="read",service="yolo"}
+    < bool(0.5)
+  labels:
+    component: yak-shaver
+    handler: read
+    service: yolo
+  record: component:latency:slo_ok_5m
+- expr: |
+    component:latency:p95_rate5m{component="yak-shaver",handler="write",service="yolo"}
+    < bool(1)
+  labels:
+    component: yak-shaver
+    handler: write
+    service: yolo
+  record: component:latency:slo_ok_5m
+```
+
+that we can use to generate PromQL queries that use the `target` above.
+
+## Availability
+
+Availability is defined as a boolean product between latency and errors SLOs. This can help us track how our system is performing measured in different points, as it is usual that latencies are measured from inside the application and error ratios from a router level. Since latencies won't be properly tracked if application is down we have another way to determine how our system is performing.
+
+We will define one availability SLO from our two handlers. In order to simplify we will use the above latency and errors rules, but we could have generated others specific to be used in the availability SLO.
+
+* Read handler SLO definition expresses that the `read_latency_slo` and `read_errors_slo` have to be met the 95% of the time
+* Write handler SLO definition expresses that the `write_latency_slo` and `write_errors_slo` have to be met the 95% of the time
+
+```yaml
+availability:
+- name: read_availability_slo
+  kind: SLO
+  rules:
+    latency:
+    - read_latency_slo
+    errors:
+    - read_errors_slo
+  target: 95
+
+- name: write_availability_slo
+  kind: SLO
+  rules:
+    latency:
+    - write_latency_slo
+    errors:
+    - write_errors_slo
+  target: 95
+```
+
+They will generate the following recording rules for the `5m` range:
+
+```yaml
+- expr: |
+    component:latency:slo_ok_5m{component="yak-shaver",handler="read",service="yolo"}
+    *
+    component:errors:slo_ok_5m{component="yak-shaver",handler="read",service="yolo"}
+  labels:
+    component: yak-shaver
+    handler: read
+    service: yolo
+  record: component:availability:slo_ok_5m
+- expr: |
+    component:latency:slo_ok_5m{component="yak-shaver",handler="write",service="yolo"}
+    *
+    component:errors:slo_ok_5m{component="yak-shaver",handler="write",service="yolo"}
+  labels:
+    component: yak-shaver
+    handler: write
+    service: yolo
+  record: component:availability:slo_ok_5m
+```
+
+Since `latency` and `errors` are array of rules, we could create an SLO that takes into account all handlers:
+
+```yaml
+- name: read_availability_slo
+  kind: SLO
+  rules:
+    latency:
+    - read_latency_slo
+    - write_latency_slo
+    errors:
+    - read_errors_slo
+    - write_errors_slo
+  target: 95
+  additionalLabels:
+    handler: all
+```
+
+that would generate the following rule for the `5m` range
+
+```yaml
+- expr: |
+    component:latency:slo_ok_5m{component="yak-shaver",handler="read",service="yolo"}
+    *
+    component:latency:slo_ok_5m{component="yak-shaver",handler="write",service="yolo"}
+    *
+    component:errors:slo_ok_5m{component="yak-shaver",handler="read",service="yolo"}
+    *
+    component:errors:slo_ok_5m{component="yak-shaver",handler="write",service="yolo"}'
+  labels:
+    component: yak-shaver
+    handler: all
+    service: yolo
+  record: component:availability:slo_ok_5m
+```
+
+In this case we've added the custom label `handler: all` as the rules generation library cannot add the `handler` label as it has different values for the different rules in place.

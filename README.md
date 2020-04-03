@@ -259,6 +259,7 @@ wheel icon (top-right corner) and replace `omit` with `include` in
 - Deletion of OpenShift users.
 - Management of notification e-mails.
 - Management of SQL Queries.
+- Creation of SLI related performance parameters recording rules.
 
 ### Planned integrations
 
@@ -1504,6 +1505,10 @@ codeComponents:
     $ref: /dependencies/jira/issues-redhat-com.yaml
 ...
 ```
+
+### Add recording rules via openshift-performance-parameters integration
+
+Please refer to this [document](docs/app-sre/sli-recording-rules-via-performance-parameters.md)
 
 ## Design
 
