@@ -1,0 +1,33 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: rbac
+  platform: insights
+
+name: rbac-redis
+description: Redis deployment for RBAC
+
+app:
+  $ref: /services/insights/rbac/app.yml
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+
+resourceTemplates:
+- name: redis
+  path: /templates/rbac/redis.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  hash_length: 7
+  parameters:
+    VOLUME_CAPACITY: 10Gi
+  targets:
+  - namespace:
+      $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
+    hash: master
