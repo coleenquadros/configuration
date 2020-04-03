@@ -34,7 +34,7 @@ For *time sensitive* requests, please ping `@app-sre-ic` in the `#sd-app-sre` ch
 If you have an urgent matter affecting production that needs to be addressed as soon as possible, please do the following:
 
 - Ping `@app-sre-emea` or `@app-sre-nasa` depending on the time of the day.
-- If you get no response, and if it's truly critical follow the [Paging AppSRE team](paging-appsre-oncall.md) guide.
+- If you get no response, and if it's truly critical follow the [Paging AppSRE team](docs/app-sre/paging-appsre-oncall.md) guide.
 
 ### How can I get access to X
 
