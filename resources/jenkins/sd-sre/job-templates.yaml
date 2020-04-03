@@ -20,3 +20,17 @@
     - timed: |
         {cron_expression}
     <<: *gh_checkout
+
+- job-template:
+    id: 'gh-pr-check-aws-account-operator'
+    name: '{gh_org}-{gh_repo}-gh-pr-check-aws-account-operator'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *aws_account_operator_ci
+        - *ocm_refresh_token
+    <<: *gh_pr_check
