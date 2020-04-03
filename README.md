@@ -1040,6 +1040,27 @@ The Secret will contain the following fields:
 - `aws_access_key_id` - The access key ID.
 - `aws_secret_access_key` - The secret access key.
 
+#### Manage Key Management Service Keys via App-Interface (`/openshift/namespace-1.yml`)
+
+Key Management Service keys can be entirely self-serviced via App-Interface.
+
+In order to add or update a Key Management Service key, you need to add them to the `terraformResources` field.
+
+- `provider`: must be `kms`
+- `account`: must be one of the AWS account names we manage. [Current options](/schemas/openshift/namespace-1.yml#L502)
+- `identifier` - name of resource to create (or update)
+- `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options:](/resources/terraform/resources/)
+- `output_resource_name`: name of Kubernetes Secret to be created.
+  - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
+  - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
+    - For example, for a resource with `identifier` "my-key" and `provider` "kms", the created Secret will be called `my-key-kms`.
+
+Once the changes are merged, the Key Management Service key will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
+
+The Secret will contain the following fields:
+- `key_id` - The globally unique identifier for the key.
+
+
 ### Manage Slack User groups via App-Interface
 
 Slack User groups can be self-serviced via App-Interface.
