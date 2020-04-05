@@ -152,7 +152,7 @@ run_int owner-approvals $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIi
 # Add STATE=true to integrations that interact with a state
 STATE=true run_int sql-query &
 STATE=true run_int email-sender &
-STATE=true run_int openshift-saas-deploy &
+# STATE=true run_int openshift-saas-deploy &
 
 wait
 }
