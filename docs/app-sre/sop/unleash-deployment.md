@@ -1,10 +1,10 @@
 # Unleash Deployment
 
-This document describes how to deploy the requested
-[Unleash](https://github.com/app-sre/unleash) instance using App Interface.
+Tenants will request an instance of Unleash following the
+[steps here](https://gitlab.cee.redhat.com/service/dev-guidelines/blob/master/unleash.md).
 
-Tenants will request an instance of Unleash according to:
-[https://gitlab.cee.redhat.com/service/dev-guidelines/blob/master/unleash.md]()
+This document describes how to deploy the requested instance using App
+Interface.
 
 ## Architecture
 
@@ -19,12 +19,12 @@ in the OpenShift Cluster. It consumes three Secrets:
 
 Clients can access Unleash using the Web UI, that authenticates users against
 Github (validating the Organization and the Team) or via client API, using the
-Client Access Token.
+[Client Access Token Secret](#client-access-token-secret).
 
 ## Naming Conventions
 
-Considering that the Unleash instance will be created in the `unleash`
-Namespace and for a given application, the naming convention used throughout
+Considering that the Unleash instance created in the `unleash` Namespace and
+will be consumed by a given application, the naming convention used throughout
 this document will always relate the Unleash instance to the application. Some
 examples:
 
@@ -32,7 +32,7 @@ examples:
 - `output_resource_name: <application-name>-unleash-rds`
 - `path: <secret>/unleash/<application-name>-token`
 
-This convention allows the Unleash Namespace for given Cluster to have
+This convention allows the Unleash Namespace of a given Cluster to have
 multiple Unleash instances, each serving different applications running on the
 same Cluster.
 
@@ -44,9 +44,9 @@ https://<application-name>.unleash.devshift.net
 
 ## Github Configuration
 
-Create a new Github OAuth application:
-[https://github.com/settings/applications/new]() and fill the details of the
-new Unleash application. Example:
+Login to Github using the app-sre-bot account then create a new Github OAuth
+application [here](https://github.com/settings/applications/new), filling the
+details of the new Unleash application. Example:
 
 ![](images/gh_newapp.png)
 
@@ -55,13 +55,13 @@ by `/api/auth/callback`.
 
 After clicking `Register application`, you will be given the `Client ID`
 and the `Client Secret`. Those values will be placed in the
-[Configuration Secret](#configuration-secret) described ahead.
+[Configuration Secret](#configuration-secret), described ahead.
 
 ## Github Org/Team
 
-Users will be given access to the Unleash instance via Github ORG/TEAM.
-
-For that, create a new `<application-name>.yml` file in the `unleash`
+Users will be given access to the Unleash instance Web UI via Github ORG/TEAM
+membership. To set that using App Interface, create a new
+`<application-name>.yml` file in the `unleash`
 [permissions directory](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/dependencies/unleash/permissions),
 containing:
 
@@ -84,7 +84,7 @@ inform the team/users in the JIRA ticket).
 
 ## Namespace
 
-All Unleash instances are deployed to a dedicated `unleash` namespace. The
+All the Unleash instances are deployed to a dedicated `unleash` Namespace. The
 Cluster will be chosen by the AppSRE Team, according to application consuming
 the instance.
 
@@ -92,9 +92,9 @@ The `app-sre-prod-01` already has an `unleash` Namespace. If you're going to
 create the new Unleash instance in that Namespace, you can skip this section.
 
 To create the Unleash namespace in a given Cluster, add the Namespace
-manifest `<cluster-name>.yml` to the namespaces directory of the
-Unleash service:
-[https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/services/unleash/namespaces]()
+manifest `<cluster-name>.yml` to the
+[namespaces directory](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/services/unleash/namespaces)
+of the Unleash service.
 
 The Namespace manifest will initially contain:
 
@@ -127,33 +127,66 @@ sections.
 
 ## Configuration Secret
 
-The Unleash instance expects an OpenShift Secret in the Namespace containing:
+The Unleash instance expects an OpenShift Secret in the Namespace containing
+with the following data:
 
 - `GH_CLIENT_ID`: The Github client ID, acquired from the OAuth application
   registration (see the [Github Configuration](#github-configuration) section
   for details).
 - `GH_CLIENT_SECRET`: The Github client secret, acquired from the OAuth
-  application registration (see the "Github Configuration" section for
-  details).
+  application registration (see the 
+  [Github Configuration](#github-configuration) section for details).
 - `GH_CALLBACK_URL`: The Unleash callback page -
-  https://<unleash-instance-domain>/api/auth/callback
+  `https://<unleash-instance-domain>/api/auth/callback`
 - `ADMIN_ACCESS_TOKEN`: The Bearer token to access the Unleash Admin API
   directly. We recommend using the bash command `uuidgen` to generate the
   token.
 - `SESSION_SECRET`: The secret to secure the client session. We recommend
   using the bash command `uuidgen` to generate the secret.
 
-Go to [https://vault.devshift.net/ui/vault/secrets/app-sre/list/unleash/]()
+Go to the Unleash
+[Vault secret](https://vault.devshift.net/ui/vault/secrets/app-sre/list/unleash/)
 and create a secret called `<application-name>-config`.
 
-Then add it to the Namespace:
+Then add it to the `unleash` Namespace:
 
 ```yaml
 openshiftResources:
 ...
 - provider: vault-secret
   path: app-sre/unleash/<application-name>-config
+  version: 1
 ```
+
+## Client Access Token Secret
+
+The Client Access Token is also required by the Unleash instance, but it lives
+in a different Secret so it can be exposed to the tenant's application
+Namespace.
+
+Only one key is expected in this Secret:
+
+- `CLIENT_ACCESS_TOKEN`: The Bearer token to access the Unleash Client API
+  directly. We recommend using the bash command `uuidgen` to generate the
+  token.
+
+Go to the Unleash
+[Vault secret](https://vault.devshift.net/ui/vault/secrets/app-sre/list/unleash/)
+and create a secret called `<application-name>-token`.
+
+Then add it to the `unleash` Namespace:
+
+```yaml
+openshiftResources:
+...
+- provider: vault-secret
+  path: app-sre/unleash/<application-name>-token
+  version: 1
+```
+
+**IMPORTANT:** Make sure to add the `vault-secret` resource also to the
+Namespace of the application consuming the Unleash instance (tenants are
+expected to inform the application Namespace in the JIRA ticket).
 
 ## Database
 
@@ -170,35 +203,10 @@ terraformResources:
   output_resource_name: <application-name>-unleash-rds
 ```
 
-## Client Access Token Secret
-
-This secret contains:
-
-- `CLIENT_ACCESS_TOKEN`: The Bearer token to access the Unleash Client API
-  directly. We recommend using the bash command `uuidgen` to generate the
-  token.
-
-Go to [https://vault.devshift.net/ui/vault/secrets/app-sre/list/unleash/]()
-and create a secret called `<application-name>-token`.
-
-The secret will be exposed both to the Unleash Namespace and to the tenants
-application Namespace (tenants are expected to inform the application Namespace
-in the JIRA ticket):
-
-```yaml
-openshiftResources:
-...
-- provider: vault-secret
-  path: app-sre/unleash/<application-name>-token
-```
-
-**IMPORTANT:** Make sure to add the `vault-secret` resource also to the
-Namespace of the application consuming the Unleash instance.
-
 ## Route
 
 Expose the Unleash instance with an OpenShift Route and add the `route`
-resource to the Unleash Namespace:
+resource to the `unleash` Namespace:
 
 ```yaml
 openshiftResources:
@@ -210,14 +218,12 @@ openshiftResources:
 The `host` value of the `Route` spec shall be
 `<application-name>.unleash.devshift.net`. You have to arrange to get that
 sub-domain created.
-
-Route example:
-[https://gitlab.cee.redhat.com/service/app-interface/blob/master/resources/app-sre/unleash/app-interface.route.yaml]()
+[Example](https://gitlab.cee.redhat.com/service/app-interface/blob/master/resources/app-sre/unleash/app-interface.route.yaml).
 
 ## Deployment
 
-To deploy Unleash to the Namespace, add a target to the `resourceTemplates`
-section in the
+To deploy the new instance to the `unleash` Namespace, add a target to the
+`resourceTemplates` section in the
 [Unleash SaaS file](https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/unleash/cicd/saas.yaml):
 
 ```yaml
