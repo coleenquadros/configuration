@@ -150,9 +150,9 @@ run_int owner-approvals $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIi
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"sentry"* ]] && run_int sentry-config &
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"mirror"* ]] && run_int quay-mirror &
 # Add STATE=true to integrations that interact with a state
+[[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"saas"* ]] && STATE=true run_int openshift-saas-deploy &
 STATE=true run_int sql-query &
 STATE=true run_int email-sender &
-# STATE=true run_int openshift-saas-deploy &
 
 wait
 }
