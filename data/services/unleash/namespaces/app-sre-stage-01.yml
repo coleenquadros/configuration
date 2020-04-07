@@ -3,18 +3,18 @@ $schema: /openshift/namespace-1.yml
 
 labels: {}
 
-name: unleash-production
-description: production namespace for unleash
+name: unleash
+description: namespace for unleash
 
 cluster:
-  $ref: /openshift/app-sre-prod-01/cluster.yml
+  $ref: /openshift/app-sre-stage-01/cluster.yml
 
 app:
   $ref: /services/unleash/app.yml
 
 networkPoliciesAllow:
-- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml
-- $ref: /services/app-interface/namespaces/app-interface-production.yml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+- $ref: /services/app-interface/namespaces/app-interface-stage.yml
 
 openshiftAcme:
   config:
@@ -32,18 +32,19 @@ managedResourceTypes:
 
 openshiftResources:
 - provider: vault-secret
-  path: app-sre/unleash/app-interface-production
+  path: app-sre/unleash/app-interface-stage-config
   version: 1
-  annotations:
-    qontract.recycle: "true"
+- provider: vault-secret
+  path: app-sre/unleash/app-interface-stage-token
+  version: 1
 - provider: route
-  path: /app-sre/unleash-production/unleash.route.yaml
+  path: /app-sre-stage/unleash/app-interface.route.yaml
 
 managedTerraformResources: true
 
 terraformResources:
 - provider: rds
   account: app-sre
-  identifier: app-interface-unleash-production
+  identifier: app-interface-unleash-stage
   defaults: /terraform/resources/unleash/rds-1.yml
-  output_resource_name: app-interface-unleash-rds
+  output_resource_name: app-interface-stage-unleash-rds
