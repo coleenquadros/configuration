@@ -1,0 +1,33 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: strimzi
+  platform: insights
+
+name: strimzi
+description: strimzi
+
+app:
+  $ref: /services/insights/strimzi/app.yml
+
+managedResourceTypes:
+- Kafka
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+
+resourceTemplates:
+- name: strimzi
+  path: /deploys/openshift/amq-streams.yaml
+  url: https://github.com/RedHatInsights/platform-mq
+  hash_length: 7
+  parameters:
+    KAFKA_VOL_SIZE: 250Gi
+    ZK_VOL_SIZE: 50Gi
+  targets:
+  - namespace:
+      $ref: /services/insights/strimzi/namespaces/stage-platform-mq-stage.yml
+    hash: master
