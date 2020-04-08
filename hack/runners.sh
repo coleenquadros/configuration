@@ -28,7 +28,64 @@ run_int() {
   status="$?"
   ENDTIME=$(date +%s)
 
-  echo "app_interface_int_execution_duration_seconds{integration=\"$INTEGRATION_NAME\"} $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
+  duration="app_interface_int_execution_duration_seconds{integration=\"$INTEGRATION_NAME\"} $((ENDTIME - STARTTIME))"
+  echo $duration >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
+
+  if [ "$LOG_GROUP_NAME" ];then
+    log_stream=$(aws logs describe-log-streams --log-group-name $LOG_GROUP_NAME|grep \"jenkins-$BUILD_NUMBER\"|cut -d'"' -f4)
+    [ -z "$log_stream" ] && aws logs create-log-stream --log-group-name $LOG_GROUP_NAME --log-stream-name jenkins-$BUILD_NUMBER
+    Token=$(aws logs describe-log-streams --log-group-name $LOG_GROUP_NAME|grep -A 5 \"jenkins-$BUILD_NUMBER\"|grep Token|cut -d'"' -f4)
+    [ -z "$Token" ] && Token=$(aws logs put-log-events --log-group-name $LOG_GROUP_NAME --log-stream-name jenkins-$BUILD_NUMBER --log-events timestamp=$(date +%s000),message="$BUILD_TAG"|grep Token|cut -d'"' -f4)
+    cat > log <<EOF
+[
+  {
+    "timestamp": $(date +%s000),
+    "message": "INTEGRATION: $INTEGRATION_NAME"
+  },
+EOF
+
+    while read line
+    do
+      if [ "$line" ];then
+      message=$(echo $line|sed 's/\"/\\\"/g')
+      cat >> log <<EOF
+  {
+    "timestamp": $(date +%s000),
+    "message": "$message"
+  },
+EOF
+      fi
+    done < ${SUCCESS_DIR}/reconcile-${INTEGRATION_NAME}.txt
+
+    message=$(echo $duration|sed 's/\"/\\\"/g')
+    cat >> log <<EOF
+  {
+    "timestamp": $(date +%s000),
+    "message": "$message"
+  },
+EOF
+
+    if [ "$status" != "0" ]
+    then
+      cat >> log <<EOF
+  {
+    "timestamp": $(date +%s000),
+    "message": "INTEGRATION FAILED: $1"
+  }
+]
+EOF
+    else
+      cat >> log <<EOF
+  {
+    "timestamp": $(date +%s000),
+    "message": "INTEGRATION SUCCESS: $1"
+  }
+]
+EOF
+    fi
+    aws logs put-log-events --log-group-name $LOG_GROUP_NAME --log-stream-name jenkins-$BUILD_NUMBER --sequence-token $Token --log-events file://log
+    rm log
+  fi
 
   if [ "$status" != "0" ]; then
     echo "INTEGRATION FAILED: $1" >&2
