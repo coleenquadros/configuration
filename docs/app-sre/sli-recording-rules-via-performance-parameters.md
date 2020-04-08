@@ -269,20 +269,22 @@ avg_over_time(component:volume:slo_ok_5m{
 
 We define two SLOs for volume using the `http_rate` errors ratio rate rules created above, we will refer to them using the name we gave them. It should be noted that errors refer to HTTP 5xx status errors, not to 4xx errors. While it is important to track 4xx errors we cannot create SLOs on top of them as we don't have full control over them.
 
-* Read handler SLO definition expresses that errors ratio should be under 1% percent the 99% of the time
-* Write handler SLO definition expresses that errors ratio should be under 5% percent the 95% of the time
+* Read handler SLO definition expresses that errors ratio should be under 1% percent the 95% of the time
+* Write handler SLO definition expresses that errors ratio should be under 5% percent the 99% of the time
 
 ```yaml
 errors:
 - name: read_errors_slo
   kind: SLO
   rules: read_http_rates
-  target: 99
+  target: 95
+  threshold: 1
 
 - name: write_errors_slo
   kind: SLO
   rules: write_http_rates
-  target: 95
+  target: 99
+  threshold: 5
 ```
 
 They will generate the following recording rules for the `5m` range:
