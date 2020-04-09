@@ -5,6 +5,7 @@ set -exvo pipefail
 source ./.env
 
 # Run integrations
+BUILDTIME=$(date +%s000)
 
 # Write config.toml for reconcile tools
 mkdir -p config
@@ -12,7 +13,8 @@ echo "$CONFIG_TOML" | base64 -d > config/config.toml
 
 SUCCESS_DIR=reports/reconcile_reports_success
 FAIL_DIR=reports/reconcile_reports_fail
-rm -rf ${SUCCESS_DIR} ${FAIL_DIR}; mkdir -p ${SUCCESS_DIR} ${FAIL_DIR}
+LOG_DIR=logs
+rm -rf ${SUCCESS_DIR} ${FAIL_DIR} ${LOG_DIR}; mkdir -p ${SUCCESS_DIR} ${FAIL_DIR} ${LOG_DIR}
 
 set +e
 
@@ -47,6 +49,7 @@ SQS_GATEWAY=true run_int gitlab-pr-submitter $APP_INTERFACE_PROJECT_ID &
 
 wait
 
+send_log
 print_execution_times
 update_pushgateway
 check_results
