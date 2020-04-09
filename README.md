@@ -72,6 +72,7 @@ this repository.
     - [Add a Grafana Dashboard](#add-a-grafana-dashboard)
     - [Execute a SQL Query on an App Interface controlled RDS instance](#execute-a-sql-query-on-an-app-interface-controlled-rds-instance)
     - [Enable Gitlab Features on an App Interface Controlled Gitlab Repository](#enable-gitlab-features-on-an-app-interface-controlled-gitlab-repository)
+    - [Add recording rules via openshift-performance-parameters integration](#add-recording-rules-via-openshift-performance-parameters-integration)
   - [Design](#design)
   - [Developer Guide](#developer-guide)
 
@@ -873,6 +874,7 @@ In order to add or update an RDS database, you need to add them to the `terrafor
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options](/resources/terraform/resources/)
 - `parameter_group`: (optional) path relative to [resources](/resources) to a file with parameter group values. Note that it starts with `/`.
 - `overrides`: list of values from `defaults` you wish to override, with the override values. For example: `engine: mysql`.
+- `replica_source`: indicates this will be a read replica with this identifier of an rds instance acting as the source
 - `output_resource_name`: name of Kubernetes Secret to be created.
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
