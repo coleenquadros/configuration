@@ -37,7 +37,7 @@ this repository.
     - [Manage openshift-acme deployments via App-Interface (`/openshift/acme-1.yml`)](#manage-openshift-acme-deployments-via-app-interface-openshiftacme-1yml)
     - [Manage OpenShift Groups association via App-Interface (`/openshift/cluster-1.yml`)](#manage-openshift-groups-association-via-app-interface-openshiftcluster-1yml)
     - [Manage OpenShift LimitRanges via App-Interface (`/openshift/limitrange-1.yml`)](#manage-openshift-limitranges-via-app-interface-openshiftlimitrange-1yml)
-    - [Self-Service OpenShift ServiceAccount tokens via App-Interface (`/openshift/limitrange-1.yml`)](#self-service-openshift-serviceaccount-tokens-via-app-interface-openshiftlimitrange-1yml)
+    - [Self-Service OpenShift ServiceAccount tokens via App-Interface (`/openshift/namespace-1.yml`)](#self-service-openshift-serviceaccount-tokens-via-app-interface-openshiftlimitrange-1yml)
     - [Manage Vault configurations via App-Interface](#manage-vault-configurations-via-app-interface)
       - [Manage vault audit backends (`/vault-config/audit-1.yml`)](#manage-vault-audit-backends-vault-configaudit-1yml)
       - [Manage vault auth backends (`/vault-config/auth-1.yml`)](#manage-vault-auth-backends-vault-configauth-1yml)
@@ -610,7 +610,7 @@ The LimitRange limits can be customized by creating a new file and referencing t
 
 The `/openshift/limitrange-1.yml` schema maps to the LimitRanges specs.
 
-### Self-Service OpenShift ServiceAccount tokens via App-Interface (`/openshift/limitrange-1.yml`)
+### Self-Service OpenShift ServiceAccount tokens via App-Interface (`/openshift/namespace-1.yml`)
 
 This integration allows namespace owners to get ServiceAccount tokens from a different cluster/namespace in to their namespace for consumption.
 
