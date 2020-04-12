@@ -24,3 +24,6 @@ validate:
 		-v $(OUTPUT_DIR):/bundle:z \
 		$(VALIDATOR_IMAGE):$(VALIDATOR_IMAGE_TAG) \
 		qontract-validator --only-errors /bundle/$(BUNDLE_FILENAME)
+
+toc:
+	./hack/toc.py
