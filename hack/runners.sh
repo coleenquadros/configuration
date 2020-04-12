@@ -32,11 +32,11 @@ run_int() {
   echo $duration >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
 
   if [ "$LOG_GROUP_NAME" ];then
-    cat > ${LOG_DIR}/reconcile-${INTEGRATION_NAME}.log <<EOF
+    cat > ${LOG_DIR}/${INTEGRATION_NAME}.log <<EOF
 [
   {
     "timestamp": $(date +%s000),
-    "message": "INTEGRATION: $INTEGRATION_NAME"
+    "message": "INTEGRATION: $BUILD_URL"
   },
 EOF
 
@@ -44,7 +44,7 @@ EOF
     do
       if [ "$line" ];then
       message=$(echo $line|sed 's/\"/\\\"/g')
-      cat >> ${LOG_DIR}/reconcile-${INTEGRATION_NAME}.log <<EOF
+      cat >> ${LOG_DIR}/${INTEGRATION_NAME}.log <<EOF
   {
     "timestamp": $(date +%s000),
     "message": "$message"
@@ -54,7 +54,7 @@ EOF
     done < ${SUCCESS_DIR}/reconcile-${INTEGRATION_NAME}.txt
 
     message=$(echo $duration|sed 's/\"/\\\"/g')
-    cat >> ${LOG_DIR}/reconcile-${INTEGRATION_NAME}.log <<EOF
+    cat >> ${LOG_DIR}/${INTEGRATION_NAME}.log <<EOF
   {
     "timestamp": $(date +%s000),
     "message": "$message"
@@ -63,7 +63,7 @@ EOF
 
     if [ "$status" != "0" ]
     then
-      cat >> ${LOG_DIR}/reconcile-${INTEGRATION_NAME}.log <<EOF
+      cat >> ${LOG_DIR}/${INTEGRATION_NAME}.log <<EOF
   {
     "timestamp": $(date +%s000),
     "message": "INTEGRATION FAILED: $1"
@@ -71,7 +71,7 @@ EOF
 ]
 EOF
     else
-      cat >> ${LOG_DIR}/reconcile-${INTEGRATION_NAME}.log <<EOF
+      cat >> ${LOG_DIR}/${INTEGRATION_NAME}.log <<EOF
   {
     "timestamp": $(date +%s000),
     "message": "INTEGRATION SUCCESS: $1"
@@ -149,24 +149,15 @@ run_vault_reconcile_integration() {
 
 send_log() {
   if [ "$LOG_GROUP_NAME" ];then
-    log_stream=$(aws logs describe-log-streams --log-group-name $LOG_GROUP_NAME|grep \"jenkins-$BUILD_NUMBER\"|cut -d'"' -f4)
-    [ -z "$log_stream" ] && aws logs create-log-stream --log-group-name $LOG_GROUP_NAME --log-stream-name jenkins-$BUILD_NUMBER
-    Token=$(aws logs describe-log-streams --log-group-name $LOG_GROUP_NAME|grep -A 5 \"jenkins-$BUILD_NUMBER\"|grep Token|cut -d'"' -f4)
-    [ -z "$Token" ] && Token=$(aws logs put-log-events --log-group-name $LOG_GROUP_NAME --log-stream-name jenkins-$BUILD_NUMBER --log-events timestamp=$BUILDTIME,message="$BUILD_TAG"|grep Token|cut -d'"' -f4)
     for file in ${LOG_DIR}/*
     do
-      Token=$(aws logs put-log-events --log-group-name $LOG_GROUP_NAME --log-stream-name jenkins-$BUILD_NUMBER --sequence-token $Token --log-events file://$file|grep Token|cut -d'"' -f4)
+      INTEGRATION_NAME=$(basename ${file} .log)
+      log_stream=$(aws logs describe-log-streams --log-group-name $LOG_GROUP_NAME|grep \"ci-int-$INTEGRATION_NAME\"|cut -d'"' -f4)
+      [ -z "$log_stream" ] && aws logs create-log-stream --log-group-name $LOG_GROUP_NAME --log-stream-name ci-int-$INTEGRATION_NAME
+      Token=$(aws logs describe-log-streams --log-group-name $LOG_GROUP_NAME|grep -A 5 \"ci-int-$INTEGRATION_NAME\"|grep Token|cut -d'"' -f4)
+      [ -z "$Token" ] && Token=$(aws logs put-log-events --log-group-name $LOG_GROUP_NAME --log-stream-name ci-int-$INTEGRATION_NAME --log-events timestamp=$BUILDTIME,message="$JENKINS_MASTER_URL"|grep Token|cut -d'"' -f4)
+      aws logs put-log-events --log-group-name $LOG_GROUP_NAME --log-stream-name ci-int-$INTEGRATION_NAME --sequence-token $Token --log-events file://$file &
     done
-
-    FAILED_COUNT=$(ls ${FAIL_DIR} | wc -l)
-    if [ "$FAILED_COUNT" != "0" ]
-    then
-      aws logs put-log-events --log-group-name $LOG_GROUP_NAME --log-stream-name jenkins-$BUILD_NUMBER --sequence-token $Token --log-events timestamp=$(date +%s000),message="BUILD FAILURE"
-    else
-      aws logs put-log-events --log-group-name $LOG_GROUP_NAME --log-stream-name jenkins-$BUILD_NUMBER --sequence-token $Token --log-events timestamp=$(date +%s000),message="BUILD SUCCESS"
-    fi
-
-    rm -rf ${LOG_DIR}
   fi
 }
 
