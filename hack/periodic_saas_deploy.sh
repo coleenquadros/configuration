@@ -5,6 +5,7 @@ set -exvo pipefail
 source ./.env
 
 # Run integrations
+BUILDTIME=$(date +%s000)
 
 # Write config.toml for reconcile tools
 mkdir -p config

@@ -32,13 +32,7 @@ run_int() {
   echo $duration >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
 
   if [ "$LOG_GROUP_NAME" ];then
-    cat > ${LOG_DIR}/${INTEGRATION_NAME}.log <<EOF
-[
-  {
-    "timestamp": $(date +%s000),
-    "message": "INTEGRATION: $BUILD_URL"
-  },
-EOF
+    echo "[" > ${LOG_DIR}/${INTEGRATION_NAME}.log
 
     while read line
     do
@@ -58,27 +52,10 @@ EOF
   {
     "timestamp": $(date +%s000),
     "message": "$message"
-  },
+  }
+]
 EOF
 
-    if [ "$status" != "0" ]
-    then
-      cat >> ${LOG_DIR}/${INTEGRATION_NAME}.log <<EOF
-  {
-    "timestamp": $(date +%s000),
-    "message": "INTEGRATION FAILED: $1"
-  }
-]
-EOF
-    else
-      cat >> ${LOG_DIR}/${INTEGRATION_NAME}.log <<EOF
-  {
-    "timestamp": $(date +%s000),
-    "message": "INTEGRATION SUCCESS: $1"
-  }
-]
-EOF
-    fi
   fi
 
   if [ "$status" != "0" ]; then
@@ -152,11 +129,11 @@ send_log() {
     for file in ${LOG_DIR}/*
     do
       INTEGRATION_NAME=$(basename ${file} .log)
-      log_stream=$(aws logs describe-log-streams --log-group-name $LOG_GROUP_NAME|grep \"ci-int-$INTEGRATION_NAME\"|cut -d'"' -f4)
-      [ -z "$log_stream" ] && aws logs create-log-stream --log-group-name $LOG_GROUP_NAME --log-stream-name ci-int-$INTEGRATION_NAME
-      Token=$(aws logs describe-log-streams --log-group-name $LOG_GROUP_NAME|grep -A 5 \"ci-int-$INTEGRATION_NAME\"|grep Token|cut -d'"' -f4)
-      [ -z "$Token" ] && Token=$(aws logs put-log-events --log-group-name $LOG_GROUP_NAME --log-stream-name ci-int-$INTEGRATION_NAME --log-events timestamp=$BUILDTIME,message="$JENKINS_MASTER_URL"|grep Token|cut -d'"' -f4)
-      aws logs put-log-events --log-group-name $LOG_GROUP_NAME --log-stream-name ci-int-$INTEGRATION_NAME --sequence-token $Token --log-events file://$file &
+      log_stream=$(aws logs describe-log-streams --log-group-name $LOG_GROUP_NAME|grep \"$INTEGRATION_NAME\"|cut -d'"' -f4)
+      [ -z "$log_stream" ] && aws logs create-log-stream --log-group-name $LOG_GROUP_NAME --log-stream-name $INTEGRATION_NAME
+      Token=$(aws logs describe-log-streams --log-group-name $LOG_GROUP_NAME --log-stream-name-prefix $INTEGRATION_NAME|grep Token|cut -d'"' -f4)
+      [ -z "$Token" ] && Token=$(aws logs put-log-events --log-group-name $LOG_GROUP_NAME --log-stream-name $INTEGRATION_NAME --log-events timestamp=$BUILDTIME,message="$JENKINS_MASTER_URL"|grep Token|cut -d'"' -f4)
+      aws logs put-log-events --log-group-name $LOG_GROUP_NAME --log-stream-name $INTEGRATION_NAME --sequence-token $Token --log-events file://$file &
     done
   fi
 }
