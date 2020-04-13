@@ -1,0 +1,142 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: remediations
+  platform: insights
+
+name: remediations
+description: remediations app on the Insights Platform
+
+app:
+  $ref: /services/insights/remediations/app.yml
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: playbooks-ssg
+  path: /templates/remediations/playbooks-ssg.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  hash_length: 7
+  parameters:
+    LIMITS_CPU: '1'
+    REQUESTS_CPU: 250m
+    SSG_REPLICAS: 2
+  targets:
+  - namespace:
+      $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
+    hash: master
+    parameters:
+      IMAGE_TAG: 48db510
+- name: redis
+  path: /templates/remediations/redis.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  hash_length: 7
+  parameters:
+    REDIS_REPLICAS: 1
+  targets:
+  - namespace:
+      $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
+    hash: master
+    parameters:
+      IMAGE_TAG: latest
+- name: remediations-cleaner
+  path: /templates/remediations/remediations-cleaner.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  hash_length: 7
+  parameters:
+    CLEANER_SUSPEND: false
+    DB_SSL_ENABLED: true
+    LOG_CW_ENABLED: true
+    LOG_LEVEL: trace
+    PROMETHEUS_PUSHGATEWAY: http://prometheus-push.mnm.svc.cluster.local:9091
+  targets:
+  - namespace:
+      $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
+    hash: master
+    parameters:
+      IMAGE_TAG: 8be52e1
+      LOG_CW_GROUP: remediations-stage
+- name: remediations-consumer
+  path: /templates/remediations/remediations-consumer.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  hash_length: 7
+  parameters:
+    DB_SSL_ENABLED: true
+    KAFKA_BOOTSTRAP_PORT: '9092'
+    LOG_CW_ENABLED: true
+    LOG_LEVEL: trace
+    NUM_REPLICAS: 2
+  targets:
+  - namespace:
+      $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
+    hash: master
+    parameters:
+      IMAGE_TAG: 8be52e1
+      KAFKA_BOOTSTRAP_HOST: platform-mq-stage-kafka-bootstrap.platform-mq-stage.svc
+      LOG_CW_GROUP: remediations-stage
+- name: remediations
+  path: /templates/remediations/remediations.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  hash_length: 7
+  parameters:
+    ADVISOR_IMPL: impl
+    COMPLIANCE_IMPL: impl
+    DB_SSL_ENABLED: true
+    IMAGE_CHANGE_TRIGGER: true
+    INVENTORY_IMPL: impl
+    LOG_CW_ENABLED: true
+    LOG_LEVEL: trace
+    MAX_REPLICAS: 5
+    MIGRATION_COMMAND: npm run db:create; npm run db:migrate
+    MIN_REPLICAS: 2
+    PATCHMAN_IMPL: impl
+    PATH_PREFIX: /api
+    RBAC_IMPL: impl
+    RECEPTOR_IMPL: impl
+    REMEDIATIONS_REPLICAS: 2
+    SOURCES_IMPL: impl
+    SSG_HOST: http://playbooks-ssg:8080
+    SSG_IMPL: impl
+    STRATEGY: Rolling
+    TARGET_CPU_UTILIZATION: 80
+    USERS_IMPL: impl
+    VULNERABILITIES_IMPL: impl
+  targets:
+  - namespace:
+      $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
+    hash: master
+    parameters:
+      ADVISOR_HOST: http://insights-advisor-api.advisor-stage.svc.cluster.local:8000
+      COMPLIANCE_HOST: http://compliance-backend.compliance-stage.svc.cluster.local:3000
+      CONTENT_SERVER_HOST: http://content-server.advisor-stage.svc.cluster.local:8080
+      IMAGE_TAG: 065440a
+      INVENTORY_HOST: http://insights-inventory.platform-stage.svc.cluster.local:8080
+      LOG_CW_GROUP: remediations-stage
+      PATCHMAN_HOST: http://patchman-engine-manager.patchman-engine-stage.svc.cluster.local:8080
+      RBAC_HOST: http://rbac.rbac-stage.svc.cluster.local:8080
+      RECEPTOR_HOST: http://receptor-controller.receptor-stage.svc.cluster.local:9090
+      SOURCES_HOST: http://sources-api.sources-stage.svc.cluster.local:8080
+      USERS_HOST: https://backoffice-proxy-insights-services.ext.us-east.dc.stage.paas.redhat.com
+      VULNERABILITIES_HOST: http://vulnerability-engine-manager.vulnerability-engine-stage.svc.cluster.local:8443
+- name: redis
+  path: /templates/remediations/redis.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  hash_length: 7
+  parameters:
+    VOLUME_CAPACITY: 10Gi
+    IMAGE_TAG: latest
+  targets:
+  - namespace:
+      $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
+    hash: master
