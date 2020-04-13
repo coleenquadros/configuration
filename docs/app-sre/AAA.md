@@ -194,6 +194,11 @@ Every app-sre engineer should have access to the following
   - Access process is documented [here](https://mojo.redhat.com/docs/DOC-1144200)
     - You should request Tier1
 
+- Pendo:
+  - This is necessary to post maintenance and outage messages in https://cloud.redhat.com/openshift
+  - Access is provided via email to Cameron Britt <cbritt@redhat.com> and Jeremy Perry <jeperry@redhat.com>.
+  - Logging in is done using the full Red Hat email.
+
 ### 1.5.1 Returning Red Hat Employee Gotchas
 
 - Accounts need to be re-enabled
