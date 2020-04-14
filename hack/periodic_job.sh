@@ -5,7 +5,6 @@ set -exvo pipefail
 source ./.env
 
 # Run integrations
-BUILDTIME=$(date +%s000)
 
 # Write config.toml for reconcile tools
 mkdir -p config
@@ -49,7 +48,6 @@ SQS_GATEWAY=true run_int gitlab-pr-submitter $APP_INTERFACE_PROJECT_ID &
 
 wait
 
-send_log
 print_execution_times
 update_pushgateway
 check_results

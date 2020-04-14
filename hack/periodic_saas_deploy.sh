@@ -5,7 +5,6 @@ set -exvo pipefail
 source ./.env
 
 # Run integrations
-BUILDTIME=$(date +%s000)
 
 # Write config.toml for reconcile tools
 mkdir -p config
@@ -28,7 +27,6 @@ STATE=true run_int openshift-saas-deploy &
 
 wait
 
-send_log
 print_execution_times
 update_pushgateway
 check_results

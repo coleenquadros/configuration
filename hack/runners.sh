@@ -31,7 +31,7 @@ run_int() {
   duration="app_interface_int_execution_duration_seconds{integration=\"$INTEGRATION_NAME\"} $((ENDTIME - STARTTIME))"
   echo $duration >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
 
-  if [ "$LOG_GROUP_NAME" ];then
+  if [ -d "$LOG_DIR" ];then
     echo "[" > ${LOG_DIR}/${INTEGRATION_NAME}.log
 
     while read line
@@ -125,14 +125,16 @@ run_vault_reconcile_integration() {
 }
 
 send_log() {
-  if [ "$LOG_GROUP_NAME" ];then
+  BUILDTIME=$(date -d "$BUILD_TIMESTAMP" +%s000)
+
+  if [ -d "$LOG_DIR" ];then
     for file in ${LOG_DIR}/*
     do
       INTEGRATION_NAME=$(basename ${file} .log)
       log_stream=$(aws logs describe-log-streams --log-group-name $LOG_GROUP_NAME|grep \"$INTEGRATION_NAME\"|cut -d'"' -f4)
       [ -z "$log_stream" ] && aws logs create-log-stream --log-group-name $LOG_GROUP_NAME --log-stream-name $INTEGRATION_NAME
       Token=$(aws logs describe-log-streams --log-group-name $LOG_GROUP_NAME --log-stream-name-prefix $INTEGRATION_NAME|grep Token|cut -d'"' -f4)
-      [ -z "$Token" ] && Token=$(aws logs put-log-events --log-group-name $LOG_GROUP_NAME --log-stream-name $INTEGRATION_NAME --log-events timestamp=$BUILDTIME,message="$JENKINS_MASTER_URL"|grep Token|cut -d'"' -f4)
+      [ -z "$Token" ] && Token=$(aws logs put-log-events --log-group-name $LOG_GROUP_NAME --log-stream-name $INTEGRATION_NAME --log-events timestamp=$BUILDTIME,message="$JOB_URL"|grep Token|cut -d'"' -f4)
       aws logs put-log-events --log-group-name $LOG_GROUP_NAME --log-stream-name $INTEGRATION_NAME --sequence-token $Token --log-events file://$file &
     done
   fi
