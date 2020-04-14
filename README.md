@@ -1176,10 +1176,9 @@ To manage a User group via App-Interface:
 - `workspace`: a reference to a file representing the Slack Workspace
 - `pagerduty`: a reference to a file representing a PagerDuty target (Schedule or Escalation Policy).
   * Adding this attribute will add the PagerDuty target as an additional "source of truth", and will add the final schedule user to the Slack user group (in addition to any references from user files).
-- `github_owners`: a list of urls of raw github `OWNERS` files to extract `approvers` from.
-- `github_owners_aliases`: a url with a raw github `OWNERS_ALIASES` file to resolve aliases in the `OWNERS` file.
-- `gitlab_owners`: a list of urls of raw gitlab `OWNERS` files to extract `approvers` from.
-- `gitlab_owners_aliases`: a url with a raw gitlab `OWNERS_ALIASES` file to resolve aliases in the `OWNERS` file.
+- `ownersFromRepos`: a list of urls of github or gitlab repositories containing
+  the `OWNERS` files to extract `approvers`/`reviewers` from. Only the root
+  `OWNERS` file is considered. The `OWNERS_ALIASES` is respected.
 - `channels`: a list of channels to add to the User group
 
 2. Add this permission to the desired `roles`, or create a new `role` with this permission only (mandatory).
