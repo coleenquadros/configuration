@@ -1,0 +1,68 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: mnm
+  platform: insights
+
+name: mnm
+description: Metrics and Monitoring stack on the Insights Platform
+
+app:
+  $ref: /services/insights/mnm/app.yml
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: insights-mnm
+  hash: b21b9c446b8775c26ca3133765b433b59a7d980a
+  path: /openshift-templates/template-mnm.yml
+  url: https://gitlab.cee.redhat.com/insights-platform/insights-mnm-sre
+  hash_length: 7
+  parameters:
+    CLUSTER: STAGE
+    CLUSTER_EXTERNAL_LABEL: insights-stage
+    ROLE_EXTERNAL_LABEL: mnm-sre
+    ENVIRONMENT: stage
+    PUBLIC_CLUSTER_DOMAIN_NAME: apps.crc-stage-01.p5t7.p1.openshiftapps.com
+    THANOS_BUCKET_SECRET: insights-thanos-stage-s3
+    PROMETHEUS_IMAGE: quay.io/prometheus/prometheus:v2.9.2
+    ALERTMANAGER_IMAGE: quay.io/prometheus/alertmanager:v0.17.0
+    OAUTH_PROXY_IMAGE: quay.io/cloudservices/oauth-proxy:v3.11.43
+    PROM_CONFIG_WATCHER_IMAGE: quay.io/cloudservices/prom-config-watcher
+    THANOS_IMAGE: quay.io/thanos/thanos:v0.10.1
+  targets:
+  - namespace:
+      $ref: /services/insights/mnm/namespaces/stage-mnm-sre.yml
+    hash: master
+    parameters:
+      IMAGE_TAG: v2.9.2
+      PUBLIC_CLUSTER_DOMAIN_NAME: apps.crc-stage-01.p5t7.p1.openshiftapps.com
+- name: insights-mnm-grafana
+  hash: 268e5b0095c8f7428256b5bf928bfcca5ff5fb9a
+  path: /openshift-templates/template-mnm-grafana.yml
+  url: https://gitlab.cee.redhat.com/insights-platform/insights-mnm-grafana
+  hash_length: 7
+  parameters:
+    parameters:
+      CLUSTER_CONFIG_NAME: stage
+      ROUTE_HOSTNAME: metrics-mnm-sre.apps.crc-stage-01.p5t7.p1.openshiftapps.com
+      OAUTH_PROXY_IMAGE: quay.io/cloudservices/oauth-proxy:v3.11.43
+  targets:
+  - namespace:
+      $ref: /services/insights/mnm/namespaces/stage-mnm-sre.yml
+    hash: master
+    parameters:
+      CLUSTER_CONFIG_NAME: stage
+      ROUTE_HOSTNAME: metrics-mnm-sre.apps.crc-stage-01.p5t7.p1.openshiftapps.com
+      OAUTH_PROXY_IMAGE: quay.io/cloudservices/oauth-proxy:v3.11.43
