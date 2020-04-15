@@ -208,89 +208,32 @@ They will generate the following recording rules for the `5m` range:
   record: component:latency:p95_rate5m
 ```
 
-## Volume, Errors, Latency and Availability SLOs
+## Errors, Latency, Availability and Volume SLOs
 
-The following sections are going to be used to define two things for each SLI:
+Every SLO definition below is composed of the following elements:
 
-* A boolean metric using one of the above base recording rules and a threshold
-* An SLO target that we can incorporate into a higher level element, as a dashboard or an alarm
-
-Boolean metrics have been chosen as they make easy to query if a certain SLO has been met over time.
-
-### Volume
-
-We define two SLOs for volume using the `http_rate` rules created above, we will refer to them using the name we gave them. It could be argued that SLO volume is difficult to justify, but it will serve us as a way of knowing if we are going above the peak capacity we have determined for our service.
-
-* Read API SLO definition expresses that requests per second have to be under 1000 the 99% of the time
-* Write API SLO definition expresses that requests per second have to be under 1000 the 99% of the time
-
-```yaml
-volume:
-- name: read_volume_slo
-  kind: SLO
-  rules: read_http_rates
-  threshold: 1000
-  target: 99
-
-- name: write_volume_slo
-  kind: SLO
-  rules: write_http_rates
-  threshold: 200
-  target: 99
-```
-
-They will generate the following recording rules for the `5m` range:
-
-
-```yaml
-- expr: |
-    status_class:http_requests_total:rate5m{component="yak-shaver",route="yak-shaver-read",service="yolo"}
-    < bool(1000)
-  labels:
-    component: yak-shaver
-    route: yak-shaver-read
-    service: yolo
-  record: component:volume:slo_ok_5m
-- expr: |
-    status_class:http_requests_total:rate5m{component="yak-shaver",route="yak-shaver-write",service="yolo"}
-    < bool(200)
-  labels:
-    component: yak-shaver
-    route: yak-shaver-write
-    service: yolo
-  record: component:volume:slo_ok_5m
-```
-
-Then if we want to calculate if your the read volume SLO has been met in the last day we could use the following PromQL query to compare with the `99%` target define above:
-
-```promql
-avg_over_time(component:volume:slo_ok_5m{
-  component="yak-shaver",
-  route="yak-shaver-read",
-  service="yolo"
-}[1d]) * 100
-```
+* A base recording rule to use in its calculation
+* A target value we want our SLI to comply with. That can be incorporated into a higher level element such as a dashboard or an alarm
+* A time window that we will calculate our SLO against. It will be 24h unless indicated otherwise.
 
 ### Errors
 
-We define two SLOs for volume using the `http_rate` errors ratio rate rules created above, we will refer to them using the name we gave them. It should be noted that errors refer to HTTP 5xx status errors, not to 4xx errors. While it is important to track 4xx errors we cannot create SLOs on top of them as we don't have full control over them.
+We define two SLOs for errors using the `http_rate` errors ratio rate rules created above, we will refer to them using the name we gave them. It should be noted that errors refer to HTTP 5xx status errors, not to 4xx errors. While it is important to track 4xx errors we cannot create SLOs on top of them as we don't have full control over them.
 
-* Read API SLO definition expresses that errors ratio should be under 1% percent the 95% of the time
-* Write API SLO definition expresses that errors ratio should be under 5% percent the 99% of the time
+* Read API SLO definition expresses that errors ratio should be under 5% in the last 28 days
+* Write API SLO definition expresses that errors ratio should be under 5% in the last 28 days
 
 ```yaml
 errors:
 - name: read_errors_slo
   kind: SLO
   rules: read_http_rates
-  target: 95
-  threshold: 1
+  target: 5
 
 - name: write_errors_slo
   kind: SLO
   rules: write_http_rates
-  target: 99
-  threshold: 5
+  target: 1
 ```
 
 They will generate the following recording rules for the `5m` range:
@@ -298,7 +241,7 @@ They will generate the following recording rules for the `5m` range:
 ```yaml
 - expr: |
     status_class_5xx:http_requests_total:ratio_rate5m{component="yak-shaver",route="yak-shaver-read",service="yolo"}
-    < bool(1)
+    < bool(5)
   labels:
     component: yak-shaver
     route: yak-shaver-read
@@ -306,7 +249,7 @@ They will generate the following recording rules for the `5m` range:
   record: component:errors:slo_ok_5m
 - expr: |
     status_class_5xx:http_requests_total:ratio_rate5m{component="yak-shaver",route="yak-shaver-write",service="yolo"}
-    < bool(5)
+    < bool(1)
   labels:
     component: yak-shaver
     route: yak-shaver-write
@@ -314,12 +257,22 @@ They will generate the following recording rules for the `5m` range:
   record: component:errors:slo_ok_5m
 ```
 
+Then if we want to calculate if your the read errors SLO has been met in the last day we could use the following PromQL query to compare with the `5%` target define above:
+
+```promql
+avg_over_time(component:errors:slo_ok_5m{
+  component="yak-shaver",
+  route="yak-shaver-read",
+  service="yolo"
+}[1d]) * 100
+```
+
 ### Latency
 
-We define two SLOs for volume using `latency_rate` rules above.
+Since latency cannot be expressed as a percentage, apart from a target we need a latency `threshold` that will indicate if we're not meeting our objective.  We define two SLOs for latency using the `latency_rate` rules above:
 
-* Read API SLO definition expresses that the p95 of the latency should be under 0.5 seconds the 99.9% of the time
-* Write API SLO definition expresses that the p95 of the latency should be under 1 seconds the 99.9% of the time
+* Read API SLO definition expresses that the p95 of the latency should be under 0.5 seconds the 99.9% of the last 28 days
+* Write API SLO definition expresses that the p95 of the latency should be under 1 seconds the 98% of the last 28 days
 
 ```yaml
 latency:
@@ -333,7 +286,7 @@ latency:
   kind: SLO
   rules: write_latency_p95
   threshold: 1
-  target: 99.9
+  target: 98
 ```
 
 They will generate the following recording rules for the `5m` range:
@@ -491,6 +444,47 @@ that would generate the following rule for the `5m` range
     service: yolo
   record: component:availability:slo_ok_5m
 ```
+
+### Volume
+
+It could be argued that SLO volume is difficult to justify, but it will serve us as a way of knowing if we are going above the peak capacity we have determined for our service. We will not define a percentage target on volume SLO but a request per second target that will reflect what we consider peak performance.
+
+We define two SLOs for volume using the `http_rate` rules created above, we will refer to them using the name we gave them.
+
+* Read API SLO definition expresses that requests per second have to be under 1000 in the last 28 days
+* Write API SLO definition expresses that requests per second have to be under 200 in the last 28 days
+
+```yaml
+volume:
+- name: read_volume_slo
+  kind: SLO
+  rules: read_http_rates
+  target: 1000
+
+- name: write_volume_slo
+  kind: SLO
+  rules: write_http_rates
+  target: 200
+```
+
+Although there's no need to create further rules to calculate this SLO as it is doable directly with the base `haproxy_server_http_responses_total` metric, we provide the following recording rules as they may be helpful
+
+- expr: |
+    status_class:http_requests_total:rate5m{component='yak-shaver',route='yak-shaver-read',service='yolo'}
+    < bool(1000)
+  labels:
+    component: yak-shaver
+    route: yak-shaver-read
+    service: yolo
+  record: component:volume:slo_ok_5m
+- expr: |
+    status_class:http_requests_total:rate5m{component='yak-shaver',route='yak-shaver-write',service='yolo'}
+    < bool(200)
+  labels:
+    component: yak-shaver
+    route: yak-shaver-write
+    service: yolo
+  record: component:volume:slo_ok_5m
 
 ## Next steps
 
