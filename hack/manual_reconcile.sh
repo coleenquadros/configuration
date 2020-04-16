@@ -115,6 +115,7 @@ cat "$CONFIG_TOML" \
 run_int github &
 run_int github-repo-invites &
 run_int service-dependencies &
+run_int user-validator &
 run_int quay-membership &
 run_int quay-repos &
 run_vault_reconcile_integration &
