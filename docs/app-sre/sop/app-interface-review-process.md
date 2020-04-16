@@ -25,12 +25,20 @@ Action items:
 
 ## Additional Reviewers
 
-Telemeter access:
+### Telemeter
+
 ```
 @kasingh @ccoleman @cvogel
 ```
 
-Insights cluster access:
+### Insights cluster access:
+
+Note: Insights team is managing their own MRs during the migration. Following folks can be asked to review MR when in doubt.
+
 ```
-@klape @gavin @bturner
+- @klape
+- @bturner
+- @aprice
+- @tparikh
+- @mafriedm
 ```
