@@ -1,0 +1,37 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: rule-nomination-api
+  platform: insights
+
+name: rule-nomination-api
+description: rule-nomination-api app on the Insights Platform
+
+app:
+  $ref: /services/insights/rule-nomination-api/app.yml
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: rule-nomination-api
+  path: /templates/rule-nomination-api/rule-nomination-api.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  hash_length: 7
+  parameters: {}
+  targets:
+  - namespace:
+      $ref: /services/insights/rule-nomination-api/namespaces/stage-rule-nomination-api-stage.yml
+    hash: master
+    parameters:
+      IMAGE_TAG: 0693af6

@@ -1,0 +1,112 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: automation-hub
+  platform: insights
+
+name: automation-hub
+description: automation-hub app on the Insights Platform
+
+app:
+  $ref: /services/insights/automation-hub/app.yml
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+- ConfigMap
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: automation-hub-backend
+  path: /templates/automation-hub/automation-hub-backend.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  hash_length: 7
+  parameters: {}
+  targets:
+  - namespace:
+      $ref: /services/insights/automation-hub/namespaces/stage-automation-hub-stage.yml
+    hash: master
+    parameters:
+      IMAGE_TAG: 250545a
+- name: galaxy-api
+  path: /templates/automation-hub/galaxy-api.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  hash_length: 7
+  parameters:
+    LOG_GROUP: platform
+    RH_ENTITLEMENT_REQUIRED: ansible
+  targets:
+  - namespace:
+      $ref: /services/insights/automation-hub/namespaces/stage-automation-hub-stage.yml
+    hash: master
+    parameters:
+      IMAGE_TAG: 58f16ed
+- name: pulp-api
+  path: /templates/automation-hub/pulp-api.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  hash_length: 7
+  parameters:
+    LOG_GROUP: platform
+    RH_ENTITLEMENT_REQUIRED: ansible
+  targets:
+  - namespace:
+      $ref: /services/insights/automation-hub/namespaces/stage-automation-hub-stage.yml
+    hash: master
+    parameters:
+      IMAGE_TAG: 58f16ed
+- name: pulp-content-app
+  path: /templates/automation-hub/pulp-content-app.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  hash_length: 7
+  parameters:
+    LOG_GROUP: platform
+  targets:
+  - namespace:
+      $ref: /services/insights/automation-hub/namespaces/stage-automation-hub-stage.yml
+    hash: master
+    parameters:
+      IMAGE_TAG: 58f16ed
+- name: pulp-resource-manager
+  path: /templates/automation-hub/pulp-resource-manager.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  hash_length: 7
+  parameters:
+    LOG_GROUP: platform
+  targets:
+  - namespace:
+      $ref: /services/insights/automation-hub/namespaces/stage-automation-hub-stage.yml
+    hash: master
+    parameters:
+      IMAGE_TAG: 58f16ed
+- name: pulp-worker
+  path: /templates/automation-hub/pulp-worker.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  hash_length: 7
+  parameters:
+    LOG_GROUP: platform
+  targets:
+  - namespace:
+      $ref: /services/insights/automation-hub/namespaces/stage-automation-hub-stage.yml
+    hash: master
+    parameters:
+      JOB_NAMESPACE: automation-hub-jobs-stage
+      IMAGE_TAG: 58f16ed
+- name: redis
+  path: /templates/automation-hub/redis.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  hash_length: 7
+  parameters: {}
+  targets:
+  - namespace:
+      $ref: /services/insights/automation-hub/namespaces/stage-automation-hub-stage.yml
+    hash: master
+    parameters:
+      IMAGE_TAG: latest
