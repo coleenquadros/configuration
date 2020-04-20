@@ -55,7 +55,7 @@ this repository.
           - [Publishing PostgreSQL Logs to CloudWatch Logs](#publishing-postgresql-logs-to-cloudwatch-logs)
       - [Manage S3 buckets via App-Interface (`/openshift/namespace-1.yml`)](#manage-s3-buckets-via-app-interface-openshiftnamespace-1yml)
       - [Manage ElastiCache databases via App-Interface (`/openshift/namespace-1.yml`)](#manage-elasticache-databases-via-app-interface-openshiftnamespace-1yml)
-      - [Manage Service account IAM Users via App-Interface (`/openshift/namespace-1.yml`)](#manage-service-account-iam-users-via-app-interface-openshiftnamespace-1yml)
+      - [Manage Service account IAM Users via App-Interface (`/openshift/namespace-1.yml`)](#manage-iam-service-account-users-via-app-interface-openshiftnamespace-1yml)
       - [Manage SQS queues via App-Interface (`/openshift/namespace-1.yml`)](#manage-sqs-queues-via-app-interface-openshiftnamespace-1yml)
       - [Manage DynamoDB tables via App-Interface (`/openshift/namespace-1.yml`)](#manage-dynamodb-tables-via-app-interface-openshiftnamespace-1yml)
       - [Manage ECR repositories via App-Interface (`/openshift/namespace-1.yml`)](#manage-ecr-repositories-via-app-interface-openshiftnamespace-1yml)
@@ -972,13 +972,13 @@ The Secret will contain the following fields:
 - `db.port` - The database port.
 - `db.auth_token` - Authentication token for the configuration endpoint.
 
-#### Manage Service account IAM Users via App-Interface (`/openshift/namespace-1.yml`)
+#### Manage IAM Service account users via App-Interface (`/openshift/namespace-1.yml`)
 
 IAM users to be used as service accounts can be entirely self-serviced via App-Interface.
 
 In order to add or update a service account, you need to add them to the `terraformResources` field.
 
-- `provider`: must be `service-account`
+- `provider`: must be `aws-iam-service-account`
 - `account`: must be one of the AWS account names we manage. Current options:
   - `app-sre`
   - `osio`
@@ -989,7 +989,7 @@ In order to add or update a service account, you need to add them to the `terraf
 - `output_resource_name`: name of Kubernetes Secret to be created.
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
-    - For example, for a resource with `identifier` "my-user" and `provider` "service-account", the created Secret will be called `my-user-service-account`.
+    - For example, for a resource with `identifier` "my-user" and `provider` "aws-iam-service-account", the created Secret will be called `my-user-aws-iam-service-account`.
 
 Once the changes are merged, the IAM resources will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
