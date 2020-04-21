@@ -32,6 +32,7 @@ This issue must contain or reference a google doc with the following bits of inf
 
 - A high level architecture of the service. Preferably with a diagram.
 - Service Owner contact and information about the (active) development team for escalations.
+- Upstream repositories.
 - Internal and external dependencies. They must be testable and may include other services.
 - Specific application requirements / dependencies in the OpenShift cluster: affinity/anti-affinity, namespace co-location with other applications, etc.
 - Language stacks, main library dependencies and installation channels.
