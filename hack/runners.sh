@@ -57,7 +57,6 @@ EOF
 ]
 EOF
   fi
-  set -x
 
   if [ "$status" != "0" ]; then
     echo "INTEGRATION FAILED: $1" >&2
