@@ -1,0 +1,37 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: uhc-auth-proxy
+  platform: insights
+
+name: uhc-auth-proxy
+description: uhc-auth-proxy app on the Insights Platform
+
+app:
+  $ref: /services/insights/uhc-auth-proxy/app.yml
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: uhc-auth-proxy
+  path: /openshift/uhc-auth-proxy-template.yaml
+  url: https://github.com/RedHatInsights/uhc-auth-proxy
+  hash_length: 7
+  parameters: 
+    REGISTRY_IMG: quay.io/cloudservices/uhc-auth-proxy
+  targets:
+  - namespace:
+      $ref: /services/insights/uhc-auth-proxy/namespaces/stage-uhc-auth-proxy-stage.yml
+    hash: 36c8f0f8cae1446c368409686d47364ca4369ab9
+    parameters: {}
