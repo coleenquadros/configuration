@@ -31,8 +31,9 @@ run_int() {
   duration="app_interface_int_execution_duration_seconds{integration=\"$INTEGRATION_NAME\"} $((ENDTIME - STARTTIME))"
   echo $duration >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
 
-  set +x
   if [ -d "$LOG_DIR" ];then
+    setting=${-//[^x]/}
+    [ -n "$setting" ] && set +x
     echo "[" > ${LOG_DIR}/${INTEGRATION_NAME}.log
 
     while read line
@@ -56,6 +57,7 @@ EOF
   }
 ]
 EOF
+  [ -n "$setting" ] && set -x
   fi
 
   if [ "$status" != "0" ]; then
