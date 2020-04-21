@@ -268,6 +268,14 @@ wheel icon (top-right corner) and replace `omit` with `include` in
   streams.
 - Management of OLM catalog entries for managing service operators.
 
+## Entities and relations
+
+App-interface data is represented by files that correspond to a schema. Files of one schema may reference files of another schema.
+
+To learn more about the different entities and their relations:
+
+- [Products, Environments, Namespaces and Apps](/docs/app-interface/api/entities-and-relations#products-environments-namespaces-and-apps.md)
+
 ## Howto
 
 ### Add or modify a user (`/access/users-1.yml`)
