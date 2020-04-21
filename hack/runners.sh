@@ -31,6 +31,7 @@ run_int() {
   duration="app_interface_int_execution_duration_seconds{integration=\"$INTEGRATION_NAME\"} $((ENDTIME - STARTTIME))"
   echo $duration >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
 
+  set +x
   if [ -d "$LOG_DIR" ];then
     echo "[" > ${LOG_DIR}/${INTEGRATION_NAME}.log
 
@@ -55,8 +56,8 @@ EOF
   }
 ]
 EOF
-
   fi
+  set -x
 
   if [ "$status" != "0" ]; then
     echo "INTEGRATION FAILED: $1" >&2
