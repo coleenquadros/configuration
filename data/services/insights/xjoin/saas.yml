@@ -1,0 +1,77 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: xjoin
+  platform: insights
+
+name: xjoin
+description: xjoin app on the Insights Platform
+
+app:
+  $ref: /services/insights/xjoin/app.yml
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: xjoin-es-exporter
+  path: /templates/xjoin/xjoin-es-exporter.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  hash_length: 7
+  parameters: {}
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
+    hash: master
+    parameters:
+      IMAGE_TAG: latest
+- name: xjoin-kafka-connect
+  path: /templates/xjoin/xjoin-kafka-connect.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  hash_length: 7
+  parameters:
+    CPU_LIMITS: 3
+    CPU_REQUESTS: 1
+    GROUP_ID: 1
+    HEAP_OPTS: -Xmx8G -Xms8G
+    KAFKA_BOOTSTRAP_PORT: '9092'
+    MEMORY_LIMITS: 10Gi
+    MEMORY_REQUESTS: 9Gi
+    NUM_REPLICAS: 13
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
+    hash: master
+    parameters:
+      IMAGE_TAG: d9a6fc0
+      KAFKA_BOOTSTRAP_HOST: platform-mq-stage-kafka-bootstrap.platform-mq-stage.svc
+      REST_ADVERTISED_HOST_NAME: xjoin-kafka-connect.xjoin-stage.svc.cluster.local
+- name: xjoin-search
+  path: /templates/xjoin/xjoin-search.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  hash_length: 7
+  parameters:
+    CPU_LIMITS: 1
+    CPU_REQUESTS: 1
+    LOG_CW_GROUP: xjoin-stage
+    MAX_REPLICAS: 4
+    MEMORY_LIMITS: 512Mi
+    MEMORY_REQUESTS: 512Mi
+    NUM_REPLICAS: 1
+    TARGET_CPU_UTILIZATION: 75
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
+    hash: master
+    parameters:
+      IMAGE_TAG: 517c5f2

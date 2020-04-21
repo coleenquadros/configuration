@@ -1,0 +1,37 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: receptor
+  platform: insights
+
+name: receptor
+description: receptor app on the Insights Platform
+
+app:
+  $ref: /services/insights/receptor/app.yml
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: receptor-gateway
+  path: /templates/receptor/receptor-gateway.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  hash_length: 7
+  parameters: {}
+  targets:
+  - namespace:
+      $ref: /services/insights/receptor/namespaces/stage-receptor-stage.yml
+    hash: master
+    parameters:
+      IMAGE_TAG: latest
