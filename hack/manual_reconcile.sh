@@ -113,6 +113,7 @@ cat "$CONFIG_TOML" \
 
 ## Run integrations on local server
 run_int github &
+run_int github-validator &
 run_int github-repo-invites &
 run_int service-dependencies &
 run_int user-validator &
