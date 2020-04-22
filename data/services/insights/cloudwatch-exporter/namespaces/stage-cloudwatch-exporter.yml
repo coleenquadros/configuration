@@ -22,6 +22,8 @@ managedRoles: true
 managedTerraformResources: true
 
 managedResourceTypes:
+- ServiceAccount
+- Secret
 - ConfigMap
 - ServiceMonitor
 
@@ -34,11 +36,20 @@ terraformResources:
   output_resource_name: aws-cloudwatch-exporter-app-sre
 
 openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 1
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
 - provider: resource
   path: /insights-stage/cloudwatch-exporter/cloudwatch-exporter.configmap.yaml
 - provider: resource
   path: /insights-stage/cloudwatch-exporter/cloudwatchexporter.servicemonitor.yaml
-
-
 
 
