@@ -1,0 +1,87 @@
+---
+$schema: /openshift/cluster-1.yml
+
+labels:
+  service: hive
+
+name: hive-stage-01
+description: Staging cluster used by Hive
+consoleUrl: "https://console-openshift-console.apps.hive-stage-01.l1d1.p1.openshiftapps.com"
+kibanaUrl: ""
+prometheusUrl: ""
+serverUrl: "https://api.hive-stage-01.l1d1.p1.openshiftapps.com"
+
+auth:
+  service: github-org-team
+  org: app-sre
+  team: hive-stage-01-cluster
+
+ocm:
+  $ref: /dependencies/ocm/production.yml
+
+#observabilityNamespace:
+#  $ref: /services/observability/namespaces/openshift-customer-monitoring.hive-stage-01.yml
+
+jumpHost:
+  hostname: ci.ext.devshift.net
+  knownHosts: /jump-host/known-hosts/ci.ext.devshift.net
+  user: app-sre-bot
+  identity:
+    path: app-sre/ansible/roles/app-sre-bot
+    field: identity
+    format: base64
+
+#managedGroups:
+#- dedicated-admins
+#managedGroups:
+#- hive-admins
+#- hive-readers
+#- dedicated-readers
+#- dedicated-admins
+###################################################################
+# The following groups should only be managed in hive-integration #
+# Reference: https://issues.redhat.com/browse/APPSRE-961          #
+# - hive-frontend                                                 #
+# - aws-account-operator-client                                   #
+###################################################################
+
+#managedClusterRoles: true
+
+spec:
+  provider: aws
+  region: us-east-1
+  major_version: 4
+  multi_az: false
+  nodes: 4
+  instance_type: m5.xlarge
+  storage: 100
+  load_balancers: 0
+
+network:
+  vpc: 10.162.0.0/16
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
+
+# peering:
+#   vpc_id: vpc-07c516fc8305b01ef
+#   connections:
+#   - name: hive-stage-01_app-sre
+#     vpc:
+#       $ref: /aws/app-sre/vpcs/app-sre-vpc-01.yml
+#   - name: hive-stage-01_app-sre-stage-01
+#     vpc:
+#       $ref: /aws/app-sre/vpcs/app-sre-stage-01-vpc.yml
+
+automationToken:
+  path: app-sre/creds/kube-configs/hive-stage-01
+  field: token
+
+internal: true
+
+awsInfrastructureAccess:
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: network-mgmt
