@@ -256,7 +256,7 @@ spec:
       annotations:
         message: "A message that this alert shows in Slack/email. Supports templating: {{ $labels.namespace }}"
         # Link to the standard operating procedure for the component
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
+        runbook: "https://gitlab.cee.redhat.com/observatorium/configuration/tree/master/docs/sop"
         # Link to the component's dashboard, pre-selecting the variables is preferred, for example:
         dashboard: "https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-prometheus&var-cluster=app-sre&var-namespace=telemeter-production"
       expr: |
@@ -284,7 +284,7 @@ All alerts that are newly added should start from the bottom of the chain i.e. `
 
 This allows us to see the behaviour of alert in practice, and build confidence around the thresholds set for the alert. This also lets us make sure that the templating for the alerts is correct, and someone receiving the alert is able to act on it.
 
-One mandate for the alerts being promoted to a severity that involves the App-SRE team is adding a standard operating procedure for each alert. An example can be seen here: https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop#sop-openshift-telemeter
+One mandate for the alerts being promoted to a severity that involves the App-SRE team is adding a standard operating procedure for each alert. An example can be seen here: https://gitlab.cee.redhat.com/observatorium/configuration/tree/master/docs/sop#sop-openshift-telemeter
 
 - `critical` alerts go to App-SRE's Pagerduty. Note that this MUST meet the conditions stated above, and should relate to a degraded customer experience that's imminent already ongoing. Please reach out to the App-SRE team before you set an alert with this Severity.
 - `high` alerts go to your team's slack channel, and also to App-SRE team's slack. These are alerts where either of the teams will take action according to the SOP, but the other team also needs to be in the loop for escalations
