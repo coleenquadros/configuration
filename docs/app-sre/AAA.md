@@ -82,15 +82,16 @@ Every app-sre engineer should have access to the following
   - Verify inclusion in all github orgs listed [here](https://visual-app-interface.devshift.net/githuborgs)
 
 - Gitlab:
-  - https://gitlab.cee.redhat.com/service/app-interface
-    - create a user file under the [app-sre team](/data/teams/app-sre/users) directory via a merge request off a fork of app-interface
-      - Pro tip: Copy the user file of the newest team member
-  - https://gitlab.cee.redhat.com/dtsd/housekeeping
-    - Keeps all our bits and bobs, Ansible, terraform, python, scripts etc
-    - Issue tracker tracks incoming interrupt catching requests
   - https://gitlab.cee.redhat.com/app-sre
     - Access to all repositories is managed via this group
     - Obtained via a [role](/data/teams/app-sre/roles/app-sre.yml)
+  - https://gitlab.cee.redhat.com/service/app-interface
+    - create a user file under the [app-sre team](/data/teams/app-sre/users) directory via a merge request off a fork of app-interface
+  - https://gitlab.cee.redhat.com/app-sre/infra
+    - Keeps our Ansible and Terraform bits and bobs
+  - https://gitlab.cee.redhat.com/dtsd/housekeeping
+    - Used to keep all our bits and bobs - Ansible, terraform, python, scripts etc
+    - Currently being deprecated as part of https://issues.redhat.com/browse/APPSRE-1495
 
 - Slack: coreos.slack.com
   - Private channels: sd-app-sre-teamchat -> speak to any team member to get an invitation
@@ -132,7 +133,6 @@ Every app-sre engineer should have access to the following
 
 - GPG key:
   - Generate one and put in:
-    - ascii armored in [housekeeping repo](https://gitlab.cee.redhat.com/dtsd/housekeeping/tree/master/gpg/SD)
     - base64 encoded binary in your app-interface user file -> [instructions](/README#adding-your-public-gpg-key)
       - User file located in [app-interface repo](/data/teams/app-sre/users)
   - Use a passphrase!
@@ -181,7 +181,7 @@ Every app-sre engineer should have access to the following
   - ACCESS: Reach out to [Paul Bargene](mailto:pbergene@redhat.com)
 
 - App SRE infrastructure managed by ansible
-  - Access is managed by adding ssh keys to the [admin-list](https://gitlab.cee.redhat.com/dtsd/housekeeping/blob/master/ansible/hosts/group_vars/all#L4) and applying the `baseline` role to all hosts. It is recommended that ssh key is RSA, 4096-sized and password-protected as those are the [requirements for Tier 1 Bastion keys](https://mojo.redhat.com/docs/DOC-1144200#jive_content_id_Tier_1)
+  - Access is managed by adding ssh keys to the [admin-list](https://gitlab.cee.redhat.com/app-sre/infra/blob/master/ansible/hosts/group_vars/all#L4) and applying the `baseline` role to all hosts. It is recommended that ssh key is RSA, 4096-sized and password-protected as those are the [requirements for Tier 1 Bastion keys](https://mojo.redhat.com/docs/DOC-1144200#jive_content_id_Tier_1)
 
 - OpenStack Project infrastructure
   - We have our ci-int infrastructure deployed [here](https://rhos-d.infra.prod.upshift.rdu2.redhat.com/dashboard/project)
