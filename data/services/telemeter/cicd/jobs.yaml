@@ -79,27 +79,3 @@ config:
         display_name: saas deploy
     - 'saas-pr-check':
         display_name: saas pr check
-
-# Temporary job to promote to app-sre-prod-02 cluster as well. Delete before migration
-# Anything that needs to be deployed to the prod-02 cluster until then should be committed to the telemeter-app-sre-prod-02-green branch
-- project:
-    name: telemeter-saas-prod02-temp
-    branch: telemeter-app-sre-prod-02-green
-    label: telemeter
-    node: app-sre
-    gl_group: service
-    gl_project: saas-telemeter
-    kube_cluster: app-sre-prod-02
-    kube_namespace: telemeter-production
-    saasherder_context: telemeter
-    saasherder_object_blacklist: 'Route,Secret,ConfigMap,ClusterRole,ClusterRoleBinding' # Default: Route,Secret,ConfigMap,ServiceAccount
-    manifest_bouncer_options: '--disable-burstable --enable-requests --enable-limits --enable-public-resources'
-    image_pattern: '^(quay\.io/(thanos/thanos|cortexproject/cortex|observatorium/thanos-receive-controller|observatorium/up|observatorium/observatorium|app-sre/jaegertracing-all-in-one|app-sre/jaegertracing-jaeger-agent|app-sre/telemeter|app-sre/observatorium-receive-proxy|app-sre/openshift-oauth-proxy|openshift/origin-oauth-proxy|app-sre/memcached|prometheus/memcached-exporter|app-sre/nginx))'
-    quay_org: app-sre
-    upstream: service-saas-telemeter-telemeter-saas-deploy
-    dry_run: "no"
-    slack_channel_notification: '#sd-app-sre-alert-test'
-    slack_notify_start: True
-    jobs:
-    - 'saas-deploy-with-upstream':
-        display_name: saas deploy app-sre-prod-02
