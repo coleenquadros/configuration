@@ -178,3 +178,17 @@
     ci_cmd: ./periodic_check.sh
     cron_expression: '0 */6 * * *'
     <<: *gl_timed
+
+- job-template:
+    id: 'ocm-build-image'
+    name: '{gl_group}-{gl_project}-ocm-build-image'
+    environment: production
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *quay_secret_push
+        - *api_tests_sentry_dsn
+    <<: *gl_build_master
