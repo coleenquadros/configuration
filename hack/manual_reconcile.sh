@@ -141,6 +141,7 @@ run_int openshift-resources &
 run_int openshift-network-policies &
 run_int openshift-acme &
 run_int openshift-limitranges &
+run_int openshift-resourcequotas &
 run_int openshift-serviceaccount-tokens &
 run_int terraform-resources &
 run_int terraform-users &

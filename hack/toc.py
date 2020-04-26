@@ -75,9 +75,9 @@ with open('README.md') as file_obj:
                 break
 
             # Starting from the second occurrence, the counter is used
-            new_link = f'{link}-{counter}'
+            new_link = '{}-{}'.format(link, counter)
             counter += 1
 
         # Putting all together
         title = " ".join(title_el)
-        print(f'{level}[{title}](#{new_link})')
+        print('{}[{}](#{})'.format(level, title, new_link))

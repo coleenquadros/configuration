@@ -22,6 +22,7 @@ this repository.
   - [Integrations](#integrations)
     - [Existing integrations](#existing-integrations)
     - [Planned integrations](#planned-integrations)
+  - [Entities and relations](#entities-and-relations)
   - [Howto](#howto)
     - [Add or modify a user (`/access/users-1.yml`)](#add-or-modify-a-user-accessusers-1yml)
     - [Get notified of events involving a service, or it's dependencies](#get-notified-of-events-involving-a-service-or-its-dependencies)
@@ -37,6 +38,7 @@ this repository.
     - [Manage openshift-acme deployments via App-Interface (`/openshift/acme-1.yml`)](#manage-openshift-acme-deployments-via-app-interface-openshiftacme-1yml)
     - [Manage OpenShift Groups association via App-Interface (`/openshift/cluster-1.yml`)](#manage-openshift-groups-association-via-app-interface-openshiftcluster-1yml)
     - [Manage OpenShift LimitRanges via App-Interface (`/openshift/limitrange-1.yml`)](#manage-openshift-limitranges-via-app-interface-openshiftlimitrange-1yml)
+    - [Manage OpenShift ResourceQuotas via App-Interface (`/openshift/quota-1.yml`)](#manage-openshift-resourcequotas-via-app-interface-openshiftquota-1yml)
     - [Self-Service OpenShift ServiceAccount tokens via App-Interface (`/openshift/namespace-1.yml`)](#self-service-openshift-serviceaccount-tokens-via-app-interface-openshiftnamespace-1yml)
     - [Manage Vault configurations via App-Interface](#manage-vault-configurations-via-app-interface)
       - [Manage vault audit backends (`/vault-config/audit-1.yml`)](#manage-vault-audit-backends-vault-configaudit-1yml)
@@ -55,7 +57,7 @@ this repository.
           - [Publishing PostgreSQL Logs to CloudWatch Logs](#publishing-postgresql-logs-to-cloudwatch-logs)
       - [Manage S3 buckets via App-Interface (`/openshift/namespace-1.yml`)](#manage-s3-buckets-via-app-interface-openshiftnamespace-1yml)
       - [Manage ElastiCache databases via App-Interface (`/openshift/namespace-1.yml`)](#manage-elasticache-databases-via-app-interface-openshiftnamespace-1yml)
-      - [Manage Service account IAM Users via App-Interface (`/openshift/namespace-1.yml`)](#manage-iam-service-account-users-via-app-interface-openshiftnamespace-1yml)
+      - [Manage IAM Service account users via App-Interface (`/openshift/namespace-1.yml`)](#manage-iam-service-account-users-via-app-interface-openshiftnamespace-1yml)
       - [Manage SQS queues via App-Interface (`/openshift/namespace-1.yml`)](#manage-sqs-queues-via-app-interface-openshiftnamespace-1yml)
       - [Manage DynamoDB tables via App-Interface (`/openshift/namespace-1.yml`)](#manage-dynamodb-tables-via-app-interface-openshiftnamespace-1yml)
       - [Manage ECR repositories via App-Interface (`/openshift/namespace-1.yml`)](#manage-ecr-repositories-via-app-interface-openshiftnamespace-1yml)
@@ -617,6 +619,21 @@ limitRanges:
 The LimitRange limits can be customized by creating a new file and referencing the new file in the namespace declaration
 
 The `/openshift/limitrange-1.yml` schema maps to the LimitRanges specs.
+
+### Manage OpenShift ResourceQuotas via App-Interface (`/openshift/quota-1.yml`)
+
+This integration allows namespace owners to manage ResourceQuota objects on their namespaces
+
+To deploy and manage ResourceQuotas on a namespace, a user must add the following to a namespace declaration:
+
+```yaml
+quota:
+  $ref: /path/to/some/quota.yml
+```
+
+The ResourceQuota limits can be customized by creating a new file and referencing the new file in the namespace declaration.
+
+The `/openshift/quota-1.yml` schema maps to the ResourceQuotas specs.
 
 ### Self-Service OpenShift ServiceAccount tokens via App-Interface (`/openshift/namespace-1.yml`)
 
