@@ -1,0 +1,29 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: app-sre-observability
+  platform: insights
+
+name: app-sre-observability-staging
+description:  app-sre-observability-staging
+
+app:
+  $ref: /services/insights/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+managedResourceTypes:
+- Deployment
+- Service
+
+resourceTemplates:
+- name: rds-exporter
+  path: /openshift/nginx-proxy.template.yaml
+  url: https://gitlab.cee.redhat.com/service/app-sre-observability
+  hash_length: 7
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.crc-stage-01.yml
+    hash: master
