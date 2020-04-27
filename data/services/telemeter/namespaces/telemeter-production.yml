@@ -7,7 +7,7 @@ name: telemeter-production
 description: production namespace for telemeter
 
 cluster:
-  $ref: /openshift/app-sre/cluster.yml
+  $ref: /openshift/app-sre-prod-02/cluster.yml
 
 app:
   $ref: /services/telemeter/app.yml
@@ -16,11 +16,11 @@ environment:
   $ref: /products/osdv4/environments/production.yml
 
 networkPoliciesAllow:
-- $ref: /services/observability/namespaces/app-sre-observability-production.yml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-02.yml
 
 openshiftAcme:
   config:
-    $ref: /dependencies/openshift/acme/default.yml
+    $ref: /dependencies/openshift/acme/v4.yml
   accountSecret:
     provider: vault-secret
     path: app-interface/app-sre/telemeter-production/acme-account
@@ -36,6 +36,7 @@ managedResourceTypes:
 - ConfigMap
 - ServiceMonitor
 - ServiceAccount
+- ClusterRole
 
 managedTerraformResources: true
 
@@ -131,11 +132,17 @@ openshiftResources:
   path: app-interface/app-sre/telemeter-production/compact-proxy
   version: 1
 
+# Prometheus-telemeter Serviceaccount
+# Required for authn/authz by openshift-oauth-proxy containers
+# Todo we need to break it down to per-component serviceaccounts
+- provider: resource
+  path: /app-sre/telemeter-production/prometheus-telemeter.serviceaccount.yaml
+- provider: resource
+  path: /app-sre/telemeter-production/prometheus-telemeter.clusterrole.yml
+
 # Consumer Serviceaccounts:
 - provider: resource
   path: /app-sre/telemeter-production/uhc-prometheus-access.serviceaccount.yaml
-- provider: resource
-  path: /app-sre/telemeter-production/prometheus-telemeter.serviceaccount.yaml
 
 # Temporary Route as part of https://issues.redhat.com/browse/APPSRE-1491
 - provider: resource
