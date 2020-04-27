@@ -364,8 +364,20 @@ Post RCA comms, followups:
 
 3. Ping the On Call in #ops-escalation in the Red Hat Internal IRC Server - irc.devel.redhat.com.
 
+# 1.10.2 IT Platform Team
+
+Manager: https://mojo.redhat.com/people/aowens
+TL: https://mojo.redhat.com/people/jblashka
+
+The IT Platform team runs components like:
+
+- `sso.redhat.com`
+  - C1 SLA (see resources below)
+  - In order to escalate a production incident this email can be used: `it-platform-page@redhat.com`.
+  - Resources: [Applications and Systems Criticality Classification](https://mojo.redhat.com/docs/DOC-1171238) and [Business Resilience Glossary](https://mojo.redhat.com/docs/DOC-1136493).
+
 ## 1.11. Escalation procedures
-### 1.11.1 Telemeter incidents 
+### 1.11.1 Telemeter incidents
 
 The telemetry-dev team has an oncall rotation that must be used to escalate incidents to the development team under the following conditions:
 
