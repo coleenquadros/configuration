@@ -1,3 +1,13 @@
+- [Onboard a new OSDv4 cluster to app-interface](#onboard-a-new-osdv4-cluster-to-app-interface)
+- [Additional configurations](#additional-configurations)
+  - [Selecting a Machine CIDR for VPC peerings](#selecting-a-machine-cidr-for-vpc-peerings)
+  - [VPC peering with app-interface](#vpc-peering-with-app-interface)
+  - [Enable enhanced dedicated-admin](#enable-enhanced-dedicated-admin)
+  - [Enable observability on a v4 cluster](#enable-observability-on-a-v4-cluster)
+  - [Enable logging (EFK)](#enable-logging-efk)
+- [Legacy (v3)](#legacy-v3)
+  - [Onboard a new OSDv3 cluster to app-interface](#onboard-a-new-osdv3-cluster-to-app-interface)
+
 # Onboard a new OSDv4 cluster to app-interface
 
 To on-board a new OSDv4 cluster to app-interface, perform the following operations:
@@ -22,7 +32,8 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
     - Region: (recommended: us-east-1)
     - Availability: Single/Multi-az
     - Scale: Choose desired configuration (LoadBalancers are typically not needed)
-    - Networking: Basic (unless a special VPC config is needed)
+    - Persistent storage: 600Gi (we need a bit more more than the default 100Gi to provision our observability stack)
+    - Networking: Basic (unless a special VPC config is needed - see Additional config section below)
 
 1. Click create and wait for the cluster to be created
 
@@ -170,6 +181,58 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
     org: app-sre
     team: <cluster>-cluster
     ```
+
+# Additional configurations
+
+## Selecting a Machine CIDR for VPC peerings
+
+If your cluster need to be peered with other clusters or AWS VPCs, it is required that the Machine CIDR is set to one that does not conflict with the other resources.
+
+App-interface has network information for all v4 clusters it is managing. Thus, running a simple query in app-interface can help retrieve known CIDR and make a decision on which CIDR to use for the new clusters
+
+```
+{clusters_v1{name network{vpc service pod}}}
+```
+
+## VPC peering with app-interface
+
+[/docs/app-sre/sop/app-interface-cluster-vpc-peerings.md]()
+
+## Enable enhanced dedicated-admin
+
+Some clusters may require enhanced dedicated-admin privileges. The process to get it enabled for a cluster can be found here: https://github.com/openshift/ops-sop/blob/master/v4/howto/extended-dedicated-admin.md#non-ccs-clusters
+
+## Enable observability on a v4 cluster
+
+1. Configure a [deadmanssnitch](https://deadmanssnitch.com/) snitch for the new cluster. The snitch settings should be as follow:
+    - Name: <cluster name>
+    - Alert type: Basic
+    - Interval: 15 min
+    - Tags: app-sre
+    - Alert email: sd-app-sre@redhat.com
+
+1. Add a route and a receiver in the App-SRE alertmanager config. The snitch URL is shown in the deadmanssnitch website UI and has to be added to the vault secret. Example MR: https://gitlab.cee.redhat.com/service/app-interface/commit/97059bb8d14681bcade500e09c67557f624d471d
+
+1. Add the `observabilityNamespace` field on the cluster data file. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/7ecd529584666d97b1418224b2772557807c6e1c/data/openshift/app-sre-prod-01/cluster.yml#L14-15
+
+1. Create a corresponding observability namespace file for that specific cluster. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/57285601a13eea11079b431103a28337642050cb/data/services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml
+
+1. Customize the above observability namespace file as desired. Some options to look out for:
+    - `clusterLabel` for the prometheus resource
+    - `externalUrl` for both the `prometheus` and `alertmanager` resources
+    - Both `prometheus` and `alertmanager` oauth proxy secrets. Those should be set in vault to values corresponding to two *different* github oauth clients. Those oauth clients need their callback URLs to be `https://<prometheus|alertmanager>.<cluster>.devshift.net/oauth2/callback`. *Note:* Both prometheus and alertmanager pods need a restart after a new secret is pushed
+
+## Enable logging (EFK)
+
+The EFK stack is currently opt-in and installed by customers. 
+
+Installing cluster logging can be done in two steps.
+1. Subscribe to the Elasticsearch and Cluster Logging operators
+2. Create the logging instalce
+
+Example MR: https://gitlab.cee.redhat.com/service/app-interface/commit/bcf699c973d04a7a539219a37f4caeca1b72d21b
+
+OSD docs for reference: https://docs.openshift.com/dedicated/4/logging/dedicated-cluster-deploying.html
 
 # Legacy (v3)
 
