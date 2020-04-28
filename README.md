@@ -40,6 +40,7 @@ this repository.
     - [Manage OpenShift LimitRanges via App-Interface (`/openshift/limitrange-1.yml`)](#manage-openshift-limitranges-via-app-interface-openshiftlimitrange-1yml)
     - [Manage OpenShift ResourceQuotas via App-Interface (`/openshift/quota-1.yml`)](#manage-openshift-resourcequotas-via-app-interface-openshiftquota-1yml)
     - [Self-Service OpenShift ServiceAccount tokens via App-Interface (`/openshift/namespace-1.yml`)](#self-service-openshift-serviceaccount-tokens-via-app-interface-openshiftnamespace-1yml)
+    - [Enable network traffic between Namespaces via App-Interface (`/openshift/namespace-1.yml`)](#enable-network-traffic-between-namespaces-via-app-interface-openshiftnamespace-1yml)
     - [Manage Vault configurations via App-Interface](#manage-vault-configurations-via-app-interface)
       - [Manage vault audit backends (`/vault-config/audit-1.yml`)](#manage-vault-audit-backends-vault-configaudit-1yml)
       - [Manage vault auth backends (`/vault-config/auth-1.yml`)](#manage-vault-auth-backends-vault-configauth-1yml)
@@ -651,6 +652,19 @@ openshiftServiceAccountTokens:
 The integration will get the token belonging to that ServiceAccount and add it into a Secret called:
 `<clusterName>-<namespaceName>-<ServiceAccountName>`.
 The Secret will have a single key called `token`, containing a token of that ServiceAccount.
+
+### Enable network traffic between Namespaces via App-Interface  (`/openshift/namespace-1.yml`)
+
+To enable network traffic between namespace, a user must add the following to a namespace declaration:
+
+```yaml
+networkPoliciesAllow:
+- $ref: /path/to/source-namespace.yml
+```
+
+This will allow traffic from the `source-namespace` to the namespace in which this section is defined.
+
+In this [example](/data/services/cincinnati/namespaces/cincinnati-production.yml#L18-19), traffic is enabled from the `openshift-customer-monitoring` namespace to the `cincinnati-production` namespace.
 
 ### Manage Vault configurations via App-Interface
 
