@@ -25,6 +25,7 @@ managedRoles: true
 managedResourceTypes:
 - ServiceAccount
 - Secret
+- ConfigMap
 
 openshiftResources:
 - provider: vault-secret
@@ -38,11 +39,14 @@ openshiftResources:
   name: quay-cloudservices-pull
 - provider: resource
   path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
-# - provider: vault-secret
-#   name: inventory-secrets
-#   path: insights/secrets/insights-stage/host-inventory/inventory-secrets
-#   type: Opaque
-#   version: 1
+- provider: resource
+  path: /insights-stage/host-inventory-stage/inventory-gunicorn-conf.configmap.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-stage/host-inventory-stage/insights-host-delete.secret.yaml
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
 
 managedTerraformResources: true
 
@@ -56,7 +60,13 @@ terraformResources:
   parameter_group: /terraform/resources/insights/stage/postgres10-parameter-group-host-inventory-stage.yml
   output_resource_name: host-inventory-db
   enhanced_monitoring: true
-# missing read only replica
+- provider: rds
+  account: insights-stage
+  identifier: host-inventory-stage-readonly
+  availability_zone: us-east-1d
+  defaults: /terraform/resources/insights/stage/host-inventory-stage-rds-read-replica-us-east-1.yml
+  parameter_group: /terraform/resources/insights/stage/host-inventory-stage-read-replica-postgres10-parameter-group.yml
+  output_resource_name: host-inventory-readonly-db
 - provider: cloudwatch
   account: insights-stage
   identifier: host-inventory-stage
