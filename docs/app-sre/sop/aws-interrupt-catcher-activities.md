@@ -41,9 +41,9 @@ These documents explain the setup that was be done to allow this design:
 
 The Terraform implementation can be found in the [housekeeping](https://gitlab.cee.redhat.com/dtsd/housekeeping) repository:
 
-1. [osio account implementation](https://gitlab.cee.redhat.com/dtsd/housekeeping/blob/master/terraform/osio/dtsd/cross-account-policy.tf)
+1. [osio account implementation](https://gitlab.cee.redhat.com/app-sre/infra/blob/master/terraform/osio/dtsd/cross-account-policy.tf)
 
-2. [osio-dev account implementation](https://gitlab.cee.redhat.com/dtsd/housekeeping/blob/master/terraform/osio-dev/dynamodb-backups.tf)
+2. [osio-dev account implementation](https://gitlab.cee.redhat.com/app-sre/infra/blob/master/terraform/osio-dev/dynamodb-backups.tf)
 
 #### Process
 

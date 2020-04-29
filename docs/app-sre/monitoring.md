@@ -121,9 +121,9 @@ It is thus important to clarify the various Prometheus instances we have:
 
 The RDU cluster has a Prometheus instance on one of the nodes. It can be accessed through http://prometheus.devshift.net:9090
 
-The configuration of this instance is done via ansible. The configuration lives in the housekeeping repo at: [link](https://gitlab.cee.redhat.com/dtsd/housekeeping/tree/master/ansible)
+The configuration of this instance is done via ansible. The configuration lives in the infra repo at: [link](https://gitlab.cee.redhat.com/app-sre/infra)
 
-The nodes being monitored all have node-exporter installed as part of the baseline playbook [link](https://gitlab.cee.redhat.com/dtsd/housekeeping/blob/master/ansible/playbooks/node-all-baseline.yml)
+The nodes being monitored all have node-exporter installed as part of the baseline playbook [link](https://gitlab.cee.redhat.com/app-sre/infra/blob/master/ansible/playbooks/node-all-baseline.yml)
 
 Other than the node exporter, any applications running on top of the nodes may provide application metrics endpoints through native instrumentation or plugins, and can be added to the Prometheus.
 
@@ -133,11 +133,11 @@ This instance gathers the following metrics:
 
 #### <a name='CentralCI'></a> CentralCI
 
-The BLR lab has a Prometheus instance on a virtual machine on top of the RHV setup. It can be accessed through http://10.70.49.219:9090
+The CentralCI prometheus can be found at: http://prometheus.centralci.devshift.net:9090/graph
 
-The configuration of this instance is done via ansible. The configuration lives in the housekeeping repo at: [link](https://gitlab.cee.redhat.com/dtsd/housekeeping/tree/master/ansible)
+The configuration of this instance is done via ansible. The configuration lives in the infra repo at: [link](https://gitlab.cee.redhat.com/app-sre/infra)
 
-The nodes being monitored all have node-exporter installed as part of the baseline playbook [link](https://gitlab.cee.redhat.com/dtsd/housekeeping/blob/master/ansible/playbooks/node-all-baseline.yml)
+The nodes being monitored all have node-exporter installed as part of the baseline playbook [link](https://gitlab.cee.redhat.com/app-sre/infra/blob/master/ansible/playbooks/node-all-baseline.yml)
 
 Other than the node exporter, any applications running on top of the nodes may provide application metrics endpoints through native instrumentation or plugins, and can be added to the Prometheus.
 
@@ -159,17 +159,13 @@ The cluster prometheus also have predefined alerting rules for cluster failures,
 
 #### <a name='App-SREprometheus'></a>App-SRE prometheus
 
-OpenShift v3: 
-
-The app-sre prometheus currently runs in the app-sre-observability-production namespace on the app-sre cluster. This is our primary prometheus instance for gathering application metrics and alerting them within the cluster.
+Please see the [openshift-customer-monitoring](https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/osdv4-openshift-customer-monitoring.md) documentation for details on how the monitoring stack is deployed on OSD v4.
 
 Overall, the Prometheus deployment on the app-sre cluster monitors the following:
 
 - Application metrics
 - External endpoints via Blackbox exporter
 - Cloudwatch metrics via cloudwatch exporter
-
-> Note: Please see the [openshift-customer-monitoring](https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/osdv4-openshift-customer-monitoring.md) documentation for details on how the monitoring stack is deployed on OSD v4.
 
 #### <a name='Addinganapplicationtomonitoring'></a>Adding an application to monitoring
 
@@ -199,11 +195,13 @@ Also remember to point to any basic auth creds or a machine token if your applic
 
 #### <a name='Configuringalertmanager'></a>Configuring alertmanager
 
-We have a central alertmanager cluster on the app-sre cluster. This is deployed via the prometheus-operator and has 3 replicas. Each of the replicas in the statefulset has a PVC where the pods store silences.
+Every app-sre managed cluster has an alertmanager alongside the prometheus. This is deployed via the prometheus-operator and has 3 replicas. Each of the replicas in the statefulset has a PVC where the pods store silences.
 
 The configuration for alertmanager has credentials/sensitive information, so it is currently stored in vault and can be changed only by app-sre team members. If you'd like to request a change, please do so via creating a task on the App-SRE jira board and ping the #sd-app-sre channel.
 
-All of the prometheus instances are expected to fire their alerts against this central alertmanager via the route: https://alertmanager.app-sre-prod-01.devshift.net
+All of the prometheus instances are expected to fire their alerts against their local alertmanager via the route: https://alertmanager.<clustername>.devshift.net
+
+The prometheus additional alertmanager configuration is already set up to do this.
 
 The configuration uses a central alertmanager so that we can provide alerts deduplication, have the routing tree configuration in a central place, and avoid having to manage the escalation procedures in multiple alertmanager instances across each of our clusters.
 
@@ -547,6 +545,3 @@ Once this is in place, a ServiceMonitor can pick-up the endpoint and start scrap
 >
 >https://docs.google.com/spreadsheets/d/1lWXWwl27VO8FIQz5eySk2CwGp47J7Psw8cwomFv9Pe0/edit#gid=0
 
-The longer term plan is to move everything over to the prometheus-based stack.
-
-### <a name='Whichoneisrightforyou'></a>Which one is right for you

@@ -16,4 +16,4 @@ The requester is the cluster's AWS account and the accepter is the app-interface
 Note: in case a VPC peering connection already exists, it will be taken over by the integration.
 
 Additional resources may still be required at this point.
-Reference: [Housekeeping](https://gitlab.cee.redhat.com/dtsd/housekeeping/blob/master/terraform/app-sre/rds-vpc-subnets.tf)
+Reference: [Housekeeping](https://gitlab.cee.redhat.com/app-sre/infra/blob/master/terraform/app-sre/rds-vpc-subnets.tf)
