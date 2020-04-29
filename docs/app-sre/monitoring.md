@@ -203,7 +203,7 @@ We have a central alertmanager cluster on the app-sre cluster. This is deployed 
 
 The configuration for alertmanager has credentials/sensitive information, so it is currently stored in vault and can be changed only by app-sre team members. If you'd like to request a change, please do so via creating a task on the App-SRE jira board and ping the #sd-app-sre channel.
 
-All of the prometheus instances are expected to fire their alerts against this central alertmanager via the route: https://alertmanager.app-sre.devshift.net
+All of the prometheus instances are expected to fire their alerts against this central alertmanager via the route: https://alertmanager.app-sre-prod-01.devshift.net
 
 The configuration uses a central alertmanager so that we can provide alerts deduplication, have the routing tree configuration in a central place, and avoid having to manage the escalation procedures in multiple alertmanager instances across each of our clusters.
 

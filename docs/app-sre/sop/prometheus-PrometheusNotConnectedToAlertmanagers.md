@@ -22,7 +22,7 @@ This alert will fire in either of the following cases:
 ## Steps
 
 - Check logs for the prometheus pods in the said namespace/ prometheus service logs on VM's
-- Check that alertmanager is up and running on the expected route (alertmanager.app-sre.devshift.net)
+- Check that alertmanager is up and running on the expected route (alertmanager.<clustername>.devshift.net)
 - In the prometheus configuration, check if the credentials to talk to alertmanager are correct
 - Investigate the possibility of a network partition if the prometheus is not on the same cluster as alertmanager
 
