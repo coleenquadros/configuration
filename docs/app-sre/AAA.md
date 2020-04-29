@@ -194,6 +194,12 @@ Every app-sre engineer should have access to the following
   - Access process is documented [here](https://mojo.redhat.com/docs/DOC-1144200)
     - You should request Tier1
 
+- Tier 2 access for OSIO starter clusters.
+  - This is necessary to be able to the OSIO starter cluster consoles and execute `oc` locally.
+  - Access process is documented [here](https://mojo.redhat.com/docs/DOC-1144200)
+    - You should request Tier2
+    - You can find an example of a request [here](https://redhat.service-now.com/help?id=rh_ticket&table=incident&sys_id=50c9c5f51b9098d0839e32a3cc4bcbc2)
+
 - Pendo:
   - This is necessary to post maintenance and outage messages in https://cloud.redhat.com/openshift
   - Access is provided via email to Cameron Britt <cbritt@redhat.com> and Jeremy Perry <jeperry@redhat.com>.
