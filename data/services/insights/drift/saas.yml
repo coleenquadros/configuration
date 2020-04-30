@@ -1,0 +1,61 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: drift
+  platform: insights
+
+name: drift
+description: drift app on the Insights Platform
+
+app:
+  $ref: /services/insights/drift/app.yml
+
+managedResourceTypes: 
+- DeploymentConfig
+- HorizontalPodAutoscaler
+- Service
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: _imagestreams
+  path: /templates/drift/_imagestreams.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  hash_length: 7
+  targets:
+  - namespace:
+      $ref: /services/insights/drift/namespaces/stage-drift-stage.yml
+    hash: master
+    parameters:
+      IMAGE_TAG: latest
+      IMAGE: registry.access.redhat.com/rhscl/python-36-rhel7
+      # IMAGE: quay.io/cloudservices/python-36-rhel7 (not available unlesss app-sre uploads the image referenced in the template)
+- name: drif-backend.yaml
+  path: /templates/drift/drif-backend.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  hash_length: 7
+  parameters:
+    DRIFT_ENABLE_RBAC: True
+    ENABLE_SMART_MANAGEMENT_ENTITLEMENT_CHECK: False
+    HOST_INVENTORY_HOST: insights-inventory.insights-inventory-stage.svc.cluster.local
+    HSP_HOST: historical-system-profiles-backend.historical-system-profiles-stage.svc.cluster.local
+    IMAGE: quay.io/cloudservices/drift-backend
+    IMAGE_TAG: latest
+    MAX_REPLICAS: 2
+    MIN_REPLICAS: 2
+    RBAC_HOST: rbac.rbac-stage.svc.cluster.local
+    SYSTEM_BASELINE_HOST:
+  targets:
+  - namespace:
+      $ref: /services/insights/entitlements/namespaces/stage-entitlements-stage.yml
+    hash: master
+    parameters:
+      IMAGE: quay.io/cloudservices/drift-backend
+      IMAGE_TAG: latest
