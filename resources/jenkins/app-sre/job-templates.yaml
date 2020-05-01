@@ -312,34 +312,24 @@
     - vault-secrets:
         <<: *vault_defaults
         secrets:
+        - *gitlab_token
         - *app_interface_basic_auth
-    cron_expression: H 4,18 * * *
-    scm:
-      - git:
-          url: 'git@github.com:{gh_org}/{gh_repo}.git'
-          credentials-id: '{github_ssh_credentials}'
-          skip-tag: true
-          refspec: '+refs/pull/*:refs/remotes/origin/pr/*'
-          branches:
-          - master
-          merge:
-              remote: origin
-              branch: master
-          git-config-name: "AppSRE"
-          git-config-email: "sd-app-sre@redhat.com"
+    cron_expression: */30 * * * *
     builders:
     - shell: |
         # clone saasherder repo 
         git clone --depth 1 https://github.com/openshiftio/saasherder.git saasherder
         pushd saasherder
-          python setup.py install
+          python setup.py install --root .
         popd
 
         export APP_INTERFACE_USER=$GRAPHQL_USERNAME
-        export APP_INTERFACE_PASSWORD=GRAPHQL_PASSWORD
+        export APP_INTERFACE_PASSWORD=$GRAPHQL_PASSWORD
+        export PYTHONPATH=`pwd`/saasherder:$PYTHONPATH
+        export PATH=`pwd`/saasherder/usr/bin:$PATH
 
         # pull the saas repos
-        pushd reports
+        pushd report
           make clone
         popd
 
@@ -350,7 +340,7 @@
         python3 setup.py install
 
         # run manifest-bouncer
-        pushd reports
+        pushd report
           make report
         popd
-
+    <<: *gh_timed
