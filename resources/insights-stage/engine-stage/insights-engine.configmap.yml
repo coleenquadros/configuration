@@ -16,7 +16,7 @@ data:
     service:
         extract_timeout: 10
         extract_tmp_dir:
-        format: insights.formats._json.JsonFormat
+        format: insights_kafka_service.formats._insights.InsightsFormat
         target_components: []
         consumer:
           name: "insights_kafka_service.consumer.InsightsKafkaConsumer"
@@ -26,11 +26,14 @@ data:
             incoming_topic: "platform.inventory.host-egress"
             group_id: "insights-core-kafka"
             bootstrap_servers:
+              - "platform-mq-kafka-bootstrap.platform-mq-stage.svc:9092"
+            queued.max.messages.kbytes: 10000
         publisher:
           name: "insights_kafka_service.producer.InsightsKafkaProducer"
           kwargs:
             topic: "platform.engine.results"
             bootstrap_servers:
+              - "platform-mq-kafka-bootstrap.platform-mq-stage.svc:9092"
         downloader:
           name: "insights_messaging.downloaders.httpfs.Http"
         logging:
@@ -62,3 +65,4 @@ data:
               level: "INFO"
         watchers:
           - name: "insights_kafka_service.metrics.Watcher"
+          - name: "insights_kafka_service.metrics.Engine"
