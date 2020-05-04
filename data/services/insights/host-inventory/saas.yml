@@ -31,15 +31,16 @@ authentication:
     path: insights/quay/cloudservices-push
     field: all
 
+parameters:
+  INVENTORY_DB_SSL_MODE: verify-full
+  LOG_GROUP: platform
+
 resourceTemplates:
 - name: insights-inventory-reaper
   path: /templates/inventory/insights-inventory-reaper.yaml
   url: https://github.com/RedHatInsights/saas-templates
   hash_length: 7
   parameters:
-    INVENTORY_DB_SSL_MODE: verify-full
-    KAFKA_BOOTSTRAP_PORT: '9092'
-    PROMETHEUS_PUSHGATEWAY: http://prometheus-push.mnm.svc.cluster.local:9091
     REAPER_SUSPEND: 'false'
   targets:
   - namespace:
@@ -47,13 +48,11 @@ resourceTemplates:
     hash: master
     parameters:
       IMAGE_TAG: d74a444
-      KAFKA_BOOTSTRAP_HOST: platform-mq-kafka-bootstrap.platform-mq-stage.svc
 - name: insights-host-delete
   path: /templates/inventory/insights-host-delete.yaml
   url: https://github.com/RedHatInsights/saas-templates
   hash_length: 7
   parameters:
-    KAFKA_BOOTSTRAP_PORT: '9092'
     REPLICAS: 1
   targets:
   - namespace:
@@ -61,15 +60,11 @@ resourceTemplates:
     hash: master
     parameters:
       IMAGE_TAG: 44fe11d
-      KAFKA_BOOTSTRAP_HOST: platform-mq-kafka-bootstrap.platform-mq-stage.svc
 - name: insights-inventory-mq-service
   path: /templates/inventory/insights-inventory-mq-service.yaml
   url: https://github.com/RedHatInsights/saas-templates
   hash_length: 7
   parameters:
-    INVENTORY_DB_SSL_MODE: verify-full
-    KAFKA_BOOTSTRAP_PORT: '9092'
-    LOG_GROUP: platform
     REPLICAS: 3
     REPLICAS_P1: 5
   targets:
@@ -78,7 +73,6 @@ resourceTemplates:
     hash: master
     parameters:
       IMAGE_TAG: d74a444
-      KAFKA_BOOTSTRAP_HOST: platform-mq-kafka-bootstrap.platform-mq-stage.svc
 - name: insights-inventory
   path: /templates/inventory/insights-inventory.yaml
   url: https://github.com/RedHatInsights/saas-templates
@@ -88,9 +82,6 @@ resourceTemplates:
     BULK_QUERY_SOURCE: db
     BULK_QUERY_SOURCE_BETA: db
     CPU_LIMIT: 1
-    INVENTORY_DB_SSL_MODE: verify-full
-    KAFKA_BOOTSTRAP_PORT: '9092'
-    LOG_GROUP: platform
     MAX_REPLICAS: 5
     MEMORY_LIMIT: 1.25Gi
     MIN_REPLICAS: 5
@@ -101,5 +92,4 @@ resourceTemplates:
     hash: master
     parameters:
       IMAGE_TAG: d74a444
-      KAFKA_BOOTSTRAP_HOST: platform-mq-kafka-bootstrap.platform-mq-stage.svc
       XJOIN_SEARCH_URL: http://xjoin-search.xjoin-stage.svc.cluster.local:4000/graphql

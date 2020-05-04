@@ -31,13 +31,14 @@ authentication:
     path: insights/quay/cloudservices-push
     field: all
 
+parameters:
+  CLOUD_WATCH_LOG_GROUP: catalog-stage
+
 resourceTemplates:
 - name: catalog-api-minion-approval
   path: /templates/catalog/catalog-api-minion-approval.yaml
   url: https://github.com/RedHatInsights/saas-templates
   hash_length: 7
-  parameters:
-    CLOUD_WATCH_LOG_GROUP: catalog-stage
   targets:
   - namespace:
       $ref: /services/insights/catalog/namespaces/stage-catalog-stage.yml
@@ -45,13 +46,10 @@ resourceTemplates:
     parameters:
       CATALOG_HOST: catalog-api.catalog-stage.svc
       IMAGE_TAG: 9b86f87
-      KAFKA_BOOTSTRAP_HOST: platform-mq-kafka-bootstrap.platform-mq-stage.svc
 - name: catalog-api-minion-task
   path: /templates/catalog/catalog-api-minion-task.yaml
   url: https://github.com/RedHatInsights/saas-templates
   hash_length: 7
-  parameters:
-    CLOUD_WATCH_LOG_GROUP: catalog-stage
   targets:
   - namespace:
       $ref: /services/insights/catalog/namespaces/stage-catalog-stage.yml
@@ -59,14 +57,11 @@ resourceTemplates:
     parameters:
       CATALOG_HOST: catalog-api.catalog-stage.svc
       IMAGE_TAG: 9b86f87
-      KAFKA_BOOTSTRAP_HOST: platform-mq-kafka-bootstrap.platform-mq-stage.svc
 - name: catalog-api
   path: /templates/catalog/catalog-api.yaml
   url: https://github.com/RedHatInsights/saas-templates
   hash_length: 7
   parameters:
-    CLOUD_WATCH_LOG_GROUP: catalog-stage
-    KAFKA_BOOTSTRAP_PORT: '9092'
     PATH_PREFIX: api
     PGSSLMODE: verify-full
   targets:
@@ -76,7 +71,3 @@ resourceTemplates:
     parameters:
       APPROVAL_HOST: approval-api.approval-stage.svc
       IMAGE_TAG: ad3bd85
-      KAFKA_BOOTSTRAP_HOST: platform-mq-kafka-bootstrap.platform-mq-stage.svc
-      RBAC_HOST: rbac.rbac-stage.svc
-      SOURCES_HOST: sources-api.sources-stage.svc
-      TOPOLOGICAL_INVENTORY_HOST: topological-inventory-api.topological-inventory-stage.svc

@@ -32,14 +32,15 @@ authentication:
     path: insights/quay/cloudservices-push
     field: all
 
+parameters:
+  CLOUD_WATCH_LOG_GROUP: platform
+
 resourceTemplates:
 - name: sources-api
   path: /templates/sources/sources-api.yaml
   url: https://github.com/RedHatInsights/saas-templates
   hash_length: 7
   parameters:
-    CLOUD_WATCH_LOG_GROUP: platform
-    KAFKA_BOOTSTRAP_PORT: '9092'
     PATH_PREFIX: api
     PGSSLMODE: verify-full
   targets:
@@ -48,20 +49,14 @@ resourceTemplates:
     hash: master
     parameters:
       IMAGE_TAG: 14489fd
-      KAFKA_BOOTSTRAP_HOST: platform-mq-kafka-bootstrap.platform-mq-stage.svc
       KOKU_SOURCES_API_HOST: koku-sources.hccm-stage.svc.cluster.local
 - name: sources-monitor
   path: /templates/sources/sources-monitor.yaml
   url: https://github.com/RedHatInsights/saas-templates
   hash_length: 7
-  parameters:
-    CLOUD_WATCH_LOG_GROUP: platform
-    KAFKA_BOOTSTRAP_PORT: '9092'
   targets:
   - namespace:
       $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
     hash: master
     parameters:
       IMAGE_TAG: 78ef13b
-      KAFKA_BOOTSTRAP_HOST: platform-mq-kafka-bootstrap.platform-mq-stage.svc
-      SOURCES_HOST: sources-api.sources-stage.svc
