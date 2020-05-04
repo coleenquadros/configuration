@@ -40,7 +40,7 @@ this repository.
     - [Manage OpenShift LimitRanges via App-Interface (`/openshift/limitrange-1.yml`)](#manage-openshift-limitranges-via-app-interface-openshiftlimitrange-1yml)
     - [Manage OpenShift ResourceQuotas via App-Interface (`/openshift/quota-1.yml`)](#manage-openshift-resourcequotas-via-app-interface-openshiftquota-1yml)
     - [Self-Service OpenShift ServiceAccount tokens via App-Interface (`/openshift/namespace-1.yml`)](#self-service-openshift-serviceaccount-tokens-via-app-interface-openshiftnamespace-1yml)
-    - [Enable network traffic between Namespaces via App-Interface (`/openshift/namespace-1.yml`)](#enable-network-traffic-between-namespaces-via-app-interface-openshiftnamespace-1yml)
+    - [Enable network traffic between Namespaces via App-Interface  (`/openshift/namespace-1.yml`)](#enable-network-traffic-between-namespaces-via-app-interface-openshiftnamespace-1yml)
     - [Manage Vault configurations via App-Interface](#manage-vault-configurations-via-app-interface)
       - [Manage vault audit backends (`/vault-config/audit-1.yml`)](#manage-vault-audit-backends-vault-configaudit-1yml)
       - [Manage vault auth backends (`/vault-config/auth-1.yml`)](#manage-vault-auth-backends-vault-configauth-1yml)
@@ -52,6 +52,7 @@ this repository.
       - [Generating a GPG key](#generating-a-gpg-key)
       - [Adding your public GPG key](#adding-your-public-gpg-key)
     - [Manage AWS resources via App-Interface (`/openshift/namespace-1.yml`) using Terraform](#manage-aws-resources-via-app-interface-openshiftnamespace-1yml-using-terraform)
+      - [Manage ElasticSearch via App-Interface (`/openshift/namespace-1.yml`)](#manage-elasticsearch-via-app-interface-openshiftnamespace-1yml)
       - [Manage RDS databases via App-Interface (`/openshift/namespace-1.yml`)](#manage-rds-databases-via-app-interface-openshiftnamespace-1yml)
         - [Publishing Database Log Files to CloudWatch](#publishing-database-log-files-to-cloudwatch)
           - [Publishing MySQL Logs to CloudWatch Logs](#publishing-mysql-logs-to-cloudwatch-logs)
@@ -898,6 +899,32 @@ Namespaces declaration enforce [this JSON schema](/schemas/openshift/namespace-1
 Notes:
 * Manual changes to AWS resources will be overridden by App-Interface in each run.
 * To be able to use this feature, the `managedTerraformResources` field must exist and equal to `true`.
+
+#### Manage ElasticSearch via App-Interface (`/openshift/namespace-1.yml`)
+
+[Amazon Elasticsearch Service](https://aws.amazon.com/elasticsearch-service/) is a fully managed service that makes it easy for you to deploy, secure, and run Elasticsearch cost effectively at scale. Amazon Elasticsearch can be entirely self-serviced via App-Interface.
+
+In order to add or update Amazon Elasticsearch Service, you need to add them to the `terraformResources` field.
+
+- `provider`: must be `elasticsearch`
+- `account`: The AWS account you want to deploy Amazon Elasticsearch Service in.
+- `identifier` - name of resource to create (or update)
+- `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options](/resources/terraform/resources/)
+- `output_resource_name`: name of Kubernetes Secret to be created.
+  - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
+  - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
+    - For example, for a resource with `identifier` "my-service" and `provider` is set to `elasticsearch`, the created Secret will be called `my-service-elasticsearch`.
+
+Once the changes are merged, the Amazon Elasticsearch Service will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
+
+The Secret will contain the following fields:
+
+- `arn` - Amazon Resource Name (ARN) of the domain.
+- `domain_id` - Unique identifier for the domain.
+- `domain_name` - The name of the Elasticsearch domain.
+- `endpoint` - Domain-specific endpoint used to submit index, search, and data upload requests.
+- `kibana_endpoint` - Domain-specific endpoint for kibana without https scheme.
+- `vpc_id` - If the domain was created inside a VPC, the ID of the VPC.
 
 #### Manage RDS databases via App-Interface (`/openshift/namespace-1.yml`)
 
