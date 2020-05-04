@@ -153,8 +153,8 @@ run_int openshift-performance-parameters &
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"slack"* ]] && run_int slack-usergroups &
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"sentry"* ]] && run_int sentry-config &
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"mirror"* ]] && run_int quay-mirror &
+[[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *" saas "* ]] && run_int openshift-saas-deploy &
 # Add STATE=true to integrations that interact with a state
-[[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"saas"* ]] && STATE=true run_int openshift-saas-deploy &
 STATE=true run_int sql-query &
 STATE=true run_int email-sender &
 

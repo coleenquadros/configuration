@@ -23,7 +23,7 @@ source $CURRENT_DIR/runners.sh
 
 GRAPHQL_SERVER=https://${GRAPHQL_SERVER_BASE_URL}/graphql
 
-STATE=true run_int openshift-saas-deploy &
+run_int openshift-saas-deploy &
 
 wait
 

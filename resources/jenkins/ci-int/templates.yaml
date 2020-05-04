@@ -45,11 +45,14 @@
 # Job template for the openshift-saas-deploy + JJB integrations
 # This template should not be directly used.
 - job-template:
-    id: 'openshift-uber-deployer-template'
+    id: 'openshift-saas-deploy'
+    # parameters to be passed in job generation
     saas_file_name: empty
     env_name: empty
     app_name: empty
-    name: 'openshift-uber-deployer-{saas_file_name}-{env_name}'
+    slack_channel: empty
+    # end of parameters
+    name: 'openshift-saas-deploy-{saas_file_name}-{env_name}'
     node: app-interface
     label: '{app_name}'
     wrappers:
@@ -64,14 +67,12 @@
     builders:
     - shell: |
         #!/bin/bash
-        set -x
-
-        echo {app_name} {saas_file_name} {env_name}
 
         # Write config.toml for reconcile tools
         mkdir -p config
         echo "$CONFIG_TOML" | base64 -d > config/config.toml
 
+        set -x
         docker run --rm \
             -v `pwd`/config:/config:z \
             -v /etc/pki:/etc/pki:z \
@@ -81,3 +82,10 @@
             -e APP_INTERFACE_STATE_BUCKET_ACCOUNT=$app_interface_state_bucket_account \
             quay.io/app-sre/qontract-reconcile:latest \
             qontract-reconcile --config /config/config.toml --dry-run openshift-saas-deploy --saas-file-name {saas_file_name} --env-name {env_name}
+    publishers:
+    - slack:
+        room: '{slack_channel}'
+        notify-start: False
+        notify-success: True
+        notify-failure: True
+        notify-repeated-failure: True
