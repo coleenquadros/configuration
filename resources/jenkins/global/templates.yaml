@@ -196,7 +196,6 @@
         secrets:
         - *reconcile_toml
         - *github_api
-        - *app_interface_state
     builders:
     - shell: |
         #!/bin/bash
@@ -204,17 +203,16 @@
         # Write config.toml for reconcile tools
         mkdir -p config
         echo "$CONFIG_TOML" | base64 -d > config/config.toml
+        WORK_DIR=`pwd`
 
         set -x
         docker run --rm \
-            -v `pwd`/config:/config:z \
+            -v $WORK_DIR/config:/config:z \
             -v /etc/pki:/etc/pki:z \
             -e REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem \
             -e GITHUB_API=$GITHUB_API \
-            -e APP_INTERFACE_STATE_BUCKET=$app_interface_state_bucket \
-            -e APP_INTERFACE_STATE_BUCKET_ACCOUNT=$app_interface_state_bucket_account \
             quay.io/app-sre/qontract-reconcile:latest \
-            qontract-reconcile --config /config/config.toml --dry-run openshift-saas-deploy --saas-file-name {saas_file_name} --env-name {env_name}
+            qontract-reconcile --config /config/config.toml openshift-saas-deploy --saas-file-name {saas_file_name} --env-name {env_name}
     publishers:
     - slack:
         room: '{slack_channel}'
