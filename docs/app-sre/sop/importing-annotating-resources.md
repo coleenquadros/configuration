@@ -24,7 +24,7 @@ LOAD_METHOD=fs DATAFILES_FILE=/path/to/bundle/data.json yarn server
 To run the `openshift-resources` integration, we need to first download the config file:
 
 ```sh
-vault read -field=data_base64 app-sre/ci-int/qontract-reconcile-toml | base64 -d > config.toml
+vault read -field=data_base64 app-sre/creds/qontract-reconcile-toml | base64 -d > config.toml
 ```
 
 And then replace the `[graphql]` section with in the `config.toml` created above:
