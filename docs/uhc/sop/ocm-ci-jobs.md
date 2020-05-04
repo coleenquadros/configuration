@@ -37,9 +37,9 @@ If this token is invalidated, it will be automatically recycled in the for the p
 2020-04-28T10:10:19Z [INFO] [apiserver/handler_helpers.go:191] [<REDACTED_ID>]- can't get access token: invalid_grant: Offline user session not found
 ```
 
-In order to fix this: TODO
+In order to fix this SDA will need to regenerate `self.token` by getting a new token from https://cloud.redhat.com/openshift/token, using cluster-service user etabak_cluster_service_20012019. Then take that value and insert it into config -> self.token.
 
-### hive-frontend and aws-account-operator serviceAccounts
+### hive-frontend, aws-account-operator serviceAccounts and gcp-project-operator tokens
 
 If the `hive-frontend` or `aws-account-operator` SAs are invalidated, they will be cycled automatically for the prod instance, but it must be addressed manually for the hive-int environment otherwise OCM will not be able to communicate with hive.
 
@@ -48,7 +48,8 @@ If the `hive-frontend` or `aws-account-operator` SAs are invalidated, they will 
 ```
 AWS_TOKEN=$(vault read -field token app-sre/integrations-output/openshift-serviceaccount-tokens/hive-integration/uhc-integration/hive-integration-aws-account-operator-aws-account-operator-client)
 HIVE_TOKEN=$(vault read -field token app-sre/integrations-output/openshift-serviceaccount-tokens/hive-integration/uhc-integration/hive-integration-hive-hive-frontend)
-vault write sd-uhc/sandbox-tokens aws-account-operator-client-token=$AWS_TOKEN hive-frontend-token=$HIVE_TOKEN
+GCP_TOKEN=$(vault read -field token app-sre/integrations-output/openshift-serviceaccount-tokens/hive-integration/uhc-integration/hive-integration-gcp-project-operator-gcp-project-operator-client)
+vault write sd-uhc/sandbox-tokens aws-account-operator-client-token=$AWS_TOKEN hive-frontend-token=$HIVE_TOKEN gcp-project-operator-token=$GCP_TOKEN
 ```
 
 - Step 2. [OCM team] Manually update the `config` (base64 encoded) to include the newly generated tokens that are available now in https://vault.devshift.net/ui/vault/secrets/sd-uhc/show/sandbox-tokens
