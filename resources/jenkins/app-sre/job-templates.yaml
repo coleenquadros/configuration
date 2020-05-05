@@ -317,6 +317,8 @@
     cron_expression: H/30 * * * *
     builders:
     - shell: |
+        set +e
+
         # clone saasherder repo 
         git clone --depth 1 https://github.com/openshiftio/saasherder.git saasherder
         pushd saasherder
@@ -327,20 +329,28 @@
         export APP_INTERFACE_PASSWORD=$GRAPHQL_PASSWORD
         export PYTHONPATH=`pwd`/saasherder:$PYTHONPATH
         export PATH=`pwd`/saasherder/usr/bin:$PATH
+        export INSECURE_PULL=true
 
         # pull the saas repos
         pushd report
           make clone
+          rc=$?
         popd
 
         # install manifest-bouncer
         python3 -m venv venv
         source venv/bin/activate
-        python3 -m pip install --upgrade pip setuptools
+        python3 -m pip install --upgrade pip setuptools sh
         python3 setup.py install
 
         # run manifest-bouncer
         pushd report
           make report
+
+          pushd saas-repos-logs-*
+            grep ERROR * && rc=1
+          popd
         popd
+
+        exit $rc
     <<: *gh_timed
