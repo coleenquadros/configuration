@@ -3,10 +3,8 @@ API calls can be made through the [web console](https://cloud.elastic.co/deploym
 or by making a request using the credentials as a basic auth header.
 
 ## Credentials
-The credientials for the production cluster are stored in Vault, under config.yaml, using the `elasticsearch_config` key.
+The credientials for the production cluster are stored in Vault, in `quayio-prod-shared-secrets/tools_misc_secrets` under the `elastic_clusters_and_logins.txt` key.
 See [quayio](../quayio.md) on how to access Vault.
-
-TODO(kleesc): Need to store the remaining elastcsearch secrets from QPE in Vault.
 
 ## Check the cluster health status
 ```
