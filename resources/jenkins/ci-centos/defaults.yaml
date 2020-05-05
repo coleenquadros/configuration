@@ -2436,6 +2436,24 @@
     <<: *job_template_defaults
 
 - job-template:
+    name: '{ci_project}-{git_repo}-pr-check-happy-path'
+    defaults: global
+    triggers:
+        - che_githubprb:
+            trigger_phrase: '{trigger_phrase}'
+            job_type: 'e2e - Happy path'
+            che-success-message: 'Happy path tests passed.'
+            che-failure-message: 'Happy path tests failed. Re-trigger by `[ci-test]` or `[ci-test-happy-path]`'
+            che-error-message: 'Happy path tests failed. Re-trigger by `[ci-test]` or `[ci-test-happy-path]`'
+    wrappers:
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+            - *che-bot-github-credentials
+            - *quay-eclipse-che-credentials
+    <<: *job_template_defaults
+
+- job-template:
     name: '{ci_project}-{git_repo}-olm-pr-check'
     defaults: global
     triggers:
@@ -4852,6 +4870,13 @@
             timeout: '1h'
             trigger_phrase: '.*\[ci-test\].*'
             job_type: "language plugin tests"
+        - '{ci_project}-{git_repo}-pr-check-happy-path':
+            git_organization: eclipse
+            git_repo: che-plugin-registry
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash .ci/cico-happy-path-pr-test.sh'
+            timeout: '2h'
+            trigger_phrase: '.*\[ci-test\].*|.*\[ci-test-happy-path\].*'
         - '{ci_project}-{git_repo}-che-nightly':
             git_organization: eclipse
             git_repo: che-theia
