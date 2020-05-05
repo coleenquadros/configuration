@@ -231,13 +231,12 @@ resourceTemplates:
 - name: unleash
   url: https://github.com/app-sre/unleash
   path: /openshift/unleash.yaml
-  hash_length: 7
   targets:
   ...
   ...
   - namespace:
       $ref: /services/unleash/namespaces/<application-name>-unleash.yml
-    hash: <commit-hash>
+    ref: <commit-hash>
     parameters:
       identifier: <application-name>
       configSecret: <application-name>-config
