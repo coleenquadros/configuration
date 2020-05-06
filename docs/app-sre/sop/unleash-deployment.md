@@ -265,3 +265,34 @@ Parameters:
 - `team`: The Github Team that the Web UI users have to be member of in order
   to access this Unleash instance, as defined in the
   [Github Org/Team](#github-org/Team) section.
+
+
+## Examples:
+
+Jira ticket requesting Unleash instances:
+
+[https://issues.redhat.com/browse/APPSRE-1801](https://issues.redhat.com/browse/APPSRE-1801)
+
+App Interface commit deploying Unleash to an existing `unleash` Namespace:
+
+[https://gitlab.cee.redhat.com/service/app-interface/commit/d00d1af](https://gitlab.cee.redhat.com/service/app-interface/commit/d00d1af)
+
+App Interface commit deploying Unleash to an new `unleash` Namespace:
+
+[https://gitlab.cee.redhat.com/service/app-interface/commit/a3ba360](https://gitlab.cee.redhat.com/service/app-interface/commit/a3ba360)
+
+Message to requester after deployment:
+
+```
+The <application>'s Unleash instance is ready to be used.
+
+Here's the documentation on how to consume it:
+https://gitlab.cee.redhat.com/service/dev-guidelines/blob/master/unleash.md#consuming-unleash
+
+The OpenShift Secret containing the CLIENT_ACCESS_TOKEN is called
+<application>-unleash-token and it is already available in the <application>
+Namespace.
+
+The Web UI / REST API endpoint is:
+https://<application>.unleash.devshift.net/
+```
