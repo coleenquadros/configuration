@@ -30,7 +30,7 @@ examples:
 
 - `path: <secret>/unleash/<application-name>-config`
 - `output_resource_name: <application-name>-unleash-rds`
-- `path: <secret>/unleash/<application-name>-token`
+- `path: <secret>/unleash/<application-name>-unleash-token`
 
 This convention allows the Unleash Namespace of a given Cluster to have
 multiple Unleash instances, each serving different applications running on the
@@ -172,7 +172,7 @@ Only one key is expected in this Secret:
 
 Go to the Unleash
 [Vault secret](https://vault.devshift.net/ui/vault/secrets/app-sre/list/unleash/)
-and create a secret called `<application-name>-token`.
+and create a secret called `<application-name>-unleash-token`.
 
 Then add it to the `unleash` Namespace:
 
@@ -180,7 +180,7 @@ Then add it to the `unleash` Namespace:
 openshiftResources:
 ...
 - provider: vault-secret
-  path: app-sre/unleash/<application-name>-token
+  path: app-sre/unleash/<application-name>-unleash-token
   version: 1
 ```
 
@@ -241,7 +241,7 @@ resourceTemplates:
       identifier: <application-name>
       configSecret: <application-name>-config
       databaseSecret: <application-name>-unleash-rds
-      tokenSecret: <application-name>-token
+      tokenSecret: <application-name>-unleash-token
       org: <github-org>
       team: <github-team>
 
