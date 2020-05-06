@@ -33,6 +33,16 @@ Axiom: *a statement or proposition which is regarded as being established, accep
         - [Sprint process](#sprint-process)
     - [App-sre escalation to external teams](#app-sre-escalation-to-external-teams)
         - [PnT Devops](#pnt-devops)
+- [Knowledge Sharing](#knowledge-sharing)
+    - [Processes](#processes)
+        - [Maintaining access pieces](#maintaining-access-pieces)
+        - [Maintaining escalation channels](#maintaining-escalation-channels)
+        - [Alerting coverage](#alerting-coverage)
+        - [Following Incident Procedure](#following-incident-procedure)
+        - [On-call pairings](#on-call-pairings)
+        - [Periodically reviewed service docs](#periodically-reviewed-service-docs)
+        - [Training Sessions at onboarding](#training-sessions-at-onboarding)
+        - [Deep Dive sessions](#deep-dive-sessions)
 - [IT Platform Team](#it-platform-team)
     - [Escalation procedures](#escalation-procedures)
         - [Telemeter incidents](#telemeter-incidents)
@@ -374,6 +384,88 @@ Post RCA comms, followups:
 3. Join the PnT DevOps Google Chat room https://chat.google.com/room/AAAA6BChWkY
 
 4. Join the Red Hat IT Ops Google Chat room https://chat.google.com/room/AAAAiUsrxXk
+
+# Knowledge Sharing
+
+The purpose of this section is to document how knowledge is shared by the AppSRE, both internally and externally.
+
+Before diving into specific processes, it is important to state that the team has a very clear mission with regard to knowledge sharing:
+
+- There are no single owners or SMEs for any of the components and processes owned or implemented by the AppSRE team.
+- It is the responsibility of every AppSRE member to make sure no knowledge is siloed, and to share any new knowledge piece with the rest of the team using the implemented processes and channels.
+- Each AppSRE member has the right to raise any concerns about any knowledge gaps and the team will prioritize filling in those gaps.
+- Equally important as internal knowledge
+
+## Processes
+
+This section documents the specific processes implemented by the AppSRE team in order to maintain a high level of accuracy and coverage of all the knowledge within AppSRE.
+
+### Maintaining access pieces
+
+Access pieces are a very quickly moving target, and they change very frequently. In order to maintain an accurate list of access pieces these actions must be followed by the each AppSRE team member:
+
+- All access pieces are documented in the [Access and surfaces list](#access-and-surfaces-list) section.
+- If an AppSRE team member gains access to something and it's not linked from in this list, it's their responsibility to add it there.
+- This list is actively reviewed by onboarding AppSRE members.
+
+### Maintaining escalation channels
+
+Similarly as with the access pieces:
+
+- All escalation channels are referenced from the AAA.md doc.
+
+### Alerting coverage
+
+- All alerts have a corresponding document in the [sop/alerts](./sop/alerts) folder with the name `<AlertName>.md`.
+
+TODO: https://issues.redhat.com/browse/APPSRE-1830
+
+### Following Incident Procedure
+
+All AppSRE team members will follow the [Incident procedure](#incident-procedure) documented in this file as accurately as possible, raise any concers and keep it up to date.
+
+TODO: [Intern proposal: Incident and alerting flow](https://docs.google.com/document/u/1/d/1WziKUZS2u-AlVkrdMnwA6tDvvueZArEA1xOxa1SrqKw/edit).
+
+### On-call pairings
+
+New AppSRE team members will be paired up with more experienced team members in order to ease first incidents:
+
+The goal of this initiative is to get SREs:
+
+- acquainted with the services
+- to understand the process on how to find information and docs about any service
+- to understand the process to deal with an incident (comms, etc)
+
+TODO: define the process
+
+### Periodically reviewed service docs
+
+Each service has a service intro, high level, but technically oriented description. Linked from app-1.yml / serviceDocs. This document will be periodically reviewed and signed-off by an AppSRE team member.
+
+TODO:
+- Add schema for date and AppSRE signoff
+- Ensure all services have this document inially
+
+### Training Sessions at onboarding
+
+The AppSRE team will create an index of resources that any new AppSRE member needs to watch in which a specific topic is discussed.
+
+TODO: create that index
+
+### Deep Dive sessions
+
+On a periodical basis, the AppSRE team will hold "Deep Dive sessions". These sessions have the following characteristics:
+
+- The main goal is to share knowledge within the AppSRE team.
+- Periodicity: every 6 weeks.
+- 1h sessions.
+- Presentations should have an accompanying slide deck and must be well prepared.
+- Any topics that are directly related to the AppSRE day-to-day will be prioritized over general knowledge ones.
+- Attendance from all the team members is strongly encouraged, as well as participation and making the sessions dynamic.
+
+Those sessions are tracked in this document: [AppSRE Deep Dives](https://docs.google.com/document/d/1T4QNO2qQYpBl4uhiNdr2iP7LO1pfmCVkzyWHgHDIIJA/edit).
+
+Every AppSRE member that identifies any knowledge gaps in our documentation / resources has the responsibility of adding new proposals to the Deep Dives list of proposals.
 
 # IT Platform Team
 
