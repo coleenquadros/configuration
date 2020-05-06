@@ -175,48 +175,39 @@
         - *pypi
     <<: *gh_build_tag
 
-# Job template for the openshift-saas-deploy + JJB integrations
-# This template should not be directly used.
+# Job templates for the openshift-saas-deploy + JJB integrations
+# These templates should not be directly used.
+
+# openshift-saas-deploy
+# ---------------------
+# parameters to be passed in job generation
+# saas_file_name: name of saas file
+# env_name: name opf environment
+# app_name: name of application
+# slack_channel: slack channel to send notifications to
 - job-template:
     id: 'openshift-saas-deploy'
-    # parameters to be passed in job generation
-    saas_file_name: empty
-    env_name: empty
-    app_name: empty
-    slack_channel: empty
-    # end of parameters
     name: 'openshift-saas-deploy-{saas_file_name}-{env_name}'
     node: app-interface
     label: '{app_name}'
-    wrappers:
-    - timeout_wrapper:
-        timeout: '{timeout}'
-    - vault-secrets:
-        <<: *vault_defaults
-        secrets:
-        - *reconcile_toml
-        - *github_api
-    builders:
-    - shell: |
-        #!/bin/bash
+    <<: *openshift_saas_deploy_template
 
-        # Write config.toml for reconcile tools
-        mkdir -p config
-        echo "$CONFIG_TOML" | base64 -d > config/config.toml
-        WORK_DIR=`pwd`
-
-        set -x
-        docker run --rm \
-            -v $WORK_DIR/config:/config:z \
-            -v /etc/pki:/etc/pki:z \
-            -e REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem \
-            -e GITHUB_API=$GITHUB_API \
-            quay.io/app-sre/qontract-reconcile:latest \
-            qontract-reconcile --config /config/config.toml openshift-saas-deploy --saas-file-name {saas_file_name} --env-name {env_name}
-    publishers:
-    - slack:
-        room: '{slack_channel}'
-        notify-start: False
-        notify-success: True
-        notify-failure: True
-        notify-repeated-failure: True
+# openshift-saas-deploy-with-upstream
+# ---------------------
+# parameters to be passed in job generation
+# saas_file_name: name of saas file
+# env_name: name opf environment
+# app_name: name of application
+# slack_channel: slack channel to send notifications to
+# upstream: name of job to build after
+- job-template:
+    id: 'openshift-saas-deploy-with-upstream'
+    name: 'openshift-saas-deploy-{saas_file_name}-{env_name}'
+    node: app-interface
+    label: '{app_name}'
+    upstream: empty
+    triggers:
+    - reverse:
+        jobs: '{upstream}'
+        results: 'success'
+    <<: *openshift_saas_deploy_template

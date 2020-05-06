@@ -493,3 +493,49 @@
         - timeout_wrapper:
             timeout: '{timeout}'
         <<: *gl_checkout
+
+
+    # This template is intended to dynamically create jobs that run the openshift-saas-deploy integration
+    # parameters to be passed in job generation
+    # saas_file_name: name of saas file
+    # env_name: name opf environment
+    # app_name: name of application
+    # slack_channel: slack channel to send notifications to
+    openshift_saas_deploy_template: &openshift_saas_deploy_template
+        saas_file_name: empty
+        env_name: empty
+        app_name: empty
+        slack_channel: empty
+        label: '{app_name}'
+        wrappers:
+        - timeout_wrapper:
+            timeout: '{timeout}'
+        - vault-secrets:
+            <<: *vault_defaults
+            secrets:
+            - *reconcile_toml
+            - *github_api
+        builders:
+        - shell: |
+            #!/bin/bash
+
+            # Write config.toml for reconcile tools
+            mkdir -p config
+            echo "$CONFIG_TOML" | base64 -d > config/config.toml
+            WORK_DIR=`pwd`
+
+            set -x
+            docker run --rm \
+                -v $WORK_DIR/config:/config:z \
+                -v /etc/pki:/etc/pki:z \
+                -e REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem \
+                -e GITHUB_API=$GITHUB_API \
+                quay.io/app-sre/qontract-reconcile:latest \
+                qontract-reconcile --config /config/config.toml --dry-run openshift-saas-deploy --saas-file-name {saas_file_name} --env-name {env_name}
+        publishers:
+        - slack:
+            room: '{slack_channel}'
+            notify-start: False
+            notify-success: True
+            notify-failure: True
+            notify-repeated-failure: True

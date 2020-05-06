@@ -155,6 +155,7 @@ run_int openshift-performance-parameters &
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"mirror"* ]] && run_int quay-mirror &
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *" saas "* ]] && run_int openshift-saas-deploy &
 # Add STATE=true to integrations that interact with a state
+STATE=true run_int openshift-saas-deploy-trigger-configs &
 STATE=true run_int sql-query &
 STATE=true run_int email-sender &
 
