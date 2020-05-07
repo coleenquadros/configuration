@@ -9,7 +9,7 @@ PWD := $(shell pwd)
 
 bundle:
 	mkdir -p $(OUTPUT_DIR)
-	cp --parents docs/**/*.md resources
+	# cp --parents docs/**/*.md resources
 	@docker pull $(VALIDATOR_IMAGE):$(VALIDATOR_IMAGE_TAG)
 	@docker run --rm \
 		-v $(PWD)/schemas:/schemas:z \

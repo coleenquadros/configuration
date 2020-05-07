@@ -7,7 +7,7 @@ This functionality replaces the saasherder flow described [here](https://github.
 
 ## SaaS file structure
 
-In order to define Continuous Delivery pipelines in app-interface, define a SaaS file with the following structure:
+In order to define Continuous Delivery pipelines in app-interface, define a SaaS file with the following structure -
 
 * `$schema` - should be `/app-sre/saas-file-1.yml`
 * `labels` - a map of labels (currently not used by automation)
@@ -16,12 +16,12 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
 * `app` - a reference to the application that this deployment is a part of
     * reference an app file, usually located under `/data/services/<service_name>/`
 * `instance` - Jenkins instance where generated deployment jobs run
-    * options:
+    * options -
         - /dependencies/ci-ext/ci-ext.yml
         - /dependencies/ci-int/ci-int.yml
     * what to choose?
         * when in doubt, go with ci-int.
-        * use ci-int if:
+        * use ci-int if -
             - the deployed version of the service is considered sensitive information
             - the manifests to be deployed are in a gitlab repository
             - the manifests to be deployed are in a private github repository
@@ -59,7 +59,13 @@ Here is an example to parameters defined for the [insights-stage](/products/insi
 
 Every saas file contains a list of resources to deploy, and each resource contains a list of targets to deploy to.  Each target is a namespace, and each such namespace is associated to an environment.
 
-A Jenkins job will be automatically created for each saas file and for each environment.
+A Jenkins job will be automatically created for each saas file and for each environment.  Each job executes an app-interface integration called `openshift-saas-deploy` for the specific saas file and environment.  The output will be similar to output you see in other app-interface integrations.
+
+In short, the output will only show resources which are changed in the deployment. Not all resources are deployed, but only ones that have changed.
+
+While we are improving our compare logic, you may see unchanged resources being applied as well. This is fine.
+
+## Triggering jobs
 
 Whenever changes are detected for an environment, a saas file, a resource template or a target, the corresponding Jenkins job will be triggered automatically.
 
@@ -71,7 +77,7 @@ Most MRs to app-interface require a review from the App SRE team.  Merging of MR
 
 Each saas file must be referenced from at least one role under the `owned_saas_files` field. [Example](/data/teams/app-sre/roles/app-sre.yml#L130-131)
 
-Each user with this role can approve MRs by adding a `/lgtm` comment in the MR in the following cases:
+Each user with this role can approve MRs by adding a `/lgtm` comment in the MR in the following cases -
 - the MR only changes saas files that this user is an owner of and no other files
 - all tests are passing succesfully 
 - approving user is an owner of the saas file in a merged version in app-interface (prevent privilege escalation). [Read more](/docs/app-sre/sop/app-interface-integrations-flow-and-failure-scenarios.md)
@@ -86,4 +92,10 @@ The App SRE team will contact you directly to migrate any saas repos you have to
 
 ## Questions?
 
-Ping @app-sre-ic on the CoreOS slack!
+Ping @app-sre-ic on #sd-app-sre in the CoreOS slack!
+
+## Future development
+
+* add manifest-bouncer checks to deployment pipelines
+* add ability to define automated promotion flows
+* add ability to define directory of resources to deploy
