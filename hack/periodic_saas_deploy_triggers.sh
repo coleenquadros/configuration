@@ -23,7 +23,6 @@ source $CURRENT_DIR/runners.sh
 
 GRAPHQL_SERVER=https://${GRAPHQL_SERVER_BASE_URL}/graphql
 
-# run_int openshift-saas-deploy &
 STATE=true run_int openshift-saas-deploy-trigger-moving-commits &
 STATE=true run_int openshift-saas-deploy-trigger-configs &
 
