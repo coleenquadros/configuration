@@ -370,12 +370,34 @@ Next, apply the secret and redeploy grafana.
 
 Currently added datasources:
 
-- Cloudwatch AWS app-sre
-- App-sre prometheus
-- App-sre cluster prometheus
-- Cluster-prometheus for dsaas, dsaas-stg, app-sre
-- Graphite on dsaas
+* `app-sre-stage-01-prometheus`: app-sre managed prometheus for `app-sre-stage-01` cluster
+* `app-sre-stage-01-cluster-prometheus`: cluster prometheus for `app-sre-stage-01` cluster
+* `app-sre-prod-01-prometheus`: app-sre managed prometheus for `app-sre-prod-01` cluster
+* `app-sre-prod-01-cluster-prometheus`: cluster prometehus for `app-sre-prod-01` cluster
+* `app-sre-prod-02-prometheus`: app-sre managed prometheus for `app-sre-prod-02` cluster
+* `app-sre-prod-02-cluster-prometheus`: cluster prometheus for `app-sre-prod-02` cluster
+* `quayio-prod-us-east-1-prometheus`: app-sre managed prometheus for `quayio-prod-us-east-1` cluster
+* `quayio-prod-us-east-2-prometheus`: app-sre managed prometheus for `quayio-prod-us-east-2` cluster
+* `quayio-stage-prometheus`: app-sre managed prometheus for `quayio-stage` cluster
+* `che-dev-cluster-prometheus`: cluster prometheus for `che-dev-cluster` cluster
+* `dsaas-cluster-prometheus`: cluster prometheus for `dsaas` cluster
+* `dsaas-stg-cluster-prometheus`: cluster prometheus for `dsaas-stg` cluster
+* `dsaas-stg-rhche-prometheus`: rhche prometheus for `dsaas-stg` cluster
+* `dsaas-rhche-prometheus`: rhche prometheus for `dsaas` cluster
+* `AWS app-sre`: cloudwatch AWS appsre
+* `dsaas-graphite`: graphite on `dsaas` cluster
+* `dsaas-bayesian-stage-graphite`: bayesian graphite on `dsaas-stg` cluster
+* `dsaas-bayesian-production-graphite`: bayesian graphite on `dsaas` cluster
+* `starter-us-east-2-cluster-prometheus`: cluster prometheus on `starter-us-east-2-cluster` cluster
+* `starter-us-east-2a-cluster-prometheus`: cluster prometheus on `starter-us-east-2a-cluster` cluster
+* `starter-us-east-1a-cluster-prometheus`: cluster prometheus on `starter-us-east-1a-cluster` cluster
+* `starter-us-east-1b-cluster-prometheus`: cluster prometheus on `starter-us-east-1b-cluster` cluster
+* `elasticsearch-monitoring`: `.monitoring-es*` database on AWS elasitcsearch
+* `elasticsearch-logstash`: `.monitoring-logstash*` database on AWS elasitcsearch
 
+For those clusters that have a `-prometheus` and `-cluster-prometheus` datasources, app-sre managed services will keep its data on the `-prometheus` ones as the other is managed by OSD and used for cluster internal metrics.
+
+In case of doubt, the [grafana datasources file](/resources/observability/grafana/grafana-datasources.secret.yaml) is the source of truth and the place to get all the details on every datasource.
 
 #### <a name='Addingdashboards'></a>Adding dashboards
 
