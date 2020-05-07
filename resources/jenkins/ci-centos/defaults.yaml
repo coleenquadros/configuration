@@ -2105,6 +2105,17 @@
       - env-var: 'QUAY_SECRET_JSON'
         vault-key: 'secret'
 
+- rh-che-automation-credentials-pre-release: &rh-che-automation-credentials-pre-release
+    name: "rh-che-automation-credentials-pre-release"
+    secret-path: "devtools-osio-ci/rh-che-automation-credentials-pre-release"
+    secret-values:
+        - env-var: 'USERNAME'
+          vault-key: 'username'
+        - env-var: 'PASSWORD'
+          vault-key: 'password'
+        - env-var: 'EMAIL'
+          vault-key: 'email'
+
 - rh-che-automation-template: &rh-che-automation-template
     name: 'rh-che-automation-template'
     concurrent: false
@@ -2165,6 +2176,35 @@
             <<: *github_pull_request_defaults
     <<: *rh-che-automation-template
 
+- job-template:
+    name: '{ci_project}-rh-che-pre-release-test'
+    triggers:
+        - github
+        - github-pull-request:
+            github_hooks: '{github_hooks}'
+            success-comment: "Large test suite passed.\n
+            console: https://ci.centos.org/view/Devtools/job/devtools-rh-che-pre-release-test/$BUILD_NUMBER/console "
+            failure-comment: "Large test suite failed.\n
+            | Link | URL |\n
+            | ---- | :-: |\n
+            | console | https://ci.centos.org/view/Devtools/job/devtools-rh-che-pre-release-test/$BUILD_NUMBER/console |\n
+            | artifacts | http://artifacts.ci.centos.org/devtools/rhche/devtools-rh-che-pre-release-test/$BUILD_NUMBER/ |"
+            error-comment: "Large test suite failed.\n
+            | Link | URL |\n
+            | ---- | :-: |\n
+            | console | https://ci.centos.org/view/Devtools/job/devtools-rh-che-pre-release-test/$BUILD_NUMBER/console |\n
+            | artifacts | http://artifacts.ci.centos.org/devtools/rhche/devtools-rh-che-pre-release-test/$BUILD_NUMBER/ |"
+            github-hooks: '{github_hooks}'
+            trigger-phrase: '.*\[pre-release-tests\].*'
+            permit-all: false
+            allow-whitelist-orgs-as-admins: true
+    wrappers:
+        - vault-secrets:
+            <<: *vault_defaults
+            secrets:
+                - *rh-che-automation-credentials-pre-release
+    <<: *rh-che-automation-template
+    
 - job-template:
     disabled: '{obj:disabled}'
     name: '{ci_project}-{git_repo}-rh-che-compatibility-test-{test_url}'
@@ -3421,6 +3461,12 @@
             ci_project: 'devtools'
             ci_cmd: '/bin/bash ./.ci/cico_cleanup_dev_cluster.sh'
             timeout: '15m'
+        - '{ci_project}-rh-che-pre-release-test':
+            git_organization: redhat-developer
+            git_repo: rh-che
+            ci_project: 'devtools'
+            ci_cmd: 'TARGET="rhel" /bin/bash ./.ci/cico_pre_release_tests.sh'
+            timeout: '75m'
         - '{ci_project}-{git_repo}-rollout-test-{test_url}':
             git_organization: redhat-developer
             git_repo: rh-che
