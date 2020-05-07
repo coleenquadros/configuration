@@ -387,12 +387,12 @@ All panels MUST query to this variable ($datasource). You can set this by editin
 For example: Creating a variable called `datasource` has the following steps.
 
 In Dashboard Settings -> Variables -> New:
-Name: datasource
-Type: Datasource
-Datasource Options.type: `Prometheus`
-Datasource Options.instanceNameFilter: `/a regexp limiting the datasources available for your dashboard/`
+* Name: datasource
+* Type: Datasource
+* Datasource Options.type: `Prometheus`
+* Datasource Options.instanceNameFilter: `/a regexp limiting the datasources available for your dashboard/`
 
-NOTE: It is **very** important that you filter the datasources relevant to your dashboard as the users of it won't usually know which are the prometheis that will have your dashboard data. Showing all the prometheus datasources available is usually wrong and will only make for a poor dashboard experience.
+> NOTE: It is **very** important that you filter the datasources relevant to your dashboard as the users of it won't usually know which are the prometheis that will have your dashboard data. Showing all the prometheus datasources available is usually wrong and will only make for a poor user experience.
 
 Click Add.
 
