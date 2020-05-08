@@ -31,7 +31,7 @@ run_int() {
   duration="app_interface_int_execution_duration_seconds{integration=\"$INTEGRATION_NAME\"} $((ENDTIME - STARTTIME))"
   echo $duration >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
 
-  if [ -d "$LOG_DIR" ];then
+  if [ -d "$LOG_DIR" ] && [ -s "${SUCCESS_DIR}/reconcile-${INTEGRATION_NAME}.txt" ];then
     setting=${-//[^x]/}
     [ -n "$setting" ] && set +x
     echo "[" > ${LOG_DIR}/${INTEGRATION_NAME}.log
@@ -49,11 +49,8 @@ EOF
       fi
     done < ${SUCCESS_DIR}/reconcile-${INTEGRATION_NAME}.txt
 
-    message=$(echo $duration|sed 's/\"/\\\"/g')
+    sed -i '$d' ${LOG_DIR}/${INTEGRATION_NAME}.log
     cat >> ${LOG_DIR}/${INTEGRATION_NAME}.log <<EOF
-  {
-    "timestamp": $(date +%s000),
-    "message": "$message"
   }
 ]
 EOF
