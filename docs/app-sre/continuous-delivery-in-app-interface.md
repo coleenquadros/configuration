@@ -46,6 +46,9 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
                 * or any other script that should run prior to deployment
                 * see [Continuous Integration in App-interface](/docs/app-sre/continuous-integration-in-app-interface.md) for more details
             * the `instance` should match the one where the upstream job runs.
+    * `hash_length` - (optional) if `IMAGE_TAG` should be set according to the referenced target, specify a length to use from the commit hash.
+        * default is set in [app-interface settings](/data/app-interface/app-interface-settings.yml#L31).
+
 
 A complete example for github-mirror can be found [here](/data/services/github-mirror/cicd/saas.yaml).
 
@@ -53,7 +56,7 @@ A complete example for github-mirror can be found [here](/data/services/github-m
 
 In addition to the parameters defined in the saas file, a deployment to each namespace will also use any parameters defined in the environment file referenced from the namespace. Read more on [Environments](/docs/app-interface/api/entities-and-relations.md).
 
-Here is an example to parameters defined for the [insights-stage](/products/insights/environments/stage.yml) environment.
+Here is an example to parameters defined for the [insights-stage](/data/products/insights/environments/stage.yml) environment.
 
 ## How does it work?
 
