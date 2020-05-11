@@ -119,15 +119,9 @@ Ping @app-sre-ic on #sd-app-sre in the CoreOS slack!
 Want to deploy the same templates as deployed via app-interface?
 
 To generate a pseudo script to assist in deployment, you can use the [qontract-cli tool](https://github.com/app-sre/qontract-reconcile).
-To generate a script to deploy the `uhc` application, as deployed to the `osd-integration` environment, use the following command:
 
-```
-qontract-cli --config config.toml saas-dev --app-name uhc --env-name osd-integration
-```
+First, create a `config.toml` file (place it in a directory called `config`).The config file should have the following structure:
 
-Follow [these instructions](https://github.com/app-sre/qontract-reconcile#usage) to run qontract-cli locally.
-
-The config file should have the following structure:
 ```
 [graphql]
 server = "https://app-interface.devshift.net/graphql"
@@ -135,3 +129,13 @@ token = "Basic REDACTED"
 ```
 
 To get the token to query app-interface, reach out to the App SRE team.
+
+To generate a script to deploy the `uhc` application, as deployed to the `osd-integration` environment, use the following command:
+
+```
+docker run \
+    -v $PWD/config:/config:z \
+    quay.io/app-sre/qontract-reconcile:latest \
+    qontract-cli --config /config/config.toml \
+    saas-dev --app-name uhc --env-name osd-integration
+```
