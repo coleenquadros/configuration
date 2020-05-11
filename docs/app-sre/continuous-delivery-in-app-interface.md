@@ -111,3 +111,18 @@ Ping @app-sre-ic on #sd-app-sre in the CoreOS slack!
 * add manifest-bouncer checks to deployment pipelines
 * add ability to define automated promotion flows
 * add ability to define directory of resources to deploy
+
+## Developer workflow
+
+Want to deploy the same templates as deployed via app-interface?
+
+To generate a pseudo script to assist in deployment, you can use the [qontract-cli tool](https://github.com/app-sre/qontract-reconcile).
+To generate a script to deploy the `uhc` application, as deployed to the `osd-integration` environment, use the following command:
+
+```
+qontract-cli --config config.toml saas-dev --app-name uhc --env-name osd-integration
+```
+
+For instructions on running qontract-cli locally, see [this SOP](/docs/app-sre/sop/running-integrations-manually.md).
+
+To get credentials to query app-interface, reach out to the App SRE team.
