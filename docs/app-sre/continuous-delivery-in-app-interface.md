@@ -114,7 +114,7 @@ Ping @app-sre-ic on #sd-app-sre in the CoreOS slack!
 
 ## Developer workflow
 
-> Note: The developer flow hasn't changed, you can still use saasherder the same way you were using it, and everything will continue to work.
+> Note: The [saasherder developer flow](https://github.com/openshiftio/saasherder/#run) hasn't changed, you can still use saasherder the same way you were using it, and everything will continue to work.
 
 Want to deploy the same templates as deployed via app-interface?
 
