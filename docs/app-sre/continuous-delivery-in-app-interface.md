@@ -123,6 +123,13 @@ To generate a script to deploy the `uhc` application, as deployed to the `osd-in
 qontract-cli --config config.toml saas-dev --app-name uhc --env-name osd-integration
 ```
 
-For instructions on running qontract-cli locally, see [this SOP](/docs/app-sre/sop/running-integrations-manually.md).
+Follow [these instructions](https://github.com/app-sre/qontract-reconcile#usage) to run qontract-cli locally.
 
-To get credentials to query app-interface, reach out to the App SRE team.
+The config file should have the following structure:
+```
+[graphql]
+server = "https://app-interface.devshift.net/graphql"
+token = "Basic REDACTED"
+```
+
+To get the token to query app-interface, reach out to the App SRE team.
