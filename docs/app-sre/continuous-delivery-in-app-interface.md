@@ -31,6 +31,15 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
         * currently only `/dependencies/slack/coreos.yml` is supported.
     * `channel` - channel to send notifications to
 * `managedResourceTypes` - a list of resource types to deploy (indicates that any other type is filtered out)
+* `imagePatterns` - a list of strings specifying allowed images to deploy
+    * examples: `quay.io/app-sre`, `quay.io/prom/prometheus`
+* `authentication` - specify credentials required to authenticate to `code` repository or to `image` registry
+    * `code` - only required for private GitHub repositories
+        * `path` - path to secret in Vault containing credentials
+        * `field` - secret field (key) to use
+    * `image` - only required for private images
+        * `path` - path to secret in Vault containing credentials (should contain `config.json`, `user` and `token` keys)
+        * `field` - should be `all`.
 * `parameters` - (optional) parameters for `oc process` to be used in all resource templates in this saas file.
 * `resourceTemplates` - a list of configurations of OpenShift templates to deploy
     * `name` - a descriptive name of the deplyoed resources
