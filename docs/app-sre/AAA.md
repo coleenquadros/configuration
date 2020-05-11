@@ -10,39 +10,41 @@ Axiom: *a statement or proposition which is regarded as being established, accep
 <!-- TOC -->
 
 - [1. Anthology of App-SRE Axioms](#1-anthology-of-app-sre-axioms)
-    - [1.1. Index](#11-index)
-    - [1.2. Preface](#12-preface)
-    - [1.3. Changes](#13-changes)
-    - [1.4. Other sources of documentation you might be looking for:](#14-other-sources-of-documentation-you-might-be-looking-for)
-    - [1.5. Access and surfaces list](#15-access-and-surfaces-list)
-        - [1.5.1 Returning Red Hat Employee Gotchas](#151-returning-red-hat-employee-gotchas)
-    - [1.6 On call](#16-on-call)
-        - [1.6.1 Primary on-call + interrupt catching](#161-primary-on-call--interrupt-catching)
-        - [1.6.2. Pagerduty set up](#162-pagerduty-set-up)
-        - [1.6.3. Follow the sun](#163-follow-the-sun)
-        - [1.6.4. Primary on-call](#164-primary-on-call)
-        - [1.6.5. Secondary on-call](#165-secondary-on-call)
-        - [1.5.6. Escalation](#156-escalation)
-        - [1.6.7. Notification](#167-notification)
-        - [1.6.8. Incident procedure](#168-incident-procedure)
-    - [1.7. Standard operating procedures](#17-standard-operating-procedures)
-    - [1.8. App oboarding / app acceptance criteria](#18-app-oboarding--app-acceptance-criteria)
-        - [1.8.1. In the app-interface](#181-in-the-app-interface)
-    - [1.9. Additional team process](#19-additional-team-process)
-        - [1.9.1 Git process](#191-git-process)
-        - [1.9.2 Sprint process](#192-sprint-process)
-    - [1.10. App-sre escalation to external teams](#110-app-sre-escalation-to-external-teams)
-        - [1.10.1 PnT Devops](#1101-pnt-devops)
+  - [Anthology: *a published collection of poems or other pieces of writing*](#anthology-a-published-collection-of-poems-or-other-pieces-of-writing)
+  - [Axiom: *a statement or proposition which is regarded as being established, accepted, or self-evidently true.*](#axiom-a-statement-or-proposition-which-is-regarded-as-being-established-accepted-or-self-evidently-true)
+  - [1.1. Index](#11-index)
+  - [1.2. Preface](#12-preface)
+  - [1.3. Changes](#13-changes)
+  - [1.4. Other sources of documentation you might be looking for:](#14-other-sources-of-documentation-you-might-be-looking-for)
+  - [1.5. Access and surfaces list](#15-access-and-surfaces-list)
+    - [1.5.1 Returning Red Hat Employee Gotchas](#151-returning-red-hat-employee-gotchas)
+  - [1.6 On call](#16-on-call)
+    - [1.6.1 Primary on-call + interrupt catching](#161-primary-on-call--interrupt-catching)
+    - [1.6.2. Pagerduty set up](#162-pagerduty-set-up)
+    - [1.6.3. Follow the sun](#163-follow-the-sun)
+    - [1.6.4. Primary on-call](#164-primary-on-call)
+    - [1.6.5. Secondary on-call](#165-secondary-on-call)
+    - [1.5.6. Escalation](#156-escalation)
+    - [1.6.7. Notification](#167-notification)
+    - [1.6.8. Incident procedure](#168-incident-procedure)
+  - [1.7. Standard operating procedures](#17-standard-operating-procedures)
+  - [1.8. App oboarding / app acceptance criteria](#18-app-oboarding--app-acceptance-criteria)
+    - [1.8.1. In the app-interface](#181-in-the-app-interface)
+  - [1.9. Additional team process](#19-additional-team-process)
+    - [1.9.1 Git process](#191-git-process)
+    - [1.9.2 Sprint process](#192-sprint-process)
+  - [1.10. App-sre escalation to external teams](#110-app-sre-escalation-to-external-teams)
+    - [1.10.1 PnT Devops](#1101-pnt-devops)
 - [1.10.2 IT Platform Team](#1102-it-platform-team)
-    - [1.11. Escalation procedures](#111-escalation-procedures)
-        - [1.11.1 Telemeter incidents](#1111-telemeter-incidents)
-    - [1.12. Contacts](#112-contacts)
-        - [1.12.1. Acknowledgements](#1121-acknowledgements)
-    - [1.13. Services](#113-services)
+  - [1.11. Escalation procedures](#111-escalation-procedures)
+    - [1.11.1 Telemeter incidents](#1111-telemeter-incidents)
+  - [1.12. Contacts](#112-contacts)
+    - [1.12.1. Acknowledgements](#1121-acknowledgements)
+  - [1.13. Services](#113-services)
 - [2. Glossary](#2-glossary)
-    - [2.1. PnT](#21-pnt)
-    - [2.2. PnT Ops](#22-pnt-ops)
-    - [2.3. PnT DevOps](#23-pnt-devops)
+  - [2.1. PnT](#21-pnt)
+  - [2.2. PnT Ops](#22-pnt-ops)
+  - [2.3. PnT DevOps](#23-pnt-devops)
 
 <!-- /TOC -->
 
@@ -347,6 +349,9 @@ Post RCA comms, followups:
 ### 1.10.1 PnT Devops
 
 * [PnT DevOps - Issue Escalation Procedure](https://mojo.redhat.com/docs/DOC-1049381) - Mojo
+  * NA Escalation manager - https://rover.redhat.com/people/profile/akrawczy
+* [Red Hat Major Incident Management (MIM)](https://mojo.redhat.com/groups/it-major-incident-management)
+* [IT ISO (IT Operations)](https://mojo.redhat.com/docs/DOC-1071493)
 
 1. Create a case: https://redhat.service-now.com/help?id=sc_cat_item&sys_id=b86bfc10133ce200dce03ff18144b028
 
@@ -366,9 +371,11 @@ Post RCA comms, followups:
 
         * Hostname Affected: `https://ci-int-jenkins.rhev-ci-vms.eng.rdu2.redhat.com`
 
-2. If this is a weekend (Saturday / Sunday), find the `PNQ On Call` from the [SysOps On Call calendar](https://calendar.google.com/calendar?cid=cmVkaGF0LmNvbV84ajE4YzFkOTFkZHFkYXQ4bDlxdDk0djFoY0Bncm91cC5jYWxlbmRhci5nb29nbGUuY29t).
+2. If this is a weekend (Saturday / Sunday), escalate issue following the [PnT DevOps - Issue Escalation Procedure](https://mojo.redhat.com/docs/DOC-1049381#jive_content_id_Business_Critical_Issues).
 
-3. Ping the On Call in #ops-escalation in the Red Hat Internal IRC Server - irc.devel.redhat.com.
+3. Join the PnT DevOps Google Chat room https://chat.google.com/room/AAAA6BChWkY
+
+4. Join the Red Hat IT Ops Google Chat room https://chat.google.com/room/AAAAiUsrxXk
 
 # 1.10.2 IT Platform Team
 
