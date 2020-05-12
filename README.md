@@ -40,7 +40,7 @@ this repository.
     - [Manage OpenShift LimitRanges via App-Interface (`/openshift/limitrange-1.yml`)](#manage-openshift-limitranges-via-app-interface-openshiftlimitrange-1yml)
     - [Manage OpenShift ResourceQuotas via App-Interface (`/openshift/quota-1.yml`)](#manage-openshift-resourcequotas-via-app-interface-openshiftquota-1yml)
     - [Self-Service OpenShift ServiceAccount tokens via App-Interface (`/openshift/namespace-1.yml`)](#self-service-openshift-serviceaccount-tokens-via-app-interface-openshiftnamespace-1yml)
-    - [Enable network traffic between Namespaces via App-Interface  (`/openshift/namespace-1.yml`)](#enable-network-traffic-between-namespaces-via-app-interface-openshiftnamespace-1yml)
+    - [Enable network traffic between Namespaces via App-Interface (`/openshift/namespace-1.yml`)](#enable-network-traffic-between-namespaces-via-app-interface-openshiftnamespace-1yml)
     - [Manage Vault configurations via App-Interface](#manage-vault-configurations-via-app-interface)
       - [Manage vault audit backends (`/vault-config/audit-1.yml`)](#manage-vault-audit-backends-vault-configaudit-1yml)
       - [Manage vault auth backends (`/vault-config/auth-1.yml`)](#manage-vault-auth-backends-vault-configauth-1yml)
@@ -192,8 +192,38 @@ The contract can be queried programmatically using a
 The GraphQL endpoint is reachable here:
 <https://app-interface.devshift.net/graphql>.
 
-You need to authenticate to access the service. Please request the credentials
-to the App-SRE team.
+To get credentials to query app-interface, submit a Credentials Request form in a merge request.
+The request itself is a file with the following structure:
+* `$schema` - must be `/app-interface/credentials-request-1.yml`
+* `labels` - labels to be added to the request (currently not used by automation)
+* `name` - name of the request object. must be unique
+* `description` - what will these credentials that you are requesting be used for
+* `user` - a reference to a user file who this request is for. user file must contain a public gpg key. [instructions](#adding-your-public-gpg-key)
+* `credentials` - the credentials which you are requesting
+  * current options:
+    - app-interface-production-basic-auth
+
+Complete example:
+
+```yaml
+---
+$schema: /app-interface/credentials-request-1.yml
+
+labels: {}
+
+name: example-request-20200512
+
+description: |
+  request description
+
+user:
+  $ref: /teams/path/to/user/file.yml
+
+credentials: app-interface-production-basic-auth
+
+```
+
+Please create the request file [here](/data/app-interface/requests).
 
 **IMPORTANT**: in order to use the GraphQL UI you need to click on the Settings
 wheel icon (top-right corner) and replace `omit` with `include` in
