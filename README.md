@@ -458,7 +458,7 @@ Notes:
 * If the resource already exists in the namespace, the PR check will fail. Please get in contact with App-SRE team to import resources to be under the control of App-Interface.
 * Manual changes to resources will be overridden by App-Interface in each run.
 * If a resource has a `qontract.recycle: "true"` annotation, all pods using that resource will be recycled on every update.
-  * Supported resources: Secrets
+  * Supported resources: Secrets, ConfigMaps
 
 OpenShift resources can be entirely self-serviced via App-Interface. A list of supported resource types can be found [here](/schemas/openshift/namespace-1.yml#L46).
 
