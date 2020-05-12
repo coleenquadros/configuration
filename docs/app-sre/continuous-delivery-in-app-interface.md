@@ -114,9 +114,13 @@ Ping @app-sre-ic on #sd-app-sre in the CoreOS slack!
 
 ## Developer workflow
 
+App-interface saas files are pluggable. If development teams wish to deploy to their development environment, they can add an additional `target` to an existing saas file.
+
+For example, by adding a target with `ref: develop` and a namespace in a development environment, developers will get a continuous delivery pipeline from the `develop` branch to their namespace through the App SRE pipelines.
+
 > Note: The [saasherder developer flow](https://github.com/openshiftio/saasherder/#run) hasn't changed, you can still use saasherder the same way you were using it, and everything will continue to work.
 
-Want to deploy the same templates as deployed via app-interface?
+Want to manually deploy the same templates as deployed via app-interface?
 
 To generate a pseudo script to assist in deployment, you can use the [qontract-cli tool](https://github.com/app-sre/qontract-reconcile).
 
