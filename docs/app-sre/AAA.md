@@ -436,9 +436,10 @@ The goal of this initiative is to get SREs:
 
 Each service has a service intro, high level, but technically oriented description. Linked from app-1.yml / serviceDocs. This document will be periodically reviewed and signed-off by an AppSRE team member.
 
-### Training Sessions at onboarding
+### Training Resources
 
-The AppSRE team will create an index of resources that any new AppSRE member needs to watch in which a specific topic is discussed.
+The AppSRE team will maintains an index of training resources. All AppSRE members must go through those training documents:
+https://mojo.redhat.com/docs/DOC-1211223#jive_content_id_AppSRE_Training
 
 ### Deep Dive sessions
 
