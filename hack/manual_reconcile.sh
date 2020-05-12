@@ -158,6 +158,7 @@ run_int openshift-performance-parameters &
 STATE=true run_int openshift-saas-deploy-trigger-configs &
 STATE=true run_int sql-query &
 STATE=true run_int email-sender &
+STATE=true run_int requests-sender &
 
 wait
 }

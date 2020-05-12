@@ -130,7 +130,7 @@ token = "Basic REDACTED"
 
 To get a token to query app-interface, follow [these instructions](/README.md#querying-the-app-interface).
 
-To generate a script to deploy the `uhc` application, as deployed to the `osd-integration` environment, use the following command:
+For example, to generate a script to deploy the `uhc` application, as deployed to the `osd-integration` environment, use the following command:
 
 ```
 docker run \
