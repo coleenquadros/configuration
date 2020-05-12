@@ -418,13 +418,9 @@ Similarly as with the access pieces:
 
 - All alerts have a corresponding document in the [sop/alerts](./sop/alerts) folder with the name `<AlertName>.md`.
 
-TODO: https://issues.redhat.com/browse/APPSRE-1830
-
 ### Following Incident Procedure
 
 All AppSRE team members will follow the [Incident procedure](#incident-procedure) documented in this file as accurately as possible, raise any concers and keep it up to date.
-
-TODO: [Intern proposal: Incident and alerting flow](https://docs.google.com/document/u/1/d/1WziKUZS2u-AlVkrdMnwA6tDvvueZArEA1xOxa1SrqKw/edit).
 
 ### On-call pairings
 
@@ -436,21 +432,13 @@ The goal of this initiative is to get SREs:
 - to understand the process on how to find information and docs about any service
 - to understand the process to deal with an incident (comms, etc)
 
-TODO: define the process
-
 ### Periodically reviewed service docs
 
 Each service has a service intro, high level, but technically oriented description. Linked from app-1.yml / serviceDocs. This document will be periodically reviewed and signed-off by an AppSRE team member.
 
-TODO:
-- Add schema for date and AppSRE signoff
-- Ensure all services have this document inially
-
 ### Training Sessions at onboarding
 
 The AppSRE team will create an index of resources that any new AppSRE member needs to watch in which a specific topic is discussed.
-
-TODO: create that index
 
 ### Deep Dive sessions
 
