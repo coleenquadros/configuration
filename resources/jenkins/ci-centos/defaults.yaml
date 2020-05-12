@@ -2508,6 +2508,24 @@
     <<: *job_template_defaults
 
 - job-template:
+    name: '{ci_project}-{git_repo}-pr-check-che-test-devfiles'
+    defaults: global
+    triggers:
+        - che_githubprb:
+            trigger_phrase: '{trigger_phrase}'
+            job_type: 'e2e - devfiles tests'
+            che-success-message: 'Devfiles tests passed.'
+            che-failure-message: 'Devfiles tests failed. Re-trigger by `[ci-test-devfiles]`'
+            che-error-message: 'Devfiles tests failed. Re-trigger by `[ci-test-devfiles]`'
+    wrappers:
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+            - *che-bot-github-credentials
+            - *quay-eclipse-che-credentials
+    <<: *job_template_defaults
+
+- job-template:
     name: '{ci_project}-{git_repo}-olm-pr-check'
     defaults: global
     triggers:
@@ -4865,6 +4883,13 @@
             build_branch: release
             extra_target: rhel
             timeout: '30m'
+        - '{ci_project}-{git_repo}-pr-check-che-test-devfiles':
+            git_organization: eclipse
+            git_repo: che-devfile-registry
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash .ci/cico-devfile-pr-test.sh'
+            timeout: '2h'
+            trigger_phrase: '.*\[ci-test-devfiles\].*'
         - '{ci_project}-{git_repo}-release-preview':
             git_organization: eclipse
             git_repo: che-devfile-registry
