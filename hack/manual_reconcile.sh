@@ -84,7 +84,7 @@ run_int gitlab-fork-compliance $gitlabMergeRequestTargetProjectId $gitlabMergeRe
 
 ## Run integrations on production
 ALIAS=jenkins-job-builder-no-compare run_int jenkins-job-builder --no-compare &
-ALIAS=owner-approvals-no-compare run_int owner-approvals $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid --no-compare &
+ALIAS=saas-file-owners-no-compare run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid --no-compare &
 
 # Prepare to run integrations on local server
 
@@ -147,7 +147,7 @@ run_int terraform-resources &
 run_int terraform-users &
 run_int terraform-vpc-peerings &
 run_int ldap-users $gitlabMergeRequestTargetProjectId &
-run_int owner-approvals $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid &
+run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid &
 run_int openshift-performance-parameters &
 # Conditionally run integrations according to MR title
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"slack"* ]] && run_int slack-usergroups &
