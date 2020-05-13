@@ -1,0 +1,62 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: openshift.io
+
+name: launchpad-production
+description: production namespace for launchpad
+
+cluster:
+    $ref: /openshift/app-sre-prod-03/cluster.yml
+
+app:
+  $ref: /services/openshift.io/app.yml
+
+environment:
+  $ref: /products/openshift.io/environments/production.yml
+
+grafanaUrl: "https://grafana.app-sre.devshift.net/d/k8s-compute-resources-namespace-pods/kubernetes-compute-resources-namespace-pods?var-datasource=dsaas-cluster-prometheus&var-namespace=launchpad-production"
+
+managedRoles: true
+
+managedResourceTypes:
+- ConfigMap
+- Secret
+- Route
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: app-interface/global/quay/openshiftio/quay.io
+  version: 2
+  type: kubernetes.io/dockercfg
+- provider: vault-secret
+  path: app-interface/global/quay/openshiftio/prod.registry.devshift.net
+  version: 2
+  type: kubernetes.io/dockercfg
+- provider: resource
+  path: /dsaas/launchpad-production/launcher-clusters.configmap.yaml
+- provider: resource
+  path: /dsaas/launchpad-production/launcher-documentation.configmap.yaml
+- provider: resource
+  path: /dsaas/launchpad-production/launcher.configmap.yaml
+- provider: vault-secret
+  path: app-interface/dsaas/launchpad-production/launcher
+  version: 1
+- provider: route
+  path: /dsaas/launchpad-production/appdev.route.yaml
+  vault_tls_secret_path: app-interface/dsaas/routes/_wildcard.openshift.io
+  vault_tls_secret_version: 2
+- provider: route
+  path: /dsaas/launchpad-production/launcher-documentation.route.yaml
+- provider: route
+  path: /dsaas/launchpad-production/launcher.route.yaml
+  vault_tls_secret_path: app-interface/dsaas/routes/_wildcard.openshift.io
+  vault_tls_secret_version: 2
+- provider: route
+  path: /dsaas/launchpad-production/launcher-application.route.yaml
+  vault_tls_secret_path: app-interface/dsaas/routes/_wildcard.api.openshift.io
+  vault_tls_secret_version: 2
+- provider: resource
+  path: /dsaas/dsaas-deploy.serviceaccount.yaml
