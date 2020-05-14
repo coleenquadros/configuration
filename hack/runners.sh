@@ -17,6 +17,8 @@ run_int() {
     -v ${WORK_DIR}/throughput:/throughput:z \
     -v /var/tmp/.cache:/root/.cache:z \
     -e GITHUB_API=$GITHUB_API \
+    -e UNLEASH_API_URL=$UNLEASH_API_URL \
+    -e UNLEASH_CLIENT_ACCESS_TOKEN=$UNLEASH_CLIENT_ACCESS_TOKEN \
     -e REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem \
     $GITLAB_PR_SUBMITTER_QUEUE_URL_ENV \
     $APP_INTERFACE_STATE_ENV \
