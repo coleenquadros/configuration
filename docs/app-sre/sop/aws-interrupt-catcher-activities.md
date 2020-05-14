@@ -18,6 +18,7 @@ This document aims to describe processes that has to be done manually from time 
 
 * DynamoDB cross account export
 * Reset user AWS console password
+* Reset user MFA device
 
 ### DynamoDB cross account export
 
@@ -138,3 +139,16 @@ Since a User is an (almost) idempotent entity in AWS, in order to reset a user p
 4. After merging the Merge Request (and after the jenkins job finishes), validate that the user is present in the `osio` AWS account.
 
 A new mail invitation is automatically sent the the user with the relevant information to login to the AWS console.
+
+
+### Reser user MFA device
+
+If a user is trying to set up a virtual MFA device and gets the following message:
+> MFADevice entity at the same path and name already exists. Before you can add a new virtual MFA device, ask you administrator to delete the exsting device using the CLI or API
+
+Run the following AWS cli command using the account's credentials or profile:
+```
+USER_ARN=<paste user ARN here>
+MFA_ARN=$(echo $USER_ARN | sed 's/user/mfa/g')
+aws iam delete-virtual-mfa-device --serial-number $MFA_ARN
+```
