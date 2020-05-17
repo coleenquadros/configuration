@@ -34,6 +34,7 @@ run_int jenkins-plugins &
 run_int jenkins-roles &
 run_int jenkins-job-builder &
 run_int jenkins-webhooks &
+run_int jenkins-webhooks-cleaner &
 run_int gitlab-members &
 run_int gitlab-housekeeping  &
 run_int gitlab-owners &

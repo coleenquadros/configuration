@@ -129,6 +129,7 @@ run_int jenkins-plugins &
 run_int jenkins-roles &
 run_int jenkins-job-builder &
 run_int jenkins-webhooks &
+run_int jenkins-webhooks-cleaner &
 run_int aws-iam-keys &
 run_int gitlab-members &
 run_int gitlab-projects &
