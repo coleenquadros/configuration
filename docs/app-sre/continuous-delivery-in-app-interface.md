@@ -96,6 +96,11 @@ Each user with this role can approve MRs by adding a `/lgtm` comment in the MR i
 
 If a `/lgtm` comment is added and all conditions are valid, an `approved` label will be automatically added to the MR, and it will be automatically rebased and merged within a few minutes.
 
+Additional supported commands:
+- `/lgtm cancel` - cancel previous LGTM comment
+- `/hold` - prevents merging, does not cancel previous LGTM (`approved` label will be removed)
+- `/hold cancel` - cancels previous HOLD and follows existing LGTM comments.
+
 MR is not being merged? [follow this SOP](/docs/app-sre/sop/app-interface-periodic-job-debug.md)
 
 ## Where do I sign?
