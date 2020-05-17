@@ -4,4 +4,4 @@ To remove webhooks in GitLab projects to Jenkins instances which we no longer us
 
 Example: [ci-int](/data/dependencies/ci-int/ci-int.yml#L15)
 
-The deletion will be done by the `jenkins-webhookd-cleaner` integration.
+The deletion will be done by the `jenkins-webhooks-cleaner` integration.
