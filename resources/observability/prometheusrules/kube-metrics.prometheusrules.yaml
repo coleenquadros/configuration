@@ -15,51 +15,74 @@ spec:
       annotations:
         message: Pod {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container
           }}) is restarting {{ printf "%.2f" $value }} times / 5 minutes.
-      expr: |
-        rate(kube_pod_container_status_restarts_total{job="kube-state-metrics"}[15m]) * 60 * 5 > 0
-      for: 1h
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubepodcrashlooping.md
+      expr: 'rate(kube_pod_container_status_restarts_total{job="kube-state-metrics"}[5m])
+        * 60 * 5 > 0'
+      for: 15m
       labels:
         severity: high
     - alert: KubePodNotReady
       annotations:
         message: Pod {{ $labels.namespace }}/{{ $labels.pod }} has been in a non-ready
-          state for longer than an hour.
+          state for longer than 15 minutes.
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubepodnotready.md
       expr: |
-        sum by (namespace, pod) (kube_pod_status_phase{job="kube-state-metrics", phase=~"Pending|Unknown"}) > 0
-      for: 1h
+        sum by (namespace, pod) (
+          max by(namespace, pod) (
+            kube_pod_status_phase{job="kube-state-metrics", phase=~"Pending|Unknown"}
+          ) * on(namespace, pod) group_left(owner_kind) topk by(namespace, pod) (
+            1, max by(namespace, pod, owner_kind) (kube_pod_owner{owner_kind!="Job"})
+          )
+        ) > 0
+      for: 15m
       labels:
-        severity: critical
+        severity: high
     - alert: KubeDeploymentGenerationMismatch
       annotations:
         message: Deployment generation for {{ $labels.namespace }}/{{ $labels.deployment
-          }} does not match, this indicates that the Deployment has failed but has
-          not been rolled back.
+          }} does not match, this indicates that the Deployment has failed but has not
+          been rolled back.
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubedeploymentgenerationmismatch.md
       expr: |
         kube_deployment_status_observed_generation{job="kube-state-metrics"}
           !=
         kube_deployment_metadata_generation{job="kube-state-metrics"}
       for: 15m
       labels:
-        severity: critical
+        severity: high
     - alert: KubeDeploymentReplicasMismatch
       annotations:
         message: Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has not
-          matched the expected number of replicas for longer than an hour.
+          matched the expected number of replicas for longer than 15 minutes.
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubedeploymentreplicasmismatch.md
       expr: |
-        kube_deployment_spec_replicas{job="kube-state-metrics"}
-          !=
-        kube_deployment_status_replicas_available{job="kube-state-metrics"}
-      for: 1h
+        (
+          kube_deployment_spec_replicas{job="kube-state-metrics"}
+            !=
+          kube_deployment_status_replicas_available{job="kube-state-metrics"}
+        ) and (
+          changes(kube_deployment_status_replicas_updated{job="kube-state-metrics"}[5m])
+            ==
+          0
+        )
+      for: 15m
       labels:
         severity: critical
     - alert: KubeStatefulSetReplicasMismatch
       annotations:
-        message: StatefulSet {{ $labels.namespace }}/{{ $labels.statefulset }} has
-          not matched the expected number of replicas for longer than 15 minutes.
+        message: StatefulSet {{ $labels.namespace }}/{{ $labels.statefulset }} has not
+          matched the expected number of replicas for longer than 15 minutes.
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubestatefulsetreplicasmismatch.md
       expr: |
-        kube_statefulset_status_replicas_ready{job="kube-state-metrics"}
-          !=
-        kube_statefulset_status_replicas{job="kube-state-metrics"}
+        (
+          kube_statefulset_status_replicas_ready{job="kube-state-metrics"}
+            !=
+          kube_statefulset_status_replicas{job="kube-state-metrics"}
+        ) and (
+          changes(kube_statefulset_status_replicas_updated{job="kube-state-metrics"}[5m])
+            ==
+          0
+        )
       for: 15m
       labels:
         severity: critical
@@ -68,6 +91,7 @@ spec:
         message: StatefulSet generation for {{ $labels.namespace }}/{{ $labels.statefulset
           }} does not match, this indicates that the StatefulSet has failed but has
           not been rolled back.
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubestatefulsetgenerationmismatch.md
       expr: |
         kube_statefulset_status_observed_generation{job="kube-state-metrics"}
           !=
@@ -79,6 +103,7 @@ spec:
       annotations:
         message: StatefulSet {{ $labels.namespace }}/{{ $labels.statefulset }} update
           has not been rolled out.
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubestatefulsetupdatenotrolledout.md
       expr: |
         max without (revision) (
           kube_statefulset_status_current_revision{job="kube-state-metrics"}
@@ -96,170 +121,117 @@ spec:
         severity: critical
     - alert: KubeDaemonSetRolloutStuck
       annotations:
-        message: Only {{ $value }}% of the desired Pods of DaemonSet {{ $labels.namespace
-          }}/{{ $labels.daemonset }} are scheduled and ready.
+        message: Only {{ $value | humanizePercentage }} of the desired Pods of DaemonSet
+          {{ $labels.namespace }}/{{ $labels.daemonset }} are scheduled and ready.
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubedaemonsetrolloutstuck.md
       expr: |
         kube_daemonset_status_number_ready{job="kube-state-metrics"}
           /
-        kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics"} * 100 < 100
+        kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics"} < 1.00
       for: 15m
       labels:
         severity: critical
+    - alert: KubeContainerWaiting
+      annotations:
+        message: |
+          Pod {{ $labels.namespace }}/{{ $labels.pod }} container {{$labels.container}}
+          has been in waiting state for longer than 15 minutes. Reason: {{$labels.reason}}
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubecontainerwaiting.md
+      expr: 'sum by (namespace, pod, container, reason) (kube_pod_container_status_waiting_reason{job="kube-state-metrics"})
+        > 0'
+      for: 15m
+      labels:
+        severity: high
     - alert: KubeDaemonSetNotScheduled
       annotations:
-        message: '{{ $value }} Pods of DaemonSet {{ $labels.namespace }}/{{ $labels.daemonset
-          }} are not scheduled.'
+        message: "{{ $value }} Pods of DaemonSet {{ $labels.namespace }}/{{ $labels.daemonset
+          }} are not scheduled."
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubedaemonsetnotscheduled.md
       expr: |
         kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics"}
           -
         kube_daemonset_status_current_number_scheduled{job="kube-state-metrics"} > 0
       for: 10m
       labels:
-        severity: warning
+        severity: high
     - alert: KubeDaemonSetMisScheduled
       annotations:
-        message: '{{ $value }} Pods of DaemonSet {{ $labels.namespace }}/{{ $labels.daemonset
-          }} are running where they are not supposed to run.'
-      expr: |
-        kube_daemonset_status_number_misscheduled{job="kube-state-metrics"} > 0
-      for: 10m
+        message: "{{ $value }} Pods of DaemonSet {{ $labels.namespace }}/{{ $labels.daemonset
+          }} are running where they are not supposed to run."
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubedaemonsetmisscheduled.md
+      expr: 'kube_daemonset_status_number_misscheduled{job="kube-state-metrics"} > 0'
+      for: 15m
       labels:
-        severity: warning
-  - name: prometheus.rules
+        severity: high
+  - name: kubernetes-resources
     rules:
-    - alert: PrometheusConfigReloadFailed
+    - alert: KubeCPUOvercommit
       annotations:
-        description: Reloading Prometheus' configuration has failed for {{$labels.namespace}}/{{$labels.pod}}
-        summary: Reloading Prometheus' configuration failed
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-PrometheusConfigReloadFailed.md"
+        message: Cluster has overcommitted CPU resource requests for Pods and cannot
+          tolerate node failure.
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubecpuovercommit.md
       expr: |
-        prometheus_config_last_reload_successful == 0
-      for: 10m
+        sum(namespace:kube_pod_container_resource_requests_cpu_cores:sum{})
+          /
+        sum(kube_node_status_allocatable_cpu_cores)
+          >
+        (count(kube_node_status_allocatable_cpu_cores)-1) / count(kube_node_status_allocatable_cpu_cores)
+      for: 5m
       labels:
-        severity: warning
-    - alert: PrometheusNotificationQueueRunningFull
+        severity: high
+    - alert: KubeMemoryOvercommit
       annotations:
-        description: Prometheus' alert notification queue is running full for {{$labels.namespace}}/{{
-          $labels.pod}}
-        summary: Prometheus' alert notification queue is running full
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-PrometheusNotificationQueueRunningFull.md"
+        message: Cluster has overcommitted memory resource requests for Pods and cannot
+          tolerate node failure.
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubememoryovercommit.md
       expr: |
-        predict_linear(prometheus_notifications_queue_length[5m], 60 * 30) > prometheus_notifications_queue_capacity
-      for: 10m
+        sum(namespace:kube_pod_container_resource_requests_memory_bytes:sum{})
+          /
+        sum(kube_node_status_allocatable_memory_bytes)
+          >
+        (count(kube_node_status_allocatable_memory_bytes)-1)
+          /
+        count(kube_node_status_allocatable_memory_bytes)
+      for: 5m
       labels:
-        severity: warning
-    - alert: PrometheusErrorSendingAlerts
+        severity: high
+    - alert: KubeCPUQuotaOvercommit
       annotations:
-        description: Errors while sending alerts from Prometheus {{$labels.namespace}}/{{
-          $labels.pod}} to Alertmanager {{$labels.Alertmanager}}
-        summary: Errors while sending alert from Prometheus
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-PrometheusErrorSendingAlerts.md"
+        message: Cluster has overcommitted CPU resource requests for Namespaces.
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubecpuquotaovercommit.md
       expr: |
-        rate(prometheus_notifications_errors_total[5m]) / rate(prometheus_notifications_sent_total[5m]) > 0.01
-      for: 10m
+        sum(kube_resourcequota{job="kube-state-metrics", type="hard", resource="cpu"})
+          /
+        sum(kube_node_status_allocatable_cpu_cores)
+          > 1.5
+      for: 5m
       labels:
-        severity: warning
-    - alert: PrometheusErrorSendingAlerts
+        severity: high
+    - alert: KubeMemoryQuotaOvercommit
       annotations:
-        description: Errors while sending alerts from Prometheus {{$labels.namespace}}/{{
-          $labels.pod}} to Alertmanager {{$labels.Alertmanager}}
-        summary: Errors while sending alerts from Prometheus
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-PrometheusErrorSendingAlerts.md"
+        message: Cluster has overcommitted memory resource requests for Namespaces.
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubememoryquotaovercommit.md
       expr: |
-        rate(prometheus_notifications_errors_total[5m]) / rate(prometheus_notifications_sent_total[5m]) > 0.03
-      for: 10m
+        sum(kube_resourcequota{job="kube-state-metrics", type="hard", resource="memory"})
+          /
+        sum(kube_node_status_allocatable_memory_bytes{job="node-exporter"})
+          > 1.5
+      for: 5m
       labels:
-        severity: critical
-    # This is currently only the app-sre prometheus instance
-    - alert: PrometheusNotConnectedToAlertmanagers
+        severity: high
+    - alert: KubeQuotaExceeded
       annotations:
-        description: Prometheus {{ $labels.namespace }}/{{ $labels.pod}} is not connected
-          to any Alertmanagers
-        summary: Prometheus is not connected to any Alertmanagers
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-PrometheusNotConnectedToAlertmanagers.md"
+        message: Namespace {{ $labels.namespace }} is using {{ $value | humanizePercentage
+          }} of its {{ $labels.resource }} quota.
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubequotaexceeded.md
       expr: |
-        prometheus_notifications_alertmanagers_discovered{namespace="app-sre-observability-production"} < 1
-      for: 10m
+        kube_resourcequota{job="kube-state-metrics", type="used"}
+          / ignoring(instance, job, type)
+        (kube_resourcequota{job="kube-state-metrics", type="hard"} > 0)
+          > 0.90
+      for: 15m
       labels:
-        severity: warning
-    - alert: PrometheusTSDBReloadsFailing
-      annotations:
-        description: '{{$labels.job}} at {{$labels.instance}} had {{$value | humanize}}
-          reload failures over the last four hours.'
-        summary: Prometheus has issues reloading data blocks from disk
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-PrometheusTSDBReloadsFailing.md"
-      expr: |
-        increase(prometheus_tsdb_reloads_failures_total[2h]) > 0
-      for: 12h
-      labels:
-        severity: warning
-    - alert: PrometheusTSDBCompactionsFailing
-      annotations:
-        description: '{{$labels.job}} at {{$labels.instance}} had {{$value | humanize}}
-          compaction failures over the last four hours.'
-        summary: Prometheus has issues compacting sample blocks
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-PrometheusTSDBCompactionsFailing.md"
-      expr: |
-        increase(prometheus_tsdb_compactions_failed_total[2h]) > 0
-      for: 12h
-      labels:
-        severity: warning
-    - alert: PrometheusTSDBWALCorruptions
-      annotations:
-        description: '{{$labels.job}} at {{$labels.instance}} has a corrupted write-ahead
-          log (WAL).'
-        summary: Prometheus write-ahead log is corrupted
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-PrometheusTSDBWALCorruptions.md"
-      expr: |
-        tsdb_wal_corruptions_total > 0
-      for: 4h
-      labels:
-        severity: warning
-    - alert: PrometheusNotIngestingSamples
-      annotations:
-        description: Prometheus {{ $labels.namespace }}/{{ $labels.pod}} isn't ingesting
-          samples.
-        summary: Prometheus isn't ingesting samples
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-PrometheusNotIngestingSamples.md"
-      expr: |
-        rate(prometheus_tsdb_head_samples_appended_total[5m]) <= 0
-      for: 10m
-      labels:
-        severity: warning
-    - alert: PrometheusTargetScrapesDuplicate
-      annotations:
-        description: '{{$labels.namespace}}/{{$labels.pod}} has many samples rejected
-          due to duplicate timestamps but different values'
-        summary: Prometheus has many samples rejected
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-PrometheusTargetScrapesDuplicate.md"
-      expr: |
-        increase(prometheus_target_scrapes_sample_duplicate_timestamp_total[5m]) > 0
-      for: 10m
-      labels:
-        severity: warning
-
-  - name: prometheus-operator
-    rules:
-    - alert: PrometheusOperatorReconcileErrors
-      annotations:
-        message: Errors while reconciling {{ $labels.controller }} in {{ $labels.namespace
-          }} Namespace.
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-operator-PrometheusOperatorReconcileErrors.md"
-      expr: |
-        rate(prometheus_operator_reconcile_errors_total[5m]) > 0.1
-      for: 10m
-      labels:
-        severity: medium
-    - alert: PrometheusOperatorNodeLookupErrors
-      annotations:
-        message: Errors while reconciling Prometheus in {{ $labels.namespace }} Namespace.
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-operator-PrometheusOperatorNodeLookupErrors.md"
-      expr: |
-        rate(prometheus_operator_node_address_lookup_errors_total[5m]) > 0.1
-      for: 10m
-      labels:
-        severity: warning
-
+        severity: high
   - name: kubernetes-storage
     rules:
     - alert: KubePersistentVolumeUsageCritical
@@ -290,7 +262,7 @@ spec:
         predict_linear(kubelet_volume_stats_available_bytes{job="kubelet"}[6h], 4 * 24 * 3600) < 0
       for: 5m
       labels:
-        severity: medium
+        severity: high
     - alert: KubePersistentVolumeErrors
       annotations:
         message: The persistent volume {{ $labels.persistentvolume }} has status {{
@@ -299,4 +271,45 @@ spec:
         kube_persistentvolume_status_phase{phase=~"Failed|Pending",job="kube-state-metrics"} > 0
       for: 5m
       labels:
-        severity: medium
+        severity: high
+  - name: kubernetes-system-kubelet
+    rules:
+    - alert: KubeNodeNotReady
+      annotations:
+        message: "{{ $labels.node }} has been unready for more than 5 minutes."
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubenodenotready.md
+      expr: 'kube_node_status_condition{job="kube-state-metrics",condition="Ready",status="true"}
+        == 0'
+      for: 5m
+      labels:
+        severity: high
+    - alert: KubeNodeUnreachable
+      annotations:
+        message: "{{ $labels.node }} is unreachable and some workloads may be rescheduled."
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubenodeunreachable.md
+      expr: '(kube_node_spec_taint{job="kube-state-metrics",key="node.kubernetes.io/unreachable",effect="NoSchedule"}
+        unless ignoring(key,value) kube_node_spec_taint{job="kube-state-metrics",key="ToBeDeletedByClusterAutoscaler"})
+        == 1'
+      labels:
+        severity: high
+    - alert: KubeletTooManyPods
+      annotations:
+        message: Kubelet '{{ $labels.node }}' is running at {{ $value | humanizePercentage
+          }} of its Pod capacity.
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubelettoomanypods.md
+      expr: 'max(max(kubelet_running_pod_count{job="kubelet"}) by(instance) * on(instance)
+        group_left(node) kubelet_node_name{job="kubelet"}) by(node) / max(kube_node_status_capacity_pods{job="kube-state-metrics"}
+        != 1) by(node) > 0.95'
+      for: 15m
+      labels:
+        severity: high
+    - alert: KubeNodeReadinessFlapping
+      annotations:
+        message: The readiness status of node {{ $labels.node }} has changed {{ $value
+          }} times in the last 15 minutes.
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubenodereadinessflapping.md
+      expr: 'sum(changes(kube_node_status_condition{status="true",condition="Ready"}[15m]))
+        by (node) > 2'
+      for: 15m
+      labels:
+        severity: high
