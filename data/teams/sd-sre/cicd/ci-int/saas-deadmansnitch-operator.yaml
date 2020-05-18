@@ -1,0 +1,46 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: osd-operators
+
+name: saas-deadmansnitch-operator
+description: SaaS tracking file for deadmansnitch-operator
+
+app:
+  $ref: /services/hive/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sre-operators
+
+managedResourceTypes:
+- CatalogSource
+- OperatorGroup
+- Subscription
+
+imagePatterns:
+- quay.io/app-sre/deadmanssnitch-operator-registry
+
+resourceTemplates:
+- name: deadmanssnitch-operator
+  url: https://github.com/openshift/deadmanssnitch-operator
+  path: /hack/olm-registry/olm-artifacts-template.yaml
+  parameters:
+    REGISTRY_IMG: quay.io/app-sre/deadmanssnitch-operator-registry
+  targets:
+  - namespace:
+      $ref: /services/hive/namespaces/deadmanssnitch-operator-integration.yml
+    ref: master
+    upstream: openshift-deadmanssnitch-operator-gh-build-master
+  # - namespace:
+  #     $ref: /services/hive/namespaces/deadmanssnitch-operator-stage.yml
+  #   ref: master
+  #   upstream: openshift-deadmanssnitch-operator-gh-build-master
+  # - namespace:
+  #     $ref: /services/hive/namespaces/deadmanssnitch-operator-production.yml
+  #   ref: 3830fad65c802e216f6095c8e8f9211ea92353cd
