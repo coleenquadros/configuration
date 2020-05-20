@@ -52,9 +52,9 @@ In order to create the Oauth client register to create a new application here:
 https://github.com/organizations/app-sre/settings/applications
 
 The callback template is:
-https://oauth-openshift.apps.app-sre-prod-04.y6b4.p1.openshiftapps.com/oauth2callback/github-app-sre
+https://oauth-openshift.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/oauth2callback/github-app-sre
 
-Note: replace `app-sre-prod-04.y6b4` with the correct values.
+Note: replace `app-sre-prod-04.i5h0` with the correct values.
 
 1. App-SRE will provide the rest of the settings
 
