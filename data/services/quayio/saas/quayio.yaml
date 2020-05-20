@@ -1,0 +1,131 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: quayio
+
+name: quayio
+description: quayio
+
+app:
+  $ref: /services/quayio/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- Deployment
+- Service
+- Role
+- RoleBinding
+
+imagePatterns:
+- quay.io/app-sre
+
+# authentication:
+#   code:
+#     path: app-sre/creds/github-app-sre-bot
+#     field: openshift-saas-deploy
+#   image:
+#     path: insights/quay/cloudservices-push
+#     field: all
+
+parameters:
+  IMAGE: quay.io/app-sre/quay
+  QUAY_ENTRYPOINT: registry-nomigrate
+  QUAY_APP_DEPLOYMENT_REPLICAS: 0
+  QUAY_APP_CPU_REQUEST: 1
+  QUAY_APP_CPU_LIMIT: 13
+  QUAY_APP_MEMORY_REQUEST: 16Gi
+  QUAY_APP_MEMORY_LIMIT: 56Gi
+  QUAY_APP_DEPLOYMENT_PROGRESS_DEADLINE_SECONDS: 2700
+  QUAY_APP_DEPLOYMENT_STRATEGY_TYPE: RollingUpdate
+  QUAY_APP_DEPLOYMENT_MIN_READY_SECONDS: 10
+  QUAY_APP_DEPLOYMENT_MAX_UNAVAILABLE: 0
+  QUAY_APP_DEPLOYMENT_MAX_SURGE: 3
+  QUAY_APP_READINESS_PROBE_INITIAL_DELAY_SECONDS: 30
+  QUAY_APP_READINESS_PROBE_PERIOD_SECONDS: 15
+  QUAY_APP_READINESS_PROBE_TIMEOUT_SECONDS: 30
+  QUAY_APP_LIVENESS_PROBE_INITIAL_DELAY_SECONDS: 30
+  QUAY_APP_LIVENESS_PROBE_TIMEOUT_SECONDS: 30
+  QUAY_APP_LIVENESS_PROBE_PERIOD_SECONDS: 60
+  QUAY_APP_DEPLOYMENT_NAMESPACE: quay
+  QUAY_APP_CONFIG_SECRET: quay-config-secret-v19
+  DEBUGLOG: "false"
+  QUAY_APP_COMPONENT_ANNOTATIONS_KEY: "quay-app-deployment"
+  QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "update_me_when_secret_changes"
+  IMAGE_PULL_POLICY: IfNotPresent
+  CLOUDWATCH_SECRET: quay-cloudwatch-iam-user
+  SYSLOG_PORT: "5014"
+  QUAY_SYSLOG_MEMORY_REQUEST: 1Gi
+  QUAY_SYSLOG_CPU_REQUEST: 1
+  QUAY_SYSLOG_MEMORY_LIMIT: 2Gi
+  QUAY_SYSLOG_CPU_LIMIT: 1
+  QUAY_SYSLOG_LIVENESS_PROBE_INITIAL_DELAY_SECONDS: 30
+  QUAY_SYSLOG_LIVENESS_PROBE_PERIOD_SECONDS: 15
+  QUAY_SYSLOG_LIVENESS_PROBE_TIMEOUT_SECONDS: 5
+  QUAY_SYSLOG_READINESS_PROBE_INITIAL_DELAY_SECONDS: 15
+  QUAY_SYSLOG_READINESS_PROBE_PERIOD_SECONDS: 30
+  QUAY_SYSLOG_READINESS_PROBE_TIMEOUT_SECONDS: 5
+  SYSLOG_SERVER: localhost
+  SYSLOG_PROTO: udp
+  QUAY_LOGGING: syslog
+  SYSLOG_IMAGE: quay.io/app-sre/syslog-cloudwatch-bridge
+  SYSLOG_IMAGE_TAG: 809de28
+
+resourceTemplates:
+- name: quayio-app-prod-us-east-1
+  path: /deploy/openshift/quay-app.yaml
+  url: https://github.com/quay/quay
+  targets:
+  - namespace:
+      $ref: /services/quayio/namespaces/quay-p-ue1.yml
+    ref: f39779db2c4b579c572f2c1f67938347046bfccd
+    parameters:
+      IMAGE_TAG: f39779d
+      IMAGE: quay.io/app-sre/quay
+      QUAY_ENTRYPOINT: registry-nomigrate
+      QUAY_APP_DEPLOYMENT_REPLICAS: 0
+      QUAY_APP_CPU_REQUEST: 1
+      QUAY_APP_CPU_LIMIT: 13
+      QUAY_APP_MEMORY_REQUEST: 16Gi
+      QUAY_APP_MEMORY_LIMIT: 56Gi
+      QUAY_APP_DEPLOYMENT_PROGRESS_DEADLINE_SECONDS: 2700
+      QUAY_APP_DEPLOYMENT_STRATEGY_TYPE: RollingUpdate
+      QUAY_APP_DEPLOYMENT_MIN_READY_SECONDS: 10
+      QUAY_APP_DEPLOYMENT_MAX_UNAVAILABLE: 0
+      QUAY_APP_DEPLOYMENT_MAX_SURGE: 3
+      QUAY_APP_READINESS_PROBE_INITIAL_DELAY_SECONDS: 30
+      QUAY_APP_READINESS_PROBE_PERIOD_SECONDS: 15
+      QUAY_APP_READINESS_PROBE_TIMEOUT_SECONDS: 30
+      QUAY_APP_LIVENESS_PROBE_INITIAL_DELAY_SECONDS: 30
+      QUAY_APP_LIVENESS_PROBE_TIMEOUT_SECONDS: 30
+      QUAY_APP_LIVENESS_PROBE_PERIOD_SECONDS: 60
+      QUAY_APP_DEPLOYMENT_NAMESPACE: quay
+      QUAY_APP_CONFIG_SECRET: quay-config-secret-v19
+      DEBUGLOG: "false"
+      QUAY_APP_COMPONENT_ANNOTATIONS_KEY: "quay-app-deployment"
+      QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "update_me_when_secret_changes"
+      IMAGE_PULL_POLICY: IfNotPresent
+      CLOUDWATCH_SECRET: quay-cloudwatch-iam-user
+      SYSLOG_PORT: "5014"
+      QUAY_SYSLOG_MEMORY_REQUEST: 1Gi
+      QUAY_SYSLOG_CPU_REQUEST: 1
+      QUAY_SYSLOG_MEMORY_LIMIT: 2Gi
+      QUAY_SYSLOG_CPU_LIMIT: 1
+      QUAY_SYSLOG_LIVENESS_PROBE_INITIAL_DELAY_SECONDS: 30
+      QUAY_SYSLOG_LIVENESS_PROBE_PERIOD_SECONDS: 15
+      QUAY_SYSLOG_LIVENESS_PROBE_TIMEOUT_SECONDS: 5
+      QUAY_SYSLOG_READINESS_PROBE_INITIAL_DELAY_SECONDS: 15
+      QUAY_SYSLOG_READINESS_PROBE_PERIOD_SECONDS: 30
+      QUAY_SYSLOG_READINESS_PROBE_TIMEOUT_SECONDS: 5
+      SYSLOG_SERVER: localhost
+      SYSLOG_PROTO: udp
+      QUAY_LOGGING: syslog
+      SYSLOG_IMAGE: quay.io/app-sre/syslog-cloudwatch-bridge
+      SYSLOG_IMAGE_TAG: 809de28
