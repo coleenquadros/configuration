@@ -1,0 +1,51 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: system-baseline
+  platform: insights
+
+name: system-baseline
+description: system-baseline app on the Insights Platform
+
+app:
+  $ref: /services/insights/system-baseline/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: system-baseline-backend
+  path: /templates/system-baseline/system-baseline-backend.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  parameters:
+    CLOUD_WATCH_LOG_GROUP: system-baseline-stage
+    ENABLE_SMART_MANGEMENT_ENTITLEMENT_CHECK: true
+    MAX_REPLICAS: 2
+    MIN_REPLICAS: 2
+  targets:
+  - namespace:
+      $ref: /services/insights/system-baseline/namespaces/stage-system-baseline-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: stable

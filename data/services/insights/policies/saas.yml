@@ -1,0 +1,72 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: policies
+  platform: insights
+
+name: policies
+description: policies app on the Insights Platform
+
+app:
+  $ref: /services/insights/policies/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+- PersistentVolumeClaim
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  CLOUD_WATCH_LOG_GROUP: policies-stage
+  SENTRY_ENV: stage
+  
+resourceTemplates:
+- name: policies-notifications
+  path: /templates/policies/policies-notifications.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/policies/namespaces/stage-policies-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: f749e0c
+      DB_SECRET_NAME: policies-notifications-db
+- name: policies-engine
+  path: /templates/policies/policies-engine.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/policies/namespaces/stage-policies-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 88b602c
+      INFINISPAN_STORAGE: 50Gi
+- name: policies-ui-backend
+  path: /templates/policies/policies-ui-backend.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/policies/namespaces/stage-policies-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 2359b75
+      DB_SECRET_NAME: policies-ui-backend-db

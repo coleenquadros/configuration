@@ -13,12 +13,22 @@ cluster:
 app:
   $ref: /services/insights/policies/app.yml
 
+environment:
+  $ref: /products/insights/environments/production.yml
+
 managedRoles: true
 
 managedResourceTypes:
+- ServiceAccount
 - Secret
 
 openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-prod/shared/private-image-puller.serviceaccount.yaml
 - provider: vault-secret
   path: insights/quay/quay.io
   version: 3
@@ -27,6 +37,10 @@ openshiftResources:
 - provider: vault-secret
   path: insights/secrets/global/rds-client-ca
   version: 1
+- provider: vault-secret
+  path: insights/secrets/backoffice/policies-prod
+  version: 2
+  name: backoffice
 
 managedTerraformResources: true
 
@@ -35,4 +49,7 @@ terraformResources:
   account: insights-prod
   identifier: policies-prod
   defaults: /terraform/resources/insights/production/rds-1.yml
+  overrides:
+    monitoring_interval: 60
   output_resource_name: policies-db
+  enhanced_monitoring: true

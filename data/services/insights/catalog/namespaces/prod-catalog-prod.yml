@@ -13,12 +13,22 @@ cluster:
 app:
   $ref: /services/insights/catalog/app.yml
 
+environment:
+  $ref: /products/insights/environments/production.yml
+
 managedRoles: true
 
 managedResourceTypes:
+- ServiceAccount
 - Secret
 
 openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-prod/shared/private-image-puller.serviceaccount.yaml
 - provider: vault-secret
   path: insights/secrets/insights-prod/catalog-prod/catalog-api-secrets
   version: 1
@@ -30,3 +40,16 @@ openshiftResources:
 - provider: vault-secret
   path: insights/secrets/global/rds-client-ca
   version: 1
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-prod
+  identifier: catalog-prod
+  defaults: /terraform/resources/insights/production/rds/rds-catalog-prod.yml
+  overrides:
+    snapshot_identifier: catalog-prod-migration
+  enhanced_monitoring: true
+  output_resource_name: catalog-db-rds
+  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-catalog-prod.yml

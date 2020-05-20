@@ -1,0 +1,54 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: drift
+  platform: insights
+
+name: drift
+description: drift app on the Insights Platform
+
+app:
+  $ref: /services/insights/drift/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes: 
+- DeploymentConfig
+- HorizontalPodAutoscaler
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: drift-backend.yaml
+  path: /templates/drift/drift-backend.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  parameters:
+    DRIFT_ENABLE_RBAC: "True"
+    ENABLE_SMART_MANAGEMENT_ENTITLEMENT_CHECK: "False"
+    HSP_HOST: historical-system-profiles-backend.historical-system-profiles-stage.svc.cluster.local
+    MAX_REPLICAS: 2
+    MIN_REPLICAS: 2
+    SYSTEM_BASELINE_HOST: system-baseline-backend.system-baseline-stage.svc.cluster.local
+  targets:
+  - namespace:
+      $ref: /services/insights/drift/namespaces/stage-drift-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: stable

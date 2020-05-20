@@ -13,21 +13,31 @@ cluster:
 app:
   $ref: /services/insights/approval/app.yml
 
+environment:
+  $ref: /products/insights/environments/production.yml
+
 managedRoles: true
 
 managedResourceTypes:
+- ServiceAccount
 - Secret
 
 openshiftResources:
 - provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-prod/shared/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
   path: insights/secrets/insights-prod/approval-prod/approval-api-secrets
-  version: 1
+  version: 2
 - provider: vault-secret
   path: insights/secrets/insights-prod/approval-prod/approval-pam-secrets
   version: 1
 - provider: vault-secret
   path: insights/secrets/insights-prod/approval-prod/keystore
-  version: 1
+  version: 3
 - provider: vault-secret
   path: insights/secrets/insights-prod/approval-prod/kie-pam-config
   version: 1
@@ -39,3 +49,16 @@ openshiftResources:
 - provider: vault-secret
   path: insights/secrets/global/rds-client-ca
   version: 1
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-prod
+  identifier: approval-prod
+  defaults: /terraform/resources/insights/production/rds/rds-approval-prod.yml
+  overrides:
+    snapshot_identifier: approval-prod-migration
+  enhanced_monitoring: true
+  output_resource_name: approval-db-rds
+  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-approval-prod.yml

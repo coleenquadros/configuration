@@ -2,7 +2,7 @@
 
 ## Background
 
-The app-interface e2e tests is executing the following tests: [link](/e2e_tests.sh#L45)
+The app-interface e2e tests is executing the following tests: [link](/hack/e2e_tests.sh)
 
 ## Purpose
 

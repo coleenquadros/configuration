@@ -44,7 +44,6 @@
         - fabric8cd
         - fche
         - gastaldi
-        - hrishin
         - ia3andy
         - ibuziuk
         - inoxx03
@@ -71,6 +70,7 @@
         - piyush-garg
         - pmacik
         - ppitonak
+        - prashbnair
         - Preeticp
         - quintesse
         - RhCheGithubBot
@@ -82,6 +82,7 @@
         - rajusem
         - sahil143
         - sanketpathak
+        - sawood14012
         - sbose78
         - sbryzak
         - ScrewTSW
@@ -98,6 +99,8 @@
         - vparfonov
         - xcoulon
         - yzainee
+        - dgpatelgit
+        
 
 
 - che_admin_list_defaults: &che_admin_list_defaults
@@ -221,6 +224,25 @@
     name: 'vault_defaults'
     vault-url: 'https://vault.devshift.net'
     credentials-id: '52ce5cda-e8f3-47a7-917b-8771518b4729'
+
+
+- kube-config-dsaas-stg-v4: &kube-config-dsaas-stg-v4
+    name: "kube-config-dsaas-stg-v4"
+    secret-path: 'app-sre/creds/kube-configs/app-sre-stage-02'
+    secret-values:
+      - env-var: 'KUBE_SERVER'
+        vault-key: 'server'
+      - env-var: 'KUBE_TOKEN'
+        vault-key: 'token'
+
+- kube-config-dsaas-v4: &kube-config-dsaas-v4
+    name: "kube-config-dsaas-stg-v4"
+    secret-path: 'app-sre/creds/kube-configs/app-sre-prod-03'
+    secret-values:
+      - env-var: 'KUBE_SERVER'
+        vault-key: 'server'
+      - env-var: 'KUBE_TOKEN'
+        vault-key: 'token'
 
 - kube-config-dsaas-stg: &kube-config-dsaas-stg
     name: "kube-config-dsaas-stg"
@@ -347,6 +369,13 @@
     secret-values:
       - env-var: 'CHE_BOT_GITHUB_TOKEN'
         vault-key: 'che-bot-github-token'
+
+- crw-bots-pull-secret: &crw-bots-pull-secret
+    name: "crw-bots-pull-secret"
+    secret-path: "devtools-osio-ci/crw-bots-pull-secret"
+    secret-values:
+      - env-var: 'CRW_BOTS_PULL_SECRETS'
+        vault-key: 'crw-bots-pull-secret'
 
 - che-bot-npm-auth-token: &che-bot-npm-auth-token
     name: "che-bot-npm-auth-token"
@@ -2084,6 +2113,17 @@
       - env-var: 'QUAY_SECRET_JSON'
         vault-key: 'secret'
 
+- rh-che-automation-credentials-pre-release: &rh-che-automation-credentials-pre-release
+    name: "rh-che-automation-credentials-pre-release"
+    secret-path: "devtools-osio-ci/rh-che-automation-credentials-pre-release"
+    secret-values:
+        - env-var: 'USERNAME'
+          vault-key: 'username'
+        - env-var: 'PASSWORD'
+          vault-key: 'password'
+        - env-var: 'EMAIL'
+          vault-key: 'email'
+
 - rh-che-automation-template: &rh-che-automation-template
     name: 'rh-che-automation-template'
     concurrent: false
@@ -2144,6 +2184,38 @@
             <<: *github_pull_request_defaults
     <<: *rh-che-automation-template
 
+- job-template:
+    name: '{ci_project}-rh-che-pre-release-test'
+    triggers:
+        - github
+        - github-pull-request:
+            success-comment: "Large test suite passed.\n
+            console: https://ci.centos.org/view/Devtools/job/devtools-rh-che-pre-release-test/$BUILD_NUMBER/console "
+            failure-comment: "Large test suite failed.\n
+            | Link | URL |\n
+            | ---- | :-: |\n
+            | console | https://ci.centos.org/view/Devtools/job/devtools-rh-che-pre-release-test/$BUILD_NUMBER/console |\n
+            | artifacts | http://artifacts.ci.centos.org/devtools/rhche/devtools-rh-che-pre-release-test/$BUILD_NUMBER/ |"
+            error-comment: "Large test suite failed.\n
+            | Link | URL |\n
+            | ---- | :-: |\n
+            | console | https://ci.centos.org/view/Devtools/job/devtools-rh-che-pre-release-test/$BUILD_NUMBER/console |\n
+            | artifacts | http://artifacts.ci.centos.org/devtools/rhche/devtools-rh-che-pre-release-test/$BUILD_NUMBER/ |"
+            trigger-phrase: '.*\[pre-release-tests\].*'
+            <<: *admin_list_defaults
+            cron: '* * * * *'
+            github-hooks: false
+            permit-all: false
+            allow-whitelist-orgs-as-admins: true
+            status-context: "ci.centos.org pre-release-tests"
+            only-trigger-phrase: true
+    wrappers:
+        - vault-secrets:
+            <<: *vault_defaults
+            secrets:
+                - *rh-che-automation-credentials-pre-release
+    <<: *rh-che-automation-template
+    
 - job-template:
     disabled: '{obj:disabled}'
     name: '{ci_project}-{git_repo}-rh-che-compatibility-test-{test_url}'
@@ -2415,6 +2487,43 @@
         <<: *vault_defaults
         secrets:
             - *che-bot-github-credentials
+            - *crw-bots-pull-secret
+    <<: *job_template_defaults
+
+- job-template:
+    name: '{ci_project}-{git_repo}-pr-check-happy-path'
+    defaults: global
+    triggers:
+        - che_githubprb:
+            trigger_phrase: '{trigger_phrase}'
+            job_type: 'e2e - Happy path'
+            che-success-message: 'Happy path tests passed.'
+            che-failure-message: 'Happy path tests failed. Re-trigger by `[ci-test]` or `[ci-test-happy-path]`'
+            che-error-message: 'Happy path tests failed. Re-trigger by `[ci-test]` or `[ci-test-happy-path]`'
+    wrappers:
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+            - *che-bot-github-credentials
+            - *quay-eclipse-che-credentials
+    <<: *job_template_defaults
+
+- job-template:
+    name: '{ci_project}-{git_repo}-pr-check-che-test-devfiles'
+    defaults: global
+    triggers:
+        - che_githubprb:
+            trigger_phrase: '{trigger_phrase}'
+            job_type: 'e2e - devfiles tests'
+            che-success-message: 'Devfiles tests passed.'
+            che-failure-message: 'Devfiles tests failed. Re-trigger by `[ci-test-devfiles]`'
+            che-error-message: 'Devfiles tests failed. Re-trigger by `[ci-test-devfiles]`'
+    wrappers:
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+            - *che-bot-github-credentials
+            - *quay-eclipse-che-credentials
     <<: *job_template_defaults
 
 - job-template:
@@ -2435,7 +2544,40 @@
     <<: *job_template_defaults
 
 - job-template:
-    name: '{ci_project}-{git_repo}-pr-check-chectl'
+    name: '{ci_project}-{git_repo}-code-pr-check'
+    defaults: global
+    triggers:
+        - che_githubprb:
+            trigger_phrase: '{trigger_phrase}'
+            job_type: '{job_type}'
+            che-success-message: '{che-success-message}'
+            che-failure-message: '{che-failure-message}'
+            che-error-message: '{che-error-message}'
+    wrappers:
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+            - *che-bot-github-credentials
+    <<: *job_template_defaults
+
+- job-template:
+    name: '{ci_project}-{git_repo}-minikube-check'
+    defaults: global
+    triggers:
+        - che_githubprb:
+            trigger_phrase: '{trigger_phrase}'
+            job_type: '{job_type}'
+            che-success-message: '{che-success-message}'
+            che-failure-message: '{che-failure-message}'
+            che-error-message: '{che-error-message}'
+    wrappers:
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+            - *che-bot-github-credentials
+    <<: *job_template_defaults
+- job-template:
+    name: '{ci_project}-{git_repo}-minishift-check'
     defaults: global
     triggers:
         - che_githubprb:
@@ -2458,9 +2600,11 @@
       - vault-secrets:
           <<: *vault_defaults
           secrets:
+            - *kube-config-dsaas-stg
             - *quay-credentials
             - *quay-eclipse-che-credentials
             - *quay-che-incubator-credentials
+            - *registry-devshift-credentials
     publishers:
         - email:
             recipients: ibuziuk@redhat.com mloriedo@redhat.com amisevsk@redhat.com vparfono@redhat.com
@@ -2560,7 +2704,7 @@
       - vault-secrets:
           <<: *vault_defaults
           secrets:
-            - *kube-config-dsaas-stg
+            - *kube-config-dsaas-stg-v4
             - *quay-credentials
             - *registry-devshift-credentials
       - fabric8_launcher_credentials_wrapper
@@ -2625,6 +2769,149 @@
             rtn_code=$?
             cico node done $CICO_ssid
             exit $rtn_code
+    <<: *job_template_defaults
+
+- job-template:
+    name: '{ci_project}-{git_repo}-promote-to-prod-v4'
+    image_pattern: ''
+    defaults: global
+    node: devtools
+    disabled: '{obj:disabled}'
+    properties:
+        - github:
+            url: https://github.com/openshiftio/{git_repo}/
+    scm:
+        - git:
+            url: https://github.com/openshiftio/{git_repo}.git
+            shallow_clone: true
+            branches:
+                - master
+    triggers:
+        - github
+    wrappers:
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+          - *kube-config-dsaas-v4
+    builders:
+        - shell: |
+            # testing out the cico client
+            set +e
+
+            export CICO_API_KEY=$(cat ~/duffy.key )
+
+            # get node
+            n=1
+            while true
+            do
+                cico_output=$(cico node get -f value -c ip_address -c comment)
+                if [ $? -eq 0 ]; then
+                    read CICO_hostname CICO_ssid <<< $cico_output
+                    if  [ ! -z "$CICO_hostname" ]; then
+                        # we got hostname from cico
+                        break
+                    fi
+                    echo "'cico node get' succeed, but can't get hostname from output"
+                fi
+                if [ $n -gt 15 ]; then
+                    # give up after 15 tries
+                    echo "giving up on 'cico node get'"
+                    exit 1
+                fi
+                echo "'cico node get' failed, trying again in 60s ($n/15)"
+                n=$[$n+1]
+                sleep 60
+            done
+
+            sshopts="-t -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -l root"
+            ssh_cmd="ssh $sshopts $CICO_hostname"
+
+            if [ -n "${{ghprbTargetBranch}}" ]; then
+                git rebase --preserve-merges origin/${{ghprbTargetBranch}}
+                rtn_code=$?
+                if [ $rtn_code -ne 0 ]; then
+                    echo "The branch can not be rebased onto origin/${{ghprbTargetBranch}}."
+                    exit $rtn_code
+                fi
+            else
+                echo "Not a PR build, using master"
+            fi
+
+
+            $ssh_cmd -t "yum install -y docker && systemctl start docker"
+
+            ENVIRONMENT=production PATH=$PATH:~/.local/bin DRY_RUN=true /bin/bash ~/saasherder/fetch_and_apply.sh
+            CONTEXTS=$(PATH=$PATH:~/.local/bin saasherder config get-contexts)
+            for c in `echo $CONTEXTS`; do
+                DIR=$(readlink -f $c-20* | tail -1)
+                for f in `ls $DIR`; do
+                    python ~/saasherder/check_image.py $DIR/$f '{image_pattern}'
+                    cat $DIR/$f | $ssh_cmd docker run --rm -i quay.io/app-sre/manifest-bouncer:{manifest_bouncer_tag} --warn-only -
+                done
+            done
+
+            cico node done $CICO_ssid
+
+            set -ex
+            ENVIRONMENT=production PATH=$PATH:~/.local/bin /bin/bash ~/saasherder/fetch_and_apply.sh
+
+- job-template:
+    name: '{ci_project}-{git_repo}-promote-to-prod-test-v4'
+    image_pattern: ''
+    wrappers:
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+          - *kube-config-dsaas-v4
+    builders:
+        - shell: |
+            # testing out the cico client
+            set +e
+
+            export CICO_API_KEY=$(cat ~/duffy.key )
+
+            # get node
+            n=1
+            while true
+            do
+                cico_output=$(cico node get -f value -c ip_address -c comment)
+                if [ $? -eq 0 ]; then
+                    read CICO_hostname CICO_ssid <<< $cico_output
+                    if  [ ! -z "$CICO_hostname" ]; then
+                        # we got hostname from cico
+                        break
+                    fi
+                    echo "'cico node get' succeed, but can't get hostname from output"
+                fi
+                if [ $n -gt 15 ]; then
+                    # give up after 15 tries
+                    echo "giving up on 'cico node get'"
+                    exit 1
+                fi
+                echo "'cico node get' failed, trying again in 60s ($n/15)"
+                n=$[$n+1]
+                sleep 60
+            done
+
+            sshopts="-t -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -l root"
+            ssh_cmd="ssh $sshopts $CICO_hostname"
+
+            set -ex
+
+            $ssh_cmd -t "yum install -y docker && systemctl start docker"
+
+            ENVIRONMENT=production PATH=$PATH:~/.local/bin DRY_RUN=true /bin/bash ~/saasherder/fetch_and_apply.sh
+            CONTEXTS=$(PATH=$PATH:~/.local/bin saasherder config get-contexts)
+            for c in `echo $CONTEXTS`; do
+                DIR=$(readlink -f $c-20* | tail -1)
+                for f in `ls $DIR`; do
+                    python ~/saasherder/check_image.py $DIR/$f '{image_pattern}'
+                    cat $DIR/$f | $ssh_cmd docker run --rm -i quay.io/app-sre/manifest-bouncer:{manifest_bouncer_tag} --warn-only -
+                done
+            done
+
+            cico node done $CICO_ssid
+
     <<: *job_template_defaults
 
 - job-template:
@@ -3380,6 +3667,12 @@
             ci_project: 'devtools'
             ci_cmd: '/bin/bash ./.ci/cico_cleanup_dev_cluster.sh'
             timeout: '15m'
+        - '{ci_project}-rh-che-pre-release-test':
+            git_organization: redhat-developer
+            git_repo: rh-che
+            ci_project: 'devtools'
+            ci_cmd: 'TARGET="rhel" /bin/bash ./.ci/cico_pre_release_tests.sh'
+            timeout: '75m'
         - '{ci_project}-{git_repo}-rollout-test-{test_url}':
             git_organization: redhat-developer
             git_repo: rh-che
@@ -3498,6 +3791,18 @@
             git_repo: kubernetes-image-puller
             ci_project: 'devtools'
             ci_cmd: '/bin/bash cico_build_ci.sh'
+            timeout: 15m
+        - '{ci_project}-{git_organization}-{git_repo}-build-master':
+            git_organization: che-incubator
+            git_repo: kubernetes-image-puller-operator
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash cico_build_ci.sh'
+            timeout: 15m
+        - '{ci_project}-{git_repo}-nightly':
+            git_organization: che-incubator
+            git_repo: kubernetes-image-puller-operator
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash cico_build_nightly.sh'
             timeout: 15m
         - '{ci_project}-{git_repo}-nightly':
             git_organization: che-incubator
@@ -3618,6 +3923,8 @@
             git_repo: launcher-documentation
             ci_project: 'devtools'
             ci_cmd: '/bin/bash cico_build_test.sh'
+            saas_git: saas-launchpad
+            prj_name: launchpad-preview
             timeout: '20m'
         - '{ci_project}-{git_repo}':
             git_organization: fabric8-ui
@@ -3631,9 +3938,11 @@
         - '{ci_project}-{git_repo}-promote-to-prod':
             git_repo: saas-analytics
             ci_project: 'devtools'
-        - '{ci_project}-{git_repo}-promote-to-prod':
+        - '{ci_project}-{git_repo}-promote-to-prod-v4':
             git_repo: saas-launchpad
             ci_project: 'devtools'
+            saas_git: saas-launchpad
+            prj_name: launchpad-production
         - '{ci_project}-{git_repo}-promote-to-prod':
             git_repo: saas-hdd
             ci_project: 'devtools'
@@ -3655,10 +3964,12 @@
             git_organization: openshiftio
             ci_project: 'devtools'
             image_pattern: '^quay\.io/openshiftio/(rhel-|osa-)'
-        - '{ci_project}-{git_repo}-promote-to-prod-test':
+        - '{ci_project}-{git_repo}-promote-to-prod-test-v4':
             git_repo: saas-launchpad
             git_organization: openshiftio
             ci_project: 'devtools'
+            saas_git: saas-launchpad
+            prj_name: launchpad-production
         - '{ci_project}-{git_repo}-promote-to-prod-test':
             git_repo: saas-hdd
             git_organization: openshiftio
@@ -4387,12 +4698,6 @@
             f8a_api_url: "https://recommender.api.openshift.io"
             ci_project: 'devtools'
             timeout: '30m'
-        - '{ci_project}-{git_repo}':
-            git_organization: rhdt
-            git_repo: error-tracking
-            ci_project: 'devtools'
-            ci_cmd: '/bin/bash cico_build_test.sh'
-            timeout: '10m'
         - '{ci_project}-{git_repo}-fabric8-analytics':
             git_organization: fabric8-analytics
             git_repo: fabric8-analytics-api-gateway
@@ -4590,6 +4895,12 @@
             ci_project: 'devtools'
             ci_cmd: '/bin/bash .ci/cico_build_nightly.sh'
             timeout: '2h'
+        - '{ci_project}-{git_repo}-che-release':
+            git_organization: eclipse
+            git_repo: che-release
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash cico_release.sh'
+            timeout: '2h'
         - '{ci_project}-{git_repo}-che-release-candidate':
             git_organization: eclipse
             git_repo: che
@@ -4750,8 +5061,18 @@
             git_repo: che-devfile-registry
             ci_project: 'devtools'
             ci_cmd: '/bin/bash cico_build_release.sh'
-            timeout: '30m'
+            saas_git: saas-openshiftio
+            branch: release
+            build_branch: release
             extra_target: rhel
+            timeout: '30m'
+        - '{ci_project}-{git_repo}-pr-check-che-test-devfiles':
+            git_organization: eclipse
+            git_repo: che-devfile-registry
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash .ci/cico-devfile-pr-test.sh'
+            timeout: '2h'
+            trigger_phrase: '.*\[ci-test-devfiles\].*'
         - '{ci_project}-{git_repo}-release-preview':
             git_organization: eclipse
             git_repo: che-devfile-registry
@@ -4793,21 +5114,35 @@
             ci_project: 'devtools'
             ci_cmd: '/bin/bash .ci/cico_operator_prcheck.sh'
             timeout: '1h'
-            job_type: "e2e tests"
+            job_type: "E2E tests using minishift platform"
         - '{ci_project}-{git_repo}-olm-pr-check':
             git_organization: eclipse
             git_repo: che-operator
             ci_project: 'devtools'
             ci_cmd: '/bin/bash .ci/cico_olm_prcheck.sh'
             timeout: '2h'
-            job_type: "olm tests"
-        - '{ci_project}-{git_repo}-pr-check-chectl':
+            job_type: "Testing nightly olm files using kubernetes platform(minikube) and minishift"
+        - '{ci_project}-{git_repo}-code-pr-check':
+            git_organization: eclipse
+            git_repo: che-operator
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash .ci/operator_code_check.sh'
+            timeout: '1h'
+            job_type: "Check che-operator generated code and nightly files"
+        - '{ci_project}-{git_repo}-minikube-check':
             git_organization: che-incubator
             git_repo: chectl
             ci_project: 'devtools'
-            ci_cmd: '/bin/bash .ci/cico_chectl_prcheck.sh'
+            ci_cmd: '/bin/bash .ci/cico_chectl_minikube.sh'
             timeout: '2h'
-            job_type: "e2e_tests"
+            job_type: "E2E tests on minikube platform"
+        - '{ci_project}-{git_repo}-minishift-check':
+            git_organization: che-incubator
+            git_repo: chectl
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash .ci/cico_chectl_minishift.sh'
+            timeout: '2h'
+            job_type: "E2E tests on minishift platform"
         - '{ci_project}-{git_repo}-pr-check':
             git_organization: eclipse
             git_repo: che-plugin-registry
@@ -4816,6 +5151,13 @@
             timeout: '1h'
             trigger_phrase: '.*\[ci-test\].*'
             job_type: "language plugin tests"
+        - '{ci_project}-{git_repo}-pr-check-happy-path':
+            git_organization: eclipse
+            git_repo: che-plugin-registry
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash .ci/cico-happy-path-pr-test.sh'
+            timeout: '2h'
+            trigger_phrase: '.*\[ci-test\].*|.*\[ci-test-happy-path\].*'
         - '{ci_project}-{git_repo}-che-nightly':
             git_organization: eclipse
             git_repo: che-theia

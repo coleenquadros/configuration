@@ -1,0 +1,49 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: unleash
+description: namespace for unleash
+
+cluster:
+  $ref: /openshift/hive-integration/cluster.yml
+
+app:
+  $ref: /services/unleash/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/integration.yml
+
+openshiftAcme:
+  config:
+    $ref: /dependencies/openshift/acme/default.yml
+  accountSecret:
+    provider: vault-secret
+    path: app-sre/unleash/acme-account
+    version: 1
+
+managedRoles: true
+
+managedResourceTypes:
+- Route
+- Secret
+
+openshiftResources:
+- provider: vault-secret
+  path: app-sre/unleash/ocm-integration-config
+  version: 1
+- provider: vault-secret
+  path: app-sre/unleash/ocm-integration-unleash-token
+  version: 1
+- provider: route
+  path: /hive-integration/unleash/ocm.route.yaml
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: app-sre
+  identifier: ocm-integration-unleash
+  defaults: /terraform/resources/unleash/rds-2.yml
+  output_resource_name: ocm-integration-unleash-rds

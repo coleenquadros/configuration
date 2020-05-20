@@ -13,15 +13,34 @@ cluster:
 app:
   $ref: /services/insights/compliance/app.yml
 
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stage-01.yml
+- $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+
 managedRoles: true
 
 managedResourceTypes:
+- ServiceAccount
 - Secret
 
 openshiftResources:
 - provider: vault-secret
-  path: insights/secrets/insights-stage/compliance-stage/compliance-backend
+  path: insights/secrets/global/rh-registry-pull
   version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
+  path: insights/secrets/insights-stage/compliance-stage/compliance-backend
+  version: 3
 
 managedTerraformResources: true
 
@@ -29,5 +48,12 @@ terraformResources:
 - provider: rds
   account: insights-stage
   identifier: compliance-stage
-  defaults: /terraform/resources/insights/stage/rds-1.yml
+  defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
+  parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-compliance-stage.yml
   output_resource_name: compliance-db
+  enhanced_monitoring: true
+- provider: cloudwatch
+  account: insights-stage
+  identifier: compliance-stage
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch

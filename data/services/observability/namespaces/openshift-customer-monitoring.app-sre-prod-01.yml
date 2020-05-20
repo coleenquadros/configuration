@@ -12,6 +12,9 @@ cluster:
 app:
   $ref: /services/observability/app.yml
 
+environment:
+  $ref: /products/app-sre/environments/production.yml
+
 managedResourceTypes:
 - Secret
 - Service
@@ -112,6 +115,9 @@ openshiftResources:
 ### Federated Kubernetes metrics
 - provider: resource
   path: /observability/prometheusrules/kube-metrics.prometheusrules.yaml
+### Prometheus mixin alerts
+- provider: resource
+  path: /observability/prometheusrules/prometheus-mixin.prometheusrules.yaml
 ### Vault
 - provider: resource
   path: /observability/prometheusrules/vault-production.prometheusrules.yaml
@@ -226,6 +232,13 @@ openshiftResources:
 ### App-SRE Prometheus
 - provider: resource
   path: /observability/servicemonitors/prometheus-app-sre.servicemonitor.yaml
+### App-SRE contract
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/app-interface.servicemonitor.yaml
+  variables:
+    environment: production
+    namespace: app-interface-production
 ### UHC
 #### UHC- Clusters Service
 - provider: resource-template
@@ -260,7 +273,7 @@ openshiftResources:
   type: jinja2
   path: /observability/prometheus/v4/ams.prometheus.yaml
   variables:
-    remoteWriteUrl: https://remote-write-proxy-telemeter-production.1061.app-sre.openshiftapps.com/api/v1/receive
+    remoteWriteUrl: https://remote-write-proxy-telemeter-production.apps.app-sre-prod-02.l6v9.p1.openshiftapps.com/api/v1/receive
 - provider: resource-template
   type: jinja2
   path: /observability/servicemonitors/ams-subscription-labels.servicemonitor.yaml

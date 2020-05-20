@@ -13,6 +13,14 @@ cluster:
 app:
   $ref: /services/quayio/app.yml
 
+environment:
+  $ref: /products/quay/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.quayio-stage.yml
+- $ref: /services/quayio/namespaces/apostille-stage.yml
+- $ref: /services/quayio/namespaces/clair-stage.yaml
+
 managedRoles: true
 
 managedResourceTypes:
@@ -28,22 +36,17 @@ openshiftResources:
 # RW mode
 - provider: vault-secret
   path: app-interface/quayio-stage/quayio-stage/quay-config-secret
-  version: 27
+  version: 32
   labels:
-    version: v27
-# RO mode & read replica
-#- provider: vault-secret
-#  path: app-interface/quayio-stage/quayio-stage/quay-config-secret-ro
-#  version: 3
-#  labels:
-#    version: v3
-#  name: quay-config-secret
+    version: v32
+  annotations:
+    qontract.recycle: "true"
 - provider: vault-secret
   path: app-interface/quayio-stage/quayio-stage/quay-cloudwatch-iam-user
   version: 1
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /quayio-stage/quay/quay.app-config.secret.yaml
+# - provider: resource-template
+#   type: extracurlyjinja2
+#   path: /quayio-stage/quay/quay.app-config.secret.yaml
 
 terraformResources:
 - provider: rds
@@ -55,6 +58,7 @@ terraformResources:
   identifier: quayio-stage-replica
   availability_zone: us-east-2b
   defaults: /terraform/resources/quayio-stage/rds-read-replica-us-east-2.yml
+  replica_source: quayio-stage
 - provider: elasticache
   account: quayio-stage
   identifier: quayio-stage
@@ -87,3 +91,9 @@ terraformResources:
   storage_class: onezone_ia
   defaults: /terraform/resources/quayio-stage/s3-cloudfront-us-east-2.yml
   output_resource_name: quayio-s3-backup
+- provider: kms
+  account: quayio-stage
+  identifier: quayio-stage-replica
+  region: us-east-2
+  defaults: /terraform/resources/quayio-stage/kms-1.yml
+  output_resource_name: quayio-kms

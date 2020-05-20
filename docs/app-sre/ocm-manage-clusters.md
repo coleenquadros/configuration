@@ -3,7 +3,7 @@
 OSDv4 clusters are managed via OCM.
 
 - Production: https://cloud.redhat.com/openshift
-- Staging: https://cloud.redhat.com/beta/openshift
+- Staging: https://qaprodauth.cloud.redhat.com/openshift
 
 ## Creating an Account
 

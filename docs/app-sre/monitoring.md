@@ -121,9 +121,9 @@ It is thus important to clarify the various Prometheus instances we have:
 
 The RDU cluster has a Prometheus instance on one of the nodes. It can be accessed through http://prometheus.devshift.net:9090
 
-The configuration of this instance is done via ansible. The configuration lives in the housekeeping repo at: [link](https://gitlab.cee.redhat.com/dtsd/housekeeping/tree/master/ansible)
+The configuration of this instance is done via ansible. The configuration lives in the infra repo at: [link](https://gitlab.cee.redhat.com/app-sre/infra)
 
-The nodes being monitored all have node-exporter installed as part of the baseline playbook [link](https://gitlab.cee.redhat.com/dtsd/housekeeping/blob/master/ansible/playbooks/node-all-baseline.yml)
+The nodes being monitored all have node-exporter installed as part of the baseline playbook [link](https://gitlab.cee.redhat.com/app-sre/infra/blob/master/ansible/playbooks/node-all-baseline.yml)
 
 Other than the node exporter, any applications running on top of the nodes may provide application metrics endpoints through native instrumentation or plugins, and can be added to the Prometheus.
 
@@ -133,11 +133,11 @@ This instance gathers the following metrics:
 
 #### <a name='CentralCI'></a> CentralCI
 
-The BLR lab has a Prometheus instance on a virtual machine on top of the RHV setup. It can be accessed through http://10.70.49.219:9090
+The CentralCI prometheus can be found at: http://prometheus.centralci.devshift.net:9090/graph
 
-The configuration of this instance is done via ansible. The configuration lives in the housekeeping repo at: [link](https://gitlab.cee.redhat.com/dtsd/housekeeping/tree/master/ansible)
+The configuration of this instance is done via ansible. The configuration lives in the infra repo at: [link](https://gitlab.cee.redhat.com/app-sre/infra)
 
-The nodes being monitored all have node-exporter installed as part of the baseline playbook [link](https://gitlab.cee.redhat.com/dtsd/housekeeping/blob/master/ansible/playbooks/node-all-baseline.yml)
+The nodes being monitored all have node-exporter installed as part of the baseline playbook [link](https://gitlab.cee.redhat.com/app-sre/infra/blob/master/ansible/playbooks/node-all-baseline.yml)
 
 Other than the node exporter, any applications running on top of the nodes may provide application metrics endpoints through native instrumentation or plugins, and can be added to the Prometheus.
 
@@ -159,17 +159,13 @@ The cluster prometheus also have predefined alerting rules for cluster failures,
 
 #### <a name='App-SREprometheus'></a>App-SRE prometheus
 
-OpenShift v3: 
-
-The app-sre prometheus currently runs in the app-sre-observability-production namespace on the app-sre cluster. This is our primary prometheus instance for gathering application metrics and alerting them within the cluster.
+Please see the [openshift-customer-monitoring](https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/osdv4-openshift-customer-monitoring.md) documentation for details on how the monitoring stack is deployed on OSD v4.
 
 Overall, the Prometheus deployment on the app-sre cluster monitors the following:
 
 - Application metrics
 - External endpoints via Blackbox exporter
 - Cloudwatch metrics via cloudwatch exporter
-
-> Note: Please see the [openshift-customer-monitoring](https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/osdv4-openshift-customer-monitoring.md) documentation for details on how the monitoring stack is deployed on OSD v4.
 
 #### <a name='Addinganapplicationtomonitoring'></a>Adding an application to monitoring
 
@@ -199,11 +195,13 @@ Also remember to point to any basic auth creds or a machine token if your applic
 
 #### <a name='Configuringalertmanager'></a>Configuring alertmanager
 
-We have a central alertmanager cluster on the app-sre cluster. This is deployed via the prometheus-operator and has 3 replicas. Each of the replicas in the statefulset has a PVC where the pods store silences.
+Every app-sre managed cluster has an alertmanager alongside the prometheus. This is deployed via the prometheus-operator and has 3 replicas. Each of the replicas in the statefulset has a PVC where the pods store silences.
 
 The configuration for alertmanager has credentials/sensitive information, so it is currently stored in vault and can be changed only by app-sre team members. If you'd like to request a change, please do so via creating a task on the App-SRE jira board and ping the #sd-app-sre channel.
 
-All of the prometheus instances are expected to fire their alerts against this central alertmanager via the route: https://alertmanager.app-sre.devshift.net
+All of the prometheus instances are expected to fire their alerts against their local alertmanager via the route: https://alertmanager.<clustername>.devshift.net
+
+The prometheus additional alertmanager configuration is already set up to do this.
 
 The configuration uses a central alertmanager so that we can provide alerts deduplication, have the routing tree configuration in a central place, and avoid having to manage the escalation procedures in multiple alertmanager instances across each of our clusters.
 
@@ -256,7 +254,7 @@ spec:
       annotations:
         message: "A message that this alert shows in Slack/email. Supports templating: {{ $labels.namespace }}"
         # Link to the standard operating procedure for the component
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
+        runbook: "https://gitlab.cee.redhat.com/observatorium/configuration/tree/master/docs/sop"
         # Link to the component's dashboard, pre-selecting the variables is preferred, for example:
         dashboard: "https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-prometheus&var-cluster=app-sre&var-namespace=telemeter-production"
       expr: |
@@ -284,7 +282,7 @@ All alerts that are newly added should start from the bottom of the chain i.e. `
 
 This allows us to see the behaviour of alert in practice, and build confidence around the thresholds set for the alert. This also lets us make sure that the templating for the alerts is correct, and someone receiving the alert is able to act on it.
 
-One mandate for the alerts being promoted to a severity that involves the App-SRE team is adding a standard operating procedure for each alert. An example can be seen here: https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop#sop-openshift-telemeter
+One mandate for the alerts being promoted to a severity that involves the App-SRE team is adding a standard operating procedure for each alert. An example can be seen here: https://gitlab.cee.redhat.com/observatorium/configuration/tree/master/docs/sop#sop-openshift-telemeter
 
 - `critical` alerts go to App-SRE's Pagerduty. Note that this MUST meet the conditions stated above, and should relate to a degraded customer experience that's imminent already ongoing. Please reach out to the App-SRE team before you set an alert with this Severity.
 - `high` alerts go to your team's slack channel, and also to App-SRE team's slack. These are alerts where either of the teams will take action according to the SOP, but the other team also needs to be in the loop for escalations
@@ -372,12 +370,34 @@ Next, apply the secret and redeploy grafana.
 
 Currently added datasources:
 
-- Cloudwatch AWS app-sre
-- App-sre prometheus
-- App-sre cluster prometheus
-- Cluster-prometheus for dsaas, dsaas-stg, app-sre
-- Graphite on dsaas
+* `app-sre-stage-01-prometheus`: app-sre managed prometheus for `app-sre-stage-01` cluster
+* `app-sre-stage-01-cluster-prometheus`: cluster prometheus for `app-sre-stage-01` cluster
+* `app-sre-prod-01-prometheus`: app-sre managed prometheus for `app-sre-prod-01` cluster
+* `app-sre-prod-01-cluster-prometheus`: cluster prometehus for `app-sre-prod-01` cluster
+* `app-sre-prod-02-prometheus`: app-sre managed prometheus for `app-sre-prod-02` cluster
+* `app-sre-prod-02-cluster-prometheus`: cluster prometheus for `app-sre-prod-02` cluster
+* `quayio-prod-us-east-1-prometheus`: app-sre managed prometheus for `quayio-prod-us-east-1` cluster
+* `quayio-prod-us-east-2-prometheus`: app-sre managed prometheus for `quayio-prod-us-east-2` cluster
+* `quayio-stage-prometheus`: app-sre managed prometheus for `quayio-stage` cluster
+* `che-dev-cluster-prometheus`: cluster prometheus for `che-dev-cluster` cluster
+* `dsaas-cluster-prometheus`: cluster prometheus for `dsaas` cluster
+* `dsaas-stg-cluster-prometheus`: cluster prometheus for `dsaas-stg` cluster
+* `dsaas-stg-rhche-prometheus`: rhche prometheus for `dsaas-stg` cluster
+* `dsaas-rhche-prometheus`: rhche prometheus for `dsaas` cluster
+* `AWS app-sre`: cloudwatch AWS appsre
+* `dsaas-graphite`: graphite on `dsaas` cluster
+* `dsaas-bayesian-stage-graphite`: bayesian graphite on `dsaas-stg` cluster
+* `dsaas-bayesian-production-graphite`: bayesian graphite on `dsaas` cluster
+* `starter-us-east-2-cluster-prometheus`: cluster prometheus on `starter-us-east-2-cluster` cluster
+* `starter-us-east-2a-cluster-prometheus`: cluster prometheus on `starter-us-east-2a-cluster` cluster
+* `starter-us-east-1a-cluster-prometheus`: cluster prometheus on `starter-us-east-1a-cluster` cluster
+* `starter-us-east-1b-cluster-prometheus`: cluster prometheus on `starter-us-east-1b-cluster` cluster
+* `elasticsearch-monitoring`: `.monitoring-es*` database on AWS elasitcsearch
+* `elasticsearch-logstash`: `.monitoring-logstash*` database on AWS elasitcsearch
 
+For those clusters that have a `-prometheus` and `-cluster-prometheus` datasources, app-sre managed services will keep its data on the `-prometheus` ones as the other is managed by OSD and used for cluster internal metrics.
+
+In case of doubt, the [grafana datasources file](/resources/observability/grafana/grafana-datasources.secret.yaml) is the source of truth and the place to get all the details on every datasource.
 
 #### <a name='Addingdashboards'></a>Adding dashboards
 
@@ -389,9 +409,12 @@ All panels MUST query to this variable ($datasource). You can set this by editin
 For example: Creating a variable called `datasource` has the following steps.
 
 In Dashboard Settings -> Variables -> New:
-Name: datasource
-Type: Datasource
-Datasource Options.type: `Prometheus`
+* Name: datasource
+* Type: Datasource
+* Datasource Options.type: `Prometheus`
+* Datasource Options.instanceNameFilter: `/a regexp limiting the datasources available for your dashboard/`
+
+> NOTE: It is **very** important that you filter the datasources relevant to your dashboard as the users of it won't usually know which are the prometheis that will have your dashboard data. Showing all the prometheus datasources available is usually wrong and will only make for a poor user experience.
 
 Click Add.
 
@@ -447,58 +470,7 @@ References:
 
 #### <a name='App-InterfacePerformanceParametersSchema:'></a>App-Interface Performance Parameters Schema: 
 
-The App-SRE team has created a schema that allows service owners to define their application's SLX in app-interface. 
-
-The schema is available for reference here: https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/app-sre/performance-parameters-1.yml
-
-An example Performance Parameters file for one of our services can be found here: https://gitlab.cee.redhat.com/service/app-interface/blob/bd4b561a5739af376ff91176aefab4d57282c59d/data/services/telemeter/performance-parameters/telemeter-server.yaml
-
-Diving deeper into the file, we support specifying SLX rules in 4 configurations.
-
-The availability and latency parameters, if specified, will generate the required recording rules according to known SRE best practices. 
-
-The service owners only need to define the metric name and the thresholds
-
-```
-availability: 
-- kind: SLO
-  metric: http_requests_total # Metric of type counter, should have a `code` label to partition return code values
-  errorBudget: x # to get an availability target of (100-x)%
-
-latency:
-- kind: SLO
-  metric: latency_bucket
-  threshold: 3
-  percentile: 90
-```
-
-In case the availability and latency SLO's are not sufficient for your application, you may define raw recording and alerting rules in the Prometheus format.
-```
-rawRecording:
-- record: component:slo_availability:ratio_rate_5m
-  expr: sum(rate(something{selector="value"}[5m]))
-  labels:
-    # inferred: component: prometheus
-    # inferred: namespace
-    service: telemeter
-
-rawAlerting:
-- alert: PrometheusErrorBudgetBurn
-  expr: something > 0
-  for: 2m
-  labels:
-    severity: test
-  annotations:
-    message: "Component {{$labels.component}} has returned {{ $value | printf `%.2f` }}% 5xx over the last hour."
-    runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/sop"
-    dashboard: "https://grafana.app-sre.devshift.net/"
-```
-
-To make sure we are consistent across the stack for our alerts, we enforce a few fields like the annotations in alerting rules. 
-
-Once you have specified your SLX rules in the Performance Parameters schema format and the PR gets merged into app-interface, our integrations will make sure that the rules are added to prometheus and we start recording SLX metrics. 
-
-The story around how we can consume these to create a report is still WIP. 
+The App-SRE team has created a schema that allows service owners to define their application's SLX in app-interface.  See this [doc](/docs/app-sre/sli-recording-rules-via-performance-parameters.md) for further information.
 
 # Getting started
 
@@ -598,6 +570,3 @@ Once this is in place, a ServiceMonitor can pick-up the endpoint and start scrap
 >
 >https://docs.google.com/spreadsheets/d/1lWXWwl27VO8FIQz5eySk2CwGp47J7Psw8cwomFv9Pe0/edit#gid=0
 
-The longer term plan is to move everything over to the prometheus-based stack.
-
-### <a name='Whichoneisrightforyou'></a>Which one is right for you

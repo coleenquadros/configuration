@@ -1,0 +1,94 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: host-inventory
+  platform: insights
+
+name: host-inventory
+description: host-inventory app on the Insights Platform
+
+app:
+  $ref: /services/insights/host-inventory/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  INVENTORY_DB_SSL_MODE: verify-full
+  LOG_GROUP: platform
+
+resourceTemplates:
+- name: insights-inventory-reaper
+  path: /templates/inventory/insights-inventory-reaper.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  parameters:
+    REAPER_SUSPEND: 'false'
+  targets:
+  - namespace:
+      $ref: /services/insights/host-inventory/namespaces/stage-host-inventory-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: d74a444
+- name: insights-host-delete
+  path: /templates/inventory/insights-host-delete.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  parameters:
+    REPLICAS: 1
+  targets:
+  - namespace:
+      $ref: /services/insights/host-inventory/namespaces/stage-host-inventory-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 44fe11d
+- name: insights-inventory-mq-service
+  path: /templates/inventory/insights-inventory-mq-service.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  parameters:
+    REPLICAS: 3
+    REPLICAS_P1: 5
+  targets:
+  - namespace:
+      $ref: /services/insights/host-inventory/namespaces/stage-host-inventory-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: d74a444
+- name: insights-inventory
+  path: /templates/inventory/insights-inventory.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  parameters:
+    AUTO_UPDATE: 'true'
+    BULK_QUERY_SOURCE: db
+    BULK_QUERY_SOURCE_BETA: db
+    CPU_LIMIT: 1
+    MAX_REPLICAS: 5
+    MEMORY_LIMIT: 1.25Gi
+    MIN_REPLICAS: 5
+    PATH_PREFIX: api
+  targets:
+  - namespace:
+      $ref: /services/insights/host-inventory/namespaces/stage-host-inventory-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: d74a444
+      XJOIN_SEARCH_URL: http://xjoin-search.xjoin-stage.svc.cluster.local:4000/graphql

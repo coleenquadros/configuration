@@ -13,30 +13,40 @@ cluster:
 app:
   $ref: /services/insights/host-inventory/app.yml
 
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stage-01.yml
+- $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+
 managedRoles: true
 
 managedResourceTypes:
+- ServiceAccount
 - Secret
 - ConfigMap
 
 openshiftResources:
-# secrets
 - provider: vault-secret
-  name: inventory-db
-  path: insights/secrets/insights-stage/host-inventory/inventory-db
-  type: Opaque
-  version: 1
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
 - provider: vault-secret
-  name: inventory-secrets
-  path: insights/secrets/insights-stage/host-inventory/inventory-secrets
-  type: Opaque
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
+- provider: resource
+  path: /insights-stage/host-inventory-stage/inventory-gunicorn-conf.configmap.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-stage/host-inventory-stage/insights-host-delete.secret.yaml
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
   version: 1
-
-# configmaps
-- provider: resource
-  path: /insights-stage/host-inventory/inventory-gunicorn-conf.configmap.yml
-- provider: resource
-  path: /insights-stage/host-inventory/inventory-nginx-conf.configmap.yml
 
 managedTerraformResources: true
 
@@ -44,5 +54,22 @@ terraformResources:
 - provider: rds
   account: insights-stage
   identifier: host-inventory-stage
-  defaults: /terraform/resources/insights/stage/rds-1.yml
+  defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
+  overrides:
+    username: "insights"
+    name: "insights"
+  parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-host-inventory-stage.yml
   output_resource_name: host-inventory-db
+  enhanced_monitoring: true
+- provider: rds
+  account: insights-stage
+  identifier: host-inventory-stage-readonly
+  availability_zone: us-east-1d
+  defaults: /terraform/resources/insights/stage/rds/postgres10-rds-read-replica-host-inventory-stage.yml
+  parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-host-inventory-stage-read-replica.yml
+  output_resource_name: host-inventory-readonly-db
+- provider: cloudwatch
+  account: insights-stage
+  identifier: host-inventory-stage
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch

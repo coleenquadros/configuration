@@ -8,12 +8,30 @@
   - { name: vault, type: boolean, isRequired: true }
   - { name: kubeBinary, type: string, isRequired: true }
   - { name: pullRequestGateway, type: string }
+  - { name: saasDeployJobTemplate, type: string, isRequired: true }
+  - { name: hashLength, type: int, isRequired: true }
   - { name: dependencies, type: AppInterfaceDependencyMapping_v1, isList: true }
+  - { name: credentials, type: CredentialsRequestMap_v1, isList: true }
 
 - name: AppInterfaceDependencyMapping_v1
   fields:
   - { name: type, type: string, isRequired: true }
   - { name: services, type: Dependency_v1, isRequired: true, isList: true }
+
+- name: CredentialsRequestMap_v1
+  fields:
+  - { name: name, type: string, isRequired: true }
+  - { name: secret, type: VaultSecret_v1, isRequired: true }
+
+- name: CredentialsRequest_v1
+  fields:
+  - { name: schema, type: string, isRequired: true }
+  - { name: path, type: string, isRequired: true }
+  - { name: labels, type: json }
+  - { name: name, type: string, isRequired: true }
+  - { name: description, type: string, isRequired: true }
+  - { name: user, type: User_v1, isRequired: true }
+  - { name: credentials, type: string, isRequired: true }
 
 - name: AppInterfaceEmail_v1
   fields:
@@ -202,6 +220,7 @@
   - { name: description, type: string, isRequired: true }
   - { name: serverUrl, type: string, isRequired: true }
   - { name: token, type: VaultSecret_v1, isRequired: true }
+  - { name: previousUrls, type: string, isList: true }
   - { name: plugins, type: string, isList: true }
   - { name: deleteMethod, type: string }
 
@@ -264,6 +283,7 @@
   - { name: name, type: string, isRequired: true }
   - { name: description, type: string, isRequired: true }
   - { name: url, type: string, isRequired: true }
+  - { name: two_factor_authentication, type: boolean, isRequired: true }
   - { name: token, type: VaultSecret_v1, isRequired: true }
   - { name: managedTeams, type: string, isList: true, isRequired: false }
 
@@ -405,6 +425,7 @@
   - { name: terraformUsername, type: string }
   - { name: accountOwners, type: Owner_v1, isList: true, isRequired: true }
   - { name: automationToken, type: VaultSecret_v1, isRequired: true }
+  - { name: garbageCollection, type: boolean }
   - { name: disable, type: DisableClusterAutomations_v1 }
   - { name: deleteKeys, type: string, isList: true }
 
@@ -502,16 +523,27 @@
       rds: NamespaceTerraformResourceRDS_v1
       s3: NamespaceTerraformResourceS3_v1
       elasticache: NamespaceTerraformResourceElastiCache_v1
-      service-account: NamespaceTerraformResourceServiceAccount_v1
+      aws-iam-service-account: NamespaceTerraformResourceServiceAccount_v1
       sqs: NamespaceTerraformResourceSQS_v1
       dynamodb: NamespaceTerraformResourceDynamoDB_v1
       ecr: NamespaceTerraformResourceECR_v1
       s3-cloudfront: NamespaceTerraformResourceS3CloudFront_v1
       cloudwatch: NamespaceTerraformResourceCloudWatch_v1
+      kms: NamespaceTerraformResourceKMS_v1
+      elasticsearch: NamespaceTerraformResourceElasticSearch_v1
   fields:
   - { name: provider, type: string, isRequired: true }
   - { name: account, type: string, isRequired: true }
   - { name: identifier, type: string, isRequired: true }
+  - { name: output_resource_name, type: string }
+
+- name: NamespaceTerraformResourceElasticSearch_v1
+  interface: NamespaceTerraformResource_v1
+  fields:
+  - { name: provider, type: string, isRequired: true }
+  - { name: account, type: string, isRequired: true }
+  - { name: identifier, type: string, isRequired: true }
+  - { name: defaults, type: string, isRequired: true }
   - { name: output_resource_name, type: string }
 
 - name: NamespaceTerraformResourceRDS_v1
@@ -526,6 +558,7 @@
   - { name: overrides, type: json }
   - { name: output_resource_name, type: string }
   - { name: enhanced_monitoring, type: boolean }
+  - { name: replica_source, type: string }
 
 - name: NamespaceTerraformResourceS3_v1
   interface: NamespaceTerraformResource_v1
@@ -622,6 +655,17 @@
   - { name: defaults, type: string, isRequired: true }
   - { name: output_resource_name, type: string }
 
+- name: NamespaceTerraformResourceKMS_v1
+  interface: NamespaceTerraformResource_v1
+  fields:
+  - { name: provider, type: string, isRequired: true }
+  - { name: account, type: string, isRequired: true }
+  - { name: region, type: string }
+  - { name: identifier, type: string, isRequired: true }
+  - { name: defaults, type: string, isRequired: true }
+  - { name: overrides, type: json }
+  - { name: output_resource_name, type: string }
+
 - name: OpenshiftAcmeOverrides_v1
   fields:
   - { name: deploymentName, type: string }
@@ -666,6 +710,25 @@
   - { name: description, type: string, isRequired: true }
   - { name: limits, type: LimitRangeItem_v1, isList: true, isRequired: true }
 
+- name: ResourceQuotaItemResources_v1
+  fields:
+  - { name: limits, type: ResourceValues_v1 }
+  - { name: requests, type: ResourceValues_v1 }
+
+- name: ResourceQuotaItem_v1
+  fields:
+  - { name: name, type: string, isRequired: true }
+  - { name: resources, type: ResourceQuotaItemResources_v1, isRequired: true }
+  - { name: scopes, type: string, isList: true }
+
+- name: ResourceQuota_v1
+  fields:
+  - { name: schema, type: string, isRequired: true }
+  - { name: labels, type: json }
+  - { name: name, type: string, isRequired: true }
+  - { name: description, type: string, isRequired: true }
+  - { name: quotas, type: ResourceQuotaItem_v1, isList: true, isRequired: true }
+
 - name: NamespaceManagedResourceTypeOverrides_v1
   fields:
   - { name: resource, type: string, isRequired: true }
@@ -690,8 +753,10 @@
   - { name: description, type: string, isRequired: true }
   - { name: grafanaUrl, type: string }
   - { name: cluster, type: Cluster_v1, isRequired: true }
-  - { name: app, type: App_v1 }
+  - { name: app, type: App_v1, isRequired: true }
+  - { name: environment, type: Environment_v1, isRequired: true}
   - { name: limitRanges, type: LimitRange_v1 }
+  - { name: quota, type: ResourceQuota_v1 }
   - { name: networkPoliciesAllow, type: Namespace_v1, isList: true }
   - { name: openshiftAcme, type: OpenshiftAcme_v1 }
   - { name: managedRoles, type: boolean }
@@ -773,6 +838,37 @@
   - { name: gitlabHousekeeping, type: CodeComponentGitlabHousekeeping_v1 }
   - { name: jira, type: JiraServer_v1 }
 
+- name: Product_v1
+  fields:
+  - { name: schema, type: string, isRequired: true }
+  - { name: path, type: string, isRequired: true }
+  - { name: labels, type: json }
+  - { name: name, type: string, isRequired: true }
+  - { name: description, type: string, isRequired: true }
+  - { name: productOwners, type: Owner_v1, isList: true, isRequired: true }
+  - name: environments
+    type: Environment_v1
+    isList: true
+    synthetic:
+      schema: /app-sre/environment-1.yml
+      subAttr: product
+
+- name: Environment_v1
+  fields:
+  - { name: schema, type: string, isRequired: true }
+  - { name: path, type: string, isRequired: true }
+  - { name: labels, type: json }
+  - { name: name, type: string, isRequired: true }
+  - { name: description, type: string, isRequired: true }
+  - { name: product, type: Product_v1, isRequired: true }
+  - { name: parameters, type: json }
+  - name: namespaces
+    type: Namespace_v1
+    isList: true
+    synthetic:
+      schema: /openshift/namespace-1.yml
+      subAttr: environment
+
 - name: App_v1
   fields:
   - { name: schema, type: string, isRequired: true }
@@ -807,10 +903,13 @@
   - { name: name, type: string, isRequired: true }
   - { name: description, type: string, isRequired: true }
   - { name: app, type: App_v1, isRequired: true }
-  - { name: slack, type: SlackOutput_v1 }
+  - { name: instance, type: JenkinsInstance_v1, isRequired: true }
+  - { name: slack, type: SlackOutput_v1, isRequired: true }
   - { name: managedResourceTypes, type: string, isRequired: true, isList: true }
   - { name: authentication, type: SaasFileAuthentication_v1 }
+  - { name: parameters, type: json }
   - { name: resourceTemplates, type: SaasResourceTemplate_v1, isRequired: true, isList: true }
+  - { name: imagePatterns, type: string, isRequired: true, isList: true }
   - name: roles
     type: Role_v1
     isList: true
@@ -833,16 +932,16 @@
   - { name: name, type: string, isRequired: true }
   - { name: url, type: string, isRequired: true }
   - { name: path, type: string, isRequired: true }
-  - { name: hash_length, type: int, isRequired: true }
+  - { name: hash_length, type: int }
   - { name: parameters, type: json }
   - { name: targets, type: SaasResourceTemplateTarget_v1, isRequired: true, isList: true }
 
 - name: SaasResourceTemplateTarget_v1
   fields:
   - { name: namespace, type: Namespace_v1, isRequired: true }
-  - { name: hash, type: string, isRequired: true }
-  - { name: notify, type: boolean }
+  - { name: ref, type: string, isRequired: true }
   - { name: parameters, type: json }
+  - { name: upstream, type: string }
 
 - name: Permission_v1
   isInterface: true
@@ -874,6 +973,7 @@
   - { name: description, type: string, isRequired: true }
   - { name: service, type: string, isRequired: true }
   - { name: org, type: string, isRequired: true }
+  - { name: role, type: string }
 
 - name: PermissionGithubOrgTeam_v1
   interface: Permission_v1
@@ -886,6 +986,7 @@
   - { name: service, type: string, isRequired: true }
   - { name: org, type: string, isRequired: true }
   - { name: team, type: string, isRequired: true }
+  - { name: role, type: string }
 
 - name: PermissionJenkinsRole_v1
   interface: Permission_v1
@@ -924,11 +1025,8 @@
   - { name: handle, type: string, isRequired: true }
   - { name: workspace, type: SlackWorkspace_v1, isRequired: true }
   - { name: pagerduty, type: PagerDutyTarget_v1, isList: true }
-  - { name: github_owners, type: string, isList: true }
-  - { name: gitlab_owners, type: string, isList: true }
   - { name: channels, type: string, isList: true }
-  - { name: github_owners_aliases, type: string }
-  - { name: gitlab_owners_aliases, type: string }
+  - { name: ownersFromRepos, type: string, isList: true }
 
 - name: VaultPolicyMapping_v1
   fields:
@@ -1033,55 +1131,59 @@
   - { name: upstream, type: string}
   - { name: schemas, type: string, isList: true}
 
-- name: PerformanceParametersSLOReports_v1
+- name: PerformanceParametersReports_v1
   fields:
   - { name: date, type: string, isRequired: true }
   - { name: url, type: string, isRequired: true }
 
-- name: PerformanceParametersVolume_v1
+- name: PerformanceParametersSLIRecordingRules_v1
   fields:
-  - { name: description, type: string }
+  - { name: name, type: string, isRequired: true }
   - { name: kind, type: string, isRequired: true }
   - { name: metric, type: string, isRequired: true }
   - { name: selectors, type: json, isRequired: true }
-  - { name: threshold, type: string, isRequired: true }
-  - { name: target, type: string, isRequired: true }
+  - { name: percentile, type: string }
   - { name: httpStatusLabel, type: string }
+
+- name: PerformanceParametersVolume_v1
+  fields:
+  - { name: name, type: string, isRequired: true }
+  - { name: kind, type: string, isRequired: true }
+  - { name: rules, type: string, isRequired: true }
+  - { name: target, type: string, isRequired: true }
+  - { name: additionalLabels, type: json }
+
+- name: PerformanceParametersAvailabilityRules_v1
+  fields:
+  - { name: latency, type: string, isRequired: true, isList: true }
+  - { name: errors, type: string, isRequired: true , isList: true}
 
 - name: PerformanceParametersAvailability_v1
   fields:
-  - { name: description, type: string }
+  - { name: name, type: string, isRequired: true }
   - { name: kind, type: string, isRequired: true }
-  - { name: metric, type: string, isRequired: true }
-  - { name: selectors, type: json, isRequired: true }
+  - { name: rules, type: PerformanceParametersAvailabilityRules_v1, isRequired: true }
   - { name: target, type: string, isRequired: true }
-  - { name: httpStatusLabel, type: string }
+  - { name: additionalLabels, type: json }
 
 - name: PerformanceParametersLatency_v1
   fields:
-  - { name: description, type: string }
+  - { name: name, type: string, isRequired: true }
   - { name: kind, type: string, isRequired: true }
-  - { name: metric, type: string, isRequired: true }
-  - { name: selectors, type: json, isRequired: true }
+  - { name: rules, type: string, isRequired: true }
   - { name: threshold, type: string, isRequired: true }
-  - { name: percentile, type: string, isRequired: true }
   - { name: target, type: string, isRequired: true }
-  - { name: httpStatusLabel, type: string }
-  - { name: handlers, type: json }
-  - { name: isAvailabilitySLO, type: boolean, isRequired: true }
+  - { name: additionalLabels, type: json }
 
 - name: PerformanceParametersErrors_v1
   fields:
-  - { name: description, type: string }
+  - { name: name, type: string, isRequired: true }
   - { name: kind, type: string, isRequired: true }
-  - { name: metric, type: string, isRequired: true }
-  - { name: selectors, type: json, isRequired: true }
+  - { name: rules, type: string, isRequired: true }
   - { name: target, type: string, isRequired: true }
-  - { name: httpStatusLabel, type: string }
-  - { name: handlers, type: json }
-  - { name: isAvailabilitySLO, type: boolean, isRequired: true }
+  - { name: additionalLabels, type: json }
 
-- name: PerformanceParametersRawRecording_v1
+- name: PerformanceParametersRawRecordingRules_v1
   fields:
   - { name: record, type: string, isRequired: true }
   - { name: expr, type: string, isRequired: true }
@@ -1098,7 +1200,7 @@
   fields:
   - { name: alert, type: string, isRequired: true }
   - { name: expr, type: string, isRequired: true }
-  - { name: for, type: json, isRequired: true }
+  - { name: for, type: string, isRequired: true }
   - { name: labels, type: json, isRequired: true }
   - { name: annotations, type: PerformanceParametersRawAlertingAnnotations_v1, isRequired: true }
 
@@ -1107,19 +1209,20 @@
   fields:
   - { name: schema, type: string, isRequired: true }
   - { name: path, type: string, isRequired: true }
-  - { name: labels, type: json }
+  - { name: labels, type: json, isRequired: true }
   - { name: name, type: string, isRequired: true }
   - { name: app, type: App_v1, isRequired: true }
-  - { name: component, type: string, isRequired: true}
-  - { name: prometheusLabels, type: json}
-  - { name: namespace, type: Namespace_v1, isRequired: true}
-  - { name: sloReports, type: PerformanceParametersSLOReports_v1, isList: true}
-  - { name: volume, type: PerformanceParametersVolume_v1, isList: true}
-  - { name: availability, type: PerformanceParametersAvailability_v1, isList: true}
-  - { name: latency, type: PerformanceParametersLatency_v1, isList: true}
-  - { name: errors, type: PerformanceParametersErrors_v1, isList: true}
-  - { name: rawRecording, type: PerformanceParametersRawRecording_v1, isList: true}
-  - { name: rawAlerting, type: PerformanceParametersRawAlerting_v1, isList: true}
+  - { name: component, type: string, isRequired: true }
+  - { name: prometheusLabels, type: json, isRequired: true }
+  - { name: namespace, type: Namespace_v1, isRequired: true }
+  - { name: sloReports, type: PerformanceParametersReports_v1, isList: true }
+  - { name: SLIRecordingRules, type: PerformanceParametersSLIRecordingRules_v1, isList: true, isRequired: true }
+  - { name: volume, type: PerformanceParametersVolume_v1, isList: true, isRequired: true }
+  - { name: availability, type: PerformanceParametersAvailability_v1, isList: true, isRequired: true }
+  - { name: latency, type: PerformanceParametersLatency_v1, isList: true, isRequired: true }
+  - { name: errors, type: PerformanceParametersErrors_v1, isList: true, isRequired: true }
+  - { name: rawRecordingRules, type: PerformanceParametersRawRecordingRules_v1, isList: true }
+  - { name: rawAlerting, type: PerformanceParametersRawAlerting_v1, isList: true }
 
 - name: Document_v1
   datafile: /app-sre/document-1.yml
@@ -1158,7 +1261,8 @@
 - name: Query
   fields:
   - { name: app_interface_settings_v1, type: AppInterfaceSettings_v1, isList: true, datafileSchema: /app-interface/app-interface-settings-1.yml }
-  - { name: app_interface_emails_v1, type: AppInterfaceEmail_v1, isList: true, datafileSchema: /app-interface/app-interface-email-1.yml}
+  - { name: app_interface_emails_v1, type: AppInterfaceEmail_v1, isList: true, datafileSchema: /app-interface/app-interface-email-1.yml }
+  - { name: credentials_requests_v1, type: CredentialsRequest_v1, isList: true, datafileSchema: /app-interface/credentials-request-1.yml }
   - { name: users_v1, type: User_v1, isList: true, datafileSchema: /access/user-1.yml }
   - { name: bots_v1, type: Bot_v1, isList: true, datafileSchema: /access/bot-1.yml }
   - { name: roles_v1, type: Role_v1, isList: true, datafileSchema: /access/role-1.yml }
@@ -1172,6 +1276,8 @@
   - { name: jenkins_configs_v1, type: JenkinsConfig_v1, isList: true, datafileSchema: /dependencies/jenkins-config-1.yml }
   - { name: jira_servers_v1, type: JiraServer_v1, isList: true, datafileSchema: /dependencies/jira-server-1.yml }
   - { name: jira_boards_v1, type: JiraBoard_v1, isList: true, datafileSchema: /dependencies/jira-board-1.yml }
+  - { name: products_v1, type: Product_v1, isList: true, datafileSchema: /app-sre/product-1.yml }
+  - { name: environments_v1, type: Environment_v1, isList: true, datafileSchema: /app-sre/environment-1.yml }
   - { name: apps_v1, type: App_v1, isList: true, datafileSchema: /app-sre/app-1.yml }
   - { name: resources_v1, type: Resource_v1, isResource: true, isRequired: true, isList: true }
   - { name: vault_audit_backends_v1, type: VaultAudit_v1, isList: true, datafileSchema: /vault-config/audit-1.yml }

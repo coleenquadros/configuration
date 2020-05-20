@@ -18,23 +18,26 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 0,
-      "iteration": 1580986936767,
+      "iteration": 1588931516773,
       "links": [],
       "panels": [
         {
-          "aliasColors": {},
+          "aliasColors": {
+            "threshold": "dark-red"
+          },
           "bars": false,
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
-          "fill": 1,
+          "fill": 0,
           "fillGradient": 0,
           "gridPos": {
             "h": 9,
-            "w": 12,
+            "w": 10,
             "x": 0,
             "y": 0
           },
+          "hiddenSeries": false,
           "id": 2,
           "legend": {
             "avg": false,
@@ -61,24 +64,10 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(haproxy_server_http_responses_total{route=\"$route\"}[5m]))",
+              "expr": "sum(status_class:http_requests_total:rate5m{route=\"$route\", service=\"cincinnati\", component=\"cincinnati-policy-engine\"})",
+              "intervalFactor": 1,
               "legendFormat": "total",
               "refId": "A"
-            },
-            {
-              "expr": "sum(rate(haproxy_server_http_responses_total{route=\"$route\", code=\"2xx\"}[5m]))",
-              "legendFormat": "2xx",
-              "refId": "B"
-            },
-            {
-              "expr": "sum(rate(haproxy_server_http_responses_total{route=\"$route\", code=\"4xx\"}[5m]))",
-              "legendFormat": "4xx",
-              "refId": "C"
-            },
-            {
-              "expr": "sum(rate(haproxy_server_http_responses_total{route=\"$route\", code=\"5xx\"}[5m]))",
-              "legendFormat": "5xx",
-              "refId": "D"
             }
           ],
           "thresholds": [],
@@ -123,19 +112,40 @@ data:
           }
         },
         {
-          "aliasColors": {},
+          "content": "Calculated over the last 28 days\n\n\n\n",
+          "datasource": null,
+          "gridPos": {
+            "h": 2,
+            "w": 3,
+            "x": 10,
+            "y": 0
+          },
+          "id": 16,
+          "mode": "markdown",
+          "options": {},
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "SLOs",
+          "type": "text"
+        },
+        {
+          "aliasColors": {
+            "95": "dark-red",
+            "threshold": "dark-red"
+          },
           "bars": false,
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
-          "fill": 1,
+          "fill": 0,
           "fillGradient": 0,
           "gridPos": {
             "h": 9,
-            "w": 12,
-            "x": 12,
+            "w": 10,
+            "x": 13,
             "y": 0
           },
+          "hiddenSeries": false,
           "id": 4,
           "legend": {
             "avg": false,
@@ -162,8 +172,8 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(cincinnati_pe_v1_graph_serve_duration_seconds_bucket{le=\"1\", job=\"cincinnati-policy-engine\"}) / sum(cincinnati_pe_v1_graph_serve_duration_seconds_count{job=\"cincinnati-policy-engine\"}) * 100",
-              "legendFormat": "1 second requests",
+              "expr": "100 * component:availability:slo_ok_5m{route=\"$route\",job=\"cincinnati-policy-engine\",service=\"cincinnati\",component=\"cincinnati-policy-engine\"}",
+              "legendFormat": "available",
               "refId": "A"
             }
           ],
@@ -172,6 +182,299 @@ data:
           "timeRegions": [],
           "timeShift": null,
           "title": "Availability",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": "percentage",
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": "$datasource",
+          "gridPos": {
+            "h": 4,
+            "w": 3,
+            "x": 10,
+            "y": 2
+          },
+          "id": 10,
+          "links": [],
+          "options": {
+            "fieldOptions": {
+              "calcs": [
+                "last"
+              ],
+              "defaults": {
+                "decimals": 2,
+                "mappings": [
+                  {
+                    "id": 0,
+                    "op": "=",
+                    "text": "N/A",
+                    "type": 1,
+                    "value": "null"
+                  }
+                ],
+                "nullValueMode": "connected",
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 5000
+                    }
+                  ]
+                },
+                "unit": "reqps"
+              },
+              "overrides": [],
+              "values": false
+            },
+            "orientation": "horizontal",
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
+          },
+          "pluginVersion": "6.6.2",
+          "targets": [
+            {
+              "expr": "sum(avg_over_time(status_class:http_requests_total:rate5m{route=\"$route\", service=\"cincinnati\", component=\"cincinnati-policy-engine\"}[28d]))",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Volume  - 5k r/s",
+          "type": "gauge"
+        },
+        {
+          "datasource": "$datasource",
+          "gridPos": {
+            "h": 4,
+            "w": 3,
+            "x": 10,
+            "y": 6
+          },
+          "id": 12,
+          "options": {
+            "fieldOptions": {
+              "calcs": [
+                "last"
+              ],
+              "defaults": {
+                "decimals": 2,
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "green",
+                      "value": 95
+                    }
+                  ]
+                },
+                "title": "",
+                "unit": "percent"
+              },
+              "overrides": [],
+              "values": false
+            },
+            "orientation": "auto",
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
+          },
+          "pluginVersion": "6.6.2",
+          "targets": [
+            {
+              "expr": "avg_over_time(component:availability:slo_ok_5m{component=\"cincinnati-policy-engine\",job=\"cincinnati-policy-engine\",service=\"cincinnati\"}[28d]) * 100",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Availability - 95%",
+          "type": "gauge"
+        },
+        {
+          "aliasColors": {
+            "3": "dark-red",
+            "threshold": "dark-red"
+          },
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fill": 0,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 10,
+            "x": 0,
+            "y": 9
+          },
+          "hiddenSeries": false,
+          "id": 6,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "component:latency:p90_rate5m{job=\"cincinnati-policy-engine\",service=\"cincinnati\",component=\"cincinnati-policy-engine\"}",
+              "legendFormat": "p90 latency",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Latency",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": "seconds",
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": "",
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {
+            "threshold": "dark-red"
+          },
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fill": 0,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 10,
+            "x": 13,
+            "y": 9
+          },
+          "hiddenSeries": false,
+          "id": 8,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "100 * status_class_5xx:http_requests_total:ratio_rate5m{route=\"$route\", service=\"cincinnati\",component=\"cincinnati-policy-engine\"}",
+              "legendFormat": "errors",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Errors",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -209,184 +512,109 @@ data:
           }
         },
         {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
           "datasource": "$datasource",
-          "fill": 1,
-          "fillGradient": 0,
           "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 0,
-            "y": 9
+            "h": 4,
+            "w": 3,
+            "x": 10,
+            "y": 10
           },
-          "id": 6,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
+          "id": 14,
           "options": {
-            "dataLinks": []
+            "fieldOptions": {
+              "calcs": [
+                "last"
+              ],
+              "defaults": {
+                "decimals": 2,
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "green",
+                      "value": 95
+                    }
+                  ]
+                },
+                "unit": "percent"
+              },
+              "overrides": [],
+              "values": false
+            },
+            "orientation": "auto",
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
           },
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
+          "pluginVersion": "6.6.2",
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum by (le) (increase(cincinnati_pe_v1_graph_serve_duration_seconds_bucket{job=\"cincinnati-policy-engine\"}[30d]))) * 1000",
-              "legendFormat": "p95 latency",
+              "expr": "avg_over_time(component:latency:slo_ok_5m{component=\"cincinnati-policy-engine\",job=\"cincinnati-policy-engine\",service=\"cincinnati\"}[28d]) * 100",
               "refId": "A"
             }
           ],
-          "thresholds": [],
           "timeFrom": null,
-          "timeRegions": [],
           "timeShift": null,
-          "title": "Latency",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": "milliseconds",
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": "",
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
+          "title": "Latency - 95%",
+          "type": "gauge"
         },
         {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
           "datasource": "$datasource",
-          "fill": 1,
-          "fillGradient": 0,
           "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 12,
-            "y": 9
+            "h": 4,
+            "w": 3,
+            "x": 10,
+            "y": 14
           },
-          "id": 8,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
+          "id": 13,
           "options": {
-            "dataLinks": []
+            "fieldOptions": {
+              "calcs": [
+                "last"
+              ],
+              "defaults": {
+                "decimals": 2,
+                "mappings": [],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "green",
+                      "value": 95
+                    }
+                  ]
+                },
+                "unit": "percent"
+              },
+              "overrides": [],
+              "values": false
+            },
+            "orientation": "auto",
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
           },
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
+          "pluginVersion": "6.6.2",
           "targets": [
             {
-              "expr": "100 * sum(rate(haproxy_server_http_responses_total{route=\"$route\", code=\"5xx\"}[30d])) / sum(rate(haproxy_server_http_responses_total{route=\"$route\"}[30d]))",
-              "legendFormat": "5xx",
+              "expr": "avg_over_time(component:errors:slo_ok_5m{component=\"cincinnati-policy-engine\",route=\"$route\",service=\"cincinnati\"}[28d]) * 100",
               "refId": "A"
-            },
-            {
-              "expr": "100 * sum(rate(haproxy_server_http_responses_total{route=\"$route\", code=\"4xx\"}[30d])) / sum(rate(haproxy_server_http_responses_total{route=\"$route\"}[30d]))",
-              "legendFormat": "4xx",
-              "refId": "B"
             }
           ],
-          "thresholds": [],
           "timeFrom": null,
-          "timeRegions": [],
           "timeShift": null,
-          "title": "Errors",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": "percentage over 30d",
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
+          "title": "Errors  - 95%",
+          "type": "gauge"
         }
       ],
-      "schemaVersion": 20,
+      "schemaVersion": 22,
       "style": "dark",
       "tags": [],
       "templating": {
@@ -404,7 +632,7 @@ data:
             "options": [],
             "query": "prometheus",
             "refresh": 1,
-            "regex": "",
+            "regex": "/app-sre-(stage|prod)-01-prometheus/",
             "skipUrlSync": false,
             "type": "datasource"
           },
@@ -442,7 +670,7 @@ data:
         ]
       },
       "time": {
-        "from": "now-30d",
+        "from": "now-28d",
         "to": "now"
       },
       "timepicker": {
@@ -462,7 +690,7 @@ data:
       "timezone": "",
       "title": "Cincinnati VALET",
       "uid": "z8tQ2cyZk",
-      "version": 1
+      "version": 3
     }
 kind: ConfigMap
 metadata:

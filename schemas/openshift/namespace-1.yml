@@ -31,9 +31,17 @@ properties:
     "$ref": "/common-1.json#/definitions/crossref"
     "$schemaRef": "/app-sre/app-1.yml"
 
+  environment:
+    "$ref": "/common-1.json#/definitions/crossref"
+    "$schemaRef": "/app-sre/environment-1.yml"
+
   limitRanges:
     "$ref": "/common-1.json#/definitions/crossref"
     "$schemaRef": "/openshift/limitrange-1.yml"
+
+  quota:
+    "$ref": "/common-1.json#/definitions/crossref"
+    "$schemaRef": "/openshift/quota-1.yml"
 
   networkPoliciesAllow:
     type: array
@@ -227,17 +235,9 @@ properties:
           provider:
             type: string
             enum:
-            - service-account
+            - aws-iam-service-account
           account:
-            type: string
-            enum:
-            - app-sre
-            - osio
-            - quay-builder
-            - quayio-stage
-            - quayio-prod
-            - insights-stage
-            - insights-prod
+            "$ref": "/aws/tenant_accounts-1.yml#/properties/account"
           identifier:
             "$ref": "/common-1.json#/definitions/longIdentifier"
           variables:
@@ -260,15 +260,7 @@ properties:
             enum:
             - rds
           account:
-            type: string
-            enum:
-            - app-sre
-            - osio
-            - quay-builder
-            - quayio-stage
-            - quayio-prod
-            - insights-stage
-            - insights-prod
+            "$ref": "/aws/tenant_accounts-1.yml#/properties/account"
           identifier:
             type: string
           availability_zone:
@@ -320,6 +312,8 @@ properties:
                 - db.r4.4xlarge
                 - db.r4.8xlarge
                 - db.r5.large
+                - db.r5.xlarge
+                - db.r5.2xlarge
               allocated_storage:
                 type: integer
               backup_retention_period:
@@ -332,6 +326,8 @@ properties:
             "$ref": "/common-1.json#/definitions/longIdentifier"
           enhanced_monitoring:
             type: boolean
+          replica_source:
+            type: string
         required:
         - account
         - identifier
@@ -343,13 +339,7 @@ properties:
             enum:
             - elasticache
           account:
-            type: string
-            enum:
-            - app-sre
-            - osio
-            - quay-builder
-            - quayio-stage
-            - quayio-prod
+            "$ref": "/aws/tenant_accounts-1.yml#/properties/account"
           identifier:
             type: string
           defaults:
@@ -357,9 +347,7 @@ properties:
           parameter_group:
             type: string
           region:
-            type: string
-            enum:
-            - us-east-1
+            "$ref": "/aws/regions-1.yml#/properties/region"
           overrides:
             type: object
             properties:
@@ -394,17 +382,9 @@ properties:
             enum:
             - sqs
           account:
-            type: string
-            enum:
-            - app-sre
-            - osio
-            - quay-builder
-            - quayio-stage
-            - quayio-prod
+            "$ref": "/aws/tenant_accounts-1.yml#/properties/account"
           region:
-            type: string
-            enum:
-            - us-east-1
+            "$ref": "/aws/regions-1.yml#/properties/region"
           identifier:
             "$ref": "/common-1.json#/definitions/longIdentifier"
           output_resource_name:
@@ -439,17 +419,9 @@ properties:
             enum:
             - dynamodb
           account:
-            type: string
-            enum:
-            - app-sre
-            - osio
-            - quay-builder
-            - quayio-stage
-            - quayio-prod
+            "$ref": "/aws/tenant_accounts-1.yml#/properties/account"
           region:
-            type: string
-            enum:
-            - us-east-1
+            "$ref": "/aws/regions-1.yml#/properties/region"
           identifier:
             "$ref": "/common-1.json#/definitions/longIdentifier"
           output_resource_name:
@@ -484,13 +456,9 @@ properties:
             enum:
             - ecr
           account:
-            type: string
-            enum:
-            - quayio-stage
+            "$ref": "/aws/tenant_accounts-1.yml#/properties/account"
           region:
-            type: string
-            enum:
-            - us-east-1
+            "$ref": "/aws/regions-1.yml#/properties/region"
           identifier:
             "$ref": "/common-1.json#/definitions/longIdentifier"
           output_resource_name:
@@ -505,17 +473,63 @@ properties:
             enum:
             - cloudwatch
           account:
-            type: string
-            enum:
-            - app-sre
-            - insights-stage
-            - insights-prod
-            - quayio-stage
-            - quayio-prod
+            "$ref": "/aws/tenant_accounts-1.yml#/properties/account"
           region:
+            "$ref": "/aws/regions-1.yml#/properties/region"
+          identifier:
+            "$ref": "/common-1.json#/definitions/longIdentifier"
+          output_resource_name:
+            "$ref": "/common-1.json#/definitions/longIdentifier"
+          defaults:
+            type: string
+        required:
+        - account
+        - identifier
+        - defaults
+      - additionalProperties: false
+        properties:
+          provider:
             type: string
             enum:
-            - us-east-1
+            - kms
+          account:
+            "$ref": "/aws/tenant_accounts-1.yml#/properties/account"
+          identifier:
+            type: string
+          region:
+            "$ref": "/aws/regions-1.yml#/properties/region"
+          defaults:
+            type: string
+          overrides:
+            type: object
+            properties:
+              name:
+                type: string
+              key_usage:
+                type: string
+                enum:
+                - encrypt_decrypt
+                - sign_verify
+              deletion_window_in_days:
+                type: integer
+              enable_key_rotation:
+                type: boolean
+          output_resource_name:
+            "$ref": "/common-1.json#/definitions/longIdentifier"
+        required:
+        - account
+        - identifier
+        - defaults
+      - additionalProperties: false
+        properties:
+          provider:
+            type: string
+            enum:
+            - elasticsearch
+          region:
+            "$ref": "/aws/regions-1.yml#/properties/region"
+          account:
+            "$ref": "/aws/tenant_accounts-1.yml#/properties/account"
           identifier:
             "$ref": "/common-1.json#/definitions/longIdentifier"
           output_resource_name:
@@ -559,3 +573,4 @@ required:
 - description
 - cluster
 - app
+- environment

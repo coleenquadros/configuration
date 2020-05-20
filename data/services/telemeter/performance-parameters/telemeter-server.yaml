@@ -21,26 +21,51 @@ prometheusLabels: # Dictionary, a bunch of labels that Prometheus uses to select
 namespace:
   $ref: /services/telemeter/namespaces/telemeter-production.yml
 
-availability:
-- kind: SLO
+SLIRecordingRules:
+- name: telemeter_server_http_rates
+  kind: http_rate
   metric: http_requests_total
   selectors:
     job: telemeter-server
-  target: 90
 
-latency:
-- kind: SLO
+- name: telemeter_server_upload_latency_rates
+  kind: latency_rate
+  percentile: 90
   metric: http_request_duration_seconds_bucket
   selectors:
     job: telemeter-server
-  threshold: 2.5
-  percentile: 90
-  target: 99
-  handlers:
-    - handler: upload
-  isAvailabilitySLO: true
+    handler: upload
 
-rawRecording:
+volume:
+- name: telemeter_server_volume_slo
+  kind: SLO
+  rules: telemeter_server_http_rates
+  target: 5000  # We should validate this with telemeter team
+
+latency:
+- name: telemeter_server_upload_latency_slo
+  kind: SLO
+  rules: telemeter_server_upload_latency_rates
+  threshold: 2.5
+  target: 99
+
+errors:
+- name: telemeter_server_errors_slo
+  kind: SLO
+  rules: telemeter_server_http_rates
+  target: 10  # We should validate this with telemeter team
+
+availability:
+- name: telemeter_server_availability_slo
+  kind: SLO
+  rules:
+    latency:
+    - telemeter_server_upload_latency_slo
+    errors:
+    - telemeter_server_errors_slo
+  target: 99
+
+rawRecordingRules:
 - record: telemeter:capacity
   expr: (sum(telemeter_partitions{namespace="telemeter-production"}) / 5000) * 100
   labels:
@@ -50,7 +75,7 @@ rawAlerting:
 - alert: SLO - TelemeterCapacityReached
   annotations:
     message: "Telemeter reached {{ $value }}% of capacity in namespace {{ $labels.namespace }}."
-    runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
+    runbook: "https://gitlab.cee.redhat.com/observatorium/configuration/tree/master/docs/sop"
     dashboard: "https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-prometheus&var-cluster=app-sre&var-namespace=telemeter-prod"
   expr: telemeter:capacity >= 50
   for: 3d

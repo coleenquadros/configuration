@@ -10,28 +10,37 @@ description: 'SaaS tracking file for GitHub Mirror'
 app:
   $ref: /services/github-mirror/app.yml
 
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
 
 managedResourceTypes:
 - Deployment
 - Service
 
+imagePatterns:
+- quay.io/app-sre/github-mirror
+
+parameters:
+  GITHUB_USERS: app-sre-bot:cs-sre-bot
+
 resourceTemplates:
 - name: github-mirror
   url: https://github.com/app-sre/github-mirror
   path: /openshift/github-mirror.yaml
-  hash_length: 7
   targets:
   - namespace:
       $ref: /services/github-mirror/namespaces/github-mirror-stage.yaml
-    hash: master
+    ref: master
+    upstream: app-sre-github-mirror-gh-build-master
     parameters:
-      GITHUB_USERS: app-sre-bot:cs-sre-bot
+      GITHUB_MIRROR_URL: https://github-mirror.stage.devshift.net
   - namespace:
       $ref: /services/github-mirror/namespaces/github-mirror-production.yaml
-    hash: 0587e6ae5e2416c66704e4551dd8a7d77806a229
+    ref: 5c52a5f70e011d461bbd73bb980cc309ec388d7f
     parameters:
-      GITHUB_USERS: app-sre-bot:cs-sre-bot
-    notify: true
+      GITHUB_MIRROR_URL: https://github-mirror.devshift.net

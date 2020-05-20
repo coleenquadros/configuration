@@ -13,6 +13,11 @@ cluster:
 app:
   $ref: /services/openshift.io/app.yml
 
+environment:
+  $ref: /products/openshift.io/environments/production.yml
+
+grafanaUrl: "https://grafana.app-sre.devshift.net/d/k8s-compute-resources-namespace-pods/kubernetes-compute-resources-namespace-pods?var-datasource=dsaas-cluster-prometheus&var-namespace=bayesian-production"
+
 managedRoles: true
 
 managedResourceTypes:
@@ -46,6 +51,9 @@ openshiftResources:
   path: app-interface/dsaas/bayesian-production/aws
   version: 1
 - provider: vault-secret
+  path: app-interface/dsaas/bayesian-production/snyk-secrets
+  version: 1
+- provider: vault-secret
   path: app-interface/dsaas/bayesian-production/coreapi-postgres
   version: 1
 - provider: vault-secret
@@ -59,9 +67,9 @@ openshiftResources:
   version: 1
 - provider: vault-secret
   path: app-interface/dsaas/bayesian-production/worker
-  # this version adds the 'sentry-auth-token' key to the secret
+  # this version adds the 'sentry-auth-token' and 'sentry-url' keys to the secret
   # this token belongs to the 'rh-devtools-bot' github user
-  version: 5
+  version: 7
   annotations:
     qontract.recycle: "true"
 - provider: vault-secret
@@ -97,6 +105,10 @@ openshiftResources:
 - provider: route
   path: /dsaas/bayesian-production/stack-analytics-report.openshift.io.route.yaml
   vault_tls_secret_path: app-interface/dsaas/routes/_wildcard.openshift.io
+  vault_tls_secret_version: 2
+- provider: route
+  path: /dsaas/bayesian-production/bayesian-osa-api.route.yaml
+  vault_tls_secret_path: app-interface/dsaas/routes/_wildcard.api.openshift.io
   vault_tls_secret_version: 2
 
 managedTerraformResources: true
@@ -187,7 +199,7 @@ terraformResources:
       value: prod_osa_txlog
     - key: system_properties_table_name
       value: prod_osa_system_properties
-- provider: service-account
+- provider: aws-iam-service-account
   account: osio
   identifier: prod-elastic-map-reduce
   user_policy:

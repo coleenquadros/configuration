@@ -1,15 +1,15 @@
-.PHONY: bundle validate
+.PHONY: bundle validate server
+
+include .env
 
 OUTPUT_DIR ?= $(shell pwd)
 OUTPUT_DIR := $(shell realpath $(OUTPUT_DIR))
-VALIDATOR_IMAGE ?= quay.io/app-sre/qontract-validator
-VALIDATOR_IMAGE_TAG ?= latest
 BUNDLE_FILENAME ?= data.json
 PWD := $(shell pwd)
 
 bundle:
 	mkdir -p $(OUTPUT_DIR)
-	cp --parents docs/**/*.md resources
+	# cp --parents docs/**/*.md resources
 	@docker pull $(VALIDATOR_IMAGE):$(VALIDATOR_IMAGE_TAG)
 	@docker run --rm \
 		-v $(PWD)/schemas:/schemas:z \
@@ -24,3 +24,14 @@ validate:
 		-v $(OUTPUT_DIR):/bundle:z \
 		$(VALIDATOR_IMAGE):$(VALIDATOR_IMAGE_TAG) \
 		qontract-validator --only-errors /bundle/$(BUNDLE_FILENAME)
+
+toc:
+	./hack/toc.py
+
+server: bundle validate
+	@docker run -it --rm \
+		-v $(OUTPUT_DIR):/bundle:z \
+		-p 4000:4000 \
+		-e LOAD_METHOD=fs \
+		-e DATAFILES_FILE=/bundle/$(BUNDLE_FILENAME) \
+		$(QONTRACT_SERVER_IMAGE):$(QONTRACT_SERVER_IMAGE_TAG)

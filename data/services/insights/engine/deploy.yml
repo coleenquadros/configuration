@@ -1,0 +1,66 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: engine
+  platform: insights
+
+name: engine
+description: engine app on the Insights Platform
+
+app:
+  $ref: /services/insights/engine/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+- ConfigMap
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: insights-engine
+  path: /templates/deployment.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/insights-engine
+  targets:
+  - namespace:
+      $ref: /services/insights/engine/namespaces/dev-engine-ci.yml
+    ref: master
+    parameters:
+      CLOUD_WATCH_LOG_GROUP: platform-dev
+      REPLICAS: "2"
+  - namespace:
+      $ref: /services/insights/engine/namespaces/dev-engine-qa.yml
+    ref: 8ddba2be3c44cefc3d46221e552a4e0689fbe80d
+    parameters:
+      CLOUD_WATCH_LOG_GROUP: platform-dev
+      REPLICAS: "2"
+  - namespace:
+      $ref: /services/insights/engine/namespaces/stage-engine-stage.yml
+    ref: master
+    parameters:
+      CLOUD_WATCH_LOG_GROUP: engine-stage
+      REPLICAS: "2"
+  - namespace:
+      $ref: /services/insights/engine/namespaces/prod-engine-prod.yml
+    ref: 8ddba2be3c44cefc3d46221e552a4e0689fbe80d
+    parameters:
+      CLOUD_WATCH_LOG_GROUP: platform
+      REPLICAS: "64"

@@ -13,20 +13,37 @@ cluster:
 app:
   $ref: /services/insights/rbac/app.yml
 
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stage-01.yml
+- $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+- $ref: /services/insights/advisor/namespaces/stage-advisor-stage.yml
+
 managedRoles: true
 
 managedResourceTypes:
+- ServiceAccount
 - Secret
 - ConfigMap
 
 openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
 - provider: resource
   path: /insights-stage/rbac-stage/rbac-env.configmap.yml
 - provider: resource
   path: /insights-stage/rbac-stage/redis-config.configmap.yml
+- provider: resource
+  path: /insights-stage/rbac-stage/rbac-config.configmap.yml
 - provider: vault-secret
   path: insights/secrets/insights-stage/rbac-stage/rbac-secret
-  version: 1
+  version: 5
 - provider: vault-secret
   path: insights/secrets/insights-stage/rbac-stage/rbac-psks
   version: 1
@@ -45,5 +62,12 @@ terraformResources:
 - provider: rds
   account: insights-stage
   identifier: rbac-stage
-  defaults: /terraform/resources/insights/stage/rds-1.yml
+  defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
+  parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-rbac-stage.yml
   output_resource_name: rbac-db
+  enhanced_monitoring: true
+- provider: cloudwatch
+  account: insights-stage
+  identifier: rbac-stage
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch

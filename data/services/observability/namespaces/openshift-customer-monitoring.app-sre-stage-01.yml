@@ -12,6 +12,9 @@ cluster:
 app:
   $ref: /services/observability/app.yml
 
+environment:
+  $ref: /products/app-sre/environments/stage.yml
+
 managedResourceTypes:
 - Secret
 - Service
@@ -268,25 +271,32 @@ openshiftResources:
   variables:
     environment: stage
     namespace: telemeter-stage
-#### Telemeter Memcached
-- provider: resource-template
-  type: jinja2
-  path: /observability/servicemonitors/telemeter-memcached.servicemonitor.yaml
-  variables:
-    environment: stage
-    namespace: telemeter-stage
-#### observatorium-up blackbox probes
+#### Observatorium Up blackbox probes
 - provider: resource-template
   type: jinja2
   path: /observability/servicemonitors/observatorium-up.servicemonitor.yaml
   variables:
     environment: stage
     namespace: telemeter-stage
-#### Observatorium Gateway
+#### Observatorium API
 - provider: resource-template
   type: jinja2
-  path: /observability/servicemonitors/observatorium-gateway.servicemonitor.yaml
+  path: /observability/servicemonitors/observatorium-api.servicemonitor.yaml
   variables:
+    namespace: telemeter-stage
+#### Observatorium Thanos Store Cache
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/observatorium-thanos-store-cache.servicemonitor.yaml
+  variables:
+    environment: stage
+    namespace: telemeter-stage
+#### Telemeter Memcached
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/telemeter-memcached.servicemonitor.yaml
+  variables:
+    environment: stage
     namespace: telemeter-stage
 
 # Temporary Prometheus and ServiceMonitor for AMS as part of https://issues.redhat.com/browse/APPSRE-1491

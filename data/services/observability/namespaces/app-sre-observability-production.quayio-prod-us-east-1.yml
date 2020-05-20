@@ -1,0 +1,41 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: app-sre-observability-production
+description: production namespace for the app-sre observability stack
+
+cluster:
+  $ref: /openshift/quayio-prod-us-east-1/cluster.yml
+
+app:
+  $ref: /services/quayio/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.quayio-prod-us-east-1.yml
+
+openshiftAcme:
+  config:
+    $ref: /dependencies/openshift/acme/v4.yml
+  accountSecret:
+    provider: vault-secret
+    path: app-interface/app-sre/app-sre-observability-production/acme-account
+    version: 1
+
+managedRoles: true
+
+managedResourceTypes:
+- ConfigMap
+
+openshiftResources:
+## Nginx proxy configmap
+- provider: resource-template
+  type: jinja2
+  path: /observability/nginx-proxy.configmap.yaml
+  variables:
+    prometheus_server_name: prometheus.quayio-prod-us-east-1.devshift.net
+    alertmanager_server_name: alertmanager.quayio-prod-us-east-1.devshift.net

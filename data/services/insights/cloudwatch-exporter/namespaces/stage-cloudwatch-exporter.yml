@@ -1,0 +1,54 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: cloudwatch-exporter
+  platform: insights
+
+name: cloudwatch-exporter
+description: stage namespace for cloudwatch-exporter to export AWS resource metrics
+
+cluster:
+  $ref: /openshift/insights/crc-stage-01.yml
+
+app:
+  $ref: /services/insights/cloudwatch-exporter/app.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stage-01.yml
+
+managedRoles: true
+
+managedTerraformResources: true
+
+managedResourceTypes:
+- ServiceAccount
+- Secret
+- ConfigMap
+
+terraformResources:
+- provider: aws-iam-service-account
+  account: insights-stage
+  identifier: cloudwatch-exporter-stage
+  policies:
+  - CloudWatchReadOnlyAccess
+  output_resource_name: aws-cloudwatch-exporter-app-sre
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
+- provider: resource
+  path: /insights-stage/cloudwatch-exporter/cloudwatch-exporter.configmap.yaml
+

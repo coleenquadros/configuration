@@ -1,0 +1,53 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: strimzi
+  platform: insights
+
+name: strimzi
+description: strimzi
+
+app:
+  $ref: /services/insights/strimzi/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- Kafka
+- KafkaTopic
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+
+resourceTemplates:
+- name: strimzi
+  path: /deploys/openshift/amq-streams.yaml
+  url: https://github.com/RedHatInsights/platform-mq
+  parameters:
+    KAFKA_VOL_SIZE: 250Gi
+    ZK_VOL_SIZE: 50Gi
+  targets:
+  - namespace:
+      $ref: /services/insights/strimzi/namespaces/stage-platform-mq-stage.yml
+    ref: master
+- name: kafka-topics
+  path: /deploys/openshift/kafka-topics.yaml
+  url: https://github.com/RedHatInsights/platform-mq
+  parameters:
+    KAFKA_CLUSTER: platform-mq
+  targets:
+  - namespace:
+      $ref: /services/insights/strimzi/namespaces/stage-platform-mq-stage.yml
+    ref: master

@@ -1,0 +1,84 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: rbac
+  platform: insights
+
+name: rbac
+description: rbac app on the Insights Platform
+
+app:
+  $ref: /services/insights/rbac/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: rbac
+  path: /templates/rbac/rbac.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  parameters:
+    CPU_LIMIT: '1'
+    MAX_REPLICAS: 10
+    MEMORY_LIMIT: 1Gi
+    MIN_REPLICAS: 1
+    PGSSLMODE: verify-full
+    IMAGE_NAMESPACE: quay.io/cloudservices
+  targets:
+  - namespace:
+      $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 37cd666
+- name: scheduler
+  path: /templates/rbac/scheduler.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 37cd666
+- name: worker
+  path: /templates/rbac/worker.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  parameters:
+    PGSSLMODE: verify-full
+  targets:
+  - namespace:
+      $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 37cd666
+- name: rbac-redis
+  path: /templates/rbac/redis.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  parameters:
+    VOLUME_CAPACITY: 10Gi
+    IMAGE: quay.io/cloudservices/redis
+    IMAGE_TAG: latest
+  targets:
+  - namespace:
+      $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
+    ref: master

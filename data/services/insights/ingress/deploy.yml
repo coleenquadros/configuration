@@ -1,0 +1,69 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: ingress
+  platform: insights
+
+name: ingress
+description: ingress app on the Insights Platform
+
+app:
+  $ref: /services/insights/ingress/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  LOG_GROUP: platform
+
+resourceTemplates:
+- name: insights-storage-broker
+  path: /templates/ingress/insights-storage-broker.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/stage-ingress-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 0e61874
+- name: insights-puptoo
+  path: /templates/ingress/insights-puptoo.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  parameters:
+    REPLICAS: 4
+  targets:
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/stage-ingress-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 7881e4b
+- name: ingress
+  path: /templates/ingress/ingress.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/stage-ingress-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 2ede2b0

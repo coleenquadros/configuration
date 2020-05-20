@@ -7,17 +7,20 @@ name: telemeter-production
 description: production namespace for telemeter
 
 cluster:
-  $ref: /openshift/app-sre/cluster.yml
+  $ref: /openshift/app-sre-prod-02/cluster.yml
 
 app:
   $ref: /services/telemeter/app.yml
 
+environment:
+  $ref: /products/osdv4/environments/production.yml
+
 networkPoliciesAllow:
-- $ref: /services/observability/namespaces/app-sre-observability-production.yml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-02.yml
 
 openshiftAcme:
   config:
-    $ref: /dependencies/openshift/acme/default.yml
+    $ref: /dependencies/openshift/acme/v4.yml
   accountSecret:
     provider: vault-secret
     path: app-interface/app-sre/telemeter-production/acme-account
@@ -30,9 +33,9 @@ managedRoles: true
 managedResourceTypes:
 - Secret
 - Route
-- ConfigMap
 - ServiceMonitor
 - ServiceAccount
+- ClusterRole
 
 managedTerraformResources: true
 
@@ -44,11 +47,6 @@ terraformResources:
   output_resource_name: telemeter-thanos-production-s3
 
 openshiftResources:
-- provider: vault-secret
-  path: app-interface/app-sre/telemeter-production/prometheus-telemeter-htpasswd
-  version: 1
-  labels:
-    k8s-app: prometheus-telemeter
 - provider: vault-secret
   path: app-interface/app-sre/telemeter-production/prometheus-telemeter-proxy
   version: 1
@@ -84,24 +82,12 @@ openshiftResources:
   path: /app-sre/telemeter-production/observatorium-thanos-compact.route.yaml
   vault_tls_secret_path: app-interface/app-sre/routes/_wildcard.api.openshift.com
   vault_tls_secret_version: 5
-- provider: resource
-  path: /app-sre/telemeter-production/nginx404.configmap.yaml
 - provider: route
   path: /app-sre/telemeter-production/observatorium-thanos-querier-cache-production.route.yaml
 - provider: route
   path: /app-sre/telemeter-production/observatorium-jaeger-production.route.yaml
-- provider: resource
-  path: /app-sre/telemeter-production/observatorium-cortex-query-frontend.configmap.yaml
-- provider: resource
-  path: /app-sre/telemeter-production/observatorium-thanos-receive-controller-tenants.configmap.yaml
-- provider: resource
-  path: /app-sre/telemeter-production/observatorium-tenants.configmap.yaml
-- provider: resource
-  path: /app-sre/telemeter-production/observatorium-prometheus-remote-write-proxy.configmap.yaml
-- provider: resource
-  path: /app-sre/telemeter-production/observatorium-thanos-ruler-telemeter-rules.configmap.yaml
-- provider: resource
-  path: /app-sre/telemeter-production/observatorium-up.configmap.yaml
+- provider: route
+  path: /app-sre/telemeter-production/conprof.route.yaml
 - provider: resource
   path: /app-sre/telemeter-production/ams-subscription-labels-production.servicemonitor.yaml
 - provider: vault-secret
@@ -112,6 +98,12 @@ openshiftResources:
   version: 1
 - provider: vault-secret
   path: app-interface/app-sre/telemeter-production/query-cache-proxy
+  version: 2
+- provider: vault-secret
+  path: app-interface/app-sre/telemeter-production/jaeger-proxy
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre/telemeter-production/conprof-proxy
   version: 1
 - provider: vault-secret
   path: app-interface/app-sre/telemeter-production/querier-proxy
@@ -120,16 +112,22 @@ openshiftResources:
     app: thanos-querier
 - provider: vault-secret
   path: app-interface/app-sre/telemeter-production/querier-cache-proxy
-  version: 1
+  version: 2
 - provider: vault-secret
   path: app-interface/app-sre/telemeter-production/compact-proxy
   version: 1
 
+# Prometheus-telemeter Serviceaccount
+# Required for authn/authz by openshift-oauth-proxy containers
+# Todo we need to break it down to per-component serviceaccounts
+- provider: resource
+  path: /app-sre/telemeter-production/prometheus-telemeter.serviceaccount.yaml
+- provider: resource
+  path: /app-sre/telemeter-production/prometheus-telemeter.clusterrole.yml
+
 # Consumer Serviceaccounts:
 - provider: resource
   path: /app-sre/telemeter-production/uhc-prometheus-access.serviceaccount.yaml
-- provider: resource
-  path: /app-sre/telemeter-production/prometheus-telemeter.serviceaccount.yaml
 
 # Temporary Route as part of https://issues.redhat.com/browse/APPSRE-1491
 - provider: resource

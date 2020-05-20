@@ -13,15 +13,29 @@ cluster:
 app:
   $ref: /services/insights/approval/app.yml
 
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stage-01.yml
+- $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+
 managedRoles: true
 
 managedResourceTypes:
+- ServiceAccount
 - Secret
 
 openshiftResources:
 - provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
   path: insights/secrets/insights-stage/approval-stage/approval-api-secrets
-  version: 1
+  version: 2
 - provider: vault-secret
   path: insights/secrets/insights-stage/approval-stage/approval-pam-secrets
   version: 1
@@ -46,5 +60,24 @@ terraformResources:
 - provider: rds
   account: insights-stage
   identifier: approval-stage
-  defaults: /terraform/resources/insights/stage/rds-1.yml
+  defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
+  overrides:
+    username: "insights"
+    name: "approval_production"
+  parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-approval-stage.yml
   output_resource_name: approval-db
+  enhanced_monitoring: true
+- provider: rds
+  account: insights-stage
+  identifier: approval-pam-stage
+  defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
+  overrides:
+    name: "pam_production"
+  parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-approval-stage.yml
+  output_resource_name: pam-db
+  enhanced_monitoring: true
+- provider: cloudwatch
+  account: insights-stage
+  identifier: approval-stage
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch

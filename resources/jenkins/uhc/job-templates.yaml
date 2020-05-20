@@ -43,6 +43,34 @@
     <<: *gl_build_master
 
 - job-template:
+    id: 'ocm-pr-check-selenium'
+    name: '{gl_group}-{gl_project}-pr-check-selenium'
+    environment: staging
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *ocm_selenium_tests
+    publishers:
+    - archive:
+        artifacts: 'run/output/embedded_files/**'
+        allow-empty: 'true'
+    - junit:
+        results: 'run/output/junit-report/*.xml'
+        test-stability: true
+        claim-build: true
+        measurement-plots: true
+        flaky-test-reports: true
+        junit-attachments: true
+        allow-empty-results: true
+    - gitlab_message:
+        <<: *gitlab_message_defaults
+    - gitlab-notifier
+    <<: *gl_pr_check
+
+- job-template:
     id: 'ocm-pr-check'
     name: '{gl_group}-{gl_project}-ocm-pr-check'
     environment: production
@@ -101,6 +129,7 @@
     - gitlab_message:
         <<: *gitlab_message_defaults
     - gitlab-notifier
+    - workspace-cleanup
     <<: *gl_pr_check
 
 - job-template:
@@ -177,4 +206,20 @@
         - *api_tests_sentry_dsn
     ci_cmd: ./periodic_check.sh
     cron_expression: '0 */6 * * *'
+    publishers:
+    - workspace-cleanup
     <<: *gl_timed
+
+- job-template:
+    id: 'ocm-build-image'
+    name: '{gl_group}-{gl_project}-ocm-build-image'
+    environment: production
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *quay_secret_push
+        - *api_tests_sentry_dsn
+    <<: *gl_build_master

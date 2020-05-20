@@ -1,0 +1,62 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: app-sre-observability-stage
+description: staging namespace for the app-sre observability stack
+
+cluster:
+  $ref: /openshift/quayio-stage/cluster.yml
+
+app:
+  $ref: /services/observability/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.quayio-stage.yml
+
+openshiftAcme:
+  config:
+    $ref: /dependencies/openshift/acme/v4.yml
+  accountSecret:
+    provider: vault-secret
+    path: app-interface/app-sre/app-sre-observability-stage/acme-account
+    version: 1
+
+managedRoles: true
+
+managedResourceTypes:
+- ConfigMap
+- Route
+
+openshiftResources:
+# Route
+## Alertmanager
+- provider: resource-template
+  type: jinja2
+  path: /observability/alertmanager.route.yaml
+  variables:
+    environment: ''
+    host: alertmanager.quayio-stage.devshift.net
+    service_name: nginx-proxy
+    target_port: 8080
+## AppSRE Prometheus
+- provider: resource-template
+  type: jinja2
+  path: /observability/prometheus.route.yaml
+  variables:
+    environment: ''
+    host: prometheus.quayio-stage.devshift.net
+    service_name: nginx-proxy
+    target_port: 8080
+
+## Nginx proxy configmap
+- provider: resource-template
+  type: jinja2
+  path: /observability/nginx-proxy.configmap.yaml
+  variables:
+    prometheus_server_name: prometheus.quayio-stage.devshift.net
+    alertmanager_server_name: alertmanager.quayio-stage.devshift.net

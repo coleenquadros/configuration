@@ -1,0 +1,66 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: unleash
+description: namespace for unleash
+
+cluster:
+  $ref: /openshift/app-sre-stage-01/cluster.yml
+
+app:
+  $ref: /services/unleash/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+- $ref: /services/app-interface/namespaces/app-interface-stage.yml
+
+openshiftAcme:
+  config:
+    $ref: /dependencies/openshift/acme/v4.yml
+  accountSecret:
+    provider: vault-secret
+    path: app-sre/unleash/acme-account
+    version: 1
+
+managedRoles: true
+
+managedResourceTypes:
+- Route
+- Secret
+
+openshiftResources:
+- provider: vault-secret
+  path: app-sre/unleash/app-interface-stage-config
+  version: 1
+- provider: vault-secret
+  path: app-sre/unleash/app-interface-stage-token
+  version: 1
+- provider: route
+  path: /app-sre-stage/unleash/app-interface.route.yaml
+- provider: vault-secret
+  path: app-sre/unleash/ocm-stage-config
+  version: 1
+- provider: vault-secret
+  path: app-sre/unleash/ocm-stage-unleash-token
+  version: 1
+- provider: route
+  path: /app-sre-stage/unleash/ocm.route.yaml
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: app-sre
+  identifier: app-interface-unleash-stage
+  defaults: /terraform/resources/unleash/rds-1.yml
+  output_resource_name: app-interface-stage-unleash-rds
+- provider: rds
+  account: app-sre
+  identifier: ocm-stage-unleash
+  defaults: /terraform/resources/unleash/rds-1.yml
+  output_resource_name: ocm-stage-unleash-rds

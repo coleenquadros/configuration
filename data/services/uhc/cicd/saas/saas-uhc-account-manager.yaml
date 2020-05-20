@@ -1,0 +1,163 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: uhc
+
+name: saas-uhc-account-manager
+description: SaaS tracking file for UHC Account manager
+
+app:
+  $ref: /services/uhc/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: service-development-b
+
+managedResourceTypes:
+- Deployment
+- Service
+- CronJob
+
+imagePatterns:
+- quay.io/app-sre/uhc-account-manager
+- quay.io/app-sre/centos
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+resourceTemplates:
+- name: uhc-account-manager
+  url: https://gitlab.cee.redhat.com/service/uhc-account-manager
+  path: /templates/service-template.yml
+  parameters:
+    ENVIRONMENT: production
+    IMAGE_REGISTRY: quay.io
+    IMAGE_REPOSITORY: app-sre/uhc-account-manager
+    JWKS_URL: https://api.openshift.com/.well-known/jwks.json
+    RHIT_BASE_USER_URL: https://user.api.redhat.com/v2/
+    RHIT_BASE_SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5/
+    RHIT_BASE_REGISTRY_URL: https://container-registry-authorizer.api.redhat.com/v1/
+    RHIT_BASE_REGNUM_URL: https://subscription.api.redhat.com/svcrest/regnum/v5/
+    OCR_PROXY_URL: ""
+    AUTOMATIC_BAN: "true"
+    ENABLE_QUOTA_ENFORCEMENT: "false"
+    REPLICAS: 4
+    SUBSCRIPTION_BASED_DATA_RECONCILER_DRY_RUN: "false"
+    DEPROVISION_OLD_SUBSCRIPTIONS_DRY_RUN: "false"
+    SUBSCRIPTION_STATUS_RECONCILER_DRY_RUN: "false"
+    SUBSCRIPTION_STATUS_RECONCILER_SCHEDULE_EXPRESSION: "0 */3 * * *"
+    EBS_ACCOUNT_RECONCILER_DRY_RUN: "false"
+    EBS_ACCOUNT_RECONCILER_CRON_SCHEDULE: "0 * * * *"
+    OCP_USAGE_RECONCILER_CRON_SCHEDULE: "0 */2 * * *"
+    OCP_USAGE_CLEANER_CRON_SCHEDULE: "0 */5 * * *"
+    OCP_USAGE_RECONCILER_LATEST_CRON_SCHEDULE: "*/15 * * * *"
+    USE_CANDLEPIN_BASIC_AUTH: "false"
+    OCR_CACHE_DURATION: "1h"
+    OCR_TIMEOUT: "5s"
+    OCR_BACKGROUND_TIMEOUT: "20s"
+    ENABLE_SENTRY: "true"
+    RHIT_TIMEOUT: "10s"
+    OCP_USAGE_RECONCILER_WORKER_COUNT: "1"
+    OCP_USAGE_CLEANER_WORKER_COUNT: "1"
+    OCP_USAGE_RECONCILER_LATEST_WORKER_COUNT: "1"
+    OCP_USAGE_RECONCILER_ACTIVE_DEADLINE_SECONDS: "21600"
+    OCP_USAGE_CLEANER_ACTIVE_DEADLINE_SECONDS: "30000"
+    OCP_USAGE_RECONCILER_LATEST_ACTIVE_DEADLINE_SECONDS: "3600"
+  targets:
+  - namespace:
+      $ref: /services/uhc/namespaces/uhc-integration.yml
+    ref: master
+    upstream: service-uhc-account-manager-gl-build-master
+    parameters:
+      RHIT_BASE_CANDLEPIN_URL: https://admin.rhsm.stage.redhat.com/candlepin
+      USE_CANDLEPIN_BASIC_AUTH: "true"
+      OCR_BASE_URL: https://rhstage.ocr-inc.com
+      UHC_BASE_URL: https://api-integration.6943.hive-integration.openshiftapps.com
+      CLUSTER_REG_RATE_LIMIT: 30000
+      ENABLE_QUOTA_ENFORCEMENT: "true"
+      DB_MAX_OPEN_CONNS: 250
+      SENTRY_URL: "sentry.autom8.in"
+      SENTRY_PROJECT: "9"
+      GLOG_V: 5
+      # Deprovision old subs only every friday in INT since it will break test subscriptions for CS when it runs
+      DEPROVISION_OLD_SUBSCRIPTIONS_CRON_SCHEDULE: "0 23 * * 5"
+      # Update the value to any random string to perform a rolling update of the deployment.
+      UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_1
+      SUBSCRIPTION_BASED_DATA_RECONCILER_CRON_SCHEDULE: "*/30 * * * *"
+      SUBSCRIPTION_STATUS_RECONCILER_EVALUATION_DURATION: "24h"
+      # Don't run OCP Usage reconciliation jobs in int, since they just fail anyway without a public rhsm stage endpoint
+      # Suspension params should always be env specific
+      SUSPEND_ACCOUNT_RECONCILER_CRON: "false"
+      SUSPEND_DEPROVISION_OLD_SUBSCRIPTIONS_CRON: "false"
+      SUSPEND_OCP_USAGE_RECONCILER_CRON: "true"
+      SUSPEND_OCP_USAGE_CLEANER_CRON: "true"
+      SUSPEND_OCP_USAGE_RECONCILER_LATEST_CRON: "true"
+      SUSPEND_SUBSCRIPTION_STATUS_RECONCILER_CRON: "false"
+      SUSPEND_SUBSCRIPTION_BASED_DATA_RECONCILER_CRON: "false"
+      SUSPEND_EBS_ACCOUNT_RECONCILER_CRON: "false"
+      ACCOUNT_RECONCILER_CRON_SCHEDULE: "30 18 * * *"
+      ACCOUNT_RECONCILER_DRY_RUN: "false"
+  # - namespace:
+  #     $ref: /services/uhc/namespaces/uhc-stage.yml
+  #   ref: master
+  #   upstream: service-uhc-account-manager-gl-build-master
+  #   parameters:
+  #     RHIT_BASE_CANDLEPIN_URL: https://admin.rhsm.stage.redhat.com/candlepin
+  #     OCR_BASE_URL: https://rhstage.ocr-inc.com
+  #     UHC_BASE_URL: https://api.stage.openshift.com
+  #     CLUSTER_REG_RATE_LIMIT: 30000
+  #     ENABLE_QUOTA_ENFORCEMENT: "true"
+  #     DB_MAX_OPEN_CONNS: 750
+  #     SENTRY_URL: "sentry.stage.devshift.net"
+  #     SENTRY_PROJECT: "10"
+  #     GLOG_V: 5
+  #     DEPROVISION_OLD_SUBSCRIPTIONS_CRON_SCHEDULE: "30 17 * * *"
+  #     # Update the value to any random string to perform a rolling update of the deployment.
+  #     UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_1
+  #     SUBSCRIPTION_BASED_DATA_RECONCILER_CRON_SCHEDULE: "*/30 * * * *"
+  #     # Don't run OCP Usage reconciliation jobs in stage, since they just fail anyway without a public rhsm stage endpoint
+  #     # Suspension params should always be env specific
+  #     SUSPEND_ACCOUNT_RECONCILER_CRON: "false"
+  #     SUSPEND_DEPROVISION_OLD_SUBSCRIPTIONS_CRON: "false"
+  #     SUSPEND_OCP_USAGE_RECONCILER_CRON: "true"
+  #     SUSPEND_OCP_USAGE_CLEANER_CRON: "true"
+  #     SUSPEND_OCP_USAGE_RECONCILER_LATEST_CRON: "true"
+  #     SUSPEND_SUBSCRIPTION_STATUS_RECONCILER_CRON: "false"
+  #     SUSPEND_SUBSCRIPTION_BASED_DATA_RECONCILER_CRON: "false"
+  #     SUSPEND_EBS_ACCOUNT_RECONCILER_CRON: "false"
+  # - namespace:
+  #     $ref: /services/uhc/namespaces/uhc-production.yml
+  #   ref: 89de99a5cebcdfbfe6908d7cd31557ec9194d5af
+  #   parameters:
+  #     RHIT_BASE_CANDLEPIN_URL: https://admin.rhsm.redhat.com/candlepin
+  #     OCR_BASE_URL: https://rhprod.ocr-inc.com
+  #     UHC_BASE_URL: https://api.openshift.com
+  #     OCR_EMAIL: exportcompliance@redhat.com
+  #     CLUSTER_REG_RATE_LIMIT: 250
+  #     ENABLE_QUOTA_ENFORCEMENT: "true"
+  #     DB_MAX_OPEN_CONNS: 750
+  #     SENTRY_URL: "sentry.devshift.net"
+  #     SENTRY_PROJECT: "2"
+  #     GLOG_V: 1
+  #     ACCOUNT_RECONCILER_CRON_SCHEDULE: "30 18 * * *"
+  #     ACCOUNT_RECONCILER_DRY_RUN: "false"
+  #     DEPROVISION_OLD_SUBSCRIPTIONS_CRON_SCHEDULE: "30 17 * * *"
+  #     SUBSCRIPTION_BASED_DATA_RECONCILER_CRON_SCHEDULE: "1 * * * *"
+  #     # Suspension params should always be env specific
+  #     SUSPEND_DEPROVISION_OLD_SUBSCRIPTIONS_CRON: "false"
+  #     SUSPEND_OCP_USAGE_RECONCILER_CRON: "false"
+  #     SUSPEND_OCP_USAGE_CLEANER_CRON: "false"
+  #     SUSPEND_OCP_USAGE_RECONCILER_LATEST_CRON: "true"
+  #     SUSPEND_SUBSCRIPTION_STATUS_RECONCILER_CRON: "false"
+  #     SUSPEND_SUBSCRIPTION_BASED_DATA_RECONCILER_CRON: "false"
+  #     SUSPEND_EBS_ACCOUNT_RECONCILER_CRON: "false"
+  #     SUSPEND_ACCOUNT_RECONCILER_CRON: "false"
+  #     # Update the value to any random string to perform a rolling update of the deployment.
+  #     UPDATE_DEPLOYMENT_CONFIG_CHANGE: roll_for_job_enablement

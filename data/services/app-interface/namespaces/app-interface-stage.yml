@@ -12,6 +12,9 @@ cluster:
 app:
   $ref: /services/app-interface/app.yml
 
+environment:
+  $ref: /products/app-interface/environments/stage.yml
+
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
 
@@ -39,17 +42,21 @@ openshiftResources:
   path: /app-sre-stage/app-interface-stage/app-interface.configmap.yaml
 - provider: vault-secret
   path: app-interface/app-sre-stage/app-interface-stage/app-interface
-  version: 3
+  version: 5
 - provider: route
   path: /app-sre-stage/app-interface-stage/app-interface.route.yaml
 - provider: vault-secret
   path: app-interface/app-sre-stage/app-interface-stage/qontract-reconcile-toml
   version: 2
+- name: unleash
+  provider: vault-secret
+  path: app-sre/unleash/app-interface-token
+  version: 1
 
 managedTerraformResources: true
 
 terraformResources:
-- provider: service-account
+- provider: aws-iam-service-account
   account: app-sre
   identifier: app-interface-sqs-reader
   variables:

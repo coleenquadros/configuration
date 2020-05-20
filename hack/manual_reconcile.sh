@@ -84,7 +84,7 @@ run_int gitlab-fork-compliance $gitlabMergeRequestTargetProjectId $gitlabMergeRe
 
 ## Run integrations on production
 ALIAS=jenkins-job-builder-no-compare run_int jenkins-job-builder --no-compare &
-ALIAS=owner-approvals-no-compare run_int owner-approvals $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid --no-compare &
+ALIAS=saas-file-owners-no-compare run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid --no-compare &
 
 # Prepare to run integrations on local server
 
@@ -113,8 +113,11 @@ cat "$CONFIG_TOML" \
 
 ## Run integrations on local server
 run_int github &
+run_int github-owners &
+run_int github-validator &
 run_int github-repo-invites &
 run_int service-dependencies &
+run_int user-validator &
 run_int quay-membership &
 run_int quay-repos &
 run_vault_reconcile_integration &
@@ -127,6 +130,7 @@ run_int jenkins-plugins &
 run_int jenkins-roles &
 run_int jenkins-job-builder &
 run_int jenkins-webhooks &
+run_int jenkins-webhooks-cleaner &
 run_int aws-iam-keys &
 run_int gitlab-members &
 run_int gitlab-projects &
@@ -139,20 +143,24 @@ run_int openshift-resources &
 run_int openshift-network-policies &
 run_int openshift-acme &
 run_int openshift-limitranges &
+run_int openshift-resourcequotas &
 run_int openshift-serviceaccount-tokens &
 run_int terraform-resources &
 run_int terraform-users &
 run_int terraform-vpc-peerings &
 run_int ldap-users $gitlabMergeRequestTargetProjectId &
-run_int owner-approvals $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid &
+run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid &
+run_int openshift-performance-parameters &
 # Conditionally run integrations according to MR title
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"slack"* ]] && run_int slack-usergroups &
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"sentry"* ]] && run_int sentry-config &
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"mirror"* ]] && run_int quay-mirror &
+[[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *" saas "* ]] && run_int openshift-saas-deploy &
 # Add STATE=true to integrations that interact with a state
+STATE=true run_int openshift-saas-deploy-trigger-configs &
 STATE=true run_int sql-query &
 STATE=true run_int email-sender &
-STATE=true run_int openshift-saas-deploy &
+STATE=true run_int requests-sender &
 
 wait
 }

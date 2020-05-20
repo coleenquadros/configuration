@@ -13,13 +13,23 @@ cluster:
 app:
   $ref: /services/insights/advisor/app.yml
 
+environment:
+  $ref: /products/insights/environments/production.yml
+
 managedRoles: true
 
 managedResourceTypes:
+- ServiceAccount
 - Secret
 - ConfigMap
 
 openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-prod/shared/private-image-puller.serviceaccount.yaml
 - provider: vault-secret
   path: insights/secrets/insights-prod/advisor-prod/classic-creds
   version: 1
@@ -41,3 +51,31 @@ openshiftResources:
   path: insights/secrets/backoffice/advisor-prod
   version: 2
   name: backoffice
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-prod
+  identifier: advisor-prod
+  defaults: /terraform/resources/insights/production/rds-1.yml
+  overrides:
+    snapshot_identifier: advisor-prod-migration-april9
+    username: insightsapi
+    engine_version: "10.10"
+    allocated_storage: 500
+    name: insightsapi
+    monitoring_interval: 60
+  enhanced_monitoring: true
+  output_resource_name: advisor-db
+  parameter_group: /terraform/resources/insights/production/advisor-rds-master-postgres10-parameter-group-1.yml
+- provider: rds
+  account: insights-prod
+  identifier: advisor-prod-readonly
+  availability_zone: us-east-1d
+  defaults: /terraform/resources/insights/production/advisor-prod-rds-read-replica-us-east-1.yml
+  overrides:
+    monitoring_interval: 60
+  output_resource_name: advisor-readonly-db
+  enhanced_monitoring: true
+  parameter_group: /terraform/resources/insights/production/advisor-rds-read-replica-postgres10-parameter-group-1.yml

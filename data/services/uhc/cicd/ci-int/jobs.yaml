@@ -29,6 +29,7 @@ config:
     - 'ocm-pr-check':
         display_name: UHC clusters service check merge request
         html_publisher_dir: '.'
+        concurrent_build: false
     - 'gl-build-master':
         display_name: UHC clusters service build master branch
         saas_git: 'https://gitlab.cee.redhat.com/service/saas-uhc-clusters-service.git'
@@ -40,6 +41,7 @@ config:
         kube_namespace: uhc-integration
         upstream: service-uhc-clusters-service-gl-build-master
         build_deploy_script_path: 'true'
+        disable: true
     - 'gl-build-master':
         display_name: UHC clusters service build next branch
         branch: 'next'
@@ -96,6 +98,7 @@ config:
         kube_cluster: hive-integration
         upstream: service-uhc-gateway-gl-build-master
         build_deploy_script_path: 'true'
+        disable: 'true'
 
 - project:
     name: uhc-gateway-cd
@@ -140,6 +143,7 @@ config:
         kube_cluster: hive-integration
         upstream: service-uhc-account-manager-gl-build-master
         build_deploy_script_path: 'true'
+        disable: 'true'
 
 - project:
     name: uhc-account-manager-cd
@@ -171,8 +175,10 @@ config:
     saas_git: https://gitlab.cee.redhat.com/service/saas-uhc-portal.git
     quay_org: app-sre
     jobs:
-    - 'gl-pr-check':
+    - 'ocm-pr-check-selenium':
         display_name: UHC portal check merge request
+        # Runs services on fixed ports and container names
+        concurrent_build: false
     - 'uhc-cloud-redhat-com-push-insights':
         display_name: UHC portal deploy to cloud.redhat.com/beta
         mode: beta
@@ -288,7 +294,7 @@ config:
     gl_group: service
     gl_project: api-tests
     jobs:
-    - 'ocm-build-master':
+    - 'ocm-build-image':
         display_name: API Tests build image
         concurrent_build: false
     - 'ocm-pr-check':
@@ -331,7 +337,6 @@ config:
         concurrent_build: true
     - 'gl-build-master':
         display_name: OCM service log deploy to staging
-        kube_cluster: none
     - 'gl-build-master-with-upstream':
         display_name: OCM service log deploy to integration
         kube_namespace: uhc-integration

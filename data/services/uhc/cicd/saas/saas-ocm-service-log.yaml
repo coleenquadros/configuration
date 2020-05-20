@@ -10,25 +10,34 @@ description: 'SaaS tracking file for OCM Service Log'
 app:
   $ref: /services/uhc/app.yml
 
-managedResourceTypes:
-- Deployment
-- Service
-
-authentication:
-  image:
-    path: app-sre/quay/app-sre-pull
-    field: all
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: service-development-b
 
+managedResourceTypes:
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/app-sre/ocm-service-log
+- quay.io/app-sre/centos
+# temporary until this is promoted to production
+# https://gitlab.cee.redhat.com/service/ocm-service-log/commit/5de88924230f04b360fe6ec397be4d7d3edcc93f
+- centos
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
 resourceTemplates:
 - name: ocm-service-log
   url: https://gitlab.cee.redhat.com/service/ocm-service-log
   path: /templates/service-template.yml
-  hash_length: 7
   parameters:
     ENVIRONMENT: production
     IMAGE_REGISTRY: quay.io
@@ -38,7 +47,8 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/uhc/namespaces/uhc-stage.yml
-    hash: master
+    ref: master
+    upstream: service-ocm-service-log-gl-build-master
     parameters:
       OCM_BASE_URL: https://api.stage.openshift.com
       GLOG_V: 5
@@ -47,15 +57,15 @@ resourceTemplates:
       SENTRY_PROJECT: 15
   - namespace:
       $ref: /services/uhc/namespaces/uhc-integration.yml
-    hash: master
+    ref: master
+    upstream: service-ocm-service-log-gl-build-master
     parameters:
       OCM_BASE_URL: https://api-integration.6943.hive-integration.openshiftapps.com
       GLOG_V: 5
       OCM_DEBUG: true
   - namespace:
       $ref: /services/uhc/namespaces/uhc-production.yml
-    hash: faca923d6ab4b7e33c1be1199430e7f56ab1427c
-    notify: true
+    ref: 20d69cc5ab8ee5eae07fa00627a2d94070269de5
     parameters:
       OCM_BASE_URL: https://api.openshift.com
       GLOG_V: 1

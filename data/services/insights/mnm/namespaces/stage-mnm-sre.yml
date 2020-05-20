@@ -13,17 +13,34 @@ cluster:
 app:
   $ref: /services/insights/mnm/app.yml
 
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stage-01.yml
+
 managedRoles: true
 
 managedResourceTypes:
+- ServiceAccount
 - Route
 - Secret
 
 openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
 - provider: route
   path: /insights-stage/stage-mnm-sre/prometheus.route.yml
 - provider: route
   path: /insights-stage/stage-mnm-sre/prometheus-am.route.yml
+- provider: route
+  path: /insights-stage/stage-mnm-sre/grafana.route.yml
+- provider: route
+  path: /insights-stage/stage-mnm-sre/thanos-query.route.yml
 - provider: vault-secret
   path: insights/secrets/insights-stage/mnm-sre/prometheus-cookie
   version: 1
@@ -31,9 +48,13 @@ openshiftResources:
   path: insights/secrets/insights-stage/mnm-sre/prometheus-am-cookie
   version: 1
 - provider: vault-secret
+  path: insights/secrets/insights-stage/mnm-sre/grafana-cookie
+  version: 1
+- provider: vault-secret
   path: insights/quay/quay.io
   version: 3
   type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
 
 managedTerraformResources: true
 
@@ -42,3 +63,23 @@ terraformResources:
   account: insights-stage
   identifier: insights-thanos-stage
   defaults: /terraform/resources/s3-private-1.yml
+- provider: s3
+  account: insights-stage
+  identifier: insights-prometheus-stage
+  defaults: /terraform/resources/s3-private-1.yml
+- provider: s3
+  account: insights-stage
+  identifier: insights-grafana-stage
+  defaults: /terraform/resources/s3-private-1.yml
+- provider: cloudwatch
+  account: insights-stage
+  identifier: mnm-sre-stage
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: mnm-stage-cloudwatch
+- provider: aws-iam-service-account
+  account: insights-stage
+  identifier: cloudwatch-exporter
+  policies:
+  - CloudWatchReadOnlyAccess
+  output_resource_name: cloudwatch-exporter-iam-user
+

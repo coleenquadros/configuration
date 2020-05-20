@@ -13,22 +13,29 @@ cluster:
 app:
   $ref: /services/insights/rbac/app.yml
 
+environment:
+  $ref: /products/insights/environments/production.yml
+
 managedRoles: true
 
 managedResourceTypes:
+- ServiceAccount
 - Secret
 - ConfigMap
 
 openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-prod/shared/private-image-puller.serviceaccount.yaml
 - provider: resource
   path: /insights-prod/rbac-prod/rbac-env.configmap.yml
 - provider: resource
   path: /insights-prod/rbac-prod/redis-config.configmap.yml
 - provider: vault-secret
   path: insights/secrets/insights-prod/rbac-prod/rbac-secret
-  version: 1
-- provider: vault-secret
-  path: insights/secrets/insights-prod/rbac-prod/rbac-psks
   version: 1
 - provider: vault-secret
   path: insights/quay/quay.io

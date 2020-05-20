@@ -1,0 +1,123 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: openshift-customer-monitoring
+description: App-SRE OpenShift Application monitoring
+
+cluster:
+  $ref: /openshift/app-sre-stage-02/cluster.yml
+
+app:
+  $ref: /services/observability/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/stage.yml
+
+managedResourceTypes:
+- Secret
+- Service
+- Subscription
+- Prometheus
+- Alertmanager
+- PrometheusRule
+- ServiceMonitor
+
+managedResourceNames:
+# https://github.com/openshift/managed-cluster-config/blob/master/deploy/osd-customer-monitoring/05-role.yaml#L24-L37
+- resource: Secret
+  resourceNames:
+    - alertmanager-auth-proxy
+    - alertmanager-instance
+    - alertmanager-main
+    - alertmanager-main-proxy
+    - prometheus-additional-alertmanager-config
+    - prometheus-additional-scrape-config
+    - prometheus-auth-proxy
+- resource: Alertmanager
+  resourceNames:
+    - instance
+
+openshiftResources:
+# Prometheus operator
+- provider: resource-template
+  type: jinja2
+  path: /observability/prometheus/v4/app-sre.prometheus.yaml
+  variables:
+    clusterLabel: app-sre-stage-02
+    environment: staging
+    externalUrl: https://prometheus.app-sre-stage-02.devshift.net
+    version: v2.15.2
+    retention: 15d
+    pvSize: 50Gi
+    walCompression: true
+    logLevel: debug
+- provider: resource
+  path: /observability/prometheus/prometheus-app-sre.service.yaml
+- provider: resource
+  path: /observability/prometheus/prometheus-operator.service.yml
+- provider: resource
+  path: /observability/prometheus/prometheus-proxy.service.yaml
+- provider: resource
+  path: /observability/prometheus/v4/prometheus.subscription.yaml
+
+# AlertManager
+- provider: resource-template
+  type: jinja2
+  path: /observability/alertmanager/app-sre.alertmanager.yaml
+  variables:
+    replicas: 3
+    version: v0.20.0
+    environment: staging
+    externalUrl: https://alertmanager.app-sre-stage-02.devshift.net
+    oauthProxySecretName: alertmanager-auth-proxy
+    storageClassName: gp2
+    logLevel: info
+    alertmanagerName: instance
+- provider: resource
+  path: /observability/alertmanager/alertmanager-app-sre.service.yaml
+- provider: resource
+  path: /observability/alertmanager/alertmanager-proxy.service.yaml
+
+# Secrets
+## Observability
+### Prometheus additional alertmanager config
+### Defines what alertmanager Prometheus fires alerts to
+- provider: vault-secret
+  path: app-interface/global/observability/prometheus-additional-alertmanager-config
+  version: 1
+### Prometheus additional scrape config
+### Defines any additional jobs that don't fit into the servicemonitor model
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/prometheus/v4/prometheus-app-sre-additional-scrapeconfig-federate-only.secret.yaml
+### Prometheus oauth proxy configuration
+- provider: vault-secret
+  path: app-interface/app-sre-stage-02/openshift-customer-monitoring/prometheus/prometheus-auth-proxy
+  version: 1
+### Alertmanager oauth proxy configuration
+- provider: vault-secret
+  path: app-interface/app-sre-stage-02/openshift-customer-monitoring/alertmanager/alertmanager-auth-proxy
+  version: 1
+### Alertmanager configuration
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/alertmanager/alertmanager-instance.secret.yaml
+
+## Prometheus Rules
+### Prometheus Deadmanssnitch
+- provider: resource
+  path: /observability/prometheusrules/deadmanssnitch.prometheusrules.yaml
+### App SRE contract
+- provider: resource
+  path: /observability/prometheusrules/app-sre-contract.yaml
+### Federated Kubernetes metrics
+- provider: resource
+  path: /observability/prometheusrules/kube-metrics.prometheusrules.yaml
+### Prometheus mixin alerts
+- provider: resource
+  path: /observability/prometheusrules/prometheus-mixin.prometheusrules.yaml
+### App-SRE Prometheus
+- provider: resource
+  path: /observability/servicemonitors/prometheus-app-sre.servicemonitor.yaml

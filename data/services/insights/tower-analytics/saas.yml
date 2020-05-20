@@ -1,0 +1,76 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: tower-analytics
+  platform: insights
+
+name: tower-analytics
+description: tower-analytics app on the Insights Platform
+
+app:
+  $ref: /services/insights/tower-analytics/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  CLOUD_WATCH_LOG_GROUP: tower-analytics-stage
+
+resourceTemplates:
+- name: automation-analytics-notifications
+  path: /templates/automation-analytics/automation-analytics-notifications.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/tower-analytics/namespaces/stage-tower-analytics-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: f42c62a
+- name: automation-analytics-migrations
+  path: /templates/automation-analytics/automation-analytics-migrations.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/tower-analytics/namespaces/stage-tower-analytics-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: f42c62a
+- name: automation-analytics-processor
+  path: /templates/automation-analytics/automation-analytics-processor.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/tower-analytics/namespaces/stage-tower-analytics-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: f42c62a
+- name: tower-analytics-backend
+  path: /templates/automation-analytics/tower-analytics-backend.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/tower-analytics/namespaces/stage-tower-analytics-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: f42c62a

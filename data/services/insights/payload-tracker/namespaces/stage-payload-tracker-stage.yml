@@ -13,13 +13,26 @@ cluster:
 app:
   $ref: /services/insights/payload-tracker/app.yml
 
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stage-01.yml
+
 managedRoles: true
 
 managedResourceTypes:
+- ServiceAccount
 - Secret
 - ConfigMap
 
 openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
 - provider: vault-secret
   path: insights/quay/quay.io
   version: 3
@@ -29,6 +42,7 @@ openshiftResources:
 #  path: insights/secrets/insights-stage/payload-tracker-stage/payload-tracker-auth
 #  version: 1
 #  type: kubernetes.io/tls
+  name: quay-cloudservices-pull
 - provider: vault-secret
   path: insights/secrets/insights-stage/payload-tracker-stage/payload-tracker-cookie
   version: 1
@@ -42,7 +56,7 @@ openshiftResources:
   version: 1
 - provider: vault-secret
   path: insights/secrets/insights-stage/payload-tracker-stage/payload-tracker-kibana
-  version: 1
+  version: 2
 - provider: resource
   path: /insights-stage/payload-tracker-stage/payload-tracker-nginx-conf.configmap.yml
 
@@ -52,5 +66,12 @@ terraformResources:
 - provider: rds
   account: insights-stage
   identifier: payload-tracker-stage
-  defaults: /terraform/resources/insights/stage/rds-1.yml
+  defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
+  parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-payload-tracker-stage.yml
   output_resource_name: payload-tracker-db
+  enhanced_monitoring: true
+- provider: cloudwatch
+  account: insights-stage
+  identifier: payload-tracker-stage
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch

@@ -45,7 +45,7 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 1,
-      "iteration": 1583150862674,
+      "iteration": 1588859526386,
       "links": [],
       "panels": [
         {
@@ -59,7 +59,7 @@ data:
           },
           "id": 108,
           "panels": [],
-          "title": "Telemeter v1 Endpoints",
+          "title": "Telemeter v1 (/authorize & /upload)",
           "type": "row"
         },
         {
@@ -126,7 +126,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "1 - (\n  (\n    sum(increase(http_request_duration_seconds_count{job=\"telemeter-server\",code!~\"5..\",handler=\"authorize\"}[28d]))-\n    sum(increase(http_request_duration_seconds_bucket{job=\"telemeter-server\",code!~\"5..\",handler=\"authorize\",le=\"0.5\"}[28d]))\n  )\n  +\n  (\n    sum(increase(http_request_duration_seconds_count{job=\"telemeter-server\",code!~\"5..\",handler=\"upload\"}[28d]))-\n    sum(increase(http_request_duration_seconds_bucket{job=\"telemeter-server\",code!~\"5..\",handler=\"upload\",le=\"0.5\"}[28d]))\n  )\n  +\n  sum(increase(haproxy_server_http_responses_total{route=~\"telemeter-server-authorize|telemeter-server-upload\",code=\"5xx\"}[28d]))\n)\n/\nsum(increase(haproxy_server_http_responses_total{route=~\"telemeter-server-authorize|telemeter-server-upload\"}[28d]))\n",
+              "expr": "1 -\nsum(increase(haproxy_server_http_responses_total{route=~\"telemeter-server-authorize|telemeter-server-upload\",code=\"5xx\"}[28d]))\n/\nsum(increase(haproxy_server_http_responses_total{route=~\"telemeter-server-authorize|telemeter-server-upload\"}[28d]))\n",
               "instant": true,
               "refId": "A"
             }
@@ -145,6 +145,99 @@ data:
             }
           ],
           "valueName": "current"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "cacheTimeout": null,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fill": 10,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 19,
+            "x": 5,
+            "y": 1
+          },
+          "hiddenSeries": false,
+          "id": 114,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": false,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 0,
+          "links": [],
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [
+            {}
+          ],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "10 * (\n  (\n    1 -\n    sum(increase(haproxy_server_http_responses_total{route=~\"telemeter-server-authorize|telemeter-server-upload\",code=\"5xx\"}[28d]))\n    /\n    sum(increase(haproxy_server_http_responses_total{route=~\"telemeter-server-authorize|telemeter-server-upload\"}[28d]))\n  ) - 0.90\n)",
+              "instant": false,
+              "intervalFactor": 10,
+              "legendFormat": "errorbudget",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Error Budget (28d)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "percentunit",
+              "label": null,
+              "logBase": 1,
+              "max": "1",
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": false
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
         },
         {
           "datasource": null,
@@ -224,7 +317,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "1 - (\n  (\n    sum(increase(http_request_duration_seconds_count{job=\"telemeter-server\",code!~\"5..\",handler=\"authorize\"}[$__range]))-\n    sum(increase(http_request_duration_seconds_bucket{job=\"telemeter-server\",code!~\"5..\",handler=\"authorize\",le=\"0.5\"}[$__range]))\n  ) \n  +\n  sum(increase(haproxy_server_http_responses_total{route=\"telemeter-server-authorize\",code=\"5xx\"}[$__range]))\n)\n/\nsum(increase(haproxy_server_http_responses_total{route=\"telemeter-server-authorize\"}[$__range]))",
+              "expr": "1 -\nsum(increase(haproxy_server_http_responses_total{route=\"telemeter-server-authorize\",code=\"5xx\"}[$__range]))\n/\nsum(increase(haproxy_server_http_responses_total{route=\"telemeter-server-authorize\"}[$__range]))",
               "instant": true,
               "refId": "A"
             }
@@ -232,7 +325,7 @@ data:
           "thresholds": ".90,0.92",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Availability",
+          "title": "Availability (selected time range)",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -670,7 +763,7 @@ data:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "1 - (\n  (\n    sum(increase(http_request_duration_seconds_count{job=\"telemeter-server\",code!~\"5..\",handler=\"authorize\"}[$__range]))-\n    sum(increase(http_request_duration_seconds_bucket{job=\"telemeter-server\",code!~\"5..\",handler=\"authorize\",le=\"0.5\"}[$__range]))\n  )\n  +\n  (\n    sum(increase(http_request_duration_seconds_count{job=\"telemeter-server\",code!~\"5..\",handler=\"upload\"}[$__range]))-\n    sum(increase(http_request_duration_seconds_bucket{job=\"telemeter-server\",code!~\"5..\",handler=\"upload\",le=\"0.5\"}[$__range]))\n  )\n  +\n  sum(increase(haproxy_server_http_responses_total{route=~\"telemeter-server-authorize|telemeter-server-upload\",code=\"5xx\"}[$__range]))\n)\n/\nsum(increase(haproxy_server_http_responses_total{route=~\"telemeter-server-authorize|telemeter-server-upload\"}[$__range]))\n",
+              "expr": "1 -\nsum(increase(haproxy_server_http_responses_total{route=~\"telemeter-server-authorize|telemeter-server-upload\",code=\"5xx\"}[$__range]))\n/\nsum(increase(haproxy_server_http_responses_total{route=~\"telemeter-server-authorize|telemeter-server-upload\"}[$__range]))\n",
               "instant": true,
               "refId": "A"
             }
@@ -678,7 +771,7 @@ data:
           "thresholds": ".90,0.92",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Availability",
+          "title": "Availability (selected time range)",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1072,7 +1165,7 @@ data:
                 "h": 9,
                 "w": 3,
                 "x": 0,
-                "y": 21
+                "y": 30
               },
               "id": 106,
               "interval": null,
@@ -1114,7 +1207,7 @@ data:
               "tableColumn": "",
               "targets": [
                 {
-                  "expr": "1 - (\n  (\n    sum(increase(http_request_duration_seconds_count{job=\"telemeter-server\",code!~\"5..\",handler=\"receive\"}[$__range]))-\n    sum(increase(http_request_duration_seconds_bucket{job=\"telemeter-server\",code!~\"5..\",handler=\"receive\",le=\"0.1\"}[$__range]))\n  ) \n  +\n  sum(increase(haproxy_server_http_responses_total{route=\"telemeter-server-metrics-v1-receive\",code=\"5xx\"}[$__range]))\n)\n/\nsum(increase(haproxy_server_http_responses_total{route=\"telemeter-server-metrics-v1-receive\"}[$__range]))",
+                  "expr": "1 - \nsum(increase(haproxy_server_http_responses_total{route=\"telemeter-server-metrics-v1-receive\",code=\"5xx\"}[$__range]))\n/\nsum(increase(haproxy_server_http_responses_total{route=\"telemeter-server-metrics-v1-receive\"}[$__range]))",
                   "instant": true,
                   "refId": "A"
                 }
@@ -1122,7 +1215,7 @@ data:
               "thresholds": ".90,0.92",
               "timeFrom": null,
               "timeShift": null,
-              "title": "Availability",
+              "title": "Availability (selected time range)",
               "type": "singlestat",
               "valueFontSize": "80%",
               "valueMaps": [
@@ -1151,7 +1244,7 @@ data:
                 "h": 9,
                 "w": 7,
                 "x": 3,
-                "y": 21
+                "y": 30
               },
               "hiddenSeries": false,
               "id": 95,
@@ -1269,7 +1362,7 @@ data:
                 "h": 9,
                 "w": 7,
                 "x": 10,
-                "y": 21
+                "y": 30
               },
               "hiddenSeries": false,
               "id": 98,
@@ -1371,7 +1464,7 @@ data:
                 "h": 9,
                 "w": 7,
                 "x": 17,
-                "y": 21
+                "y": 30
               },
               "hiddenSeries": false,
               "id": 93,
@@ -2291,8 +2384,9 @@ data:
         "list": [
           {
             "current": {
-              "text": "app-sre-prometheus",
-              "value": "app-sre-prometheus"
+              "selected": false,
+              "text": "app-sre-prod-02-prometheus",
+              "value": "app-sre-prod-02-prometheus"
             },
             "hide": 0,
             "includeAll": false,
@@ -2308,7 +2402,12 @@ data:
           },
           {
             "allValue": null,
-            "current": {},
+            "current": {
+              "isNone": true,
+              "selected": true,
+              "text": "None",
+              "value": ""
+            },
             "datasource": "$datasource",
             "definition": "label_values(kube_pod_info, cluster)",
             "hide": 0,
@@ -2330,7 +2429,10 @@ data:
           },
           {
             "allValue": null,
-            "current": {},
+            "current": {
+              "text": "telemeter-production",
+              "value": "telemeter-production"
+            },
             "datasource": "$datasource",
             "definition": "label_values(kube_pod_info{cluster=\"$cluster\"}, namespace)",
             "hide": 0,
@@ -2353,7 +2455,7 @@ data:
         ]
       },
       "time": {
-        "from": "now-24h",
+        "from": "now-6h",
         "to": "now"
       },
       "timepicker": {
@@ -2390,3 +2492,5 @@ kind: ConfigMap
 metadata:
   creationTimestamp: null
   name: grafana-dashboard-telemeter
+
+

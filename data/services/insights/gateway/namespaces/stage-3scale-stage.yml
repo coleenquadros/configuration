@@ -5,7 +5,7 @@ labels:
   service: gateway
 
 name: 3scale-stage
-description: Insights 3scale-stage on the DEV cluster under e2e-deploy/ocdeployer management
+description: Insights 3scale-stage on the Stage cluster under e2e-deploy/ocdeployer management
 
 cluster:
   $ref: /openshift/insights/crc-stage-01.yml
@@ -13,24 +13,54 @@ cluster:
 app:
   $ref: /services/insights/gateway/app.yml
 
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stage-01.yml
+
 managedRoles: true
 
 managedResourceTypes:
+- ServiceAccount
 - Secret
+- Route
 
 openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource
+  path: /insights-stage/3scale-stage/api-gateway-stage.route.yml
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
 - provider: vault-secret
   path: insights/secrets/insights-stage/3scale-stage/apicast-configuration-url-secret
   version: 1
 - provider: vault-secret
   path: insights/secrets/insights-stage/3scale-stage/apicast-insights-3scale-config
-  version: 1
-- provider: vault-secret
-  path: insights/secrets/insights-stage/3scale-stage/apicast-insights-services-cert
-  version: 1
+  version: 9
 - provider: vault-secret
   path: insights/secrets/insights-stage/3scale-stage/apicast-insights-services-ephemeral-jwt-pub-key
   version: 1
 - provider: vault-secret
   path: insights/secrets/insights-stage/3scale-stage/cloudservices-threescale-pull-secret
   version: 1
+- provider: vault-secret
+  path: insights/secrets/insights-stage/3scale-stage/gateway-server
+  version: 2
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-stage
+  identifier: 3scale-stage
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch

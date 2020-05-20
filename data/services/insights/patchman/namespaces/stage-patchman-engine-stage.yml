@@ -13,6 +13,13 @@ cluster:
 app:
   $ref: /services/insights/patchman/app.yml
 
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stage-01.yml
+- $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+
 managedRoles: true
 
 managedTerraformResources: true
@@ -21,5 +28,35 @@ terraformResources:
 - provider: rds
   account: insights-stage
   identifier: patchman-stage
-  defaults: /terraform/resources/insights/stage/rds-1.yml
+  defaults: /terraform/resources/insights/stage/rds/postgres12-rds-1.yml
+  parameter_group: /terraform/resources/insights/stage/rds/postgres12-parameter-group-patchman-stage.yml
   output_resource_name: patchman-db
+  enhanced_monitoring: true
+- provider: aws-iam-service-account
+  account: insights-stage
+  identifier: patchman-aws-stageee
+  policies:
+  - CloudWatchReadOnlyAccess
+  output_resource_name: patchman-aws
+- provider: cloudwatch
+  account: insights-stage
+  identifier: patchman-stage
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+
+managedResourceTypes:
+- ServiceAccount
+- Secret
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml

@@ -13,12 +13,26 @@ cluster:
 app:
   $ref: /services/insights/hooks/app.yml
 
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stage-01.yml
+- $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+
 managedRoles: true
 
 managedResourceTypes:
+- ServiceAccount
 - Secret
 
 openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
 - provider: vault-secret
   path: insights/secrets/insights-stage/hooks-stage/hooks-backend
   version: 1
@@ -40,5 +54,9 @@ terraformResources:
 - provider: rds
   account: insights-stage
   identifier: hooks-stage
-  defaults: /terraform/resources/insights/stage/rds-1.yml
+  defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
+  overrides:
+    username: "insights"
+  parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-hooks-stage.yml
   output_resource_name: hooks-db
+  enhanced_monitoring: true

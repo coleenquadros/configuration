@@ -1,0 +1,87 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: advisor
+  platform: insights
+
+name: advisor
+description: advisor app on the Insights Platform
+
+app:
+  $ref: /services/insights/advisor/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  CW_LOG_STREAM: advisor-stage
+
+resourceTemplates:
+- name: content-server
+  path: /templates/advisor/content-server.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/advisor/namespaces/stage-advisor-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 884b55f
+- name: insights-advisor-service
+  path: /templates/advisor/insights-advisor-service.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  parameters:
+    CPU_LIMIT: '2'
+    CW_LOG_GROUP: advisor-stage
+    MAX_REPLICAS: 8
+    MIN_REPLICAS: 2
+  targets:
+  - namespace:
+      $ref: /services/insights/advisor/namespaces/stage-advisor-stage.yml
+    ref: master
+    parameters:
+      ADVISOR_ENV: stage
+      IMAGE_TAG: f1cd64c
+- name: insights-advisor-api
+  path: /templates/advisor/insights-advisor-api.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  parameters:
+    CPU_LIMIT: '1'
+    CW_LOG_GROUP: advisor-stage
+    INVENTORY_CONCURRENCY_LEVEL: 20
+    MAX_REPLICAS: 12
+    MIN_REPLICAS: 4
+    SUSPEND_COMPARE_ACTIVE_RULES: 'false'
+    SUSPEND_STALE_HOST_JOB: 'true'
+    SUSPEND_VACUUM_JOB: 'false'
+    SUSPEND_WARM_CACHE: 'false'
+    SUSPEND_WEEKLY_REPORT_JOB: 'true'
+    USE_CLOUDWATCH_LOGGING: 'true'
+    USE_NEWRELIC: 'true'
+    USE_PROMETHEUS: 'true'
+  targets:
+  - namespace:
+      $ref: /services/insights/advisor/namespaces/stage-advisor-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: da91910

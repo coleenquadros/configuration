@@ -1,0 +1,46 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: rule-nomination-api
+  platform: insights
+
+name: rule-nomination-api
+description: rule-nomination-api app on the Insights Platform
+
+app:
+  $ref: /services/insights/rule-nomination-api/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: rule-nomination-api
+  path: /templates/rule-nomination-api/rule-nomination-api.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/rule-nomination-api/namespaces/stage-rule-nomination-api-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 0693af6
