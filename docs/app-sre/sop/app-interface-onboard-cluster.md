@@ -1,25 +1,28 @@
+<!-- TOC -->
+
 - [Onboard a new OSDv4 cluster to app-interface](#onboard-a-new-osdv4-cluster-to-app-interface)
 - [Additional configurations](#additional-configurations)
-  - [Selecting a Machine CIDR for VPC peerings](#selecting-a-machine-cidr-for-vpc-peerings)
-  - [VPC peering with app-interface](#vpc-peering-with-app-interface)
-  - [Enable enhanced dedicated-admin](#enable-enhanced-dedicated-admin)
-  - [Enable observability on a v4 cluster](#enable-observability-on-a-v4-cluster)
-  - [Enable logging (EFK)](#enable-logging-efk)
+    - [Selecting a Machine CIDR for VPC peerings](#selecting-a-machine-cidr-for-vpc-peerings)
+    - [VPC peering with app-interface](#vpc-peering-with-app-interface)
+    - [Enable enhanced dedicated-admin](#enable-enhanced-dedicated-admin)
+    - [Enable observability on a v4 cluster](#enable-observability-on-a-v4-cluster)
+    - [Enable logging (EFK)](#enable-logging-efk)
 - [Legacy (v3)](#legacy-v3)
-  - [Onboard a new OSDv3 cluster to app-interface](#onboard-a-new-osdv3-cluster-to-app-interface)
+    - [Onboard a new OSDv3 cluster to app-interface](#onboard-a-new-osdv3-cluster-to-app-interface)
+
+<!-- /TOC -->
 
 # Onboard a new OSDv4 cluster to app-interface
 
 To on-board a new OSDv4 cluster to app-interface, perform the following operations:
 
-1. Login to https://cloud.redhat.com/
-
-1. Go to `OpenShift Cluster Manager`
+1. Login to https://cloud.redhat.com/openshift
 
 1. Click `Subscriptions` and ensure you have enough quota to provision a cluster
-    
+
     - Must have at least 1 cluster.aws of the desired type
     - Check that you have enough compute nodes quota for the desired total compute (4 are included in a single-az cluster, 6 in a multi-az)
+    - Note that quota is driven via this [repo](https://gitlab.cee.redhat.com/service/ocm-resources/) and this is our [org file](https://gitlab.cee.redhat.com/service/ocm-resources/blob/master/data/uhc-production/orgs/12147054.yaml) in prod. Aaron Weitekamp
 
 1. Click `Clusters`, then `Create Cluster`
 
@@ -31,7 +34,7 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
     - Cluster name: (choose a short and descriptive name, ex: devtools01)
     - Region: (recommended: us-east-1)
     - Availability: Single/Multi-az
-    - Scale: Choose desired configuration (LoadBalancers are typically not needed)
+    - Scale: Choose desired configuration (LoadBalancers are typically not needed) TODO: clarify when?
     - Persistent storage: 600Gi (we need a bit more more than the default 100Gi to provision our observability stack)
     - Networking: Basic (unless a special VPC config is needed - see Additional config section below)
 
@@ -45,12 +48,14 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
 
 1. Contact App-SRE and request a new App-SRE Github Oauth Client. You will need to provide the callback URL.
 
+TODO: how to
+
 1. App-SRE will provide the rest of the settings
 
     - Client ID: (provided by App-SRE)
     - Client Secret: (provided by App-SRE)
     - Type: Teams
-    - Teams: (provided by App-SRE)
+    - Teams: (provided by App-SRE) <cluster-name>-cluster
 
 1. Click `Open Console`
 
@@ -61,6 +66,8 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
 1. Add the github username of the App-SRE team member who is setting up your cluster in app-interface to grant dedicated-admin access
 
 1. Login to the cluster as a dedicated-admin user
+
+TODO: disable github integration, add user manually, balbal
 
 1. Add the `app-sre-bot` ServiceAccount
 
@@ -104,6 +111,14 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
       field: token
 
     internal: false
+
+    awsInfrastructureAccess:
+    - awsGroup:
+        $ref: /aws/app-sre/groups/App-SRE-admin.yml
+      accessLevel: read-only
+    - awsGroup:
+        $ref: /aws/app-sre/groups/App-SRE-admin.yml
+      accessLevel: network-mgmt
     ```
 
 1. Add the `openshift-config` namespace in app-interface
@@ -165,34 +180,23 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
         group: dedicated-admins
     ```
 
-1. Create permissions to grant cluster access to others
-
-    ```yaml
-    # /data/openshift/<cluster>/permissions/auth.yml
-    ---
-    $schema: /access/permission-1.yml
-
-    labels: {}
-
-    name: <cluster>-auth
-    description: Access to <cluster> cluster
-
-    service: github-org-team
-    org: app-sre
-    team: <cluster>-cluster
-    ```
-
 # Additional configurations
 
 ## Selecting a Machine CIDR for VPC peerings
 
-If your cluster need to be peered with other clusters or AWS VPCs, it is required that the Machine CIDR is set to one that does not conflict with the other resources.
+If your cluster needd to be peered with other clusters or AWS VPCs, it is required that the Machine CIDR is set to one that does not conflict with the other resources. This the case for most of the AppSRE clusters. In order to be able to select this you must used `Advanced` network definition option.
 
 App-interface has network information for all v4 clusters it is managing. Thus, running a simple query in app-interface can help retrieve known CIDR and make a decision on which CIDR to use for the new clusters
 
 ```
 {clusters_v1{name network{vpc service pod}}}
 ```
+
+There is a convenience utility to fetch this data: `qontract-cli get clusters-network`.
+
+The value of the NETWORK.VPC must be unique (find an unused /24 network), however, the NETWORK.SERVICE and NETWORK.POD can be reused (`10.120.0.0/16` and `10.128.0.0/14` respectively).
+
+Note that the host prefix must be set to /23.
 
 ## VPC peering with app-interface
 
@@ -222,7 +226,6 @@ Some clusters may require enhanced dedicated-admin privileges. The process to ge
     - `externalUrl` for both the `prometheus` and `alertmanager` resources
     - Both `prometheus` and `alertmanager` oauth proxy secrets. Those should be set in vault to values corresponding to two *different* github oauth clients. Those oauth clients need their callback URLs to be `https://<prometheus|alertmanager>.<cluster>.devshift.net/oauth2/callback`. *Note:* Both prometheus and alertmanager pods need a restart after a new secret is pushed
 
-
 1. Create a app-sre-observability namespace file for that specific cluster with openshift-acme and nginx config. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/24dcd1f3bec3b0accea6c834b12e65e9873440c9/data/services/observability/namespaces/app-sre-observability-production.app-sre-prod-03.yml
 
 1. Add app-sre-observability namespace as target namespaces in [saas-app-sre-observability.yaml](https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/observability/cicd/saas/saas-app-sre-observability.yaml) to deploy nginx-proxy.
@@ -233,7 +236,7 @@ Some clusters may require enhanced dedicated-admin privileges. The process to ge
 
 ## Enable logging (EFK)
 
-The EFK stack is currently opt-in and installed by customers. 
+The EFK stack is currently opt-in and installed by customers.
 
 Installing cluster logging can be done in two steps.
 1. Subscribe to the Elasticsearch and Cluster Logging operators
