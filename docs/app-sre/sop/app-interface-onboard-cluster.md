@@ -34,7 +34,7 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
     - Cluster name: (choose a short and descriptive name, ex: devtools01)
     - Region: (recommended: us-east-1)
     - Availability: Single/Multi-az
-    - Scale: Choose desired configuration (LoadBalancers are typically not needed) TODO: clarify when?
+    - Scale: Choose desired configuration (LoadBalancers are typically not needed as the default Routes include their own LoadBalancers).
     - Persistent storage: 600Gi (we need a bit more more than the default 100Gi to provision our observability stack)
     - Networking: Basic (unless a special VPC config is needed - see Additional config section below)
 
@@ -48,14 +48,20 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
 
 1. Contact App-SRE and request a new App-SRE Github Oauth Client. You will need to provide the callback URL.
 
-TODO: how to
+In order to create the Oauth client register to create a new application here:
+https://github.com/organizations/app-sre/settings/applications
+
+The callback template is:
+https://oauth-openshift.apps.app-sre-prod-04.y6b4.p1.openshiftapps.com/oauth2callback/github-app-sre
+
+Note: replace `app-sre-prod-04.y6b4` with the correct values.
 
 1. App-SRE will provide the rest of the settings
 
     - Client ID: (provided by App-SRE)
     - Client Secret: (provided by App-SRE)
     - Type: Teams
-    - Teams: (provided by App-SRE) <cluster-name>-cluster
+    - Teams: (provided by App-SRE) should be: `<cluster-name>-cluster`
 
 1. Click `Open Console`
 
@@ -67,7 +73,11 @@ TODO: how to
 
 1. Login to the cluster as a dedicated-admin user
 
-TODO: disable github integration, add user manually, balbal
+In order to achieve this the following steps must be followed:
+
+- Disable the `github` integration in https://app-interface.unleash.devshift.net/#/features.
+- Manually add a new team called `<cluster-name>-cluster` in the AppSRE org: https://github.com/orgs/app-sre/new-team.
+- By creating the team, it will automatically add you as a member.
 
 1. Add the `app-sre-bot` ServiceAccount
 
