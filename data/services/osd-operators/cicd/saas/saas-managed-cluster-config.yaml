@@ -1,0 +1,66 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: osd-operators
+
+name: saas-managed-cluster-config
+description: SaaS tracking file for managed-cluster-config
+
+app:
+  $ref: /services/osd-operators/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-srep-info
+
+managedResourceTypes:
+- SelectorSyncSet
+
+imagePatterns:
+- quay.io/app-sre/managed-cluster-config-registry
+
+resourceTemplates:
+- name: managed-cluster-config
+  url: https://github.com/openshift/managed-cluster-config
+  path: /hack/00-osd-managed-cluster-config.selectorsyncset.yaml.tmpl
+  parameters:
+    IDENTITY_ATTR_EMAIL: mail
+    IDENTITY_ATTR_ID: uid
+    IDENTITY_ATTR_NAME: cn
+    IDENTITY_ATTR_PREFERRED_USERNAME: mail
+    IDENTITY_BIND_DN: uid=AosSrePlatformTestingEmail,ou=serviceaccounts,dc=redhat,dc=com
+    IDENTITY_URL: ldaps://ext-ldap.corp.redhat.com/ou=users,dc=redhat,dc=com?uid?sub
+    IDENTITY_NAME: OpenShift_SRE
+    IDENTITY_MAPPING_METHOD: claim
+    IDENTITY_SRE_GOOGLE_CLIENTID: 211953714079-afmg28lojv8m2vv97b56s64ivm5ercn4.apps.googleusercontent.com 
+    RHMI_SRE_USER1: amoran@redhat.com
+    RHMI_SRE_USER2: crarobin@redhat.com
+    RHMI_SRE_USER3: mfreer@redhat.com
+    RHMI_SRE_USER4: jcueto@redhat.com
+    RHMI_SRE_USER5: mciccone@redhat.com
+    RHMI_SRE_USER6: pcremin@redhat.com
+    RHMI_SRE_USER7: raananda@redhat.com
+    RHMI_SRE_USER8: sclarkso@redhat.com
+  targets:
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-integration-cluster-scope.yml
+    ref: master
+    upstream: openshift-managed-cluster-config-gh-build-master
+    parameters:
+      TELEMETER_SERVER_URL: https://infogw.api.stage.openshift.com
+  # - namespace:
+  #     $ref: /services/osd-operators/namespaces/hive-stage-cluster-scope.yml
+  #   ref: master
+  #   upstream: openshift-managed-cluster-config-gh-build-master
+  #   parameters:
+  #     TELEMETER_SERVER_URL: https://infogw.api.stage.openshift.com
+  # - namespace:
+  #     $ref: /services/osd-operators/namespaces/hive-production-cluster-scope.yml
+  #   ref: aba15265d815732a6000efd3cf94e32578777e2e
+  #   parameters:
+  #     TELEMETER_SERVER_URL: https://infogw.api.openshift.com
