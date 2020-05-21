@@ -1,6 +1,6 @@
 # Failed service-clusterimagesets-prod-gl-build-master-clusterimagesets-apply job
 
-Job: https://ci-int-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/view/app-sre/job/service-clusterimagesets-prod-gl-build-master-clusterimagesets-apply/
+Job: https://ci.int.devshift.net/view/app-sre/job/service-clusterimagesets-prod-gl-build-master-clusterimagesets-apply/
 
 This job will apply all files in [clusterimagesets/](https://gitlab.cee.redhat.com/service/clusterimagesets-prod/tree/master/clusterimagesets) to the [hive-production](https://visual-app-interface.devshift.net/clusters#/openshift/hive-production/cluster.yml) cluster.
 
@@ -11,7 +11,7 @@ If this job fails it means that the SRE-P team has submitted a MR to the repo, a
 
 # Failed service-clusterimagesets-stage-gl-build-master-clusterimagesets-apply job
 
-Job: https://ci-int-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/view/app-sre/job/service-clusterimagesets-stage-gl-build-master-clusterimagesets-apply/
+Job: https://ci.int.devshift.net/view/app-sre/job/service-clusterimagesets-stage-gl-build-master-clusterimagesets-apply/
 
 This job will apply all files in [clusterimagesets/](https://gitlab.cee.redhat.com/service/clusterimagesets-stage/tree/master/clusterimagesets) to the [hive-stage](https://visual-app-interface.devshift.net/clusters#/openshift/hive-stage/cluster.yml) cluster.
 
@@ -22,7 +22,7 @@ If this job fails it means that the ClusterImageSets in hive-stage are not up to
 
 # Failed clusterimageset-run job
 
-Job: https://ci-int-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/view/app-sre/job/clusterimageset-run/
+Job: https://ci.int.devshift.net/view/app-sre/job/clusterimageset-run/
 
 Script: https://gitlab.cee.redhat.com/service/clusterimagesets-stage/blob/master/generate-clusterimagesets.py
 

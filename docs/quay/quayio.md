@@ -43,13 +43,13 @@
 
 ## Jenkins Jobs
 
-Quay Jenkins jobs can be found [here](https://ci-int-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/view/quayio/). Following Jenkins configured for Quay right now:
+Quay Jenkins jobs can be found [here](https://ci.int.devshift.net/view/quayio/). Following Jenkins configured for Quay right now:
 
-1. [[quayio] build master and deploy to stage](https://ci-int-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/view/quayio/job/quay-quay-gh-build-master/) - This job is triggered every time a pull request is merged to quay repository's master branch. It will build container image and deploy latest code to `stage` cluster.
-2. [[quayio] saas pr check quayio-prod-us-east-1](https://ci-int-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/view/quayio/job/service-saas-quay-quay-saas-pr-check-quayio-prod-us-east-1/) - This job is triggered every time a merge request is raised on `saas-quay` repository. It will validate the environment variables for `quayio-prod-us-east-1` cluster provided in saas-quay repository against the Quay OpenShift template.
-1. [[quayio] saas pr check quayio-prod-us-east-2](https://ci-int-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/view/quayio/job/service-saas-quay-quay-saas-pr-check-quayio-prod-us-east-2/) - This job is triggered every time a merge request is raised on `saas-quay` repository. It will validate the environment variables for `quayio-prod-us-east-2` cluster provided in saas-quay repository against the Quay OpenShift template.
-1. [[quayio] saas deploy quayio-prod-us-east-1](https://ci-int-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/view/quayio/job/service-saas-quay-quay-saas-deploy/) - This job is triggered when merged request is merged. It will deploy to the `us-east-1` cluster.
-1. [[quayio] saas deploy quayio-prod-us-east-2](https://ci-int-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/view/quayio/job/service-saas-quay-quay-saas-deploy-with-upstream-service-saas-quay-quay-saas-deploy-quayio-prod-us-east-2/) - This job is triggered when deployment to `us-east-1` cluster is successful.
+1. [[quayio] build master and deploy to stage](https://ci.int.devshift.net/view/quayio/job/quay-quay-gh-build-master/) - This job is triggered every time a pull request is merged to quay repository's master branch. It will build container image and deploy latest code to `stage` cluster.
+2. [[quayio] saas pr check quayio-prod-us-east-1](https://ci.int.devshift.net/view/quayio/job/service-saas-quay-quay-saas-pr-check-quayio-prod-us-east-1/) - This job is triggered every time a merge request is raised on `saas-quay` repository. It will validate the environment variables for `quayio-prod-us-east-1` cluster provided in saas-quay repository against the Quay OpenShift template.
+1. [[quayio] saas pr check quayio-prod-us-east-2](https://ci.int.devshift.net/view/quayio/job/service-saas-quay-quay-saas-pr-check-quayio-prod-us-east-2/) - This job is triggered every time a merge request is raised on `saas-quay` repository. It will validate the environment variables for `quayio-prod-us-east-2` cluster provided in saas-quay repository against the Quay OpenShift template.
+1. [[quayio] saas deploy quayio-prod-us-east-1](https://ci.int.devshift.net/view/quayio/job/service-saas-quay-quay-saas-deploy/) - This job is triggered when merged request is merged. It will deploy to the `us-east-1` cluster.
+1. [[quayio] saas deploy quayio-prod-us-east-2](https://ci.int.devshift.net/view/quayio/job/service-saas-quay-quay-saas-deploy-with-upstream-service-saas-quay-quay-saas-deploy-quayio-prod-us-east-2/) - This job is triggered when deployment to `us-east-1` cluster is successful.
 
 ## Managing Access for Quay Development Team
 

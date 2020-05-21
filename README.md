@@ -258,7 +258,7 @@ wheel icon (top-right corner) and replace `omit` with `include` in
 
 - GitHub org and team syncing. With this integration we can leverage any service
   that is configured to use GitHub as the authentication platform. For example:
-  - <https://ci-int-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/>
+  - <https://ci.int.devshift.net/>
   - <https://ci.ext.devshift.net/>
   - <https://vault.devshift.net/ui/>
   - Many OpenShift [clusters](/data/openshift)

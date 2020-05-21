@@ -377,7 +377,7 @@ Post RCA comms, followups:
 
         * Item: `CI-RHOS`
 
-        * Hostname Affected: `https://ci-int-jenkins.rhev-ci-vms.eng.rdu2.redhat.com`
+        * Hostname Affected: `https://ci.int.devshift.net`
 
 2. If this is a weekend (Saturday / Sunday), escalate issue following the [PnT DevOps - Issue Escalation Procedure](https://mojo.redhat.com/docs/DOC-1049381#jive_content_id_Business_Critical_Issues).
 

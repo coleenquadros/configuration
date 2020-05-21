@@ -14,7 +14,7 @@ App-Interface is composed by the following repositories:
 When someone submits MR to change the data in `service/app-interface` this is what happens:
 
 - MR sent to `service/app-interface` with some kind of modification to the datafiles.
-- [PR check Jenkins job](https://ci-int-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/view/app-interface/job/service-app-interface-gl-pr-check/) runs executing [pr_check.sh](https://gitlab.cee.redhat.com/service/app-interface/blob/master/pr_check.sh), which in turn does the following:
+- [PR check Jenkins job](https://ci.int.devshift.net/view/app-interface/job/service-app-interface-gl-pr-check/) runs executing [pr_check.sh](https://gitlab.cee.redhat.com/service/app-interface/blob/master/pr_check.sh), which in turn does the following:
   - Bundles app-interface into a single JSON file and validates it (`make bundle validate`, uses [qontract-validator](https://github.com/app-sre/qontract-validator)).
   - Generates a report.
   - Runs [manual_reconcile.sh](https://gitlab.cee.redhat.com/service/app-interface/blob/master/manual_reconcile.sh):
@@ -22,7 +22,7 @@ When someone submits MR to change the data in `service/app-interface` this is wh
     - Runs all the defined [integrations](https://gitlab.cee.redhat.com/service/app-interface/blob/7f8a15444fab01fbd3467e32e8d4ff00a4d61032/manual_reconcile.sh#L109-112)
   - Runs the reporting engine again to append to the previous report the output of integrations.
 - The AppSRE engineer looks at the report and decided whether to merge.
-- If merged, [production app-interface Jenkins Job](https://ci-int-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/view/app-interface/job/service-app-interface-gl-pr-check/view/app-interface/job/service-app-interface-gl-build-master/) is executed, which runs [build_deploy.sh](https://gitlab.cee.redhat.com/service/app-interface/blob/master/build_deploy.sh)
+- If merged, [production app-interface Jenkins Job](https://ci.int.devshift.net/view/app-interface/job/service-app-interface-gl-pr-check/view/app-interface/job/service-app-interface-gl-build-master/) is executed, which runs [build_deploy.sh](https://gitlab.cee.redhat.com/service/app-interface/blob/master/build_deploy.sh)
   - Bundles the data and uploads to `app-interface.stage.devshift.net` and reloads the service.
   - Bundles the data and uploads to `app-interface.devshift.net` and reloads the service.
   - It waits and ensures that the data was correctly loaded (by looking at the sha256)
