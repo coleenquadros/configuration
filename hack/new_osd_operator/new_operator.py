@@ -25,6 +25,9 @@ def err(msg):
 
 
 def load_tpl(fpath, subs):
+    """Loads and interpolates a template file containing {format} placeholders,
+    returning it as a string.
+    """
     try:
         with open(fpath) as f:
             content = f.read()
@@ -41,6 +44,9 @@ def load_tpl(fpath, subs):
 
 
 def load_yml_tpl(fpath, subs):
+    """Loads and interpolates a template file containing {format} placeholders,
+    interprets it as YAML, and returns the resulting dict.
+    """
     try:
         return yaml.safe_load(load_tpl(fpath, subs))
     except Exception as e:
@@ -55,6 +61,7 @@ def load_yml_tpl(fpath, subs):
 
 
 def load_yml(fpath):
+    """Loads and parses a YAML file and returns the resulting dict."""
     try:
         with open(fpath) as f:
             return yaml.safe_load(f)
@@ -63,12 +70,20 @@ def load_yml(fpath):
 
 
 def dump_yml(fpath, yml):
+    """Writes a dict as YAML to a file. The file is created or
+    replaced.
+    """
     with open(fpath, "w+") as f:
         f.write(yaml.dump(yml, default_flow_style=False))
 
 
 def inject_from_yml_tpl(chunkname, items, operator_name):
+    """Extends `items` with the list loaded and
+    interpolated from template file {chunkname}.yml.tpl.
 
+    Idempotence is *roughly* checked by assuming no action is necessary
+    if `items` contains an entry with a `name` of `operator_name`.
+    """
     # Already there?
     # NOTE: this assumes if the operator entry exists, the other entry
     # does too.
@@ -85,6 +100,7 @@ def inject_from_yml_tpl(chunkname, items, operator_name):
 
 
 def update_app_yml(operator_name):
+    """Adds quayRepos and codeComponents entries to app.yml."""
     fpath = os.path.join(SVC_DIR, "app.yml")
     app_yml = load_yml(fpath)
 
@@ -96,12 +112,14 @@ def update_app_yml(operator_name):
 
 
 def update_gitlab_yml(operator_name):
+    """Idempotently registers the operator's SAAS bundle in gitlab.yml."""
     fpath = os.path.join("data", "dependencies", "gitlab", "gitlab.yml")
     yml = load_yml(fpath)
 
     projects = yml["projectRequests"][0]["projects"]
     bundle = "saas-%s-bundle" % operator_name
 
+    # Already there?
     if bundle in projects:
         print("gitlab project " + bundle + " already in projectRequests.")
         return
@@ -113,6 +131,7 @@ def update_gitlab_yml(operator_name):
 
 
 def update_jobs_yaml(operator_name):
+    """Idempotently adds a pr-check entry to jobs.yaml."""
     fpath = os.path.join(CICD_DIR, "ci-ext", "jobs.yaml")
     yml = load_yml(fpath)
 
@@ -126,14 +145,73 @@ def update_jobs_yaml(operator_name):
 
     print("Adding pr-check entry for " + operator_name)
     new_job = load_yml_tpl(
-        os.path.join(TPL_DIR, "pr_check_job.yml.tpl"), {"operator_name": operator_name}
+        os.path.join(TPL_DIR, "pr-check-job.yml.tpl"), {"operator_name": operator_name}
     )
     jobs.extend(new_job)
 
     dump_yml(fpath, yml)
 
 
+def update_saas_approver_yml(operator_name):
+    """Idempotently registers the operator's SAAS file in saas-approver.yml."""
+    fpath = os.path.join(TEAM_DIR, "roles", "saas-approver.yml")
+    yml = load_yml(fpath)
+
+    saas_files = yml["owned_saas_files"]
+
+    # Already there?
+    for saas_file in saas_files:
+        if saas_file.get("$ref", "").endswith("/saas-" + operator_name + ".yaml"):
+            print("SAAS file entry for " + operator_name + " already exists.")
+            return
+
+    print("Adding SAAS file entry for " + operator_name)
+    new_entry = load_yml_tpl(
+        os.path.join(TPL_DIR, "owned-saas-file.yml.tpl"),
+        {"operator_name": operator_name},
+    )
+    saas_files.extend(new_entry)
+
+    dump_yml(fpath, yml)
+
+
+def update_slack_roles_yml(operator_name):
+    """Idempotently registers the operator's slack permissions file in
+    sre-operator-all-coreos-slack.yml.
+    """
+    fpath = os.path.join(TEAM_DIR, "roles", "sre-operator-all-coreos-slack.yml")
+    yml = load_yml(fpath)
+
+    perms = yml["permissions"]
+
+    # Already there?
+    for perm in perms:
+        if perm.get("$ref", "").endswith("/" + operator_name + "-coreos-slack.yml"):
+            print("Slack permissions entry for " + operator_name + " already exists.")
+            return
+
+    print("Adding slack permissions entry for " + operator_name)
+    new_entry = load_yml_tpl(
+        os.path.join(TPL_DIR, "slack-perm-role.yml.tpl"),
+        {"operator_name": operator_name},
+    )
+    perms.extend(new_entry)
+
+    dump_yml(fpath, yml)
+
+
 def write_from_template(tplname, destfmt, operator_name, **subs):
+    """(Over)writes a file from a template.
+
+    :param tplname: Name of the template file, assumed to be in TPL_DIR.
+    :param destfmt: Format string (printf-style) of the relative path to the
+            destination file to be written. The `%s` will be substituted with
+            the operator_name. E.g.  'path/to/foo-%s-bar.yaml'.
+    :param operator_name: String name of the operator. Will be substituted into
+            `detsfmt`. Will also be included in the template file's
+            substitutions with key `operator_name`.
+    :param subs: Additional substitutions for the template, if needed.
+    """
     # NOTE: This will replace the file if it already exists. That ought
     # to be okay, if you're using git sanely.
     dest = destfmt % operator_name
@@ -150,15 +228,6 @@ def write_from_template(tplname, destfmt, operator_name, **subs):
 
 def main():
     args = parse_args()
-
-    # Add quayRepos and codeComponents entries
-    update_app_yml(args.operator_name)
-
-    # Add gitlab bundle project request
-    update_gitlab_yml(args.operator_name)
-
-    # Register the pr-check job
-    update_jobs_yaml(args.operator_name)
 
     # Add ci-int/jobs file
     write_from_template(
@@ -190,11 +259,20 @@ def main():
         args.operator_name,
     )
 
-    write_from_template(
-        "roles-saas-approver.tpl",
-        os.path.join(TEAM_DIR, "roles", "saas-%s-approver.yml"),
-        args.operator_name,
-    )
+    # Add quayRepos and codeComponents entries
+    update_app_yml(args.operator_name)
+
+    # Add gitlab bundle project request
+    update_gitlab_yml(args.operator_name)
+
+    # Register the pr-check job
+    update_jobs_yaml(args.operator_name)
+
+    # Register the saas file
+    update_saas_approver_yml(args.operator_name)
+
+    # Register the slack permissions file
+    update_slack_roles_yml(args.operator_name)
 
 
 if __name__ == "__main__":
