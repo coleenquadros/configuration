@@ -1,0 +1,44 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: osd-operators
+
+name: saas-splunk-forwarder-operator
+description: SaaS tracking file for splunk-forwarder-operator
+
+app:
+  $ref: /services/osd-operators/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-srep-info
+
+managedResourceTypes:
+- SelectorSyncSet
+
+imagePatterns:
+- quay.io/app-sre/splunk-forwarder-operator-registry
+
+resourceTemplates:
+- name: splunk-forwarder-operator
+  url: https://github.com/openshift/splunk-forwarder-operator
+  path: /hack/olm-registry/olm-artifacts-template.yaml
+  parameters:
+    REGISTRY_IMG: quay.io/app-sre/splunk-forwarder-operator-registry
+  targets:
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-integration-cluster-scope.yml
+    ref: master
+    upstream: openshift-splunk-forwarder-operator-gh-build-master
+  # - namespace:
+  #     $ref: /services/osd-operators/namespaces/hive-stage-cluster-scope.yml
+  #   ref: master
+  #   upstream: openshift-splunk-forwarder-operator-gh-build-master
+  # - namespace:
+  #     $ref: /services/osd-operators/namespaces/hive-production-cluster-scope.yml
+  #   ref: 3dca592a88d94054faa4e3c8fa5e35f7b5265a9f
