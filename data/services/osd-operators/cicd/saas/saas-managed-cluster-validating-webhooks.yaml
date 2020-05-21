@@ -1,0 +1,42 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: osd-operators
+
+name: saas-managed-cluster-validating-webhooks
+description: SaaS tracking file for managed-cluster-validating-webhooks
+
+app:
+  $ref: /services/osd-operators/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-srep-info
+
+managedResourceTypes:
+- SelectorSyncSet
+
+imagePatterns:
+- quay.io/app-sre/managed-cluster-validating-webhooks-registry
+
+resourceTemplates:
+- name: managed-cluster-validating-webhooks
+  url: https://github.com/openshift/managed-cluster-validating-webhooks
+  path: /build/selectorsyncset.yaml
+  targets:
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-integration-cluster-scope.yml
+    ref: master
+    upstream: openshift-managed-cluster-validating-webhooks-gh-build-master
+  # - namespace:
+  #     $ref: /services/osd-operators/namespaces/hive-stage-cluster-scope.yml
+  #   ref: master
+  #   upstream: openshift-managed-cluster-validating-webhooks-gh-build-master
+  # - namespace:
+  #     $ref: /services/osd-operators/namespaces/hive-production-cluster-scope.yml
+  #   ref: b8484492378dedc761f8c44444774b5af36a0d6c
