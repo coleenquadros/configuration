@@ -119,6 +119,13 @@ openshiftResources:
 - provider: resource
   path: /observability/prometheusrules/prometheus-mixin.prometheusrules.yaml
 
+### UHC Account Manager
+- provider: resource
+  path: /observability/prometheusrules/uhc-acct-mngr-production.prometheusrules.yaml
+### UHC Clusters Service
+- provider: resource
+  path: /observability/prometheusrules/uhc-clusters-service-production.prometheusrules.yaml
+
 ## ServiceMonitors
 ### App-SRE Prometheus
 - provider: resource
@@ -126,3 +133,37 @@ openshiftResources:
 ### All managed Prometheus Operators
 - provider: resource
   path: /observability/servicemonitors/prometheus-operators-production.servicemonitor.yaml
+### UHC
+#### UHC- Clusters Service
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/uhc-clusters-service.servicemonitor.yaml
+  variables:
+    environment: production
+    namespace: uhc-production
+#### UHC- Account Manager
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/uhc-account-manager.servicemonitor.yaml
+  variables:
+    environment: production
+    namespace: uhc-production
+#### UHC- Gateway Server
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/uhc-gateway-server.servicemonitor.yaml
+  variables:
+    environment: production
+    namespace: uhc-production
+
+# Temporary Prometheus and ServiceMonitor for AMS as part of https://issues.redhat.com/browse/APPSRE-1491
+- provider: resource-template
+  type: jinja2
+  path: /observability/prometheus/v4/ams.prometheus.yaml
+  variables:
+    remoteWriteUrl: https://remote-write-proxy-telemeter-production.apps.app-sre-prod-02.l6v9.p1.openshiftapps.com/api/v1/receive
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/ams-subscription-labels.servicemonitor.yaml
+  variables:
+    namespace: uhc-production
