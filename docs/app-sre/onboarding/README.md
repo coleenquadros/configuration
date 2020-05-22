@@ -13,6 +13,7 @@
     - [Developer Access](#developer-access)
     - [OpenShift](#openshift)
     - [SOPs](#sops)
+    - [Basic Functional Testing](#basic-functional-testing)
 
 <!-- /TOC -->
 
@@ -66,7 +67,8 @@ Onboarding a new App onto the App-SRE's team contract involves many different st
 - Developer access to the App is represented properly in roles/permissions in the App-Interface.
 - The Escalation matrix is properly defined.
 - OpenShift resources: it has a staging environment targetting a staging namespace and a production environment targetting a production namespace.
-- There documented SOPs to help triage possible problems with the app running in production.
+- There are documented SOPs to help triage possible problems with the app running in production.
+- There is a documented SOP for determining basic functionality.
 
 A WIP step by step guide can be found [here](onboarding-app-step-by-step/).
 
@@ -122,3 +124,9 @@ ServiceMonitors, etc are managed via
 ### SOPs
 
 The developer team must create a catalog of SOPs to help the AppSRE team to triage and operate the service.
+
+### Basic Functional Testing
+
+The developer team must create an SOP for how to determine the application is functioning at a basic level.  This SOP should be targeted at helping the AppSRE team validate that the application is functioning properly after any kind of service outage is experienced.
+
+If additional tooling is created to support this SOP then the tooling must be keep up-to-date with application changes.
