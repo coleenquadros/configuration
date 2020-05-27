@@ -1,5 +1,18 @@
 # Quay.io SSL Certificates
 
-Quay SSL certificates are managed in Vault with other Quay configuration & secrets. Quay SSL certs are stored in `quay-config-secret` with keys `ssl.cert` and `ssl.key`.
+## Generate SSL Certificates
 
-Quay SSL certificates also need to be imported into Amazon ACM so that they can be used with CloudFront distribution.
+```sh
+openssl req -new -newkey rsa:2048 -nodes \
+ -out star_quay_io.csr \
+ -keyout star_quay_io.key \
+ -subj "/C=US/ST=North Carolina/L=Raleigh/O=Red Hat, Inc./OU=Service Delivery/CN=*.quay.io"
+```
+
+## Request Certificate from Digicert
+
+Reach out to Red Hat IT or tparikh@redhat.com to get certificate issued by Digicert. Include  `star_quay_io.csr` with your request.
+
+## Update the Certificate in Vault
+
+Quay SSL certificates are managed in Vault with other Quay configuration & secrets. Quay SSL certs are stored in `quay-config-secret` with keys `ssl.cert` and `ssl.key`. Secret in Vault can be found [here](quayio.md#updating-secret-in-vault)
