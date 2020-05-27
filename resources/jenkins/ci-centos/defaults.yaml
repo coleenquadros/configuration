@@ -14,6 +14,8 @@
     che-success-message: ""
     che-failure-message: ""
     che-error-message: ""
+    kubeconfver: none
+    sa_name: app-sre-bot
 
 - admin_list_defaults: &admin_list_defaults
     name: 'admin_list_defaults'
@@ -2848,12 +2850,13 @@
                 echo "Not a PR build, using master"
             fi
 
-
             $ssh_cmd -t "yum install -y docker && systemctl start docker"
 
-            ENVIRONMENT=production PATH=$PATH:~/.local/bin DRY_RUN=true /bin/bash ~/saasherder/fetch_and_apply.sh
+
+            KUBECONFVER={kubeconfver} ENVIRONMENT=production PATH=$PATH:~/.local/bin DRY_RUN=true /bin/bash ~/saasherder/fetch_and_apply.sh
             CONTEXTS=$(PATH=$PATH:~/.local/bin saasherder config get-contexts)
             for c in `echo $CONTEXTS`; do
+                KUBECONFVER={kubeconfver} KUBEHOME=/home/devtools/.kube SA_NAME={sa_name} CONTEXT=$c ENVIRONMENT=production PATH=$PATH:~/.local/bin /bin/bash ~/saasherder/fmt-kubeconf.py
                 DIR=$(readlink -f $c-20* | tail -1)
                 for f in `ls $DIR`; do
                     python ~/saasherder/check_image.py $DIR/$f '{image_pattern}'
@@ -2864,7 +2867,7 @@
             cico node done $CICO_ssid
 
             set -ex
-            ENVIRONMENT=production PATH=$PATH:~/.local/bin /bin/bash ~/saasherder/fetch_and_apply.sh
+            KUBECONFVER={kubeconfver} ENVIRONMENT=production PATH=$PATH:~/.local/bin /bin/bash ~/saasherder/fetch_and_apply.sh
 
 - job-template:
     name: '{ci_project}-{git_repo}-promote-to-prod-test-v4'
@@ -2911,7 +2914,7 @@
 
             $ssh_cmd -t "yum install -y docker && systemctl start docker"
 
-            ENVIRONMENT=production PATH=$PATH:~/.local/bin DRY_RUN=true /bin/bash ~/saasherder/fetch_and_apply.sh
+            KUBECONFVER={kubeconfver} ENVIRONMENT=production PATH=$PATH:~/.local/bin DRY_RUN=true /bin/bash ~/saasherder/fetch_and_apply.sh
             CONTEXTS=$(PATH=$PATH:~/.local/bin saasherder config get-contexts)
             for c in `echo $CONTEXTS`; do
                 DIR=$(readlink -f $c-20* | tail -1)
@@ -3062,6 +3065,69 @@
             cico node done $CICO_ssid
 
     <<: *job_template_defaults
+
+- job:
+    name: 'ci-conf-recycler-test-master'
+    defaults: global
+    node: devtools
+    properties:
+        - github:
+            url: https://github.com/appsre/ci-conf-recycler
+    scm:
+        - git:
+            url: https://github.com/appsre/ci-conf-recycler.git
+            shallow_clone: true
+            branches:
+                - master
+    triggers:
+        - github
+    builders:
+        - shell: |
+            cp ~/cico-tools/env-toolkit .
+            ./env-toolkit dump -f jenkins-env.json
+            env > jenkins-env
+
+            export CICO_API_KEY=$(cat ~/duffy.key )
+            # get node
+            n=1
+            while true
+            do
+                cico_output=$(cico node get -f value -c ip_address -c comment)
+                if [ $? -eq 0 ]; then
+                    read CICO_hostname CICO_ssid <<< $cico_output
+                    if  [ ! -z "$CICO_hostname" ]; then
+                        # we got hostname from cico
+                        break
+                    fi
+                    echo "'cico node get' succeed, but can't get hostname from output"
+                fi
+                if [ $n -gt 15 ]; then
+                    # give up after 15 tries
+                    echo "giving up on 'cico node get'"
+                    exit 1
+                fi
+                echo "'cico node get' failed, trying again in 60s ($n/15)"
+                n=$[$n+1]
+                sleep 60
+            done
+            echo 'Using Host' $CICO_hostname
+            set -x
+            sshopts="-t -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -l root"
+            ssh_cmd="ssh $sshopts $CICO_hostname"
+            $ssh_cmd yum -y install rsync
+            rsync -e "ssh $sshopts" -Ha $(pwd)/ $CICO_hostname:payload
+            $ssh_cmd -t "cd payload && /bin/bash cico_test.sh"
+            rtn_code=$?
+            if [ $rtn_code -eq 0 ]; then
+              cico node done $CICO_ssid
+              set -ex
+              cp fmt-kubeconf.py ~/saasherder/fmt-kubeconf.py                   
+              chmod 755 ~/saasherder/fmt-kubeconf.py     
+            else
+              # fail mode gives us 12 hrs to debug the machine
+              curl "http://admin.ci.centos.org:8080/Node/fail?key=$CICO_API_KEY&ssid=$CICO_ssid"
+            fi
+            exit $rtn_code
 
 - job:
     name: 'devtools-saasherder-test-master'
@@ -3954,6 +4020,7 @@
             ci_project: 'devtools'
             saas_git: saas-launchpad
             prj_name: launchpad-production
+            kubeconfver: v4
         - '{ci_project}-{git_repo}-promote-to-prod':
             git_repo: saas-hdd
             ci_project: 'devtools'
@@ -3981,6 +4048,7 @@
             ci_project: 'devtools'
             saas_git: saas-launchpad
             prj_name: launchpad-production
+            kubeconfver: v4
         - '{ci_project}-{git_repo}-promote-to-prod-test':
             git_repo: saas-hdd
             git_organization: openshiftio
