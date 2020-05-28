@@ -291,7 +291,7 @@ Initiate incident communications:
 - If deemed appropriate, a new channel can be created in slack: #incident-app-sre-<JIRAID>. This channel should be linked from #sd-org.
 - Send email to:
   - [serviceOwners](https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/app-sre/app-1.yml)
-  - [serviceNotifications](https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/app-sre/app-1.yml)
+  - [serviceNotifications](https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/app-sre/app-1.yml). This list may include `outage-list@redhat.com`, make sure an email is sent to that list if it's a major outage and if that list includes the outage list.
   - sd-notifications@redhat.com
   - sd-org@redhat.com (major outage)
 
