@@ -2558,16 +2558,16 @@
 
 - job-template:
     name: '{ci_project}-{git_repo}-minikube-updates'
-    defaults: global
     triggers:
-        - che_githubprb:
-            trigger_phrase: '{trigger_phrase}'
-            job_type: '{job_type}'
-            che-success-message: '{che-success-message}'
-            che-failure-message: '{che-failure-message}'
-            che-error-message: '{che-error-message}'
-            include-regions:
-                - 'olm/eclipse-che-preview-kubernetes/deploy/olm-catalog/eclipse-che-preview-kubernetes/.*'
+        - github
+        - github-pull-request:
+            success-comment: "Operator updates test passed"
+            failure-comment: "Operator updates failed"
+            error-comment: "Operator updates failed"
+            <<: *che_admin_list_defaults
+            status-context: "ci.centos.org [Minikube test update last version]"
+            included-regions:
+              - 'olm/eclipse-che-preview-kubernetes/deploy/olm-catalog/eclipse-che-preview-kubernetes/.*'
     wrappers:
     - vault-secrets:
         <<: *vault_defaults
