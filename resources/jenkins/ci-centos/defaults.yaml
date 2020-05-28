@@ -2856,14 +2856,15 @@
             KUBECONFVER={kubeconfver} ENVIRONMENT=production PATH=$PATH:~/.local/bin DRY_RUN=true /bin/bash ~/saasherder/fetch_and_apply.sh
             CONTEXTS=$(PATH=$PATH:~/.local/bin saasherder config get-contexts)
             for c in `echo $CONTEXTS`; do
-                KUBECONFVER={kubeconfver} KUBEHOME=/home/devtools/.kube SA_NAME={sa_name} CONTEXT=$c ENVIRONMENT=production PATH=$PATH:~/.local/bin /bin/bash ~/saasherder/fmt-kubeconf.py
+                KUBECONFVER={kubeconfver} KUBEHOME=/home/devtools/.kube SA_NAME={sa_name} CONTEXT=$c ENVIRONMENT=production PATH=$PATH:~/.local/bin /usr/bin/python ~/saasherder/fmt-kubeconf.py
                 DIR=$(readlink -f $c-20* | tail -1)
                 for f in `ls $DIR`; do
                     python ~/saasherder/check_image.py $DIR/$f '{image_pattern}'
                     cat $DIR/$f | $ssh_cmd docker run --rm -i quay.io/app-sre/manifest-bouncer:{manifest_bouncer_tag} --warn-only -
                 done
             done
-
+            unset KUBE_SERVER
+            unset KUBE_TOKEN
             cico node done $CICO_ssid
 
             set -ex
@@ -2917,6 +2918,7 @@
             KUBECONFVER={kubeconfver} ENVIRONMENT=production PATH=$PATH:~/.local/bin DRY_RUN=true /bin/bash ~/saasherder/fetch_and_apply.sh
             CONTEXTS=$(PATH=$PATH:~/.local/bin saasherder config get-contexts)
             for c in `echo $CONTEXTS`; do
+                KUBECONFVER={kubeconfver} KUBEHOME=/home/devtools/.kube SA_NAME={sa_name} CONTEXT=$c ENVIRONMENT=production PATH=$PATH:~/.local/bin /usr/bin/python ~/saasherder/fmt-kubeconf.py
                 DIR=$(readlink -f $c-20* | tail -1)
                 for f in `ls $DIR`; do
                     python ~/saasherder/check_image.py $DIR/$f '{image_pattern}'
@@ -2924,6 +2926,8 @@
                 done
             done
 
+            unset KUBE_SERVER
+            unset KUBE_TOKEN
             cico node done $CICO_ssid
 
     <<: *job_template_defaults
