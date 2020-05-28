@@ -2557,6 +2557,25 @@
     <<: *job_template_defaults
 
 - job-template:
+    name: '{ci_project}-{git_repo}-minikube-updates'
+    defaults: global
+    triggers:
+        - che_githubprb:
+            trigger_phrase: '{trigger_phrase}'
+            job_type: '{job_type}'
+            che-success-message: '{che-success-message}'
+            che-failure-message: '{che-failure-message}'
+            che-error-message: '{che-error-message}'
+            include-regions:
+                - 'olm/eclipse-che-preview-kubernetes/deploy/olm-catalog/eclipse-che-preview-kubernetes/.*'
+    wrappers:
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+            - *che-bot-github-credentials
+    <<: *job_template_defaults
+
+- job-template:
     name: '{ci_project}-{git_repo}-code-pr-check'
     defaults: global
     triggers:
@@ -5226,6 +5245,13 @@
             ci_cmd: '/bin/bash .ci/cico_chectl_minishift.sh'
             timeout: '2h'
             job_type: "E2E tests on minishift platform"
+        - '{ci_project}-{git_repo}-minikube-updates':
+            git_organization: eclipse
+            git_repo: che-operator
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash .ci/cico_updates_minikube.sh'
+            timeout: '2h'
+            job_type: "[MINIKUBE] Test latest che operator updates."
         - '{ci_project}-{git_repo}-pr-check':
             git_organization: eclipse
             git_repo: che-plugin-registry
