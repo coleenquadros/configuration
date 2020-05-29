@@ -71,9 +71,6 @@ SUCCESS_DIR=${WORK_DIR}/reports/reconcile_reports_success
 FAIL_DIR=${WORK_DIR}/reports/reconcile_reports_fail
 rm -rf ${SUCCESS_DIR} ${FAIL_DIR}; mkdir -p ${SUCCESS_DIR} ${FAIL_DIR}
 
-docker pull ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG}
-docker pull ${VAULT_RECONCILE_IMAGE}:${VAULT_RECONCILE_IMAGE_TAG}
-
 # Prepare to run integrations on production
 
 ## Write config.toml for reconcile tools
