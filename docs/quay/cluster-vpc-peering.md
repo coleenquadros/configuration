@@ -1,5 +1,14 @@
 # Quay OSD Cluster VPC Peering Setup
 
+Ref: [AWS Documentation](https://docs.aws.amazon.com/vpc/latest/peering/working-with-vpc-peering.html)
+
+1. From the AWS account that hosts the OpenShift Dedicated cluster, initiate a VPC Peering request to the Quay AWS account.
+2. From the Quay AWS account, accept the peering request.
+3. Update the route table in both accounts to send traffic for appropriate CIDR over the peering connection.
+4. Update security group to allow traffic from OSD to MySQL & Redis.
+
+See https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/aws-add-region-resources-to-cluster.md#creating-a-vpc-peering-connection for more details on setting up VPC peering, route tables, etc.
+
 ## Staging
 
 ### OSD Cluster Networking
@@ -32,13 +41,6 @@
 
 ![](images/rtb-05b1b511167898254.png)
 
-### Steps to setup VPC Peering
-
-Ref: [AWS Documentation](https://docs.aws.amazon.com/vpc/latest/peering/working-with-vpc-peering.html)
-
-1. From the AWS account that hosts the OpenShift Dedicated cluster, initiate a VPC Peering request to the Quay AWS account.
-2. From the Quay AWS account, accept the peering request.
-3. Update the route table in both accounts to send traffic for appropriate CIDR over the peering connection.
 
 ## Production
 
@@ -50,10 +52,10 @@ All Quay OSD clusters must be peered with following VPCs in `us-east-1`.
 
 #### Quay VPC Peering
 
-| VPC ID | CIDR |
-| --- | --- |
-| [vpc-0f65a7fc309ee81](https://console.aws.amazon.com/vpc/home?region=us-east-1#vpcs:vpcId=vpc-0f65a7fc309ee81b7) | 10.17.128.0/21 |
-| [vpc-f94c689f](https://console.aws.amazon.com/vpc/home?region=us-east-1#vpcs:vpcId=vpc-f94c689f) | 10.18.0.0/18 |
+| VPC ID | CIDR | Route Table |
+| --- | --- | -- |
+| [vpc-0f65a7fc309ee81](https://console.aws.amazon.com/vpc/home?region=us-east-1#vpcs:vpcId=vpc-0f65a7fc309ee81b7) | 10.17.128.0/21 | [rtb-0f873e62b9ffe2505](https://console.aws.amazon.com/vpc/home?region=us-east-1#routetables:filter=rtb-0f873e62b9ffe2505) |
+| [vpc-f94c689f](https://console.aws.amazon.com/vpc/home?region=us-east-1#vpcs:vpcId=vpc-f94c689f) | 10.18.0.0/18 | [rtb-7af58103](https://console.aws.amazon.com/vpc/home?region=us-east-1#routetables:filter=rtb-7af58103) |
 
 #### Quay Security Group
 
@@ -68,9 +70,9 @@ Quay OSD cluster in `us-east-2` must be peered with following VPCs.
 
 #### Quay VPCs
 
-| VPC ID | CIDR |
-| --- | --- |
-| [vpc-0a5fc7f7d771915c3](https://us-east-2.console.aws.amazon.com/vpc/home?region=us-east-2#vpcs:vpcId=vpc-0a5fc7f7d771915c3) | 172.32.0.0/16 |
+| VPC ID | CIDR | Route Table |
+| --- | --- | -- |
+| [vpc-0a5fc7f7d771915c3](https://us-east-2.console.aws.amazon.com/vpc/home?region=us-east-2#vpcs:vpcId=vpc-0a5fc7f7d771915c3) | 172.32.0.0/16 | [rtb-0856bff762cb6cf23](https://us-east-2.console.aws.amazon.com/vpc/home?region=us-east-2#routetables:filter=rtb-0856bff762cb6cf23)|
 
 #### Quay Security Group
 
