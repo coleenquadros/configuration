@@ -2558,22 +2558,16 @@
 
 - job-template:
     name: '{ci_project}-{git_repo}-minikube-updates'
+    che-success-message: "Latest version of Eclipse installed and tested successfully on minikube."
+    che-failure-message: "Latest version of Eclipse failed installing in minikube."
+    che-error-message: "Latest version of Eclipse failed installing in minikube."
     triggers:
-        - github
         - github-pull-request:
-            success-comment: "Operator updates test passed"
-            failure-comment: "Operator updates failed"
-            error-comment: "Operator updates failed"
-            <<: *che_admin_list_defaults
-            status-context: "ci.centos.org [Minikube test update last version]"
+            status-context: "[MINIKUBE] Tests of latest Eclipse Che version."
             included-regions:
               - 'olm/eclipse-che-preview-kubernetes/deploy/olm-catalog/eclipse-che-preview-kubernetes/.*'
-    wrappers:
-    - vault-secrets:
-        <<: *vault_defaults
-        secrets:
-            - *che-bot-github-credentials
-    <<: *job_template_defaults
+            <<: *che_github_pull_request_defaults
+    <<: *che-pullrequest-template
 
 - job-template:
     name: '{ci_project}-{git_repo}-code-pr-check'
@@ -5251,7 +5245,6 @@
             ci_project: 'devtools'
             ci_cmd: '/bin/bash .ci/cico_updates_minikube.sh'
             timeout: '2h'
-            job_type: "[MINIKUBE] Test latest che operator updates."
         - '{ci_project}-{git_repo}-pr-check':
             git_organization: eclipse
             git_repo: che-plugin-registry
