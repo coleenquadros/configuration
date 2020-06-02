@@ -465,7 +465,7 @@ The IT Platform team runs components like:
 
 - `sso.redhat.com`
   - C1 SLA (see resources below)
-  - In order to escalate a production incident this email can be used: `it-platform-page@redhat.com`.
+  - In order to escalate a production incident this email can be used: `it-es-platform-page@redhat.com`.
   - Resources: [Applications and Systems Criticality Classification](https://mojo.redhat.com/docs/DOC-1171238) and [Business Resilience Glossary](https://mojo.redhat.com/docs/DOC-1136493).
 
 ## Escalation procedures
