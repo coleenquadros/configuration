@@ -3,7 +3,7 @@
 CURRENT_DIR=$(dirname "$0")
 
 # Check EOF newline
-pip install binaryornot
+pip install --user binaryornot
 git ls-files | $CURRENT_DIR/eofcheck.py
 if [ $? != 0 ]; then
     echo "Detected files that do not end with newline"
