@@ -216,6 +216,10 @@ Every app-sre engineer should have access to the following
   - Access is provided via email to Cameron Britt <cbritt@redhat.com> and Jeremy Perry <jeperry@redhat.com>.
   - Logging in is done using the full Red Hat email.
 
+- Unleash:
+  - Feature toggle service to enable/disable features in runtime.
+  - More details available [here](https://mojo.redhat.com/groups/service-delivery/blog/2020/05/06/appsre-announcing-unleash-ga)
+
 ### Returning Red Hat Employee Gotchas
 
 - Accounts need to be re-enabled
