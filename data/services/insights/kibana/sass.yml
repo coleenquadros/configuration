@@ -1,0 +1,41 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: kibana 
+  platform: insights
+
+name: kibana
+description: ingress app on the Insights Platform
+
+app:
+  $ref: /services/insights/kibana/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+managedResourceTypes:
+- CronJob 
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  LOG_GROUP: platform
+
+resourceTemplates:
+- name: es-cleanup
+  path: /templates/es-cleanup.yml
+  url: https://github.com/RedHatInsights/es-cleanup
+  targets:
+  - namespace:
+      $ref: /services/insights/kibana/namespaces/dev-kibana-ci.yml
+    ref: master
