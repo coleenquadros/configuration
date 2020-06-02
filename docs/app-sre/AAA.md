@@ -140,6 +140,7 @@ Every app-sre engineer should have access to the following
     - ACCESS: outage-list -> subscribe from UI
     - ACCESS: aos-devel -> subscribe from UI
     - ACCESS: it-iam-announce-list -> subscribe from UI
+    - ACCESS: it-platform-community-list (useful for SSO) -> subscribe from UI
 
 - GPG key:
   - Generate one and put in:
