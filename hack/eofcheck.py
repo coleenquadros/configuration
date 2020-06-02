@@ -4,12 +4,7 @@ import logging
 import os
 import sys
 
-SKIP_EXTS = [
-    ".png",
-    ".jpg",
-    ".drawio",
-    ".gif",
-]
+from binaryornot.check import is_binary
 
 logging.basicConfig(format='%(levelname)s: %(message)s')
 
@@ -17,8 +12,8 @@ error = False
 for file_name in sys.stdin:
     file_name = file_name.strip()
 
-    if os.path.splitext(file_name)[1] in SKIP_EXTS:
-        logging.info([file_name, "skipping file (extension)"])
+    if is_binary(file_name):
+        logging.info([file_name, "skipping binary file"])
         continue
 
     with open(file_name, 'rb') as f:
