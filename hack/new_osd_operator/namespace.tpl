@@ -19,7 +19,3 @@ networkPoliciesAllow:
 - $ref: /services/osd-operators/namespaces/olm-{level}.yml
 
 managedRoles: true
-
-managedResourceTypes:
-- Secret
-- ConfigMap

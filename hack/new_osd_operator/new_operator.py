@@ -200,6 +200,26 @@ def update_slack_roles_yml(operator_name):
     dump_yml(fpath, yml)
 
 
+def update_slack_user_groups_yml(operator_name):
+    """Idempotently registers the operator's slack user group in
+    slack/coreos.yml.
+    """
+    fpath = os.path.join("data", "dependencies", "slack", "coreos.yml")
+    yml = load_yml(fpath)
+
+    groups = yml["managedUsergroups"]
+
+    # Already there
+    if operator_name in groups:
+        print("Slack user group for " + operator_name + " already registered.")
+        return
+
+    print("Adding slack user group for " + operator_name)
+    groups.append(operator_name)
+
+    dump_yml(fpath, yml)
+
+
 def write_from_template(tplname, destfmt, operator_name, **subs):
     """(Over)writes a file from a template.
 
@@ -273,6 +293,9 @@ def main():
 
     # Register the slack permissions file
     update_slack_roles_yml(args.operator_name)
+
+    # Register the slack user group
+    update_slack_user_groups_yml(args.operator_name)
 
 
 if __name__ == "__main__":
