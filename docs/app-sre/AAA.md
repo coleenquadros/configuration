@@ -218,7 +218,7 @@ Every app-sre engineer should have access to the following
 
 - Unleash:
   - Feature toggle service to enable/disable features in runtime.
-  - More details available [here](https://mojo.redhat.com/groups/service-delivery/blog/2020/05/06/appsre-announcing-unleash-ga)
+  - More details available [here](https://gitlab.cee.redhat.com/service/dev-guidelines/blob/master/unleash.md)
 
 ### Returning Red Hat Employee Gotchas
 
