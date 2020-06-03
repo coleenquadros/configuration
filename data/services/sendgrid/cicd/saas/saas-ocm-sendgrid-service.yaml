@@ -1,0 +1,54 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: ocm-sendgrid
+
+name: saas-ocm-sendgrid-service
+description: 'SaaS tracking file for OCM Sengrid Service'
+
+app:
+  $ref: /services/sendgrid/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  # todo - update channel name
+  channel: rhmi-sendgrid-service
+
+managedResourceTypes:
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/app-sre/ocm-sendgrid-service
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+resourceTemplates:
+- name: ocm-sendgrid-service
+  url: https://gitlab.cee.redhat.com/service/ocm-sendgrid-service
+  path: /templates/service-template.yml
+  parameters:
+    ENVIRONMENT: production
+    IMAGE_REGISTRY: quay.io
+    IMAGE_REPOSITORY: app-sre/ocm-sendgrid-service
+    JWKS_URL: https://api.openshift.com/.well-known/jwks.json
+    REPLICAS: 3
+  targets:
+  - namespace:
+      $ref: /services/sendgrid/namespaces/sendgrid-stage.yml
+    ref: master
+    upstream: service-ocm-sendgrid-service-gl-build-master
+    parameters:
+      OCM_BASE_URL: https://api.stage.openshift.com
+      GLOG_V: 5
+      # leaving sentry set to false, until sentry project/team/membership is setup
+      ENABLE_SENTRY: false
+
