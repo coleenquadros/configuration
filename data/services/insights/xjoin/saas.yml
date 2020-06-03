@@ -1,0 +1,66 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: xjoin
+  platform: insights
+
+name: xjoin
+description: xjoin app on the Insights Platform
+
+app:
+  $ref: /services/insights/xjoin/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- DeploymentConfig
+- HorizontalPodAutoscaler
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+- quay.io/prometheus/pushgateway
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: xjoin-search
+  path: /templates/xjoin/xjoin-search.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: c25ad00
+- name: xjoin-kafka-connect
+  path: /templates/xjoin/xjoin-kafka-connect.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: d9a6fc0
+- name: xjoin-es-exporter
+  path: /templates/xjoin/xjoin-es-exporter.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
+    ref: master
+    parameters:
+      uIMAGE_TAG: latest
