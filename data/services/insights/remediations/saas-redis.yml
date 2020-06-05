@@ -1,0 +1,46 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: remediations
+  platform: insights
+
+name: remediations-redis
+description: remediations-redis app on the Insights Platform
+
+app:
+  $ref: /services/insights/remediations/app.yml
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+imagePatterns:
+- registry.redhat.io/rhscl
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/secrets/global/rh-registry-pull
+    field: all
+
+resourceTemplates:
+- name: remediations-redis
+  path: /templates/remediations/redis.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  parameters:
+    VOLUME_CAPACITY: 10Gi
+    IMAGE_TAG: 3.2-47
+    IMAGE: registry.redhat.io/rhscl/redis-32-rhel7
+    REDIS_REPLICAS: 1
+  targets:
+  - namespace:
+      $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
+    ref: master
