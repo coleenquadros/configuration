@@ -40,15 +40,10 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
 
 1. Click create and wait for the cluster to be created
 
-1. Click `Access Control`, then `Add Identity Provider`
-
-    - Provider: Github
-    - Name: github-app-sre
-    - Mapping Method: claim
-
 1. Contact App-SRE and request a new App-SRE Github Oauth Client. You will need to provide the callback URL.
+  * Note: place the `client-id` and `client-secret` in a secret in [Vault](https://vault.devshift.net/ui/vault/secrets/app-sre/list/integrations-input/ocm-github-idp/github-org-team/app-sre/) named `<cluster-name>-cluster`.
 
-In order to create the Oauth client register to create a new application here:
+In order to create the OAuth client register to create a new application here:
 https://github.com/organizations/app-sre/settings/applications
 
 The callback template is:
@@ -62,31 +57,6 @@ Note: replace `app-sre-prod-04.i5h0` with the correct values.
     - Client Secret: (provided by App-SRE)
     - Type: Teams
     - Teams: (provided by App-SRE) should be: `<cluster-name>-cluster`
-
-1. Click `Open Console`
-
-1. Verify that you see a link named `github-app-sre` (can take a few minutes to appear after the previous step)
-
-1. Go back to your cluster in OCM, then `Access control`
-
-1. Add the github username of the App-SRE team member who is setting up your cluster in app-interface to grant dedicated-admin access
-
-1. Login to the cluster as a dedicated-admin user
-
-In order to achieve this the following steps must be followed:
-
-- Disable the `github` integration in https://app-interface.unleash.devshift.net/#/features.
-- Manually add a new team called `<cluster-name>-cluster` in the AppSRE org: https://github.com/orgs/app-sre/new-team.
-- By creating the team, it will automatically add you as a member.
-
-1. Add the `app-sre-bot` ServiceAccount
-
-    ```shell
-    oc -n dedicated-admin create sa app-sre-bot
-    oc -n dedicated-admin sa get-token app-sre-bot
-    ```
-
-1. Add the `app-sre-bot` credentials to vault at https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/kube-configs/
 
 1. Add the cluster in app-interface
 
@@ -116,10 +86,6 @@ In order to achieve this the following steps must be followed:
     managedGroups:
     - dedicated-admins
 
-    automationToken:
-      path: app-sre/creds/kube-configs/<cluster>
-      field: token
-
     internal: false
 
     awsInfrastructureAccess:
@@ -129,6 +95,41 @@ In order to achieve this the following steps must be followed:
     - awsGroup:
         $ref: /aws/app-sre/groups/App-SRE-admin.yml
       accessLevel: network-mgmt
+    ```
+
+1. Grant dedicated-admin access to App-SRE team
+
+    ```yaml
+    # /data/teams/app-sre/roles/app-sre.yml
+    ...
+    access:
+        ...
+        - cluster:
+            $ref: /openshift/<clustername>/cluster.yml
+        group: dedicated-admins
+    ```
+
+1. Click `Open Console`
+
+1. Verify that you see a link named `github-app-sre` (can take a few minutes to appear after the previous step)
+
+1. Login to the cluster (as a dedicated-admin user)
+
+1. Add the `app-sre-bot` ServiceAccount
+
+    ```shell
+    oc -n dedicated-admin create sa app-sre-bot
+    oc -n dedicated-admin sa get-token app-sre-bot
+    ```
+
+1. Add the `app-sre-bot` credentials to vault at https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/kube-configs/
+
+1. Add the `app-sre-bot` credentials to the cluster file in app-interface
+
+    ```yaml
+    automationToken:
+      path: app-sre/creds/kube-configs/<cluster>
+      field: token
     ```
 
 1. Add the `openshift-config` namespace in app-interface
@@ -176,18 +177,6 @@ In order to achieve this the following steps must be followed:
     # this is a cluster scoped resources, but this should work for now
     - provider: resource
       path: /setup/cluster.project.v4.yaml
-    ```
-
-1. Grant dedicated-admin access to App-SRE team
-
-    ```yaml
-    # /data/teams/app-sre/roles/app-sre.yml
-    ...
-    access:
-        ...
-        - cluster:
-            $ref: /openshift/<clustername>/cluster.yml
-        group: dedicated-admins
     ```
 
 # Additional configurations
