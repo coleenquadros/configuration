@@ -134,7 +134,7 @@ In order to achieve this the following steps must be followed:
 1. Add the `openshift-config` namespace in app-interface
 
     ```yaml
-    # /data/services/app-sre/namespaces/<cluster>-openshift-config.yml
+    # /data/openshift/<cluster>/namespaces/openshift-config.yml
     ---
     $schema: /openshift/namespace-1.yml
 
