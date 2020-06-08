@@ -21,6 +21,8 @@ slack:
 managedResourceTypes:
 - Deployment
 - Service
+- ConfigMap
+- Route
 
 imagePatterns:
 - quay.io/app-sre
@@ -29,49 +31,72 @@ resourceTemplates:
 - name: nginx-proxy
   path: /openshift/nginx-proxy.template.yaml
   url: https://gitlab.cee.redhat.com/service/app-sre-observability
+  parameters:
+    WORKER_CONNECTIONS: 1024
+    SERVER_NAMES_HASH_BUCKET_SIZE: 128
+    PROXY_READ_TIMEOUT: 900s
+    PROXY_SEND_TIMEOUT: 900s
   targets:
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-stage.app-sre-stage-01.yml
     ref: master
     parameters:
       REPLICAS: 1
+      ALERTMANAGER_SERVER_NAME: alertmanager.app-sre-stage-01.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.app-sre-stage-01.devshift.net
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-stage.app-sre-stage-02.yml
     ref: master
     parameters:
       REPLICAS: 1
+      ALERTMANAGER_SERVER_NAME: alertmanager.app-sre-stage-02.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.app-sre-stage-02.devshift.net
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.app-sre-prod-01.yml
     ref: d2f6288562634feb10819807a1ca144c71bb426c
     parameters:
       REPLICAS: 3
+      ALERTMANAGER_SERVER_NAME: alertmanager.app-sre-prod-01.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.app-sre-prod-01.devshift.net
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.app-sre-prod-02.yml
     ref: d2f6288562634feb10819807a1ca144c71bb426c
     parameters:
       REPLICAS: 3
+      ALERTMANAGER_SERVER_NAME: alertmanager.app-sre-prod-02.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.app-sre-prod-02.devshift.net
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.app-sre-prod-03.yml
     ref: d2f6288562634feb10819807a1ca144c71bb426c
     parameters:
       REPLICAS: 3
+      ALERTMANAGER_SERVER_NAME: alertmanager.app-sre-prod-03.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.app-sre-prod-03.devshift.net
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.app-sre-prod-04.yml
     ref: d2f6288562634feb10819807a1ca144c71bb426c
     parameters:
       REPLICAS: 3
+      ALERTMANAGER_SERVER_NAME: alertmanager.app-sre-prod-04.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.app-sre-prod-04.devshift.net
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.telemeter-prod-01.yml
     ref: d2f6288562634feb10819807a1ca144c71bb426c
     parameters:
       REPLICAS: 3
+      ALERTMANAGER_SERVER_NAME: alertmanager.telemeter-prod-01.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.telemeter-prod-01.devshift.net
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-stage.crc-stage-01.yml
     ref: master
     parameters:
       REPLICAS: 1
+      ALERTMANAGER_SERVER_NAME: alertmanager.crc-stage-01.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.crc-stage-01.devshift.net
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-stage.quayio-stage.yml
     ref: master
     parameters:
       REPLICAS: 1
+      ALERTMANAGER_SERVER_NAME: alertmanager.quayio-stage.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.quayio-stage.devshift.net

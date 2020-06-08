@@ -225,11 +225,9 @@ Some clusters may require enhanced dedicated-admin privileges. The process to ge
     - `externalUrl` for both the `prometheus` and `alertmanager` resources
     - Both `prometheus` and `alertmanager` oauth proxy secrets. Those should be set in vault to values corresponding to two *different* github oauth clients. Those oauth clients need their callback URLs to be `https://<prometheus|alertmanager>.<cluster>.devshift.net/oauth2/callback`. *Note:* Both prometheus and alertmanager pods need a restart after a new secret is pushed
 
-1. Create a app-sre-observability namespace file for that specific cluster with openshift-acme and nginx config. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/24dcd1f3bec3b0accea6c834b12e65e9873440c9/data/services/observability/namespaces/app-sre-observability-production.app-sre-prod-03.yml
+1. Create a app-sre-observability namespace file for that specific cluster with openshift-acme. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/24dcd1f3bec3b0accea6c834b12e65e9873440c9/data/services/observability/namespaces/app-sre-observability-production.app-sre-prod-03.yml
 
 1. Add app-sre-observability namespace as target namespaces in [saas-app-sre-observability.yaml](https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/observability/cicd/saas/saas-app-sre-observability.yaml) to deploy nginx-proxy.
-
-1. Add route in app-sre-observability namespace and point to nginx-proxy. Ex: https://gitlab.cee.redhat.com/service/app-interface/commit/2346400fc3e7e1a701becadc7279d129a8c16c0f#8937e708e9d62be0ba5cba4d4fad5cb2c550047b
 
 1. Verify `https://<prometheus|alertmanager>.<cluster>.devshift.net` have valid ssl certificates.
 
