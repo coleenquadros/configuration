@@ -1,0 +1,59 @@
+---
+$schema: /openshift/cluster-1.yml
+
+labels:
+  service: quayio
+
+name: quay-s-ue1
+description: Stage cluster for Quay.io
+consoleUrl: "https://console-openshift-console.apps.quay-s-ue1.h1m6.p1.openshiftapps.com/"
+kibanaUrl: ""
+prometheusUrl: "https://prometheus.quay-s-ue1.devshift.net"
+serverUrl: "https://api.quay-s-ue1.h1m6.p1.openshiftapps.com:6443"
+
+auth:
+  service: github-org-team
+  org: app-sre
+  team: quay-s-ue1-cluster
+
+ocm:
+  $ref: /dependencies/ocm/production.yml
+
+managedGroups:
+- dedicated-admins
+
+spec:
+  provider: aws
+  region: us-east-1
+  major_version: 4
+  multi_az: false
+  nodes: 12
+  instance_type: m5.4xlarge
+  storage: 1100
+  load_balancers: 4
+
+network:
+  vpc: 10.105.0.0/16
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
+
+automationToken:
+  path: app-sre/creds/kube-configs/quay-s-ue1
+  field: token
+
+disable:
+  e2eTests:
+  - create-namespace
+  - dedicated-admin-rolebindings
+  - default-network-policies
+  - default-project-labels
+
+internal: false
+
+awsInfrastructureAccess:
+- awsGroup:
+    $ref: /aws/quayio-stage/groups/App-SRE-admin.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/quayio-stage/groups/App-SRE-admin.yml
+  accessLevel: network-mgmt
