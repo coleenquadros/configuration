@@ -31,9 +31,33 @@ openshiftResources:
   version: 2
   type: kubernetes.io/dockerconfigjson
 - provider: vault-secret
+  path: insights/secrets/insights-stage/xavier-stage/xavier-analytics
+  version: 1
+- provider: vault-secret
   path: insights/quay/quay.io
   version: 3
   type: kubernetes.io/dockerconfigjson
   name: quay-cloudservices-pull
 - provider: resource
   path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-stage
+  identifier: xavier-stage
+  defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
+  parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-xavier-stage.yml
+  enhanced_monitoring: true
+  output_resource_name: xavier-db
+- provider: s3
+  account: insights-stage
+  identifier: xavier-stage
+  defaults: /terraform/resources/s3-private-1.yml
+  output_resource_name: upload-s3
+- provider: cloudwatch
+  account: insights-stage
+  identifier: xavier-stage
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
