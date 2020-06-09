@@ -224,7 +224,9 @@ Some clusters may require enhanced dedicated-admin privileges. The process to ge
     - key: `deadmanssnitch-<clustername>-url`
     - value: the deadmanssnitch URL
 
-1. Add a route and a receiver in the App-SRE alertmanager config. Example MR: https://gitlab.cee.redhat.com/service/app-interface/commit/97059bb8d14681bcade500e09c67557f624d471d.
+1. Add a route and a receiver in the App-SRE alertmanager config. Example MR: https://gitlab.cee.redhat.com/service/app-interface/commit/97059bb8d14681bcade500e09c67557f624d471d. Update the following file:
+
+    - https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/resources/observability/alertmanager/alertmanager-instance.secret.yaml
 
 1. Create an `openshift-customer-monitoring` namespace file for that specific cluster. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/57285601a13eea11079b431103a28337642050cb/data/services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml.
 
