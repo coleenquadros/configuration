@@ -207,29 +207,62 @@ Some clusters may require enhanced dedicated-admin privileges. The process to ge
 
 ## Enable observability on a v4 cluster
 
+1. Create DNS records:
+- `prometheus.<cluster-name>.devshift.net`: `elb.apps.<clustername>.<clusterid>.p1.openshiftapps.com`
+- `alertmanager.<cluster-name>.devshift.net`: `elb.apps.<clustername>.<clusterid>.p1.openshiftapps.com`
+
 1. Configure a [deadmanssnitch](https://deadmanssnitch.com/) snitch for the new cluster. The snitch settings should be as follow:
     - Name: <cluster name>
     - Alert type: Basic
     - Interval: 15 min
     - Tags: app-sre
     - Alert email: sd-app-sre@redhat.com
+    - Notes: Runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-deadmanssnitch.md
 
-1. Add a route and a receiver in the App-SRE alertmanager config. The snitch URL is shown in the deadmanssnitch website UI and has to be added to the vault secret. Example MR: https://gitlab.cee.redhat.com/service/app-interface/commit/97059bb8d14681bcade500e09c67557f624d471d
+1. Add the deadmansnitch URL to this secret in Vault: https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/alertmanager-integration
 
-1. Add the `observabilityNamespace` field on the cluster data file. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/7ecd529584666d97b1418224b2772557807c6e1c/data/openshift/app-sre-prod-01/cluster.yml#L14-15
+    - key: `deadmanssnitch-<clustername>-url`
+    - value: the deadmanssnitch URL
 
-1. Create a corresponding observability namespace file for that specific cluster. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/57285601a13eea11079b431103a28337642050cb/data/services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml
+1. Add a route and a receiver in the App-SRE alertmanager config. Example MR: https://gitlab.cee.redhat.com/service/app-interface/commit/97059bb8d14681bcade500e09c67557f624d471d.
+
+1. Create an `openshift-customer-monitoring` namespace file for that specific cluster. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/57285601a13eea11079b431103a28337642050cb/data/services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml.
 
 1. Customize the above observability namespace file as desired. Some options to look out for:
     - `clusterLabel` for the prometheus resource
     - `externalUrl` for both the `prometheus` and `alertmanager` resources
-    - Both `prometheus` and `alertmanager` oauth proxy secrets. Those should be set in vault to values corresponding to two *different* github oauth clients. Those oauth clients need their callback URLs to be `https://<prometheus|alertmanager>.<cluster>.devshift.net/oauth2/callback`. *Note:* Both prometheus and alertmanager pods need a restart after a new secret is pushed
+
+1. Create OAuth apps for Prometheus and Alertmanager:
+    - Name: `<prometheus|alertmanager>.<cluster>.devshift.net`
+    - Home page: `https://<prometheus|alertmanager>.<cluster>.devshift.net`
+    - Callback URL: `https://<prometheus|alertmanager>.<cluster>.devshift.net/oauth2/callback`
+
+1. Create the following secrets in Vault to match the OAuth apps created in the previous step:
+    - https://vault.devshift.net/ui/vault/secrets/app-interface/show/<clustername>/openshift-customer-monitoring/alertmanager/alertmanager-auth-proxy ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quay-s-ue1/openshift-customer-monitoring/alertmanager/alertmanager-auth-proxy))
+    - https://vault.devshift.net/ui/vault/secrets/app-interface/show/<clustername>/openshift-customer-monitoring/prometheus-additional-scrape-config ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quay-s-ue1/openshift-customer-monitoring/prometheus-additional-scrape-config))
+    - https://vault.devshift.net/ui/vault/secrets/app-interface/show/<clustername>/openshift-customer-monitoring/prometheus-auth-proxy ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quay-s-ue1/openshift-customer-monitoring/prometheus-auth-proxy))
+
+    *Note:* Both prometheus and alertmanager pods need a restart after a new secret is pushed
+
+1. Add the `cluster-monitoring-view` cluster role to https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/roles/app-sre-osdv4-monitored-namespaces-view.yml.
+
+1. Add the `observabilityNamespace` field on the cluster data file and reference the `openshift-customer-monitoring` namespace file created in the previous step. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/7ecd529584666d97b1418224b2772557807c6e1c/data/openshift/app-sre-prod-01/cluster.yml#L14-15
 
 1. Create a app-sre-observability namespace file for that specific cluster with openshift-acme. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/24dcd1f3bec3b0accea6c834b12e65e9873440c9/data/services/observability/namespaces/app-sre-observability-production.app-sre-prod-03.yml
 
 1. Add app-sre-observability namespace as target namespaces in [saas-app-sre-observability.yaml](https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/observability/cicd/saas/saas-app-sre-observability.yaml) to deploy nginx-proxy.
 
 1. Verify `https://<prometheus|alertmanager>.<cluster>.devshift.net` have valid ssl certificates.
+
+1. Update the Grafana datasources secret in Vault: https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/grafana/datasources
+
+    - Add a new key `<clustername>-prometheus` with a value that matches the `auth` key in the https://vault.devshift.net/ui/vault/secrets/app-interface/show/<clustername>/openshift-customer-monitoring/prometheus-auth-proxy secret (TODO: explain how)
+
+1. Add Grafana data sources for the new cluster:
+    - <clustername>-prometheus - the Prometheus instance in `openshift-customer-monitoring`
+    - <clustername>-cluster-prometheus - the Cluster's Prometheus instance
+
+1. Rollout Grafana to make the data source changes effective.
 
 ## Enable logging (EFK)
 

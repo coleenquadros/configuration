@@ -1,0 +1,29 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: app-sre-observability-stage
+description: staging namespace for the app-sre observability stack
+
+cluster:
+  $ref: /openshift/quay-s-ue1/cluster.yml
+
+app:
+  $ref: /services/observability/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.quay-s-ue1.yml
+
+openshiftAcme:
+  config:
+    $ref: /dependencies/openshift/acme/v4.yml
+  accountSecret:
+    provider: vault-secret
+    path: app-interface/app-sre/app-sre-observability-stage/acme-account
+    version: 1
+
+managedRoles: true
