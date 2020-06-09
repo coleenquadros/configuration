@@ -199,7 +199,7 @@ Note that the host prefix must be set to /23.
 
 ## VPC peering with app-interface
 
-[app-interface-cluster-vpc-peerings.md]()
+[app-interface-cluster-vpc-peerings.md](app-interface-cluster-vpc-peerings.md)
 
 ## Enable enhanced dedicated-admin
 
