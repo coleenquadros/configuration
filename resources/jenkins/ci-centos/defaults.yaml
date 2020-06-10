@@ -3530,13 +3530,13 @@
             | Link | URL |\n
             | ---- | :-: |\n
             | job log | https://ci.centos.org/job/$JOB_NAME/$BUILD_NUMBER/console |\n
-            | artifacts | http://artifacts.ci.centos.org/devtools/saas-openshiftio/$JOB_NAME/$BUILD_NUMBER |\n\n
+            | artifacts | http://artifacts.ci.centos.org/devtools/$JOB_NAME/$BUILD_NUMBER |\n\n
             **Please review the job results and re-run the job by commenting [test] if necessary.**"
             error-comment: "**The rh-che test against prod-preview failed.**\n\n
             | Link | URL |\n
             | ---- | :-: |\n
             | job log | https://ci.centos.org/job/$JOB_NAME/$BUILD_NUMBER/console |\n
-            | artifacts | http://artifacts.ci.centos.org/devtools/saas-openshiftio/$JOB_NAME/$BUILD_NUMBER |\n\n
+            | artifacts | http://artifacts.ci.centos.org/devtools/$JOB_NAME/$BUILD_NUMBER |\n\n
             **Please review the job results and re-run the job by commenting [test] if necessary.**"
             <<: *github_pull_request_defaults
     wrappers:
@@ -3544,6 +3544,55 @@
             <<: *vault_defaults
             secrets:
                 - secret-path: 'devtools-osio-ci/rhche-saas-prcheck'
+                  secret-values:
+                    - env-var: 'PASSWORD'
+                      vault-key: 'password'
+                    - env-var: 'USERNAME'
+                      vault-key: 'username'
+                    - env-var: 'EMAIL'
+                      vault-key: 'email'
+    <<: *saas_prcheck_rhche_template
+
+- job-template:
+    name: '{ci_project}-saas-openshiftio-pre-release-test'
+    scm:
+        - git-scm:
+            git_url: https://{github_user}@github.com/{git_organization}/{git_repo}.git
+            git_basedir: '{git_repo}'
+        - git:
+            url: https://github.com/redhat-developer/rh-che/
+            shallow_clone: true
+            branches:
+                - master
+            basedir: rhche
+    triggers:
+        - github-pull-request:
+            github_hooks: '{github_hooks}'
+            failure-comment: "**The pre-release rh-che test against prod-preview failed.**\n\n
+            | Link | URL |\n
+            | ---- | :-: |\n
+            | job log | https://ci.centos.org/job/$JOB_NAME/$BUILD_NUMBER/console |\n
+            | artifacts | http://artifacts.ci.centos.org/devtools/$JOB_NAME/$BUILD_NUMBER |\n\n
+            **Please review the job results and re-run the job by commenting [pre-release-tests] if necessary.**"
+            error-comment: "**The pre-release rh-che test against prod-preview failed.**\n\n
+            | Link | URL |\n
+            | ---- | :-: |\n
+            | job log | https://ci.centos.org/job/$JOB_NAME/$BUILD_NUMBER/console |\n
+            | artifacts | http://artifacts.ci.centos.org/devtools/$JOB_NAME/$BUILD_NUMBER |\n\n
+            **Please review the job results and re-run the job by commenting [pre-release-tests] if necessary.**"
+            trigger-phrase: '.*\[pre-release-tests\].*'
+            <<: *admin_list_defaults
+            cron: '* * * * *'
+            github-hooks: false
+            permit-all: false
+            allow-whitelist-orgs-as-admins: true
+            status-context: "ci.centos.org rh-che pre-release-tests"
+            only-trigger-phrase: true
+    wrappers:
+        - vault-secrets:
+            <<: *vault_defaults
+            secrets:
+                - secret-path: 'devtools-osio-ci/rh-che-automation-credentials-pre-release-saas'
                   secret-values:
                     - env-var: 'PASSWORD'
                       vault-key: 'password'
@@ -3764,6 +3813,12 @@
         - '{ci_project}-rh-che-pre-release-test':
             git_organization: redhat-developer
             git_repo: rh-che
+            ci_project: 'devtools'
+            ci_cmd: 'TARGET="rhel" /bin/bash ./.ci/cico_pre_release_tests.sh'
+            timeout: '75m'
+        - '{ci_project}-saas-openshiftio-pre-release-test':
+            git_organization: openshiftio
+            git_repo: saas-openshiftio
             ci_project: 'devtools'
             ci_cmd: 'TARGET="rhel" /bin/bash ./.ci/cico_pre_release_tests.sh'
             timeout: '75m'
