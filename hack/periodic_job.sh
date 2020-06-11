@@ -42,6 +42,7 @@ run_int gitlab-permissions &
 run_int gitlab-integrations &
 run_int ldap-users $APP_INTERFACE_PROJECT_ID &
 run_int slack-usergroups &
+run_int openshift-namespaces --internal &
 run_int openshift-resources --internal &
 run_int openshift-network-policies --internal &
 run_int openshift-rolebindings --internal &
