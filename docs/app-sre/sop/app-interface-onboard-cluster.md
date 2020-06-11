@@ -250,8 +250,9 @@ Some clusters may require enhanced dedicated-admin privileges. The process to ge
 
 1. Add the `observabilityNamespace` field on the cluster data file and reference the `openshift-customer-monitoring` namespace file created in the previous step. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/7ecd529584666d97b1418224b2772557807c6e1c/data/openshift/app-sre-prod-01/cluster.yml#L14-15
 
-1. Create a app-sre-observability-per-cluster namespace file for that specific cluster with openshift-acme. Ex: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/openshift/app-sre-prod-02/namespaces/app-sre-observability-per-cluster.yaml
-1. Add app-sre-observability namespace as target namespaces in [saas-app-sre-observability.yaml](https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/observability/cicd/saas/saas-app-sre-observability.yaml) to deploy nginx-proxy.
+1. Create an `app-sre-observability-per-cluster` namespace file for that specific cluster with openshift-acme. Ex: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/openshift/app-sre-prod-02/namespaces/app-sre-observability-per-cluster.yaml
+
+1. Add the new `app-sre-observability-per-cluster` namespace to the target namespaces in [saas-nginx-proxy.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/cicd/saas/saas-nginx-proxy.yaml) to deploy nginx-proxy.
 
 1. Verify `https://<prometheus|alertmanager>.<cluster>.devshift.net` have valid ssl certificates.
 

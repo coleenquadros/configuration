@@ -1428,7 +1428,7 @@ To get access to the project, if required, contact the App SRE team.
 
 6. Add the configmap as a volume and volumeMount to the grafana pod template in [the app-sre-observability repo](https://gitlab.cee.redhat.com/service/app-sre-observability/). An example of the changes can be found [here](https://gitlab.cee.redhat.com/service/app-sre-observability/commit/0bee8c95be4a27121e6b1ff82a75a2e01901a8f4)
 
-7. Once the template changes are merged, the saas-repo hash for the grafana service need to be bumped so the changes are deployed. This can be done on [the saas-app-sre-observability repo](https://gitlab.cee.redhat.com/service/saas-app-sre-observability/)
+7. Once the template changes are merged, the saas file hash for the grafana service need to be bumped so the changes are deployed. This can be done in [saas-grafana](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/cicd/saas/saas-grafana.yaml).
 
 ### Execute a SQL Query on an App Interface controlled RDS instance
 
