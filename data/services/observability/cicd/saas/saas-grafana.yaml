@@ -1,0 +1,43 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: app-sre-observability
+
+name: saas-grafana
+description: saas-grafana
+
+app:
+  $ref: /services/observability/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/app-sre
+- quay.io/pusher
+
+resourceTemplates:
+- name: grafana
+  path: /openshift/grafana.template.yaml
+  url: https://gitlab.cee.redhat.com/service/app-sre-observability
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: master
+    parameters:
+      REPLICAS: 1
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: 57600229ce7292e1d15a85af74da902cf25d8d21
+    parameters: 
+      REPLICAS: 3

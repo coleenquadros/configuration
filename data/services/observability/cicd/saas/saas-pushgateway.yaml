@@ -1,0 +1,40 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: app-sre-observability
+
+name: saas-pushgateway
+description: saas-pushgateway
+
+app:
+  $ref: /services/observability/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/app-sre
+
+resourceTemplates:
+- name: pushgateway
+  path: /openshift/pushgateway.template.yaml
+  url: https://gitlab.cee.redhat.com/service/app-sre-observability
+  parameters:
+    IMAGE_GATE_TAG: 89fffba
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: c90b17a08471483a7443c8efd5d54f9dc1a03022
