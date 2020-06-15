@@ -224,9 +224,9 @@ Some clusters may require enhanced dedicated-admin privileges. The process to ge
     - key: `deadmanssnitch-<clustername>-url`
     - value: the deadmanssnitch URL
 
-1. Create an `openshift-customer-monitoring` namespace file for that specific cluster. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/57285601a13eea11079b431103a28337642050cb/data/services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml.
+1. Create an `openshift-customer-monitoring` namespace file for that specific cluster. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml.
 
-1. Customize the above observability namespace file as desired. Some options to look out for:
+1. Add the new `openshift-customer-monitoring` namespace to the target namespaces in [saas-observability-per-cluster](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/cicd/saas/saas-observability-per-cluster) to deploy Prometheus and Alertmanager. Some options to look out for:
     - `clusterLabel` for the prometheus resource
     - `externalUrl` for both the `prometheus` and `alertmanager` resources
 
