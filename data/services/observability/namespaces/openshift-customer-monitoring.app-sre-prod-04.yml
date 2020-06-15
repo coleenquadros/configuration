@@ -18,9 +18,7 @@ environment:
 managedResourceTypes:
 - Secret
 - Service
-- Subscription
 - Prometheus
-- Alertmanager
 - PrometheusRule
 - ServiceMonitor
 
@@ -35,51 +33,8 @@ managedResourceNames:
     - prometheus-additional-alertmanager-config
     - prometheus-additional-scrape-config
     - prometheus-auth-proxy
-- resource: Alertmanager
-  resourceNames:
-    - instance
 
 openshiftResources:
-# Prometheus operator
-- provider: resource-template
-  type: jinja2
-  path: /observability/prometheus/v4/app-sre.prometheus.yaml
-  variables:
-    clusterLabel: app-sre-prod-04
-    environment: production
-    externalUrl: https://prometheus.app-sre-prod-04.devshift.net
-    version: v2.15.2
-    retention: 15d
-    pvSize: 50Gi
-    walCompression: true
-    logLevel: debug
-- provider: resource
-  path: /observability/prometheus/prometheus-app-sre.service.yaml
-- provider: resource
-  path: /observability/prometheus/prometheus-operator.service.yml
-- provider: resource
-  path: /observability/prometheus/prometheus-proxy.service.yaml
-- provider: resource
-  path: /observability/prometheus/v4/prometheus.subscription.yaml
-
-# AlertManager
-- provider: resource-template
-  type: jinja2
-  path: /observability/alertmanager/app-sre.alertmanager.yaml
-  variables:
-    replicas: 3
-    version: v0.20.0
-    environment: production
-    externalUrl: https://alertmanager.app-sre-prod-04.devshift.net
-    oauthProxySecretName: alertmanager-auth-proxy
-    storageClassName: gp2
-    logLevel: info
-    alertmanagerName: instance
-- provider: resource
-  path: /observability/alertmanager/alertmanager-app-sre.service.yaml
-- provider: resource
-  path: /observability/alertmanager/alertmanager-proxy.service.yaml
-
 # Secrets
 ## Observability
 ### Prometheus additional alertmanager config
@@ -106,9 +61,6 @@ openshiftResources:
   path: /observability/alertmanager/alertmanager-instance.secret.yaml
 
 ## Prometheus Rules
-### Prometheus Deadmanssnitch
-- provider: resource
-  path: /observability/prometheusrules/deadmanssnitch.prometheusrules.yaml
 ### App SRE contract
 - provider: resource
   path: /observability/prometheusrules/app-sre-contract.yaml
