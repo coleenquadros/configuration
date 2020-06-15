@@ -477,6 +477,12 @@ The `resource-template` provider supports using the `Jinja2` template language t
     {{ vault('app-sre/creds/smtp', 'username') }}
     ```
 
+- Fetch a secret from vault with a templated path or key:
+
+    ```jinja
+    {{ vault('path/to/secret-with-key-per-namespace', '{{ resource.namespace.name }}') }}
+    ```
+
 - Base64 encode a block of data
 
     ```jinja
