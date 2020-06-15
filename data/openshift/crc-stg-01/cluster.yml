@@ -1,0 +1,66 @@
+---
+$schema: /openshift/cluster-1.yml
+
+labels:
+  service: insights
+  version: osdv4
+  env: staging
+
+name: crc-stg-01
+description: Insights OSDv4 Stage cluster
+consoleUrl: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/"
+serverUrl: "https://api.crc-stg-01.o4v9.p1.openshiftapps.com:6443"
+kibanaUrl: ""
+prometheusUrl: ""
+
+auth:
+  service: github-org-team
+  org: app-sre
+  team: crc-stage-01-cluster
+
+ocm:
+  $ref: /dependencies/ocm/production.yml
+
+managedGroups:
+- dedicated-admins
+
+automationToken:
+  path: app-sre/creds/kube-configs/crc-stg-01
+  field: token
+
+internal: false
+
+managedClusterRoles: true
+
+spec:
+  provider: aws
+  region: us-east-1
+  major_version: 4
+  multi_az: false
+  nodes: 9
+  instance_type: m5.2xlarge
+  storage: 1600
+  load_balancers: 4
+
+network:
+  vpc: 10.2.0.0/16
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
+
+awsInfrastructureAccess:
+- awsGroup:
+    $ref: /aws/insights-stage/groups/App-SRE-admin.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/insights-stage/groups/App-SRE-admin.yml
+  accessLevel: network-mgmt
+
+# peering:
+#   connections:
+#   - name: crc-stg-01-vpc-peering
+#     vpc:
+#       $ref: /aws/insights-stage/vpcs/insights-stage-us-east-1-vpc-01.yml
+
+disable:
+  integrations:
+  - openshift-users
