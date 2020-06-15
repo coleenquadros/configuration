@@ -493,9 +493,8 @@ AppSRE on-call may be assigned PagerDuty incidents that were triggered by our te
 ## Contacts
 
 - OSD SRE
-    - #libra-ops on irc.devel.redhat.com - Shift lead and on-call listed in /topic
     - #sd-sre-platform on slack.coreos.org
-    - Openshift SRE Servicenow direct form: https://url.corp.redhat.com/OpenShift-SRE-Service-Request-Form
+    - Create a JIRA: [task](https://issues.redhat.com/secure/CreateIssueDetails!init.jspa?pid=12323823&issuetype=3&customfield_12316441=14554&priority=10000) or [incident](https://issues.redhat.com/secure/CreateIssueDetails!init.jspa?pid=12323823&issuetype=10901&customfield_12316441=14554&priority=10000). [More info](https://mojo.redhat.com/docs/DOC-1223261).
 
 - BLR infrastructure -> PnT Devops irc -> Mattermost: sureshn, snandago@redhat.com -> PnT Devops
 - RDU infrastructure ->
