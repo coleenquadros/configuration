@@ -19,3 +19,26 @@ spec:
       for: 5m
       labels:
         severity: high
+  - name: qontract-reconcile
+    interval: 1m
+    rules:
+    - alert: QontractReconcileError
+      labels:
+        severity: high
+      expr: sum(increase(qontract_reconcile_run_status_total{status!~"0|3|-9"}[5m])) > 0
+      for: 5m
+      annotations:
+        runbook: ""
+        dashboard: "https://prometheus.app-sre-prod-01.devshift.net/graph?g0.range_input=2d&g0.expr=increase(qontract_reconcile_run_status_total%7Bstatus!~%220%7C3%7C-9%22%7D%5B5m%5D)&g0.tab=1"
+        message: ""
+        link_url: ""
+    - alert: QontractReconcileOomKiller
+      labels:
+        severity: high
+      expr: sum(increase(qontract_reconcile_run_status_total{status="-9"}[5m])) > 0
+      for: 5m
+      annotations:
+        runbook: ""
+        dashboard: "https://prometheus.app-sre-prod-01.devshift.net/graph?g0.range_input=2d&g0.expr=increase(qontract_reconcile_run_status_total%7Bstatus%3D%22-9%22%7D%5B5m%5D)&g0.tab=1"
+        message: ""
+        link_url: ""
