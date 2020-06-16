@@ -9,4 +9,4 @@ Repository: https://github.com/app-sre/diag-container
 ## Creating it
 
 - Make sure the `app-sre` namespace exists.
-- `oc process --local - fhttps://raw.githubusercontent.com/app-sre/diag-container/master/openshift.yml | oc apply -n app-sre -f -`
+- `oc process --local -f https://raw.githubusercontent.com/app-sre/diag-container/master/openshift.yml | oc apply -n app-sre -f -`
