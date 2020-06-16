@@ -22,7 +22,7 @@ oc scale -n quay deployment quay-app --replicas=0
 
 - Click on Actions -> Reboot
 
-- Check 'Reboot with Failover' if available
+- Check 'Reboot with Failover'
 
 - Let the database instance start again, monitor active connections
 
