@@ -1,0 +1,63 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: kibana
+  platform: insights
+
+name: kibana
+description: Kibana app on the Insights Platform
+
+app:
+  $ref: /services/insights/kibana/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  CLOUD_WATCH_LOG_GROUP: kibana-stage
+
+resourceTemplates:
+- name: kibana
+  path: /templates/kibana.yaml
+  url: https://github.com/RedHatInsights/kibana
+  targets:
+  - namespace:
+      $ref: /services/insights/kibana/namespaces/stage-kibana.yml
+    ref: master
+    parameters:
+      IMAGE: quay.io/cloudservices/kibana-oss
+      IMAGE_TAG: "6.5.4"
+      OAUTH_IMAGE: quay.io/cloudservices/oauth-proxy
+      OAUTH_IMAGE_TAG: v3.11.43
+- name: p8s-elastic-exporter
+  path: /templates/p8s-elastic-exporter.yaml
+  url: https://github.com/RedHatInsights/kibana
+  targets:
+  - namespace:
+      $ref: /services/insights/kibana/namespaces/stage-kibana.yml
+    ref: master
+    parameters:
+      IMAGE: quay.io/cloudservices/xjoin-es-exporter
+      IMAGE_TAG: f621527
+      ELASTICSEARCH_URL: https://vpc-kibana-elasticsearch-2v2ydb43phxfw2byfkv3kqem64.us-east-1.es.amazonaws.com/
