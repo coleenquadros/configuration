@@ -23,9 +23,6 @@ networkPoliciesAllow:
 
 managedRoles: true
 
-managedResourceTypes:
-- Secret
-
 managedTerraformResources: true
 
 openshiftResources:
@@ -33,14 +30,20 @@ openshiftResources:
   path: app-interface/quayio-stage/quayio-stage/quay-pull-secret
   version: 1
   type: kubernetes.io/dockerconfigjson
+# ECR image pull secret
+- provider: vault-secret
+  path: app-sre/integrations-output/aws-ecr-image-pull-secrets/quayio-prod/eu-central-1/dockercfg
+  version: 1
+  type: kubernetes.io/dockerconfigjson
+  name: quayio-backup-image-pull-secret
 # RW mode
 - provider: vault-secret
   path: app-interface/quayio-stage/quayio-stage/quay-config-secret
-  version: 32
+  version: 37
   labels:
-    version: v32
-  annotations:
-    qontract.recycle: "true"
+    version: v37
+#  annotations:
+#    qontract.recycle: "true"
 - provider: vault-secret
   path: app-interface/quayio-stage/quayio-stage/quay-cloudwatch-iam-user
   version: 1
@@ -73,10 +76,6 @@ terraformResources:
 #   identifier: quayio-dev
 #   defaults: /terraform/resources/quayio-stage/elasticache-2.yml
 #   parameter_group: /terraform/resources/quayio-stage/elasticache-parameter-group-2.yml
-- provider: ecr
-  account: quayio-stage
-  identifier: quayio-backup
-  output_resource_name: quayio-backup
 # Quay S3 bucket and CloudFront distribution for us-east-1
 - provider: s3-cloudfront
   account: quayio-stage

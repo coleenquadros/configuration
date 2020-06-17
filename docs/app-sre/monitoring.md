@@ -173,11 +173,11 @@ Overall, the Prometheus deployment on the app-sre cluster monitors the following
 
 In app-interface, create a `ServiceMonitor` custom resource file in the `app-sre-prometheus` namespace on the cluster where your application is running.
 
-For example, a `ServiceMonitor` for the app-sre cluster looks like: https://gitlab.cee.redhat.com/service/app-interface/blob/master/resources/app-sre/app-sre-prometheus/servicemonitors/alertmanager.servicemonitor.yaml
+For example, a `ServiceMonitor` for the app-sre cluster looks like: https://gitlab.cee.redhat.com/service/app-interface/blob/f0fe35941d538d6231ce52dbe333dc4c1622847a/resources/observability/servicemonitors/app-interface.servicemonitor.yaml
 
-And the `ServiceMonitor` must also be referenced from the namespace.yml, like this: https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/observability/namespaces/app-sre-prometheus.yml
+And the `ServiceMonitor` must also be referenced from the namespace.yml, like this: https://gitlab.cee.redhat.com/service/app-interface/blob/f0fe35941d538d6231ce52dbe333dc4c1622847a/data/services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml#L212-217
 
-Once the PR in app-interface is merged, your application should appear on the prometheus corresponding to the cluster. On the app-sre cluster, the URL you'd want to check is https://prometheus.app-sre.devshift.net/targets
+Once the PR in app-interface is merged, your application should appear on the prometheus corresponding to the cluster. On the app-sre cluster, the URL you'd want to check is https://prometheus.app-sre-prod-01.devshift.net/targets
 
 In case your application doesn't show up in the `targets` section, please follow this troubleshooting guide: https://github.com/coreos/prometheus-operator/blob/master/Documentation/troubleshooting.md
 
@@ -199,7 +199,7 @@ Every app-sre managed cluster has an alertmanager alongside the prometheus. This
 
 The configuration for alertmanager has credentials/sensitive information, so it is currently stored in vault and can be changed only by app-sre team members. If you'd like to request a change, please do so via creating a task on the App-SRE jira board and ping the #sd-app-sre channel.
 
-All of the prometheus instances are expected to fire their alerts against their local alertmanager via the route: https://alertmanager.<clustername>.devshift.net
+All of the prometheus instances are expected to fire their alerts against their local alertmanager via the route: `https://alertmanager.<clustername>.devshift.net`
 
 The prometheus additional alertmanager configuration is already set up to do this.
 
@@ -225,7 +225,7 @@ Metrics are only so useful if you're not alerting on significant events or error
 
 To get started with alerting, first ensure that the metrics for your application are being scraped by Prometheus. If in doubt, see [Monitoring](#monitoring-using-prometheus)
 
-For example on the app-sre cluster, you can see if you have a `job` for your application in the `targets` tab at : https://prometheus.app-sre.devshift.net
+For example on the app-sre cluster, you can see if you have a `job` for your application in the `targets` tab at : https://prometheus.app-sre-prod-01.devshift.net
 
 The next step is adding alerting rules for your application.
 
@@ -234,7 +234,7 @@ The next step is adding alerting rules for your application.
 Alerts in the Prometheus world are represented in the same language as the queries : PromQL
 
 Since we're using the Prometheus Operator, alerts for the components are represented in the form of a `PrometheusRule` Custom resource, which we collect here:
-https://gitlab.cee.redhat.com/service/app-interface/tree/master/resources/app-sre/app-sre-prometheus/prometheusrules
+https://gitlab.cee.redhat.com/service/app-interface/tree/master/resources/observability/prometheusrules
 
 For example, a PrometheusRule CR should look something like:
 
@@ -268,7 +268,7 @@ spec:
         severity: critical
 ```
 
-It is important to note that the `PrometheusRule` must also be referenced from the namespace.yml: https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/observability/namespaces/app-sre-prometheus.yml
+It is important to note that the `PrometheusRule` must also be referenced from the namespace.yml: https://gitlab.cee.redhat.com/service/app-interface/blob/f0fe35941d538d6231ce52dbe333dc4c1622847a/data/services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml#L108-148
 
 To add alerting for your application, create a manifest in the same directory as other PrometheusRules for the cluster, and reference it in the namespace.yml if its not already present.
 
@@ -282,7 +282,7 @@ All alerts that are newly added should start from the bottom of the chain i.e. `
 
 This allows us to see the behaviour of alert in practice, and build confidence around the thresholds set for the alert. This also lets us make sure that the templating for the alerts is correct, and someone receiving the alert is able to act on it.
 
-One mandate for the alerts being promoted to a severity that involves the App-SRE team is adding a standard operating procedure for each alert. An example can be seen here: https://gitlab.cee.redhat.com/observatorium/configuration/tree/master/docs/sop#sop-openshift-telemeter
+One mandate for the alerts being promoted to a severity that involves the App-SRE team is adding a standard operating procedure for each alert. An example can be seen here: https://gitlab.cee.redhat.com/observatorium/configuration/blob/master/docs/sop/telemeter.md#sop--openshift-telemeter
 
 - `critical` alerts go to App-SRE's Pagerduty. Note that this MUST meet the conditions stated above, and should relate to a degraded customer experience that's imminent already ongoing. Please reach out to the App-SRE team before you set an alert with this Severity.
 - `high` alerts go to your team's slack channel, and also to App-SRE team's slack. These are alerts where either of the teams will take action according to the SOP, but the other team also needs to be in the loop for escalations
@@ -360,7 +360,7 @@ The Grafana instance is configured without admin privileges for any user. To enc
 
 Since the App-SRE grafana does not allow admin users and we want to maintain all the config as code, the Grafana provisioning mechanism is used to add the desired datasources into grafana.
 
-The datasource files have sensitive credentials, so they're currently managed via saas-crypt. You can find them here: https://gitlab.cee.redhat.com/dtsd/saas-crypt/tree/master/secure/_app-sre/app-sre-prometheus/grafana
+The datasource files have sensitive credentials, so they're currently managed via vault. You can find them here: https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/grafana/datasources
 
 To add another datasource, edit the `datasources.yaml` file, adding a new JSON object into the list. Next, regenerate the configmap using a command like:
 
@@ -376,8 +376,8 @@ Currently added datasources:
 * `app-sre-prod-01-cluster-prometheus`: cluster prometehus for `app-sre-prod-01` cluster
 * `app-sre-prod-02-prometheus`: app-sre managed prometheus for `app-sre-prod-02` cluster
 * `app-sre-prod-02-cluster-prometheus`: cluster prometheus for `app-sre-prod-02` cluster
-* `quayio-prod-us-east-1-prometheus`: app-sre managed prometheus for `quayio-prod-us-east-1` cluster
-* `quayio-prod-us-east-2-prometheus`: app-sre managed prometheus for `quayio-prod-us-east-2` cluster
+* `quayio-p-ue1-prometheus`: app-sre managed prometheus for `quayio-p-ue1` cluster
+* `quayio-p-ue2-prometheus`: app-sre managed prometheus for `quayio-p-ue2` cluster
 * `quayio-stage-prometheus`: app-sre managed prometheus for `quayio-stage` cluster
 * `che-dev-cluster-prometheus`: cluster prometheus for `che-dev-cluster` cluster
 * `dsaas-cluster-prometheus`: cluster prometheus for `dsaas` cluster
@@ -420,7 +420,7 @@ Click Add.
 
 Next up, change all your panels to send queries to this datasource
 
-Since the Grafana instance is read-only, there is no 'save' button for the dashboard changes you make. In order to add a new dashboard, you should use the 'Grafana Playground' dashboard. The Grafana Playground dashboard has one instance each for each of the supported panels. You can duplicate the panels as many times as you'd like, and use the query view to add the graphs for desired metrics. Once that's done, export the dashboard as json, and send a pull requests to our dashboards configuration here: [link](https://gitlab.cee.redhat.com/service/app-interface/tree/master/resources/app-sre/app-sre-prometheus/grafana)
+Since the Grafana instance is read-only, there is no 'save' button for the dashboard changes you make. In order to add a new dashboard, you should use the 'Grafana Playground' dashboard. The Grafana Playground dashboard has one instance each for each of the supported panels. You can duplicate the panels as many times as you'd like, and use the query view to add the graphs for desired metrics. Once that's done, export the dashboard as json, and send a pull requests to our dashboards configuration here: [link](https://gitlab.cee.redhat.com/service/app-interface/tree/master/resources/observability/grafana)
 
 Dashboards are injected into grafana as configmaps, to generate a configmap from an existing dashboard, use a command similar to:
 
@@ -428,7 +428,7 @@ Dashboards are injected into grafana as configmaps, to generate a configmap from
 
 Once the pull request is merged, the app-interface will automatically apply the configmap. No restart of the Grafana server deployment is needed.
 
-> Note: If you're adding a completely new dashboard, make sure that the configmap is referenced from the namespace.yml: [link](https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/observability/namespaces/app-sre-prometheus.yml)
+> Note: If you're adding a completely new dashboard, make sure that the configmap is referenced from the namespace.yml: [link](https://gitlab.cee.redhat.com/service/app-interface/blob/f0fe35941d538d6231ce52dbe333dc4c1622847a/data/services/observability/namespaces/app-sre-observability-production.app-sre-prod-01.yml#L125-290)
 
 In case you have any questions about adding a new dashboard, the App-SRE team can offer a best-effort support on walking you through the steps, but we hope that the documentation here is enough :)
 

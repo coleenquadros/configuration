@@ -26,61 +26,15 @@ managedResourceNames:
     - prometheus-additional-alertmanager-config
     - prometheus-additional-scrape-config
     - prometheus-auth-proxy
-- resource: Alertmanager
-  resourceNames:
-    - instance
 
 managedResourceTypes:
-- Alertmanager
 - ServiceMonitor
 - Secret
 - PrometheusRule
-- Service
-- Subscription
 - Prometheus
 - Service
 
 openshiftResources:
-# Prometheus operator
-- provider: resource-template
-  type: jinja2
-  path: /observability/prometheus/v4/app-sre.prometheus.yaml
-  variables:
-    clusterLabel: quayio-stage
-    environment: staging
-    externalUrl: https://prometheus.quayio-stage.devshift.net
-    version: v2.15.2
-    retention: 30d
-    pvSize: 50Gi
-    walCompression: true
-    logLevel: info
-- provider: resource
-  path: /observability/prometheus/prometheus-app-sre.service.yaml
-- provider: resource
-  path: /observability/prometheus/prometheus-operator.service.yml
-- provider: resource
-  path: /observability/prometheus/prometheus-proxy.service.yaml
-- provider: resource
-  path: /observability/prometheus/v4/prometheus.subscription.yaml
-
-# AlertManager
-- provider: resource-template
-  type: jinja2
-  path: /observability/alertmanager/app-sre.alertmanager.yaml
-  variables:
-    replicas: 3
-    version: v0.20.0
-    environment: production
-    externalUrl: https://alertmanager.quayio-stage.devshift.net
-    oauthProxySecretName: alertmanager-auth-proxy
-    storageClassName: gp2
-    logLevel: info
-    alertmanagerName: instance
-- provider: resource
-  path: /observability/alertmanager/alertmanager-app-sre.service.yaml
-- provider: resource
-  path: /observability/alertmanager/alertmanager-proxy.service.yaml
-
 # Secrets
 ## Observability
 ### Prometheus additional alertmanager config
@@ -109,10 +63,16 @@ openshiftResources:
 
 # ServiceMonitor
 ## Quay
-- provider: resource
+- provider: resource-template
+  type: jinja2
   path: /quayio-stage/quay/quay.app-sre.servicemonitor.yaml
-- provider: resource
+  variables:
+    quay_app_namespace: quayio-stage
+- provider: resource-template
   path: /quayio-stage/quay/quay.aggregation.servicemonitor.yaml
+  type: jinja2
+  variables:
+    quay_app_namespace: quayio-stage
 - provider: resource
   path: /quayio-stage/quay/quay.aggregation.federation.servicemonitor.yaml
 ## CloudWatch Exporter
@@ -143,7 +103,3 @@ openshiftResources:
 ## Quay Aggregation Prometheus
 - provider: resource
   path: /quayio-stage/quay/quay.aggregation.service.yaml
-
-### Prometheus Deadmanssnitch
-- provider: resource
-  path: /observability/prometheusrules/deadmanssnitch.prometheusrules.yaml

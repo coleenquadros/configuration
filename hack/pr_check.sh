@@ -1,8 +1,16 @@
 #!/bin/bash
 
-set -exvo pipefail
-
 CURRENT_DIR=$(dirname "$0")
+
+# Check EOF newline
+pip install --user binaryornot
+git ls-files | $CURRENT_DIR/eofcheck.py
+if [ $? != 0 ]; then
+    echo "Detected files that do not end with newline"
+    exit 1
+fi
+
+set -exvo pipefail
 
 # Setup vars and clean files
 export TEMP_DIR=$(realpath -s temp)

@@ -71,9 +71,6 @@ SUCCESS_DIR=${WORK_DIR}/reports/reconcile_reports_success
 FAIL_DIR=${WORK_DIR}/reports/reconcile_reports_fail
 rm -rf ${SUCCESS_DIR} ${FAIL_DIR}; mkdir -p ${SUCCESS_DIR} ${FAIL_DIR}
 
-docker pull ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG}
-docker pull ${VAULT_RECONCILE_IMAGE}:${VAULT_RECONCILE_IMAGE_TAG}
-
 # Prepare to run integrations on production
 
 ## Write config.toml for reconcile tools
@@ -124,6 +121,7 @@ run_vault_reconcile_integration &
 run_int ocm-clusters &
 run_int ocm-groups &
 run_int ocm-aws-infrastructure-access &
+run_int ocm-github-idp --vault-input-path app-sre/integrations-input &
 run_int openshift-groups &
 run_int openshift-users &
 run_int jenkins-plugins &
@@ -140,10 +138,12 @@ run_int openshift-namespaces &
 run_int openshift-clusterrolebindings &
 run_int openshift-rolebindings &
 run_int openshift-resources &
+run_int openshift-vault-secrets &
+run_int openshift-routes &
 run_int openshift-network-policies &
 run_int openshift-acme &
 run_int openshift-limitranges &
-run_int openshift-resourcequotas &
+# run_int openshift-resourcequotas &
 run_int openshift-serviceaccount-tokens &
 run_int terraform-resources &
 run_int terraform-users &

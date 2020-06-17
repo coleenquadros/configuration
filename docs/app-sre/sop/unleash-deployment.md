@@ -114,10 +114,6 @@ app:
   $ref: /services/unleash/app.yml
 
 managedTerraformResources: true
-
-managedResourceTypes:
-- Route
-- Secret
 ```
 
 Replace `<cluster>` with the directory to the cluster configuration.

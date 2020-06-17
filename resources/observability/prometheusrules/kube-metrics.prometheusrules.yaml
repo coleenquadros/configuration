@@ -15,7 +15,7 @@ spec:
       annotations:
         message: Pod {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container
           }}) is restarting {{ printf "%.2f" $value }} times / 5 minutes.
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubepodcrashlooping.md
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubePodCrashLooping.md
       expr: 'rate(kube_pod_container_status_restarts_total{job="kube-state-metrics"}[5m])
         * 60 * 5 > 0'
       for: 15m
@@ -25,7 +25,7 @@ spec:
       annotations:
         message: Pod {{ $labels.namespace }}/{{ $labels.pod }} has been in a non-ready
           state for longer than 15 minutes.
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubepodnotready.md
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubePodNotReady.md
       expr: |
         sum by (namespace, pod) (
           max by(namespace, pod) (
@@ -42,7 +42,7 @@ spec:
         message: Deployment generation for {{ $labels.namespace }}/{{ $labels.deployment
           }} does not match, this indicates that the Deployment has failed but has not
           been rolled back.
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubedeploymentgenerationmismatch.md
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeDeploymentGenerationMismatch.md
       expr: |
         kube_deployment_status_observed_generation{job="kube-state-metrics"}
           !=
@@ -54,7 +54,7 @@ spec:
       annotations:
         message: Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has not
           matched the expected number of replicas for longer than 15 minutes.
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubedeploymentreplicasmismatch.md
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeDeploymentReplicasMismatch.md
       expr: |
         (
           kube_deployment_spec_replicas{job="kube-state-metrics"}
@@ -67,12 +67,12 @@ spec:
         )
       for: 15m
       labels:
-        severity: critical
+        severity: high
     - alert: KubeStatefulSetReplicasMismatch
       annotations:
         message: StatefulSet {{ $labels.namespace }}/{{ $labels.statefulset }} has not
           matched the expected number of replicas for longer than 15 minutes.
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubestatefulsetreplicasmismatch.md
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeStatefulSetReplicasMismatch.md
       expr: |
         (
           kube_statefulset_status_replicas_ready{job="kube-state-metrics"}
@@ -85,25 +85,25 @@ spec:
         )
       for: 15m
       labels:
-        severity: critical
+        severity: high
     - alert: KubeStatefulSetGenerationMismatch
       annotations:
         message: StatefulSet generation for {{ $labels.namespace }}/{{ $labels.statefulset
           }} does not match, this indicates that the StatefulSet has failed but has
           not been rolled back.
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubestatefulsetgenerationmismatch.md
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeStatefulSetGenerationMismatch.md
       expr: |
         kube_statefulset_status_observed_generation{job="kube-state-metrics"}
           !=
         kube_statefulset_metadata_generation{job="kube-state-metrics"}
       for: 15m
       labels:
-        severity: critical
+        severity: high
     - alert: KubeStatefulSetUpdateNotRolledOut
       annotations:
         message: StatefulSet {{ $labels.namespace }}/{{ $labels.statefulset }} update
           has not been rolled out.
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubestatefulsetupdatenotrolledout.md
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeStatefulSetUpdateNotRolledOut.md
       expr: |
         max without (revision) (
           kube_statefulset_status_current_revision{job="kube-state-metrics"}
@@ -118,12 +118,12 @@ spec:
         )
       for: 15m
       labels:
-        severity: critical
+        severity: high
     - alert: KubeDaemonSetRolloutStuck
       annotations:
         message: Only {{ $value | humanizePercentage }} of the desired Pods of DaemonSet
           {{ $labels.namespace }}/{{ $labels.daemonset }} are scheduled and ready.
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubedaemonsetrolloutstuck.md
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeDaemonSetRolloutStuck.md
       expr: |
         kube_daemonset_status_number_ready{job="kube-state-metrics"}
           /
@@ -136,7 +136,7 @@ spec:
         message: |
           Pod {{ $labels.namespace }}/{{ $labels.pod }} container {{$labels.container}}
           has been in waiting state for longer than 15 minutes. Reason: {{$labels.reason}}
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubecontainerwaiting.md
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeContainerWaiting.md
       expr: 'sum by (namespace, pod, container, reason) (kube_pod_container_status_waiting_reason{job="kube-state-metrics"})
         > 0'
       for: 15m
@@ -146,7 +146,7 @@ spec:
       annotations:
         message: "{{ $value }} Pods of DaemonSet {{ $labels.namespace }}/{{ $labels.daemonset
           }} are not scheduled."
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubedaemonsetnotscheduled.md
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeDaemonSetNotScheduled.md
       expr: |
         kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics"}
           -
@@ -158,7 +158,7 @@ spec:
       annotations:
         message: "{{ $value }} Pods of DaemonSet {{ $labels.namespace }}/{{ $labels.daemonset
           }} are running where they are not supposed to run."
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubedaemonsetmisscheduled.md
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeDaemonSetMisScheduled.md
       expr: 'kube_daemonset_status_number_misscheduled{job="kube-state-metrics"} > 0'
       for: 15m
       labels:
@@ -169,7 +169,7 @@ spec:
       annotations:
         message: Cluster has overcommitted CPU resource requests for Pods and cannot
           tolerate node failure.
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubecpuovercommit.md
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeCPUOverCommit.md
       expr: |
         sum(namespace:kube_pod_container_resource_requests_cpu_cores:sum{})
           /
@@ -183,7 +183,7 @@ spec:
       annotations:
         message: Cluster has overcommitted memory resource requests for Pods and cannot
           tolerate node failure.
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubememoryovercommit.md
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeMemoryOvercommit.md
       expr: |
         sum(namespace:kube_pod_container_resource_requests_memory_bytes:sum{})
           /
@@ -198,7 +198,7 @@ spec:
     - alert: KubeCPUQuotaOvercommit
       annotations:
         message: Cluster has overcommitted CPU resource requests for Namespaces.
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubecpuquotaovercommit.md
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeCPUQuotaOvercommit.md
       expr: |
         sum(kube_resourcequota{job="kube-state-metrics", type="hard", resource="cpu"})
           /
@@ -210,7 +210,7 @@ spec:
     - alert: KubeMemoryQuotaOvercommit
       annotations:
         message: Cluster has overcommitted memory resource requests for Namespaces.
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubememoryquotaovercommit.md
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeMemoryQuotaOvercommit.md
       expr: |
         sum(kube_resourcequota{job="kube-state-metrics", type="hard", resource="memory"})
           /
@@ -223,12 +223,12 @@ spec:
       annotations:
         message: Namespace {{ $labels.namespace }} is using {{ $value | humanizePercentage
           }} of its {{ $labels.resource }} quota.
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubequotaexceeded.md
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeQuotaExceeded.md
       expr: |
         kube_resourcequota{job="kube-state-metrics", type="used"}
           / ignoring(instance, job, type)
         (kube_resourcequota{job="kube-state-metrics", type="hard"} > 0)
-          > 0.90
+          > 1
       for: 15m
       labels:
         severity: high
@@ -277,7 +277,7 @@ spec:
     - alert: KubeNodeNotReady
       annotations:
         message: "{{ $labels.node }} has been unready for more than 5 minutes."
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubenodenotready.md
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeNodeNotReady.md
       expr: 'kube_node_status_condition{job="kube-state-metrics",condition="Ready",status="true"}
         == 0'
       for: 5m
@@ -286,7 +286,7 @@ spec:
     - alert: KubeNodeUnreachable
       annotations:
         message: "{{ $labels.node }} is unreachable and some workloads may be rescheduled."
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubenodeunreachable.md
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeNodeUnreachable.md
       expr: '(kube_node_spec_taint{job="kube-state-metrics",key="node.kubernetes.io/unreachable",effect="NoSchedule"}
         unless ignoring(key,value) kube_node_spec_taint{job="kube-state-metrics",key="ToBeDeletedByClusterAutoscaler"})
         == 1'
@@ -296,7 +296,7 @@ spec:
       annotations:
         message: Kubelet '{{ $labels.node }}' is running at {{ $value | humanizePercentage
           }} of its Pod capacity.
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubelettoomanypods.md
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeletTooManyPods.md
       expr: 'max(max(kubelet_running_pod_count{job="kubelet"}) by(instance) * on(instance)
         group_left(node) kubelet_node_name{job="kubelet"}) by(node) / max(kube_node_status_capacity_pods{job="kube-state-metrics"}
         != 1) by(node) > 0.95'
@@ -307,7 +307,7 @@ spec:
       annotations:
         message: The readiness status of node {{ $labels.node }} has changed {{ $value
           }} times in the last 15 minutes.
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/kubenodereadinessflapping.md
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeNodeReadinessFlapping.md
       expr: 'sum(changes(kube_node_status_condition{status="true",condition="Ready"}[15m]))
         by (node) > 2'
       for: 15m

@@ -18,9 +18,7 @@ environment:
 managedResourceTypes:
 - Secret
 - Service
-- Subscription
 - Prometheus
-- Alertmanager
 - PrometheusRule
 - ServiceMonitor
 
@@ -35,51 +33,8 @@ managedResourceNames:
     - prometheus-additional-alertmanager-config
     - prometheus-additional-scrape-config
     - prometheus-auth-proxy
-- resource: Alertmanager
-  resourceNames:
-    - instance
 
 openshiftResources:
-# Prometheus operator
-- provider: resource-template
-  type: jinja2
-  path: /observability/prometheus/v4/app-sre.prometheus.yaml
-  variables:
-    clusterLabel: app-sre-stage-01
-    environment: staging
-    externalUrl: https://prometheus.app-sre-stage-01.devshift.net
-    version: v2.15.2
-    retention: 10d
-    pvSize: 50Gi
-    walCompression: true
-    logLevel: info
-- provider: resource
-  path: /observability/prometheus/prometheus-app-sre.service.yaml
-- provider: resource
-  path: /observability/prometheus/prometheus-operator.service.yml
-- provider: resource
-  path: /observability/prometheus/prometheus-proxy.service.yaml
-- provider: resource
-  path: /observability/prometheus/v4/prometheus.subscription.yaml
-
-# AlertManager
-- provider: resource-template
-  type: jinja2
-  path: /observability/alertmanager/app-sre.alertmanager.yaml
-  variables:
-    replicas: 1
-    version: v0.20.0
-    environment: staging
-    externalUrl: https://alertmanager.stage.devshift.net
-    oauthProxySecretName: alertmanager-auth-proxy
-    storageClassName: gp2
-    logLevel: info
-    alertmanagerName: instance
-- provider: resource
-  path: /observability/alertmanager/alertmanager-app-sre.service.yaml
-- provider: resource
-  path: /observability/alertmanager/alertmanager-proxy.service.yaml
-
 # Secrets
 ## Observability
 ### Prometheus additional alertmanager config
@@ -92,6 +47,8 @@ openshiftResources:
 - provider: resource-template
   type: extracurlyjinja2
   path: /observability/prometheus/v4/prometheus-app-sre-additional-scrapeconfig.secret.yaml
+  variables:
+    blackbox_exporter_svc_url: blackbox-exporter.app-sre-observability-stage.svc.cluster.local:9115
 ### Prometheus oauth proxy configuration
 - provider: vault-secret
   path: app-interface/app-sre/app-sre-observability-stage/prometheus/prometheus-auth-proxy
@@ -105,9 +62,6 @@ openshiftResources:
   path: /observability/alertmanager/alertmanager-instance.secret.yaml
 
 ## PrometheusRules
-### Prometheus Deadmanssnitch
-- provider: resource
-  path: /observability/prometheusrules/deadmanssnitch.prometheusrules.yaml
 ### Vault
 - provider: resource
   path: /observability/prometheusrules/vault-stage.prometheusrules.yaml
@@ -133,6 +87,9 @@ openshiftResources:
 #### Jaeger
 - provider: resource
   path: /observability/prometheusrules/observatorium-jaeger.prometheusrules.yaml
+#### API
+- provider: resource
+  path: /observability/prometheusrules/observatorium-api-stage.prometheusrules.yaml
 
 ## ServiceMonitors
 ### Vault
@@ -192,12 +149,7 @@ openshiftResources:
   variables:
     environment: stage
     namespace: uhc-stage
-## CVExporter
-- provider: resource-template
-  type: jinja2
-  path: /observability/servicemonitors/cvexporter.servicemonitor.yaml
-  variables:
-    namespace: app-sre-observability-stage
+
 ### App-SRE Prometheus
 - provider: resource
   path: /observability/servicemonitors/prometheus-app-sre.servicemonitor.yaml
@@ -283,11 +235,18 @@ openshiftResources:
   type: jinja2
   path: /observability/servicemonitors/observatorium-api.servicemonitor.yaml
   variables:
+    environment: stage
     namespace: telemeter-stage
 #### Observatorium Thanos Store Cache
 - provider: resource-template
   type: jinja2
-  path: /observability/servicemonitors/observatorium-thanos-store-cache.servicemonitor.yaml
+  path: /observability/servicemonitors/observatorium-thanos-store-index-cache.servicemonitor.yaml
+  variables:
+    environment: stage
+    namespace: telemeter-stage
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/observatorium-thanos-store-bucket-cache.servicemonitor.yaml
   variables:
     environment: stage
     namespace: telemeter-stage
@@ -298,6 +257,13 @@ openshiftResources:
   variables:
     environment: stage
     namespace: telemeter-stage
+### Qontract-reconcile
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/qontract-reconcile.servicemonitor.yaml
+  variables:
+    environment: stage
+    namespace: app-interface-stage
 
 # Temporary Prometheus and ServiceMonitor for AMS as part of https://issues.redhat.com/browse/APPSRE-1491
 - provider: resource-template
@@ -310,3 +276,7 @@ openshiftResources:
   path: /observability/servicemonitors/ams-subscription-labels.servicemonitor.yaml
   variables:
     namespace: uhc-stage
+- provider: resource
+  path: /observability/prometheus/v4/prometheus-ams.service.yaml
+- provider: resource
+  path: /observability/servicemonitors/prometheus-ams.servicemonitor.yaml

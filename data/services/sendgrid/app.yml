@@ -1,0 +1,45 @@
+---
+$schema: /app-sre/app-1.yml
+
+labels:
+  service: sendgrid
+
+name: sendgrid
+
+description: |
+    Creates and configures SendGrid account credentials on Openshift
+
+parentApp:
+    $ref: /services/uhc/app.yml
+
+serviceOwners:
+- name: RHMI Engineering team
+  email: integreatly-team@redhat.com
+
+performanceParameters:
+  SLO: 90
+
+dependencies:
+- $ref: /dependencies/aws/service.yml
+- $ref: /dependencies/ci-int/service.yml
+- $ref: /dependencies/gitlab/service.yml
+- $ref: /dependencies/quay/service.yml
+- $ref: /dependencies/openshift/service.yml
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/app-sre.yml
+  items:
+  - name: ocm-sendgrid-service
+    description: 'Creates and configures SendGrid account credentials on Openshift'
+    public: false
+  - name: centos
+    description: "Mirror of the upstream centos repository"
+    public: true
+    mirror: docker.io/centos
+
+codeComponents:
+- name: ocm-sendgrid-service
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/service/ocm-sendgrid-service
+

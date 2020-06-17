@@ -40,15 +40,10 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
 
 1. Click create and wait for the cluster to be created
 
-1. Click `Access Control`, then `Add Identity Provider`
-
-    - Provider: Github
-    - Name: github-app-sre
-    - Mapping Method: claim
-
 1. Contact App-SRE and request a new App-SRE Github Oauth Client. You will need to provide the callback URL.
+  * Note: place the `client-id` and `client-secret` in a secret in [Vault](https://vault.devshift.net/ui/vault/secrets/app-sre/list/integrations-input/ocm-github-idp/github-org-team/app-sre/) named `<cluster-name>-cluster`.
 
-In order to create the Oauth client register to create a new application here:
+In order to create the OAuth client register to create a new application here:
 https://github.com/organizations/app-sre/settings/applications
 
 The callback template is:
@@ -62,31 +57,6 @@ Note: replace `app-sre-prod-04.i5h0` with the correct values.
     - Client Secret: (provided by App-SRE)
     - Type: Teams
     - Teams: (provided by App-SRE) should be: `<cluster-name>-cluster`
-
-1. Click `Open Console`
-
-1. Verify that you see a link named `github-app-sre` (can take a few minutes to appear after the previous step)
-
-1. Go back to your cluster in OCM, then `Access control`
-
-1. Add the github username of the App-SRE team member who is setting up your cluster in app-interface to grant dedicated-admin access
-
-1. Login to the cluster as a dedicated-admin user
-
-In order to achieve this the following steps must be followed:
-
-- Disable the `github` integration in https://app-interface.unleash.devshift.net/#/features.
-- Manually add a new team called `<cluster-name>-cluster` in the AppSRE org: https://github.com/orgs/app-sre/new-team.
-- By creating the team, it will automatically add you as a member.
-
-1. Add the `app-sre-bot` ServiceAccount
-
-    ```shell
-    oc -n dedicated-admin create sa app-sre-bot
-    oc -n dedicated-admin sa get-token app-sre-bot
-    ```
-
-1. Add the `app-sre-bot` credentials to vault at https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/kube-configs/
 
 1. Add the cluster in app-interface
 
@@ -116,10 +86,6 @@ In order to achieve this the following steps must be followed:
     managedGroups:
     - dedicated-admins
 
-    automationToken:
-      path: app-sre/creds/kube-configs/<cluster>
-      field: token
-
     internal: false
 
     awsInfrastructureAccess:
@@ -131,10 +97,45 @@ In order to achieve this the following steps must be followed:
       accessLevel: network-mgmt
     ```
 
+1. Grant dedicated-admin access to App-SRE team
+
+    ```yaml
+    # /data/teams/app-sre/roles/app-sre.yml
+    ...
+    access:
+        ...
+        - cluster:
+            $ref: /openshift/<clustername>/cluster.yml
+        group: dedicated-admins
+    ```
+
+1. Click `Open Console`
+
+1. Verify that you see a link named `github-app-sre` (can take a few minutes to appear after the previous step)
+
+1. Login to the cluster (as a dedicated-admin user)
+
+1. Add the `app-sre-bot` ServiceAccount
+
+    ```shell
+    oc -n dedicated-admin create sa app-sre-bot
+    oc -n dedicated-admin sa get-token app-sre-bot
+    ```
+
+1. Add the `app-sre-bot` credentials to vault at https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/kube-configs/
+
+1. Add the `app-sre-bot` credentials to the cluster file in app-interface
+
+    ```yaml
+    automationToken:
+      path: app-sre/creds/kube-configs/<cluster>
+      field: token
+    ```
+
 1. Add the `openshift-config` namespace in app-interface
 
     ```yaml
-    # /data/services/app-sre/namespaces/<cluster>-openshift-config.yml
+    # /data/openshift/<cluster>/namespaces/openshift-config.yml
     ---
     $schema: /openshift/namespace-1.yml
 
@@ -178,18 +179,6 @@ In order to achieve this the following steps must be followed:
       path: /setup/cluster.project.v4.yaml
     ```
 
-1. Grant dedicated-admin access to App-SRE team
-
-    ```yaml
-    # /data/teams/app-sre/roles/app-sre.yml
-    ...
-    access:
-        ...
-        - cluster:
-            $ref: /openshift/<clustername>/cluster.yml
-        group: dedicated-admins
-    ```
-
 # Additional configurations
 
 ## Selecting a Machine CIDR for VPC peerings
@@ -210,7 +199,7 @@ Note that the host prefix must be set to /23.
 
 ## VPC peering with app-interface
 
-[/docs/app-sre/sop/app-interface-cluster-vpc-peerings.md]()
+[app-interface-cluster-vpc-peerings.md](app-interface-cluster-vpc-peerings.md)
 
 ## Enable enhanced dedicated-admin
 
@@ -218,31 +207,60 @@ Some clusters may require enhanced dedicated-admin privileges. The process to ge
 
 ## Enable observability on a v4 cluster
 
+1. Create DNS records:
+- `prometheus.<cluster-name>.devshift.net`: `elb.apps.<clustername>.<clusterid>.p1.openshiftapps.com`
+- `alertmanager.<cluster-name>.devshift.net`: `elb.apps.<clustername>.<clusterid>.p1.openshiftapps.com`
+
 1. Configure a [deadmanssnitch](https://deadmanssnitch.com/) snitch for the new cluster. The snitch settings should be as follow:
     - Name: <cluster name>
     - Alert type: Basic
     - Interval: 15 min
     - Tags: app-sre
     - Alert email: sd-app-sre@redhat.com
+    - Notes: Runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-deadmanssnitch.md
 
-1. Add a route and a receiver in the App-SRE alertmanager config. The snitch URL is shown in the deadmanssnitch website UI and has to be added to the vault secret. Example MR: https://gitlab.cee.redhat.com/service/app-interface/commit/97059bb8d14681bcade500e09c67557f624d471d
+1. Add the deadmansnitch URL to this secret in Vault: https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/alertmanager-integration
 
-1. Add the `observabilityNamespace` field on the cluster data file. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/7ecd529584666d97b1418224b2772557807c6e1c/data/openshift/app-sre-prod-01/cluster.yml#L14-15
+    - key: `deadmanssnitch-<clustername>-url`
+    - value: the deadmanssnitch URL
 
-1. Create a corresponding observability namespace file for that specific cluster. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/57285601a13eea11079b431103a28337642050cb/data/services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml
+1. Create an `openshift-customer-monitoring` namespace file for that specific cluster. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml.
 
-1. Customize the above observability namespace file as desired. Some options to look out for:
+1. Add the new `openshift-customer-monitoring` namespace to the target namespaces in [saas-observability-per-cluster](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/cicd/saas/saas-observability-per-cluster) to deploy Prometheus and Alertmanager. Some options to look out for:
     - `clusterLabel` for the prometheus resource
     - `externalUrl` for both the `prometheus` and `alertmanager` resources
-    - Both `prometheus` and `alertmanager` oauth proxy secrets. Those should be set in vault to values corresponding to two *different* github oauth clients. Those oauth clients need their callback URLs to be `https://<prometheus|alertmanager>.<cluster>.devshift.net/oauth2/callback`. *Note:* Both prometheus and alertmanager pods need a restart after a new secret is pushed
 
-1. Create a app-sre-observability namespace file for that specific cluster with openshift-acme and nginx config. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/24dcd1f3bec3b0accea6c834b12e65e9873440c9/data/services/observability/namespaces/app-sre-observability-production.app-sre-prod-03.yml
+1. Create OAuth apps for Prometheus and Alertmanager:
+    - Name: `<prometheus|alertmanager>.<cluster>.devshift.net`
+    - Home page: `https://<prometheus|alertmanager>.<cluster>.devshift.net`
+    - Callback URL: `https://<prometheus|alertmanager>.<cluster>.devshift.net/oauth2/callback`
 
-1. Add app-sre-observability namespace as target namespaces in [saas-app-sre-observability.yaml](https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/observability/cicd/saas/saas-app-sre-observability.yaml) to deploy nginx-proxy.
+1. Create the following secrets in Vault to match the OAuth apps created in the previous step:
+    - https://vault.devshift.net/ui/vault/secrets/app-interface/show/<clustername>/openshift-customer-monitoring/alertmanager/alertmanager-auth-proxy ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quay-s-ue1/openshift-customer-monitoring/alertmanager/alertmanager-auth-proxy))
+    - https://vault.devshift.net/ui/vault/secrets/app-interface/show/<clustername>/openshift-customer-monitoring/prometheus-additional-scrape-config ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quay-s-ue1/openshift-customer-monitoring/prometheus-additional-scrape-config))
+    - https://vault.devshift.net/ui/vault/secrets/app-interface/show/<clustername>/openshift-customer-monitoring/prometheus-auth-proxy ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quay-s-ue1/openshift-customer-monitoring/prometheus-auth-proxy))
 
-1. Add route in app-sre-observability namespace and point to nginx-proxy. Ex: https://gitlab.cee.redhat.com/service/app-interface/commit/2346400fc3e7e1a701becadc7279d129a8c16c0f#8937e708e9d62be0ba5cba4d4fad5cb2c550047b
+    *Note:* Both prometheus and alertmanager pods need a restart after a new secret is pushed
+
+1. Add the `cluster-monitoring-view` cluster role to https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/roles/app-sre-osdv4-monitored-namespaces-view.yml.
+
+1. Add the `observabilityNamespace` field on the cluster data file and reference the `openshift-customer-monitoring` namespace file created in the previous step. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/7ecd529584666d97b1418224b2772557807c6e1c/data/openshift/app-sre-prod-01/cluster.yml#L14-15
+
+1. Create an `app-sre-observability-per-cluster` namespace file for that specific cluster with openshift-acme. Ex: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/openshift/app-sre-prod-02/namespaces/app-sre-observability-per-cluster.yaml
+
+1. Add the new `app-sre-observability-per-cluster` namespace to the target namespaces in [saas-nginx-proxy.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/cicd/saas/saas-nginx-proxy.yaml) to deploy nginx-proxy.
 
 1. Verify `https://<prometheus|alertmanager>.<cluster>.devshift.net` have valid ssl certificates.
+
+1. Update the Grafana datasources secret in Vault: https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/grafana/datasources
+
+    - Add a new key `<clustername>-prometheus` with a value that matches the `auth` key in the https://vault.devshift.net/ui/vault/secrets/app-interface/show/<clustername>/openshift-customer-monitoring/prometheus-auth-proxy secret (TODO: explain how)
+
+1. Add Grafana data sources for the new cluster:
+    - <clustername>-prometheus - the Prometheus instance in `openshift-customer-monitoring`
+    - <clustername>-cluster-prometheus - the Cluster's Prometheus instance
+
+1. Rollout Grafana to make the data source changes effective.
 
 ## Enable logging (EFK)
 

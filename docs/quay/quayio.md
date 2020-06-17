@@ -30,7 +30,7 @@
 | Environment | Namespace |
 | --- | --- |
 |Stage|[Grafana](https://grafana.stage.devshift.net/d/_BkydJaWz/quay-io-runtime?orgId=1&var-rate=1m&var-datasource=quayio-stage-prometheus)|
-|Production (us-east-1)|[Grafana](https://grafana.app-sre.devshift.net/d/_BkydJaWz/quay-io-runtime?orgId=1&var-rate=1m&var-datasource=quayio-prod-us-east-1-prometheus)|
+|Production (us-east-1)|[Grafana](https://grafana.app-sre.devshift.net/d/_BkydJaWz/quay-io-runtime?orgId=1&var-rate=1m&var-datasource=quay-p-ue1-prometheus)|
 |Production (us-east-2)|[Grafana](https://grafana.app-sre.devshift.net/d/_BkydJaWz/quay-io-runtime?orgId=1&var-rate=1m&var-datasource=quayio-prod-us-east-2-prometheus)|
 
 ## Quay AWS Resources Grafana Dashboard

@@ -1,0 +1,35 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: insights-3scale
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: insights-3scale-stage
+    rules:
+    - alert: Insights3scalePodDown
+      expr: |
+        up{app="3scale-gateway",kubernetes_namespace="3scale-stage"} == 0
+      for: 2m
+      labels:
+        severity: critical
+        service: insights
+        env: stage
+      annotations:
+        message: "Insights 3scale Gateway Service Alert. At least one 3scale pod has been down for two minutes."
+        runbook: "https://gitlab.cee.redhat.com/service"
+    - alert: Insights3scaleSinglePod
+      expr: |
+        count(up{app="3scale-gateway",kubernetes_namespace="3scale-stage"}) == 1
+      for: 2m
+      labels:
+        severity: critical
+        service: insights
+        env: stage
+      annotations:
+        message: "Insights 3scale Gateway Service Alert. There has been only one active 3scale-staging pod for two minutes."
+        runbook: "https://gitlab.cee.redhat.com/service"

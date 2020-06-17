@@ -16,14 +16,9 @@ environment:
   $ref: /products/app-sre/environments/stage.yml
 
 managedResourceTypes:
-- Alertmanager
 - ServiceMonitor
 - Secret
 - PrometheusRule
-- Service
-- Subscription
-- Prometheus
-- Service
 
 managedResourceNames:
 # https://github.com/openshift/managed-cluster-config/blob/master/deploy/osd-customer-monitoring/05-role.yaml#L24-L37
@@ -36,51 +31,8 @@ managedResourceNames:
     - prometheus-additional-alertmanager-config
     - prometheus-additional-scrape-config
     - prometheus-auth-proxy
-- resource: Alertmanager
-  resourceNames:
-    - instance
 
 openshiftResources:
-# Prometheus operator
-- provider: resource-template
-  type: jinja2
-  path: /observability/prometheus/v4/app-sre.prometheus.yaml
-  variables:
-    clusterLabel: crc-stage-01
-    environment: staging
-    externalUrl: https://prometheus.crc-stage-01.devshift.net
-    version: v2.15.2
-    retention: 15d
-    pvSize: 50Gi
-    walCompression: true
-    logLevel: info
-- provider: resource
-  path: /observability/prometheus/prometheus-app-sre.service.yaml
-- provider: resource
-  path: /observability/prometheus/prometheus-operator.service.yml
-- provider: resource
-  path: /observability/prometheus/prometheus-proxy.service.yaml
-- provider: resource
-  path: /observability/prometheus/v4/prometheus.subscription.yaml
-
-# AlertManager
-- provider: resource-template
-  type: jinja2
-  path: /observability/alertmanager/app-sre.alertmanager.yaml
-  variables:
-    replicas: 3
-    version: v0.20.0
-    environment: staging
-    externalUrl: https://alertmanager.crc-stage-01.devshift.net
-    oauthProxySecretName: alertmanager-auth-proxy
-    storageClassName: gp2
-    logLevel: info
-    alertmanagerName: instance
-- provider: resource
-  path: /observability/alertmanager/alertmanager-app-sre.service.yaml
-- provider: resource
-  path: /observability/alertmanager/alertmanager-proxy.service.yaml
-
 # Secrets
 ## Observability
 ### Prometheus additional alertmanager config
@@ -108,9 +60,6 @@ openshiftResources:
   path: /observability/alertmanager/alertmanager-instance.secret.yaml
 
 ## Prometheus Rules
-### Prometheus Deadmanssnitch
-- provider: resource
-  path: /observability/prometheusrules/deadmanssnitch.prometheusrules.yaml
 ### App SRE contract
 - provider: resource
   path: /observability/prometheusrules/app-sre-contract.yaml
@@ -131,7 +80,101 @@ openshiftResources:
   path: /insights-stage/rds-exporter/rds-exporter.servicemonitor.yaml
 - provider: resource
   path: /insights-stage/strimzi/strimzi.servicemonitor.yaml
+- provider: resource
+  path: /insights-stage/hccm-stage/koku.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/payload-tracker-stage/payload-tracker.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/receptor-stage/receptor-gateway.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/xjoin-stage/xjoin-kafka-connect.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/ingress-stage/insights-puptoo.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/policies-stage/policies.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/remediations-stage/remediations.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/subscriptions-stage/yupana.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/hccm-stage/rdsexporter.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/historical-system-profiles-stage/historical-system-profiles-clean-expired-records.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/historical-system-profiles-stage/historical-system-profiles-backend.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/advisor-stage/insights-advisor-api.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/engine-stage/insights-engine.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/system-baseline-stage/system-baseline-backend.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/ingress-stage/upload-service.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/patchman-engine-stage/patchman-engine-app.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/xjoin-stage/kafka-lag-exporter.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/uhc-auth-proxy-stage/uhc-auth-proxy.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/xjoin-stage/xjoin-es-exporter.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/rhsm-stage/subscriptions.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/host-inventory-stage/insights-inventory.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/hooks-stage/hooks-prometheus-exporter.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/hccm-stage/redis-exporter.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/insights-stage/rabbitmq-exporter-mnm.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/rhsm-stage/rhsm-conduit.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/rbac-stage/rbac.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/advisor-stage/insights-advisor-service.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/remediations-stage/remediations-consumer.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/ccx-data-pipeline-stage/ccx-data-pipeline.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/sources-stage/sources.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/insights-stage/insights-api.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/vulnerability-engine-stage/vulnerability-engine.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/drift-stage/drift-backend.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/compliance-stage/compliance-prometheus-exporter.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/marketplace-stage/marketplace.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/hccm-stage/postgresql-exporter.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/historical-system-profiles-stage/historical-system-profiles-archiver.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/ingress-stage/insights-storage-broker.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/xjoin-stage/xjoin-search.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/approval-stage/approval.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/ingress-stage/insights-pup.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/topological-inventory-stage/topological-inventory.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/historical-system-profiles-stage/historical-system-profiles-deleter.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/catalog-stage/catalog.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/3scale-stage/apicast.servicemonitor.yml
+- provider: resource
+  path: /insights-stage/network-check/network-check.servicemonitor.yml
 
-
-
-
+# PrometheusRule
+- provider: resource
+  path: /insights-stage/3scale-stage/3scale.prometheusrules.yaml
+- provider: resource
+  path: /insights-stage/rbac-stage/rbac.prometheusrules.yaml

@@ -1,0 +1,244 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: app-sre-observability
+
+name: saas-app-sre-observability-per-cluster
+description: saas-app-sre-observability-per-cluster
+
+app:
+  $ref: /services/observability/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- Prometheus
+- PrometheusRule
+- Service
+- Subscription
+- Alertmanager
+
+imagePatterns:
+- quay.io/app-sre
+
+resourceTemplates:
+# Prometheus
+- name: prometheus
+  path: /openshift/prometheus.template.yaml
+  url: https://gitlab.cee.redhat.com/service/app-sre-observability
+  parameters:
+    VERSION: v2.15.2
+    RETENTION: 15d
+    PV_SIZE: 50Gi
+    WAL_COMPRESSION: true
+    LOG_LEVEL: debug
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+    ref: master
+    parameters:
+      CLUSTER_LABEL: app-sre-stage-01
+      ENVIRONMENT: staging
+      EXTERNAL_URL: https://prometheus.app-sre-stage-01.devshift.net
+      RETENTION: 10d
+      LOG_LEVEL: info
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-02.yml
+    ref: master
+    parameters:
+      CLUSTER_LABEL: app-sre-stage-02
+      ENVIRONMENT: staging
+      EXTERNAL_URL: https://prometheus.app-sre-stage-02.devshift.net
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stage-01.yml
+    ref: master
+    parameters:
+      CLUSTER_LABEL: crc-stage-01
+      ENVIRONMENT: staging
+      EXTERNAL_URL: https://prometheus.crc-stage-01.devshift.net
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stg-01.yml
+    ref: master
+    parameters:
+      CLUSTER_LABEL: crc-stg-01
+      ENVIRONMENT: staging
+      EXTERNAL_URL: https://prometheus.crc-stg-01.devshift.net
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.hive-stage-01.yml
+    ref: master
+    parameters:
+      CLUSTER_LABEL: hive-stage-01
+      ENVIRONMENT: staging
+      EXTERNAL_URL: https://prometheus.hive-stage-01.devshift.net
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.quayio-stage.yml
+    ref: master
+    parameters:
+      CLUSTER_LABEL: quayio-stage
+      ENVIRONMENT: staging
+      EXTERNAL_URL: https://prometheus.quayio-stage.devshift.net
+      RETENTION: 30d
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.quay-s-ue1.yml
+    ref: master
+    parameters:
+      CLUSTER_LABEL: quay-s-ue1
+      ENVIRONMENT: staging
+      EXTERNAL_URL: https://prometheus.quay-s-ue1.devshift.net
+      RETENTION: 30d
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml
+    ref: cdfd2f37e8d6101e86192055216af3829ec635fa
+    parameters:
+      CLUSTER_LABEL: app-sre-prod-01
+      ENVIRONMENT: production
+      EXTERNAL_URL: https://prometheus.app-sre-prod-01.devshift.net
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-02.yml
+    ref: cdfd2f37e8d6101e86192055216af3829ec635fa
+    parameters:
+      CLUSTER_LABEL: app-sre-prod-02
+      ENVIRONMENT: production
+      EXTERNAL_URL: https://prometheus.app-sre-prod-02.devshift.net
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-03.yml
+    ref: cdfd2f37e8d6101e86192055216af3829ec635fa
+    parameters:
+      CLUSTER_LABEL: app-sre-prod-03
+      ENVIRONMENT: production
+      EXTERNAL_URL: https://prometheus.app-sre-prod-03.devshift.net
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-04.yml
+    ref: cdfd2f37e8d6101e86192055216af3829ec635fa
+    parameters:
+      CLUSTER_LABEL: app-sre-prod-04
+      ENVIRONMENT: production
+      EXTERNAL_URL: https://prometheus.app-sre-prod-04.devshift.net
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.quay-p-ue1.yml
+    ref: cdfd2f37e8d6101e86192055216af3829ec635fa
+    parameters:
+      CLUSTER_LABEL: quay-p-ue1
+      ENVIRONMENT: production
+      EXTERNAL_URL: https://prometheus.quay-p-ue1.devshift.net
+      LOG_LEVEL: info
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.quay-p-ue2.yml
+    ref: cdfd2f37e8d6101e86192055216af3829ec635fa
+    parameters:
+      CLUSTER_LABEL: quay-p-ue2
+      ENVIRONMENT: production
+      EXTERNAL_URL: https://prometheus.quay-p-ue2.devshift.net
+      LOG_LEVEL: info
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.telemeter-prod-01.yml
+    ref: cdfd2f37e8d6101e86192055216af3829ec635fa
+    parameters:
+      CLUSTER_LABEL: telemeter-prod-01
+      ENVIRONMENT: production
+      EXTERNAL_URL: https://prometheus.telemeter-prod-01.devshift.net
+      LOG_LEVEL: info
+# Alertmanager
+- name: alertmanager
+  path: /openshift/alertmanager.template.yaml
+  url: https://gitlab.cee.redhat.com/service/app-sre-observability
+  parameters:
+    REPLICAS: 3
+    VERSION: v0.20.0
+    OAUTH_PROXY_SECRET_NAME: alertmanager-auth-proxy
+    STORAGE_CLASS_NAME: gp2
+    LOG_LEVEL: info
+    ALERTMANAGER_NAME: instance
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+    ref: master
+    parameters:
+      REPLICAS: 1
+      ENVIRONMENT: staging
+      EXTERNAL_URL: https://alertmanager.app-sre-stage-01.devshift.net
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-02.yml
+    ref: master
+    parameters:
+      ENVIRONMENT: staging
+      EXTERNAL_URL: https://alertmanager.app-sre-stage-02.devshift.net
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stage-01.yml
+    ref: master
+    parameters:
+      ENVIRONMENT: staging
+      EXTERNAL_URL: https://alertmanager.crc-stage-01.devshift.net
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stg-01.yml
+    ref: master
+    parameters:
+      ENVIRONMENT: staging
+      EXTERNAL_URL: https://alertmanager.crc-stg-01.devshift.net
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.hive-stage-01.yml
+    ref: master
+    parameters:
+      ENVIRONMENT: staging
+      EXTERNAL_URL: https://alertmanager.hive-stage-01.devshift.net
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.quayio-stage.yml
+    ref: master
+    parameters:
+      ENVIRONMENT: staging
+      EXTERNAL_URL: https://alertmanager.quayio-stage.devshift.net
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.quay-s-ue1.yml
+    ref: master
+    parameters:
+      ENVIRONMENT: staging
+      EXTERNAL_URL: https://alertmanager.quay-s-ue1.devshift.net
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml
+    ref: cdfd2f37e8d6101e86192055216af3829ec635fa
+    parameters:
+      ENVIRONMENT: production
+      EXTERNAL_URL: https://alertmanager.app-sre-prod-01.devshift.net
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-02.yml
+    ref: cdfd2f37e8d6101e86192055216af3829ec635fa
+    parameters:
+      ENVIRONMENT: production
+      EXTERNAL_URL: https://alertmanager.app-sre-prod-02.devshift.net
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-03.yml
+    ref: cdfd2f37e8d6101e86192055216af3829ec635fa
+    parameters:
+      ENVIRONMENT: production
+      EXTERNAL_URL: https://alertmanager.app-sre-prod-03.devshift.net
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-04.yml
+    ref: cdfd2f37e8d6101e86192055216af3829ec635fa
+    parameters:
+      ENVIRONMENT: production
+      EXTERNAL_URL: https://alertmanager.app-sre-prod-04.devshift.net
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.quay-p-ue1.yml
+    ref: cdfd2f37e8d6101e86192055216af3829ec635fa
+    parameters:
+      ENVIRONMENT: production
+      EXTERNAL_URL: https://alertmanager.quay-p-ue1.devshift.net
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.quay-p-ue2.yml
+    ref: cdfd2f37e8d6101e86192055216af3829ec635fa
+    parameters:
+      ENVIRONMENT: production
+      EXTERNAL_URL: https://alertmanager.quay-p-ue2.devshift.net
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.telemeter-prod-01.yml
+    ref: cdfd2f37e8d6101e86192055216af3829ec635fa
+    parameters:
+      ENVIRONMENT: production
+      EXTERNAL_URL: https://alertmanager.telemeter-prod-01.devshift.net

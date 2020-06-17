@@ -1,0 +1,49 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: operator-controller
+  platform: insights
+
+name: operator-controller
+description: operator-controller app on the Insights Platform
+
+app:
+  $ref: /services/insights/operator-controller/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+- ConfigMap
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: insights-operator-controller
+  path: /templates/insights-operator-controller/insights-operator-controller.yaml
+  url: https://github.com/RedHatInsights/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/operator-controller/namespaces/stage-operator-controller-stage.yml
+    ref: master
+    parameters:
+      MAX_REPLICAS: 6
+      MIN_REPLICAS: 2
+      IMAGE_TAG: 7941c51

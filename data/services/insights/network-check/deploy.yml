@@ -1,0 +1,44 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: network-check
+  platform: insights
+
+name: network-check
+description: Checks basic network stbility
+
+app:
+  $ref: /services/insights/network-check/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+
+resourceTemplates:
+- name: network-check
+  path: /template.yml
+  url: https://github.com/RedHatInsights/network-check
+  parameters:
+    GETENT_HOST: koku-stage.cm3mmfyi8atf.us-east-1.rds.amazonaws.com
+    HTTP_TIMEOUT: "2"
+    GETENT_TIMEOUT: "2"
+    HTTP_URL: http://entitlements-api-go.entitlements-stage.svc:3000/
+  targets:
+  - namespace:
+      $ref: /services/insights/network-check/namespaces/stage.yml
+    ref: master
+  - namespace:
+      $ref: /services/insights/network-check/namespaces/stage-18.yml
+    ref: master

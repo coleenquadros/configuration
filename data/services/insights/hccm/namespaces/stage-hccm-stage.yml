@@ -19,13 +19,13 @@ environment:
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stage-01.yml
 - $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+- $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
 
 managedRoles: true
 
 managedResourceTypes:
 - ConfigMap
 - ServiceAccount
-- Secret
 
 openshiftResources:
 - provider: vault-secret
@@ -60,21 +60,33 @@ openshiftResources:
 - provider: vault-secret
   path: insights/secrets/insights-stage/hccm-stage/koku-aws
   version: 1
+  annotations:
+    qontract.recycle: "true"
 - provider: vault-secret
   path: insights/secrets/insights-stage/hccm-stage/koku-gcp
   version: 1
+  annotations:
+    qontract.recycle: "true"
 - provider: vault-secret
   path: insights/secrets/insights-stage/hccm-stage/koku-secret
   version: 1
+  annotations:
+    qontract.recycle: "true"
 - provider: vault-secret
   path: insights/secrets/insights-stage/hccm-stage/koku-sentry
   version: 2
+  annotations:
+    qontract.recycle: "true"
 - provider: vault-secret
   path: insights/secrets/insights-stage/hccm-stage/nise-populator-secret
   version: 1
+  annotations:
+    qontract.recycle: "true"
 - provider: vault-secret
   path: insights/secrets/global/rds-client-ca
   version: 1
+  annotations:
+    qontract.recycle: "true"
 
 
 managedTerraformResources: true
@@ -94,3 +106,8 @@ terraformResources:
   identifier: hccm-stage
   defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
   output_resource_name: cloudwatch
+- provider: s3
+  account: insights-stage
+  identifier: hccm-stage
+  defaults: /terraform/resources/s3-private-1.yml
+  output_resource_name: hccm-s3

@@ -20,10 +20,10 @@ WORK_DIR=`pwd`
 CURRENT_DIR=$(dirname "$0")
 source $CURRENT_DIR/runners.sh
 
-run_test create-namespace &
-run_test dedicated-admin-rolebindings &
-run_test default-project-labels &
-run_test default-network-policies &
+run_test create-namespace --thread-pool-size 1 &
+run_test dedicated-admin-rolebindings --thread-pool-size 1 &
+run_test default-project-labels --thread-pool-size 1 &
+run_test default-network-policies --thread-pool-size 1 &
 
 wait
 

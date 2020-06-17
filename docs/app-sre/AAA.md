@@ -140,6 +140,7 @@ Every app-sre engineer should have access to the following
     - ACCESS: outage-list -> subscribe from UI
     - ACCESS: aos-devel -> subscribe from UI
     - ACCESS: it-iam-announce-list -> subscribe from UI
+    - ACCESS: it-platform-community-list (useful for SSO) -> subscribe from UI
 
 - GPG key:
   - Generate one and put in:
@@ -214,6 +215,10 @@ Every app-sre engineer should have access to the following
   - This is necessary to post maintenance and outage messages in https://cloud.redhat.com/openshift
   - Access is provided via email to Cameron Britt <cbritt@redhat.com> and Jeremy Perry <jeperry@redhat.com>.
   - Logging in is done using the full Red Hat email.
+
+- Unleash:
+  - Feature toggle service to enable/disable features in runtime.
+  - More details available [here](https://gitlab.cee.redhat.com/service/dev-guidelines/blob/master/unleash.md)
 
 ### Returning Red Hat Employee Gotchas
 
@@ -291,7 +296,7 @@ Initiate incident communications:
 - If deemed appropriate, a new channel can be created in slack: #incident-app-sre-<JIRAID>. This channel should be linked from #sd-org.
 - Send email to:
   - [serviceOwners](https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/app-sre/app-1.yml)
-  - [serviceNotifications](https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/app-sre/app-1.yml)
+  - [serviceNotifications](https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/app-sre/app-1.yml). This list may include `outage-list@redhat.com`, make sure an email is sent to that list if it's a major outage and if that list includes the outage list.
   - sd-notifications@redhat.com
   - sd-org@redhat.com (major outage)
 
@@ -465,7 +470,9 @@ The IT Platform team runs components like:
 
 - `sso.redhat.com`
   - C1 SLA (see resources below)
+  - Quick link to [blackbox poll Prometheus data](https://prometheus.app-sre-prod-01.devshift.net/graph?g0.range_input=2h&g0.stacked=1&g0.expr=probe_success%7Binstance%3D~%22.*sso.redhat.com.*%22%7D&g0.tab=0) for sso.redhat.com 
   - In order to escalate a production incident this email can be used: `it-platform-page@redhat.com`.
+  - To get ahold of a person directly to follow up on an escalation or incident connect to the [IT/ISO Google chat](https://chat.google.com/room/AAAAiUsrxXk)
   - Resources: [Applications and Systems Criticality Classification](https://mojo.redhat.com/docs/DOC-1171238) and [Business Resilience Glossary](https://mojo.redhat.com/docs/DOC-1136493).
 
 ## Escalation procedures
@@ -486,9 +493,8 @@ AppSRE on-call may be assigned PagerDuty incidents that were triggered by our te
 ## Contacts
 
 - OSD SRE
-    - #libra-ops on irc.devel.redhat.com - Shift lead and on-call listed in /topic
     - #sd-sre-platform on slack.coreos.org
-    - Openshift SRE Servicenow direct form: https://url.corp.redhat.com/OpenShift-SRE-Service-Request-Form
+    - Create a JIRA: [task](https://issues.redhat.com/secure/CreateIssueDetails!init.jspa?pid=12323823&issuetype=3&customfield_12316441=14554&priority=10000) or [incident](https://issues.redhat.com/secure/CreateIssueDetails!init.jspa?pid=12323823&issuetype=10901&customfield_12316441=14554&priority=10000). [More info](https://mojo.redhat.com/docs/DOC-1223261).
 
 - BLR infrastructure -> PnT Devops irc -> Mattermost: sureshn, snandago@redhat.com -> PnT Devops
 - RDU infrastructure ->

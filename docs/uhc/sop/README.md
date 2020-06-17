@@ -362,6 +362,32 @@ Controller manager is down.
 
 - Inform the greater service delivery team.
 
+## Metrics Worker Down
+
+### Impact:
+
+Metrics will not be reported for existing and new clusters.
+
+### Summary:
+
+Cluster Service cannot report metrics for the clusters. This may be because telemetry is down.
+
+https://infogw-proxy.api.openshift.com/ (data from prod telemeter)
+https://infogw-proxy.api.stage.openshift.com/ (data from staging telemeter)
+
+
+### Access required:
+ 
+- Console access to the cluster that runs the clusters service (`app-sre` and
+  `app-sre-stage`).
+- /app-interface/blob/master/data/services/observability/permissions/observability-access.yml.
+
+### Steps:
+
+- Check `deployment/clusters-service` logs to confirm the telemetry down.
+- Contact Service Development A team on #service-delivery, sd-mp-devel@redhat.com.
+- Contact #forum-telemetry slack channel,monitoring-telemeter-service@redhat.com
+
 ## Escalations
 
 We want a link to app-interface here, but okay to just contacts here for now.

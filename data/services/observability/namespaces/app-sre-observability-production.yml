@@ -7,7 +7,7 @@ name: app-sre-observability-production
 description: production namespace for the app-sre observability stack
 
 cluster:
-  $ref: /openshift/app-sre/cluster.yml
+  $ref: /openshift/app-sre-prod-01/cluster.yml
 
 app:
   $ref: /services/observability/app.yml
@@ -15,144 +15,305 @@ app:
 environment:
   $ref: /products/app-sre/environments/production.yml
 
-managedRoles: true
-
-managedTerraformResources: true
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml
 
 openshiftAcme:
   config:
-    $ref: /dependencies/openshift/acme/default.yml
+    $ref: /dependencies/openshift/acme/v4.yml
   accountSecret:
     provider: vault-secret
     path: app-interface/app-sre/app-sre-observability-production/acme-account
     version: 1
 
-terraformResources: []
+managedRoles: true
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: aws-iam-service-account
+  account: app-sre
+  identifier: aws-resource-exporter-prod-01
+  policies:
+  - AmazonRDSReadOnlyAccess
+  output_resource_name: aws-resource-exporter-app-sre
+- provider: aws-iam-service-account
+  account: app-sre
+  identifier: aws-cloudwatch-exporter-prod-01
+  policies:
+  - AmazonEC2ReadOnlyAccess
+  - AmazonSQSReadOnlyAccess
+  - AmazonDynamoDBReadOnlyAccess
+  - AmazonS3ReadOnlyAccess
+  - AmazonRDSReadOnlyAccess
+  - AmazonInspectorReadOnlyAccess
+  - CloudWatchReadOnlyAccess
+  output_resource_name: aws-cloudwatch-exporter-app-sre
+- provider: aws-iam-service-account
+  account: osio
+  identifier: aws-cloudwatch-exporter-prod-01
+  policies:
+  - AmazonEC2ReadOnlyAccess
+  - AmazonSQSReadOnlyAccess
+  - AmazonDynamoDBReadOnlyAccess
+  - AmazonS3ReadOnlyAccess
+  - AmazonRDSReadOnlyAccess
+  - AmazonInspectorReadOnlyAccess
+  - CloudWatchReadOnlyAccess
+  output_resource_name: aws-cloudwatch-exporter-osio
+- provider: aws-iam-service-account
+  account: osio
+  identifier: aws-resource-exporter-prod-01
+  policies:
+  - AmazonRDSReadOnlyAccess
+  output_resource_name: aws-resource-exporter-osio
 
 managedResourceTypes:
-- Prometheus
-- Alertmanager
-- Service
-- Subscription
 - ConfigMap
 - Secret
-- ServiceMonitor
-- PrometheusRule
 - Route
 
 openshiftResources:
-# Prometheus operator
-- provider: resource-template
-  type: jinja2
-  path: /observability/prometheus/v3/app-sre.prometheus.yaml
-  variables:
-    replicas: 3
-    clusterLabel: app-sre
-    environment: production
-    externalUrl: https://prometheus.app-sre.devshift.net
-    version: v2.15.2
-    retention: 31d
-    pvSize: 50Gi
-    logLevel: info
-- provider: resource
-  path: /observability/prometheus/prometheus-app-sre.service.yaml
-- provider: resource
-  path: /observability/prometheus/prometheus-operator.service.yml
-- provider: resource
-  path: /observability/prometheus/prometheus-proxy.service.yaml
-- provider: resource
-  path: /observability/prometheus/v3/prometheus.subscription.yaml
-# AlertManager operator
-- provider: resource-template
-  type: jinja2
-  path: /observability/alertmanager/app-sre.alertmanager.yaml
-  variables:
-    replicas: 1
-    version: v0.20.0
-    environment: production
-    externalUrl: https://alertmanager.app-sre.devshift.net
-    oauthProxySecretName: alertmanager-auth-proxy
-    storageClassName: gp2-encrypted
-    logLevel: debug
-- provider: resource
-  path: /observability/alertmanager/alertmanager-app-sre.service.yaml
-- provider: resource
-  path: /observability/alertmanager/alertmanager-proxy.service.yaml
-
 # Routes
-## Alertmanager
+## Grafana
 - provider: resource-template
   type: jinja2
-  path: /observability/alertmanager.route.yaml
+  path: /observability/grafana.route.yaml
   variables:
     environment: ''
-    host: alertmanager.app-sre.devshift.net
+    host: grafana.app-sre.devshift.net
+- provider: resource
+  path: /observability/grafana-via-openshift.route.yaml
+## Blackbox Exporter
 - provider: resource-template
   type: jinja2
-  path: /observability/alertmanager-external.route.yaml
+  path: /observability/blackbox-exporter.route.yaml
   variables:
-    environment: ''
-    host: alertmanager.devshift.net
-## Prometheus
+    host: blackbox-exporter.devshift.net
+## PushGateway
 - provider: resource-template
   type: jinja2
-  path: /observability/prometheus.route.yaml
+  path: /observability/pushgateway.route.yaml
   variables:
-    environment: ''
-    host: prometheus.app-sre.devshift.net
+    host: pushgateway.app-sre.devshift.net
+## Zabbix impersonator
+- provider: resource-template
+  type: jinja2
+  path: /observability/zabbix-impersonator/zabbix-impersonator-exporter.route.yaml
+  variables:
+    host: zabbix-impersonator-exporter.devshift.net
 
 # ConfigMaps
-## Alertmanager
+## Grafana Dashboards
 - provider: resource
-  path: /observability/alertmanager/templates.configmap.yaml
+  path: /observability/grafana/grafana-dashboard-appsre-grafana.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-openshift-router.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-appsre-rds.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-appsre-vault.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-blackbox-exporter.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-cpu-throttling.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-osdv3-tenant-compute-resources.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-osdv4-tenant-compute-resources.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-playground.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboards.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-prometheus-health.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-compute-resources-cluster-v3.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-compute-resources-namespace-v3.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-compute-resources-pod-v3.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-use-cluster-v3.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-use-node-v3.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-compute-resources-cluster.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-compute-resources-namespace-pods.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-compute-resources-namespace-workloads.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-compute-resources-node-pods.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-compute-resources-pod.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-compute-resources-workload.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-networking-cluster.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-use-cluster.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-use-node.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-che-graphite.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-cincinnati.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-jenkins-overview.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-telemeter.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-telemeter-canary.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-hive.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-rhche.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-uhc-clusters-service.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-osio-capacity.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-osio-gluster.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-uhc-account-manager.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-uhc-gateway.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-bayesian-graphite.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-bayesian-availability.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-aws-account-operator.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-observatorium-api.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-observatorium-thanos-compact.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-observatorium-thanos-overview.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-observatorium-thanos-querier.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-observatorium-thanos-receive.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-observatorium-thanos-rule.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-observatorium-thanos-sidecar.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-observatorium-thanos-store.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-observatorium-thanos-receive-controller.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-observatorium-jaeger-jaeger.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-observatorium-memcached-memcached-overview.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-elasticsearch.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-cincinnati-valet.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-github-mirror.configmap.yaml
+  validate_json: true
+## Cloudwatch exporter
+- provider: resource
+  path: /observability/cloudwatch-exporter/cloudwatch-exporter-config.configmap.yaml
+## Zabbix impersonator
+- provider: resource
+  path: /observability/zabbix-impersonator/zabbix-impersonator.configmap.yaml
+## Quay
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-quay.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-quayio-stage-aws-resources.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-quayio-prod-aws-resources.configmap.yaml
+  validate_json: true
 
 # Secrets
-## Common
+## Blackbox Exporter
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/blackbox-exporter/blackbox-exporter-config.secret.yaml
+## Grafana
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/grafana/grafana-config.secret.yaml
+  variables:
+    auto_assign_org_role: Viewer
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/grafana/grafana-datasources.secret.yaml
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-observability-production/grafana/grafana-proxy-config
+  version: 2
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-observability-production/grafana/grafana-proxy-config-openshift
+  version: 1
+## Online-registration-exporter
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/online-registration-exporter/online-registration-exporter-config.secret.yaml
+## Pushgateway
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-observability-production/pushgateway
+  version: 1
+
+## Common (delete?)
 - provider: vault-secret
   path: app-interface/app-sre/app-sre-observability-production/app-sre-observability-htpasswd
   version: 1
-
-## Alertmanager
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /observability/alertmanager/alertmanager-app-sre-production.secret.yaml
-- provider: vault-secret
-  path: app-interface/app-sre/app-sre-observability-production/alertmanager/alertmanager-auth-proxy
-  version: 1
-
-## Prometheus
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /observability/prometheus/prometheus-app-sre-additional-scrapeconfig.secret.yaml
-- provider: vault-secret
-  path: app-interface/app-sre/app-sre-observability-production/prometheus/prometheus-proxy-config
-  version: 2
-
-## ServiceMonitors
-### App-SRE AlertManager
-- provider: resource
-  path: /observability/servicemonitors/alertmanager.servicemonitor.yaml
-### OpenShift Routers
-- provider: resource
-  path: /observability/servicemonitors/openshift-router.servicemonitor.yaml
-### App-SRE Prometheus
-- provider: resource
-  path: /observability/servicemonitors/prometheus-app-sre.servicemonitor.yaml
-### All managed Prometheus Operators
-- provider: resource
-  path: /observability/servicemonitors/prometheus-operators-production.servicemonitor.yaml
-## Alerting and Recording Rules
-### App SRE contract
-- provider: resource
-  path: /observability/prometheusrules/app-sre-contract.yaml
-### Federated Kubernetes metrics
-- provider: resource
-  path: /observability/prometheusrules/kube-metrics.prometheusrules.yaml
-### Prometheus mixin alerts
-- provider: resource
-  path: /observability/prometheusrules/prometheus-mixin.prometheusrules.yaml
-### Prometheus Deadmanssnitch
-- provider: resource
-  path: /observability/prometheusrules/deadmanssnitch.prometheusrules.yaml
-
-

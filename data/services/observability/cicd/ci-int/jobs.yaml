@@ -15,49 +15,12 @@ type: jobs
 
 config:
 - project:
-    name: app-sre-observability
-    label: app-sre-observability
-    node: app-sre
-    gl_group: service
-    gl_project: app-sre-observability
-    kube_cluster: app-sre-stage-01
-    kube_namespace: app-sre-observability-stage
-    saasherder_context: app-sre-observability
-    saasherder_services: cloudwatch-exporter cloudwatch-exporter-osio blackbox-exporter grafana pushgateway
-    saas_git: https://gitlab.cee.redhat.com/service/saas-app-sre-observability.git
-    quay_org: app-sre
-    jobs:
-    - 'gl-build-master':
-        display_name: build master
-
-- project:
-    name: app-sre-observability-cd
-    label: app-sre-observability
-    node: app-sre
-    gl_group: service
-    gl_project: saas-app-sre-observability
-    kube_cluster: app-sre-prod-01
-    kube_namespace: app-sre-observability-production
-    saasherder_context: app-sre-observability
-    quay_org: app-sre
-    jobs:
-    - 'saas-pr-check':
-        display_name: promote-to-prod pr check
-    - 'saas-deploy':
-        display_name: promote-to-prod saas deploy
-
-- project:
     name: online-registration-exporter
     label: online-registration-exporter
     node: app-sre
     gh_org: app-sre
     gh_repo: online-registration-exporter
     quay_org: app-sre
-    kube_cluster: app-sre-stage-01
-    kube_namespace: app-sre-observability-stage
-    saasherder_services: online-registration-exporter
-    saasherder_context: app-sre-observability
-    saas_git: https://gitlab.cee.redhat.com/service/saas-app-sre-observability.git
     build_deploy_script_path: "./hack/build_deploy.sh"
     jobs:
     - 'gh-build-master':
@@ -70,15 +33,9 @@ config:
     gh_org: app-sre
     gh_repo: aws-resource-exporter
     quay_org: app-sre
-    kube_cluster: app-sre-stage-01
-    kube_namespace: app-sre-observability-stage
-    saasherder_services: aws-resource-exporter-app-sre aws-resource-exporter-osio
-    saasherder_context: app-sre-observability
-    saas_git: https://gitlab.cee.redhat.com/service/saas-app-sre-observability.git
     jobs:
     - 'gh-build-master':
         display_name: build master
-        auto_promote: true
 
 - project:
     name: zabbix-impersonator
@@ -87,34 +44,7 @@ config:
     gh_org: app-sre
     gh_repo: zabbix-impersonator
     quay_org: app-sre
-    kube_cluster: app-sre-stage-01
-    kube_namespace: app-sre-observability-stage
-    saasherder_services: zabbix-impersonator
-    saasherder_context: app-sre-observability
-    saas_git: https://gitlab.cee.redhat.com/service/saas-app-sre-observability.git
     jobs:
     - 'gh-build-master':
         display_name: build master
         build_deploy_script_path: './hack/build_deploy.sh'
-        auto_promote: true
-
-
-- project:
-    name: cvexporter-saas
-    label: app-sre-observability
-    node: app-sre
-    gl_group: service
-    gl_project: saas-cvexporter
-    saasherder_context: cvexporter
-    saasherder_services: cvexporter
-    image_pattern: '^quay\.io/app-sre/cvexporter'
-    quay_org: app-sre
-    kube_cluster: app-sre-stage-01
-    kube_namespace: app-sre-observability-stage
-    jobs:
-    - 'saas-deploy':
-        saas_env: stage
-        display_name: cvexporter saas deploy
-    - 'saas-pr-check':
-        saas_env: stage
-        display_name: cvexporter saas pr check

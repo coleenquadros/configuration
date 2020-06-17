@@ -55,6 +55,7 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
                 * or any other script that should run prior to deployment
                 * see [Continuous Integration in App-interface](/docs/app-sre/continuous-integration-in-app-interface.md) for more details
             * the `instance` should match the one where the upstream job runs.
+        * `disable` - (optional) if set to `true`, target will be skipped during deployment.
     * `hash_length` - (optional) if `IMAGE_TAG` should be set according to the referenced target, specify a length to use from the commit hash.
         * default is set in [app-interface settings](/data/app-interface/app-interface-settings.yml#L31).
 

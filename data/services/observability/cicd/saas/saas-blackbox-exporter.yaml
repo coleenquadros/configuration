@@ -1,0 +1,42 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: app-sre-observability
+
+name: saas-blackbox-exporter
+description: saas-blackbox-exporter
+
+app:
+  $ref: /services/observability/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/app-sre
+
+resourceTemplates:
+- name: blackbox-exporter
+  path: /openshift/blackbox-exporter.template.yaml
+  url: https://gitlab.cee.redhat.com/service/app-sre-observability
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: master
+    parameters:
+      REPLICAS: 1
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: 8a0a0b19617bcf453bf9ec2fc951bcd33a110180
+    parameters:
+      REPLICAS: 3

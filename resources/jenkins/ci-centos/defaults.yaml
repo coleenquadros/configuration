@@ -14,6 +14,8 @@
     che-success-message: ""
     che-failure-message: ""
     che-error-message: ""
+    kubeconfver: none
+    sa_name: app-sre-bot
 
 - admin_list_defaults: &admin_list_defaults
     name: 'admin_list_defaults'
@@ -818,7 +820,7 @@
           <<: *github_pull_request_defaults
     publishers:
         - email:
-            recipients: ptisnovs@redhat.com
+            recipients: msawood@redhat.com
             notify-every-unstable-build: true
             send-to-individuals: true
     <<: *job_template_defaults
@@ -1397,7 +1399,7 @@
             $ssh_cmd -t "cd payload-tests/integration-tests && /bin/bash cico_run_tests.sh"
     publishers:
         - email:
-            recipients: ptisnovs@redhat.com devtools-bayesian@redhat.com
+            recipients: msawood@redhat.com rh-depanalytics@redhat.com
             notify-every-unstable-build: true
             send-to-individuals: true
     <<: *job_template_defaults
@@ -1507,7 +1509,7 @@
     name: '{ci_project}-f8a-master-deploy-e2e-test'
     publishers:
         - email:
-            recipients: bayesian-ci@redhat.com
+            recipients: bayesian-ci@redhat.com rh-depanalytics@redhat.com 
             notify-every-unstable-build: true
             send-to-individuals: true
     wrappers:
@@ -1843,14 +1845,14 @@
     <<: *che-pullrequest-template
 
 - job-template:
-    name: '{ci_project}-{git_repo}-rc-{test_type}'
+    name: '{ci_project}-{git_repo}-release-{test_type}'
 
     scm:
       - git:
           url: https://github.com/{git_organization}/{git_repo}.git
           shallow_clone: true
           branches:
-            - cico-rc-test
+            - cico-release-test
     triggers:
       - github
 
@@ -2555,6 +2557,19 @@
     <<: *job_template_defaults
 
 - job-template:
+    name: '{ci_project}-{git_repo}-minikube-updates'
+    che-success-message: "Latest version of Eclipse installed and tested successfully on minikube."
+    che-failure-message: "Latest version of Eclipse failed installing in minikube."
+    che-error-message: "Latest version of Eclipse failed installing in minikube."
+    triggers:
+        - github-pull-request:
+            status-context: "[MINIKUBE] Tests of latest Eclipse Che version."
+            included-regions:
+              - 'olm/eclipse-che-preview-kubernetes/deploy/olm-catalog/eclipse-che-preview-kubernetes/.*'
+            <<: *che_github_pull_request_defaults
+    <<: *che-pullrequest-template
+
+- job-template:
     name: '{ci_project}-{git_repo}-code-pr-check'
     defaults: global
     triggers:
@@ -2848,23 +2863,25 @@
                 echo "Not a PR build, using master"
             fi
 
-
             $ssh_cmd -t "yum install -y docker && systemctl start docker"
 
-            ENVIRONMENT=production PATH=$PATH:~/.local/bin DRY_RUN=true /bin/bash ~/saasherder/fetch_and_apply.sh
+
+            KUBECONFVER={kubeconfver} ENVIRONMENT=production PATH=$PATH:~/.local/bin DRY_RUN=true /bin/bash ~/saasherder/fetch_and_apply.sh
             CONTEXTS=$(PATH=$PATH:~/.local/bin saasherder config get-contexts)
             for c in `echo $CONTEXTS`; do
+                KUBECONFVER={kubeconfver} KUBEHOME=/home/devtools/.kube SA_NAME={sa_name} CONTEXT=$c ENVIRONMENT=production PATH=$PATH:~/.local/bin /usr/bin/python ~/saasherder/fmt-kubeconf.py
                 DIR=$(readlink -f $c-20* | tail -1)
                 for f in `ls $DIR`; do
                     python ~/saasherder/check_image.py $DIR/$f '{image_pattern}'
                     cat $DIR/$f | $ssh_cmd docker run --rm -i quay.io/app-sre/manifest-bouncer:{manifest_bouncer_tag} --warn-only -
                 done
             done
-
+            unset KUBE_SERVER
+            unset KUBE_TOKEN
             cico node done $CICO_ssid
 
             set -ex
-            ENVIRONMENT=production PATH=$PATH:~/.local/bin /bin/bash ~/saasherder/fetch_and_apply.sh
+            KUBECONFVER={kubeconfver} ENVIRONMENT=production PATH=$PATH:~/.local/bin /bin/bash ~/saasherder/fetch_and_apply.sh
 
 - job-template:
     name: '{ci_project}-{git_repo}-promote-to-prod-test-v4'
@@ -2911,9 +2928,10 @@
 
             $ssh_cmd -t "yum install -y docker && systemctl start docker"
 
-            ENVIRONMENT=production PATH=$PATH:~/.local/bin DRY_RUN=true /bin/bash ~/saasherder/fetch_and_apply.sh
+            KUBECONFVER={kubeconfver} ENVIRONMENT=production PATH=$PATH:~/.local/bin DRY_RUN=true /bin/bash ~/saasherder/fetch_and_apply.sh
             CONTEXTS=$(PATH=$PATH:~/.local/bin saasherder config get-contexts)
             for c in `echo $CONTEXTS`; do
+                KUBECONFVER={kubeconfver} KUBEHOME=/home/devtools/.kube SA_NAME={sa_name} CONTEXT=$c ENVIRONMENT=production PATH=$PATH:~/.local/bin /usr/bin/python ~/saasherder/fmt-kubeconf.py
                 DIR=$(readlink -f $c-20* | tail -1)
                 for f in `ls $DIR`; do
                     python ~/saasherder/check_image.py $DIR/$f '{image_pattern}'
@@ -2921,6 +2939,8 @@
                 done
             done
 
+            unset KUBE_SERVER
+            unset KUBE_TOKEN
             cico node done $CICO_ssid
 
     <<: *job_template_defaults
@@ -3062,6 +3082,69 @@
             cico node done $CICO_ssid
 
     <<: *job_template_defaults
+
+- job:
+    name: 'ci-conf-recycler-test-master'
+    defaults: global
+    node: devtools
+    properties:
+        - github:
+            url: https://github.com/app-sre/ci-conf-recycler
+    scm:
+        - git:
+            url: https://github.com/app-sre/ci-conf-recycler.git
+            shallow_clone: true
+            branches:
+                - master
+    triggers:
+        - github
+    builders:
+        - shell: |
+            cp ~/cico-tools/env-toolkit .
+            ./env-toolkit dump -f jenkins-env.json
+            env > jenkins-env
+
+            export CICO_API_KEY=$(cat ~/duffy.key )
+            # get node
+            n=1
+            while true
+            do
+                cico_output=$(cico node get -f value -c ip_address -c comment)
+                if [ $? -eq 0 ]; then
+                    read CICO_hostname CICO_ssid <<< $cico_output
+                    if  [ ! -z "$CICO_hostname" ]; then
+                        # we got hostname from cico
+                        break
+                    fi
+                    echo "'cico node get' succeed, but can't get hostname from output"
+                fi
+                if [ $n -gt 15 ]; then
+                    # give up after 15 tries
+                    echo "giving up on 'cico node get'"
+                    exit 1
+                fi
+                echo "'cico node get' failed, trying again in 60s ($n/15)"
+                n=$[$n+1]
+                sleep 60
+            done
+            echo 'Using Host' $CICO_hostname
+            set -x
+            sshopts="-t -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -l root"
+            ssh_cmd="ssh $sshopts $CICO_hostname"
+            $ssh_cmd yum -y install rsync
+            rsync -e "ssh $sshopts" -Ha $(pwd)/ $CICO_hostname:payload
+            $ssh_cmd -t "cd payload && /bin/bash cico_test.sh"
+            rtn_code=$?
+            if [ $rtn_code -eq 0 ]; then
+              cico node done $CICO_ssid
+              set -ex
+              cp fmt-kubeconf.py ~/saasherder/fmt-kubeconf.py                   
+              chmod 755 ~/saasherder/fmt-kubeconf.py     
+            else
+              # fail mode gives us 12 hrs to debug the machine
+              curl "http://admin.ci.centos.org:8080/Node/fail?key=$CICO_API_KEY&ssid=$CICO_ssid"
+            fi
+            exit $rtn_code
 
 - job:
     name: 'devtools-saasherder-test-master'
@@ -3447,13 +3530,13 @@
             | Link | URL |\n
             | ---- | :-: |\n
             | job log | https://ci.centos.org/job/$JOB_NAME/$BUILD_NUMBER/console |\n
-            | artifacts | http://artifacts.ci.centos.org/devtools/saas-openshiftio/$JOB_NAME/$BUILD_NUMBER |\n\n
+            | artifacts | http://artifacts.ci.centos.org/devtools/rhche/$JOB_NAME/$BUILD_NUMBER |\n\n
             **Please review the job results and re-run the job by commenting [test] if necessary.**"
             error-comment: "**The rh-che test against prod-preview failed.**\n\n
             | Link | URL |\n
             | ---- | :-: |\n
             | job log | https://ci.centos.org/job/$JOB_NAME/$BUILD_NUMBER/console |\n
-            | artifacts | http://artifacts.ci.centos.org/devtools/saas-openshiftio/$JOB_NAME/$BUILD_NUMBER |\n\n
+            | artifacts | http://artifacts.ci.centos.org/devtools/rhche/$JOB_NAME/$BUILD_NUMBER |\n\n
             **Please review the job results and re-run the job by commenting [test] if necessary.**"
             <<: *github_pull_request_defaults
     wrappers:
@@ -3461,6 +3544,55 @@
             <<: *vault_defaults
             secrets:
                 - secret-path: 'devtools-osio-ci/rhche-saas-prcheck'
+                  secret-values:
+                    - env-var: 'PASSWORD'
+                      vault-key: 'password'
+                    - env-var: 'USERNAME'
+                      vault-key: 'username'
+                    - env-var: 'EMAIL'
+                      vault-key: 'email'
+    <<: *saas_prcheck_rhche_template
+
+- job-template:
+    name: '{ci_project}-saas-openshiftio-pre-release-test'
+    scm:
+        - git-scm:
+            git_url: https://{github_user}@github.com/{git_organization}/{git_repo}.git
+            git_basedir: '{git_repo}'
+        - git:
+            url: https://github.com/redhat-developer/rh-che/
+            shallow_clone: true
+            branches:
+                - master
+            basedir: rhche
+    triggers:
+        - github-pull-request:
+            github_hooks: '{github_hooks}'
+            failure-comment: "**The pre-release rh-che test against prod-preview failed.**\n\n
+            | Link | URL |\n
+            | ---- | :-: |\n
+            | job log | https://ci.centos.org/job/$JOB_NAME/$BUILD_NUMBER/console |\n
+            | artifacts | http://artifacts.ci.centos.org/devtools/rhche/$JOB_NAME/$BUILD_NUMBER |\n\n
+            **Please review the job results and re-run the job by commenting [pre-release-tests] if necessary.**"
+            error-comment: "**The pre-release rh-che test against prod-preview failed.**\n\n
+            | Link | URL |\n
+            | ---- | :-: |\n
+            | job log | https://ci.centos.org/job/$JOB_NAME/$BUILD_NUMBER/console |\n
+            | artifacts | http://artifacts.ci.centos.org/devtools/rhche/$JOB_NAME/$BUILD_NUMBER |\n\n
+            **Please review the job results and re-run the job by commenting [pre-release-tests] if necessary.**"
+            trigger-phrase: '.*\[pre-release-tests\].*'
+            <<: *admin_list_defaults
+            cron: '* * * * *'
+            github-hooks: false
+            permit-all: false
+            allow-whitelist-orgs-as-admins: true
+            status-context: "ci.centos.org rh-che pre-release-tests"
+            only-trigger-phrase: true
+    wrappers:
+        - vault-secrets:
+            <<: *vault_defaults
+            secrets:
+                - secret-path: 'devtools-osio-ci/rh-che-automation-credentials-pre-release-saas'
                   secret-values:
                     - env-var: 'PASSWORD'
                       vault-key: 'password'
@@ -3681,6 +3813,12 @@
         - '{ci_project}-rh-che-pre-release-test':
             git_organization: redhat-developer
             git_repo: rh-che
+            ci_project: 'devtools'
+            ci_cmd: 'TARGET="rhel" /bin/bash ./.ci/cico_pre_release_tests.sh'
+            timeout: '75m'
+        - '{ci_project}-saas-openshiftio-pre-release-test':
+            git_organization: openshiftio
+            git_repo: saas-openshiftio
             ci_project: 'devtools'
             ci_cmd: 'TARGET="rhel" /bin/bash ./.ci/cico_pre_release_tests.sh'
             timeout: '75m'
@@ -3954,6 +4092,7 @@
             ci_project: 'devtools'
             saas_git: saas-launchpad
             prj_name: launchpad-production
+            kubeconfver: v4
         - '{ci_project}-{git_repo}-promote-to-prod':
             git_repo: saas-hdd
             ci_project: 'devtools'
@@ -3981,6 +4120,7 @@
             ci_project: 'devtools'
             saas_git: saas-launchpad
             prj_name: launchpad-production
+            kubeconfver: v4
         - '{ci_project}-{git_repo}-promote-to-prod-test':
             git_repo: saas-hdd
             git_organization: openshiftio
@@ -5154,6 +5294,12 @@
             ci_cmd: '/bin/bash .ci/cico_chectl_minishift.sh'
             timeout: '2h'
             job_type: "E2E tests on minishift platform"
+        - '{ci_project}-{git_repo}-minikube-updates':
+            git_organization: eclipse
+            git_repo: che-operator
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash .ci/cico_updates_minikube.sh'
+            timeout: '2h'
         - '{ci_project}-{git_repo}-pr-check':
             git_organization: eclipse
             git_repo: che-plugin-registry
@@ -5230,6 +5376,13 @@
             test_type: "oauth-test"
             ci_cmd: '/bin/bash tests/.infra/centos-ci/nightly/ocp-oauth-test.sh'
             timeout: '3h'
+        - '{ci_project}-{git_repo}-nightly-{test_type}':
+            git_organization: eclipse
+            git_repo: che
+            ci_project: 'devtools'
+            test_type: "openshif-plugin-test"
+            ci_cmd: '/bin/bash tests/.infra/centos-ci/nightly/cico-openshift-connector-test.sh'
+            timeout: '3h'
         # End of Eclipse Che nightly tests
         - '{ci_project}-{git_repo}-pullrequests-{job_type}':
             git_organization: eclipse
@@ -5256,40 +5409,40 @@
             timeout: '3h'
             trigger_phrase: '.*\[ci-build\].*'
         # Eclipse Che RC jobs
-        - '{ci_project}-{git_repo}-rc-{test_type}':
+        - '{ci_project}-{git_repo}-release-{test_type}':
             git_organization: eclipse
             git_repo: che
             ci_project: 'devtools'
             test_type: "multiuser-integration-tests"
-            ci_cmd: '/bin/bash tests/.infra/centos-ci/rc/cico-rc-multiuser-integration-tests.sh'
+            ci_cmd: '/bin/bash tests/.infra/centos-ci/release/cico-release-multiuser-integration-tests.sh'
             timeout: '3h'
-        - '{ci_project}-{git_repo}-rc-{test_type}':
+        - '{ci_project}-{git_repo}-release-{test_type}':
             git_organization: eclipse
             git_repo: che
             ci_project: 'devtools'
             test_type: "ocp-oauth-test"
-            ci_cmd: '/bin/bash tests/.infra/centos-ci/rc/cico-rc-ocp-oauth-test.sh'
+            ci_cmd: '/bin/bash tests/.infra/centos-ci/release/cico-release-ocp-oauth-test.sh'
             timeout: '1h'
-        - '{ci_project}-{git_repo}-rc-{test_type}':
+        - '{ci_project}-{git_repo}-release-{test_type}':
             git_organization: eclipse
             git_repo: che
             ci_project: 'devtools'
-            test_type: "recreate-strategy-test"
-            ci_cmd: '/bin/bash tests/.infra/centos-ci/rc/cico-rc-recreate-strategy-test.sh'
+            test_type: "devfiles-test"
+            ci_cmd: '/bin/bash tests/.infra/centos-ci/release/cico-release-devfiles-test.sh'
             timeout: '1h'
-        - '{ci_project}-{git_repo}-rc-{test_type}':
+        - '{ci_project}-{git_repo}-release-{test_type}':
             git_organization: eclipse
             git_repo: che
             ci_project: 'devtools'
             test_type: "rolling-strategy-test"
-            ci_cmd: '/bin/bash tests/.infra/centos-ci/rc/cico-rc-rolling-strategy-test.sh'
+            ci_cmd: '/bin/bash tests/.infra/centos-ci/release/cico-release-rolling-strategy-test.sh'
             timeout: '1h'
-        - '{ci_project}-{git_repo}-rc-{test_type}':
+        - '{ci_project}-{git_repo}-release-{test_type}':
             git_organization: eclipse
             git_repo: che
             ci_project: 'devtools'
             test_type: "multiuser-happy-path-test"
-            ci_cmd: '/bin/bash tests/.infra/centos-ci/rc/cico-rc-multiuser-happy-path-test.sh'
+            ci_cmd: '/bin/bash tests/.infra/centos-ci/release/cico-release-multiuser-happy-path-test.sh'
             timeout: '3h'
         # End of Eclipse Che RC jobs
         - '{ci_project}-{git_repo}':
@@ -5627,12 +5780,35 @@
             git_repo: osa-api-server
             ci_project: 'devtools'
             ci_cmd: '/bin/bash cico_run_tests.sh'
-            timeout: '30m'                
-            registry: 'quay.io'                          
-            image_name: 'openshiftio/osa-api-server' 
+            timeout: '30m'
+            registry: 'quay.io'
+            image_name: 'openshiftio/osa-api-server'
         - '{ci_project}-{git_repo}-fabric8-analytics-pylint':
             git_organization: kubesecurity
             git_repo: osa-api-server
         - '{ci_project}-{git_repo}-fabric8-analytics-pydoc':
             git_organization: kubesecurity
             git_repo: osa-api-server
+        - '{ci_project}-{git_repo}-build-master':
+            git_organization: kubesecurity
+            git_repo: openshift-probable-vulnerabilities
+            saas_git: saas-analytics
+            prj_name: bayesian-preview
+            saas_service_name: openshift-probable-vulnerabilities
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash cico_build_deploy.sh'
+            timeout: '30m'
+        - '{ci_project}-{git_repo}-fabric8-analytics':
+            git_organization: kubesecurity
+            git_repo: openshift-probable-vulnerabilities
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash cico_run_tests.sh'
+            timeout: '30m'
+            registry: 'quay.io'
+            image_name: 'openshiftio/openshift-probable-vulnerabilities'
+        - '{ci_project}-{git_repo}-fabric8-analytics-pylint':
+            git_organization: kubesecurity
+            git_repo: openshift-probable-vulnerabilities
+        - '{ci_project}-{git_repo}-fabric8-analytics-pydoc':
+            git_organization: kubesecurity
+            git_repo: openshift-probable-vulnerabilities

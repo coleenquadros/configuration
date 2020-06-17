@@ -29,7 +29,7 @@ config:
     build_deploy_script_path: "./build_and_deploy.sh"
     saas_git: https://gitlab.cee.redhat.com/service/saas-quay.git
     jobs:
-    - 'gh-build-master-quayio':
+    - 'gh-build-master':
         timeout: 45
         display_name: apostille build master and deploy to stage
 
@@ -48,9 +48,9 @@ config:
     build_deploy_script_path: "./contrib/openshift/build_and_deploy.sh"
     saas_git: https://gitlab.cee.redhat.com/service/saas-quay.git
     jobs:
-    - 'gh-build-master-quayio':
+    - 'gh-build-master':
         timeout: 45
-        branch: development-4.0-app-sre
+        branch: development-4.0
         display_name: clair build master and deploy to stage
 
 - project:
@@ -60,85 +60,14 @@ config:
     gh_org: quay
     gh_repo: quay
     quay_org: app-sre
-    kube_cluster: quayio-stage
-    kube_namespace: quayio-stage
-    saasherder_context: quay
-    saasherder_services: quay
-    pr_check_script_path: "./scripts/app_sre_pr_check_rhel7.sh"
     build_deploy_script_path: "./scripts/app_sre_build_deploy_rhel7.sh"
-    # post_apply_script_path: "./scripts/app_sre_post_deploy_rhel7.sh"
-    saas_git: https://gitlab.cee.redhat.com/service/saas-quay.git
+    post_apply_script_path: "./scripts/app_sre_post_deploy_rhel7.sh"
+    backup_ecr_push_creds_account_region: "quayio-prod/eu-central-1"
     jobs:
-    - 'gh-build-master-quayio':
+    - 'gh-build-master':
         timeout: 45
-        display_name: build master and deploy to stage
-        #  branch: 5b5025-and-github-fix
-
-- project:
-    name: quayio-saas
-    label: quayio
-    node: rhel7
-    gl_group: service
-    gl_project: saas-quay
-    kube_namespace: quay
-    kube_cluster: quayio-prod-us-east-1
-    saasherder_context: quay
-    image_pattern: '^quay\.io/app-sre/(quay|syslog-cloudwatch-bridge|prom-cloudwatch-exporter)'
-    quay_org: app-sre
-    manifest_bouncer_options: '--disable-burstable --enable-requests --enable-limits'
-    jobs:
-    - 'saas-pr-check-quay':
-        display_name: saas pr check quayio-prod-us-east-1
-        saas_env: quayio-prod-us-east-1
-        kube_cluster: quayio-prod-us-east-1
-    - 'saas-pr-check-quay':
-        display_name: saas pr check quayio-prod-us-east-2
-        saas_env: quayio-prod-us-east-2
-        kube_cluster: quayio-prod-us-east-2
-    # - 'saas-deploy':
-    #     display_name: saas deploy quayio-prod-us-east-1
-    #     saas_env: quayio-prod-us-east-1
-    #     kube_cluster: quayio-prod-us-east-1
-    #     dry_run: "no"
-    #     timeout: 45
-    #     saasherder_validate_max_attempts: 100
-    #     slack_channel_notification: '#oncall-quay'
-    #     slack_notify_start: True
-    # - 'saas-deploy-with-upstream':
-    #     display_name: saas deploy quayio-prod-us-east-2
-    #     saas_env: quayio-prod-us-east-2
-    #     kube_cluster: quayio-prod-us-east-2
-    #     upstream: service-saas-quay-quay-saas-deploy
-    #     dry_run: "no"
-    #     timeout: 45
-    #     saasherder_validate_max_attempts: 100
-    #     slack_channel_notification: '#oncall-quay'
-    #     slack_notify_start: True
-    # - 'saas-deploy':
-    #     display_name: saas deploy cloudwatch-exporter us-east-1
-    #     saas_env: quayio-prod-us-east-1
-    #     kube_cluster: quayio-prod-us-east-1
-    #     kube_namespace: cloudwatch-exporter
-    #     saasherder_context: cloudwatch-exporter
-    #     saasherder_services: cloudwatch-exporter
-    #     dry_run: "no"
-    #     timeout: 5
-    #     saasherder_validate_max_attempts: 100
-    #     slack_channel_notification: '#oncall-quay'
-    #     slack_notify_start: True
-    # - 'saas-deploy-with-upstream':
-    #     display_name: saas deploy cloudwatch-exporter us-east-2
-    #     saas_env: quayio-prod-us-east-2
-    #     kube_cluster: quayio-prod-us-east-2
-    #     kube_namespace: cloudwatch-exporter
-    #     saasherder_context: cloudwatch-exporter
-    #     saasherder_services: cloudwatch-exporter
-    #     dry_run: "no"
-    #     timeout: 5
-    #     saasherder_validate_max_attempts: 100
-    #     slack_channel_notification: '#oncall-quay'
-    #     slack_notify_start: True
-    #     upstream: service-saas-quay-cloudwatch-exporter-saas-deploy
+        display_name: build master
+        branch: quayio
 
 - project:
     name: quay-cloudwatch-exporter

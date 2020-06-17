@@ -45,6 +45,16 @@ resourceTemplates:
     CLIENT_ID: cloud-services
     VERSION: latest
     JWKS_URL: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/certs
+    DEFAULT_EXPIRATION: 36h
+    MAXIMUM_EXPIRATION: 168h
+    DEBUG_PORT: 8081
+    # Observed up to 160M BUT saw OOMKilled at limit of 200Mi.
+    # Increasing liberally, at least until we measure better.
+    MEMORY_REQUEST: "500Mi"
+    MEMORY_LIMIT: "1Gi"
+    # Observed CPU up to 0.100 leader with metrics worker (< 0.050 non-leader).
+    CPU_REQUEST: "200m"
+    CPU_LIMIT: "1"
   targets:
   - namespace:
       $ref: /services/uhc/namespaces/uhc-integration.yml
@@ -54,22 +64,18 @@ resourceTemplates:
       GATEWAY_URL: https://api-integration.6943.hive-integration.openshiftapps.com
       ENVIRONMENT: integration
       LOG_LEVEL: info
-      DEFAULT_EXPIRATION: 36h
-      MAXIMUM_EXPIRATION: 168h
-  # - namespace:
-  #     $ref: /services/uhc/namespaces/uhc-stage.yml
-  #   ref: master
-  #   upstream: service-uhc-clusters-service-gl-build-master
-  #   parameters:
-  #     GATEWAY_URL: https://api.stage.openshift.com
-  #     ENVIRONMENT: staging
-  #     LOG_LEVEL: info
-  #     DEFAULT_EXPIRATION: 36h
-  #     MAXIMUM_EXPIRATION: 168h
-  # - namespace:
-  #     $ref: /services/uhc/namespaces/uhc-production.yml
-  #   ref: 457f451b8d1e1333ebbc35d695c57b93c5489200
-  #   parameters:
-  #     GATEWAY_URL: https://api.openshift.com
-  #     ENVIRONMENT: production
-  #     LOG_LEVEL: info
+  - namespace:
+      $ref: /services/uhc/namespaces/uhc-stage.yml
+    ref: master
+    upstream: service-uhc-clusters-service-gl-build-master
+    parameters:
+      GATEWAY_URL: https://api.stage.openshift.com
+      ENVIRONMENT: staging
+      LOG_LEVEL: info
+  - namespace:
+      $ref: /services/uhc/namespaces/uhc-production.yml
+    ref: 49e3d79b0c261806d45d6acb9a7c585ea3489045
+    parameters:
+      GATEWAY_URL: https://api.openshift.com
+      ENVIRONMENT: production
+      LOG_LEVEL: info
