@@ -66,6 +66,7 @@ this repository.
       - [Manage stacks of S3 bucket and CloudFront distribution via App-Interface (`/openshift/namespace-1.yml`)](#manage-stacks-of-s3-bucket-and-cloudfront-distribution-via-app-interface-openshiftnamespace-1yml)
       - [Manage CloudWatch Log Groups via App-Interface (`/openshift/namespace-1.yml`)](#manage-cloudwatch-log-groups-via-app-interface-openshiftnamespace-1yml)
       - [Manage Key Management Service Keys via App-Interface (`/openshift/namespace-1.yml`)](#manage-key-management-service-keys-via-app-interface-openshiftnamespace-1yml)
+      - [Manage VPCs via App-Interface (`/openshift/cluster-1.yml`)](#manage-vpcs-via-app-interface-openshiftcluster-1yml)
     - [Manage Slack User groups via App-Interface](#manage-slack-user-groups-via-app-interface)
     - [Manage Jenkins jobs configurations using jenkins-jobs](#manage-jenkins-jobs-configurations-using-jenkins-jobs)
     - [Delete AWS IAM access keys via App-Interface](#delete-aws-iam-access-keys-via-app-interface)
@@ -1261,6 +1262,54 @@ Once the changes are merged, the Key Management Service key will be created (or 
 
 The Secret will contain the following fields:
 - `key_id` - The globally unique identifier for the key.
+
+#### Manage VPCs via App-Interface (`/openshift/cluster-1.yml`)
+
+VPC peerings can be entirely self-services via App-Interface.
+
+A cluster can be peered to a VPC that is defined in app-interface (we call it an account VPC) or to another OCM cluster account VPC (we call it a cluster VPC)
+
+In order to use this integration, the following must be defined in the cluster definition file, under the `peering` key
+
+- `vpc_id`: the VPC ID of the cluster (can be found by logging in to AWS via the OCM network-mgmt role)
+- `connections`: a list of peering connections that this cluster should have. A peering connection can be either to an `account VPC` or a `cluster VPC`
+  - `provider`: One of `account-vpc`, `cluster-vpc-requester` or `cluster-vpc-accepter`
+  - `name`: A name for the VPC peering connection (ex: `clusterA-cluster-B`)
+  - `vpc` (mutually exclusive with `cluster`): Value as `$ref: /path/to/some/vpc.yaml` (of type `/aws/vpc-1.yml`)
+  - `cluster` (mutually exclusive with `cluster`): Value as `$ref: /path/to/some/cluster.yaml` (of type `/openshift/cluster-1.yml`)
+  
+**Note:** For a cluster-to-cluster VPC peering, both clusters MUST have a corresponding VPC peering definition, one of which defined as `cluster-vpc-requester` and one as `cluster-vpc-accepter`, each referencing the other cluster. This ensures we are very specific about peerings and don't end up creating peering requests that will not lead to an account that won't have a corresponding accepter.
+
+Example:
+
+```yaml
+# hive-stage-01 cluster.yaml
+...
+peering:
+  vpc_id: vpc-01417c044e7124802
+  connections:
+  - provider: account-vpc
+    name: hive-stage-01_app-sre
+    vpc:
+      $ref: /aws/app-sre/vpcs/app-sre-vpc-02-ci-ext.yml
+  - provider: cluster-vpc-requester
+    name: hive-stage-01_app-sre-stage-01
+    cluster:
+      $ref: /openshift/app-sre-stage-01/cluster.yml
+```
+
+```yaml
+# app-sre-stage-01 cluster.yaml
+...
+peering:
+  vpc_id: vpc-0fdea7c2456fdf0b8
+  connections:
+  - provider: cluster-vpc-accepter
+    name: app-sre-stage-01_hive-stage-01
+    cluster:
+      $ref: /openshift/hive-stage-01/cluster.yml
+```
+
 
 
 ### Manage Slack User groups via App-Interface

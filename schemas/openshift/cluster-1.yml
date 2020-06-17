@@ -145,14 +145,63 @@ properties:
         items:
           type: object
           properties:
+            provider:
+              type: string
+              enum:
+              - account-vpc
+              - cluster-vpc-requester
+              - cluster-vpc-accepter
             name:
               type: string
             vpc:
               "$ref": "/common-1.json#/definitions/crossref"
               "$schemaRef": "/aws/vpc-1.yml"
-          required:
-          - name
-          - vpc
+            cluster:
+              "$ref": "/common-1.json#/definitions/crossref"
+              "$schemaRef": "/openshift/cluster-1.yml"
+          oneOf:
+          - properties:
+              provider:
+                type: string
+                enum:
+                - account-vpc
+              name:
+                type: string
+              vpc:
+                "$ref": "/common-1.json#/definitions/crossref"
+                "$schemaRef": "/aws/vpc-1.yml"
+            required:
+            - provider
+            - name
+            - vpc
+          - properties:
+              provider:
+                type: string
+                enum:
+                - cluster-vpc-requester
+              name:
+                type: string
+              cluster:
+                "$ref": "/common-1.json#/definitions/crossref"
+                "$schemaRef": "/openshift/cluster-1.yml"
+            required:
+            - provider
+            - name
+            - cluster
+          - properties:
+              provider:
+                type: string
+                enum:
+                - cluster-vpc-accepter
+              name:
+                type: string
+              cluster:
+                "$ref": "/common-1.json#/definitions/crossref"
+                "$schemaRef": "/openshift/cluster-1.yml"
+            required:
+            - provider
+            - name
+            - cluster
     required:
     - connections
   jumpHost:
