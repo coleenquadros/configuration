@@ -57,19 +57,16 @@ resourceTemplates:
     EBS_ACCOUNT_RECONCILER_CRON_SCHEDULE: "0 * * * *"
     OCP_USAGE_RECONCILER_CRON_SCHEDULE: "0 */2 * * *"
     OCP_USAGE_CLEANER_CRON_SCHEDULE: "0 */5 * * *"
-    OCP_USAGE_RECONCILER_LATEST_CRON_SCHEDULE: "*/15 * * * *"
     USE_CANDLEPIN_BASIC_AUTH: "false"
     OCR_CACHE_DURATION: "1h"
     OCR_TIMEOUT: "5s"
     OCR_BACKGROUND_TIMEOUT: "20s"
     ENABLE_SENTRY: "true"
-    RHIT_TIMEOUT: "10s"
+    RHIT_TIMEOUT: "30s"
     OCP_USAGE_RECONCILER_WORKER_COUNT: "1"
     OCP_USAGE_CLEANER_WORKER_COUNT: "1"
-    OCP_USAGE_RECONCILER_LATEST_WORKER_COUNT: "1"
     OCP_USAGE_RECONCILER_ACTIVE_DEADLINE_SECONDS: "21600"
     OCP_USAGE_CLEANER_ACTIVE_DEADLINE_SECONDS: "30000"
-    OCP_USAGE_RECONCILER_LATEST_ACTIVE_DEADLINE_SECONDS: "3600"
   targets:
   - namespace:
       $ref: /services/uhc/namespaces/uhc-integration.yml
@@ -86,19 +83,20 @@ resourceTemplates:
       SENTRY_URL: "sentry.autom8.in"
       SENTRY_PROJECT: "9"
       GLOG_V: 5
+      ORG_CLUSTER_REG_RATE_LIMIT: 50
       # Deprovision old subs only every friday in INT since it will break test subscriptions for CS when it runs
       DEPROVISION_OLD_SUBSCRIPTIONS_CRON_SCHEDULE: "0 23 * * 5"
       # Update the value to any random string to perform a rolling update of the deployment.
-      UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_1
+      UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_2
       SUBSCRIPTION_BASED_DATA_RECONCILER_CRON_SCHEDULE: "*/30 * * * *"
       SUBSCRIPTION_STATUS_RECONCILER_EVALUATION_DURATION: "24h"
+      SUBSCRIPTION_BASED_DATA_RECONCILER_CLIENT_CARDINALITY: "5"
       # Don't run OCP Usage reconciliation jobs in int, since they just fail anyway without a public rhsm stage endpoint
       # Suspension params should always be env specific
       SUSPEND_ACCOUNT_RECONCILER_CRON: "false"
       SUSPEND_DEPROVISION_OLD_SUBSCRIPTIONS_CRON: "false"
       SUSPEND_OCP_USAGE_RECONCILER_CRON: "true"
       SUSPEND_OCP_USAGE_CLEANER_CRON: "true"
-      SUSPEND_OCP_USAGE_RECONCILER_LATEST_CRON: "true"
       SUSPEND_SUBSCRIPTION_STATUS_RECONCILER_CRON: "false"
       SUSPEND_SUBSCRIPTION_BASED_DATA_RECONCILER_CRON: "false"
       SUSPEND_EBS_ACCOUNT_RECONCILER_CRON: "false"
@@ -132,13 +130,12 @@ resourceTemplates:
       SUSPEND_DEPROVISION_OLD_SUBSCRIPTIONS_CRON: "false"
       SUSPEND_OCP_USAGE_RECONCILER_CRON: "true"
       SUSPEND_OCP_USAGE_CLEANER_CRON: "true"
-      SUSPEND_OCP_USAGE_RECONCILER_LATEST_CRON: "true"
       SUSPEND_SUBSCRIPTION_STATUS_RECONCILER_CRON: "false"
       SUSPEND_SUBSCRIPTION_BASED_DATA_RECONCILER_CRON: "false"
       SUSPEND_EBS_ACCOUNT_RECONCILER_CRON: "false"
   - namespace:
       $ref: /services/uhc/namespaces/uhc-production.yml
-    ref: 89de99a5cebcdfbfe6908d7cd31557ec9194d5af
+    ref: 019dd1528118ad6da985dc79db01dd9310ebe31c
     parameters:
       RHIT_BASE_CANDLEPIN_URL: https://admin.rhsm.redhat.com/candlepin
       OCR_BASE_URL: https://rhprod.ocr-inc.com
@@ -162,7 +159,6 @@ resourceTemplates:
       SUSPEND_DEPROVISION_OLD_SUBSCRIPTIONS_CRON: "false"
       SUSPEND_OCP_USAGE_RECONCILER_CRON: "false"
       SUSPEND_OCP_USAGE_CLEANER_CRON: "false"
-      SUSPEND_OCP_USAGE_RECONCILER_LATEST_CRON: "true"
       SUSPEND_SUBSCRIPTION_STATUS_RECONCILER_CRON: "false"
       SUSPEND_SUBSCRIPTION_BASED_DATA_RECONCILER_CRON: "false"
       SUSPEND_EBS_ACCOUNT_RECONCILER_CRON: "false"
