@@ -92,7 +92,7 @@ The `SLIRecordingRules` section of the performance schema defines these base rec
 * The `haproxy_server_http_responses_total` metric will give us request and errors ratio rates. It is necessary that it is a metric that has HTTP status codes.
 * The `http_request_duration_seconds_bucket` will be used to measure latencies. It is convenient that it supports HTTP status codes as we will have more control over what we measure.
 
-Those two metrics are generic. There's nothing in their names that is specific neither to the `yolo` service nor the `yak-shaver` component. In order to select the values from our service, we will have to specify the appropriate [selectors](https://prometheus.io/docs/prometheus/latest/querying/basics/#time-series-selectors)
+Those two metrics are generic. There's nothing in their names that is specific neither to the `yolo` service nor the `yak-shaver` component. In order to select the values from our service, we will have to specify the appropriate [selectors](https://prometheus.io/docs/prometheus/latest/querying/basics/#time-series-selectors). Note that it is possible to define selectors with the following operators: `=~`, `!=`, `!~`, and of course `=` (as in the example).
 
 Our example defines 4 base SLI recording rules using the above metrics for our two APIs. The generated recording rules only show the `5m` range to keep things short, but we will generate rates for `5m, 30m, 1h, 2h, 6h, 1d` ranges
 
@@ -107,13 +107,13 @@ These are defined using the `http_rate` kind.
   kind: http_rate
   metric: haproxy_server_http_responses_total
   selectors:
-    route: yak-shaver-read
+  - route="yak-shaver-read"
 
 - name: write_http_rates
   kind: http_rate
   metric: haproxy_server_http_responses_total
   selectors:
-    route: yak-shaver-write
+  - route="yak-shaver-write"
 ```
 
 They will generate the following recording rules for the `5m` range:
@@ -173,14 +173,14 @@ These are defined using the `http_rate` kind for the p95 of the latency.
   percentile: 95
   metric: http_request_duration_seconds_bucket
   selectors:
-    job: yak-shaver-read
+  - job="yak-shaver-read"
 
 - name: write_latency_p95
   kind: latency_rate
   percentile: 95
   metric: http_request_duration_seconds_bucket
   selectors:
-    job: yak-shaver-write
+  - job="yak-shaver-write"
 ```
 
 They will generate the following recording rules for the `5m` range:
@@ -408,7 +408,7 @@ Since the `job` and `route` are different for the different rules, we cannot kee
 }
 ```
 
-to differentiate from the other two we created before. If we want to avoid this kind of non-intuitive selectors, we can add custom labels to a generated recording rule via the `additionalLabels` parameter. In our case, we could define something like this
+to differentiate from the other two we created before. If we want to avoid this kind of non-intuitive selectors, we can add custom labels to a generated recording rule via the `additionalLabels` parameter. You can define `additionalLabels` the same way as you define `selectors` (see above). In our case, we could define something like this
 
 ```yaml
 - name: read_availability_slo
@@ -422,8 +422,8 @@ to differentiate from the other two we created before. If we want to avoid this 
     - write_errors_slo
   target: 95
   additionalLabels:
-    route: YAK-SHAVER-ALL
-    job: YAK-SHAVER-ALL
+    - route="YAK-SHAVER-ALL"
+    - job="YAK-SHAVER-ALL"
 ```
 
 that would generate the following rule for the `5m` range
