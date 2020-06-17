@@ -469,6 +469,7 @@ volume:
 
 Although there's no need to create further rules to calculate this SLO as it is doable directly with the base `haproxy_server_http_responses_total` metric, we provide the following recording rules as they may be helpful
 
+```yaml
 - expr: |
     status_class:http_requests_total:rate5m{component='yak-shaver',route='yak-shaver-read',service='yolo'}
     < bool(1000)
@@ -485,6 +486,7 @@ Although there's no need to create further rules to calculate this SLO as it is 
     route: yak-shaver-write
     service: yolo
   record: component:volume:slo_ok_5m
+```
 
 ## Next steps
 
