@@ -97,6 +97,23 @@
 6. Start new jenkins master `systemctl start jenkins`
 7. Make number of executors=0 for master, we don't want any job to be run on master
 
+## Configure git user and email, need for talking to Gitlab
+
+1. Go to "Manage Jenkins" > ""Configure System" and fill "Git plugin" fields
+1.1. user.name is 'App-SRE Team'
+1.2. user.email is 'sd-app-sre@redhat.com'
+
+## Configure slack plugin
+
+1. Go to "Manage Jenkins" > ""Configure System" and fill "Slack" fields
+1.1. Workspace is 'coreos'
+1.2. Default channel is '#sd-app-sre-info'
+1.3. Credentials is 'slack-integration-token'
+
+## Make sure jenkins trasting GitLab's SSL
+
+1. Disable SSL checks if jenkins can't trust GitLab's SSL certificate
+
 ## Make changes to monitoring
 
 1. Make monitoring URLs change in prom alertmanager etc, if changing URL
