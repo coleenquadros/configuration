@@ -8,6 +8,7 @@
     - [UHCAccountManager5xxErrorsHigh](#account-manager-5xx)
     - [UHCAccountManager4xxErrorsHigh](#account-manager-4xx)
     - [UHCAccountManagerBannedUsersHigh](#account-manager-banned-users)
+    - [OCM Account Manager Dependencies](#account-manager-dependencies)
     - [Escalations](#escalations)
 
 <!-- /TOC -->
@@ -180,6 +181,32 @@ The number of banned users has abnormally increased during the last 24 hours.
 ### Steps:
 
 - Contact Service Delivery B team, inform the greater service delivery team.
+
+---
+
+## Account Manager Dependencies
+
+### Summary:
+
+One or more dependency services is experiencing issues or has been downgraded.
+
+### Quay.io
+- Creating a robot user
+- Adding a robot user to a team
+- Removing a robot user from a team
+
+### Access required:
+- Console access to the cluster that runs account-manager (app-sre)
+- Edit access to the uhc namespaces:
+  - uhc-stage
+  - uhc-production
+
+### Relevant secrets:
+- secrets/uhc-acct-mngr
+
+### Steps:
+- Contact SRE team for a service outage.
+- Contact Service Delivery B team otherwise, and inform the greater service delivery team.
 
 ---
 
