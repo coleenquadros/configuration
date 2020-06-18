@@ -1,0 +1,34 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: hive
+description: staging namespace for hive
+
+cluster:
+  $ref: /openshift/hive-stage-01/cluster.yml
+
+app:
+  $ref: /services/hive/app.yml
+
+environment:
+  $ref: /products/osdv4/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/osd-operators/namespaces/v4/openshift-operator-lifecycle-manager.yml
+
+managedRoles: true
+
+openshiftResources:
+- provider: route
+  path: /hive-stage/hive/hive-controllers-metrics.route.yaml
+- provider: vault-secret
+  path: osd-sre/hive-stage/hive-external-dns/external-dns-route53-admin
+  version: 1
+- provider: vault-secret
+  path: osd-sre/hive-stage/hive-lets-encrypt-ca/letsencrypt-ca
+  version: 3
+- provider: vault-secret
+  path: osd-sre/hive-stage/hive-external-dns/google-cloud-dns-creds
+  version: 2
