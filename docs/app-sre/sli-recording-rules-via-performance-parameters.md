@@ -161,7 +161,7 @@ They will generate the following recording rules for the `5m` range:
   record: status_class_5xx:http_requests_total:ratio_rate5m
 ```
 
-We can see that the `selectors` set in the `SLIRecordingRules` definitions are used in the queries that build the recording rules. This is needed as `haproxy_server_http_responses_total` is a metric name that will be used across many service/components in our Prometheus server.
+We can see that the `selectors` set in the `SLIRecordingRules` definitions are used in the queries that build the recording rules. This is needed as `haproxy_server_http_responses_total` is a metric name that will be used across many service/components in our Prometheus server. You will also see how the `=` selectors get turned into `labels`, but not the rest.
 
 ### Latency rates
 
