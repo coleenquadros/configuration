@@ -2,9 +2,12 @@
 
 import logging
 import os
+import re
 import sys
 
 from binaryornot.check import is_binary
+
+IGNORE_PATTERN = re.compile(r'^hack/new_osd_operator/.*\.tpl$')
 
 logging.basicConfig(format='%(levelname)s: %(message)s')
 
@@ -14,6 +17,10 @@ for file_name in sys.stdin:
 
     if is_binary(file_name):
         logging.info([file_name, "skipping binary file"])
+        continue
+
+    if re.search(IGNORE_PATTERN, file_name):
+        logging.info([file_name, "skipping file matching IGNORE_PATTERN"])
         continue
 
     with open(file_name, 'rb') as f:

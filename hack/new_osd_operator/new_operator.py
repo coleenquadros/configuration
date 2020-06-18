@@ -4,8 +4,14 @@ import argparse
 import os
 import sys
 
-import oyaml as yaml
+from ruamel.yaml import YAML
 
+
+yaml = YAML()
+# Keep (redundant) quotes around keys and non-special values
+yaml.preserve_quotes = True
+# `---` at top of files (though all are single documents at the moment)
+yaml.explicit_start = True
 
 TPL_DIR = os.path.join("hack", "new_osd_operator")
 SVC_DIR = os.path.join("data", "services", "osd-operators")
@@ -31,50 +37,68 @@ def load_tpl(fpath, subs):
     try:
         with open(fpath) as f:
             content = f.read()
-        return content.format(**subs)
+        if subs:
+            return content.format(**subs)
+        # This is a little weird: it accounts for loading non-template YAMLs containing empty dicts
+        return content.format("{}")
     except Exception as e:
         err(
             "Failed to load and populate template "
             + fpath
             + " with subs "
-            + subs
+            + str(subs)
             + "\n"
             + e
         )
 
 
-def load_yml_tpl(fpath, subs):
+def load_yml(fpath, subs=None):
     """Loads and interpolates a template file containing {format} placeholders,
     interprets it as YAML, and returns the resulting dict.
     """
     try:
-        return yaml.safe_load(load_tpl(fpath, subs))
+        return yaml.load(load_tpl(fpath, subs))
     except Exception as e:
         err(
             "Failed to load and populate yaml template "
             + fpath
             + " with subs "
-            + subs
+            + str(subs)
             + "\n"
             + e
         )
 
 
-def load_yml(fpath):
-    """Loads and parses a YAML file and returns the resulting dict."""
-    try:
-        with open(fpath) as f:
-            return yaml.safe_load(f)
-    except Exception as e:
-        err("Failed to load yaml from %s: %s" % (fpath, e))
-
-
-def dump_yml(fpath, yml):
+def dump_yml(fpath, yml, **yaml_attrs):
     """Writes a dict as YAML to a file. The file is created or
     replaced.
+
+    :param fpath: String path to the file to write.
+    :param yml: YAML document object.
+    :param yaml_attrs: Optional attributes to set on the emitter.
+            The original values are restored after dumping.
     """
+    # Save the original values
+    orig_attrs = {}
+    for k, v in yaml_attrs.items():
+        orig_attrs[k] = getattr(yaml, k)
+        setattr(yaml, k, v)
+
     with open(fpath, "w+") as f:
-        f.write(yaml.dump(yml, default_flow_style=False))
+        yaml.dump(yml, f)
+
+    # Restore the original values
+    for k, v in orig_attrs.items():
+        setattr(yaml, k, v)
+
+
+def seq_inject(seq, items):
+    """Inject new items into a sequence (list)."""
+    # NOTE(efried): We're prepending here because comments and extra newlines
+    # stick with the *preceding* line with ruamel.yaml, so appending would put
+    # the item after the comment/newline, which is ugly.
+    for item in items[::-1]:
+        seq.insert(0, item)
 
 
 def inject_from_yml_tpl(chunkname, items, operator_name):
@@ -93,10 +117,11 @@ def inject_from_yml_tpl(chunkname, items, operator_name):
             return
 
     print("Adding " + chunkname + " entry for " + operator_name)
-    new_items = load_yml_tpl(
-        os.path.join(TPL_DIR, chunkname + ".yml.tpl"), {"operator_name": operator_name}
+    new_items = load_yml(
+        os.path.join(TPL_DIR, chunkname + ".yml.tpl"),
+        subs={"operator_name": operator_name},
     )
-    items.extend(new_items)
+    seq_inject(items, new_items)
 
 
 def update_app_yml(operator_name):
@@ -125,7 +150,7 @@ def update_gitlab_yml(operator_name):
         return
 
     print("Adding gitlab project " + bundle + " to projectRequests.")
-    projects.append(bundle)
+    seq_inject(projects, [bundle])
 
     dump_yml(fpath, yml)
 
@@ -144,10 +169,11 @@ def update_jobs_yaml(operator_name):
             return
 
     print("Adding pr-check entry for " + operator_name)
-    new_job = load_yml_tpl(
-        os.path.join(TPL_DIR, "pr-check-job.yml.tpl"), {"operator_name": operator_name}
+    new_jobs = load_yml(
+        os.path.join(TPL_DIR, "pr-check-job.yml.tpl"),
+        subs={"operator_name": operator_name},
     )
-    jobs.extend(new_job)
+    seq_inject(jobs, new_jobs)
 
     dump_yml(fpath, yml)
 
@@ -166,11 +192,11 @@ def update_saas_approver_yml(operator_name):
             return
 
     print("Adding SAAS file entry for " + operator_name)
-    new_entry = load_yml_tpl(
+    refs = load_yml(
         os.path.join(TPL_DIR, "owned-saas-file.yml.tpl"),
-        {"operator_name": operator_name},
+        subs={"operator_name": operator_name},
     )
-    saas_files.extend(new_entry)
+    seq_inject(saas_files, refs)
 
     dump_yml(fpath, yml)
 
@@ -191,11 +217,11 @@ def update_slack_roles_yml(operator_name):
             return
 
     print("Adding slack permissions entry for " + operator_name)
-    new_entry = load_yml_tpl(
+    refs = load_yml(
         os.path.join(TPL_DIR, "slack-perm-role.yml.tpl"),
-        {"operator_name": operator_name},
+        subs={"operator_name": operator_name},
     )
-    perms.extend(new_entry)
+    seq_inject(perms, refs)
 
     dump_yml(fpath, yml)
 
@@ -215,7 +241,7 @@ def update_slack_user_groups_yml(operator_name):
         return
 
     print("Adding slack user group for " + operator_name)
-    groups.append(operator_name)
+    seq_inject(groups, [operator_name])
 
     dump_yml(fpath, yml)
 

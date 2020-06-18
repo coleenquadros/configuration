@@ -4,4 +4,3 @@
 - name: saas-{operator_name}-bundle
   resource: bundle
   url: https://gitlab.cee.redhat.com/service/saas-{operator_name}-bundle
-
