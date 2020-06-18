@@ -471,7 +471,7 @@ The IT Platform team runs components like:
 - `sso.redhat.com`
   - C1 SLA (see resources below)
   - Quick link to [blackbox poll Prometheus data](https://prometheus.app-sre-prod-01.devshift.net/graph?g0.range_input=2h&g0.stacked=1&g0.expr=probe_success%7Binstance%3D~%22.*sso.redhat.com.*%22%7D&g0.tab=0) for sso.redhat.com 
-  - In order to escalate a production incident this email can be used: `it-platform-page@redhat.com`.
+  - In order to escalate a production incident this email can be used: `it-es-platform-page@redhat.com`.
   - To get ahold of a person directly to follow up on an escalation or incident connect to the [IT/ISO Google chat](https://chat.google.com/room/AAAAiUsrxXk)
   - Resources: [Applications and Systems Criticality Classification](https://mojo.redhat.com/docs/DOC-1171238) and [Business Resilience Glossary](https://mojo.redhat.com/docs/DOC-1136493).
 
