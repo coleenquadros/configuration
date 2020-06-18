@@ -1636,7 +1636,11 @@ repositories:
 - `gitlabHousekeeping`:  Value `enabled: true` will enable the
   `gitlab-housekeeping` integration, that auto-merges Merge Requests that are
   labelled as such. It also rebases the Merge Requests that are not rebased
-  (you can disable the rebase feature with `rebase: false`).
+  (you can disable the rebase feature with `rebase: false`). Additional supported
+  fields:
+    - `limit` - limit number of merges/rebases to avoid load (default: 1)
+    - `days_interval` - number of days to consider an item as stale (default: 15)
+    - `enable_closing` - enable closing of stale items after two stale periods (default: disabled)
 - `jira`: Value as `$ref: /path/to/jira-server.yaml` will enable the
   Gitlab/JIRA integration, that links Merge Requests mentioning JIRA tickets
   to the mentioned JIRA ticket.
