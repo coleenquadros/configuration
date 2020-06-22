@@ -195,6 +195,14 @@ One or more dependency services is experiencing issues or has been downgraded.
 - Adding a robot user to a team
 - Removing a robot user from a team
 
+### RHIT
+- Creating Service Accounts
+- Retrieving a Service Account
+- Removing a Service Account
+- Creating Auto Entitlements
+- Find OCP Subscriptions of an Account
+- Retrieving User's Information
+
 ### Access required:
 - Console access to the cluster that runs account-manager (app-sre)
 - Edit access to the uhc namespaces:

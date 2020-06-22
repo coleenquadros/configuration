@@ -99,3 +99,15 @@ spec:
       labels:
         service: uhc-acct-mngr
         severity: medium
+    - alert: OCM dependencies - RHIT too many errors - stage
+      annotations:
+        message: "AMS is seeing a high rate of errors from RHIT for {{ $value | humanize }}% of requests."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
+      expr: |
+        sum(rate(api_outbound_request_count{namespace="uhc-stage",service="uhc-acct-mngr-metrics",apiservice="rhit",code!~"2.."}[5m]))
+        /
+        sum(rate(api_outbound_request_count{namespace="uhc-stage",service="uhc-acct-mngr-metrics",apiservice="rhit"}[5m])) * 100 > 5
+      for: 10m
+      labels:
+        service: uhc-acct-mngr
+        severity: medium
