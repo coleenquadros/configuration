@@ -1,0 +1,52 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: cincinnati
+
+name: saas-cincinnati
+description: SaaS tracking file for Cincinnati
+
+app:
+  $ref: /services/cincinnati/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-cincinnati-info
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+- PodDisruptionBudget
+- ConfigMap
+
+imagePatterns:
+- quay.io/app-sre/cincinnati
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+resourceTemplates:
+- name: cincinnati
+  url: https://github.com/openshift/cincinnati
+  path: /dist/openshift/cincinnati.yaml
+  targets:
+  - namespace:
+      $ref: /services/cincinnati/namespaces/cincinnati-stage.yml
+    ref: master
+    upstream: openshift-cincinnati-gh-build-master
+    parameters:
+      GB_LOG_VERBOSITY: "vvv"
+      PE_LOG_VERBOSITY: "vv"
+  # - namespace:
+  #     $ref: /services/cincinnati/namespaces/cincinnati-production.yml
+  #   ref: 924fe15fd97425ab96825a0aa6b2ac912f7f54a1
+  #   parameters:
+  #     GB_LOG_VERBOSITY: "vv"
+  #     PE_LOG_VERBOSITY: "v"
