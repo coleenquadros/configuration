@@ -25,32 +25,40 @@ spec:
       expr: |
         count(kafka_server_replicamanager_leadercount)  < on (strimzi_io_cluster) MQ_MIN_LEADER_COUNT
       labels:
-        alert_team: insights_sre_alerts
         severity: info
         service: insights
+        env: stage
       annotations:
-        message: '{{ $labels.strimzi_io_cluster }} Broker Down'
-        runbook: "https://gitlab.cee.redhat.com/service"
+        dashboard: "https://LINK_TO_GRAFANA_DASHBOARD"
+        link_url: "https://LINK_TO_DEPLOYMENTS"
+        message: "{{ $labels.strimzi_io_cluster }} Broker Down"
+        runbook: "https://LINK_TO_RUNBOOK_IN_APP_INTERFACE"
+
     - alert: StageMQAllBrokersDown
       expr: |
         count(kafka_server_replicamanager_leadercount{strimzi_io_cluster=~'platform-mq-stage'}) == 0
       labels:
-        alert_team: insights_sre_alerts
         severity: info
         service: insights
+        env: stage
       annotations:
-        message: 'All Stage MQ Brokers Down'
-        runbook: "https://gitlab.cee.redhat.com/service"
+        dashboard: "https://LINK_TO_GRAFANA_DASHBOARD"
+        link_url: "https://LINK_TO_DEPLOYMENTS"
+        message: "All Stage MQ Brokers Down"
+        runbook: "https://LINK_TO_RUNBOOK_IN_APP_INTERFACE"
+
     - alert: DevMQAllBrokersDown
       expr: |
         count(kafka_server_replicamanager_leadercount{strimzi_io_cluster!~'platform-mq-stage'}) == 0
       labels:
-        alert_team: insights_sre_alerts
         severity: info
         service: insights
+        env: stage
       annotations:
-        message: 'All {{ $labels.strimzi_io_cluster }} Brokers Down'
-        runbook: "https://gitlab.cee.redhat.com/service"
+        dashboard: "https://LINK_TO_GRAFANA_DASHBOARD"
+        link_url: "https://LINK_TO_DEPLOYMENTS"
+        message: "All {{ $labels.strimzi_io_cluster }} Brokers Down"
+        runbook: "https://LINK_TO_RUNBOOK_IN_APP_INTERFACE"
 
     # MQ_MIN_VOLUME_AVAILABLE: Minimum amount of free space on Kafka topic before triggering alert
     #    for a given (namespace, persistentvolumeclaim) pair
@@ -81,10 +89,11 @@ spec:
       expr: |
         kubelet_volume_stats_available_bytes < on (namespace, persistentvolumeclaim) MQ_MIN_VOLUME_AVAILABLE
       labels:
-        alert_team: insights_sre_alerts
         severity: info
         service: insights
         env: stage
       annotations:
-        message: 'MQ Volume Storage Low {{ $labels.persistentvolumeclaim }} in {{ $labels.namespace }}'
-        runbook: "https://gitlab.cee.redhat.com/service"
+        dashboard: "https://LINK_TO_GRAFANA_DASHBOARD"
+        link_url: "https://LINK_TO_DEPLOYMENTS"
+        message: "MQ Volume Storage Low {{ $labels.persistentvolumeclaim }} in {{ $labels.namespace }}"
+        runbook: "https://LINK_TO_RUNBOOK_IN_APP_INTERFACE"

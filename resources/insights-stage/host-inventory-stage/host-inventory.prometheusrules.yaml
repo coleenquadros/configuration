@@ -18,20 +18,23 @@ spec:
       expr: sum(delta(kafka_consumer_group_lag{group="inventory-mq",topic=~"platform.inventory.host-ingress.*",kubernetes_namespace="platform-mq-stage"}[5m])) by (group,topic) > 0
       for: 60m
       labels:
-        alert_team: insights_sre_alerts
         severity: info
         service: insights
         env: stage
       annotations:
-        description: 'HBI not processing messages in topic {{ $labels.topic }}'
-        summary: 'HBI MQ Lag Too High'
+        dashboard: "https://LINK_TO_GRAFANA_DASHBOARD"
+        link_url: "https://LINK_TO_DEPLOYMENTS"
+        message: "HBI MQ Lag Too High.  HBI not processing messages in topic {{ $labels.topic }}"
+        runbook: "https://LINK_TO_RUNBOOK_IN_APP_INTERFACE"
+
     - alert: HBIFreeSpaceLow
       expr: rdsosmetrics_fileSys_usedPercent{instance="host-inventory-*",job="rds-enhanced",mount_point="/rdsdbdata"} > 80
       labels:
-        alert_team: platform-inventory
         severity: info
         service: insights
         env: stage
       annotations:
-        message: '{{ $labels.namespace }} HBI RDS database free storage is less than 20% :rain_cloud:'
-        description: 'Estimated number of hours until storage is full: {{ query "node_filesystem_free{instance=\"host-inventory-$labels.namespace\",job=\"rds-enhanced\",mountpoint=\"/rdsdbdata\"} / delta(node_filesystem_free{instance=\"host-inventory-$labels.namespace\",job=\"rds-enhanced\",mountpoint=\"/rdsdbdata\"}[24h]) * 24 hours" }}'
+        dashboard: "https://LINK_TO_GRAFANA_DASHBOARD"
+        link_url: "https://LINK_TO_DEPLOYMENTS"
+        message: "{{ $labels.namespace }} HBI RDS database free storage is less than 20% :rain_cloud:  Estimated number of hours until storage is full: {{ query \"node_filesystem_free{instance=\"host-inventory-$labels.namespace\",job=\"rds-enhanced\",mountpoint=\"/rdsdbdata\"} / delta(node_filesystem_free{instance=\"host-inventory-$labels.namespace\",job=\"rds-enhanced\",mountpoint=\"/rdsdbdata\"}[24h]) * 24 hours\" }}"
+        runbook: "https://LINK_TO_RUNBOOK_IN_APP_INTERFACE"

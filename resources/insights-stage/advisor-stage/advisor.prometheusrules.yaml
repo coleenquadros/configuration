@@ -16,49 +16,57 @@ spec:
           (sum(increase(http_request_duration_seconds_count{app="insights-api", status_code="500"}[1m])) / sum(increase(http_request_duration_seconds_count{app="insights-api"}[1m]))) > .05
         for: 5m
         labels:
-          alert_team: advisor
           severity: info
           service: insights
           env: stage
         annotations:
+          dashboard: "https://LINK_TO_GRAFANA_DASHBOARD"
+          link_url: "https://LINK_TO_DEPLOYMENTS"
           message: "Insights Classic API Alert.  Insights Classic API Percentage of 500 responses exceeds 5% of all requests for 5 minutes"
-          runbook: "https://gitlab.cee.redhat.com/service"
+          runbook: "https://LINK_TO_RUNBOOK_IN_APP_INTERFACE"
+
       - alert: ClassicApiLatencySliSoft
         expr: |
           (sum(rate(http_request_duration_seconds_sum{app="insights-api",status_code="200|201"}[1m]) / rate(http_request_duration_seconds_count{app="insights-api", status_code="200|201"}[1m]))) > 120
         for: 5m
         labels:
-          alert_team: advisor
           severity: info
           service: insights
           env: stage
         annotations:
+          dashboard: "https://LINK_TO_GRAFANA_DASHBOARD"
+          link_url: "https://LINK_TO_DEPLOYMENTS"
           message: "Insights Classic API Alert.  Insights Classic API 200s and 201s exceeding 2 minutes for 5 minutes"
-          runbook: "https://gitlab.cee.redhat.com/service"
+          runbook: "https://LINK_TO_RUNBOOK_IN_APP_INTERFACE"
+
       - alert: ClassicApiLatencySliHard
         expr: |
           (sum(rate(http_request_duration_seconds_sum{app="insights-api",status_code="200|201"}[1m]) / rate(http_request_duration_seconds_count{app="insights-api", status_code="200|201"}[1m]))) > 240
         for: 5m
         labels:
-          alert_team: advisor
           severity: info
           service: insights
           env: stage
         annotations:
+          dashboard: "https://LINK_TO_GRAFANA_DASHBOARD"
+          link_url: "https://LINK_TO_DEPLOYMENTS"
           message: "Insights Classic API Alert.  Insights Classic API 200s and 201s exceeding 4 minutes for 5 minutes"
-          runbook: "https://gitlab.cee.redhat.com/service"
+          runbook: "https://LINK_TO_RUNBOOK_IN_APP_INTERFACE"
+
       - alert: PlatformKafkaLagMaxExceededSoft
         expr: |
           sum(kafka_consumer_group_lag{topic="platform.inventory.host-ingress-p1", group="inventory-mq"}) by (group) > 2000 or sum(kafka_consumer_group_lag{topic="platform.upload.advisor", group="insights-puptoo"}) by (group) > 2000 or sum(kafka_consumer_group_lag{topic="platform.inventory.host-egress", group="insights-core-kafka"}) by (group) > 4000 or sum(kafka_consumer_group_lag{topic="platform.engine.results", group="advisor_results"}) by (group) > 2000
         for: 15m
         labels:
-          alert_team: insights_sre_alerts
           severity: info
           service: insights
           env: stage
         annotations:
+          dashboard: "https://LINK_TO_GRAFANA_DASHBOARD"
+          link_url: "https://LINK_TO_DEPLOYMENTS"
           message: "Platform Kafka Topic Alert.  Any platform ingress topic exceeding 2000 messages in lag for fifteen minutes"
-          runbook: "https://gitlab.cee.redhat.com/service"
+          runbook: "https://LINK_TO_RUNBOOK_IN_APP_INTERFACE"
+
       - alert: PlatformKafkaLagMaxExceededHard
         expr: |
           sum(kafka_consumer_group_lag{topic="platform.inventory.host-ingress-p1", group="inventory-mq"}) by (group) > 4000 or sum(kafka_consumer_group_lag{topic="platform.upload.advisor", group="insights-puptoo"}) by (group) > 4000 or sum(kafka_consumer_group_lag{topic="platform.inventory.host-egress", group="insights-core-kafka"}) by (group) > 15000 or sum(kafka_consumer_group_lag{topic="platform.engine.results", group="advisor_results"}) by (group) > 4000
@@ -68,98 +76,116 @@ spec:
           service: insights
           env: stage
         annotations:
+          dashboard: "https://LINK_TO_GRAFANA_DASHBOARD"
+          link_url: "https://LINK_TO_DEPLOYMENTS"
           message: "Platform Kafka Topic Alert.  Any platform ingress topic exceeding 4000 messages in lag for fifteen minutes"
-          runbook: "https://gitlab.cee.redhat.com/service"
+          runbook: "https://LINK_TO_RUNBOOK_IN_APP_INTERFACE"
+
       - alert: AdvisorWeeklyEmailsFailed
         expr: |
           advisor_weekly_report_emails_status == 0
         labels:
-          alert_team: advisor
           severity: info
           service: insights
           env: stage
         annotations:
+          dashboard: "https://LINK_TO_GRAFANA_DASHBOARD"
+          link_url: "https://LINK_TO_DEPLOYMENTS"
           message: "'*Cause:* {{ $labels.status_message }}'.  Sending weekly report emails failed :dumpsterfire:"
-          runbook: "https://gitlab.cee.redhat.com/service"
+          runbook: "https://LINK_TO_RUNBOOK_IN_APP_INTERFACE"
+
       - alert: AdvisorVsClassicActiveRulesCountMismatch
         expr: |
           insights_advisor_active_rules_count != insights_classic_active_rules_count
         for: 2d
         labels:
-          alert_team: advisor
           severity: info
           service: insights
           env: stage
         annotations:
+          dashboard: "https://LINK_TO_GRAFANA_DASHBOARD"
+          link_url: "https://LINK_TO_DEPLOYMENTS"
           message: "Advisor and Classic active rule counts are different :count:  Advisor active rules: *{{ printf \"insights_advisor_active_rules_count\" | query | first | value }}* vs Classic active rules: *{{ printf \"insights_classic_active_rules_count\" | query | first | value }}*\nView the logs for the latest *compare-active-rules* pod in advisor-stage for more details."
-          runbook: "https://gitlab.cee.redhat.com/service"
+          runbook: "https://LINK_TO_RUNBOOK_IN_APP_INTERFACE"
+
       - alert: DemoStaleSystems
         expr: |
           stale_demo_systems == 1
         labels:
-          alert_team: rules-team
           severity: info
           service: insights
           env: stage
         annotations:
+          dashboard: "https://LINK_TO_GRAFANA_DASHBOARD"
+          link_url: "https://LINK_TO_DEPLOYMENTS"
           message: "Insights Demo Systems Stale Alert.  Insights Demo Systems are stale. Please update"
-          runbook: "https://gitlab.cee.redhat.com/service"
+          runbook: "https://LINK_TO_RUNBOOK_IN_APP_INTERFACE"
+
       - alert: CertTest
         expr: |
           api_cert_test == 1
         labels:
-          alert_team: engineering
           severity: info
           service: insights
           env: stage
         annotations:
+          dashboard: "https://LINK_TO_GRAFANA_DASHBOARD"
+          link_url: "https://LINK_TO_DEPLOYMENTS"
           message: "Insights Cert Test Failed!.  Insights Cert Test Failed! Check certificate auth"
-          runbook: "https://gitlab.cee.redhat.com/service"
+          runbook: "https://LINK_TO_RUNBOOK_IN_APP_INTERFACE"
+
       - alert: EngineUnackQueueLarge
         expr: |
           rabbitmq_queue_messages_unacknowledged{queue='engine_work'} >= 1000
         for: 10m
         labels:
-          alert_team: engineering
           severity: info
           service: insights
           env: stage
         annotations:
+          dashboard: "https://LINK_TO_GRAFANA_DASHBOARD"
+          link_url: "https://LINK_TO_DEPLOYMENTS"
           message: "RabbitMQ Engine Message Queue Alert.  RMQ unacknowledged engine_work messages over 1000"
-          runbook: "https://gitlab.cee.redhat.com/service"
+          runbook: "https://LINK_TO_RUNBOOK_IN_APP_INTERFACE"
+
       - alert: MessageQueueDown
         expr: |
           message_queue{instance="platform-monitor.platform-ci.svc.cluster.local:8000",job="platform_stack"} == 1
         for: 2m
         labels:
-          alert_team: engineering
           severity: info
           service: insights
           env: stage
         annotations:
+          dashboard: "https://LINK_TO_GRAFANA_DASHBOARD"
+          link_url: "https://LINK_TO_DEPLOYMENTS"
           message: "Platform Message Queue Alert.  Platform MQ is DOWN"
-          runbook: "https://gitlab.cee.redhat.com/service"
+          runbook: "https://LINK_TO_RUNBOOK_IN_APP_INTERFACE"
+
       - alert: UploadServiceDown
         expr: |
           upload_service{instance="platform-monitor.platform-ci.svc.cluster.local:8000",job="platform_stack"} == 1
         for: 2m
         labels:
-          alert_team: engineering
           severity: info
           service: insights
           env: stage
         annotations:
+          dashboard: "https://LINK_TO_GRAFANA_DASHBOARD"
+          link_url: "https://LINK_TO_DEPLOYMENTS"
           message: "Insights Upload Service Alert.  Insights Upload Service is DOWN"
-          runbook: "https://gitlab.cee.redhat.com/service"
+          runbook: "https://LINK_TO_RUNBOOK_IN_APP_INTERFACE"
+
       - alert: EngineQueueLarge
         expr: |
           rabbitmq_queue_messages{queue='engine_work'} > 1000
         for: 10m
         labels:
-          alert_team: engineering
           severity: info
           service: insights
           env: stage
         annotations:
+          dashboard: "https://LINK_TO_GRAFANA_DASHBOARD"
+          link_url: "https://LINK_TO_DEPLOYMENTS"
           message: "RabbitMQ Engine Message Queue Alert.  RMQ Engine_Work queue messages over 1000"
-          runbook: "https://gitlab.cee.redhat.com/service"
+          runbook: "https://LINK_TO_RUNBOOK_IN_APP_INTERFACE"
