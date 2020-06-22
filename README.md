@@ -202,7 +202,8 @@ The request itself is a file with the following structure:
 * `user` - a reference to a user file who this request is for. user file must contain a public gpg key. [instructions](#adding-your-public-gpg-key)
 * `credentials` - the credentials which you are requesting
   * current options:
-    - app-interface-production-basic-auth
+    - app-interface-production-dev-access
+    - app-interface-production-cicd-access
 
 Complete example:
 
@@ -220,7 +221,7 @@ description: |
 user:
   $ref: /teams/path/to/user/file.yml
 
-credentials: app-interface-production-basic-auth
+credentials: app-interface-production-dev-access
 
 ```
 
