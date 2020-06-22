@@ -25,20 +25,20 @@ spec:
     - alert: QontractReconcileError
       labels:
         severity: high
-      expr: sum(increase(qontract_reconcile_run_status_total{status!~"0|3|-9"}[5m])) > 0
+      expr: sum(increase(qontract_reconcile_run_status_total{status!~"0|3|-9"}[5m])) by (integration, shards, shard_id, status) > 0
       for: 5m
       annotations:
         runbook: ""
-        dashboard: "https://prometheus.app-sre-prod-01.devshift.net/graph?g0.range_input=2d&g0.expr=increase(qontract_reconcile_run_status_total%7Bstatus!~%220%7C3%7C-9%22%7D%5B5m%5D)&g0.tab=1"
-        message: ""
+        dashboard: "https://grafana.devshift.net/d/Integrations/integrations"
+        message: "Integration: {{ $labels.integration }} has failed with exit code {{ $labels.status }}"
         link_url: ""
     - alert: QontractReconcileOomKiller
       labels:
         severity: high
-      expr: sum(increase(qontract_reconcile_run_status_total{status="-9"}[5m])) > 0
+      expr: sum(increase(qontract_reconcile_run_status_total{status="-9"}[5m])) by (integration, shards, shard_id, status) > 0
       for: 5m
       annotations:
         runbook: ""
-        dashboard: "https://prometheus.app-sre-prod-01.devshift.net/graph?g0.range_input=2d&g0.expr=increase(qontract_reconcile_run_status_total%7Bstatus%3D%22-9%22%7D%5B5m%5D)&g0.tab=1"
-        message: ""
+        dashboard: "https://grafana.devshift.net/d/Integrations/integrations"
+        message: "Integration: {{ $labels.integration }} has been OOM-Killed"
         link_url: ""
