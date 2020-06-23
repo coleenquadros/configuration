@@ -4,4 +4,11 @@ If you're getting paged for this, chances are that the service is already down o
 
 - Check the connection count on the AWS console, monitoring tab: https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=quayenc-2019-quayvpc;is-cluster=false;tab=monitoring. Take a screenshot of this graph.
 - Get a diagnostic dump of the RDS instance using the SOP: [quay-db-diagnostics.md](/docs/quay/sop/quay-db-diagnostics.md)
-- Once you have captured the diagnostic information, follow the database restart SOP: [database-reboot.md](/docs/quay/sop/database-reboot.md)
+- Once you have captured follow this process
+  - Scale the service to 0 replicas: `oc scale deployment/quay-app --replicas=0`
+  - Wait until connections are back to 0 in the RDS console: https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=quayenc-2019-quayvpc;is-cluster=false;tab=monitoring
+  - Scale the service to 15 replicas: `oc scale deployment/quay-app --replicas=15`
+  - The connections will spike, but we need to wait until the stabilize again.
+  - Scale the service to 30 replicas: `oc scale deployment/quay-app --replicas=30`
+
+Note: consider 30 to be a placeholder, the right amount of replicas may be different.
