@@ -34,6 +34,8 @@ In cases where that analysis is "this alert is too sensitive; this is nothing we
 Production reverts can be applied via [saas-cincinnati][], in cases where the issue is due to a production bump having pushed out broken code.
 Reverting [the most-recently merged bump][saas-cincinnati-bump] will move production back to the code it was running before.
 
+The production deployment used to reside in [saas-cincinnati-repo][]
+
 ---
 
 ## GBUpstreamScrapesHalted
@@ -171,5 +173,6 @@ Slack alerts: `#team-cincinnati-alert`
 Team email: aos-team-ota@redhat.com
 
 [cincinnati-graph-data]: https://github.com/openshift/cincinnati-graph-data/
-[saas-cincinnati]: https://gitlab.cee.redhat.com/service/saas-cincinnati
-[saas-cincinnati-bump]: https://gitlab.cee.redhat.com/service/saas-cincinnati/commits/master/cincinnati-services/cincinnati.yaml
+[saas-cincinnati]: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/cincinnati/cicd/ci-int/saas.yaml
+[saas-cincinnati-bump]: https://gitlab.cee.redhat.com/service/app-interface/-/commits/master/data/services/cincinnati/cicd/ci-int/saas.yaml
+[saas-cincinnati-repo]: https://gitlab.cee.redhat.com/service/saas-cincinnati
