@@ -101,6 +101,7 @@ Additional supported commands:
 - `/lgtm cancel` - cancel previous LGTM comment
 - `/hold` - prevents merging, does not cancel previous LGTM (`approved` label will be removed)
 - `/hold cancel` - cancels previous HOLD and follows existing LGTM comments.
+- `/retest` - run tests again.
 
 MR is not being merged? [follow this SOP](/docs/app-sre/sop/app-interface-periodic-job-debug.md)
 
