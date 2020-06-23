@@ -26,3 +26,5 @@ This includes:
 - openshift-saas-deploy jobs
 - saasherder saas-pr-check jobs
 - saasherder saas-deploy jobs
+
+In addition, disable the quay integrations in Unleash.
