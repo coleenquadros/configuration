@@ -1231,6 +1231,8 @@ In order to add or update an CloudWatch Log Group, you need to add them to the `
 - `account`: must be one of the AWS account names we manage. [Current options](/schemas/openshift/namespace-1.yml#L502)
 - `identifier` - name of resource to create (or update)
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options:](/resources/terraform/resources/)
+- `es_identifier`: identifier of a existing elasticsearch. It will create a AWS lambda to stream logs to elasticsearch service. This field is optional.
+- `filter_pattern`: filter pattern for log data. Only works with streaming logs to elasticsearch.
 - `output_resource_name`: name of Kubernetes Secret to be created.
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
