@@ -1,0 +1,105 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: openshift-customer-monitoring
+description: App-SRE OpenShift Application monitoring
+
+cluster:
+  $ref: /openshift/quays02ue1/cluster.yml
+
+app:
+  $ref: /services/quayio/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/stage.yml
+
+managedResourceNames:
+# https://github.com/openshift/managed-cluster-config/blob/master/deploy/osd-customer-monitoring/05-role.yaml#L24-L37
+- resource: Secret
+  resourceNames:
+    - alertmanager-auth-proxy
+    - alertmanager-instance
+    - alertmanager-main
+    - alertmanager-main-proxy
+    - prometheus-additional-alertmanager-config
+    - prometheus-additional-scrape-config
+    - prometheus-auth-proxy
+
+managedResourceTypes:
+- ServiceMonitor
+- Secret
+- PrometheusRule
+- Prometheus
+- Service
+- Subscription
+
+openshiftResources:
+# Prometheus Subscription
+- provider: resource
+  path: /observability/prometheus/v4/prometheus.subscription.yaml
+# Secrets
+## Observability
+### Prometheus additional alertmanager config
+### Defines what alertmanager Prometheus fires alerts to
+- provider: vault-secret
+  path: app-interface/global/observability/prometheus-additional-alertmanager-config
+  version: 1
+### Prometheus additional scrape config
+### Defines any additional jobs that don't fit into the servicemonitor model
+- provider: vault-secret
+  path: app-interface/quays02ue1/openshift-customer-monitoring/prometheus-additional-scrape-config
+  version: 1
+### Prometheus additional alertmanager config
+### Defines what alertmanager Prometheus fires alerts to
+- provider: vault-secret
+  path: app-interface/quays02ue1/openshift-customer-monitoring/prometheus-auth-proxy
+  version: 1
+### Alertmanager oauth proxy configuration
+- provider: vault-secret
+  path: app-interface/quays02ue1/openshift-customer-monitoring/alertmanager/alertmanager-auth-proxy
+  version: 1
+### Alertmanager configuration
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/alertmanager/alertmanager-instance.secret.yaml
+
+# ServiceMonitor
+## Quay
+- provider: resource-template
+  type: jinja2
+  path: /quayio-stage/quay/quay.app-sre.servicemonitor.yaml
+- provider: resource-template
+  type: jinja2
+  path: /quayio-stage/quay/quay.aggregation.servicemonitor.yaml
+- provider: resource
+  path: /quayio-stage/quay/quay.aggregation.federation.servicemonitor.yaml
+## CloudWatch Exporter
+- provider: resource
+  path: /quayio-stage/cloudwatch-exporter/quay.cloudwatchexporter.servicemonitor.yaml
+### App-SRE Prometheus
+- provider: resource
+  path: /observability/servicemonitors/prometheus-app-sre.servicemonitor.yaml
+
+# PrometheusRule
+## Quayio
+- provider: resource
+  path: /quayio-stage/quay/quay.alerts.prometheusrules.yaml
+- provider: resource
+  path: /quayio-stage/quay/quay.aggregation.prometheusrules.yaml
+
+# Prometheus
+- provider: resource-template
+  type: jinja2
+  path: /quayio-stage/quay/quay.aggregation.prometheus.yaml
+  variables:
+    version: v2.14.0
+    retention: 1h
+    tempfsSize: 10Gi
+    walCompression: true
+
+# Service
+## Quay Aggregation Prometheus
+- provider: resource
+  path: /quayio-stage/quay/quay.aggregation.service.yaml
