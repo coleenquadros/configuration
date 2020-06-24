@@ -1,0 +1,79 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: openshift-customer-monitoring
+description: App-SRE OpenShift Application monitoring
+
+cluster:
+  $ref: /openshift/crcp01ue1/cluster.yml
+
+app:
+  $ref: /services/insights/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/production.yml
+
+managedResourceTypes:
+- ServiceMonitor
+- Secret
+- PrometheusRule
+- Subscription
+
+managedResourceNames:
+# https://github.com/openshift/managed-cluster-config/blob/master/deploy/osd-customer-monitoring/05-role.yaml#L24-L37
+- resource: Secret
+  resourceNames:
+    - alertmanager-auth-proxy
+    - alertmanager-instance
+    - alertmanager-main
+    - alertmanager-main-proxy
+    - prometheus-additional-alertmanager-config
+    - prometheus-additional-scrape-config
+    - prometheus-auth-proxy
+
+openshiftResources:
+# Prometheus Subscription
+- provider: resource
+  path: /observability/prometheus/v4/prometheus.subscription.yaml
+# Secrets
+## Observability
+### Prometheus additional alertmanager config
+### Defines what alertmanager Prometheus fires alerts to
+- provider: vault-secret
+  path: app-interface/global/observability/prometheus-additional-alertmanager-config
+  version: 1
+### Prometheus additional scrape config
+### Defines any additional jobs that don't fit into the servicemonitor model
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/prometheus/v4/prometheus-app-sre-additional-scrapeconfig-federate-only.secret.yaml
+### Prometheus additional alertmanager config
+### Defines what alertmanager Prometheus fires alerts to
+- provider: vault-secret
+  path: app-interface/crcp01ue1/openshift-customer-monitoring/prometheus-auth-proxy
+  version: 1
+### Alertmanager oauth proxy configuration
+- provider: vault-secret
+  path: app-interface/crcp01ue1/openshift-customer-monitoring/alertmanager/alertmanager-auth-proxy
+  version: 1
+### Alertmanager configuration
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/alertmanager/alertmanager-instance.secret.yaml
+
+## Prometheus Rules
+### Federated Kubernetes metrics
+- provider: resource
+  path: /observability/prometheusrules/kube-metrics.prometheusrules.yaml
+### Prometheus mixin alerts
+- provider: resource
+  path: /observability/prometheusrules/prometheus-mixin.prometheusrules.yaml
+### App-SRE Prometheus
+- provider: resource
+  path: /observability/servicemonitors/prometheus-app-sre.servicemonitor.yaml
+
+## Insights Service Monitors
+
+# PrometheusRules
