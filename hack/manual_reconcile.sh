@@ -110,7 +110,7 @@ cat "$CONFIG_TOML" \
 
 ## Run integrations on local server
 
-### saas-file-owners runs first to determine how openshift-saas-deploy should run
+### saas-file-owners runs first to determine how openshift-saas-deploy-wrappers should run
 run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid
 
 run_int github &
@@ -155,12 +155,12 @@ run_int terraform-vpc-peerings &
 run_int ldap-users $gitlabMergeRequestTargetProjectId &
 run_int openshift-performance-parameters &
 run_int saas-file-validator &
-# throughtput/ is the mounted directory (see runners.sh)
-run_int openshift-saas-deploy --io-dir throughput/ &
+run_int openshift-saas-deploy-wrapper &
 # Conditionally run integrations according to MR title
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"slack"* ]] && run_int slack-usergroups &
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"sentry"* ]] && run_int sentry-config &
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"mirror"* ]] && run_int quay-mirror &
+[[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"saas-deploy-full"* ]] && run_int openshift-saas-deploy &
 # Add STATE=true to integrations that interact with a state
 STATE=true run_int openshift-saas-deploy-trigger-configs &
 STATE=true run_int sql-query &
