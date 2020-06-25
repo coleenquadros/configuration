@@ -7,6 +7,7 @@
     - [Enable enhanced dedicated-admin](#enable-enhanced-dedicated-admin)
     - [Enable observability on a v4 cluster](#enable-observability-on-a-v4-cluster)
     - [Enable logging (EFK)](#enable-logging-efk)
+- [Offboard an OSDv4 cluster from app-interface](#offboard-an-osdv4-cluster-from-app-interface)
 - [Legacy (v3)](#legacy-v3)
     - [Onboard a new OSDv3 cluster to app-interface](#onboard-a-new-osdv3-cluster-to-app-interface)
 
@@ -273,6 +274,29 @@ Installing cluster logging can be done in two steps.
 Example MR: https://gitlab.cee.redhat.com/service/app-interface/commit/bcf699c973d04a7a539219a37f4caeca1b72d21b
 
 OSD docs for reference: https://docs.openshift.com/dedicated/4/logging/dedicated-cluster-deploying.html
+
+# Offboard an OSDv4 cluster from app-interface
+
+To off-board an OSDv4 cluster from app-interface, perform the following operations:
+
+1. Verify that the cluster is no longer in use and create a MR to remove it from app-interface.
+  - Example: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/5793
+  - Things to look out for:
+    - openshift-customer-monitoring namespace does not contain any tenant monitoring resources
+    - if the cluster has existing VPC peerings, remove them in a separate MR first
+
+1. Merge the merge request before proceeding.
+
+1. Delete the cluster from the Dead Man's Snitch console: https://deadmanssnitch.com/cases/0693dfc1-40e9-4e84-89b2-30d696e77e06/snitches?tags=app-sre
+
+1. Delete the cluster from the OCM console: https://cloud.redhat.com/openshift
+
+1. Delete the cluster credentials from Vault (verify that no secrets are in use):
+  - https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/kube-configs/
+  - https://vault.devshift.net/ui/vault/secrets/app-interface/list/<cluster>/
+  - https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/alertmanager-integration
+  - https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/grafana/datasources
+
 
 # Legacy (v3)
 
