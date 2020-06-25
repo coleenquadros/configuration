@@ -7,7 +7,7 @@ The job runs once a minute and executes the [periodic_saas_deploy_triggers.sh](/
 
 This script runs the following integrations:
 - `openshift-saas-deploy-moving-commits` - Trigger a job in case a commit changed under a reference such as `master`.
-- `openshift-saas-deploy-configs` - Trigger a job in case a configur
+- `openshift-saas-deploy-configs` - Trigger a job in case a configuration changed in app-interface (new target, updated ref, etc).  In case a configuration changes during a run of an upstream job, the trigger will be skipped (the upstream job will trigger the deployment upon success).
 
 ## Purpose
 
