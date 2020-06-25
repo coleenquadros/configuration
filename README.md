@@ -1350,7 +1350,7 @@ Notes:
 * Creating new User groups is not supported (User group has to pre-exist).
 * In order to be able to use the `pagerduty` attribute of a `permission`, the relevant users (ones from that PagerDuty schedule) should have the following attributes in their user files:
   * `slack_username` - if it is different from `org_username`
-  * `pagerduty_name` - if it is different from `name`
+  * `pagerduty_username` - if it is different from `org_username`
 
 ### Manage Jenkins jobs configurations using jenkins-jobs
 
