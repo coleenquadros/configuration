@@ -39,7 +39,7 @@ Look in this [file](https://gitlab.cee.redhat.com/service/uhc-account-manager/bl
 
 ### Using ocm Commandline Tool
 
-Use the ocm commandline tool as instructed [here](docs/app-sre/ocm-manage-clusters.md#ocm-cli)
+Use the ocm commandline tool as instructed [here](https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/ocm-manage-clusters.md#ocm-cli)
 
 NOTE: An easy way to find relevant information is to do:
 
@@ -51,7 +51,7 @@ The AZ type can be found in OCM.  Click on the cluster name and scroll down to `
 
 ## Request the Quota Increase
 
-Follow the process [here](docs/app-sre/ocm-manage-clusters.md#quotas) to determine which file to update.  Edit that file and find the SKU that matches the SKU for the instance type that is to be increased.  When increasing quota it is best to ask for a large increase.
+Follow the process [here](https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/ocm-manage-clusters.md#quotas) to determine which file to update.  Edit that file and find the SKU that matches the SKU for the instance type that is to be increased.  When increasing quota it is best to ask for a large increase.
 
 If an entry doesn't exist for the SKU to be modified, add it to the list of SKUs with a comment describing the instance type.  Look at existing entries for examples.
 
