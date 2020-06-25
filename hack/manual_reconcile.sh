@@ -117,6 +117,7 @@ run_int github &
 run_int github-owners &
 run_int github-validator &
 run_int github-repo-invites &
+run_int github-repo-permissions-validator ci-ext app-sre &
 run_int service-dependencies &
 run_int user-validator &
 run_int quay-membership &
