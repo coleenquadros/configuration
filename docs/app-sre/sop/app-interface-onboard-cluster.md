@@ -263,6 +263,50 @@ Some clusters may require enhanced dedicated-admin privileges. The process to ge
 
 1. Rollout Grafana to make the data source changes effective.
 
+## Install the Container Security Operator
+
+The Container Security Operator (CSO) brings Quay and Clair metadata to
+Kubernetes / OpenShift. We use the vulnerabilities information in the tenants
+dashboard and in the monthly reports.
+
+1. Create an `container-secutiry-operator` namespace file for that specific
+cluster. Example:
+
+```yaml
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: container-secutiry-operator
+description: namespace for the app-sre per-cluster Container Secutiry Operator
+
+cluster:
+  $ref: /openshift/app-sre-stage-01/cluster.yml
+
+app:
+  $ref: /services/container-secutiry-operator/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/stage.yml
+```
+
+1. Add the new `container-secutiry-operator` namespace to the target namespaces
+in [saas.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/container-security-operator/cicd/saas.yaml)
+to deploy the Container Secutiry Operator. Example:
+
+```yaml
+resourceTemplates:
+- name: container-security-operator
+  url: https://github.com/app-sre/container-security-operator
+  path: /openshift/container-security-operator.yaml
+  targets:
+  ...
+  - namespace:
+      $ref: /openshift/app-sre-stage-01/namespaces/app-sre-cso-per-cluster.yml
+    ref: master
+```
+
 ## Enable logging (EFK)
 
 The EFK stack is currently opt-in and installed by customers.

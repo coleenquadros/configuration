@@ -1,0 +1,36 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: container-security-operator
+
+name: container-security-operator
+description: 'SaaS tracking file for Container Security Operator'
+
+app:
+  $ref: /services/container-security-operator/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- CatalogSource
+- OperatorGroup
+- Subscription
+
+imagePatterns:
+- quay.io/app-sre/container-security-operator
+
+resourceTemplates:
+- name: container-security-operator
+  url: https://github.com/app-sre/container-security-operator
+  path: /openshift/container-security-operator.yaml
+  targets:
+  - namespace:
+      $ref: /openshift/app-sre-stage-01/namespaces/app-sre-cso-per-cluster.yml
+    ref: master
