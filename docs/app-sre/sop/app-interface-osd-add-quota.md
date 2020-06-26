@@ -43,9 +43,11 @@ Use the ocm commandline tool as instructed [here](https://gitlab.cee.redhat.com/
 
 NOTE: An easy way to find relevant information is to do:
 
-- ocm get /api/accounts_mgmt/v1/skus | jq -r '.items[] | "\(.resource_type)\t\(.resource_name)\tAZ:\(.availability_zone_type)\tbyoc:\(.byoc)\t\(.id)"' | grep <instance type> | grep cluster.aws
+- ocm get /api/accounts_mgmt/v1/skus | jq -r '.items[] | "\(.resource_type)\t\(.resource_name)\tAZ:\(.availability_zone_type)\tbyoc:\(.byoc)\t\(.id)"' | grep <instance type>
 
 This will likely list multiple entries.  Look for the entry that matches AZ type (single or multi) and has `byoc:false`.
+
+An entry starting with `cluster.aws` is quota for creating a cluster with workers of that instance type.  An entry starting with `compute.node.aws` is used for expanding an existing cluster of that instance type.
 
 The AZ type can be found in OCM.  Click on the cluster name and scroll down to `Availability`.
 
