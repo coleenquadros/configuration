@@ -2,14 +2,14 @@
 
 - [Onboard a new OSDv4 cluster to app-interface](#onboard-a-new-osdv4-cluster-to-app-interface)
 - [Additional configurations](#additional-configurations)
-    - [Selecting a Machine CIDR for VPC peerings](#selecting-a-machine-cidr-for-vpc-peerings)
-    - [VPC peering with app-interface](#vpc-peering-with-app-interface)
-    - [Enable enhanced dedicated-admin](#enable-enhanced-dedicated-admin)
-    - [Enable observability on a v4 cluster](#enable-observability-on-a-v4-cluster)
-    - [Enable logging (EFK)](#enable-logging-efk)
+  - [Selecting a Machine CIDR for VPC peerings](#selecting-a-machine-cidr-for-vpc-peerings)
+  - [VPC peering with app-interface](#vpc-peering-with-app-interface)
+  - [Enable enhanced dedicated-admin](#enable-enhanced-dedicated-admin)
+  - [Enable observability on a v4 cluster](#enable-observability-on-a-v4-cluster)
+  - [Enable logging (EFK)](#enable-logging-efk)
 - [Offboard an OSDv4 cluster from app-interface](#offboard-an-osdv4-cluster-from-app-interface)
 - [Legacy (v3)](#legacy-v3)
-    - [Onboard a new OSDv3 cluster to app-interface](#onboard-a-new-osdv3-cluster-to-app-interface)
+  - [Onboard a new OSDv3 cluster to app-interface](#onboard-a-new-osdv3-cluster-to-app-interface)
 
 <!-- /TOC -->
 
@@ -227,7 +227,7 @@ Some clusters may require enhanced dedicated-admin privileges. The process to ge
 
 1. Create an `openshift-customer-monitoring` namespace file for that specific cluster. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml.
 
-1. Add the new `openshift-customer-monitoring` namespace to the target namespaces in [saas-observability-per-cluster](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/cicd/saas/saas-observability-per-cluster) to deploy Prometheus and Alertmanager. Some options to look out for:
+1. Add the new `openshift-customer-monitoring` namespace to the target namespaces in [saas-observability-per-cluster](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/cicd/saas/saas-observability-per-cluster.yaml) to deploy Prometheus and Alertmanager. Some options to look out for:
     - `clusterLabel` for the prometheus resource
     - `externalUrl` for both the `prometheus` and `alertmanager` resources
 
