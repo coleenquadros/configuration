@@ -1,0 +1,38 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: app-sre
+
+name: saas-openshift-acme
+description: SaaS tracking file for openshift-acme
+
+app:
+  $ref: /services/github-mirror/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- Deployment
+- ConfigMap
+- ServiceAccount
+- Role
+- RoleBinding
+
+imagePatterns:
+- quay.io/tnozicka/openshift-acme
+
+resourceTemplates:
+- name: openshift-acme
+  url: https://github.com/app-sre/openshift-acme-templates
+  path: /openshift/openshift-acme.template.yaml
+  targets:
+  - namespace:
+      $ref: /services/visual-app-interface.devshift.net/namespaces/visual-qontract-stage.yml
+    ref: master
