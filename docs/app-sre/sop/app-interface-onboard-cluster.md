@@ -265,11 +265,17 @@ Some clusters may require enhanced dedicated-admin privileges. The process to ge
 
 1. Rollout Grafana to make the data source changes effective.
 
-## Install the Container Security Operator
+## [WiP] Install the Container Security Operator
+
+Work in Progress. Skip this section now now.
 
 The Container Security Operator (CSO) brings Quay and Clair metadata to
 Kubernetes / OpenShift. We use the vulnerabilities information in the tenants
 dashboard and in the monthly reports.
+
+1. Create a ticket to [OHSS](https://issues.redhat.com/secure/CreateIssue.jspa?pid=12323823&issuetype=3),
+requesting `extended-dedicated-admin` for the user `app-sre-bot` on the new
+cluster (provide the cluster id).
 
 1. Create an `container-secutiry-operator` namespace file for that specific
 cluster. Example:
