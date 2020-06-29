@@ -12,45 +12,16 @@ spec:
   groups:
   - name: insights-host-inventory
     rules:
-    # HBILagTooHigh: MQ lag value for HBI topic and group to trigger urgent alert
-    # Note: Alert to trigger when delta value keeps increasing over a sustained period and inventory is not depleted
-    - alert: HBILagTooHigh
-      expr: sum(delta(kafka_consumer_group_lag{group="inventory-mq",topic=~"platform.inventory.host-ingress.*",kubernetes_namespace="platform-mq-stage"}[5m])) by (group,topic) > 0
-      for: 60m
-      labels:
-        alert-tool: pagerduty
-        alert-team: insights-sre-alerts
-        severity: info
-        service: insights
-        env: stage
-      annotations:
-        dashboard: "https://grafana.stage.devshift.net/d/EiIhtC0Wa/inventory"
-        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/host-inventory-stage/deployments"
-        message: "HBI MQ Lag Too High.  HBI not processing messages in topic {{ $labels.topic }}"
-        runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/HBILagTooHigh.html"
-
-    - alert: HBIFreeSpaceLow
-      expr: rdsosmetrics_fileSys_usedPercent{instance="host-inventory-*",job="rds-enhanced",mount_point="/rdsdbdata"} > 80
-      labels:
-        severity: info
-        service: insights
-        env: stage
-      annotations:
-        dashboard: "https://grafana.stage.devshift.net/d/EiIhtC0Wa/inventory"
-        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/host-inventory-stage/deployments"
-        message: "{{ $labels.namespace }} HBI RDS database free storage is less than 20% :rain_cloud:"
-        runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/HBILagTooHigh.html"  # should be updated with new link when available
-
     # pagerduty
     - alert: App-insights-inventory-In-platform-prod-Absent
-      expr: absent(up{app="insights-inventory", kubernetes_namespace="host-inventory-stage"})
+      expr: absent(up{service="insights-inventory", namespace="host-inventory-stage"})
       for: 5m
       labels:
         alert-tool: pagerduty
         alert-team: insights-sre-alerts
         env: stage
       annotations:
-        dashboard: "https://grafana.stage.devshift.net/d/EiIhtC0Wa/inventory"
+        dashboard: "https://GRAFANA_URL"
         link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/host-inventory-stage/deployments"
         message: "Alert name: App-insights-inventory-In-platform-tage-Absent from insights-inventory"
-        runbook: "https://url.corp.redhat.com/a50dfca"
+        runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/App-insights-inventory-In-platform-prod-Absent.html"

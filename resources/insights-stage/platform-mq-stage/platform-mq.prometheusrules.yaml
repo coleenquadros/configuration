@@ -11,139 +11,16 @@ spec:
   groups:
   - name: insights-platform-mq-stage
     rules:
-    # MQ_MIN_LEADER_COUNT: Minimum number of Kafka leaders before triggering alert
-    #    for a given strimzi_io_cluster
-    #    strimzi_io_cluster's that are not given a minimum do not alert
-    - record: MQ_MIN_LEADER_COUNT
-      labels:
-        severity: info
-        service: insights
-        strimzi_io_cluster: platform-mq-stage
-      expr: '3'
-
-    - alert: MQBrokerDown
-      expr: |
-        count(kafka_server_replicamanager_leadercount)  < on (strimzi_io_cluster) MQ_MIN_LEADER_COUNT
-      labels:
-        severity: info
-        service: insights
-        env: stage
-      annotations:
-        dashboard: "https://grafana.app-sre.devshift.net/d/oxMpso4Wz/is-kafka-down"
-        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/platform-mq-stage/deployments"
-        message: "{{ $labels.strimzi_io_cluster }} Broker Down"
-        runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/index.html"
-
-    - alert: StageMQAllBrokersDown
-      expr: |
-        count(kafka_server_replicamanager_leadercount{strimzi_io_cluster=~'platform-mq-stage'}) == 0
-      labels:
-        severity: info
-        service: insights
-        env: stage
-      annotations:
-        dashboard: "https://grafana.app-sre.devshift.net/d/oxMpso4Wz/is-kafka-down"
-        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/platform-mq-stage/deployments"
-        message: "All Stage MQ Brokers Down"
-        runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/index.html"
-
-    - alert: DevMQAllBrokersDown
-      expr: |
-        count(kafka_server_replicamanager_leadercount{strimzi_io_cluster!~'platform-mq-stage'}) == 0
-      labels:
-        severity: info
-        service: insights
-        env: stage
-      annotations:
-        dashboard: "https://grafana.app-sre.devshift.net/d/oxMpso4Wz/is-kafka-down"
-        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/platform-mq-stage/deployments"
-        message: "All {{ $labels.strimzi_io_cluster }} Brokers Down"
-        runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/index.html"
-
-    # MQ_MIN_VOLUME_AVAILABLE: Minimum amount of free space on Kafka topic before triggering alert
-    #    for a given (namespace, persistentvolumeclaim) pair
-    #    pairs not listed will not alert
-    - record: MQ_MIN_VOLUME_AVAILABLE
-      labels:
-        namespace: platform-mq-stage
-        persistentvolumeclaim: data-platform-mq-stage-kafka-0
-        severity: info
-        service: insights
-      expr: '50000000000'
-    - record: MQ_MIN_VOLUME_AVAILABLE
-      labels:
-        namespace: platform-mq-stage
-        persistentvolumeclaim: data-platform-mq-stage-kafka-1
-        severity: info
-        service: insights
-      expr: '50000000000'
-    - record: MQ_MIN_VOLUME_AVAILABLE
-      labels:
-        namespace: platform-mq-stage
-        persistentvolumeclaim: data-platform-mq-stage-kafka-2
-        severity: info
-        service: insights
-      expr: '50000000000'
-
-    - alert: MQStorageLow
-      expr: |
-        kubelet_volume_stats_available_bytes < on (namespace, persistentvolumeclaim) MQ_MIN_VOLUME_AVAILABLE
-      labels:
-        severity: info
-        service: insights
-        env: stage
-      annotations:
-        dashboard: "https://grafana.app-sre.devshift.net/d/oxMpso4Wz/is-kafka-down"
-        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/platform-mq-stage/deployments"
-        message: "MQ Volume Storage Low {{ $labels.persistentvolumeclaim }} in {{ $labels.namespace }}"
-        runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/index.html"
-
     # pagerduty
     - alert: App-platform-mq-prod-In-platform-mq-prod-Absent
-      expr: absent(up{app="platform-mq", kubernetes_namespace="platform-mq-stage"})
+      expr: absent(up{app="platform-mq", namespace="platform-mq-stage"})
       for: 5m
       labels:
         alert-tool: pagerduty
         alert-team: insights-sre-alerts
         env: stage
       annotations:
-        dashboard: "https://grafana.app-sre.devshift.net/d/oxMpso4Wz/is-kafka-down"
+        dashboard: "https://GRAFANA_URL"
         link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/platform-mq-stage/deployments"
         message: "Alert name: App-platform-mq-prod-In-platform-mq-prod-Absent from insights-puptoo in ingress-stage"
         runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/App-platform-mq-prod-In-platform-mq-prod-Absent.html"
-
-    - alert: PlatformKafkaLagMaxExceededHard
-      expr: |
-        sum(kafka_consumer_group_lag{topic="platform.inventory.host-ingress-p1", group="inventory-mq"}) by (group) > 4000
-        or
-        sum(kafka_consumer_group_lag{topic="platform.upload.advisor", group="insights-puptoo"}) by (group) > 15000
-        or
-        sum(kafka_consumer_group_lag{topic="platform.inventory.host-egress", group="insights-core-kafka"}) by (group) > 15000
-        or
-        sum(kafka_consumer_group_lag{topic="platform.engine.results", group="advisor_results"}) by (group) > 4000
-        or
-        sum(kafka_consumer_group_lag{topic="platform.inventory.host-egress", group="insights-storage-broker"}) by (group) > 10000
-      for: 30m
-      labels:
-        alert-tool: pagerduty
-        alert-team: insights-sre-alerts
-        env: stage
-      annotations:
-        dashboard: "https://grafana.app-sre.devshift.net/d/oxMpso4Wz/is-kafka-down"
-        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/platform-mq-stage/deployments"
-        message: "Platform Kafka High Lag Alert.  Number of messages exceeded the limit for Platform advisor, inventory-host-ingress, inventory-host-egress, or engine-results"
-        runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/PlatformKafkaLagMaxExceededHard.html"
-
-    - alert: ProdMQAllBrokersDown
-      expr: count(kafka_server_replicamanager_leadercount{strimzi_io_cluster=~'platform-mq-stage'}) == 0
-      labels:
-        alert-tool: pagerduty
-        alert-team: insights-sre-alerts
-        env: stage
-      annotations:
-        description: 'All Prod MQ Brokers Down'
-        summary: 'All Prod MQ Brokers Down'
-        dashboard: "https://grafana.app-sre.devshift.net/d/oxMpso4Wz/is-kafka-down"
-        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/platform-mq-stage/deployments"
-        message: "Alert name: ProdMQAllBrokersDown.  All Prod MQ Brokers Down"
-        runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/ProdMQAllBrokersDown.html"
