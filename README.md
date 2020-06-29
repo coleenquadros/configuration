@@ -609,29 +609,15 @@ Notes:
 
 This integration allows namespace owners to deploy openshift-acme to their namespaces.
 
-To deploy and manage an openshift-acme instance, a user must add the following to a namespace declaration:
+To deploy and manage an openshift-acme instance, a user must add the following to the [saas-openshift-acme](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-sre/cicd/ci-int/saas-openshift-acme.yaml) file:
 
 ```yaml
-openshiftAcme:
-  config:
-    $ref: /dependencies/openshift/acme/default.yml
+  - namespace:
+      $ref: /services/path/to/namespace/file.yaml
+    ref: master
 ```
 
-The openshift-acme deployment can be customized by creating a new file alongside the default one.
-
-The default definition (as shown above) is self-documented and shows how to tweak the openshift-acme deployment.
-
-An optional acme-account secret in Vault can be declared in the following way:
-
-```yaml
-openshiftAcme:
-  config:
-    $ref: /dependencies/openshift/acme/default.yml
-  accountSecret:
-    provider: vault-secret
-    path: vault/path/to/acme-account
-    version: 1
-```
+use `ref` master for stage namespaces and a commit hash as exists in other `ref`s for production namespaces.
 
 ### Manage OpenShift Groups association via App-Interface (`/openshift/cluster-1.yml`)
 
