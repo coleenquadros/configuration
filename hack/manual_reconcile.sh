@@ -114,7 +114,7 @@ cat "$CONFIG_TOML" \
 run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid
 
 # if changes are only to saas files, skip all other integrations
-[[ "$(cat throughput/saas-file-owners/diffs.json | jq .valid_saas_file_changes_only)" != "true" ]] && {
+[[ "$(cat ${WORK_DIR}/throughput/saas-file-owners/diffs.json | jq .valid_saas_file_changes_only)" != "true" ]] && {
 run_int github &
 run_int github-owners &
 run_int github-validator &
