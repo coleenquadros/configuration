@@ -21,6 +21,25 @@ spec:
       annotations:
         message: "The Quay build system has more than 15 builds queued up in the backlog."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/quay/quay-builder-ocp-cluster-setup/prometheus-alerts"
+    - alert: QuayOSDBuilderStuck5m
+      expr: |
+        sum(increase(quay_build_ack_duration_seconds_count{executor="openshift-dedicated"}[5m])) == 0
+      labels:
+        severity: critical
+        service: quay
+      annotations:
+        message: "The OSD based Quay builder has not acknowledged any build jobs for 5m."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/builder.md"
+    - alert: QuayBuilderTooManyEc2Builds
+      expr: |
+        sum(increase(quay_build_ack_duration_seconds_count{executor="EC2Executor"}[3m])) > 1
+      for: 5m
+      labels:
+        severity: critical
+        service: quay
+      annotations:
+        message: "The EC2 based Quay has done too many builds in that last 5m."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/builder.md"
     - alert: CPU Greater Than 40%
       expr: |
         sum(irate(process_cpu_seconds_total[5m])) by (instance) * 100 > 40 * 13

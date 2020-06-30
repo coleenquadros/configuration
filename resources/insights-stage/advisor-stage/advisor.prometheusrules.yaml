@@ -11,208 +11,29 @@ spec:
   groups:
   - name: insights-advisor
     rules:
-      - alert: ClassicApiInternalServerErrors
-        expr: |
-          (sum(increase(http_request_duration_seconds_count{app="insights-api", status_code="500"}[1m])) / sum(increase(http_request_duration_seconds_count{app="insights-api"}[1m]))) > .05
-        for: 5m
-        labels:
-          severity: info
-          service: insights
-          env: stage
-        annotations:
-          dashboard: "https://grafana.stage.devshift.net/d/syx7TZqmk/advisor-crc-stg-01-basedonprod"
-          link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/advisor-stage/deployments"
-          message: "Insights Classic API Alert.  Insights Classic API Percentage of 500 responses exceeds 5% of all requests for 5 minutes"
-          runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/ClassicApiInternalServerErrors.html"
-
-      - alert: ClassicApiLatencySliSoft
-        expr: |
-          (sum(rate(http_request_duration_seconds_sum{app="insights-api",status_code="200|201"}[1m]) / rate(http_request_duration_seconds_count{app="insights-api", status_code="200|201"}[1m]))) > 120
-        for: 5m
-        labels:
-          severity: info
-          service: insights
-          env: stage
-        annotations:
-          dashboard: "https://grafana.stage.devshift.net/d/syx7TZqmk/advisor-crc-stg-01-basedonprod"
-          link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/advisor-stage/deployments"
-          message: "Insights Classic API Alert.  Insights Classic API 200s and 201s exceeding 2 minutes for 5 minutes"
-          runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/index.html"
-
-      - alert: ClassicApiLatencySliHard
-        expr: |
-          (sum(rate(http_request_duration_seconds_sum{app="insights-api",status_code="200|201"}[1m]) / rate(http_request_duration_seconds_count{app="insights-api", status_code="200|201"}[1m]))) > 240
-        for: 5m
-        labels:
-          severity: info
-          service: insights
-          env: stage
-        annotations:
-          dashboard: "https://grafana.stage.devshift.net/d/syx7TZqmk/advisor-crc-stg-01-basedonprod"
-          link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/advisor-stage/deployments"
-          message: "Insights Classic API Alert.  Insights Classic API 200s and 201s exceeding 4 minutes for 5 minutes"
-          runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/index.html"
-
-      - alert: PlatformKafkaLagMaxExceededSoft
-        expr: |
-          sum(kafka_consumer_group_lag{topic="platform.inventory.host-ingress-p1", group="inventory-mq"}) by (group) > 2000 or sum(kafka_consumer_group_lag{topic="platform.upload.advisor", group="insights-puptoo"}) by (group) > 2000 or sum(kafka_consumer_group_lag{topic="platform.inventory.host-egress", group="insights-core-kafka"}) by (group) > 4000 or sum(kafka_consumer_group_lag{topic="platform.engine.results", group="advisor_results"}) by (group) > 2000
-        for: 15m
-        labels:
-          severity: info
-          service: insights
-          env: stage
-        annotations:
-          dashboard: "https://grafana.stage.devshift.net/d/syx7TZqmk/advisor-crc-stg-01-basedonprod"
-          link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/advisor-stage/deployments"
-          message: "Platform Kafka Topic Alert.  Any platform ingress topic exceeding 2000 messages in lag for fifteen minutes"
-          runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/index.html"
-
-      - alert: PlatformKafkaLagMaxExceededHard
-        expr: |
-          sum(kafka_consumer_group_lag{topic="platform.inventory.host-ingress-p1", group="inventory-mq"}) by (group) > 4000 or sum(kafka_consumer_group_lag{topic="platform.upload.advisor", group="insights-puptoo"}) by (group) > 4000 or sum(kafka_consumer_group_lag{topic="platform.inventory.host-egress", group="insights-core-kafka"}) by (group) > 15000 or sum(kafka_consumer_group_lag{topic="platform.engine.results", group="advisor_results"}) by (group) > 4000
-        for: 30m
-        labels:
-          severity: info
-          service: insights
-          env: stage
-        annotations:
-          dashboard: "https://grafana.stage.devshift.net/d/syx7TZqmk/advisor-crc-stg-01-basedonprod"
-          link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/advisor-stage/deployments"
-          message: "Platform Kafka High Lag Alert.  Number of messages exceeded the limit for Platform advisor, inventory-host-ingress, inventory-host-egress, or engine-results"
-          runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/PlatformKafkaLagMaxExceededHard.html"
-
-      - alert: AdvisorWeeklyEmailsFailed
-        expr: |
-          advisor_weekly_report_emails_status == 0
-        labels:
-          severity: info
-          service: insights
-          env: stage
-        annotations:
-          dashboard: "https://grafana.stage.devshift.net/d/syx7TZqmk/advisor-crc-stg-01-basedonprod"
-          link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/advisor-stage/deployments"
-          message: "'*Cause:* {{ $labels.status_message }}'.  Sending weekly report emails failed :dumpsterfire:"
-          runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/index.html"
-
-      - alert: AdvisorVsClassicActiveRulesCountMismatch
-        expr: |
-          insights_advisor_active_rules_count != insights_classic_active_rules_count
-        for: 2d
-        labels:
-          severity: info
-          service: insights
-          env: stage
-        annotations:
-          dashboard: "https://grafana.stage.devshift.net/d/syx7TZqmk/advisor-crc-stg-01-basedonprod"
-          link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/advisor-stage/deployments"
-          message: "Advisor and Classic active rule counts are different :count:  Advisor active rules: *{{ printf \"insights_advisor_active_rules_count\" | query | first | value }}* vs Classic active rules: *{{ printf \"insights_classic_active_rules_count\" | query | first | value }}*\nView the logs for the latest *compare-active-rules* pod in advisor-stage for more details."
-          runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/index.html"
-
-      - alert: DemoStaleSystems
-        expr: |
-          stale_demo_systems == 1
-        labels:
-          severity: info
-          service: insights
-          env: stage
-        annotations:
-          dashboard: "https://grafana.stage.devshift.net/d/syx7TZqmk/advisor-crc-stg-01-basedonprod"
-          link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/advisor-stage/deployments"
-          message: "Insights Demo Systems Stale Alert.  Insights Demo Systems are stale. Please update"
-          runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/index.html"
-
-      - alert: CertTest
-        expr: |
-          api_cert_test == 1
-        labels:
-          severity: info
-          service: insights
-          env: stage
-        annotations:
-          dashboard: "https://grafana.stage.devshift.net/d/syx7TZqmk/advisor-crc-stg-01-basedonprod"
-          link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/advisor-stage/deployments"
-          message: "Insights Cert Test Failed!.  Insights Cert Test Failed! Check certificate auth"
-          runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/index.html"
-
-      - alert: EngineUnackQueueLarge
-        expr: |
-          rabbitmq_queue_messages_unacknowledged{queue='engine_work'} >= 1000
-        for: 10m
-        labels:
-          severity: info
-          service: insights
-          env: stage
-        annotations:
-          dashboard: "https://grafana.stage.devshift.net/d/syx7TZqmk/advisor-crc-stg-01-basedonprod"
-          link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/advisor-stage/deployments"
-          message: "RabbitMQ Engine Message Queue Alert.  RMQ unacknowledged engine_work messages over 1000"
-          runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/index.html"
-
-      - alert: MessageQueueDown
-        expr: |
-          message_queue{instance="platform-monitor.platform-ci.svc.cluster.local:8000",job="platform_stack"} == 1
-        for: 2m
-        labels:
-          severity: info
-          service: insights
-          env: stage
-        annotations:
-          dashboard: "https://grafana.stage.devshift.net/d/syx7TZqmk/advisor-crc-stg-01-basedonprod"
-          link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/advisor-stage/deployments"
-          message: "Platform Message Queue Alert.  Platform MQ is DOWN"
-          runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/index.html"
-
-      - alert: UploadServiceDown
-        expr: |
-          upload_service{instance="platform-monitor.platform-ci.svc.cluster.local:8000",job="platform_stack"} == 1
-        for: 2m
-        labels:
-          severity: info
-          service: insights
-          env: stage
-        annotations:
-          dashboard: "https://grafana.stage.devshift.net/d/syx7TZqmk/advisor-crc-stg-01-basedonprod"
-          link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/advisor-stage/deployments"
-          message: "Insights Upload Service Alert.  Insights Upload Service is DOWN"
-          runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/index.html"
-
-      - alert: EngineQueueLarge
-        expr: |
-          rabbitmq_queue_messages{queue='engine_work'} > 1000
-        for: 10m
-        labels:
-          severity: info
-          service: insights
-          env: stage
-        annotations:
-          dashboard: "https://grafana.stage.devshift.net/d/syx7TZqmk/advisor-crc-stg-01-basedonprod"
-          link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/advisor-stage/deployments"
-          message: "RabbitMQ Engine Message Queue Alert.  RMQ Engine_Work queue messages over 1000"
-          runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/index.html"
-
       # pagerduty
       - alert: App-insights-advisor-api-In-advisor-prod-Absent
-        expr: absent(up{app="insights-advisor-api", kubernetes_namespace="advisor-stage"})
+        expr: absent(up{service="insights-advisor-api", namespace="advisor-stage"})
         for: 5m
         labels:
           alert-tool: pagerduty
           alert-team: insights-sre-alerts
           env: stage
         annotations:
-          dashboard: "https://grafana.stage.devshift.net/d/syx7TZqmk/advisor-crc-stg-01-basedonprod"
+          dashboard: "https://GRAFANA_URL"
           link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/advisor-stage/deployments"
           message: "Metrics for insights-advisor-api in STAGE are absent"
           runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/App-insights-advisor-api-In-advisor-prod-Absent.html"
 
       - alert: App-insights-advisor-service-In-advisor-prod-Absent
-        expr: absent(up{app="insights-advisor-service", kubernetes_namespace="advisor-stage"})
+        expr: absent(up{service="insights-advisor-service", namespace="advisor-stage"})
         for: 5m
         labels:
           alert-tool: pagerduty
           alert-team: insights-sre-alerts
           env: stage
         annotations:
-          dashboard: "https://grafana.stage.devshift.net/d/syx7TZqmk/advisor-crc-stg-01-basedonprod"
+          dashboard: "https://GRAFANA_URL"
           link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/advisor-stage/deployments"
           message: "Metrics for insights-advisor-service in STAGE are absent"
           description: "https://platform-docs.cloud.paas.psi.redhat.com/sop/App-insights-advisor-service-In-advisor-prod-Absent.html"

@@ -3,52 +3,46 @@ $schema: /openshift/prometheus-rule-1.yml
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: insights-3scale
+  name: 3scale-prod
   labels:
     prometheus: app-sre
     role: alert-rules
 spec:
   groups:
-  - name: insights-3scale-stage
+  - name: insights-3scale-prod
     rules:
     - alert: Insights3scalePodDown
-      expr: |
-        up{service="apicast", namespace="3scale-stage"} == 0
+      expr: up{service="apicast",namespace="3scale-prod"} == 0
       for: 2m
       labels:
-        severity: critical
         service: insights
-        env: stage
+        env: prod
       annotations:
-        dashboard: "https://GRAFANA_URL"
+        dashboard: "https://grafana.stage.devshift.net/d/NncCcICiz/3scale-gateway-health"
         link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/3scale-stage/deployments"
         message: "Insights 3scale Gateway Service Alert. At least one 3scale pod has been down for two minutes."
         runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/index.html"
 
     - alert: Insights3scaleSinglePod
-      expr: |
-        count(up{service="apicast", namespace="3scale-stage"}) == 1
+      expr: count(up{service="apicast",namespace="3scale-prod"}) == 1
       for: 2m
       labels:
-        severity: critical
         service: insights
-        env: stage
+        env: prod
       annotations:
-        dashboard: "https://GRAFANA_URL"
+        dashboard: "https://grafana.stage.devshift.net/d/NncCcICiz/3scale-gateway-health"
         link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/3scale-stage/deployments"
         message: "Insights 3scale Gateway Service Alert. There has been only one active 3scale-staging pod for two minutes."
         runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/App-3scale-gateway-In-3scale-Absent.html"
 
-    # pagerduty
     - alert: App-3scale-gateway-In-3scale-Absent
-      expr: absent(up{service="apicast", namespace="3scale-stage"})
+      expr: absent(up{aservice="apicast", namespace="3scale-prod"})
       for: 5m
       labels:
-        alert-tool: pagerduty
         alert-team: insights-sre-alerts
-        env: stage
+        env: prod
       annotations:
-        dashboard: "https://GRAFANA_URL"
+        dashboard: "https://grafana.stage.devshift.net/d/NncCcICiz/3scale-gateway-health"
         link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/3scale-stage/deployments"
         message: "Insights 3scale Gateway Service Alert. At least one 3scale pod has been down for 5 minutes."
         runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/App-3scale-gateway-In-3scale-Absent.html"

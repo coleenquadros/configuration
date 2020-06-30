@@ -1,0 +1,38 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: quayio
+
+name: quay-mysql-diag
+description: quayio
+
+app:
+  $ref: /services/quayio/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: oncall-quay
+
+managedResourceTypes:
+- CronJob
+
+imagePatterns:
+- quay.io/app-sre/quay-mysql-diag
+
+resourceTemplates:
+- name: quay-mysql-diag
+  path: /openshift/cronjob.yaml
+  url: https://github.com/app-sre/quay-mysql-diag
+  parameters:
+    MYSQL_DEFAULTS_EXTRA_FILE: app-sre-diag-mysql-defaults-extra-file
+    AWS_S3_SECRET: quay-mysql-diag-s3
+    IMAGE_PULL_POLICY: IfNotPresent
+  targets:
+  - namespace:
+      $ref: /services/quayio/namespaces/quay-mysql-diag.quay-s-ue1.yaml
+    ref: master

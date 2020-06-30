@@ -1,0 +1,38 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: quayio
+
+name: quay-mysql-diag-stage
+description: stage namespace for quay-mysql-diag
+
+cluster:
+  $ref: /openshift/quay-s-ue1/cluster.yml
+
+app:
+  $ref: /services/quayio/app.yml
+
+environment:
+  $ref: /products/quay/environments/stage.yml
+
+managedRoles: true
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: s3
+  account: app-sre
+  identifier: quay-mysql-diag-stage
+  defaults: /terraform/resources/s3-private-1.yml
+  output_resource_name: quay-mysql-diag-s3
+
+openshiftResources:
+- provider: vault-secret
+  path: app-interface/quayio-stage/quayio-stage/quay-config-secret
+  version: 45
+  labels:
+    version: v45
+- provider: vault-secret
+  path: app-interface/quayio-stage/quayio-stage/app-sre-diag-mysql-defaults-extra-file
+  version: 1
