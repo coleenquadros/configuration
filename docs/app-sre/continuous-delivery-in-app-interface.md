@@ -74,10 +74,6 @@ Every saas file contains a list of resources to deploy, and each resource contai
 
 A Jenkins job will be automatically created for each saas file and for each environment.  Each job executes an app-interface integration called `openshift-saas-deploy` for the specific saas file and environment.  The output will be similar to output you see in other app-interface integrations.
 
-In short, the output will only show resources which are changed in the deployment. Not all resources are deployed, but only ones that have changed.
-
-While we are improving our compare logic, you may see unchanged resources being applied as well. This is fine.
-
 ## Triggering jobs
 
 Whenever changes are detected for an environment, a saas file, a resource template or a target, the corresponding Jenkins job will be triggered automatically.
