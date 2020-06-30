@@ -113,6 +113,8 @@ cat "$CONFIG_TOML" \
 ### saas-file-owners runs first to determine how openshift-saas-deploy-wrappers should run
 run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid
 
+# if changes are only to saas files, skip all other integrations
+[[ "$(cat ${WORK_DIR}/throughput/saas-file-owners/diffs.json | jq .valid_saas_file_changes_only)" != "true" ]] && {
 run_int github &
 run_int github-owners &
 run_int github-validator &
@@ -146,7 +148,6 @@ run_int openshift-resources &
 run_int openshift-vault-secrets &
 run_int openshift-routes &
 run_int openshift-network-policies &
-run_int openshift-acme &
 run_int openshift-limitranges &
 # run_int openshift-resourcequotas &
 run_int openshift-serviceaccount-tokens &
@@ -156,17 +157,19 @@ run_int terraform-vpc-peerings &
 run_int ldap-users $gitlabMergeRequestTargetProjectId &
 run_int openshift-performance-parameters &
 run_int saas-file-validator &
-run_int openshift-saas-deploy-wrapper &
 # Conditionally run integrations according to MR title
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"slack"* ]] && run_int slack-usergroups &
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"sentry"* ]] && run_int sentry-config &
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"mirror"* ]] && run_int quay-mirror &
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"saas-deploy-full"* ]] && run_int openshift-saas-deploy &
 # Add STATE=true to integrations that interact with a state
-STATE=true run_int openshift-saas-deploy-trigger-configs &
 STATE=true run_int sql-query &
 STATE=true run_int email-sender &
 STATE=true run_int requests-sender &
+} # end of skip all other integrations
+
+STATE=true run_int openshift-saas-deploy-trigger-configs &
+run_int openshift-saas-deploy-wrapper &
 
 wait
 }

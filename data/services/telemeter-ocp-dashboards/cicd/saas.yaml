@@ -1,0 +1,46 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: telemeter-ocp-dashboards
+
+name: saas-telemeter-ocp-dashboards
+description: SaaS tracking file for Telemeter OCP dashboards
+
+app:
+  $ref: /services/telemeter-ocp-dashboards/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+- ConfigMap
+
+imagePatterns:
+- quay.io/app-sre/grafana:6.4.3
+- openshift/oauth-proxy:v1.0.0
+
+resourceTemplates:
+- name: telemeter-ocp-dashboards
+  url: https://gitlab.cee.redhat.com/data-hub/telemeter-ocp-dashboards
+  path: /openshift/bundle.yaml
+  parameters:
+    SESSION_SECRET: test
+  targets:
+  - namespace:
+      $ref: /services/telemeter-ocp-dashboards/namespaces/dh-stage-prometheus-lts.yml
+    ref: master
+    parameters:
+      REPLICAS: 1
+  - namespace:
+      $ref: /services/telemeter-ocp-dashboards/namespaces/dh-prod-prometheus-lts.yml
+    ref: 9d53bc29fb1183dbd7d23d6ebf9b3fd81c0bcf6c
+    parameters:
+      REPLICAS: 3

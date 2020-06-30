@@ -294,6 +294,9 @@ Initiate incident communications:
 
 - Send message to the #sd-org slack channel. Keep it updated with the incident progress.
 - If deemed appropriate, a new channel can be created in slack: #incident-app-sre-<JIRAID>. This channel should be linked from #sd-org.
+- If applicable, update the service statuspage following the available SOP:
+  - [Updating status.quay.io](https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/quay/statuspage.md)
+  - [Updating status.redhat.com](https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/statuspage.md)
 - Send email to:
   - [serviceOwners](https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/app-sre/app-1.yml)
   - [serviceNotifications](https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/app-sre/app-1.yml). This list may include `outage-list@redhat.com`, make sure an email is sent to that list if it's a major outage and if that list includes the outage list.
