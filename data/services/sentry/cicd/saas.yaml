@@ -1,0 +1,54 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: sentry
+
+name: saas-sentry
+description: SaaS tracking file for Sentry
+
+app:
+  $ref: /services/sentry/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+managedResourceTypes:
+- Deployment
+- Service
+- CronJob
+- ServiceAccount
+- ConfigMap
+
+imagePatterns:
+- quay.io/app-sre/sentry
+- quay.io/app-sre/redis-5
+
+resourceTemplates:
+- name: sentry
+  url: https://github.com/app-sre/sentry
+  path: /sentry.yaml
+  parameters:
+    SENTRY_SINGLE_ORGANIZATION: "true"
+  targets:
+  - namespace:
+      $ref: /services/sentry/namespaces/sentry-stage.yaml
+    ref: master
+    upstream: app-sre-sentry-gh-build-master
+    parameters:
+      CLEANUP_DAYS: 7
+  - namespace:
+      $ref: /services/sentry/namespaces/sentry-production.yaml
+    ref: d51be407c7560d517980feea46f6bafe9d322dbf
+    parameters:
+      CLEANUP_DAYS: 14
