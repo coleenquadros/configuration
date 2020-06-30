@@ -99,7 +99,6 @@ if [[ "$DEPLOYED_SHA256" != "$SHA256" ]]; then
 fi
 
 ## Wait for production integrations to complete
-
 wait
 
 ## Write config.toml for reconcile tools
@@ -108,68 +107,10 @@ cat "$CONFIG_TOML" \
   | sed "s|https://app-interface.devshift.net/graphql|$GRAPHQL_SERVER|" \
   > ${WORK_DIR}/config/config.toml
 
-## Run integrations on local server
+python $CURRENT_DIR/select-integrations.py > $TEMP_DIR/integrations.sh
+source integrations.sh
 
-### saas-file-owners runs first to determine how openshift-saas-deploy-wrappers should run
-run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid
-
-# if changes are only to saas files, skip all other integrations
-[[ "$(cat ${WORK_DIR}/throughput/saas-file-owners/diffs.json | jq .valid_saas_file_changes_only)" != "true" ]] && {
-run_int github &
-run_int github-owners &
-run_int github-validator &
-run_int github-repo-invites &
-run_int github-repo-permissions-validator ci-ext app-sre &
-run_int service-dependencies &
-run_int user-validator &
-run_int quay-membership &
-run_int quay-repos &
 run_vault_reconcile_integration &
-run_int ocm-clusters &
-run_int ocm-groups &
-run_int ocm-aws-infrastructure-access &
-run_int ocm-github-idp --vault-input-path app-sre/integrations-input &
-run_int openshift-groups &
-run_int openshift-users &
-run_int jenkins-plugins &
-run_int jenkins-roles &
-run_int jenkins-job-builder &
-run_int jenkins-webhooks &
-run_int jenkins-webhooks-cleaner &
-run_int aws-iam-keys &
-run_int gitlab-members &
-run_int gitlab-projects &
-run_int gitlab-permissions &
-run_int gitlab-integrations &
-run_int openshift-namespaces &
-run_int openshift-clusterrolebindings &
-run_int openshift-rolebindings &
-run_int openshift-resources &
-run_int openshift-vault-secrets &
-run_int openshift-routes &
-run_int openshift-network-policies &
-run_int openshift-limitranges &
-# run_int openshift-resourcequotas &
-run_int openshift-serviceaccount-tokens &
-run_int terraform-resources &
-run_int terraform-users &
-run_int terraform-vpc-peerings &
-run_int ldap-users $gitlabMergeRequestTargetProjectId &
-run_int openshift-performance-parameters &
-run_int saas-file-validator &
-# Conditionally run integrations according to MR title
-[[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"slack"* ]] && run_int slack-usergroups &
-[[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"sentry"* ]] && run_int sentry-config &
-[[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"mirror"* ]] && run_int quay-mirror &
-[[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"saas-deploy-full"* ]] && run_int openshift-saas-deploy &
-# Add STATE=true to integrations that interact with a state
-STATE=true run_int sql-query &
-STATE=true run_int email-sender &
-STATE=true run_int requests-sender &
-} # end of skip all other integrations
-
-STATE=true run_int openshift-saas-deploy-trigger-configs &
-run_int openshift-saas-deploy-wrapper &
 
 wait
 }
