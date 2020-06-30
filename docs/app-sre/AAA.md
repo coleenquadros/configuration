@@ -369,15 +369,19 @@ Post RCA comms, followups:
 * [Red Hat Major Incident Management (MIM)](https://mojo.redhat.com/groups/it-major-incident-management)
 * [IT ISO (IT Operations)](https://mojo.redhat.com/docs/DOC-1071493)
 
-1. Create a case: https://redhat.service-now.com/help?id=sc_cat_item&sys_id=b86bfc10133ce200dce03ff18144b028
+1. Create a case: https://redhat.service-now.com/help?id=sc_cat_item&sys_id=4c66fd3a1bfbc4d0ebbe43f8bc4bcb6a
 
     1.1 For CEE GitLab:
 
-        * Category: `Application`
+        * Impact: 2 - Affects all of Red Hat
 
-        * Item: `Gerrit/Git`
+        * Urgency: 2 - No workaround; blocks business-critical processes
 
-        * Hostname Affected: `https://gitlab.cee.redhat.com`
+        * Application: DevOps - GitLab
+
+        * Assign to this group - CI/CD PNT (Should auto-fill)
+
+        * Mention `https://gitlab.cee.redhat.com` is inaccessible in the description
 
     1.2 For CentralCI Jenkins:
 
