@@ -52,7 +52,7 @@ def get_integrations_by_schema(integrations, schema):
     return matches
 
 
-def print_integration_cmds(integrations, selected=None, select_all=False):
+def print_pr_check_cmds(integrations, selected=None, select_all=False):
     if selected is None:
         selected = []
 
@@ -95,7 +95,7 @@ def main():
 
     if any_modified(lambda p: not re.match(r'^(data|resources)/', p)):
         # unknow case: we run all integrations
-        print_integration_cmds(integrations, select_all=True)
+        print_pr_check_cmds(integrations, select_all=True)
         return
 
     selected = set()
@@ -116,7 +116,7 @@ def main():
         selected.add('qontract-reconcile openshift-routes')
         selected.add('qontract-reconcile openshift-resources')
 
-    print_integration_cmds(integrations, selected=selected)
+    print_pr_check_cmds(integrations, selected=selected)
 
 if __name__ == '__main__':
     main()
