@@ -107,10 +107,17 @@ cat "$CONFIG_TOML" \
   | sed "s|https://app-interface.devshift.net/graphql|$GRAPHQL_SERVER|" \
   > ${WORK_DIR}/config/config.toml
 
+## Run integrations on local server
+
+### saas-file-owners runs first to determine how openshift-saas-deploy-wrappers should run
+run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid
+
+### vault integration
+run_vault_reconcile_integration &
+
+# run integrations based on their pr_check definitions
 python $CURRENT_DIR/select-integrations.py ${DATAFILES_BUNDLE} > $TEMP_DIR/integrations.sh
 source $TEMP_DIR/integrations.sh
-
-run_vault_reconcile_integration &
 
 wait
 }
