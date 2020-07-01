@@ -107,7 +107,7 @@ cat "$CONFIG_TOML" \
   | sed "s|https://app-interface.devshift.net/graphql|$GRAPHQL_SERVER|" \
   > ${WORK_DIR}/config/config.toml
 
-python $CURRENT_DIR/select-integrations.py > $TEMP_DIR/integrations.sh
+python $CURRENT_DIR/select-integrations.py ${DATAFILES_BUNDLE} > $TEMP_DIR/integrations.sh
 source $TEMP_DIR/integrations.sh
 
 run_vault_reconcile_integration &
