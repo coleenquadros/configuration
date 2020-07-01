@@ -36,7 +36,6 @@ run_int jenkins-job-builder &
 run_int jenkins-webhooks &
 run_int jenkins-webhooks-cleaner &
 run_int gitlab-members &
-run_int gitlab-housekeeping  &
 run_int gitlab-owners &
 run_int gitlab-permissions &
 run_int gitlab-integrations &

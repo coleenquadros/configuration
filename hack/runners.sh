@@ -7,6 +7,7 @@ run_int() {
   [ -n "$DRY_RUN" ] && DRY_RUN_FLAG="--dry-run"
   [ -n "$SQS_GATEWAY" ] && GITLAB_PR_SUBMITTER_QUEUE_URL_ENV="-e gitlab_pr_submitter_queue_url=$gitlab_pr_submitter_queue_url"
   [ -n "$STATE" ] && APP_INTERFACE_STATE_ENV="-e APP_INTERFACE_STATE_BUCKET=$app_interface_state_bucket -e APP_INTERFACE_STATE_BUCKET_ACCOUNT=$app_interface_state_bucket_account"
+  [ -n "$NO_GQL_SHA_URL" ] && NO_GQL_SHA_URL_FLAG="--no-gql-sha-url"
 
   echo "INTEGRATION $INTEGRATION_NAME" >&2
 
@@ -24,7 +25,7 @@ run_int() {
     $APP_INTERFACE_STATE_ENV \
     -w / \
     ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
-    qontract-reconcile --config /config/config.toml $DRY_RUN_FLAG $@ \
+    qontract-reconcile --config /config/config.toml $DRY_RUN_FLAG $NO_GQL_SHA_URL_FLAG $@ \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-${INTEGRATION_NAME}.txt
 
   status="$?"
