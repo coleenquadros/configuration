@@ -84,23 +84,40 @@ def main():
     integrations = get_integrations(data)
     modified_files = get_modified_files()
 
-    if all([re.match(r'^(data|resources)/', p) for p in modified_files]):
-        # only changes in data/ or resources/
-        selected = set()
+    def any_modified(func):
+        return any([func(p) for p in modified_files])
 
-        modified_schemas = get_modified_schemas(data, modified_files)
-        for schema in modified_schemas:
-            selected = selected.union(
-                get_integrations_by_schema(integrations, schema))
+    def all_modified(func):
+        return all([func(p) for p in modified_files])
 
-        print_integration_cmds(integrations, selected=selected)
-    elif all([re.match(r'^docs/', p) for p in modified_files]):
+    if all_modified(lambda p: re.match(r'^docs/', p)):
         # only docs: no need to run pr check
-        pass
-    else:
-        # unknown case: we run all integrations
-        print_integration_cmds(integrations, select_all=True)
+        return
 
+    if any_modified(lambda p: not re.match(r'^(data|resources)/', p)):
+        # unknow case: we run all integrations
+        print_integration_cmds(integrations, select_all=True)
+        return
+
+    selected = set()
+
+    # list of integrations based on the datafiles that are changed
+    modified_schemas = get_modified_schemas(data, modified_files)
+    for schema in modified_schemas:
+        schema_integrations = get_integrations_by_schema(integrations, schema)
+        selected = selected.union(schema_integrations)
+
+    # list of integrations based on resources/
+    # TEMPORARY PATH BASED HACK
+    if any_modified(lambda p: re.match(r'^resources/terraform/', p)):
+        selected.add('qontract-reconcile terraform-resources')
+    if any_modified(lambda p: re.match(r'^resources/jenkins/', p)):
+        selected.add('qontract-reconcile jenkins-job-builder')
+    if any_modified(lambda p: not re.match(r'resources/(terraform|jenkins)/', p)):
+        selected.add('qontract-reconcile openshift-routes')
+        selected.add('qontract-reconcile openshift-resources')
+
+    print_integration_cmds(integrations, selected=selected)
 
 if __name__ == '__main__':
     main()
