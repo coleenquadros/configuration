@@ -108,13 +108,14 @@ def main():
 
     # list of integrations based on resources/
     # TEMPORARY PATH BASED HACK
-    if any_modified(lambda p: re.match(r'^resources/terraform/', p)):
-        selected.add('qontract-reconcile terraform-resources')
-    if any_modified(lambda p: re.match(r'^resources/jenkins/', p)):
-        selected.add('qontract-reconcile jenkins-job-builder')
-    if any_modified(lambda p: not re.match(r'resources/(terraform|jenkins)/', p)):
-        selected.add('qontract-reconcile openshift-routes')
-        selected.add('qontract-reconcile openshift-resources')
+    if any_modified(lambda p: re.match(r'^resources/', p)):
+        if any_modified(lambda p: re.match(r'^resources/terraform/', p)):
+            selected.add('qontract-reconcile terraform-resources')
+        if any_modified(lambda p: re.match(r'^resources/jenkins/', p)):
+            selected.add('qontract-reconcile jenkins-job-builder')
+        if any_modified(lambda p: not re.match(r'resources/(terraform|jenkins)/', p)):
+            selected.add('qontract-reconcile openshift-routes')
+            selected.add('qontract-reconcile openshift-resources')
 
     print_pr_check_cmds(integrations, selected=selected)
 
