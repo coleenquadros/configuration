@@ -57,11 +57,10 @@ def print_integration_cmds(integrations, selected=None, select_all=False):
         selected = []
 
     for int_name, integration in integrations.items():
-        pr = integration.get('pr_check')
-
         if int_name not in selected and not select_all:
             continue
 
+        pr = integration.get('pr_check')
         if not pr or pr.get('disabled'):
             continue
 
