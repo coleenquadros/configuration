@@ -22,7 +22,7 @@ def get_integrations(data):
 
 
 def get_modified_files():
-    return check_output(['git', 'diff', 'origin', '--name-only']).split()
+    return check_output(['git', 'diff', 'remotes/origin/master', '--name-only']).split()
 
 
 def get_schema(data, f):
@@ -30,7 +30,7 @@ def get_schema(data, f):
     if f in data['data']:
         data['data'][f]
     else:
-        data = check_output(['git', 'show', 'origin:{}'.format(f)])
+        data = check_output(['git', 'show', 'remotes/origin/master:{}'.format(f)])
 
     datafile = yaml.safe_load(data)
     return datafile['$schema']
