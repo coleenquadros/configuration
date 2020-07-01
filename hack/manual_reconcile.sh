@@ -108,7 +108,7 @@ cat "$CONFIG_TOML" \
   > ${WORK_DIR}/config/config.toml
 
 python $CURRENT_DIR/select-integrations.py > $TEMP_DIR/integrations.sh
-source integrations.sh
+source $TEMP_DIR/integrations.sh
 
 run_vault_reconcile_integration &
 

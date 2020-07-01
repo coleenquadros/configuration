@@ -6,10 +6,8 @@ import sys
 from glob import glob
 from subprocess import check_output
 import json
-# from enum import Enum
 
 import yaml
-
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -64,16 +62,13 @@ def print_integration_cmds(integrations, selected=None, select_all=False):
         if int_name not in selected and not select_all:
             continue
 
-        if not pr:
-            continue
-
-        if pr.get('disabled'):
+        if not pr or pr.get('disabled'):
             continue
 
         cmd = ""
         if pr.get('state'):
             cmd = "STATE=true "
-        cmd += pr['cmd'] + ' &'
+        cmd += "run_int " + pr['cmd'] + ' &'
 
         print(cmd)
 
