@@ -1,0 +1,47 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: ingress
+
+name: ingress-prod
+description: Insights ingress-prod on the prod cluster under e2e-deploy/ocdeployer management
+
+cluster:
+  $ref: /openshift/insights/cluster-insights-prod.yml
+
+app:
+  $ref: /services/insights/ingress/app.yml
+
+environment:
+  $ref: /products/insights/environments/production.yml
+
+managedRoles: true
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: s3
+  account: insights-prod
+  identifier: insights-ingress-prod
+  defaults: /terraform/resources/s3-gdpr-1.yml
+  output_resource_name: upload-s3
+
+managedResourceTypes:
+- ConfigMap
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/global/cloudwatch
+  version: 3
+- provider: resource
+  path: /insights-prod/ingress-prod/storage-broker-map.configmap.yml
