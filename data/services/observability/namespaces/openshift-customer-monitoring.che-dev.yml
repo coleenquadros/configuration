@@ -1,0 +1,36 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: openshift-customer-monitoring
+description: App-SRE OpenShift Application monitoring
+
+cluster:
+  $ref: /openshift/che-dev/cluster.yml
+
+app:
+  $ref: /services/observability/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/stage.yml
+
+managedResourceTypes:
+- Secret
+
+managedResourceNames:
+# https://github.com/openshift/managed-cluster-config/blob/master/deploy/osd-customer-monitoring/05-role.yaml#L24-L37
+- resource: Secret
+  resourceNames:
+    - prometheus-additional-alertmanager-config
+    - prometheus-auth-proxy
+
+openshiftResources:
+### Prometheus additional alertmanager config
+- provider: vault-secret
+  path: app-interface/global/observability/prometheus-additional-alertmanager-config
+  version: 1
+### Prometheus oauth proxy configuration
+- provider: vault-secret
+  path: app-interface/app-sre-stage-02/openshift-customer-monitoring/prometheus/prometheus-auth-proxy
+  version: 1
