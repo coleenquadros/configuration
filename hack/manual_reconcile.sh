@@ -120,6 +120,11 @@ run_vault_reconcile_integration &
 
 # run integrations based on their pr_check definitions
 python $CURRENT_DIR/select-integrations.py ${DATAFILES_BUNDLE} > $TEMP_DIR/integrations.sh
+exit_status=$?
+if [ $exit_status != 0 ]; then
+  exit $exit_status
+fi
+
 source $TEMP_DIR/integrations.sh
 
 wait
