@@ -125,6 +125,10 @@ if [ $exit_status != 0 ]; then
   exit $exit_status
 fi
 
+echo "selected integrations:"
+cat $TEMP_DIR/integrations.sh
+
+echo "run selected integrations:"
 source $TEMP_DIR/integrations.sh
 
 wait
