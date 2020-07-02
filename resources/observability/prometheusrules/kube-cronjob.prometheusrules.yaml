@@ -1,0 +1,42 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: kube-cronjob
+spec:
+  groups:
+  - name: kube-cron
+    rules:
+    - record: job_cronjob:kube_job_status_start_time:max
+      expr: |
+        label_replace(
+          label_replace(
+            max(
+              kube_job_status_start_time
+              * ON(job_name) GROUP_RIGHT()
+              kube_job_labels{label_cronjob!=""}
+            ) BY (job_name, label_cronjob)
+            == ON(label_cronjob) GROUP_LEFT()
+            max(
+              kube_job_status_start_time
+              * ON(job_name) GROUP_RIGHT()
+              kube_job_labels{label_cronjob!=""}
+            ) BY (label_cronjob),
+            "job", "$1", "job_name", "(.+)"),
+          "cronjob", "$1", "label_cronjob", "(.+)")
+
+    - record: job_cronjob:kube_job_status_failed:sum
+      expr: |
+        clamp_max(
+          job_cronjob:kube_job_status_start_time:max,
+        1)
+        * ON(job) GROUP_LEFT()
+        label_replace(
+          label_replace(
+            (kube_job_status_failed != 0),
+            "job", "$1", "job_name", "(.+)"),
+          "cronjob", "$1", "label_cronjob", "(.+)")
