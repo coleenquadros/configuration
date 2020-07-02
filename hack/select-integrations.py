@@ -3,7 +3,6 @@
 import os
 import re
 import sys
-from glob import glob
 from subprocess import check_output
 import json
 
@@ -12,6 +11,7 @@ import yaml
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 ORIGIN_BRANCH = os.getenv('ORIGIN_BRANCH', 'remotes/origin/master')
+
 
 def get_integrations(data):
     integrations = {}
@@ -27,13 +27,18 @@ def get_modified_files():
 
 
 def get_schema(data, f):
-    """ get the schema of a file. If the file does not exist, it has been deleted, so get it from git """
-    if f in data['data']:
-        data['data'][f]
-    else:
-        data = check_output(['git', 'show', '{}:{}'.format(ORIGIN_BRANCH, f)])
+    """ get the schema of a file. If the file does not exist,
+    it has been deleted, so get it from git """
 
-    datafile = yaml.safe_load(data)
+    data_path = f[len('data'):]
+
+    if data_path in data['data']:
+        datafile = data['data'][data_path]
+    else:
+        datafile_raw = check_output(
+            ['git', 'show', '{}:{}'.format(ORIGIN_BRANCH, f)])
+        datafile = yaml.safe_load(datafile_raw)
+
     return datafile['$schema']
 
 
@@ -119,6 +124,7 @@ def main():
             selected.add('qontract-reconcile openshift-resources')
 
     print_pr_check_cmds(integrations, selected=selected)
+
 
 if __name__ == '__main__':
     main()
