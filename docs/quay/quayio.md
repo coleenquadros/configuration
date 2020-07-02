@@ -4,9 +4,9 @@
 
 | Environment | Console URL |
 | --- | --- |
-|Stage|[Console](https://console-openshift-console.apps.quayio-stage.d7r2.p1.openshiftapps.com/k8s/ns/quayio-stage/deployments)|
-|Production (us-east-1)|[Console](https://console-openshift-console.apps.quayio-prod-us.k6s9.p1.openshiftapps.com/k8s/ns/quay/deployments)|
-|Production (us-east-2)|[Console](https://console-openshift-console.apps.quayio-prod-us.z2r7.p1.openshiftapps.com/k8s/ns/quay/deployments)|
+|Stage|[Console](https://console-openshift-console.apps.quay-s-ue1.h1m6.p1.openshiftapps.com/)|
+|Production (us-east-1)|[Console](https://console-openshift-console.apps.quay-p-ue1.w2l8.p1.openshiftapps.com/)|
+|Production (us-east-2)|[Console](https://console-openshift-console.apps.quay-p-ue2.g1y7.p1.openshiftapps.com/)|
 
 ## Application Logs
 
@@ -21,35 +21,46 @@
 | Environment | Namespace |
 | --- | --- |
 |Stage|[Prometheus](https://prometheus.quayio-stage.devshift.net/graph)|
-|Production (us-east-1)|[Prometheus](https://prometheus.quayio-prod-us-east-1.devshift.net/graph)|
-|Production (us-east-2)|[Prometheus](https://prometheus.quayio-prod-us-east-2.devshift.net/graph)|
+|Production (us-east-1)|[Prometheus](https://prometheus.quay-p-ue1.devshift.net/graph)|
+|Production (us-east-2)|[Prometheus](https://prometheus.quay-p-ue2.devshift.net/graph)|
 
+## Quay Dashboards
 
-## Quay Runtime Grafana Dashboard
+All quay dashboards are located in the [Quay folder of our grafana server](https://grafana.app-sre.devshift.net). We currently have three dashboards:
 
-| Environment | Namespace |
-| --- | --- |
-|Stage|[Grafana](https://grafana.stage.devshift.net/d/_BkydJaWz/quay-io-runtime?orgId=1&var-rate=1m&var-datasource=quayio-stage-prometheus)|
-|Production (us-east-1)|[Grafana](https://grafana.app-sre.devshift.net/d/_BkydJaWz/quay-io-runtime?orgId=1&var-rate=1m&var-datasource=quay-p-ue1-prometheus)|
-|Production (us-east-2)|[Grafana](https://grafana.app-sre.devshift.net/d/_BkydJaWz/quay-io-runtime?orgId=1&var-rate=1m&var-datasource=quayio-prod-us-east-2-prometheus)|
+* [Quay.io runtime](https://grafana.app-sre.devshift.net/d/_BkydJaWz/quay-io-runtime?orgId=1&refresh=1m)
+* [Quay APIs](https://grafana.app-sre.devshift.net/d/JIOgB0ZGk/quay-apis?orgId=1&refresh=1m)
+* [Quay AWS resources](https://grafana.app-sre.devshift.net/d/_BkydJaWqprod1234/quay-aws-resources-us-east-1?orgId=1&refresh=1m)
 
-## Quay AWS Resources Grafana Dashboard
-
-| Environment | Namespace |
-| --- | --- |
-|Stage|[Grafana](https://grafana.stage.devshift.net/d/_BkydJaW123/quay-stage-aws-resources-us-east-1?orgId=1&refresh=1m)|
-|Production (us-east-1)|[Grafana](https://grafana.app-sre.devshift.net/d/_BkydJaWqprod1234/quay-production-aws-resources-us-east-1?orgId=1&refresh=1m)|
-|Production (us-east-2)|N/A|
+Each dashboard has selectors to show data from the different stage and prod environments.
 
 ## Jenkins Jobs
 
-Quay Jenkins jobs can be found [here](https://ci.int.devshift.net/view/quayio/). Following Jenkins configured for Quay right now:
+Quay Jenkins jobs can be found in:
 
-1. [[quayio] build master and deploy to stage](https://ci.int.devshift.net/view/quayio/job/quay-quay-gh-build-master/) - This job is triggered every time a pull request is merged to quay repository's master branch. It will build container image and deploy latest code to `stage` cluster.
-2. [[quayio] saas pr check quayio-prod-us-east-1](https://ci.int.devshift.net/view/quayio/job/service-saas-quay-quay-saas-pr-check-quayio-prod-us-east-1/) - This job is triggered every time a merge request is raised on `saas-quay` repository. It will validate the environment variables for `quayio-prod-us-east-1` cluster provided in saas-quay repository against the Quay OpenShift template.
-1. [[quayio] saas pr check quayio-prod-us-east-2](https://ci.int.devshift.net/view/quayio/job/service-saas-quay-quay-saas-pr-check-quayio-prod-us-east-2/) - This job is triggered every time a merge request is raised on `saas-quay` repository. It will validate the environment variables for `quayio-prod-us-east-2` cluster provided in saas-quay repository against the Quay OpenShift template.
-1. [[quayio] saas deploy quayio-prod-us-east-1](https://ci.int.devshift.net/view/quayio/job/service-saas-quay-quay-saas-deploy/) - This job is triggered when merged request is merged. It will deploy to the `us-east-1` cluster.
-1. [[quayio] saas deploy quayio-prod-us-east-2](https://ci.int.devshift.net/view/quayio/job/service-saas-quay-quay-saas-deploy-with-upstream-service-saas-quay-quay-saas-deploy-quayio-prod-us-east-2/) - This job is triggered when deployment to `us-east-1` cluster is successful.
+* [ci-int](https://ci.int.devshift.net/view/quayio) - Deployment jobs
+* [ci-ext](https://ci.ext.devshift.net/view/quayio) - PR checks and image builds
+
+## Deployments
+
+Deployments of quay in every namespace are done via [opensfhit-saas-deploy](/docs/app-sre/continuous-delivery-in-app-interface.md) integration. The main file controlling the deployments to the different environments is [`/data/services/quayio/saas/quayio.yaml`](data/services/quayio/saas/quayio.yaml).
+
+* Stage deployments are triggered from the `quayio` branch. Any push to that branch will trigger a deployment to the stage enviroment(s).
+* Production deployments are controlled via a hash. Any update to the hash of the different prod environments will trigger a new deployment.
+
+Deployments in the prod environments MUST be done separately. Do NOT update the hashes of all the prod environments at the same time as it is important to verify the deployment working correctly in one environment before deploying the other.
+
+Deployments can be managed by the development team themselves. AppSRE review or approval are not required on updates to the above saas file. A MR to the saas file will indicate the required approvers.
+
+### Deploying Read-Only
+
+Quay can be deployed in a read-only state, which will allow for pulls but disable all write operations. This is typically used during infrastructure migrations, such as moving the database.
+
+See [Deploying Quay Read-Only](services/read-only.md) for more information.
+
+### Trigger Deployment when Secret or Config has Changed
+
+You will have to bounce all quay pods for them to load updated secrets. Since the commit hash has not changed in this scenario, you will need to update the annotation value `QUAY_APP_COMPONENT_ANNOTATIONS_VALUE`. Set this to any random string to trigger a "new" deployment.
 
 ## Managing Access for Quay Development Team
 
@@ -70,40 +81,12 @@ Instructions for managing secrets in Vault can be found at [here](https://gitlab
 
 **When creating a new secret in Vault, be sure to set the Maximum Number of Versions field to 0 (unlimited).**
 
-| Environment | Vault URL |
-| --- | --- |
-|Stage|https://vault.devshift.net/ui/vault/secrets/app-interface/list/quayio-stage/quayio-stage/|
-|Production (us-east-1)|https://vault.devshift.net/ui/vault/secrets/app-interface/list/quayio-prod-us-east-1/quay/|
-|Production (us-east-2)|https://vault.devshift.net/ui/vault/secrets/app-interface/list/quayio-prod-us-east-2/quay/|
-
-### Update Secret Reference
-
-Update the secret's version number to the version of secret you want on the cluster and raise a merge request for AppSRE team to review and merge.
+Secrets' exact location can be found in the files namespaces
 
 | Environment | Namespace |
 | --- | --- |
-|Stage|https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/quayio/namespaces/quayio-stage.yml|
-|Production (us-east-1)|https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/quayio/namespaces/quayio-prod-us-east-1.yml|
-|Production (us-east-2)|https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/quayio/namespaces/quayio-prod-us-east-2.yml|
+|Stage|https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/quayio/namespaces/quay-s-ue1.yml|
+|Production (us-east-1)|https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/quayio/namespaces/quay-p-ue1.yml|
+|Production (us-east-2)|https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/quayio/namespaces/quay-p-ue2.yml|
 
-## Production Deployment
-
-Production deployments will happen from the `master` branch of the Quay repository. You will need the full hash of the commit you want to promote to production. The deployment pipeline is setup to perform a zero downtime rolling update on the clusters. Deployment pipeline will deploy to one cluster at a time starting with `us-east-1`. Successful deployment will trigger the deployment pipeline for the cluster in `us-east-2` region. Deployment to the cluster in  `us-east-1` region takes about 12-15 minutes.
-
-Access to the [saas-quay](https://gitlab.cee.redhat.com/service/saas-quay) repository is managed by GitLab group [quay-dev](https://gitlab.cee.redhat.com/quay-dev).
-
-Deployments are managed by the development team themselves. AppSRE review or approval are not needed on merge requests to the [saas-quay](https://gitlab.cee.redhat.com/service/saas-quay).
-
-### Deploying Read-Only
-
-Quay can be deployed in a read-only state, which will allow for pulls but disable all write operations. This is typically used during infrastructure migrations, such as moving the database.
-
-See [Deploying Quay Read-Only](services/read-only.md) for more information.
-
-### Trigger Deployment on Code Change
-To promote changes to production, you need to update the commit hash in the [saas-quay](https://gitlab.cee.redhat.com/service/saas-quay) repository. Once you have raised a merge request, you need to work with Quay developers who have permission to merge. Once the merge request is merged, deployment pipeline will be automatically triggered to perform new deployment. Here's an [example](https://gitlab.cee.redhat.com/service/saas-quay/merge_requests/25/diffs).
-
-### Trigger Deployment when Secret or Config has Changed
-
-You will have to bounce all quay pods for them to load updated secrets. Since the commit hash has not changed in this scenario, you will need to update the annotation value `QUAY_APP_COMPONENT_ANNOTATIONS_VALUE`. Set this to any random string to trigger a "new" deployment. See [example](https://gitlab.cee.redhat.com/service/saas-quay/merge_requests/29/diffs) merge request.
-
+Once updated the secret, update the secret's version number to the version of secret you want on the cluster and raise a merge request for AppSRE team to review and merge.
