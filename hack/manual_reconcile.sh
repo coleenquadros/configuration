@@ -115,6 +115,9 @@ run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestI
 ### vault integration
 run_vault_reconcile_integration &
 
+### openshift-saas-deploy only runs if the MR title contains "saas-deploy-full"
+[[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"saas-deploy-full"* ]] && run_int openshift-saas-deploy &
+
 # run integrations based on their pr_check definitions
 python $CURRENT_DIR/select-integrations.py ${DATAFILES_BUNDLE} > $TEMP_DIR/integrations.sh
 source $TEMP_DIR/integrations.sh
