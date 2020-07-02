@@ -3217,6 +3217,20 @@
     <<: *job_template_defaults
 
 - job:
+    name: 'ci-conf-generate-v4'
+    defaults: global
+    node: devtools
+    wrappers:
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+          - *kube-config-dsaas-v4
+    builders:
+        - shell: |
+            KUBECONFVER=v4 KUBEHOME=/home/devtools/.kube SA_NAME={sa_name} CONTEXT=bay ENVIRONMENT=production PATH=$PATH:~/.local/bin /usr/bin/python ~/saasherder/fmt-kubeconf.py
+            ls -ltr /home/devtools/.kube/*v4
+
+- job:
     name: 'ci-conf-recycler-test-master'
     defaults: global
     node: devtools
