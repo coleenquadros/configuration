@@ -26,17 +26,22 @@ def get_modified_files():
     return check_output(['git', 'diff', ORIGIN_BRANCH, '--name-only']).split()
 
 
-def get_schema(data, f):
+def get_schema(data, modified_file):
     """ get the schema of a file. If the file does not exist,
     it has been deleted, so get it from git """
 
-    data_path = f[len('data'):]
+    # modified_file represents the git path, but not the keys of data['data']
+    # because the leading `data` has been stripped. We need to calculate it
+    # here to be able to fetch it from data
+    data_path = modified_file[len('data'):]
 
     if data_path in data['data']:
+        # file is present in data.json, we can obtain it from there
         datafile = data['data'][data_path]
     else:
+        # file has been deleted, we need to obtain it from git history
         datafile_raw = check_output(
-            ['git', 'show', '{}:{}'.format(ORIGIN_BRANCH, f)])
+            ['git', 'show', '{}:{}'.format(ORIGIN_BRANCH, modified_file)])
         datafile = yaml.safe_load(datafile_raw)
 
     return datafile['$schema']
@@ -44,9 +49,9 @@ def get_schema(data, f):
 
 def get_modified_schemas(data, modified_files):
     schemas = set()
-    for f in modified_files:
-        if f.startswith("data/"):
-            schemas.add(get_schema(data, f))
+    for modified_file in modified_files:
+        if modified_file.startswith("data/"):
+            schemas.add(get_schema(data, modified_file))
     return schemas
 
 
