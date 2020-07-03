@@ -84,3 +84,52 @@
           source ./hack/runners.sh
           send_log >/dev/null
     <<: *gl_timed
+
+
+# qontract-reconcile-with-upstream
+# ---------------------
+# parameters to be passed to job
+# integrations: names of integrations to run seperated by a space
+# upstream: name of job to build after
+- job-template:
+    id: 'qontract-reconcile-with-upstream'
+    name: 'qontract-reconcile-with-upstream-{job_type}'
+    upstream: empty
+    triggers:
+    - reverse:
+        jobs: '{upstream}'
+        results: 'success'
+    wrappers:
+    - timestamps
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *reconcile_toml
+        - *github_api
+        - *app_interface_state
+    <<: *qontract_reconcile
+
+
+# qontract-reconcile-timed
+# ---------------------
+# parameters to be passed to job
+# integrations: names of integrations to run seperated by a space
+- job-template:
+    id: 'qontract-reconcile-timed'
+    name: 'qontract-reconcile-timed-{job_type}'
+    triggers:
+    - timed: |
+        {cron_expression}
+    wrappers:
+    - timestamps
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *reconcile_toml
+        - *github_api
+        - *app_interface_state
+    <<: *qontract_reconcile
