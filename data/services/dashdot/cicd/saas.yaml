@@ -1,0 +1,35 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: dashdotdb
+
+name: app-interface-dashdotdb
+description: 'SaaS tracking file for Dashdotdb'
+
+app:
+  $ref: /services/dashdot/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/app-sre/dashdotdb
+
+resourceTemplates:
+- name: dashdotdb
+  url: https://github.com/app-sre/dashdotdb
+  path: /openshift/template.yaml
+  targets:
+  - namespace:
+      $ref: /services/dashdot/namespaces/app-sre-stage-01.yml
+    ref: master
