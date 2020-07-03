@@ -1,0 +1,35 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: dashdotdb
+description: namespace for dashdotdb
+
+cluster:
+  $ref: /openshift/app-sre-stage-01/cluster.yml
+
+app:
+  $ref: /services/dashdot/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+
+managedRoles: true
+
+openshiftResources:
+- provider: vault-secret
+  path: app-sre/dashdot/dashdotdb/access-token
+  version: 1
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: app-sre
+  identifier: dashdotdb-stage
+  defaults: /terraform/resources/dashdot/rds-stage-1.yml
+  output_resource_name: dashdotdb-rds
