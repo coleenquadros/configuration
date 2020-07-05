@@ -164,16 +164,16 @@ check_results() {
 }
 
 wait_response() {
-    local count=0
+    local count=1
     local max=10
 
     URL=$1
     EXPECTED_RESPONSE=$2
 
-    while [[ ${count} -lt ${max} ]]; do
+    while [[ ${count} -le ${max} ]]; do
         let count++ || :
         RESPONSE=$(curl -s $URL)
-        [[ "$EXPECTED_RESPONSE" == "$RESPONSE" ]] && break || sleep 10
+        [[ "$EXPECTED_RESPONSE" == "$RESPONSE" ]] && break || sleep $count
     done
 
     if [[ "$EXPECTED_RESPONSE" != "$RESPONSE" ]]; then
