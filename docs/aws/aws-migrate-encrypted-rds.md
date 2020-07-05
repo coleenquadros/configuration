@@ -1,5 +1,10 @@
 # Migrate Encrypted RDS Instance Across Accounts
 
+Few things to note:
+
+1. This process will require downtime.
+2. It takes about 3 hours total for the migration progress. This time can be longer depending on database size.
+
 ## Step By Step Instructions
 
 ### Add the target account to a customer managed key
