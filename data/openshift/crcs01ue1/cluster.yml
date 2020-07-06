@@ -1,0 +1,56 @@
+---
+$schema: /openshift/cluster-1.yml
+
+labels:
+  service: insights
+  version: osdv4
+  env: staging
+
+name: crcs01ue1
+description: Insights OSDv4 Stage cluster
+consoleUrl: "https://console-openshift-console.apps.crcs01ue1.g0q8.p1.openshiftapps.com/"
+serverUrl: "https://api.crcs01ue1.g0q8.p1.openshiftapps.com:6443"
+kibanaUrl: ""
+prometheusUrl: ""
+
+auth:
+  service: github-org-team
+  org: app-sre
+  team: crcs01ue1-cluster
+
+ocm:
+  $ref: /dependencies/ocm/production.yml
+
+managedGroups:
+- dedicated-admins
+
+internal: false
+
+managedClusterRoles: true
+
+spec:
+  provider: aws
+  region: us-east-1
+  major_version: 4
+  multi_az: true
+  nodes: 4
+  instance_type: m5.2xlarge
+  storage: 600
+  load_balancers: 4
+
+network:
+  vpc: 10.3.0.0/16
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
+
+awsInfrastructureAccess:
+- awsGroup:
+    $ref: /aws/insights-prod/groups/App-SRE-admin.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/insights-prod/groups/App-SRE-admin.yml
+  accessLevel: network-mgmt
+
+disable:
+  integrations:
+  - openshift-users
