@@ -12,7 +12,7 @@ spec:
   - name: insights-platform-mq-stage
     rules:
     # pagerduty
-    - alert: App-platform-mq-prod-In-platform-mq-prod-Absent
+    - alert: App-platform-mq-stage-In-platform-mq-stage-Absent
       expr: absent(up{app="platform-mq", namespace="platform-mq-stage"})
       for: 5m
       labels:
@@ -22,7 +22,7 @@ spec:
       annotations:
         dashboard: "https://GRAFANA_URL"
         link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/platform-mq-stage/deployments"
-        message: "Alert name: App-platform-mq-prod-In-platform-mq-prod-Absent from insights-puptoo in ingress-stage"
+        message: "None of the MQ brokers are running in platform-mq-stag on stage cluster."
         runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/App-platform-mq-prod-In-platform-mq-prod-Absent.html"
 
     # SOP mentions groups "insights-core-kafka", "advisor-results", and "insights-storage-broker" but not found.
@@ -40,3 +40,13 @@ spec:
         link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/platform-mq-stage/deployments"
         message: "Any platform ingress topic exceeding 4000 messages in lag for five minutes"
         runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/PlatformKafkaLagMaxExceededHard.html"
+    - alert: StageMQAllBrokersDown
+      expr: count(kafka_server_replicamanager_leadercount{strimzi_io_cluster=~'platform-mq'}) == 0
+      labels:
+        severity: info
+        service: insights
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/platform-mq-stage/deployments"
+        message: "MQ all brokers down in platform-mq-stage on stage cluster"
+        runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/ProdMQAllBrokersDown.html"
