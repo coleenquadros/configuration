@@ -119,14 +119,14 @@ def main():
 
     # list of integrations based on resources/
     # TEMPORARY PATH BASED HACK
-    if any_modified(lambda p: re.match(r'^resources/', p)):
-        if any_modified(lambda p: re.match(r'^resources/terraform/', p)):
-            selected.add('terraform-resources')
-        if any_modified(lambda p: re.match(r'^resources/jenkins/', p)):
-            selected.add('jenkins-job-builder')
-        if any_modified(lambda p: not re.match(r'resources/(terraform|jenkins)/', p)):
-            selected.add('openshift-routes')
-            selected.add('openshift-resources')
+    if any_modified(lambda p: re.match(r'^resources/terraform/', p)):
+        selected.add('terraform-resources')
+    if any_modified(lambda p: re.match(r'^resources/jenkins/', p)):
+        selected.add('jenkins-job-builder')
+    if any_modified(lambda p: re.match(r'^resources/', p) \
+            and not re.match(r'resources/(terraform|jenkins)/', p)):
+        selected.add('openshift-routes')
+        selected.add('openshift-resources')
 
     print_pr_check_cmds(integrations, selected=selected)
 
