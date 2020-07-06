@@ -43,20 +43,30 @@ resourceTemplates:
 - name: insights-inventory-reaper
   path: /templates/inventory/insights-inventory-reaper.yaml
   url: https://github.com/RedHatInsights/saas-templates
-  parameters:
-    REAPER_SUSPEND: 'false'
   targets:
+  - namespace:
+      $ref: /services/insights/host-inventory/namespaces/host-inventory-prod.yml
+    ref: bd63dabf3ded31154799f785db9775b0c9d4535e
+    parameters:
+      IMAGE_TAG: 35c5400
+      REAPER_SUSPEND: 'true'
   - namespace:
       $ref: /services/insights/host-inventory/namespaces/stage-host-inventory-stage.yml
     ref: master
     parameters:
-      IMAGE_TAG: d74a444
+      IMAGE_TAG: 35c5400
+      REAPER_SUSPEND: 'false'
 - name: insights-host-delete
   path: /templates/inventory/insights-host-delete.yaml
   url: https://github.com/RedHatInsights/saas-templates
   parameters:
     REPLICAS: 1
   targets:
+  - namespace:
+      $ref: /services/insights/host-inventory/namespaces/host-inventory-prod.yml
+    ref: bd63dabf3ded31154799f785db9775b0c9d4535e
+    parameters:
+      IMAGE_TAG: 587a4f3
   - namespace:
       $ref: /services/insights/host-inventory/namespaces/stage-host-inventory-stage.yml
     ref: master
@@ -70,10 +80,15 @@ resourceTemplates:
     REPLICAS_P1: 5
   targets:
   - namespace:
+      $ref: /services/insights/host-inventory/namespaces/host-inventory-prod.yml
+    ref: bd63dabf3ded31154799f785db9775b0c9d4535e
+    parameters:
+      IMAGE_TAG: 35c5400
+  - namespace:
       $ref: /services/insights/host-inventory/namespaces/stage-host-inventory-stage.yml
     ref: master
     parameters:
-      IMAGE_TAG: d74a444
+      IMAGE_TAG: 35c5400
 - name: insights-inventory
   path: /templates/inventory/insights-inventory.yaml
   url: https://github.com/RedHatInsights/saas-templates
@@ -88,8 +103,14 @@ resourceTemplates:
     PATH_PREFIX: api
   targets:
   - namespace:
+      $ref: /services/insights/host-inventory/namespaces/host-inventory-prod.yml
+    ref: bd63dabf3ded31154799f785db9775b0c9d4535e
+    parameters:
+      IMAGE_TAG: 35c5400
+      XJOIN_SEARCH_URL: http://xjoin-search.xjoin-prod.svc.cluster.local:4000/graphql
+  - namespace:
       $ref: /services/insights/host-inventory/namespaces/stage-host-inventory-stage.yml
     ref: master
     parameters:
-      IMAGE_TAG: d74a444
+      IMAGE_TAG: 35c5400
       XJOIN_SEARCH_URL: http://xjoin-search.xjoin-stage.svc.cluster.local:4000/graphql
