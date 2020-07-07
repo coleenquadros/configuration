@@ -35,10 +35,6 @@ authentication:
   image:
     path: insights/quay/cloudservices-push
     field: all
-
-parameters:
-  CLOUD_WATCH_LOG_GROUP: policies-stage
-  SENTRY_ENV: stage
   
 resourceTemplates:
 - name: policies-notifications
@@ -51,6 +47,14 @@ resourceTemplates:
     parameters:
       IMAGE_TAG: f749e0c
       DB_SECRET_NAME: policies-notifications-db
+      CLOUD_WATCH_LOG_GROUP: policies-stage
+  - namespace:
+      $ref: /services/insights/policies/namespaces/policies-prod.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: f749e0c
+      DB_SECRET_NAME: policies-notifications-db
+      CLOUD_WATCH_LOG_GROUP: policies-prod
 - name: policies-engine
   path: /templates/policies/policies-engine.yaml
   url: https://github.com/RedHatInsights/saas-templates
@@ -61,6 +65,16 @@ resourceTemplates:
     parameters:
       IMAGE_TAG: 88b602c
       INFINISPAN_STORAGE: 50Gi
+      CLOUD_WATCH_LOG_GROUP: policies-stage
+      SENTRY_ENV: stage
+  - namespace:
+      $ref: /services/insights/policies/namespaces/policies-prod.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 88b602c
+      INFINISPAN_STORAGE: 50Gi
+      CLOUD_WATCH_LOG_GROUP: policies-prod
+      SENTRY_ENV: prod
 - name: policies-ui-backend
   path: /templates/policies/policies-ui-backend.yaml
   url: https://github.com/RedHatInsights/saas-templates
@@ -71,3 +85,13 @@ resourceTemplates:
     parameters:
       IMAGE_TAG: 2359b75
       DB_SECRET_NAME: policies-ui-backend-db
+      CLOUD_WATCH_LOG_GROUP: policies-stage
+      SENTRY_ENV: stage
+  - namespace:
+      $ref: /services/insights/policies/namespaces/policies-prod.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 2359b75
+      DB_SECRET_NAME: policies-ui-backend-db
+      CLOUD_WATCH_LOG_GROUP: policies-prod
+      SENTRY_ENV: prod
