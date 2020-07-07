@@ -1460,19 +1460,17 @@ To get access to the project, if required, contact the App SRE team.
 
 ### Add a Grafana Dashboard
 
-1. Open the Playground dashboard and follow the documentation there.
+1. Add manually your dashboard following [these instructions](/docs/app-sre/monitoring.md#Addingdashboards)
 
-2. Export the graph from Grafana as JSON
+1. Add the graph json to `/resources/observability/grafana/`. Please follow the naming convention
 
-3. Add the graph json to `/resources/observability/grafana/`. Please follow the naming convention
+1. Add the graph to the resources list at `/data/services/observability/namespaces/app-sre-observability-ENV.yml`, `ENV` being both production AND stage. It is mandatory that both environments are added or one of the deployments will eventually fail.
 
-4. Add the graph to the resources list at `/data/services/observability/namespaces/app-sre-observability-ENV.yml` (ENV being either production or stage)
+1. Wait for the configmap has been merged and applied to the cluster(s)
 
-5. Wait for the configmap has been merged and applied to the cluster(s)
+1. Add the configmap as a volume and volumeMount to the grafana pod template in [the app-sre-observability repo](https://gitlab.cee.redhat.com/service/app-sre-observability/). An example of the changes can be found [here](https://gitlab.cee.redhat.com/service/app-sre-observability/commit/0bee8c95be4a27121e6b1ff82a75a2e01901a8f4)
 
-6. Add the configmap as a volume and volumeMount to the grafana pod template in [the app-sre-observability repo](https://gitlab.cee.redhat.com/service/app-sre-observability/). An example of the changes can be found [here](https://gitlab.cee.redhat.com/service/app-sre-observability/commit/0bee8c95be4a27121e6b1ff82a75a2e01901a8f4)
-
-7. Once the template changes are merged, the saas file hash for the grafana service need to be bumped so the changes are deployed. This can be done in [saas-grafana](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/cicd/saas/saas-grafana.yaml).
+1. Once the template changes are merged, the saas file hash for the grafana service need to be bumped so the changes are deployed. This can be done in [saas-grafana](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/cicd/saas/saas-grafana.yaml).
 
 ### Execute a SQL Query on an App Interface controlled RDS instance
 
