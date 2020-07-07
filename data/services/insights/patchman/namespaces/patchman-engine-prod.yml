@@ -1,0 +1,79 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: patchman
+
+name: patchman-engine-prod
+description: Insights patchman-engine-prod on the PROD cluster under e2e-deploy/ocdeployer management
+
+cluster:
+  $ref: /openshift/insights/cluster-insights-prod.yml
+
+app:
+  $ref: /services/insights/patchman/app.yml
+
+environment:
+  $ref: /products/insights/environments/production.yml
+
+# TODO: confirm namespace files.
+networkPoliciesAllow:
+- $ref: /openshift/crcp01ue1/namespaces/app-sre-observability-per-cluster.yml
+- $ref: /services/insights/gateway/namespaces/3scale-prod.yml
+- $ref: /services/insights/remediations/namespaces/prod-remediations-prod.yml
+- $ref: /services/insights/vulnerability/namespaces/prod-vmaas-prod.yml
+
+managedRoles: true
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-prod
+  identifier: patchman-prod
+  parameter_group: /terraform/resources/insights/production/postgres11-parameter-group-patchman-prod.yml
+  defaults: /terraform/resources/insights/production/postgres11-rds-1.yml
+  output_resource_name: patchman-db
+  overrides:
+    instance_class: db.r5.xlarge
+    monitoring_interval: 30
+  enhanced_monitoring: true
+- provider: aws-iam-service-account
+  account: insights-prod
+  identifier: patchman-aws-prod
+  policies:
+  - CloudWatchReadOnlyAccess
+  output_resource_name: patchman-aws
+- provider: cloudwatch
+  account: insights-prod
+  identifier: patchman-prod
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
+
+managedResourceTypes:
+- ServiceAccount
+
+# TODO: Check vault and what values source
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource
+  path: /insights-prod/shared/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
+  path: insights/secrets/insights-prod/patchman-engine-prod/patchman-engine-database-passwords
+  version: 2
+  type: Opaque
+- provider: vault-secret # already there.  May have to move it to "insights/sercrets/insights-prod/"
+  path: insights/secrets/insights-stage/vulnerability-engine-prod/github-vulnerability-bot
+  version: 1
+  type: Opaque
+  annotations:
+    qontract.recycle: "true"
