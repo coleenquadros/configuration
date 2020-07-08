@@ -99,13 +99,15 @@ In the end, you get a token that is encrypted and base64 encoded.
 
     `echo -n <encrypted string> | base64 -d | gpg -d`
 
-5. Update the token in Vault, in the corresponding secret. For pathes, [consult](#relevant-secrets)
+5. Update the token in Vault, in the corresponding secret. For paths, [consult](#relevant-secrets)
 
 6. Send a merge request to app-interface to bump the version of the secret 
 
 7. Merge app-interface PR.
+ 
+8. Restart the f8tenant and f8auth deployments in the relevant namespace/cluster
 
-8. Update the token in Vault for blackbox-exporter checks, this should clear alert
+9. Update the token in Vault for blackbox-exporter checks, this should clear alert
     - Put token in [Vault](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/blackbox-exporter/osio-devtools-bot)
     - Check if secret updated for blackbox-exporter
     - Do rolout for blackbox-eporter to pick-up changes
