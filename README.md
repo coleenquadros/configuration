@@ -40,7 +40,7 @@ this repository.
     - [Manage OpenShift LimitRanges via App-Interface (`/openshift/limitrange-1.yml`)](#manage-openshift-limitranges-via-app-interface-openshiftlimitrange-1yml)
     - [Manage OpenShift ResourceQuotas via App-Interface (`/openshift/quota-1.yml`)](#manage-openshift-resourcequotas-via-app-interface-openshiftquota-1yml)
     - [Self-Service OpenShift ServiceAccount tokens via App-Interface (`/openshift/namespace-1.yml`)](#self-service-openshift-serviceaccount-tokens-via-app-interface-openshiftnamespace-1yml)
-    - [Enable network traffic between Namespaces via App-Interface (`/openshift/namespace-1.yml`)](#enable-network-traffic-between-namespaces-via-app-interface-openshiftnamespace-1yml)
+    - [Enable network traffic between Namespaces via App-Interface  (`/openshift/namespace-1.yml`)](#enable-network-traffic-between-namespaces-via-app-interface-openshiftnamespace-1yml)
     - [Manage Vault configurations via App-Interface](#manage-vault-configurations-via-app-interface)
       - [Manage vault audit backends (`/vault-config/audit-1.yml`)](#manage-vault-audit-backends-vault-configaudit-1yml)
       - [Manage vault auth backends (`/vault-config/auth-1.yml`)](#manage-vault-auth-backends-vault-configauth-1yml)
@@ -54,6 +54,7 @@ this repository.
     - [Manage AWS resources via App-Interface (`/openshift/namespace-1.yml`) using Terraform](#manage-aws-resources-via-app-interface-openshiftnamespace-1yml-using-terraform)
       - [Manage ElasticSearch via App-Interface (`/openshift/namespace-1.yml`)](#manage-elasticsearch-via-app-interface-openshiftnamespace-1yml)
       - [Manage RDS databases via App-Interface (`/openshift/namespace-1.yml`)](#manage-rds-databases-via-app-interface-openshiftnamespace-1yml)
+        - [Create RDS database from Snapshot](#create-rds-database-from-snapshot)
         - [Publishing Database Log Files to CloudWatch](#publishing-database-log-files-to-cloudwatch)
           - [Publishing MySQL Logs to CloudWatch Logs](#publishing-mysql-logs-to-cloudwatch-logs)
           - [Publishing PostgreSQL Logs to CloudWatch Logs](#publishing-postgresql-logs-to-cloudwatch-logs)
@@ -80,7 +81,7 @@ this repository.
     - [Add recording rules via openshift-performance-parameters integration](#add-recording-rules-via-openshift-performance-parameters-integration)
   - [Design](#design)
   - [Developer Guide](#developer-guide)
-  - [Quay.io documentation](#quay-documentation)
+  - [Quay Documentation](#quay-documentation)
 
 ## Overview
 
@@ -955,30 +956,47 @@ The Secret will contain the following fields:
 
 RDS instances can be entirely self-serviced via App-Interface.
 
-In order to add or update an RDS database, you need to add them to the `terraformResources` field.
+In order to create or update an RDS database, you need to add them to the `terraformResources` field.
 
 - `provider`: must be `rds`
-- `account`: must be one of the AWS account names we manage. Current options:
-  - `app-sre`
-  - `osio`
-- `identifier` - name of resource to create (or update)
+- `account`: must be one of the AWS account names managed by app-interface. Account values can be found [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/schemas/aws/tenant_accounts-1.yml).
+- `identifier` - name of database instance to create (or update). Must be unique across all RDS instances in the AWS account.
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options](/resources/terraform/resources/)
 - `parameter_group`: (optional) path relative to [resources](/resources) to a file with parameter group values. Note that it starts with `/`.
-- `overrides`: list of values from `defaults` you wish to override, with the override values. For example: `engine: mysql`.
-- `replica_source`: indicates this will be a read replica with this identifier of an rds instance acting as the source
-- `output_resource_name`: name of Kubernetes Secret to be created.
+- `overrides`: (optional) list of values from `defaults` you wish to override, with the override values. For example: `engine: mysql`.
+- `replica_source`: (optional) indicates this will be a read replica with this identifier of an rds instance acting as the source
+- `output_resource_name`: (optional) name of Kubernetes Secret to be created.
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-instance" and `provider` "rds", the created Secret will be called `my-instance-rds`.
+- `enhanced_monitoring`: (optional) Setting it to `true` will enable enhanced monitoring for the database instance. Learn more about enhanced monitoring [here](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_Monitoring.OS.html).
 
-Once the changes are merged, the RDS instance will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
+Once the changes are merged, the RDS instance will be created (or updated) and a Kubernetes Secret will be created in the same namespace with following details.
 
-The Secret will contain the following fields:
 - `db.host` - The hostname of the RDS instance.
 - `db.port` - The database port.
 - `db.name` - The database name.
 - `db.user` - The master username for the database.
 - `db.password` - Password for the master DB user.
+
+##### Create RDS database from Snapshot
+
+You can create an RDS instance from a database snapshot by setting `snapshot_identifier` in your `defaults` file. However, most AppSRE tenants tend to use the same defaults file for multiple RDS instance. If you are re-using the defaults file, you can set `snapshot_identifier` in the `overrides`.
+
+Here's an example of RDS database created from snapshot:
+
+```yaml
+terraformResources:
+- provider: rds
+  account: insights-prod
+  identifier: system-baseline-prod
+  defaults: /terraform/resources/insights/production/rds/rds-system-baseline-prod.yml
+  overrides:
+    snapshot_identifier: system-baseline-prod-migration
+  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-system-baseline-prod.yml
+  output_resource_name: system-baseline-db-rds
+  enhanced_monitoring: true
+```
 
 ##### Publishing Database Log Files to CloudWatch
 
@@ -1267,7 +1285,7 @@ In order to use this integration, the following must be defined in the cluster d
   - `name`: A name for the VPC peering connection (ex: `clusterA-cluster-B`)
   - `vpc` (mutually exclusive with `cluster`): Value as `$ref: /path/to/some/vpc.yaml` (of type `/aws/vpc-1.yml`)
   - `cluster` (mutually exclusive with `cluster`): Value as `$ref: /path/to/some/cluster.yaml` (of type `/openshift/cluster-1.yml`)
-  
+
 **Note:** For a cluster-to-cluster VPC peering, both clusters MUST have a corresponding VPC peering definition, one of which defined as `cluster-vpc-requester` and one as `cluster-vpc-accepter`, each referencing the other cluster. This ensures we are very specific about peerings and don't end up creating peering requests that will not lead to an account that won't have a corresponding accepter.
 
 Example:
