@@ -5,6 +5,14 @@ Few things to note:
 1. This process will require downtime.
 2. It takes about 3 hours total for the migration progress. This time can be longer depending on database size.
 
+## Migration Use Cases
+
+Most migration will be done when a new service or tenant is be onboard onto app-interface. Few reasons why existing resources will need to be migrated:
+
+1. **Security** - Production resources need to be in an account where user access and resources are managed using app-interface and reconciled periodically.
+1. **Reliability** - SRE team needs to ensure that resources are not modified outside of app-interface or accidentally deleted.
+1. **CAPEX -> OPEX** - By keeping production resources in a separate account from development resources, we can accurately categorize the expenses as cost of goods sold (COGS) which helps Red Hat bottom line. As not all business units can have COGS expenses, Service Delivery can help with this.
+
 ## Step By Step Instructions
 
 ### Add the target account to a customer managed key
@@ -36,4 +44,4 @@ Few things to note:
 
 ### Create the Database Instance
 
-1. After the DB snapshot is copied, you can use the copy to launch the instance.
+1. After the DB snapshot is copied, you can use the copy to launch the instance. [Example MR](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/4846/diffs) that launches RDS instance from database snapshot.
