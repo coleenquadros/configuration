@@ -793,6 +793,7 @@
 
 - job-template:
     name: '{ci_project}-{git_repo}-fabric8-analytics'
+    disabled: '{obj:disabled}'
     registry: 'MISSING_REGISTRY_NAME'
     image_name: 'MISSING_IMAGE_NAME'
     wrappers:
@@ -841,6 +842,8 @@
 
 - job-template:
     name: '{ci_project}-{git_repo}-fabric8-analytics-copr-mercator'
+    disabled: '{obj:disabled}'
+    disabled: true
     wrappers:
         - vault-secrets:
             <<: *vault_defaults
@@ -893,6 +896,7 @@
 
 - job-template:
     name: '{ci_project}-{git_repo}-fabric8-analytics-pylint'
+    disabled: '{obj:disabled}'
     wrappers:
         - ansicolor
     git_organization: fabric8-analytics
@@ -911,6 +915,7 @@
 
 - job-template:
     name: '{ci_project}-{git_repo}-fabric8-analytics-pydoc'
+    disabled: '{obj:disabled}'
     git_organization: fabric8-analytics
     ci_project: 'devtools'
     ci_cmd: '/bin/bash cico_run_pydoc.sh'
@@ -1088,11 +1093,12 @@
 
 - job-template:
     name: '{ci_project}-{git_repo}-fabric8-analytics-build-master'
+    disabled: true
     wrappers:
       - vault-secrets:
           <<: *vault_defaults
           secrets:
-            - *kube-config-dsaas-stg
+            - *kube-config-dsaas-stg-v4
             - *quay-credentials
             - *registry-devshift-credentials
     scm:
@@ -1211,6 +1217,7 @@
 
 - job-template:
     name: '{ci_project}-{git_repo}-f8a-build-master'
+    disabled: true
     wrappers:
       - vault-secrets:
           <<: *vault_defaults
@@ -1320,6 +1327,7 @@
 
 - job-template:
     name: '{ci_project}-{git_repo}-f8a-build-master-v4'
+    disabled: '{obj:disabled}'
     wrappers:
       - vault-secrets:
           <<: *vault_defaults
@@ -1416,16 +1424,16 @@
             EOF
 
             exit $rtn_code
-        - conditional-step:
-            condition-kind: shell
-            condition-command: |
-                [[ {skip_deploy} -eq 0 ]] && exit 0 || exit 1
-            steps:
-                - trigger-builds:
-                    - project:
-                        - "devtools-f8a-master-deploy-e2e-test"
-                      property-file: deploy-e2e-test-params
-                      block: true
+#        - conditional-step:
+#            condition-kind: shell
+#            condition-command: |
+#                [[ {skip_deploy} -eq 0 ]] && exit 0 || exit 1
+#            steps:
+#                - trigger-builds:
+#                    - project:
+#                        - "devtools-f8a-master-deploy-e2e-test"
+#                      property-file: deploy-e2e-test-params
+#                      block: true
     <<: *job_template_build_defaults
 
 - job-template:
@@ -1457,6 +1465,7 @@
 
 - job-template:
     name: '{ci_project}-e2e-fabric8-analytics'
+    disabled: '{obj:disabled}'
     triggers:
       - github-pull-request:
           status-context: "ci.centos.org PR build (fabric8-analytics)"
@@ -1560,6 +1569,7 @@
 
 - job-template:
     name: '{ci_project}-test-end-to-end-prod-fabric8-analytics'
+    disabled: '{obj:disabled}'
     triggers:
       - timed: '@hourly'
     wrappers:
@@ -1629,6 +1639,7 @@
 
 - job-template:
     name: '{ci_project}-f8a-master-deploy-e2e-test'
+    disabled: '{obj:disabled}'
     publishers:
         - email:
             recipients: bayesian-ci@redhat.com rh-depanalytics@redhat.com 
@@ -1638,7 +1649,7 @@
         - vault-secrets:
             <<: *vault_defaults
             secrets:
-              - *kube-config-dsaas-stg
+              - *kube-config-dsaas-stg-v4
               - *recommender-api-token
               - *3scale-user-key
               - *recommender-refresh-token
@@ -3031,6 +3042,7 @@
     defaults: global
     node: devtools
     disabled: '{obj:disabled}'
+     
     properties:
         - github:
             url: https://github.com/openshiftio/{git_repo}/
@@ -4177,9 +4189,11 @@
             git_repo: saas-openshiftio
             ci_project: 'devtools'
         - '{ci_project}-{git_repo}-promote-to-prod':
+            disabled: false
             git_repo: saas-analytics
             ci_project: 'devtools'
-        - '{ci_project}-{git_repo}-promote-to-prod-v4':
+        - '{ci_project}-{git_repo}-promote-to-prod':
+            disabled: true
             git_repo: saas-launchpad
             ci_project: 'devtools'
             saas_git: saas-launchpad
@@ -4202,11 +4216,13 @@
             timeout: '40m'
             cluster: '2a'
         - '{ci_project}-{git_repo}-promote-to-prod-test':
+            disabled: false
             git_repo: saas-analytics
             git_organization: openshiftio
             ci_project: 'devtools'
             image_pattern: '^quay\.io/openshiftio/(rhel-|osa-)'
-        - '{ci_project}-{git_repo}-promote-to-prod-test-v4':
+        - '{ci_project}-{git_repo}-promote-to-prod-test':
+            disabled: true
             git_repo: saas-launchpad
             git_organization: openshiftio
             ci_project: 'devtools'
@@ -4394,6 +4410,7 @@
             registry: 'quay.io'
             image_name: 'openshiftio/rhel-bayesian-coreapi-pgbouncer'
         - '{ci_project}-f8a-master-deploy-e2e-test':
+            disabled: true
             git_organization: fabric8-analytics
             git_repo: fabric8-analytics-common
             ci_project: 'devtools'
@@ -5055,6 +5072,7 @@
             ci_cmd: '/bin/bash cico_run_tests.sh'
             timeout: '60m'
         - '{ci_project}-{git_repo}-fabric8-analytics-build-master':
+            disabled: true
             git_organization: fabric8-analytics
             git_repo: cvejob
             saas_git: saas-analytics
@@ -5654,6 +5672,7 @@
         - '{ci_project}-{git_repo}-fabric8-analytics-pydoc':
             git_repo: fabric8-analytics-utils
         - '{ci_project}-{git_repo}-build-master':
+            disabled: true
             git_organization: fabric8-analytics
             git_repo: f8a-stacks-report
             saas_git: saas-analytics
@@ -5676,6 +5695,7 @@
         - '{ci_project}-{git_repo}-fabric8-analytics-pydoc':
             git_repo: f8a-stacks-report
         - '{ci_project}-{git_repo}-build-master':
+            disabled: true
             git_organization: fabric8-analytics
             git_repo: fabric8-analytics-bigquery-manifests-job
             saas_git: saas-analytics
@@ -5698,6 +5718,7 @@
         - '{ci_project}-{git_repo}-fabric8-analytics-pydoc':
             git_repo: fabric8-analytics-bigquery-manifests-job
         - '{ci_project}-{git_repo}-build-master':
+            disabled: true
             git_organization: fabric8-analytics
             git_repo: f8a-data-ingestion-service
             saas_git: saas-analytics
@@ -5720,6 +5741,7 @@
         - '{ci_project}-{git_repo}-fabric8-analytics-pydoc':
             git_repo: f8a-data-ingestion-service
         - '{ci_project}-{git_repo}-build-master':
+            disabled: true
             git_organization: fabric8-analytics
             git_repo: f8a-emr-deployment
             saas_git: saas-analytics
@@ -5744,6 +5766,7 @@
         - '{ci_project}-{git_repo}-fabric8-analytics-pydoc':
             git_repo: f8a-emr-deployment
         - '{ci_project}-{git_repo}-build-master':
+            disabled: true
             git_organization: fabric8-analytics
             git_repo: graph-cve-sync
             saas_git: saas-analytics
@@ -5764,6 +5787,7 @@
         - '{ci_project}-{git_repo}-fabric8-analytics-pydoc':
             git_repo: graph-cve-sync
         - '{ci_project}-{git_repo}-build-master':
+            disabled: true
             git_organization: fabric8-analytics
             git_repo: fabric8-analytics-github-refresh-cronjob
             saas_git: saas-analytics
@@ -5805,6 +5829,7 @@
         - '{ci_project}-{git_repo}-fabric8-analytics-pydoc':
             git_repo: fabric8-analytics-release-monitor
         - '{ci_project}-{git_repo}-build-master':
+            disabled: true
             git_organization: fabric8-analytics
             git_repo: fabric8-analytics-github-events-monitor
             saas_git: saas-analytics
@@ -5859,6 +5884,7 @@
             ci_cmd: '/bin/bash .ci/cico_compatibility_build_check.sh'
             timeout: '1h'
         - '{ci_project}-{git_repo}-build-master':
+            disabled: true
             git_organization: kubesecurity
             git_repo: osa-api-server
             saas_git: saas-analytics
@@ -5882,6 +5908,7 @@
             git_organization: kubesecurity
             git_repo: osa-api-server
         - '{ci_project}-{git_repo}-build-master':
+            disabled: true
             git_organization: kubesecurity
             git_repo: openshift-probable-vulnerabilities
             saas_git: saas-analytics
