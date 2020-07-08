@@ -80,6 +80,7 @@ this repository.
     - [Add recording rules via openshift-performance-parameters integration](#add-recording-rules-via-openshift-performance-parameters-integration)
   - [Design](#design)
   - [Developer Guide](#developer-guide)
+  - [Quay.io documentation](#quay-documentation)
 
 ## Overview
 
@@ -1666,3 +1667,7 @@ Additional design information: [here](docs/app-interface/design.md).
 ## Developer Guide
 
 More information [here](docs/app-interface/developer.md).
+
+## Quay Documentation
+
+All the quay.io related documentation can be found in the [`quay`](docs/quay) folder.
