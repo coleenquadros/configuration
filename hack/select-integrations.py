@@ -104,7 +104,7 @@ def main():
         # only docs: no need to run pr check
         return
 
-    if any_modified(lambda p: not re.match(r'^(data|resources)/', p)):
+    if any_modified(lambda p: not re.match(r'^(data|resources|docs)/', p)):
         # unknow case: we run all integrations
         print_pr_check_cmds(integrations, select_all=True)
         return
