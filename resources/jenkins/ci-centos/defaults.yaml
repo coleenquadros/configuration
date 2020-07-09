@@ -1327,7 +1327,7 @@
 
 - job-template:
     name: '{ci_project}-{git_repo}-f8a-build-master-v4'
-    disabled: '{obj:disabled}'
+    disabled: true
     wrappers:
       - vault-secrets:
           <<: *vault_defaults
@@ -1397,17 +1397,14 @@
             ssh_cmd="ssh $sshopts $CICO_hostname"
             $ssh_cmd yum -y install rsync
             rsync -e "ssh $sshopts" -Ha $(pwd)/ $CICO_hostname:payload
-            ##### temporarily skip build so we can migrate
-            ##$ssh_cmd -t "cd payload && {ci_cmd}"
-            ##rtn_code=$?
-            rtn_code=0
-            skip_deploy=0
+            $ssh_cmd -t "cd payload && {ci_cmd}"
+            rtn_code=$?
 
             ## RHEL build
-            ##if [[ $rtn_code -eq 0 && -n "{extra_target}" ]]; then
-            ##    $ssh_cmd -t "cd payload && TARGET=\"{extra_target}\" {ci_cmd}"
-            ##    rtn_code=$?
-            ##fi
+            if [[ $rtn_code -eq 0 && -n "{extra_target}" ]]; then
+                $ssh_cmd -t "cd payload && TARGET=\"{extra_target}\" {ci_cmd}"
+                rtn_code=$?
+            fi
 
             # We want to reuse the node for running E2E tests,
             # but only if we are not doomed already.
@@ -2980,6 +2977,7 @@
 
 - job-template:
     name: '{ci_project}-{git_repo}-promote-to-prod-test-v4'
+    disabled: true
     image_pattern: ''
     wrappers:
     - vault-secrets:
@@ -4197,7 +4195,7 @@
             git_repo: saas-analytics
             ci_project: 'devtools'
         - '{ci_project}-{git_repo}-promote-to-prod':
-            disabled: true
+            disabled: false
             git_repo: saas-launchpad
             ci_project: 'devtools'
             saas_git: saas-launchpad
