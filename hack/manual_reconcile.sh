@@ -110,7 +110,7 @@ cat "$CONFIG_TOML" \
 ## Run integrations on local server
 
 ### saas-file-owners runs first to determine how openshift-saas-deploy-wrappers should run
-run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid
+NO_VALIDATE=true run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid
 
 ### vault integration
 run_vault_reconcile_integration &
