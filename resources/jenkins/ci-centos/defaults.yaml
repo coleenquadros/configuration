@@ -2891,155 +2891,6 @@
     <<: *job_template_defaults
 
 - job-template:
-    name: '{ci_project}-{git_repo}-promote-to-prod-v4'
-    image_pattern: ''
-    defaults: global
-    node: devtools
-    disabled: '{obj:disabled}'
-    properties:
-        - github:
-            url: https://github.com/openshiftio/{git_repo}/
-    scm:
-        - git:
-            url: https://github.com/openshiftio/{git_repo}.git
-            shallow_clone: true
-            branches:
-                - master
-    triggers:
-        - github
-    wrappers:
-    - vault-secrets:
-        <<: *vault_defaults
-        secrets:
-          - *kube-config-dsaas-v4
-    builders:
-        - shell: |
-            # testing out the cico client
-            set +e
-
-            export CICO_API_KEY=$(cat ~/duffy.key )
-
-            # get node
-            n=1
-            while true
-            do
-                cico_output=$(cico node get -f value -c ip_address -c comment)
-                if [ $? -eq 0 ]; then
-                    read CICO_hostname CICO_ssid <<< $cico_output
-                    if  [ ! -z "$CICO_hostname" ]; then
-                        # we got hostname from cico
-                        break
-                    fi
-                    echo "'cico node get' succeed, but can't get hostname from output"
-                fi
-                if [ $n -gt 15 ]; then
-                    # give up after 15 tries
-                    echo "giving up on 'cico node get'"
-                    exit 1
-                fi
-                echo "'cico node get' failed, trying again in 60s ($n/15)"
-                n=$[$n+1]
-                sleep 60
-            done
-
-            sshopts="-t -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -l root"
-            ssh_cmd="ssh $sshopts $CICO_hostname"
-
-            if [ -n "${{ghprbTargetBranch}}" ]; then
-                git rebase --preserve-merges origin/${{ghprbTargetBranch}}
-                rtn_code=$?
-                if [ $rtn_code -ne 0 ]; then
-                    echo "The branch can not be rebased onto origin/${{ghprbTargetBranch}}."
-                    exit $rtn_code
-                fi
-            else
-                echo "Not a PR build, using master"
-            fi
-
-            $ssh_cmd -t "yum install -y docker && systemctl start docker"
-
-
-            KUBECONFVER={kubeconfver} ENVIRONMENT=production PATH=$PATH:~/.local/bin DRY_RUN=true /bin/bash ~/saasherder/fetch_and_apply.sh
-            CONTEXTS=$(PATH=$PATH:~/.local/bin saasherder config get-contexts)
-            for c in `echo $CONTEXTS`; do
-                KUBECONFVER={kubeconfver} KUBEHOME=/home/devtools/.kube SA_NAME={sa_name} CONTEXT=$c ENVIRONMENT=production PATH=$PATH:~/.local/bin /usr/bin/python ~/saasherder/fmt-kubeconf.py
-                DIR=$(readlink -f $c-20* | tail -1)
-                for f in `ls $DIR`; do
-                    python ~/saasherder/check_image.py $DIR/$f '{image_pattern}'
-                    cat $DIR/$f | $ssh_cmd docker run --rm -i quay.io/app-sre/manifest-bouncer:{manifest_bouncer_tag} --warn-only -
-                done
-            done
-            unset KUBE_SERVER
-            unset KUBE_TOKEN
-            cico node done $CICO_ssid
-
-            set -ex
-            KUBECONFVER={kubeconfver} ENVIRONMENT=production PATH=$PATH:~/.local/bin /bin/bash ~/saasherder/fetch_and_apply.sh
-
-- job-template:
-    name: '{ci_project}-{git_repo}-promote-to-prod-test-v4'
-    disabled: true
-    image_pattern: ''
-    wrappers:
-    - vault-secrets:
-        <<: *vault_defaults
-        secrets:
-          - *kube-config-dsaas-v4
-    builders:
-        - shell: |
-            # testing out the cico client
-            set +e
-
-            export CICO_API_KEY=$(cat ~/duffy.key )
-
-            # get node
-            n=1
-            while true
-            do
-                cico_output=$(cico node get -f value -c ip_address -c comment)
-                if [ $? -eq 0 ]; then
-                    read CICO_hostname CICO_ssid <<< $cico_output
-                    if  [ ! -z "$CICO_hostname" ]; then
-                        # we got hostname from cico
-                        break
-                    fi
-                    echo "'cico node get' succeed, but can't get hostname from output"
-                fi
-                if [ $n -gt 15 ]; then
-                    # give up after 15 tries
-                    echo "giving up on 'cico node get'"
-                    exit 1
-                fi
-                echo "'cico node get' failed, trying again in 60s ($n/15)"
-                n=$[$n+1]
-                sleep 60
-            done
-
-            sshopts="-t -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -l root"
-            ssh_cmd="ssh $sshopts $CICO_hostname"
-
-            set -ex
-
-            $ssh_cmd -t "yum install -y docker && systemctl start docker"
-
-            KUBECONFVER={kubeconfver} ENVIRONMENT=production PATH=$PATH:~/.local/bin DRY_RUN=true /bin/bash ~/saasherder/fetch_and_apply.sh
-            CONTEXTS=$(PATH=$PATH:~/.local/bin saasherder config get-contexts)
-            for c in `echo $CONTEXTS`; do
-                KUBECONFVER={kubeconfver} KUBEHOME=/home/devtools/.kube SA_NAME={sa_name} CONTEXT=$c ENVIRONMENT=production PATH=$PATH:~/.local/bin /usr/bin/python ~/saasherder/fmt-kubeconf.py
-                DIR=$(readlink -f $c-20* | tail -1)
-                for f in `ls $DIR`; do
-                    python ~/saasherder/check_image.py $DIR/$f '{image_pattern}'
-                    cat $DIR/$f | $ssh_cmd docker run --rm -i quay.io/app-sre/manifest-bouncer:{manifest_bouncer_tag} --warn-only -
-                done
-            done
-
-            unset KUBE_SERVER
-            unset KUBE_TOKEN
-            cico node done $CICO_ssid
-
-    <<: *job_template_defaults
-
-- job-template:
     name: '{ci_project}-{git_repo}-promote-to-prod'
     image_pattern: ''
     defaults: global
@@ -3127,6 +2978,65 @@
         <<: *vault_defaults
         secrets:
           - *kube-config-dsaas-stg
+    builders:
+        - shell: |
+            # testing out the cico client
+            set +e
+
+            export CICO_API_KEY=$(cat ~/duffy.key )
+
+            # get node
+            n=1
+            while true
+            do
+                cico_output=$(cico node get -f value -c ip_address -c comment)
+                if [ $? -eq 0 ]; then
+                    read CICO_hostname CICO_ssid <<< $cico_output
+                    if  [ ! -z "$CICO_hostname" ]; then
+                        # we got hostname from cico
+                        break
+                    fi
+                    echo "'cico node get' succeed, but can't get hostname from output"
+                fi
+                if [ $n -gt 15 ]; then
+                    # give up after 15 tries
+                    echo "giving up on 'cico node get'"
+                    exit 1
+                fi
+                echo "'cico node get' failed, trying again in 60s ($n/15)"
+                n=$[$n+1]
+                sleep 60
+            done
+
+            sshopts="-t -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -l root"
+            ssh_cmd="ssh $sshopts $CICO_hostname"
+
+            set -ex
+
+            $ssh_cmd -t "yum install -y docker && systemctl start docker"
+
+            ENVIRONMENT=production PATH=$PATH:~/.local/bin DRY_RUN=true /bin/bash ~/saasherder/fetch_and_apply.sh
+            CONTEXTS=$(PATH=$PATH:~/.local/bin saasherder config get-contexts)
+            for c in `echo $CONTEXTS`; do
+                DIR=$(readlink -f $c-20* | tail -1)
+                for f in `ls $DIR`; do
+                    python ~/saasherder/check_image.py $DIR/$f '{image_pattern}'
+                    cat $DIR/$f | $ssh_cmd docker run --rm -i quay.io/app-sre/manifest-bouncer:{manifest_bouncer_tag} --warn-only -
+                done
+            done
+
+            cico node done $CICO_ssid
+
+    <<: *job_template_defaults
+
+- job-template:
+    name: '{ci_project}-{git_repo}-promote-to-prod-test-v4'
+    image_pattern: ''
+    wrappers:
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+          - *kube-config-dsaas-stg-v4
     builders:
         - shell: |
             # testing out the cico client
@@ -4201,7 +4111,6 @@
             ci_project: 'devtools'
             saas_git: saas-launchpad
             prj_name: launchpad-production
-            kubeconfver: v4
         - '{ci_project}-{git_repo}-promote-to-prod':
             git_repo: saas-hdd
             ci_project: 'devtools'
@@ -4224,14 +4133,13 @@
             git_organization: openshiftio
             ci_project: 'devtools'
             image_pattern: '^quay\.io/openshiftio/(rhel-|osa-)'
-        - '{ci_project}-{git_repo}-promote-to-prod-test':
+        - '{ci_project}-{git_repo}-promote-to-prod-test-v4':
             disabled: false
             git_repo: saas-launchpad
             git_organization: openshiftio
             ci_project: 'devtools'
             saas_git: saas-launchpad
             prj_name: launchpad-production
-            kubeconfver: v4
         - '{ci_project}-{git_repo}-promote-to-prod-test':
             git_repo: saas-hdd
             git_organization: openshiftio
