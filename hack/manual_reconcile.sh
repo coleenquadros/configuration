@@ -80,8 +80,8 @@ cat "$CONFIG_TOML" > ${WORK_DIR}/config/config.toml
 NO_GQL_SHA_URL=true run_int gitlab-fork-compliance $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid app-sre && {
 
 ## Run integrations on production
-ALIAS=jenkins-job-builder-no-compare NO_GQL_SHA_URL=true run_int jenkins-job-builder --no-compare &
-ALIAS=saas-file-owners-no-compare NO_GQL_SHA_URL=true run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid --no-compare &
+ALIAS=jenkins-job-builder-no-compare NO_GQL_SHA_URL=true NO_VALIDATE=true run_int jenkins-job-builder --no-compare &
+ALIAS=saas-file-owners-no-compare NO_GQL_SHA_URL=true NO_VALIDATE=true run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid --no-compare &
 
 # Prepare to run integrations on local server
 
