@@ -1,0 +1,36 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: dashdot
+
+name: dashdotcollector
+description: 'SaaS tracking file for dashdotcollector'
+
+app:
+  $ref: /services/dashdot/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/app-sre/dashdotcollector
+- quay.io/app-sre/rabbitmq
+
+resourceTemplates:
+- name: dashdotcollector
+  url: https://github.com/app-sre/dashdotcollector
+  path: /openshift/template.yaml
+  targets:
+  - namespace:
+      $ref: /services/dashdot/namespaces/app-sre-stage-01.yml
+    ref: master
