@@ -298,7 +298,7 @@ app:
   $ref: /services/container-security-operator/app.yml
 
 environment:
-  $ref: /products/app-sre/environments/production.yml
+  $ref: /products/dashdot/environments/production.yml
 
 networkPoliciesAllow:
 - $ref: /openshift/<cluster>/namespaces/openshift-operator-lifecycle-manager.yml
