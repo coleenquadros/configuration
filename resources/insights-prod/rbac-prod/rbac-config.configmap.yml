@@ -1,4 +1,7 @@
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rbac-config
 data:
   approval.json: |
     {
@@ -6,7 +9,7 @@ data:
         {
           "name": "Approval Administrator",
           "system": true,
-          "version": 4,
+          "version": 5,
           "description": "An approval administrator role that grants permissions to manage workflows, requests, actions, and templates.",
           "access": [
             {
@@ -114,6 +117,13 @@ data:
                     "operation": "equal",
                     "value": "admin"
                   }
+                },
+                {
+                  "attributeFilter": {
+                    "key": "scope",
+                    "operation": "equal",
+                    "value": "group"
+                  }
                 }
               ]
             },
@@ -125,6 +135,13 @@ data:
                     "key": "scope",
                     "operation": "equal",
                     "value": "admin"
+                  }
+                },
+                {
+                  "attributeFilter": {
+                    "key": "scope",
+                    "operation": "equal",
+                    "value": "group"
                   }
                 }
               ]
@@ -264,7 +281,7 @@ data:
         {
           "name": "Catalog Administrator",
           "system": true,
-          "version": 6,
+          "version": 7,
           "description": "A catalog administrator roles grants create,read,update, delete and order permissions",
           "access": [
             {
@@ -503,6 +520,54 @@ data:
             },
             {
               "permission": "catalog:tenants:read"
+            },
+            {
+              "permission": "catalog:order_processes:create",
+              "resourceDefinitions": [
+                {
+                  "attributeFilter": {
+                    "key": "scope",
+                    "operation": "equal",
+                    "value": "admin"
+                  }
+                }
+              ]
+            },
+            {
+              "permission": "catalog:order_processes:delete",
+              "resourceDefinitions": [
+                {
+                  "attributeFilter": {
+                    "key": "scope",
+                    "operation": "equal",
+                    "value": "admin"
+                  }
+                }
+              ]
+            },
+            {
+              "permission": "catalog:order_processes:read",
+              "resourceDefinitions": [
+                {
+                  "attributeFilter": {
+                    "key": "scope",
+                    "operation": "equal",
+                    "value": "admin"
+                  }
+                }
+              ]
+            },
+            {
+              "permission": "catalog:order_processes:update",
+              "resourceDefinitions": [
+                {
+                  "attributeFilter": {
+                    "key": "scope",
+                    "operation": "equal",
+                    "value": "admin"
+                  }
+                }
+              ]
             }
           ]
         },
@@ -699,12 +764,14 @@ data:
             "name": "Cost Cloud Viewer",
             "description": "A cost management role that grants read permissions on cost reports related to cloud sources.",
             "system": true,
-            "version": 3,
+            "version": 4,
             "access": [{
                 "permission": "cost-management:aws.account:*"
             }, {
+                "permission": "cost-management:aws.organizational_unit:*"
+            }, {
                 "permission": "cost-management:azure.subscription_guid:*"
-               }]
+            }]
         }, {
             "name": "Cost OpenShift Viewer",
             "description": "A cost management role that grants read permissions on cost reports related to OpenShift sources.",
@@ -832,6 +899,23 @@ data:
         }
       ]
     }
+  subscriptions.json: |
+    {
+      "roles": [
+        {
+          "name": "Subscription Watch administrator",
+          "description": "Perform any available operation against any Subscription Watch resource.",
+          "system": true,
+          "platform_default": true,
+          "version": 2,
+          "access": [
+            {
+              "permission": "subscriptions:*:*"
+            }
+          ]
+        }
+      ]
+    }
   vulnerability.json: |
     {
       "roles": [
@@ -849,6 +933,4 @@ data:
         }
       ]
     }
-kind: ConfigMap
-metadata:
-  name: rbac-config
+
