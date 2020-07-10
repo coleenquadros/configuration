@@ -265,9 +265,7 @@ Some clusters may require enhanced dedicated-admin privileges. The process to ge
 
 1. Rollout Grafana to make the data source changes effective.
 
-## [WiP] Install the Container Security Operator
-
-Work in Progress. Skip this section now now.
+## Install the Container Security Operator
 
 The Container Security Operator (CSO) brings Quay and Clair metadata to
 Kubernetes / OpenShift. We use the vulnerabilities information in the tenants
@@ -277,8 +275,12 @@ dashboard and in the monthly reports.
 requesting `extended-dedicated-admin` for the user `app-sre-bot` on the new
 cluster (provide the cluster id).
 
-1. Create an `container-secutiry-operator` namespace file for that specific
+1. Create an `container-security-operator` namespace file for that specific
 cluster. Example:
+
+File name: `app-sre-cso-per-cluster.yml`
+
+Content:
 
 ```yaml
 ---
@@ -286,22 +288,53 @@ $schema: /openshift/namespace-1.yml
 
 labels: {}
 
-name: container-secutiry-operator
-description: namespace for the app-sre per-cluster Container Secutiry Operator
+name: container-security-operator
+description: namespace for the app-sre per-cluster Container Security Operator
 
 cluster:
-  $ref: /openshift/app-sre-stage-01/cluster.yml
+  $ref: /openshift/<cluster>/cluster.yml
 
 app:
-  $ref: /services/container-secutiry-operator/app.yml
+  $ref: /services/container-security-operator/app.yml
 
 environment:
-  $ref: /products/app-sre/environments/stage.yml
+  $ref: /products/app-sre/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /openshift/<cluster>/namespaces/openshift-operator-lifecycle-manager.yml
 ```
 
-1. Add the new `container-secutiry-operator` namespace to the target namespaces
-in [saas.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/container-security-operator/cicd/saas.yaml)
-to deploy the Container Secutiry Operator. Example:
+If the `openshift-operator-lifecycle-manager` namespace is not yet defined in
+app-interface, you have to define it also:
+
+File name: `openshift-operator-lifecycle-manager.yml`
+
+Content:
+
+```yaml
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: openshift-operator-lifecycle-manager
+
+cluster:
+  $ref: /openshift/<cluster>/cluster.yml
+
+app:
+  $ref: /services/app-sre/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/production.yml
+
+description: openshift-operator-lifecycle-manager namespace
+```
+
+1. Add the new `container-security-operator` namespace to the target
+namespaces in the
+[saas.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/container-security-operator/cicd/saas.yaml)
+to deploy the Container Security Operator. Example:
 
 ```yaml
 resourceTemplates:
@@ -312,7 +345,7 @@ resourceTemplates:
   ...
   - namespace:
       $ref: /openshift/app-sre-stage-01/namespaces/app-sre-cso-per-cluster.yml
-    ref: master
+    ref: <commit_hash>
 ```
 
 ## Enable logging (EFK)
