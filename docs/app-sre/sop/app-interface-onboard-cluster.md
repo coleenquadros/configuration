@@ -312,7 +312,7 @@ Some clusters may require enhanced dedicated-admin privileges. The process to ge
 
 1. Update the Grafana datasources secret in Vault: https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/grafana/datasources
 
-    - Add a new key `<cluster_name>-prometheus` with value that is to be used as a password.  It can be any password.  It is recommended to use a tool like pwgen (ex to create a single 16 character random password: `pwgen -cnys 32 1`
+    - Add a new key `<cluster_name>-prometheus` with value that is to be used as a password.  It can be any password.  It is recommended to use a tool like pwgen (ex to create a single 16 character random password: `pwgen -cns 32 1`
 
 1. Create the following secrets in Vault to match the OAuth apps created in the previous step:
     - Generate the auth token value: `htpasswd -s -n app-sre-observability`
