@@ -1,1 +1,1 @@
-# cloud.redhat.com
+# cloud.redhat.com (Insights)
