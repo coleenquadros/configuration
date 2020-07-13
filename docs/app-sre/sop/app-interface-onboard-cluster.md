@@ -119,6 +119,19 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
       accessLevel: network-mgmt
     ```
 
+1. If the cluster is private, the following must be added to the `cluster.yml` file
+
+    ```yaml
+    jumpHost:
+      hostname: ci.ext.devshift.net
+      knownHosts: /jump-host/known-hosts/ci.ext.devshift.net
+      user: app-sre-bot
+      identity:
+        path: app-sre/ansible/roles/app-sre-bot
+        field: identity
+        format: base64
+    ```
+
 1. Grant dedicated-admin access to App-SRE team
 
     ```yaml
