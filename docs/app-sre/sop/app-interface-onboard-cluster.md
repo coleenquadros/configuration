@@ -23,7 +23,7 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
 1. Click `Subscriptions` and ensure you have enough quota to provision a cluster
     - Must have at least 1 cluster.aws of the desired type
     - Check that you have enough compute nodes quota for the desired total compute (4 are included in a single-az cluster, 6 in a multi-az)
-    - Note that quota is driven via this [repo](https://gitlab.cee.redhat.com/service/ocm-resources/) and this is our [org file](https://gitlab.cee.redhat.com/service/ocm-resources/blob/master/data/uhc-production/orgs/12147054.yaml) in prod. Aaron Weitekamp
+    - Note that quota is driven via this [repo](https://gitlab.cee.redhat.com/service/ocm-resources/) and this is our [org file](https://gitlab.cee.redhat.com/service/ocm-resources/blob/master/data/uhc-production/orgs/12147054.yaml) in prod. The `@ocm-resources` Slack alias can also be pinged for any questions or if the change is urgent.
 
 1. Click `Clusters`, then `Create Cluster`
 
@@ -31,7 +31,7 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
 
 1. Select the following options
     - Billing model: Standard
-    - Cluster name: Follow naming convenstions [here](https://docs.google.com/document/d/1OIe4JGbScz57dIGZztThLTvji056OBCfaHSvGAo7Hao)
+    - Cluster name: Follow naming convention [here](https://docs.google.com/document/d/1OIe4JGbScz57dIGZztThLTvji056OBCfaHSvGAo7Hao)
     - Region: (recommended: us-east-1)
     - Availability: Multi-az
     - Choose appropriate instance type
