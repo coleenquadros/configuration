@@ -412,8 +412,8 @@ Kubernetes / OpenShift. We use the vulnerabilities information in the tenants
 dashboard and in the monthly reports.
 
 1. Create a ticket to [OHSS](https://issues.redhat.com/secure/CreateIssue.jspa?pid=12323823&issuetype=3),
-requesting `extended-dedicated-admin` for the user `app-sre-bot` on the new
-cluster (provide the cluster id).
+requesting `extended-dedicated-admin` on the new cluster (provide the cluster 
+id).
 
 1. Create an `container-security-operator` namespace file for that specific
 cluster. Example:
@@ -484,7 +484,7 @@ resourceTemplates:
   targets:
   ...
   - namespace:
-      $ref: /openshift/app-sre-stage-01/namespaces/app-sre-cso-per-cluster.yml
+      $ref: /openshift/<cluster>/namespaces/app-sre-cso-per-cluster.yml
     ref: <commit_hash>
 ```
 
