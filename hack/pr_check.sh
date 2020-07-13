@@ -25,8 +25,11 @@ REPORT=$TEMP_DIR/reports/index.html
 
 # Run validator
 OUTPUT_DIR=${TEMP_DIR}/validate make bundle
+
+set +e
 OUTPUT_DIR=${TEMP_DIR}/validate make validate | tee ${RESULTS}
 exit_status=$?
+set -e
 
 # Write report
 python ./$CURRENT_DIR/gen-report.py ${RESULTS} > ${REPORT}

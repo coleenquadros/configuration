@@ -1,0 +1,71 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: patchman
+
+name: patchman-engine-prod
+description: Insights patchman-engine-prod on the PROD cluster under e2e-deploy/ocdeployer management
+
+cluster:
+  $ref: /openshift/crcp01ue1/cluster.yml
+
+app:
+  $ref: /services/insights/patchman/app.yml
+
+environment:
+  $ref: /products/insights/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-prod.yml
+- $ref: /services/insights/remediations/namespaces/remediations-prod.yml
+- $ref: /services/insights/vulnerability/namespaces/vmaas-prod.yml
+
+managedRoles: true
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: aws-iam-service-account
+  account: insights-prod
+  identifier: patchman-aws-prod
+  policies:
+  - CloudWatchReadOnlyAccess
+  output_resource_name: patchman-aws
+- provider: cloudwatch
+  account: insights-prod
+  identifier: patchman-prod
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/insights-prod/patchman-engine-prod/patchman-engine-database-passwords
+  version: 2
+  type: Opaque
+- provider: vault-secret
+  path: insights/secrets/insights-prod/vulnerability-engine-prod/github-vulnerability-bot
+  version: 1
+  type: Opaque
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: app-sre/integrations-output/terraform-resources/insights-prod/patchman-engine-prod/patchman-db
+  version: 1
+  type: Opaque
+  annotations:
+    qontract.recycle: "true"
