@@ -1,0 +1,68 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: marketplace
+
+name: marketplace-prod
+description: Marketplace PROD under app-interface management
+
+cluster:
+  $ref: /openshift/crcp01ue1/cluster.yml
+
+app:
+  $ref: /services/insights/marketplace/app.yml
+
+environment:
+  $ref: /products/insights/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-prod.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ConfigMap
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/insights-stage/marketplace-stage/marketplace-secret
+  version: 2
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: app-sre/integrations-output/terraform-resources/insights-prod/marketplace-prod/marketplace-db-rds
+  version: 1
+  type: Opaque
+  annotations:
+    qontract.recycle: "true"
+- provider: resource
+  path: /insights-prod/marketplace-prod/marketplace-app.configmap.yaml
+- provider: resource
+  path: /insights-prod/marketplace-prod/marketplace-db.configmap.yaml
+- provider: resource
+  path: /insights-prod/marketplace-prod/marketplace-env.configmap.yaml
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: s3
+  account: insights-prod
+  identifier: open-marketplace-prod
+  defaults: /terraform/resources/s3-gdpr-1.yml
+  output_resource_name: marketplace-s3
