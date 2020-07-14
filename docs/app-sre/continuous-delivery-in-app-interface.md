@@ -91,6 +91,10 @@ Each saas file must be referenced from at least one role under the `owned_saas_f
 
 Each user with this role can approve MRs by adding a `/lgtm` comment in the MR in the following cases -
 - the MR only changes saas files that this user is an owner of and no other files
+- the MR only changes one or more of the following fields in a saas file:
+    - `ref`
+    - `parameters`
+    - `disable`
 - all tests are passing succesfully 
 - approving user is an owner of the saas file in a merged version in app-interface (prevent privilege escalation). [Read more](/docs/app-sre/sop/app-interface-integrations-flow-and-failure-scenarios.md)
 - a user can not `/lgtm` themselves (unless there is only one owner of the saas file)
