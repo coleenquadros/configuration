@@ -19,3 +19,4 @@ To determine a weight for a record, look [here](docs/aws/aws-route53.md#selectin
 ## Adding a record
 
 Follow the procedure for [Adding a record to a Hosted Zone](docs/aws/aws-route53#adding-a-record-to-a-hosted-zone).
+

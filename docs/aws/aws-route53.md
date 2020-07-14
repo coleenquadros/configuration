@@ -58,3 +58,4 @@ Then recordB will get 2x the traffic of recordA, or roughly 66.6% of the total t
 The weight values are completely independent but must be between 0 and 255, inclusive (0 <= x <= 255).  The higher the value the more traffic a record will get.
 
 The `Set ID` is a free form field and can be anything, but it must be unique.  Use it to provide a value that will distinguish between the records with the same name.  This will be the fastest means to know what each record is pointing to without having to track down what the alias is pointint to.  In most cases this value should be set to the name of the OSD cluster.
+
