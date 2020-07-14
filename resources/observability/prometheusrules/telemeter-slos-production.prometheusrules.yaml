@@ -6,155 +6,220 @@ metadata:
   labels:
     prometheus: app-sre
     role: alert-rules
-  name: telemeter-slos-prod
+  name: telemeter-slos-production
 spec:
   groups:
-  - name: telemeter.slo.rules
+  - name: telemeter-upload.slo.rules
     rules:
-    - expr: |
-        sum(label_replace(rate(http_requests_total{service="telemeter-server",handler="upload",namespace="telemeter-production"}[5m]), "status_code", "${1}xx", "code", "([0-9])..")) by (status_code)
+    - alert: TelemeterUploadErrorBudgetBurning
+      annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&refresh=1m&var-datasource=telemeter-prod-01-prometheus
+        message: Telemeter /upload is burning too much error budget to gurantee overall availability
+        runbook: https://gitlab.cee.redhat.com/observatorium/configuration/blob/master/docs/sop/observatorium.md#telemeteruploaderrorbudgetburning
+      expr: |
+        sum(haproxy_server_http_responses_total:burnrate5m{route="telemeter-server-upload"}) > (14.40 * (1-0.98000))
+        and
+        sum(haproxy_server_http_responses_total:burnrate1h{route="telemeter-server-upload"}) > (14.40 * (1-0.98000))
+      for: 2m
       labels:
-        handler: upload
-        namespace: telemeter-production
-        service: telemeter-server
-      record: status_code:http_requests_total:rate5m:sum
-    - expr: |
-        sum(label_replace(rate(http_requests_total{service="telemeter-server",handler="upload",namespace="telemeter-production"}[30m]), "status_code", "${1}xx", "code", "([0-9])..")) by (status_code)
+        route: telemeter-server-upload
+        service: telemeter
+        severity: critical
+    - alert: TelemeterUploadErrorBudgetBurning
+      annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&refresh=1m&var-datasource=telemeter-prod-01-prometheus
+        message: Telemeter /upload is burning too much error budget to gurantee overall availability
+        runbook: https://gitlab.cee.redhat.com/observatorium/configuration/blob/master/docs/sop/observatorium.md#telemeteruploaderrorbudgetburning
+      expr: |
+        sum(haproxy_server_http_responses_total:burnrate30m{route="telemeter-server-upload"}) > (6.00 * (1-0.98000))
+        and
+        sum(haproxy_server_http_responses_total:burnrate6h{route="telemeter-server-upload"}) > (6.00 * (1-0.98000))
+      for: 15m
       labels:
-        handler: upload
-        namespace: telemeter-production
-        service: telemeter-server
-      record: status_code:http_requests_total:rate30m:sum
-    - expr: |
-        sum(label_replace(rate(http_requests_total{service="telemeter-server",handler="upload",namespace="telemeter-production"}[1h]), "status_code", "${1}xx", "code", "([0-9])..")) by (status_code)
+        route: telemeter-server-upload
+        service: telemeter
+        severity: critical
+    - alert: TelemeterUploadErrorBudgetBurning
+      annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&refresh=1m&var-datasource=telemeter-prod-01-prometheus
+        message: Telemeter /upload is burning too much error budget to gurantee overall availability
+        runbook: https://gitlab.cee.redhat.com/observatorium/configuration/blob/master/docs/sop/observatorium.md#telemeteruploaderrorbudgetburning
+      expr: |
+        sum(haproxy_server_http_responses_total:burnrate2h{route="telemeter-server-upload"}) > (3.00 * (1-0.98000))
+        and
+        sum(haproxy_server_http_responses_total:burnrate1d{route="telemeter-server-upload"}) > (3.00 * (1-0.98000))
+      for: 1h
       labels:
-        handler: upload
-        namespace: telemeter-production
-        service: telemeter-server
-      record: status_code:http_requests_total:rate1h:sum
-    - expr: |
-        sum(label_replace(rate(http_requests_total{service="telemeter-server",handler="upload",namespace="telemeter-production"}[2h]), "status_code", "${1}xx", "code", "([0-9])..")) by (status_code)
+        route: telemeter-server-upload
+        service: telemeter
+        severity: medium
+    - alert: TelemeterUploadErrorBudgetBurning
+      annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&refresh=1m&var-datasource=telemeter-prod-01-prometheus
+        message: Telemeter /upload is burning too much error budget to gurantee overall availability
+        runbook: https://gitlab.cee.redhat.com/observatorium/configuration/blob/master/docs/sop/observatorium.md#telemeteruploaderrorbudgetburning
+      expr: |
+        sum(haproxy_server_http_responses_total:burnrate6h{route="telemeter-server-upload"}) > (1.00 * (1-0.98000))
+        and
+        sum(haproxy_server_http_responses_total:burnrate3d{route="telemeter-server-upload"}) > (1.00 * (1-0.98000))
+      for: 3h
       labels:
-        handler: upload
-        namespace: telemeter-production
-        service: telemeter-server
-      record: status_code:http_requests_total:rate2h:sum
+        route: telemeter-server-upload
+        service: telemeter
+        severity: medium
     - expr: |
-        sum(label_replace(rate(http_requests_total{service="telemeter-server",handler="upload",namespace="telemeter-production"}[6h]), "status_code", "${1}xx", "code", "([0-9])..")) by (status_code)
-      labels:
-        handler: upload
-        namespace: telemeter-production
-        service: telemeter-server
-      record: status_code:http_requests_total:rate6h:sum
-    - expr: |
-        sum(label_replace(rate(http_requests_total{service="telemeter-server",handler="upload",namespace="telemeter-production"}[1d]), "status_code", "${1}xx", "code", "([0-9])..")) by (status_code)
-      labels:
-        handler: upload
-        namespace: telemeter-production
-        service: telemeter-server
-      record: status_code:http_requests_total:rate1d:sum
-    - expr: |
-        sum(label_replace(rate(http_requests_total{service="telemeter-server",handler="upload",namespace="telemeter-production"}[3d]), "status_code", "${1}xx", "code", "([0-9])..")) by (status_code)
-      labels:
-        handler: upload
-        namespace: telemeter-production
-        service: telemeter-server
-      record: status_code:http_requests_total:rate3d:sum
-    - expr: |
-        sum(status_code:http_requests_total:rate5m:sum{service="telemeter-server",handler="upload",namespace="telemeter-production",status_code="5xx"})
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-upload",code="5xx"}[1d]))
         /
-        sum(status_code:http_requests_total:rate5m:sum{service="telemeter-server",handler="upload",namespace="telemeter-production"})
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-upload"}[1d]))
       labels:
-        handler: upload
-        namespace: telemeter-production
-        service: telemeter-server
-      record: errors:status_code:http_requests_total:rate5m:sum
+        route: telemeter-server-upload
+      record: haproxy_server_http_responses_total:burnrate1d
     - expr: |
-        sum(status_code:http_requests_total:rate30m:sum{service="telemeter-server",handler="upload",namespace="telemeter-production",status_code="5xx"})
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-upload",code="5xx"}[1h]))
         /
-        sum(status_code:http_requests_total:rate30m:sum{service="telemeter-server",handler="upload",namespace="telemeter-production"})
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-upload"}[1h]))
       labels:
-        handler: upload
-        namespace: telemeter-production
-        service: telemeter-server
-      record: errors:status_code:http_requests_total:rate30m:sum
+        route: telemeter-server-upload
+      record: haproxy_server_http_responses_total:burnrate1h
     - expr: |
-        sum(status_code:http_requests_total:rate1h:sum{service="telemeter-server",handler="upload",namespace="telemeter-production",status_code="5xx"})
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-upload",code="5xx"}[2h]))
         /
-        sum(status_code:http_requests_total:rate1h:sum{service="telemeter-server",handler="upload",namespace="telemeter-production"})
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-upload"}[2h]))
       labels:
-        handler: upload
-        namespace: telemeter-production
-        service: telemeter-server
-      record: errors:status_code:http_requests_total:rate1h:sum
+        route: telemeter-server-upload
+      record: haproxy_server_http_responses_total:burnrate2h
     - expr: |
-        sum(status_code:http_requests_total:rate2h:sum{service="telemeter-server",handler="upload",namespace="telemeter-production",status_code="5xx"})
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-upload",code="5xx"}[30m]))
         /
-        sum(status_code:http_requests_total:rate2h:sum{service="telemeter-server",handler="upload",namespace="telemeter-production"})
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-upload"}[30m]))
       labels:
-        handler: upload
-        namespace: telemeter-production
-        service: telemeter-server
-      record: errors:status_code:http_requests_total:rate2h:sum
+        route: telemeter-server-upload
+      record: haproxy_server_http_responses_total:burnrate30m
     - expr: |
-        sum(status_code:http_requests_total:rate6h:sum{service="telemeter-server",handler="upload",namespace="telemeter-production",status_code="5xx"})
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-upload",code="5xx"}[3d]))
         /
-        sum(status_code:http_requests_total:rate6h:sum{service="telemeter-server",handler="upload",namespace="telemeter-production"})
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-upload"}[3d]))
       labels:
-        handler: upload
-        namespace: telemeter-production
-        service: telemeter-server
-      record: errors:status_code:http_requests_total:rate6h:sum
+        route: telemeter-server-upload
+      record: haproxy_server_http_responses_total:burnrate3d
     - expr: |
-        sum(status_code:http_requests_total:rate1d:sum{service="telemeter-server",handler="upload",namespace="telemeter-production",status_code="5xx"})
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-upload",code="5xx"}[5m]))
         /
-        sum(status_code:http_requests_total:rate1d:sum{service="telemeter-server",handler="upload",namespace="telemeter-production"})
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-upload"}[5m]))
       labels:
-        handler: upload
-        namespace: telemeter-production
-        service: telemeter-server
-      record: errors:status_code:http_requests_total:rate1d:sum
+        route: telemeter-server-upload
+      record: haproxy_server_http_responses_total:burnrate5m
     - expr: |
-        sum(status_code:http_requests_total:rate3d:sum{service="telemeter-server",handler="upload",namespace="telemeter-production",status_code="5xx"})
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-upload",code="5xx"}[6h]))
         /
-        sum(status_code:http_requests_total:rate3d:sum{service="telemeter-server",handler="upload",namespace="telemeter-production"})
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-upload"}[6h]))
       labels:
-        handler: upload
-        namespace: telemeter-production
-        service: telemeter-server
-      record: errors:status_code:http_requests_total:rate3d:sum
+        route: telemeter-server-upload
+      record: haproxy_server_http_responses_total:burnrate6h
+  - name: telemeter-authorize.slo.rules
+    rules:
+    - alert: TelemeterAuthorizeErrorBudgetBurning
+      annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&refresh=1m&var-datasource=telemeter-prod-01-prometheus
+        message: Telemeter /authorize is burning too much error budget to gurantee overall availability
+        runbook: https://gitlab.cee.redhat.com/observatorium/configuration/blob/master/docs/sop/observatorium.md#telemeterauthorizeerrorbudgetburning
+      expr: |
+        sum(haproxy_server_http_responses_total:burnrate5m{route="telemeter-server-authorize"}) > (14.40 * (1-0.98000))
+        and
+        sum(haproxy_server_http_responses_total:burnrate1h{route="telemeter-server-authorize"}) > (14.40 * (1-0.98000))
+      for: 2m
+      labels:
+        route: telemeter-server-authorize
+        service: telemeter
+        severity: critical
+    - alert: TelemeterAuthorizeErrorBudgetBurning
+      annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&refresh=1m&var-datasource=telemeter-prod-01-prometheus
+        message: Telemeter /authorize is burning too much error budget to gurantee overall availability
+        runbook: https://gitlab.cee.redhat.com/observatorium/configuration/blob/master/docs/sop/observatorium.md#telemeterauthorizeerrorbudgetburning
+      expr: |
+        sum(haproxy_server_http_responses_total:burnrate30m{route="telemeter-server-authorize"}) > (6.00 * (1-0.98000))
+        and
+        sum(haproxy_server_http_responses_total:burnrate6h{route="telemeter-server-authorize"}) > (6.00 * (1-0.98000))
+      for: 15m
+      labels:
+        route: telemeter-server-authorize
+        service: telemeter
+        severity: critical
+    - alert: TelemeterAuthorizeErrorBudgetBurning
+      annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&refresh=1m&var-datasource=telemeter-prod-01-prometheus
+        message: Telemeter /authorize is burning too much error budget to gurantee overall availability
+        runbook: https://gitlab.cee.redhat.com/observatorium/configuration/blob/master/docs/sop/observatorium.md#telemeterauthorizeerrorbudgetburning
+      expr: |
+        sum(haproxy_server_http_responses_total:burnrate2h{route="telemeter-server-authorize"}) > (3.00 * (1-0.98000))
+        and
+        sum(haproxy_server_http_responses_total:burnrate1d{route="telemeter-server-authorize"}) > (3.00 * (1-0.98000))
+      for: 1h
+      labels:
+        route: telemeter-server-authorize
+        service: telemeter
+        severity: medium
+    - alert: TelemeterAuthorizeErrorBudgetBurning
+      annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&refresh=1m&var-datasource=telemeter-prod-01-prometheus
+        message: Telemeter /authorize is burning too much error budget to gurantee overall availability
+        runbook: https://gitlab.cee.redhat.com/observatorium/configuration/blob/master/docs/sop/observatorium.md#telemeterauthorizeerrorbudgetburning
+      expr: |
+        sum(haproxy_server_http_responses_total:burnrate6h{route="telemeter-server-authorize"}) > (1.00 * (1-0.98000))
+        and
+        sum(haproxy_server_http_responses_total:burnrate3d{route="telemeter-server-authorize"}) > (1.00 * (1-0.98000))
+      for: 3h
+      labels:
+        route: telemeter-server-authorize
+        service: telemeter
+        severity: medium
     - expr: |
-        sum(label_replace(increase(http_requests_total{service="telemeter-server",handler="upload",namespace="telemeter-production"}[30d]), "status_code", "${1}xx", "code", "([0-9])..")) by (status_code)
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-authorize",code="5xx"}[1d]))
+        /
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-authorize"}[1d]))
       labels:
-        handler: upload
-        namespace: telemeter-production
-        service: telemeter-server
-      record: status_code:http_requests_total:increase30d:sum
+        route: telemeter-server-authorize
+      record: haproxy_server_http_responses_total:burnrate1d
     - expr: |
-        status_code:http_requests_total:increase30d:sum{service="telemeter-server",handler="upload",namespace="telemeter-production",status_code="5xx"}
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-authorize",code="5xx"}[1h]))
+        /
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-authorize"}[1h]))
       labels:
-        handler: upload
-        namespace: telemeter-production
-        service: telemeter-server
-      record: errors:status_code:http_requests_total:increase30d:sum
+        route: telemeter-server-authorize
+      record: haproxy_server_http_responses_total:burnrate1h
     - expr: |
-        (0.100000) * sum(status_code:http_requests_total:increase30d:sum)
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-authorize",code="5xx"}[2h]))
+        /
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-authorize"}[2h]))
       labels:
-        handler: upload
-        namespace: telemeter-production
-        service: telemeter-server
-      record: errorbudget_requests:status_code:http_requests_total:increase30d:sum
+        route: telemeter-server-authorize
+      record: haproxy_server_http_responses_total:burnrate2h
     - expr: |
-        sum(errorbudget_requests:status_code:http_requests_total:increase30d:sum{service="telemeter-server",handler="upload",namespace="telemeter-production"}) - sum(errors:status_code:http_requests_total:increase30d:sum{service="telemeter-server",handler="upload",namespace="telemeter-production"})
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-authorize",code="5xx"}[30m]))
+        /
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-authorize"}[30m]))
       labels:
-        handler: upload
-        namespace: telemeter-production
-        service: telemeter-server
-      record: errorbudget_remaining:status_code:http_requests_total:increase30d:sum
+        route: telemeter-server-authorize
+      record: haproxy_server_http_responses_total:burnrate30m
     - expr: |
-        errorbudget_remaining:status_code:http_requests_total:increase30d:sum / errorbudget_requests:status_code:http_requests_total:increase30d:sum
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-authorize",code="5xx"}[3d]))
+        /
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-authorize"}[3d]))
       labels:
-        handler: upload
-        namespace: telemeter-production
-        service: telemeter-server
-      record: errorbudget:status_code:http_requests_total:increase30d:sum
+        route: telemeter-server-authorize
+      record: haproxy_server_http_responses_total:burnrate3d
+    - expr: |
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-authorize",code="5xx"}[5m]))
+        /
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-authorize"}[5m]))
+      labels:
+        route: telemeter-server-authorize
+      record: haproxy_server_http_responses_total:burnrate5m
+    - expr: |
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-authorize",code="5xx"}[6h]))
+        /
+        sum(rate(haproxy_server_http_responses_total{route="telemeter-server-authorize"}[6h]))
+      labels:
+        route: telemeter-server-authorize
+      record: haproxy_server_http_responses_total:burnrate6h
