@@ -45,6 +45,9 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
     * `name` - a descriptive name of the deplyoed resources
     * `url` - git repository URL (https and not SSH)
     * `path` - path to file containing an OpenShift template in the repository
+    * `provider` - (optional) specify what is the form of the resources in the specified url and path. options:
+        * `openshift-template` - default, an OpenShift template that will be processed into resources and applied
+        * `directory` - a directory containing raw manifests to be applied (not templated)
     * `targets` - a list of namespaces to deploy resources to
         * `namespace` - a reference to a namespace to deploy to
         * `ref` - git ref to deploy (commit sha or branch name (usually `master`))
