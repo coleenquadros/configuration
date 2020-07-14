@@ -4,6 +4,8 @@ This SOP describes the support plan for the cloud.redhat.com production environm
 
 Below is the plan that the cloud.redhat.com Engineering team will follow to provide support for the cloud.redhat.com platform.
 
+For reference, the AppSRE Incident Management Procedure can be read [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/AAA.md#incident-procedure).
+
 ### On-call Plan
 
 The cloud.redhat.com Engineering team includes a set of engineers who form an on-call rotation.  They are responsible for fielding, troubleshooting, and resolving critical alerts that may be triggered by the platform.  The rotation is managed by PagerDuty (https://redhat.pagerduty.com/schedules#P0IM8C0).
