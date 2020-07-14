@@ -7,19 +7,18 @@ name: openshift-customer-monitoring
 description: App-SRE OpenShift Application monitoring
 
 cluster:
-  $ref: /openshift/crcs01ue1/cluster.yml
+  $ref: /openshift/CLUSTERNAME/cluster.yml
 
 app:
-  $ref: /services/insights/app.yml
+  $ref: /services/observability/app.yml
 
 environment:
-  $ref: /products/app-sre/environments/stage.yml
+  $ref: /products/app-sre/environments/production.yml
 
 managedResourceTypes:
-- ServiceMonitor
 - Secret
 - PrometheusRule
-- Subscription
+- ServiceMonitor
 
 managedResourceNames:
 # https://github.com/openshift/managed-cluster-config/blob/master/deploy/osd-customer-monitoring/05-role.yaml#L24-L37
@@ -34,9 +33,6 @@ managedResourceNames:
     - prometheus-auth-proxy
 
 openshiftResources:
-# Prometheus Subscription
-- provider: resource
-  path: /observability/prometheus/v4/prometheus.subscription.yaml
 # Observability
 
 ## Secrets
@@ -52,12 +48,12 @@ openshiftResources:
   path: /observability/prometheus/v4/prometheus-app-sre-additional-scrapeconfig-federate-only.secret.yaml
 ### Prometheus oauth proxy configuration
 - provider: vault-secret
-  path: app-interface/crcs01ue1/openshift-customer-monitoring/prometheus-auth-proxy
-  version: 1
+  path: app-interface/CLUSTERNAME/openshift-customer-monitoring/prometheus/prometheus-auth-proxy
+  version: 2
 ### Alertmanager oauth proxy configuration
 - provider: vault-secret
-  path: app-interface/crcs01ue1/openshift-customer-monitoring/alertmanager/alertmanager-auth-proxy
-  version: 1
+  path: app-interface/CLUSTERNAME/openshift-customer-monitoring/alertmanager/alertmanager-auth-proxy
+  version: 2
 ### Alertmanager configuration
 - provider: resource-template
   type: extracurlyjinja2

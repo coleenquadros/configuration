@@ -37,8 +37,10 @@ openshiftResources:
 # Prometheus Subscription
 - provider: resource
   path: /observability/prometheus/v4/prometheus.subscription.yaml
-# Secrets
-## Observability
+
+# Observability
+
+## Secrets
 ### Prometheus additional alertmanager config
 ### Defines what alertmanager Prometheus fires alerts to
 - provider: vault-secret
@@ -49,8 +51,7 @@ openshiftResources:
 - provider: resource-template
   type: extracurlyjinja2
   path: /observability/prometheus/v4/prometheus-app-sre-additional-scrapeconfig-federate-only.secret.yaml
-### Prometheus additional alertmanager config
-### Defines what alertmanager Prometheus fires alerts to
+### Prometheus oauth proxy configuration
 - provider: vault-secret
   path: app-interface/crc-stg-01/openshift-customer-monitoring/prometheus-auth-proxy
   version: 2
@@ -63,16 +64,29 @@ openshiftResources:
   type: extracurlyjinja2
   path: /observability/alertmanager/alertmanager-instance.secret.yaml
 
+## Servicemonitors
+### App-SRE Prometheus
+- provider: resource
+  path: /observability/servicemonitors/prometheus-app-sre.servicemonitor.yaml
+### Alertmanager
+- provider: resource
+  path: /observability/servicemonitors/alertmanager.servicemonitor.yaml
+### All managed Prometheus Operators
+- provider: resource
+  path: /observability/servicemonitors/prometheus-operators-production.servicemonitor.yaml
+
 ## Prometheus Rules
+### App SRE contract
+- provider: resource
+  path: /observability/prometheusrules/app-sre-contract.yaml
 ### Federated Kubernetes metrics
 - provider: resource
   path: /observability/prometheusrules/kube-metrics.prometheusrules.yaml
 ### Prometheus mixin alerts
 - provider: resource
   path: /observability/prometheusrules/prometheus-mixin.prometheusrules.yaml
-### App-SRE Prometheus
-- provider: resource
-  path: /observability/servicemonitors/prometheus-app-sre.servicemonitor.yaml
+
+################## Add  any cluster-specific content below this line ##################
 
 ## Insights Service Monitors
 - provider: resource
