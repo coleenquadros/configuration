@@ -25,40 +25,7 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
     - Check that you have enough compute nodes quota for the desired total compute (4 are included in a single-az cluster, 6 in a multi-az)
     - Note that quota is driven via this [repo](https://gitlab.cee.redhat.com/service/ocm-resources/) and this is our [org file](https://gitlab.cee.redhat.com/service/ocm-resources/blob/master/data/uhc-production/orgs/12147054.yaml) in prod. The `@ocm-resources` Slack alias can also be pinged for any questions or if the change is urgent.
 
-1. Click `Clusters`, then `Create Cluster`
-
-1. Select `Red Hat OpenShift Dedicated` to provision a managed cluster
-
-1. Select the following options
-    - Billing model: Standard
-    - Cluster name: Follow naming convention [here](https://docs.google.com/document/d/1OIe4JGbScz57dIGZztThLTvji056OBCfaHSvGAo7Hao)
-    - Region: (recommended: us-east-1)
-    - Availability: Multi-az
-    - Choose appropriate instance type
-    - Scale: Choose desired configuration (LoadBalancers are typically not needed as the default Routes include their own LoadBalancers).
-    - Persistent storage: at least 600Gi (we need a bit more more than the default 100Gi to provision our observability stack)
-    - Networking: Advanced (see [Additional configurations](#additional-configurations) section below.  If those conditions do not apply, then Simple networking will be fine)
-
-1. Click create and wait for the cluster to be created
-
-1. Create a new App-SRE Github Oauth Client.
-    In order to create the OAuth client register to create a new application here:
-    https://github.com/organizations/app-sre/settings/applications
-
-    - Name: <cluster_name> cluster
-    - Homepage URL: https://console-openshift-console.apps.<cluster_name>.<cluster_id>.p1.openshiftapps.com/
-        * Note: cluster_id can be obtained from the console.  In OCM, click on the link for the cluster and then click on the `Open Console` button in the upper right corner.  Looking at the URL bar there should be something like: `oauth-openshift.apps.<cluster_name>.<cluster_id>.p1.openshiftapps.com`
-    - Authorization callback URL: (Retrieve this from OCM)
-        * Note: To get the callback URL do the following:
-            - Go to OCM and click on the cluster.
-            - Go to the `Access Control` tab and look for the `Identity providers` section.  Click the `Add identity provider` button.
-            - On the following screen copy the url from the `OAuth callback URL` field.
-            - Press the `Cancel` button to exit that screen.
-            - The callback URL from OCM will end with `oauth2callback/GitHub`.  This needs to be changed to `oauth2callback/github-app-sre`.
-
-1. Place the `client-id` and `client-secret` from the Oauth Client in a secret in [Vault](https://vault.devshift.net/ui/vault/secrets/app-sre/list/integrations-input/ocm-github-idp/github-org-team/app-sre/) named `<cluster_name>-cluster`.
-
-1. Add the cluster in app-interface
+1. Cluster creation in OCM is self-serviced in app-interface. As such cluster.yml file should be added to app-interface at this point
 
     ```yaml
     # /data/openshift/<cluster_name>/cluster.yml
@@ -70,10 +37,10 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
 
     name: <cluster_name>
     description: <cluster_name> cluster
-    consoleUrl: "https://console-openshift-console.apps.<cluster_name>.<cluster_id>.p1.openshiftapps.com"
+    consoleUrl: ""
     kibanaUrl: ""
     prometheusUrl: ""
-    serverUrl: "https://api.<cluster_name>.<cluster_id>.p1.openshiftapps.com:6443"
+    serverUrl: ""
 
     auth:
       service: github-org-team
@@ -88,18 +55,19 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
 
     spec:
       provider: aws
-      region: (Region chosen at cluster creation)
-      version: (OpenShift version)
+      region: (desired region. ex: us-east-1)
+      version: (desired version. ex: 4.4.11)
       multi_az: true
-      nodes: (Compute value on OCM->cluster Overview tab)
-      instance_type: (Instance type chosen at cluster creation)
-      storage: (Persistent storage value on OCM->cluster Overview tab)
-      load_balancers: (Load Balancer value on OCM->cluster Overview tab)
+      nodes: (desired compute nodes todal across all AZs)
+      instance_type: (desired instance type. ex: m5.xlarge)
+      storage: (desired storage amount. ex: 600)
+      load_balancers: (desired load-balancer count. ex: 0)
+      private: false (or true for private clusters)
 
     network:
-      vpc: (Machine CIDR value on OCM->cluster Overview tab)
-      service: (Service CIDR value on OCM->cluster Overview tab)
-      pod: (Pod CIDR value on OCM->cluster Overview tab)
+      vpc: (desired machine CIDR. ex: 10.123.0.0/16)
+      service: (desired service CIDR. ex: 172.30.0.0/16)
+      pod: (desired pod CIDR. ex: 10.128.0.0/14)
 
     disable:
       e2eTests:
@@ -118,6 +86,30 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
         $ref: /aws/<aws account name>/groups/App-SRE-admin.yml
       accessLevel: network-mgmt
     ```
+
+* Note: Cluster name should follow naming convention [here](https://docs.google.com/document/d/1OIe4JGbScz57dIGZztThLTvji056OBCfaHSvGAo7Hao)
+* Note the cluster ID is not known at this point so we do not add a `consoleUrl` and `serverUrl` yet
+
+1. Send the MR, wait for the check to pass and merge. The ocm-clusters integration will create your cluster. You can view the progress in OCM.
+
+1. Once the cluster is created, update the above `cluster.yml` and add the `consoleUrl` and `serverUrl` fields to point to the console and api respectively
+
+1. Create a new App-SRE Github Oauth Client.
+    In order to create the OAuth client register to create a new application here:
+    https://github.com/organizations/app-sre/settings/applications
+
+    - Name: <cluster_name> cluster
+    - Homepage URL: https://console-openshift-console.apps.<cluster_name>.<cluster_id>.p1.openshiftapps.com/
+        * Note: cluster_id can be obtained from the console.  In OCM, click on the link for the cluster and then click on the `Open Console` button in the upper right corner.  Looking at the URL bar there should be something like: `oauth-openshift.apps.<cluster_name>.<cluster_id>.p1.openshiftapps.com`
+    - Authorization callback URL: (Retrieve this from OCM)
+        * Note: To get the callback URL do the following:
+            - Go to OCM and click on the cluster.
+            - Go to the `Access Control` tab and look for the `Identity providers` section.  Click the `Add identity provider` button.
+            - On the following screen copy the url from the `OAuth callback URL` field.
+            - Press the `Cancel` button to exit that screen.
+            - The callback URL from OCM will end with `oauth2callback/GitHub`.  This needs to be changed to `oauth2callback/github-app-sre`.
+
+1. Place the `client-id` and `client-secret` from the Oauth Client in a secret in [Vault](https://vault.devshift.net/ui/vault/secrets/app-sre/list/integrations-input/ocm-github-idp/github-org-team/app-sre/) named `<cluster_name>-cluster`.
 
 1. If the cluster is private, the following must be added to the `cluster.yml` file
 
