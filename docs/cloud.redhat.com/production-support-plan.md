@@ -10,7 +10,7 @@ For reference, the AppSRE Incident Management Procedure can be read [here](https
 
 The cloud.redhat.com Engineering team includes a set of engineers who form an on-call rotation.  They are responsible for fielding, troubleshooting, and resolving critical alerts that may be triggered by the platform.  The rotation is managed by PagerDuty (https://redhat.pagerduty.com/schedules#P0IM8C0).
 
-On-call rotations are one week (Monday to Monday).  On Monday at 9am, the on-call engineer rotates to the next engineer on the calendar.
+On-call rotations are one week (Monday to Monday).  On Monday at 9am ET, the on-call engineer rotates to the next engineer on the calendar.
 
 ### Incident Response Plan
 
@@ -25,13 +25,14 @@ On-call rotations are one week (Monday to Monday).  On Monday at 9am, the on-cal
   - Elect a member of the team to be responsible for regular communication
   - Business Hours: Engineering manager over the responding engineer
   - Non-Business Hours: On-call engineer
-- Page the AppSRE primary on-call
-  - Give them notice that a production outage is being worked.  They will be the AppSRE contact to escalate app-interface MRs
 - Immediately post a message to the Ansible Slack #cloudservices-outage channel indicating that we are aware of the incident
   - Set the channel topic to something like "Inventory is down, refer to XYZ for details"
   - Continually post updates in this channel every 30 minutes, when new information is available, or when the incident is resolved
 - Immediately send an email to the insights-platform@ and cloudservices-outage-list@ mailing lists
   - Continually send email updates every 60 minutes, when new information is available, or when the incident is resolved
+- If an immediate merge into app-interface is necessary, page the AppSRE primary on-call
+  -  Trigger the on-call AppSRE engineer by typing /pd trigger in the #sd-app-sre-oncall CoreOS Slack channel. Fill in the appropriate information as mentioned in this [blog post](https://mojo.redhat.com/groups/service-delivery/blog/2020/03/19/paging-appsre-oncall)
+
 - Resolve the incident
 
 - Notify the proper channels that the issue is resolved
