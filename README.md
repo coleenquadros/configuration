@@ -12,6 +12,7 @@ this repository.
   - [Overview](#overview)
   - [Components](#components)
   - [Workflow](#workflow)
+  - [App-Interface Etiquette](#app-interface-etiquette)
   - [Local validation of datafile modifications / contract amendment](#local-validation-of-datafile-modifications--contract-amendment)
     - [JSON schema validation](#json-schema-validation)
     - [Running integrations locally with `--dry-run`](#running-integrations-locally-with---dry-run)
