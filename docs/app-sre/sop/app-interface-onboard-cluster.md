@@ -87,8 +87,8 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
       accessLevel: network-mgmt
     ```
 
-* Note: Cluster name should follow naming convention [here](https://docs.google.com/document/d/1OIe4JGbScz57dIGZztThLTvji056OBCfaHSvGAo7Hao)
-* Note the cluster ID is not known at this point so we do not add a `consoleUrl` and `serverUrl` yet
+    * Note: Cluster name should follow naming convention [here](https://docs.google.com/document/d/1OIe4JGbScz57dIGZztThLTvji056OBCfaHSvGAo7Hao)
+    * Note the cluster ID is not known at this point so we do not add a `consoleUrl` and `serverUrl` yet
 
 1. Send the MR, wait for the check to pass and merge. The ocm-clusters integration will create your cluster. You can view the progress in OCM.
 
@@ -111,19 +111,6 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
 
 1. Place the `client-id` and `client-secret` from the Oauth Client in a secret in [Vault](https://vault.devshift.net/ui/vault/secrets/app-sre/list/integrations-input/ocm-github-idp/github-org-team/app-sre/) named `<cluster_name>-cluster`.
 
-1. If the cluster is private, the following must be added to the `cluster.yml` file
-
-    ```yaml
-    jumpHost:
-      hostname: ci.ext.devshift.net
-      knownHosts: /jump-host/known-hosts/ci.ext.devshift.net
-      user: app-sre-bot
-      identity:
-        path: app-sre/ansible/roles/app-sre-bot
-        field: identity
-        format: base64
-    ```
-
 1. Grant dedicated-admin access to App-SRE team
 
     ```yaml
@@ -136,20 +123,19 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
         group: dedicated-admins
     ```
 
-1. The above two steps will create an IDP on the cluster and give everyone in the App-SRE team dedicated-admin access.  Submit a MR to app-interface with the changes from the 2 steps above.
+1. Configure VPC peering to jumphost (ci.ext) as needed for private clusters. See  [app-interface-cluster-vpc-peerings.md](app-interface-cluster-vpc-peerings.md) (Disregard this step for public clusters)
 
-1. Once the MR has merged and the integrations have created the IDP and added the app-sre user accounts to the dedicated-admins group,  the `Access control` tab for the cluster in OCM should display an IDP as well as all the app-sre users as dedicate-admins.  Open the console in OCM by clicking `Open Console` for the cluster.
+    ```yaml
+    peering:
+      connections:
+      - provider: account-vpc
+        name: <cluster_id>_app-sre
+        vpc:
+          $ref: /aws/app-sre/vpcs/app-sre-vpc-02-ci-ext.yml
 
-1. Verify that you see a link named `github-app-sre` (can take a few minutes to appear after the previous steps)
+    ```
 
-1. Add your user account to the github team
-   - Navigate to the github team: https://github.com/orgs/app-sre/teams/<cluster_name>-cluster
-   - Add your user account to this team
-
-   Note: This step is a workaround and should be removed once the core chicken/egg problem is resolved
-
-1. Login to the cluster using the `github-app-sre` link and retrieve the command to log into the cluster from the commandline.
-   * Note: The command can be retrived by clicking on the username in the upper-right hand corner and selecting `Copy Login Command`.  A new page will open requiring re-authentication via the `github-app-sre` link.  Once authenticated click on the `Display token` link and copy the command provided and use it to log into the cluster on the command line.
+1. At this point you should be able to access the cluster via the console / oc cli
 
 1. Add the `app-sre-bot` ServiceAccount
 
@@ -176,6 +162,19 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
     automationToken:
       path: app-sre/creds/kube-configs/<cluster_name>
       field: token
+      
+1. If the cluster is private, the following must be added to the `cluster.yml` file
+
+    ```yaml
+    jumpHost:
+      hostname: ci.ext.devshift.net
+      knownHosts: /jump-host/known-hosts/ci.ext.devshift.net
+      user: app-sre-bot
+      identity:
+        path: app-sre/ansible/roles/app-sre-bot
+        field: identity
+        format: base64
+    ```
 
 1. Add the `openshift-config` namespace in app-interface.  This adds the project request template to the cluster
 
