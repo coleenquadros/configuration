@@ -89,7 +89,7 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
     spec:
       provider: aws
       region: (Region chosen at cluster creation)
-      major_version: 4
+      version: (OpenShift version)
       multi_az: true
       nodes: (Compute value on OCM->cluster Overview tab)
       instance_type: (Instance type chosen at cluster creation)
