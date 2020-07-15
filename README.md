@@ -149,6 +149,14 @@ expressed as json schemas. You can find the supported schemas here:
 4. From the moment the MR is accepted, the amended contract will enter into
    effect.
 
+## App-Interface Etiquette
+
+- When you create a MR, it's not necessary to immediately ping the @app-sre-ic in #sd-app-sre. The IC will eventually see it and merge it. It's only necessary to ping the IC if the MR is urgent or if a day has passed and the IC has not commented anything.
+- If your PR only contains changes to saas-files, you can auto-approve, see here: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-delivery-in-app-interface.md#approval-process
+- Even if you have rights to merge the PR, please refrain from doing so. If you need it merged urgently, ping @app-sre-ic in #sd-app-sre.
+- If an AppSRE team members adds the `lgtm` label, it will be automerged by a bot.
+- The AppSRE team members will also refrain from manually merging PRs and will use labels instead to allow the bot to merge automatically merge them. In App-Interface the order of the PRs is important, and if we manually merge, it will affect waiting times for other users.
+
 ## Local validation of datafile modifications / contract amendment
 
 Before submitting a MR with a datafile modification / contract amendment, the
