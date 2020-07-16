@@ -235,6 +235,242 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
       - default-network-policies
       - default-project-label
     ```
+    
+1. Enable enhanced dedicated-admin
+
+    We enable enhanced dedicated-admin on all App-SRE clusters https://github.com/openshift/ops-sop/blob/master/v4/howto/extended-dedicated-admin.md#non-ccs-clusters
+
+1. Enable observability on a v4 cluster
+
+    1. Create DNS records:
+        - `prometheus.<cluster_name>.devshift.net`: `elb.apps.<cluster_name>.<clusterid>.p1.openshiftapps.com`
+        - `alertmanager.<cluster_name>.devshift.net`: `elb.apps.<cluster_name>.<clusterid>.p1.openshiftapps.com`
+
+        NOTE: Currently only Paul Bergene and Jean-Francois Chevrette can create these DNS entries. (Pending https://issues.redhat.com/browse/APPSRE-1987)
+
+    1. Configure a [deadmanssnitch](https://deadmanssnitch.com/) snitch for the new cluster. The snitch settings should be as follow:
+        - Name: prometheus.<cluster_name>.devshift.net
+        - Alert type: Basic
+        - Interval: 15 min
+        - Tags: app-sre
+        - Alert email: sd-app-sre@redhat.com
+        - Notes: Runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-deadmanssnitch.md
+    
+    1. Add the deadmansnitch URL to this secret in Vault: https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/alertmanager-integration
+    
+        - key: `deadmanssnitch-<cluster_name>-url`
+        - value: the `Unique Snitch URL` from deadmanssnitch
+    
+    1. Create an `openshift-customer-monitoring` namespace file for that specific cluster, please use the template provided and replace CLUSTERNAME with the actual cluster name:
+    
+        - Template: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/boilerplates/openshift-customer-monitoring.clustername.yml
+        - Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml.
+    
+    1. Add the new `openshift-customer-monitoring` namespace to the target namespaces in [saas-observability-per-cluster](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/cicd/saas/saas-observability-per-cluster.yaml) to deploy Prometheus and Alertmanager. New entries need to be added for Prometheus and Alertmanager:
+    
+        ```yaml
+        # Prometheus
+        ...
+        - namespace:
+          $ref: /services/observability/namespaces/openshift-customer-monitoring.<cluster_name>.yml
+        ref: <sha>  # Use the same sha that existing entries are using
+        parameters:
+          CLUSTER_LABEL: <cluster_name>
+          ENVIRONMENT: The environment, usually one of [integration|staging|production]
+          EXTERNAL_URL: https://prometheus.<cluster_name>.devshift.net
+        ...
+        # Alertmanager
+        - namespace:
+          $ref: /services/observability/namespaces/openshift-customer-monitoring.<cluster_name>.yml
+        ref: <sha>  # Use the same sha that existing entries are using
+        parameters:
+          ENVIRONMENT: The environment, usually one of [integration|staging|production]
+          EXTERNAL_URL: https://alertmanager.<cluster_name>.devshift.net
+        ```
+    
+        Note: The only entry that should not be using a specific SHA should be the app-sre-stage-01 cluster.  That cluster should be using a ref of master.
+    
+    1. Create OAuth apps for Prometheus and Alertmanager [here](https://github.com/organizations/app-sre/settings/applications):
+        - Name: `<cluster_name> <prometheus|alertmanager>`
+        - Homepage URL: `https://<prometheus|alertmanager>.<cluster_name>.devshift.net`
+        - Callback URL: `https://<prometheus|alertmanager>.<cluster_name>.devshift.net/oauth2/callback`
+    
+    1. Update the Grafana datasources secret in Vault: https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/grafana/datasources
+    
+        - Add a new key `<cluster_name>-prometheus` with value that is to be used as a password.  It can be any password.  It is recommended to use a tool like pwgen (ex to create a single 16 character random password: `pwgen -cns 32 1`
+    
+    1. Create the following secrets in Vault to match the OAuth apps created in the previous step:
+        - Generate the auth token value: `htpasswd -s -n app-sre-observability`
+            At the password prompt, enter the password stored in the [grafana datasources secret](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/grafana/datasources) for the cluster
+        - Create `https://vault.devshift.net/ui/vault/secrets/app-interface/show/<cluster_name>/openshift-customer-monitoring/alertmanager/alertmanager-auth-proxy` ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quay-s-ue1/openshift-customer-monitoring/alertmanager/alertmanager-auth-proxy))
+    
+            Secret keys:
+            - auth: `<generated auth token value from above>`
+            - client-id: <from_github_OAuth_app>
+            - client-secret: <from_github_OAuth_app>
+            - cookie-secret: <random_128_char_string> (Can use this [tool](https://pinetools.com/random-string-generator) or similar to generate )
+    
+        - Create `https://vault.devshift.net/ui/vault/secrets/app-interface/show/<cluster_name>/openshift-customer-monitoring/prometheus-auth-proxy` ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quay-s-ue1/openshift-customer-monitoring/prometheus-auth-proxy))
+    
+            Secret keys:
+            - auth: `<generated auth token value from above>`
+            - client-id: <from_github_OAuth_app>
+            - client-secret: <from_github_OAuth_app>
+            - cookie-secret: <random_128_char_string> (Can use this [tool](https://pinetools.com/random-string-generator) or similar to generate )
+    
+        *Note:* If a new version of either secret is deployed to the cluster than both prometheus and alertmanager pods will need to be restarted
+    
+    1. Add the `cluster-monitoring-view` ClusterRole for the cluster to https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/roles/app-sre-osdv4-monitored-namespaces-view.yml.
+    
+       *Note*: This file will need to be updated again once application namespaces are applied to the cluster. (Ex. https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/roles/app-sre-osdv4-monitored-namespaces-view.yml#L120-134)
+    
+    1. Add the `observabilityNamespace` field on the cluster data file and reference the `openshift-customer-monitoring` namespace file created in the previous step. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/7ecd529584666d97b1418224b2772557807c6e1c/data/openshift/app-sre-prod-01/cluster.yml#L14-15
+    
+    1. Create an `app-sre-observability-per-cluster` namespace file for that specific cluster. Ex: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/openshift/app-sre-prod-01/namespaces/app-sre-observability-per-cluster.yml
+    
+    1. Add the new `app-sre-observability-per-cluster` namespace to the target namespaces in [saas-nginx-proxy.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/cicd/saas/saas-nginx-proxy.yaml) to deploy nginx-proxy.
+    
+    1. Add the new `app-sre-observability-per-cluster` namespace to the target namespaces in [saas-openshift-acme.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-sre/cicd/ci-int/saas-openshift-acme.yaml) to deploy openshift-acme.
+    
+    1. After the above changes have merged and the integrations have applied the changes, verify `https://<prometheus|alertmanager>.<cluster_name>.devshift.net` have valid ssl certificates by accessing the URLs.  If no security warning is given and the connection is secure as notifed by the browser than the ssl certificates are valid.
+    
+    1. Edit the grafana data sources secret and add the following entries for the new cluster: (Ex https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/resources/observability/grafana/grafana-datasources.secret.yaml#L43-73)
+        - <cluster_name>-prometheus - the Prometheus instance in `openshift-customer-monitoring`
+            ```yaml
+            # /resources/observability/grafana/grafana-datasources.secret.yaml
+                {
+                    "access": "proxy",
+                    "basicAuth": true,
+                    "basicAuthPassword": "{{{ vault('app-interface/app-sre/app-sre-observability-production/grafana/datasources', '<cluster_name>-prometheus') }}}",
+                    "basicAuthUser": "app-sre-observability",
+                    "editable": false,
+                    "jsonData": {
+                        "tlsSkipVerify": true
+                    },
+                    "name": "<cluster_name>-prometheus",
+                    "orgId": 1,
+                    "type": "prometheus",
+                    "url": "https://prometheus.<cluster_name>.devshift.net",
+                    "version": 1
+                }
+            ```
+        - <cluster_name>-cluster-prometheus - the Cluster's Prometheus instance
+            ```yaml
+            # /resources/observability/grafana/grafana-datasources.secret.yaml
+                {
+                    "access": "proxy",
+                    "editable": false,
+                    "jsonData": {
+                        "tlsSkipVerify": true,
+                        "httpHeaderName1": "Authorization"
+                    },
+                    "name": "<cluster_name>-cluster-prometheus",
+                    "orgId": 1,
+                    "secureJsonData": {
+                        "httpHeaderValue1": "Bearer {{{ vault('app-sre/creds/kube-configs/<cluster_name>', 'token') }}}"
+                    },
+                    "type": "prometheus",
+                    "url": "https://prometheus-k8s-openshift-monitoring.<cluster-url>",
+                    "version": 1
+                }
+            ```
+    
+        *Note*: The `<cluster-url>` can be retrieved from the cluster console.  Remove the `https://console-openshift-console` from the beginning and end with `openshiftapps.com`, removing all the trailing slashes and paths.
+
+1. Install the Container Security Operator
+
+    The Container Security Operator (CSO) brings Quay and Clair metadata to
+    Kubernetes / OpenShift. We use the vulnerabilities information in the tenants
+    dashboard and in the monthly reports.
+    
+    1. Create a ticket to [OHSS](https://issues.redhat.com/secure/CreateIssue.jspa?pid=12323823&issuetype=3),
+    requesting `extended-dedicated-admin` on the new cluster (provide the cluster 
+    id).
+    
+    1. Create an `container-security-operator` namespace file for that specific
+    cluster. Example:
+    
+    File name: `app-sre-cso-per-cluster.yml`
+    
+    Content:
+    
+    ```yaml
+    ---
+    $schema: /openshift/namespace-1.yml
+    
+    labels: {}
+    
+    name: container-security-operator
+    description: namespace for the app-sre per-cluster Container Security Operator
+    
+    cluster:
+      $ref: /openshift/<cluster>/cluster.yml
+    
+    app:
+      $ref: /services/container-security-operator/app.yml
+    
+    environment:
+      $ref: /products/dashdot/environments/production.yml
+    
+    networkPoliciesAllow:
+    - $ref: /openshift/<cluster>/namespaces/openshift-operator-lifecycle-manager.yml
+    ```
+    
+    If the `openshift-operator-lifecycle-manager` namespace is not yet defined in
+    app-interface, you have to define it also:
+    
+    File name: `openshift-operator-lifecycle-manager.yml`
+    
+    Content:
+    
+    ```yaml
+    ---
+    $schema: /openshift/namespace-1.yml
+    
+    labels: {}
+    
+    name: openshift-operator-lifecycle-manager
+    
+    cluster:
+      $ref: /openshift/<cluster>/cluster.yml
+    
+    app:
+      $ref: /services/app-sre/app.yml
+    
+    environment:
+      $ref: /products/app-sre/environments/production.yml
+    
+    description: openshift-operator-lifecycle-manager namespace
+    ```
+    
+    1. Add the new `container-security-operator` namespace to the target
+    namespaces in the
+    [saas.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/container-security-operator/cicd/saas.yaml)
+    to deploy the Container Security Operator. Example:
+    
+    ```yaml
+    resourceTemplates:
+    - name: container-security-operator
+      url: https://github.com/app-sre/container-security-operator
+      path: /openshift/container-security-operator.yaml
+      targets:
+      ...
+      - namespace:
+          $ref: /openshift/<cluster>/namespaces/app-sre-cso-per-cluster.yml
+        ref: <commit_hash>
+    ```
+
+1. Enable logging (EFK)
+
+    The EFK stack is currently opt-in and installed by customers.
+    
+    Installing cluster logging can be done in two steps.
+    1. Subscribe to the Elasticsearch and Cluster Logging operators
+    2. Create the logging instalce
+    
+    Example MR: https://gitlab.cee.redhat.com/service/app-interface/commit/bcf699c973d04a7a539219a37f4caeca1b72d21b
+    
+    OSD docs for reference: https://docs.openshift.com/dedicated/4/logging/dedicated-cluster-deploying.html
 
 # Additional configurations
 
@@ -257,242 +493,6 @@ Note that the host prefix must be set to /23.
 ## VPC peering with app-interface
 
 [app-interface-cluster-vpc-peerings.md](app-interface-cluster-vpc-peerings.md)
-
-## Enable enhanced dedicated-admin
-
-Some clusters may require enhanced dedicated-admin privileges. The process to get it enabled for a cluster can be found here: https://github.com/openshift/ops-sop/blob/master/v4/howto/extended-dedicated-admin.md#non-ccs-clusters
-
-## Enable observability on a v4 cluster
-
-1. Create DNS records:
-    - `prometheus.<cluster_name>.devshift.net`: `elb.apps.<cluster_name>.<clusterid>.p1.openshiftapps.com`
-    - `alertmanager.<cluster_name>.devshift.net`: `elb.apps.<cluster_name>.<clusterid>.p1.openshiftapps.com`
-
-    NOTE: Currently only Paul Bergene and Jean-Francois Chevrette can create these DNS entries. (Pending https://issues.redhat.com/browse/APPSRE-1987)
-
-1. Configure a [deadmanssnitch](https://deadmanssnitch.com/) snitch for the new cluster. The snitch settings should be as follow:
-    - Name: prometheus.<cluster_name>.devshift.net
-    - Alert type: Basic
-    - Interval: 15 min
-    - Tags: app-sre
-    - Alert email: sd-app-sre@redhat.com
-    - Notes: Runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-deadmanssnitch.md
-
-1. Add the deadmansnitch URL to this secret in Vault: https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/alertmanager-integration
-
-    - key: `deadmanssnitch-<cluster_name>-url`
-    - value: the `Unique Snitch URL` from deadmanssnitch
-
-1. Create an `openshift-customer-monitoring` namespace file for that specific cluster, please use the template provided and replace CLUSTERNAME with the actual cluster name:
-
-- Template: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/boilerplates/openshift-customer-monitoring.clustername.yml
-- Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml.
-
-1. Add the new `openshift-customer-monitoring` namespace to the target namespaces in [saas-observability-per-cluster](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/cicd/saas/saas-observability-per-cluster.yaml) to deploy Prometheus and Alertmanager. New entries need to be added for Prometheus and Alertmanager:
-
-    ```yaml
-    # Prometheus
-    ...
-    - namespace:
-      $ref: /services/observability/namespaces/openshift-customer-monitoring.<cluster_name>.yml
-    ref: <sha>  # Use the same sha that existing entries are using
-    parameters:
-      CLUSTER_LABEL: <cluster_name>
-      ENVIRONMENT: The environment, usually one of [integration|staging|production]
-      EXTERNAL_URL: https://prometheus.<cluster_name>.devshift.net
-    ...
-    # Alertmanager
-    - namespace:
-      $ref: /services/observability/namespaces/openshift-customer-monitoring.<cluster_name>.yml
-    ref: <sha>  # Use the same sha that existing entries are using
-    parameters:
-      ENVIRONMENT: The environment, usually one of [integration|staging|production]
-      EXTERNAL_URL: https://alertmanager.<cluster_name>.devshift.net
-    ```
-
-    Note: The only entry that should not be using a specific SHA should be the app-sre-stage-01 cluster.  That cluster should be using a ref of master.
-
-1. Create OAuth apps for Prometheus and Alertmanager [here](https://github.com/organizations/app-sre/settings/applications):
-    - Name: `<cluster_name> <prometheus|alertmanager>`
-    - Homepage URL: `https://<prometheus|alertmanager>.<cluster_name>.devshift.net`
-    - Callback URL: `https://<prometheus|alertmanager>.<cluster_name>.devshift.net/oauth2/callback`
-
-1. Update the Grafana datasources secret in Vault: https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/grafana/datasources
-
-    - Add a new key `<cluster_name>-prometheus` with value that is to be used as a password.  It can be any password.  It is recommended to use a tool like pwgen (ex to create a single 16 character random password: `pwgen -cns 32 1`
-
-1. Create the following secrets in Vault to match the OAuth apps created in the previous step:
-    - Generate the auth token value: `htpasswd -s -n app-sre-observability`
-        At the password prompt, enter the password stored in the [grafana datasources secret](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/grafana/datasources) for the cluster
-    - Create `https://vault.devshift.net/ui/vault/secrets/app-interface/show/<cluster_name>/openshift-customer-monitoring/alertmanager/alertmanager-auth-proxy` ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quay-s-ue1/openshift-customer-monitoring/alertmanager/alertmanager-auth-proxy))
-
-        Secret keys:
-        - auth: `<generated auth token value from above>`
-        - client-id: <from_github_OAuth_app>
-        - client-secret: <from_github_OAuth_app>
-        - cookie-secret: <random_128_char_string> (Can use this [tool](https://pinetools.com/random-string-generator) or similar to generate )
-
-    - Create `https://vault.devshift.net/ui/vault/secrets/app-interface/show/<cluster_name>/openshift-customer-monitoring/prometheus-auth-proxy` ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quay-s-ue1/openshift-customer-monitoring/prometheus-auth-proxy))
-
-        Secret keys:
-        - auth: `<generated auth token value from above>`
-        - client-id: <from_github_OAuth_app>
-        - client-secret: <from_github_OAuth_app>
-        - cookie-secret: <random_128_char_string> (Can use this [tool](https://pinetools.com/random-string-generator) or similar to generate )
-
-    *Note:* If a new version of either secret is deployed to the cluster than both prometheus and alertmanager pods will need to be restarted
-
-1. Add the `cluster-monitoring-view` ClusterRole for the cluster to https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/roles/app-sre-osdv4-monitored-namespaces-view.yml.
-
-   *Note*: This file will need to be updated again once application namespaces are applied to the cluster. (Ex. https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/roles/app-sre-osdv4-monitored-namespaces-view.yml#L120-134)
-
-1. Add the `observabilityNamespace` field on the cluster data file and reference the `openshift-customer-monitoring` namespace file created in the previous step. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/7ecd529584666d97b1418224b2772557807c6e1c/data/openshift/app-sre-prod-01/cluster.yml#L14-15
-
-1. Create an `app-sre-observability-per-cluster` namespace file for that specific cluster. Ex: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/openshift/app-sre-prod-01/namespaces/app-sre-observability-per-cluster.yml
-
-1. Add the new `app-sre-observability-per-cluster` namespace to the target namespaces in [saas-nginx-proxy.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/cicd/saas/saas-nginx-proxy.yaml) to deploy nginx-proxy.
-
-1. Add the new `app-sre-observability-per-cluster` namespace to the target namespaces in [saas-openshift-acme.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-sre/cicd/ci-int/saas-openshift-acme.yaml) to deploy openshift-acme.
-
-1. After the above changes have merged and the integrations have applied the changes, verify `https://<prometheus|alertmanager>.<cluster_name>.devshift.net` have valid ssl certificates by accessing the URLs.  If no security warning is given and the connection is secure as notifed by the browser than the ssl certificates are valid.
-
-1. Edit the grafana data sources secret and add the following entries for the new cluster: (Ex https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/resources/observability/grafana/grafana-datasources.secret.yaml#L43-73)
-    - <cluster_name>-prometheus - the Prometheus instance in `openshift-customer-monitoring`
-        ```yaml
-        # /resources/observability/grafana/grafana-datasources.secret.yaml
-            {
-                "access": "proxy",
-                "basicAuth": true,
-                "basicAuthPassword": "{{{ vault('app-interface/app-sre/app-sre-observability-production/grafana/datasources', '<cluster_name>-prometheus') }}}",
-                "basicAuthUser": "app-sre-observability",
-                "editable": false,
-                "jsonData": {
-                    "tlsSkipVerify": true
-                },
-                "name": "<cluster_name>-prometheus",
-                "orgId": 1,
-                "type": "prometheus",
-                "url": "https://prometheus.<cluster_name>.devshift.net",
-                "version": 1
-            }
-        ```
-    - <cluster_name>-cluster-prometheus - the Cluster's Prometheus instance
-        ```yaml
-        # /resources/observability/grafana/grafana-datasources.secret.yaml
-            {
-                "access": "proxy",
-                "editable": false,
-                "jsonData": {
-                    "tlsSkipVerify": true,
-                    "httpHeaderName1": "Authorization"
-                },
-                "name": "<cluster_name>-cluster-prometheus",
-                "orgId": 1,
-                "secureJsonData": {
-                    "httpHeaderValue1": "Bearer {{{ vault('app-sre/creds/kube-configs/<cluster_name>', 'token') }}}"
-                },
-                "type": "prometheus",
-                "url": "https://prometheus-k8s-openshift-monitoring.<cluster-url>",
-                "version": 1
-            }
-        ```
-
-    *Note*: The `<cluster-url>` can be retrieved from the cluster console.  Remove the `https://console-openshift-console` from the beginning and end with `openshiftapps.com`, removing all the trailing slashes and paths.
-
-## Install the Container Security Operator
-
-The Container Security Operator (CSO) brings Quay and Clair metadata to
-Kubernetes / OpenShift. We use the vulnerabilities information in the tenants
-dashboard and in the monthly reports.
-
-1. Create a ticket to [OHSS](https://issues.redhat.com/secure/CreateIssue.jspa?pid=12323823&issuetype=3),
-requesting `extended-dedicated-admin` on the new cluster (provide the cluster 
-id).
-
-1. Create an `container-security-operator` namespace file for that specific
-cluster. Example:
-
-File name: `app-sre-cso-per-cluster.yml`
-
-Content:
-
-```yaml
----
-$schema: /openshift/namespace-1.yml
-
-labels: {}
-
-name: container-security-operator
-description: namespace for the app-sre per-cluster Container Security Operator
-
-cluster:
-  $ref: /openshift/<cluster>/cluster.yml
-
-app:
-  $ref: /services/container-security-operator/app.yml
-
-environment:
-  $ref: /products/dashdot/environments/production.yml
-
-networkPoliciesAllow:
-- $ref: /openshift/<cluster>/namespaces/openshift-operator-lifecycle-manager.yml
-```
-
-If the `openshift-operator-lifecycle-manager` namespace is not yet defined in
-app-interface, you have to define it also:
-
-File name: `openshift-operator-lifecycle-manager.yml`
-
-Content:
-
-```yaml
----
-$schema: /openshift/namespace-1.yml
-
-labels: {}
-
-name: openshift-operator-lifecycle-manager
-
-cluster:
-  $ref: /openshift/<cluster>/cluster.yml
-
-app:
-  $ref: /services/app-sre/app.yml
-
-environment:
-  $ref: /products/app-sre/environments/production.yml
-
-description: openshift-operator-lifecycle-manager namespace
-```
-
-1. Add the new `container-security-operator` namespace to the target
-namespaces in the
-[saas.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/container-security-operator/cicd/saas.yaml)
-to deploy the Container Security Operator. Example:
-
-```yaml
-resourceTemplates:
-- name: container-security-operator
-  url: https://github.com/app-sre/container-security-operator
-  path: /openshift/container-security-operator.yaml
-  targets:
-  ...
-  - namespace:
-      $ref: /openshift/<cluster>/namespaces/app-sre-cso-per-cluster.yml
-    ref: <commit_hash>
-```
-
-## Enable logging (EFK)
-
-The EFK stack is currently opt-in and installed by customers.
-
-Installing cluster logging can be done in two steps.
-1. Subscribe to the Elasticsearch and Cluster Logging operators
-2. Create the logging instalce
-
-Example MR: https://gitlab.cee.redhat.com/service/app-interface/commit/bcf699c973d04a7a539219a37f4caeca1b72d21b
-
-OSD docs for reference: https://docs.openshift.com/dedicated/4/logging/dedicated-cluster-deploying.html
 
 # Offboard an OSDv4 cluster from app-interface
 
