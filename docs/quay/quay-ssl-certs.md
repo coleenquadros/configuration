@@ -16,3 +16,7 @@ Reach out to Red Hat IT or tparikh@redhat.com to get certificate issued by Digic
 ## Update the Certificate in Vault
 
 Quay SSL certificates are managed in Vault with other Quay configuration & secrets. Quay SSL certs are stored in `quay-config-secret` with keys `ssl.cert` and `ssl.key`. Secret in Vault can be found [here](quayio.md#updating-secret-in-vault)
+
+## Digicert Docs
+
+- [Order a wildcard SSL certificate](https://docs.digicert.com/manage-certificates/order-your-ssl-certificates/order-wildcard-ssl-certificate/)
