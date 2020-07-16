@@ -31,6 +31,7 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
         * currently only `/dependencies/slack/coreos.yml` is supported.
     * `channel` - channel to send notifications to
 * `managedResourceTypes` - a list of resource types to deploy (indicates that any other type is filtered out)
+* `takeover` - (optional) if set to true, the specified `managedResourceTypes` will be managed exclusively
 * `imagePatterns` - a list of strings specifying allowed images to deploy
     * examples: `quay.io/app-sre`, `quay.io/prom/prometheus`
 * `authentication` - specify credentials required to authenticate to `code` repository or to `image` registry
