@@ -20,3 +20,4 @@ Quay SSL certificates are managed in Vault with other Quay configuration & secre
 ## Digicert Docs
 
 - [Order a wildcard SSL certificate](https://docs.digicert.com/manage-certificates/order-your-ssl-certificates/order-wildcard-ssl-certificate/)
+
