@@ -1,0 +1,109 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: hccm
+
+name: hccm-prod
+description: Insights hccm-prod on the PROD cluster under app-interface management
+
+cluster:
+  $ref: /openshift/crcp01ue1/cluster.yml
+
+app:
+  $ref: /services/insights/hccm/app.yml
+
+environment:
+  $ref: /products/insights/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-prod.yml
+- $ref: /services/insights/sources/namespaces/sources-prod.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ConfigMap
+
+openshiftResources:
+# configmaps
+- provider: resource
+  path: /insights-prod/hccm-prod/koku-app.configmap.yml
+- provider: resource
+  path: /insights-prod/hccm-prod/koku-auth.configmap.yml
+- provider: resource
+  path: /insights-prod/hccm-prod/koku-debug.configmap.yml
+- provider: resource
+  path: /insights-prod/hccm-prod/koku-logging.configmap.yml
+- provider: resource
+  path: /insights-prod/hccm-prod/koku-messaging.configmap.yml
+- provider: resource
+  path: /insights-prod/hccm-prod/koku-monitoring.configmap.yml
+- provider: resource
+  path: /insights-prod/hccm-prod/koku-processor.configmap.yml
+- provider: resource
+  path: /insights-prod/hccm-prod/koku-upload.configmap.yml
+
+
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: app-sre/integrations-output/terraform-resources/insights-prod/hccm-prod/cost-management-db-rds
+  version: 1
+  type: Opaque
+  annotations:
+    qontract.recycle: "true"
+
+- provider: vault-secret
+  path: insights/secrets/insights-prod/hccm-prod/koku-aws
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-prod/hccm-prod/koku-gcp
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-prod/hccm-prod/koku-secret
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-prod/hccm-prod/koku-sentry
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-prod/hccm-prod/nise-populator-secret
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-prod
+  identifier: hccm-prod
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
+- provider: s3
+  account: insights-prod
+  identifier: hccm-prod
+  defaults: /terraform/resources/s3-private-1.yml
+  output_resource_name: hccm-s3
