@@ -32,9 +32,6 @@ imagePatterns:
 - quay.io/prometheus/pushgateway
 
 authentication:
-  code:
-    path: app-sre/creds/github-app-sre-bot
-    field: openshift-saas-deploy
   image:
     path: insights/quay/cloudservices-push
     field: all
@@ -51,20 +48,13 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: 5c8cc0e6236e5252aad834c8548ef7e657216c89
+    ref: master
     parameters:
       APP_DOMAIN: apps.crc-stg-01.o4v9.p1.openshiftapps.com
-      IMAGE_TAG: 06172d9
+      RBAC_HOST: rbac.rbac-stage.svc.cluster.local
+      IMAGE_TAG: e9c67a7
       S3_BUCKET_NAME: koku-data-archive-stage
       KOKU_SENTRY_ENV: stage
-  - namespace:
-      $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: 5c8cc0e6236e5252aad834c8548ef7e657216c89
-    parameters:
-      APP_DOMAIN: apps.crcp01ue1.o9m8.p1.openshiftapps.com
-      IMAGE_TAG: 06172d9
-      S3_BUCKET_NAME: koku-data-archive-prod
-      KOKU_SENTRY_ENV: prod
   
 # template: masu
 - name: masu
@@ -73,32 +63,11 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: 69a17ceb3cb13893548c24051b2ae8e2b6511dd3
+    ref: master
     parameters:
       APP_DOMAIN: apps.crc-stg-01.o4v9.p1.openshiftapps.com
-      IMAGE_TAG: 06172d9
-  - namespace:
-      $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: 69a17ceb3cb13893548c24051b2ae8e2b6511dd3
-    parameters:
-      APP_DOMAIN: apps.crcp01ue1.o9m8.p1.openshiftapps.com
-      IMAGE_TAG: 06172d9
-
-# template: koku-listener
-- name: koku-listener
-  path: /templates/hccm/koku-listener.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  targets:
-  - namespace:
-      $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: 6260f3d60ba5befa86923f81a63fd39eb4e52aca
-    parameters:
-      IMAGE_TAG: 06172d9
-  - namespace:
-      $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: 6260f3d60ba5befa86923f81a63fd39eb4e52aca
-    parameters:
-      IMAGE_TAG: 06172d9
+      IMAGE_TAG: e9c67a7
+      RBAC_HOST: rbac.rbac-stage.svc.cluster.local
 
 # template: koku-sources
 - name: koku-sources
@@ -107,18 +76,12 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: 5c8cc0e6236e5252aad834c8548ef7e657216c89
+    ref: master
     parameters:
       APP_DOMAIN: apps.crc-stg-01.o4v9.p1.openshiftapps.com
       ENABLE_API_SENTRY: True
-      IMAGE_TAG: 06172d9
-  - namespace:
-      $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: 5c8cc0e6236e5252aad834c8548ef7e657216c89
-    parameters:
-      APP_DOMAIN: apps.crcp01ue1.o9m8.p1.openshiftapps.com
-      ENABLE_API_SENTRY: True
-      IMAGE_TAG: 06172d9
+      IMAGE_TAG: e9c67a7
+      SOURCES_HOST: sources-api.sources-stage.svc.cluster.local
 
 # template: rabbitmq
 - name: rabbitmq
@@ -127,14 +90,9 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: cdcf9dcfc04a68c69b8f83706603c56af30eb943
+    ref: master
     parameters:
-      IMAGE_TAG: c30564c
-  - namespace:
-      $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: cdcf9dcfc04a68c69b8f83706603c56af30eb943
-    parameters:
-      IMAGE_TAG: c30564c
+      IMAGE_TAG: 8b6afba
 
 # template: celery-scheduler
 - name: celery-scheduler
@@ -143,14 +101,9 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: 69a17ceb3cb13893548c24051b2ae8e2b6511dd3
+    ref: master
     parameters:
-      IMAGE_TAG: 06172d9
-  - namespace:
-      $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: 69a17ceb3cb13893548c24051b2ae8e2b6511dd3
-    parameters:
-      IMAGE_TAG: 06172d9
+      IMAGE_TAG: e9c67a7
 
 # template: celery-worker
 - name: celery-worker
@@ -159,17 +112,10 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: 84e8c19a966a64f5b0698291ed4422db16025eb6
+    ref: master
     parameters:
-      IMAGE_TAG: 06172d9
+      IMAGE_TAG: e9c67a7
       S3_BUCKET_NAME: koku-data-archive-stage
-      KOKU_SENTRY_ENV: stage
-  - namespace:
-      $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: 84e8c19a966a64f5b0698291ed4422db16025eb6
-    parameters:
-      IMAGE_TAG: 06172d9
-      S3_BUCKET_NAME: koku-data-archive-prod
       KOKU_SENTRY_ENV: stage
 
 # template: koku-auth-cache
@@ -179,13 +125,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: 69a17ceb3cb13893548c24051b2ae8e2b6511dd3
+    ref: master
     parameters:
       IMAGE: quay.io/cloudservices/redis
-      IMAGE_TAG: 3.0.3
-  - namespace:
-      $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: 69a17ceb3cb13893548c24051b2ae8e2b6511dd3
-    parameters:
-      IMAGE: quay.io/cloudservices/redis
-      IMAGE_TAG: 3.0.3
+      IMAGE_TAG: 4.0-alpine3.11
