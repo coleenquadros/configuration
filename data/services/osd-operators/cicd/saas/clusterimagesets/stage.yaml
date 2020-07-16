@@ -1,0 +1,39 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: osd-operators
+
+name: saas-clusterimagesets-stage
+description: SaaS tracking file for clusterimagesets
+
+app:
+  $ref: /services/osd-operators/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-srep-releases-stage
+
+managedResourceTypes:
+- ClusterImageSet
+
+takeover: true
+
+imagePatterns: []
+
+resourceTemplates:
+- name: clusterimagesets
+  url: https://gitlab.cee.redhat.com/service/clusterimagesets
+  path: /stage
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-stage-cluster-scope.yml
+    ref: master
+  - namespace:
+      $ref: /services/osd-operators/namespaces/v4/hive-stage-01-cluster-scope.yml
+    ref: master
