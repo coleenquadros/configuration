@@ -18,8 +18,8 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 0,
-      "id": null,
-      "iteration": 1594405593142,
+      "id": 73,
+      "iteration": 1595011480563,
       "links": [],
       "panels": [
         {
@@ -222,42 +222,22 @@ data:
         },
         {
           "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": true,
+          "colors": [
+            "#d44a3a",
+            "rgba(237, 129, 40, 0.89)",
+            "#37872D"
+          ],
           "datasource": "$datasource",
           "description": "The difference between the pool size and the number of unclaimed account CRs. If this number > 0, it indicates an issue. ",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {},
-              "decimals": 0,
-              "mappings": [
-                {
-                  "id": 0,
-                  "op": "=",
-                  "text": "N/A",
-                  "type": 1,
-                  "value": "null"
-                }
-              ],
-              "nullValueMode": "connected",
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "#299c46",
-                    "value": null
-                  },
-                  {
-                    "color": "rgba(237, 129, 40, 0.89)",
-                    "value": 1
-                  },
-                  {
-                    "color": "#d44a3a",
-                    "value": 1.1
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": []
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
           },
           "gridPos": {
             "h": 7,
@@ -268,47 +248,45 @@ data:
           "id": 25,
           "interval": null,
           "links": [],
-          "maxDataPoints": 100,
-          "options": {
-            "colorMode": "value",
-            "fieldOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "defaults": {
-                "mappings": [],
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": null
-                    },
-                    {
-                      "color": "red",
-                      "value": 80
-                    }
-                  ]
-                }
-              },
-              "overrides": [],
-              "values": false
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
             },
-            "graphMode": "area",
-            "justifyMode": "auto",
-            "orientation": "horizontal",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
+            {
+              "name": "range to text",
+              "value": 2
             }
-          },
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "options": {},
           "pluginVersion": "6.6.2",
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false,
+            "ymax": null,
+            "ymin": null
+          },
+          "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(aws_account_operator_account_crs{job=\"$environment\",reused=\"false\",claimed=\"false\", state!=\"Failed\"})-sum(aws_account_operator_account_pool_size{job=\"$environment\"})",
+              "expr": "sum(aws_account_operator_account_crs{job=\"$environment\",reused=\"false\",claimed=\"false\", state!~\"Failed|\"})-sum(aws_account_operator_account_pool_size{job=\"$environment\"})",
               "format": "time_series",
               "instant": false,
               "interval": "",
@@ -317,10 +295,20 @@ data:
               "refId": "A"
             }
           ],
+          "thresholds": "0,0",
           "timeFrom": null,
           "timeShift": null,
           "title": "Difference Between Pool Size and Unclaimed CRs",
-          "type": "stat"
+          "type": "singlestat",
+          "valueFontSize": "120%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "current"
         },
         {
           "cacheTimeout": null,
@@ -414,6 +402,97 @@ data:
           "valueName": "current"
         },
         {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "description": "Duration of controller reconcile",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 8
+          },
+          "hiddenSeries": false,
+          "id": 51,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": true,
+            "max": true,
+            "min": true,
+            "rightSide": true,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "rate(aws_account_operator_reconcile_duration_seconds_sum{job=\"$environment\"}[10m])/rate(aws_account_operator_reconcile_duration_seconds_count{job=\"$environment\"}[10m])",
+              "intervalFactor": 2,
+              "legendFormat": "{{controller}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Controller Reconcile Duration",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "s",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
           "aliasColors": {
             "Total AWS Accounts": "blue"
           },
@@ -436,7 +515,7 @@ data:
             "h": 8,
             "w": 24,
             "x": 0,
-            "y": 8
+            "y": 16
           },
           "hiddenSeries": false,
           "id": 21,
@@ -524,7 +603,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 16
+            "y": 24
           },
           "id": 34,
           "panels": [],
@@ -560,7 +639,7 @@ data:
             "h": 7,
             "w": 6,
             "x": 0,
-            "y": 17
+            "y": 25
           },
           "id": 41,
           "interval": null,
@@ -645,7 +724,7 @@ data:
             "h": 7,
             "w": 18,
             "x": 6,
-            "y": 17
+            "y": 25
           },
           "id": 16,
           "interval": null,
@@ -679,6 +758,220 @@ data:
         {
           "aliasColors": {},
           "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "description": "Duration for non-CCS Account to get ready",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 32
+          },
+          "hiddenSeries": false,
+          "id": 47,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": true,
+            "max": true,
+            "min": true,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pluginVersion": "6.6.2",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.99, aws_account_operator_account_ready_duration_seconds_bucket{job=\"$environment\"})",
+              "format": "heatmap",
+              "hide": false,
+              "intervalFactor": 2,
+              "legendFormat": "p99",
+              "refId": "B"
+            },
+            {
+              "expr": "histogram_quantile(0.9, aws_account_operator_account_ready_duration_seconds_bucket{job=\"$environment\"})",
+              "hide": false,
+              "intervalFactor": 2,
+              "legendFormat": "p90",
+              "refId": "C"
+            },
+            {
+              "expr": "histogram_quantile(0.5, aws_account_operator_account_ready_duration_seconds_bucket{job=\"$environment\"})",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "p50",
+              "refId": "D"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "non-CCS Account Ready Duration",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "s",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "description": "Duration for non-CCS Account Claim to get ready",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 32
+          },
+          "hiddenSeries": false,
+          "id": 49,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": true,
+            "max": true,
+            "min": true,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pluginVersion": "6.6.2",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.99, aws_account_operator_account_claim_ready_duration_seconds_bucket{job=\"$environment\"})",
+              "format": "heatmap",
+              "hide": false,
+              "intervalFactor": 2,
+              "legendFormat": "p99",
+              "refId": "B"
+            },
+            {
+              "expr": "histogram_quantile(0.9, aws_account_operator_account_claim_ready_duration_seconds_bucket{job=\"$environment\"})",
+              "hide": false,
+              "intervalFactor": 2,
+              "legendFormat": "p90",
+              "refId": "C"
+            },
+            {
+              "expr": "histogram_quantile(0.5, aws_account_operator_account_claim_ready_duration_seconds_bucket{job=\"$environment\"})",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "p50",
+              "refId": "D"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "non-CCS Account Claim Ready Duration",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "s",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
           "cacheTimeout": null,
           "dashLength": 10,
           "dashes": false,
@@ -696,7 +989,7 @@ data:
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 24
+            "y": 40
           },
           "hiddenSeries": false,
           "id": 2,
@@ -794,7 +1087,7 @@ data:
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 24
+            "y": 40
           },
           "hiddenSeries": false,
           "id": 8,
@@ -894,7 +1187,7 @@ data:
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 31
+            "y": 47
           },
           "hiddenSeries": false,
           "id": 18,
@@ -996,7 +1289,7 @@ data:
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 31
+            "y": 47
           },
           "hiddenSeries": false,
           "id": 28,
@@ -1087,7 +1380,7 @@ data:
           "dashes": false,
           "datasource": "$datasource",
           "decimals": 3,
-          "description": "Show rate of Account Reuse Cleanup",
+          "description": "Duration of account reuse cleanup",
           "fieldConfig": {
             "defaults": {
               "custom": {}
@@ -1100,7 +1393,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 38
+            "y": 54
           },
           "hiddenSeries": false,
           "id": 26,
@@ -1134,19 +1427,31 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(aws_account_operator_account_reuse_cleanup_duration_seconds_count{job=\"$environment\"}[1h]))",
+              "expr": "histogram_quantile(0.99, aws_account_operator_account_reuse_cleanup_duration_seconds_bucket{job=\"$environment\"})",
               "format": "time_series",
               "instant": false,
               "intervalFactor": 2,
-              "legendFormat": "rate",
+              "legendFormat": "p99",
               "refId": "A"
+            },
+            {
+              "expr": "histogram_quantile(0.9, aws_account_operator_account_reuse_cleanup_duration_seconds_bucket{job=\"$environment\"})",
+              "intervalFactor": 2,
+              "legendFormat": "p90",
+              "refId": "B"
+            },
+            {
+              "expr": "histogram_quantile(0.5, aws_account_operator_account_reuse_cleanup_duration_seconds_bucket{job=\"$environment\"})",
+              "intervalFactor": 2,
+              "legendFormat": "p50",
+              "refId": "C"
             }
           ],
           "thresholds": [],
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Rate of Account Reuse Cleanup",
+          "title": "Account Reuse Cleanup Duration",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -1206,7 +1511,7 @@ data:
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 38
+            "y": 54
           },
           "hiddenSeries": false,
           "id": 27,
@@ -1296,7 +1601,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 46
+            "y": 62
           },
           "id": 32,
           "panels": [],
@@ -1332,7 +1637,7 @@ data:
             "h": 7,
             "w": 6,
             "x": 0,
-            "y": 47
+            "y": 63
           },
           "id": 42,
           "interval": null,
@@ -1417,7 +1722,7 @@ data:
             "h": 7,
             "w": 18,
             "x": 6,
-            "y": 47
+            "y": 63
           },
           "id": 43,
           "interval": null,
@@ -1451,6 +1756,220 @@ data:
         {
           "aliasColors": {},
           "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "description": "Duration for CCS Account to get ready",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 70
+          },
+          "hiddenSeries": false,
+          "id": 46,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": true,
+            "max": true,
+            "min": true,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pluginVersion": "6.6.2",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.99, aws_account_operator_account_ccs_ready_duration_seconds_bucket{job=\"$environment\"})",
+              "format": "heatmap",
+              "hide": false,
+              "intervalFactor": 2,
+              "legendFormat": "p99",
+              "refId": "B"
+            },
+            {
+              "expr": "histogram_quantile(0.9, aws_account_operator_account_ccs_ready_duration_seconds_bucket{job=\"$environment\"})",
+              "hide": false,
+              "intervalFactor": 2,
+              "legendFormat": "p90",
+              "refId": "C"
+            },
+            {
+              "expr": "histogram_quantile(0.5, aws_account_operator_account_ccs_ready_duration_seconds_bucket{job=\"$environment\"})",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "p50",
+              "refId": "D"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "CCS Account Ready Duration",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "s",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "description": "Duration for CCS Account Claim to get ready",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 70
+          },
+          "hiddenSeries": false,
+          "id": 48,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": true,
+            "max": true,
+            "min": true,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null as zero",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pluginVersion": "6.6.2",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.99, aws_account_operator_account_claim_ccs_ready_duration_seconds_bucket{job=\"$environment\"})",
+              "format": "heatmap",
+              "hide": false,
+              "intervalFactor": 2,
+              "legendFormat": "p99",
+              "refId": "B"
+            },
+            {
+              "expr": "histogram_quantile(0.9, aws_account_operator_account_claim_ccs_ready_duration_seconds_bucket{job=\"$environment\"})",
+              "hide": false,
+              "intervalFactor": 2,
+              "legendFormat": "p90",
+              "refId": "C"
+            },
+            {
+              "expr": "histogram_quantile(0.5, aws_account_operator_account_claim_ccs_ready_duration_seconds_bucket{job=\"$environment\"})",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "p50",
+              "refId": "D"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "CCS Account Claim Ready duration",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "s",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
           "cacheTimeout": null,
           "dashLength": 10,
           "dashes": false,
@@ -1468,7 +1987,7 @@ data:
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 54
+            "y": 78
           },
           "hiddenSeries": false,
           "id": 35,
@@ -1568,7 +2087,7 @@ data:
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 54
+            "y": 78
           },
           "hiddenSeries": false,
           "id": 36,
@@ -1671,7 +2190,7 @@ data:
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 61
+            "y": 85
           },
           "hiddenSeries": false,
           "id": 37,
@@ -1758,7 +2277,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 68
+            "y": 92
           },
           "id": 30,
           "panels": [],
@@ -1787,7 +2306,7 @@ data:
             "h": 10,
             "w": 8,
             "x": 0,
-            "y": 69
+            "y": 93
           },
           "hiddenSeries": false,
           "id": 22,
@@ -1920,7 +2439,7 @@ data:
             "h": 10,
             "w": 7,
             "x": 8,
-            "y": 69
+            "y": 93
           },
           "hiddenSeries": false,
           "id": 23,
@@ -2021,7 +2540,7 @@ data:
             "h": 10,
             "w": 9,
             "x": 15,
-            "y": 69
+            "y": 93
           },
           "hiddenSeries": false,
           "id": 24,
@@ -2151,9 +2670,14 @@ data:
                 "selected": false,
                 "text": "hive-aws-account-operator-integration",
                 "value": "hive-aws-account-operator-integration"
+              },
+              {
+                "selected": false,
+                "text": "hive-aws-account-operator-hive-stage-01",
+                "value": "hive-aws-account-operator-hive-stage-01"
               }
             ],
-            "query": "hive-aws-account-operator-stage,hive-aws-account-operator-production,hive-aws-account-operator-integration",
+            "query": "hive-aws-account-operator-stage,hive-aws-account-operator-production,hive-aws-account-operator-integration,hive-aws-account-operator-hive-stage-01",
             "skipUrlSync": false,
             "type": "custom"
           }
@@ -2191,7 +2715,7 @@ data:
       "timezone": "",
       "title": "AWS Account Operator",
       "uid": "WPRpa7HWz",
-      "version": 30
+      "version": 1
     }
 kind: ConfigMap
 metadata:
