@@ -466,10 +466,56 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
     
     Installing cluster logging can be done in two steps.
     1. Subscribe to the Elasticsearch and Cluster Logging operators
-    2. Create the logging instalce
     
-    Example MR: https://gitlab.cee.redhat.com/service/app-interface/commit/bcf699c973d04a7a539219a37f4caeca1b72d21b
+        ```yaml
+        # /data/openshift/<cluster_name>/namespaces/openshift-logging.yml
+        ---
+        $schema: /openshift/namespace-1.yml
+        
+        labels: {}
+        
+        name: openshift-logging
+        description: <cluster_name> openshift-logging namespace
+        
+        cluster:
+          $ref: /openshift/<cluster_name>/cluster.yml
+        
+        app:
+          $ref: /services/app-sre/app.yml
+        
+        environment:
+          $ref: /products/app-sre/environments/production.yml
+        
+        managedResourceTypes:
+        - Subscription
+        - ClusterLogging
+        
+        openshiftResources:
+        - provider: resource
+          path: /setup/clusterlogging/elasticsearch-operator.subscription.yaml
+        - provider: resource
+          path: /setup/clusterlogging/cluster-logging.subscription.yaml
+        #- provider: resource-template
+        #  type: jinja2
+        #  path: /setup/clusterlogging/instance.clusterlogging.yaml
+        #  variables:
+        #    memoryRequests: 8G
+        ```
     
+    2. Create the logging instance (uncomment the resource in the above file)
+
+        ```yaml
+        # /data/openshift/<cluster_name>/namespaces/openshift-logging.yml
+        ...
+        openshiftResources:
+        - ...
+        - provider: resource-template
+          type: jinja2
+          path: /setup/clusterlogging/instance.clusterlogging.yaml
+          variables:
+            memoryRequests: 8G
+        ```
+
     OSD docs for reference: https://docs.openshift.com/dedicated/4/logging/dedicated-cluster-deploying.html
 
 # Additional configurations
