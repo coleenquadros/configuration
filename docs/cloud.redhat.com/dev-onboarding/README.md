@@ -1,5 +1,11 @@
 # cloud.redhat.com Developer Onboarding
 
+- [Quick Links](#quick-links)
+- [Accessing Stage Environment](#accessing-stage-environment)
+- [Accessing Production Environment](#accessing-production-environment)
+- [Connect with App SRE on Slack](#connect-with-app-sre-on-slack)
+- [How to Promote an Image to Stage](#how-to-promote-an-image-to-stage)
+
 ## Quick Links
 
 * [app-interface deep dive slides](https://docs.google.com/presentation/d/1R1JtB29TVnANfCoy_JOxVE5ehe_6cfiVdzRrQ468TIo/edit#slide=id.g782698ae7e_2_697)
@@ -17,6 +23,37 @@
 Our stage environment follows IT's [pre-prod lockdown](https://mojo.redhat.com/docs/DOC-1193747) requirement.  Thus you must [configure your brower and scripts to use the Red Hat internal squid proxy](https://redhat.service-now.com/help?id=kb_article_view&sysparm_article=KB0006375&sys_kb_id=26c75be61b538490384411761a4bcbf9) ([alternative Mojo link](https://mojo.redhat.com/docs/DOC-1213497)) in order to access cloud.stage.redhat.com.
 
 Your credentials are usually the same as QA:  all passwords are set to `redhat`.
+
+**Commmand-line Examples**
+
+You can make command-line requests to Stage using curl’s proxy flag:
+
+```
+curl --proxy http://squid.corp.redhat.com:3128 https://cloud.stage.redhat.com/api/<path>
+```
+
+If you prefer wget, you can do the same thing like this:
+
+```
+wget -e use_proxy=yes -e http_proxy=http://squid.corp.redhat.com:3128 https://cloud.stage.redhat.com/api/<path>
+```
+
+**Insights Client Config**
+
+NOTE:  This requires insights-client version 3.0.173+
+
+Edit `/etc/insights-client/insights-client.conf`:
+
+```
+auto_config=False
+authmethod=BASIC
+base_url=cloud.stage.redhat.com/api
+username=<your customer portal username>
+password=redhat (or other stage rhsm password)
+legacy_upload=False
+cert_verify=True
+proxy=http://squid.corp.redhat.com:3128
+```
 
 ## Accessing Production Environment
 
@@ -67,3 +104,11 @@ To log in to CoreOS Slack, go to https://coreos.slack.com and click on `Sign in 
 The channels `#cloudservices-outage` and `#team-insights-migration` are shared between the Ansible and CoreOS Slack workspaces.  Once the migration to App SRE is completed, these channels will be phased out and devs will be expected to interact with App SRE exclusively on CoreOS Slack.
 
 If you have a question specific to setting up your app prior to the production cutover (August 11), feel free to ask in `#team-insights-migration` and use the `@platform-tools` handle.
+
+## How to Promote an Image to Stage
+
+1. Find the git commit from your source repo that you want to promote and copy the first seven characters, e.g `87ff3c59c94fe28d1d500a701d8acc2167cc7703` becomes `87ff3c5`.
+2. Locate your app folder in app-interface, e.g. `data/services/insights/ingress` and open `deploy.yml` (also known as `saas.yml`).
+3. For each `resourceTemplate` that uses your updated image, set the `IMAGE_TAG` parameter value to your seven character git commit hash.
+4. Commit the change, push to your fork of app-interface, and open a merge request (MR).
+5. App devs need to get an owner of your saas file to approve your changes (you cannot self-approve even if you are an owner).  The devtools bot should add a comment to your MR stating which users can approve.  The approver just needs to add a comment to the MR with the content `/lgtm`.  [Example](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/5684).
