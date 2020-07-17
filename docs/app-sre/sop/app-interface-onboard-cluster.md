@@ -488,7 +488,7 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
         
         managedResourceTypes:
         - Subscription
-        - ClusterLogging
+        #- ClusterLogging
         
         openshiftResources:
         - provider: resource
@@ -507,6 +507,10 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
         ```yaml
         # /data/openshift/<cluster_name>/namespaces/openshift-logging.yml
         ...
+        managedResourceTypes:
+        - ...
+        - ClusterLogging
+        
         openshiftResources:
         - ...
         - provider: resource-template
