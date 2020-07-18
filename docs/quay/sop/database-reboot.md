@@ -6,7 +6,7 @@ This helps us capture the information around what was causing the DB to lock up
 
 ## Actions
 
-- On the AWS RDS console, go to the instance overview page, for example: https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=quayenc-2019-quayvpc;is-cluster=false;tab=connectivity.
+- On the AWS RDS console, go to the instance overview page, for example: https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=quayio-production;is-cluster=false;tab=connectivity.
 
 - Click on Actions -> Reboot
 
