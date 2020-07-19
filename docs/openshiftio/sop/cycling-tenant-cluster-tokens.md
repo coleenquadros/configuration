@@ -1,7 +1,7 @@
 # SOP : Cycling OSIO tenant cluster tokens
 
 ## Alert: 
-> Defined [alerts](https://gitlab.cee.redhat.com/service/app-interface/blob/master/resources/observability/prometheusrules/blackbox-exporter.prometheusrules.yaml) and [checks](https://gitlab.cee.redhat.com/service/app-interface/blob/master/resources/observability/prometheus/v4/prometheus-app-sre-additional-scrapeconfig.secret.yaml)
+> Defined [alerts](https://gitlab.cee.redhat.com/service/app-interface/blob/master/resources/observability/prometheusrules/blackbox-exporter.prometheusrules.yaml) and [checks](https://gitlab.cee.redhat.com/service/app-interface/blob/master/resources/observability/prometheus/prometheus-app-sre-additional-scrapeconfig.secret.yaml)
 
 First need to check if probes failing because of tokens or because of other reasons for API unaviability
 
