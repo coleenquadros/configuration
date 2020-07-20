@@ -1,0 +1,80 @@
+- job-template:
+    id: 'sd-scale-test'
+    name: 'sd-scale-test'
+    wrappers:
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *sd-scale-ocm
+    parameters:
+    - choice:
+        name: SCALE_TEST_TYPE
+        description: The type of scale test being run.
+        choices:
+        - BURST
+        - CONCURRENT_MANAGEMENT  
+    - string:
+        name: NUMBER_OF_CLUSTERS
+        description: The number of clusters to provision.
+    - string:
+        name: SIZE_OF_BATCHES
+        description: The size of batches to use when provisioning clusters. If left blank, will assume an infinite batch size.
+    - string:
+        name: SECONDS_BETWEEN_BATCHES
+        description: The number of seconds in between batches.
+        default: 120
+    builders:
+    - shell: |
+        #!/bin/bash
+
+        # Check the validity of the number of clusters
+        if ! echo "$NUMBER_OF_CLUSTERS" | grep -qE "^[0-9]+$"; then
+          echo "Invalid number of clusters: number of clusters is malformed, should be a number."
+          exit 1
+        fi
+
+        if [ "$NUMBER_OF_CLUSTERS" -le "0" ]; then
+          echo "Invalid number of clusters: number of clusters needs to be greater than zero."
+          exit 1
+        fi
+
+        # Burst tests don't need anything other than the number of clusters
+        if [ "$SCALE_TEST_TYPE" == "BURST" ]; then
+          echo "Burst"
+
+          # Set the size of batches to values that will provision everything at once.
+          SIZE_OF_BATCHES=-1
+          SECONDS_BETWEEN_BATCHES=1
+        # Concurrent management tests need to validate the size of batches and seconds between batches
+        elif [ "$SCALE_TEST_TYPE" == "CONCURRENT_MANAGEMENT" ]
+        then
+
+          # We're just going to validate the values, then we'll break out of this to call the osde2ectl command.
+          if ! echo "$SIZE_OF_BATCHES" | grep -qE "^[0-9]+$"; then
+            echo "Invalid size of batches: size of batches is malformed, should be a number."
+            exit 1
+          fi
+
+          if ! echo "$SECONDS_BETWEEN_BATCHES" | grep -qE "^[0-9]+$"; then
+            echo "Invalid seconds between batches: seconds between batches is malformed, should be a number."
+            exit 1
+          fi
+
+          if [ "$SIZE_OF_BATCHES" -le "0" ]; then
+              echo "Invalid size of batches: size of batches needs to be greater than zero."
+            exit 1
+          fi
+
+          if [ "$SECONDS_BETWEEN_BATCHES" -le "0" ]; then
+            echo "Invalid seconds between batches: seconds between batches needs to be greater than zero."
+            exit 1
+          fi
+        else
+          echo "Invalid scale test type."
+          exit 1
+        fi
+
+        echo "Running $SCALE_TEST_TYPE test..."
+
+        docker pull quay.io/app-sre/osde2e
+        docker run -e OCM_TOKEN --entrypoint osde2ectl quay.io/app-sre/osde2e create --configs stage -n $NUMBER_OF_CLUSTERS -b $SIZE_OF_BATCHES -s $SECONDS_BETWEEN_BATCHES
