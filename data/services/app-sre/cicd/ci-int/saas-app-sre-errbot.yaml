@@ -1,0 +1,37 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: app-sre
+
+name: saas-app-sre-errbot
+description: SaaS tracking file for app-sre error bot
+
+app:
+  $ref: /services/app-sre/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/app-sre/app-sre-errbot
+
+resourceTemplates:
+- name: app-sre-errbot
+  url: https://github.com/app-sre/app-sre-errbot
+  path: /hack/openshift/template.yaml
+  targets:
+  - namespace:
+      $ref: /services/app-sre/namespaces/app-sre-prod-01-app-sre-errbot-production.yaml
+    ref: f8058118c55bb38f9b1848b68d52c112ec76b2ab
+    parameters:
+      REPLICAS: 1
