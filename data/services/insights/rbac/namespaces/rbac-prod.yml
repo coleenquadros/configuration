@@ -39,6 +39,7 @@ managedRoles: true
 
 managedResourceTypes:
 - ConfigMap
+- Secret
 
 openshiftResources:
 - provider: vault-secret
@@ -79,6 +80,10 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
   name: rbac-db-vault
+# Templated secret for rbac-prod rds instance.
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-prod/rbac-prod/rbac-rds.secret.yaml
 
 managedTerraformResources: true
 
@@ -89,6 +94,7 @@ terraformResources:
   defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
   output_resource_name: cloudwatch
   es_identifier: kibana-elasticsearch
+# Must use templated secret for rbac-prod rds instance.
 - provider: rds
   account: insights-prod
   identifier: rbac-prod
