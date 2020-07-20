@@ -42,3 +42,7 @@ Quay publishes following SLI for build queue:
 - `quay_queue_items_locked` - non-expired locked items
 
 The SLI we should look at is `quay_queue_items_available`.
+
+## Builds are queued but none are running
+
+See [sop/fix-builder-redis.md](Fix Builder Redis) to see if this the issue.
