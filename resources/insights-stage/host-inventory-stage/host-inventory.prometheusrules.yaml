@@ -1,0 +1,27 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: insights-host-inventory-stage
+
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: insights-host-inventory
+    rules:
+    # pagerduty
+    - alert: App-insights-inventory-In-platform-stage-Absent
+      expr: absent(up{service="insights-inventory", namespace="host-inventory-stage"})
+      for: 5m
+      labels:
+        severity: info
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/host-inventory-stage/deployments"
+        message: "Alert name: App-insights-inventory-In-platform-tage-Absent from insights-inventory"
+        runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/App-insights-inventory-In-platform-prod-Absent.html"

@@ -1,0 +1,177 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: osd-operators
+
+name: saas-managed-cluster-config
+description: SaaS tracking file for managed-cluster-config
+
+app:
+  $ref: /services/osd-operators/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-srep-info
+
+managedResourceTypes:
+- SelectorSyncSet
+- SelectorSyncIdentityProvider
+
+imagePatterns:
+- quay.io/app-sre/managed-cluster-config-registry
+
+resourceTemplates:
+- name: managed-cluster-config
+  url: https://github.com/openshift/managed-cluster-config
+  path: /hack/00-osd-managed-cluster-config.selectorsyncset.yaml.tmpl
+  parameters:
+    IDENTITY_ATTR_EMAIL: mail
+    IDENTITY_ATTR_ID: uid
+    IDENTITY_ATTR_NAME: cn
+    IDENTITY_ATTR_PREFERRED_USERNAME: mail
+    IDENTITY_BIND_DN: uid=AosSrePlatformTestingEmail,ou=serviceaccounts,dc=redhat,dc=com
+    IDENTITY_URL: ldaps://ext-ldap.corp.redhat.com/ou=users,dc=redhat,dc=com?uid?sub
+    IDENTITY_NAME: OpenShift_SRE
+    IDENTITY_MAPPING_METHOD: claim
+    IDENTITY_SRE_GOOGLE_CLIENTID: 211953714079-afmg28lojv8m2vv97b56s64ivm5ercn4.apps.googleusercontent.com 
+    CS_SRE_USERS: 
+    - amoran@redhat.com
+    - crarobin@redhat.com
+    - mfreer@redhat.com
+    - jcueto@redhat.com
+    - mciccone@redhat.com
+    - pcremin@redhat.com
+    - raananda@redhat.com
+    - sclarkso@redhat.com
+    - mtreadwe@redhat.com
+    - rraghupa@redhat.com
+    CEE_USERS:
+    - dsquirre@redhat.com
+    - bshirren@redhat.com
+    - maupadhy@redhat.com
+    - pkanthal@redhat.com
+    - bmchugh@redhat.com
+    - dcaldwel@redhat.com
+    - zhigwang@redhat.com
+    - grodrigu@redhat.com
+    - ksalunkh@redhat.com
+    SREP_USERS:
+    - achvatal@redhat.com
+    - ahubenko@redhat.com
+    - alima@redhat.com
+    - anaik@redhat.com
+    - anjoshi@redhat.com
+    - aweiteka@redhat.com
+    - bdematte@redhat.com
+    - bembery@redhat.com
+    - bmeng@redhat.com
+    - bmontgom@redhat.com
+    - bmorriso@redhat.com
+    - bseref@redhat.com
+    - cattias@redhat.com
+    - cbeckham@redhat.com
+    - cblecker@redhat.com
+    - cbrumm@redhat.com
+    - chcollin@redhat.com
+    - cshereme@redhat.com
+    - dedgar@redhat.com
+    - dofinn@redhat.com
+    - dranders@redhat.com
+    - drow@redhat.com
+    - efried@redhat.com
+    - gchaturv@redhat.com
+    - gsleeman@redhat.com
+    - haowang@redhat.com
+    - hdogra@redhat.com
+    - jaharrin@redhat.com
+    - jburrell@redhat.com
+    - jroche@redhat.com
+    - kbater@redhat.com
+    - khnguyen@redhat.com
+    - kramraja@redhat.com
+    - lfalconm@redhat.com
+    - lseelye@redhat.com
+    - mbargenq@redhat.com
+    - mbarnes@redhat.com
+    - mdewald@redhat.com
+    - mmazur@redhat.com
+    - mwhittin@redhat.com
+    - mwoodson@redhat.com
+    - nbauer@redhat.com
+    - nmalik@redhat.com
+    - pcremin@redhat.com
+    - pgeorgia@redhat.com
+    - pyates@redhat.com
+    - pzheng@redhat.com
+    - razevedo@redhat.com
+    - rbastos@redhat.com
+    - rogreen@redhat.com
+    - rrackow@redhat.com
+    - siwu@redhat.com
+    - sulmer@redhat.com
+    - tfahlman@redhat.com
+    - tgabriel@redhat.com
+    - travi@redhat.com
+    - wadhwani@redhat.com
+    - whearn@redhat.com
+
+  targets:
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-integration-cluster-scope.yml
+    ref: master
+    upstream: openshift-managed-cluster-config-gh-build-master
+    parameters:
+      TELEMETER_SERVER_URL: https://infogw.api.stage.openshift.com
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-stage-cluster-scope.yml
+    ref: master
+    upstream: openshift-managed-cluster-config-gh-build-master
+    parameters:
+      TELEMETER_SERVER_URL: https://infogw.api.stage.openshift.com
+      CS_SRE_USERS: 
+      - amoran@redhat.com
+      - crarobin@redhat.com
+      - mfreer@redhat.com
+      - jcueto@redhat.com
+      - mciccone@redhat.com
+      - pcremin@redhat.com
+      - raananda@redhat.com
+      - sclarkso@redhat.com
+      - mtreadwe@redhat.com
+      - rraghupa@redhat.com
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-stage-01/hive-stage-01-cluster-scope.yml
+    ref: master
+    upstream: openshift-managed-cluster-config-gh-build-master
+    parameters:
+      TELEMETER_SERVER_URL: https://infogw.api.stage.openshift.com
+      CS_SRE_USERS: 
+      - amoran@redhat.com
+      - crarobin@redhat.com
+      - mfreer@redhat.com
+      - jcueto@redhat.com
+      - mciccone@redhat.com
+      - pcremin@redhat.com
+      - raananda@redhat.com
+      - sclarkso@redhat.com
+      - mtreadwe@redhat.com
+      - rraghupa@redhat.com
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-production-cluster-scope.yml
+    ref: 3246103880527ef55d91e9aac9a40af4e821daf6
+    parameters:
+      TELEMETER_SERVER_URL: https://infogw.api.openshift.com
+      CS_SRE_USERS: 
+      - amoran@redhat.com
+      - crarobin@redhat.com
+      - mfreer@redhat.com
+      - jcueto@redhat.com
+      - mciccone@redhat.com
+      - pcremin@redhat.com
+      - raananda@redhat.com
+      - sclarkso@redhat.com

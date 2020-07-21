@@ -8,6 +8,82 @@ this repository by the appropriate parties.
 The Application SRE team is responsible of fulfilling the contract defined in
 this repository.
 
+- [App-Interface](#app-interface)
+  - [Overview](#overview)
+  - [Components](#components)
+  - [Workflow](#workflow)
+  - [App-Interface Etiquette](#app-interface-etiquette)
+  - [Local validation of datafile modifications / contract amendment](#local-validation-of-datafile-modifications--contract-amendment)
+    - [JSON schema validation](#json-schema-validation)
+    - [Running integrations locally with `--dry-run`](#running-integrations-locally-with---dry-run)
+  - [Querying the App-interface](#querying-the-app-interface)
+  - [Features](#features)
+    - [Existing Features](#existing-features)
+    - [Planned Features](#planned-features)
+  - [Integrations](#integrations)
+    - [Existing integrations](#existing-integrations)
+    - [Planned integrations](#planned-integrations)
+  - [Entities and relations](#entities-and-relations)
+  - [Howto](#howto)
+    - [Add or modify a user (`/access/users-1.yml`)](#add-or-modify-a-user-accessusers-1yml)
+    - [Get notified of events involving a service, or it's dependencies](#get-notified-of-events-involving-a-service-or-its-dependencies)
+    - [Create a Quay Repository for an onboarded App (`/app-sre/app-1.yml`)](#create-a-quay-repository-for-an-onboarded-app-app-sreapp-1yml)
+    - [Create a Sentry Project for an onboarded App (`/app-sre/app-1.yml`)](#create-a-sentry-project-for-an-onboarded-app-app-sreapp-1yml)
+    - [Create a Sentry Team (`/dependencies/sentry-team-1.yml`)](#create-a-sentry-team-dependenciessentry-team-1yml)
+    - [Manage Sentry team membership via App-Interface (`/access/role-1.yml`)](#manage-sentry-team-membership-via-app-interface-accessrole-1yml)
+    - [Manage Openshift resources via App-Interface (`/openshift/namespace-1.yml`)](#manage-openshift-resources-via-app-interface-openshiftnamespace-1yml)
+      - [Example: Manage a ConfigMap via App-Interface (`/openshift/namespace-1.yml`)](#example-manage-a-configmap-via-app-interface-openshiftnamespace-1yml)
+      - [Example: Manage a templated ConfigMap via App-Interface (`/openshift/namespace-1.yml`)](#example-manage-a-templated-configmap-via-app-interface-openshiftnamespace-1yml)
+      - [Manage Secrets via App-Interface (`/openshift/namespace-1.yml`) using Vault](#manage-secrets-via-app-interface-openshiftnamespace-1yml-using-vault)
+      - [Manage Routes via App-Interface (`/openshift/namespace-1.yml`) using Vault](#manage-routes-via-app-interface-openshiftnamespace-1yml-using-vault)
+    - [Manage openshift-acme deployments via App-Interface (`/openshift/acme-1.yml`)](#manage-openshift-acme-deployments-via-app-interface-openshiftacme-1yml)
+    - [Manage OpenShift Groups association via App-Interface (`/openshift/cluster-1.yml`)](#manage-openshift-groups-association-via-app-interface-openshiftcluster-1yml)
+    - [Manage OpenShift LimitRanges via App-Interface (`/openshift/limitrange-1.yml`)](#manage-openshift-limitranges-via-app-interface-openshiftlimitrange-1yml)
+    - [Manage OpenShift ResourceQuotas via App-Interface (`/openshift/quota-1.yml`)](#manage-openshift-resourcequotas-via-app-interface-openshiftquota-1yml)
+    - [Self-Service OpenShift ServiceAccount tokens via App-Interface (`/openshift/namespace-1.yml`)](#self-service-openshift-serviceaccount-tokens-via-app-interface-openshiftnamespace-1yml)
+    - [Enable network traffic between Namespaces via App-Interface (`/openshift/namespace-1.yml`)](#enable-network-traffic-between-namespaces-via-app-interface-openshiftnamespace-1yml)
+    - [Manage Vault configurations via App-Interface](#manage-vault-configurations-via-app-interface)
+      - [Manage vault audit backends (`/vault-config/audit-1.yml`)](#manage-vault-audit-backends-vault-configaudit-1yml)
+      - [Manage vault auth backends (`/vault-config/auth-1.yml`)](#manage-vault-auth-backends-vault-configauth-1yml)
+      - [Manage vault policies (`/vault-config/policy-1.yml`)](#manage-vault-policies-vault-configpolicy-1yml)
+      - [Manage vault roles (`/vault-config/role-1.yml`)](#manage-vault-roles-vault-configrole-1yml)
+      - [Manage vault secret-engines (`/vault-config/secret-engine-1.yml`)](#manage-vault-secret-engines-vault-configsecret-engine-1yml)
+    - [Manage AWS access via App-Interface (`/aws/group-1.yml`) using Terraform](#manage-aws-access-via-app-interface-awsgroup-1yml-using-terraform)
+      - [Manage AWS users via App-Interface (`/aws/group-1.yml`) using Terraform](#manage-aws-users-via-app-interface-awsgroup-1yml-using-terraform)
+      - [Generating a GPG key](#generating-a-gpg-key)
+      - [Adding your public GPG key](#adding-your-public-gpg-key)
+    - [Manage AWS resources via App-Interface (`/openshift/namespace-1.yml`) using Terraform](#manage-aws-resources-via-app-interface-openshiftnamespace-1yml-using-terraform)
+      - [Manage ElasticSearch via App-Interface (`/openshift/namespace-1.yml`)](#manage-elasticsearch-via-app-interface-openshiftnamespace-1yml)
+      - [Manage RDS databases via App-Interface (`/openshift/namespace-1.yml`)](#manage-rds-databases-via-app-interface-openshiftnamespace-1yml)
+        - [Create RDS database from Snapshot](#create-rds-database-from-snapshot)
+        - [Publishing Database Log Files to CloudWatch](#publishing-database-log-files-to-cloudwatch)
+          - [Publishing MySQL Logs to CloudWatch Logs](#publishing-mysql-logs-to-cloudwatch-logs)
+          - [Publishing PostgreSQL Logs to CloudWatch Logs](#publishing-postgresql-logs-to-cloudwatch-logs)
+      - [Manage S3 buckets via App-Interface (`/openshift/namespace-1.yml`)](#manage-s3-buckets-via-app-interface-openshiftnamespace-1yml)
+      - [Manage ElastiCache databases via App-Interface (`/openshift/namespace-1.yml`)](#manage-elasticache-databases-via-app-interface-openshiftnamespace-1yml)
+      - [Manage IAM Service account users via App-Interface (`/openshift/namespace-1.yml`)](#manage-iam-service-account-users-via-app-interface-openshiftnamespace-1yml)
+      - [Manage SQS queues via App-Interface (`/openshift/namespace-1.yml`)](#manage-sqs-queues-via-app-interface-openshiftnamespace-1yml)
+      - [Manage DynamoDB tables via App-Interface (`/openshift/namespace-1.yml`)](#manage-dynamodb-tables-via-app-interface-openshiftnamespace-1yml)
+      - [Manage ECR repositories via App-Interface (`/openshift/namespace-1.yml`)](#manage-ecr-repositories-via-app-interface-openshiftnamespace-1yml)
+      - [Manage stacks of S3 bucket and CloudFront distribution via App-Interface (`/openshift/namespace-1.yml`)](#manage-stacks-of-s3-bucket-and-cloudfront-distribution-via-app-interface-openshiftnamespace-1yml)
+      - [Manage CloudWatch Log Groups via App-Interface (`/openshift/namespace-1.yml`)](#manage-cloudwatch-log-groups-via-app-interface-openshiftnamespace-1yml)
+      - [Manage Key Management Service Keys via App-Interface (`/openshift/namespace-1.yml`)](#manage-key-management-service-keys-via-app-interface-openshiftnamespace-1yml)
+      - [Manage VPCs via App-Interface (`/openshift/cluster-1.yml`)](#manage-vpcs-via-app-interface-openshiftcluster-1yml)
+    - [Manage Slack User groups via App-Interface](#manage-slack-user-groups-via-app-interface)
+    - [Manage Jenkins jobs configurations using jenkins-jobs](#manage-jenkins-jobs-configurations-using-jenkins-jobs)
+    - [Delete AWS IAM access keys via App-Interface](#delete-aws-iam-access-keys-via-app-interface)
+    - [AWS garbage collection](#aws-garbage-collection)
+    - [GitHub user profile compliance](#github-user-profile-compliance)
+    - [Manage GitLab group members](#manage-gitlab-group-members)
+    - [Create GitLab projects](#create-gitlab-projects)
+    - [Add a Grafana Dashboard](#add-a-grafana-dashboard)
+    - [Execute a SQL Query on an App Interface controlled RDS instance](#execute-a-sql-query-on-an-app-interface-controlled-rds-instance)
+    - [Enable Gitlab Features on an App Interface Controlled Gitlab Repository](#enable-gitlab-features-on-an-app-interface-controlled-gitlab-repository)
+    - [Add recording rules via openshift-performance-parameters integration](#add-recording-rules-via-openshift-performance-parameters-integration)
+  - [Design](#design)
+  - [Developer Guide](#developer-guide)
+  - [Quay Documentation](#quay-documentation)
+
 ## Overview
 
 This repository contains of a collection of files under the `data` folder.
@@ -74,6 +150,14 @@ expressed as json schemas. You can find the supported schemas here:
 4. From the moment the MR is accepted, the amended contract will enter into
    effect.
 
+## App-Interface Etiquette
+
+- When you create a MR, it's not necessary to immediately ping the @app-sre-ic in #sd-app-sre. The IC will eventually see it and merge it. It's only necessary to ping the IC if the MR is urgent or if a day has passed and the IC has not commented anything.
+- If your PR only contains changes to saas-files, you can auto-approve, see here: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-delivery-in-app-interface.md#approval-process
+- Even if you have rights to merge the PR, please refrain from doing so. If you need it merged urgently, ping @app-sre-ic in #sd-app-sre.
+- If an AppSRE team members adds the `lgtm` label, it will be automerged by a bot.
+- The AppSRE team members will also refrain from manually merging PRs and will use labels instead to allow the bot to automatically merge them. In App-Interface the order of the PRs is important, and if we manually merge, it will affect waiting times for other users.
+
 ## Local validation of datafile modifications / contract amendment
 
 Before submitting a MR with a datafile modification / contract amendment, the
@@ -120,8 +204,39 @@ The contract can be queried programmatically using a
 The GraphQL endpoint is reachable here:
 <https://app-interface.devshift.net/graphql>.
 
-You need to authenticate to access the service. Please request the credentials
-to the App-SRE team.
+To get credentials to query app-interface, submit a Credentials Request form in a merge request.
+The request itself is a file with the following structure:
+* `$schema` - must be `/app-interface/credentials-request-1.yml`
+* `labels` - labels to be added to the request (currently not used by automation)
+* `name` - name of the request object. must be unique
+* `description` - what will these credentials that you are requesting be used for
+* `user` - a reference to a user file who this request is for. user file must contain a public gpg key. [instructions](#adding-your-public-gpg-key)
+* `credentials` - the credentials which you are requesting
+  * current options:
+    - app-interface-production-dev-access
+    - app-interface-production-cicd-access
+
+Complete example:
+
+```yaml
+---
+$schema: /app-interface/credentials-request-1.yml
+
+labels: {}
+
+name: example-request-20200512
+
+description: |
+  request description
+
+user:
+  $ref: /teams/path/to/user/file.yml
+
+credentials: app-interface-production-dev-access
+
+```
+
+Please create the request file [here](/data/app-interface/requests).
 
 **IMPORTANT**: in order to use the GraphQL UI you need to click on the Settings
 wheel icon (top-right corner) and replace `omit` with `include` in
@@ -156,7 +271,7 @@ wheel icon (top-right corner) and replace `omit` with `include` in
 
 - GitHub org and team syncing. With this integration we can leverage any service
   that is configured to use GitHub as the authentication platform. For example:
-  - <https://ci-int-jenkins.rhev-ci-vms.eng.rdu2.redhat.com/>
+  - <https://ci.int.devshift.net/>
   - <https://ci.ext.devshift.net/>
   - <https://vault.devshift.net/ui/>
   - Many OpenShift [clusters](/data/openshift)
@@ -192,12 +307,21 @@ wheel icon (top-right corner) and replace `omit` with `include` in
 - Deletion of OpenShift users.
 - Management of notification e-mails.
 - Management of SQL Queries.
+- Creation of SLI related performance parameters recording rules.
 
 ### Planned integrations
 
 - Top level tracking of managed services, their contact points, and work
   streams.
 - Management of OLM catalog entries for managing service operators.
+
+## Entities and relations
+
+App-interface data is represented by files that correspond to a schema. Files of one schema may reference files of another schema.
+
+To learn more about the different entities and their relations:
+
+- [Products, Environments, Namespaces and Apps](/docs/app-interface/api/entities-and-relations#products-environments-namespaces-and-apps.md)
 
 ## Howto
 
@@ -241,7 +365,7 @@ There are three ways a user or group can get notified of service events (e.g. pl
 * `serviceNotifications`:  This is a list of additional email addresses of employees who would like to receive notifications about a service.  This field is Optional.
 * Subscribe to the `sd-notifications@redhat.com` [mailing list](https://post-office.corp.redhat.com/mailman/listinfo/sd-notifications). This list receives all event communications.
 
-Find out more about App-SRE Incident Procedures [here](https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/AAA.md#168-incident-procedure).
+Find out more about App-SRE Incident Procedures [here](https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/AAA.md#incident-procedure).
 
 Example usage for [Hive](https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/hive/app.yml):
 
@@ -347,7 +471,7 @@ Notes:
 * If the resource already exists in the namespace, the PR check will fail. Please get in contact with App-SRE team to import resources to be under the control of App-Interface.
 * Manual changes to resources will be overridden by App-Interface in each run.
 * If a resource has a `qontract.recycle: "true"` annotation, all pods using that resource will be recycled on every update.
-  * Supported resources: Secrets
+  * Supported resources: Secrets, ConfigMaps
 
 OpenShift resources can be entirely self-serviced via App-Interface. A list of supported resource types can be found [here](/schemas/openshift/namespace-1.yml#L46).
 
@@ -364,6 +488,12 @@ The `resource-template` provider supports using the `Jinja2` template language t
 
     ```jinja
     {{ vault('app-sre/creds/smtp', 'username') }}
+    ```
+
+- Fetch a secret from vault with a templated path or key:
+
+    ```jinja
+    {{ vault('path/to/secret-with-key-per-namespace', '{{ resource.namespace.name }}') }}
     ```
 
 - Base64 encode a block of data
@@ -490,29 +620,15 @@ Notes:
 
 This integration allows namespace owners to deploy openshift-acme to their namespaces.
 
-To deploy and manage an openshift-acme instance, a user must add the following to a namespace declaration:
+To deploy and manage an openshift-acme instance, a user must add the following to the [saas-openshift-acme](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-sre/cicd/ci-int/saas-openshift-acme.yaml) file:
 
 ```yaml
-openshiftAcme:
-  config:
-    $ref: /dependencies/openshift/acme/default.yml
+  - namespace:
+      $ref: /services/path/to/namespace/file.yaml
+    ref: master
 ```
 
-The openshift-acme deployment can be customized by creating a new file alongside the default one.
-
-The default definition (as shown above) is self-documented and shows how to tweak the openshift-acme deployment.
-
-An optional acme-account secret in Vault can be declared in the following way:
-
-```yaml
-openshiftAcme:
-  config:
-    $ref: /dependencies/openshift/acme/default.yml
-  accountSecret:
-    provider: vault-secret
-    path: vault/path/to/acme-account
-    version: 1
-```
+use `ref` master for stage namespaces and a commit hash as exists in other `ref`s for production namespaces.
 
 ### Manage OpenShift Groups association via App-Interface (`/openshift/cluster-1.yml`)
 
@@ -541,7 +657,22 @@ The LimitRange limits can be customized by creating a new file and referencing t
 
 The `/openshift/limitrange-1.yml` schema maps to the LimitRanges specs.
 
-### Self-Service OpenShift ServiceAccount tokens via App-Interface (`/openshift/limitrange-1.yml`)
+### Manage OpenShift ResourceQuotas via App-Interface (`/openshift/quota-1.yml`)
+
+This integration allows namespace owners to manage ResourceQuota objects on their namespaces
+
+To deploy and manage ResourceQuotas on a namespace, a user must add the following to a namespace declaration:
+
+```yaml
+quota:
+  $ref: /path/to/some/quota.yml
+```
+
+The ResourceQuota limits can be customized by creating a new file and referencing the new file in the namespace declaration.
+
+The `/openshift/quota-1.yml` schema maps to the ResourceQuotas specs.
+
+### Self-Service OpenShift ServiceAccount tokens via App-Interface (`/openshift/namespace-1.yml`)
 
 This integration allows namespace owners to get ServiceAccount tokens from a different cluster/namespace in to their namespace for consumption.
 
@@ -557,6 +688,19 @@ openshiftServiceAccountTokens:
 The integration will get the token belonging to that ServiceAccount and add it into a Secret called:
 `<clusterName>-<namespaceName>-<ServiceAccountName>`.
 The Secret will have a single key called `token`, containing a token of that ServiceAccount.
+
+### Enable network traffic between Namespaces via App-Interface  (`/openshift/namespace-1.yml`)
+
+To enable network traffic between namespace, a user must add the following to a namespace declaration:
+
+```yaml
+networkPoliciesAllow:
+- $ref: /path/to/source-namespace.yml
+```
+
+This will allow traffic from the `source-namespace` to the namespace in which this section is defined.
+
+In this [example](/data/services/cincinnati/namespaces/cincinnati-production.yml#L18-19), traffic is enabled from the `openshift-customer-monitoring` namespace to the `cincinnati-production` namespace.
 
 ### Manage Vault configurations via App-Interface
 
@@ -791,33 +935,107 @@ Notes:
 * Manual changes to AWS resources will be overridden by App-Interface in each run.
 * To be able to use this feature, the `managedTerraformResources` field must exist and equal to `true`.
 
+#### Manage ElasticSearch via App-Interface (`/openshift/namespace-1.yml`)
+
+[Amazon Elasticsearch Service](https://aws.amazon.com/elasticsearch-service/) is a fully managed service that makes it easy for you to deploy, secure, and run Elasticsearch cost effectively at scale. Amazon Elasticsearch can be entirely self-serviced via App-Interface.
+
+In order to add or update Amazon Elasticsearch Service, you need to add them to the `terraformResources` field.
+
+- `provider`: must be `elasticsearch`
+- `account`: The AWS account you want to deploy Amazon Elasticsearch Service in.
+- `identifier` - name of resource to create (or update)
+- `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options](/resources/terraform/resources/)
+- `output_resource_name`: name of Kubernetes Secret to be created.
+  - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
+  - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
+    - For example, for a resource with `identifier` "my-service" and `provider` is set to `elasticsearch`, the created Secret will be called `my-service-elasticsearch`.
+
+Once the changes are merged, the Amazon Elasticsearch Service will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
+
+The Secret will contain the following fields:
+
+- `arn` - Amazon Resource Name (ARN) of the domain.
+- `domain_id` - Unique identifier for the domain.
+- `domain_name` - The name of the Elasticsearch domain.
+- `endpoint` - Domain-specific endpoint used to submit index, search, and data upload requests.
+- `kibana_endpoint` - Domain-specific endpoint for kibana without https scheme.
+- `vpc_id` - If the domain was created inside a VPC, the ID of the VPC.
+
 #### Manage RDS databases via App-Interface (`/openshift/namespace-1.yml`)
 
 RDS instances can be entirely self-serviced via App-Interface.
 
-In order to add or update an RDS database, you need to add them to the `terraformResources` field.
+In order to create or update an RDS database, you need to add them to the `terraformResources` field.
 
 - `provider`: must be `rds`
-- `account`: must be one of the AWS account names we manage. Current options:
-  - `app-sre`
-  - `osio`
-- `identifier` - name of resource to create (or update)
+- `account`: must be one of the AWS account names managed by app-interface. Account values can be found [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/schemas/aws/tenant_accounts-1.yml).
+- `identifier` - name of database instance to create (or update). Must be unique across all RDS instances in the AWS account.
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options](/resources/terraform/resources/)
 - `parameter_group`: (optional) path relative to [resources](/resources) to a file with parameter group values. Note that it starts with `/`.
-- `overrides`: list of values from `defaults` you wish to override, with the override values. For example: `engine: mysql`.
-- `output_resource_name`: name of Kubernetes Secret to be created.
+- `overrides`: (optional) list of values from `defaults` you wish to override, with the override values. For example: `engine: mysql`.
+- `replica_source`: (optional) indicates this will be a read replica with this identifier of an rds instance acting as the source
+- `output_resource_name`: (optional) name of Kubernetes Secret to be created.
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-instance" and `provider` "rds", the created Secret will be called `my-instance-rds`.
+- `enhanced_monitoring`: (optional) Setting it to `true` will enable enhanced monitoring for the database instance. Learn more about enhanced monitoring [here](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_Monitoring.OS.html).
 
-Once the changes are merged, the RDS instance will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
+Once the changes are merged, the RDS instance will be created (or updated) and a Kubernetes Secret will be created in the same namespace with following details.
 
-The Secret will contain the following fields:
 - `db.host` - The hostname of the RDS instance.
 - `db.port` - The database port.
 - `db.name` - The database name.
 - `db.user` - The master username for the database.
 - `db.password` - Password for the master DB user.
+
+##### Create RDS database from Snapshot
+
+You can create an RDS instance from a database snapshot by setting `snapshot_identifier` in your `defaults` file. However, most AppSRE tenants tend to use the same defaults file for multiple RDS instance. If you are re-using the defaults file, you can set `snapshot_identifier` in the `overrides`.
+
+Here's an example of RDS database created from snapshot:
+
+```yaml
+terraformResources:
+- provider: rds
+  account: insights-prod
+  identifier: system-baseline-prod
+  defaults: /terraform/resources/insights/production/rds/rds-system-baseline-prod.yml
+  overrides:
+    snapshot_identifier: system-baseline-prod-migration
+  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-system-baseline-prod.yml
+  output_resource_name: system-baseline-db-rds
+  enhanced_monitoring: true
+```
+
+##### Publishing Database Log Files to CloudWatch
+
+Database logs for MySQL and PostgreSQL can be configured to be published to CloudWatch where developers can look at the logs to identify & troubleshoot slow queries.
+
+###### Publishing MySQL Logs to CloudWatch Logs
+
+You can publish `audit`, `general`, `slowquery`, and `error` logs to CloudWatch for MySQL RDS instances by adding the following to your RDS specification file:
+
+```yaml
+enabled_cloudwatch_logs_exports: ["audit","error","general","slowquery"]
+```
+
+Amazon RDS publishes each MySQL database log as a separate database stream in the log group. For example, if you configure the export function to include the slow query log, slow query data is stored in a slow query log stream in the `/aws/rds/instance/my_instance/slowquery` log group.
+
+Additonal details can be found in AWS [documentation](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_LogAccess.Concepts.MySQL.html).
+
+###### Publishing PostgreSQL Logs to CloudWatch Logs
+
+AWS does not break down RDS logs for PostgreSQL into `error`, `slowquery`, `audit`, etc. categories for logs. The only log options available for PostgreSQL RDS instances are `postgresql`, and `upgrade`.
+
+To publish slow query logs to cloudwatch, we must first configure logging parameters for the RDS instance. RDS instance must be configured to use a custom parameter group. If this is not the case, we must first attach a custom parameter group to the database. To enable query logging for your PostgreSQL DB instance, set two parameters in the DB parameter group associated with your DB instance: `log_statement` and `log_min_duration_statement`.
+
+The `log_statement` parameter controls which SQL statements are logged. We recommend that you set this parameter to `all` to log `all` statements when you debug issues in your DB instance. The default value is `none`. To log all data definition language (DDL) statements (CREATE, ALTER, DROP, and so on), set this value to `ddl`. To log all DDL and data modification language (DML) statements (INSERT, UPDATE, DELETE, and so on), set this value to `mod`.
+
+The `log_min_duration_statement` parameter sets the limit in milliseconds of a statement to be logged. All SQL statements that run longer than the parameter setting are logged. This parameter is disabled and set to `-1` by default. Enabling this parameter can help you find unoptimized queries.
+
+After you complete the configuration, Amazon RDS publishes the log events to log streams within a CloudWatch log group. For example, the PostgreSQL log data is stored within the log group `/aws/rds/instance/my_instance/postgresql`.
+
+Additonal details can be found in AWS [documentation](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_LogAccess.Concepts.PostgreSQL.html#USER_LogAccess.PostgreSQL.Query_Logging).
 
 #### Manage S3 buckets via App-Interface (`/openshift/namespace-1.yml`)
 
@@ -872,13 +1090,13 @@ The Secret will contain the following fields:
 - `db.port` - The database port.
 - `db.auth_token` - Authentication token for the configuration endpoint.
 
-#### Manage Service account IAM Users via App-Interface (`/openshift/namespace-1.yml`)
+#### Manage IAM Service account users via App-Interface (`/openshift/namespace-1.yml`)
 
 IAM users to be used as service accounts can be entirely self-serviced via App-Interface.
 
 In order to add or update a service account, you need to add them to the `terraformResources` field.
 
-- `provider`: must be `service-account`
+- `provider`: must be `aws-iam-service-account`
 - `account`: must be one of the AWS account names we manage. Current options:
   - `app-sre`
   - `osio`
@@ -889,7 +1107,7 @@ In order to add or update a service account, you need to add them to the `terraf
 - `output_resource_name`: name of Kubernetes Secret to be created.
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
-    - For example, for a resource with `identifier` "my-user" and `provider` "service-account", the created Secret will be called `my-user-service-account`.
+    - For example, for a resource with `identifier` "my-user" and `provider` "aws-iam-service-account", the created Secret will be called `my-user-aws-iam-service-account`.
 
 Once the changes are merged, the IAM resources will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
@@ -1027,6 +1245,8 @@ In order to add or update an CloudWatch Log Group, you need to add them to the `
 - `account`: must be one of the AWS account names we manage. [Current options](/schemas/openshift/namespace-1.yml#L502)
 - `identifier` - name of resource to create (or update)
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options:](/resources/terraform/resources/)
+- `es_identifier`: identifier of a existing elasticsearch. It will create a AWS lambda to stream logs to elasticsearch service. This field is optional.
+- `filter_pattern`: filter pattern for log data. Only works with streaming logs to elasticsearch.
 - `output_resource_name`: name of Kubernetes Secret to be created.
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
@@ -1039,6 +1259,76 @@ The Secret will contain the following fields:
 - `aws_region` - The name of the Log group's AWS region.
 - `aws_access_key_id` - The access key ID.
 - `aws_secret_access_key` - The secret access key.
+
+#### Manage Key Management Service Keys via App-Interface (`/openshift/namespace-1.yml`)
+
+Key Management Service keys can be entirely self-serviced via App-Interface.
+
+In order to add or update a Key Management Service key, you need to add them to the `terraformResources` field.
+
+- `provider`: must be `kms`
+- `account`: must be one of the AWS account names we manage. [Current options](/schemas/openshift/namespace-1.yml#L502)
+- `identifier` - name of resource to create (or update)
+- `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options:](/resources/terraform/resources/)
+- `output_resource_name`: name of Kubernetes Secret to be created.
+  - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
+  - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
+    - For example, for a resource with `identifier` "my-key" and `provider` "kms", the created Secret will be called `my-key-kms`.
+
+Once the changes are merged, the Key Management Service key will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
+
+The Secret will contain the following fields:
+- `key_id` - The globally unique identifier for the key.
+
+#### Manage VPCs via App-Interface (`/openshift/cluster-1.yml`)
+
+VPC peerings can be entirely self-services via App-Interface.
+
+A cluster can be peered to a VPC that is defined in app-interface (we call it an account VPC) or to another OCM cluster account VPC (we call it a cluster VPC)
+
+In order to use this integration, the following must be defined in the cluster definition file, under the `peering` key
+
+- `vpc_id`: the VPC ID of the cluster (can be found by logging in to AWS via the OCM network-mgmt role)
+- `connections`: a list of peering connections that this cluster should have. A peering connection can be either to an `account VPC` or a `cluster VPC`
+  - `provider`: One of `account-vpc`, `cluster-vpc-requester` or `cluster-vpc-accepter`
+  - `name`: A name for the VPC peering connection (ex: `clusterA-cluster-B`)
+  - `vpc` (mutually exclusive with `cluster`): Value as `$ref: /path/to/some/vpc.yaml` (of type `/aws/vpc-1.yml`)
+  - `cluster` (mutually exclusive with `cluster`): Value as `$ref: /path/to/some/cluster.yaml` (of type `/openshift/cluster-1.yml`)
+  - `manageRoutes`: (optional) A boolean value indicating should the integration add appropriate routes to existing Route Tables.
+
+**Note:** For a cluster-to-cluster VPC peering, both clusters MUST have a corresponding VPC peering definition, one of which defined as `cluster-vpc-requester` and one as `cluster-vpc-accepter`, each referencing the other cluster. This ensures we are very specific about peerings and don't end up creating peering requests that will not lead to an account that won't have a corresponding accepter.
+
+Example:
+
+```yaml
+# hive-stage-01 cluster.yaml
+...
+peering:
+  vpc_id: vpc-01417c044e7124802
+  connections:
+  - provider: account-vpc
+    name: hive-stage-01_app-sre
+    vpc:
+      $ref: /aws/app-sre/vpcs/app-sre-vpc-02-ci-ext.yml
+  - provider: cluster-vpc-requester
+    name: hive-stage-01_app-sre-stage-01
+    cluster:
+      $ref: /openshift/app-sre-stage-01/cluster.yml
+```
+
+```yaml
+# app-sre-stage-01 cluster.yaml
+...
+peering:
+  vpc_id: vpc-0fdea7c2456fdf0b8
+  connections:
+  - provider: cluster-vpc-accepter
+    name: app-sre-stage-01_hive-stage-01
+    cluster:
+      $ref: /openshift/hive-stage-01/cluster.yml
+```
+
+
 
 ### Manage Slack User groups via App-Interface
 
@@ -1055,10 +1345,9 @@ To manage a User group via App-Interface:
 - `workspace`: a reference to a file representing the Slack Workspace
 - `pagerduty`: a reference to a file representing a PagerDuty target (Schedule or Escalation Policy).
   * Adding this attribute will add the PagerDuty target as an additional "source of truth", and will add the final schedule user to the Slack user group (in addition to any references from user files).
-- `github_owners`: a list of urls of raw github `OWNERS` files to extract `approvers` from.
-- `github_owners_aliases`: a url with a raw github `OWNERS_ALIASES` file to resolve aliases in the `OWNERS` file.
-- `gitlab_owners`: a list of urls of raw gitlab `OWNERS` files to extract `approvers` from.
-- `gitlab_owners_aliases`: a url with a raw gitlab `OWNERS_ALIASES` file to resolve aliases in the `OWNERS` file.
+- `ownersFromRepos`: a list of urls of github or gitlab repositories containing
+  the `OWNERS` files to extract `approvers`/`reviewers` from. Only the root
+  `OWNERS` file is considered. The `OWNERS_ALIASES` is respected.
 - `channels`: a list of channels to add to the User group
 
 2. Add this permission to the desired `roles`, or create a new `role` with this permission only (mandatory).
@@ -1076,7 +1365,7 @@ Notes:
 * Creating new User groups is not supported (User group has to pre-exist).
 * In order to be able to use the `pagerduty` attribute of a `permission`, the relevant users (ones from that PagerDuty schedule) should have the following attributes in their user files:
   * `slack_username` - if it is different from `org_username`
-  * `pagerduty_name` - if it is different from `name`
+  * `pagerduty_username` - if it is different from `org_username`
 
 ### Manage Jenkins jobs configurations using jenkins-jobs
 
@@ -1137,13 +1426,15 @@ One use case this is useful for is leaked keys.
 
 ### AWS garbage collection
 
+To enable garbage collection in an AWS account, add `garbageCollection: true` to the account file. [example](/data/aws/osio-dev/account.yml#L20)
+
 AWS resources which do *NOT* have one of the following properties are continuously garbage collected:
 
 * The resource name starts with the name of an existing IAM user
 * The resource name has `stage` or `prod` in it
 * The resource has one of these tags:
   * `managed_by_integration` - resources managed by the `terraform-resources` or `terraform-users` integrations
-  * `owner` - resources managed by `app-sre` team terraform configurations in [housekeeping](https://gitlab.cee.redhat.com/dtsd/housekeeping/tree/master/terraform)
+  * `owner` - resources managed by `app-sre` team terraform configurations in [app-sre/infra](https://gitlab.cee.redhat.com/app-sre/infra/tree/master/terraform)
   * `aws_gc_hands_off` - resources created manually, if tag is set to `true`
   * `ENV`/`environment` - resources which are related to `stage` or `prod`
 
@@ -1153,8 +1444,6 @@ Supported resource types are:
 * RDS
 * DynamoDB
 
-Notes:
-* This integration does not actually delete resources currently (disabled by default), but it will still list resources that would have otherwise been deleted in every PR check.
 
 ### GitHub user profile compliance
 
@@ -1200,19 +1489,17 @@ To get access to the project, if required, contact the App SRE team.
 
 ### Add a Grafana Dashboard
 
-1. Open the Playground dashboard and follow the documentation there.
+1. Add manually your dashboard following [these instructions](/docs/app-sre/monitoring.md#Addingdashboards)
 
-2. Export the graph from Grafana as JSON
+1. Add the graph json to `/resources/observability/grafana/`. Please follow the naming convention
 
-3. Add the graph json to `/resources/observability/grafana/`. Please follow the naming convention
+1. Add the graph to the resources list at `/data/services/observability/namespaces/app-sre-observability-ENV.yml`, `ENV` being both production AND stage. It is mandatory that both environments are added or one of the deployments will eventually fail.
 
-4. Add the graph to the resources list at `/data/services/observability/namespaces/app-sre-observability-ENV.yml` (ENV being either production or stage)
+1. Wait for the configmap has been merged and applied to the cluster(s)
 
-5. Wait for the configmap has been merged and applied to the cluster(s)
+1. Add the configmap as a volume and volumeMount to the grafana pod template in [the app-sre-observability repo](https://gitlab.cee.redhat.com/service/app-sre-observability/). An example of the changes can be found [here](https://gitlab.cee.redhat.com/service/app-sre-observability/commit/0bee8c95be4a27121e6b1ff82a75a2e01901a8f4)
 
-6. Add the configmap as a volume and volumeMount to the grafana pod template in [the app-sre-observability repo](https://gitlab.cee.redhat.com/service/app-sre-observability/). An example of the changes can be found [here](https://gitlab.cee.redhat.com/service/app-sre-observability/commit/0bee8c95be4a27121e6b1ff82a75a2e01901a8f4)
-
-7. Once the template changes are merged, the saas-repo hash for the grafana service need to be bumped so the changes are deployed. This can be done on [the saas-app-sre-observability repo](https://gitlab.cee.redhat.com/service/saas-app-sre-observability/)
+1. Once the template changes are merged, the saas file hash for the grafana service need to be bumped so the changes are deployed. This can be done in [saas-grafana](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/cicd/saas/saas-grafana.yaml).
 
 ### Execute a SQL Query on an App Interface controlled RDS instance
 
@@ -1365,7 +1652,11 @@ repositories:
 - `gitlabHousekeeping`:  Value `enabled: true` will enable the
   `gitlab-housekeeping` integration, that auto-merges Merge Requests that are
   labelled as such. It also rebases the Merge Requests that are not rebased
-  (you can disable the rebase feature with `rebase: false`).
+  (you can disable the rebase feature with `rebase: false`). Additional supported
+  fields:
+    - `limit` - limit number of merges/rebases to avoid load (default: 1)
+    - `days_interval` - number of days to consider an item as stale (default: 15)
+    - `enable_closing` - enable closing of stale items after two stale periods (default: disabled)
 - `jira`: Value as `$ref: /path/to/jira-server.yaml` will enable the
   Gitlab/JIRA integration, that links Merge Requests mentioning JIRA tickets
   to the mentioned JIRA ticket.
@@ -1387,6 +1678,10 @@ codeComponents:
 ...
 ```
 
+### Add recording rules via openshift-performance-parameters integration
+
+Please refer to this [document](docs/app-sre/sli-recording-rules-via-performance-parameters.md)
+
 ## Design
 
 Additional design information: [here](docs/app-interface/design.md).
@@ -1400,3 +1695,7 @@ Additional design information: [here](docs/app-interface/design.md).
 ## Developer Guide
 
 More information [here](docs/app-interface/developer.md).
+
+## Quay Documentation
+
+All the quay.io related documentation can be found in the [`quay`](docs/quay) folder.

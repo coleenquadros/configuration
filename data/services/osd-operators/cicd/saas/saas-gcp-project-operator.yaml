@@ -1,0 +1,50 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: osd-operators
+
+name: saas-gcp-project-operator
+description: SaaS tracking file for gcp-project-operator
+
+app:
+  $ref: /services/osd-operators/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-srep-info
+
+managedResourceTypes:
+- CatalogSource
+- OperatorGroup
+- Subscription
+
+imagePatterns:
+- quay.io/app-sre/gcp-project-operator-registry
+
+resourceTemplates:
+- name: gcp-project-operator
+  url: https://github.com/openshift/gcp-project-operator
+  path: /hack/olm-registry/olm-artifacts-template.yaml
+  parameters:
+    REGISTRY_IMG: quay.io/app-sre/gcp-project-operator-registry
+  targets:
+  - namespace:
+      $ref: /services/osd-operators/namespaces/gcp-project-operator-integration.yml
+    ref: master
+    upstream: openshift-gcp-project-operator-gh-build-master
+  - namespace:
+      $ref: /services/osd-operators/namespaces/gcp-project-operator-stage.yml
+    ref: master
+    upstream: openshift-gcp-project-operator-gh-build-master
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-stage-01/gcp-project-operator-stage-01.yml
+    ref: master
+    upstream: openshift-gcp-project-operator-gh-build-master
+  - namespace:
+      $ref: /services/osd-operators/namespaces/gcp-project-operator-production.yml
+    ref: 0561e30a7df584fc11eacfb40ab97dbd7136d07c

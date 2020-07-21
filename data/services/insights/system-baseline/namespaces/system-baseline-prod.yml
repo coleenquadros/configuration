@@ -1,0 +1,54 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: system-baseline
+
+name: system-baseline-prod
+description: Insights system-baseline-prod on the v4 prod cluster
+
+cluster:
+  $ref: /openshift/crcp01ue1/cluster.yml
+
+app:
+  $ref: /services/insights/system-baseline/app.yml
+
+environment:
+  $ref: /products/insights/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-prod.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+- Secret
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-prod/shared/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+# Templated secret for rds instance.
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-prod/system-baseline-prod/system-baseline-rds.secret.yaml
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-prod
+  identifier: system-baseline-prod
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch

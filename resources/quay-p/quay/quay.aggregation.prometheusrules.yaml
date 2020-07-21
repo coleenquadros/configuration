@@ -1,0 +1,16 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: quay-aggregation
+    quay-component: metrics-aggregation
+  name: quay-aggregation
+spec:
+  groups:
+  - name: quay-aggregation.rules
+    rules:
+    - record: "aggregation:quay_request_duration_seconds_bucket:rate5m:sum"
+      expr: sum(rate(quay_request_duration_seconds_bucket[5m])) by (le, route, method, status)
+    - record: "aggregation:quay_request_duration_seconds_count:rate1m:sum"
+      expr: sum(rate(quay_request_duration_seconds_count[1m])) by (route, status, method)

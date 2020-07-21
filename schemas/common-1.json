@@ -1,11 +1,11 @@
 {
-  "$schema": "http://json-schema.org/draft-04/schema",
+  "$schema": "http://json-schema.org/draft-06/schema",
   "version": "1.0",
   "type": "object",
   "definitions": {
     "query": {
       "type": "string",
-      "pattern": "^(SELECT|select)[^;]+;$"
+      "pattern": "(?i)^(select|explain) (?!analyze)[^;]+;$"
     },
     "labels": {
       "type": "object",
@@ -34,6 +34,11 @@
     "nonEmptyString": {
       "type": "string",
       "minLength": 1
+    },
+    "nonEmptyShortString": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 63
     },
     "nonEmptyArray": {
       "type": "array",
@@ -82,8 +87,7 @@
     "serviceLevel": {
       "type": "number",
       "minimum": 90,
-      "maximum": 100,
-      "exclusiveMaximum": true
+      "exclusiveMaximum": 100
     },
     "crossref": {
       "type": "object",
@@ -166,6 +170,11 @@
         {"required": ["slackRecipients"]},
         {"required": ["webhookRecipients"]}
       ]
+    },
+    "promSelector": {
+      "type": "string",
+      "description": "Valid instant-vector selector: https://prometheus.io/docs/concepts/data_model/#metric-names-and-labels",
+      "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*(=|!=|=~|!~)\".+\"$"
     }
   }
 }

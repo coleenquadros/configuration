@@ -1,0 +1,63 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: xjoin
+
+name: xjoin-prod
+description: Insights xjoin-prod on the Prod v4 cluster under app sre
+
+cluster:
+  $ref: /openshift/crcp01ue1/cluster.yml
+
+app:
+  $ref: /services/insights/xjoin/app.yml
+
+environment:
+  $ref: /products/insights/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-prod.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ConfigMap
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/insights-prod/host-inventory-prod/host-inventory-db
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: resource
+  path: /insights-prod/xjoin-prod/kafka-connect.configmap.yml
+- provider: resource
+  path: /insights-prod/xjoin-prod/validation.configmap.yml
+- provider: resource
+  path: /insights-prod/xjoin-prod/xjoin-config.configmap.yml
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-prod
+  identifier: xjoin-prod
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  es_identifier: kibana-elasticsearch
+  output_resource_name: cloudwatch
+- provider: elasticsearch
+  account: insights-prod
+  identifier: xjoin-elasticsearch
+  defaults: /terraform/resources/insights/production/elasticsearch/elasticsearch-1.yml
+  output_resource_name: xjoin-elasticsearch

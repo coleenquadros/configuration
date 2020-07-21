@@ -1,0 +1,94 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: policies
+  platform: insights
+
+name: policies
+description: policies app on the Insights Platform
+
+app:
+  $ref: /services/insights/policies/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- Deployment
+- DeploymentConfig
+- Service
+- PersistentVolumeClaim
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+  
+resourceTemplates:
+- name: policies-notifications
+  path: /templates/policies/policies-notifications.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/policies/namespaces/stage-policies-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: f749e0c
+      DB_SECRET_NAME: policies-notifications-db
+      CLOUD_WATCH_LOG_GROUP: policies-stage
+  - namespace:
+      $ref: /services/insights/policies/namespaces/policies-prod.yml
+    ref: 020e72c48ab14d2ffdd2364a574c3da8fb87282c
+    parameters:
+      IMAGE_TAG: f749e0c
+      DB_SECRET_NAME: policies-notifications-db
+      CLOUD_WATCH_LOG_GROUP: policies-prod
+- name: policies-engine
+  path: /templates/policies/policies-engine.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/policies/namespaces/stage-policies-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 88b602c
+      INFINISPAN_STORAGE: 50Gi
+      CLOUD_WATCH_LOG_GROUP: policies-stage
+      SENTRY_ENV: stage
+  - namespace:
+      $ref: /services/insights/policies/namespaces/policies-prod.yml
+    ref: 020e72c48ab14d2ffdd2364a574c3da8fb87282c
+    parameters:
+      IMAGE_TAG: 88b602c
+      INFINISPAN_STORAGE: 50Gi
+      CLOUD_WATCH_LOG_GROUP: policies-prod
+      SENTRY_ENV: prod
+- name: policies-ui-backend
+  path: /templates/policies/policies-ui-backend.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/policies/namespaces/stage-policies-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 2359b75
+      DB_SECRET_NAME: policies-ui-backend-db
+      CLOUD_WATCH_LOG_GROUP: policies-stage
+      SENTRY_ENV: stage
+  - namespace:
+      $ref: /services/insights/policies/namespaces/policies-prod.yml
+    ref: 020e72c48ab14d2ffdd2364a574c3da8fb87282c
+    parameters:
+      IMAGE_TAG: 2359b75
+      DB_SECRET_NAME: policies-ui-backend-db
+      CLOUD_WATCH_LOG_GROUP: policies-prod
+      SENTRY_ENV: prod

@@ -1,0 +1,38 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: dashdot
+description: namespace for the dashdot project
+
+cluster:
+  $ref: /openshift/app-sre-prod-01/cluster.yml
+
+app:
+  $ref: /services/dashdot/app.yml
+
+environment:
+  $ref: /products/dashdot/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml
+
+managedRoles: true
+
+openshiftResources:
+- provider: route
+  path: /app-sre/dashdot/dashdotdb.route.yaml
+- provider: vault-secret
+  name: dashdotdb
+  path: app-sre/dashdot/dashdotdb-production
+  version: 1
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: app-sre
+  identifier: dashdotdb-production
+  defaults: /terraform/resources/dashdot/rds-production-1.yml
+  output_resource_name: dashdotdb-rds

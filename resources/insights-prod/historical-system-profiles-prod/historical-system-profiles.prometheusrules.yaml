@@ -1,0 +1,26 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: historical-system-profiles
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: historical-system-profiles-prod
+    rules:
+    - alert: HistoricalSystemProfilesProdDown
+      expr: |
+        absent(up{service="historical-system-profiles-backend", namespace="historical-system-profiles-prod"})
+      for: 3m
+      labels:
+        severity: info
+        service: insights
+        env: prod
+      annotations:
+        dashboard: "GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/historical-system-profiles-prod/deployments"
+        message: "Historical System Profiles Alert (Prod). historical-system-profiles-backend down in Prod for 3 minutes."
+        runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/index.html"

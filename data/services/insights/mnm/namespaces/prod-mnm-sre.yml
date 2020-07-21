@@ -13,13 +13,21 @@ cluster:
 app:
   $ref: /services/insights/mnm/app.yml
 
+environment:
+  $ref: /products/insights/environments/production.yml
+
 managedRoles: true
 
 managedResourceTypes:
-- Route
-- Secret
+- ServiceAccount
 
 openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-prod/shared/private-image-puller.serviceaccount.yaml
 - provider: route
   path: /insights-prod/prod-mnm-sre/prometheus.route.yml
 - provider: route
@@ -35,6 +43,7 @@ openshiftResources:
   version: 3
   type: kubernetes.io/dockerconfigjson
 
+  name: quay-cloudservices-pull
 managedTerraformResources: true
 
 terraformResources:
@@ -42,3 +51,16 @@ terraformResources:
   account: insights-prod
   identifier: insights-thanos-prod
   defaults: /terraform/resources/s3-private-1.yml
+- provider: aws-iam-service-account
+  account: insights-prod
+  identifier: cloudwatch-exporter
+  policies:
+  - CloudWatchReadOnlyAccess
+  output_resource_name: cloudwatch-exporter-iam-user
+- provider: aws-iam-service-account
+  account: insights-prod
+  identifier: mnm-sre-rds-exporter
+  policies:
+  - CloudWatchReadOnlyAccess
+  - AmazonRDSReadOnlyAccess
+  output_resource_name: rds-exporter-iam-user

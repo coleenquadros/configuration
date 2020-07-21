@@ -1,31 +1,7 @@
-kind: ConfigMap
 apiVersion: v1
-metadata:
-  name: grafana-dashboard-quay-prod-aws-resources
 data:
-  quay-aws-resources.json: |-
+  quay-aws-resources.json: |
     {
-      "__inputs": [],
-      "__requires": [
-        {
-          "type": "grafana",
-          "id": "grafana",
-          "name": "Grafana",
-          "version": "6.4.3"
-        },
-        {
-          "type": "panel",
-          "id": "graph",
-          "name": "Graph",
-          "version": ""
-        },
-        {
-          "type": "datasource",
-          "id": "prometheus",
-          "name": "Prometheus",
-          "version": "1.0.0"
-        }
-      ],
       "annotations": {
         "list": [
           {
@@ -42,8 +18,7 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 0,
-      "id": null,
-      "iteration": 1582601110906,
+      "iteration": 1593110842951,
       "links": [],
       "panels": [
         {
@@ -67,10 +42,11 @@ data:
               "fillGradient": 0,
               "gridPos": {
                 "h": 8,
-                "w": 24,
+                "w": 12,
                 "x": 0,
                 "y": 1
               },
+              "hiddenSeries": false,
               "id": 2,
               "legend": {
                 "avg": false,
@@ -97,8 +73,8 @@ data:
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "max without(pod,instance) (aws_rds_cpuutilization_average{dbinstance_identifier=\"quayenc-2019-quayvpc\"})",
-                  "legendFormat": "quayenc-2019-quayvpc",
+                  "expr": "max without(pod,instance) (aws_rds_cpuutilization_average{dbinstance_identifier=\"$quay_db\"})",
+                  "legendFormat": "{{dbinstance_identifier}}",
                   "refId": "A"
                 }
               ],
@@ -144,7 +120,10 @@ data:
               }
             },
             {
-              "aliasColors": {},
+              "aliasColors": {
+                "quayio-production": "super-light-yellow",
+                "{dbinstance_identifier=\"quayio-production\",endpoint=\"prom\",exported_job=\"aws_rds\",job=\"cloudwatch-exporter-quay\",namespace=\"app-sre-observability-production\",service=\"cloudwatch-exporter-quay\"}": "dark-orange"
+              },
               "bars": false,
               "cacheTimeout": null,
               "dashLength": 10,
@@ -154,10 +133,11 @@ data:
               "fillGradient": 0,
               "gridPos": {
                 "h": 8,
-                "w": 24,
-                "x": 0,
-                "y": 9
+                "w": 12,
+                "x": 12,
+                "y": 1
               },
+              "hiddenSeries": false,
               "id": 3,
               "legend": {
                 "alignAsTable": true,
@@ -190,8 +170,8 @@ data:
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "max without(pod,instance) (aws_rds_database_connections_average{dbinstance_identifier=\"quayenc-2019-quayvpc\"})",
-                  "legendFormat": "quayenc-2019-quayvpc",
+                  "expr": "max without(pod,instance) (aws_rds_database_connections_average{dbinstance_identifier=\"$quay_db\"})",
+                  "legendFormat": "{{dbinstance_identifier}}",
                   "refId": "A"
                 }
               ],
@@ -238,7 +218,200 @@ data:
               }
             },
             {
-              "aliasColors": {},
+              "aliasColors": {
+                "read": "blue",
+                "write": "red"
+              },
+              "bars": false,
+              "dashLength": 10,
+              "dashes": false,
+              "datasource": "$datasource",
+              "fill": 1,
+              "fillGradient": 0,
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 9
+              },
+              "hiddenSeries": false,
+              "id": 37,
+              "legend": {
+                "avg": false,
+                "current": false,
+                "max": false,
+                "min": false,
+                "show": true,
+                "total": false,
+                "values": false
+              },
+              "lines": true,
+              "linewidth": 1,
+              "nullPointMode": "null",
+              "options": {
+                "dataLinks": []
+              },
+              "percentage": false,
+              "pointradius": 2,
+              "points": false,
+              "renderer": "flot",
+              "seriesOverrides": [],
+              "spaceLength": 10,
+              "stack": false,
+              "steppedLine": false,
+              "targets": [
+                {
+                  "expr": "max without(pod,instance) (aws_rds_read_iops_average{dbinstance_identifier=\"$quay_db\"})",
+                  "legendFormat": "read",
+                  "refId": "A"
+                },
+                {
+                  "expr": "max without(pod,instance) (aws_rds_write_iops_average{dbinstance_identifier=\"$quay_db\"})",
+                  "legendFormat": "write",
+                  "refId": "B"
+                }
+              ],
+              "thresholds": [],
+              "timeFrom": null,
+              "timeRegions": [],
+              "timeShift": null,
+              "title": "[AWS/RDS] Read/Write IOPS",
+              "tooltip": {
+                "shared": true,
+                "sort": 0,
+                "value_type": "individual"
+              },
+              "type": "graph",
+              "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+              },
+              "yaxes": [
+                {
+                  "format": "none",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": "0",
+                  "show": true
+                },
+                {
+                  "format": "short",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": false
+                }
+              ],
+              "yaxis": {
+                "align": false,
+                "alignLevel": null
+              }
+            },
+            {
+              "aliasColors": {
+                "read": "blue",
+                "write": "red",
+                "{dbinstance_identifier=\"quayio-production\",endpoint=\"prom\",exported_job=\"aws_rds\",job=\"cloudwatch-exporter-quay\",namespace=\"app-sre-observability-production\",service=\"cloudwatch-exporter-quay\"}": "dark-red"
+              },
+              "bars": false,
+              "dashLength": 10,
+              "dashes": false,
+              "datasource": "$datasource",
+              "fill": 1,
+              "fillGradient": 0,
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 9
+              },
+              "hiddenSeries": false,
+              "id": 35,
+              "legend": {
+                "avg": false,
+                "current": false,
+                "max": false,
+                "min": false,
+                "show": true,
+                "total": false,
+                "values": false
+              },
+              "lines": true,
+              "linewidth": 1,
+              "nullPointMode": "null",
+              "options": {
+                "dataLinks": []
+              },
+              "percentage": false,
+              "pointradius": 2,
+              "points": false,
+              "renderer": "flot",
+              "seriesOverrides": [],
+              "spaceLength": 10,
+              "stack": false,
+              "steppedLine": false,
+              "targets": [
+                {
+                  "expr": "max without(pod,instance) (aws_rds_read_latency_average{dbinstance_identifier=\"$quay_db\"})",
+                  "legendFormat": "read",
+                  "refId": "A"
+                },
+                {
+                  "expr": "max without(pod,instance) (aws_rds_write_latency_average{dbinstance_identifier=\"$quay_db\"})",
+                  "legendFormat": "write",
+                  "refId": "B"
+                }
+              ],
+              "thresholds": [],
+              "timeFrom": null,
+              "timeRegions": [],
+              "timeShift": null,
+              "title": "[AWS/RDS] Read/Write Latency",
+              "tooltip": {
+                "shared": true,
+                "sort": 0,
+                "value_type": "individual"
+              },
+              "type": "graph",
+              "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+              },
+              "yaxes": [
+                {
+                  "format": "s",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": "0",
+                  "show": true
+                },
+                {
+                  "format": "short",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": false
+                }
+              ],
+              "yaxis": {
+                "align": false,
+                "alignLevel": null
+              }
+            },
+            {
+              "aliasColors": {
+                "quayio-production": "super-light-orange"
+              },
               "bars": false,
               "cacheTimeout": null,
               "dashLength": 10,
@@ -247,11 +420,12 @@ data:
               "fill": 1,
               "fillGradient": 0,
               "gridPos": {
-                "h": 8,
+                "h": 5,
                 "w": 24,
                 "x": 0,
                 "y": 17
               },
+              "hiddenSeries": false,
               "id": 4,
               "legend": {
                 "alignAsTable": true,
@@ -284,8 +458,8 @@ data:
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "max without(pod,instance) (aws_rds_free_storage_space_average{dbinstance_identifier=\"quayenc-2019-quayvpc\"})",
-                  "legendFormat": "quayenc-2019-quayvpc",
+                  "expr": "max without(pod,instance) (aws_rds_free_storage_space_average{dbinstance_identifier=\"$quay_db\"})",
+                  "legendFormat": "{{dbinstance_identifier}}",
                   "refId": "A"
                 }
               ],
@@ -345,6 +519,202 @@ data:
             "x": 0,
             "y": 1
           },
+          "id": 43,
+          "panels": [
+            {
+              "aliasColors": {
+                "pull": "super-light-yellow",
+                "push": "dark-red"
+              },
+              "bars": false,
+              "dashLength": 10,
+              "dashes": false,
+              "datasource": "$datasource",
+              "fill": 1,
+              "fillGradient": 0,
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 2
+              },
+              "hiddenSeries": false,
+              "id": 45,
+              "legend": {
+                "avg": false,
+                "current": false,
+                "max": false,
+                "min": false,
+                "show": true,
+                "total": false,
+                "values": false
+              },
+              "lines": true,
+              "linewidth": 1,
+              "nullPointMode": "null",
+              "options": {
+                "dataLinks": []
+              },
+              "percentage": false,
+              "pointradius": 2,
+              "points": false,
+              "renderer": "flot",
+              "seriesOverrides": [],
+              "spaceLength": 10,
+              "stack": false,
+              "steppedLine": false,
+              "targets": [
+                {
+                  "expr": "max without(pod,instance) (quay_monitor_monitor_pull_time_average)",
+                  "legendFormat": "pull",
+                  "refId": "A"
+                },
+                {
+                  "expr": "max without(pod,instance) (quay_monitor_monitor_push_time_average)",
+                  "legendFormat": "push",
+                  "refId": "B"
+                }
+              ],
+              "thresholds": [],
+              "timeFrom": null,
+              "timeRegions": [],
+              "timeShift": null,
+              "title": "Pull/push time",
+              "tooltip": {
+                "shared": true,
+                "sort": 0,
+                "value_type": "individual"
+              },
+              "type": "graph",
+              "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+              },
+              "yaxes": [
+                {
+                  "format": "s",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": true
+                },
+                {
+                  "format": "short",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": true
+                }
+              ],
+              "yaxis": {
+                "align": false,
+                "alignLevel": null
+              }
+            },
+            {
+              "aliasColors": {},
+              "bars": false,
+              "dashLength": 10,
+              "dashes": false,
+              "datasource": "$datasource",
+              "fill": 1,
+              "fillGradient": 0,
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 2
+              },
+              "hiddenSeries": false,
+              "id": 47,
+              "legend": {
+                "avg": false,
+                "current": false,
+                "max": false,
+                "min": false,
+                "show": false,
+                "total": false,
+                "values": false
+              },
+              "lines": true,
+              "linewidth": 1,
+              "nullPointMode": "null",
+              "options": {
+                "dataLinks": []
+              },
+              "percentage": false,
+              "pointradius": 2,
+              "points": false,
+              "renderer": "flot",
+              "seriesOverrides": [],
+              "spaceLength": 10,
+              "stack": false,
+              "steppedLine": false,
+              "targets": [
+                {
+                  "expr": "max without(pod,instance) (quay_monitor_monitor_success_average) * 100",
+                  "refId": "A"
+                }
+              ],
+              "thresholds": [],
+              "timeFrom": null,
+              "timeRegions": [],
+              "timeShift": null,
+              "title": "Success ratio",
+              "tooltip": {
+                "shared": true,
+                "sort": 0,
+                "value_type": "individual"
+              },
+              "type": "graph",
+              "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+              },
+              "yaxes": [
+                {
+                  "format": "percent",
+                  "label": null,
+                  "logBase": 1,
+                  "max": "100",
+                  "min": "0",
+                  "show": true
+                },
+                {
+                  "format": "short",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": true
+                }
+              ],
+              "yaxis": {
+                "align": false,
+                "alignLevel": null
+              }
+            }
+          ],
+          "title": "Quay Monitor",
+          "type": "row"
+        },
+        {
+          "collapsed": true,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 2
+          },
           "id": 8,
           "panels": [
             {
@@ -394,14 +764,14 @@ data:
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "max without(pod,instance) (aws_elasticache_cpuutilization_average{cache_cluster_id=\"rer1009pi4rj7c06-001\"})",
-                  "legendFormat": "rer1009pi4rj7c06-001",
+                  "expr": "max without(pod,instance) (aws_elasticache_cpuutilization_average{cache_cluster_id=\"quayio-production-001\"})",
+                  "legendFormat": "quayio-production-001",
                   "refId": "A"
                 },
                 {
-                  "expr": "max without(pod,instance) (aws_elasticache_cpuutilization_average{cache_cluster_id=\"rer1009pi4rj7c06-002\"})",
+                  "expr": "max without(pod,instance) (aws_elasticache_cpuutilization_average{cache_cluster_id=\"quayio-production-002\"})",
                   "hide": false,
-                  "legendFormat": "rer1009pi4rj7c06-002",
+                  "legendFormat": "quayio-production-002",
                   "refId": "B"
                 }
               ],
@@ -494,14 +864,14 @@ data:
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "max without(pod,instance) (aws_elasticache_replication_lag_average{cache_cluster_id=\"rer1009pi4rj7c06-001\"})",
-                  "legendFormat": "rer1009pi4rj7c06-001",
+                  "expr": "max without(pod,instance) (aws_elasticache_replication_lag_average{cache_cluster_id=\"quayio-production-001\"})",
+                  "legendFormat": "quayio-production-001",
                   "refId": "A"
                 },
                 {
-                  "expr": "max without(pod,instance) (aws_elasticache_replication_lag_average{cache_cluster_id=\"rer1009pi4rj7c06-002\"})",
+                  "expr": "max without(pod,instance) (aws_elasticache_replication_lag_average{cache_cluster_id=\"quayio-production-002\"})",
                   "hide": false,
-                  "legendFormat": "rer1009pi4rj7c06-002",
+                  "legendFormat": "quayio-production-002",
                   "refId": "B"
                 }
               ],
@@ -594,14 +964,14 @@ data:
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "max without(pod,instance) (aws_elasticache_curr_connections_average{cache_cluster_id=\"rer1009pi4rj7c06-001\"})",
-                  "legendFormat": "rer1009pi4rj7c06-001",
+                  "expr": "max without(pod,instance) (aws_elasticache_curr_connections_average{cache_cluster_id=\"quayio-production-001\"})",
+                  "legendFormat": "quayio-production-001",
                   "refId": "A"
                 },
                 {
-                  "expr": "max without(pod,instance) (aws_elasticache_curr_connections_average{cache_cluster_id=\"rer1009pi4rj7c06-002\"})",
+                  "expr": "max without(pod,instance) (aws_elasticache_curr_connections_average{cache_cluster_id=\"quayio-production-002\"})",
                   "hide": false,
-                  "legendFormat": "rer1009pi4rj7c06-002",
+                  "legendFormat": "quayio-production-002",
                   "refId": "B"
                 }
               ],
@@ -694,14 +1064,14 @@ data:
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "max without(pod,instance) (aws_elasticache_new_connections_average{cache_cluster_id=\"rer1009pi4rj7c06-001\"})",
-                  "legendFormat": "rer1009pi4rj7c06-001",
+                  "expr": "max without(pod,instance) (aws_elasticache_new_connections_average{cache_cluster_id=\"quayio-production-001\"})",
+                  "legendFormat": "quayio-production-001",
                   "refId": "A"
                 },
                 {
-                  "expr": "max without(pod,instance) (aws_elasticache_new_connections_average{cache_cluster_id=\"rer1009pi4rj7c06-002\"})",
+                  "expr": "max without(pod,instance) (aws_elasticache_new_connections_average{cache_cluster_id=\"quayio-production-002\"})",
                   "hide": false,
-                  "legendFormat": "rer1009pi4rj7c06-002",
+                  "legendFormat": "quayio-production-002",
                   "refId": "B"
                 }
               ],
@@ -794,14 +1164,14 @@ data:
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "max without(pod,instance) (aws_elasticache_cache_hits_average{cache_cluster_id=\"rer1009pi4rj7c06-001\"})",
-                  "legendFormat": "rer1009pi4rj7c06-001",
+                  "expr": "max without(pod,instance) (aws_elasticache_cache_hits_average{cache_cluster_id=\"quayio-production-001\"})",
+                  "legendFormat": "quayio-production-001",
                   "refId": "A"
                 },
                 {
-                  "expr": "max without(pod,instance) (aws_elasticache_cache_hits_average{cache_cluster_id=\"rer1009pi4rj7c06-002\"})",
+                  "expr": "max without(pod,instance) (aws_elasticache_cache_hits_average{cache_cluster_id=\"quayio-production-002\"})",
                   "hide": false,
-                  "legendFormat": "rer1009pi4rj7c06-002",
+                  "legendFormat": "quayio-production-002",
                   "refId": "B"
                 }
               ],
@@ -894,14 +1264,14 @@ data:
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "max without(pod,instance) (aws_elasticache_cache_misses_average{cache_cluster_id=\"rer1009pi4rj7c06-001\"})",
-                  "legendFormat": "rer1009pi4rj7c06-001",
+                  "expr": "max without(pod,instance) (aws_elasticache_cache_misses_average{cache_cluster_id=\"quayio-production-001\"})",
+                  "legendFormat": "quayio-production-001",
                   "refId": "A"
                 },
                 {
-                  "expr": "max without(pod,instance) (aws_elasticache_cache_misses_average{cache_cluster_id=\"rer1009pi4rj7c06-002\"})",
+                  "expr": "max without(pod,instance) (aws_elasticache_cache_misses_average{cache_cluster_id=\"quayio-production-002\"})",
                   "hide": false,
-                  "legendFormat": "rer1009pi4rj7c06-002",
+                  "legendFormat": "quayio-production-002",
                   "refId": "B"
                 }
               ],
@@ -994,14 +1364,14 @@ data:
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "max without(pod,instance) (aws_elasticache_network_bytes_in_average{cache_cluster_id=\"rer1009pi4rj7c06-001\"})",
-                  "legendFormat": "rer1009pi4rj7c06-001",
+                  "expr": "max without(pod,instance) (aws_elasticache_network_bytes_in_average{cache_cluster_id=\"quayio-production-001\"})",
+                  "legendFormat": "quayio-production-001",
                   "refId": "A"
                 },
                 {
-                  "expr": "max without(pod,instance) (aws_elasticache_network_bytes_in_average{cache_cluster_id=\"rer1009pi4rj7c06-002\"})",
+                  "expr": "max without(pod,instance) (aws_elasticache_network_bytes_in_average{cache_cluster_id=\"quayio-production-002\"})",
                   "hide": false,
-                  "legendFormat": "rer1009pi4rj7c06-002",
+                  "legendFormat": "quayio-production-002",
                   "refId": "B"
                 }
               ],
@@ -1094,14 +1464,14 @@ data:
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "max without(pod,instance) (aws_elasticache_network_bytes_out_average{cache_cluster_id=\"rer1009pi4rj7c06-001\"})",
-                  "legendFormat": "rer1009pi4rj7c06-001",
+                  "expr": "max without(pod,instance) (aws_elasticache_network_bytes_out_average{cache_cluster_id=\"quayio-production-001\"})",
+                  "legendFormat": "quayio-production-001",
                   "refId": "A"
                 },
                 {
-                  "expr": "max without(pod,instance) (aws_elasticache_network_bytes_out_average{cache_cluster_id=\"rer1009pi4rj7c06-002\"})",
+                  "expr": "max without(pod,instance) (aws_elasticache_network_bytes_out_average{cache_cluster_id=\"quayio-production-002\"})",
                   "hide": false,
-                  "legendFormat": "rer1009pi4rj7c06-002",
+                  "legendFormat": "quayio-production-002",
                   "refId": "B"
                 }
               ],
@@ -1159,7 +1529,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 2
+            "y": 3
           },
           "id": 18,
           "panels": [
@@ -1175,8 +1545,9 @@ data:
                 "h": 8,
                 "w": 24,
                 "x": 0,
-                "y": 3
+                "y": 12
               },
+              "hiddenSeries": false,
               "id": 28,
               "legend": {
                 "alignAsTable": true,
@@ -1262,8 +1633,9 @@ data:
                 "h": 8,
                 "w": 12,
                 "x": 0,
-                "y": 11
+                "y": 20
               },
+              "hiddenSeries": false,
               "id": 29,
               "legend": {
                 "alignAsTable": true,
@@ -1349,8 +1721,9 @@ data:
                 "h": 8,
                 "w": 12,
                 "x": 12,
-                "y": 11
+                "y": 20
               },
+              "hiddenSeries": false,
               "id": 31,
               "legend": {
                 "alignAsTable": true,
@@ -1436,8 +1809,9 @@ data:
                 "h": 9,
                 "w": 12,
                 "x": 0,
-                "y": 19
+                "y": 28
               },
+              "hiddenSeries": false,
               "id": 33,
               "legend": {
                 "alignAsTable": true,
@@ -1523,8 +1897,9 @@ data:
                 "h": 9,
                 "w": 12,
                 "x": 12,
-                "y": 19
+                "y": 28
               },
+              "hiddenSeries": false,
               "id": 34,
               "legend": {
                 "alignAsTable": true,
@@ -1610,8 +1985,9 @@ data:
                 "h": 8,
                 "w": 24,
                 "x": 0,
-                "y": 28
+                "y": 37
               },
+              "hiddenSeries": false,
               "id": 32,
               "legend": {
                 "alignAsTable": true,
@@ -1697,7 +2073,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 3
+            "y": 4
           },
           "id": 20,
           "panels": [
@@ -1711,11 +2087,12 @@ data:
               "fillGradient": 0,
               "gridPos": {
                 "h": 8,
-                "w": 24,
+                "w": 12,
                 "x": 0,
-                "y": 4
+                "y": 25
               },
-              "id": 22,
+              "hiddenSeries": false,
+              "id": 38,
               "legend": {
                 "avg": false,
                 "current": false,
@@ -1735,21 +2112,14 @@ data:
               "pointradius": 2,
               "points": false,
               "renderer": "flot",
-              "scopedVars": {
-                "quay_component": {
-                  "selected": true,
-                  "text": "quayio-stage",
-                  "value": "quayio-stage"
-                }
-              },
               "seriesOverrides": [],
               "spaceLength": 10,
               "stack": false,
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "max without(pod,instance) (aws_rds_cpuutilization_average{dbinstance_identifier=\"db-apostille-prod-4b8cc2ff-d1f3-497c-bc18-859593c68bdf\"})",
-                  "legendFormat": "db-apostille-prod-4b8cc2ff-d1f3-497c-bc18-859593c68bdf",
+                  "expr": "max without(pod,instance) (aws_rds_cpuutilization_average{dbinstance_identifier=\"$apostille_db\"})",
+                  "legendFormat": "{{dbinstance_identifier}}",
                   "refId": "A"
                 }
               ],
@@ -1795,7 +2165,11 @@ data:
               }
             },
             {
-              "aliasColors": {},
+              "aliasColors": {
+                "db-apostille-prod-4b8cc2ff-d1f3-497c-bc18-859593c68bdf": "purple",
+                "quayio-production": "purple",
+                "{dbinstance_identifier=\"quayio-production\",endpoint=\"prom\",exported_job=\"aws_rds\",job=\"cloudwatch-exporter-quay\",namespace=\"app-sre-observability-production\",service=\"cloudwatch-exporter-quay\"}": "dark-orange"
+              },
               "bars": false,
               "cacheTimeout": null,
               "dashLength": 10,
@@ -1805,11 +2179,12 @@ data:
               "fillGradient": 0,
               "gridPos": {
                 "h": 8,
-                "w": 24,
-                "x": 0,
-                "y": 12
+                "w": 12,
+                "x": 12,
+                "y": 25
               },
-              "id": 24,
+              "hiddenSeries": false,
+              "id": 39,
               "legend": {
                 "alignAsTable": true,
                 "avg": true,
@@ -1835,21 +2210,14 @@ data:
               "pointradius": 2,
               "points": false,
               "renderer": "flot",
-              "scopedVars": {
-                "quay_component": {
-                  "selected": true,
-                  "text": "quayio-stage",
-                  "value": "quayio-stage"
-                }
-              },
               "seriesOverrides": [],
               "spaceLength": 10,
               "stack": false,
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "max without(pod,instance) (aws_rds_database_connections_average{dbinstance_identifier=\"db-apostille-prod-4b8cc2ff-d1f3-497c-bc18-859593c68bdf\"})",
-                  "legendFormat": "db-apostille-prod-4b8cc2ff-d1f3-497c-bc18-859593c68bdf",
+                  "expr": "max without(pod,instance) (aws_rds_database_connections_average{dbinstance_identifier=\"$apostille_db\"})",
+                  "legendFormat": "{{dbinstance_identifier}}",
                   "refId": "A"
                 }
               ],
@@ -1896,6 +2264,197 @@ data:
               }
             },
             {
+              "aliasColors": {
+                "read": "blue",
+                "write": "red"
+              },
+              "bars": false,
+              "dashLength": 10,
+              "dashes": false,
+              "datasource": "$datasource",
+              "fill": 1,
+              "fillGradient": 0,
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 33
+              },
+              "hiddenSeries": false,
+              "id": 40,
+              "legend": {
+                "avg": false,
+                "current": false,
+                "max": false,
+                "min": false,
+                "show": true,
+                "total": false,
+                "values": false
+              },
+              "lines": true,
+              "linewidth": 1,
+              "nullPointMode": "null",
+              "options": {
+                "dataLinks": []
+              },
+              "percentage": false,
+              "pointradius": 2,
+              "points": false,
+              "renderer": "flot",
+              "seriesOverrides": [],
+              "spaceLength": 10,
+              "stack": false,
+              "steppedLine": false,
+              "targets": [
+                {
+                  "expr": "max without(pod,instance) (aws_rds_read_iops_average{dbinstance_identifier=\"$apostille_db\"})",
+                  "legendFormat": "read",
+                  "refId": "A"
+                },
+                {
+                  "expr": "max without(pod,instance) (aws_rds_write_iops_average{dbinstance_identifier=\"$apostille_db\"})",
+                  "legendFormat": "write",
+                  "refId": "B"
+                }
+              ],
+              "thresholds": [],
+              "timeFrom": null,
+              "timeRegions": [],
+              "timeShift": null,
+              "title": "[AWS/RDS] Read/Write IOPS",
+              "tooltip": {
+                "shared": true,
+                "sort": 0,
+                "value_type": "individual"
+              },
+              "type": "graph",
+              "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+              },
+              "yaxes": [
+                {
+                  "format": "none",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": "0",
+                  "show": true
+                },
+                {
+                  "format": "short",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": false
+                }
+              ],
+              "yaxis": {
+                "align": false,
+                "alignLevel": null
+              }
+            },
+            {
+              "aliasColors": {
+                "read": "blue",
+                "write": "red",
+                "{dbinstance_identifier=\"quayio-production\",endpoint=\"prom\",exported_job=\"aws_rds\",job=\"cloudwatch-exporter-quay\",namespace=\"app-sre-observability-production\",service=\"cloudwatch-exporter-quay\"}": "dark-red"
+              },
+              "bars": false,
+              "dashLength": 10,
+              "dashes": false,
+              "datasource": "$datasource",
+              "fill": 1,
+              "fillGradient": 0,
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 33
+              },
+              "hiddenSeries": false,
+              "id": 41,
+              "legend": {
+                "avg": false,
+                "current": false,
+                "max": false,
+                "min": false,
+                "show": true,
+                "total": false,
+                "values": false
+              },
+              "lines": true,
+              "linewidth": 1,
+              "nullPointMode": "null",
+              "options": {
+                "dataLinks": []
+              },
+              "percentage": false,
+              "pointradius": 2,
+              "points": false,
+              "renderer": "flot",
+              "seriesOverrides": [],
+              "spaceLength": 10,
+              "stack": false,
+              "steppedLine": false,
+              "targets": [
+                {
+                  "expr": "max without(pod,instance) (aws_rds_read_latency_average{dbinstance_identifier=\"$apostille_db\"})",
+                  "legendFormat": "read",
+                  "refId": "A"
+                },
+                {
+                  "expr": "max without(pod,instance) (aws_rds_write_latency_average{dbinstance_identifier=\"$apostille_db\"})",
+                  "legendFormat": "write",
+                  "refId": "B"
+                }
+              ],
+              "thresholds": [],
+              "timeFrom": null,
+              "timeRegions": [],
+              "timeShift": null,
+              "title": "[AWS/RDS] Read/Write Latency",
+              "tooltip": {
+                "shared": true,
+                "sort": 0,
+                "value_type": "individual"
+              },
+              "type": "graph",
+              "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+              },
+              "yaxes": [
+                {
+                  "format": "s",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": "0",
+                  "show": true
+                },
+                {
+                  "format": "short",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": false
+                }
+              ],
+              "yaxis": {
+                "align": false,
+                "alignLevel": null
+              }
+            },
+            {
               "aliasColors": {},
               "bars": false,
               "cacheTimeout": null,
@@ -1905,11 +2464,12 @@ data:
               "fill": 1,
               "fillGradient": 0,
               "gridPos": {
-                "h": 8,
+                "h": 6,
                 "w": 24,
                 "x": 0,
-                "y": 20
+                "y": 41
               },
+              "hiddenSeries": false,
               "id": 26,
               "legend": {
                 "alignAsTable": true,
@@ -1936,20 +2496,13 @@ data:
               "pointradius": 2,
               "points": false,
               "renderer": "flot",
-              "scopedVars": {
-                "quay_component": {
-                  "selected": true,
-                  "text": "quayio-stage",
-                  "value": "quayio-stage"
-                }
-              },
               "seriesOverrides": [],
               "spaceLength": 10,
               "stack": false,
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "max without(pod,instance) (aws_rds_free_storage_space_average{dbinstance_identifier=\"db-apostille-prod-4b8cc2ff-d1f3-497c-bc18-859593c68bdf\"})",
+                  "expr": "max without(pod,instance) (aws_rds_free_storage_space_average{dbinstance_identifier=\"$apostille_db\"})",
                   "legendFormat": "db-apostille-prod-4b8cc2ff-d1f3-497c-bc18-859593c68bdf",
                   "refId": "A"
                 }
@@ -2003,7 +2556,7 @@ data:
         }
       ],
       "refresh": "1m",
-      "schemaVersion": 20,
+      "schemaVersion": 22,
       "style": "dark",
       "tags": [
         "quay",
@@ -2014,9 +2567,9 @@ data:
         "list": [
           {
             "current": {
-              "tags": [],
-              "text": "quayio-prod-us-east-1-prometheus",
-              "value": "quayio-prod-us-east-1-prometheus"
+              "selected": true,
+              "text": "app-sre-prod-01-prometheus",
+              "value": "app-sre-prod-01-prometheus"
             },
             "hide": 0,
             "includeAll": false,
@@ -2026,15 +2579,84 @@ data:
             "options": [],
             "query": "prometheus",
             "refresh": 1,
-            "regex": "",
+            "regex": "/app-sre-(stage|prod)-01-prometheus/",
             "skipUrlSync": false,
             "type": "datasource"
+          },
+          {
+            "allValue": null,
+            "current": {
+              "selected": true,
+              "text": "quayio-production",
+              "value": "quayio-production"
+            },
+            "datasource": "$datasource",
+            "definition": "label_values(aws_rds_cpuutilization_average, dbinstance_identifier)",
+            "hide": 0,
+            "includeAll": false,
+            "label": null,
+            "multi": false,
+            "name": "quay_db",
+            "options": [
+              {
+                "selected": true,
+                "text": "quayio-production",
+                "value": "quayio-production"
+              }
+            ],
+            "query": "label_values(aws_rds_cpuutilization_average, dbinstance_identifier)",
+            "refresh": 0,
+            "regex": "/quay.*/",
+            "skipUrlSync": false,
+            "sort": 0,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          },
+          {
+            "allValue": null,
+            "current": {
+              "selected": true,
+              "text": "db-apostille-prod-4b8cc2ff-d1f3-497c-bc18-859593c68bdf",
+              "value": "db-apostille-prod-4b8cc2ff-d1f3-497c-bc18-859593c68bdf"
+            },
+            "datasource": "$datasource",
+            "definition": "label_values(aws_rds_cpuutilization_average, dbinstance_identifier)",
+            "hide": 0,
+            "includeAll": false,
+            "label": null,
+            "multi": false,
+            "name": "apostille_db",
+            "options": [
+              {
+                "selected": true,
+                "text": "db-apostille-prod-4b8cc2ff-d1f3-497c-bc18-859593c68bdf",
+                "value": "db-apostille-prod-4b8cc2ff-d1f3-497c-bc18-859593c68bdf"
+              },
+              {
+                "selected": false,
+                "text": "db-apostille-staging-926eef16-1496-45ad-bd09-366946b9475a",
+                "value": "db-apostille-staging-926eef16-1496-45ad-bd09-366946b9475a"
+              }
+            ],
+            "query": "label_values(aws_rds_cpuutilization_average, dbinstance_identifier)",
+            "refresh": 0,
+            "regex": "/.*apostille.*/",
+            "skipUrlSync": false,
+            "sort": 0,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
           }
         ]
       },
       "time": {
-        "from": "now-15m",
-        "to": "now-5m"
+        "from": "now-1h",
+        "to": "now-7m"
       },
       "timepicker": {
         "nowDelay": "7m",
@@ -2046,7 +2668,11 @@ data:
         ]
       },
       "timezone": "utc",
-      "title": "Quay Production AWS Resources (us-east-1)",
+      "title": "Quay AWS Resources (us-east-1)",
       "uid": "_BkydJaWqprod1234",
-      "version": 10
+      "version": 2
     }
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: grafana-dashboard-quay-prod-aws-resources

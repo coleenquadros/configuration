@@ -1,0 +1,103 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: advisor
+  platform: insights
+
+name: advisor
+description: advisor app on the Insights Platform
+
+app:
+  $ref: /services/insights/advisor/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- Deployment
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: content-server
+  path: /templates/advisor/content-server.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/advisor/namespaces/stage-advisor-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 884b55f
+  targets:
+  - namespace:
+      $ref: /services/insights/advisor/namespaces/advisor-prod.yml
+    ref: 69a17ceb3cb13893548c24051b2ae8e2b6511dd3
+    parameters:
+      IMAGE_TAG: 884b55f
+- name: insights-advisor-service
+  path: /templates/advisor/insights-advisor-service.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  parameters:
+    CPU_LIMIT: '2'
+    MAX_REPLICAS: 8
+    MIN_REPLICAS: 2
+  targets:
+  - namespace:
+      $ref: /services/insights/advisor/namespaces/stage-advisor-stage.yml
+    ref: master
+    parameters:
+      ADVISOR_ENV: stage
+      IMAGE_TAG: f1cd64c
+      CW_LOG_STREAM: advisor-stage
+  targets:
+  - namespace:
+      $ref: /services/insights/advisor/namespaces/advisor-prod.yml
+    ref: 69a17ceb3cb13893548c24051b2ae8e2b6511dd3
+    parameters:
+      ADVISOR_ENV: prod
+      IMAGE_TAG: f1cd64c
+      CW_LOG_STREAM: advisor-prod
+- name: insights-advisor-api
+  path: /templates/advisor/insights-advisor-api.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  parameters:
+    CPU_LIMIT: '1'
+    INVENTORY_CONCURRENCY_LEVEL: 20
+    MAX_REPLICAS: 12
+    MIN_REPLICAS: 4
+    SUSPEND_COMPARE_ACTIVE_RULES: 'false'
+    SUSPEND_STALE_HOST_JOB: 'true'
+    SUSPEND_VACUUM_JOB: 'false'
+    SUSPEND_WARM_CACHE: 'false'
+    SUSPEND_WEEKLY_REPORT_JOB: 'true'
+    USE_CLOUDWATCH_LOGGING: 'true'
+    USE_NEWRELIC: 'true'
+    USE_PROMETHEUS: 'true'
+  targets:
+  - namespace:
+      $ref: /services/insights/advisor/namespaces/stage-advisor-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: da91910
+      CW_LOG_STREAM: advisor-stage
+  targets:
+  - namespace:
+      $ref: /services/insights/advisor/namespaces/advisor-prod.yml
+    ref: 69a17ceb3cb13893548c24051b2ae8e2b6511dd3
+    parameters:
+      IMAGE_TAG: da91910
+      CW_LOG_STREAM: advisor-prod

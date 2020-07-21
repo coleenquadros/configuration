@@ -7,6 +7,8 @@ run_int() {
   [ -n "$DRY_RUN" ] && DRY_RUN_FLAG="--dry-run"
   [ -n "$SQS_GATEWAY" ] && GITLAB_PR_SUBMITTER_QUEUE_URL_ENV="-e gitlab_pr_submitter_queue_url=$gitlab_pr_submitter_queue_url"
   [ -n "$STATE" ] && APP_INTERFACE_STATE_ENV="-e APP_INTERFACE_STATE_BUCKET=$app_interface_state_bucket -e APP_INTERFACE_STATE_BUCKET_ACCOUNT=$app_interface_state_bucket_account"
+  [ -n "$NO_GQL_SHA_URL" ] && NO_GQL_SHA_URL_FLAG="--no-gql-sha-url"
+  [ -n "$NO_VALIDATE" ] && NO_VALIDATE="--no-validate-schemas"
 
   echo "INTEGRATION $INTEGRATION_NAME" >&2
 
@@ -17,18 +19,47 @@ run_int() {
     -v ${WORK_DIR}/throughput:/throughput:z \
     -v /var/tmp/.cache:/root/.cache:z \
     -e GITHUB_API=$GITHUB_API \
+    -e UNLEASH_API_URL=$UNLEASH_API_URL \
+    -e UNLEASH_CLIENT_ACCESS_TOKEN=$UNLEASH_CLIENT_ACCESS_TOKEN \
     -e REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem \
     $GITLAB_PR_SUBMITTER_QUEUE_URL_ENV \
     $APP_INTERFACE_STATE_ENV \
     -w / \
     ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
-    qontract-reconcile --config /config/config.toml $DRY_RUN_FLAG $@ \
+    qontract-reconcile --config /config/config.toml $NO_VALIDATE $DRY_RUN_FLAG $NO_GQL_SHA_URL_FLAG $@ \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-${INTEGRATION_NAME}.txt
 
   status="$?"
   ENDTIME=$(date +%s)
 
-  echo "app_interface_int_execution_duration_seconds{integration=\"$INTEGRATION_NAME\"} $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
+  duration="app_interface_int_execution_duration_seconds{integration=\"$INTEGRATION_NAME\"} $((ENDTIME - STARTTIME))"
+  echo $duration >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
+
+  if [ -d "$LOG_DIR" ] && [ -s "${SUCCESS_DIR}/reconcile-${INTEGRATION_NAME}.txt" ];then
+    setting=${-//[^x]/}
+    [ -n "$setting" ] && set +x
+    echo "[" > ${LOG_DIR}/${INTEGRATION_NAME}.log
+
+    while read line
+    do
+      if [ "$line" ];then
+      message=$(echo $line|sed 's/\"/\\\"/g')
+      cat >> ${LOG_DIR}/${INTEGRATION_NAME}.log <<EOF
+  {
+    "timestamp": $(date +%s000),
+    "message": "$message"
+  },
+EOF
+      fi
+    done < ${SUCCESS_DIR}/reconcile-${INTEGRATION_NAME}.txt
+
+    sed -i '$d' ${LOG_DIR}/${INTEGRATION_NAME}.log
+    cat >> ${LOG_DIR}/${INTEGRATION_NAME}.log <<EOF
+  }
+]
+EOF
+  [ -n "$setting" ] && set -x
+  fi
 
   if [ "$status" != "0" ]; then
     echo "INTEGRATION FAILED: $1" >&2
@@ -96,6 +127,22 @@ run_vault_reconcile_integration() {
   return $status
 }
 
+send_log() {
+  BUILDTIME=$(date -d "$BUILD_TIMESTAMP" +%s000)
+
+  if [ -d "$LOG_DIR" ];then
+    for file in ${LOG_DIR}/*
+    do
+      INTEGRATION_NAME=$(basename ${file} .log)
+      log_stream=$(aws logs describe-log-streams --log-group-name $LOG_GROUP_NAME|grep \"$INTEGRATION_NAME\"|cut -d'"' -f4)
+      [ -z "$log_stream" ] && aws logs create-log-stream --log-group-name $LOG_GROUP_NAME --log-stream-name $INTEGRATION_NAME
+      Token=$(aws logs describe-log-streams --log-group-name $LOG_GROUP_NAME --log-stream-name-prefix $INTEGRATION_NAME|grep Token|cut -d'"' -f4)
+      [ -z "$Token" ] && Token=$(aws logs put-log-events --log-group-name $LOG_GROUP_NAME --log-stream-name $INTEGRATION_NAME --log-events timestamp=$BUILDTIME,message="$JOB_URL"|grep Token|cut -d'"' -f4)
+      aws logs put-log-events --log-group-name $LOG_GROUP_NAME --log-stream-name $INTEGRATION_NAME --sequence-token $Token --log-events file://$file &
+    done
+  fi
+}
+
 print_execution_times() {
     echo
     echo "Execution times for integrations that were executed"
@@ -118,16 +165,16 @@ check_results() {
 }
 
 wait_response() {
-    local count=0
+    local count=1
     local max=10
 
     URL=$1
     EXPECTED_RESPONSE=$2
 
-    while [[ ${count} -lt ${max} ]]; do
+    while [[ ${count} -le ${max} ]]; do
         let count++ || :
         RESPONSE=$(curl -s $URL)
-        [[ "$EXPECTED_RESPONSE" == "$RESPONSE" ]] && break || sleep 10
+        [[ "$EXPECTED_RESPONSE" == "$RESPONSE" ]] && break || sleep $count
     done
 
     if [[ "$EXPECTED_RESPONSE" != "$RESPONSE" ]]; then

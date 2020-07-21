@@ -5,6 +5,7 @@
 - [SOP : OpenShift Cincinnati](#sop--openshift-cincinnati)
     - [Verify it's working](#verify-its-working)
     - [Reporting analysis](#reporting-analysis)
+    - [Reverting broken versions](#reverting-broken-versions)
     - [GBUpstreamScrapesHalted](#gbupstreamscrapeshalted)
     - [GBUpstreamScrapeErrors](#gbupstreamscrapeerrors)
     - [PEIncomingRequestsHalted](#peincomingrequestshalted)
@@ -28,6 +29,13 @@
 Analysis of alerts should be reported on Slack in `#team-cincinnati-alert`, mentioning both `@app-sre-ic` and `@over-the-air-updates` and.
 In cases where that analysis is "this alert is too sensitive; this is nothing we need to worry about in the short term", the mentions are still worthwhile because they make it less likely that either team invests duplicate time in re-analyzing the same alert.
 
+## Reverting broken versions
+
+Production reverts can be applied via [saas-cincinnati][], in cases where the issue is due to a production bump having pushed out broken code.
+Reverting [the most-recently merged bump][saas-cincinnati-bump] will move production back to the code it was running before.
+
+The production deployment used to reside in [saas-cincinnati-repo][]
+
 ---
 
 ## GBUpstreamScrapesHalted
@@ -50,6 +58,7 @@ Updated releases and transition-edges will not be reflected in the update graph.
 ### Steps:
 
 - Contact Cincinnati team, investigate why graph-builder got blocked.
+- If the scrape failure is preventing [a new release][cincinnati-graph-data] and appears to be due to a recent production deploy, consider [reverting the deploy](#reverting-broken-versions).
 
 ---
 
@@ -75,7 +84,8 @@ Updated releases and transition-edges will not be reflected in the update graph.
 - Check quay.io outage status: https://status.quay.io/
 - Look at the logs for the 'graph-builder' container to pinpoint what is failing.
 - If logs contain service errors from quay.io, check #forum-quay-oncall and contact quay.io ops.
-- Contact Cincinnati team, investigate why graph-builder is experiencing scapre errors.
+- Contact Cincinnati team, investigate why graph-builder is experiencing scrape errors.
+- If the scrape failure is preventing [a new release][cincinnati-graph-data] and appears to be due to a recent production deploy, consider [reverting the deploy](#reverting-broken-versions).
 
 ---
 
@@ -100,6 +110,7 @@ Cluster-Version-Operator (CVO) could be hanging or showing errors on clusters co
 
 - Investigate pod connectivity.
 - Contact Cincinnati team, investigate why policy-engine is not processing client requests.
+- If the failure appears to be due to a recent production deploy, consider [reverting the deploy](#reverting-broken-versions).
 
 ---
 
@@ -123,6 +134,7 @@ Cluster-Version-Operator (CVO) is showing errors on clusters console.
 ### Steps:
 
 - Contact Cincinnati team, investigate why policy-engine is not processing client requests.
+- If the failure appears to be due to a recent production deploy, consider [reverting the deploy](#reverting-broken-versions).
 
 ---
 
@@ -146,6 +158,7 @@ Cluster-Version-Operator (CVO) is showing errors on clusters console.
 ### Steps:
 
 - Contact Cincinnati team, investigate why policy-engine is generating error-reponses.
+- If the failure appears to be due to a recent production deploy, consider [reverting the deploy](#reverting-broken-versions).
 
 ---
 
@@ -158,3 +171,8 @@ Developers: `@over-the-air-updates`
 Slack alerts: `#team-cincinnati-alert`
 
 Team email: aos-team-ota@redhat.com
+
+[cincinnati-graph-data]: https://github.com/openshift/cincinnati-graph-data/
+[saas-cincinnati]: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/cincinnati/cicd/ci-int/saas.yaml
+[saas-cincinnati-bump]: https://gitlab.cee.redhat.com/service/app-interface/-/commits/master/data/services/cincinnati/cicd/ci-int/saas.yaml
+[saas-cincinnati-repo]: https://gitlab.cee.redhat.com/service/saas-cincinnati

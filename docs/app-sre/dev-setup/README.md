@@ -70,7 +70,7 @@ $ python3 setup.py develop
 
 ## Configure qontract-reconcile
 
-1. Generate a new Github [Personal access tokens](https://github.com/settings/tokens) for [Vault](https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-int/qontract-reconcile-toml) access. Only `read:org` is required for scopes.
+1. Generate a new Github [Personal access tokens](https://github.com/settings/tokens) for [Vault](https://vault.devshift.net) access. Only `read:org` is required for scopes.
 1. Make sure to copy and save the new personal access token right after generation. You won’t be able to see it again!
 1. Sign in to Vault with Github Token. Copy the value of `data_base64` in [ci-int/qontract-reconcile-toml](https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-int/qontract-reconcile-toml).
 1. Decode the content to create a `config.debug.toml` file in `qontract-reconcile` directory with command `echo <content> | base64 -d > config.debug.toml`

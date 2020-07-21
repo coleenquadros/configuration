@@ -1,0 +1,51 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: app-interface
+
+name: saas-qontract-server
+description: 'SaaS tracking file for App-interface'
+
+app:
+  $ref: /services/app-interface/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/app-sre/qontract-server
+- quay.io/app-sre/nginx-gate
+- quay.io/app-sre/s3-reload
+- quay.io/app-sre/busybox
+
+resourceTemplates:
+- name: qontract-server
+  url: https://github.com/app-sre/qontract-server
+  path: /openshift/app-interface.yaml
+  parameters:
+    IMAGE_GATE_TAG: 89fffba
+    CPU_REQUESTS: 150m
+    CPU_LIMIT: 300m
+    MEMORY_REQUESTS: 512Mi
+    MEMORY_LIMIT: 1Gi
+    REPLICAS: 1
+  targets:
+  - namespace:
+      $ref: /services/app-interface/namespaces/app-interface-stage.yml
+    ref: master
+    upstream: app-sre-qontract-server-gh-build-master
+  - namespace:
+      $ref: /services/app-interface/namespaces/app-interface-production.yml
+    ref: e7fc635e5588738f234597a78dbe8487eb8ea0bc
+    parameters:
+      REPLICAS: 3

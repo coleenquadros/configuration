@@ -1,0 +1,171 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: app-sre
+
+name: saas-openshift-acme
+description: SaaS tracking file for openshift-acme
+
+app:
+  $ref: /services/app-sre/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- Deployment
+- ConfigMap
+- ServiceAccount
+- Role
+- RoleBinding
+
+imagePatterns:
+- quay.io/app-sre/openshift-acme
+
+# Are you updating refs to deploy openshift-acme to production?
+# Please update the ref in the vault saas file as well!
+# https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/vault.devshift.net/cicd/saas.yaml
+resourceTemplates:
+- name: openshift-acme
+  url: https://github.com/app-sre/openshift-acme-templates
+  path: /openshift/openshift-acme.template.yaml
+  parameters:
+    IMAGE: quay.io/app-sre/openshift-acme
+    CONTROLLER_IMAGE_TAG: controller
+    EXPOSER_IMAGE_TAG: exposer
+  targets:
+  # Visual App-interface
+  - namespace:
+      $ref: /services/visual-app-interface.devshift.net/namespaces/visual-qontract-stage.yml
+    ref: master
+  - namespace:
+      $ref: /services/visual-app-interface.devshift.net/namespaces/visual-qontract-production.yml
+    ref: 121c829cab41bc53a9f896e8475ce0b42c5020b6
+  # App-interface
+  - namespace:
+      $ref: /services/app-interface/namespaces/app-interface-stage.yml
+    ref: master
+  - namespace:
+      $ref: /services/app-interface/namespaces/app-interface-production.yml
+    ref: 121c829cab41bc53a9f896e8475ce0b42c5020b6
+  # GitHub-mirror
+  - namespace:
+      $ref: /services/github-mirror/namespaces/github-mirror-stage.yaml
+    ref: master
+  - namespace:
+      $ref: /services/github-mirror/namespaces/github-mirror-production.yaml
+    ref: 121c829cab41bc53a9f896e8475ce0b42c5020b6
+  # App SRE observability
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: 121c829cab41bc53a9f896e8475ce0b42c5020b6
+  # Sentry
+  - namespace:
+      $ref: /services/sentry/namespaces/sentry-stage.yaml
+    ref: master
+  - namespace:
+      $ref: /services/sentry/namespaces/sentry-production.yaml
+    ref: 121c829cab41bc53a9f896e8475ce0b42c5020b6
+  # Unleash
+  - namespace:
+      $ref: /services/unleash/namespaces/hive-integration.yml
+    ref: master
+  - namespace:
+      $ref: /services/unleash/namespaces/app-sre-stage-01.yml
+    ref: master
+  - namespace:
+      $ref: /services/unleash/namespaces/app-sre-prod-01.yml
+    ref: 121c829cab41bc53a9f896e8475ce0b42c5020b6
+  # Dashdotdb
+  - namespace:
+      $ref: /services/dashdot/namespaces/app-sre-stage-01.yml
+    ref: master
+  - namespace:
+      $ref: /services/dashdot/namespaces/app-sre-prod-01.yml
+    ref: 121c829cab41bc53a9f896e8475ce0b42c5020b6
+  # per-cluster observability namespaces
+  - namespace:
+      $ref: /openshift/app-sre-prod-01/namespaces/app-sre-observability-per-cluster.yml
+    ref: 121c829cab41bc53a9f896e8475ce0b42c5020b6
+  - namespace:
+      $ref: /openshift/app-sre-prod-03/namespaces/app-sre-observability-per-cluster.yml
+    ref: 121c829cab41bc53a9f896e8475ce0b42c5020b6
+  - namespace:
+      $ref: /openshift/app-sre-prod-04/namespaces/app-sre-observability-per-cluster.yml
+    ref: 121c829cab41bc53a9f896e8475ce0b42c5020b6
+  - namespace:
+      $ref: /openshift/app-sre-stage-01/namespaces/app-sre-observability-per-cluster.yml
+    ref: master
+  - namespace:
+      $ref: /openshift/app-sre-stage-02/namespaces/app-sre-observability-per-cluster.yml
+    ref: master
+  - namespace:
+      $ref: /openshift/codereadyi01ue1/namespaces/app-sre-observability-per-cluster.yml
+    ref: master
+  - namespace:
+      $ref: /openshift/crc-stg-01/namespaces/app-sre-observability-per-cluster.yml
+    ref: master
+  - namespace:
+      $ref: /openshift/crcs01ue1/namespaces/app-sre-observability-per-cluster.yml
+    ref: master
+  - namespace:
+      $ref: /openshift/crcp01ue1/namespaces/app-sre-observability-per-cluster.yml
+    ref: 121c829cab41bc53a9f896e8475ce0b42c5020b6
+  - namespace:
+      $ref: /openshift/hive-stage-01/namespaces/app-sre-observability-per-cluster.yml
+    ref: master
+  - namespace:
+      $ref: /openshift/hivep01ue1/namespaces/app-sre-observability-per-cluster.yml
+    ref: master
+  - namespace:
+      $ref: /openshift/quay-s-ue1/namespaces/app-sre-observability-per-cluster.yml
+    ref: master
+  - namespace:
+      $ref: /openshift/quayio-stage/namespaces/app-sre-observability-per-cluster.yml
+    ref: master
+  - namespace:
+      $ref: /openshift/quays02ue1/namespaces/app-sre-observability-per-cluster.yml
+    ref: master
+  - namespace:
+      $ref: /openshift/quayp01ue1/namespaces/app-sre-observability-per-cluster.yml
+    ref: 121c829cab41bc53a9f896e8475ce0b42c5020b6
+  - namespace:
+      $ref: /openshift/quayp02ue2/namespaces/app-sre-observability-per-cluster.yml
+    ref: 121c829cab41bc53a9f896e8475ce0b42c5020b6
+  - namespace:
+      $ref: /openshift/quay-p-ue1/namespaces/app-sre-observability-per-cluster.yml
+    ref: 121c829cab41bc53a9f896e8475ce0b42c5020b6
+  - namespace:
+      $ref: /openshift/quay-p-ue2/namespaces/app-sre-observability-per-cluster.yml
+    ref: 121c829cab41bc53a9f896e8475ce0b42c5020b6
+  - namespace:
+      $ref: /openshift/telemeter-prod-01/namespaces/app-sre-observability-per-cluster.yml
+    ref: 121c829cab41bc53a9f896e8475ce0b42c5020b6
+  - namespace:
+      $ref: /openshift/che-dev/namespaces/app-sre-observability-per-cluster.yml
+    ref: master
+  # Code Quarkus
+  - namespace:
+      $ref: /services/launcher/namespaces/code-quarkus-redhat-int-build.yml
+    ref: master
+  - namespace:
+      $ref: /services/launcher/namespaces/code-quarkus-redhat-stage.yml
+    ref: master
+  - namespace:
+      $ref: /services/launcher/namespaces/code-quarkus-stage.yml
+    ref: master
+  - namespace:
+      $ref: /services/launcher/namespaces/code-quarkus-production.yml
+    ref: 121c829cab41bc53a9f896e8475ce0b42c5020b6
+  - namespace:
+      $ref: /services/launcher/namespaces/code-quarkus-redhat-production.yml
+    ref: 121c829cab41bc53a9f896e8475ce0b42c5020b6

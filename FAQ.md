@@ -6,6 +6,7 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
 
 ## ToC
 
+- [Contacting AppSRE](#contacting-appsre)
 - [How can I get access to X](#how-can-i-get-access-to-x)
 - [I can not access X](#i-can-not-access-x)
 - [I can not access ci-ext](#i-can-not-access-ci-ext)
@@ -21,6 +22,19 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
 - [Visual App-Interface](https://visual-app-interface.devshift.net)
 
 ## Topics
+
+### Contacting AppSRE
+
+You can catch the AppSRE team in the `#sd-app-sre` channel of `coreos.slack.com`.
+
+To create a request, please open an issue in the [APPSRE Project](https://issues.redhat.com/projects/APPSRE/issues) in JIRA.
+
+For *time sensitive* requests, please ping `@app-sre-ic` in the `#sd-app-sre` channel.
+
+If you have an urgent matter affecting production that needs to be addressed as soon as possible, please do the following:
+
+- Ping `@app-sre-emea` or `@app-sre-nasa` depending on the time of the day.
+- If you get no response, and if it's truly critical follow the [Paging AppSRE team](docs/app-sre/paging-appsre-oncall.md) guide.
 
 ### How can I get access to X
 
@@ -62,7 +76,7 @@ Choose the namespace for which you would like to find the Console/Kibana URL. Fo
 
 Choosing the namespace will take you to the namespace's page, in which you can find a link to the cluster running this namespace.
 
-In the Cluster page, you can find links to the cluster's Console and to the cluster's Kibana. 
+In the Cluster page, you can find links to the cluster's Console and to the cluster's Kibana.
 
 ### Jenkins is going to shutdown
 

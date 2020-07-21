@@ -16,6 +16,9 @@ auth:
   org: app-sre
   team: app-sre-stage-01-cluster
 
+observabilityNamespace:
+  $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+
 ocm:
   $ref: /dependencies/ocm/production.yml
 
@@ -27,12 +30,13 @@ managedClusterRoles: true
 spec:
   provider: aws
   region: us-east-1
-  major_version: 4
+  version: 4.3.19
   multi_az: true
   nodes: 9
   instance_type: m5.2xlarge
-  storage: 600
+  storage: 1100
   load_balancers: 4
+  private: false
 
 network:
   vpc: 10.112.0.0/16
@@ -40,11 +44,15 @@ network:
   pod: 10.128.0.0/14
 
 peering:
-  vpc_id: vpc-0fdea7c2456fdf0b8
   connections:
-  - name: app-sre-stage-01_app-sre
+  - provider: account-vpc
+    name: app-sre-stage-01_app-sre
     vpc:
       $ref: /aws/app-sre/vpcs/app-sre-vpc-01.yml
+  - provider: cluster-vpc-accepter
+    name: app-sre-stage-01_hive-stage-01
+    cluster:
+      $ref: /openshift/hive-stage-01/cluster.yml
 
 automationToken:
   path: app-sre/creds/kube-configs/app-sre-stage-01

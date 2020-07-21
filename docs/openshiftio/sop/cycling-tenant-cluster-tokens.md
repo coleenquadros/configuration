@@ -1,7 +1,9 @@
 # SOP : Cycling OSIO tenant cluster tokens
 
 ## Alert: 
-> Not yet, maybe after [this issue](https://issues.redhat.com/browse/APPSRE-1647) is done
+> Defined [alerts](https://gitlab.cee.redhat.com/service/app-interface/blob/master/resources/observability/prometheusrules/blackbox-exporter.prometheusrules.yaml) and [checks](https://gitlab.cee.redhat.com/service/app-interface/blob/master/resources/observability/prometheus/prometheus-app-sre-additional-scrapeconfig.secret.yaml)
+
+First need to check if probes failing because of tokens or because of other reasons for API unaviability
 
 ## Severity: High
 
@@ -53,14 +55,20 @@ On dsaas/dsaas-stg OSD clusters:
 - All other starter clusters are production only, so look at dsaas OSD.
 
 2. Find `auth.token.key` and `service-account-token` as described in the Relevant secrets section above.
+ 
+        # auth.token.key
+        oc -n dsaas-production get secret f8tenant -ojson | jq -r '.data["auth.token.key"]' | base64 -d
+        
+        # oso.clusters
+        oc -n dsaas-production get secret f8cluster-config-files -ojson | jq -r '.data["oso.clusters"]' | base64 -d
 
 3. Decrypt the `service-account-token` to get the actual user token, using the command: 
 
-    `echo -n <encrypted string> | base64 -d | gpg -d`
+        echo -n <encrypted string> | base64 -d | gpg -d
 
-4. Try to login using the token: 
+4. Try list namespaces (or anything else) using the token: 
 
-`oc login --token=<token> api.starter-us-east-xx.openshift.com`
+        oc --server=api.starter-us-east-xx.openshift.com --token=<token> get namespaces
 
 5. Once you have confirmed that login fails, proceed further. 
 
@@ -68,13 +76,11 @@ On dsaas/dsaas-stg OSD clusters:
 
 1. Log in to relevant cluster with devtool-sre@redhat.com user. The credentials are in Vault at: https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/devtools-sre-rhd-account
 
-2.  Once logged in, execute: 
+2. Once logged in, execute the following to retrieve the user token: 
 
-    `oc whoami -t`
+        oc whoami -t
 
-    This will get you the token
-
-3. Encrypt token with the `auth.token.key` symmetric key, using the following command: 
+3. Encrypt token with the `auth.token.key` symmetric key retrieved earlier, using the following command: 
 
 > Note: The default pin entry program doesn’t allow pasting into it, so the workarounds are either: 
 >
@@ -83,22 +89,23 @@ On dsaas/dsaas-stg OSD clusters:
 > b. Change pinentry-program in ~/.gnupg/gpg-agent.conf to /usr/bin/pinentry-qt 
 
 
-	`echo -n <token> | gpg --symmetric --cipher-algo AES256 | base64`
+	    echo -n <token> | gpg --symmetric --cipher-algo AES256 | base64
 
 In the end, you get a token that is encrypted and base64 encoded. 
 
+4. Validate the steps in reverse by decoding the encrypted `service-account-token`. You should arrive at the original token.
 
-4. Validate the steps in reverse: 
-    - Decode the string obtained in the last step
-    - Decrypt it 
-    - See if you arrive at the token
-    
-    You can use the following command for decryption: 
+        echo -n <encrypted string> | base64 -d | gpg -d
 
-    `echo -n <encrypted string> | base64 -d | gpg -d`
-
-5. Update the token in Vault, in the corresponding secret. For pathes, [consult](#relevant-secrets)
+5. Update the token in Vault, in the corresponding secret. For paths, [consult](#relevant-secrets)
 
 6. Send a merge request to app-interface to bump the version of the secret 
 
 7. Merge app-interface PR.
+ 
+8. Rollout the `f8tenant` and `auth` deployments in the relevant namespace/cluster
+
+9. Update the token in Vault for blackbox-exporter checks, this should clear alert
+    - Put token in [Vault](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/blackbox-exporter/osio-devtools-bot)
+    - Check if secret updated for blackbox-exporter
+    - Do rolout for blackbox-eporter to pick-up changes

@@ -55,6 +55,18 @@ spec:
       labels:
         service: cincinnati
         severity: medium
+    - alert: GBRestart
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/"
+        dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1"
+        message: "Graph builder container has restarted"
+        link_url: "https://console-openshift-console.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com/k8s/ns/cincinnati-stage/pods"
+      expr: |
+        increase(kube_pod_container_status_restarts_total{namespace="cincinnati-stage",container="cincinnati-graph-builder"}[5m]) > 1
+      for: 5m
+      labels:
+        service: cincinnati
+        severity: warning
     - alert: PEUpstreamErrors
       annotations:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/"
@@ -77,3 +89,15 @@ spec:
       labels:
         service: cincinnati
         severity: high
+    - alert: PERestart
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/"
+        dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1"
+        message: "Policy engine container has restarted"
+        link_url: "https://console-openshift-console.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com/k8s/ns/cincinnati-stage/pods"
+      expr: |
+        increase(kube_pod_container_status_restarts_total{namespace="cincinnati-stage",container="cincinnati-policy-engine"}[5m]) > 1
+      for: 5m
+      labels:
+        service: cincinnati
+        severity: warning

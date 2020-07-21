@@ -1,0 +1,52 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: module-update-router
+  platform: insights
+
+name: module-update-router
+description: module-update-router
+
+app:
+  $ref: /services/insights/module-update-router/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- Service
+- Deployment
+- ConfigMap
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  IMAGE: quay.io/cloudservices/module-update-router
+
+resourceTemplates:
+- name: module-update-router
+  path: /template.yml
+  url: https://github.com/RedHatInsights/module-update-router
+  targets:
+  - namespace:
+      $ref: /services/insights/module-update-router/namespaces/stage-module-update-router-stage.yml
+    ref: master
+    upstream: RedHatInsights-module-update-router-gh-build-master
+  - namespace:
+      $ref: /services/insights/module-update-router/namespaces/prod-module-update-router-prod.yml
+    ref: 32d459c8f1656f17ba0010cacedc60adce9da0a6

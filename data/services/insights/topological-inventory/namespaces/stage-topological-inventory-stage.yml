@@ -8,38 +8,50 @@ name: topological-inventory-stage
 description: Insights topological-inventory-stage on the Stage cluster under e2e-deploy/ocdeployer management
 
 cluster:
-  $ref: /openshift/insights/crc-stage-01.yml
+  $ref: /openshift/crc-stg-01/cluster.yml
 
 app:
   $ref: /services/insights/topological-inventory/app.yml
 
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stg-01.yml
+- $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+- $ref: /services/insights/approval/namespaces/stage-approval-stage.yml
+
 managedRoles: true
 
 managedResourceTypes:
-- Secret
+- ServiceAccount
 
 openshiftResources:
-# secrets
 - provider: vault-secret
-  name: cloudwatch
-  path: insights/secrets/global/cloudwatch
-  type: Opaque
-  version: 1
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
 - provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
   name: quay-cloudservices-pull
-  path: insights/quay/cloudservices-pull
-  type: Opaque
-  version: 4
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
 - provider: vault-secret
   name: rds-client-ca
   path: insights/secrets/global/rds-client-ca
   type: Opaque
   version: 1
+  annotations:
+    qontract.recycle: "true"
 - provider: vault-secret
   name: topological-inventory-api-secrets
   path: insights/secrets/insights-stage/topological-inventory/topological-inventory-api-secrets
   type: Opaque
   version: 1
+  annotations:
+    qontract.recycle: "true"
 
 # TODO How to create these configmaps named after AWS and ansible tower
 # config-amazon-037f10ff-e776-4a31-9deb-7513790bd5d8          3      1h
@@ -54,5 +66,16 @@ terraformResources:
 - provider: rds
   account: insights-stage
   identifier: topological-inventory-stage
-  defaults: /terraform/resources/insights/stage/rds-1.yml
+  defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
+  overrides:
+    username: "insights"
+    name: "topological_inventory_production"
+  parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-topological-inventory-stage.yml
   output_resource_name: topological-inventory-db
+  enhanced_monitoring: true
+- provider: cloudwatch
+  account: insights-stage
+  identifier: topological-inventory-stage
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch

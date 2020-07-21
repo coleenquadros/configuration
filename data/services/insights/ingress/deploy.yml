@@ -1,0 +1,113 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: ingress
+  platform: insights
+
+name: ingress
+description: ingress app on the Insights Platform
+
+app:
+  $ref: /services/insights/ingress/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- Deployment
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  LOG_GROUP: platform
+
+resourceTemplates:
+- name: insights-storage-broker
+  path: /templates/ingress/insights-storage-broker.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/stage-ingress-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: c151175
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/ingress-prod-v3.yml
+    ref: 995c886b2d2f3421d75703549c333765a2eb553f
+    parameters:
+      IMAGE_TAG: c151175
+      REPLICAS: 2
+      KAFKA_BOOTSTRAP_HOST: platform-mq-prod-kafka-bootstrap.platform-mq-prod.svc
+      STAGE_BUCKET: insights-upload-perma
+      REJECT_BUCKET: insights-upload-rejected
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/ingress-prod.yml
+    ref: 3a1f23f25a48fd169a6c906f2ee5f1a13b66f3e6
+    parameters:
+      IMAGE_TAG: c151175
+      REPLICAS: 2
+      STAGE_BUCKET: insights-upload-perma
+      REJECT_BUCKET: insights-upload-rejected
+- name: insights-puptoo
+  path: /templates/ingress/insights-puptoo.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/stage-ingress-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 5b64268
+      REPLICAS: 4
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/ingress-prod-v3.yml
+    ref: 93c781b5afb3e2a2afa24eef8dfb56874f51ccdf
+    parameters:
+      IMAGE_TAG: 5b64268
+      REPLICAS: 64
+      KAFKA_BOOTSTRAP_HOST: platform-mq-prod-kafka-bootstrap.platform-mq-prod.svc
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/ingress-prod.yml
+    ref: 3a1f23f25a48fd169a6c906f2ee5f1a13b66f3e6
+    parameters:
+      IMAGE_TAG: 5b64268
+      REPLICAS: 64
+- name: ingress
+  path: /templates/ingress/ingress.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/stage-ingress-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: c0c4220
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/ingress-prod-v3.yml
+    ref: 4f270d737ecadee5d147530d6ea59b7468d640a1
+    parameters:
+      IMAGE_TAG: c0c4220
+      REPLICAS: 10
+      INGRESS_REJECTBUCKET: insights-upload-rejected
+      INGRESS_INVENTORYURL: http://insights-inventory.platform-prod.svc:8080/api/inventory/v1/hosts
+      KAFKA_BOOTSTRAP_HOST: platform-mq-prod-kafka-bootstrap.platform-mq-prod.svc
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/ingress-prod.yml
+    ref: 3a1f23f25a48fd169a6c906f2ee5f1a13b66f3e6
+    parameters:
+      IMAGE_TAG: c0c4220
+      REPLICAS: 10
+      INGRESS_REJECTBUCKET: insights-upload-rejected
+      INGRESS_INVENTORYURL: http://insights-inventory.platform-prod.svc:8080/api/inventory/v1/hosts

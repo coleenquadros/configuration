@@ -1,0 +1,46 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: osd-operators
+
+name: saas-managed-prometheus-exporter-dns
+description: SaaS tracking file for managed-prometheus-exporter-dns
+
+app:
+  $ref: /services/osd-operators/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-srep-info
+
+managedResourceTypes:
+- SelectorSyncSet
+
+imagePatterns:
+- quay.io/app-sre/managed-prometheus-exporter-dns-registry
+
+resourceTemplates:
+- name: managed-prometheus-exporter-dns
+  url: https://github.com/openshift/managed-prometheus-exporter-dns
+  path: /hack/00-osd-managed-prometheus-exporter-dns.selectorsyncset.yaml.tmpl
+  targets:
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-integration-cluster-scope.yml
+    ref: master
+    upstream: openshift-managed-prometheus-exporter-dns-gh-build-master
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-stage-cluster-scope.yml
+    ref: master
+    upstream: openshift-managed-prometheus-exporter-dns-gh-build-master
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-stage-01/hive-stage-01-cluster-scope.yml
+    ref: master
+    upstream: openshift-managed-prometheus-exporter-dns-gh-build-master
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-production-cluster-scope.yml
+    ref: e268c0ea1feed442a6116335128b61693e0e5d26

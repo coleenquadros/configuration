@@ -33,5 +33,16 @@ Note that every time you add a new `m5.metal` node to the cluster, you will need
 
 Follow steps from OpenShift [documentation](https://docs.openshift.com/container-platform/4.1/updating/updating-cluster.html) to upgrade the cluster. Cluster upgrades must be scheduled during a Quay.io maintenance window.
 
+## Understanding Quay Build Queue SLI
 
+Quay publishes following SLI for build queue:
 
+- `quay_queue_items_available_unlocked` - backlog of builds
+- `quay_queue_items_available` - unlocked + any expired locked items
+- `quay_queue_items_locked` - non-expired locked items
+
+The SLI we should look at is `quay_queue_items_available`.
+
+## Builds are queued but none are running
+
+See [sop/fix-builder-redis.md](Fix Builder Redis) to see if this the issue.

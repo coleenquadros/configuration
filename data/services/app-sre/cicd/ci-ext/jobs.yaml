@@ -15,13 +15,22 @@ type: jobs
 
 config:
 - project:
+    name: logs-to-elasticsearch-lambda
+    label: logs-to-elasticsearch-lambda
+    node: app-sre
+    gh_org: app-sre
+    gh_repo: logs-to-elasticsearch-lambda
+    jobs:
+    - 'gh-build-tag':
+        display_name: build tag
+
+- project:
     name: fluentd
     label: app-sre
     node: app-sre
     gh_org: app-sre
     gh_repo: fluentd
     quay_org: app-sre
-    kube_cluster: none
     build_deploy_script_path: "./build_deploy.sh"
     jobs:
     - 'gh-build-master':
@@ -34,7 +43,6 @@ config:
     gh_org: app-sre
     gh_repo: jenkins-job-builder
     quay_org: app-sre
-    kube_cluster: none
     build_deploy_script_path: "./build_deploy.sh"
     jobs:
     - 'gh-build-master':
@@ -47,7 +55,6 @@ config:
     gh_org: app-sre
     gh_repo: manifest-bouncer
     quay_org: app-sre
-    kube_cluster: none
     jobs:
     - 'gh-build-master':
         display_name: manifest-bouncer build master
@@ -63,7 +70,6 @@ config:
     gh_org: app-sre
     gh_repo: s3-reload
     quay_org: app-sre
-    kube_cluster: none
     jobs:
     - 'gh-build-master':
         display_name: s3-reload build master
@@ -75,7 +81,6 @@ config:
     gh_org: app-sre
     gh_repo: git-keeper
     quay_org: app-sre
-    kube_cluster: none
     jobs:
     - 'gh-build-master':
         display_name: git-keeper build master
@@ -89,25 +94,9 @@ config:
     gh_org: app-sre
     gh_repo: nginx-gate
     quay_org: app-sre
-    kube_cluster: none
     jobs:
     - 'gh-build-master':
         display_name: nginx-gate build master
-
-- project:
-    name: cvexporter
-    label: app-sre
-    node: app-sre
-    gh_org: app-sre
-    gh_repo: container-vulnerability-exporter
-    quay_org: app-sre
-    kube_cluster: none
-    jobs:
-    - 'gh-build-master':
-        display_name: cvexporter build master
-    - 'gh-pr-check':
-        pr_check_script_path: make test
-        display_name: cvexporter pr-check test
 
 - project:
     name: sretoolbox
@@ -116,7 +105,6 @@ config:
     gh_org: app-sre
     gh_repo: sretoolbox
     quay_org: none
-    kube_cluster: none
     jobs:
     - 'gh-pr-check':
         display_name: sretoolbox pr-check
@@ -132,10 +120,23 @@ config:
     quay_org: app-sre
     build_deploy_script_path: "./hack/build_deploy.sh"
     pr_check_script_path: "./hack/pr_check.sh"
-    kube_cluster: none
     jobs:
     - 'gh-build-master':
         display_name: app-sre-errbot build master
     - 'gh-pr-check':
         display_name: app-sre-errbot pr check
-    
+
+- project:
+    name: rds-enhanced-metrics-exporter
+    label: app-sre
+    node: app-sre
+    gh_org: app-sre
+    gh_repo: rds-enhanced-metrics-exporter
+    pr_check_script_path: "./pr_check.sh"
+    jobs:
+    - 'gh-pr-check':
+        display_name: pr-check rds-enhanced-metrics-exporter
+        concurrent_build: false
+    - 'gh-build-master':
+        display_name: build and push image rds-enhanced-metrics-exporter
+        build_deploy_script_path: "./build_deploy.sh"

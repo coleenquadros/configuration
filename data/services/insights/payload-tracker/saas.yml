@@ -1,0 +1,61 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: payload-tracker
+  platform: insights
+
+name: payload-tracker
+description: payload-tracker app on the Insights Platform
+
+app:
+  $ref: /services/insights/payload-tracker/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- Deployment
+- DeploymentConfig
+- Service
+- ServiceAccount
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  OAUTH_IMAGE: quay.io/cloudservices/oauth-proxy
+  OAUTH_IMAGE_TAG: v3.11.43
+
+resourceTemplates:
+- name: payload-tracker
+  path: /templates/payload-tracker/payload-tracker.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/payload-tracker/namespaces/stage-payload-tracker-stage.yml
+    ref: master
+    parameters:
+      CPU_LIMIT: '1'
+      IMAGE_TAG: 5e1bd75
+      MEMORY_LIMIT: 1Gi
+      REPLICAS: 1
+- name: payload-tracker-frontend
+  path: /templates/payload-tracker/payload-tracker-frontend.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/payload-tracker/namespaces/stage-payload-tracker-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 204f9cc

@@ -1,0 +1,39 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: assisted-installer
+
+name: assisted-installer
+description: 'SaaS tracking file for assisted-installer'
+
+app:
+  $ref: /services/assisted-installer/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- Deployment
+
+imagePatterns:
+- quay.io/app-sre/bm-inventory
+
+resourceTemplates:
+- name: assisted-service
+  url: https://github.com/openshift/assisted-service
+  path: /openshift/template.yaml
+  targets:
+  - namespace:
+      $ref: /services/assisted-installer/namespaces/hive-integration.yml
+    ref: master
+    upstream: openshift-assisted-installer-gh-build-master
+  - namespace:
+      $ref: /services/assisted-installer/namespaces/hive-integration-test.yml
+    ref: integration-test
+    upstream: openshift-assisted-installer-gh-build-master

@@ -1,0 +1,179 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: topological-inventory
+  platform: insights
+
+name: topological-inventory
+description: topological-inventory app on the Insights Platform
+
+app:
+  $ref: /services/insights/topological-inventory/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- Deployment
+- DeploymentConfig
+- Service
+- ServiceAccount
+- RoleBinding
+- HorizontalPodAutoscaler
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  CLOUD_WATCH_LOG_GROUP: topological-inventory-stage
+
+resourceTemplates:
+- name: topological-inventory-ingress-api
+  path: /templates/topological-inventory/topological-inventory-ingress-api.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/topological-inventory/namespaces/stage-topological-inventory-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 4573b59
+- name: topological-inventory-upload-validator
+  path: /templates/topological-inventory/topological-inventory-upload-validator.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/topological-inventory/namespaces/stage-topological-inventory-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 9cbda7f
+- name: topological-inventory-amazon-operations
+  path: /templates/topological-inventory/topological-inventory-amazon-operations.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/topological-inventory/namespaces/stage-topological-inventory-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 4be4302
+- name: topological-inventory-ansible-tower-operations
+  path: /templates/topological-inventory/topological-inventory-ansible-tower-operations.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/topological-inventory/namespaces/stage-topological-inventory-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: e5ed977
+- name: topological-inventory-api
+  path: /templates/topological-inventory/topological-inventory-api.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  parameters:
+    PATH_PREFIX: api
+    PGSSLMODE: verify-full
+  targets:
+  - namespace:
+      $ref: /services/insights/topological-inventory/namespaces/stage-topological-inventory-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: dbac442
+- name: topological-inventory-azure-operations
+  path: /templates/topological-inventory/topological-inventory-azure-operations.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/topological-inventory/namespaces/stage-topological-inventory-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 46222cb
+- name: topological-inventory-openshift-operations
+  path: /templates/topological-inventory/topological-inventory-openshift-operations.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/topological-inventory/namespaces/stage-topological-inventory-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 437ea40
+- name: topological-inventory-orchestrator
+  path: /templates/topological-inventory/topological-inventory-orchestrator.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  parameters:
+    PATH_PREFIX: api
+  targets:
+  - namespace:
+      $ref: /services/insights/topological-inventory/namespaces/stage-topological-inventory-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: abe18c0
+- name: topological-inventory-persister
+  path: /templates/topological-inventory/topological-inventory-persister.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  parameters:
+    PGSSLMODE: verify-full
+  targets:
+  - namespace:
+      $ref: /services/insights/topological-inventory/namespaces/stage-topological-inventory-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 09cff91
+- name: topological-inventory-satellite-operations
+  path: /templates/topological-inventory/topological-inventory-satellite-operations.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/topological-inventory/namespaces/stage-topological-inventory-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 201ca16
+      RECEPTOR_CONTROLLER_HOST: receptor-controller.receptor-stage.svc
+- name: topological-inventory-sources-sync
+  path: /templates/topological-inventory/topological-inventory-sources-sync.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  parameters:
+    PGSSLMODE: verify-full
+  targets:
+  - namespace:
+      $ref: /services/insights/topological-inventory/namespaces/stage-topological-inventory-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 9cbda7f
+- name: topological-inventory-upload
+  path: /templates/topological-inventory/topological-inventory-upload.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/topological-inventory/namespaces/stage-topological-inventory-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 9cbda7f
+- name: topological-inventory-host-inventory-sync
+  path: /templates/topological-inventory/topological-inventory-host-inventory-sync.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  parameters:
+    PATH_PREFIX: api
+  targets:
+  - namespace:
+      $ref: /services/insights/topological-inventory/namespaces/stage-topological-inventory-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 9cbda7f
+- name: topological-inventory-metric-scaler
+  path: /templates/topological-inventory/topological-inventory-metric-scaler.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/topological-inventory/namespaces/stage-topological-inventory-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: e238e05

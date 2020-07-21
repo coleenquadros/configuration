@@ -32,15 +32,15 @@ config:
     node: app-sre
     gh_org: app-sre
     gh_repo: syslog-cloudwatch-bridge
-    pr_check_script_path: "./app_sre_pr_check.sh"
-    kube_cluster: none
     jobs:
     - 'gh-pr-check':
         display_name: pr-check syslog-cloudwatch-bridge
+        pr_check_script_path: "./app_sre_pr_check.sh"
         concurrent_build: false
     - 'gh-build-master':
         display_name: build and push image syslog-cloudwatch-bridge
         build_deploy_script_path: "./app_sre_build_deploy.sh"
+        backup_ecr_push_creds_account_region: "quayio-prod/eu-central-1"
 
 - project:
     name: apostille
@@ -52,3 +52,26 @@ config:
     - 'gh-pr-check':
         display_name: pr-check for apostille
         concurrent_build: true
+
+- project:
+    name: clair
+    label: quayio
+    node: app-sre
+    gh_org: quay
+    gh_repo: clair
+    jobs:
+    - 'gh-pr-check':
+        display_name: pr-check for clair
+        branch: development-4.0
+        concurrent_build: true
+
+- project:
+    name: quay-mysql-diag
+    label: quayio
+    node: app-sre
+    gh_org: app-sre
+    gh_repo: quay-mysql-diag
+    quay_org: app-sre
+    jobs:
+    - 'gh-build-master':
+        display_name: quay-mysql-diag build master

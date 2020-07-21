@@ -3,7 +3,7 @@
 OSDv4 clusters are managed via OCM.
 
 - Production: https://cloud.redhat.com/openshift
-- Staging: https://cloud.redhat.com/beta/openshift
+- Staging: https://qaprodauth.cloud.redhat.com/openshift
 
 ## Creating an Account
 
@@ -30,10 +30,10 @@ Quotas are managed via the [ocm-resources](https://gitlab.cee.redhat.com/service
 
 As of 2020-01-30 the quota files in the ocm-resources repo are:
 
-- [uhc-production/orgs/12147054.yaml](https://gitlab.cee.redhat.com/service/ocm-resources/blob/a867f1ad9e567db8ff99d4a1836515c47073a822/data/uhc-production/orgs/12147054.yaml)
-- [uhc-stage/orgs/12147054.yaml](https://gitlab.cee.redhat.com/service/ocm-resources/blob/a867f1ad9e567db8ff99d4a1836515c47073a822/data/uhc-stage/orgs/12147054.yaml)
+- [uhc-production/orgs/12147054.yaml](https://gitlab.cee.redhat.com/service/ocm-resources/blob/master/data/uhc-production/orgs/12147054.yaml)
+- [uhc-stage/orgs/12147054.yaml](https://gitlab.cee.redhat.com/service/ocm-resources/blob/master/data/uhc-stage/orgs/12147054.yaml)
 
-In order to request more quota, a PR must be sent to those files requesting more SKUs. This request must be approved by Tim Williams and/or Abhishek Gupta, as well as Jonathan Beakley from the AppSRE side.
+In order to request more quota, a PR must be sent to those files requesting more SKUs. This request must be approved by Aaron Weitekamp, as well as Jonathan Beakley from the AppSRE side.
 
 For more information look at [How to request quota for creating OpenShift Dedicated cluster](https://mojo.redhat.com/docs/DOC-1199606). Note that as AppSRE is part of SD, we do not need to create a PO.
 

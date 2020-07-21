@@ -14,6 +14,8 @@
     che-success-message: ""
     che-failure-message: ""
     che-error-message: ""
+    kubeconfver: none
+    sa_name: app-sre-bot
 
 - admin_list_defaults: &admin_list_defaults
     name: 'admin_list_defaults'
@@ -38,13 +40,13 @@
         - DhritiShikhar
         - dlabrecq
         - dmytro-ndp
+        - dvandra
         - ebaron
         - edewit
         - evidolob
         - fabric8cd
         - fche
         - gastaldi
-        - hrishin
         - ia3andy
         - ibuziuk
         - inoxx03
@@ -60,6 +62,7 @@
         - ldimaggi
         - ljelinkova
         - maorfr
+        - mathur07
         - MatousJobanek
         - maxandersen
         - michaelkleinhenz
@@ -71,6 +74,7 @@
         - piyush-garg
         - pmacik
         - ppitonak
+        - prashbnair
         - Preeticp
         - quintesse
         - RhCheGithubBot
@@ -82,6 +86,7 @@
         - rajusem
         - sahil143
         - sanketpathak
+        - sawood14012
         - sbose78
         - sbryzak
         - ScrewTSW
@@ -98,6 +103,8 @@
         - vparfonov
         - xcoulon
         - yzainee
+        - dgpatelgit
+        - jparsai
 
 - che_admin_list_defaults: &che_admin_list_defaults
     name: 'che_admin_list_defaults'
@@ -152,6 +159,8 @@
         - vkuznyetsov
         - vparfonov
         - vzhukovskii
+        # external users
+        - monaka
 
 - che_github_pull_request_defaults: &che_github_pull_request_defaults
     name: 'che_github_pull_request_defaults'
@@ -220,6 +229,25 @@
     name: 'vault_defaults'
     vault-url: 'https://vault.devshift.net'
     credentials-id: '52ce5cda-e8f3-47a7-917b-8771518b4729'
+
+
+- kube-config-dsaas-stg-v4: &kube-config-dsaas-stg-v4
+    name: "kube-config-dsaas-stg-v4"
+    secret-path: 'app-sre/creds/kube-configs/app-sre-stage-02'
+    secret-values:
+      - env-var: 'KUBE_SERVER'
+        vault-key: 'server'
+      - env-var: 'KUBE_TOKEN'
+        vault-key: 'token'
+
+- kube-config-dsaas-v4: &kube-config-dsaas-v4
+    name: "kube-config-dsaas-stg-v4"
+    secret-path: 'app-sre/creds/kube-configs/app-sre-prod-03'
+    secret-values:
+      - env-var: 'KUBE_SERVER'
+        vault-key: 'server'
+      - env-var: 'KUBE_TOKEN'
+        vault-key: 'token'
 
 - kube-config-dsaas-stg: &kube-config-dsaas-stg
     name: "kube-config-dsaas-stg"
@@ -347,6 +375,13 @@
       - env-var: 'CHE_BOT_GITHUB_TOKEN'
         vault-key: 'che-bot-github-token'
 
+- crw-bots-pull-secret: &crw-bots-pull-secret
+    name: "crw-bots-pull-secret"
+    secret-path: "devtools-osio-ci/crw-bots-pull-secret"
+    secret-values:
+      - env-var: 'CRW_BOTS_PULL_SECRETS'
+        vault-key: 'crw-bots-pull-secret'
+
 - che-bot-npm-auth-token: &che-bot-npm-auth-token
     name: "che-bot-npm-auth-token"
     secret-path: "devtools-osio-ci/che-bot-npm-auth-token"
@@ -432,17 +467,6 @@
       - env-var: 'RH_CHE_AUTOMATION_DOCKERHUB_PASSWORD'
         vault-key: 'password'
 
-- rhche-flaky-2-creds: &rhche-flaky-2-creds
-    name: "rhche-flaky-2-creds"
-    secret-path: 'devtools-osio-ci/rhche-flaky-2-creds'
-    secret-values:
-      - env-var: 'USERNAME'
-        vault-key: 'username'
-      - env-var: 'PASSWORD'
-        vault-key: 'password'
-      - env-var: 'EMAIL'
-        vault-key: 'email'
-
 - rhche-periodic-2-creds: &rhche-periodic-2-creds
     name: "rhche-periodic-2-creds"
     secret-path: 'devtools-osio-ci/rhche-periodic-2-creds'
@@ -524,6 +548,13 @@
 - 3scale-user-key: &3scale-user-key
     name: "3scale-user-key"
     secret-path: 'devtools-osio-ci/3scale-user-key'
+    secret-values:
+      - env-var: 'THREE_SCALE_PREVIEW_USER_KEY'
+        vault-key: 'user_key'
+
+- 3scale-user-key-prod: &3scale-user-key-prod
+    name: "3scale-user-key-prod"
+    secret-path: 'devtools-osio-ci/3scale-user-key-prod'
     secret-values:
       - env-var: 'THREE_SCALE_PREVIEW_USER_KEY'
         vault-key: 'user_key'
@@ -770,6 +801,7 @@
 
 - job-template:
     name: '{ci_project}-{git_repo}-fabric8-analytics'
+    disabled: '{obj:disabled}'
     registry: 'MISSING_REGISTRY_NAME'
     image_name: 'MISSING_IMAGE_NAME'
     wrappers:
@@ -789,7 +821,7 @@
           <<: *github_pull_request_defaults
     publishers:
         - email:
-            recipients: ptisnovs@redhat.com
+            recipients: msawood@redhat.com
             notify-every-unstable-build: true
             send-to-individuals: true
     <<: *job_template_defaults
@@ -818,6 +850,7 @@
 
 - job-template:
     name: '{ci_project}-{git_repo}-fabric8-analytics-copr-mercator'
+    disabled: '{obj:disabled}'
     wrappers:
         - vault-secrets:
             <<: *vault_defaults
@@ -870,6 +903,7 @@
 
 - job-template:
     name: '{ci_project}-{git_repo}-fabric8-analytics-pylint'
+    disabled: '{obj:disabled}'
     wrappers:
         - ansicolor
     git_organization: fabric8-analytics
@@ -888,6 +922,7 @@
 
 - job-template:
     name: '{ci_project}-{git_repo}-fabric8-analytics-pydoc'
+    disabled: '{obj:disabled}'
     git_organization: fabric8-analytics
     ci_project: 'devtools'
     ci_cmd: '/bin/bash cico_run_pydoc.sh'
@@ -1065,11 +1100,12 @@
 
 - job-template:
     name: '{ci_project}-{git_repo}-fabric8-analytics-build-master'
+    disabled: '{obj:disabled}'
     wrappers:
       - vault-secrets:
           <<: *vault_defaults
           secrets:
-            - *kube-config-dsaas-stg
+            - *kube-config-dsaas-stg-v4
             - *quay-credentials
             - *registry-devshift-credentials
     scm:
@@ -1091,6 +1127,7 @@
             [ "$CONTEXT" != "$SAAS_GIT" ] && saasherder --context $CONTEXT config get-contexts > /dev/null
             cd ..
         fi
+
         set +x
     saasherder_deploy: |
         if [ "$SAAS_GIT" != "none" ]; then
@@ -1114,6 +1151,26 @@
           <<: *vault_defaults
           secrets:
             - *kube-config-dsaas-stg
+            - *quay-credentials
+            - *quay-eclipse-che-credentials
+            - *quay-che-incubator-credentials
+            - *registry-devshift-credentials
+            - *eclipse-che-github-packages-credentials
+    scm:
+        - git:
+            url: https://github.com/{git_organization}/{git_repo}.git
+            shallow_clone: true
+            branches:
+                - '{build_branch}'
+    <<: *job_template_build_defaults
+
+- job-template: &job_template_build_master-v4
+    name: '{ci_project}-{git_repo}-build-master-v4'
+    wrappers:
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *kube-config-dsaas-stg-v4
             - *quay-credentials
             - *quay-eclipse-che-credentials
             - *quay-che-incubator-credentials
@@ -1168,10 +1225,12 @@
 
 - job-template:
     name: '{ci_project}-{git_repo}-f8a-build-master'
+    disabled: '{obj:disabled}'
     wrappers:
       - vault-secrets:
           <<: *vault_defaults
           secrets:
+            - *kube-config-dsaas-stg-v4
             - *quay-credentials
             - *registry-devshift-credentials
             - *recommender-api-token-prod
@@ -1276,6 +1335,118 @@
     <<: *job_template_build_defaults
 
 - job-template:
+    name: '{ci_project}-{git_repo}-f8a-build-master-v4'
+    disabled: true
+    wrappers:
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *kube-config-dsaas-stg-v4
+            - *quay-credentials
+            - *registry-devshift-credentials
+            - *recommender-api-token-prod
+      - ansicolor
+    scm:
+        - git:
+            url: https://github.com/{git_organization}/{git_repo}.git
+            shallow_clone: true
+            branches:
+                - master
+    skip_deploy: 0
+    deployment_units: ''
+    deployment_configs: ''
+    extra_target: ''
+    builders:
+        - shell: |
+            # testing out the cico client
+            set +e
+            set +x
+            export CICO_API_KEY=$(cat ~/duffy.key )
+            # get node
+            n=1
+            while true
+            do
+                cico_output=$(cico node get -f value -c ip_address -c comment)
+                if [ $? -eq 0 ]; then
+                    read CICO_hostname CICO_ssid <<< $cico_output
+                    if  [ ! -z "$CICO_hostname" ]; then
+                        # we got hostname from cico
+                        break
+                    fi
+                    echo "'cico node get' succeed, but can't get hostname from output"
+                fi
+                if [ $n -gt 15 ]; then
+                    # give up after 15 tries
+                    echo "giving up on 'cico node get'"
+                    exit 1
+                fi
+                echo "'cico node get' failed, trying again in 60s ($n/15)"
+                n=$[$n+1]
+                sleep 60
+            done
+            echo 'Using Host' $CICO_hostname
+
+            export DEVSHIFT_TAG_LEN=7
+
+            (
+                # run in subshell not to affect current environment
+                set +x
+
+                # load creds_config_file
+                eval "$(sed '/^\s*$/d;s/^/export /' $creds_config_file)"
+
+                cp ~/cico-tools/env-toolkit .
+                ./env-toolkit dump -f jenkins-env.json
+                env > jenkins-env
+            )
+
+            set -x
+
+            sshopts="-t -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -l root"
+            ssh_cmd="ssh $sshopts $CICO_hostname"
+            $ssh_cmd yum -y install rsync
+            rsync -e "ssh $sshopts" -Ha $(pwd)/ $CICO_hostname:payload
+            $ssh_cmd -t "cd payload && {ci_cmd}"
+            rtn_code=$?
+
+            ## RHEL build
+            if [[ $rtn_code -eq 0 && -n "{extra_target}" ]]; then
+                $ssh_cmd -t "cd payload && TARGET=\"{extra_target}\" {ci_cmd}"
+                rtn_code=$?
+            fi
+
+            # We want to reuse the node for running E2E tests,
+            # but only if we are not doomed already.
+            if [[ $rtn_code -ne 0 || {skip_deploy} -ne 0 ]]; then
+                cico node done $CICO_ssid
+            fi
+
+            # Dump params for deploy-e2e-test-params
+            cat > deploy-e2e-test-params << EOF
+            GIT_ORGANIZATION={git_organization}
+            UPSTREAM_GIT_COMMIT=$GIT_COMMIT
+            SAAS_GIT={saas_git}
+            DEPLOYMENT_UNITS={deployment_units}
+            DEPLOYMENT_CONFIGS={deployment_configs}
+            CICO_HOSTNAME=$CICO_hostname
+            CICO_SSID=$CICO_ssid
+            EOF
+
+            exit $rtn_code
+
+        - conditional-step:
+            condition-kind: shell
+            condition-command: |
+                [[ {skip_deploy} -eq 0 ]] && exit 0 || exit 1
+            steps:
+                - trigger-builds:
+                    - project:
+                        - "devtools-f8a-master-deploy-e2e-test"
+                      property-file: deploy-e2e-test-params
+                      block: true
+    <<: *job_template_build_defaults
+
+- job-template:
     name: '{ci_project}-{git_repo}-saasorg-build-master'
     saas_organization: openshiftio
     parameters:
@@ -1304,6 +1475,7 @@
 
 - job-template:
     name: '{ci_project}-e2e-fabric8-analytics'
+    disabled: '{obj:disabled}'
     triggers:
       - github-pull-request:
           status-context: "ci.centos.org PR build (fabric8-analytics)"
@@ -1368,7 +1540,7 @@
             $ssh_cmd -t "cd payload-tests/integration-tests && /bin/bash cico_run_tests.sh"
     publishers:
         - email:
-            recipients: ptisnovs@redhat.com devtools-bayesian@redhat.com
+            recipients: msawood@redhat.com rh-depanalytics@redhat.com
             notify-every-unstable-build: true
             send-to-individuals: true
     <<: *job_template_defaults
@@ -1407,6 +1579,7 @@
 
 - job-template:
     name: '{ci_project}-test-end-to-end-prod-fabric8-analytics'
+    disabled: '{obj:disabled}'
     triggers:
       - timed: '@hourly'
     wrappers:
@@ -1414,6 +1587,7 @@
             <<: *vault_defaults
             secrets:
               - *recommender-api-token-prod
+              - *3scale-user-key-prod
         - ansicolor
     scm:
         - git:
@@ -1453,6 +1627,7 @@
 
             # We have to point other endpoints to production too
             export F8A_API_URL={f8a_api_url}
+            export F8A_API_V2_URL={f8a_api_v2_url}
 
             cp ~/cico-tools/env-toolkit .
             ./env-toolkit dump -f integration-tests/jenkins-env.json
@@ -1476,16 +1651,17 @@
 
 - job-template:
     name: '{ci_project}-f8a-master-deploy-e2e-test'
+    disabled: '{obj:disabled}'
     publishers:
         - email:
-            recipients: bayesian-ci@redhat.com
+            recipients: bayesian-ci@redhat.com rh-depanalytics@redhat.com 
             notify-every-unstable-build: true
             send-to-individuals: true
     wrappers:
         - vault-secrets:
             <<: *vault_defaults
             secrets:
-              - *kube-config-dsaas-stg
+              - *kube-config-dsaas-stg-v4
               - *recommender-api-token
               - *3scale-user-key
               - *recommender-refresh-token
@@ -1814,14 +1990,14 @@
     <<: *che-pullrequest-template
 
 - job-template:
-    name: '{ci_project}-{git_repo}-rc-{test_type}'
+    name: '{ci_project}-{git_repo}-release-{test_type}'
 
     scm:
       - git:
           url: https://github.com/{git_organization}/{git_repo}.git
           shallow_clone: true
           branches:
-            - cico-rc-test
+            - cico-release-test
     triggers:
       - github
 
@@ -2083,6 +2259,17 @@
       - env-var: 'QUAY_SECRET_JSON'
         vault-key: 'secret'
 
+- rh-che-automation-credentials-pre-release: &rh-che-automation-credentials-pre-release
+    name: "rh-che-automation-credentials-pre-release"
+    secret-path: "devtools-osio-ci/rh-che-automation-credentials-pre-release"
+    secret-values:
+        - env-var: 'USERNAME'
+          vault-key: 'username'
+        - env-var: 'PASSWORD'
+          vault-key: 'password'
+        - env-var: 'EMAIL'
+          vault-key: 'email'
+
 - rh-che-automation-template: &rh-che-automation-template
     name: 'rh-che-automation-template'
     concurrent: false
@@ -2143,6 +2330,38 @@
             <<: *github_pull_request_defaults
     <<: *rh-che-automation-template
 
+- job-template:
+    name: '{ci_project}-rh-che-pre-release-test'
+    triggers:
+        - github
+        - github-pull-request:
+            success-comment: "Large test suite passed.\n
+            console: https://ci.centos.org/view/Devtools/job/devtools-rh-che-pre-release-test/$BUILD_NUMBER/console "
+            failure-comment: "Large test suite failed.\n
+            | Link | URL |\n
+            | ---- | :-: |\n
+            | console | https://ci.centos.org/view/Devtools/job/devtools-rh-che-pre-release-test/$BUILD_NUMBER/console |\n
+            | artifacts | http://artifacts.ci.centos.org/devtools/rhche/devtools-rh-che-pre-release-test/$BUILD_NUMBER/ |"
+            error-comment: "Large test suite failed.\n
+            | Link | URL |\n
+            | ---- | :-: |\n
+            | console | https://ci.centos.org/view/Devtools/job/devtools-rh-che-pre-release-test/$BUILD_NUMBER/console |\n
+            | artifacts | http://artifacts.ci.centos.org/devtools/rhche/devtools-rh-che-pre-release-test/$BUILD_NUMBER/ |"
+            trigger-phrase: '.*\[pre-release-tests\].*'
+            <<: *admin_list_defaults
+            cron: '* * * * *'
+            github-hooks: false
+            permit-all: false
+            allow-whitelist-orgs-as-admins: true
+            status-context: "ci.centos.org pre-release-tests"
+            only-trigger-phrase: true
+    wrappers:
+        - vault-secrets:
+            <<: *vault_defaults
+            secrets:
+                - *rh-che-automation-credentials-pre-release
+    <<: *rh-che-automation-template
+    
 - job-template:
     disabled: '{obj:disabled}'
     name: '{ci_project}-{git_repo}-rh-che-compatibility-test-{test_url}'
@@ -2211,21 +2430,6 @@
             - *rollout-test-creds
             - *qe-osio-che-dev-osd-SA-token
     <<: *job_template_defaults
-
-- rhche-flaky-tests-template: &rhche-flaky-tests-template
-    name: 'rhche-flaky-tests-template'
-    wrappers:
-      - rhche_credentials_wrapper-flaky-{cluster}
-    concurrent: false
-    <<: *job_template_defaults
-
-- wrapper:
-    name: 'rhche_credentials_wrapper-flaky-2'
-    wrappers:
-      - vault-secrets:
-          <<: *vault_defaults
-          secrets:
-            - *rhche-flaky-2-creds
 
 - rhche-functional-tests-template: &rhche-functional-tests-template
     name: 'rhche-functional-tests-template'
@@ -2353,7 +2557,7 @@
 - job-template:
     name: '{ci_project}-{git_repo}-periodic-{env}-{cluster}'
     triggers:
-        - timed: 'H 2,6,10,14,18,22 * * *'
+        - timed: 'H 5,11,17,23 * * *'
     publishers:
         - email:
             recipients: rhopp@redhat.com kkanova@redhat.com tdancs@redhat.com
@@ -2414,6 +2618,55 @@
         <<: *vault_defaults
         secrets:
             - *che-bot-github-credentials
+            - *crw-bots-pull-secret
+    <<: *job_template_defaults
+
+- job-template:
+    name: '{ci_project}-{git_repo}-pr-check-happy-path'
+    defaults: global
+    triggers:
+        - che_githubprb:
+            trigger_phrase: '{trigger_phrase}'
+            job_type: 'e2e - Happy path'
+            che-success-message: 'Happy path tests passed.'
+            che-failure-message: "### $ghprbPullAuthorLoginMention Happy Path PR check [build $BUILD_NUMBER] failed.\n
+            Re-trigger by `[ci-test]` or `[ci-test-happy-path]`.\n
+            | Link | URL |\n
+            | ---- | :-: |\n
+            | console | https://ci.centos.org/job/devtools-che-plugin-registry-pr-check-happy-path/$BUILD_NUMBER/console |\n
+            | artifacts | http://artifacts.ci.centos.org/devtools/che/che-plugin-registry-prcheck/$BUILD_NUMBER/ |\n
+            ### *Depending on failure reason, the artifacts or deployment may not be present.*"
+            che-error-message: "### $ghprbPullAuthorLoginMention Happy Path PR check [build $BUILD_NUMBER] failed.\n
+            Re-trigger by `[ci-test]` or `[ci-test-happy-path]`.\n
+            | Link | URL |\n
+            | ---- | :-: |\n
+            | console | https://ci.centos.org/job/devtools-che-plugin-registry-pr-check-happy-path/$BUILD_NUMBER/console |\n
+            | artifacts | http://artifacts.ci.centos.org/devtools/che/che-plugin-registry-prcheck/$BUILD_NUMBER/ |\n
+            ### *Depending on failure reason, the artifacts or deployment may not be present.*"
+    wrappers:
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+            - *che-bot-github-credentials
+            - *quay-eclipse-che-credentials
+    <<: *job_template_defaults
+
+- job-template:
+    name: '{ci_project}-{git_repo}-pr-check-che-test-devfiles'
+    defaults: global
+    triggers:
+        - che_githubprb:
+            trigger_phrase: '{trigger_phrase}'
+            job_type: 'e2e - devfiles tests'
+            che-success-message: 'Devfiles tests passed.'
+            che-failure-message: 'Devfiles tests failed. Re-trigger by `[ci-test-devfiles]`'
+            che-error-message: 'Devfiles tests failed. Re-trigger by `[ci-test-devfiles]`'
+    wrappers:
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+            - *che-bot-github-credentials
+            - *quay-eclipse-che-credentials
     <<: *job_template_defaults
 
 - job-template:
@@ -2434,7 +2687,66 @@
     <<: *job_template_defaults
 
 - job-template:
-    name: '{ci_project}-{git_repo}-pr-check-chectl'
+    name: '{ci_project}-{git_repo}-minikube-updates'
+    che-success-message: "Latest version of Eclipse Che installed and tested successfully in minikube."
+    che-failure-message: "Latest version of Eclipse Che failed installation in minikube."
+    che-error-message: "Latest version of Eclipse Che failed installation in minikube."
+    triggers:
+        - github-pull-request:
+            status-context: "[MINIKUBE] Tests of latest Eclipse Che version."
+            included-regions:
+              - 'olm/eclipse-che-preview-kubernetes/deploy/olm-catalog/eclipse-che-preview-kubernetes/.*'
+            <<: *che_github_pull_request_defaults
+    <<: *che-pullrequest-template
+
+- job-template:
+    name: '{ci_project}-{git_repo}-minishift-updates'
+    che-success-message: "Latest version of Eclipse Che installed and tested successfully in minishift."
+    che-failure-message: "Latest version of Eclipse Che failed installation in minishift."
+    che-error-message: "Latest version of Eclipse Che failed installation in minishift."
+    triggers:
+        - github-pull-request:
+            status-context: "[MINISHIFT] Tests of latest Eclipse Che version."
+            included-regions:
+              - 'olm/eclipse-che-preview-openshift/deploy/olm-catalog/eclipse-che-preview-openshift/.*'
+            <<: *che_github_pull_request_defaults
+    <<: *che-pullrequest-template
+
+- job-template:
+    name: '{ci_project}-{git_repo}-code-pr-check'
+    defaults: global
+    triggers:
+        - che_githubprb:
+            trigger_phrase: '{trigger_phrase}'
+            job_type: '{job_type}'
+            che-success-message: '{che-success-message}'
+            che-failure-message: '{che-failure-message}'
+            che-error-message: '{che-error-message}'
+    wrappers:
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+            - *che-bot-github-credentials
+    <<: *job_template_defaults
+
+- job-template:
+    name: '{ci_project}-{git_repo}-minikube-check'
+    defaults: global
+    triggers:
+        - che_githubprb:
+            trigger_phrase: '{trigger_phrase}'
+            job_type: '{job_type}'
+            che-success-message: '{che-success-message}'
+            che-failure-message: '{che-failure-message}'
+            che-error-message: '{che-error-message}'
+    wrappers:
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+            - *che-bot-github-credentials
+    <<: *job_template_defaults
+- job-template:
+    name: '{ci_project}-{git_repo}-minishift-check'
     defaults: global
     triggers:
         - che_githubprb:
@@ -2457,9 +2769,11 @@
       - vault-secrets:
           <<: *vault_defaults
           secrets:
+            - *kube-config-dsaas-stg
             - *quay-credentials
             - *quay-eclipse-che-credentials
             - *quay-che-incubator-credentials
+            - *registry-devshift-credentials
     publishers:
         - email:
             recipients: ibuziuk@redhat.com mloriedo@redhat.com amisevsk@redhat.com vparfono@redhat.com
@@ -2498,33 +2812,6 @@
     <<: *job_template_build_defaults
 
 - job-template:
-    name: '{ci_project}-{git_repo}-flaky-{env}-{cluster}'
-    triggers:
-        - timed: 'H 3,9,15,21 * * *'
-    publishers:
-        - email:
-            recipients: rhopp@redhat.com kkanova@redhat.com tdancs@redhat.com
-    scm:
-        - git:
-            url: https://{github_user}@github.com/{git_organization}/{git_repo}.git
-            branches:
-                - origin/master
-    <<: *rhche-flaky-tests-template
-
-- job-template:
-    name: '{ci_project}-{git_repo}-prcheck-build-dep'
-    triggers:
-        - build-result:
-            cron: '* * * * *'
-            groups:
-              - jobs:
-                    - 'devtools-rh-che-build-che-credentials-master'
-                results:
-                    - success
-    <<: *rh-che-automation-depbuild-template
-
-
-- job-template:
     name: '{ci_project}-{git_repo}-build-func-dep'
     triggers:
         - build-result:
@@ -2559,7 +2846,7 @@
       - vault-secrets:
           <<: *vault_defaults
           secrets:
-            - *kube-config-dsaas-stg
+            - *kube-config-dsaas-stg-v4
             - *quay-credentials
             - *registry-devshift-credentials
       - fabric8_launcher_credentials_wrapper
@@ -2632,6 +2919,7 @@
     defaults: global
     node: devtools
     disabled: '{obj:disabled}'
+     
     properties:
         - github:
             url: https://github.com/openshiftio/{git_repo}/
@@ -2763,6 +3051,154 @@
             cico node done $CICO_ssid
 
     <<: *job_template_defaults
+
+- job-template:
+    name: '{ci_project}-{git_repo}-promote-to-prod-test-v4'
+    image_pattern: ''
+    wrappers:
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+          - *kube-config-dsaas-stg-v4
+    builders:
+        - shell: |
+            # testing out the cico client
+            set +e
+
+            export CICO_API_KEY=$(cat ~/duffy.key )
+
+            # get node
+            n=1
+            while true
+            do
+                cico_output=$(cico node get -f value -c ip_address -c comment)
+                if [ $? -eq 0 ]; then
+                    read CICO_hostname CICO_ssid <<< $cico_output
+                    if  [ ! -z "$CICO_hostname" ]; then
+                        # we got hostname from cico
+                        break
+                    fi
+                    echo "'cico node get' succeed, but can't get hostname from output"
+                fi
+                if [ $n -gt 15 ]; then
+                    # give up after 15 tries
+                    echo "giving up on 'cico node get'"
+                    exit 1
+                fi
+                echo "'cico node get' failed, trying again in 60s ($n/15)"
+                n=$[$n+1]
+                sleep 60
+            done
+
+            sshopts="-t -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -l root"
+            ssh_cmd="ssh $sshopts $CICO_hostname"
+
+            set -ex
+
+            $ssh_cmd -t "yum install -y docker && systemctl start docker"
+
+            ENVIRONMENT=production PATH=$PATH:~/.local/bin DRY_RUN=true /bin/bash ~/saasherder/fetch_and_apply.sh
+            CONTEXTS=$(PATH=$PATH:~/.local/bin saasherder config get-contexts)
+            for c in `echo $CONTEXTS`; do
+                DIR=$(readlink -f $c-20* | tail -1)
+                for f in `ls $DIR`; do
+                    python ~/saasherder/check_image.py $DIR/$f '{image_pattern}'
+                    cat $DIR/$f | $ssh_cmd docker run --rm -i quay.io/app-sre/manifest-bouncer:{manifest_bouncer_tag} --warn-only -
+                done
+            done
+
+            cico node done $CICO_ssid
+
+    <<: *job_template_defaults
+
+- job:
+    name: 'ci-conf-generate-v4'
+    defaults: global
+    node: devtools
+    wrappers:
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+          - *kube-config-dsaas-v4
+    builders:
+        - shell: |
+            # this will allow us to rotate production ci keys for osio
+            # you are welcome.
+            # uncomment the cp command(s) to make v4 confs live and manaully
+            # build the job on ci.c.o
+            #NAMESPACE=bayesian-production KUBECONFVER=v4 KUBEHOME=/home/devtools/.kube SA_NAME=app-sre-bot CONTEXT=bay ENVIRONMENT=production PATH=$PATH:~/.local/bin /usr/bin/python ~/saasherder/fmt-kubeconf.py
+            #NAMESPACE=dsaas-production KUBECONFVER=v4 KUBEHOME=/home/devtools/.kube SA_NAME=app-sre-bot CONTEXT=dsaas ENVIRONMENT=production PATH=$PATH:~/.local/bin /usr/bin/python ~/saasherder/fmt-kubeconf.py
+            #NAMESPACE=dsaas-keycloak KUBECONFVER=v4 KUBEHOME=/home/devtools/.kube SA_NAME=app-sre-bot CONTEXT=keycloak ENVIRONMENT=production PATH=$PATH:~/.local/bin /usr/bin/python ~/saasherder/fmt-kubeconf.py
+            #NAMESPACE=launchpad-production KUBECONFVER=v4 KUBEHOME=/home/devtools/.kube SA_NAME=app-sre-bot CONTEXT=launchpad ENVIRONMENT=production PATH=$PATH:~/.local/bin /usr/bin/python ~/saasherder/fmt-kubeconf.py
+            #
+            #cp /home/devtools/.kube/cfg-launchpad-v4 /home/devtools/.kube/cfg-launchpad
+            #cp /home/devtools/.kube/cfg-bay-v4 /home/devtools/.kube/cfg-bay
+            #cp /home/devtools/.kube/cfg-keycloak-v4 /home/devtools/.kube/cfg-keycloak
+            #cp /home/devtools/.kube/cfg-dsaas-v4 /home/devtools/.kube/cfg-dsaas
+            exit 0
+
+- job:
+    name: 'ci-conf-recycler-test-master'
+    defaults: global
+    node: devtools
+    properties:
+        - github:
+            url: https://github.com/app-sre/ci-conf-recycler
+    scm:
+        - git:
+            url: https://github.com/app-sre/ci-conf-recycler.git
+            shallow_clone: true
+            branches:
+                - master
+    triggers:
+        - github
+    builders:
+        - shell: |
+            cp ~/cico-tools/env-toolkit .
+            ./env-toolkit dump -f jenkins-env.json
+            env > jenkins-env
+
+            export CICO_API_KEY=$(cat ~/duffy.key )
+            # get node
+            n=1
+            while true
+            do
+                cico_output=$(cico node get -f value -c ip_address -c comment)
+                if [ $? -eq 0 ]; then
+                    read CICO_hostname CICO_ssid <<< $cico_output
+                    if  [ ! -z "$CICO_hostname" ]; then
+                        # we got hostname from cico
+                        break
+                    fi
+                    echo "'cico node get' succeed, but can't get hostname from output"
+                fi
+                if [ $n -gt 15 ]; then
+                    # give up after 15 tries
+                    echo "giving up on 'cico node get'"
+                    exit 1
+                fi
+                echo "'cico node get' failed, trying again in 60s ($n/15)"
+                n=$[$n+1]
+                sleep 60
+            done
+            echo 'Using Host' $CICO_hostname
+            set -x
+            sshopts="-t -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -l root"
+            ssh_cmd="ssh $sshopts $CICO_hostname"
+            $ssh_cmd yum -y install rsync
+            rsync -e "ssh $sshopts" -Ha $(pwd)/ $CICO_hostname:payload
+            $ssh_cmd -t "cd payload && /bin/bash cico_test.sh"
+            rtn_code=$?
+            if [ $rtn_code -eq 0 ]; then
+              cico node done $CICO_ssid
+              set -ex
+              cp fmt-kubeconf.py ~/saasherder/fmt-kubeconf.py                   
+              chmod 755 ~/saasherder/fmt-kubeconf.py     
+            else
+              # fail mode gives us 12 hrs to debug the machine
+              curl "http://admin.ci.centos.org:8080/Node/fail?key=$CICO_API_KEY&ssid=$CICO_ssid"
+            fi
+            exit $rtn_code
 
 - job:
     name: 'devtools-saasherder-test-master'
@@ -3148,13 +3584,13 @@
             | Link | URL |\n
             | ---- | :-: |\n
             | job log | https://ci.centos.org/job/$JOB_NAME/$BUILD_NUMBER/console |\n
-            | artifacts | http://artifacts.ci.centos.org/devtools/saas-openshiftio/$JOB_NAME/$BUILD_NUMBER |\n\n
+            | artifacts | http://artifacts.ci.centos.org/devtools/rhche/$JOB_NAME/$BUILD_NUMBER |\n\n
             **Please review the job results and re-run the job by commenting [test] if necessary.**"
             error-comment: "**The rh-che test against prod-preview failed.**\n\n
             | Link | URL |\n
             | ---- | :-: |\n
             | job log | https://ci.centos.org/job/$JOB_NAME/$BUILD_NUMBER/console |\n
-            | artifacts | http://artifacts.ci.centos.org/devtools/saas-openshiftio/$JOB_NAME/$BUILD_NUMBER |\n\n
+            | artifacts | http://artifacts.ci.centos.org/devtools/rhche/$JOB_NAME/$BUILD_NUMBER |\n\n
             **Please review the job results and re-run the job by commenting [test] if necessary.**"
             <<: *github_pull_request_defaults
     wrappers:
@@ -3162,6 +3598,55 @@
             <<: *vault_defaults
             secrets:
                 - secret-path: 'devtools-osio-ci/rhche-saas-prcheck'
+                  secret-values:
+                    - env-var: 'PASSWORD'
+                      vault-key: 'password'
+                    - env-var: 'USERNAME'
+                      vault-key: 'username'
+                    - env-var: 'EMAIL'
+                      vault-key: 'email'
+    <<: *saas_prcheck_rhche_template
+
+- job-template:
+    name: '{ci_project}-saas-openshiftio-pre-release-test'
+    scm:
+        - git-scm:
+            git_url: https://{github_user}@github.com/{git_organization}/{git_repo}.git
+            git_basedir: '{git_repo}'
+        - git:
+            url: https://github.com/redhat-developer/rh-che/
+            shallow_clone: true
+            branches:
+                - master
+            basedir: rhche
+    triggers:
+        - github-pull-request:
+            github_hooks: '{github_hooks}'
+            failure-comment: "**The pre-release rh-che test against prod-preview failed.**\n\n
+            | Link | URL |\n
+            | ---- | :-: |\n
+            | job log | https://ci.centos.org/job/$JOB_NAME/$BUILD_NUMBER/console |\n
+            | artifacts | http://artifacts.ci.centos.org/devtools/rhche/$JOB_NAME/$BUILD_NUMBER |\n\n
+            **Please review the job results and re-run the job by commenting [pre-release-tests] if necessary.**"
+            error-comment: "**The pre-release rh-che test against prod-preview failed.**\n\n
+            | Link | URL |\n
+            | ---- | :-: |\n
+            | job log | https://ci.centos.org/job/$JOB_NAME/$BUILD_NUMBER/console |\n
+            | artifacts | http://artifacts.ci.centos.org/devtools/rhche/$JOB_NAME/$BUILD_NUMBER |\n\n
+            **Please review the job results and re-run the job by commenting [pre-release-tests] if necessary.**"
+            trigger-phrase: '.*\[pre-release-tests\].*'
+            <<: *admin_list_defaults
+            cron: '* * * * *'
+            github-hooks: false
+            permit-all: false
+            allow-whitelist-orgs-as-admins: true
+            status-context: "ci.centos.org rh-che pre-release-tests"
+            only-trigger-phrase: true
+    wrappers:
+        - vault-secrets:
+            <<: *vault_defaults
+            secrets:
+                - secret-path: 'devtools-osio-ci/rh-che-automation-credentials-pre-release-saas'
                   secret-values:
                     - env-var: 'PASSWORD'
                       vault-key: 'password'
@@ -3379,6 +3864,18 @@
             ci_project: 'devtools'
             ci_cmd: '/bin/bash ./.ci/cico_cleanup_dev_cluster.sh'
             timeout: '15m'
+        - '{ci_project}-rh-che-pre-release-test':
+            git_organization: redhat-developer
+            git_repo: rh-che
+            ci_project: 'devtools'
+            ci_cmd: 'TARGET="rhel" /bin/bash ./.ci/cico_pre_release_tests.sh'
+            timeout: '75m'
+        - '{ci_project}-saas-openshiftio-pre-release-test':
+            git_organization: openshiftio
+            git_repo: saas-openshiftio
+            ci_project: 'devtools'
+            ci_cmd: 'TARGET="rhel" /bin/bash ./.ci/cico_pre_release_tests.sh'
+            timeout: '75m'
         - '{ci_project}-{git_repo}-rollout-test-{test_url}':
             git_organization: redhat-developer
             git_repo: rh-che
@@ -3386,12 +3883,6 @@
             ci_cmd: '/bin/bash ./.ci/cico_rollout_test.sh'
             test_url: 'apps.che-dev.x6e0.p1.openshiftapps.com'
             timeout: '60m'
-        - '{ci_project}-{git_repo}-prcheck-build-dep':
-            git_organization: redhat-developer
-            git_repo: rh-che
-            ci_project: 'devtools'
-            ci_cmd: '/bin/bash ./.ci/cico_build_prcheck_dep.sh'
-            timeout: '120m'
         - '{ci_project}-{git_repo}-periodic-route-{cluster}':
             git_organization: redhat-developer
             git_repo: rh-che
@@ -3426,14 +3917,6 @@
             ci_project: 'devtools'
             ci_cmd: '/bin/bash ./.ci/cico_build_func_dep.sh'
             timeout: '120m'
-        - '{ci_project}-{git_repo}-flaky-{env}-{cluster}':
-            git_organization: redhat-developer
-            git_repo: rh-che
-            ci_project: 'devtools'
-            ci_cmd: 'export HOST_URL="che.openshift.io" && source ./functional-tests/devscripts/prepare_env.sh && ./functional-tests/devscripts/run_tests.sh'
-            env: 'prod'
-            timeout: '50m'
-            cluster: '2'
         - '{ci_project}-{git_repo}-periodic-{env}-{cluster}':
             git_organization: redhat-developer
             git_repo: rh-che
@@ -3497,6 +3980,18 @@
             git_repo: kubernetes-image-puller
             ci_project: 'devtools'
             ci_cmd: '/bin/bash cico_build_ci.sh'
+            timeout: 15m
+        - '{ci_project}-{git_organization}-{git_repo}-build-master':
+            git_organization: che-incubator
+            git_repo: kubernetes-image-puller-operator
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash cico_build_ci.sh'
+            timeout: 15m
+        - '{ci_project}-{git_repo}-nightly':
+            git_organization: che-incubator
+            git_repo: kubernetes-image-puller-operator
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash cico_build_nightly.sh'
             timeout: 15m
         - '{ci_project}-{git_repo}-nightly':
             git_organization: che-incubator
@@ -3617,6 +4112,8 @@
             git_repo: launcher-documentation
             ci_project: 'devtools'
             ci_cmd: '/bin/bash cico_build_test.sh'
+            saas_git: saas-launchpad
+            prj_name: launchpad-preview
             timeout: '20m'
         - '{ci_project}-{git_repo}':
             git_organization: fabric8-ui
@@ -3628,11 +4125,15 @@
             git_repo: saas-openshiftio
             ci_project: 'devtools'
         - '{ci_project}-{git_repo}-promote-to-prod':
+            disabled: false
             git_repo: saas-analytics
             ci_project: 'devtools'
         - '{ci_project}-{git_repo}-promote-to-prod':
+            disabled: false
             git_repo: saas-launchpad
             ci_project: 'devtools'
+            saas_git: saas-launchpad
+            prj_name: launchpad-production
         - '{ci_project}-{git_repo}-promote-to-prod':
             git_repo: saas-hdd
             ci_project: 'devtools'
@@ -3650,14 +4151,18 @@
             timeout: '40m'
             cluster: '2a'
         - '{ci_project}-{git_repo}-promote-to-prod-test':
+            disabled: false
             git_repo: saas-analytics
             git_organization: openshiftio
             ci_project: 'devtools'
             image_pattern: '^quay\.io/openshiftio/(rhel-|osa-)'
-        - '{ci_project}-{git_repo}-promote-to-prod-test':
+        - '{ci_project}-{git_repo}-promote-to-prod-test-v4':
+            disabled: false
             git_repo: saas-launchpad
             git_organization: openshiftio
             ci_project: 'devtools'
+            saas_git: saas-launchpad
+            prj_name: launchpad-production
         - '{ci_project}-{git_repo}-promote-to-prod-test':
             git_repo: saas-hdd
             git_organization: openshiftio
@@ -3839,6 +4344,7 @@
             registry: 'quay.io'
             image_name: 'openshiftio/rhel-bayesian-coreapi-pgbouncer'
         - '{ci_project}-f8a-master-deploy-e2e-test':
+            disabled: false
             git_organization: fabric8-analytics
             git_repo: fabric8-analytics-common
             ci_project: 'devtools'
@@ -4290,20 +4796,6 @@
             timeout: '20m'
         - '{ci_project}-{git_repo}-fabric8-analytics-pylint':
             git_repo: fabric8-analytics-tagger
-        - '{ci_project}-{git_repo}-fabric8-analytics-pydoc':
-            git_repo: fabric8-analytics-tagger
-        - '{ci_project}-{git_repo}-fabric8-analytics':
-            git_organization: fabric8-analytics
-            git_repo: fabric8-analytics-ingestion
-            ci_project: 'devtools'
-            ci_cmd: '/bin/bash cico_run_tests.sh'
-            timeout: '20m'
-            registry: 'quay.io'
-            image_name: 'openshiftio/rhel-fabric8-analytics-f8a-analytics-ingestion'
-        - '{ci_project}-{git_repo}-fabric8-analytics-pylint':
-            git_repo: fabric8-analytics-ingestion
-        - '{ci_project}-{git_repo}-fabric8-analytics-pydoc':
-            git_repo: fabric8-analytics-ingestion
         - '{ci_project}-{git_repo}-fabric8-analytics':
             git_organization: fabric8-analytics
             git_repo: fabric8-analytics-nvd-toolkit
@@ -4346,23 +4838,6 @@
             deployment_configs: 'f8a-3scale-connect-api'
             timeout: '20m'
             extra_target: rhel
-        - '{ci_project}-{git_repo}-fabric8-analytics':
-            git_organization: fabric8-analytics
-            git_repo: api-machine-stacks
-            ci_project: 'devtools'
-            ci_cmd: '/bin/bash cico_run_tests.sh'
-            timeout: '20m'
-            registry: 'quay.io'
-            image_name: 'openshiftio/rhel-fabric8-analytics-api-machine-stacks'
-        - '{ci_project}-{git_repo}-f8a-build-master':
-            git_organization: fabric8-analytics
-            git_repo: api-machine-stacks
-            ci_project: 'devtools'
-            ci_cmd: '/bin/bash cico_build_deploy.sh'
-            saas_git: saas-analytics
-            deployment_units: 'api-machine-stacks'
-            deployment_configs: 'f8a-api-machine-stacks'
-            timeout: '20m'
         - '{ci_project}-e2e-fabric8-analytics':
             git_organization: fabric8-analytics
             git_repo: fabric8-analytics-common
@@ -4384,35 +4859,9 @@
             git_organization: fabric8-analytics
             git_repo: fabric8-analytics-common
             f8a_api_url: "https://recommender.api.openshift.io"
+            f8a_api_v2_url: "https://f8a-analytics-2445582058137.production.gw.apicast.io"
             ci_project: 'devtools'
             timeout: '30m'
-        - '{ci_project}-{git_repo}':
-            git_organization: rhdt
-            git_repo: error-tracking
-            ci_project: 'devtools'
-            ci_cmd: '/bin/bash cico_build_test.sh'
-            timeout: '10m'
-        - '{ci_project}-{git_repo}-fabric8-analytics':
-            git_organization: fabric8-analytics
-            git_repo: fabric8-analytics-api-gateway
-            ci_project: 'devtools'
-            ci_cmd: '/bin/bash cico_run_tests.sh'
-            timeout: '20m'
-            registry: 'quay.io'
-            image_name: 'openshiftio/rhel-fabric8-analytics-f8a-api-gateway'
-        - '{ci_project}-{git_repo}-f8a-build-master':
-            git_organization: fabric8-analytics
-            git_repo: fabric8-analytics-api-gateway
-            ci_project: 'devtools'
-            ci_cmd: '/bin/bash cico_build_deploy.sh'
-            saas_git: saas-analytics
-            deployment_units: 'api-gateway'
-            deployment_configs: 'f8a-api-gateway'
-            timeout: '20m'
-        - '{ci_project}-{git_repo}-fabric8-analytics-pylint':
-            git_repo: fabric8-analytics-api-gateway
-        - '{ci_project}-{git_repo}-fabric8-analytics-pydoc':
-            git_repo: fabric8-analytics-api-gateway
         - '{ci_project}-{git_repo}-fabric8-analytics':
             git_organization: fabric8-analytics
             git_repo: fabric8-analytics-version-comparator
@@ -4506,6 +4955,7 @@
             ci_cmd: '/bin/bash cico_run_tests.sh'
             timeout: '60m'
         - '{ci_project}-{git_repo}-fabric8-analytics-build-master':
+            disabled: false
             git_organization: fabric8-analytics
             git_repo: cvejob
             saas_git: saas-analytics
@@ -4588,6 +5038,12 @@
             git_repo: che
             ci_project: 'devtools'
             ci_cmd: '/bin/bash .ci/cico_build_nightly.sh'
+            timeout: '2h'
+        - '{ci_project}-{git_repo}-che-release':
+            git_organization: eclipse
+            git_repo: che-release
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash cico_release.sh'
             timeout: '2h'
         - '{ci_project}-{git_repo}-che-release-candidate':
             git_organization: eclipse
@@ -4726,12 +5182,6 @@
             ci_project: 'devtools'
             ci_cmd: '/bin/bash .cico/cico_build_master.sh'
             timeout: '10m'
-        - '{ci_project}-{git_repo}-nightly':
-            git_organization: che-incubator
-            git_repo: che-workspace-operator
-            ci_project: 'devtools'
-            ci_cmd: '/bin/bash .cico/cico_build_nightly.sh'
-            timeout: '10m'
         - '{ci_project}-{git_repo}-build-master':
             git_organization: eclipse
             git_repo: che-devfile-registry
@@ -4749,8 +5199,18 @@
             git_repo: che-devfile-registry
             ci_project: 'devtools'
             ci_cmd: '/bin/bash cico_build_release.sh'
-            timeout: '30m'
+            saas_git: saas-openshiftio
+            branch: release
+            build_branch: release
             extra_target: rhel
+            timeout: '30m'
+        - '{ci_project}-{git_repo}-pr-check-che-test-devfiles':
+            git_organization: eclipse
+            git_repo: che-devfile-registry
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash .ci/cico-devfile-pr-test.sh'
+            timeout: '2h'
+            trigger_phrase: '.*\[ci-test-devfiles\].*'
         - '{ci_project}-{git_repo}-release-preview':
             git_organization: eclipse
             git_repo: che-devfile-registry
@@ -4792,21 +5252,47 @@
             ci_project: 'devtools'
             ci_cmd: '/bin/bash .ci/cico_operator_prcheck.sh'
             timeout: '1h'
-            job_type: "e2e tests"
+            job_type: "E2E tests using minishift platform"
         - '{ci_project}-{git_repo}-olm-pr-check':
             git_organization: eclipse
             git_repo: che-operator
             ci_project: 'devtools'
             ci_cmd: '/bin/bash .ci/cico_olm_prcheck.sh'
             timeout: '2h'
-            job_type: "olm tests"
-        - '{ci_project}-{git_repo}-pr-check-chectl':
+            job_type: "Testing nightly olm files using kubernetes platform(minikube) and minishift"
+        - '{ci_project}-{git_repo}-code-pr-check':
+            git_organization: eclipse
+            git_repo: che-operator
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash .ci/operator_code_check.sh'
+            timeout: '1h'
+            job_type: "Check che-operator generated code and nightly files"
+        - '{ci_project}-{git_repo}-minikube-check':
             git_organization: che-incubator
             git_repo: chectl
             ci_project: 'devtools'
-            ci_cmd: '/bin/bash .ci/cico_chectl_prcheck.sh'
+            ci_cmd: '/bin/bash .ci/cico_chectl_minikube.sh'
             timeout: '2h'
-            job_type: "e2e_tests"
+            job_type: "E2E tests on minikube platform"
+        - '{ci_project}-{git_repo}-minishift-check':
+            git_organization: che-incubator
+            git_repo: chectl
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash .ci/cico_chectl_minishift.sh'
+            timeout: '2h'
+            job_type: "E2E tests on minishift platform"
+        - '{ci_project}-{git_repo}-minikube-updates':
+            git_organization: eclipse
+            git_repo: che-operator
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash .ci/cico_updates_minikube.sh'
+            timeout: '2h'
+        - '{ci_project}-{git_repo}-minishift-updates':
+            git_organization: eclipse
+            git_repo: che-operator
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash .ci/cico_updates_minishift.sh'
+            timeout: '2h'
         - '{ci_project}-{git_repo}-pr-check':
             git_organization: eclipse
             git_repo: che-plugin-registry
@@ -4815,6 +5301,13 @@
             timeout: '1h'
             trigger_phrase: '.*\[ci-test\].*'
             job_type: "language plugin tests"
+        - '{ci_project}-{git_repo}-pr-check-happy-path':
+            git_organization: eclipse
+            git_repo: che-plugin-registry
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash .ci/cico-happy-path-pr-test.sh'
+            timeout: '2h'
+            trigger_phrase: '.*\[ci-test\].*|.*\[ci-test-happy-path\].*'
         - '{ci_project}-{git_repo}-che-nightly':
             git_organization: eclipse
             git_repo: che-theia
@@ -4876,6 +5369,13 @@
             test_type: "oauth-test"
             ci_cmd: '/bin/bash tests/.infra/centos-ci/nightly/ocp-oauth-test.sh'
             timeout: '3h'
+        - '{ci_project}-{git_repo}-nightly-{test_type}':
+            git_organization: eclipse
+            git_repo: che
+            ci_project: 'devtools'
+            test_type: "openshif-plugin-test"
+            ci_cmd: '/bin/bash tests/.infra/centos-ci/nightly/cico-openshift-connector-test.sh'
+            timeout: '3h'
         # End of Eclipse Che nightly tests
         - '{ci_project}-{git_repo}-pullrequests-{job_type}':
             git_organization: eclipse
@@ -4902,40 +5402,40 @@
             timeout: '3h'
             trigger_phrase: '.*\[ci-build\].*'
         # Eclipse Che RC jobs
-        - '{ci_project}-{git_repo}-rc-{test_type}':
+        - '{ci_project}-{git_repo}-release-{test_type}':
             git_organization: eclipse
             git_repo: che
             ci_project: 'devtools'
             test_type: "multiuser-integration-tests"
-            ci_cmd: '/bin/bash tests/.infra/centos-ci/rc/cico-rc-multiuser-integration-tests.sh'
+            ci_cmd: '/bin/bash tests/.infra/centos-ci/release/cico-release-multiuser-integration-tests.sh'
             timeout: '3h'
-        - '{ci_project}-{git_repo}-rc-{test_type}':
+        - '{ci_project}-{git_repo}-release-{test_type}':
             git_organization: eclipse
             git_repo: che
             ci_project: 'devtools'
             test_type: "ocp-oauth-test"
-            ci_cmd: '/bin/bash tests/.infra/centos-ci/rc/cico-rc-ocp-oauth-test.sh'
+            ci_cmd: '/bin/bash tests/.infra/centos-ci/release/cico-release-ocp-oauth-test.sh'
             timeout: '1h'
-        - '{ci_project}-{git_repo}-rc-{test_type}':
+        - '{ci_project}-{git_repo}-release-{test_type}':
             git_organization: eclipse
             git_repo: che
             ci_project: 'devtools'
-            test_type: "recreate-strategy-test"
-            ci_cmd: '/bin/bash tests/.infra/centos-ci/rc/cico-rc-recreate-strategy-test.sh'
+            test_type: "devfiles-test"
+            ci_cmd: '/bin/bash tests/.infra/centos-ci/release/cico-release-devfiles-test.sh'
             timeout: '1h'
-        - '{ci_project}-{git_repo}-rc-{test_type}':
+        - '{ci_project}-{git_repo}-release-{test_type}':
             git_organization: eclipse
             git_repo: che
             ci_project: 'devtools'
             test_type: "rolling-strategy-test"
-            ci_cmd: '/bin/bash tests/.infra/centos-ci/rc/cico-rc-rolling-strategy-test.sh'
+            ci_cmd: '/bin/bash tests/.infra/centos-ci/release/cico-release-rolling-strategy-test.sh'
             timeout: '1h'
-        - '{ci_project}-{git_repo}-rc-{test_type}':
+        - '{ci_project}-{git_repo}-release-{test_type}':
             git_organization: eclipse
             git_repo: che
             ci_project: 'devtools'
             test_type: "multiuser-happy-path-test"
-            ci_cmd: '/bin/bash tests/.infra/centos-ci/rc/cico-rc-multiuser-happy-path-test.sh'
+            ci_cmd: '/bin/bash tests/.infra/centos-ci/release/cico-release-multiuser-happy-path-test.sh'
             timeout: '3h'
         # End of Eclipse Che RC jobs
         - '{ci_project}-{git_repo}':
@@ -5054,7 +5554,8 @@
             git_repo: fabric8-analytics-utils
         - '{ci_project}-{git_repo}-fabric8-analytics-pydoc':
             git_repo: fabric8-analytics-utils
-        - '{ci_project}-{git_repo}-build-master':
+        - '{ci_project}-{git_repo}-build-master-v4':
+            disabled: false
             git_organization: fabric8-analytics
             git_repo: f8a-stacks-report
             saas_git: saas-analytics
@@ -5076,7 +5577,8 @@
             git_repo: f8a-stacks-report
         - '{ci_project}-{git_repo}-fabric8-analytics-pydoc':
             git_repo: f8a-stacks-report
-        - '{ci_project}-{git_repo}-build-master':
+        - '{ci_project}-{git_repo}-build-master-v4':
+            disabled: false
             git_organization: fabric8-analytics
             git_repo: fabric8-analytics-bigquery-manifests-job
             saas_git: saas-analytics
@@ -5098,29 +5600,8 @@
             git_repo: fabric8-analytics-bigquery-manifests-job
         - '{ci_project}-{git_repo}-fabric8-analytics-pydoc':
             git_repo: fabric8-analytics-bigquery-manifests-job
-        - '{ci_project}-{git_repo}-build-master':
-            git_organization: fabric8-analytics
-            git_repo: f8a-data-ingestion-service
-            saas_git: saas-analytics
-            prj_name: bayesian-preview
-            saas_service_name: f8a-data-ingestion-service
-            ci_project: 'devtools'
-            ci_cmd: '/bin/bash cico_build_deploy.sh'
-            timeout: '20m'
-            extra_target: rhel
-        - '{ci_project}-{git_repo}-fabric8-analytics':
-            git_organization: fabric8-analytics
-            git_repo: f8a-data-ingestion-service
-            ci_project: 'devtools'
-            ci_cmd: '/bin/bash cico_run_tests.sh'
-            timeout: '20m'
-            registry: 'quay.io'
-            image_name: 'openshiftio/rhel-fabric8-analytics-f8a-data-ingestion-service'
-        - '{ci_project}-{git_repo}-fabric8-analytics-pylint':
-            git_repo: f8a-data-ingestion-service
-        - '{ci_project}-{git_repo}-fabric8-analytics-pydoc':
-            git_repo: f8a-data-ingestion-service
-        - '{ci_project}-{git_repo}-build-master':
+        - '{ci_project}-{git_repo}-build-master-v4':
+            disabled: false
             git_organization: fabric8-analytics
             git_repo: f8a-emr-deployment
             saas_git: saas-analytics
@@ -5144,7 +5625,8 @@
             git_repo: f8a-emr-deployment
         - '{ci_project}-{git_repo}-fabric8-analytics-pydoc':
             git_repo: f8a-emr-deployment
-        - '{ci_project}-{git_repo}-build-master':
+        - '{ci_project}-{git_repo}-build-master-v4':
+            disabled: false
             git_organization: fabric8-analytics
             git_repo: graph-cve-sync
             saas_git: saas-analytics
@@ -5164,7 +5646,8 @@
             git_repo: graph-cve-sync
         - '{ci_project}-{git_repo}-fabric8-analytics-pydoc':
             git_repo: graph-cve-sync
-        - '{ci_project}-{git_repo}-build-master':
+        - '{ci_project}-{git_repo}-build-master-v4':
+            disabled: false
             git_organization: fabric8-analytics
             git_repo: fabric8-analytics-github-refresh-cronjob
             saas_git: saas-analytics
@@ -5205,7 +5688,8 @@
             git_repo: fabric8-analytics-release-monitor
         - '{ci_project}-{git_repo}-fabric8-analytics-pydoc':
             git_repo: fabric8-analytics-release-monitor
-        - '{ci_project}-{git_repo}-build-master':
+        - '{ci_project}-{git_repo}-build-master-v4':
+            disabled: false
             git_organization: fabric8-analytics
             git_repo: fabric8-analytics-github-events-monitor
             saas_git: saas-analytics
@@ -5259,7 +5743,8 @@
             ci_project: 'devtools'
             ci_cmd: '/bin/bash .ci/cico_compatibility_build_check.sh'
             timeout: '1h'
-        - '{ci_project}-{git_repo}-build-master':
+        - '{ci_project}-{git_repo}-build-master-v4':
+            disabled: false
             git_organization: kubesecurity
             git_repo: osa-api-server
             saas_git: saas-analytics
@@ -5273,12 +5758,36 @@
             git_repo: osa-api-server
             ci_project: 'devtools'
             ci_cmd: '/bin/bash cico_run_tests.sh'
-            timeout: '30m'                
-            registry: 'quay.io'                          
-            image_name: 'openshiftio/osa-api-server' 
+            timeout: '30m'
+            registry: 'quay.io'
+            image_name: 'openshiftio/osa-api-server'
         - '{ci_project}-{git_repo}-fabric8-analytics-pylint':
             git_organization: kubesecurity
             git_repo: osa-api-server
         - '{ci_project}-{git_repo}-fabric8-analytics-pydoc':
             git_organization: kubesecurity
             git_repo: osa-api-server
+        - '{ci_project}-{git_repo}-build-master-v4':
+            disabled: false
+            git_organization: kubesecurity
+            git_repo: openshift-probable-vulnerabilities
+            saas_git: saas-analytics
+            prj_name: bayesian-preview
+            saas_service_name: openshift-probable-vulnerabilities
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash cico_build_deploy.sh'
+            timeout: '30m'
+        - '{ci_project}-{git_repo}-fabric8-analytics':
+            git_organization: kubesecurity
+            git_repo: openshift-probable-vulnerabilities
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash cico_run_tests.sh'
+            timeout: '30m'
+            registry: 'quay.io'
+            image_name: 'openshiftio/openshift-probable-vulnerabilities'
+        - '{ci_project}-{git_repo}-fabric8-analytics-pylint':
+            git_organization: kubesecurity
+            git_repo: openshift-probable-vulnerabilities
+        - '{ci_project}-{git_repo}-fabric8-analytics-pydoc':
+            git_organization: kubesecurity
+            git_repo: openshift-probable-vulnerabilities

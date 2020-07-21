@@ -1,7 +1,4 @@
-kind: ConfigMap
 apiVersion: v1
-metadata:
-  name: grafana-dashboard-quay
 data:
   quay.json: |-
     {
@@ -21,7 +18,8 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 0,
-      "iteration": 1579632291869,
+      "id": 65,
+      "iteration": 1592923583369,
       "links": [],
       "panels": [
         {
@@ -68,7 +66,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(process_cpu_seconds_total[$rate])) by (pod) * 100",
+              "expr": "sum(rate(process_cpu_seconds_total{namespace=\"$namespace\"}[$rate])) by (pod) * 100",
               "format": "time_series",
               "instant": false,
               "legendFormat": "{{pod}}",
@@ -213,7 +211,7 @@ data:
           "fillGradient": 0,
           "gridPos": {
             "h": 6,
-            "w": 12,
+            "w": 8,
             "x": 0,
             "y": 6
           },
@@ -244,7 +242,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, aggregation:quay_request_duration_seconds_bucket:rate5m:sum)",
+              "expr": "sum(rate(quay_registry_image_pulls_total{namespace=\"$namespace\"}[$rate]))",
               "legendFormat": "{{method}} {{route}} {{status}}",
               "refId": "A"
             }
@@ -253,7 +251,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "HTTP Response Duration (P95)",
+          "title": "Image pulls",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -269,7 +267,7 @@ data:
           },
           "yaxes": [
             {
-              "format": "s",
+              "format": "none",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -291,98 +289,6 @@ data:
           }
         },
         {
-          "aliasColors": {
-            "greenlet switches": "orange",
-            "greenlet throws": "red"
-          },
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "$datasource",
-          "fill": 1,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 6,
-            "w": 12,
-            "x": 12,
-            "y": 6
-          },
-          "hiddenSeries": false,
-          "id": 2,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": false,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "connected",
-          "options": {
-            "dataLinks": []
-          },
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "histogram_quantile(0.95, max(rate(greenlet_duration_seconds_bucket[$rate])) by (le, process_name))",
-              "hide": false,
-              "instant": false,
-              "legendFormat": "{{process_name}}",
-              "refId": "A"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Gevent Duration (P95)",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "s",
-              "label": "",
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "none",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": "0",
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
           "aliasColors": {},
           "bars": false,
           "dashLength": 10,
@@ -392,9 +298,9 @@ data:
           "fillGradient": 0,
           "gridPos": {
             "h": 6,
-            "w": 12,
-            "x": 0,
-            "y": 12
+            "w": 8,
+            "x": 8,
+            "y": 6
           },
           "hiddenSeries": false,
           "id": 22,
@@ -423,7 +329,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(quay_authentication_attempts_total[$rate]))",
+              "expr": "sum(rate(quay_authentication_attempts_total{namespace=\"$namespace\"}[$rate]))",
               "legendFormat": "auth attempts",
               "refId": "A"
             },
@@ -482,12 +388,12 @@ data:
           "fillGradient": 0,
           "gridPos": {
             "h": 6,
-            "w": 12,
-            "x": 12,
-            "y": 12
+            "w": 8,
+            "x": 16,
+            "y": 6
           },
           "hiddenSeries": false,
-          "id": 16,
+          "id": 23,
           "legend": {
             "avg": false,
             "current": false,
@@ -513,8 +419,8 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(pushgateway_http_push_duration_seconds_sum[$rate]) / rate(pushgateway_http_push_duration_seconds_count[5m])",
-              "legendFormat": "{{instance}}",
+              "expr": "sum(rate(quay_registry_image_pushes_total{namespace=\"$namespace\"}[$rate]))",
+              "legendFormat": "{{method}} {{route}} {{status}}",
               "refId": "A"
             }
           ],
@@ -522,7 +428,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "PushGateway Push Duration",
+          "title": "Image pushes",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -538,11 +444,11 @@ data:
           },
           "yaxes": [
             {
-              "format": "s",
+              "format": "none",
               "label": null,
               "logBase": 1,
               "max": null,
-              "min": null,
+              "min": "0",
               "show": true
             },
             {
@@ -571,7 +477,7 @@ data:
             "h": 6,
             "w": 12,
             "x": 0,
-            "y": 18
+            "y": 12
           },
           "hiddenSeries": false,
           "id": 20,
@@ -669,7 +575,7 @@ data:
             "h": 6,
             "w": 12,
             "x": 12,
-            "y": 18
+            "y": 12
           },
           "hiddenSeries": false,
           "id": 12,
@@ -762,6 +668,185 @@ data:
           }
         },
         {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 18
+          },
+          "hiddenSeries": false,
+          "id": 16,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": false,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "rate(pushgateway_http_push_duration_seconds_sum[$rate]) / rate(pushgateway_http_push_duration_seconds_count[5m])",
+              "legendFormat": "{{instance}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "PushGateway Push Duration",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "s",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {
+            "greenlet switches": "orange",
+            "greenlet throws": "red"
+          },
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 18
+          },
+          "hiddenSeries": false,
+          "id": 2,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": false,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "connected",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.95, max(rate(greenlet_duration_seconds_bucket[$rate])) by (le, process_name))",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "{{process_name}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Gevent Duration (P95)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "s",
+              "label": "",
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "none",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
           "cacheTimeout": null,
           "datasource": "$datasource",
           "gridPos": {
@@ -778,6 +863,9 @@ data:
                 "max"
               ],
               "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
                 "mappings": [
                   {
                     "id": 0,
@@ -790,26 +878,29 @@ data:
                 "max": 100,
                 "min": 0,
                 "nullValueMode": "connected",
-                "thresholds": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ],
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 80
+                    }
+                  ]
+                },
                 "unit": "none"
               },
-              "override": {},
+              "overrides": [],
               "values": false
             },
             "orientation": "horizontal",
             "showThresholdLabels": false,
             "showThresholdMarkers": false
           },
-          "pluginVersion": "6.4.3",
+          "pluginVersion": "6.6.2",
           "targets": [
             {
               "expr": "max(quay_repository_rows > 0)",
@@ -949,7 +1040,8 @@ data:
           }
         }
       ],
-      "schemaVersion": 20,
+      "refresh": "1m",
+      "schemaVersion": 22,
       "style": "dark",
       "tags": [],
       "templating": {
@@ -959,17 +1051,23 @@ data:
             "auto_count": 30,
             "auto_min": "10s",
             "current": {
-              "text": "1m",
-              "value": "1m"
+              "selected": false,
+              "text": "5m",
+              "value": "5m"
             },
             "hide": 0,
             "label": "",
             "name": "rate",
             "options": [
               {
-                "selected": true,
+                "selected": false,
                 "text": "1m",
                 "value": "1m"
+              },
+              {
+                "selected": true,
+                "text": "5m",
+                "value": "5m"
               },
               {
                 "selected": false,
@@ -1017,16 +1115,16 @@ data:
                 "value": "30d"
               }
             ],
-            "query": "1m,10m,30m,1h,6h,12h,1d,7d,14d,30d",
+            "query": "1m,5m,10m,30m,1h,6h,12h,1d,7d,14d,30d",
             "refresh": 2,
             "skipUrlSync": false,
             "type": "interval"
           },
           {
             "current": {
-              "tags": [],
-              "text": "quayio-prod-us-east-1-prometheus",
-              "value": "quayio-prod-us-east-1-prometheus"
+              "selected": true,
+              "text": "quay-p-ue1-prometheus",
+              "value": "quay-p-ue1-prometheus"
             },
             "hide": 0,
             "includeAll": false,
@@ -1036,14 +1134,45 @@ data:
             "options": [],
             "query": "prometheus",
             "refresh": 1,
-            "regex": "",
+            "regex": ".*quay.*",
             "skipUrlSync": false,
             "type": "datasource"
+          },
+          {
+            "allValue": null,
+            "current": {
+              "text": "quay",
+              "value": "quay"
+            },
+            "datasource": "$datasource",
+            "definition": "label_values(process_cpu_seconds_total, namespace)",
+            "hide": 0,
+            "includeAll": false,
+            "label": null,
+            "multi": false,
+            "name": "namespace",
+            "options": [
+              {
+                "selected": true,
+                "text": "quay",
+                "value": "quay"
+              }
+            ],
+            "query": "label_values(process_cpu_seconds_total, namespace)",
+            "refresh": 0,
+            "regex": "/quay.*/",
+            "skipUrlSync": false,
+            "sort": 0,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
           }
         ]
       },
       "time": {
-        "from": "now-15m",
+        "from": "now-1h",
         "to": "now"
       },
       "timepicker": {
@@ -1065,3 +1194,7 @@ data:
       "uid": "_BkydJaWz",
       "version": 1
     }
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: grafana-dashboard-quay

@@ -13,6 +13,13 @@ cluster:
 app:
   $ref: /services/insights/cloudigrade/app.yml
 
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+# stage env is in prod cluster.
+# networkPoliciesAllow:
+# - $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stg-01.yml
+
 managedRoles: true
 
 managedTerraformResources: true
@@ -21,5 +28,22 @@ terraformResources:
 - provider: rds
   account: insights-prod
   identifier: cloudigrade-stage
-  defaults: /terraform/resources/insights/stage/rds-1.yml
+  defaults: /terraform/resources/insights/stage/rds/postgres11-rds-1.yml
   output_resource_name: cloudigrade-db
+  enhanced_monitoring: true
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: resource
+  path: /insights-prod/shared/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull

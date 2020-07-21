@@ -1,0 +1,51 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: sendgrid-stage
+description: staging namespace for sendgrid
+
+cluster:
+  $ref: /openshift/app-sre-stage-01/cluster.yml
+
+app:
+  $ref: /services/sendgrid/app.yml
+
+environment:
+  $ref: /products/osdv4/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+- $ref: /services/uhc/namespaces/uhc-stage.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: app-interface/global/quay/app-sre/quay.io
+  version: 2
+  type: kubernetes.io/dockercfg
+- provider: resource
+  path: /app-sre-stage/sendgrid-stage/ocm-sendgrid-service.serviceaccount.yaml
+- provider: vault-secret
+  path:  rhmi/ocm-sendgrid-service/stage/ocm-sendgrid-service
+  version: 5
+# NOTE:
+# The below route should be removed as soon as a testing framework has been implemented for the sendgrid service.
+# This is only a temporary workaround to unblock sendgrid validation/testing in staging.
+# - provider: route
+#   path: /app-sre-stage/sendgrid-stage/ocm-sendgrid-service.route.yaml
+  
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: app-sre
+  identifier: ocm-sendgrid-service-staging
+  defaults: /terraform/resources/app-sre/staging/rds-1.yml
+  output_resource_name: ocm-sendgrid-service-rds
+

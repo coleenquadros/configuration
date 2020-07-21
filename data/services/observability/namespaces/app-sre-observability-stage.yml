@@ -1,0 +1,343 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: app-sre-observability-stage
+description: staging namespace for the app-sre observability stack
+
+cluster:
+  $ref: /openshift/app-sre-stage-01/cluster.yml
+
+app:
+  $ref: /services/observability/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+
+managedRoles: true
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: aws-iam-service-account
+  account: app-sre
+  identifier: aws-resource-exporter-stage-01
+  policies:
+  - AmazonRDSReadOnlyAccess
+  output_resource_name: aws-resource-exporter-app-sre
+- provider: aws-iam-service-account
+  account: app-sre
+  identifier: aws-cloudwatch-exporter-stage-01
+  policies:
+  - AmazonEC2ReadOnlyAccess
+  - AmazonSQSReadOnlyAccess
+  - AmazonDynamoDBReadOnlyAccess
+  - AmazonS3ReadOnlyAccess
+  - AmazonRDSReadOnlyAccess
+  - AmazonInspectorReadOnlyAccess
+  - CloudWatchReadOnlyAccess
+  output_resource_name: aws-cloudwatch-exporter-app-sre
+- provider: aws-iam-service-account
+  account: osio
+  identifier: aws-cloudwatch-exporter-stage-01
+  policies:
+  - AmazonEC2ReadOnlyAccess
+  - AmazonSQSReadOnlyAccess
+  - AmazonDynamoDBReadOnlyAccess
+  - AmazonS3ReadOnlyAccess
+  - AmazonRDSReadOnlyAccess
+  - AmazonInspectorReadOnlyAccess
+  - CloudWatchReadOnlyAccess
+  output_resource_name: aws-cloudwatch-exporter-osio
+- provider: aws-iam-service-account
+  account: osio
+  identifier: aws-resource-exporter-stage-01
+  policies:
+  - AmazonRDSReadOnlyAccess
+  output_resource_name: aws-resource-exporter-osio
+
+managedResourceTypes:
+- ConfigMap
+- Secret
+- Route
+
+openshiftResources:
+# Routes
+## Grafana
+- provider: resource-template
+  type: jinja2
+  path: /observability/grafana.route.yaml
+  variables:
+    environment: -stage
+    host: grafana.stage.devshift.net
+## Blackbox Exporter
+- provider: resource-template
+  type: jinja2
+  path: /observability/blackbox-exporter.route.yaml
+  variables:
+    host: blackbox-exporter.stage.devshift.net
+## PushGateway
+- provider: resource-template
+  type: jinja2
+  path: /observability/pushgateway.route.yaml
+  variables:
+    host: pushgateway.app-sre-stage.devshift.net
+## Zabbix impersonator
+- provider: resource-template
+  type: jinja2
+  path: /observability/zabbix-impersonator/zabbix-impersonator-exporter.route.yaml
+  variables:
+    host: zabbix-impersonator-exporter.stage.devshift.net
+
+# ConfigMaps
+## Grafana Dashboards
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-appsre-grafana.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-openshift-router.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-osdv3-tenant-compute-resources.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-osdv4-tenant-compute-resources.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-appsre-rds.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-appsre-vault.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-blackbox-exporter.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-cpu-throttling.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-playground.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboards.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-prometheus-health.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-compute-resources-cluster-v3.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-compute-resources-namespace-v3.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-compute-resources-pod-v3.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-use-cluster-v3.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-use-node-v3.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-compute-resources-cluster.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-compute-resources-namespace-pods.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-compute-resources-namespace-workloads.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-compute-resources-node-pods.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-compute-resources-pod.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-compute-resources-workload.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-networking-cluster.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-use-cluster.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-k8s-use-node.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-che-graphite.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-cincinnati.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-jenkins-overview.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/stage/grafana-dashboard-telemeter.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-telemeter-canary.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-hive.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-rhche.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-uhc-clusters-service.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-clusters-service-valet.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-osio-capacity.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-osio-gluster.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-uhc-account-manager.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-uhc-gateway.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/stage/grafana-dashboard-bayesian-graphite.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-bayesian-availability.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/stage/grafana-dashboard-aws-account-operator.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-observatorium-api.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/stage/grafana-dashboard-observatorium-thanos-compact.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/stage/grafana-dashboard-observatorium-thanos-overview.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/stage/grafana-dashboard-observatorium-thanos-querier.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/stage/grafana-dashboard-observatorium-thanos-receive.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/stage/grafana-dashboard-observatorium-thanos-rule.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/stage/grafana-dashboard-observatorium-thanos-sidecar.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/stage/grafana-dashboard-observatorium-thanos-store.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/stage/grafana-dashboard-observatorium-thanos-receive-controller.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-observatorium-jaeger-jaeger.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-observatorium-memcached-memcached-overview.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-elasticsearch.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-cincinnati-valet.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-github-mirror.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-integrations.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-insights-is-kafka-down.configmap.yaml
+  validate_json: true
+## Cloudwatch exporters
+- provider: resource
+  path: /observability/cloudwatch-exporter/cloudwatch-exporter-config.configmap.yaml
+- provider: resource-template
+  type: jinja2
+  path: /observability/cloudwatch-exporter/cloudwatch-exporter-config-quay.configmap.yaml
+  variables:
+    environment: staging
+## Zabbix impersonator
+- provider: resource
+  path: /observability/zabbix-impersonator/zabbix-impersonator.configmap.yaml
+## Quay
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-quay.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-quayio-prod-aws-resources.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-quay-api.configmap.yaml
+  validate_json: true
+## insights
+- provider: resource
+  path: /observability/grafana/stage/grafana-dashboard-insights-advisor-general.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/stage/grafana-dashboard-insights-3scale-gateway-health.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/stage/grafana-dashboard-insights-inventory-general.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/stage/grafana-dashboard-insights-rbac-operations.configmap.yaml
+  validate_json: true
+
+# Secrets
+## Blackbox Exporter
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/blackbox-exporter/blackbox-exporter-config.secret.yaml
+## Grafana
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/grafana/grafana-config.secret.yaml
+  variables:
+    auto_assign_org_role: Editor
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/grafana/grafana-datasources.secret.yaml
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-observability-stage/grafana/grafana-proxy-config
+  version: 2
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-observability-stage/grafana/grafana-proxy-config-openshift
+  version: 1
+## Online-registration-exporter
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/online-registration-exporter/online-registration-exporter-config.secret.yaml
+## Pushgateway
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-observability-stage/pushgateway
+  version: 1
+## Quay cloudwatch exporter
+- provider: vault-secret
+  path: app-interface/quayio-stage/cloudwatch-exporter/iam-creds
+  name: aws-cloudwatch-exporter-quay
+  version: 3
+  labels:
+    version: v3
+
+## Common (delete?)
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-observability-stage/app-sre-observability-htpasswd
+  version: 1

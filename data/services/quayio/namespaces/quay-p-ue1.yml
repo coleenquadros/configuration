@@ -1,0 +1,86 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: quayio
+
+name: quay
+description: prod namespace for quayio
+
+cluster:
+  $ref: /openshift/quay-p-ue1/cluster.yml
+
+app:
+  $ref: /services/quayio/app.yml
+
+environment:
+  $ref: /products/quay/environments/production.yml
+
+managedRoles: true
+
+#managedTerraformResources: true
+
+openshiftResources:
+- provider: vault-secret
+  path: app-interface/quayio-prod-us-east-1/quay/quay-config-secret-readonly
+  version: 3
+  labels:
+    version: v3
+- provider: vault-secret
+  path: app-interface/quayio-prod-us-east-1/quay/quay-config-secret-readonly
+  version: 6
+  name: quay-config-secret-readonly-v6
+- provider: vault-secret
+  path: app-interface/quayio-prod-us-east-1/quay/quay-config-secret
+  version: 30
+  labels:
+    version: v30
+- provider: vault-secret
+  path: app-interface/quayio-prod-us-east-1/quay/quay-config-secret
+  version: 30
+  name: quay-config-secret-v30
+- provider: vault-secret
+  path: app-interface/quayio-prod-us-east-1/quay/quay-config-secret
+  version: 29
+  name: quay-config-secret-v29
+- provider: vault-secret
+  path: app-interface/quayio-prod-us-east-1/quay/quay-extra-ca-certs
+  version: 1
+- provider: vault-secret
+  path: app-interface/quayio-prod-us-east-1/quay/quay-cloudwatch-iam-user
+  version: 2
+# ECR image pull secret
+- provider: vault-secret
+  path: app-sre/integrations-output/aws-ecr-image-pull-secrets/quayio-prod/eu-central-1/dockercfg
+  version: 1
+  type: kubernetes.io/dockerconfigjson
+  name: quayio-backup-image-pull-secret
+
+#terraformResources:
+#- provider: rds
+#  account: quayio-prod
+#  identifier: quayenc-2019-quayvpc
+#  defaults: /terraform/resources/quayio-production/rds-1.yml
+#  parameter_group: /terraform/resources/quayio-production/rds-parameter-group-1.yml
+#- provider: elasticache
+#  account: quayio-prod
+#  identifier: quayio-production
+#  defaults: /terraform/resources/quayio-production/elasticache-1.yml
+#  parameter_group: /terraform/resources/quayio-production/elasticache-parameter-group-1.yml
+#  output_resource_name: quayio-elasticache
+#- provider: s3-cloudfront
+#  account: quayio-prod
+#  identifier: quayio-production-s3
+#  storage_class: intelligent_tiering
+#  defaults: /terraform/resources/quayio-production/s3-cloudfront-us-east-2-replication.yml
+#  output_resource_name: quayio-s3
+#- provider: ecr
+#  account: quayio-prod
+#  region: eu-central-1
+#  identifier: quayio-backup
+#  output_resource_name: quayio-backup
+#- provider: ecr
+#  account: quayio-prod
+#  region: eu-central-1
+#  identifier: syslog-cloudwatch-bridge-backup
+#  output_resource_name: syslog-cloudwatch-bridge-backup

@@ -8,19 +8,42 @@ name: tower-analytics-stage
 description: Insights tower-analytics-stage on the Stage cluster under e2e-deploy/ocdeployer management
 
 cluster:
-  $ref: /openshift/insights/crc-stage-01.yml
+  $ref: /openshift/crc-stg-01/cluster.yml
 
 app:
   $ref: /services/insights/tower-analytics/app.yml
 
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stg-01.yml
+- $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+
 managedRoles: true
 
 managedResourceTypes:
-- Secret
+- ServiceAccount
 
 openshiftResources:
 - provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
   path: insights/secrets/insights-stage/tower-analytics-stage/django
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
   version: 1
 
 managedTerraformResources: true
@@ -29,10 +52,18 @@ terraformResources:
 - provider: rds
   account: insights-stage
   identifier: tower-analytics-stage
-  defaults: /terraform/resources/insights/stage/rds-1.yml
-  output_resource_name: tower-analytics-db
+  defaults: /terraform/resources/insights/stage/rds/postgres11-rds-1.yml
+  parameter_group: /terraform/resources/insights/stage/rds/postgres11-parameter-group-tower-analytics-stage.yml
+  output_resource_name: automation-analytics-db
+  enhanced_monitoring: true
 - provider: s3
   account: insights-stage
   identifier: tower-analytics-dbdumps-stage-s3
   defaults: /terraform/resources/s3-private-1.yml
   output_resource_name: tower-analytics-dbdumps
+- provider: cloudwatch
+  account: insights-stage
+  identifier: tower-analytics-stage
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch

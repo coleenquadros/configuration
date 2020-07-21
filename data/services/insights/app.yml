@@ -3,6 +3,7 @@ $schema: /app-sre/app-1.yml
 
 labels:
   service: insights
+  platform: insights
 
 name: insights
 
@@ -10,14 +11,34 @@ description: |
   The Insights Application
 
 serviceOwners:
-- name: Gavin Romig-Koch
-  email: gavin@redhat.com
 - name: Kyle Lape
   email: klape@redhat.com
 
 dependencies:
 - $ref: /dependencies/openshift/service.yml
+- $ref: /dependencies/quay/service.yml
+- $ref: /dependencies/ci-int/service.yml
+- $ref: /dependencies/gitlab/service.yml
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/cloudservices.yml
+  items:
+  - name: redis
+    public: true
+    description: Mirror of docker.io/redis
+    mirror: docker.io/redis
+  - name: kube-scripts
+    description: ''
+    public: true
+  - name: miniop
+    description: 'mini-operator for simple deployments'
+    public: true
 
 performanceParameters:
   SLO: 90
 
+codeComponents:
+- name: saas-templates
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates

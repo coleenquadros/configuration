@@ -29,6 +29,22 @@ dependencies:
 - $ref: /dependencies/quay/service.yml
 - $ref: /dependencies/openshift/service.yml
 
+sentryProjects:
+- team:
+    $ref: /dependencies/sentry/teams/app-sre-stage.yml
+  projects:
+  - name: app-interface-stage
+    description: "app-interface project in stage"
+    email_prefix: "[App-Interface Stage]"
+    platform: python
+- team:
+    $ref: /dependencies/sentry/teams/app-sre-production.yml
+  projects:
+  - name: app-interface-prod
+    description: "app-interface project in prod"
+    email_prefix: "[App-Interface Prod]"
+    platform: python
+
 quayRepos:
 - org:
     $ref: /dependencies/quay/app-sre.yml
@@ -57,6 +73,35 @@ quayRepos:
     public: true
     mirror: docker.io/mysql
 
+gcrRepos:
+- project:
+    $ref: /dependencies/gcp/app-sre.yml
+  items:
+  - name: qontract-validator
+    description: ''
+    public: true
+    mirror: quay.io/app-sre/qontract-validator
+  - name: qontract-server
+    description: ''
+    public: true
+    mirror: quay.io/app-sre/qontract-server
+  - name: qontract-reconcile
+    description: ''
+    public: true
+    mirror: quay.io/app-sre/qontract-reconcile
+  - name: manifest-bouncer
+    description: ''
+    public: true
+    mirror: quay.io/app-sre/manifest-bouncer
+  - name: saasherder
+    description: ''
+    public: true
+    mirror: quay.io/openshiftio/saasherder
+  - name: vault-manager
+    description: ''
+    public: true
+    mirror: quay.io/app-sre/vault-manager
+
 codeComponents:
 - name: app-interface
   resource: upstream
@@ -64,6 +109,8 @@ codeComponents:
   gitlabHousekeeping:
     enabled: true
     rebase: true
+    limit: 2
+    enable_closing: true
   jira:
     $ref: /dependencies/jira/issues-redhat-com.yaml
 - name: qontract-server
@@ -75,6 +122,3 @@ codeComponents:
 - name: qontract-validator
   resource: upstream
   url: https://github.com/app-sre/qontract-validator
-- name: app-interface saas
-  resource: saasrepo
-  url: https://github.com/app-sre/saas-app-interface

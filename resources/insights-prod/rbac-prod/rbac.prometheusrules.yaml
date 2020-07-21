@@ -1,0 +1,26 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: insights-rbac
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: insights-rbac-prod
+    rules:
+    - alert: InsightsRbacProdDown
+      expr: |
+        absent(up{service="rbac", namespace="rbac-prod"})
+      for: 3m
+      labels:
+        severity: info
+        service: insights
+        env: prod
+      annotations:
+        dashboard: "https://grafana.devshift.net/d/TjP_nMWMk/operations-rbac-w-cpu"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/rbac-prod/deployments"
+        message: "Insights RBAC Alert (Prod). Insights RBAC down in Prod for 3 minutes."
+        runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/index.html"

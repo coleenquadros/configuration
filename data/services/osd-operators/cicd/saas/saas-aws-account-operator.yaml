@@ -1,0 +1,67 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: osd-operators
+
+name: saas-aws-account-operator
+description: SaaS tracking file for aws-account-operator
+
+app:
+  $ref: /services/osd-operators/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-srep-info
+
+managedResourceTypes:
+- CatalogSource
+- OperatorGroup
+- Subscription
+- ConfigMap
+
+imagePatterns:
+- quay.io/app-sre/aws-account-operator-registry
+
+resourceTemplates:
+- name: aws-account-operator
+  url: https://github.com/openshift/aws-account-operator
+  path: /hack/olm-registry/olm-artifacts-template.yaml
+  parameters:
+    REGISTRY_IMG: quay.io/app-sre/aws-account-operator-registry
+  targets:
+  - namespace:
+      $ref: /services/osd-operators/namespaces/aws-account-operator-integration.yml
+    ref: master
+    upstream: openshift-aws-account-operator-gh-build-master
+    parameters:
+      ACCOUNT_LIMIT: "100"
+      ROOT_OU_ID: r-0wd6s
+      BASE_OU_ID: ou-0wd6-oq5d7v8g
+  - namespace:
+      $ref: /services/osd-operators/namespaces/aws-account-operator-stage.yml
+    ref: master
+    upstream: openshift-aws-account-operator-gh-build-master
+    parameters:
+      ACCOUNT_LIMIT: "100"
+      ROOT_OU_ID: r-0wd6
+      BASE_OU_ID: ou-0wd6-tmsbvahq
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-stage-01/aws-account-operator-stage-01.yml
+    ref: master
+    upstream: openshift-aws-account-operator-gh-build-master
+    parameters:
+      ACCOUNT_LIMIT: "100"
+      ROOT_OU_ID: r-0wd6
+      BASE_OU_ID: ou-0wd6-tmsbvahq
+  - namespace:
+      $ref: /services/osd-operators/namespaces/aws-account-operator-production.yml
+    ref: 768659a7cd0cbdd4460c085a2c8c16e288985816
+    parameters:
+      ACCOUNT_LIMIT: "100"
+      ROOT_OU_ID: r-jtfp
+      BASE_OU_ID: ou-jtfp-w0octtat

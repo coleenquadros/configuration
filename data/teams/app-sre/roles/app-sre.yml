@@ -5,10 +5,12 @@ labels: {}
 name: app-sre
 
 permissions:
+# github
+- $ref: /teams/app-sre/permissions/github-app-sre-owner.yml
 # gitlab
 - $ref: /dependencies/gitlab/permissions/app-sre-member.yml
 # jenkins
-- $ref: /dependencies/ci-int/permissions/ci-int-admin.yml
+- $ref: /dependencies/ci-int/permissions/ci-int.yml
 # vault
 - $ref: /dependencies/vault/permissions/app-sre.yml
 - $ref: /dependencies/vault/permissions/app-sre-quay.yml
@@ -19,24 +21,19 @@ permissions:
 - $ref: /dependencies/quay/permissions/quay-membership-app-sre-owners.yml
 - $ref: /dependencies/quay/permissions/quay-membership-openshiftio-devs.yml
 - $ref: /dependencies/quay/permissions/quay-membership-codeready-toolchain-owners.yml
-- $ref: /dependencies/quay/permissions/quay-membership-cloudservices-appsre.yml
+- $ref: /teams/insights/quay-teams/appsre.yml
 # observability
 - $ref: /services/observability/permissions/observability-access.yml
 # extra clusters
-- $ref: /openshift/app-sre-dev/permissions/auth.yml
-- $ref: /openshift/insights/permissions/auth.yml
-- $ref: /openshift/insights/permissions/auth-cluster-insights-dev.yml
-- $ref: /openshift/insights/permissions/auth-cluster-insights-stage.yml
-- $ref: /openshift/insights/permissions/auth-cluster-insights-prod.yml
+- $ref: /teams/insights/github-teams/openshift-dev-cluster-access.yml
+- $ref: /teams/insights/github-teams/openshift-stage-cluster-access.yml
+- $ref: /teams/insights/github-teams/openshift-prod-cluster-access.yml
 - $ref: /openshift/osd4-wkld/permissions/auth.yml
 # Unleash
-- $ref: /dependencies/unleash/permissions/app-interface-unleash.yml
+- $ref: /dependencies/unleash/permissions/app-interface.yml
 
 access:
 # OSDv3 clusters - managed using oc
-- cluster:
-    $ref: /openshift/app-sre/cluster.yml
-  group: dedicated-admins
 - cluster:
     $ref: /openshift/dsaas/cluster.yml
   group: dedicated-admins
@@ -59,32 +56,84 @@ access:
     $ref: /openshift/hive-stage/cluster.yml
   group: hive-admins
 - cluster:
+    $ref: /openshift/hive-stage-01/cluster.yml
+  group: hive-admins
+- cluster:
+    $ref: /openshift/hivep01ue1/cluster.yml
+  group: dedicated-admins
+- cluster:
     $ref: /openshift/hive-integration/cluster.yml
   group: hive-admins
+## Insights
+- cluster:
+    $ref: /openshift/insights/cluster-insights-prod.yml
+  group: dedicated-admins
 # OSDv4 clusters - managed using OCM
+## AppSRE production
 - cluster:
     $ref: /openshift/app-sre-prod-01/cluster.yml
   group: dedicated-admins
 - cluster:
+    $ref: /openshift/app-sre-prod-03/cluster.yml
+  group: dedicated-admins
+- cluster:
+    $ref: /openshift/app-sre-prod-04/cluster.yml
+  group: dedicated-admins
+## AppSRE stage
+- cluster:
     $ref: /openshift/app-sre-stage-01/cluster.yml
   group: dedicated-admins
 - cluster:
-    $ref: /openshift/quayio-prod-us-east-1/cluster.yml
+    $ref: /openshift/app-sre-stage-02/cluster.yml
+  group: dedicated-admins
+## Hive
+- cluster:
+    $ref: /openshift/hive-stage-01/cluster.yml
+  group: dedicated-admins
+# Quay.io
+- cluster:
+    $ref: /openshift/quay-p-ue1/cluster.yml
   group: dedicated-admins
 - cluster:
-    $ref: /openshift/quayio-prod-us-east-2/cluster.yml
+    $ref: /openshift/quayp01ue1/cluster.yml
+  group: dedicated-admins
+- cluster:
+    $ref: /openshift/quayp02ue2/cluster.yml
+  group: dedicated-admins
+- cluster:
+    $ref: /openshift/quay-p-ue2/cluster.yml
+  group: dedicated-admins
+- cluster:
+    $ref: /openshift/quay-s-ue1/cluster.yml
+  group: dedicated-admins
+- cluster:
+    $ref: /openshift/quays02ue1/cluster.yml
   group: dedicated-admins
 - cluster:
     $ref: /openshift/quayio-stage/cluster.yml
   group: dedicated-admins
 - cluster:
-    $ref: /openshift/insights/crc-stage-01.yml
+    $ref: /openshift/telemeter-prod-01/cluster.yml
+  group: dedicated-admins
+## Insights
+- cluster:
+    $ref: /openshift/crc-stg-01/cluster.yml
+  group: dedicated-admins
+- cluster:
+    $ref: /openshift/crcs01ue1/cluster.yml
+  group: dedicated-admins
+- cluster:
+    $ref: /openshift/crcp01ue1/cluster.yml
   group: dedicated-admins
 # OCM is not defined for this v4 cluster
 # dedicated-admins are being overridden
 # - cluster:
 #     $ref: /openshift/che-dev/cluster.yml
 #   group: dedicated-admins
+## CodeReady
+- cluster:
+    $ref: /openshift/codereadyi01ue1/cluster.yml
+  group: dedicated-admins
 
 aws_groups:
 - $ref: /aws/app-sre/groups/App-SRE-admin.yml
@@ -95,6 +144,7 @@ aws_groups:
 - $ref: /aws/quayio-prod/groups/App-SRE-admin.yml
 - $ref: /aws/insights-stage/groups/App-SRE-admin.yml
 - $ref: /aws/insights-prod/groups/App-SRE-admin.yml
+- $ref: /aws/engr-cloud-aws-insights/groups/App-SRE-admin.yml
 
 user_policies:
 - $ref: /aws/app-sre/policies/BillingViewAccess.yml
@@ -103,6 +153,7 @@ user_policies:
 - $ref: /aws/quay-builder/policies/BillingViewAccess.yml
 - $ref: /aws/insights-stage/policies/BillingViewAccess.yml
 - $ref: /aws/insights-prod/policies/BillingViewAccess.yml
+- $ref: /aws/engr-cloud-aws-insights/policies/BillingViewAccess.yml
 
 sentry_roles:
 - instance:
@@ -118,3 +169,26 @@ sentry_teams:
 
 owned_saas_files:
 - $ref: /services/github-mirror/cicd/saas.yaml
+- $ref: /services/unleash/cicd/saas-ocm.yaml
+- $ref: /services/unleash/cicd/saas-app-interface.yaml
+- $ref: /services/observability/cicd/saas/saas-aws-resource-exporter.yaml
+- $ref: /services/observability/cicd/saas/saas-blackbox-exporter.yaml
+- $ref: /services/observability/cicd/saas/saas-cloudwatch-exporter.yaml
+- $ref: /services/observability/cicd/saas/saas-grafana.yaml
+- $ref: /services/observability/cicd/saas/saas-nginx-proxy.yaml
+- $ref: /services/observability/cicd/saas/saas-online-registration-exporter.yaml
+- $ref: /services/observability/cicd/saas/saas-pushgateway.yaml
+- $ref: /services/observability/cicd/saas/saas-zabbix-impersonator.yaml
+- $ref: /services/observability/cicd/saas/saas-observability-per-cluster.yaml
+- $ref: /services/app-sre/cicd/ci-int/saas-openshift-acme.yaml
+- $ref: /services/sentry/cicd/saas.yaml
+- $ref: /services/quayio/saas/quay-mysql-diag.yaml
+- $ref: /services/dashdot/cicd/saas-dashdotdb.yaml
+- $ref: /services/visual-app-interface.devshift.net/cicd/saas.yaml
+- $ref: /services/app-interface/cicd/ci-ext/saas-qontract-reconcile.yaml
+- $ref: /services/app-interface/cicd/ci-ext/saas-qontract-server.yaml
+- $ref: /services/vault.devshift.net/cicd/saas.yaml
+- $ref: /services/app-sre/cicd/ci-int/saas-app-sre-errbot.yaml
+# tenant monitoring saas files
+- $ref: /services/telemeter/cicd/saas-monitoring.yaml
+- $ref: /services/container-security-operator/cicd/saas.yaml

@@ -12,6 +12,9 @@ cluster:
 app:
   $ref: /services/telemeter-ocp-dashboards/app.yml
 
+environment:
+  $ref: /products/osdv4/environments/production.yml
+
 managedResourceTypes:
 - Secret
 
@@ -22,8 +25,13 @@ openshiftResources:
   path: app-interface/datahub-psi/dh-prod-prometheus-lts/grafana/grafana-config
   version: 4
 - provider: vault-secret
-  path: app-interface/datahub-psi/dh-prod-prometheus-lts/grafana/grafana-datasources
-  version: 8
-- provider: vault-secret
   path: app-interface/datahub-psi/dh-prod-prometheus-lts/grafana/grafana-proxy-config
   version: 1
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /datahub-psi/grafana-datasources.secret.yaml
+
+openshiftServiceAccountTokens:
+- namespace:
+    $ref: /services/telemeter/namespaces/telemeter-production.yml
+  serviceAccountName: datahub-prometheus-access

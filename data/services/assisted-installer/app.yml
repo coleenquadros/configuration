@@ -1,0 +1,54 @@
+---
+$schema: /app-sre/app-1.yml
+
+labels:
+  service: assisted-installer
+
+name: assisted-installer
+
+description: |
+  The Assisted Installer provides for easy provisioning of new bare metal
+  machines and creation of OpenShift clusters.
+
+serviceOwners:
+- name: Rom Freiman
+  email: rfreiman@redhat.com
+- name: Michael Filanov
+  email: mfilanov@redhat.com
+- name: Ronnie Lazar
+  email: alazar@redhat.com
+
+dependencies:
+- $ref: /dependencies/aws/service.yml
+- $ref: /dependencies/github/service.yml
+- $ref: /dependencies/quay/service.yml
+- $ref: /dependencies/openshift/service.yml
+- $ref: /dependencies/ci-ext/service.yml
+
+performanceParameters:
+  SLO: 90
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/app-sre.yml
+  items:
+  - name: assisted-installer
+    description: Provisioning of new bare metal machines
+    public: true
+  - name: bm-inventory
+    description: Assisted Installer
+    public: true
+  - name: bm-inventory-build
+    description: Assisted Installer
+    public: true
+  - name: s3-object-expirer
+    description: Assisted Installer
+    public: true
+
+codeComponents:
+- name: assisted-installer
+  resource: upstream
+  url: https://github.com/openshift/assisted-installer
+- name: assisted-service
+  resource: upstream
+  url: https://github.com/openshift/assisted-service

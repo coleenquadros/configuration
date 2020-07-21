@@ -5,8 +5,7 @@ labels:
   service: historical-system-profiles
 
 name: historical-system-profiles-prod
-description: Insights historical-system-profiles-prod on the PROD cluster under e2e-deploy/ocdeployer
-  management
+description: Insights historical-system-profiles-prod on the PROD cluster under e2e-deploy/ocdeployer management
 
 cluster:
   $ref: /openshift/insights/cluster-insights-prod.yml
@@ -14,12 +13,21 @@ cluster:
 app:
   $ref: /services/insights/historical-system-profiles/app.yml
 
+environment:
+  $ref: /products/insights/environments/production.yml
+
 managedRoles: true
 
 managedResourceTypes:
-- Secret
+- ServiceAccount
 
 openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-prod/shared/private-image-puller.serviceaccount.yaml
 - provider: vault-secret
   path: insights/quay/quay.io
   version: 3
@@ -39,3 +47,5 @@ terraformResources:
   output_resource_name: historical-system-profiles-db
   overrides:
     allocated_storage: 3072
+    monitoring_interval: 60
+  enhanced_monitoring: true

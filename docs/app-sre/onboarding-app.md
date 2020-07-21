@@ -3,7 +3,9 @@
 <!-- TOC -->
 
 - [Onboarding an App](#onboarding-an-app)
-    - [Overview](#overview)
+  - [Overview](#overview)
+  - [Introduction / Engagement](#introduction--engagement)
+  - [Onboarding](#onboarding)
     - [Defining the app in App-Interface](#defining-the-app-in-app-interface)
     - [CI/CD Jobs](#cicd-jobs)
     - [Monitoring](#monitoring)
@@ -11,10 +13,31 @@
     - [Developer Access](#developer-access)
     - [OpenShift](#openshift)
     - [SOPs](#sops)
+    - [Basic Functional Testing](#basic-functional-testing)
 
 <!-- /TOC -->
 
 ## Overview
+
+As an application / service onboards with the AppSRE team, it requires all the developer / contributor teams to go through a process. This doc aims to lay out what the checklists are, and what the expectations might be from the developer side at each state, and AppSRE side for each stage.
+
+The onboarding phases are the following:
+
+- **Introduction / Engagement**. In this phase the application development team engages with AppSRE to verify the viability and supportability of the application. The application development team provides documentation around the application, and the AppSRE team analyzes it to certify that it follows the best-practices required to be accepted. After completing this phase the application is determined supportable by the AppSRE team.
+
+- **Onboarding**. During this phase the application development team, with the guidance and help of the AppSRE team, will self-service the deployment of the application via AppSRE's offerings. Most of the work that happens in this phase are PRs submitted by the application development team to onboard the application into App-Interface.
+
+## Introduction / Engagement
+
+The application development team must submit a JIRA issue to the [AppSRE project](https://issues.redhat.com/projects/APPSRE).
+
+Create a copy of the [AppSRE Onboarding Questionnaire](https://docs.google.com/document/d/1IWzhZDHoValpNrCvPIwn6YqIlctdq3mPcZ5PPl77Mo0/edit#) Google doc for your application and fill it out.
+
+Provide link to the document in the JIRA issue.
+
+AppSRE team will follow-up with the team on the JIRA issue and work through the items in this questionnaire.
+
+## Onboarding
 
 Onboarding a new App onto the App-SRE's team contract involves many different steps. These are the requirements for the App to be fully onboarded:
 
@@ -28,11 +51,12 @@ Onboarding a new App onto the App-SRE's team contract involves many different st
 - Developer access to the App is represented properly in roles/permissions in the App-Interface.
 - The Escalation matrix is properly defined.
 - OpenShift resources: it has a staging environment targetting a staging namespace and a production environment targetting a production namespace.
-- There documented SOPs to help triage possible problems with the app running in production.
+- There are documented SOPs to help triage possible problems with the app running in production.
+- There is a documented SOP for determining basic functionality.
 
 A WIP step by step guide can be found [here](onboarding-app-step-by-step/).
 
-## Defining the app in App-Interface
+### Defining the app in App-Interface
 
 A document representing the application must be defined in under the [data](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data) with name `data/services/<service_name>/app.yml`.
 
@@ -41,7 +65,7 @@ https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/app-sre/
 
 Some of the properties are required, whereas some aren't. However please take into consideration that not defining some of the optional fields will **decrease the SLO** value.
 
-## CI/CD Jobs
+### CI/CD Jobs
 
 Each deployed upstream repo must have 2 CI/CD jobs:
 
@@ -52,11 +76,11 @@ Additionally each component must be associated to a [saasherder](https://github.
 
 More info here: [ci.int](ci-int.md) for upstream repositories in GitLab or [ci.ext](ci-ext.md) for upstream repositories in GitHub.
 
-## Monitoring
+### Monitoring
 
 Monitoring relies on a Prometheus / Alertmanager stack. Read more about it [here](https://gitlab.cee.redhat.com/service/dev-guidelines/blob/master/monitoring.md).
 
-## Defining the SLO
+### Defining the SLO
 
 The SLO is manually assigned by the App-SRE team.
 
@@ -69,11 +93,11 @@ It depends on things like:
 - SOPs have been documented.
 - The App-SRE team has privileges to create commits in the upstream repos in order to create an emergency release.
 
-## Developer Access
+### Developer Access
 
 The developer access will rely on the [App-Interface](https://gitlab.cee.redhat.com/service/app-interface) and will be created by the App-SRE team.
 
-## OpenShift
+### OpenShift
 
 OpenShift resources are defined in `OpenShift Templates` in the upstream repo, and applied via the saasherder process.
 
@@ -81,6 +105,12 @@ Exceptionally, sensitive resources like Secrets, ConfigMaps, Routes,
 ServiceMonitors, etc are managed via
 [App-Interface](https://gitlab.cee.redhat.com/service/app-interface).
 
-## SOPs
+### SOPs
 
 The developer team must create a catalog of SOPs to help the AppSRE team to triage and operate the service.
+
+### Basic Functional Testing
+
+The developer team must create an SOP for how to determine the application is functioning at a basic level.  This SOP should be targeted at helping the AppSRE team validate that the application is functioning properly after any kind of service outage is experienced.
+
+If additional tooling is created to support this SOP then the tooling must be keep up-to-date with application changes.

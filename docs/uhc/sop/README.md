@@ -8,6 +8,7 @@
     - [UHCAccountManager5xxErrorsHigh](#account-manager-5xx)
     - [UHCAccountManager4xxErrorsHigh](#account-manager-4xx)
     - [UHCAccountManagerBannedUsersHigh](#account-manager-banned-users)
+    - [OCM Account Manager Dependencies](#account-manager-dependencies)
     - [Escalations](#escalations)
 
 <!-- /TOC -->
@@ -180,6 +181,40 @@ The number of banned users has abnormally increased during the last 24 hours.
 ### Steps:
 
 - Contact Service Delivery B team, inform the greater service delivery team.
+
+---
+
+## Account Manager Dependencies
+
+### Summary:
+
+One or more dependency services is experiencing issues or has been downgraded.
+
+### Quay.io
+- Creating a robot user
+- Adding a robot user to a team
+- Removing a robot user from a team
+
+### RHIT
+- Creating Service Accounts
+- Retrieving a Service Account
+- Removing a Service Account
+- Creating Auto Entitlements
+- Find OCP Subscriptions of an Account
+- Retrieving User's Information
+
+### Access required:
+- Console access to the cluster that runs account-manager (app-sre)
+- Edit access to the uhc namespaces:
+  - uhc-stage
+  - uhc-production
+
+### Relevant secrets:
+- secrets/uhc-acct-mngr
+
+### Steps:
+- Contact SRE team for a service outage.
+- Contact Service Delivery B team otherwise, and inform the greater service delivery team.
 
 ---
 
@@ -361,6 +396,32 @@ Controller manager is down.
 - Contact Service Development A team on #service-delivery, sd-mp-devel@redhat.com.
 
 - Inform the greater service delivery team.
+
+## Metrics Worker Down
+
+### Impact:
+
+Metrics will not be reported for existing and new clusters.
+
+### Summary:
+
+Cluster Service cannot report metrics for the clusters. This may be because telemetry is down.
+
+https://infogw-proxy.api.openshift.com/ (data from prod telemeter)
+https://infogw-proxy.api.stage.openshift.com/ (data from staging telemeter)
+
+
+### Access required:
+ 
+- Console access to the cluster that runs the clusters service (`app-sre` and
+  `app-sre-stage`).
+- /app-interface/blob/master/data/services/observability/permissions/observability-access.yml.
+
+### Steps:
+
+- Check `deployment/clusters-service` logs to confirm the telemetry down.
+- Contact Service Development A team on #service-delivery, sd-mp-devel@redhat.com.
+- Contact #forum-telemetry slack channel,monitoring-telemeter-service@redhat.com
 
 ## Escalations
 

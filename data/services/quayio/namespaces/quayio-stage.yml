@@ -13,10 +13,15 @@ cluster:
 app:
   $ref: /services/quayio/app.yml
 
-managedRoles: true
+environment:
+  $ref: /products/quay/environments/stage.yml
 
-managedResourceTypes:
-- Secret
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.quayio-stage.yml
+- $ref: /services/quayio/namespaces/apostille-stage.yml
+- $ref: /services/quayio/namespaces/clair-stage.yaml
+
+managedRoles: true
 
 managedTerraformResources: true
 
@@ -25,65 +30,84 @@ openshiftResources:
   path: app-interface/quayio-stage/quayio-stage/quay-pull-secret
   version: 1
   type: kubernetes.io/dockerconfigjson
-# RW mode
+# ECR image pull secret
+- provider: vault-secret
+  path: app-sre/integrations-output/aws-ecr-image-pull-secrets/quayio-prod/eu-central-1/dockercfg
+  version: 1
+  type: kubernetes.io/dockerconfigjson
+  name: quayio-backup-image-pull-secret
 - provider: vault-secret
   path: app-interface/quayio-stage/quayio-stage/quay-config-secret
-  version: 27
+  version: 50
   labels:
-    version: v27
-# RO mode & read replica
+    version: v50
 #- provider: vault-secret
-#  path: app-interface/quayio-stage/quayio-stage/quay-config-secret-ro
-#  version: 3
+#  path: app-interface/quayio-stage/quayio-stage/quay-config-secret
+#  version: 45
 #  labels:
-#    version: v3
-#  name: quay-config-secret
+#    version: v45
 - provider: vault-secret
   path: app-interface/quayio-stage/quayio-stage/quay-cloudwatch-iam-user
   version: 1
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /quayio-stage/quay/quay.app-config.secret.yaml
+# - provider: resource-template
+#   type: extracurlyjinja2
+#   path: /quayio-stage/quay/quay.app-config.secret.yaml
 
-terraformResources:
-- provider: rds
-  account: quayio-stage
-  identifier: quayio-stage
-  defaults: /terraform/resources/quayio-stage/rds-1.yml
-- provider: rds
-  account: quayio-stage
-  identifier: quayio-stage-replica
-  availability_zone: us-east-2b
-  defaults: /terraform/resources/quayio-stage/rds-read-replica-us-east-2.yml
-- provider: elasticache
-  account: quayio-stage
-  identifier: quayio-stage
-  defaults: /terraform/resources/quayio-stage/elasticache-1.yml
-  parameter_group: /terraform/resources/quayio-stage/elasticache-parameter-group-1.yml
-# - provider: rds
-#   account: quayio-stage
-#   identifier: quayio-dev
-#   defaults: /terraform/resources/quayio-stage/rds-2.yml
-# - provider: elasticache
-#   account: quayio-stage
-#   identifier: quayio-dev
-#   defaults: /terraform/resources/quayio-stage/elasticache-2.yml
-#   parameter_group: /terraform/resources/quayio-stage/elasticache-parameter-group-2.yml
-- provider: ecr
-  account: quayio-stage
-  identifier: quayio-backup
-  output_resource_name: quayio-backup
-# Quay S3 bucket and CloudFront distribution for us-east-1
-- provider: s3-cloudfront
-  account: quayio-stage
-  identifier: quayio-stage-s3
-  defaults: /terraform/resources/quayio-stage/s3-cloudfront-us-east-1.yml
-  output_resource_name: quayio-s3
-# Quay S3 bucket and CloudFront distribution for us-east-2
-- provider: s3-cloudfront
-  account: quayio-stage
-  identifier: quayio-stage-s3-backup
-  region: us-east-2
-  storage_class: onezone_ia
-  defaults: /terraform/resources/quayio-stage/s3-cloudfront-us-east-2.yml
-  output_resource_name: quayio-s3-backup
+#terraformResources:
+#- provider: rds
+#  account: quayio-stage
+#  identifier: quayio-stage
+#  defaults: /terraform/resources/quayio-stage/rds-1.yml
+#- provider: rds
+#  account: quayio-stage
+#  identifier: quayio-stage-replica
+#  availability_zone: us-east-2b
+#  defaults: /terraform/resources/quayio-stage/rds-read-replica-us-east-2.yml
+#  replica_source: quayio-stage
+#- provider: rds
+#  account: quayio-stage
+#  identifier: quayio-stage-57
+#  availability_zone: us-east-1a
+#  defaults: /terraform/resources/quayio-stage/rds-3.yml
+#  parameter_group: /terraform/resources/quayio-stage/rds-parameter-group-2.yml
+#- provider: rds
+#  account: quayio-stage
+#  identifier: quayio-stage-57-replica
+#  availability_zone: us-east-2b
+#  defaults: /terraform/resources/quayio-stage/rds-read-replica-us-east-2-57.yml
+#  replica_source: quayio-stage-57
+#  parameter_group: /terraform/resources/quayio-stage/rds-parameter-group-2.yml
+#- provider: elasticache
+#  account: quayio-stage
+#  identifier: quayio-stage
+#  defaults: /terraform/resources/quayio-stage/elasticache-1.yml
+#  parameter_group: /terraform/resources/quayio-stage/elasticache-parameter-group-1.yml
+## - provider: rds
+##   account: quayio-stage
+##   identifier: quayio-dev
+##   defaults: /terraform/resources/quayio-stage/rds-2.yml
+## - provider: elasticache
+##   account: quayio-stage
+##   identifier: quayio-dev
+##   defaults: /terraform/resources/quayio-stage/elasticache-2.yml
+##   parameter_group: /terraform/resources/quayio-stage/elasticache-parameter-group-2.yml
+## Quay S3 bucket and CloudFront distribution for us-east-1
+#- provider: s3-cloudfront
+#  account: quayio-stage
+#  identifier: quayio-stage-s3
+#  defaults: /terraform/resources/quayio-stage/s3-cloudfront-us-east-1.yml
+#  output_resource_name: quayio-s3
+## Quay S3 bucket and CloudFront distribution for us-east-2
+#- provider: s3-cloudfront
+#  account: quayio-stage
+#  identifier: quayio-stage-s3-backup
+#  region: us-east-2
+#  storage_class: onezone_ia
+#  defaults: /terraform/resources/quayio-stage/s3-cloudfront-us-east-2.yml
+#  output_resource_name: quayio-s3-backup
+#- provider: kms
+#  account: quayio-stage
+#  identifier: quayio-stage-replica
+#  region: us-east-2
+#  defaults: /terraform/resources/quayio-stage/kms-1.yml
+#  output_resource_name: quayio-kms

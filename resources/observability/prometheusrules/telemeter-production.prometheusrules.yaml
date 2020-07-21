@@ -14,7 +14,7 @@ spec:
     - alert: TelemeterDown - prod
       annotations:
         message: "No targets found for Telemeter in namespace {{ $labels.namespace }}. Telemeter is down."
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
+        runbook: "https://gitlab.cee.redhat.com/observatorium/configuration/tree/master/docs/sop"
         dashboard: "https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-prometheus&var-cluster=app-sre&var-namespace=telemeter-production"
       expr: |
         absent(up{job="telemeter-server",namespace="telemeter-production"} == 1)
@@ -25,7 +25,7 @@ spec:
     - alert: UploadHandlerErrorsHigh - prod
       annotations:
         message: "{{ $labels.client }} is returning errors for {{ $value }}% of requests."
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
+        runbook: "https://gitlab.cee.redhat.com/observatorium/configuration/tree/master/docs/sop"
         dashboard: "https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-prometheus&var-cluster=app-sre&var-namespace=telemeter-production"
       expr: |
         sum without(instance, pod, job, code) (rate(http_requests_total{code=~"^(?:5..)$",handler="upload",job="telemeter-server",namespace="telemeter-production",service="telemeter-server"}[5m]))
@@ -38,7 +38,7 @@ spec:
     - alert: UploadHandlerErrorsHigh - prod
       annotations:
         message: "{{ $labels.client }} is returning errors for {{ $value }}% of requests."
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
+        runbook: "https://gitlab.cee.redhat.com/observatorium/configuration/tree/master/docs/sop"
         dashboard: "https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-prometheus&var-cluster=app-sre&var-namespace=telemeter-production"
       expr: |
         sum without(instance, pod, job, code) (rate(http_requests_total{code=~"^(?:5..)$",handler="upload",job="telemeter-server",namespace="telemeter-production",service="telemeter-server"}[5m]))
@@ -51,20 +51,20 @@ spec:
     - alert: AuthorizeClientErrorsHigh - prod
       annotations:
         message: "{{ $labels.client }} is returning errors for {{ $value }}% of requests."
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
+        runbook: "https://gitlab.cee.redhat.com/observatorium/configuration/tree/master/docs/sop"
         dashboard: "https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-prometheus&var-cluster=app-sre&var-namespace=telemeter-production"
       expr: |
         sum(rate(client_api_requests_total{namespace="telemeter-production",client="authorize",code=~"^(?:5..)$"}[5m])) without(instance,pod,code)
           /
         sum(rate(client_api_requests_total{namespace="telemeter-production",client="authorize"}[5m])) without(instance,pod,code) * 100 > 10
-      for: 10m
+      for: 30m
       labels:
         service: telemeter
         severity: critical
     - alert: AuthorizeClientErrorsHigh - prod
       annotations:
         message: "{{ $labels.client }} is returning errors for {{ $value }}% of requests."
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
+        runbook: "https://gitlab.cee.redhat.com/observatorium/configuration/tree/master/docs/sop"
         dashboard: "https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-prometheus&var-cluster=app-sre&var-namespace=telemeter-production"
       expr: |
         sum(rate(client_api_requests_total{namespace="telemeter-production",client="authorize",code=~"^(?:5..)$"}[5m])) without(instance,pod,code)
@@ -77,7 +77,7 @@ spec:
     - alert: OAuthClientErrorsHigh - prod
       annotations:
         message: "{{ $labels.client }} is returning errors for {{ $value }}% of requests."
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
+        runbook: "https://gitlab.cee.redhat.com/observatorium/configuration/tree/master/docs/sop"
         dashboard: "https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-prometheus&var-cluster=app-sre&var-namespace=telemeter-production"
       expr: |
         sum(rate(client_api_requests_total{namespace="telemeter-production",client="oauth",code=~"^(?:5..)$"}[5m])) without(instance,pod,code)
@@ -90,7 +90,7 @@ spec:
     - alert: OAuthClientErrorsHigh - prod
       annotations:
         message: "{{ $labels.client }} is returning errors for {{ $value }}% of requests."
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/telemeter/sop"
+        runbook: "https://gitlab.cee.redhat.com/observatorium/configuration/tree/master/docs/sop"
         dashboard: "https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-prometheus&var-cluster=app-sre&var-namespace=telemeter-production"
       expr: |
         sum(rate(client_api_requests_total{namespace="telemeter-production",client="oauth",code=~"^(?:5..)$"}[5m])) without(instance,pod,code)

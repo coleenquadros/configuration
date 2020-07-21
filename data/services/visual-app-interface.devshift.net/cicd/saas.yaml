@@ -1,0 +1,40 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: app-interface
+
+name: saas-visual-app-interface
+description: 'SaaS tracking file for Visual App-interface'
+
+app:
+  $ref: /services/visual-app-interface.devshift.net/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/app-sre/visual-qontract
+- quay.io/pusher/oauth2_proxy
+
+resourceTemplates:
+- name: visual-qontract
+  url: https://github.com/app-sre/visual-qontract
+  path: /openshift/visual-qontract.yaml
+  targets:
+  - namespace:
+      $ref: /services/visual-app-interface.devshift.net/namespaces/visual-qontract-stage.yml
+    ref: master
+    upstream: app-sre-visual-qontract-gh-build-master
+  - namespace:
+      $ref: /services/visual-app-interface.devshift.net/namespaces/visual-qontract-production.yml
+    ref: a9a6934b060839f3b285e24108d1e529d011e1da

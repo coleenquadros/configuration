@@ -74,3 +74,40 @@ spec:
       labels:
         service: uhc-acct-mngr
         severity: medium
+    - alert: OCM dependencies - quay creating robot users slow - stage
+      annotations:
+        message: "AMS is seeing a high average latency creating robot accounts on Quay. The average response time over the last 5 minutes is {{ $value | humanize }} seconds"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
+      expr: |
+        sum(rate(api_outbound_request_duration_sum{namespace="uhc-stage",service="uhc-acct-mngr-metrics",apiservice="quay",code="201",path="/api/v1/organization/-/robots/-"}[5m]))
+        /
+        sum(rate(api_outbound_request_duration_count{namespace="uhc-stage",service="uhc-acct-mngr-metrics",apiservice="quay",code="201",path="/api/v1/organization/-/robots/-"}[5m]))
+        > 1
+      for: 10m
+      labels:
+        service: uhc-acct-mngr
+        severity: medium
+    - alert: OCM dependencies - quay too many errors - stage
+      annotations:
+        message: "AMS is seeing a high rate of errors from Quay for {{ $value | humanize }}% of requests."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
+      expr: |
+        sum(rate(api_outbound_request_count{namespace="uhc-stage",service="uhc-acct-mngr-metrics",apiservice="quay",code!~"2.."}[5m]))
+        /
+        sum(rate(api_outbound_request_count{namespace="uhc-stage",service="uhc-acct-mngr-metrics",apiservice="quay"}[5m])) * 100 > 5
+      for: 10m
+      labels:
+        service: uhc-acct-mngr
+        severity: medium
+    - alert: OCM dependencies - RHIT too many errors - stage
+      annotations:
+        message: "AMS is seeing a high rate of errors from RHIT for {{ $value | humanize }}% of requests."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
+      expr: |
+        sum(rate(api_outbound_request_count{namespace="uhc-stage",service="uhc-acct-mngr-metrics",apiservice="rhit",code!~"2.."}[5m]))
+        /
+        sum(rate(api_outbound_request_count{namespace="uhc-stage",service="uhc-acct-mngr-metrics",apiservice="rhit"}[5m])) * 100 > 5
+      for: 10m
+      labels:
+        service: uhc-acct-mngr
+        severity: medium

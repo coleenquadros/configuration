@@ -1,0 +1,1 @@
+- $ref: /services/osd-operators/cicd/saas/saas-{operator_name}.yaml

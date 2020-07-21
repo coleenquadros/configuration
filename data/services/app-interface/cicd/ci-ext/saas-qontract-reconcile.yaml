@@ -1,0 +1,57 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: app-interface
+
+name: saas-qontract-reconcile
+description: 'SaaS tracking file for App-interface'
+
+app:
+  $ref: /services/app-interface/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/app-sre/qontract-reconcile
+- quay.io/app-sre/fluentd
+- quay.io/app-sre/busybox
+
+resourceTemplates:
+- name: qontract-reconcile
+  url: https://github.com/app-sre/qontract-reconcile
+  path: /openshift/qontract-reconcile.yaml
+  parameters:
+    BUSYBOX_IMAGE_PULL_POLICY: IfNotPresent
+    BUSYBOX_IMAGE_TAG: 1.31.1
+    FLUENTD_IMAGE_PULL_POLICY: IfNotPresent
+    FLUENTD_IMAGE_TAG: 8e1d986
+    SLACK_ICON_EMOJI: ':app-sre:'
+  targets:
+  - namespace:
+      $ref: /services/app-interface/namespaces/app-interface-stage.yml
+    ref: master
+    upstream: app-sre-qontract-reconcile-gh-build-master
+    parameters:
+      DRY_RUN: --dry-run
+      GITHUB_API: https://github-mirror.stage.devshift.net
+      SLACK_CHANNEL: sd-app-sre-reconcile-stage
+      SLEEP_DURATION_SECS: 600
+  - namespace:
+      $ref: /services/app-interface/namespaces/app-interface-production.yml
+    ref: b41e9b56a2cba835fb3c8decc72348dc87fab93d
+    parameters:
+      DRY_RUN: --no-dry-run
+      GITHUB_API: https://github-mirror.devshift.net
+      SLACK_CHANNEL: sd-app-sre-reconcile
+      SLEEP_DURATION_SECS: 120

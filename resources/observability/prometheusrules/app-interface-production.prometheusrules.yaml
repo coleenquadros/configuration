@@ -1,0 +1,44 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: app-interface-alerts
+spec:
+  groups:
+  - name: app-interface-cronjob
+    rules:
+    - alert: KubeJobFailed
+      annotations:
+        message: Job {{ $labels.namespace }}/{{ $labels.job_name }} failed to complete in {{ $labels.namespace }}.
+      expr: |
+        kube_job_status_failed{job="kube-state-metrics",namespace="app-interface-production"}  > 0
+      for: 5m
+      labels:
+        severity: high
+  - name: qontract-reconcile
+    interval: 1m
+    rules:
+    - alert: QontractReconcileError
+      labels:
+        severity: high
+      expr: sum(increase(qontract_reconcile_run_status_total{status!~"0|3|-9"}[5m])) by (integration, shards, shard_id, status) > 0
+      for: 5m
+      annotations:
+        runbook: ""
+        dashboard: "https://grafana.devshift.net/d/Integrations/integrations"
+        message: "Integration: {{ $labels.integration }} has failed with exit code {{ $labels.status }}"
+        link_url: ""
+    - alert: QontractReconcileOomKiller
+      labels:
+        severity: high
+      expr: sum(increase(qontract_reconcile_run_status_total{status="-9"}[5m])) by (integration, shards, shard_id, status) > 0
+      for: 5m
+      annotations:
+        runbook: ""
+        dashboard: "https://grafana.devshift.net/d/Integrations/integrations"
+        message: "Integration: {{ $labels.integration }} has been OOM-Killed"
+        link_url: ""

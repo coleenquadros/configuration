@@ -1,0 +1,79 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: xjoin
+  platform: insights
+
+name: xjoin
+description: xjoin app on the Insights Platform
+
+app:
+  $ref: /services/insights/xjoin/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- Deployment
+- DeploymentConfig
+- HorizontalPodAutoscaler
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+- quay.io/prometheus/pushgateway
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: xjoin-search
+  path: /templates/xjoin/xjoin-search.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: a308c74
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
+    ref: 69a17ceb3cb13893548c24051b2ae8e2b6511dd3
+    parameters:
+      IMAGE_TAG: a308c74
+- name: xjoin-kafka-connect
+  path: /templates/xjoin/xjoin-kafka-connect.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: a404273
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
+    ref: 5c8cc0e6236e5252aad834c8548ef7e657216c89
+    parameters:
+      IMAGE_TAG: a404273
+- name: xjoin-es-exporter
+  path: /templates/xjoin/xjoin-es-exporter.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: f621527
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
+    ref: 69a17ceb3cb13893548c24051b2ae8e2b6511dd3
+    parameters:
+      IMAGE_TAG: f621527

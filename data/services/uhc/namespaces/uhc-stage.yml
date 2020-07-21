@@ -12,16 +12,17 @@ cluster:
 app:
   $ref: /services/uhc/app.yml
 
+environment:
+  $ref: /products/osdv4/environments/stage.yml
+
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
-# - $ref: /services/telemeter/namespaces/telemeter-stage.yml
 
 managedRoles: true
 
 managedResourceTypes:
 - ConfigMap
 - Secret
-- Route
 - ServiceAccount
 
 openshiftResources:
@@ -38,7 +39,7 @@ openshiftResources:
   version: 4
 - provider: vault-secret
   path: app-interface/app-sre-stage/uhc-stage/uhc-acct-mngr
-  version: 7
+  version: 10
 - provider: vault-secret
   path: app-interface/app-sre-stage/uhc-stage/clusters-cleaner
   version: 2
@@ -72,6 +73,12 @@ openshiftResources:
   path: /app-sre-stage/uhc-stage/authentication.configmap.yaml
 - provider: resource
   path: /app-sre-stage/uhc-stage/gateway.configmap.yaml
+- provider: resource
+  path: /app-sre-stage/uhc-stage/ocm-service-log-triggers.configmap.yaml
+- name: unleash
+  provider: vault-secret
+  path: app-sre/unleash/ocm-stage-unleash-token
+  version: 1
 
 managedTerraformResources: true
 
@@ -97,11 +104,20 @@ openshiftServiceAccountTokens:
     $ref: /services/hive/namespaces/hive-stage.yml
   serviceAccountName: hive-frontend
 - namespace:
-    $ref: /services/hive/namespaces/aws-account-operator-stage.yml
+    $ref: /services/hive/namespaces/hive-stage-01/hive-stage.yml
+  serviceAccountName: hive-frontend
+- namespace:
+    $ref: /services/osd-operators/namespaces/aws-account-operator-stage.yml
+  serviceAccountName: aws-account-operator-client
+- namespace:
+    $ref: /services/osd-operators/namespaces/hive-stage-01/aws-account-operator-stage-01.yml
   serviceAccountName: aws-account-operator-client
 - namespace:
     $ref: /services/telemeter/namespaces/telemeter-stage.yml
   serviceAccountName: uhc-prometheus-access
 - namespace:
-    $ref: /services/hive/namespaces/gcp-project-operator-stage.yml
+    $ref: /services/osd-operators/namespaces/gcp-project-operator-stage.yml
+  serviceAccountName: gcp-project-operator-client
+- namespace:
+    $ref: /services/osd-operators/namespaces/hive-stage-01/gcp-project-operator-stage-01.yml
   serviceAccountName: gcp-project-operator-client

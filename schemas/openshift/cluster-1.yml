@@ -96,11 +96,13 @@ properties:
         enum:
         - us-east-1
         - us-east-2
-      major_version:
-        type: integer
+      version:
+        type: string
         enum:
-        - 3
-        - 4
+        - 4.3.18
+        - 4.3.19
+        - 4.3.25
+        - 4.4.11
       multi_az:
         type: boolean
       nodes:
@@ -111,12 +113,18 @@ properties:
         - m5.xlarge
         - m5.2xlarge
         - m5.4xlarge
+        - r5.2xlarge
+      private:
+        type: boolean
       storage:
         type: integer
         enum:
         - 1
         - 100
         - 600
+        - 1100
+        - 1600
+        - 2100
       load_balancers:
         type: integer
         enum:
@@ -136,23 +144,77 @@ properties:
     type: object
     additionalProperties: false
     properties:
-      vpc_id:
-        type: string
       connections:
         type: array
         items:
           type: object
           properties:
+            provider:
+              type: string
+              enum:
+              - account-vpc
+              - cluster-vpc-requester
+              - cluster-vpc-accepter
             name:
               type: string
             vpc:
               "$ref": "/common-1.json#/definitions/crossref"
               "$schemaRef": "/aws/vpc-1.yml"
-          required:
-          - name
-          - vpc
+            cluster:
+              "$ref": "/common-1.json#/definitions/crossref"
+              "$schemaRef": "/openshift/cluster-1.yml"
+            manageRoutes:
+              type: boolean
+          oneOf:
+          - properties:
+              provider:
+                type: string
+                enum:
+                - account-vpc
+              name:
+                type: string
+              vpc:
+                "$ref": "/common-1.json#/definitions/crossref"
+                "$schemaRef": "/aws/vpc-1.yml"
+              manageRoutes:
+                type: boolean
+            required:
+            - provider
+            - name
+            - vpc
+          - properties:
+              provider:
+                type: string
+                enum:
+                - cluster-vpc-requester
+              name:
+                type: string
+              cluster:
+                "$ref": "/common-1.json#/definitions/crossref"
+                "$schemaRef": "/openshift/cluster-1.yml"
+              manageRoutes:
+                type: boolean
+            required:
+            - provider
+            - name
+            - cluster
+          - properties:
+              provider:
+                type: string
+                enum:
+                - cluster-vpc-accepter
+              name:
+                type: string
+              cluster:
+                "$ref": "/common-1.json#/definitions/crossref"
+                "$schemaRef": "/openshift/cluster-1.yml"
+              manageRoutes:
+                type: boolean
+            required:
+            - provider
+            - name
+            - cluster
     required:
-    - vpc_id
     - connections
   jumpHost:
     type: object
@@ -193,6 +255,8 @@ properties:
           - openshift-resources
           - openshift-rolebindings
           - openshift-users
+          - openshift-vault-secrets
+          - openshift-routes
       e2eTests:
         type: array
         items:
@@ -240,8 +304,6 @@ required:
 - description
 - internal
 dependencies:
-  managedGroups:
-  - automationToken
   jumpHost:
   - automationToken
   ocm:

@@ -1,0 +1,179 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: app-sre-observability
+
+name: saas-nginx-proxy
+description: saas-nginx-proxy
+
+app:
+  $ref: /services/observability/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- Deployment
+- Service
+- ConfigMap
+- Route
+
+imagePatterns:
+- quay.io/app-sre
+
+resourceTemplates:
+- name: nginx-proxy
+  path: /openshift/nginx-proxy.template.yaml
+  url: https://gitlab.cee.redhat.com/service/app-sre-observability
+  parameters:
+    WORKER_CONNECTIONS: 1024
+    SERVER_NAMES_HASH_BUCKET_SIZE: 128
+    PROXY_READ_TIMEOUT: 900s
+    PROXY_SEND_TIMEOUT: 900s
+  targets:
+  - namespace:
+      $ref: /openshift/app-sre-stage-01/namespaces/app-sre-observability-per-cluster.yml
+    ref: master
+    parameters:
+      REPLICAS: 1
+      ALERTMANAGER_SERVER_NAME: alertmanager.app-sre-stage-01.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.app-sre-stage-01.devshift.net
+  - namespace:
+      $ref: /openshift/app-sre-stage-02/namespaces/app-sre-observability-per-cluster.yml
+    ref: master
+    parameters:
+      REPLICAS: 1
+      ALERTMANAGER_SERVER_NAME: alertmanager.app-sre-stage-02.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.app-sre-stage-02.devshift.net
+  - namespace:
+      $ref: /openshift/app-sre-prod-01/namespaces/app-sre-observability-per-cluster.yml
+    ref: 278b4f34bc8c89dde30b6209efbcde3be38db840
+    parameters:
+      REPLICAS: 3
+      ALERTMANAGER_SERVER_NAME: alertmanager.app-sre-prod-01.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.app-sre-prod-01.devshift.net
+  - namespace:
+      $ref: /openshift/app-sre-prod-03/namespaces/app-sre-observability-per-cluster.yml
+    ref: 278b4f34bc8c89dde30b6209efbcde3be38db840
+    parameters:
+      REPLICAS: 3
+      ALERTMANAGER_SERVER_NAME: alertmanager.app-sre-prod-03.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.app-sre-prod-03.devshift.net
+  - namespace:
+      $ref: /openshift/app-sre-prod-04/namespaces/app-sre-observability-per-cluster.yml
+    ref: 278b4f34bc8c89dde30b6209efbcde3be38db840
+    parameters:
+      REPLICAS: 3
+      ALERTMANAGER_SERVER_NAME: alertmanager.app-sre-prod-04.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.app-sre-prod-04.devshift.net
+  - namespace:
+      $ref: /openshift/telemeter-prod-01/namespaces/app-sre-observability-per-cluster.yml
+    ref: 278b4f34bc8c89dde30b6209efbcde3be38db840
+    parameters:
+      REPLICAS: 3
+      ALERTMANAGER_SERVER_NAME: alertmanager.telemeter-prod-01.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.telemeter-prod-01.devshift.net
+  - namespace:
+      $ref: /openshift/quayio-stage/namespaces/app-sre-observability-per-cluster.yml
+    ref: master
+    parameters:
+      REPLICAS: 1
+      ALERTMANAGER_SERVER_NAME: alertmanager.quayio-stage.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.quayio-stage.devshift.net
+  - namespace:
+      $ref: /openshift/quay-s-ue1/namespaces/app-sre-observability-per-cluster.yml
+    ref: master
+    parameters:
+      REPLICAS: 1
+      ALERTMANAGER_SERVER_NAME: alertmanager.quay-s-ue1.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.quay-s-ue1.devshift.net
+  - namespace:
+      $ref: /openshift/quays02ue1/namespaces/app-sre-observability-per-cluster.yml
+    ref: master
+    parameters:
+      REPLICAS: 1
+      ALERTMANAGER_SERVER_NAME: alertmanager.quays02ue1.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.quays02ue1.devshift.net
+  - namespace:
+      $ref: /openshift/quayp01ue1/namespaces/app-sre-observability-per-cluster.yml
+    ref: 278b4f34bc8c89dde30b6209efbcde3be38db840
+    parameters:
+      REPLICAS: 3
+      ALERTMANAGER_SERVER_NAME: alertmanager.quayp01ue1.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.quayp01ue1.devshift.net
+  - namespace:
+      $ref: /openshift/quayp02ue2/namespaces/app-sre-observability-per-cluster.yml
+    ref: 278b4f34bc8c89dde30b6209efbcde3be38db840
+    parameters:
+      REPLICAS: 3
+      ALERTMANAGER_SERVER_NAME: alertmanager.quayp02ue2.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.quayp02ue2.devshift.net
+  - namespace:
+      $ref: /openshift/quay-p-ue1/namespaces/app-sre-observability-per-cluster.yml
+    ref: 278b4f34bc8c89dde30b6209efbcde3be38db840
+    parameters:
+      REPLICAS: 3
+      ALERTMANAGER_SERVER_NAME: alertmanager.quay-p-ue1.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.quay-p-ue1.devshift.net
+  - namespace:
+      $ref: /openshift/quay-p-ue2/namespaces/app-sre-observability-per-cluster.yml
+    ref: 278b4f34bc8c89dde30b6209efbcde3be38db840
+    parameters:
+      REPLICAS: 3
+      ALERTMANAGER_SERVER_NAME: alertmanager.quay-p-ue2.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.quay-p-ue2.devshift.net
+  - namespace:
+      $ref: /openshift/hive-stage-01/namespaces/app-sre-observability-per-cluster.yml
+    ref: master
+    parameters:
+      REPLICAS: 1
+      ALERTMANAGER_SERVER_NAME: alertmanager.hive-stage-01.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.hive-stage-01.devshift.net
+  - namespace:
+      $ref: /openshift/hivep01ue1/namespaces/app-sre-observability-per-cluster.yml
+    ref: master
+    parameters:
+      REPLICAS: 1
+      ALERTMANAGER_SERVER_NAME: alertmanager.hivep01ue1.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.hivep01ue1.devshift.net
+  - namespace:
+      $ref: /openshift/crc-stg-01/namespaces/app-sre-observability-per-cluster.yml
+    ref: master
+    parameters:
+      REPLICAS: 1
+      ALERTMANAGER_SERVER_NAME: alertmanager.crc-stg-01.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.crc-stg-01.devshift.net
+  - namespace:
+      $ref: /openshift/crcs01ue1/namespaces/app-sre-observability-per-cluster.yml
+    ref: master
+    parameters:
+      REPLICAS: 1
+      ALERTMANAGER_SERVER_NAME: alertmanager.crcs01ue1.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.crcs01ue1.devshift.net
+  - namespace:
+      $ref: /openshift/crcp01ue1/namespaces/app-sre-observability-per-cluster.yml
+    ref: master
+    parameters:
+      REPLICAS: 3
+      ALERTMANAGER_SERVER_NAME: alertmanager.crcp01ue1.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.crcp01ue1.devshift.net
+  - namespace:
+      $ref: /openshift/codereadyi01ue1/namespaces/app-sre-observability-per-cluster.yml
+    ref: master
+    parameters:
+      REPLICAS: 1
+      ALERTMANAGER_SERVER_NAME: alertmanager.codereadyi01ue1.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.codereadyi01ue1.devshift.net
+  - namespace:
+      $ref: /openshift/che-dev/namespaces/app-sre-observability-per-cluster.yml
+    ref: master
+    parameters:
+      REPLICAS: 1
+      ALERTMANAGER_SERVER_NAME: alertmanager.che-dev.devshift.net
+      PROMETHEUS_SERVER_NAME: prometheus.che-dev.devshift.net

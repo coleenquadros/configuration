@@ -1,0 +1,105 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: historical-system-profiles
+  platform: insights
+
+name: historical-system-profiles
+description: historical-system-profiles app on the Insights Platform
+
+app:
+  $ref: /services/insights/historical-system-profiles/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- Deployment
+- DeploymentConfig
+- HorizontalPodAutoscaler
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+- quay.io/prometheus/pushgateway
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: historical-system-profiles-archiver
+  path: /templates/historical-system-profiles/historical-system-profiles-archiver.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/historical-system-profiles/namespaces/stage-historical-system-profiles-stage.yml
+    ref: master
+    parameters:
+      CLOUD_WATCH_LOG_GROUP: historical-system-profiles-stage
+      IMAGE_TAG: 7eee118
+  - namespace:
+      $ref: /services/insights/historical-system-profiles/namespaces/historical-system-profiles-prod.yml
+    ref: 995c886b2d2f3421d75703549c333765a2eb553f
+    parameters:
+      CLOUD_WATCH_LOG_GROUP: historical-system-profiles-prod
+      IMAGE_TAG: 7eee118
+      REPLICAS: 3
+
+- name: historical-system-profiles-backend
+  path: /templates/historical-system-profiles/historical-system-profiles-backend.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/historical-system-profiles/namespaces/stage-historical-system-profiles-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 7eee118
+  - namespace:
+      $ref: /services/insights/historical-system-profiles/namespaces/historical-system-profiles-prod.yml
+    ref: 995c886b2d2f3421d75703549c333765a2eb553f
+    parameters:
+      IMAGE_TAG: 7eee118
+      MAX_REPLICAS: 4
+      MIN_REPLICAS: 2
+
+- name: historical-system-profiles-clean-expired-records
+  path: /templates/historical-system-profiles/historical-system-profiles-clean-expired-records.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/historical-system-profiles/namespaces/stage-historical-system-profiles-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 7eee118
+      LOG_GROUP: historical-system-profiles-stage
+  - namespace:
+      $ref: /services/insights/historical-system-profiles/namespaces/historical-system-profiles-prod.yml
+    ref: 995c886b2d2f3421d75703549c333765a2eb553f
+    parameters:
+      LOG_GROUP: historical-system-profiles-prod
+      IMAGE_TAG: 7eee118
+
+- name: historical-system-profiles-deleter
+  path: /templates/historical-system-profiles/historical-system-profiles-deleter.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/historical-system-profiles/namespaces/stage-historical-system-profiles-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 7eee118
+      LOG_GROUP: historical-system-profiles-stage
+  - namespace:
+      $ref: /services/insights/historical-system-profiles/namespaces/historical-system-profiles-prod.yml
+    ref: 995c886b2d2f3421d75703549c333765a2eb553f
+    parameters:
+      LOG_GROUP: historical-system-profiles-prod
+      IMAGE_TAG: 7eee118

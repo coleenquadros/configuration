@@ -65,12 +65,61 @@ spec:
       labels:
         service: uhc-acct-mngr
         severity: medium
+    - alert: CronJobStatusFailed
+      expr: |
+        job_cronjob:kube_job_status_failed:sum
+        * ON(cronjob) GROUP_RIGHT()
+        kube_cronjob_labels
+        > 0
+      for: 1m
+      annotations:
+        description: '{{ $labels.cronjob }} last run has failed {{ $value }} times.'
+      labels:
+        service: uhc-acct-mngr
+        severity: medium
     - alert: KubeJobFailed
       annotations:
         message: Job {{ $labels.namespace }}/{{ $labels.job_name }} failed to complete in {{ $labels.namespace }}.
       expr: |
         kube_job_status_failed{job="kube-state-metrics",namespace="uhc-production"}  > 0
       for: 1h
+      labels:
+        service: uhc-acct-mngr
+        severity: medium
+    - alert: OCM dependencies - Quay creating robot users slow - production
+      annotations:
+        message: "AMS is seeing a high average latency creating robot accounts on Quay. The average response time over the last 5 minutes is {{ $value | humanize }} seconds"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
+      expr: |
+        sum(rate(api_outbound_request_duration_sum{namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="quay",code="201",path="/api/v1/organization/-/robots/-"}[5m]))
+        /
+        sum(rate(api_outbound_request_duration_count{namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="quay",code="201",path="/api/v1/organization/-/robots/-"}[5m]))
+        > 1
+      for: 10m
+      labels:
+        service: uhc-acct-mngr
+        severity: medium
+    - alert: OCM dependencies - Quay too many errors - production
+      annotations:
+        message: "AMS is seeing a high rate of errors from Quay for {{ $value | humanize }}% of requests."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
+      expr: |
+        sum(rate(api_outbound_request_count{namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="quay",code!~"2.."}[5m]))
+        /
+        sum(rate(api_outbound_request_count{namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="quay"}[5m])) * 100 > 5
+      for: 10m
+      labels:
+        service: uhc-acct-mngr
+        severity: medium
+    - alert: OCM dependencies - RHIT too many errors - production
+      annotations:
+        message: "AMS is seeing a high rate of errors from RHIT for {{ $value | humanize }}% of requests."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
+      expr: |
+        sum(rate(api_outbound_request_count{namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="rhit",code!~"2.."}[5m]))
+        /
+        sum(rate(api_outbound_request_count{namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="rhit"}[5m])) * 100 > 5
+      for: 10m
       labels:
         service: uhc-acct-mngr
         severity: medium

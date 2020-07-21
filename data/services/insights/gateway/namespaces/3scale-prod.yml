@@ -1,0 +1,70 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: gateway
+
+name: 3scale-prod
+description: Insights 3scale-stage on the Stage cluster under e2e-deploy/ocdeployer management
+
+cluster:
+  $ref: /openshift/crcp01ue1/cluster.yml
+
+app:
+  $ref: /services/insights/gateway/app.yml
+
+environment:
+  $ref: /products/insights/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- Route
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource
+  path: /insights-prod/3scale-prod/api-gateway-prod.route.yml
+- provider: vault-secret
+  path: insights/secrets/insights-prod/3scale-prod/apicast-configuration-url-secret
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-prod/3scale-prod/apicast-insights-3scale-config
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-prod/3scale-prod/apicast-insights-services-ephemeral-jwt-pub-key
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-prod/3scale-prod/cloudservices-threescale-pull-secret
+  version: 1
+- provider: vault-secret
+  path: insights/secrets/insights-prod/3scale-prod/gateway-server
+  version: 2
+  annotations:
+    qontract.recycle: "true"
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-prod
+  identifier: 3scale-prod
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch

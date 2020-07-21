@@ -1,0 +1,56 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: ccx-data-pipeline
+  platform: insights
+
+name: ccx-data-pipeline
+description: ccx-data-pipeline app on the Insights Platform
+
+app:
+  $ref: /services/insights/ccx-data-pipeline/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- ConfigMap
+- Deployment
+- DeploymentConfig
+- HorizontalPodAutoscaler
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+- quay.io/prometheus/pushgateway
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: ccx-data-pipeline
+  path: /templates/ccx-data-pipeline/ccx-data-pipeline.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 4e482e0
+- name: insights-results-aggregator
+  path: /templates/ccx-data-pipeline/insights-results-aggregator.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: fb1938e

@@ -8,17 +8,20 @@ name: bayesian-preview
 description: preview namespace for bayesian
 
 cluster:
-  $ref: /openshift/dsaas-stg/cluster.yml
+  $ref: /openshift/app-sre-stage-02/cluster.yml
 
 app:
   $ref: /services/openshift.io/app.yml
+
+environment:
+  $ref: /products/openshift.io/environments/stage.yml
+
+grafanaUrl: "https://grafana.app-sre.devshift.net/d/k8s-compute-resources-namespace-pods/kubernetes-compute-resources-namespace-pods?var-datasource=dsaas-stg-cluster-prometheus&var-namespace=bayesian-preview"
 
 managedRoles: true
 
 managedResourceTypes:
 - ConfigMap
-- Secret
-- Route
 
 openshiftResources:
 - provider: vault-secret
@@ -45,6 +48,9 @@ openshiftResources:
   path: app-interface/dsaas-stg/bayesian-preview/3scale
   version: 1
 - provider: vault-secret
+  path: app-interface/dsaas-stg/bayesian-preview/snyk-secrets
+  version: 1
+- provider: vault-secret
   path: app-interface/dsaas-stg/bayesian-preview/aws
   version: 1
 - provider: vault-secret
@@ -53,6 +59,9 @@ openshiftResources:
 - provider: vault-secret
   path: app-interface/dsaas-stg/bayesian-preview/gemini-server
   version: 1
+- provider: vault-secret
+  path: app-interface/dsaas-stg/bayesian-preview/google-big-query
+  version: 2
 - provider: vault-secret
   path: app-interface/dsaas-stg/bayesian-preview/google-cloud-key
   version: 1
@@ -64,9 +73,9 @@ openshiftResources:
   version: 1
 - provider: vault-secret
   path: app-interface/dsaas-stg/bayesian-preview/worker
-  # this version adds the 'sentry-auth-token' key to the secret
+  # this version adds the 'sentry-auth-token' and 'sentry-url' key to the secret
   # this token belongs to the 'rh-devtools-bot' github user
-  version: 3
+  version: 4
   annotations:
     qontract.recycle: "true"
 - provider: vault-secret
@@ -111,6 +120,12 @@ openshiftResources:
   vault_tls_secret_version: 3
 - provider: route
   path: /dsaas-stg/bayesian-preview/stage-pg-bouncer.route.yaml
+- provider: route
+  path: /dsaas-stg/bayesian-preview/bayesian-osa-api.route.yaml
+  vault_tls_secret_path: app-interface/dsaas-stg/routes/_wildcard.api.prod-preview.openshift.io
+  vault_tls_secret_version: 3
+- provider: route
+  path: /dsaas-stg/bayesian-preview/bayesian-data-importer.route.yaml
 
 managedTerraformResources: true
 
@@ -157,12 +172,22 @@ terraformResources:
   identifier: public-dynamic-manifests
   defaults: /terraform/resources/s3-public-read-1.yml
   output_resource_name: dynamic-manifests-s3
+- provider: s3
+  account: osio
+  identifier: stage-openshift-probable-vulnerability-models
+  defaults: /terraform/resources/s3-private-1.yml
+  output_resource_name: openshift-probable-vulnerability-models-s3
+- provider: s3
+  account: osio
+  identifier: stage-openshift-probable-vulnerability-inference-result
+  defaults: /terraform/resources/s3-private-1.yml
+  output_resource_name: openshift-probable-vulnerability-inference-result-s3
 - provider: dynamodb
   account: osio
   identifier: stage-dynamodb
   output_resource_name: aws-dynamodb
   specs:
-  - defaults: /terraform/resources/osio/dynamodb-1.yml
+  - defaults: /terraform/resources/osio/dynamodb-cra-stg.yml
     tables:
     - key: edgestore_table_name
       value: STAGE_edgestore
@@ -185,7 +210,7 @@ terraformResources:
   identifier: osa-stage-dynamodb
   output_resource_name: aws-dynamodb-osa
   specs:
-  - defaults: /terraform/resources/osio/dynamodb-1.yml
+  - defaults: /terraform/resources/osio/dynamodb-osa-stg.yml
     tables:
     - key: edgestore_table_name
       value: stage_osa_edgestore
@@ -201,7 +226,7 @@ terraformResources:
       value: stage_osa_txlog
     - key: system_properties_table_name
       value: stage_osa_system_properties
-- provider: service-account
+- provider: aws-iam-service-account
   account: osio
   identifier: stage-elastic-map-reduce
   user_policy:

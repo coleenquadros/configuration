@@ -51,10 +51,10 @@ spec:
     - alert: LocalKubeClientRequestsHigh - prod
       annotations:
         message: "detected {{ $value }} {{ $labels.resource }} local API requests per second from controller {{ $labels.controller }}"
-        runbook: "https://github.com/openshift/hive-sops/blob/master/sop"
+        runbook: "https://github.com/openshift/hive-sops/blob/master/sop/KubeClientRequestsHigh.md"
         dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-production"
       expr: |
-        rate(hive_kube_client_requests_total{job="hive-controllers-production",remote="false"}[10m]) > 5
+        rate(hive_kube_client_requests_total{job="hive-controllers-production",remote="false",method!~"GET|LIST"}[10m]) > 5
       for: 1m
       labels:
         service: hive
@@ -63,10 +63,10 @@ spec:
     - alert: RemoteKubeClientRequestsHigh - prod
       annotations:
         message: "detected {{ $value }} {{ $labels.resource }} remote API requests per second from controller {{ $labels.controller }}"
-        runbook: "https://github.com/openshift/hive-sops/blob/master/sop"
+        runbook: "https://github.com/openshift/hive-sops/blob/master/sop/KubeClientRequestsHigh.md"
         dashboard: "https://grafana.app-sre.devshift.net/d/hive/hive?orgId=1&var-datasource=app-sre-prometheus&var-instance=hive-controllers-production"
       expr: |
-        rate(hive_kube_client_requests_total{job="hive-controllers-production",remote="true"}[10m]) > 2
+        rate(hive_kube_client_requests_total{job="hive-controllers-production",remote="true",method!~"GET|LIST"}[10m]) > 2
       for: 1m
       labels:
         service: hive
@@ -114,7 +114,7 @@ spec:
         runbook: "https://github.com/openshift/hive-sops/blob/master/sop/AWSAccountLimit.md"
         dashboard: "https://grafana.app-sre.devshift.net/d/WPRpa7HWz/aws-account-operator?orgId=1&var-datasource=app-sre-prometheus&var-environment=hive-aws-account-operator-production"
       expr: |
-        aws_account_operator_total_aws_accounts{job="hive-aws-account-operator-production"} > 2800
+        aws_account_operator_total_aws_accounts{job="hive-aws-account-operator-production"} > 2850
       labels:
         service: hive
         severity: high

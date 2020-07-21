@@ -1,0 +1,100 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: kibana
+  platform: insights
+
+name: kibana
+description: Kibana app on the Insights Platform
+
+app:
+  $ref: /services/insights/kibana/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+- Route
+- CronJob
+
+imagePatterns:
+- quay.io/cloudservices
+- quay.io/pusher
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  CLOUD_WATCH_LOG_GROUP: kibana-stage
+
+resourceTemplates:
+- name: kibana
+  path: /templates/kibana.yaml
+  url: https://github.com/RedHatInsights/kibana
+  parameters:
+    IMAGE: quay.io/cloudservices/kibana-oss
+    OAUTH_IMAGE: quay.io/pusher/oauth2_proxy
+    GITHUB_ORG: app-sre
+    GITHUB_AUTH_SECRET: kibana-auth-proxy
+  targets:
+  - namespace:
+      $ref: /services/insights/kibana/namespaces/stage-kibana-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: "7.4.2"
+      OAUTH_IMAGE_TAG: v4.0.0
+      KIBANA_HOST: kibana.apps.crc-stg-01.o4v9.p1.openshiftapps.com
+      GITHUB_TEAM: crc-stg-01-cluster
+  - namespace:
+      $ref: /services/insights/kibana/namespaces/kibana-prod.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: "7.4.2"
+      OAUTH_IMAGE_TAG: v4.0.0
+      KIBANA_HOST: kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com
+      GITHUB_TEAM: crcp01ue1-cluster
+- name: p8s-elastic-exporter
+  path: /templates/p8s-elastic-exporter.yaml
+  url: https://github.com/RedHatInsights/kibana
+  parameters:
+    IMAGE: quay.io/cloudservices/xjoin-es-exporter
+  targets:
+  - namespace:
+      $ref: /services/insights/kibana/namespaces/stage-kibana-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: f621527
+  - namespace:
+      $ref: /services/insights/kibana/namespaces/kibana-prod.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: f621527
+- name: es-cleanup
+  path: /templates/es-cleanup.yml
+  url: https://github.com/RedHatInsights/es-cleanup
+  parameters:
+    IMAGE: quay.io/cloudservices/es-cleanup
+  targets:
+  - namespace:
+      $ref: /services/insights/kibana/namespaces/dev-kibana.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 8b4067b
+  - namespace:
+      $ref: /services/insights/kibana/namespaces/prod-kibana-prod.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 8b4067b

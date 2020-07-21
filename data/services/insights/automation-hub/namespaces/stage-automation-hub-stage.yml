@@ -8,18 +8,31 @@ name: automation-hub-stage
 description: Insights automation-hub-stage on the Stage cluster under e2e-deploy/ocdeployer management
 
 cluster:
-  $ref: /openshift/insights/crc-stage-01.yml
+  $ref: /openshift/crc-stg-01/cluster.yml
 
 app:
   $ref: /services/insights/automation-hub/app.yml
 
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stg-01.yml
+- $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+
 managedRoles: true
 
 managedResourceTypes:
+- ServiceAccount
 - ConfigMap
-- Secret
 
 openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
 - provider: resource
   path: /insights-stage/automation-hub-stage/galaxy-api-config.configmap.yml
 - provider: vault-secret
@@ -30,6 +43,8 @@ openshiftResources:
 - provider: vault-secret
   path: insights/secrets/insights-stage/automation-hub-stage/automation-hub-pulp
   version: 1
+  annotations:
+    qontract.recycle: "true"
 
 managedTerraformResources: true
 
@@ -37,10 +52,18 @@ terraformResources:
 - provider: rds
   account: insights-stage
   identifier: automation-hub-stage
-  defaults: /terraform/resources/insights/stage/rds-1.yml
+  defaults: /terraform/resources/insights/stage/rds/postgres11-rds-1.yml
+  parameter_group: /terraform/resources/insights/stage/rds/postgres11-parameter-group-automation-hub-stage.yml
   output_resource_name: automation-hub-db
+  enhanced_monitoring: true
 - provider: s3
   account: insights-stage
   identifier: automation-hub-stage
   defaults: /terraform/resources/s3-private-1.yml
   output_resource_name: automation-hub-s3
+- provider: cloudwatch
+  account: insights-stage
+  identifier: automation-hub-stage
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch

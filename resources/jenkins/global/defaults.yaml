@@ -7,11 +7,13 @@
     image_pattern: ''
     kube_namespace: 'error_no_ns'
     oc: '$SSH_CMD oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" -n {kube_namespace}'
-    saasherder_image: "quay.io/openshiftio/saasherder:fdde3fb"
+    saasherder_image: "quay.io/openshiftio/saasherder:17f2f4a"
+    # replace the above line if quay.io is down
+    # saasherder_image: "gcr.io/app-sre/saasherder:17f2f4a"
     saasherder_context: ''
     saas_env: ''
     saasherder: 'docker run {saasherder_options} {saasherder_image} --context "{saasherder_context}" --environment "{saas_env}"'
-    saasherder_check_image: "docker run {saasherder_options} -e SKOPEO_USER=$QUAY_USER -e SKOPEO_PASS=$QUAY_TOKEN --entrypoint '' {saasherder_image} python /scripts/check_image.py"
+    saasherder_check_image: "docker run {saasherder_options} -e SKOPEO_USER=$QUAY_USER -e SKOPEO_PASS=$QUAY_TOKEN -v ~/.docker/config.json:/root/docker.json:z -e AUTH_FILE=/root/docker.json --entrypoint '' {saasherder_image} python /scripts/check_image.py"
     saasherder_object_blacklist: 'Route,Secret,ConfigMap,ServiceAccount'
     saasherder_object_whitelist: 'Deployment,DeploymentConfig,Service,ConfigMap,Role,RoleBinding,ServiceAccount,CronJob,StatefulSet'
     saasherder_object_validate: 'Deployment,DeploymentConfig'
@@ -22,6 +24,8 @@
     timeout: 30
     concurrent_build: false
     manifest_bouncer_image: 'quay.io/app-sre/manifest-bouncer:d3e5cbf'
+    # replace the above line if quay.io is down
+    # manifest_bouncer_image: 'gcr.io/app-sre/manifest-bouncer:d3e5cbf'
     manifest_bouncer_cmd: 'docker run --rm -i {manifest_bouncer_image} {manifest_bouncer_options} -'
     success_note_url_path: ''
     failure_note_url_path: ''
@@ -33,10 +37,14 @@
     include_path: ''
     slack_channel_notification: '#sd-app-sre-info'
     slack_notify_start: False
+    qontract_reconcile_image: 'quay.io/app-sre/qontract-reconcile:1e73a50'
+    # replace the above line if quay.io is down
+    # qontract_reconcile_image: 'gcr.io/app-sre/qontract-reconcile:1e73a50'
 
 - wrapper:
     name: timeout_wrapper
     wrappers:
+      - timestamps
       - timeout:
           timeout: '{timeout}'
           timeout-var: 'BUILD_TIMEOUT'

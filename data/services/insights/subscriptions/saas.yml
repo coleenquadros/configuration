@@ -1,0 +1,46 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: subscriptions
+  platform: insights
+
+name: subscriptions
+description: subscriptions app on the Insights Platform
+
+app:
+  $ref: /services/insights/subscriptions/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- Deployment
+- DeploymentConfig
+- HorizontalPodAutoscaler
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+- quay.io/prometheus/pushgateway
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: yupana
+  path: /templates/subscriptions/yupana.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/subscriptions/namespaces/stage-subscriptions-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 24f2a05

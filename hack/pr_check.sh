@@ -1,8 +1,16 @@
 #!/bin/bash
 
-set -exvo pipefail
-
 CURRENT_DIR=$(dirname "$0")
+
+# Check EOF newline
+pip install --user binaryornot
+git ls-files | $CURRENT_DIR/eofcheck.py
+if [ $? != 0 ]; then
+    echo "Detected files that do not end with newline"
+    exit 1
+fi
+
+set -exvo pipefail
 
 # Setup vars and clean files
 export TEMP_DIR=$(realpath -s temp)
@@ -17,8 +25,11 @@ REPORT=$TEMP_DIR/reports/index.html
 
 # Run validator
 OUTPUT_DIR=${TEMP_DIR}/validate make bundle
+
+set +e
 OUTPUT_DIR=${TEMP_DIR}/validate make validate | tee ${RESULTS}
 exit_status=$?
+set -e
 
 # Write report
 python ./$CURRENT_DIR/gen-report.py ${RESULTS} > ${REPORT}

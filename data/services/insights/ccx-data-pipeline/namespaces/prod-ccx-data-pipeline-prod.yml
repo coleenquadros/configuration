@@ -13,12 +13,21 @@ cluster:
 app:
   $ref: /services/insights/ccx-data-pipeline/app.yml
 
+environment:
+  $ref: /products/insights/environments/production.yml
+
 managedRoles: true
 
 managedResourceTypes:
-- Secret
+- ServiceAccount
 
 openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-prod/shared/private-image-puller.serviceaccount.yaml
 - provider: vault-secret
   name: quay-cloudservices-pull
   path: insights/quay/quay.io
@@ -32,4 +41,7 @@ terraformResources:
   account: insights-prod
   identifier: ccx-data-pipeline-prod
   defaults: /terraform/resources/insights/production/rds-1.yml
+  overrides:
+    monitoring_interval: 60
+  enhanced_monitoring: true
   output_resource_name: ccx-data-pipeline-db

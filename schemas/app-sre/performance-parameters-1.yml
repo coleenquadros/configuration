@@ -33,7 +33,7 @@ properties:
     "$ref": "/common-1.json#/definitions/crossref"
     "$schemaRef": "/openshift/namespace-1.yml"
 
-  sloReports:
+  reports:
     type: array
     items:
       type: object
@@ -47,11 +47,52 @@ properties:
         url:
           type: string
           format: uri
-          description: "Link this to some proof of where SLO's are coming from. Not a JIRA ticket"
+          description: "Link this to some proof of where SLI's values are coming from. Not a JIRA ticket"
 
       required:
       - date
       - url
+
+  SLIRecordingRules:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+
+      properties:
+        name:
+          type: string
+          description: "Name describing this property. Must be unique"
+          pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
+
+        kind:
+          type: string
+          enum: ['http_rate', 'latency_rate']
+
+        metric:
+          type: string
+          description: "Metric used for this rule"
+          pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
+
+        selectors:
+          description: "Metric selectors to be used in Prometheus rule"
+          type: array
+          items:
+            "$ref": "/common-1.json#/definitions/promSelector"
+
+        percentile:
+          description: "Percentile for latency_rate metrics"
+
+        httpStatusLabel:
+          description: "Name of the label that contains the http status code"
+          type: string
+          pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
+
+      required:
+      - name
+      - kind
+      - metric
+      - selectors
 
   volume:
     type: array
@@ -60,39 +101,34 @@ properties:
       additionalProperties: false
 
       properties:
-        description:
+        name:
           type: string
+          description: "Name describing this property. Must be unique"
+          pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
 
         kind:
           type: string
           enum: ['SLO']
 
-        metric:
+        rules:
           type: string
+          description: "Name of the sli recording rules we will be using here. It must exist"
           pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
-
-        selectors:
-          description: "Metric selectors to be used in Prometheus rule"
-          type: object
-
-        threshold:
-          description: "Maximum value of the metric"
-          type: number
 
         target:
           description: "SLO target percentage"
           type: number
 
-        httpStatusLabel:
-          description: "Name of the label that contains the http status code"
-          type: string
-          pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
+        additionalLabels:
+          description: "Additional labels to tag the recording rules"
+          type: array
+          items:
+            "$ref": "/common-1.json#/definitions/promSelector"
 
       required:
+      - name
       - kind
-      - metric
-      - selectors
-      - threshold
+      - rules
       - target
 
   availability:
@@ -102,34 +138,48 @@ properties:
       additionalProperties: false
 
       properties:
-        description:
+        name:
           type: string
+          description: "Name describing this property. Must be unique"
+          pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
 
         kind:
           type: string
           enum: ['SLO']
 
-        metric:
-          type: string
-          pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
-
-        selectors:
-          description: "Metric selectors to be used in Prometheus rule"
+        rules:
           type: object
+          additionalProperties: false
+          description: "Set of latency/errors slo rule names."
+          properties:
+            latency:
+              type: array
+              items:
+                type: string
+                pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
+            errors:
+              type: array
+              items:
+                type: string
+                pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
+          required:
+          - latency
+          - errors
 
         target:
           description: "SLO target percentage"
           type: number
 
-        httpStatusLabel:
-          description: "Name of the label that contains the http status code"
-          type: string
-          pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
+        additionalLabels:
+          description: "Additional labels to tag the recording rules"
+          type: array
+          items:
+            "$ref": "/common-1.json#/definitions/promSelector"
 
       required:
+      - name
       - kind
-      - metric
-      - selectors
+      - rules
       - target
 
   latency:
@@ -139,55 +189,40 @@ properties:
       additionalProperties: false
 
       properties:
-        description:
+        name:
           type: string
+          description: "Name describing this property. Must be unique"
+          pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
 
         kind:
           type: string
           enum: ['SLO']
 
-        metric:
+        rules:
           type: string
+          description: "Name of the sli recording rules we will be using here. It must exist"
           pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
-
-        selectors:
-          description: "Metric selectors to be used in Prometheus rule"
-          type: object
 
         threshold:
           description: "threshold in seconds"
-          type: number
-
-        percentile:
           type: number
 
         target:
           description: "SLO target percentage"
           type: number
 
-        httpStatusLabel:
-          description: "Name of the label that contains the http status code"
-          type: string
-          pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
-
-        handlers:
+        additionalLabels:
+          description: "Additional labels to tag the recording rules"
           type: array
-          description: "Define selectors over we will iterate to generate rules that will be used in availability"
           items:
-            type: object
-
-        isAvailabilitySLO:
-          type: boolean
-          description: "Defines if this SLO will be used as a basis of availability SLO"
+            "$ref": "/common-1.json#/definitions/promSelector"
 
       required:
+      - name
       - kind
-      - metric
-      - selectors
+      - rules
       - threshold
-      - percentile
       - target
-      - isAvailabilitySLO
 
   errors:
     type: array
@@ -196,48 +231,37 @@ properties:
       additionalProperties: false
 
       properties:
-        description:
+        name:
           type: string
+          description: "Name describing this property. Must be unique"
+          pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
 
         kind:
           type: string
           enum: ['SLO']
 
-        metric:
+        rules:
           type: string
+          description: "Name of the sli recording rules we will be using here. It must exist"
           pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
-
-        selectors:
-          description: "Metric selectors to be used in Prometheus rule"
-          type: object
 
         target:
           description: "SLO target percentage"
           type: number
 
-        httpStatusLabel:
-          description: "Name of the label that contains the http status code"
-          type: string
-          pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
-
-        handlers:
+        additionalLabels:
+          description: "Additional labels to tag the recording rules"
           type: array
-          description: "Define selectors over we will iterate to generate rules that will be used in availability"
           items:
-            type: object
-
-        isAvailabilitySLO:
-          type: boolean
-          description: "Defines if this SLO will be used as a basis of availability SLO"
+            "$ref": "/common-1.json#/definitions/promSelector"
 
       required:
+      - name
       - kind
-      - metric
-      - selectors
+      - rules
       - target
-      - isAvailabilitySLO
 
-  rawRecording:
+  rawRecordingRules:
     type: array
     items:
       type: object
@@ -315,3 +339,8 @@ required:
 - component
 - prometheusLabels
 - namespace
+- SLIRecordingRules
+- volume
+- availability
+- latency
+- errors

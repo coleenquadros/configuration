@@ -1,0 +1,68 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: quayio
+
+name: saas-apostille
+description: SaaS tracking file for apostille
+
+app:
+  $ref: /services/quayio/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: oncall-quay
+
+managedResourceTypes:
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/app-sre/apostille-server
+- quay.io/app-sre/apostille-signer
+
+resourceTemplates:
+- name: apostille
+  path: /deploy/apostille.yaml
+  url: https://github.com/coreos-inc/apostille
+  parameters:
+    NAME: apostille
+    REPLICA_COUNT: 1
+    CLUSTERIP_SERVICE_PORT: 4443
+    CLUSTERIP_SERVICE_TARGET_PORT: 4443
+    SERVER_WEB_PORT: 4443
+    SIGNER_GRPC_PORT: 7899
+    APOSTILLE_SERVER_SECRET: apostille-server-secret
+    APOSTILLE_SIGNER_SECRET: apostille-signer-secret
+    STRATEGY: RollingUpdate
+    MAX_UNAVAILABLE: 0
+    MAX_SURGE: 1
+    MIN_READY_SECONDS: 60
+    SERVER_CPU_LIMIT: 1
+    SERVER_CPU_REQUEST: 1
+    SERVER_MEMORY_LIMIT: 4096Mi
+    SERVER_MEMORY_REQUEST: 4096Mi
+    SIGNER_CPU_LIMIT: 1
+    SIGNER_CPU_REQUEST: 1
+    SIGNER_MEMORY_LIMIT: 4096Mi
+    SIGNER_MEMORY_REQUEST: 4096Mi
+    SERVER_IMAGE: quay.io/app-sre/apostille-server
+    SIGNER_IMAGE: quay.io/app-sre/apostille-signer
+  targets:
+  - namespace:
+      $ref: /services/quayio/namespaces/apostille-stage.yml
+    ref: master
+    upstream: coreos-inc-apostille-gh-build-master
+  # - namespace:
+  #     $ref: /services/quayio/namespaces/apostille-quay-p-ue1.yml
+  #   parameters:
+  #     REPLICA_COUNT: 0
+  # - namespace:
+  #     $ref: /services/quayio/namespaces/apostille-quay-p-ue2.yml
+  #   parameters:
+  #     REPLICA_COUNT: 0

@@ -71,20 +71,17 @@ SUCCESS_DIR=${WORK_DIR}/reports/reconcile_reports_success
 FAIL_DIR=${WORK_DIR}/reports/reconcile_reports_fail
 rm -rf ${SUCCESS_DIR} ${FAIL_DIR}; mkdir -p ${SUCCESS_DIR} ${FAIL_DIR}
 
-docker pull ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG}
-docker pull ${VAULT_RECONCILE_IMAGE}:${VAULT_RECONCILE_IMAGE_TAG}
-
 # Prepare to run integrations on production
 
 ## Write config.toml for reconcile tools
 cat "$CONFIG_TOML" > ${WORK_DIR}/config/config.toml
 
 # Gatekeeper. If this fails, we skip all the integrations.
-run_int gitlab-fork-compliance $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid app-sre && {
+NO_GQL_SHA_URL=true NO_VALIDATE=true run_int gitlab-fork-compliance $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid app-sre && {
 
 ## Run integrations on production
-ALIAS=jenkins-job-builder-no-compare run_int jenkins-job-builder --no-compare &
-ALIAS=owner-approvals-no-compare run_int owner-approvals $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid --no-compare &
+ALIAS=jenkins-job-builder-no-compare NO_GQL_SHA_URL=true NO_VALIDATE=true run_int jenkins-job-builder --no-compare &
+ALIAS=saas-file-owners-no-compare NO_GQL_SHA_URL=true NO_VALIDATE=true run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid --no-compare &
 
 # Prepare to run integrations on local server
 
@@ -102,7 +99,6 @@ if [[ "$DEPLOYED_SHA256" != "$SHA256" ]]; then
 fi
 
 ## Wait for production integrations to complete
-
 wait
 
 ## Write config.toml for reconcile tools
@@ -112,47 +108,28 @@ cat "$CONFIG_TOML" \
   > ${WORK_DIR}/config/config.toml
 
 ## Run integrations on local server
-run_int github &
-run_int github-repo-invites &
-run_int service-dependencies &
-run_int quay-membership &
-run_int quay-repos &
+
+### saas-file-owners runs first to determine how openshift-saas-deploy-wrappers should run
+NO_VALIDATE=true run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid
+
+### vault integration
 run_vault_reconcile_integration &
-run_int ocm-clusters &
-run_int ocm-groups &
-run_int ocm-aws-infrastructure-access &
-run_int openshift-groups &
-run_int openshift-users &
-run_int jenkins-plugins &
-run_int jenkins-roles &
-run_int jenkins-job-builder &
-run_int jenkins-webhooks &
-run_int aws-iam-keys &
-run_int gitlab-members &
-run_int gitlab-projects &
-run_int gitlab-permissions &
-run_int gitlab-integrations &
-run_int openshift-namespaces &
-run_int openshift-clusterrolebindings &
-run_int openshift-rolebindings &
-run_int openshift-resources &
-run_int openshift-network-policies &
-run_int openshift-acme &
-run_int openshift-limitranges &
-run_int openshift-serviceaccount-tokens &
-run_int terraform-resources &
-run_int terraform-users &
-run_int terraform-vpc-peerings &
-run_int ldap-users $gitlabMergeRequestTargetProjectId &
-run_int owner-approvals $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid &
-# Conditionally run integrations according to MR title
-[[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"slack"* ]] && run_int slack-usergroups &
-[[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"sentry"* ]] && run_int sentry-config &
-[[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"mirror"* ]] && run_int quay-mirror &
-# Add STATE=true to integrations that interact with a state
-STATE=true run_int sql-query &
-STATE=true run_int email-sender &
-STATE=true run_int openshift-saas-deploy &
+
+### openshift-saas-deploy only runs if the MR title contains "saas-deploy-full"
+[[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"saas-deploy-full"* ]] && NO_VALIDATE=true run_int openshift-saas-deploy &
+
+# run integrations based on their pr_check definitions
+python $CURRENT_DIR/select-integrations.py ${DATAFILES_BUNDLE} > $TEMP_DIR/integrations.sh
+exit_status=$?
+if [ $exit_status != 0 ]; then
+  exit $exit_status
+fi
+
+echo "selected integrations:"
+cat $TEMP_DIR/integrations.sh
+
+echo "run selected integrations:"
+source $TEMP_DIR/integrations.sh
 
 wait
 }

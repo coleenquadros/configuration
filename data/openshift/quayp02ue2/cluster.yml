@@ -1,0 +1,70 @@
+---
+$schema: /openshift/cluster-1.yml
+
+labels:
+  service: quayio
+
+name: quayp02ue2
+description: Production cluster for Quay.io (4.3.25)
+consoleUrl: "https://console-openshift-console.apps.quayp02ue2.h5h6.p1.openshiftapps.com/"
+kibanaUrl: ""
+prometheusUrl: ""
+serverUrl: "https://api.quayp02ue2.h5h6.p1.openshiftapps.com:6443"
+
+observabilityNamespace:
+  $ref: /services/observability/namespaces/openshift-customer-monitoring.quayp02ue2.yml
+
+auth:
+  service: github-org-team
+  org: app-sre
+  team: quayp02ue2-cluster
+
+ocm:
+  $ref: /dependencies/ocm/production.yml
+
+managedGroups:
+- dedicated-admins
+
+spec:
+  provider: aws
+  region: us-east-2
+  version: 4.3.25
+  multi_az: true
+  nodes: 36
+  instance_type: m5.4xlarge
+  storage: 1100
+  load_balancers: 4
+  private: false
+
+network:
+  vpc: 10.22.0.0/16
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
+
+peering:
+  connections:
+  - provider: account-vpc
+    name: quayp02ue2-quayio-prod
+    vpc:
+      $ref: /aws/quayio-prod/vpcs/quayio-prod.yml
+
+disable:
+  e2eTests:
+  - create-namespace
+  - dedicated-admin-rolebindings
+  - default-network-policies
+  - default-project-labels
+
+automationToken:
+  path: app-sre/creds/kube-configs/quayp02ue2
+  field: token
+
+internal: false
+
+awsInfrastructureAccess:
+- awsGroup:
+    $ref: /aws/quayio-prod/groups/App-SRE-admin.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/quayio-prod/groups/App-SRE-admin.yml
+  accessLevel: network-mgmt

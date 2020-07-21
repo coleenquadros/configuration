@@ -67,3 +67,15 @@ spec:
         service: uhc-clusters-service
         severity: high
         email: service-development-a
+
+    - alert: OCM telemetry worker failed - production
+      annotations:
+        message: "OCM telemetry worker got {{ $value }} errors in '{{ $labels.namespace }}'."
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop
+      # Alert when at least 2 executions of the worker out of 3-4 had errors. (default TELEMETER_WORKER_PERIOD=8m between runs)
+      expr: increase(telemetry_worker_metrics_error_total{job="clusters-service-metrics", namespace="uhc-production"}[25m]) > 0
+      for: 30m
+      labels:
+        service: uhc-clusters-service
+        severity: medium
+        email: service-development-a

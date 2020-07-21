@@ -16,7 +16,7 @@ spec:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/"
         dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1"
         message: "No valid targets found for Cincinnati Graph builder. Either no pods are running or Prometheus was not able to scrape them"
-        link_url: "https://console-openshift-console.apps.app-sre-prod-01.i7w5.p1.openshiftapps.com/k8s/ns/cincinnati-production/pods"
+        link_url: "https://console-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/k8s/ns/cincinnati-production/pods"
       expr: absent(up{job="cincinnati-graph-builder", namespace="cincinnati-production"} == 1)
       for: 1m
       labels:
@@ -27,7 +27,7 @@ spec:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/"
         dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1"
         message: "No valid targets found for Cincinnati policy-engine. Either no pods are running or Prometheus was not able to scrape them"
-        link_url: "https://console-openshift-console.apps.app-sre-prod-01.i7w5.p1.openshiftapps.com/k8s/ns/cincinnati-production/pods"
+        link_url: "https://console-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/k8s/ns/cincinnati-production/pods"
       expr: absent(up{job="cincinnati-policy-engine", namespace="cincinnati-production"} == 1)
       for: 1m
       labels:
@@ -38,7 +38,7 @@ spec:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/"
         dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1"
         message: "Cincinnati graph-builder upstream scrapes are not functioning"
-        link_url: "https://console-openshift-console.apps.app-sre-prod-01.i7w5.p1.openshiftapps.com/k8s/ns/cincinnati-production/pods"
+        link_url: "https://console-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/k8s/ns/cincinnati-production/pods"
       expr: rate(cincinnati_gb_graph_upstream_scrapes_total{job="cincinnati-graph-builder",namespace="cincinnati-production"}[5m]) == 0
       for: 15m
       labels:
@@ -49,18 +49,30 @@ spec:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/"
         dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1"
         message: "High error rate for Cincinnati graph-builder scrapes"
-        link_url: "https://console-openshift-console.apps.app-sre-prod-01.i7w5.p1.openshiftapps.com/k8s/ns/cincinnati-production/pods"
+        link_url: "https://console-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/k8s/ns/cincinnati-production/pods"
       expr: rate(cincinnati_gb_graph_upstream_errors_total{job="cincinnati-graph-builder",namespace="cincinnati-production"}[5m]) != 0
       for: 15m
       labels:
         service: cincinnati
         severity: high
+    - alert: GBRestart
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/"
+        dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1"
+        message: "Graph builder container has restarted"
+        link_url: "https://console-openshift-console.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com/k8s/ns/cincinnati-stage/pods"
+      expr: |
+        increase(kube_pod_container_status_restarts_total{namespace="cincinnati-production",container="cincinnati-graph-builder"}[5m]) > 1
+      for: 5m
+      labels:
+        service: cincinnati
+        severity: warning
     - alert: PEIncomingRequestsHalted
       annotations:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/"
         dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1"
         message: "Cincinnati policy-engine is not receiving/processing requests"
-        link_url: "https://console-openshift-console.apps.app-sre-prod-01.i7w5.p1.openshiftapps.com/k8s/ns/cincinnati-production/pods"
+        link_url: "https://console-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/k8s/ns/cincinnati-production/pods"
       expr: rate(cincinnati_pe_v1_graph_incoming_requests_total{job="cincinnati-policy-engine",namespace="cincinnati-production"}[5m]) == 0
       for: 5m
       labels:
@@ -71,7 +83,7 @@ spec:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/"
         dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1"
         message: "Cincinnati policy-engine is receiving an high error rate from upstream graph-builder"
-        link_url: "https://console-openshift-console.apps.app-sre-prod-01.i7w5.p1.openshiftapps.com/k8s/ns/cincinnati-production/pods"
+        link_url: "https://console-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/k8s/ns/cincinnati-production/pods"
       expr: rate(cincinnati_pe_http_upstream_errors_total{job="cincinnati-policy-engine",namespace="cincinnati-production"}[5m]) != 0
       for: 5m
       labels:
@@ -82,10 +94,22 @@ spec:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/"
         dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1"
         message: "High error rate (kind {{ $labels.kind  }}) for Cincinnati policy-engine graph endpoint"
-        link_url: "https://console-openshift-console.apps.app-sre-prod-01.i7w5.p1.openshiftapps.com/k8s/ns/cincinnati-production/pods"
+        link_url: "https://console-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/k8s/ns/cincinnati-production/pods"
       # NOTE(lucab): threshold accounts for baseline errors from ancient/broken/development clients.
       expr: rate(cincinnati_pe_v1_graph_response_errors_total{job="cincinnati-policy-engine",namespace="cincinnati-production"}[5m]) > 0.015
       for: 5m
       labels:
         service: cincinnati
         severity: high
+    - alert: PERestart
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/"
+        dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1"
+        message: "Policy engine container has restarted"
+        link_url: "https://console-openshift-console.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com/k8s/ns/cincinnati-stage/pods"
+      expr: |
+        increase(kube_pod_container_status_restarts_total{namespace="cincinnati-production",container="cincinnati-policy-engine"}[5m]) > 1
+      for: 5m
+      labels:
+        service: cincinnati
+        severity: warning

@@ -13,6 +13,9 @@ cluster:
 app:
   $ref: /services/insights/patchman/app.yml
 
+environment:
+  $ref: /products/insights/environments/production.yml
+
 managedRoles: true
 
 managedTerraformResources: true
@@ -21,9 +24,26 @@ terraformResources:
 - provider: rds
   account: insights-prod
   identifier: patchman-prod
-  defaults: /terraform/resources/insights/production/rds-1.yml
+  parameter_group: /terraform/resources/insights/production/postgres11-parameter-group-patchman-prod.yml
+  defaults: /terraform/resources/insights/production/postgres11-rds-1.yml
   output_resource_name: patchman-db
   overrides:
-    instance_class: db.r5.large
+    instance_class: db.r5.xlarge
     monitoring_interval: 30
   enhanced_monitoring: true
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource
+  path: /insights-prod/shared/private-image-puller.serviceaccount.yaml

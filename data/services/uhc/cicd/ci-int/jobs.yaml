@@ -20,26 +20,14 @@ config:
     node: sd-uhc
     gl_group: service
     gl_project: uhc-clusters-service
-    kube_cluster: app-sre-stage-01
-    kube_namespace: uhc-stage
-    saasherder_context: uhc-clusters-service
-    saasherder_services: uhc-clusters-service
     quay_org: app-sre
     jobs:
     - 'ocm-pr-check':
         display_name: UHC clusters service check merge request
         html_publisher_dir: '.'
+        concurrent_build: false
     - 'gl-build-master':
         display_name: UHC clusters service build master branch
-        saas_git: 'https://gitlab.cee.redhat.com/service/saas-uhc-clusters-service.git'
-    - 'gl-build-master-with-upstream':
-        display_name: UHC clusters service build master branch (integration)
-        saas_git: 'https://gitlab.cee.redhat.com/service/saas-uhc-clusters-service.git'
-        saas_env: integration
-        kube_cluster: hive-integration
-        kube_namespace: uhc-integration
-        upstream: service-uhc-clusters-service-gl-build-master
-        build_deploy_script_path: 'true'
     - 'gl-build-master':
         display_name: UHC clusters service build next branch
         branch: 'next'
@@ -56,63 +44,17 @@ config:
         environment: staging
 
 - project:
-    name: uhc-clusters-service-cd
-    label: sd-uhc
-    node: sd-uhc
-    gl_group: service
-    gl_project: saas-uhc-clusters-service
-    kube_cluster: app-sre-prod-01
-    kube_namespace: uhc-production
-    saasherder_context: uhc-clusters-service
-    image_pattern: '^quay\.io/app-sre/uhc-clusters-service'
-    quay_org: app-sre
-    jobs:
-    - 'saas-deploy':
-        display_name: UHC clusters service deploy to production
-    - 'saas-pr-check':
-        display_name: UHC clusters service deploy to production test
-
-- project:
     name: uhc-gateway
     label: sd-uhc
     node: sd-uhc
     gl_group: service
     gl_project: uhc-gateway
-    kube_cluster: app-sre-stage-01
-    kube_namespace: uhc-stage
-    saasherder_context: uhc-gateway
-    saasherder_services: uhc-gateway
-    saas_git: https://gitlab.cee.redhat.com/service/saas-uhc-gateway.git
     quay_org: app-sre
     jobs:
     - 'gl-pr-check':
         display_name: UHC API gateway check merge request
     - 'gl-build-master':
         display_name: UHC API gateway deploy to staging
-    - 'gl-build-master-with-upstream':
-        display_name: UHC API gateway deploy to integration
-        kube_namespace: uhc-integration
-        saas_env: integration
-        kube_cluster: hive-integration
-        upstream: service-uhc-gateway-gl-build-master
-        build_deploy_script_path: 'true'
-
-- project:
-    name: uhc-gateway-cd
-    label: sd-uhc
-    node: sd-uhc
-    gl_group: service
-    gl_project: saas-uhc-gateway
-    kube_cluster: app-sre-prod-01
-    kube_namespace: uhc-production
-    saasherder_context: uhc-gateway
-    image_pattern: '^quay\.io/app-sre/(uhc-gateway|uhc-apache-exporter)'
-    quay_org: app-sre
-    jobs:
-    - 'saas-deploy':
-        display_name: UHC API gateway deploy to production
-    - 'saas-pr-check':
-        display_name: UHC API gateway deploy to production test
 
 - project:
     name: uhc-account-manager
@@ -120,11 +62,6 @@ config:
     node: sd-uhc
     gl_group: service
     gl_project: uhc-account-manager
-    kube_cluster: app-sre-stage-01
-    kube_namespace: uhc-stage
-    saasherder_context: uhc-account-manager
-    saasherder_services: uhc-account-manager
-    saas_git: https://gitlab.cee.redhat.com/service/saas-uhc-account-manager.git
     quay_org: app-sre
     jobs:
     - 'ocm-pr-check':
@@ -133,30 +70,6 @@ config:
         timeout: 60
     - 'gl-build-master':
         display_name: UHC Account Manager deploy to staging
-    - 'gl-build-master-with-upstream':
-        display_name: UHC Account Manager deploy to integration
-        kube_namespace: uhc-integration
-        saas_env: integration
-        kube_cluster: hive-integration
-        upstream: service-uhc-account-manager-gl-build-master
-        build_deploy_script_path: 'true'
-
-- project:
-    name: uhc-account-manager-cd
-    label: sd-uhc
-    node: sd-uhc
-    gl_group: service
-    gl_project: saas-uhc-account-manager
-    kube_cluster: app-sre-prod-01
-    kube_namespace: uhc-production
-    saasherder_context: uhc-account-manager
-    image_pattern: '^quay\.io/app-sre/uhc-account-manager'
-    quay_org: app-sre
-    jobs:
-    - 'saas-deploy':
-        display_name: UHC Account Manager deploy to production
-    - 'saas-pr-check':
-        display_name: UHC Account Manager deploy to production test
 
 - project:
     name: uhc-portal
@@ -164,23 +77,25 @@ config:
     node: sd-uhc
     gl_group: service
     gl_project: uhc-portal
-    kube_cluster: app-sre-stage-01
-    kube_namespace: uhc-stage
-    saasherder_context: uhc-portal
-    saasherder_services: uhc-portal
-    saas_git: https://gitlab.cee.redhat.com/service/saas-uhc-portal.git
+    kube_cluster: none
     quay_org: app-sre
     jobs:
-    - 'gl-pr-check':
-        display_name: UHC portal check merge request
-    - 'uhc-cloud-redhat-com-push-insights':
-        display_name: UHC portal deploy to cloud.redhat.com/beta
-        mode: beta
-    - 'uhc-cloud-redhat-com-push-insights':
-        display_name: UHC portal deploy to cloud.redhat.com prod-stable
+    - 'ocm-pr-check-selenium':
+        display_name: OCM UI check merge request
+        # Runs services on fixed ports and container names
+        concurrent_build: false
+    - 'ocm-portal-deploy':
+        display_name: OCM UI deploy to qaprodauth.cloud.redhat.com
+        mode: staging
+        branch: "master"
+    - 'ocm-portal-deploy':
+        display_name: OCM UI deploy to cloud.redhat.com/beta
+        mode: candidate
+        branch: "candidate"
+    - 'ocm-portal-deploy':
+        display_name: OCM UI deploy to cloud.redhat.com (prod-stable)
         mode: stable
         branch: "stable"
-    # TODO: add for uhc-integration
 
 - project:
     name: uhc-apache-exporter
@@ -203,22 +118,10 @@ config:
     node: sd-uhc
     gl_group: service
     gl_project: uhc-portal-redirector
-    kube_cluster: app-sre-stage-01
-    kube_namespace: uhc-stage
-    saasherder_context: uhc-portal
-    saasherder_services: uhc-portal-redirector
-    saas_git: https://gitlab.cee.redhat.com/service/saas-uhc-portal.git
     quay_org: app-sre
     jobs:
     - 'gl-build-master':
         display_name: UHC portal redirector deploy to staging
-    - 'gl-build-master-with-upstream':
-        display_name: UHC portal redirector deploy to integration
-        kube_namespace: uhc-integration
-        saas_env: integration
-        kube_cluster: hive-integration
-        upstream: service-uhc-portal-redirector-gl-build-master
-        build_deploy_script_path: 'true'
 
 - project:
     name: uhc-clusters-cleaner
@@ -226,41 +129,12 @@ config:
     node: sd-uhc
     gl_group: service
     gl_project: uhc-clusters-cleaner
-    kube_cluster: app-sre-stage-01
-    kube_namespace: uhc-stage
-    saasherder_context: uhc-clusters-cleaner
-    saasherder_services: uhc-clusters-cleaner
-    saas_git: https://gitlab.cee.redhat.com/service/saas-uhc-clusters-cleaner.git
     quay_org: app-sre
     jobs:
     - 'gl-pr-check':
         display_name: UHC clusters cleaner check merge request
     - 'gl-build-master':
-        display_name: UHC clusters cleaner deploy to staging
-    - 'gl-build-master-with-upstream':
-        display_name: UHC clusters cleaner deploy to integration
-        kube_namespace: uhc-integration
-        saas_env: integration
-        kube_cluster: hive-integration
-        upstream: service-uhc-clusters-cleaner-gl-build-master
-        build_deploy_script_path: 'true'
-
-- project:
-    name: uhc-clusters-cleaner-cd
-    label: sd-uhc
-    node: sd-uhc
-    gl_group: service
-    gl_project: saas-uhc-clusters-cleaner
-    kube_cluster: app-sre-prod-01
-    kube_namespace: uhc-production
-    saasherder_context: uhc-clusters-cleaner
-    image_pattern: '^quay\.io/app-sre/uhc-clusters-cleaner'
-    quay_org: app-sre
-    jobs:
-    - 'saas-deploy':
-        display_name: UHC clusters cleaner deploy to production
-    - 'saas-pr-check':
-        display_name: UHC clusters cleaner deploy to production test
+        display_name: UHC clusters cleaner build master
 
 - project:
     name: ocm-resources
@@ -288,7 +162,7 @@ config:
     gl_group: service
     gl_project: api-tests
     jobs:
-    - 'ocm-build-master':
+    - 'ocm-build-image':
         display_name: API Tests build image
         concurrent_build: false
     - 'ocm-pr-check':
@@ -300,18 +174,21 @@ config:
         tests: 'readonly-single'
         cron_expression: '0 * * * *'
         ci_cmd: ./periodic_check.sh periodic-readonly-single https://api.stage.openshift.com 1 1
+        disable: true
     - 'ocm-api-tests-timed':
         display_name: API Tests periodic int
         environment: integration
         tests: 'readonly-single'
         cron_expression: '20 * * * *'
         ci_cmd: ./periodic_check.sh periodic-readonly-single https://api-integration.6943.hive-integration.openshiftapps.com  1 1
+        disable: true
     - 'ocm-api-tests-timed':
         display_name: API Tests periodic prod
         environment: production
         tests: 'readonly-single'
         cron_expression: '40 * * * *'
         ci_cmd: ./periodic_check.sh periodic-readonly-single https://api.openshift.com  1 1
+        disable: true
 
 - project:
     name: ocm-service-log
@@ -319,43 +196,10 @@ config:
     node: sd-uhc
     gl_group: service
     gl_project: ocm-service-log
-    saasherder_context: ocm-service-log
-    saasherder_services: ocm-service-log
-    saas_git: https://gitlab.cee.redhat.com/service/saas-ocm.git
-    kube_cluster: app-sre-stage-01
-    kube_namespace: uhc-stage
     quay_org: app-sre
     jobs:
     - 'ocm-pr-check':
         display_name: OCM service log check merge request
         concurrent_build: true
     - 'gl-build-master':
-        display_name: OCM service log deploy to staging
-        kube_cluster: none
-    - 'gl-build-master-with-upstream':
-        display_name: OCM service log deploy to integration
-        kube_namespace: uhc-integration
-        saas_env: integration
-        kube_cluster: hive-integration
-        upstream: service-ocm-service-log-gl-build-master
-        build_deploy_script_path: 'true'
-        disable: true
-
-- project:
-    name: ocm-service-log-cd
-    label: sd-uhc
-    node: sd-uhc
-    gl_group: service
-    gl_project: saas-ocm
-    kube_cluster: app-sre-prod-01
-    kube_namespace: uhc-production
-    saasherder_context: ocm-service-log
-    image_pattern: '^quay\.io/app-sre/ocm-service-log'
-    quay_org: app-sre
-    jobs:
-    - 'saas-deploy':
-        display_name: OCM service log deploy to production
-        disable: true
-    - 'saas-pr-check':
-        display_name: OCM service log deploy to production test
-        disable: true
+        display_name: OCM service log build master

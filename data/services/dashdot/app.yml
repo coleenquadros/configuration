@@ -1,0 +1,39 @@
+---
+$schema: /app-sre/app-1.yml
+
+labels:
+  service: dashdot
+
+name: dashdot
+
+description: |
+  AppSRE service that retrieves information from multiple sources and place
+  them in a database for consumption via Grafana dashboards and monthly
+  reports
+
+serviceOwners:
+- name: App-SRE Team
+  email: sd-app-sre@redhat.com
+
+dependencies:
+- $ref: /dependencies/aws/service.yml
+- $ref: /dependencies/github/service.yml
+- $ref: /dependencies/quay/service.yml
+- $ref: /dependencies/openshift/service.yml
+- $ref: /dependencies/ci-ext/service.yml
+
+performanceParameters:
+  SLO: 90
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/app-sre.yml
+  items:
+  - name: dashdotdb
+    description: The database API service
+    public: true
+
+codeComponents:
+- name: dashdotdb
+  resource: upstream
+  url: https://github.com/app-sre/dashdotdb

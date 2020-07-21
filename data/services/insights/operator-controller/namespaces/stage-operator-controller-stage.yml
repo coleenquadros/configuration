@@ -8,10 +8,17 @@ name: insights-operator-controller-stage
 description: Insights operator-controller-stage on the Stage cluster under e2e-deploy/ocdeployer management
 
 cluster:
-  $ref: /openshift/insights/crc-stage-01.yml
+  $ref: /openshift/crc-stg-01/cluster.yml
 
 app:
   $ref: /services/insights/operator-controller/app.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stg-01.yml
+- $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
 
 managedRoles: true
 
@@ -21,5 +28,22 @@ terraformResources:
 - provider: rds
   account: insights-stage
   identifier: insights-operator-controller-stage
-  defaults: /terraform/resources/insights/stage/rds-1.yml
+  defaults: /terraform/resources/insights/stage/rds/postgres11-rds-1.yml
   output_resource_name: insights-operator-controller-db
+  enhanced_monitoring: true
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml

@@ -12,12 +12,11 @@ cluster:
 app:
   $ref: /services/observability/app.yml
 
+environment:
+  $ref: /products/app-sre/environments/production.yml
+
 managedResourceTypes:
 - Secret
-- Service
-- Subscription
-- Prometheus
-- Alertmanager
 - PrometheusRule
 - ServiceMonitor
 
@@ -32,53 +31,11 @@ managedResourceNames:
     - prometheus-additional-alertmanager-config
     - prometheus-additional-scrape-config
     - prometheus-auth-proxy
-- resource: Alertmanager
-  resourceNames:
-    - instance
 
 openshiftResources:
-# Prometheus operator
-- provider: resource-template
-  type: jinja2
-  path: /observability/prometheus/v4/app-sre.prometheus.yaml
-  variables:
-    clusterLabel: app-sre-prod-01
-    environment: production
-    externalUrl: https://prometheus.app-sre-prod-01.devshift.net
-    version: v2.15.2
-    retention: 15d
-    pvSize: 50Gi
-    walCompression: true
-    logLevel: debug
-- provider: resource
-  path: /observability/prometheus/prometheus-app-sre.service.yaml
-- provider: resource
-  path: /observability/prometheus/prometheus-operator.service.yml
-- provider: resource
-  path: /observability/prometheus/prometheus-proxy.service.yaml
-- provider: resource
-  path: /observability/prometheus/v4/prometheus.subscription.yaml
+# Observability
 
-# AlertManager
-- provider: resource-template
-  type: jinja2
-  path: /observability/alertmanager/app-sre.alertmanager.yaml
-  variables:
-    replicas: 3
-    version: v0.20.0
-    environment: production
-    externalUrl: https://alertmanager.app-sre-prod-01.devshift.net
-    oauthProxySecretName: alertmanager-auth-proxy
-    storageClassName: gp2
-    logLevel: info
-    alertmanagerName: instance
-- provider: resource
-  path: /observability/alertmanager/alertmanager-app-sre.service.yaml
-- provider: resource
-  path: /observability/alertmanager/alertmanager-proxy.service.yaml
-
-# Secrets
-## Observability
+## Secrets
 ### Prometheus additional alertmanager config
 ### Defines what alertmanager Prometheus fires alerts to
 - provider: vault-secret
@@ -88,7 +45,9 @@ openshiftResources:
 ### Defines any additional jobs that don't fit into the servicemonitor model
 - provider: resource-template
   type: extracurlyjinja2
-  path: /observability/prometheus/v4/prometheus-app-sre-additional-scrapeconfig.secret.yaml
+  path: /observability/prometheus/prometheus-app-sre-additional-scrapeconfig.secret.yaml
+  variables:
+    blackbox_exporter_svc_url: blackbox-exporter.app-sre-observability-production.svc.cluster.local:9115
 ### Prometheus oauth proxy configuration
 - provider: vault-secret
   path: app-interface/app-sre/app-sre-observability-production/prometheus/prometheus-auth-proxy
@@ -102,22 +61,42 @@ openshiftResources:
   type: extracurlyjinja2
   path: /observability/alertmanager/alertmanager-instance.secret.yaml
 
-## Prometheus Rules
-### Prometheus Deadmanssnitch
+## Servicemonitors
+### App-SRE Prometheus
 - provider: resource
-  path: /observability/prometheusrules/deadmanssnitch.prometheusrules.yaml
+  path: /observability/servicemonitors/prometheus-app-sre.servicemonitor.yaml
+### Alertmanager
+- provider: resource
+  path: /observability/servicemonitors/alertmanager.servicemonitor.yaml
+### All managed Prometheus Operators
+- provider: resource
+  path: /observability/servicemonitors/prometheus-operators-production.servicemonitor.yaml
+
+## Prometheus Rules
 ### App SRE contract
 - provider: resource
   path: /observability/prometheusrules/app-sre-contract.yaml
 ### Federated Kubernetes metrics
 - provider: resource
   path: /observability/prometheusrules/kube-metrics.prometheusrules.yaml
+### Prometheus mixin alerts
+- provider: resource
+  path: /observability/prometheusrules/prometheus-mixin.prometheusrules.yaml
+
+################## Add  any cluster-specific content below this line ##################
+
+
+# Secrets
+#### API
+# - provider: resource
+#   path: /observability/prometheusrules/observatorium-api-production.prometheusrules.yaml
+## Prometheus Rules
+### App-interface
+- provider: resource
+  path: /observability/prometheusrules/app-interface-production.prometheusrules.yaml
 ### Vault
 - provider: resource
   path: /observability/prometheusrules/vault-production.prometheusrules.yaml
-### Cincinnati
-- provider: resource
-  path: /observability/prometheusrules/cincinnati-production.prometheusrules.yaml
 ### AWS resource exporter checks
 - provider: resource
   path: /observability/prometheusrules/aws-resources.prometheusrules.yaml
@@ -140,12 +119,6 @@ openshiftResources:
   path: /observability/prometheusrules/hive-production.prometheusrules.yaml
 - provider: resource
   path: /observability/prometheusrules/hive-stage.prometheusrules.yaml
-### UHC Account Manager
-- provider: resource
-  path: /observability/prometheusrules/uhc-acct-mngr-production.prometheusrules.yaml
-### UHC Clusters Service
-- provider: resource
-  path: /observability/prometheusrules/uhc-clusters-service-production.prometheusrules.yaml
 ### Github Mirror Service
 - provider: resource
   path: /observability/prometheusrules/github-mirror-production.prometheusrules.yaml
@@ -158,21 +131,6 @@ openshiftResources:
   variables:
     environment: prod
     namespace: vault-prod
-### Cincinnati- Policy Engine
-- provider: resource-template
-  type: jinja2
-  path: /observability/servicemonitors/cincinnati-policy-engine.servicemonitor.yaml
-  variables:
-    environment: production
-    namespace: cincinnati-production
-#### Cincinnati- Graph Builder
-- provider: resource-template
-  type: jinja2
-  path: /observability/servicemonitors/cincinnati-graph-builder.servicemonitor.yaml
-  variables:
-    environment: production
-    namespace: cincinnati-production
-## ServiceMonitors
 ### App-SRE PushGateway
 - provider: resource-template
   type: jinja2
@@ -190,6 +148,12 @@ openshiftResources:
   path: /observability/servicemonitors/cloudwatch-exporter-osio.servicemonitor.yaml
   variables:
     namespace: app-sre-observability-production
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/cloudwatch-exporter.servicemonitor.yaml
+  variables:
+    namespace: app-sre-observability-production
+    name: cloudwatch-exporter-quay
 - provider: resource-template
   type: jinja2
   path: /observability/servicemonitors/aws-resource-exporter.servicemonitor.yaml
@@ -223,46 +187,24 @@ openshiftResources:
   path: /observability/servicemonitors/grafana.servicemonitor.yaml
   variables:
     namespace: app-sre-observability-production
-### App-SRE Prometheus
-- provider: resource
-  path: /observability/servicemonitors/prometheus-app-sre.servicemonitor.yaml
-### UHC
-#### UHC- Clusters Service
+### App-SRE contract
 - provider: resource-template
   type: jinja2
-  path: /observability/servicemonitors/uhc-clusters-service.servicemonitor.yaml
+  path: /observability/servicemonitors/app-interface.servicemonitor.yaml
   variables:
     environment: production
-    namespace: uhc-production
-#### UHC- Account Manager
+    namespace: app-interface-production
+### Qontract-reconcile
 - provider: resource-template
   type: jinja2
-  path: /observability/servicemonitors/uhc-account-manager.servicemonitor.yaml
+  path: /observability/servicemonitors/qontract-reconcile.servicemonitor.yaml
   variables:
     environment: production
-    namespace: uhc-production
-#### UHC- Gateway Server
+    namespace: app-interface-production
+### Dashdotdb
 - provider: resource-template
   type: jinja2
-  path: /observability/servicemonitors/uhc-gateway-server.servicemonitor.yaml
+  path: /observability/servicemonitors/dashdotdb.servicemonitor.yaml
   variables:
     environment: production
-    namespace: uhc-production
-#### CVExporter
-- provider: resource-template
-  type: jinja2
-  path: /observability/servicemonitors/cvexporter.servicemonitor.yaml
-  variables:
-    namespace: app-sre-observability-production
-
-# Temporary Prometheus and ServiceMonitor for AMS as part of https://issues.redhat.com/browse/APPSRE-1491
-- provider: resource-template
-  type: jinja2
-  path: /observability/prometheus/v4/ams.prometheus.yaml
-  variables:
-    remoteWriteUrl: https://remote-write-proxy-telemeter-production.1061.app-sre.openshiftapps.com/api/v1/receive
-- provider: resource-template
-  type: jinja2
-  path: /observability/servicemonitors/ams-subscription-labels.servicemonitor.yaml
-  variables:
-    namespace: uhc-production
+    namespace: dashdot

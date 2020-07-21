@@ -1,0 +1,179 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: quayio
+
+name: quayio
+description: quayio
+
+app:
+  $ref: /services/quayio/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: oncall-quay
+
+authentication:
+  image:
+    path: app-sre/integrations-output/aws-ecr-image-pull-secrets/quayio-prod/eu-central-1/basic-auth
+    field: all
+
+managedResourceTypes:
+- Deployment
+- Service
+- ServiceAccount
+- Role
+- RoleBinding
+
+imagePatterns:
+- quay.io/app-sre
+- 206170669542.dkr.ecr.eu-central-1.amazonaws.com
+
+parameters:
+  IMAGE: 206170669542.dkr.ecr.eu-central-1.amazonaws.com/quayio-backup
+  QUAY_ENTRYPOINT: registry-nomigrate
+  QUAY_APP_CPU_REQUEST: 9
+  QUAY_APP_CPU_LIMIT: 13
+  QUAY_APP_MEMORY_REQUEST: 16Gi
+  QUAY_APP_MEMORY_LIMIT: 56Gi
+  QUAY_APP_DEPLOYMENT_PROGRESS_DEADLINE_SECONDS: 2700
+  QUAY_APP_DEPLOYMENT_STRATEGY_TYPE: RollingUpdate
+  QUAY_APP_DEPLOYMENT_MIN_READY_SECONDS: 5
+  QUAY_APP_DEPLOYMENT_MAX_UNAVAILABLE: 0
+  QUAY_APP_DEPLOYMENT_MAX_SURGE: 3
+  QUAY_APP_READINESS_PROBE_INITIAL_DELAY_SECONDS: 30
+  QUAY_APP_READINESS_PROBE_PERIOD_SECONDS: 15
+  QUAY_APP_READINESS_PROBE_TIMEOUT_SECONDS: 30
+  QUAY_APP_LIVENESS_PROBE_INITIAL_DELAY_SECONDS: 30
+  QUAY_APP_LIVENESS_PROBE_TIMEOUT_SECONDS: 30
+  QUAY_APP_LIVENESS_PROBE_PERIOD_SECONDS: 30
+  QUAY_APP_DEPLOYMENT_NAMESPACE: quay
+  DEBUGLOG: "false"
+  QUAY_APP_COMPONENT_ANNOTATIONS_KEY: "quay-app-deployment"
+  IMAGE_PULL_POLICY: IfNotPresent
+  CLOUDWATCH_SECRET: quay-cloudwatch-iam-user
+  SYSLOG_PORT: "5014"
+  QUAY_SYSLOG_MEMORY_REQUEST: 1Gi
+  QUAY_SYSLOG_CPU_REQUEST: 1
+  QUAY_SYSLOG_MEMORY_LIMIT: 2Gi
+  QUAY_SYSLOG_CPU_LIMIT: 1
+  QUAY_SYSLOG_LIVENESS_PROBE_INITIAL_DELAY_SECONDS: 5
+  QUAY_SYSLOG_LIVENESS_PROBE_PERIOD_SECONDS: 15
+  QUAY_SYSLOG_LIVENESS_PROBE_TIMEOUT_SECONDS: 5
+  QUAY_SYSLOG_READINESS_PROBE_INITIAL_DELAY_SECONDS: 5
+  QUAY_SYSLOG_READINESS_PROBE_PERIOD_SECONDS: 10
+  QUAY_SYSLOG_READINESS_PROBE_TIMEOUT_SECONDS: 5
+  SYSLOG_SERVER: localhost
+  SYSLOG_PROTO: udp
+  QUAY_LOGGING: syslog
+  SYSLOG_IMAGE: 206170669542.dkr.ecr.eu-central-1.amazonaws.com/syslog-cloudwatch-bridge-backup
+  SYSLOG_IMAGE_TAG: a5858bd
+  QUAY_WORKER_MULTIPLIER_REGISTRY: 1
+  QUAY_WORKER_CONNECTION_COUNT_REGISTRY: 20
+
+resourceTemplates:
+- name: quayio-app
+  path: /deploy/openshift/quay-app.yaml
+  url: https://github.com/quay/quay
+  targets:
+  - namespace:
+      $ref: /services/quayio/namespaces/quayio-stage.yml
+#    ref: quayio
+    ref: 19a527e74b60944394fe654eefaac4800e3c3508
+    upstream: quay-quay-gh-build-quayio
+    parameters:
+      QUAY_ENTRYPOINT: registry
+      QUAY_APP_DEPLOYMENT_REPLICAS: 1
+      QUAY_APP_CPU_REQUEST: 1
+      QUAY_APP_CPU_LIMIT: 5
+      QUAY_APP_MEMORY_REQUEST: 4Gi
+      QUAY_APP_MEMORY_LIMIT: 24Gi
+      QUAY_APP_DEPLOYMENT_PROGRESS_DEADLINE_SECONDS: 1800
+      QUAY_APP_DEPLOYMENT_MAX_SURGE: 1
+      QUAY_APP_READINESS_PROBE_TIMEOUT_SECONDS: 20
+      QUAY_APP_LIVENESS_PROBE_TIMEOUT_SECONDS: 20
+      QUAY_APP_LIVENESS_PROBE_PERIOD_SECONDS: 15
+      QUAY_APP_DEPLOYMENT_NAMESPACE: quayio-stage
+      QUAY_APP_CONFIG_SECRET: quay-config-secret
+      DEBUGLOG: "true"
+      QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "update_me_when_secret_changes_v37"
+      QUAY_WORKER_MULTIPLIER_REGISTRY: 2
+      QUAY_WORKER_CONNECTION_COUNT_REGISTRY: 80
+  - namespace:
+      $ref: /services/quayio/namespaces/quay-s-ue1.yml
+#    ref: quayio
+    ref: 19a527e74b60944394fe654eefaac4800e3c3508
+    upstream: quay-quay-gh-build-quayio
+    parameters:
+      QUAY_ENTRYPOINT: registry
+      QUAY_APP_DEPLOYMENT_REPLICAS: 1
+      QUAY_APP_CPU_REQUEST: 1
+      QUAY_APP_CPU_LIMIT: 5
+      QUAY_APP_MEMORY_REQUEST: 4Gi
+      QUAY_APP_MEMORY_LIMIT: 24Gi
+      QUAY_APP_DEPLOYMENT_PROGRESS_DEADLINE_SECONDS: 1800
+      QUAY_APP_DEPLOYMENT_MAX_SURGE: 1
+      QUAY_APP_READINESS_PROBE_TIMEOUT_SECONDS: 20
+      QUAY_APP_LIVENESS_PROBE_TIMEOUT_SECONDS: 20
+      QUAY_APP_LIVENESS_PROBE_PERIOD_SECONDS: 15
+      QUAY_APP_DEPLOYMENT_NAMESPACE: quay
+      QUAY_APP_CONFIG_SECRET: quay-config-secret
+      DEBUGLOG: "true"
+      QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "update_me_when_secret_changes_v37"
+      QUAY_WORKER_MULTIPLIER_REGISTRY: 1
+      QUAY_WORKER_CONNECTION_COUNT_REGISTRY: 80
+  - namespace:
+      $ref: /services/quayio/namespaces/quays02ue1.yml
+    ref: quayio
+    upstream: quay-quay-gh-build-quayio
+    parameters:
+      QUAY_ENTRYPOINT: registry
+      QUAY_APP_DEPLOYMENT_REPLICAS: 1
+      QUAY_APP_CPU_REQUEST: 1
+      QUAY_APP_CPU_LIMIT: 5
+      QUAY_APP_MEMORY_REQUEST: 4Gi
+      QUAY_APP_MEMORY_LIMIT: 24Gi
+      QUAY_APP_DEPLOYMENT_PROGRESS_DEADLINE_SECONDS: 1800
+      QUAY_APP_DEPLOYMENT_MAX_SURGE: 1
+      QUAY_APP_READINESS_PROBE_TIMEOUT_SECONDS: 20
+      QUAY_APP_LIVENESS_PROBE_TIMEOUT_SECONDS: 20
+      QUAY_APP_LIVENESS_PROBE_PERIOD_SECONDS: 15
+      QUAY_APP_DEPLOYMENT_NAMESPACE: quay
+      QUAY_APP_CONFIG_SECRET: quay-config-secret
+      DEBUGLOG: "true"
+      QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "update_me_when_secret_changes_v36"
+      QUAY_WORKER_MULTIPLIER_REGISTRY: 1
+      QUAY_WORKER_CONNECTION_COUNT_REGISTRY: 80
+  - namespace:
+      $ref: /services/quayio/namespaces/quay-p-ue1.yml
+    ref: 15b78595dcce842c65470534bc960dde06f6d5c2 
+    parameters:
+      QUAY_APP_DEPLOYMENT_REPLICAS: 30
+      QUAY_APP_CONFIG_SECRET: quay-config-secret-v30
+      QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "update_me_when_secret_changes_v1"
+  - namespace:
+      $ref: /services/quayio/namespaces/quayp01ue1.yml
+    ref: 15b78595dcce842c65470534bc960dde06f6d5c2
+    parameters:
+      QUAY_APP_DEPLOYMENT_REPLICAS: 30
+      QUAY_APP_CONFIG_SECRET: quay-config-secret-v33
+      QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "update_me_when_secret_changes"
+  - namespace:
+      $ref: /services/quayio/namespaces/quay-p-ue2.yml
+    ref: 15b78595dcce842c65470534bc960dde06f6d5c2 
+    parameters:
+      QUAY_APP_DEPLOYMENT_REPLICAS: 30
+      QUAY_APP_CONFIG_SECRET: quay-config-secret-v15
+      QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "update_me_when_secret_changes"
+  - namespace:
+      $ref: /services/quayio/namespaces/quayp02ue2.yml
+    ref: 15b78595dcce842c65470534bc960dde06f6d5c2
+    parameters:
+      QUAY_APP_DEPLOYMENT_REPLICAS: 30
+      QUAY_APP_CONFIG_SECRET: quay-config-secret-v16
+      QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "update_me_when_secret_changes"

@@ -125,7 +125,8 @@
     build_master: &build_master_template
         <<: *feature_defaults
         disabled: '{disable}'
-        kube_cluster: ''
+        kube_cluster: 'none' # https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/kube-configs/none
+        backup_ecr_push_creds_account_region: 'none' # https://vault.devshift.net/ui/vault/secrets/app-sre/show/integrations-output/aws-ecr-image-pull-secrets/none/basic-auth
         saasherder_services: ''
         build_deploy_script_path: './build_deploy.sh'
         post_apply_script_path: 'true'
@@ -133,6 +134,7 @@
         saas_git: ''
         saas_env: 'staging'
         wrappers:
+        - timestamps
         - timeout_wrapper:
             timeout: '{timeout}'
         builders:
@@ -149,6 +151,7 @@
         pr_check_script_path: "./pr_check.sh"
         run_stack_analysis_path: ''
         wrappers:
+        - timestamps
         - timeout_wrapper:
             timeout: '{timeout}'
         builders:
@@ -164,6 +167,7 @@
         ci_cmd: ./run.sh
         unstable_return: 80
         wrappers:
+        - timestamps
         - timeout_wrapper:
             timeout: '{timeout}'
         builders:
@@ -178,6 +182,7 @@
         disabled: '{disable}'
         build_tag_script_path: './build_tag.sh'
         wrappers:
+        - timestamps
         - timeout_wrapper:
             timeout: '{timeout}'
         builders:
@@ -209,6 +214,7 @@
         saas_env: 'production'
         repo_url: ''
         wrappers:
+        - timestamps
         - timeout_wrapper:
             timeout: '{timeout}'
         - ansicolor
@@ -327,7 +333,8 @@
         <<: *gh_properties
         scm:
         - git:
-            url: 'https://github.com/{gh_org}/{gh_repo}.git'
+            url: 'git@github.com:{gh_org}/{gh_repo}.git'
+            credentials-id: '{github_ssh_credentials}'
             branches:
             - '{branch}'
             included-regions:
@@ -343,7 +350,8 @@
         status_context: "ci.ext.devshift.net PR build"
         scm:
         - git:
-            url: 'https://github.com/{gh_org}/{gh_repo}.git'
+            url: 'git@github.com:{gh_org}/{gh_repo}.git'
+            credentials-id: '{github_ssh_credentials}'
             skip-tag: true
             refspec: '+refs/pull/*:refs/remotes/origin/pr/*'
             branches:
@@ -360,7 +368,7 @@
               cron: '* * * * *'
               github-hooks: true
               permit-all: false
-              trigger-phrase: '(?ms).*^(\[test\]|\/retest|\/lgtm)\s*$.*'
+              trigger-phrase: '(?ms).*^(\[test\]|\/retest|\/lgtm|\/hold)\s*$.*'
               org-list:
               - app-sre
               - openshift
@@ -447,7 +455,7 @@
             trigger-push: true
             trigger-merge-request: true
             trigger-open-merge-request-push: source
-            note-regex: '(?ms).*^(\[test\]|\/retest|\/lgtm)\s*$.*'
+            note-regex: '(?ms).*^(\[test\]|\/retest|\/lgtm|\/hold)\s*$.*'
             set-build-description: true
             add-note-merge-request: true
             add-vote-merge-request: true
@@ -482,6 +490,85 @@
         - pollscm:
             cron: '* * * * *'
         wrappers:
+        - timestamps
         - timeout_wrapper:
             timeout: '{timeout}'
         <<: *gl_checkout
+
+
+    # This template is intended to dynamically create jobs that run the openshift-saas-deploy integration
+    # parameters to be passed in job generation
+    # saas_file_name: name of saas file
+    # env_name: name opf environment
+    # app_name: name of application
+    # slack_channel: slack channel to send notifications to
+    openshift_saas_deploy_template: &openshift_saas_deploy_template
+        saas_file_name: empty
+        env_name: empty
+        app_name: empty
+        slack_channel: empty
+        label: '{app_name}'
+        wrappers:
+        - timeout_wrapper:
+            timeout: '{timeout}'
+        - vault-secrets:
+            <<: *vault_defaults
+            secrets:
+            - *reconcile_toml
+            - *github_api
+        builders:
+        - shell: |
+            #!/bin/bash
+
+            # Write config.toml for reconcile tools
+            mkdir -p config
+            echo "$CONFIG_TOML" | base64 -d > config/config.toml
+            WORK_DIR=`pwd`
+
+            set -x
+            docker run --rm \
+                -v $WORK_DIR/config:/config:z \
+                -v /etc/pki:/etc/pki:z \
+                -e REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem \
+                -e GITHUB_API=$GITHUB_API \
+                {qontract_reconcile_image} \
+                qontract-reconcile --config /config/config.toml --no-gql-sha-url --no-validate-schemas openshift-saas-deploy \
+                --saas-file-name {saas_file_name} \
+                --env-name {env_name}
+        publishers:
+        - slack:
+            room: '{slack_channel}'
+            notify-start: False
+            notify-success: True
+            notify-failure: True
+            notify-repeated-failure: True
+
+
+    qontract_reconcile: &qontract_reconcile
+        node: '{node}'
+        concurrent: '{concurrent_build}'
+        integrations: ''
+        builders:
+        - shell: |
+            #!/bin/bash
+
+            # Write config.toml for reconcile tools
+            mkdir -p config
+            echo "$CONFIG_TOML" | base64 -d > config/config.toml
+            WORK_DIR=`pwd`
+
+            set -x
+            for integration in {integrations}; do
+                docker run --rm \
+                    -v $WORK_DIR/config:/config:z \
+                    -v /etc/pki:/etc/pki:z \
+                    -e REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem \
+                    -e GITHUB_API=$GITHUB_API \
+                    -e APP_INTERFACE_STATE_BUCKET=$app_interface_state_bucket \
+                    -e APP_INTERFACE_STATE_BUCKET_ACCOUNT=$app_interface_state_bucket_account \
+                    -e UNLEASH_API_URL=$UNLEASH_API_URL \
+                    -e UNLEASH_CLIENT_ACCESS_TOKEN=$UNLEASH_CLIENT_ACCESS_TOKEN \
+                    {qontract_reconcile_image} \
+                    qontract-reconcile --config /config/config.toml --no-validate-schemas $integration &
+            done
+            wait

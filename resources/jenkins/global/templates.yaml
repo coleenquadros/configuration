@@ -30,6 +30,7 @@
     - vault-secrets:
         <<: *vault_defaults
         secrets:
+        - *backup_ecr_push_creds
         - *kube_config
         - *quay_secret_push
         - *app_sre_bot_push_token
@@ -44,6 +45,7 @@
       - vault-secrets:
           <<: *vault_defaults
           secrets:
+          - *backup_ecr_push_creds
           - *kube_config
           - *quay_secret_push
           - *app_sre_bot_push_token
@@ -174,3 +176,41 @@
         - *goreleaser
         - *pypi
     <<: *gh_build_tag
+
+# Job templates for the openshift-saas-deploy + JJB integrations
+# These templates should not be directly used.
+
+# openshift-saas-deploy
+# ---------------------
+# parameters to be passed in job generation
+# saas_file_name: name of saas file
+# env_name: name opf environment
+# app_name: name of application
+# slack_channel: slack channel to send notifications to
+- job-template:
+    id: 'openshift-saas-deploy'
+    name: 'openshift-saas-deploy-{saas_file_name}-{env_name}'
+    node: app-interface
+    label: '{app_name}'
+    <<: *openshift_saas_deploy_template
+
+# openshift-saas-deploy-with-upstream
+# ---------------------
+# parameters to be passed in job generation
+# saas_file_name: name of saas file
+# env_name: name opf environment
+# app_name: name of application
+# slack_channel: slack channel to send notifications to
+# upstream: name of job to build after
+- job-template:
+    id: 'openshift-saas-deploy-with-upstream'
+    name: 'openshift-saas-deploy-{saas_file_name}-{env_name}'
+    node: app-interface
+    label: '{app_name}'
+    upstream: empty
+    block-upstream: true
+    triggers:
+    - reverse:
+        jobs: '{upstream}'
+        results: 'success'
+    <<: *openshift_saas_deploy_template

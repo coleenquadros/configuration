@@ -1,0 +1,48 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: osd-operators
+
+name: saas-managed-velero-operator
+description: SaaS tracking file for managed-velero-operator
+
+app:
+  $ref: /services/osd-operators/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-srep-info
+
+managedResourceTypes:
+- SelectorSyncSet
+
+imagePatterns:
+- quay.io/app-sre/managed-velero-operator-registry
+
+resourceTemplates:
+- name: managed-velero-operator
+  url: https://github.com/openshift/managed-velero-operator
+  path: /hack/olm-registry/olm-artifacts-template.yaml
+  parameters:
+    REGISTRY_IMG: quay.io/app-sre/managed-velero-operator-registry
+  targets:
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-integration-cluster-scope.yml
+    ref: master
+    upstream: openshift-managed-velero-operator-gh-build-master
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-stage-cluster-scope.yml
+    ref: master
+    upstream: openshift-managed-velero-operator-gh-build-master
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-stage-01/hive-stage-01-cluster-scope.yml
+    ref: master
+    upstream: openshift-managed-velero-operator-gh-build-master
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-production-cluster-scope.yml
+    ref: 939034875d47e43a5787e475cbc28fccc50b9f34

@@ -1,0 +1,61 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: sources
+  platform: insights
+
+name: sources
+description: sources app on the Insights Platform
+
+app:
+  $ref: /services/insights/sources/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- Deployment
+- DeploymentConfig
+- Service
+- CronJob
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  CLOUD_WATCH_LOG_GROUP: sources-stage
+
+resourceTemplates:
+- name: sources-api
+  path: /templates/sources/sources-api.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  parameters:
+    PATH_PREFIX: api
+    PGSSLMODE: verify-full
+  targets:
+  - namespace:
+      $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: a417c19
+      KOKU_SOURCES_API_HOST: koku-sources.hccm-stage.svc.cluster.local
+- name: sources-monitor
+  path: /templates/sources/sources-monitor.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: a0b0a78

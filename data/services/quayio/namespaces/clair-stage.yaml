@@ -1,0 +1,43 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: quayio
+
+name: clair
+description: staging namespace for clair
+
+cluster:
+  $ref: /openshift/quayio-stage/cluster.yml
+
+app:
+  $ref: /services/quayio/app.yml
+
+environment:
+  $ref: /products/quay/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.quayio-stage.yml
+- $ref: /services/quayio/namespaces/quayio-stage.yml
+
+managedRoles: true
+
+managedTerraformResources: true
+
+  
+openshiftResources:
+  - provider: vault-secret
+    path: app-interface/quayio-stage/clair
+    version: 7
+    labels:
+      version: v7
+
+terraformResources:
+  - provider: rds
+    account: quayio-stage
+    identifier: clair-indexer-rds
+    defaults: /terraform/resources/quayio-stage/clair-indexer-rds-1.yml
+  - provider: rds
+    account: quayio-stage
+    identifier: clair-matcher-rds
+    defaults: /terraform/resources/quayio-stage/clair-matcher-rds-1.yml

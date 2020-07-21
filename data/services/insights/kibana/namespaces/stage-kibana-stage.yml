@@ -1,0 +1,54 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: kibana
+
+name: kibana-stage
+description: Insights Kibana on the Stage cluster
+
+cluster:
+  $ref: /openshift/crc-stg-01/cluster.yml
+
+app:
+  $ref: /services/insights/kibana/app.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stg-01.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/insights-stage/kibana-stage/kibana-auth-proxy
+  version: 2
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-stage
+  identifier: kibana-stage
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
+- provider: elasticsearch
+  account: insights-stage
+  identifier: kibana-elasticsearch
+  defaults: /terraform/resources/insights/stage/elasticsearch/elasticsearch-1.yml
+  output_resource_name: kibana-elasticsearch

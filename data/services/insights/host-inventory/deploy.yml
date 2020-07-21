@@ -1,0 +1,115 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: host-inventory
+  platform: insights
+
+name: host-inventory
+description: host-inventory app on the Insights Platform
+
+app:
+  $ref: /services/insights/host-inventory/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- Deployment
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  INVENTORY_DB_SSL_MODE: verify-full
+  LOG_GROUP: platform
+
+resourceTemplates:
+- name: insights-inventory-reaper
+  path: /templates/inventory/insights-inventory-reaper.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  parameters:
+    REAPER_SUSPEND: 'false'
+  targets:
+  - namespace:
+      $ref: /services/insights/host-inventory/namespaces/host-inventory-prod.yml
+    ref: 995c886b2d2f3421d75703549c333765a2eb553f
+    parameters:
+      IMAGE_TAG: f7e099a
+      REAPER_SUSPEND: 'true'
+      PROMETHEUS_PUSHGATEWAY: 'TODO'
+  - namespace:
+      $ref: /services/insights/host-inventory/namespaces/stage-host-inventory-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: f7e099a
+      REAPER_SUSPEND: 'true'
+      PROMETHEUS_PUSHGATEWAY: 'TODO'
+- name: insights-host-delete
+  path: /templates/inventory/insights-host-delete.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  parameters:
+    REPLICAS: 1
+  targets:
+  - namespace:
+      $ref: /services/insights/host-inventory/namespaces/host-inventory-prod.yml
+    ref: 995c886b2d2f3421d75703549c333765a2eb553f
+    parameters:
+      IMAGE_TAG: 587a4f3
+  - namespace:
+      $ref: /services/insights/host-inventory/namespaces/stage-host-inventory-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 587a4f3
+- name: insights-inventory-mq-service
+  path: /templates/inventory/insights-inventory-mq-service.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  parameters:
+    REPLICAS: 3
+    REPLICAS_P1: 5
+  targets:
+  - namespace:
+      $ref: /services/insights/host-inventory/namespaces/host-inventory-prod.yml
+    ref: 995c886b2d2f3421d75703549c333765a2eb553f
+    parameters:
+      IMAGE_TAG: f7e099a
+  - namespace:
+      $ref: /services/insights/host-inventory/namespaces/stage-host-inventory-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: f7e099a
+- name: insights-inventory
+  path: /templates/inventory/insights-inventory.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  parameters:
+    BULK_QUERY_SOURCE: db
+    BULK_QUERY_SOURCE_BETA: db
+    CPU_LIMIT: 1
+    MAX_REPLICAS: 5 # TODO: increase to 25 before v3 cutoff
+    MEMORY_LIMIT: 2Gi
+    MIN_REPLICAS: 5 # TODO: increase to 25 before v3 cutoff
+  targets:
+  - namespace:
+      $ref: /services/insights/host-inventory/namespaces/host-inventory-prod.yml
+    ref: 995c886b2d2f3421d75703549c333765a2eb553f
+    parameters:
+      IMAGE_TAG: f7e099a
+      XJOIN_SEARCH_URL: http://xjoin-search.xjoin-prod.svc.cluster.local:4000/graphql
+  - namespace:
+      $ref: /services/insights/host-inventory/namespaces/stage-host-inventory-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: f7e099a
+      XJOIN_SEARCH_URL: http://xjoin-search.xjoin-stage.svc.cluster.local:4000/graphql

@@ -12,23 +12,16 @@ cluster:
 app:
   $ref: /services/app-interface/app.yml
 
+environment:
+  $ref: /products/app-interface/environments/production.yml
+
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml
-
-openshiftAcme:
-  config:
-    $ref: /dependencies/openshift/acme/v4.yml
-  accountSecret:
-    provider: vault-secret
-    path: app-interface/app-sre/app-interface-production/acme-account
-    version: 1
 
 managedRoles: true
 
 managedResourceTypes:
 - ConfigMap
-- Secret
-- Route
 
 openshiftResources:
 - provider: vault-secret
@@ -39,12 +32,22 @@ openshiftResources:
   path: /app-sre/app-interface-production/app-interface.configmap.yaml
 - provider: vault-secret
   path: app-interface/app-sre/app-interface-production/app-interface
-  version: 3
+  version: 5
+  annotations:
+    qontract.recycle: "true"
 - provider: route
   path: /app-sre/app-interface-production/app-interface.route.yaml
 - provider: vault-secret
   path: app-interface/app-sre/app-interface-production/qontract-reconcile-toml
-  version: 2
+  version: 3
+- name: unleash
+  provider: vault-secret
+  path: app-sre/unleash/app-interface-token
+  version: 1
+- provider: vault-secret
+  name: dashdotdb
+  path: app-sre/dashdot/dashdotdb-production
+  version: 1
 
 managedTerraformResources: true
 

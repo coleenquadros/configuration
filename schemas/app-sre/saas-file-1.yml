@@ -19,6 +19,9 @@ properties:
   app:
     "$ref": "/common-1.json#/definitions/crossref"
     "$schemaRef": "/app-sre/app-1.yml"
+  instance:
+    "$ref": "/common-1.json#/definitions/crossref"
+    "$schemaRef": "/dependencies/jenkins-instance-1.yml"
   slack:
     type: object
     properties:
@@ -29,6 +32,7 @@ properties:
         type: string
     required:
     - workspace
+    - channel
   managedResourceTypes:
     type: array
     items:
@@ -43,6 +47,23 @@ properties:
       - Service
       - CronJob
       - PersistentVolumeClaim
+      - ConfigMap
+      - ServiceAccount
+      - CatalogSource
+      - OperatorGroup
+      - Subscription
+      - HiveConfig
+      - Role
+      - RoleBinding
+      - SelectorSyncIdentityProvider
+      - SelectorSyncSet
+      - Route
+      - ServiceMonitor
+      - Prometheus
+      - Alertmanager
+      - PrometheusRule
+      - PodDisruptionBudget
+      - ClusterImageSet
   authentication:
     type: object
     properties:
@@ -50,10 +71,13 @@ properties:
         "$ref": "/common-1.json#/definitions/vaultSecret"
       image:
         "$ref": "/common-1.json#/definitions/vaultSecret"
+  parameters:
+    type: object
   resourceTemplates:
     type: array
     items:
       type: object
+      additionalProperties: false
       properties:
         name:
           type: string
@@ -63,6 +87,11 @@ properties:
         path:
           type: string
           pattern: '^\/.*'
+        provider:
+          type: string
+          enum:
+          - openshift-template
+          - directory
         hash_length:
           type: integer
         parameters:
@@ -71,31 +100,42 @@ properties:
           type: array
           items:
             type: object
+            additionalProperties: false
             properties:
               namespace:
                 "$ref": "/common-1.json#/definitions/crossref"
                 "$schemaRef": "/openshift/namespace-1.yml"
-              hash:
+              ref:
                 type: string
-                pattern: '^([0-9a-f]{40}|master)$'
-              notify:
-                type: boolean
+                pattern: '^([0-9a-f]{40}|master|quayio|development-4\.0|integration-test)$'
               parameters:
                 type: object
+              upstream:
+                type: string
+              disable:
+                type: boolean
             required:
             - namespace
-            - hash
+            - ref
       required:
       - name
       - url
       - path
-      - hash_length
       - targets
+  takeover:
+    type: boolean
+  imagePatterns:
+    type: array
+    items:
+      type: string
 required:
 - "$schema"
 - labels
 - name
 - description
 - app
+- instance
+- slack
 - managedResourceTypes
 - resourceTemplates
+- imagePatterns

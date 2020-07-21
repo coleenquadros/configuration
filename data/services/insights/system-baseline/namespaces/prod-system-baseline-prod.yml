@@ -13,14 +13,36 @@ cluster:
 app:
   $ref: /services/insights/system-baseline/app.yml
 
+environment:
+  $ref: /products/insights/environments/production.yml
+
 managedRoles: true
 
 managedResourceTypes:
-- Secret
+- ServiceAccount
 
 openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-prod/shared/private-image-puller.serviceaccount.yaml
 - provider: vault-secret
   path: insights/quay/quay.io
   version: 3
   type: kubernetes.io/dockerconfigjson
   name: quay-cloudservices-pull
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-prod
+  identifier: system-baseline-prod
+  defaults: /terraform/resources/insights/production/rds/rds-system-baseline-prod.yml
+  overrides:
+    snapshot_identifier: system-baseline-prod-migration
+  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-system-baseline-prod.yml
+  output_resource_name: system-baseline-db-rds
+  enhanced_monitoring: true

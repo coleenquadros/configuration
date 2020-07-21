@@ -1,0 +1,86 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: catalog
+  platform: insights
+
+name: catalog
+description: catalog app on the Insights Platform
+
+app:
+  $ref: /services/insights/catalog/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- Deployment
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: catalog-api-minion-approval
+  path: /templates/catalog/catalog-api-minion-approval.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/catalog/namespaces/stage-catalog-stage.yml
+    ref: master
+    parameters:
+      CLOUD_WATCH_LOG_GROUP: catalog-stage
+      IMAGE_TAG: 85b939a
+  - namespace:
+      $ref: /services/insights/catalog/namespaces/catalog-prod.yml
+    ref: 69a17ceb3cb13893548c24051b2ae8e2b6511dd3
+    parameters:
+      CLOUD_WATCH_LOG_GROUP: catalog-prod
+      IMAGE_TAG: 85b939a
+- name: catalog-api-minion-task
+  path: /templates/catalog/catalog-api-minion-task.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/catalog/namespaces/stage-catalog-stage.yml
+    ref: master
+    parameters:
+      CLOUD_WATCH_LOG_GROUP: catalog-stage
+      IMAGE_TAG: 85b939a
+  - namespace:
+      $ref: /services/insights/catalog/namespaces/catalog-prod.yml
+    ref: 69a17ceb3cb13893548c24051b2ae8e2b6511dd3
+    parameters:
+      CLOUD_WATCH_LOG_GROUP: catalog-prod
+      IMAGE_TAG: 85b939a
+- name: catalog-api
+  path: /templates/catalog/catalog-api.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  parameters:
+    PATH_PREFIX: api
+    PGSSLMODE: verify-full
+  targets:
+  - namespace:
+      $ref: /services/insights/catalog/namespaces/stage-catalog-stage.yml
+    ref: master
+    parameters:
+      CLOUD_WATCH_LOG_GROUP: catalog-stage
+      IMAGE_TAG: f28aa1f
+  - namespace:
+      $ref: /services/insights/catalog/namespaces/catalog-prod.yml
+    ref: master
+    parameters:
+      CLOUD_WATCH_LOG_GROUP: catalog-prod
+      IMAGE_TAG: f28aa1f
