@@ -21,3 +21,47 @@ networkPoliciesAllow:
 - $ref: /services/insights/gateway/namespaces/3scale-prod.yml
 
 managedRoles: true
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/insights-prod/remediations-prod/redis
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/backoffice/remediations-prod
+  version: 2
+  name: backoffice
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: app-sre/integrations-output/terraform-resources/insights-prod/remediations-prod/remediations-db-rds
+  version: 1
+  type: Opaque
+  annotations:
+    qontract.recycle: "true"
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-stage
+  identifier: remediations-stage
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
