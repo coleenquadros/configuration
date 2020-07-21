@@ -10,7 +10,7 @@ Note: The following credentials should only be used in break glass situations
 
         oc get clusterdeployment --all-namespaces | grep <cluster-name>
 
-1) List the secrets under the cluster namespace and make note of the secrets prefix that looks like *<cluster-name>-<number>-<short-id>-* (ex: quay-p-ue1-0-vsscf-admin-kubeconfig)
+1) List the secrets under the cluster namespace and make note of the secrets prefix that looks like *<cluster-name>-<number>-<short-id>-* (ex: quayp01ue1-0-vsscf-admin-kubeconfig)
 
         oc -n <cluster_ns> get secrets
 
