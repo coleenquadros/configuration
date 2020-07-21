@@ -4,8 +4,8 @@ $schema: /app-sre/saas-file-1.yml
 labels:
   service: hive
 
-name: saas-hive
-description: SaaS tracking file for Hive
+name: saas-hive-config
+description: SaaS tracking file for HiveConfig
 
 app:
   $ref: /services/hive/app.yml
@@ -19,13 +19,9 @@ slack:
   channel: team-hive-info
 
 managedResourceTypes:
-- CatalogSource
-- OperatorGroup
-- Subscription
 - HiveConfig
 
-imagePatterns:
-- quay.io/app-sre/hive-registry
+imagePatterns: []
 
 resourceTemplates:
 - name: hive
@@ -36,7 +32,7 @@ resourceTemplates:
     ADDITIONAL_CERTIFICATE_AUTHORITY: letsencrypt-ca
   targets:
   - namespace:
-      $ref: /services/hive/namespaces/hive-integration.yml
+      $ref: /services/osd-operators/namespaces/hive-integration-cluster-scope.yml
     ref: master
     upstream: openshift-hive-gh-build-master
     parameters:
@@ -55,7 +51,7 @@ resourceTemplates:
       DISABLED_CONTROLLERS:
         - "remoteingress"
   - namespace:
-      $ref: /services/hive/namespaces/hive-stage.yml
+      $ref: /services/osd-operators/namespaces/hive-stage-cluster-scope.yml
     ref: master
     upstream: openshift-hive-gh-build-master
     parameters:
@@ -73,7 +69,7 @@ resourceTemplates:
       DISABLED_CONTROLLERS:
         - "remoteingress"
   - namespace:
-      $ref: /services/hive/namespaces/v4/hive-stage.yml
+      $ref: /services/osd-operators/namespaces/v4/hive-stage-01-cluster-scope.yml
     ref: master
     upstream: openshift-hive-gh-build-master
     parameters:
@@ -91,7 +87,7 @@ resourceTemplates:
       DISABLED_CONTROLLERS:
         - "remoteingress"
   - namespace:
-      $ref: /services/hive/namespaces/hive-production.yml
+      $ref: /services/osd-operators/namespaces/hive-production-cluster-scope.yml
     ref: e9039a4eea4493f37bc13c3d02bebf09b197daa4
     parameters:
       MANAGED_DOMAINS:
