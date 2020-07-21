@@ -1,0 +1,38 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: assisted-installer-test
+description: namespace for assisted-installer-test
+
+cluster:
+  $ref: /openshift/hive-integration/cluster.yml
+
+app:
+  $ref: /services/assisted-installer/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/integration.yml
+
+openshiftResources:
+- provider: vault-secret
+  name: route53-creds
+  path: app-interface/hive-integration/assisted-installer/route53-creds-test
+  version: 1
+
+managedRoles: true
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: s3
+  account: app-sre
+  identifier: assisted-installer-integration-test
+  defaults: /terraform/resources/s3-backup-1.yml
+  output_resource_name: assisted-installer-s3
+- provider: rds
+  account: app-sre
+  identifier: assisted-installer-integration-test
+  defaults: /terraform/resources/assisted-installer/rds-1.yml
+  output_resource_name: assisted-installer-rds
