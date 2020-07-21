@@ -1,0 +1,57 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: quayio
+
+name: saas-clair
+description: SaaS tracking file for clair
+
+app:
+  $ref: /services/quayio/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: oncall-quay
+
+managedResourceTypes:
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/app-sre/clair
+
+resourceTemplates:
+- name: clair
+  path: /contrib/openshift/manifests/manifests.yaml
+  url: https://github.com/quay/clair
+  targets:
+  - namespace:
+      $ref: /services/quayio/namespaces/clair-stage.yaml
+    ref: development-4.0
+    upstream: quay-clair-gh-build-development-4.0
+    parameters:
+      # indexer params
+      INDEXER_DEPLOYMENT_REPLICAS: "1"
+      INDEXER_CPU_LIMITS: "4"
+      INDEXER_CPU_REQS: "2"
+      INDEXER_MEM_LIMITS: "8192Mi"
+      INDEXER_MEM_REQS: "4096Mi"
+      # matcher params
+      MATCHER_DEPLOYMENT_REPLICAS: "1"
+      MATCHER_CPU_LIMITS: "4"
+      MATCHER_CPU_REQS: "2"
+      MATCHER_MEM_LIMITS: "8192Mi"
+      MATCHER_MEM_REQS: "4096Mi"
+      # shared params
+      CLAIR_SECRET: "clair"
+      CLAIR_IMAGE: "quay.io/app-sre/clair"
+      IMAGE_TAG: "latest"
+      HTTP_TRANSPORT_PORT: "8080"
+      INTROSPECTION_PORT: "8089"
+      HEALTH_PATH: "/healthz"
+      HEALTH_PORT: "8089"
