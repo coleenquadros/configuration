@@ -27,11 +27,15 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
             - the manifests to be deployed are in a private github repository
         * otherwise, use ci-ext
 * `slack` - configure where to send notifications of success/failure of deployments
+    * `output` - a type of output to use
+        - `publish` - (default) publish jenkins job results using the slack publisher
+        - `events` - publish the events that were carried out in the job as slack messages
     * `workspace` - a reference to a slack workspace
         * currently only `/dependencies/slack/coreos.yml` is supported.
     * `channel` - channel to send notifications to
 * `managedResourceTypes` - a list of resource types to deploy (indicates that any other type is filtered out)
 * `takeover` - (optional) if set to true, the specified `managedResourceTypes` will be managed exclusively
+* `compare` - (optional) if set to true, the job compares desired to current resource and only applies if it has changed
 * `imagePatterns` - a list of strings specifying allowed images to deploy
     * examples: `quay.io/app-sre`, `quay.io/prom/prometheus`
 * `authentication` - specify credentials required to authenticate to `code` repository or to `image` registry
