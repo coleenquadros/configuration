@@ -302,7 +302,7 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
     1. Create the following secrets in Vault to match the OAuth apps created in the previous step:
         - Generate the auth token value: `htpasswd -s -n app-sre-observability`
             At the password prompt, enter the password stored in the [grafana datasources secret](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/grafana/datasources) for the cluster
-        - Create `https://vault.devshift.net/ui/vault/secrets/app-interface/show/<cluster_name>/openshift-customer-monitoring/alertmanager/alertmanager-auth-proxy` ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quay-s-ue1/openshift-customer-monitoring/alertmanager/alertmanager-auth-proxy))
+        - Create `https://vault.devshift.net/ui/vault/secrets/app-interface/show/<cluster_name>/openshift-customer-monitoring/alertmanager/alertmanager-auth-proxy` ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quays02ue1/openshift-customer-monitoring/alertmanager/alertmanager-auth-proxy))
     
             Secret keys:
             - auth: `<generated auth token value from above>`
@@ -310,7 +310,7 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
             - client-secret: <from_github_OAuth_app>
             - cookie-secret: <random_128_char_string> (Can use this [tool](https://pinetools.com/random-string-generator) or similar to generate )
     
-        - Create `https://vault.devshift.net/ui/vault/secrets/app-interface/show/<cluster_name>/openshift-customer-monitoring/prometheus-auth-proxy` ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quay-s-ue1/openshift-customer-monitoring/prometheus-auth-proxy))
+        - Create `https://vault.devshift.net/ui/vault/secrets/app-interface/show/<cluster_name>/openshift-customer-monitoring/prometheus-auth-proxy` ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quays02ue1/openshift-customer-monitoring/prometheus-auth-proxy))
     
             Secret keys:
             - auth: `<generated auth token value from above>`

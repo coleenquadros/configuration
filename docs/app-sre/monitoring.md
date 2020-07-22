@@ -374,9 +374,9 @@ Currently added datasources:
 * `app-sre-stage-01-cluster-prometheus`: cluster prometheus for `app-sre-stage-01` cluster
 * `app-sre-prod-01-prometheus`: app-sre managed prometheus for `app-sre-prod-01` cluster
 * `app-sre-prod-01-cluster-prometheus`: cluster prometehus for `app-sre-prod-01` cluster
-* `quayio-p-ue1-prometheus`: app-sre managed prometheus for `quayio-p-ue1` cluster
-* `quayio-p-ue2-prometheus`: app-sre managed prometheus for `quayio-p-ue2` cluster
-* `quayio-stage-prometheus`: app-sre managed prometheus for `quayio-stage` cluster
+* `quayiop01ue1-prometheus`: app-sre managed prometheus for `quayp01ue1` cluster
+* `quayiop02ue2-prometheus`: app-sre managed prometheus for `quayp02ue2` cluster
+* `quays02ue1-prometheus`: app-sre managed prometheus for `quays02ue1` cluster
 * `che-dev-cluster-prometheus`: cluster prometheus for `che-dev-cluster` cluster
 * `dsaas-cluster-prometheus`: cluster prometheus for `dsaas` cluster
 * `dsaas-stg-cluster-prometheus`: cluster prometheus for `dsaas-stg` cluster

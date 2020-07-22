@@ -20,7 +20,7 @@
 
 | Environment | Namespace |
 | --- | --- |
-|Stage|[Prometheus](https://prometheus.quayio-stage.devshift.net/graph)|
+|Stage|[Prometheus](https://prometheus.quays02ue1.devshift.net/graph)|
 |Production (us-east-1)|[Prometheus](https://prometheus.quayp01ue1.devshift.net/graph)|
 |Production (us-east-2)|[Prometheus](https://prometheus.quayp02ue2.devshift.net/graph)|
 
@@ -85,7 +85,7 @@ Secrets' exact location can be found in the files namespaces
 
 | Environment | Namespace |
 | --- | --- |
-|Stage|https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/quayio/namespaces/quay-s-ue1.yml|
+|Stage|https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/quayio/namespaces/quays02ue1.yml|
 |Production (us-east-1)|https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/quayio/namespaces/quayp01ue1.yml|
 |Production (us-east-2)|https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/quayio/namespaces/quayp02ue2.yml|
 
