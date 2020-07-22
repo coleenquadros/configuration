@@ -1,0 +1,64 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: subscriptions
+
+name: subscriptions-prod
+description: Insights subscriptions-prod on the PROD cluster under app-sre management
+
+cluster:
+  $ref: /openshift/crcp01ue1/cluster.yml
+
+app:
+  $ref: /services/insights/subscriptions/app.yml
+
+environment:
+  $ref: /products/insights/environments/production.yml
+
+managedRoles: true
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-prod
+  identifier: subscriptions-prod
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
+
+managedResourceTypes:
+- ConfigMap
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/insights-prod/subscriptions-prod/yupana-secret
+  version: 1
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: resource
+  path: /insights-prod/subscriptions/yupana-app.configmap.yaml
+- provider: resource
+  path: /insights-prod/subscriptions/yupana-db.configmap.yaml
+- provider: resource
+  path: /insights-prod/subscriptions/yupana-env.configmap.yaml
+- provider: resource
+  path: /insights-prod/subscriptions/yupana-messaging.configmap.yaml
+
+# Templated secret for rds instance.
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-prod/subscriptions/subscriptions-rds.secret.yaml
