@@ -5,6 +5,7 @@
 - [Accessing Production Environment](#accessing-production-environment)
 - [Connect with App SRE on Slack](#connect-with-app-sre-on-slack)
 - [How to Promote an Image to Stage](#how-to-promote-an-image-to-stage)
+- [How to Update the UI in Stage](#how-to-update-the-ui-in-stage)
 
 ## Quick Links
 
@@ -112,3 +113,7 @@ If you have a question specific to setting up your app prior to the production c
 3. For each `resourceTemplate` that uses your updated image, set the `IMAGE_TAG` parameter value to your seven character git commit hash.
 4. Commit the change, push to your fork of app-interface, and open a merge request (MR).
 5. App devs need to get an owner of your saas file to approve your changes (you cannot self-approve even if you are an owner).  The devtools bot should add a comment to your MR stating which users can approve.  The approver just needs to add a comment to the MR with the content `/lgtm`.  [Example](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/5684).
+
+## How to Update the UI in Stage
+
+The UI for the Stage environment is kept in sync with the QA environment. Follow your usual process for updating your QA UI to update your Stage UI. This generally means pushing the associated branch (such as `qa-stable`) in the source repository for your app's UI.
