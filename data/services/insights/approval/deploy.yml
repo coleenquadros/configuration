@@ -32,9 +32,6 @@ authentication:
     path: insights/quay/cloudservices-push
     field: all
 
-parameters:
-  CLOUD_WATCH_LOG_GROUP: approval-stage
-
 resourceTemplates:
 - name: approval-pam
   path: /templates/approval/approval-pam.yaml
@@ -49,6 +46,17 @@ resourceTemplates:
       IMAGE_TAG: 5e3626d
       PAM_REPLICAS: 1
       PLATFORM_HOSTNAME: cloud.stage.redhat.com
+      CLOUD_WATCH_LOG_GROUP: approval-stage
+  - namespace:
+      $ref: /services/insights/approval/namespaces/approval-prod.yml
+    ref: 229824a2b7d9f05662c207f75df82b773a9ca2bf
+    parameters:
+      BACKOFFICE_CLIENT_ENV: prod
+      BACKOFFICE_EMAIL_PATH: v1/sendEmails
+      IMAGE_TAG: 5e3626d
+      PAM_REPLICAS: 1
+      PLATFORM_HOSTNAME: cloud.redhat.com
+      CLOUD_WATCH_LOG_GROUP: approval-prod
 - name: approval-api
   path: /templates/approval/approval-api.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
@@ -60,3 +68,12 @@ resourceTemplates:
       IMAGE_TAG: 25aeea5
       PATH_PREFIX: api
       PGSSLMODE: verify-full
+      CLOUD_WATCH_LOG_GROUP: approval-stage
+  - namespace:
+      $ref: /services/insights/approval/namespaces/approval-prod.yml
+    ref: 229824a2b7d9f05662c207f75df82b773a9ca2bf
+    parameters:
+      IMAGE_TAG: 25aeea5
+      PATH_PREFIX: api
+      PGSSLMODE: verify-full
+      CLOUD_WATCH_LOG_GROUP: approval-prod
