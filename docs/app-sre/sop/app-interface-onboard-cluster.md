@@ -239,7 +239,9 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
     
 1. Enable enhanced dedicated-admin
 
-    We enable enhanced dedicated-admin on all App-SRE clusters https://github.com/openshift/ops-sop/blob/master/v4/howto/extended-dedicated-admin.md#non-ccs-clusters
+    We enable enhanced dedicated-admin on all App-SRE clusters. Here's the documented [process](https://github.com/openshift/ops-sop/blob/master/v4/howto/extended-dedicated-admin.md#non-ccs-clusters).
+    The process has since been updated to create a ticket in jira instead of a SNOW ticket.  Create a ticket [here](https://issues.redhat.com/secure/RapidBoard.jspa?rapidView=6052)
+    Here's an [example](https://issues.redhat.com/browse/OHSS-608)
 
 1. Enable observability on a v4 cluster
 
