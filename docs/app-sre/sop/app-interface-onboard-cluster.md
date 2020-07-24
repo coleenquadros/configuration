@@ -239,8 +239,8 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
     
 1. Enable enhanced dedicated-admin
 
-    We enable enhanced dedicated-admin on all App-SRE clusters. Here's the documented [process](https://github.com/openshift/ops-sop/blob/master/v4/howto/extended-dedicated-admin.md#non-ccs-clusters).
-    The process has since been updated to create a ticket in jira instead of a SNOW ticket.  Create a ticket [here](https://issues.redhat.com/secure/RapidBoard.jspa?rapidView=6052)
+    We enable enhanced dedicated-admin on all App-SRE clusters. Here's the documented [process](https://github.com/openshift/ops-sop/blob/master/v4/howto/extended-dedicated-admin.md#non-ccs-clusters) as defined by SREP.
+    The process has since been updated to create a ticket in jira instead of a SNOW ticket.  Create a ticket to [OHSS](Create a ticket to [OHSS](https://issues.redhat.com/secure/CreateIssue.jspa?pid=12323823&issuetype=3) requesting `extended-dedicated-admin` on the new cluster (provide the cluster id).
     Here's an [example](https://issues.redhat.com/browse/OHSS-608)
 
 1. Enable observability on a v4 cluster
@@ -386,9 +386,7 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
     Kubernetes / OpenShift. We use the vulnerabilities information in the tenants
     dashboard and in the monthly reports.
     
-    1. Create a ticket to [OHSS](https://issues.redhat.com/secure/CreateIssue.jspa?pid=12323823&issuetype=3),
-    requesting `extended-dedicated-admin` on the new cluster (provide the cluster 
-    id).
+    1. Ensure `enhanced-dedicated-admin` is enabled on the cluster.  Details for this are [here](#enable-enhanced-dedicated-admin)
     
     1. Create an `container-security-operator` namespace file for that specific
     cluster. Example:
