@@ -18,8 +18,9 @@ slack:
   channel: team-insights-info
 
 managedResourceTypes:
-- DeploymentConfig
+- Deployment
 - Service
+
 imagePatterns:
 - registry.redhat.io/rhscl
 
@@ -28,19 +29,20 @@ authentication:
     path: insights/secrets/global/rh-registry-pull
     field: all
 
+parameters:
+  IMAGE: registry.redhat.io/rhscl/redis-32-rhel7
+  IMAGE_TAG: 3.2-47
+  VOLUME_CAPACITY: 10Gi
+  REDIS_REPLICAS: 1
+
 resourceTemplates:
 - name: remediations-redis
   path: /templates/remediations/redis.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  parameters:
-    VOLUME_CAPACITY: 10Gi
-    IMAGE_TAG: 3.2-47
-    IMAGE: registry.redhat.io/rhscl/redis-32-rhel7 # image available in "docker pull NOT webUI"
-    REDIS_REPLICAS: 1
   targets:
   - namespace:
       $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
     ref: master
   - namespace:
       $ref: /services/insights/remediations/namespaces/remediations-prod.yml
-    ref: 320aa03e4eec76e94dfe9b274b1f9d7e4cf4f09e
+    ref: ac8557d52d9ef4dc0823ad0af145ff41981cd561
