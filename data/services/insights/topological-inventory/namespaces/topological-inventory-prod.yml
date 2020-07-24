@@ -1,0 +1,69 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: topological-inventory
+
+name: topological-inventory-prod
+description: Production namespace for Topological Inventory
+
+cluster:
+  $ref: /openshift/crcp01ue1/cluster.yml
+
+app:
+  $ref: /services/insights/topological-inventory/app.yml
+
+environment:
+  $ref: /products/insights/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-prod.yml
+- $ref: /services/insights/approval/namespaces/approval-prod.yml
+- $ref: /services/insights/catalog/namespaces/catalog-prod.yml
+- $ref: /services/insights/sources/namespaces/sources-prod.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- Secret
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  name: rds-client-ca
+  path: insights/secrets/global/rds-client-ca
+  type: Opaque
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  name: topological-inventory-api-secrets
+  path: insights/secrets/insights-prod/topological-inventory-prod/topological-inventory-api-secrets
+  type: Opaque
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-prod/topological-inventory-prod/receptor
+  version: 1
+- provider: resource
+  path: /insights-prod/topological-inventory-prod/topological-inventory-rds.secret.yaml
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-prod
+  identifier: topological-inventory-prod-cw
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
