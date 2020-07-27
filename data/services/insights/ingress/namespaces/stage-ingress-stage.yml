@@ -37,6 +37,113 @@ terraformResources:
   identifier: upload-stage
   defaults: /terraform/resources/s3-gdpr-1.yml
   output_resource_name: upload-s3
+- provider: s3
+  account: insights-prod
+  identifier: insights-ingress-archives
+  defaults: /terraform/resources/s3-gdpr-1.yml
+  output_resource_name: insights-ingress-archives
+- provider: s3
+  account: insights-prod
+  identifier: insights-ingress-rejected
+  defaults: /terraform/resources/s3-gdpr-1.yml
+  output_resource_name: insights-ingress-rejected
+- provider: s3
+  account: insights-prod
+  identifier: insights-buck-it-openshift
+  defaults: /terraform/resources/s3-gdpr-1.yml
+  output_resource_name: insights-buck-it-openshift
+- provider: s3
+  account: insights-prod
+  identifier: insights-buck-it-ansible
+  defaults: /terraform/resources/s3-gdpr-1.yml
+  output_resource_name: insights-buck-it-ansible
+- provider: s3
+  account: insights-prod
+  identifier: insights-client-metrics
+  defaults: /terraform/resources/s3-gdpr-1.yml
+  output_resource_name: insights-client-metrics-bucket
+- provider: aws-iam-service-account
+  account: insights-prod
+  identifier: ingress-buckets-read-write
+  variables:
+    aws_region: us-east-1
+  user_policy:
+    {
+      "Version": "2012-10-17",
+      "Statement": [{
+        "Effect": "Allow",
+        "Action": [
+          "s3:ListBucket",
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:DeleteObject"
+        ],
+        "Resouce": [
+          "arn:aws:s3:::insights-ingress-prod",
+          "arn:aws:s3:::insights-ingress-rejected",
+          "arn:aws:s3:::insights-buck-it-openshift",
+          "arn:aws:s3:::insights-buck-it-ansible",
+          "arn:aws:s3:::insights-ingress-archives",
+        ]
+      }]
+    }
+  output_resource_name: ingress-buckets-read-write
+- provider:
+  account: insights-prod
+  identifier: ingress-buck-it-openshift-read
+  variables:
+    aws_region: us-east-1
+  user_policy:
+    {
+      "Version": "2012-10-17",
+      "Statement": [{
+        "Effect": "Allow",
+        "Action": [
+          "s3:ListBucket",
+          "s3:GetObject",
+        ],
+        "Resource": "arn:aws:s3:::insights-buck-it-openshift"
+      }]
+    }
+  output_resource_name: ingress-buck-it-openshift-read
+- provider:
+  account: insights-prod
+  identifier: ingress-buck-it-ansible-read
+  variables:
+    aws_region: us-east-1
+  user_policy:
+    {
+      "Version": "2012-10-17",
+      "Statement": [{
+        "Effect": "Allow",
+        "Action": [
+          "s3:ListBucket",
+          "s3:GetObject",
+        ],
+        "Resource": "arn:aws:s3:::insights-buck-it-ansible"
+      }]
+    }
+  output_resource_name: ingress-buck-it-ansible-read
+- provider:
+  account: insights-prod
+  identifier: ingress-data-hub-read
+  variables:
+    aws_region: us-east-1
+  user_policy:
+    {
+      "Version": "2012-10-17",
+      "Statement": [{
+        "Effect": "Allow",
+        "Action": [
+          "s3:ListBucket",
+          "s3:GetObject",
+        ],
+        "Resource": [
+          "arn:aws:s3:::insights-ingress-prod",
+          "arn:aws:s3:::insights-ingress-archives",
+        ]
+      }]
+    }
 
 managedResourceTypes:
 - ServiceAccount
