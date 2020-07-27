@@ -243,7 +243,11 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
     The process has since been updated to create a ticket in jira instead of a SNOW ticket.  Create a ticket to [OHSS](Create a ticket to [OHSS](https://issues.redhat.com/secure/CreateIssue.jspa?pid=12323823&issuetype=3) requesting `extended-dedicated-admin` on the new cluster (provide the cluster id).
     Here's an [example](https://issues.redhat.com/browse/OHSS-608)
 
+    *NOTE*: enchanced dedicated-admin must be enabled on the cluster before installing observability or the CSO operator.
+
 1. Enable observability on a v4 cluster
+
+    1. Ensure `enhanced-dedicated-admin` is enabled on the cluster.  Details for this are [here](#enable-enhanced-dedicated-admin)
 
     1. Create DNS records:
         - `prometheus.<cluster_name>.devshift.net`: `elb.apps.<cluster_name>.<clusterid>.p1.openshiftapps.com`
