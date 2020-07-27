@@ -89,7 +89,6 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
 
     * Note: Cluster name should follow naming convention [here](https://docs.google.com/document/d/1OIe4JGbScz57dIGZztThLTvji056OBCfaHSvGAo7Hao)
     * Note: The cluster ID is not known at this point so we do not add a `consoleUrl` and `serverUrl` yet
-    * Note: Currently the pr_check will fail because ocm-github-idp and ocm-groups integrations fail.  This is expected, and if only those two integrations fail then it is ok to merge
 
 1. Send the MR, wait for the check to pass and merge. The ocm-clusters integration will create your cluster. You can view the progress in OCM.
 
