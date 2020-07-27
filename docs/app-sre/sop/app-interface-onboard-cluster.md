@@ -56,7 +56,8 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
     spec:
       provider: aws
       region: (desired region. ex: us-east-1)
-      version: (desired version. ex: 4.4.11)
+      version: (same as initial_version, this will be automatically updated with cluster upgrades)
+      initial_version: (desired version. ex: 4.4.11)
       multi_az: true
       nodes: (desired compute nodes todal across all AZs)
       instance_type: (desired instance type. ex: m5.xlarge)
