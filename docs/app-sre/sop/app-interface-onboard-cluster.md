@@ -557,7 +557,21 @@ To off-board an OSDv4 cluster from app-interface, perform the following operatio
   - Example: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/5793
   - Things to look out for:
     - openshift-customer-monitoring namespace does not contain any tenant monitoring resources
-    - if the cluster has existing VPC peerings, remove them in a separate MR first
+    - if the cluster has existing VPC peerings, configure them to be deleted in a separate MR first by adding `delete: true` to each peering connection:
+
+        ```yaml
+        peering:
+          connections:
+          - provider: account-vpc
+            name: <name>
+            vpc:
+              $ref: <ref>
+            delete: true
+        ```
+
+      Once that MR has merged, run the `terraform-vpc-peerings` integration with `--enable-deletion` to remove the peering connections.  Once the peering connections are removed it is safe to delete the cluster.
+
+      *NOTE*: How to run an integration is documented [here](https://github.com/app-sre/qontract-reconcile#usage)
 
 1. Merge the merge request before proceeding.
 
