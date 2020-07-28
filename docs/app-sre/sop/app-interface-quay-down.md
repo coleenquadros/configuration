@@ -24,7 +24,5 @@ This includes:
 - app-interface build-master jobs
 - app-interface periodic jobs (integrations, saas-deploy triggers, e2e tests)
 - openshift-saas-deploy jobs
-- saasherder saas-pr-check jobs
-- saasherder saas-deploy jobs
 
 In addition, disable the quay integrations in Unleash.

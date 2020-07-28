@@ -9,16 +9,9 @@
 # - gl_project: GitLab repo
 #
 # optional vars
-# - kube_cluster: cluster name
-# - kube_namespace: Namespace to deploy to
-# - saasherder_context: saasherder context declared in config.yaml
-# - saasherder_services: space separated list of saasherder service names
-# - saas_git: saas herder repo uri, should be public
-# - image_pattern: Regex of the image path to check against
 # - quay_org: name of the quay organisation
 #
 # optional secrets:
-# The secret 'app-sre/creds/kube-configs/{kube_cluster}' must exist.
 # The secret 'app-sre/quay/{quay_org}-push' must exist, with `user`, `token` and `config.json` keys.
 - job-template:
     id: 'gh-build-master'
@@ -31,7 +24,6 @@
         <<: *vault_defaults
         secrets:
         - *backup_ecr_push_creds
-        - *kube_config
         - *quay_secret_push
         - *app_sre_bot_push_token
     <<: *gh_build_master
@@ -46,7 +38,6 @@
           <<: *vault_defaults
           secrets:
           - *backup_ecr_push_creds
-          - *kube_config
           - *quay_secret_push
           - *app_sre_bot_push_token
     <<: *gl_build_master
@@ -63,7 +54,6 @@
     - vault-secrets:
         <<: *vault_defaults
         secrets:
-        - *kube_config
         - *quay_secret_push
         - *app_sre_bot_push_token
     triggers:
@@ -84,7 +74,6 @@
     - vault-secrets:
         <<: *vault_defaults
         secrets:
-        - *kube_config
         - *quay_secret_push
         - *app_sre_bot_push_token
     triggers:

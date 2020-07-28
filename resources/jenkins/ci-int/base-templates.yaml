@@ -6,16 +6,3 @@
         triggers:
         - pollscm:
             cron: '{pollscm_cron}'
-
-    saasherder_create_pr: &saasherder_create_pr
-        shell: |
-            #!/bin/bash
-            set -e
-
-            if [ -z "{auto_promote}" ]; then exit; fi
-
-            SAAS_PROJECT_ID="$(echo {saas_git} | sed -e 's/\.git//g' -e 's|https://gitlab.cee.redhat.com/||g' -e 's|/|%2F|g')"
-            SOURCE_BRANCH="promote-$GIT_COMMIT"
-            curl -s -X POST -H "PRIVATE-TOKEN: $APP_SRE_BOT_PUSH_TOKEN" -H "Content-Type: application/json" \
-            --data '{{ "source_branch": "'$SOURCE_BRANCH'", "target_branch": "master", "title": "[{saasherder_context}] promote '$GIT_COMMIT'", "remove_source_branch": true }}' \
-            https://gitlab.cee.redhat.com/api/v4/projects/$SAAS_PROJECT_ID/merge_requests | echo MR created - $(jq -r .web_url)
