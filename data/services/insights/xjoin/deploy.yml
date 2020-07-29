@@ -24,20 +24,31 @@ managedResourceTypes:
 - DeploymentConfig
 - HorizontalPodAutoscaler
 - Service
+- PersistentVolumeClaim
 
 imagePatterns:
 - quay.io/cloudservices
 - quay.io/prometheus/pushgateway
+- quay.io/openshift/origin-jenkins
 
 authentication:
   image:
     path: insights/quay/cloudservices-push
     field: all
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
 
 resourceTemplates:
 - name: xjoin-search
   path: /templates/xjoin/xjoin-search.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  parameters:
+    CPU_REQUESTS: 1
+    CPU_LIMITS: 1
+    MEMORY_REQUESTS: 512Mi
+    MEMORY_LIMITS: 512Mi
+    MAX_REPLICAS: 4
   targets:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
@@ -46,23 +57,33 @@ resourceTemplates:
       IMAGE_TAG: a308c74
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
-    ref: 69a17ceb3cb13893548c24051b2ae8e2b6511dd3
+    ref: master
     parameters:
       IMAGE_TAG: a308c74
+      LOG_LEVEL: info
 - name: xjoin-kafka-connect
   path: /templates/xjoin/xjoin-kafka-connect.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  parameters:
+    NUM_REPLICAS: 13
+    CPU_REQUESTS: 1
+    MEMORY_REQUESTS: 9Gi
+    CPU_LIMITS: 3
+    MEMORY_LIMITS: 10Gi
+    HEAP_OPTS: -Xmx8G -Xms8G
   targets:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
     ref: master
     parameters:
       IMAGE_TAG: a404273
+      REST_ADVERTISED_HOST_NAME: xjoin-search.xjoin-stage.svc.cluster.local
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
-    ref: 5c8cc0e6236e5252aad834c8548ef7e657216c89
+    ref: master
     parameters:
       IMAGE_TAG: a404273
+      REST_ADVERTISED_HOST_NAME: xjoin-search.xjoin-prod.svc.cluster.local
 - name: xjoin-es-exporter
   path: /templates/xjoin/xjoin-es-exporter.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
@@ -74,6 +95,13 @@ resourceTemplates:
       IMAGE_TAG: f621527
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
-    ref: 69a17ceb3cb13893548c24051b2ae8e2b6511dd3
+    ref: master
     parameters:
       IMAGE_TAG: f621527
+- name: xjoin-jenkins
+  path: /openshift/jenkins.yaml
+  url: https://github.com/RedHatInsights/xjoin-config
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
+    ref: master

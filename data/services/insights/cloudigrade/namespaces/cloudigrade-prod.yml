@@ -1,0 +1,40 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: cloudigrade
+
+name: cloudigrade-prod
+description: Cloudigrade app's PROD namespace
+
+cluster:
+  $ref: /openshift/crcp01ue1/cluster.yml
+
+app:
+  $ref: /services/insights/cloudigrade/app.yml
+
+environment:
+  $ref: /products/insights/environments/production.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- Secret
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+
+- provider: vault-secret
+  path: app-sre/integrations-output/terraform-resources/insights-prod/cloudigrade-prod/cloudigrade-prod-rds
+  version: 1
+  type: Opaque
+  annotations:
+    qontract.recycle: "true"

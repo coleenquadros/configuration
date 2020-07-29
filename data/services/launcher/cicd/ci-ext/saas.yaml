@@ -1,0 +1,57 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: quarkus
+
+name: saas-quarkus
+description: 'SaaS tracking file for Quarkus'
+
+app:
+  $ref: /services/launcher/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/quarkus/code-quarkus-app
+
+resourceTemplates:
+- name: code-quarkus
+  url: https://github.com/quarkusio/code.quarkus.io
+  path: /openshift/template.yaml
+  parameters:
+    IO_QUARKUS_CODE_FEATURES: support-button
+  targets:
+  - namespace:
+      $ref: /services/launcher/namespaces/code-quarkus-stage.yml
+    ref: master
+    upstream: quarkusio-code.quarkus.io-gh-build-master
+    parameters:
+      REPLICAS: 1
+      IO_QUARKUS_CODE_HOSTNAME: stage.code.quarkus.io
+      IO_QUARKUS_CODE_GA_EXTENSIONS_DIMENSION_INDEX: 5
+      IO_QUARKUS_CODE_GA_QUARKUS_VERSION_DIMENSION_INDEX: 6
+      IO_QUARKUS_CODE_GA_BUILD_TOOL_DIMENSION_INDEX: 7
+      IO_QUARKUS_CODE_GA_EXTENSION_QUANTITY_INDEX: 8
+      IO_QUARKUS_CODE_GA_BATCHING_ENABLED: "false"
+  - namespace:
+      $ref: /services/launcher/namespaces/code-quarkus-production.yml
+    ref: 25bd686ca502ec304dc29e47cbeac63d143d3eb4
+    parameters:
+      REPLICAS: 3
+      IO_QUARKUS_CODE_HOSTNAME: code.quarkus.io
+      IO_QUARKUS_CODE_GA_EXTENSIONS_DIMENSION_INDEX: 3
+      IO_QUARKUS_CODE_GA_QUARKUS_VERSION_DIMENSION_INDEX: 4
+      IO_QUARKUS_CODE_GA_BUILD_TOOL_DIMENSION_INDEX: 5
+      IO_QUARKUS_CODE_GA_EXTENSION_QUANTITY_INDEX: 6
+      IO_QUARKUS_CODE_LOG_LEVEL: inherit

@@ -4,9 +4,9 @@
 
 | Environment | Console URL |
 | --- | --- |
-|Stage|[Console](https://console-openshift-console.apps.quay-s-ue1.h1m6.p1.openshiftapps.com/)|
-|Production (us-east-1)|[Console](https://console-openshift-console.apps.quay-p-ue1.w2l8.p1.openshiftapps.com/)|
-|Production (us-east-2)|[Console](https://console-openshift-console.apps.quay-p-ue2.g1y7.p1.openshiftapps.com/)|
+|Stage|[Console](https://console-openshift-console.apps.quays02ue1.s6d1.p1.openshiftapps.com/)|
+|Production (us-east-1)|[Console](https://console-openshift-console.apps.quayp01ue1.n7b1.p1.openshiftapps.com/)|
+|Production (us-east-2)|[Console](https://console-openshift-console.apps.quayp02ue2.h5h6.p1.openshiftapps.com/)|
 
 ## Application Logs
 
@@ -20,9 +20,9 @@
 
 | Environment | Namespace |
 | --- | --- |
-|Stage|[Prometheus](https://prometheus.quayio-stage.devshift.net/graph)|
-|Production (us-east-1)|[Prometheus](https://prometheus.quay-p-ue1.devshift.net/graph)|
-|Production (us-east-2)|[Prometheus](https://prometheus.quay-p-ue2.devshift.net/graph)|
+|Stage|[Prometheus](https://prometheus.quays02ue1.devshift.net/graph)|
+|Production (us-east-1)|[Prometheus](https://prometheus.quayp01ue1.devshift.net/graph)|
+|Production (us-east-2)|[Prometheus](https://prometheus.quayp02ue2.devshift.net/graph)|
 
 ## Quay Dashboards
 
@@ -85,8 +85,8 @@ Secrets' exact location can be found in the files namespaces
 
 | Environment | Namespace |
 | --- | --- |
-|Stage|https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/quayio/namespaces/quay-s-ue1.yml|
-|Production (us-east-1)|https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/quayio/namespaces/quay-p-ue1.yml|
-|Production (us-east-2)|https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/quayio/namespaces/quay-p-ue2.yml|
+|Stage|https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/quayio/namespaces/quays02ue1.yml|
+|Production (us-east-1)|https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/quayio/namespaces/quayp01ue1.yml|
+|Production (us-east-2)|https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/quayio/namespaces/quayp02ue2.yml|
 
 Once updated the secret, update the secret's version number to the version of secret you want on the cluster and raise a merge request for AppSRE team to review and merge.

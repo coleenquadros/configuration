@@ -5,6 +5,8 @@
 - [Accessing Production Environment](#accessing-production-environment)
 - [Connect with App SRE on Slack](#connect-with-app-sre-on-slack)
 - [How to Promote an Image to Stage](#how-to-promote-an-image-to-stage)
+- [How to Update the UI in Stage](#how-to-update-the-ui-in-stage)
+- [How to Update Secrets in Vault](#how-to-update-secrets-in-vault)
 
 ## Quick Links
 
@@ -112,3 +114,61 @@ If you have a question specific to setting up your app prior to the production c
 3. For each `resourceTemplate` that uses your updated image, set the `IMAGE_TAG` parameter value to your seven character git commit hash.
 4. Commit the change, push to your fork of app-interface, and open a merge request (MR).
 5. App devs need to get an owner of your saas file to approve your changes (you cannot self-approve even if you are an owner).  The devtools bot should add a comment to your MR stating which users can approve.  The approver just needs to add a comment to the MR with the content `/lgtm`.  [Example](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/5684).
+
+## How to Update the UI in Stage
+
+The UI for the Stage environment is kept in sync with the QA environment. Follow your usual process for updating your QA UI to update your Stage UI. This generally means pushing the associated branch (such as `qa-stable`) in the source repository for your app's UI.
+
+## How to Update Secrets in Vault
+
+Before you can update your Vault secrets, you need to get proper access, and then log in to Vault.
+
+### Getting access to Vault
+
+1. Check the vault policies located at `data/services/vault.devshift.net/config/policies/insights`. If there isn't one for your team, copy an existing policy (such as `advisor-policy.yml`) and modify it to give you access to the correct Vault namespace. Name it "{TEAM_NAME}-policy.yml`.
+2. Check `data/services/vault.devshift.net/config/auth-backends/github-auth.yml`. If you don't see your vault policy file from step 1, add an entry that associates your policy file with your GitHub team, eg:
+
+```yml
+  - github_team:
+      $ref: /teams/insights/github-teams/{TEAM_NAME}.yml
+    policies:
+      - $ref: /services/vault.devshift.net/config/policies/insights/{TEAM_NAME}-policy.yml
+```
+
+3. Check `data/teams/insights/github-teams` and ensure there's a GitHub team created for your team. If not, copy one of the existing files, such as `advisor.yml`, and modify it for your team.
+
+4. Check /data/teams/insights/roles` and ensure there's a role created for your team. In your team file, under "permissions", you should see a reference to your GitHub team file, e.g.:
+
+```yml
+permissions:
+- $ref: /teams/insights/github-teams/{TEAM_NAME}.yml
+```
+
+5. Finally, edit your user file at `data/teams/insights/users` and make sure you have the role from Step 4 assigned to you, e.g.:
+
+```yml
+roles:
+- $ref: /teams/insights/roles/{TEAM_NAME}.yml
+```
+
+### Logging into Vault
+
+To log into Vault, follow the instructions in [Vault's Readme](https://gitlab.cee.redhat.com/service/dev-guidelines/blob/master/vault.md).
+
+### Updating Vault Secrets
+
+1. Log into Vault and make sure you're at the [root URL](https://vault.devshift.net/ui/vault/secrets).
+
+2. Navigate to your secret within the UI:
+
+    1. Click on `insights/secrets/` to get to where cloud.redhat.com secrets are stored.
+
+    2. Click on `insights-prod/` or `insights-stage/`, depending on which environment's secrets you want to modify.
+
+    3. Click on your app, and then click on the secret you want to update.
+
+3. Click "Create new version +" in the top-right corner.
+
+4. Set "Maximum Number of Versions" to 0, which removes the maximum. Make updates to your secret, and hit "Save".
+
+5. Open an app-interface MR to update the secret's version number in your app's config.

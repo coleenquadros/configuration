@@ -40,7 +40,7 @@ run_int gitlab-owners &
 run_int gitlab-permissions &
 run_int gitlab-integrations &
 run_int ldap-users $APP_INTERFACE_PROJECT_ID &
-run_int slack-usergroups &
+# run_int slack-usergroups &
 run_int openshift-resources --internal &
 run_int openshift-vault-secrets --internal &
 run_int terraform-resources --internal --light --vault-output-path app-sre/integrations-output &

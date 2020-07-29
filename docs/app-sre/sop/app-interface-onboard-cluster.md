@@ -56,7 +56,8 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
     spec:
       provider: aws
       region: (desired region. ex: us-east-1)
-      version: (desired version. ex: 4.4.11)
+      version: (same as initial_version, this will be automatically updated with cluster upgrades)
+      initial_version: (desired version. ex: 4.4.11)
       multi_az: true
       nodes: (desired compute nodes todal across all AZs)
       instance_type: (desired instance type. ex: m5.xlarge)
@@ -88,7 +89,7 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
     ```
 
     * Note: Cluster name should follow naming convention [here](https://docs.google.com/document/d/1OIe4JGbScz57dIGZztThLTvji056OBCfaHSvGAo7Hao)
-    * Note the cluster ID is not known at this point so we do not add a `consoleUrl` and `serverUrl` yet
+    * Note: The cluster ID is not known at this point so we do not add a `consoleUrl` and `serverUrl` yet
 
 1. Send the MR, wait for the check to pass and merge. The ocm-clusters integration will create your cluster. You can view the progress in OCM.
 
@@ -238,9 +239,15 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
     
 1. Enable enhanced dedicated-admin
 
-    We enable enhanced dedicated-admin on all App-SRE clusters https://github.com/openshift/ops-sop/blob/master/v4/howto/extended-dedicated-admin.md#non-ccs-clusters
+    We enable enhanced dedicated-admin on all App-SRE clusters. Here's the documented [process](https://github.com/openshift/ops-sop/blob/master/v4/howto/extended-dedicated-admin.md#non-ccs-clusters) as defined by SREP.
+    The process has since been updated to create a ticket in jira instead of a SNOW ticket.  Create a ticket to [OHSS](Create a ticket to [OHSS](https://issues.redhat.com/secure/CreateIssue.jspa?pid=12323823&issuetype=3) requesting `extended-dedicated-admin` on the new cluster (provide the cluster id).
+    Here's an [example](https://issues.redhat.com/browse/OHSS-608)
+
+    *NOTE*: enchanced dedicated-admin must be enabled on the cluster before installing observability or the CSO operator.
 
 1. Enable observability on a v4 cluster
+
+    1. Ensure `enhanced-dedicated-admin` is enabled on the cluster.  Details for this are [here](#enable-enhanced-dedicated-admin)
 
     1. Create DNS records:
         - `prometheus.<cluster_name>.devshift.net`: `elb.apps.<cluster_name>.<clusterid>.p1.openshiftapps.com`
@@ -302,7 +309,7 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
     1. Create the following secrets in Vault to match the OAuth apps created in the previous step:
         - Generate the auth token value: `htpasswd -s -n app-sre-observability`
             At the password prompt, enter the password stored in the [grafana datasources secret](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/grafana/datasources) for the cluster
-        - Create `https://vault.devshift.net/ui/vault/secrets/app-interface/show/<cluster_name>/openshift-customer-monitoring/alertmanager/alertmanager-auth-proxy` ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quay-s-ue1/openshift-customer-monitoring/alertmanager/alertmanager-auth-proxy))
+        - Create `https://vault.devshift.net/ui/vault/secrets/app-interface/show/<cluster_name>/openshift-customer-monitoring/alertmanager/alertmanager-auth-proxy` ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quays02ue1/openshift-customer-monitoring/alertmanager/alertmanager-auth-proxy))
     
             Secret keys:
             - auth: `<generated auth token value from above>`
@@ -310,7 +317,7 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
             - client-secret: <from_github_OAuth_app>
             - cookie-secret: <random_128_char_string> (Can use this [tool](https://pinetools.com/random-string-generator) or similar to generate )
     
-        - Create `https://vault.devshift.net/ui/vault/secrets/app-interface/show/<cluster_name>/openshift-customer-monitoring/prometheus-auth-proxy` ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quay-s-ue1/openshift-customer-monitoring/prometheus-auth-proxy))
+        - Create `https://vault.devshift.net/ui/vault/secrets/app-interface/show/<cluster_name>/openshift-customer-monitoring/prometheus-auth-proxy` ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quays02ue1/openshift-customer-monitoring/prometheus-auth-proxy))
     
             Secret keys:
             - auth: `<generated auth token value from above>`
@@ -383,9 +390,7 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
     Kubernetes / OpenShift. We use the vulnerabilities information in the tenants
     dashboard and in the monthly reports.
     
-    1. Create a ticket to [OHSS](https://issues.redhat.com/secure/CreateIssue.jspa?pid=12323823&issuetype=3),
-    requesting `extended-dedicated-admin` on the new cluster (provide the cluster 
-    id).
+    1. Ensure `enhanced-dedicated-admin` is enabled on the cluster.  Details for this are [here](#enable-enhanced-dedicated-admin)
     
     1. Create an `container-security-operator` namespace file for that specific
     cluster. Example:
