@@ -1,0 +1,70 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: payload-tracker
+
+name: payload-tracker-prod
+description: Insights payload-tracker-prod on the v4 Prod cluster
+
+cluster:
+  $ref: /openshift/crcp01ue1/cluster.yml
+
+app:
+  $ref: /services/insights/payload-tracker/app.yml
+
+environment:
+  $ref: /products/insights/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-prod.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ConfigMap
+- Route
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/insights-prod/payload-tracker-prod/payload-tracker-cookie
+  version: 1
+- provider: vault-secret
+  path: insights/secrets/insights-prod/payload-tracker-prod/payload-tracker-frontend-cookie
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-prod/payload-tracker-prod/payload-tracker-kibana
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: resource
+  path: /insights-prod/payload-tracker-prod/payload-tracker-nginx-conf.configmap.yml
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-prod
+  identifier: payload-tracker-prod
+  defaults: /terraform/resources/insights/production/rds/rds-payload-tracker-prod.yml
+  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-payload-tracker-prod.yml
+  output_resource_name: payload-tracker-db
+  enhanced_monitoring: true
+- provider: cloudwatch
+  account: insights-prod
+  identifier: payload-tracker-prod
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
