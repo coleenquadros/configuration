@@ -572,6 +572,9 @@ To off-board an OSDv4 cluster from app-interface, perform the following operatio
       Once that MR has merged, run the `terraform-vpc-peerings` integration with `--enable-deletion` to remove the peering connections.  Once the peering connections are removed it is safe to delete the cluster.
 
       *NOTE*: How to run an integration is documented [here](https://github.com/app-sre/qontract-reconcile#usage)
+      *NOTE*: If the cluster had `manageRoutes: true` for one or more peering connections, then those routes will have to be deleted manually.  To delete these routes:
+          1. Log a ticket with [SREP](https://issues.redhat.com/secure/CreateIssue.jspa?pid=12323823&issuetype=3) to remove the peering connections.  Give the subnets that are to be removed.  [Example](https://issues.redhat.com/browse/OHSS-718)
+          1. Use `terraform state rm` to remove the routes from the terraform state file.  If unsure how to do this, ask Maor Friedman or Rob Rati.
 
 1. Merge the merge request before proceeding.
 
