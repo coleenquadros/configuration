@@ -65,7 +65,7 @@ resourceTemplates:
       IMAGE_TAG: 06172d9
       S3_BUCKET_NAME: koku-data-archive-prod
       KOKU_SENTRY_ENV: prod
-  
+
 # template: masu
 - name: masu
   path: /templates/hccm/masu.yaml
@@ -191,3 +191,23 @@ resourceTemplates:
     parameters:
       IMAGE: quay.io/cloudservices/redis
       IMAGE_TAG: 3.0.3
+
+# template: pg script runner
+- name: koku-pg-script-runner
+  path: /openshift.yml
+  url: https://gitlab.cee.redhat.com/insights-platform/pg-post-update-actions
+  targets:
+  # staging
+  - namespace:
+      $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
+    ref: 633ef07c60189f45fa3cef285491c7446be0e23b
+    parameters:
+      IMAGE: quay.io/cloudservices/pg-script-runner
+      IMAGE_TAG: "633ef07c"
+      DB_SECRET: "koku-db"
+      ACTIVE_DEADLINE_SECONDS: "7200"
+  # production
+  # - namespace:
+  #     $ref: /services/insights/hccm/namespaces/hccm-prod.yml
+  #   ref:
+  #   parameters:
