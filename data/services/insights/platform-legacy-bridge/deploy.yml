@@ -1,0 +1,47 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: platform-legacy-bridge
+  platform: insights
+
+name: platform-legacy-bridge
+description: platform-legacy-bridge app on the Insights Platform
+
+app:
+  $ref: /services/insights/platform-legacy-bridge/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- Deployment
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: platform-legacy-bridge
+  path: /templates/advisor/platform-legacy-bridge.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/platform-legacy-bridge/namespaces/stage-platform-legacy-bridge-stage.yml
+    ref: master
+    parameters:
+      CPU_LIMIT: '1'
+      IMAGE_TAG: 2d96024
+      MEMORY_LIMIT: 1Gi
+      REPLICAS: 1
