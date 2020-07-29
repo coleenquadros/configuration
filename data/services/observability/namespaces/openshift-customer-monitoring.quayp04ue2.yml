@@ -10,15 +10,10 @@ cluster:
   $ref: /openshift/quayp04ue2/cluster.yml
 
 app:
-  $ref: /services/observability/app.yml
+  $ref: /services/quayio/app.yml
 
 environment:
   $ref: /products/app-sre/environments/production.yml
-
-managedResourceTypes:
-- Secret
-- PrometheusRule
-- ServiceMonitor
 
 managedResourceNames:
 # https://github.com/openshift/managed-cluster-config/blob/master/deploy/osd-customer-monitoring/05-role.yaml#L24-L37
@@ -31,6 +26,13 @@ managedResourceNames:
     - prometheus-additional-alertmanager-config
     - prometheus-additional-scrape-config
     - prometheus-auth-proxy
+
+managedResourceTypes:
+- ServiceMonitor
+- PrometheusRule
+- Service
+- Prometheus
+- Secret
 
 openshiftResources:
 # Observability
@@ -76,3 +78,37 @@ openshiftResources:
   path: /observability/prometheusrules/prometheus-mixin.prometheusrules.yaml
 
 ################## Add  any cluster-specific content below this line ##################
+
+# ServiceMonitor
+## Quay
+- provider: resource
+  path: /quay-p/quay/quay.app-sre.servicemonitor.yaml
+- provider: resource
+  path: /quay-p/quay/quay.aggregation.servicemonitor.yaml
+- provider: resource
+  path: /quay-p/quay/quay.aggregation.federation.servicemonitor.yaml
+
+# PrometheusRule
+## Quayio
+- provider: resource
+  path: /quay-p/quay/quay.alerts.prometheusrules.yaml
+- provider: resource
+  path: /quay-p/quay/quay.aggregation.prometheusrules.yaml
+- provider: resource
+  path: /observability/prometheusrules/kube-cronjob.prometheusrules.yaml
+
+# Prometheus
+## Quay Aggregation Prometheus
+- provider: resource-template
+  type: jinja2
+  path: /quay-p/quay/quay.aggregation.prometheus.yaml
+  variables:
+    version: v2.15.2
+    retention: 1h
+    tempfsSize: 10Gi
+    walCompression: true
+
+# Service
+## Quay Aggregation Prometheus
+- provider: resource
+  path: /quay-p/quay/quay.aggregation.service.yaml
