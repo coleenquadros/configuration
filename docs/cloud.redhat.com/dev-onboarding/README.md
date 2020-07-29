@@ -1,7 +1,9 @@
 # cloud.redhat.com Developer Onboarding
 
 - [Quick Links](#quick-links)
+- [Asking for Help](#asking-for-help)
 - [Accessing Stage Environment](#accessing-stage-environment)
+- [Using insights-client in Stage](#using-insights-client-in-stage)
 - [Accessing Production Environment](#accessing-production-environment)
 - [Connect with App SRE on Slack](#connect-with-app-sre-on-slack)
 - [How to Promote an Image to Stage](#how-to-promote-an-image-to-stage)
@@ -10,11 +12,20 @@
 
 ## Quick Links
 
+* [Paging AppSRE OnCall](https://mojo.redhat.com/groups/service-delivery/blog/2020/03/19/paging-appsre-oncall)
 * [app-interface deep dive slides](https://docs.google.com/presentation/d/1R1JtB29TVnANfCoy_JOxVE5ehe_6cfiVdzRrQ468TIo/edit#slide=id.g782698ae7e_2_697)
 * [app-interface deep dive recording](https://bluejeans.com/s/eLhjG)
 * [Production promotion epic](https://projects.engineering.redhat.com/browse/RHCLOUD-5439): You can find your respective apps in that epic and follow along with the progress.
 * [Visual App-Interface](https://visual-app-interface.devshift.net/)
 * [Grafana](https://grafana.app-sre.devshift.net/dashboards): App SRE uses one Granfana for all clusters; each graph chooses the datasource by cluster.
+
+## Asking for Help
+
+If you need assistance from an SRE, need advice, or temporary elevated access to a system, reach out to AppSRE.  During business hours, the easiest way to contact AppSRE is via the Interupt Catcher (IC).  To contact the IC, ping **@app-sre-ic** in **#sd-app-sre** in **CoreOS Slack**.
+
+Additional contact information for AppSRE can be found [here](https://mojo.redhat.com/docs/DOC-1211223#jive_content_id_Contacting_AppSRE).
+
+If you need emergency help after-hours, AppSRE can be paged.  Please review the information [here](https://mojo.redhat.com/groups/service-delivery/blog/2020/03/19/paging-appsre-oncall) for guidance on when to use the AppSRE pager.
 
 ## Accessing Stage Environment
 
@@ -40,9 +51,9 @@ If you prefer wget, you can do the same thing like this:
 wget -e use_proxy=yes -e http_proxy=http://squid.corp.redhat.com:3128 https://cloud.stage.redhat.com/api/<path>
 ```
 
-**Insights Client Config**
+## Using insights-client in Stage
 
-NOTE:  This requires insights-client version 3.0.173+
+**NOTE:  This requires insights-client version 3.0.173+**
 
 Edit `/etc/insights-client/insights-client.conf`:
 
