@@ -1,0 +1,45 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: ccx-data-pipeline
+
+name: ccx-data-pipeline-prod
+description: Insights ccx-data-pipeline-prod on the PROD cluster deployed by app-interface
+
+cluster:
+  $ref: /openshift/crcp01ue1/cluster.yml
+
+app:
+  $ref: /services/insights/ccx-data-pipeline/app.yml
+
+environment:
+  $ref: /products/insights/environments/production.yml
+
+managedRoles: true
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  name: quay-cloudservices-pull
+  path: insights/quay/quay.io
+  type: kubernetes.io/dockerconfigjson
+  version: 3
+- provider: vault-secret
+  path: app-sre/integrations-output/terraform-resources/insights-prod/ccx-data-pipeline-prod/ccx-data-pipeline-db
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-prod
+  identifier: ccx-data-pipeline-prod
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
