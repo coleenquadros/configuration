@@ -69,7 +69,7 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
         * default is set in [app-interface settings](/data/app-interface/app-interface-settings.yml#L31).
 
 
-A complete example for github-mirror can be found [here](/data/services/github-mirror/cicd/saas.yaml).
+A complete example for github-mirror can be found [here](/data/services/github-mirror/cicd/deploy.yaml).
 
 ## Environment parameters
 

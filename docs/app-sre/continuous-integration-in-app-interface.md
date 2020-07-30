@@ -36,7 +36,7 @@ In order to define Continuous Integration pipelines in app-interface, define a J
             * `display_name` - display name of the Jenkins job
             * additional optional fields can be found in [advanced usage](https - //gitlab.cee.redhat.com/service/dev-guidelines#cicd).
 
-A complete example for github-mirror can be found [here](/data/services/github-mirror/cicd/saas.yaml).
+A complete example for github-mirror can be found [here](/data/services/github-mirror/cicd/deploy.yaml).
 
 ## How does it work?
 
