@@ -1,6 +1,12 @@
 <!-- TOC -->
 
 - [Onboard a new OSDv4 cluster to app-interface](#onboard-a-new-osdv4-cluster-to-app-interface)
+  - [Step 1 - Cluster creation and initial access for dedicated-admins](#step-1-cluster-creation-and-initial-access-for-dedicated-admins)
+  - [Step 2 - Bot access and App SRE project template](#step-2-bot-access-and-app-sre-project-template)
+  - [Step 3 - Enhanced dedicated admin](#step-3-enhanced-dedicated-admin)
+  - [Step 4 - Observability](#step-4-observability)
+  - [Step 5 - Container Security Operator](#step-5-container-security-operator)
+  - [Step 6 - Logging](#step-6-logging)
 - [Additional configurations](#additional-configurations)
   - [Selecting a Machine CIDR for VPC peerings](#selecting-a-machine-cidr-for-vpc-peerings)
   - [VPC peering with app-interface](#vpc-peering-with-app-interface)
@@ -18,12 +24,26 @@
 
 To on-board a new OSDv4 cluster to app-interface, perform the following operations:
 
+## Step 1 - Cluster creation and initial access for dedicated-admins
+
+This step should be performed in a single merge request.
+
 1. Login to https://cloud.redhat.com/openshift
 
 1. Click `Subscriptions` and ensure you have enough quota to provision a cluster
     - Must have at least 1 cluster.aws of the desired type
     - Check that you have enough compute nodes quota for the desired total compute (4 are included in a single-az cluster, 6 in a multi-az)
     - Note that quota is driven via this [repo](https://gitlab.cee.redhat.com/service/ocm-resources/) and this is our [org file](https://gitlab.cee.redhat.com/service/ocm-resources/blob/master/data/uhc-production/orgs/12147054.yaml) in prod. The `@ocm-resources` Slack alias can also be pinged for any questions or if the change is urgent.
+
+1. Create a new App-SRE Github Oauth Client.
+    In order to create the OAuth client register to create a new application here:
+    https://github.com/organizations/app-sre/settings/applications
+
+    - Name: <cluster_name> cluster
+    - Homepage URL: https://console-openshift-console.apps.<cluster_name>.TBD.p1.openshiftapps.com
+    - Authorization callback URL: https://oauth-openshift.apps.<cluster_name>.TBD.p1.openshiftapps.com/oauth2callback/github-app-sre
+
+1. Place the `client-id` and `client-secret` from the Oauth Client in a secret in [Vault](https://vault.devshift.net/ui/vault/secrets/app-sre/list/integrations-input/ocm-github-idp/github-org-team/app-sre/) named `<cluster_name>-cluster`.
 
 1. Cluster creation in OCM is self-serviced in app-interface. As such cluster.yml file should be added to app-interface at this point
 
@@ -91,27 +111,6 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
     * Note: Cluster name should follow naming convention [here](https://docs.google.com/document/d/1OIe4JGbScz57dIGZztThLTvji056OBCfaHSvGAo7Hao)
     * Note: The cluster ID is not known at this point so we do not add a `consoleUrl` and `serverUrl` yet
 
-1. Send the MR, wait for the check to pass and merge. The ocm-clusters integration will create your cluster. You can view the progress in OCM.
-
-1. Once the cluster is created, update the above `cluster.yml` and add the `consoleUrl` and `serverUrl` fields to point to the console and api respectively
-
-1. Create a new App-SRE Github Oauth Client.
-    In order to create the OAuth client register to create a new application here:
-    https://github.com/organizations/app-sre/settings/applications
-
-    - Name: <cluster_name> cluster
-    - Homepage URL: https://console-openshift-console.apps.<cluster_name>.<cluster_id>.p1.openshiftapps.com/
-        * Note: cluster_id can be obtained from the console.  In OCM, click on the link for the cluster and then click on the `Open Console` button in the upper right corner.  Looking at the URL bar there should be something like: `oauth-openshift.apps.<cluster_name>.<cluster_id>.p1.openshiftapps.com`
-    - Authorization callback URL: (Retrieve this from OCM)
-        * Note: To get the callback URL do the following:
-            - Go to OCM and click on the cluster.
-            - Go to the `Access Control` tab and look for the `Identity providers` section.  Click the `Add identity provider` button.
-            - On the following screen copy the url from the `OAuth callback URL` field.
-            - Press the `Cancel` button to exit that screen.
-            - The callback URL from OCM will end with `oauth2callback/GitHub`.  This needs to be changed to `oauth2callback/github-app-sre`.
-
-1. Place the `client-id` and `client-secret` from the Oauth Client in a secret in [Vault](https://vault.devshift.net/ui/vault/secrets/app-sre/list/integrations-input/ocm-github-idp/github-org-team/app-sre/) named `<cluster_name>-cluster`.
-
 1. Grant dedicated-admin access to App-SRE team
 
     ```yaml
@@ -123,6 +122,22 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
             $ref: /openshift/<cluster_name>/cluster.yml
         group: dedicated-admins
     ```
+
+1. Send the MR, wait for the check to pass and merge. The ocm-clusters integration will create your cluster. You can view the progress in OCM. Proceed with the following steps after the cluster's installation is complete.
+  * Note: during the installation it is expected that other ocm integrations will fail.
+
+## Step 2 - Bot access and App SRE project template
+
+At this point you should be able to access the cluster via the console / oc cli.
+
+* Note: This step should be performed in a single merge request.
+
+1. Update App-SRE Github Oauth Client.
+    - Homepage URL: https://console-openshift-console.apps.<cluster_name>.<cluster_id>.p1.openshiftapps.com/
+        * Note: cluster_id can be obtained from the console.  In OCM, click on the link for the cluster and then click on the `Open Console` button in the upper right corner.  Looking at the URL bar there should be something like: `oauth-openshift.apps.<cluster_name>.<cluster_id>.p1.openshiftapps.com`
+    - Authorization callback URL: https://oauth-openshift.apps.<cluster_name>.<cluster_id>.p1.openshiftapps.com/oauth2callback/github-app-sre
+
+1. Update the above `cluster.yml` and add the `consoleUrl` and `serverUrl` fields to point to the console and api respectively
 
 1. Configure VPC peering to jumphost (ci.ext) as needed for private clusters. See  [app-interface-cluster-vpc-peerings.md](app-interface-cluster-vpc-peerings.md) (Disregard this step for public clusters)
 
@@ -136,16 +151,12 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
 
     ```
 
-1. At this point you should be able to access the cluster via the console / oc cli
-
 1. Add the `app-sre-bot` ServiceAccount
 
     ```shell
     oc -n dedicated-admin create sa app-sre-bot
     oc -n dedicated-admin sa get-token app-sre-bot
     ```
-
-1. NOTE: The remaining modifications can be completed in a single MR
 
 1. Add the `app-sre-bot` credentials to vault at https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/kube-configs
 
@@ -236,7 +247,11 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
       - default-network-policies
       - default-project-label
     ```
-    
+
+1. Send the MR, wait for the check to pass and merge.
+
+## Step 3 - Enhanced dedicated admin
+
 1. Enable enhanced dedicated-admin
 
     We enable enhanced dedicated-admin on all App-SRE clusters. Here's the documented [process](https://github.com/openshift/ops-sop/blob/master/v4/howto/extended-dedicated-admin.md#non-ccs-clusters) as defined by SREP.
@@ -244,6 +259,8 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
     Here's an [example](https://issues.redhat.com/browse/OHSS-608)
 
     *NOTE*: enchanced dedicated-admin must be enabled on the cluster before installing observability or the CSO operator.
+
+## Step 4 - Observability
 
 1. Enable observability on a v4 cluster
 
@@ -261,7 +278,7 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
         - Interval: 15 min
         - Tags: app-sre
         - Alert email: sd-app-sre@redhat.com
-        - Notes: Runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus-deadmanssnitch.md
+        - Notes: Runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/prometheus/prometheus-deadmanssnitch.md
     
     1. Add the deadmansnitch URL to this secret in Vault: https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/alertmanager-integration
     
@@ -384,6 +401,8 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
     
         *Note*: The `<cluster-url>` can be retrieved from the cluster console.  Remove the `https://console-openshift-console` from the beginning and end with `openshiftapps.com`, removing all the trailing slashes and paths.
 
+## Step 5 - Container Security Operator
+
 1. Install the Container Security Operator
 
     The Container Security Operator (CSO) brings Quay and Clair metadata to
@@ -464,6 +483,8 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
           $ref: /openshift/<cluster>/namespaces/app-sre-cso-per-cluster.yml
         ref: <commit_hash>
     ```
+
+## Step 6 - Logging
 
 1. Enable logging (EFK)
 
