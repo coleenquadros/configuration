@@ -9,6 +9,7 @@
 - [How to Promote an Image to Stage](#how-to-promote-an-image-to-stage)
 - [How to Update the UI in Stage](#how-to-update-the-ui-in-stage)
 - [How to Update Secrets in Vault](#how-to-update-secrets-in-vault)
+- [How to add a Grafana dashboard](#how-to-add-a-grafana-dashboard)
 
 ## Quick Links
 
@@ -183,3 +184,14 @@ To log into Vault, follow the instructions in [Vault's Readme](https://gitlab.ce
 4. Set "Maximum Number of Versions" to 0, which removes the maximum. Make updates to your secret, and hit "Save".
 
 5. Open an app-interface MR to update the secret's version number in your app's config.
+
+
+### How to add a Grafana dashboard
+
+1. Add (or update) the dashboard file (a ConfigMap containing the json data) in [saas-templates/dashboards](https://gitlab.cee.redhat.com/insights-platform/saas-templates/-/tree/master/dashboards). Each merge to this repository will deploy the dashboards to the [Grafana stage instance](https://grafana.stage.devshift.net/).
+
+1. If this is a new dashbord:
+  - Add the configmap as a volume and volumeMount to the grafana pod template in [the app-sre-observability repo](https://gitlab.cee.redhat.com/service/app-sre-observability/). An example of the changes can be found [here](https://gitlab.cee.redhat.com/service/app-sre-observability/commit/0bee8c95be4a27121e6b1ff82a75a2e01901a8f4)
+  - Once the template changes are merged, the saas file hash for the grafana service should be bumped so the changes are deployed. This can be done in [saas-grafana](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/cicd/saas/saas-grafana.yaml)
+
+1. To promote the dashboard changes to the [Grafana production instance](https://grafana.app-sre.devshift.net/), the saas file hash for the `insights-dashboards` should be bumped so the changes are deployed.
