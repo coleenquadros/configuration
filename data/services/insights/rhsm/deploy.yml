@@ -1,0 +1,74 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: rhsm
+  platform: insights
+
+name: rhsm
+description: Backend components for Subscription Watch
+
+app:
+  $ref: /services/insights/rhsm/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- ConfigMap
+- CronJob
+- Deployment
+- DeploymentConfig
+- HorizontalPodAutoscaler
+- Service
+- Route
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: swatch-product-allowlist
+  path: /templates/capacity-allowlist.yml
+  url: https://gitlab.cee.redhat.com/rhsm/swatch-product-allowlist
+  targets:
+  - namespace:
+      $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
+    ref: master
+- name: rhsm-subscriptions-api
+  path: /templates/rhsm-subscriptions-api.yml
+  url: https://github.com/RedHatInsights/rhsm-subscriptions
+  targets:
+  - namespace:
+      $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
+    ref: master
+- name: rhsm-subscriptions-capacity-ingress
+  path: /templates/rhsm-subscriptions-capacity-ingress.yml
+  url: https://github.com/RedHatInsights/rhsm-subscriptions
+  targets:
+  - namespace:
+      $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
+    ref: master
+- name: rhsm-subscriptions-scheduler
+  path: /templates/rhsm-subscriptions-scheduler.yml
+  url: https://github.com/RedHatInsights/rhsm-subscriptions
+  targets:
+  - namespace:
+      $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
+    ref: master
+- name: rhsm-subscriptions-worker
+  path: /templates/rhsm-subscriptions-worker.yml
+  url: https://github.com/RedHatInsights/rhsm-subscriptions
+  targets:
+  - namespace:
+      $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
+    ref: master
