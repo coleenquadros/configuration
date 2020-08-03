@@ -1,0 +1,48 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: osd-operators
+
+name: saas-authorizedkeys-builder
+description: SaaS tracking file for authorizedkeys-builder
+
+app:
+  $ref: /services/osd-operators/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-srep-info
+
+managedResourceTypes:
+- SelectorSyncSet
+
+resourceTemplates:
+- name: authorizedkeys
+  url: https://gitlab.cee.redhat.com/service/authorizedkeys-builder
+  path: /deploy
+  provider: directory
+  targets:
+  # Since this is just deploying ConfigMaps with internal data for SREs,
+  # updates are synced to all environments immediately, including production.
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-integration-cluster-scope.yml
+    ref: master
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-stage-cluster-scope.yml
+    ref: master
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-stage-01/hive-stage-01-cluster-scope.yml
+    ref: master
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-production-cluster-scope.yml
+    ref: master
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hivep01ue1/hivep01ue1-cluster-scope.yml
+    ref: master
+
+imagePatterns: []
