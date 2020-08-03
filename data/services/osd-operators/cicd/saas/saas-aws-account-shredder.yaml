@@ -1,0 +1,45 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: osd-operators
+
+name: saas-aws-account-shredder
+description: SaaS tracking file for aws-account-shredder
+
+app:
+  $ref: /services/osd-operators/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-srep-info
+
+managedResourceTypes:
+  - Deployment
+
+imagePatterns:
+  - quay.io/app-sre/aws-account-shredder
+
+resourceTemplates:
+  - name: aws-account-shredder
+    url: https://github.com/openshift/aws-account-shredder
+    path: /deploy/template.yaml
+    parameters:
+      IMAGE: quay.io/app-sre/aws-account-shredder
+    targets:
+      - namespace:
+          $ref: /services/osd-operators/namespaces/aws-account-shredder-integration.yml
+        ref: master
+        upstream: openshift-aws-account-shredder-gh-build-master
+      - namespace:
+          $ref: /services/osd-operators/namespaces/aws-account-shredder-stage.yml
+        ref: master
+        upstream: openshift-aws-account-shredder-gh-build-master
+      - namespace:
+          $ref: /services/osd-operators/namespaces/hive-stage-01/aws-account-shredder-stage-01.yml
+        ref: master
+        upstream: openshift-aws-account-shredder-gh-build-master
