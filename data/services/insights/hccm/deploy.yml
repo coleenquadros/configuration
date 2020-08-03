@@ -27,6 +27,8 @@ managedResourceTypes:
 - Service
 - StatefulSet
 - Job
+- RoleBinding
+- HorizontalPodAutoscaler
 
 imagePatterns:
 - quay.io/cloudservices
@@ -55,17 +57,29 @@ resourceTemplates:
     ref: 5c8cc0e6236e5252aad834c8548ef7e657216c89
     parameters:
       APP_DOMAIN: apps.crc-stg-01.o4v9.p1.openshiftapps.com
-      IMAGE_TAG: 06172d9
+      IMAGE_TAG: 2f971b5
       S3_BUCKET_NAME: koku-data-archive-stage
       KOKU_SENTRY_ENV: stage
+      DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
+      CPU_REQUEST: 200m
+      CPU_LIMIT: 1
+      MEMORY_REQUEST: 1Gi
+      MEMORY_LIMIT: 2Gi
+      UPDATE_TIMEOUT: 7200
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
     ref: 5c8cc0e6236e5252aad834c8548ef7e657216c89
     parameters:
       APP_DOMAIN: apps.crcp01ue1.o9m8.p1.openshiftapps.com
-      IMAGE_TAG: 06172d9
+      IMAGE_TAG: 2f971b5
       S3_BUCKET_NAME: koku-data-archive-prod
       KOKU_SENTRY_ENV: prod
+      DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
+      CPU_REQUEST: 200m
+      CPU_LIMIT: 1
+      MEMORY_REQUEST: 1Gi
+      MEMORY_LIMIT: 2Gi
+      UPDATE_TIMEOUT: 7200
 
 # template: masu
 - name: masu
@@ -77,13 +91,13 @@ resourceTemplates:
     ref: 69a17ceb3cb13893548c24051b2ae8e2b6511dd3
     parameters:
       APP_DOMAIN: apps.crc-stg-01.o4v9.p1.openshiftapps.com
-      IMAGE_TAG: 06172d9
+      IMAGE_TAG: 2f971b5
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
     ref: 69a17ceb3cb13893548c24051b2ae8e2b6511dd3
     parameters:
       APP_DOMAIN: apps.crcp01ue1.o9m8.p1.openshiftapps.com
-      IMAGE_TAG: 06172d9
+      IMAGE_TAG: 2f971b5
 
 # template: koku-listener
 - name: koku-listener
@@ -94,12 +108,24 @@ resourceTemplates:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
     ref: 6260f3d60ba5befa86923f81a63fd39eb4e52aca
     parameters:
-      IMAGE_TAG: 06172d9
+      IMAGE_TAG: 2f971b5
+      ENABLE_API_SENTRY: true
+      CPU_REQUEST: 200m
+      CPU_LIMIT: 1
+      MEMORY_REQUEST: 512Mi
+      MEMORY_LIMIT: 2Gi
+      VOLUME_CAPACITY: 100Gi
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
     ref: 6260f3d60ba5befa86923f81a63fd39eb4e52aca
     parameters:
-      IMAGE_TAG: 06172d9
+      IMAGE_TAG: 2f971b5
+      ENABLE_API_SENTRY: true
+      CPU_REQUEST: 200m
+      CPU_LIMIT: 1
+      MEMORY_REQUEST: 512Mi
+      MEMORY_LIMIT: 2Gi
+      VOLUME_CAPACITY: 100Gi
 
 # template: koku-sources
 - name: koku-sources
@@ -112,14 +138,16 @@ resourceTemplates:
     parameters:
       APP_DOMAIN: apps.crc-stg-01.o4v9.p1.openshiftapps.com
       ENABLE_API_SENTRY: True
-      IMAGE_TAG: 06172d9
+      IMAGE_TAG: 2f971b5
+      DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
     ref: 5c8cc0e6236e5252aad834c8548ef7e657216c89
     parameters:
       APP_DOMAIN: apps.crcp01ue1.o9m8.p1.openshiftapps.com
       ENABLE_API_SENTRY: True
-      IMAGE_TAG: 06172d9
+      IMAGE_TAG: 2f971b5
+      DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
 
 # template: rabbitmq
 - name: rabbitmq
@@ -130,13 +158,13 @@ resourceTemplates:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
     ref: cdcf9dcfc04a68c69b8f83706603c56af30eb943
     parameters:
-      IMAGE_TAG: c30564c
+      IMAGE_TAG: 2f971b5
       REPLICAS: 3
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
     ref: cdcf9dcfc04a68c69b8f83706603c56af30eb943
     parameters:
-      IMAGE_TAG: c30564c
+      IMAGE_TAG: 2f971b5
       REPLICAS: 3
 
 # template: celery-scheduler
@@ -148,12 +176,12 @@ resourceTemplates:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
     ref: 69a17ceb3cb13893548c24051b2ae8e2b6511dd3
     parameters:
-      IMAGE_TAG: 06172d9
+      IMAGE_TAG: 2f971b5
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
     ref: 69a17ceb3cb13893548c24051b2ae8e2b6511dd3
     parameters:
-      IMAGE_TAG: 06172d9
+      IMAGE_TAG: 2f971b5
 
 # template: celery-worker
 - name: celery-worker
@@ -164,16 +192,30 @@ resourceTemplates:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
     ref: 84e8c19a966a64f5b0698291ed4422db16025eb6
     parameters:
-      IMAGE_TAG: 06172d9
+      IMAGE_TAG: 2f971b5
       S3_BUCKET_NAME: koku-data-archive-stage
       KOKU_SENTRY_ENV: stage
+      ENABLE_CELERY_SENTRY: true
+      DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
+      CPU_REQUEST: 200m
+      CPU_LIMIT: 2
+      MEMORY_REQUEST: 512Mi
+      MEMORY_LIMIT: 4Gi
+      VOLUME_CAPACITY: 100Gi
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
     ref: 84e8c19a966a64f5b0698291ed4422db16025eb6
     parameters:
-      IMAGE_TAG: 06172d9
+      IMAGE_TAG: 2f971b5
       S3_BUCKET_NAME: koku-data-archive-prod
       KOKU_SENTRY_ENV: stage
+      ENABLE_CELERY_SENTRY: true
+      DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
+      CPU_REQUEST: 200m
+      CPU_LIMIT: 2
+      MEMORY_REQUEST: 512Mi
+      MEMORY_LIMIT: 4Gi
+      VOLUME_CAPACITY: 100Gi
 
 # template: koku-auth-cache
 - name: koku-auth-cache
