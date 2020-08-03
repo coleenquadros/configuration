@@ -1,0 +1,72 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: automation-hub
+
+name: automation-hub-prod
+description: Insights automation-hub-prod on the prod v4 cluster under app interface mgmt
+
+cluster:
+  $ref: /openshift/crcp01ue1/cluster.yml
+
+app:
+  $ref: /services/insights/automation-hub/app.yml
+
+environment:
+  $ref: /products/insights/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-prod.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+- ConfigMap
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-prod/automation-hub-prod/galaxy-api-config.configmap.yml
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/insights-prod/automation-hub-prod/automation-hub-pulp
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-prod/automation-hub-prod/automation-hub-galaxy
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-prod
+  identifier: automation-hub-prod
+  defaults: /terraform/resources/insights/production/rds/postgres11-rds-1.yml
+  parameter_group: /terraform/resources/insights/production/rds/postgres11-parameter-group-automation-hub-prod.yml
+  output_resource_name: automation-hub-db
+  enhanced_monitoring: true
+- provider: s3
+  account: insights-prod
+  identifier: automation-hub-prod-s3
+  defaults: /terraform/resources/s3-private-1.yml
+  output_resource_name: automation-hub-s3
+- provider: cloudwatch
+  account: insights-prod
+  identifier: automation-hub-prod-cw
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
