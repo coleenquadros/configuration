@@ -1,7 +1,7 @@
 # Continuous Delivery in App-interface
 
 App-interface is a declarative interface to define everything.
-Service owners are able to define their deployment flow using a Saas file.
+Service owners are able to define their deployment flow using a SaaS file.
 
 This functionality replaces the saasherder flow described [here](https://github.com/openshiftio/saasherder#the-process).
 
@@ -37,6 +37,7 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
 * `takeover` - (optional) if set to true, the specified `managedResourceTypes` will be managed exclusively
 * `compare` - (optional) if set to true, the job compares desired to current resource and only applies if it has changed
 * `timeout` - (optional) set a timeout in minutes for the deployment job ([default](https://gitlab.cee.redhat.com/service/app-interface/-/blob/2581e30973e9ead6611d6fa1b0fa7dc34d41e63d/resources/jenkins/global/defaults.yaml#L24))
+* `publishJobLogs` - (optional) if this is a [saas file running post-deployment tests](/docs/app-sre/continuous-testing-in-app-interface.md), set this to `true` to publish Jobs' pods logs as artifacts in the Jenkins job.
 * `imagePatterns` - a list of strings specifying allowed images to deploy
     * examples: `quay.io/app-sre`, `quay.io/prom/prometheus`
 * `authentication` - specify credentials required to authenticate to `code` repository or to `image` registry
@@ -124,9 +125,7 @@ Ping @app-sre-ic on #sd-app-sre in the CoreOS slack!
 
 ## Future development
 
-* add manifest-bouncer checks to deployment pipelines
 * add ability to define automated promotion flows
-* add ability to define directory of resources to deploy
 
 ## Developer workflow
 

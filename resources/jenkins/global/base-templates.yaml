@@ -282,19 +282,26 @@
             # Write config.toml for reconcile tools
             mkdir -p config
             echo "$CONFIG_TOML" | base64 -d > config/config.toml
+            # Create directory for artifacts
+            mkdir -p artifacts
             WORK_DIR=`pwd`
 
             set -x
             docker run --rm \
                 -v $WORK_DIR/config:/config:z \
+                -v $WORK_DIR/artifacts:/artifacts:z \
                 -v /etc/pki:/etc/pki:z \
                 -e REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem \
                 -e GITHUB_API=$GITHUB_API \
                 {qontract_reconcile_image} \
                 qontract-reconcile --config /config/config.toml --no-gql-sha-url --no-validate-schemas openshift-saas-deploy \
+                --io-dir /artifacts \
                 --saas-file-name {saas_file_name} \
                 --env-name {env_name}
         publishers:
+        - archive:
+            artifacts: 'artifacts/**'
+            allow-empty: 'true'
         - slack:
             room: '{slack_channel}'
             notify-start: False
