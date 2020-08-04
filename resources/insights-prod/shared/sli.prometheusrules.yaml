@@ -1,0 +1,27 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: sli-prod
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: insights-sli-prod
+    rules:
+    - record: service:request_count:rate5m
+      expr: sum by(exported_service, environment) (rate(api_3scale_gateway_api_time_count[5m])) > 0
+    - record: service:latency_le_2000:rate5m
+      expr: sum by(exported_service, environment) (rate(api_3scale_gateway_api_time_bucket{le="2000.0"}[5m]))
+    - record: service:status_5xx:rate5m
+      expr: sum by(exported_service, environment) (rate(api_3scale_gateway_api_status{status="5xx"}[5m]))
+    - record: service:proportion:latency_gt_2000:rate5m
+      expr: 1 - (service:latency_le_2000:rate5m / service:request_count:rate5m)
+    - record: service:proportion:status_5xx:rate5m
+      expr: service:status_5xx:rate5m / service:request_count:rate5m
+    - record: service:sli:latency_gt_2000:pctl5rate5m
+      expr: service:proportion:latency_gt_2000:rate5m < bool 0.1
+    - record: service:sli:status_5xx:pctl5rate5m
+      expr: service:proportion:status_5xx:rate5m < bool 0.05
