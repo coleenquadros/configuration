@@ -365,7 +365,9 @@ At this point you should be able to access the cluster via the console / oc cli.
                 {
                     "access": "proxy",
                     "basicAuth": true,
-                    "basicAuthPassword": "{{{ vault('app-interface/app-sre/app-sre-observability-production/grafana/datasources', '<cluster_name>-prometheus') }}}",
+                    "secureJsonData": {
+                        "basicAuthPassword": "{{{ vault('app-interface/app-sre/app-sre-observability-production/grafana/datasources', '<cluster_name>-prometheus') }}}"
+                    },
                     "basicAuthUser": "app-sre-observability",
                     "editable": false,
                     "jsonData": {
