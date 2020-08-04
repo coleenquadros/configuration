@@ -2687,6 +2687,23 @@
     <<: *job_template_defaults
 
 - job-template:
+    name: '{ci_project}-{git_repo}-che-nightly-deploy'
+    defaults: global
+    triggers:
+        - che_githubprb:
+            trigger_phrase: '{trigger_phrase}'
+            job_type: '{job_type}'
+            che-success-message: '{che-success-message}'
+            che-failure-message: '{che-failure-message}'
+            che-error-message: '{che-error-message}'
+    wrappers:
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+            - *che-bot-github-credentials
+    <<: *job_template_defaults
+
+- job-template:
     name: '{ci_project}-{git_repo}-minikube-updates'
     che-success-message: "Latest version of Eclipse Che installed and tested successfully in minikube."
     che-failure-message: "Latest version of Eclipse Che failed installation in minikube."
@@ -5209,9 +5226,16 @@
             git_organization: eclipse
             git_repo: che-operator
             ci_project: 'devtools'
-            ci_cmd: '/bin/bash .ci/cico_olm_prcheck.sh'
+            ci_cmd: '/bin/bash .ci/cico_olm_minikube.sh'
             timeout: '2h'
             job_type: "[MINIKUBE] Testing olm nightly files."
+        - '{ci_project}-{git_repo}-che-nightly-deploy':
+            git_organization: eclipse
+            git_repo: che-operator
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash .ci/cico_minishift_nightly.sh'
+            timeout: '2h'
+            job_type: "[MINISHIFT] Eclipse Che nightly eploy."
         - '{ci_project}-{git_repo}-code-pr-check':
             git_organization: eclipse
             git_repo: che-operator
