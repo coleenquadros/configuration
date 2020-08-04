@@ -1,0 +1,45 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  platform: insights
+
+name: insights-prometheus-rules
+description: Prometheus rules for the Insights Platform Tools team
+
+app:
+  $ref: /services/insights/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+managedResourceTypes:
+- PrometheusRule
+
+resourceTemplates:
+- name: prometheus-rules
+  path: /rules.yml
+  url: https://gitlab.cee.redhat.com/insights-platform/prometheus-rules
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stg-01.yml
+    ref: master
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
+    ref: 16c9e7005b9684f23785828ebe05360e63fdb0e2
