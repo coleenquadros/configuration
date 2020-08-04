@@ -10,6 +10,7 @@
 - [How to Update the UI in Stage](#how-to-update-the-ui-in-stage)
 - [How to Update Secrets in Vault](#how-to-update-secrets-in-vault)
 - [How to add a Grafana dashboard](#how-to-add-a-grafana-dashboard)
+- [Adding Alerts](#adding-alerts)
 
 ## Quick Links
 
@@ -188,6 +189,8 @@ To log into Vault, follow the instructions in [Vault's Readme](https://gitlab.ce
 5. Open an app-interface MR to update the secret's version number in your app's config.
 
 
+## Metrics and Monitoring
+
 ### How to add a Grafana dashboard
 
 1. Add (or update) the dashboard file (a ConfigMap containing the json data) in [saas-templates/dashboards](https://gitlab.cee.redhat.com/insights-platform/saas-templates/-/tree/master/dashboards). Each merge to this repository will deploy the dashboards to the [Grafana stage instance](https://grafana.stage.devshift.net/).
@@ -197,3 +200,19 @@ To log into Vault, follow the instructions in [Vault's Readme](https://gitlab.ce
   - Once the template changes are merged, the saas file hash for the grafana service should be bumped so the changes are deployed. This can be done in [saas-grafana](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/cicd/saas/saas-grafana.yaml)
 
 1. To promote the dashboard changes to the [Grafana production instance](https://grafana.app-sre.devshift.net/), the saas file hash for the `insights-dashboards` should be bumped so the changes are deployed.
+
+### Adding Alerts
+
+Each app team needs to migrate their alerts from e2e-deploy to app-interface.  App SRE-managed Openshift clusters use the Prometheus operator, thus rules and alerts are defined as a `PrometheusRule` CR (custom resource).  You can add these resources in two ways:
+
+- Commit the resources directly to app-interface and reference it from the `openshift-customer-monitoring` namespace from your cluster.
+- Add them to a separate deployment template. Deploy this by adding a resource template to your `deploy.yml`, pointing to your deployment template and targeting the `openshift-customer-monitoring` namespace on your respective cluster.  [Here is an example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/insights/prometheus-rules-deploy.yml), with the [corresponding git repo](https://gitlab.cee.redhat.com/insights-platform/prometheus-rules).
+
+[App SRE documentation for alerting](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/monitoring.md#alerting-for-your-applications) explains the labels you need to set and how to direct your alerts to the appropriate channel.  We currently use `insights` as the team for all alerts, but this will likely be split up into individual teams in the near future.
+
+Alert annotations are used to render action buttons in Slack alert messages:
+
+- `dashboard`: Link to corresponding grafana dashboard. Can put in placeholder "https://GRAFANA_URL" for now.
+- `link_url`: Link to project in Openshift console
+- `message`: The message you want to display in slack or pagerduy
+- `runbook`: Link to SOP in platform-docs or app-interface
