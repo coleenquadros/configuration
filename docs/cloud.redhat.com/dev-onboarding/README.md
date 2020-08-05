@@ -31,10 +31,12 @@ If you need emergency help after-hours, AppSRE can be paged.  Please review the 
 
 ## Accessing Stage Environment
 
+* visual app interface (common across envs): https://visual-app-interface.devshift.net/
 * UI: https://cloud.stage.redhat.com
 * Openshift console: visual-app-interface > Clusters > Search "crc" > Choose cluster that says "stage cluster"
 * Prometheus: visual-app-interface > Clusters > Search "crc" > Choose cluster that says "stage cluster" > Details > Prometheus
 * Kibana: https://kibana.apps.crc-stg-01.o4v9.p1.openshiftapps.com
+* payload tracker: https://payload-tracker-frontend-payload-tracker-stage.apps.crc-stg-01.o4v9.p1.openshiftapps.com/
 
 Our stage environment follows IT's [pre-prod lockdown](https://mojo.redhat.com/docs/DOC-1193747) requirement.  Thus you must [configure your brower and scripts to use the Red Hat internal squid proxy](https://redhat.service-now.com/help?id=kb_article_view&sysparm_article=KB0006375&sys_kb_id=26c75be61b538490384411761a4bcbf9) ([alternative Mojo link](https://mojo.redhat.com/docs/DOC-1213497)) in order to access cloud.stage.redhat.com.
 
@@ -73,11 +75,13 @@ proxy=http://squid.corp.redhat.com:3128
 
 ## Accessing Production Environment
 
+* visual app interface (common across envs): https://visual-app-interface.devshift.net/
 * UI: https://cloud.redhat.com (with special cookie)
 * Openshift console: visual-app-interface > Clusters > Search "crc" > Choose cluster that says "production cluster"
 * Prometheus: visual-app-interface > Clusters > Search "crc" > Choose cluster that says "stage cluster" > Details > Prometheus
 * Set cookie: https://cloud.redhat.com/yOM53v3hTsaKDZJoVAtZ7r2or79PuzWI
 * Kibana: https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/
+* payload tracker: https://payload-tracker-frontend-payload-tracker-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com/
 
 Accessing the new production environment is done with the same URLs as our current production environment, but all your requests must contain the `x-rh-prod-v4` cookie.  Go [here](https://cloud.redhat.com/yOM53v3hTsaKDZJoVAtZ7r2or79PuzWI) to set the cookie in your browser.  This will keep the cookie set until your delete your cookies for cloud.redhat.com.
 
