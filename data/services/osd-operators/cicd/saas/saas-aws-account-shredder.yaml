@@ -20,6 +20,9 @@ slack:
 
 managedResourceTypes:
   - Deployment
+  - ServiceAccount
+  - Role
+  - RoleBinding
 
 imagePatterns:
   - quay.io/app-sre/aws-account-shredder
@@ -27,7 +30,7 @@ imagePatterns:
 resourceTemplates:
   - name: aws-account-shredder
     url: https://github.com/openshift/aws-account-shredder
-    path: /deploy/template.yaml
+    path: /deploy/aws-account-shredder-template.yaml
     parameters:
       IMAGE: quay.io/app-sre/aws-account-shredder
     targets:
@@ -43,3 +46,21 @@ resourceTemplates:
           $ref: /services/osd-operators/namespaces/hive-stage-01/aws-account-shredder-stage-01.yml
         ref: master
         upstream: openshift-aws-account-shredder-gh-build-master
+  - name: aws-account-operator
+    url: https://github.com/openshift/aws-account-shredder
+    path: /deploy/aws-account-operator-template.yaml
+    parameters:
+      SHREDDER_NAMESPACE: aws-account-shredder
+    targets:
+      - namespace:
+          $ref: /services/osd-operators/namespaces/aws-account-operator-integration.yml
+        ref: master
+        upstream: openshift-aws-account-operator-gh-build-master
+      - namespace:
+          $ref: /services/osd-operators/namespaces/aws-account-operator-stage.yml
+        ref: master
+        upstream: openshift-aws-account-operator-gh-build-master
+      - namespace:
+          $ref: /services/osd-operators/namespaces/hive-stage-01/aws-account-operator-stage-01.yml
+        ref: master
+        upstream: openshift-aws-account-operator-gh-build-master
