@@ -16,6 +16,10 @@ app:
 environment:
   $ref: /products/insights/environments/production.yml
 
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-prod.yml
+
 managedRoles: true
 
 managedResourceTypes:
@@ -31,10 +35,24 @@ openshiftResources:
   version: 3
   type: kubernetes.io/dockerconfigjson
   name: quay-cloudservices-pull
-
 - provider: vault-secret
   path: app-sre/integrations-output/terraform-resources/insights-prod/cloudigrade-prod/cloudigrade-prod-rds
   version: 1
   type: Opaque
   annotations:
     qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-prod/cloudigrade-prod/cloudigrade
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-prod
+  identifier: cloudigrade-prod-cw
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
