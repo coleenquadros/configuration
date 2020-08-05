@@ -45,6 +45,9 @@ resourceTemplates:
     JWKS_URL: https://api.openshift.com/.well-known/jwks.json
     REPLICAS: 3
     ENABLE_TRIGGERS: true
+    # After openshift upgrade, we're seeing sporadic "http2: server: error reading preface"
+    # errors in log, source IP is openshift router.
+    GODEBUG: http2server=0
   targets:
   - namespace:
       $ref: /services/uhc/namespaces/uhc-stage.yml
@@ -53,9 +56,6 @@ resourceTemplates:
     parameters:
       OCM_BASE_URL: https://api.stage.openshift.com
       GLOG_V: 5
-      # After openshift upgrade, we're seeing sporadic "http2: server: error reading preface"
-      # errors in log, source IP is openshift router.
-      GODEBUG: http2server=0
       ENABLE_SENTRY: true
       SENTRY_URL: sentry.stage.devshift.net
       SENTRY_PROJECT: 15
@@ -70,7 +70,7 @@ resourceTemplates:
       OCM_DEBUG: true
   - namespace:
       $ref: /services/uhc/namespaces/uhc-production.yml
-    ref: 3fc510d070d89be0e50b6b9ac9f23b42bc564823
+    ref: ed0559e01a55f72ba378e48e69018c6d0ca60ce8
     parameters:
       OCM_BASE_URL: https://api.openshift.com
       GLOG_V: 1
