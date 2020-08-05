@@ -1,0 +1,93 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: insights-hccm
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: insights-hccm-stage
+    rules:
+    - alert: InsightsCostManagementPodDown
+      expr: |
+        up{service="koku", namespace="hccm-stage"} == 0
+      for: 2m
+      labels:
+        severity: high
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
+        message: "Insights Cost Management Alert. At least one hccm pod has been down for two minutes."
+
+    - alert: App-koku-In-hccm-stage-Absent
+      expr: absent(up{service="koku", namespace="hccm-stage"})
+      for: 5m
+      labels:
+        severity: high
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
+        message: "Insights Cost Management Alert. At least one hccm pod has been down for 5 minutes."
+
+    - alert: App-koku-5xx-In-hccm-stage
+      expr: rate(django_http_responses_total_by_status_total{status=~"5[0-9]{2}", kubernetes_namespace="hccm-stage"}[5m]) > 0
+      labels:
+        severity: warning
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
+        message: "Insights Cost Management Alert. 5xx repsponses observed in the last 5 minutes."
+
+    - alert: Celery-errors-In-hccm-stage
+      expr: rate(celery_errors_total{kubernetes_namespace="hccm-stage"}[5m]) > 0
+      labels:
+        severity: warning
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
+        message: "Insights Cost Management Alert. Celery errors observed in the last 5 minutes."
+
+    - alert: App-cost-stale-sources-In-hccm-stage
+      expr: sum(hccm_count_stale_providers{namespace="hccm-stage"}) - sum(hccm_count_stale_providers{namespace="hccm-stage"} offset 1h) > 0
+      labels:
+        severity: info
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
+        message: "Insights Cost Management Alert. Stale sources observed in the last hour."
+
+    - alert: App-cost-invalid-sources-In-hccm-stage
+      expr: sum(hccm_count_invalid_sources{namespace="hccm-stage"}) - sum(hccm_count_invalid_sources{namespace="hccm-stage"} offset 1h) > 0
+      labels:
+        severity: info
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
+        message: "Insights Cost Management Alert. Invalid sources observed in the last hour."
+
+    - alert: App-cost-incomplete-manifests-In-hccm-stage
+      expr: sum(hccm_count_incomplete_manifests{namespace="hccm-stage"}) - sum(hccm_count_incomplete_manifests{namespace="hccm-stage"} offset 1h) > 0
+      labels:
+        severity: info
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
+        message: "Insights Cost Management Alert. Incomplete manifests observed in the last hour."
+
