@@ -77,9 +77,11 @@ def print_pr_check_cmds(integrations, selected=None, select_all=False):
 
         cmd = ""
         if pr.get('state'):
-            cmd = "STATE=true "
+            cmd += "STATE=true "
         if pr.get('sqs'):
-            cmd = "SQS_GATEWAY=true "
+            cmd += "SQS_GATEWAY=true "
+        if pr.get('no_validate_schemas'):
+            cmd += "NO_VALIDATE=true "
         cmd += "run_int " + pr['cmd'] + ' &'
 
         print(cmd)
