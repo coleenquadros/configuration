@@ -867,6 +867,7 @@
 
 - job-template:
     name: '{ci_project}-{git_repo}-fabric8-hdd'
+    disabled: '{obj:disabled}'
     image_name: 'MISSING_IMAGE_NAME'
     registry: 'MISSING_REGISTRY_NAME'
     wrappers:
@@ -887,6 +888,7 @@
 
 - job-template:
     name: '{ci_project}-{git_repo}-fabric8-hdd-eslint'
+    disabled: '{obj:disabled}'
     wrappers:
         - ansicolor
     git_organization: fabric8-hdd
@@ -1146,6 +1148,7 @@
 
 - job-template: &job_template_build_master
     name: '{ci_project}-{git_repo}-build-master'
+    disabled: '{obj:disabled}'
     wrappers:
       - vault-secrets:
           <<: *vault_defaults
@@ -1166,6 +1169,7 @@
 
 - job-template: &job_template_build_master-v4
     name: '{ci_project}-{git_repo}-build-master-v4'
+    disabled: '{obj:disabled}'
     wrappers:
       - vault-secrets:
           <<: *vault_defaults
@@ -3011,7 +3015,88 @@
             ENVIRONMENT=production PATH=$PATH:~/.local/bin /bin/bash ~/saasherder/fetch_and_apply.sh
 
 - job-template:
+    name: '{ci_project}-{git_repo}-promote-to-prod-v4'
+    image_pattern: ''
+    defaults: global
+    node: devtools
+    disabled: '{obj:disabled}'
+     
+    properties:
+        - github:
+            url: https://github.com/openshiftio/{git_repo}/
+    scm:
+        - git:
+            url: https://github.com/openshiftio/{git_repo}.git
+            shallow_clone: true
+            branches:
+                - master
+    triggers:
+        - github
+    builders:
+        - shell: |
+            # testing out the cico client
+            set +e
+
+            export CICO_API_KEY=$(cat ~/duffy.key )
+
+            # get node
+            n=1
+            while true
+            do
+                cico_output=$(cico node get -f value -c ip_address -c comment)
+                if [ $? -eq 0 ]; then
+                    read CICO_hostname CICO_ssid <<< $cico_output
+                    if  [ ! -z "$CICO_hostname" ]; then
+                        # we got hostname from cico
+                        break
+                    fi
+                    echo "'cico node get' succeed, but can't get hostname from output"
+                fi
+                if [ $n -gt 15 ]; then
+                    # give up after 15 tries
+                    echo "giving up on 'cico node get'"
+                    exit 1
+                fi
+                echo "'cico node get' failed, trying again in 60s ($n/15)"
+                n=$[$n+1]
+                sleep 60
+            done
+
+            sshopts="-t -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -l root"
+            ssh_cmd="ssh $sshopts $CICO_hostname"
+
+            if [ -n "${{ghprbTargetBranch}}" ]; then
+                git rebase --preserve-merges origin/${{ghprbTargetBranch}}
+                rtn_code=$?
+                if [ $rtn_code -ne 0 ]; then
+                    echo "The branch can not be rebased onto origin/${{ghprbTargetBranch}}."
+                    exit $rtn_code
+                fi
+            else
+                echo "Not a PR build, using master"
+            fi
+
+
+            $ssh_cmd -t "yum install -y docker && systemctl start docker"
+
+            ENVIRONMENT=production PATH=$PATH:~/.local/bin DRY_RUN=true /bin/bash ~/saasherder/fetch_and_apply.sh
+            CONTEXTS=$(PATH=$PATH:~/.local/bin saasherder config get-contexts)
+            for c in `echo $CONTEXTS`; do
+                DIR=$(readlink -f $c-20* | tail -1)
+                for f in `ls $DIR`; do
+                    python ~/saasherder/check_image.py $DIR/$f '{image_pattern}'
+                    cat $DIR/$f | $ssh_cmd docker run --rm -i quay.io/app-sre/manifest-bouncer:{manifest_bouncer_tag} --warn-only -
+                done
+            done
+
+            cico node done $CICO_ssid
+
+            set -ex
+            ENVIRONMENT=production PATH=$PATH:~/.local/bin /bin/bash ~/saasherder/fetch_and_apply.sh
+
+- job-template:
     name: '{ci_project}-{git_repo}-promote-to-prod-test'
+    disabled: '{obj:disabled}'
     image_pattern: ''
     wrappers:
     - vault-secrets:
@@ -3071,6 +3156,7 @@
 
 - job-template:
     name: '{ci_project}-{git_repo}-promote-to-prod-test-v4'
+    disabled: '{obj:disabled}'
     image_pattern: ''
     wrappers:
     - vault-secrets:
@@ -4067,6 +4153,7 @@
             prj_name: dsaas-keycloak-preview
             extra_target: rhel
         - '{ci_project}-{git_repo}-build-master-v4':
+            disabled: false
             git_organization: fabric8-services
             git_repo: keycloak-deployment
             ci_project: 'devtools'
@@ -4149,10 +4236,19 @@
             ci_cmd: '/bin/bash cico_run_tests.sh'
             timeout: '30m'
         - '{ci_project}-{git_repo}-promote-to-prod':
+            disabled: false
+            git_repo: saas-openshiftio
+            ci_project: 'devtools'
+        - '{ci_project}-{git_repo}-promote-to-prod-v4':
+            disabled: true
             git_repo: saas-openshiftio
             ci_project: 'devtools'
         - '{ci_project}-{git_repo}-promote-to-prod':
             disabled: false
+            git_repo: saas-analytics
+            ci_project: 'devtools'
+        - '{ci_project}-{git_repo}-promote-to-prod-v4':
+            disabled: true
             git_repo: saas-analytics
             ci_project: 'devtools'
         - '{ci_project}-{git_repo}-promote-to-prod':
@@ -4162,9 +4258,17 @@
             saas_git: saas-launchpad
             prj_name: launchpad-production
         - '{ci_project}-{git_repo}-promote-to-prod':
+            disabled: true
             git_repo: saas-hdd
             ci_project: 'devtools'
         - '{ci_project}-{git_repo}-promote-to-prod-test':
+            disabled: false
+            git_repo: saas-openshiftio
+            git_organization: openshiftio
+            ci_project: 'devtools'
+            image_pattern: '^quay\.io/(openshiftio/rhel-|prometheus/prometheus)'
+        - '{ci_project}-{git_repo}-promote-to-prod-test-v4':
+            disabled: true
             git_repo: saas-openshiftio
             git_organization: openshiftio
             ci_project: 'devtools'
@@ -4191,6 +4295,7 @@
             saas_git: saas-launchpad
             prj_name: launchpad-production
         - '{ci_project}-{git_repo}-promote-to-prod-test':
+            disabled: true
             git_repo: saas-hdd
             git_organization: openshiftio
             ci_project: 'devtools'
@@ -4250,6 +4355,15 @@
             timeout: '20m'
             extra_target: rhel
         - '{ci_project}-{git_repo}-build-master':
+            disabled: false
+            git_repo: admin-console
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash cico_build_deploy.sh'
+            saas_git: saas-openshiftio
+            timeout: '20m'
+            extra_target: rhel
+        - '{ci_project}-{git_repo}-build-master-v4':
+            disabled: true
             git_repo: admin-console
             ci_project: 'devtools'
             ci_cmd: '/bin/bash cico_build_deploy.sh'
@@ -4667,6 +4781,7 @@
             git_repo: fabric8-analytics-server
             discarder_days: 30
         - '{ci_project}-{git_repo}-fabric8-hdd':
+            disabled: true
             git_organization: fabric8-hdd
             git_repo: supervisor
             ci_project: 'devtools'
@@ -4675,6 +4790,7 @@
             registry: 'quay.io'
             image_name: 'openshiftio/rhel-fabric8-hdd-openshift-hdd-supervisor'
         - '{ci_project}-{git_repo}-build-master':
+            disabled: true
             git_organization: fabric8-hdd
             git_repo: supervisor
             ci_project: 'devtools'
@@ -4683,6 +4799,7 @@
             timeout: '30m'
             prj_name: hdd-preview
         - '{ci_project}-{git_repo}-fabric8-hdd-eslint':
+            disabled: true
             git_repo: supervisor
         - '{ci_project}-{git_repo}-fabric8-analytics':
             git_organization: fabric8-analytics
@@ -5712,6 +5829,13 @@
             ci_cmd: '/bin/bash build_deploy.sh'
             saas_git: saas-openshiftio
             svc_name: che-monitoring
+        - '{ci_project}-{git_repo}-build-master-v4':
+            disabled: true
+            git_organization: redhat-developer
+            git_repo: che-monitoring
+            ci_project: 'devtools'
+            ci_cmd: '/bin/bash build_deploy.sh'
+            saas_git: saas-openshiftio
         - '{ci_project}-{git_repo}-build-master':
             git_organization: redhat-developer
             git_repo: che-workspace-telemetry-woopra-backend
