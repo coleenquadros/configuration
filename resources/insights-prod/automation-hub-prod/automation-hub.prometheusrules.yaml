@@ -1,0 +1,49 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: insights-automation-hub
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: insights-automation-hub-prod
+    rules:
+    - alert: InsightsAutomationHubPodDown
+      expr: |
+        up{service="automation-hub-backend", namespace="automation-hub-prod"} == 0
+      for: 2m
+      labels:
+        severity: high
+        service: insights
+        env: prod
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/automation-hub-prod/deployments"
+        message: "Insights Automation Hub Alert. At least one automation-hub pod has been down for two minutes."
+
+    - alert: App-koku-In-automation-hub-prod-Absent
+      expr: absent(up{service="koku", namespace="automation-hub-prod"})
+      for: 5m
+      labels:
+        severity: high
+        service: insights
+        env: prod
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/automation-hub-prod/deployments"
+        message: "Insights Automation Hub Alert. At least one automation-hub pod has been down for 5 minutes."
+
+    - alert: App-automation-hub-backend-5xx-In-automation-hub-prod
+      expr: rate(django_http_responses_total_by_status_total{status=~"5[0-9]{2}", namespace="automation-hub-prod"}[5m]) > 0
+      labels:
+        severity: warning
+        service: insights
+        env: prod
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/automation-hub-prod/deployments"
+        message: "Insights Automation Hub Alert. 5xx repsponses observed in the last 5 minutes."
+
