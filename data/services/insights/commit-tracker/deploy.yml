@@ -1,0 +1,46 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: commit-tracker
+  platform: insights
+
+name: commit-tracker
+description: Commit tracker service
+
+app:
+  $ref: /services/insights/commit-tracker/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- Deployment
+- Service
+- PersistentVolumeClaim
+
+imagePatterns:
+- quay.io/cloudservices
+- registry.redhat.io/rhel8/postgresql-12
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: commit-tracker
+  path: /template.yml
+  url: https://gitlab.cee.redhat.com/insights-platform/commit-tracker-go
+  targets:
+  - namespace:
+      $ref: /services/insights/commit-tracker/namespaces/commit-tracker-ci.yml
+    ref: master
+    parameters:
+      DB_USER: commit
+      DB_PASS: commit
