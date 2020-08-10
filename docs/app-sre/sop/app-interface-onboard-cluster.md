@@ -57,10 +57,11 @@ This step should be performed in a single merge request.
 
     name: <cluster_name>
     description: <cluster_name> cluster
-    consoleUrl: ""
-    kibanaUrl: ""
-    prometheusUrl: ""
-    serverUrl: ""
+    consoleUrl: ''
+    kibanaUrl: ''
+    prometheusUrl: ''
+    alertmanagerUrl: ''
+    serverUrl: ''
 
     auth:
       service: github-org-team
@@ -331,7 +332,7 @@ At this point you should be able to access the cluster via the console / oc cli.
     
        *Note*: This file will need to be updated again once application namespaces are applied to the cluster. (Ex. https://gitlab.cee.redhat.com/service/app-interface/-/blob/445d7650cd5da4033fb6fb24b9be54403b710228/data/services/observability/roles/app-sre-osdv4-monitored-namespaces-view.yml#L139-153)
     
-    1. Add the `observabilityNamespace` field on the cluster data file and reference the `openshift-customer-monitoring` namespace file created in the previous step. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/7ecd529584666d97b1418224b2772557807c6e1c/data/openshift/app-sre-prod-01/cluster.yml#L14-15
+    1. Update `prometheusUrl`, `alertmanagerUrl` and add the `observabilityNamespace` field on the cluster data file and reference the `openshift-customer-monitoring` namespace file created in the previous step. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/7ecd529584666d97b1418224b2772557807c6e1c/data/openshift/app-sre-prod-01/cluster.yml#L14-15
     
     1. Create an `app-sre-observability-per-cluster` namespace file for that specific cluster. Ex: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/openshift/app-sre-prod-01/namespaces/app-sre-observability-per-cluster.yml
     
