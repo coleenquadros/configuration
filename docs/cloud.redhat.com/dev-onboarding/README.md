@@ -2,11 +2,14 @@
 
 - [Quick Links](#quick-links)
 - [Asking for Help](#asking-for-help)
+- [Forking the app-interface Gitlab Repo](#forking-the-app-interface-gitlab-repo)
 - [Accessing Stage Environment](#accessing-stage-environment)
+- [Logging into quay.io](#logging-into-quay.io)
 - [Using insights-client in Stage](#using-insights-client-in-stage)
 - [Accessing Production Environment](#accessing-production-environment)
 - [Connect with App SRE on Slack](#connect-with-app-sre-on-slack)
 - [How to Promote an Image to Stage](#how-to-promote-an-image-to-stage)
+- [How to Promote an Image to Production](#how-to-promote-an-image-to-production)
 - [How to Update the UI in Stage](#how-to-update-the-ui-in-stage)
 - [How to Update Secrets in Vault](#how-to-update-secrets-in-vault)
 - [How to add a Grafana dashboard](#how-to-add-a-grafana-dashboard)
@@ -29,6 +32,19 @@ Additional contact information for AppSRE can be found [here](https://mojo.redha
 
 If you need emergency help after-hours, AppSRE can be paged.  Please review the information [here](https://mojo.redhat.com/groups/service-delivery/blog/2020/03/19/paging-appsre-oncall) for guidance on when to use the AppSRE pager.
 
+## Forking the app-interface Gitlab Repo
+
+You'll need to fork the app-interface gitlab repo in order to create merge requests (MRs), which are the same thing as github PRs. If you are new to gitlab, it works almost exactly the same as github for day-to-day tasks. However some of the buttons are in different places. To fork, you'll need to:
+
+  * go to [the app-interface repo](https://gitlab.cee.redhat.com/service/app-interface)
+  * click "fork" in the upper right
+  * let it fork. When complete, it will redirect you to your fork.
+  * click "members" in the left-hand side bar
+  * add "devtools-bot" so the bot can check your merge requests. Enter "devtools-bot" in the "GitLab member or Email address" box and grant it the "maintainer" role.
+  * Click your account in the upper right, and click "settings". Click "SSH Keys" in the left side bar. Add your SSH public key (typically the contents of `~/.ssh/id_rsa.pub`).
+  * after that, you should be all set! Just treat `https://gitlab.cee.redhat.com/service/app-interface` as the upstream project, and your fork as your fork, just like you would in github. When you push a new branch to your fork, you'll be provided with a link to create an MR.
+
+More info can be found in the [workflow doc](https://gitlab.cee.redhat.com/service/app-interface#workflow).
 ## Accessing Stage Environment
 
 * visual app interface (common across envs): https://visual-app-interface.devshift.net/
@@ -55,6 +71,13 @@ If you prefer wget, you can do the same thing like this:
 ```
 wget -e use_proxy=yes -e http_proxy=http://squid.corp.redhat.com:3128 https://cloud.stage.redhat.com/api/<path>
 ```
+
+## Logging into quay.io
+
+All images for stage and prod are stored in quay.io. Your buildfactory config in the dev cluster probably has a `quay-copier` config in it somewhere that copies images to quay for you.
+
+If you'd like to see what's in quay.io, you can [log in](#logging-into-quay.io) with your quay.io username/pass (not kerberos) and go to the [cloudservices org](https://quay.io/organization/cloudservices). If you don't have access, you'll need to create an MR adding your user to insights-engineers [like so](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/7511). If you'd like to learn more about quay.io, check out this [15 minute tutorial](https://quay.io/tutorial/).
+
 
 ## Using insights-client in Stage
 
@@ -128,11 +151,16 @@ If you have a question specific to setting up your app prior to the production c
 
 ## How to Promote an Image to Stage
 
-1. Find the git commit from your source repo that you want to promote and copy the first seven characters, e.g `87ff3c59c94fe28d1d500a701d8acc2167cc7703` becomes `87ff3c5`.
+1. Find the git commit from your source repo that you want to promote and copy the first seven characters, e.g `87ff3c59c94fe28d1d500a701d8acc2167cc7703` becomes `87ff3c5`. This hash is also used as the image tag in quay.io. If you'd like to confirm that the image is there and has the content you expect, you can run something like `docker run -it quay.io/cloudservices/upload-service:87ff3c5 /bin/bash`. This will pull down a local copy of the image and drop into a bash shell that you can use to inspect the image.
 2. Locate your app folder in app-interface, e.g. `data/services/insights/ingress` and open `deploy.yml` (also known as `saas.yml`).
-3. For each `resourceTemplate` that uses your updated image, set the `IMAGE_TAG` parameter value to your seven character git commit hash.
+3. For each `resourceTemplate` that uses your updated image, set the `IMAGE_TAG` parameter value to your seven character git commit hash. Please ensure you are updating all pods that you want updated (for example, if you have a REST API pod and a message listener pod that you want updated, make sure you update both `IMAGE_TAG`s). Also note that both stage and production use the same file, so be mindful that you are updating only stage.
 4. Commit the change, push to your fork of app-interface, and open a merge request (MR).
 5. App devs need to get an owner of your saas file to approve your changes (you cannot self-approve even if you are an owner).  The devtools bot should add a comment to your MR stating which users can approve.  The approver just needs to add a comment to the MR with the content `/lgtm`.  [Example](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/5684).
+6. After the change is approved, go eat a chocolate croissant for 10-15 minutes. You should then see the updated image deployed to your project in stage openshift. If you don't see it, find your (deploy job)[https://ci.int.devshift.net] by searching for your app name and clicking "saas-deploy" and then click the environment you are interested in. If all else fails, you can ask for help in the channels mentioned above.
+
+## How to Promote an Image to Production
+
+This is the same process as stage. Just edit the production part of your `deploy.yml` when making changes, and re-use the hash you used on stage.
 
 ## How to Update the UI in Stage
 
