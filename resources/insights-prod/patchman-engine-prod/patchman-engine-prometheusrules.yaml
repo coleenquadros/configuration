@@ -1,0 +1,52 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: patchman
+spec:
+  groups:
+  - name: patchman.insights.openshiftio.rules
+    interval: 1m
+    rules:
+    - alert: Patchman5xx
+      expr: sum(rate(patchman_engine_requests_total{code=~"5.*"}[5m])) by (kubernetes_namespace) > 0
+      labels:
+        severity: info
+        service: insights
+        env: prod
+      annotations:
+        summary: '{{ $labels.kubernetes_namespace }} 5xx :rain_cloud:'
+        description: '<!channel> 5xx responses observed'
+    - alert: PatchmanKafkaLag
+      expr: sum(delta(kafka_consumer_group_lag{group="patchman"}[5m])) by (kubernetes_namespace, topic) > 4000
+      for: 5m
+      labels:
+        severity: info
+        service: insights
+        env: prod
+      annotations:
+        summary: 'patchman-engine lag delta > 4000 in {{ $labels.kubernetes_namespace }} :rain_cloud:'
+        description: 'topic: {{ $labels.topic }}, current lag delta: {{ $value  }}'
+    - alert: PatchmanExternalService
+      expr: sum(delta(patchman_engine_manager_dependency_call{ namespace="patchman-engine-prod" }[5m])) by (name, status) > 10
+      for: 5m
+      labels:
+        severity: info
+        service: insights
+        env: prod
+      annotations:
+        summary: '{{ $labels.namespace }} - Receiving {{ $labels.status }} responses from {{ $labels.name }} '
+        description: 'External service failing'
+    - alert: PatchmanDeleteError
+      expr: sum(rate(patchman_engine_listener_kafka_message_received{event="delete", type=~"error-.*"}[5m])) by (kubernetes_namespace) > 0
+      annotations:
+        summary: '{{ $labels.kubernetes_namespace }} system deleting error :rain_cloud:'
+        description: 'System deleting error observed'
+      labels:
+        severity: info
+        service: insights
+        env: prod
