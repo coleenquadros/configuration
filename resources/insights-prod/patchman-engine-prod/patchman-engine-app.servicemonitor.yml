@@ -1,0 +1,30 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: patchman-engine-app
+  labels:
+    prometheus: app-sre
+spec:
+  endpoints:
+  - interval: 15s
+    path: /metrics
+    port: 8082-tcp # evaluator-upload
+  - interval: 15s
+    path: /metrics
+    port: 8081-tcp # listener
+  - interval: 15s
+    path: /metrics
+    port: 8080-tcp # engine-manager
+  - interval: 15s
+    path: /metrics
+    port: 8084-tcp # recalc
+  - interval: 15s
+    path: /metrics
+    port: 8083-tcp # vmaas-sync
+  namespaceSelector:
+    matchNames:
+    - patchman-engine-prod
+  selector:
+    matchLabels:
+      app: patchman-engine-app
