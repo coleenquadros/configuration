@@ -313,40 +313,23 @@ At this point you should be able to access the cluster via the console / oc cli.
         ```
     
         Note: The only entry that should not be using a specific SHA should be the app-sre-stage-01 cluster.  That cluster should be using a ref of master.
-    
-    1. Create OAuth apps for Prometheus and Alertmanager [here](https://github.com/organizations/app-sre/settings/applications):
-        - Name: `<cluster_name> <prometheus|alertmanager>`
-        - Homepage URL: `https://<prometheus|alertmanager>.<cluster_name>.devshift.net`
-        - Callback URL: `https://<prometheus|alertmanager>.<cluster_name>.devshift.net/oauth2/callback`
-    
+
     1. Update the Grafana datasources secret in Vault: https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/grafana/datasources
     
         - Add a new key `<cluster_name>-prometheus` with value that is to be used as a password.  It can be any password.  It is recommended to use a tool like pwgen (ex to create a single 16 character random password: `pwgen -cns 32 1`
     
-    1. Create the following secrets in Vault to match the OAuth apps created in the previous step:
+    1. Create the following secret in Vault:
         - Generate the auth token value: `htpasswd -s -n app-sre-observability`
             At the password prompt, enter the password stored in the [grafana datasources secret](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/grafana/datasources) for the cluster
-        - Create `https://vault.devshift.net/ui/vault/secrets/app-interface/show/<cluster_name>/openshift-customer-monitoring/alertmanager/alertmanager-auth-proxy` ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quays02ue1/openshift-customer-monitoring/alertmanager/alertmanager-auth-proxy))
-    
+        - Create `https://vault.devshift.net/ui/vault/secrets/app-interface/show/<cluster_name>/openshift-customer-monitoring/nginx-auth-proxy` ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre-prod-01/openshift-customer-monitoring/nginx-auth-proxy))
+
             Secret keys:
             - auth: `<generated auth token value from above>`
-            - client-id: <from_github_OAuth_app>
-            - client-secret: <from_github_OAuth_app>
-            - cookie-secret: <random_128_char_string> (Can use this [tool](https://pinetools.com/random-string-generator) or similar to generate )
-    
-        - Create `https://vault.devshift.net/ui/vault/secrets/app-interface/show/<cluster_name>/openshift-customer-monitoring/prometheus-auth-proxy` ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quays02ue1/openshift-customer-monitoring/prometheus-auth-proxy))
-    
-            Secret keys:
-            - auth: `<generated auth token value from above>`
-            - client-id: <from_github_OAuth_app>
-            - client-secret: <from_github_OAuth_app>
-            - cookie-secret: <random_128_char_string> (Can use this [tool](https://pinetools.com/random-string-generator) or similar to generate )
-    
-        *Note:* If a new version of either secret is deployed to the cluster than both prometheus and alertmanager pods will need to be restarted
+            - cookie-secret: <random_128_char_string> (Can use `pwgen -cns 128 1` or similar to generate )
     
     1. Add the `cluster-monitoring-view` ClusterRole for the cluster to https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/roles/app-sre-osdv4-monitored-namespaces-view.yml.
     
-       *Note*: This file will need to be updated again once application namespaces are applied to the cluster. (Ex. https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/roles/app-sre-osdv4-monitored-namespaces-view.yml#L120-134)
+       *Note*: This file will need to be updated again once application namespaces are applied to the cluster. (Ex. https://gitlab.cee.redhat.com/service/app-interface/-/blob/445d7650cd5da4033fb6fb24b9be54403b710228/data/services/observability/roles/app-sre-osdv4-monitored-namespaces-view.yml#L139-153)
     
     1. Add the `observabilityNamespace` field on the cluster data file and reference the `openshift-customer-monitoring` namespace file created in the previous step. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/7ecd529584666d97b1418224b2772557807c6e1c/data/openshift/app-sre-prod-01/cluster.yml#L14-15
     
