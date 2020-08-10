@@ -53,6 +53,7 @@ this repository.
       - [Generating a GPG key](#generating-a-gpg-key)
       - [Adding your public GPG key](#adding-your-public-gpg-key)
     - [Manage AWS resources via App-Interface (`/openshift/namespace-1.yml`) using Terraform](#manage-aws-resources-via-app-interface-openshiftnamespace-1yml-using-terraform)
+      - [Manage AWS Certificate via App-Interface (`/openshift/namespace-1.yml`)](#manage-aws-certificate-via-app-interface-openshiftnamespace-1yml)
       - [Manage ElasticSearch via App-Interface (`/openshift/namespace-1.yml`)](#manage-elasticsearch-via-app-interface-openshiftnamespace-1yml)
       - [Manage RDS databases via App-Interface (`/openshift/namespace-1.yml`)](#manage-rds-databases-via-app-interface-openshiftnamespace-1yml)
         - [Create RDS database from Snapshot](#create-rds-database-from-snapshot)
@@ -934,6 +935,33 @@ Namespaces declaration enforce [this JSON schema](/schemas/openshift/namespace-1
 Notes:
 * Manual changes to AWS resources will be overridden by App-Interface in each run.
 * To be able to use this feature, the `managedTerraformResources` field must exist and equal to `true`.
+
+#### Manage AWS Certificate via App-Interface (`/openshift/namespace-1.yml`)
+
+[AWS Certificate Manager](https://aws.amazon.com/certificate-manager/) AWS Certificate Manager is a service that lets you easily provision, manage, and deploy public and private Secure Sockets Layer/Transport Layer Security (SSL/TLS) certificates.
+
+In order to import certificates stored in Vault into AWS Certificate Manager, you need to add them to the `terraformResources` field.
+
+- `provider`: must be `acm`
+- `account`: The AWS account you want to import certificates in.
+- `identifier` - name of resource to create (or update)
+- `secret`: Certificate store in Vault ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/dsaas/routes/_wildcard.api.openshift.io))
+  - `path`: vault path
+  - `field`: `all`
+  - `version`: (optional) for vault kv2
+- `output_resource_name`: name of Kubernetes Secret to be created.
+  - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
+  - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
+    - For example, for a resource with `identifier` "my-ssl" and `provider` is set to `acm`, the created Secret will be called `my-ssl-acm`.
+
+Once the changes are merged, the certificate will be imported into ACM and a Kubernetes Secret will be created in the same namespace with all relevant details.
+
+The Secret will contain the following fields:
+
+- `arn` - Amazon Resource Name (ARN) of the Certificate.
+- `key` - Certificate private key.
+- `certificate` - Certificate body.
+- `caCertificate` - Certificate chain if provided.
 
 #### Manage ElasticSearch via App-Interface (`/openshift/namespace-1.yml`)
 
