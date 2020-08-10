@@ -1,0 +1,24 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: insights-sources-stage
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: sources-api-stage
+    rules:
+      - alert: SourcesApi5xxErrors
+        expr: (sum(rate(api_3scale_gateway_api_status{exported_service="sources",status="5xx"}[1m])) / sum(rate(api_3scale_gateway_api_status{exported_service="sources"}[1m]))) * 100 > 50
+        for: 10m
+        labels:
+          severity: info
+          service: insights
+          env: stage
+        annotations:
+          dashboard: "https://GRAFANA_URL"
+          link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/sources-prod/deployments/sources-api"
+          description: "Sources API has been throwing 5xx errors more than 50% of the time for the last 10 minutes"
