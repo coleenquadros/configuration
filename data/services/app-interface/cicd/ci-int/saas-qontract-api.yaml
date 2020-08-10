@@ -1,0 +1,41 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: app-interface
+
+name: saas-qontract-api
+description: 'SaaS tracking file for App-interface'
+
+app:
+  $ref: /services/app-interface/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/app-sre/qontract-api
+
+resourceTemplates:
+- name: qontract-reconcile
+  url: https://gitlab.cee.redhat.com/service/qontract-api
+  path: /openshift/qontract-api.yaml
+  #parameters:
+  #  SLACK_ICON_EMOJI: ':app-sre:'
+  targets:
+  - namespace:
+      $ref: /services/app-interface/namespaces/app-interface-stage.yml
+    ref: master
+    upstream: service-qontract-api-gl-build-master
+  #- namespace:
+  #    $ref: /services/app-interface/namespaces/app-interface-production.yml
+  #  ref: changeme
