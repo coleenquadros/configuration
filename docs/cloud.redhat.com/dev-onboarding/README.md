@@ -198,6 +198,13 @@ To log into Vault, follow the instructions in [Vault's Readme](https://gitlab.ce
 ### How to add a Grafana dashboard
 
 1. Add (or update) the dashboard file (a ConfigMap containing the json data) in [saas-templates/dashboards](https://gitlab.cee.redhat.com/insights-platform/saas-templates/-/tree/master/dashboards). Each merge to this repository will deploy the dashboards to the [Grafana stage instance](https://grafana.stage.devshift.net/).
+  * Note: Each dashboard ConfigMap should have the following section under `metadata`:
+    ```yaml
+    labels:
+      grafana_dashboard: "true"
+    annotations:
+      grafana-folder: /grafana-dashboard-definitions/Insights
+    ```
 
 1. To promote the dashboard changes to the [Grafana production instance](https://grafana.app-sre.devshift.net/), the saas file hash for the `insights-dashboards` should be bumped so the changes are deployed.
 

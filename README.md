@@ -1490,6 +1490,14 @@ To get access to the project, if required, contact the App SRE team.
 ### Add a Grafana Dashboard
 
 1. Add manually your dashboard following [these instructions](/docs/app-sre/monitoring.md#Addingdashboards)
+  * Note: Each dashboard ConfigMap should have the following section under `metadata`:
+    ```yaml
+    labels:
+      grafana_dashboard: "true"
+    annotations:
+      grafana-folder: /grafana-dashboard-definitions/<app_name>
+    ```
+    * app_name should be defined in the [grafana dashboards ConfigMap](/resources/observability/grafana/grafana-dashboards.configmap.yaml)
 
 1. Add the graph json to `/resources/observability/grafana/`. Please follow the naming convention
 
