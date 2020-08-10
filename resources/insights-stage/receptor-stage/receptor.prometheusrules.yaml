@@ -1,0 +1,25 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: receptor-controller
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: receptor-controller
+    rules:
+    - alert: ReceptorGatewayDown
+      expr: |
+        up{service="receptor-controller", namespace="receptor-stage"} == 0
+      for: 2m
+      labels:
+        severity: info
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/receptor-stage/deployments"
+        message: "Receptor-Controller Alert. The receptor-gateway pod has been down for two minutes."
