@@ -49,8 +49,8 @@ More info can be found in the [workflow doc](https://gitlab.cee.redhat.com/servi
 
 * visual app interface (common across envs): https://visual-app-interface.devshift.net/
 * UI: https://cloud.stage.redhat.com
-* Openshift console: visual-app-interface > Clusters > Search "crc" > Choose cluster that says "stage cluster"
-* Prometheus: visual-app-interface > Clusters > Search "crc" > Choose cluster that says "stage cluster" > Details > Prometheus
+* Openshift console: go to [Clusters](https://visual-app-interface.devshift.net/clusters) > Search "crc" > Choose cluster that says "Stage cluster" (click first link with URL in it for console, not 'details' link!)
+* Prometheus: [Clusters](https://visual-app-interface.devshift.net/clusters) > Search "crc" > Choose cluster that says "stage cluster" > Details > Prometheus
 * Kibana: https://kibana.apps.crc-stg-01.o4v9.p1.openshiftapps.com
 * payload tracker: https://payload-tracker-frontend-payload-tracker-stage.apps.crc-stg-01.o4v9.p1.openshiftapps.com/
 
@@ -100,8 +100,8 @@ proxy=http://squid.corp.redhat.com:3128
 
 * visual app interface (common across envs): https://visual-app-interface.devshift.net/
 * UI: https://cloud.redhat.com (with special cookie)
-* Openshift console: visual-app-interface > Clusters > Search "crc" > Choose cluster that says "production cluster"
-* Prometheus: visual-app-interface > Clusters > Search "crc" > Choose cluster that says "stage cluster" > Details > Prometheus
+* Openshift console: go to [Clusters](https://visual-app-interface.devshift.net/clusters) > Search "crc" > Choose cluster that says "Production cluster" (click first link with URL in it for console, not 'details' link!)
+* Prometheus: [Clusters](https://visual-app-interface.devshift.net/clusters) > Search "crc" > Choose cluster that says "stage cluster" > Details > Prometheus
 * Set cookie: https://cloud.redhat.com/yOM53v3hTsaKDZJoVAtZ7r2or79PuzWI
 * Kibana: https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/
 * payload tracker: https://payload-tracker-frontend-payload-tracker-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com/
