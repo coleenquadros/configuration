@@ -1,0 +1,35 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: assisted-installer
+
+name: assisted-installer-monitoring
+description: 'SaaS tracking file for assisted-installer monitoring resources'
+
+app:
+  $ref: /services/assisted-installer/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: assisted-app-sre-ci
+
+managedResourceTypes:
+- ServiceMonitor
+
+imagePatterns: []
+
+resourceTemplates:
+- name: assisted-service
+  url: https://github.com/openshift/assisted-service
+  path: /openshift/template-monitoring.yaml
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+    ref: master
+    parameters:
+      NAMESPACE: assisted-installer-staging
