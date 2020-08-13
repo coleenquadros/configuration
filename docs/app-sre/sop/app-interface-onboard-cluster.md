@@ -489,7 +489,7 @@ At this point you should be able to access the cluster via the console / oc cli.
         labels: {}
         
         name: openshift-logging
-        description: <cluster_name> openshift-logging namespace
+        description: openshift-logging namespace
         
         cluster:
           $ref: /openshift/<cluster_name>/cluster.yml
@@ -502,31 +502,13 @@ At this point you should be able to access the cluster via the console / oc cli.
         
         managedResourceTypes:
         - Subscription
-        #- ClusterLogging
+        - ClusterLogging
         
         openshiftResources:
         - provider: resource
           path: /setup/clusterlogging/elasticsearch-operator.subscription.yaml
         - provider: resource
           path: /setup/clusterlogging/cluster-logging.subscription.yaml
-        #- provider: resource-template
-        #  type: jinja2
-        #  path: /setup/clusterlogging/instance.clusterlogging.yaml
-        #  variables:
-        #    memoryRequests: 8G
-        ```
-    
-    2. Create the logging instance (uncomment the resource in the above file)
-
-        ```yaml
-        # /data/openshift/<cluster_name>/namespaces/openshift-logging.yml
-        ...
-        managedResourceTypes:
-        - ...
-        - ClusterLogging
-        
-        openshiftResources:
-        - ...
         - provider: resource-template
           type: jinja2
           path: /setup/clusterlogging/instance.clusterlogging.yaml
