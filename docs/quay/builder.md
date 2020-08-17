@@ -45,4 +45,10 @@ The SLI we should look at is `quay_queue_items_available`.
 
 ## Builds are queued but none are running
 
-See [sop/fix-builder-redis.md](Fix Builder Redis) to see if this the issue.
+See [Fix Builder Redis](sop/fix-builder-redis.md) to see if this the issue.
+
+## Scaling In/Out Builder Cluster Nodes
+
+1. Log in to the builder cluster.
+2. Under `Compute`, click on `Machine Sets`.
+3. Click on `c1-gjlfl-builder-worker-us-east-1d` machine set and set the `Desired Count` to increase/decrease node count.
