@@ -1,0 +1,168 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: remediations
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: remediations
+    rules:
+    - alert: RemediationsDown
+      expr: |
+        up{service="remediations", namespace="remediations-stage"} == 0
+      for: 1m
+      labels:
+        severity: info
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/KDvc-DmWk/remediations?orgId=1"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/remediations-stage/deployments"
+        message: "Remediations Alert. The remediations pod has been down in stage for one minute."
+
+    - alert: RemediationsConsumerDown
+      expr: |
+        up{service="remediations-consumer", namespace="remediations-stage"} == 0
+      for: 1m
+      labels:
+        severity: info
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/KDvc-DmWk/remediations?orgId=1"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/remediations-stage/deployments"
+        message: "Remediations Alert. The remediations-consumer pods have been down in stage for one minute."
+
+    - alert: Remediations5xx
+      expr: |
+        sum(rate(remediations_http_request_duration_seconds_count{status_code=~"5[0-9]{2}"}[5m])) > 0
+      labels:
+        for: 1m
+        severity: info
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/KDvc-DmWk/remediations?orgId=1"
+        link_url: "https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-3h,to:now))&_a=(columns:!(res.statusCode),index:'43c5fed0-d5ce-11ea-b58c-a7c95afd7a5d',interval:auto,query:(language:kuery,query:'@log_stream:%22remediations*%22%20and%20res.statusCode%20%3E%3D%20500'),sort:!(!('@timestamp',desc)))"
+        message: "Remediations Alert. 5xx responses observed."
+
+    - alert: RemediationFiFiLockMismatch
+      expr: |
+        sum(increase(remediations_fifi_etag_checks{status="mismatch"}[5m])) > 0
+      labels:
+        for: 1m
+        severity: info
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/KDvc-DmWk/remediations?orgId=1"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/remediations-stage/deployments"
+        message: "Remediations Alert. Optimistic lock mismatch observed."
+
+    - alert: RemediationReceptorParsingErrors
+      expr: |
+        sum(increase(remediations_consumer_receptor_total{result="error_parse"}[5m])) > 0
+      labels:
+        for: 1m
+        severity: info
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/KDvc-DmWk/remediations?orgId=1"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/remediations-stage/deployments"
+        message: "Remediations Alert. Receptor parsing errors observed."
+
+    - alert: RemediationReceptorHandlingErrors
+      expr: |
+        sum(increase(remediations_consumer_receptor_total{result="error"}[5m])) > 0
+      labels:
+        for: 1m
+        severity: info
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/KDvc-DmWk/remediations?orgId=1"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/remediations-stage/deployments"
+        message: "Remediations Alert. Receptor handler errors observed."
+
+    - alert: RemediationReceptorExecutorErrors
+      expr: |
+        sum(increase(remediations_consumer_receptor_executor_not_found[5m])) > 0
+      labels:
+        for: 1m
+        severity: info
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/KDvc-DmWk/remediations?orgId=1"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/remediations-stage/deployments"
+        message: "Remediations Alert. Some executors not found processing sat-receptor responses."
+
+    - alert: RemediationReceptorCancelFailures
+      expr: |
+        sum(increase(remediations_consumer_receptor_cancel_ack_total{status="failure"}[5m])) > 0
+      labels:
+        for: 1m
+        severity: info
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/KDvc-DmWk/remediations?orgId=1"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/remediations-stage/deployments"
+        message: "Remediations Alert. sat-receptor failed to cancel a run."
+
+    - alert: RemediationReceptorCancelFailures
+      expr: |
+        sum(increase(remediations_consumer_receptor_cancel_ack_total{status="failure"}[5m])) > 0
+      labels:
+        for: 1m
+        severity: info
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/KDvc-DmWk/remediations?orgId=1"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/remediations-stage/deployments"
+        message: "Remediations Alert. sat-receptor failed to cancel a run."
+
+    - alert: RemediationKafkaConsumerLag
+      expr: |
+        sum(kafka_consumer_group_lag{group='remediations-consumer'}) by (topic) > 10000
+      labels:
+        for: 1m
+        severity: info
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/KDvc-DmWk/remediations?orgId=1"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/remediations-stage/deployments"
+        message: "Remediations Alert. Remediations topic lag exceding 10000 messages."
+
+    - alert: RemediationsCleanerFailed
+      expr: |
+        sum(sum_over_time(kube_pod_status_phase{phase="Failed", namespace="remediations-stage", pod=~"remediations-cleaner.*"}[30m:5m]) < 3) by (pod) > 0
+      labels:
+        for: 1m
+        severity: info
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/KDvc-DmWk/remediations?orgId=1"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/remediations-stage/deployments"
+        message: "Remediations Alert. Remediations cleaner failed."
+
+    - alert: RemediationsReceptorMissedMessages
+      expr: |
+        sum(increase(remediations_consumer_lost_messages_total[5m])) > 0
+      labels:
+        for: 1m
+        severity: info
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/KDvc-DmWk/remediations?orgId=1"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/remediations-stage/deployments"
+        message: "Remediations Alert. Some messages were lost while executing in diff mode."
