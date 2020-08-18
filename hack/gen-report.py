@@ -68,7 +68,7 @@ REPORT_TEMPLATE = """
 <h2>Successful Reconcile Integrations</h2>
 {% for report in reconcile_success %}
 <h3>{{ report[0] }}</h3>
-<pre><code>{{ report[1] }}</pre></code>
+<pre><code>{{ report[1]|escape }}</pre></code>
 {% endfor %}
 {% endif %}
 
@@ -76,7 +76,7 @@ REPORT_TEMPLATE = """
 <h2>Failed Reconcile Integrations</h2>
 {% for report in reconcile_fail %}
 <h3>{{ report[0] }}</h3>
-<pre><code>{{ report[1] }}</pre></code>
+<pre><code>{{ report[1]|escape }}</pre></code>
 {% endfor %}
 {% endif %}
 
