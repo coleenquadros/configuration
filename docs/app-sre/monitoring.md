@@ -426,8 +426,6 @@ Dashboards are injected into grafana as configmaps, to generate a configmap from
 
 Once the pull request is merged, the app-interface will automatically apply the configmap. No restart of the Grafana server deployment is needed.
 
-> Note: If you're adding a completely new dashboard, make sure that the configmap is referenced from the namespace.yml: [link](https://gitlab.cee.redhat.com/service/app-interface/blob/f0fe35941d538d6231ce52dbe333dc4c1622847a/data/services/observability/namespaces/app-sre-observability-production.app-sre-prod-01.yml#L125-290)
-
 In case you have any questions about adding a new dashboard, the App-SRE team can offer a best-effort support on walking you through the steps, but we hope that the documentation here is enough :)
 
 #### <a name='Updatingdashboards'></a>Updating dashboards
