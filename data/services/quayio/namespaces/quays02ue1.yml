@@ -25,6 +25,7 @@ managedTerraformResources: true
 
 managedResourceTypes:
 - NetworkPolicy
+- Secret
 
 openshiftResources:
 - provider: vault-secret
@@ -37,23 +38,20 @@ openshiftResources:
   version: 1
   type: kubernetes.io/dockerconfigjson
   name: quayio-backup-image-pull-secret
-- provider: vault-secret
-  path: app-interface/quayio-stage/quayio-stage/quay-config-secret
-  version: 56
-  labels:
-    version: v56
-- provider: vault-secret
-  path: app-interface/quayio-stage/quayio-stage/quay-config-secret
-  version: 56
-  labels:
-    version: v56
-  name: quay-config-secret-v56
-- provider: vault-secret
-  path: app-interface/quayio-stage/quayio-stage/quay-config-secret
-  version: 47
-  labels:
-    version: v47
-  name: quay-config-secret-v47
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /quayio-stage/quay/quay-config.secret.yaml
+  variables:
+    name: quay-config-secret
+    vault_secret_version: 56
+    version_label: v56
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /quayio-stage/quay/quay-config.secret.yaml
+  variables:
+    name: quay-config-secret-v56
+    vault_secret_version: 56
+    version_label: v56
 - provider: vault-secret
   path: app-interface/quayio-stage/quayio-stage/quay-cloudwatch-iam-user
   version: 1
