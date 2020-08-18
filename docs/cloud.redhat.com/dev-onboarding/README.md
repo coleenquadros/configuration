@@ -234,7 +234,8 @@ To log into Vault, follow the instructions in [Vault's Readme](https://gitlab.ce
       grafana-folder: /grafana-dashboard-definitions/Insights
     ```
 
-1. To promote the dashboard changes to the [Grafana production instance](https://grafana.app-sre.devshift.net/), the saas file hash for the `insights-dashboards` should be bumped so the changes are deployed.
+2. Once you've verified the changes look good on the stage grafana, to promote the dashboard changes to the [Grafana production instance](https://grafana.app-sre.devshift.net/), the saas file hash for the `insights-dashboards` should be bumped so the changes are deployed. Open a PR to edit [this line](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/cicd/saas/saas-grafana.yaml#L70)
+
 
 ### Adding Alerts
 
