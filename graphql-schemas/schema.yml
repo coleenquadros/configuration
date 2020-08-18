@@ -420,6 +420,7 @@
   - { name: prometheusUrl, type: string, isRequired: true }
   - { name: alertmanagerUrl, type: string, isRequired: true }
   - { name: serverUrl, type: string, isRequired: true }
+  - { name: elbFQDN, type: string, isRequired: true }
   - { name: managedGroups, type: string, isList: true }
   - { name: managedClusterRoles, type: boolean }
   - { name: ocm, type: OpenShiftClusterManager_v1 }
@@ -1451,6 +1452,7 @@
   - { name: app_interface_sql_queries_v1, type: AppInterfaceSqlQuery_v1, isList: true, datafileSchema: /app-interface/app-interface-sql-query-1.yml }
   - { name: saas_files_v1, type: SaasFile_v1, isList: true, datafileSchema: /app-sre/saas-file-1.yml }
   - { name: unleash_instances_v1, type: UnleashInstance_v1, isList: true, datafileSchema: /app-sre/unleash-instance-1.yml }
+  - { name: dns_zone_v1, type: DnsZone_v1, isList: true, datafileSchema: /dependencies/dns-zone-1.yml }
 
 - name: SentryTeam_v1
   fields:
@@ -1499,3 +1501,47 @@
   - { name: db_name, type: string }
   - { name: db_user, type: string }
   - { name: db_password, type: string }
+
+- name: DnsRecordCommon_v1
+  interface: DnsRecord_v1
+  fields:
+  - { name: type, type: string, isRequired: true }
+  - { name: ttl, type: int }
+  - { name: name, type: string, isRequired: true }
+  - { name: target, type: string }
+  - { name: targets, type: string, isList: true }
+  - { name: target_cluster, type: Cluster_v1 }
+
+- name: DnsRecordMX_v1
+  interface: DnsRecord_v1
+  fields:
+  - { name: type, type: string, isRequired: true }
+  - { name: ttl, type: int }
+  - { name: name, type: string, isRequired: true }
+  - { name: priority, type: int, isRequired: true }
+  - { name: target, type: string }
+
+- name: DnsRecord_v1
+  isInterface: true
+  interfaceResolve:
+    strategy: fieldMap
+    field: type
+    fieldMap:
+      A: DnsRecordCommon_v1
+      CNAME: DnsRecordCommon_v1
+      MX: DnsRecordMX_v1
+      NS: DnsRecordCommon_v1
+  fields:
+  - { name: type, type: string, isRequired: true}
+
+- name: DnsZone_v1
+  fields:
+  - { name: schema, type: string, isRequired: true }
+  - { name: labels, type: json }
+  - { name: name, type: string, isRequired: true }
+  - { name: description, type: string, isRequired: true }
+  - { name: provider, type: string, isRequired: true }
+  - { name: account, type: AWSAccount_v1, isRequired: true }
+  - { name: origin, type: string, isRequired: true }
+  - { name: default_ttl, type: int }
+  - { name: records, type: DnsRecord_v1, isList: true, isInterface: true }

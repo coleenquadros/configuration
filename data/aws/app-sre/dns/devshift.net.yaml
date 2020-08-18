@@ -1,0 +1,197 @@
+---
+$schema: /dependencies/dns-zone-1.yml
+
+labels: {}
+
+name: devshift.net
+description: devshift.net
+
+account:
+  $ref: /aws/app-sre/account.yml
+
+records:
+# ; KB
+- name: kb
+  type: NS
+  targets:
+  - ns-1894.awsdns-44.co.uk
+  - ns-1427.awsdns-50.org
+  - ns-84.awsdns-10.com
+  - ns-936.awsdns-53.net
+
+# ; Delegation to UHC
+- name: sdev
+  type: NS
+  targets:
+  - ns-660.awsdns-18.net
+  - ns-508.awsdns-63.com
+  - ns-1265.awsdns-30.org
+  - ns-1880.awsdns-43.co.uk
+
+- name: api-tests
+  type: NS
+  targets:
+  - ns-640.awsdns-16.net
+  - ns-68.awsdns-08.com
+  - ns-1241.awsdns-27.org
+  - ns-1904.awsdns-46.co.uk
+
+- { name: acmedns, type: NS, target: ns.acmedns.devshift.net }
+- { name: ns.acmedns, type: A, target: 18.214.179.128 }
+- { name: _acme-challenge.testjfc, type: CNAME, target: 80d5f70c-198d-4f65-9c3e-1aa1c55df90e.acmedns.devshift.net }
+
+- { name: prod.registry, type: A, target: 8.43.84.245 }
+- { name: push.registry, type: A, target: 8.43.84.245 }
+- { name: registry, type: A, target: 8.43.84.245 }
+
+- { name: vault, type: CNAME, target_cluster: { $ref: /openshift/app-sre-prod-01/cluster.yml } }
+- { name: vault.stage, type: CNAME, target_cluster: { $ref: /openshift/app-sre-stage-01/cluster.yml } }
+- { name: zabbix, type: A, target: 8.43.84.241 }
+- { name: app-interface, type: CNAME, target_cluster: { $ref: /openshift/app-sre-prod-01/cluster.yml } }
+- { name: app-interface.stage, type: CNAME, target_cluster: { $ref: /openshift/app-sre-stage-01/cluster.yml } }
+
+- { name: ocm.unleash, type: CNAME, target_cluster: { $ref: /openshift/app-sre-prod-01/cluster.yml } }
+- { name: ocm-integration.unleash, type: CNAME, target: api-integration.6943.hive-integration.openshiftapps.com }
+- { name: ocm-stage.unleash, type: CNAME, target_cluster: { $ref: /openshift/app-sre-stage-01/cluster.yml } }
+- { name: app-interface.unleash, type: CNAME, target_cluster: { $ref: /openshift/app-sre-prod-01/cluster.yml } }
+- { name: app-interface.unleash.stage, type: CNAME, target_cluster: { $ref: /openshift/app-sre-stage-01/cluster.yml } }
+
+- { name: visual-app-interface, type: CNAME, target_cluster: { $ref: /openshift/app-sre-prod-01/cluster.yml } }
+- { name: visual-app-interface.stage, type: CNAME, target_cluster: { $ref: /openshift/app-sre-stage-01/cluster.yml } }
+
+- { name: prometheus.app-sre, type: CNAME, target: elb.1061.app-sre.openshiftapps.com }
+- { name: prometheus.app-sre-prod-01, type: CNAME, target_cluster: { $ref: /openshift/app-sre-prod-01/cluster.yml } }
+- { name: prometheus.app-sre-prod-03, type: CNAME, target_cluster: { $ref: /openshift/app-sre-prod-03/cluster.yml } }
+- { name: prometheus.app-sre-prod-04, type: CNAME, target_cluster: { $ref: /openshift/app-sre-prod-04/cluster.yml } }
+- { name: prometheus.telemeter-prod-01, type: CNAME, target_cluster: { $ref: /openshift/telemeter-prod-01/cluster.yml } }
+- { name: grafana.app-sre, type: CNAME, target_cluster: { $ref: /openshift/app-sre-prod-01/cluster.yml } }
+- { name: grafana.openshift-app-sre, type: CNAME, target_cluster: { $ref: /openshift/app-sre-prod-01/cluster.yml } }
+- { name: alertmanager.app-sre, type: CNAME, target: elb.1061.app-sre.openshiftapps.com }
+- { name: alertmanager.app-sre-prod-01, type: CNAME, target_cluster: { $ref: /openshift/app-sre-prod-01/cluster.yml } }
+- { name: alertmanager.app-sre-prod-03, type: CNAME, target_cluster: { $ref: /openshift/app-sre-prod-03/cluster.yml } }
+- { name: alertmanager.app-sre-prod-04, type: CNAME, target_cluster: { $ref: /openshift/app-sre-prod-04/cluster.yml } }
+- { name: alertmanager.telemeter-prod-01, type: CNAME, target_cluster: { $ref: /openshift/telemeter-prod-01/cluster.yml } }
+- { name: pushgateway.app-sre, type: CNAME, target_cluster: { $ref: /openshift/app-sre-prod-01/cluster.yml } }
+
+- { name: prometheus.quayio-stage, type: CNAME, target: elb.apps.quayio-stage.d7r2.p1.openshiftapps.com }
+- { name: alertmanager.quayio-stage, type: CNAME, target: elb.apps.quayio-stage.d7r2.p1.openshiftapps.com }
+- { name: prometheus.quayio-prod-us-east-1, type: CNAME, target: elb.apps.quayio-prod-us.k6s9.p1.openshiftapps.com }
+- { name: alertmanager.quayio-prod-us-east-1, type: CNAME, target: elb.apps.quayio-prod-us.k6s9.p1.openshiftapps.com }
+- { name: prometheus.quayio-prod-us-east-2, type: CNAME, target: elb.apps.quayio-prod-us.z2r7.p1.openshiftapps.com }
+- { name: alertmanager.quayio-prod-us-east-2, type: CNAME, target: elb.apps.quayio-prod-us.z2r7.p1.openshiftapps.com }
+
+- { name: prometheus.quayio-p-ue1, type: CNAME, target: elb.apps.quay-p-ue1.w2l8.p1.openshiftapps.com }
+- { name: alertmanager.quayio-p-ue1, type: CNAME, target: elb.apps.quay-p-ue1.w2l8.p1.openshiftapps.com }
+- { name: prometheus.quayio-p-ue2, type: CNAME, target: elb.apps.quay-p-ue2.g1y7.p1.openshiftapps.com }
+- { name: alertmanager.quayio-p-ue2, type: CNAME, target: elb.apps.quay-p-ue2.g1y7.p1.openshiftapps.com }
+
+- { name: sentry, type: CNAME, target_cluster: { $ref: /openshift/app-sre-prod-01/cluster.yml } }
+- { name: sentry.stage, type: CNAME, target_cluster: { $ref: /openshift/app-sre-stage-01/cluster.yml } }
+- { name: github-mirror, type: CNAME, target_cluster: { $ref: /openshift/app-sre-prod-01/cluster.yml } }
+- { name: github-mirror.stage, type: CNAME, target_cluster: { $ref: /openshift/app-sre-stage-01/cluster.yml } }
+
+- { name: grafana, type: CNAME, target: elb.1061.app-sre.openshiftapps.com }
+- { name: alertmanager, type: CNAME, target: elb.1061.app-sre.openshiftapps.com }
+- { name: blackbox-exporter, type: CNAME, target_cluster: { $ref: /openshift/app-sre-prod-01/cluster.yml } }
+- { name: app-sre-cloudwatch-exporter, type: CNAME, target: elb.1061.app-sre.openshiftapps.com }
+- { name: app-sre-aws-resource-exporter, type: CNAME, target: elb.1061.app-sre.openshiftapps.com }
+- { name: devtools-cloudwatch-exporter, type: CNAME, target: elb.1061.app-sre.openshiftapps.com }
+- { name: devtools-aws-resource-exporter, type: CNAME, target: elb.1061.app-sre.openshiftapps.com }
+- { name: online-registration-exporter, type: CNAME, target: elb.1061.app-sre.openshiftapps.com }
+- { name: zabbix-impersonator-exporter, type: CNAME, target_cluster: { $ref: /openshift/app-sre-prod-01/cluster.yml } }
+- { name: zabbix-impersonator-trapper, type: CNAME, target: adf0331c83b5b11ea8313023e213e25c-1678761183.us-east-1.elb.amazonaws.com }
+
+- { name: prometheus.app-sre-stage, type: CNAME, target: elb.ce10.app-sre-stage.openshiftapps.com }
+- { name: grafana.stage, type: CNAME, target_cluster: { $ref: /openshift/app-sre-stage-01/cluster.yml } }
+- { name: alertmanager.stage, type: CNAME, target: elb.ce10.app-sre-stage.openshiftapps.com }
+- { name: pushgateway.app-sre-stage, type: CNAME, target_cluster: { $ref: /openshift/app-sre-stage-01/cluster.yml } }
+- { name: blackbox-exporter.stage, type: CNAME, target_cluster: { $ref: /openshift/app-sre-stage-01/cluster.yml } }
+- { name: app-sre-cloudwatch-exporter.stage, type: CNAME, target: elb.ce10.app-sre-stage.openshiftapps.com }
+- { name: app-sre-aws-resource-exporter.stage, type: CNAME, target: elb.ce10.app-sre-stage.openshiftapps.com }
+- { name: devtools-cloudwatch-exporter.stage, type: CNAME, target: elb.ce10.app-sre-stage.openshiftapps.com }
+- { name: devtools-aws-resource-exporter.stage, type: CNAME, target: elb.ce10.app-sre-stage.openshiftapps.com }
+- { name: online-registration-exporter.stage, type: CNAME, target: elb.ce10.app-sre-stage.openshiftapps.com }
+- { name: zabbix-impersonator-exporter.stage, type: CNAME, target_cluster: { $ref: /openshift/app-sre-stage-01/cluster.yml } }
+
+
+- { name: prometheus.app-sre-stage-01, type: CNAME, target_cluster: { $ref: /openshift/app-sre-stage-01/cluster.yml } }
+- { name: prometheus.app-sre-stage-02, type: CNAME, target: elb.apps.app-sre-stage-0.e9a2.p1.openshiftapps.com }
+- { name: alertmanager.app-sre-stage-01, type: CNAME, target_cluster: { $ref: /openshift/app-sre-stage-01/cluster.yml } }
+- { name: alertmanager.app-sre-stage-02, type: CNAME, target: elb.apps.app-sre-stage-0.e9a2.p1.openshiftapps.com }
+
+- { name: alertmanager.hive-stage-01, type: CNAME, target: elb.apps.hive-stage-01.l1d1.p1.openshiftapps.com }
+- { name: prometheus.hive-stage-01, type: CNAME, target: elb.apps.hive-stage-01.l1d1.p1.openshiftapps.com }
+
+- { name: alertmanager.crc-stage-01, type: CNAME, target: elb.apps.crc-stage-01.p5t7.p1.openshiftapps.com }
+- { name: prometheus.crc-stage-01, type: CNAME, target: elb.apps.crc-stage-01.p5t7.p1.openshiftapps.com }
+- { name: alertmanager.crc-stg-01, type: CNAME, target: elb.apps.crc-stg-01.o4v9.p1.openshiftapps.com }
+- { name: prometheus.crc-stg-01, type: CNAME, target: elb.apps.crc-stg-01.o4v9.p1.openshiftapps.com }
+
+- { name: prometheus.centralci, type: A, target: 10.0.132.57 }
+- { name: prometheus.blr, type: A, target: 10.70.49.219 }
+- { name: prometheus.rdu, type: A, target: 8.43.84.245 }
+
+- { name: mmpush, type: A, target: 8.43.84.242 }
+- { name: awsjump, type: A, target: 18.220.140.179 }
+
+- { name: sd-jenkins, type: A, target: 10.70.49.212 }
+
+- { name: cvexporter.stage, type: CNAME, target_cluster: { $ref: /openshift/app-sre-stage-01/cluster.yml } }
+
+# ; Test route for openshift-acme on app-sre-dev
+- { name: app-sre-dev, type: CNAME, target: elb.12ab.app-sre-dev.openshiftapps.com }
+
+# ;;;
+# ;; EXT
+# ;;;
+- { name: ci.ext, type: A, target: 18.214.51.196 }
+- { name: devtools-dev.ext, type: A, target: 8.43.84.242 }
+- { name: '*.devtools-dev.ext', type: A, target: 8.43.84.242 }
+
+# ;;;
+# ;; INT
+# ;;;
+- { name: int, type: A, target: 10.70.49.212 }
+- { name: ci.int, type: A, target: 10.0.132.101 }
+- { name: n1.int, type: A, target: 192.168.173.1 }
+- { name: n2.int, type: A, target: 192.168.173.2 }
+- { name: n3.int, type: A, target: 192.168.173.3 }
+- { name: n4.int, type: A, target: 192.168.173.4 }
+- { name: n5.int, type: A, target: 192.168.173.5 }
+- { name: n6.int, type: A, target: 192.168.173.6 }
+- { name: n7.int, type: A, target: 192.168.173.7 }
+- { name: n8.int, type: A, target: 192.168.173.8 }
+- { name: n9.int, type: A, target: 192.168.173.9 }
+- { name: n10.int, type: A, target: 192.168.173.10 }
+- { name: n11.int, type: A, target: 192.168.173.11 }
+- { name: n12.int, type: A, target: 192.168.173.12 }
+- { name: n13.int, type: A, target: 192.168.173.13 }
+- { name: n14.int, type: A, target: 192.168.173.14 }
+- { name: n15.int, type: A, target: 192.168.173.15 }
+- { name: n16.int, type: A, target: 192.168.173.16 }
+- { name: n17.int, type: A, target: 192.168.173.17 }
+- { name: n18.int, type: A, target: 192.168.173.18 }
+- { name: n19.int, type: A, target: 192.168.173.19 }
+- { name: n20.int, type: A, target: 192.168.173.20 }
+- { name: n21.int, type: A, target: 192.168.173.21 }
+- { name: n22.int, type: A, target: 192.168.173.22 }
+- { name: n23.int, type: A, target: 192.168.173.23 }
+- { name: n24.int, type: A, target: 192.168.173.24 }
+- { name: n25.int, type: A, target: 192.168.173.25 }
+- { name: n26.int, type: A, target: 192.168.173.26 }
+- { name: n27.int, type: A, target: 192.168.173.27 }
+- { name: n28.int, type: A, target: 192.168.173.28 }
+
+- { name: ci-int-jenkins-slave-01-app-sre.int, type: A, target: 10.0.132.26 }
+- { name: ci-int-jenkins-slave-02-uhc.int, type: A, target: 10.0.132.76 }
+- { name: ci-int-jenkins-slave-03-hive.int, type: A, target: 10.0.132.154 }
+- { name: ci-int-jenkins-slave-04-uhc-provisioning.int, type: A, target: 10.0.133.124 }
+- { name: ci-int-jenkins-slave-05-app-sre.int, type: A, target: 10.0.132.127 }
+- { name: ci-int-jenkins-slave-06-insights.int, type: A, target: 10.0.132.22 }
+- { name: ci-int-jenkins-slave-07-rhel7.int, type: A, target: 10.0.133.0 }
+- { name: ci-int-jenkins-slave-08-app-interface.int, type: A, target: 10.0.132.217 }
+- { name: ci-int-jenkins-slave-09-app-interface.int, type: A, target: 10.0.132.71 }
+
+# ;;;
+# ;; EOF
+# ;;;
