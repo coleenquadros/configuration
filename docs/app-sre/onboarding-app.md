@@ -27,6 +27,8 @@ The onboarding phases are the following:
 
 - **Onboarding**. During this phase the application development team, with the guidance and help of the AppSRE team, will self-service the deployment of the application via AppSRE's offerings. Most of the work that happens in this phase are PRs submitted by the application development team to onboard the application into App-Interface.
 
+- **Done / Run mode**. An application is considered onboarded with AppSRE once the team carries first line pager, has integrated monitoring and has a high level of cofidence to the business, technical and service vialibilty for the application.
+
 ## Introduction / Engagement
 
 The application development team must submit a JIRA issue to the [AppSRE project](https://issues.redhat.com/projects/APPSRE).
@@ -47,9 +49,16 @@ Onboarding a new App onto the App-SRE's team contract involves many different st
 - The software is packaged into containers and hosted in the [quay.io/app-sre](https://quay.io/organization/app-sre) org.
 - Monitoring has been set-up.
 - SaaS repos exist and the dev teams have merge access.
-- An SLO has been defined.
+- A component architecture has been agreed ( at the service, microservice level )
+- All dependancies have been identified and asset management agreed ( eg. RDS, Storage model )
+- Data and state management has been documented and agreed
+- A product definition has been Agreed to ( ToDo:link to existing prod def's as example )
+- SLI's has been defined, proven to validate product definition
+- SLO's are agreed, validated to be reporting as criteria to raise alerts
+- SLA's are agreed, as needed
+- Validation and e2e testing to ensure service execution goals are agreed ( as needed )
 - Developer access to the App is represented properly in roles/permissions in the App-Interface.
-- The Escalation matrix is properly defined.
+- The Escalation matrix is properly defined, managers on various teams involved have signed off ownership.
 - OpenShift resources: it has a staging environment targetting a staging namespace and a production environment targetting a production namespace.
 - There are documented SOPs to help triage possible problems with the app running in production.
 - There is a documented SOP for determining basic functionality.
