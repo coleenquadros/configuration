@@ -5,13 +5,13 @@ labels:
   service: quayio
 
 name: quayp06ue2
-description: Production cluster for Quay.io (4.4.16)
-consoleUrl: ''
-kibanaUrl: ''
-prometheusUrl: ''
-alertmanagerUrl: ''
-serverUrl: ''
-elbFQDN: ''
+description: Stand-by production cluster for Quay.io (4.4.16)
+consoleUrl: https://console-openshift-console.apps.quayp06ue2.x8x7.p1.openshiftapps.com
+kibanaUrl: https://kibana-openshift-logging.apps.quayp06ue2.x8x7.p1.openshiftapps.com
+prometheusUrl: https://prometheus.quayp06ue2.devshift.net
+alertmanagerUrl: https://alertmanager.quayp06ue2.devshift.net
+serverUrl: https://api.quayp06ue2.x8x7.p1.openshiftapps.com:6443
+elbFQDN: elb.apps.quayp06ue2.x8x7.p1.openshiftapps.com
 
 #observabilityNamespace:
 #  $ref: /services/observability/namespaces/openshift-customer-monitoring.quayp06ue2.yml
@@ -28,6 +28,8 @@ managedGroups:
 - dedicated-admins
 
 spec:
+  id: 1f5gad35kb9l5tfsa0pgab2bh13hg9vr
+  external_id: ca9b9ecd-31c1-4824-bba5-fcf4f1410a30
   provider: aws
   region: us-east-2
   version: 4.4.16
@@ -45,24 +47,17 @@ network:
   service: 172.30.0.0/16
   pod: 10.128.0.0/14
 
-disable:
-  e2eTests:
-  - create-namespace
-  - dedicated-admin-rolebindings
-  - default-network-policies
-  - default-project-labels
+peering:
+  connections:
+  - provider: account-vpc
+    name: quayp06ue2-quayio-prod
+    vpc:
+      $ref: /aws/quayio-prod/vpcs/quayio-prod.yml
+#    manageRoutes: true
 
-#peering:
-#  connections:
-#  - provider: account-vpc
-#    name: quayp04ue2-quayio-prod
-#    vpc:
-#      $ref: /aws/quayio-prod/vpcs/quayio-prod.yml
-##    manageRoutes: true
-#
-#automationToken:
-#  path: app-sre/creds/kube-configs/quayp04ue2
-#  field: token
+automationToken:
+  path: app-sre/creds/kube-configs/quayp06ue2
+  field: token
 
 internal: false
 
