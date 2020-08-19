@@ -62,6 +62,7 @@ This step should be performed in a single merge request.
     prometheusUrl: ''
     alertmanagerUrl: ''
     serverUrl: ''
+    elbFQDN: ''
 
     auth:
       service: github-org-team
@@ -126,7 +127,33 @@ This step should be performed in a single merge request.
     ```
 
 1. Send the MR, wait for the check to pass and merge. The ocm-clusters integration will create your cluster. You can view the progress in OCM. Proceed with the following steps after the cluster's installation is complete.
-  * Note: during the installation it is expected that other ocm integrations will fail.
+
+    * Note: during the installation it is expected that other ocm integrations will fail.
+
+1. Once the cluster has finished installing, the following fields have to be updated in the `cluster.yml` file
+    * `consoleUrl`: https://console-openshift-console.apps.<cluster_name>.<base_domain>
+    * `kibanaUrl`: https://kibana-openshift-logging.apps.<cluster_name>.<base_domain>
+    * `prometheusUrl`: https://prometheus.<cluster_name>.devshift.net
+    * `alertmanagerUrl`: https://alertmanager.<cluster_name>.devshift.net
+    * `serverUrl`: https://api.<cluster_name>.<base_domain>:6443
+    * `elbFQDN`: elb.apps.<cluster_name>.<base_domain>
+    * `.spec.id`: This ID can be seen as part of the URL when navigating to cluster page in OCM as well as when using the [ocm cli](https://github.com/openshift-online/ocm-cli)
+    * `.spec.external_id`: This is a  UUID which can be seen in cluster page in OCM as `Cluster ID` well as when using the [ocm cli](https://github.com/openshift-online/ocm-cli)
+
+    * **Note**: The `<cluster_name>` and `<base_domain>` of a cluster can be retrieved using the [ocm cli](https://github.com/openshift-online/ocm-cli)
+    
+    ```
+    $ ocm list clusters
+    
+    $ ocm get cluster <ID> | jq . '.id'
+    $ ocm get cluster <ID> | jq . '.external_id'
+    
+    $ ocm get cluster <ID> | jq . '.name'
+    $ ocm get cluster <ID> | jq . '.dns.base_domain'
+
+    # One-liner to get the complete DNS name of a cluster
+    $ ocm get cluster 19v7edlfn3oq8cjfd51nuliida2m37ie | jq -r '(.name + "." + .dns.base_domain)'
+    ```
 
 ## Step 2 - Bot access and App SRE project template
 
