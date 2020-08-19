@@ -30,6 +30,12 @@ openshiftResources:
   path: app-interface/global/quay/app-sre/quay.io
   version: 2
   type: kubernetes.io/dockercfg
+# ECR image pull secret
+- provider: vault-secret
+  path: app-sre/integrations-output/aws-ecr-image-pull-secrets/app-sre/eu-central-1/dockercfg
+  version: 1
+  type: kubernetes.io/dockerconfigjson
+  name: uhc-backup-image-pull-secret
 # the `telemeter.bearer` key in clusters-service is the telemeter-stage/uhc-prometheus-access SA's token
 - provider: resource-template
   type: extracurlyjinja2
@@ -90,12 +96,26 @@ openshiftResources:
   path: /app-sre-stage/uhc-stage/gateway-server.route.yaml
   vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.stage.openshift.com
   vault_tls_secret_version: 3
-- provider: resource
-  path: /app-sre-stage/uhc-stage/clusters-service.serviceaccount.yaml
-- provider: resource
-  path: /app-sre-stage/uhc-stage/account-manager.serviceaccount.yaml
-- provider: resource
-  path: /app-sre-stage/uhc-stage/ocm-service-log.serviceaccount.yaml
+- provider: resource-template
+  path: /services/uhc/serviceaccount.yaml
+  variables:
+    name: clusters-service
+- provider: resource-template
+  path: /services/uhc/serviceaccount.yaml
+  variables:
+    name: account-manager
+- provider: resource-template
+  path: /services/uhc/serviceaccount.yaml
+  variables:
+    name: ocm-service-log
+- provider: resource-template
+  path: /services/uhc/serviceaccount.yaml
+  variables:
+    name: uhc-clusters-cleaner
+- provider: resource-template
+  path: /services/uhc/serviceaccount.yaml
+  variables:
+    name: uhc-gateway
 - provider: resource
   path: /app-sre-stage/uhc-stage/authentication.configmap.yaml
 - provider: resource

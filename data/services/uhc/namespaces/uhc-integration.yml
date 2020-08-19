@@ -27,6 +27,12 @@ openshiftResources:
   path: app-interface/global/quay/app-sre/quay.io
   version: 2
   type: kubernetes.io/dockercfg
+# ECR image pull secret
+- provider: vault-secret
+  path: app-sre/integrations-output/aws-ecr-image-pull-secrets/app-sre/eu-central-1/dockercfg
+  version: 1
+  type: kubernetes.io/dockerconfigjson
+  name: uhc-backup-image-pull-secret
 # the `telemeter.bearer` key in clusters-service is the telemeter-cache-stage/uhc-telemeter-cache-access SA's token
 - provider: resource-template
   type: extracurlyjinja2
@@ -68,12 +74,26 @@ openshiftResources:
   path: /hive-integration/uhc-integration/service-logs.route.yaml
 - provider: route
   path: /hive-integration/uhc-integration/gateway-server.route.yaml
-- provider: resource
-  path: /hive-integration/uhc-integration/clusters-service.serviceaccount.yaml
-- provider: resource
-  path: /hive-integration/uhc-integration/account-manager.serviceaccount.yaml
-- provider: resource
-  path: /hive-integration/uhc-integration/ocm-service-log.serviceaccount.yaml
+- provider: resource-template
+  path: /services/uhc/serviceaccount.yaml
+  variables:
+    name: clusters-service
+- provider: resource-template
+  path: /services/uhc/serviceaccount.yaml
+  variables:
+    name: account-manager
+- provider: resource-template
+  path: /services/uhc/serviceaccount.yaml
+  variables:
+    name: ocm-service-log
+- provider: resource-template
+  path: /services/uhc/serviceaccount.yaml
+  variables:
+    name: uhc-clusters-cleaner
+- provider: resource-template
+  path: /services/uhc/serviceaccount.yaml
+  variables:
+    name: uhc-gateway
 - provider: resource
   path: /hive-integration/uhc-integration/authentication.configmap.yaml
 - provider: resource

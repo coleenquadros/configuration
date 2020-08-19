@@ -31,6 +31,12 @@ openshiftResources:
   path: app-interface/global/quay/app-sre/quay.io
   version: 2
   type: kubernetes.io/dockercfg
+# ECR image pull secret
+- provider: vault-secret
+  path: app-sre/integrations-output/aws-ecr-image-pull-secrets/app-sre/eu-central-1/dockercfg
+  version: 1
+  type: kubernetes.io/dockerconfigjson
+  name: uhc-backup-image-pull-secret
 - provider: resource-template
   type: extracurlyjinja2
   path: /app-sre/uhc-production/clusters-service.secret.yaml
@@ -92,12 +98,26 @@ openshiftResources:
   path: /app-sre/uhc-production/service-logs.route.yaml
 - provider: resource
   path: /app-sre/uhc-production/portal-redirector-rewriterules.configmap.yaml
-- provider: resource
-  path: /app-sre/uhc-production/clusters-service.serviceaccount.yaml
-- provider: resource
-  path: /app-sre/uhc-production/account-manager.serviceaccount.yaml
-- provider: resource
-  path: /app-sre/uhc-production/ocm-service-logs.serviceaccount.yaml
+- provider: resource-template
+  path: /services/uhc/serviceaccount.yaml
+  variables:
+    name: clusters-service
+- provider: resource-template
+  path: /services/uhc/serviceaccount.yaml
+  variables:
+    name: account-manager
+- provider: resource-template
+  path: /services/uhc/serviceaccount.yaml
+  variables:
+    name: ocm-service-log
+- provider: resource-template
+  path: /services/uhc/serviceaccount.yaml
+  variables:
+    name: uhc-portal-redirector
+- provider: resource-template
+  path: /services/uhc/serviceaccount.yaml
+  variables:
+    name: uhc-gateway
 - provider: resource
   path: /app-sre/uhc-production/authentication.configmap.yaml
 - provider: resource
@@ -129,7 +149,41 @@ terraformResources:
   identifier: ocm-service-log-production
   defaults: /terraform/resources/app-sre/production/rds-1.yml
   output_resource_name: ocm-service-log-rds
-
+- provider: ecr
+  account: app-sre
+  region: eu-central-1
+  identifier: uhc-apache-exporter
+  output_resource_name: uhc-apache-exporter-backup
+- provider: ecr
+  account: app-sre
+  region: eu-central-1
+  identifier: uhc-gateway
+  output_resource_name: uhc-gateway-backup
+- provider: ecr
+  account: app-sre
+  region: eu-central-1
+  identifier: uhc-clusters-service
+  output_resource_name: uhc-clusters-service-backup
+- provider: ecr
+  account: app-sre
+  region: eu-central-1
+  identifier: uhc-account-manager
+  output_resource_name: uhc-account-manager-backup
+- provider: ecr
+  account: app-sre
+  region: eu-central-1
+  identifier: uhc-portal-redirector
+  output_resource_name: uhc-portal-redirector-backup
+- provider: ecr
+  account: app-sre
+  region: eu-central-1
+  identifier: uhc-clusters-cleaner
+  output_resource_name: uhc-clusters-cleaner-backup
+- provider: ecr
+  account: app-sre
+  region: eu-central-1
+  identifier: ocm-service-log
+  output_resource_name: ocm-service-log-backup
 
 openshiftServiceAccountTokens:
 # telemeter
