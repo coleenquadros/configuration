@@ -76,6 +76,8 @@ This step should be performed in a single merge request.
     - dedicated-admins
 
     spec:
+      id: ''
+      external_id: ''
       provider: aws
       region: (desired region. ex: us-east-1)
       channel: (desired channel group. either 'stable' or 'fast', depending on the workload to run on the cluster)
@@ -138,22 +140,17 @@ This step should be performed in a single merge request.
     * `alertmanagerUrl`: https://alertmanager.<cluster_name>.devshift.net
     * `serverUrl`: https://api.<cluster_name>.<base_domain>:6443
     * `elbFQDN`: elb.apps.<cluster_name>.<base_domain>
-    * `.spec.id`: This ID can be seen as part of the URL when navigating to cluster page in OCM as well as when using the [ocm cli](https://github.com/openshift-online/ocm-cli)
-    * `.spec.external_id`: This is a  UUID which can be seen in cluster page in OCM as `Cluster ID` well as when using the [ocm cli](https://github.com/openshift-online/ocm-cli)
 
     * **Note**: The `<cluster_name>` and `<base_domain>` of a cluster can be retrieved using the [ocm cli](https://github.com/openshift-online/ocm-cli)
     
     ```
     $ ocm list clusters
     
-    $ ocm get cluster <ID> | jq . '.id'
-    $ ocm get cluster <ID> | jq . '.external_id'
-    
-    $ ocm get cluster <ID> | jq . '.name'
-    $ ocm get cluster <ID> | jq . '.dns.base_domain'
+    $ ocm get cluster <ID> | jq '.name'
+    $ ocm get cluster <ID> | jq '.dns.base_domain'
 
     # One-liner to get the complete DNS name of a cluster
-    $ ocm get cluster 19v7edlfn3oq8cjfd51nuliida2m37ie | jq -r '(.name + "." + .dns.base_domain)'
+    $ ocm get cluster <ID> | jq -r '(.name + "." + .dns.base_domain)'
     ```
 
 ## Step 2 - Bot access and App SRE project template
@@ -164,10 +161,14 @@ At this point you should be able to access the cluster via the console / oc cli.
 
 1. Update App-SRE Github Oauth Client.
     - Homepage URL: https://console-openshift-console.apps.<cluster_name>.<cluster_id>.p1.openshiftapps.com/
-        * Note: cluster_id can be obtained from the console.  In OCM, click on the link for the cluster and then click on the `Open Console` button in the upper right corner.  Looking at the URL bar there should be something like: `oauth-openshift.apps.<cluster_name>.<cluster_id>.p1.openshiftapps.com`
     - Authorization callback URL: https://oauth-openshift.apps.<cluster_name>.<cluster_id>.p1.openshiftapps.com/oauth2callback/github-app-sre
 
-1. Update the above `cluster.yml` and add the `consoleUrl` and `serverUrl` fields to point to the console and api respectively
+    * Note: cluster_id can be obtained from OCM.  In OCM, click on the link for the cluster and then click on the `Networking` tab and look at the `Master endpoint API` entry.  There should be something like: `api.<cluster_name>.<cluster_id>.p1.openshiftapps.com:6443`
+
+1. Update the above `cluster.yml` and add the `consoleUrl` and `serverUrl` fields to point to the console and api respectively.
+    - consoleUrl: `https://console-openshift-console.apps.<cluster_name>.<cluster_id>.p1.openshiftapps.com`
+    - serverUrl: `https://api.<cluster_name>.<cluster_id>.p1.openshiftapps.com:6443`
+        * **Note**: This can be obtained from OCM.  In OCM, click on the link for the cluster and then click on the `Networking` tab and look at the `Master endpoint API` entry.  Copy that value for the `serverUrl`.
 
 1. Configure VPC peering to jumphost (ci.ext) as needed for private clusters. See  [app-interface-cluster-vpc-peerings.md](app-interface-cluster-vpc-peerings.md) (Disregard this step for public clusters)
 
@@ -192,9 +193,9 @@ At this point you should be able to access the cluster via the console / oc cli.
 
    Create a secret named after the <cluster_name>
 
-       - server: https://api.<cluster_name>.<cluster_id>.p1.openshiftapps.com:6443
-       - token: <token>
-       - username: `dedicated-admin/app-sre-bot # not used by automation`
+       server: https://api.<cluster_name>.<cluster_id>.p1.openshiftapps.com:6443
+       token: <token>
+       username: dedicated-admin/app-sre-bot # not used by automation
 
 1. Add the `app-sre-bot` credentials to the cluster file in app-interface
    Create a secret named after the <cluster_name>
@@ -288,7 +289,9 @@ At this point you should be able to access the cluster via the console / oc cli.
 1. Enable enhanced dedicated-admin
 
     We enable enhanced dedicated-admin on all App-SRE clusters. Here's the documented [process](https://github.com/openshift/ops-sop/blob/master/v4/howto/extended-dedicated-admin.md#non-ccs-clusters) as defined by SREP.
-    The process has since been updated to create a ticket in jira instead of a SNOW ticket.  Create a ticket to [OHSS](Create a ticket to [OHSS](https://issues.redhat.com/secure/CreateIssue.jspa?pid=12323823&issuetype=3) requesting `extended-dedicated-admin` on the new cluster (provide the cluster id).
+
+    The process has since been updated to create a ticket in jira instead of a SNOW ticket.  Create a ticket to [OHSS](https://issues.redhat.com/secure/CreateIssue.jspa?pid=12323823&issuetype=3) requesting `enhanced-dedicated-admin` on the new cluster (provide the cluster id).
+
     Here's an [example](https://issues.redhat.com/browse/OHSS-608)
 
     *NOTE*: enchanced dedicated-admin must be enabled on the cluster before installing observability or the CSO operator.
