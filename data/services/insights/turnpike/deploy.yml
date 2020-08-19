@@ -33,75 +33,32 @@ authentication:
     field: all
 
 resourceTemplates:
-- name: rbac
-  path: /templates/rbac/rbac.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  parameters:
-    CPU_LIMIT: '1'
-    MAX_REPLICAS: 5
-    MEMORY_LIMIT: 1Gi
-    MIN_REPLICAS: 2
-    PGSSLMODE: verify-full
-    PERMISSION_SEEDING_ENABLED: 'False'
-    ROLE_SEEDING_ENABLED: 'False'
-    GROUP_SEEDING_ENABLED: 'False'
+- name: nginx
+  path: /templates/nginx.yml
+  url: https://github.com/RedHatInsights/turnpike
   targets:
   - namespace:
-      $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
+      $ref: /services/insights/turnpike/namespaces/stage-turnpike-stage.yml
     ref: master
     parameters:
-      IMAGE_TAG: 44bbaa6
-  - namespace:
-      $ref: /services/insights/rbac/namespaces/rbac-prod.yml
-    ref: 16bd6c1bdbe0397d71fbefae8cda150b929d8440
-    parameters:
-      IMAGE_TAG: 44bbaa6
-      DB_SECRET_NAME: templated-secret-rbac-db
+      IMAGE_TAG: master
 
-- name: scheduler
-  path: /templates/rbac/scheduler.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+- name: web
+  path: /templates/web.yml
+  url: https://github.com/RedHatInsights/turnpike
   targets:
   - namespace:
-      $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
+      $ref: /services/insights/turnpike/namespaces/stage-turnpike-stage.yml
     ref: master
     parameters:
-      IMAGE_TAG: 44bbaa6
-  - namespace:
-      $ref: /services/insights/rbac/namespaces/rbac-prod.yml
-    ref: cea8038009353a1ea076cd2651b6d321fd58e2fc
-    parameters:
-      IMAGE_TAG: 44bbaa6
+      IMAGE_TAG: master
 
-- name: worker
-  path: /templates/rbac/worker.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  parameters:
-    PGSSLMODE: verify-full
+- name: redis
+  path: /templates/redis.yaml
+  url: https://github.com/RedHatInsights/turnpike
   targets:
   - namespace:
-      $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
+      $ref: /services/insights/turnpike/namespaces/stage-turnpike-stage.yml
     ref: master
     parameters:
-      IMAGE_TAG: 44bbaa6
-  - namespace:
-      $ref: /services/insights/rbac/namespaces/rbac-prod.yml
-    ref: 16bd6c1bdbe0397d71fbefae8cda150b929d8440
-    parameters:
-      IMAGE_TAG: 44bbaa6
-      DB_SECRET_NAME: templated-secret-rbac-db
-
-- name: rbac-redis
-  path: /templates/rbac/redis.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  parameters:
-    VOLUME_CAPACITY: 10Gi
-    IMAGE: quay.io/cloudservices/redis
-    IMAGE_TAG: latest
-  targets:
-  - namespace:
-      $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
-    ref: cea8038009353a1ea076cd2651b6d321fd58e2fc
-  - namespace:
-      $ref: /services/insights/rbac/namespaces/rbac-prod.yml
-    ref: cea8038009353a1ea076cd2651b6d321fd58e2fc
+      IMAGE_TAG: master
