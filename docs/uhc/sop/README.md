@@ -432,3 +432,155 @@ We want a link to app-interface here, but okay to just contacts here for now.
 Juan Hernandez (jhernand@redhat.com)
 Oved Ourfali (oourfali@redhat.com)
 Nimrod Shneor (nshneor@redhat.com)
+
+
+## Sendgrid Service Down
+
+### Impact:
+
+New clusters will be unable to generate Sendgrid credentials for SMTP services.
+Existing clusters will be unable to rotate current Sendgrid credentials. 
+Sendgrid credentials will not be cleaned up for clusters in deletion.
+
+### Summary:
+
+Sendgrid Service API is down
+
+### Access required:
+
+- Console access to the cluster that runs the sendgrid service (app-sre)
+- Edit access to the namespaces:
+  - sendgrid-stage
+
+### Relevant secrets:
+- secrets/ocm-sendgrid-service
+
+### Steps:
+
+- Check `deployment/ocm-sendgrid-service` logs to determine why pods are down
+- Contact the RHMI team (see escalation contacts) and inform them of the downtime 
+
+---
+
+## Sendgrid Service 5xx
+
+### Impact:
+
+New clusters will be unable to generate Sendgrid credentials for SMTP services.
+Existing clusters will be unable to rotate current Sendgrid credentials. 
+Sendgrid credentials will not be cleaned up for clusters in deletion.
+
+### Summary:
+
+Sendgrid Service API is returning an abnormally high number of 5xx Error requests
+
+### Access required:
+
+- Console access to the cluster that runs the sendgrid service (app-sre)
+- Edit access to the namespaces:
+  - sendgrid-stage
+
+### Relevant secrets:
+- secrets/ocm-sendgrid-service
+
+### Steps:
+
+- Check `deployment/ocm-sendgrid-service` logs to determine why errors are occurring.
+- Contact the RHMI team (see escalation contacts) 
+
+---
+
+## Sendgrid Service 4xx
+
+### Impact:
+
+New clusters will be unable to generate Sendgrid credentials for SMTP services.
+Existing clusters will be unable to rotate current Sendgrid credentials. 
+Sendgrid credentials will not be cleaned up for clusters in deletion.
+
+### Summary:
+
+Sendgrid Service API is returning an abnormally high number of 4xx Error requests
+
+### Access required:
+
+- Console access to the cluster that runs the sendgrid service (app-sre)
+- Edit access to the namespaces:
+  - sendgrid-stage
+
+### Relevant secrets:
+- secrets/ocm-sendgrid-service
+
+### Steps:
+
+- Check `deployment/ocm-sendgrid-service` logs to determine why errors are occurring
+- Contact the RHMI team (see escalation contacts) 
+
+---
+
+## Sendgrid Service Latency High 
+
+### Impact:
+
+New clusters will be unable to generate Sendgrid credentials for SMTP services.
+Existing clusters will be unable to rotate current Sendgrid credentials. 
+Sendgrid credentials will not be cleaned up for clusters in deletion.
+
+### Summary:
+
+Sendgrid Service API is experiencing latency
+
+### Access required:
+
+- Console access to the cluster that runs the sendgrid service (app-sre)
+- Edit access to the namespaces:
+  - sendgrid-stage
+
+### Relevant secrets:
+- secrets/ocm-sendgrid-service
+
+### Steps:
+
+- Check `deployment/ocm-sendgrid-service` logs
+- Contact the RHMI team (see escalation contacts) 
+
+---
+
+## Sendgrid Service Dependencies
+
+A dependency service is experiencing issues or has been downgraded.
+
+### Sendgrid
+The following rules are in place to alert on dependency service issues:
+- Sendgrid 5xx Errors High
+- Sendgrid 4xx Errors High 
+- Sendgrid Latency High
+
+### Access required:
+- Console access to the cluster that runs the sendgrid service (app-sre)
+- Edit access to the namespaces:
+  - sendgrid-stage
+
+### Relevant secrets:
+- secrets/ocm-sendgrid-service
+
+### Steps:
+- Contact SRE team for a service outage
+- Copy any relevant logs from `deployment/ocm-sendgrid-service` 
+- Inform the RHMI team (see escalation contacts), including the copied logs
+
+---
+
+## Escalations
+
+Contact the RHMI team for any Sendgrid Service related alerts
+
+### Contacts:
+
+Aiden Keating (akeating@redhat.com)
+Ciaran Roche (croche@redhat.com)
+Dimitra Zuccarelli (dzuccare@redhat.com)
+Kevin Fan (chfan@redhat.com)
+Paul McCarthy (pamccart@redhat.com)
+
+
