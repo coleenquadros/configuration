@@ -1,0 +1,48 @@
+---
+
+$schema: /app-sre/app-1.yml
+
+labels:
+  service: turnpike
+  platform: insights
+
+name: turnpike
+
+description: Red Hat Associates' gateway into the Platform
+
+parentApp:
+  $ref: /services/insights/app.yml
+
+serviceOwners:
+- name: Lindani Phiri
+  email: lphiri@redhat.com
+- name: Keith Walsh
+  email: kwalsh@redhat.com
+- name: Joshua "jag" Ginsberg
+  email: jginsber@redhat.com
+
+performanceParameters:
+  SLO: 90
+
+dependencies:
+- $ref: /dependencies/ci-int/service.yml
+- $ref: /dependencies/github/service.yml
+- $ref: /dependencies/quay/service.yml
+- $ref: /dependencies/openshift/service.yml
+- $ref: /dependencies/aws/service.yml
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/cloudservices.yml
+  items:
+  - name: turnpike-nginx
+    public: false
+    description: Repository for Turnpike's nginx gateway
+  - name: turnpike-web
+    public: false
+    description: Repository for Turnpike's Python/Flask-based policy service
+
+codeComponents:
+- name: turnpike
+  resource: upstream
+  url: https://github.com/RedHatInsights/turnpike
