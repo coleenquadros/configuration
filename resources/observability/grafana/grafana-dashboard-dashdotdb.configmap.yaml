@@ -19,7 +19,7 @@ data:
       "gnetId": null,
       "graphTooltip": 0,
       "id": 101,
-      "iteration": 1597851303740,
+      "iteration": 1597909102418,
       "links": [],
       "panels": [
         {
@@ -27,11 +27,11 @@ data:
           "datasource": "dashdotdb-rds",
           "gridPos": {
             "h": 4,
-            "w": 6,
+            "w": 5,
             "x": 0,
             "y": 0
           },
-          "id": 9,
+          "id": 12,
           "links": [],
           "options": {
             "fieldOptions": {
@@ -39,7 +39,17 @@ data:
                 "first"
               ],
               "defaults": {
-                "mappings": [],
+                "mappings": [
+                  {
+                    "from": "",
+                    "id": 1,
+                    "operator": "",
+                    "text": "0",
+                    "to": "",
+                    "type": 1,
+                    "value": "null"
+                  }
+                ],
                 "max": 1000,
                 "min": 0,
                 "nullValueMode": "connected",
@@ -52,7 +62,7 @@ data:
                     },
                     {
                       "color": "red",
-                      "value": 100
+                      "value": 1
                     }
                   ]
                 },
@@ -72,7 +82,7 @@ data:
               "group": [],
               "metricColumn": "none",
               "rawQuery": true,
-              "rawSql": "WITH last_token as (\n            SELECT token.id\n            FROM token, pod, namespace, cluster\n            WHERE pod.token_id = token.id\n              AND namespace.id = pod.namespace_id\n              AND cluster.name = '$cluster'\n              AND namespace.name = '$namespace'\n              AND cluster.id = namespace.cluster_id\n            ORDER BY token.timestamp DESC\n            LIMIT 1),\nvulnerabilities as (\n        SELECT\n            DISTINCT vulnerability.name as vulnerability,\n                     feature.name as feature,\n                     severity.name as severity\n        FROM cluster,\n             namespace,\n             pod,\n             image,\n             imagefeature,\n             feature,\n             vulnerability,\n             severity,\n             last_token\n        WHERE pod.namespace_id = namespace.id\n          AND namespace.cluster_id = cluster.id\n          AND cluster.id = namespace.cluster_id\n          AND pod.image_id = image.id\n          AND image.id = imagefeature.image_id\n          AND imagefeature.feature_id = feature.id\n          AND feature.id = vulnerability.feature_id\n          AND vulnerability.severity_id = severity.id\n          AND pod.token_id = last_token.id\n          AND cluster.name =  '$cluster'\n          AND namespace.name = '$namespace'\n          AND severity.name = 'Low'\n        GROUP BY feature.name,\n                 vulnerability.name,\n                 severity.name)\nSELECT now() AS time,\n       count(feature) as value,\n       severity as metric\nFROM vulnerabilities\nGROUP BY severity;",
+              "rawSql": "WITH last_token as (\n            SELECT token.id\n            FROM token, pod, namespace, cluster\n            WHERE pod.token_id = token.id\n              AND namespace.id = pod.namespace_id\n              AND cluster.name = '$cluster'\n              AND namespace.name = '$namespace'\n              AND cluster.id = namespace.cluster_id\n            ORDER BY token.timestamp DESC\n            LIMIT 1),\nvulnerabilities as (\n        SELECT\n            DISTINCT vulnerability.name as vulnerability,\n                     feature.name as feature,\n                     severity.name as severity\n        FROM cluster,\n             namespace,\n             pod,\n             image,\n             imagefeature,\n             feature,\n             vulnerability,\n             severity,\n             last_token\n        WHERE pod.namespace_id = namespace.id\n          AND namespace.cluster_id = cluster.id\n          AND cluster.id = namespace.cluster_id\n          AND pod.image_id = image.id\n          AND image.id = imagefeature.image_id\n          AND imagefeature.feature_id = feature.id\n          AND feature.id = vulnerability.feature_id\n          AND vulnerability.severity_id = severity.id\n          AND pod.token_id = last_token.id\n          AND cluster.name =  '$cluster'\n          AND namespace.name = '$namespace'\n          AND severity.name = 'Critical'\n        GROUP BY feature.name,\n                 vulnerability.name,\n                 severity.name)\nSELECT now() AS time,\n       count(feature) as value,\n       severity as metric\nFROM vulnerabilities\nGROUP BY severity;",
               "refId": "A",
               "select": [
                 [
@@ -94,7 +104,7 @@ data:
               ]
             }
           ],
-          "title": "Low",
+          "title": "Critical",
           "type": "gauge"
         },
         {
@@ -102,8 +112,93 @@ data:
           "datasource": "dashdotdb-rds",
           "gridPos": {
             "h": 4,
-            "w": 6,
-            "x": 6,
+            "w": 5,
+            "x": 5,
+            "y": 0
+          },
+          "id": 11,
+          "links": [],
+          "options": {
+            "fieldOptions": {
+              "calcs": [
+                "first"
+              ],
+              "defaults": {
+                "mappings": [
+                  {
+                    "from": "",
+                    "id": 1,
+                    "operator": "",
+                    "text": "0",
+                    "to": "",
+                    "type": 1,
+                    "value": "null"
+                  }
+                ],
+                "max": 1000,
+                "min": 0,
+                "nullValueMode": "connected",
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "red",
+                      "value": 20
+                    }
+                  ]
+                },
+                "unit": "none"
+              },
+              "overrides": [],
+              "values": true
+            },
+            "orientation": "horizontal",
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
+          },
+          "pluginVersion": "6.6.2",
+          "targets": [
+            {
+              "format": "table",
+              "group": [],
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "WITH last_token as (\n            SELECT token.id\n            FROM token, pod, namespace, cluster\n            WHERE pod.token_id = token.id\n              AND namespace.id = pod.namespace_id\n              AND cluster.name = '$cluster'\n              AND namespace.name = '$namespace'\n              AND cluster.id = namespace.cluster_id\n            ORDER BY token.timestamp DESC\n            LIMIT 1),\nvulnerabilities as (\n        SELECT\n            DISTINCT vulnerability.name as vulnerability,\n                     feature.name as feature,\n                     severity.name as severity\n        FROM cluster,\n             namespace,\n             pod,\n             image,\n             imagefeature,\n             feature,\n             vulnerability,\n             severity,\n             last_token\n        WHERE pod.namespace_id = namespace.id\n          AND namespace.cluster_id = cluster.id\n          AND cluster.id = namespace.cluster_id\n          AND pod.image_id = image.id\n          AND image.id = imagefeature.image_id\n          AND imagefeature.feature_id = feature.id\n          AND feature.id = vulnerability.feature_id\n          AND vulnerability.severity_id = severity.id\n          AND pod.token_id = last_token.id\n          AND cluster.name =  '$cluster'\n          AND namespace.name = '$namespace'\n          AND severity.name = 'High'\n        GROUP BY feature.name,\n                 vulnerability.name,\n                 severity.name)\nSELECT now() AS time,\n       count(feature) as value,\n       severity as metric\nFROM vulnerabilities\nGROUP BY severity;",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "value"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "timeColumn": "time",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "title": "High",
+          "type": "gauge"
+        },
+        {
+          "cacheTimeout": null,
+          "datasource": "dashdotdb-rds",
+          "gridPos": {
+            "h": 4,
+            "w": 5,
+            "x": 10,
             "y": 0
           },
           "id": 10,
@@ -114,7 +209,17 @@ data:
                 "first"
               ],
               "defaults": {
-                "mappings": [],
+                "mappings": [
+                  {
+                    "from": "",
+                    "id": 1,
+                    "operator": "",
+                    "text": "0",
+                    "to": "",
+                    "type": 1,
+                    "value": "null"
+                  }
+                ],
                 "max": 1000,
                 "min": 0,
                 "nullValueMode": "connected",
@@ -174,55 +279,74 @@ data:
         },
         {
           "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": false,
+          "colors": [
+            "#299c46",
+            "rgba(237, 129, 40, 0.89)",
+            "#d44a3a"
+          ],
           "datasource": "dashdotdb-rds",
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
           "gridPos": {
             "h": 4,
-            "w": 6,
-            "x": 12,
+            "w": 3,
+            "x": 15,
             "y": 0
           },
-          "id": 11,
+          "id": 9,
+          "interval": null,
           "links": [],
-          "options": {
-            "fieldOptions": {
-              "calcs": [
-                "first"
-              ],
-              "defaults": {
-                "mappings": [],
-                "max": 1000,
-                "min": 0,
-                "nullValueMode": "connected",
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": null
-                    },
-                    {
-                      "color": "red",
-                      "value": 100
-                    }
-                  ]
-                },
-                "unit": "none"
-              },
-              "overrides": [],
-              "values": true
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
             },
-            "orientation": "horizontal",
-            "showThresholdLabels": false,
-            "showThresholdMarkers": true
-          },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "options": {},
           "pluginVersion": "6.6.2",
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false,
+            "ymax": null,
+            "ymin": null
+          },
+          "tableColumn": "value",
           "targets": [
             {
               "format": "table",
               "group": [],
               "metricColumn": "none",
               "rawQuery": true,
-              "rawSql": "WITH last_token as (\n            SELECT token.id\n            FROM token, pod, namespace, cluster\n            WHERE pod.token_id = token.id\n              AND namespace.id = pod.namespace_id\n              AND cluster.name = '$cluster'\n              AND namespace.name = '$namespace'\n              AND cluster.id = namespace.cluster_id\n            ORDER BY token.timestamp DESC\n            LIMIT 1),\nvulnerabilities as (\n        SELECT\n            DISTINCT vulnerability.name as vulnerability,\n                     feature.name as feature,\n                     severity.name as severity\n        FROM cluster,\n             namespace,\n             pod,\n             image,\n             imagefeature,\n             feature,\n             vulnerability,\n             severity,\n             last_token\n        WHERE pod.namespace_id = namespace.id\n          AND namespace.cluster_id = cluster.id\n          AND cluster.id = namespace.cluster_id\n          AND pod.image_id = image.id\n          AND image.id = imagefeature.image_id\n          AND imagefeature.feature_id = feature.id\n          AND feature.id = vulnerability.feature_id\n          AND vulnerability.severity_id = severity.id\n          AND pod.token_id = last_token.id\n          AND cluster.name =  '$cluster'\n          AND namespace.name = '$namespace'\n          AND severity.name = 'High'\n        GROUP BY feature.name,\n                 vulnerability.name,\n                 severity.name)\nSELECT now() AS time,\n       count(feature) as value,\n       severity as metric\nFROM vulnerabilities\nGROUP BY severity;",
+              "rawSql": "WITH last_token as (\n            SELECT token.id\n            FROM token, pod, namespace, cluster\n            WHERE pod.token_id = token.id\n              AND namespace.id = pod.namespace_id\n              AND cluster.name = '$cluster'\n              AND namespace.name = '$namespace'\n              AND cluster.id = namespace.cluster_id\n            ORDER BY token.timestamp DESC\n            LIMIT 1),\nvulnerabilities as (\n        SELECT\n            DISTINCT vulnerability.name as vulnerability,\n                     feature.name as feature,\n                     severity.name as severity\n        FROM cluster,\n             namespace,\n             pod,\n             image,\n             imagefeature,\n             feature,\n             vulnerability,\n             severity,\n             last_token\n        WHERE pod.namespace_id = namespace.id\n          AND namespace.cluster_id = cluster.id\n          AND cluster.id = namespace.cluster_id\n          AND pod.image_id = image.id\n          AND image.id = imagefeature.image_id\n          AND imagefeature.feature_id = feature.id\n          AND feature.id = vulnerability.feature_id\n          AND vulnerability.severity_id = severity.id\n          AND pod.token_id = last_token.id\n          AND cluster.name =  '$cluster'\n          AND namespace.name = '$namespace'\n          AND severity.name = 'Low'\n        GROUP BY feature.name,\n                 vulnerability.name,\n                 severity.name)\nSELECT now() AS time,\n       count(feature) as value,\n       severity as metric\nFROM vulnerabilities\nGROUP BY severity;",
               "refId": "A",
               "select": [
                 [
@@ -244,60 +368,89 @@ data:
               ]
             }
           ],
-          "title": "High",
-          "type": "gauge"
+          "thresholds": "",
+          "title": "Low",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "avg"
         },
         {
           "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": false,
+          "colors": [
+            "#299c46",
+            "rgba(237, 129, 40, 0.89)",
+            "#d44a3a"
+          ],
           "datasource": "dashdotdb-rds",
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
           "gridPos": {
             "h": 4,
-            "w": 6,
+            "w": 3,
             "x": 18,
             "y": 0
           },
-          "id": 12,
+          "id": 15,
+          "interval": null,
           "links": [],
-          "options": {
-            "fieldOptions": {
-              "calcs": [
-                "first"
-              ],
-              "defaults": {
-                "mappings": [],
-                "max": 1000,
-                "min": 0,
-                "nullValueMode": "connected",
-                "thresholds": {
-                  "mode": "absolute",
-                  "steps": [
-                    {
-                      "color": "green",
-                      "value": null
-                    },
-                    {
-                      "color": "red",
-                      "value": 100
-                    }
-                  ]
-                },
-                "unit": "none"
-              },
-              "overrides": [],
-              "values": true
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
             },
-            "orientation": "horizontal",
-            "showThresholdLabels": false,
-            "showThresholdMarkers": true
-          },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "options": {},
           "pluginVersion": "6.6.2",
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false,
+            "ymax": null,
+            "ymin": null
+          },
+          "tableColumn": "value",
           "targets": [
             {
               "format": "table",
               "group": [],
               "metricColumn": "none",
               "rawQuery": true,
-              "rawSql": "WITH last_token as (\n            SELECT token.id\n            FROM token, pod, namespace, cluster\n            WHERE pod.token_id = token.id\n              AND namespace.id = pod.namespace_id\n              AND cluster.name = '$cluster'\n              AND namespace.name = '$namespace'\n              AND cluster.id = namespace.cluster_id\n            ORDER BY token.timestamp DESC\n            LIMIT 1),\nvulnerabilities as (\n        SELECT\n            DISTINCT vulnerability.name as vulnerability,\n                     feature.name as feature,\n                     severity.name as severity\n        FROM cluster,\n             namespace,\n             pod,\n             image,\n             imagefeature,\n             feature,\n             vulnerability,\n             severity,\n             last_token\n        WHERE pod.namespace_id = namespace.id\n          AND namespace.cluster_id = cluster.id\n          AND cluster.id = namespace.cluster_id\n          AND pod.image_id = image.id\n          AND image.id = imagefeature.image_id\n          AND imagefeature.feature_id = feature.id\n          AND feature.id = vulnerability.feature_id\n          AND vulnerability.severity_id = severity.id\n          AND pod.token_id = last_token.id\n          AND cluster.name =  '$cluster'\n          AND namespace.name = '$namespace'\n          AND severity.name = 'Critical'\n        GROUP BY feature.name,\n                 vulnerability.name,\n                 severity.name)\nSELECT now() AS time,\n       count(feature) as value,\n       severity as metric\nFROM vulnerabilities\nGROUP BY severity;",
+              "rawSql": "WITH last_token as (\n            SELECT token.id\n            FROM token, pod, namespace, cluster\n            WHERE pod.token_id = token.id\n              AND namespace.id = pod.namespace_id\n              AND cluster.name = '$cluster'\n              AND namespace.name = '$namespace'\n              AND cluster.id = namespace.cluster_id\n            ORDER BY token.timestamp DESC\n            LIMIT 1),\nvulnerabilities as (\n        SELECT\n            DISTINCT vulnerability.name as vulnerability,\n                     feature.name as feature,\n                     severity.name as severity\n        FROM cluster,\n             namespace,\n             pod,\n             image,\n             imagefeature,\n             feature,\n             vulnerability,\n             severity,\n             last_token\n        WHERE pod.namespace_id = namespace.id\n          AND namespace.cluster_id = cluster.id\n          AND cluster.id = namespace.cluster_id\n          AND pod.image_id = image.id\n          AND image.id = imagefeature.image_id\n          AND imagefeature.feature_id = feature.id\n          AND feature.id = vulnerability.feature_id\n          AND vulnerability.severity_id = severity.id\n          AND pod.token_id = last_token.id\n          AND cluster.name =  '$cluster'\n          AND namespace.name = '$namespace'\n          AND severity.name = 'Negligible'\n        GROUP BY feature.name,\n                 vulnerability.name,\n                 severity.name)\nSELECT now() AS time,\n       count(feature) as value,\n       severity as metric\nFROM vulnerabilities\nGROUP BY severity;",
               "refId": "A",
               "select": [
                 [
@@ -319,8 +472,122 @@ data:
               ]
             }
           ],
-          "title": "Critical",
-          "type": "gauge"
+          "thresholds": "",
+          "title": "Negligible",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "0",
+              "value": "null"
+            }
+          ],
+          "valueName": "avg"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": false,
+          "colors": [
+            "#299c46",
+            "rgba(237, 129, 40, 0.89)",
+            "#d44a3a"
+          ],
+          "datasource": "dashdotdb-rds",
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 3,
+            "x": 21,
+            "y": 0
+          },
+          "id": 14,
+          "interval": null,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "options": {},
+          "pluginVersion": "6.6.2",
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false,
+            "ymax": null,
+            "ymin": null
+          },
+          "tableColumn": "value",
+          "targets": [
+            {
+              "format": "table",
+              "group": [],
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "WITH last_token as (\n            SELECT token.id\n            FROM token, pod, namespace, cluster\n            WHERE pod.token_id = token.id\n              AND namespace.id = pod.namespace_id\n              AND cluster.name = '$cluster'\n              AND namespace.name = '$namespace'\n              AND cluster.id = namespace.cluster_id\n            ORDER BY token.timestamp DESC\n            LIMIT 1),\nvulnerabilities as (\n        SELECT\n            DISTINCT vulnerability.name as vulnerability,\n                     feature.name as feature,\n                     severity.name as severity\n        FROM cluster,\n             namespace,\n             pod,\n             image,\n             imagefeature,\n             feature,\n             vulnerability,\n             severity,\n             last_token\n        WHERE pod.namespace_id = namespace.id\n          AND namespace.cluster_id = cluster.id\n          AND cluster.id = namespace.cluster_id\n          AND pod.image_id = image.id\n          AND image.id = imagefeature.image_id\n          AND imagefeature.feature_id = feature.id\n          AND feature.id = vulnerability.feature_id\n          AND vulnerability.severity_id = severity.id\n          AND pod.token_id = last_token.id\n          AND cluster.name =  '$cluster'\n          AND namespace.name = '$namespace'\n          AND severity.name = 'Unknown'\n        GROUP BY feature.name,\n                 vulnerability.name,\n                 severity.name)\nSELECT now() AS time,\n       count(feature) as value,\n       severity as metric\nFROM vulnerabilities\nGROUP BY severity;",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "value"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "timeColumn": "time",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "thresholds": "",
+          "title": "Unknown",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "avg"
         },
         {
           "columns": [],
@@ -340,7 +607,7 @@ data:
           "showHeader": true,
           "sort": {
             "col": 5,
-            "desc": false
+            "desc": true
           },
           "styles": [
             {
@@ -545,8 +812,8 @@ data:
             "allValue": null,
             "current": {
               "selected": true,
-              "text": "app-interface-production",
-              "value": "app-interface-production"
+              "text": "app-sre-observability-per-cluster",
+              "value": "app-sre-observability-per-cluster"
             },
             "datasource": "dashdotdb-rds",
             "definition": "select namespace.name from cluster, namespace where cluster.id = namespace.cluster_id and cluster.name = '$cluster' order by namespace.name;",
@@ -557,12 +824,12 @@ data:
             "name": "namespace",
             "options": [
               {
-                "selected": true,
+                "selected": false,
                 "text": "app-interface-production",
                 "value": "app-interface-production"
               },
               {
-                "selected": false,
+                "selected": true,
                 "text": "app-sre-observability-per-cluster",
                 "value": "app-sre-observability-per-cluster"
               },
@@ -712,7 +979,7 @@ data:
       "timezone": "",
       "title": "Dash.DB",
       "uid": "dashdotdb",
-      "version": 1
+      "version": 2
     }
 kind: ConfigMap
 metadata:
