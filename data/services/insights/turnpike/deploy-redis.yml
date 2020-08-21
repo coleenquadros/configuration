@@ -5,8 +5,8 @@ labels:
   service: turnpike
   platform: insights
 
-name: turnpike
-description: Turnpike API Gateway
+name: turnpike-redis
+description: Turnpike API Gateway (Redis deploy)
 
 app:
   $ref: /services/insights/turnpike/app.yml
@@ -21,33 +21,24 @@ slack:
 
 managedResourceTypes:
 - Deployment
+- PersistentVolumeClaim
 - Service
 
 imagePatterns:
-- quay.io/cloudservices
+- registry.redhat.io/rhel8
 
 authentication:
   image:
-    path: insights/quay/cloudservices-push
+    path: insights/secrets/global/rh-registry-pull
     field: all
 
 resourceTemplates:
-- name: nginx
-  path: /templates/nginx.yml
+- name: redis
+  path: /templates/redis.yml
   url: https://github.com/RedHatInsights/turnpike
   targets:
   - namespace:
       $ref: /services/insights/turnpike/namespaces/stage-turnpike-stage.yml
     ref: master
     parameters:
-      IMAGE_TAG: a0c954a
-
-- name: web
-  path: /templates/web.yml
-  url: https://github.com/RedHatInsights/turnpike
-  targets:
-  - namespace:
-      $ref: /services/insights/turnpike/namespaces/stage-turnpike-stage.yml
-    ref: master
-    parameters:
-      IMAGE_TAG: a0c954a
+      IMAGE_TAG: b7153bf4e515
