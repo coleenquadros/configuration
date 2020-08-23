@@ -241,6 +241,7 @@ At this point you should be able to access the cluster via the console / oc cli.
     managedResourceTypes:
     - Template
     - Project
+    - ClusterRoleBinding
 
     # when using `oc`, use the override as the kind instead of the resource
     managedResourceTypeOverrides:
@@ -251,17 +252,19 @@ At this point you should be able to access the cluster via the console / oc cli.
     # https://github.com/openshift/managed-cluster-config/blob/master/deploy/osd-project-request-template/02-role.dedicated-admins-project-request.yaml#L12
     - resource: Template
       resourceNames:
-      - project-request
+        - project-request
     - resource: Project
       resourceNames:
-      - cluster
+        - cluster
 
     openshiftResources:
     - provider: resource
       path: /setup/project-request.v4.template.yaml
-    # this is a cluster scoped resources, but this should work for now
+    # these are cluster scoped resources, but this should work for now
     - provider: resource
       path: /setup/cluster.project.v4.yaml
+    - provider: resource
+      path: /setup/self-provisioners.clusterrolebinding.yaml
     ```
 
 1. Re-enable e2e tests on the cluster by removing the following lines from the cluster definition:
