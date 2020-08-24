@@ -177,6 +177,8 @@ For example, a `ServiceMonitor` for the app-sre cluster looks like: https://gitl
 
 And the `ServiceMonitor` must also be referenced from the namespace.yml, like this: https://gitlab.cee.redhat.com/service/app-interface/blob/f0fe35941d538d6231ce52dbe333dc4c1622847a/data/services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml#L212-217
 
+Add observability access to your namespace(s) like this: https://gitlab.cee.redhat.com/service/app-interface/-/blob/88f829b1d3b164dc345e7d94ac51ed9cd3a72cad/data/services/observability/roles/app-sre-osdv4-monitored-namespaces-view.yml#L175
+
 Once the PR in app-interface is merged, your application should appear on the prometheus corresponding to the cluster. On the app-sre cluster, the URL you'd want to check is https://prometheus.app-sre-prod-01.devshift.net/targets
 
 In case your application doesn't show up in the `targets` section, please follow this troubleshooting guide: https://github.com/coreos/prometheus-operator/blob/master/Documentation/troubleshooting.md
