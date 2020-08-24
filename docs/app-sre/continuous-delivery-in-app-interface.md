@@ -78,6 +78,8 @@ In addition to the parameters defined in the saas file, a deployment to each nam
 
 Here is an example to parameters defined for the [insights-stage](/data/products/insights/environments/stage.yml) environment.
 
+Environment parameters can be used to template saas file parameters. For example, if `ENV_PARAMETER` is defined in the environment file parameters, it can be reused in a saas file parameters: `SAAS_PARAMETER: ${ENV_PARAMETER}/api/example`.
+
 ## How does it work?
 
 Every saas file contains a list of resources to deploy, and each resource contains a list of targets to deploy to.  Each target is a namespace, and each such namespace is associated to an environment.
