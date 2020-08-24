@@ -55,8 +55,6 @@ resourceTemplates:
   parameters:
     CPU_LIMIT: '2'
     # autoscaling on this app based on cpu is not working, so pinning replicas.
-    MAX_REPLICAS: 10
-    MIN_REPLICAS: 10
   targets:
   - namespace:
       $ref: /services/insights/advisor/namespaces/stage-advisor-stage.yml
@@ -65,6 +63,9 @@ resourceTemplates:
       ADVISOR_ENV: stage
       IMAGE_TAG: de26688
       CW_LOG_STREAM: advisor-stage
+      MAX_REPLICAS: 0
+      MIN_REPLICAS: 0
+      ADVISOR_DB_READONLY_SECRET: advisor-db
   - namespace:
       $ref: /services/insights/advisor/namespaces/advisor-prod.yml
     ref: 69a17ceb3cb13893548c24051b2ae8e2b6511dd3
@@ -72,6 +73,8 @@ resourceTemplates:
       ADVISOR_ENV: prod
       IMAGE_TAG: de26688
       CW_LOG_STREAM: advisor-prod
+      MAX_REPLICAS: 10
+      MIN_REPLICAS: 10
 - name: insights-advisor-api
   path: /templates/advisor/insights-advisor-api.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
