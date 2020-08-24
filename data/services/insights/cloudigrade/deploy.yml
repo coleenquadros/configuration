@@ -38,21 +38,20 @@ resourceTemplates:
 - name: cloudigrade-api
   path: /templates/cloudigrade/cloudigrade-api.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  parameters:
+    LISTENER_SERVER: ${KAFKA_BOOTSTRAP_HOST}
+    SOURCES_API_BASE_URL: http://${SOURCES_HOST}:8080
   targets:
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml
     ref: master
     parameters:  # all other parameters have default values
       IMAGE_TAG: 1dd9278
-      LISTENER_SERVER: platform-mq-kafka-bootstrap.platform-mq-stage.svc.cluster.local
-      SOURCES_API_BASE_URL: http://sources-api.sources-stage.svc.cluster.local:8080
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
     ref: 4f6d687a7f477c639b0dcad76ca6729ded4173b2
     parameters:  # all other parameters have default values
       IMAGE_TAG: 1dd9278
-      LISTENER_SERVER: platform-mq-kafka-bootstrap.platform-mq-prod.svc.cluster.local
-      SOURCES_API_BASE_URL: http://sources-api.sources-prod.svc.cluster.local:8080
       IMAGE_TAG: 1dd9278
       AWS_HOUNDIGRADE_ECS_CLUSTER_NAME: cloudigrade-prod-us-east-1c
       AWS_HOUNDIGRADE_ECS_AVAILABILITY_ZONE: us-east-1c
@@ -67,10 +66,8 @@ resourceTemplates:
       HOUNDIGRADE_SENTRY_ENVIRONMENT: prod
       COMMIT_REF: prod
       LISTENER_GROUP_ID: cloudmeter_prod
-      LISTENER_SERVER: platform-mq-kafka-bootstrap.platform-mq-prod.svc.cluster.local
       LISTENER_SENTRY_ENVIRONMENT: prod
       LISTENER_SENTRY_RELEASE: prod
-      SOURCES_API_BASE_URL: http://sources-api.sources-prod.svc.cluster.local:8080
       IMAGE_NAMESPACE: cloudigrade-prod
 - name: cloudigrade-beat
   path: /templates/cloudigrade/cloudigrade-beat.yaml
