@@ -546,6 +546,26 @@ Sendgrid Service API is experiencing latency
 
 ---
 
+## Sendgrid Service Job Failed 
+
+Sendgrid Service job has reached the maximum number of attempts.
+
+### Impact: 
+
+Sendgrid Subaccount or Credentials will not be created or synced to the cluster. 
+
+### Relevant secrets:
+- secrets/ocm-sendgrid-service
+
+### Steps:
+From Sendgrid Service Postgres, reset the attempts to 0 for the failed job.
+```
+$ UPDATE sendgrid_jobs SET attempts=0 WHERE id = '{{$labels.jobID}}';
+```
+Watch the logs for `deployment/ocm-sendgrid-service` for the service to execute job. Copy any relevant logs and inform the RHMI team (see escalation contacts), including the copied logs
+
+---
+
 ## Sendgrid Service Dependencies
 
 A dependency service is experiencing issues or has been downgraded.
@@ -568,6 +588,27 @@ The following rules are in place to alert on dependency service issues:
 - Contact SRE team for a service outage
 - Copy any relevant logs from `deployment/ocm-sendgrid-service` 
 - Inform the RHMI team (see escalation contacts), including the copied logs
+
+---
+
+## Sendgrid Service Dependencies - Sendgrid SubAccount Quota low
+
+Sendgrid SubAccount Quota is low
+
+### Alerts
+- OCM dependencies - Sendgrid SubAccount Quota less than 100
+- OCM dependencies - Sendgrid SubAccount Quota less than 20 
+
+### Impact:
+
+New clusters will be unable to generate Sendgrid credentials for SMTP services.
+Existing clusters will be unable to rotate current Sendgrid credentials. 
+
+### Relevant secrets:
+- secrets/ocm-sendgrid-service
+
+### Steps:
+- TODO sync with Alan (what are the steps for App-SRE to get subaccount quota extended)
 
 ---
 

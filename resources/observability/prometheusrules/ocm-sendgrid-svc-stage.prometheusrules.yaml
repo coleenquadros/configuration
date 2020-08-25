@@ -11,7 +11,7 @@ spec:
   groups:
   - name: ocm-sendgrid-service-stage
     rules:
-    - alert: OCM Sendgrid Service DOWN - stage
+    - alert: OCM Sendgrid Service DOWN
       annotations:
         message: "No targets found for OCM Sendgrid Service in namespace {{ $labels.namespace }}. Sendgrid Service is down."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
@@ -21,7 +21,7 @@ spec:
       labels:
         service: ocm-sendgrid-service
         severity: medium
-    - alert: OCM Sendgrid Service 5xx Errors High - stage
+    - alert: OCM Sendgrid Service 5xx Errors High
       annotations:
         message: "OCM Sendgrid Service in namespace {{ $labels.namespace }} is returning 5xx errors for {{ $value | humanize }}% of requests."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
@@ -33,7 +33,7 @@ spec:
       labels:
         service: ocm-sendgrid-service
         severity: medium
-    - alert: OCM Sendgrid Service 4xx Errors High - stage
+    - alert: OCM Sendgrid Service 4xx Errors High
       annotations:
         message: "OCM Sendgrid Service in namespace {{ $labels.namespace }} is returning 4xx errors for {{ $value | humanize }}% of requests."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
@@ -45,13 +45,22 @@ spec:
       labels:
         service: ocm-sendgrid-service
         severity: medium
-    - alert: OCM Sendgrid Service Latency High - stage
+    - alert: OCM Sendgrid Service Latency High
       annotations:
         message: "OCM Sendgrid Service in namespace {{ $labels.namespace }} 50th percentile latency is greater than 2s. Current value: {{ $value | humanize }}"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
       expr: |
         histogram_quantile(0.50, sum(rate(api_inbound_request_duration_bucket{namespace="sendgrid-stage",service="ocm-sendgrid-service-metrics"}[1m])) by (le)) > 2
       for: 10m
+      labels:
+        service: ocm-sendgrid-service
+        severity: medium
+    - alert: OCM Sendgrid Service Job Failed 
+      annotations:
+        message: "OCM Sendgrid Job failed in {{ $labels.namespace }} affecting cluster : {{ $labels.clusterID }}"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
+      expr: |
+        sendgrid_service_max_retries
       labels:
         service: ocm-sendgrid-service
         severity: medium
@@ -64,7 +73,7 @@ spec:
       labels:
         service: ocm-sendgrid-service
         severity: medium
-    - alert: OCM dependencies - Sendgrid 5xx Errors High - stage
+    - alert: OCM dependencies - Sendgrid 5xx Errors High
       annotations:
         message: "Sendgrid is returning 5xx errors for {{ $value | humanize }}% of requests."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
@@ -76,7 +85,7 @@ spec:
       labels:
         service: ocm-sendgrid-service
         severity: medium
-    - alert: OCM dependencies - Sendgrid 4xx Errors High - stage
+    - alert: OCM dependencies - Sendgrid 4xx Errors High
       annotations:
         message: "OCM Sendgrid Service in namespace {{ $labels.namespace }} is returning 4xx errors for {{ $value | humanize }}% of requests."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
@@ -88,7 +97,7 @@ spec:
       labels:
         service: ocm-sendgrid-service
         severity: medium
-    - alert: OCM dependencies - Sendgrid Latency High - stage
+    - alert: OCM dependencies - Sendgrid Latency High
       annotations:
         message: "OCM Sendgrid Service in namespace {{ $labels.namespace }} 50th percentile latency is greater than 2s. Current value: {{ $value | humanize }}"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
@@ -98,8 +107,7 @@ spec:
       labels:
         service: ocm-sendgrid-service
         severity: medium
-    # TODO: Update runbook links when sops are created
-    - alert: OCM dependencies - Sendgrid SubAccount Quota less than 100 - stage
+    - alert: OCM dependencies - Sendgrid SubAccount Quota less than 100 
       annotations:
         message: "There are less than 100 sub accounts remaining for Sendgrid quota in namespace {{ $labels.namespace }}"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
@@ -109,8 +117,7 @@ spec:
       labels:
         service: ocm-sendgrid-service
         severity: medium
-        team: cssre
-    - alert: OCM dependencies - Sendgrid SubAccount Quota less than 20 - stage
+    - alert: OCM dependencies - Sendgrid SubAccount Quota less than 20 
       annotations:
         message: "There are less than 20 sub accounts remaining for Sendgrid quota in namespace {{ $labels.namespace }}"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
@@ -120,8 +127,7 @@ spec:
       labels:
         service: ocm-sendgrid-service
         severity: high
-        team: cssre
-    - alert: OCM dependencies - Sendgrid API Rate Limited - stage
+    - alert: OCM dependencies - Sendgrid API Rate Limited 
       annotations:
         message: "OCM Sendgrid API Rate Limit reached in namespace {{ $labels.namespace }}"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
@@ -131,4 +137,3 @@ spec:
       labels:
         service: ocm-sendgrid-service
         severity: medium
-        team: cssre
