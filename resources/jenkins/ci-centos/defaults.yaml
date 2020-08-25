@@ -1491,15 +1491,8 @@
         fi
     <<: *job_template_build_master
 
-- job-template:
-    name: '{ci_project}-e2e-fabric8-analytics'
-    disabled: '{obj:disabled}'
-    triggers:
-      - github-pull-request:
-          status-context: "ci.centos.org PR build (fabric8-analytics)"
-          org-list:
-            - fabric8-analytics
-          <<: *github_pull_request_defaults
+- fabric8-analytics-tests-template: &fabric8-analytics-tests-template
+    name: 'fabric8-analytics-tests-template'
     wrappers:
         - vault-secrets:
             <<: *vault_defaults
@@ -1562,6 +1555,30 @@
             notify-every-unstable-build: true
             send-to-individuals: true
     <<: *job_template_defaults
+    
+- job-template:
+    name: '{ci_project}-e2e-fabric8-analytics'
+    disabled: '{obj:disabled}'
+    triggers:
+      - github-pull-request:
+          status-context: "ci.centos.org PR build (fabric8-analytics)"
+          org-list:
+            - fabric8-analytics
+          <<: *github_pull_request_defaults
+    <<: *fabric8-analytics-tests-template
+
+- job-template:
+    name: '{ci_project}-e2e-fabric8-analytics-nightly-build'
+    disabled: '{obj:disabled}'
+    triggers:
+      - timed: '@midnight'
+    scm:
+        - git:
+            url: https://github.com/{git_organization}/{git_repo}.git
+            shallow_clone: true
+            branches:
+                - master
+    <<: *fabric8-analytics-tests-template
 
 - job-template:
     name: 'osd-monitor-analytics-build-master'
@@ -4998,6 +5015,11 @@
             timeout: '20m'
             extra_target: rhel
         - '{ci_project}-e2e-fabric8-analytics':
+            git_organization: fabric8-analytics
+            git_repo: fabric8-analytics-common
+            ci_project: 'devtools'
+            timeout: '30m'
+        - '{ci_project}-e2e-fabric8-analytics-nightly-build':
             git_organization: fabric8-analytics
             git_repo: fabric8-analytics-common
             ci_project: 'devtools'
