@@ -25,34 +25,25 @@ managedTerraformResources: true
 
 managedResourceTypes:
 - NetworkPolicy
+- Secret
 
 openshiftResources:
-- provider: vault-secret
-  path: app-interface/quayio-prod-us-east-1/quay/quay-config-secret-readonly
-  version: 3
-  labels:
-    version: v3
-- provider: vault-secret
-  path: app-interface/quayio-prod-us-east-1/quay/quay-config-secret-readonly
-  version: 6
-  name: quay-config-secret-readonly-v6
-- provider: vault-secret
-  path: app-interface/quayio-prod-us-east-1/quay/quay-config-secret
-  version: 36
-  labels:
-    version: v36
-- provider: vault-secret
-  path: app-interface/quayio-prod-us-east-1/quay/quay-config-secret
-  version: 36
-  name: quay-config-secret-v36
-- provider: vault-secret
-  path: app-interface/quayio-prod-us-east-1/quay/quay-config-secret
-  version: 35
-  name: quay-config-secret-v35
-- provider: vault-secret
-  path: app-interface/quayio-prod-us-east-1/quay/quay-config-secret
-  version: 33
-  name: quay-config-secret-v33
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /quay-p/quay/quay-config.secret.yaml
+  variables:
+    name: quay-config-secret-readonly
+    vault_secret_version: 36
+    version_label: v36
+    readonly: true
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /quay-p/quay/quay-config.secret.yaml
+  variables:
+    name: quay-config-secret
+    vault_secret_version: 36
+    version_label: v36
+    readonly: false
 - provider: vault-secret
   path: app-interface/quayio-prod-us-east-1/quay/quay-extra-ca-certs
   version: 1
