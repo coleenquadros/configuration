@@ -1332,16 +1332,14 @@ VPC peerings can be entirely self-services via App-Interface.
 
 A cluster can be peered to a VPC that is defined in app-interface (we call it an account VPC) or to another OCM cluster account VPC (we call it a cluster VPC)
 
-[Account VPC SOP](/docs/app-sre/sop/app-interface-cluster-vpc-peerings.md)
-
 In order to use this integration, the following must be defined in the cluster definition file, under the `peering` key
 
 - `connections`: a list of peering connections that this cluster should have. A peering connection can be either to an `account VPC` or a `cluster VPC`
   - `provider`: One of `account-vpc`, `cluster-vpc-requester` or `cluster-vpc-accepter`
   - `name`: A name for the VPC peering connection (ex: `clusterA-cluster-B`)
-  - `vpc` (mutually exclusive with `cluster`): Value as `$ref: /path/to/some/vpc.yaml` (of type `/aws/vpc-1.yml`)
-  - `cluster` (mutually exclusive with `cluster`): Value as `$ref: /path/to/some/cluster.yaml` (of type `/openshift/cluster-1.yml`)
-  - `manageRoutes`: (optional) A boolean value indicating should the integration add appropriate routes to existing Route Tables.
+  - `vpc` (mutually exclusive with `cluster`): Value as `$ref: /path/to/some/vpc.yaml` (of type `/aws/vpc-1.yml`) [Account VPC SOP](/docs/app-sre/sop/app-interface-cluster-vpc-peerings.md)
+  - `cluster` (mutually exclusive with `vpc`): Value as `$ref: /path/to/some/cluster.yaml` (of type `/openshift/cluster-1.yml`)
+  - `manageRoutes`: (optional) A boolean value indicating should the integration add appropriate routes to existing Route Tables. (only for cluster2cluster VPC)
 
 **Note:** For a cluster-to-cluster VPC peering, both clusters MUST have a corresponding VPC peering definition, one of which defined as `cluster-vpc-requester` and one as `cluster-vpc-accepter`, each referencing the other cluster. This ensures we are very specific about peerings and don't end up creating peering requests that will not lead to an account that won't have a corresponding accepter.
 
