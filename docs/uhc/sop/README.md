@@ -608,7 +608,10 @@ Existing clusters will be unable to rotate current Sendgrid credentials.
 - secrets/ocm-sendgrid-service
 
 ### Steps:
-- TODO sync with Alan (what are the steps for App-SRE to get subaccount quota extended)
+- Raise a ticket with Sendgrid team to increase quota for account
+- You can contact SendGrid support from the [SendGrid Support Portal](https://support.sendgrid.com/). Click Login & Contact Support and open a ticket to increase the quota
+- Once Sendgrid has granted the new quota, the RHMI vault secret will need to be updated with the updated quota count. This env var is located in `rhmi/ocm-sendgrid-service/<stage|prod>/ocm-sendgrid-service` in Vault and is called `sendgrid-subuser.quota`
+- Finally, create an MR to bump the vault secret version in app-interface: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/sendgrid/namespaces/sendgrid-stage.yml#L36
 
 ---
 
