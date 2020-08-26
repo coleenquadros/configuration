@@ -1332,9 +1332,10 @@ VPC peerings can be entirely self-services via App-Interface.
 
 A cluster can be peered to a VPC that is defined in app-interface (we call it an account VPC) or to another OCM cluster account VPC (we call it a cluster VPC)
 
+[Account VPC SOP](/docs/app-sre/sop/app-interface-cluster-vpc-peerings.md)
+
 In order to use this integration, the following must be defined in the cluster definition file, under the `peering` key
 
-- `vpc_id`: the VPC ID of the cluster (can be found by logging in to AWS via the OCM network-mgmt role)
 - `connections`: a list of peering connections that this cluster should have. A peering connection can be either to an `account VPC` or a `cluster VPC`
   - `provider`: One of `account-vpc`, `cluster-vpc-requester` or `cluster-vpc-accepter`
   - `name`: A name for the VPC peering connection (ex: `clusterA-cluster-B`)
