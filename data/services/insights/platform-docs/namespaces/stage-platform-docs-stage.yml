@@ -1,0 +1,52 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: platform-docs
+
+name: platform-docs-stage
+description: Platform Docs on the staging cluster
+
+cluster:
+  $ref: /openshift/crc-stg-01/cluster.yml
+
+app:
+  $ref: /services/insights/platform-docs/app.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stg-01.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ConfigMap
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
+  path: insights/secrets/insights-stage/platform-docs-stage/service-credentials
+  version: 2
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-stage
+  identifier: platform-docs-stage
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch-disabled
+  es_identifier: kibana-elasticsearch
