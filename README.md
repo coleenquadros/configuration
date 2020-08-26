@@ -1349,7 +1349,6 @@ Example:
 # hive-stage-01 cluster.yaml
 ...
 peering:
-  vpc_id: vpc-01417c044e7124802
   connections:
   - provider: account-vpc
     name: hive-stage-01_app-sre
@@ -1365,7 +1364,6 @@ peering:
 # app-sre-stage-01 cluster.yaml
 ...
 peering:
-  vpc_id: vpc-0fdea7c2456fdf0b8
   connections:
   - provider: cluster-vpc-accepter
     name: app-sre-stage-01_hive-stage-01
