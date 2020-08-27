@@ -1,0 +1,54 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: platform-docs
+  platform: insights
+
+name: platform-docs
+description: Platform Docs
+
+app:
+  $ref: /services/insights/platform-docs/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- Deployment
+- Service
+- CronJob
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: aletheia
+  path: /templates/aletheia-job.yml
+  url: https://github.com/RedHatInsights/platform-docs
+  targets:
+  - namespace:
+      $ref: /services/insights/platform-docs/namespaces/stage-platform-docs-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: d339015
+
+- name: platform-docs
+  path: /templates/platform-docs.yml
+  url: https://github.com/RedHatInsights/platform-docs
+  targets:
+  - namespace:
+      $ref: /services/insights/platform-docs/namespaces/stage-platform-docs-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: latest
