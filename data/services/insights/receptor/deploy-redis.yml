@@ -1,0 +1,49 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: receptor
+  platform: insights
+
+name: receptor-redis
+description: receptor-redis app on the Insights Platform
+
+app:
+  $ref: /services/insights/receptor/app.yml
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- Deployment
+- Service
+
+imagePatterns:
+- registry.redhat.io/rhscl
+
+authentication:
+  image:
+    path: insights/secrets/global/rh-registry-pull
+    field: all
+
+parameters:
+  IMAGE: registry.redhat.io/rhscl/redis-32-rhel7
+  IMAGE_TAG: 3.2-47
+  VOLUME_CAPACITY: 10Gi
+
+resourceTemplates:
+- name: receptor-redis
+  path: /templates/receptor/redis.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/receptor/namespaces/stage-receptor-stage.yml
+    ref: master
+    parameters:
+      REDIS_REPLICAS: 1
+#  - namespace:
+#      $ref: /services/insights/receptor/namespaces/receptor-prod.yml
+#    ref: ac8557d52d9ef4dc0823ad0af145ff41981cd561
