@@ -33,7 +33,7 @@ Sendgrid Service is down
 
 - Console access to the cluster that runs the sendgrid service (app-sre)
 - Edit access to the namespaces:
-  - sendgrid-stage
+  - sendgrid-<stage|production>
 
 ### Relevant secrets:
 - secrets/ocm-sendgrid-service
@@ -51,9 +51,9 @@ Sendgrid Service is down
 
 ### Impact:
 
-New OCM clusters will be unable to generate Sendgrid credentials for SMTP services.
-Existing clusters will be unable to rotate current Sendgrid credentials. 
-Sendgrid credentials will not be cleaned up for clusters in deletion.
+New OCM clusters could be unable to generate Sendgrid credentials for SMTP services.
+Existing clusters could be unable to rotate current Sendgrid credentials. 
+Sendgrid credentials might not be cleaned up for clusters in deletion.
 
 ### Summary:
 
@@ -63,14 +63,15 @@ Sendgrid Service API is returning an abnormally high number of 5xx Error request
 
 - Console access to the cluster that runs the sendgrid service (app-sre)
 - Edit access to the namespaces:
-  - sendgrid-stage
+  - sendgrid-<stage|production>
 
 ### Relevant secrets:
 - secrets/ocm-sendgrid-service
 
 ### Steps:
 
-- Check `deployment/ocm-sendgrid-service` logs to determine why errors are occurring.
+- Check `deployment/ocm-sendgrid-service` logs to determine why errors are occurring. 
+- Check the RDS database instance connection (`ocm-sendgrid-service-<staging|production>`)
 - Contact the RHMI team (see escalation contacts) 
 
 ---
@@ -79,9 +80,9 @@ Sendgrid Service API is returning an abnormally high number of 5xx Error request
 
 ### Impact:
 
-New OCM clusters will be unable to generate Sendgrid credentials for SMTP services.
-Existing clusters will be unable to rotate current Sendgrid credentials. 
-Sendgrid credentials will not be cleaned up for clusters in deletion.
+New OCM clusters could be unable to generate Sendgrid credentials for SMTP services.
+Existing clusters could be unable to rotate current Sendgrid credentials. 
+Sendgrid credentials might not be cleaned up for clusters in deletion.
 
 ### Summary:
 
@@ -91,7 +92,7 @@ Sendgrid Service API is returning an abnormally high number of 4xx Error request
 
 - Console access to the cluster that runs the sendgrid service (app-sre)
 - Edit access to the namespaces:
-  - sendgrid-stage
+  - sendgrid-<stage|production>
 
 ### Relevant secrets:
 - secrets/ocm-sendgrid-service
@@ -99,6 +100,7 @@ Sendgrid Service API is returning an abnormally high number of 4xx Error request
 ### Steps:
 
 - Check `deployment/ocm-sendgrid-service` logs to determine why errors are occurring
+- Check the RDS database instance connection (`ocm-sendgrid-service-<staging|production>`)
 - Contact the RHMI team (see escalation contacts) 
 
 ---
@@ -107,9 +109,9 @@ Sendgrid Service API is returning an abnormally high number of 4xx Error request
 
 ### Impact:
 
-New OCM clusters will be unable to generate Sendgrid credentials for SMTP services.
-Existing clusters will be unable to rotate current Sendgrid credentials. 
-Sendgrid credentials will not be cleaned up for clusters in deletion.
+New OCM clusters could be unable to generate Sendgrid credentials for SMTP services.
+Existing clusters could be unable to rotate current Sendgrid credentials. 
+Sendgrid credentials might not be cleaned up for clusters in deletion.
 
 ### Summary:
 
@@ -119,7 +121,7 @@ Sendgrid Service API is experiencing latency
 
 - Console access to the cluster that runs the sendgrid service (app-sre)
 - Edit access to the namespaces:
-  - sendgrid-stage
+  - sendgrid-<stage|production>
 
 ### Relevant secrets:
 - secrets/ocm-sendgrid-service
@@ -147,7 +149,9 @@ Sendgrid Subaccount or Credentials will not be created or synced to the cluster.
 ```
 $ UPDATE sendgrid_jobs SET attempts=0 WHERE id = '{{$labels.jobID}}';
 ```
-- Watch the logs for `deployment/ocm-sendgrid-service` for the service to execute job. Copy any relevant logs and inform the RHMI team (see escalation contacts), including the copied logs
+- Watch the logs for `deployment/ocm-sendgrid-service` for the service to execute job 
+- If the job is continuously reach the maximum number of attempts, verify that no other service interruptions are occurring
+- Finally, escalate to the RHMI team (see escalation contacts), including the copied logs
 
 ---
 
@@ -164,7 +168,7 @@ The following rules are in place to alert on dependency service issues:
 ### Access required:
 - Console access to the cluster that runs the sendgrid service (app-sre)
 - Edit access to the namespaces:
-  - sendgrid-stage
+  - sendgrid-<stage|production>
 
 ### Relevant secrets:
 - secrets/ocm-sendgrid-service
@@ -193,9 +197,13 @@ Existing clusters will be unable to rotate current Sendgrid credentials.
 - secrets/ocm-sendgrid-service
 
 ### Steps:
+#### Raise Ticket with Sendgrid
 - Raise a ticket with the Sendgrid team to increase the quota for  the account
-- You can contact SendGrid support from the [SendGrid Support Portal](https://support.sendgrid.com/). Click Login & Contact Support and open a ticket to increase the quota (log in with the Sendgrid credentials in the RHMI vault)
-- Once Sendgrid has granted the new quota, the RHMI vault secret will need to be updated with the updated quota count. This env var is located in `rhmi/ocm-sendgrid-service/<stage|prod>/ocm-sendgrid-service` in Vault and is called `sendgrid-subuser.quota`
+- First get the SendGrid credentials in the RHMI vault `/rhmi/ocm-sendgrid-service/<stage|production>/ocm-sendgrid-service`
+- The credential keys are `sendgrid.username` and `sendgrid.password`
+- You can contact SendGrid support from the [SendGrid Support Portal](https://support.sendgrid.com/). Click Login & Contact Support and open a ticket to increase the quota.
+#### Update Sendgrid quota secret
+- Once Sendgrid has granted the new quota, the RHMI vault secret will need to be updated with the updated quota count. This env var is located in `rhmi/ocm-sendgrid-service/<stage|production>/ocm-sendgrid-service` in Vault and is called `sendgrid-subuser.quota`
 - Finally, create an MR to bump the vault secret version in app-interface: https://gitlab.cee.redhat.com/service/app-interface/-/blob/1adb526/data/services/sendgrid/namespaces/sendgrid-stage.yml#L36
 
 ---
@@ -205,6 +213,8 @@ Existing clusters will be unable to rotate current Sendgrid credentials.
 Contact the RHMI team for any Sendgrid Service related alerts
 
 ### Contacts:
+
+Slack channel: `#rhmi-sendgrid-service`
 
 - Aiden Keating (akeating@redhat.com)
 - Ciaran Roche (croche@redhat.com)
