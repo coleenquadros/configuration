@@ -1,0 +1,52 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: blackbox-monitor 
+  platform: insights
+
+name: blackbox-monitor 
+description: Blackbox Monitoring for c.rh.c
+
+app:
+  $ref: /services/insights/blackbox-monitor/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- DeploymentConfig
+- ServiceAccount
+
+imagePatterns:
+- quay.io/cloudservices
+- quay.io/openshift
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  CLOUD_WATCH_LOG_GROUP: blackbox-monitor-stage
+
+resourceTemplates:
+- name: blackbox-monitor
+  path: /templates/blackbox-monitor/blackbox-monitor.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/devprod-ops
+  parameters:
+    IMAGE: quay.io/cloudservices/blackbox-monitor
+  targets:
+  - namespace:
+      $ref: /services/insights/blackbox-monitor/namespaces/stage-blackbox-monitor.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: c768b8da
