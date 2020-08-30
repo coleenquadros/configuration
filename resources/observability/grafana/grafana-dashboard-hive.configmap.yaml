@@ -82,7 +82,7 @@ data:
       "gnetId": null,
       "graphTooltip": 0,
       "id": null,
-      "iteration": 1594903706255,
+      "iteration": 1594903706256,
       "links": [],
       "panels": [
         {
@@ -1637,7 +1637,7 @@ data:
           "yaxes": [
             {
               "format": "short",
-              "label": null,
+              "label": "reconciles per second",
               "logBase": 1,
               "max": null,
               "min": null,
@@ -1759,7 +1759,7 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
-          "description": "Rate of requests to the Kube API via clients.",
+          "description": "Rate of all requests to the hive cluster's Kube API.",
           "fill": 0,
           "fillGradient": 0,
           "gridPos": {
@@ -1810,7 +1810,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Local Kube Client Requests",
+          "title": "Local (hive cluster) kube client requests - all methods",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -1827,7 +1827,7 @@ data:
           "yaxes": [
             {
               "format": "short",
-              "label": null,
+              "label": "requests per second",
               "logBase": 1,
               "max": null,
               "min": null,
@@ -1856,7 +1856,7 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
-          "description": "Rate of requests to the Kube API via clients.",
+          "description": "Rate of POST requests to the hive cluster's Kube API. Anything in the 19-20 range indicates a hotloop of etcd creations. This is an urgent scale down Hive situation!",
           "fill": 0,
           "fillGradient": 0,
           "gridPos": {
@@ -1864,6 +1864,200 @@ data:
             "w": 9,
             "x": 9,
             "y": 68
+          },
+          "hiddenSeries": false,
+          "hideTimeOverride": false,
+          "id": 65,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "paceLength": 10,
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum without(resource,response,status)(rate(hive_kube_client_requests_total{job=\"$instance\",method=\"POST\",remote=\"false\"}[5m]))",
+              "format": "time_series",
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ controller }} - {{ method }}",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Local (hive cluster) kube client requests - POST (anything near 20 is an urgent problem)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": "requests per second",
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {
+            "error": "dark-red",
+            "success": "dark-green"
+          },
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "description": "Rate of non-POST requests to the hive cluster's Kube API. Anything over 15 indicates a hotloop, but not urgent enough to scale down Hive.",
+          "fill": 0,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 14,
+            "w": 9,
+            "x": 0,
+            "y": 82
+          },
+          "hiddenSeries": false,
+          "hideTimeOverride": false,
+          "id": 64,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "paceLength": 10,
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum without(resource,response,status)(rate(hive_kube_client_requests_total{job=\"$instance\",method!=\"POST\",remote=\"false\"}[5m]))",
+              "format": "time_series",
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{ controller }} - {{ method }}",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Local (hive cluster) kube client requests - non-POST",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": "requests per second",
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {
+            "error": "dark-red",
+            "success": "dark-green"
+          },
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "description": "Rate of remote requests to the Kube API of managed clusters, e.g. for syncset applies.",
+          "fill": 0,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 14,
+            "w": 9,
+            "x": 9,
+            "y": 82
           },
           "hiddenSeries": false,
           "hideTimeOverride": false,
@@ -1907,7 +2101,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Remote Kube Client Requests",
+          "title": "Remote (to managed clusters) kube client requests - all methods",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -1924,7 +2118,7 @@ data:
           "yaxes": [
             {
               "format": "short",
-              "label": null,
+              "label": "requests per second",
               "logBase": 1,
               "max": null,
               "min": null,
@@ -1953,201 +2147,7 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
-          "description": "Rate of requests to the Kube API via clients.",
-          "fill": 0,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 14,
-            "w": 9,
-            "x": 0,
-            "y": 82
-          },
-          "hiddenSeries": false,
-          "hideTimeOverride": false,
-          "id": 64,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "links": [],
-          "nullPointMode": "null",
-          "options": {
-            "dataLinks": []
-          },
-          "paceLength": 10,
-          "percentage": false,
-          "pointradius": 5,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "sum without(resource,response,status)(rate(hive_kube_client_requests_total{job=\"$instance\",method=\"PUT\",remote=\"false\"}[5m]))",
-              "format": "time_series",
-              "instant": false,
-              "intervalFactor": 1,
-              "legendFormat": "{{ controller }}",
-              "refId": "B"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Local Kube Client Requests - PUT",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {
-            "error": "dark-red",
-            "success": "dark-green"
-          },
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "$datasource",
-          "description": "Rate of requests to the Kube API via clients.",
-          "fill": 0,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 14,
-            "w": 9,
-            "x": 9,
-            "y": 82
-          },
-          "hiddenSeries": false,
-          "hideTimeOverride": false,
-          "id": 65,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "links": [],
-          "nullPointMode": "null",
-          "options": {
-            "dataLinks": []
-          },
-          "paceLength": 10,
-          "percentage": false,
-          "pointradius": 5,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "sum without(resource,response,status)(rate(hive_kube_client_requests_total{job=\"$instance\",method=\"POST\",remote=\"false\"}[5m]))",
-              "format": "time_series",
-              "instant": false,
-              "intervalFactor": 1,
-              "legendFormat": "{{ controller }}",
-              "refId": "B"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Local Kube Client Requests - POST",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {
-            "error": "dark-red",
-            "success": "dark-green"
-          },
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "$datasource",
-          "description": "Rate of requests to the Kube API via clients.",
+          "description": "Rate of remote POST requests to the Kube API of managed clusters, e.g. for syncset applies.  Anything in the 19-20 range indicates a hotloop of etcd creations. This is an urgent scale down Hive situation!",
           "fill": 0,
           "fillGradient": 0,
           "gridPos": {
@@ -2158,7 +2158,7 @@ data:
           },
           "hiddenSeries": false,
           "hideTimeOverride": false,
-          "id": 66,
+          "id": 67,
           "legend": {
             "avg": false,
             "current": false,
@@ -2186,11 +2186,11 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum without(resource,response,status)(rate(hive_kube_client_requests_total{job=\"$instance\",method=\"DELETE\",remote=\"false\"}[5m]))",
+              "expr": "sum without(resource,response,status)(rate(hive_kube_client_requests_total{job=\"$instance\",remote=\"true\",method=\"POST\"}[5m]))",
               "format": "time_series",
               "instant": false,
               "intervalFactor": 1,
-              "legendFormat": "{{ controller }}",
+              "legendFormat": "{{controller}} - {{method}}",
               "refId": "B"
             }
           ],
@@ -2198,7 +2198,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Local Kube Client Requests - DELETE",
+          "title": "Remote (to managed clusters) kube client requests - POST (anything near 20 is an urgent problem)",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -2215,7 +2215,104 @@ data:
           "yaxes": [
             {
               "format": "short",
+              "label": "requests per second",
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
               "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {
+            "error": "dark-red",
+            "success": "dark-green"
+          },
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "description": "Rate of remote non-POST requests to the Kube API of managed clusters, e.g. for syncset applies. Anything over 15 indicates a hotloop, but not urgent enough to scale down Hive.",
+          "fill": 0,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 14,
+            "w": 9,
+            "x": 9,
+            "y": 96
+          },
+          "hiddenSeries": false,
+          "hideTimeOverride": false,
+          "id": 71,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "paceLength": 10,
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum without(resource,response,status)(rate(hive_kube_client_requests_total{job=\"$instance\",remote=\"true\",method!=\"POST\"}[5m]))",
+              "format": "time_series",
+              "instant": false,
+              "intervalFactor": 1,
+              "legendFormat": "{{controller}} - {{method}}",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Remote (to managed clusters) kube client requests - non-POST",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": "requests per second",
               "logBase": 1,
               "max": null,
               "min": null,
