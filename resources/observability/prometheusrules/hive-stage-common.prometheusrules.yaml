@@ -46,28 +46,50 @@ spec:
       labels:
         service: hive
         severity: high
-    - alert: LocalKubeClientRequestsHigh - stage - {{{shard_name}}}
+    - alert: LocalKubeClientRequestsHigh - POST requests - stage - {{{shard_name}}}
       annotations:
-        message: "detected {{ $value }} {{ $labels.resource }} local API requests per second from controller {{ $labels.controller }}"
+        message: "detected {{ $value }} {{ $labels.resource }} local POST API requests per second from controller {{ $labels.controller }}"
         runbook: "https://github.com/openshift/hive-sops/blob/master/sop/KubeClientRequestsHigh.md"
         dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
       expr: |
-        rate(hive_kube_client_requests_total{job="hive-controllers-{{{shard_name}}}",remote="false",method!~"GET|LIST"}[10m]) > 5
+        rate(hive_kube_client_requests_total{job="hive-controllers-{{{shard_name}}}",remote="false",method="POST"}[5m]) > 15
       for: 1m
       labels:
         service: hive
         severity: high
-    - alert: RemoteKubeClientRequestsHigh - stage - {{{shard_name}}}
+    - alert: LocalKubeClientRequestsHigh - non-POST requests - stage - {{{shard_name}}}
       annotations:
-        message: "detected {{ $value }} {{ $labels.resource }} remote API requests per second from controller {{ $labels.controller }}"
+        message: "detected {{ $value }} {{ $labels.resource }} local non-POST API requests per second from controller {{ $labels.controller }}"
         runbook: "https://github.com/openshift/hive-sops/blob/master/sop/KubeClientRequestsHigh.md"
         dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
       expr: |
-        rate(hive_kube_client_requests_total{job="hive-controllers-{{{shard_name}}}",remote="true",method!~"GET|LIST"}[10m]) > 2
+        rate(hive_kube_client_requests_total{job="hive-controllers-{{{shard_name}}}",remote="false",method!~"POST"}[5m]) > 15
+      for: 1m
+      labels:
+        service: hive
+        severity: medium
+    - alert: RemoteKubeClientRequestsHigh - POST requests - stage - {{{shard_name}}}
+      annotations:
+        message: "detected {{ $value }} {{ $labels.resource }} remote POST API requests per second from controller {{ $labels.controller }}"
+        runbook: "https://github.com/openshift/hive-sops/blob/master/sop/KubeClientRequestsHigh.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
+      expr: |
+        rate(hive_kube_client_requests_total{job="hive-controllers-{{{shard_name}}}",remote="true",method="POST"}[5m]) > 15
       for: 1m
       labels:
         service: hive
         severity: high
+    - alert: RemoteKubeClientRequestsHigh - non-POST - stage - {{{shard_name}}}
+      annotations:
+        message: "detected {{ $value }} {{ $labels.resource }} remote non-POST API requests per second from controller {{ $labels.controller }}"
+        runbook: "https://github.com/openshift/hive-sops/blob/master/sop/KubeClientRequestsHigh.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
+      expr: |
+        rate(hive_kube_client_requests_total{job="hive-controllers-{{{shard_name}}}",remote="true",method!~"POST"}[5m]) > 15
+      for: 1m
+      labels:
+        service: hive
+        severity: medium
     - alert: ClusterProvisioningDelay - stage - {{{shard_name}}}
       annotations:
         message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.namespace }} provisioning taking over 2 hours"
