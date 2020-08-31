@@ -53,12 +53,14 @@ resourceTemplates:
   parameters:
     ENABLE_API_SENTRY: True
   targets:
+  # STAGING
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: master
+    # This is a pinned ref for the saas-templates repo version of master that we want to use
+    ref: 3e8d4e3fae39fafefb175440ee587014a06c2ae9
     parameters:
       APP_DOMAIN: apps.crc-stg-01.o4v9.p1.openshiftapps.com
-      IMAGE_TAG: d478b5e
+      IMAGE_TAG: 0b2bf2d
       KOKU_SENTRY_ENV: stage
       DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
       CPU_REQUEST: 200m
@@ -67,6 +69,7 @@ resourceTemplates:
       MEMORY_LIMIT: 2Gi
       UPDATE_TIMEOUT: 7200
       PROMETHEUS_PUSHGATEWAY: prometheus-push.insights-push-stage.svc.cluster.local:9091
+  # PRODUCTION
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
     ref: ef4a0eba381b3260a5ad9a47f5666d705930fa3d
@@ -87,12 +90,15 @@ resourceTemplates:
   path: /templates/hccm/masu.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
   targets:
+  # STAGING
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: master
+    # This is a pinned ref for the saas-templates repo version of master that we want to use
+    ref: 3e8d4e3fae39fafefb175440ee587014a06c2ae9
     parameters:
       APP_DOMAIN: apps.crc-stg-01.o4v9.p1.openshiftapps.com
-      IMAGE_TAG: d478b5e
+      IMAGE_TAG: 0b2bf2d
+  # PRODUCTION
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
     ref: ef4a0eba381b3260a5ad9a47f5666d705930fa3d
@@ -105,17 +111,20 @@ resourceTemplates:
   path: /templates/hccm/koku-listener.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
   targets:
+  # STAGING
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: master
+    # This is a pinned ref for the saas-templates repo version of master that we want to use
+    ref: 3e8d4e3fae39fafefb175440ee587014a06c2ae9
     parameters:
-      IMAGE_TAG: d478b5e
+      IMAGE_TAG: 0b2bf2d
       ENABLE_API_SENTRY: true
       CPU_REQUEST: 200m
       CPU_LIMIT: 1
       MEMORY_REQUEST: 512Mi
       MEMORY_LIMIT: 2Gi
       VOLUME_CAPACITY: 100Gi
+  # PRODUCTION
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
     ref: ef4a0eba381b3260a5ad9a47f5666d705930fa3d
@@ -133,14 +142,17 @@ resourceTemplates:
   path: /templates/hccm/koku-sources.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
   targets:
+  # STAGING
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: master
+    # This is a pinned ref for the saas-templates repo version of master that we want to use
+    ref: 3e8d4e3fae39fafefb175440ee587014a06c2ae9
     parameters:
       APP_DOMAIN: apps.crc-stg-01.o4v9.p1.openshiftapps.com
       ENABLE_API_SENTRY: True
-      IMAGE_TAG: d478b5e
+      IMAGE_TAG: 0b2bf2d
       DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
+  # PRODUCTION
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
     ref: ef4a0eba381b3260a5ad9a47f5666d705930fa3d
@@ -149,6 +161,62 @@ resourceTemplates:
       ENABLE_API_SENTRY: True
       IMAGE_TAG: d478b5e
       DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
+
+# template: celery-scheduler
+- name: celery-scheduler
+  path: /templates/hccm/celery-scheduler.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  # STAGING
+  - namespace:
+      $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
+    # This is a pinned ref for the saas-templates repo version of master that we want to use
+    ref: 3e8d4e3fae39fafefb175440ee587014a06c2ae9
+    parameters:
+      IMAGE_TAG: 0b2bf2d
+  # PRODUCTION
+  - namespace:
+      $ref: /services/insights/hccm/namespaces/hccm-prod.yml
+    ref: ef4a0eba381b3260a5ad9a47f5666d705930fa3d
+    parameters:
+      IMAGE_TAG: d478b5e
+      REPLICAS: 1
+
+# template: celery-worker
+- name: celery-worker
+  path: /templates/hccm/celery-worker.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  # STAGING
+  - namespace:
+      $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
+    # This is a pinned ref for the saas-templates repo version of master that we want to use
+    ref: 3e8d4e3fae39fafefb175440ee587014a06c2ae9
+    parameters:
+      IMAGE_TAG: 0b2bf2d
+      KOKU_SENTRY_ENV: stage
+      ENABLE_CELERY_SENTRY: true
+      DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
+      CPU_REQUEST: 200m
+      CPU_LIMIT: 2
+      MEMORY_REQUEST: 512Mi
+      MEMORY_LIMIT: 4Gi
+      PROMETHEUS_PUSHGATEWAY: prometheus-push.insights-push-stage.svc.cluster.local:9091
+  # PRODUCTION
+  - namespace:
+      $ref: /services/insights/hccm/namespaces/hccm-prod.yml
+    ref: ef4a0eba381b3260a5ad9a47f5666d705930fa3d
+    parameters:
+      IMAGE_TAG: d478b5e
+      KOKU_SENTRY_ENV: prod
+      ENABLE_CELERY_SENTRY: true
+      DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
+      CPU_REQUEST: 200m
+      CPU_LIMIT: 2
+      MEMORY_REQUEST: 512Mi
+      MEMORY_LIMIT: 4Gi
+      VOLUME_CAPACITY: 100Gi
+      PROMETHEUS_PUSHGATEWAY: prometheus-push.insights-push-prod.svc.cluster.local:9091
 
 # template: rabbitmq
 - name: rabbitmq
@@ -167,56 +235,6 @@ resourceTemplates:
     parameters:
       IMAGE_TAG: 2f971b5
       REPLICAS: 3
-
-# template: celery-scheduler
-- name: celery-scheduler
-  path: /templates/hccm/celery-scheduler.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  targets:
-  - namespace:
-      $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: master
-    parameters:
-      IMAGE_TAG: d478b5e
-  - namespace:
-      $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: ef4a0eba381b3260a5ad9a47f5666d705930fa3d
-    parameters:
-      IMAGE_TAG: d478b5e
-      REPLICAS: 1
-
-# template: celery-worker
-- name: celery-worker
-  path: /templates/hccm/celery-worker.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  targets:
-  - namespace:
-      $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: master
-    parameters:
-      IMAGE_TAG: d478b5e
-      KOKU_SENTRY_ENV: stage
-      ENABLE_CELERY_SENTRY: true
-      DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
-      CPU_REQUEST: 200m
-      CPU_LIMIT: 2
-      MEMORY_REQUEST: 512Mi
-      MEMORY_LIMIT: 4Gi
-      PROMETHEUS_PUSHGATEWAY: prometheus-push.insights-push-stage.svc.cluster.local:9091
-  - namespace:
-      $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: ef4a0eba381b3260a5ad9a47f5666d705930fa3d
-    parameters:
-      IMAGE_TAG: d478b5e
-      KOKU_SENTRY_ENV: prod
-      ENABLE_CELERY_SENTRY: true
-      DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
-      CPU_REQUEST: 200m
-      CPU_LIMIT: 2
-      MEMORY_REQUEST: 512Mi
-      MEMORY_LIMIT: 4Gi
-      VOLUME_CAPACITY: 100Gi
-      PROMETHEUS_PUSHGATEWAY: prometheus-push.insights-push-prod.svc.cluster.local:9091
 
 # template: koku-auth-cache
 - name: koku-auth-cache
