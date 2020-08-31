@@ -35,6 +35,7 @@ To adjust cluster capacity limits, a user must:
 - Edit the clusters as needed
     - Raise or lower the limit so that there is less or more capacity available
     - Hide or unhide the clusters
+**Note: don't unhide -1a and -1b clusters, they are currently in DRAIN mode and scheduled for tearing down in Sept 2020.**
 
 *Note:* The registration portal does not support provisioning users to clusters that are available and with enough capacity in a random or round-robin maner.
 
