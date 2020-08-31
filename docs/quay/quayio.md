@@ -10,6 +10,7 @@
 
 ## Application Logs
 
+Account ID: quayio
 | Environment | Namespace |
 | --- | --- |
 |Stage|[CloudWatch](https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#logEventViewer:group=quay)|
