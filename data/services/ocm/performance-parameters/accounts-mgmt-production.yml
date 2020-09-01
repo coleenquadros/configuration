@@ -1,0 +1,75 @@
+---
+$schema: /app-sre/performance-parameters-1.yml
+
+# Labels for this file in app-interface
+# Not related to generated manifests
+labels:
+  service: accounts-mgmt
+
+name: accounts-mgmt
+
+app:
+  $ref: /services/ocm/app.yml
+
+component: uhc-accounts-mgmt
+
+# Labels that Prometheus uses to select this rules file
+# These labels are added to the generated Manifest's metadata.labels
+prometheusLabels:
+  prometheus: app-sre
+  role: alert-rules
+  type: slo-rules
+
+# Namespaces that this app lives in
+namespace:
+  $ref: /services/ocm/namespaces/uhc-production.yml
+
+reports:
+  - date: "2020-24-06"
+    url: https://docs.google.com/document/d/1tEFNzWZ9lz5fv9ZHDlp6rxHas4uwZ-haYGPB1LRh3_A/edit?usp=sharing
+
+SLIRecordingRules:
+  - name: http_rates_from_router
+    kind: http_rate
+    metric: haproxy_server_http_responses_total
+    selectors:
+      - route="accounts-mgmt"
+  - name: accounts_mgmt_latency_p90
+    kind: latency_rate
+    percentile: 90
+    metric: api_inbound_request_duration_bucket
+    selectors:
+      - service="accounts-mgmt-metrics"
+      - namespace="uhc-production"
+
+# req/s per second on average in the last 28d. Calculated
+# from existing metrics
+volume:
+  - name: volume_slo
+    kind: SLO
+    rules: http_rates_from_router
+    target: 300
+
+latency:
+  - name: accounts_mgmt_latency_slo
+    kind: SLO
+    rules: accounts_mgmt_latency_p90
+    threshold: 2
+    target: 95
+
+errors:
+  - name: errors_slo
+    kind: SLO
+    rules: http_rates_from_router
+    target: 5
+
+availability:
+  - name: availability_slo
+    kind: SLO
+    rules:
+      latency:
+        - accounts_mgmt_latency_slo
+      errors:
+        - errors_slo
+    target: 95
+

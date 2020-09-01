@@ -48,7 +48,7 @@
     |--------------------------------------|-----------------------------------------|------------------------------------------|
     | data/teams/hive/roles/dev.yml        | hive-admins<br>View access to namespace | hive-readers<br>View access to namespace |
     | data/teams/hive/roles/qe.yml         | hive-admins                             | hive-readers                             |
-    | data/teams/sd-uhc/roles/dev.yml      | hive-readers                            | hive-readers                             |
+    | data/teams/ocm/roles/dev.yml      | hive-readers                            | hive-readers                             |
     | data/teams/app-sre/roles/app-sre.yml | hive-admins                             | hive-admins                              |
 
 1. Add `ClusterRoleBinding` (required?)

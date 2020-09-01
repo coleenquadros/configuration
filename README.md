@@ -461,7 +461,7 @@ Sentry users and team membership can be entirely self-serviced via App-Interface
 
 In order to get access to Sentry, a user has to have:
 * A `role` that includes a `sentry_teams` section, with one or more references to sentry team file(s).
-    * Example: [dev](/data/teams/sd-uhc/roles/dev.yml) role.
+    * Example: [dev](/data/teams/ocm/roles/dev.yml) role.
 
 ### Manage Openshift resources via App-Interface (`/openshift/namespace-1.yml`)
 
@@ -1574,7 +1574,7 @@ $schema: /app-interface/app-interface-sql-query-1.yml
 labels: {}
 name: 2020-01-30-account-manager-registries-stage
 namespace:
-  $ref: /services/uhc/namespaces/uhc-stage.yml
+  $ref: /services/ocm/namespaces/uhc-stage.yml
 identifier: uhc-acct-mngr-staging
 output: filesystem
 query: |

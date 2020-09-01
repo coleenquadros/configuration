@@ -90,7 +90,7 @@ If a job is pending and need to be rushed, contact the App SRE team for assitanc
 
 ### How can I make my PR check job run concurrently
 
-Add `concurrent_build: true` to your job definition. [example](https://gitlab.cee.redhat.com/service/app-interface/blob/9e1185d/data/services/uhc/cicd/ci-int/jobs.yaml#L143)
+Add `concurrent_build: true` to your job definition. [example](https://gitlab.cee.redhat.com/service/app-interface/blob/9e1185d/data/services/ocm/cicd/ci-int/jobs.yaml#L143)
 
 ### How can I see who has access to a service
 

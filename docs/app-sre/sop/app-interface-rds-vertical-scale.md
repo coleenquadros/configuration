@@ -13,7 +13,7 @@ This document explains how to vertically scale an RDS instance managed through a
 ## Process
 
 1. Find the RDS instance you want to scale in the appropriate namespace file.
-    * Example - RDS instance defition: [uhc-production/cluster-service](/data/services/uhc/namespaces/uhc-production.yml#L56)
+    * Example - RDS instance defition: [uhc-production/cluster-service](/data/services/ocm/namespaces/uhc-production.yml#L56)
 2. Take a snapshot of the RDS instance
     * Find the actual RDS instance in AWS [RDS console](https://console.aws.amazon.com/rds/home?region=us-east-1#databases:)
     * Select the instance and select `Actions` -> `Take snapshot`.
