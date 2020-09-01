@@ -68,11 +68,12 @@ def print_pr_check_cmds(integrations, selected=None, select_all=False):
         selected = []
 
     for int_name, integration in integrations.items():
-        if int_name not in selected and not select_all:
-            continue
-
         pr = integration.get('pr_check')
         if not pr or pr.get('disabled'):
+            continue
+
+        always_run = pr.get('always_run')
+        if int_name not in selected and not select_all and not always_run:
             continue
 
         cmd = ""
