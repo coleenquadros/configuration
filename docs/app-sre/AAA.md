@@ -109,12 +109,12 @@ Every app-sre engineer should have access to the following
   - Channels: as stated [here](/data/teams/app-sre/permissions/app-sre-team-coreos-slack.yml) -> obtained via the @app-sre-team user group membership
 
 - Internal IRC (irc.devel.redhat.com):
-  - #appsre: backup channel if Slack is down or if sensitive content must be addressed.
-  - #servicedelivery: backup channel for service delivery org if Slack is down.
-  - #MIM: Major incident management
-  - #aos: Openshift
-  - #libra-ops: Openshift SD SRE-ops
-  - #libra-noc: Openshift SD SRE
+  - __#appsre__: backup channel if Slack is down or if sensitive content must be addressed.
+  - __#servicedelivery__: backup channel for service delivery org if Slack is down.
+  - __#MIM__: Major incident management
+  - __#aos__: Openshift
+  - __#libra-ops__: Openshift SD SRE-ops
+  - __#libra-noc__: Openshift SD SRE
 
 - Calendar:
 
@@ -128,7 +128,7 @@ Every app-sre engineer should have access to the following
 
 - Invite to sprint kickoffs, coordination sessions
 - Mailing lists:
-  - Many people just use the web email client, other thunderbird.
+  - Many people just use the web email client, others use thunderbird.
   - Recommended to sort into folders
   - https://post-office.corp.redhat.com/mailman/listinfo is the mailing list central
     - ACCESS: sd-app-sre -> speak to @jake, @jonathan beakley or @paul on slack
@@ -144,7 +144,7 @@ Every app-sre engineer should have access to the following
 
 - GPG key:
   - Generate one and put in:
-    - base64 encoded binary in your app-interface user file -> [instructions](/README#adding-your-public-gpg-key)
+    - base64 encoded binary in your app-interface user file -> [instructions](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master#adding-your-public-gpg-key)
       - User file located in [app-interface repo](/data/teams/app-sre/users)
   - Use a passphrase!
   - External reference for [generating](https://www.gnupg.org/gph/en/manual/c14.html) and [exporting](https://www.gnupg.org/gph/en/manual/x56.html)
@@ -186,11 +186,14 @@ Every app-sre engineer should have access to the following
   - Nothing to do. Obtained via a [role](data/teams/app-sre/roles/app-sre.yml)
 
 - Pagerduty
-  - ACCESS: Create a [SNOW ticket](https://redhat.service-now.com/help?id=sc_cat_item&sys_id=200813d513e3f600dce03ff18144b0fd) to request access to PagerDuty and then reach out to [Bill Montgomery](mailto:bmontgom@redhat.com) with the ticket number
+  - ACCESS: Create a [Jira ticket](https://issues.redhat.com/) to request access to PagerDuty and then reach out to [Bill Montgomery](mailto:bmontgom@redhat.com) with the ticket number<br/>
+   [Example ticket](https://issues.redhat.com/browse/OHSS-1078)
 
-- App-sre shared folder
-  - ACCESS: Reach out to [Paul Bargene](mailto:pbergene@redhat.com)
-
+- App-sre shared folders
+  - ACCESS: Go to the following folders and request access with your Red Hat Gsuite account
+    * [Public Top Level Directory](https://drive.google.com/drive/u/1/folders/1sQGfo57eU7UAKfbBy8LgwxhMdnzXc0KZ) (contains RCAs, etc)
+    * [Private](https://drive.google.com/drive/u/1/folders/0B9akCOYRTJW_TFAxOUtEaWtRZWs) (for AppSRE Team members only)
+    
 - App SRE infrastructure managed by ansible
   - Access is managed by adding ssh keys to the [admin-list](https://gitlab.cee.redhat.com/app-sre/infra/blob/master/ansible/hosts/group_vars/all#L4) and applying the `baseline` role to all hosts. It is recommended that ssh key is RSA, 4096-sized and password-protected as those are the [requirements for Tier 1 Bastion keys](https://mojo.redhat.com/docs/DOC-1144200#jive_content_id_Tier_1)
 
