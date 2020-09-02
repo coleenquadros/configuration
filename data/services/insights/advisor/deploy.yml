@@ -25,6 +25,8 @@ managedResourceTypes:
 - Service
 - CronJob
 - HorizontalPodAutoscaler
+- ConfigMap
+- Job
 
 imagePatterns:
 - quay.io/cloudservices
@@ -33,6 +35,9 @@ authentication:
   image:
     path: insights/quay/cloudservices-push
     field: all
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
 
 resourceTemplates:
 - name: content-server
@@ -108,3 +113,15 @@ resourceTemplates:
       SUSPEND_COMPARE_ACTIVE_RULES: 'false'
       PROMETHEUS_PUSHGATEWAY: prometheus-push.insights-push-prod.svc.cluster.local:9091
       CLASSIC_URL: https://insights-api-insights-prod.1b13.insights.openshiftapps.com/r/insights/v3/rules/
+- name: cyndi-init
+  path: /openshift/cyndi-init.yml
+  url: https://github.com/redhatinsights/inventory-syndication
+  targets:
+    - namespace:
+        $ref: /services/insights/advisor/namespaces/stage-advisor-stage.yml
+      ref: 1da34cd701ca9bca732e7a3eaaff516dd2b6402b
+      parameters:
+        APP_NAME: advisor
+        APP_ROLE: insightsapi
+        DB_SECRET: advisor-db
+        IMAGE_TAG: "3a34b0c"
