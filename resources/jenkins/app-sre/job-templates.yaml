@@ -21,6 +21,26 @@
     <<: *gl_timed
 
 - job-template:
+    id: 'gl-job-workday-reminder'
+    name: '{gl_group}-{gl_project}-job-workday-reminder'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *pd_api_key
+        - *smtp
+    builders:
+    - shell: |
+        python3 -m venv venv
+        source venv/bin/activate
+        pip3 install -r requirements.txt
+        python3 workday-reminder.py
+    cron_expression: 0 9 * * *
+    <<: *gl_timed
+
+- job-template:
     id: 'gl-build-master-jjb'
     name: '{gl_group}-{gl_project}-gl-build-{branch}-jjb'
     wrappers:
@@ -77,8 +97,6 @@
         - akonarde
         - jfchevrette
         - jmelis
-        - jmoshenk
-        - jzelinskie
         - maorfr
         - mmclane
         - pbergene
@@ -121,8 +139,6 @@
             akonarde) PD_ID=PT28Z07 ;;
             jfchevrette) PD_ID=PW01TAV ;;
             jmelis) PD_ID=PD8AV28 ;;
-            jmoshenk) PD_ID=PPACECK ;;
-            jzelinskie) PD_ID=PSQDSL5 ;;
             maorfr) PD_ID=PYPZ9FP ;;
             mmclane) PD_ID=P0JVQ4C ;;
             pbergene) PD_ID=PG6TPCW ;;
