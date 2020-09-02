@@ -1,0 +1,104 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: ccx-data-pipeline-prod
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: ccx-data-pipeline-prod
+    rules:
+      - alert: InsightsResultsAggregatorRestart
+        expr: sum(increase(kube_pod_container_status_restarts_total{container="insights-results-aggregator"}[5m])) by (container) > 1
+        for: 30m
+        labels:
+          severity: critical
+          service: insights
+          env: prod
+        annotations:
+          dashboard: "https://grafana.openshift-app-sre.devshift.net/d/ruvKwhqWk/ccx-insights-results-aggregator"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ccx-data-pipeline-prod/deployments"
+          message: "insights-results-aggregator pods are restarting permanently"
+          runbook: "https://ccx-docs.cloud.paas.psi.redhat.com/customer/sops/ira_restarting.html"
+      - alert: InsightsResultsDBWriterRestart
+        expr: sum(increase(kube_pod_container_status_restarts_total{container="insights-results-db-writer"}[5m])) by (container) > 1
+        for: 30m
+        labels:
+          severity: critical
+          service: insights
+          env: prod
+        annotations:
+          dashboard: "https://grafana.openshift-app-sre.devshift.net/d/C4vK5h2Wk/ccx-insights-results-db-writer"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ccx-data-pipeline-prod/deployments"
+          message: "insights-results-db-writer pods are restarting permanently"
+      - alert: CCXDataPipelineKafkaLag
+        expr: sum(kafka_consumergroup_group_lag{topic="platform.upload.buckit",group="ccx_data_pipeline_app"}) by (group) > 100
+        for: 10m
+        labels:
+          severity: critical
+          service: insights
+          env: prod
+        annotations:
+          dashboard: "https://grafana.openshift-app-sre.devshift.net/d/jRluM4NMz/ccx-data-pipeline"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ccx-data-pipeline-prod/deployments"
+          message: "Kafka lag for ccx-data-pipeline in platform.upload.buckit topic exceeded 100"
+          runbook: "https://ccx-docs.cloud.paas.psi.redhat.com/customer/sops/cdp_kafka_lag_gt_100.html"
+      - alert: InsightsResultsDBWriterKafkaLag
+        expr: sum(kafka_consumergroup_group_lag{topic="ccx.ocp.results", group="ccx_data_pipeline_app"}) by (topic) > 100
+        for: 10m
+        labels:
+          severity: critical
+          service: insights
+          env: prod
+        annotations:
+          dashboard: "https://grafana.openshift-app-sre.devshift.net/d/C4vK5h2Wk/ccx-insights-results-db-writer"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ccx-data-pipeline-prod/deployments"
+          message: "Kafka lag for insights-results-db-writer in ccx.ocp.results topic exceeded 100"
+          runbook: "https://ccx-docs.cloud.paas.psi.redhat.com/customer/sops/irdw_kafka_lag_gt_100.html"
+      - alert: CCXSmartProxyDown
+        expr: sum(up{service="ccx-smart-proxy"}) by (service) == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: insights
+          env: prod
+        annotations:
+          dashboard: "https://grafana.openshift-app-sre.devshift.net/d/5RvvwGqW0/ccx-smart-proxy"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ccx-data-pipeline-prod/deployments"
+          message: "ccx-smart-proxy has been down for two minutes"
+      - alert: CCXInsightsContentServiceDown
+        expr: sum(up{service="ccx-insights-content-service"}) by (service) == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: insights
+          env: prod
+        annotations:
+          dashboard: "https://grafana.openshift-app-sre.devshift.net/d/i7kJG7vGz/ccx-insights-content-service"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ccx-data-pipeline-prod/deployments"
+          message: "ccx-insights-content-service has been down for two minutes"
+      - alert: CCXDataPipelineDown
+        expr: sum(up{service="ccx-data-pipeline"}) by (service) == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: insights
+          env: prod
+        annotations:
+          dashboard: "https://grafana.openshift-app-sre.devshift.net/d/jRluM4NMz/ccx-data-pipeline"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ccx-data-pipeline-prod/deployments"
+          message: "ccx-data-pipeline backend service has been down for two minutes"
+      - alert: InsightsResultsAggregatorDown
+        expr: sum(up{service="insights-results-aggregator"}) by (service) == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: insights
+          env: prod
+        annotations:
+          message: "insights-results-aggregator backend service has been down for two minutes"
+          dashboard: "https://grafana.openshift-app-sre.devshift.net/d/ruvKwhqWk/ccx-insights-results-aggregator"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ccx-data-pipeline-prod/deployments"
