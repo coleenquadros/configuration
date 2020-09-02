@@ -58,9 +58,8 @@
 ## Provisioning Hive
 
 Provisioning hive is a multi-step process:
-- Add the hive namespace:
-- Add the hive operator saas job:
-- Add the hiveconfig CR saas job:
+- Add the hive namespace
+- Hive is deployed using a saas file. In order to deploy to a new shard, a new target must be added to the Hive saas file located here: [/data/services/hive/cicd/ci-int/saas-hive.yaml]()
 
 ## Hive Monitoring
 
