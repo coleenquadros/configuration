@@ -7,7 +7,7 @@
     - [Sendgrid Service 5xx Errors High](#sendgrid-service-5xx)
     - [Sendgrid Service 4xx Errors High](#sendgrid-service-4xx)
     - [Sendgrid Service Latency High](#sendgrid-service-latency-high)
-    - [Sendgrid Service Job Failed](#sendgrid-service-job-failed)
+    - [Sendgrid Service Job(s) Failed](#sendgrid-service-jobs-failed)
     - [Sendgrid Service Dependencies](#sendgrid-service-dependencies)
     - [Sendgrid Service SubAccount Quota Low](#sendgrid-service-dependencies-sendgrid-subaccount-quota-low)
     - [Escalations](#escalations)
@@ -133,7 +133,7 @@ Sendgrid Service API is experiencing latency
 
 ---
 
-## Sendgrid Service Job Failed 
+## Sendgrid Service Job(s) Failed
 
 Sendgrid Service job has reached the maximum number of attempts.
 
@@ -145,12 +145,13 @@ Sendgrid Subaccount or Credentials will not be created or synced to the cluster.
 - secrets/ocm-sendgrid-service
 
 ### Steps:
+- Find max attempt value from Sendgrid Service Vault key `secrets/scheduler.maxRetry` : https://vault.devshift.net/ui/vault/secrets/rhmi/show/ocm-sendgrid-service/<stage|production>/ocm-sendgrid-service 
 - From the Sendgrid Service RDS instance (`ocm-sendgrid-service-<staging|production>`), reset the attempts to 0 for the failed job:
 ```
-$ UPDATE sendgrid_jobs SET attempts=0 WHERE id = '{{$labels.jobID}}';
+$ UPDATE sendgrid_jobs SET attempts=0 WHERE attempts=<secrets/scheduler.maxRetry>;
 ```
 - Watch the logs for `deployment/ocm-sendgrid-service` for the service to execute job 
-- If the job is continuously reach the maximum number of attempts, verify that no other service interruptions are occurring
+- If the job is continuously reaching the maximum number of attempts, verify that no other service interruptions are occurring
 - Finally, escalate to the RHMI team (see escalation contacts), including the copied logs
 
 ---
