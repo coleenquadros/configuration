@@ -74,3 +74,24 @@ The DSN is a unique string used by the sentry SDK to direct events to a specific
 ## How to solve events not appearing
 
 This is likely because the sentry-cron and/or sentry-worker pods had a problem contacting the DB.  It seems when this happens the print a traceback in their log files and then continue running.  There's no external indication that there is a problem other than that events aren't getting recorded.  This can be discovered by looking the pod logs and searching for a traceback.  The error will likely report a problem contacting/resolving the DB.  The fix is just to delete the pod and let it be restarted.  If one of th pods has the error it is likely the other one does as well so it's probably best to just delete both pods.
+
+## Sentry isn't receiving data
+
+Sentry has pretty terrible error handling.  It will dump backtraces into log files, and then happily try to continue on instead of exiting/crashing.  What's worse is if the error is because of an inability to access a part of sentry, like the DB or redis, it will be unable to access the resource in the future.  This basically means sentry errors are hidden from us and we can't rely on an automated pod crash/restart to fix things.
+
+If this occurs then there are likely errors/backtraces in the pod logs.  Look in the logs of the sentry-web and sentry-worker pods:
+
+```shell
+oc get pods
+oc logs sentry-web-<id>
+oc logs sentry-worker-<id>
+```
+
+To fix this, restart the sentry-cron, sentry-web, sentry-worker, and redis pods in the namespace:
+
+```shell
+oc delete pod redis-<id> sentry-cron-<id> sentry-web-<id1> sentry-web-<id2> sentry-worker-<id>
+```
+
+Then log into the sentry instance UI and into projects to see that events are being received.  Do this by logging into sentry and clicking on `Settings` on the left side then choose `Projects`.  Choose a project and look at the events to see when it was last seen.  This is shown underneath the issue title next to an icon of a clock.  Clicking on an issue will also show more details for that issue, and on the right hand side is a field "LAST SEEN".
+
