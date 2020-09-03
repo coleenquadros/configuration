@@ -1,0 +1,33 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: managed-services-stage
+description: staging namespace for managed-services
+
+cluster:
+  $ref: /openshift/app-sre-stage-01/cluster.yml
+
+app:
+  $ref: /services/managed-services/app.yml
+
+environment:
+  $ref: /products/osdv4/environments/stage.yml
+
+networkPoliciesAllow:
+  - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+
+managedRoles: true
+
+managedResourceTypes:
+  - Secret
+  - ServiceAccount
+
+openshiftResources:
+  - provider: vault-secret
+    path: app-interface/global/quay/app-sre/quay.io
+    version: 2
+    type: kubernetes.io/dockercfg
+  - provider: resource
+    path: /app-sre-stage/managed-services-stage/managed-services.serviceaccount.yaml
