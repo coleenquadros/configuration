@@ -3,11 +3,11 @@
 <!-- TOC depthTo:2 -->
 
 - [SOP : OCM Sendgrid Service](#sop-ocm-sendgrid-service)
-    - [Sendgrid Service Down](#sendgrid-service-down)  
-    - [Sendgrid Service 5xx Errors High](#sendgrid-service-5xx)
-    - [Sendgrid Service 4xx Errors High](#sendgrid-service-4xx)
-    - [Sendgrid Service Latency High](#sendgrid-service-latency-high)
-    - [Sendgrid Service Job(s) Failed](#sendgrid-service-jobs-failed)
+    - [OCM Sendgrid Service Down](#ocm-sendgrid-service-down)  
+    - [OCM Sendgrid Service 5xx Errors High](#ocm-sendgrid-service-5xx-errors-high)
+    - [OCM Sendgrid Service 4xx Errors High](#ocm-sendgrid-service-4xx-errors-high)
+    - [OCM Sendgrid Service Latency High](#ocm-sendgrid-service-latency-high)
+    - [OCM Sendgrid Service Job(s) Failed](#ocm-sendgrid-service-jobs-failed)
     - [Sendgrid Service Dependencies](#sendgrid-service-dependencies)
     - [Sendgrid Service SubAccount Quota Low](#sendgrid-service-dependencies-sendgrid-subaccount-quota-low)
     - [Escalations](#escalations)
@@ -16,7 +16,7 @@
 
 ---
 
-## Sendgrid Service Down
+## OCM Sendgrid Service Down
 
 ### Impact:
 
@@ -27,7 +27,7 @@ Sendgrid credentials will not be cleaned up for clusters in deletion, consuming 
 
 ### Summary:
 
-Sendgrid Service is down
+OCM Sendgrid Service is down
 
 ### Access required:
 
@@ -47,7 +47,7 @@ Sendgrid Service is down
 
 ---
 
-## Sendgrid Service 5xx
+## OCM Sendgrid Service 5xx Errors High
 
 ### Impact:
 
@@ -76,7 +76,7 @@ Sendgrid Service API is returning an abnormally high number of 5xx Error request
 
 ---
 
-## Sendgrid Service 4xx
+## OCM Sendgrid Service 4xx Errors High
 
 ### Impact:
 
@@ -105,7 +105,7 @@ Sendgrid Service API is returning an abnormally high number of 4xx Error request
 
 ---
 
-## Sendgrid Service Latency High 
+## OCM Sendgrid Service Latency High 
 
 ### Impact:
 
@@ -115,7 +115,7 @@ Sendgrid credentials might not be cleaned up for clusters in deletion.
 
 ### Summary:
 
-Sendgrid Service API is experiencing latency
+OCM Sendgrid Service API is experiencing high latency
 
 ### Access required:
 
@@ -133,7 +133,7 @@ Sendgrid Service API is experiencing latency
 
 ---
 
-## Sendgrid Service Job(s) Failed
+## OCM Sendgrid Service Job(s) Failed
 
 Sendgrid Service job has reached the maximum number of attempts.
 
