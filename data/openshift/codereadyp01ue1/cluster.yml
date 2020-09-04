@@ -1,0 +1,61 @@
+---
+$schema: /openshift/cluster-1.yml
+
+labels:
+  service: codeready
+
+name: codereadyp01ue1
+description: CodeReady production cluster
+consoleUrl: ''
+kibanaUrl: ''
+prometheusUrl: ''
+alertmanagerUrl: ''
+serverUrl: ''
+elbFQDN: ''
+
+auth:
+  service: github-org-team
+  org: app-sre
+  team: codereadyp01ue1-cluster
+
+ocm:
+  $ref: /dependencies/ocm/production.yml
+
+managedGroups:
+- dedicated-admins
+
+spec:
+  provider: aws
+  region: us-east-1
+  channel: 'fast'
+  version: 4.4.19-fast
+  initial_version: 4.4.19-fast
+  multi_az: false
+  nodes: 4
+  instance_type: m5.xlarge
+  storage: 600
+  load_balancers: 0
+  private: false
+  upgrade: batch2
+
+network:
+  vpc: 10.126.0.0/16
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
+
+disable:
+  e2eTests:
+  - create-namespace
+  - dedicated-admin-rolebindings
+  - default-network-policies
+  - default-project-labels
+
+internal: false
+
+awsInfrastructureAccess:
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: network-mgmt
