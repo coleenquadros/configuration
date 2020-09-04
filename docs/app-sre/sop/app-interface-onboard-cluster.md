@@ -169,28 +169,27 @@ This step should be performed in a single merge request.
         * Note: cluster_id can be obtained from the console.  In OCM, click on the link for the cluster and then click on the `Open Console` button in the upper right corner.  Looking at the URL bar there should be something like: `oauth-openshift.apps.<cluster_name>.<cluster_id>.p1.openshiftapps.com`
     - Authorization callback URL: `https://oauth-openshift.apps.<cluster_name>.<cluster_id>.p1.openshiftapps.com/oauth2callback/github-app-sre`
 
+
+1. If your cluster is private, you should first make sure you can access it through ci.ext via VPC peering.
+
+    1. Configure VPC peering to jumphost (ci.ext) as needed for private clusters. See  [app-interface-cluster-vpc-peerings.md](app-interface-cluster-vpc-peerings.md).
+
+        ```yaml
+        peering:
+          connections:
+          - provider: account-vpc
+            name: <cluster_name>_app-sre
+            vpc:
+              $ref: /aws/app-sre/vpcs/app-sre-vpc-02-ci-ext.yml
+            manageRoutes: true
+        ```
+    1. Once the above is merged and deployed, you should add a route in app-sre vpc. This is achieved in [app-sre/infra](https://gitlab.cee.redhat.com/app-sre/infra) repo. See this [MR](https://gitlab.cee.redhat.com/app-sre/infra/-/merge_requests/79) as an example. You can get VPC peering connection name from the app-sre AWS account.
+
 ## Step 2 - Bot access and App SRE project template
-
-If your cluster is private, you should first make sure you can access it through ci.ext via VPC peering.
-
-1. Configure VPC peering to jumphost (ci.ext) as needed for private clusters. See  [app-interface-cluster-vpc-peerings.md](app-interface-cluster-vpc-peerings.md).
-
-    ```yaml
-    peering:
-      connections:
-      - provider: account-vpc
-        name: <cluster_name>_app-sre
-        vpc:
-          $ref: /aws/app-sre/vpcs/app-sre-vpc-02-ci-ext.yml
-        manageRoutes: true
-    ```
-1. Once the above is merged and deployed, you should add a route in app-sre vpc. This is achieved in [app-sre/infra](https://gitlab.cee.redhat.com/app-sre/infra) repo. See this [MR](https://gitlab.cee.redhat.com/app-sre/infra/-/merge_requests/79) as an example. You can get VPC peering connection name from the app-sre AWS account.
 
 At this point you should be able to access the cluster via the console / `oc` cli.
 
 * Note: This step should be performed in a single merge request.
-
-1. Update the above `cluster.yml` and add the `consoleUrl` and `serverUrl` fields to point to the console and api respectively
 
 1. Add the `app-sre-bot` ServiceAccount
 
