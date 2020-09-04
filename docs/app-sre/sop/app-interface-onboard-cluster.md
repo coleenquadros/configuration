@@ -76,8 +76,6 @@ This step should be performed in a single merge request.
     - dedicated-admins
 
     spec:
-      id: ''
-      external_id: ''
       provider: aws
       region: (desired region. ex: us-east-1)
       channel: (desired channel group. either 'stable' or 'fast', depending on the workload to run on the cluster)
@@ -153,6 +151,13 @@ This step should be performed in a single merge request.
     $ ocm get cluster <ID> | jq -r '(.name + "." + .dns.base_domain)'
     ```
 
+    *Note*: The cluster's spec.id and spec.external_id can be obtained using the following commands:
+    ```shell
+    $ ocm get cluster <ID> | jq . '.id'
+    $ ocm get cluster <ID> | jq . '.external_id'
+    ```
+    These values will be added automatically by the ocm_clusters integration.
+
 ## Step 2 - Bot access and App SRE project template
 
 At this point you should be able to access the cluster via the console / oc cli.
@@ -168,7 +173,7 @@ At this point you should be able to access the cluster via the console / oc cli.
 1. Update the above `cluster.yml` and add the `consoleUrl` and `serverUrl` fields to point to the console and api respectively.
     - consoleUrl: `https://console-openshift-console.apps.<cluster_name>.<cluster_id>.p1.openshiftapps.com`
     - serverUrl: `https://api.<cluster_name>.<cluster_id>.p1.openshiftapps.com:6443`
-        * **Note**: This can be obtained from OCM.  In OCM, click on the link for the cluster and then click on the `Networking` tab and look at the `Master endpoint API` entry.  Copy that value for the `serverUrl`.
+        **Note**: This can be obtained from OCM.  In OCM, click on the link for the cluster and then click on the `Networking` tab and look at the `Master endpoint API` entry.  Copy that value for the `serverUrl`.
 
 1. Configure VPC peering to jumphost (ci.ext) as needed for private clusters. See  [app-interface-cluster-vpc-peerings.md](app-interface-cluster-vpc-peerings.md) (Disregard this step for public clusters)
 
