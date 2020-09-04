@@ -379,15 +379,10 @@ Currently added datasources:
 * `quayiop03ue1-prometheus`: app-sre managed prometheus for `quayp03ue1` cluster
 * `quayiop04ue2-prometheus`: app-sre managed prometheus for `quayp04ue2` cluster
 * `quays02ue1-prometheus`: app-sre managed prometheus for `quays02ue1` cluster
-* `che-dev-cluster-prometheus`: cluster prometheus for `che-dev-cluster` cluster
-* `dsaas-cluster-prometheus`: cluster prometheus for `dsaas` cluster
-* `dsaas-stg-cluster-prometheus`: cluster prometheus for `dsaas-stg` cluster
-* `dsaas-stg-rhche-prometheus`: rhche prometheus for `dsaas-stg` cluster
-* `dsaas-rhche-prometheus`: rhche prometheus for `dsaas` cluster
 * `AWS app-sre`: cloudwatch AWS appsre
-* `dsaas-graphite`: graphite on `dsaas` cluster
-* `dsaas-bayesian-stage-graphite`: bayesian graphite on `dsaas-stg` cluster
-* `dsaas-bayesian-production-graphite`: bayesian graphite on `dsaas` cluster
+* `dsaas-graphite`: graphite on `app-sre-prod-03` cluster
+* `dsaas-bayesian-stage-graphite`: bayesian graphite on `app-sre-stage-02` cluster
+* `dsaas-bayesian-production-graphite`: bayesian graphite on `app-sre-prod-03` cluster
 * `starter-us-east-2-cluster-prometheus`: cluster prometheus on `starter-us-east-2-cluster` cluster
 * `starter-us-east-2a-cluster-prometheus`: cluster prometheus on `starter-us-east-2a-cluster` cluster
 * `starter-us-east-1a-cluster-prometheus`: cluster prometheus on `starter-us-east-1a-cluster` cluster
