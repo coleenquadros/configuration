@@ -1463,6 +1463,106 @@
     <<: *job_template_build_defaults
 
 - job-template:
+    name: '{ci_project}-{git_repo}-build-deploy-{branch}'
+    disabled: true
+    wrappers:
+        - vault-secrets:
+            <<: *vault_defaults
+            secrets:
+            - *kube-config-dsaas-stg-v4
+            - *quay-credentials
+            - *registry-devshift-credentials
+            - *recommender-api-token-prod
+        - ansicolor
+    scm:
+        - git:
+            url: https://github.com/{git_organization}/{git_repo}.git
+            shallow_clone: true
+            branches:
+                - master
+    skip_deploy: 0
+    deployment_units: ''
+    deployment_configs: ''
+    extra_target: ''
+    builders:
+        - shell: |
+            # testing out the cico client
+            set +e
+            set +x
+            export CICO_API_KEY=$(cat ~/duffy.key )
+            # get node
+            n=1
+            while true
+            do
+                cico_output=$(cico node get -f value -c ip_address -c comment)
+                if [ $? -eq 0 ]; then
+                    read CICO_hostname CICO_ssid <<< $cico_output
+                    if  [ ! -z "$CICO_hostname" ]; then
+                        # we got hostname from cico
+                        break
+                    fi
+                    echo "'cico node get' succeed, but can't get hostname from output"
+                fi
+                if [ $n -gt 15 ]; then
+                    # give up after 15 tries
+                    echo "giving up on 'cico node get'"
+                    exit 1
+                fi
+                echo "'cico node get' failed, trying again in 60s ($n/15)"
+                n=$[$n+1]
+                sleep 60
+            done
+            echo 'Using Host' $CICO_hostname
+
+            export DEVSHIFT_TAG_LEN=7
+
+            (
+                # run in subshell not to affect current environment
+                set +x
+
+                # load creds_config_file
+                eval "$(sed '/^\s*$/d;s/^/export /' $creds_config_file)"
+
+                cp ~/cico-tools/env-toolkit .
+                ./env-toolkit dump -f jenkins-env.json
+                env > jenkins-env
+            )
+
+            set -x
+
+            sshopts="-t -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -l root"
+            ssh_cmd="ssh $sshopts $CICO_hostname"
+            $ssh_cmd yum -y install rsync
+            rsync -e "ssh $sshopts" -Ha $(pwd)/ $CICO_hostname:payload
+            $ssh_cmd -t "cd payload && {ci_cmd}"
+            rtn_code=$?
+
+            ## RHEL build
+            if [[ $rtn_code -eq 0 && -n "{extra_target}" ]]; then
+                $ssh_cmd -t "cd payload && TARGET=\"{extra_target}\" {ci_cmd}"
+                rtn_code=$?
+            fi
+
+
+            GIT_ORGANIZATION={git_organization}
+            UPSTREAM_GIT_COMMIT=$GIT_COMMIT
+            SAAS_GIT={saas_git}
+            DEPLOYMENT_UNITS={deployment_units}
+            DEPLOYMENT_CONFIGS={deployment_configs}
+            CICO_HOSTNAME=$CICO_hostname
+            CICO_SSID=$CICO_ssid
+
+            # Deploy
+            {saasherder_prepare}
+            export DEVSHIFT_TAG_LEN=7
+            for DEPLOYMENT_UNIT in $DEPLOYMENT_UNITS; do
+                export SAAS_SERVICE_NAME=$DEPLOYMENT_UNIT
+                export GIT_REPO=$DEPLOYMENT_UNIT
+                {saasherder_deploy}
+            done
+    <<: *job_template_build_defaults
+
+- job-template:
     name: '{ci_project}-{git_repo}-saasorg-build-{branch}'
     disabled: '{obj:disabled}'
     saas_organization: openshiftio
@@ -5695,7 +5795,7 @@
             git_repo: fabric8-analytics-utils
         - '{ci_project}-{git_repo}-fabric8-analytics-pydoc':
             git_repo: fabric8-analytics-utils
-        - '{ci_project}-{git_repo}-f8a-build-{branch}':
+        - '{ci_project}-{git_repo}-build-deploy-{branch}':
             git_organization: fabric8-analytics
             git_repo: f8a-stacks-report
             saas_git: saas-analytics
