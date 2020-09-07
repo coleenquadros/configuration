@@ -31,17 +31,18 @@ This step should be performed in a single merge request.
 1. Login to https://cloud.redhat.com/openshift
 
 1. Click `Subscriptions` and ensure you have enough quota to provision a cluster
-    - Must have at least 1 cluster.aws of the desired type
+    - Must have at least 1 cluster of the desired type
     - Check that you have enough compute nodes quota for the desired total compute (4 are included in a single-az cluster, 6 in a multi-az)
     - Note that quota is driven via this [repo](https://gitlab.cee.redhat.com/service/ocm-resources/) and this is our [org file](https://gitlab.cee.redhat.com/service/ocm-resources/blob/master/data/uhc-production/orgs/12147054.yaml) in prod. The `@ocm-resources` Slack alias can also be pinged for any questions or if the change is urgent.
+    - Use the [OCM resource cost mappings spreadsheet](https://docs.google.com/spreadsheets/d/1HGvQnahZCxb_zYH2kSnnTFsxy9MM49vywd-P0X_ISLA/edit#gid=315221665) mapping table to find which are correspondences between OCM types and AWS instance types
 
 1. Create a new App-SRE Github Oauth Client.
     In order to create the OAuth client register to create a new application here:
     https://github.com/organizations/app-sre/settings/applications
 
-    - Name: <cluster_name> cluster
-    - Homepage URL: https://console-openshift-console.apps.<cluster_name>.TBD.p1.openshiftapps.com
-    - Authorization callback URL: https://oauth-openshift.apps.<cluster_name>.TBD.p1.openshiftapps.com/oauth2callback/github-app-sre
+    - Name: `<cluster_name> cluster`
+    - Homepage URL: `https://console-openshift-console.apps.<cluster_name>.TBD.p1.openshiftapps.com`
+    - Authorization callback URL: `https://oauth-openshift.apps.<cluster_name>.TBD.p1.openshiftapps.com/oauth2callback/github-app-sre`
 
 1. Place the `client-id` and `client-secret` from the Oauth Client in a secret in [Vault](https://vault.devshift.net/ui/vault/secrets/app-sre/list/integrations-input/ocm-github-idp/github-org-team/app-sre/) named `<cluster_name>-cluster`.
 
@@ -131,61 +132,64 @@ This step should be performed in a single merge request.
 
     * Note: during the installation it is expected that other ocm integrations will fail.
 
-1. Once the cluster has finished installing, the following fields have to be updated in the `cluster.yml` file
-    * `consoleUrl`: https://console-openshift-console.apps.<cluster_name>.<base_domain>
-    * `kibanaUrl`: https://kibana-openshift-logging.apps.<cluster_name>.<base_domain>
-    * `prometheusUrl`: https://prometheus.<cluster_name>.devshift.net
-    * `alertmanagerUrl`: https://alertmanager.<cluster_name>.devshift.net
-    * `serverUrl`: https://api.<cluster_name>.<base_domain>:6443
-    * `elbFQDN`: elb.apps.<cluster_name>.<base_domain>
+1. Once the cluster has finished installing, the following fields have to be updated in the `cluster.yml` file in the `spec` section:
+    * `consoleUrl`: `https://console-openshift-console.apps.<cluster_name>.<base_domain>`
+    * `kibanaUrl`: `https://kibana-openshift-logging.apps.<cluster_name>.<base_domain>`
+    * `prometheusUrl`: `https://prometheus.<cluster_name>.devshift.net`
+    * `alertmanagerUrl`: `https://alertmanager.<cluster_name>.devshift.net`
+    * `serverUrl`: `https://api.<cluster_name>.<base_domain>:6443`
+    * `elbFQDN`: `elb.apps.<cluster_name>.<base_domain>`
+    * `id`: This ID can be seen as part of the URL when navigating to cluster page in OCM as well as when using the [ocm cli](https://github.com/openshift-online/ocm-cli). This field should have been automatically added.
+    * `external_id`: This is a  UUID which can be seen in cluster page in OCM as `Cluster ID` well as when using the [ocm cli](https://github.com/openshift-online/ocm-cli). This field should have been automatically added.
 
-    * **Note**: The `<cluster_name>` and `<base_domain>` of a cluster can be retrieved using the [ocm cli](https://github.com/openshift-online/ocm-cli)
-    
-    ```
-    $ ocm list clusters
-    
-    $ ocm get cluster <ID> | jq '.name'
-    $ ocm get cluster <ID> | jq '.dns.base_domain'
+    *Note*: The `<cluster_name>` and `<base_domain>` of a cluster can be retrieved using the [ocm cli](https://github.com/openshift-online/ocm-cli)
+
+    ```shell
+    ocm list clusters
+
+    ID=<ID>
+    ocm get cluster $ID | jq . '.name'
+    ocm get cluster $ID | jq . '.dns.base_domain'
 
     # One-liner to get the complete DNS name of a cluster
-    $ ocm get cluster <ID> | jq -r '(.name + "." + .dns.base_domain)'
+    ocm get cluster $ID | jq -r '(.name + "." + .dns.base_domain)'
     ```
 
     *Note*: The cluster's spec.id and spec.external_id can be obtained using the following commands:
+
     ```shell
     $ ocm get cluster <ID> | jq . '.id'
     $ ocm get cluster <ID> | jq . '.external_id'
     ```
-    These values will be added automatically by the ocm_clusters integration.
+
+    These values will be added automatically by the `ocm_clusters` integration.
+
+1. Update App-SRE Github Oauth Client.
+    - Homepage URL: `https://console-openshift-console.apps.<cluster_name>.<cluster_id>.p1.openshiftapps.com/`
+        * Note: cluster_id can be obtained from the console.  In OCM, click on the link for the cluster and then click on the `Open Console` button in the upper right corner.  Looking at the URL bar there should be something like: `oauth-openshift.apps.<cluster_name>.<cluster_id>.p1.openshiftapps.com`
+    - Authorization callback URL: `https://oauth-openshift.apps.<cluster_name>.<cluster_id>.p1.openshiftapps.com/oauth2callback/github-app-sre`
+
+
+1. If your cluster is private, you should first make sure you can access it through ci.ext via VPC peering.
+
+    1. Configure VPC peering to jumphost (ci.ext) as needed for private clusters. See  [app-interface-cluster-vpc-peerings.md](app-interface-cluster-vpc-peerings.md).
+
+        ```yaml
+        peering:
+          connections:
+          - provider: account-vpc
+            name: <cluster_name>_app-sre
+            vpc:
+              $ref: /aws/app-sre/vpcs/app-sre-vpc-02-ci-ext.yml
+            manageRoutes: true
+        ```
+    1. Once the above is merged and deployed, you should add a route in app-sre vpc. This is achieved in [app-sre/infra](https://gitlab.cee.redhat.com/app-sre/infra) repo. See this [MR](https://gitlab.cee.redhat.com/app-sre/infra/-/merge_requests/79) as an example. You can get VPC peering connection name from the app-sre AWS account.
 
 ## Step 2 - Bot access and App SRE project template
 
-At this point you should be able to access the cluster via the console / oc cli.
+At this point you should be able to access the cluster via the console / `oc` cli.
 
 * Note: This step should be performed in a single merge request.
-
-1. Update App-SRE Github Oauth Client.
-    - Homepage URL: https://console-openshift-console.apps.<cluster_name>.<cluster_id>.p1.openshiftapps.com/
-    - Authorization callback URL: https://oauth-openshift.apps.<cluster_name>.<cluster_id>.p1.openshiftapps.com/oauth2callback/github-app-sre
-
-    * Note: cluster_id can be obtained from OCM.  In OCM, click on the link for the cluster and then click on the `Networking` tab and look at the `Master endpoint API` entry.  There should be something like: `api.<cluster_name>.<cluster_id>.p1.openshiftapps.com:6443`
-
-1. Update the above `cluster.yml` and add the `consoleUrl` and `serverUrl` fields to point to the console and api respectively.
-    - consoleUrl: `https://console-openshift-console.apps.<cluster_name>.<cluster_id>.p1.openshiftapps.com`
-    - serverUrl: `https://api.<cluster_name>.<cluster_id>.p1.openshiftapps.com:6443`
-        **Note**: This can be obtained from OCM.  In OCM, click on the link for the cluster and then click on the `Networking` tab and look at the `Master endpoint API` entry.  Copy that value for the `serverUrl`.
-
-1. Configure VPC peering to jumphost (ci.ext) as needed for private clusters. See  [app-interface-cluster-vpc-peerings.md](app-interface-cluster-vpc-peerings.md) (Disregard this step for public clusters)
-
-    ```yaml
-    peering:
-      connections:
-      - provider: account-vpc
-        name: <cluster_id>_app-sre
-        vpc:
-          $ref: /aws/app-sre/vpcs/app-sre-vpc-02-ci-ext.yml
-
-    ```
 
 1. Add the `app-sre-bot` ServiceAccount
 
@@ -210,19 +214,40 @@ At this point you should be able to access the cluster via the console / oc cli.
     automationToken:
       path: app-sre/creds/kube-configs/<cluster_name>
       field: token
-      
-1. If the cluster is private, the following must be added to the `cluster.yml` file
 
-    ```yaml
-    jumpHost:
-      hostname: ci.ext.devshift.net
-      knownHosts: /jump-host/known-hosts/ci.ext.devshift.net
-      user: app-sre-bot
-      identity:
-        path: app-sre/ansible/roles/app-sre-bot
-        field: identity
-        format: base64
-    ```
+1. If the cluster is private, the following lines must be added
+
+    1. Jump host configuration to your `cluster.yml` file:
+        ```yaml
+        jumpHost:
+          hostname: ci.ext.devshift.net
+          knownHosts: /jump-host/known-hosts/ci.ext.devshift.net
+          user: app-sre-bot
+          identity:
+            path: app-sre/ansible/roles/app-sre-bot
+            field: identity
+            format: base64
+        ```
+
+    1. Request vpc peering config to `app-sre-prod-01` to your `cluster.yml` file:
+
+        ```yaml
+        - provider: cluster-vpc-requester
+          name: <cluster_name>_app-sre-prod-01
+          cluster:
+            $ref: /openshift/app-sre-prod-01/cluster.yml
+          manageRoutes: true
+        ```
+
+    1. Accepter vpc peering config `app-sre-prod-01`'s `cluster.yml` file:
+
+        ```yaml
+        - provider: cluster-vpc-accepter
+          name: app-sre-prod-01_<cluster_name>
+          cluster:
+            $ref: /openshift/<cluster_id>/cluster.yml
+          manageRoutes: true
+        ```
 
 1. Add the `openshift-config` namespace in app-interface.  This adds the project request template to the cluster
 
@@ -299,19 +324,15 @@ At this point you should be able to access the cluster via the console / oc cli.
 
     Here's an [example](https://issues.redhat.com/browse/OHSS-608)
 
-    *NOTE*: enchanced dedicated-admin must be enabled on the cluster before installing observability or the CSO operator.
+    *NOTE*: enchanced dedicated-admin must be enabled on the cluster before installing observability namespaces or the CSO operator.
 
 ## Step 4 - Observability
 
 1. Enable observability on a v4 cluster
 
-    1. Ensure `enhanced-dedicated-admin` is enabled on the cluster.  Details for this are [here](#enable-enhanced-dedicated-admin)
-
-    1. Create DNS records:
+    1. Create DNS records ([example MR](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/8533)):
         - `prometheus.<cluster_name>.devshift.net`: `elb.apps.<cluster_name>.<clusterid>.p1.openshiftapps.com`
         - `alertmanager.<cluster_name>.devshift.net`: `elb.apps.<cluster_name>.<clusterid>.p1.openshiftapps.com`
-
-        NOTE: Currently only Paul Bergene and Jean-Francois Chevrette can create these DNS entries. (Pending https://issues.redhat.com/browse/APPSRE-1987)
 
     1. Configure a [deadmanssnitch](https://deadmanssnitch.com/) snitch for the new cluster. The snitch settings should be as follow:
         - Name: prometheus.<cluster_name>.devshift.net
@@ -320,19 +341,34 @@ At this point you should be able to access the cluster via the console / oc cli.
         - Tags: app-sre
         - Alert email: sd-app-sre@redhat.com
         - Notes: Runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/prometheus/prometheus-deadmanssnitch.md
-    
+
     1. Add the deadmansnitch URL to this secret in Vault: https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/alertmanager-integration
-    
+
         - key: `deadmanssnitch-<cluster_name>-url`
         - value: the `Unique Snitch URL` from deadmanssnitch
-    
+
+    1. Update the Grafana datasources secret in Vault: https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/grafana/datasources
+
+        - Add a new key `<cluster_name>-prometheus` with value that is to be used as a password.  It can be any password.  It is recommended to use a tool like pwgen (ex to create a single 16 character random password: `pwgen -cns 32 1`
+
+    1. Create the following secret in Vault:
+        - Generate the auth token value: `htpasswd -s -n app-sre-observability`
+            At the password prompt, enter the password stored in the [grafana datasources secret](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/grafana/datasources) for the cluster (the one just created in the previous step)
+        - Create `https://vault.devshift.net/ui/vault/secrets/app-interface/show/<cluster_name>/openshift-customer-monitoring/nginx-auth-proxy` ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre-prod-01/openshift-customer-monitoring/nginx-auth-proxy))
+
+            Secret keys:
+            - auth: `<generated auth token value from above>`
+            - cookie-secret: <random_128_char_string> (Can use `pwgen -cns 128 1` or similar to generate )
+
+    1. Ensure `enhanced-dedicated-admin` is enabled on the cluster.  Details for this are [here](#enable-enhanced-dedicated-admin)
+
     1. Create an `openshift-customer-monitoring` namespace file for that specific cluster, please use the template provided and replace CLUSTERNAME with the actual cluster name:
-    
+
         - Template: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/boilerplates/openshift-customer-monitoring.clustername.yml
         - Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml.
-    
+
     1. Add the new `openshift-customer-monitoring` namespace to the target namespaces in [saas-observability-per-cluster](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/cicd/saas/saas-observability-per-cluster.yaml) to deploy Prometheus and Alertmanager. New entries need to be added for Prometheus and Alertmanager:
-    
+
         ```yaml
         # Prometheus
         ...
@@ -352,38 +388,25 @@ At this point you should be able to access the cluster via the console / oc cli.
           ENVIRONMENT: The environment, usually one of [integration|staging|production]
           EXTERNAL_URL: https://alertmanager.<cluster_name>.devshift.net
         ```
-    
+
         Note: The only entry that should not be using a specific SHA should be the app-sre-stage-01 cluster.  That cluster should be using a ref of master.
 
-    1. Update the Grafana datasources secret in Vault: https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/grafana/datasources
-    
-        - Add a new key `<cluster_name>-prometheus` with value that is to be used as a password.  It can be any password.  It is recommended to use a tool like pwgen (ex to create a single 16 character random password: `pwgen -cns 32 1`
-    
-    1. Create the following secret in Vault:
-        - Generate the auth token value: `htpasswd -s -n app-sre-observability`
-            At the password prompt, enter the password stored in the [grafana datasources secret](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/grafana/datasources) for the cluster
-        - Create `https://vault.devshift.net/ui/vault/secrets/app-interface/show/<cluster_name>/openshift-customer-monitoring/nginx-auth-proxy` ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre-prod-01/openshift-customer-monitoring/nginx-auth-proxy))
-
-            Secret keys:
-            - auth: `<generated auth token value from above>`
-            - cookie-secret: <random_128_char_string> (Can use `pwgen -cns 128 1` or similar to generate )
-    
     1. Add the `cluster-monitoring-view` ClusterRole for the cluster to https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/roles/app-sre-osdv4-monitored-namespaces-view.yml.
-    
+
        *Note*: This file will need to be updated again once application namespaces are applied to the cluster. (Ex. https://gitlab.cee.redhat.com/service/app-interface/-/blob/445d7650cd5da4033fb6fb24b9be54403b710228/data/services/observability/roles/app-sre-osdv4-monitored-namespaces-view.yml#L139-153)
-    
+
     1. Add `managedClusterRoles: true` to the `cluster.yml` file
-    
-    1. Update `prometheusUrl`, `alertmanagerUrl` and add the `observabilityNamespace` field on the cluster data file and reference the `openshift-customer-monitoring` namespace file created in the previous step. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/7ecd529584666d97b1418224b2772557807c6e1c/data/openshift/app-sre-prod-01/cluster.yml#L14-15
-    
+
+    1. Add the `observabilityNamespace` field on the cluster data file and reference the `openshift-customer-monitoring` namespace file created in the previous step. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/7ecd529584666d97b1418224b2772557807c6e1c/data/openshift/app-sre-prod-01/cluster.yml#L14-15
+
     1. Create an `app-sre-observability-per-cluster` namespace file for that specific cluster. Ex: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/openshift/app-sre-prod-01/namespaces/app-sre-observability-per-cluster.yml
-    
+
     1. Add the new `app-sre-observability-per-cluster` namespace to the target namespaces in [saas-nginx-proxy.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/cicd/saas/saas-nginx-proxy.yaml) to deploy nginx-proxy.
-    
+
     1. Add the new `app-sre-observability-per-cluster` namespace to the target namespaces in [saas-openshift-acme.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-sre/cicd/ci-int/saas-openshift-acme.yaml) to deploy openshift-acme.
-    
+
     1. After the above changes have merged and the integrations have applied the changes, verify `https://<prometheus|alertmanager>.<cluster_name>.devshift.net` have valid ssl certificates by accessing the URLs.  If no security warning is given and the connection is secure as notifed by the browser than the ssl certificates are valid.
-    
+
     1. Edit the grafana data sources secret and add the following entries for the new cluster: (Ex https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/resources/observability/grafana/grafana-datasources.secret.yaml#L43-73)
         - <cluster_name>-prometheus - the Prometheus instance in `openshift-customer-monitoring`
             ```yaml
@@ -426,7 +449,7 @@ At this point you should be able to access the cluster via the console / oc cli.
                     "version": 1
                 }
             ```
-    
+
         *Note*: The `<cluster-url>` can be retrieved from the cluster console.  Remove the `https://console-openshift-console` from the beginning and end with `openshiftapps.com`, removing all the trailing slashes and paths.
 
 ## Step 5 - Container Security Operator
@@ -436,70 +459,70 @@ At this point you should be able to access the cluster via the console / oc cli.
     The Container Security Operator (CSO) brings Quay and Clair metadata to
     Kubernetes / OpenShift. We use the vulnerabilities information in the tenants
     dashboard and in the monthly reports.
-    
+
     1. Ensure `enhanced-dedicated-admin` is enabled on the cluster.  Details for this are [here](#enable-enhanced-dedicated-admin)
-    
+
     1. Create an `container-security-operator` namespace file for that specific
     cluster. Example:
-    
+
     File name: `app-sre-cso-per-cluster.yml`
-    
+
     Content:
-    
+
     ```yaml
     ---
     $schema: /openshift/namespace-1.yml
-    
+
     labels: {}
-    
+
     name: container-security-operator
     description: namespace for the app-sre per-cluster Container Security Operator
-    
+
     cluster:
       $ref: /openshift/<cluster>/cluster.yml
-    
+
     app:
       $ref: /services/container-security-operator/app.yml
-    
+
     environment:
       $ref: /products/dashdot/environments/production.yml
-    
+
     networkPoliciesAllow:
     - $ref: /openshift/<cluster>/namespaces/openshift-operator-lifecycle-manager.yml
     ```
-    
+
     If the `openshift-operator-lifecycle-manager` namespace is not yet defined in
     app-interface, you have to define it also:
-    
+
     File name: `openshift-operator-lifecycle-manager.yml`
-    
+
     Content:
-    
+
     ```yaml
     ---
     $schema: /openshift/namespace-1.yml
-    
+
     labels: {}
-    
+
     name: openshift-operator-lifecycle-manager
-    
+
     cluster:
       $ref: /openshift/<cluster>/cluster.yml
-    
+
     app:
       $ref: /services/app-sre/app.yml
-    
+
     environment:
       $ref: /products/app-sre/environments/production.yml
-    
+
     description: openshift-operator-lifecycle-manager namespace
     ```
-    
+
     1. Add the new `container-security-operator` namespace to the target
     namespaces in the
     [saas.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/container-security-operator/cicd/saas.yaml)
     to deploy the Container Security Operator. Example:
-    
+
     ```yaml
     resourceTemplates:
     - name: container-security-operator
@@ -517,44 +540,11 @@ At this point you should be able to access the cluster via the console / oc cli.
 1. Enable logging (EFK)
 
     The EFK stack is currently opt-in and installed by customers.
-    
-    Installing cluster logging can be done in two steps.
-    1. Subscribe to the Elasticsearch and Cluster Logging operators
-    
-        ```yaml
-        # /data/openshift/<cluster_name>/namespaces/openshift-logging.yml
-        ---
-        $schema: /openshift/namespace-1.yml
-        
-        labels: {}
-        
-        name: openshift-logging
-        description: openshift-logging namespace
-        
-        cluster:
-          $ref: /openshift/<cluster_name>/cluster.yml
-        
-        app:
-          $ref: /services/app-sre/app.yml
-        
-        environment:
-          $ref: /products/app-sre/environments/production.yml
-        
-        managedResourceTypes:
-        - Subscription
-        - ClusterLogging
-        
-        openshiftResources:
-        - provider: resource
-          path: /setup/clusterlogging/elasticsearch-operator.subscription.yaml
-        - provider: resource
-          path: /setup/clusterlogging/cluster-logging.subscription.yaml
-        - provider: resource-template
-          type: jinja2
-          path: /setup/clusterlogging/instance.clusterlogging.yaml
-          variables:
-            memoryRequests: 8G
-        ```
+
+    Installing cluster logging is done in two steps.
+
+    1. Create namespace and subscribe to the Elasticsearch and Cluster Logging operators. [Example MR](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/8792)
+    1. Create ES cluster. [Example MR](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/8815)
 
     OSD docs for reference: https://docs.openshift.com/dedicated/4/logging/dedicated-cluster-deploying.html
 
