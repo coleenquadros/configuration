@@ -1,0 +1,39 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cyndi-prod
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: cyndi-prod
+    rules:
+    - alert: CyndiLagTooHigh
+      expr: |
+        min(sum(label_replace(kafka_consumergroup_group_lag{topic="platform.inventory.events", group=~"connect-syndication-sink-.*"}, "cyndi_application", "$1", "group", "connect-syndication-sink-(.*)\\.v.*")) by (group, cyndi_application, namespace)) by (cyndi_application, namespace) > 10000
+      for: 15m
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: inventory
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/fF9U-h7Mk/cyndi?orgId=1&refresh=1m&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/xjoin-prod/deployments/xjoin-kafka-connect/pods"
+        message: "Consumer lag for {{ $labels.cyndi_application }} reached {{ $value }} messages (limit is 10000)"
+
+    - alert: CyndiErrorDLQ
+      expr: |
+        sum(increase(kafka_server_brokertopicmetrics_messagesin_total{kubernetes_namespace=~"platform-mq-.*", topic="platform.cyndi.dlq"}[5m])) by (kubernetes_namespace) > 0
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: inventory
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/fF9U-h7Mk/cyndi?orgId=1&refresh=1m&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/xjoin-prod/deployments/xjoin-kafka-connect/pods"
+        message: "{{ $value }} new messages written to DLQ topic"
