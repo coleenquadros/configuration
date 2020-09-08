@@ -1,0 +1,83 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: hccm
+  platform: insights
+
+name: hccm-presto
+description: presto for hccm app on the Insights Platform
+
+app:
+  $ref: /services/insights/hccm/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- ConfigMap
+- Deployment
+- DeploymentConfig
+- PersistentVolumeClaim
+- Service
+- StatefulSet
+- CronJob
+- Job
+- RoleBinding
+- HorizontalPodAutoscaler
+
+imagePatterns:
+- registry.redhat.io/openshift4/ose-metering-hive
+- registry.redhat.io/openshift4/ose-metering-presto
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: app-sre/ci-int/redhat-registry-io-pull
+    field: all
+
+# templates are listed in the they were listed in the dry run log
+# template: koku
+resourceTemplates:
+# template: hive-metastore
+- name: hive-metastore
+  path: /templates/hccm/hive-metastore.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
+    ref: master
+    parameters:
+      IMAGE: registry.redhat.io/openshift4/ose-metering-hive
+      IMAGE_TAG: latest
+  - namespace:
+      $ref: /services/insights/hccm/namespaces/hccm-prod.yml
+    ref: 59c72d7b3660743a1ae0e0228bdbe79a45405e91
+    parameters:
+      IMAGE: registry.redhat.io/openshift4/ose-metering-hive
+      IMAGE_TAG: latest
+
+# template: presto
+- name: presto
+  path: /templates/hccm/presto.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
+    ref: master
+    parameters:
+      IMAGE: registry.redhat.io/openshift4/ose-metering-presto
+      IMAGE_TAG: latest
+  - namespace:
+      $ref: /services/insights/hccm/namespaces/hccm-prod.yml
+    ref: 59c72d7b3660743a1ae0e0228bdbe79a45405e91
+    parameters:
+      IMAGE: registry.redhat.io/openshift4/ose-metering-presto
+      IMAGE_TAG: latest
