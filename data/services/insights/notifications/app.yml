@@ -1,0 +1,41 @@
+---
+
+$schema: /app-sre/app-1.yml
+
+labels:
+  service: notifications
+  platform: insights
+
+name: notifications
+
+description: Notifications application on the Insights Platform
+
+parentApp:
+  $ref: /services/insights/app.yml
+
+serviceOwners:
+- name: Thomas Heute
+  email: theute@redhat.com
+
+performanceParameters:
+  SLO: 90
+
+dependencies:
+- $ref: /dependencies/ci-ext/service.yml
+- $ref: /dependencies/github/service.yml
+- $ref: /dependencies/quay/service.yml
+- $ref: /dependencies/openshift/service.yml
+- $ref: /dependencies/aws/service.yml
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/cloudservices.yml
+  items:
+  - name: notifications-backend
+    public: true
+    description: Notifications service that serves the UI
+
+codeComponents:
+- name: notifications-backend
+  resource: upstream
+  url: https://github.com/RedHatInsights/notifications-backend
