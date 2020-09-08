@@ -22,15 +22,15 @@ spec:
         summary: '{{ $labels.kubernetes_namespace }} 5xx :rain_cloud:'
         description: '5xx responses observed'
     - alert: PatchmanKafkaLag
-      expr: sum(delta(kafka_consumer_group_lag{group="patchman"}[5m])) by (kubernetes_namespace, topic) > 4000
+      expr: sum(kafka_consumergroup_group_topic_sum_lag{group="patchman", topic=~"platform.inventory.events|patchman.evaluator.upload"}) by (topic) > 4000
       for: 5m
       labels:
         severity: info
         service: insights
         env: prod
       annotations:
-        summary: 'patchman-engine lag delta > 4000 in {{ $labels.kubernetes_namespace }} :rain_cloud:'
-        description: 'topic: {{ $labels.topic }}, current lag delta: {{ $value  }}'
+        summary: 'patchman-engine lag > 4000'
+        description: 'topic: {{ $labels.topic }}, current lag: {{ $value  }}'
     - alert: PatchmanExternalService
       expr: sum(delta(patchman_engine_manager_dependency_call{ namespace="patchman-engine-prod" }[5m])) by (name, status) > 10
       for: 5m
