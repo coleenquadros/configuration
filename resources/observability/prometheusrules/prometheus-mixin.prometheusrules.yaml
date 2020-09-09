@@ -121,6 +121,42 @@ spec:
       for: 10m
       labels:
         severity: high
+    - alert: PrometheusRemoteStorageFailures
+      annotations:
+        message: "Prometheus {{$labels.instance}} failed to send {{ printf \"%.1f\" $value }}% of the samples to {{ $labels.remote_name}}:{{ $labels.url }}"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus/prometheus-PrometheusRemoteStorageFailures.md"
+      expr: |
+        (
+          rate(prometheus_remote_storage_failed_samples_total{job="prometheus"}[5m])
+        /
+          (
+            rate(prometheus_remote_storage_failed_samples_total{job="prometheus"}[5m])
+          +
+            rate(prometheus_remote_storage_succeeded_samples_total{job="prometheus"}[5m])
+          )
+        )
+        * 100
+        > 1
+      for: 15m
+      labels:
+        severity: high
+    - alert: PrometheusRemoteWriteBehind
+      annotations:
+        message: "Prometheus {{$labels.instance}} remote write is {{ printf \"%.1f\" $value }}s behind for {{ $labels.remote_name}}:{{ $labels.url }}."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus/prometheus-PrometheusRemoteStorageFailures.md"
+      expr: |
+        # Without max_over_time, failed scrapes could create false negatives, see
+        # https://www.robustperception.io/alerting-on-gauges-in-prometheus-2-0 for details.
+        (
+          max_over_time(prometheus_remote_storage_highest_timestamp_in_seconds{job="prometheus"}[5m])
+        - on(job, instance) group_right
+          max_over_time(prometheus_remote_storage_queue_highest_sent_timestamp_seconds{job="prometheus"}[5m])
+        )
+        > 120
+      for: 15m
+      labels:
+        severity: high
+
   - name: prometheus-operator
     rules:
     - alert: PrometheusOperatorReconcileErrors
