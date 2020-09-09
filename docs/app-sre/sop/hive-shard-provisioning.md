@@ -133,6 +133,7 @@ This may not be needed in the future, as it is being reworked in https://issues.
 ## Adding the shard to OCM
 
 1. Add `uhc-leadership` namespace. Example: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/6829
+1. Add `view` access to the `uhc-leadership` namespace to the OCM [dev role](/data/teams/ocm/roles/dev.yml).
 1. Add Service Account references to hive, aws-account-opeator and gcp-project-operator namespaces from the uhc namespaces. Example: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/7655
 1. Update `uhc-clusters-service` secret to add new shards. Example: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/7665. It is important to note that the shard it is first attached into a distant region.
 1. The id field is set to a random uuid unique per shard (uuidgen can be used to generate one)
