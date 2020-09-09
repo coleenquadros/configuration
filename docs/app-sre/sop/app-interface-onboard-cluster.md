@@ -347,19 +347,6 @@ At this point you should be able to access the cluster via the console / `oc` cl
         - key: `deadmanssnitch-<cluster_name>-url`
         - value: the `Unique Snitch URL` from deadmanssnitch
 
-    1. Update the Grafana datasources secret in Vault: https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/grafana/datasources
-
-        - Add a new key `<cluster_name>-prometheus` with value that is to be used as a password.  It can be any password.  It is recommended to use a tool like pwgen (ex to create a single 16 character random password: `pwgen -cns 32 1`
-
-    1. Create the following secret in Vault:
-        - Generate the auth token value: `htpasswd -s -n app-sre-observability`
-            At the password prompt, enter the password stored in the [grafana datasources secret](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/grafana/datasources) for the cluster (the one just created in the previous step)
-        - Create `https://vault.devshift.net/ui/vault/secrets/app-interface/show/<cluster_name>/openshift-customer-monitoring/nginx-auth-proxy` ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre-prod-01/openshift-customer-monitoring/nginx-auth-proxy))
-
-            Secret keys:
-            - auth: `<generated auth token value from above>`
-            - cookie-secret: <random_128_char_string> (Can use `pwgen -cns 128 1` or similar to generate )
-
     1. Ensure `enhanced-dedicated-admin` is enabled on the cluster.  Details for this are [here](#enable-enhanced-dedicated-admin)
 
     1. Create an `openshift-customer-monitoring` namespace file for that specific cluster, please use the template provided and replace CLUSTERNAME with the actual cluster name:
@@ -407,23 +394,22 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
     1. After the above changes have merged and the integrations have applied the changes, verify `https://<prometheus|alertmanager>.<cluster_name>.devshift.net` have valid ssl certificates by accessing the URLs.  If no security warning is given and the connection is secure as notifed by the browser than the ssl certificates are valid.
 
-    1. Edit the grafana data sources secret and add the following entries for the new cluster: (Ex https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/resources/observability/grafana/grafana-datasources.secret.yaml#L43-73)
+    1. Edit the grafana data sources secret and add the following entries for the new cluster: (Ex https://gitlab.cee.redhat.com/service/app-interface/-/blob/667dde06bb4c2b27656791ca05d5b7ba47b9d432/resources/observability/grafana/grafana-datasources.secret.yaml#L13-42)
         - <cluster_name>-prometheus - the Prometheus instance in `openshift-customer-monitoring`
             ```yaml
             # /resources/observability/grafana/grafana-datasources.secret.yaml
                 {
                     "access": "proxy",
-                    "basicAuth": true,
-                    "secureJsonData": {
-                        "basicAuthPassword": "{{{ vault('app-interface/app-sre/app-sre-observability-production/grafana/datasources', '<cluster_name>-prometheus') }}}"
-                    },
-                    "basicAuthUser": "app-sre-observability",
                     "editable": false,
                     "jsonData": {
-                        "tlsSkipVerify": true
+                        "tlsSkipVerify": true, # Only need for internal cluster
+                        "httpHeaderName1": "Authorization"
                     },
                     "name": "<cluster_name>-prometheus",
                     "orgId": 1,
+                    "secureJsonData": {
+                        "httpHeaderValue1": "Bearer {{{ vault('app-sre/creds/kube-configs/<cluster_name>', 'token') }}}"
+                    },
                     "type": "prometheus",
                     "url": "https://prometheus.<cluster_name>.devshift.net",
                     "version": 1
@@ -436,7 +422,6 @@ At this point you should be able to access the cluster via the console / `oc` cl
                     "access": "proxy",
                     "editable": false,
                     "jsonData": {
-                        "tlsSkipVerify": true,
                         "httpHeaderName1": "Authorization"
                     },
                     "name": "<cluster_name>-cluster-prometheus",
