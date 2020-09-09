@@ -37,3 +37,17 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net/d/fF9U-h7Mk/cyndi?orgId=1&refresh=1m&var-datasource=crcp01ue1-prometheus"
         link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/xjoin-prod/deployments/xjoin-kafka-connect/pods"
         message: "{{ $value }} new messages written to DLQ topic"
+
+    - alert: CyndiNoRunningConnectors
+      expr: |
+        sum(label_replace(kafka_connect_connect_worker_metrics_connector_running_task_count{connector=~"syndication-sink-.*"}, "cyndi_application", "$1", "connector", "syndication-sink-(.*)\\.v.*")) by (cyndi_application) == 0
+      for: 5m
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: inventory
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/fF9U-h7Mk/cyndi?orgId=1&refresh=1m&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/xjoin-prod/deployments/xjoin-kafka-connect/pods"
+        message: "No connectors are running for {{ $labels.cyndi_application }}"
