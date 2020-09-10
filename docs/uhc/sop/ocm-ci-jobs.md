@@ -39,3 +39,5 @@ vault write sd-uhc/sandbox-tokens aws-account-operator-client-token=$AWS_TOKEN h
 ```
 
 - Step 2. [OCM team] Manually update the `config` (base64 encoded) to include the newly generated tokens that are available now in https://vault.devshift.net/ui/vault/secrets/sd-uhc/show/sandbox-tokens
+
+- Step 3. [OCM team] Manually update the `hive_config` (base64 encoded) to include the newly generated tokens that are available now in https://vault.devshift.net/ui/vault/secrets/app-interface/show/hive-integration/uhc-integration/clusters-cleaner
