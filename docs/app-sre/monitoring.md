@@ -374,15 +374,19 @@ Currently added datasources:
 
 * `app-sre-stage-01-prometheus`: app-sre managed prometheus for `app-sre-stage-01` cluster
 * `app-sre-stage-01-cluster-prometheus`: cluster prometheus for `app-sre-stage-01` cluster
+* `app-sre-stage-02-prometheus`: app-sre managed prometheus for `app-sre-stage-02` cluster
+* `app-sre-stage-02-cluster-prometheus`: cluster prometheus for `app-sre-stage-02` cluster
 * `app-sre-prod-01-prometheus`: app-sre managed prometheus for `app-sre-prod-01` cluster
 * `app-sre-prod-01-cluster-prometheus`: cluster prometehus for `app-sre-prod-01` cluster
+* `app-sre-prod-03-prometheus`: app-sre managed prometheus for `app-sre-prod-03` cluster
+* `app-sre-prod-03-cluster-prometheus`: cluster prometehus for `app-sre-prod-03` cluster
 * `quayiop03ue1-prometheus`: app-sre managed prometheus for `quayp03ue1` cluster
 * `quayiop04ue2-prometheus`: app-sre managed prometheus for `quayp04ue2` cluster
 * `quays02ue1-prometheus`: app-sre managed prometheus for `quays02ue1` cluster
 * `AWS app-sre`: cloudwatch AWS appsre
-* `dsaas-graphite`: graphite on `app-sre-prod-03` cluster
-* `dsaas-bayesian-stage-graphite`: bayesian graphite on `app-sre-stage-02` cluster
-* `dsaas-bayesian-production-graphite`: bayesian graphite on `app-sre-prod-03` cluster
+* `dsaas-graphite`: graphite (osd-monitor) on `app-sre-prod-03` cluster
+* `dsaas-bayesian-stage-graphite`: bayesian graphite (osd-monitor) on `app-sre-stage-02` cluster
+* `dsaas-bayesian-production-graphite`: bayesian graphite (osd-monitor) on `app-sre-prod-03` cluster
 * `starter-us-east-2-cluster-prometheus`: cluster prometheus on `starter-us-east-2-cluster` cluster
 * `starter-us-east-2a-cluster-prometheus`: cluster prometheus on `starter-us-east-2a-cluster` cluster
 * `starter-us-east-1a-cluster-prometheus`: cluster prometheus on `starter-us-east-1a-cluster` cluster
