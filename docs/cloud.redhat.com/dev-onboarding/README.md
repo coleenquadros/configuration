@@ -1,19 +1,31 @@
 # cloud.redhat.com Developer Onboarding
 
-- [Quick Links](#quick-links)
-- [Asking for Help](#asking-for-help)
-- [Forking the app-interface Gitlab Repo](#forking-the-app-interface-gitlab-repo)
-- [Accessing Stage Environment](#accessing-stage-environment)
-- [Logging into quay.io](#logging-into-quay.io)
-- [Using insights-client in Stage](#using-insights-client-in-stage)
-- [Accessing Production Environment](#accessing-production-environment)
-- [Connect with App SRE on Slack](#connect-with-app-sre-on-slack)
-- [How to Promote an Image to Stage](#how-to-promote-an-image-to-stage)
-- [How to Promote an Image to Production](#how-to-promote-an-image-to-production)
-- [How to Update the UI in Stage](#how-to-update-the-ui-in-stage)
-- [How to Update Secrets in Vault](#how-to-update-secrets-in-vault)
-- [How to add a Grafana dashboard](#how-to-add-a-grafana-dashboard)
-- [Adding Alerts](#adding-alerts)
+- [cloud.redhat.com Developer Onboarding](#cloudredhatcom-developer-onboarding)
+  - [Quick Links](#quick-links)
+  - [Asking for Help](#asking-for-help)
+  - [Forking the app-interface Gitlab Repo](#forking-the-app-interface-gitlab-repo)
+  - [Accessing Stage Environment](#accessing-stage-environment)
+  - [Logging into quay.io](#logging-into-quayio)
+  - [Using insights-client in Stage](#using-insights-client-in-stage)
+  - [Accessing Production Environment](#accessing-production-environment)
+  - [Connect with App SRE on Slack](#connect-with-app-sre-on-slack)
+    - [`#sd-app-sre`](#sd-app-sre)
+    - [`#team-insights-info`](#team-insights-info)
+    - [`#sd-app-sre-insights-alerts-stage`](#sd-app-sre-insights-alerts-stage)
+    - [`#sd-app-sre-reconcile`](#sd-app-sre-reconcile)
+    - [CoreOS Slack](#coreos-slack)
+    - [Shared Channels](#shared-channels)
+  - [How to Promote an Image to Stage](#how-to-promote-an-image-to-stage)
+  - [How to Promote an Image to Production](#how-to-promote-an-image-to-production)
+  - [How to Update the UI in Stage](#how-to-update-the-ui-in-stage)
+  - [How to Update Secrets in Vault](#how-to-update-secrets-in-vault)
+    - [Getting access to Vault](#getting-access-to-vault)
+    - [Logging into Vault](#logging-into-vault)
+    - [Updating Vault Secrets](#updating-vault-secrets)
+  - [Metrics and Monitoring](#metrics-and-monitoring)
+    - [How to add a Grafana dashboard](#how-to-add-a-grafana-dashboard)
+    - [Adding Alerts](#adding-alerts)
+    - [Route Alerts to Team Channels in CoreOS Slack](#route-alerts-to-team-channels-in-coreos-slack)
 
 ## Quick Links
 
@@ -127,7 +139,7 @@ This is the primary channel used to communicate with App SRE.  For immediate nee
 
 app-interface is configured to send all saas-deploy notifications to this channel.  You can check this channel to see when a promtion to stage or prod completed and whether it was successful or not.
 
-As teams become more familiar with the promotion flow, we can add team-specific channels for notifications to go to. 
+As teams become more familiar with the promotion flow, we can add team-specific channels for notifications to go to.
 
 ### `#sd-app-sre-insights-alerts-stage`
 
@@ -252,3 +264,7 @@ Alert annotations are used to render action buttons in Slack alert messages:
 - `link_url`: Link to project in Openshift console
 - `message`: The message you want to display in slack or pagerduy
 - `runbook`: Link to SOP in platform-docs or app-interface
+
+### Route Alerts to Team Channels in CoreOS Slack
+
+Follow instructions documented [here](https://gitlab.cee.redhat.com/snippets/2733) to route alerts to your team channel in CoreOS slack.
