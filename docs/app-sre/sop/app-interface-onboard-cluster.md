@@ -524,12 +524,42 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
 1. Enable logging (EFK)
 
-    The EFK stack is currently opt-in and installed by customers.
+    1. Create an `openshift-logging` namespace file for that specific cluster. Content:
 
-    Installing cluster logging is done in two steps.
-
-    1. Create namespace and subscribe to the Elasticsearch and Cluster Logging operators. [Example MR](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/8792)
-    1. Create ES cluster. [Example MR](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/8815)
+    ```yaml
+    # /data/openshift/<cluster_name>/namespaces/openshift-logging.yml
+    ---
+    $schema: /openshift/namespace-1.yml
+    
+    labels: {}
+    
+    name: openshift-logging
+    description: openshift-logging namespace
+    
+    cluster:
+      $ref: /openshift/<cluster_name>/cluster.yml
+    
+    app:
+      $ref: /services/app-sre/app.yml
+    
+    environment:
+      $ref: /products/app-sre/environments/production.yml
+    
+    managedResourceTypes:
+    - Subscription
+    - ClusterLogging
+    
+    openshiftResources:
+    - provider: resource
+      path: /setup/clusterlogging/elasticsearch-operator.subscription.yaml
+    - provider: resource
+      path: /setup/clusterlogging/cluster-logging.subscription.yaml
+    - provider: resource-template
+      type: jinja2
+      path: /setup/clusterlogging/instance.clusterlogging.yaml
+      variables:
+        memoryRequests: 8G
+    ```
 
     OSD docs for reference: https://docs.openshift.com/dedicated/4/logging/dedicated-cluster-deploying.html
 
