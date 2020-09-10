@@ -27,21 +27,32 @@ managedResourceTypes:
 imagePatterns:
 - quay.io/app-sre/pagerduty-operator-registry
 
+parameters:
+  REGISTRY_IMG: quay.io/app-sre/pagerduty-operator-registry
+  ACKNOWLEDGE_TIMEOUT: 21600
+  RESOLVE_TIMEOUT: 0
+  ESCALATION_POLICY: PNCPMTV
+  # "silent" escalation policy usable in any environment, will not page on-call.
+  ESCALATION_POLICY_SILENT: PNCPMTV
+
 resourceTemplates:
 - name: pagerduty-operator
   url: https://github.com/openshift/pagerduty-operator
   path: /hack/olm-registry/olm-artifacts-template.yaml
   parameters:
-    REGISTRY_IMG: quay.io/app-sre/pagerduty-operator-registry
-    ACKNOWLEDGE_TIMEOUT: 21600
-    RESOLVE_TIMEOUT: 0
-    SERVICE_PREFIX: osd
-    ESCALATION_POLICY: PNCPMTV
+    SERVICE_PREFIX: osd_int
   targets:
   - namespace:
       $ref: /services/osd-operators/namespaces/pagerduty-operator-integration.yml
     ref: master
     upstream: openshift-pagerduty-operator-gh-build-master
+
+- name: pagerduty-operator
+  url: https://github.com/openshift/pagerduty-operator
+  path: /hack/olm-registry/olm-artifacts-template.yaml
+  parameters:
+    SERVICE_PREFIX: osd_stage
+  targets:
   - namespace:
       $ref: /services/osd-operators/namespaces/pagerduty-operator-stage.yml
     ref: master
@@ -55,20 +66,27 @@ resourceTemplates:
     ref: master
     upstream: openshift-pagerduty-operator-gh-build-master    
   - namespace:
+      $ref: /services/osd-operators/namespaces/ssotest01ue1/pagerduty-operator.yml
+    ref: master
+    upstream: openshift-pagerduty-operator-gh-build-master    
+
+- name: pagerduty-operator
+  url: https://github.com/openshift/pagerduty-operator
+  path: /hack/olm-registry/olm-artifacts-template.yaml
+  parameters:
+    # keep prefix as 'osd' to not result in renaming existing services in production
+    SERVICE_PREFIX: osd
+    # set to real on-call escalation policy
+    ESCALATION_POLICY: PA4586M
+    # send CICD org to silent policy
+    SILENT_ALERT_LEGALENTITY_IDS: ["1aV37K1VQv2zSStwSkdwBNOUBGI"]
+  targets:
+  - namespace:
       $ref: /services/osd-operators/namespaces/pagerduty-operator-production.yml
     ref: 686d3def3fcebeaba0b39d9479b6ca1bd55ab7f5
-    parameters:
-      ESCALATION_POLICY: PA4586M
   - namespace:
       $ref: /services/osd-operators/namespaces/hivep01ue1/pagerduty-operator.yml
     ref: 686d3def3fcebeaba0b39d9479b6ca1bd55ab7f5
-    parameters:
-      ESCALATION_POLICY: PA4586M
   - namespace:
       $ref: /services/osd-operators/namespaces/hivep02ue1/pagerduty-operator.yml
     ref: 686d3def3fcebeaba0b39d9479b6ca1bd55ab7f5
-    parameters:
-      ESCALATION_POLICY: PA4586M
-  - namespace:
-      $ref: /services/osd-operators/namespaces/ssotest01ue1/pagerduty-operator.yml
-    ref: master
