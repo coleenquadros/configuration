@@ -109,10 +109,12 @@ Each user with this role can approve MRs by adding a `/lgtm` comment in the MR i
 
 If a `/lgtm` comment is added and all conditions are valid, an `approved` label will be automatically added to the MR, and it will be automatically rebased and merged within a few minutes.
 
+Can I get pinged on merge requests updating saas files I am an approver for? Yes! Add `tag_on_merge_requests: true` to your user file.
+
 Additional supported commands:
-- `/lgtm cancel` - cancel previous LGTM comment
-- `/hold` - prevents merging, does not cancel previous LGTM (`approved` label will be removed)
-- `/hold cancel` - cancels previous HOLD and follows existing LGTM comments.
+- `/lgtm cancel` - cancel previous LGTM comment (`bot/lgtm` label will be removed)
+- `/hold` - prevents merging, does not cancel previous LGTM (`bot/approved` label will be removed, `bot/hold` label will be added)
+- `/hold cancel` - cancels previous HOLD and follows existing LGTM comments  (`bot/hold` label will be removed)
 - `/retest` - run tests again.
 
 MR is not being merged? [follow this SOP](/docs/app-sre/sop/app-interface-periodic-job-debug.md)
@@ -123,7 +125,7 @@ The App SRE team will contact you directly to migrate any saas repos you have to
 
 ## Questions?
 
-Ping @app-sre-ic on #sd-app-sre in the CoreOS slack!
+Reach out to us on #sd-app-sre in the CoreOS slack!
 
 ## Future development
 
