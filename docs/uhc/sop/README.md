@@ -387,7 +387,7 @@ Controller manager is down.
 - Check that the service account used by the OCM clusters service to talk
   to the _Hive_ and AWS account operator exists and has the required
   permissions. The complete _kubeconfig_ files containing the details
-  of these service accounts are stored in `external_cluster_services.config`.
+  of these service accounts are stored in `provision_shards.config`.
   This file contains the complete _kubeconfig_ of those services.
 
   The OCM clusters service needs full permissions on configuration maps
