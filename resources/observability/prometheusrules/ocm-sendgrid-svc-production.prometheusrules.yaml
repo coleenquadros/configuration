@@ -1,0 +1,130 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: ocm-sendgrid-service-production
+spec:
+  groups:
+  - name: ocm-sendgrid-service-production
+    rules:
+    - alert: OCM Sendgrid Service DOWN
+      annotations:
+        message: "No targets found for OCM Sendgrid Service in namespace {{ $labels.namespace }}. Sendgrid Service is down."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop/sendgrid#ocm-sendgrid-service-down"
+      expr: |
+        absent(up{job="ocm-sendgrid-service-metrics",namespace="sendgrid-production"} == 1)
+      for: 5m
+      labels:
+        service: ocm-sendgrid-service
+        severity: high
+    - alert: OCM Sendgrid Service 5xx Errors High
+      annotations:
+        message: "OCM Sendgrid Service in namespace {{ $labels.namespace }} is returning 5xx errors for {{ $value | humanize }}% of requests."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop/sendgrid#ocm-sendgrid-service-5xx-errors-high"
+      expr: |
+        sum without(instance, pod, job, code) (rate(api_inbound_request_count{code=~"^(?:5..)$",namespace="sendgrid-production",service="ocm-sendgrid-service-metrics"}[5m]))
+        /
+        sum without(instance, pod, job, code) (rate(api_inbound_request_count{namespace="sendgrid-production",service="ocm-sendgrid-service-metrics"}[5m])) * 100 > 5
+      for: 10m
+      labels:
+        service: ocm-sendgrid-service
+        severity: medium
+    - alert: OCM Sendgrid Service 4xx Errors High
+      annotations:
+        message: "OCM Sendgrid Service in namespace {{ $labels.namespace }} is returning 4xx errors for {{ $value | humanize }}% of requests."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop/sendgrid#ocm-sendgrid-service-4xx-errors-high"
+      expr: |
+        sum without(instance, pod, job, code) (rate(api_inbound_request_count{code=~"^(?:4..)$",namespace="sendgrid-production",service="ocm-sendgrid-service-metrics"}[5m]))
+        /
+        sum without(instance, pod, job, code) (rate(api_inbound_request_count{namespace="sendgrid-production",service="ocm-sendgrid-service-metrics"}[5m])) * 100 > 5
+      for: 10m
+      labels:
+        service: ocm-sendgrid-service
+        severity: medium
+    - alert: OCM Sendgrid Service Latency High
+      annotations:
+        message: "OCM Sendgrid Service in namespace {{ $labels.namespace }} 50th percentile latency is greater than 2s. Current value: {{ $value | humanize }}"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop/sendgrid#ocm-sendgrid-service-latency-high"
+      expr: |
+        histogram_quantile(0.50, sum(rate(api_inbound_request_duration_bucket{namespace="sendgrid-production",service="ocm-sendgrid-service-metrics"}[1m])) by (le)) > 2
+      for: 10m
+      labels:
+        service: ocm-sendgrid-service
+        severity: medium
+    - alert: OCM Sendgrid Service Job(s) Failed 
+      annotations:
+        message: "OCM Sendgrid Service has failed jobs in {{ $labels.namespace }}"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop/sendgrid#ocm-sendgrid-service-jobs-failed"
+      expr: |
+        sendgrid_service_jobs_max_retry == 1
+      labels:
+        service: ocm-sendgrid-service
+        severity: medium
+    - alert: OCM dependencies - Sendgrid 5xx Errors High
+      annotations:
+        message: "Sendgrid is returning 5xx errors for {{ $value | humanize }}% of requests."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop/sendgrid#sendgrid-service-dependencies"
+      expr: |
+        sum without(instance, pod, job, code) (rate(sendgrid_service_api_request_count{code=~"^(?:5..)$",namespace="sendgrid-production",service="ocm-sendgrid-service-metrics"}[5m]))
+        /
+        sum without(instance, pod, job, code) (rate(sendgrid_service_api_request_count{namespace="sendgrid-production",service="ocm-sendgrid-service-metrics"}[5m])) * 100 > 5
+      for: 10m
+      labels:
+        service: ocm-sendgrid-service
+        severity: medium
+    - alert: OCM dependencies - Sendgrid 4xx Errors High
+      annotations:
+        message: "OCM Sendgrid Service in namespace {{ $labels.namespace }} is returning 4xx errors for {{ $value | humanize }}% of requests."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop/sendgrid#sendgrid-service-dependencies"
+      expr: |
+        sum without(instance, pod, job, code) (rate(sendgrid_service_api_request_count{code=~"^(?:4..)$",namespace="sendgrid-production",service="ocm-sendgrid-service-metrics"}[5m]))
+        /
+        sum without(instance, pod, job, code) (rate(sendgrid_service_api_request_count{namespace="sendgrid-production",service="ocm-sendgrid-service-metrics"}[5m])) * 100 > 5
+      for: 10m
+      labels:
+        service: ocm-sendgrid-service
+        severity: medium
+    - alert: OCM dependencies - Sendgrid Latency High
+      annotations:
+        message: "OCM Sendgrid Service in namespace {{ $labels.namespace }} 50th percentile latency is greater than 2s. Current value: {{ $value | humanize }}"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop/sendgrid#sendgrid-service-dependencies"
+      expr: |
+        histogram_quantile(0.50, sum(rate(sendgrid_service_api_request_duration_bucket{namespace="sendgrid-production",service="ocm-sendgrid-service-metrics"}[1m])) by (le)) > 2
+      for: 10m
+      labels:
+        service: ocm-sendgrid-service
+        severity: medium
+    - alert: OCM dependencies - Sendgrid SubAccount Quota less than 100 
+      annotations:
+        message: "There are less than 100 sub accounts remaining for Sendgrid quota in namespace {{ $labels.namespace }}"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop/sendgrid#sendgrid-service-dependencies-sendgrid-subaccount-quota-low"
+      expr: |
+        (sendgrid_service_api_subuser_quota_limit - sendgrid_service_api_subuser_quota_usage) < 100
+      for: 10m
+      labels:
+        service: ocm-sendgrid-service
+        severity: high
+    - alert: OCM dependencies - Sendgrid SubAccount Quota less than 20 
+      annotations:
+        message: "There are less than 20 sub accounts remaining for Sendgrid quota in namespace {{ $labels.namespace }}"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop/sendgrid#sendgrid-service-dependencies-sendgrid-subaccount-quota-low"
+      expr: |
+        (sendgrid_service_api_subuser_quota_limit - sendgrid_service_api_subuser_quota_usage) < 20
+      for: 10m
+      labels:
+        service: ocm-sendgrid-service
+        severity: high
+    - alert: OCM dependencies - Sendgrid API Rate Limited 
+      annotations:
+        message: "OCM Sendgrid API Rate Limit reached in namespace {{ $labels.namespace }}"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop/sendgrid#sendgrid-service-dependencies"
+      expr: |
+        increase(sendgrid_service_api_request_count{code="429"} [5m]) > 0
+      for: 10m
+      labels:
+        service: ocm-sendgrid-service
+        severity: medium
