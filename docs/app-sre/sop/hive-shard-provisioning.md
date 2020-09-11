@@ -67,11 +67,10 @@ Provisioning hive is a multi-step process:
 
 #### operator resources (secrets, configmaps, etc)
 
-Add a new directory named after the shard name here: [`/data/services/osd-operators/namespaces`](/data/services/osd-operators/namespaces)
+Add a new directory named after the shard name here: [`/data/services/osd-operators/namespaces`](/data/services/osd-operators/namespaces). A few notes about this:
 
-It is typical to copy the content from another shard of the same environment as we are re-using the same configs and secrets for all shards.
-
-Make sure that the namespaces belong to the environment created above.
+* It is typical to copy the content from another shard of the same environment as we are re-using the same configs and secrets for all shards. Unless instructed otherwise, start with a prod as an example as it will have a really working setup.
+* Make sure that the namespaces belong to the environment created above.
 
 #### saas deploy jobs
 
@@ -135,22 +134,176 @@ This may not be needed in the future, as it is being reworked in https://issues.
 1. Add `uhc-leadership` namespace. Example: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/6829
 1. Add `view` access to the `uhc-leadership` namespace to the OCM [dev role](/data/teams/ocm/roles/dev.yml).
 1. Add Service Account references to hive, aws-account-opeator and gcp-project-operator namespaces from the uhc namespaces. Example: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/7655
-1. Update `uhc-clusters-service` secret to add new shards. Example: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/7665. It is important to note that the shard it is first attached into a distant region.
+1. Update `uhc-clusters-service` secret to add new shards. Example: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/8951. We don't assign any region nor cloud provider, we will manually pin clusters to this shard in the validation phase.
 1. The id field is set to a random uuid unique per shard (uuidgen can be used to generate one)
 
 ## Validations
 
-- Consult SDA QE for a full stack test
-- Test provisioning an AWS cluster
-- Test provisioning a GCP cluster
-- Test that private clusters can be provisioned
-  - Can SRE-P access them?
-  - Does Hive report them as Reachable?
-- Make sure certificates are delivered quickly (currently within 10 minutes of Ready in OCM)
-- Verify that all syncsetinstances report Applied == true. Currently the managed-velero sss takes a while, but after some minutes, all should report successfully applied.
-- Verify that at least one round of osde2e tests ran successfully when using the new shard. Dashboards:
-  - https://prow.ci.openshift.org/job-history/gs/origin-ci-test/logs/osde2e-prod-aws-e2e-default
-  - https://openshift.github.io/osde2e/
+When creating clusters make sure that you're logged in the correct environment. Use the option `--url` of the `ocm login` command to connect to the proper environment.
+
+* You can follow the cluster creation using the `ocm status` command
+* Make sure you delete the clusters created with the `ocm delete /api/clusters_mgmt/v1/clusters/<CLUSTER ID>` command
+
+For all the created clusters perform the following validations:
+
+* Make sure certificates are delivered quickly (at least 10 minutes from `Ready` status reported by `ocm`). You can inspect the console url:
+
+    ```shell
+    ID=<cluster id>
+    CONSOLE=$(ocm get cluster $ID | jq -r '("console-openshift-console.apps." + .name + "." + .dns.base_domain)')
+    openssl s_client -servername $CONSOLE -showcerts -connect $CONSOLE:443 2>/dev/null </dev/null | openssl x509 -text
+    ```
+
+    and make sure that it is not self signed. Alternative you can make sure that `curl` doesn't complain (but that needs that you have up to date CAs installed in your system, which is not always the case)
+
+* Verify that all syncsetinstances report `Applied == true`. Currently the managed-velero sss takes a while, but after some minutes, all should report successfully applied. In order to do this you have to inspect the `ClusterSync` CRD in the shard project related to the cluster you have created, e.g
+
+   ```shell
+   oc get clustersync -n uhc-staging-1fjs44ifpfolii89opv6ua394b1qti0l -o yaml | grep result | sort --uniq
+         result: Success
+   ```
+
+### Test provisioning an AWS cluster
+
+In the following example we create a cluster pinning it to the shard we have added to OCM before.
+
+```shell
+ocm post /api/clusters_mgmt/v1/clusters <<EOJ
+{
+    "byoc": false,
+    "name": "rporresm-aws01",
+    "region": {
+        "id": "us-east-1"
+    },
+    "nodes": {
+        "compute": 4,
+        "compute_machine_type": {
+            "id": "m5.xlarge"
+        }
+    },
+    "managed": true,
+    "cloud_provider": {
+        "id": "aws"
+    },
+    "multi_az": false,
+    "load_balancer_quota": 0,
+    "storage_quota": {
+        "unit": "B",
+        "value": 107374182400
+    }
+    ,
+    "properties": {
+        "provision_shard_id": "11015a3e-9e4d-4cf1-93d7-06fb2cf83a1c"
+    }
+}
+EOJ
+```
+
+### Test provisioning a GCP cluster
+
+Example
+
+```shell
+ocm post /api/clusters_mgmt/v1/clusters <<EOJ
+{
+    "byoc": false,
+    "name": "gshereme-test3-sep10",
+    "region": {
+        "id": "us-east1"
+    },
+    "nodes": {
+        "compute": 4,
+        "compute_machine_type": {
+            "id": "custom-4-16384"
+        }
+    },
+    "managed": true,
+    "cloud_provider": {
+        "id": "gcp"
+    },
+    "multi_az": false,
+    "load_balancer_quota": 0,
+    "storage_quota": {
+        "unit": "B",
+        "value": 107374182400
+    },
+    "properties": {
+        "provision_shard_id": "11015a3e-9e4d-4cf1-93d7-06fb2cf83a1c"
+    }
+}
+EOJ
+```
+
+### Test that private clusters can be provisioned
+
+Example:
+
+```shell
+ocm post /api/clusters_mgmt/v1/clusters <<EOJ
+{
+    "byoc": false,
+    "name": "rporresm-aws02p",
+    "region": {
+        "id": "us-east-1"
+    },
+    "nodes": {
+        "compute": 4,
+        "compute_machine_type": {
+            "id": "m5.xlarge"
+        }
+    },
+    "managed": true,
+    "cloud_provider": {
+        "id": "aws"
+    },
+    "multi_az": false,
+    "load_balancer_quota": 0,
+    "storage_quota": {
+        "unit": "B",
+        "value": 107374182400
+    },
+    "network": {
+        "machine_cidr": "10.225.0.0/16",
+        "service_cidr": "172.30.0.0/16",
+        "pod_cidr": "10.128.0.0/14"
+    },
+    "api": {
+        "listening": "internal"
+    },
+    "properties": {
+        "provision_shard_id": "11015a3e-9e4d-4cf1-93d7-06fb2cf83a1c"
+    }
+}
+EOJ
+```
+
+Once created, there are two further validations
+
+* Can SRE-P access them? Create a JIRA card in OHSS project to make sure that SREP can access the cluster. Example: https://issues.redhat.com/browse/OHSS-1321
+* Does Hive report them as Reachable? To check this, you have to go into the cluster project in the hive shard (`uhc-<environment>-<cluster_id>`) and inspect the `ClusterDeployment` CRD.  Under the `.status.conditions` section you will find the `type` `ActiveAPIURLOverride` that should tell you that the cluster is reachable. e.g.
+
+    ```shell
+    oc get clusterdeployment rporresm-aws02p -o json | jq '.status.conditions[] | select(.type | contains("ActiveAPIURLOverride"))'
+    {
+      "lastProbeTime": "2020-09-10T16:20:10Z",
+      "lastTransitionTime": "2020-09-10T16:20:10Z",
+      "message": "cluster is reachable",
+      "reason": "ClusterReachable",
+      "status": "True",
+      "type": "ActiveAPIURLOverride"
+    }
+    ```
+
+## Attach the shard to a region
+
+Once all the validations have been completed the shard is ready to be associated with providers and regions. Take a look into other shards configs to see the syntax of the `cloud_providers` section
+
+### Verify that at least one round of osde2e tests ran successfully when using the new shard. Dashboards:
+
+osd2e2e tests use `osdctl` to create new clusters periodically and run validations on top of them. At the moment `osdctl` does not support to specify a shard, so these tests will be run once we have attached the shard to a region. Once that is done, wait a few hours and check the following urls to see a cluster associated in the new shard passing osde2e tests.
+
+- https://prow.ci.openshift.org/job-history/gs/origin-ci-test/logs/osde2e-prod-aws-e2e-default
+- https://openshift.github.io/osde2e/
 
 ## OSD operators notes
 
