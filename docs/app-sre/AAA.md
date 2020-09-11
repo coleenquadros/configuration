@@ -121,7 +121,11 @@ Every app-sre engineer should have access to the following
   - [SD-org calendar](https://calendar.google.com/calendar?cid=cmVkaGF0LmNvbV9hZzdoNG5kMnIydGlrM2dqZWxhaGRmbGhkOEBncm91cC5jYWxlbmRhci5nb29nbGUuY29t)
   - [SD-org PTO / OOO](https://calendar.google.com/calendar?cid=cmVkaGF0LmNvbV8xN2piaHNtYmR2MTdhMTJhaHBvcDc5cWJ0a0Bncm91cC5jYWxlbmRhci5nb29nbGUuY29t)
 
-- BlueJeans:
+- Google Meet:
+
+  - App SRE bridge: https://meet.google.com/zti-gkvy-pvn
+
+- BlueJeans (still used for communications with teams not migrated to Google Meet and as backup solution when Meet is down):
 
   - Install bluejeans client
   - App SRE bridge: https://bluejeans.com/994349364/8531
@@ -131,7 +135,7 @@ Every app-sre engineer should have access to the following
   - Many people just use the web email client, others use thunderbird.
   - Recommended to sort into folders
   - https://post-office.corp.redhat.com/mailman/listinfo is the mailing list central
-    - ACCESS: sd-app-sre -> speak to @jake, @jonathan beakley or @paul on slack
+    - ACCESS: sd-app-sre -> speak to @jonathan beakley or @paul on slack
     - ACCESS: sd-notifications -> subscribe from UI
     - ACCESS: sd-org -> subscribe from UI
     - ACCESS: sres -> subscribe from UI
@@ -162,7 +166,7 @@ Every app-sre engineer should have access to the following
   - Submit PRs to be added to OWNERS once access is granted:
     - https://github.com/openshift/telemeter/blob/master/OWNERS
     - https://github.com/openshift/cincinnati/blob/master/OWNERS_ALIASES
-  - e-mail Jake Moshenko or ping on slack for access to quay github group
+  - Ping on slack for access to quay github group
 
 - AWS
   - Nothing to do. Access obtained via a [role](/data/teams/app-sre/roles/app-sre.yml)
@@ -217,7 +221,7 @@ Every app-sre engineer should have access to the following
 - Pendo:
   - This is necessary to post maintenance and outage messages in https://cloud.redhat.com/openshift
   - Access is provided via email to Cameron Britt <cbritt@redhat.com> and Jeremy Perry <jeperry@redhat.com>.
-  - Logging in is done using the full Red Hat email.
+  - [Logging](https://app.pendo.io/login) in is done using the full Red Hat email.
 
 - Unleash:
   - Feature toggle service to enable/disable features in runtime.
@@ -324,7 +328,7 @@ We will provide updates in the #sd-org slack channel as the incident progresses.
 
 During the incident:
 
-- Join the [App-SRE Bluejeans Bridge](https://bluejeans.com/994349364/8531)
+- Join the [App-SRE Meet Bridge](https://meet.google.com/zti-gkvy-pvn) or [App-SRE Bluejeans Bridge](https://bluejeans.com/994349364/8531) in case Meet is down
   - If the incident investigation needs assistance from the developer teams, also send them the link and ask to join in
 
 Post incident comms, followups:
@@ -506,12 +510,8 @@ AppSRE on-call may be assigned PagerDuty incidents that were triggered by our te
     - #sd-sre-platform on slack.coreos.org
     - Create a JIRA: [task](https://issues.redhat.com/secure/CreateIssueDetails!init.jspa?pid=12323823&issuetype=3&customfield_12316441=14554&priority=10000) or [incident](https://issues.redhat.com/secure/CreateIssueDetails!init.jspa?pid=12323823&issuetype=10901&customfield_12316441=14554&priority=10000). [More info](https://mojo.redhat.com/docs/DOC-1223261).
 
-- BLR infrastructure -> PnT Devops irc -> Mattermost: sureshn, snandago@redhat.com -> PnT Devops
-- RDU infrastructure ->
-- OpenStack project -> Pnt Devops https://mojo.redhat.com/docs/DOC-1049381
+- OpenStack project -> Pnt Devops https://docs.engineering.redhat.com/pages/viewpage.action?pageId=140541042
 
-<!- ## Query app-interface
-- https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/app-interface-basic-auth-prod ->
 
 ### Acknowledgements
 
