@@ -389,8 +389,6 @@ Currently added datasources:
 * `dsaas-bayesian-production-graphite`: bayesian graphite (osd-monitor) on `app-sre-prod-03` cluster
 * `starter-us-east-2-cluster-prometheus`: cluster prometheus on `starter-us-east-2-cluster` cluster
 * `starter-us-east-2a-cluster-prometheus`: cluster prometheus on `starter-us-east-2a-cluster` cluster
-* `starter-us-east-1a-cluster-prometheus`: cluster prometheus on `starter-us-east-1a-cluster` cluster
-* `starter-us-east-1b-cluster-prometheus`: cluster prometheus on `starter-us-east-1b-cluster` cluster
 * `elasticsearch-monitoring`: `.monitoring-es*` database on AWS elasitcsearch
 * `elasticsearch-logstash`: `.monitoring-logstash*` database on AWS elasitcsearch
 
