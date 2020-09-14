@@ -1,0 +1,24 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: insights-approval-prod
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: approval-api-prod
+    rules:
+      - alert: Approval5xxErrors
+        expr: (sum(rate(api_3scale_gateway_api_status{exported_service="approval",status="5xx"}[1m])) / sum(rate(api_3scale_gateway_api_status{exported_service="approval"}[1m]))) * 100 > 50
+        for: 10m
+        labels:
+          severity: info
+          service: insights
+          env: prod
+        annotations:
+          dashboard: "https://GRAFANA_URL"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/approval-prod/deployments/approval-api"
+          description: "Approval API has been throwing 5xx errors more than 50% of the time for the last 10 minutes"
