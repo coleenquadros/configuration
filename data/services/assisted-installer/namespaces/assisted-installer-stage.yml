@@ -3,21 +3,21 @@ $schema: /openshift/namespace-1.yml
 
 labels: {}
 
-name: assisted-installer
-description: namespace for assisted-installer production
+name: assisted-installer-stage
+description: namespace for assisted-installer stage
 
 cluster:
-  $ref: /openshift/app-sre-prod-04/cluster.yml
+  $ref: /openshift/app-sre-stage-01/cluster.yml
 
 app:
   $ref: /services/assisted-installer/app.yml
 
 environment:
-  $ref: /products/osdv4/environments/production.yml
+  $ref: /products/osdv4/environments/stage.yml
 
 networkPoliciesAllow:
-- $ref: /services/ocm/namespaces/uhc-production.yml
-- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-04.yml
+- $ref: /services/ocm/namespaces/uhc-stage.yml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
 
 managedResourceTypes:
 - ServiceAccount
@@ -47,6 +47,10 @@ openshiftResources:
   version: 4
   annotations:
     qontract.recycle: "true"
+- provider: vault-secret
+  name: jenkins
+  path: app-interface/assisted-installer/jenkins/stage
+  version: 2
 
 managedRoles: true
 
@@ -55,11 +59,11 @@ managedTerraformResources: true
 terraformResources:
 - provider: s3
   account: app-sre
-  identifier: assisted-installer
+  identifier: assisted-installer-stage
   defaults: /terraform/resources/assisted-installer/s3-backup-1.yml
   output_resource_name: assisted-installer-s3
 - provider: rds
   account: app-sre
-  identifier: assisted-installer
+  identifier: assisted-installer-stage
   defaults: /terraform/resources/assisted-installer/rds-1.yml
   output_resource_name: assisted-installer-rds
