@@ -72,6 +72,15 @@ Add a new directory named after the shard name here: [`/data/services/osd-operat
 * It is typical to copy the content from another shard of the same environment as we are re-using the same configs and secrets for all shards. Unless instructed otherwise, start with a prod as an example as it will have a really working setup.
 * Make sure that the namespaces belong to the environment created above.
 
+#### SREP IDP SelectorSyncSets
+
+The `OpenShift_SRE` IDP associated to every OSD is configured via a SelectorSyncSet in hive:
+
+- `osd-google-secret` for production environments, e.g. [/data/services/osd-operators/namespaces/hivep01ue1/cluster-scope.yml](/data/services/osd-operators/namespaces/hivep01ue1/cluster-scope.yml)
+- `osd-ldap-secret` for staging and integration, e.g. [/data/services/osd-operators/namespaces/hives02ue1/cluster-scope.yml](/data/services/osd-operators/namespaces/hives02ue1/cluster-scope.yml)
+
+Make sure that the SSS deployed corresponds to your environment
+
 #### saas deploy jobs
 
 OSD operator are deployed using saas-file. In order to deploy to a new shard, a new target must be added to all of the OSD operators saas files located here: [`/data/services/osd-operators/cicd/saas`](/data/services/osd-operators/cicd/saas)
