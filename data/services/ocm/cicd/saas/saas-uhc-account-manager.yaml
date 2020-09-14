@@ -179,6 +179,54 @@ resourceTemplates:
       UHC_DEBUG: "true"
       UNLEASH_URL: "https://ocm-stage.unleash.devshift.net/api"
   - namespace:
+      $ref: /services/ocm/namespaces/uhc-stage-appsres04ue2.yml
+    ref: master
+    upstream: service-uhc-account-manager-gl-build-master
+    parameters:
+      FETCH_TELEMETER_METRICS_CRON_SCHEDULE: "*/5 * * * *"
+      SUSPEND_FETCH_TELEMETER_METRICS_CRON: "true"
+      FETCH_TELEMETER_METRICS_DRY_RUN: "false"
+      TELEMETER_BASE_URL: "https://infogw-proxy.api.stage.openshift.com/"
+      TELEMETER_DEBUG: "true"
+      RHIT_BASE_CANDLEPIN_URL: https://admin.rhsm.stage.redhat.com/candlepin
+      OCR_BASE_URL: https://rhstage.ocr-inc.com
+      # These rate limit values are purposefully insanely high to ensure they do not get in the way of scale testing in stage
+      CLUSTER_REG_RATE_LIMIT: 500000
+      ORG_CLUSTER_REG_RATE_LIMIT: 750000
+      ENABLE_QUOTA_ENFORCEMENT: "true"
+      ENABLE_QUOTAID: "true"
+      DB_MAX_OPEN_CONNS: 750
+      SENTRY_URL: "sentry.stage.devshift.net"
+      SENTRY_PROJECT: "10"
+      GLOG_V: 5
+      SUSPEND_HYDRA_FETCH_ORGANIZATIONS_DATA_CRON: "true"
+      HYDRA_FETCH_ORGANIZATONS_DATA_DRY_RUN: "false"
+      HYDRA_DEBUG: "false"
+      DEPROVISION_OLD_SUBSCRIPTIONS_CRON_SCHEDULE: "30 17 * * *"
+      # Update the value to any random string to perform a rolling update of the deployment.
+      UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_1
+      SUBSCRIPTION_BASED_DATA_RECONCILER_CRON_SCHEDULE: "*/30 * * * *"
+      SUBSCRIPTION_BASED_DATA_RECONCILER_CLIENT_CARDINALITY: "5"
+      SUBSCRIPTION_STATUS_RECONCILER_RELEASED_UNRELEASED_TRIGGER_DURATION: "1h"
+      # Don't run OCP Usage reconciliation jobs in stage, since they just fail anyway without a public rhsm stage endpoint
+      # Suspension params should always be env specific
+      SUSPEND_ACCOUNT_RECONCILER_CRON: "true"
+      SUSPEND_DEPROVISION_OLD_SUBSCRIPTIONS_CRON: "true"
+      SUSPEND_OCP_USAGE_RECONCILER_CRON: "true"
+      SUSPEND_OCP_USAGE_CLEANER_CRON: "true"
+      SUSPEND_SUBSCRIPTION_BASED_DATA_RECONCILER_CRON: "true"
+      SUSPEND_EBS_ACCOUNT_RECONCILER_CRON: "true"
+      SUSPEND_SUBSCRIPTION_STATUS_RECONCILER_CRON: "true"
+      # TODO un-suspend reg cred pool loader once issues are resolved
+      SUSPEND_REGISTRY_CREDENTIAL_POOL_LOADER_CRON: "true"
+      REGISTRY_CREDENTIAL_POOL_LOADER_CRON_SCHEDULE: "0 * * * *"
+      REGISTRY_CREDENTIAL_POOL_LOADER_DRY_RUN: "false"
+      REGISTRY_CREDENTIAL_POOL_LOADER_WORKER_COUNT: "1"
+      REGISTRY_CREDENTIAL_POOL_LOADER_CARDINALITY: "5"
+      REGISTRY_CREDENTIAL_POOL_LOADER_HIGH_WATERMARK: "10"
+      UHC_DEBUG: "true"
+      UNLEASH_URL: "https://ocm-stage.unleash.devshift.net/api"
+  - namespace:
       $ref: /services/ocm/namespaces/uhc-production.yml
     ref: ccd35baf05866f785faf2fda88d3aa18c9c88f06
     parameters:
