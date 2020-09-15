@@ -285,7 +285,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
     # https://github.com/openshift/managed-cluster-config/blob/master/deploy/osd-project-request-template/02-role.dedicated-admins-project-request.yaml#L12
     - resource: Template
       resourceNames:
-        - osd-project-request
+        - project-request
     - resource: Project
       resourceNames:
         - cluster
