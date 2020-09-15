@@ -11,6 +11,7 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
 - [I can not access X](#i-can-not-access-x)
 - [I can not access ci-ext](#i-can-not-access-ci-ext)
 - [What is the Console or Kibana URL for a service](#what-is-the-console-or-kibana-url-for-a-service)
+- [Can you restart my pods](#can-you-restart-my-pods)
 - [Jenkins is going to shut down](#jenkins-is-going-to-shutdown)
 - [How can I make my PR check job run concurrently](#how-can-i-make-my-pr-check-job-run-concurrently)
 - [How can I see who has access to a service](#how-can-i-see-who-has-access-to-a-service)
@@ -77,6 +78,18 @@ Choose the namespace for which you would like to find the Console/Kibana URL. Fo
 Choosing the namespace will take you to the namespace's page, in which you can find a link to the cluster running this namespace.
 
 In the Cluster page, you can find links to the cluster's Console and to the cluster's Kibana.
+
+### Can you restart my pods
+
+There are cases where pods get into an unhealthy state and may require a restart. In such cases, here is what you should do:
+1. Verify that you are exposing a `REPLICAS` parameter for templating.
+2. Submit a MR to app-interface to changes `REPLICAS` to 0 (owners of that saas file are able to self-service the merge).
+3. After the MR is merged and applied, submit another MR to app-interface to change `REPLICAS` back to the original value.
+
+Now that the fire is out, please work towards not having to do this again. The solution depends on the underlying issue, but here are some common cases:
+1. A dependency of the pod is not responding (example: Kafka). You may want to consider using Kubernetes health probes. We can highly recommend:
+A liveness probe that checks your container's health thoroughly; on a liveness probe failure, Kubernetes restarts the container. A readiness probe that takes a container out of service if it is not healthy. 
+2. A new version of a Secret/ConfigMap has been rolled out. You may use the `qontract.recycle: "true"` annotation to indicate that any pods using these resources should be restarted upon update. More information [here](/README.md#manage-openshift-resources-via-app-interface-openshiftnamespace-1yml).
 
 ### Jenkins is going to shutdown
 
