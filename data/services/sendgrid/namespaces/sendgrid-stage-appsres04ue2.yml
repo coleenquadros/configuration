@@ -1,0 +1,46 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: sendgrid-stage
+description: staging namespace for sendgrid
+
+cluster:
+  $ref: /openshift/appsres04ue2/cluster.yml
+
+app:
+  $ref: /services/sendgrid/app.yml
+
+environment:
+  $ref: /products/osdv4/environments/stage-appsres04ue2.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.appsres04ue2.yml
+- $ref: /services/ocm/namespaces/uhc-stage-appsres04ue2.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+- ConfigMap
+
+openshiftResources:
+- provider: vault-secret
+  path: app-interface/global/quay/app-sre/quay.io
+  version: 2
+  type: kubernetes.io/dockercfg
+- provider: resource
+  path: /app-sre-stage/sendgrid-stage/ocm-sendgrid-service.serviceaccount.yaml
+- provider: vault-secret
+  path:  rhmi/ocm-sendgrid-service/stage/ocm-sendgrid-service
+  version: 11
+  annotations:
+    qontract.recycle: "true"
+- provider: resource
+  path: /app-sre-stage/sendgrid-stage/ocm-sendgrid-service.supportedservices.configmap.yaml
+
+# terraformSecrets
+- provider: vault-secret
+  path: app-sre/integrations-output/terraform-resources/app-sre-stage-01/sendgrid-stage/ocm-sendgrid-service-rds
+  version: 1
