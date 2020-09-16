@@ -5,6 +5,30 @@
         shell: |
             {build_deploy_script_path}
 
+    abort_job_multibranch: &abort_job_multibranch
+        system-groovy:
+            command: |
+                import hudson.model.Result
+                import jenkins.model.CauseOfInterruption
+
+                // get the current branch name
+                def currentBranchName = build.environment.get("GIT_BRANCH")
+                // iterate through current project runs
+                build.getProject()._getRuns().iterator().each{ run ->
+                    def exec = run.getExecutor()
+                    // if the run is not a current build and it has executor (running)
+                    if (run != build && exec != null){
+                        def execBuild = exec.getCurrentExecutable()
+                        def execBranchName = execBuild.environment.get("GIT_BRANCH")
+                        // if the run is for the same branch - abort it
+                        if (currentBranchName == execBranchName){
+                            // prepare the cause of interruption
+                            def cause = { "interrupted by build ${build.getId()}" as String } as CauseOfInterruption 
+                            exec.interrupt(Result.ABORTED, cause)
+                        }
+                    }
+                }
+
     pr_check: &pr_check
         shell: |
             {pr_check_script_path}
@@ -40,6 +64,7 @@
         - timeout_wrapper:
             timeout: '{timeout}'
         builders:
+        - *abort_job_multibranch
         - *pr_check
         - *stack_analysis
 
