@@ -3,7 +3,7 @@
 - [cloud.redhat.com Developer Onboarding](#cloudredhatcom-developer-onboarding)
   - [Quick Links](#quick-links)
   - [Asking for Help](#asking-for-help)
-  - [Forking the app-interface Gitlab Repo](#forking-the-app-interface-gitlab-repo)
+  - [Forking the app-interface GitLab Repo](#forking-the-app-interface-gitlab-repo)
   - [Accessing Stage Environment](#accessing-stage-environment)
   - [Logging into quay.io](#logging-into-quayio)
   - [Using insights-client in Stage](#using-insights-client-in-stage)
@@ -27,6 +27,7 @@
     - [How to add a Grafana dashboard](#how-to-add-a-grafana-dashboard)
     - [Adding Alerts](#adding-alerts)
     - [Route Alerts to Team Channels in CoreOS Slack](#route-alerts-to-team-channels-in-coreos-slack)
+    - [RDS Enhanced Monitoring Metrics](#rds-enhanced-monitoring-metrics)
 
 ## Quick Links
 
@@ -45,7 +46,7 @@ Additional contact information for AppSRE can be found [here](https://mojo.redha
 
 If you need emergency help after-hours, AppSRE can be paged.  Please review the information [here](https://mojo.redhat.com/groups/service-delivery/blog/2020/03/19/paging-appsre-oncall) for guidance on when to use the AppSRE pager.
 
-## Forking the app-interface Gitlab Repo
+## Forking the app-interface GitLab Repo
 
 You'll need to fork the app-interface gitlab repo in order to create merge requests (MRs), which are the same thing as github PRs. If you are new to gitlab, it works almost exactly the same as github for day-to-day tasks. However some of the buttons are in different places. To fork, you'll need to:
 
@@ -279,3 +280,26 @@ Alert annotations are used to render action buttons in Slack alert messages:
 ### Route Alerts to Team Channels in CoreOS Slack
 
 Follow instructions documented [here](https://gitlab.cee.redhat.com/snippets/2733) to route alerts to your team channel in CoreOS slack.
+
+### RDS Enhanced Monitoring Metrics
+
+RDS Exporter has been deployed by AppSRE to the AppSRE cluster. It will collect metrics and publish them to the AppSRE prometheus (which is different than the Prometheus instance running on Insights cluster.) To collect metrics published by enhanced monitoring, update following ConfigMaps:
+
+1. [Staging](../../../resources/observability/rds-exporter/crc/rds-exporter.configmap.crc-stage.yaml)
+2. [Production](../../../resources/observability/rds-exporter/crc/rds-exporter.configmap.crc-prod.yaml)
+
+Add following configuration
+
+```yaml
+    - region: us-east-1
+      instance: RDS_INSTANCE_IDENTIFIER
+      disable_basic_metrics: true
+      disable_enhanced_metrics: false
+```
+
+1. Set `region` to the region where your RDS instance is deployed.
+1. Set `instance` to your RDS instance. Note that you must have `enhanced_monitoring` set to `true` for RDS instance.
+1. Set `disable_basic_metrics` to `true` as these metrics are collected by `cloudwatch-exporter.
+1. Set `disable_enhanced_metrics` to `false`.
+
+Updates to ConfigMap will update the RDS exporter deployment.
