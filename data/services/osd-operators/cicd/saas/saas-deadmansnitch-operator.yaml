@@ -27,17 +27,27 @@ managedResourceTypes:
 imagePatterns:
 - quay.io/app-sre/deadmanssnitch-operator-registry
 
+parameters:
+  REGISTRY_IMG: quay.io/app-sre/deadmanssnitch-operator-registry
+
 resourceTemplates:
 - name: deadmanssnitch-operator
   url: https://github.com/openshift/deadmanssnitch-operator
   path: /hack/olm-registry/olm-artifacts-template.yaml
   parameters:
-    REGISTRY_IMG: quay.io/app-sre/deadmanssnitch-operator-registry
+    DEADMANSSNITCH_OSD_TAGS: ["hive-int"]
   targets:
   - namespace:
       $ref: /services/osd-operators/namespaces/deadmanssnitch-operator-integration.yml
     ref: master
     upstream: openshift-deadmanssnitch-operator-gh-build-master
+
+- name: deadmanssnitch-operator
+  url: https://github.com/openshift/deadmanssnitch-operator
+  path: /hack/olm-registry/olm-artifacts-template.yaml
+  parameters:
+    DEADMANSSNITCH_OSD_TAGS: ["hive-stage"]
+  targets:
   - namespace:
       $ref: /services/osd-operators/namespaces/deadmanssnitch-operator-stage.yml
     ref: master
@@ -51,6 +61,18 @@ resourceTemplates:
     ref: master
     upstream: openshift-deadmanssnitch-operator-gh-build-master
   - namespace:
+      $ref: /services/osd-operators/namespaces/ssotest01ue1/deadmanssnitch-operator.yml
+    ref: master
+
+- name: deadmanssnitch-operator
+  url: https://github.com/openshift/deadmanssnitch-operator
+  path: /hack/olm-registry/olm-artifacts-template.yaml
+  parameters:
+    DEADMANSSNITCH_OSD_TAGS: ["hive-production"]
+    # send CICD org to silent policy
+    SILENT_ALERT_LEGALENTITY_IDS: ["1aV37K1VQv2zSStwSkdwBNOUBGI"]
+  targets:
+  - namespace:
       $ref: /services/osd-operators/namespaces/deadmanssnitch-operator-production.yml
     ref: 6a89eab0fa386eedb6dd9c957520f54f2513cfac
   - namespace:
@@ -62,6 +84,3 @@ resourceTemplates:
   - namespace:
       $ref: /services/osd-operators/namespaces/hivep03uw1/deadmanssnitch-operator.yml
     ref: 6a89eab0fa386eedb6dd9c957520f54f2513cfac
-  - namespace:
-      $ref: /services/osd-operators/namespaces/ssotest01ue1/deadmanssnitch-operator.yml
-    ref: master
