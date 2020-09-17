@@ -1,0 +1,71 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: insightsapp-poc
+  platform: insights
+
+name: insightsapp-poc
+description: insightsapp-poc app on the Insights Platform
+
+app:
+  $ref: /services/insights/insightsapp-poc/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- Deployment
+- DeploymentConfig
+- Service
+- ConfigMap
+- InsightsApp
+- InsightsBase
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  LOG_GROUP: platform
+
+resourceTemplates:
+- name: ingress
+  path: /templates/ingress.yaml
+  url: https://gitlab.cee.redhat.com/bsquizza/insights-ingress-go
+  targets:
+  - namespace:
+      $ref: /services/insights/insightsapp-poc/namespaces/stage-insightsapp-poc.yml
+    ref: 6da05794feda9e2dbd09a2e59b9777ef391c714a
+    disable: true  # for POC, so that no real deploy job is created
+    parameters:
+      IMAGE_TAG: 6da0579
+      INGRESS_INVENTORYURL: http://insights-inventory.host-inventory-stage.svc:8080/api/inventory/v1/hosts
+  - namespace:
+      $ref: /services/insights/insightsapp-poc/namespaces/prod-insightsapp-poc.yml
+    ref: 6da05794feda9e2dbd09a2e59b9777ef391c714a
+    disable: true  # for POC, so that no real deploy job is created
+    parameters:
+      IMAGE_TAG: b8ec3cb
+      REPLICAS: 10
+      INGRESS_REJECTBUCKET: insights-upload-rejected
+      INGRESS_INVENTORYURL: http://insights-inventory.platform-prod.svc:8080/api/inventory/v1/hosts
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+    parameters:
+      IMAGE_TAG: internal  # populated by bonfire
+      REPLICAS: 1
+      INGRESS_REJECTBUCKET: insights-upload-rejected-ephemeral
+      INGRESS_INVENTORYURL: http://insights-inventory:8080/api/inventory/v1/hosts
+
