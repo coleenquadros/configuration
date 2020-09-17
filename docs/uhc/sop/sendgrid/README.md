@@ -3,14 +3,15 @@
 <!-- TOC depthTo:2 -->
 
 - [SOP : OCM Sendgrid Service](#sop-ocm-sendgrid-service)
-    - [OCM Sendgrid Service Down](#ocm-sendgrid-service-down)  
-    - [OCM Sendgrid Service 5xx Errors High](#ocm-sendgrid-service-5xx-errors-high)
-    - [OCM Sendgrid Service 4xx Errors High](#ocm-sendgrid-service-4xx-errors-high)
-    - [OCM Sendgrid Service Latency High](#ocm-sendgrid-service-latency-high)
-    - [OCM Sendgrid Service Job(s) Failed](#ocm-sendgrid-service-jobs-failed)
-    - [Sendgrid Service Dependencies](#sendgrid-service-dependencies)
-    - [Sendgrid Service SubAccount Quota Low](#sendgrid-service-dependencies-sendgrid-subaccount-quota-low)
-    - [Escalations](#escalations)
+  - [OCM Sendgrid Service Down](#ocm-sendgrid-service-down)  
+  - [OCM Sendgrid Service 5xx Errors High](#ocm-sendgrid-service-5xx-errors-high)
+  - [OCM Sendgrid Service 4xx Errors High](#ocm-sendgrid-service-4xx-errors-high)
+  - [OCM Sendgrid Service Latency High](#ocm-sendgrid-service-latency-high)
+  - [OCM Sendgrid Service Job(s) Failed](#ocm-sendgrid-service-jobs-failed)
+  - [Sendgrid Service Dependencies](#sendgrid-service-dependencies)
+  - [Sendgrid Service SubAccount Quota Low](#sendgrid-service-dependencies-sendgrid-subaccount-quota-low)
+  - [Preflight Checks](#preflight-checks)
+  - [Escalations](#escalations)
 
 <!-- /TOC -->
 
@@ -42,6 +43,7 @@ OCM Sendgrid Service is down
 
 - If the sendgrid service pod is crashing, check the pod logs (`deployment/ocm-sendgrid-service`) to investigate possible causes for the crash
 - Investigate possible misconfiguration in the pod logs, for example errors reading secrets from vault or misconfiguration within the service template
+- If the SendGrid service pod is failing on start up, check to see if preflight checks are failing. See [Preflight Checks](#preflight-checks) section of this SOP
 - Investigate possible OCM outages that might be impacting the service uptime
 - If cause of outage cannot be determined, escalate to the RHMI team (see escalation contacts)
 
@@ -222,6 +224,34 @@ Existing clusters will be unable to rotate current Sendgrid credentials.
 - Finally, create an MR to bump the vault secret version in app-interface: https://gitlab.cee.redhat.com/service/app-interface/-/blob/1adb526/data/services/sendgrid/namespaces/sendgrid-stage.yml#L36
 
 ---
+
+## Preflight Checks
+
+Each time a SendGrid pod is initialised a series of preflight checks are run. The outcome of these checks will determine if the pod goes into a `Running` state.
+
+### Database connection check
+
+The SendGrid pod will attempt to connect to the database using the connection details stored in the `ocm-sendgrid-service-rds` secret in the SendGrid namespace.
+
+In the event that the pod is unable to connect to the database, the following errors should be present in the pod logs:
+
+`error connecting to the database: <err>`
+
+### SendGrid configuration check
+
+The OCM SendGrid service uses an API key to communicate with the external SendGrid API. This API key is stored in a vault secret under `sendgrid.key`. The vault secret is then created in the SendGrid namespace and mounted in each pod.
+
+The SendGrid configuration check reads the value of `sendgrid.key` and performs create, list and delete operations against the SendGrid API. If these operations are unsuccessful, the following errors should be present in the pod logs:
+
+`{"sendgrid_config_check":"failed to check sendgrid api connection: failed to list sendgrid subusers: failed to unmarshal sub users, content={\"errors\":[{\"field\":null,\"message\":\"access forbidden\"}]}: json: cannot unmarshal object into Go value of type []*sendgrid.SubUser"}%`
+
+### OCM service account check
+
+An SSO service account is required for the OCM SendGrid service to communicate with other OCM services. The account credentials are located in a vault secret under `ocm-service.clientId` and `ocm-service.clientSecret` respectively.
+
+The OCM service account check reads in the value of both `ocm-service.clientId` and `ocm-service.clientSecret` and validates these credentials by running a simple `ocm whoami` query. Should this validation be unsuccessful, the following errors should be present in the pod logs:
+
+`{"ocm_config_check\":"failed to check ocm account: can't get access token: unauthorized_client: Invalid client secret"}%`
 
 ## Escalations
 
