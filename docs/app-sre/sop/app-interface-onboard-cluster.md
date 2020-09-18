@@ -331,9 +331,14 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
 1. Enable observability on a v4 cluster
 
-    1. Create DNS records ([example MR](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/8533)):
-        - `prometheus.<cluster_name>.devshift.net`: `elb.apps.<cluster_name>.<clusterid>.p1.openshiftapps.com`
-        - `alertmanager.<cluster_name>.devshift.net`: `elb.apps.<cluster_name>.<clusterid>.p1.openshiftapps.com`
+    1. Add the following DNS records to the [devshift.net DNS zone file]([/data/aws/app-sre/dns/devshift.net.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre/dns/devshift.net.yaml))
+
+        ```yaml
+        ...
+        records:
+        - { name: prometheus.<cluster_name>, type: CNAME, target_cluster: { $ref: /openshift/<cluster_name>/cluster.yml } }
+        - { name: alertmanager.<cluster_name>, type: CNAME, target_cluster: { $ref: /openshift/<cluster_name>/cluster.yml } }
+        ```
 
     1. Configure a [deadmanssnitch](https://deadmanssnitch.com/) snitch for the new cluster. The snitch settings should be as follow:
         - Name: prometheus.<cluster_name>.devshift.net
