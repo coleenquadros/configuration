@@ -395,7 +395,9 @@ quayRepos:
   - name: <name of the repo, e.g. 'centos'>
     description: <description>
     public: <true | false>
-    mirror: (optional) <upstream repository to sync the Quay repo from, e.g. 'docker.io/centos'>
+    mirror: (optional) <upstream repository to sync the Quay repo from>
+      # Example
+      $ref: /dependencies/image-mirrors/docker.io/centos.yml
   - ...
 ```
 
