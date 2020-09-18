@@ -54,3 +54,13 @@ spec:
         service: insights
         env: prod
         app_team: patch
+    - alert: PatchmanOutOfDateSystems
+      expr: sum(patchman_engine_vmaas_sync_systems{last_upload="last1D"}) / sum(patchman_engine_vmaas_sync_systems{last_upload="last30D"}) < 0.8
+      annotations:
+        summary: '{{ $labels.namespace }} many out-of-date systems observed :rain_cloud:'
+        description: 'Increasing number of out-of-date systems observed'
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: patch
