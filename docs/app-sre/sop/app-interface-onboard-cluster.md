@@ -556,9 +556,9 @@ At this point you should be able to access the cluster via the console / `oc` cl
     - ClusterLogging
     
     openshiftResources:
-    - provider: resource
+    - provider: resource-template
       path: /setup/clusterlogging/elasticsearch-operator.subscription.yaml
-    - provider: resource
+    - provider: resource-template
       path: /setup/clusterlogging/cluster-logging.subscription.yaml
     - provider: resource-template
       path: /setup/clusterlogging/instance.clusterlogging.yaml
