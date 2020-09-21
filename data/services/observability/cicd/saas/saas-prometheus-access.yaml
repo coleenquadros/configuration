@@ -1,0 +1,37 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: app-sre-observability
+
+name: saas-prometheus-access
+description: saas-prometheus-access
+
+app:
+  $ref: /services/observability/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- ServiceAccount
+- ClusterRoleBinding
+
+imagePatterns:
+- quay.io/app-sre
+
+resourceTemplates:
+- name: prometheus-access
+  path: /openshift/prometheus-access.template.yaml
+  url: https://gitlab.cee.redhat.com/service/app-sre-observability
+  targets:
+  - namespace:
+      $ref: /openshift/app-sre-stage-02/namespaces/app-sre-observability-per-cluster.yml
+    ref: internal
+    parameters:
+      SERVICE_ACCOUNT_NAME: test
