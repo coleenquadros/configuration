@@ -561,10 +561,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
     - provider: resource
       path: /setup/clusterlogging/cluster-logging.subscription.yaml
     - provider: resource-template
-      type: jinja2
       path: /setup/clusterlogging/instance.clusterlogging.yaml
-      variables:
-        memoryRequests: 8G
     ```
 
     OSD docs for reference: https://docs.openshift.com/dedicated/4/logging/dedicated-cluster-deploying.html
