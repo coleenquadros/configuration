@@ -187,6 +187,28 @@
     <<: *gl_timed
 
 - job-template:
+    id: 'gl-build-master-ansible-bastion'
+    name: 'gl-build-master-ansible-bastion'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *app_sre_bot_key
+    builders:
+    - shell: |
+        trap "rm -f ${{WORKSPACE}}/ansible/app-sre-bot.key" EXIT SIGINT
+        cd ansible
+        echo ${{APP_SRE_BOT_KEY}} | base64 --decode > app-sre-bot.key
+        chmod 0600 app-sre-bot.key
+        eval `ssh-agent -s`
+        ssh-add app-sre-bot.key
+        ansible-playbook -u ${{APP_SRE_BOT_USERNAME}} --key-file app-sre-bot.key playbooks/ci-ext-bastion-accounts.yml -CD
+    <<: *gl_build_master
+
+
+- job-template:
     id: 'clusterimageset-run'
     job_name: 'clusterimageset-run'
     name: '{job_name}'

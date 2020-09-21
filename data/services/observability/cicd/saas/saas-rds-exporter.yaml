@@ -1,0 +1,52 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: app-sre-observability
+
+name: saas-rds-exporter
+description: saas-rds-exporter
+
+app:
+  $ref: /services/observability/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/app-sre
+
+resourceTemplates:
+# NOTE: Increasing the number of replicas drastically increases the cost of Cloudwatch API usage,
+# Please keep the replicas here to 1, even in production
+- name: rds-exporter-crc
+  path: /openshift/rds-exporter.template.yaml
+  url: https://gitlab.cee.redhat.com/service/app-sre-observability
+  parameters:
+      REPLICAS: 1
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: master
+    parameters:
+      NAME: "rds-exporter-crc-stage"
+      AWS_IAM_USER_SECRET_NAME: "aws-rds-exporter-crc"
+      RDS_EXPORTER_CONFIG_MAP_NAME: "aws-rds-exporter-crc-stage-config"
+      IMAGE_TAG: 4c3a960
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: 2c653b217da13d5e66c3610ab8f9ad16073da87f
+    parameters:
+      NAME: "rds-exporter-crc-prod"
+      AWS_IAM_USER_SECRET_NAME: "aws-rds-exporter-crc"
+      RDS_EXPORTER_CONFIG_MAP_NAME: "aws-rds-exporter-crc-prod-config"
+      IMAGE_TAG: 4c3a960

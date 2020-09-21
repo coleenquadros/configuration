@@ -395,13 +395,57 @@ quayRepos:
   - name: <name of the repo, e.g. 'centos'>
     description: <description>
     public: <true | false>
-    mirror: (optional) <upstream repository to sync the Quay repo from, e.g. 'docker.io/centos'>
   - ...
 ```
 
 In order to add or remove a Quay repo, a MR must be sent to the appropriate App datafile and add the repo to the `items` array.
 
 **NOTE**: If the App or the relevant Quay org are not modelled in the App-Interface repository, please seek the assistance from the App-SRE team.
+
+
+#### Mirroring Quay Repositories
+
+If you are creating a Quay Repository that is not used for publishing you
+application on, but instead is used for mirroring an external repository,
+you can automate the mirroring by adding `mirror` section to your `quayRepo`
+specification:
+
+```yaml
+quayRepos:
+- org:
+    ...
+  items:
+  - name: my-private-repo
+    ...
+    mirror:
+      $ref: /dependencies/image-mirrors/docker.io/me/my-private-repo.yml
+```
+
+The `$ref` file content would then be:
+
+```yaml
+---
+$schema: /dependencies/container-image-mirror-1.yml
+
+url: docker.io/me/my-private-repo
+
+pullCredentials:
+  path: app-sre/creds/mirror-images/docker-io_me_my-private-repo
+  field: all
+
+tags:
+  - "latest"
+```
+
+The supported fields in the container-image-mirror specification are:
+
+* `url` (mandatory): the url for the image we are to mirror from.
+* `pullCredentials` (optional): the path for the vault secret containing the
+  `user` and the `token` for the repository.
+* `tags` (optional): list of tags to limit the mirroring to. Regular
+  expressions are supported. When defined, `tagsExclude` is ignored.
+* `tagsExclude` (optional): list of tags to exclude from the mirroring. Regular
+  expressions are supported.
 
 ### Create a Sentry Project for an onboarded App (`/app-sre/app-1.yml`)
 

@@ -48,29 +48,53 @@ spec:
         service: hive
         severity: critical
         team: appsre
-    - alert: LocalKubeClientRequestsHigh - production - {{{shard_name}}}
+    - alert: LocalKubeClientRequestsHigh - POST requests - production - {{{shard_name}}}
       annotations:
-        message: "detected {{ $value }} {{ $labels.resource }} local API requests per second from controller {{ $labels.controller }}"
+        message: "detected {{ $value }} {{ $labels.resource }} local POST API requests per second from controller {{ $labels.controller }}"
         runbook: "https://github.com/openshift/hive-sops/blob/master/sop/KubeClientRequestsHigh.md"
         dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
       expr: |
-        rate(hive_kube_client_requests_total{job="hive-controllers-{{{shard_name}}}",remote="false",method!~"GET|LIST"}[10m]) > 5
+        rate(hive_kube_client_requests_total{job="hive-controllers-{{{shard_name}}}",remote="false",method="POST"}[5m]) > 15
       for: 1m
       labels:
         service: hive
         severity: critical
         team: appsre
-    - alert: RemoteKubeClientRequestsHigh - production - {{{shard_name}}}
+    - alert: LocalKubeClientRequestsHigh - non-POST requests - production - {{{shard_name}}}
       annotations:
-        message: "detected {{ $value }} {{ $labels.resource }} remote API requests per second from controller {{ $labels.controller }}"
+        message: "detected {{ $value }} {{ $labels.resource }} local non-POST API requests per second from controller {{ $labels.controller }}"
         runbook: "https://github.com/openshift/hive-sops/blob/master/sop/KubeClientRequestsHigh.md"
         dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
       expr: |
-        rate(hive_kube_client_requests_total{job="hive-controllers-{{{shard_name}}}",remote="true",method!~"GET|LIST"}[10m]) > 2
+        rate(hive_kube_client_requests_total{job="hive-controllers-{{{shard_name}}}",remote="false",method!~"POST"}[5m]) > 15
+      for: 1m
+      labels:
+        service: hive
+        severity: medium
+        team: appsre
+    - alert: RemoteKubeClientRequestsHigh - POST requests - production - {{{shard_name}}}
+      annotations:
+        message: "detected {{ $value }} {{ $labels.resource }} remote POST API requests per second from controller {{ $labels.controller }}"
+        runbook: "https://github.com/openshift/hive-sops/blob/master/sop/KubeClientRequestsHigh.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
+      expr: |
+        rate(hive_kube_client_requests_total{job="hive-controllers-{{{shard_name}}}",remote="true",method="POST"}[5m]) > 15
       for: 1m
       labels:
         service: hive
         severity: critical
+        team: appsre
+    - alert: RemoteKubeClientRequestsHigh - non-POST requests - production - {{{shard_name}}}
+      annotations:
+        message: "detected {{ $value }} {{ $labels.resource }} remote non-POST API requests per second from controller {{ $labels.controller }}"
+        runbook: "https://github.com/openshift/hive-sops/blob/master/sop/KubeClientRequestsHigh.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
+      expr: |
+        rate(hive_kube_client_requests_total{job="hive-controllers-{{{shard_name}}}",remote="true",method!~"POST"}[5m]) > 15
+      for: 1m
+      labels:
+        service: hive
+        severity: medium
         team: appsre
     - alert: ClusterProvisioningDelay - production - {{{shard_name}}}
       annotations:
@@ -116,7 +140,7 @@ spec:
       expr: |
         aws_account_operator_aws_accounts{job="hive-aws-account-operator-{{{shard_name}}}"} > {{{aws_account_operator_accounts_threshold}}}
       labels:
-        service: hive
+        service: srep
         severity: high
         team: srep
     - alert: AWSAccountOperator Target Down - production - {{{shard_name}}}

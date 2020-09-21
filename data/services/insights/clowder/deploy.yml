@@ -1,0 +1,46 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: clowder
+  platform: insights
+
+name: clowder
+description: Deploy clowder OLM resources
+
+app:
+  $ref: /services/insights/clowder/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- CatalogSource
+- OperatorGroup
+- Subscription
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+
+resourceTemplates:
+- name: olm
+  path: /bundle/olm-bundle.yml
+  url: https://github.com/RedHatInsights/clowder
+  targets:
+  - namespace:
+      $ref: /services/insights/clowder/namespaces/stage-research.yml
+    ref: master
+    upstream: RedHatInsights-clowder-gh-build-master

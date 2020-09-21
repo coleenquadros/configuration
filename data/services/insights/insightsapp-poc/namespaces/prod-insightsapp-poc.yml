@@ -1,0 +1,32 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: insightsapp-poc
+
+name: insightsapp-poc
+description: insightsapp-poc on the prod cluster
+
+cluster:
+  $ref: /openshift/crcp01ue1/cluster.yml
+
+app:
+  $ref: /services/insights/insightsapp-poc/app.yml
+
+environment:
+  $ref: /products/insights/environments/production.yml
+
+managedRoles: true
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml

@@ -65,7 +65,14 @@ terraformResources:
   policies:
   - ReadOnlyAccess
   output_resource_name: aws-cloudwatch-exporter-crc
-
+## Insights production rds exporter IAM user
+- provider: aws-iam-service-account
+  account: insights-prod
+  identifier: aws-rds-exporter-crc-prod-01
+  policies:
+  - CloudWatchReadOnlyAccess
+  - AmazonRDSReadOnlyAccess
+  output_resource_name: aws-rds-exporter-crc
 
 managedResourceTypes:
 - ConfigMap
@@ -104,6 +111,9 @@ openshiftResources:
 
 # ConfigMaps
 ## Grafana Dashboards
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-assisted-installer.configmap.yaml
+  validate_json: true
 - provider: resource
   path: /observability/grafana/grafana-dashboard-appsre-grafana.configmap.yaml
   validate_json: true
@@ -311,3 +321,7 @@ openshiftResources:
 - provider: vault-secret
   path: app-interface/app-sre/app-sre-observability-production/app-sre-observability-htpasswd
   version: 1
+
+### Insights RDS Exporter Configuration
+- provider: resource
+  path: /observability/rds-exporter/crc/rds-exporter.configmap.crc-prod.yaml
