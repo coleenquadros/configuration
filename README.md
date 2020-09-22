@@ -905,6 +905,7 @@ DNS Zones can be managed in app-interface. A DNS zone follows [this JSON schema]
 - `name`: A name for the DNS zone
 - `description`: Description for the DNS zone
 - `account`: a `$ref` to the account definition to be used in conjunction with the provider
+- `unmanaged_record_names`: A list of regexes to exclude record names from being managed (literal strings work too, those will be considered to be a full match on the record name)
 - `records`: A list of `record` (see spec below) to be definied within this zone
 
 `record` spec:
