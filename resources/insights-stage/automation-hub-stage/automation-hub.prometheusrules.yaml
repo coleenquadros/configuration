@@ -11,9 +11,9 @@ spec:
   groups:
   - name: insights-automation-hub-stage
     rules:
-    - alert: InsightsAutomationHubPodDown
+    - alert: App-galaxy-api-In-automation-hub-stage-Absent
       expr: |
-        up{service="automation-hub-backend", namespace="automation-hub-stage"} == 0
+        absent(up{namespace="automation-hub-stage", service="galaxy-api"} == 1)
       for: 2m
       labels:
         severity: high
@@ -22,10 +22,23 @@ spec:
       annotations:
         dashboard: "https://GRAFANA_URL"
         link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/automation-hub-stage/deployments"
-        message: "Insights Automation Hub Alert. At least one automation-hub pod has been down for two minutes."
+        message: "Insights Automation Hub Alert. The galaxy-api service has been down for 2 minutes."
 
-    - alert: App-automation-hub-backend-5xx-In-automation-hub-stage
-      expr: rate(django_http_responses_total_by_status_total{status=~"5[0-9]{2}", namespace="automation-hub-stage"}[5m]) > 0
+    - alert: App-pulp-api-In-automation-hub-stage-Absent
+      expr: |
+        absent(up{namespace="automation-hub-stage", service="pulp-api"} == 1)
+      for: 2m
+      labels:
+        severity: high
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/automation-hub-stage/deployments"
+        message: "Insights Automation Hub Alert. The pulp-api service has been down for 2 minutes."
+
+    - alert: App-automation-hub-stage-Errors-5xx
+      expr: rate(django_http_responses_total_by_status_total{namespace="automation-hub-stage", status=~"5[0-9]{2}"}[5m]) > 0
       labels:
         severity: warning
         service: insights
@@ -34,4 +47,3 @@ spec:
         dashboard: "https://GRAFANA_URL"
         link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/automation-hub-stage/deployments"
         message: "Insights Automation Hub Alert. 5xx repsponses observed in the last 5 minutes."
-
