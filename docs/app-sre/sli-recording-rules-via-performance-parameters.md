@@ -89,7 +89,7 @@ It is ideal that these two metrics are measured outside of the application, e.g.
 
 The `SLIRecordingRules` section of the performance schema defines these base recording rules for the different APIs of our `yak-shaver` component.
 
-* The `haproxy_server_http_responses_total` metric will give us request and errors ratio rates. It is necessary that it is a metric that has HTTP status codes.
+* The `haproxy_backend_http_responses_total` metric will give us request and errors ratio rates. It is necessary that it is a metric that has HTTP status codes.
 * The `http_request_duration_seconds_bucket` will be used to measure latencies. It is convenient that it supports HTTP status codes as we will have more control over what we measure.
 
 Those two metrics are generic. There's nothing in their names that is specific neither to the `yolo` service nor the `yak-shaver` component. In order to select the values from our service, we will have to specify the appropriate [selectors](https://prometheus.io/docs/prometheus/latest/querying/basics/#time-series-selectors). Note that it is possible to define selectors with the following operators: `=~`, `!=`, `!~`, and of course `=` (as in the example).
@@ -105,13 +105,13 @@ These are defined using the `http_rate` kind.
 ```yaml
 - name: read_http_rates
   kind: http_rate
-  metric: haproxy_server_http_responses_total
+  metric: haproxy_backend_http_responses_total
   selectors:
   - route="yak-shaver-read"
 
 - name: write_http_rates
   kind: http_rate
-  metric: haproxy_server_http_responses_total
+  metric: haproxy_backend_http_responses_total
   selectors:
   - route="yak-shaver-write"
 ```
@@ -122,7 +122,7 @@ They will generate the following recording rules for the `5m` range:
 - expr: |
     sum by (status_class) (
       label_replace(
-        rate(haproxy_server_http_responses_total{route="yak-shaver-read"}[5m]
+        rate(haproxy_backend_http_responses_total{route="yak-shaver-read"}[5m]
       ), "status_class", "${1}xx", "code", "([0-9])..")
     )
   labels:
@@ -133,7 +133,7 @@ They will generate the following recording rules for the `5m` range:
 - expr: |
     sum by (status_class) (
       label_replace(
-        rate(haproxy_server_http_responses_total{route="yak-shaver-write"}[5m]
+        rate(haproxy_backend_http_responses_total{route="yak-shaver-write"}[5m]
       ), "status_class", "${1}xx", "code", "([0-9])..")
     )
   labels:
@@ -161,7 +161,7 @@ They will generate the following recording rules for the `5m` range:
   record: status_class_5xx:http_requests_total:ratio_rate5m
 ```
 
-We can see that the `selectors` set in the `SLIRecordingRules` definitions are used in the queries that build the recording rules. This is needed as `haproxy_server_http_responses_total` is a metric name that will be used across many service/components in our Prometheus server. You will also see how the `=` selectors get turned into `labels`, but not the rest.
+We can see that the `selectors` set in the `SLIRecordingRules` definitions are used in the queries that build the recording rules. This is needed as `haproxy_backend_http_responses_total` is a metric name that will be used across many service/components in our Prometheus server. You will also see how the `=` selectors get turned into `labels`, but not the rest.
 
 ### Latency rates
 
@@ -467,7 +467,7 @@ volume:
   target: 200
 ```
 
-Although there's no need to create further rules to calculate this SLO as it is doable directly with the base `haproxy_server_http_responses_total` metric, we provide the following recording rules as they may be helpful
+Although there's no need to create further rules to calculate this SLO as it is doable directly with the base `haproxy_backend_http_responses_total` metric, we provide the following recording rules as they may be helpful
 
 ```yaml
 - expr: |
