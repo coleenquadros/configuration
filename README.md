@@ -1647,8 +1647,8 @@ $ oc get pods | grep 2020-01-30-account-manager-registries-stage
 That Job will execute the SQL query and place the result to the requested
 location:
 
-- `stdout`: the pod created by the Job will have the SQL query result printed
-  to the stdout. Example:
+- `stdout`: requires `view` access to the namespace. The pod created by the Job
+  will have the SQL query result printed to the stdout. Example:
 
 ```bash
 $ oc logs 2020-01-28-account-manager-registries-stage-7pl6v
@@ -1676,9 +1676,9 @@ $ oc logs 2020-01-28-account-manager-registries-stage-7pl6v
 (19 rows)
 ```
 
-- `filesystem`: the pod created by the Job will have the SQL query result
-  written to the pod filesystem. In the pod stdout you will see the `oc`
-  command to retrieve the SQL query results.
+- `filesystem`: requires `edit` access to the namespace. The pod created by the
+  Job will have the SQL query result written to the pod filesystem. In the pod
+  stdout you will see the `oc` command to retrieve the SQL query results.
 
 ```bash
 $ oc logs 2020-01-30-account-manager-registries-stage-cjh82
