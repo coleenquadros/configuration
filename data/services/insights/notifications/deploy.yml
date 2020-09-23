@@ -1,0 +1,49 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: notifications
+  platform: insights
+
+name: notifications
+description: notifications app on the Insights Platform
+
+app:
+  $ref: /services/insights/notifications/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- Deployment
+- DeploymentConfig
+- Service
+- PersistentVolumeClaim
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+  
+resourceTemplates:
+- name: notifications-backend
+  path: /templates/notifications/notifications-backend.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
+    ref: 220356de2eb87f9a4f56d06f38b3f608dfeec614
+    parameters:
+      IMAGE_TAG: 2f0b8d0
+      DB_SECRET_NAME: notifications-backend-db
+      CLOUD_WATCH_LOG_GROUP: notifications-stage
+      SENTRY_ENV: stage
+      SENTRY_ENABLED: true
