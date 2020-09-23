@@ -153,10 +153,36 @@ Sendgrid Subaccount or Credentials will not be created or synced to the cluster.
 ### Steps
 
 - Find max attempt value from Sendgrid Service Vault key `secrets/scheduler.maxRetry` : https://vault.devshift.net/ui/vault/secrets/rhmi/show/ocm-sendgrid-service/<stage|production>/ocm-sendgrid-service 
-- From the Sendgrid Service RDS instance (`ocm-sendgrid-service-<staging|production>`), reset the attempts to 0 for the failed job:
-```
-$ UPDATE sendgrid_jobs SET attempts=0 WHERE attempts=<secrets/scheduler.maxRetry>;
-```
+- Find api key value from Sendgrid Service Vault key `secrets/sendgrid.key` : https://vault.devshift.net/ui/vault/secrets/rhmi/show/ocm-sendgrid-service/<stage|production>/ocm-sendgrid-service 
+- From the Sendgrid Service RDS instance (`ocm-sendgrid-service-<staging|production>`), find the cluster ids of all jobs that have reached the maximum retry 
+  ```
+  SELECT cluster_id FROM sendgrid_jobs WHERE attempts=<secrets/scheduler.maxRetry>;
+  ```
+- For each `cluster_id`
+  - Ensure ocm is signed into the correct stage|production url:
+    ```
+    ocm account status
+    ```
+  - Check cluster if failed job exists:
+    ```
+    ocm get /api/clusters_mgmt/v1/clusters/<cluster_id>
+    ```
+  - If **cluster exists** - reset the attempts to 0 for the failed job:
+    ```
+    UPDATE sendgrid_jobs SET attempts=0 WHERE attempts=<secrets/scheduler.maxRetry> AND cluster_id=<cluster_id>;
+    ```
+  - If **cluster does not exist** - verify credentials are removed from sendgrid:
+    ```
+    curl -X "GET" "https://api.sendgrid.com/v3/subusers?username=<cluster_id>" -H "Authorization: Bearer <secrets/sendgrid.key>" -H "Content-Type: application/json"
+    ```
+    - If **sendgrid credential exist** (curl output was a non-emtpy array with a single entry with details of the subuser), reset attempts to 0 and mark job for deletion:
+      ```
+      UPDATE sendgrid_jobs SET attempts=0, remove=true WHERE attempts=<secrets/scheduler.maxRetry> AND cluster_id=<cluster_id>;
+      ```
+    - If **sendgrid credential does not exist** (curl output was an emtpy array - `[]%`), remove the failed job from the DB:
+      ```
+      DELETE FROM sendgrid_jobs WHERE attempts=<secrets/scheduler.maxRetry> AND cluster_id=<cluster_id>;
+      ```
 - Watch the logs for `deployment/ocm-sendgrid-service` for the service to execute job 
 - If the job is continuously reaching the maximum number of attempts, verify that no other service interruptions are occurring
 - Finally, escalate to the RHMI team (see escalation contacts), including the copied logs
