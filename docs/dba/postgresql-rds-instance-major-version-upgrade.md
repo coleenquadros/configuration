@@ -6,14 +6,15 @@
   - [Steps for Upgrade at High Level](#steps-for-upgrade-at-high-level)
   - [Note About Upgrading Read-Replicas](#note-about-upgrading-read-replicas)
   - [app-interface changes for upgrading](#app-interface-changes-for-upgrading)
-    - [MR #01 - Terminate Read Replicas](#mr-01---terminate-read-replicas)
-    - [MR #02 - Create a New Parameter Group](#mr-02---create-a-new-parameter-group)
-    - [MR #03 - Update RDS Maintenance Window](#mr-03---update-rds-maintenance-window)
-    - [MR #04 - Scale DOWN the application](#mr-04---scale-down-the-application)
-    - [MR #05 - Update Engine Version](#mr-05---update-engine-version)
-    - [MR #06 - Scale UP the application](#mr-06---scale-up-the-application)
-    - [MR #07 - Create read-replicas](#mr-07---create-read-replicas)
-    - [MR #08 - Update Application Config Changes to use read replicas](#mr-08---update-application-config-changes-to-use-read-replicas)
+    - [Terminate Read Replicas](#terminate-read-replicas)
+      - [Remove Read Replica Dependency](#remove-read-replica-dependency)
+      - [Read Replicas Termination and Config Updates](#read-replicas-termination-and-config-updates)
+    - [Create a New Parameter Group and Update Engine Version](#create-a-new-parameter-group-and-update-engine-version)
+    - [Scale DOWN the application](#scale-down-the-application)
+    - [Start Database Upgrade](#start-database-upgrade)
+    - [Scale UP the application](#scale-up-the-application)
+    - [Create read-replicas](#create-read-replicas)
+    - [Update Application Config Changes to use read replicas](#update-application-config-changes-to-use-read-replicas)
 
 This document outline the steps and expectations for a major version upgrade of PostgreSQL RDS instance.
 
@@ -30,7 +31,7 @@ Following documentations are _must_ read for anyone considering a _major engine 
 
 ## Steps for Upgrade at High Level
 
-1. Upgrade will take `3-6` hours and will require someone from AppSRE to be available.
+1. Upgrade will take `3-6` hours and will require someone from AppSRE team to be available.
 2. Confirm the upgrade path. Upgrading a `10.x` to `12.x` may look something like `10.10 => 11.8 => 12.3`.
 3. Identify time window that works for dev team and SRE to upgrade in staging environment.
    1. Open a JIRA ticket in [AppSRE backlog](https://issues.redhat.com/browse/appsre) for AppSRE approval and resource allocation for the upgrade.
@@ -40,7 +41,7 @@ Following documentations are _must_ read for anyone considering a _major engine 
    2. Upgrades should be started early in the morning. AppSRE will not approve upgrades that start after 11am ET.
 6. Identify date and time for production upgrade.
    1. Open a JIRA ticket in [AppSRE backlog](https://issues.redhat.com/browse/appsre) for AppSRE approval and resource allocation for the upgrade.
-7. Post necessary banners on Pendo and Statuspage.
+7. Post necessary banners on `Pendo` and `Statuspage`.
 8. Execute the upgrade in production.
 
 ## Note About Upgrading Read-Replicas
@@ -51,18 +52,26 @@ Upgrading RDS instances that have read-replicas is bit more complicated for Post
 
 Make changes in following order.
 
-###  MR #01 - Terminate Read Replicas
+### Terminate Read Replicas
+
+#### Remove Read Replica Dependency
 
 1. Deploy configuration changes so that your application will stop using read replica instance.
-2. Update your parameter group to remove any parameters related to replication.
-3. Raise MR to app-interface to delete the read-replica instance. This step will have to executed by AppSRE team member. Remember to set `deletion_protection` to `false` for the read replica instance.
-4. Drop the `Logical replication slots`. This step will have to executed by AppSRE team member. If the database is using logical replication slots, the major version upgrade fails and shows the message `PreUpgrade checks failed: The instance could not be upgraded because one or more databases have logical replication slots. Please drop all logical replication slots and try again`. To resolve the issue, stop any running DMS or logical replication jobs and drop any existing replication slots. See the following code:
-   ```
-    SELECT * FROM pg_replication_slots;
-    SELECT pg_drop_replication_slot(slot_name);
-    ```
 
-### MR #02 - Create a New Parameter Group
+#### Read Replicas Termination and Config Updates
+
+1. Update your parameter group to remove any parameters related to replication.
+2. Raise MR to app-interface to delete the read-replica instance. This step will have to executed by AppSRE team member. Remember to set `deletion_protection` to `false` for the read replica instance.
+3. Drop the `Logical replication slots`. This step will have to executed by AppSRE team member. If the database is using logical replication slots, the major version upgrade fails and shows the message `PreUpgrade checks failed: The instance could not be upgraded because one or more databases have logical replication slots. Please drop all logical replication slots and try again`. To resolve the issue, stop any running DMS or logical replication jobs and drop any existing replication slots. See the following code:
+
+```
+   SELECT * FROM pg_replication_slots;
+   SELECT pg_drop_replication_slot(slot_name);
+```
+
+Example MR: [Terminate read-replica](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/9692)
+
+### Create a New Parameter Group and Update Engine Version
 
 Create a copy of your current parameter group and update at least following 2 things:
 
@@ -71,26 +80,45 @@ Create a copy of your current parameter group and update at least following 2 th
 
 At this point the file exists but is not referenced by your RDS instance. This change can be combined with next step.
 
-### MR #03 - Update RDS Maintenance Window
+1. Update the `engine` version for your RDS instance in either the defaults file or add it to overriding section.
+1. Add `allow_major_version_upgrade: true` to your RDS defaults file to allow upgrade. Terraform will fail if this flag is not set.
+1. Update parameter group reference to use the file.
+1. The actual upgrade step will have to executed by AppSRE team member.
 
-Raise an MR to change the maintenance window to match the time when the upgrade should happen. Usually 15-20 minutes from when you are working on raising the MR. The maintenance window should be `30 minutes`.
+Example MRs: [Upgrade RDS Instance from PostgreSQL 10.x to 11.6 & Create PostgreSQL 11 parameter group](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/9698/diffs)
 
-### MR #04 - Scale DOWN the application
+### Scale DOWN the application
 
-Set the deployment's replica count to 0.
+Raise MR that set's the deployment's replica count to `0`.
 
-### MR #05 - Update Engine Version
+Example MR: [Scale down service](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/9695)
 
-Update the engine version for your RDS instance in either the defaults file or add it to overriding section. Update parameter group reference to use the file. The actual upgrade step will have to executed by AppSRE team member.
+### Start Database Upgrade
 
-### MR #06 - Scale UP the application
+NOTE: Create access key in AWS console and configure your AWS CLI prior to running the following command.
 
-Scale the application back to usual capacity. At this point your application will still not use read-replica as none exists.
+```sh
+aws rds modify-db-instance --db-instance-identifier="RDS_IDENTIFIER" --db-parameter-group-name="NEW_PARAMETER_GROUP_NAME" --apply-immediately
+```
 
-### MR #07 - Create read-replicas
+Example:
+
+```sh
+aws rds modify-db-instance --db-instance-identifier="advisor-prod" --db-parameter-group-name="advisor-prod-pg12" --apply-immediately
+```
+
+Monitor the upgrade in AWS console. AWS will run a pre upgrade check and upgrade may not proceed if pre upgrade check fails. The AWS docs linked above have troubleshooting steps if you run into errors with pre upgrade checks.
+
+### Scale UP the application
+
+When the RDS instance status changes to `Available`, scale the application back to usual capacity. At this point your application will still not use read-replica as none exists.
+
+Example MR: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/9716
+
+### Create read-replicas
 
 Now re-create the read-replica instances.
 
-### MR #08 - Update Application Config Changes to use read replicas
+### Update Application Config Changes to use read replicas
 
 Update your application configuration to use the read replicas.
