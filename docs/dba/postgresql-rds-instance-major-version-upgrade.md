@@ -12,6 +12,10 @@
     - [Create a New Parameter Group and Update Engine Version](#create-a-new-parameter-group-and-update-engine-version)
     - [Scale DOWN the application](#scale-down-the-application)
     - [Start Database Upgrade](#start-database-upgrade)
+      - [Disable Terraform Resources (tf-r) integration in Production using Unleash](#disable-terraform-resources-tf-r-integration-in-production-using-unleash)
+      - [Run Terraform Resources (tf-r) integration](#run-terraform-resources-tf-r-integration)
+      - [Apply RDS Modifications](#apply-rds-modifications)
+    - [Enable Terraform Resources (tf-r) integration in Production using Unleash](#enable-terraform-resources-tf-r-integration-in-production-using-unleash)
     - [Scale UP the application](#scale-up-the-application)
     - [Create read-replicas](#create-read-replicas)
     - [Update Application Config Changes to use read replicas](#update-application-config-changes-to-use-read-replicas)
@@ -95,6 +99,40 @@ Example MR: [Scale down service](https://gitlab.cee.redhat.com/service/app-inter
 
 ### Start Database Upgrade
 
+#### Disable Terraform Resources (tf-r) integration in Production using Unleash
+
+Disable tf-r in production using unleash. Notify AppSRE IC & team.
+
+#### Run Terraform Resources (tf-r) integration
+
+Run the Terraform Resources (tf-r) integration with `--enable-deletion` flag.
+
+Example:
+
+```sh
+qontract-reconcile --config config.prod.toml --log-level INFO terraform-resources --enable-deletion
+```
+
+Note: When you run `tf-r`, it will fail because it won't be able to delete the current parameter group until the upgrade is done. Expect error similar to following:
+
+```
+[2020-09-23 10:05:23] [INFO] [terraform_client.py:log_plan_diff:176] - ['update', 'insights-prod', 'aws_db_instance', 'advisor-prod']
+[2020-09-23 10:05:23] [INFO] [terraform_client.py:log_plan_diff:159] - ['destroy', 'insights-prod', 'aws_db_parameter_group', 'advisor-prod-pg']
+[2020-09-23 10:05:23] [INFO] [terraform_client.py:log_plan_diff:153] - ['create', 'insights-prod', 'aws_db_parameter_group', 'advisor-prod-pg11']
+[2020-09-23 10:09:32] [WARNING] [__init__.py:cmd:306] - error: b'\nError: Error applying plan:\n\n1 error occurred:\n\t* aws_db_parameter_group.advisor-prod-pg (destroy): 1 error occurred:\n\t* aws_db_parameter_group.advisor-prod-pg: Error deleting DB parameter group: InvalidDBParameterGroupState: One or more database instances are still members of this parameter group advisor-prod-pg, so the group cannot be deleted\n\tstatus code: 400, request id: a4367d47-2398-4134-93f6-3d4f1dfb26c1\n\n\n\n\n\nTerraform does not automatically rollback in the face of errors.\nInstead, your Terraform state file has been partially updated with\nany resources that successfully completed. Please address the error\nabove and apply again to incrementally change your infrastructure.\n\n\n'
+[2020-09-23 10:09:32] [ERROR] [terraform_client.py:check_output:346] - [insights-prod] Error: Error applying plan:
+[2020-09-23 10:09:32] [ERROR] [terraform_client.py:check_output:346] - [insights-prod] 1 error occurred:
+[2020-09-23 10:09:32] [ERROR] [terraform_client.py:check_output:346] - [insights-prod]  * aws_db_parameter_group.advisor-prod-pg (destroy): 1 error occurred:
+[2020-09-23 10:09:32] [ERROR] [terraform_client.py:check_output:346] - [insights-prod]  * aws_db_parameter_group.advisor-prod-pg: Error deleting DB parameter group: InvalidDBParameterGroupState: One or more database instances are still members of this parameter group advisor-prod-pg, so the group cannot be deleted
+[2020-09-23 10:09:32] [ERROR] [terraform_client.py:check_output:346] - [insights-prod]  status code: 400, request id: a4367d47-2398-4134-93f6-3d4f1dfb26c1
+[2020-09-23 10:09:32] [ERROR] [terraform_client.py:check_output:346] - [insights-prod] Terraform does not automatically rollback in the face of errors.
+[2020-09-23 10:09:32] [ERROR] [terraform_client.py:check_output:346] - [insights-prod] Instead, your Terraform state file has been partially updated with
+[2020-09-23 10:09:32] [ERROR] [terraform_client.py:check_output:346] - [insights-prod] any resources that successfully completed. Please address the error
+[2020-09-23 10:09:32] [ERROR] [terraform_client.py:check_output:346] - [insights-prod] above and apply again to incrementally change your infrastructure.
+```
+
+#### Apply RDS Modifications
+
 NOTE: Create access key in AWS console and configure your AWS CLI prior to running the following command.
 
 ```sh
@@ -108,6 +146,10 @@ aws rds modify-db-instance --db-instance-identifier="advisor-prod" --db-paramete
 ```
 
 Monitor the upgrade in AWS console. AWS will run a pre upgrade check and upgrade may not proceed if pre upgrade check fails. The AWS docs linked above have troubleshooting steps if you run into errors with pre upgrade checks.
+
+### Enable Terraform Resources (tf-r) integration in Production using Unleash
+
+Enable tf-r in production using unleash once upgrade is complete.
 
 ### Scale UP the application
 
