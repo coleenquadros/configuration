@@ -331,7 +331,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
 1. Enable observability on a v4 cluster
 
-    1. Add the following DNS records to the [devshift.net DNS zone file]([/data/aws/app-sre/dns/devshift.net.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre/dns/devshift.net.yaml))
+    1. Add the following DNS records to the [devshift.net DNS zone file](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre/dns/devshift.net.yaml)
 
         ```yaml
         ...
