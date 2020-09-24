@@ -2732,66 +2732,6 @@
     <<: *job_template_defaults
 
 - job-template:
-    name: '{ci_project}-{git_repo}-olm-pr-check'
-    defaults: global
-    triggers:
-        - che_githubprb:
-            trigger_phrase: '{trigger_phrase}'
-            job_type: '{job_type}'
-            che-success-message: '{che-success-message}'
-            che-failure-message: '{che-failure-message}'
-            che-error-message: '{che-error-message}'
-    wrappers:
-    - vault-secrets:
-        <<: *vault_defaults
-        secrets:
-            - *che-bot-github-credentials
-    <<: *job_template_defaults
-
-- job-template:
-    name: '{ci_project}-{git_repo}-che-nightly-deploy'
-    defaults: global
-    triggers:
-        - che_githubprb:
-            trigger_phrase: '{trigger_phrase}'
-            job_type: '{job_type}'
-            che-success-message: '{che-success-message}'
-            che-failure-message: '{che-failure-message}'
-            che-error-message: '{che-error-message}'
-    wrappers:
-    - vault-secrets:
-        <<: *vault_defaults
-        secrets:
-            - *che-bot-github-credentials
-    <<: *job_template_defaults
-
-- job-template:
-    name: '{ci_project}-{git_repo}-minikube-updates'
-    che-success-message: "Latest version of Eclipse Che installed and tested successfully in minikube."
-    che-failure-message: "Latest version of Eclipse Che failed installation in minikube."
-    che-error-message: "Latest version of Eclipse Che failed installation in minikube."
-    triggers:
-        - github-pull-request:
-            status-context: "[MINIKUBE] Che operator update test."
-            included-regions:
-              - 'olm/eclipse-che-preview-kubernetes/deploy/olm-catalog/eclipse-che-preview-kubernetes/.*'
-            <<: *che_github_pull_request_defaults
-    <<: *che-pullrequest-template
-
-- job-template:
-    name: '{ci_project}-{git_repo}-minishift-updates'
-    che-success-message: "Latest version of Eclipse Che installed and tested successfully in minishift."
-    che-failure-message: "Latest version of Eclipse Che failed installation in minishift."
-    che-error-message: "Latest version of Eclipse Che failed installation in minishift."
-    triggers:
-        - github-pull-request:
-            status-context: "[MINISHIFT] Che operator update test."
-            included-regions:
-              - 'olm/eclipse-che-preview-openshift/deploy/olm-catalog/eclipse-che-preview-openshift/.*'
-            <<: *che_github_pull_request_defaults
-    <<: *che-pullrequest-template
-
-- job-template:
     name: '{ci_project}-{git_repo}-release'
     concurrent: false
     wrappers:
@@ -5327,39 +5267,6 @@
             ci_project: 'devtools'
             ci_cmd: '/bin/bash cico_build_nightly.sh'
             timeout: '15m'
-        - '{ci_project}-{git_repo}-pr-check':
-            git_organization: eclipse
-            git_repo: che-operator
-            ci_project: 'devtools'
-            ci_cmd: '/bin/bash .ci/cico_operator_prcheck.sh'
-            timeout: '1h'
-            job_type: "E2E tests using minishift platform"
-        - '{ci_project}-{git_repo}-olm-pr-check':
-            git_organization: eclipse
-            git_repo: che-operator
-            ci_project: 'devtools'
-            ci_cmd: '/bin/bash .ci/cico_olm_minikube.sh'
-            timeout: '2h'
-            job_type: "[MINIKUBE] Testing latest changes using OLM."
-        - '{ci_project}-{git_repo}-che-nightly-deploy':
-            git_organization: eclipse
-            git_repo: che-operator
-            ci_project: 'devtools'
-            ci_cmd: '/bin/bash .ci/cico_minishift_nightly.sh'
-            timeout: '2h'
-            job_type: "[MINISHIFT] Testing latest changes using chectl."
-        - '{ci_project}-{git_repo}-minikube-updates':
-            git_organization: eclipse
-            git_repo: che-operator
-            ci_project: 'devtools'
-            ci_cmd: '/bin/bash .ci/cico_updates_minikube.sh'
-            timeout: '2h'
-        - '{ci_project}-{git_repo}-minishift-updates':
-            git_organization: eclipse
-            git_repo: che-operator
-            ci_project: 'devtools'
-            ci_cmd: '/bin/bash .ci/cico_updates_minishift.sh'
-            timeout: '2h'
         - '{ci_project}-{git_repo}-pr-check':
             git_organization: eclipse
             git_repo: che-plugin-registry
