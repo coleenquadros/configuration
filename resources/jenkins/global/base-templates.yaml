@@ -10,26 +10,22 @@
             command: |
                 import hudson.model.Result
                 import jenkins.model.CauseOfInterruption
-                // get change id
-                def currentChangeId = build.environment.get("CHANGE_ID")
-                // get change branch name
-                def currentChangeBranchName = build.environment.get("CHANGE_BRANCH")
                 // get the current branch name
-                def currentBranchName = build.environment.get("GIT_BRANCH")
+                // source_branch_env_var_name is different in ci-int and ci-ext
+                def currentBranchName = build.environment.get("{source_branch_env_var_name}")
+                println "[DEBUG] CURRENT BRANCH NAME ${{currentBranchName}}"
                 // iterate through current project runs
                 build.getProject()._getRuns().iterator().each{{ run ->
                     def exec = run.getExecutor()
-                    println "CURRENT CHANGE PR ID ${{currentChangeId}}"
-                    println "CURRENT CHANGE BRANCH NAME ${{currentChangeBranchName}}"
-                    println "CURRENT BRANCH NAME ${{currentBranchName}}"
                     // if the run is not a current build and it has executor (running)
                     if (run != build && exec != null){{
                         def execBuild = exec.getCurrentExecutable()
-                        def execBranchName = execBuild.environment.get("GIT_BRANCH")
+                        def execBranchName = execBuild.environment.get("{source_branch_env_var_name}")
+                        println "[DEBUG] CHECKING EXEC BRANCH NAME ${{execBranchName}}"
                         // if the run is for the same branch - abort it
                         if (currentBranchName == execBranchName){{
+                            println "[DEBUG] ABORTING EXEC BRANCH NAME ${{execBranchName}}"
                             // prepare the cause of interruption
-                            println "EXEC BRANCH NAME ${{execBranchName}}"
                             def cause = {{ "interrupted by build ${{build.getId()}}" as String }} as CauseOfInterruption 
                             exec.interrupt(Result.ABORTED, cause)
                         }}
