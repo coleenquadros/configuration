@@ -1,13 +1,16 @@
 ---
 $schema: /app-interface/app-interface-sql-query-1.yml
 labels: {}
+overrides:
+  db_name: quay
 name: 2020-09-02-select-signing-users-proddb
 namespace:
   $ref: /services/quayio/namespaces/quayp03ue1.yml
 identifier: quayio-production
 output: stdout
 query: |
-  SELECT username, name
-  FROM "user" 
-  JOIN repository on repository.namespace_user_id = "user".id
-  WHERE repository.trust_enabled;
+  SELECT "user".username, name as repo_name
+  FROM repository
+  JOIN "user" on "user".id = repository.namespace_user_id
+  WHERE trust_enabled = 1 and state != 3
+  ORDER BY "user".username;
