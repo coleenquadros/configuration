@@ -61,6 +61,13 @@ Provisioning hive is a multi-step process:
     | `data/teams/ocm/roles/dev.yml`         | hive-readers                            | hive-readers                             |
     | `data/teams/app-sre/roles/app-sre.yml` | hive-admins                             | hive-admins                              |
 
+1. An additional clusterrolebinding is required for hive-admins. Add the following lines to the `openshift-config` namespace on hive clusters:
+```
+## Required for APPSRE-2440, hive-admins need to explicitly be bound to this role
+- provider: resource
+  path: /setup/dedicated-readers-hive-admins.clusterrolebinding.yaml
+```
+
 ## Provisioning OSD operators
 
 ### Resources
