@@ -5,6 +5,50 @@
         shell: |
             {build_deploy_script_path}
 
+    build_catalog: &build_catalog
+        shell: |
+            #!/bin/bash
+
+            num_commits=$(git rev-list $(git rev-list --max-parents=0 HEAD)..HEAD --count)
+            current_commit=$(git rev-parse --short=7 HEAD)
+            version="0.1.$num_commits-$current_commit"
+            opm_version="1.14.0"
+
+            # Find the CSV version from the previous bundle
+            docker pull {bundle_image_name}:latest && exists=1 || exists=0
+
+            if [ $exists -eq 1 ]; then
+                docker create --name="tmp_$$" {bundle_image_name}:latest sh
+                tmp_dir=$(mktemp -d -t sa-XXXXXXXXXX)
+                pushd $tmp_dir
+                    docker export tmp_$$ | tar -xf
+                    prev_version=`cat `find . -name *.clusterserviceversion.*` | yq r - metadata.name`
+                popd
+                docker rm tmp_$$
+            fi
+
+            # Build/push the new bundle
+            pushd deploy/bundle
+                IMAGE={bundle_image_name} IMAGE_TAG=$current_commit VERSION=$version REPLACE_VERSION=$prev_version make bundle
+                docker tag {bundle_image_name}:$current_commit {bundle_image_name}:latest
+                docker push {bundle_image_name}:$current_commit
+                docker push {bundle_image_name}:latest
+            popd
+
+            # Download opm build
+            curl -L https://github.com/operator-framework/operator-registry/releases/download/v$opm_version/linux-amd64-opm -o ./opm
+            chmod u+x ./opm
+
+            # Create/push a new catalog via opm
+            docker pull {catalog_image_name}:latest && exists=1 || exists=0
+            if [ $exists -eq 1 ]; then
+                from_arg="--from-index {catalog_image_name}:latest"
+            fi
+            ./opm index add --bundles {bundle_image_name}:$current_commit $from_arg --tag {catalog_image_name}:$current_commit --build-tool docker
+            docker tag {catalog_image_name}:$current_commit {catalog_image_name}:latest
+            docker push {catalog_image_name}:$current_commit
+            docker push {catalog_image_name}:latest
+
     abort_job_multibranch: &abort_job_multibranch
         system-groovy:
             command: |
@@ -55,6 +99,16 @@
             timeout: '{timeout}'
         builders:
         - *build_deploy
+
+    build_olm_catalog: &build_olm_catalog_template
+        disabled: '{disable}'
+        backup_ecr_push_creds_account_region: 'none' # https://vault.devshift.net/ui/vault/secrets/app-sre/show/integrations-output/aws-ecr-image-pull-secrets/none/basic-auth
+        wrappers:
+        - timestamps
+        - timeout_wrapper:
+            timeout: '{timeout}'
+        builders:
+        - *build_catalog
 
     pr_check_template: &pr_check_template
         disabled: '{disable}'
@@ -131,6 +185,11 @@
         <<: *gh_checkout
         <<: *build_master_template
 
+    gh_build_olm_catalog: &gh_build_olm_catalog
+        <<: *gh_triggers # these are different on ci.int and ci.ext
+        <<: *gh_checkout
+        <<: *build_olm_catalog_template
+
     gh_pr_check: &gh_pr_check
         <<: *gh_properties
         status_context: "ci.ext.devshift.net PR build"
@@ -202,7 +261,7 @@
             included-regions:
             - '{include_path}'
 
-    gl_build_master: &gl_build_master
+    gl_triggers: &gl_triggers
         triggers:
         - gitlab:
             trigger-push: true
@@ -218,8 +277,16 @@
             branch-filter-type: "NameBasedFilter"
             include-branches:
             - '{branch}'
+
+    gl_build_master: &gl_build_master
+        <<: *gl_triggers
         <<: *gl_checkout
         <<: *build_master_template
+
+    gl_build_olm_catalog: &gl_build_olm_catalog
+        <<: *gl_triggers
+        <<: *gl_checkout
+        <<: *build_olm_catalog_template
 
     gl_pr_check: &gl_pr_check
         <<: *gl_properties
