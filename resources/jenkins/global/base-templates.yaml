@@ -17,10 +17,12 @@
             # Login to docker
             DOCKER_CONF="$PWD/.docker"
             mkdir -p "$DOCKER_CONF"
-            docker --config="$DOCKER_CONF" login -u="$QUAY_USER" -p="$QUAY_TOKEN" quay.io
+            docker_cmd="docker --config=\"$DOCKER_CONF\""
+
+            $docker_cmd login -u="$QUAY_USER" -p="$QUAY_TOKEN" quay.io
 
             # Find the CSV version from the previous bundle
-            docker pull {bundle_image_name}:latest && exists=1 || exists=0
+            $docker_cmd pull {bundle_image_name}:latest && exists=1 || exists=0
 
             if [ $exists -eq 1 ]; then
                 docker create --name="tmp_$$" {bundle_image_name}:latest sh
@@ -36,8 +38,8 @@
             pushd deploy/bundle
                 IMAGE={bundle_image_name} IMAGE_TAG=$current_commit VERSION=$version REPLACE_VERSION=$prev_version make bundle
                 docker tag {bundle_image_name}:$current_commit {bundle_image_name}:latest
-                docker push {bundle_image_name}:$current_commit
-                docker push {bundle_image_name}:latest
+                $docker_cmd push {bundle_image_name}:$current_commit
+                $docker_cmd push {bundle_image_name}:latest
             popd
 
             # Download opm build
@@ -45,14 +47,14 @@
             chmod u+x ./opm
 
             # Create/push a new catalog via opm
-            docker pull {catalog_image_name}:latest && exists=1 || exists=0
+            $docker_cmd pull {catalog_image_name}:latest && exists=1 || exists=0
             if [ $exists -eq 1 ]; then
                 from_arg="--from-index {catalog_image_name}:latest"
             fi
             ./opm index add --bundles {bundle_image_name}:$current_commit $from_arg --tag {catalog_image_name}:$current_commit --build-tool docker
             docker tag {catalog_image_name}:$current_commit {catalog_image_name}:latest
-            docker push {catalog_image_name}:$current_commit
-            docker push {catalog_image_name}:latest
+            $docker_cmd push {catalog_image_name}:$current_commit
+            $docker_cmd push {catalog_image_name}:latest
 
     abort_job_multibranch: &abort_job_multibranch
         system-groovy:
