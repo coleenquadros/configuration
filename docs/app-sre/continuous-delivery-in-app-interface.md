@@ -96,7 +96,7 @@ Jobs are not being triggered? [follow this SOP](/docs/app-sre/sop/app-interface-
 
 Most MRs to app-interface require a review from the App SRE team.  Merging of MRs to saas files does NOT require an approval from App SRE and should be completely self serviced.
 
-Each saas file must be referenced from at least one role under the `owned_saas_files` field. [Example](/data/teams/app-sre/roles/app-sre.yml#L130-131). Each such role must be referenced from at least one user file. TL;DR - every saas file should have at least one owner.
+Each saas file must be referenced from at least one role under the `owned_saas_files` field. [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/e40300ca8ebc2cc0be18cf09fa076bb7ebae4dd9/data/teams/app-sre/roles/app-sre.yml#L189-191). Each such role must be referenced from at least one user file. TL;DR - every saas file should have at least one owner.
 
 Each user with this role can approve MRs by adding a `/lgtm` comment in the MR in the following cases -
 - the MR only changes saas files that this user is an owner of and no other files
