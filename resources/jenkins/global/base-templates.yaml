@@ -7,54 +7,7 @@
 
     build_catalog: &build_catalog
         shell: |
-            #!/bin/bash
-
-            num_commits=$(git rev-list $(git rev-list --max-parents=0 HEAD)..HEAD --count)
-            current_commit=$(git rev-parse --short=7 HEAD)
-            version="0.1.$num_commits-$current_commit"
-            opm_version="1.14.0"
-
-            # Login to docker
-            DOCKER_CONF="$PWD/.docker"
-            mkdir -p "$DOCKER_CONF"
-            docker_cmd="docker --config=\"$DOCKER_CONF\""
-
-            $docker_cmd login -u="$QUAY_USER" -p="$QUAY_TOKEN" quay.io
-
-            # Find the CSV version from the previous bundle
-            $docker_cmd pull {bundle_image_name}:latest && exists=1 || exists=0
-
-            if [ $exists -eq 1 ]; then
-                docker create --name="tmp_$$" {bundle_image_name}:latest sh
-                tmp_dir=$(mktemp -d -t sa-XXXXXXXXXX)
-                pushd $tmp_dir
-                    docker export tmp_$$ | tar -xf
-                    prev_version=`cat `find . -name *.clusterserviceversion.*` | yq r - metadata.name`
-                popd
-                docker rm tmp_$$
-            fi
-
-            # Build/push the new bundle
-            pushd deploy/bundle
-                IMAGE={bundle_image_name} IMAGE_TAG=$current_commit VERSION=$version REPLACE_VERSION=$prev_version make bundle
-                docker tag {bundle_image_name}:$current_commit {bundle_image_name}:latest
-                $docker_cmd push {bundle_image_name}:$current_commit
-                $docker_cmd push {bundle_image_name}:latest
-            popd
-
-            # Download opm build
-            curl -L https://github.com/operator-framework/operator-registry/releases/download/v$opm_version/linux-amd64-opm -o ./opm
-            chmod u+x ./opm
-
-            # Create/push a new catalog via opm
-            $docker_cmd pull {catalog_image_name}:latest && exists=1 || exists=0
-            if [ $exists -eq 1 ]; then
-                from_arg="--from-index {catalog_image_name}:latest"
-            fi
-            ./opm index add --bundles {bundle_image_name}:$current_commit $from_arg --tag {catalog_image_name}:$current_commit --build-tool docker
-            docker tag {catalog_image_name}:$current_commit {catalog_image_name}:latest
-            $docker_cmd push {catalog_image_name}:$current_commit
-            $docker_cmd push {catalog_image_name}:latest
+            {build_catalog_script_path}
 
     abort_job_multibranch: &abort_job_multibranch
         system-groovy:
@@ -110,10 +63,16 @@
     build_olm_catalog: &build_olm_catalog_template
         disabled: '{disable}'
         backup_ecr_push_creds_account_region: 'none' # https://vault.devshift.net/ui/vault/secrets/app-sre/show/integrations-output/aws-ecr-image-pull-secrets/none/basic-auth
+        build_catalog_script_path: './build_catalog.sh'
         wrappers:
         - timestamps
         - timeout_wrapper:
             timeout: '{timeout}'
+        properties:
+        - inject:
+            properties-content: |
+               BUNDLE_IMAGE_NAME={bundle_image_name}
+               CATALOG_IMAGE_NAME={catalog_image_name}
         builders:
         - *build_catalog
 
