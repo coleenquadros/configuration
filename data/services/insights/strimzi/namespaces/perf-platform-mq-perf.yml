@@ -1,0 +1,81 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: strimzi
+
+name: platform-mq-perf
+description: Insights platform-mq-perf on the Stage cluster under e2e-deploy/ocdeployer management
+
+cluster:
+  $ref: /openshift/crc-stg-01/cluster.yml
+
+#limitRanges:
+#  $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
+
+#quota:
+#  $ref: /services/insights/strimzi/strimzi-quota.yml
+
+app:
+  $ref: /services/insights/strimzi/app.yml
+
+environment:
+  $ref: /products/insights/environments/perf.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stg-01.yml
+# - $ref: /services/insights/advisor/namespaces/stage-advisor-stage.yml
+#- $ref: /services/insights/catalog/namespaces/stage-catalog-stage.yml
+# - $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
+# - $ref: /services/insights/engine/namespaces/stage-engine-stage.yml
+# - $ref: /services/insights/host-inventory/namespaces/stage-host-inventory-stage.yml
+# - $ref: /services/insights/ingress/namespaces/stage-ingress-stage.yml
+# - $ref: /services/insights/patchman/namespaces/stage-patchman-engine-stage.yml
+# - $ref: /services/insights/policies/namespaces/stage-policies-stage.yml
+# - $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
+# - $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
+# - $ref: /services/insights/topological-inventory/namespaces/stage-topological-inventory-stage.yml
+# - $ref: /services/insights/tower-analytics/namespaces/stage-tower-analytics-stage.yml
+# - $ref: /services/insights/vulnerability/namespaces/stage-vulnerability-engine-stage.yml
+# - $ref: /services/insights/vulnerability/namespaces/stage-vmaas-stage.yml
+# - $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
+# - $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
+# - $ref: /services/insights/xavier/namespaces/stage-xavier-stage.yml
+
+managedRoles: true
+
+#managedTerraformResources: true
+
+# terraformResources:
+# - provider: cloudwatch
+#   account: insights-stage
+#   identifier: platform-mq-stage
+#   defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+#   output_resource_name: cloudwatch
+#   es_identifier: kibana-elasticsearch
+
+managedResourceTypes:
+- ServiceAccount
+- Role
+- RoleBinding
+# - Subscription
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
+- provider: resource
+  path: /insights-stage/strimzi/xjoin-jenkins.role.yaml
+- provider: resource
+  path: /insights-stage/strimzi/xjoin-jenkins.rolebinding.yaml
+
+# - provider: resource
+#   path: /insights-stage/strimzi/amq-streams.subcriptions.yaml
