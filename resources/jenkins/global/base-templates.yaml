@@ -20,18 +20,20 @@
                 println "[DEBUG] CURRENT BRANCH NAME ${{currentBranchName}}"
                 // iterate through current project runs
                 build.getProject()._getRuns().iterator().each{{ run ->
-                    def exec = run.getExecutor()
-                    // if the run is not a current build and it has executor (running)
-                    if (run != build && exec != null){{
-                        def execBuild = exec.getCurrentExecutable()
-                        def execBranchName = execBuild.environment.get("{source_branch_env_var_name}")
-                        println "[DEBUG] CHECKING EXEC BRANCH NAME ${{execBranchName}}"
-                        // if the run is for the same branch - abort it
-                        if (currentBranchName == execBranchName){{
-                            println "[DEBUG] ABORTING EXEC BRANCH NAME ${{execBranchName}}"
-                            // prepare the cause of interruption
-                            def cause = {{ "interrupted by build ${{build.getId()}}" as String }} as CauseOfInterruption 
-                            exec.interrupt(Result.ABORTED, cause)
+                    if (run.isInProgress()){{
+                        def exec = run.getExecutor()
+                        // if the run is not a current build and it has executor (running)
+                        if (run != build && exec != null){{
+                            def execBuild = exec.getCurrentExecutable()
+                            def execBranchName = execBuild.environment.get("{source_branch_env_var_name}")
+                            println "[DEBUG] CHECKING EXEC BRANCH NAME ${{execBranchName}}"
+                            // if the run is for the same branch - abort it
+                            if (currentBranchName == execBranchName){{
+                                println "[DEBUG] ABORTING EXEC BRANCH NAME ${{execBranchName}}"
+                                // prepare the cause of interruption
+                                def cause = {{ "interrupted by build ${{build.getId()}}" as String }} as CauseOfInterruption 
+                                exec.interrupt(Result.ABORTED, cause)
+                            }}
                         }}
                     }}
                 }}
@@ -87,6 +89,7 @@
         - timeout_wrapper:
             timeout: '{timeout}'
         builders:
+        - *abort_job_multibranch
         - *pr_check
         - *stack_analysis
 
