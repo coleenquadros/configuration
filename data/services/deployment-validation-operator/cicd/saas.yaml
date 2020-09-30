@@ -1,0 +1,40 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: deployment-validation-operator
+
+name: deployment-validation-operator
+description: 'An operator that inspects workloads in the cluster and recommends improvements'
+
+app:
+  $ref: /services/deployment-validation-operator/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- CatalogSource
+- OperatorGroup
+- Subscription
+
+parameters:
+  IMAGE: quay.io/app-sre/deployment-validation-operator-catalog
+  NAMESPACE: deployment-validation-operator
+
+imagePatterns:
+- quay.io/app-sre/deployment-validation-operator-catalog
+
+resourceTemplates:
+- name: deployment-validation-operator
+  url: https://github.com/app-sre/deployment-validation-operator
+  path: /deploy/openshift/deployment-validation-operator-olm.yaml
+  targets:
+  - namespace:
+      $ref: /openshift/app-sre-stage-01/namespaces/app-sre-dvo-per-cluster.yml
+    ref: master
