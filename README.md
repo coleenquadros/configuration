@@ -32,6 +32,7 @@ this repository.
     - [Create a Sentry Team (`/dependencies/sentry-team-1.yml`)](#create-a-sentry-team-dependenciessentry-team-1yml)
     - [Manage Sentry team membership via App-Interface (`/access/role-1.yml`)](#manage-sentry-team-membership-via-app-interface-accessrole-1yml)
     - [Manage Openshift resources via App-Interface (`/openshift/namespace-1.yml`)](#manage-openshift-resources-via-app-interface-openshiftnamespace-1yml)
+      - [Manage shared OpenShift resources via App-interface (`/openshift/namespace-1.yml`)](#manage-shared-openshift-resources-via-app-interface-openshiftnamespace-1yml)
       - [Example: Manage a ConfigMap via App-Interface (`/openshift/namespace-1.yml`)](#example-manage-a-configmap-via-app-interface-openshiftnamespace-1yml)
       - [Example: Manage a templated ConfigMap via App-Interface (`/openshift/namespace-1.yml`)](#example-manage-a-templated-configmap-via-app-interface-openshiftnamespace-1yml)
       - [Manage Secrets via App-Interface (`/openshift/namespace-1.yml`) using Vault](#manage-secrets-via-app-interface-openshiftnamespace-1yml-using-vault)
@@ -571,9 +572,9 @@ The next section demonstrates how to manage a `ConfigMap` resource via two examp
 
 In order to manage resources for multiple namespaces in a single location you can use a Shared Resources file.
 
-Create a shared resources file with an `openshiftResources` section. [Example](/services/ocm/shared-resources/stage.yml). The `openshiftResources` section is defined identically in a namespace file and in a shared resources file (see previous section).
+Create a shared resources file with an `openshiftResources` section. [Example](/data/services/ocm/shared-resources/stage.yml). The `openshiftResources` section is defined identically in a namespace file and in a shared resources file (see previous section).
 
-To add the shared resources to a namespace, add a `sharedResources` section to a namespace file and reference the shared resources file. [Example](/services/ocm/namespaces/uhc-stage.yml).
+To add the shared resources to a namespace, add a `sharedResources` section to a namespace file and reference the shared resources file. [Example](/data/services/ocm/namespaces/uhc-stage.yml).
 
 #### Example: Manage a ConfigMap via App-Interface (`/openshift/namespace-1.yml`)
 
