@@ -298,6 +298,8 @@ At this point you should be able to access the cluster via the console / `oc` cl
       path: /setup/cluster.project.v4.yaml
     - provider: resource
       path: /setup/self-provisioners.clusterrolebinding.yaml
+    - provider: resource
+      path: /setup/dedicated-readers.clusterrolebinding.yaml
     ```
 
 1. Re-enable e2e tests on the cluster by removing the following lines from the cluster definition:
