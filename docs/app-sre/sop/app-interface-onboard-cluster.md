@@ -79,7 +79,7 @@ This step should be performed in a single merge request.
     spec:
       provider: aws
       region: (desired region. ex: us-east-1)
-      channel: (desired channel group. either 'stable' or 'fast', depending on the workload to run on the cluster)
+      channel: (desired channel group. either 'stable' or 'fast', use the latest 'fast' version by default, unless the cluster hosts OSD related workloads. latest fast can be found in https://gitlab.cee.redhat.com/service/clusterimagesets/-/tree/master/prod)
       version: (same as initial_version, this will be automatically updated with cluster upgrades)
       initial_version: (desired version. ex: 4.4.11)
       multi_az: true
