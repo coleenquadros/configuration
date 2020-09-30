@@ -1,0 +1,66 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: slo-report
+  platform: insights
+
+name: slo-report
+description: SLO Report for the Insights Platform
+
+app:
+  $ref: /services/insights/slo-report/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- ServiceAccount
+- ConfigMap
+- CronJob
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: slo-report
+  path: /templates/slo-report/slo-report.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/devprod-ops
+  targets:
+  - namespace:
+      $ref: /services/insights/slo-report/namespaces/stage-slo-report.yml
+    ref: master
+    parameters:
+      IMAGE: "quay.io/cloudservices/slo-report"
+      IMAGE_TAG: "52bbe2ca"
+      SEND_EMAILS: "True"
+      SCHEDULE: "0 0 * * 1"
+      EMAIL_TO: "bholifie@redhat.com"
+      EMAIL_FROM: "clouddot_slo_metrics@redhat.com"
+      PLATFORM_SERVICES: "inventory,ingress,remediations,rbac,receptor-controller,entitlements,sources,topological-inventory,module-update-router"
+      SERVICES: "apicast-tests,approval,automation-hub,catalog,cloudigrade,compliance,cost-management,drift,entitlements,historical-system-profiles,ingress,insights,insights-results-aggregator,inventory,module-update-router,patch,policies,rbac,receptor-controller,remediations,rhsm-subscriptions,sources,system-baseline,topological-inventory,tower-analytics,vulnerability,xavier"
+  - namespace:
+      $ref: /services/insights/slo-report/namespaces/prod-slo-report.yml
+    ref: 52bbe2ca105dd70a65a187397da161972668eb57 
+    parameters:
+      IMAGE: "quay.io/cloudservices/slo-report"
+      IMAGE_TAG: "52bbe2ca"
+      SEND_EMAILS: "True"
+      SCHEDULE: "0 0 * * 1"
+      EMAIL_TO: "insights-platform@redhat.com"
+      EMAIL_FROM: "clouddot_slo_metrics@redhat.com"
+      PLATFORM_SERVICES: "inventory,ingress,remediations,rbac,receptor-controller,entitlements,sources,topological-inventory,module-update-router"
+      SERVICES: "apicast-tests,approval,automation-hub,catalog,cloudigrade,compliance,cost-management,drift,entitlements,historical-system-profiles,ingress,insights,insights-results-aggregator,inventory,module-update-router,patch,policies,rbac,receptor-controller,remediations,rhsm-subscriptions,sources,system-baseline,topological-inventory,tower-analytics,vulnerability,xavier"

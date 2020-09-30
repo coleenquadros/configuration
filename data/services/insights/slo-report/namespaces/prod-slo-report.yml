@@ -1,0 +1,43 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: slo-report
+
+name: slo-report-prod
+description: SLO-Report on prod c.rh.c
+
+cluster:
+  $ref: /openshift/crcp01ue1/cluster.yml
+
+quota:
+  $ref: /services/insights/default-quota.yml
+
+app:
+  $ref: /services/insights/slo-report/app.yml
+
+environment:
+  $ref: /products/insights/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/insights-prod/slo-report-prod/slo-report-secrets
+  version: 4
+

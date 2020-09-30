@@ -5,31 +5,49 @@
         shell: |
             {build_deploy_script_path}
 
+    build_catalog: &build_catalog
+        shell: |
+            BUNDLE_IMAGE_NAME={bundle_image_name} CATALOG_IMAGE_NAME={catalog_image_name} {build_catalog_script_path}
+
     abort_job_multibranch: &abort_job_multibranch
         system-groovy:
             command: |
                 import hudson.model.Result
+                import hudson.model.Run
+                import hudson.model.Executor
                 import jenkins.model.CauseOfInterruption
+
                 // get the current branch name
                 // source_branch_env_var_name is different in ci-int and ci-ext
                 def currentBranchName = build.environment.get("{source_branch_env_var_name}")
                 println "[DEBUG] CURRENT BRANCH NAME ${{currentBranchName}}"
-                // iterate through current project runs
-                build.getProject()._getRuns().iterator().each{{ run ->
-                    def exec = run.getExecutor()
-                    // if the run is not a current build and it has executor (running)
-                    if (run != build && exec != null){{
-                        def execBuild = exec.getCurrentExecutable()
-                        def execBranchName = execBuild.environment.get("{source_branch_env_var_name}")
-                        println "[DEBUG] CHECKING EXEC BRANCH NAME ${{execBranchName}}"
-                        // if the run is for the same branch - abort it
-                        if (currentBranchName == execBranchName){{
-                            println "[DEBUG] ABORTING EXEC BRANCH NAME ${{execBranchName}}"
-                            // prepare the cause of interruption
-                            def cause = {{ "interrupted by build ${{build.getId()}}" as String }} as CauseOfInterruption 
-                            exec.interrupt(Result.ABORTED, cause)
+
+                // https://javadoc.jenkins-ci.org/hudson/model/Run.html
+                Run previousBuild = build.getPreviousBuildInProgress()
+                def previousBuildCount = 0
+                def maxPreviousBuildsCount = {max_previous_builds_count}
+                while (previousBuild != null && previousBuildCount < maxPreviousBuildsCount) {{
+                    if (previousBuild.isInProgress()) {{
+                        println "[DEBUG] CHECKING BUILD ${{previousBuild.getId()}} (${{previousBuildCount}}/${{maxPreviousBuildsCount}})"
+                        // https://javadoc.jenkins-ci.org/hudson/model/Executor.html
+                        Executor exec = previousBuild.getExecutor()
+                        // if exec is null it means the build is not running
+                        // just safety even though we checked it before
+                        if (exec != null) {{
+                            def execBuild = exec.getCurrentExecutable()
+                            def execBranchName = execBuild.environment.get("{source_branch_env_var_name}")
+                            println "[DEBUG] CHECKING EXEC BRANCH NAME ${{execBranchName}}"
+                            if (currentBranchName == execBranchName) {{
+                                println "[DEBUG] ABORTING EXEC BRANCH NAME ${{execBranchName}}"
+                                // prepare the cause of interruption
+                                def cause = {{ "interrupted by build ${{build.getId()}}" as String }} as CauseOfInterruption 
+                                exec.interrupt(Result.ABORTED, cause)
+                                println "[DEBUG] ABORTED EXEC BRANCH NAME ${{execBranchName}}"
+                            }}
                         }}
                     }}
+                    previousBuild = previousBuild.getPreviousBuildInProgress()
+                    previousBuildCount = previousBuildCount + 1
                 }}
 
     pr_check: &pr_check
@@ -56,18 +74,29 @@
         builders:
         - *build_deploy
 
+    build_olm_catalog: &build_olm_catalog_template
+        disabled: '{disable}'
+        backup_ecr_push_creds_account_region: 'none' # https://vault.devshift.net/ui/vault/secrets/app-sre/show/integrations-output/aws-ecr-image-pull-secrets/none/basic-auth
+        build_catalog_script_path: './build_catalog.sh'
+        wrappers:
+        - timestamps
+        - timeout_wrapper:
+            timeout: '{timeout}'
+        builders:
+        - *build_catalog
+
     pr_check_template: &pr_check_template
         disabled: '{disable}'
         node: '{node}'
         concurrent: '{concurrent_build}'
         pr_check_script_path: "./pr_check.sh"
         run_stack_analysis_path: ''
+        max_previous_builds_count: 20
         wrappers:
         - timestamps
         - timeout_wrapper:
             timeout: '{timeout}'
         builders:
-        - *abort_job_multibranch
         - *pr_check
         - *stack_analysis
 
@@ -130,6 +159,11 @@
         <<: *gh_triggers # these are different on ci.int and ci.ext
         <<: *gh_checkout
         <<: *build_master_template
+
+    gh_build_olm_catalog: &gh_build_olm_catalog
+        <<: *gh_triggers # these are different on ci.int and ci.ext
+        <<: *gh_checkout
+        <<: *build_olm_catalog_template
 
     gh_pr_check: &gh_pr_check
         <<: *gh_properties
@@ -202,7 +236,7 @@
             included-regions:
             - '{include_path}'
 
-    gl_build_master: &gl_build_master
+    gl_triggers: &gl_triggers
         triggers:
         - gitlab:
             trigger-push: true
@@ -218,8 +252,16 @@
             branch-filter-type: "NameBasedFilter"
             include-branches:
             - '{branch}'
+
+    gl_build_master: &gl_build_master
+        <<: *gl_triggers
         <<: *gl_checkout
         <<: *build_master_template
+
+    gl_build_olm_catalog: &gl_build_olm_catalog
+        <<: *gl_triggers
+        <<: *gl_checkout
+        <<: *build_olm_catalog_template
 
     gl_pr_check: &gl_pr_check
         <<: *gl_properties

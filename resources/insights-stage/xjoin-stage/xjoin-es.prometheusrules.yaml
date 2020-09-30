@@ -1,0 +1,39 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: xjoin-es
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: xjoin-es
+    rules:
+
+    - alert: xjoinESFilesystemUsage
+      expr: |
+        (elasticsearch_filesystem_data_free_bytes{cluster=~".*xjoin.*", es_data_node="true"} / elasticsearch_filesystem_data_size_bytes{cluster=~".*xjoin.*", es_data_node="true"}) * 100 < 20.0
+      labels:
+        severity: info
+        service: insights
+        env: stage
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/R-meuUJZk/xjoin-elasticsearch?orgId=1&refresh=1m&var-datasource=crc-stg-01-prometheus&var-cluster=351356922033:xjoin-elasticsearch"
+        link_url: "https://console.aws.amazon.com/es/home?region=us-east-1#domain:resource=xjoin-elasticsearch;action=dashboard;tab=TAB_INSTANCE_HEALTH_ID"
+        message: "xjoin-elasticsearch available storage below 20% ({{ $value }}%)"
+
+    - alert: xjoinESHeapUsage
+      expr: |
+        (avg_over_time(elasticsearch_jvm_memory_used_bytes{area="heap", cluster=~".*xjoin.*"}[5m]) / elasticsearch_jvm_memory_max_bytes{area="heap", cluster=~".*xjoin.*"}) * 100 > 80
+      labels:
+        severity: info
+        service: insights
+        env: stage
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/R-meuUJZk/xjoin-elasticsearch?orgId=1&refresh=1m&var-datasource=crc-stg-01-prometheus&var-cluster=351356922033:xjoin-elasticsearch"
+        link_url: "https://console.aws.amazon.com/es/home?region=us-east-1#domain:resource=xjoin-elasticsearch;action=dashboard;tab=TAB_INSTANCE_HEALTH_ID"
+        message: "xjoin-elasticsearch heap usage over 80% ({{ $value }}%)"

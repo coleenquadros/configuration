@@ -209,3 +209,91 @@
         jobs: '{upstream}'
         results: 'success'
     <<: *openshift_saas_deploy_template
+
+# Builds a bundle and catalog for OLM using opm
+#
+# vars required in the GitHub job definition:
+# - gh_org: GitHub org
+# - gh_repo: GitHub repo
+#
+# vars required in the GitLab job definition:
+# - gl_group: GitLab group
+# - gl_project: GitLab repo
+#
+# optional vars
+# - quay_org: name of the quay organisation
+#
+# optional secrets:
+# The secret 'app-sre/quay/{quay_org}-push' must exist, with `user`, `token` and `config.json` keys.
+- job-template:
+    id: 'gh-build-catalog-master'
+    name: '{gh_org}-{gh_repo}-gh-build-catalog-{branch}'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *backup_ecr_push_creds
+        - *quay_secret_push
+        - *app_sre_bot_push_token
+        - *app_interface_creds
+    <<: *gh_build_olm_catalog
+
+- job-template:
+    id: 'gl-build-catalog-master'
+    name: '{gl_group}-{gl_project}-gl-build-catalog-{branch}'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *backup_ecr_push_creds
+        - *quay_secret_push
+        - *app_sre_bot_push_token
+        - *app_interface_creds
+    <<: *gl_build_olm_catalog
+
+- job-template:
+    id: gh-build-catalog-master-with-upstream
+    name: '{gh_org}-{gh_repo}-gh-build-catalog-{branch}-upstream-{upstream}'
+    upstream: ''
+    branch: master
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *quay_secret_push
+        - *app_sre_bot_push_token
+        - *app_interface_creds
+    triggers:
+    - reverse:
+        jobs: '{upstream}'
+        results: 'success'
+    <<: *gh_build_olm_catalog
+
+- job-template:
+    id: gl-build-catalog-master-with-upstream
+    name: '{gl_group}-{gl_project}-gl-build-catalog-{branch}-upstream-{upstream}'
+    upstream: ''
+    branch: master
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *quay_secret_push
+        - *app_sre_bot_push_token
+        - *app_interface_creds
+    triggers:
+    - reverse:
+        jobs: '{upstream}'
+        results: 'success'
+    <<: *gl_build_olm_catalog

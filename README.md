@@ -567,6 +567,14 @@ The `resource-template` provider supports using the `Jinja2` template language t
 
 The next section demonstrates how to manage a `ConfigMap` resource via two examples showing both the `resource` and `resource-template` providers:
 
+#### Manage shared OpenShift resources via App-interface (`/openshift/namespace-1.yml`)
+
+In order to manage resources for multiple namespaces in a single location you can use a Shared Resources file.
+
+Create a shared resources file with an `openshiftResources` section. [Example](/services/ocm/shared-resources/stage.yml). The `openshiftResources` section is defined identically in a namespace file and in a shared resources file (see previous section).
+
+To add the shared resources to a namespace, add a `sharedResources` section to a namespace file and reference the shared resources file. [Example](/services/ocm/namespaces/uhc-stage.yml).
+
 #### Example: Manage a ConfigMap via App-Interface (`/openshift/namespace-1.yml`)
 
 In order to add ConfigMaps to a namespace, you need to add them to the `openshiftResources` field.

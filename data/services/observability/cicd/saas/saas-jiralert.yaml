@@ -1,0 +1,54 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: app-sre-observability
+
+name: saas-jiralert
+description: saas-jiralert
+
+app:
+  $ref: /services/observability/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- Deployment
+- Service
+- ServiceAccount
+- ClusterRoleBinding
+
+imagePatterns:
+- quay.io/app-sre
+- quay.io/openshift/
+
+resourceTemplates:
+- name: jiralert
+  path: /openshift/jiralert.template.yaml
+  url: https://gitlab.cee.redhat.com/service/app-sre-observability
+  parameters:
+      NAME: "jiralert"
+      APPLICATION_PORT: "9091"
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: master
+    parameters:
+      IMAGE: "quay.io/app-sre/jiralert"
+      IMAGE_TAG: 4cb7192
+      LOG_LEVEL: info
+      REPLICAS: 1      
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: 4cb7192acdcd936c34608711eb79d81676aeb30d
+    parameters:
+      IMAGE: "quay.io/app-sre/jiralert"
+      IMAGE_TAG: 4cb7192
+      LOG_LEVEL: info
+      REPLICAS: 3

@@ -24,6 +24,7 @@ networkPoliciesAllow:
 managedRoles: true
 
 managedResourceTypes:
+- ServiceAccount
 - Secret
 
 openshiftResources:
@@ -38,14 +39,15 @@ openshiftResources:
   name: quay-cloudservices-pull
 - provider: vault-secret
   path: insights/secrets/insights-prod/compliance-prod/compliance-backend
-  version: 1
+  version: 2
   annotations:
     qontract.recycle: "true"
 # Templated secret for rds instance.
 - provider: resource-template
   type: extracurlyjinja2
   path: /insights-prod/compliance-prod/compliance-rds.secret.yaml
-
+- provider: resource
+  path: /insights-prod/shared/private-image-puller.serviceaccount.yaml
 
 managedTerraformResources: true
 
@@ -56,3 +58,12 @@ terraformResources:
   defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
   output_resource_name: cloudwatch
   es_identifier: kibana-elasticsearch
+- provider: rds
+  account: insights-prod
+  identifier: compliance-prod
+  defaults: /terraform/resources/insights/production/rds/rds-compliance-prod.yml
+  overrides:
+    snapshot_identifier: compliance-prod-migration
+  enhanced_monitoring: true
+  output_resource_name: compliance-db-rds
+  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-compliance-prod.yml

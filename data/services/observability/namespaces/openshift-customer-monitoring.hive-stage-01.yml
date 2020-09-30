@@ -63,3 +63,43 @@ openshiftResources:
 ### Prometheus mixin alerts
 - provider: resource
   path: /observability/prometheusrules/prometheus-mixin.prometheusrules.yaml
+
+################## Add  any cluster-specific content below this line ##################
+
+# ServiceMonitor
+## Hive
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/hive/hive-controllers.servicemonitor.yaml
+  variables:
+    namespace: hive
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/osd-operators/hive-operator-generic.servicemonitor.yaml
+  variables:
+    operator_name: aws-account-operator
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/osd-operators/hive-operator-generic.servicemonitor.yaml
+  variables:
+    operator_name: certman-operator
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/osd-operators/hive-operator-generic.servicemonitor.yaml
+  variables:
+    operator_name: deadmanssnitch-operator
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/osd-operators/hive-operator-generic.servicemonitor.yaml
+  variables:
+    operator_name: pagerduty-operator
+
+# PrometheusRule
+## hive-stage-01
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/hive/hive-stage-common.prometheusrules.yaml
+  variables:
+    shard_name: hive-stage-01
+    aws_account_operator_accounts_threshold: 2851
+    grafana_datasource: hive-stage-01-prometheus

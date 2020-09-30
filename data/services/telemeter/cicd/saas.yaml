@@ -45,6 +45,7 @@ imagePatterns:
 - quay.io/prometheus/memcached-exporter
 - registry.redhat.io/rhel8/memcached
 - quay.io/jpkroehling/all-in-one
+- quay.io/app-sre/loki
 
 parameters:
   PROXY_IMAGE: quay.io/openshift/origin-oauth-proxy
@@ -77,12 +78,12 @@ resourceTemplates:
       TELEMETER_SERVER_CPU_LIMIT: 1
       TELEMETER_SERVER_MEMORY_REQUEST: 100Mi
       TELEMETER_SERVER_MEMORY_LIMIT: 1Gi
-      TELEMETER_FORWARD_URL: 'http://observatorium-thanos-receive.telemeter-stage.svc.cluster.local:19291/api/v1/receive'
+      TELEMETER_FORWARD_URL: 'http://observatorium-observatorium-api.telemeter-stage.svc.cluster.local:8080/api/metrics/v1/telemeter/api/v1/receive'
       PROMETHEUS_AMS_REMOTE_WRITE_PROXY_TARGET: 'observatorium-thanos-receive'
       OBSERVATORIUM_API_IMAGE_TAG: master-2020-09-22-v0.1.1-150-gb315f72
       THANOS_CONFIG_SECRET: thanos-objectstorage
       THANOS_S3_SECRET: telemeter-thanos-stage-s3
-      THANOS_IMAGE_TAG: v0.15.0
+      THANOS_IMAGE_TAG: master-2020-09-24-49dad93e
       THANOS_RECEIVE_CONTROLLER_IMAGE_TAG: master-2020-02-06-b66e0c8
       THANOS_QUERIER_REPLICAS: 2
       THANOS_QUERIER_CPU_REQUEST: '50m'
@@ -116,6 +117,35 @@ resourceTemplates:
       MEMCACHED_EXPORTER_IMAGE: quay.io/prometheus/memcached-exporter
       MEMCACHED_EXPORTER_IMAGE_TAG: v0.6.0
       TELEMETER_SERVER_TOKEN_EXPIRE_SECONDS: 43200
+      LOKI_IMAGE_TAG: 1.6.1
+      LOKI_IMAGE: quay.io/app-sre/loki
+      LOKI_S3_SECRET: telemeter-loki-stage-s3
+      LOKI_DISTRIBUTOR_REPLICAS: 2
+      LOKI_DISTRIBUTOR_CPU_REQUESTS: '500m'
+      LOKI_DISTRIBUTOR_CPU_LIMITS: '1000m'
+      LOKI_DISTRIBUTOR_MEMORY_REQUESTS: '500Mi'
+      LOKI_DISTRIBUTOR_MEMORY_LIMITS: '1Gi'
+      LOKI_INGESTER_REPLICAS: 2
+      LOKI_INGESTER_CPU_REQUESTS: '1000m'
+      LOKI_INGESTER_CPU_LIMITS: '2000m'
+      LOKI_INGESTER_MEMORY_REQUESTS: '5Gi'
+      LOKI_INGESTER_MEMORY_LIMITS: '10Gi'
+      LOKI_QUERIER_REPLICAS: 2
+      LOKI_QUERIER_CPU_REQUESTS: '500m'
+      LOKI_QUERIER_CPU_LIMITS: '500m'
+      LOKI_QUERIER_MEMORY_REQUESTS: '600Mi'
+      LOKI_QUERIER_MEMORY_LIMITS: '1200Mi'
+      LOKI_QUERY_FRONTEND_REPLICAS: 2
+      LOKI_QUERY_FRONTEND_CPU_REQUESTS: '500m'
+      LOKI_QUERY_FRONTEND_CPU_LIMITS: '500m'
+      LOKI_QUERY_FRONTEND_MEMORY_REQUESTS: '600Mi'
+      LOKI_QUERY_FRONTEND_MEMORY_LIMITS: '1200Mi'
+      LOKI_QUERY_CONCURRENCY: 32
+      LOKI_QUERY_FRONTEND_PARALLELISM: 2
+      LOKI_CHUNK_CACHE_REPLICAS: 2
+      LOKI_INDEX_QUERY_CACHE_REPLICAS: 2
+      LOKI_RESULTS_CACHE_REPLICAS: 2
+      LOKI_PVC_REQUEST: '50Gi'
   - namespace:
       $ref: /services/telemeter/namespaces/telemeter-production.yml
     # Commit for gitlab.cee.redhat.com/observatorium/configuration repo.
@@ -137,7 +167,7 @@ resourceTemplates:
       OBSERVATORIUM_API_REPLICAS: 3
       THANOS_CONFIG_SECRET: thanos-objectstorage
       THANOS_S3_SECRET: telemeter-thanos-production-s3
-      THANOS_IMAGE_TAG: v0.15.0
+      THANOS_IMAGE_TAG: master-2020-09-24-49dad93e
       THANOS_RECEIVE_CONTROLLER_IMAGE_TAG: master-2020-02-06-b66e0c8
       THANOS_QUERIER_REPLICAS: 6
       THANOS_RECEIVE_REPLICAS: 6
@@ -169,6 +199,35 @@ resourceTemplates:
       MEMCACHED_IMAGE_TAG: 1.5
       MEMCACHED_EXPORTER_IMAGE: quay.io/prometheus/memcached-exporter
       MEMCACHED_EXPORTER_IMAGE_TAG: v0.6.0
+      LOKI_IMAGE_TAG: 1.6.1
+      LOKI_IMAGE: quay.io/app-sre/loki
+      LOKI_S3_SECRET: telemeter-loki-production-s3
+      LOKI_DISTRIBUTOR_REPLICAS: 2
+      LOKI_DISTRIBUTOR_CPU_REQUESTS: '500m'
+      LOKI_DISTRIBUTOR_CPU_LIMITS: '1000m'
+      LOKI_DISTRIBUTOR_MEMORY_REQUESTS: '500Mi'
+      LOKI_DISTRIBUTOR_MEMORY_LIMITS: '1Gi'
+      LOKI_INGESTER_REPLICAS: 2
+      LOKI_INGESTER_CPU_REQUESTS: '1000m'
+      LOKI_INGESTER_CPU_LIMITS: '2000m'
+      LOKI_INGESTER_MEMORY_REQUESTS: '5Gi'
+      LOKI_INGESTER_MEMORY_LIMITS: '10Gi'
+      LOKI_QUERIER_REPLICAS: 2
+      LOKI_QUERIER_CPU_REQUESTS: '500m'
+      LOKI_QUERIER_CPU_LIMITS: '500m'
+      LOKI_QUERIER_MEMORY_REQUESTS: '600Mi'
+      LOKI_QUERIER_MEMORY_LIMITS: '1200Mi'
+      LOKI_QUERY_FRONTEND_REPLICAS: 2
+      LOKI_QUERY_FRONTEND_CPU_REQUESTS: '500m'
+      LOKI_QUERY_FRONTEND_CPU_LIMITS: '500m'
+      LOKI_QUERY_FRONTEND_MEMORY_REQUESTS: '600Mi'
+      LOKI_QUERY_FRONTEND_MEMORY_LIMITS: '1200Mi'
+      LOKI_QUERY_CONCURRENCY: 32
+      LOKI_QUERY_FRONTEND_PARALLELISM: 2
+      LOKI_CHUNK_CACHE_REPLICAS: 2
+      LOKI_INDEX_QUERY_CACHE_REPLICAS: 2
+      LOKI_RESULTS_CACHE_REPLICAS: 2
+      LOKI_PVC_REQUEST: '150Gi'
 - name: observatorium-jaeger
   path: /manifests/production/jaeger-template.yaml
   url: https://gitlab.cee.redhat.com/observatorium/configuration

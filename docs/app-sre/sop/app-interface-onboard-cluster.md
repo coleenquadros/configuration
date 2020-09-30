@@ -79,7 +79,7 @@ This step should be performed in a single merge request.
     spec:
       provider: aws
       region: (desired region. ex: us-east-1)
-      channel: (desired channel group. either 'stable' or 'fast', depending on the workload to run on the cluster)
+      channel: (desired channel group. either 'stable' or 'fast', use the latest 'fast' version by default, unless the cluster hosts OSD related workloads. latest fast can be found in https://gitlab.cee.redhat.com/service/clusterimagesets/-/tree/master/prod)
       version: (same as initial_version, this will be automatically updated with cluster upgrades)
       initial_version: (desired version. ex: 4.4.11)
       multi_az: true
@@ -221,8 +221,8 @@ At this point you should be able to access the cluster via the console / `oc` cl
     1. Jump host configuration to your `cluster.yml` file:
         ```yaml
         jumpHost:
-          hostname: ci.ext.devshift.net
-          knownHosts: /jump-host/known-hosts/ci.ext.devshift.net
+          hostname: bastion.ci.ext.devshift.net
+          knownHosts: /jump-host/known-hosts/bastion.ci.ext.devshift.net
           user: app-sre-bot
           identity:
             path: app-sre/ansible/roles/app-sre-bot
@@ -298,6 +298,8 @@ At this point you should be able to access the cluster via the console / `oc` cl
       path: /setup/cluster.project.v4.yaml
     - provider: resource
       path: /setup/self-provisioners.clusterrolebinding.yaml
+    - provider: resource
+      path: /setup/dedicated-readers.clusterrolebinding.yaml
     ```
 
 1. Re-enable e2e tests on the cluster by removing the following lines from the cluster definition:
@@ -393,6 +395,8 @@ At this point you should be able to access the cluster via the console / `oc` cl
     1. Add the `observabilityNamespace` field on the cluster data file and reference the `openshift-customer-monitoring` namespace file created in the previous step. Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/7ecd529584666d97b1418224b2772557807c6e1c/data/openshift/app-sre-prod-01/cluster.yml#L14-15
 
     1. Create an `app-sre-observability-per-cluster` namespace file for that specific cluster. Ex: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/openshift/app-sre-prod-01/namespaces/app-sre-observability-per-cluster.yml
+
+    1. Add the new `app-sre-observability-per-cluster` namespace to list of namespaces in [observability-access-elevated.yml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/roles/observability-access-elevated.yml) under `access`, to allow users with elevated observability access to access all the prometheus.
 
     1. Add the new `app-sre-observability-per-cluster` namespace to the target namespaces in [saas-nginx-proxy.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/cicd/saas/saas-nginx-proxy.yaml) to deploy nginx-proxy.
 

@@ -1,0 +1,94 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: xjoin-connect
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: xjoin-connect
+    rules:
+
+    - alert: xjoinConnectAbsent
+      expr: |
+        absent(up{service="xjoin-kafka-connect"}) OR sum (up{service="xjoin-kafka-connect"}) by (namespace) == 0
+      for: 5m
+      labels:
+        severity: info
+        service: insights
+        env: stage
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/Sq0szVPZz/xjoin-kafka-connectors?orgId=1&var-datasource=crc-stg-01-prometheus"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/xjoin-stage/deployments/xjoin-kafka-connect"
+        message: "xjoin-kafka-connect pods missing"
+
+    - alert: xjoinConnectContainerRestart
+      expr: |
+        sum(increase(kube_pod_container_status_restarts_total{container="xjoin-kafka-connect"}[5m])) by (namespace) > 0
+      labels:
+        severity: info
+        service: insights
+        env: stage
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/Sq0szVPZz/xjoin-kafka-connectors?orgId=1&var-datasource=crc-stg-01-prometheus"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/xjoin-stage/deployments/xjoin-kafka-connect"
+        message: "xjoin-kafka-connect containers restarting"
+
+    - alert: xjoinConnectLagTime
+      expr: |
+        avg by (namespace, topic) (avg_over_time(kafka_consumergroup_group_lag_seconds{topic=~".*xjoin.*"}[1m])) > 60
+      labels:
+        severity: info
+        service: insights
+        env: stage
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/Sq0szVPZz/xjoin-kafka-connectors?orgId=1&var-datasource=crc-stg-01-prometheus"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/xjoin-stage/deployments/xjoin-kafka-connect"
+        message: "xjoin connector lag time is abnormally high ({{ $value }} seconds) which is above the threshold (60 seconds)"
+
+    - alert: xjoinConnectProcessingRateLow
+      expr: |
+        sum by (namespace) (increase(kafka_consumergroup_group_offset{topic=~".*xjoin.*"}[12h])) < 50
+      labels:
+        severity: info
+        service: insights
+        env: stage
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/Sq0szVPZz/xjoin-kafka-connectors?orgId=1&var-datasource=crc-stg-01-prometheus"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/xjoin-stage/deployments/xjoin-kafka-connect"
+        message: "xjoin connector processing rate is unusally low ({{ $value }} messages processed in last 12 hours)"
+
+    - alert: xjoinConnectNoDbConnector
+      expr: |
+        absent (kafka_connect_connect_worker_metrics_connector_running_task_count{connector=~".*xjoin.*db.*"}) OR sum (kafka_connect_connect_worker_metrics_connector_running_task_count{connector=~".*xjoin.*db.*"}) == 0
+      for: 5m
+      labels:
+        severity: info
+        service: insights
+        env: stage
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/Sq0szVPZz/xjoin-kafka-connectors?orgId=1&var-datasource=crc-stg-01-prometheus"
+        link_url: "https://xjoin-jenkins.apps.crc-stg-01.o4v9.p1.openshiftapps.com/job/xjoin/"
+        message: "xjoin DB connector missing"
+
+    - alert: xjoinConnectNoEsConnector
+      expr: |
+        absent (kafka_connect_connect_worker_metrics_connector_running_task_count{connector=~".*xjoin.*es.*"}) OR sum (kafka_connect_connect_worker_metrics_connector_running_task_count{connector=~".*xjoin.*es.*"}) == 0
+      for: 5m
+      labels:
+        severity: info
+        service: insights
+        env: stage
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/Sq0szVPZz/xjoin-kafka-connectors?orgId=1&var-datasource=crc-stg-01-prometheus"
+        link_url: "https://xjoin-jenkins.apps.crc-stg-01.o4v9.p1.openshiftapps.com/job/xjoin/"
+        message: "xjoin ES connector missing"
