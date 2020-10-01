@@ -1,0 +1,61 @@
+---
+$schema: /openshift/cluster-1.yml
+
+labels:
+  service: hive
+
+name: hivei01ue1
+description: hivei01ue1 cluster
+consoleUrl: ''
+kibanaUrl: ''
+prometheusUrl: ''
+alertmanagerUrl: ''
+serverUrl: ''
+elbFQDN: ''
+
+auth:
+  service: github-org-team
+  org: app-sre
+  team: hivei01ue1-cluster
+
+ocm:
+  $ref: /dependencies/ocm/production.yml
+
+managedGroups:
+- dedicated-admins
+
+spec:
+  provider: aws
+  region: us-east-1
+  channel: fast
+  version: 4.5.11
+  initial_version: 4.5.11
+  multi_az: false
+  nodes: 4
+  instance_type: m5.xlarge
+  storage: 600
+  load_balancers: 0
+  private: true
+  upgrade: batch0
+
+network:
+  vpc: 10.164.0.0/16
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
+
+disable:
+  e2eTests:
+  - create-namespace
+  - dedicated-admin-rolebindings
+  - default-network-policies
+  - default-project-labels
+
+internal: false
+
+awsInfrastructureAccess:
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: network-mgmt
