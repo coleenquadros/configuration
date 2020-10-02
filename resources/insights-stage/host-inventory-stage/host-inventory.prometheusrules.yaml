@@ -27,17 +27,6 @@ spec:
         message: "Host inventory pods are missing in stage"
         runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/App-insights-inventory-In-platform-prod-Absent.html"
     #Not pagerduty
-    - alert: InventoryApi5xx
-      expr: sum (rate(inventory_http_request_total{service="insights-inventory", namespace="platform-stage", status=~"5[0-9]{2}"}[5m])) by (namespace) > 0
-      labels:
-        severity: medium
-        service: insights
-        env: stage
-        app_team: inventory
-      annotations:
-        dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crc-stg-01-prometheus
-        link_url: https://kibana.apps.crc-stg-01.o4v9.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(columns:!(_source),filters:!(),index:'6c31b1b0-d854-11ea-9f21-6b7e641a18be',interval:auto,query:(language:lucene,query:'(@log_stream:%20%223scale%22%20AND%20gateway.application:%20%22inventory%22%20AND%20gateway.status:%20%5B500%20TO%20599%5D)%20OR%20(@log_stream:%20%22insights-inventory%22%20AND%20levelname:%20%22ERROR%22)'),sort:!(!('@timestamp',desc)))
-        message: '{{ $labels.kubernetes_namespace }} 5xx responses observed'
     - alert: InventoryHttp5xx
       expr: sum(rate(inventory_http_request_total{namespace="host-inventory-stage", service="insights-inventory", status=~"5[0-9]{2}"}[10m])) by (namespace) / sum(rate(inventory_http_request_total{namespace="host-inventory-stage", service="insights-inventory"}[10m])) by (namespace) * 100  > 5
       labels:
