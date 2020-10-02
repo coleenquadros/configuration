@@ -138,4 +138,4 @@ This user policy file a description, which explains the permissions allowed by t
 
 ### Accessing DataHub
 
-DataHub is not managed by the AppSRE team, but you can find the process to request access here: https://help.datahub.redhat.com/docs/interacting-with-telemetry-data
+DataHub is not managed by the AppSRE team, but you can find the process to request access here: https://help.datahub.redhat.com/docs/interacting-with-telemetry-data. To report issues with Datahub (ex: timeouts with telemeter-lts-dashboards.datahub.redhat.com) see (this help page)[https://help.datahub.redhat.com/docs/data-hub-report-issues] or reach out to #forum-telemetry on Slack for additional info.
