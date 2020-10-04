@@ -10,6 +10,7 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
 - [How can I get access to X](#how-can-i-get-access-to-x)
 - [I can not access X](#i-can-not-access-x)
 - [I can not access ci-ext](#i-can-not-access-ci-ext)
+- [Tagging options in app-interface](#tagging-options-in-app-interface)
 - [What is the Console or Kibana URL for a service](#what-is-the-console-or-kibana-url-for-a-service)
 - [Can you restart my pods](#can-you-restart-my-pods)
 - [Jenkins is going to shut down](#jenkins-is-going-to-shutdown)
@@ -62,6 +63,12 @@ Managed to log in but having issues? Maybe even seeing this error message? `"Acc
 
 1. Log out and log in again.
 2. Revoke the `jenkins-ci-ext` Authorized OAuth app in [GitHub settings](https://github.com/settings/applications) and log in again.
+
+### Tagging options in app-interface
+
+GitLab: Users are not being tagged by default for SaaS file reviews. To be tagged on MRs for SaaS files you own, add `tag_on_merge_requests: true` to your user file.
+
+Slack: Users are being tagged by default for cluster updates in clusters they have access to (through membership in a Slack usergroup called <cluster_name>-cluster). To be removed from those usergroups, add `tag_on_cluster_updates: false` to your user file.
 
 ### What is the Console or Kibana URL for a service
 
