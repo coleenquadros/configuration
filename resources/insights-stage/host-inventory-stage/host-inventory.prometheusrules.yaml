@@ -36,8 +36,19 @@ spec:
         app_team: inventory
       annotations:
         dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crc-stg-01-prometheus
-        link_url: https://kibana.apps.crc-stg-01.o4v9.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(columns:!(_source),filters:!(),index:'6c31b1b0-d854-11ea-9f21-6b7e641a18be',interval:auto,query:(language:lucene,query:'(@log_stream:%20%223scale%22%20AND%20gateway.application:%20%22inventory%22%20AND%20gateway.status:%20%5B500%20TO%20599%5D)%20OR%20(@log_stream:%20%22insights-inventory%22%20AND%20levelname:%20%22ERROR%22)'),sort:!(!('@timestamp',desc)))
+        link_url: https://kibana.apps.crc-stg-01.o4v9.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(columns:!(_source),filters:!(),index:'6c31b1b0-d854-11ea-9f21-6b7e641a18be',interval:auto,query:(language:lucene,query:'(@log_stream:%20%223scale%22%20AND%20gateway.application:%20%22inventory%22%20AND%20gateway.status:%20%5B500%20TO%20599%5D)%20OR%20(@log_stream:%20%22insights-inventory-*%22%20AND%20levelname:%20%22ERROR%22)'),sort:!(!('@timestamp',desc)))
         message: '{{ $labels.kubernetes_namespace }} 5xx responses observed'
+    - alert: InventoryHttpLatency
+      expr: sum(rate(inventory_http_request_duration_seconds_bucket{namespace="host-inventory-stage", le="2.5"} [10m])) / sum(rate(inventory_http_request_duration_seconds_bucket{namespace="host-inventory-stage"} [10m])) * 100  > 5
+      labels:
+        severity: medium
+        service: insights
+        env: stage
+        app_team: inventory
+      annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crc-stg-01-prometheus
+        link_url: https://kibana.apps.crc-stg-01.o4v9.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(columns:!(_source),filters:!(),index:'6c31b1b0-d854-11ea-9f21-6b7e641a18be',interval:auto,query:(language:lucene,query:'@log_stream:%20%223scale%22%20AND%20gateway.application:%20%22inventory%22%20AND%20gateway.time_taken:%20%5B2.5%20TO%20*%5D'),sort:!(!('@timestamp',desc)))
+        message: '{{ $labels.namespace }} showing response times longer than 2.5 seconds'
     - alert: InventoryMqErrors
       expr: sum(rate(inventory_ingress_add_host_failures_total{cause="Exception", namespace=~"platform-.*"}[5m])) by (namespace) > 0
       labels:
