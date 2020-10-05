@@ -24,7 +24,6 @@ managedRoles: true
 
 managedResourceTypes:
 - ConfigMap
-- Secret
 
 openshiftResources:
 - provider: vault-secret
@@ -53,9 +52,6 @@ openshiftResources:
   version: 1
   annotations:
     qontract.recycle: "true"
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /insights-prod/automation-hub/automation-hub-rds.secret.yaml
 
 managedTerraformResources: true
 
@@ -66,3 +62,13 @@ terraformResources:
   defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
   output_resource_name: cloudwatch
   es_identifier: kibana-elasticsearch
+- provider: rds
+  account: insights-prod
+  identifier: automation-hub-prod
+  defaults: /terraform/resources/insights/production/rds/rds-automation-hub-prod.yml
+  overrides:
+    snapshot_identifier: automation-hub-prod-migration
+  enhanced_monitoring: true
+  output_resource_name: automation-hub-db
+  output_resource_db_name: galaxy_ng
+  parameter_group: /terraform/resources/insights/production/rds/postgres11-parameter-group-automation-hub-prod.yml

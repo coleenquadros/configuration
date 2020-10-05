@@ -1079,6 +1079,7 @@ In order to create or update an RDS database, you need to add them to the `terra
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-instance" and `provider` "rds", the created Secret will be called `my-instance-rds`.
 - `enhanced_monitoring`: (optional) Setting it to `true` will enable enhanced monitoring for the database instance. Learn more about enhanced monitoring [here](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_Monitoring.OS.html).
+- `output_resource_db_name`: (optional) set the `db.name` key in the output Secret (does not affect actual terraform resource).
 
 Once the changes are merged, the RDS instance will be created (or updated) and a Kubernetes Secret will be created in the same namespace with following details.
 
