@@ -128,6 +128,7 @@ def main():
         selected.add('terraform-resources')
     if any_modified(lambda p: re.match(r'^resources/jenkins/', p)):
         selected.add('jenkins-job-builder')
+        selected.add('jenkins-job-cleaner')
     if any_modified(lambda p: re.match(r'^resources/', p) \
             and not re.match(r'resources/(terraform|jenkins)/', p)):
         selected.add('openshift-routes')
