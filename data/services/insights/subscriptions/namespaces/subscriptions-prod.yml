@@ -31,10 +31,19 @@ terraformResources:
   defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
   output_resource_name: cloudwatch
   es_identifier: kibana-elasticsearch
+- provider: rds
+  account: insights-prod
+  identifier: subscriptions-prod
+  defaults: /terraform/resources/insights/production/rds/rds-subscriptions-prod.yml
+  overrides:
+    snapshot_identifier: subscriptions-prod-migration
+  enhanced_monitoring: true
+  output_resource_name: yupana-db
+  output_resource_db_name: yupana
+  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-subscriptions-prod.yml
 
 managedResourceTypes:
 - ConfigMap
-- Secret
 
 openshiftResources:
 - provider: vault-secret
@@ -62,8 +71,3 @@ openshiftResources:
   path: /insights-prod/subscriptions/yupana-env.configmap.yaml
 - provider: resource
   path: /insights-prod/subscriptions/yupana-messaging.configmap.yaml
-
-# Templated secret for rds instance.
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /insights-prod/subscriptions/subscriptions-rds.secret.yaml
