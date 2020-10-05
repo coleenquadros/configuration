@@ -147,10 +147,63 @@ To deploy the managed-tenants SelectorSyncSets, add a target in the managed-tena
 
 ## Monitoring
 
-1. Hive and some operators are still monitored from `app-sre-prod-01`. Add scrapeconfigs here: [`/resources/observability/prometheus/prometheus-app-sre-additional-scrapeconfig.secret.yaml`](/resources/observability/prometheus/prometheus-app-sre-additional-scrapeconfig.secret.yaml). Example MR: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/8846
-1. Alerts. Example MR: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/8848
+All v4 hive shards (clusters) are monitored with their own workload prometheus, which runs in the `openshift-customer-monitoring` namespace.
 
-This may not be needed in the future, as it is being reworked in https://issues.redhat.com/browse/APPSRE-2348
+1. Check that an `openshift-customer-monitoring` namespace file exists for the specific hive cluster. This is usually done as part of [onboarding any new cluster](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/app-interface-onboard-cluster.md#step-4-observability)
+1. Use the hive monitoring boilerplate to add hive specific monitoring rules and servicemonitors to the `openshift-customer-monitoring` namespace file for the specific hive cluster:
+
+```
+# ServiceMonitor
+## Hive
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/hive/hive-controllers.servicemonitor.yaml
+  variables:
+    namespace: hive
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/osd-operators/hive-operator-generic.servicemonitor.yaml
+  variables:
+    operator_name: aws-account-operator
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/osd-operators/hive-operator-generic.servicemonitor.yaml
+  variables:
+    operator_name: certman-operator
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/osd-operators/hive-operator-generic.servicemonitor.yaml
+  variables:
+    operator_name: deadmanssnitch-operator
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/osd-operators/hive-operator-generic.servicemonitor.yaml
+  variables:
+    operator_name: pagerduty-operator
+
+
+# PrometheusRule
+## SHARDNAME
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/hive/hive-production-common.prometheusrules.yaml
+  variables:
+    shard_name: SHARDNAME
+    aws_account_operator_accounts_threshold: 4950
+    grafana_datasource: SHARDNAME-prometheus
+
+```
+
+1. Make sure you're using the correct rules depending on the environment (integration/stage/production). Pay close attention to the value for aws_account_operator_accounts_threshold, which depends on the environment.
+
+1. Make RBAC changes and allow network traffic from `openshift-customer-monitoring` on all relevant namespaces. For example, see PR: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/10168/diffs. Note that you'll need to do the same for the `hive` namespace on the cluster
+
+Post file creation checks:
+
+1. Make sure SHARDNAME is replaced by the actual shard ID, for example `hivep01ue1`
+
+At this point, the monitoring is all set, and you're ready to move on to the next step
+
 
 ## Adding the shard to OCM
 
