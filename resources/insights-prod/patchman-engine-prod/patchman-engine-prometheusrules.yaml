@@ -12,6 +12,7 @@ spec:
   - name: patchman.insights.openshiftio.rules
     interval: 1m
     rules:
+
     - alert: Patchman5xx
       expr: sum(rate(patchman_engine_requests_total{code=~"5.*"}[5m])) by (kubernetes_namespace) > 0
       labels:
@@ -22,6 +23,7 @@ spec:
       annotations:
         summary: '{{ $labels.kubernetes_namespace }} 5xx :rain_cloud:'
         description: '5xx responses observed'
+
     - alert: PatchmanKafkaLag
       expr: sum(kafka_consumergroup_group_topic_sum_lag{group="patchman", topic=~"platform.inventory.events|patchman.evaluator.upload"}) by (topic) > 4000
       for: 5m
@@ -33,6 +35,7 @@ spec:
       annotations:
         summary: 'patchman-engine lag > 4000'
         description: 'topic: {{ $labels.topic }}, current lag: {{ $value  }}'
+
     - alert: PatchmanExternalService
       expr: sum(delta(patchman_engine_manager_dependency_call{ namespace="patchman-engine-prod" }[5m])) by (name, status) > 10
       for: 5m
@@ -44,6 +47,7 @@ spec:
       annotations:
         summary: '{{ $labels.namespace }} - Receiving {{ $labels.status }} responses from {{ $labels.name }} '
         description: 'External service failing'
+
     - alert: PatchmanDeleteError
       expr: sum(rate(patchman_engine_listener_kafka_message_received{event="delete", type=~"error-.*"}[5m])) by (kubernetes_namespace) > 0
       annotations:
@@ -54,11 +58,23 @@ spec:
         service: insights
         env: prod
         app_team: patch
+
     - alert: PatchmanOutOfDateSystems
       expr: sum(patchman_engine_vmaas_sync_systems{last_upload="last1D"}) / sum(patchman_engine_vmaas_sync_systems{last_upload="last30D"}) < 0.8
       annotations:
         summary: '{{ $labels.namespace }} many out-of-date systems observed :rain_cloud:'
         description: 'Increasing number of out-of-date systems observed'
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: patch
+
+    - alert: PatchmanPodRestarting
+      expr: sum(increase(kube_pod_container_status_restarts_total{container=~"patchman-engine-.*"}[15m])) by (container) > 1
+      annotations:
+        summary: '{{ $labels.container }} pod restarting :rain_cloud:'
+        description: 'Observed multiple pod restarts in a short time period'
       labels:
         severity: info
         service: insights
