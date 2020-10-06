@@ -26,7 +26,6 @@ managedRoles: true
 
 managedResourceTypes:
 - ServiceAccount
-- Secret
 
 openshiftResources:
 - provider: vault-secret
@@ -40,10 +39,6 @@ openshiftResources:
   version: 3
   type: kubernetes.io/dockerconfigjson
   name: quay-cloudservices-pull
-# Templated secret for rds instance.
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /insights-prod/system-baseline-prod/system-baseline-rds.secret.yaml
 
 managedTerraformResources: true
 
@@ -54,3 +49,13 @@ terraformResources:
   defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
   output_resource_name: cloudwatch
   es_identifier: kibana-elasticsearch
+- provider: rds
+  account: insights-prod
+  identifier: system-baseline-prod
+  defaults: /terraform/resources/insights/production/rds/rds-system-baseline-prod.yml
+  overrides:
+    snapshot_identifier: system-baseline-prod-migration
+  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-system-baseline-prod.yml
+  output_resource_name: system-baseline-db
+  output_resource_db_name: baselinedb
+  enhanced_monitoring: true

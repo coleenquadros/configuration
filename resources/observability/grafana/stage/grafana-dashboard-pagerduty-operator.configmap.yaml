@@ -89,7 +89,7 @@ data:
       "gnetId": null,
       "graphTooltip": 0,
       "id": null,
-      "iteration": 1596700032314,
+      "iteration": 1601890816715,
       "links": [],
       "panels": [
         {
@@ -151,7 +151,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(pagerduty_operator_reconcile_duration_seconds_sum{job=\"$environment\"}[10m])/rate(pagerduty_operator_reconcile_duration_seconds_count{job=\"$environment\"}[10m])",
+              "expr": "sum(rate(pagerduty_operator_reconcile_duration_seconds_sum{job=\"$environment\"}[10m]) ) by (controller) / sum(rate (pagerduty_operator_reconcile_duration_seconds_count{job=\"$environment\"}[10m])) by (controller)",
               "intervalFactor": 2,
               "legendFormat": "{{controller}}",
               "refId": "A"
@@ -243,7 +243,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(pagerduty_operator_reconcile_duration_seconds_count{job=\"$environment\"}[10m])",
+              "expr": "sum(rate(pagerduty_operator_reconcile_duration_seconds_count{job=\"$environment\"}[10m])) by (controller)",
               "intervalFactor": 2,
               "legendFormat": "{{controller}}",
               "refId": "A"
@@ -334,7 +334,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(pagerduty_operator_api_request_duration_seconds_sum{job=\"$environment\"}[10m])/rate(pagerduty_operator_api_request_duration_seconds_count{job=\"$environment\"}[10m])",
+              "expr": "sum(rate(pagerduty_operator_api_request_duration_seconds_sum{job=\"$environment\"}[10m])) by (controller,method,resource,status) / sum (rate(pagerduty_operator_api_request_duration_seconds_count{job=\"$environment\"}[10m])) by (controller,method,resource,status)",
               "intervalFactor": 2,
               "legendFormat": "{{controller}} {{method}} {{resource}} {{status}}",
               "refId": "A"
@@ -425,7 +425,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(pagerduty_operator_api_request_duration_seconds_count{job=\"$environment\"}[10m])",
+              "expr": "sum(rate(pagerduty_operator_api_request_duration_seconds_count{job=\"$environment\"}[10m])) by (controller,method,resource,status)",
               "legendFormat": "{{controller}} {{method}} {{resource}} {{status}}",
               "refId": "A"
             }
@@ -530,37 +530,37 @@ data:
             {
               "expr": "go_memstats_alloc_bytes{job=\"$environment\"}",
               "intervalFactor": 2,
-              "legendFormat": "alloc all",
+              "legendFormat": "alloc all - {{instance}}",
               "refId": "A"
             },
             {
               "expr": "go_memstats_heap_alloc_bytes{job=\"$environment\"}",
               "intervalFactor": 2,
-              "legendFormat": "alloc heap",
+              "legendFormat": "alloc heap - {{instance}}",
               "refId": "B"
             },
             {
               "expr": "rate(go_memstats_alloc_bytes_total{job=\"$environment\"}[30s])",
               "intervalFactor": 2,
-              "legendFormat": "alloc rate all",
+              "legendFormat": "alloc rate all - {{instance}}",
               "refId": "C"
             },
             {
               "expr": "rate(go_memstats_heap_alloc_bytes{job=\"$environment\"}[30s])",
               "intervalFactor": 2,
-              "legendFormat": "alloc rate heap",
+              "legendFormat": "alloc rate heap - {{instance}}",
               "refId": "D"
             },
             {
               "expr": "go_memstats_stack_inuse_bytes{job=\"$environment\"}",
               "intervalFactor": 2,
-              "legendFormat": "inuse stack",
+              "legendFormat": "inuse stack - {{instance}}",
               "refId": "E"
             },
             {
               "expr": "go_memstats_heap_inuse_bytes{job=\"$environment\"}",
               "intervalFactor": 2,
-              "legendFormat": "inuse heap",
+              "legendFormat": "inuse heap - {{instance}}",
               "refId": "F"
             }
           ],
@@ -650,7 +650,7 @@ data:
             {
               "expr": "go_goroutines{job=\"$environment\"}",
               "intervalFactor": 2,
-              "legendFormat": "goroutines",
+              "legendFormat": "goroutines - {{instance}}",
               "refId": "A"
             }
           ],
@@ -740,7 +740,7 @@ data:
             {
               "expr": "go_gc_duration_seconds{job=\"$environment\"}",
               "intervalFactor": 2,
-              "legendFormat": "{{quantile}}",
+              "legendFormat": "{{quantile}} - {{instance}}",
               "refId": "A"
             }
           ],
@@ -1156,8 +1156,9 @@ data:
           {
             "current": {
               "selected": true,
-              "text": "app-sre-prod-01-prometheus",
-              "value": "app-sre-prod-01-prometheus"
+              "tags": [],
+              "text": "hive-stage-01-prometheus",
+              "value": "hive-stage-01-prometheus"
             },
             "hide": 0,
             "includeAll": false,
@@ -1167,7 +1168,7 @@ data:
             "options": [],
             "query": "prometheus",
             "refresh": 1,
-            "regex": "app-sre-prod-01-prometheus",
+            "regex": "/(?:^hive.*(?<!cluster-prometheus)$)|(?:^app-sre-.*(?<!cluster-prometheus)$)/",
             "skipUrlSync": false,
             "type": "datasource"
           },

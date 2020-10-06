@@ -25,25 +25,18 @@ managedTerraformResources: true
 
 managedResourceTypes:
 - NetworkPolicy
+- Secret
 
 openshiftResources:
-- provider: vault-secret
-  path: app-interface/quayio-prod-us-east-2/quay/quay-config-secret
-  version: 19
-  name: quay-config-secret-v19
-- provider: vault-secret
-  path: app-interface/quayio-prod-us-east-2/quay/quay-config-secret
-  version: 19
-  labels:
-    version: v19
-- provider: vault-secret
-  path: app-interface/quayio-prod-us-east-2/quay/quay-config-secret
-  version: 18
-  name: quay-config-secret-v18
-- provider: vault-secret
-  path: app-interface/quayio-prod-us-east-2/quay/quay-config-secret
-  version: 16
-  name: quay-config-secret-v16
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /quay-p/quay/quay-config.secret.yaml
+  variables:
+    name: quay-config-secret-readonly
+    vault_secret_version: 36
+    version_label: v36
+    readonly: true
+    standby: true
 - provider: vault-secret
   path: app-interface/quayio-prod-us-east-2/quay/quay-extra-ca-certs
   version: 1

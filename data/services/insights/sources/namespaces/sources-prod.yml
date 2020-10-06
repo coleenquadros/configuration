@@ -53,11 +53,6 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-# Templated secret for rds instance.
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /insights-prod/sources/sources-rds.secret.yaml
-
 managedTerraformResources: true
 
 terraformResources:
@@ -67,3 +62,13 @@ terraformResources:
   defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
   output_resource_name: cloudwatch
   es_identifier: kibana-elasticsearch
+- provider: rds
+  account: insights-prod
+  identifier: sources-prod
+  defaults: /terraform/resources/insights/production/rds/rds-sources-prod.yml
+  overrides:
+    snapshot_identifier: sources-prod-migration
+  enhanced_monitoring: true
+  output_resource_name: sources-db
+  output_resource_db_name: sources_production
+  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-sources-prod.yml

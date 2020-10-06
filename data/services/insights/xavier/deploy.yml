@@ -23,6 +23,8 @@ managedResourceTypes:
 - Deployment
 - DeploymentConfig
 - Service
+- Job
+- ConfigMap
 
 imagePatterns:
 - quay.io/cloudservices
@@ -49,10 +51,10 @@ resourceTemplates:
       REST_AUTHORIZATION_ADMINISTRATION: pcattana,mrizzi@redhat.com,rhn-engineering-jlabocki,mperezco@redhat.com
   - namespace:
       $ref: /services/insights/xavier/namespaces/xavier-prod.yml
-    ref: d60fe80d385aa01b25b2a403f2d499bf3f04fa88
+    ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
     parameters:
       CPU_LIMIT: "4"
-      IMAGE_TAG: 964cd84
+      IMAGE_TAG: 9b01b4c
       KIESERVER_CONTAINER: xavier-analytics_0.0.1-SNAPSHOT
       REST_AUTHORIZATION_ADMINISTRATION: pcattana,mrizzi@redhat.com,rhn-engineering-jlabocki,mperezco@redhat.com
 - name: xavier-analytics-kieserver
@@ -66,6 +68,29 @@ resourceTemplates:
       IMAGE_TAG: d953f1d
   - namespace:
       $ref: /services/insights/xavier/namespaces/xavier-prod.yml
-    ref: d60fe80d385aa01b25b2a403f2d499bf3f04fa88
+    ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
     parameters:
-      IMAGE_TAG: fca8160
+      IMAGE_TAG: d953f1d
+# comment the whole next resource if not pg-script-runner is required
+- name: xavier-pg-script-runner
+  path: /templates/xavier/xavier-pg-script-runner-init-flag-assessment-model.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+    # staging
+    - namespace:
+        $ref: /services/insights/xavier/namespaces/stage-xavier-stage.yml
+      ref: 5d61dc86823368f758a449863a40e1633e9b46fa
+      parameters:
+        PG_IMAGE_TAG: "latest"
+        DB_SECRET: "xavier-db"
+        ACTIVE_DEADLINE_SECONDS: "600"
+        JOB_NAME_SUFFIX: "xavier-update-flag-assessment-model"
+    # production
+    - namespace:
+        $ref: /services/insights/xavier/namespaces/xavier-prod.yml
+      ref: c84f096ff65509eb725823afa3aa6ba38c00cdaa
+      parameters:
+        PG_IMAGE_TAG: "latest"
+        DB_SECRET: "xavier-db"
+        ACTIVE_DEADLINE_SECONDS: "600"
+        JOB_NAME_SUFFIX: "xavier-prod-delete-duplicates-ise-7764"
