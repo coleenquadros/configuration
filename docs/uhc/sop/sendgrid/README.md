@@ -152,8 +152,8 @@ Sendgrid Subaccount or Credentials will not be created or synced to the cluster.
 
 ### Steps
 
-- Find max attempt value from Sendgrid Service Vault key `secrets/scheduler.maxRetry` : https://vault.devshift.net/ui/vault/secrets/app-interface/show/ocm-sendgrid-service/<env>/service/credentials
-- Find api key value from Sendgrid Service Vault key `secrets/sendgrid.key` : https://vault.devshift.net/ui/vault/secrets/app-interface/show/ocm-sendgrid-service/<env>/service/credentials
+- Find max attempt value from Sendgrid Service Vault key `secrets/scheduler.maxRetry` : https://vault.devshift.net/ui/vault/secrets/app-interface/show/ocm-sendgrid-service/`<env>`/service/credentials
+- Find api key value from Sendgrid Service Vault key `secrets/sendgrid.key` : https://vault.devshift.net/ui/vault/secrets/app-interface/show/ocm-sendgrid-service/`<env>`/service/credentials
 - From the Sendgrid Service RDS instance (`ocm-sendgrid-service-<staging|production>`), find the cluster ids of all jobs that have reached the maximum retry 
   ```
   SELECT cluster_id FROM sendgrid_jobs WHERE attempts=<secrets/scheduler.maxRetry>;
