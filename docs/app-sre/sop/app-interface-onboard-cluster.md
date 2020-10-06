@@ -469,8 +469,11 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
     environment:
       $ref: /products/app-sre/environments/production.yml
+    
+    networkPoliciesAllow:
+    - $ref: /services/observability/namespaces/openshift-customer-monitoring.<cluster>.yml
 
-    description: openshift-operator-lifecycle-manager namespac
+    description: openshift-operator-lifecycle-manager namespace
     ```
 
 ## Step 5 - Container Security Operator
