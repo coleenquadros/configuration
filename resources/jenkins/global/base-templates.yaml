@@ -390,7 +390,7 @@
         - shell: |
             #!/bin/bash
 
-            set -o nounset -o pipefail -o errexit
+            set -eu -o nounset -o pipefail -o errexit
 
             # Write config.toml for reconcile tools
             mkdir -p config
@@ -411,5 +411,9 @@
                     {qontract_reconcile_image} \
                     qontract-reconcile --config /config/config.toml --no-validate-schemas $integration \
                     {options} &
+                    pids+=($!)
             done
-            wait
+            
+            for pid in "${pids[@]}"; do
+                wait "$pid"
+            done
