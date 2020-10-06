@@ -152,8 +152,8 @@ Sendgrid Subaccount or Credentials will not be created or synced to the cluster.
 
 ### Steps
 
-- Find max attempt value from Sendgrid Service Vault key `secrets/scheduler.maxRetry` : https://vault.devshift.net/ui/vault/secrets/app-interface/show/ocm-sendgrid-service/
-- Find api key value from Sendgrid Service Vault key `secrets/sendgrid.key` : https://vault.devshift.net/ui/vault/secrets/app-interface/show/ocm-sendgrid-service/
+- Find max attempt value from Sendgrid Service Vault key `secrets/scheduler.maxRetry` : https://vault.devshift.net/ui/vault/secrets/app-interface/list/ocm-sendgrid-service/
+- Find api key value from Sendgrid Service Vault key `secrets/sendgrid.key` : https://vault.devshift.net/ui/vault/secrets/app-interface/list/ocm-sendgrid-service/
 - From the Sendgrid Service RDS instance (`ocm-sendgrid-service-<staging|production>`), find the cluster ids of all jobs that have reached the maximum retry 
   ```
   SELECT cluster_id FROM sendgrid_jobs WHERE attempts=<secrets/scheduler.maxRetry>;
@@ -242,11 +242,11 @@ Existing clusters will be unable to rotate current Sendgrid credentials.
 #### Raise Ticket with Sendgrid
 
 - Raise a ticket with the Sendgrid team to increase the quota for  the account
-- First get the SendGrid credentials in [vault](https://vault.devshift.net/ui/vault/secrets/app-interface/show/ocm-sendgrid-service/).
+- First get the SendGrid credentials in [vault](https://vault.devshift.net/ui/vault/secrets/app-interface/list/ocm-sendgrid-service/).
 - The credential keys are `sendgrid.username` and `sendgrid.password`
 - You can contact SendGrid support from the [SendGrid Support Portal](https://support.sendgrid.com/). Click Login & Contact Support and open a ticket to increase the quota.
 #### Update Sendgrid quota secret
-- Once Sendgrid has granted the new quota, the RHMI vault secret will need to be updated with the updated quota count. This env var is located in [vault](https://vault.devshift.net/ui/vault/secrets/app-interface/show/ocm-sendgrid-service/) and is called `sendgrid-subuser.quota`
+- Once Sendgrid has granted the new quota, the RHMI vault secret will need to be updated with the updated quota count. This env var is located in [vault](https://vault.devshift.net/ui/vault/secrets/app-interface/list/ocm-sendgrid-service/) and is called `sendgrid-subuser.quota`
 - Finally, create an MR to bump the vault secret version in app-interface: https://gitlab.cee.redhat.com/service/app-interface/-/blob/1adb526/data/services/sendgrid/namespaces/sendgrid-stage.yml#L36
 
 ---
