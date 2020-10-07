@@ -1,19 +1,14 @@
 <!-- TOC -->
 
 - [Onboard a new OSDv4 cluster to app-interface](#onboard-a-new-osdv4-cluster-to-app-interface)
-  - [Step 1 - Cluster creation and initial access for dedicated-admins](#step-1-cluster-creation-and-initial-access-for-dedicated-admins)
-  - [Step 2 - Bot access and App SRE project template](#step-2-bot-access-and-app-sre-project-template)
-  - [Step 3 - Enhanced dedicated admin](#step-3-enhanced-dedicated-admin)
-  - [Step 4 - Observability](#step-4-observability)
-  - [Step 5 - Container Security Operator](#step-5-container-security-operator)
-  - [Step 6 - Logging](#step-6-logging)
+  - [Step 1 - Cluster creation and initial access for dedicated-admins](#step-1---cluster-creation-and-initial-access-for-dedicated-admins)
+  - [Step 2 - Bot access and App SRE project template](#step-2---bot-access-and-app-sre-project-template)
+  - [Step 3 - Observability](#step-3---observability)
+  - [Step 4 - Container Security Operator](#step-4---container-security-operator)
+  - [Step 5 - Logging](#step-5---logging)
 - [Additional configurations](#additional-configurations)
   - [Selecting a Machine CIDR for VPC peerings](#selecting-a-machine-cidr-for-vpc-peerings)
   - [VPC peering with app-interface](#vpc-peering-with-app-interface)
-  - [Enable enhanced dedicated-admin](#enable-enhanced-dedicated-admin)
-  - [Enable observability on a v4 cluster](#enable-observability-on-a-v4-cluster)
-  - [Install the Container Security Operator](#install-the-container-security-operator)
-  - [Enable logging (EFK)](#enable-logging-efk)
 - [Offboard an OSDv4 cluster from app-interface](#offboard-an-osdv4-cluster-from-app-interface)
 - [Legacy (v3)](#legacy-v3)
   - [Onboard a new OSDv3 cluster to app-interface](#onboard-a-new-osdv3-cluster-to-app-interface)
@@ -317,19 +312,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
 1. Send the MR, wait for the check to pass and merge.
 
-## Step 3 - Enhanced dedicated admin
-
-1. Enable enhanced dedicated-admin
-
-    We enable enhanced dedicated-admin on all App-SRE clusters. Here's the documented [process](https://github.com/openshift/ops-sop/blob/master/v4/howto/extended-dedicated-admin.md#non-ccs-clusters) as defined by SREP.
-
-    The process has since been updated to create a ticket in jira instead of a SNOW ticket.  Create a ticket to [OHSS](https://issues.redhat.com/secure/CreateIssue.jspa?pid=12323823&issuetype=3) requesting `enhanced-dedicated-admin` on the new cluster (provide the cluster id).
-
-    Here's an [example](https://issues.redhat.com/browse/OHSS-608)
-
-    *NOTE*: enchanced dedicated-admin must be enabled on the cluster before installing observability namespaces or the CSO operator.
-
-## Step 4 - Observability
+## Step 3 - Observability
 
 1. Enable observability on a v4 cluster
 
@@ -447,15 +430,13 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
         *Note*: The `<cluster-url>` can be retrieved from the cluster console.  Remove the `https://console-openshift-console` from the beginning and end with `openshiftapps.com`, removing all the trailing slashes and paths.
 
-## Step 5 - Container Security Operator
+## Step 4 - Container Security Operator
 
 1. Install the Container Security Operator
 
     The Container Security Operator (CSO) brings Quay and Clair metadata to
     Kubernetes / OpenShift. We use the vulnerabilities information in the tenants
     dashboard and in the monthly reports.
-
-    1. Ensure `enhanced-dedicated-admin` is enabled on the cluster.  Details for this are [here](#enable-enhanced-dedicated-admin)
 
     1. Create an `container-security-operator` namespace file for that specific
     cluster. Example:
@@ -530,7 +511,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
         ref: <commit_hash>
     ```
 
-## Step 6 - Logging
+## Step 5 - Logging
 
 1. Enable logging (EFK)
 
