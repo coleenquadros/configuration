@@ -1,0 +1,44 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: hive
+description: integration namespace for hive
+
+cluster:
+  $ref: /openshift/hivei01ue1/cluster.yml
+
+app:
+  $ref: /services/hive/app.yml
+
+environment:
+  $ref: /products/osdv4/environments/integration-hivei01ue1.yml
+
+networkPoliciesAllow:
+- $ref: /openshift/hivei01ue1/namespaces/openshift-operator-lifecycle-manager.yml
+- $ref: /services/hive/namespaces/hivei01ue1/openshift-kube-apiserver.yaml
+# temporary. related to https://github.com/openshift/cluster-network-operator/pull/702
+- $ref: /services/hive/namespaces/hivei01ue1/default.yaml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.hivei01ue1.yml
+
+managedRoles: true
+
+openshiftResources:
+- provider: route
+  path: /hive-common/hive/hive-controllers-metrics.route.yaml
+- provider: vault-secret
+  path: osd-sre/hive-integration/hive-external-dns/external-dns-route53-admin
+  version: 1
+- provider: vault-secret
+  path: osd-sre/hive-integration/hive-lets-encrypt-ca/letsencrypt-ca
+  version: 1
+- provider: vault-secret
+  path: osd-sre/hive-integration/hive-external-dns/google-cloud-dns-creds
+  version: 2
+# This valut secret was copied from hive-integration
+# see info on JIRA https://issues.redhat.com/browse/OSD-4481
+- provider: vault-secret
+  path: osd-sre/hive-integration/hive-ci-global-pull-secret
+  version: 1
+  type: kubernetes.io/dockerconfigjson
