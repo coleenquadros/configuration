@@ -43,7 +43,7 @@ Note: Insights team is managing their own MRs during the migration. Following fo
 - @mafriedm
 ```
 
-### Manages services
+### Managed services
 
 ```
 - @weil
