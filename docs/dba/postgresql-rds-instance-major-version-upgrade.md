@@ -108,6 +108,7 @@ Disable the following integrations in [Unleash](https://app-interface.unleash.de
 Note: Notify AppSRE IC & team.
 
 #### Run Terraform Resources (tf-r) integration
+Pull the latest copy of qontract-reconcile repo from upstream.
 
 Run the Terraform Resources (tf-r) integration with `--dry-run` flag.
 
