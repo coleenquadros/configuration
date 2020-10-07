@@ -101,9 +101,24 @@ Example MR: [Scale down service](https://gitlab.cee.redhat.com/service/app-inter
 
 #### Disable Terraform Resources (tf-r) integration in Production using Unleash
 
-Disable tf-r in production using unleash. Notify AppSRE IC & team.
+Disable the following integrations in [Unleash](https://app-interface.unleash.devshift.net/#/features):
+- terraform-resources
+- gitlab-housekeeping (to avoid accidental automated merges)
+
+Note: Notify AppSRE IC & team.
 
 #### Run Terraform Resources (tf-r) integration
+
+Run the Terraform Resources (tf-r) integration with `--dry-run` flag.
+
+Example:
+
+```sh
+qontract-reconcile --config config.prod.toml --log-level INFO --dry-run terraform-resources
+```
+
+Verify that the only changes are to the resources you are modifying.
+
 
 Run the Terraform Resources (tf-r) integration with `--enable-deletion` flag.
 

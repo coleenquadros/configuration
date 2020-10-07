@@ -94,4 +94,12 @@ oc delete pod redis-<id> sentry-cron-<id> sentry-web-<id1> sentry-web-<id2> sent
 ```
 
 Then log into the sentry instance UI and into projects to see that events are being received.  Do this by logging into sentry and clicking on `Settings` on the left side then choose `Projects`.  Choose a project and look at the events to see when it was last seen.  This is shown underneath the issue title next to an icon of a clock.  Clicking on an issue will also show more details for that issue, and on the right hand side is a field "LAST SEEN".
+### Redis+Worker disconnect
+During one incident where teams reported events were not getting processed by sentry, we found the following log entries in the worker pod:
+```
+ConnectionError: Error 111 connecting to redis:6379. Connection refused. 09:55:30 [WARNING] celery.worker.consumer: consumer: Connection to broker lost. Trying to re-establish the connection...
+...
+OperationalError: could not translate host name "sentry-stage.cgkhgcepvyrh.us-east-1.rds.amazonaws.com" to address: Name or service not known
+```
+This seemed to indicate redis broker connectivity and/or rds connectivity had become disrupted. To fix: scaled worker deployment to 0 and back up to 1. This has the effect of recreating and/or reconnecting to redis and it's queues.
 

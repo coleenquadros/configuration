@@ -22,6 +22,7 @@ slack:
 managedResourceTypes:
 - Deployment
 - Service
+- ConfigMap
 
 imagePatterns:
 - quay.io/cloudservices
@@ -63,6 +64,7 @@ resourceTemplates:
     ref: master
     upstream: RedHatInsights-turnpike-gh-build-master
     parameters:
+      AUTH_DEBUG: "1"
       FLASK_SERVER_NAME: internal.cloud.stage.redhat.com
       REDIS_SERVICE_NAME: redis.turnpike-stage.svc.cluster.local
       SETTINGS_JSON: |
@@ -134,6 +136,7 @@ resourceTemplates:
           origin: http://web.turnpike-stage.svc.cluster.local:5000/api/turnpike
           auth:
             saml: "True"
+            x509: "True"
         - name: healthcheck
           route: /public/healthcheck/
           origin: http://web.turnpike-stage.svc.cluster.local:5000/_healthcheck/
@@ -172,6 +175,11 @@ resourceTemplates:
           origin: http://koku-masu.hccm-stage.svc.cluster.local:8080/api/cost-management/v1/crawl_account_hierarchy/
           auth:
             saml: "True"
+        - name: module-update-router-events
+          route: /api/module-update-router/v1/events
+          origin: http://module-update-router.module-update-router-stage.svc.cluster.local:8080/api/module-update-router/v1/events
+          auth:
+            saml: "'clouddot-data' in user['Role']"
   - namespace:
       $ref: /services/insights/turnpike/namespaces/prod-turnpike-prod.yml
     ref: master

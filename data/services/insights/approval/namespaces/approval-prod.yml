@@ -63,17 +63,6 @@ openshiftResources:
   version: 1
   annotations:
     qontract.recycle: "true"
-- provider: vault-secret
-  path: app-sre/integrations-output/terraform-resources/insights-prod/approval-prod/approval-db-rds
-  name: approval-db
-  version: 1
-  annotations:
-    qontract.recycle: "true"
-- provider: vault-secret
-  path: app-sre/integrations-output/terraform-resources/insights-prod/approval-prod/pam-db
-  version: 1
-  annotations:
-    qontract.recycle: "true"
 
 managedTerraformResources: true
 
@@ -84,3 +73,22 @@ terraformResources:
   defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
   output_resource_name: cloudwatch
   es_identifier: kibana-elasticsearch
+- provider: rds
+  account: insights-prod
+  identifier: approval-prod
+  defaults: /terraform/resources/insights/production/rds/rds-approval-prod.yml
+  overrides:
+    snapshot_identifier: approval-prod-migration
+  enhanced_monitoring: true
+  output_resource_name: approval-db
+  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-approval-prod.yml
+- provider: rds
+  account: insights-prod
+  identifier: approval-pam-prod
+  defaults: /terraform/resources/insights/production/rds/postgres10-rds-1.yml
+  overrides:
+    username: "insights"
+    name: "pam_production"
+  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-approval-prod.yml
+  output_resource_name: pam-db
+  enhanced_monitoring: true
