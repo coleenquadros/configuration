@@ -1501,7 +1501,7 @@ Examples:
 - `jobs` - [object](/data/services/app-interface/cicd/ci-int/jobs.yaml)
 
 All JJB configurations rely on a set of JJB entities for the corresponding Jenkins intance:
-- `global` - [resources](/resources/jenkins/common/)
+- `global` - [resources](/resources/jenkins/global/)
 - `ci-int` - [object](/data/services/jenkins/cicd/ci-int/), [resources](/resources/jenkins/ci-int/)
 - `ci-ext` - [object](/data/services/jenkins/cicd/ci-ext/), [resources](/resources/jenkins/ci-ext/)
 - `ci-centos` - [object](/data/services/jenkins/cicd/ci-centos/), [resources](/resources/jenkins/ci-centos/)
