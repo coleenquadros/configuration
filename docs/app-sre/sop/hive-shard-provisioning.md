@@ -91,9 +91,14 @@ Take into account the following for two of the operators
 
 ##### cloud-ingress-operator
 
-Ensure that the new hive shard's egress gateway IP is listed in [`/data/services/osd-operators/cicd/saas/saas-cloud-ingress-operator.yaml`](/data/services/osd-operators/cicd/saas/saas-cloud-ingress-operator.yaml). In orther to get this, you have to access the hive shard cluster AWS account through a impersonation link and then find under VPC > Nat Gateway. There are two ways to get that link:
+Ensure that the new hive shard's egress gateway IP is listed in
+[`/data/services/osd-operators/cicd/saas/saas-cloud-ingress-operator.yaml`](/data/services/osd-operators/cicd/saas/saas-cloud-ingress-operator.yaml).
+In order to get this, you have to access the hive shard cluster AWS account
+through a impersonation link. There are two ways to get the impersonation link:
 
-* OCM console: Go to https://cloud.redhat.com/openshift, then click into your cluster and then you will get the details under "AWS infrastructure access" in the "Access Control" section
+* OCM console: Go to https://cloud.redhat.com/openshift, then click into your
+cluster and then you will get the details under "AWS infrastructure access" in
+the "Access Control" section.
 
 * `ocm` cli:
 
@@ -108,6 +113,15 @@ Ensure that the new hive shard's egress gateway IP is listed in [`/data/services
 
       ```
     **Hint**: Look for your RedHat login name
+
+Having access to the AWS console, find the egress gateway IP under:
+
+* VPC -> NAT Gateways -> Elastic IP address
+
+IMPORTANT:
+
+* The "Elastic IP address" from all NAT gateways should be listed. 
+* Add `/32` to each os the IPs in the saas file list. 
 
 ##### aws-account-operator
 
