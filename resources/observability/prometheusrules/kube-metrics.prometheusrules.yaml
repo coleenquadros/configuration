@@ -16,7 +16,7 @@ spec:
         message: ({{ $labels.cluster }}/{{ $labels.namespace }}) Pod {{ $labels.pod }} ({{ $labels.container
           }}) is restarting {{ printf "%.2f" $value }} times / 5 minutes.
         runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubePodCrashLooping.md
-      expr: 'rate(kube_pod_container_status_restarts_total{job="kube-state-metrics"}[5m])
+      expr: 'rate(kube_pod_container_status_restarts_total{job="kube-state-metrics",namespace!~"^openshift-.*$"}[5m])
         * 60 * 5 > 0'
       for: 15m
       labels:
@@ -29,7 +29,7 @@ spec:
       expr: |
         sum by (namespace, pod) (
           max by(namespace, pod) (
-            kube_pod_status_phase{job="kube-state-metrics", phase=~"Pending|Unknown"}
+            kube_pod_status_phase{job="kube-state-metrics",phase=~"Pending|Unknown",namespace!~"^openshift-.*$"}
           ) * on(namespace, pod) group_left(owner_kind) topk by(namespace, pod) (
             1, max by(namespace, pod, owner_kind) (kube_pod_owner{owner_kind!="Job"})
           )
@@ -44,9 +44,9 @@ spec:
           been rolled back.
         runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeDeploymentGenerationMismatch.md
       expr: |
-        kube_deployment_status_observed_generation{job="kube-state-metrics"}
+        kube_deployment_status_observed_generation{job="kube-state-metrics",namespace!~"^openshift-.*$"}
           !=
-        kube_deployment_metadata_generation{job="kube-state-metrics"}
+        kube_deployment_metadata_generation{job="kube-state-metrics",namespace!~"^openshift-.*$"}
       for: 15m
       labels:
         severity: high
@@ -57,11 +57,11 @@ spec:
         runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeDeploymentReplicasMismatch.md
       expr: |
         (
-          kube_deployment_spec_replicas{job="kube-state-metrics"}
+          kube_deployment_spec_replicas{job="kube-state-metrics",namespace!~"^openshift-.*$"}
             !=
-          kube_deployment_status_replicas_available{job="kube-state-metrics"}
+          kube_deployment_status_replicas_available{job="kube-state-metrics",namespace!~"^openshift-.*$"}
         ) and (
-          changes(kube_deployment_status_replicas_updated{job="kube-state-metrics"}[5m])
+          changes(kube_deployment_status_replicas_updated{job="kube-state-metrics",namespace!~"^openshift-.*$"}[5m])
             ==
           0
         )
@@ -75,11 +75,11 @@ spec:
         runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeStatefulSetReplicasMismatch.md
       expr: |
         (
-          kube_statefulset_status_replicas_ready{job="kube-state-metrics"}
+          kube_statefulset_status_replicas_ready{job="kube-state-metrics",namespace!~"^openshift-.*$"}
             !=
-          kube_statefulset_status_replicas{job="kube-state-metrics"}
+          kube_statefulset_status_replicas{job="kube-state-metrics",namespace!~"^openshift-.*$"}
         ) and (
-          changes(kube_statefulset_status_replicas_updated{job="kube-state-metrics"}[5m])
+          changes(kube_statefulset_status_replicas_updated{job="kube-state-metrics",namespace!~"^openshift-.*$"}[5m])
             ==
           0
         )
@@ -93,9 +93,9 @@ spec:
           not been rolled back.
         runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeStatefulSetGenerationMismatch.md
       expr: |
-        kube_statefulset_status_observed_generation{job="kube-state-metrics"}
+        kube_statefulset_status_observed_generation{job="kube-state-metrics",namespace!~"^openshift-.*$"}
           !=
-        kube_statefulset_metadata_generation{job="kube-state-metrics"}
+        kube_statefulset_metadata_generation{job="kube-state-metrics",namespace!~"^openshift-.*$"}
       for: 15m
       labels:
         severity: high
@@ -106,18 +106,18 @@ spec:
         runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeStatefulSetUpdateNotRolledOut.md
       expr: |
         max without (revision) (
-          kube_statefulset_status_current_revision{job="kube-state-metrics"}
+          kube_statefulset_status_current_revision{job="kube-state-metrics",namespace!~"^openshift-.*$"}
             unless
-          kube_statefulset_status_update_revision{job="kube-state-metrics"}
+          kube_statefulset_status_update_revision{job="kube-state-metrics",namespace!~"^openshift-.*$"}
         )
           *
         (
-          kube_statefulset_replicas{job="kube-state-metrics"}
+          kube_statefulset_replicas{job="kube-state-metrics",namespace!~"^openshift-.*$"}
             !=
-          kube_statefulset_status_replicas_updated{job="kube-state-metrics"}
+          kube_statefulset_status_replicas_updated{job="kube-state-metrics",namespace!~"^openshift-.*$"}
         )
         and (
-          changes(kube_statefulset_status_replicas_updated{job="kube-state-metrics"}[5m])
+          changes(kube_statefulset_status_replicas_updated{job="kube-state-metrics",namespace!~"^openshift-.*$"}[5m])
             ==
           0
         )
@@ -130,9 +130,9 @@ spec:
           {{ $labels.daemonset }} are scheduled and ready.
         runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeDaemonSetRolloutStuck.md
       expr: |
-        kube_daemonset_status_number_ready{job="kube-state-metrics"}
+        kube_daemonset_status_number_ready{job="kube-state-metrics",namespace!~"^openshift-.*$"}
           /
-        kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics"} < 1.00
+        kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics",namespace!~"^openshift-.*$"} < 1.00
       for: 15m
       labels:
         severity: high
@@ -142,7 +142,7 @@ spec:
           ({{ $labels.cluster }}/{{ $labels.namespace }}) Pod {{ $labels.pod }} container {{ $labels.container }}
           has been in waiting state for longer than 15 minutes. Reason: {{ $labels.reason }}
         runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeContainerWaiting.md
-      expr: 'sum by (namespace, pod, container, reason) (kube_pod_container_status_waiting_reason{job="kube-state-metrics",namespace!~"^uhc-.*-.*$"})
+      expr: 'sum by (namespace, pod, container, reason) (kube_pod_container_status_waiting_reason{job="kube-state-metrics",namespace!~"^(uhc-.*|openshift)-.*$"})
         > 0'
       for: 15m
       labels:
@@ -153,9 +153,9 @@ spec:
           are not scheduled."
         runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeDaemonSetNotScheduled.md
       expr: |
-        kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics"}
+        kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics",namespace!~"^openshift-.*$"}
           -
-        kube_daemonset_status_current_number_scheduled{job="kube-state-metrics"} > 0
+        kube_daemonset_status_current_number_scheduled{job="kube-state-metrics",namespace!~"^openshift-.*$"} > 0
       for: 10m
       labels:
         severity: high
@@ -164,7 +164,7 @@ spec:
         message: "({{ $labels.cluster }}/{{ $labels.namespace }}) {{ $value }} Pods of DaemonSet {{ $labels.daemonset }}
           are running where they are not supposed to run."
         runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeDaemonSetMisScheduled.md
-      expr: 'kube_daemonset_status_number_misscheduled{job="kube-state-metrics"} > 0'
+      expr: 'kube_daemonset_status_number_misscheduled{job="kube-state-metrics",namespace!~"^openshift-.*$"} > 0'
       for: 15m
       labels:
         severity: high
