@@ -13,7 +13,7 @@ spec:
     interval: 1m
     rules:
 
-    - alert: Patchman5xx
+    - alert: PatchmanAlert5xx
       expr: sum(rate(patchman_engine_requests_total{code=~"5.*"}[5m])) by (kubernetes_namespace) > 0
       annotations:
         description: '5xx responses observed ({{ $value }})'
@@ -23,7 +23,7 @@ spec:
         env: prod
         app_team: patch
 
-    - alert: PatchmanKafkaLag
+    - alert: PatchmanAlertKafkaLag
       expr: sum(kafka_consumergroup_group_topic_sum_lag{group="patchman", topic=~"platform.inventory.events|patchman.evaluator.upload"}) by (topic) > 4000
       for: 5m
       annotations:
@@ -34,7 +34,7 @@ spec:
         env: prod
         app_team: patch
 
-    - alert: PatchmanExternalService
+    - alert: PatchmanAlertExternalService
       expr: sum(delta(patchman_engine_manager_dependency_call{ namespace="patchman-engine-prod" }[5m])) by (name, status) > 10
       for: 5m
       annotations:
@@ -45,7 +45,7 @@ spec:
         env: prod
         app_team: patch
 
-    - alert: PatchmanDeleteError
+    - alert: PatchmanAlertDeleteError
       expr: sum(rate(patchman_engine_listener_kafka_message_received{event="delete", type=~"error-.*"}[5m])) by (kubernetes_namespace) > 0
       annotations:
         description: 'System deleting error observed'
@@ -55,7 +55,7 @@ spec:
         env: prod
         app_team: patch
 
-    - alert: PatchmanOutOfDateSystems
+    - alert: PatchmanAlertOutOfDateSystems
       expr: sum(patchman_engine_vmaas_sync_systems{last_upload="last1D"}) / sum(patchman_engine_vmaas_sync_systems{last_upload="last30D"}) < 0.8
       annotations:
         description: 'Increasing number of out-of-date systems observed (last1D / last30D = {{ $value }})'
@@ -65,10 +65,10 @@ spec:
         env: prod
         app_team: patch
 
-    - alert: PatchmanPodRestarting
-      expr: sum(increase(kube_pod_container_status_restarts_total{container=~"patchman-engine-.*"}[15m])) by (container) > 1
+    - alert: PatchmanAlertPodRestarting
+      expr: sum(increase(kube_pod_container_status_restarts_total{container=~"patchman-engine-.*"}[5m])) by (container) > 0
       annotations:
-        description: 'Observed multiple pod ({{ $labels.container }}) restarts ({{ $value }}) in a short time period'
+        description: 'Observed pod ({{ $labels.container }}) restart(s) ({{ $value }})'
       labels:
         severity: info
         service: insights
