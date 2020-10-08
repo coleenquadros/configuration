@@ -200,7 +200,7 @@ All v4 hive shards (clusters) are monitored with their own workload prometheus, 
 
 Post file creation checks:
 
-1. Make sure SHARDNAME is replaced by the actual shard ID, for example `hivep01ue1`
+1. Make sure SHARDNAME is replaced by the actual shard name, for example `hivep01ue1`
 
 At this point, the monitoring is all set, and you're ready to move on to the next step
 
