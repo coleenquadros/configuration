@@ -1,0 +1,83 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: remediations
+
+name: remediations-perf
+description: Insights remediations-perf on the Stage cluster under e2e-deploy/ocdeployer management
+
+cluster:
+  $ref: /openshift/crc-stg-01/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/standard-resource-limits.yml
+
+quota:
+  $ref: /services/insights/remediations/remediations-quota.yml
+
+app:
+  $ref: /services/insights/remediations/app.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stg-01.yml
+#- $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+#- $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
+- $ref: /services/insights/xjoin/namespaces/perf-xjoin-perf.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
+  path: insights/secrets/insights-stage/remediations-stage/redis
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/backoffice/preprod/remediations
+  version: 2
+  name: backoffice
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-stage
+  identifier: remediations-perf
+  defaults: /terraform/resources/insights/perf/rds/postgres10-rds-1.yml
+  overrides:
+    username: "insights"
+    name: "remediations"
+  parameter_group: /terraform/resources/insights/perf/rds/postgres10-parameter-group-remediations-perf.yml
+  output_resource_name: remediations-db
+  enhanced_monitoring: true
+- provider: cloudwatch
+  account: insights-stage
+  identifier: remediations-perf
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
