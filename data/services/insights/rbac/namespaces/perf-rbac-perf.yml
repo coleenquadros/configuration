@@ -1,0 +1,102 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: rbac
+
+name: rbac-perf
+description: Insights rbac-pref on the Stage cluster under e2e-deploy/ocdeployer management
+
+cluster:
+  $ref: /openshift/crc-stg-01/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/standard-resource-limits.yml
+
+quota:
+  $ref: /services/insights/rbac/rbac-quota.yml
+
+app:
+  $ref: /services/insights/rbac/app.yml
+
+environment:
+  $ref: /products/insights/environments/perf.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stg-01.yml
+# - $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+# - $ref: /services/insights/advisor/namespaces/stage-advisor-stage.yml
+# - $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
+# - $ref: /services/insights/policies/namespaces/stage-policies-stage.yml
+# - $ref: /services/insights/approval/namespaces/stage-approval-stage.yml
+# - $ref: /services/insights/patchman/namespaces/stage-patchman-engine-stage.yml
+# - $ref: /services/insights/catalog/namespaces/stage-catalog-stage.yml
+# - $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
+# - $ref: /services/insights/drift/namespaces/stage-drift-stage.yml
+# - $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
+# - $ref: /services/insights/historical-system-profiles/namespaces/stage-historical-system-profiles-stage.yml
+# - $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
+# - $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
+# - $ref: /services/insights/system-baseline/namespaces/stage-system-baseline-stage.yml
+# - $ref: /services/insights/vulnerability/namespaces/stage-vulnerability-engine-stage.yml
+# - $ref: /services/insights/xavier/namespaces/stage-xavier-stage.yml
+# - $ref: /services/insights/turnpike/namespaces/stage-turnpike-stage.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+- ConfigMap
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
+- provider: resource
+  path: /insights-stage/rbac-stage/rbac-env.configmap.yml
+- provider: resource
+  path: /insights-stage/rbac-stage/redis-config.configmap.yml
+- provider: resource
+  path: /insights-stage/rbac-stage/rbac-config.configmap.yml
+- provider: resource
+  path: /insights-stage/rbac-stage/model-access-permissions.configmap.yml
+- provider: vault-secret
+  path: insights/secrets/insights-stage/rbac-stage/rbac-secret
+  version: 9
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/rbac-stage/rbac-psks
+  version: 2
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-stage
+  identifier: rbac-perf
+  defaults: /terraform/resources/insights/perf/rds/postgres10-rds-1.yml
+  parameter_group: /terraform/resources/insights/perf/rds/postgres10-parameter-group-rbac-perf.yml
+  output_resource_name: rbac-db
+  enhanced_monitoring: true
+- provider: cloudwatch
+  account: insights-stage
+  identifier: rbac-perf
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch-disabled
+  es_identifier: kibana-elasticsearch
