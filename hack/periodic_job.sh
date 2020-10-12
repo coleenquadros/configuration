@@ -38,7 +38,7 @@ run_int gitlab-members &
 run_int gitlab-owners &
 run_int gitlab-permissions &
 run_int gitlab-integrations &
-run_int jenkins-job-builder &
+STATE=true run_int jenkins-job-builder &
 run_int ldap-users $APP_INTERFACE_PROJECT_ID &
 # run_int slack-usergroups &
 run_int openshift-resources --internal &
