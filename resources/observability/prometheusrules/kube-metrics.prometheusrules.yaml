@@ -230,9 +230,9 @@ spec:
           }} of its {{ $labels.resource }} quota.
         runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeQuotaExceeded.md
       expr: |
-        kube_resourcequota{job="kube-state-metrics", type="used"}
+        kube_resourcequota{job="kube-state-metrics",type="used",namespace!~"^openshift-.*$"}
           / ignoring(instance, job, type)
-        (kube_resourcequota{job="kube-state-metrics", type="hard"} > 0)
+        (kube_resourcequota{job="kube-state-metrics",type="hard",namespace!~"^openshift-.*$"} > 0)
           > 1
       for: 15m
       labels:
@@ -245,9 +245,9 @@ spec:
           }} in Namespace {{ $labels.namespace }} is only {{ printf "%0.2f" $value
           }}% free.
       expr: |
-        100 * kubelet_volume_stats_available_bytes{job="kubelet"}
+        100 * kubelet_volume_stats_available_bytes{job="kubelet",namespace!~"^openshift-.*$"}
           /
-        kubelet_volume_stats_capacity_bytes{job="kubelet"}
+        kubelet_volume_stats_capacity_bytes{job="kubelet",namespace!~"^openshift-.*$"}
           < 3
       for: 10m
       labels:
@@ -259,9 +259,9 @@ spec:
           days. Currently {{ printf "%0.2f" $value }}% is available.
       expr: |
         100 * (
-          kubelet_volume_stats_available_bytes{job="kubelet"}
+          kubelet_volume_stats_available_bytes{job="kubelet",namespace!~"^openshift-.*$"}
             /
-          kubelet_volume_stats_capacity_bytes{job="kubelet"}
+          kubelet_volume_stats_capacity_bytes{job="kubelet",namespace!~"^openshift-.*$"}
         ) < 15
         and
         predict_linear(kubelet_volume_stats_available_bytes{job="kubelet"}[6h], 4 * 24 * 3600) < 0
@@ -273,7 +273,7 @@ spec:
         message: The persistent volume {{ $labels.persistentvolume }} has status {{
           $labels.phase }}.
       expr: |
-        kube_persistentvolume_status_phase{phase=~"Failed|Pending",job="kube-state-metrics"} > 0
+        kube_persistentvolume_status_phase{phase=~"Failed|Pending",job="kube-state-metrics",namespace!~"^openshift-.*$"} > 0
       for: 5m
       labels:
         severity: high
