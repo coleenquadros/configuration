@@ -4,8 +4,10 @@
   - [Step 1 - Cluster creation and initial access for dedicated-admins](#step-1---cluster-creation-and-initial-access-for-dedicated-admins)
   - [Step 2 - Bot access and App SRE project template](#step-2---bot-access-and-app-sre-project-template)
   - [Step 3 - Observability](#step-3---observability)
-  - [Step 4 - Container Security Operator](#step-4---container-security-operator)
-  - [Step 5 - Logging](#step-5---logging)
+  - [Step 4 - Operator Lifecycle Manager](#step-4---operator-lifecycle-manager)
+  - [Step 5 - Container Security Operator](#step-5---container-security-operator)
+  - [Step 6 - Logging](#step-6---logging)
+  - [WIP Step 7 - Deployment Validation Operator (DVO)](#wip-step-7---deployment-validation-operator-dvo)
 - [Additional configurations](#additional-configurations)
   - [Selecting a Machine CIDR for VPC peerings](#selecting-a-machine-cidr-for-vpc-peerings)
   - [VPC peering with app-interface](#vpc-peering-with-app-interface)
@@ -430,7 +432,35 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
         *Note*: The `<cluster-url>` can be retrieved from the cluster console.  Remove the `https://console-openshift-console` from the beginning and end with `openshiftapps.com`, removing all the trailing slashes and paths.
 
-## Step 4 - Container Security Operator
+## Step 4 - Operator Lifecycle Manager
+
+1. Install the Operator Lifecycle Manager
+
+    The Operator Lifecycle Manager is responsible for managing operator lifecycles.  It will install and update operators using a subscription.
+
+    1. Create an `openshift-operator-lifecycle-manager.yml` namespace file for the cluster:
+
+    ```yaml
+    ---
+    $schema: /openshift/namespace-1.yml
+
+    labels: {}
+
+    name: openshift-operator-lifecycle-manager
+
+    cluster:
+      $ref: /openshift/<cluster>/cluster.yml
+
+    app:
+      $ref: /services/app-sre/app.yml
+
+    environment:
+      $ref: /products/app-sre/environments/production.yml
+
+    description: openshift-operator-lifecycle-manager namespac
+    ```
+
+## Step 5 - Container Security Operator
 
 1. Install the Container Security Operator
 
@@ -468,31 +498,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
     ```
 
     If the `openshift-operator-lifecycle-manager` namespace is not yet defined in
-    app-interface, you have to define it also:
-
-    File name: `openshift-operator-lifecycle-manager.yml`
-
-    Content:
-
-    ```yaml
-    ---
-    $schema: /openshift/namespace-1.yml
-
-    labels: {}
-
-    name: openshift-operator-lifecycle-manager
-
-    cluster:
-      $ref: /openshift/<cluster>/cluster.yml
-
-    app:
-      $ref: /services/app-sre/app.yml
-
-    environment:
-      $ref: /products/app-sre/environments/production.yml
-
-    description: openshift-operator-lifecycle-manager namespace
-    ```
+    app-interface, follow [Step 4](step-4---operator-lifecycle-manager)
 
     1. Add the new `container-security-operator` namespace to the target
     namespaces in the
@@ -511,7 +517,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
         ref: <commit_hash>
     ```
 
-## Step 5 - Logging
+## Step 6 - Logging
 
 1. Enable logging (EFK)
 
@@ -550,6 +556,77 @@ At this point you should be able to access the cluster via the console / `oc` cl
     ```
 
     OSD docs for reference: https://docs.openshift.com/dedicated/4/logging/dedicated-cluster-deploying.html
+
+## WIP Step 7 - Deployment Validation Operator (DVO)
+
+1. Install the Deployment Validation Operator
+
+   The Deployment Validation Opreator inspects wordloads in a cluster and evaluates them against know best practices.  It generates metric information about which workloads in which namespaces do not meet specific guidelines.  This information is presented in tenant dashboards and in monthly reports.
+
+    1. Create an `app-sre-dvo-per-cluster` namespace file for that specific
+    cluster. Example:
+
+    ```yaml
+    ---
+    $schema: /openshift/namespace-1.yml
+
+    labels: {}
+
+    name: deployment-validation-operator
+    description: namespace for the app-sre per-cluster Deployment Validation Operator
+
+    cluster:
+      $ref: /openshift/<cluster>/cluster.yml
+
+    app:
+      $ref: /services/deployment-validation-operator/app.yml
+
+    environment:
+      $ref: /products/app-sre/environments/stage.yml
+
+    networkPoliciesAllow:
+    - $ref: /openshift/<cluster>/namespaces/openshift-operator-lifecycle-manager.yml
+    - $ref: /services/observability/namespaces/openshift-customer-monitoring.<cluster>.yml
+
+    managedRoles: true
+    ```
+
+    *NOTE*: This file goes in the `data/openshift<cluster>/namespaces directory` [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/openshift/app-sre-stage-01/namespaces/app-sre-dvo-per-cluster.yml)
+
+    *NOTE*: If the `openshift-operator-lifecycle-manager` namespace is not yet defined in
+    app-interface, follow [Step 4](step-4---operator-lifecycle-manager
+
+    1. Add a service monitor for the Deployment Validation Operator to the `openshift-customer-monitoring/<cluster>.yml` file:
+
+    ```yaml
+    ### Deployment Validation Operator
+    - provider: resource-template
+      type: jinja2
+      path: /observability/servicemonitors/deployment-validation-operator.servicemonitor.yaml
+      variables:
+        environment: <production|stage>
+        namespace: deployment-validation-operator
+    ```
+
+    *Note*: [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml)
+
+    1. Add the new `deployment-validation-operator` namespace to the target
+    namespaces in the
+    [saas.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/deployment-validation-operator/cicd/saas.yaml)
+    to deploy the Deployment Validation Operator. Example:
+
+    ```yaml
+    resourceTemplates:
+    - name: deployment-validation-operator
+      url: https://github.com/app-sre/deployment-validation-operator
+      path: /deploy/openshift/deployment-validation-operator-olm.yaml
+      targets:
+      ...
+      - namespace:
+          $ref: /openshift/<cluster>/namespaces/app-sre-dvo-per-cluster.yml
+        ref: <commit_hash>
+        upstream: app-sre-deployment-validation-operator-gh-build-catalog-master-upstream-app-sre-deployment-validation-operator-gh-build-master
+    ```
 
 # Additional configurations
 
