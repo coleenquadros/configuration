@@ -83,7 +83,6 @@ NO_GQL_SHA_URL=true NO_VALIDATE=true run_int gitlab-fork-compliance $gitlabMerge
 [[ "$(run_int gitlab-ci-skipper $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid)" == "no" ]] && {
 
 ## Run integrations on production
-ALIAS=jenkins-job-builder-no-compare NO_GQL_SHA_URL=true NO_VALIDATE=true run_int jenkins-job-builder --no-compare &
 ALIAS=saas-file-owners-no-compare NO_GQL_SHA_URL=true NO_VALIDATE=true run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid --no-compare &
 
 # Prepare to run integrations on local server
