@@ -63,7 +63,8 @@ def get_integrations_by_schema(integrations, schema):
     return matches
 
 
-def print_pr_check_cmds(integrations, selected=None, select_all=False):
+def print_pr_check_cmds(integrations, selected=None, select_all=False,
+                        valid_saas_file_changes=False):
     if selected is None:
         selected = []
 
@@ -74,6 +75,10 @@ def print_pr_check_cmds(integrations, selected=None, select_all=False):
 
         always_run = pr.get('always_run')
         if int_name not in selected and not select_all and not always_run:
+            continue
+
+        run_for_valid_saas_file_changes = pr.get('run_for_valid_saas_file_changes')
+        if valid_saas_file_changes and run_for_valid_saas_file_changes is False:
             continue
 
         cmd = ""
@@ -95,6 +100,8 @@ def main():
     # grab data
     with open(sys.argv[1], 'r') as f:
         data = json.load(f)
+
+    valid_saas_file_changes_only = True if sys.argv[2] == "yes" else False
 
     integrations = get_integrations(data)
     modified_files = get_modified_files()
@@ -134,7 +141,8 @@ def main():
         selected.add('openshift-routes')
         selected.add('openshift-resources')
 
-    print_pr_check_cmds(integrations, selected=selected)
+    print_pr_check_cmds(integrations, selected=selected,
+                        valid_saas_file_changes=valid_saas_file_changes_only)
 
 
 if __name__ == '__main__':

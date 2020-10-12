@@ -112,16 +112,16 @@ cat "$CONFIG_TOML" \
 ## Run integrations on local server
 
 ### saas-file-owners runs first to determine how openshift-saas-deploy-wrappers should run
-NO_VALIDATE=true run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid
+VALID_SAAS_FILE_CHANGES_ONLY=$(NO_VALIDATE=true run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid)
 
 ### vault integration
-run_vault_reconcile_integration &
+[[ "$VALID_SAAS_FILE_CHANGES_ONLY" == "no" ]] && run_vault_reconcile_integration &
 
 ### openshift-saas-deploy only runs if the MR title contains "saas-deploy-full"
 [[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"saas-deploy-full"* ]] && NO_VALIDATE=true run_int openshift-saas-deploy &
 
 # run integrations based on their pr_check definitions
-python $CURRENT_DIR/select-integrations.py ${DATAFILES_BUNDLE} > $TEMP_DIR/integrations.sh
+python $CURRENT_DIR/select-integrations.py ${DATAFILES_BUNDLE} ${VALID_SAAS_FILE_CHANGES_ONLY} > $TEMP_DIR/integrations.sh
 exit_status=$?
 if [ $exit_status != 0 ]; then
   exit $exit_status
