@@ -1,6 +1,7 @@
 - [Info](#info)
 - [Process](#process)
   - [Provisioning the cluster](#provisioning-the-cluster)
+  - [Label cluster as CCS](#label-cluster-as-ccs)
   - [Provisioning Hive](#provisioning-hive)
   - [Hive Monitoring](#hive-monitoring)
   - [Provisioning OSD operators](#provisioning-osd-operators)
@@ -44,6 +45,16 @@ These instructions have been adapted from the [original google doc](https://docs
 1. Add `ClusterRoleBinding` (required?)
 
    - Example: https://issues.redhat.com/projects/OHSS/issues/OHSS-495
+
+## Label cluster as CCS
+
+1. Label cluster as CCS
+
+    Create a ticket to [OHSS](https://issues.redhat.com/secure/CreateIssue.jspa?pid=12323823&issuetype=3) requesting `ccs` on the new cluster (provide the cluster id).
+
+    Here's an [example](https://issues.redhat.com/browse/OHSS-1752)
+
+    *NOTE*: It wouldn't block it from being functional, just limit number of clusters it can provision in a day.
 
 ## Provisioning Hive
 
