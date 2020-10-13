@@ -1,0 +1,79 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: gateway
+
+name: 3scale-stage
+description: Insights 3scale-stage on the FedRAMP cluster under e2e-deploy/ocdeployer management
+
+cluster:
+  $ref: /openshift/crcs01ue1/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/standard-resource-limits.yml
+
+quota:
+  $ref: /services/insights/default-quota.yml
+
+app:
+  $ref: /services/insights/gateway/app.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs01ue1.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- Route
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource
+  path: /insights-stage/3scale-stage/api-gateway-stage.route.yml
+- provider: vault-secret
+  path: insights/secrets/insights-stage/3scale-stage/apicast-configuration-url-secret
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/3scale-stage/apicast-insights-3scale-config
+  # When incrementing the version of this, do the same in data/services/insights/turnpike/namespaces/stage-turnpike-stage.yml
+  version: 19
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/3scale-stage/apicast-insights-services-ephemeral-jwt-pub-key
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/3scale-stage/cloudservices-threescale-pull-secret
+  version: 1
+- provider: vault-secret
+  path: insights/secrets/insights-stage/3scale-stage/gateway-server
+  version: 3
+  annotations:
+    qontract.recycle: "true"
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-stage
+  identifier: 3scale-fedramp
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch-fedramp
+  

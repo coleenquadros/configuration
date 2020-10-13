@@ -1,0 +1,33 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: gateway
+
+name: apicast-test-services
+description: Basic web service used to test 3scale gateway functionality
+
+cluster:
+  $ref: /openshift/crcs01ue1/cluster.yml
+
+app:
+  $ref: /services/insights/gateway/app.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/standard-resource-limits.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs01ue1.yml
+- $ref: /services/insights/gateway/namespaces/fedramp-3scale-stage.yml
+
+managedRoles: true
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull

@@ -1,0 +1,103 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: xjoin
+
+name: xjoin-stage
+description: Insights xjoin-stage on the Stage cluster under e2e-deploy/ocdeployer management
+
+cluster:
+  $ref: /openshift/crcs01ue1/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/standard-resource-limits.yml
+
+quota:
+  $ref: /services/insights/xjoin/xjoin-quota.yml
+
+app:
+  $ref: /services/insights/xjoin/app.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs01ue1.yml
+- $ref: /services/insights/gateway/namespaces/fedramp-3scale-stage.yml
+- $ref: /services/insights/host-inventory/namespaces/fedramp-host-inventory-stage.yml
+- $ref: /services/insights/xjoin/namespaces/fedramp-xjoin-jenkins-stage.yml
+#- $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+- ConfigMap
+- Role
+- RoleBinding
+- Secret
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  # requires access to the host-inventory-db provisioned through the host-inventory-stage namespace
+  path: app-sre/integrations-output/terraform-resources/crc-stg-01/host-inventory-stage/host-inventory-db
+  version: 1
+  name: host-inventory-db
+  annotations:
+    qontract.recycle: "true"
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
+- provider: resource
+  path: /insights-stage/xjoin/kafka-connect.configmap.yml
+- provider: resource
+  path: /insights-stage/xjoin/validation.configmap.yml
+- provider: resource
+  path: /insights-stage/xjoin/xjoin-config.configmap.yml
+- provider: resource
+  path: /insights-stage/xjoin/xjoin-jenkins.role.yml
+- provider: resource
+  path: /insights-stage/xjoin/xjoin-jenkins.rolebinding.yml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-stage/xjoin-stage/syndication-test-db.secret.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-stage/xjoin-stage/advisor-db.secret.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-stage/xjoin-stage/patch-db.secret.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-stage/xjoin-stage/vulnerability-db.secret.yaml
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-stage
+  identifier: xjoin-stage-fedramp
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  es_identifier: kibana-elasticsearch-fedramp
+  output_resource_name: cloudwatch
+- provider: elasticsearch
+  account: insights-stage
+  identifier: xjoin-elasticsearch-fedramp
+  defaults: /terraform/resources/insights/stage/elasticsearch/xjoin.yml
+  output_resource_name: xjoin-elasticsearch
+- provider: rds
+  account: insights-stage
+  identifier: cyndi-stage-fedramp
+  defaults: /terraform/resources/insights/stage/rds/rds-cyndi-stage.yml
+  enhanced_monitoring: true
+  output_resource_name: cyndi-db-rds
+  parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-cyndi-stage.yml
