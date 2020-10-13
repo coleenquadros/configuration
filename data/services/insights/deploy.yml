@@ -1,0 +1,46 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: clowder
+  platform: insights
+
+name: clowder-env
+description: ClowdEnvironment deployments
+
+app:
+  $ref: /services/insights/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- ClowdEnvironment
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+
+imagePatterns:
+- quay.io/cloudservices/clowder
+
+resourceTemplates:
+- name: clowder-env
+  path: /env.yml
+  url: https://gitlab.cee.redhat.com/insights-platform/clowd-environments
+  targets:
+  - namespace:
+      $ref: /services/insights/clowder/namespaces/stage.yml
+    ref: master
