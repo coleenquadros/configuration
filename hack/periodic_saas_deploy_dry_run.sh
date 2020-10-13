@@ -26,7 +26,7 @@ source $CURRENT_DIR/runners.sh
 
 GRAPHQL_SERVER=https://${GRAPHQL_SERVER_BASE_URL}/graphql
 
-DRY_RUN=true NO_VALIDATE=true run_int openshift-saas-deploy &
+DRY_RUN=true run_int openshift-saas-deploy &
 
 wait
 
