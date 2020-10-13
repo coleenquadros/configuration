@@ -9,6 +9,7 @@
       - [AppSRE mirror of common Docker Hub images](#appsre-mirror-of-common-docker-hub-images)
     - [Ad-hoc uses of images from Docker Hub](#ad-hoc-uses-of-images-from-docker-hub)
   - [What if I cannot find a way to move away from Docker Hub?](#what-if-i-cannot-find-a-way-to-move-away-from-docker-hub)
+- [Implementation](#implementation)
 
 # Moving off of Docker Hub
 
@@ -94,3 +95,14 @@ Note: The default choice should always be to move to UBI. While the path may not
 ## What if I cannot find a way to move away from Docker Hub?
 
 Please reach out to the AppSRE team via Slack #sd-app-sre or email sd-app-sre@redhat.com and we will work with you to find a solution.
+
+# Implementation
+
+The block is implemented by pointing the docker hub registry hostnames to an invalid IP address in `/etc/hosts`
+
+The ansible task for this is defined here:
+- https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ansible/playbooks/node-ci-ext-jenkins-slave.yml#L18
+- https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ansible/playbooks/node-ci-int-jenkins-slave.yml#L13
+- https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ansible/playbooks/roles/docker-block-registries/tasks/main.yml
+
+It is possible to temporarily undo this by commenting out the lines in `/etc/hosts` on the jenkins nodes. The playbooks can also be changed to ensure the entry is `absent` from `/etc/hosts`
