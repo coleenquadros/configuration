@@ -17,7 +17,6 @@ environment:
 
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-04.yml
-# - $ref: /services/telemeter/namespaces/telemeter-production.yml
 
 managedRoles: true
 
@@ -26,121 +25,14 @@ managedResourceTypes:
 - Secret
 - ServiceAccount
 
-openshiftResources:
-- provider: vault-secret
-  path: app-interface/global/quay/app-sre/quay.io
-  version: 2
-  type: kubernetes.io/dockercfg
-# ECR image pull secret
-- provider: vault-secret
-  path: app-sre/integrations-output/aws-ecr-image-pull-secrets/app-sre/eu-central-1/dockercfg
-  version: 1
-  type: kubernetes.io/dockerconfigjson
-  name: uhc-backup-image-pull-secret
-# OSD fallback ECR image pull secret
-- provider: vault-secret
-  path: app-sre/integrations-output/aws-ecr-image-pull-secrets/app-sre/us-east-1/basic-auth
-  version: 1
-  name: osd-fallback-pull-secret
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /app-sre/uhc-production/clusters-service.secret.yaml
-  variables:
-    vault_secret_version: 18
-    shards:
-    - id: 7c2626e2-da06-11ea-8f62-8c1645a911be
-      cloud_providers:
-      - id: aws
-        region_id: us-east-1
-      - id: gcp
-        region_id: us-east1
-      hive_cluster_name: hivep01ue1
-      hive_cluster_api_url: https://api.hivep01ue1.b6s7.p1.openshiftapps.com:6443
-      hive_cluster_api_url_slug: api-hivep01ue1-b6s7-p1-openshiftapps-com:6443
-    - id: de4b0632-dca7-11ea-b3b9-8c1645a911be
-      cloud_providers:
-      - id: aws
-        region_id: us-east-1
-      - id: gcp
-        region_id: us-east1
-      hive_cluster_name: hivep02ue1
-      hive_cluster_api_url: https://api.hivep02ue1.p0r5.p1.openshiftapps.com:6443
-      hive_cluster_api_url_slug: api-hivep02ue1-p0r5-p1-openshiftapps-com:6443
-    - id: 07285129-332e-4bb8-a85b-a06f1a365554
-      cloud_providers: []
-      hive_cluster_name: hivep03uw1
-      hive_cluster_api_url: https://api.hivep03uw1.o2y3.p1.openshiftapps.com:6443
-      hive_cluster_api_url_slug: api-hivep03uw1-o2y3-p1-openshiftapps-com:6443
-    # hive-production v3 shard
-    - id: 0c7d42ee-d751-4e5e-928d-838c4141ec20
-      cloud_providers: []
-      hive_cluster_name: hive-production
-      hive_cluster_api_url: https://api.hive-production.openshift.com:443
-      hive_cluster_api_url_slug: api-hive-production-openshift-com:443
-    # we define the cluster as a variable to allow migrating the namespace
-    # only update this variable after namespace is moved
-    cluster: app-sre-prod-04
-    # this is a workaround to use the vault function inside the for loop in the template
-    current_hive_cluster:
-      name: 'workaround'
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /app-sre/uhc-production/uhc-acct-mngr-templated.secret.yaml
-- provider: vault-secret
-  path: app-interface/app-sre/uhc-production/uhc-acct-mngr
-  version: 16
-- provider: vault-secret
-  path: app-interface/app-sre/uhc-production/ocm-service-log
-  version: 4
-- provider: vault-secret
-  path: app-interface/app-sre/uhc-production/clusters-cleaner
-  version: 3
-- provider: route
-  path: /app-sre/uhc-production/clusters-mgmt.route.yaml
-- provider: route
-  path: /app-sre/uhc-production/accounts-mgmt.route.yaml
-- provider: route
-  path: /app-sre/uhc-production/authorizations.route.yaml
-- provider: route
-  path: /app-sre/uhc-production/gateway-server.route.yaml
-- provider: route
-  path: /app-sre/uhc-production/portal-redirector.route.yaml
-- provider: route
-  path: /app-sre/uhc-production/service-logs.route.yaml
-- provider: resource
-  path: /app-sre/uhc-production/portal-redirector-rewriterules.configmap.yaml
-- provider: resource-template
-  path: /services/ocm/serviceaccount.yaml
-  variables:
-    name: clusters-service
-- provider: resource-template
-  path: /services/ocm/serviceaccount.yaml
-  variables:
-    name: account-manager
-- provider: resource-template
-  path: /services/ocm/serviceaccount.yaml
-  variables:
-    name: ocm-service-log
-- provider: resource-template
-  path: /services/ocm/serviceaccount.yaml
-  variables:
-    name: uhc-portal-redirector
-- provider: resource-template
-  path: /services/ocm/serviceaccount.yaml
-  variables:
-    name: uhc-gateway
-- provider: resource
-  path: /app-sre/uhc-production/authentication.configmap.yaml
-- provider: resource
-  path: /app-sre/uhc-production/service-ca.configmap.yaml
-- provider: resource
-  path: /app-sre/uhc-production/gateway.configmap.yaml
-- provider: resource
-  path: /app-sre/uhc-production/ocm-service-log-triggers.configmap.yaml
-- name: unleash
-  provider: vault-secret
-  path: app-sre/unleash/ocm-unleash-token
-  version: 1
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+- $ref: /services/ocm/shared-resources/ecr.yml
+- $ref: /services/ocm/shared-resources/service-accounts.yml
+- $ref: /services/ocm/shared-resources/common.yml
+- $ref: /services/ocm/shared-resources/production.yml
+
+openshiftResources: []
 
 managedTerraformResources: true
 

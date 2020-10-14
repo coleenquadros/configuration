@@ -10,7 +10,7 @@ openshiftResources:
 # the `telemeter.bearer` key in clusters-service is the telemeter-stage/uhc-prometheus-access SA's token
 - provider: resource-template
   type: extracurlyjinja2
-  path: /app-sre-stage/uhc-stage/clusters-service.secret.yaml
+  path: /services/ocm/stage/clusters-service.secret.yaml
   variables:
     vault_secret_version: 17
     shards:
@@ -43,3 +43,46 @@ openshiftResources:
     # this is a workaround to use the vault function inside the for loop in the template
     current_hive_cluster:
       name: 'workaround'
+# the `telemeter.bearer` key in uhc-acct-mngr-tpl is the telemeter-stage/uhc-prometheus-access SA's token
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/ocm/stage/uhc-acct-mngr-templated.secret.yaml
+- provider: vault-secret
+  path: app-interface/app-sre-stage/uhc-stage/ocm-service-log
+  version: 4
+- provider: vault-secret
+  path: app-interface/app-sre-stage/uhc-stage/uhc-acct-mngr
+  version: 10
+- provider: vault-secret
+  path: app-interface/app-sre-stage/uhc-stage/clusters-cleaner
+  version: 3
+- provider: route
+  path: /services/ocm/stage/clusters-mgmt.route.yaml
+  vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.stage.openshift.com
+  vault_tls_secret_version: 3
+- provider: route
+  path: /services/ocm/stage/accounts-mgmt.route.yaml
+  vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.stage.openshift.com
+  vault_tls_secret_version: 3
+- provider: route
+  path: /services/ocm/stage/authorizations.route.yaml
+  vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.stage.openshift.com
+  vault_tls_secret_version: 3
+- provider: route
+  path: /services/ocm/stage/service-logs.route.yaml
+  vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.stage.openshift.com
+  vault_tls_secret_version: 3
+- provider: route
+  path: /services/ocm/stage/gateway-server.route.yaml
+  vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.stage.openshift.com
+  vault_tls_secret_version: 3
+- provider: resource
+  path: /services/ocm/stage/authentication.configmap.yaml
+- name: unleash
+  provider: vault-secret
+  path: app-sre/unleash/ocm-stage-unleash-token
+  version: 1
+- provider: resource
+  path: /services/ocm/stage/ocm-service-log-triggers.configmap.yaml
+- provider: resource
+  path: /services/ocm/stage/gateway.configmap.yaml

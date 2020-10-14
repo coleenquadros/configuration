@@ -22,26 +22,17 @@ managedResourceTypes:
 - Secret
 - ServiceAccount
 
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+- $ref: /services/ocm/shared-resources/ecr.yml
+- $ref: /services/ocm/shared-resources/service-accounts.yml
+- $ref: /services/ocm/shared-resources/common.yml
+
 openshiftResources:
-- provider: vault-secret
-  path: app-interface/global/quay/app-sre/quay.io
-  version: 2
-  type: kubernetes.io/dockercfg
-# ECR image pull secret
-- provider: vault-secret
-  path: app-sre/integrations-output/aws-ecr-image-pull-secrets/app-sre/eu-central-1/dockercfg
-  version: 1
-  type: kubernetes.io/dockerconfigjson
-  name: uhc-backup-image-pull-secret
-# OSD fallback ECR image pull secret
-- provider: vault-secret
-  path: app-sre/integrations-output/aws-ecr-image-pull-secrets/app-sre/us-east-1/basic-auth
-  version: 1
-  name: osd-fallback-pull-secret
 # the `telemeter.bearer` key in clusters-service is the telemeter-stage/uhc-prometheus-access SA's token
 - provider: resource-template
   type: extracurlyjinja2
-  path: /app-sre-stage/uhc-stage-sso-test/clusters-service.secret.yaml
+  path: /services/ocm/stage-sso-test/clusters-service.secret.yaml
   variables:
     shards:
     - id: aba5ebec-e068-11ea-84d1-8c1645a911be
@@ -59,7 +50,7 @@ openshiftResources:
 # the `telemeter.bearer` key in uhc-acct-mngr-tpl is the telemeter-stage/uhc-prometheus-access SA's token
 - provider: resource-template
   type: extracurlyjinja2
-  path: /app-sre-stage/uhc-stage-sso-test/uhc-acct-mngr-templated.secret.yaml
+  path: /services/ocm/stage-sso-test/uhc-acct-mngr-templated.secret.yaml
 # - provider: vault-secret
 #   path: app-interface/app-sre-stage/uhc-stage-sso-test/ocm-service-log
 #   version: 4
@@ -70,35 +61,21 @@ openshiftResources:
 #   path: app-interface/app-sre-stage/uhc-stage-sso-test/clusters-cleaner
 #   version: 3
 - provider: route
-  path: /app-sre-stage/uhc-stage-sso-test/clusters-mgmt.route.yaml
+  path: /services/ocm/stage-sso-test/clusters-mgmt.route.yaml
 - provider: route
-  path: /app-sre-stage/uhc-stage-sso-test/accounts-mgmt.route.yaml
+  path: /services/ocm/stage-sso-test/accounts-mgmt.route.yaml
 - provider: route
-  path: /app-sre-stage/uhc-stage-sso-test/authorizations.route.yaml
+  path: /services/ocm/stage-sso-test/authorizations.route.yaml
 - provider: route
-  path: /app-sre-stage/uhc-stage-sso-test/service-logs.route.yaml
+  path: /services/ocm/stage-sso-test/service-logs.route.yaml
 - provider: route
-  path: /app-sre-stage/uhc-stage-sso-test/gateway-server.route.yaml
-- provider: resource-template
-  path: /services/ocm/serviceaccount.yaml
-  variables:
-    name: clusters-service
-- provider: resource-template
-  path: /services/ocm/serviceaccount.yaml
-  variables:
-    name: account-manager
-- provider: resource-template
-  path: /services/ocm/serviceaccount.yaml
-  variables:
-    name: uhc-gateway
+  path: /services/ocm/stage-sso-test/gateway-server.route.yaml
 - provider: resource
-  path: /app-sre-stage/uhc-stage-sso-test/authentication.configmap.yaml
+  path: /services/ocm/stage-sso-test/authentication.configmap.yaml
 - provider: resource
-  path: /app-sre-stage/uhc-stage-sso-test/service-ca.configmap.yaml
-- provider: resource
-  path: /app-sre-stage/uhc-stage-sso-test/gateway.configmap.yaml
+  path: /services/ocm/stage-sso-test/gateway.configmap.yaml
 # - provider: resource
-#   path: /app-sre-stage/uhc-stage-sso-test/ocm-service-log-triggers.configmap.yaml
+#   path: /services/ocm/stage-sso-test/ocm-service-log-triggers.configmap.yaml
 # - name: unleash
 #   provider: vault-secret
 #   path: app-sre/unleash/ocm-stage-unleash-token

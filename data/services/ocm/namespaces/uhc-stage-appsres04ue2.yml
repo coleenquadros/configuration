@@ -26,90 +26,13 @@ managedResourceTypes:
 - ServiceAccount
 
 sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+- $ref: /services/ocm/shared-resources/ecr.yml
+- $ref: /services/ocm/shared-resources/service-accounts.yml
+- $ref: /services/ocm/shared-resources/common.yml
 - $ref: /services/ocm/shared-resources/stage.yml
 
 openshiftResources:
-- provider: vault-secret
-  path: app-interface/global/quay/app-sre/quay.io
-  version: 2
-  type: kubernetes.io/dockercfg
-# ECR image pull secret
-- provider: vault-secret
-  path: app-sre/integrations-output/aws-ecr-image-pull-secrets/app-sre/eu-central-1/dockercfg
-  version: 1
-  type: kubernetes.io/dockerconfigjson
-  name: uhc-backup-image-pull-secret
-# OSD fallback ECR image pull secret
-- provider: vault-secret
-  path: app-sre/integrations-output/aws-ecr-image-pull-secrets/app-sre/us-east-1/basic-auth
-  version: 1
-  name: osd-fallback-pull-secret
-# the `telemeter.bearer` key in uhc-acct-mngr-tpl is the telemeter-stage/uhc-prometheus-access SA's token
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /app-sre-stage/uhc-stage/uhc-acct-mngr-templated.secret.yaml
-- provider: vault-secret
-  path: app-interface/app-sre-stage/uhc-stage/ocm-service-log
-  version: 4
-- provider: vault-secret
-  path: app-interface/app-sre-stage/uhc-stage/uhc-acct-mngr
-  version: 10
-- provider: vault-secret
-  path: app-interface/app-sre-stage/uhc-stage/clusters-cleaner
-  version: 3
-- provider: route
-  path: /app-sre-stage/uhc-stage/clusters-mgmt.route.yaml
-  vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.stage.openshift.com
-  vault_tls_secret_version: 3
-- provider: route
-  path: /app-sre-stage/uhc-stage/accounts-mgmt.route.yaml
-  vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.stage.openshift.com
-  vault_tls_secret_version: 3
-- provider: route
-  path: /app-sre-stage/uhc-stage/authorizations.route.yaml
-  vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.stage.openshift.com
-  vault_tls_secret_version: 3
-- provider: route
-  path: /app-sre-stage/uhc-stage/service-logs.route.yaml
-  vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.stage.openshift.com
-  vault_tls_secret_version: 3
-- provider: route
-  path: /app-sre-stage/uhc-stage/gateway-server.route.yaml
-  vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.stage.openshift.com
-  vault_tls_secret_version: 3
-- provider: resource-template
-  path: /services/ocm/serviceaccount.yaml
-  variables:
-    name: clusters-service
-- provider: resource-template
-  path: /services/ocm/serviceaccount.yaml
-  variables:
-    name: account-manager
-- provider: resource-template
-  path: /services/ocm/serviceaccount.yaml
-  variables:
-    name: ocm-service-log
-- provider: resource-template
-  path: /services/ocm/serviceaccount.yaml
-  variables:
-    name: uhc-clusters-cleaner
-- provider: resource-template
-  path: /services/ocm/serviceaccount.yaml
-  variables:
-    name: uhc-gateway
-- provider: resource
-  path: /app-sre-stage/uhc-stage/authentication.configmap.yaml
-- provider: resource
-  path: /app-sre-stage/uhc-stage/service-ca.configmap.yaml
-- provider: resource
-  path: /app-sre-stage/uhc-stage/gateway.configmap.yaml
-- provider: resource
-  path: /app-sre-stage/uhc-stage/ocm-service-log-triggers.configmap.yaml
-- name: unleash
-  provider: vault-secret
-  path: app-sre/unleash/ocm-stage-unleash-token
-  version: 1
-
 # terraformSecrets
 - provider: vault-secret
   path: app-sre/integrations-output/terraform-resources/app-sre-stage-01/uhc-stage/clusters-service-rds
