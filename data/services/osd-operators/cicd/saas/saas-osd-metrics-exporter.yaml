@@ -1,0 +1,49 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: osd-operators
+
+name: saas-osd-metrics-exporter
+description: SaaS tracking file for osd-metrics-exporter
+
+app:
+  $ref: /services/osd-operators/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-srep-info
+
+managedResourceTypes:
+- SelectorSyncSet
+
+imagePatterns:
+- quay.io/app-sre/osd-metrics-exporter-registry
+
+resourceTemplates:
+- name: osd-metrics-exporter
+  url: https://github.com/openshift/osd-metrics-exporter
+  path: /hack/olm-registry/olm-artifacts-template.yaml
+  parameters:
+    REGISTRY_IMG: quay.io/app-sre/osd-metrics-exporter-registry
+  targets:
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-integration-cluster-scope.yml
+    ref: main
+    upstream: openshift-osd-metrics-exporter-gh-build-master
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-stage-cluster-scope.yml
+    ref: main
+    upstream: openshift-osd-metrics-exporter-gh-build-master
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-stage-01/cluster-scope.yml
+    ref: main
+    upstream: openshift-osd-metrics-exporter-gh-build-master
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hives02ue1/cluster-scope.yml
+    ref: main
+    upstream: openshift-osd-metrics-exporter-gh-build-master
