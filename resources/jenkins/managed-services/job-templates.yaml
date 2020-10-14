@@ -11,3 +11,45 @@
             - *app_interface_creds
             - *managed_services_test_cluster
     <<: *gl_pr_check
+    
+- job-template:   
+    id: 'managed-kafka-performance'
+    name: 'managed-kafka-performance-{mk_perf_type}'
+    wrappers:
+    - timestamps
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *ci_ocm_token
+        - *ci_aws_keys
+    parameters:
+    - string:
+        name: TESTCASE
+        default: '{mk_perf_test}'
+        description: 'maven parameter for executing specific tests'
+    - string:
+        name: KAFKA_WORKER_COUNT
+        default: '10'
+        description: 'count of worker nodes for kafka cluster'
+    - string:
+        name: OMB_WORKER_COUNT
+        default: '10'
+        description: 'count of worker nodes for OMB cluster'
+    - string:
+        name: FLAVOR
+        default: 'm5.4xlarge'
+        description: 'OSD aws node flavor'
+    - string:
+        name: REGION
+        default: 'us-east-2'
+        description: 'OSD aws region'
+    <<: *gl_checkout
+    builders:
+      - shell: "make pipeline"
+    publishers:
+    - archive:
+        artifacts: 'target/logs/**'
+        allow-empty: true
