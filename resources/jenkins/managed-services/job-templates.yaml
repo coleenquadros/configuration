@@ -48,8 +48,14 @@
         description: 'OSD aws region'
     <<: *gl_checkout
     builders:
-      - shell: "make pipeline"
+      - shell: "make ci/pipeline"
     publishers:
     - archive:
         artifacts: 'target/logs/**'
         allow-empty: true
+    - post-tasks:
+      - matches:
+        - log-text: ""
+          operator: AND
+        script: |
+          make ci/pipeline/cleanup
