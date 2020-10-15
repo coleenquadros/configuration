@@ -1,0 +1,13 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2020-10-15-patch-inventory-query
+namespace:
+  $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
+identifier: patchman-prod
+output: stdout
+query: |
+    select sp.rh_account_id, count(rh_account_id) as cnt from system_platform sp
+    left join inventory.hosts ih on sp.inventory_id = ih.id::text where
+    sp.last_updated > '2020-10-15 14:00:00'
+    and ih.id is null group by sp.rh_account_id;
