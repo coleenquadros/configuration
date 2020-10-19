@@ -1,0 +1,33 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+# Labels are metadata useful for querying Qontract using GraphQL
+labels:
+  service: resources
+  platform: insights
+
+name: ci-ext-insights-resources
+
+description: 'Job for building resources'
+
+# We are going to build our app using the Jenkins outside the Red Hat VPN since
+# our repository is in a public GitHub
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+type: jobs
+
+config:
+- project:
+    name: resources
+    label: insights
+    node: insights
+    quay_org: cloudservices
+    # For GitHub based projects, use these keys to point to your repository
+    gh_org: patilsuraj767
+    gh_repo: resource-optimization-test
+    jobs:
+    - gh-pr-check:
+        display_name: resources pr-check
+    - gh-build-master:
+        display_name: resources build-master

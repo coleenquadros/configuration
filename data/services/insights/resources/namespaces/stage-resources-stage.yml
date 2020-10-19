@@ -1,0 +1,52 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: resources
+
+name: resources-stage
+description: Insights resources-stage on the Stage cluster under e2e-deploy/ocdeployer management
+
+cluster:
+  $ref: /openshift/crc-stg-01/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/standard-resource-limits.yml
+
+quota:
+  $ref: /services/insights/default-quota.yml
+
+app:
+  $ref: /services/insights/resources/app.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stg-01.yml
+- $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+
+managedRoles: true
+
+managedResourceTypes: []
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-stage
+  identifier: resources-stage
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch-disabled
+  es_identifier: kibana-elasticsearch
