@@ -1,0 +1,27 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2020-10-15-patch-packages-query-2
+namespace:
+  $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
+identifier: patchman-prod
+output: stdout
+query: |
+  EXPLAIN (ANALYZE, COSTS, VERBOSE, BUFFERS, FORMAT JSON)
+  SELECT res.name              as name,
+        res.systems_installed as systems_installed,
+        res.systems_updatable as systems_updatable,
+        latest.summary        as summary
+  FROM package_latest_cache latest
+          INNER JOIN (SELECT p.name_id                                   as name_id,
+                              pn.name                                    as name,
+                              count(sp.id)                               as systems_installed,
+                              count(sp.id) filter (where spkg.updatable) as systems_updatable
+                      FROM system_platform sp
+                                inner join system_package spkg
+                                          on spkg.system_id = sp.id and sp.stale = false and sp.rh_account_id = 10
+                                inner join package p on p.id = spkg.package_id
+                                inner join package_name pn on pn.id = p.name_id
+                      WHERE (spkg.rh_account_id = 10)
+                      GROUP BY p.name_id, pn.name) res ON res.name_id = latest.name_id
+  ORDER BY res.name ASC;
