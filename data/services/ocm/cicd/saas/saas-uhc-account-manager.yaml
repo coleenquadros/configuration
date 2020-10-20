@@ -83,14 +83,15 @@ resourceTemplates:
     MOA_ENTITLEMENT_RECONCILER_WORKER_COUNT: "1"
     MOA_SKU: "MW01369"
     MOA_ENTITLEMENT_RENEW_DURATION: "120h"
-    API_REPLICA_COUNT_MIN: "3"
-    API_REPLICA_COUNT_MAX: "5"
+    # Set replica min and max to 4 to essentially disable the HPA due to https://bugzilla.redhat.com/show_bug.cgi?id=1867477
+    API_REPLICA_COUNT_MIN: "4"
+    API_REPLICA_COUNT_MAX: "4"
     API_TARGET_AVERAGE_CPU_UTILIZATION: "80"
     API_TARGET_AVERAGE_MEMORY_UTILIZATION: "75"
     TARGET_CPU_UTILIZATION: "80"
   targets:
   - namespace:
-      $ref: /services/ocm/namespaces/uhc-integration.yml
+      $ref: /services/ocm/namespaces/uhc-integration-v3.yml
     ref: master
     upstream: service-uhc-account-manager-gl-build-master
     parameters:
@@ -145,6 +146,12 @@ resourceTemplates:
     ref: master
     upstream: service-uhc-account-manager-gl-build-master
     parameters:
+      REPLICAS: 6
+      # Set replica min and max to 6 to essentially disable the HPA due to https://bugzilla.redhat.com/show_bug.cgi?id=1867477
+      API_REPLICA_COUNT_MIN: "6"
+      API_REPLICA_COUNT_MAX: "6"
+      # Temporarily increase the CPU limit to 2 for stage AMS during scale testing the replicas were also increased for ^
+      CPU_LIMIT: "2"
       ENABLE_TERMS_ENFORCEMENT: "false"
       FETCH_TELEMETER_METRICS_CRON_SCHEDULE: "*/5 * * * *"
       SUSPEND_FETCH_TELEMETER_METRICS_CRON: "false"
@@ -173,7 +180,7 @@ resourceTemplates:
       # Don't run OCP Usage reconciliation jobs in stage, since they just fail anyway without a public rhsm stage endpoint
       # Suspension params should always be env specific
       SUSPEND_ACCOUNT_RECONCILER_CRON: "false"
-      SUSPEND_DEPROVISION_OLD_SUBSCRIPTIONS_CRON: "false"
+      SUSPEND_DEPROVISION_OLD_SUBSCRIPTIONS_CRON: "true"
       SUSPEND_OCP_USAGE_RECONCILER_CRON: "true"
       SUSPEND_OCP_USAGE_CLEANER_CRON: "true"
       SUSPEND_SUBSCRIPTION_BASED_DATA_RECONCILER_CRON: "false"
@@ -243,7 +250,7 @@ resourceTemplates:
       UNLEASH_URL: "https://ocm-stage.unleash.devshift.net/api"
   - namespace:
       $ref: /services/ocm/namespaces/uhc-production.yml
-    ref: a33c0dc72ddf96c39ea5aa651cfef90fa5244182
+    ref: 94e83dd38b73089b1f193e5aac5fd4d11f1fe7b9
     parameters:
       ENABLE_TERMS_ENFORCEMENT: "false"
       RHIT_BASE_CANDLEPIN_URL: https://admin.rhsm.redhat.com/candlepin
@@ -271,7 +278,7 @@ resourceTemplates:
       REGISTRY_CREDENTIAL_POOL_LOADER_CARDINALITY: "100"
       REGISTRY_CREDENTIAL_POOL_LOADER_HIGH_WATERMARK: "3000"
       # Suspension params should always be env specific
-      SUSPEND_DEPROVISION_OLD_SUBSCRIPTIONS_CRON: "false"
+      SUSPEND_DEPROVISION_OLD_SUBSCRIPTIONS_CRON: "true"
       SUSPEND_OCP_USAGE_RECONCILER_CRON: "false"
       SUSPEND_OCP_USAGE_CLEANER_CRON: "false"
       SUSPEND_SUBSCRIPTION_STATUS_RECONCILER_CRON: "false"
@@ -331,7 +338,7 @@ resourceTemplates:
       # Don't run OCP Usage reconciliation jobs in stage, since they just fail anyway without a public rhsm stage endpoint
       # Suspension params should always be env specific
       SUSPEND_ACCOUNT_RECONCILER_CRON: "false"
-      SUSPEND_DEPROVISION_OLD_SUBSCRIPTIONS_CRON: "false"
+      SUSPEND_DEPROVISION_OLD_SUBSCRIPTIONS_CRON: "true"
       SUSPEND_OCP_USAGE_RECONCILER_CRON: "true"
       SUSPEND_OCP_USAGE_CLEANER_CRON: "true"
       SUSPEND_SUBSCRIPTION_BASED_DATA_RECONCILER_CRON: "false"

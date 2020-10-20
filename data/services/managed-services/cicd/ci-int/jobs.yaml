@@ -4,7 +4,7 @@ $schema: /dependencies/jenkins-config-1.yml
 labels:
   service: managed-services
 
-name: ci-int-mk-jobs
+name: ci-int-managed-services-jobs
 
 description: ''
 
@@ -26,3 +26,69 @@ config:
             display_name: build managed-kafka master
         - 'gl-pr-check':
             display_name: managed-kafka pr-check
+        - 'gl-timed':
+            display_name: managed-kafka pull upstream
+            branch: mk-master
+            ci_cmd: './pull-upstream.sh'
+            cron_expression: 'H 1 * * *'
+        - 'managed-kafka-security-scan':
+            display_name: managed-kafka security scan
+            branch: mk-master
+            ci_cmd: 'make scan_project'
+            cron_expression: 'H 6 * * *'
+
+  - project:
+      name: strimzi-operator-bundle
+      label: managed-services
+      node: managed-services
+      gl_group: mk-ci-cd
+      gl_project: strimzi-operator-bundle
+      jobs:
+        - 'gl-pr-check-managed-services':
+            display_name: strimzi-operator-bundle pr-check
+
+  - project:
+      name: managed-services-api
+      label: managed-services-api
+      node: managed-services
+      gl_group: service
+      gl_project: managed-services-api
+      jobs:
+        - 'gl-pr-check':
+            display_name: managed-services-api pr-check
+            concurrent_build: true
+        - 'gl-build-master':
+            display_name: managed-services-api build master
+
+  - project:
+      name: managed-services-kafka-performance-tests
+      label: managed-services
+      node: managed-services
+      gl_group: mk-bin-packing
+      gl_project: mk-performance-tests
+      jobs:
+        - 'managed-kafka-performance':
+            display_name: 'managed-kafka-performance value-prod'
+            mk_perf_type: 'value-prod'
+            mk_perf_test: 'KafkaInstanceScalingSmallTest#testKafkaValueProdBinPacking'
+            timeout: 240
+        - 'managed-kafka-performance':
+            display_name: 'managed-kafka-performance tyre-kicker'
+            mk_perf_type: 'tyre-kicker'
+            mk_perf_test: 'KafkaInstanceScalingSmallTest#testKafkaTyreKickerBinPacking'
+            timeout: 240
+
+  - project:
+      name: managed-service-ci-tools
+      label: managed-services
+      node: managed-services
+      gl_group: mk-ci-cd
+      gl_project: mk-ci-tools
+      jobs:
+        - 'gl-pr-check':
+            display_name: managed-service-ci-tools pr-check
+            pr_check_script_path: './hack/pr_check.sh'
+        - 'gl-build-master':
+            display_name: managed-service-ci-tools build master
+            build_deploy_script_path: './hack/build_deploy.sh'
+

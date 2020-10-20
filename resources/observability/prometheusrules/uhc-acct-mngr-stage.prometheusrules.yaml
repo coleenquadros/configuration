@@ -111,3 +111,29 @@ spec:
       labels:
         service: uhc-acct-mngr
         severity: medium
+    - alert: OCM dependencies - Terms and Conditions slow - stage
+      annotations:
+        message: "AMS is seeing a high average latency accessing Terms and Conditions. The average response time over the last 5 minutes is {{ $value | humanize }} seconds"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
+      expr: |
+        sum(rate(api_outbound_request_duration_sum{namespace="uhc-stage",service="uhc-acct-mngr-metrics",apiservice="rhit/terms",code=~"2.."}[5m]))
+        /
+        sum(rate(api_outbound_request_duration_count{namespace="uhc-stage",service="uhc-acct-mngr-metrics",apiservice="rhit/terms",code=~"2.."}[5m]))
+        > 1
+      for: 10m
+      labels:
+        service: uhc-acct-mngr
+        severity: medium
+    - alert: OCM dependencies - Terms and Conditions too many errors - stage
+      annotations:
+        message: "AMS is seeing a high rate of errors from Terms and Conditions for {{ $value | humanize }}% of requests."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
+      expr: |
+        sum(rate(api_outbound_request_count{namespace="uhc-stage",service="uhc-acct-mngr-metrics",apiservice="rhit/terms",code!~"2.."}[5m]))
+        /
+        sum(rate(api_outbound_request_count{namespace="uhc-stage",service="uhc-acct-mngr-metrics",apiservice="rhit/terms"}[5m])) * 100
+        > 1
+      for: 10m
+      labels:
+        service: uhc-acct-mngr
+        severity: medium

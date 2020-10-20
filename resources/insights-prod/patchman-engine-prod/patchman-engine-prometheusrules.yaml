@@ -16,7 +16,7 @@ spec:
     - alert: PatchmanAlert5xx
       expr: sum(rate(patchman_engine_requests_total{code=~"5.*"}[5m])) by (kubernetes_namespace) > 0
       annotations:
-        description: '5xx responses observed ({{ $value }})'
+        message: '5xx responses observed ({{ $value }})'
       labels:
         severity: info
         service: insights
@@ -27,7 +27,7 @@ spec:
       expr: sum(kafka_consumergroup_group_topic_sum_lag{group="patchman", topic=~"platform.inventory.events|patchman.evaluator.upload"}) by (topic) > 4000
       for: 5m
       annotations:
-        description: 'patchman-engine lag > 4000, topic: {{ $labels.topic }}, current lag: {{ $value  }}'
+        message: 'patchman-engine lag > 4000, topic: {{ $labels.topic }}, current lag: {{ $value  }}'
       labels:
         severity: info
         service: insights
@@ -38,7 +38,7 @@ spec:
       expr: sum(delta(patchman_engine_manager_dependency_call{ namespace="patchman-engine-prod" }[5m])) by (name, status) > 10
       for: 5m
       annotations:
-        description: 'External service failing ({{ $labels.name }} - {{ $labels.status }})'
+        message: 'External service failing ({{ $labels.name }} - {{ $labels.status }})'
       labels:
         severity: info
         service: insights
@@ -48,7 +48,7 @@ spec:
     - alert: PatchmanAlertDeleteError
       expr: sum(rate(patchman_engine_listener_kafka_message_received{event="delete", type=~"error-.*"}[5m])) by (kubernetes_namespace) > 0
       annotations:
-        description: 'System deleting error observed'
+        message: 'System deleting error observed'
       labels:
         severity: info
         service: insights
@@ -58,7 +58,7 @@ spec:
     - alert: PatchmanAlertOutOfDateSystems
       expr: sum(patchman_engine_vmaas_sync_systems{last_upload="last1D"}) / sum(patchman_engine_vmaas_sync_systems{last_upload="last30D"}) < 0.8
       annotations:
-        description: 'Increasing number of out-of-date systems observed (last1D / last30D = {{ $value }})'
+        message: 'Increasing number of out-of-date systems observed (last1D / last30D = {{ $value }})'
       labels:
         severity: info
         service: insights
@@ -68,7 +68,7 @@ spec:
     - alert: PatchmanAlertPodRestarting
       expr: sum(increase(kube_pod_container_status_restarts_total{container=~"patchman-engine-.*"}[5m])) by (container) > 0
       annotations:
-        description: 'Observed pod ({{ $labels.container }}) restart(s) ({{ $value }})'
+        message: 'Observed pod ({{ $labels.container }}) restart(s) ({{ $value }})'
       labels:
         severity: info
         service: insights

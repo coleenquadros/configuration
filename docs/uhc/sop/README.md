@@ -202,6 +202,7 @@ One or more dependency services is experiencing issues or has been downgraded.
 - Creating Auto Entitlements
 - Find OCP Subscriptions of an Account
 - Retrieving User's Information
+- Retrieving User's Status of Acknowledgement of Terms and Conditions
 
 ### Access required:
 - Console access to the cluster that runs account-manager (app-sre)

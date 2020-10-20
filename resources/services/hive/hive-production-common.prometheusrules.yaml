@@ -187,3 +187,26 @@ spec:
       labels:
         severity: critical
         service: srep
+    - alert: LetsEncryptIssuanceRateLimit - devshift.org - {{{shard_name}}}
+      annotations:
+        message: "Certman Operator is about to reach account limit for issued certificate in the last 7 days - devshift.org domain"
+        runbook: "https://github.com/openshift/ops-sop/blob/master/v4/howto/lets-encrypt-rate-limit-adjustment.md"
+        dashboard: "https://grafana.stage.devshift.net/d/sd-scale/service-delivery-scale?orgId=1"
+      expr: |
+        certman_operator_certs_in_last_week_devshift_org{job="certman-operator"} > {{{certman_operator_devshift_org_issuance_rate_threshold}}}
+      labels:
+        service: srep
+        severity: high
+        team: srep
+    - alert: LetsEncryptIssuanceRateLimit - openshiftapps.com - {{{shard_name}}}
+      annotations:
+        message: "Certman Operator is about to reach account limit for issued certificate in the last 7 days - openshiftapps.com domain"
+        runbook: "https://github.com/openshift/ops-sop/blob/master/v4/howto/lets-encrypt-rate-limit-adjustment.md"
+        dashboard: "https://grafana.stage.devshift.net/d/sd-scale/service-delivery-scale?orgId=1"
+      expr: |
+        certman_operator_certs_in_last_week_openshift_apps_com{job="certman-operator"} > {{{certman_operator_openshift_apps_com_issuance_rate_threshold}}}
+      labels:
+        service: srep
+        severity: high
+        team: srep
+

@@ -150,34 +150,41 @@ resourceTemplates:
           origin: http://rhsm-subscriptions-worker-monitoring.rhsm-stage.svc.cluster.local:8080/actuator
           auth:
             saml: "'subscription-watch-admins' in user['Role']"
+            x509: "x509['subject_dn'] == '/DC=com/DC=redhat/OU=messaging/OU=serviceusers/UID=msg-subscription-watch-turnpike/L=stage/CN=msg-subscription-watch-turnpike'"
         - name: rhsm-conduit
           route: /app/rhsm-conduit/actuator
           origin: http://rhsm-conduit.rhsm-stage.svc.cluster.local:8080/actuator
           auth:
             saml: "'subscription-watch-admins' in user['Role']"
+            x509: "x509['subject_dn'] == '/DC=com/DC=redhat/OU=messaging/OU=serviceusers/UID=msg-subscription-watch-turnpike/L=stage/CN=msg-subscription-watch-turnpike'"
         - name: policies-engine
           route: /api/policies-engine/
           origin: http://policies-engine.policies-stage.svc.cluster.local:8080/
           auth:
             saml: "True"
+        - name: policies-ui-backend
+          route: /api/policies-ui-backend/
+          origin: http://policies-ui-backend.policies-stage.svc.cluster.local:8080/
+          auth:
+            saml: "True"
         - name: cost-management-masu-download
-          route: /api/cost-management/download/
+          route: /api/cost-management/v1/download/
           origin: http://koku-masu.hccm-stage.svc.cluster.local:8080/api/cost-management/v1/download/
           auth:
-            saml: "True"
+            saml: "'cost-management-team' in user['Role']"
         - name: cost-management-masu-resummary
-          route: /api/cost-management/report_data/
+          route: /api/cost-management/v1/report_data/
           origin: http://koku-masu.hccm-stage.svc.cluster.local:8080/api/cost-management/v1/report_data/
           auth:
-            saml: "True"
+            saml: "'cost-management-team' in user['Role']"
         - name: cost-management-masu-acct-hierarchy
           route: /api/cost-management/crawl_account_hierarchy/
           origin: http://koku-masu.hccm-stage.svc.cluster.local:8080/api/cost-management/v1/crawl_account_hierarchy/
           auth:
-            saml: "True"
+            saml: "'cost-management-team' in user['Role']"
         - name: module-update-router-events
-          route: /api/module-update-router/v1/events
-          origin: http://module-update-router.module-update-router-stage.svc.cluster.local:8080/api/module-update-router/v1/events
+          route: /api/module-update-router/v1/event
+          origin: http://module-update-router.module-update-router-stage.svc.cluster.local:8080/api/module-update-router/v1/event
           auth:
             saml: "'clouddot-data' in user['Role']"
         - name: rbac
@@ -284,3 +291,18 @@ resourceTemplates:
           origin: http://rbac.rbac-prod.svc.cluster.local:8080/_private/api
           auth:
             saml: "'clouddot-infrastructure' in user['Role']"
+        - name: cost-management-masu-download
+          route: /api/cost-management/v1/download/
+          origin: http://koku-masu.hccm-prod.svc.cluster.local:8080/api/cost-management/v1/download/
+          auth:
+            saml: "'cost-management-team' in user['Role']"
+        - name: cost-management-masu-resummary
+          route: /api/cost-management/v1/report_data/
+          origin: http://koku-masu.hccm-prod.svc.cluster.local:8080/api/cost-management/v1/report_data/
+          auth:
+            saml: "'cost-management-team' in user['Role']"
+        - name: cost-management-masu-acct-hierarchy
+          route: /api/cost-management/v1/crawl_account_hierarchy/
+          origin: http://koku-masu.hccm-prod.svc.cluster.local:8080/api/cost-management/v1/crawl_account_hierarchy/
+          auth:
+            saml: "'cost-management-team' in user['Role']"

@@ -1,0 +1,81 @@
+- job-template:
+    id: gl-pr-check-managed-services
+    name: "{gl_group}-{gl_project}-gl-pr-check"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *app_interface_creds
+            - *quay_secret_push
+            - *managed_services_test_cluster
+    <<: *gl_pr_check
+    artifacts_path: 'test-results/**'
+    publishers:
+    - archive:
+        artifacts: '{artifacts_path}'
+        allow-empty: true
+
+- job-template:   
+    id: 'managed-kafka-performance'
+    name: 'managed-kafka-performance-{mk_perf_type}'
+    wrappers:
+    - timestamps
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *ci_ocm_token
+        - *ci_aws_keys
+    parameters:
+    - string:
+        name: TESTCASE
+        default: '{mk_perf_test}'
+        description: 'maven parameter for executing specific tests'
+    - string:
+        name: KAFKA_WORKER_COUNT
+        default: '10'
+        description: 'count of worker nodes for kafka cluster'
+    - string:
+        name: OMB_WORKER_COUNT
+        default: '10'
+        description: 'count of worker nodes for OMB cluster'
+    - string:
+        name: FLAVOR
+        default: 'm5.4xlarge'
+        description: 'OSD aws node flavor'
+    - string:
+        name: REGION
+        default: 'us-east-2'
+        description: 'OSD aws region'
+    <<: *gl_checkout
+    builders:
+      - shell: "make ci/pipeline"
+    publishers:
+    - archive:
+        artifacts: 'target/logs/**'
+        allow-empty: true
+    - post-tasks:
+      - matches:
+        - log-text: ""
+          operator: AND
+        script: |
+          make ci/pipeline/cleanup
+
+- job-template:
+    id: managed-kafka-security-scan
+    name: "managed-kafka-security-scan"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *mk_security_scan_token
+    <<: *gl_timed
+

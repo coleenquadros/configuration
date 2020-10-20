@@ -5,7 +5,7 @@ labels:
   service: host-inventory
 
 name: platform-prod
-description: Insights host-inventory-prod on the v4 Prod cluster
+description: Insights platform-prod on the v4 Prod cluster
 
 cluster:
   $ref: /openshift/crcp01ue1/cluster.yml
@@ -49,32 +49,15 @@ openshiftResources:
 - provider: resource-template
   type: extracurlyjinja2
   path: /insights-stage/host-inventory-stage/insights-host-delete.secret.yaml
-
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-prod
-  identifier: host-inventory-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: rds
-  account: insights-prod
-  identifier: host-inventory-prod
-  defaults: /terraform/resources/insights/production/rds/rds-host-inventory-prod.yml
-  overrides:
-    snapshot_identifier: host-inventory-migration-prod
-  enhanced_monitoring: true
-  output_resource_name: host-inventory-db
-  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-host-inventory-prod.yml
-- provider: rds
-  account: insights-prod
-  identifier: host-inventory-prod-readonly
-  availability_zone: us-east-1d
-  defaults: /terraform/resources/insights/production/rds/rds-host-inventory-prod-readonly.yml
-  overrides:
-    monitoring_interval: 60
-  output_resource_name: host-inventory-db-readonly-rds
-  enhanced_monitoring: true
-  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-host-inventory-prod-readonly.yml
+- provider: vault-secret
+  path: app-sre/integrations-output/terraform-resources/crcp01ue1/platform-prod/cloudwatch
+  version: 1
+  name: cloudwatch
+- provider: vault-secret
+  path: app-sre/integrations-output/terraform-resources/crcp01ue1/platform-prod/host-inventory-db
+  version: 1
+  name: host-inventory-db
+- provider: vault-secret
+  path: app-sre/integrations-output/terraform-resources/crcp01ue1/platform-prod/host-inventory-db-readonly-rds
+  version: 1
+  name: host-inventory-db-readonly-rds
