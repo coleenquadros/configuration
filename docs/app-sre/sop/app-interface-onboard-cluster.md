@@ -335,7 +335,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
         - Alert email: sd-app-sre@redhat.com
         - Notes: Runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/prometheus/prometheus-deadmanssnitch.md
 
-    1. Add the deadmansnitch URL to this secret in Vault: https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/alertmanager-integration
+    1. Add the deadmanssnitch URL to this secret in Vault: https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/alertmanager-integration
 
         - key: `deadmanssnitch-<cluster_name>-url`
         - value: the `Unique Snitch URL` from deadmanssnitch
