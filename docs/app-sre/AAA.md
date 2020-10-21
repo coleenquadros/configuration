@@ -168,6 +168,9 @@ Every app-sre engineer should have access to the following
     - https://github.com/openshift/cincinnati/blob/master/OWNERS_ALIASES
   - Ping on slack for access to quay github group
 
+- App-SRE OCM org (https://cloud.redhat.com/openshift)
+  - Access is [configured manually by an org administrator](/docs/app-sre/sop/ocm-appsre-org-access.md)
+
 - AWS
   - Nothing to do. Access obtained via a [role](/data/teams/app-sre/roles/app-sre.yml)
 
