@@ -1,0 +1,95 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: telemeter
+
+name: saas-observatorium-logs
+description: SaaS tracking file for Observatorium Logs services
+
+app:
+  $ref: /services/telemeter/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-logging-info
+
+authentication:
+  image:
+    path: app-sre/ci-int/redhat-registry-io-pull
+    field: all
+
+managedResourceTypes:
+- Deployment
+- Service
+- ConfigMap
+- StatefulSet
+- Role
+- RoleBinding
+- ServiceAccount
+- PodDisruptionBudget
+- PersistentVolumeClaim
+- PrometheusRule # adding everything that exists. this will be moved to a separate saas file
+
+imagePatterns:
+- quay.io/observatorium
+- quay.io/app-sre
+- quay.io/prometheus/memcached-exporter
+- registry.redhat.io/rhel8/memcached
+- quay.io/jpkroehling/all-in-one
+- quay.io/app-sre/loki
+
+resourceTemplates:
+- name: observatorium-logs
+  path: /manifests/production/observatorium-logs-template.yaml
+  url: https://gitlab.cee.redhat.com/observatorium/configuration
+  parameters:
+    JAEGER_AGENT_IMAGE: quay.io/app-sre/jaegertracing-jaeger-agent
+    STORAGE_CLASS: "gp2"
+    AUTHORIZE_URL: ${OCM_BASE_URL}/api/accounts_mgmt/v1/cluster_registrations
+  targets:
+  - namespace:
+      $ref: /services/telemeter/namespaces/telemeter-stage.yml
+    # Commit for gitlab.cee.redhat.com/observatorium/configuration repo. Keep it pinned, so we know what we can promote to production.
+    ref: adab71dcda784eaa2742fc49a565114cf386adeb
+    parameters:
+      NAMESPACE: telemeter-stage
+      JAEGER_AGENT_IMAGE_TAG: 1.16.0
+      MEMCACHED_IMAGE: registry.redhat.io/rhel8/memcached
+      MEMCACHED_IMAGE_TAG: 1.5
+      MEMCACHED_EXPORTER_IMAGE: quay.io/prometheus/memcached-exporter
+      MEMCACHED_EXPORTER_IMAGE_TAG: v0.6.0
+      TELEMETER_SERVER_TOKEN_EXPIRE_SECONDS: 43200
+      LOKI_IMAGE_TAG: 1.6.1
+      LOKI_IMAGE: quay.io/app-sre/loki
+      LOKI_S3_SECRET: telemeter-loki-stage-s3
+      LOKI_DISTRIBUTOR_REPLICAS: 2
+      LOKI_DISTRIBUTOR_CPU_REQUESTS: '500m'
+      LOKI_DISTRIBUTOR_CPU_LIMITS: '1000m'
+      LOKI_DISTRIBUTOR_MEMORY_REQUESTS: '500Mi'
+      LOKI_DISTRIBUTOR_MEMORY_LIMITS: '1Gi'
+      LOKI_INGESTER_REPLICAS: 2
+      LOKI_INGESTER_CPU_REQUESTS: '1000m'
+      LOKI_INGESTER_CPU_LIMITS: '2000m'
+      LOKI_INGESTER_MEMORY_REQUESTS: '5Gi'
+      LOKI_INGESTER_MEMORY_LIMITS: '10Gi'
+      LOKI_QUERIER_REPLICAS: 2
+      LOKI_QUERIER_CPU_REQUESTS: '500m'
+      LOKI_QUERIER_CPU_LIMITS: '500m'
+      LOKI_QUERIER_MEMORY_REQUESTS: '600Mi'
+      LOKI_QUERIER_MEMORY_LIMITS: '1200Mi'
+      LOKI_QUERY_FRONTEND_REPLICAS: 2
+      LOKI_QUERY_FRONTEND_CPU_REQUESTS: '500m'
+      LOKI_QUERY_FRONTEND_CPU_LIMITS: '500m'
+      LOKI_QUERY_FRONTEND_MEMORY_REQUESTS: '600Mi'
+      LOKI_QUERY_FRONTEND_MEMORY_LIMITS: '1200Mi'
+      LOKI_QUERY_CONCURRENCY: 32
+      LOKI_QUERY_FRONTEND_PARALLELISM: 2
+      LOKI_CHUNK_CACHE_REPLICAS: 2
+      LOKI_INDEX_QUERY_CACHE_REPLICAS: 2
+      LOKI_RESULTS_CACHE_REPLICAS: 2
+      LOKI_PVC_REQUEST: '50Gi'
