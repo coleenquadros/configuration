@@ -19,7 +19,7 @@
 1. Clone the [diag container](https://github.com/app-sre/diag-container) repository locally on your system.
 2. Get OpenShift login token.
 3. Switch to the OpenShift namespace with command `oc project <project-name>`.
-4. Process the OpenShift template to deploy the diag container using the command `oc process --local -f openshift.yml -p POSTGRES_DB_SECRET_NAME="<db-secret-name" | oc create -f -`.
+4. Process the OpenShift template to deploy the diag container using the command `oc process --local -f openshift.yml -p POSTGRES_DB_SECRET_NAME="<db-secret-name>" | oc create -f -`.
    1. `POSTGRES_DB_SECRET_NAME` can be skipped if you are connecting to MySQL.
 5. List all the pods using command `oc get pods` and you should see pod running with name starting with `diag-container`.
 
