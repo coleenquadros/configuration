@@ -1,0 +1,57 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: host-inventory
+  platform: insights
+
+name: insights-host-delete
+description: insights-host-delete deployment for host-inventory app on the Insights Platform
+
+app:
+  $ref: /services/insights/host-inventory/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- Deployment
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: insights-host-delete
+  path: /templates/inventory/insights-host-delete.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  parameters:
+    REPLICAS: 1
+  targets:
+  - namespace:
+      $ref: /services/insights/host-inventory/namespaces/prod-host-inventory-prod.yml
+    ref: f45cb4480fc0c74106a247911b620ddb68ce82c2
+    parameters:
+      IMAGE_TAG: 3677f8d
+      LOG_LEVEL: DEBUG
+  - namespace:
+      $ref: /services/insights/host-inventory/namespaces/stage-host-inventory-stage.yml
+    ref: f45cb4480fc0c74106a247911b620ddb68ce82c2
+    parameters:
+      IMAGE_TAG: 3677f8d
+      LOG_LEVEL: DEBUG
+  - namespace:
+      $ref: /services/insights/host-inventory/namespaces/perf-host-inventory-perf.yml
+    ref: f45cb4480fc0c74106a247911b620ddb68ce82c2
+    parameters:
+      IMAGE_TAG: 3677f8d
+      LOG_LEVEL: DEBUG
