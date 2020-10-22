@@ -1,7 +1,7 @@
 ---
 $schema: /app-interface/app-interface-sql-query-1.yml
 labels: {}
-name: 2020-10-20-patch-packages-perf-query
+name: 2020-10-22-patch-packages-perf-query
 namespace:
   $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
 identifier: patchman-prod
@@ -13,10 +13,10 @@ query: |
         res.systems_updatable as systems_updatable,
         latest.summary        as summary
   FROM package_latest_cache latest
-          INNER JOIN (SELECT p.name_id                                   as name_id,
-                              pn.name                                    as name,
-                              count(sp.id)                               as systems_installed,
-                              count(sp.id) filter (where spkg.updatable) as systems_updatable
+          INNER JOIN (SELECT p.name_id                                                 as name_id,
+                              pn.name                                                  as name,
+                              count(sp.id)                                             as systems_installed,
+                              count(sp.id) filter (where spkg.latest_evra IS NOT NULL) as systems_updatable
                       FROM system_platform sp
                                 inner join system_package spkg
                                           on spkg.system_id = sp.id and sp.stale = false and sp.rh_account_id = 10
