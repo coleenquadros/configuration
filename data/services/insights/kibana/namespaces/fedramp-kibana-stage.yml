@@ -1,0 +1,63 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: kibana
+
+name: kibana-stage
+description: Insights Kibana on the FedRAMP cluster
+
+cluster:
+  $ref: /openshift/crcs01ue1/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/standard-resource-limits.yml
+
+quota:
+  $ref: /services/insights/default-quota.yml
+
+app:
+  $ref: /services/insights/kibana/app.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs01ue1.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/insights-stage/kibana-stage/kibana-cookie
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-stage
+  identifier: kibana-stage-fedramp
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch-fedramp
+  es_identifier: kibana-elasticsearch-fedramp
+- provider: elasticsearch
+  account: insights-stage
+  identifier: kibana-elasticsearch-fedramp
+  defaults: /terraform/resources/insights/stage/elasticsearch/elasticsearch-1.yml
+  output_resource_name: kibana-elasticsearch
+
