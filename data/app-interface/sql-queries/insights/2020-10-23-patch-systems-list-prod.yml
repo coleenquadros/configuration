@@ -1,0 +1,14 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2020-10-23-patch-systems-list-prod
+namespace:
+  $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
+identifier: patchman-prod
+output: stdout
+query: |
+    select sp.rh_account_id, sp.display_name, sp.packages_installed, sp.last_evaluation, sp.last_updated, sp.reporter_id
+    from system_platform sp
+    left join inventory.hosts ih on sp.inventory_id = ih.id::text
+    where sp.last_updated > '2020-10-23 10:30:00'
+    and ih.id is null order by sp.last_updated desc limit 500;
