@@ -1,0 +1,15 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2020-10-26-check-removed-content-prod
+namespace:
+  $ref: /services/insights/automation-hub/namespaces/automation-hub-prod.yml
+identifier: automation-hub-prod
+output: stdout
+overrides:
+  db_name: galaxy_ng
+query: |
+  SELECT namespace, name, version, certification
+  FROM ansible_collectionversion
+  WHERE content_ptr_id IN (
+      SELECT content_id FROM core_repositorycontent WHERE version_removed_id IS NOT NULL);
