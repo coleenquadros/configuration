@@ -97,6 +97,12 @@ This step should be performed in a single merge request.
       service: (desired service CIDR. ex: 172.30.0.0/16)
       pod: (desired pod CIDR. ex: 10.128.0.0/14)
 
+    machinePools: # optional, specify additional Machine Pools to be provisioned
+    - id: (machine pool name, should be unique per cluster)
+      instance_type: (desired instance type. m5.xlarge for example)
+      replicas: (desired number of instances in the pool)
+      labels: {}
+
     disable:
       e2eTests:
       - create-namespace
