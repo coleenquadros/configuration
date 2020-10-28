@@ -97,3 +97,38 @@
         artifacts: 'logs/*.txt'
         allow-empty: true
 
+
+- job-template:
+    id: managed-kafka-chaos
+    name: "managed-kafka-chaos"
+    wrappers:
+      - timestamps
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+      - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *ci_ocm_token
+        - *ci_aws_keys
+    parameters:
+    - string:
+        name: OSD_CLUSTER_API
+        default: ''
+        description: '[REQUIRED] api server of the osd cluster hosting the managed kafka service'
+    - credentials:
+        name: OSD_API_TOKEN
+        default: ''
+        type: secrettext
+        description: '[REQUIRED] kubeadmin token for osd cluster'
+    <<: *gh_checkout
+    builders:
+      - shell: |
+        "oc login --server=$OSD_CLUSTER_API --token=$OSD_API_TOKEN"
+        "cd install"
+        "make test/chaos"
+    artifacts_path: 'chaos-results/**'
+    publishers:
+    - archive:
+        artifacts: '{artifacts_path}'
+        allow-empty: true
