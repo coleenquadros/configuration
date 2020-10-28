@@ -6,7 +6,7 @@ labels:
   platform: insights
 
 name: clowder
-description: Deploy clowder OLM resources
+description: Deploy clowder OLM resources and ClowdEnvironment
 
 app:
   $ref: /services/insights/clowder/app.yml
@@ -23,6 +23,7 @@ managedResourceTypes:
 - CatalogSource
 - OperatorGroup
 - Subscription
+- ClowdEnvironment
 
 authentication:
   image:
@@ -33,7 +34,7 @@ authentication:
     field: openshift-saas-deploy
 
 imagePatterns:
-- quay.io/cloudservices/clowder-index
+- quay.io/cloudservices/clowder
 
 resourceTemplates:
 - name: olm
@@ -53,3 +54,17 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/clowder/namespaces/prod.yml
     ref: bceef563c2bb8594b0cc1354d6ee08dd8e511b67
+- name: clowder-env
+  path: /env.yml
+  url: https://gitlab.cee.redhat.com/insights-platform/clowd-environments
+  targets:
+  - namespace:
+      $ref: /services/insights/clowder/namespaces/stage.yml
+    ref: master
+    parameters:
+      ENV_NAME: stage
+  - namespace:
+      $ref: /services/insights/clowder/namespaces/prod.yml
+    ref: 3bbb1874eacccdeefa6ddede88fa4cac66bbc9ca
+    parameters:
+      ENV_NAME: prod
