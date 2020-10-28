@@ -1,0 +1,52 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: ocm-sendgrid
+
+name: saas-managed-services-api
+description: 'SaaS tracking file for Managed Services API'
+
+app:
+  $ref: /services/managed-services/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: managed-services-api
+
+managedResourceTypes:
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/app-sre/managed-services-api
+- quay.io/app-sre/centos
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+resourceTemplates:
+- name: managed-services-api
+  url: https://gitlab.cee.redhat.com/service/managed-services-api
+  path: /templates/service-template.yml
+  parameters:
+    ENVIRONMENT: production
+    IMAGE_REGISTRY: quay.io
+    IMAGE_REPOSITORY: app-sre/managed-services-api
+    JWKS_URL: https://api.openshift.com/.well-known/jwks.json
+    REPLICAS: 3
+  targets:
+  - namespace:
+      $ref: /services/managed-services/namespaces/managed-services-stage.yml
+    ref: master
+    upstream: service-managed-services-api-gl-build-master
+    parameters:
+      GLOG_V: 5
+      # leaving sentry set to false, until sentry project/team/membership is setup
+      ENABLE_SENTRY: false
