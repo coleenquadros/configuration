@@ -1,0 +1,43 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  platform: insights
+
+name: insights-third-party-operators
+description: Deploy third party OLM resources for cloud.redhat.com
+
+app:
+  $ref: /services/insights/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- CatalogSource
+- OperatorGroup
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+
+imagePatterns:
+- quay.io/cloudservices
+
+resourceTemplates:
+- name: global-operators
+  path: /global-operators.yml
+  url: https://gitlab.cee.redhat.com/insights-plaform/third-party-operators
+  targets:
+  - namespace:
+      $ref: /services/insights/clowder/namespaces/stage-research.yml
+    ref: master
