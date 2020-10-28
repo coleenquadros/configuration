@@ -13,13 +13,109 @@ spec:
     rules:
     - alert: ReceptorGatewayDown
       expr: |
+        up{service="receptor-gateway-internal", namespace="receptor-prod"} == 0
+      for: 2m
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/receptor-prod/deployments"
+        message: "Receptor-Controller Alert. The receptor-gateway pod has been down for two minutes."
+
+    - alert: ReceptorGatewayContainerRestart
+      expr: |
+        sum(increase(kube_pod_container_status_restarts_total{container="receptor-gateway"}[5m])) by (namespace) > 0
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/receptor-prod/deployments"
+        message: "Receptor-Controller Alert. The receptor-gateway pod has been restarting."
+
+    - alert: ReceptorSwitchDown
+      expr: |
         up{service="receptor-controller", namespace="receptor-prod"} == 0
       for: 2m
       labels:
         severity: info
         service: insights
         env: prod
+        app_team: data-pipeline
       annotations:
         dashboard: "https://GRAFANA_URL"
         link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/receptor-prod/deployments"
-        message: "Receptor-Controller Alert. The receptor-gateway pod has been down for two minutes."
+        message: "Receptor-Controller Alert. The receptor-switch pod has been down for two minutes."
+
+    - alert: ReceptorSwitchContainerRestart
+      expr: |
+        sum(increase(kube_pod_container_status_restarts_total{container="receptor-switch"}[5m])) by (namespace) > 0
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/receptor-prod/deployments"
+        message: "Receptor-Controller Alert. The receptor-switch pod has been restarting."
+
+    - alert: RedisDown
+      expr: |
+        kube_pod_container_status_running{namespace="receptor-prod", container="redis"} OR on() vector(0) == 0
+      for: 2m
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/receptor-prod/deployments"
+        message: "Receptor-Controller Alert. The redis pod has been down for two minutes."
+
+    - alert: RedisContainerRestart
+      expr: |
+        sum(increase(kube_pod_container_status_restarts_total{namespace="receptor-prod", container="redis"}[5m])) by (namespace) > 0
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/receptor-prod/deployments"
+        message: "Receptor-Controller Alert. The redis pod has been restarting."
+
+    - alert: ReceptorRedisConnectionErrors
+      expr: |
+        sum(increase(receptor_controller_redis_connection_error_count[5m])) by (kubernetes_namespace) > 0
+      for: 2m
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/receptor-prod/deployments"
+        message: "Receptor-Controller Alert. Receptor-Controller failed to connect to redis"
+
+    - alert: ReceptorGatewayKafkaProducerErrors
+      expr: |
+        sum(increase(receptor_controller_kafka_response_writer_failure_count[5m])) by (kubernetes_namespace) > 0
+      for: 2m
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/receptor-prod/deployments"
+        message: "Receptor-Controller Alert. The gateway pod failed to write responses to kafka."
