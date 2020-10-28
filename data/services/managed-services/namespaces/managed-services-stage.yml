@@ -24,11 +24,26 @@ managedResourceTypes:
   - ServiceAccount
 
 openshiftResources:
-  - provider: vault-secret
-    path: app-interface/global/quay/app-sre/quay.io
-    version: 2
-    type: kubernetes.io/dockercfg
-  - provider: resource
-    path: /services/managed-services/managed-services-api.serviceaccount.yaml
-  - provider: route
-    path: /services/managed-services/stage/managed-services-api.route.yaml
+- provider: vault-secret
+  path: app-interface/global/quay/app-sre/quay.io
+  version: 2
+  type: kubernetes.io/dockercfg
+- provider: resource
+  path: /services/managed-services/managed-services-api.serviceaccount.yaml
+- provider: route
+  path: /services/managed-services/stage/managed-services-api.route.yaml
+- provider: vault-secret
+  name: managed-services-api
+  path:  app-interface/managed-services-api/stage/service/credentials
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: app-sre
+  identifier: managed-services-api-staging
+  defaults: /terraform/resources/app-sre/staging/rds-1.yml
+  output_resource_name: managed-services-api-rds
