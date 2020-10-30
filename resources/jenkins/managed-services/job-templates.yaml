@@ -77,12 +77,15 @@
         artifacts: 'target/logs/**,target/surefire-reports/**'
         allow-empty: true
     - <<: *slack_notify
-    - post-tasks:
-      - matches:
-        - log-text: ""
-          operator: AND
-        script: |
-          make ci/pipeline/cleanup
+    - postbuildscript:
+        builders:
+            - role: SLAVE
+              build-on:
+                - NOT_BUILT
+                - ABORTED
+                - FAILURE
+              build-steps:
+                - shell: "make ci/pipeline/cleanup"
 
 - job-template:
     id: managed-kafka-security-scan
