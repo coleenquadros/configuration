@@ -26,17 +26,10 @@ config:
     quay_org: app-sre
     jobs:
     - 'gh-build-master':
+        node: app-interface # the only place where I can install pyyaml with python3
         display_name: deployment-validation-operator build master
-        build_deploy_script_path: "./hack/build_deploy.sh"
+        build_deploy_script_path: make build-push
     - 'gh-pr-check':
         display_name: deployment-validation-operator pr-check
         timeout: 300
         pr_check_script_path: "./hack/pr_check.sh"
-    - 'gh-build-catalog-master-with-upstream':
-        node: app-interface # the only place where I can install pyyaml with python3
-        display_name: deployment-valdation-opreator catalog build master
-        upstream: app-sre-deployment-validation-operator-gh-build-master
-        build_catalog_script_path: "./hack/build_catalog.sh"
-        # These will be ignored by our custom build_catalog_script
-        bundle_image: quay.io/app-sre/deployment-validation-operator-bundle
-        catalog_image: quay.io/app-sre/deployment-validation-operator-catalog
