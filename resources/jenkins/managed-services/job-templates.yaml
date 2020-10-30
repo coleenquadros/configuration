@@ -30,8 +30,10 @@
           <<: *vault_defaults
           secrets:
             - *app_sre_bot_push_token
+      - publishers:
+          <<: *slack_notify
     <<: *gl_timed
-    <<: *slack_notify
+    
     
 - job-template:   
     id: 'managed-kafka-performance'
@@ -68,13 +70,13 @@
         default: 'us-east-2'
         description: 'OSD aws region'
     <<: *gl_checkout
-    <<: *slack_notify
     builders:
       - shell: "make ci/pipeline"
     publishers:
     - archive:
         artifacts: 'target/logs/**'
         allow-empty: true
+    <<: *slack_notify
     - post-tasks:
       - matches:
         - log-text: ""
@@ -94,12 +96,11 @@
           secrets:
             - *mk_security_scan_token
     <<: *gl_timed
-    <<: *slack_notify
     publishers:
     - archive:
         artifacts: 'logs/*.txt'
         allow-empty: true
-
+    <<: *slack_notify
 
 - job-template:
     id: managed-kafka-chaos
