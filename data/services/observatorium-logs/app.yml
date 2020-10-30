@@ -1,0 +1,54 @@
+---
+$schema: /app-sre/app-1.yml
+
+labels:
+  service: observatorium-logs
+
+name: observatorium-logs
+
+description: |
+  Observatorium logs implements a logging solution based on Loki to
+  allow multiple instances of OCP clusters store their logs to a
+  central location.
+
+grafanaUrl: https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter
+
+serviceOwners:
+- name: OpenShift Logging Explore Team
+  email: observatorium-logs-service@redhat.com
+
+serviceNotifications: []
+
+performanceParameters:
+  SLO: 90
+
+serviceDocs:
+- /observatorium-logs/readme.md
+
+dependencies:
+- $ref: /dependencies/aws/service.yml
+- $ref: /dependencies/ci-int/service.yml
+- $ref: /dependencies/github/service.yml
+- $ref: /dependencies/gitlab/service.yml
+- $ref: /dependencies/quay/service.yml
+- $ref: /dependencies/openshift/service.yml
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/app-sre.yml
+  items:
+  - name: loki
+    description: 'Mirrors docker.io/grafana/loki'
+    public: true
+    mirror:
+      $ref: /dependencies/image-mirrors/docker.io/grafana/loki.yml
+
+endPoints: []
+
+codeComponents:
+- name: observatorium
+  resource: upstream
+  url: https://github.com/observatorium/deployments
+- name: configuration
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/observatorium/configuration

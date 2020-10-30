@@ -1,0 +1,36 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: observatorium-logs-stage
+description: staging namespace for observatorium-logs
+
+cluster:
+  $ref: /openshift/app-sre-stage-01/cluster.yml
+
+app:
+  $ref: /services/observatorium-logs/app.yml
+
+environment:
+  $ref: /products/osdv4/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+
+grafanaUrl: https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-stage-prometheus&var-cluster=app-sre-stage&var-namespace=observatorium-logs-stage
+
+managedRoles: true
+
+managedResourceTypes: []
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: s3
+  account: app-sre
+  identifier: observatorium-logs-stage
+  defaults: /terraform/resources/s3-private-1.yml
+  output_resource_name: observatorium-logs-stage-s3
+
+openshiftResources: []

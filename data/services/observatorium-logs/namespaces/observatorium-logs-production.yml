@@ -1,0 +1,36 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: observatorium-logs-production
+description: production namespace for observatorium-logs
+
+cluster:
+  $ref: /openshift/telemeter-prod-01/cluster.yml
+
+app:
+  $ref: /services/observatorium-logs/app.yml
+
+environment:
+  $ref: /products/osdv4/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.telemeter-prod-01.yml
+
+grafanaUrl: https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-prometheus&var-cluster=app-sre&var-namespace=observatorium-logs-production
+
+managedRoles: true
+
+managedResourceTypes: []
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: s3
+  account: app-sre
+  identifier: observatorium-logs-production
+  defaults: /terraform/resources/s3-private-1.yml
+  output_resource_name: observatorium-logs-production-s3
+
+openshiftResources: []
