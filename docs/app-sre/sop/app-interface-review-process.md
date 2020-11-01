@@ -39,7 +39,6 @@ Note: Insights team is managing their own MRs during the migration. Following fo
 - @klape
 - @bturner
 - @aprice
-- @tparikh
 - @mafriedm
 ```
 

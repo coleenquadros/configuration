@@ -32,11 +32,12 @@ Note this output down, we will refer to it as `<db_password>`
 
 ## Get connection into rds
 
-Create a [debug-container](https://github.com/tparikh/debug-container/blob/master/pod.yaml) pod in `quay` namespace and rsh into the pod after it is running.
+Create a `diag-container` pod in the `app-sre` namespace (if it doesn't already exist):
 
 ```shell
-$ oc apply -f https://raw.githubusercontent.com/tparikh/debug-container/master/pod.yaml -n quay
-$ oc rsh -n quay debug-container
+$ oc new-project app-sre
+$ oc new-app https://github.com/app-sre/diag-container
+$ oc rsh <diag-container-pod-name>
 
 # now in the diag-container
 $ export DB_HOST=<db_host>

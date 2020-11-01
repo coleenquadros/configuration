@@ -971,8 +971,6 @@ $ gpg --full-generate-key
       6. At the confirmation prompt, enter the letter O to continue if all entries are correct, or use the other options to fix any problems.
       7. Finally, enter a passphrase for your secret key. The gpg program asks you to enter your passphrase twice to ensure you made no typing errors.
 5. Use the `gpg --list-secret-keys --keyid-format LONG` command to list GPG keys for which you have both a public and private key.
-6. Export the public key using the command `gpg --armor --export YOUR_KEY_ID`.
-7. Copy your GPG key, beginning with `-----BEGIN PGP PUBLIC KEY BLOCK-----` and ending with `-----END PGP PUBLIC KEY BLOCK-----` and publish the  key on [pgp.mit.edu](https://pgp.mit.edu/).
 
 #### Adding your public GPG key
 

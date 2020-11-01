@@ -11,7 +11,7 @@ openssl req -new -newkey rsa:2048 -nodes \
 
 ## Request Certificate from Digicert
 
-Reach out to Red Hat IT or tparikh@redhat.com to get certificate issued by Digicert. Include  `star_quay_io.csr` with your request.
+Reach out to Red Hat IT to get certificate issued by Digicert. Include  `star_quay_io.csr` with your request.
 
 ## Update the Certificate in Vault
 
