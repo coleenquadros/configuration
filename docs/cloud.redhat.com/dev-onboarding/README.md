@@ -10,8 +10,8 @@
   - [Accessing Production Environment](#accessing-production-environment)
   - [Connect with App SRE on Slack](#connect-with-app-sre-on-slack)
     - [`#sd-app-sre`](#sd-app-sre)
-    - [`#team-insights-info`](#team-insights-info)
-    - [`#sd-app-sre-insights-alerts-stage`](#sd-app-sre-insights-alerts-stage)
+    - [`#team-clouddot-info`](#team-clouddot-info)
+    - [`#team-clouddot-alert-stage`](#team-clouddot-alert-stage)
     - [`#sd-app-sre-reconcile`](#sd-app-sre-reconcile)
     - [CoreOS Slack](#coreos-slack)
     - [Shared Channels](#shared-channels)
@@ -137,13 +137,13 @@ App SRE has several different communication channels in CoreOS Slack that app de
 
 This is the primary channel used to communicate with App SRE.  For immediate needs, use the `@app-sre-ic` handle to ping the App SRE engineer currently set as the "interrupt catcher".  If a question is not immediate in nature, please do not use the handle.
 
-### `#team-insights-info`
+### `#team-clouddot-info`
 
 app-interface is configured to send all saas-deploy notifications to this channel.  You can check this channel to see when a promtion to stage or prod completed and whether it was successful or not.
 
 As teams become more familiar with the promotion flow, we can add team-specific channels for notifications to go to.
 
-### `#sd-app-sre-insights-alerts-stage`
+### `#team-clouddot-alert-stage`
 
 Alertmanager notifications for the Insights stage environment are sent to this channel.
 
