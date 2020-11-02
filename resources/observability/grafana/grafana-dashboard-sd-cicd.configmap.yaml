@@ -1,0 +1,360 @@
+apiVersion: v1
+data:
+  sd-cicd-weather-report.json: |-
+    {
+      "annotations": {
+          "list": [
+          {
+              "builtIn": 1,
+              "datasource": "-- Grafana --",
+              "enable": true,
+              "hide": true,
+              "iconColor": "rgba(0, 211, 255, 1)",
+              "name": "Annotations & Alerts",
+              "type": "dashboard"
+          }
+          ]
+      },
+      "editable": true,
+      "gnetId": null,
+      "graphTooltip": 0,
+      "id": 133,
+      "links": [],
+      "panels": [
+          {
+          "datasource": "app-sre-prod-01-prometheus",
+          "fieldConfig": {
+              "defaults": {
+              "custom": {
+                  "align": null,
+                  "filterable": false
+              },
+              "links": [
+                  {
+                  "targetBlank": true,
+                  "title": "${__field.labels.job} Prow History",
+                  "url": "https://prow.ci.openshift.org/job-history/gs/origin-ci-test/logs/${__field.labels.job}"
+                  }
+              ],
+              "mappings": [],
+              "noValue": "0.0",
+              "thresholds": {
+                  "mode": "percentage",
+                  "steps": [
+                  {
+                      "color": "red",
+                      "value": null
+                  },
+                  {
+                      "color": "yellow",
+                      "value": 90
+                  },
+                  {
+                      "color": "green",
+                      "value": 98
+                  }
+                  ]
+              },
+              "unit": "percentunit"
+              },
+              "overrides": [
+              {
+                  "matcher": {
+                  "id": "byName",
+                  "options": "osde2e-int-aws-e2e-osd-default-nightly"
+                  },
+                  "properties": []
+              }
+              ]
+          },
+          "gridPos": {
+              "h": 29,
+              "w": 12,
+              "x": 0,
+              "y": 0
+          },
+          "id": 2,
+          "interval": "14400",
+          "options": {
+              "displayMode": "lcd",
+              "orientation": "horizontal",
+              "reduceOptions": {
+              "calcs": [
+                  "mean"
+              ],
+              "fields": "",
+              "values": false
+              },
+              "showUnfilled": true
+          },
+          "pluginVersion": "7.2.1",
+          "targets": [
+              {
+              "expr": "1 - (sum by (job) (count_over_time(cicd_jUnitResult{job=~\".*-e2e-.*\", testname !~ \".*Log Metrics.*\", result =~ \"failed\"}[12h:4h]) or vector(0)) / on(job) group_right sum by (job) (count_over_time(cicd_jUnitResult{job=~\".*-e2e-.*\", testname !~ \".*Log Metrics.*\", result =~ \"passed|failed\"}[12h:4h]))) or (sum by (job) (count_over_time(cicd_jUnitResult{job=~\".*-e2e-.*\", testname !~ \".*Log Metrics.*\", result =~ \"passed\"}[12h:4h]) or vector(0)) / on(job) group_right sum by (job) (count_over_time(cicd_jUnitResult{job=~\".*-e2e-.*\", testname !~ \".*Log Metrics.*\", result =~ \"passed|failed\"}[12h:4h])))",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{job}}",
+              "refId": "A"
+              }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Job Pass Rates",
+          "transformations": [],
+          "type": "bargauge"
+          },
+          {
+          "datasource": "app-sre-prod-01-prometheus",
+          "fieldConfig": {
+              "defaults": {
+              "custom": {
+                  "align": null,
+                  "filterable": false
+              },
+              "links": [
+                  {
+                  "targetBlank": true,
+                  "title": "Search for failures using ${__field.labels.install_version} ",
+                  "url": "https://search.ci.openshift.org/?search=CLUSTER_VERSION+set+to+${__field.labels.install_version}&maxAge=48h&context=1&type=build-log&name=osde2e.*&maxMatches=5&maxBytes=20971520&groupBy=job"
+                  }
+              ],
+              "mappings": [],
+              "noValue": "0.0",
+              "thresholds": {
+                  "mode": "percentage",
+                  "steps": [
+                  {
+                      "color": "red",
+                      "value": null
+                  },
+                  {
+                      "color": "yellow",
+                      "value": 90
+                  },
+                  {
+                      "color": "green",
+                      "value": 98
+                  }
+                  ]
+              },
+              "unit": "percentunit"
+              },
+              "overrides": [
+              {
+                  "matcher": {
+                  "id": "byName",
+                  "options": "osde2e-int-aws-e2e-osd-default-nightly"
+                  },
+                  "properties": []
+              }
+              ]
+          },
+          "gridPos": {
+              "h": 29,
+              "w": 12,
+              "x": 12,
+              "y": 0
+          },
+          "id": 5,
+          "interval": "14400",
+          "options": {
+              "displayMode": "lcd",
+              "orientation": "horizontal",
+              "reduceOptions": {
+              "calcs": [
+                  "mean"
+              ],
+              "fields": "",
+              "values": false
+              },
+              "showUnfilled": true
+          },
+          "pluginVersion": "7.2.1",
+          "targets": [
+              {
+              "expr": "1 - (sum by (install_version) (count_over_time(cicd_jUnitResult{phase=\"install\", job=~\".*-e2e-.*\", testname !~ \".*Log Metrics.*\", result =~ \"failed\"}[12h:4h]) or vector(0)) / on(install_version) group_right sum by (install_version) (count_over_time(cicd_jUnitResult{phase=\"install\", job=~\".*-e2e-.*\", testname !~ \".*Log Metrics.*\", result =~ \"passed|failed\"}[12h:4h]))) or (sum by (install_version) (count_over_time(cicd_jUnitResult{phase=\"install\", job=~\".*-e2e-.*\", testname !~ \".*Log Metrics.*\", result =~ \"passed\"}[12h:4h]) or vector(0)) / on(install_version) group_right sum by (install_version) (count_over_time(cicd_jUnitResult{phase=\"install\", job=~\".*-e2e-.*\", testname !~ \".*Log Metrics.*\", result =~ \"passed|failed\"}[12h:4h])))",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{job}}",
+              "refId": "A"
+              }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Install Version Pass Rates",
+          "transformations": [],
+          "type": "bargauge"
+          },
+          {
+          "datasource": "app-sre-prod-01-prometheus",
+          "fieldConfig": {
+              "defaults": {
+              "custom": {
+                  "align": null,
+                  "filterable": false
+              },
+              "mappings": [],
+              "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                  {
+                      "color": "green",
+                      "value": null
+                  },
+                  {
+                      "color": "#EAB839",
+                      "value": 5
+                  },
+                  {
+                      "color": "red",
+                      "value": 10
+                  }
+                  ]
+              }
+              },
+              "overrides": []
+          },
+          "gridPos": {
+              "h": 29,
+              "w": 12,
+              "x": 0,
+              "y": 29
+          },
+          "id": 4,
+          "options": {
+              "displayMode": "gradient",
+              "orientation": "horizontal",
+              "reduceOptions": {
+              "calcs": [
+                  "max"
+              ],
+              "fields": "",
+              "values": false
+              },
+              "showUnfilled": true
+          },
+          "pluginVersion": "7.2.1",
+          "targets": [
+              {
+              "expr": "count by (testname) (cicd_jUnitResult{job=~\".*-e2e-.*\", testname !~ \".*Log Metrics.*\", result=\"failed\"})",
+              "format": "time_series",
+              "interval": "",
+              "legendFormat": "{{testname}}",
+              "refId": "A"
+              }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Aggregate failures by JUnitResult",
+          "type": "bargauge"
+          },
+          {
+          "datasource": "app-sre-prod-01-prometheus",
+          "fieldConfig": {
+              "defaults": {
+              "custom": {
+                  "align": null,
+                  "filterable": false
+              },
+              "links": [
+                  {
+                  "targetBlank": true,
+                  "title": "${__field.labels.install_version} to ${__field.labels.upgrade_version} Failures",
+                  "url": "https://search.ci.openshift.org/?search=Selecting+version+%27${__field.labels.install_version}%27+to+be+able+to+upgrade+to+%27${__field.labels.upgrade_version}%27&maxAge=48h&context=1&type=build-log&name=osde2e.*&maxMatches=5&maxBytes=20971520&groupBy=job"
+                  }
+              ],
+              "mappings": [],
+              "noValue": "0.0",
+              "thresholds": {
+                  "mode": "percentage",
+                  "steps": [
+                  {
+                      "color": "red",
+                      "value": null
+                  },
+                  {
+                      "color": "yellow",
+                      "value": 90
+                  },
+                  {
+                      "color": "green",
+                      "value": 98
+                  }
+                  ]
+              },
+              "unit": "percentunit"
+              },
+              "overrides": [
+              {
+                  "matcher": {
+                  "id": "byName",
+                  "options": "osde2e-int-aws-e2e-osd-default-nightly"
+                  },
+                  "properties": []
+              }
+              ]
+          },
+          "gridPos": {
+              "h": 29,
+              "w": 12,
+              "x": 12,
+              "y": 29
+          },
+          "id": 6,
+          "interval": "14400",
+          "options": {
+              "displayMode": "lcd",
+              "orientation": "horizontal",
+              "reduceOptions": {
+              "calcs": [
+                  "mean"
+              ],
+              "fields": "",
+              "values": false
+              },
+              "showUnfilled": true
+          },
+          "pluginVersion": "7.2.1",
+          "targets": [
+              {
+              "expr": "1 - (sum by (upgrade_version, install_version) (count_over_time(cicd_jUnitResult{phase=\"upgrade\", job=~\".*-e2e-.*\", testname !~ \".*Log Metrics.*\", result =~ \"failed\"}[12h:4h]) or vector(0)) / on(upgrade_version, install_version) group_right sum by (upgrade_version, install_version) (count_over_time(cicd_jUnitResult{phase=\"upgrade\", job=~\".*-e2e-.*\", testname !~ \".*Log Metrics.*\", result =~ \"passed|failed\"}[12h:4h]))) or (sum by (upgrade_version, install_version) (count_over_time(cicd_jUnitResult{phase=\"upgrade\", job=~\".*-e2e-.*\", testname !~ \".*Log Metrics.*\", result =~ \"passed\"}[12h:4h]) or vector(0)) / on(upgrade_version, install_version) group_right sum by (upgrade_version, install_version) (count_over_time(cicd_jUnitResult{phase=\"upgrade\", job=~\".*-e2e-.*\", testname !~ \".*Log Metrics.*\", result =~ \"passed|failed\"}[12h:4h])))",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{install_version}} to {{upgrade_version}}",
+              "refId": "A"
+              }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Upgrade Version Pass Rates",
+          "transformations": [],
+          "type": "bargauge"
+          }
+      ],
+      "refresh": false,
+      "schemaVersion": 26,
+      "style": "dark",
+      "tags": [],
+      "templating": {
+          "list": []
+      },
+      "time": {
+          "from": "now-24h",
+          "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "",
+      "title": "SD-CICD Weather Report",
+      "uid": "sd-cicd-weather",
+      "version": 4
+    }
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-sd-cicd
+  labels:
+    grafana_dashboard: "true"
+  annotations:
+    grafana-folder: /grafana-dashboard-definitions/SD-CICD
