@@ -1,0 +1,82 @@
+---
+
+$schema: /app-sre/app-1.yml
+
+# These labels are useful metadata for use when querying Qontract using GraphQL
+labels:
+  service: pes
+  platform: insights
+
+name: pes
+
+description: Package Evolution Service (PES) - service for tracking package changes between RHEL versions
+
+# All apps on the Cloud Services Platform have this as their parent app
+parentApp:
+  $ref: /services/insights/app.yml
+
+# List here all of the contacts that the AppSRE team should reach out to in
+# case of issues with this particular app.
+serviceOwners:
+- name: Tomas Meszaros
+  email: tmeszaro@redhat.com
+
+# All apps on the Cloud Services Platform should have a defined service level
+# objective, measured as a percentage of time the service is available
+performanceParameters:
+  SLO: 90
+
+# List references to all AppSRE provided services that your app will depend
+# upon. Your merge requests will fail if you do not declare all of the services
+# you depend upon, but you should not list dependencies that you don't actually
+# depend on.
+dependencies:
+# There are two CI systems - one behind the Red Hat firewall and one outside of
+# it. You should choose now which one you will use. If your repository is a
+# public GitHub repository, use the external one; if it is a GitLab repository
+# use the internal one.
+# ci-int is the Jenkins instance that lives inside the Red Hat VPN
+- $ref: /dependencies/ci-int/service.yml
+# ci-ext is the Jenkins instance that lives outside the Red Hat VPN
+#- $ref: /dependencies/ci-ext/service.yml
+# You also must list dependencies on the Git hosting platforms you use.
+# Include this if your app depends on software hosted on GitHub
+#- $ref: /dependencies/github/service.yml
+# Include this if your app depends on software hosted on Red Hat's GitLab
+- $ref: /dependencies/gitlab/service.yml
+# You must include this because our built images are served from Quay
+- $ref: /dependencies/quay/service.yml
+# You must include this because our app runs on OpenShift
+- $ref: /dependencies/openshift/service.yml
+# You want to include this as the Cloud Services Platform uses CloudWatch for
+# monitoring, as well as offering other AWS managed services
+- $ref: /dependencies/aws/service.yml
+
+# This directive is not just cosmetic. It creates Quay repositories for your
+# images
+quayRepos:
+- org:
+    # All built images on the Cloud Services Platform belong to this Quay org
+    $ref: /dependencies/quay/cloudservices.yml
+  items:
+  - name: pes
+    # You get to decide whether your built images are public or private.
+    public: false
+    description: Package Evolution Service (PES) - service for tracking package changes between RHEL versions
+  # If you need to mirror an image from another container registry, you can
+  # set up that mirroring to our Quay repository here, for example:
+  # - name: redis-5
+  #   public: true
+  #   description: RHEL 8 based Redis server
+  #   mirror: registry.access.redhat.com/rhel8/redis-5
+
+# You should reference all code repositories that comprise your application
+# The app-interface Qontract integrations checker will report an error if you
+# reference a repository elsewhere in your app-interface resources that is not
+# listed here. Additionally, AppSRE does daily backups of every repository in
+# the codeComponents.
+codeComponents:
+- name: pes-cloud
+  # Valid resource values include: upstream, cicd, saasrepo, bundle, and other
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/tmeszaro/pes-cloud
