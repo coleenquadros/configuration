@@ -18,8 +18,8 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 0,
-      "id": 123,
-      "iteration": 1603998833339,
+      "id": 6,
+      "iteration": 1604335095978,
       "links": [],
       "panels": [
         {
@@ -37,7 +37,13 @@ data:
           "type": "row"
         },
         {
-          "aliasColors": {},
+          "aliasColors": {
+            "Created clusters": "blue",
+            "Installation canceled": "yellow",
+            "Installation completed successfully": "green",
+            "Installation error": "red",
+            "Installation started": "orange"
+          },
           "bars": true,
           "dashLength": 10,
           "dashes": false,
@@ -87,21 +93,21 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "increase(sum(service_assisted_installer_cluster_creations{clusterId=~\".+\"})[$__range:])",
+              "expr": "increase(sum(service_assisted_installer_cluster_creations{clusterId=~\".+\"})[$__range:$__rate_interval])",
               "hide": false,
               "interval": "",
               "legendFormat": "Created clusters",
               "refId": "A"
             },
             {
-              "expr": "increase(sum(service_assisted_installer_cluster_installation_started{clusterId=~\".+\"})[$__range:])",
+              "expr": "increase(sum(service_assisted_installer_cluster_installation_started{clusterId=~\".+\"})[$__range:$__rate_interval])",
               "hide": false,
               "interval": "",
               "legendFormat": "Installation started",
               "refId": "B"
             },
             {
-              "expr": "increase(sum(service_assisted_installer_cluster_installation_seconds_count{clusterId=~\".+\", result=\"installed\"})[$__range:])",
+              "expr": "increase(sum(service_assisted_installer_cluster_installation_seconds_count{clusterId=~\".+\", result=\"installed\"})[$__range:$__rate_interval])",
               "hide": false,
               "instant": true,
               "interval": "",
@@ -109,13 +115,13 @@ data:
               "refId": "C"
             },
             {
-              "expr": "increase(sum(service_assisted_installer_cluster_installation_seconds_count{clusterId=~\".+\", result=\"error\"})[$__range:])",
+              "expr": "increase(sum(service_assisted_installer_cluster_installation_seconds_count{clusterId=~\".+\", result=\"error\"})[$__range:$__rate_interval])",
               "interval": "",
               "legendFormat": "Installation error",
               "refId": "D"
             },
             {
-              "expr": "increase(sum(service_assisted_installer_cluster_installation_seconds_count{clusterId=~\".+\", result=\"canceled\"})[$__range:])",
+              "expr": "increase(sum(service_assisted_installer_cluster_installation_seconds_count{clusterId=~\".+\", result=\"canceled\"})[$__range:$__rate_interval])",
               "hide": false,
               "interval": "",
               "legendFormat": "Installation canceled",
@@ -185,7 +191,7 @@ data:
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
+            "h": 4,
             "w": 8,
             "x": 10,
             "y": 1
@@ -208,21 +214,20 @@ data:
           "pluginVersion": "7.2.1",
           "targets": [
             {
-              "expr": "increase(sum(service_assisted_installer_cluster_hosts{clusterId=~\".+\"} * on(clusterId) group_left() count by (clusterId)(service_assisted_installer_cluster_installation_started{clusterId=~\".+\"}))[$__range:])",
-              "hide": false,
+              "expr": "increase(sum(service_assisted_installer_cluster_hosts{clusterId=~\".+\"} * on(clusterId) group_left() count by (clusterId)(service_assisted_installer_cluster_installation_started{clusterId=~\".+\"}))[$__range:$__rate_interval])",
               "interval": "",
               "legendFormat": "Hosts",
               "refId": "C"
             },
             {
-              "expr": "increase(count(count by (clusterId)(service_assisted_installer_cluster_installation_started))[$__range:])",
+              "expr": "increase(count(count by (clusterId)(service_assisted_installer_cluster_installation_started))[$__range:$__rate_interval])",
               "hide": false,
               "interval": "",
               "legendFormat": "Clusters",
               "refId": "E"
             },
             {
-              "expr": "increase(sum(service_assisted_installer_cluster_hosts{clusterId=~\".+\"} * on(clusterId) group_left() count by (clusterId)(service_assisted_installer_cluster_installation_started{clusterId=~\".+\"}))[$__range:])  / increase(count(count by (clusterId)(service_assisted_installer_cluster_installation_started))[$__range:])",
+              "expr": "(increase(sum(service_assisted_installer_cluster_hosts{clusterId=~\".+\"} * on(clusterId) group_left() count by (clusterId)(service_assisted_installer_cluster_installation_started{clusterId=~\".+\"}))[$__range:$__rate_interval]) + 1) / (increase(count(count by (clusterId)(service_assisted_installer_cluster_installation_started))[$__range:$__rate_interval]))",
               "hide": false,
               "instant": false,
               "interval": "",
@@ -236,7 +241,11 @@ data:
           "type": "stat"
         },
         {
-          "aliasColors": {},
+          "aliasColors": {
+            "canceled": "#FADE2A",
+            "error": "#F2495C",
+            "installed": "#73BF69"
+          },
           "breakPoint": "50%",
           "cacheTimeout": null,
           "combine": {
@@ -276,7 +285,7 @@ data:
           "strokeWidth": 1,
           "targets": [
             {
-              "expr": "increase(sum by (result)(service_assisted_installer_cluster_installation_seconds_count{clusterId=~\".+\"})[$__range:])",
+              "expr": "increase(sum by (result)(service_assisted_installer_cluster_installation_seconds_count{clusterId=~\".+\"})[$__range:$__rate_interval])",
               "hide": false,
               "interval": "",
               "legendFormat": "{{result}}",
@@ -288,6 +297,31 @@ data:
           "title": "Installations success rate",
           "type": "grafana-piechart-panel",
           "valueName": "current"
+        },
+        {
+          "datasource": null,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 8,
+            "x": 10,
+            "y": 5
+          },
+          "id": 33,
+          "options": {
+            "content": "* _Clusters_: We measure clusters count only for those ever started an install process at least once.\n\n* _Hosts_: We measure hosts count only if those belong to the clusters we measure as described above.",
+            "mode": "markdown"
+          },
+          "pluginVersion": "7.1.0",
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "",
+          "type": "text"
         },
         {
           "datasource": "$datasource",
@@ -311,10 +345,10 @@ data:
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
+            "h": 3,
             "w": 4,
             "x": 10,
-            "y": 6
+            "y": 8
           },
           "id": 26,
           "options": {
@@ -334,21 +368,21 @@ data:
           "pluginVersion": "7.2.1",
           "targets": [
             {
-              "expr": "increase(count(count by (clusterId)(service_assisted_installer_cluster_installation_started))[$__range:])",
+              "expr": "increase(count(count by (clusterId)(service_assisted_installer_cluster_installation_started))[$__range:$__rate_interval])",
               "hide": true,
               "interval": "",
               "legendFormat": "Clusters",
               "refId": "E"
             },
             {
-              "expr": "increase(sum(service_assisted_installer_cluster_installation_started{clusterId=~\".+\"})[$__range:])",
+              "expr": "increase(sum(service_assisted_installer_cluster_installation_started{clusterId=~\".+\"})[$__range:$__rate_interval])",
               "hide": true,
               "interval": "",
               "legendFormat": "attempts",
               "refId": "A"
             },
             {
-              "expr": "increase(sum(service_assisted_installer_cluster_installation_started{clusterId=~\".+\"})[$__range:]) / increase(count(count by (clusterId)(service_assisted_installer_cluster_installation_started))[$__range:])",
+              "expr": "increase(sum(service_assisted_installer_cluster_installation_started{clusterId=~\".+\"})[$__range:$__rate_interval]) / increase(count(count by (clusterId)(service_assisted_installer_cluster_installation_started))[$__range:$__rate_interval])",
               "hide": false,
               "interval": "",
               "legendFormat": "avg",
@@ -385,10 +419,10 @@ data:
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
+            "h": 3,
             "w": 4,
             "x": 14,
-            "y": 6
+            "y": 8
           },
           "id": 17,
           "options": {
@@ -408,7 +442,7 @@ data:
           "pluginVersion": "7.2.1",
           "targets": [
             {
-              "expr": "increase(sum(service_assisted_installer_cluster_installation_started{clusterId=~\".+\"})[$__range:])/increase(sum(service_assisted_installer_cluster_creations{clusterId=~\".+\"})[$__range:])",
+              "expr": "increase(count(count by (clusterId)(service_assisted_installer_cluster_installation_started))[$__range:$__rate_interval]) / increase(sum(service_assisted_installer_cluster_creations{clusterId=~\".+\"})[$__range:$__rate_interval])",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
@@ -484,7 +518,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "increase(sum by (phase)(service_assisted_installer_host_installation_phase_seconds_sum{clusterId=~\".+\",result=\"Done\"})[$__range:]) / increase(sum by (phase)(service_assisted_installer_host_installation_phase_seconds_count{clusterId=~\".+\",result=\"Done\"})[$__range:])",
+              "expr": "increase(sum by (phase)(service_assisted_installer_host_installation_phase_seconds_sum{clusterId=~\".+\",result=\"Done\"})[$__range:$__rate_interval]) / increase(sum by (phase)(service_assisted_installer_host_installation_phase_seconds_count{clusterId=~\".+\",result=\"Done\"})[$__range:$__rate_interval])",
               "hide": false,
               "interval": "",
               "legendFormat": "{{phase}}",
@@ -577,7 +611,7 @@ data:
           "strokeWidth": 1,
           "targets": [
             {
-              "expr": "sum(increase(service_assisted_installer_cluster_hosts{vendor=~\".+\",product=~\".+\"}[$__range:])) by (vendor,product)",
+              "expr": "increase(sum by (vendor,product)(service_assisted_installer_cluster_hosts{clusterId=~\".+\"} * on(clusterId) group_left() count by (clusterId)(service_assisted_installer_cluster_installation_started{clusterId=~\".+\"}))[$__range:$__rate_interval])",
               "hide": false,
               "interval": "",
               "legendFormat": "{{vendor}} {{product}}",
@@ -641,7 +675,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "increase(sum by (role)(service_assisted_installer_cluster_hosts{clusterId=~\".+\", result=\"Failed\"})[$__range:])",
+              "expr": "increase(sum by (role)(service_assisted_installer_cluster_hosts{clusterId=~\".+\", result=\"Failed\"})[$__range:$__rate_interval])",
               "interval": "",
               "legendFormat": "{{role}}",
               "refId": "A"
@@ -721,7 +755,7 @@ data:
         ]
       },
       "time": {
-        "from": "now-24h",
+        "from": "now-7d",
         "to": "now"
       },
       "timepicker": {
@@ -741,7 +775,7 @@ data:
       "timezone": "",
       "title": "General Overview",
       "uid": "assisted-installer-general-overview",
-      "version": 1
+      "version": 56
     }
 kind: ConfigMap
 metadata:
