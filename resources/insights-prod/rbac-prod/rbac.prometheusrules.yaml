@@ -41,7 +41,7 @@ spec:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/app-sops/rbac/app-rbac-prod-down_alert.rst"
     - alert: InsightsRbacLatencySLOBreach
       expr: |
-        avg_over_time(service:sli:latency_gt_2000:pctl10rate5m{environment="prod",exported_service="rbac"}[7d]) < .9
+        sum(django_http_requests_latency_including_middlewares_seconds_bucket{le="2.5", namespace="rbac-prod"} )/sum(django_http_requests_latency_including_middlewares_seconds_bucket{le="+Inf", namespace="rbac-prod"}) < .99
       for: 5m
       labels:
         severity: medium
