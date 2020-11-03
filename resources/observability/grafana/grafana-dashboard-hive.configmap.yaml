@@ -82,7 +82,7 @@ data:
       "gnetId": null,
       "graphTooltip": 0,
       "id": null,
-      "iteration": 1603453719427,
+      "iteration": 1604427562886,
       "links": [],
       "panels": [
         {
@@ -204,9 +204,10 @@ data:
           ],
           "targets": [
             {
-              "expr": "sum without(instance, __name__, job, age_lt)(hive_cluster_deployments{age_lt=\"+Inf\",job=\"$instance\"})",
+              "expr": "sum without(instance, __name__, job, age_lt,endpoint,namespace,pod,service)(hive_cluster_deployments{age_lt=\"+Inf\",job=\"$instance\"})",
               "format": "table",
               "instant": true,
+              "interval": "",
               "intervalFactor": 1,
               "legendFormat": "",
               "refId": "A"
@@ -335,25 +336,28 @@ data:
           ],
           "targets": [
             {
-              "expr": "sum without(Time,instance,job)(increase(hive_cluster_deployments_created_total{job=\"$instance\"}[24h])) ",
+              "expr": "sum without(Time,instance,job,endpoint,namespace,pod,service)(increase(hive_cluster_deployments_created_total{job=\"$instance\"}[24h])) ",
               "format": "table",
               "instant": true,
+              "interval": "",
               "intervalFactor": 1,
               "legendFormat": "Created",
               "refId": "A"
             },
             {
-              "expr": "sum without(Time,instance,job)(increase(hive_cluster_deployments_installed_total{job=\"$instance\"}[24h])) ",
+              "expr": "sum without(Time,instance,job,endpoint,namespace,pod,service)(increase(hive_cluster_deployments_installed_total{job=\"$instance\"}[24h])) ",
               "format": "table",
               "instant": true,
+              "interval": "",
               "intervalFactor": 1,
               "legendFormat": "Installed",
               "refId": "B"
             },
             {
-              "expr": "sum without(Time,instance,job)(increase(hive_cluster_deployments_deleted_total{job=\"$instance\"}[24h])) ",
+              "expr": "sum without(Time,instance,job,endpoint,namespace,pod,service)(increase(hive_cluster_deployments_deleted_total{job=\"$instance\"}[24h])) ",
               "format": "table",
               "instant": true,
+              "interval": "",
               "intervalFactor": 1,
               "legendFormat": "Deleted",
               "refId": "C"
@@ -452,11 +456,12 @@ data:
           ],
           "targets": [
             {
-              "expr": "sum without(instance,job)((hive_cluster_deployment_provision_underway_seconds{job=\"$instance\"} > 7200) / 60)",
+              "expr": "sum without(instance,job,endpoint,namespace,pod,service)((hive_cluster_deployment_provision_underway_seconds{job=\"$instance\"} > 7200) / 60)",
               "format": "table",
               "instant": true,
               "interval": "",
               "intervalFactor": 1,
+              "legendFormat": "",
               "refId": "A"
             }
           ],
@@ -554,11 +559,12 @@ data:
           ],
           "targets": [
             {
-              "expr": "sum without(instance,job)((hive_cluster_deployment_deprovision_underway_seconds{job=\"$instance\"} > 7200) / 60)",
+              "expr": "sum without(instance,job,endpoint,namespace,pod,service)((hive_cluster_deployment_deprovision_underway_seconds{job=\"$instance\"} > 7200) / 60)",
               "format": "table",
               "instant": true,
               "interval": "",
               "intervalFactor": 1,
+              "legendFormat": "",
               "refId": "A"
             }
           ],
@@ -618,11 +624,11 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "hive_cluster_deployments{age_lt=\"+Inf\",job=\"$instance\"}",
+              "expr": "sum without(endpoint,instance,job,pod,namespace,service)(hive_cluster_deployments{age_lt=\"+Inf\",job=\"$instance\"})",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "{{cluster_type}} ",
+              "legendFormat": "{{cluster_type}}",
               "refId": "A"
             },
             {
@@ -654,6 +660,7 @@ data:
           },
           "yaxes": [
             {
+              "$$hashKey": "object:1596",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -662,6 +669,7 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:1597",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -731,7 +739,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "hive_install_jobs{job=\"$instance\",state!=\"succeeded\"}",
+              "expr": "sum without(endpoint,instance,job,namespace,pod,service)(hive_install_jobs{job=\"$instance\",state!=\"succeeded\"})",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -759,6 +767,7 @@ data:
           },
           "yaxes": [
             {
+              "$$hashKey": "object:1700",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -767,6 +776,7 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:1701",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -832,7 +842,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(hive_cluster_deployment_install_job_duration_seconds_sum{job=\"$instance\"}[48h]) / rate(hive_cluster_deployment_install_job_duration_seconds_count{job=\"$instance\"}[48h])",
+              "expr": "(sum without(endpoint,instance,job,namespace,pod,service)(rate(hive_cluster_deployment_install_job_duration_seconds_sum{job=\"$instance\"}[48h]))) / (sum without(endpoint,instance,job,namespace,pod,service)(rate(hive_cluster_deployment_install_job_duration_seconds_count{job=\"$instance\"}[48h])))",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -860,6 +870,7 @@ data:
           },
           "yaxes": [
             {
+              "$$hashKey": "object:1753",
               "format": "s",
               "label": null,
               "logBase": 1,
@@ -868,6 +879,7 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:1754",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -933,15 +945,17 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(hive_cluster_deployment_install_job_delay_seconds_sum{job=\"$instance\"}[6h]) / rate(hive_cluster_deployment_install_job_delay_seconds_count{job=\"$instance\"}[6h])",
+              "expr": "(sum without(instance,pod,namespace,service,job)(rate(hive_cluster_deployment_install_job_delay_seconds_sum{job=\"$instance\"}[6h]))) / (sum without(instance,pod,namespace,service,job)(rate(hive_cluster_deployment_install_job_delay_seconds_count{job=\"$instance\"}[6h])))",
               "format": "time_series",
+              "interval": "",
               "intervalFactor": 1,
               "legendFormat": "Total Install Delay",
               "refId": "A"
             },
             {
-              "expr": "rate(hive_cluster_deployment_dns_delay_seconds_sum{job=\"$instance\"}[6h]) / rate(hive_cluster_deployment_dns_delay_seconds_count{job=\"$instance\"}[6h])",
+              "expr": "(sum without(instance,pod,namespace,service,job)(rate(hive_cluster_deployment_dns_delay_seconds_sum{job=\"$instance\"}[6h]))) / (sum without(instance,pod,namespace,service,job)(rate(hive_cluster_deployment_dns_delay_seconds_count{job=\"$instance\"}[6h])))",
               "format": "time_series",
+              "interval": "",
               "intervalFactor": 1,
               "legendFormat": "DNS Delay",
               "refId": "B"
@@ -967,6 +981,7 @@ data:
           },
           "yaxes": [
             {
+              "$$hashKey": "object:1807",
               "format": "s",
               "label": null,
               "logBase": 1,
@@ -975,6 +990,7 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:1808",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -1044,9 +1060,10 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(hive_install_errors{job=\"$instance\"}[6h])",
+              "expr": "sum without(instance,pod,namespace,service,job)(rate(hive_install_errors{job=\"$instance\"}[6h]))",
               "format": "time_series",
               "instant": false,
+              "interval": "",
               "intervalFactor": 1,
               "legendFormat": "{{cluster_type}} {{reason}}",
               "refId": "B"
@@ -1072,6 +1089,7 @@ data:
           },
           "yaxes": [
             {
+              "$$hashKey": "object:1860",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -1080,6 +1098,7 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:1861",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -1146,7 +1165,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(hive_cluster_deployment_completed_install_restart_sum{job=\"$instance\"}[12h]) / rate(hive_cluster_deployment_completed_install_restart_count{job=\"$instance\"}[12h])",
+              "expr": "(sum without(instance,pod,namespace,service,job)(rate(hive_cluster_deployment_completed_install_restart_sum{job=\"$instance\"}[12h])))\n/ \n(sum without(instance,pod,namespace,service,job)(rate(hive_cluster_deployment_completed_install_restart_count{job=\"$instance\"}[12h])))",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -1174,6 +1193,7 @@ data:
           },
           "yaxes": [
             {
+              "$$hashKey": "object:1913",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -1182,6 +1202,7 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:1914",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -1247,9 +1268,11 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.9, rate(hive_cluster_deployment_install_job_delay_seconds_bucket{job=\"$instance\"}[12h]))",
+              "expr": "histogram_quantile(0.9, (sum without(instance,pod,namespace,service,job)(rate(hive_cluster_deployment_install_job_delay_seconds_bucket{job=\"$instance\"}[12h]))))",
               "format": "time_series",
+              "interval": "",
               "intervalFactor": 1,
+              "legendFormat": "",
               "refId": "A"
             }
           ],
@@ -1273,6 +1296,7 @@ data:
           },
           "yaxes": [
             {
+              "$$hashKey": "object:1966",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -1281,6 +1305,7 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:1967",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -1346,8 +1371,9 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "hive_selectorsyncset_apply_duration_seconds_sum{job=\"$instance\"}/hive_selectorsyncset_apply_duration_seconds_count{job=\"$instance\"}",
+              "expr": "(sum without(instance,pod,namespace,service,job,endpoint)(hive_selectorsyncset_apply_duration_seconds_sum{job=\"$instance\"}))\n/\n(sum without(instance,pod,namespace,service,job,endpoint)(hive_selectorsyncset_apply_duration_seconds_count{job=\"$instance\"}))",
               "format": "time_series",
+              "interval": "",
               "intervalFactor": 1,
               "legendFormat": "{{name}}",
               "refId": "A"
@@ -1373,6 +1399,7 @@ data:
           },
           "yaxes": [
             {
+              "$$hashKey": "object:2019",
               "format": "s",
               "label": null,
               "logBase": 1,
@@ -1381,6 +1408,7 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:2020",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -1446,8 +1474,9 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "hive_syncset_apply_duration_seconds_sum{job=\"$instance\"}/hive_syncset_apply_duration_seconds_count{job=\"$instance\"}",
+              "expr": "(sum without(instance,pod,namespace,service,job,endpoint)(hive_syncset_apply_duration_seconds_sum{job=\"$instance\"}))\n/\n(sum without(instance,pod,namespace,service,job,endpoint)(hive_syncset_apply_duration_seconds_count{job=\"$instance\"}))",
               "format": "time_series",
+              "interval": "",
               "intervalFactor": 1,
               "legendFormat": "",
               "refId": "A"
@@ -1473,6 +1502,7 @@ data:
           },
           "yaxes": [
             {
+              "$$hashKey": "object:2123",
               "format": "s",
               "label": null,
               "logBase": 1,
@@ -1481,6 +1511,7 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:2124",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -1550,9 +1581,10 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "hive_cluster_deployments_conditions{job=\"$instance\",cluster_type=\"managed\",age_lt=\"+Inf\"} > 0",
+              "expr": "(sum without(instance,pod,namespace,service,job,endpoint)(hive_cluster_deployments_conditions{job=\"$instance\",cluster_type=\"managed\",age_lt=\"+Inf\"})) > 0",
               "format": "time_series",
               "instant": false,
+              "interval": "",
               "intervalFactor": 1,
               "legendFormat": "{{ condition }}",
               "refId": "B"
@@ -1578,6 +1610,7 @@ data:
           },
           "yaxes": [
             {
+              "$$hashKey": "object:2175",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -1586,6 +1619,7 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:2176",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -1655,7 +1689,9 @@ data:
               "expr": "sum without(instance,job)((hive_selectorsyncset_clusters_unapplied_total{job=\"$instance\"} / hive_selectorsyncset_clusters_total{job=\"$instance\"}) * 100 > 10)",
               "format": "table",
               "instant": true,
+              "interval": "",
               "intervalFactor": 1,
+              "legendFormat": "",
               "refId": "A"
             }
           ],
@@ -1721,9 +1757,10 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(controller_runtime_reconcile_total{result=~\"success|error\",job=\"$instance\"}[5m])",
+              "expr": "(sum without(instance,pod,namespace,service,job,endpoint)(rate(controller_runtime_reconcile_total{result=~\"success|error\",job=\"$instance\"}[15m])))",
               "format": "time_series",
               "instant": false,
+              "interval": "",
               "intervalFactor": 1,
               "legendFormat": "{{controller}} {{result}}",
               "refId": "B"
@@ -1749,6 +1786,7 @@ data:
           },
           "yaxes": [
             {
+              "$$hashKey": "object:2239",
               "format": "short",
               "label": "reconciles per second",
               "logBase": 1,
@@ -1757,6 +1795,7 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:2240",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -1822,11 +1861,11 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(hive_controller_reconcile_seconds_sum{job=\"$instance\"}[5m]) / rate(hive_controller_reconcile_seconds_count{job=\"$instance\"}[5m])",
+              "expr": "(sum without(instance,pod,namespace,service,job,endpoint)(rate(hive_controller_reconcile_seconds_sum{job=\"$instance\"}[15m]))) \n/ \n(sum without(instance,pod,namespace,service,job,endpoint)(rate(hive_controller_reconcile_seconds_count{job=\"$instance\"}[15m])))",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "{{controller}}",
+              "legendFormat": "{{controller}} {{outcome}}",
               "refId": "A"
             }
           ],
@@ -1850,6 +1889,7 @@ data:
           },
           "yaxes": [
             {
+              "$$hashKey": "object:2292",
               "format": "s",
               "label": null,
               "logBase": 1,
@@ -1858,6 +1898,7 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:2293",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -1880,7 +1921,7 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
-          "description": "Rate of all requests to the hive cluster's Kube API.",
+          "description": "Rate of non-POST requests to the hive cluster's Kube API. Anything over 15 indicates a hotloop, but not urgent enough to scale down Hive.",
           "fieldConfig": {
             "defaults": {
               "custom": {},
@@ -1898,7 +1939,7 @@ data:
           },
           "hiddenSeries": false,
           "hideTimeOverride": false,
-          "id": 57,
+          "id": 64,
           "legend": {
             "avg": false,
             "current": false,
@@ -1927,11 +1968,12 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum without(resource,method,response,status)(rate(hive_kube_client_requests_total{job=\"$instance\",remote=\"false\"}[5m]))",
+              "expr": "sum without(resource,response,status,instance,pod,namespace,job,service)(rate(hive_kube_client_requests_total{job=\"$instance\",method!=\"POST\",remote=\"false\"}[15m]))",
               "format": "time_series",
               "instant": false,
+              "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "{{ controller }}",
+              "legendFormat": "{{ controller }} - {{ method }}",
               "refId": "B"
             }
           ],
@@ -1939,7 +1981,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Local (hive cluster) kube client requests - all methods",
+          "title": "Local (hive cluster) kube client requests - non-POST",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -1955,6 +1997,7 @@ data:
           },
           "yaxes": [
             {
+              "$$hashKey": "object:2440",
               "format": "short",
               "label": "requests per second",
               "logBase": 1,
@@ -1963,6 +2006,7 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:2441",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -2032,9 +2076,10 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum without(resource,response,status)(rate(hive_kube_client_requests_total{job=\"$instance\",method=\"POST\",remote=\"false\"}[5m]))",
+              "expr": "sum without(resource,response,status,job,pod,namespace,instance,service)(rate(hive_kube_client_requests_total{job=\"$instance\",method=\"POST\",remote=\"false\"}[15m]))",
               "format": "time_series",
               "instant": false,
+              "interval": "",
               "intervalFactor": 1,
               "legendFormat": "{{ controller }} - {{ method }}",
               "refId": "B"
@@ -2060,6 +2105,7 @@ data:
           },
           "yaxes": [
             {
+              "$$hashKey": "object:2492",
               "format": "short",
               "label": "requests per second",
               "logBase": 1,
@@ -2068,321 +2114,7 @@ data:
               "show": true
             },
             {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {
-            "error": "dark-red",
-            "success": "dark-green"
-          },
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "$datasource",
-          "description": "Rate of non-POST requests to the hive cluster's Kube API. Anything over 15 indicates a hotloop, but not urgent enough to scale down Hive.",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {},
-              "links": []
-            },
-            "overrides": []
-          },
-          "fill": 0,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 14,
-            "w": 9,
-            "x": 0,
-            "y": 82
-          },
-          "hiddenSeries": false,
-          "hideTimeOverride": false,
-          "id": 64,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "links": [],
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "paceLength": 10,
-          "percentage": false,
-          "pluginVersion": "7.2.1",
-          "pointradius": 5,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "sum without(resource,response,status)(rate(hive_kube_client_requests_total{job=\"$instance\",method!=\"POST\",remote=\"false\"}[5m]))",
-              "format": "time_series",
-              "instant": false,
-              "intervalFactor": 1,
-              "legendFormat": "{{ controller }} - {{ method }}",
-              "refId": "B"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Local (hive cluster) kube client requests - non-POST",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": "requests per second",
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {
-            "error": "dark-red",
-            "success": "dark-green"
-          },
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "$datasource",
-          "description": "Rate of remote requests to the Kube API of managed clusters, e.g. for syncset applies.",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {},
-              "links": []
-            },
-            "overrides": []
-          },
-          "fill": 0,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 14,
-            "w": 9,
-            "x": 9,
-            "y": 82
-          },
-          "hiddenSeries": false,
-          "hideTimeOverride": false,
-          "id": 58,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "links": [],
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "paceLength": 10,
-          "percentage": false,
-          "pluginVersion": "7.2.1",
-          "pointradius": 5,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "sum without(resource,method,response,status)(rate(hive_kube_client_requests_total{job=\"$instance\",remote=\"true\"}[5m]))",
-              "format": "time_series",
-              "instant": false,
-              "intervalFactor": 1,
-              "legendFormat": "{{controller}} ",
-              "refId": "B"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Remote (to managed clusters) kube client requests - all methods",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": "requests per second",
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {
-            "error": "dark-red",
-            "success": "dark-green"
-          },
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "$datasource",
-          "description": "Rate of remote POST requests to the Kube API of managed clusters, e.g. for syncset applies.  Anything in the 19-20 range indicates a hotloop of etcd creations. This is an urgent scale down Hive situation!",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {},
-              "links": []
-            },
-            "overrides": []
-          },
-          "fill": 0,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 14,
-            "w": 9,
-            "x": 0,
-            "y": 96
-          },
-          "hiddenSeries": false,
-          "hideTimeOverride": false,
-          "id": 67,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "links": [],
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "paceLength": 10,
-          "percentage": false,
-          "pluginVersion": "7.2.1",
-          "pointradius": 5,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "sum without(resource,response,status)(rate(hive_kube_client_requests_total{job=\"$instance\",remote=\"true\",method=\"POST\"}[5m]))",
-              "format": "time_series",
-              "instant": false,
-              "intervalFactor": 1,
-              "legendFormat": "{{controller}} - {{method}}",
-              "refId": "B"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Remote (to managed clusters) kube client requests - POST (anything near 20 is an urgent problem)",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": "requests per second",
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
+              "$$hashKey": "object:2493",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -2418,8 +2150,8 @@ data:
           "gridPos": {
             "h": 14,
             "w": 9,
-            "x": 9,
-            "y": 96
+            "x": 0,
+            "y": 82
           },
           "hiddenSeries": false,
           "hideTimeOverride": false,
@@ -2452,9 +2184,10 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum without(resource,response,status)(rate(hive_kube_client_requests_total{job=\"$instance\",remote=\"true\",method!=\"POST\"}[5m]))",
+              "expr": "sum without(resource,response,status,instance,pod)(rate(hive_kube_client_requests_total{job=\"$instance\",remote=\"true\",method!=\"POST\"}[15m]))",
               "format": "time_series",
               "instant": false,
+              "interval": "",
               "intervalFactor": 1,
               "legendFormat": "{{controller}} - {{method}}",
               "refId": "B"
@@ -2480,6 +2213,7 @@ data:
           },
           "yaxes": [
             {
+              "$$hashKey": "object:2698",
               "format": "short",
               "label": "requests per second",
               "logBase": 1,
@@ -2488,6 +2222,115 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:2699",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {
+            "error": "dark-red",
+            "success": "dark-green"
+          },
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "description": "Rate of remote POST requests to the Kube API of managed clusters, e.g. for syncset applies.  Anything in the 19-20 range indicates a hotloop of etcd creations. This is an urgent scale down Hive situation!",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "links": []
+            },
+            "overrides": []
+          },
+          "fill": 0,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 14,
+            "w": 9,
+            "x": 9,
+            "y": 82
+          },
+          "hiddenSeries": false,
+          "hideTimeOverride": false,
+          "id": 67,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "paceLength": 10,
+          "percentage": false,
+          "pluginVersion": "7.2.1",
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum without(resource,response,status,instance,pod,namespace,service,job)(rate(hive_kube_client_requests_total{job=\"$instance\",remote=\"true\",method=\"POST\"}[15m]))",
+              "format": "time_series",
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{controller}} - {{method}}",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Remote (to managed clusters) kube client requests - POST",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:2546",
+              "format": "short",
+              "label": "requests per second",
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "$$hashKey": "object:2547",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -2521,7 +2364,7 @@ data:
             "h": 14,
             "w": 9,
             "x": 0,
-            "y": 110
+            "y": 96
           },
           "hiddenSeries": false,
           "id": 74,
@@ -2553,7 +2396,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum without(endpoint,instance,job,namespace,pod,service)(rate(hive_syncsetinstance_apply_duration_seconds_sum[5m]) / rate(hive_syncsetinstance_apply_duration_seconds_count[5m]))",
+              "expr": "(sum without(endpoint,instance,job,namespace,pod,service)(rate(hive_syncsetinstance_apply_duration_seconds_sum[15m]))) \n/ \n(sum without(endpoint,instance,job,namespace,pod,service)(rate(hive_syncsetinstance_apply_duration_seconds_count[15m])))",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -2624,7 +2467,7 @@ data:
             "h": 14,
             "w": 9,
             "x": 9,
-            "y": 110
+            "y": 96
           },
           "hiddenSeries": false,
           "id": 75,
@@ -2656,7 +2499,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum without(endpoint, instance, job, namespace, pod, service, resource, controller, remote, status)(rate(hive_kube_client_request_seconds_sum{remote=\"true\"}[5m]) / rate(hive_kube_client_request_seconds_count{remote=\"true\"}[5m]))",
+              "expr": "(sum without(endpoint, instance, job, namespace, pod, service, resource, controller, remote, status)(rate(hive_kube_client_request_seconds_sum{remote=\"true\"}[15m])))\n/\n(sum without(endpoint, instance, job, namespace, pod, service, resource, controller, remote, status)(rate(hive_kube_client_request_seconds_count{remote=\"true\"}[15m])))",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -2727,7 +2570,7 @@ data:
             "h": 14,
             "w": 9,
             "x": 0,
-            "y": 124
+            "y": 110
           },
           "hiddenSeries": false,
           "id": 72,
@@ -2833,7 +2676,7 @@ data:
             "h": 14,
             "w": 9,
             "x": 9,
-            "y": 124
+            "y": 110
           },
           "hiddenSeries": false,
           "hideTimeOverride": false,
@@ -2866,7 +2709,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum without(endpoint,instance,job,namespace,pod,service,type)(rate(hive_syncsetinstance_resources_applied_total{job=\"$instance\"}[5m]))",
+              "expr": "sum without(endpoint,instance,job,namespace,pod,service,type)(rate(hive_syncsetinstance_resources_applied_total{job=\"$instance\"}[15m]))",
               "format": "time_series",
               "instant": false,
               "interval": "",
@@ -2925,7 +2768,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 138
+            "y": 124
           },
           "id": 4,
           "panels": [],
@@ -2945,7 +2788,7 @@ data:
             "h": 9,
             "w": 20,
             "x": 0,
-            "y": 139
+            "y": 125
           },
           "id": 28,
           "links": [],
@@ -2977,7 +2820,7 @@ data:
             "h": 7,
             "w": 5,
             "x": 0,
-            "y": 148
+            "y": 134
           },
           "hiddenSeries": false,
           "id": 2,
@@ -3076,7 +2919,7 @@ data:
             "h": 7,
             "w": 5,
             "x": 5,
-            "y": 148
+            "y": 134
           },
           "id": 6,
           "interval": null,
@@ -3140,7 +2983,7 @@ data:
             "h": 7,
             "w": 5,
             "x": 10,
-            "y": 148
+            "y": 134
           },
           "id": 8,
           "links": [],
@@ -3192,7 +3035,7 @@ data:
             "h": 7,
             "w": 5,
             "x": 15,
-            "y": 148
+            "y": 134
           },
           "id": 10,
           "links": [],
@@ -3229,7 +3072,7 @@ data:
             "h": 7,
             "w": 5,
             "x": 0,
-            "y": 155
+            "y": 141
           },
           "heatmap": {},
           "hideZeroBuckets": false,
@@ -3278,7 +3121,7 @@ data:
             "h": 7,
             "w": 5,
             "x": 5,
-            "y": 155
+            "y": 141
           },
           "id": 14,
           "limit": 10,
@@ -3304,7 +3147,7 @@ data:
             "h": 7,
             "w": 5,
             "x": 10,
-            "y": 155
+            "y": 141
           },
           "headings": true,
           "id": 16,
@@ -3330,7 +3173,7 @@ data:
             "h": 7,
             "w": 5,
             "x": 15,
-            "y": 155
+            "y": 141
           },
           "id": 20,
           "links": [],
@@ -3344,7 +3187,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 162
+            "y": 148
           },
           "id": 22,
           "panels": [],
@@ -3358,7 +3201,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 163
+            "y": 149
           },
           "id": 24,
           "panels": [],
@@ -3372,7 +3215,7 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 164
+            "y": 150
           },
           "id": 26,
           "panels": [],
@@ -3388,9 +3231,9 @@ data:
         "list": [
           {
             "current": {
-              "selected": true,
-              "text": "hives02ue1-prometheus",
-              "value": "hives02ue1-prometheus"
+              "selected": false,
+              "text": "hivep01ue1-prometheus",
+              "value": "hivep01ue1-prometheus"
             },
             "hide": 0,
             "includeAll": false,
@@ -3430,7 +3273,7 @@ data:
         ]
       },
       "time": {
-        "from": "now-24h",
+        "from": "now-7d",
         "to": "now"
       },
       "timepicker": {
@@ -3471,4 +3314,3 @@ metadata:
     grafana_dashboard: "true"
   annotations:
     grafana-folder: /grafana-dashboard-definitions/Hive
-
