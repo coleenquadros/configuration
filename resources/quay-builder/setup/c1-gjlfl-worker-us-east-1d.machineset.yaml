@@ -1,0 +1,67 @@
+---
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineSet
+metadata:
+  annotations:
+    machine.openshift.io/GPU: "0"
+    machine.openshift.io/memoryMb: "16384"
+    machine.openshift.io/vCPU: "4"
+  generation: 1
+  labels:
+    machine.openshift.io/cluster-api-cluster: c1-gjlfl
+  name: c1-gjlfl-worker-us-east-1d
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      machine.openshift.io/cluster-api-cluster: c1-gjlfl
+      machine.openshift.io/cluster-api-machine-role: worker
+      machine.openshift.io/cluster-api-machine-type: worker
+      machine.openshift.io/cluster-api-machineset: c1-gjlfl-worker-us-east-1d
+  template:
+    metadata:
+      labels:
+        machine.openshift.io/cluster-api-cluster: c1-gjlfl
+        machine.openshift.io/cluster-api-machine-role: worker
+        machine.openshift.io/cluster-api-machine-type: worker
+        machine.openshift.io/cluster-api-machineset: c1-gjlfl-worker-us-east-1d
+    spec:
+      metadata: {}
+      providerSpec:
+        value:
+          ami:
+            id: ami-046fe691f52a953f9
+          apiVersion: awsproviderconfig.openshift.io/v1beta1
+          blockDevices:
+          - ebs:
+              iops: 100
+              volumeSize: 500
+              volumeType: gp2
+          credentialsSecret:
+            name: aws-cloud-credentials
+          deviceIndex: 0
+          iamInstanceProfile:
+            id: c1-gjlfl-worker-profile
+          instanceType: m5.xlarge
+          kind: AWSMachineProviderConfig
+          metadata:
+            creationTimestamp: null
+          placement:
+            availabilityZone: us-east-1d
+            region: us-east-1
+          publicIp: null
+          securityGroups:
+          - filters:
+            - name: tag:Name
+              values:
+              - c1-gjlfl-worker-sg
+          subnet:
+            filters:
+            - name: tag:Name
+              values:
+              - c1-gjlfl-private-us-east-1d
+          tags:
+          - name: kubernetes.io/cluster/c1-gjlfl
+            value: owned
+          userDataSecret:
+            name: worker-user-data
