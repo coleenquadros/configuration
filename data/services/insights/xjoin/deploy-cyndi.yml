@@ -1,0 +1,48 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: xjoin
+  platform: insights
+
+name: cyndi
+description: cyndi app on the Insights Platform
+
+app:
+  $ref: /services/insights/xjoin/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+managedResourceTypes:
+- CatalogSource
+- OperatorGroup
+- Subscription
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+
+resourceTemplates:
+- name: cyndi-operator
+  path: /deploy/operator.yml
+  url: https://github.com/RedHatInsights/cyndi-operator
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
+    ref: master
+    upstream: RedHatInsights-cyndi-operator-gh-build-catalog-master-upstream-RedHatInsights-cyndi-operator-gh-build-master
+    parameters:
+      TARGET_NAMESPACE: xjoin-stage
