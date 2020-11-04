@@ -160,6 +160,29 @@ spec:
       expr: sum(increase(kube_pod_container_status_restarts_total{container=~"uhc-acct-mngr-.*"}[5m])) by (container) > 1
       annotations:
         message: 'Observed pod ({{ $labels.container }}) restart(s) ({{ $value }})'
+    - alert: OCM dependencies - Hydra slow - production
+      annotations:
+        message: "AMS is seeing a high average latency accessing Hydra. The average response time over the last 5 minutes is {{ $value | humanize }} seconds"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop#hydra"
+      expr: |
+        sum(rate(api_outbound_request_duration_bucket{namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="ocm-/hydra/rest",le="10",code!~"5.."}[5m]))
+        /
+        sum(rate(api_outbound_request_duration_count{namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="ocm-/hydra/rest"}[5m]))
+        > 0.99
+      for: 10m
+      labels:
+        service: uhc-acct-mngr
+        severity: medium
+    - alert: OCM dependencies - Hydra too many errors - production
+      annotations:
+        message: "AMS is seeing a high rate of errors from Hydra for {{ $value | humanize }}% of requests."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop#hydra"
+      expr: |
+        sum(rate(api_outbound_request_count{namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="ocm-/hydra/rest",code=~"5.."}[5m]))
+        /
+        sum(rate(api_outbound_request_count{namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="ocm-/hydra/rest"}[5m])) * 100
+        > 5
+      for: 10m
       labels:
         service: uhc-acct-mngr
         severity: high
