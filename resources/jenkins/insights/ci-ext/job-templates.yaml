@@ -1,3 +1,14 @@
+- base_templates:
+    name: insights-base-templates
+
+    gpg_verify: &gpg_verify
+        shell: |
+            # Load GPG fingerprints
+            
+            pip install graphqlclient
+            curl -LO https://raw.githubusercontent.com/RedHatInsights/gpg-verify/master/import_gpg.py
+            python import_gpg.py
+
 - job-template:
     id: 'insights-operator-gh-pr-check'
     name: '{gh_org}-{gh_repo}-pr-check'
@@ -13,6 +24,11 @@
         - *quay_secret_push
         - *insights_minikube_ssh_key
     <<: *gh_pr_check
+    builders:
+    - *gpg_verify
+    - *pr_check
+    - *stack_analysis
+
 
 - job-template:
     id: 'insights-gh-pr-check'
