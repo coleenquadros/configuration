@@ -58,7 +58,7 @@ this repository.
       - [Manage AWS Certificate via App-Interface (`/openshift/namespace-1.yml`)](#manage-aws-certificate-via-app-interface-openshiftnamespace-1yml)
       - [Manage ElasticSearch via App-Interface (`/openshift/namespace-1.yml`)](#manage-elasticsearch-via-app-interface-openshiftnamespace-1yml)
       - [Manage RDS databases via App-Interface (`/openshift/namespace-1.yml`)](#manage-rds-databases-via-app-interface-openshiftnamespace-1yml)
-        - [Reset RDS database password](#reset-rds-databse-password)
+        - [Reset RDS database password](#reset-rds-database-password)
         - [Create RDS database from Snapshot](#create-rds-database-from-snapshot)
         - [Publishing Database Log Files to CloudWatch](#publishing-database-log-files-to-cloudwatch)
         - [Publishing MySQL Logs to CloudWatch Logs](#publishing-mysql-logs-to-cloudwatch-logs)
