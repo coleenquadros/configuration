@@ -58,6 +58,7 @@ this repository.
       - [Manage AWS Certificate via App-Interface (`/openshift/namespace-1.yml`)](#manage-aws-certificate-via-app-interface-openshiftnamespace-1yml)
       - [Manage ElasticSearch via App-Interface (`/openshift/namespace-1.yml`)](#manage-elasticsearch-via-app-interface-openshiftnamespace-1yml)
       - [Manage RDS databases via App-Interface (`/openshift/namespace-1.yml`)](#manage-rds-databases-via-app-interface-openshiftnamespace-1yml)
+        - [Reset RDS database password](#reset-rds-databse-password)
         - [Create RDS database from Snapshot](#create-rds-database-from-snapshot)
         - [Publishing Database Log Files to CloudWatch](#publishing-database-log-files-to-cloudwatch)
         - [Publishing MySQL Logs to CloudWatch Logs](#publishing-mysql-logs-to-cloudwatch-logs)
@@ -1078,6 +1079,8 @@ In order to create or update an RDS database, you need to add them to the `terra
     - For example, for a resource with `identifier` "my-instance" and `provider` "rds", the created Secret will be called `my-instance-rds`.
 - `enhanced_monitoring`: (optional) Setting it to `true` will enable enhanced monitoring for the database instance. Learn more about enhanced monitoring [here](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_Monitoring.OS.html).
 - `output_resource_db_name`: (optional) set the `db.name` key in the output Secret (does not affect actual terraform resource).
+- `reset_password`: (optional) add or update this field to a random string to trigger a database password reset.
+  - Note: removing this field will lead to a recycle of the pods using the output resource.
 
 Once the changes are merged, the RDS instance will be created (or updated) and a Kubernetes Secret will be created in the same namespace with following details.
 
@@ -1086,6 +1089,14 @@ Once the changes are merged, the RDS instance will be created (or updated) and a
 - `db.name` - The database name.
 - `db.user` - The master username for the database.
 - `db.password` - Password for the master DB user.
+
+##### Reset RDS database password
+
+To reset the password of an RDS instance, add the `reset_password` field to the RDS definition according to the instructions in [Manage RDS databases via App-Interface](#manage-rds-databases-via-app-interface-openshiftnamespace-1yml).
+
+Choose a value that represents a trace to why the password should be recycled (for example, a Jira ticket).
+
+Note: You do not need to remove the `reset_password` field from the RDS definition once the password was recycled.
 
 ##### Create RDS database from Snapshot
 
