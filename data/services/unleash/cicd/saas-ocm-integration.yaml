@@ -1,0 +1,42 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: unleash
+
+name: ocm-unleash-integration
+description: 'SaaS tracking file for Unleash Integration'
+
+app:
+  $ref: /services/unleash/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/app-sre/unleash
+
+resourceTemplates:
+- name: unleash
+  url: https://github.com/app-sre/unleash
+  path: /openshift/unleash.yaml
+  targets:
+  - namespace:
+      $ref: /services/unleash/namespaces/app-sre-stage-01.yml
+    ref: 0bab5152c5c721cf42a3ee3cd9253a462f4e8280
+    parameters:
+      identifier: ocm-integration
+      configSecret: ocm-integration-config
+      tokenSecret: ocm-integration-unleash-token
+      databaseSecret: ocm-integration-unleash-rds
+      org: app-sre
+      team: ocm-integration-unleash
