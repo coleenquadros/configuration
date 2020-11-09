@@ -9,15 +9,15 @@ The following categories will correspond to the SLIs and SLOs below.
 
 ## SLIs
 
-1. Percentage of payloads successfully processed in the past 24 hours
-2. Percentage of time that the pod remains in the UP stage during the past 24 hours
-3. Percentage of messages produced to kafka in the past 24 hours
-4. Percentage of messages consumed from kafka in the past 24 hours
+1. Percentage of payloads successfully processed in the past 24 hours # need better metrics
+2. Uptime: avg(avg_over_time(up{service="puptoo-processor"}[24h])) > .98
+3. Percentage of messages produced to kafka in the past 24 hours # need better metrics
+4. Percentage of messages consumed from kafka in the past 24 hours  # need better metrics
 
 ## SLOs
 
 1. `> 95%` of payloads are processed successfully through the system
-2. `> 95%` uptime
+2. `> 98%` uptime
 3. `> 95%` of messages successfully produced to kafka
 4. `> 95%` of messages successfully consumed from kafka
 

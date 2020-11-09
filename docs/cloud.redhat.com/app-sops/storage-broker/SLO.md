@@ -9,13 +9,14 @@ The following categories will correspond to the SLIs and SLOs below.
 
 ## SLIs
 
-1. Percentage of time that the pod remains in the UP stage during the past 24 hours
-2. Percentage of messages produced to kafka in the past 24 hours
-3. Percentage of messages consumed from kafka in the past 24 hours
+1. Uptime: avg(avg_over_time(up{service="storage-broker"}[24h])) > .98
+2. Copy Operations: sum(increase(storage_broker_object_copy_error_count_total[24h])) / sum(increase(storage_broker_object_copy_success_count_total[24h])) + sum(increase(storage_broker_object_copy_error_count_total[24h])) 
+3. Percentage of messages produced to kafka in the past 24 hours
+4. Percentage of messages consumed from kafka in the past 24 hours
 
 ## SLOs
 
-1. `> 95%` uptime
+1. `> 98%` uptime
 2. `> 95%` of S3 operations are successful
 3. `> 95%` of messages successfully produced to kafka
 4. `> 95%` of messages successfully consumed from kafka
