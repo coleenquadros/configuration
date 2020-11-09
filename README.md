@@ -1637,6 +1637,7 @@ namespace:
   $ref: /services/<service>/namespaces/<namespace>.yml
 identifier: <RDS resource identifier (same as defined in the namespace)>
 output: <filesystem or stdout>
+schedule: <if defined the output resource will be a CronJob instead of a Job>
 query: <sql query>
 ```
 
@@ -1656,7 +1657,7 @@ query: |
 ```
 
 When that SQL Query specification is merged, the integration will create a
-Job in the namespace provided:
+Job (or a CronJob if `schedule` is defined) in the namespace provided:
 
 ```bash
 $ oc get pods | grep 2020-01-30-account-manager-registries-stage
