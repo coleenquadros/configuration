@@ -25,6 +25,7 @@ managedResourceTypes:
 - Subscription
 - ConfigMap
 - Service
+- CyndiPipeline
 
 imagePatterns:
 - quay.io/cloudservices
@@ -36,6 +37,9 @@ authentication:
   code:
     path: app-sre/creds/github-app-sre-bot
     field: openshift-saas-deploy
+
+parameters:
+  VALIDATION_THRESHOLD: "3"
 
 resourceTemplates:
 - name: cyndi-operator
@@ -50,6 +54,17 @@ resourceTemplates:
       TARGET_NAMESPACE: xjoin-stage
       RECONCILE_INTERVAL: "120"
       VALIDATION_INTERVAL: "1800"
-      VALIDATION_THRESHOLD: "3"
       VALIDATION_ATTEMPTS_THRESHOLD: "2"
       VALIDATION_ATTEMPTS_THRESHOLD_INIT: "15"
+
+- name: cyndi-pipeline-test
+  path: /deploy/pipeline.yml
+  url: https://github.com/RedHatInsights/cyndi-operator
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
+    ref: master
+    upstream: RedHatInsights-cyndi-operator-gh-build-master
+    parameters:
+      APP_NAME: syndication-test
+      INSIGHTS_ONLY: "false"
