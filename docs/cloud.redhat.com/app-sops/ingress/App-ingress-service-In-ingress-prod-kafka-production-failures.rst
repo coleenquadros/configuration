@@ -1,5 +1,5 @@
-IngressMessageProductionErrorsHigh
-==================================
+App-ingress-service-In-ingress-prod-kafka-production-failures
+=============================================================
 
 Severity: Pagerduty
 -------------------
@@ -7,7 +7,7 @@ Severity: Pagerduty
 Impact
 ------
 
--  This alert fires when the error count on Ingress producing messages to kafka exceeds 200
+-  This alert fires when the error count on Ingress producing messages to kafka exceeds 5%
 
 Summary
 -------
@@ -22,8 +22,8 @@ to a kafka issue. In that case, this alert may fire along with others.
 Access required
 ---------------
 
--  Access to the production `Grafana`_ or `Thanos`_ instance in order to see the current error count
--  Access to the `production Openshift cluster`_ to view the ingress-prod namespace for errors in upload-service
+-  Access to the production `Grafana`_ or instance in order to see the current error count
+-  Access to the `Production Openshift cluster`_ to view the ingress-prod namespace for errors in upload-service
 -  Access to the `Kibana instance`_ in order to review logs to see if there are any problems causing the failures
 
 Steps
@@ -39,8 +39,8 @@ Escalations
 -  Ping platform-infrastructure-dev or platform-data-dev Slack groups for assistance
 -  Ping the engineering team that owns the APP
 
-.. _Grafana: https://metrics.1b13.insights.openshiftapps.com/?orgId=1
-.. _Thanos: http://thanos-query-mnm.1b13.insights.openshiftapps.com/graph
-.. _production Openshift Cluster: https://console.insights.openshift.com/console/catalog
-.. _Kibana instance: https://kibana-kibana.1b13.insights.openshiftapps.com/app/kibana
-.. _Ingress dashboard: https://metrics.1b13.insights.openshiftapps.com/d/Av2gccIZk/ingress-dashboard?orgId=1&from=now-1h&to=now
+.. _Incident Response Doc: https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE
+.. _Grafana: https://grafana.app-sre.devshift.net/?orgId=1
+.. _Production Openshift Cluster: https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ingress-prod/deployments
+.. _Kibana instance: https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/app/kibana
+.. _Ingress dashboard: https://grafana.app-sre.devshift.net/d/Av2gccIZk/ingress?orgId=1

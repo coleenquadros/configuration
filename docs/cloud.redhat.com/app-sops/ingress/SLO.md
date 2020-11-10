@@ -9,7 +9,7 @@ The following categories will correspond to the SLIs and SLOs below.
 
 ## SLIs
 
-1. Response Codes: sum(increase(ingress_responses{code=~"2.*"}[24h])) / sum(increase(ingress_responses[24h])) > .95
+1. Response Codes: sum(increase(ingress_responses{code=~"2.*"}[24h])) / sum(increase(ingress_responses[24h])) < .95
 2. Uptime: avg(avg_over_time(up{service="upload-service"}[24h])) > .98
 3. Kafka Production: sum(increase(ingress_kafka_produce_failures[24h])) / sum(increase(ingress_kafka_produced[24h])) > .95
 

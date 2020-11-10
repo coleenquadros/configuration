@@ -1,8 +1,13 @@
-StorageBrokerS3CopyErrorsHigh
-=============================
+App-storage-broker-In-ingress-prod-high-copy-operation-failures
+===============================================================
 
 Severity: Pagerduty
 -------------------
+
+Incident Response Plan
+----------------------
+
+`Incident Response Doc`_ for cloud.redhat.com
 
 Impact
 ------
@@ -21,8 +26,8 @@ env variables, and that the AWS keys have not become outdated.
 Access required
 ---------------
 
--  Access to the production `Grafana`_ or `Thanos`_ instance in order to see the current error count
--  Access to the `production Openshift cluster`_ to view the ingress-prod namespace for errors in upload-service
+-  Access to the production `Grafana`_ instance in order to see the current error count
+-  Access to the `Production Openshift cluster`_ to view the ingress-prod namespace for errors in upload-service
 -  Access to the `Kibana instance`_ in order to review logs to see if there are any problems causing the failures
 
 Steps
@@ -36,11 +41,10 @@ Steps
 Escalations
 -----------
 
--  Ping platform-infrastructure-dev or platform-data-dev Slack groups for assistance
+-  Ping platform-data-pipeline-standup or platform-dev Slack groups for assistance
 -  Ping the engineering team that owns the APP
 
-.. _Grafana: https://metrics.1b13.insights.openshiftapps.com/?orgId=1
-.. _Thanos: http://thanos-query-mnm.1b13.insights.openshiftapps.com/graph
-.. _production Openshift Cluster: https://console.insights.openshift.com/console/catalog
-.. _Kibana instance: https://kibana-kibana.1b13.insights.openshiftapps.com/app/kibana
-.. _Storage Broker dashboard: https://metrics.1b13.insights.openshiftapps.com/d/Z0JGkV6Zz/storage-broker?orgId=1
+.. _Grafana: https://grafana.app-sre.devshift.net/?orgId=1
+.. _Production Openshift Cluster: https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ingress-prod/deployments
+.. _Kibana instance: https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/app/kibana
+.. _Storage Broker dashboard: https://grafana.app-sre.devshift.net/d/hWJAh5dGk/storage-broker?orgId=1
