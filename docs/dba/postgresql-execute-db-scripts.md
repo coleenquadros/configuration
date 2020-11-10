@@ -12,10 +12,11 @@
 
 This document shows you how to run SQL scripts against app-interface managed PostgreSQL RDS instance.
 
-## WARNING
+## DISCLAIMER
 
-**The SQL scripts will be executed by user that has admin privileges to the database. Bad script can result in data loss or database destruction. You should test your script in development and staging environment before running it in production. You may also request AppSRE team take a database snapshot before you run the script. You should also try to make your scripts idempotent where possible.**
+**The SQL scripts will be executed by a user that has admin privileges to the database. Bad script can result in data loss or database destruction. Any issues resulting from using this tool can not be handled by the App SRE team.**
 
+For alternate approaches, please consult the [db-migrations](docs/dba/db-migrations.md) section.
 
 ## Container Image
 
