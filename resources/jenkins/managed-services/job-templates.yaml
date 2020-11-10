@@ -154,6 +154,50 @@
         allow-empty: true
 
 - job-template:
+    id: strimzi-operator-test
+    name: "strimzi-operator-test"
+    wrappers: 
+    - timestamps
+    - timeout_wrapper:
+        timeout: "{timeout}"
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+          - *app_interface_creds
+          - *quay_secret_push
+          - *ci_ocm_token
+          - *ci_aws_keys
+    parameters:
+    - choice:
+        name: TEST_GROUP
+        choices:
+          - acceptance
+          - regression
+          - smoke
+          - acceptance,regression
+          - acceptance,smoke
+          - regression,smoke
+          - acceptance,regression,smoke
+        description: 'Select the test-group to be executed'
+    - string:
+        name: EXCLUDED_GROUPS
+        default: 'loadbalancer,nodeport,connectcomponents,connectoperator,mirrormaker,bridge,cruisecontrol'
+        description: 'Mention the test-group to be skipped'
+    - string:
+        name: OSD_CLUSTER_NAME
+        default: 'sob-test-$BUILD_NUMBER'
+        description: 'Name of the cluster to be provisioned'
+    <<: *gl_checkout
+    builders: 
+    - shell: pr_check.sh
+    artifacts_path: 'test-results/**'
+    publishers:
+    - archive:
+        artifacts: '{artifacts_path}'
+        allow-empty: true
+
+- job-template:
     id: 'gl-build-master-strimzi'
     name: '{gl_group}-{gl_project}-gl-build-{branch}'
     wrappers:
