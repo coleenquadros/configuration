@@ -34,12 +34,13 @@ networkPoliciesAllow:
 - $ref: /services/insights/system-baseline/namespaces/system-baseline-prod.yml
 - $ref: /services/insights/vulnerability/namespaces/vulnerability-engine-prod.yml
 - $ref: /services/insights/xavier/namespaces/xavier-prod.yml
+- $ref: /services/insights/turnpike/namespaces/prod-turnpike-prod.yml
+- $ref: /services/insights/host-inventory/namespaces/prod-host-inventory-prod.yml
 
 managedRoles: true
 
 managedResourceTypes:
 - ConfigMap
-- Secret
 
 openshiftResources:
 - provider: vault-secret
@@ -80,10 +81,6 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
   name: rbac-db-vault
-# Templated secret for rbac-prod rds instance.
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /insights-prod/rbac-prod/rbac-rds.secret.yaml
 
 managedTerraformResources: true
 
@@ -94,7 +91,6 @@ terraformResources:
   defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
   output_resource_name: cloudwatch-disabled
   es_identifier: kibana-elasticsearch
-# Must use templated secret for rbac-prod rds instance.
 - provider: rds
   account: insights-prod
   identifier: rbac-prod
@@ -102,5 +98,6 @@ terraformResources:
   overrides:
     snapshot_identifier: rbac-migration-migration-prod
   enhanced_monitoring: true
-  output_resource_name: rbac-db-rds
+  output_resource_name: rbac-db
+  output_resource_db_name: rbac
   parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-rbac-prod.yml

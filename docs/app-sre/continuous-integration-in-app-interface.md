@@ -11,6 +11,8 @@ In order to define Continuous Integration pipelines in app-interface, define a J
 * `labels` - a map of labels (currently not used by automation)
 * `name` - name of saas file (usually starts with `saas-` and contains the name of the deployed app/service/component)
 * `description` - description of the saas file (what is being deployed in this file)
+* `app` - a reference to the application that this deployment is a part of
+    * reference an app file, usually located under /data/services/<service_name>/
 * `instance` - Jenkins instance where generated deployment jobs run
     * options -
         - /dependencies/ci-ext/ci-ext.yml

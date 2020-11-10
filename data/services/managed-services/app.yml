@@ -7,42 +7,111 @@ labels:
 name: managed-services
 
 description: |
-    Build and deployment pipelines for managed services.
+  Allow different customer types (Tire Kicker, Value Prod and Enterprise) to create instances of a Red Hat managed service. Includes the service API and build/deployment pipelines for managed services.
+
+parentApp:
+  $ref: /services/ocm/app.yml
 
 serviceOwners:
   - name: Managed Services CI/CD
     email: mk-ci-cd@redhat.com
+  - name: Managed Kafka - Service API Team
+    email: mk-service-api@redhat.com
 
 performanceParameters:
   SLO: 90
 
 dependencies:
-- $ref: /dependencies/ci-int/service.yml
-- $ref: /dependencies/github/service.yml
-- $ref: /dependencies/gitlab/service.yml
-- $ref: /dependencies/quay/service.yml
+  - $ref: /dependencies/ci-int/service.yml
+  - $ref: /dependencies/gitlab/service.yml
+  - $ref: /dependencies/quay/service.yml
+  - $ref: /dependencies/openshift/service.yml
+  - $ref: /dependencies/aws/service.yml
+  - $ref: /dependencies/github/service.yml
 
 codeComponents:
-- name: strimzi-operator
-  resource: upstream
-  url: https://gitlab.cee.redhat.com/mk-ci-cd/strimzi-operator
+  - name: strimzi-operator
+    resource: upstream
+    url: https://gitlab.cee.redhat.com/mk-ci-cd/strimzi-operator
+  - name: strimzi-operator-bundle
+    resource: upstream
+    url: https://gitlab.cee.redhat.com/mk-ci-cd/strimzi-operator-bundle
+  - name: managed-services-api
+    resource: upstream
+    url: https://gitlab.cee.redhat.com/service/managed-services-api
+    gitlabRepoOwners: true
+    gitlabHousekeeping:
+      enabled: true
+      rebase: false
+  - name: mk-performance-tests
+    resource: upstream
+    url: https://gitlab.cee.redhat.com/mk-bin-packing/mk-performance-tests
+  - name: mk-ci-tools
+    resource: upstream
+    url: https://gitlab.cee.redhat.com/mk-ci-cd/mk-ci-tools
+    gitlabRepoOwners: true
+    gitlabHousekeeping:
+      enabled: true
+      rebase: true
+  - name: kafka-monitoring-stuff
+    resource: upstream
+    url: https://github.com/RHCloudServices/kafka-monitoring-stuff
 
 quayRepos:
   - org:
       $ref: /dependencies/quay/app-sre.yml
     items:
       - name: managed-kafka-kafka
-        description: 'Kafka image for managed kafka'
+        description: "Kafka image for managed kafka"
         public: false
       - name: managed-kafka-operator
-        description: 'Operator image for managed kafka'
+        description: "Operator image for managed kafka"
         public: false
       - name: managed-kafka-jmxtrans
-        description: 'JMXTrans image for managed kafka'
+        description: "JMXTrans image for managed kafka"
         public: false
       - name: managed-kafka-base
-        description: 'Base image for managed kafka'
+        description: "Base image for managed kafka"
         public: false
       - name: managed-kafka-test-client
-        description: 'Test client image for managed kafka'
+        description: "Test client image for managed kafka"
         public: false
+      - name: managed-services-api
+        description: "The Managed Services API allows different customer types (Tire Kicker, Value Prod and Enterprise) to create instances of a Red Hat managed service"
+        public: false
+      - name: managed-kafka-strimzi-operator-bundle
+        description: "Strimzi operator bundle image for managed kafka (https://gitlab.cee.redhat.com/mk-ci-cd/strimzi-operator-bundle)"
+        public: true
+      - name: managed-kafka-strimzi-operator-tests
+        description: "Image with system tests inside to run them inside Kube clusters"
+        public: true
+      - name: mk-ci-tools
+        description: "CI tools image for managed kafka"
+        public: true
+      - name: mk-strimzi-operator
+        description: "Managed services strimzi operator"
+        public: false
+
+
+sentryProjects:
+  - team:
+      $ref: /dependencies/sentry/teams/managed-services-stage.yml
+    projects:
+      - name: managed-services-stage
+        description: Managed Services Stage
+        email_prefix: mk-service-api
+        platform: go
+        auto_resolve_age: 168
+        allowed_domains:
+          - "*"
+
+  - team:
+      $ref: /dependencies/sentry/teams/managed-services-production.yml
+    projects:
+      - name: managed-services-prod
+        description: Managed Services Production
+        email_prefix: mk-service-api
+        platform: go
+        auto_resolve_age: 168
+        allowed_domains:
+          - "*"

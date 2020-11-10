@@ -92,7 +92,7 @@ spec:
         severity: medium
     - alert: ClusterProvisioningDelay - stage - {{{shard_name}}}
       annotations:
-        message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.namespace }} provisioning taking over 2 hours"
+        message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.exported_namespace }} provisioning taking over 2 hours. Condition/Reason: {{ $labels.condition }} / {{ $labels.reason }}."
         runbook: "https://github.com/openshift/hive-sops/blob/master/sop/ClusterProvisioningDelay.md"
         dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
       expr: |
@@ -178,4 +178,13 @@ spec:
       for: 15m
       labels:
         severity: high
+        service: srep
+    - alert: AWS Account Shredder Crash Looping - stage - {{{shard_name}}}
+      annotations:
+        message: "AWS Account Shredder is crash looping more than 5 times in 15 minutes on hive-{{{shard_name}}}"
+        runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/AwsAccountShredderCrashLooping.md"
+      expr: |
+        sum(rate(kube_pod_container_status_restarts_total{namespace="aws-account-shredder"}[15m])) > 5
+      labels:
+        severity: medium
         service: srep

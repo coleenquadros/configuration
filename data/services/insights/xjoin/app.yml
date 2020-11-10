@@ -5,10 +5,14 @@ $schema: /app-sre/app-1.yml
 labels:
   service: xjoin
   platform: insights
+  type: core
 
 name: xjoin
 
-description: xjoin app on the Insights Platform
+description: |
+  Cross Join (or Xjoin for short) is the name of the service that synchronizes and joins (via relations)
+  isolated data in Application databases into a consolidated Elasticsearch document
+  that can be used for advanced searches, filters and queries.
 
 parentApp:
   $ref: /services/insights/app.yml
@@ -18,8 +22,12 @@ serviceOwners:
   email: sdunning@redhat.com
 - name: Jozef Hartinger
   email: jharting@redhat.com
+
+serviceNotifications:
 - name: Rodrigo Antunes
   email: rantunes@redhat.com
+- name: Silas Pusateri
+  email: spusater@redhat.com
 - name: Eduardo Cerqueira
   email: ecerquei@redhat.com
 
@@ -27,13 +35,22 @@ performanceParameters:
   SLO: 90
 
 dependencies:
-- $ref: /dependencies/ci-ext/service.yml
 - $ref: /dependencies/github/service.yml
 - $ref: /dependencies/quay/service.yml
 - $ref: /dependencies/openshift/service.yml
 - $ref: /dependencies/aws/service.yml
+- $ref: /dependencies/ci-int/service.yml
 
 quayRepos:
+- org:
+    $ref: /dependencies/quay/app-sre.yml
+  items:
+  - name: kafka
+    public: true
+    description: Mirror of docker.io/strimzi/kafka. Used as the base image for xjoin-kafka-connect
+    mirror:
+      $ref: /dependencies/image-mirrors/docker.io/strimzi.yml
+
 - org:
     $ref: /dependencies/quay/cloudservices.yml
   items:
@@ -64,6 +81,15 @@ quayRepos:
   - name: cyndi-config
     public: false
     description: Repo with host data syndication configuration images
+  - name: cyndi-operator
+    public: true
+    description: Repo for Cyndi Operator
+  - name: cyndi-operator-bundle
+    public: true
+    description: Repo for Cyndi Operator Bundles
+  - name: cyndi-operator-index
+    public: true
+    description: Repo for Cyndi Operator Bundle Index
 
 codeComponents:
 - name: xjoin-config
@@ -80,4 +106,7 @@ codeComponents:
   url: https://github.com/RedHatInsights/xjoin-search
 - name: inventory-syndication
   resource: upstream
-  url: https://github.com/redhatinsights/inventory-syndication
+  url: https://github.com/RedHatInsights/inventory-syndication
+- name: cyndi-operator
+  resource: upstream
+  url: https://github.com/RedHatInsights/cyndi-operator

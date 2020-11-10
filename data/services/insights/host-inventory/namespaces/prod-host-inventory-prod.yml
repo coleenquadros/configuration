@@ -5,10 +5,10 @@ labels:
   service: host-inventory
 
 name: host-inventory-prod
-description: Insights host-inventory-prod on the PROD cluster under e2e-deploy/ocdeployer management
+description: Insights host-inventory-prod on the v4 Prod cluster
 
 cluster:
-  $ref: /openshift/insights/cluster-insights-prod.yml
+  $ref: /openshift/crcp01ue1/cluster.yml
 
 app:
   $ref: /services/insights/host-inventory/app.yml
@@ -16,10 +16,20 @@ app:
 environment:
   $ref: /products/insights/environments/production.yml
 
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-prod.yml
+- $ref: /services/insights/historical-system-profiles/namespaces/historical-system-profiles-prod.yml
+- $ref: /services/insights/remediations/namespaces/remediations-prod.yml
+- $ref: /services/insights/drift/namespaces/drift-prod.yml
+- $ref: /services/insights/system-baseline/namespaces/system-baseline-prod.yml
+- $ref: /services/insights/ingress/namespaces/ingress-prod.yml
+- $ref: /services/insights/compliance/namespaces/compliance-prod.yml
+
 managedRoles: true
 
 managedResourceTypes:
-- ServiceAccount
+- Secret
 
 openshiftResources:
 - provider: vault-secret
@@ -31,5 +41,40 @@ openshiftResources:
   version: 3
   type: kubernetes.io/dockerconfigjson
   name: quay-cloudservices-pull
-- provider: resource
-  path: /insights-prod/shared/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-stage/host-inventory-stage/insights-host-delete.secret.yaml
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-prod
+  identifier: host-inventory-prod
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
+- provider: rds
+  account: insights-prod
+  identifier: host-inventory-prod
+  defaults: /terraform/resources/insights/production/rds/rds-host-inventory-prod.yml
+  overrides:
+    snapshot_identifier: host-inventory-migration-prod
+  enhanced_monitoring: true
+  output_resource_name: host-inventory-db
+  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-host-inventory-prod.yml
+- provider: rds
+  account: insights-prod
+  identifier: host-inventory-prod-readonly
+  availability_zone: us-east-1d
+  defaults: /terraform/resources/insights/production/rds/rds-host-inventory-prod-readonly.yml
+  overrides:
+    monitoring_interval: 60
+  output_resource_name: host-inventory-db-readonly-rds
+  enhanced_monitoring: true
+  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-host-inventory-prod-readonly.yml

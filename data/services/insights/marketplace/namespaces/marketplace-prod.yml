@@ -24,7 +24,6 @@ managedRoles: true
 
 managedResourceTypes:
 - ConfigMap
-- Secret
 
 openshiftResources:
 - provider: vault-secret
@@ -46,21 +45,17 @@ openshiftResources:
   version: 1
   annotations:
     qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-prod/marketplace-prod/pendo-prom-emitter-secret
+  version: 2
+  annotations:
+    qontract.recycle: "true"
 - provider: resource
   path: /insights-prod/marketplace-prod/marketplace-app.configmap.yaml
 - provider: resource
   path: /insights-prod/marketplace-prod/marketplace-db.configmap.yaml
 - provider: resource
   path: /insights-prod/marketplace-prod/marketplace-env.configmap.yaml
-# Templated secret for rds instance.
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /insights-prod/marketplace-prod/marketplace-rds.secret.yaml
-- provider: vault-secret
-  path: app-sre/integrations-output/terraform-resources/insights-prod/marketplace-prod/marketplace-s3
-  version: 1
-  annotations:
-    qontract.recycle: "true"
 
 managedTerraformResources: true
 
@@ -76,3 +71,13 @@ terraformResources:
   defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
   output_resource_name: cloudwatch
   es_identifier: kibana-elasticsearch
+- provider: rds
+  account: insights-prod
+  identifier: marketplace-prod
+  defaults: /terraform/resources/insights/production/rds/rds-marketplace-prod.yml
+  overrides:
+    snapshot_identifier: marketplace-prod-migration
+  enhanced_monitoring: true
+  output_resource_name: marketplace-db
+  output_resource_db_name: postgres
+  parameter_group: /terraform/resources/insights/production/rds/postgres11-parameter-group-marketplace-prod.yml

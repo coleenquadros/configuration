@@ -1,0 +1,45 @@
+---
+
+$schema: /dependencies/jenkins-config-1.yml
+
+# Labels are metadata useful for querying Qontract using GraphQL
+labels:
+  service: image-builder
+  platform: insights
+
+name: ci-ext-insights-image-builder
+
+description: 'Job for building image-builder'
+
+app:
+  $ref: /services/insights/image-builder/app.yml
+
+# We are going to build our app using the Jenkins outside the Red Hat VPN since
+# our repository is in a public GitHub
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+type: jobs
+
+config:
+- project:
+    name: image-builder
+    label: insights
+    node: insights
+    quay_org: cloudservices
+    # For GitHub based projects, use these keys to point to your repository
+    gh_org: osbuild
+    gh_repo: image-builder
+    jobs:
+      - gh-pr-check:
+          display_name: image-builder pr-check
+      - gh-build-master:
+          display_name: image-builder build-master
+    # If our upstream repository were in GitLab, we would use these keys instead
+    # gl_group: insights-platform
+    # gl_project: image-builder
+    # jobs:
+    # - gl-pr-check:
+    #     display_name: image-builder pr-check
+    # - gl-build-master:
+    #     display_name: image-builder build-master

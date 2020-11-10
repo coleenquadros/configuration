@@ -1,0 +1,35 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: cluster-alerts
+spec:
+  groups:
+  - name: cluster-alerts
+    rules:
+    - alert: ElasticSearchClusterStatusYellow
+      annotations:
+        message: Elastic search cluster is degraded (yellow). This should be handled by SREP
+        description: Cluster health status has been YELLOW for at least 20m. Some shard replicas are not allocated.
+        summary: Elastic search cluster is degraded (yellow)
+        runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/ElasticsearchClusterNotHealthy.md"
+      expr: |
+        sum(es_cluster_status == 1) by (namespace) > 0
+      for: 20m
+      labels:
+        severity: medium
+    - alert: ElasticSearchClusterStatusRed
+      annotations:
+        message: Elastic search cluster is degraded (yellow). This should be handled by SREP
+        description: Cluster health status has been RED for at least 10m. Cluster does not accept writes, shards may be missing or master node hasn’t been elected yet.
+        summary: Elastic search cluster is not healthy (red)
+        runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/ElasticsearchClusterNotHealthy.md"
+      expr: |
+        sum(es_cluster_status == 2) by (namespace) > 0
+      for: 10m
+      labels:
+        severity: high

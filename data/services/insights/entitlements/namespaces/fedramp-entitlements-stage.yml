@@ -1,0 +1,65 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: entitlements
+
+name: entitlements-stage
+description: Insights Entitlements Stage on FedRAMP cluster under app-interface management
+
+cluster:
+  $ref: /openshift/crcs01ue1/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/standard-resource-limits.yml
+
+quota:
+  $ref: /services/insights/default-quota.yml
+
+app:
+  $ref: /services/insights/entitlements/app.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs01ue1.yml
+#- $ref: /services/insights/network-check/namespaces/stage.yml
+- $ref: /services/insights/gateway/namespaces/fedramp-3scale-stage.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+- ConfigMap
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-stage/entitlements-stage/entitlements-config.configmap.yml
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
+  path: insights/secrets/insights-stage/entitlements-stage/go-api-certs
+  version: 2
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-stage
+  identifier: entitlements-fedramp
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch-fedramp
+  

@@ -89,6 +89,7 @@ properties:
       - aws-account-operator-client
       - gcp-project-operator-client
       - observatorium-dev
+      - quay-app-sre-cluster-admins
   managedClusterRoles:
     type: boolean
   spec:
@@ -114,6 +115,7 @@ properties:
         enum:
         - stable
         - fast
+        - candidate
       version:
         type: string
       initial_version:
@@ -164,6 +166,8 @@ properties:
         enum:
         - 7c2626e2-da06-11ea-8f62-8c1645a911be
         - de4b0632-dca7-11ea-b3b9-8c1645a911be
+        # hive-production v3
+        - 0c7d42ee-d751-4e5e-928d-838c4141ec20
     required:
     - provider
     - region
@@ -176,6 +180,20 @@ properties:
     - storage
     - load_balancers
     - upgrade
+  upgradePolicy:
+    type: object
+    additionalProperties: false
+    properties:
+      schedule_type:
+        type: string
+        enum:
+        - automatic
+      schedule:
+        type: string
+        pattern: '(((\d+,)+\d+|(\d+(\/|-)\d+)|\d+|\*) ?){5}'
+    required:
+    - schedule_type
+    - schedule
   network:
     type: object
     additionalProperties: false
@@ -186,6 +204,28 @@ properties:
         type: string
       pod:
         type: string
+  machinePools:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          maxLength: 30
+        instance_type:
+          type: string
+          enum:
+          - c5.4xlarge
+          - m5.xlarge
+        replicas:
+          type: integer
+        labels:
+          "$ref": "/common-1.json#/definitions/labels"
+      required:
+      - id
+      - instance_type
+      - replicas
   peering:
     type: object
     additionalProperties: false
@@ -364,7 +404,10 @@ dependencies:
   ocm:
   - spec
   - network
+  machinePools:
+  - ocm
   awsInfrastructureAccess:
   - ocm
   peering:
   - ocm
+  - awsInfrastructureAccess

@@ -22,6 +22,7 @@ managedResourceTypes:
 - Deployment
 - Service
 - CronJob
+- HorizontalPodAutoscaler
 
 imagePatterns:
 - quay.io/app-sre/uhc-account-manager
@@ -82,7 +83,65 @@ resourceTemplates:
     MOA_ENTITLEMENT_RECONCILER_WORKER_COUNT: "1"
     MOA_SKU: "MW01369"
     MOA_ENTITLEMENT_RENEW_DURATION: "120h"
+    # Set replica min and max to 4 to essentially disable the HPA due to https://bugzilla.redhat.com/show_bug.cgi?id=1867477
+    API_REPLICA_COUNT_MIN: "4"
+    API_REPLICA_COUNT_MAX: "4"
+    API_TARGET_AVERAGE_CPU_UTILIZATION: "80"
+    API_TARGET_AVERAGE_MEMORY_UTILIZATION: "75"
+    TARGET_CPU_UTILIZATION: "80"
   targets:
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-integration-v3.yml
+    ref: master
+    upstream: service-uhc-account-manager-gl-build-master
+    parameters:
+      ENABLE_TERMS_ENFORCEMENT: "false"
+      FETCH_TELEMETER_METRICS_CRON_SCHEDULE: "*/30 * * * *"
+      SUSPEND_FETCH_TELEMETER_METRICS_CRON: "true"
+      FETCH_TELEMETER_METRICS_DRY_RUN: "true"
+      TELEMETER_BASE_URL: "https://infogw-proxy.api.stage.openshift.com/"
+      TELEMETER_DEBUG: "true"
+      SUSPEND_HYDRA_FETCH_ORGANIZATIONS_DATA_CRON: "true"
+      HYDRA_DEBUG: "false"
+      RHIT_BASE_CANDLEPIN_URL: https://admin.rhsm.stage.redhat.com/candlepin
+      USE_CANDLEPIN_BASIC_AUTH: "true"
+      CLUSTER_REG_RATE_LIMIT: 30000
+      ENABLE_QUOTA_ENFORCEMENT: "true"
+      ENABLE_QUOTAID: "true"
+      DB_MAX_OPEN_CONNS: 250
+      SENTRY_URL: "sentry.autom8.in"
+      SENTRY_PROJECT: "9"
+      GLOG_V: 5
+      ORG_CLUSTER_REG_RATE_LIMIT: 50
+      # Deprovision old subs only every friday in INT since it will break test subscriptions for CS when it runs
+      DEPROVISION_OLD_SUBSCRIPTIONS_CRON_SCHEDULE: "0 23 * * 5"
+      # Update the value to any random string to perform a rolling update of the deployment.
+      UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_2
+      SUBSCRIPTION_BASED_DATA_RECONCILER_CRON_SCHEDULE: "*/30 * * * *"
+      SUBSCRIPTION_STATUS_RECONCILER_EVALUATION_DURATION: "24h"
+      SUBSCRIPTION_BASED_DATA_RECONCILER_CLIENT_CARDINALITY: "5"
+      # Don't run OCP Usage reconciliation jobs in int, since they just fail anyway without a public rhsm stage endpoint
+      # Suspension params should always be env specific
+      SUSPEND_ACCOUNT_RECONCILER_CRON: "false"
+      SUSPEND_DEPROVISION_OLD_SUBSCRIPTIONS_CRON: "false"
+      SUSPEND_OCP_USAGE_RECONCILER_CRON: "true"
+      SUSPEND_OCP_USAGE_CLEANER_CRON: "true"
+      SUSPEND_SUBSCRIPTION_BASED_DATA_RECONCILER_CRON: "false"
+      SUSPEND_EBS_ACCOUNT_RECONCILER_CRON: "false"
+      SUSPEND_SUBSCRIPTION_STATUS_RECONCILER_CRON: "false"
+      # TODO un-suspend reg cred pool loader once issues are resolved
+      SUSPEND_REGISTRY_CREDENTIAL_POOL_LOADER_CRON: "false"
+      SUSPEND_MOA_ENTITLEMENT_RECONCILER_CRON: "false"
+      MOA_SKU: "SER0579"
+      ACCOUNT_RECONCILER_CRON_SCHEDULE: "30 18 * * *"
+      ACCOUNT_RECONCILER_DRY_RUN: "false"
+      REGISTRY_CREDENTIAL_POOL_LOADER_CRON_SCHEDULE: "0 * * * *"
+      REGISTRY_CREDENTIAL_POOL_LOADER_DRY_RUN: "false"
+      REGISTRY_CREDENTIAL_POOL_LOADER_WORKER_COUNT: "1"
+      REGISTRY_CREDENTIAL_POOL_LOADER_CARDINALITY: "5"
+      REGISTRY_CREDENTIAL_POOL_LOADER_HIGH_WATERMARK: "10"
+      UNLEASH_URL: "https://ocm-integration.unleash.devshift.net/api"
+      QUAY_REGISTRY_TEAM_NAME: "integrationinstallers"
   - namespace:
       $ref: /services/ocm/namespaces/uhc-integration.yml
     ref: master
@@ -139,6 +198,12 @@ resourceTemplates:
     ref: master
     upstream: service-uhc-account-manager-gl-build-master
     parameters:
+      REPLICAS: 6
+      # Set replica min and max to 6 to essentially disable the HPA due to https://bugzilla.redhat.com/show_bug.cgi?id=1867477
+      API_REPLICA_COUNT_MIN: "6"
+      API_REPLICA_COUNT_MAX: "6"
+      # Temporarily increase the CPU limit to 2 for stage AMS during scale testing the replicas were also increased for ^
+      CPU_LIMIT: "2"
       ENABLE_TERMS_ENFORCEMENT: "false"
       FETCH_TELEMETER_METRICS_CRON_SCHEDULE: "*/5 * * * *"
       SUSPEND_FETCH_TELEMETER_METRICS_CRON: "false"
@@ -167,7 +232,7 @@ resourceTemplates:
       # Don't run OCP Usage reconciliation jobs in stage, since they just fail anyway without a public rhsm stage endpoint
       # Suspension params should always be env specific
       SUSPEND_ACCOUNT_RECONCILER_CRON: "false"
-      SUSPEND_DEPROVISION_OLD_SUBSCRIPTIONS_CRON: "false"
+      SUSPEND_DEPROVISION_OLD_SUBSCRIPTIONS_CRON: "true"
       SUSPEND_OCP_USAGE_RECONCILER_CRON: "true"
       SUSPEND_OCP_USAGE_CLEANER_CRON: "true"
       SUSPEND_SUBSCRIPTION_BASED_DATA_RECONCILER_CRON: "false"
@@ -185,6 +250,7 @@ resourceTemplates:
       REGISTRY_CREDENTIAL_POOL_LOADER_HIGH_WATERMARK: "10"
       UHC_DEBUG: "true"
       UNLEASH_URL: "https://ocm-stage.unleash.devshift.net/api"
+      QUAY_REGISTRY_TEAM_NAME: "staginginstallers"
   - namespace:
       $ref: /services/ocm/namespaces/uhc-stage-appsres04ue2.yml
     ref: master
@@ -235,9 +301,10 @@ resourceTemplates:
       REGISTRY_CREDENTIAL_POOL_LOADER_HIGH_WATERMARK: "10"
       UHC_DEBUG: "true"
       UNLEASH_URL: "https://ocm-stage.unleash.devshift.net/api"
+      QUAY_REGISTRY_TEAM_NAME: "staginginstallers"
   - namespace:
       $ref: /services/ocm/namespaces/uhc-production.yml
-    ref: a33c0dc72ddf96c39ea5aa651cfef90fa5244182
+    ref: 76a6e20bd3053542be755c8058a917e598c91bc8
     parameters:
       ENABLE_TERMS_ENFORCEMENT: "false"
       RHIT_BASE_CANDLEPIN_URL: https://admin.rhsm.redhat.com/candlepin
@@ -254,7 +321,6 @@ resourceTemplates:
       ACCOUNT_RECONCILER_WORKER_COUNT: "2"
       STALE_SCREEN_PERIOD: "72h"
       DEPROVISION_OLD_SUBSCRIPTIONS_CRON_SCHEDULE: "30 17 * * *"
-      SUSPEND_HYDRA_FETCH_ORGANIZATIONS_DATA_CRON: "false"
       HYDRA_FETCH_ORGANIZATONS_DATA_DRY_RUN: "false"
       HYDRA_DEBUG: "false"
       SUBSCRIPTION_BASED_DATA_RECONCILER_CRON_SCHEDULE: "1 * * * *"
@@ -265,7 +331,7 @@ resourceTemplates:
       REGISTRY_CREDENTIAL_POOL_LOADER_CARDINALITY: "100"
       REGISTRY_CREDENTIAL_POOL_LOADER_HIGH_WATERMARK: "3000"
       # Suspension params should always be env specific
-      SUSPEND_DEPROVISION_OLD_SUBSCRIPTIONS_CRON: "false"
+      SUSPEND_DEPROVISION_OLD_SUBSCRIPTIONS_CRON: "true"
       SUSPEND_OCP_USAGE_RECONCILER_CRON: "false"
       SUSPEND_OCP_USAGE_CLEANER_CRON: "false"
       SUSPEND_SUBSCRIPTION_STATUS_RECONCILER_CRON: "false"
@@ -274,16 +340,18 @@ resourceTemplates:
       SUSPEND_ACCOUNT_RECONCILER_CRON: "false"
       SUSPEND_REGISTRY_CREDENTIAL_POOL_LOADER_CRON: "false"
       SUSPEND_MOA_ENTITLEMENT_RECONCILER_CRON: "false"
+      SUSPEND_HYDRA_FETCH_ORGANIZATIONS_DATA_CRON: "false"
+      SUSPEND_FETCH_TELEMETER_METRICS_CRON: "false"
       MOA_ENTITLEMENT_RECONCILER_DRY_RUN: "false"
       MOA_SKU: "MW01369"
       # Update the value to any random string to perform a rolling update of the deployment.
-      UPDATE_DEPLOYMENT_CONFIG_CHANGE: roll_for_job_enablement
+      UPDATE_DEPLOYMENT_CONFIG_CHANGE: roll_for_certificate
       UNLEASH_URL: "https://ocm.unleash.devshift.net/api"
       FETCH_TELEMETER_METRICS_CRON_SCHEDULE: "*/5 * * * *"
-      SUSPEND_FETCH_TELEMETER_METRICS_CRON: "false"
       FETCH_TELEMETER_METRICS_DRY_RUN: "false"
       TELEMETER_BASE_URL: "https://infogw-proxy.api.openshift.com/"
       TELEMETER_DEBUG: "true"
+      QUAY_REGISTRY_TEAM_NAME: "installers"
   - namespace:
       $ref: /services/ocm/namespaces/uhc-stage-sso-test.yml
     ref: master
@@ -325,11 +393,12 @@ resourceTemplates:
       # Don't run OCP Usage reconciliation jobs in stage, since they just fail anyway without a public rhsm stage endpoint
       # Suspension params should always be env specific
       SUSPEND_ACCOUNT_RECONCILER_CRON: "false"
-      SUSPEND_DEPROVISION_OLD_SUBSCRIPTIONS_CRON: "false"
+      SUSPEND_DEPROVISION_OLD_SUBSCRIPTIONS_CRON: "true"
       SUSPEND_OCP_USAGE_RECONCILER_CRON: "true"
       SUSPEND_OCP_USAGE_CLEANER_CRON: "true"
-      SUSPEND_SUBSCRIPTION_BASED_DATA_RECONCILER_CRON: "false"
-      SUSPEND_EBS_ACCOUNT_RECONCILER_CRON: "false"
+      # Suspend RHIT-based reconciliation jobs in sso-test since they won't work anyway without proper certs
+      SUSPEND_SUBSCRIPTION_BASED_DATA_RECONCILER_CRON: "true"
+      SUSPEND_EBS_ACCOUNT_RECONCILER_CRON: "true"
       SUSPEND_SUBSCRIPTION_STATUS_RECONCILER_CRON: "false"
       # TODO un-suspend reg cred pool loader once issues are resolved
       SUSPEND_REGISTRY_CREDENTIAL_POOL_LOADER_CRON: "false"
@@ -342,3 +411,4 @@ resourceTemplates:
       REGISTRY_CREDENTIAL_POOL_LOADER_HIGH_WATERMARK: "10"
       UHC_DEBUG: "true"
       UNLEASH_URL: "https://ocm-stage.unleash.devshift.net/api"
+      QUAY_REGISTRY_TEAM_NAME: "staginginstallers"

@@ -11,6 +11,7 @@ An environment is a set of namespaces, that when working together create a compl
 Relations:
 - A Namespace will reference the App it is serving and the Environment it is a part of.
 - An Environment will reference a Product it serves.
+- An Environment may reference another environment it depends on for gating/automated promotions.
 - An App may reference a parentApp to allow an App to be comprised of Components (We treat apps/services/components just as Apps).
 
 ![](docs/app-interface/api/images/products-environments-namespaces-apps.png)

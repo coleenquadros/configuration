@@ -20,12 +20,12 @@ networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
 - $ref: /services/insights/gateway/namespaces/3scale-prod.yml
 - $ref: /services/insights/sources/namespaces/sources-prod.yml
+- $ref: /services/insights/turnpike/namespaces/prod-turnpike-prod.yml
 
 managedRoles: true
 
 managedResourceTypes:
 - ConfigMap
-- Secret
 
 openshiftResources:
 # configmaps
@@ -90,11 +90,6 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 - provider: vault-secret
-  path: app-sre/integrations-output/terraform-resources/insights-prod/hccm-prod/hccm-s3
-  version: 1
-  annotations:
-    qontract.recycle: "true"
-- provider: vault-secret
   path: insights/secrets/insights-prod/hccm-prod/koku-daily-secret
   version: 1
   annotations:
@@ -110,11 +105,6 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-# Templated secret for rds instance.
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /insights-prod/hccm-prod/koku-rds.secret.yaml
-
 managedTerraformResources: true
 
 terraformResources:
@@ -124,3 +114,18 @@ terraformResources:
   defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
   output_resource_name: cloudwatch
   es_identifier: kibana-elasticsearch
+- provider: rds
+  account: insights-prod
+  identifier: cost-management-prod
+  defaults: /terraform/resources/insights/production/rds/postgres12-rds-cost-management-prod.yml
+  overrides:
+    snapshot_identifier: cost-management-prod-migration
+  enhanced_monitoring: true
+  output_resource_name: koku-db
+  output_resource_db_name: koku
+  parameter_group: /terraform/resources/insights/production/rds/postgres12-parameter-group-cost-management-prod.yml
+- provider: s3
+  account: insights-prod
+  identifier: hccm-prod-s3
+  defaults: /terraform/resources/s3-private-1.yml
+  output_resource_name: hccm-s3

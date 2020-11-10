@@ -8,6 +8,9 @@ name: ci-int-osde2e-jobs
 
 description: ''
 
+app:
+  $ref: /services/sd-cicd/app.yml
+
 instance:
   $ref: /dependencies/ci-int/ci-int.yml
 
@@ -66,3 +69,19 @@ config:
         display_name: "osde2e granular alerting"
         cron_expression: '0 16 * * *'
         ci_cmd: './scripts/granular-alerting.sh'
+- project:
+    name: osde2e-trigger-jobs
+    label: osde2e
+    node: osde2e
+    gh_org: openshift
+    gh_repo: osde2e
+    jobs:
+    # ---- run trigger-jobs script
+    - 'osde2e-trigger-jobs':
+        branch: trigger-ci-jobs
+        display_name: "osde2e trigger jobs"
+        ci_cmd: './scripts/trigger-jobs.py'
+        upstream: |
+          openshift-saas-deploy-saas-clusterimagesets-stage-osd-stage-hives02ue1,
+          openshift-saas-deploy-saas-clusterimagesets-prod-osd-production-hivep01ue1,
+          openshift-saas-deploy-saas-clusterimagesets-integration-osd-integration-hivei01ue1

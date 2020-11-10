@@ -1,0 +1,191 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: ingress
+
+name: ingress-stage
+description: Insights ingress-stage on the Stage cluster under e2e-deploy/ocdeployer management
+
+cluster:
+  $ref: /openshift/crcs01ue1/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/standard-resource-limits.yml
+
+quota:
+  $ref: /services/insights/ingress/ingress-quota.yml
+
+app:
+  $ref: /services/insights/ingress/app.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs01ue1.yml
+- $ref: /services/insights/gateway/namespaces/fedramp-3scale-stage.yml
+#- $ref: /services/insights/xavier/namespaces/stage-xavier-stage.yml
+#- $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
+
+managedRoles: true
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-stage
+  identifier: ingress-stage-fedramp
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch-fedramp
+- provider: s3
+  account: insights-stage
+  identifier: upload-stage-fedramp
+  defaults: /terraform/resources/s3-gdpr-1.yml
+  output_resource_name: upload-s3
+# - provider: s3
+#   account: insights-stage
+#   identifier: insights-ingress-archives-stage-fedramp
+#   defaults: /terraform/resources/s3-gdpr-1.yml
+# output_resource_name: insights-ingress-archives
+- provider: s3
+  account: insights-stage
+  identifier: insights-ingress-rejected-stage-fedramp
+  defaults: /terraform/resources/s3-gdpr-1.yml
+  output_resource_name: insights-ingress-rejected
+# - provider: s3
+#   account: insights-stage
+#   identifier: insights-buck-it-openshift-stage-fedramp
+#   defaults: /terraform/resources/s3-gdpr-1.yml
+#   sqs_identifier: insights-buck-it-openshift-stage
+#   s3_events: ["s3:ObjectCreated:*"]
+#   output_resource_name: insights-buck-it-openshift
+# - provider: s3
+#   account: insights-stage
+#   identifier: insights-buck-it-ansible-stage
+#   defaults: /terraform/resources/s3-gdpr-1.yml
+#   output_resource_name: insights-buck-it-ansible
+# - provider: s3
+#   account: insights-stage
+#   identifier: insights-client-metrics-stage
+#   defaults: /terraform/resources/s3-gdpr-1.yml
+#   output_resource_name: insights-client-metrics-bucket
+- provider: aws-iam-service-account
+  account: insights-stage
+  identifier: ingress-buckets-read-write-stage-fedramp
+  variables:
+    aws_region: us-east-1
+  user_policy:
+    {
+      "Version": "2012-10-17",
+      "Statement": [{
+        "Effect": "Allow",
+        "Action": [
+          "s3:ListBucket",
+        ],
+        "Resource": [
+          "arn:aws:s3:::upload-stage-fedramp",
+          "arn:aws:s3:::insights-ingress-rejected-stage-fedramp",
+          "arn:aws:s3:::insights-buck-it-openshift-stage-fedramp",
+          "arn:aws:s3:::insights-buck-it-ansible-stage-fedramp",
+          "arn:aws:s3:::insights-ingress-archives-stage-fedramp"
+        ]
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "s3:*Object"
+        ],
+        "Resource": [
+          "arn:aws:s3:::upload-stage-fedramp/*",
+          "arn:aws:s3:::insights-ingress-rejected-stage-fedramp/*",
+          "arn:aws:s3:::insights-buck-it-openshift-stage-fedramp/*",
+          "arn:aws:s3:::insights-buck-it-ansible-stage-fedramp/*",
+          "arn:aws:s3:::insights-ingress-archives-stage-fedramp/*"
+        ]
+      }]
+    }
+  output_resource_name: ingress-buckets-read-write
+# - provider: aws-iam-service-account
+#   account: insights-stage
+#   identifier: ingress-buck-it-openshift-read-stage
+#   variables:
+#     aws_region: us-east-1
+#   user_policy:
+#     {
+#       "Version": "2012-10-17",
+#       "Statement": [{
+#         "Effect": "Allow",
+#         "Action": [
+#           "s3:ListBucket",
+#           "s3:GetObject"
+#         ],
+#         "Resource": [
+#           "arn:aws:s3:::insights-buck-it-openshift-stage",
+#           "arn:aws:s3:::insights-buck-it-openshift-stage/*"
+#         ]
+#       }]
+#     }
+#   output_resource_name: ingress-buck-it-openshift-read
+# - provider: aws-iam-service-account
+#   account: insights-stage
+#   identifier: ingress-buck-it-ansible-read-stage
+#   variables:
+#     aws_region: us-east-1
+#   user_policy:
+#     {
+#       "Version": "2012-10-17",
+#       "Statement": [{
+#         "Effect": "Allow",
+#         "Action": [
+#           "s3:ListBucket",
+#           "s3:GetObject"
+#         ],
+#         "Resource": [
+#           "arn:aws:s3:::insights-buck-it-ansible-stage",
+#           "arn:aws:s3:::insights-buck-it-ansible-stage/*"
+#         ]
+#       }]
+#     }
+#   output_resource_name: ingress-buck-it-ansible-read
+# - provider: aws-iam-service-account
+#   account: insights-stage
+#   identifier: ingress-data-hub-read-stage
+#   variables:
+#     aws_region: us-east-1
+#   user_policy:
+#     {
+#       "Version": "2012-10-17",
+#       "Statement": [{
+#         "Effect": "Allow",
+#         "Action": [
+#           "s3:ListBucket",
+#           "s3:GetObject"
+#         ],
+#         "Resource": [
+#           "arn:aws:s3:::upload-stage",
+#           "arn:aws:s3:::upload-stage/*",
+#           "arn:aws:s3:::insights-ingress-archives-stage",
+#           "arn:aws:s3:::insights-ingress-archives-stage/*",
+#         ]
+#       }]
+#     }
+#   output_resource_name: ingress-data-hub-read
+
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml

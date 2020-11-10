@@ -1,0 +1,69 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: osd-operators
+
+name: saas-must-gather-operator
+description: SaaS tracking file for must-gather-operator
+
+app:
+  $ref: /services/osd-operators/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-srep-info
+
+managedResourceTypes:
+- SelectorSyncSet
+
+imagePatterns:
+- quay.io/app-sre/must-gather-operator-registry
+
+resourceTemplates:
+- name: must-gather-operator
+  url: https://github.com/openshift/must-gather-operator
+  path: /hack/olm-registry/olm-artifacts-template.yaml
+  parameters:
+    REGISTRY_IMG: quay.io/app-sre/must-gather-operator-registry
+  targets:
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-integration-cluster-scope.yml
+    ref: master
+    upstream: must-gather-operator-gh-build-master
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hivei01ue1/cluster-scope.yml
+    ref: master
+    upstream: must-gather-operator-gh-build-master
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-stage-cluster-scope.yml
+    ref: master
+    upstream: must-gather-operator-gh-build-master
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-stage-01/cluster-scope.yml
+    ref: master
+    upstream: must-gather-operator-gh-build-master
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hives02ue1/cluster-scope.yml
+    ref: master
+    upstream: must-gather-operator-gh-build-master
+  # - namespace:
+  #     $ref: /services/osd-operators/namespaces/hive-production-cluster-scope.yml
+  #   ref: 935f039cb64f208bc70fbea17631cdca086a2b81
+  # - namespace:
+  #     $ref: /services/osd-operators/namespaces/hivep01ue1/cluster-scope.yml
+  #   ref: 935f039cb64f208bc70fbea17631cdca086a2b81
+  # - namespace:
+  #     $ref: /services/osd-operators/namespaces/hivep02ue1/cluster-scope.yml
+  #   ref: 935f039cb64f208bc70fbea17631cdca086a2b81
+  # - namespace:
+  #     $ref: /services/osd-operators/namespaces/hivep03uw1/cluster-scope.yml
+  #   ref: 935f039cb64f208bc70fbea17631cdca086a2b81
+  - namespace:
+      $ref: /services/osd-operators/namespaces/ssotest01ue1/cluster-scope.yml
+    ref: master
+    upstream: must-gather-operator-gh-build-master

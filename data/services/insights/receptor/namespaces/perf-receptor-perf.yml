@@ -1,0 +1,67 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: receptor
+
+name: receptor-perf
+description: Insights receptor-perf on the Stage cluster under e2e-deploy/ocdeployer management
+
+cluster:
+  $ref: /openshift/crc-stg-01/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/standard-resource-limits.yml
+
+quota:
+  $ref: /services/insights/default-quota.yml
+
+app:
+  $ref: /services/insights/receptor/app.yml
+
+environment:
+  $ref: /products/insights/environments/perf.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stg-01.yml
+#- $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+- $ref: /services/insights/remediations/namespaces/perf-remediations-perf.yml
+#- $ref: /services/insights/topological-inventory/namespaces/stage-topological-inventory-stage.yml
+
+managedRoles: true
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-stage
+  identifier: receptor-perf
+  defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
+  path: insights/secrets/insights-stage/receptor-stage/receptor-psks
+  version: 3
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/receptor-stage/redis
+  version: 1
+  annotations:
+    qontract.recycle: "true"

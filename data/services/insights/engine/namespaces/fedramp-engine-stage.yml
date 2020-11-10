@@ -1,0 +1,55 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: engine
+
+name: engine-stage
+description: Insights engine-stage on the FedRAMP test cluster under e2e-deploy/ocdeployer management
+
+cluster:
+  $ref: /openshift/crcs01ue1/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/standard-resource-limits.yml
+
+quota:
+  $ref: /services/insights/engine/engine-quota.yml
+
+app:
+  $ref: /services/insights/engine/app.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs01ue1.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-stage
+  identifier: engine-stage-fedramp
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch-fedramp
+  

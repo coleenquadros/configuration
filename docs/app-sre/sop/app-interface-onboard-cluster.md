@@ -1,19 +1,16 @@
 <!-- TOC -->
 
 - [Onboard a new OSDv4 cluster to app-interface](#onboard-a-new-osdv4-cluster-to-app-interface)
-  - [Step 1 - Cluster creation and initial access for dedicated-admins](#step-1-cluster-creation-and-initial-access-for-dedicated-admins)
-  - [Step 2 - Bot access and App SRE project template](#step-2-bot-access-and-app-sre-project-template)
-  - [Step 3 - Enhanced dedicated admin](#step-3-enhanced-dedicated-admin)
-  - [Step 4 - Observability](#step-4-observability)
-  - [Step 5 - Container Security Operator](#step-5-container-security-operator)
-  - [Step 6 - Logging](#step-6-logging)
+  - [Step 1 - Cluster creation and initial access for dedicated-admins](#step-1---cluster-creation-and-initial-access-for-dedicated-admins)
+  - [Step 2 - Bot access and App SRE project template](#step-2---bot-access-and-app-sre-project-template)
+  - [Step 3 - Observability](#step-3---observability)
+  - [Step 4 - Operator Lifecycle Manager](#step-4---operator-lifecycle-manager)
+  - [Step 5 - Container Security Operator](#step-5---container-security-operator)
+  - [Step 6 - Logging](#step-6---logging)
+  - [WIP Step 7 - Deployment Validation Operator (DVO)](#wip-step-7---deployment-validation-operator-dvo)
 - [Additional configurations](#additional-configurations)
   - [Selecting a Machine CIDR for VPC peerings](#selecting-a-machine-cidr-for-vpc-peerings)
   - [VPC peering with app-interface](#vpc-peering-with-app-interface)
-  - [Enable enhanced dedicated-admin](#enable-enhanced-dedicated-admin)
-  - [Enable observability on a v4 cluster](#enable-observability-on-a-v4-cluster)
-  - [Install the Container Security Operator](#install-the-container-security-operator)
-  - [Enable logging (EFK)](#enable-logging-efk)
 - [Offboard an OSDv4 cluster from app-interface](#offboard-an-osdv4-cluster-from-app-interface)
 - [Legacy (v3)](#legacy-v3)
   - [Onboard a new OSDv3 cluster to app-interface](#onboard-a-new-osdv3-cluster-to-app-interface)
@@ -91,10 +88,20 @@ This step should be performed in a single merge request.
       upgrade: (batch1 | batch2 | skip - generally stage is batch1, prod is batch2 and skip for special cases like quay as of 2020-08)
       provision_shard_id: (optional) specify hive shard ID to create the cluster in (IDs can be found in the uhc-production namespace file)
 
+    upgradePolicy: # optional, specify an upgrade schedule
+      schedule_type: automatic
+      schedule: '0 10 * * 4' # choose a cron expression to upgrade on
+
     network:
       vpc: (desired machine CIDR. ex: 10.123.0.0/16)
       service: (desired service CIDR. ex: 172.30.0.0/16)
       pod: (desired pod CIDR. ex: 10.128.0.0/14)
+
+    machinePools: # optional, specify additional Machine Pools to be provisioned
+    - id: (machine pool name, should be unique per cluster)
+      instance_type: (desired instance type. m5.xlarge for example)
+      replicas: (desired number of instances in the pool)
+      labels: {}
 
     disable:
       e2eTests:
@@ -317,19 +324,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
 1. Send the MR, wait for the check to pass and merge.
 
-## Step 3 - Enhanced dedicated admin
-
-1. Enable enhanced dedicated-admin
-
-    We enable enhanced dedicated-admin on all App-SRE clusters. Here's the documented [process](https://github.com/openshift/ops-sop/blob/master/v4/howto/extended-dedicated-admin.md#non-ccs-clusters) as defined by SREP.
-
-    The process has since been updated to create a ticket in jira instead of a SNOW ticket.  Create a ticket to [OHSS](https://issues.redhat.com/secure/CreateIssue.jspa?pid=12323823&issuetype=3) requesting `enhanced-dedicated-admin` on the new cluster (provide the cluster id).
-
-    Here's an [example](https://issues.redhat.com/browse/OHSS-608)
-
-    *NOTE*: enchanced dedicated-admin must be enabled on the cluster before installing observability namespaces or the CSO operator.
-
-## Step 4 - Observability
+## Step 3 - Observability
 
 1. Enable observability on a v4 cluster
 
@@ -350,7 +345,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
         - Alert email: sd-app-sre@redhat.com
         - Notes: Runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/prometheus/prometheus-deadmanssnitch.md
 
-    1. Add the deadmansnitch URL to this secret in Vault: https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/alertmanager-integration
+    1. Add the deadmanssnitch URL to this secret in Vault: https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/alertmanager-integration
 
         - key: `deadmanssnitch-<cluster_name>-url`
         - value: the `Unique Snitch URL` from deadmanssnitch
@@ -447,6 +442,34 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
         *Note*: The `<cluster-url>` can be retrieved from the cluster console.  Remove the `https://console-openshift-console` from the beginning and end with `openshiftapps.com`, removing all the trailing slashes and paths.
 
+## Step 4 - Operator Lifecycle Manager
+
+1. Install the Operator Lifecycle Manager
+
+    The Operator Lifecycle Manager is responsible for managing operator lifecycles.  It will install and update operators using a subscription.
+
+    1. Create an `openshift-operator-lifecycle-manager.yml` namespace file for the cluster:
+
+    ```yaml
+    ---
+    $schema: /openshift/namespace-1.yml
+
+    labels: {}
+
+    name: openshift-operator-lifecycle-manager
+
+    cluster:
+      $ref: /openshift/<cluster>/cluster.yml
+
+    app:
+      $ref: /services/app-sre/app.yml
+
+    environment:
+      $ref: /products/app-sre/environments/production.yml
+
+    description: openshift-operator-lifecycle-manager namespac
+    ```
+
 ## Step 5 - Container Security Operator
 
 1. Install the Container Security Operator
@@ -454,8 +477,6 @@ At this point you should be able to access the cluster via the console / `oc` cl
     The Container Security Operator (CSO) brings Quay and Clair metadata to
     Kubernetes / OpenShift. We use the vulnerabilities information in the tenants
     dashboard and in the monthly reports.
-
-    1. Ensure `enhanced-dedicated-admin` is enabled on the cluster.  Details for this are [here](#enable-enhanced-dedicated-admin)
 
     1. Create an `container-security-operator` namespace file for that specific
     cluster. Example:
@@ -487,31 +508,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
     ```
 
     If the `openshift-operator-lifecycle-manager` namespace is not yet defined in
-    app-interface, you have to define it also:
-
-    File name: `openshift-operator-lifecycle-manager.yml`
-
-    Content:
-
-    ```yaml
-    ---
-    $schema: /openshift/namespace-1.yml
-
-    labels: {}
-
-    name: openshift-operator-lifecycle-manager
-
-    cluster:
-      $ref: /openshift/<cluster>/cluster.yml
-
-    app:
-      $ref: /services/app-sre/app.yml
-
-    environment:
-      $ref: /products/app-sre/environments/production.yml
-
-    description: openshift-operator-lifecycle-manager namespace
-    ```
+    app-interface, follow [Step 4](step-4---operator-lifecycle-manager)
 
     1. Add the new `container-security-operator` namespace to the target
     namespaces in the
@@ -569,6 +566,77 @@ At this point you should be able to access the cluster via the console / `oc` cl
     ```
 
     OSD docs for reference: https://docs.openshift.com/dedicated/4/logging/dedicated-cluster-deploying.html
+
+## WIP Step 7 - Deployment Validation Operator (DVO)
+
+1. Install the Deployment Validation Operator
+
+   The Deployment Validation Opreator inspects wordloads in a cluster and evaluates them against know best practices.  It generates metric information about which workloads in which namespaces do not meet specific guidelines.  This information is presented in tenant dashboards and in monthly reports.
+
+    1. Create an `app-sre-dvo-per-cluster` namespace file for that specific
+    cluster. Example:
+
+    ```yaml
+    ---
+    $schema: /openshift/namespace-1.yml
+
+    labels: {}
+
+    name: deployment-validation-operator
+    description: namespace for the app-sre per-cluster Deployment Validation Operator
+
+    cluster:
+      $ref: /openshift/<cluster>/cluster.yml
+
+    app:
+      $ref: /services/deployment-validation-operator/app.yml
+
+    environment:
+      $ref: /products/app-sre/environments/stage.yml
+
+    networkPoliciesAllow:
+    - $ref: /openshift/<cluster>/namespaces/openshift-operator-lifecycle-manager.yml
+    - $ref: /services/observability/namespaces/openshift-customer-monitoring.<cluster>.yml
+
+    managedRoles: true
+    ```
+
+    *NOTE*: This file goes in the `data/openshift<cluster>/namespaces directory` [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/openshift/app-sre-stage-01/namespaces/app-sre-dvo-per-cluster.yml)
+
+    *NOTE*: If the `openshift-operator-lifecycle-manager` namespace is not yet defined in
+    app-interface, follow [Step 4](step-4---operator-lifecycle-manager
+
+    1. Add a service monitor for the Deployment Validation Operator to the `openshift-customer-monitoring/<cluster>.yml` file:
+
+    ```yaml
+    ### Deployment Validation Operator
+    - provider: resource-template
+      type: jinja2
+      path: /observability/servicemonitors/deployment-validation-operator.servicemonitor.yaml
+      variables:
+        environment: <production|stage>
+        namespace: deployment-validation-operator
+    ```
+
+    *Note*: [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml)
+
+    1. Add the new `deployment-validation-operator` namespace to the target
+    namespaces in the
+    [saas.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/deployment-validation-operator/cicd/saas.yaml)
+    to deploy the Deployment Validation Operator. Example:
+
+    ```yaml
+    resourceTemplates:
+    - name: deployment-validation-operator
+      url: https://github.com/app-sre/deployment-validation-operator
+      path: /deploy/openshift/deployment-validation-operator-olm.yaml
+      targets:
+      ...
+      - namespace:
+          $ref: /openshift/<cluster>/namespaces/app-sre-dvo-per-cluster.yml
+        ref: <commit_hash>
+        upstream: app-sre-deployment-validation-operator-gh-build-catalog-master-upstream-app-sre-deployment-validation-operator-gh-build-master
+    ```
 
 # Additional configurations
 

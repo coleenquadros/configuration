@@ -1,0 +1,52 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: managed-services-stage
+description: staging namespace for managed-services
+
+cluster:
+  $ref: /openshift/app-sre-stage-01/cluster.yml
+
+app:
+  $ref: /services/managed-services/app.yml
+
+environment:
+  $ref: /products/osdv4/environments/stage.yml
+
+networkPoliciesAllow:
+  - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+
+managedRoles: true
+
+managedResourceTypes:
+  - ServiceAccount
+  - ConfigMap
+
+openshiftResources:
+- provider: vault-secret
+  path: app-interface/global/quay/app-sre/quay.io
+  version: 2
+  type: kubernetes.io/dockercfg
+- provider: resource
+  path: /services/managed-services/managed-services-api.serviceaccount.yaml
+- provider: route
+  path: /services/managed-services/stage/managed-services-api.route.yaml
+- provider: vault-secret
+  name: managed-services-api
+  path:  app-interface/managed-service-api/stage/service/credentials
+  version: 6
+  annotations:
+    qontract.recycle: "true"
+- provider: resource
+  path: /services/managed-services/stage/ocm-managed-services.providers.configmap.yaml
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: app-sre
+  identifier: managed-services-api-staging
+  defaults: /terraform/resources/app-sre/staging/rds-1.yml
+  output_resource_name: managed-services-api-rds

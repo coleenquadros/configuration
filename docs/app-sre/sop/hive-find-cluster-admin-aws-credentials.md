@@ -1,14 +1,19 @@
 Note: The following credentials should only be used in break glass situations
 
+- [How to find a cluster's shard and namespace](#how-to-find-a-clusters-shard-and-namespace)
 - [How to find a cluster's kubeadmin credentials in hive](#how-to-find-a-clusters-kubeadmin-credentials-in-hive)
 - [How to find a cluster's AWS access key in hive](#how-to-find-a-clusters-aws-access-key-in-hive)
 - [How to find a cluster's AWS root credentials in hive](#how-to-find-a-clusters-aws-root-credentials-in-hive)
 
+# How to find a cluster's shard and namespace
+
+1) In the cluster file in app-interface, under `.spec` exists a `provision_shard_id` key. This value is the ID of the Hive shard that holds the cluster and it is automatically populated. The ID should correspond to a `name` in the appropriate clusters-service secret (can be found [here](/data/services/ocm/shared-resources/production.yml) for production).
+
+2) In the cluster file in app-interface, under `.spec` exists an `id` key which is automatically populated. The name of the namespace on the Hive shard is `uhc-<environment>-<id>`. For example, in production, the name of the namespace will be `uhc-production-<id>`.
+
 # How to find a cluster's kubeadmin credentials in hive
 
-1) Find the cluster namespace on the hive cluster
-
-        oc get clusterdeployment --all-namespaces | grep <cluster-name>
+1) Find the cluster's shard and namespace according to the [find a cluster's shard and namespace](#how-to-find-a-clusters-shard-and-namespace) section.
 
 1) List the secrets under the cluster namespace and make note of the secrets prefix that looks like *<cluster-name>-<number>-<short-id>-* (ex: quayp03ue1-0-vsscf-admin-kubeconfig)
 
@@ -30,9 +35,7 @@ Note: The following credentials should only be used in break glass situations
 
 # How to find a cluster's AWS access key in hive
 
-1) Find the cluster namespace on the hive cluster
-
-        oc get clusterdeployment --all-namespaces | grep <cluster-name>
+1) Find the cluster's shard and namespace according to the [find a cluster's shard and namespace](#how-to-find-a-clusters-shard-and-namespace) section.
 
 1) Retrieve the AWS access key from the aws secret
 
@@ -42,9 +45,7 @@ Note: The following credentials should only be used in break glass situations
 
 # How to find a cluster's AWS root credentials in hive
 
-1) Find the cluster namespace on the hive cluster
-
-        oc get clusterdeployment --all-namespaces | grep <cluster-name>
+1) Find the cluster's shard and namespace according to the [find a cluster's shard and namespace](#how-to-find-a-clusters-shard-and-namespace) section.
 
 1) Find the accountLink ID from the accountclaim
 

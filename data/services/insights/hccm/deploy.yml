@@ -17,7 +17,7 @@ instance:
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
-  channel: team-insights-info
+  channel: team-clouddot-info
 
 managedResourceTypes:
 - ConfigMap
@@ -57,12 +57,16 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
     # This is a pinned ref for the saas-templates repo version of master that we want to use
-    ref: bd7b164366b40710461bc234d238d8e140846e29
+    ref: 32b3172c74dcc4fb8bc72b62291b8ba96674c350
     parameters:
       APP_DOMAIN: apps.crc-stg-01.o4v9.p1.openshiftapps.com
-      IMAGE_TAG: a873f9e
+      IMAGE_TAG: 1fd47c0
       KOKU_SENTRY_ENV: stage
       DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
+      INIT_CPU_REQUEST: 250m
+      INIT_CPU_LIMIT: 500m
+      INIT_MEMORY_REQUEST: 512Mi
+      INIT_MEMORY_LIMIT: 1Gi
       CPU_REQUEST: 200m
       CPU_LIMIT: 1
       MEMORY_REQUEST: 1Gi
@@ -73,12 +77,16 @@ resourceTemplates:
   # PRODUCTION
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: bd7b164366b40710461bc234d238d8e140846e29
+    ref: 32b3172c74dcc4fb8bc72b62291b8ba96674c350
     parameters:
       APP_DOMAIN: apps.crcp01ue1.o9m8.p1.openshiftapps.com
-      IMAGE_TAG: a873f9e
+      IMAGE_TAG: 1fd47c0
       KOKU_SENTRY_ENV: prod
       DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
+      INIT_CPU_REQUEST: 250m
+      INIT_CPU_LIMIT: 500m
+      INIT_MEMORY_REQUEST: 512Mi
+      INIT_MEMORY_LIMIT: 1Gi
       CPU_REQUEST: 200m
       CPU_LIMIT: 1
       MEMORY_REQUEST: 1Gi
@@ -86,6 +94,7 @@ resourceTemplates:
       UPDATE_TIMEOUT: 14400
       PROMETHEUS_PUSHGATEWAY: prometheus-push.insights-push-prod.svc.cluster.local:9091
       MIN_REPLICAS: 3
+      ENABLE_PARQUET_PROCESSING: 'False'
 
 # template: masu
 - name: masu
@@ -96,17 +105,17 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
     # This is a pinned ref for the saas-templates repo version of master that we want to use
-    ref: bd7b164366b40710461bc234d238d8e140846e29
+    ref: 32b3172c74dcc4fb8bc72b62291b8ba96674c350
     parameters:
       APP_DOMAIN: apps.crc-stg-01.o4v9.p1.openshiftapps.com
-      IMAGE_TAG: a873f9e
+      IMAGE_TAG: 1fd47c0
   # PRODUCTION
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: bd7b164366b40710461bc234d238d8e140846e29
+    ref: 32b3172c74dcc4fb8bc72b62291b8ba96674c350
     parameters:
       APP_DOMAIN: apps.crcp01ue1.o9m8.p1.openshiftapps.com
-      IMAGE_TAG: a873f9e
+      IMAGE_TAG: 1fd47c0
 
 # template: koku-listener
 - name: koku-listener
@@ -117,9 +126,9 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
     # This is a pinned ref for the saas-templates repo version of master that we want to use
-    ref: bd7b164366b40710461bc234d238d8e140846e29
+    ref: 32b3172c74dcc4fb8bc72b62291b8ba96674c350
     parameters:
-      IMAGE_TAG: a873f9e
+      IMAGE_TAG: 1fd47c0
       ENABLE_API_SENTRY: true
       CPU_REQUEST: 200m
       CPU_LIMIT: 1
@@ -130,15 +139,16 @@ resourceTemplates:
   # PRODUCTION
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: bd7b164366b40710461bc234d238d8e140846e29
+    ref: 32b3172c74dcc4fb8bc72b62291b8ba96674c350
     parameters:
-      IMAGE_TAG: a873f9e
+      IMAGE_TAG: 1fd47c0
       ENABLE_API_SENTRY: true
       CPU_REQUEST: 200m
       CPU_LIMIT: 1
-      MEMORY_REQUEST: 512Mi
+      MEMORY_REQUEST: 1Gi
       MEMORY_LIMIT: 2Gi
       VOLUME_CAPACITY: 100Gi
+      ENABLE_PARQUET_PROCESSING: 'False'
 
 # template: koku-sources
 - name: koku-sources
@@ -149,11 +159,11 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
     # This is a pinned ref for the saas-templates repo version of master that we want to use
-    ref: bd7b164366b40710461bc234d238d8e140846e29
+    ref: 32b3172c74dcc4fb8bc72b62291b8ba96674c350
     parameters:
       APP_DOMAIN: apps.crc-stg-01.o4v9.p1.openshiftapps.com
       ENABLE_API_SENTRY: True
-      IMAGE_TAG: a873f9e
+      IMAGE_TAG: 1fd47c0
       DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
       CPU_REQUEST: 100m
       CPU_LIMIT: 250m
@@ -162,12 +172,16 @@ resourceTemplates:
   # PRODUCTION
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: bd7b164366b40710461bc234d238d8e140846e29
+    ref: 32b3172c74dcc4fb8bc72b62291b8ba96674c350
     parameters:
       APP_DOMAIN: apps.crcp01ue1.o9m8.p1.openshiftapps.com
       ENABLE_API_SENTRY: True
-      IMAGE_TAG: a873f9e
+      IMAGE_TAG: 1fd47c0
       DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
+      CPU_REQUEST: 100m
+      CPU_LIMIT: 250m
+      MEMORY_REQUEST: 256Mi
+      MEMORY_LIMIT: 512Mi
 
 # template: celery-scheduler
 - name: celery-scheduler
@@ -178,19 +192,23 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
     # This is a pinned ref for the saas-templates repo version of master that we want to use
-    ref: bd7b164366b40710461bc234d238d8e140846e29
+    ref: 32b3172c74dcc4fb8bc72b62291b8ba96674c350
     parameters:
-      IMAGE_TAG: a873f9e
+      IMAGE_TAG: 1fd47c0
       ENABLE_PARQUET_PROCESSING: 'False'
       MEMORY_REQUEST: 256Mi
       MEMORY_LIMIT: 512Mi
+      REPLICAS: 1
   # PRODUCTION
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: bd7b164366b40710461bc234d238d8e140846e29
+    ref: 32b3172c74dcc4fb8bc72b62291b8ba96674c350
     parameters:
-      IMAGE_TAG: a873f9e
+      IMAGE_TAG: 1fd47c0
+      ENABLE_PARQUET_PROCESSING: 'False'
       REPLICAS: 1
+      MEMORY_REQUEST: 256Mi
+      MEMORY_LIMIT: 512Mi
 
 # template: celery-worker
 - name: celery-worker
@@ -201,9 +219,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
     # This is a pinned ref for the saas-templates repo version of master that we want to use
-    ref: bd7b164366b40710461bc234d238d8e140846e29
+    ref: 32b3172c74dcc4fb8bc72b62291b8ba96674c350
     parameters:
-      IMAGE_TAG: a873f9e
+      IMAGE_TAG: 1fd47c0
+      REPLICAS: 1
       KOKU_SENTRY_ENV: stage
       ENABLE_CELERY_SENTRY: true
       DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
@@ -216,18 +235,19 @@ resourceTemplates:
   # PRODUCTION
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: bd7b164366b40710461bc234d238d8e140846e29
+    ref: 32b3172c74dcc4fb8bc72b62291b8ba96674c350
     parameters:
-      IMAGE_TAG: a873f9e
+      IMAGE_TAG: 1fd47c0
       KOKU_SENTRY_ENV: prod
       ENABLE_CELERY_SENTRY: true
       DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
       CPU_REQUEST: 200m
-      CPU_LIMIT: 2
-      MEMORY_REQUEST: 512Mi
-      MEMORY_LIMIT: 4Gi
+      CPU_LIMIT: 1
+      MEMORY_REQUEST: 1Gi
+      MEMORY_LIMIT: 2Gi
       VOLUME_CAPACITY: 100Gi
       PROMETHEUS_PUSHGATEWAY: prometheus-push.insights-push-prod.svc.cluster.local:9091
+      ENABLE_PARQUET_PROCESSING: 'False'
 
 # template: rabbitmq
 - name: rabbitmq
@@ -236,15 +256,15 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
+    ref: 32b3172c74dcc4fb8bc72b62291b8ba96674c350
     parameters:
-      IMAGE_TAG: 2f971b5
+      IMAGE_TAG: 1023e4e
       REPLICAS: 3
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: ef4a0eba381b3260a5ad9a47f5666d705930fa3d
+    ref: 32b3172c74dcc4fb8bc72b62291b8ba96674c350
     parameters:
-      IMAGE_TAG: 2f971b5
+      IMAGE_TAG: 1023e4e
       REPLICAS: 3
 
 # template: koku-auth-cache
@@ -254,13 +274,13 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
+    ref: 32b3172c74dcc4fb8bc72b62291b8ba96674c350
     parameters:
       IMAGE: quay.io/cloudservices/redis
       IMAGE_TAG: 3.0.3
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: 69a17ceb3cb13893548c24051b2ae8e2b6511dd3
+    ref: 32b3172c74dcc4fb8bc72b62291b8ba96674c350
     parameters:
       IMAGE: quay.io/cloudservices/redis
       IMAGE_TAG: 3.0.3
@@ -272,14 +292,22 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
+    ref: 11d698338c2a2584d967fad6643887662173be83
     parameters:
       IMAGE_TAG: e410e08
+      CPU_REQUEST: 100m
+      CPU_LIMIT: 250m
+      MEMORY_REQUEST: 200Mi
+      MEMORY_LIMIT: 250Mi
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: 5fe53ef5d908c53000f94f2dd1c22bab3d89b14f
+    ref: 32b3172c74dcc4fb8bc72b62291b8ba96674c350
     parameters:
       IMAGE_TAG: e410e08
+      CPU_REQUEST: 100m
+      CPU_LIMIT: 250m
+      MEMORY_REQUEST: 200Mi
+      MEMORY_LIMIT: 250Mi
 
 # template: koku-daily
 - name: koku-daily
@@ -288,39 +316,63 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
+    ref: 49b058c663e562d618389c23c30462b47a04b024
     parameters:
       IMAGE_TAG: 00301ae
       PROMETHEUS_PUSH_GATEWAY: prometheus-push.insights-push-stage.svc.cluster.local:9091
+      REPLICAS: 1
+      APP_URL_PREFIX: /api/cost-management/v1/koku-daily
+      CPU_REQUEST: 100m
+      CPU_LIMIT: 250m
+      MEMORY_REQUEST: 200Mi
+      MEMORY_LIMIT: 250Mi
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: 5fe53ef5d908c53000f94f2dd1c22bab3d89b14f
+    ref: 32b3172c74dcc4fb8bc72b62291b8ba96674c350
     parameters:
-      IMAGE_TAG: 00301ae
+      IMAGE_TAG: 0ca6abb
       PROMETHEUS_PUSH_GATEWAY: prometheus-pushgateway:9091
+      REPLICAS: 1
+      APP_URL_PREFIX: /api/cost-management/v1/koku-daily
+      CPU_REQUEST: 100m
+      CPU_LIMIT: 250m
+      MEMORY_REQUEST: 200Mi
+      MEMORY_LIMIT: 250Mi
+
+# configmap -- This is where the sql scripts are specified
+- name: cost-management-analysis-sql-scripts
+  path: /openshift-configmap.yml
+  url: https://gitlab.cee.redhat.com/insights-platform/cost-management-analysis
+  targets:
+  # staging
+  - namespace:
+      $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
+    ref: 88aa1692bbc466ed83fe8eda21e1b50db3f2e3a1
+  # production
+  - namespace:
+      $ref: /services/insights/hccm/namespaces/hccm-prod.yml
+    ref: 88aa1692bbc466ed83fe8eda21e1b50db3f2e3a1
 
 # template: pg script runner
-# - name: koku-pg-script-runner
-#   path: /openshift.yml
-#   url: https://gitlab.cee.redhat.com/insights-platform/pg-script-runner
-#   targets:
-#   # staging
-#   - namespace:
-#       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-#     ref: 0df87bac8458f01c0b9841de9df066e38a69cf8f
-#     parameters:
-#       IMAGE: quay.io/cloudservices/pg-script-runner
-#       IMAGE_TAG: "0df87ba"
-#       DB_SECRET: "koku-db"
-#       ACTIVE_DEADLINE_SECONDS: "7200"
+- name: cost-management-analysis-sql
+  path: /openshift.yml
+  url: https://gitlab.cee.redhat.com/insights-platform/cost-management-analysis
+  targets:
+  # staging
+  - namespace:
+      $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
+    ref: 88aa1692bbc466ed83fe8eda21e1b50db3f2e3a1
+    parameters:
+      DB_SECRET: "koku-db"
+      ACTIVE_DEADLINE_SECONDS: "300"
+      JOB_NAME_SUFFIX: "202011041430"
 #       PGVERSION: "12"
-#   # production
-#   - namespace:
-#       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-#     ref: 3a34b0c01b5f5c058e079dd9612970e5530a7a5d
-#     parameters:
-#       IMAGE: quay.io/cloudservices/pg-script-runner
-#       IMAGE_TAG: "3a34b0c"
-#       DB_SECRET: "koku-db"
-#       ACTIVE_DEADLINE_SECONDS: "86400"
+  # production
+  - namespace:
+      $ref: /services/insights/hccm/namespaces/hccm-prod.yml
+    ref: 88aa1692bbc466ed83fe8eda21e1b50db3f2e3a1
+    parameters:
+      DB_SECRET: "koku-db"
+      ACTIVE_DEADLINE_SECONDS: "300"
+      JOB_NAME_SUFFIX: "202011041500"
 #       PGVERSION: "12"

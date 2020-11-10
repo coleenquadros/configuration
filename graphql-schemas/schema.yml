@@ -260,6 +260,7 @@
   - { name: labels, type: json }
   - { name: name, type: string, isRequired: true }
   - { name: description, type: string, isRequired: true }
+  - { name: app, type: App_v1, isRequired: true }
   - { name: instance, type: JenkinsInstance_v1, isRequired: true }
   - { name: type, type: string, isRequired: true }
   - { name: config, type: json }
@@ -370,11 +371,23 @@
   - { name: upgrade, type: string, isRequired: true }
   - { name: provision_shard_id, type: string }
 
+- name: ClusterUpgradePolicy_v1
+  fields:
+  - { name: schedule_type, type: string }
+  - { name: schedule, type: string }
+
 - name: ClusterNetwork_v1
   fields:
   - { name: vpc, type: string, isRequired: true }
   - { name: service, type: string, isRequired: true }
   - { name: pod, type: string, isRequired: true }
+
+- name: ClusterMachinePool_v1
+  fields:
+  - { name: id, type: string, isRequired: true }
+  - { name: instance_type, type: string, isRequired: true }
+  - { name: replicas, type: int, isRequired: true }
+  - { name: labels, type: json }
 
 - name: ClusterPeeringConnection_v1
   isInterface: true
@@ -447,7 +460,9 @@
   - { name: managedClusterRoles, type: boolean }
   - { name: ocm, type: OpenShiftClusterManager_v1 }
   - { name: spec, type: ClusterSpec_v1 }
+  - { name: upgradePolicy, type: ClusterUpgradePolicy_v1 }
   - { name: network, type: ClusterNetwork_v1 }
+  - { name: machinePools, type: ClusterMachinePool_v1, isList: true }
   - { name: peering, type: ClusterPeering_v1 }
   - { name: jumpHost, type: ClusterJumpHost_v1 }
   - { name: automationToken, type: VaultSecret_v1 }
@@ -662,6 +677,7 @@
   - { name: overrides, type: json }
   - { name: output_resource_name, type: string }
   - { name: output_resource_db_name, type: string }
+  - { name: reset_password, type: string }
   - { name: enhanced_monitoring, type: boolean }
   - { name: replica_source, type: string }
 
@@ -872,6 +888,8 @@
   - { name: name, type: string, isRequired: true }
   - { name: description, type: string, isRequired: true }
   - { name: openshiftResources, type: NamespaceOpenshiftResource_v1, isList: true, isInterface: true, isRequired: true }
+  - { name: openshiftServiceAccountTokens, type: ServiceAccountTokenSpec_v1, isList: true }
+  - { name: terraformResources, type: NamespaceTerraformResource_v1, isList: true, isInterface: true }
 
 - name: Namespace_v1
   fields:
@@ -928,6 +946,13 @@
   - { name: description, type: string, isRequired: true }
   - { name: public, type: boolean, isRequired: true }
   - { name: mirror, type: ContainerImageMirror_v1, isRequired: false }
+
+- name: OcpReleaseEcrMirror_v1
+  fields:
+  - { name: hiveCluster, type: Cluster_v1, isRequired: true }
+  - { name: ecrResourcesNamespace, type: Namespace_v1, isRequired: true}
+  - { name: ocpReleaseEcrIdentifier, type: string, isRequired: true }
+  - { name: ocpArtDevEcrIdentifier, type: string, isRequired: true }
 
 - name: ContainerImageMirror_v1
   fields:
@@ -1014,6 +1039,7 @@
   - { name: description, type: string, isRequired: true }
   - { name: product, type: Product_v1, isRequired: true }
   - { name: parameters, type: json }
+  - { name: dependsOn, type: Environment_v1 }
   - name: namespaces
     type: Namespace_v1
     isList: true
@@ -1053,13 +1079,25 @@
     synthetic:
       schema: /app-sre/app-1.yml
       subAttr: parentApp
+  - name: jenkinsConfigs
+    type: JenkinsConfig_v1
+    isList: true
+    synthetic:
+      schema: /dependencies/jenkins-config-1.yml
+      subAttr: app
+  - name: saasFiles
+    type: SaasFile_v1
+    isList: true
+    synthetic:
+      schema: /app-sre/saas-file-1.yml
+      subAttr: app
 
 - name: SaasFile_v1
   fields:
   - { name: schema, type: string, isRequired: true }
   - { name: path, type: string, isRequired: true }
   - { name: labels, type: json }
-  - { name: name, type: string, isRequired: true }
+  - { name: name, type: string, isRequired: true, isSearchable: true, isUnique: true }
   - { name: description, type: string, isRequired: true }
   - { name: app, type: App_v1, isRequired: true }
   - { name: instance, type: JenkinsInstance_v1, isRequired: true }
@@ -1284,6 +1322,7 @@
   - { name: description, type: string }
   - { name: expiration_hours, type: int }
   - { name: permissions, type: Permission_v1, isList: true, isInterface: true }
+  - { name: tag_on_cluster_updates, type: boolean }
   - { name: access, type: Access_v1, isList: true }
   - { name: aws_groups, type: AWSGroup_v1, isList: true }
   - { name: user_policies, type: AWSUserPolicy_v1, isList: true }
@@ -1311,6 +1350,7 @@
   - { name: disabled, type: boolean }
   - { name: always_run, type: boolean }
   - { name: no_validate_schemas, type: boolean }
+  - { name: run_for_valid_saas_file_changes, type: boolean }
 
 - name: Integration_v1
   datafile: /app-sre/integration-1.yml
@@ -1445,11 +1485,12 @@
   - { name: path, type: string, isRequired: true }
   - { name: labels, type: json }
   - { name: name, type: string, isRequired: true }
-  - { name: namespace, type: Namespace_v1, isRequired: true}
-  - { name: identifier, type: string, isRequired: true}
-  - { name: overrides, type: SqlEmailOverrides_v1}
-  - { name: output, type: string, isRequired: true}
-  - { name: query, type: string, isRequired: true}
+  - { name: namespace, type: Namespace_v1, isRequired: true }
+  - { name: identifier, type: string, isRequired: true }
+  - { name: overrides, type: SqlEmailOverrides_v1 }
+  - { name: output, type: string, isRequired: true }
+  - { name: schedule, type: string }
+  - { name: query, type: string, isRequired: true }
 
 - name: UnleashNotifications_v1
   fields:
@@ -1519,6 +1560,7 @@
   - { name: unleash_instances_v1, type: UnleashInstance_v1, isList: true, datafileSchema: /app-sre/unleash-instance-1.yml }
   - { name: dns_zone_v1, type: DnsZone_v1, isList: true, datafileSchema: /dependencies/dns-zone-1.yml }
   - { name: slack_workspaces_v1, type: SlackWorkspace_v1, isList: true, datafileSchema: /dependencies/slack-workspace-1.yml }
+  - { name: ocp_release_ecr_mirror_v1, type: OcpReleaseEcrMirror_v1, isList: true, datafileSchema: /dependencies/ocp-release-ecr-mirror-1.yml}
 
 - name: SentryTeam_v1
   fields:

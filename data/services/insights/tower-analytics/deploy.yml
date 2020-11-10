@@ -17,12 +17,15 @@ instance:
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
-  channel: team-insights-info
+  channel: team-clouddot-info
 
 managedResourceTypes:
 - Deployment
 - DeploymentConfig
 - Service
+- CronJob
+- Job
+
 
 imagePatterns:
 - quay.io/cloudservices
@@ -42,29 +45,32 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/tower-analytics/namespaces/stage-tower-analytics-stage.yml
-    ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
+    ref: 4cc20c95ba4ed19ca43a910c3f79db9e10431c10
     parameters:
-      IMAGE_TAG: 1f9b4a9
+      IMAGE_TAG: 2b52499
   - namespace:
       $ref: /services/insights/tower-analytics/namespaces/tower-analytics-prod.yml
-    ref: f29bb48baf2c6c759ca72a1633f837d5f3bfe8e2
+    ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
     parameters:
-      IMAGE_TAG: 65973bd
+      IMAGE_TAG: c07645d
 - name: automation-analytics-processor
   path: /templates/automation-analytics/automation-analytics-processor.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
   targets:
   - namespace:
       $ref: /services/insights/tower-analytics/namespaces/stage-tower-analytics-stage.yml
-    ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
+    ref: 4cc20c95ba4ed19ca43a910c3f79db9e10431c10
     parameters:
-      IMAGE_TAG: 1f9b4a9
+      IMAGE_TAG: 2b52499
+      REPLICAS: 3
+      MEMORY_REQUEST: 2Gi
+      MEMORY_LIMIT: 4Gi
       KAFKA_GROUPID: processor-stage
   - namespace:
       $ref: /services/insights/tower-analytics/namespaces/tower-analytics-prod.yml
-    ref: 7f7116c28a01e15410978273e4bc2285a02edff6
+    ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
     parameters:
-      IMAGE_TAG: 65973bd
+      IMAGE_TAG: a2a4f23
       REPLICAS: 3
       MEMORY_REQUEST: 2Gi
       MEMORY_LIMIT: 4Gi
@@ -75,25 +81,36 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/tower-analytics/namespaces/stage-tower-analytics-stage.yml
-    ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
+    ref: 4cc20c95ba4ed19ca43a910c3f79db9e10431c10
     parameters:
-      IMAGE_TAG: 1f9b4a9
+      IMAGE_TAG: 2b52499
   - namespace:
       $ref: /services/insights/tower-analytics/namespaces/tower-analytics-prod.yml
-    ref: f29bb48baf2c6c759ca72a1633f837d5f3bfe8e2
+    ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
     parameters:
-      IMAGE_TAG: 65973bd
-- name: tower-analytics-rules
-  path: /templates/automation-analytics/automation-analytics-rules.yaml
+      IMAGE_TAG: a2a4f23
+- name: tower-analytics-rollups
+  path: /templates/automation-analytics/automation-analytics-rollups.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
   targets:
   - namespace:
       $ref: /services/insights/tower-analytics/namespaces/stage-tower-analytics-stage.yml
-    ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
+    ref: 4cc20c95ba4ed19ca43a910c3f79db9e10431c10
     parameters:
-      IMAGE_TAG: 1f9b4a9
+      IMAGE_TAG: 2b52499
   - namespace:
       $ref: /services/insights/tower-analytics/namespaces/tower-analytics-prod.yml
-    ref: f29bb48baf2c6c759ca72a1633f837d5f3bfe8e2
+    ref: e4fedb1f3b960dcfa263c301acf6c713293ce6ab
     parameters:
-      IMAGE_TAG: 65973bd
+      IMAGE_TAG: a2a4f23
+- name: tower-analytics-metrics
+  path: /templates/automation-analytics/automation-analytics-prom-metrics.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/tower-analytics/namespaces/stage-tower-analytics-stage.yml
+    ref: b3de0312a6de178508ff1566848a89c48e3ee282
+    parameters:
+      IMAGE_TAG: 2b52499
+      IMAGE_NAME: 'quay.io/cloudservices/automation-analytics-api'
+      PROMETHEUS_PUSH_GATEWAY: prometheus-push.insights-push-stage.svc.cluster.local:9091

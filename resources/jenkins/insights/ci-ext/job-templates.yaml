@@ -1,0 +1,74 @@
+- base_templates:
+    name: insights-base-templates
+
+    gpg_verify: &gpg_verify
+        shell: |
+            # Load GPG keys from app-interface
+            python3 -m venv .
+            source bin/activate
+            pip3 install graphqlclient
+            curl -LO https://raw.githubusercontent.com/RedHatInsights/gpg-verify/master/import_gpg.py
+            python3 import_gpg.py
+
+            echo '#!/bin/sh
+            exec gpg --no-default-keyring --keyring=$PWD/git.gpg "$@"' > gitgpg
+            chmod +x gitgpg
+            git config gpg.program $PWD/gitgpg
+            git verify-commit $ghprbActualCommit
+
+            if [ $? != 0 ]; then
+                echo "GPG signature either not present or not trusted"
+                exit 1
+            fi
+
+
+- job-template:
+    id: 'insights-operator-gh-pr-check'
+    name: '{gh_org}-{gh_repo}-pr-check'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *app_interface_creds
+        - *insights_rh_registry_pull_secret
+        - *quay_secret_push
+        - *insights_minikube_ssh_key
+    <<: *gh_pr_check
+    builders:
+    - *gpg_verify
+    - *pr_check
+    - *stack_analysis
+
+
+- job-template:
+    id: 'insights-gh-pr-check'
+    name: '{gh_org}-{gh_repo}-pr-check'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_ephemeral_oc_login
+        - *app_interface_creds
+        - *insights_rh_registry_pull_secret
+        - *quay_secret_push
+    <<: *gh_pr_check
+
+- job-template:
+    id: 'insights-gh-build-master'
+    name: '{gh_org}-{gh_repo}-gh-build-{branch}'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_rh_registry_pull_secret
+        - *quay_secret_push
+    <<: *gh_build_master

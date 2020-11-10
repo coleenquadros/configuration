@@ -102,10 +102,6 @@
 
     timed_template: &timed_template
         disabled: '{disable}'
-        properties:
-        - build-discarder:
-            days-to-keep: '{days_to_keep}'
-            num-to-keep: '{num_to_keep}'
         ci_cmd: ./run.sh
         unstable_return: 80
         wrappers:
@@ -131,6 +127,14 @@
         - shell: |
             {build_tag_script_path}
 
+    slack_notify: &slack_notify
+        slack:
+            room: '{slack_channel_notification}'
+            notify-start: False
+            notify-success: True
+            notify-failure: True
+            notify-repeated-failure: True
+
 - base_templates:
     name: github-base-templates
 
@@ -138,9 +142,6 @@
         properties:
         - github:
             url: 'https://github.com/{gh_org}/{gh_repo}/'
-        - build-discarder:
-            days-to-keep: '{days_to_keep}'
-            num-to-keep: '{num_to_keep}'
 
     gh_checkout: &gh_checkout
         branch: "master"
@@ -218,9 +219,6 @@
             url: 'https://gitlab.cee.redhat.com/{gl_group}/{gl_project}.git'
         - gitlab:
             connection: 'gitlab cee'
-        - build-discarder:
-            days-to-keep: '{days_to_keep}'
-            num-to-keep: '{num_to_keep}'
 
     gl_checkout: &gl_checkout
         branch: "master"
@@ -365,7 +363,7 @@
                 -e REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem \
                 -e GITHUB_API=$GITHUB_API \
                 {qontract_reconcile_image} \
-                qontract-reconcile --config /config/config.toml --no-gql-sha-url --no-validate-schemas openshift-saas-deploy \
+                qontract-reconcile --config /config/config.toml --no-gql-sha-url openshift-saas-deploy \
                 --io-dir /artifacts \
                 --saas-file-name {saas_file_name} \
                 --env-name {env_name}
@@ -390,6 +388,8 @@
         - shell: |
             #!/bin/bash
 
+            set -e -o pipefail -o errexit
+
             # Write config.toml for reconcile tools
             mkdir -p config
             echo "$CONFIG_TOML" | base64 -d > config/config.toml
@@ -400,6 +400,7 @@
                 docker run --rm \
                     -v $WORK_DIR/config:/config:z \
                     -v /etc/pki:/etc/pki:z \
+                    -v /var/tmp/.cache:/root/.cache:z \
                     -e REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem \
                     -e GITHUB_API=$GITHUB_API \
                     -e APP_INTERFACE_STATE_BUCKET=$app_interface_state_bucket \
@@ -407,7 +408,11 @@
                     -e UNLEASH_API_URL=$UNLEASH_API_URL \
                     -e UNLEASH_CLIENT_ACCESS_TOKEN=$UNLEASH_CLIENT_ACCESS_TOKEN \
                     {qontract_reconcile_image} \
-                    qontract-reconcile --config /config/config.toml --no-validate-schemas $integration \
+                    qontract-reconcile --config /config/config.toml $integration \
                     {options} &
+                    pids+=($!)
             done
-            wait
+            
+            for pid in "${{pids[@]}}"; do
+                wait "$pid"
+            done

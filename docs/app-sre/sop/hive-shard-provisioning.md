@@ -1,6 +1,7 @@
 - [Info](#info)
 - [Process](#process)
   - [Provisioning the cluster](#provisioning-the-cluster)
+  - [Label cluster as CCS](#label-cluster-as-ccs)
   - [Provisioning Hive](#provisioning-hive)
   - [Hive Monitoring](#hive-monitoring)
   - [Provisioning OSD operators](#provisioning-osd-operators)
@@ -44,6 +45,16 @@ These instructions have been adapted from the [original google doc](https://docs
 1. Add `ClusterRoleBinding` (required?)
 
    - Example: https://issues.redhat.com/projects/OHSS/issues/OHSS-495
+
+## Label cluster as CCS
+
+1. Label cluster as CCS
+
+    Create a ticket to [OHSS](https://issues.redhat.com/secure/CreateIssue.jspa?pid=12323823&issuetype=3) requesting `ccs` on the new cluster (provide the cluster id).
+
+    Here's an [example](https://issues.redhat.com/browse/OHSS-1752)
+
+    *NOTE*: It wouldn't block it from being functional, just limit number of clusters it can provision in a day.
 
 ## Provisioning Hive
 
@@ -91,9 +102,14 @@ Take into account the following for two of the operators
 
 ##### cloud-ingress-operator
 
-Ensure that the new hive shard's egress gateway IP is listed in [`/data/services/osd-operators/cicd/saas/saas-cloud-ingress-operator.yaml`](/data/services/osd-operators/cicd/saas/saas-cloud-ingress-operator.yaml). In orther to get this, you have to access the hive shard cluster AWS account through a impersonation link and then find under VPC > Nat Gateway. There are two ways to get that link:
+Ensure that the new hive shard's egress gateway IP is listed in
+[`/data/services/osd-operators/cicd/saas/saas-cloud-ingress-operator.yaml`](/data/services/osd-operators/cicd/saas/saas-cloud-ingress-operator.yaml).
+In order to get this, you have to access the hive shard cluster AWS account
+through a impersonation link. There are two ways to get the impersonation link:
 
-* OCM console: Go to https://cloud.redhat.com/openshift, then click into your cluster and then you will get the details under "AWS infrastructure access" in the "Access Control" section
+* OCM console: Go to https://cloud.redhat.com/openshift, then click into your
+cluster and then you will get the details under "AWS infrastructure access" in
+the "Access Control" section.
 
 * `ocm` cli:
 
@@ -108,6 +124,15 @@ Ensure that the new hive shard's egress gateway IP is listed in [`/data/services
 
       ```
     **Hint**: Look for your RedHat login name
+
+Having access to the AWS console, find the egress gateway IP under:
+
+* VPC -> NAT Gateways -> Elastic IP address
+
+IMPORTANT:
+
+* The "Elastic IP address" from all NAT gateways should be listed. 
+* Add `/32` to each os the IPs in the saas file list. 
 
 ##### aws-account-operator
 
@@ -133,10 +158,63 @@ To deploy the managed-tenants SelectorSyncSets, add a target in the managed-tena
 
 ## Monitoring
 
-1. Hive and some operators are still monitored from `app-sre-prod-01`. Add scrapeconfigs here: [`/resources/observability/prometheus/prometheus-app-sre-additional-scrapeconfig.secret.yaml`](/resources/observability/prometheus/prometheus-app-sre-additional-scrapeconfig.secret.yaml). Example MR: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/8846
-1. Alerts. Example MR: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/8848
+All v4 hive shards (clusters) are monitored with their own workload prometheus, which runs in the `openshift-customer-monitoring` namespace.
 
-This may not be needed in the future, as it is being reworked in https://issues.redhat.com/browse/APPSRE-2348
+1. Check that an `openshift-customer-monitoring` namespace file exists for the specific hive cluster. This is usually done as part of [onboarding any new cluster](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/app-interface-onboard-cluster.md#step-4-observability)
+1. Use the hive monitoring boilerplate to add hive specific monitoring rules and servicemonitors to the `openshift-customer-monitoring` namespace file for the specific hive cluster:
+
+```
+# ServiceMonitor
+## Hive
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/hive/hive-controllers.servicemonitor.yaml
+  variables:
+    namespace: hive
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/osd-operators/hive-operator-generic.servicemonitor.yaml
+  variables:
+    operator_name: aws-account-operator
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/osd-operators/hive-operator-generic.servicemonitor.yaml
+  variables:
+    operator_name: certman-operator
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/osd-operators/hive-operator-generic.servicemonitor.yaml
+  variables:
+    operator_name: deadmanssnitch-operator
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/osd-operators/hive-operator-generic.servicemonitor.yaml
+  variables:
+    operator_name: pagerduty-operator
+
+
+# PrometheusRule
+## SHARDNAME
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/hive/hive-production-common.prometheusrules.yaml
+  variables:
+    shard_name: SHARDNAME
+    aws_account_operator_accounts_threshold: 4950
+    grafana_datasource: SHARDNAME-prometheus
+
+```
+
+1. Make sure you're using the correct rules depending on the environment (integration/stage/production). Pay close attention to the value for aws_account_operator_accounts_threshold, which depends on the environment.
+
+1. Make RBAC changes and allow network traffic from `openshift-customer-monitoring` on all relevant namespaces. For example, see PR: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/10168/diffs. Note that you'll need to do the same for the `hive` namespace on the cluster
+
+Post file creation checks:
+
+1. Make sure SHARDNAME is replaced by the actual shard name, for example `hivep01ue1`
+
+At this point, the monitoring is all set, and you're ready to move on to the next step
+
 
 ## Adding the shard to OCM
 

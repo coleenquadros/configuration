@@ -1,0 +1,43 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: quayio
+
+name: builder-prod
+description: prod namespace for quay builder
+
+cluster:
+  $ref: /openshift/quayio-builder/cluster.yml
+app:
+  $ref: /services/quayio/app.yml
+
+environment:
+  $ref: /products/quay/environments/production.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+- NetworkPolicy
+- EgressNetworkPolicy
+- Role
+- RoleBinding
+
+openshiftResources:
+- provider: resource
+  path: /quay-builder/serviceaccount.yaml
+- provider: resource
+  path: /quay-builder/ingress.networkpolicy.yaml
+- provider: resource
+  path: /quay-builder/egress.networkpolicy.yaml
+- provider: resource
+  path: /quay-builder/scc.role.yaml
+- provider: resource
+  path: /quay-builder/scc.rolebinding.yaml
+- provider: resource
+  path: /quay-builder/prod.serviceaccount.admin.rolebinding.yaml
+- provider: vault-secret
+  path: app-interface/quay-builder/image-pull-secret
+  version: 1
+  type: kubernetes.io/dockerconfigjson

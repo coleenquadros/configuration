@@ -1,0 +1,91 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: host-inventory
+
+name: host-inventory-stage
+description: Insights host-inventory-stage on the FedRAMP cluster under e2e-deploy/ocdeployer management
+
+cluster:
+  $ref: /openshift/crcs01ue1/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
+
+quota:
+  $ref: /services/insights/host-inventory/host-inventory-quota.yml
+
+app:
+  $ref: /services/insights/host-inventory/app.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs01ue1.yml
+- $ref: /services/insights/gateway/namespaces/fedramp-3scale-stage.yml
+#- $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
+#- $ref: /services/insights/drift/namespaces/stage-drift-stage.yml
+#- $ref: /services/insights/historical-system-profiles/namespaces/stage-historical-system-profiles-stage.yml
+#- $ref: /services/insights/system-baseline/namespaces/stage-system-baseline-stage.yml
+- $ref: /services/insights/ingress/namespaces/fedramp-ingress-stage.yml
+#- $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+- Secret
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-stage/host-inventory-stage/insights-host-delete.secret.yaml
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-stage
+  identifier: host-inventory-stage-fedramp
+  defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
+  overrides:
+    username: "insights"
+    name: "insights"
+    allocated_storage: 100
+  parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-host-inventory-stage.yml
+  output_resource_name: host-inventory-db
+  enhanced_monitoring: true
+- provider: rds
+  account: insights-stage
+  identifier: host-inventory-stage-readonly-fedramp
+  availability_zone: us-east-1d
+  defaults: /terraform/resources/insights/stage/rds/postgres10-rds-read-replica-host-inventory-stage.yml
+  parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-host-inventory-stage-read-replica.yml
+  output_resource_name: host-inventory-readonly-db
+  overrides:
+    allocated_storage: 100
+- provider: cloudwatch
+  account: insights-stage
+  identifier: host-inventory-stage-fedramp
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch-fedramp
+  

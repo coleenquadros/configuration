@@ -37,6 +37,16 @@ terraformResources:
   identifier: rhsm-subscriptions-egress-prod
   defaults: /terraform/resources/insights/stage/s3/s3-gdpr-14.yml
   output_resource_name: egress-s3
+- provider: rds
+  account: insights-prod
+  identifier: rhsm-prod
+  defaults: /terraform/resources/insights/production/rds/rds-rhsm-prod.yml
+  overrides:
+    snapshot_identifier: rhsm-prod-migration
+  enhanced_monitoring: true
+  output_resource_name: rhsm-db
+  output_resource_db_name: rhsm-subscriptions
+  parameter_group: /terraform/resources/insights/production/rds/postgres11-parameter-group-rhsm-prod.yml
 
 managedResourceTypes:
 - Secret
@@ -66,9 +76,6 @@ openshiftResources:
   version: 1
 - provider: resource
   path: /insights-prod/shared/private-image-puller.serviceaccount.yaml
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /insights-prod/rhsm/rhsm-rds.secret.yaml
 - provider: resource-template
   type: extracurlyjinja2
   path: /insights-prod/rhsm/inventory-db-readonly.secret.yaml

@@ -1,0 +1,67 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: assisted-installer-integration
+description: namespace for assisted-installer
+
+cluster:
+  $ref: /openshift/hive-integration/cluster.yml
+
+app:
+  $ref: /services/assisted-installer/app.yml
+
+environment:
+  $ref: /products/osdv4/environments/integration.yml
+
+networkPoliciesAllow:
+- $ref: /services/ocm/namespaces/uhc-integration-v3.yml
+
+managedResourceTypes:
+- ServiceAccount
+- Role
+- RoleBinding
+
+openshiftResources:
+- provider: resource
+  path: /services/assisted-installer/assisted-service.serviceaccount.yaml
+- provider: resource
+  path: /services/assisted-installer/assisted-service-job-creator.rolebinding.yaml
+- provider: resource
+  path: /services/assisted-installer/job-creator.role.yaml
+- provider: resource
+  path: /services/assisted-installer/assisted-service-leader-election.rolebinding.yaml
+- provider: resource
+  path: /services/assisted-installer/leader-election.role.yaml
+- provider: vault-secret
+  name: route53-creds
+  path: app-interface/hive-integration/assisted-installer/route53-creds
+  version: 7
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  name: assisted-installer-sso
+  path: app-interface/assisted-installer/sso/integration-v3
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  name: jenkins
+  path: app-interface/assisted-installer/jenkins/integration-v3
+  version: 1
+managedRoles: true
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: s3
+  account: app-sre
+  identifier: assisted-installer-integration
+  defaults: /terraform/resources/assisted-installer/s3-backup-1.yml
+  output_resource_name: assisted-installer-s3
+- provider: rds
+  account: app-sre
+  identifier: assisted-installer-integration
+  defaults: /terraform/resources/assisted-installer/rds-integration-1.yml
+  output_resource_name: assisted-installer-rds

@@ -1,0 +1,91 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: ingress
+  platform: insights
+
+name: ingress-clowder
+description: ingress app on the Insights Platform via clowder
+
+app:
+  $ref: /services/insights/ingress/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+managedResourceTypes:
+- ClowdApp
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  CLOWDER_ENABLED: "true"
+
+resourceTemplates:
+- name: puptoo
+  path: /deployment.yaml
+  url: https://github.com/RedHatInsights/insights-puptoo
+  targets:
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/stage-ingress-stage.yml
+    ref: master
+    upstream: RedHatInsights-insights-puptoo-gh-build-master
+    parameters:
+      MIN_REPLICAS: 4
+      ENV_NAME: stage
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/fedramp-ingress-stage.yml
+    ref: master
+    upstream: RedHatInsights-insights-puptoo-gh-build-master
+    parameters:
+      MIN_REPLICAS: 4
+      ENV_NAME: stage
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/ingress-prod.yml
+    ref: 40409bc602ed1908d838e32ccf59b689141c799f
+    parameters:
+      MIN_REPLICAS: 64
+      ENV_NAME: prod
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+    parameters:
+      MIN_REPLICAS: 1
+- name: ingress
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/insights-ingress-go
+  targets:
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/stage-ingress-stage.yml
+    ref: master
+    upstream: RedHatInsights-insights-ingress-go-gh-build-master
+    parameters:
+      ENV_NAME: stage
+      INGRESS_STAGEBUCKET: upload-stage
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/ingress-prod.yml
+    ref: 45b7558c136dfc8a35d88f49b82b3210da515e72
+    parameters:
+      ENV_NAME: prod
+      INGRESS_STAGEBUCKET: insights-ingress-prod
+      MIN_REPLICAS: 10
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+    parameters:
+      MIN_REPLICAS: 1
+

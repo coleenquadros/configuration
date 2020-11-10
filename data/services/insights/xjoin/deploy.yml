@@ -17,7 +17,7 @@ instance:
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
-  channel: team-insights-info
+  channel: team-clouddot-info
 
 managedResourceTypes:
 - Deployment
@@ -27,6 +27,7 @@ managedResourceTypes:
 - PersistentVolumeClaim
 - ConfigMap
 - Job
+- KafkaConnect
 
 imagePatterns:
 - quay.io/cloudservices
@@ -54,15 +55,27 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
-    ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
+    ref: 7fa02b687dfa77fd71ae04f0a4fec2ba0145bcc9
     parameters:
-      IMAGE_TAG: 96fb220
+      IMAGE_TAG: 7a74950
+      LOG_LEVEL: info
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/perf-xjoin-perf.yml
+    ref: 7fa02b687dfa77fd71ae04f0a4fec2ba0145bcc9
+    parameters:
+      IMAGE_TAG: 7a74950
       LOG_LEVEL: info
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
-    ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
+    ref: 7fa02b687dfa77fd71ae04f0a4fec2ba0145bcc9
     parameters:
-      IMAGE_TAG: 96fb220
+      IMAGE_TAG: 7a74950
+      LOG_LEVEL: info
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/fedramp-xjoin-stage.yml
+    ref: 7fa02b687dfa77fd71ae04f0a4fec2ba0145bcc9
+    parameters:
+      IMAGE_TAG: 7a74950
       LOG_LEVEL: info
 - name: xjoin-kafka-connect
   path: /templates/xjoin/xjoin-kafka-connect.yaml
@@ -77,9 +90,21 @@ resourceTemplates:
       CPU_REQUESTS: 500m
       MEMORY_REQUESTS: 6Gi
       CPU_LIMITS: 3
-      MEMORY_LIMITS: 10Gi
+      MEMORY_LIMITS: 8Gi
       HEAP_OPTS: -Xmx4G -Xms4G
       REST_ADVERTISED_HOST_NAME: xjoin-search.xjoin-stage.svc.cluster.local
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/perf-xjoin-perf.yml
+    ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
+    parameters:
+      IMAGE_TAG: dc96729
+      NUM_REPLICAS: 7
+      CPU_REQUESTS: 500m
+      MEMORY_REQUESTS: 6Gi
+      CPU_LIMITS: 3
+      MEMORY_LIMITS: 10Gi
+      HEAP_OPTS: -Xmx4G -Xms4G
+      REST_ADVERTISED_HOST_NAME: xjoin-search.xjoin-perf.svc.cluster.local
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
     ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
@@ -92,18 +117,40 @@ resourceTemplates:
       MEMORY_LIMITS: 10Gi
       HEAP_OPTS: -Xmx8G -Xms8G
       REST_ADVERTISED_HOST_NAME: xjoin-search.xjoin-prod.svc.cluster.local
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/fedramp-xjoin-stage.yml
+    ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
+    parameters:
+      IMAGE_TAG: dc96729
+      NUM_REPLICAS: 7
+      CPU_REQUESTS: 500m
+      MEMORY_REQUESTS: 6Gi
+      CPU_LIMITS: 3
+      MEMORY_LIMITS: 10Gi
+      HEAP_OPTS: -Xmx4G -Xms4G
+      REST_ADVERTISED_HOST_NAME: xjoin-search.xjoin-stage.svc.cluster.local
 - name: xjoin-es-exporter
   path: /templates/xjoin/xjoin-es-exporter.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
   targets:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
-    ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
+    ref: 7fa02b687dfa77fd71ae04f0a4fec2ba0145bcc9
+    parameters:
+      IMAGE_TAG: f621527
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/perf-xjoin-perf.yml
+    ref: 7fa02b687dfa77fd71ae04f0a4fec2ba0145bcc9
     parameters:
       IMAGE_TAG: f621527
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
-    ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
+    ref: 7fa02b687dfa77fd71ae04f0a4fec2ba0145bcc9
+    parameters:
+      IMAGE_TAG: f621527
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/fedramp-xjoin-stage.yml
+    ref: 7fa02b687dfa77fd71ae04f0a4fec2ba0145bcc9
     parameters:
       IMAGE_TAG: f621527
 - name: xjoin-jenkins
@@ -114,15 +161,30 @@ resourceTemplates:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-jenkins-stage.yml
     ref: master
   - namespace:
+      $ref: /services/insights/xjoin/namespaces/perf-xjoin-jenkins-perf.yml
+    ref: master
+  - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-jenkins-prod.yml
+    ref: master
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/fedramp-xjoin-jenkins-stage.yml
     ref: master
 # Execute Cyndi onboarding script on cyndi test db
 - name: cyndi-init
   path: /openshift/cyndi-init.yml
-  url: https://github.com/redhatinsights/inventory-syndication
+  url: https://github.com/RedHatInsights/inventory-syndication
   targets:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
+    ref: 1da34cd701ca9bca732e7a3eaaff516dd2b6402b
+    parameters:
+      APP_NAME: syndication-test
+      VERSION: "1"
+      APP_ROLE: postgres
+      DB_SECRET: cyndi-db-rds
+      IMAGE_TAG: "3a34b0c"
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/perf-xjoin-perf.yml
     ref: 1da34cd701ca9bca732e7a3eaaff516dd2b6402b
     parameters:
       APP_NAME: syndication-test
@@ -138,3 +200,29 @@ resourceTemplates:
       APP_ROLE: postgres
       DB_SECRET: cyndi-db-rds
       IMAGE_TAG: "3a34b0c"
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/fedramp-xjoin-stage.yml
+    ref: 1da34cd701ca9bca732e7a3eaaff516dd2b6402b
+    parameters:
+      APP_NAME: syndication-test
+      VERSION: "1"
+      APP_ROLE: postgres
+      DB_SECRET: cyndi-db-rds
+      IMAGE_TAG: "3a34b0c"
+
+- name: xjoin-kafka-connect-strimzi
+  path: /deploy/kafka-connect.yml
+  url: https://github.com/RedHatInsights/xjoin-kafka-connect
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
+    ref: master
+    upstream: RedHatInsights-xjoin-kafka-connect-gh-build-master
+    parameters:
+      KAFKA_CONNECT_IMAGE_TAG: c06acd0
+      VERSION: '2.5.0'
+      NUM_REPLICAS: '1'
+      CPU_REQUESTS: 500m
+      MEMORY_REQUESTS: 6Gi
+      CPU_LIMITS: 3
+      MEMORY_LIMITS: 8Gi

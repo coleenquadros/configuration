@@ -1,0 +1,36 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: observatorium-logs
+
+name: saas-observatorium-logs-monitoring
+description: SaaS tracking file for observatorium-logs monitoring resources
+
+app:
+  $ref: /services/observatorium-logs/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-observatorium-logs-info
+
+managedResourceTypes:
+- ServiceMonitor
+
+imagePatterns: []
+
+resourceTemplates:
+- name: observatorium-logs
+  path: /manifests/production/observatorium-logs-template.yaml
+  url: https://gitlab.cee.redhat.com/observatorium/configuration
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+    # Commit for gitlab.cee.redhat.com/observatorium/configuration repo. Keep it pinned, so we know what we can promote to production.
+    ref: c8575a48c924c86273eff9879ef12c2513d46220
+    parameters:
+      NAMESPACE: observatorium-logs-stage

@@ -50,13 +50,6 @@ openshiftResources:
   name: backoffice
   annotations:
     qontract.recycle: "true"
-- provider: vault-secret
-  path: app-sre/integrations-output/terraform-resources/insights-prod/remediations-prod/remediations-db-rds
-  version: 1
-  type: Opaque
-  name: remediations-db
-  annotations:
-    qontract.recycle: "true"
 
 managedTerraformResources: true
 
@@ -67,3 +60,12 @@ terraformResources:
   defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
   output_resource_name: cloudwatch
   es_identifier: kibana-elasticsearch
+- provider: rds
+  account: insights-prod
+  identifier: remediations-prod
+  defaults: /terraform/resources/insights/production/rds/rds-remediations-prod.yml
+  overrides:
+    snapshot_identifier: remediations-prod-migration
+  enhanced_monitoring: true
+  output_resource_name: remediations-db
+  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-remediations-prod.yml

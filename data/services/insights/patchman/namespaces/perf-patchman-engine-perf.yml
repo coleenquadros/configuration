@@ -1,0 +1,85 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: patchman
+
+name: patchman-engine-perf
+description: Insights patchman-engine-perf on the Stage cluster under app-interface management
+
+cluster:
+  $ref: /openshift/crc-stg-01/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/standard-resource-limits.yml
+
+quota:
+  $ref: /services/insights/default-quota.yml
+
+app:
+  $ref: /services/insights/patchman/app.yml
+
+environment:
+  $ref: /products/insights/environments/perf.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stg-01.yml
+#- $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+#- $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
+- $ref: /services/insights/vulnerability/namespaces/perf-vmaas-perf.yml
+- $ref: /services/insights/remediations/namespaces/perf-remediations-perf.yml
+#- $ref: /services/insights/vulnerability/namespaces/stage-vmaas-stage.yml
+- $ref: /services/insights/vulnerability/namespaces/perf-vulnerability-engine-perf.yml
+
+managedRoles: true
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-stage
+  identifier: patchman-perf
+  defaults: /terraform/resources/insights/perf/rds/postgres12-rds-1.yml
+  parameter_group: /terraform/resources/insights/perf/rds/postgres12-parameter-group-patchman-perf.yml
+  output_resource_name: patchman-db
+  enhanced_monitoring: true
+- provider: aws-iam-service-account
+  account: insights-stage
+  identifier: patchman-aws-perf
+  policies:
+  - CloudWatchReadOnlyAccess
+  output_resource_name: patchman-aws
+- provider: cloudwatch
+  account: insights-stage
+  identifier: patchman-perf
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
+  path: insights/secrets/insights-stage/patchman-engine-stage/patchman-engine-database-passwords
+  version: 4
+  type: Opaque
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/vulnerability-engine-stage/github-vulnerability-bot
+  version: 1
+  type: Opaque
+  annotations:
+    qontract.recycle: "true"

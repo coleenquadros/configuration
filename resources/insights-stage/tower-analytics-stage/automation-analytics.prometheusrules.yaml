@@ -1,0 +1,130 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: tower-analytics-stage
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: automation-analytics-stage
+    rules:
+    - alert: AutomationAnalyticsPodDown
+      expr: |
+        up{namespace="tower-analytics-stage"} == 0
+      for: 2m
+      labels:
+        severity: high
+        service: insights
+        env: stage
+        app_team: automation-analytics
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/tower-analytics-stage/deployments"
+        message: "Automation Analytics Alert. At least one automation analytics pod has been down for two minutes."
+
+    - alert: AutomationAnalyticsProcessorServiceAbsent
+      expr: absent(up{service="automation-analytics-processor", namespace="tower-analytics-stage"})
+      for: 2m
+      labels:
+        severity: high
+        service: insights
+        env: stage
+        app_team: automation-analytics
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/tower-analytics-stage/deployments"
+        message: "Automation Analytics Alert. All Processor pods have been down for two minutes."
+
+    - alert: AutomationAnalyticsFastAPIServiceAbsent
+      expr: absent(up{service="tower-analytics-backend", namespace="tower-analytics-stage"})
+      for: 2m
+      labels:
+        severity: high
+        service: insights
+        env: stage
+        app_team: automation-analytics
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/tower-analytics-stage/deployments"
+        message: "Automation Analytics Alert. All FastAPI pods have been down for two minutes."
+    
+    - alert: AutomationAnalyticsRollupServiceAbsent
+      expr: absent(up{service="automation-analytics-rollups", namespace="tower-analytics-stage"})
+      for: 2m
+      labels:
+        severity: high
+        service: insights
+        env: stage
+        app_team: automation-analytics
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/tower-analytics-stage/deployments"
+        message: "Automation Analytics Alert. All Rollup pods have been down for two minutes."
+
+    - alert: AutomationAnalyticsApiResponse5xx
+      expr: sum(rate(api_3scale_gateway_api_status{exported_service="tower-analytics",status="5xx"}[5m])) > 0
+      for: 5m
+      labels:
+        severity: medium
+        service: insights
+        env: stage
+        app_team: automation-analytics
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/tower-analytics-stage/deployments"
+        message: "Automation Analytics Alert. FastAPI 5xx responses observed in the last 5 minutes."
+
+    - alert: AutomationAnalyticsRollupsErrors
+      expr: sum(rate(ta_rollup_processor_exception_total{namespace=~"tower-analytics-stage", pod=~"automation-analytics-rollups-.*"}[5m])) > 0
+      for: 5m
+      labels:
+        severity: medium
+        service: insights
+        env: stage
+        app_team: automation-analytics
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/tower-analytics-stage/deployments"
+        message: "Automation Analytics Alert. Rollups processing errors observed in the last 5 minutes."
+
+    - alert: AutomationAnalyticsProcessorErrors
+      expr: sum(increase(ta_processor_exception_total{namespace=~"tower-analytics-stage", pod=~"automation-analytics-processor.*"}[1h])) > 10
+      for: 5m
+      labels:
+        severity: medium
+        service: insights
+        env: stage
+        app_team: automation-analytics
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/tower-analytics-stage/deployments"
+        message: "Automation Analytics Alert. More than 10 Processor errors observed in the last hour."
+
+    - alert: AutomationAnalyticsProcessorStoppedProcessing
+      expr: sum(increase(ta_processor_message_processed_total{namespace=~"tower-analytics-stage", pod=~"automation-analytics-processor.*"}[6h])) < 1
+      for: 5m
+      labels:
+        severity: medium
+        service: insights
+        env: stage
+        app_team: automation-analytics
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/tower-analytics-stage/deployments"
+        message: "Automation Analytics Alert. Processor has too low processing rate, less than 1 payload was processed for more than past 6 hours"
+
+    - alert: AutomationAnalyticsIngressRefusingPayloads
+      expr: sum(increase(ingress_responses{useragent=~"(Red Hat Ansible Tower.*)|(AWX.*)", code="202"}[6h])) < 1
+      for: 5m
+      labels:
+        severity: medium
+        service: insights
+        env: stage
+        app_team: automation-analytics
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/tower-analytics-stage/deployments"
+        message: "Automation Analytics Alert. Ingress is refusing payloads from Tower, less than 1 was accepted with code 202 for more than past 6 hours"

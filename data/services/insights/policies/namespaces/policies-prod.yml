@@ -19,6 +19,8 @@ environment:
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
 - $ref: /services/insights/gateway/namespaces/3scale-prod.yml
+- $ref: /services/insights/turnpike/namespaces/prod-turnpike-prod.yml
+
 
 managedRoles: true
 
@@ -46,16 +48,6 @@ openshiftResources:
   name: backoffice
   annotations:
     qontract.recycle: "true"
-- provider: vault-secret
-  path: app-sre/integrations-output/terraform-resources/insights-prod/policies-prod/policies-notifications-db
-  version: 1
-  annotations:
-    qontract.recycle: "true"
-- provider: vault-secret
-  path: app-sre/integrations-output/terraform-resources/insights-prod/policies-prod/policies-ui-backend-db
-  version: 1
-  annotations:
-    qontract.recycle: "true"
 
 managedTerraformResources: true
 
@@ -66,3 +58,31 @@ terraformResources:
   defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
   output_resource_name: cloudwatch
   es_identifier: kibana-elasticsearch
+- provider: rds
+  account: insights-prod
+  identifier: policies-prod
+  defaults: /terraform/resources/insights/production/rds-1.yml
+  overrides:
+    monitoring_interval: 60
+  output_resource_name: policies-db
+  enhanced_monitoring: true
+  reset_password: APPSRE-2714
+- provider: rds
+  account: insights-prod
+  identifier: policies-notifications-prod
+  defaults: /terraform/resources/insights/production/postgres11-rds-1.yml
+  overrides:
+    monitoring_interval: 60
+    name: policies_notifications
+  output_resource_name: policies-notifications-db
+  enhanced_monitoring: true
+  reset_password: APPSRE-2714
+- provider: rds
+  account: insights-prod
+  identifier: policies-ui-backend-prod
+  defaults: /terraform/resources/insights/production/postgres11-rds-1.yml
+  overrides:
+    monitoring_interval: 60
+    name: policies_ui_backend
+  output_resource_name: policies-ui-backend-db
+  enhanced_monitoring: true

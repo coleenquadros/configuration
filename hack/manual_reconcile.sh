@@ -77,14 +77,13 @@ rm -rf ${SUCCESS_DIR} ${FAIL_DIR}; mkdir -p ${SUCCESS_DIR} ${FAIL_DIR}
 cat "$CONFIG_TOML" > ${WORK_DIR}/config/config.toml
 
 # Gatekeeper. If this fails, we skip all the integrations.
-NO_GQL_SHA_URL=true NO_VALIDATE=true run_int gitlab-fork-compliance $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid app-sre && {
+NO_GQL_SHA_URL=true run_int gitlab-fork-compliance $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid app-sre && {
 
 ### gitlab-ci-skipper runs first to determine if other integrations should run
 [[ "$(run_int gitlab-ci-skipper $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid)" == "no" ]] && {
 
 ## Run integrations on production
-ALIAS=jenkins-job-builder-no-compare NO_GQL_SHA_URL=true NO_VALIDATE=true run_int jenkins-job-builder --no-compare &
-ALIAS=saas-file-owners-no-compare NO_GQL_SHA_URL=true NO_VALIDATE=true run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid --no-compare &
+ALIAS=saas-file-owners-no-compare NO_GQL_SHA_URL=true run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid --no-compare &
 
 # Prepare to run integrations on local server
 
@@ -113,16 +112,16 @@ cat "$CONFIG_TOML" \
 ## Run integrations on local server
 
 ### saas-file-owners runs first to determine how openshift-saas-deploy-wrappers should run
-NO_VALIDATE=true run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid
+VALID_SAAS_FILE_CHANGES_ONLY=$(run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid)
 
 ### vault integration
-run_vault_reconcile_integration &
+[[ "$VALID_SAAS_FILE_CHANGES_ONLY" == "no" ]] && run_vault_reconcile_integration &
 
 ### openshift-saas-deploy only runs if the MR title contains "saas-deploy-full"
-[[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"saas-deploy-full"* ]] && NO_VALIDATE=true run_int openshift-saas-deploy &
+[[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"saas-deploy-full"* ]] && run_int openshift-saas-deploy &
 
 # run integrations based on their pr_check definitions
-python $CURRENT_DIR/select-integrations.py ${DATAFILES_BUNDLE} > $TEMP_DIR/integrations.sh
+python $CURRENT_DIR/select-integrations.py ${DATAFILES_BUNDLE} ${VALID_SAAS_FILE_CHANGES_ONLY} > $TEMP_DIR/integrations.sh
 exit_status=$?
 if [ $exit_status != 0 ]; then
   exit $exit_status

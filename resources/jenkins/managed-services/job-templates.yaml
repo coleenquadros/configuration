@@ -1,0 +1,209 @@
+- job-template:
+    id: gl-pr-check-managed-services
+    name: "{gl_group}-{gl_project}-gl-pr-check"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *app_interface_creds
+            - *quay_secret_push
+            - *ci_ocm_token
+            - *ci_aws_keys
+    <<: *gl_pr_check
+    artifacts_path: 'test-results/**'
+    publishers:
+    - archive:
+        artifacts: '{artifacts_path}'
+        allow-empty: true
+
+- job-template:
+    id: managed-kafka-pull-upstream
+    name: 'managed-kafka-pull-upstream-{type}'
+    description: "pipeline will pull changes from upstream UPSTREAM_BRANCH and merge them to MIDSTREAM_BASE_BRANCH, then it will create MR to MIDSTREAM_TARGET_BRANCH"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *app_sre_bot_push_token
+    publishers:
+      - <<: *slack_notify
+    parameters:
+      - string:
+          name: UPSTREAM_BRANCH
+          default: ''
+          description: '[REQUIRED] upstream branch (https://github.com/strimzi/strimzi-kafka-operator)'
+      - string:
+          name: MIDSTREAM_BASE_BRANCH
+          default: ''
+          description: '[REQUIRED] midstream base branch (https://gitlab.cee.redhat.com/mk-ci-cd/strimzi-operator)'
+      - string:
+          name: MIDSTREAM_TARGET_BRANCH
+          default: ''
+          description: "[REQUIRED] midstream target branch for MR"
+    <<: *gl_timed
+    
+    
+- job-template:   
+    id: 'managed-kafka-performance'
+    name: 'managed-kafka-performance-{mk_perf_type}'
+    wrappers:
+    - timestamps
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *ci_ocm_token
+        - *ci_aws_keys
+        - *ci_observatorium
+    parameters:
+    - string:
+        name: TESTCASE
+        default: '{mk_perf_test}'
+        description: 'maven parameter for executing specific tests'
+    - string:
+        name: KAFKA_WORKER_COUNT
+        default: '17'
+        description: 'count of worker nodes for kafka cluster'
+    - string:
+        name: OMB_WORKER_COUNT
+        default: '10'
+        description: 'count of worker nodes for OMB cluster'
+    - string:
+        name: FLAVOR
+        default: 'm5.4xlarge'
+        description: 'OSD aws node flavor'
+    - string:
+        name: REGION
+        default: 'us-east-2'
+        description: 'OSD aws region'
+    - string:
+        name: MULTI_AZ
+        default: 'false'
+        description: 'aws multi availablility for osd cluster'
+    <<: *gl_checkout
+    builders:
+      - shell: "make ci/pipeline"
+    publishers:
+    - archive:
+        artifacts: 'target/logs/**,target/surefire-reports/**'
+        allow-empty: true
+    - <<: *slack_notify
+    - postbuildscript:
+        builders:
+            - role: SLAVE
+              build-on:
+                - NOT_BUILT
+                - ABORTED
+                - FAILURE
+              build-steps:
+                - shell: "make ci/pipeline/cleanup"
+
+- job-template:
+    id: managed-kafka-security-scan
+    name: "managed-kafka-security-scan"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *mk_security_scan_token
+    <<: *gl_timed
+    publishers:
+    - archive:
+        artifacts: 'logs/*.txt'
+        allow-empty: true
+    - <<: *slack_notify
+
+- job-template:
+    id: managed-kafka-chaos
+    name: "managed-kafka-chaos"
+    wrappers:
+      - timestamps
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+    parameters:
+    - string:
+        name: OSD_CLUSTER_API
+        default: ''
+        description: '[REQUIRED] api server of the osd cluster hosting the managed kafka service'
+    - password:
+        name: OSD_API_TOKEN
+        default: ''
+        description: '[REQUIRED] kubeadmin token for osd cluster'
+    <<: *gh_checkout
+    builders:
+      - shell: |
+          oc login --server=$OSD_CLUSTER_API --token=$OSD_API_TOKEN --insecure-skip-tls-verify
+          cd install
+          make test/chaos
+    artifacts_path: 'chaos-results/**'
+    publishers:
+    - archive:
+        artifacts: '{artifacts_path}'
+        allow-empty: true
+
+- job-template:
+    id: strimzi-operator-test
+    name: "strimzi-operator-test"
+    wrappers: 
+    - timestamps
+    - timeout_wrapper:
+        timeout: "{timeout}"
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+          - *app_interface_creds
+          - *quay_secret_push
+          - *ci_ocm_token
+          - *ci_aws_keys
+    parameters:
+    - choice:
+        name: TEST_GROUP
+        choices:
+          - acceptance
+          - regression
+          - smoke
+          - acceptance,regression
+          - acceptance,smoke
+          - regression,smoke
+          - acceptance,regression,smoke
+        description: 'Select the test-group to be executed'
+    - string:
+        name: EXCLUDED_GROUPS
+        default: 'loadbalancer,nodeport,connectcomponents,connectoperator,mirrormaker,bridge,cruisecontrol'
+        description: 'Mention the test-group to be skipped'
+    - string:
+        name: OSD_CLUSTER_NAME
+        default: 'sob-test-$BUILD_NUMBER'
+        description: 'Name of the cluster to be provisioned'
+    <<: *gl_checkout
+    builders: 
+    - shell: ./pr_check.sh
+    artifacts_path: 'test-results/**'
+    publishers:
+    - archive:
+        artifacts: '{artifacts_path}'
+        allow-empty: true
+
+- job-template:
+    id: 'gl-build-master-strimzi'
+    name: '{gl_group}-{gl_project}-gl-build-{branch}'
+    wrappers:
+        - vault-secrets:
+            <<: *vault_defaults
+            secrets:
+            - *ci_jenkins_token
+            - *gitlab_token
+    <<: *gl_build_master

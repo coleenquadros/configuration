@@ -7,6 +7,7 @@
         secrets:
         - *osde2e-aws-access
         - *osde2e-datahub
+        - *app_sre_push_gateway
     <<: *gh_timed
 - job-template:
     id: 'osde2e-weather-report'
@@ -46,3 +47,19 @@
         - *osde2e-datahub
         - *osde2e-slack
     <<: *gh_timed
+- job-template:
+    id: 'osde2e-trigger-jobs'
+    name: 'osde2e-trigger-jobs'
+    wrappers:
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *app_sre_ci_trigger_jobs_bot
+    triggers:
+    - reverse:
+        jobs: '{upstream}'
+        results: 'success'
+    builders:
+    - shell:
+        command: "{ci_cmd}"
+    <<: *gh_checkout

@@ -1,0 +1,21 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2020-10-22-patch-package-systems
+namespace:
+  $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
+identifier: patchman-prod
+output: stdout
+query: |
+  EXPLAIN (ANALYZE, COSTS, VERBOSE, BUFFERS, FORMAT JSON)
+  SELECT sp.inventory_id             as id,
+        p.evra                       as installed_evra,
+        spkg.latest_evra             as available_evra,
+        spkg.latest_evra IS NOT NULL as updatable
+  FROM system_platform sp
+          inner join system_package spkg on spkg.system_id = sp.id and sp.stale = false and sp.rh_account_id = 10
+          inner join package p on p.id = spkg.package_id
+          inner join package_name pn on pn.id = p.name_id
+  WHERE (spkg.rh_account_id = 10)
+    AND (pn.name = 'kernel')
+  ORDER BY sp.inventory_id ASC;

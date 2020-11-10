@@ -1,0 +1,81 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: xjoin
+  platform: insights
+
+name: cyndi
+description: cyndi app on the Insights Platform
+
+app:
+  $ref: /services/insights/xjoin/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+managedResourceTypes:
+- CatalogSource
+- OperatorGroup
+- Subscription
+- ConfigMap
+- Service
+- CyndiPipeline
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+
+parameters:
+  VALIDATION_THRESHOLD: "1"
+  INSIGHTS_ONLY: "true"
+
+resourceTemplates:
+- name: cyndi-operator
+  path: /deploy/operator.yml
+  url: https://github.com/RedHatInsights/cyndi-operator
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
+    ref: master
+    upstream: RedHatInsights-cyndi-operator-gh-build-catalog-master-upstream-RedHatInsights-cyndi-operator-gh-build-master
+    parameters:
+      TARGET_NAMESPACE: xjoin-stage
+      RECONCILE_INTERVAL: "120"
+      VALIDATION_INTERVAL: "1800"
+      VALIDATION_ATTEMPTS_THRESHOLD: "2"
+      VALIDATION_ATTEMPTS_THRESHOLD_INIT: "15"
+
+- name: cyndi-pipeline-test
+  path: /deploy/pipeline.yml
+  url: https://github.com/RedHatInsights/cyndi-operator
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
+    ref: master
+    upstream: RedHatInsights-cyndi-operator-gh-build-master
+    parameters:
+      APP_NAME: syndication-test
+
+- name: advisor-pipeline
+  path: /deploy/pipeline.yml
+  url: https://github.com/RedHatInsights/cyndi-operator
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
+    ref: master
+    upstream: RedHatInsights-cyndi-operator-gh-build-master
+    parameters:
+      APP_NAME: advisor

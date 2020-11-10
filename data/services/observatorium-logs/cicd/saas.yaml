@@ -1,0 +1,110 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: observatorium-logs
+
+name: saas-observatorium-logs
+description: SaaS tracking file for Observatorium Logs services
+
+app:
+  $ref: /services/observatorium-logs/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-observatorium-logs-info
+
+authentication:
+  image:
+    path: app-sre/ci-int/redhat-registry-io-pull
+    field: all
+
+managedResourceTypes:
+- Deployment
+- Service
+- ConfigMap
+- StatefulSet
+- Role
+- RoleBinding
+- ServiceAccount
+- PodDisruptionBudget
+- PersistentVolumeClaim
+
+imagePatterns:
+- quay.io/observatorium
+- quay.io/app-sre
+- quay.io/prometheus/memcached-exporter
+- registry.redhat.io/rhel8/memcached
+- quay.io/jpkroehling/all-in-one
+- quay.io/app-sre/loki
+
+resourceTemplates:
+- name: observatorium-logs
+  path: /manifests/production/observatorium-logs-template.yaml
+  url: https://gitlab.cee.redhat.com/observatorium/configuration
+  parameters:
+    JAEGER_AGENT_IMAGE: quay.io/app-sre/jaegertracing-jaeger-agent
+    STORAGE_CLASS: "gp2"
+    AUTHORIZE_URL: ${OCM_BASE_URL}/api/accounts_mgmt/v1/cluster_registrations
+  targets:
+  - namespace:
+      $ref: /services/observatorium-logs/namespaces/observatorium-logs-stage.yml
+    # Commit for gitlab.cee.redhat.com/observatorium/configuration repo. Keep it pinned, so we know what we can promote to production.
+    ref: c8575a48c924c86273eff9879ef12c2513d46220
+    parameters:
+      NAMESPACE: observatorium-logs-stage
+      JAEGER_AGENT_IMAGE_TAG: 1.16.0
+      JAEGER_COLLECTOR_NAMESPACE: telemeter-stage
+      JAEGER_PROXY_CPU_REQUEST: '100m'
+      JAEGER_PROXY_CPU_LIMITS: '200m'
+      JAEGER_PROXY_MEMORY_REQUEST: '100Mi'
+      JAEGER_PROXY_MEMORY_LIMITS: '200Mi'
+      MEMCACHED_IMAGE: registry.redhat.io/rhel8/memcached
+      MEMCACHED_IMAGE_TAG: 1.5
+      MEMCACHED_EXPORTER_IMAGE: quay.io/prometheus/memcached-exporter
+      MEMCACHED_EXPORTER_IMAGE_TAG: v0.6.0
+      MEMCACHED_CPU_REQUEST: '500m'
+      MEMCACHED_CPU_LIMIT: '3000m'
+      MEMCACHED_MEMORY_REQUEST: '1329Mi'
+      MEMCACHED_MEMORY_LIMIT: '1844Mi'
+      MEMCACHED_EXPORTER_CPU_REQUEST: '50m'
+      MEMCACHED_EXPORTER_CPU_LIMIT: '200m'
+      MEMCACHED_EXPORTER_MEMORY_REQUEST: '50Mi'
+      MEMCACHED_EXPORTER_MEMORY_LIMIT: '200Mi'
+      LOKI_IMAGE_TAG: 2.0.0
+      LOKI_IMAGE: quay.io/app-sre/loki
+      LOKI_S3_SECRET: observatorium-logs-stage-s3
+      LOKI_COMPACTOR_CPU_REQUESTS: '500m'
+      LOKI_COMPACTOR_CPU_LIMITS: '1000m'
+      LOKI_COMPACTOR_MEMORY_REQUESTS: '2Gi'
+      LOKI_COMPACTOR_MEMORY_LIMITS: '4Gi'
+      LOKI_DISTRIBUTOR_REPLICAS: 2
+      LOKI_DISTRIBUTOR_CPU_REQUESTS: '500m'
+      LOKI_DISTRIBUTOR_CPU_LIMITS: '1000m'
+      LOKI_DISTRIBUTOR_MEMORY_REQUESTS: '500Mi'
+      LOKI_DISTRIBUTOR_MEMORY_LIMITS: '1Gi'
+      LOKI_INGESTER_REPLICAS: 2
+      LOKI_INGESTER_CPU_REQUESTS: '1200m'
+      LOKI_INGESTER_CPU_LIMITS: '2000m'
+      LOKI_INGESTER_MEMORY_REQUESTS: '5Gi'
+      LOKI_INGESTER_MEMORY_LIMITS: '10Gi'
+      LOKI_QUERIER_REPLICAS: 2
+      LOKI_QUERIER_CPU_REQUESTS: '500m'
+      LOKI_QUERIER_CPU_LIMITS: '500m'
+      LOKI_QUERIER_MEMORY_REQUESTS: '600Mi'
+      LOKI_QUERIER_MEMORY_LIMITS: '1200Mi'
+      LOKI_QUERY_FRONTEND_REPLICAS: 2
+      LOKI_QUERY_FRONTEND_CPU_REQUESTS: '500m'
+      LOKI_QUERY_FRONTEND_CPU_LIMITS: '500m'
+      LOKI_QUERY_FRONTEND_MEMORY_REQUESTS: '600Mi'
+      LOKI_QUERY_FRONTEND_MEMORY_LIMITS: '1200Mi'
+      LOKI_QUERY_CONCURRENCY: 32
+      LOKI_QUERY_FRONTEND_PARALLELISM: 2
+      LOKI_CHUNK_CACHE_REPLICAS: 2
+      LOKI_INDEX_QUERY_CACHE_REPLICAS: 2
+      LOKI_RESULTS_CACHE_REPLICAS: 2
+      LOKI_PVC_REQUEST: '50Gi'

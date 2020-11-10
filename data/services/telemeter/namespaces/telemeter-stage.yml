@@ -17,6 +17,7 @@ environment:
 
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+- $ref: /services/observatorium-logs/namespaces/observatorium-logs-stage.yml
 
 grafanaUrl: https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-stage-prometheus&var-cluster=app-sre-stage&var-namespace=telemeter-stage
 
@@ -36,11 +37,6 @@ terraformResources:
   identifier: telemeter-thanos-stage
   defaults: /terraform/resources/s3-private-1.yml
   output_resource_name: telemeter-thanos-stage-s3
-- provider: s3
-  account: app-sre
-  identifier: telemeter-loki-stage
-  defaults: /terraform/resources/s3-private-1.yml
-  output_resource_name: telemeter-loki-stage-s3
 
 openshiftResources:
 - provider: vault-secret
@@ -50,7 +46,9 @@ openshiftResources:
     k8s-app: prometheus-telemeter
 - provider: vault-secret
   path: app-interface/app-sre-stage/telemeter-stage/telemeter-server
-  version: 3
+  version: 4
+  annotations:
+    qontract.recycle: "true"
 - provider: vault-secret
   path: app-interface/app-sre-stage/telemeter-stage/thanos-objectstorage
   version: 1
@@ -129,7 +127,7 @@ openshiftResources:
   version: 1
 - provider: vault-secret
   path: app-interface/app-sre-stage/telemeter-stage/observatorium-observatorium-api
-  version: 8
+  version: 15
   annotations:
     qontract.recycle: "true"
 

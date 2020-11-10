@@ -17,7 +17,7 @@ instance:
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
-  channel: team-insights-info
+  channel: team-clouddot-info
 
 managedResourceTypes:
 - Deployment
@@ -46,14 +46,14 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/advisor/namespaces/stage-advisor-stage.yml
-    ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
+    ref: master
     parameters:
-      IMAGE_TAG: 01eb1d9
+      IMAGE_TAG: f0b3273
   - namespace:
       $ref: /services/insights/advisor/namespaces/advisor-prod.yml
-    ref: d4a263276c3028f6c2f85c986affd3d988a65cd2
+    ref: f144cf30b41280c66283ad80414c66a12363217c
     parameters:
-      IMAGE_TAG: 01eb1d9
+      IMAGE_TAG: f0b3273
 - name: insights-advisor-service
   path: /templates/advisor/insights-advisor-service.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
@@ -64,19 +64,19 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/advisor/namespaces/stage-advisor-stage.yml
-    ref: fd3aec883ca19f58ac670dfb16961825a83fdb56
+    ref: 0037566d9862f701acbfeaf3f524fbcfe24f0501
     parameters:
       ADVISOR_ENV: stage
-      IMAGE_TAG: 2928666
+      IMAGE_TAG: 9937a10
       CW_LOG_STREAM: advisor-stage
       MAX_REPLICAS: 5
       MIN_REPLICAS: 5
   - namespace:
       $ref: /services/insights/advisor/namespaces/advisor-prod.yml
-    ref: fd3aec883ca19f58ac670dfb16961825a83fdb56
+    ref: 0037566d9862f701acbfeaf3f524fbcfe24f0501
     parameters:
       ADVISOR_ENV: prod
-      IMAGE_TAG: 2928666
+      IMAGE_TAG: 9937a10
       CW_LOG_STREAM: advisor-prod
       MAX_REPLICAS: 10
       MIN_REPLICAS: 10
@@ -93,30 +93,32 @@ resourceTemplates:
     SUSPEND_VACUUM_JOB: 'false'
     SUSPEND_WARM_CACHE: 'true'
     SUSPEND_WEEKLY_REPORT_JOB: 'true'
+    MIDDLEWARE_HOST_URL: ''
     USE_CLOUDWATCH_LOGGING: 'true'
     USE_NEWRELIC: 'true'
     USE_PROMETHEUS: 'true'
   targets:
   - namespace:
       $ref: /services/insights/advisor/namespaces/stage-advisor-stage.yml
-    ref: 7aa2e2de284dd75a919bf7be992bf9a353a33032
+    ref: master
     parameters:
-      IMAGE_TAG: 01bebc2
+      IMAGE_TAG: 9cafe8b
       CW_LOG_STREAM: advisor-stage
       PROMETHEUS_PUSHGATEWAY: prometheus-push.insights-push-stage.svc.cluster.local:9091
   - namespace:
       $ref: /services/insights/advisor/namespaces/advisor-prod.yml
-    ref: 7aa2e2de284dd75a919bf7be992bf9a353a33032
+    ref: ecf0583ad57adb26abbdbe3acf482e40fb64b9e2
     parameters:
-      IMAGE_TAG: 01bebc2
+      IMAGE_TAG: 9cafe8b
       CW_LOG_STREAM: advisor-prod
       SUSPEND_WEEKLY_REPORT_JOB: 'false'
-      SUSPEND_COMPARE_ACTIVE_RULES: 'false'
+      MIDDLEWARE_HOST_URL: https://${BACKOFFICE_HOST}/v1
       PROMETHEUS_PUSHGATEWAY: prometheus-push.insights-push-prod.svc.cluster.local:9091
-      CLASSIC_URL: https://insights-api-insights-prod.1b13.insights.openshiftapps.com/r/insights/v3/rules/
+      SUSPEND_COMPARE_ACTIVE_RULES: 'false'
+      WEEKLY_REPORT_JOB_SCHEDULE: "1 11 * * 1"
 - name: cyndi-init
   path: /openshift/cyndi-init.yml
-  url: https://github.com/redhatinsights/inventory-syndication
+  url: https://github.com/RedHatInsights/inventory-syndication
   targets:
   - namespace:
       $ref: /services/insights/advisor/namespaces/stage-advisor-stage.yml

@@ -6,26 +6,24 @@ labels:
   platform: insights
 
 name: clowder
-description: Deploy clowder OLM resources
+description: Deploy clowder OLM resources and ClowdEnvironment
 
 app:
   $ref: /services/insights/clowder/app.yml
 
 instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+  $ref: /dependencies/ci-ext/ci-ext.yml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
-  channel: team-insights-info
+  channel: team-clouddot-info
 
 managedResourceTypes:
 - CatalogSource
 - OperatorGroup
 - Subscription
-
-imagePatterns:
-- quay.io/cloudservices
+- ClowdEnvironment
 
 authentication:
   image:
@@ -35,6 +33,9 @@ authentication:
     path: app-sre/creds/github-app-sre-bot
     field: openshift-saas-deploy
 
+imagePatterns:
+- quay.io/cloudservices/clowder
+
 resourceTemplates:
 - name: olm
   path: /bundle/olm-bundle.yml
@@ -43,4 +44,27 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/clowder/namespaces/stage-research.yml
     ref: master
-    upstream: RedHatInsights-clowder-gh-build-master
+    upstream: RedHatInsights-clowder-gh-build-catalog-master-upstream-RedHatInsights-clowder-gh-build-master
+    parameters:
+      TARGET_NAMESPACE: clowder-system
+  - namespace:
+      $ref: /services/insights/clowder/namespaces/stage.yml
+    ref: master
+    upstream: RedHatInsights-clowder-gh-build-catalog-master-upstream-RedHatInsights-clowder-gh-build-master
+  - namespace:
+      $ref: /services/insights/clowder/namespaces/prod.yml
+    ref: 8ff0713bb4c34d31fe62e2dca5f62e591dc4c62e
+- name: clowder-env
+  path: /env.yml
+  url: https://gitlab.cee.redhat.com/insights-platform/clowd-environments
+  targets:
+  - namespace:
+      $ref: /services/insights/clowder/namespaces/stage.yml
+    ref: master
+    parameters:
+      ENV_NAME: stage
+  - namespace:
+      $ref: /services/insights/clowder/namespaces/prod.yml
+    ref: 3bbb1874eacccdeefa6ddede88fa4cac66bbc9ca
+    parameters:
+      ENV_NAME: prod

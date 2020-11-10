@@ -4,12 +4,15 @@ $schema: /dependencies/jenkins-config-1.yml
 labels:
   service: deployment-validation-operator
 
-name: ci-ext-deployment-validation-operator-jobs
+name: ci-int-deployment-validation-operator-jobs
 
 description: ''
 
+app:
+  $ref: /services/deployment-validation-operator/app.yml
+
 instance:
-  $ref: /dependencies/ci-ext/ci-ext.yml
+  $ref: /dependencies/ci-int/ci-int.yml
 
 type: jobs
 
@@ -23,12 +26,10 @@ config:
     quay_org: app-sre
     jobs:
     - 'gh-build-master':
+        node: app-interface # the only place where I can install pyyaml with python3
         display_name: deployment-validation-operator build master
+        build_deploy_script_path: make build-push
     - 'gh-pr-check':
         display_name: deployment-validation-operator pr-check
         timeout: 300
-    - 'gh-build-catalog-master-with-upstream':
-        display_name: deployment-valdation-opreator catalog build master
-        upstream: app-sre-deployment-validation-operator-gh-build-master
-        bundle_image: quay.io/app-sre/deployment-validation-operator-bundle
-        catalog_image: quay.io/app-sre/deployment-validation-operator-catalog
+        pr_check_script_path: "./hack/pr_check.sh"

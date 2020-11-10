@@ -4,24 +4,32 @@ $schema: /dependencies/jenkins-config-1.yml
 labels:
   service: clowder
 
-name: ci-int-clowder-jobs
-description: clowder ci-int jobs
+name: ci-ext-clowder-jobs
+description: clowder ci-ext jobs
+
+app:
+  $ref: /services/insights/clowder/app.yml
 
 instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+  $ref: /dependencies/ci-ext/ci-ext.yml
 
 type: jobs
 
 config:
-  - project:
-      name: clowder-stage
-      label: insights
-      node: insights
-      gh_org: RedHatInsights
-      gh_repo: clowder
-      quay_org: cloudservices
-      jobs:
-        - "gh-pr-check":
-            display_name: clowder pr-check
-        - "gh-build-master":
-            display_name: clowder build-master
+- project:
+    name: clowder-stage
+    label: insights
+    node: insights
+    gh_org: RedHatInsights
+    gh_repo: clowder
+    quay_org: cloudservices
+    jobs:
+    - "insights-operator-gh-pr-check":
+        display_name: clowder pr-check
+    - "gh-build-master":
+        display_name: clowder build-master
+    - 'gh-build-catalog-master-with-upstream':
+        display_name: clowder catalog build master
+        upstream: RedHatInsights-clowder-gh-build-master
+        bundle_image: quay.io/cloudservices/clowder-bundle
+        catalog_image: quay.io/cloudservices/clowder-index

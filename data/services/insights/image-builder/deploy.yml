@@ -1,0 +1,74 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: image-builder
+  platform: insights
+
+name: image-builder
+description: image-builder service deployment
+
+# We reference our app definition here
+app:
+  $ref: /services/insights/image-builder/app.yml
+
+# Deploys are carried out by a Jenkins job. We have to specify which Jenkins
+# instance will do our deploys for us.
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+# Every time a deploy is attempted, updates are fed to the CoreOS Slack instance
+# in the #team-insights-info channel.
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+# Like in the namespace definition, for integrity purposes, we enumerate what
+# types of OpenShift resources we're expecting to be created in the templates
+managedResourceTypes:
+  - ConfigMap
+  - Deployment
+  - DeploymentConfig
+  - Service
+
+# For integrity purposes, we enumerate here what container image registry path
+# patterns we are expecting to exist in our OpenShift template. Usually you
+# would only include quay.io/cloudservices here. If you want to use stock images
+# for other services, it is recommended you mirror them to Quay by listing them
+# in your app.yml
+imagePatterns:
+  - quay.io/cloudservices
+
+# The authentication section is for providing the deploy integrations with the
+# credentials they'd need to validate and perform a deploy.
+authentication: {}
+
+# Here we list the templates that go into deploying into our various
+# clusters, along with the parameters that go into processing the templates.
+resourceTemplates:
+- name: image-builder
+  # The URL of the Git repo where the OpenShift template can be found
+  url: https://github.com/osbuild/image-builder
+  # The path in the repository where the OpenShift template can be found
+  path: /templates/image-builder.yml
+  targets:
+  # For each namespace we want to deploy this app into, create a target
+    - namespace:
+        $ref: /services/insights/image-builder/namespaces/stage-image-builder-stage.yml
+      # The ref in the Git repo from which to find the version of the template to
+      # deploy
+      ref: master
+      # We can't deploy the new version of the container until it is built, so to
+      # make sure our deploy job waits until that build is complete, we specify
+      # the name of the Jenkins job that performs the build for us. It's the
+      # composition of the values of the gh_org, gh_repo, and build job name
+      # from our build.yml file
+      upstream: osbuild-image-builder-gh-build-master
+      parameters:
+        # Parameters for the OpenShift template processing. These also inherit
+        # all values from the environment you're deploying into as well as a
+        # special IMAGE_TAG parameter matching the first 7 characters of the
+        # revision ID in the repository referenced by url above. You can override
+        # any of those if you must
+        EXAMPLE: "Example data"

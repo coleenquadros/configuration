@@ -58,6 +58,7 @@ this repository.
       - [Manage AWS Certificate via App-Interface (`/openshift/namespace-1.yml`)](#manage-aws-certificate-via-app-interface-openshiftnamespace-1yml)
       - [Manage ElasticSearch via App-Interface (`/openshift/namespace-1.yml`)](#manage-elasticsearch-via-app-interface-openshiftnamespace-1yml)
       - [Manage RDS databases via App-Interface (`/openshift/namespace-1.yml`)](#manage-rds-databases-via-app-interface-openshiftnamespace-1yml)
+        - [Reset RDS database password](#reset-rds-database-password)
         - [Create RDS database from Snapshot](#create-rds-database-from-snapshot)
         - [Publishing Database Log Files to CloudWatch](#publishing-database-log-files-to-cloudwatch)
         - [Publishing MySQL Logs to CloudWatch Logs](#publishing-mysql-logs-to-cloudwatch-logs)
@@ -971,8 +972,6 @@ $ gpg --full-generate-key
       6. At the confirmation prompt, enter the letter O to continue if all entries are correct, or use the other options to fix any problems.
       7. Finally, enter a passphrase for your secret key. The gpg program asks you to enter your passphrase twice to ensure you made no typing errors.
 5. Use the `gpg --list-secret-keys --keyid-format LONG` command to list GPG keys for which you have both a public and private key.
-6. Export the public key using the command `gpg --armor --export YOUR_KEY_ID`.
-7. Copy your GPG key, beginning with `-----BEGIN PGP PUBLIC KEY BLOCK-----` and ending with `-----END PGP PUBLIC KEY BLOCK-----` and publish the  key on [pgp.mit.edu](https://pgp.mit.edu/).
 
 #### Adding your public GPG key
 
@@ -1080,6 +1079,8 @@ In order to create or update an RDS database, you need to add them to the `terra
     - For example, for a resource with `identifier` "my-instance" and `provider` "rds", the created Secret will be called `my-instance-rds`.
 - `enhanced_monitoring`: (optional) Setting it to `true` will enable enhanced monitoring for the database instance. Learn more about enhanced monitoring [here](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_Monitoring.OS.html).
 - `output_resource_db_name`: (optional) set the `db.name` key in the output Secret (does not affect actual terraform resource).
+- `reset_password`: (optional) add or update this field to a random string to trigger a database password reset.
+  - Note: removing this field will lead to a recycle of the pods using the output resource.
 
 Once the changes are merged, the RDS instance will be created (or updated) and a Kubernetes Secret will be created in the same namespace with following details.
 
@@ -1088,6 +1089,14 @@ Once the changes are merged, the RDS instance will be created (or updated) and a
 - `db.name` - The database name.
 - `db.user` - The master username for the database.
 - `db.password` - Password for the master DB user.
+
+##### Reset RDS database password
+
+To reset the password of an RDS instance, add the `reset_password` field to the RDS definition according to the instructions in [Manage RDS databases via App-Interface](#manage-rds-databases-via-app-interface-openshiftnamespace-1yml).
+
+Choose a value that represents a trace to why the password should be recycled (for example, a Jira ticket).
+
+Note: You do not need to remove the `reset_password` field from the RDS definition once the password was recycled.
 
 ##### Create RDS database from Snapshot
 
@@ -1501,7 +1510,7 @@ Examples:
 - `jobs` - [object](/data/services/app-interface/cicd/ci-int/jobs.yaml)
 
 All JJB configurations rely on a set of JJB entities for the corresponding Jenkins intance:
-- `global` - [resources](/resources/jenkins/common/)
+- `global` - [resources](/resources/jenkins/global/)
 - `ci-int` - [object](/data/services/jenkins/cicd/ci-int/), [resources](/resources/jenkins/ci-int/)
 - `ci-ext` - [object](/data/services/jenkins/cicd/ci-ext/), [resources](/resources/jenkins/ci-ext/)
 - `ci-centos` - [object](/data/services/jenkins/cicd/ci-centos/), [resources](/resources/jenkins/ci-centos/)
@@ -1628,6 +1637,7 @@ namespace:
   $ref: /services/<service>/namespaces/<namespace>.yml
 identifier: <RDS resource identifier (same as defined in the namespace)>
 output: <filesystem or stdout>
+schedule: <if defined the output resource will be a CronJob instead of a Job>
 query: <sql query>
 ```
 
@@ -1647,7 +1657,7 @@ query: |
 ```
 
 When that SQL Query specification is merged, the integration will create a
-Job in the namespace provided:
+Job (or a CronJob if `schedule` is defined) in the namespace provided:
 
 ```bash
 $ oc get pods | grep 2020-01-30-account-manager-registries-stage

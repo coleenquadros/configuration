@@ -13,68 +13,62 @@ spec:
     interval: 1m
     rules:
 
-    - alert: Patchman5xx
+    - alert: PatchmanAlert5xx
       expr: sum(rate(patchman_engine_requests_total{code=~"5.*"}[5m])) by (kubernetes_namespace) > 0
+      annotations:
+        message: '5xx responses observed ({{ $value }})'
       labels:
         severity: info
         service: insights
         env: prod
         app_team: patch
-      annotations:
-        summary: '{{ $labels.kubernetes_namespace }} 5xx :rain_cloud:'
-        description: '5xx responses observed'
 
-    - alert: PatchmanKafkaLag
+    - alert: PatchmanAlertKafkaLag
       expr: sum(kafka_consumergroup_group_topic_sum_lag{group="patchman", topic=~"platform.inventory.events|patchman.evaluator.upload"}) by (topic) > 4000
       for: 5m
+      annotations:
+        message: 'patchman-engine lag > 4000, topic: {{ $labels.topic }}, current lag: {{ $value  }}'
       labels:
         severity: info
         service: insights
         env: prod
         app_team: patch
-      annotations:
-        summary: 'patchman-engine lag > 4000'
-        description: 'topic: {{ $labels.topic }}, current lag: {{ $value  }}'
 
-    - alert: PatchmanExternalService
+    - alert: PatchmanAlertExternalService
       expr: sum(delta(patchman_engine_manager_dependency_call{ namespace="patchman-engine-prod" }[5m])) by (name, status) > 10
       for: 5m
+      annotations:
+        message: 'External service failing ({{ $labels.name }} - {{ $labels.status }})'
       labels:
         severity: info
         service: insights
         env: prod
         app_team: patch
-      annotations:
-        summary: '{{ $labels.namespace }} - Receiving {{ $labels.status }} responses from {{ $labels.name }} '
-        description: 'External service failing'
 
-    - alert: PatchmanDeleteError
+    - alert: PatchmanAlertDeleteError
       expr: sum(rate(patchman_engine_listener_kafka_message_received{event="delete", type=~"error-.*"}[5m])) by (kubernetes_namespace) > 0
       annotations:
-        summary: '{{ $labels.kubernetes_namespace }} system deleting error :rain_cloud:'
-        description: 'System deleting error observed'
+        message: 'System deleting error observed'
       labels:
         severity: info
         service: insights
         env: prod
         app_team: patch
 
-    - alert: PatchmanOutOfDateSystems
+    - alert: PatchmanAlertOutOfDateSystems
       expr: sum(patchman_engine_vmaas_sync_systems{last_upload="last1D"}) / sum(patchman_engine_vmaas_sync_systems{last_upload="last30D"}) < 0.8
       annotations:
-        summary: '{{ $labels.namespace }} many out-of-date systems observed :rain_cloud:'
-        description: 'Increasing number of out-of-date systems observed'
+        message: 'Increasing number of out-of-date systems observed (last1D / last30D = {{ $value }})'
       labels:
         severity: info
         service: insights
         env: prod
         app_team: patch
 
-    - alert: PatchmanPodRestarting
-      expr: sum(increase(kube_pod_container_status_restarts_total{container=~"patchman-engine-.*"}[15m])) by (container) > 1
+    - alert: PatchmanAlertPodRestarting
+      expr: sum(increase(kube_pod_container_status_restarts_total{container=~"patchman-engine-.*"}[5m])) by (container) > 0
       annotations:
-        summary: '{{ $labels.container }} pod restarting :rain_cloud:'
-        description: 'Observed multiple pod restarts in a short time period'
+        message: 'Observed pod ({{ $labels.container }}) restart(s) ({{ $value }})'
       labels:
         severity: info
         service: insights
