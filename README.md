@@ -84,6 +84,7 @@ this repository.
     - [Execute a SQL Query on an App Interface controlled RDS instance](#execute-a-sql-query-on-an-app-interface-controlled-rds-instance)
     - [Enable Gitlab Features on an App Interface Controlled Gitlab Repository](#enable-gitlab-features-on-an-app-interface-controlled-gitlab-repository)
     - [Add recording rules via openshift-performance-parameters integration](#add-recording-rules-via-openshift-performance-parameters-integration)
+    - [Provision and consume Kafka clusters via Managed Services API](#provision-and-consume-kafka-clusters-via-managed-services-api)
   - [Design](#design)
   - [Developer Guide](#developer-guide)
   - [Quay Documentation](#quay-documentation)
@@ -1805,6 +1806,39 @@ codeComponents:
 ### Add recording rules via openshift-performance-parameters integration
 
 Please refer to this [document](docs/app-sre/sli-recording-rules-via-performance-parameters.md)
+
+### Provision and consume Kafka clusters via Managed Services API
+
+Provisioning Kafka managed clusters through the Managed Services API can be self-serviced via app-interface.
+
+To provision a new cluster, create a Kafka cluster file. Example:
+```yaml
+---
+$schema: /kafka/cluster-1.yml
+
+labels: {}
+
+name: example-kafka
+description: <cluster description>
+
+ocm:
+  $ref: /dependencies/ocm/production.yml
+
+spec:
+  provider: aws
+  region: us-east-1
+```
+
+To define a consumer of the Kafka cluster, add the `kafkaCluster` reference to a namespace file. Example:
+```yaml
+kafkaCluster:
+  $ref: /kafka/example-kafka/cluster.yml
+```
+
+This will result in a Secret being created in the consuming namespace. The Secret will be called `kafka` and it will contain the following keys:
+- `bootstrapServerHost` - Bootstrap server hostname
+
+* Note: The Managed Services API is not yet deployed to production, so this feature is not ready for usage yet.
 
 ## Design
 
