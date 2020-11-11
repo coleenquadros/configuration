@@ -207,3 +207,28 @@
             - *ci_jenkins_token
             - *gitlab_token
     <<: *gl_build_master
+
+- job-template:
+    id: 'managed-services-api-tests-timed'
+    name: 'managed-services-api-tests-{environment}-{tests}'
+    tests: 'readonly'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets: 
+        <<: *vault_defaults
+        secrets:
+        - *managed_services_api_int_tests
+    ci_cmd: ./pr_check.sh
+    cron_expression: 'H 8 * * 1-5'
+    upstream: ''
+    triggers:
+    - reverse:
+        jobs: '{upstream}'
+        results: 'success'
+    artifacts_path: 'results/**'
+    publishers:
+    - archive:
+        artifacts: '{artifacts_path}'
+        allow-empty: true
+    <<: *gl_timed
