@@ -37,7 +37,7 @@ spec:
       annotations:
         dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crc-stg-01-prometheus
         link_url: https://kibana.apps.crc-stg-01.o4v9.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(columns:!(_source),filters:!(),index:'6c31b1b0-d854-11ea-9f21-6b7e641a18be',interval:auto,query:(language:lucene,query:'(@log_stream:%20%223scale%22%20AND%20gateway.application:%20%22inventory%22%20AND%20gateway.status:%20%5B500%20TO%20599%5D)%20OR%20(@log_stream:%20%22insights-inventory-*%22%20AND%20levelname:%20%22ERROR%22)'),sort:!(!('@timestamp',desc)))
-        message: '{{ $labels.kubernetes_namespace }} 5xx responses observed'
+        message: '{{ $labels.namespace }} 5xx responses observed'
     - alert: InventoryHttpLatency
       expr: sum(rate(inventory_http_request_duration_seconds_bucket{namespace="host-inventory-stage", le="7.5"} [15m])) / sum(rate(inventory_http_request_duration_seconds_count{namespace="host-inventory-stage"} [15m])) < 0.95
       labels:
@@ -59,7 +59,7 @@ spec:
       annotations:
         dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crc-stg-01-prometheus
         link_url: https://kibana.apps.crc-stg-01.o4v9.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-30m,to:now))&_a=(columns:!(_source),filters:!(),index:'6c31b1b0-d854-11ea-9f21-6b7e641a18be',interval:auto,query:(language:lucene,query:'@log_stream:%20%22inventory-mq%22%20AND%20levelname:%20ERROR'),sort:!(!('@timestamp',desc)))
-        message: '{{ $labels.kubernetes_namespace }} consumer errors'
+        message: '{{ $labels.namespace }} consumer errors'
     - alert: InventoryMqEventProducerErrors
       expr: sum(increase(inventory_event_producer_failures_total[5m])) by (namespace, topic, event_type) > 0
       labels:
@@ -70,7 +70,7 @@ spec:
       annotations:
         dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crc-stg-01-prometheus
         link_url: https://kibana.apps.crc-stg-01.o4v9.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-30m,to:now))&_a=(columns:!(_source),filters:!(),index:'6c31b1b0-d854-11ea-9f21-6b7e641a18be',interval:auto,query:(language:lucene,query:'@log_stream:%20%22inventory-mq%22%20AND%20levelname:%20ERROR%20AND%20msg:%22Failed%20to%20send%20event%22'),sort:!(!('@timestamp',desc)))
-        message: '{{ $labels.kubernetes_namespace }} event producer errors Event producer failed to produce a(n) {{ $labels.event_type }} event on {{ $labels.topic }}'
+        message: '{{ $labels.namespace }} event producer errors Event producer failed to produce a(n) {{ $labels.event_type }} event on {{ $labels.topic }}'
     - alert: InventoryMqNotProcessing
       expr: sum(increase(inventory_ingress_add_host_successes_total{namespace="platform-stage"}[5m])) by (namespace) < 1
       labels:
@@ -81,7 +81,7 @@ spec:
       annotations:
         dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crc-stg-01-prometheus
         link_url: https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/host-inventory-stage/deployments/inventory-mq-pmin
-        message: '{{ $labels.kubernetes_namespace }} consumer not processing (0 messages processed in last 5 minutes)'
+        message: '{{ $labels.namespace }} consumer not processing (0 messages processed in last 5 minutes)'
     - alert: InventoryContainerRestart
       expr: sum(rate(kube_pod_container_status_restarts_total{container=~"insights-inventory.*", namespace=~"platform.*"}[5m])) by (namespace, container) > 0
       labels:
