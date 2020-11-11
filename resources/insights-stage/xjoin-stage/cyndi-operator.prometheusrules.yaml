@@ -1,0 +1,53 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cyndi-operator-stage
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: cyndi-operator-stage
+    rules:
+
+    - alert: CyndiOperatorAbsent
+      expr: |
+        absent(up{service="cyndi-operator"}) OR sum (up{service="cyndi-operator"}) by (namespace) == 0
+      for: 5m
+      labels:
+        severity: info
+        service: insights
+        env: stage
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/fF9U-h7Mk/cyndi?orgId=1&refresh=1m&var-datasource=crc-stg-01-prometheus"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/xjoin-stage/deployments/cyndi-operator-controller-manager"
+        message: "cyndi-operator pod missing"
+
+    - alert: CyndiOperatorContainerRestart
+      expr: |
+        sum(increase(kube_pod_container_status_restarts_total{pod=~"cyndi-operator-controller.*"}[5m])) by (namespace) > 0
+      labels:
+        severity: info
+        service: insights
+        env: stage
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/fF9U-h7Mk/cyndi?orgId=1&refresh=1m&var-datasource=crc-stg-01-prometheus"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/xjoin-stage/deployments/cyndi-operator-controller-manager"
+        message: "cyndi-operator container restarting"
+
+    - alert: CyndiOperatorNoReconciles
+      expr: |
+        sum(increase(controller_runtime_reconcile_total{controller=~"cyndi-.*"}[1h])) by (controller) == 0
+      labels:
+        severity: info
+        service: insights
+        env: stage
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/fF9U-h7Mk/cyndi?orgId=1&refresh=1m&var-datasource=crc-stg-01-prometheus"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/xjoin-stage/deployments/cyndi-operator-controller-manager"
+        message: "cyndi-operator is not running"
