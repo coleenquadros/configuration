@@ -51,19 +51,38 @@ openshiftResources:
   variables:
     identifier: ocm
     host: ocm.unleash.devshift.net
+### Insights
+- provider: vault-secret
+  path: app-sre/unleash/insights-config
+  version: 1
+- provider: vault-secret
+  path: app-sre/unleash/insights-unleash-token
+  version: 1
+- provider: resource-template
+  type: jinja2
+  path: /services/unleash/unleash.route.yaml
+  variables:
+    identifier: insights
+    host: insights.unleash.devshift.net
 
 managedTerraformResources: true
 
 terraformResources:
-#AppInterface
+# AppInterface
 - provider: rds
   account: app-sre
   identifier: app-interface-unleash-production
   defaults: /terraform/resources/unleash/rds-1.yml
   output_resource_name: app-interface-unleash-rds
-#OCM
+# OCM
 - provider: rds
   account: app-sre
   identifier: ocm-unleash
   defaults: /terraform/resources/unleash/rds-1.yml
   output_resource_name: ocm-unleash-rds
+# Insight
+- provider: rds
+  account: app-sre
+  identifier: insights-unleash
+  defaults: /terraform/resources/unleash/rds-1.yml
+  output_resource_name: insights-unleash-rds
