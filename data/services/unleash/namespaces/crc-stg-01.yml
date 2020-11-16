@@ -1,0 +1,47 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: unleash
+description: namespace for unleash
+
+cluster:
+  $ref: /openshift/crc-stg-01/cluster.yml
+
+app:
+  $ref: /services/unleash/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crc-stg-01.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- Route
+
+openshiftResources:
+- provider: vault-secret
+  path: app-sre/unleash/insights-stage-config
+  version: 1
+- provider: vault-secret
+  path: app-sre/unleash/insights-stage-unleash-token
+  version: 1
+- provider: resource-template
+  type: jinja2
+  path: /services/unleash/unleash.route.yaml
+  variables:
+    identifier: insights-stage
+    host: insights-stage.unleash.devshift.net
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: app-sre
+  identifier: insights-stage-unleash
+  defaults: /terraform/resources/unleash/rds-1.yml
+  output_resource_name: insights-stage-unleash-rds
