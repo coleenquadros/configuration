@@ -45,6 +45,36 @@
     <<: *gl_build_master
 
 - job-template:
+    id: 'gl-pipeline-scm-trigger'
+    name: '{gl_group}-{gl_project}-gl-pipeline-scm-trigger-{branch}'
+    wrappers:
+      - timeout_wrapper:
+          timeout: '{timeout}'
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+          - *backup_ecr_push_creds
+          - *quay_secret_push
+          - *app_sre_bot_push_token
+          - *app_interface_creds
+    <<: *gl_pipeline_scm_trigger
+
+- job-template:
+    id: 'gl-pipeline-timed'
+    name: '{gl_group}-{gl_project}-gl-pipeline-timed-{branch}'
+    wrappers:
+      - timeout_wrapper:
+          timeout: '{timeout}'
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+          - *backup_ecr_push_creds
+          - *quay_secret_push
+          - *app_sre_bot_push_token
+          - *app_interface_creds
+    <<: *gl_pipeline_timed
+
+- job-template:
     id: gh-build-master-with-upstream
     name: '{gh_org}-{gh_repo}-gh-build-{branch}-upstream-{upstream}'
     upstream: ''

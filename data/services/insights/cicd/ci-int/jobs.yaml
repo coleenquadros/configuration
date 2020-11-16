@@ -1,0 +1,32 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+labels:
+  service: insights
+
+name: insights-cicd-int-jobs
+
+description: ''
+
+app:
+  $ref: /services/insights/cicd/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+type: jobs
+
+config:
+- project:
+    label: insights
+    node: insights
+    name: 'insights-cicd-int'
+    jobs:
+    - 'gl-pipeline-timed':
+        branch: master
+        gl_group: insights-platform
+        gl_project: saas-templates
+        display_name: 'insights-saas-templates-sync'
+        script_path: 'Jenkinsfile.groovy'
+        cron_expression: 'H/5 * * * *'
+
