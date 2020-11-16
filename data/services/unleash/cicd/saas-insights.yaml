@@ -1,0 +1,52 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: unleash
+
+name: insights-unleash
+description: 'SaaS tracking file for Unleash'
+
+app:
+  $ref: /services/unleash/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/app-sre/unleash
+
+resourceTemplates:
+- name: unleash
+  url: https://github.com/app-sre/unleash
+  path: /openshift/unleash.yaml
+  targets:
+  - namespace:
+      $ref: /services/unleash/namespaces/crc-stg-01.yml
+    ref: 0bab5152c5c721cf42a3ee3cd9253a462f4e8280
+    parameters:
+      identifier: insights-stage
+      configSecret: insights-stage-config
+      tokenSecret: insights-stage-unleash-token
+      databaseSecret: insights-stage-unleash-rds
+      org: app-sre
+      team: insights-stage-unleash
+  - namespace:
+      $ref: /services/unleash/namespaces/crcp01ue1.yml
+    ref: 0bab5152c5c721cf42a3ee3cd9253a462f4e8280
+    parameters:
+      identifier: insights
+      configSecret: insights-config
+      tokenSecret: insights-unleash-token
+      databaseSecret: insights-unleash-rds
+      org: app-sre
+      team: insights-unleash
