@@ -11,6 +11,10 @@ spec:
   groups:
   - name: cyndi-stage
     rules:
+    - record: cyndi:consumer_group_lag:min_per_app
+      expr: |
+        min(sum(label_replace(kafka_consumergroup_group_lag{topic="platform.inventory.events", group=~"connect-cyndi-.*"}, "cyndi_application", "$1", "group", "connect-cyndi-(.*)-([0-9]+)-.*")) by (group, cyndi_application, namespace)) by (cyndi_application, namespace)
+
     - alert: CyndiLagTooHigh
       expr: |
         min(sum(label_replace(kafka_consumergroup_group_lag{topic="platform.inventory.events", group=~"connect-cyndi-.*"}, "cyndi_application", "$1", "group", "connect-cyndi-(.*)-([0-9]+)-.*")) by (group, cyndi_application, namespace)) by (cyndi_application, namespace) > 10000
