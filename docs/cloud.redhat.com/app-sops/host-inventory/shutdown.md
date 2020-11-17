@@ -1,4 +1,3 @@
-
 # Inventory service shutdown procedure
 
 
