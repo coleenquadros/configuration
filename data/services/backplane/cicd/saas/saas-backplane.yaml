@@ -19,10 +19,10 @@ slack:
   channel: team-srep-info
 
 managedResourceTypes:
-- Deployment
+- StatefulSet
 - Service
 - Route
-- PersistentVolumeClaim
+- ConfigMap
 
 imagePatterns:
 - quay.io/app-sre/backplane-api
@@ -37,14 +37,19 @@ resourceTemplates:
   url: https://gitlab.cee.redhat.com/service/backplane-api
   path: /hack/service-template.yml
   parameters:
-    DEMO_MODE: false
     IMAGE_REGISTRY: quay.io
     IMAGE_REPOSITORY: app-sre
     IMAGE_NAME: backplane-api
+    IMAGE_TAG: latest
     JWKS_URL: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/certs
     AUDIT_MAX_BACKUPS: 10
     AUDIT_MAX_SIZE: 10
     LOG_LEVEL: 8
-    AUTH_SECRET: <FILL THIS>
+    USE_RH_API: true
   targets:
-
+  - namespace:
+      $ref: /services/backplane/namespaces/backplane-stage-hive-stage-01.yml
+    ref: master
+  - namespace:
+      $ref: /services/backplane/namespaces/backplane-stage-hives02ue1.yml
+    ref: master
