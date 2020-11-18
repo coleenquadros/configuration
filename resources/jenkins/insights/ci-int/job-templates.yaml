@@ -40,3 +40,27 @@
         - *app_interface_creds
     <<: *gh_timed
 
+- job-template:
+    id: 'insights-deploy-notifier'
+    name: 'insights-deploy-notifier'
+    concurrent: true
+    gl_group: insights-platform
+    gl_project: cicd-common
+    branch: master
+    wrappers:
+    - timeout_wrapper:
+        timeout: 60
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *app_sre_ci_trigger_jobs_bot
+        # TODO: add secrets for POST'ing to ibutsu and creating a grafana annotation
+    triggers:
+    - reverse:
+        jobs: '{upstream_saas_jobs}'
+        results: 'success'
+    builders:
+    - shell: './deploy_notifier.sh'
+    <<: *gl_checkout
+
