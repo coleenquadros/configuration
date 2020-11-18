@@ -210,8 +210,6 @@
 
 - job-template:
     id: 'managed-services-api-tests'
-    name: 'managed-services-api-tests-{environment}-{tests}'
-    tests: 'readonly'
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'
@@ -220,17 +218,17 @@
         secrets:
         - *managed_services_api_int_tests
     concurrent: false
-    upstream: ''
     triggers:
     - reverse:
         jobs: '{upstream}'
         results: 'success'
-    artifacts_path: 'reports/**'
+    artifacts_path: 'reports/*.xml'
+    build_deploy_script_path: './pr_check.sh'
     publishers:
     - archive:
         artifacts: '{artifacts_path}'
         allow-empty: true
-    <<: *pr_check_template
+    <<: *gl_build_master
 
 - job-template:
     id: gl-pr-check-apache-kafka
