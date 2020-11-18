@@ -103,6 +103,9 @@ This step should be performed in a single merge request.
       replicas: (desired number of instances in the pool)
       labels: {}
 
+    addons: # optional, specify addons to be installed
+    - $ref: /dependencies/ocm/addons/<addon_name>.yml
+
     disable:
       e2eTests:
       - create-namespace
