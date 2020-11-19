@@ -1,0 +1,39 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2020-11-19-collection-stats-prod
+namespace:
+  $ref: /services/insights/automation-hub/namespaces/automation-hub-prod.yml
+identifier: automation-hub-prod
+output: stdout
+overrides:
+  db_name: galaxy_ng
+query: |
+  SELECT 'Total collections', (SELECT count(pulp_id) FROM ansible_collection)
+  UNION ALL
+  SELECT 'Total collection versions', (SELECT count(content_ptr_id) FROM ansible_collectionversion)
+  UNION ALL
+  SELECT 'Total repository versions', (SELECT count(pulp_id) FROM core_repositoryversion)
+  UNION ALL
+  SELECT 'Total tasks', (SELECT count(pulp_id) FROM core_task)
+  UNION ALL
+  SELECT
+      unnest(array [
+          'Versions per collection - max',
+          'Versions per collection - average',
+          'Versions per collection - 50 percentile',
+          'Versions per collection - 90 percentile',
+          'Versions per collection - 99 percentile'
+      ]),
+      unnest(array [
+          max(cnt),
+          round(avg(cnt), 2),
+          percentile_cont(0.5) WITHIN GROUP ( ORDER BY cnt ),
+          percentile_cont(0.9) WITHIN GROUP ( ORDER BY cnt ),
+          percentile_cont(0.99) WITHIN GROUP ( ORDER BY cnt )
+      ])
+  FROM (
+      SELECT count(content_ptr_id) cnt
+      FROM ansible_collectionversion
+      GROUP BY namespace, name
+  ) t;
