@@ -181,7 +181,7 @@ Instructions to perform JSON schema validation on changes to the datafiles.
 
 **Requirements**:
 
-- docker
+- docker (or podman)
 - git
 
 **Instructions**:
