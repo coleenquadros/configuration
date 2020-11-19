@@ -11,9 +11,13 @@ spec:
   groups:
   - name: cyndi-prod
     rules:
+    - record: cyndi:consumer_group_lag:min_per_app
+      expr: |
+        min(sum(label_replace(kafka_consumergroup_group_lag{topic="platform.inventory.events", group=~"connect-cyndi-.*"}, "cyndi_application", "$1", "group", "connect-cyndi-(.*)-([0-9]+)-.*")) by (group, cyndi_application, namespace)) by (cyndi_application, namespace)
+
     - alert: CyndiLagTooHigh
       expr: |
-        min(sum(label_replace(kafka_consumergroup_group_lag{topic="platform.inventory.events", group=~"connect-syndication-sink-.*"}, "cyndi_application", "$1", "group", "connect-syndication-sink-(.*)\\.v.*")) by (group, cyndi_application, namespace)) by (cyndi_application, namespace) > 10000
+        min(sum(label_replace(kafka_consumergroup_group_lag{topic="platform.inventory.events", group=~"connect-cyndi-.*"}, "cyndi_application", "$1", "group", "connect-cyndi-(.*)-([0-9]+)-.*")) by (group, cyndi_application, namespace)) by (cyndi_application, namespace) > 10000
       for: 15m
       labels:
         severity: info
@@ -22,7 +26,7 @@ spec:
         app_team: data-pipeline
       annotations:
         dashboard: "https://grafana.app-sre.devshift.net/d/fF9U-h7Mk/cyndi?orgId=1&refresh=1m&var-datasource=crcp01ue1-prometheus"
-        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/xjoin-prod/deployments/xjoin-kafka-connect/pods"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/api-resource/ns/xjoin-prod/cyndi.cloud.redhat.com~v1alpha1~CyndiPipeline/instances"
         message: "Consumer lag for {{ $labels.cyndi_application }} reached {{ $value }} messages (limit is 10000)"
 
     - alert: CyndiErrorDLQ
@@ -35,12 +39,12 @@ spec:
         app_team: data-pipeline
       annotations:
         dashboard: "https://grafana.app-sre.devshift.net/d/fF9U-h7Mk/cyndi?orgId=1&refresh=1m&var-datasource=crcp01ue1-prometheus"
-        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/xjoin-prod/deployments/xjoin-kafka-connect/pods"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/api-resource/ns/xjoin-prod/cyndi.cloud.redhat.com~v1alpha1~CyndiPipeline/instances"
         message: "{{ $value }} new messages written to DLQ topic"
 
     - alert: CyndiNoRunningConnectors
       expr: |
-        sum(label_replace(kafka_connect_connect_worker_metrics_connector_running_task_count{connector=~"syndication-sink-.*"}, "cyndi_application", "$1", "connector", "syndication-sink-(.*)\\.v.*")) by (cyndi_application) == 0
+        sum(label_replace(kafka_connect_worker_connector_running_task_count{connector=~"cyndi-.*"}, "cyndi_application", "$1", "connector", "cyndi-(.*)-([0-9]+)-.*")) by (cyndi_application) == 0
       for: 5m
       labels:
         severity: info
@@ -49,5 +53,32 @@ spec:
         app_team: data-pipeline
       annotations:
         dashboard: "https://grafana.app-sre.devshift.net/d/fF9U-h7Mk/cyndi?orgId=1&refresh=1m&var-datasource=crcp01ue1-prometheus"
-        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/xjoin-prod/deployments/xjoin-kafka-connect/pods"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/api-resource/ns/xjoin-prod/cyndi.cloud.redhat.com~v1alpha1~CyndiPipeline/instances"
         message: "No connectors are running for {{ $labels.cyndi_application }}"
+
+    - alert: CyndiPipelineNotValid
+      expr: |
+        sum(cyndi_inconsistency_ratio) by (app) > sum(cyndi_inconsistency_threshold) by (app)
+      for: 30m
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/fF9U-h7Mk/cyndi?orgId=1&refresh=1m&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/api-resource/ns/xjoin-prod/cyndi.cloud.redhat.com~v1alpha1~CyndiPipeline/instances"
+        message: "Cyndi Pipeline for {{ $labels.app }} is not valid. Inconsistency ratio reached {{ $value }}"
+
+    - alert: CyndiPipelineRefreshing
+      expr: |
+        sum(increase(cyndi_refresh_total[3h])) by (app) > 5
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/fF9U-h7Mk/cyndi?orgId=1&refresh=1m&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/api-resource/ns/xjoin-prod/cyndi.cloud.redhat.com~v1alpha1~CyndiPipeline/instances"
+        message: "Cyndi Pipeline for {{ $labels.app }} is being refreshed too often ({{ $value }} times within past 3 hours)"
