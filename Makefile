@@ -8,6 +8,7 @@ OUTPUT_DIR := $(shell realpath $(OUTPUT_DIR))
 BUNDLE_FILENAME ?= data.json
 PWD := $(shell pwd)
 GIT_COMMIT := $(shell git rev-parse HEAD)
+GIT_COMMIT_TIMESTAMP := $(shell git log -1 --format=%ct $(GIT_COMMIT))
 
 bundle:
 	mkdir -p $(OUTPUT_DIR)
@@ -18,7 +19,7 @@ bundle:
 		-v $(PWD)/data:/data:z \
 		-v $(PWD)/resources:/resources:z \
 		$(VALIDATOR_IMAGE):$(VALIDATOR_IMAGE_TAG) \
-		qontract-bundler /schemas /graphql/schema.yml /data /resources $(GIT_COMMIT) > $(OUTPUT_DIR)/$(BUNDLE_FILENAME)
+		qontract-bundler /schemas /graphql/schema.yml /data /resources $(GIT_COMMIT) $(GIT_COMMIT_TIMESTAMP) > $(OUTPUT_DIR)/$(BUNDLE_FILENAME)
 
 validate:
 	@$(CONTAINER_ENGINE) run --rm \
