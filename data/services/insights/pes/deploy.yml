@@ -1,0 +1,45 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: pes
+  platform: insights
+
+name: pes
+description: Package Evolution Service (PES) - service for tracking package changes between RHEL versions
+
+app:
+  $ref: /services/insights/pes/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-insights-info
+
+managedResourceTypes:
+- ConfigMap
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: pes
+  url: https://gitlab.cee.redhat.com/insights-platform/pes-cloud
+  path: /templates/pes.yml
+  targets:
+  - namespace:
+      $ref: /services/insights/pes/namespaces/stage-pes-stage.yml
+    ref: master
+    upstream: insights-platform-pes-cloud-gl-build-master
+    parameters:
+      GREETING: "pre-prod"
