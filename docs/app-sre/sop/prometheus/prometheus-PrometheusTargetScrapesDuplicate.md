@@ -8,7 +8,7 @@
 
 ## Summary
 
-Prometheus has a duplicate job entry 
+Error on ingesting samples with different value but same timestamp
 
 ## Access required
 
@@ -16,8 +16,27 @@ Prometheus has a duplicate job entry
 
 ## Steps
 
-- Find duplicate entries in prometheus targets/jobs
+- Find the duplicate timeseries in prometheus pods (0/1):
+```
+oc logs --tail 10000 -c prometheus prometheus-app-sre-0 | grep Duplicate
+```
+or
+```
+oc logs --tail 10000 -c prometheus prometheus-app-sre-0 | grep Duplicate | sed 's/.*series="//;s/{.*//' | sort -u
+```
 - Remove duplicate entry
+
+## History
+
+This issue has been observed recently with AWS/CloudFront metrics.
+
+Related references:
+- https://github.com/prometheus/cloudwatch_exporter/issues/235
+- https://github.com/prometheus/cloudwatch_exporter#timestamps
+
+Related app-interface MRs:
+- https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/6337
+- https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/12374
 
 ## Escalations
 
