@@ -1666,6 +1666,24 @@ schedule: <if defined the output resource will be a CronJob instead of a Job>
 query: <sql query>
 ```
 
+If you want to run multiple queries in the same spec, you can define the
+`queries` list instead of the `query` string. Example:
+
+```yaml
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+name: <sql query unique name>
+namespace:
+  $ref: /services/<service>/namespaces/<namespace>.yml
+identifier: <RDS resource identifier (same as defined in the namespace)>
+output: <filesystem or stdout>
+schedule: <if defined the output resource will be a CronJob instead of a Job>
+queries:
+  - <sql query 1>
+  - <sql query 2>
+  - <sql query 3>
+```
+
 Example:
 
 ```yaml
