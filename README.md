@@ -72,6 +72,7 @@ this repository.
       - [Manage stacks of S3 bucket and CloudFront distribution via App-Interface (`/openshift/namespace-1.yml`)](#manage-stacks-of-s3-bucket-and-cloudfront-distribution-via-app-interface-openshiftnamespace-1yml)
       - [Manage CloudWatch Log Groups via App-Interface (`/openshift/namespace-1.yml`)](#manage-cloudwatch-log-groups-via-app-interface-openshiftnamespace-1yml)
       - [Manage Key Management Service Keys via App-Interface (`/openshift/namespace-1.yml`)](#manage-key-management-service-keys-via-app-interface-openshiftnamespace-1yml)
+      - [Manage Kinesis Streams via App-Interface (`/openshift/namespace-1.yml`)](#manage-kinesis-streams-via-app-interface-openshiftnamespace-1yml)
       - [Manage VPCs via App-Interface (`/openshift/cluster-1.yml`)](#manage-vpcs-via-app-interface-openshiftcluster-1yml)
     - [Manage Slack User groups via App-Interface](#manage-slack-user-groups-via-app-interface)
     - [Manage Jenkins jobs configurations using jenkins-jobs](#manage-jenkins-jobs-configurations-using-jenkins-jobs)
@@ -1392,6 +1393,29 @@ Once the changes are merged, the Key Management Service key will be created (or 
 
 The Secret will contain the following fields:
 - `key_id` - The globally unique identifier for the key.
+
+#### Manage Kinesis Streams via App-Interface (`/openshift/namespace-1.yml`)
+
+Kinesis Streams can be entirely self-services via App-Interface.
+
+In order to add or update a Kinesis Stream, you need to add them to the `terraformResources` field.
+
+- `provider`: must be `kinesis`
+- `account`: must be one of the AWS account names we manage.
+- `identifier` - name of resource to create (or update)
+- `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options](/resources/terraform/resources/)
+- `output_resource_name`: name of Kubernetes Secret to be created.
+  - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
+  - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
+    - For example, for a resource with `identifier` "my-stream" and `provider` "kinesis", the created Secret will be called `my-stream-kinesis`.
+
+Once the changes are merged, the Kinesis Stream will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
+
+The Secret will contain the following fields:
+- `stream_name` - The name of the stream.
+- `aws_region` - The name of the stream's AWS region.
+- `aws_access_key_id` - The access key ID.
+- `aws_secret_access_key` - The secret access key.
 
 #### Manage VPCs via App-Interface (`/openshift/cluster-1.yml`)
 
