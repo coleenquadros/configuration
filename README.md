@@ -1747,7 +1747,7 @@ $ oc logs 2020-01-28-account-manager-registries-stage-7pl6v
 $ oc logs 2020-01-30-account-manager-registries-stage-cjh82
 Get the sql-query results with:
 
-oc rsh --shell=/bin/bash 2020-01-30-account-manager-registries-stage-cjh82 cat /tmp/query-result.txt
+oc cp 2020-01-30-account-manager-registries-stage-cjh82:/tmp/query-result.txt 2020-01-30-account-manager-registries-stage-cjh82-query-result.txt
 
 Sleeping 3600s...
 ```
