@@ -1,0 +1,14 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2020-11-25-patch-noninventory-systems
+namespace:
+  $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
+identifier: patchman-prod
+output: stdout
+query: |
+    select r.name, count(r.name) from system_platform sp
+    left join inventory.hosts ih on ih.id = sp.inventory_id::uuid
+    join reporter r on r.id = sp.reporter_id
+    where ih.id is null
+    group by r.name;
