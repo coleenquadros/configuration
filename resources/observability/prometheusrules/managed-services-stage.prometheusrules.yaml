@@ -1,0 +1,24 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: managed-services-stage
+spec:
+  groups:
+  - name: managed-services-stage
+    rules:
+    - alert: ManagedServicesDown - stage
+      annotations:
+        message: "No targets found for Managed Services in namespace {{ $labels.namespace }}. Managed Services is down."
+        dashboard: "TODO: add dashboard"
+        runbook: "TODO: add runbook"
+      expr: |
+        absent(up{job="managed-services-api-metrics",namespace="managed-services-stage"} == 1)
+      for: 15m
+      labels:
+        service: managed-services-api
+        severity: info

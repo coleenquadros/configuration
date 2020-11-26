@@ -1,0 +1,289 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: managed-services-slos-kafka-latency-stage
+spec:
+  groups:
+    - name: managed-services-kafka-operations-latency-p90.slo.rules
+      rules:
+        - alert: ManagedServicesKafkaOperationsLatencyP90BudgetBurn
+          annotations:
+            message: "High Kafka operations p90 latency budget burn for Managed Service (current value: {{ $value }})"
+            dashboard: "TODO: add dashboard"
+            runbook: "TODO: add runbook"
+          expr: |
+            (
+              latencytarget:managed_services_api_worker_kafka_duration:rate1h{job="managed-services-api-metrics",namespace="managed-services-stage",latency="300",jobType="kafka_create"} > (14.4*(1-0.90000))
+              and
+              latencytarget:managed_services_api_worker_kafka_duration:rate5m{job="managed-services-api-metrics",namespace="managed-services-stage",latency="300",jobType="kafka_create"} > (14.4*(1-0.90000))
+            )
+            or
+            (
+              latencytarget:managed_services_api_worker_kafka_duration:rate6h{job="managed-services-api-metrics",namespace="managed-services-stage",latency="300",jobType="kafka_create"} > (6*(1-0.90000))
+              and
+              latencytarget:managed_services_api_worker_kafka_duration:rate30m{job="managed-services-api-metrics",namespace="managed-services-stage",latency="300",jobType="kafka_create"} > (6*(1-0.90000))
+            )
+          labels:
+            service: managed-services-api
+            latency: "300"
+            quantile: "90"
+            namespace: managed-services-stage
+            jobType: kafka_create
+            severity: info
+        - alert: ManagedServicesKafkaOperationsLatencyP90BudgetBurn
+          annotations:
+            message: "High Kafka operations p90 latency budget burn for Managed Service API p99 (current value: {{ $value }})"
+            dashboard: "TODO: add dashboard"
+            runbook: "TODO: add runbook"
+          expr: |
+            (
+              latencytarget:managed_services_api_worker_kafka_duration:rate1d{job="managed-services-api-metrics",namespace="managed-services-stage",latency="300",jobType="kafka_create"} > (3*(1-0.90000))
+              and
+              latencytarget:managed_services_api_worker_kafka_duration:rate2h{job="managed-services-api-metrics",namespace="managed-services-stage",latency="300",jobType="kafka_create"} > (3*(1-0.90000))
+            )
+            or
+            (
+              latencytarget:managed_services_api_worker_kafka_duration:rate3d{job="managed-services-api-metrics",namespace="managed-services-stage",latency="300",jobType="kafka_create"} > (1*(1-0.90000))
+              and
+              latencytarget:managed_services_api_worker_kafka_duration:rate6h{job="managed-services-api-metrics",namespace="managed-services-stage",latency="300",jobType="kafka_create"} > (1*(1-0.90000))
+            )
+          labels:
+            service: managed-services-api
+            latency: "300"
+            quantile: "90"
+            namespace: managed-services-stage
+            jobType: kafka_create
+            severity: info
+        - expr: |
+            1 - (
+              sum(rate(managed_services_api_worker_kafka_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="300",jobType="kafka_create"}[5m]))
+              /
+              sum(rate(managed_services_api_worker_kafka_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage",jobType="kafka_create"}[5m]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "300"
+            namespace: managed-services-stage
+            jobType: kafka_create
+          record: latencytarget:managed_services_api_worker_kafka_duration:rate5m
+        - expr: |
+            1 - (
+              sum(rate(managed_services_api_worker_kafka_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="300",jobType="kafka_create"}[30m]))
+              /
+              sum(rate(managed_services_api_worker_kafka_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage",jobType="kafka_create"}[30m]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "300"
+            namespace: managed-services-stage
+            jobType: kafka_create
+          record: latencytarget:managed_services_api_worker_kafka_duration:rate30m
+        - expr: |
+            1 - (
+              sum(rate(managed_services_api_worker_kafka_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="300",jobType="kafka_create"}[1h]))
+              /
+              sum(rate(managed_services_api_worker_kafka_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage",jobType="kafka_create"}[1h]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "300"
+            namespace: managed-services-stage
+            jobType: kafka_create
+          record: latencytarget:managed_services_api_worker_kafka_duration:rate1h
+        - expr: |
+            1 - (
+              sum(rate(managed_services_api_worker_kafka_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="300",jobType="kafka_create"}[2h]))
+              /
+              sum(rate(managed_services_api_worker_kafka_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage",jobType="kafka_create"}[2h]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "300"
+            namespace: managed-services-stage
+            jobType: kafka_create
+          record: latencytarget:managed_services_api_worker_kafka_duration:rate2h
+        - expr: |
+            1 - (
+              sum(rate(managed_services_api_worker_kafka_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="300",jobType="kafka_create"}[6h]))
+              /
+              sum(rate(managed_services_api_worker_kafka_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage",jobType="kafka_create"}[6h]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "300"
+            namespace: managed-services-stage
+            jobType: kafka_create
+          record: latencytarget:managed_services_api_worker_kafka_duration:rate6h
+        - expr: |
+            1 - (
+              sum(rate(managed_services_api_worker_kafka_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="300",jobType="kafka_create"}[1d]))
+              /
+              sum(rate(managed_services_api_worker_kafka_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage",jobType="kafka_create"}[1d]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "300"
+            namespace: managed-services-stage
+            jobType: kafka_create
+          record: latencytarget:managed_services_api_worker_kafka_duration:rate1d
+        - expr: |
+            1 - (
+              sum(rate(managed_services_api_worker_kafka_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="300",jobType="kafka_create"}[3d]))
+              /
+              sum(rate(managed_services_api_worker_kafka_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage",jobType="kafka_create"}[3d]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "300"
+            namespace: managed-services-stage
+            jobType: kafka_create
+          record: latencytarget:managed_services_api_worker_kafka_duration:rate3d
+    - name: managed-services-kafka-operations-latency-p99.slo.rules
+      rules:
+        - alert: ManagedServicesKafkaOperationsLatencyP99BudgetBurn
+          annotations:
+            message: "High Kafka operations p99 latency budget burn for Managed Service (current value: {{ $value }})"
+          expr: |
+            (
+              latencytarget:managed_services_api_worker_kafka_duration:rate1h{job="managed-services-api-metrics",namespace="managed-services-stage",latency="3600",jobType="kafka_create"} > (14.4*(1-0.99000))
+              and
+              latencytarget:managed_services_api_worker_kafka_duration:rate5m{job="managed-services-api-metrics",namespace="managed-services-stage",latency="3600",jobType="kafka_create"} > (14.4*(1-0.99000))
+            )
+            or
+            (
+              latencytarget:managed_services_api_worker_kafka_duration:rate6h{job="managed-services-api-metrics",namespace="managed-services-stage",latency="3600",jobType="kafka_create"} > (6*(1-0.99000))
+              and
+              latencytarget:managed_services_api_worker_kafka_duration:rate30m{job="managed-services-api-metrics",namespace="managed-services-stage",latency="3600",jobType="kafka_create"} > (6*(1-0.99000))
+            )
+          labels:
+            service: managed-services-api
+            latency: "3600"
+            quantile: "99"
+            namespace: managed-services-stage
+            jobType: kafka_create
+            severity: info
+        - alert: ManagedServicesKafkaOperationsLatencyP99BudgetBurn
+          annotations:
+            message: "High Kafka operations p99 latency budget burn for Managed Service API p99 (current value: {{ $value }})"
+          expr: |
+            (
+              latencytarget:managed_services_api_worker_kafka_duration:rate1d{job="managed-services-api-metrics",namespace="managed-services-stage",latency="3600",jobType="kafka_create"} > (3*(1-0.99000))
+              and
+              latencytarget:managed_services_api_worker_kafka_duration:rate2h{job="managed-services-api-metrics",namespace="managed-services-stage",latency="3600",jobType="kafka_create"} > (3*(1-0.99000))
+            )
+            or
+            (
+              latencytarget:managed_services_api_worker_kafka_duration:rate3d{job="managed-services-api-metrics",namespace="managed-services-stage",latency="3600",jobType="kafka_create"} > (1*(1-0.99000))
+              and
+              latencytarget:managed_services_api_worker_kafka_duration:rate6h{job="managed-services-api-metrics",namespace="managed-services-stage",latency="3600",jobType="kafka_create"} > (1*(1-0.99000))
+            )
+          labels:
+            service: managed-services-api
+            latency: "3600"
+            quantile: "99"
+            namespace: managed-services-stage
+            jobType: kafka_create
+            severity: info
+        - expr: |
+            1 - (
+              sum(rate(managed_services_api_worker_kafka_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="3600",jobType="kafka_create"}[5m]))
+              /
+              sum(rate(managed_services_api_worker_kafka_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage",jobType="kafka_create"}[5m]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "3600"
+            namespace: managed-services-stage
+            jobType: kafka_create
+          record: latencytarget:managed_services_api_worker_kafka_duration:rate5m
+        - expr: |
+            1 - (
+              sum(rate(managed_services_api_worker_kafka_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="3600",jobType="kafka_create"}[30m]))
+              /
+              sum(rate(managed_services_api_worker_kafka_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage",jobType="kafka_create"}[30m]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "3600"
+            namespace: managed-services-stage
+            jobType: kafka_create
+          record: latencytarget:managed_services_api_worker_kafka_duration:rate30m
+        - expr: |
+            1 - (
+              sum(rate(managed_services_api_worker_kafka_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="3600",jobType="kafka_create"}[1h]))
+              /
+              sum(rate(managed_services_api_worker_kafka_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage",jobType="kafka_create"}[1h]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "3600"
+            namespace: managed-services-stage
+            jobType: kafka_create
+          record: latencytarget:managed_services_api_worker_kafka_duration:rate1h
+        - expr: |
+            1 - (
+              sum(rate(managed_services_api_worker_kafka_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="3600",jobType="kafka_create"}[2h]))
+              /
+              sum(rate(managed_services_api_worker_kafka_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage",jobType="kafka_create"}[2h]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "3600"
+            namespace: managed-services-stage
+            jobType: kafka_create
+          record: latencytarget:managed_services_api_worker_kafka_duration:rate2h
+        - expr: |
+            1 - (
+              sum(rate(managed_services_api_worker_kafka_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="3600",jobType="kafka_create"}[6h]))
+              /
+              sum(rate(managed_services_api_worker_kafka_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage",jobType="kafka_create"}[6h]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "3600"
+            namespace: managed-services-stage
+            jobType: kafka_create
+          record: latencytarget:managed_services_api_worker_kafka_duration:rate6h
+        - expr: |
+            1 - (
+              sum(rate(managed_services_api_worker_kafka_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="3600",jobType="kafka_create"}[1d]))
+              /
+              sum(rate(managed_services_api_worker_kafka_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage",jobType="kafka_create"}[1d]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "3600"
+            namespace: managed-services-stage
+            jobType: kafka_create
+          record: latencytarget:managed_services_api_worker_kafka_duration:rate1d
+        - expr: |
+            1 - (
+              sum(rate(managed_services_api_worker_kafka_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="3600",jobType="kafka_create"}[3d]))
+              /
+              sum(rate(managed_services_api_worker_kafka_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage",jobType="kafka_create"}[3d]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "3600"
+            namespace: managed-services-stage
+            jobType: kafka_create
+          record: latencytarget:managed_services_api_worker_kafka_duration:rate3d

@@ -1,0 +1,143 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: managed-services-cluster-correctness-stage
+spec:
+  groups:
+    - name: managed-services-osd-cluster-creation-correctness.rules
+      rules:
+        - alert: ManagedServicesOSDClusterCreationSuccessBudgetBurn
+          annotations:
+            message: "High error budget burn for Managed Services OSD cluster create operations (current value: {{ $value }})"
+            dashboard: "TODO: add dashboard"
+            runbook: "TODO: add runbook"
+          expr: |
+            sum(managed_services_api_cluster_operations:burnrate5m{job="managed-services-api-metrics",namespace="managed-services-stage",operation="create"}) > (14.40 * (1-0.99000))
+            and
+            sum(managed_services_api_cluster_operations:burnrate1h{job="managed-services-api-metrics",namespace="managed-services-stage",operation="create"}) > (14.40 * (1-0.99000))
+          for: 2m
+          labels:
+            service: managed-services-api
+            namespace: managed-services-stage
+            operation: create
+            severity: info
+        - alert: ManagedServicesOSDClusterCreationSuccessBudgetBurn
+          annotations:
+            message: "High error budget burn for Managed Services OSD cluster create operations (current value: {{ $value }})"
+            dashboard: "TODO: add dashboard"
+            runbook: "TODO: add runbook"
+          expr: |
+            sum(managed_services_api_cluster_operations:burnrate30m{job="managed-services-api-metrics",namespace="managed-services-stage",operation="create"}) > (6.00 * (1-0.99000))
+            and
+            sum(managed_services_api_cluster_operations:burnrate6h{job="managed-services-api-metrics",namespace="managed-services-stage",operation="create"}) > (6.00 * (1-0.99000))
+          for: 15m
+          labels:
+            service: managed-services-api
+            namespace: managed-services-stage
+            operation: create
+            severity: info
+        - alert: ManagedServicesOSDClusterCreationSuccessBudgetBurn
+          annotations:
+            message: "High error budget burn for Managed Services OSD cluster create operations (current value: {{ $value }})"
+            dashboard: "TODO: add dashboard"
+            runbook: "TODO: add runbook"
+          expr: |
+            sum(managed_services_api_cluster_operations:burnrate2h{job="managed-services-api-metrics",namespace="managed-services-stage",operation="create"}) > (3.00 * (1-0.99000))
+            and
+            sum(managed_services_api_cluster_operations:burnrate1d{job="managed-services-api-metrics",namespace="managed-services-stage",operation="create"}) > (3.00 * (1-0.99000))
+          for: 1h
+          labels:
+            service: managed-services-api
+            namespace: managed-services-stage
+            operation: create
+            severity: info
+        - alert: ManagedServicesOSDClusterCreationSuccessBudgetBurn
+          annotations:
+            message: "High error budget burn for Managed Services OSD cluster create operations (current value: {{ $value }})"
+            dashboard: "TODO: add dashboard"
+            runbook: "TODO: add runbook"
+          expr: |
+            sum(managed_services_api_cluster_operations:burnrate6h{job="managed-services-api-metrics",namespace="managed-services-stage",operation="create"}) > (1.00 * (1-0.99000))
+            and
+            sum(managed_services_api_cluster_operations:burnrate3d{job="managed-services-api-metrics",namespace="managed-services-stage",operation="create"}) > (1.00 * (1-0.99000))
+          for: 3h
+          labels:
+            service: managed-services-api
+            namespace: managed-services-stage
+            operation: create
+            severity: info
+        - expr: |
+            sum(rate(managed_services_api_cluster_operations_success_count{job="managed-services-api-metrics",namespace="managed-services-stage",operation="create"}[1d]))
+            /
+            sum(rate(managed_services_api_cluster_operations_total_count{job="managed-services-api-metrics",namespace="managed-services-stage",operation="create"}[1d]))
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            namespace: managed-services-stage
+            operation: create
+          record: managed_services_api_cluster_operations:burnrate1d
+        - expr: |
+            sum(rate(managed_services_api_cluster_operations_success_count{job="managed-services-api-metrics",namespace="managed-services-stage",operation="create"}[1h]))
+            /
+            sum(rate(managed_services_api_cluster_operations_total_count{job="managed-services-api-metrics",namespace="managed-services-stage",operation="create"}[1h]))
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            namespace: managed-services-stage
+            operation: create
+          record: managed_services_api_cluster_operations:burnrate1h
+        - expr: |
+            sum(rate(managed_services_api_cluster_operations_success_count{job="managed-services-api-metrics",namespace="managed-services-stage",operation="create"}[2h]))
+            /
+            sum(rate(managed_services_api_cluster_operations_total_count{job="managed-services-api-metrics",namespace="managed-services-stage",operation="create"}[2h]))
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            namespace: managed-services-stage
+            operation: create
+          record: managed_services_api_cluster_operations:burnrate2h
+        - expr: |
+            sum(rate(managed_services_api_cluster_operations_success_count{job="managed-services-api-metrics",namespace="managed-services-stage",operation="create"}[30m]))
+            /
+            sum(rate(managed_services_api_cluster_operations_total_count{job="managed-services-api-metrics",namespace="managed-services-stage",operation="create"}[30m]))
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            namespace: managed-services-stage
+            operation: create
+          record: managed_services_api_cluster_operations:burnrate30m
+        - expr: |
+            sum(rate(managed_services_api_cluster_operations_success_count{job="managed-services-api-metrics",namespace="managed-services-stage",operation="create"}[3d]))
+            /
+            sum(rate(managed_services_api_cluster_operations_total_count{job="managed-services-api-metrics",namespace="managed-services-stage",operation="create"}[3d]))
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            namespace: managed-services-stage
+            operation: create
+          record: managed_services_api_cluster_operations:burnrate3d
+        - expr: |
+            sum(rate(managed_services_api_cluster_operations_success_count{job="managed-services-api-metrics",namespace="managed-services-stage",operation="create"}[5m]))
+            /
+            sum(rate(managed_services_api_cluster_operations_total_count{job="managed-services-api-metrics",namespace="managed-services-stage",operation="create"}[5m]))
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            namespace: managed-services-stage
+            operation: create
+          record: managed_services_api_cluster_operations:burnrate5m
+        - expr: |
+            sum(rate(managed_services_api_cluster_operations_success_count{job="managed-services-api-metrics",namespace="managed-services-stage",operation="create"}[6h]))
+            /
+            sum(rate(managed_services_api_cluster_operations_total_count{job="managed-services-api-metrics",namespace="managed-services-stage",operation="create"}[6h]))
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            namespace: managed-services-stage
+            operation: create
+          record: managed_services_api_cluster_operations:burnrate6h

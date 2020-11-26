@@ -1,0 +1,272 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: managed-services-slos-latency-stage
+spec:
+  groups:
+    - name: managed-services-latency-p99.slo.rules
+      rules:
+        - alert: ManagedServicesAPILatencyP99BudgetBurn
+          annotations:
+            message: "High requests latency budget burn for Managed Service API p99 (current value: {{ $value }})"
+            dashboard: "TODO: add dashboard"
+            runbook: "TODO: add runbook"
+          expr: |
+            (
+              latencytarget:api_inbound_request_duration:rate1h{job="managed-services-api-metrics",namespace="managed-services-stage",latency="2"} > (14.4*(1-0.99000))
+              and
+              latencytarget:api_inbound_request_duration:rate5m{job="managed-services-api-metrics",namespace="managed-services-stage",latency="2"} > (14.4*(1-0.99000))
+            )
+            or
+            (
+              latencytarget:api_inbound_request_duration:rate6h{job="managed-services-api-metrics",namespace="managed-services-stage",latency="2"} > (6*(1-0.99000))
+              and
+              latencytarget:api_inbound_request_duration:rate30m{job="managed-services-api-metrics",namespace="managed-services-stage",latency="2"} > (6*(1-0.99000))
+            )
+          labels:
+            service: managed-services-api
+            latency: "2"
+            quantile: "99"
+            namespace: managed-services-stage
+            severity: info
+        - alert: ManagedServicesAPILatencyP99BudgetBurn
+          annotations:
+            message: "High requests latency budget burn for Managed Service API p99 (current value: {{ $value }})"
+            dashboard: "TODO: add dashboard"
+            runbook: "TODO: add runbook"
+          expr: |
+            (
+              latencytarget:api_inbound_request_duration:rate1d{job="managed-services-api-metrics",namespace="managed-services-stage",latency="2"} > (3*(1-0.99000))
+              and
+              latencytarget:api_inbound_request_duration:rate2h{job="managed-services-api-metrics",namespace="managed-services-stage",latency="2"} > (3*(1-0.99000))
+            )
+            or
+            (
+              latencytarget:api_inbound_request_duration:rate3d{job="managed-services-api-metrics",namespace="managed-services-stage",latency="2"} > (1*(1-0.99000))
+              and
+              latencytarget:api_inbound_request_duration:rate6h{job="managed-services-api-metrics",namespace="managed-services-stage",latency="2"} > (1*(1-0.99000))
+            )
+          labels:
+            service: managed-services-api
+            latency: "2"
+            quantile: "99"
+            namespace: managed-services-stage
+            severity: info
+        - expr: |
+            1 - (
+              sum(rate(api_inbound_request_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="2",code!~"5.."}[5m]))
+              /
+              sum(rate(api_inbound_request_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage"}[5m]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "2"
+            namespace: managed-services-stage
+          record: latencytarget:api_inbound_request_duration:rate5m
+        - expr: |
+            1 - (
+              sum(rate(api_inbound_request_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="2",code!~"5.."}[30m]))
+              /
+              sum(rate(api_inbound_request_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage"}[30m]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "2"
+            namespace: managed-services-stage
+          record: latencytarget:api_inbound_request_duration:rate30m
+        - expr: |
+            1 - (
+              sum(rate(api_inbound_request_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="2",code!~"5.."}[1h]))
+              /
+              sum(rate(api_inbound_request_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage"}[1h]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "2"
+            namespace: managed-services-stage
+          record: latencytarget:api_inbound_request_duration:rate1h
+        - expr: |
+            1 - (
+              sum(rate(api_inbound_request_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="2",code!~"5.."}[2h]))
+              /
+              sum(rate(api_inbound_request_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage"}[2h]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "2"
+            namespace: managed-services-stage
+          record: latencytarget:api_inbound_request_duration:rate2h
+        - expr: |
+            1 - (
+              sum(rate(api_inbound_request_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="2",code!~"5.."}[6h]))
+              /
+              sum(rate(api_inbound_request_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage"}[6h]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "2"
+            namespace: managed-services-stage
+          record: latencytarget:api_inbound_request_duration:rate6h
+        - expr: |
+            1 - (
+              sum(rate(api_inbound_request_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="2",code!~"5.."}[1d]))
+              /
+              sum(rate(api_inbound_request_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage"}[1d]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "2"
+            namespace: managed-services-stage
+          record: latencytarget:api_inbound_request_duration:rate1d
+        - expr: |
+            1 - (
+              sum(rate(api_inbound_request_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="2",code!~"5.."}[3d]))
+              /
+              sum(rate(api_inbound_request_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage"}[3d]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "2"
+            namespace: managed-services-stage
+          record: latencytarget:api_inbound_request_duration:rate3d
+    - name: managed-services-latency-p90.slo.rules
+      rules:
+        - alert: ManagedServicesAPILatencyP90BudgetBurn
+          annotations:
+            message: "High requests latency budget burn for Managed Service API p90 (current value: {{ $value }})"
+          expr: |
+            (
+              latencytarget:api_inbound_request_duration:rate1h{job="managed-services-api-metrics",namespace="managed-services-stage",latency="1"} > (14.4*(1 - 0.90000))
+              and
+              latencytarget:api_inbound_request_duration:rate5m{job="managed-services-api-metrics",namespace="managed-services-stage",latency="1"} > (14.4*(1 - 0.90000))
+            )
+            or
+            (
+              latencytarget:api_inbound_request_duration:rate6h{job="managed-services-api-metrics",namespace="managed-services-stage",latency="1"} > (6*(1 - 0.90000))
+              and
+              latencytarget:api_inbound_request_duration:rate30m{job="managed-services-api-metrics",namespace="managed-services-stage",latency="1"} > (6*(1 - 0.90000))
+            )
+          labels:
+            service: managed-services-api
+            latency: "1"
+            quantile: "90"
+            namespace: managed-services-stage
+            severity: info
+        - alert: ManagedServicesAPILatencyP90BudgetBurn
+          annotations:
+            message: "High requests latency budget burn for Managed Service API p90 (current value: {{ $value }})"
+          expr: |
+            (
+              latencytarget:api_inbound_request_duration:rate1d{job="managed-services-api-metrics",namespace="managed-services-stage",latency="1"} > (3*(1 - 0.90000))
+              and
+              latencytarget:api_inbound_request_duration:rate2h{job="managed-services-api-metrics",namespace="managed-services-stage",latency="1"} > (3*(1 - 0.90000))
+            )
+            or
+            (
+              latencytarget:api_inbound_request_duration:rate3d{job="managed-services-api-metrics",namespace="managed-services-stage",latency="1"} > (1*(1 - 0.90000))
+              and
+              latencytarget:api_inbound_request_duration:rate6h{job="managed-services-api-metrics",namespace="managed-services-stage",latency="1"} > (1*(1 - 0.90000))
+            )
+          labels:
+            service: managed-services-api
+            latency: "1"
+            quantile: "90"
+            namespace: managed-services-stage
+            severity: info
+        - expr: |
+            1 - (
+              sum(rate(api_inbound_request_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="1",code!~"5.."}[5m]))
+              /
+              sum(rate(api_inbound_request_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage"}[5m]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "1"
+            namespace: managed-services-stage
+          record: latencytarget:api_inbound_request_duration:rate5m
+        - expr: |
+            1 - (
+              sum(rate(api_inbound_request_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="1",code!~"5.."}[30m]))
+              /
+              sum(rate(api_inbound_request_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage"}[30m]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "1"
+            namespace: managed-services-stage
+          record: latencytarget:api_inbound_request_duration:rate30m
+        - expr: |
+            1 - (
+              sum(rate(api_inbound_request_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="1",code!~"5.."}[1h]))
+              /
+              sum(rate(api_inbound_request_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage"}[1h]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "1"
+            namespace: managed-services-stage
+          record: latencytarget:api_inbound_request_duration:rate1h
+        - expr: |
+            1 - (
+              sum(rate(api_inbound_request_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="1",code!~"5.."}[2h]))
+              /
+              sum(rate(api_inbound_request_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage"}[2h]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "1"
+            namespace: managed-services-stage
+          record: latencytarget:api_inbound_request_duration:rate2h
+        - expr: |
+            1 - (
+              sum(rate(api_inbound_request_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="1",code!~"5.."}[6h]))
+              /
+              sum(rate(api_inbound_request_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage"}[6h]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "1"
+            namespace: managed-services-stage
+          record: latencytarget:api_inbound_request_duration:rate6h
+        - expr: |
+            1 - (
+              sum(rate(api_inbound_request_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="1",code!~"5.."}[1d]))
+              /
+              sum(rate(api_inbound_request_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage"}[1d]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "1"
+            namespace: managed-services-stage
+          record: latencytarget:api_inbound_request_duration:rate1d
+        - expr: |
+            1 - (
+              sum(rate(api_inbound_request_duration_bucket{job="managed-services-api-metrics",namespace="managed-services-stage",le="1",code!~"5.."}[3d]))
+              /
+              sum(rate(api_inbound_request_duration_count{job="managed-services-api-metrics",namespace="managed-services-stage"}[3d]))
+            )
+          labels:
+            service: managed-services-api
+            job: managed-services-api-metrics
+            latency: "1"
+            namespace: managed-services-stage
+          record: latencytarget:api_inbound_request_duration:rate3d
+
