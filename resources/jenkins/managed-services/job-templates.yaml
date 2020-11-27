@@ -20,6 +20,22 @@
         allow-empty: true
 
 - job-template:
+    id: gl-build-master-managed-services
+    name: "{gl_group}-{gl_project}-gl-build-{branch}"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+          - *backup_ecr_push_creds
+          - *quay_secret_push
+          - *app_sre_bot_push_token
+          - *app_interface_creds
+          - *managed_services_github_deploy_key
+    <<: *gl_build_master
+
+- job-template:
     id: managed-services-pull-upstream
     name: 'managed-services-pull-upstream'
     description: "pull changes from all upstreams specified in {gl_group}/{gl_project}/script/repo-config.yaml"
