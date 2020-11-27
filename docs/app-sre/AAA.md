@@ -345,7 +345,7 @@ Post RCA comms, followups:
 
 ## Standard operating procedures
 
-- SOPs related to engineering tasks are to be stored in the app-interface/docs/app-sre/docs folder.
+- SOPs related to engineering tasks are to be stored in the app-interface/docs/app-sre/sop folder.
 - A SOP should have the following filename format: [CATEGORY]-[SHORT_DESCRIPTION].md
     - Where category is 'OSD', [servicename] or other relevant category
 - A SOP should contain the following information:
