@@ -42,6 +42,12 @@ These instructions have been adapted from the [original google doc](https://docs
 
 1. Configure VPC peering
 1. Add hive-readers and hive-admins in `cluster.yml`
+1. Add External Configuration labels to the cluster:
+    ```yaml
+    externalConfiguration:
+    labels:
+        ext-managed.openshift.io/hive-shard: "true"
+    ```
 1. Add `ClusterRoleBinding` (required?)
 
    - Example: https://issues.redhat.com/projects/OHSS/issues/OHSS-495
