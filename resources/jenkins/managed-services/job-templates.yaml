@@ -227,7 +227,7 @@
 
 - job-template:
     id: 'managed-services-api-tests'
-    name: 'managed-services-api-tests-{environment}'
+    name: 'managed-services-api-tests-stage'
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'
@@ -235,18 +235,16 @@
         <<: *vault_defaults
         secrets:
         - *managed_services_api_int_tests
-    concurrent: false
     triggers:
-    - reverse:
-        jobs: '{upstream}'
-        results: 'success'
-    artifacts_path: 'reports/*.xml'
-    build_deploy_script_path: './pr_check.sh'
-    publishers:
-    - archive:
-        artifacts: '{artifacts_path}'
-        allow-empty: true
-    <<: *gl_build_master
+        - timed: |
+            {cron_expression}
+    builders:
+        - shell:
+            command: "{ci_cmd}"
+    slack:
+        room: '{slack_channel_notification}'
+    <<: *timed_template
+    <<: *slack_notify
 
 - job-template:
     id: gl-pr-check-apache-kafka
