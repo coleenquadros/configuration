@@ -1,0 +1,75 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: host-inventory
+  platform: insights
+
+name: host-inventory-clowder
+description: host-inventory app deployed via clowder
+
+app:
+  $ref: /services/insights/host-inventory/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+managedResourceTypes:
+- ClowdApp
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  KAFKA_PRODUCER_RETRIES: '8'
+  KAFKA_PRODUCER_RETRY_BACKOFF_MS: '250'
+
+resourceTemplates:
+- name: inventory
+  path: /deployment.yaml
+  url: https://github.com/RedHatInsights/insights-host-inventory
+  parameters:
+    CLOWDER_ENABLED: 'true'
+  targets:
+  - namespace:
+      $ref: /services/insights/host-inventory/namespaces/fedramp-host-inventory-stage.yml
+    ref: master
+    upstream: RedHatInsights-insights-host-inventory-gh-build-master
+    parameters:
+      REPLICAS_P1: 5
+      REPLICAS_PMIN: 5
+      REPLICAS_SVC: 25
+      CPU_LIMIT: 1
+      MEMORY_LIMIT: 2Gi
+      SECONDARY_TOPIC_ENABLED: 'false'
+      REST_POST_ENABLED: 'false'
+      RBAC_ENFORCED: 'true'
+      BULK_QUERY_SOURCE: db
+      BULK_QUERY_SOURCE_BETA: db
+      URLLIB3_LOG_LEVEL: DEBUG
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+    parameters:
+      REPLICAS_P1: 1
+      REPLICAS_PMIN: 1
+      REPLICAS_SVC: 1
+      CPU_LIMIT: 1
+      MEMORY_LIMIT: 2Gi
+      SECONDARY_TOPIC_ENABLED: 'false'
+      REST_POST_ENABLED: 'false'
+      RBAC_ENFORCED: 'true'
+      BULK_QUERY_SOURCE: db
+      BULK_QUERY_SOURCE_BETA: db
+      URLLIB3_LOG_LEVEL: DEBUG
