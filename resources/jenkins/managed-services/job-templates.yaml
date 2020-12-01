@@ -229,21 +229,14 @@
     id: 'managed-services-api-tests'
     name: 'managed-services-api-tests-stage'
     wrappers:
-    - timeout_wrapper:
-        timeout: '{timeout}'
-    - vault-secrets: 
-        <<: *vault_defaults
-        secrets:
-        - *managed_services_api_int_tests
-    triggers:
-        - timed: |
-            {cron_expression}
-    builders:
-        - shell:
-            command: "{ci_cmd}"
-    slack:
-        room: '{slack_channel_notification}'
-    <<: *timed_template
+      - timeout_wrapper:
+          timeout: '{timeout}'
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *managed_services_api_int_tests
+    <<: *gl_timed
     <<: *slack_notify
 
 - job-template:
