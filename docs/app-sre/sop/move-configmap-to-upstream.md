@@ -10,3 +10,7 @@ To move a ConfigMap from app-interface to your code repository, follow these ste
 1. Update the SaaS file and namespace file to move the ConfigMap to be deployed through the SaaS file:
     * In the namespace file, remove the `openshiftResources` items that reference a ConfigMap and remove `ConfigMap` from `managedResourceTypes`.
     * In the SaaS file, add `ConfigMap` to `managedResourceTypes` and add the parameters required to template the ConfigMap.
+
+Example:
+* https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/12565
+* https://github.com/openshift/gcp-project-operator/pull/126
