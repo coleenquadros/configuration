@@ -35,7 +35,6 @@ run_int jenkins-roles &
 run_int jenkins-webhooks &
 run_int jenkins-webhooks-cleaner &
 run_int gitlab-members &
-run_int gitlab-owners &
 run_int gitlab-permissions &
 run_int gitlab-integrations &
 run_int ldap-users $APP_INTERFACE_PROJECT_ID &
