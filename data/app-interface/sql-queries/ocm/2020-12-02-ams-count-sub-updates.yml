@@ -1,0 +1,17 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2020-12-02-ams-count-sub-updates
+namespace:
+  $ref: /services/ocm/namespaces/uhc-production.yml
+identifier: uhc-acct-mngr-production
+output: stdout
+queries:
+  - |
+    SELECT COUNT(1) FROM subscriptions INNER JOIN metrics ON metrics.external_id = subscriptions.external_cluster_id AND subscriptions.region_id is null;
+  - |
+    SELECT COUNT(1) FROM subscriptions INNER JOIN metrics ON metrics.external_id = subscriptions.external_cluster_id AND subscriptions.cloud_provider_id is null;
+  - |
+    SELECT COUNT(1) FROM subscriptions INNER JOIN metrics ON metrics.external_id = subscriptions.external_cluster_id AND subscriptions.console_url = '' AND metrics.metrics->>'ConsoleURL' IS NOT NULL;
+  - |
+    SELECT COUNT(1) FROM subscriptions WHERE deleted_at IS NOT NULL;
