@@ -395,6 +395,10 @@ The structure of this parameter is the following:
 quayRepos:
 - org:
     $ref: <quay org datafile (`/dependencies/quay-org-1.yml`), for example `/dependencies/quay/openshiftio.yml`>
+  teams: # optional
+  - permissions:
+    - $ref: <quay-membership permission datafile (`/access/permission-1.yml`), for example `/dependencies/quay/permissions/quay-membership-app-sre-managed-services.yml`>
+    role: read
   items:
   - name: <name of the repo, e.g. 'centos'>
     description: <description>
@@ -403,6 +407,8 @@ quayRepos:
 ```
 
 In order to add or remove a Quay repo, a MR must be sent to the appropriate App datafile and add the repo to the `items` array.
+
+The `teams` section should be added if you want to have `read` access to your team's repos. This access will be added to the teams specified in the `permissions` section for each repo in the `items` section.
 
 **NOTE**: If the App or the relevant Quay org are not modelled in the App-Interface repository, please seek the assistance from the App-SRE team.
 
