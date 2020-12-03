@@ -47,3 +47,100 @@ spec:
         dashboard: "https://GRAFANA_URL"
         link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/automation-hub-stage/deployments"
         message: "Insights Automation Hub Alert. 5xx repsponses observed in the last 5 minutes."
+
+    # RDS alerts
+    - alert: RDS-LongCPUThrottling-In-Automation-Hub-Stage
+      expr: rdsosmetrics_cpuUtilization_total{exported_instance="automation-hub-stage"} > 95
+      for: 10m
+      labels:
+        severity: warning
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/automation-hub-stage/deployments"
+        message: "Insights Automation Hub Alert. CPU usage over 95% for 10 minutes."
+
+    - alert: RDS-LowFreeMemory-In-Automation-Hub-Stage
+      expr: aws_rds_freeable_memory_average{dbinstance_identifier="automation-hub-stage"} < 128 * 1024 * 1024
+      for: 10m
+      labels:
+        severity: warning
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/automation-hub-stage/deployments"
+        message: "Insights Automation Hub Alert. Free memory under 128 MiB."
+
+    - alert: RDS-LowFreeDisk-In-Automation-Hub-Stage
+      expr: aws_rds_free_storage_space_average{dbinstance_identifier="automation-hub-stage"} < 4 * 1024 * 1024 * 1024
+      for: 10m
+      labels:
+        severity: warning
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/automation-hub-stage/deployments"
+        message: "Insights Automation Hub Alert. Free disk under 4 GiB."
+
+    - alert: RDS-DiskFullIn72H-In-Automation-Hub-Stage
+      expr: predict_linear(aws_rds_free_storage_space_average{dbinstance_identifier="automation-hub-stage"}, 72 * 3600) < 0
+      for: 10m
+      labels:
+        severity: warning
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/automation-hub-stage/deployments"
+        message: "Insights Automation Hub Alert. Disk will be full within 72 hours."
+
+    - alert: RDS-DiskFullIn24H-In-Automation-Hub-Stage
+      expr: predict_linear(aws_rds_free_storage_space_average{dbinstance_identifier="automation-hub-stage"}, 24 * 3600) < 0
+      for: 10m
+      labels:
+        severity: warning
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/automation-hub-stage/deployments"
+        message: "Insights Automation Hub Alert. Disk will be full within 24 hours."
+
+    - alert: RDS-HighReadLatency-In-Automation-Hub-Stage
+      expr: aws_rds_read_latency_average{dbinstance_identifier="automation-hub-stage"} > 0.250
+      for: 10m
+      labels:
+        severity: warning
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/automation-hub-stage/deployments"
+        message: "Insights Automation Hub Alert.  Average read latency over 250ms."
+
+    - alert: RDS-HighWriteLatency-In-Automation-Hub-Stage
+      expr: aws_rds_write_latency_average{dbinstance_identifier="automation-hub-stage"} > 0.250
+      for: 10m
+      labels:
+        severity: warning
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/automation-hub-stage/deployments"
+        message: "Insights Automation Hub Alert.  Average write latency over 250ms."
+
+    - alert: RDS-HighDiskQueue-In-Automation-Hub-Stage
+      expr: rdsosmetrics_diskIO_avgQueueLen{exported_instance="automation-hub-stage", device="rdsdev"}
+      for: 10m
+      labels:
+        severity: warning
+        service: insights
+        env: stage
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/automation-hub-stage/deployments"
+        message: "Insights Automation Hub Alert. High disk queue depth."
