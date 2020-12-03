@@ -86,3 +86,39 @@
         - *github_token
     <<: *gl_timed
 
+- job-template:
+    id: 'insights-engine-gl-pr-check'
+    name: '{gl_group}-{gl_project}-pr-check'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_ephemeral_oc_login
+        - *app_interface_creds
+        - *insights_rh_registry_pull_secret
+        - *quay_secret_push
+        - *prodsec_rules_build_token
+    publishers:
+    - junit:
+        results: 'artifacts/junit-*.xml'
+    - archive:
+        artifacts: 'artifacts/**/*'
+    <<: *gl_pr_check
+
+- job-template:
+    id: 'insights-engine-gl-build-master'
+    name: '{gl_group}-{gl_project}-gl-build-{branch}'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_rh_registry_pull_secret
+        - *quay_secret_push
+        - *prodsec_rules_build_token
+    <<: *gl_build_master
