@@ -27,11 +27,11 @@ config:
       jobs:
         - 'gl-build-master-strimzi':
             branch: mk-release
-            display_name: build managed-kafka master
+            display_name: build mk-strimzi-operator mk-release
         - 'gl-pr-check':
-            display_name: managed-kafka pr-check
+            display_name: mk-strimzi-operator pr-check
         - 'managed-kafka-security-scan':
-            display_name: managed-kafka security scan
+            display_name: mk-strimzi-operator security-scan mk-master
             branch: mk-master
             ci_cmd: 'make scan_project'
             slack_channel_notification: mk-ci-cd
@@ -101,9 +101,9 @@ config:
             display_name: strimzi-operator-bundle pr-check
         - 'gl-build-master':
             branch: staging
-            display_name: strimzi-operator-bundle build branch
+            display_name: strimzi-operator-bundle build staging
         - 'strimzi-operator-test':
-            display_name: strimzi-operator system-test
+            display_name: strimzi-operator system-test staging
             branch: staging
 
   - project:
@@ -125,7 +125,16 @@ config:
             cron_expression: 'H 6 * * *'
             ci_cmd: './pr_check.sh'
             slack_channel_notification: managed-services-api
-
+        # At the moment, there is no other way to have an OSD cluster running longer than 7 days, hence the automation here.
+        # This will be removed once we have a production cluster, or have a better way to have OSD clusters that can last longer.
+        # See https://issues.redhat.com/browse/MGDSTRM-878
+        - 'managed-services-api-cluster-extension':
+            display_name: Managed Services API Extend Staging Cluster Lifetime
+            timeout: 7200
+            disable: false
+            cron_expression: '0 10 * * *' # Every morning at 10am. This will ensure there is always 7 days until the cluster is expired.
+            ci_cmd: './scripts/extend_staging_osd.sh'
+            slack_channel_notification: managed-services-api
 
   - project:
       name: managed-services-kafka-performance-tests
