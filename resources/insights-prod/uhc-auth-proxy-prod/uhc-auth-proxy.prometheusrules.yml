@@ -40,4 +40,19 @@ spec:
         message: "c.rh.c uhc-auth-proxy Alert (Prod). Latency SLO breach"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/app-sops/uhc-auth-proxy/app-uhc-prod-down.rst"
 
+    - alert: InsightsUHCAuth4xxSpike
+      expr: |
+        avg(rate(api_3scale_gateway_auth_status{service="apicast",auth_type="uhc-auth",status="4xx"}[5m])) > .1
+      for: 5m
+      labels:
+        severity: medium
+        service: insights
+        env: prod
+        app_team: platform
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/0fmN7EWGz/platform-health?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/uhc-auth-proxy-prod/deployments"
+        message: "c.rh.c uhc-auth-proxy Alert (Prod). Spike in 4xx responses (SSO issue?)"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/app-sops/uhc-auth-proxy/app-uhc-prod-4xx.rst"
+
 
