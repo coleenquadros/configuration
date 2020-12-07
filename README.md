@@ -1170,6 +1170,7 @@ In order to add or update an S3 bucket, you need to add them to the `terraformRe
 - `overrides`: list of values from `defaults` you wish to override, with the override values. For example: `acl: public`.
 - `sqs_identifier`: identifier of a existing sqs queue. It will create a s3 notifacation to that sqs queue. This field is optional.
 - `s3_events`: a listing of the event types for sqs queue.
+- `bucket_policy`: an AWS bucket policy to create and attach to the s3 bucket.
 - `output_resource_name`: name of Kubernetes Secret to be created.
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
