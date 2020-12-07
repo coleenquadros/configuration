@@ -77,13 +77,13 @@ rm -rf ${SUCCESS_DIR} ${FAIL_DIR}; mkdir -p ${SUCCESS_DIR} ${FAIL_DIR}
 cat "$CONFIG_TOML" > ${WORK_DIR}/config/config.toml
 
 # Gatekeeper. If this fails, we skip all the integrations.
-NO_GQL_SHA_URL=true run_int gitlab-fork-compliance $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid app-sre && {
+run_int gitlab-fork-compliance $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid app-sre && {
 
 ### gitlab-ci-skipper runs first to determine if other integrations should run
 [[ "$(run_int gitlab-ci-skipper $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid)" == "no" ]] && {
 
 ## Run integrations on production
-ALIAS=saas-file-owners-no-compare NO_GQL_SHA_URL=true run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid --no-compare &
+ALIAS=saas-file-owners-no-compare run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid --no-compare &
 
 # Prepare to run integrations on local server
 
