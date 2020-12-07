@@ -57,11 +57,7 @@ resourceTemplates:
     SUBSCRIPTION_BASED_DATA_RECONCILER_DRY_RUN: "false"
     DEPROVISION_OLD_SUBSCRIPTIONS_DRY_RUN: "false"
     SUBSCRIPTION_STATUS_RECONCILER_DRY_RUN: "false"
-    SUBSCRIPTION_STATUS_RECONCILER_SCHEDULE_EXPRESSION: "0 * * * *"
     EBS_ACCOUNT_RECONCILER_DRY_RUN: "false"
-    EBS_ACCOUNT_RECONCILER_CRON_SCHEDULE: "0 * * * *"
-    OCP_USAGE_RECONCILER_CRON_SCHEDULE: "0 */2 * * *"
-    OCP_USAGE_CLEANER_CRON_SCHEDULE: "0 */5 * * *"
     OCP_SKU_LIST_FILE: /configs/subscription-skus/ocp-skus.yaml
     USE_CANDLEPIN_BASIC_AUTH: "false"
     ENABLE_SENTRY: "true"
@@ -70,7 +66,6 @@ resourceTemplates:
     OCP_USAGE_CLEANER_WORKER_COUNT: "1"
     OCP_USAGE_RECONCILER_ACTIVE_DEADLINE_SECONDS: "21600"
     OCP_USAGE_CLEANER_ACTIVE_DEADLINE_SECONDS: "30000"
-    HYDRA_FETCH_ORGANIZATIONS_DATA_CRON_SCHEDULE: "0 * * * *"
     HYDRA_FETCH_ORGANIZATIONS_DATA_CACHE_EXP: "24"
     HYDRA_FETCH_ORGANIZATIONS_DATA_CARDINALITY: "500"
     HYDRA_FETCH_ORGANIZATIONS_DATA_WORKER_COUNT: "3"
@@ -80,7 +75,6 @@ resourceTemplates:
     GODEBUG: http2server=0
     FETCH_TELEMETER_METRICS_WORKER_COUNT: "16"
     FETCH_TELEMETER_METRICS_STALE_METRICS_DURATION: "1440h"
-    MOA_ENTITLEMENT_RECONCILER_CRON_SCHEDULE: "0 */1 * * *"
     MOA_ENTITLEMENT_RECONCILER_DRY_RUN: "true"
     MOA_ENTITLEMENT_RECONCILER_WORKER_COUNT: "1"
     MOA_SKU: "MW01369"
@@ -91,6 +85,13 @@ resourceTemplates:
     API_TARGET_AVERAGE_CPU_UTILIZATION: "80"
     API_TARGET_AVERAGE_MEMORY_UTILIZATION: "75"
     TARGET_CPU_UTILIZATION: "80"
+    # group cron schedules here
+    SUBSCRIPTION_STATUS_RECONCILER_SCHEDULE_EXPRESSION: "0 * * * *"
+    EBS_ACCOUNT_RECONCILER_CRON_SCHEDULE: "0 * * * *"
+    OCP_USAGE_RECONCILER_CRON_SCHEDULE: "0 */2 * * *"
+    OCP_USAGE_CLEANER_CRON_SCHEDULE: "0 */5 * * *"
+    HYDRA_FETCH_ORGANIZATIONS_DATA_CRON_SCHEDULE: "0 * * * *"
+    MOA_ENTITLEMENT_RECONCILER_CRON_SCHEDULE: "0 */1 * * *"
   targets:
   - namespace:
       $ref: /services/ocm/namespaces/uhc-integration-v3.yml
@@ -98,7 +99,6 @@ resourceTemplates:
     upstream: service-uhc-account-manager-gl-build-master
     parameters:
       ENABLE_TERMS_ENFORCEMENT: "false"
-      FETCH_TELEMETER_METRICS_CRON_SCHEDULE: "*/30 * * * *"
       SUSPEND_FETCH_TELEMETER_METRICS_CRON: "true"
       FETCH_TELEMETER_METRICS_DRY_RUN: "true"
       TELEMETER_BASE_URL: "https://infogw-proxy.api.stage.openshift.com/"
@@ -115,11 +115,8 @@ resourceTemplates:
       SENTRY_PROJECT: "9"
       GLOG_V: 5
       ORG_CLUSTER_REG_RATE_LIMIT: 50
-      # Deprovision old subs only every friday in INT since it will break test subscriptions for CS when it runs
-      DEPROVISION_OLD_SUBSCRIPTIONS_CRON_SCHEDULE: "0 23 * * 5"
       # Update the value to any random string to perform a rolling update of the deployment.
       UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_2
-      SUBSCRIPTION_BASED_DATA_RECONCILER_CRON_SCHEDULE: "*/30 * * * *"
       SUBSCRIPTION_STATUS_RECONCILER_EVALUATION_DURATION: "24h"
       SUBSCRIPTION_BASED_DATA_RECONCILER_CLIENT_CARDINALITY: "5"
       # Don't run OCP Usage reconciliation jobs in int, since they just fail anyway without a public rhsm stage endpoint
@@ -135,22 +132,26 @@ resourceTemplates:
       SUSPEND_REGISTRY_CREDENTIAL_POOL_LOADER_CRON: "false"
       SUSPEND_MOA_ENTITLEMENT_RECONCILER_CRON: "false"
       MOA_SKU: "SER0579"
-      ACCOUNT_RECONCILER_CRON_SCHEDULE: "30 18 * * *"
       ACCOUNT_RECONCILER_DRY_RUN: "false"
-      REGISTRY_CREDENTIAL_POOL_LOADER_CRON_SCHEDULE: "0 * * * *"
       REGISTRY_CREDENTIAL_POOL_LOADER_DRY_RUN: "false"
       REGISTRY_CREDENTIAL_POOL_LOADER_WORKER_COUNT: "1"
       REGISTRY_CREDENTIAL_POOL_LOADER_CARDINALITY: "5"
       REGISTRY_CREDENTIAL_POOL_LOADER_HIGH_WATERMARK: "10"
       UNLEASH_URL: "https://ocm-integration.unleash.devshift.net/api"
       QUAY_REGISTRY_TEAM_NAME: "integrationinstallers"
+      # group cron schedules here
+      FETCH_TELEMETER_METRICS_CRON_SCHEDULE: "*/30 * * * *"
+      # Deprovision old subs only every friday in INT since it will break test subscriptions for CS when it runs
+      DEPROVISION_OLD_SUBSCRIPTIONS_CRON_SCHEDULE: "0 23 * * 5"
+      SUBSCRIPTION_BASED_DATA_RECONCILER_CRON_SCHEDULE: "*/30 * * * *"
+      ACCOUNT_RECONCILER_CRON_SCHEDULE: "30 18 * * *"
+      REGISTRY_CREDENTIAL_POOL_LOADER_CRON_SCHEDULE: "0 * * * *"
   - namespace:
       $ref: /services/ocm/namespaces/uhc-integration.yml
     ref: master
     upstream: service-uhc-account-manager-gl-build-master
     parameters:
       ENABLE_TERMS_ENFORCEMENT: "false"
-      FETCH_TELEMETER_METRICS_CRON_SCHEDULE: "*/30 * * * *"
       SUSPEND_FETCH_TELEMETER_METRICS_CRON: "true"
       FETCH_TELEMETER_METRICS_DRY_RUN: "true"
       TELEMETER_BASE_URL: "https://infogw-proxy.api.stage.openshift.com/"
@@ -167,11 +168,8 @@ resourceTemplates:
       SENTRY_PROJECT: "9"
       GLOG_V: 5
       ORG_CLUSTER_REG_RATE_LIMIT: 50
-      # Deprovision old subs only every friday in INT since it will break test subscriptions for CS when it runs
-      DEPROVISION_OLD_SUBSCRIPTIONS_CRON_SCHEDULE: "0 23 * * 5"
       # Update the value to any random string to perform a rolling update of the deployment.
       UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_2
-      SUBSCRIPTION_BASED_DATA_RECONCILER_CRON_SCHEDULE: "*/30 * * * *"
       SUBSCRIPTION_STATUS_RECONCILER_EVALUATION_DURATION: "24h"
       SUBSCRIPTION_BASED_DATA_RECONCILER_CLIENT_CARDINALITY: "5"
       # Don't run OCP Usage reconciliation jobs in int, since they just fail anyway without a public rhsm stage endpoint
@@ -187,14 +185,19 @@ resourceTemplates:
       SUSPEND_REGISTRY_CREDENTIAL_POOL_LOADER_CRON: "false"
       SUSPEND_MOA_ENTITLEMENT_RECONCILER_CRON: "false"
       MOA_SKU: "SER0579"
-      ACCOUNT_RECONCILER_CRON_SCHEDULE: "30 18 * * *"
       ACCOUNT_RECONCILER_DRY_RUN: "false"
-      REGISTRY_CREDENTIAL_POOL_LOADER_CRON_SCHEDULE: "0 * * * *"
       REGISTRY_CREDENTIAL_POOL_LOADER_DRY_RUN: "false"
       REGISTRY_CREDENTIAL_POOL_LOADER_WORKER_COUNT: "1"
       REGISTRY_CREDENTIAL_POOL_LOADER_CARDINALITY: "5"
       REGISTRY_CREDENTIAL_POOL_LOADER_HIGH_WATERMARK: "10"
       UNLEASH_URL: "https://ocm-integration.unleash.devshift.net/api"
+      # group cron schedules here
+      FETCH_TELEMETER_METRICS_CRON_SCHEDULE: "*/30 * * * *"
+      # Deprovision old subs only every friday in INT since it will break test subscriptions for CS when it runs
+      DEPROVISION_OLD_SUBSCRIPTIONS_CRON_SCHEDULE: "0 23 * * 5"
+      SUBSCRIPTION_BASED_DATA_RECONCILER_CRON_SCHEDULE: "*/30 * * * *"
+      ACCOUNT_RECONCILER_CRON_SCHEDULE: "30 18 * * *"
+      REGISTRY_CREDENTIAL_POOL_LOADER_CRON_SCHEDULE: "0 * * * *"
   - namespace:
       $ref: /services/ocm/namespaces/uhc-stage.yml
     ref: master
@@ -207,7 +210,6 @@ resourceTemplates:
       # Temporarily increase the CPU limit to 2 for stage AMS during scale testing the replicas were also increased for ^
       CPU_LIMIT: "2"
       ENABLE_TERMS_ENFORCEMENT: "false"
-      FETCH_TELEMETER_METRICS_CRON_SCHEDULE: "*/5 * * * *"
       SUSPEND_FETCH_TELEMETER_METRICS_CRON: "false"
       FETCH_TELEMETER_METRICS_DRY_RUN: "false"
       TELEMETER_BASE_URL: "https://infogw-proxy.api.stage.openshift.com/"
@@ -225,10 +227,8 @@ resourceTemplates:
       SUSPEND_HYDRA_FETCH_ORGANIZATIONS_DATA_CRON: "false"
       HYDRA_FETCH_ORGANIZATONS_DATA_DRY_RUN: "false"
       HYDRA_DEBUG: "false"
-      DEPROVISION_OLD_SUBSCRIPTIONS_CRON_SCHEDULE: "30 17 * * *"
       # Update the value to any random string to perform a rolling update of the deployment.
       UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_2
-      SUBSCRIPTION_BASED_DATA_RECONCILER_CRON_SCHEDULE: "*/30 * * * *"
       SUBSCRIPTION_BASED_DATA_RECONCILER_CLIENT_CARDINALITY: "5"
       SUBSCRIPTION_STATUS_RECONCILER_RELEASED_UNRELEASED_TRIGGER_DURATION: "1h"
       # Don't run OCP Usage reconciliation jobs in stage, since they just fail anyway without a public rhsm stage endpoint
@@ -245,7 +245,6 @@ resourceTemplates:
       SUSPEND_MOA_ENTITLEMENT_RECONCILER_CRON: "false"
       MOA_ENTITLEMENT_RECONCILER_DRY_RUN: "false"
       MOA_SKU: "SER0579"
-      REGISTRY_CREDENTIAL_POOL_LOADER_CRON_SCHEDULE: "0 * * * *"
       REGISTRY_CREDENTIAL_POOL_LOADER_DRY_RUN: "false"
       REGISTRY_CREDENTIAL_POOL_LOADER_WORKER_COUNT: "1"
       REGISTRY_CREDENTIAL_POOL_LOADER_CARDINALITY: "5"
@@ -253,13 +252,17 @@ resourceTemplates:
       UHC_DEBUG: "true"
       UNLEASH_URL: "https://ocm-stage.unleash.devshift.net/api"
       QUAY_REGISTRY_TEAM_NAME: "staginginstallers"
+      # group cron schedules here
+      FETCH_TELEMETER_METRICS_CRON_SCHEDULE: "*/5 * * * *"
+      DEPROVISION_OLD_SUBSCRIPTIONS_CRON_SCHEDULE: "30 17 * * *"
+      SUBSCRIPTION_BASED_DATA_RECONCILER_CRON_SCHEDULE: "*/30 * * * *"
+      REGISTRY_CREDENTIAL_POOL_LOADER_CRON_SCHEDULE: "0 * * * *"
   - namespace:
       $ref: /services/ocm/namespaces/uhc-stage-appsres04ue2.yml
     ref: master
     upstream: service-uhc-account-manager-gl-build-master
     parameters:
       ENABLE_TERMS_ENFORCEMENT: "false"
-      FETCH_TELEMETER_METRICS_CRON_SCHEDULE: "*/5 * * * *"
       SUSPEND_FETCH_TELEMETER_METRICS_CRON: "true"
       FETCH_TELEMETER_METRICS_DRY_RUN: "false"
       TELEMETER_BASE_URL: "https://infogw-proxy.api.stage.openshift.com/"
@@ -277,10 +280,8 @@ resourceTemplates:
       SUSPEND_HYDRA_FETCH_ORGANIZATIONS_DATA_CRON: "true"
       HYDRA_FETCH_ORGANIZATONS_DATA_DRY_RUN: "false"
       HYDRA_DEBUG: "false"
-      DEPROVISION_OLD_SUBSCRIPTIONS_CRON_SCHEDULE: "30 17 * * *"
       # Update the value to any random string to perform a rolling update of the deployment.
       UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_1
-      SUBSCRIPTION_BASED_DATA_RECONCILER_CRON_SCHEDULE: "*/30 * * * *"
       SUBSCRIPTION_BASED_DATA_RECONCILER_CLIENT_CARDINALITY: "5"
       SUBSCRIPTION_STATUS_RECONCILER_RELEASED_UNRELEASED_TRIGGER_DURATION: "1h"
       # Don't run OCP Usage reconciliation jobs in stage, since they just fail anyway without a public rhsm stage endpoint
@@ -296,7 +297,6 @@ resourceTemplates:
       SUSPEND_REGISTRY_CREDENTIAL_POOL_LOADER_CRON: "true"
       SUSPEND_MOA_ENTITLEMENT_RECONCILER_CRON: "true"
       MOA_SKU: "SER0579"
-      REGISTRY_CREDENTIAL_POOL_LOADER_CRON_SCHEDULE: "0 * * * *"
       REGISTRY_CREDENTIAL_POOL_LOADER_DRY_RUN: "false"
       REGISTRY_CREDENTIAL_POOL_LOADER_WORKER_COUNT: "1"
       REGISTRY_CREDENTIAL_POOL_LOADER_CARDINALITY: "5"
@@ -304,6 +304,11 @@ resourceTemplates:
       UHC_DEBUG: "true"
       UNLEASH_URL: "https://ocm-stage.unleash.devshift.net/api"
       QUAY_REGISTRY_TEAM_NAME: "staginginstallers"
+      # group cron schedules here
+      FETCH_TELEMETER_METRICS_CRON_SCHEDULE: "*/5 * * * *"
+      DEPROVISION_OLD_SUBSCRIPTIONS_CRON_SCHEDULE: "30 17 * * *"
+      SUBSCRIPTION_BASED_DATA_RECONCILER_CRON_SCHEDULE: "*/30 * * * *"
+      REGISTRY_CREDENTIAL_POOL_LOADER_CRON_SCHEDULE: "0 * * * *"
   - namespace:
       $ref: /services/ocm/namespaces/uhc-production.yml
     ref: dcc16033dc9037b61945177897982d0fc37aca33
@@ -322,16 +327,12 @@ resourceTemplates:
       SENTRY_URL: "sentry.devshift.net"
       SENTRY_PROJECT: "2"
       GLOG_V: 1
-      ACCOUNT_RECONCILER_CRON_SCHEDULE: "30 18 * * *"
       ACCOUNT_RECONCILER_DRY_RUN: "false"
       ACCOUNT_RECONCILER_WORKER_COUNT: "2"
       STALE_SCREEN_PERIOD: "72h"
-      DEPROVISION_OLD_SUBSCRIPTIONS_CRON_SCHEDULE: "30 17 * * *"
       HYDRA_FETCH_ORGANIZATONS_DATA_DRY_RUN: "false"
       HYDRA_DEBUG: "false"
-      SUBSCRIPTION_BASED_DATA_RECONCILER_CRON_SCHEDULE: "1 * * * *"
       SUBSCRIPTION_BASED_DATA_RECONCILER_CLIENT_CARDINALITY: "1"
-      REGISTRY_CREDENTIAL_POOL_LOADER_CRON_SCHEDULE: "0 * * * *"
       REGISTRY_CREDENTIAL_POOL_LOADER_DRY_RUN: "false"
       REGISTRY_CREDENTIAL_POOL_LOADER_WORKER_COUNT: "1"
       REGISTRY_CREDENTIAL_POOL_LOADER_CARDINALITY: "100"
@@ -353,11 +354,16 @@ resourceTemplates:
       # Update the value to any random string to perform a rolling update of the deployment.
       UPDATE_DEPLOYMENT_CONFIG_CHANGE: roll_for_certificate
       UNLEASH_URL: "https://ocm.unleash.devshift.net/api"
-      FETCH_TELEMETER_METRICS_CRON_SCHEDULE: "*/5 * * * *"
       FETCH_TELEMETER_METRICS_DRY_RUN: "false"
       TELEMETER_BASE_URL: "https://infogw-proxy.api.openshift.com/"
       TELEMETER_DEBUG: "true"
       QUAY_REGISTRY_TEAM_NAME: "installers"
+      # group cron schedules
+      ACCOUNT_RECONCILER_CRON_SCHEDULE: "30 18 * * *"
+      DEPROVISION_OLD_SUBSCRIPTIONS_CRON_SCHEDULE: "30 17 * * *"
+      SUBSCRIPTION_BASED_DATA_RECONCILER_CRON_SCHEDULE: "1 * * * *"
+      REGISTRY_CREDENTIAL_POOL_LOADER_CRON_SCHEDULE: "0 * * * *"
+      FETCH_TELEMETER_METRICS_CRON_SCHEDULE: "*/5 * * * *"
   - namespace:
       $ref: /services/ocm/namespaces/uhc-stage-sso-test.yml
     ref: master
@@ -374,7 +380,6 @@ resourceTemplates:
       RHIT_BASE_REGNUM_URL: https://subscription.stage.api.redhat.com/svcrest/regnum/v5/
       RHIT_BASE_REGISTRY_URL: https://container-registry-authorizer.stage.api.redhat.com/v1/
       RHIT_BASE_EXPORT_COMPLIANCE_URL: https://export-compliance.stage.api.redhat.com/v1/
-      FETCH_TELEMETER_METRICS_CRON_SCHEDULE: "*/5 * * * *"
       SUSPEND_FETCH_TELEMETER_METRICS_CRON: "false"
       FETCH_TELEMETER_METRICS_DRY_RUN: "false"
       TELEMETER_BASE_URL: "https://infogw-proxy.api.stage.openshift.com/"
@@ -391,10 +396,8 @@ resourceTemplates:
       SUSPEND_HYDRA_FETCH_ORGANIZATIONS_DATA_CRON: "true"
       HYDRA_FETCH_ORGANIZATONS_DATA_DRY_RUN: "false"
       HYDRA_DEBUG: "false"
-      DEPROVISION_OLD_SUBSCRIPTIONS_CRON_SCHEDULE: "30 17 * * *"
       # Update the value to any random string to perform a rolling update of the deployment.
       UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_1
-      SUBSCRIPTION_BASED_DATA_RECONCILER_CRON_SCHEDULE: "*/30 * * * *"
       SUBSCRIPTION_BASED_DATA_RECONCILER_CLIENT_CARDINALITY: "5"
       # Don't run OCP Usage reconciliation jobs in stage, since they just fail anyway without a public rhsm stage endpoint
       # Suspension params should always be env specific
@@ -410,7 +413,6 @@ resourceTemplates:
       SUSPEND_REGISTRY_CREDENTIAL_POOL_LOADER_CRON: "false"
       SUSPEND_MOA_ENTITLEMENT_RECONCILER_CRON: "true"
       MOA_SKU: "SER0579"
-      REGISTRY_CREDENTIAL_POOL_LOADER_CRON_SCHEDULE: "0 * * * *"
       REGISTRY_CREDENTIAL_POOL_LOADER_DRY_RUN: "false"
       REGISTRY_CREDENTIAL_POOL_LOADER_WORKER_COUNT: "1"
       REGISTRY_CREDENTIAL_POOL_LOADER_CARDINALITY: "5"
@@ -418,3 +420,8 @@ resourceTemplates:
       UHC_DEBUG: "true"
       UNLEASH_URL: "https://ocm-stage.unleash.devshift.net/api"
       QUAY_REGISTRY_TEAM_NAME: "staginginstallers"
+      # group cron schedules here
+      FETCH_TELEMETER_METRICS_CRON_SCHEDULE: "*/5 * * * *"
+      DEPROVISION_OLD_SUBSCRIPTIONS_CRON_SCHEDULE: "30 17 * * *"
+      SUBSCRIPTION_BASED_DATA_RECONCILER_CRON_SCHEDULE: "*/30 * * * *"
+      REGISTRY_CREDENTIAL_POOL_LOADER_CRON_SCHEDULE: "0 * * * *"
