@@ -25,6 +25,7 @@ managedResourceTypes:
 - Service
 - HorizontalPodAutoscaler
 - CronJob
+- Job
 
 imagePatterns:
 - quay.io/cloudservices
@@ -148,3 +149,15 @@ resourceTemplates:
       BULK_QUERY_SOURCE: xjoin
       BULK_QUERY_SOURCE_BETA: xjoin
       XJOIN_SEARCH_URL: http://xjoin-search.xjoin-stage.svc.cluster.local.:4000/graphql
+- name: inventory-host-synchronizer
+  path: /templates/inventory/inventory-host-synchronizer.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/host-inventory/namespaces/stage-host-inventory-stage.yml
+    ref: 0ef931a82c30086c96a08dfd14ae443c0fc5d559
+    parameters:
+      IMAGE_NAMESPACE: quay.io/cloudservices
+      IMAGE_TAG: dd58ccb
+      PROMETHEUS_PUSHGATEWAY: 'prometheus-push.insights-push-stage.svc.cluster.local:9091'
+      KAFKA_EVENT_TOPIC: platform.inventory.events-test
