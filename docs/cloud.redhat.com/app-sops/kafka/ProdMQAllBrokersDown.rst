@@ -30,6 +30,7 @@ Steps
 
 -  Check logs for the Kafka pods in the said namespace
 -  Ping Chris Mitchel if available
+-  Further escalation is described in https://source.redhat.com/groups/public/sre-services/sre_services_wiki/escalating_kafka_strimzi_amq.
 
 Escalations
 -----------
