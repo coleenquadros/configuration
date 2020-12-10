@@ -51,6 +51,7 @@ Escalations
 
 -  Ping platform-infrastructure-dev or platform-data-dev Slack groups for assistance
 -  Ping the engineering team that owns the APP
+-  Further escalation is described in https://source.redhat.com/groups/public/sre-services/sre_services_wiki/escalating_kafka_strimzi_amq.
 
 .. _Grafana: https://metrics.1b13.insights.openshiftapps.com/?orgId=1
 .. _Thanos: http://thanos-query-mnm.1b13.insights.openshiftapps.com/graph
