@@ -1,0 +1,46 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: tower-analytics
+  platform: insights
+
+name: tower-analytics-clowder
+description: tower-analytics app on the Insights Platform
+
+app:
+  $ref: /services/insights/tower-analytics/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+managedResourceTypes:
+- ClowdApp
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  CLOUD_WATCH_LOG_GROUP: tower-analytics-stage
+
+resourceTemplates:
+- name: tower-analytics-clowder
+  path: /saas-templates/clowderapp.yaml
+  url: https://gitlab.cee.redhat.com/automation-analytics/automation-analytics-backend
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/jwong-test.yml
+    ref: c82bbc61f4ecdaf1298d64946d09cf14e15b55f8
+    parameters:
+      IMAGE_TAG: latest
+      REPLICAS: 1
