@@ -1,0 +1,37 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: insights
+
+name: clowder
+description: Namespace where Clowder OLM resources (and clower itself) are deployed
+
+cluster:
+  $ref: /openshift/crcs02ue1/cluster.yml
+
+app:
+  $ref: /services/insights/clowder/app.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /openshift/crcs02ue1/namespaces/openshift-operator-lifecycle-manager.yml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs02ue1.yml
+
+managedRoles: true
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
