@@ -34,6 +34,7 @@ If SSO is not experiencing an issue, continue troubleshooting uhc-auth-proxy:
 -  Check if there were any recent changes to the deployed code
     -  In this case a deployment rollback should be safe and get things running again until the team can be pinged.
 
+  Check uhc-auth-proxy health dashboard (https://grafana.app-sre.devshift.net/d/NncCcICiz/uhc-auth-proxy-health?orgId=1)
   Check operational dashboard (https://grafana.app-sre.devshift.net/d/0fmN7EWGz/platform-health?orgId=1&var-datasource=crcp01ue1-prometheus)
 
 Escalations
