@@ -9,6 +9,20 @@ metadata:
     role: alert-rules
 spec:
   groups:
+  - name: sources-services-up-stage
+    rules:
+      - alert: SourcesApiSvcAbsent
+        expr: absent(up{job="sources-api",namespace="sources-stage"}==1)
+        for: 2m
+        labels:
+          severity: high
+          service: insights
+          env: stage
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.stage.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-30m&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-api"
+          message: "[Stage] Sources: API: All pods have been down for two minutes"
   - name: sources-kafka-lag-stage
     rules:
       - alert: SourcesKafkaLagSourcesStatus
