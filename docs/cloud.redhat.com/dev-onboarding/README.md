@@ -65,8 +65,8 @@ More info can be found in the [workflow doc](https://gitlab.cee.redhat.com/servi
 * UI: https://cloud.stage.redhat.com
 * Openshift console: go to [Clusters](https://visual-app-interface.devshift.net/clusters) > Search "crc" > Choose cluster that says "Stage cluster" (click first link with URL in it for console, not 'details' link!)
 * Prometheus: [Clusters](https://visual-app-interface.devshift.net/clusters) > Search "crc" > Choose cluster that says "stage cluster" > Details > Prometheus
-* Kibana: https://kibana.apps.crc-stg-01.o4v9.p1.openshiftapps.com
-* payload tracker: https://payload-tracker-frontend-payload-tracker-stage.apps.crc-stg-01.o4v9.p1.openshiftapps.com/
+* Kibana: https://kibana.apps.crcs02ue1.urby.p1.openshiftapps.com
+* payload tracker: https://payload-tracker-frontend-payload-tracker-stage.apps.crcs02ue1.urby.p1.openshiftapps.com/
 
 Our stage environment follows IT's [pre-prod lockdown](https://mojo.redhat.com/docs/DOC-1193747) requirement.  Thus you must [configure your brower and scripts to use the Red Hat internal squid proxy](https://redhat.service-now.com/help?id=kb_article_view&sysparm_article=KB0006375&sys_kb_id=26c75be61b538490384411761a4bcbf9) ([alternative Mojo link](https://mojo.redhat.com/docs/DOC-1213497)) in order to access cloud.stage.redhat.com.
 
