@@ -1,0 +1,26 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: clowder
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: clowder
+    rules:
+      - alert: Clowder-no-metrics
+        expr: absent(up{service="clowder-controller-manager"}) or sum(up{service="clowder-controller-manager"}) == 0
+        for: 5m
+        labels:
+          severity: medium
+          service: clowder
+          env: stage
+          app_team: platform
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/VTSfF_0Gk/clowder-metrics"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/clowder/deployments"
+          message: "Clowder metrics are no longer being scraped."
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/cloud.redhat.com/app-sops/clowder/Clowder-no-metrics.md"
