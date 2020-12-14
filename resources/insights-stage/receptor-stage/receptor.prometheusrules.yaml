@@ -65,33 +65,6 @@ spec:
         link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/receptor-stage/deployments"
         message: "Receptor-Controller Alert. The receptor-switch pod has been restarting."
 
-    - alert: RedisDown
-      expr: |
-        kube_pod_container_status_running{namespace="receptor-stage", container="redis"} OR on() vector(0) == 0
-      for: 2m
-      labels:
-        severity: info
-        service: insights
-        env: stage
-        app_team: data-pipeline
-      annotations:
-        dashboard: "https://GRAFANA_URL"
-        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/receptor-stage/deployments"
-        message: "Receptor-Controller Alert. The redis pod has been down for two minutes."
-
-    - alert: RedisContainerRestart
-      expr: |
-        sum(increase(kube_pod_container_status_restarts_total{namespace="receptor-stage", container="redis"}[5m])) by (namespace) > 0
-      labels:
-        severity: info
-        service: insights
-        env: stage
-        app_team: data-pipeline
-      annotations:
-        dashboard: "https://GRAFANA_URL"
-        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/receptor-stage/deployments"
-        message: "Receptor-Controller Alert. The redis pod has been restarting."
-
     - alert: ReceptorRedisConnectionErrors
       expr: |
         sum(increase(receptor_controller_redis_connection_error_count[5m])) by (kubernetes_namespace) > 0
