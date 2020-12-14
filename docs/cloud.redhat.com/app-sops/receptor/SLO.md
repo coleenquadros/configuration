@@ -1,25 +1,17 @@
 # Receptor-Controller SLOs
 
-## SLO
+## SLIs
+1. Percentage of successful (non-5xx) WebSocket requests made to the API in the past 24 hours
+1. Percentage of successful (non-5xx) HTTP requests made to the API in the past 24 hours
+2. Percentage of correctly-formatted messages ingested from receptor nodes, which are successfully delivered to kafka in the past 24 hours.
+3. Percentage of time that the pods remain in the UP state during the past 24h
 
-Availability:
-99% of websocket requests result in successful (non-5xx) response
-99% of message submission / connection management requests result in successful (non-5xx) response
-99% of responses are successfully delivered to kafka
+## SLOs
 
-
-## SLI
-
-Availability:
-
-WebSocket Errors (5xx) %:
-`sum(increase(api_3scale_gateway_api_status{exported_service="receptor-controller", status="5xx"}[$__range])) / sum(increase(api_3scale_gateway_api_status{exported_service="receptor-controller"}[$__range]))`
-
-API Errors (5xx) %:
-sum(increase(receptor_controller_http_status_code_counter{status_code=~"5[0-9]{2}"})) / sum(increase(receptor_controller_http_status_code_counter))
-
-Response Delivery Errors %:
-`sum(increase(receptor_controller_kafka_response_writer_failure_count[$__range])) / sum(increase(receptor_controller_payload_message_sizes_count[$__range]))`
+1. `> 95%` of WebSocket requests are non-5xx
+2. `> 95%` of message submission / connection manaagement API requests are non-5xx
+3. `> 95%` of responses are successfully delivered to kafka
+4. `> 98%` uptime
 
 ## Dashboards
 
