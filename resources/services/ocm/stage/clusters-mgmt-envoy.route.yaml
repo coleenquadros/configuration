@@ -2,14 +2,15 @@ apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   annotations:
-    kubernetes.io/tls-acme: "true"
     haproxy.router.openshift.io/timeout: 5m
+    # Changing from default 5s to check if https://issues.redhat.com/browse/SDB-1327 is haproxy health checks.
+    router.openshift.io/haproxy.health.check.interval: 6s
     haproxy.router.openshift.io/balance: roundrobin
     haproxy.router.openshift.io/disable_cookies: "true"
-  name: clusters-mgmt
+  name: clusters-mgmt-envoy
 spec:
-  # TODO: Comment this line to send traffic via Envoy.
-  host: api.integration.openshift.com
+  # TODO: Uncomment this line to send traffic via Envoy.
+  # host: api.stage.openshift.com
   path: "/api/clusters_mgmt"
   tls:
     insecureEdgeTerminationPolicy: Redirect
