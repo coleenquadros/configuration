@@ -12,4 +12,4 @@ Availability:  sum(api_3scale_gateway_auth_status{service="apicast",auth_type="u
 Latency:  sum(api_3scale_gateway_auth_time_bucket{auth_type="uhc-auth",le="2000.0"})/sum(api_3scale_gateway_auth_time_bucket{auth_type="uhc-auth",le="+Inf"}) < .99
 
 ## SLO Dashboard
-https://grafana.app-sre.devshift.net/d/NncCcICiz/uhc-auth-proxy-health?orgId=1
+https://grafana.app-sre.devshift.net/d/NncCcICiz/uhc-auth-proxy-health?orgId=1&var-datasource=crcp01ue1-prometheus
