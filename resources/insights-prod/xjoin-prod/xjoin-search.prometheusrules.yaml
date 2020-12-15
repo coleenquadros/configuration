@@ -104,3 +104,32 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net/d/eqi9ATJWz/xjoin-search?orgId=1&var-datasource=crcp01ue1-prometheus&var-interval=5m"
         link_url: "https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/goto/61156529221207bfe7ca60da61c23152"
         message: "xjoin-search 4xx ratio above threshold ({{ $value }}%) in past 15 minutes"
+
+    - alert: xjoinAvailabilitySLOBreach
+      expr: |
+        1 - (sum(increase(xjoin_search_http_request_duration_seconds_count{status_code=~"5.*"}[7d])) or 0 + sum(increase(xjoin_search_errors_total{type="system"}[7d]))) / sum(increase(xjoin_search_http_request_duration_seconds_count[7d])) < 0.99
+      for: 5m
+      labels:
+        severity: critical
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/eqi9ATJWz/xjoin-search?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/goto/8efe5764b78469a7abba1e35a0f51402"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/app-sops/xjoin/xjoinAvailabilitySLOBreach.rst"
+        message: "xjoin availability SLO breached ({{ $value }}%)"
+
+    - alert: xjoinLatencySLOBreach
+      expr: |
+        sum(increase(xjoin_search_http_request_duration_seconds_bucket{le="1.5"}[7d])) / sum(increase(xjoin_search_http_request_duration_seconds_bucket{le="+Inf"}[7d])) < 0.95
+      for: 5m
+      labels:
+        severity: critical
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/eqi9ATJWz/xjoin-search?orgId=1&var-datasource=crcp01ue1-prometheus"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/app-sops/xjoin/xjoinLatencySLOBreach.rst"
+        message: "xjoin latency SLO breached ({{ $value }}%)"
