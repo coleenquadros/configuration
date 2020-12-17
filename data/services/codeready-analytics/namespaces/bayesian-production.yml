@@ -1,0 +1,33 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: codeready-analytics
+
+name: bayesian-production
+description: production namespace for bayesian
+
+cluster:
+    $ref: /openshift/app-sre-prod-03/cluster.yml
+
+app:
+  $ref: /services/codeready-analytics/app.yml
+
+environment:
+  $ref: /products/codeready-analytics/environments/production.yml
+
+grafanaUrl: "https://grafana.app-sre.devshift.net/d/k8s-compute-resources-namespace-pods/kubernetes-compute-resources-namespace-pods?var-datasource=dsaas-cluster-prometheus&var-namespace=bayesian-production"
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: app-interface/global/quay/openshiftio/quay.io
+  version: 2
+  type: kubernetes.io/dockercfg
+- provider: route
+  path: /dsaas/bayesian-production/f8a-server-backbone.route.yaml
+
