@@ -1,0 +1,69 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: policies-prod
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: policies-prod
+    rules:
+      - alert: PoliciesEngineDownProd
+        expr: up{endpoint='policies-engine', namespace='policies-prod'} == 0
+        for: 5m
+        labels:
+          severity: medium
+          service: insights
+          env: prod
+          app_team: policies
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/wX1EjUqZk/policies-dashboard"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/policies-prod/deployments"
+          message: "Policies Engine Alert (Prod)"
+          description: "Policies Engine: Down in PROD for 5 minutes."
+
+      - alert: PoliciesUiBackendDownProd
+        expr: up{endpoint='policies-ui-backend', namespace='policies-prod'} == 0
+        for: 5m
+        labels:
+          severity: medium
+          service: insights
+          env: prod
+          app_team: policies
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/wX1EjUqZk/policies-dashboard"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/policies-prod/deployments"
+          message: "Policies UI Backend Alert (Prod)"
+          description: "Policies UI Backend: Down in PROD for 5 minutes."
+
+      - alert: PoliciesEngineTotalProcessedProd
+        expr: rate(application_engine_input_processed_total{namespace='policies-prod'}[10m]) == 0
+        for: 5m
+        labels:
+          severity: medium
+          service: insights
+          env: prod
+          app_team: policies
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/wX1EjUqZk/policies-dashboard"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/policies-prod/deployments"
+          message: "Policies Engine Alert (Prod)"
+          description: "Policies Engine: No payload is being processed in PROD for 10 minutes."
+
+      - alert: PoliciesEnginePVFullProd
+        expr: max(kubelet_volume_stats_used_bytes{persistentvolumeclaim="policies-engine-data", namespace="policies-prod"} / (kubelet_volume_stats_used_bytes + kubelet_volume_stats_available_bytes)) > 0.8
+        for: 10m
+        labels:
+          severity: medium
+          service: insights
+          env: prod
+          app_team: policies
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/wX1EjUqZk/policies-dashboard"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/policies-prod/deployments"
+          message: "Policies Engine Alert (Prod)"
+          description: "Policies Engine: Persistent volume is getting full (80%)."
+
