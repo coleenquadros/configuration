@@ -1,0 +1,66 @@
+---
+$schema: /app-sre/app-1.yml
+
+labels:
+  service: codeready-analytics
+
+name: CodeReady-Analytics
+
+description: |
+  CodeReady Toolchain is an open online development environment for planning, creating, and deploying hybrid cloud services.
+
+onboardingStatus: OnBoarded
+
+serviceOwners:
+- name: Devtools
+  email: devtools-saas@redhat.com
+
+performanceParameters:
+  SLO: 90
+
+dependencies:
+- $ref: /dependencies/aws/service.yml
+- $ref: /dependencies/ci-int/service.yml
+- $ref: /dependencies/ci-ext/service.yml
+- $ref: /dependencies/gitlab/service.yml
+- $ref: /dependencies/github/service.yml
+- $ref: /dependencies/quay/service.yml
+- $ref: /dependencies/openshift/service.yml
+
+sentryProjects:
+- team:
+    $ref: /dependencies/sentry/teams/codeready-analytics-stage.yml
+  projects:
+  - name: codeready-analytics-stage
+    description: CodeReady-Analytics Stage sentry error monitoring
+    email_prefix: devtools-bayesian
+    platform: python
+  - name: osa-stage
+    description: Openshift-Analytics Stage sentry error monitoring
+    email_prefix: devtools-bayesian
+    platform: python
+- team:
+    $ref: /dependencies/sentry/teams/codeready-analytics-production.yml
+  projects:
+  - name: codeready-analytics-production
+    description: CodeReady-Analytics Production sentry error monitoring
+    email_prefix: devtools-bayesian
+    platform: python
+  - name: osa-production
+    description: Openshift Analytics Production sentry error monitoring
+    email_prefix: devtools-bayesian
+    platform: python
+
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/app-sre.yml
+  items:
+  - name: rhel-fabric8-analytics-f8a-server-backbone
+    description: ''
+    public: false
+
+codeComponents:
+- name: f8a-server-backbone
+  resource: upstream
+  url: https://github.com/fabric8-analytics/f8a-server-backbone
