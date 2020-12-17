@@ -1499,6 +1499,7 @@ To manage a User group via App-Interface:
 - `ownersFromRepos`: a list of urls of github or gitlab repositories containing
   the `OWNERS` files to extract `approvers`/`reviewers` from. Only the root
   `OWNERS` file is considered. The `OWNERS_ALIASES` is respected.
+    - Note: optionally add `:<branch>` to use a specific branch. For example: `https://github.com/openshift/osde2e:main`.
 - `channels`: a list of channels to add to the User group
 
 3. **Add this permission to the desired `roles`, or create a new `role` with this permission only (mandatory).**
