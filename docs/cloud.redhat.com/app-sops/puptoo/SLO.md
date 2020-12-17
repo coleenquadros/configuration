@@ -9,8 +9,8 @@ The following categories will correspond to the SLIs and SLOs below.
 
 ## SLIs
 
-1. Processing: sum(increase(puptoo_successful_extractions_total[24h])) / sum(increase(puptoo_extractions_total[24h])) > .95
-2. Uptime: avg(avg_over_time(up{service="puptoo-processor"}[24h])) > .98
+1. Processing: sum(increase(puptoo_successful_extractions_total[24h])) / sum(increase(puptoo_extractions_total[24h])) < .95
+2. Uptime: avg(avg_over_time(up{service="puptoo-processor"}[24h])) < .98
 3. Message Consumption: sum(increase(puptoo_messages_consumed_failure_total[24h])) / sum(increase(puptoo_messages_consumed_total[24h])) < .05
 
 ## SLOs
