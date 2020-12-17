@@ -1,7 +1,7 @@
 App-insights-receptor-controller-gateway-In-receptor-prod-5XX-WebSocket-Quota-Reached.rst
 =========================================================================================
 
-Severity: Pagerduty
+Severity: Medium
 -------------------
 
 Incident Response Plan

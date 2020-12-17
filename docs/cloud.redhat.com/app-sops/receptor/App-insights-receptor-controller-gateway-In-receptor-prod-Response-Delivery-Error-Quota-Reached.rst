@@ -1,7 +1,7 @@
 App-insights-receptor-controller-gateway-In-receptor-prod-Response-Delivery-Error-Quota-Reached
 ===============================================================================================
 
-Severity: Pagerduty
+Severity: Medium
 -------------------
 
 Incident Response Plan

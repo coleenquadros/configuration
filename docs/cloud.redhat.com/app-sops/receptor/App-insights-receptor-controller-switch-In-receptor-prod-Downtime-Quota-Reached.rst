@@ -1,7 +1,7 @@
 App-insights-receptor-controller-switch-In-receptor-prod-Downtime-Quota-.rst
 ============================================================================
 
-Severity: Pagerduty
+Severity: Medium
 -------------------
 
 Incident Response Plan

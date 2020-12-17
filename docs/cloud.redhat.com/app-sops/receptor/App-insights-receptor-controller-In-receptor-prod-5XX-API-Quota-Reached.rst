@@ -1,7 +1,7 @@
 App-insights-receptor-controller-In-receptor-prod-5XX-API-Quota-Reached
 =======================================================================
 
-Severity: Pagerduty
+Severity: Medium
 -------------------
 
 Incident Response Plan
