@@ -1,0 +1,121 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: insights-platform-rules
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: insights-sli
+    rules:
+    - record: service:constant:sli:pcterror
+      expr: {{{ ERROR_RATE_THRESHOLD_PCT }}}
+    - record: service:constant:sli:pctlatency
+      expr: {{{ LATENCY_THRESHOLD_PCT }}}
+    - record: service:request_count:rate5m
+      expr: sum by(exported_service, environment) (rate(api_3scale_gateway_api_time_count[5m])) > 0
+    - record: service:latency_le_{{{ LATENCY_THRESHOLD_MS }}}:rate5m
+      expr: sum by(exported_service, environment) (rate(api_3scale_gateway_api_time_bucket{le="{{{ LATENCY_THRESHOLD_MS }}}.0" }}}[5m]))
+    - record: service:status_5xx:rate5m
+      expr: sum by(exported_service, environment) (rate(api_3scale_gateway_api_status{ status="5xx" }[5m]))
+    - record: service:proportion:latency_gt_{{{ LATENCY_THRESHOLD_MS }}}:rate5m
+      expr: 1 - (service:latency_le_{{{ LATENCY_THRESHOLD_MS }}}:rate5m / service:request_count:rate5m)
+    - record: service:proportion:status_5xx:rate5m
+      expr: service:status_5xx:rate5m / service:request_count:rate5m
+    - record: service:sli:latency_gt_{{{ LATENCY_THRESHOLD_MS }}}:pctl{{{ LATENCY_THRESHOLD_PCT }}}rate5m
+      expr: service:proportion:latency_gt_{{{ LATENCY_THRESHOLD_MS }}}:rate5m * 100 < bool {{{ LATENCY_THRESHOLD_PCT }}}
+    - record: service:sli:status_5xx:pctl{{{ ERROR_RATE_THRESHOLD_PCT }}}rate5m
+      expr: service:proportion:status_5xx:rate5m * 100 < bool {{{ ERROR_RATE_THRESHOLD_PCT }}}
+
+    # Dynamic service based metrics
+    - record: service:sli:latency_gt_{{{ LATENCY_THRESHOLD_MS }}}:pctlrate5m
+      expr: service:proportion:latency_gt_{{{ LATENCY_THRESHOLD_MS }}}:rate5m * 100 < bool on(exported_service) service:constant:sli:pctlatency
+    - record: service:sli:status_5xx:pctlrate5m
+      expr: service:proportion:status_5xx:rate5m * 100 < bool on(exported_service) service:constant:sli:pcterror
+
+    # Dynamic latency based metrics
+    - record: service:proportion:latency_adjusted:pctlrate5m
+      expr: service:latency:adjusted:rate5m * 100 < bool on (exported_service) service:constant:sli:pctlatency
+
+  - name: network-check
+    rules:
+    - record: HttpFailuresLast1Min
+      expr: increase(netcheck_http_failures_total[1m])
+    - record: GetentFailuresLast1Min
+      expr: increase(netcheck_getent_failures_total[1m])
+    - alert: HttpFailuresAlert
+      expr: HttpFailuresLast1Min > 0
+      for: 5m
+      labels:
+        severity: medium
+        service: insights
+        env: {{{ env }}}
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/6Y8XkcHGz/network-check?orgId=1"
+        message: "insights network-check HTTP check has ongoing failures for the last 5min"
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/network-check.rst
+    - alert: GetentFailuresAlert
+      expr: GetentFailuresLast1Min > 0
+      for: 5m
+      labels:
+        severity: medium
+        service: insights
+        env: {{{ env }}}
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/6Y8XkcHGz/network-check?orgId=1"
+        message: "insights network-check getent check has ongoing failures for the last 5min"
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/network-check.rst
+  - name: lag
+    rules:
+    - record: LagGauge
+      expr: sum(kafka_consumergroup_group_lag{topic!~"__.*"}) by (topic, group)
+    - record: LagDelta
+      expr: sum(delta(kafka_consumergroup_group_lag{topic!~"__.*"}[5m])) by (topic, group)
+    - record: InventoryLag
+      expr: 10000
+      labels:
+        group: inventory-mq
+        topic: platform.inventory.host-ingress-p1
+    - record: LAG_THRESHOLD
+      expr: 10000
+      labels:
+        group: insights-puptoo
+        topic: platform.upload.advisor
+    - record: LAG_THRESHOLD
+      expr: 10000
+      labels:
+        group: insights-core-kafka
+        topic: platform.inventory.events
+    - record: LAG_THRESHOLD
+      expr: 10000
+      labels:
+        group: advisor_results
+        topic: platform.engine.results
+    - record: LAG_THRESHOLD
+      expr: 10000
+      labels:
+        group: insights-storage-broker
+        topic: platform.inventory.events
+    - alert: KafkaLagFast
+      expr: LagGauge > LAG_THRESHOLD and LagDelta > 1000
+      for: 15m
+      labels:
+        severity: critical
+        service: insights
+        env: {{{ env }}}
+      annotations:
+        dashboard: "https://grafana.stage.devshift.net"
+        message: "High Lag for {{ $labels.topic }} : {{ $labels.group }}"
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/kafka-lag.rst
+    - alert: KafkaLag
+      expr: LagGauge > LAG_THRESHOLD and LagDelta > 0
+      for: 1h
+      labels:
+        severity: critical
+        service: insights
+        env: {{{ env }}}
+      annotations:
+        dashboard: "https://grafana.stage.devshift.net"
+        message: "High Lag for {{ $labels.topic }} : ({ $labels.group )}"
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/kafka-lag.rst
