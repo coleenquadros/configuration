@@ -1230,6 +1230,7 @@
             branches:
                 - master
     skip_deploy: 0
+    run_e2e : '0'
     deployment_units: ''
     deployment_configs: ''
     extra_target: ''
@@ -1307,6 +1308,7 @@
             DEPLOYMENT_CONFIGS={deployment_configs}
             CICO_HOSTNAME=$CICO_hostname
             CICO_SSID=$CICO_ssid
+            RUN_E2E={run_e2e}
             EOF
 
             exit $rtn_code
@@ -1763,7 +1765,7 @@
     disabled: '{obj:disabled}'
     publishers:
         - email:
-            recipients: bayesian-ci@redhat.com rh-depanalytics@redhat.com 
+            recipients: msawood@redhat.com rh-depanalytics@redhat.com 
             notify-every-unstable-build: true
             send-to-individuals: true
     wrappers:
@@ -1803,6 +1805,9 @@
           name: CICO_SSID
       - string:
           name: BUILD_URL
+      - string:
+          name: RUN_E2E
+          default: '0'
     scm:
         - git:
             url: https://github.com/{git_organization}/{git_repo}.git
@@ -1888,10 +1893,13 @@
             oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" logs -f dc/$DC_NAME -n $PRJ_NAME
 
             # Now is the time to run E2E tests
-            sshopts="-t -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -l root"
-            ssh_cmd="ssh $sshopts $CICO_HOSTNAME"
-            rsync -e "ssh $sshopts" -Ha $(pwd)/ $CICO_HOSTNAME:payload-tests
-            $ssh_cmd -t "cd payload-tests/integration-tests && /bin/bash cico_run_tests.sh"
+            if [ $RUN_E2E -ne '0' ]; then
+                sshopts="-t -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -l root"
+                ssh_cmd="ssh $sshopts $CICO_HOSTNAME"
+                rsync -e "ssh $sshopts" -Ha $(pwd)/ $CICO_HOSTNAME:payload-tests
+                $ssh_cmd -t "cd payload-tests/integration-tests && /bin/bash cico_run_tests.sh"
+            fi
+            exit 0
 
     <<: *job_template_build_defaults
 
@@ -4423,6 +4431,7 @@
         - '{ci_project}-{git_repo}-f8a-build-{branch}':
             git_organization: fabric8-analytics
             git_repo: fabric8-analytics-pgbouncer
+            run_e2e : '1'
             ci_project: 'devtools'
             ci_cmd: '/bin/bash cico_build_deploy.sh'
             saas_git: saas-analytics
@@ -4472,6 +4481,7 @@
         - '{ci_project}-{git_repo}-f8a-build-{branch}':
             git_organization: fabric8-analytics
             git_repo: gremlin-docker
+            run_e2e : '1'
             ci_project: 'devtools'
             ci_cmd: '/bin/bash cico_build_deploy.sh'
             saas_git: saas-analytics
@@ -4512,6 +4522,7 @@
         - '{ci_project}-{git_repo}-f8a-build-{branch}':
             git_organization: fabric8-analytics
             git_repo: fabric8-analytics-license-analysis
+            run_e2e : '1'
             ci_project: 'devtools'
             ci_cmd: '/bin/bash cico_build_deploy.sh'
             saas_git: saas-analytics
@@ -4534,6 +4545,7 @@
         - '{ci_project}-{git_repo}-f8a-build-{branch}':
             git_organization: fabric8-analytics
             git_repo: metrics-accumulator
+            run_e2e : '1'
             ci_project: 'devtools'
             ci_cmd: '/bin/bash cico_build_deploy.sh'
             saas_git: saas-analytics
@@ -4577,6 +4589,7 @@
             git_organization: fabric8-analytics
             git_repo: f8a-server-backbone
             ci_project: 'devtools'
+            run_e2e : '1'
             ci_cmd: '/bin/bash cico_build_deploy.sh'
             saas_git: saas-analytics
             deployment_units: 'api-backbone'
@@ -4599,6 +4612,7 @@
             git_organization: fabric8-analytics
             git_repo: fabric8-analytics-npm-insights
             ci_project: 'devtools'
+            run_e2e : '1'
             ci_cmd: '/bin/bash cico_build_deploy.sh'
             saas_git: saas-analytics
             deployment_units: 'f8a-npm-insights'
@@ -4620,6 +4634,7 @@
         - '{ci_project}-{git_repo}-f8a-build-{branch}':
             git_organization: fabric8-analytics
             git_repo: f8a-golang-insights
+            run_e2e : '1'
             ci_project: 'devtools'
             ci_cmd: '/bin/bash cico_build_deploy.sh'
             saas_git: saas-analytics
@@ -4642,6 +4657,7 @@
         - '{ci_project}-{git_repo}-f8a-build-{branch}':
             git_organization: fabric8-analytics
             git_repo: f8a-pypi-insights
+            run_e2e : '1'
             ci_project: 'devtools'
             ci_cmd: '/bin/bash cico_build_deploy.sh'
             saas_git: saas-analytics
@@ -4681,6 +4697,7 @@
             git_organization: fabric8-analytics
             git_repo: fabric8-analytics-server
             ci_project: 'devtools'
+            run_e2e : '1'
             ci_cmd: '/bin/bash cico_build_deploy.sh'
             saas_git: saas-analytics
             deployment_units: 'api'
@@ -4769,6 +4786,7 @@
             git_organization: fabric8-analytics
             git_repo: fabric8-analytics-data-model
             ci_project: 'devtools'
+            run_e2e : '1'
             ci_cmd: '/bin/bash cico_build_deploy.sh'
             saas_git: saas-analytics
             deployment_units: 'data-importer'
@@ -4827,6 +4845,7 @@
             git_organization: fabric8-analytics
             git_repo: fabric8-gemini-server
             ci_project: 'devtools'
+            run_e2e : '1'
             ci_cmd: '/bin/bash cico_build_deploy.sh'
             saas_git: saas-analytics
             deployment_units: 'gemini'
@@ -4974,6 +4993,7 @@
             git_organization: fabric8-analytics
             git_repo: f8a-hpf-insights
             ci_project: 'devtools'
+            run_e2e : '1'
             ci_cmd: '/bin/bash cico_build_deploy.sh'
             saas_git: saas-analytics
             deployment_units: 'f8a-hpf-insights-maven'
