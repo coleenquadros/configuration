@@ -1,0 +1,18 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2020-12-23-patch-packages-explain-host
+namespace:
+  $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
+identifier: patchman-prod
+output: stdout
+query: |
+      explain SELECT res.name as name, res.systems_installed as systems_installed, res.systems_updatable as systems_updatable, latest.summary as summary 
+      FROM package_latest_cache latest INNER JOIN 
+      (
+        SELECT p.name_id as name_id, pn.name as name, count(spkg.system_id) as systems_installed, count(spkg.system_id) filter (where spkg.latest_evra IS NOT NULL) as systems_updatable 
+        FROM system_package spkg inner join system_platform sp on sp.id = spkg.system_id and sp.rh_account_id = 77 
+        inner join package p on p.id = spkg.package_id 
+        inner join package_name pn on pn.id = p.name_id 
+        JOIN inventory.hosts ih ON ih.id::text = sp.inventory_id WHERE (sp.stale = false) AND (spkg.rh_account_id = 77) GROUP BY p.name_id, pn.name
+      ) res ON res.name_id = latest.name_id  ORDER BY res.name ASC LIMIT 20 OFFSET 0;
