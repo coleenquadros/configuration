@@ -13,6 +13,7 @@
   - { name: hashLength, type: int, isRequired: true }
   - { name: dependencies, type: AppInterfaceDependencyMapping_v1, isList: true }
   - { name: credentials, type: CredentialsRequestMap_v1, isList: true }
+  - { name: sqlQuery, type: SqlQuerySettings_v1 }
 
 - name: AppInterfaceDependencyMapping_v1
   fields:
@@ -33,6 +34,11 @@
   - { name: description, type: string, isRequired: true }
   - { name: user, type: User_v1, isRequired: true }
   - { name: credentials, type: string, isRequired: true }
+
+- name: SqlQuerySettings_v1
+  fields:
+  - { name: imageRepository, type: string, isRequired: true }
+  - { name: pullSecret, type: NamespaceOpenshiftResourceVaultSecret_v1, isRequired: true }
 
 - name: AppInterfaceEmail_v1
   fields:
@@ -190,6 +196,7 @@
   - { name: path, type: string, isRequired: true }
   - { name: content, type: string, isRequired: true }
   - { name: sha256sum, type: string, isRequired: true }
+  - { name: schema, type: string }
 
 - name: VaultSecret_v1
   fields:
@@ -353,6 +360,11 @@
   - { name: org, type: string, isRequired: true }
   - { name: team, type: string }
 
+- name: KafkaClusterSpec_v1
+  fields:
+  - { name: provider, type: string, isRequired: true }
+  - { name: region, type: string, isRequired: true }
+
 - name: ClusterSpec_v1
   fields:
   - { name: id, type: string }
@@ -370,6 +382,10 @@
   - { name: private, type: boolean, isRequired: true }
   - { name: upgrade, type: string, isRequired: true }
   - { name: provision_shard_id, type: string }
+
+- name: ClusterExternalConfiguration_v1
+  fields:
+  - { name: labels, type: json, isRequired: true }
 
 - name: ClusterUpgradePolicy_v1
   fields:
@@ -460,10 +476,12 @@
   - { name: managedClusterRoles, type: boolean }
   - { name: ocm, type: OpenShiftClusterManager_v1 }
   - { name: spec, type: ClusterSpec_v1 }
+  - { name: externalConfiguration, type: ClusterExternalConfiguration_v1 }
   - { name: upgradePolicy, type: ClusterUpgradePolicy_v1 }
   - { name: network, type: ClusterNetwork_v1 }
   - { name: machinePools, type: ClusterMachinePool_v1, isList: true }
   - { name: peering, type: ClusterPeering_v1 }
+  - { name: addons, type: ClusterAddon_v1, isList: true }
   - { name: jumpHost, type: ClusterJumpHost_v1 }
   - { name: automationToken, type: VaultSecret_v1 }
   - { name: internal, type: boolean }
@@ -476,6 +494,22 @@
     synthetic:
       schema: /openshift/namespace-1.yml
       subAttr: cluster
+
+- name: KafkaCluster_v1
+  fields:
+  - { name: schema, type: string, isRequired: true }
+  - { name: path, type: string, isRequired: true }
+  - { name: labels, type: json }
+  - { name: name, type: string, isRequired: true }
+  - { name: description, type: string }
+  - { name: ocm, type: OpenShiftClusterManager_v1 }
+  - { name: spec, type: KafkaClusterSpec_v1 }
+  - name: namespaces
+    type: Namespace_v1
+    isList: true
+    synthetic:
+      schema: /openshift/namespace-1.yml
+      subAttr: kafkaCluster
 
 - name: OpenShiftClusterManager_v1
   fields:
@@ -494,6 +528,14 @@
     synthetic:
       schema: /openshift/cluster-1.yml
       subAttr: cluster
+
+- name: ClusterAddon_v1
+  fields:
+  - { name: schema, type: string, isRequired: true }
+  - { name: path, type: string, isRequired: true }
+  - { name: labels, type: json }
+  - { name: name, type: string, isRequired: true }
+  - { name: description, type: string }
 
 - name: AWSInfrastructureAccess_v1
   fields:
@@ -639,6 +681,7 @@
       kms: NamespaceTerraformResourceKMS_v1
       elasticsearch: NamespaceTerraformResourceElasticSearch_v1
       acm: NamespaceTerraformResourceACM_v1
+      kinesis: NamespaceTerraformResourceKinesis_v1
   fields:
   - { name: provider, type: string, isRequired: true }
   - { name: account, type: string, isRequired: true }
@@ -692,6 +735,7 @@
   - { name: overrides, type: json }
   - { name: sqs_identifier, type: string }
   - { name: s3_events, type: string, isList: true }
+  - { name: bucket_policy, type: json }
   - { name: output_resource_name, type: string }
   - { name: storage_class, type: string }
 
@@ -792,6 +836,17 @@
   - { name: output_resource_name, type: string }
 
 - name: NamespaceTerraformResourceKMS_v1
+  interface: NamespaceTerraformResource_v1
+  fields:
+  - { name: provider, type: string, isRequired: true }
+  - { name: account, type: string, isRequired: true }
+  - { name: region, type: string }
+  - { name: identifier, type: string, isRequired: true }
+  - { name: defaults, type: string, isRequired: true }
+  - { name: overrides, type: json }
+  - { name: output_resource_name, type: string }
+
+- name: NamespaceTerraformResourceKinesis_v1
   interface: NamespaceTerraformResource_v1
   fields:
   - { name: provider, type: string, isRequired: true }
@@ -915,6 +970,7 @@
   - { name: managedTerraformResources, type: boolean }
   - { name: terraformResources, type: NamespaceTerraformResource_v1, isList: true, isInterface: true }
   - { name: openshiftServiceAccountTokens, type: ServiceAccountTokenSpec_v1, isList: true }
+  - { name: kafkaCluster, type: KafkaCluster_v1 }
 
 - name: Owner_v1
   fields:
@@ -973,9 +1029,15 @@
   - { name: public, type: boolean, isRequired: true }
   - { name: mirror, type: ContainerImageMirror_v1, isRequired: false }
 
+- name: AppQuayReposTeams_v1
+  fields:
+  - { name: permissions, type: PermissionGithubOrgTeam_v1, isList: true, isRequired: true }
+  - { name: role, type: string, isRequired: true }
+
 - name: AppQuayRepos_v1
   fields:
   - { name: org, type: QuayOrg_v1, isRequired: true }
+  - { name: teams, type: AppQuayReposTeams_v1, isList: true }
   - { name: items, type: AppQuayReposItems_v1, isRequired: true, isList: true }
 
 - name: AppEscalationsEscalation_v1
@@ -1054,6 +1116,7 @@
   - { name: labels, type: json }
   - { name: name, type: string, isRequired: true }
   - { name: description, type: string, isRequired: true }
+  - { name: onboardingStatus, type: string, isRequired: true }
   - { name: grafanaUrl, type: string }
   - { name: parentApp, type: App_v1 }
   - { name: serviceDocs, type: string, isList: true }
@@ -1279,7 +1342,7 @@
   - { name: path, type: string, isRequired: true }
   - { name: labels, type: json }
   - { name: name, type: string, isRequired: true }
-  - { name: org_username, type: string, isRequired: true }
+  - { name: org_username, type: string, isRequired: true, isUnique: true }
   - { name: github_username, type: string, isRequired: true }
   - { name: quay_username, type: string }
   - { name: slack_username, type: string }
@@ -1490,7 +1553,8 @@
   - { name: overrides, type: SqlEmailOverrides_v1 }
   - { name: output, type: string, isRequired: true }
   - { name: schedule, type: string }
-  - { name: query, type: string, isRequired: true }
+  - { name: query, type: string }
+  - { name: queries, type: string, isList: true }
 
 - name: UnleashNotifications_v1
   fields:
@@ -1530,6 +1594,7 @@
   - { name: awsgroups_v1, type: AWSGroup_v1, isList: true, datafileSchema: /aws/group-1.yml }
   - { name: awsaccounts_v1, type: AWSAccount_v1, isList: true, datafileSchema: /aws/account-1.yml }
   - { name: clusters_v1, type: Cluster_v1, isList: true, datafileSchema: /openshift/cluster-1.yml }
+  - { name: kafka_clusters_v1, type: KafkaCluster_v1, isList: true, datafileSchema: /kafka/cluster-1.yml }
   - { name: namespaces_v1, type: Namespace_v1, isList: true, datafileSchema: /openshift/namespace-1.yml }
   - { name: gcp_projects_v1, type: GcpProject_v1, isList: true, datafileSchema: /dependencies/gcp-project-1.yml }
   - { name: quay_orgs_v1, type: QuayOrg_v1, isList: true, datafileSchema: /dependencies/quay-org-1.yml }

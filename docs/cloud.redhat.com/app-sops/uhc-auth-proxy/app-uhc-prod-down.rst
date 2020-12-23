@@ -26,7 +26,8 @@ Steps
 -  Check if there were any recent changes to the deployed code
     -  In this case a deployment rollback should be safe and get things running again until the team can be pinged.
 
-  Check operational dashboard (https://grafana.app-sre.devshift.net/d/0fmN7EWGz/platform-health?orgId=1&var-datasource=crcp01ue1-prometheus)
+  Check uhc-auth-proxy health dashboard (https://grafana.app-sre.devshift.net/d/NncCcICiz/uhc-auth-proxy-health?orgId=1&var-datasource=crcp01ue1-prometheus)
+  Check platform operational dashboard (https://grafana.app-sre.devshift.net/d/0fmN7EWGz/platform-health?orgId=1&var-datasource=crcp01ue1-prometheus)
 
 Escalations
 -----------

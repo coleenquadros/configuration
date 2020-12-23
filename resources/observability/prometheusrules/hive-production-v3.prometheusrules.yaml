@@ -72,30 +72,6 @@ spec:
         service: hive
         severity: medium
         team: appsre
-    - alert: RemoteKubeClientRequestsHigh - POST requests - production - {{{shard_name}}}
-      annotations:
-        message: "detected {{ $value }} {{ $labels.resource }} remote POST API requests per second from controller {{ $labels.controller }}"
-        runbook: "https://github.com/openshift/hive-sops/blob/master/sop/KubeClientRequestsHigh.md"
-        dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
-      expr: |
-        rate(hive_kube_client_requests_total{job="hive-controllers-{{{shard_name}}}",remote="true",method="POST"}[5m]) > 15
-      for: 1m
-      labels:
-        service: hive
-        severity: critical
-        team: appsre
-    - alert: RemoteKubeClientRequestsHigh - non-POST requests - production - {{{shard_name}}}
-      annotations:
-        message: "detected {{ $value }} {{ $labels.resource }} remote non-POST API requests per second from controller {{ $labels.controller }}"
-        runbook: "https://github.com/openshift/hive-sops/blob/master/sop/KubeClientRequestsHigh.md"
-        dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
-      expr: |
-        rate(hive_kube_client_requests_total{job="hive-controllers-{{{shard_name}}}",remote="true",method!~"POST"}[5m]) > 15
-      for: 1m
-      labels:
-        service: hive
-        severity: medium
-        team: appsre
     - alert: ClusterProvisioningDelay - production - {{{shard_name}}}
       annotations:
         message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.namespace }} provisioning taking over 2 hours. SOP: https://github.com/openshift/hive-sops/blob/master/sop/ClusterProvisioningDelay.md"

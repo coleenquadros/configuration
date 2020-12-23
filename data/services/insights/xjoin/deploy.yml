@@ -19,6 +19,8 @@ slack:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
 
+timeout: 5
+
 managedResourceTypes:
 - Deployment
 - DeploymentConfig
@@ -57,8 +59,9 @@ resourceTemplates:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
     ref: 7fa02b687dfa77fd71ae04f0a4fec2ba0145bcc9
     parameters:
-      IMAGE_TAG: 7a74950
+      IMAGE_TAG: 125bfa5
       LOG_LEVEL: info
+      NUM_REPLICAS: 2
   - namespace:
       $ref: /services/insights/xjoin/namespaces/perf-xjoin-perf.yml
     ref: 7fa02b687dfa77fd71ae04f0a4fec2ba0145bcc9
@@ -69,8 +72,9 @@ resourceTemplates:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
     ref: 7fa02b687dfa77fd71ae04f0a4fec2ba0145bcc9
     parameters:
-      IMAGE_TAG: 7a74950
+      IMAGE_TAG: 125bfa5
       LOG_LEVEL: info
+      NUM_REPLICAS: 2
   - namespace:
       $ref: /services/insights/xjoin/namespaces/fedramp-xjoin-stage.yml
     ref: 7fa02b687dfa77fd71ae04f0a4fec2ba0145bcc9
@@ -98,7 +102,7 @@ resourceTemplates:
     ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
     parameters:
       IMAGE_TAG: dc96729
-      NUM_REPLICAS: 7
+      NUM_REPLICAS: 2
       CPU_REQUESTS: 500m
       MEMORY_REQUESTS: 6Gi
       CPU_LIMITS: 3
@@ -169,60 +173,27 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/fedramp-xjoin-jenkins-stage.yml
     ref: master
-# Execute Cyndi onboarding script on cyndi test db
-- name: cyndi-init
-  path: /openshift/cyndi-init.yml
-  url: https://github.com/RedHatInsights/inventory-syndication
-  targets:
-  - namespace:
-      $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
-    ref: 1da34cd701ca9bca732e7a3eaaff516dd2b6402b
-    parameters:
-      APP_NAME: syndication-test
-      VERSION: "1"
-      APP_ROLE: postgres
-      DB_SECRET: cyndi-db-rds
-      IMAGE_TAG: "3a34b0c"
-  - namespace:
-      $ref: /services/insights/xjoin/namespaces/perf-xjoin-perf.yml
-    ref: 1da34cd701ca9bca732e7a3eaaff516dd2b6402b
-    parameters:
-      APP_NAME: syndication-test
-      VERSION: "1"
-      APP_ROLE: postgres
-      DB_SECRET: cyndi-db-rds
-      IMAGE_TAG: "3a34b0c"
-  - namespace:
-      $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
-    ref: 1da34cd701ca9bca732e7a3eaaff516dd2b6402b
-    parameters:
-      APP_NAME: syndication-test
-      APP_ROLE: postgres
-      DB_SECRET: cyndi-db-rds
-      IMAGE_TAG: "3a34b0c"
-  - namespace:
-      $ref: /services/insights/xjoin/namespaces/fedramp-xjoin-stage.yml
-    ref: 1da34cd701ca9bca732e7a3eaaff516dd2b6402b
-    parameters:
-      APP_NAME: syndication-test
-      VERSION: "1"
-      APP_ROLE: postgres
-      DB_SECRET: cyndi-db-rds
-      IMAGE_TAG: "3a34b0c"
 
 - name: xjoin-kafka-connect-strimzi
   path: /deploy/kafka-connect.yml
   url: https://github.com/RedHatInsights/xjoin-kafka-connect
+  parameters:
+    VERSION: '2.5.0'
+    CPU_REQUESTS: 500m
+    MEMORY_REQUESTS: 6Gi
+    CPU_LIMITS: 3
+    MEMORY_LIMITS: 10Gi
+    XMX: 8G
+    XMS: 8G
   targets:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
     ref: master
     upstream: RedHatInsights-xjoin-kafka-connect-gh-build-master
     parameters:
-      KAFKA_CONNECT_IMAGE_TAG: c06acd0
-      VERSION: '2.5.0'
-      NUM_REPLICAS: '1'
-      CPU_REQUESTS: 500m
-      MEMORY_REQUESTS: 6Gi
-      CPU_LIMITS: 3
-      MEMORY_LIMITS: 8Gi
+      NUM_REPLICAS: '3'
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
+    ref: 190a1aaef98d80772f50b66a5a54964f96eb4a43
+    parameters:
+      NUM_REPLICAS: '7'

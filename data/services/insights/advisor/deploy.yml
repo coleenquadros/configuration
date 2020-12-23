@@ -19,6 +19,8 @@ slack:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
 
+timeout: 5
+
 managedResourceTypes:
 - Deployment
 - DeploymentConfig
@@ -48,12 +50,14 @@ resourceTemplates:
       $ref: /services/insights/advisor/namespaces/stage-advisor-stage.yml
     ref: master
     parameters:
-      IMAGE_TAG: f0b3273
+      IMAGE_TAG: 2a26c65
+      CONTENT_PUSH_JOB_SCHEDULE: "45 23,5,11,17 * * *"
   - namespace:
       $ref: /services/insights/advisor/namespaces/advisor-prod.yml
-    ref: f144cf30b41280c66283ad80414c66a12363217c
+    ref: 21537f2c6217aa2788436e00bdc915b4e83949e7
     parameters:
-      IMAGE_TAG: f0b3273
+      IMAGE_TAG: 2a26c65
+      CONTENT_PUSH_JOB_SCHEDULE: "58 23,5,11,17 * * *"
 - name: insights-advisor-service
   path: /templates/advisor/insights-advisor-service.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
@@ -64,22 +68,23 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/advisor/namespaces/stage-advisor-stage.yml
-    ref: 0037566d9862f701acbfeaf3f524fbcfe24f0501
+    ref: 366d4cda9a4ca44490d8fd0ef8bc74a608822a76
     parameters:
       ADVISOR_ENV: stage
-      IMAGE_TAG: 9937a10
+      IMAGE_TAG: 69c71e1
       CW_LOG_STREAM: advisor-stage
       MAX_REPLICAS: 5
       MIN_REPLICAS: 5
   - namespace:
       $ref: /services/insights/advisor/namespaces/advisor-prod.yml
-    ref: 0037566d9862f701acbfeaf3f524fbcfe24f0501
+    ref: 366d4cda9a4ca44490d8fd0ef8bc74a608822a76
     parameters:
       ADVISOR_ENV: prod
-      IMAGE_TAG: 9937a10
+      IMAGE_TAG: 69c71e1
       CW_LOG_STREAM: advisor-prod
       MAX_REPLICAS: 10
       MIN_REPLICAS: 10
+      HANDLE_LEGACY_DELETE: true
 - name: insights-advisor-api
   path: /templates/advisor/insights-advisor-api.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
@@ -102,14 +107,14 @@ resourceTemplates:
       $ref: /services/insights/advisor/namespaces/stage-advisor-stage.yml
     ref: master
     parameters:
-      IMAGE_TAG: 9cafe8b
+      IMAGE_TAG: 4a6833b
       CW_LOG_STREAM: advisor-stage
       PROMETHEUS_PUSHGATEWAY: prometheus-push.insights-push-stage.svc.cluster.local:9091
   - namespace:
       $ref: /services/insights/advisor/namespaces/advisor-prod.yml
-    ref: ecf0583ad57adb26abbdbe3acf482e40fb64b9e2
+    ref: acb9cb0b3528952655a40ee8514844e6e6365fa1
     parameters:
-      IMAGE_TAG: 9cafe8b
+      IMAGE_TAG: 4a6833b
       CW_LOG_STREAM: advisor-prod
       SUSPEND_WEEKLY_REPORT_JOB: 'false'
       MIDDLEWARE_HOST_URL: https://${BACKOFFICE_HOST}/v1

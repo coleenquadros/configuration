@@ -12,6 +12,11 @@
         - *app_interface_creds
         - *insights_rh_registry_pull_secret
         - *quay_secret_push
+    publishers:
+    - junit:
+        results: 'artifacts/junit-*.xml'
+    - archive:
+        artifacts: 'artifacts/**/*'
     <<: *gl_pr_check
 
 - job-template:
@@ -39,3 +44,81 @@
         - *insights_ephemeral_oc_login
         - *app_interface_creds
     <<: *gh_timed
+
+- job-template:
+    id: 'insights-deploy-notifier'
+    name: 'insights-deploy-notifier'
+    concurrent: true
+    gl_group: insights-platform
+    gl_project: cicd-common
+    branch: master
+    wrappers:
+    - timeout_wrapper:
+        timeout: 60
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *app_sre_ci_trigger_jobs_bot
+        # TODO: add secrets for POST'ing to ibutsu and creating a grafana annotation
+    triggers:
+    - reverse:
+        jobs: '{obj:upstream_saas_jobs}'
+        result: 'success'
+    builders:
+    - shell: './deploy_notifier.sh'
+    <<: *gl_checkout
+
+- job-template:
+    id: 'insights-saas-templates-sync'
+    name: 'insights-saas-templates-sync'
+    branch: master
+    gl_group: insights-platform
+    gl_project: saas-templates
+    ci_cmd: './ci.sh'
+    wrappers:
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *gitlab_token
+        - *app_sre_bot_push_token
+        - *github_token
+    <<: *gl_timed
+
+- job-template:
+    id: 'insights-engine-gl-pr-check'
+    name: '{gl_group}-{gl_project}-pr-check'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_ephemeral_oc_login
+        - *app_interface_creds
+        - *insights_rh_registry_pull_secret
+        - *quay_secret_push
+        - *prodsec_rules_build_token
+    publishers:
+    - junit:
+        results: 'artifacts/junit-*.xml'
+    - archive:
+        artifacts: 'artifacts/**/*'
+    <<: *gl_pr_check
+
+- job-template:
+    id: 'insights-engine-gl-build-master'
+    name: '{gl_group}-{gl_project}-gl-build-{branch}'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_rh_registry_pull_secret
+        - *quay_secret_push
+        - *prodsec_rules_build_token
+    <<: *gl_build_master

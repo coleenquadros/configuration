@@ -1,0 +1,46 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: rate-limiting
+
+name: rate-limiting
+description: Per cluster rate-limiting
+
+app:
+  $ref: /services/rate-limiting/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+managedResourceTypes:
+- Deployment
+- Service
+- ConfigMap
+- StatefulSet
+
+imagePatterns:
+- quay.io/3scale/limitador
+- quay.io/app-sre/redis-5
+
+resourceTemplates:
+- name: limitador
+  url: https://gitlab.cee.redhat.com/service/rate-limiting-templates
+  path: /limitador.yaml
+  targets:
+  - namespace:
+      $ref: /openshift/app-sre-stage-01/namespaces/app-sre-rate-limiting.yml
+    ref: master
+    parameters:
+      CLEANUP_DAYS: 7
+      IMAGE_TAG: "0.3.0"

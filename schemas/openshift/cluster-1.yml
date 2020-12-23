@@ -90,6 +90,7 @@ properties:
       - gcp-project-operator-client
       - observatorium-dev
       - quay-app-sre-cluster-admins
+      - sda-dev
   managedClusterRoles:
     type: boolean
   spec:
@@ -168,6 +169,8 @@ properties:
         - de4b0632-dca7-11ea-b3b9-8c1645a911be
         # hive-production v3
         - 0c7d42ee-d751-4e5e-928d-838c4141ec20
+        # empty
+        - ''
     required:
     - provider
     - region
@@ -180,6 +183,14 @@ properties:
     - storage
     - load_balancers
     - upgrade
+  externalConfiguration:
+    type: object
+    additionalProperties: false
+    properties:
+      labels:
+        "$ref": "/common-1.json#/definitions/labels"
+    required:
+    - labels
   upgradePolicy:
     type: object
     additionalProperties: false
@@ -310,6 +321,11 @@ properties:
             - cluster
     required:
     - connections
+  addons:
+    type: array
+    items:
+      "$ref": "/common-1.json#/definitions/crossref"
+      "$schemaRef": "/openshift/cluster-addon-1.yml"
   jumpHost:
     type: object
     additionalProperties: false
@@ -404,6 +420,8 @@ dependencies:
   ocm:
   - spec
   - network
+  externalConfiguration:
+  - ocm
   machinePools:
   - ocm
   awsInfrastructureAccess:
@@ -411,3 +429,5 @@ dependencies:
   peering:
   - ocm
   - awsInfrastructureAccess
+  addons:
+  - ocm

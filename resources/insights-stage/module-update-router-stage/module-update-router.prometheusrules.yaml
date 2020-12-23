@@ -1,0 +1,34 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: module-update-router
+
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: module-update-router
+    rules:
+    - alert: ModuleUpdateRouterHttp5xx
+      expr: sum(rate(api_3scale_gateway_api_status{exported_service="module-update-router", status="5xx"}[5m])) / sum(rate(api_3scale_gateway_api_status{exported_service="module-update-router"}[5m])) * 100 > 5
+      labels:
+        severity: medium
+        service: insights
+        env: stage
+        app_team: platform-data
+      annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/PbAL6YHMz/module-update-router?orgId=1&var-datasource=crcs02ue1-prometheus
+        message: '{{ $labels.namespace }} 5xx responses observed'
+    - alert: ModuleUpdateRouterHttpLatency
+      expr: sum(increase(http_request_duration_seconds_bucket{le="1", service="module-update-router"}[10m])) / sum(increase(http_request_duration_seconds_count{service="module-update-router"}[10m])) < 0.95
+      labels:
+        severity: medium
+        service: insights
+        env: stage
+        app_team: platform-data
+      annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/PbAL6YHMz/module-update-router?orgId=1&var-datasource=crcs02ue1-prometheus
+        message: '{{ $labels.namespace }} showing response times longer than 1 second'

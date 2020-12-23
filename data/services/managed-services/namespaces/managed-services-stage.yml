@@ -22,25 +22,36 @@ managedRoles: true
 
 managedResourceTypes:
   - ServiceAccount
-  - ConfigMap
 
 openshiftResources:
 - provider: vault-secret
   path: app-interface/global/quay/app-sre/quay.io
   version: 2
   type: kubernetes.io/dockercfg
-- provider: resource
-  path: /services/managed-services/managed-services-api.serviceaccount.yaml
+- provider: resource-template
+  path: /services/common/serviceaccount.yaml
+  variables:
+    name: managed-services-api
+- provider: resource-template
+  path: /services/common/serviceaccount.yaml
+  variables:
+    name: strimzi-ui
 - provider: route
   path: /services/managed-services/stage/managed-services-api.route.yaml
+- provider: route
+  path: /services/managed-services/stage/strimzi-ui.route.yaml
 - provider: vault-secret
   name: managed-services-api
   path:  app-interface/managed-service-api/stage/service/credentials
-  version: 6
+  version: 14
   annotations:
     qontract.recycle: "true"
-- provider: resource
-  path: /services/managed-services/stage/ocm-managed-services.providers.configmap.yaml
+- provider: vault-secret
+  name: managed-services-api-dataplane-certificate
+  path:  app-interface/managed-service-api/stage/service/dataplane-certificate
+  version: 1
+  annotations:
+    qontract.recycle: "true"
 
 managedTerraformResources: true
 

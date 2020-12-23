@@ -9,6 +9,8 @@ name: managed-services
 description: |
   Allow different customer types (Tire Kicker, Value Prod and Enterprise) to create instances of a Red Hat managed service. Includes the service API and build/deployment pipelines for managed services.
 
+onboardingStatus: InProgress
+
 parentApp:
   $ref: /services/ocm/app.yml
 
@@ -17,6 +19,8 @@ serviceOwners:
     email: mk-ci-cd@redhat.com
   - name: Managed Kafka - Service API Team
     email: mk-service-api@redhat.com
+  - name: Managed Kafka - Consoles & DevExp
+    email: mas-devexp@redhat.com
 
 performanceParameters:
   SLO: 90
@@ -33,6 +37,9 @@ codeComponents:
   - name: strimzi-operator
     resource: upstream
     url: https://gitlab.cee.redhat.com/mk-ci-cd/strimzi-operator
+  - name: apache-kafka
+    resource: upstream
+    url: https://gitlab.cee.redhat.com/mk-ci-cd/apache-kafka
   - name: strimzi-operator-bundle
     resource: upstream
     url: https://gitlab.cee.redhat.com/mk-ci-cd/strimzi-operator-bundle
@@ -42,7 +49,7 @@ codeComponents:
     gitlabRepoOwners: true
     gitlabHousekeeping:
       enabled: true
-      rebase: false
+      rebase: true
   - name: mk-performance-tests
     resource: upstream
     url: https://gitlab.cee.redhat.com/mk-bin-packing/mk-performance-tests
@@ -56,10 +63,26 @@ codeComponents:
   - name: kafka-monitoring-stuff
     resource: upstream
     url: https://github.com/RHCloudServices/kafka-monitoring-stuff
-
+  - name: strimzi-ui
+    resource: upstream
+    url: https://gitlab.cee.redhat.com/mk-ci-cd/strimzi-ui
+  - name: mk-ui-frontend
+    resource: upstream
+    url: https://gitlab.cee.redhat.com/mk-ci-cd/mk-ui-frontend
+  - name: mk-ui-host
+    resource: upstream
+    url: https://gitlab.cee.redhat.com/mk-ci-cd/mk-ui-host
+  - name: mk-e2e-test-suite
+    resource: upstream
+    url: https://gitlab.cee.redhat.com/mk-ci-cd/mk-e2e-test-suite
+    
 quayRepos:
   - org:
       $ref: /dependencies/quay/app-sre.yml
+    teams:
+    - permissions:
+      - $ref: /dependencies/quay/permissions/quay-membership-app-sre-managed-services.yml
+      role: read
     items:
       - name: managed-kafka-kafka
         description: "Kafka image for managed kafka"
@@ -91,7 +114,12 @@ quayRepos:
       - name: mk-strimzi-operator
         description: "Managed services strimzi operator"
         public: false
-
+      - name: mk-strimzi-ui
+        description: Strimzi UI for managed kafka (https://gitlab.cee.redhat.com/mk-ci-cd/strimzi-ui)
+        public: false
+      - name: mk-ui-frontend
+        description: Control Plane UI (https://gitlab.cee.redhat.com/mk-ci-cd/mk-ui-frontend)
+        public: false
 
 sentryProjects:
   - team:

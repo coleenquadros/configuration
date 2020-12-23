@@ -32,11 +32,13 @@ openshiftResources:
   type: extracurlyjinja2
   path: /quay-p/quay/quay-config.secret.yaml
   variables:
+    recycle: false
     name: quay-config-secret-readonly
     vault_secret_version: 36
     version_label: v36
     readonly: true
     standby: true
+    log_producer: kinesis_stream
 - provider: vault-secret
   path: app-interface/quayio-prod-us-east-2/quay/quay-extra-ca-certs
   version: 1
@@ -73,3 +75,9 @@ terraformResources:
   region: us-east-2
   defaults: /terraform/resources/quayio-production/kms-1.yml
   output_resource_name: quayio-kms
+- provider: kinesis
+  account: quayio-prod
+  region: us-east-2
+  identifier: quay-prod-logentry-stream-backup
+  defaults: /terraform/resources/quayio-production/kinesis-2.yml
+  output_resource_name: quayio-kinesis

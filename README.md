@@ -72,6 +72,7 @@ this repository.
       - [Manage stacks of S3 bucket and CloudFront distribution via App-Interface (`/openshift/namespace-1.yml`)](#manage-stacks-of-s3-bucket-and-cloudfront-distribution-via-app-interface-openshiftnamespace-1yml)
       - [Manage CloudWatch Log Groups via App-Interface (`/openshift/namespace-1.yml`)](#manage-cloudwatch-log-groups-via-app-interface-openshiftnamespace-1yml)
       - [Manage Key Management Service Keys via App-Interface (`/openshift/namespace-1.yml`)](#manage-key-management-service-keys-via-app-interface-openshiftnamespace-1yml)
+      - [Manage Kinesis Streams via App-Interface (`/openshift/namespace-1.yml`)](#manage-kinesis-streams-via-app-interface-openshiftnamespace-1yml)
       - [Manage VPCs via App-Interface (`/openshift/cluster-1.yml`)](#manage-vpcs-via-app-interface-openshiftcluster-1yml)
     - [Manage Slack User groups via App-Interface](#manage-slack-user-groups-via-app-interface)
     - [Manage Jenkins jobs configurations using jenkins-jobs](#manage-jenkins-jobs-configurations-using-jenkins-jobs)
@@ -84,6 +85,7 @@ this repository.
     - [Execute a SQL Query on an App Interface controlled RDS instance](#execute-a-sql-query-on-an-app-interface-controlled-rds-instance)
     - [Enable Gitlab Features on an App Interface Controlled Gitlab Repository](#enable-gitlab-features-on-an-app-interface-controlled-gitlab-repository)
     - [Add recording rules via openshift-performance-parameters integration](#add-recording-rules-via-openshift-performance-parameters-integration)
+    - [Provision and consume Kafka clusters via Managed Services API](#provision-and-consume-kafka-clusters-via-managed-services-api)
   - [Design](#design)
   - [Developer Guide](#developer-guide)
   - [Quay Documentation](#quay-documentation)
@@ -180,7 +182,7 @@ Instructions to perform JSON schema validation on changes to the datafiles.
 
 **Requirements**:
 
-- docker
+- docker (or podman)
 - git
 
 **Instructions**:
@@ -393,6 +395,10 @@ The structure of this parameter is the following:
 quayRepos:
 - org:
     $ref: <quay org datafile (`/dependencies/quay-org-1.yml`), for example `/dependencies/quay/openshiftio.yml`>
+  teams: # optional
+  - permissions:
+    - $ref: <quay-membership permission datafile (`/access/permission-1.yml`), for example `/dependencies/quay/permissions/quay-membership-app-sre-managed-services.yml`>
+    role: read
   items:
   - name: <name of the repo, e.g. 'centos'>
     description: <description>
@@ -401,6 +407,8 @@ quayRepos:
 ```
 
 In order to add or remove a Quay repo, a MR must be sent to the appropriate App datafile and add the repo to the `items` array.
+
+The `teams` section should be added if you want to have `read` access to your team's repos. This access will be added to the teams specified in the `permissions` section for each repo in the `items` section.
 
 **NOTE**: If the App or the relevant Quay org are not modelled in the App-Interface repository, please seek the assistance from the App-SRE team.
 
@@ -1162,6 +1170,7 @@ In order to add or update an S3 bucket, you need to add them to the `terraformRe
 - `overrides`: list of values from `defaults` you wish to override, with the override values. For example: `acl: public`.
 - `sqs_identifier`: identifier of a existing sqs queue. It will create a s3 notifacation to that sqs queue. This field is optional.
 - `s3_events`: a listing of the event types for sqs queue.
+- `bucket_policy`: an AWS bucket policy to create and attach to the s3 bucket.
 - `output_resource_name`: name of Kubernetes Secret to be created.
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
@@ -1392,6 +1401,29 @@ Once the changes are merged, the Key Management Service key will be created (or 
 The Secret will contain the following fields:
 - `key_id` - The globally unique identifier for the key.
 
+#### Manage Kinesis Streams via App-Interface (`/openshift/namespace-1.yml`)
+
+Kinesis Streams can be entirely self-services via App-Interface.
+
+In order to add or update a Kinesis Stream, you need to add them to the `terraformResources` field.
+
+- `provider`: must be `kinesis`
+- `account`: must be one of the AWS account names we manage.
+- `identifier` - name of resource to create (or update)
+- `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options](/resources/terraform/resources/)
+- `output_resource_name`: name of Kubernetes Secret to be created.
+  - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
+  - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
+    - For example, for a resource with `identifier` "my-stream" and `provider` "kinesis", the created Secret will be called `my-stream-kinesis`.
+
+Once the changes are merged, the Kinesis Stream will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
+
+The Secret will contain the following fields:
+- `stream_name` - The name of the stream.
+- `aws_region` - The name of the stream's AWS region.
+- `aws_access_key_id` - The access key ID.
+- `aws_secret_access_key` - The secret access key.
+
 #### Manage VPCs via App-Interface (`/openshift/cluster-1.yml`)
 
 VPC peerings can be entirely self-services via App-Interface.
@@ -1467,6 +1499,7 @@ To manage a User group via App-Interface:
 - `ownersFromRepos`: a list of urls of github or gitlab repositories containing
   the `OWNERS` files to extract `approvers`/`reviewers` from. Only the root
   `OWNERS` file is considered. The `OWNERS_ALIASES` is respected.
+    - Note: optionally add `:<branch>` to use a specific branch. For example: `https://github.com/openshift/osde2e:main`.
 - `channels`: a list of channels to add to the User group
 
 3. **Add this permission to the desired `roles`, or create a new `role` with this permission only (mandatory).**
@@ -1641,6 +1674,24 @@ schedule: <if defined the output resource will be a CronJob instead of a Job>
 query: <sql query>
 ```
 
+If you want to run multiple queries in the same spec, you can define the
+`queries` list instead of the `query` string. Example:
+
+```yaml
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+name: <sql query unique name>
+namespace:
+  $ref: /services/<service>/namespaces/<namespace>.yml
+identifier: <RDS resource identifier (same as defined in the namespace)>
+output: <filesystem or stdout>
+schedule: <if defined the output resource will be a CronJob instead of a Job>
+queries:
+  - <sql query 1>
+  - <sql query 2>
+  - <sql query 3>
+```
+
 Example:
 
 ```yaml
@@ -1704,7 +1755,7 @@ $ oc logs 2020-01-28-account-manager-registries-stage-7pl6v
 $ oc logs 2020-01-30-account-manager-registries-stage-cjh82
 Get the sql-query results with:
 
-oc rsh --shell=/bin/bash 2020-01-30-account-manager-registries-stage-cjh82 cat /tmp/query-result.txt
+oc cp 2020-01-30-account-manager-registries-stage-cjh82:/tmp/query-result.txt 2020-01-30-account-manager-registries-stage-cjh82-query-result.txt
 
 Sleeping 3600s...
 ```
@@ -1805,6 +1856,39 @@ codeComponents:
 ### Add recording rules via openshift-performance-parameters integration
 
 Please refer to this [document](docs/app-sre/sli-recording-rules-via-performance-parameters.md)
+
+### Provision and consume Kafka clusters via Managed Services API
+
+Provisioning Kafka managed clusters through the Managed Services API can be self-serviced via app-interface.
+
+To provision a new cluster, create a Kafka cluster file. Example:
+```yaml
+---
+$schema: /kafka/cluster-1.yml
+
+labels: {}
+
+name: example-kafka
+description: <cluster description>
+
+ocm:
+  $ref: /dependencies/ocm/production.yml
+
+spec:
+  provider: aws
+  region: us-east-1
+```
+
+To define a consumer of the Kafka cluster, add the `kafkaCluster` reference to a namespace file. Example:
+```yaml
+kafkaCluster:
+  $ref: /kafka/example-kafka/cluster.yml
+```
+
+This will result in a Secret being created in the consuming namespace. The Secret will be called `kafka` and it will contain the following keys:
+- `bootstrapServerHost` - Bootstrap server hostname
+
+* Note: The Managed Services API is not yet deployed to production, so this feature is not ready for usage yet.
 
 ## Design
 

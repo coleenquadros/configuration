@@ -63,5 +63,6 @@ Escalations
 -  Ping the App SRE on-call if storage qutoa is needed
 -  Escalate the PagerDuty incident if Kafka has started crashlooping and you
    are having trouble getting the deployment to recover.
+-  Further escalation is described in https://source.redhat.com/groups/public/sre-services/sre_services_wiki/escalating_kafka_strimzi_amq.
 
 .. _Incident Response Doc: https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE

@@ -12,4 +12,4 @@ Latency:  avg_over_time(service:sli:latency_gt_2000:pctl10rate5m{environment="pr
 
 ## Dashboards
 
-https://grafana.stage.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&from=now-7d&to=now&var-label=apicast-tests&var-datasource=crcp01ue1-prometheus
+https://grafana.app-sre.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&from=now-7d&to=now&var-label=apicast-tests&var-datasource=crcp01ue1-prometheus

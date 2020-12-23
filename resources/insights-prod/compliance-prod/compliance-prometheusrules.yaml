@@ -1,0 +1,36 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: compliance
+spec:
+  groups:
+  - name: compliance.insights.openshiftio.rules
+    interval: 1m
+    rules:
+
+    - alert: ComplianceNoPodsFound
+      expr: sum(up{namespace="compliance-prod"}) == 0
+      for: 5m
+      annotations:
+        message: No pods found in the namespace
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: compliance
+
+    - alert: CompliancePodDown
+      expr: sum(up{namespace="compliance-prod"}) by (pod) == 0
+      for: 5m
+      annotations:
+        message: 'Pod ({{ $labels.pod }}) down!'
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: compliance

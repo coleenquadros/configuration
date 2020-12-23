@@ -169,6 +169,7 @@
     gh_pr_check: &gh_pr_check
         <<: *gh_properties
         status_context: "ci.ext.devshift.net PR build"
+        branch: "master"
         scm:
         - git:
             url: 'git@github.com:{gh_org}/{gh_repo}.git'
@@ -179,7 +180,7 @@
             - '${{ghprbActualCommit}}'
             merge:
                 remote: origin
-                branch: master
+                branch: '{branch}'
             git-config-name: "AppSRE"
             git-config-email: "sd-app-sre@redhat.com"
             included-regions:
@@ -301,27 +302,47 @@
         <<: *gl_checkout
 
     # This template is intended to create jobs that run the pipeline described
-    # in the 'Jenkinsfile' of the project when changes are merged to the master
-    # branch.
-    gl_build_pipeline_template: &gl_build_pipeline_template
+    # in the 'Jenkinsfile' of the project
+    #
+    # NOTE -- pipeline jobs currently unsupported (waiting for the openshift jenkins operator to be out of alpha)
+    gl_pipeline_base: &gl_pipeline_base
+        disabled: '{disable}'
+        node: '{node}'
+        concurrent: '{concurrent_build}'
+        backup_ecr_push_creds_account_region: 'none' # https://vault.devshift.net/ui/vault/secrets/app-sre/show/integrations-output/aws-ecr-image-pull-secrets/none/basic-auth
+        script_path: 'Jenkinsfile'
         project-type: pipeline
         pipeline-scm:
           scm:
           - git:
-              url: 'git@gitlab.cee.redhat.com/{gl_group}/{gl_project}.git'
+              url: 'git@gitlab.cee.redhat.com:{gl_group}/{gl_project}.git'
               credentials-id: '{gitlab_ssh_credentials}'
               shallow_clone: true
+              clean: true
               branches:
               - '{branch}'
-        triggers:
-        - pollscm:
-            cron: '* * * * *'
+          script-path: '{script_path}'
         wrappers:
         - timestamps
         - timeout_wrapper:
             timeout: '{timeout}'
         <<: *gl_checkout
 
+    # Run a pipeline by polling for SCM changes to 'branch'
+    # NOTE -- pipeline jobs currently unsupported (waiting for the openshift jenkins operator to be out of alpha)
+    gl_pipeline_scm_trigger: &gl_pipeline_scm_trigger
+        triggers:
+        - pollscm:
+            cron: '* * * * *'
+        <<: *gl_pipeline_base
+
+    # Run a pipeline on a generic cron timer
+    # NOTE -- pipeline jobs currently unsupported (waiting for the openshift jenkins operator to be out of alpha)
+    gl_pipeline_timed: &gl_pipeline_timed
+        triggers:
+        - timed: |
+            {cron_expression}
+        <<: *gl_pipeline_base
 
     # This template is intended to dynamically create jobs that run the openshift-saas-deploy integration
     # parameters to be passed in job generation
@@ -363,7 +384,7 @@
                 -e REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem \
                 -e GITHUB_API=$GITHUB_API \
                 {qontract_reconcile_image} \
-                qontract-reconcile --config /config/config.toml --no-gql-sha-url openshift-saas-deploy \
+                qontract-reconcile --config /config/config.toml openshift-saas-deploy \
                 --io-dir /artifacts \
                 --saas-file-name {saas_file_name} \
                 --env-name {env_name}

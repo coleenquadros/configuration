@@ -54,7 +54,7 @@ resourceTemplates:
 # tenant dashboards
 - name: telemeter-dashboards
   url: https://gitlab.cee.redhat.com/observatorium/configuration
-  path: /manifests/production/grafana
+  path: /manifests/production/grafana/observatorium
   provider: directory
   targets:
   - namespace:
@@ -62,7 +62,26 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: 6c1031680965bbf8e9448cd040c6a9abc414f4ef
+    ref: f4732955cbd9489d100bbe1360a6c4dc5f86d8b5
+- name: observatorium-logs-dashboards
+  url: https://gitlab.cee.redhat.com/observatorium/configuration
+  path: /resources/observability/grafana/observatorium-logs/grafana-dashboards-template.yaml
+  provider: openshift-template
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: c5cf4c7ab8ff6ba0984fec91c6cada0181292353
+    parameters:
+      OBSERVATORIUM_API_DATASOURCE: app-sre-stage-01-prometheus
+      OBSERVATORIUM_API_NAMESPACE: telemeter-stage
+      OBSERVATORIUM_LOGS_NAMESPACE: observatorium-logs-stage
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: c5cf4c7ab8ff6ba0984fec91c6cada0181292353
+    parameters:
+      OBSERVATORIUM_API_DATASOURCE: telemeter-prod-01-prometheus
+      OBSERVATORIUM_API_NAMESPACE: telemeter-production
+      OBSERVATORIUM_LOGS_NAMESPACE: observatorium-logs-production
 - name: insights-dashboards
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
   path: /dashboards
@@ -73,7 +92,18 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: 9f17f2942fed7c99ee54ab899e1b09896b01d28d
+    ref: 275a511be533ea286fcc65110d965d7f2f1648d1
+- name: uhc-auth-proxy-dashboards
+  url: https://github.com/RedHatInsights/uhc-auth-proxy
+  path: /grafana/dashboards
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: 9c3bcb465cf2f648857ab824907527fa5b2510a8
 - name: remediations-dashboards
   url: https://github.com/RedHatInsights/insights-remediations
   path: /dashboards
@@ -140,6 +170,17 @@ resourceTemplates:
     - namespace:
         $ref: /services/observability/namespaces/app-sre-observability-production.yml
       ref: 6c0cf9b030733ac4dac669a83636d7353f3fc800
+- name: insights-sources-dashboards
+  url: https://github.com/RedHatInsights/sources-api
+  path: /grafana-dashboards
+  provider: directory
+  targets:
+    - namespace:
+        $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+      ref: master
+    - namespace:
+        $ref: /services/observability/namespaces/app-sre-observability-production.yml
+      ref: 164081da4ce7af2709c48d38a84d17d68c4ada30
 - name: insights-engine-dashboards
   url: https://gitlab.cee.redhat.com/insights-platform/insights-engine
   path: /dashboards
@@ -161,7 +202,7 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: 087e355a9beb1b5cab088ae7fd0751923e494d91
+    ref: 5d5d6edc7eaccf014359720479b493b34953b5d2
 - name: ingress-dashboards
   url: https://github.com/RedHatInsights/insights-ingress-go
   path: /dashboards
@@ -172,7 +213,7 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: 24350d611923dff61596bdd814ad5f94d7911548
+    ref: 7c1e636bed24c102f1748103cea7a11042189f7e
 - name: insights-hccm-dashboards
   url: https://github.com/project-koku/koku
   path: /dashboards
@@ -194,7 +235,7 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: 3ed37f08b95246b5d53ed1c80006727d93142de7
+    ref: 62afe36b8549855629e27cc8c5769ebf4f20a859
 - name: platform-legacy-bridge-dashboards
   url: https://github.com/RedHatInsights/platform-legacy-bridge
   path: /dashboards
@@ -216,7 +257,7 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: da5f236e23c7bad8e19f1974de2606f06bf9c5f8
+    ref: 55b518685d70b7d1cfdf24d7476b2aedefdc9cd6
 - name: insights-storage-broker-dashboards
   url: https://github.com/RedHatInsights/insights-storage-broker
   path: /dashboards
@@ -227,7 +268,18 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: 890f2b63fa15027557e7c60936de75d8c7492611
+    ref: dee75e2d6af47ec0dca5ab2b1cb5f7c4fc2a84ba
+- name: insights-clowder-dashboards
+  url: https://github.com/RedHatInsights/clowder
+  path: /dashboards
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: 3505be4fbef1ab0f9502c384ce31279391af024b
 - name: insights-advisor-service-dashboards
   url: https://github.com/RedHatInsights/insights-advisor-service
   path: /dashboards
@@ -271,7 +323,7 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: c5cec5e73eeac6bc76a3bd83be434d8d6047917c
+    ref: fbf5c9fbf8241fb4384981c0b896d0cc7ae9dd75
 - name: xjoin-dashboards
   url: https://github.com/RedHatInsights/xjoin-search
   path: /grafana
@@ -293,7 +345,7 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: 8d709d38dafcdeafd3bb553406ff42c0f0e57074
+    ref: 9a1251bed7fa8090f1da8916baf87e782c957f1b
 - name: compliance-dashboards
   url: https://github.com/RedHatInsights/compliance-backend
   path: /dashboards
@@ -327,3 +379,15 @@ resourceTemplates:
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
     ref: 2f1461aae1a6f61f39f92dfe9349b47e6dcd6492
+- name: assisted-installer-dashboards
+  url: https://github.com/openshift/assisted-service
+  path: /dashboards
+  provider: directory
+  targets:
+    - namespace:
+        $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+      ref: master
+    - namespace:
+        $ref: /services/observability/namespaces/app-sre-observability-production.yml
+      ref: b0ef94269de6a08d5ebc0b61a053e0717755bca6
+

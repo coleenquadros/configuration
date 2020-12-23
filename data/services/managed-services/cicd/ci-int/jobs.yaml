@@ -18,7 +18,7 @@ type: jobs
 
 config:
   - project:
-      name: managed-services-kafka
+      name: mk-strimzi-operator-midstream
       label: managed-services
       node: managed-services
       gl_group: mk-ci-cd
@@ -27,29 +27,68 @@ config:
       jobs:
         - 'gl-build-master-strimzi':
             branch: mk-release
-            display_name: build managed-kafka master
+            display_name: build mk-strimzi-operator mk-release
         - 'gl-pr-check':
-            display_name: managed-kafka pr-check
-        - 'managed-kafka-pull-upstream':
-            display_name: managed-kafka pull upstream master branch
-            type: master
-            branch: mk-master
-            ci_cmd: 'make sync_master'
-            slack_channel_notification: mk-ci-cd
-            cron_expression: 'H 1 * * *'
-        - 'managed-kafka-pull-upstream':
-            display_name: managed-kafka pull upstream release branch
-            type: release
-            branch: mk-master
-            ci_cmd: 'make sync_release'
-            slack_channel_notification: mk-ci-cd
-            cron_expression: 'H 1 * * *'
+            display_name: mk-strimzi-operator pr-check
         - 'managed-kafka-security-scan':
-            display_name: managed-kafka security scan
+            display_name: mk-strimzi-operator security-scan mk-master
             branch: mk-master
             ci_cmd: 'make scan_project'
             slack_channel_notification: mk-ci-cd
             cron_expression: 'H 6 * * *'
+
+  - project:
+      name: mk-apache-kafka-midstream
+      label: managed-services
+      node: managed-services
+      gl_group: mk-ci-cd
+      gl_project: apache-kafka
+      quay_org: app-sre
+      jobs:
+        - 'gl-pr-check-apache-kafka':
+            display_name: apache-kafka pr-check
+
+  - project:
+      name: mk-strimzi-ui-midstream
+      label: managed-services
+      node: managed-services
+      gl_group: mk-ci-cd
+      gl_project: strimzi-ui
+      jobs:
+        - 'gl-pr-check':
+            display_name: mk-strimzi-ui pr-check
+            concurrent_build: true
+        - 'gl-build-master-managed-services':
+            branch: mk-release
+            display_name: mk-strimzi-ui build-mk-release
+
+  - project:
+      name: mk-ui-frontend-midstream
+      label: managed-services
+      node: managed-services
+      gl_group: mk-ci-cd
+      gl_project: mk-ui-frontend
+      jobs:
+        - 'gl-pr-check':
+            display_name: mk-ui-frontend pr-check
+            concurrent_build: true
+        - 'gl-build-master-managed-services':
+            branch: mk-release
+            display_name: mk-ui-frontend build-mk-release
+
+  - project:
+      name: mk-ui-host-midstream
+      label: managed-services
+      node: managed-services
+      gl_group: mk-ci-cd
+      gl_project: mk-ui-host
+      jobs:
+        - 'gl-pr-check':
+            display_name: mk-ui-host pr-check
+            concurrent_build: true
+        - 'gl-build-master-managed-services':
+            branch: mk-release
+            display_name: mk-ui-host build-mk-release
 
   - project:
       name: strimzi-operator-bundle
@@ -62,9 +101,9 @@ config:
             display_name: strimzi-operator-bundle pr-check
         - 'gl-build-master':
             branch: staging
-            display_name: strimzi-operator-bundle build branch
+            display_name: strimzi-operator-bundle build staging
         - 'strimzi-operator-test':
-            display_name: strimzi-operator system-test
+            display_name: strimzi-operator system-test staging
             branch: staging
 
   - project:
@@ -79,6 +118,23 @@ config:
             concurrent_build: true
         - 'gl-build-master':
             display_name: managed-services-api build master
+        - 'managed-services-api-tests':
+            display_name: Managed Services API Tests periodic stage
+            timeout: 7200
+            disable: false
+            cron_expression: 'H 6 * * 1-5'
+            ci_cmd: './pr_check.sh'
+            slack_channel_notification: managed-services-api
+        # At the moment, there is no other way to have an OSD cluster running longer than 7 days, hence the automation here.
+        # This will be removed once we have a production cluster, or have a better way to have OSD clusters that can last longer.
+        # See https://issues.redhat.com/browse/MGDSTRM-878
+        - 'managed-services-api-cluster-extension':
+            display_name: Managed Services API Extend Staging Cluster Lifetime
+            timeout: 7200
+            disable: false
+            cron_expression: '0 10 * * *' # Every morning at 10am. This will ensure there is always 7 days until the cluster is expired.
+            ci_cmd: './scripts/extend_staging_osd.sh'
+            slack_channel_notification: managed-services-api
 
   - project:
       name: managed-services-kafka-performance-tests
@@ -107,6 +163,11 @@ config:
         - 'gl-build-master':
             display_name: managed-service-ci-tools build master
             build_deploy_script_path: './hack/build_deploy.sh'
+        - 'managed-services-pull-upstream':
+            display_name: managed services pull upstream
+            ci_cmd: 'make pull/upstream/all'
+            slack_channel_notification: mk-ci-cd
+            cron_expression: 'H 1 * * *'
 
   - project:
       name: managed-services-kafka-chaos-tests
@@ -118,3 +179,18 @@ config:
         - 'managed-kafka-chaos':
             display_name: 'managed-kafka-chaos pod-delete'
             timeout: 3600
+            slack_channel_notification: forum-managed-kafka
+
+  - project:
+      name: mk-e2e-test-suite
+      label: managed-services
+      node: managed-services
+      gl_group: mk-ci-cd
+      gl_project: mk-e2e-test-suite
+      jobs:
+        - 'gl-pr-check':
+            display_name: mk-e2e-test-suite pr-check
+            pr_check_script_path: './pr_check.sh'
+        - 'gl-build-master':
+            display_name: mk-e2e-test-suite build master
+            build_deploy_script_path: './build_deploy.sh'

@@ -1,0 +1,70 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: engine
+  platform: insights
+
+name: engine-clowder
+description: ingress app on the Insights Platform via clowder
+
+app:
+  $ref: /services/insights/engine/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+timeout: 5
+
+managedResourceTypes:
+- ConfigMap
+- ClowdApp
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  CLOWDER_ENABLED: "true"
+
+resourceTemplates:
+- name: insights-engine
+  path: /deploy/clowdapp.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/insights-engine
+  targets:
+  - namespace:
+      $ref: /services/insights/engine/namespaces/stage-engine-stage.yml
+    ref: master
+    upstream: insights-platform-insights-engine-gl-build-master
+    parameters:
+      MIN_REPLICAS: 16
+      ENV_NAME: stage
+  - namespace:
+      $ref: /services/insights/engine/namespaces/fedramp-engine-stage.yml
+    ref: master
+    upstream: insights-platform-insights-engine-gl-build-master
+    parameters:
+      MIN_REPLICAS: 2
+      ENV_NAME: stage
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+    parameters:
+      MIN_REPLICAS: 1
+  - namespace:
+      $ref: /services/insights/engine/namespaces/engine-prod.yml
+    ref: 3b0235e40c69801f55d84cf07f97341082c7b282
+    parameters:
+      MIN_REPLICAS: "64"
+      MEMORY_LIMIT: 2Gi
+      ENV_NAME: prod

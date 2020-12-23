@@ -10,6 +10,11 @@ A vertical scale is the approach to increase the capacity of a single instance, 
 
 This document explains how to vertically scale an RDS instance managed through app-interface.
 
+## Notes
+
+* Storage: DB storage scale ups are seamless in most cases and will not cause an outage or performance degradation. This is documented here: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.StorageTypes.html
+
+
 ## Process
 
 1. Find the RDS instance you want to scale in the appropriate namespace file.

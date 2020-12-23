@@ -5,7 +5,12 @@ labels:
   platform: insights
 
 name: insights-third-party-operators
-description: Deploy third party OLM resources for cloud.redhat.com
+description: |
+  Deploy third party OLM resources for cloud.redhat.com.  Each operator will
+  get its own resource template in the third-party-operators repo as well as a
+  subfolder in app-interface that contains all the namespaces/environments the
+  operator is deployed to.  Each operator will be deployed by itself in any
+  given namespace.
 
 app:
   $ref: /services/insights/app.yml
@@ -17,6 +22,8 @@ slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
+
+timeout: 5
 
 managedResourceTypes:
 - Subscription
@@ -34,17 +41,19 @@ imagePatterns:
 - quay.io/cloudservices
 
 resourceTemplates:
-- name: third-party-operators
-  path: /third-party-operators.yml
+- name: amq-streams
+  path: /amq-streams.yml
   url: https://gitlab.cee.redhat.com/insights-platform/third-party-operators
   targets:
   - namespace:
-      $ref: /services/insights/third-party-operators/namespaces/stage-research.yml
+      $ref: /services/insights/third-party-operators/amq-streams/stage-research.yml
     ref: master
-- name: pre-production
-  path: /pre-production.yml
-  url: https://gitlab.cee.redhat.com/insights-platform/third-party-operators
-  targets:
   - namespace:
-      $ref: /services/insights/third-party-operators/namespaces/preprod-stage-research.yml
+      $ref: /services/insights/third-party-operators/amq-streams/ephem.yml
     ref: master
+  - namespace:
+      $ref: /services/insights/third-party-operators/amq-streams/stage.yml
+    ref: master
+  - namespace:
+      $ref: /services/insights/third-party-operators/amq-streams/production.yml
+    ref: e1cfcfa05a2d49249b52b4eba3ed6e387deabbad

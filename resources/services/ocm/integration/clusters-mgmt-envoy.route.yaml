@@ -1,0 +1,20 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    haproxy.router.openshift.io/timeout: 5m
+    haproxy.router.openshift.io/balance: roundrobin
+    haproxy.router.openshift.io/disable_cookies: "true"
+  name: clusters-mgmt-envoy
+spec:
+  # TODO: Uncomment this line to send traffic via Envoy.
+  # host: api.integration.openshift.com
+  path: "/api/clusters_mgmt"
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: reencrypt
+  to:
+    kind: Service
+    name: clusters-service-envoy
+    weight: 100

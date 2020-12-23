@@ -20,9 +20,25 @@
         allow-empty: true
 
 - job-template:
-    id: managed-kafka-pull-upstream
-    name: 'managed-kafka-pull-upstream-{type}'
-    description: "pipeline will pull changes from upstream UPSTREAM_BRANCH and merge them to MIDSTREAM_BASE_BRANCH, then it will create MR to MIDSTREAM_TARGET_BRANCH"
+    id: gl-build-master-managed-services
+    name: "{gl_group}-{gl_project}-gl-build-{branch}"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+          - *backup_ecr_push_creds
+          - *quay_secret_push
+          - *app_sre_bot_push_token
+          - *app_interface_creds
+          - *managed_services_github_deploy_key
+    <<: *gl_build_master
+
+- job-template:
+    id: managed-services-pull-upstream
+    name: 'managed-services-pull-upstream'
+    description: "pull changes from all upstreams specified in {gl_group}/{gl_project}/script/repo-config.yaml"
     wrappers:
       - timeout_wrapper:
           timeout: "{timeout}"
@@ -31,21 +47,9 @@
           <<: *vault_defaults
           secrets:
             - *app_sre_bot_push_token
+            - *managed_services_github_deploy_key
     publishers:
       - <<: *slack_notify
-    parameters:
-      - string:
-          name: UPSTREAM_BRANCH
-          default: ''
-          description: '[REQUIRED] upstream branch (https://github.com/strimzi/strimzi-kafka-operator)'
-      - string:
-          name: MIDSTREAM_BASE_BRANCH
-          default: ''
-          description: '[REQUIRED] midstream base branch (https://gitlab.cee.redhat.com/mk-ci-cd/strimzi-operator)'
-      - string:
-          name: MIDSTREAM_TARGET_BRANCH
-          default: ''
-          description: "[REQUIRED] midstream target branch for MR"
     <<: *gl_timed
     
     
@@ -77,6 +81,14 @@
         default: '10'
         description: 'count of worker nodes for OMB cluster'
     - string:
+        name: OMB_TEST_DURATION
+        default: 'PT1M'
+        description: 'OMB test duration in minutes, minimum 1 min'
+    - string:
+        name: OMB_WARMUP_DURATION
+        default: 'PT1M'
+        description: 'OMB warmup duration in minutes, minimum 1 min'
+    - string:
         name: FLAVOR
         default: 'm5.4xlarge'
         description: 'OSD aws node flavor'
@@ -88,6 +100,10 @@
         name: MULTI_AZ
         default: 'false'
         description: 'aws multi availablility for osd cluster'
+    - string:
+        name: OMB_COLLECT_LOG
+        default: 'true'
+        description: 'collect logs from OMB framework'
     <<: *gl_checkout
     builders:
       - shell: "make ci/pipeline"
@@ -95,6 +111,8 @@
     - archive:
         artifacts: 'target/logs/**,target/surefire-reports/**'
         allow-empty: true
+    - junit:
+        results: 'target/surefire-reports/*.xml'
     - <<: *slack_notify
     - postbuildscript:
         builders:
@@ -152,6 +170,7 @@
     - archive:
         artifacts: '{artifacts_path}'
         allow-empty: true
+    - <<: *slack_notify
 
 - job-template:
     id: strimzi-operator-test
@@ -207,3 +226,48 @@
             - *ci_jenkins_token
             - *gitlab_token
     <<: *gl_build_master
+
+- job-template:
+    id: 'managed-services-api-tests'
+    name: 'managed-services-api-tests-stage'
+    publishers:
+    - <<: *slack_notify
+    wrappers:
+      - timeout_wrapper:
+          timeout: '{timeout}'
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *managed_services_api_int_tests
+    <<: *gl_timed
+
+- job-template:
+    id: 'managed-services-api-cluster-extension'
+    name: 'managed-services-api-cluster-extension'
+    publishers:
+    - <<: *slack_notify
+    wrappers:
+      - timeout_wrapper:
+          timeout: '{timeout}'
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *managed_services_cluster_extension
+    <<: *gl_timed
+
+- job-template:
+    id: gl-pr-check-apache-kafka
+    name: "{gl_group}-{gl_project}-gl-pr-check"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+    <<: *gl_pr_check
+    artifacts_path: 'clients/build/reports/tests/unitTest/*.html'
+    publishers:
+    - archive:
+        artifacts: '{artifacts_path}'
+        allow-empty: true
+

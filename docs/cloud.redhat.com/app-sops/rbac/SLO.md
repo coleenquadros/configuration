@@ -12,4 +12,4 @@ Latency:  sum(django_http_requests_latency_including_middlewares_seconds_bucket{
 
 ## Dashboards
 
-https://grafana.stage.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&from=now-7d&to=now&var-datasource=crcp01ue1-prometheus&var-label=rbac
+https://grafana.app-sre.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&from=now-7d&to=now&var-datasource=crcp01ue1-prometheus&var-label=rbac

@@ -1,0 +1,185 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: ingress
+
+name: ingress-perf
+description: Insights ingress-perf on the Perf cluster under e2e-deploy/ocdeployer management
+
+cluster:
+  $ref: /openshift/insights/cluster-insights-perf.yml
+
+quota:
+  $ref: /services/insights/ingress/ingress-quota.yml
+
+app:
+  $ref: /services/insights/ingress/app.yml
+
+environment:
+  $ref: /products/insights/environments/perf.yml
+
+# networkPoliciesAllow:
+# - $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs02ue1.yml
+# - $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+# - $ref: /services/insights/xavier/namespaces/stage-xavier-stage.yml
+# - $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
+
+managedRoles: true
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-perf
+  identifier: ingress-perf
+  defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+- provider: s3
+  account: insights-perf
+  identifier: upload-perf
+  defaults: /terraform/resources/s3-gdpr-1.yml
+  output_resource_name: upload-s3
+- provider: s3
+  account: insights-perf
+  identifier: insights-ingress-archives-perf
+  defaults: /terraform/resources/s3-gdpr-1.yml
+  output_resource_name: insights-ingress-archives
+- provider: s3
+  account: insights-perf
+  identifier: insights-ingress-rejected-perf
+  defaults: /terraform/resources/s3-gdpr-1.yml
+  output_resource_name: insights-ingress-rejected
+- provider: s3
+  account: insights-perf
+  identifier: insights-buck-it-openshift-perf
+  defaults: /terraform/resources/s3-gdpr-1.yml
+  output_resource_name: insights-buck-it-openshift
+- provider: s3
+  account: insights-perf
+  identifier: insights-buck-it-ansible-perf
+  defaults: /terraform/resources/s3-gdpr-1.yml
+  output_resource_name: insights-buck-it-ansible
+- provider: s3
+  account: insights-perf
+  identifier: insights-client-metrics-perf
+  defaults: /terraform/resources/s3-gdpr-1.yml
+  output_resource_name: insights-client-metrics-bucket
+- provider: aws-iam-service-account
+  account: insights-perf
+  identifier: ingress-buckets-read-write-perf
+  variables:
+    aws_region: us-east-1
+  user_policy:
+    {
+      "Version": "2012-10-17",
+      "Statement": [{
+        "Effect": "Allow",
+        "Action": [
+          "s3:ListBucket",
+        ],
+        "Resource": [
+          "arn:aws:s3:::upload-perf",
+          "arn:aws:s3:::insights-ingress-rejected-perf",
+          "arn:aws:s3:::insights-buck-it-openshift-perf",
+          "arn:aws:s3:::insights-buck-it-ansible-perf",
+          "arn:aws:s3:::insights-ingress-archives-perf"
+        ]
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "s3:*Object"
+        ],
+        "Resource": [
+          "arn:aws:s3:::upload-perf/*",
+          "arn:aws:s3:::insights-ingress-rejected-perf/*",
+          "arn:aws:s3:::insights-buck-it-openshift-perf/*",
+          "arn:aws:s3:::insights-buck-it-ansible-perf/*",
+          "arn:aws:s3:::insights-ingress-archives-perf/*"
+        ]
+      }]
+    }
+  output_resource_name: ingress-buckets-read-write
+- provider: aws-iam-service-account
+  account: insights-perf
+  identifier: ingress-buck-it-openshift-read-perf
+  variables:
+    aws_region: us-east-1
+  user_policy:
+    {
+      "Version": "2012-10-17",
+      "Statement": [{
+        "Effect": "Allow",
+        "Action": [
+          "s3:ListBucket",
+          "s3:GetObject"
+        ],
+        "Resource": [
+          "arn:aws:s3:::insights-buck-it-openshift-perf",
+          "arn:aws:s3:::insights-buck-it-openshift-perf/*"
+        ]
+      }]
+    }
+  output_resource_name: ingress-buck-it-openshift-read
+- provider: aws-iam-service-account
+  account: insights-perf
+  identifier: ingress-buck-it-ansible-read-perf
+  variables:
+    aws_region: us-east-1
+  user_policy:
+    {
+      "Version": "2012-10-17",
+      "Statement": [{
+        "Effect": "Allow",
+        "Action": [
+          "s3:ListBucket",
+          "s3:GetObject"
+        ],
+        "Resource": [
+          "arn:aws:s3:::insights-buck-it-ansible-perf",
+          "arn:aws:s3:::insights-buck-it-ansible-perf/*"
+        ]
+      }]
+    }
+  output_resource_name: ingress-buck-it-ansible-read
+- provider: aws-iam-service-account
+  account: insights-perf
+  identifier: ingress-data-hub-read-perf
+  variables:
+    aws_region: us-east-1
+  user_policy:
+    {
+      "Version": "2012-10-17",
+      "Statement": [{
+        "Effect": "Allow",
+        "Action": [
+          "s3:ListBucket",
+          "s3:GetObject"
+        ],
+        "Resource": [
+          "arn:aws:s3:::upload-perf",
+          "arn:aws:s3:::upload-perf/*",
+          "arn:aws:s3:::insights-ingress-archives-perf",
+          "arn:aws:s3:::insights-ingress-archives-perf/*",
+        ]
+      }]
+    }
+  output_resource_name: ingress-data-hub-read
+
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml

@@ -11,6 +11,7 @@ spec:
   groups:
   - name: historical-system-profiles-prod
     rules:
+
     - alert: HistoricalSystemProfilesProdDown
       expr: |
         absent(up{service="historical-system-profiles-backend", namespace="historical-system-profiles-prod"})
@@ -19,8 +20,20 @@ spec:
         severity: info
         service: insights
         env: prod
+        app_team: historical-system-profiles
       annotations:
         dashboard: "GRAFANA_URL"
         link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/historical-system-profiles-prod/deployments"
         message: "Historical System Profiles Alert (Prod). historical-system-profiles-backend down in Prod for 3 minutes."
         runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/index.html"
+
+    - alert: HistoricalSystemProfilesPodDown
+      expr: sum(up{namespace="historical-system-profiles-prod"}) by (pod) == 0
+      for: 5m
+      annotations:
+        message: 'Pod ({{ $labels.pod }}) down!'
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: historical-system-profiles

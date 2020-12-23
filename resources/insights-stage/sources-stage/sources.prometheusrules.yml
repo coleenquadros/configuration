@@ -9,16 +9,43 @@ metadata:
     role: alert-rules
 spec:
   groups:
-  - name: sources-api-stage
+  - name: sources-kafka-lag-stage
     rules:
-      - alert: SourcesApi5xxErrors
-        expr: (sum(rate(api_3scale_gateway_api_status{exported_service="sources",status="5xx"}[1m])) / sum(rate(api_3scale_gateway_api_status{exported_service="sources"}[1m]))) * 100 > 50
+      - alert: SourcesKafkaLagSourcesStatus
+        expr: sum(kafka_consumergroup_group_lag{topic='platform.sources.status'}) > 200
         for: 10m
         labels:
           severity: info
           service: insights
           env: stage
+          app_team: topo-sources # Slack channel for app_team defined in resources/observability/alertmanager/alertmanager-instance.secret.yaml
         annotations:
-          dashboard: "https://GRAFANA_URL"
-          link_url: "https://console-openshift-console.apps.crc-stg-01.o4v9.p1.openshiftapps.com/k8s/ns/sources-prod/deployments/sources-api"
-          message: "Sources API has been throwing 5xx errors more than 50% of the time for the last 10 minutes"
+          dashboard: "https://grafana.stage.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-api"
+          message: "[Stage] Sources API: Kafka Lag (availability check) is bigger than 200 for the last 10 minutes"
+  - name: sources-api-stage
+    rules:
+      - alert: SourcesApi5xxErrors
+        expr: sum(rate(sources_api_http_requests_total{status=~"^[5].*"}[5m])) * 100 > 50
+        for: 10m
+        labels:
+          severity: info
+          service: insights
+          env: stage
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.stage.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-15m&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-api"
+          message: "[Stage] Sources API has been throwing 5xx errors more than 50% of the time for the last 10 minutes"
+      - alert: SourcesApiRequestDuration
+        expr: avg(rate(sources_api_http_duration_seconds_sum{controller!="status"}[5m]) / rate(sources_api_http_duration_seconds_count{controller!="status"}[5m]) > 0) > 500
+        for: 10m
+        labels:
+          severity: info
+          service: insights
+          env: stage
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.stage.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-15m&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-api"
+          message: "[Stage] Sources API's Average Request Duration > 500 ms for the last 10 minutes"

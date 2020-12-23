@@ -19,6 +19,8 @@ slack:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
 
+timeout: 5
+
 managedResourceTypes:
 - CatalogSource
 - OperatorGroup
@@ -41,11 +43,17 @@ authentication:
 parameters:
   VALIDATION_THRESHOLD: "1"
   INSIGHTS_ONLY: "true"
+  MAX_AGE: "45"
 
 resourceTemplates:
 - name: cyndi-operator
   path: /deploy/operator.yml
   url: https://github.com/RedHatInsights/cyndi-operator
+  parameters:
+    RECONCILE_INTERVAL: "120"
+    VALIDATION_INTERVAL: "1800"
+    VALIDATION_ATTEMPTS_THRESHOLD: "2"
+    VALIDATION_ATTEMPTS_THRESHOLD_INIT: "30"
   targets:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
@@ -53,29 +61,86 @@ resourceTemplates:
     upstream: RedHatInsights-cyndi-operator-gh-build-catalog-master-upstream-RedHatInsights-cyndi-operator-gh-build-master
     parameters:
       TARGET_NAMESPACE: xjoin-stage
-      RECONCILE_INTERVAL: "120"
-      VALIDATION_INTERVAL: "1800"
-      VALIDATION_ATTEMPTS_THRESHOLD: "2"
-      VALIDATION_ATTEMPTS_THRESHOLD_INIT: "15"
+      CONNECTOR_ALLOWLIST_SP: "sap_system,sap_sids,operating_system,owner_id"
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
+    ref: d0caf4e6144b6951623ab516852a3a7862a1238e
+    parameters:
+      TARGET_NAMESPACE: xjoin-prod
+      CONNECTOR_ALLOWLIST_SP: "sap_system,sap_sids,operating_system,owner_id"
+      MAX_AGE: "46"
+
+# Unlike in stable environments where the operator is deployed in SingleNamespace mode,
+# AllNamespaces (i.e. cluster-wide) mode is used in ephemeral environments
+- name: cyndi-operator-global
+  path: /deploy/operator-global.yml
+  url: https://github.com/RedHatInsights/cyndi-operator
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/cyndi-ephemeral.yml
+    ref: master
+    upstream: RedHatInsights-cyndi-operator-gh-build-catalog-master-upstream-RedHatInsights-cyndi-operator-gh-build-master
 
 - name: cyndi-pipeline-test
   path: /deploy/pipeline.yml
   url: https://github.com/RedHatInsights/cyndi-operator
+  parameters:
+    APP_NAME: syndication-test
   targets:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
     ref: master
     upstream: RedHatInsights-cyndi-operator-gh-build-master
     parameters:
-      APP_NAME: syndication-test
+      VALIDATION_THRESHOLD: "4"
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
+    ref: d0caf4e6144b6951623ab516852a3a7862a1238e
 
 - name: advisor-pipeline
   path: /deploy/pipeline.yml
   url: https://github.com/RedHatInsights/cyndi-operator
+  parameters:
+    APP_NAME: advisor
   targets:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
     ref: master
     upstream: RedHatInsights-cyndi-operator-gh-build-master
     parameters:
-      APP_NAME: advisor
+      VALIDATION_THRESHOLD: "4"
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
+    ref: d0caf4e6144b6951623ab516852a3a7862a1238e
+
+- name: patch-pipeline
+  path: /deploy/pipeline.yml
+  url: https://github.com/RedHatInsights/cyndi-operator
+  parameters:
+    APP_NAME: patch
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
+    ref: master
+    upstream: RedHatInsights-cyndi-operator-gh-build-master
+    parameters:
+      VALIDATION_THRESHOLD: "4"
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
+    ref: d0caf4e6144b6951623ab516852a3a7862a1238e
+
+- name: vulnerability-pipeline
+  path: /deploy/pipeline.yml
+  url: https://github.com/RedHatInsights/cyndi-operator
+  parameters:
+    APP_NAME: vulnerability
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
+    ref: master
+    upstream: RedHatInsights-cyndi-operator-gh-build-master
+    parameters:
+      VALIDATION_THRESHOLD: "4"
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
+    ref: d0caf4e6144b6951623ab516852a3a7862a1238e

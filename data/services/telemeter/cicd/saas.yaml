@@ -48,6 +48,9 @@ imagePatterns:
 - quay.io/app-sre/gubernator
 
 parameters:
+  OAUTH_PROXY_IMAGE: quay.io/openshift/origin-oauth-proxy
+  OAUTH_PROXY_IMAGE_TAG: 4.7.0
+  # Deprecated. Will be removed when the migration is completed.
   PROXY_IMAGE: quay.io/openshift/origin-oauth-proxy
   PROXY_IMAGE_TAG: 4.7.0
 
@@ -66,9 +69,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/telemeter/namespaces/telemeter-stage.yml
     # Commit for gitlab.cee.redhat.com/observatorium/configuration repo. Keep it pinned, so we know what we can promote to production.
-    ref: 44236373c9e5667134a2cfc7e7c85af797631bf4
+    ref: 2b3c7257df45cfd16cd08197da324b51dc86a1f7
     parameters:
       NAMESPACE: telemeter-stage
+      OBSERVATORIUM_METRICS_NAMESPACE: telemeter-stage
       OBSERVATORIUM_LOGS_NAMESPACE: observatorium-logs-stage
       IMAGE_TAG: '8e65e1c'
       IMAGE_CANARY: quay.io/app-sre/telemeter
@@ -86,9 +90,10 @@ resourceTemplates:
       GUBERNATOR_IMAGE_TAG: 1.0.0-rc.1
       GUBERNATOR_REPLICAS: 2
       OBSERVATORIUM_API_IMAGE_TAG: master-2020-11-02-v0.1.1-192-ge324057
+      OBSERVATORIUM_API_REPLICAS: 3
       THANOS_CONFIG_SECRET: thanos-objectstorage
       THANOS_S3_SECRET: telemeter-thanos-stage-s3
-      THANOS_IMAGE_TAG: v0.16.0
+      THANOS_IMAGE_TAG: master-2020-12-11-843482bf
       THANOS_RECEIVE_CONTROLLER_IMAGE_TAG: master-2020-02-06-b66e0c8
       THANOS_QUERIER_REPLICAS: 2
       THANOS_QUERIER_CPU_REQUEST: '50m'
@@ -115,6 +120,14 @@ resourceTemplates:
       THANOS_RECEIVE_DEBUG_ENV: '1'
       THANOS_COMPACTOR_REPLICAS: 1
       THANOS_COMPACTOR_PVC_REQUEST: '50Gi'
+      THANOS_RULER_LOG_LEVEL: 'info'
+      THANOS_RULER_REPLICAS: 2
+      THANOS_RULER_CPU_REQUEST: '500m'
+      THANOS_RULER_CPU_LIMIT: '1'
+      THANOS_RULER_MEMORY_REQUEST: '2Gi'
+      THANOS_RULER_MEMORY_LIMIT: '2Gi'
+      THANOS_RULER_PVC_REQUEST: '50Gi'
+      THANOS_COMPACTOR_LOG_LEVEL: 'debug'
       THANOS_STORE_CACHE_MEMORY_LIMIT_MB: 2048
       JAEGER_AGENT_IMAGE_TAG: 1.16.0
       MEMCACHED_IMAGE: registry.redhat.io/rhel8/memcached
@@ -125,9 +138,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/telemeter/namespaces/telemeter-production.yml
     # Commit for gitlab.cee.redhat.com/observatorium/configuration repo.
-    ref: 236c8abb03a75b37ab53532453cb1b8b3d9e5979
+    ref: 2b3c7257df45cfd16cd08197da324b51dc86a1f7
     parameters:
       NAMESPACE: telemeter-production
+      OBSERVATORIUM_METRICS_NAMESPACE: telemeter-production
       IMAGE_TAG: '8e65e1c'
       REPLICAS: 10
       IMAGE_CANARY: quay.io/app-sre/telemeter
@@ -147,7 +161,7 @@ resourceTemplates:
       OBSERVATORIUM_API_REPLICAS: 3
       THANOS_CONFIG_SECRET: thanos-objectstorage
       THANOS_S3_SECRET: telemeter-thanos-production-s3
-      THANOS_IMAGE_TAG: v0.16.0
+      THANOS_IMAGE_TAG: master-2020-12-11-843482bf
       THANOS_RECEIVE_CONTROLLER_IMAGE_TAG: master-2020-02-06-b66e0c8
       THANOS_QUERIER_REPLICAS: 6
       THANOS_RECEIVE_REPLICAS: 6
@@ -174,6 +188,13 @@ resourceTemplates:
       THANOS_QUERIER_CACHE_MEMORY_LIMIT: '2Gi'
       THANOS_COMPACTOR_REPLICAS: 1
       THANOS_COMPACTOR_PVC_REQUEST: '150Gi'
+      THANOS_RULER_LOG_LEVEL: 'info'
+      THANOS_RULER_REPLICAS: 2
+      THANOS_RULER_CPU_REQUEST: '500m'
+      THANOS_RULER_CPU_LIMIT: '1'
+      THANOS_RULER_MEMORY_REQUEST: '2Gi'
+      THANOS_RULER_MEMORY_LIMIT: '2Gi'
+      THANOS_RULER_PVC_REQUEST: '50Gi'
       JAEGER_AGENT_IMAGE_TAG: 1.14.0
       MEMCACHED_IMAGE: registry.redhat.io/rhel8/memcached
       MEMCACHED_IMAGE_TAG: 1.5
@@ -216,9 +237,10 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/telemeter/namespaces/telemeter-stage.yml
-    ref: 538810de2b5fd2d25e5fa0dcf64c1bf4c1dd8a3f
+    ref: 67b2f64f4c3cdc41e366a4a933bcc899658247f1
     parameters:
       NAMESPACE: telemeter-stage
+      OBSERVATORIUM_METRICS_NAMESPACE: telemeter-stage
       OBSERVATORIUM_LOGS_NAMESPACE: observatorium-logs-stage
       IMAGE_TAG: 'master-2020-09-23-08090ad'
       CONPROF_REPLICAS: '1'

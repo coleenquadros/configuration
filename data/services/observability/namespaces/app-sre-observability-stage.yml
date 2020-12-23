@@ -43,6 +43,12 @@ terraformResources:
   output_resource_name: aws-cloudwatch-exporter-app-sre
 - provider: aws-iam-service-account
   account: osio
+  identifier: aws-resource-exporter-stage-01
+  policies:
+  - AmazonRDSReadOnlyAccess
+  output_resource_name: aws-resource-exporter-osio
+- provider: aws-iam-service-account
+  account: osio
   identifier: aws-cloudwatch-exporter-stage-01
   policies:
   - AmazonEC2ReadOnlyAccess
@@ -54,11 +60,11 @@ terraformResources:
   - CloudWatchReadOnlyAccess
   output_resource_name: aws-cloudwatch-exporter-osio
 - provider: aws-iam-service-account
-  account: osio
-  identifier: aws-resource-exporter-stage-01
+  account: quayio-stage
+  identifier: aws-cloudwatch-exporter-quay-stage-01
   policies:
-  - AmazonRDSReadOnlyAccess
-  output_resource_name: aws-resource-exporter-osio
+  - CloudWatchReadOnlyAccess
+  output_resource_name: aws-cloudwatch-exporter-quay
 ## Insights staging cloudwatch exporter IAM user
 - provider: aws-iam-service-account
   account: insights-stage
@@ -117,30 +123,6 @@ openshiftResources:
 # ConfigMaps
 ## Grafana Dashboards
 - provider: resource
-  path: /observability/grafana/grafana-dashboard-assisted-installer-weekly-overview.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-assisted-installer-cluster-overview.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-assisted-installer-ocm-operations.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-assisted-installer-general-overview.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-assisted-installer-basic-cluster-operation.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-assisted-installer-rnd-overview.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-assisted-installer-agent-api.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-assisted-installer-resource-utilization.configmap.yaml
-  validate_json: true
-- provider: resource
   path: /observability/grafana/grafana-dashboard-appsre-grafana.configmap.yaml
   validate_json: true
 - provider: resource
@@ -154,6 +136,9 @@ openshiftResources:
   validate_json: true
 - provider: resource
   path: /observability/grafana/grafana-dashboard-appsre-rds.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-appsre-elasticache.configmap.yaml
   validate_json: true
 - provider: resource
   path: /observability/grafana/grafana-dashboard-appsre-vault.configmap.yaml
@@ -318,6 +303,9 @@ openshiftResources:
 ### Insights RDS Exporter Configuration
 - provider: resource
   path: /observability/rds-exporter/crc/rds-exporter.configmap.crc-stage.yaml
+### Managed Services API
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-managed-services-api-slos.configmap.yaml
 
 # Secrets
 ## Blackbox Exporter
@@ -347,13 +335,6 @@ openshiftResources:
 - provider: vault-secret
   path: app-interface/app-sre/app-sre-observability-stage/pushgateway
   version: 1
-## Quay cloudwatch exporter
-- provider: vault-secret
-  path: app-interface/quayio-stage/cloudwatch-exporter/iam-creds
-  name: aws-cloudwatch-exporter-quay
-  version: 3
-  labels:
-    version: v3
 ## Jiralert
 - provider: resource-template
   type: extracurlyjinja2

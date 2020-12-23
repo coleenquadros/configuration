@@ -19,6 +19,8 @@ slack:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
 
+timeout: 5
+
 managedResourceTypes:
 - ConfigMap
 - Deployment
@@ -44,12 +46,15 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml
-    ref: c84f096ff65509eb725823afa3aa6ba38c00cdaa
+    ref: 410946ad872920e1978839725f6ffcdc536ef801
     parameters:  # all other parameters have default values
-      IMAGE_TAG: 2101734
+      IMAGE_TAG: 1af0b82
+      OSD_REDEPLOY_TRIGGER: 8
+      API_REPLICA_COUNT_MAX: '8'
+      API_TARGET_AVERAGE_CPU_UTILIZATION: '50'
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
-    ref: c84f096ff65509eb725823afa3aa6ba38c00cdaa 
+    ref: 410946ad872920e1978839725f6ffcdc536ef801
     parameters:  # all other parameters have default values
       API_SENTRY_ENVIRONMENT: prod
       API_SENTRY_RELEASE: prod
@@ -60,30 +65,33 @@ resourceTemplates:
       CELERY_SENTRY_RELEASE: prod
       CLOUDIGRADE_CW_STREAM_NAME: cloudigrade-prod
       CLOUDIGRADE_ENVIRONMENT: prod
-      COMMIT_REF: 2101734 
+      COMMIT_REF: 1af0b82
       HOUNDIGRADE_SENTRY_ENVIRONMENT: prod
       HOUNDIGRADE_ECS_CLUSTER_NAME: cloudigrade-prod-us-east-1c
       HOUNDIGRADE_AWS_AVAILABILITY_ZONE: us-east-1c
       HOUNDIGRADE_AWS_AUTOSCALING_GROUP_NAME: EC2ContainerService-cloudigrade-prod-us-east-1c-EcsInstanceAsg-UZR9Y10ZTWKM
       IMAGE_NAMESPACE: cloudigrade-prod
-      IMAGE_TAG: 2101734
+      IMAGE_TAG: 1af0b82
       LISTENER_GROUP_ID: cloudmeter_prod
       LISTENER_SENTRY_ENVIRONMENT: prod
       LISTENER_SENTRY_RELEASE: prod
+      SOURCES_ENABLE_DATA_MANAGEMENT_FROM_KAFKA: "true"
+      API_REPLICA_COUNT_MAX: '16'
+      API_TARGET_AVERAGE_CPU_UTILIZATION: '35'
 - name: cloudigrade-beat
   path: /templates/cloudigrade/cloudigrade-beat.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
   targets:
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml
-    ref: c84f096ff65509eb725823afa3aa6ba38c00cdaa
+    ref: 410946ad872920e1978839725f6ffcdc536ef801
     parameters: # all other parameters have default values
-      IMAGE_TAG: 2101734
+      IMAGE_TAG: 1af0b82
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
-    ref: c84f096ff65509eb725823afa3aa6ba38c00cdaa 
+    ref: 410946ad872920e1978839725f6ffcdc536ef801
     parameters:  # all other parameters have default values
-      IMAGE_TAG: 2101734 
+      IMAGE_TAG: 1af0b82
 
 - name: cloudigrade-listener
   path: /templates/cloudigrade/cloudigrade-listener.yaml
@@ -91,14 +99,15 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml
-    ref: c84f096ff65509eb725823afa3aa6ba38c00cdaa
+    ref: 410946ad872920e1978839725f6ffcdc536ef801
     parameters: # all other parameters have default values
-      IMAGE_TAG: 2101734
+      IMAGE_TAG: 1af0b82
+      LISTENER_WORKER_REPLICA_COUNT: 1
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
-    ref: c84f096ff65509eb725823afa3aa6ba38c00cdaa 
+    ref: 410946ad872920e1978839725f6ffcdc536ef801
     parameters:  # all other parameters have default values
-      IMAGE_TAG: 2101734
+      IMAGE_TAG: 1af0b82
 
 - name: cloudigrade-worker
   path: /templates/cloudigrade/cloudigrade-worker.yaml
@@ -106,11 +115,11 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml
-    ref: c84f096ff65509eb725823afa3aa6ba38c00cdaa
+    ref: 410946ad872920e1978839725f6ffcdc536ef801
     parameters: # all other parameters have default values
-      IMAGE_TAG: 2101734
+      IMAGE_TAG: 1af0b82
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
-    ref: c84f096ff65509eb725823afa3aa6ba38c00cdaa 
+    ref: 410946ad872920e1978839725f6ffcdc536ef801
     parameters:  # all other parameters have default values
-      IMAGE_TAG: 2101734 
+      IMAGE_TAG: 1af0b82

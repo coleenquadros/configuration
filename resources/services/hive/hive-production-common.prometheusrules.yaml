@@ -72,30 +72,6 @@ spec:
         service: hive
         severity: medium
         team: appsre
-    - alert: RemoteKubeClientRequestsHigh - POST requests - production - {{{shard_name}}}
-      annotations:
-        message: "detected {{ $value }} {{ $labels.resource }} remote POST API requests per second from controller {{ $labels.controller }}"
-        runbook: "https://github.com/openshift/hive-sops/blob/master/sop/KubeClientRequestsHigh.md"
-        dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
-      expr: |
-        rate(hive_kube_client_requests_total{job="hive-controllers",remote="true",method="POST"}[5m]) > 15
-      for: 1m
-      labels:
-        service: hive
-        severity: critical
-        team: appsre
-    - alert: RemoteKubeClientRequestsHigh - non-POST requests - production - {{{shard_name}}}
-      annotations:
-        message: "detected {{ $value }} {{ $labels.resource }} remote non-POST API requests per second from controller {{ $labels.controller }}"
-        runbook: "https://github.com/openshift/hive-sops/blob/master/sop/KubeClientRequestsHigh.md"
-        dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
-      expr: |
-        rate(hive_kube_client_requests_total{job="hive-controllers",remote="true",method!~"POST"}[5m]) > 15
-      for: 1m
-      labels:
-        service: hive
-        severity: medium
-        team: appsre
     - alert: ClusterProvisioningDelay - production - {{{shard_name}}}
       annotations:
         message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.exported_namespace }} provisioning taking over 2 hours. Condition/Reason: {{ $labels.condition }} / {{ $labels.reason }}. SOP: https://github.com/openshift/hive-sops/blob/master/sop/ClusterProvisioningDelay.md"
@@ -191,7 +167,7 @@ spec:
       annotations:
         message: "Certman Operator is about to reach account limit for issued certificate in the last 7 days - devshift.org domain"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/howto/lets-encrypt-rate-limit-adjustment.md"
-        dashboard: "https://grafana.stage.devshift.net/d/sd-scale/service-delivery-scale?orgId=1"
+        dashboard: "https://grafana.app-sre.devshift.net/d/sd-scale/service-delivery-scale?orgId=1"
       expr: |
         certman_operator_certs_in_last_week_devshift_org{job="certman-operator"} > {{{certman_operator_devshift_org_issuance_rate_threshold}}}
       labels:
@@ -202,7 +178,7 @@ spec:
       annotations:
         message: "Certman Operator is about to reach account limit for issued certificate in the last 7 days - openshiftapps.com domain"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/howto/lets-encrypt-rate-limit-adjustment.md"
-        dashboard: "https://grafana.stage.devshift.net/d/sd-scale/service-delivery-scale?orgId=1"
+        dashboard: "https://grafana.app-sre.devshift.net/d/sd-scale/service-delivery-scale?orgId=1"
       expr: |
         certman_operator_certs_in_last_week_openshift_apps_com{job="certman-operator"} > {{{certman_operator_openshift_apps_com_issuance_rate_threshold}}}
       labels:

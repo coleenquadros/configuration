@@ -19,10 +19,13 @@ slack:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
 
+timeout: 5
+
 managedResourceTypes:
 - CronJob
 - Deployment
 - DeploymentConfig
+- HorizontalPodAutoscaler
 - Service
 - ServiceAccount
 - Route
@@ -48,20 +51,23 @@ resourceTemplates:
     CPU_LIMIT: '1'
     MEMORY_LIMIT: 1Gi
     UPDATE_TIMEOUT: 7200
-    DURATIONS_DELETION_INTERVAL: '5'
   targets:
   - namespace:
       $ref: /services/insights/payload-tracker/namespaces/stage-payload-tracker-stage.yml
-    ref: c180b2effea959ee8964626fd40b7d9dc7732eda
+    ref: b9060a0c128f7e3f4cc8b1810c5e91ea856bf265
     parameters:
-      IMAGE_TAG: 39c8728
-      REPLICAS: 1
+      IMAGE_TAG: 921a91d
+      USE_REDIS: 'true'
   - namespace:
       $ref: /services/insights/payload-tracker/namespaces/payload-tracker-prod.yml
-    ref: 35e6c759f71f34006362efeaf2e300dc37f93b9a
+    ref: b9060a0c128f7e3f4cc8b1810c5e91ea856bf265
     parameters:
-      IMAGE_TAG: 0b0aee9
-      REPLICAS: 1
+      IMAGE_TAG: 921a91d
+      USE_REDIS: 'true'
+      MAX_REPLICAS: '4'
+      MIN_REPLICAS: '4'
+      MAXIMUM_RUNNING_TASKS: '500'
+      SECONDS_TO_LIVE: '3600'
 - name: payload-tracker-frontend
   path: /templates/payload-tracker/payload-tracker-frontend.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
@@ -76,13 +82,3 @@ resourceTemplates:
     ref: 768e6fe1e8283d3e4c0f8d0fabfbf0b74a5174ef
     parameters:
       IMAGE_TAG: ba3e85f
-- name: payload-tracker-redis
-  path: /templates/payload-tracker/payload-tracker-redis.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  targets:
-  - namespace:
-      $ref: /services/insights/payload-tracker/namespaces/stage-payload-tracker-stage.yml
-    ref: ff1350b0386d56d68e7bed0277739681fcfd9e74
-    parameters:
-      IMAGE: quay.io/cloudservices/redis
-      IMAGE_TAG: 3.2.3

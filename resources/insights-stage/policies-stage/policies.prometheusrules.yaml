@@ -1,0 +1,43 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: policies-stage
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: policies-stage
+    rules:
+      # pagerduty
+      - alert: PoliciesEngineDownStage
+        expr: up{endpoint='policies-engine', namespace='policies-stage'} == 0
+        for: 5m
+        labels:
+          severity: medium
+          service: insights
+          env: stage
+          app_team: policies
+        annotations:
+          dashboard: "https://grafana.stage.devshift.net/d/wX1EjUqZk/policies-dashboard"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/policies-stage/deployments"
+          message: "Policies Engine: Down in Stage for 5 minutes."
+          description: "Policies Engine: Down in Stage for 5 minutes."
+
+      - alert: PoliciesUiBackendDownStage
+        expr: up{endpoint='policies-ui-backend', namespace='policies-stage'} == 0
+        for: 5m
+        labels:
+          severity: medium
+          service: insights
+          env: stage
+          app_team: policies
+        annotations:
+          dashboard: "https://grafana.stage.devshift.net/d/wX1EjUqZk/policies-dashboard"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/policies-stage/deployments"
+          message: "Policies UI Backend Alert (Stage)"
+          description: "Policies UI Backend: Down in Stage for 5 minutes."
+          runbook: "https://core-platform-apps.pages.redhat.com/policies-docs/dev/runbooks/alerts/PoliciesUiBackendDownProd.html"
+
