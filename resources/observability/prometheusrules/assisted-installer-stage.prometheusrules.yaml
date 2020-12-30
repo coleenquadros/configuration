@@ -1,0 +1,22 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: assisted-installer
+spec:
+  groups:
+    - name: assisted-installer_alerts
+      rules:
+        - alert: Assisted Installer - Service Is Down - Stage
+          annotations:
+            message: "SERVICE IS DOWN"
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/assisted-installer/sop/assisted-installer-service-is-down.md#assisted-installer-service-is-down-errors"
+          expr: absent(up{job="assisted-service",namespace="assisted-installer-stage"} == 1)
+          for: 5m
+          labels:
+            severity: medium #FIXME: update to critical once we go GA
+            service: assisted-installer
