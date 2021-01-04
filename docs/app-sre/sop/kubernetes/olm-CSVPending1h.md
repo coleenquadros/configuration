@@ -4,7 +4,7 @@
 
 ## Impact
 
-The operator in question is not in running condition, the dependant application may also be degraded as a result
+The operator in question is not in running condition, the dependant application may also be degraded as a result. In either case, this needs to be investigated as soon as possible.
 
 ## Summary
 
