@@ -1,0 +1,41 @@
+---
+
+$schema: /app-sre/app-1.yml
+
+labels:
+  service: playbook-dispatcher
+  platform: insights
+
+name: playbook-dispatcher
+description: The Playbook Dispatcher service enables other services to run Ansible Playbooks on connected hosts
+
+onboardingStatus: BestEffort
+
+parentApp:
+  $ref: /services/insights/app.yml
+
+serviceOwners:
+- name: Jozef Hartinger
+  email: jharting@redhat.com
+
+performanceParameters:
+  SLO: 90
+
+dependencies:
+- $ref: /dependencies/github/service.yml
+- $ref: /dependencies/quay/service.yml
+- $ref: /dependencies/openshift/service.yml
+- $ref: /dependencies/ci-int/service.yml
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/cloudservices.yml
+  items:
+  - name: playbook-artifact-validator
+    public: true
+    description: Validator of playbook run artifacts uploaded to cloud.redhat.com platform
+
+codeComponents:
+- name: playbook-artifact-validator
+  resource: upstream
+  url: https://github.com/RedHatInsights/playbook-artifact-validator
