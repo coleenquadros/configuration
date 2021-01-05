@@ -1,0 +1,159 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: observatorium-osd-stage
+description: staging namespace for OSD tenant
+
+cluster:
+  $ref: /openshift/app-sre-stage-01/cluster.yml
+
+app:
+  $ref: /services/telemeter/app.yml
+
+environment:
+  $ref: /products/osdv4/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+- $ref: /services/observatorium-logs/namespaces/observatorium-logs-stage.yml
+
+grafanaUrl: https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-stage-prometheus&var-cluster=app-sre-stage&var-namespace=telemeter-stage
+
+managedRoles: true
+
+managedResourceTypes:
+- ClusterRole
+- Role
+- RoleBinding
+- Route
+- ServiceAccount
+- ServiceMonitor
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: s3
+  account: app-sre
+  identifier: telemeter-thanos-stage
+  defaults: /terraform/resources/s3-private-1.yml
+  output_resource_name: telemeter-thanos-stage-s3
+  
+openshiftResources:
+- provider: vault-secret
+  path: app-interface/app-sre-stage/telemeter-stage/prometheus-telemeter-proxy
+  version: 1
+  labels:
+    k8s-app: prometheus-telemeter
+- provider: vault-secret
+  path: app-interface/app-sre-stage/telemeter-stage/telemeter-server
+  version: 4
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: app-interface/app-sre-stage/telemeter-stage/thanos-objectstorage
+  version: 1
+- provider: route
+  path: /app-sre-stage/telemeter-stage/infogw-data.route.yaml
+  vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.api.stage.openshift.com
+  vault_tls_secret_version: 3
+- provider: route
+  path: /app-sre-stage/telemeter-stage/telemeter-server.route.yaml
+  vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.api.stage.openshift.com
+  vault_tls_secret_version: 3
+- provider: route
+  path: /app-sre-stage/telemeter-stage/telemeter-server-authorize.route.yaml
+  vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.api.stage.openshift.com
+  vault_tls_secret_version: 3
+- provider: route
+  path: /app-sre-stage/telemeter-stage/telemeter-server-upload.route.yaml
+  vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.api.stage.openshift.com
+  vault_tls_secret_version: 3
+- provider: route
+  path: /app-sre-stage/telemeter-stage/telemeter-server-metrics-v1-receive.route.yaml
+  vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.api.stage.openshift.com
+  vault_tls_secret_version: 3
+- provider: route
+  path: /app-sre-stage/telemeter-stage/observatorium-thanos-querier-cache-stage.route.yaml
+  vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.api.stage.openshift.com
+  vault_tls_secret_version: 3
+- provider: vault-secret
+  path: app-interface/app-sre-stage/telemeter-stage/jaeger-proxy
+  version: 1
+- provider: route
+  path: /app-sre-stage/telemeter-stage/observatorium-jaeger-stage.route.yaml
+  vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.api.stage.openshift.com
+  vault_tls_secret_version: 3
+- provider: route
+  path: /app-sre-stage/telemeter-stage/conprof.route.yaml
+  vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.api.stage.openshift.com
+  vault_tls_secret_version: 3
+- provider: route
+  path: /app-sre-stage/telemeter-stage/observatorium-api-stage.route.yaml
+  vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.api.stage.openshift.com
+  vault_tls_secret_version: 3
+- provider: route
+  path: /app-sre-stage/telemeter-stage/observatorium-thanos-compact-stage.route.yaml
+  vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.api.stage.openshift.com
+  vault_tls_secret_version: 3
+- provider: resource
+  path: /app-sre-stage/telemeter-stage/ams-subscription-labels-stage.servicemonitor.yaml
+- provider: vault-secret
+  path: app-interface/app-sre-stage/telemeter-stage/querier-htpasswd
+  version: 2
+  labels:
+    app: thanos-querier
+- provider: vault-secret
+  path: app-interface/app-sre-stage/telemeter-stage/querier-proxy
+  version: 1
+  labels:
+    app: thanos-querier
+- provider: vault-secret
+  path: app-interface/app-sre-stage/telemeter-stage/querier-cache-proxy
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre-stage/telemeter-stage/query-proxy
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre-stage/telemeter-stage/conprof-proxy
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre-stage/telemeter-stage/observatorium-api-proxy
+  version: 3
+- provider: vault-secret
+  path: app-interface/app-sre-stage/telemeter-stage/query-frontend-proxy
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre-stage/telemeter-stage/compact-proxy
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre-stage/telemeter-stage/observatorium-observatorium-api
+  version: 16
+  annotations:
+    qontract.recycle: "true"
+
+# Prometheus-telemeter Serviceaccount
+# Required for authn/authz by openshift-oauth-proxy containers
+# Todo we need to break it down to per-component serviceaccounts
+- provider: resource
+  path: /app-sre-stage/telemeter-stage/prometheus-telemeter.serviceaccount.yaml
+#
+- provider: resource
+  path: /app-sre-stage/telemeter-stage/prometheus-telemeter.clusterrole.yml
+
+# Consumer Serviceaccounts:
+- provider: resource
+  path: /app-sre-stage/telemeter-stage/uhc-prometheus-access.serviceaccount.yaml
+- provider: resource
+  path: /app-sre-stage/telemeter-stage/datahub-prometheus-access.serviceaccount.yaml
+
+# Temporary Route as part of https://issues.redhat.com/browse/APPSRE-1491
+- provider: resource
+  path: /app-sre-stage/telemeter-stage/remote-write-proxy.route.yaml
+
+# Stage port-forward for debugging
+- provider: resource
+  path: /app-sre-stage/telemeter-stage/observatorium-allow-port-forward.role.yaml
+- provider: resource
+  path: /app-sre-stage/telemeter-stage/observatorium-allow-port-forward.rolebinding.yaml
