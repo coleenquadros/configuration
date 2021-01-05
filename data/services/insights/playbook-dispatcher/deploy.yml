@@ -1,0 +1,45 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: playbook-dispatcher
+  platform: insights
+
+name: playbook-dispatcher
+description: The Playbook Dispatcher service enables other services to run Ansible Playbooks on connected hosts
+
+app:
+  $ref: /services/insights/playbook-dispatcher/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+timeout: 5
+
+managedResourceTypes:
+- ClowdApp
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: playbook-artifact-validator
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/playbook-artifact-validator
+  targets:
+  - namespace:
+      $ref: /services/insights/playbook-dispatcher/namespaces/stage.yml
+    ref: master
+    upstream: RedHatInsights-playbook-artifact-validator-gh-build-master
+    parameters:
+      ENV_NAME: stage
