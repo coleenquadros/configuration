@@ -26,9 +26,9 @@ def get_modified_files():
     return check_output(['git', 'diff', ORIGIN_BRANCH, '--name-only']).split()
 
 
-def get_schema(data, modified_file):
-    """ get the schema of a file. If the file does not exist,
-    it has been deleted, so get it from git """
+def get_data_schema(data, modified_file):
+    """ get the schema of a file coming from data dir. If the file does not
+    exist, it has been deleted, so get it from git """
 
     # modified_file represents the git path, but not the keys of data['data']
     # because the leading `data` has been stripped. We need to calculate it
@@ -47,11 +47,43 @@ def get_schema(data, modified_file):
     return datafile['$schema']
 
 
+def get_resource_schema(data, modified_file):
+    """ get the schema of a file coming from resources dir. If the file does
+    not exist, it has been deleted, so get it from git """
+
+    # modified_file represents the git path, but not the keys of
+    # data['resources'] because the leading `resources` has been stripped. We
+    # need to calculate it here to be able to fetch it from data
+    data_path = modified_file[len('resources'):]
+
+    schema = None
+    if data_path in data['resources']:
+        # file is present in data.json, we can obtain it from there
+        schema = data['resources'][data_path]['$schema']
+    else:
+        # file has been deleted, we need to obtain it from git history
+        datafile_raw = check_output(
+            ['git', 'show', '{}:{}'.format(ORIGIN_BRANCH, modified_file)])
+        schema_re = re.compile(r'^\$schema: (?P<schema>.+\.ya?ml)$',
+                               re.MULTILINE)
+        s = schema_re.search(datafile_raw)
+        if s:
+            schema = s.group('schema')
+
+    return schema
+
+
 def get_modified_schemas(data, modified_files):
     schemas = set()
     for modified_file in modified_files:
         if modified_file.startswith("data/"):
-            schemas.add(get_schema(data, modified_file))
+            schemas.add(get_data_schema(data, modified_file))
+
+        if modified_file.startswith("resources/"):
+            schema = get_resource_schema(data, modified_file)
+            if schema:
+                schemas.add(schema)
+
     return schemas
 
 
