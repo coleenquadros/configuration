@@ -13,4 +13,3 @@ The service contains the states of all user’s clusters.
 
 | | SLI | SLO |
 |:-------------:|:-------------|:-------------:|
-| Liveness | The liveness of the pods that serve the service.<br /><br />All pods down for at least 5m is considered a failure. | No failures |
