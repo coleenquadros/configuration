@@ -40,6 +40,29 @@ There are 0 pods serving Assisted-installer service.
 ### Escalations
 - Ping the `@assistedinstaller-team` user on Slack channel #team-assisted-installer-alert
 
+## Assisted Installer Version Upgrade Failed
+
+### Severity: Info
+
+### Impact
+Incremental version upgrade on the service pods has failed.
+
+### Summary
+When a version upgrade occurs, it is first deployed on a single pod and only if it is deployed without
+errors the reset of the pods will be upgraded as well.
+
+If the first pods failed to upgrade we want to be notified about it regardless the job which handle the upgrade.
+
+### Access required
+
+- Access to the cluster that runs the assisted-service Pod
+- View access to the namespaces:
+  - assisted-installer
+
+### Steps
+- Check which pod failed
+- Describe the pod to identify the reason of the failure - look at the events.
+
 ## Assisted Installer Cluster Installation
 
 ### Severity: Medium
