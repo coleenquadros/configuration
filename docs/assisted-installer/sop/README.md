@@ -1,5 +1,59 @@
 # SOP
 
+## Assisted Installer Low Availability
+[alert-stage](/resources/observability/prometheusrules/assisted-installer-stage.prometheusrules.yaml#L15)
+[alert-prod](/resources/observability/prometheusrules/assisted-installer-production.prometheusrules.yaml#L15)
+
+### Severity: Medium
+
+### Impact
+Users are getting errors on API requests
+
+### Summary
+Assisted Installer  service API is returning an abnormally high number of 5xx Error requests
+
+### Access required
+
+- Access to the cluster that runs the assisted-service Pod
+- View access to the namespaces:
+  - assisted-installer
+
+### Steps
+- Check for error level logs in the pod.
+    `oc logs pod/<pod> -n assisted-installer-<stage|production> | grep level=error`
+- In each log you will see a `request-id`, you can then filter the logs with that `request-id` in order to track a single request.
+    `oc logs pod/<pod> -n assisted-installer-<stage|production> | grep level=error  | grep <request-id>`
+
+### Escalations
+- Ping the `@assistedinstaller-team` user on Slack channel #team-assisted-installer-alert
+
+## Assisted Installer High Latency
+[alert-stage](/resources/observability/prometheusrules/assisted-installer-stage.prometheusrules.yaml#L128)
+[alert-prod](/resources/observability/prometheusrules/assisted-installer-production.prometheusrules.yaml#L128)
+
+### Severity: Medium
+
+### Impact
+Users are experiencing hight latency on API requests
+
+### Summary
+Assisted Installer service API is having an abnormally high number of requests with high latency
+
+### Access required
+
+- Access to the cluster that runs the assisted-service Pod
+  - stage: https://console-openshift-console.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com/k8s/cluster/projects
+  - prod: https://console-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/k8s/cluster/projects
+- View access to the namespaces:
+  - assisted-installer-<stage|production>
+
+### Steps
+- Make sure the service has all its replicas running
+- Check service distribution of requests between the different pods.
+
+### Escalations
+- Ping the `@assistedinstaller-team` user on Slack channel #team-assisted-installer-alert
+
 ## Assisted Installer Service Is Down
 
 ### Severity: Critical
@@ -13,8 +67,10 @@ There are 0 pods serving Assisted-installer service.
 ### Access required
 
 - Access to the cluster that runs the assisted-service Pod
+  - stage: https://console-openshift-console.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com/k8s/cluster/projects
+  - prod: https://console-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/k8s/cluster/projects
 - View access to the namespaces:
-  - assisted-installer
+  - assisted-installer-<stage|production>
 
 ### Steps
 - Check the endpoint:
