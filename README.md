@@ -5,6 +5,8 @@ run by the Application SRE team. Many or all of the portions of the contract
 defined herein will be handled through automation after changes are accepted to
 this repository by the appropriate parties.
 
+If you are a team looking to run your service with the App SRE team, please follow the [onboarding-app](/docs/app-sre/onboarding-app.md) guide.
+
 The Application SRE team is responsible of fulfilling the contract defined in
 this repository.
 
