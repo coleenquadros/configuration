@@ -173,6 +173,38 @@
     - <<: *slack_notify
 
 - job-template:
+    id: managed-kafka-litmus-test-run
+    name: "managed-kafka-litmus-test-run"
+    wrappers:
+      - timestamps
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+    parameters:
+    - string:
+        name: OSD_CLUSTER_API
+        default: ''
+        description: '[REQUIRED] api server of the osd cluster hosting the managed kafka service'
+    - password:
+        name: OSD_API_TOKEN
+        default: ''
+        description: '[REQUIRED] kubeadmin token for osd cluster'
+    - string:
+        name: LITMUS_TEST
+        default: ''
+        description: '[REQUIRED] The litmus test you want to run'
+    <<: *gh_checkout
+    builders:
+      - shell: |
+        ./install/resources/testing-chaos/scripts/run-litmus-test.sh
+    artifacts_path: 'litmus-results/**'
+    publishers:
+    - archive:
+        artifacts: '{artifacts_path}'
+        allow-empty: true
+    - <<: *slack_notify
+
+- job-template:
     id: strimzi-operator-test
     name: "strimzi-operator-test"
     wrappers: 
