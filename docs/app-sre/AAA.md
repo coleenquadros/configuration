@@ -83,7 +83,7 @@ The goal is to move this to the app-interface itself as it matures.
 - The developers guide: https://gitlab.cee.redhat.com/service/dev-guidelines
 - App-sre team drive: https://drive.google.com/drive/u/0/folders/0B9akCOYRTJW_TFAxOUtEaWtRZWs
 
-### Example user manifest with minimum viable roles for an AppSRE team member
+## Example user manifest with minimum viable roles for an AppSRE team member
 
 ```yaml
 ---
@@ -107,6 +107,14 @@ roles:
 public_gpg_key: |
   your base64 encoded gpg pubic key goes here
 ```
+
+### Setting up a GPG key
+
+- Generate one and put in:
+  - base64 encoded binary in your app-interface user file -> [instructions](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master#adding-your-public-gpg-key)
+    - User file located in [app-interface repo](/data/teams/app-sre/users)
+- Use a passphrase!
+- External reference for [generating](https://www.gnupg.org/gph/en/manual/c14.html) and [exporting](https://www.gnupg.org/gph/en/manual/x56.html)
 
 ## Access and surfaces list
 
@@ -170,13 +178,6 @@ Every app-sre engineer should have access to the following
     - ACCESS: aos-devel -> subscribe from UI
     - ACCESS: it-iam-announce-list -> subscribe from UI
     - ACCESS: it-platform-community-list (useful for SSO) -> subscribe from UI
-
-- GPG key:
-  - Generate one and put in:
-    - base64 encoded binary in your app-interface user file -> [instructions](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master#adding-your-public-gpg-key)
-      - User file located in [app-interface repo](/data/teams/app-sre/users)
-  - Use a passphrase!
-  - External reference for [generating](https://www.gnupg.org/gph/en/manual/c14.html) and [exporting](https://www.gnupg.org/gph/en/manual/x56.html)
 
 - Sd-org onboarding
   - ACCESS Contact Meghna Gala (mgala@redhat.com) re Sd-org onboarding (may not be needed)
