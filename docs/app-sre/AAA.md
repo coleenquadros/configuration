@@ -83,6 +83,31 @@ The goal is to move this to the app-interface itself as it matures.
 - The developers guide: https://gitlab.cee.redhat.com/service/dev-guidelines
 - App-sre team drive: https://drive.google.com/drive/u/0/folders/0B9akCOYRTJW_TFAxOUtEaWtRZWs
 
+### Example user manifest with minimum viable roles for an AppSRE team member
+
+```yaml
+---
+$schema: /access/user-1.yml
+
+labels: {}
+
+name: John Doe
+org_username: jdoe
+github_username: jdoe
+quay_username: jdoe
+
+roles:
+- $ref: /teams/app-sre/roles/app-sre.yml
+- $ref: /teams/app-sre/roles/app-sre-emea-slack.yml
+- $ref: /teams/app-sre/roles/app-sre-github-external-orgs.yml
+- $ref: /teams/app-sre/roles/app-sre-managed-namespaces-admin.yml
+- $ref: /teams/app-sre/roles/dsaas-managed-namespaces-admin.yml
+- $ref: /teams/app-sre/roles/dsaas-stg-managed-namespaces-admin.yml
+
+public_gpg_key: |
+  your base64 encoded gpg pubic key goes here
+```
+
 ## Access and surfaces list
 
 Every app-sre engineer should have access to the following
