@@ -398,7 +398,8 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
     1. Add the new `app-sre-observability-per-cluster` namespace to the target namespaces in [saas-nginx-proxy.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/cicd/saas/saas-nginx-proxy.yaml) to deploy nginx-proxy.
 
-    1. Add the new `app-sre-observability-per-cluster` namespace to the target namespaces in [saas-openshift-acme.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-sre/cicd/ci-int/saas-openshift-acme.yaml) to deploy openshift-acme.
+    1. If the cluster is not private, add the new `app-sre-observability-per-cluster` namespace to the target namespaces in [saas-openshift-acme.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-sre/cicd/ci-int/saas-openshift-acme.yaml) to deploy openshift-acme.
+      * Note: A private cluster can not use openshift-acme since it is not exposed to the public internet. Routes should still work, but the certificate will be invalid.
 
     1. After the above changes have merged and the integrations have applied the changes, verify `https://<prometheus|alertmanager>.<cluster_name>.devshift.net` have valid ssl certificates by accessing the URLs.  If no security warning is given and the connection is secure as notifed by the browser than the ssl certificates are valid.
 
