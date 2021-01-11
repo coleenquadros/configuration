@@ -664,6 +664,13 @@ Note that the host prefix must be set to /23.
 
 [app-interface-cluster-vpc-peerings.md](app-interface-cluster-vpc-peerings.md)
 
+## Additional steps for clusters for specific services
+
+1. If the cluster is a hive shard, follow the [Hive shard provisioning SOP](/docs/app-sre/sop/hive-shard-provisioning.md)
+1. If the cluster is a cloud.redhat.com (crc) cluster, perform the following steps:
+  * Deploy [3rd party operators](/data/services/insights/third-party-operators) (includes AMQ streams operator)
+  * Deploy [Clowder operator](/data/services/insights/clowder)
+
 # Offboard an OSDv4 cluster from app-interface
 
 To off-board an OSDv4 cluster from app-interface, perform the following operations:
