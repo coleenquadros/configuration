@@ -1760,7 +1760,10 @@ name: <sql query unique name>
 namespace:
   $ref: /services/<service>/namespaces/<namespace>.yml
 identifier: <RDS resource identifier (same as defined in the namespace)>
-output: <filesystem or stdout>
+output: <filesystem or stdout or encrypted>
+# Required if output is encrypted
+requestor: 
+  $ref: <user-1.yml with public_gpg_key>
 schedule: <if defined the output resource will be a CronJob instead of a Job>
 query: <sql query>
 ```
@@ -1775,7 +1778,10 @@ name: <sql query unique name>
 namespace:
   $ref: /services/<service>/namespaces/<namespace>.yml
 identifier: <RDS resource identifier (same as defined in the namespace)>
-output: <filesystem or stdout>
+output: <filesystem or stdout or encrypted>
+# Required if output is encrypted
+requestor: 
+  $ref: <user-1.yml with public_gpg_key>
 schedule: <if defined the output resource will be a CronJob instead of a Job>
 queries:
   - <sql query 1>
@@ -1881,6 +1887,28 @@ $ oc rsh --shell=/bin/bash 2020-01-30-account-manager-registries-stage-cjh82 cat
  1VVBUV6rcZ9jsqo2vUuBpw21gbP | aaa                         | 2020-01-13 08:27:41.733607+00
 (19 rows)
 ```
+
+- `encrypted`: requires `view` access to the namespace. The pod created by the Job
+  will have the SQL query result encrypted with requestor's public_gpg_key and 
+  printed to the stdout.
+
+```bash
+$ oc logs 2020-01-30-account-manager-registries-stage-cjh82
+Get the sql-query results with:
+
+cat <<EOF > 2020-01-30-account-manager-registries-stage-cjh82-query-result.txt
+-----BEGIN PGP MESSAGE-----
+
+hQIMA4VLxbLWZXlwARAAopxeOIKmfRbsH/a12s35aClwjVb0hTbVvfT4jHXZJR9C
+...
+=jA8e
+-----END PGP MESSAGE-----
+EOF
+gpg -d 2020-01-30-account-manager-registries-stage-cjh82-query-result.txt
+```
+
+Running that command locally and decrypt the message with requestor's private key.
+
 
 Each Job will be automatically deleted after 7 days.
 
