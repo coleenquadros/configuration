@@ -14,30 +14,30 @@ spec:
     - alert: RemediationsDown
       expr: |
         up{service="remediations", namespace="remediations-prod"} == 0
-      for: 1m
+      for: 2m
       labels:
-        severity: info
+        severity: high # This should be turned to Critical when the transition period comes
         service: insights
         env: prod
         app_team: remediations
       annotations:
         dashboard: "https://grafana.app-sre.devshift.net/d/KDvc-DmWk/remediations?orgId=1"
         link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/cluster/projects/remediations-prod/workloads"
-        message: "Remediations Alert. The remediations pod has been down in prod for one minute."
+        message: "Remediations Alert. The remediations pod has been down in prod for two minutes."
 
     - alert: RemediationsConsumerDown
       expr: |
         up{service="remediations-consumer", namespace="remediations-prod"} == 0
-      for: 1m
+      for: 2m
       labels:
-        severity: info
+        severity: high # This should be turned to Critical when the transition period comes
         service: insights
         env: prod
         app_team: remediations
       annotations:
         dashboard: "https://grafana.app-sre.devshift.net/d/KDvc-DmWk/remediations?orgId=1"
         link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/cluster/projects/remediations-prod/workloads"
-        message: "Remediations Alert. The remediations-consumer pods have been down in prod for one minute."
+        message: "Remediations Alert. The remediations-consumer pods have been down in prod for two minutes."
 
     - alert: Remediations5xx
       expr: |
@@ -142,7 +142,7 @@ spec:
         sum(kafka_consumer_group_lag{group='remediations-consumer'}) by (topic) > 10000
       for: 1m
       labels:
-        severity: info
+        severity: high
         service: insights
         env: prod
         app_team: remediations

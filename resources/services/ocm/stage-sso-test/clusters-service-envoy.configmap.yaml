@@ -2,6 +2,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: clusters-service-envoy
+  annotations:
+    qontract.recycle: "true"
 data:
   main.yaml: |
     # The administration endpoint uses a Unix socket instead of TCP in order
@@ -73,7 +75,7 @@ data:
             - endpoint:
                 address:
                   socket_address:
-                    address: limitador.app-sre-rate-limit.svc
+                    address: limitador.app-sre-rate-limiting.svc
                     port_value: 8081
 
       listeners:
@@ -149,16 +151,16 @@ data:
 
                   # This is an example of how to define a rate limit for a
                   # specific path.
-                  - name: clusters
+                  - name: register_cluster
                     match:
-                      prefix: /api/clusters_mgmt/v1/clusters
+                      prefix: /api/clusters_mgmt/v1/register_cluster
                     route:
                       cluster: backend
                       rate_limits:
                       - actions:
                         - generic_key:
                             descriptor_key: path
-                            descriptor_value: clusters
+                            descriptor_value: register_cluster
 
                   # Everything else not matching one of the rules above goes
                   # directly to the backend, without rate limits.
@@ -175,13 +177,14 @@ data:
               - name: envoy.filters.http.ratelimit
                 typed_config:
                   "@type": type.googleapis.com/envoy.extensions.filters.http.ratelimit.v3.RateLimit
-                  domain: clusters_mgmt
+                  domain: stage-sso-test:clusters_mgmt
                   failure_mode_deny: false
                   timeout: 0.05s
                   rate_limit_service:
                     grpc_service:
                       envoy_grpc:
                         cluster_name: limiter
+                    transport_api_version: V3
 
               # This is mandatory in order to have the HTTP routes above.
               - name: envoy.filters.http.router

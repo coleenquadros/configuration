@@ -1,0 +1,70 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: platform-logging
+  platform: insights
+
+name: platform-logging
+description: logstash aggregator
+
+app:
+  $ref: /services/insights/platform-logging/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+managedResourceTypes:
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: platform-logstash
+  path: /templates/logstash.yaml
+  url: https://github.com/RedHatInsights/platform-logging
+  parameters:
+    CPU_LIMIT: '1'
+    MAX_REPLICAS: 2
+    MEMORY_LIMIT: 2Gi
+    MIN_REPLICAS: 1
+    IMAGE_TAG: '7.9.2'
+  targets:
+  - namespace:
+      $ref: /services/insights/platform-logging/namespaces/stage-platform-logging-stage.yml
+    ref: master
+  - namespace:
+      $ref: /services/insights/platform-logging/namespaces/platform-logging-prod.yml
+    ref: a97a892d644428e5fdd94b60bed910e9ca889a26
+
+- name: platform-logger
+  path: /templates/platform-logger.yaml
+  url: https://github.com/RedHatInsights/platform-logging    
+  parameters:
+    IMAGE_TAG: '381f7aa'
+  targets:
+  - namespace:
+      $ref: /services/insights/platform-logging/namespaces/stage-platform-logging-stage.yml
+    ref: master
+    parameters:
+        CW_ALLOWED_STREAMS: 'platform-logging-stage'
+  - namespace:
+      $ref: /services/insights/platform-logging/namespaces/platform-logging-prod.yml
+    ref: a97a892d644428e5fdd94b60bed910e9ca889a26
+    parameters:
+        CW_ALLOWED_STREAMS: 'platform-logging-prod'

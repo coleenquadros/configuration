@@ -9,7 +9,7 @@ The following categories will correspond to the SLIs and SLOs below.
 ## SLIs
 
 1. Uptime: avg(avg_over_time(up{service="storage-broker"}[24h])) > .98
-2. Copy Operations: sum(increase(storage_broker_object_copy_error_count_total[24h])) / sum(increase(storage_broker_object_copy_success_count_total[24h])) + sum(increase(storage_broker_object_copy_error_count_total[24h])) < 5%
+2. Copy Operations: sum(increase(storage_broker_object_copy_error_count_total[24h])) / sum(increase(storage_broker_object_copy_success_count_total[24h])) + sum(increase(storage_broker_object_copy_error_count_total[24h])) > .05
 
 ## SLOs
 

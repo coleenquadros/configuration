@@ -105,6 +105,7 @@
         - yzainee
         - dgpatelgit
         - jparsai
+        - rafiu007
 
 - che_admin_list_defaults: &che_admin_list_defaults
     name: 'che_admin_list_defaults'
@@ -1230,6 +1231,7 @@
             branches:
                 - master
     skip_deploy: 0
+    run_e2e : '0'
     deployment_units: ''
     deployment_configs: ''
     extra_target: ''
@@ -1307,6 +1309,7 @@
             DEPLOYMENT_CONFIGS={deployment_configs}
             CICO_HOSTNAME=$CICO_hostname
             CICO_SSID=$CICO_ssid
+            RUN_E2E={run_e2e}
             EOF
 
             exit $rtn_code
@@ -1642,19 +1645,6 @@
     <<: *fabric8-analytics-tests-template
 
 - job-template:
-    name: '{ci_project}-e2e-fabric8-analytics-nightly-build'
-    disabled: '{obj:disabled}'
-    triggers:
-      - timed: '@midnight'
-    scm:
-        - git:
-            url: https://github.com/{git_organization}/{git_repo}.git
-            shallow_clone: true
-            branches:
-                - master
-    <<: *fabric8-analytics-tests-template
-
-- job-template:
     name: 'osd-monitor-analytics-build-master'
     saasherder_prepare: |
         SAAS_ENV=staging
@@ -1763,7 +1753,7 @@
     disabled: '{obj:disabled}'
     publishers:
         - email:
-            recipients: bayesian-ci@redhat.com rh-depanalytics@redhat.com 
+            recipients: msawood@redhat.com rh-depanalytics@redhat.com 
             notify-every-unstable-build: true
             send-to-individuals: true
     wrappers:
@@ -1803,6 +1793,9 @@
           name: CICO_SSID
       - string:
           name: BUILD_URL
+      - string:
+          name: RUN_E2E
+          default: '0'
     scm:
         - git:
             url: https://github.com/{git_organization}/{git_repo}.git
@@ -1888,10 +1881,12 @@
             oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" logs -f dc/$DC_NAME -n $PRJ_NAME
 
             # Now is the time to run E2E tests
-            sshopts="-t -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -l root"
-            ssh_cmd="ssh $sshopts $CICO_HOSTNAME"
-            rsync -e "ssh $sshopts" -Ha $(pwd)/ $CICO_HOSTNAME:payload-tests
-            $ssh_cmd -t "cd payload-tests/integration-tests && /bin/bash cico_run_tests.sh"
+            if [ $RUN_E2E -ne '0' ]; then
+                sshopts="-t -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -l root"
+                ssh_cmd="ssh $sshopts $CICO_HOSTNAME"
+                rsync -e "ssh $sshopts" -Ha $(pwd)/ $CICO_HOSTNAME:payload-tests
+                $ssh_cmd -t "cd payload-tests/integration-tests && /bin/bash cico_run_tests.sh"
+            fi
 
     <<: *job_template_build_defaults
 
@@ -4423,6 +4418,7 @@
         - '{ci_project}-{git_repo}-f8a-build-{branch}':
             git_organization: fabric8-analytics
             git_repo: fabric8-analytics-pgbouncer
+            run_e2e : '1'
             ci_project: 'devtools'
             ci_cmd: '/bin/bash cico_build_deploy.sh'
             saas_git: saas-analytics
@@ -4472,6 +4468,7 @@
         - '{ci_project}-{git_repo}-f8a-build-{branch}':
             git_organization: fabric8-analytics
             git_repo: gremlin-docker
+            run_e2e : '1'
             ci_project: 'devtools'
             ci_cmd: '/bin/bash cico_build_deploy.sh'
             saas_git: saas-analytics
@@ -4512,6 +4509,7 @@
         - '{ci_project}-{git_repo}-f8a-build-{branch}':
             git_organization: fabric8-analytics
             git_repo: fabric8-analytics-license-analysis
+            run_e2e : '1'
             ci_project: 'devtools'
             ci_cmd: '/bin/bash cico_build_deploy.sh'
             saas_git: saas-analytics
@@ -4534,6 +4532,7 @@
         - '{ci_project}-{git_repo}-f8a-build-{branch}':
             git_organization: fabric8-analytics
             git_repo: metrics-accumulator
+            run_e2e : '1'
             ci_project: 'devtools'
             ci_cmd: '/bin/bash cico_build_deploy.sh'
             saas_git: saas-analytics
@@ -4577,6 +4576,7 @@
             git_organization: fabric8-analytics
             git_repo: f8a-server-backbone
             ci_project: 'devtools'
+            run_e2e : '1'
             ci_cmd: '/bin/bash cico_build_deploy.sh'
             saas_git: saas-analytics
             deployment_units: 'api-backbone'
@@ -4599,6 +4599,7 @@
             git_organization: fabric8-analytics
             git_repo: fabric8-analytics-npm-insights
             ci_project: 'devtools'
+            run_e2e : '1'
             ci_cmd: '/bin/bash cico_build_deploy.sh'
             saas_git: saas-analytics
             deployment_units: 'f8a-npm-insights'
@@ -4620,6 +4621,7 @@
         - '{ci_project}-{git_repo}-f8a-build-{branch}':
             git_organization: fabric8-analytics
             git_repo: f8a-golang-insights
+            run_e2e : '1'
             ci_project: 'devtools'
             ci_cmd: '/bin/bash cico_build_deploy.sh'
             saas_git: saas-analytics
@@ -4642,6 +4644,7 @@
         - '{ci_project}-{git_repo}-f8a-build-{branch}':
             git_organization: fabric8-analytics
             git_repo: f8a-pypi-insights
+            run_e2e : '1'
             ci_project: 'devtools'
             ci_cmd: '/bin/bash cico_build_deploy.sh'
             saas_git: saas-analytics
@@ -4681,6 +4684,7 @@
             git_organization: fabric8-analytics
             git_repo: fabric8-analytics-server
             ci_project: 'devtools'
+            run_e2e : '1'
             ci_cmd: '/bin/bash cico_build_deploy.sh'
             saas_git: saas-analytics
             deployment_units: 'api'
@@ -4769,6 +4773,7 @@
             git_organization: fabric8-analytics
             git_repo: fabric8-analytics-data-model
             ci_project: 'devtools'
+            run_e2e : '1'
             ci_cmd: '/bin/bash cico_build_deploy.sh'
             saas_git: saas-analytics
             deployment_units: 'data-importer'
@@ -4827,6 +4832,7 @@
             git_organization: fabric8-analytics
             git_repo: fabric8-gemini-server
             ci_project: 'devtools'
+            run_e2e : '1'
             ci_cmd: '/bin/bash cico_build_deploy.sh'
             saas_git: saas-analytics
             deployment_units: 'gemini'
@@ -4884,11 +4890,6 @@
             timeout: '20m'
             extra_target: rhel
         - '{ci_project}-e2e-fabric8-analytics':
-            git_organization: fabric8-analytics
-            git_repo: fabric8-analytics-common
-            ci_project: 'devtools'
-            timeout: '30m'
-        - '{ci_project}-e2e-fabric8-analytics-nightly-build':
             git_organization: fabric8-analytics
             git_repo: fabric8-analytics-common
             ci_project: 'devtools'
@@ -4974,6 +4975,7 @@
             git_organization: fabric8-analytics
             git_repo: f8a-hpf-insights
             ci_project: 'devtools'
+            run_e2e : '1'
             ci_cmd: '/bin/bash cico_build_deploy.sh'
             saas_git: saas-analytics
             deployment_units: 'f8a-hpf-insights-maven'
@@ -5131,13 +5133,6 @@
             ci_project: 'devtools'
             ci_cmd: '/bin/bash cico_build_ci.sh'
             timeout: '10m'
-        - '{ci_project}-{git_repo}-release':
-            git_organization: eclipse
-            git_repo: che-plugin-registry
-            ci_project: 'devtools'
-            ci_cmd: '/bin/bash cico_build_release.sh'
-            timeout: '10m'
-            extra_target: rhel
         - '{ci_project}-{git_repo}-release-preview':
             git_organization: eclipse
             git_repo: che-plugin-registry
@@ -5177,16 +5172,6 @@
             git_repo: che-devfile-registry
             ci_project: 'devtools'
             ci_cmd: '/bin/bash cico_build_ci.sh'
-            timeout: '30m'
-        - '{ci_project}-{git_repo}-release':
-            git_organization: eclipse
-            git_repo: che-devfile-registry
-            ci_project: 'devtools'
-            ci_cmd: '/bin/bash cico_build_release.sh'
-            saas_git: saas-openshiftio
-            branch: release
-            build_branch: release
-            extra_target: rhel
             timeout: '30m'
         - '{ci_project}-{git_repo}-release-preview':
             git_organization: eclipse

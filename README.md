@@ -5,6 +5,8 @@ run by the Application SRE team. Many or all of the portions of the contract
 defined herein will be handled through automation after changes are accepted to
 this repository by the appropriate parties.
 
+If you are a team looking to run your service with the App SRE team, please follow the [onboarding-app](/docs/app-sre/onboarding-app.md) guide.
+
 The Application SRE team is responsible of fulfilling the contract defined in
 this repository.
 
@@ -28,6 +30,7 @@ this repository.
     - [Add or modify a user (`/access/users-1.yml`)](#add-or-modify-a-user-accessusers-1yml)
     - [Get notified of events involving a service, or it's dependencies](#get-notified-of-events-involving-a-service-or-its-dependencies)
     - [Create a Quay Repository for an onboarded App (`/app-sre/app-1.yml`)](#create-a-quay-repository-for-an-onboarded-app-app-sreapp-1yml)
+      - [Mirroring Quay Repositories](#mirroring-quay-repositories)
     - [Create a Sentry Project for an onboarded App (`/app-sre/app-1.yml`)](#create-a-sentry-project-for-an-onboarded-app-app-sreapp-1yml)
     - [Create a Sentry Team (`/dependencies/sentry-team-1.yml`)](#create-a-sentry-team-dependenciessentry-team-1yml)
     - [Manage Sentry team membership via App-Interface (`/access/role-1.yml`)](#manage-sentry-team-membership-via-app-interface-accessrole-1yml)
@@ -924,15 +927,103 @@ DNS Zones can be managed in app-interface. A DNS zone follows [this JSON schema]
 - `description`: Description for the DNS zone
 - `account`: a `$ref` to the account definition to be used in conjunction with the provider
 - `unmanaged_record_names`: A list of regexes to exclude record names from being managed (literal strings work too, those will be considered to be a full match on the record name)
-- `records`: A list of `record` (see spec below) to be definied within this zone
+- `records`: A list of `record`. The parameters of the `record` match those of Terraform's [aws_route53_record resource](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record). In addition to the terraform fields, we also support special fields which are distinguishable by their name starting with `_` (underscore). The special fields are described below.
 
-`record` spec:
-- `name`: The name of the record (ex: `test` for `test.example.com`)
-- `type`: The record type (currently supported: `A`, `CNAME`, `MX`, `NS`)
-- `priority`: MX priority (used only for record of type `MX`)
-- `target`: A single target to which the record will point to (IP or FQDN)
-- `targets`: A list of targets to which the record will point to (IP or FQDN)
-- `target_cluster`: A `$ref` to an OpenShift cluster definition. The value of `elbFQDN` on the cluster definition will be used as a target on the record
+
+Additional special fields:
+- `_target_cluster`: A `$ref` to an OpenShift cluster definition. The value of `elbFQDN` on the cluster definition will be used as a target on the record
+- `_healthcheck`: Allows defining a health check resource that will be assigned to the record. The parameters from Terraform's [aws_route53_health_check resource](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_health_check) are permitted.
+
+Example DNS zone resource:
+```yaml
+---
+$schema: /dependencies/dns-zone-1.yml
+
+labels: {}
+
+name: example.com
+description: This is an example
+
+account:
+  # The account under which the DNS zone will be created
+  $ref: /aws/app-sre/account.yml
+
+unmanaged_record_names:
+# This is useful if we want to ignore letsencrypt TXT records managed externally by certbot
+- '^_acme-challenge.*'
+
+records:
+# Simple record, flattened yaml (same line)
+- { name: my-record, type: A, records: [127.0.0.1, 127.0.0.2, 127.0.0.3] }
+
+# Simple record, indented yaml 
+- name: my-record
+  type: A
+  records:
+  - 127.0.0.1
+  - 127.0.0.2
+  - 127.0.0.3
+
+# Simple CNAME record using special parameter _target_cluster
+- { name: my-cluster, type: CNAME, _target_cluster: { $ref: /openshift/my-cluster/cluster.yml } }
+
+# Multiple weighted records (10%/90% weights)
+- name: my-weighted-record
+  type: CNAME
+  ttl: 5
+  weighted_routing_policy:
+    weight: 90
+  set_identifier: my-weighted-record-A
+  records:
+  - subA.example.com
+- name: my-weighted-record
+  type: CNAME
+  ttl: 5
+  weighted_routing_policy:
+    weight: 10
+  set_identifier: my-weighted-record-B
+  records:
+  - subB.example.com
+
+# Records with healthcheck (foo.example.com will be returned if healthy, otherwise bar.example.com will be returned)
+- name: my-healthy-record
+  type: CNAME
+  ttl: 5
+  records:
+  - foo.example.com
+  failover_routing_policy:
+    type: PRIMARY
+  _healthcheck:
+    fqdn: foo.example.com
+    port: 80
+    type: HTTP
+    resource_path: /
+    failure_threshold: 5
+    request_interval: 30
+- name: my-healthy-record
+  type: CNAME
+  ttl: 5
+  records:
+  - bar.example.com
+  failover_routing_policy:
+    type: SECONDARY
+  _healthcheck:
+    fqdn: bar.example.com
+    port: 80
+    type: HTTP
+    resource_path: /
+    failure_threshold: 5
+    request_interval: 30
+
+# NS delegation (the records would be different depending on whats assigned to the delegated zone `my-delegation.example.com`)
+- name: my-delegation
+  type: NS
+  records:
+  - ns-660.awsdns-18.net
+  - ns-508.awsdns-63.com
+  - ns-1265.awsdns-30.org
+  - ns-1880.awsdns-43.co.uk
+```
 
 ### Manage AWS access via App-Interface (`/aws/group-1.yml`) using Terraform
 
@@ -1669,7 +1760,10 @@ name: <sql query unique name>
 namespace:
   $ref: /services/<service>/namespaces/<namespace>.yml
 identifier: <RDS resource identifier (same as defined in the namespace)>
-output: <filesystem or stdout>
+output: <filesystem or stdout or encrypted>
+# Required if output is encrypted
+requestor: 
+  $ref: <user-1.yml with public_gpg_key>
 schedule: <if defined the output resource will be a CronJob instead of a Job>
 query: <sql query>
 ```
@@ -1684,7 +1778,10 @@ name: <sql query unique name>
 namespace:
   $ref: /services/<service>/namespaces/<namespace>.yml
 identifier: <RDS resource identifier (same as defined in the namespace)>
-output: <filesystem or stdout>
+output: <filesystem or stdout or encrypted>
+# Required if output is encrypted
+requestor: 
+  $ref: <user-1.yml with public_gpg_key>
 schedule: <if defined the output resource will be a CronJob instead of a Job>
 queries:
   - <sql query 1>
@@ -1790,6 +1887,28 @@ $ oc rsh --shell=/bin/bash 2020-01-30-account-manager-registries-stage-cjh82 cat
  1VVBUV6rcZ9jsqo2vUuBpw21gbP | aaa                         | 2020-01-13 08:27:41.733607+00
 (19 rows)
 ```
+
+- `encrypted`: requires `view` access to the namespace. The pod created by the Job
+  will have the SQL query result encrypted with requestor's public_gpg_key and 
+  printed to the stdout.
+
+```bash
+$ oc logs 2020-01-30-account-manager-registries-stage-cjh82
+Get the sql-query results with:
+
+cat <<EOF > 2020-01-30-account-manager-registries-stage-cjh82-query-result.txt
+-----BEGIN PGP MESSAGE-----
+
+hQIMA4VLxbLWZXlwARAAopxeOIKmfRbsH/a12s35aClwjVb0hTbVvfT4jHXZJR9C
+...
+=jA8e
+-----END PGP MESSAGE-----
+EOF
+gpg -d 2020-01-30-account-manager-registries-stage-cjh82-query-result.txt
+```
+
+Running that command locally and decrypt the message with requestor's private key.
+
 
 Each Job will be automatically deleted after 7 days.
 
