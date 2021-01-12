@@ -1,0 +1,74 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: rhsm
+
+name: rhsm-perf
+description: Insights rhsm-perf on the Perf cluster under e2e-deploy/ocdeployer management
+
+cluster:
+  $ref: /openshift/insights/cluster-insights-perf.yml
+
+app:
+  $ref: /services/insights/rhsm/app.yml
+
+environment:
+  $ref: /products/insights/environments/perf.yml
+
+networkPoliciesAllow: []
+
+managedRoles: true
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-perf
+  identifier: rhsm-perf
+  defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+- provider: rds
+  account: insights-perf
+  identifier: rhsm-perf
+  defaults: /terraform/resources/insights/stage/rds/postgres11-rds-1.yml
+  enhanced_monitoring: true
+  output_resource_name: rhsm-db
+  parameter_group: /terraform/resources/insights/stage/rds/postgres11-parameter-group-rhsm-stage.yml
+- provider: s3
+  account: insights-perf
+  identifier: rhsm-subscriptions-egress-perf
+  defaults: /terraform/resources/insights/stage/s3/s3-gdpr-14.yml
+  output_resource_name: egress-s3
+
+managedResourceTypes:
+- Secret
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/insights-stage/rhsm-stage/splunk
+  version: 1
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/insights-stage/rhsm-stage/ingress
+  version: 2
+- provider: vault-secret
+  path: insights/secrets/insights-stage/rhsm-stage/pinhead
+  version: 2
+- provider: vault-secret
+  path: insights/secrets/insights-stage/rhsm-stage/tls
+  version: 1
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-stage/rhsm-stage/inventory-db-readonly.secret.yaml
