@@ -192,7 +192,7 @@ Every app-sre engineer should have access to the following
   - Submit PRs to be added to OWNERS once access is granted:
     - https://github.com/openshift/telemeter/blob/master/OWNERS
     - https://github.com/openshift/cincinnati/blob/master/OWNERS_ALIASES
-  - Ping on slack for access to quay github group
+  - Ping [Bill Dettelback](https://rover.redhat.com/people/profile/bdettelb) on slack or mail for access to quay github org
 
 - App-SRE OCM org (https://cloud.redhat.com/openshift)
   - Access is [configured manually by an org administrator](/docs/app-sre/sop/ocm-appsre-org-access.md)
