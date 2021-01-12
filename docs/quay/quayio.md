@@ -63,6 +63,17 @@ See [Deploying Quay Read-Only](services/read-only.md) for more information.
 
 You will have to bounce all quay pods for them to load updated secrets. Since the commit hash has not changed in this scenario, you will need to update the annotation value `QUAY_APP_COMPONENT_ANNOTATIONS_VALUE`. Set this to any random string to trigger a "new" deployment.
 
+### Restarting all Quay Pods
+
+Quay.io should not follow the standard AppSRE procedure of bringing the replica
+count to zero and back up when restarting Quay pods. Instead, create a Merge
+Request to change the value of `QUAY_APP_COMPONENT_ANNOTATIONS_VALUE` in the 
+file `data/services/quayio/saas/quay.io.yaml`. This will trigger a redeployment
+with the existing configuration and not incur any downtime.
+
+See this [Merge Request](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/13512/)
+as an example.
+
 ## Managing Access for Quay Development Team
 
 ### Add User
