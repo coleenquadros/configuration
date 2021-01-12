@@ -9,6 +9,141 @@ metadata:
     role: alert-rules
 spec:
   groups:
+  - name: topology-services-up-prod # TODO: Targeted refresh
+    rules:
+      - alert: TopologyApiSvcAbsent
+        expr: absent(up{job="topological-inventory-api",namespace="topological-inventory-prod"}==1)
+        for: 2m
+        labels:
+          severity: info # high
+          service: insights
+          env: prod
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/qRvAZLAMk/topological-inventory-apis?orgId=1&from=now-30m&to=now&refresh=10s&var-Datasource=crcp01ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-api"
+          message: "[Prod] Topological Inventory: API: All pods have been down for two minutes"
+      - alert: TopologyIngressApiSvcAbsent
+        expr: absent(up{job="topological-inventory-ingress-api",namespace="topological-inventory-prod"}==1)
+        for: 2m
+        labels:
+          severity: info # high
+          service: insights
+          env: prod
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/qRvAZLAMk/topological-inventory-apis?orgId=1&from=now-30m&to=now&refresh=10s&var-Datasource=crcp01ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-ingress-api"
+          message: "[Prod] Topological Inventory: Ingress API: All pods have been down for two minutes"
+      - alert: TopologyPersisterSvcAbsent
+        expr: absent(up{job="topological-inventory-persister",namespace="topological-inventory-prod"}==1)
+        for: 2m
+        labels:
+          severity: info # high
+          service: insights
+          env: prod
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/MnHGlz5Mk/topological-inventory-core?orgId=1&refresh=30s&from=now-1h&to=now&var-Datasource=crcp01ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-persister"
+          message: "[Prod] Topological Inventory: Persister: All pods have been down for two minutes"
+      - alert: TopologyOrchestratorSvcAbsent
+        expr: absent(up{job="topological-inventory-orchestrator",namespace="topological-inventory-prod"}==1)
+        for: 2m
+        labels:
+          severity: info # high
+          service: insights
+          env: prod
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/MnHGlz5Mk/topological-inventory-core?orgId=1&refresh=30s&from=now-1h&to=now&var-Datasource=crcp01ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-orchestrator"
+          message: "[Prod] Topological Inventory: Orchestrator: All pods have been down for two minutes"
+      - alert: TopologySourcesSyncSvcAbsent
+        expr: absent(up{job="topological-inventory-sources-sync",namespace="topological-inventory-prod"}==1)
+        for: 2m
+        labels:
+          severity: info # high
+          service: insights
+          env: prod
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/MnHGlz5Mk/topological-inventory-core?orgId=1&refresh=30s&from=now-1h&to=now&var-Datasource=crcp01ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-sources-sync"
+          message: "[Prod] Topological Inventory: Sources Sync: All pods have been down for two minutes"
+      - alert: TopologyHostInventorySyncSvcAbsent
+        expr: absent(up{job="topological-inventory-host-inventory-sync",namespace="topological-inventory-prod"}==1)
+        for: 2m
+        labels:
+          severity: info # high
+          service: insights
+          env: prod
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/MnHGlz5Mk/topological-inventory-core?orgId=1&refresh=30s&from=now-1h&to=now&var-Datasource=crcp01ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-host-inventory-sync"
+          message: "[Prod] Topological Inventory: Host Inventory Sync: All pods have been down for two minutes"
+      - alert: TopologyAmazonOperationsSvcAbsent
+        expr: absent(up{job="topological-inventory-amazon-operations",namespace="topological-inventory-prod"}==1)
+        for: 2m
+        labels:
+          severity: info # high
+          service: insights
+          env: prod
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/aanIgg0Mz/topological-inventory-collectors-and-operations?orgId=1&from=now-30m&to=now&var-Datasource=crcp01ue1-prometheus&var-controller=All&var-action=All&refresh=30s"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-amazon-operations"
+          message: "[Prod] Topological Inventory: Amazon Operations: All pods have been down for two minutes"
+      - alert: TopologyAnsibleTowerOperationsSvcAbsent
+        expr: absent(up{job="topological-inventory-ansible-tower-operations",namespace="topological-inventory-prod"}==1)
+        for: 2m
+        labels:
+          severity: info # high
+          service: insights
+          env: prod
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/aanIgg0Mz/topological-inventory-collectors-and-operations?orgId=1&from=now-30m&to=now&var-Datasource=crcp01ue1-prometheus&var-controller=All&var-action=All&refresh=30s"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-ansible-tower-operations"
+          message: "[Prod] Topological Inventory: Ansible Tower Operations: All pods have been down for two minutes"
+      - alert: TopologyAzureOperationsSvcAbsent
+        expr: absent(up{job="topological-inventory-azure-operations",namespace="topological-inventory-prod"}==1)
+        for: 2m
+        labels:
+          severity: info # high
+          service: insights
+          env: prod
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/aanIgg0Mz/topological-inventory-collectors-and-operations?orgId=1&from=now-30m&to=now&var-Datasource=crcp01ue1-prometheus&var-controller=All&var-action=All&refresh=30s"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-azure-operations"
+          message: "[Prod] Topological Inventory: Azure Operations: All pods have been down for two minutes"
+      - alert: TopologyOpenshiftOperationsSvcAbsent
+        expr: absent(up{job="topological-inventory-openshift-operations",namespace="topological-inventory-prod"}==1)
+        for: 2m
+        labels:
+          severity: info # high
+          service: insights
+          env: prod
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/aanIgg0Mz/topological-inventory-collectors-and-operations?orgId=1&from=now-30m&to=now&var-Datasource=crcp01ue1-prometheus&var-controller=All&var-action=All&refresh=30s"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-openshift-operations"
+          message: "[Prod] Topological Inventory: OpenShift Operations: All pods have been down for two minutes"
+      - alert: TopologySatelliteOperationsSvcAbsent
+        expr: absent(up{job="topological-inventory-satellite-operations",namespace="topological-inventory-prod"}==1)
+        for: 2m
+        labels:
+          severity: info # high
+          service: insights
+          env: prod
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/aanIgg0Mz/topological-inventory-collectors-and-operations?orgId=1&from=now-30m&to=now&var-Datasource=crcp01ue1-prometheus&var-controller=All&var-action=All&refresh=30s"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-satellite-operations"
+          message: "[Prod] Topological Inventory: Satellite Operations: All pods have been down for two minutes"
+    # Rules below will be deprecated and replaced by stage's rules
   - name: topology-api-prod
     rules:
       - alert: TopologyApi5xxErrors

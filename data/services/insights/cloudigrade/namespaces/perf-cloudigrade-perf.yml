@@ -1,0 +1,52 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: cloudigrade
+
+name: cloudigrade-perf
+description: Cloudigrade app's perf namespace
+
+cluster:
+  $ref: /openshift/insights/cluster-insights-perf.yml
+
+app:
+  $ref: /services/insights/cloudigrade/app.yml
+
+environment:
+  $ref: /products/insights/environments/perf.yml
+
+networkPoliciesAllow: []
+
+managedRoles: true
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/insights-stage/cloudigrade-stage/cloudigrade
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-perf
+  identifier: cloudigrade-perf
+  defaults: /terraform/resources/insights/stage/rds/postgres11-rds-1.yml
+  output_resource_name: cloudigrade-rds
+  enhanced_monitoring: true
+- provider: cloudwatch
+  account: insights-perf
+  identifier: cloudigrade-perf
+  defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
