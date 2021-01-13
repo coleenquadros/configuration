@@ -189,9 +189,6 @@ Every app-sre engineer should have access to the following
 
 - Openshift github onboarding (access to private repositories in openshift github org):
   - ACCESS: https://mojo.redhat.com/docs/DOC-1081313#jive_content_id_Github_Access
-  - Submit PRs to be added to OWNERS once access is granted:
-    - https://github.com/openshift/telemeter/blob/master/OWNERS
-    - https://github.com/openshift/cincinnati/blob/master/OWNERS_ALIASES
   - Ping [Bill Dettelback](https://rover.redhat.com/people/profile/bdettelb) on slack or mail for access to [quay github org](https://github.com/quay)
 
 - App-SRE OCM org (https://cloud.redhat.com/openshift)
