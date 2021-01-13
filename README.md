@@ -1300,7 +1300,7 @@ Once the changes are merged, the ElastiCache clusters will be created (or update
 The Secret will contain the following fields:
 - `db.endpoint` - The configuration endpoint of the ElastiCache cluster.
 - `db.port` - The database port.
-- `db.auth_token` - Authentication token for the configuration endpoint.
+- `db.auth_token` - Authentication token for in-transit encryption, if `transit_encryption_enabled` is set to `true`.
 
 #### Manage IAM Service account users via App-Interface (`/openshift/namespace-1.yml`)
 
