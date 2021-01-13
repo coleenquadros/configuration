@@ -40,6 +40,14 @@ These instructions have been adapted from the [original google doc](https://docs
     | Machine CIRD       | See note    | See note   |
     | Privacy            | Private     | Private    |
 
+1. Request that the cluster's Master nodes be adjusted to m5.2xlarge
+
+    Create a ticket to [OHSS](https://issues.redhat.com/secure/CreateIssue.jspa?pid=12323823&issuetype=3) requesting to change the Master nodes instance type to m5.2xlarge (provide the cluster id).
+
+    Here's an [example](https://issues.redhat.com/browse/OHSS-2552)
+
+    *NOTE*: You can proceed with the rest of the SOP without waiting for the ticket to be complete.
+
 1. Configure VPC peering
 1. Add hive-readers and hive-admins in `cluster.yml`
 1. Add External Configuration labels to the cluster:
