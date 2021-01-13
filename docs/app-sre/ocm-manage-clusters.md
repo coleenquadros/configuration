@@ -102,3 +102,33 @@ ocm /get/api/clusters_mgmt/<your-cluster-id-here>/credentials
 
 More info: https://api.openshift.com
 
+## OCM cluster creation and query
+
+The AppSRE team can create clusters in the staging environment when you login:  
+`--url staging` and UI for stage is https://qaprodauth.cloud.redhat.com/openshift/  
+
+
+### Creating a cluster
+
+First make sure you have enough quota to create a cluster
+```
+ocm account quota
+```
+__Output:__
+```
+Cluster quota for organization 'Red Hat - Service Delivery - AppSRE' ID: '1QxuZ9DyDkGuTuijEXoncha6QTq'
+0/100 dbaOperatorAddon ANY
+1/2 m5.2xlarge SINGLE
+0/1 m5.xlarge MULTI
+1/1 m5.xlarge SINGLE
+```
+In the example above I still have quota to create a cluster in multizone
+
+```
+ocm create cluster --version openshift-v4.6.1 --multi-az mytestcluster
+```
+
+### Querying an existing cluster
+```
+ocm get /api/clusters_mgmt/v1/clusters --parameter search="name like '<full name of cluster>'"
+```
