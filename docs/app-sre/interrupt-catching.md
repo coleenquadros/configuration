@@ -23,15 +23,11 @@ The IC schedule matches the AppSRE escalation policy in Pager Duty, which is [Fo
 
 #### PRs
 
-All the PRs should be reviewed and potentially merged by the IC in < 24h:
+PRs should be reviewed and potentially merged by the IC according to the [AppSRE SLOs](https://source.redhat.com/groups/public/sre-services/sre_services_wiki/appsre_slos) document:
 
 - [App-Interface](https://gitlab.cee.redhat.com/service/app-interface/merge_requests) - [review process SOP](https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/app-interface-review-process.md).
-- [Housekeeping](https://gitlab.cee.redhat.com/dtsd/housekeeping/merge_requests) - should be processed manually (ansible/terraform).
+- [Infra](https://gitlab.cee.redhat.com/app-sre/infra/merge_requests) - should be processed manually (ansible/terraform) if a job does not exist in ci-int.
 - [EL-Dockerfiles](https://github.com/rhdt/EL-Dockerfiles/pulls)
-
-### Issues
-
-- [Housekeeping](https://gitlab.cee.redhat.com/dtsd/housekeeping/issues) - this surface is deprecated. There are still issues created here occassionaly. Create a replacing Jira issue, close the HK issue and request that the issue be created in Jira in future cases.
 
 ### Resources
 
@@ -46,23 +42,6 @@ All the PRs should be reviewed and potentially merged by the IC in < 24h:
 
 - End of the week IC hand-off: communicate with the next IC inform about pending issues. These should be track in Jira.
 - `@app-sre-ic` Slack group member will be set automatically to the person who is IC according to the PagerDuty Primary schedule.
-
-### 1st of every month
-
-* Check possible upgrades for the following components:
-    - Vault:
-        * Curret versions:
-            - [stage](https://gitlab.cee.redhat.com/service/vault-devshift-net/blob/master/openshift-vault.yaml#L382-383)
-            - [production](https://gitlab.cee.redhat.com/service/saas-vault-devshift-net/blob/master/vault-devshift-net-services/vault-devshift-net.yaml#L11)
-        * New versions: [Vault upgrade guide](https://www.vaultproject.io/docs/upgrading/index.html)
-    - fluend:
-        * [Current version](https://github.com/app-sre/fluentd/blob/master/Dockerfile#L1)
-        * Used by:
-            - [Vault stage](https://gitlab.cee.redhat.com/service/vault-devshift-net/blob/master/openshift-vault.yaml#L388-389)
-            - [Vault production](https://gitlab.cee.redhat.com/service/saas-vault-devshift-net/blob/master/vault-devshift-net-services/vault-devshift-net.yaml#L12)
-        * New versions: [Fluentd Docker Image](https://hub.docker.com/r/fluent/fluentd/)
-
-* [Optional] Create a Task in Jira for each found possible upgrade, if it is required.
 
 ### Daily
 
