@@ -88,7 +88,21 @@ In the Cluster page, you can find links to the cluster's Console and to the clus
 
 ### Can you restart my pods
 
-There are cases where pods get into an unhealthy state and may require a restart. In such cases, here is what you should do:
+There are a couple of choices depending on the state of onboarding the service is in currently
+[here](https://visual-app-interface.devshift.net/services)  
+_Note: To the right of the search for services the drop down defaults to "show child apps" you can choose to hide these by selecting the "hide child apps" option_
+
+#### OnBoarded Services
+
+__Example service:__ [quay.io](https://visual-app-interface.devshift.net/services#/services/quayio/app.yml)  
+If the service is OnBoarded you can contact @app-sre-ic in the #sd-app-sre channel with the reason why you are requesting to "bounce" a pod, (which is actually deleting the pod.)
+We also require a Jira ticket in the backlog of the development team that owns the service to automate pod restarting via liveliness probes or health checks so manual intervention is not required.
+You may also want to collect information from the the cluster and namespace.  Clusters are listed [here](https://visual-app-interface.devshift.net/clusters) ex. [quayp05ue1](https://visual-app-interface.devshift.net/clusters#/openshift/quayp05ue1/cluster.yml). If the application team still needs help to retrieve debugging information please let the @app-sre-ic team know before we "bounce" the pod.
+#### Services not yet OnBoarded
+
+A service may be in some other state such as, but not limited to: _BestEffort_ or _InProgress_
+
+In cases where pods get into an unhealthy state and may require a restart. Below is what you should do:
 1. Verify that you are exposing a `REPLICAS` parameter for templating.
 2. Submit a MR to app-interface to changes `REPLICAS` to 0 (owners of that saas file are able to self-service the merge).
 3. After the MR is merged and applied, submit another MR to app-interface to change `REPLICAS` back to the original value.

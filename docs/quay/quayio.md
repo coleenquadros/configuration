@@ -1,11 +1,15 @@
 # [Quay.io](https://quay.io/)
 
+## App-interface
+
+[quayio](https://visual-app-interface.devshift.net/services#/services/quayio/app.yml)
+
 ## OpenShift Clusters
 
 | Environment | Console URL |
 | --- | --- |
 |Stage|[Console](https://console-openshift-console.apps.quays02ue1.s6d1.p1.openshiftapps.com/)|
-|Production (us-east-1)|[Console](https://console-openshift-console.apps.quayp03ue1.n7b1.p1.openshiftapps.com/)|
+|Production (us-east-1)|[Console](https://console-openshift-console.apps.quayp05ue1.d9j8.p1.openshiftapps.com/)|
 |Production (us-east-2)|[Console](https://console-openshift-console.apps.quayp04ue2.h5h6.p1.openshiftapps.com/)|
 
 ## Application Logs
@@ -62,6 +66,17 @@ See [Deploying Quay Read-Only](services/read-only.md) for more information.
 ### Trigger Deployment when Secret or Config has Changed
 
 You will have to bounce all quay pods for them to load updated secrets. Since the commit hash has not changed in this scenario, you will need to update the annotation value `QUAY_APP_COMPONENT_ANNOTATIONS_VALUE`. Set this to any random string to trigger a "new" deployment.
+
+### Restarting all Quay Pods
+
+Quay.io should not follow the standard AppSRE procedure of bringing the replica
+count to zero and back up when restarting Quay pods. Instead, create a Merge
+Request to change the value of `QUAY_APP_COMPONENT_ANNOTATIONS_VALUE` in the 
+file `data/services/quayio/saas/quay.io.yaml`. This will trigger a redeployment
+with the existing configuration and not incur any downtime.
+
+See this [Merge Request](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/13512/)
+as an example.
 
 ## Managing Access for Quay Development Team
 

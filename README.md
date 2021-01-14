@@ -89,6 +89,7 @@ this repository.
     - [Enable Gitlab Features on an App Interface Controlled Gitlab Repository](#enable-gitlab-features-on-an-app-interface-controlled-gitlab-repository)
     - [Add recording rules via openshift-performance-parameters integration](#add-recording-rules-via-openshift-performance-parameters-integration)
     - [Provision and consume Kafka clusters via Managed Services API](#provision-and-consume-kafka-clusters-via-managed-services-api)
+    - [Write and run Prometheus rules tests](#write-and-run-prometheus-rules-tests)
   - [Design](#design)
   - [Developer Guide](#developer-guide)
   - [Quay Documentation](#quay-documentation)
@@ -1300,7 +1301,7 @@ Once the changes are merged, the ElastiCache clusters will be created (or update
 The Secret will contain the following fields:
 - `db.endpoint` - The configuration endpoint of the ElastiCache cluster.
 - `db.port` - The database port.
-- `db.auth_token` - Authentication token for the configuration endpoint.
+- `db.auth_token` - Authentication token for in-transit encryption, if `transit_encryption_enabled` is set to `true`.
 
 #### Manage IAM Service account users via App-Interface (`/openshift/namespace-1.yml`)
 
@@ -2008,6 +2009,20 @@ This will result in a Secret being created in the consuming namespace. The Secre
 - `bootstrapServerHost` - Bootstrap server hostname
 
 * Note: The Managed Services API is not yet deployed to production, so this feature is not ready for usage yet.
+
+### Write and run Prometheus rules tests
+
+We rely on Prometheus to generate alerts for our service using expressions that are difficult to test in real world as they are dependent on very specific conditions or that don't do what you expect. Luckily Prometheus developers have recognized this and [unit tests](https://prometheus.io/docs/prometheus/latest/configuration/unit_testing_rules/) can be written for Prometheus alert and recording rules.
+
+In app-interface prometheus rules that have the `/openshift/prometheus-rule-1.yml` will be validated using `promtool check rules` command that will be used from tests that have the `/app-interface/prometheus-rule-test-1.yml` schema that will be run using `promtool test rules` e.g. rules in [app-sre-contract.yaml](resources/observability/prometheusrules/app-sre-contract.yaml) are tested in the [app-sre-contract-test.yaml](resources/observability/prometheusrules/app-sre-contract-test.yaml) file.
+
+A few notes about the integration that run the tests:
+
+- Since prometheus rules can be templates, prometheus tests needs to be templates (extracurlyjinja2).
+- Tests will be run for every namespace where the rules are defined. This is needed as rules can have a different shape from one namespace to other.
+- The prometheus test schema allows for multiple rule files in a test. This complicated the code to run the testss a lot so we allow for one test rule per test file.
+
+Writing tests can be difficult at the beginning. This [article](https://www.robustperception.io/unit-testing-rules-with-prometheus) is a nicer start than the official documentation.
 
 ## Design
 
