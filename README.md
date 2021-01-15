@@ -29,6 +29,10 @@ this repository.
   - [Howto](#howto)
     - [Add or modify a user (`/access/users-1.yml`)](#add-or-modify-a-user-accessusers-1yml)
     - [Get notified of events involving a service, or it's dependencies](#get-notified-of-events-involving-a-service-or-its-dependencies)
+    - [Define an escalation policy for a service](#define-an-escalation-policy-for-a-service)
+      - [Prerequisites: The team's slack channel and Pagerduty schedule are defined in app-interface](#prerequisites-the-teams-slack-channel-and-pagerduty-schedule-are-defined-in-app-interface)
+      - [Step 1: Define escalation policies for the team:](#step-1-define-escalation-policies-for-the-team)
+      - [Step 2: Link the service to a team's escalation policy](#step-2-link-the-service-to-a-teams-escalation-policy)
     - [Create a Quay Repository for an onboarded App (`/app-sre/app-1.yml`)](#create-a-quay-repository-for-an-onboarded-app-app-sreapp-1yml)
       - [Mirroring Quay Repositories](#mirroring-quay-repositories)
     - [Create a Sentry Project for an onboarded App (`/app-sre/app-1.yml`)](#create-a-sentry-project-for-an-onboarded-app-app-sreapp-1yml)
@@ -45,7 +49,7 @@ this repository.
     - [Manage OpenShift LimitRanges via App-Interface (`/openshift/limitrange-1.yml`)](#manage-openshift-limitranges-via-app-interface-openshiftlimitrange-1yml)
     - [Manage OpenShift ResourceQuotas via App-Interface (`/openshift/quota-1.yml`)](#manage-openshift-resourcequotas-via-app-interface-openshiftquota-1yml)
     - [Self-Service OpenShift ServiceAccount tokens via App-Interface (`/openshift/namespace-1.yml`)](#self-service-openshift-serviceaccount-tokens-via-app-interface-openshiftnamespace-1yml)
-    - [Enable network traffic between Namespaces via App-Interface  (`/openshift/namespace-1.yml`)](#enable-network-traffic-between-namespaces-via-app-interface-openshiftnamespace-1yml)
+    - [Enable network traffic between Namespaces via App-Interface (`/openshift/namespace-1.yml`)](#enable-network-traffic-between-namespaces-via-app-interface-openshiftnamespace-1yml)
     - [Manage Vault configurations via App-Interface](#manage-vault-configurations-via-app-interface)
       - [Manage vault audit backends (`/vault-config/audit-1.yml`)](#manage-vault-audit-backends-vault-configaudit-1yml)
       - [Manage vault auth backends (`/vault-config/auth-1.yml`)](#manage-vault-auth-backends-vault-configauth-1yml)
@@ -388,6 +392,52 @@ serviceNotifications:
 - name: Hive Mailing list
   email:  aos-hive@redhat.com
 ```
+
+### Define an escalation policy for a service
+
+There are two steps to defining an escalation policy for a given service:
+
+#### Prerequisites: The team's slack channel and Pagerduty schedule are defined in app-interface
+
+In case you don't meet the prerequisites, please follow:
+- [Manage Slack User groups via App-Interface](#manage-slack-user-groups-via-app-interface)
+
+#### Step 1: Define escalation policies for the team:
+
+Each team can have multiple escalaiton policies defined. This is useful in case the team divides the ownership of developed services. For a single escalation policy, create a general.yml under `teams/<teamname>/escalation-policies/`. An example can be seen [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/9bcb0b1c07d79ef164c552b2b970bc0247e9c1fa/data/teams/telemeter/escalation-policies/general.yaml)
+
+Here's a template you can copy-paste and edit as needed:
+
+```yaml
+
+
+---
+$schema: /app-sre/escalation-policy-1.yml
+
+labels: {}
+
+name: <teamname>-general-escalations
+
+description: |
+  Here, you should note whether the team has developer oncall support and what the reaction times for each of the escalation channels is.
+
+  Also, we expect some information on escalation criteria.
+
+channels:
+  slackUserGroup:
+  - $ref: /teams/<teamname>/permissions/<teamname>-coreos-slack.yml
+
+  email: 
+  - <teamname>@redhat.com
+
+  pagerduty:
+    $ref: /dependencies/pagerduty/<teamname>-oncall.yml
+
+```
+
+#### Step 2: Link the service to a team's escalation policy
+
+The next step is to link the defined escalation policy to the service. In order to do that, we add a new `escalationPolicy` reference within the `app.yml`. For example, see [this PR](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/13851/diffs?commit_id=9bcb0b1c07d79ef164c552b2b970bc0247e9c1fa)
 
 ### Create a Quay Repository for an onboarded App (`/app-sre/app-1.yml`)
 
@@ -757,7 +807,7 @@ The integration will get the token belonging to that ServiceAccount and add it i
 `<clusterName>-<namespaceName>-<ServiceAccountName>`.
 The Secret will have a single key called `token`, containing a token of that ServiceAccount.
 
-### Enable network traffic between Namespaces via App-Interface  (`/openshift/namespace-1.yml`)
+### Enable network traffic between Namespaces via App-Interface (`/openshift/namespace-1.yml`)
 
 To enable network traffic between namespace, a user must add the following to a namespace declaration:
 
