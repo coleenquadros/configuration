@@ -1,0 +1,61 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: ephemeral
+  platform: insights
+
+name: insights-ephemeral
+description: apps used for testing in ephemeral environments
+
+app:
+  $ref: /services/insights/ephemeral/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+timeout: 5
+
+managedResourceTypes:
+- Deployment
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: front-end-aggregator
+  path: /deploy/template.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/front-end-aggregator
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+    parameters:
+      REPLICAS: 1
+- name: mocks
+  path: /deploy/template.yaml
+  url: https://github.com/RedHatInsights/mocks
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+    parameters:
+      REPLICAS: 1
+
