@@ -59,6 +59,9 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
         * `namespace` - a reference to a namespace to deploy to
         * `ref` - git ref to deploy (commit sha or branch name (usually `master`))
             * for deployments to a production namespace, always use a git commit hash
+        * `promotion` - a section to indicate promotion behavior/validations
+            * `publish` - a list of channels to publish the success of the deployment
+            * `subscribe` - before deploying, validate that the current commit sha has been successfully deployed and published to the specified channels
         * `parameters` - (optional) parameters for `oc process` to be used when deploying to the current namespace
         * `upstream` - (optional) name of Jenkins job to build after.
             * use this option in the case a docker image should be built before deployment
@@ -118,6 +121,14 @@ Additional supported commands:
 - `/retest` - run tests again.
 
 MR is not being merged? [follow this SOP](/docs/app-sre/sop/app-interface-periodic-job-debug.md)
+
+## Automated/Gated promotions
+
+By defining `promotion.publish` and `promotion.subscribe` on deployment `targets` you can add a validation that the commit being promoted was previously successfully deployed.
+
+For example, define a `promotion.subscribe` to a production target and a `promotion.publish` to a stage post-deployment test target with a matching value (any unique string) to make the production deployment dependant on the success of the stage post-deployment tests.
+
+TODO(mafriedm): add examples
 
 ## Where do I sign?
 
