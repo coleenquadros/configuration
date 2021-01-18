@@ -128,7 +128,10 @@ By defining `promotion.publish` and `promotion.subscribe` on deployment `targets
 
 For example, define a `promotion.subscribe` to a production target and a `promotion.publish` to a stage post-deployment test target with a matching value (any unique string) to make the production deployment dependant on the success of the stage post-deployment tests.
 
-TODO(mafriedm): add examples
+Examples:
+
+* Publish: [github-mirror stage post-deployment testing SaaS file](https://gitlab.cee.redhat.com/service/app-interface/-/blob/fe22ed43d0cb46f1ac708cf86f9f569c1ffa5b68/data/services/github-mirror/cicd/test.yaml#L42-44)
+* Subscribe: [github-mirror production deployment](https://gitlab.cee.redhat.com/service/app-interface/-/blob/fe22ed43d0cb46f1ac708cf86f9f569c1ffa5b68/data/services/github-mirror/cicd/deploy.yaml#L49-51)
 
 ## Where do I sign?
 
