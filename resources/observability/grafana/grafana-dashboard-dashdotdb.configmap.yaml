@@ -165,7 +165,7 @@ data:
                     "value": null
                   },
                   {
-                    "color": "dark-red",
+                    "color": "dark-blue",
                     "value": 0.1
                   }
                 ]
@@ -185,15 +185,15 @@ data:
           "links": [],
           "options": {
             "displayMode": "basic",
-            "orientation": "vertical",
+            "orientation": "horizontal",
             "reduceOptions": {
               "calcs": [
-                "first"
+                "mean"
               ],
               "fields": "",
               "values": true
             },
-            "showUnfilled": false
+            "showUnfilled": true
           },
           "pluginVersion": "7.2.1",
           "targets": [
@@ -202,7 +202,7 @@ data:
               "group": [],
               "metricColumn": "none",
               "rawQuery": true,
-              "rawSql": "WITH last_token as (\n            SELECT token.id\n            FROM token, deploymentvalidation, namespace, cluster\n            WHERE deploymentvalidation.token_id = token.id\n              AND namespace.id = deploymentvalidation.namespace_id\n              AND cluster.name = '$cluster'\n              AND namespace.name = '$namespace'\n              AND cluster.id = namespace.cluster_id\n            ORDER BY token.timestamp DESC\n            LIMIT 1),\ndeploymentvalidations as (\n        SELECT\n            DISTINCT deploymentvalidation.name as objectname,\n                     validation.name as validation,\n                     validation.status as status\n        FROM cluster,\n             namespace,\n             deploymentvalidation,\n             validation,\n             last_token\n        WHERE deploymentvalidation.namespace_id = namespace.id\n          AND namespace.cluster_id = cluster.id\n          AND cluster.id = namespace.cluster_id\n          AND deploymentvalidation.token_id = last_token.id\n          AND cluster.name =  '$cluster'\n          AND namespace.name = '$namespace'\n        GROUP BY deploymentvalidation.name,\n                 validation.name,\n                 validation.status)\nSELECT CONCAT(validation,':',status) as metric,\n  count(validation) as value\nFROM deploymentvalidations\nGROUP BY validation, status",
+              "rawSql": "WITH last_token as (\n            SELECT token.id\n            FROM token, deploymentvalidation, namespace, cluster\n            WHERE deploymentvalidation.token_id = token.id\n              AND namespace.id = deploymentvalidation.namespace_id\n              AND cluster.name = '$cluster'\n              AND namespace.name = '$namespace'\n              AND cluster.id = namespace.cluster_id\n            ORDER BY token.timestamp DESC\n            LIMIT 1),\ndeploymentvalidations as (\n        SELECT\n            deploymentvalidation.name as objectname,\n                     validation.name as validation,\n                     validation.status as status\n        FROM cluster,\n             namespace,\n             deploymentvalidation,\n             validation,\n             last_token\n        WHERE deploymentvalidation.namespace_id = namespace.id\n          AND namespace.cluster_id = cluster.id\n          AND cluster.id = namespace.cluster_id\n          AND deploymentvalidation.token_id = last_token.id\n          AND validation.id = deploymentvalidation.validation_id\n          AND cluster.name =  '$cluster'\n          AND namespace.name = '$namespace'\n        GROUP BY deploymentvalidation.name,\n                 validation.name,\n                 validation.status)\nSELECT CONCAT(\n        REPLACE(validation,'deployment_validation_operator_',''),' ',\n        case status\n          when 0 then 'Passing'\n          when 1 then 'Failures'\n          end\n        ) as metric,\n  count(validation) as value\nFROM deploymentvalidations\nGROUP BY validation, status",
               "refId": "A",
               "select": [
                 [
@@ -393,7 +393,7 @@ data:
                   "group": [],
                   "metricColumn": "none",
                   "rawQuery": true,
-                  "rawSql": "WITH last_token as (\n            SELECT token.id\n            FROM token, deploymentvalidation, namespace, cluster\n            WHERE deploymentvalidation.token_id = token.id\n              AND namespace.id = deploymentvalidation.namespace_id\n              AND cluster.name = '$cluster'\n              AND namespace.name = '$namespace'\n              AND cluster.id = namespace.cluster_id\n            ORDER BY token.timestamp DESC\n            LIMIT 1)\n        SELECT\n          DISTINCT deploymentvalidation.name as objectname,\n            objectkind.name as objectkind,\n            validation.name as validation,\n            validation.status as status\n        FROM cluster,\n             namespace,\n             deploymentvalidation,\n             validation,\n             objectkind,\n             last_token\n        WHERE deploymentvalidation.namespace_id = namespace.id\n          AND namespace.cluster_id = cluster.id\n          AND cluster.id = namespace.cluster_id\n          AND deploymentvalidation.token_id = last_token.id\n          AND objectkind.id = deploymentvalidation.objectkind_id\n          AND cluster.name =  '$cluster'\n          AND namespace.name = '$namespace'",
+                  "rawSql": "WITH last_token as (\n            SELECT token.id\n            FROM token, deploymentvalidation, namespace, cluster\n            WHERE deploymentvalidation.token_id = token.id\n              AND deploymentvalidation.namespace_id = namespace.id\n              AND cluster.name = '$cluster'\n              AND namespace.name = '$namespace'\n              AND cluster.id = namespace.cluster_id\n            ORDER BY token.timestamp DESC\n            LIMIT 1)\n        SELECT\n          DISTINCT deploymentvalidation.name as objectname,\n            objectkind.name as objectkind,\n            validation.name as validation,\n            case validation.status\n              when 0 then 'Passed'\n              when 1 then 'Failed'\n            end as status\n        FROM cluster,\n             namespace,\n             deploymentvalidation,\n             validation,\n             objectkind,\n             last_token\n        WHERE deploymentvalidation.namespace_id = namespace.id\n          AND namespace.cluster_id = cluster.id\n          AND cluster.id = namespace.cluster_id\n          AND deploymentvalidation.token_id = last_token.id\n          AND objectkind.id = deploymentvalidation.objectkind_id\n          AND validation.id = deploymentvalidation.validation_id\n          AND cluster.name =  '$cluster'\n          AND namespace.name = '$namespace'",
                   "refId": "A",
                   "select": [
                     [
@@ -773,7 +773,7 @@ data:
       "timezone": "",
       "title": "Dash.DB",
       "uid": "dashdotdb",
-      "version": 3
+      "version": 4
     }
 kind: ConfigMap
 metadata:
