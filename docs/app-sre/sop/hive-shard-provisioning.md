@@ -187,6 +187,11 @@ All v4 hive shards (clusters) are monitored with their own workload prometheus, 
     namespace: hive
 - provider: resource-template
   type: extracurlyjinja2
+  path: /services/hive/hive-clustersync.servicemonitor.yaml
+  variables:
+    namespace: hive
+- provider: resource-template
+  type: extracurlyjinja2
   path: /services/osd-operators/hive-operator-generic.servicemonitor.yaml
   variables:
     operator_name: aws-account-operator
