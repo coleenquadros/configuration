@@ -1,0 +1,24 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2021-01-19-patchadvisories-perf-query
+namespace:
+  $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
+identifier: patchman-prod
+output: stdout
+query: |
+  EXPLAIN (ANALYZE, COSTS, VERBOSE, BUFFERS, FORMAT JSON)
+  SELECT am.name             as id,
+        am.description      as description,
+        am.public_date      as public_date,
+        am.synopsis         as synopsis,
+        am.advisory_type_id as advisory_type,
+        am.severity_id      as severity
+  FROM system_advisories sa
+          join advisory_metadata am ON am.id = sa.advisory_id
+          join system_platform sp ON sa.system_id = sp.id
+          JOIN inventory.hosts ih ON ih.id = sp.inventory_id
+  WHERE (sp.inventory_id in (select inventory_id from system_platform limit 10))
+    AND (sp.rh_account_id = 10)
+    AND (when_patched IS NULL)
+  ORDER BY am.public_date DESC;
