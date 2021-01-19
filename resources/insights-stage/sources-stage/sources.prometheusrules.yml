@@ -18,15 +18,15 @@ spec:
           severity: info # high
           service: insights
           env: stage
-          app_team: topo-sources
+          app_team: topo-sources # Slack channel for app_team defined in resources/observability/alertmanager/alertmanager-instance.secret.yaml
         annotations:
           dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-30m&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-api"
           message: "[Stage] Sources: API: All pods have been down for two minutes"
   - name: sources-kafka-lag-stage
     rules:
-      - alert: SourcesKafkaLagSourcesStatus
-        expr: sum(kafka_consumergroup_group_lag{topic='platform.sources.status'}) > 200
+      - alert: SourcesKafkaLag
+        expr: sum(kafka_consumergroup_group_lag{topic=~'platform.sources..*',namespace='platform-mq-stage'}) by (group, topic) > 200
         for: 10m
         labels:
           severity: info
@@ -36,11 +36,25 @@ spec:
         annotations:
           dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-api"
-          message: "[Stage] Sources API: Kafka Lag (availability check) is bigger than 200 for the last 10 minutes"
+          message: "[Stage] Sources API: Kafka Lag reached {{ $value }} (limit is 200) for the last 10 minutes"
+  - name: sources-restarts-stage
+    rules:
+      - alert: SourcesApiRestarts
+        expr: round(sum(increase(kube_pod_container_status_restarts_total{container="sources-api", namespace="sources-stage"}[30m]))) > 5
+        for: 1h
+        labels:
+          severity: info
+          service: insights
+          env: stage
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-api"
+          message: "[Stage] Sources API: Pod was restarted more than 5 times in 30 minutes for the last 1 hour"
   - name: sources-api-stage
     rules:
       - alert: SourcesApi5xxErrors
-        expr: sum(rate(sources_api_http_requests_total{status=~"^[5].*"}[5m])) * 100 > 50
+        expr: sum(rate(sources_api_http_requests_total{status=~"^5.*", namespace="sources-stage"}[5m])) > 50
         for: 10m
         labels:
           severity: info
@@ -52,7 +66,7 @@ spec:
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-api"
           message: "[Stage] Sources API has been throwing 5xx errors more than 50% of the time for the last 10 minutes"
       - alert: SourcesApiRequestDuration
-        expr: avg(rate(sources_api_http_duration_seconds_sum{controller!="status"}[5m]) / rate(sources_api_http_duration_seconds_count{controller!="status"}[5m]) > 0) > 500
+        expr: avg(rate(sources_api_http_duration_seconds_sum{controller!="status", namespace="sources-stage"}[5m]) / rate(sources_api_http_duration_seconds_count{controller!="status",namespace="sources-stage"}[5m]) > 0) * 100 > 500
         for: 10m
         labels:
           severity: info
