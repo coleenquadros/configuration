@@ -1,0 +1,31 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /observability/prometheusrules/ocm-metrics.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+- interval: 1m
+  input_series:
+  - series: openshift_clusterresourcequota_usage{cluster='app-sre-stage-01',name="persistent-volume-quota",type="used"}
+    values: 95+0x15
+  - series: openshift_clusterresourcequota_usage{cluster='app-sre-stage-01',name="persistent-volume-quota",type="hard"}
+    values: 100+0x15
+  - series: openshift_clusterresourcequota_usage{cluster='app-sre-stage-01',name="loadbalancer-quota",type="used"}
+    values: 0+0x15
+  - series: openshift_clusterresourcequota_usage{cluster='app-sre-stage-01',name="loadbalancer-quota",type="hard"}
+    values: 0+0x15
+
+  alert_rule_test:
+  - eval_time: 15m
+    alertname: ClusterResourceQuotaAlmostFull
+    exp_alerts:
+    - exp_labels:
+        cluster: app-sre-stage-01
+        name: persistent-volume-quota
+        severity: high
+      exp_annotations:
+        runbook: https://docs.openshift.com/dedicated/4/getting_started/scaling-your-cluster.html
+        message: "cluster app-sre-stage-01 is using 95% of its persistent-volume-quota"
