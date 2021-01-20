@@ -1,0 +1,25 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: ocm-metrics
+spec:
+  groups:
+  - name: cluster-resource-quota
+    rules:
+    - alert: ClusterResourceQuotaAlmostFull
+      annotations:
+        message: ({{ $labels.cluster }}) is using {{ $value | humanizePercentage }} of its {{ $labels.resource }} quota.
+        runbook: https://docs.openshift.com/dedicated/4/getting_started/scaling-your-cluster.html
+      expr: |
+        openshift_clusterresourcequota_usage{type="used"}
+          / ignoring(type)
+        (openshift_clusterresourcequota_usage{type="hard"} > 0)
+          > 0.9
+      for: 15m
+      labels:
+        severity: high
