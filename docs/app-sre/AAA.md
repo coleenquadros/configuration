@@ -233,12 +233,12 @@ Every app-sre engineer should have access to the following
     - Kerberos login and password
   - Detailed info [here](https://gitlab.cee.redhat.com/dtsd/housekeeping/blob/master/docs/openstack-ci-int.md)
 
-- Tier 1 Bastion access:
+- Tier 1 Bastion access (optional - mostly not needed):
   - This is necessary to access some clusters that are not publicly exposed (for example hive-production)
   - Access process is documented [here](https://mojo.redhat.com/docs/DOC-1144200)
     - You should request Tier1
 
-- Tier 2 access for OSIO starter clusters.
+- Tier 2 access for OSIO starter clusters (optional - mostly not needed):
   - This is necessary to be able to the OSIO starter cluster consoles and execute `oc` locally.
   - Access process is documented [here](https://mojo.redhat.com/docs/DOC-1144200)
     - You should request Tier2
