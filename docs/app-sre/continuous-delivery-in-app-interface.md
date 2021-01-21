@@ -133,6 +133,8 @@ Examples:
 * Publish: [github-mirror stage post-deployment testing SaaS file](https://gitlab.cee.redhat.com/service/app-interface/-/blob/fe22ed43d0cb46f1ac708cf86f9f569c1ffa5b68/data/services/github-mirror/cicd/test.yaml#L42-44)
 * Subscribe: [github-mirror production deployment](https://gitlab.cee.redhat.com/service/app-interface/-/blob/fe22ed43d0cb46f1ac708cf86f9f569c1ffa5b68/data/services/github-mirror/cicd/deploy.yaml#L49-51)
 
+To make the promotion process automated, set `promotion.auto` to `true`.
+
 ## Where do I sign?
 
 The App SRE team will contact you directly to migrate any saas repos you have to saas files.
@@ -140,10 +142,6 @@ The App SRE team will contact you directly to migrate any saas repos you have to
 ## Questions?
 
 Reach out to us on #sd-app-sre in the CoreOS slack!
-
-## Future development
-
-* add ability to define automated promotion flows
 
 ## Developer workflow
 
