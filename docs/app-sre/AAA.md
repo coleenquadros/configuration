@@ -72,7 +72,7 @@ The goal is to move this to the app-interface itself as it matures.
 
 ## Changes
 
-- This document was created and maintained using vscode, using Markdown ToC plugin
+- This document was created and maintained using vscode, using [Markdown ToC plugin](https://marketplace.visualstudio.com/items?itemName=AlanWalk.markdown-toc)
 - Merge requests are accepted but require team lead signoff
 - As it is important to communicate and gain common aknowledgement of process captured within, this document will be reviewed every sprint retro when there are changes.  If you can not attend a sprint retro, make sure you review this document before going on call.
 - Prior to each
