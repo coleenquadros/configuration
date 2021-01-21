@@ -76,9 +76,7 @@ Slack: Users are being tagged by default for cluster updates in clusters they ha
 To gate production promotions, follow these steps:
 
 1. Define a [post-deployment testing SaaS file](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-testing-in-app-interface.md#define-post-deployment-testing-saas-file) containing tests to be run against the service following it's deployment to the stage environment.
-1. Define a [gated promotion](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-delivery-in-app-interface.md#automatedgated-promotions) based on the results of the post-deployment tests that ran on stage.
-
-Future work: Allow automated promotions (https://issues.redhat.com/browse/APPSRE-2244).
+1. Define an [automated/gated promotion](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-delivery-in-app-interface.md#automatedgated-promotions) based on the results of the post-deployment tests that ran on stage.
 
 ### What is the Console or Kibana URL for a service
 
