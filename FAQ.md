@@ -11,6 +11,7 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
 - [I can not access X](#i-can-not-access-x)
 - [I can not access ci-ext](#i-can-not-access-ci-ext)
 - [Tagging options in app-interface](#tagging-options-in-app-interface)
+- [Gating production promotions in app-interface](#gating-production-promotions-in-app-interface)
 - [What is the Console or Kibana URL for a service](#what-is-the-console-or-kibana-url-for-a-service)
 - [Can you restart my pods](#can-you-restart-my-pods)
 - [Jenkins is going to shut down](#jenkins-is-going-to-shutdown)
@@ -69,6 +70,13 @@ Managed to log in but having issues? Maybe even seeing this error message? `"Acc
 GitLab: Users are not being tagged by default for SaaS file reviews. To be tagged on MRs for SaaS files you own, add `tag_on_merge_requests: true` to your user file.
 
 Slack: Users are being tagged by default for cluster updates in clusters they have access to (through membership in a Slack usergroup called <cluster_name>-cluster). To be removed from those usergroups, add `tag_on_cluster_updates: false` to your user file.
+
+### Gating production promotions in app-interface
+
+To gate production promotions, follow these steps:
+
+1. Define a [post-deployment testing SaaS file](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-testing-in-app-interface.md#define-post-deployment-testing-saas-file) containing tests to be run against the service following it's deployment to the stage environment.
+1. Define an [automated/gated promotion](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-delivery-in-app-interface.md#automatedgated-promotions) based on the results of the post-deployment tests that ran on stage.
 
 ### What is the Console or Kibana URL for a service
 

@@ -61,7 +61,7 @@ spec:
     - alert: LowFreeMemory
       labels:
         severity: warning
-      expr: aws_rds_freeable_memory_sum{job=~"cloudwatch-exporter.*"} offset 10m < (200 * 1024^2)
+      expr: aws_rds_freeable_memory_average{job=~"cloudwatch-exporter.*"} offset 10m < (200 * 1024^2)
       annotations:
         message: 'The current free(able) memory of DB instance {{ $labels.dbinstance_identifier }} is under 200 MB.'
         runbook: "https://gitlab.cee.redhat.com/observatorium/configuration/tree/master/docs/sop"
@@ -69,7 +69,7 @@ spec:
     - alert: LowStorageSpace
       labels:
         severity: warning
-      expr: aws_rds_free_storage_space_sum{job=~"cloudwatch-exporter.*"} offset 10m < (1 * 1024^3)
+      expr: aws_rds_free_storage_space_average{job=~"cloudwatch-exporter.*"} offset 10m < (1 * 1024^3)
       for: 30m
       annotations:
         message: 'The current free storage space of DB instance {{ $labels.dbinstance_identifier }} is under 1 GB.'
@@ -78,12 +78,20 @@ spec:
     - alert: PredictOutOfStorage
       labels:
         severity: high
-      expr: predict_linear(aws_rds_free_storage_space_sum[1h], 3600 * 24 * 3) < 0
+      expr: predict_linear(aws_rds_free_storage_space_average[1h], 3600 * 24 * 3) < 0
       for: 1h
       annotations:
         message: 'DB instance {{ $labels.dbinstance_identifier }} storage will be full within 2 days.'
         runbook: "https://gitlab.cee.redhat.com/observatorium/configuration/tree/master/docs/sop"
         dashboard: "https://grafana.app-sre.devshift.net"
+    - alert: PredictRDSOutOfBurstBalance
+      labels:
+        severity: high
+      expr: predict_linear(aws_rds_burst_balance_average[1h], 3600 * 8) < 0
+      for: 5m
+      annotations:
+        message: "DB instance '{{ $labels.dbinstance_identifier }}' storage will be out of burst balance in 8 hours"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/sop/rds-burst-balance.md"
     - alert: HighAverageReadLatency
       labels:
         severity: warning

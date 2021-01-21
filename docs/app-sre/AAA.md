@@ -10,49 +10,51 @@ Axiom: *a statement or proposition which is regarded as being established, accep
 <!-- TOC -->
 
 - [Anthology of App-SRE Axioms](#anthology-of-app-sre-axioms)
-    - [Index](#index)
-    - [Preface](#preface)
-    - [Changes](#changes)
-    - [Other sources of documentation you might be looking for:](#other-sources-of-documentation-you-might-be-looking-for)
-    - [Access and surfaces list](#access-and-surfaces-list)
-        - [Returning Red Hat Employee Gotchas](#returning-red-hat-employee-gotchas)
-    - [On call](#on-call)
-        - [Primary on-call + interrupt catching](#primary-on-call--interrupt-catching)
-        - [Pagerduty set up](#pagerduty-set-up)
-        - [Follow the sun](#follow-the-sun)
-        - [Primary on-call](#primary-on-call)
-        - [Secondary on-call](#secondary-on-call)
-        - [Escalation](#escalation)
-        - [Notification](#notification)
-        - [Incident procedure](#incident-procedure)
-    - [Standard operating procedures](#standard-operating-procedures)
-    - [App oboarding / app acceptance criteria](#app-oboarding--app-acceptance-criteria)
-        - [In the app-interface](#in-the-app-interface)
-    - [Additional team process](#additional-team-process)
-        - [Git process](#git-process)
-        - [Sprint process](#sprint-process)
-    - [App-sre escalation to external teams](#app-sre-escalation-to-external-teams)
-        - [PnT Devops](#pnt-devops)
+  - [Index](#index)
+  - [Preface](#preface)
+  - [Changes](#changes)
+  - [Other sources of documentation you might be looking for:](#other-sources-of-documentation-you-might-be-looking-for)
+  - [Example user manifest with minimum viable roles for an AppSRE team member](#example-user-manifest-with-minimum-viable-roles-for-an-appsre-team-member)
+    - [Setting up a GPG key](#setting-up-a-gpg-key)
+  - [Access and surfaces list](#access-and-surfaces-list)
+    - [Returning Red Hat Employee Gotchas](#returning-red-hat-employee-gotchas)
+  - [On call](#on-call)
+    - [Primary on-call + interrupt catching](#primary-on-call--interrupt-catching)
+    - [Pagerduty set up](#pagerduty-set-up)
+    - [Follow the sun](#follow-the-sun)
+    - [Primary on-call](#primary-on-call)
+    - [Secondary on-call](#secondary-on-call)
+    - [Escalation](#escalation)
+    - [Notification](#notification)
+    - [Incident procedure](#incident-procedure)
+  - [Standard operating procedures](#standard-operating-procedures)
+  - [App oboarding / app acceptance criteria](#app-oboarding--app-acceptance-criteria)
+    - [In the app-interface](#in-the-app-interface)
+  - [Additional team process](#additional-team-process)
+    - [Git process](#git-process)
+    - [Sprint process](#sprint-process)
+  - [App-sre escalation to external teams](#app-sre-escalation-to-external-teams)
+    - [PnT Devops](#pnt-devops)
 - [Knowledge Sharing](#knowledge-sharing)
-    - [Processes](#processes)
-        - [Maintaining access pieces](#maintaining-access-pieces)
-        - [Maintaining escalation channels](#maintaining-escalation-channels)
-        - [Alerting coverage](#alerting-coverage)
-        - [Following Incident Procedure](#following-incident-procedure)
-        - [On-call pairings](#on-call-pairings)
-        - [Periodically reviewed service docs](#periodically-reviewed-service-docs)
-        - [Training Sessions at onboarding](#training-sessions-at-onboarding)
-        - [Deep Dive sessions](#deep-dive-sessions)
+  - [Processes](#processes)
+    - [Maintaining access pieces](#maintaining-access-pieces)
+    - [Maintaining escalation channels](#maintaining-escalation-channels)
+    - [Alerting coverage](#alerting-coverage)
+    - [Following Incident Procedure](#following-incident-procedure)
+    - [On-call pairings](#on-call-pairings)
+    - [Periodically reviewed service docs](#periodically-reviewed-service-docs)
+    - [Training Resources](#training-resources)
+    - [Deep Dive sessions](#deep-dive-sessions)
 - [IT Platform Team](#it-platform-team)
-    - [Escalation procedures](#escalation-procedures)
-        - [Telemeter incidents](#telemeter-incidents)
-    - [Contacts](#contacts)
-        - [Acknowledgements](#acknowledgements)
-    - [Services](#services)
+  - [Escalation procedures](#escalation-procedures)
+    - [Telemeter incidents](#telemeter-incidents)
+  - [Contacts](#contacts)
+    - [Acknowledgements](#acknowledgements)
+  - [Services](#services)
 - [Glossary](#glossary)
-    - [PnT](#pnt)
-    - [PnT Ops](#pnt-ops)
-    - [PnT DevOps](#pnt-devops)
+  - [PnT](#pnt)
+  - [PnT Ops](#pnt-ops)
+  - [PnT DevOps](#pnt-devops)
 
 <!-- /TOC -->
 
@@ -72,7 +74,7 @@ The goal is to move this to the app-interface itself as it matures.
 
 ## Changes
 
-- This document was created and maintained using vscode, using Markdown ToC plugin
+- This document was created and maintained using vscode, using [Markdown ToC plugin](https://marketplace.visualstudio.com/items?itemName=AlanWalk.markdown-toc)
 - Merge requests are accepted but require team lead signoff
 - As it is important to communicate and gain common aknowledgement of process captured within, this document will be reviewed every sprint retro when there are changes.  If you can not attend a sprint retro, make sure you review this document before going on call.
 - Prior to each
@@ -233,12 +235,12 @@ Every app-sre engineer should have access to the following
     - Kerberos login and password
   - Detailed info [here](https://gitlab.cee.redhat.com/dtsd/housekeeping/blob/master/docs/openstack-ci-int.md)
 
-- Tier 1 Bastion access:
+- Tier 1 Bastion access (optional - mostly not needed):
   - This is necessary to access some clusters that are not publicly exposed (for example hive-production)
   - Access process is documented [here](https://mojo.redhat.com/docs/DOC-1144200)
     - You should request Tier1
 
-- Tier 2 access for OSIO starter clusters.
+- Tier 2 access for OSIO starter clusters (optional - mostly not needed):
   - This is necessary to be able to the OSIO starter cluster consoles and execute `oc` locally.
   - Access process is documented [here](https://mojo.redhat.com/docs/DOC-1144200)
     - You should request Tier2

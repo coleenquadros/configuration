@@ -9,7 +9,7 @@ metadata:
     role: alert-rules
 spec:
   groups:
-  - name: topology-services-up-stage # TODO: Targeted refresh
+  - name: topology-services-up-stage
     rules:
       - alert: TopologyApiSvcAbsent
         expr: absent(up{job="topological-inventory-api",namespace="topological-inventory-stage"}==1)
@@ -83,6 +83,18 @@ spec:
           dashboard: "https://grafana.app-sre.devshift.net/d/MnHGlz5Mk/topological-inventory-core?orgId=1&refresh=30s&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-host-inventory-sync"
           message: "[Stage] Topological Inventory: Host Inventory Sync: All pods have been down for two minutes"
+      - alert: TopologyAnsibleTargetedRefreshSvcAbsent
+        expr: absent(up{job="topological-ansible-tower-targeted-collector",namespace="topological-inventory-stage"}==1)
+        for: 2m
+        labels:
+          severity: info # high
+          service: insights
+          env: stage
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/qRvAZLAMk/topological-inventory-apis?orgId=1&from=now-30m&to=now&refresh=10s&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-api"
+          message: "[Stage] Topological Inventory: Ansible Tower Targeted Collector: All pods have been down for two minutes"
       - alert: TopologyAmazonOperationsSvcAbsent
         expr: absent(up{job="topological-inventory-amazon-operations",namespace="topological-inventory-stage"}==1)
         for: 2m
@@ -107,6 +119,18 @@ spec:
           dashboard: "https://grafana.app-sre.devshift.net/d/aanIgg0Mz/topological-inventory-collectors-and-operations?orgId=1&from=now-30m&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All&refresh=30s"
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-ansible-tower-operations"
           message: "[Stage] Topological Inventory: Ansible Tower Operations: All pods have been down for two minutes"
+      - alert: TopologyAnsibleTowerTargetedSvcAbsent
+        expr: absent(up{job="topological-ansible-tower-targeted-collector",namespace="topological-inventory-stage"}==1)
+        for: 2m
+        labels:
+          severity: info # high
+          service: insights
+          env: stage
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/aanIgg0Mz/topological-inventory-collectors-and-operations?orgId=1&from=now-30m&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All&refresh=30s"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-ansible-tower-operations"
+          message: "[Stage] Topological Inventory: Ansible Tower Operations: All pods have been down for two minutes"
       - alert: TopologyAzureOperationsSvcAbsent
         expr: absent(up{job="topological-inventory-azure-operations",namespace="topological-inventory-stage"}==1)
         for: 2m
@@ -119,6 +143,18 @@ spec:
           dashboard: "https://grafana.app-sre.devshift.net/d/aanIgg0Mz/topological-inventory-collectors-and-operations?orgId=1&from=now-30m&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All&refresh=30s"
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-azure-operations"
           message: "[Stage] Topological Inventory: Azure Operations: All pods have been down for two minutes"
+      - alert: TopologyGoogleOperationsSvcAbsent
+        expr: absent(up{job="topological-inventory-google-operations",namespace="topological-inventory-stage"}==1)
+        for: 2m
+        labels:
+          severity: info # high
+          service: insights
+          env: stage
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/aanIgg0Mz/topological-inventory-collectors-and-operations?orgId=1&from=now-30m&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All&refresh=30s"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-google-operations"
+          message: "[Stage] Topological Inventory: Google Operations: All pods have been down for two minutes"
       - alert: TopologyOpenshiftOperationsSvcAbsent
         expr: absent(up{job="topological-inventory-openshift-operations",namespace="topological-inventory-stage"}==1)
         for: 2m
@@ -146,7 +182,7 @@ spec:
   - name: topology-kafka-lag-stage
     rules:
       - alert: TopologyKafkaLagPersister
-        expr: sum(kafka_consumergroup_group_lag{topic='platform.topological-inventory.persister'}) > 500
+        expr: sum(kafka_consumergroup_group_lag{topic='platform.topological-inventory.persister', namespace='platform-mq-stage'}) by (group) > 500
         for: 10m
         labels:
           severity: info
@@ -158,7 +194,7 @@ spec:
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-persister"
           message: "[Stage] Topo Persister: Kafka Lag is bigger than 500 for the last 10 minutes"
       - alert: TopologyKafkaLagPersisterOutputStream
-        expr: sum(kafka_consumergroup_group_lag{topic='platform.topological-inventory.persister-output-stream'}) > 200
+        expr: sum(kafka_consumergroup_group_lag{topic='platform.topological-inventory.persister-output-stream', namespace='platform-mq-stage'}) > 200
         for: 10m
         labels:
           severity: info
@@ -170,7 +206,7 @@ spec:
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-host-inventory-sync"
           message: "[Stage] Topo Host Inventory Sync: Kafka Lag is bigger than 200 for the last 10 minutes"
       - alert: TopologyKafkaLagCollectorAnsibleTower
-        expr: sum(kafka_consumergroup_group_lag{topic='platform.topological-inventory.collector-ansible-tower'}) > 200
+        expr: sum(kafka_consumergroup_group_lag{topic='platform.topological-inventory.collector-ansible-tower', namespace='platform-mq-stage'}) > 200
         for: 10m
         labels:
           severity: info
@@ -182,7 +218,7 @@ spec:
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-ansible-tower-targeted-collector"
           message: "[Stage] Topo Targeted Collector (Tower): Kafka Lag is bigger than 200 for the last 10 minutes"
       - alert: TopologyKafkaLagTaskOutputStream
-        expr: sum(kafka_consumergroup_group_lag{topic='platform.topological-inventory.task-output-stream'}) > 200
+        expr: sum(kafka_consumergroup_group_lag{topic='platform.topological-inventory.task-output-stream', namespace='platform-mq-stage'}) by (group) > 200
         for: 10m
         labels:
           severity: info
@@ -193,8 +229,8 @@ spec:
           dashboard: "https://grafana.app-sre.devshift.net/d/MnHGlz5Mk/topological-inventory-core?orgId=1&refresh=30s&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-api"
           message: "[Stage] Catalog Task Minion: Kafka Lag (task-output-stream) is bigger than 200 for the last 10 minutes"
-      - alert: TopologyKafkaLagOperationsAmazon
-        expr: sum(kafka_consumergroup_group_lag{topic='platform.topological-inventory.operations-amazon'}) > 200
+      - alert: TopologyKafkaLagOperations
+        expr: sum(kafka_consumergroup_group_lag{topic=~'platform.topological-inventory.operations-.*', namespace='platform-mq-stage'}) by (group, topic) > 200
         for: 10m
         labels:
           severity: info
@@ -204,83 +240,11 @@ spec:
         annotations:
           dashboard: "https://grafana.app-sre.devshift.net/d/MnHGlz5Mk/topological-inventory-core?orgId=1&refresh=30s&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-amazon-operations"
-          message: "[Stage] Topo Amazon Operations: Kafka Lag is bigger than 200 for the last 10 minutes"
-      - alert: TopologyKafkaLagOperationsAnsibleTower
-        expr: sum(kafka_consumergroup_group_lag{topic='platform.topological-inventory.operations-ansible-tower'}) > 200
-        for: 10m
-        labels:
-          severity: info
-          service: insights
-          env: stage
-          app_team: topo-sources
-        annotations:
-          dashboard: "https://grafana.app-sre.devshift.net/d/MnHGlz5Mk/topological-inventory-core?orgId=1&refresh=30s&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
-          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-ansible-tower-operations"
-          message: "[Stage] Topo Ansible Tower Operations: Kafka Lag is bigger than 200 for the last 10 minutes"
-      - alert: TopologyKafkaLagOperationsAzure
-        expr: sum(kafka_consumergroup_group_lag{topic='platform.topological-inventory.operations-azure'}) > 200
-        for: 10m
-        labels:
-          severity: info
-          service: insights
-          env: stage
-          app_team: topo-sources
-        annotations:
-          dashboard: "https://grafana.app-sre.devshift.net/d/MnHGlz5Mk/topological-inventory-core?orgId=1&refresh=30s&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
-          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-azure-operations"
-          message: "[Stage] Topo Azure Operations: Kafka Lag is bigger than 200 for the last 10 minutes"
-      - alert: TopologyKafkaLagOperationsOpenshift
-        expr: sum(kafka_consumergroup_group_lag{topic='platform.topological-inventory.operations-openshift'}) > 200
-        for: 10m
-        labels:
-          severity: info
-          service: insights
-          env: stage
-          app_team: topo-sources
-        annotations:
-          dashboard: "https://grafana.app-sre.devshift.net/d/MnHGlz5Mk/topological-inventory-core?orgId=1&refresh=30s&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
-          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-openshift-operations"
-          message: "[Stage] Topo OpenShift Operations: Kafka Lag is bigger than 200 for the last 10 minutes"
-      - alert: TopologyKafkaLagOperationsSatellite
-        expr: sum(kafka_consumergroup_group_lag{topic='platform.topological-inventory.operations-satellite'}) > 200
-        for: 10m
-        labels:
-          severity: info
-          service: insights
-          env: stage
-          app_team: topo-sources
-        annotations:
-          dashboard: "https://grafana.app-sre.devshift.net/d/MnHGlz5Mk/topological-inventory-core?orgId=1&refresh=30s&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
-          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-satellite-operations"
-          message: "[Stage] Topo Satellite Operations: Kafka Lag is bigger than 200 for the last 10 minutes"
-      - alert: TopoKafkaLagEventStreamOrchestrator
-        expr: sum(kafka_consumergroup_group_lag{topic='platform.sources.event-stream', group='topological-inventory-orchestrator'}) > 200
-        for: 10m
-        labels:
-          severity: info
-          service: insights
-          env: stage
-          app_team: topo-sources
-        annotations:
-          dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
-          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-orchestrator"
-          message: "[Stage] Topo Orchestrator: Kafka Lag is bigger than 200 for the last 10 minutes"
-      - alert: TopoKafkaLagEventStreamSourcesSync
-        expr: sum(kafka_consumergroup_group_lag{topic='platform.sources.event-stream', group='topological-inventory-sync-sources'}) > 200
-        for: 10m
-        labels:
-          severity: info
-          service: insights
-          env: stage
-          app_team: topo-sources
-        annotations:
-          dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
-          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-sources-sync"
-          message: "[Stage] Topo Sources Sync: Kafka Lag is bigger than 200 for the last 10 minutes"
-  - name: topology-restarts-stage # TODO: Collectors & Targeted
+          message: "[Stage] Topological Operations: Kafka Lag is bigger than 200 for the last 10 minutes"
+  - name: topology-restarts-stage
     rules:
       - alert: TopologyApiRestarts
-        expr: sum(increase(kube_pod_container_status_restarts_total{container="topological-inventory-api"}[1h])) > 5
+        expr: sum(increase(kube_pod_container_status_restarts_total{container="topological-inventory-api",namespace="topological-inventory-stage"}[1h])) > 5
         for: 30m
         labels:
           severity: info
@@ -292,7 +256,7 @@ spec:
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-api"
           message: "[Stage] Topo API: Restarted at least 5x/1h for the last 30 minutes"
       - alert: TopologyIngressApiRestarts
-        expr: sum(increase(kube_pod_container_status_restarts_total{container="topological-inventory-ingress-api"}[1h])) > 5
+        expr: sum(increase(kube_pod_container_status_restarts_total{container="topological-inventory-ingress-api",namespace="topological-inventory-stage"}[1h])) > 5
         for: 30m
         labels:
           severity: info
@@ -304,7 +268,7 @@ spec:
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-ingress-api"
           message: "[Stage] Topo Ingress API: Restarted at least 5x/1h for the last 30 minutes"
       - alert: TopologyOrchestratorRestarts
-        expr: sum(increase(kube_pod_container_status_restarts_total{container="topological-inventory-orchestrator"}[1h])) > 5
+        expr: sum(increase(kube_pod_container_status_restarts_total{container="topological-inventory-orchestrator",namespace="topological-inventory-stage"}[1h])) > 5
         for: 30m
         labels:
           severity: info
@@ -316,7 +280,7 @@ spec:
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-orchestrator"
           message: "[Stage] Topo Orchestrator: Restarted at least 5x/1h for the last 30 minutes"
       - alert: TopologyPersisterRestarts
-        expr: sum(increase(kube_pod_container_status_restarts_total{container="topological-inventory-persister"}[1h])) > 5
+        expr: sum(increase(kube_pod_container_status_restarts_total{container="topological-inventory-persister",namespace="topological-inventory-stage"}[1h])) > 5
         for: 30m
         labels:
           severity: info
@@ -328,7 +292,7 @@ spec:
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-persister"
           message: "[Stage] Topo Persister: Restarted at least 5x/1h for the last 30 minutes"
       - alert: TopologySourcesSyncRestarts
-        expr: sum(increase(kube_pod_container_status_restarts_total{container="topological-inventory-sources-sync"}[1h])) > 5
+        expr: sum(increase(kube_pod_container_status_restarts_total{container="topological-inventory-sources-sync",namespace="topological-inventory-stage"}[1h])) > 5
         for: 30m
         labels:
           severity: info
@@ -340,7 +304,7 @@ spec:
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-sources-sync"
           message: "[Stage] Topo Sources Sync: Restarted at least 5x/1h for the last 30 minutes"
       - alert: TopologyHostInvSyncRestarts
-        expr: sum(increase(kube_pod_container_status_restarts_total{container="topological-inventory-host-inventory-sync"}[1h])) > 5
+        expr: sum(increase(kube_pod_container_status_restarts_total{container="topological-inventory-host-inventory-sync",namespace="topological-inventory-stage"}[1h])) > 5
         for: 30m
         labels:
           severity: info
@@ -352,7 +316,7 @@ spec:
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-host-inventory-sync"
           message: "[Stage] Topo Host Inventory Sync: Restarted at least 5x/1h for the last 30 minutes"
       - alert: TopologyAmazonOperationsRestarts
-        expr: sum(increase(kube_pod_container_status_restarts_total{container="topological-inventory-amazon-operations"}[1h])) > 5
+        expr: sum(increase(kube_pod_container_status_restarts_total{container="topological-inventory-amazon-operations",namespace="topological-inventory-stage"}[1h])) > 5
         for: 30m
         labels:
           severity: info
@@ -364,7 +328,7 @@ spec:
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-amazon-operations"
           message: "[Stage] Topo Amazon Operations: Restarted at least 5x/1h for the last 30 minutes"
       - alert: TopologyAnsibleTowerOperationsRestarts
-        expr: sum(increase(kube_pod_container_status_restarts_total{container="topological-inventory-ansible-tower-operations"}[1h])) > 5
+        expr: sum(increase(kube_pod_container_status_restarts_total{container="topological-inventory-ansible-tower-operations",namespace="topological-inventory-stage"}[1h])) > 5
         for: 30m
         labels:
           severity: info
@@ -376,7 +340,7 @@ spec:
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-ansible-tower-operations"
           message: "[Stage] Topo Ansible Tower Operations: Restarted at least 5x/1h for the last 30 minutes"
       - alert: TopologyAzureOperationsRestarts
-        expr: sum(increase(kube_pod_container_status_restarts_total{container="topological-inventory-azure-operations"}[1h])) > 5
+        expr: sum(increase(kube_pod_container_status_restarts_total{container="topological-inventory-azure-operations",namespace="topological-inventory-stage"}[1h])) > 5
         for: 30m
         labels:
           severity: info
@@ -387,8 +351,20 @@ spec:
           dashboard: "https://grafana.app-sre.devshift.net/d/aanIgg0Mz/topological-inventory-collectors-and-operations?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-azure-operations"
           message: "[Stage] Topo Azure Operations: Restarted at least 5x/1h for the last 30 minutes"
+      - alert: TopologyGoogleOperationsRestarts
+        expr: sum(increase(kube_pod_container_status_restarts_total{container="topological-inventory-google-operations",namespace="topological-inventory-stage"}[1h])) > 5
+        for: 30m
+        labels:
+          severity: info
+          service: insights
+          env: stage
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/aanIgg0Mz/topological-inventory-collectors-and-operations?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-google-operations"
+          message: "[Stage] Topo Google Operations: Restarted at least 5x/1h for the last 30 minutes"
       - alert: TopologyOpenShiftOperationsRestarts
-        expr: sum(increase(kube_pod_container_status_restarts_total{container="topological-inventory-openshift-operations"}[1h])) > 5
+        expr: sum(increase(kube_pod_container_status_restarts_total{container="topological-inventory-openshift-operations",namespace="topological-inventory-stage"}[1h])) > 5
         for: 30m
         labels:
           severity: info
@@ -400,7 +376,7 @@ spec:
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-openshift-operations"
           message: "[Stage] Topo OpenShift Operations: Restarted at least 5x/1h for the last 30 minutes"
       - alert: TopologySatelliteOperationsRestarts
-        expr: sum(increase(kube_pod_container_status_restarts_total{container="topological-inventory-satellite-operations"}[1h])) > 5
+        expr: sum(increase(kube_pod_container_status_restarts_total{container="topological-inventory-satellite-operations",namespace="topological-inventory-stage"}[1h])) > 5
         for: 30m
         labels:
           severity: info
@@ -411,10 +387,34 @@ spec:
           dashboard: "https://grafana.app-sre.devshift.net/d/aanIgg0Mz/topological-inventory-collectors-and-operations?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-satellite-operations"
           message: "[Stage] Topo Satellite Operations: Restarted at least 5x/1h for the last 30 minutes"
+      - alert: TopologyTowerTargetedCollectorRestarts
+        expr: sum(increase(kube_pod_container_status_restarts_total{container="topological-ansible-tower-targeted-collector",namespace="topological-inventory-stage"}[1h])) > 5
+        for: 30m
+        labels:
+          severity: info
+          service: insights
+          env: stage
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/aanIgg0Mz/topological-inventory-collectors-and-operations?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-ansible-tower-targeted-collector"
+          message: "[Stage] Topo Ansible Tower Targeted Collector: Restarted at least 5x/1h for the last 30 minutes"
+      - alert: TopologyCollectorRestarts
+        expr: sum(increase(kube_pod_container_status_restarts_total{container=~"collector-.*",namespace="topological-inventory-stage"}[1h])) by (container) > 5
+        for: 30m
+        labels:
+          severity: info
+          service: insights
+          env: stage
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/aanIgg0Mz/topological-inventory-collectors-and-operations?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deploymentconfigs"
+          message: "[Stage] Topological Collectors: Some collector restarted at least 5x/1h for the last 30 minutes"
   - name: topology-api-stage
     rules:
       - alert: TopologyApi5xxErrors
-        expr: sum(rate(topological_inventory_api_http_requests_total{status=~"^[5].*"}[5m])) * 100 > 50
+        expr: sum(rate(topological_inventory_api_http_requests_total{status=~"^[5].*",namespace="topological-inventory-stage"}[5m])) * 100 > 50
         for: 10m
         labels:
           severity: info
@@ -426,7 +426,7 @@ spec:
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-api"
           message: "[Stage] Topology API has been throwing 5xx errors more than 50% of the time for the last 10 minutes"
       - alert: TopologyApiRequestDuration
-        expr: avg(rate(topological_inventory_api_http_duration_seconds_sum{controller!="status"}[5m]) / rate(topological_inventory_api_http_duration_seconds_count{controller!="status"}[5m]) > 0) > 500
+        expr: avg(rate(topological_inventory_api_http_duration_seconds_sum{controller!="status",namespace="topological-inventory-stage"}[5m]) / rate(topological_inventory_api_http_duration_seconds_count{controller!="status",namespace="topological-inventory-stage"}[5m]) > 0) > 500
         for: 10m
         labels:
           severity: info
@@ -440,7 +440,7 @@ spec:
   - name: topology-ingress-stage
     rules:
       - alert: TopologyIngressApi5xxErrors
-        expr: sum(rate(topological_inventory_ingress_api_http_requests_total{status=~"^[5].*"}[5m])) * 100 > 50
+        expr: sum(rate(topological_inventory_ingress_api_http_requests_total{status=~"^[5].*",namespace="topological-inventory-stage"}[5m])) * 100 > 50
         for: 10m
         labels:
           severity: info
@@ -452,7 +452,7 @@ spec:
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-ingress-api"
           message: "[Stage] Topology Ingress API has been throwing 5xx errors more than 50% of the time for the last 10 minutes"
       - alert: TopologyIngressApiRequestDuration
-        expr: avg(rate(topological_inventory_ingress_api_http_duration_seconds_sum{controller!="status"}[5m]) / rate(topological_inventory_ingress_api_http_duration_seconds_count{controller!="status"}[5m]) > 0) > 500
+        expr: avg(rate(topological_inventory_ingress_api_http_duration_seconds_sum{controller!="status",namespace="topological-inventory-stage"}[5m]) / rate(topological_inventory_ingress_api_http_duration_seconds_count{controller!="status",namespace="topological-inventory-stage"}[5m]) > 0) > 500
         for: 10m
         labels:
           severity: info
@@ -466,7 +466,7 @@ spec:
   - name: topology-persister-stage
     rules:
       - alert: TopologyPersisterMessageDuration
-        expr: avg(rate(topological_inventory_persister_message_process_seconds_sum[5m]) / rate(topological_inventory_persister_message_process_seconds_count[5m]) > 0) > 500
+        expr: avg(rate(topological_inventory_persister_message_process_seconds_sum{namespace="topological-inventory-stage"}[5m]) / rate(topological_inventory_persister_message_process_seconds_count{namespace="topological-inventory-stage"}[5m]) > 0) * 100 > 500
         for: 10m
         labels:
           severity: info
@@ -478,7 +478,7 @@ spec:
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-persister"
           message: "[Stage] Topology Persister's Average Payload Processing Duration > 500 ms for the last 10 minutes"
       - alert: TopologyPersisterErrors
-        expr: sum(increase(topological_inventory_persister_messages_total{result='error'}[10m])) > 50
+        expr: sum(increase(topological_inventory_persister_messages_total{result='error',namespace="topological-inventory-stage"}[10m])) > 50
         for: 10m
         labels:
           severity: info
@@ -492,7 +492,8 @@ spec:
   - name: topology-orchestrator-stage
     rules:
       - alert: TopologyOrchestratorErrors
-        expr: sum(increase(topological_inventory_orchestrator_errors_total[10m])) > 10
+        expr: sum(increase(topological_inventory_orchestrator_errors_total{namespace="topological-inventory-stage"}[10m])) > 10
+        for: 30m
         labels:
           severity: info
           service: insights
@@ -501,4 +502,150 @@ spec:
         annotations:
           dashboard: "https://grafana.app-sre.devshift.net/d/MnHGlz5Mk/topological-inventory-core?orgId=1&refresh=30s&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-orchestrator"
-          message: "[Stage] Topology Orchestrator: Average number of errors was > 10 per 10 mins for the last 10 minutes"
+          message: "[Stage] Topology Orchestrator: Average number of errors was > 10 per 10 mins for the last 30 minutes"
+  - name: topology-operations-stage
+    rules:
+      - alert: TopologyAmazonOperationsErrors
+        expr: round(sum(increase(topological_inventory_amazon_operations_errors_total{namespace="topological-inventory-stage"}[10m])))+round(sum(increase(topological_inventory_amazon_operations_status_counter{status="error",namespace="topological-inventory-stage"}[10m]))) > 10
+        for: 30m
+        labels:
+          severity: info
+          service: insights
+          env: stage
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/aanIgg0Mz/topological-inventory-collectors-and-operations?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-amazon-operations"
+          message: "[Stage] Topology Amazon Operations: Average number of errors was > 10 per 10 mins for the last 30 minutes"
+      - alert: TopologyAzureOperationsErrors
+        expr: round(sum(increase(topological_inventory_azure_operations_errors_total{namespace="topological-inventory-stage"}[10m])))+round(sum(increase(topological_inventory_azure_operations_status_counter{status="error",namespace="topological-inventory-stage"}[10m]))) > 10
+        for: 30m
+        labels:
+          severity: info
+          service: insights
+          env: stage
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/aanIgg0Mz/topological-inventory-collectors-and-operations?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-azure-operations"
+          message: "[Stage] Topology Azure Operations: Average number of errors was > 10 per 10 mins for the last 30 minutes"
+      - alert: TopologyAnsibleTowerOperationsErrors
+        expr: round(sum(increase(topological_inventory_ansible_tower_operations_errors_total{namespace="topological-inventory-stage"}[10m])))+round(sum(increase(topological_inventory_ansible_tower_operations_status_counter{status="error",namespace="topological-inventory-stage"}[10m]))) > 10
+        for: 30m
+        labels:
+          severity: info
+          service: insights
+          env: stage
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/aanIgg0Mz/topological-inventory-collectors-and-operations?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-ansible-tower-operations"
+          message: "[Stage] Topology Ansible Tower Operations: Average number of errors was > 10 per 10 mins for the last 30 minutes"
+      - alert: TopologyGoogleOperationsErrors
+        expr: round(sum(increase(topological_inventory_google_operations_errors_total{namespace="topological-inventory-stage"}[10m])))+round(sum(increase(topological_inventory_google_operations_status_counter{status="error",namespace="topological-inventory-stage"}[10m]))) > 10
+        for: 30m
+        labels:
+          severity: info
+          service: insights
+          env: stage
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/aanIgg0Mz/topological-inventory-collectors-and-operations?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-google-operations"
+          message: "[Stage] Topology Google Operations: Average number of errors was > 10 per 10 mins for the last 30 minutes"
+      - alert: TopologyOpenShiftOperationsErrors
+        expr: round(sum(increase(topological_inventory_openshift_operations_errors_total{namespace="topological-inventory-stage"}[10m])))+round(sum(increase(topological_inventory_openshift_operations_status_counter{status="error",namespace="topological-inventory-stage"}[10m]))) > 10
+        for: 30m
+        labels:
+          severity: info
+          service: insights
+          env: stage
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/aanIgg0Mz/topological-inventory-collectors-and-operations?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-openshift-operations"
+          message: "[Stage] Topology OpenShift Operations: Average number of errors was > 10 per 10 mins for the last 30 minutes"
+      - alert: TopologySatelliteOperationsErrors
+        expr: round(sum(increase(topological_inventory_satellite_operations_errors_total{namespace="topological-inventory-stage"}[10m])))+round(sum(increase(topological_inventory_satellite_operations_status_counter{status="error",namespace="topological-inventory-stage"}[10m]))) > 10
+        for: 30m
+        labels:
+          severity: info
+          service: insights
+          env: stage
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/aanIgg0Mz/topological-inventory-collectors-and-operations?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-satellite-operations"
+          message: "[Stage] Topology Satellite Operations: Average number of errors was > 10 per 10 mins for the last 30 minutes"
+      - alert: TopologyAmazonCollectorErrors
+        expr: round(sum(increase(topological_inventory_amazon_collector_errors_total{namespace="topological-inventory-stage"}[10m]))) > 10
+        for: 30m
+        labels:
+          severity: info
+          service: insights
+          env: stage
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/aanIgg0Mz/topological-inventory-collectors-and-operations?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deploymentconfigs"
+          message: "[Stage] Topology Amazon Collectors: Average number of errors was > 10 per 10 mins for the last 30 minutes"
+      - alert: TopologyAzureCollectorErrors
+        expr: round(sum(increase(topological_inventory_azure_collector_errors_total{namespace="topological-inventory-stage"}[10m]))) > 10
+        for: 30m
+        labels:
+          severity: info
+          service: insights
+          env: stage
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/aanIgg0Mz/topological-inventory-collectors-and-operations?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deploymentconfigs"
+          message: "[Stage] Topology Azure Collectors: Average number of errors was > 10 per 10 mins for the last 30 minutes"
+      - alert: TopologyAnsibleTowerCollectorErrors
+        expr: round(sum(increase(topological_inventory_ansible_tower_collector_errors_total{namespace="topological-inventory-stage"}[10m]))) > 10
+        for: 30m
+        labels:
+          severity: info
+          service: insights
+          env: stage
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/aanIgg0Mz/topological-inventory-collectors-and-operations?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deploymentconfigs"
+          message: "[Stage] Topology AnsibleTower Collectors: Average number of errors was > 10 per 10 mins for the last 30 minutes"
+      - alert: TopologyAnsibleTowerTargetedCollectorErrors
+        expr: round(sum(increase(topological_inventory_ansible_tower_targeted_refresh_errors_total{namespace="topological-inventory-stage"}[10m]))) > 10
+        for: 30m
+        labels:
+          severity: info
+          service: insights
+          env: stage
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/aanIgg0Mz/topological-inventory-collectors-and-operations?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-ansible-tower-targeted-collector"
+          message: "[Stage] Topology Ansible Tower Targeted Collectors: Average number of errors was > 10 per 10 mins for the last 30 minutes"
+      - alert: TopologySourcesSyncErrors
+        expr: round(sum(increase(topological_inventory_sources_sync_errors_total{namespace="topological-inventory-stage"}[10m]))) > 10
+        for: 30m
+        labels:
+          severity: info
+          service: insights
+          env: stage
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/aanIgg0Mz/topological-inventory-collectors-and-operations?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-sources-sync"
+          message: "[Stage] Topology Sources Sync: Average number of errors was > 10 per 10 mins for the last 30 minutes"
+      - alert: TopologyHostInventorySyncErrors
+        expr: round(sum(increase(topological_inventory_host_inventory_sync_errors_total{namespace="topological-inventory-stage"}[10m]))) > 10
+        for: 30m
+        labels:
+          severity: info
+          service: insights
+          env: stage
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/aanIgg0Mz/topological-inventory-collectors-and-operations?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/topological-inventory-stage/deployments/topological-inventory-host-inventory-sync"
+          message: "[Stage] Topology Host Inventory Sync: Average number of errors was > 10 per 10 mins for the last 30 minutes"

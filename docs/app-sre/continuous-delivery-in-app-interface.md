@@ -59,6 +59,9 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
         * `namespace` - a reference to a namespace to deploy to
         * `ref` - git ref to deploy (commit sha or branch name (usually `master`))
             * for deployments to a production namespace, always use a git commit hash
+        * `promotion` - a section to indicate promotion behavior/validations
+            * `publish` - a list of channels to publish the success of the deployment
+            * `subscribe` - before deploying, validate that the current commit sha has been successfully deployed and published to the specified channels
         * `parameters` - (optional) parameters for `oc process` to be used when deploying to the current namespace
         * `upstream` - (optional) name of Jenkins job to build after.
             * use this option in the case a docker image should be built before deployment
@@ -119,6 +122,19 @@ Additional supported commands:
 
 MR is not being merged? [follow this SOP](/docs/app-sre/sop/app-interface-periodic-job-debug.md)
 
+## Automated/Gated promotions
+
+By defining `promotion.publish` and `promotion.subscribe` on deployment `targets` you can add a validation that the commit being promoted was previously successfully deployed.
+
+For example, define a `promotion.subscribe` to a production target and a `promotion.publish` to a stage post-deployment test target with a matching value (any unique string) to make the production deployment dependant on the success of the stage post-deployment tests.
+
+Examples:
+
+* Publish: [github-mirror stage post-deployment testing SaaS file](https://gitlab.cee.redhat.com/service/app-interface/-/blob/fe22ed43d0cb46f1ac708cf86f9f569c1ffa5b68/data/services/github-mirror/cicd/test.yaml#L42-44)
+* Subscribe: [github-mirror production deployment](https://gitlab.cee.redhat.com/service/app-interface/-/blob/fe22ed43d0cb46f1ac708cf86f9f569c1ffa5b68/data/services/github-mirror/cicd/deploy.yaml#L49-51)
+
+To make the promotion process automated, set `promotion.auto` to `true`.
+
 ## Where do I sign?
 
 The App SRE team will contact you directly to migrate any saas repos you have to saas files.
@@ -126,10 +142,6 @@ The App SRE team will contact you directly to migrate any saas repos you have to
 ## Questions?
 
 Reach out to us on #sd-app-sre in the CoreOS slack!
-
-## Future development
-
-* add ability to define automated promotion flows
 
 ## Developer workflow
 

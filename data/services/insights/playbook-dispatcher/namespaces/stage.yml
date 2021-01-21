@@ -31,6 +31,11 @@ openshiftResources:
   version: 3
   type: kubernetes.io/dockerconfigjson
   name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
 
 managedTerraformResources: true
 
@@ -41,3 +46,15 @@ terraformResources:
   defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
   output_resource_name: cloudwatch
   es_identifier: kibana-elasticsearch
+- provider: rds
+  account: insights-stage
+  identifier: playbook-dispatcher-stage
+  defaults: /terraform/resources/insights/stage/rds/postgres12-rds-1.yml
+  overrides:
+    username: insights
+    allocated_storage: 300
+    name: insights
+    engine_version: "12.3"
+  parameter_group: /terraform/resources/insights/stage/rds/postgres12-parameter-group-playbook-dispatcher-stage.yml
+  output_resource_name: playbook-dispatcher-db
+  enhanced_monitoring: true

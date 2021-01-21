@@ -423,6 +423,10 @@ description: |
 
   Also, we expect some information on escalation criteria.
 
+  In case the team does not have an oncall rotation, it is required to add a `nextEscalationPolicy` -
+  a reference to the next escalation policy to follow in case of an incident.
+  This can be a Manager escalation for example.
+
 channels:
   slackUserGroup:
   - $ref: /teams/<teamname>/permissions/<teamname>-coreos-slack.yml
@@ -432,6 +436,9 @@ channels:
 
   pagerduty:
     $ref: /dependencies/pagerduty/<teamname>-oncall.yml
+
+  nextEscalationPolicy:
+    $ref: /teams/<teamname>/escalation-policies/<next>.yml
 
 ```
 

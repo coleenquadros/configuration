@@ -272,9 +272,9 @@ spec:
     # This is a special case where anything under 5 seconds is expected. Large runs will fail the
     # SLO. Approved and asked for by @sthirugn
     - record: service:latency:adjusted:rate5m
-      expr: sum by(exported_service, environment) (rate(api_3scale_gateway_api_time_bucket{le="5000.0"}[5m]))
+      expr: sum by(exported_service, environment) (rate(api_3scale_gateway_api_time_bucket{le="4000.0"}[5m]))
       labels:
-        exported_service: drift
+        service: drift
 
   #### entitlements ####
   - name: entitlements-sli
@@ -901,4 +901,29 @@ spec:
     - record: service:latency:adjusted:rate5m
       expr: sum by(exported_service, environment) (rate(api_3scale_gateway_api_time_bucket{le="2000.0"}[5m]))
       labels:
-        exported_service: xavier
+        service: xavier
+
+  #### yupana ####
+  - name: yupana-sli
+    rules:
+    # Proportion of requests allowed to have 500 status in a given period
+    - record: service:constant:sli:pcterror
+      expr: "5"
+
+    # Proportion of requests allowed to be over latency threshold in a given period
+    - record: service:constant:sli:pctlatency
+      expr: "10"
+
+    # Proportion time that the SLI should be met for error SLI
+    - record: service:constant:slo:pcterror
+      expr: "90"
+
+    # Proportion time that the SLI should be met for latency SLI
+    - record: service:constant:slo:pctlatency
+      expr: "90"
+
+    # Custom adjusted latency threshold by increments of 500 up to 4000
+    - record: service:latency:adjusted:rate5m
+      expr: sum by(exported_service, environment) (rate(api_3scale_gateway_api_time_bucket{le="1500.0"}[5m]))
+      labels:
+        service: yupana
