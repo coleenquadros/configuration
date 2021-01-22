@@ -34,8 +34,10 @@ managedResourceTypes:
 - HorizontalPodAutoscaler
 
 imagePatterns:
-- registry.redhat.io/openshift4/ose-metering-hive
-- registry.redhat.io/openshift4/ose-metering-presto
+- quay.io/cloudservices/ubi-hive
+- quay.io/cloudservices/ubi-trino
+# - registry.redhat.io/openshift4/ose-metering-hive
+# - registry.redhat.io/openshift4/ose-metering-presto
 
 authentication:
   code:
@@ -46,21 +48,25 @@ authentication:
     field: all
 
 # templates are listed in the they were listed in the dry run log
-# template: koku
 resourceTemplates:
 # template: hive-metastore
 - name: hive-metastore
   path: /templates/hccm/hive-metastore.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
   targets:
+  # STAGING
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: 32b3172c74dcc4fb8bc72b62291b8ba96674c350
+    ref: 34914d3f399296d6ffb17989dd90efc1b9f51829
     parameters:
-      IMAGE: registry.redhat.io/openshift4/ose-metering-hive
-      IMAGE_TAG: v4.6
+      #IMAGE: registry.redhat.io/openshift4/ose-metering-hive
+      #IMAGE_TAG: v4.6
+      IMAGE: quay.io/cloudservices/ubi-hive
+      IMAGE_TAG: 2.3.3-001
+      REPLICAS: 1
       CPU_REQUEST: 200m
       CPU_LIMIT: 500m
+  # PRODUCTION
   # - namespace:
   #     $ref: /services/insights/hccm/namespaces/hccm-prod.yml
   #   ref: 59c72d7b3660743a1ae0e0228bdbe79a45405e91
@@ -75,15 +81,19 @@ resourceTemplates:
   path: /templates/hccm/presto.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
   targets:
+  # STAGING
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: 32b3172c74dcc4fb8bc72b62291b8ba96674c350
+    ref: 34914d3f399296d6ffb17989dd90efc1b9f51829
     parameters:
-      IMAGE: registry.redhat.io/openshift4/ose-metering-presto
-      IMAGE_TAG: v4.6
-      REPLICAS: 0
+      # IMAGE: registry.redhat.io/openshift4/ose-metering-presto
+      # IMAGE_TAG: v4.6
+      IMAGE: quay.io/cloudservices/ubi-trino
+      IMAGE_TAG: 348-001
+      REPLICAS: 1
       CPU_REQUEST: 200m
       CPU_LIMIT: 500m
+  # PRODUCTION
   # - namespace:
   #     $ref: /services/insights/hccm/namespaces/hccm-prod.yml
   #   ref: 6bf412d6df35b809ff17dff11524c62c47fae237
