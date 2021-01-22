@@ -741,6 +741,14 @@ Notes:
 * In case the Route contains no sensitive information, a secret in Vault is not required (hence the fields are optional).
 * It is recommended to read through the instructions for [Secrets](#manage-secrets-via-app-interface-openshiftnamespace-1yml-using-vault) before using Routes.
 
+#### Validate JSON in Secrets and ConfigMaps
+
+If a key of a Secret or ConfigMap keys is a JSON, you can add the option `validate_json` to the openshift resource definition in order to make sure it is valid json.
+
+#### Validate AlertManager configuration in Secrets and ConfigMaps
+
+If a key of a Secret or ConfigMap keys is a JSON, you can add the option `validate_alertmanager` to the openshift resource definition in order to make sure it is valid alertmanager config. The integration will look into the `alertmanager.yaml` key of the secret to look for it unless `alertmanager_config_key` is specified.
+
 ### Manage openshift-acme deployments via App-Interface (`/openshift/acme-1.yml`)
 
 This integration allows namespace owners to deploy openshift-acme to their namespaces.
