@@ -83,16 +83,32 @@ List Addons:
 ocm get /api/clusters_mgmt/v1/addons
 ```
 
+Find Cluster ID:
+
+```
+ocm get /api/clusters_mgmt/v1/clusters --parameter search="name like '$CLUSTER_NAME'" | jq -r .items[].id
+```
+
+Find the Expiration Time:
+
+```
+ocm get cluster $CLUSTER_ID | jq -r .expiration_timestamp
+```
+
 Extend **staging** Clusters lifetime (note: we need Narayanan's and Jonathan Beakley's approval for this):
 
 ```
 # login into *staging*
-ocm patch /api/clusters_mgmt/v1/clusters/YOUR_ID_HERE << EOF
+ocm patch /api/clusters_mgmt/v1/clusters/CLUSTER_ID << EOF
 > {
->   "expiration_timestamp": "$(date --iso-8601=seconds -d '+7 days')"
+>   "expiration_timestamp": "$(date -v +7d +"%Y-%m-%dT%TZ")"
 > }
 > EOF
 ```
+
+NOTE: The format for the expiration_timestamp is YYYY-MM-DDTHH:MM:SSZ, for example 2021-01-29T14:02:36Z
+
+TIP: Instead of using `date -v +7d +"%Y-%m-%dT%TZ"` to generate the date, some date implementations support a `--iso-8601=seconds` option which can be used instead.  The output of this command may be rejected by OCM which is why this is left as an alternate means to generate the timestamp.  To use this, substitute `date -v +7d +"%Y-%m-%dT%TZ"` with `--iso-8601=seconds -d '+7 days'` in the `ocm patch` command above.
 
 Obtain `cluster-admin` for a **staging** cluster (note: your user needs the SREP role in ocm-resources: [example](https://gitlab.cee.redhat.com/service/ocm-resources/merge_requests/102)):
 
