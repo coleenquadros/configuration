@@ -37,3 +37,6 @@ server: bundle validate
 		-e LOAD_METHOD=fs \
 		-e DATAFILES_FILE=/bundle/$(BUNDLE_FILENAME) \
 		$(QONTRACT_SERVER_IMAGE):$(QONTRACT_SERVER_IMAGE_TAG)
+
+qr-promote:
+	./hack/update-qr-tag.sh

@@ -19,6 +19,7 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
 - [How can I see who has access to a service](#how-can-i-see-who-has-access-to-a-service)
 - [How to determine my AWS permissions](#how-to-determine-my-aws-permissions)
 - [Accessing DataHub](#accessing-datahub)
+- [Jenkins Vault plugin upgrade](#jenkins-vault-plugin-upgrade)
 
 ## Useful links
 
@@ -168,3 +169,14 @@ This user policy file a description, which explains the permissions allowed by t
 ### Accessing DataHub
 
 DataHub is not managed by the AppSRE team, but you can find the process to [request access here](https://help.datahub.redhat.com/docs/interacting-with-telemetry-data). To report issues with Datahub (ex: timeouts with telemeter-lts-dashboards.datahub.redhat.com) see [this help page](https://help.datahub.redhat.com/docs/data-hub-report-issues) or reach out to [#forum-telemetry](https://coreos.slack.com/messages/forum-telemetry) on Slack for additional info.
+
+
+### Jenkins Vault plugin upgrade
+
+The App SRE team is upgrading the Vault plugin on it's Jenkins instances from version 2 to 3.
+
+As a result from this upgrade, jobs may fail due to not being able to read secrets from Vault if they contain empty keys. If you encounter a failing job which seems related to Vault, please check all the secrets used by the job to verify they do not contain empty keys.
+
+In case of any other issues, please reach out to @app-sre-ic on #sd-app-sre in CoreOS slack.
+
+Related Jira ticket: https://issues.redhat.com/browse/APPSRE-947
