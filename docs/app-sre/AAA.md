@@ -248,7 +248,7 @@ Every app-sre engineer should have access to the following
 
 - Pendo:
   - This is necessary to post maintenance and outage messages in https://cloud.redhat.com/openshift
-  - Access is provided via email to Cameron Britt <cbritt@redhat.com> and Jeremy Perry <jeperry@redhat.com>.
+  - Access is provided via email to Allie Higgins <ahiggins@redhat.com>.
   - [Logging](https://app.pendo.io/login) in is done using the full Red Hat email.
 
 - Unleash:
