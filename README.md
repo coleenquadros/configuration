@@ -404,7 +404,7 @@ In case you don't meet the prerequisites, please follow:
 
 #### Step 1: Define escalation policies for the team:
 
-Each team can have multiple escalaiton policies defined. This is useful in case the team divides the ownership of developed services. For a single escalation policy, create a general.yml under `teams/<teamname>/escalation-policies/`. An example can be seen [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/9bcb0b1c07d79ef164c552b2b970bc0247e9c1fa/data/teams/telemeter/escalation-policies/general.yaml)
+Each team can have multiple escalation policies defined. This is useful in case the team divides the ownership of developed services. For a single escalation policy, create a general.yml under `teams/<teamname>/escalation-policies/`. An example can be seen [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/9bcb0b1c07d79ef164c552b2b970bc0247e9c1fa/data/teams/telemeter/escalation-policies/general.yaml)
 
 Here's a template you can copy-paste and edit as needed:
 
@@ -547,7 +547,7 @@ sentryProjects:
 
 The name, description, email-prefix, and platform fields are required, whereas the other fields are optional.
 
-In order to add or remove a Sentry project, a MR must be sent to the appropriate App datafile and the project needs to be added to or remoted from the projects array.
+In order to add or remove a Sentry project, a MR must be sent to the appropriate App datafile and the project needs to be added to or removed from the projects array.
 
 ### Create a Sentry Team (`/dependencies/sentry-team-1.yml`)
 
@@ -740,6 +740,14 @@ Notes:
 * The secret in Vault should be stored in the following path: `app-interface/<cluster>/<namespace>/routes/<secret_name>`.
 * In case the Route contains no sensitive information, a secret in Vault is not required (hence the fields are optional).
 * It is recommended to read through the instructions for [Secrets](#manage-secrets-via-app-interface-openshiftnamespace-1yml-using-vault) before using Routes.
+
+#### Validate JSON in Secrets and ConfigMaps
+
+If a key of a Secret or ConfigMap keys is a JSON, you can add the option `validate_json` to the openshift resource definition in order to make sure it is valid json.
+
+#### Validate AlertManager configuration in Secrets and ConfigMaps
+
+If a key of a Secret or ConfigMap keys is a JSON, you can add the option `validate_alertmanager_config` to the openshift resource definition in order to make sure it is valid alertmanager config. The integration will look into the `alertmanager.yaml` key of the secret to look for it unless `alertmanager_config_key` is specified.
 
 ### Manage openshift-acme deployments via App-Interface (`/openshift/acme-1.yml`)
 

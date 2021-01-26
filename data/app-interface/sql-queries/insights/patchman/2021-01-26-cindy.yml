@@ -1,0 +1,17 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2021-01-26-cindy
+namespace:
+  $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
+identifier: patchman-prod
+output: stdout
+queries:
+    - select 'current';
+    - explain select count(tag) from (SELECT DISTINCT jsonb_array_elements(tags) as tag FROM inventory.hosts) as t;
+    - select 'current + jsonb_array_length';
+    - explain select count(tag) from (SELECT DISTINCT jsonb_array_elements(tags) as tag FROM inventory.hosts where jsonb_array_length(tags) > 0) as t;
+    - select 'distinct count';
+    - explain select count(distinct tag) from (SELECT jsonb_array_elements(tags) as tag FROM inventory.hosts) as t;
+    - select 'distinct count + jsonb_array_length';
+    - explain select count(distinct tag) from (SELECT jsonb_array_elements(tags) as tag FROM inventory.hosts where jsonb_array_length(tags) > 0) as t;
