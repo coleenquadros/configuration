@@ -547,7 +547,7 @@ sentryProjects:
 
 The name, description, email-prefix, and platform fields are required, whereas the other fields are optional.
 
-In order to add or remove a Sentry project, a MR must be sent to the appropriate App datafile and the project needs to be added to or remoted from the projects array.
+In order to add or remove a Sentry project, a MR must be sent to the appropriate App datafile and the project needs to be added to or removed from the projects array.
 
 ### Create a Sentry Team (`/dependencies/sentry-team-1.yml`)
 
