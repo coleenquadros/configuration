@@ -325,3 +325,19 @@
         artifacts: '{artifacts_path}'
         allow-empty: true
 
+- job-template:
+    id: managed-kafka-e2e-test-suite
+    name: managed-kafka-e2e-test-suite-staging
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *mk_e2e_test_suite_staging
+    <<: *gl_timed
+    publishers:
+    - archive:
+        artifacts: 'target/logs/**,target/surefire-reports/**'
+        allow-empty: true
