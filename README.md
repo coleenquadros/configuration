@@ -747,7 +747,7 @@ If a key of a Secret or ConfigMap keys is a JSON, you can add the option `valida
 
 #### Validate AlertManager configuration in Secrets and ConfigMaps
 
-If a key of a Secret or ConfigMap keys is a JSON, you can add the option `validate_alertmanager` to the openshift resource definition in order to make sure it is valid alertmanager config. The integration will look into the `alertmanager.yaml` key of the secret to look for it unless `alertmanager_config_key` is specified.
+If a key of a Secret or ConfigMap keys is a JSON, you can add the option `validate_alertmanager_config` to the openshift resource definition in order to make sure it is valid alertmanager config. The integration will look into the `alertmanager.yaml` key of the secret to look for it unless `alertmanager_config_key` is specified.
 
 ### Manage openshift-acme deployments via App-Interface (`/openshift/acme-1.yml`)
 
