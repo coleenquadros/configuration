@@ -404,7 +404,7 @@ In case you don't meet the prerequisites, please follow:
 
 #### Step 1: Define escalation policies for the team:
 
-Each team can have multiple escalaiton policies defined. This is useful in case the team divides the ownership of developed services. For a single escalation policy, create a general.yml under `teams/<teamname>/escalation-policies/`. An example can be seen [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/9bcb0b1c07d79ef164c552b2b970bc0247e9c1fa/data/teams/telemeter/escalation-policies/general.yaml)
+Each team can have multiple escalation policies defined. This is useful in case the team divides the ownership of developed services. For a single escalation policy, create a general.yml under `teams/<teamname>/escalation-policies/`. An example can be seen [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/9bcb0b1c07d79ef164c552b2b970bc0247e9c1fa/data/teams/telemeter/escalation-policies/general.yaml)
 
 Here's a template you can copy-paste and edit as needed:
 
