@@ -9,8 +9,12 @@
         <<: *vault_defaults
         secrets:
         - *uhc_integration_tests
-    ci_cmd: ./run_integration_tests.sh
-    cron_expression: 0 10,22 * * *
+    build_deploy_script_path: './run_integration_tests.sh'
+    upstream: ''
+    triggers:
+    - reverse:
+        jobs: '{upstream}'
+        results: 'success'
     publishers:
     - junit:
         results: '**/**/junit.xml'
@@ -21,7 +25,7 @@
         junit-attachments: true
     - email:
         recipients: sda-devel@redhat.com
-    <<: *gl_timed
+    <<: *gl_build_master
 
 - job-template:
     id: 'ocm-portal-deploy'
