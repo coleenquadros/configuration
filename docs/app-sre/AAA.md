@@ -177,8 +177,8 @@ Every app-sre engineer should have access to the following
     - ACCESS: outage-list -> subscribe from UI
     - ACCESS: it-iam-announce-list -> subscribe from UI
     - ACCESS: it-platform-community-list (useful for SSO) -> subscribe from UI
-  - optional - don't subscribe if you are just getting onboarded to the AppSRE team:
-    - ACCESS: aos-devel (useful to get the hottest news about openshift) -> subscribe from UI
+  - Optional - Additional information surfaces, subscription not mandatory
+    - ACCESS: aos-devel: very high volume (useful to get the latest news about OpenShift development) -> subscribe from UI
     - ACCESS: devtools-saas -> subscribe from UI
     - ACCESS: devtools-team -> subscribe from UI
 
