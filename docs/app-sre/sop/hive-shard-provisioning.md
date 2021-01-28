@@ -30,15 +30,15 @@ These instructions have been adapted from the [original google doc](https://docs
 
 1. Follow the standard [Cluster Onboarding SOP](app-interface-onboard-cluster.md) using the following specs
 
-    |                    | Staging     | Production |
-    |--------------------|-------------|------------|
-    | Availability       | Single zone | Multizone  |
-    | Compute type       | m5.xlarge   | m5.xlarge  |
-    | Compute count      | 4           | 9          |
-    | Persistent storage | 600 GB      | 600 GB     |
-    | Load balancers     | 0           | 0          |
-    | Machine CIRD       | See note    | See note   |
-    | Privacy            | Private     | Private    |
+    |                            | Staging     | Production |
+    |----------------------------|-------------|------------|
+    | Availability               | Single zone | Multizone  |
+    | Compute type               | m5.xlarge   | m5.xlarge  |
+    | Compute count (autoscale)  | 4 - 25      | 9 - 25     |
+    | Persistent storage         | 600 GB      | 600 GB     |
+    | Load balancers             | 0           | 0          |
+    | Machine CIRD               | See note    | See note   |
+    | Privacy                    | Private     | Private    |
 
 1. Request that the cluster's Master nodes be adjusted to m5.2xlarge
 
