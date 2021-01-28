@@ -1,0 +1,26 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /backplane/backplane-api-prod-common.prometheusrules.yml
+
+evaluation_interval: 1m
+
+tests:
+- interval: 1m
+  input_series:
+  - series: up{job="backplane-api"}
+    values: 2+0x30 0+0x30 # 2 for the first 30 minutes, 0 for the next 30 minutes
+
+  alert_rule_test:
+  - eval_time: 25m
+    alertname: Backplane API Target Down
+    exp_alerts:
+  - eval_time: 55m
+    alertname: Backplane API Target Down
+    exp_alerts:
+    - exp_labels:
+        severity: critical
+        service: srep
+      exp_annotations:
+        runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/BackplaneTargetDown.md"

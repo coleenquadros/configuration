@@ -1,0 +1,23 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: backplane-api-rules-{{{shard_name}}}
+spec:
+  groups:
+  - name: backplane-api-rules-{{{shard_name}}}
+    rules:
+    - alert: Backplane API Target Down
+      annotations:
+        message: "No targets found for Backplane API on prod - {{{shard_name}}}"
+        runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/BackplaneTargetDown.md"
+      expr: |
+        absent(up{job="backplane-api"} == 1)
+      for: 15m
+      labels:
+        severity: critical
+        service: srep
