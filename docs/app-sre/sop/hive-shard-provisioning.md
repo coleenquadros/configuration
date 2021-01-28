@@ -34,7 +34,7 @@ These instructions have been adapted from the [original google doc](https://docs
     |----------------------------|-------------|------------|
     | Availability               | Single zone | Multizone  |
     | Compute type               | m5.xlarge   | m5.xlarge  |
-    | Compute count (autoscale)  | 4 - 25      | 9 - 25     |
+    | Compute count (autoscale)  | 4 - 25      | 9 - 27     |
     | Persistent storage         | 600 GB      | 600 GB     |
     | Load balancers             | 0           | 0          |
     | Machine CIRD               | See note    | See note   |
