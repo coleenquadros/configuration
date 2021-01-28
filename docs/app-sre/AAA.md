@@ -174,12 +174,13 @@ Every app-sre engineer should have access to the following
     - ACCESS: sd-notifications -> subscribe from UI
     - ACCESS: sd-org -> subscribe from UI
     - ACCESS: sres -> subscribe from UI
-    - ACCESS: devtools-saas -> subscribe from UI
-    - ACCESS: devtools-team -> subscribe from UI
     - ACCESS: outage-list -> subscribe from UI
-    - ACCESS: aos-devel -> subscribe from UI
     - ACCESS: it-iam-announce-list -> subscribe from UI
     - ACCESS: it-platform-community-list (useful for SSO) -> subscribe from UI
+  - Optional - Additional information surfaces, subscription not mandatory
+    - ACCESS: aos-devel: very high volume (useful to get the latest news about OpenShift development) -> subscribe from UI
+    - ACCESS: devtools-saas -> subscribe from UI
+    - ACCESS: devtools-team -> subscribe from UI
 
 - Sd-org onboarding
   - ACCESS Contact Meghna Gala (mgala@redhat.com) re Sd-org onboarding (may not be needed)
@@ -190,7 +191,7 @@ Every app-sre engineer should have access to the following
     - Jira boards [Sprint Board](https://issues.redhat.com/secure/RapidBoard.jspa?rapidView=5536) & [SD Epics](https://issues.redhat.com/projects/SDE)
 
 - Openshift github onboarding (access to private repositories in openshift github org):
-  - ACCESS: https://mojo.redhat.com/docs/DOC-1081313#jive_content_id_Github_Access
+  - ACCESS: https://source.redhat.com/groups/public/atomicopenshift/atomicopenshift_wiki/openshift_onboarding_checklist_for_github
   - Ping [Bill Dettelback](https://rover.redhat.com/people/profile/bdettelb) on slack or mail for access to [quay github org](https://github.com/quay)
 
 - App-SRE OCM org (https://cloud.redhat.com/openshift)
