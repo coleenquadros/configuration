@@ -174,12 +174,13 @@ Every app-sre engineer should have access to the following
     - ACCESS: sd-notifications -> subscribe from UI
     - ACCESS: sd-org -> subscribe from UI
     - ACCESS: sres -> subscribe from UI
-    - ACCESS: devtools-saas -> subscribe from UI
-    - ACCESS: devtools-team -> subscribe from UI
     - ACCESS: outage-list -> subscribe from UI
-    - ACCESS: aos-devel -> subscribe from UI
     - ACCESS: it-iam-announce-list -> subscribe from UI
     - ACCESS: it-platform-community-list (useful for SSO) -> subscribe from UI
+  - optional - don't subscribe if you are just getting onboarded to the AppSRE team:
+    - ACCESS: aos-devel (useful to get the hottest news about openshift) -> subscribe from UI
+    - ACCESS: devtools-saas -> subscribe from UI
+    - ACCESS: devtools-team -> subscribe from UI
 
 - Sd-org onboarding
   - ACCESS Contact Meghna Gala (mgala@redhat.com) re Sd-org onboarding (may not be needed)
