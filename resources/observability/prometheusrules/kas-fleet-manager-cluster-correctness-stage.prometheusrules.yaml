@@ -1,0 +1,157 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: managed-services-cluster-correctness-stage
+spec:
+  groups:
+    - name: managed-services-osd-cluster-creation-correctness.rules
+      rules:
+        - alert: ManagedServicesOSDClusterCreationSuccessBudgetBurn
+          annotations:
+            message: "High 1h error budget burn for Managed Services OSD cluster create operations (current value: {{ $value }})"
+            dashboard: "https://grafana.stage.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#osd-cluster-provisioning-correctness"
+          expr: |
+            sum(kas_fleet_manager_cluster_operations:burnrate5m{job="kas-fleet-manager-metrics",namespace="managed-services-stage",operation="create"}) > (14.40 * (1-0.99000))
+            and
+            sum(kas_fleet_manager_cluster_operations:burnrate1h{job="kas-fleet-manager-metrics",namespace="managed-services-stage",operation="create"}) > (14.40 * (1-0.99000))
+          for: 2m
+          labels:
+            service: kas-fleet-manager
+            namespace: managed-services-stage
+            operation: create
+            severity: info
+        - alert: ManagedServicesOSDClusterCreationSuccessBudgetBurn
+          annotations:
+            message: "High 6h error budget burn for Managed Services OSD cluster create operations (current value: {{ $value }})"
+            dashboard: "https://grafana.stage.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#osd-cluster-provisioning-correctness"
+          expr: |
+            sum(kas_fleet_manager_cluster_operations:burnrate30m{job="kas-fleet-manager-metrics",namespace="managed-services-stage",operation="create"}) > (6.00 * (1-0.99000))
+            and
+            sum(kas_fleet_manager_cluster_operations:burnrate6h{job="kas-fleet-manager-metrics",namespace="managed-services-stage",operation="create"}) > (6.00 * (1-0.99000))
+          for: 15m
+          labels:
+            service: kas-fleet-manager
+            namespace: managed-services-stage
+            operation: create
+            severity: info
+        - alert: ManagedServicesOSDClusterCreationSuccessBudgetBurn
+          annotations:
+            message: "High 1d error budget burn for Managed Services OSD cluster create operations (current value: {{ $value }})"
+            dashboard: "https://grafana.stage.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#osd-cluster-provisioning-correctness"
+          expr: |
+            sum(kas_fleet_manager_cluster_operations:burnrate2h{job="kas-fleet-manager-metrics",namespace="managed-services-stage",operation="create"}) > (3.00 * (1-0.99000))
+            and
+            sum(kas_fleet_manager_cluster_operations:burnrate1d{job="kas-fleet-manager-metrics",namespace="managed-services-stage",operation="create"}) > (3.00 * (1-0.99000))
+          for: 1h
+          labels:
+            service: kas-fleet-manager
+            namespace: managed-services-stage
+            operation: create
+            severity: info
+        - alert: ManagedServicesOSDClusterCreationSuccessBudgetBurn
+          annotations:
+            message: "High 3d error budget burn for Managed Services OSD cluster create operations (current value: {{ $value }})"
+            dashboard: "https://grafana.stage.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#osd-cluster-provisioning-correctness"
+          expr: |
+            sum(kas_fleet_manager_cluster_operations:burnrate6h{job="kas-fleet-manager-metrics",namespace="managed-services-stage",operation="create"}) > (1.00 * (1-0.99000))
+            and
+            sum(kas_fleet_manager_cluster_operations:burnrate3d{job="kas-fleet-manager-metrics",namespace="managed-services-stage",operation="create"}) > (1.00 * (1-0.99000))
+          for: 3h
+          labels:
+            service: kas-fleet-manager
+            namespace: managed-services-stage
+            operation: create
+            severity: info
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_cluster_operations_success_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",operation="create"}[1d]))
+              /
+              sum(rate(kas_fleet_manager_cluster_operations_total_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",operation="create"}[1d]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            namespace: managed-services-stage
+            operation: create
+          record: kas_fleet_manager_cluster_operations:burnrate1d
+        - expr: |
+            1 - ( 
+              sum(rate(kas_fleet_manager_cluster_operations_success_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",operation="create"}[1h]))
+              /
+              sum(rate(kas_fleet_manager_cluster_operations_total_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",operation="create"}[1h]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            namespace: managed-services-stage
+            operation: create
+          record: kas_fleet_manager_cluster_operations:burnrate1h
+        - expr: |
+            1 - ( 
+              sum(rate(kas_fleet_manager_cluster_operations_success_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",operation="create"}[2h]))
+              /
+              sum(rate(kas_fleet_manager_cluster_operations_total_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",operation="create"}[2h]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            namespace: managed-services-stage
+            operation: create
+          record: kas_fleet_manager_cluster_operations:burnrate2h
+        - expr: |
+            1 - ( 
+              sum(rate(kas_fleet_manager_cluster_operations_success_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",operation="create"}[30m]))
+              /
+              sum(rate(kas_fleet_manager_cluster_operations_total_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",operation="create"}[30m]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            namespace: managed-services-stage
+            operation: create
+          record: kas_fleet_manager_cluster_operations:burnrate30m
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_cluster_operations_success_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",operation="create"}[3d]))
+              /
+              sum(rate(kas_fleet_manager_cluster_operations_total_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",operation="create"}[3d]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            namespace: managed-services-stage
+            operation: create
+          record: kas_fleet_manager_cluster_operations:burnrate3d
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_cluster_operations_success_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",operation="create"}[5m]))
+              /
+              sum(rate(kas_fleet_manager_cluster_operations_total_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",operation="create"}[5m]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            namespace: managed-services-stage
+            operation: create
+          record: kas_fleet_manager_cluster_operations:burnrate5m
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_cluster_operations_success_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",operation="create"}[6h]))
+              /
+              sum(rate(kas_fleet_manager_cluster_operations_total_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",operation="create"}[6h]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            namespace: managed-services-stage
+            operation: create
+          record: kas_fleet_manager_cluster_operations:burnrate6h
