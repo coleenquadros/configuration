@@ -2106,3 +2106,5 @@ More information [here](docs/app-interface/developer.md).
 ## Quay Documentation
 
 All the quay.io related documentation can be found in the [`quay`](docs/quay) folder.
+
+## Trigger and run OpenShift Pipelines
