@@ -1,0 +1,67 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: telemeter
+name: telemeter-2021-02-01
+app:
+  $ref: /services/telemeter/app.yml
+date: '2021-02-01'
+contentFormatVersion: 1.0.0
+content: |
+  production_promotions: null
+  merges_to_master:
+  - repo: https://github.com/openshift/telemeter
+    total: 2
+    success: 2
+  container_vulnerabilities:
+  - cluster: telemeter-prod-01
+    namespace: telemeter-production
+    vulnerabilities:
+      Unknown: 2
+      Medium: 825
+      High: 125
+      Low: 148
+  - cluster: app-sre-stage-01
+    namespace: telemeter-stage
+    vulnerabilities:
+      Unknown: 2
+      Medium: 367
+      High: 47
+      Low: 68
+  - cluster: app-sre-stage-01
+    namespace: observatorium-osd-stage
+    vulnerabilities:
+      Medium: 191
+      High: 32
+      Low: 33
+  post_deploy_jobs:
+  - cluster: app-sre-stage-01
+    namespace: telemeter-stage
+    post_deploy_job: false
+  - cluster: telemeter-prod-01
+    namespace: telemeter-production
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: app-sre-stage-01
+    namespace: telemeter-stage
+    validations:
+      deployment_validation_operator_replica_validation:
+        Passed: 4
+        Failed: 16
+      deployment_validation_operator_request_limit_validation:
+        Passed: 20
+  - cluster: app-sre-stage-01
+    namespace: observatorium-osd-stage
+    validations:
+      deployment_validation_operator_replica_validation:
+        Failed: 12
+        Passed: 6
+      deployment_validation_operator_request_limit_validation:
+        Passed: 18
+  - cluster: telemeter-prod-01
+    namespace: telemeter-production
+    validations:
+      deployment_validation_operator_request_limit_validation:
+        Passed: 16
+      deployment_validation_operator_replica_validation:
+        Failed: 10
+        Passed: 6

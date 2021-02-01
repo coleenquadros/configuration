@@ -1,0 +1,69 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: assisted-installer
+name: assisted-installer-2021-02-01
+app:
+  $ref: /services/assisted-installer/app.yml
+date: '2021-02-01'
+contentFormatVersion: 1.0.0
+content: |
+  production_promotions: null
+  merges_to_master:
+  - repo: https://github.com/openshift/assisted-service
+    total: 100
+    success: 100
+  container_vulnerabilities:
+  - cluster: app-sre-stage-01
+    namespace: assisted-installer-stage
+    vulnerabilities:
+      Medium: 35
+      High: 6
+      Low: 4
+  - cluster: app-sre-stage-01
+    namespace: assisted-installer-integration
+    vulnerabilities:
+      Medium: 6
+      High: 3
+  - cluster: app-sre-prod-04
+    namespace: assisted-installer-production
+    vulnerabilities:
+      Medium: 36
+      High: 7
+      Low: 4
+  post_deploy_jobs:
+  - cluster: hive-integration
+    namespace: assisted-installer-integration
+    post_deploy_job: true
+  - cluster: app-sre-stage-01
+    namespace: openshift-customer-monitoring
+    post_deploy_job: false
+  - cluster: app-sre-prod-04
+    namespace: openshift-customer-monitoring
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: app-sre-stage-01
+    namespace: assisted-installer-stage
+    validations:
+      deployment_validation_operator_request_limit_validation:
+        Failed: 2
+        Passed: 2
+      deployment_validation_operator_replica_validation:
+        Failed: 2
+        Passed: 2
+  - cluster: app-sre-stage-01
+    namespace: assisted-installer-integration
+    validations:
+      deployment_validation_operator_request_limit_validation:
+        Passed: 10
+      deployment_validation_operator_replica_validation:
+        Failed: 8
+        Passed: 2
+  - cluster: app-sre-prod-04
+    namespace: assisted-installer-production
+    validations:
+      deployment_validation_operator_request_limit_validation:
+        Passed: 3
+        Failed: 2
+      deployment_validation_operator_replica_validation:
+        Passed: 2
+        Failed: 3
