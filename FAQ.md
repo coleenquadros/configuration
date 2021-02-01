@@ -74,6 +74,12 @@ Slack: Users are being tagged by default for cluster updates in clusters they ha
 
 ### Gating production promotions in app-interface
 
+Prerequisites:
+
+1. Your app's OpenShift templates are located in the same repository as your source code.
+    - Hint: multiple code repos? multiple OpenShift templates
+    - Hint: not [saas-templates](https://gitlab.cee.redhat.com/insights-platform/saas-templates)
+
 To gate production promotions, follow these steps:
 
 1. Define a [post-deployment testing SaaS file](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-testing-in-app-interface.md#define-post-deployment-testing-saas-file) containing tests to be run against the service following it's deployment to the stage environment.

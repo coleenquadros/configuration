@@ -108,6 +108,18 @@ spec:
         service: hive
         severity: medium
         team: srep
+    - alert: SyncsetPausedTooLong - production - {{{shard_name}}}
+      annotations:
+        message: "Cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.exported_namespace }} has paused Hive syncrhonization for longer than 48 hours"
+        runbook: "https://github.com/openshift/ops-sop/tree/master/v4/alerts/SyncsetPausedTooLong.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
+      expr: |
+        hive_cluster_deployment_syncset_paused{cluster_type="managed"} > 0
+      for: 48h
+      labels:
+        service: hive
+        severity: medium
+        team: srep
     - alert: AWSAccountLimit - production - {{{shard_name}}}
       annotations:
         message: "AWS Account Operator is about to reach account limit"
