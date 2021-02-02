@@ -3,12 +3,17 @@
   - [Provisioning the cluster](#provisioning-the-cluster)
   - [Label cluster as CCS](#label-cluster-as-ccs)
   - [Provisioning Hive](#provisioning-hive)
-  - [Hive Monitoring](#hive-monitoring)
   - [Provisioning OSD operators](#provisioning-osd-operators)
     - [Resources](#resources)
     - [Others](#others)
-  - [Validations](#validations)
+  - [Monitoring](#monitoring)
   - [Adding the shard to OCM](#adding-the-shard-to-ocm)
+  - [Validations](#validations)
+    - [Test provisioning an AWS cluster](#test-provisioning-an-aws-cluster)
+    - [Test provisioning a GCP cluster](#test-provisioning-a-gcp-cluster)
+    - [Test that private clusters can be provisioned](#test-that-private-clusters-can-be-provisioned)
+  - [Attach the shard to a region](#attach-the-shard-to-a-region)
+    - [Verify that at least one round of osde2e tests ran successfully when using the new shard. Dashboards:](#verify-that-at-least-one-round-of-osde2e-tests-ran-successfully-when-using-the-new-shard-dashboards)
   - [OSD operators notes](#osd-operators-notes)
 
 # Info
@@ -227,6 +232,11 @@ All v4 hive shards (clusters) are monitored with their own workload prometheus, 
 1. Make sure you're using the correct rules depending on the environment (integration/stage/production). Pay close attention to the value for aws_account_operator_accounts_threshold, which depends on the environment.
 
 1. Make RBAC changes and allow network traffic from `openshift-customer-monitoring` on all relevant namespaces. For example, see PR: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/10168/diffs. Note that you'll need to do the same for the `hive` namespace on the cluster
+
+1. Add federation config for shard metrics in [/resources/observability/prometheus/prometheus-app-sre-additional-scrapeconfig.secret.yaml](/resources/observability/prometheus/prometheus-app-sre-additional-scrapeconfig.secret.yaml)
+    - You can copy the block from another shard
+    - Make sure the targets hostnames match the cluster hostname
+    - Ensure the appsre_env label is set to the correct environment
 
 Post file creation checks:
 
