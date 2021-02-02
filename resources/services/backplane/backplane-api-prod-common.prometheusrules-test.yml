@@ -25,3 +25,84 @@ tests:
       exp_annotations:
         message: "No targets found for Backplane API on prod - {{{shard_name}}}"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/BackplaneTargetDown.md"
+- interval: 1m
+  input_series:
+  # If sum(value) > (14.4*(1-0.95))=0.72 and last for 2 mins
+  - series: http_requests_total:burnrate5m{job="backplane-api",handler="login"}
+    values: 0.73+0.0x10
+  - series: http_requests_total:burnrate1h{job="backplane-api",handler="login"}
+    values: 0.73+0.0x10
+  alert_rule_test: 
+  - eval_time: 1m
+    alertname: BackplaneLoginSLOBudgetBurn
+    exp_alerts:
+  - eval_time: 2m
+    alertname: BackplaneLoginSLOBudgetBurn
+    exp_alerts:
+    - exp_labels:
+        severity: critical
+        service: srep
+        job: backplane-api
+      exp_annotations:
+        message: "High error budget burn for backplane-api logins (current value: 0.73)  on prod - {{{shard_name}}}"
+        runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/BackplaneLoginSLOBudgetBurn.md"       
+- interval: 1m
+  input_series:
+
+  # If sum(value) > (6*(1-0.95))=0.3 and last for 15 mins
+  - series: http_requests_total:burnrate30m{job="backplane-api",handler="login"}
+    values: 0.31+0x15
+  - series: http_requests_total:burnrate6h{job="backplane-api",handler="login"}
+    values: 0.31+0x15        
+  alert_rule_test:
+  - eval_time: 15m
+    alertname: BackplaneLoginSLOBudgetBurn
+    exp_alerts:
+    - exp_labels:
+        severity: critical
+        service: srep
+        job: backplane-api
+      exp_annotations:
+        message: "High error budget burn for backplane-api logins (current value: 0.31)  on prod - {{{shard_name}}}"
+        runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/BackplaneLoginSLOBudgetBurn.md"     
+- interval: 1m
+  input_series:
+  # If value > (3*(1-0.95))=0.15 and last for 1 hour
+  - series: http_requests_total:burnrate2h{job="backplane-api",handler="login"}
+    values: 0.16+0x70
+  - series: http_requests_total:burnrate1d{job="backplane-api",handler="login"}
+    values: 0.16+0x70  
+  alert_rule_test:
+  - eval_time: 60m
+    alertname: BackplaneLoginSLOBudgetBurn
+    exp_alerts:
+    - exp_labels:
+        severity: warning
+        service: srep
+        job: backplane-api
+      exp_annotations:
+        message: "High error budget burn for backplane-api logins (current value: 0.16)  on prod - {{{shard_name}}}"
+        runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/BackplaneLoginSLOBudgetBurn.md"    
+- interval: 1m
+  input_series:
+  # If value > (1*(1-0.95))=0.05 and last for 3 hour
+  - series: http_requests_total:burnrate6h{job="backplane-api",handler="login"}
+    values: 0.051+0x200
+  - series: http_requests_total:burnrate3d{job="backplane-api",handler="login"}
+    values: 0.051+0x200  
+  alert_rule_test:  
+  - eval_time: 180m
+    alertname: BackplaneLoginSLOBudgetBurn
+    exp_alerts:
+    - exp_labels:
+        severity: critical
+        service: srep
+        job: backplane-api
+      exp_annotations:
+        message: "High error budget burn for backplane-api logins (current value: 0.051)  on prod - {{{shard_name}}}"
+        runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/BackplaneLoginSLOBudgetBurn.md" 
+
+
+     
+       
+
