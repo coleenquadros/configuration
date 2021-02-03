@@ -34,6 +34,9 @@ imagePatterns:
 - quay.io/cloudservices
 
 authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
   image:
     path: insights/quay/cloudservices-push
     field: all
@@ -42,6 +45,18 @@ parameters:
   PATH_PREFIX: /api
 
 resourceTemplates:
+- name: cyndi-init
+  path: /openshift/cyndi-init.yml
+  url: https://github.com/redhatinsights/inventory-syndication
+  targets:
+  - namespace:
+      $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
+    ref: 165cd33c70fd50be977a5584ab13b4f28502a442
+    parameters:
+      APP_NAME: compliance
+      APP_ROLE: cyndi
+      DB_SECRET: compliance-db
+      IMAGE_TAG: "3a34b0c"
 - name: compliance-redis
   path: /templates/compliance/compliance-redis.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
