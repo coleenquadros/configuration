@@ -6,12 +6,12 @@ labels:
 
 name: hivep04ew2
 description: hivep04ew2 cluster
-consoleUrl: ''
-kibanaUrl: ''
-prometheusUrl: ''
-alertmanagerUrl: ''
-serverUrl: ''
-elbFQDN: ''
+consoleUrl: https://console-openshift-console.apps.hivep04ew2.byo5.p1.openshiftapps.com
+kibanaUrl: https://kibana-openshift-logging.apps.hivep04ew2.byo5.p1.openshiftapps.com
+prometheusUrl: https://prometheus.hivep04ew2.devshift.net
+alertmanagerUrl: https://alertmanager.hivep04ew2.devshift.net
+serverUrl: https://api.hivep04ew2.byo5.p1.openshiftapps.com:6443
+elbFQDN: elb.apps.hivep04ew2.byo5.p1.openshiftapps.com
 
 auth:
   service: github-org-team
@@ -26,7 +26,7 @@ managedGroups:
 
 spec:
   provider: aws
-  region: us-west-1
+  region: eu-west-2
   channel: fast
   version: 4.6.8
   initial_version: 4.6.8-fast
@@ -39,9 +39,9 @@ spec:
   load_balancers: 0
   private: true
   upgrade: batch2
-  id: 1ii56sml08760269uhk08gdn9c7u1url
-  external_id: dae6eabc-d103-40bc-886c-a3491ced7584
-  provision_shard_id: de4b0632-dca7-11ea-b3b9-8c1645a911be
+  id: 1ik2acojo5ckhbg9l7d4s6sjjbior7ce
+  external_id: 19119e45-adb7-45a6-a57a-5276ec741200
+  provision_shard_id: 7c2626e2-da06-11ea-8f62-8c1645a911be
 
 externalConfiguration:
   labels:
@@ -53,3 +53,42 @@ network:
   pod: 10.128.0.0/14
 
 internal: false
+
+automationToken:
+  path: app-sre/creds/kube-configs/hivep04ew2
+  field: token
+
+jumpHost:
+  hostname: bastion.ci.ext.devshift.net
+  knownHosts: /jump-host/known-hosts/bastion.ci.ext.devshift.net
+  user: app-sre-bot
+  identity:
+    path: app-sre/ansible/roles/app-sre-bot
+    field: identity
+    format: base64
+
+awsInfrastructureAccess:
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: network-mgmt
+
+peering:
+  connections:
+  - provider: account-vpc
+    name: hivep04ew2_app-sre
+    vpc:
+      $ref: /aws/app-sre/vpcs/app-sre-vpc-02-ci-ext.yml
+    manageRoutes: true
+  - provider: cluster-vpc-requester
+    name: hivep04ew2_app-sre-prod-04
+    cluster:
+      $ref: /openshift/app-sre-prod-04/cluster.yml
+    manageRoutes: true
+  - provider: cluster-vpc-requester
+    name: hivep04ew2_app-sre-prod-01
+    cluster:
+      $ref: /openshift/app-sre-prod-01/cluster.yml
+    manageRoutes: true
