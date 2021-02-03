@@ -1,0 +1,67 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: notifications
+
+name: notifications-prod
+description: Insights notifications-prod on the Prod cluster under e2e-deploy/ocdeployer management
+
+cluster:
+  $ref: /openshift/crcp01ue1/cluster.yml
+
+app:
+  $ref: /services/insights/notifications/app.yml
+
+environment:
+  $ref: /products/insights/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-prod.yml
+- $ref: /services/insights/turnpike/namespaces/prod-turnpike-prod.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/backoffice/prod/notifications
+  version: 2
+  name: backoffice
+  annotations:
+    qontract.recycle: "true"
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-prod
+  identifier: notifications-backend-prod
+  defaults: /terraform/resources/insights/production/postgres11-rds-1.yml
+  overrides:
+    name: notifications_backend
+  output_resource_name: notifications-backend-db
+  enhanced_monitoring: true
+- provider: cloudwatch
+  account: insights-prod
+  identifier: notifications-prod
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
