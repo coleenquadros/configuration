@@ -1,0 +1,25 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: dh-prod-thanos-extractor
+description: |
+  Extracts cloud.redhat.com metrics from Prometheus and loads them into datahub
+
+cluster:
+  $ref: /openshift/datahub-psi/cluster.yml
+
+app:
+  $ref: /services/insights/app.yml
+
+environment:
+  $ref: /products/insights/environments/production.yml
+
+openshiftServiceAccountTokens:
+# We get a SA token from whichever cluster cloud.redhat.com prod is running on
+# The SA needs to be in the app-sre-observability-production namespace as that is what
+# the proxy for auth checks
+- namespace:
+    $ref: /openshift/crcp01ue1/namespaces/app-sre-observability-per-cluster.yml
+  serviceAccountName: insights-datahub-thanos-extractor-access

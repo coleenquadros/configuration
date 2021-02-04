@@ -1,0 +1,79 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: ingress
+name: ingress-2021-02-01
+app:
+  $ref: /services/insights/ingress/app.yml
+date: '2021-02-01'
+contentFormatVersion: 1.0.0
+content: |
+  production_promotions: null
+  merges_to_master:
+  - repo: https://github.com/RedHatInsights/insights-ingress-go
+    total: 11
+    success: 11
+  - repo: https://github.com/RedHatInsights/insights-puptoo
+    total: 9
+    success: 9
+  - repo: https://github.com/RedHatInsights/insights-storage-broker
+    total: 3
+    success: 3
+  container_vulnerabilities:
+  - cluster: crcp01ue1
+    namespace: ingress-prod
+    vulnerabilities:
+      Medium: 370
+      High: 220
+      Low: 80
+  - cluster: crcs01ue1
+    namespace: ingress-stage
+    vulnerabilities:
+      Medium: 37
+      High: 15
+      Low: 8
+  - cluster: crcs02ue1
+    namespace: ingress-stage
+    vulnerabilities:
+      High: 7
+  post_deploy_jobs:
+  - cluster: crcs02ue1
+    namespace: ingress-stage
+    post_deploy_job: false
+  - cluster: crcs01ue1
+    namespace: ingress-stage
+    post_deploy_job: false
+  - cluster: crcp01ue1
+    namespace: ingress-prod
+    post_deploy_job: false
+  - cluster: c-rh-c-eph
+    namespace: ephemeral-base
+    post_deploy_job: false
+  - cluster: insights-perf
+    namespace: ingress-perf
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: crcs02ue1
+    namespace: ingress-stage
+    validations:
+      deployment_validation_operator_request_limit_validation:
+        Passed: 8
+      deployment_validation_operator_replica_validation:
+        Failed: 2
+        Passed: 6
+  - cluster: crcp01ue1
+    namespace: ingress-prod
+    validations:
+      deployment_validation_operator_request_limit_validation:
+        Passed: 11
+      deployment_validation_operator_replica_validation:
+        Failed: 1
+        Passed: 10
+  - cluster: crcs01ue1
+    namespace: ingress-stage
+    validations:
+      deployment_validation_operator_replica_validation:
+        Failed: 4
+        Passed: 3
+      deployment_validation_operator_request_limit_validation:
+        Failed: 2
+        Passed: 5

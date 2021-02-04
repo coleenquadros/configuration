@@ -30,8 +30,8 @@ config:
             display_name: build mk-strimzi-operator mk-release
         - 'gl-pr-check':
             display_name: mk-strimzi-operator pr-check
-        - 'managed-kafka-security-scan':
-            display_name: mk-strimzi-operator security-scan mk-master
+        - 'managed-services-security-scan':
+            display_name: mk-strimzi-operator security-scan
             branch: mk-master
             ci_cmd: 'make scan_project'
             slack_channel_notification: mk-ci-cd
@@ -47,6 +47,15 @@ config:
       jobs:
         - 'gl-pr-check-apache-kafka':
             display_name: apache-kafka pr-check
+        - 'managed-services-security-scan':
+            display_name: mk-apache-kafka security-scan
+            branch: mk-release
+            ci_cmd: 'make scan_project'
+            slack_channel_notification: mk-ci-cd
+            cron_expression: 'H 6 * * *'
+        - 'gl-build-master-managed-services':
+            branch: mk-release
+            display_name: apache-kafka build mk-release
 
   - project:
       name: mk-strimzi-ui-midstream
@@ -63,6 +72,20 @@ config:
             display_name: mk-strimzi-ui build-mk-release
 
   - project:
+      name: guides-midstream
+      label: managed-services
+      node: managed-services
+      gl_group: mk-ci-cd
+      gl_project: guides
+      jobs:
+        - 'gl-pr-check':
+            display_name: guides pr-check
+            concurrent_build: true
+        - 'gl-build-master-managed-services':
+            branch: mk-release
+            display_name: guides build-mk-release
+
+  - project:
       name: mk-ui-frontend-midstream
       label: managed-services
       node: managed-services
@@ -75,6 +98,7 @@ config:
         - 'gl-build-master-managed-services':
             branch: mk-release
             display_name: mk-ui-frontend build-mk-release
+
 
   - project:
       name: mk-ui-host-midstream
@@ -205,6 +229,11 @@ config:
         - 'gl-build-master':
             display_name: mk-e2e-test-suite build master
             build_deploy_script_path: './build_deploy.sh'
+        - 'managed-kafka-e2e-test-suite':
+            display_name: periodic mk-e2e tests
+            timeout: 120
+            ci_cmd: 'make ci/pipeline'
+            cron_expression: '0 */1 * * *' # Every 1h
 
   - project:
       name: managed-services-sso

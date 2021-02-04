@@ -34,10 +34,10 @@ sharedResources:
 - $ref: /services/ocm/shared-resources/common.yml
 - $ref: /services/ocm/shared-resources/stage.yml
 
-openshiftResources: 
+openshiftResources:
 # Port forwarding for debugging
-- provider: resource 
-  path: /ocm/allow-port-forwarding.role.yml 
+- provider: resource
+  path: /ocm/allow-port-forwarding.role.yml
 - provider: resource
   path: /ocm/sda-dev-allow-port-forwarding.rolebinding.yml
 
@@ -60,6 +60,15 @@ terraformResources:
 - provider: rds
   account: app-sre
   identifier: ocm-service-log-staging
-  defaults: /terraform/resources/app-sre/staging/rds-1.yml
+  defaults: /terraform/resources/app-sre/staging/rds-2-cloudwatch-enabled.yml
+  parameter_group: /terraform/resources/rds-parameter-group-log-min-duration-2-pg11.yml
   output_resource_name: ocm-service-log-rds
-
+- provider: sqs
+  account: app-sre
+  identifier: job-queue-service-staging
+  output_resource_name: job-queue-service-sqs
+  specs:
+    - defaults: /terraform/resources/sqs-1.yml
+      queues:
+        - key: name
+          value: job-queue-service-heartbeat

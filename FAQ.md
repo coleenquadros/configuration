@@ -12,6 +12,7 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
 - [I can not access ci-ext](#i-can-not-access-ci-ext)
 - [Tagging options in app-interface](#tagging-options-in-app-interface)
 - [Gating production promotions in app-interface](#gating-production-promotions-in-app-interface)
+- [Get access to cluster logs via Log Forwarding](#get-access-to-cluster-logs-via-log-forwarding)
 - [What is the Console or Kibana URL for a service](#what-is-the-console-or-kibana-url-for-a-service)
 - [Can you restart my pods](#can-you-restart-my-pods)
 - [Jenkins is going to shut down](#jenkins-is-going-to-shutdown)
@@ -19,6 +20,7 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
 - [How can I see who has access to a service](#how-can-i-see-who-has-access-to-a-service)
 - [How to determine my AWS permissions](#how-to-determine-my-aws-permissions)
 - [Accessing DataHub](#accessing-datahub)
+- [Jenkins Vault plugin upgrade](#jenkins-vault-plugin-upgrade)
 
 ## Useful links
 
@@ -73,10 +75,32 @@ Slack: Users are being tagged by default for cluster updates in clusters they ha
 
 ### Gating production promotions in app-interface
 
+Prerequisites:
+
+1. Your app's OpenShift templates are located in the same repository as your source code.
+    - Hint: multiple code repos? multiple OpenShift templates
+    - Hint: not [saas-templates](https://gitlab.cee.redhat.com/insights-platform/saas-templates)
+
 To gate production promotions, follow these steps:
 
 1. Define a [post-deployment testing SaaS file](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-testing-in-app-interface.md#define-post-deployment-testing-saas-file) containing tests to be run against the service following it's deployment to the stage environment.
 1. Define an [automated/gated promotion](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-delivery-in-app-interface.md#automatedgated-promotions) based on the results of the post-deployment tests that ran on stage.
+
+### Get access to cluster logs via Log Forwarding
+
+The App SRE logging stack is currently an EFK (ElasticSearch, Fluentd, Kibana) stack installed on each cluster.
+
+We are starting a migration towards a Log Forwarding solution, in which all logs from a cluster will be forwarded to AWS CloudWatch on the cluster's AWS account.
+
+To get access to CloudWatch on a cluster's AWS account, follow these steps (examples for `app-sre-stage-01`):
+
+1. Submit a MR to app-interface to add the [log-consumer](https://gitlab.cee.redhat.com/service/app-interface/-/blob/f0ca82a2253b4c213c8b438408f68113a662d6c1/data/aws/app-sre/roles/log-consumer.yml) role to your user file. You will also need to [add your public GPG key](https://gitlab.cee.redhat.com/service/app-interface#adding-your-public-gpg-key) (if you havn't already) in the same MR.
+1. Once the MR is merged you will get an email invitation to join the AWS account (in this example - the `app-sre` account). Follow the instructions in the email to login to the account. You will also need to reach out to the App SRE team to get a Switch Role link for the desired cluster (will be obtained from the OCM console -> Cluster -> Access Control -> AWS infrastructure access -> Copy URL to clipboard).
+1. Once you are logged in, go to [Security Credentials page](https://console.aws.amazon.com/iam/home?#/security_credentials) and enable Multi-factor authentication (MFA).
+1. Logout and login to the account again using the configured MFA device.
+1. Once you are logged in, navigate to the Switch Role link obtained from the App SRE team (suggestion: add to bookmarks).
+1. In the Switch Role page, select a name for this role (suggestion: `<cluster_name>-read-only`) and click "Switch Role" (Account and Role should be filled automatically).
+1. You are now logged in to the cluster's AWS account. Go to the CloudWatch console and get your logs!
 
 ### What is the Console or Kibana URL for a service
 
@@ -168,3 +192,14 @@ This user policy file a description, which explains the permissions allowed by t
 ### Accessing DataHub
 
 DataHub is not managed by the AppSRE team, but you can find the process to [request access here](https://help.datahub.redhat.com/docs/interacting-with-telemetry-data). To report issues with Datahub (ex: timeouts with telemeter-lts-dashboards.datahub.redhat.com) see [this help page](https://help.datahub.redhat.com/docs/data-hub-report-issues) or reach out to [#forum-telemetry](https://coreos.slack.com/messages/forum-telemetry) on Slack for additional info.
+
+
+### Jenkins Vault plugin upgrade
+
+The App SRE team is upgrading the Vault plugin on it's Jenkins instances from version 2 to 3.
+
+As a result from this upgrade, jobs may fail due to not being able to read secrets from Vault if they contain empty keys. If you encounter a failing job which seems related to Vault, please check all the secrets used by the job to verify they do not contain empty keys.
+
+In case of any other issues, please reach out to @app-sre-ic on #sd-app-sre in CoreOS slack.
+
+Related Jira ticket: https://issues.redhat.com/browse/APPSRE-947

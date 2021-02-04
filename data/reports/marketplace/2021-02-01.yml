@@ -1,0 +1,52 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: marketplace
+name: marketplace-2021-02-01
+app:
+  $ref: /services/insights/marketplace/app.yml
+date: '2021-02-01'
+contentFormatVersion: 1.0.0
+content: |
+  production_promotions: null
+  merges_to_master:
+  - repo: https://github.com/RedHatInsights/marketplace-processor
+    total: 8
+    success: 8
+  container_vulnerabilities:
+  - cluster: crcp01ue1
+    namespace: marketplace-prod
+    vulnerabilities:
+      Medium: 39
+      High: 60
+      Low: 3
+  - cluster: crcs02ue1
+    namespace: marketplace-stage
+    vulnerabilities:
+      Medium: 39
+      High: 60
+      Low: 3
+  post_deploy_jobs:
+  - cluster: crcs02ue1
+    namespace: marketplace-stage
+    post_deploy_job: false
+  - cluster: crcp01ue1
+    namespace: marketplace-prod
+    post_deploy_job: false
+  - cluster: c-rh-c-eph
+    namespace: ephemeral-base
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: crcs02ue1
+    namespace: marketplace-stage
+    validations:
+      deployment_validation_operator_replica_validation:
+        Passed: 5
+      deployment_validation_operator_request_limit_validation:
+        Passed: 5
+  - cluster: crcp01ue1
+    namespace: marketplace-prod
+    validations:
+      deployment_validation_operator_replica_validation:
+        Passed: 2
+      deployment_validation_operator_request_limit_validation:
+        Passed: 2

@@ -38,7 +38,7 @@
 - job-template:
     id: managed-services-pull-upstream
     name: 'managed-services-pull-upstream'
-    description: "pull changes from all upstreams specified in {gl_group}/{gl_project}/script/repo-config.yaml"
+    description: "[managed-services] pull changes from all upstreams specified in {gl_group}/{gl_project}/script/repo-config.yaml"
     wrappers:
       - timeout_wrapper:
           timeout: "{timeout}"
@@ -125,8 +125,8 @@
                 - shell: "make ci/pipeline/cleanup"
 
 - job-template:
-    id: managed-kafka-security-scan
-    name: "managed-kafka-security-scan"
+    id: managed-services-security-scan
+    name: "{gl_project}-security-scan-{branch}"
     wrappers:
       - timeout_wrapper:
           timeout: "{timeout}"
@@ -325,3 +325,19 @@
         artifacts: '{artifacts_path}'
         allow-empty: true
 
+- job-template:
+    id: managed-kafka-e2e-test-suite
+    name: managed-kafka-e2e-test-suite-staging
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *mk_e2e_test_suite_staging
+    <<: *gl_timed
+    publishers:
+    - archive:
+        artifacts: 'target/logs/**,target/surefire-reports/**'
+        allow-empty: true
