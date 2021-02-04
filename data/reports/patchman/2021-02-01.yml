@@ -1,0 +1,38 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: patchman
+name: patchman-2021-02-01
+app:
+  $ref: /services/insights/patchman/app.yml
+date: '2021-02-01'
+contentFormatVersion: 1.0.0
+content: |
+  production_promotions: null
+  merges_to_master: null
+  container_vulnerabilities: null
+  post_deploy_jobs:
+  - cluster: crcs02ue1
+    namespace: patchman-engine-stage
+    post_deploy_job: false
+  - cluster: insights-perf
+    namespace: patchman-engine-perf
+    post_deploy_job: false
+  - cluster: crcp01ue1
+    namespace: patchman-engine-prod
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: crcs02ue1
+    namespace: patchman-engine-stage
+    validations:
+      deployment_validation_operator_request_limit_validation:
+        Passed: 24
+      deployment_validation_operator_replica_validation:
+        Failed: 24
+  - cluster: crcp01ue1
+    namespace: patchman-engine-prod
+    validations:
+      deployment_validation_operator_replica_validation:
+        Failed: 16
+        Passed: 2
+      deployment_validation_operator_request_limit_validation:
+        Passed: 18

@@ -55,21 +55,142 @@ parameters:
   PROXY_IMAGE_TAG: 4.7.0
 
 resourceTemplates:
+- name: observatorium-mst-common
+  path: /resources/services/observatorium-template.yaml
+  url: https://gitlab.cee.redhat.com/observatorium/configuration
+  parameters:
+    OBSERVATORIUM_API_IMAGE: quay.io/observatorium/observatorium
+    OBSERVATORIUM_API_IMAGE_TAG: master-2020-11-02-v0.1.1-192-ge324057
+    OPA_AMS_IMAGE: quay.io/observatorium/opa-ams
+    OPA_AMS_IMAGE_TAG: master-2020-10-28-902d400
+    MEMCACHED_IMAGE: registry.redhat.io/rhel8/memcached
+    MEMCACHED_IMAGE_TAG: 1.5
+    MEMCACHED_EXPORTER_IMAGE: quay.io/prometheus/memcached-exporter
+    MEMCACHED_EXPORTER_IMAGE_TAG: v0.6.0
+    OCM_BASE_URL: "https://api.openshift.com"
+    AUTHORIZE_URL: ${OCM_BASE_URL}/api/accounts_mgmt/v1/cluster_registrations
+    AMS_URL: ${OCM_BASE_URL}/api/accounts_mgmt/v1/cluster_registrations
+  targets:
+  - namespace:
+      $ref: /services/telemeter/namespaces/observatorium-mst-stage.yml
+    # Commit for gitlab.cee.redhat.com/observatorium/configuration repo. Keep it pinned, so we know what we can promote to production.
+    ref: 9441f8846519a21f0fe4740fa6ff6e485a5d3a1b
+    parameters:
+      NAMESPACE: observatorium-mst-stage
+      OBSERVATORIUM_METRICS_NAMESPACE: observatorium-mst-stage
+      OBSERVATORIUM_LOGS_NAMESPACE: observatorium-logs-stage
+      PROMETHEUS_AMS_REMOTE_WRITE_PROXY_TARGET: 'observatorium-thanos-receive'
+      GUBERNATOR_REPLICAS: 0
+      OBSERVATORIUM_API_REPLICAS: 3
+      OBSERVATORIUM_API_CPU_REQUEST: 100m
+      OBSERVATORIUM_API_CPU_LIMIT: 1
+      OBSERVATORIUM_API_MEMORY_REQUEST: 256Mi
+      OBSERVATORIUM_API_MEMORY_LIMIT: 1Gi
+      OPA_AMS_MEMCACHED_EXPIRE: "300"
+      OPA_AMS_CPU_REQUEST: 100m
+      OPA_AMS_CPU_LIMIT: 200m
+      OPA_AMS_MEMORY_REQUEST: 100Mi
+      OPA_AMS_MEMORY_LIMIT: 200Mi
+      OSD_ORGANIZATION_ID: 1lneg5EWJaGAK3d7RZpAJM9WujU
+      MEMCACHED_MEMORY_LIMIT_MB: 2048Mi
+      MEMCACHED_CONNECTION_LIMIT: 3072Mi
+      MEMCACHED_CPU_REQUEST: 500m
+      MEMCACHED_CPU_LIMIT: 3
+      MEMCACHED_MEMORY_REQUEST: 1329Mi
+      MEMCACHED_MEMORY_LIMIT:  1844Mi
+      MEMCACHED_EXPORTER_CPU_REQUEST: 50m
+      MEMCACHED_EXPORTER_CPU_LIMIT: 200m
+      MEMCACHED_EXPORTER_MEMORY_REQUEST: 50Mi
+      MEMCACHED_EXPORTER_MEMORY_LIMIT: 200Mi
+      SERVICE_ACCOUNT_NAME: observatorium-mst
+      OBSERVATORIUM_API_IDENTIFIER: observatorium-observatorium-mst-api
+- name: observatorium-mst-metrics
+  path: /resources/services/observatorium-metrics-template.yaml
+  url: https://gitlab.cee.redhat.com/observatorium/configuration
+  parameters:
+    THANOS_IMAGE: quay.io/thanos/thanos
+    MEMCACHED_IMAGE: registry.redhat.io/rhel8/memcached
+    MEMCACHED_IMAGE_TAG: 1.5
+    MEMCACHED_EXPORTER_IMAGE: quay.io/prometheus/memcached-exporter
+    MEMCACHED_EXPORTER_IMAGE_TAG: v0.6.0
+    STORAGE_CLASS: "gp2"
+    AUTHORIZE_URL: ${OCM_BASE_URL}/api/accounts_mgmt/v1/cluster_registrations
+  targets:
+  - namespace:
+      $ref: /services/telemeter/namespaces/observatorium-mst-stage.yml
+    # Commit for gitlab.cee.redhat.com/observatorium/configuration repo. Keep it pinned, so we know what we can promote to production.
+    ref: 9441f8846519a21f0fe4740fa6ff6e485a5d3a1b
+    parameters:
+      NAMESPACE: observatorium-mst-stage
+      OBSERVATORIUM_METRICS_NAMESPACE: observatorium-mst-stage
+      OBSERVATORIUM_LOGS_NAMESPACE: observatorium-logs-stage
+      THANOS_CONFIG_SECRET: observatorium-mst-thanos-objectstorage
+      THANOS_S3_SECRET: observatorium-mst-thanos-stage-s3
+      THANOS_IMAGE_TAG: master-2020-12-11-843482bf
+      THANOS_RECEIVE_CONTROLLER_IMAGE_TAG: master-2020-02-06-b66e0c8
+      THANOS_QUERIER_REPLICAS: 2
+      THANOS_QUERIER_CPU_REQUEST: '50m'
+      THANOS_QUERIER_CPU_LIMIT: '250m'
+      THANOS_QUERIER_MEMORY_REQUEST: '100Mi'
+      THANOS_QUERIER_MEMORY_LIMIT: '512Mi'
+      THANOS_QUERY_FRONTEND_REPLICAS: 3
+      THANOS_QUERY_FRONTEND_CPU_REQUEST: '100m'
+      THANOS_QUERY_FRONTEND_CPU_LIMIT: '1'
+      THANOS_QUERY_FRONTEND_MEMORY_REQUEST: '256Mi'
+      THANOS_QUERY_FRONTEND_MEMORY_LIMIT: '1Gi'
+      THANOS_STORE_LOG_LEVEL: 'debug'
+      THANOS_STORE_REPLICAS: 1
+      THANOS_STORE_CPU_REQUEST: '50m'
+      THANOS_STORE_CPU_LIMIT: '250m'
+      THANOS_STORE_MEMORY_REQUEST: '512Mi'
+      THANOS_STORE_MEMORY_LIMIT: '2Gi'
+      THANOS_RECEIVE_REPLICAS: 3
+      THANOS_RECEIVE_CPU_REQUEST: '700m'
+      THANOS_RECEIVE_CPU_LIMIT: '700m'
+      THANOS_RECEIVE_MEMORY_REQUEST: '5Gi'
+      THANOS_RECEIVE_MEMORY_LIMIT: '5Gi'
+      THANOS_RECEIVE_LOG_LEVEL: 'debug'
+      THANOS_RECEIVE_DEBUG_ENV: '1'
+      THANOS_COMPACTOR_REPLICAS: 1
+      THANOS_COMPACTOR_PVC_REQUEST: '50Gi'
+      THANOS_RULER_LOG_LEVEL: 'info'
+      THANOS_RULER_REPLICAS: 2
+      THANOS_RULER_CPU_REQUEST: '500m'
+      THANOS_RULER_CPU_LIMIT: '1'
+      THANOS_RULER_MEMORY_REQUEST: '2Gi'
+      THANOS_RULER_MEMORY_LIMIT: '2Gi'
+      THANOS_RULER_PVC_REQUEST: '50Gi'
+      THANOS_COMPACTOR_LOG_LEVEL: 'debug'
+      THANOS_STORE_CACHE_MEMORY_LIMIT_MB: 2048
+      MEMCACHED_MEMORY_LIMIT_MB: 2048Mi
+      MEMCACHED_CONNECTION_LIMIT: 3072Mi
+      MEMCACHED_CPU_REQUEST: 500m
+      MEMCACHED_CPU_LIMIT: 3
+      MEMCACHED_MEMORY_REQUEST: 1329Mi
+      MEMCACHED_MEMORY_LIMIT:  1844Mi
+      MEMCACHED_EXPORTER_CPU_REQUEST: 50m
+      MEMCACHED_EXPORTER_CPU_LIMIT: 200m
+      MEMCACHED_EXPORTER_MEMORY_REQUEST: 50Mi
+      MEMCACHED_EXPORTER_MEMORY_LIMIT: 200Mi
+      SERVICE_ACCOUNT_NAME: observatorium-mst
 - name: observatorium
   path: /manifests/production/observatorium-template.yaml
   url: https://gitlab.cee.redhat.com/observatorium/configuration
   parameters:
     IMAGE: quay.io/app-sre/telemeter
     OBSERVATORIUM_API_IMAGE: quay.io/observatorium/observatorium
+    OPA_AMS_IMAGE: quay.io/observatorium/opa-ams
+    OPA_AMS_IMAGE_TAG: master-2020-10-28-902d400
     THANOS_IMAGE: quay.io/thanos/thanos
     JAEGER_AGENT_IMAGE: quay.io/app-sre/jaegertracing-jaeger-agent
     STORAGE_CLASS: "gp2"
     AUTHORIZE_URL: ${OCM_BASE_URL}/api/accounts_mgmt/v1/cluster_registrations
+    AMS_URL: ${OCM_BASE_URL}/api/accounts_mgmt/v1/cluster_registrations
   targets:
   - namespace:
       $ref: /services/telemeter/namespaces/telemeter-stage.yml
     # Commit for gitlab.cee.redhat.com/observatorium/configuration repo. Keep it pinned, so we know what we can promote to production.
-    ref: 6b9a9fecd85e7e93653c714ce2537e84db4dc486
+    ref: 55319fa0868fcd7779403521b45cd18cb42c2f5c
     parameters:
       NAMESPACE: telemeter-stage
       OBSERVATORIUM_METRICS_NAMESPACE: telemeter-stage
@@ -91,6 +212,12 @@ resourceTemplates:
       GUBERNATOR_REPLICAS: 2
       OBSERVATORIUM_API_IMAGE_TAG: master-2020-11-02-v0.1.1-192-ge324057
       OBSERVATORIUM_API_REPLICAS: 3
+      OPA_AMS_MEMCACHED_EXPIRE: "300"
+      OPA_AMS_CPU_REQUEST: 100m
+      OPA_AMS_CPU_LIMIT: 200m
+      OPA_AMS_MEMORY_REQUEST: 100Mi
+      OPA_AMS_MEMORY_LIMIT: 200Mi
+      OSD_ORGANIZATION_ID: 1lneg5EWJaGAK3d7RZpAJM9WujU
       THANOS_CONFIG_SECRET: thanos-objectstorage
       THANOS_S3_SECRET: telemeter-thanos-stage-s3
       THANOS_IMAGE_TAG: master-2020-12-11-843482bf
@@ -138,7 +265,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/telemeter/namespaces/telemeter-production.yml
     # Commit for gitlab.cee.redhat.com/observatorium/configuration repo.
-    ref: 6b9a9fecd85e7e93653c714ce2537e84db4dc486
+    ref: 55319fa0868fcd7779403521b45cd18cb42c2f5c
     parameters:
       NAMESPACE: telemeter-production
       OBSERVATORIUM_METRICS_NAMESPACE: telemeter-production
@@ -159,6 +286,12 @@ resourceTemplates:
       GUBERNATOR_REPLICAS: 2
       OBSERVATORIUM_API_IMAGE_TAG: master-2020-10-26-v0.1.1-184-ge8aa228
       OBSERVATORIUM_API_REPLICAS: 3
+      OPA_AMS_MEMCACHED_EXPIRE: "300"
+      OPA_AMS_CPU_REQUEST: 100m
+      OPA_AMS_CPU_LIMIT: 200m
+      OPA_AMS_MEMORY_REQUEST: 100Mi
+      OPA_AMS_MEMORY_LIMIT: 200Mi
+      OSD_ORGANIZATION_ID: 1ln3QD58ag2A5fqq5Dh1wa2lX5P
       THANOS_CONFIG_SECRET: thanos-objectstorage
       THANOS_S3_SECRET: telemeter-thanos-production-s3
       THANOS_IMAGE_TAG: master-2020-12-11-843482bf

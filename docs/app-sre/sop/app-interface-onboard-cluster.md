@@ -81,6 +81,9 @@ This step should be performed in a single merge request.
       initial_version: (desired version. ex: 4.4.11)
       multi_az: true
       nodes: (desired compute nodes todal across all AZs)
+      autoscale: # optional. nodes should not be defined if autoscale is defined
+        min_replicas: (desired minimal count of compute nodes todal across all AZs)
+        max_replicas: (desired maximal count of compute nodes todal across all AZs)
       instance_type: (desired instance type. ex: m5.xlarge)
       storage: (desired storage amount. ex: 600)
       load_balancers: (desired load-balancer count. ex: 0)

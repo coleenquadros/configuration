@@ -149,3 +149,17 @@ spec:
       labels:
         service: uhc-acct-mngr
         severity: high
+    - alert: OCM Alert Pod Restarted - production
+      expr: sum(increase(kube_pod_container_status_restarts_total{container=~"uhc-acct-mngr-.*"}[5m])) by (container) == 1
+      annotations:
+        message: 'Observed pod ({{ $labels.container }}) restart(s) ({{ $value }})'
+      labels:
+        service: uhc-acct-mngr
+        severity: info
+    - alert: OCM Alert Pod Restarting too many times - production
+      expr: sum(increase(kube_pod_container_status_restarts_total{container=~"uhc-acct-mngr-.*"}[5m])) by (container) > 1
+      annotations:
+        message: 'Observed pod ({{ $labels.container }}) restart(s) ({{ $value }})'
+      labels:
+        service: uhc-acct-mngr
+        severity: high

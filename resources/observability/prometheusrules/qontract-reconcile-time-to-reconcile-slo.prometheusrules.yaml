@@ -1,3 +1,5 @@
+## SLO objective: 95% of reconciliation time under 20 minutes (1200s)
+## Calculations from formulas in https://sre.google/workbook/alerting-on-slos/
 ---
 $schema: /openshift/prometheus-rule-1.yml
 apiVersion: monitoring.coreos.com/v1
@@ -11,6 +13,12 @@ spec:
   groups:
   - name: SLOs-qontract_reconcile_function_elapsed_seconds_since_bundle_commit
     rules:
+     # out of budget in ~50 hours
+     # burn rate of 14.4 over 1h is consuming 2% of the 30d error budget
+     # burn rate of 14.4 over 5m is consuming 0.17% of the 30d error budget
+     # out of budget in ~120 hours
+     # burn rate of 6 over 6h is consuming 5% of the 30d error budget
+     # burn rate of 6 over 30m is consuming 0.42% of the 30d error budget
 #    - alert: LatencyBudgetBurn
 #      annotations:
 #        message: 'High requests latency budget burn for namespace={{{ namespace }}},latency=1200.0 (current value: {{ $value }})'
@@ -30,6 +38,12 @@ spec:
 #        latency: "1200.0"
 #        namespace: {{{ namespace }}}
 #        severity: {{{ severity }}}
+     # out of budget in 10 days
+     # burn rate of 3 over 1d is consuming 10% of the 30d error budget
+     # burn rate of 3 over 2h is consuming 0.83% of the 30d error budget
+     # out of budget in 30 days
+     # burn rate of 1 over 3d is consuming 10% of the 30d error budget
+     # burn rate of 1 over 6h is consuming 0.83% of the 30d error budget
 #    - alert: LatencyBudgetBurn
 #      annotations:
 #        message: 'High requests latency budget burn for namespace={{{ namespace }}},latency=1200.0 (current value: {{ $value }})'
@@ -41,9 +55,9 @@ spec:
 #        )
 #        or
 #        (
-#          latencytarget:qontract_reconcile_function_elapsed_seconds_since_bundle_commit:rate3d{namespace="{{{ namespace }}}",latency="1200.0"} > (5/100)
+#          latencytarget:qontract_reconcile_function_elapsed_seconds_since_bundle_commit:rate3d{namespace="{{{ namespace }}}",latency="1200.0"} > (1*5/100)
 #          and
-#          latencytarget:qontract_reconcile_function_elapsed_seconds_since_bundle_commit:rate6h{namespace="{{{ namespace }}}",latency="1200.0"} > (5/100)
+#          latencytarget:qontract_reconcile_function_elapsed_seconds_since_bundle_commit:rate6h{namespace="{{{ namespace }}}",latency="1200.0"} > (1*5/100)
 #        )
 #      labels:
 #        latency: "1200.0"

@@ -293,6 +293,15 @@
   - { name: server, type: JiraServer_v1, isRequired: true }
   - { name: slack, type: SlackOutput_v1 }
 
+- name: SendGridAccount_v1
+  fields:
+  - { name: schema, type: string, isRequired: true }
+  - { name: path, type: string, isRequired: true }
+  - { name: labels, type: json }
+  - { name: name, type: string, isRequired: true, isUnique: true }
+  - { name: description, type: string, isRequired: true }
+  - { name: token, type: VaultSecret_v1, isRequired: true }
+
 - name: SlackWorkspace_v1
   fields:
   - { name: schema, type: string, isRequired: true }
@@ -375,13 +384,19 @@
   - { name: version, type: string, isRequired: true }
   - { name: initial_version, type: string, isRequired: true }
   - { name: multi_az, type: boolean, isRequired: true }
-  - { name: nodes, type: int, isRequired: true }
+  - { name: nodes, type: int }
   - { name: instance_type, type: string, isRequired: true }
   - { name: storage, type: int, isRequired: true }
   - { name: load_balancers, type: int, isRequired: true }
   - { name: private, type: boolean, isRequired: true }
   - { name: upgrade, type: string, isRequired: true }
   - { name: provision_shard_id, type: string }
+  - { name: autoscale, type: ClusterSpecAutoScale_v1 }
+
+- name: ClusterSpecAutoScale_v1
+  fields:
+  - { name: min_replicas, type: int, isRequired: true }
+  - { name: max_replicas, type: int, isRequired: true }
 
 - name: ClusterExternalConfiguration_v1
   fields:
@@ -553,6 +568,7 @@
   - { name: uid, type: string, isRequired: true }
   - { name: resourcesDefaultRegion, type: string, isRequired: true }
   - { name: supportedDeploymentRegions, type: string, isList: true }
+  - { name: providerVersion, type: string, isRequired: true }
   - { name: terraformUsername, type: string }
   - { name: accountOwners, type: Owner_v1, isList: true, isRequired: true }
   - { name: automationToken, type: VaultSecret_v1, isRequired: true }
@@ -634,6 +650,8 @@
   - { name: provider, type: string, isRequired: true }
   - { name: path, type: string, isRequired: true }
   - { name: validate_json, type: boolean }
+  - { name: validate_alertmanager_config, type: boolean }
+  - { name: alertmanager_config_key, type: string }
 
 - name: NamespaceOpenshiftResourceResourceTemplate_v1
   interface: NamespaceOpenshiftResource_v1
@@ -642,6 +660,8 @@
   - { name: path, type: string, isRequired: true }
   - { name: type, type: string }
   - { name: variables, type: json }
+  - { name: validate_alertmanager_config, type: boolean }
+  - { name: alertmanager_config_key, type: string }
 
 - name: NamespaceOpenshiftResourceVaultSecret_v1
   interface: NamespaceOpenshiftResource_v1
@@ -653,6 +673,8 @@
   - { name: labels, type: json }
   - { name: annotations, type: json }
   - { name: type, type: string }
+  - { name: validate_alertmanager_config, type: boolean }
+  - { name: alertmanager_config_key, type: string }
 
 - name: NamespaceOpenshiftResourceRoute_v1
   interface: NamespaceOpenshiftResource_v1
@@ -1034,10 +1056,18 @@
   - { name: permissions, type: PermissionGithubOrgTeam_v1, isList: true, isRequired: true }
   - { name: role, type: string, isRequired: true }
 
+- name: AppQuayReposNotifications_v1
+  fields:
+  - { name: event, type: string, isRequired: true }
+  - { name: severity, type: string }
+  - { name: method, type: string, isRequired: true }
+  - { name: escalationPolicy, type: AppEscalationPolicy_v1, isRequired: true }
+
 - name: AppQuayRepos_v1
   fields:
   - { name: org, type: QuayOrg_v1, isRequired: true }
   - { name: teams, type: AppQuayReposTeams_v1, isList: true }
+  - { name: notifications, type: AppQuayReposNotifications_v1, isList: true }
   - { name: items, type: AppQuayReposItems_v1, isRequired: true, isList: true }
 
 - name: AppEscalationsEscalation_v1
@@ -1414,6 +1444,7 @@
   - { name: user_policies, type: AWSUserPolicy_v1, isList: true }
   - { name: sentry_teams, type: SentryTeam_v1, isList: true }
   - { name: sentry_roles, type: SentryRole_v1, isList: true }
+  - { name: sendgrid_accounts, type: SendGridAccount_v1, isList: true }
   - { name: owned_saas_files, type: SaasFile_v1, isList: true }
   - name: users
     type: User_v1
@@ -1626,6 +1657,7 @@
   - { name: jenkins_configs_v1, type: JenkinsConfig_v1, isList: true, datafileSchema: /dependencies/jenkins-config-1.yml }
   - { name: jira_servers_v1, type: JiraServer_v1, isList: true, datafileSchema: /dependencies/jira-server-1.yml }
   - { name: jira_boards_v1, type: JiraBoard_v1, isList: true, datafileSchema: /dependencies/jira-board-1.yml }
+  - { name: sendgrid_accounts_v1, type: SendGridAccount_v1, isList: true, datafileSchema: /dependencies/sendgrid-account-1.yml }
   - { name: products_v1, type: Product_v1, isList: true, datafileSchema: /app-sre/product-1.yml }
   - { name: environments_v1, type: Environment_v1, isList: true, datafileSchema: /app-sre/environment-1.yml }
   - { name: apps_v1, type: App_v1, isList: true, datafileSchema: /app-sre/app-1.yml }

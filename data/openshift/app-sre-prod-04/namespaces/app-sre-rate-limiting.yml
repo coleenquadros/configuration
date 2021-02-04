@@ -1,0 +1,34 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: app-sre-rate-limiting
+description: namespace for the app-sre rate-limiting service
+
+cluster:
+  $ref: /openshift/app-sre-prod-04/cluster.yml
+
+app:
+  $ref: /services/rate-limiting/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/ocm/namespaces/uhc-production.yml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-04.yml
+
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: resource-template
+  path: /services/common/serviceaccount.yaml
+  variables:
+    name: app-sre-rate-limiting
