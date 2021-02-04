@@ -13,15 +13,15 @@ Prerequisites:
 git clone https://github.com/app-sre/qontract-reconcile.git && cd qontract-reconcile
 
 # start a python virtual environment
-virtualenv venv
+python3 -m venv venv
 
 # activate virtual environment and install
 source venv/bin/activate
-python setup.py install
+python3 setup.py install
 
 # prepare vault environment variables
 export VAULT_ADDR=https://vault.devshift.net
-export TOKEN=$(cat ~/path/to/github/token)
+export TOKEN=Z<YOUR_TOKEN>
 vault login -method=github token=$TOKEN
 
 # get the config file from vault using the CLI:
@@ -36,8 +36,40 @@ qontract-reconcile --config config.debug.toml --dry-run terraform-resources
 qontract-reconcile --config config.debug.toml terraform-resources
 ```
 
+# Running vault-manager manually (not for development)
 
-**Note: If you're using python3 by default, you must create a virtualenv specifying
-the use of the python2 executable path. The command to create it would then be:**
- 
-`virtualenv --python=/usr/bin/python2 venv`
+Prerequisites: 
+- `vault` : CLI for Vault. Can be obtained from the `vault` package on Fedora and CentOS
+- A Github personal access token. Obtained from: https://github.com/settings/tokens
+
+To run the vault-manager integration manually, perform the following steps:
+```
+# prepare vault environment variables
+export VAULT_ADDR=https://vault.devshift.net
+export TOKEN=<YOUR_TOKEN>
+vault login -method=github token=$TOKEN
+
+gql_data=$(vault kv get -format=json app-sre/creds/app-interface/production/basic-auth)
+export GRAPHQL_SERVER="$(echo $gql_data | jq -r .data.base_url)/graphql"
+export GRAPHQL_USERNAME="$(echo $gql_data | jq -r .data.username)"
+export GRAPHQL_PASSWORD="$(echo $gql_data | jq -r .data.password)"
+
+vm_data=$(vault kv get -format=json app-sre/ci-int/vault-manager-creds)
+export VAULT_AUTHTYPE="$(echo $vm_data | jq -r .data.auth_type)"
+export VAULT_MANAGER_ROLE_ID="$(echo $vm_data | jq -r .data.role_id)"
+export VAULT_MANAGER_SECRET_ID="$(echo $vm_data | jq -r .data.secret_id)"
+
+export VAULT_RECONCILE_IMAGE=quay.io/app-sre/vault-manager
+export VAULT_RECONCILE_IMAGE_TAG=<get used image tag from app-interface/.env file>
+
+docker run --rm -t \
+    -e GRAPHQL_SERVER=${GRAPHQL_SERVER} \
+    -e GRAPHQL_USERNAME=${GRAPHQL_USERNAME} \
+    -e GRAPHQL_PASSWORD=${GRAPHQL_PASSWORD} \
+    -e VAULT_ADDR={VAULT_ADDR} \
+    -e VAULT_AUTHTYPE=approle \
+    -e VAULT_ROLE_ID=${VAULT_MANAGER_ROLE_ID} \
+    -e VAULT_SECRET_ID=${VAULT_MANAGER_SECRET_ID} \
+    ${VAULT_RECONCILE_IMAGE}:${VAULT_RECONCILE_IMAGE_TAG} -dry-run
+```
+Note: if a manual reconciliation is required - run the integration again without -dry-run
