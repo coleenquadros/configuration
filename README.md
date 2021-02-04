@@ -335,7 +335,7 @@ App-interface data is represented by files that correspond to a schema. Files of
 
 To learn more about the different entities and their relations:
 
-- [Products, Environments, Namespaces and Apps](/docs/app-interface/api/entities-and-relations#products-environments-namespaces-and-apps.md)
+- [Products, Environments, Namespaces and Apps](/docs/app-interface/api/entities-and-relations.md#products-environments-namespaces-and-apps)
 
 ## Howto
 
