@@ -268,6 +268,31 @@ resourceTemplates:
             name: s3-bucket-creds
           region: us-east-1
   - namespace:
+      $ref: /services/hive/namespaces/hivep04ew2/hive-production.yml
+    ref: a1e442db3c81cc1131567eecd022af0798144fe4
+    parameters:
+      GLOBAL_PULL_SECRET: hive-ci-global-pull-secret
+      MANAGED_DOMAINS:
+        - aws:
+            credentialsSecretRef:
+              name: external-dns-route53-admin
+          domains:
+          - p1.openshiftapps.com
+        - gcp:
+            credentialsSecretRef:
+              name: google-cloud-dns-creds
+          domains:
+          - p2.openshiftapps.com
+      DISABLED_CONTROLLERS:
+        - "remoteingress"
+      DELETE_PROTECTION: enabled
+      FAILED_PROVISION_CONFIG:
+        aws:
+          bucket: hive-production-storage-01
+          credentialsSecretRef:
+            name: s3-bucket-creds
+          region: us-east-1
+  - namespace:
       $ref: /services/hive/namespaces/ssotest01ue1/hive-stage.yml
     ref: master
     upstream: openshift-hive-gh-build-master
