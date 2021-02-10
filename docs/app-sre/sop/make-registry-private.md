@@ -8,7 +8,7 @@ As of 2021-02-02 we have a spreadsheet with the list of pods that are using imag
 
 ## Ensure the namespace has the quay.io pull secret
 
-Ensure that the quay.io pull secret has to be added to the namespace as follows:
+Ensure that the quay.io pull secret exists in the namespace where your pods are running as follows:
 
 ```yaml
 ---
@@ -43,7 +43,7 @@ openshiftResources:
         name: <name>
 ```
 
-You will note that [/services/common/serviceaccount.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/95eb17194b2bd801b5fc77a1b041f0b42d2344b0/resources/services/common/serviceaccount.yaml#L6) includes the `quay.io` pull secret.
+Note that [/services/common/serviceaccount.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/95eb17194b2bd801b5fc77a1b041f0b42d2344b0/resources/services/common/serviceaccount.yaml#L6) includes the `quay.io` pull secret.
 
 ## Adding quay.io pull secret to the ServiceAccount
 
@@ -62,11 +62,16 @@ imagePullSecrets:
 ...
 ```
 
-The definition of the ServiceAccount will be found in the `namespace` file, reference in either the `openshiftResources` parameter or in the `sharedResources` one.
+The ServiceAccount may have been defined in two places:
+
+1. In App-Interface, in the `namespace` file, referenced in the `openshiftResources` parameter or in the `sharedResources` one.
+1. In the upstream repo, referenced by `saas_file`.
+
+Either way, you must make sure that the SA contains the `quay.io` imagePullSecret.
 
 ## Patch upstream to use the new serviceAccount
 
-Find the upstream repository (you can locate it following the `saas_file`), and patch it in order to include the previously defined named `ServiceAccount` as such:
+Find the upstream repository where the openshift manifests for your application are located (you can locate it following the `saas_file`), and patch them in order to include the service account from the previous steps in the appropriate openshift object:
 
 ```yaml
 ---
