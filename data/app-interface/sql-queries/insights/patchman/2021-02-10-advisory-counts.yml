@@ -1,0 +1,35 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2021-02-10-advisory-count
+namespace:
+  $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
+identifier: patchman-prod
+output: stdout
+queries:
+    - select 'old';
+    - |
+     select sp.rh_account_id, sa.advisory_id, aac.systems_affected as cache, count(advisory_id) as cnt
+       from system_advisories sa
+       join system_platform sp
+         on sp.id=sa.system_id
+       join advisory_account_data aac
+         on aac.rh_account_id = sp.rh_account_id and aac.advisory_id = sa.advisory_id
+      where sp.stale=false and sp.opt_out=false and sp.last_evaluation IS NOT NULL
+      group by sp.rh_account_id, sa.advisory_id, aac.systems_affected
+     having aac.systems_affected != count(advisory_id)
+      order by sp.rh_account_id, sa.advisory_id
+      limit 1000;
+    - select 'new - when_patched IS NULL';
+    - |
+     select sp.rh_account_id, sa.advisory_id, aac.systems_affected as cache, count(advisory_id) as cnt
+       from system_advisories sa
+       join system_platform sp
+         on sp.id=sa.system_id
+       join advisory_account_data aac
+         on aac.rh_account_id = sp.rh_account_id and aac.advisory_id = sa.advisory_id
+      where sp.stale=false and sp.opt_out=false and sp.last_evaluation IS NOT NULL and sa.when_patched IS NULL
+      group by sp.rh_account_id, sa.advisory_id, aac.systems_affected
+     having aac.systems_affected != count(advisory_id)
+      order by sp.rh_account_id, sa.advisory_id
+      limit 1000;
