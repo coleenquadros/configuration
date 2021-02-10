@@ -43,7 +43,7 @@ Best Practice: manage your remote repo as following to avoid confusion of "origi
 ## Setup qontract-server
 
 1. Install [docker](https://www.docker.com/products/docker-desktop).
-1. In `qontract-server` directory, run `make dev` command.
+1. In `app-interface` directory, run `make server` command.
 
 > Optionally, if you want to specify the path for the app-interface repo on your local filesystem, you can use the parameter:
 >*  `APP_INTERFACE_PATH` - (optional) path to a local app-interface repo (Default: `$PWD/../../service/app-interface`).
