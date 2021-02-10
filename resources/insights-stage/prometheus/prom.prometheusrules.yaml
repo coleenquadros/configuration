@@ -10,24 +10,41 @@ spec:
   groups:
   - name: insights-sli
     rules:
+      # Constants passed in during deploy via app-interface
     - record: service:constant:sli:pcterror
       expr: {{{ ERROR_RATE_THRESHOLD_PCT }}}
     - record: service:constant:sli:pctlatency
       expr: {{{ LATENCY_THRESHOLD_PCT }}}
+
+      # Get total requests, returns for all exported_services
     - record: service:request_count:rate5m
       expr: sum by(exported_service, environment) (rate(api_3scale_gateway_api_time_count[5m])) > 0
-    - record: service:latency_le_{{{ LATENCY_THRESHOLD_MS }}}:rate5m
-      expr: sum by(exported_service, environment) (rate(api_3scale_gateway_api_time_bucket{le="{{{ LATENCY_THRESHOLD_MS }}}.0" }[5m]))
+
+      # Get all 500 errors, returns for all exported_services
     - record: service:status_5xx:rate5m
       expr: sum by(exported_service, environment) (rate(api_3scale_gateway_api_status{ status="5xx" }[5m]))
-    - record: service:proportion:latency_gt_{{{ LATENCY_THRESHOLD_MS }}}:rate5m
-      expr: 1 - (service:latency_le_{{{ LATENCY_THRESHOLD_MS }}}:rate5m / service:request_count:rate5m)
+
+      # Get the ratio of 500 / total requests, returns for all exported_services
     - record: service:proportion:status_5xx:rate5m
       expr: service:status_5xx:rate5m / service:request_count:rate5m
-    - record: service:sli:latency_gt_{{{ LATENCY_THRESHOLD_MS }}}:pctl{{{ LATENCY_THRESHOLD_PCT }}}rate5m
-      expr: service:proportion:latency_gt_{{{ LATENCY_THRESHOLD_MS }}}:rate5m * 100 < bool {{{ LATENCY_THRESHOLD_PCT }}}
+
+      # THRESHOLD is set to 5. Use the ratio to return a true or false for threshold met
+      # Averaged over 30 days, we get the % amount of time a the SLI was met
     - record: service:sli:status_5xx:pctl{{{ ERROR_RATE_THRESHOLD_PCT }}}rate5m
       expr: service:proportion:status_5xx:rate5m * 100 < bool {{{ ERROR_RATE_THRESHOLD_PCT }}}
+
+      # Latency Threshold is 2000ms by default, or 2s
+      # Get the number of requests that were within the the 2s threshold
+    - record: service:latency_le_{{{ LATENCY_THRESHOLD_MS }}}:rate5m
+      expr: sum by(exported_service, environment) (rate(api_3scale_gateway_api_time_bucket{le="{{{ LATENCY_THRESHOLD_MS }}}.0" }[5m]))
+
+      # Get the ratio of compliant (< 2s) requests, and take the inverse to get downtime
+    - record: service:proportion:latency_gt_{{{ LATENCY_THRESHOLD_MS }}}:rate5m
+      expr: 1 - (service:latency_le_{{{ LATENCY_THRESHOLD_MS }}}:rate5m / service:request_count:rate5m)
+
+      # Using that downtime ratio, return the % amount of time the SLI was met
+    - record: service:sli:latency_gt_{{{ LATENCY_THRESHOLD_MS }}}:pctl{{{ LATENCY_THRESHOLD_PCT }}}rate5m
+      expr: service:proportion:latency_gt_{{{ LATENCY_THRESHOLD_MS }}}:rate5m * 100 < bool {{{ LATENCY_THRESHOLD_PCT }}}
 
     # Dynamic service based metrics
     - record: service:sli:latency_gt_{{{ LATENCY_THRESHOLD_MS }}}:pctlrate5m
