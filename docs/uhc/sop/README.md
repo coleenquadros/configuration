@@ -398,6 +398,8 @@ Controller manager is down.
 
 - Inform the greater service delivery team.
 
+---
+
 ## Metrics Worker Down
 
 ### Impact:
@@ -423,6 +425,48 @@ https://infogw-proxy.api.stage.openshift.com/ (data from staging telemeter)
 - Check `deployment/clusters-service` logs to confirm the telemetry down.
 - Contact Service Development A team on #service-delivery, sd-mp-devel@redhat.com.
 - Contact #forum-telemetry slack channel,monitoring-telemeter-service@redhat.com
+
+---
+
+## Clusters Service Rejecting Requests Due To Exceeded Rate Limits
+
+### Impact:
+
+Requests that exceed the rate limits will be rejected with HTTP status code 429
+so some clients, probably those abusing the service, will be blocked.
+
+### Summary:
+
+Clusters service is rejecting requests due to exceeded rate limits.
+
+### Access required:
+
+- Console access to the cluster that runs the clusters service.
+
+- Edit access to the affected UHC namespaces:
+  - `uhc-stage`
+  - `uhc-production`
+
+### Steps:
+
+Check the logs of the `envoy` container of the `clusters-service` pods to find
+out more details about the rejected requests. To do that you can use a Kibana
+query like this:
+
+```
+kubernetes.namespace_name:uhc-stage AND kubernetes.pod_name:clusters-service-* AND kubernetes.container_name=envoy AND message:429
+```
+
+For each are rejected requests you will see messages like this:
+
+```
+[2021-02-03T12:02:32.490Z] POST /api/clusters_mgmt/v1/register_cluster HTTP/1.1" 429 - 3 126 2 -
+"79.155.131.35,10.131.8.13" "OCM/0.1.145" "4e7b443e-c039-4339-bd02-a0f2b551aeac" "api.stage.openshift.com" "-"
+```
+
+Inform Service Development A team on #service-development, sd-mp-devel@redhat.com.
+
+---
 
 ## Escalations
 
