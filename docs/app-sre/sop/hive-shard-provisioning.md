@@ -173,7 +173,7 @@ To deploy ClusterImageSets to a new cluster, add a target in the matching saas f
 
 #### Managed-tenants
 
-To deploy the managed-tenants SelectorSyncSets, add a target in the managed-tenants saas file: [`/data/services/app-sre/cicd/ci-int/saas-managed-tenants.yaml`](/data/services/app-sre/cicd/ci-int/saas-managed-tenants.yaml)
+To deploy the managed-tenants SelectorSyncSets, add a target in the managed-tenants saas file: [`/data/services/addons/cicd/ci-int/saas-managed-tenants.yaml`](/data/services/app-sre/cicd/ci-int/saas-managed-tenants.yaml)
 
 ## Monitoring
 
