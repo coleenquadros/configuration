@@ -339,3 +339,40 @@
     - archive:
         artifacts: 'target/logs/**,target/surefire-reports/**'
         allow-empty: true
+
+- job-template:
+    id: managed-kafka-promote-ui
+    name: managed-kafka-promote-ui
+    wrappers: 
+    - timestamps
+    - timeout_wrapper:
+        timeout: "{timeout}"
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+          - *managed_services_github_deploy_key
+    parameters:
+    - string:
+        name: REPOSITORIES
+        default: 'https://github.com/RedHatInsights/rhosak-dashboard-build;https://github.com/RedHatInsights/rhoas-guides-build;https://github.com/RedHatInsights/rhosak-control-plane-ui-build;https://github.com/RedHatInsights/rhosak-data-plane-ui-build'
+        description: 'All repositories to promote'
+    - string:
+        name: FROM_BRANCH
+        default: qa-beta
+    - string:
+        name: TO_BRANCH
+        default: prod-beta
+    - string:
+        name: AUTHOR_NAME
+        default: Bot
+    - string:
+        name: AUTHOR_EMAIL
+        default: ms-devexp@redhat.com
+    - bool:
+        name: DRY_RUN
+        default: true
+        description: If true the changes are not pushed
+    <<: *gl_checkout
+    builders: 
+    - shell: ./script/promote-ui.sh
