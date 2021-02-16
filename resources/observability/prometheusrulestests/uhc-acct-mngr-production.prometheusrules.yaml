@@ -1,0 +1,194 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+  - /observability/prometheusrules/uhc-acct-mngr-production.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+  - interval: 1m
+    input_series:
+      # ams up
+      - series: up{job="uhc-acct-mngr-metrics",namespace="uhc-production",pod="uhc-acct-mngr-7fccd765b-nscfn"}
+        values: 1 1 1 1 1 0 0 0 0 0 # up for 5min then down
+      # ams inbound request count
+      - series: api_inbound_request_count{code="500",namespace="uhc-production",service="uhc-acct-mngr-metrics"}
+        values: 0+1x20 # http 500 (10%)
+      - series: api_inbound_request_count{code="403",namespace="uhc-production",service="uhc-acct-mngr-metrics"}
+        values: 0+1x20 # http 403 (10%)
+      - series: api_inbound_request_count{code="200",namespace="uhc-production",service="uhc-acct-mngr-metrics"}
+        values: 0+8x20 # http 200 (80%)
+      # ams inbound request duration
+      - series: api_inbound_request_duration_bucket{le="0.1",namespace="uhc-production",service="uhc-acct-mngr-metrics"}
+        values: 0+1x20 # <= 0.1
+      - series: api_inbound_request_duration_bucket{le="1",namespace="uhc-production",service="uhc-acct-mngr-metrics"}
+        values: 0+2x20 # <= 1
+      - series: api_inbound_request_duration_bucket{le="2",namespace="uhc-production",service="uhc-acct-mngr-metrics"}
+        values: 0+3x20 # <= 2
+      - series: api_inbound_request_duration_bucket{le="5",namespace="uhc-production",service="uhc-acct-mngr-metrics"}
+        values: 0+4x20 # <= 5
+      - series: api_inbound_request_duration_bucket{le="10",namespace="uhc-production",service="uhc-acct-mngr-metrics"}
+        values: 0+5x20 # <= 10
+      - series: api_inbound_request_duration_bucket{le="30",namespace="uhc-production",service="uhc-acct-mngr-metrics"}
+        values: 0+6x20 # <= 30
+      - series: api_inbound_request_duration_bucket{le="+Inf",namespace="uhc-production",service="uhc-acct-mngr-metrics"}
+        values: 0+7x20 # <= inf (50% > 2s)
+      # quay request count
+      - series: api_outbound_request_count{apiservice="quay",code="400",namespace="uhc-production",service="uhc-acct-mngr-metrics"}
+        values: 0+1x20 # http 400 10%
+      - series: api_outbound_request_count{apiservice="quay",code="0",namespace="uhc-production",service="uhc-acct-mngr-metrics"}
+        values: 0+1x20 # http timeout 10%
+      - series: api_outbound_request_count{apiservice="quay",code="200",namespace="uhc-production",service="uhc-acct-mngr-metrics"}
+        values: 0+4x20 # http 200 40%
+      - series: api_outbound_request_count{apiservice="quay",code="201",namespace="uhc-production",service="uhc-acct-mngr-metrics"}
+        values: 0+4x20 # http 201 40%
+      # quay request duration
+      - series: api_outbound_request_duration_bucket{le="1",namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="quay",code="201",path="/api/v1/organization/-/robots/-"}
+        values: 0+1x20 # <= 1
+      - series: api_outbound_request_duration_bucket{le="5",namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="quay",code="201",path="/api/v1/organization/-/robots/-"}
+        values: 0+2x20 # <= 5
+      - series: api_outbound_request_duration_bucket{le="10",namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="quay",code="201",path="/api/v1/organization/-/robots/-"}
+        values: 0+3x20 # <= 10
+      - series: api_outbound_request_duration_bucket{le="+Inf",namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="quay",code="201",path="/api/v1/organization/-/robots/-"}
+        values: 0+4x20 # <= inf (50% > 1s)
+      # rhit request count
+      - series: api_outbound_request_count{apiservice="rhit",code="400",namespace="uhc-production",service="uhc-acct-mngr-metrics"}
+        values: 0+1x20 # http 400 10%
+      - series: api_outbound_request_count{apiservice="rhit",code="0",namespace="uhc-production",service="uhc-acct-mngr-metrics"}
+        values: 0+1x20 # http timeout 10%
+      - series: api_outbound_request_count{apiservice="rhit",code="200",namespace="uhc-production",service="uhc-acct-mngr-metrics"}
+        values: 0+4x20 # http 200 40%
+      - series: api_outbound_request_count{apiservice="rhit",code="201",namespace="uhc-production",service="uhc-acct-mngr-metrics"}
+        values: 0+4x20 # http 201 40%
+      # rhit/terms request count
+      - series: api_outbound_request_count{apiservice="rhit/terms",code="400",namespace="uhc-production",service="uhc-acct-mngr-metrics"}
+        values: 0+1x20 # http 400 10%
+      - series: api_outbound_request_count{apiservice="rhit/terms",code="0",namespace="uhc-production",service="uhc-acct-mngr-metrics"}
+        values: 0+1x20 # http timeout 10%
+      - series: api_outbound_request_count{apiservice="rhit/terms",code="200",namespace="uhc-production",service="uhc-acct-mngr-metrics"}
+        values: 0+4x20 # http 200 40%
+      - series: api_outbound_request_count{apiservice="rhit/terms",code="201",namespace="uhc-production",service="uhc-acct-mngr-metrics"}
+        values: 0+4x20 # http 201 40%
+      # rhit/terms request duration
+      - series: api_outbound_request_duration_bucket{le="1",namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="rhit/terms",code="200"}
+        values: 0+1x20 # <= 1
+      - series: api_outbound_request_duration_bucket{le="5",namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="rhit/terms",code="200"}
+        values: 0+2x20 # <= 5
+      - series: api_outbound_request_duration_bucket{le="10",namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="rhit/terms",code="200"}
+        values: 0+3x20 # <= 10
+      - series: api_outbound_request_duration_bucket{le="+Inf",namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="rhit/terms",code="200"}
+        values: 0+4x20 # <= inf (50% > 1s)
+      # pod restart
+      - series: kube_pod_container_status_restarts_total{container="service",namespace="uhc-production",pod="uhc-acct-mngr-7fccd765b-mpqmk"}
+        values: 0 0 1 1 # ams-service
+      - series: kube_pod_container_status_restarts_total{container="uhc-acct-mngr-fetch-telemeter-metrics",namespace="uhc-production",pod="uhc-acct-mngr-fetch-telemeter-metrics-1613509500-srnkx"}
+        values: 0 0 2 2 # fetch-telemeter
+
+    alert_rule_test:
+      - eval_time: 4m
+        alertname: UHC account manager DOWN - production
+        exp_alerts:
+      - eval_time: 10m
+        alertname: UHC account manager DOWN - production
+        exp_alerts:
+          - exp_labels:
+              service: uhc-acct-mngr
+              severity: critical
+            exp_annotations:
+              message: "No targets found for UHC Account Manager in namespace uhc-production. Account Manager is down."
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
+      - eval_time: 20m
+        alertname: UHC account manager 5xx Errors High - production
+        exp_alerts:
+          - exp_labels:
+              namespace: uhc-production
+              service: uhc-acct-mngr
+              severity: high
+            exp_annotations:
+              message: "UHC Account Manager in namespace uhc-production is returning code 5xx for 10% of requests."
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
+      - eval_time: 20m
+        alertname: UHC account manager 4xx Errors High - production
+        exp_alerts:
+          - exp_labels:
+              namespace: uhc-production
+              service: uhc-acct-mngr
+              severity: medium
+            exp_annotations:
+              message: "UHC Account Manager in namespace uhc-production is returning 4xx errors for 10% of requests."
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
+      - eval_time: 20m
+        alertname: UHC account manager Latency High - production
+        exp_alerts:
+          - exp_labels:
+              service: uhc-acct-mngr
+              severity: medium
+            exp_annotations:
+              message: "UHC Account Manager in namespace uhc-production 50th percentile latency is greater than 2s. Current value: 3.5"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
+      - eval_time: 20m
+        alertname: OCM dependencies - Quay too many errors - production
+        exp_alerts:
+          - exp_labels:
+              service: uhc-acct-mngr
+              severity: medium
+            exp_annotations:
+              message: "AMS is seeing a high rate of errors from Quay for 20% of requests."
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
+      - eval_time: 20m
+        alertname: OCM dependencies - Quay creating robot users slow - production
+        exp_alerts:
+          - exp_labels:
+              service: uhc-acct-mngr
+              severity: medium
+            exp_annotations:
+              message: "AMS is seeing a high average latency creating robot accounts on Quay. The average response time over the last 5 minutes is 5 seconds"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
+      - eval_time: 20m
+        alertname: OCM dependencies - RHIT too many errors - production
+        exp_alerts:
+          - exp_labels:
+              service: uhc-acct-mngr
+              severity: high
+            exp_annotations:
+              message: "AMS is seeing a high rate of errors from RHIT for 20% of requests."
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
+      - eval_time: 20m
+        alertname: OCM dependencies - Terms and Conditions too many errors - production
+        exp_alerts:
+          - exp_labels:
+              service: uhc-acct-mngr
+              severity: high
+            exp_annotations:
+              message: "AMS is seeing a high rate of errors from Terms and Conditions for 20% of requests."
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
+      - eval_time: 20m
+        alertname: OCM dependencies - Terms and Conditions slow - production
+        exp_alerts:
+          - exp_labels:
+              service: uhc-acct-mngr
+              severity: medium
+            exp_annotations:
+              message: "AMS is seeing a high average latency accessing Terms and Conditions. The average response time over the last 5 minutes is 5 seconds"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
+      - eval_time: 3m
+        alertname: OCM Alert Pod Restarted - production
+        exp_alerts:
+          - exp_labels:
+              namespace: uhc-production
+              pod: uhc-acct-mngr-7fccd765b-mpqmk
+              service: uhc-acct-mngr
+              severity: info
+            exp_annotations:
+              message: 'Observed pod (uhc-acct-mngr-7fccd765b-mpqmk) in namespace uhc-production restart(s) (1)'
+      - eval_time: 3m
+        alertname: OCM Alert Pod Restarting too many times - production
+        exp_alerts:
+          - exp_labels:
+              namespace: uhc-production
+              pod: uhc-acct-mngr-fetch-telemeter-metrics-1613509500-srnkx
+              service: uhc-acct-mngr
+              severity: high
+            exp_annotations:
+              message: 'Observed pod (uhc-acct-mngr-fetch-telemeter-metrics-1613509500-srnkx) in namespace uhc-production restart(s) (2)'
