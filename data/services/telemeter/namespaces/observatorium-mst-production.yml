@@ -1,15 +1,75 @@
 # TODO(kakkoyun): Move with CI/CD changes.
 ---
-$schema: /access/role-1.yml
+$schema: /openshift/namespace-1.yml
 
 labels: {}
 
 name: observatorium-mst-production
+description: production namespace for Observatorium Managed Service Tenants
 
-permissions: []
+cluster:
+  $ref: /openshift/telemeter-prod-01/cluster.yml
 
-access:
-# app-sre-stage-01
-- cluster:
-    $ref: /openshift/telemeter-prod-01/cluster.yml
-  clusterRole: observatorium-mst
+app:
+  $ref: /services/telemeter/app.yml
+
+environment:
+  $ref: /products/osdv4/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.telemeter-prod-01.yml
+- $ref: /services/observatorium-logs/namespaces/observatorium-logs-production.yml
+
+grafanaUrl: https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-prometheus&var-cluster=app-sre&var-namespace=telemeter-production
+
+managedRoles: true
+
+managedResourceTypes:
+- Role
+- RoleBinding
+- ServiceAccount
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: s3
+  account: app-sre
+  identifier: observatorium-mst-thanos-production
+  defaults: /terraform/resources/s3-private-1.yml
+  output_resource_name: observatorium-mst-thanos-production-s3
+
+openshiftResources:
+- provider: route
+  path: /app-sre/telemeter-production/observatorium-mst-api-production.route.yaml
+  vault_tls_secret_path: app-interface/app-sre/routes/_wildcard.api.openshift.com
+  vault_tls_secret_version: 3
+- provider: vault-secret
+  path: app-interface/app-sre/telemeter-production/observatorium-mst-thanos-objectstorage
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre/telemeter-production/observatorium-api-proxy
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre/telemeter-production/query-frontend-proxy
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre/telemeter-production/compact-proxy
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre/telemeter-production/query-proxy
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre/telemeter-production/observatorium-observatorium-mst-api
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+
+# Serviceaccount for Observatorium platform, Cluster role to access OSD tenant namespace
+- provider: resource
+  path: /app-sre/telemeter-production/observatorium-mst.serviceaccount.yaml
+
+# proruction port-forward for debugging
+- provider: resource
+  path: /app-sre/telemeter-production/observatorium-allow-port-forward.role.yaml
+- provider: resource
+  path: /app-sre/telemeter-production/observatorium-allow-port-forward.rolebinding.yaml
