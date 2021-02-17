@@ -2091,7 +2091,7 @@ Writing tests can be difficult at the beginning. This [article](https://www.robu
 
 ## Design
 
-Additional design information: [here](docs/app-interface/design.md).
+Additional design information: [here](docs/app-interface/design.md)
 
 [schemas]: </schemas>
 [userschema]: </schemas/access/user-1.yml>
