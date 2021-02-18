@@ -221,11 +221,17 @@ resourceTemplates:
           origin: http://cloudigrade-api.cloudigrade-stage.svc.cluster.local:80/internal/
           auth:
             saml: "'doppler-dev' in user['Role']"
+            x509: "x509['subject_dn'] == '/DC=com/DC=redhat/OU=messaging/OU=serviceusers/UID=msg-cloudigrade-turnpike/L=Stage/CN=msg-cloudigrade-turnpike'"
         - name: automation-analytics-oneview
           route: /api/automation-analytics/oneview
           origin: http://automation-analytics-api-oneview.tower-analytics-stage.svc.cluster.local:8080/api/tower-analytics/oneview
           auth:
             saml: "'automation-analytics' in user['Role']"
+        - name: vmaas-reposcan
+          route: /api/vmaas
+          origin: http://vmaas-reposcan.vmaas-stage.svc.cluster.local:8081/api/vmaas
+          auth:
+            saml: "'vulnerability-admins' in user['Role']"
   - namespace:
       $ref: /services/insights/turnpike/namespaces/prod-turnpike-prod.yml
     ref: master
@@ -382,6 +388,7 @@ resourceTemplates:
           origin: http://cloudigrade-api.cloudigrade-prod.svc.cluster.local:80/internal/
           auth:
             saml: "'doppler-dev' in user['Role']"
+            x509: "x509['subject_dn'] == '/DC=com/DC=redhat/OU=messaging/OU=serviceusers/UID=msg-cloudigrade-turnpike/L=Stage/CN=msg-cloudigrade-turnpike'"
         - name: vulnerability-engine-admin
           route: /api/vulnerability
           origin: http://vulnerability-engine-manager-admin.vulnerability-engine-prod.svc.cluster.local:8443/api/vulnerability
@@ -392,6 +399,11 @@ resourceTemplates:
           origin: http://automation-analytics-api-oneview.tower-analytics-prod.svc.cluster.local:8080/api/tower-analytics/oneview
           auth:
             saml: "'automation-analytics' in user['Role']"
+        - name: vmaas-reposcan
+          route: /api/vmaas
+          origin: http://vmaas-reposcan.vmaas-prod.svc.cluster.local:8081/api/vmaas
+          auth:
+            saml: "'vulnerability-admins' in user['Role']"
 - name: nginx-prometheus
   path: /templates/prometheus-nginx.yml
   url: https://github.com/RedHatInsights/turnpike
