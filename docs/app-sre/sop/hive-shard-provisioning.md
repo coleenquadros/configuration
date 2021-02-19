@@ -6,6 +6,7 @@
   - [Provisioning OSD operators](#provisioning-osd-operators)
     - [Resources](#resources)
     - [Others](#others)
+  - [Provision Backplane](#provisioning-backplane)  
   - [Monitoring](#monitoring)
   - [Adding the shard to OCM](#adding-the-shard-to-ocm)
   - [Validations](#validations)
@@ -174,6 +175,14 @@ To deploy ClusterImageSets to a new cluster, add a target in the matching saas f
 #### Managed-tenants
 
 To deploy the managed-tenants SelectorSyncSets, add a target in the managed-tenants saas file: [`/data/services/addons/cicd/ci-int/saas-managed-tenants.yaml`](/data/services/app-sre/cicd/ci-int/saas-managed-tenants.yaml)
+
+## Provisioning backplane
+
+Backplane should run on all v4 hive, to deploy backplane on a new v4 hive cluster:
+
+1. Create a new enviroment file under here: [`/data/services/backplane/namespaces`](/data/services/backplane/namespaces).
+
+2. Add a new target in the saas file: [`/data/services/backplane/cicd/saas/saas-backplane-api.yaml`](/data/services/backplane/cicd/saas/saas-backplane-api.yaml).
 
 ## Monitoring
 
