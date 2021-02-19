@@ -164,24 +164,6 @@ resourceTemplates:
       CLOUDIGRADE_ENABLED: true
       CLOUDIGRADE_HOST: cloudigrade-api.cloudigrade-prod.svc.cluster.local
       CLOUDIGRADE_PORT: 80
-- name: rhsm-conduit
-  path: /templates/rhsm-conduit.yaml
-  url: https://github.com/RedHatInsights/rhsm-conduit
-  targets:
-  - namespace:
-      $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
-    ref: main
-    upstream: RedHatInsights-rhsm-conduit-gh-build-main
-    parameters:
-      MEMORY_REQUEST: 1000Mi
-      PINHEAD_URL: https://systems.stage.api.redhat.com/v1
-      RHSM_URL: https://api.rhsm.stage.redhat.com/v1
-  - namespace:
-      $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
-    ref: 68b11bb05865a6cc6af71911982798714780b39c
-    parameters:
-      PINHEAD_URL: https://systems.api.redhat.com/v1
-      RHSM_URL: https://api.rhsm.redhat.com/v1
 - name: system-conduit
   path: /templates/rhsm-conduit.yaml
   url: https://github.com/RedHatInsights/rhsm-subscriptions
@@ -201,3 +183,45 @@ resourceTemplates:
       MEMORY_REQUEST: 1000Mi
       PINHEAD_URL: https://systems.stage.api.redhat.com/v1
       RHSM_URL: https://api.rhsm.stage.redhat.com/v1
+  - namespace:
+      $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
+    ref: main
+    upstream: RedHatInsights-rhsm-conduit-gh-build-main
+    parameters:
+      MEMORY_REQUEST: 1000Mi
+      PINHEAD_URL: https://systems.stage.api.redhat.com/v1
+      RHSM_URL: https://api.rhsm.stage.redhat.com/v1
+  - namespace:
+      $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
+    ref: 8be26a2afffe58a5c215bd2d0d4791914c700c4b
+    parameters:
+      PINHEAD_URL: https://systems.api.redhat.com/v1
+      RHSM_URL: https://api.rhsm.redhat.com/v1
+- name: auto-registration-listener
+  path: /deploy/listener.yml
+  url: https://gitlab.cee.redhat.com/rhsm/automatic-registration
+  targets:
+  - namespace:
+      $ref: /services/insights/rhsm/namespaces/dev-rhsm-ci.yml
+    ref: master
+    parameters:
+      RHSM_SERVICE_URL: https://api.rhsm.dev.redhat.com/v1/cloud_access_providers/
+      USER_SERVICE_URL: https://user.qa.api.redhat.com/
+  - namespace:
+      $ref: /services/insights/rhsm/namespaces/dev-rhsm-qa.yml
+    ref: aebf67ddedc35e48ec0f185abe7924efb76397eb
+    parameters:
+      RHSM_SERVICE_URL: https://api.rhsm.qa.redhat.com/v1/cloud_access_providers/
+      USER_SERVICE_URL: https://user.qa.api.redhat.com/
+  - namespace:
+      $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
+    ref: 4a70295c0797f446057ee5ae297c209342ec04b3
+    parameters:
+      RHSM_SERVICE_URL: https://api.rhsm.stage.redhat.com/v1/cloud_access_providers/
+      USER_SERVICE_URL: https://user.stage.api.redhat.com/
+  - namespace:
+      $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
+    ref: 4a70295c0797f446057ee5ae297c209342ec04b3
+    parameters:
+      RHSM_SERVICE_URL: https://api.rhsm.redhat.com/v1/cloud_access_providers/
+      USER_SERVICE_URL: https://user.api.redhat.com/

@@ -1,0 +1,17 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2021-02-16-advisory-cache-counts
+namespace:
+  $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
+identifier: patchman-prod
+output: stdout
+queries:
+    - |
+     select sp.rh_account_id, sa.advisory_id, am.name, aac.systems_affected as cache, count(sa.advisory_id) as cnt from system_advisories sa
+     join system_platform sp on sa.rh_account_id = sp.rh_account_id and sp.id=sa.system_id
+     join advisory_account_data aac on aac.rh_account_id = sp.rh_account_id and aac.advisory_id = sa.advisory_id
+     join advisory_metadata am on am.id = sa.advisory_id
+     where sp.stale=false
+     group by sp.rh_account_id, sa.advisory_id, am.name, aac.systems_affected
+     having aac.systems_affected != count(sa.advisory_id);
