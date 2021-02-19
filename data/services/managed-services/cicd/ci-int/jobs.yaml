@@ -25,11 +25,11 @@ config:
       gl_project: strimzi-operator
       quay_org: app-sre
       jobs:
-        - 'gl-build-master-strimzi':
-            branch: mk-release
-            display_name: build mk-strimzi-operator mk-release
         - 'gl-pr-check':
             display_name: mk-strimzi-operator pr-check
+        - 'gl-build-master-managed-services':
+            branch: mk-release
+            display_name: mk-strimzi-operator build mk-release
         - 'managed-services-security-scan':
             display_name: mk-strimzi-operator security-scan
             branch: mk-master
@@ -46,16 +46,16 @@ config:
       quay_org: app-sre
       jobs:
         - 'gl-pr-check-apache-kafka':
-            display_name: apache-kafka pr-check
+            display_name: mk-apache-kafka pr-check
+        - 'gl-build-master-managed-services':
+            branch: mk-release
+            display_name: mk-apache-kafka build mk-release
         - 'managed-services-security-scan':
             display_name: mk-apache-kafka security-scan
             branch: mk-release
             ci_cmd: 'make scan_project'
             slack_channel_notification: mk-ci-cd
             cron_expression: 'H 6 * * *'
-        - 'gl-build-master-managed-services':
-            branch: mk-release
-            display_name: apache-kafka build mk-release
 
   - project:
       name: mk-strimzi-ui-midstream
@@ -192,6 +192,9 @@ config:
             ci_cmd: 'make pull/upstream/all'
             slack_channel_notification: mk-ci-cd
             cron_expression: 'H 1 * * *'
+        - 'managed-kafka-promote-ui':
+            display_name: managed-kafka promote ui components
+            timeout: 120
 
   - project:
       name: managed-services-kafka-chaos-tests
@@ -239,8 +242,8 @@ config:
       name: managed-services-sso
       label: managed-services
       node: managed-services
-      gl_group: service
-      gl_project: managed-services-api
+      gh_org: RHCloudServices
+      gh_repo: kafka-monitoring-stuff
       jobs:
         - 'managed-services-sso-cluster-extension':
             display_name: Managed Services SSO Extend Staging Cluster Lifetime

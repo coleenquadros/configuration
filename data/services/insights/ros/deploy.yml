@@ -1,0 +1,48 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: ros
+  platform: insights
+
+name: ros
+description: ros app on the Insights Platform
+
+app:
+  $ref: /services/insights/ros/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+timeout: 5
+
+managedResourceTypes: 
+- Deployment
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: ros-backend.yaml
+  path: /templates/ros/ros-backend.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  parameters:
+    MINIMUM_REPLICAS: 1
+  targets:
+  - namespace:
+      $ref: /services/insights/ros/namespaces/stage-ros-stage.yml
+    ref: 66c26740e5313364bf00504bd8d8e380b9dd1b69
+    parameters:
+      IMAGE_TAG: 46b74f2

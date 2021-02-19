@@ -33,6 +33,7 @@ managedResourceNames:
     - prometheus-additional-alertmanager-config
     - prometheus-additional-scrape-config
     - prometheus-auth-proxy
+    - prometheus-additional-scrape-config-2
 
 sharedResources:
 - $ref: /services/observability/shared-resources/cluster-alerts.yml
@@ -56,6 +57,13 @@ openshiftResources:
   type: extracurlyjinja2
   path: /observability/alertmanager/alertmanager-instance.secret.yaml
   validate_alertmanager_config: true
+### Prometheus AMS subscription_labels scrape config
+### Defines the job for scraping subscription_labels
+- provider: resource-template
+  type: jinja2
+  path: /observability/prometheus/prometheus-ams-subscription-labels-scrapeconfig.secret.yaml
+  variables:
+    namespace: uhc-production
 
 ## Servicemonitors
 ### All managed Prometheus Operators
@@ -171,12 +179,6 @@ openshiftResources:
   path: /observability/prometheus/prometheus-ams.service.yaml
 - provider: resource
   path: /observability/servicemonitors/prometheus-ams.servicemonitor.yaml
-- provider: resource-template
-  type: jinja2
-  path: /observability/servicemonitors/ams-subscription-labels.servicemonitor.yaml
-  variables:
-    environment: production
-    namespace: uhc-production
 
 ### Sendgrid
 - provider: resource-template

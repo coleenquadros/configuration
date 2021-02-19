@@ -113,7 +113,7 @@ TIP: Instead of using `date -v +7d +"%Y-%m-%dT%TZ"` to generate the date, some d
 Obtain `cluster-admin` for a **staging** cluster (note: your user needs the SREP role in ocm-resources: [example](https://gitlab.cee.redhat.com/service/ocm-resources/merge_requests/102)):
 
 ```
-ocm /get/api/clusters_mgmt/<your-cluster-id-here>/credentials
+ocm /get/api/clusters_mgmt/v1/clusters/<your-cluster-id-here>/credentials
 ```
 
 More info: https://api.openshift.com

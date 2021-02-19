@@ -47,6 +47,10 @@ resourceTemplates:
     # After openshift upgrade, we're seeing sporadic "http2: server: error reading preface"
     # errors in log, source IP is openshift router.
     GODEBUG: http2server=0
+    MEMORY_REQUEST: 200Mi
+    MEMORY_LIMIT: 1Gi
+    CPU_LIMIT: 1
+    CPU_REQUEST: 200m
   targets:
   - namespace:
       $ref: /services/ocm/namespaces/uhc-stage.yml
@@ -81,6 +85,11 @@ resourceTemplates:
       # Webhook CA should not be specified for INT since the servica-ca crt generation is not available in
       # OCP 3.x clusters, so the configMap actually has no data values
       WEBHOOK_ADDITIONAL_CA_FILE: ""
+      # Resources are lower in INT env since it does not have to be prod-like and there is significantly lower traffic
+      MEMORY_REQUEST: 100Mi
+      MEMORY_LIMIT: 512Mi
+      CPU_REQUEST: 100m
+      CPU_LIMIT: 500m
   - namespace:
       $ref: /services/ocm/namespaces/uhc-integration.yml
     ref: master
@@ -89,13 +98,15 @@ resourceTemplates:
       GLOG_V: 5
       UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_3
       WEBHOOK_ADDITIONAL_CA_FILE: "/config/service-ca/service-ca.crt"
+      # Resources are lower in INT env since it does not have to be prod-like and there is significantly lower traffic
+      MEMORY_REQUEST: 100Mi
+      MEMORY_LIMIT: 512Mi
+      CPU_REQUEST: 100m
+      CPU_LIMIT: 500m
   - namespace:
       $ref: /services/ocm/namespaces/uhc-production.yml
-    ref: 8ac86673ceaeb3cd72e3b21024bdf7b46f140f50
+    ref: 9b358564978dca463c0e0ecac74bcdb89b3b6c50
     parameters:
-      MEMORY_REQUEST: 200Mi
-      MEMORY_LIMIT: 2Gi
-      CPU_LIMIT: 2
       UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_2
       GLOG_V: 1
       ENABLE_SENTRY: true

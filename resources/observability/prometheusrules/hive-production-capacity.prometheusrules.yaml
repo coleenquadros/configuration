@@ -1,0 +1,46 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: hive-{{{appsre_env}}}-capacity
+spec:
+  groups:
+  - name: hive-{{{appsre_env}}}-capacity
+    rules:
+    - expr: |
+        sum (hive_cluster_deployments{age_lt="+Inf",appsre_env="{{{appsre_env}}}"}) / (count(hive_cluster_deployments{age_lt="+Inf",appsre_env="{{{appsre_env}}}"}) * {{{max_clusters_per_shard}}})
+      labels:
+        appsre_env: {{{appsre_env}}}
+      record: hive:global_capacity_used:percent
+    # Global capacity utilization warning
+    - alert: HiveGlobalCapacityWarning
+      annotations:
+        message: "Hive shards in {{{appsre_env}}} has reached 80% total capacity utilization"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/hive/sop/HiveGlobalCapacity.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{appsre_env}}}"
+      expr: |
+        hive:global_capacity_used:percent{appsre_env="{{{appsre_env}}}"} >= 80/100
+      for: 5m
+      labels:
+        service: hive
+        severity: medium
+        team: appsre
+        appsre_env: {{{appsre_env}}}
+    # Global capacity utilization critical
+    - alert: HiveGlobalCapacityCritical
+      annotations:
+        message: "Hive shards in {{{appsre_env}}} has reached 90% total capacity utilization"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/hive/sop/HiveGlobalCapacity.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{appsre_env}}}"
+      expr: |
+        hive:global_capacity_used:percent{appsre_env="{{{appsre_env}}}"} >= 90/100
+      for: 5m
+      labels:
+        service: hive
+        severity: critical
+        team: appsre
+        appsre_env: {{{appsre_env}}}
