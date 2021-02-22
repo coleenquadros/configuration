@@ -258,8 +258,19 @@
         allow-empty: true
 
 - job-template:
-    id: 'managed-services-api-tests'
-    name: 'managed-services-api-tests-stage'
+    id: 'gl-build-master-strimzi'
+    name: '{gl_group}-{gl_project}-gl-build-{branch}'
+    wrappers:
+        - vault-secrets:
+            <<: *vault_defaults
+            secrets:
+            - *ci_jenkins_token
+            - *gitlab_token
+    <<: *gl_build_master
+
+- job-template:
+    id: 'kas-fleet-manager-tests'
+    name: 'kas-fleet-manager-tests-stage'
     publishers:
     - <<: *slack_notify
     wrappers:
@@ -269,12 +280,12 @@
       - vault-secrets:
           <<: *vault_defaults
           secrets:
-            - *managed_services_api_int_tests
+            - *kas_fleet_manager_int_tests
     <<: *gl_timed
 
 - job-template:
-    id: 'managed-services-api-cluster-extension'
-    name: 'managed-services-api-cluster-extension'
+    id: 'kas-fleet-manager-cluster-extension'
+    name: 'kas-fleet-manager-cluster-extension'
     publishers:
     - <<: *slack_notify
     wrappers:
