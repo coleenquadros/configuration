@@ -75,4 +75,15 @@ This guide will use [fabric8-analytics-worker](https://github.com/fabric8-analyt
     Once all above MRs/PRs are merged, go to the [CodeReady-Analytics view in ci.ext](https://ci.ext.devshift.net/view/codeready-analytics/), find the new jobs and make sure their last result is a success. If not, try to debug to understand the issues and iterate until success.
 
 ### Deploy
+
+1. Define saas file to deploy the service to the stage (preview) environment
+
+    A saas file is the newer version of a saas repository. A single file can (and should _not_) replace an entire saas repository. We will define a new saas file for each service we migrate in this process. The documentation exists [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-delivery-in-app-interface.md).
+
+    The saas file structure is very similar to the saas repo service.
+
+    For fabric8-analytics-worker, this is the [saas service](https://github.com/openshiftio/saas-analytics/blob/master/bay-services/worker.yaml) which we will need to translate to the saas file.
+
+    * ACTION ITEM: Submit a MR to app-interface to add a saas file for the service and deploy it to stage.
+
 ### Cleanup
