@@ -96,6 +96,18 @@ spec:
         service: hive
         severity: high
         team: srep
+    - alert: ClusterProvisioningDelay - production CCS - {{{shard_name}}}
+      annotations:
+        message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.exported_namespace }} provisioning taking over 2 hours. Condition/Reason: {{ $labels.condition }} / {{ $labels.reason }}. SOP: https://github.com/openshift/hive-sops/blob/master/sop/ClusterProvisioningDelay.md"
+        runbook: "https://github.com/openshift/hive-sops/blob/master/sop/ClusterProvisioningDelay.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
+      expr: |
+        (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers",cluster_type="managed-byoc"}/3600) > 2
+      for: 10m
+      labels:
+        service: hive
+        severity: high
+        team: srep    
     - alert: ClusterDeprovisioningDelay - production - {{{shard_name}}}
       annotations:
         message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.namespace }} deprovision taking over 6 hours"
