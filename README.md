@@ -2085,9 +2085,9 @@ In app-interface prometheus rules that have the `/openshift/prometheus-rule-1.ym
 
 A few notes about the integration that run the tests:
 
-- Since prometheus rules can be templates, prometheus tests needs to be templates (extracurlyjinja2).
+- Since prometheus rules can be templates, prometheus tests need to be templates (`extracurlyjinja2` type). The variables the template will expand are the same that the prometheus rule it tests.
 - Tests will be run for every namespace where the rules are defined. This is needed as rules can have a different shape from one namespace to other.
-- The prometheus test schema allows for multiple rule files in a test. This complicated the code to run the testss a lot so we allow for one test rule per test file.
+- The prometheus test schema allows for multiple rule files in a test. This complicated the code to run the tests a lot so we allow for one test rule per test file.
 
 Writing tests can be difficult at the beginning. This [article](https://www.robustperception.io/unit-testing-rules-with-prometheus) is a nicer start than the official documentation.
 
