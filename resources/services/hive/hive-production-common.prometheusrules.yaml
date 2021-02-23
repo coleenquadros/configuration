@@ -79,7 +79,19 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
       expr: |
         (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers",cluster_type="managed"}/3600) > 2
-      for: 10m
+      for: 5m
+      labels:
+        service: hive
+        severity: medium
+        team: srep
+    - alert: ClusterProvisioningFailure - production - {{{shard_name}}}
+      annotations:
+        message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.exported_namespace }} provisioning failed after 3 times retries. Condition/Reason: {{ $labels.condition }} / {{ $labels.reason }}. SOP: https://github.com/openshift/hive-sops/blob/master/sop/ClusterProvisioningFailure.md"
+        runbook: "https://github.com/openshift/hive-sops/blob/master/sop/ClusterProvisioningFailure.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
+      expr: |
+        (hive_cluster_deployment_provision_underway_install_restarts{job="hive-controllers",cluster_type="managed"}) > 2
+      for: 1m
       labels:
         service: hive
         severity: high
