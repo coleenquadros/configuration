@@ -277,6 +277,59 @@ spec:
       for: 5m
       labels:
         severity: high
+  - name: kubernetes-storage-openshift-customer-monitoring
+    rules:
+    - alert: KubePersistentVolumeUsageHigh
+      annotations:
+        message: The PersistentVolume claimed by {{ $labels.persistentvolumeclaim
+          }} in Namespace {{ $labels.namespace }} is only {{ printf "%0.2f" $value
+          }}% free.
+      expr: |
+        100 * kubelet_volume_stats_available_bytes{job="kubelet",namespace="openshift-customer-monitoring"}
+          /
+        kubelet_volume_stats_capacity_bytes{job="kubelet",namespace="openshift-customer-monitoring"}
+          < 20
+      for: 10m
+      labels:
+        severity: high
+    - alert: KubePersistentVolumeUsageCritical
+      annotations:
+        message: The PersistentVolume claimed by {{ $labels.persistentvolumeclaim
+          }} in Namespace {{ $labels.namespace }} is only {{ printf "%0.2f" $value
+          }}% free.
+      expr: |
+        100 * kubelet_volume_stats_available_bytes{job="kubelet",namespace="openshift-customer-monitoring"}
+          /
+        kubelet_volume_stats_capacity_bytes{job="kubelet",namespace="openshift-customer-monitoring"}
+          < 5
+      for: 10m
+      labels:
+        severity: critical
+    - alert: KubePersistentVolumeFullInFourDays
+      annotations:
+        message: Based on recent sampling, the PersistentVolume claimed by {{ $labels.persistentvolumeclaim
+          }} in Namespace {{ $labels.namespace }} is expected to fill up within four
+          days. Currently {{ printf "%0.2f" $value }}% is available.
+      expr: |
+        100 * (
+          kubelet_volume_stats_available_bytes{job="kubelet",namespace="openshift-customer-monitoring"}
+            /
+          kubelet_volume_stats_capacity_bytes{job="kubelet",namespace="openshift-customer-monitoring"}
+        ) < 15
+        and
+        predict_linear(kubelet_volume_stats_available_bytes{job="kubelet"}[6h], 4 * 24 * 3600) < 0
+      for: 5m
+      labels:
+        severity: high
+    - alert: KubePersistentVolumeErrors
+      annotations:
+        message: The persistent volume {{ $labels.persistentvolume }} has status {{
+          $labels.phase }}.
+      expr: |
+        kube_persistentvolume_status_phase{phase=~"Failed|Pending",job="kube-state-metrics",namespace="openshift-customer-monitoring"} > 0
+      for: 5m
+      labels:
+        severity: high
   - name: kubernetes-system-kubelet
     rules:
     - alert: KubeNodeNotReady
