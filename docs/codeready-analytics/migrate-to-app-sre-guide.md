@@ -26,10 +26,11 @@ This guide will use [fabric8-analytics-worker](https://github.com/fabric8-analyt
 
     For fabric8-analytics-worker, [Dockerfile.rhel](https://github.com/fabric8-analytics/fabric8-analytics-worker/blob/f98ebb858e7383b06ae39163ef582b76373b06e3/Dockerfile.rhel) uses quay.io/openshiftio/rhel-fabric8-analytics-f8a-worker-base as a base image, so we'll need to mirror this image to quay.io/app-sre.
 
-    * ACTION ITEM: Submit a MR to app-interface to mirror any images which are dependencies for building the service's image.
+    * ACTION ITEM: Submit a MR to app-interface to mirror and/or build any images which are dependencies for building the service's image.
         * Examples:
             - https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/15360
             - https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/15370
+            - https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/15385
 
     > Pro tip: You can submit a single MR for the entire `Build` section.
 
@@ -115,7 +116,14 @@ This guide will use [fabric8-analytics-worker](https://github.com/fabric8-analyt
     * ACTION ITEM: Submit a PR to the service code repository to undo any duplications made in previous steps.
         * Example: https://github.com/fabric8-analytics/fabric8-analytics-worker/pull/952
 
-1. Remove job definitions and templates from ci.centos.org
+1. Remove definitions from app-interface
+
+    In this final cleanup, we will remove resources from app-interface:
+    - job definitions
+    - unused job templates
+    - quay repositories mirroring
+    - quay repositories
+    - code repositories from openshift.io app file
 
     * ACTION ITEM: Submit a MR to app-interface to remove any job definitions and templates used by the service
         * Example: TBD
