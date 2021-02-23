@@ -60,26 +60,15 @@ spec:
         message: "UHC Account Manager in namespace {{ $labels.namespace }} has banned {{ $value | humanize }} users in 24 hours"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
       expr: |
-        sum(delta(banned_users{namespace="uhc-production",service="uhc-acct-mngr-metrics"}[24h])) > 25
+        max by (namespace, service) (delta(banned_users{namespace="uhc-production",service="uhc-acct-mngr-metrics"}[24h])) > 25
       for: 10m
-      labels:
-        service: uhc-acct-mngr
-        severity: medium
-    - alert: CronJobStatusFailed
-      expr: |
-        job_cronjob:kube_job_status_failed:sum
-        * ON(cronjob) GROUP_RIGHT()
-        kube_cronjob_labels
-        > 0
-      for: 1m
-      annotations:
-        message: '{{ $labels.cronjob }} last run has failed {{ $value }} times.'
       labels:
         service: uhc-acct-mngr
         severity: medium
     - alert: KubeJobFailed
       annotations:
         message: Job {{ $labels.namespace }}/{{ $labels.job_name }} failed to complete in {{ $labels.namespace }}.
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
       expr: |
         kube_job_status_failed{job="kube-state-metrics",namespace="uhc-production"}  > 0
       for: 1h
