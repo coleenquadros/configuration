@@ -1,0 +1,78 @@
+# Migrate CodeReady Analytics services to App SRE standards
+
+## Overview
+
+This process serves several purposes:
+- Migrate off ci.centos.org (related to [APPSRE-2140](https://issues.redhat.com/browse/APPSRE-2140))
+- Split CodeReady Analytics out of openshift.io (related to [SDE-1050](https://issues.redhat.com/browse/SDE-1050))
+- Move from saasherder to current App SRE deployment method ([openshift-saas-deploy](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-delivery-in-app-interface.md))
+
+This guide lists the steps required to migrate a service from -> to:
+1. Build: ci.centos -> ci.ext
+1. Container images: quay.io/openshiftio -> quay.io/app-sre
+1. Deployment: saas repos (saasherder) -> saas files (openshift-saas-deploy)
+
+This guide will use [fabric8-analytics-worker](https://github.com/fabric8-analytics/fabric8-analytics-worker) as an example.
+
+## Steps
+
+### Build
+
+1. Define image repositories in quay.io/app-sre
+
+    The first part of this effort is to build the code in [ci.ext](https://ci.ext.devshift.net) and push the images to quay.io/app-sre. To be able to build the images we need to be able to pull the base images (used in the Dockerfiles' `FROM` statement).
+
+    Most services are building two images, one of which is RHEL based. To build a RHEL based image, most services rely on a private RHEL base image located in quay.io/openshiftio. Since we only expose a single set of quay.io credentials in our pipelines, we can't pull a private image from quay.io/openshiftio and push to quay.io/app-sre. Hence, we will need to start by mirroring any image dependencies from quay.io/openshiftio to quay.io/app-sre.
+
+    For fabric8-analytics-worker, [Dockerfile.rhel](https://github.com/fabric8-analytics/fabric8-analytics-worker/blob/f98ebb858e7383b06ae39163ef582b76373b06e3/Dockerfile.rhel) uses quay.io/openshiftio/rhel-fabric8-analytics-f8a-worker-base as a base image, so we'll need to mirror this image to quay.io/app-sre.
+
+    * ACTION ITEM: Submit a MR to app-interface to mirror any images which are dependencies for building the service's image.
+        * Examples:
+            - https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/15360
+            - https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/15370
+
+    > Pro tip: You can submit a single MR for the entire `Build` section.
+
+    > Note: at a later point we will want to move the base image build jobs to push directly to quay.io/app-sre, but [this is currently not possible](https://gitlab.cee.redhat.com/service/app-interface/-/blob/093bf933062f64565ebc93b3b63dd9f60104bbcf/data/services/openshift.io/cicd/ci-int/jobs.yaml#L47-55).
+
+    In addition to the base images, we will also need image repositories for the service images.
+
+    For fabric8-analytics-worker, The images can be found in the [Makefile](https://github.com/fabric8-analytics/fabric8-analytics-worker/blob/f98ebb858e7383b06ae39163ef582b76373b06e3/Makefile#L5-L11).
+
+    To keep all previous image tags we need to create new quay repos in quay.io/app-sre that will also mirror the content from the old quay repo in quay.io/openshiftio
+
+    * ACTION ITEM: Submit a MR to app-interface to add quay repos for the service images.
+        * Example: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/15365
+
+1. Define build jobs in ci.ext
+
+    For each image used by the service (not the `FROM` base images) we need to define a job to build and push the image.
+
+    For fabric8-analytics-worker, we are building and pushing two images, so we will need to create two jobs. Since one of the images is RHEL based, we will need to run this job on a RHEL based Jenkins node.
+
+    * ACTION ITEM: Submit a MR to app-interface to add jenkins jobs for the service images
+        * Examples:
+            - https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/15368
+            - https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/15371
+
+1. Define build scripts in source code repository
+
+    In the previous section we created two jobs to build and push the service images. By default, the jobs will run a script that will be located in the code repository (defined in the `build_deploy_script_path` variable). We now need to create the matching scripts in the code repository.
+
+    * ACTION ITEM: Submit a PR to the code repository to add scripts to build and push the service images.
+        * Example: https://github.com/fabric8-analytics/fabric8-analytics-worker/pull/950
+
+    > Note: To pull and push to quay.io/app-sre we need to duplicate the Dockerfiles. These will be cleaned up in a following step.
+
+    You will also need to define a Push webhook in the code repository.
+
+    * ACTION ITEM: Go to https://github.com/{org}/{repo}/settings/hooks and add a webhook:
+        * Payload URL: https://ci.ext.devshift.net/github-webhook/
+        * Which events would you like to trigger this webhook? Just the push event
+
+1. Validate jobs success
+
+    Once all above MRs/PRs are merged, go to the [CodeReady-Analytics view in ci.ext](https://ci.ext.devshift.net/view/codeready-analytics/), find the new jobs and make sure their last result is a success. If not, try to debug to understand the issues and iterate until success.
+
+### Deploy
+### Cleanup
