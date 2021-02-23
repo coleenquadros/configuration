@@ -85,5 +85,8 @@ This guide will use [fabric8-analytics-worker](https://github.com/fabric8-analyt
     For fabric8-analytics-worker, this is the [saas service](https://github.com/openshiftio/saas-analytics/blob/master/bay-services/worker.yaml) which we will need to translate to the saas file.
 
     * ACTION ITEM: Submit a MR to app-interface to add a saas file for the service and deploy it to stage.
+        * Example: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/15378
+
+    > Note: in this MR we are commenting out all the production targets. It is easier to add all targets in a single effort and commenting out.
 
 ### Cleanup
