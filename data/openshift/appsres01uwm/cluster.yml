@@ -1,0 +1,61 @@
+---
+$schema: /openshift/cluster-1.yml
+
+labels:
+  service: app-sre-uwm
+
+name: appsres01uwm
+description: app-sre OSDv4 stage cluster
+consoleUrl: ''
+kibanaUrl: ''
+prometheusUrl: ''
+alertmanagerUrl: ''
+serverUrl: ''
+elbFQDN: ''
+
+auth:
+  service: github-org-team
+  org: app-sre
+  team: appsres01uwm-cluster
+
+ocm:
+  $ref: /dependencies/ocm/production.yml
+
+managedGroups:
+- dedicated-admins
+
+spec:
+  provider: aws
+  region: us-east-1
+  channel: candidate
+  version: 4.7.0-rc.3
+  initial_version: 4.7.0-rc.3
+  multi_az: false
+  nodes: 4
+  instance_type: m5.xlarge
+  storage: 100
+  load_balancers: 0
+  private: false
+  upgrade: skip
+
+network:
+  vpc: 10.126.0.0/16
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
+
+disable:
+  e2eTests:
+  - create-namespace
+  - dedicated-admin-rolebindings
+  - default-network-policies
+  - default-project-labels
+
+internal: false
+
+awsInfrastructureAccess:
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: network-mgmt
