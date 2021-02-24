@@ -7,6 +7,28 @@ rule_files:
 evaluation_interval: 1m
 
 tests:
+  - interval: 1h
+    input_series:
+      # banned_users
+      - series: banned_users{namespace="uhc-production",service="uhc-acct-mngr-metrics",pod="uhc-acct-mngr-7fccd765b-nscfn"}
+        values: 0+2x24 # 2 banned users per hour
+      - series: banned_users{namespace="uhc-production",service="uhc-acct-mngr-metrics",pod="uhc-acct-mngr-7fccd765b-9nz6b"}
+        values: 0+2x24 # duplicate series
+    alert_rule_test:
+      - eval_time: 12h
+        alertname: UHC account manager too many banned users - production
+        exp_alerts:
+      - eval_time: 24h
+        alertname: UHC account manager too many banned users - production
+        exp_alerts:
+          - exp_labels:
+              namespace: uhc-production
+              service: uhc-acct-mngr
+              severity: medium
+            exp_annotations:
+              message: "UHC Account Manager in namespace uhc-production has banned 48 users in 24 hours"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
+
   - interval: 1m
     input_series:
       # ams up
@@ -87,11 +109,6 @@ tests:
         values: 0 0 1 1 # ams-service
       - series: kube_pod_container_status_restarts_total{container="uhc-acct-mngr-fetch-telemeter-metrics",namespace="uhc-production",pod="uhc-acct-mngr-fetch-telemeter-metrics-1613509500-srnkx"}
         values: 0 0 2 2 # fetch-telemeter
-      # banned_users
-      - series: banned_users{namespace="uhc-production",service="uhc-acct-mngr-metrics",pod="uhc-acct-mngr-7fccd765b-nscfn"}
-        values: 0+2x2880 # 2 days with 2 banned users per hour
-      - series: banned_users{namespace="uhc-production",service="uhc-acct-mngr-metrics",pod="uhc-acct-mngr-7fccd765b-9nz6b"}
-        values: 0+2x2880 # duplicate series
       # hydra request count
       - series: api_outbound_request_count{apiservice="ocm-/hydra/rest",code="500",namespace="uhc-production",service="uhc-acct-mngr-metrics"}
         values: 0+1x20 # http 500 10%
@@ -103,7 +120,7 @@ tests:
         values: 0+4x20 # http 201 40%
       # hydra request duration
       - series: api_outbound_request_duration_bucket{namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="ocm-/hydra/rest",le="10",code="200"}
-        values: 0+98x20 # 98% le=10
+        values: 0+90x20 # 90% le=10
       - series: api_outbound_request_duration_count{namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="ocm-/hydra/rest"}
         values: 0+100x20
 
@@ -157,6 +174,21 @@ tests:
               severity: medium
             exp_annotations:
               message: "UHC Account Manager in namespace uhc-production 50th percentile latency is greater than 2s. Current value: 3.5"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
+      - eval_time: 60m
+        alertname: KubeJobFailed
+        exp_alerts:
+      - eval_time: 120m
+        alertname: KubeJobFailed
+        exp_alerts:
+          - exp_labels:
+              job: kube-state-metrics
+              job_name: uhc-acct-mngr-account-reconciler-1613846160
+              namespace: uhc-production
+              service: uhc-acct-mngr
+              severity: medium
+            exp_annotations:
+              message: "Job uhc-production/uhc-acct-mngr-account-reconciler-1613846160 failed to complete in uhc-production."
               runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
       - eval_time: 10m
         alertname: OCM dependencies - Quay too many errors - production
@@ -218,6 +250,32 @@ tests:
             exp_annotations:
               message: "AMS is seeing a high average latency accessing Terms and Conditions. The average response time over the last 5 minutes is 5 seconds"
               runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
+      - eval_time: 1m
+        alertname: OCM Alert Pod Restarted - production
+        exp_alerts:
+      - eval_time: 3m
+        alertname: OCM Alert Pod Restarted - production
+        exp_alerts:
+          - exp_labels:
+              namespace: uhc-production
+              pod: uhc-acct-mngr-7fccd765b-mpqmk
+              service: uhc-acct-mngr
+              severity: info
+            exp_annotations:
+              message: 'Observed pod (uhc-acct-mngr-7fccd765b-mpqmk) in namespace uhc-production restart(s) (1)'
+      - eval_time: 1m
+        alertname: OCM Alert Pod Restarting too many times - production
+        exp_alerts:
+      - eval_time: 3m
+        alertname: OCM Alert Pod Restarting too many times - production
+        exp_alerts:
+          - exp_labels:
+              namespace: uhc-production
+              pod: uhc-acct-mngr-fetch-telemeter-metrics-1613509500-srnkx
+              service: uhc-acct-mngr
+              severity: high
+            exp_annotations:
+              message: 'Observed pod (uhc-acct-mngr-fetch-telemeter-metrics-1613509500-srnkx) in namespace uhc-production restart(s) (2)'
       - eval_time: 10m
         alertname: OCM dependencies - Hydra too many errors - production
         exp_alerts:
