@@ -29,9 +29,16 @@ Access required
 Steps
 -----
 
+**Review Logs**
 Links to logs for stage & production are listed on the `Advisor dashboard`_ towards the top right.  Review these logs 
 to find errors that are occuring.  In particular, adding 'AND levelname:"ERROR"' to the Kibana query can be helpful
 
+**Review Suspect Requests**
+You may utilize the *request_id* from the suspect error log and paste this ID directly into Kibana to trace the 
+Payload through the Platform and see which components it may have touched. The Payload Tracker may also be utilized 
+for tracing the Payload through the Platform by using the same *request_id* and using the `Payload Tracker page`_
+
+**Follow Up Steps**
 -  Log into the console / namespace and verify if pods are up / stuck / etc
 -  Check oc logs for error messages of severity ERROR.
 -  Check for recent changes to the total memory consumption of the application
@@ -44,3 +51,5 @@ Escalations
 
 .. _Incident Response Doc: https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE
 .. _Advisor dashboard: https://grafana.app-sre.devshift.net/d/s9df5udMk/advisor-service?orgId=1&refresh=5s&from=now-7d&to=now
+.. _Payload Tracker page: https://payload-tracke    r-frontend-payload-tracker-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com/track
+
