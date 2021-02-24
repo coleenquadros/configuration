@@ -29,6 +29,9 @@ Access required
 Steps
 -----
 
+Links to logs for stage & production are listed on the `Advisor dashboard`_ towards the top right.  Review these logs 
+to find errors that are occuring.  In particular, adding 'AND levelname:"ERROR"' to the Kibana query can be helpful
+
 -  Log into the console / namespace and verify if pods are up / stuck / etc
 -  Check oc logs for error messages of severity ERROR.
 -  Check for recent changes to the total memory consumption of the application
@@ -37,7 +40,7 @@ Steps
 Escalations
 -----------
 
--  Ping more team members if available
--  Ping the engineering team that owns the APP
+-  To reach the Advisor engineering team, ping @Dank, @rbrantle, @fjansen or @theute on CoreOS Slack
 
 .. _Incident Response Doc: https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE
+.. _Advisor dashboard: https://grafana.app-sre.devshift.net/d/s9df5udMk/advisor-service?orgId=1&refresh=5s&from=now-7d&to=now
