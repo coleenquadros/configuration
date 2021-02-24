@@ -6,61 +6,61 @@ metadata:
   labels:
     prometheus: app-sre
     role: alert-rules
-  name: uhc-acct-mngr-prod
+  name: uhc-acct-mngr-{{{environment}}}
 spec:
   groups:
-  - name: uhc-acct-mngr-prod
+  - name: uhc-acct-mngr-{{{environment}}}
     rules:
     - alert: UHC account manager DOWN - {{{environment}}}
       annotations:
-        message: "No targets found for UHC Account Manager in namespace uhc-production. Account Manager is down."
+        message: "No targets found for UHC Account Manager in namespace uhc-{{{environment}}}. Account Manager is down."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
       expr: |
-        absent(up{job="uhc-acct-mngr-metrics",namespace="uhc-production"} == 1)
+        absent(up{job="uhc-acct-mngr-metrics",namespace="uhc-{{{environment}}}"} == 1)
       for: 5m
       labels:
         service: uhc-acct-mngr
         severity: critical
-    - alert: UHC account manager 5xx Errors High - production
+    - alert: UHC account manager 5xx Errors High - {{{environment}}}
       annotations:
         message: "UHC Account Manager in namespace {{ $labels.namespace }} is returning code 5xx for {{ $value | humanize }}% of requests."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
       expr: |
-        sum without(instance, pod, job, code) (rate(api_inbound_request_count{code=~"^(?:5..)$",namespace="uhc-production",service="uhc-acct-mngr-metrics"}[5m]))
+        sum without(instance, pod, job, code) (rate(api_inbound_request_count{code=~"^(?:5..)$",namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics"}[5m]))
         /
-        sum without(instance, pod, job, code) (rate(api_inbound_request_count{namespace="uhc-production",service="uhc-acct-mngr-metrics"}[5m])) * 100 > 5
+        sum without(instance, pod, job, code) (rate(api_inbound_request_count{namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics"}[5m])) * 100 > 5
       for: 10m
       labels:
         service: uhc-acct-mngr
         severity: high
-    - alert: UHC account manager 4xx Errors High - production
+    - alert: UHC account manager 4xx Errors High - {{{environment}}}
       annotations:
         message: "UHC Account Manager in namespace {{ $labels.namespace }} is returning 4xx errors for {{ humanize $value }}% of requests."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
       expr: |
-        sum without(instance, pod, job, code) (rate(api_inbound_request_count{code=~"^(?:4..)$",namespace="uhc-production",service="uhc-acct-mngr-metrics"}[5m]))
+        sum without(instance, pod, job, code) (rate(api_inbound_request_count{code=~"^(?:4..)$",namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics"}[5m]))
         /
-        sum without(instance, pod, job, code) (rate(api_inbound_request_count{namespace="uhc-production",service="uhc-acct-mngr-metrics"}[5m])) * 100 > 5
+        sum without(instance, pod, job, code) (rate(api_inbound_request_count{namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics"}[5m])) * 100 > 5
       for: 10m
       labels:
         service: uhc-acct-mngr
         severity: medium
-    - alert: UHC account manager Latency High - production
+    - alert: UHC account manager Latency High - {{{environment}}}
       annotations:
-        message: "UHC Account Manager in namespace uhc-production 50th percentile latency is greater than 2s. Current value: {{ $value | humanize }}"
+        message: "UHC Account Manager in namespace uhc-{{{environment}}} 50th percentile latency is greater than 2s. Current value: {{ $value | humanize }}"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
       expr: |
-        histogram_quantile(0.50, sum(rate(api_inbound_request_duration_bucket{namespace="uhc-production",service="uhc-acct-mngr-metrics"}[1m])) by (le)) > 2
+        histogram_quantile(0.50, sum(rate(api_inbound_request_duration_bucket{namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics"}[1m])) by (le)) > 2
       for: 10m
       labels:
         service: uhc-acct-mngr
         severity: medium
-    - alert: UHC account manager too many banned users - production
+    - alert: UHC account manager too many banned users - {{{environment}}}
       annotations:
         message: "UHC Account Manager in namespace {{ $labels.namespace }} has banned {{ $value | humanize }} users in 24 hours"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
       expr: |
-        max by (namespace, service) (delta(banned_users{namespace="uhc-production",service="uhc-acct-mngr-metrics"}[24h])) > 25
+        max by (namespace, service) (delta(banned_users{namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics"}[24h])) > 25
       for: 10m
       labels:
         service: uhc-acct-mngr
@@ -70,103 +70,103 @@ spec:
         message: Job {{ $labels.namespace }}/{{ $labels.job_name }} failed to complete in {{ $labels.namespace }}.
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
       expr: |
-        kube_job_status_failed{job="kube-state-metrics",namespace="uhc-production"}  > 0
+        kube_job_status_failed{job="kube-state-metrics",namespace="uhc-{{{environment}}}"}  > 0
       for: 1h
       labels:
         service: uhc-acct-mngr
         severity: medium
-    - alert: OCM dependencies - Quay creating robot users slow - production
+    - alert: OCM dependencies - Quay creating robot users slow - {{{environment}}}
       annotations:
         message: "AMS is seeing a high average latency creating robot accounts on Quay. The average response time over the last 5 minutes is {{ $value | humanize }} seconds"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
       expr: |
-        histogram_quantile(0.50, sum(rate(api_outbound_request_duration_bucket{namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="quay",code="201",path="/api/v1/organization/-/robots/-"}[1m])) by (le)) > 1
+        histogram_quantile(0.50, sum(rate(api_outbound_request_duration_bucket{namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",apiservice="quay",code="201",path="/api/v1/organization/-/robots/-"}[1m])) by (le)) > 1
       for: 10m
       labels:
         service: uhc-acct-mngr
         severity: medium
-    - alert: OCM dependencies - Quay too many errors - production
+    - alert: OCM dependencies - Quay too many errors - {{{environment}}}
       annotations:
         message: "AMS is seeing a high rate of errors from Quay for {{ $value | humanize }}% of requests."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
       expr: |
-        sum(rate(api_outbound_request_count{namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="quay",code!~"2.."}[5m]))
+        sum(rate(api_outbound_request_count{namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",apiservice="quay",code!~"2.."}[5m]))
         /
-        sum(rate(api_outbound_request_count{namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="quay"}[5m])) * 100 > 5
+        sum(rate(api_outbound_request_count{namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",apiservice="quay"}[5m])) * 100 > 5
       for: 10m
       labels:
         service: uhc-acct-mngr
         severity: medium
-    - alert: OCM dependencies - RHIT too many errors - production
+    - alert: OCM dependencies - RHIT too many errors - {{{environment}}}
       annotations:
         message: "AMS is seeing a high rate of errors from RHIT for {{ $value | humanize }}% of requests."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
       expr: |
-        sum(rate(api_outbound_request_count{namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="rhit",code!~"2.."}[5m]))
+        sum(rate(api_outbound_request_count{namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",apiservice="rhit",code!~"2.."}[5m]))
         /
-        sum(rate(api_outbound_request_count{namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="rhit"}[5m])) * 100 > 5
+        sum(rate(api_outbound_request_count{namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",apiservice="rhit"}[5m])) * 100 > 5
       for: 10m
       labels:
         service: uhc-acct-mngr
         severity: high
-    - alert: OCM dependencies - Terms and Conditions slow - production
+    - alert: OCM dependencies - Terms and Conditions slow - {{{environment}}}
       annotations:
         message: "AMS is seeing a high average latency accessing Terms and Conditions. The average response time over the last 5 minutes is {{ $value | humanize }} seconds"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
       expr: |
-        histogram_quantile(0.50, sum(rate(api_outbound_request_duration_bucket{namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="rhit/terms",code=~"2.."}[1m])) by (le)) > 1
+        histogram_quantile(0.50, sum(rate(api_outbound_request_duration_bucket{namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",apiservice="rhit/terms",code=~"2.."}[1m])) by (le)) > 1
       for: 10m
       labels:
         service: uhc-acct-mngr
         severity: medium
-    - alert: OCM dependencies - Terms and Conditions too many errors - production
+    - alert: OCM dependencies - Terms and Conditions too many errors - {{{environment}}}
       annotations:
         message: "AMS is seeing a high rate of errors from Terms and Conditions for {{ $value | humanize }}% of requests."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
       expr: |
-        sum(rate(api_outbound_request_count{namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="rhit/terms",code!~"2.."}[5m]))
+        sum(rate(api_outbound_request_count{namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",apiservice="rhit/terms",code!~"2.."}[5m]))
         /
-        sum(rate(api_outbound_request_count{namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="rhit/terms"}[5m])) * 100
+        sum(rate(api_outbound_request_count{namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",apiservice="rhit/terms"}[5m])) * 100
         > 1
       for: 10m
       labels:
         service: uhc-acct-mngr
         severity: high
-    - alert: OCM Alert Pod Restarted - production
-      expr: sum(increase(kube_pod_container_status_restarts_total{namespace="uhc-production",pod=~"uhc-acct-mngr-.*"}[5m])) by (pod,namespace) == 1
+    - alert: OCM Alert Pod Restarted - {{{environment}}}
+      expr: sum(increase(kube_pod_container_status_restarts_total{namespace="uhc-{{{environment}}}",pod=~"uhc-acct-mngr-.*"}[5m])) by (pod,namespace) == 1
       annotations:
         message: 'Observed pod ({{ $labels.pod }}) in namespace {{ $labels.namespace }} restart(s) ({{ $value }})'
       labels:
         service: uhc-acct-mngr
         severity: info
-    - alert: OCM Alert Pod Restarting too many times - production
-      expr: sum(increase(kube_pod_container_status_restarts_total{namespace="uhc-production",pod=~"uhc-acct-mngr-.*"}[5m])) by (pod,namespace) > 1
+    - alert: OCM Alert Pod Restarting too many times - {{{environment}}}
+      expr: sum(increase(kube_pod_container_status_restarts_total{namespace="uhc-{{{environment}}}",pod=~"uhc-acct-mngr-.*"}[5m])) by (pod,namespace) > 1
       annotations:
         message: 'Observed pod ({{ $labels.pod }}) in namespace {{ $labels.namespace }} restart(s) ({{ $value }})'
       labels:
         service: uhc-acct-mngr
         severity: high
-    - alert: OCM dependencies - Hydra slow - production
+    - alert: OCM dependencies - Hydra slow - {{{environment}}}
       annotations:
         message: "AMS is seeing a high average latency accessing Hydra. {{ $value | humanizePercentage }} of the requests took more than 10s during the last 10 minutes."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop#hydra"
       expr: |
-        1 - (sum(rate(api_outbound_request_duration_bucket{namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="ocm-/hydra/rest",le="10",code!~"5.."}[5m]))
+        1 - (sum(rate(api_outbound_request_duration_bucket{namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",apiservice="ocm-/hydra/rest",le="10",code!~"5.."}[5m]))
         /
-        sum(rate(api_outbound_request_duration_count{namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="ocm-/hydra/rest"}[5m])))
+        sum(rate(api_outbound_request_duration_count{namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",apiservice="ocm-/hydra/rest"}[5m])))
         > 0.05
       for: 10m
       labels:
         service: uhc-acct-mngr
         severity: medium
-    - alert: OCM dependencies - Hydra too many errors - production
+    - alert: OCM dependencies - Hydra too many errors - {{{environment}}}
       annotations:
         message: "AMS is seeing a high rate of errors from Hydra for {{ $value | humanize }}% of requests."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop#hydra"
       expr: |
-        sum(rate(api_outbound_request_count{namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="ocm-/hydra/rest",code=~"5.."}[5m]))
+        sum(rate(api_outbound_request_count{namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",apiservice="ocm-/hydra/rest",code=~"5.."}[5m]))
         /
-        sum(rate(api_outbound_request_count{namespace="uhc-production",service="uhc-acct-mngr-metrics",apiservice="ocm-/hydra/rest"}[5m])) * 100
+        sum(rate(api_outbound_request_count{namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics",apiservice="ocm-/hydra/rest"}[5m])) * 100
         > 5
       for: 10m
       labels:
