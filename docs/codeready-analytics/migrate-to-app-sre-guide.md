@@ -77,6 +77,15 @@ This guide will use [fabric8-analytics-worker](https://github.com/fabric8-analyt
 
 ### Deploy
 
+1. Update OpenShift deployment manifests to include a ServiceAccount
+
+    If the service is using private images, you need to add a ServiceAccount which mounts a private pull secret.
+
+    * ACTION ITEM: Submit a PR to the code repository to add/update OpenShift deployment manifests.
+        * Examples:
+        - https://github.com/fabric8-analytics/fabric8-analytics-worker/pull/951
+        - https://github.com/fabric8-analytics/fabric8-analytics-worker/pull/953
+
 1. Define saas file to deploy the service to the stage (preview) environment
 
     A saas file is the newer version of a saas repository. A single file can (and should _not_) replace an entire saas repository. We will define a new saas file for each service we migrate in this process. The documentation exists [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-delivery-in-app-interface.md).
@@ -89,6 +98,13 @@ This guide will use [fabric8-analytics-worker](https://github.com/fabric8-analyt
         * Example: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/15378
 
     > Note: in this MR we are commenting out all the production targets. It is easier to add all targets in a single effort and commenting out.
+
+1. Remove webhooks to ci.centos.org
+
+    Since the service is now deployed to stage through app-interface, we no longer need to trigger builds in ci.centos.
+
+    * ACTION ITEM: Go to https://github.com/{org}/{repo}/settings/hooks and delete webhooks:
+        * Payload URL: https://ci.centos.org/*
 
 1. Deploy from saas file to production
 
@@ -106,10 +122,7 @@ This guide will use [fabric8-analytics-worker](https://github.com/fabric8-analyt
     * ACTION ITEM: Submit a PR to the saas repository removing the saas service file.
         * Example: https://github.com/openshiftio/saas-analytics/pull/943
 
-1. Remove webhooks to ci.centos.org
 
-    * ACTION ITEM: Go to https://github.com/{org}/{repo}/settings/hooks and delete webhooks:
-        * Payload URL: https://ci.centos.org/*
 
 1. Remove duplications introduced in previous steps from code repository
 
