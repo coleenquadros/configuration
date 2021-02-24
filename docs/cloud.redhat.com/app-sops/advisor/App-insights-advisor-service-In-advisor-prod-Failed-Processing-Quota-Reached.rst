@@ -51,5 +51,5 @@ Escalations
 
 .. _Incident Response Doc: https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE
 .. _Advisor dashboard: https://grafana.app-sre.devshift.net/d/s9df5udMk/advisor-service?orgId=1&refresh=5s&from=now-7d&to=now
-.. _Payload Tracker page: https://payload-tracke    r-frontend-payload-tracker-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com/track
+.. _Payload Tracker page: https://payload-tracker-frontend-payload-tracker-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com/track
 
