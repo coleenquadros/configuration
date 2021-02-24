@@ -1,0 +1,54 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: engine
+
+name: engine-stage
+description: Insights engine for FedRAMP on stage
+
+cluster:
+  $ref: /openshift/insights/crcgovs02ue1/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/standard-resource-limits.yml
+
+quota:
+  $ref: /services/insights/engine/engine-quota.yml
+
+app:
+  $ref: /services/insights/engine/app.yml
+
+environment:
+  $ref: /products/insights/environments/fedramp-stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcgovs02ue1.yml
+
+managedRoles: true
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+
+# managedTerraformResources: true
+
+# terraformResources:
+# - provider: cloudwatch
+#   account: insights-stage
+#   identifier: engine-stage
+#   defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+#   output_resource_name: cloudwatch
+#   es_identifier: kibana-elasticsearch
+# - provider: elasticache
+#   account: insights-stage
+#   identifier: engine-elasticache
+#   defaults: /terraform/resources/insights/stage/elasticache/elasticache-engine-1.yml
+#   output_resource_name: in-memory-db
