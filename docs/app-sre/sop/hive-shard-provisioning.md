@@ -419,9 +419,9 @@ Once created, there are two further validations
     }
     ```
 
-## Attach the shard to a region
+## Disabling shards from rotation
 
-Once all the validations have been completed the shard is ready to be associated with providers and regions. Take a look into other shards configs to see the syntax of the `cloud_providers` section
+A shard can be taken out of rotation pick for new clusters, by setting it's status to "maintenance".
 
 ### Verify that at least one round of osde2e tests ran successfully when using the new shard. Dashboards:
 
