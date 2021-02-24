@@ -1,0 +1,54 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: sources
+  platform: insights
+
+name: sources-clowder
+description: sources app on the Insights Platform
+
+app:
+  $ref: /services/insights/sources/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+timeout: 5
+
+managedResourceTypes:
+  - ClowdApp
+
+imagePatterns:
+  - quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+  - name: sources-api
+    path: /deploy/clowdapp.yaml
+    url: https://github.com/slemrmartin/sources-api/tree/clowder-migration
+    parameters:
+      PATH_PREFIX: api
+      PGSSLMODE: verify-full
+    targets:
+    - namespace:
+        $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+      disable: true # tells app-sre to not actually run the deploy job for this target
+      ref: internal # altered by bonfire
+      parameters:
+        # IMAGE_TAG: i9
+        # KOKU_SOURCES_API_HOST: koku-sources.hccm-stage.svc.cluster.local
+        # CLOUD_METER_API_HOST: cloudigrade-api.cloudigrade-stage.svc.cluster.local
+        LOG_LEVEL: WARN
+        MIN_REPLICAS: 1
+        SOURCES_ENV: stage
+        SOURCETYPE_SKIP_LIST: ""
