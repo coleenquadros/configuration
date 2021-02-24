@@ -32,7 +32,7 @@ spec:
       for: 10m
       labels:
         service: uhc-acct-mngr
-        severity: high
+        severity: {{{severity_500_errors}}}
     - alert: UHC account manager 4xx Errors High - {{{environment}}}
       annotations:
         message: "UHC Account Manager in namespace {{ $labels.namespace }} is returning 4xx errors for {{ humanize $value }}% of requests."
@@ -108,7 +108,7 @@ spec:
       for: 10m
       labels:
         service: uhc-acct-mngr
-        severity: high
+        severity: {{{severity_rhit_errors}}}
     - alert: OCM dependencies - Terms and Conditions slow - {{{environment}}}
       annotations:
         message: "AMS is seeing a high average latency accessing Terms and Conditions. The average response time over the last 5 minutes is {{ $value | humanize }} seconds"
@@ -131,21 +131,21 @@ spec:
       for: 10m
       labels:
         service: uhc-acct-mngr
-        severity: high
+        severity: {{{severity_terms_errors}}}
     - alert: OCM Alert Pod Restarted - {{{environment}}}
       expr: sum(increase(kube_pod_container_status_restarts_total{namespace="uhc-{{{environment}}}",pod=~"uhc-acct-mngr-.*"}[5m])) by (pod,namespace) == 1
       annotations:
         message: 'Observed pod ({{ $labels.pod }}) in namespace {{ $labels.namespace }} restart(s) ({{ $value }})'
       labels:
         service: uhc-acct-mngr
-        severity: info
+        severity: {{{severity_pod_restart}}}
     - alert: OCM Alert Pod Restarting too many times - {{{environment}}}
       expr: sum(increase(kube_pod_container_status_restarts_total{namespace="uhc-{{{environment}}}",pod=~"uhc-acct-mngr-.*"}[5m])) by (pod,namespace) > 1
       annotations:
         message: 'Observed pod ({{ $labels.pod }}) in namespace {{ $labels.namespace }} restart(s) ({{ $value }})'
       labels:
         service: uhc-acct-mngr
-        severity: high
+        severity: {{{severity_pod_restart_many_times}}}
     - alert: OCM dependencies - Hydra slow - {{{environment}}}
       annotations:
         message: "AMS is seeing a high average latency accessing Hydra. {{ $value | humanizePercentage }} of the requests took more than 10s during the last 10 minutes."
