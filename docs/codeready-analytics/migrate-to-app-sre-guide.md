@@ -79,12 +79,17 @@ This guide will use [fabric8-analytics-worker](https://github.com/fabric8-analyt
 
 1. Update OpenShift deployment manifests to include a ServiceAccount
 
-    If the service is using private images, you need to add a ServiceAccount which mounts a private pull secret.
+    If the service is using private images, you need to add an `imagePullSecrets` section to DeploymentConfigs which mounts a private pull secret.
 
     * ACTION ITEM: Submit a PR to the code repository to add/update OpenShift deployment manifests.
-        * Examples:
-        - https://github.com/fabric8-analytics/fabric8-analytics-worker/pull/951
-        - https://github.com/fabric8-analytics/fabric8-analytics-worker/pull/953
+        * Example: https://github.com/fabric8-analytics/fabric8-analytics-worker/pull/956
+
+1. Remove webhooks to ci.centos.org
+
+    Since the service is now deployed to stage through app-interface, we no longer need to trigger builds in ci.centos.
+
+    * ACTION ITEM: Go to https://github.com/{org}/{repo}/settings/hooks and delete webhooks:
+        * Payload URL: https://ci.centos.org/*
 
 1. Define saas file to deploy the service to the stage (preview) environment
 
@@ -99,22 +104,6 @@ This guide will use [fabric8-analytics-worker](https://github.com/fabric8-analyt
 
     > Note: in this MR we are commenting out all the production targets. It is easier to add all targets in a single effort and commenting out.
 
-1. Remove webhooks to ci.centos.org
-
-    Since the service is now deployed to stage through app-interface, we no longer need to trigger builds in ci.centos.
-
-    * ACTION ITEM: Go to https://github.com/{org}/{repo}/settings/hooks and delete webhooks:
-        * Payload URL: https://ci.centos.org/*
-
-1. Deploy from saas file to production
-
-    Once the service has been deployed and validated in stage, we can now deploy to production. The service is already deployed, but we are taking over the deployment in this step.
-
-    * ACTION ITEM: Submit a MR to app-interface to uncomment all production targets from the saas file introduced in the previous section.
-        * Example: TBD
-
-### Cleanup
-
 1. Remove the saas service file from the saas repository
 
     This is to avoid having the service deployed from both app-interface and the saas repository.
@@ -122,7 +111,14 @@ This guide will use [fabric8-analytics-worker](https://github.com/fabric8-analyt
     * ACTION ITEM: Submit a PR to the saas repository removing the saas service file.
         * Example: https://github.com/openshiftio/saas-analytics/pull/943
 
+1. Deploy from saas file to production
 
+    Once the service has been deployed and validated in stage, we can now deploy to production. The service is already deployed, but we are taking over the deployment in this step.
+
+    * ACTION ITEM: Submit a MR to app-interface to uncomment all production targets from the saas file introduced in the previous section.
+        * Example: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/15508
+
+### Cleanup
 
 1. Remove duplications introduced in previous steps from code repository
 
