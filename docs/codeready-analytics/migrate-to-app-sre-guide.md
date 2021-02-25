@@ -75,9 +75,13 @@ This guide will use [fabric8-analytics-worker](https://github.com/fabric8-analyt
 
     Once all above MRs/PRs are merged, go to the [CodeReady-Analytics view in ci.ext](https://ci.ext.devshift.net/view/codeready-analytics/), find the new jobs and make sure their last result is a success. If not, try to debug to understand the issues and iterate until success.
 
+Further reading:
+- [Manage Jenkins jobs configurations using jenkins-jobs](https://gitlab.cee.redhat.com/service/app-interface#manage-jenkins-jobs-configurations-using-jenkins-jobs)
+- [Continuous Integration in App-interface](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-integration-in-app-interface.md)
+
 ### Deploy
 
-1. Update OpenShift deployment manifests to include a ServiceAccount
+1. Update OpenShift deployment manifests to include a pull secret
 
     If the service is using private images, you need to add an `imagePullSecrets` section to DeploymentConfigs which mounts a private pull secret.
 
@@ -118,6 +122,9 @@ This guide will use [fabric8-analytics-worker](https://github.com/fabric8-analyt
     * ACTION ITEM: Submit a MR to app-interface to uncomment all production targets from the saas file introduced in the previous section.
         * Example: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/15508
 
+Further reading:
+- [Continuous Delivery in App-interface](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-delivery-in-app-interface.md)
+
 ### Cleanup
 
 1. Remove duplications introduced in previous steps from code repository
@@ -128,11 +135,13 @@ This guide will use [fabric8-analytics-worker](https://github.com/fabric8-analyt
 1. Remove definitions from app-interface
 
     In this final cleanup, we will remove resources from app-interface:
-    - job definitions
+    - job definitions (hint: search for `git_repo: {repo}`)
     - unused job templates
-    - quay repositories mirroring
-    - quay repositories
+    - quay repositories mirroring (hint: search for `this mirror should be removed once all existing images are mirrored`)
+    - quay repositories from openshift.io app file (hint: any repo you remove the mirroring for)
     - code repositories from openshift.io app file
 
     * ACTION ITEM: Submit a MR to app-interface to remove any job definitions and templates used by the service
-        * Example: TBD
+        * Example: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/15512
+
+    > Note: CodeReady Analytics developers all have access to view all relevant repositories in quay.io/openshiftio and quay.io/app-sre. Make sure all the images were mirrored to quay.io/app-sre before removing the image mirroring.
