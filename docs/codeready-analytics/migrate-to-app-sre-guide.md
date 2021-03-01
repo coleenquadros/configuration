@@ -75,16 +75,29 @@ This guide will use [fabric8-analytics-worker](https://github.com/fabric8-analyt
 
     Once all above MRs/PRs are merged, go to the [CodeReady-Analytics view in ci.ext](https://ci.ext.devshift.net/view/codeready-analytics/), find the new jobs and make sure their last result is a success. If not, try to debug to understand the issues and iterate until success.
 
+Further reading:
+- [Manage Jenkins jobs configurations using jenkins-jobs](https://gitlab.cee.redhat.com/service/app-interface#manage-jenkins-jobs-configurations-using-jenkins-jobs)
+- [Continuous Integration in App-interface](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-integration-in-app-interface.md)
+
 ### Deploy
 
-1. Update OpenShift deployment manifests to include a ServiceAccount
+1. Update OpenShift deployment manifests to include a pull secret
 
-    If the service is using private images, you need to add a ServiceAccount which mounts a private pull secret.
+    OpenShift manifests must have healthProbe, readinessProbe and resources defined.
+
+    * ACTION ITEM: Submit a PR to the code repository to add/update OpenShift template attributes.
+
+    If the service is using private images, you need to add an `imagePullSecrets` section to DeploymentConfigs which mounts a private pull secret.
 
     * ACTION ITEM: Submit a PR to the code repository to add/update OpenShift deployment manifests.
-        * Examples:
-        - https://github.com/fabric8-analytics/fabric8-analytics-worker/pull/951
-        - https://github.com/fabric8-analytics/fabric8-analytics-worker/pull/953
+        * Example: https://github.com/fabric8-analytics/fabric8-analytics-worker/pull/956
+
+1. Remove webhooks to ci.centos.org
+
+    Since the service is now deployed to stage through app-interface, we no longer need to trigger builds in ci.centos.
+
+    * ACTION ITEM: Go to https://github.com/{org}/{repo}/settings/hooks and delete webhooks:
+        * Payload URL: https://ci.centos.org/*
 
 1. Define saas file to deploy the service to the stage (preview) environment
 
@@ -99,22 +112,6 @@ This guide will use [fabric8-analytics-worker](https://github.com/fabric8-analyt
 
     > Note: in this MR we are commenting out all the production targets. It is easier to add all targets in a single effort and commenting out.
 
-1. Remove webhooks to ci.centos.org
-
-    Since the service is now deployed to stage through app-interface, we no longer need to trigger builds in ci.centos.
-
-    * ACTION ITEM: Go to https://github.com/{org}/{repo}/settings/hooks and delete webhooks:
-        * Payload URL: https://ci.centos.org/*
-
-1. Deploy from saas file to production
-
-    Once the service has been deployed and validated in stage, we can now deploy to production. The service is already deployed, but we are taking over the deployment in this step.
-
-    * ACTION ITEM: Submit a MR to app-interface to uncomment all production targets from the saas file introduced in the previous section.
-        * Example: TBD
-
-### Cleanup
-
 1. Remove the saas service file from the saas repository
 
     This is to avoid having the service deployed from both app-interface and the saas repository.
@@ -122,7 +119,17 @@ This guide will use [fabric8-analytics-worker](https://github.com/fabric8-analyt
     * ACTION ITEM: Submit a PR to the saas repository removing the saas service file.
         * Example: https://github.com/openshiftio/saas-analytics/pull/943
 
+1. Deploy from saas file to production
 
+    Once the service has been deployed and validated in stage, we can now deploy to production. The service is already deployed, but we are taking over the deployment in this step.
+
+    * ACTION ITEM: Submit a MR to app-interface to uncomment all production targets from the saas file introduced in the previous section.
+        * Example: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/15508
+
+Further reading:
+- [Continuous Delivery in App-interface](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-delivery-in-app-interface.md)
+
+### Cleanup
 
 1. Remove duplications introduced in previous steps from code repository
 
@@ -132,11 +139,13 @@ This guide will use [fabric8-analytics-worker](https://github.com/fabric8-analyt
 1. Remove definitions from app-interface
 
     In this final cleanup, we will remove resources from app-interface:
-    - job definitions
+    - job definitions (hint: search for `git_repo: {repo}`)
     - unused job templates
-    - quay repositories mirroring
-    - quay repositories
+    - quay repositories mirroring (hint: search for `this mirror should be removed once all existing images are mirrored`)
+    - quay repositories from openshift.io app file (hint: any repo you remove the mirroring for)
     - code repositories from openshift.io app file
 
     * ACTION ITEM: Submit a MR to app-interface to remove any job definitions and templates used by the service
-        * Example: TBD
+        * Example: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/15512
+
+    > Note: CodeReady Analytics developers all have access to view all relevant repositories in quay.io/openshiftio and quay.io/app-sre. Make sure all the images were mirrored to quay.io/app-sre before removing the image mirroring.

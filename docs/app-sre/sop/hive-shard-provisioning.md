@@ -6,14 +6,14 @@
   - [Provisioning OSD operators](#provisioning-osd-operators)
     - [Resources](#resources)
     - [Others](#others)
-  - [Provision Backplane](#provisioning-backplane)  
+  - [Provisioning backplane](#provisioning-backplane)
   - [Monitoring](#monitoring)
   - [Adding the shard to OCM](#adding-the-shard-to-ocm)
   - [Validations](#validations)
     - [Test provisioning an AWS cluster](#test-provisioning-an-aws-cluster)
     - [Test provisioning a GCP cluster](#test-provisioning-a-gcp-cluster)
     - [Test that private clusters can be provisioned](#test-that-private-clusters-can-be-provisioned)
-  - [Attach the shard to a region](#attach-the-shard-to-a-region)
+  - [Disabling shards from rotation](#disabling-shards-from-rotation)
     - [Verify that at least one round of osde2e tests ran successfully when using the new shard. Dashboards:](#verify-that-at-least-one-round-of-osde2e-tests-ran-successfully-when-using-the-new-shard-dashboards)
   - [OSD operators notes](#osd-operators-notes)
 
@@ -186,9 +186,30 @@ Backplane should run on all v4 hive, to deploy backplane on a new v4 hive cluste
 
 ## Monitoring
 
-All v4 hive shards (clusters) are monitored with their own workload prometheus, which runs in the `openshift-customer-monitoring` namespace.
+All v4 hive shards (clusters) are monitored with their own workload prometheus, which runs in the `openshift-customer-monitoring` namespace. We deploy the Hive shards Prometheus instances on their own machinepool to ensure Prometheus has ample resources and do not risk impacting other critical components
+
+1. In the `cluster.yml` file, ensure a machine pool is defined for this
+
+    ```yaml
+    machinePools:
+    - id: o-c-monitoring
+      instance_type: m5.4xlarge
+      replicas: 3
+      labels:
+        app-sre/machinepool: 'o-c-monitoring'
+    ```
 
 1. Check that an `openshift-customer-monitoring` namespace file exists for the specific hive cluster. This is usually done as part of [onboarding any new cluster](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/app-interface-onboard-cluster.md#step-4-observability)
+
+1. In `data/services/observability/cicd/saas/saas-observability-per-cluster.yaml` ensure that the entry for the cluster `openshift-customer-monitoring` namespace has the following parameters which ensure the pods are scheduled on the machine pool and the limits high enough so the pods can use the resources
+
+    ```yaml
+    CPU_LIMITS: '16'
+    MEM_LIMITS: '60Gi'
+    PROMETHEUS_NODE_SELECTOR:
+        app-sre/machinepool: o-c-monitoring
+    ```
+
 1. Use the hive monitoring boilerplate to add hive specific monitoring rules and servicemonitors to the `openshift-customer-monitoring` namespace file for the specific hive cluster:
 
 ```
