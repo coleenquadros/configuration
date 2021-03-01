@@ -196,6 +196,7 @@
         <<: *vault_defaults
         secrets:
         - *app_sre_bot_key
+        - *ansible-reader-role-creds
     builders:
     - shell: |
         trap "rm -f ${{WORKSPACE}}/ansible/app-sre-bot.key" EXIT SIGINT
@@ -204,6 +205,7 @@
         chmod 0600 app-sre-bot.key
         eval `ssh-agent -s`
         ssh-add app-sre-bot.key
+        export VAULT_ADDR="https://vault.devshift.net/"
         ansible-playbook -u ${{APP_SRE_BOT_USERNAME}} --key-file app-sre-bot.key '{playbook}' -D
     <<: *gl_build_master
 
