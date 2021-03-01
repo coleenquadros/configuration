@@ -83,6 +83,10 @@ Further reading:
 
 1. Update OpenShift deployment manifests to include a pull secret
 
+    OpenShift manifests must have healthProbe, readinessProbe and resources defined.
+
+    * ACTION ITEM: Submit a PR to the code repository to add/update OpenShift template attributes.
+
     If the service is using private images, you need to add an `imagePullSecrets` section to DeploymentConfigs which mounts a private pull secret.
 
     * ACTION ITEM: Submit a PR to the code repository to add/update OpenShift deployment manifests.
