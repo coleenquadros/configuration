@@ -358,6 +358,8 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
     1. Ensure `enhanced-dedicated-admin` is enabled on the cluster.  Details for this are [here](#enable-enhanced-dedicated-admin)
 
+    1. As of OpenShift 4.6.17, UWM (user-workload-monitoring) is enabled by default on OSD, replacing `openshift-customer-monitoring`. App-SRE still uses `openshift-customer-monitoring` and as such we need to ask SREP to disable UWM for us so we can use the current monitoring configs as described below. We need to create a ticket in OHSS and ask for UWM to be disabled.
+
     1. Create an `openshift-customer-monitoring` namespace file for that specific cluster, please use the template provided and replace CLUSTERNAME with the actual cluster name:
 
         - Template: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/boilerplates/openshift-customer-monitoring.clustername.yml
