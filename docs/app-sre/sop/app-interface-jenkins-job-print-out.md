@@ -41,7 +41,8 @@ Run `qontract-reconcile --config config.debug.toml --dry-run jenkins-job-builder
 
 Following filters can help to limit the output scope.
 
-Use `--config-name` to print out jobs defined in the exact config file
+Use `--config-name` to print out jobs defined in the exact config file and generate xml file in 'throughput/jjb/printout'
+
 Example for jobs defined in [config](/data/services/github-mirror/cicd/build.yaml):
 ```sh
 $ qontract-reconcile --config config.debug.toml --dry-run jenkins-job-builder --print-only --config-name ci-ext-github-mirror-jobs
