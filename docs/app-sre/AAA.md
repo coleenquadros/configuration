@@ -10,6 +10,8 @@ Axiom: *a statement or proposition which is regarded as being established, accep
 <!-- TOC -->
 
 - [Anthology of App-SRE Axioms](#anthology-of-app-sre-axioms)
+  - [Anthology: *a published collection of poems or other pieces of writing*](#anthology-a-published-collection-of-poems-or-other-pieces-of-writing)
+  - [Axiom: *a statement or proposition which is regarded as being established, accepted, or self-evidently true.*](#axiom-a-statement-or-proposition-which-is-regarded-as-being-established-accepted-or-self-evidently-true)
   - [Index](#index)
   - [Preface](#preface)
   - [Changes](#changes)
@@ -54,7 +56,7 @@ Axiom: *a statement or proposition which is regarded as being established, accep
 - [Glossary](#glossary)
   - [PnT](#pnt)
   - [PnT Ops](#pnt-ops)
-  - [PnT DevOps](#pnt-devops)
+  - [PnT DevOps](#pnt-devops-1)
 
 <!-- /TOC -->
 
@@ -240,12 +242,6 @@ Every app-sre engineer should have access to the following
   - This is necessary to access some clusters that are not publicly exposed (for example hive-production)
   - Access process is documented [here](https://mojo.redhat.com/docs/DOC-1144200)
     - You should request Tier1
-
-- Tier 2 access for OSIO starter clusters (optional - mostly not needed):
-  - This is necessary to be able to the OSIO starter cluster consoles and execute `oc` locally.
-  - Access process is documented [here](https://mojo.redhat.com/docs/DOC-1144200)
-    - You should request Tier2
-    - You can find an example of a request [here](https://redhat.service-now.com/help?id=rh_ticket&table=incident&sys_id=50c9c5f51b9098d0839e32a3cc4bcbc2)
 
 - Pendo:
   - This is necessary to post maintenance and outage messages in https://cloud.redhat.com/openshift
