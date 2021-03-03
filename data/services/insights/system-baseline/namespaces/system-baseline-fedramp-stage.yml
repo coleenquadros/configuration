@@ -1,0 +1,59 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: system-baseline
+
+name: system-baseline-stage
+description: Insights system-baseline for FedRAMP on stage
+
+cluster:
+  $ref: /openshift/insights/crcgovs02ue1/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
+
+quota:
+  $ref: /services/insights/system-baseline/system-baseline-quota.yml
+
+app:
+  $ref: /services/insights/system-baseline/app.yml
+
+environment:
+  $ref: /products/insights/environments/fedramp-stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcgovs02ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-fedramp-stage.yml
+- $ref: /services/insights/drift/namespaces/drift-fedramp-stage.yml
+- $ref: /services/insights/historical-system-profiles/namespaces/historical-system-profiles-fedramp-stage.yml
+
+managedRoles: true
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-fedramp-stage
+  identifier: system-baseline-stage
+  defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
+  parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-system-baseline-stage.yml
+  output_resource_name: system-baseline-db
+  enhanced_monitoring: true
+- provider: cloudwatch
+  account: insights-fedramp-stage
+  identifier: system-baseline-stage
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
