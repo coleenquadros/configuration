@@ -22,7 +22,6 @@
     - [Supported notification channels](#supported-notification-channels)
     - [Notification templates](#notification-templates)
     - [Alerting for your applications](#alerting-for-your-applications)
-      - [Adding alerting for an application from scratch](#adding-alerting-for-an-application-from-scratch)
     - [Alert Severities](#alert-severities)
     - [Recommended Alerts](#recommended-alerts)
     - [Availability](#availability)
@@ -34,9 +33,6 @@
     - [Updating dashboards](#updating-dashboards)
   - [How-To](#how-to)
     - [Define application performance Parameters](#define-application-performance-parameters)
-      - [Prequisites](#prequisites)
-      - [Process](#process)
-      - [App-Interface Performance Parameters Schema](#app-interface-performance-parameters-schema)
     - [Monitor a persistent volume's filesystem used/available space](#monitor-a-persistent-volumes-filesystem-usedavailable-space)
   - [Ask a question](#ask-a-question)
 
@@ -379,8 +375,6 @@ Currently added datasources:
 - `dsaas-graphite`: graphite (osd-monitor) on `app-sre-prod-03` cluster
 - `dsaas-bayesian-stage-graphite`: bayesian graphite (osd-monitor) on `app-sre-stage-02` cluster
 - `dsaas-bayesian-production-graphite`: bayesian graphite (osd-monitor) on `app-sre-prod-03` cluster
-- `starter-us-east-2-cluster-prometheus`: cluster prometheus on `starter-us-east-2-cluster` cluster
-- `starter-us-east-2a-cluster-prometheus`: cluster prometheus on `starter-us-east-2a-cluster` cluster
 - `elasticsearch-monitoring`: `.monitoring-es*` database on AWS elasitcsearch
 - `elasticsearch-logstash`: `.monitoring-logstash*` database on AWS elasitcsearch
 
