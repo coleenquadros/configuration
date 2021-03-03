@@ -1,0 +1,50 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: cincinnati
+
+name: cincinnati
+
+namespaces:
+- $ref: /services/cincinnati/namespaces/cincinnati-production.yml
+
+slos:
+- name: policy-engine latency
+  SLIType: latency
+  SLISpecification: p90 of the latency must be under 3 seconds a target of the time
+  SLODetails: https://github.com/openshift/cincinnati/blob/master/docs/developer/end-to-end-testing.md
+  SLOParameters:
+    window: 28d
+  expr: avg_over_time(component:latency:slo_ok_5m{component="cincinnati-policy-engine",job="cincinnati-policy-engine",service="cincinnati"}[{{window}}])
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/cincinnati-production-slo.prometheusrules.yaml
+  prometheusRulesTests: /to/do.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/z8tQ2cyZk/cincinnati-valet?orgId=1
+
+- name: policy-engine errors
+  SLIType: availability
+  SLISpecification: Errors ratio should be under a certain ratio in the last 28 days
+  SLODetails: https://github.com/openshift/cincinnati/blob/master/docs/developer/end-to-end-testing.md
+  SLOParameters:
+    window: 28d
+  expr: avg_over_time(component:errors:slo_ok_5m{component="cincinnati-policy-engine",route="cincinnati-route-prod",service="cincinnati"}[{{window}}])
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/cincinnati-production-slo.prometheusrules.yaml
+  prometheusRulesTests: /to/do.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/z8tQ2cyZk/cincinnati-valet?orgId=1
+
+- name: policy-engine availability
+  SLIType: availability
+  SLISpecification: Availability (measured as the product of errors and latency) has to be met a certain target of the last days
+  SLODetails: https://github.com/openshift/cincinnati/blob/master/docs/developer/end-to-end-testing.md
+  SLOParameters:
+    window: 28d
+  expr: avg_over_time(component:availability:slo_ok_5m{component="cincinnati-policy-engine",job="cincinnati-policy-engine",service="cincinnati"}[{{window}}])
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/cincinnati-production-slo.prometheusrules.yaml
+  prometheusRulesTests: /to/do.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/z8tQ2cyZk/cincinnati-valet?orgId=1
