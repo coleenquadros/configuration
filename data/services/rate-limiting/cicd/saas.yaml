@@ -44,9 +44,92 @@ resourceTemplates:
     parameters:
       CLEANUP_DAYS: 7
       IMAGE_TAG: "0.3.0"
+      LIMITS:
+      # Limit OCM clusters management service cluster registrations to 50
+      # per minute in the integration environment:
+      - namespace: integration:clusters_mgmt
+        max_value: 50
+        seconds: 60
+        conditions:
+        - path == register_cluster
+        variables:
+        - path
+      # Limit OCM clusters management service cluster registrations to 50
+      # per minute in the stage environment:
+      - namespace: stage:clusters_mgmt
+        max_value: 50
+        seconds: 60
+        conditions:
+        - path == register_cluster
+        variables:
+        - path
+      # Limit OCM accounts management service cluster registrations to 10000
+      # per minute in the integration environment:
+      - namespace: integration:accounts_mgmt
+        max_value: 10000
+        seconds: 60
+        conditions:
+        - path == cluster_registrations
+        variables:
+        - path
+      # Limit OCM accounts management service cluster registrations to 10000
+      # per minute in the stage environment:
+      - namespace: stage:accounts_mgmt
+        max_value: 10000
+        seconds: 60
+        conditions:
+        - path == cluster_registrations
+        variables:
+        - path
+      # Limit OCM service log service cluster logs to 50
+      # per minute in the integration environment:
+      - namespace: integration:service_logs
+        max_value: 50
+        seconds: 60
+        conditions:
+        - path == cluster_logs
+        variables:
+        - path
+      # Limit OCM service log service cluster logs to 10000
+      # per minute in the stage environment:
+      - namespace: stage:service_logs
+        max_value: 10000
+        seconds: 60
+        conditions:
+        - path == cluster_logs
+        variables:
+        - path
   - namespace:
       $ref: /openshift/app-sre-prod-04/namespaces/app-sre-rate-limiting.yml
     ref: f8e96c06c9b2f1fdd029525388b6fc51dcce00a7
     parameters:
       CLEANUP_DAYS: 7
       IMAGE_TAG: "0.3.0"
+      LIMITS:
+      # Limit OCM clusters management service cluster registrations to 50
+      # per minute in the production environment:
+      - namespace: production:clusters_mgmt
+        max_value: 50
+        seconds: 60
+        conditions:
+        - path == register_cluster
+        variables:
+        - path
+      # Limit OCM accounts management service cluster registrations to 10000
+      # per minute in the production environment:
+      - namespace: production:accounts_mgmt
+        max_value: 10000
+        seconds: 60
+        conditions:
+        - path == cluster_registrations
+        variables:
+        - path
+      # Limit OCM service log service cluster logs to 10000
+      # per minute in the production environment:
+      - namespace: production:service_logs
+        max_value: 10000
+        seconds: 60
+        conditions:
+        - path == cluster_logs
+        variables:
+        - path
