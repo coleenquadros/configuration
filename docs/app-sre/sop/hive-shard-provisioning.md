@@ -280,7 +280,7 @@ At this point, the monitoring is all set, and you're ready to move on to the nex
 1. Add `uhc-leadership` namespace. Example: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/6829
 1. Add `view` access to the `uhc-leadership` namespace to the OCM [dev role](/data/teams/ocm/roles/dev.yml).
 1. Add Service Account references to hive, aws-account-opeator and gcp-project-operator namespaces from the uhc namespaces. Example: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/7655
-1. Update `uhc-clusters-service` secret to add new shards. Example: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/8951. We don't assign any region nor cloud provider, we will manually pin clusters to this shard in the validation phase.
+1. Update `clusters-service` secret to add new shards. Example: https://gitlab.cee.redhat.com/service/app-interface/-/blob/55beecac/data/services/ocm/shared-resources/production.yml#L31-35.
 1. The id field is set to a random uuid unique per shard (uuidgen can be used to generate one)
 
 ## Validations
@@ -442,7 +442,7 @@ Once created, there are two further validations
 
 ## Disabling shards from rotation
 
-A shard can be taken out of rotation pick for new clusters, by setting it's status to "maintenance".
+A shard can be taken out of rotation pick for new clusters, by setting its status to "maintenance".
 
 ### Verify that at least one round of osde2e tests ran successfully when using the new shard. Dashboards:
 
