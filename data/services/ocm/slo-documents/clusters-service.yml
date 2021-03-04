@@ -1,0 +1,47 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: clusters-service
+
+name: clusters-service
+
+namespaces:
+- $ref: /services/ocm/namespaces/uhc-production.yml
+
+slos:
+- name: latency
+  SLIType: latency
+  SLISpecification: p90 of the latency must be under 2 seconds a certain target of the time
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/uhc/slos/proposed-slos-based-on-current-performance.md
+  SLOParameters:
+    window: 28d
+  expr: avg_over_time(component:latency:slo_ok_5m{component="uhc-clusters-service",namespace="uhc-production",service="clusters-service"}[{{window}}])
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/uhc-clusters-service-slo.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/rd6Q8fhVo/clusters-service-valet?orgId=1
+
+- name: errors
+  SLIType: availability
+  SLISpecification: Errors ratio should be under a certain percentage
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/uhc/slos/proposed-slos-based-on-current-performance.md
+  SLOParameters:
+    window: 28d
+  expr: avg_over_time(component:errors:slo_ok_5m{component="uhc-clusters-service",route="clusters-mgmt",service="clusters-service"}[{{window}}])
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/uhc-clusters-service-slo.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/rd6Q8fhVo/clusters-service-valet?orgId=1
+
+- name: availability
+  SLIType: availability
+  SLISpecification: Availability (measured as the product of errors and latency) has to be met a certain percentage of the time
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/uhc/slos/proposed-slos-based-on-current-performance.md
+  SLOParameters:
+    window: 28d
+  expr: avg_over_time(component:availability:slo_ok_5m{component="uhc-clusters-service",namespace="uhc-production",service="clusters-service"}[{{window}}])
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/uhc-clusters-service-slo.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/rd6Q8fhVo/clusters-service-valet?orgId=1

@@ -1,0 +1,342 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+    type: slo-rules
+  name: uhc-clusters-service-slo-{{{namespace}}}
+spec:
+  groups:
+  - name: uhc-clusters-service.slo.rules
+    rules:
+    - expr: |
+        sum by (status_class) (
+          label_replace(
+            rate(haproxy_backend_http_responses_total{route="clusters-mgmt"}[5m]
+          ), "status_class", "${1}xx", "code", "([0-9])..")
+        )
+      labels:
+        component: uhc-clusters-service
+        route: clusters-mgmt
+        service: clusters-service
+      record: status_class:http_requests_total:rate5m
+    - expr: |
+        sum by (status_class) (
+          label_replace(
+            rate(haproxy_backend_http_responses_total{route="clusters-mgmt"}[30m]
+          ), "status_class", "${1}xx", "code", "([0-9])..")
+        )
+      labels:
+        component: uhc-clusters-service
+        route: clusters-mgmt
+        service: clusters-service
+      record: status_class:http_requests_total:rate30m
+    - expr: |
+        sum by (status_class) (
+          label_replace(
+            rate(haproxy_backend_http_responses_total{route="clusters-mgmt"}[1h]
+          ), "status_class", "${1}xx", "code", "([0-9])..")
+        )
+      labels:
+        component: uhc-clusters-service
+        route: clusters-mgmt
+        service: clusters-service
+      record: status_class:http_requests_total:rate1h
+    - expr: |
+        sum by (status_class) (
+          label_replace(
+            rate(haproxy_backend_http_responses_total{route="clusters-mgmt"}[2h]
+          ), "status_class", "${1}xx", "code", "([0-9])..")
+        )
+      labels:
+        component: uhc-clusters-service
+        route: clusters-mgmt
+        service: clusters-service
+      record: status_class:http_requests_total:rate2h
+    - expr: |
+        sum by (status_class) (
+          label_replace(
+            rate(haproxy_backend_http_responses_total{route="clusters-mgmt"}[6h]
+          ), "status_class", "${1}xx", "code", "([0-9])..")
+        )
+      labels:
+        component: uhc-clusters-service
+        route: clusters-mgmt
+        service: clusters-service
+      record: status_class:http_requests_total:rate6h
+    - expr: |
+        sum by (status_class) (
+          label_replace(
+            rate(haproxy_backend_http_responses_total{route="clusters-mgmt"}[1d]
+          ), "status_class", "${1}xx", "code", "([0-9])..")
+        )
+      labels:
+        component: uhc-clusters-service
+        route: clusters-mgmt
+        service: clusters-service
+      record: status_class:http_requests_total:rate1d
+    - expr: |
+        sum(status_class:http_requests_total:rate5m{route="clusters-mgmt",status_class="5xx"})
+        /
+        sum(status_class:http_requests_total:rate5m{route="clusters-mgmt"})
+      labels:
+        component: uhc-clusters-service
+        route: clusters-mgmt
+        service: clusters-service
+      record: status_class_5xx:http_requests_total:ratio_rate5m
+    - expr: |
+        sum(status_class:http_requests_total:rate30m{route="clusters-mgmt",status_class="5xx"})
+        /
+        sum(status_class:http_requests_total:rate30m{route="clusters-mgmt"})
+      labels:
+        component: uhc-clusters-service
+        route: clusters-mgmt
+        service: clusters-service
+      record: status_class_5xx:http_requests_total:ratio_rate30m
+    - expr: |
+        sum(status_class:http_requests_total:rate1h{route="clusters-mgmt",status_class="5xx"})
+        /
+        sum(status_class:http_requests_total:rate1h{route="clusters-mgmt"})
+      labels:
+        component: uhc-clusters-service
+        route: clusters-mgmt
+        service: clusters-service
+      record: status_class_5xx:http_requests_total:ratio_rate1h
+    - expr: |
+        sum(status_class:http_requests_total:rate2h{route="clusters-mgmt",status_class="5xx"})
+        /
+        sum(status_class:http_requests_total:rate2h{route="clusters-mgmt"})
+      labels:
+        component: uhc-clusters-service
+        route: clusters-mgmt
+        service: clusters-service
+      record: status_class_5xx:http_requests_total:ratio_rate2h
+    - expr: |
+        sum(status_class:http_requests_total:rate6h{route="clusters-mgmt",status_class="5xx"})
+        /
+        sum(status_class:http_requests_total:rate6h{route="clusters-mgmt"})
+      labels:
+        component: uhc-clusters-service
+        route: clusters-mgmt
+        service: clusters-service
+      record: status_class_5xx:http_requests_total:ratio_rate6h
+    - expr: |
+        sum(status_class:http_requests_total:rate1d{route="clusters-mgmt",status_class="5xx"})
+        /
+        sum(status_class:http_requests_total:rate1d{route="clusters-mgmt"})
+      labels:
+        component: uhc-clusters-service
+        route: clusters-mgmt
+        service: clusters-service
+      record: status_class_5xx:http_requests_total:ratio_rate1d
+    - expr: |
+        histogram_quantile(
+          0.90,
+          sum(rate(api_inbound_request_duration_bucket{service="clusters-service-metrics",namespace="{{{namespace}}}"}[5m])) by (le)
+        )
+      labels:
+        component: uhc-clusters-service
+        namespace: {{{namespace}}}
+        service: clusters-service
+      record: component:latency:p90_rate5m
+    - expr: |
+        histogram_quantile(
+          0.90,
+          sum(rate(api_inbound_request_duration_bucket{service="clusters-service-metrics",namespace="{{{namespace}}}"}[30m])) by (le)
+        )
+      labels:
+        component: uhc-clusters-service
+        namespace: {{{namespace}}}
+        service: clusters-service
+      record: component:latency:p90_rate30m
+    - expr: |
+        histogram_quantile(
+          0.90,
+          sum(rate(api_inbound_request_duration_bucket{service="clusters-service-metrics",namespace="{{{namespace}}}"}[1h])) by (le)
+        )
+      labels:
+        component: uhc-clusters-service
+        namespace: {{{namespace}}}
+        service: clusters-service
+      record: component:latency:p90_rate1h
+    - expr: |
+        histogram_quantile(
+          0.90,
+          sum(rate(api_inbound_request_duration_bucket{service="clusters-service-metrics",namespace="{{{namespace}}}"}[2h])) by (le)
+        )
+      labels:
+        component: uhc-clusters-service
+        namespace: {{{namespace}}}
+        service: clusters-service
+      record: component:latency:p90_rate2h
+    - expr: |
+        histogram_quantile(
+          0.90,
+          sum(rate(api_inbound_request_duration_bucket{service="clusters-service-metrics",namespace="{{{namespace}}}"}[6h])) by (le)
+        )
+      labels:
+        component: uhc-clusters-service
+        namespace: {{{namespace}}}
+        service: clusters-service
+      record: component:latency:p90_rate6h
+    - expr: |
+        histogram_quantile(
+          0.90,
+          sum(rate(api_inbound_request_duration_bucket{service="clusters-service-metrics",namespace="{{{namespace}}}"}[1d])) by (le)
+        )
+      labels:
+        component: uhc-clusters-service
+        namespace: {{{namespace}}}
+        service: clusters-service
+      record: component:latency:p90_rate1d
+    - expr: status_class:http_requests_total:rate5m{component='uhc-clusters-service',route='clusters-mgmt',service='clusters-service'} < bool(300)
+      labels:
+        component: uhc-clusters-service
+        route: clusters-mgmt
+        service: clusters-service
+      record: component:volume:slo_ok_5m
+    - expr: status_class:http_requests_total:rate30m{component='uhc-clusters-service',route='clusters-mgmt',service='clusters-service'} < bool(300)
+      labels:
+        component: uhc-clusters-service
+        route: clusters-mgmt
+        service: clusters-service
+      record: component:volume:slo_ok_30m
+    - expr: status_class:http_requests_total:rate1h{component='uhc-clusters-service',route='clusters-mgmt',service='clusters-service'} < bool(300)
+      labels:
+        component: uhc-clusters-service
+        route: clusters-mgmt
+        service: clusters-service
+      record: component:volume:slo_ok_1h
+    - expr: status_class:http_requests_total:rate2h{component='uhc-clusters-service',route='clusters-mgmt',service='clusters-service'} < bool(300)
+      labels:
+        component: uhc-clusters-service
+        route: clusters-mgmt
+        service: clusters-service
+      record: component:volume:slo_ok_2h
+    - expr: status_class:http_requests_total:rate6h{component='uhc-clusters-service',route='clusters-mgmt',service='clusters-service'} < bool(300)
+      labels:
+        component: uhc-clusters-service
+        route: clusters-mgmt
+        service: clusters-service
+      record: component:volume:slo_ok_6h
+    - expr: status_class:http_requests_total:rate1d{component='uhc-clusters-service',route='clusters-mgmt',service='clusters-service'} < bool(300)
+      labels:
+        component: uhc-clusters-service
+        route: clusters-mgmt
+        service: clusters-service
+      record: component:volume:slo_ok_1d
+    - expr: component:latency:p90_rate5m{component='uhc-clusters-service',namespace='{{{namespace}}}',service='clusters-service'} < bool(2)
+      labels:
+        component: uhc-clusters-service
+        namespace: {{{namespace}}}
+        service: clusters-service
+      record: component:latency:slo_ok_5m
+    - expr: component:latency:p90_rate30m{component='uhc-clusters-service',namespace='{{{namespace}}}',service='clusters-service'} < bool(2)
+      labels:
+        component: uhc-clusters-service
+        namespace: {{{namespace}}}
+        service: clusters-service
+      record: component:latency:slo_ok_30m
+    - expr: component:latency:p90_rate1h{component='uhc-clusters-service',namespace='{{{namespace}}}',service='clusters-service'} < bool(2)
+      labels:
+        component: uhc-clusters-service
+        namespace: {{{namespace}}}
+        service: clusters-service
+      record: component:latency:slo_ok_1h
+    - expr: component:latency:p90_rate2h{component='uhc-clusters-service',namespace='{{{namespace}}}',service='clusters-service'} < bool(2)
+      labels:
+        component: uhc-clusters-service
+        namespace: {{{namespace}}}
+        service: clusters-service
+      record: component:latency:slo_ok_2h
+    - expr: component:latency:p90_rate6h{component='uhc-clusters-service',namespace='{{{namespace}}}',service='clusters-service'} < bool(2)
+      labels:
+        component: uhc-clusters-service
+        namespace: {{{namespace}}}
+        service: clusters-service
+      record: component:latency:slo_ok_6h
+    - expr: component:latency:p90_rate1d{component='uhc-clusters-service',namespace='{{{namespace}}}',service='clusters-service'} < bool(2)
+      labels:
+        component: uhc-clusters-service
+        namespace: {{{namespace}}}
+        service: clusters-service
+      record: component:latency:slo_ok_1d
+    - expr: status_class_5xx:http_requests_total:ratio_rate5m{component='uhc-clusters-service',route='clusters-mgmt',service='clusters-service'} < bool(0.05)
+      labels:
+        component: uhc-clusters-service
+        route: clusters-mgmt
+        service: clusters-service
+      record: component:errors:slo_ok_5m
+    - expr: status_class_5xx:http_requests_total:ratio_rate30m{component='uhc-clusters-service',route='clusters-mgmt',service='clusters-service'} < bool(0.05)
+      labels:
+        component: uhc-clusters-service
+        route: clusters-mgmt
+        service: clusters-service
+      record: component:errors:slo_ok_30m
+    - expr: status_class_5xx:http_requests_total:ratio_rate1h{component='uhc-clusters-service',route='clusters-mgmt',service='clusters-service'} < bool(0.05)
+      labels:
+        component: uhc-clusters-service
+        route: clusters-mgmt
+        service: clusters-service
+      record: component:errors:slo_ok_1h
+    - expr: status_class_5xx:http_requests_total:ratio_rate2h{component='uhc-clusters-service',route='clusters-mgmt',service='clusters-service'} < bool(0.05)
+      labels:
+        component: uhc-clusters-service
+        route: clusters-mgmt
+        service: clusters-service
+      record: component:errors:slo_ok_2h
+    - expr: status_class_5xx:http_requests_total:ratio_rate6h{component='uhc-clusters-service',route='clusters-mgmt',service='clusters-service'} < bool(0.05)
+      labels:
+        component: uhc-clusters-service
+        route: clusters-mgmt
+        service: clusters-service
+      record: component:errors:slo_ok_6h
+    - expr: status_class_5xx:http_requests_total:ratio_rate1d{component='uhc-clusters-service',route='clusters-mgmt',service='clusters-service'} < bool(0.05)
+      labels:
+        component: uhc-clusters-service
+        route: clusters-mgmt
+        service: clusters-service
+      record: component:errors:slo_ok_1d
+    - expr: component:latency:slo_ok_5m{component='uhc-clusters-service',namespace='{{{namespace}}}',service='clusters-service'} * on (component,service) component:errors:slo_ok_5m{component='uhc-clusters-service',route='clusters-mgmt',service='clusters-service'}
+      labels:
+        component: uhc-clusters-service
+        namespace: {{{namespace}}}
+        route: clusters-mgmt
+        service: clusters-service
+      record: component:availability:slo_ok_5m
+    - expr: component:latency:slo_ok_30m{component='uhc-clusters-service',namespace='{{{namespace}}}',service='clusters-service'} * on (component,service) component:errors:slo_ok_30m{component='uhc-clusters-service',route='clusters-mgmt',service='clusters-service'}
+      labels:
+        component: uhc-clusters-service
+        namespace: {{{namespace}}}
+        route: clusters-mgmt
+        service: clusters-service
+      record: component:availability:slo_ok_30m
+    - expr: component:latency:slo_ok_1h{component='uhc-clusters-service',namespace='{{{namespace}}}',service='clusters-service'} * on (component,service) component:errors:slo_ok_1h{component='uhc-clusters-service',route='clusters-mgmt',service='clusters-service'}
+      labels:
+        component: uhc-clusters-service
+        namespace: {{{namespace}}}
+        route: clusters-mgmt
+        service: clusters-service
+      record: component:availability:slo_ok_1h
+    - expr: component:latency:slo_ok_2h{component='uhc-clusters-service',namespace='{{{namespace}}}',service='clusters-service'} * on (component,service) component:errors:slo_ok_2h{component='uhc-clusters-service',route='clusters-mgmt',service='clusters-service'}
+      labels:
+        component: uhc-clusters-service
+        namespace: {{{namespace}}}
+        route: clusters-mgmt
+        service: clusters-service
+      record: component:availability:slo_ok_2h
+    - expr: component:latency:slo_ok_6h{component='uhc-clusters-service',namespace='{{{namespace}}}',service='clusters-service'} * on (component,service) component:errors:slo_ok_6h{component='uhc-clusters-service',route='clusters-mgmt',service='clusters-service'}
+      labels:
+        component: uhc-clusters-service
+        namespace: {{{namespace}}}
+        route: clusters-mgmt
+        service: clusters-service
+      record: component:availability:slo_ok_6h
+    - expr: component:latency:slo_ok_1d{component='uhc-clusters-service',namespace='{{{namespace}}}',service='clusters-service'} * on (component,service) component:errors:slo_ok_1d{component='uhc-clusters-service',route='clusters-mgmt',service='clusters-service'}
+      labels:
+        component: uhc-clusters-service
+        namespace: {{{namespace}}}
+        route: clusters-mgmt
+        service: clusters-service
+      record: component:availability:slo_ok_1d
