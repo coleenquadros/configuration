@@ -1,0 +1,47 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: accounts-mgmt
+
+name: accounts-mgmt
+
+namespaces:
+- $ref: /services/ocm/namespaces/uhc-production.yml
+
+slos:
+- name: latency
+  SLIType: latency
+  SLISpecification: p90 of the latency must be under 2 seconds a certain target of the time in the last days
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/uhc/slos/proposed-slos-based-on-current-performance.md
+  SLOParameters:
+    window: 28d
+  expr: avg_over_time(component:latency:slo_ok_5m{component="uhc-accounts-mgmt",namespace="uhc-production",service="accounts-mgmt"}[{{window}}])
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/uhc-accounts-mgmt-slo.prometheusrules.yaml
+  dashboard: /to/do
+
+- name: errors
+  SLIType: availability
+  SLISpecification: Errors ratio should be under a certain percentage in the last days
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/uhc/slos/proposed-slos-based-on-current-performance.md
+  SLOParameters:
+    window: 28d
+  expr: avg_over_time(component:errors:slo_ok_5m{component="uhc-accounts-mgmt",route="accounts-mgmt",service="accounts-mgmt"}[{{window}}])
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/uhc-accounts-mgmt-slo.prometheusrules.yaml
+  dashboard: /to/do
+
+- name: availability
+  SLIType: availability
+  SLISpecification: Availability (measured as the product of errors and latency) has to be met a certain percentafe of the time
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/uhc/slos/proposed-slos-based-on-current-performance.md
+  SLOParameters:
+    window: 28d
+  expr: avg_over_time(component:availability:slo_ok_5m{component="uhc-accounts-mgmt",namespace="uhc-production",service="accounts-mgmt"}[{{window}}])
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/uhc-accounts-mgmt-slo.prometheusrules.yaml
+  dashboard: /to/do

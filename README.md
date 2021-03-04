@@ -93,7 +93,6 @@ this repository.
     - [Add a Grafana Dashboard](#add-a-grafana-dashboard)
     - [Execute a SQL Query on an App Interface controlled RDS instance](#execute-a-sql-query-on-an-app-interface-controlled-rds-instance)
     - [Enable Gitlab Features on an App Interface Controlled Gitlab Repository](#enable-gitlab-features-on-an-app-interface-controlled-gitlab-repository)
-    - [Add recording rules via openshift-performance-parameters integration](#add-recording-rules-via-openshift-performance-parameters-integration)
     - [Provision and consume Kafka clusters via KAS Fleet Manager](#provision-and-consume-kafka-clusters-via-kas-fleet-manager)
     - [Write and run Prometheus rules tests](#write-and-run-prometheus-rules-tests)
   - [Design](#design)
@@ -2039,10 +2038,6 @@ codeComponents:
     $ref: /dependencies/jira/issues-redhat-com.yaml
 ...
 ```
-
-### Add recording rules via openshift-performance-parameters integration
-
-Please refer to this [document](docs/app-sre/sli-recording-rules-via-performance-parameters.md)
 
 ### Provision and consume Kafka clusters via KAS Fleet Manager
 
