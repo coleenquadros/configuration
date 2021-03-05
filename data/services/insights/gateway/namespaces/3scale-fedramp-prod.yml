@@ -1,0 +1,87 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: gateway
+
+name: 3scale-prod
+description: Insights 3scale for FedRAMP on prod
+
+cluster:
+  $ref: /openshift/insights/crcgovp01ue1/cluster.yml
+
+# limitRanges:
+#   $ref: /dependencies/openshift/limitranges/standard-resource-limits.yml
+
+quota:
+  $ref: /services/insights/default-quota.yml
+
+app:
+  $ref: /services/insights/gateway/app.yml
+
+environment:
+  $ref: /products/insights/environments/fedramp-production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcgovp01ue1.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- Route
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/platform-mq-prod/kafka-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource-template
+  type: jinja2
+  path: /insights-prod/3scale-prod/api-gateway-prod.route.yml
+  variables:
+    host: api-gateway-prod.apps.crcgovp01ue1.43j0.p1.openshiftapps.com
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/3scale-fedramp-prod/apicast-configuration-url-secret
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/3scale-fedramp-prod/apicast-insights-3scale-config
+  # When incrementing the version of this, do the same in data/services/insights/turnpike/namespaces/prod-turnpike-prod.yml
+  version: 29
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/3scale-fedramp-prod/apicast-insights-services-ephemeral-jwt-pub-key
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/3scale-fedramp-prod/cloudservices-threescale-pull-secret
+  version: 1
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/3scale-fedramp-prod/gateway-server
+  version: 3
+  annotations:
+    qontract.recycle: "true"
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-fedramp-prod
+  identifier: cw-3scale-fedramp
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
+  

@@ -1,0 +1,86 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: payload-tracker
+
+name: payload-tracker-prod
+description: Insights payload-tracker for FedRAMP on prod
+
+cluster:
+  $ref: /openshift/insights/crcgovp01ue1/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
+
+quota:
+  $ref: /services/insights/payload-tracker/payload-tracker-quota.yml
+
+app:
+  $ref: /services/insights/payload-tracker/app.yml
+
+environment:
+  $ref: /products/insights/environments/fedramp-production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcgovp01ue1.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ConfigMap
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/platform-mq-prod/kafka-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/payload-tracker-fedramp-prod/payload-tracker-cookie
+  version: 1
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/payload-tracker-fedramp-prod/payload-tracker-frontend-cookie
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/payload-tracker-fedramp-prod/payload-tracker-kibana
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: resource
+  path: /insights-prod/payload-tracker-prod/payload-tracker-nginx-conf.configmap.yml
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-fedramp-prod
+  identifier: payload-tracker-prod-db
+  defaults: /terraform/resources/insights/production/rds/rds-payload-tracker-prod-12.yml
+  overrides:
+    name: "payloadtracker"
+  parameter_group: /terraform/resources/insights/production/rds/postgres12-parameter-group-payload-tracker-prod.yml
+  output_resource_name: payload-tracker-db-creds
+  enhanced_monitoring: true
+- provider: cloudwatch
+  account: insights-fedramp-prod
+  identifier: payload-tracker-prod
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
+# - provider: elasticache
+#   account: insights-fedramp-prod
+#   identifier: payload-tracker-prod-cache
+#   defaults: /terraform/resources/insights/prod/elasticache/elasticache-payload-tracker-1.yml
+#   output_resource_name: payload-tracker-cache-creds

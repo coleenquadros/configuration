@@ -1,0 +1,75 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: rbac
+
+name: rbac-prod
+description: Insights rbac-prod on the FedRAMP cluster
+
+cluster:
+  $ref: /openshift/insights/crcgovp01ue1/cluster.yml
+
+app:
+  $ref: /services/insights/rbac/app.yml
+
+environment:
+  $ref: /products/insights/environments/fedramp-production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcgovp01ue1.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ConfigMap
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/platform-mq-prod/kafka-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-prod/rbac-prod/rbac-env.configmap.yml
+- provider: resource
+  path: /insights-prod/rbac-prod/redis-config.configmap.yml
+- provider: resource
+  path: /insights-prod/rbac-prod/rbac-config.configmap.yml
+- provider: resource
+  path: /insights-prod/rbac-prod/model-access-permissions.configmap.yml
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/rbac-fedramp-prod/rbac-secret
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/rbac-fedramp-prod/rbac-psks
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-fedramp-prod
+  identifier: rbac-prod
+  defaults: /terraform/resources/insights/production/rds/postgres10-rds-1.yml
+  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-rbac-prod.yml
+  output_resource_name: rbac-db
+  enhanced_monitoring: true

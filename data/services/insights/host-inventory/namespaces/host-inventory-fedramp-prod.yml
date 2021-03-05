@@ -1,0 +1,90 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: host-inventory
+
+name: host-inventory-prod
+description: Insights host-inventory for FedRAMP on prod
+
+cluster:
+  $ref: /openshift/insights/crcgovp01ue1/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
+
+quota:
+  $ref: /services/insights/host-inventory/host-inventory-quota.yml
+
+app:
+  $ref: /services/insights/host-inventory/app.yml
+
+environment:
+  $ref: /products/insights/environments/fedramp-production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcgovp01ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-fedramp-prod.yml
+# - $ref: /services/insights/remediations/namespaces/prod-remediations-prod.yml
+- $ref: /services/insights/drift/namespaces/drift-fedramp-prod.yml
+- $ref: /services/insights/historical-system-profiles/namespaces/historical-system-profiles-fedramp-prod.yml
+- $ref: /services/insights/system-baseline/namespaces/system-baseline-fedramp-prod.yml
+- $ref: /services/insights/ingress/namespaces/ingress-fedramp-prod.yml
+- $ref: /services/insights/compliance/namespaces/compliance-fedramp-prod.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- Secret
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/platform-mq-prod/kafka-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-prod/host-inventory-prod/insights-host-delete.secret.yaml
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-fedramp-prod
+  identifier: host-inventory-prod
+  defaults: /terraform/resources/insights/production/rds/postgres10-rds-1.yml
+  overrides:
+    username: "insights"
+    name: "insights"
+    allocated_storage: 100
+  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-host-inventory-prod.yml
+  output_resource_name: host-inventory-db
+  enhanced_monitoring: true
+# - provider: rds
+#   account: insights-fedramp-prod
+#   identifier: host-inventory-prod-readonly
+#   availability_zone: us-east-1d
+#   defaults: /terraform/resources/insights/production/rds/postgres10-rds-read-replica-host-inventory-prod.yml
+#   parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-host-inventory-prod-read-replica.yml
+#   output_resource_name: host-inventory-readonly-db
+- provider: cloudwatch
+  account: insights-fedramp-prod
+  identifier: host-inventory-prod
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
