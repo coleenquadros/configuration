@@ -1,7 +1,5 @@
 # Temporary pod exec access
-To temporarily grant exec access to pods in a namespace for a user, you'll need to create a role if it doesn't exist and then add a user to that role.  
-
-Also captured at https://gist.github.com/mmclanerh/ec3201c010c70902de380e8917da9a17
+To temporarily grant exec access to pods in a namespace for a user, you'll need to create a role if it doesn't exist and then add a user to that role.
 
 ## role yaml
 ```
