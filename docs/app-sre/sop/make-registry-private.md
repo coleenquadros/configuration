@@ -96,6 +96,6 @@ spec:
 ...
 ```
 
-If the pods need to read config from a Secret or a ConfigMap or any other special action, you may need to add capabilities via a Role, e.g. https://gitlab.cee.redhat.com/service/app-sre-observability/-/blob/master/openshift/cloudwatch-exporter.template.yaml#L12-35
+If the pods need to read config from a Secret or a ConfigMap or any other special action, you may need to add capabilities via a Role, e.g. https://gitlab.cee.redhat.com/service/app-sre-observability/-/blob/5a9eda36cb0846c697d8afa7d4b75d7f534cce2b/openshift/cloudwatch-exporter.template.yaml#L12-35
 
 After you commit this, it will trigger a deployment to staging. If it works successfully, you can promote to prod.
