@@ -21,18 +21,23 @@ We use the `qontract_reconcile_function_elapsed_seconds_since_bundle_commit` set
 In order to populate this histogram, we have instrumented our code to calculate the time between the bundle creation and the modifying operations. A few considerations about this process:
 
 * We have forced the creation of a merge commit in app-interface to accurately reflect the commit merge timestamp
-* We have implemented a mechanism to avoid that certain objects count into the histogram via the `qontract.ignore_reconcile_time` annotation. These are the objects that can be updated in Vault which will trigger a modification in the cluster that does not correspond to a merge
 * Since integrations may take several minutes to run, we can be underestimating the time to merge as we can have multiple merges while the integrations run.
-* We may need to inject traffic (commits to app-interface) if we see that we don't have enough data
+* We may need to inject traffic (commits to app-interface) if we see that we don't have enough data (see https://issues.redhat.com/browse/APPSRE-3078)
 
-A final note: we're not taking into account the modifications that come from saas files as those are made in the Jenkins nodes, that are one shot processes.
+With more detail, this is what we're taking into account in this metric:
+
+* Resources in `openshiftResources` sections in namespace files (openshift-resources, openshift-vault-secrets, openshift-routes)
+* Resources in `networkPoliciesAllow` sections in namespace files (openshift-network-policies)
+* Resources in access sections in role files (openshift-rolebindings)
+
+We have implemented a mechanism to avoid that certain objects count into the histogram via the `qontract.ignore_reconcile_time` annotation. These are the objects that can be updated in Vault which will trigger a modification in the cluster that does not correspond to a merge
+
+In particular, we're not taking into account the modifications that come from saas files as those are made in the Jenkins nodes as those are one shot processes.
 
 ## SLO Rationale
 
-We acknowledge that 20 minutes may seem as a long time for a reconciliation process but for the moment it models well the expectations of the tenants and it helps us not overcommitting. We strive for a high percentage of our reconciliations to fall under 20 minutes and this should be reviewed to make it higher as soon as we gain confidence.
+We acknowledge that 20 minutes may seem as a long time for a reconciliation process but it models well the expectations of the tenants since our SLO for MRs of the type that is being measured by this document is 24h (goal of 3h, but formal SLO is 24h).
 
 ## Alerts
 
-There are no alerts associated to this SLO yet. We still are in an analysis phase, making sure that we are correctly measuring.
-
-We will need to adjust our burn rates windows to make sure to make sure we have enough datapoints to feed the expressions.
+There are no alerts associated to this SLO yet. We still are in an analysis phase, making sure that we are correctly measuring what we want to measure.  We will need to adjust our burn rates windows to make sure to make sure we have enough datapoints to feed the expressions (see https://issues.redhat.com/browse/APPSRE-2800).
