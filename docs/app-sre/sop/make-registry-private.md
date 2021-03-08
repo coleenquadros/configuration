@@ -8,7 +8,16 @@ As of 2021-02-02 we have a spreadsheet with the list of pods that are using imag
 
 ## Ensure the namespace has the quay.io pull secret
 
-Ensure that the quay.io pull secret exists in the namespace where your pods are running as follows:
+Ensure that the quay.io pull secret exists in the namespace where your pods are running as follows.
+
+The preferred approach is to use a shared resource:
+
+```yaml
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+```
+
+but it may already exist directly as an openshift resource:
 
 ```yaml
 ---
@@ -86,5 +95,7 @@ spec:
       serviceAccountName: <name>
 ...
 ```
+
+If the pods need to read config from a Secret or a ConfigMap or any other special action, you may need to add capabilities via a Role, e.g. https://gitlab.cee.redhat.com/service/app-sre-observability/-/blob/master/openshift/cloudwatch-exporter.template.yaml#L12-35
 
 After you commit this, it will trigger a deployment to staging. If it works successfully, you can promote to prod.
