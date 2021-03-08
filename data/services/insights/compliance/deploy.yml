@@ -72,10 +72,11 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
-    ref: 807f36f1d22931f299ef603ca2dcb9e0c31660a8
+    ref: 8c9fdc7034ceb36206e3ad711a8ee0db9e06e615
     parameters:
       IMAGE_TAG: latest
       IMAGE: quay.io/cloudservices/redis
+      REPLICAS: '0'
   - namespace:
       $ref: /services/insights/compliance/namespaces/compliance-prod.yml
     ref: 807f36f1d22931f299ef603ca2dcb9e0c31660a8
@@ -93,7 +94,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
-    ref: 807f36f1d22931f299ef603ca2dcb9e0c31660a8
+    ref: 8c9fdc7034ceb36206e3ad711a8ee0db9e06e615
     parameters:
       IMAGE_TAG: 25c9ed7
       PGSSLMODE: verify-full
@@ -109,10 +110,11 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
-    ref: 807f36f1d22931f299ef603ca2dcb9e0c31660a8
+    ref: 8c9fdc7034ceb36206e3ad711a8ee0db9e06e615
     parameters:
       IMAGE_TAG: 25c9ed7
       PGSSLMODE: verify-full
+      REDIS_SSL: 'true'
   - namespace:
       $ref: /services/insights/compliance/namespaces/compliance-prod.yml
     ref: 807f36f1d22931f299ef603ca2dcb9e0c31660a8
@@ -127,7 +129,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
-    ref: 807f36f1d22931f299ef603ca2dcb9e0c31660a8
+    ref: 8c9fdc7034ceb36206e3ad711a8ee0db9e06e615
     parameters:
       IMAGE_TAG: 25c9ed7
       PGSSLMODE: verify-full
@@ -145,7 +147,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
-    ref: 807f36f1d22931f299ef603ca2dcb9e0c31660a8
+    ref: 8c9fdc7034ceb36206e3ad711a8ee0db9e06e615
     parameters:
       IMAGE_TAG: 25c9ed7
       PGSSLMODE: verify-full
@@ -163,10 +165,11 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
-    ref: 807f36f1d22931f299ef603ca2dcb9e0c31660a8
+    ref: 8c9fdc7034ceb36206e3ad711a8ee0db9e06e615
     parameters:
       IMAGE_TAG: 25c9ed7
       PGSSLMODE: verify-full
+      REDIS_SSL: 'true'
   - namespace:
       $ref: /services/insights/compliance/namespaces/compliance-prod.yml
     ref: 807f36f1d22931f299ef603ca2dcb9e0c31660a8
@@ -179,10 +182,11 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
-    ref: 807f36f1d22931f299ef603ca2dcb9e0c31660a8
+    ref: 8c9fdc7034ceb36206e3ad711a8ee0db9e06e615
     parameters:
       IMAGE_TAG: 25c9ed7
       PGSSLMODE: verify-full
+      REDIS_SSL: 'true'
   - namespace:
       $ref: /services/insights/compliance/namespaces/compliance-prod.yml
     ref: 807f36f1d22931f299ef603ca2dcb9e0c31660a8
@@ -191,3 +195,18 @@ resourceTemplates:
       MAX_REPLICAS: 6
       MIN_REPLICAS: 2
       PGSSLMODE: verify-full
+- name: compliance-sidekiq-new
+  # Side pod for draining old jobs using the original Redis pod
+  path: /templates/compliance/compliance-sidekiq-new.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
+    ref: 8c9fdc7034ceb36206e3ad711a8ee0db9e06e615
+    parameters:
+      IMAGE_TAG: 25c9ed7
+      PGSSLMODE: verify-full
+      COMPLIANCE_REDIS: compliance-redis
+      COMPLIANCE_REDIS_CACHE: compliance-redis
+      MAX_REPLICAS: 0
+      MIN_REPLICAS: 0
