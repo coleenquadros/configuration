@@ -212,6 +212,7 @@ data:
                       prefix: /api/clusters_mgmt/v1/register_cluster
                     route:
                       cluster: backend
+                      timeout: 300s
                       rate_limits:
                       - actions:
                         - generic_key:
@@ -225,6 +226,7 @@ data:
                       prefix: /
                     route:
                       cluster: backend
+                      timeout: 300s
 
               http_filters:
 
@@ -264,6 +266,20 @@ data:
                       href: "/api/clusters_mgmt/v1/errors/429"
                       code: "CLUSTERS-MGMT-429"
                       reason: "Too Many Requests"
+                - filter:
+                    status_code_filter:
+                      comparison:
+                        op: EQ
+                        value:
+                          default_value: 504
+                          runtime_key: none
+                  body_format_override:
+                    json_format:
+                      kind: "Error"
+                      id: "504"
+                      href: "/api/clusters_mgmt/v1/errors/504"
+                      code: "CLUSTERS-MGMT-504"
+                      reason: "Gateway Timeout"
 
       # This listener is used to process outbound API requests.
       - name: egress
@@ -296,16 +312,19 @@ data:
                       prefix: /api/accounts_mgmt
                     route:
                       cluster: accounts_mgmt
+                      timeout: 300s
                   - name: authorizations
                     match:
                       prefix: /api/authorizations
                     route:
                       cluster: authorizations
+                      timeout: 300s
                   - name: service_logs
                     match:
                       prefix: /api/service_logs
                     route:
                       cluster: service_logs
+                      timeout: 300s
 
               http_filters:
               - name: envoy.filters.http.router

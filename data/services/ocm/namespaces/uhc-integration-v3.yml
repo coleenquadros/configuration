@@ -37,11 +37,7 @@ openshiftResources:
     vault_secret_version: 19
     shards:
     - id: 53e10583-5fb1-46d4-a752-e4bc28a53008
-      cloud_providers:
-      - id: aws
-        region_id: us-east-1
-      - id: gcp
-        region_id: us-east1
+      status: active
       hive_cluster_name: hive-integration
       hive_cluster_api_url: https://api.hive-integration.openshift.com:443
       hive_cluster_api_url_slug: api-hive-integration-openshift-com:443
@@ -60,13 +56,15 @@ openshiftResources:
   version: 9
 - provider: vault-secret
   path: app-interface/hive-integration/uhc-integration/clusters-cleaner
-  version: 6
+  version: 10
 - provider: route
   path: /services/ocm/integration-v3/clusters-mgmt.route.yaml
 - provider: route
   path: /services/ocm/integration-v3/accounts-mgmt.route.yaml
 - provider: route
   path: /services/ocm/integration-v3/accounts-mgmt-envoy.route.yaml
+- provider: route
+  path: /services/ocm/integration-v3/service-logs-envoy.route.yaml
 - provider: route
   path: /services/ocm/integration-v3/authorizations.route.yaml
 - provider: route
@@ -87,6 +85,8 @@ openshiftResources:
   version: 1
 - provider: resource
   path: /services/ocm/integration-v3/uhc-acct-mngr-envoy.configmap.yaml
+- provider: resource
+  path: /services/ocm/integration-v3/ocm-service-log-envoy.configmap.yaml
 
 managedTerraformResources: true
 
@@ -96,17 +96,23 @@ terraformResources:
   identifier: clusters-service-integration
   defaults: /terraform/resources/app-sre/integration/rds-v3-1.yml
   output_resource_name: clusters-service-rds
+  overrides:
+    engine_version: "12.5"
 - provider: rds
   account: app-sre
   identifier: uhc-acct-mngr-integration
   defaults: /terraform/resources/app-sre/integration/rds-v3-1.yml
   output_resource_name: uhc-acct-mngr-rds
+  overrides:
+    engine_version: "12.5"
 - provider: rds
   account: app-sre
   identifier: ocm-service-log-integration
   defaults: /terraform/resources/app-sre/integration/rds-v3-1.yml
-  parameter_group: /terraform/resources/rds-parameter-group-ssl-1.yml
+  parameter_group: /terraform/resources/rds-parameter-group-ssl-2-pg12.yml
   output_resource_name: ocm-service-log-rds
+  overrides:
+    engine_version: "12.5"
 
 openshiftServiceAccountTokens:
 # telemeter
