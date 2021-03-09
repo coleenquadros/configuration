@@ -429,3 +429,19 @@
     <<: *gl_checkout
     builders: 
     - shell: ./script/promote-ui.sh
+
+- job-template:
+    id: managed-services-rhoas-access
+    name: 'managed-services-rhoas-access'
+    description: " rhoas quay robot account credentials"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *rhoas-quay-access
+    publishers:
+      - <<: *slack_notify
+    <<: *gl_timed
