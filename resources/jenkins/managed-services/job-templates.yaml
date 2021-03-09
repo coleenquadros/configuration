@@ -429,3 +429,19 @@
     <<: *gl_checkout
     builders: 
     - shell: ./script/promote-ui.sh
+
+- job-template:
+    id: mas-sso-build-template
+    name: 'mas-sso-build-template'
+    description: "mass-sso build template"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *rhoas-quay-access
+    publishers:
+      - <<: *slack_notify
+    <<: *gl_timed
