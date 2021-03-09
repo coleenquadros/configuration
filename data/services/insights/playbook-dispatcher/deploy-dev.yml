@@ -55,3 +55,21 @@ resourceTemplates:
     parameters:
       CLOUD_CONNECTOR_HOST: "http://cloud-connector.connector-qa.svc.cluster.local:8080"
       RETURN_URL: "https://qa.cloud.redhat.com/api/v1/ingres/upload"
+
+- name: playbook-dispatcher-connect-dev
+  path: /deploy/connect-dev.yaml
+  url: https://github.com/RedHatInsights/playbook-dispatcher
+  parameters:
+    MEMORY_REQUESTS: 1Gi
+    MEMORY_LIMITS: 2Gi
+    XMX: 1G
+    XMS: 1G
+  targets:
+  - namespace:
+      $ref: /services/insights/playbook-dispatcher/namespaces/ci.yml
+    ref: master
+    upstream: RedHatInsights-playbook-dispatcher-gh-build-master
+  - namespace:
+      $ref: /services/insights/playbook-dispatcher/namespaces/qa.yml
+    ref: master
+    upstream: RedHatInsights-playbook-dispatcher-gh-build-master
