@@ -23,6 +23,8 @@ timeout: 5
 
 managedResourceTypes:
 - ClowdApp
+- KafkaConnect
+- KafkaConnector
 
 imagePatterns:
 - quay.io/cloudservices
@@ -54,3 +56,25 @@ resourceTemplates:
       RBAC_IMPL: mock
       RBAC_HOST: foobar
       PSK_AUTH_TEST: xwKhCUzgJ8
+
+- name: playbook-dispatcher-connect
+  path: /deploy/connect.yaml
+  url: https://github.com/RedHatInsights/playbook-dispatcher
+  targets:
+  - namespace:
+      $ref: /services/insights/playbook-dispatcher/namespaces/stage.yml
+    ref: master
+    upstream: RedHatInsights-playbook-dispatcher-gh-build-master
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+
+- name: test-secret-psk
+  path: /deploy/secrets.yaml
+  url: https://github.com/RedHatInsights/playbook-dispatcher
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire

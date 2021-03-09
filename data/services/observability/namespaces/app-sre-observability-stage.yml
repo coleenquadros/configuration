@@ -18,6 +18,9 @@ environment:
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
 
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+
 managedRoles: true
 
 managedTerraformResources: true
@@ -118,6 +121,10 @@ openshiftResources:
   path: /services/observability/jiralert/jiralert.route.yaml
   variables:
     host: jiralert.app-sre-stage.devshift.net
+## OSD Observatorium Credentials
+- provider: vault-secret
+  path: osd-sre/hive-stage/observatorium-tenant/observatorium-credentials
+  version: 3
 
 # ConfigMaps
 ## Grafana Dashboards
@@ -313,11 +320,6 @@ openshiftResources:
   path: /observability/grafana/grafana-dashboard-kas-fleet-manager-slos.configmap.yaml
 
 # Secrets
-## Quay.io pull secret
-- provider: vault-secret
-  path: app-interface/global/quay/app-sre/quay.io
-  version: 2
-  type: kubernetes.io/dockercfg
 ## Blackbox Exporter
 - provider: resource-template
   type: extracurlyjinja2
