@@ -98,4 +98,16 @@ spec:
 
 If the pods need to read config from a Secret or a ConfigMap or any other special action, you may need to add capabilities via a Role, e.g. https://gitlab.cee.redhat.com/service/app-sre-observability/-/blob/5a9eda36cb0846c697d8afa7d4b75d7f534cce2b/openshift/cloudwatch-exporter.template.yaml#L12-35
 
+
+## Add authentication in saas file
+
+Find saas file for your application, add the authentication for get private images:
+
+```yaml
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+```
+
 After you commit this, it will trigger a deployment to staging. If it works successfully, you can promote to prod.

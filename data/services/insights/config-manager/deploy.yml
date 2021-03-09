@@ -1,0 +1,52 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: config-manager
+  platform: insights
+
+name: config-manager
+description: The Config Manager service allows users to set a service configuration for all hosts connected through Red Hat Connector
+
+app:
+  $ref: /services/insights/config-manager/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+timeout: 5
+
+managedResourceTypes:
+- ClowdApp
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: config-manager
+  path: /deploy/clowdapp.yml
+  url: https://github.com/RedHatInsights/config-manager
+  targets:
+  - namespace:
+      $ref: /services/insights/config-manager/namespaces/config-manager-stage.yml
+    ref: master
+    upstream: RedHatInsights-config-manager-gh-build-master
+    parameters:
+      ENV_NAME: stage
+      LOG_LEVEL: debug
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+    parameters:
+      MIN_REPLICAS: 1
