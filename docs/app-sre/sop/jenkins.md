@@ -37,13 +37,14 @@ Admin access to jenkins is required to troubleshoot this alert
 ### Steps:
 
 Things to check:
+- https://ci.int.devshift.net/metrics/currentUser/healthcheck?pretty=true or https://ci.ext.devshift.net/metrics/currentUser/healthcheck?pretty=true
 - Nodes status:
   - Manage Jenkins -> Manage Nodes
 
 - Nodes available disk space
   - Verify /tmp (/) 
   - Verify /var/lib/jenkins
-  - Verify /var/lib/docker
+  - Verify /var/lib/docker. Clean with `docker system prune -a`.
   - Duplicity backups cache can fill up in /root/.cache/duplicity
     - Clear old backups with: /backup/backup.sh remove-older-than 3M
 
