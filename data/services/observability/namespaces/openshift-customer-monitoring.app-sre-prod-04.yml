@@ -94,11 +94,23 @@ openshiftResources:
 ### OLM alerts
 - provider: resource
   path: /observability/olm/olm.prometheusrules.yaml
+### App SRE prometheus PVC metrics
+- provider: resource
+  path: /observability/prometheusrules/kube-metrics-pvc-observability.prometheusrules.yaml
 
 
 ### UHC Account Manager
-- provider: resource
-  path: /observability/prometheusrules/uhc-acct-mngr-production.prometheusrules.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/prometheusrules/uhc-acct-mngr.prometheusrules.yaml
+  variables:
+    environment: production
+    severity_ams_down: critical
+    severity_500_errors: high
+    severity_rhit_errors: high
+    severity_terms_errors: high
+    severity_pod_restart: medium
+    severity_pod_restart_many_times: high
 ### UHC Clusters Service
 - provider: resource
   path: /observability/prometheusrules/uhc-clusters-service-production.prometheusrules.yaml
@@ -118,6 +130,28 @@ openshiftResources:
 ### Assisted-Installer Service
 - provider: resource
   path: /observability/prometheusrules/assisted-installer-production.prometheusrules.yaml
+
+### OCM Clusters service SLO rules
+- provider: resource-template
+  path: /observability/prometheusrules/uhc-clusters-service-slo.prometheusrules.yaml
+  type: extracurlyjinja2
+  variables:
+    namespace: uhc-production
+
+### OCM Accounts mgmt SLO rules
+- provider: resource-template
+  path: /observability/prometheusrules/uhc-accounts-mgmt-slo.prometheusrules.yaml
+  type: extracurlyjinja2
+  variables:
+    namespace: uhc-production
+ 
+### Cincinnati SLO rules
+- provider: resource-template
+  path: /observability/prometheusrules/cincinnati-slo.prometheusrules.yaml
+  type: extracurlyjinja2
+  variables:
+    namespace: cincinnati-stage
+    route: cincinnati-route-prod
 
 ## ServiceMonitors
 ### UHC
@@ -144,6 +178,19 @@ openshiftResources:
 - provider: resource-template
   type: jinja2
   path: /observability/servicemonitors/uhc-account-manager-envoy.servicemonitor.yaml
+  variables:
+    environment: production
+    namespace: uhc-production
+#### OCM Service Log
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/ocm-service-log.servicemonitor.yaml
+  variables:
+    environment: production
+    namespace: uhc-production
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/ocm-service-log-envoy.servicemonitor.yaml
   variables:
     environment: production
     namespace: uhc-production

@@ -48,6 +48,18 @@ resourceTemplates:
     parameters:
       MIN_REPLICAS: 4
       ENV_NAME: stage
+      HABERDASHER_EMITTER: kafka
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+      HABERDASHER_KAFKA_TOPIC: platform.logging.logs
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/ingress-fedramp-stage.yml
+    ref: master
+    upstream: RedHatInsights-insights-puptoo-gh-build-master
+    parameters:
+      MIN_REPLICAS: 4
+      HABERDASHER_EMITTER: kafka
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+      HABERDASHER_KAFKA_TOPIC: platform.logging.logs
   - namespace:
       $ref: /services/insights/ingress/namespaces/fedramp-ingress-stage.yml
     ref: master
@@ -55,12 +67,18 @@ resourceTemplates:
     parameters:
       MIN_REPLICAS: 4
       ENV_NAME: stage
+      HABERDASHER_EMITTER: kafka
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+      HABERDASHER_KAFKA_TOPIC: platform.logging.logs
   - namespace:
       $ref: /services/insights/ingress/namespaces/ingress-prod.yml
-    ref: 9432ecdc6d0c7c809be6f493ba19c6150b66528e
+    ref: edac2b51ad8b094a54a1ac145d5bacf0c06317a7
     parameters:
       MIN_REPLICAS: 64
       ENV_NAME: prod
+      HABERDASHER_EMITTER: kafka
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+      HABERDASHER_KAFKA_TOPIC: platform.logging.logs
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
@@ -79,8 +97,14 @@ resourceTemplates:
       ENV_NAME: stage
       INGRESS_STAGEBUCKET: upload-stage
   - namespace:
+      $ref: /services/insights/ingress/namespaces/ingress-fedramp-stage.yml
+    ref: master
+    upstream: RedHatInsights-insights-ingress-go-gh-build-master
+    parameters:
+      INGRESS_STAGEBUCKET: upload-stage
+  - namespace:
       $ref: /services/insights/ingress/namespaces/ingress-prod.yml
-    ref: 730cdcc83283e74a4b117144dc8288584aa983f0
+    ref: 8ec88ab66f0d8edf370329525a82989907dc6833
     parameters:
       ENV_NAME: prod
       INGRESS_STAGEBUCKET: insights-ingress-prod
@@ -107,6 +131,23 @@ resourceTemplates:
       PERM_BUCKET: upload-stage
       REJECT_BUCKET: insights-ingress-rejected-stage
       BUCKET_MAP_FILE: /var/config.yaml
+      HABERDASHER_EMITTER: kafka
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+      HABERDASHER_KAFKA_TOPIC: platform.logging.logs
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/ingress-fedramp-stage.yml
+    ref: master
+    upstream: RedHatInsights-insights-storage-broker-gh-build-master
+    parameters:
+      MIN_REPLICAS: 4
+      OPENSHIFT_BUCKET: insights-buck-it-openshift-stage
+      ANSIBLE_BUCKET: insights-buck-it-ansible-stage
+      PERM_BUCKET: upload-stage
+      REJECT_BUCKET: insights-ingress-rejected-stage
+      BUCKET_MAP_FILE: /var/config.yaml
+      HABERDASHER_EMITTER: kafka
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+      HABERDASHER_KAFKA_TOPIC: platform.logging.logs
   - namespace:
       $ref: /services/insights/ingress/namespaces/fedramp-ingress-stage.yml
     ref: master
@@ -119,9 +160,12 @@ resourceTemplates:
       PERM_BUCKET: upload-stage-fedramp
       REJECT_BUCKET: insights-ingress-rejected-stage-fedramp
       BUCKET_MAP_FILE: /var/config.yaml
+      HABERDASHER_EMITTER: kafka
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+      HABERDASHER_KAFKA_TOPIC: platform.logging.logs
   - namespace:
       $ref: /services/insights/ingress/namespaces/ingress-prod.yml
-    ref: a1f26aacce8a2cd46e08af50ff27577bfc604edb
+    ref: fa2402079a9cc5ce46724087b4b66a22616aa23a
     parameters:
       MIN_REPLICAS: 3
       ENV_NAME: prod
@@ -130,6 +174,9 @@ resourceTemplates:
       ANSIBLE_BUCKET: insights-buck-it-ansible-prod
       PERM_BUCKET: insights-ingress-prod
       BUCKET_MAP_FILE: /var/config.yaml
+      HABERDASHER_EMITTER: kafka
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+      HABERDASHER_KAFKA_TOPIC: platform.logging.logs
   # - namespace:
   #     $ref: /services/insights/ingress/namespaces/ingress-prod.yml
   #   ref: 40409bc602ed1908d838e32ccf59b689141c799f
@@ -144,3 +191,17 @@ resourceTemplates:
     ref: internal  # populated by bonfire
     parameters:
       MIN_REPLICAS: 1
+- name: ingress-sideloader
+  path: /deploy/clowdapp.yml
+  url: https://gitlab.cee.redhat.com/insights-platform/ingress-sideloader
+  targets:
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/stage-ingress-stage.yml
+    ref: master
+    upstream: insights-gl-build-master
+    parameters:
+      MIN_REPLICAS: 1
+      ENV_NAME: stage
+      HABERDASHER_EMITTER: kafka
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+      HABERDASHER_KAFKA_TOPIC: platform.logging.logs

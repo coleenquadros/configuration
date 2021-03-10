@@ -98,7 +98,6 @@
         - jfchevrette
         - jmelis
         - maorfr
-        - mmclane
         - pbergene
         - skryzhnii
     - bool:
@@ -140,7 +139,6 @@
             jfchevrette) PD_ID=PW01TAV ;;
             jmelis) PD_ID=PD8AV28 ;;
             maorfr) PD_ID=PYPZ9FP ;;
-            mmclane) PD_ID=P0JVQ4C ;;
             pbergene) PD_ID=PG6TPCW ;;
             skryzhnii) PD_ID=PYKHONG ;;
             *) echo "Invalid username" >&2 ; exit 1;;
@@ -196,6 +194,7 @@
         <<: *vault_defaults
         secrets:
         - *app_sre_bot_key
+        - *ansible-reader-role-creds
     builders:
     - shell: |
         trap "rm -f ${{WORKSPACE}}/ansible/app-sre-bot.key" EXIT SIGINT
@@ -204,6 +203,7 @@
         chmod 0600 app-sre-bot.key
         eval `ssh-agent -s`
         ssh-add app-sre-bot.key
+        export VAULT_ADDR="https://vault.devshift.net/"
         ansible-playbook -u ${{APP_SRE_BOT_USERNAME}} --key-file app-sre-bot.key '{playbook}' -D
     <<: *gl_build_master
 
@@ -286,6 +286,7 @@
         - *kube_config_hive_prod
         - *quay_secret_push
         - *addons_flow_ocm_token
+        - *gitlab_token
     builders:
     - shell: |
         export JUMPHOST="ci.ext.devshift.net"
@@ -326,4 +327,5 @@
         - *kube_config_hive_stage
         - *kube_config_hive_stage_01
         - *kube_config_hive_prod
+        - *gitlab_token
     <<: *gl_pr_check

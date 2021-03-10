@@ -239,16 +239,38 @@ properties:
       properties:
         id:
           type: string
-          maxLength: 30
+          maxLength: 15
         instance_type:
           type: string
           enum:
           - c5.4xlarge
           - m5.xlarge
+          - m5.2xlarge
+          - m5.4xlarge
         replicas:
           type: integer
         labels:
           "$ref": "/common-1.json#/definitions/labels"
+        taints:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              key:
+                type: string
+              value:
+                type: string
+              effect:
+                type: string
+                enum:
+                - NoSchedule
+                - NoExecute
+                - PreferNoSchedule
+            required:
+            - key
+            - value
+            - effect
       required:
       - id
       - instance_type
@@ -266,6 +288,7 @@ properties:
               type: string
               enum:
               - account-vpc
+              - account-vpc-mesh
               - cluster-vpc-requester
               - cluster-vpc-accepter
             name:
@@ -276,6 +299,11 @@ properties:
             cluster:
               "$ref": "/common-1.json#/definitions/crossref"
               "$schemaRef": "/openshift/cluster-1.yml"
+            account:
+              "$ref": "/common-1.json#/definitions/crossref"
+              "$schemaRef": "/aws/account-1.yml"
+            tags:
+              type: object
             manageRoutes:
               type: boolean
             delete:
@@ -299,6 +327,26 @@ properties:
             - provider
             - name
             - vpc
+          - properties:
+              provider:
+                type: string
+                enum:
+                - account-vpc-mesh
+              name:
+                type: string
+              account:
+                "$ref": "/common-1.json#/definitions/crossref"
+                "$schemaRef": "/aws/account-1.yml"
+              tags:
+                type: object
+              manageRoutes:
+                type: boolean
+              delete:
+                type: boolean
+            required:
+            - provider
+            - name
+            - account
           - properties:
               provider:
                 type: string

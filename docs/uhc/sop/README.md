@@ -204,6 +204,11 @@ One or more dependency services is experiencing issues or has been downgraded.
 - Retrieving User's Information
 - Retrieving User's Status of Acknowledgement of Terms and Conditions
 
+### Hydra
+- Creating support cases
+- Getting support cases
+- Closing a support case
+
 ### Access required:
 - Console access to the cluster that runs account-manager (app-sre)
 - Edit access to the uhc namespaces:

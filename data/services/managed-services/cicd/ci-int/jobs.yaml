@@ -25,7 +25,7 @@ config:
       gl_project: strimzi-operator
       quay_org: app-sre
       jobs:
-        - 'gl-pr-check':
+        - 'gl-pr-check-managed-services':
             display_name: mk-strimzi-operator pr-check
         - 'gl-build-master-managed-services':
             branch: mk-release
@@ -58,18 +58,18 @@ config:
             cron_expression: 'H 6 * * *'
 
   - project:
-      name: mk-strimzi-ui-midstream
+      name: mk-kafka-ui-midstream
       label: managed-services
       node: managed-services
       gl_group: mk-ci-cd
-      gl_project: strimzi-ui
+      gl_project: kafka-ui
       jobs:
         - 'gl-pr-check':
-            display_name: mk-strimzi-ui pr-check
+            display_name: mk-kafka-ui pr-check
             concurrent_build: true
         - 'gl-build-master-managed-services':
             branch: mk-release
-            display_name: mk-strimzi-ui build-mk-release
+            display_name: mk-kafka-ui build-mk-release
 
   - project:
       name: guides-midstream
@@ -86,33 +86,32 @@ config:
             display_name: guides build-mk-release
 
   - project:
-      name: mk-ui-frontend-midstream
+      name: kas-ui-midstream
       label: managed-services
       node: managed-services
       gl_group: mk-ci-cd
-      gl_project: mk-ui-frontend
+      gl_project: kas-ui
       jobs:
         - 'gl-pr-check':
-            display_name: mk-ui-frontend pr-check
+            display_name: kas-ui pr-check
             concurrent_build: true
         - 'gl-build-master-managed-services':
             branch: mk-release
-            display_name: mk-ui-frontend build-mk-release
-
+            display_name: kas-ui build-mk-release
 
   - project:
-      name: mk-ui-host-midstream
+      name: application-services-ui-midstream
       label: managed-services
       node: managed-services
       gl_group: mk-ci-cd
-      gl_project: mk-ui-host
+      gl_project: application-services-ui
       jobs:
         - 'gl-pr-check':
-            display_name: mk-ui-host pr-check
+            display_name: application-services-ui pr-check
             concurrent_build: true
         - 'gl-build-master-managed-services':
             branch: mk-release
-            display_name: mk-ui-host build-mk-release
+            display_name: application-services-ui build-mk-release
 
   - project:
       name: strimzi-operator-bundle
@@ -131,19 +130,37 @@ config:
             branch: staging
 
   - project:
-      name: managed-services-api
-      label: managed-services-api
+      name: mk-kas-fleetshard-midstream
+      label: managed-services
+      node: managed-services
+      gl_group: mk-ci-cd
+      gl_project: kas-fleetshard
+      quay_org: app-sre
+      jobs:
+        - 'gl-pr-check':
+            display_name: kas-fleetshard pr-check
+        - 'managed-services-gl-build-test-branch':
+            branch: mk-main
+            display_name: kas-fleetshard build and test mk-main
+            archive_artifacts: 'systemtest/target/logs/**,systemtest/target/failsafe-reports/**'
+            junit_results: 'systemtest/target/failsafe-reports/*.xml'
+            cleanup_script: 'make ci/pipeline/cleanup'
+
+  - project:
+      name: kas-fleet-manager
+      label: kas-fleet-manager
       node: managed-services
       gl_group: service
       gl_project: managed-services-api
       jobs:
         - 'gl-pr-check':
-            display_name: managed-services-api pr-check
+            display_name: kas-fleet-manager pr-check
             concurrent_build: true
-        - 'gl-build-master':
-            display_name: managed-services-api build master
-        - 'managed-services-api-tests':
-            display_name: Managed Services API Tests periodic stage
+        - 'gl-build-master-kas-fleet-manager':
+            display_name: kas-fleet-manager build master
+            branch: master
+        - 'kas-fleet-manager-tests':
+            display_name: KasFleetManager Tests periodic stage
             timeout: 7200
             disable: false
             cron_expression: 'H 6 * * 1-5'
@@ -152,8 +169,8 @@ config:
         # At the moment, there is no other way to have an OSD cluster running longer than 7 days, hence the automation here.
         # This will be removed once we have a production cluster, or have a better way to have OSD clusters that can last longer.
         # See https://issues.redhat.com/browse/MGDSTRM-878
-        - 'managed-services-api-cluster-extension':
-            display_name: Managed Services API Extend Staging Cluster Lifetime
+        - 'kas-fleet-manager-cluster-extension':
+            display_name: KasFleetManager Extend Staging Cluster Lifetime
             timeout: 7200
             disable: false
             cron_expression: '0 10 * * *' # Every morning at 10am. This will ensure there is always 7 days until the cluster is expired.
@@ -191,7 +208,7 @@ config:
             display_name: managed services pull upstream
             ci_cmd: 'make pull/upstream/all'
             slack_channel_notification: mk-ci-cd
-            cron_expression: 'H 1 * * *'
+            cron_expression: '0 */1 * * *' # Every 1h
         - 'managed-kafka-promote-ui':
             display_name: managed-kafka promote ui components
             timeout: 120
@@ -235,7 +252,6 @@ config:
         - 'managed-kafka-e2e-test-suite':
             display_name: periodic mk-e2e tests
             timeout: 120
-            ci_cmd: 'make ci/pipeline'
             cron_expression: '0 */1 * * *' # Every 1h
 
   - project:

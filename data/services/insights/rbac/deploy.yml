@@ -26,6 +26,7 @@ managedResourceTypes:
 - DeploymentConfig
 - PersistentVolumeClaim
 - Service
+- ConfigMap
 
 imagePatterns:
 - quay.io/cloudservices
@@ -36,6 +37,22 @@ authentication:
     field: all
 
 resourceTemplates:
+- name: model-access-permissions-yml
+  path: /_private/configmaps/model-access-permissions.configmap.yml
+  url: https://github.com/RedHatInsights/rbac-config
+  targets:
+  - namespace:
+      $ref: /services/insights/rbac/namespaces/dev-rbac-sre-ci.yml
+    ref: internal
+
+- name: rbac-config-yml
+  path: /_private/configmaps/rbac-config.yml
+  url: https://github.com/RedHatInsights/rbac-config
+  targets:
+  - namespace:
+      $ref: /services/insights/rbac/namespaces/dev-rbac-sre-ci.yml
+    ref: internal
+
 - name: rbac
   path: /templates/rbac/rbac.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
@@ -80,11 +97,21 @@ resourceTemplates:
       IMAGE_TAG: 1ebf91a
   - namespace:
       $ref: /services/insights/rbac/namespaces/rbac-prod.yml
-    ref: 69807dbc67b7e82348070f4f20cf56890da65f5c
+    ref: 229b7f4e2ae61907612ad5b8261a7fbf9160c0ed
     parameters:
       IMAGE_TAG: ebd29a5
       DB_SECRET_NAME: rbac-db
       RBAC_DESTRUCTIVE_ENABLED_UNTIL: 01-08-2021
+      HABERDASHER_EMITTER: kafka
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+      HABERDASHER_KAFKA_TOPIC: platform.logging.logs
+      HABERDASHER_LABELS: {"app": "rbac"}
+      HABERDASHER_TAGS: ["rbac"]
+  - namespace:
+      $ref: /services/insights/rbac/namespaces/dev-rbac-sre-ci.yml
+    ref: 91011aa706772d4be92f93c7d6e984bc965d329d
+    parameters:
+      IMAGE_TAG: ebd29a5
       HABERDASHER_EMITTER: kafka
       HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
       HABERDASHER_KAFKA_TOPIC: platform.logging.logs
@@ -112,7 +139,7 @@ resourceTemplates:
       IMAGE_TAG: ddae941
   - namespace:
       $ref: /services/insights/rbac/namespaces/rbac-prod.yml
-    ref: 69807dbc67b7e82348070f4f20cf56890da65f5c
+    ref: 229b7f4e2ae61907612ad5b8261a7fbf9160c0ed
     parameters:
       IMAGE_TAG: ebd29a5
 
@@ -142,7 +169,7 @@ resourceTemplates:
       IMAGE_TAG: 1ebf91a
   - namespace:
       $ref: /services/insights/rbac/namespaces/rbac-prod.yml
-    ref: 69807dbc67b7e82348070f4f20cf56890da65f5c
+    ref: 229b7f4e2ae61907612ad5b8261a7fbf9160c0ed
     parameters:
       IMAGE_TAG: ebd29a5
       DB_SECRET_NAME: rbac-db
@@ -169,4 +196,4 @@ resourceTemplates:
     ref: cea8038009353a1ea076cd2651b6d321fd58e2fc
   - namespace:
       $ref: /services/insights/rbac/namespaces/rbac-prod.yml
-    ref: 8cd383a274464d16635ed6bfda0edfa1e8ae6657
+    ref: 229b7f4e2ae61907612ad5b8261a7fbf9160c0ed

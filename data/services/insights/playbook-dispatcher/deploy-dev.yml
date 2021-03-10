@@ -1,0 +1,75 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: playbook-dispatcher
+  platform: insights
+
+name: playbook-dispatcher-dev
+description: The Playbook Dispatcher service enables other services to run Ansible Playbooks on connected hosts
+
+app:
+  $ref: /services/insights/playbook-dispatcher/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+timeout: 5
+
+managedResourceTypes:
+- Deployment
+- Service
+- PersistentVolumeClaim
+
+imagePatterns:
+- quay.io/cloudservices
+- registry.redhat.io/rhel8/postgresql-12
+
+authentication:
+  image:
+    path: insights/secrets/global/rh-registry-pull
+    field: all
+
+resourceTemplates:
+- name: playbook-dispatcher-dev
+  path: /deploy/template.yaml
+  url: https://github.com/RedHatInsights/playbook-dispatcher
+  targets:
+  - namespace:
+      $ref: /services/insights/playbook-dispatcher/namespaces/ci.yml
+    ref: master
+    upstream: RedHatInsights-playbook-dispatcher-gh-build-master
+    parameters:
+      CLOUD_CONNECTOR_HOST: "http://cloud-connector.connector-ci.svc.cluster.local:8080"
+      RETURN_URL: "https://ci.cloud.redhat.com/api/v1/ingres/upload"
+
+  - namespace:
+      $ref: /services/insights/playbook-dispatcher/namespaces/qa.yml
+    ref: master
+    upstream: RedHatInsights-playbook-dispatcher-gh-build-master
+    parameters:
+      CLOUD_CONNECTOR_HOST: "http://cloud-connector.connector-qa.svc.cluster.local:8080"
+      RETURN_URL: "https://qa.cloud.redhat.com/api/v1/ingres/upload"
+
+- name: playbook-dispatcher-connect-dev
+  path: /deploy/connect-dev.yaml
+  url: https://github.com/RedHatInsights/playbook-dispatcher
+  parameters:
+    MEMORY_REQUESTS: 1Gi
+    MEMORY_LIMITS: 2Gi
+    XMX: 1G
+    XMS: 1G
+  targets:
+  - namespace:
+      $ref: /services/insights/playbook-dispatcher/namespaces/ci.yml
+    ref: master
+    upstream: RedHatInsights-playbook-dispatcher-gh-build-master
+  - namespace:
+      $ref: /services/insights/playbook-dispatcher/namespaces/qa.yml
+    ref: master
+    upstream: RedHatInsights-playbook-dispatcher-gh-build-master

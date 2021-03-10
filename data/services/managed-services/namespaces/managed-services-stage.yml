@@ -31,23 +31,17 @@ openshiftResources:
 - provider: resource-template
   path: /services/common/serviceaccount.yaml
   variables:
-    name: managed-services-api
-- provider: resource-template
-  path: /services/common/serviceaccount.yaml
-  variables:
-    name: strimzi-ui
+    name: kas-fleet-manager
 - provider: route
-  path: /services/managed-services/stage/managed-services-api.route.yaml
-- provider: route
-  path: /services/managed-services/stage/strimzi-ui.route.yaml
+  path: /services/managed-services/stage/kas-fleet-manager.route.yaml
 - provider: vault-secret
-  name: managed-services-api
+  name: kas-fleet-manager
   path:  app-interface/managed-service-api/stage/service/credentials
-  version: 17
+  version: 21
   annotations:
     qontract.recycle: "true"
 - provider: vault-secret
-  name: managed-services-api-dataplane-certificate
+  name: kas-fleet-manager-dataplane-certificate
   path:  app-interface/managed-service-api/stage/service/dataplane-certificate
   version: 1
   annotations:
@@ -58,6 +52,8 @@ managedTerraformResources: true
 terraformResources:
 - provider: rds
   account: app-sre
+  # This should be  prefixed by "kas-fleet-manager" but we held renaming for now to avoid loosing data.
+  # See https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/14437#note_2097734 for more details.
   identifier: managed-services-api-staging
   defaults: /terraform/resources/app-sre/staging/rds-1.yml
-  output_resource_name: managed-services-api-rds
+  output_resource_name: kas-fleet-manager-rds

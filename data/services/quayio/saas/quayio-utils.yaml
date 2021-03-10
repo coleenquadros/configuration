@@ -1,0 +1,54 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: quayio
+
+name: quayio-utils
+description: quayio utilities
+
+app:
+  $ref: /services/quayio/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: oncall-quay
+
+managedResourceTypes:
+- Job
+
+imagePatterns:
+- quay.io/app-sre/quayio-update-banner-job
+
+parameters:
+  IMAGE: "quay.io/app-sre/quayio-update-banner-job"
+
+resourceTemplates:
+- name: quayio-update-banner-job
+  path: /openshift.yml
+  url: https://github.com/quay/update-banner-job
+  targets:
+  - namespace:
+      $ref: /services/quayio/namespaces/quays02ue1.yml
+    ref: 0d05389c42c59b20c77af6904303288acf201318
+    parameters:
+      JOB_NAME: "2021-02-23-update-msg-year" # provide_a_unique_job_name_to_trigger_job
+      ACTIVE_DEADLINE_SECONDS: "600"
+      DB_HOST_SECRET: "quayio-stage-57-rds"
+      DB_CREDS_SECRET: "quayio-stage-57-rds"
+      MESSAGE: "Please be aware that BitTorrent download support is now deprecated and will be removed by March 10 2021."
+      SEVERITY: "info"
+  - namespace:
+      $ref: /services/quayio/namespaces/quayp05ue1.yml
+    ref: 818801f69a9ef5005b1e88013a413bbfdc03c4f5
+    parameters:
+      JOB_NAME: "2021-02-23-update-msg-year" # provide_a_unique_job_name_to_trigger_job
+      ACTIVE_DEADLINE_SECONDS: "600"
+      DB_HOST_SECRET: "quay-db-config-secret"
+      DB_CREDS_SECRET: "quay-db-config-secret"
+      MESSAGE: "Please be aware that BitTorrent download support is now deprecated and will be removed by March 10 2021."
+      SEVERITY: "info"

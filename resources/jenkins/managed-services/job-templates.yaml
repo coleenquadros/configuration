@@ -38,6 +38,44 @@
     <<: *gl_build_master
 
 - job-template:
+    id: managed-services-gl-build-test-branch
+    name: "{gl_group}-{gl_project}-gl-build-test-{branch}"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+          - *ci_jenkins_token
+          - *gitlab_token
+          - *backup_ecr_push_creds
+          - *quay_secret_push
+          - *app_sre_bot_push_token
+          - *app_interface_creds
+          - *managed_services_github_deploy_key
+          - *ci_ocm_token
+          - *ci_aws_keys
+          - *ci_observatorium
+          - *kas_fleetshard
+          - *ci_cd_quay
+    <<: *gl_build_master
+    publishers:
+    - archive:
+        artifacts: "{archive_artifacts}"
+        allow-empty: true
+    - junit:
+        results: "{junit_results}"
+    - postbuildscript:
+        builders:
+            - role: SLAVE
+              build-on:
+                - NOT_BUILT
+                - ABORTED
+                - FAILURE
+              build-steps:
+                - shell: "{cleanup_script}"
+
+- job-template:
     id: managed-services-pull-upstream
     name: 'managed-services-pull-upstream'
     description: "[managed-services] pull changes from all upstreams specified in {gl_group}/{gl_project}/script/repo-config.yaml"
@@ -258,8 +296,19 @@
         allow-empty: true
 
 - job-template:
-    id: 'managed-services-api-tests'
-    name: 'managed-services-api-tests-stage'
+    id: 'gl-build-master-strimzi'
+    name: '{gl_group}-{gl_project}-gl-build-{branch}'
+    wrappers:
+        - vault-secrets:
+            <<: *vault_defaults
+            secrets:
+            - *ci_jenkins_token
+            - *gitlab_token
+    <<: *gl_build_master
+
+- job-template:
+    id: 'kas-fleet-manager-tests'
+    name: 'kas-fleet-manager-tests-stage'
     publishers:
     - <<: *slack_notify
     wrappers:
@@ -269,12 +318,12 @@
       - vault-secrets:
           <<: *vault_defaults
           secrets:
-            - *managed_services_api_int_tests
+            - *kas_fleet_manager_int_tests
     <<: *gl_timed
 
 - job-template:
-    id: 'managed-services-api-cluster-extension'
-    name: 'managed-services-api-cluster-extension'
+    id: 'kas-fleet-manager-cluster-extension'
+    name: 'kas-fleet-manager-cluster-extension'
     publishers:
     - <<: *slack_notify
     wrappers:
@@ -337,10 +386,11 @@
           <<: *vault_defaults
           secrets:
             - *mk_e2e_test_suite_staging
+    ci_cmd: './pipeline.sh'
     <<: *gl_timed
     publishers:
     - archive:
-        artifacts: 'target/logs/**,target/surefire-reports/**'
+        artifacts: 'test-results/**'
         allow-empty: true
 
 - job-template:
@@ -379,3 +429,32 @@
     <<: *gl_checkout
     builders: 
     - shell: ./script/promote-ui.sh
+
+- job-template:
+    id: mas-sso-build-template
+    name: 'mas-sso-build-template'
+    description: "mass-sso build template"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *rhoas-quay-access
+    publishers:
+      - <<: *slack_notify
+    <<: *gl_timed
+
+- job-template:
+    id: gl-build-master-kas-fleet-manager
+    name: "{gl_group}-{gl_project}-gl-build-{branch}"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+          - *quay_secret_push
+          - *rhoas-quay-access
+    <<: *gl_build_master

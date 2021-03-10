@@ -287,8 +287,9 @@ Contact the RHMI team for any Sendgrid Service related alerts
 
 Slack channel: `#rhmi-sendgrid-service`
 
-- Aiden Keating (akeating@redhat.com)
-- Ciaran Roche (croche@redhat.com)
-- Dimitra Zuccarelli (dzuccare@redhat.com)
-- Kevin Fan (chfan@redhat.com)
+Slack user group: `@rhmi-sendgrid-team`
+
+Direct Contacts:
 - Paul McCarthy (pamccart@redhat.com)
+- Kevin Fan (chfan@redhat.com)
+- Ciaran Roche (croche@redhat.com)

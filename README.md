@@ -44,6 +44,8 @@ this repository.
       - [Example: Manage a templated ConfigMap via App-Interface (`/openshift/namespace-1.yml`)](#example-manage-a-templated-configmap-via-app-interface-openshiftnamespace-1yml)
       - [Manage Secrets via App-Interface (`/openshift/namespace-1.yml`) using Vault](#manage-secrets-via-app-interface-openshiftnamespace-1yml-using-vault)
       - [Manage Routes via App-Interface (`/openshift/namespace-1.yml`) using Vault](#manage-routes-via-app-interface-openshiftnamespace-1yml-using-vault)
+      - [Validate JSON in Secrets and ConfigMaps](#validate-json-in-secrets-and-configmaps)
+      - [Validate AlertManager configuration in Secrets and ConfigMaps](#validate-alertmanager-configuration-in-secrets-and-configmaps)
     - [Manage openshift-acme deployments via App-Interface (`/openshift/acme-1.yml`)](#manage-openshift-acme-deployments-via-app-interface-openshiftacme-1yml)
     - [Manage OpenShift Groups association via App-Interface (`/openshift/cluster-1.yml`)](#manage-openshift-groups-association-via-app-interface-openshiftcluster-1yml)
     - [Manage OpenShift LimitRanges via App-Interface (`/openshift/limitrange-1.yml`)](#manage-openshift-limitranges-via-app-interface-openshiftlimitrange-1yml)
@@ -91,8 +93,7 @@ this repository.
     - [Add a Grafana Dashboard](#add-a-grafana-dashboard)
     - [Execute a SQL Query on an App Interface controlled RDS instance](#execute-a-sql-query-on-an-app-interface-controlled-rds-instance)
     - [Enable Gitlab Features on an App Interface Controlled Gitlab Repository](#enable-gitlab-features-on-an-app-interface-controlled-gitlab-repository)
-    - [Add recording rules via openshift-performance-parameters integration](#add-recording-rules-via-openshift-performance-parameters-integration)
-    - [Provision and consume Kafka clusters via Managed Services API](#provision-and-consume-kafka-clusters-via-managed-services-api)
+    - [Provision and consume Kafka clusters via KAS Fleet Manager](#provision-and-consume-kafka-clusters-via-kas-fleet-manager)
     - [Write and run Prometheus rules tests](#write-and-run-prometheus-rules-tests)
   - [Design](#design)
   - [Developer Guide](#developer-guide)
@@ -685,7 +686,7 @@ Instructions:
   * The secret in Vault should be stored in the following path: `app-interface/<cluster>/<namespace>/<secret_name>`
   * The value of each key in the secret in Vault should **NOT** be base64 encoded.
   * If you wish to have the value base64 encoded in Vault, the field key should be of the form `<key_name>_qb64`.
-2. Add a reference to the secret in Vault under the `openshiftResources` field ([example](/data/services/openshift.io/namespaces/bayesian-preview.yml#L43))with the following attributes:
+2. Add a reference to the secret in Vault under the `openshiftResources` field ([example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/cd9c6062819e2da76ed108f1bf4946ca72e593d6/data/services/cincinnati/namespaces/cincinnati-production.yml#L26-29))with the following attributes:
 
 - `provider`: must be `vault-secret`.
 - `path`: absolute path to secret in [Vault](https://vault.devshift.net). Note that it should **NOT** start with `/`.
@@ -2038,13 +2039,9 @@ codeComponents:
 ...
 ```
 
-### Add recording rules via openshift-performance-parameters integration
+### Provision and consume Kafka clusters via KAS Fleet Manager
 
-Please refer to this [document](docs/app-sre/sli-recording-rules-via-performance-parameters.md)
-
-### Provision and consume Kafka clusters via Managed Services API
-
-Provisioning Kafka managed clusters through the Managed Services API can be self-serviced via app-interface.
+Provisioning Kafka managed clusters through the Kafka Service Fleet Manager can be self-serviced via app-interface.
 
 To provision a new cluster, create a Kafka cluster file. Example:
 ```yaml
@@ -2073,7 +2070,7 @@ kafkaCluster:
 This will result in a Secret being created in the consuming namespace. The Secret will be called `kafka` and it will contain the following keys:
 - `bootstrapServerHost` - Bootstrap server hostname
 
-* Note: The Managed Services API is not yet deployed to production, so this feature is not ready for usage yet.
+* Note: The KAS Fleet Manager is not yet deployed to production, so this feature is not ready for usage yet.
 
 ### Write and run Prometheus rules tests
 
@@ -2083,15 +2080,15 @@ In app-interface prometheus rules that have the `/openshift/prometheus-rule-1.ym
 
 A few notes about the integration that run the tests:
 
-- Since prometheus rules can be templates, prometheus tests needs to be templates (extracurlyjinja2).
+- Since prometheus rules can be templates, prometheus tests need to be templates (`extracurlyjinja2` type). The variables the template will expand are the same that the prometheus rule it tests.
 - Tests will be run for every namespace where the rules are defined. This is needed as rules can have a different shape from one namespace to other.
-- The prometheus test schema allows for multiple rule files in a test. This complicated the code to run the testss a lot so we allow for one test rule per test file.
+- The prometheus test schema allows for multiple rule files in a test. This complicated the code to run the tests a lot so we allow for one test rule per test file.
 
 Writing tests can be difficult at the beginning. This [article](https://www.robustperception.io/unit-testing-rules-with-prometheus) is a nicer start than the official documentation.
 
 ## Design
 
-Additional design information: [here](docs/app-interface/design.md).
+Additional design information: [here](docs/app-interface/design.md)
 
 [schemas]: </schemas>
 [userschema]: </schemas/access/user-1.yml>

@@ -6,14 +6,14 @@
   - [Provisioning OSD operators](#provisioning-osd-operators)
     - [Resources](#resources)
     - [Others](#others)
-  - [Provision Backplane](#provisioning-backplane)  
+  - [Provisioning backplane](#provisioning-backplane)
   - [Monitoring](#monitoring)
   - [Adding the shard to OCM](#adding-the-shard-to-ocm)
   - [Validations](#validations)
     - [Test provisioning an AWS cluster](#test-provisioning-an-aws-cluster)
     - [Test provisioning a GCP cluster](#test-provisioning-a-gcp-cluster)
     - [Test that private clusters can be provisioned](#test-that-private-clusters-can-be-provisioned)
-  - [Attach the shard to a region](#attach-the-shard-to-a-region)
+  - [Disabling shards from rotation](#disabling-shards-from-rotation)
     - [Verify that at least one round of osde2e tests ran successfully when using the new shard. Dashboards:](#verify-that-at-least-one-round-of-osde2e-tests-ran-successfully-when-using-the-new-shard-dashboards)
   - [OSD operators notes](#osd-operators-notes)
 
@@ -186,9 +186,30 @@ Backplane should run on all v4 hive, to deploy backplane on a new v4 hive cluste
 
 ## Monitoring
 
-All v4 hive shards (clusters) are monitored with their own workload prometheus, which runs in the `openshift-customer-monitoring` namespace.
+All v4 hive shards (clusters) are monitored with their own workload prometheus, which runs in the `openshift-customer-monitoring` namespace. We deploy the Hive shards Prometheus instances on their own machinepool to ensure Prometheus has ample resources and do not risk impacting other critical components
+
+1. In the `cluster.yml` file, ensure a machine pool is defined for this
+
+    ```yaml
+    machinePools:
+    - id: o-c-monitoring
+      instance_type: m5.4xlarge
+      replicas: 3
+      labels:
+        app-sre/machinepool: 'o-c-monitoring'
+    ```
 
 1. Check that an `openshift-customer-monitoring` namespace file exists for the specific hive cluster. This is usually done as part of [onboarding any new cluster](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/app-interface-onboard-cluster.md#step-4-observability)
+
+1. In `data/services/observability/cicd/saas/saas-observability-per-cluster.yaml` ensure that the entry for the cluster `openshift-customer-monitoring` namespace has the following parameters which ensure the pods are scheduled on the machine pool and the limits high enough so the pods can use the resources
+
+    ```yaml
+    CPU_LIMITS: '16'
+    MEM_LIMITS: '60Gi'
+    PROMETHEUS_NODE_SELECTOR:
+        app-sre/machinepool: o-c-monitoring
+    ```
+
 1. Use the hive monitoring boilerplate to add hive specific monitoring rules and servicemonitors to the `openshift-customer-monitoring` namespace file for the specific hive cluster:
 
 ```
@@ -259,7 +280,7 @@ At this point, the monitoring is all set, and you're ready to move on to the nex
 1. Add `uhc-leadership` namespace. Example: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/6829
 1. Add `view` access to the `uhc-leadership` namespace to the OCM [dev role](/data/teams/ocm/roles/dev.yml).
 1. Add Service Account references to hive, aws-account-opeator and gcp-project-operator namespaces from the uhc namespaces. Example: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/7655
-1. Update `uhc-clusters-service` secret to add new shards. Example: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/8951. We don't assign any region nor cloud provider, we will manually pin clusters to this shard in the validation phase.
+1. Update `clusters-service` secret to add new shards. Example: https://gitlab.cee.redhat.com/service/app-interface/-/blob/55beecac/data/services/ocm/shared-resources/production.yml#L31-35.
 1. The id field is set to a random uuid unique per shard (uuidgen can be used to generate one)
 
 ## Validations
@@ -419,9 +440,9 @@ Once created, there are two further validations
     }
     ```
 
-## Attach the shard to a region
+## Disabling shards from rotation
 
-Once all the validations have been completed the shard is ready to be associated with providers and regions. Take a look into other shards configs to see the syntax of the `cloud_providers` section
+A shard can be taken out of rotation pick for new clusters, by setting its status to "maintenance".
 
 ### Verify that at least one round of osde2e tests ran successfully when using the new shard. Dashboards:
 
