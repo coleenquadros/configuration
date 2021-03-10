@@ -2,7 +2,7 @@
 $schema: /openshift/namespace-1.yml
 
 labels:
-  service: config-manager
+  service: insights
 
 name: config-manager-stage
 description: Namespace where config-manager is deployed
@@ -36,3 +36,30 @@ openshiftResources:
   path: insights/secrets/insights-stage/playbook-dispatcher-stage/auth-psk-config-manager
   name: psk-playbook-dispatcher
   version: 1
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-stage
+  identifier: config-manager-stage
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
+- provider: rds
+  account: insights-stage
+  identifier: config-manager-stage
+  defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
+  overrides:
+    username: insights
+    allocated_storage: 300
+    name: insights
+  parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-config-manager-stage.yml
+  output_resource_name: config-manager-db
+  enhanced_monitoring: true
+
