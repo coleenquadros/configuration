@@ -686,7 +686,7 @@ Instructions:
   * The secret in Vault should be stored in the following path: `app-interface/<cluster>/<namespace>/<secret_name>`
   * The value of each key in the secret in Vault should **NOT** be base64 encoded.
   * If you wish to have the value base64 encoded in Vault, the field key should be of the form `<key_name>_qb64`.
-2. Add a reference to the secret in Vault under the `openshiftResources` field ([example](/data/services/openshift.io/namespaces/bayesian-preview.yml#L43))with the following attributes:
+2. Add a reference to the secret in Vault under the `openshiftResources` field ([example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/cd9c6062819e2da76ed108f1bf4946ca72e593d6/data/services/cincinnati/namespaces/cincinnati-production.yml#L26-29))with the following attributes:
 
 - `provider`: must be `vault-secret`.
 - `path`: absolute path to secret in [Vault](https://vault.devshift.net). Note that it should **NOT** start with `/`.

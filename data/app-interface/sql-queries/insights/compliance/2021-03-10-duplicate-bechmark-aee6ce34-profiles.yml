@@ -1,0 +1,26 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+name: 2021-03-10-duplicate-bechmark-aee6ce34-profiles
+labels: {}
+namespace:
+  $ref: /services/insights/compliance/namespaces/compliance-prod.yml
+identifier: compliance-prod
+output: stdout
+query: >-
+  SELECT b."ref_id", p."ref_id", p."external", p."parent_profile_id",
+         p."created_at", p."updated_at", (
+      SELECT COUNT(id)
+      FROM "profiles" AS c
+      WHERE c.parent_profile_id = p.id AND c.account_id IS NOT NULL
+  ) AS num_children_in_accounts,
+  (
+      SELECT COUNT(id)
+      FROM "profiles" AS c
+      WHERE c.parent_profile_id = p.id
+  ) AS num_all_children
+  FROM "profiles" AS p
+  JOIN "benchmarks" AS b ON p.benchmark_id = b.id
+  WHERE p."account_id" IS NULL AND
+        p."policy_id" IS NULL AND
+        p."benchmark_id" = 'aee6ce34-702a-4685-b2ae-4c0d62cb379c' AND
+        p."ref_id" = 'xccdf_org.ssgproject.content_profile_ospp42';
