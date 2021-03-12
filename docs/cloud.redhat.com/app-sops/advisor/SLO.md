@@ -16,7 +16,7 @@ The following categories will correspond to the SLIs and SLOs below.
 
 1. `> 95%` of HTTP requests are non-5xx
 2. `> 95%` of consumed messages are processed successfully based on SLI success criteria
-3. `> 98%` uptime
+3. `> 95%` uptime
 
 ## Rationale
 The given SLIs were determined based on the necessary components of the Advisor API and Advisor Service. The main function of the API is to serve HTTP requests. Database connection and successful operation, therefore, is paramount to the operability of the API on the whole. The main function of the Service is to process results from the shared engine. Database connection and successful operation, therefore, is paramount to the operability of the service on the whole.
