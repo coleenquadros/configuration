@@ -1,7 +1,7 @@
 App-insights-advisor-api-In-advisor-prod-Downtime-Quota-Reached
 ==================================================================
 
-Severity: Pagerduty
+Severity: High
 -------------------
 
 Incident Response Plan
@@ -17,7 +17,7 @@ Impact
 Summary
 -------
 
-This alert fires when the Insights Advisor API has downtime at or in excess of 2% of the past 24 hours.
+This alert fires when the Insights Advisor API has downtime at or in excess of 5% of the past 24 hours.
 
 Access required
 ---------------

@@ -1,0 +1,41 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: app-sre-observability
+
+name: saas-osd-token-refresher
+description: saas-osd-token-refresher
+
+app:
+  $ref: /services/observability/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/observatorium/
+
+resourceTemplates:
+- name: osd-token-refresher
+  path: /openshift/osd-token-refresher.template.yaml
+  url: https://gitlab.cee.redhat.com/service/app-sre-observability
+  parameters:
+      NAME: "osd-token-refresher"
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: master
+    parameters:
+      TOKEN_REFRESHER_IMAGE: "quay.io/observatorium/token-refresher"
+      TOKEN_REFRESHER_IMAGE_TAG: master-2021-02-24-1e01b9c
+      REPLICAS: 1
