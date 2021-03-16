@@ -1,0 +1,59 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: mas-sso
+
+name: saas-deployment-mas-sso
+description: 'MAS SSO'
+
+app:
+  $ref: /services/mas-sso/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: mas-sso-stage
+
+managedResourceTypes:
+- CatalogSource
+- OperatorGroup
+- Subscription
+- Keycloak
+
+authentication:
+  image:
+    path: managed-services/quay-org-accounts/rhoas/robots/rhoas-pull
+    field: all
+
+imagePatterns:
+- quay.io/rhoas/rhsso-operator-catalog
+
+resourceTemplates:
+- name: mas-sso-operator
+  url: https://gitlab.cee.redhat.com/service/saas-mas-sso
+  path: /deploy/openshift/mas-sso-olm-template.yaml
+  parameters:
+    IMAGE: quay.io/rhoas/rhsso-operator-catalog
+    NAMESPACE: mas-sso-stage
+    OPERATOR_NAME: mas-sso-operator
+    # IMAGE_TAG is SHA Based tag.
+    RHSSO_OPERATOR_IMAGE_TAG: $(IMAGE_TAG)
+    RELATED_IMAGE_RHSSO_TAG: $(IMAGE_TAG)
+    RELATED_IMAGE_RHSSO_INIT_CONTAINER_TAG: $(IMAGE_TAG)
+    CHANNEL: alpha
+    #CR Related
+    CR_REQUESTS_MEMORY: 4Gi 
+    CR_REQUESTS_CPU: 2 
+    CR_LIMITS_MEMORY: 4Gi
+    CR_LIMITS_CPU: 4
+    CR_INSTANCES: 3
+
+  targets:
+  - namespace:
+      $ref: /services/mas-sso/namespaces/mas-sso-stage.yml
+    ref: master
+    upstream: service-saas-mas-sso-gl-build-master
