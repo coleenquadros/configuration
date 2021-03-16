@@ -1,0 +1,35 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels: {}
+
+name: saas-managed-tenants-manifests
+description: SaaS tracking file for managed-tenants
+
+app:
+  $ref: /services/addons/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: dev-null
+
+managedResourceTypes:
+- SelectorSyncSet
+- PagerDutyIntegration
+- DeadmansSnitchIntegration
+
+imagePatterns: []
+
+resourceTemplates:
+- name: managed-tenants-integration
+  url: https://gitlab.cee.redhat.com/service/managed-tenants-manifests
+  path: /integration
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-integration-cluster-scope.yml
+    ref: main
