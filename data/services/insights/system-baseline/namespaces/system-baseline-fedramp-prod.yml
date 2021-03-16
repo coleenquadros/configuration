@@ -1,0 +1,64 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: system-baseline
+
+name: system-baseline-prod
+description: Insights system-baseline for FedRAMP on prod
+
+cluster:
+  $ref: /openshift/insights/crcgovp01ue1/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
+
+quota:
+  $ref: /services/insights/system-baseline/system-baseline-quota.yml
+
+app:
+  $ref: /services/insights/system-baseline/app.yml
+
+environment:
+  $ref: /products/insights/environments/fedramp-production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcgovp01ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-fedramp-prod.yml
+- $ref: /services/insights/drift/namespaces/drift-fedramp-prod.yml
+- $ref: /services/insights/historical-system-profiles/namespaces/historical-system-profiles-fedramp-prod.yml
+
+managedRoles: true
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/platform-mq-prod/kafka-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-fedramp-prod
+  identifier: system-baseline-prod
+  defaults: /terraform/resources/insights/production/rds/postgres10-rds-1.yml
+  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-system-baseline-prod.yml
+  output_resource_name: system-baseline-db
+  enhanced_monitoring: true
+- provider: cloudwatch
+  account: insights-fedramp-prod
+  identifier: system-baseline-prod
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
