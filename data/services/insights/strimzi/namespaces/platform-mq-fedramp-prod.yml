@@ -1,0 +1,80 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: strimzi
+
+name: platform-mq-prod
+description: Insights platform-mq for FedRAMP on prod
+
+cluster:
+  $ref: /openshift/insights/crcgovp01ue1/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
+
+quota:
+  $ref: /services/insights/strimzi/strimzi-quota.yml
+
+app:
+  $ref: /services/insights/strimzi/app.yml
+
+environment:
+  $ref: /products/insights/environments/fedramp-production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcgovp01ue1.yml
+# - $ref: /services/insights/advisor/namespaces/prod-advisor-prod.yml
+# - $ref: /services/insights/catalog/namespaces/prod-catalog-prod.yml
+# - $ref: /services/insights/compliance/namespaces/prod-compliance-prod.yml
+# - $ref: /services/insights/engine/namespaces/prod-engine-prod.yml
+# - $ref: /services/insights/host-inventory/namespaces/prod-host-inventory-prod.yml
+# - $ref: /services/insights/ingress/namespaces/prod-ingress-prod.yml
+# - $ref: /services/insights/patchman/namespaces/prod-patchman-engine-prod.yml
+# - $ref: /services/insights/policies/namespaces/prod-policies-prod.yml
+# - $ref: /services/insights/remediations/namespaces/prod-remediations-prod.yml
+# - $ref: /services/insights/sources/namespaces/prod-sources-prod.yml
+# - $ref: /services/insights/topological-inventory/namespaces/prod-topological-inventory-prod.yml
+# - $ref: /services/insights/tower-analytics/namespaces/prod-tower-analytics-prod.yml
+# - $ref: /services/insights/vulnerability/namespaces/prod-vulnerability-engine-prod.yml
+# - $ref: /services/insights/vulnerability/namespaces/prod-vmaas-prod.yml
+# - $ref: /services/insights/xjoin/namespaces/prod-xjoin-prod.yml
+# - $ref: /services/insights/hccm/namespaces/prod-hccm-prod.yml
+# - $ref: /services/insights/xavier/namespaces/prod-xavier-prod.yml
+# - $ref: /services/insights/playbook-dispatcher/namespaces/prod.yml
+
+managedRoles: true
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-fedramp-prod
+  identifier: platform-mq-prod
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
+
+managedResourceTypes:
+- Role
+- RoleBinding
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/platform-mq-prod/kafka-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource
+  path: /insights-prod/strimzi/xjoin-jenkins.role.yaml
+- provider: resource
+  path: /insights-prod/strimzi/xjoin-jenkins.rolebinding.yaml
