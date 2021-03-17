@@ -57,11 +57,10 @@ Users interacting with the registry through tools like odo or Eclipse Che will s
 
 ### Steps:
 
-- Contact Devfile Registry team, investigate why the latency is occurring
-- Collect logs from the index server container.
-- Check load on the index server container.
+- Check load on the index server container, using the [Devfile Registry Service Grafana dashboard][].
+    - CPU & Memory usage, and number of requests to the server.
 - High latency may require increasing the number of replicas deployed, or increasing the CPU and Memory given to the index server container
-
+- If increasing the number of replicas, CPU, or Memory limits did not help, contact the devfile registry team.
 ---
 
 ## OCIServerHTTPLatency
@@ -84,10 +83,10 @@ Users trying to retrieve devfile stacks from the registry will see an increased 
 
 ### Steps:
 
-- Contact Devfile Registry team, investigate why the latency is occurring
-- Collect logs from the oci server container.
-- Check load on the oci server container.
+- Check load on the oci server container, using the [Devfile Registry Service Grafana dashboard][].
+    - CPU & Memory usage, and number of requests to the server.
 - High latency may require increasing the number of replicas deployed, or increasing the CPU and Memory given to the oci server container
+- If increasing the number of replicas, CPU, or Memory limits did not help, contact the devfile registry team.
 
 ---
 
@@ -111,13 +110,15 @@ If the OCI server is unavailable, then users will be completely unable to retrie
 
 ### Steps:
 
-- Contact Devfile Registry team
-- Collect logs from the oci server container if possible.
-- Check load on the oci server container if possible.
+- Collect logs from the oci server container if possible. See if there are any error messages (should be none).
+- Check load on the oci server container, using the [Devfile Registry Service Grafana dashboard][].
+   - CPU & Memory usage, and number of requests to the server.
+- Check number of requests to the server that ended with a 5xx error, using the [Devfile Registry Service Grafana dashboard][].
 - Most likely culprits include **very** high loads on the oci server or a bad update. 
-   - If an update was recently performed, roll back to last known good version
    - If very heavy load is suspected across replicas, increase the CPU/Memory limits, or # of replicas.
-   - OCI server logs may provide insight on why it's not serving requests for other causes.
+   - OCI server logs may provide insight on why it's not serving requests for other causes. There should be no errors in the logs for a healthy OCI server
+   - If increasing CPU, Memory, or numbers of replicas did not help, and if an update was recently performed, roll back to last known good version. 
+- Contact the devfile registry team if above steps to do not resolve the problem or if an update had to be rolled back.
 
 ---
 
@@ -141,12 +142,14 @@ If the OCI server is unavailable, then users will be completely unable to list o
 
 ### Steps:
 
-- Contact Devfile Registry team
-- Collect logs from the index server container if possible.
-- Check load on the index server container if possible.
+- Collect logs from the index server container if possible. There should be no errors in logs for a healthy index server.
+- Check load on the index server container, using the [Devfile Registry Service Grafana dashboard][].
+   - CPU & Memory usage, and number of requests to the server.
+- Check number of requests to the server that ended with a 5xx error, using the [Devfile Registry Service Grafana dashboard][].
 - As the index server is just a simple nginx server hosting an index.json file, the most likely culprit is a bad update was performed.
-   - If an update was recently performed, roll back to last known good version
    - If very heavy load is suspected across all of its replicas, consider increasing the CPU/Memory limits or number of replicas
+   - If an update was recently performed, roll back to last known good version
+- Contact the devfile registry team if above steps to do not resolve the problem or if an update had to be rolled back.
 
 
 ## Escalations
@@ -161,3 +164,4 @@ Team email: team-devfile@redhat.com
 
 [saas-devfile-registry]: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/devfile-registry/cicd/ci-int/saas.yaml
 [saas-devfile-registry-bump]: https://gitlab.cee.redhat.com/service/app-interface/-/commits/master/data/services/devfile-registry/cicd/ci-int/saas.yaml
+[Devfile Registry Service Grafana dashboard]: https://grafana.app-sre.devshift.net/d/7s_TsTsGz/devfile-registry-service?orgId=1
