@@ -1,6 +1,6 @@
 ---
 $schema: /app-interface/app-interface-sql-query-1.yml
-name: 2021-03-11-staging-dbs-and-roles
+name: 2021-03-18-staging-db-settings
 labels: {}
 namespace:
   $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
@@ -11,23 +11,27 @@ output: stdout
 #   $ref: <user-1.yml with public_gpg_key>
 # schedule: <if defined the output resource will be a CronJob instead of a Job>
 queries: 
-  - SELECT current_user;
   - |
-    SELECT d.datname as name,
-          pg_catalog.pg_get_userbyid(d.datdba) as owner
-    FROM pg_catalog.pg_database d
-    WHERE d.datname !~ 'template'
-    ORDER BY 1;
+    SELECT name,
+           setting as setting_ms,
+           setting::int / 60000::int as "setting_m",
+           setting::int / 3600000::int as "setting_h",
+           boot_val as boot_val_ms,
+           boot_val::int / 60000::int as "boot_val_m",
+           boot_val::int / 3600000::int as "boot_val_h",
+           reset_val as reset_val_ms,
+           reset_val::int / 60000::int as "reset_val_m",
+           reset_val::int / 3600000::int as "reset_val_h"
+      FROM pg_catalog.pg_settings
+     WHERE name = 'idle_in_transaction_session_timeout'
+     ORDER BY 1;
   - |
-    SELECT r.rolname, r.rolsuper, r.rolinherit,
-      r.rolcreaterole, r.rolcreatedb, r.rolcanlogin,
-      r.rolconnlimit, r.rolvaliduntil,
-      ARRAY(SELECT b.rolname
-            FROM pg_catalog.pg_auth_members m
-            JOIN pg_catalog.pg_roles b ON (m.roleid = b.oid)
-            WHERE m.member = r.oid) as memberof
-    , r.rolreplication
-    , r.rolbypassrls
-    FROM pg_catalog.pg_roles r
-    WHERE r.rolname !~ '^pg_'
-    ORDER BY 1;
+    SELECT name, setting
+      FROM pg_catalog.pg_settings
+     WHERE name = 'ssl'
+     ORDER BY 1;
+  - |
+    SELECT rolname, rolconfig
+      FROM pg_roles
+     WHERE rolname IN ('insights', 'hive')
+     ORDER BY 1;
