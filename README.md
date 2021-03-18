@@ -1677,6 +1677,8 @@ Notes:
   * `slack_username` - if it is different from `org_username`
   * `pagerduty_username` - if it is different from `org_username`
 
+4. **Add the group in the `managedUsergroups` section of the** [coreos slack](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/slack/coreos.yml) **dependency file**
+
 ### Manage Jenkins jobs configurations using jenkins-jobs
 
 Jenkins jobs configurations can be entirely self-serviced via App-Interface, and allows to define JJB Manifests to be used to bring up CI/CD/Automation pipelines or adhoc jobs in the internal and external Jenkins instance.
