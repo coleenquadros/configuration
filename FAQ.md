@@ -95,12 +95,13 @@ We are starting a migration towards a Log Forwarding solution, in which all logs
 To get access to CloudWatch on a cluster's AWS account, follow these steps (examples for `app-sre-stage-01`):
 
 1. Submit a MR to app-interface to add the [log-consumer](https://gitlab.cee.redhat.com/service/app-interface/-/blob/f0ca82a2253b4c213c8b438408f68113a662d6c1/data/aws/app-sre/roles/log-consumer.yml) role to your user file. You will also need to [add your public GPG key](https://gitlab.cee.redhat.com/service/app-interface#adding-your-public-gpg-key) (if you havn't already) in the same MR.
-1. Once the MR is merged you will get an email invitation to join the AWS account (in this example - the `app-sre` account). Follow the instructions in the email to login to the account. You will also need to obtain your Switch Role link for the desired cluster from the [ocm-aws-infrastructure-access-switch-role-links](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/ocm-aws-infrastructure-access-switch-role-links.md) page.
+1. Once the MR is merged you will get an email invitation to join the AWS account (in this example - the `app-sre` account). Follow the instructions in the email to login to the account.
 1. Once you are logged in, go to [Security Credentials page](https://console.aws.amazon.com/iam/home?#/security_credentials) and enable Multi-factor authentication (MFA).
 1. Logout and login to the account again using the configured MFA device.
-1. Once you are logged in, navigate to the Switch Role link obtained from the App SRE team (suggestion: add to bookmarks).
+1. Once you are logged in, navigate to the Switch Role link obtained from the [ocm-aws-infrastructure-access-switch-role-links](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/ocm-aws-infrastructure-access-switch-role-links.md) page (suggestion: add to bookmarks).
+    * Note: search for your org_username for the cluster you want to view logs.
 1. In the Switch Role page, select a name for this role (suggestion: `<cluster_name>-read-only`) and click "Switch Role" (Account and Role should be filled automatically).
-1. You are now logged in to the cluster's AWS account. Go to the CloudWatch console and get your logs!
+1. You are now logged in to the cluster's AWS account. Go to the [CloudWatch console](https://console.aws.amazon.com/cloudwatch/home?#logsV2:log-groups) and get your logs!
 
 ### What is the Console or Kibana URL for a service
 
