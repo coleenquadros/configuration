@@ -2076,7 +2076,7 @@ This will result in a Secret being created in the consuming namespace. The Secre
 
 We rely on Prometheus to generate alerts for our service using expressions that are difficult to test in real world as they are dependent on very specific conditions or that don't do what you expect. Luckily Prometheus developers have recognized this and [unit tests](https://prometheus.io/docs/prometheus/latest/configuration/unit_testing_rules/) can be written for Prometheus alert and recording rules.
 
-In app-interface prometheus rules that have the `/openshift/prometheus-rule-1.yml` will be validated using `promtool check rules` command that will be used from tests that have the `/app-interface/prometheus-rule-test-1.yml` schema that will be run using `promtool test rules` e.g. rules in [app-sre-contract.yaml](resources/observability/prometheusrules/app-sre-contract.yaml) are tested in the [app-sre-contract-test.yaml](resources/observability/prometheusrules/app-sre-contract-test.yaml) file.
+In app-interface prometheus rules that have the `/openshift/prometheus-rule-1.yml` will be validated using `promtool check rules` command that will be used from tests that have the `/app-interface/prometheus-rule-test-1.yml` schema that will be run using `promtool test rules` e.g. rules in [app-sre-contract.prometheusrules.yaml](resources/observability/prometheusrules/app-sre-contract.prometheusrules.yaml) are tested in the [app-sre-contract.prometheusrulestests.yaml](resources/observability/prometheusrules/app-sre-contract.prometheusrulestests.yaml) file.
 
 A few notes about the integration that run the tests:
 
