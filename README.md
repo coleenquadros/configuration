@@ -2086,6 +2086,8 @@ A few notes about the integration that run the tests:
 
 Writing tests can be difficult at the beginning. This [article](https://www.robustperception.io/unit-testing-rules-with-prometheus) is a nicer start than the official documentation.
 
+If your alerts are based on recording rules, do not write tests using the recorded series, use always the original metrics or you won't be testing the complete setup.
+
 ## Design
 
 Additional design information: [here](docs/app-interface/design.md)
