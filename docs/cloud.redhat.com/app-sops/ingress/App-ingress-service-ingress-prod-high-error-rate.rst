@@ -12,6 +12,8 @@ Impact
 Summary
 -------
 
+Note:  This service is deployed via `Clowder`_.
+
 This alert tracks the response codes from ingress to clients. If the non-200 error count exceeds 5%, it will fire.
 
 Access required
@@ -39,3 +41,4 @@ Escalations
 .. _Production Openshift Cluster: https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ingress-prod/deployments
 .. _Kibana instance: https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/app/kibana
 .. _Ingress dashboard: https://grafana.app-sre.devshift.net/d/Av2gccIZk/ingress?orgId=1
+.. _Clowder: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/app-sops/clowder/clowder.rst
