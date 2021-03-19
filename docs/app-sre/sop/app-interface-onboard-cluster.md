@@ -1,13 +1,13 @@
 <!-- TOC -->
 
 - [Onboard a new OSDv4 cluster to app-interface](#onboard-a-new-osdv4-cluster-to-app-interface)
-  - [Step 1 - Cluster creation and initial access for dedicated-admins](#step-1---cluster-creation-and-initial-access-for-dedicated-admins)
-  - [Step 2 - Bot access and App SRE project template](#step-2---bot-access-and-app-sre-project-template)
-  - [Step 3 - Observability](#step-3---observability)
-  - [Step 4 - Operator Lifecycle Manager](#step-4---operator-lifecycle-manager)
-  - [Step 5 - Container Security Operator](#step-5---container-security-operator)
-  - [Step 6 - Logging](#step-6---logging)
-  - [WIP Step 7 - Deployment Validation Operator (DVO)](#wip-step-7---deployment-validation-operator-dvo)
+  - [Step 1 - Cluster creation and initial access for dedicated-admins](#step-1-cluster-creation-and-initial-access-for-dedicated-admins)
+  - [Step 2 - Bot access and App SRE project template](#step-2-bot-access-and-app-sre-project-template)
+  - [Step 3 - Observability](#step-3-observability)
+  - [Step 4 - Operator Lifecycle Manager](#step-4-operator-lifecycle-manager)
+  - [Step 5 - Container Security Operator](#step-5-container-security-operator)
+  - [Step 6 - Logging](#step-6-logging)
+  - [Step 7 - Deployment Validation Operator (DVO)](#step-7-deployment-validation-operator-dvo)
 - [Additional configurations](#additional-configurations)
   - [Selecting a Machine CIDR for VPC peerings](#selecting-a-machine-cidr-for-vpc-peerings)
   - [VPC peering with app-interface](#vpc-peering-with-app-interface)
@@ -576,7 +576,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
     OSD docs for reference: https://docs.openshift.com/dedicated/4/logging/dedicated-cluster-deploying.html
 
-## WIP Step 7 - Deployment Validation Operator (DVO)
+## Step 7 - Deployment Validation Operator (DVO)
 
 1. Install the Deployment Validation Operator
 
