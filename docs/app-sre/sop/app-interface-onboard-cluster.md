@@ -538,43 +538,14 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
 ## Step 6 - Logging
 
-1. Enable logging (EFK)
+1. Enable logging (CloudWatch log forwarding)
 
-    1. Create an `openshift-logging` namespace file for that specific cluster. Content:
+    1. Add the following section to the cluster file to enable log forwarding to the cluster's AWS account:
 
     ```yaml
-    # /data/openshift/<cluster_name>/namespaces/openshift-logging.yml
-    ---
-    $schema: /openshift/namespace-1.yml
-    
-    labels: {}
-    
-    name: openshift-logging
-    description: openshift-logging namespace
-    
-    cluster:
-      $ref: /openshift/<cluster_name>/cluster.yml
-    
-    app:
-      $ref: /services/app-sre/app.yml
-    
-    environment:
-      $ref: /products/app-sre/environments/production.yml
-    
-    managedResourceTypes:
-    - Subscription
-    - ClusterLogging
-    
-    openshiftResources:
-    - provider: resource-template
-      path: /setup/clusterlogging/elasticsearch-operator.subscription.yaml
-    - provider: resource-template
-      path: /setup/clusterlogging/cluster-logging.subscription.yaml
-    - provider: resource-template
-      path: /setup/clusterlogging/instance.clusterlogging.yaml
+    addons:
+    - $ref: /dependencies/ocm/addons/cluster-logging-operator.yml
     ```
-
-    OSD docs for reference: https://docs.openshift.com/dedicated/4/logging/dedicated-cluster-deploying.html
 
 ## Step 7 - Deployment Validation Operator (DVO)
 
