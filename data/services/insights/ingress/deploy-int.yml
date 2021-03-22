@@ -35,6 +35,9 @@ authentication:
 
 parameters:
   CLOWDER_ENABLED: "true"
+  HABERDASHER_EMITTER: kafka
+  HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+  HABERDASHER_KAFKA_TOPIC: platform.logging.logs
 
 resourceTemplates:
 - name: ingress-sideloader
@@ -46,8 +49,12 @@ resourceTemplates:
     ref: master
     upstream: insights-gl-build-master
     parameters:
-      MIN_REPLICAS: 1
+      MIN_REPLICAS: 2
       ENV_NAME: stage
-      HABERDASHER_EMITTER: kafka
-      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
-      HABERDASHER_KAFKA_TOPIC: platform.logging.logs
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/ingress-prod.yml
+    ref: 42e47a435f80b7e22a61784d77869f7a2472169b
+    upstream: insights-gl-build-master
+    parameters:
+      MIN_REPLICAS: 3
+      ENV_NAME: prod
