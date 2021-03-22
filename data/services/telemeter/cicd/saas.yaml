@@ -60,7 +60,7 @@ resourceTemplates:
   url: https://gitlab.cee.redhat.com/observatorium/configuration
   parameters:
     OBSERVATORIUM_API_IMAGE: quay.io/observatorium/observatorium
-    OBSERVATORIUM_API_IMAGE_TAG: master-2020-11-02-v0.1.1-192-ge324057
+    OBSERVATORIUM_API_IMAGE_TAG: master-2021-03-09-v0.1.1-198-g937be40
     OPA_AMS_IMAGE: quay.io/observatorium/opa-ams
     OPA_AMS_IMAGE_TAG: master-2021-02-24-fc0d722
     MEMCACHED_IMAGE: registry.redhat.io/rhel8/memcached
@@ -68,11 +68,12 @@ resourceTemplates:
     MEMCACHED_EXPORTER_IMAGE: quay.io/prometheus/memcached-exporter
     MEMCACHED_EXPORTER_IMAGE_TAG: v0.6.0
     AMS_URL: ${OCM_BASE_URL}
+    JAEGER_AGENT_IMAGE: quay.io/app-sre/jaegertracing-jaeger-agent
   targets:
   - namespace:
       $ref: /services/telemeter/namespaces/observatorium-mst-stage.yml
     # Commit for gitlab.cee.redhat.com/observatorium/configuration repo. Keep it pinned, so we know what we can promote to production.
-    ref: fd76ea7056dab178c1fc4c8d0db5ef8faf6cb821
+    ref: 31153cd93a3aad79f8bf0a402e212f0366d33b36
     parameters:
       NAMESPACE: observatorium-mst-stage
       OBSERVATORIUM_METRICS_NAMESPACE: observatorium-mst-stage
@@ -103,6 +104,8 @@ resourceTemplates:
       MEMCACHED_EXPORTER_MEMORY_LIMIT: 200Mi
       SERVICE_ACCOUNT_NAME: observatorium-mst
       OBSERVATORIUM_API_IDENTIFIER: observatorium-observatorium-mst-api
+      JAEGER_AGENT_IMAGE_TAG: 1.22.0
+      JAEGER_COLLECTOR_NAMESPACE: telemeter-stage
 - name: observatorium-mst-common-production
   path: /resources/services/observatorium-template.yaml
   url: https://gitlab.cee.redhat.com/observatorium/configuration
@@ -161,11 +164,12 @@ resourceTemplates:
     MEMCACHED_EXPORTER_IMAGE: quay.io/prometheus/memcached-exporter
     MEMCACHED_EXPORTER_IMAGE_TAG: v0.6.0
     STORAGE_CLASS: "gp2"
+    JAEGER_AGENT_IMAGE: quay.io/app-sre/jaegertracing-jaeger-agent
   targets:
   - namespace:
       $ref: /services/telemeter/namespaces/observatorium-mst-stage.yml
     # Commit for gitlab.cee.redhat.com/observatorium/configuration repo. Keep it pinned, so we know what we can promote to production.
-    ref: fd76ea7056dab178c1fc4c8d0db5ef8faf6cb821
+    ref: 31153cd93a3aad79f8bf0a402e212f0366d33b36
     parameters:
       NAMESPACE: observatorium-mst-stage
       OBSERVATORIUM_METRICS_NAMESPACE: observatorium-mst-stage
@@ -219,6 +223,8 @@ resourceTemplates:
       MEMCACHED_EXPORTER_MEMORY_REQUEST: 50Mi
       MEMCACHED_EXPORTER_MEMORY_LIMIT: 200Mi
       SERVICE_ACCOUNT_NAME: observatorium-mst
+      JAEGER_AGENT_IMAGE_TAG: 1.22.0
+      JAEGER_COLLECTOR_NAMESPACE: telemeter-stage
 - name: observatorium-mst-metrics-production
   path: /resources/services/observatorium-metrics-template.yaml
   url: https://gitlab.cee.redhat.com/observatorium/configuration
@@ -305,7 +311,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/telemeter/namespaces/telemeter-stage.yml
     # Commit for gitlab.cee.redhat.com/observatorium/configuration repo. Keep it pinned, so we know what we can promote to production.
-    ref: fd76ea7056dab178c1fc4c8d0db5ef8faf6cb821
+    ref: 31153cd93a3aad79f8bf0a402e212f0366d33b36
     parameters:
       NAMESPACE: telemeter-stage
       OBSERVATORIUM_METRICS_NAMESPACE: telemeter-stage
@@ -325,7 +331,7 @@ resourceTemplates:
       GUBERNATOR_IMAGE: 'quay.io/app-sre/gubernator'
       GUBERNATOR_IMAGE_TAG: 1.0.0-rc.1
       GUBERNATOR_REPLICAS: 2
-      OBSERVATORIUM_API_IMAGE_TAG: master-2020-11-02-v0.1.1-192-ge324057
+      OBSERVATORIUM_API_IMAGE_TAG: master-2021-03-09-v0.1.1-198-g937be40
       OBSERVATORIUM_API_REPLICAS: 3
       OPA_AMS_MEMCACHED_EXPIRE: "300"
       OPA_AMS_CPU_REQUEST: 100m
