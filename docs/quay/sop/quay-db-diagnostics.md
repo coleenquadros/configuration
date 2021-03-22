@@ -11,7 +11,7 @@ The database host url can be obtained from the only `-rds` secret in the `quay` 
 
 ```shell
 RDS_SECRET=$(oc get -n quay secret --no-headers -o custom-columns=":metadata.name" | grep -- -rds$)
-$ oc get secret $RDS_SECRET -o json | jq -r '.data."db.host"|@base64d'
+$ oc -n quay get secret $RDS_SECRET -o json | jq -r '.data."db.host"|@base64d'
 ```
 
 Note this output down, we will refer to it as `<db_host>`
