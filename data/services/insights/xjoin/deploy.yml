@@ -46,30 +46,6 @@ authentication:
 
 resourceTemplates:
 - name: xjoin-search
-  path: /templates/xjoin/xjoin-search.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  parameters:
-    CPU_REQUESTS: 1
-    CPU_LIMITS: 1
-    MEMORY_REQUESTS: 512Mi
-    MEMORY_LIMITS: 512Mi
-    MAX_REPLICAS: 4
-  targets:
-  - namespace:
-      $ref: /services/insights/xjoin/namespaces/perf-xjoin-perf.yml
-    ref: 7fa02b687dfa77fd71ae04f0a4fec2ba0145bcc9
-    parameters:
-      IMAGE_TAG: 7a74950
-      LOG_LEVEL: info
-  - namespace:
-      $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
-    ref: 7fa02b687dfa77fd71ae04f0a4fec2ba0145bcc9
-    parameters:
-      IMAGE_TAG: 125bfa5
-      LOG_LEVEL: info
-      NUM_REPLICAS: 2
-
-- name: xjoin-search-component
   path: /deploy/template.yaml
   url: https://github.com/RedHatInsights/xjoin-search
   parameters:
@@ -78,12 +54,20 @@ resourceTemplates:
     MEMORY_REQUESTS: 512Mi
     MEMORY_LIMITS: 512Mi
     MAX_REPLICAS: 4
+    LOG_LEVEL: info
   targets:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
     ref: master
     parameters:
-      LOG_LEVEL: info
+      NUM_REPLICAS: 2
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/perf-xjoin-perf.yml
+    ref: 3e363551559aa0f8d2c00cd57726a729b3eea386
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
+    ref: 3e363551559aa0f8d2c00cd57726a729b3eea386
+    parameters:
       NUM_REPLICAS: 2
 
 - name: xjoin-kafka-connect
