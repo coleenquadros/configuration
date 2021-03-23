@@ -1,0 +1,58 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: catalog-tower-persister
+  platform: insights
+
+name: catalog-tower-persister-clowder
+description: catalog-tower-persister app on the Insights Platform
+
+app:
+  $ref: /services/insights/catalog-tower-persister/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+timeout: 5
+
+managedResourceTypes:
+  - ClowdApp
+
+imagePatterns:
+  - quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  CLOWDER_ENABLED: "true"
+
+resourceTemplates:
+  - name: catalog_tower_persister
+    path: /deploy/clowdapp.yaml
+    url: https://github.com/RedHatInsights/catalog_tower_persister
+    parameters:
+      PATH_PREFIX: api
+      PGSSLMODE: verify-full
+    targets:
+    - namespace:
+        $ref: /services/insights/catalog-tower-persister/namespaces/stage-catalog-tower-persister-stage.yml
+      ref: master
+      upstream: RedHatInsights-catalog_tower_persister-gh-build-master
+      parameters:
+        ENV_NAME: stage
+    - namespace:
+        $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+      disable: true
+      ref: internal
+      parameters:
+        LOG_LEVEL: WARN
+        MIN_REPLICAS: 1
