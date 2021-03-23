@@ -22,10 +22,10 @@ slack:
 timeout: 5
 
 managedResourceTypes:
-  - ClowdApp
+- ClowdApp
 
 imagePatterns:
-  - quay.io/cloudservices
+- quay.io/cloudservices
 
 authentication:
   image:
@@ -33,30 +33,40 @@ authentication:
     field: all
 
 resourceTemplates:
-  - name: sources-api
-    path: /deploy/clowdapp.yaml
-    url: https://github.com/RedHatInsights/sources-api
+- name: sources-api
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/sources-api
+  parameters:
+    PATH_PREFIX: api
+    PGSSLMODE: verify-full
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true # tells app-sre to not actually run the deploy job for this target
+    ref: internal # altered by bonfire
     parameters:
-      PATH_PREFIX: api
-      PGSSLMODE: verify-full
-    targets:
-    - namespace:
-        $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
-      disable: true # tells app-sre to not actually run the deploy job for this target
-      ref: internal # altered by bonfire
-      parameters:
-        IMAGE_TAG: cee0984
-        LOG_LEVEL: WARN
-        MIN_REPLICAS: 1
-        SOURCES_ENV: stage
-        SOURCETYPE_SKIP_LIST: "my-source-type"
-  - name: sources-monitor
-    path: /deploy/clowdapp.yaml
-    url: https://github.com/RedHatInsights/sources-monitor
-    targets:
-    - namespace:
-        $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
-      disable: true # tells app-sre to not actually run the deploy job for this target
-      ref: internal # altered by bonfire
-      parameters:
-        IMAGE_TAG: 3ad621c
+      IMAGE_TAG: f42d912
+      LOG_LEVEL: WARN
+      MIN_REPLICAS: 1
+      SOURCES_ENV: stage
+      SOURCETYPE_SKIP_LIST: "my-source-type"
+- name: sources-monitor
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/sources-monitor
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true # tells app-sre to not actually run the deploy job for this target
+    ref: internal # altered by bonfire
+    parameters:
+      IMAGE_TAG: "461a534"
+- name: sources-superkey-worker
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/sources-superkey-worker
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true # tells app-sre to not actually run the deploy job for this target
+    ref: internal # altered by bonfire
+    parameters:
+      IMAGE_TAG: a0b4f79
