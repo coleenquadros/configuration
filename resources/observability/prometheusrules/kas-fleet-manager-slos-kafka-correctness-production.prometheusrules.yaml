@@ -1,0 +1,273 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: kas-fleet-manager-slos-kafka-correctness-production
+spec:
+  groups:
+    - name: kas-fleet-manager-kafka-create-correctness.slo.rules
+      rules:
+        - alert: KasFleetManagerKafkaCreationSuccessBudgetBurn
+          annotations:
+            message: "High 6h error budget burn for Fleet Manager Kafka create operations (current value: {{ $value }})"
+            dashboard: "https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#kafka-cluster-provisioning-correctness"
+          expr: |
+            sum(kas_fleet_manager_kafka_operations:burnrate30m{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="create"}) > (6.00 * (1-0.99000))
+            and
+            sum(kas_fleet_manager_kafka_operations:burnrate6h{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="create"}) > (6.00 * (1-0.99000))
+          for: 15m
+          labels:
+            service: kas-fleet-manager
+            namespace: managed-services-production
+            operation: create
+            severity: info
+        - alert: KasFleetManagerKafkaCreationSuccessBudgetBurn
+          annotations:
+            message: "High 1d error budget burn for Fleet Manager Kafka create operations (current value: {{ $value }})"
+            dashboard: "https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#kafka-cluster-provisioning-correctness"
+          expr: |
+            sum(kas_fleet_manager_kafka_operations:burnrate2h{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="create"}) > (3.00 * (1-0.99000))
+            and
+            sum(kas_fleet_manager_kafka_operations:burnrate1d{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="create"}) > (3.00 * (1-0.99000))
+          for: 1h
+          labels:
+            service: kas-fleet-manager
+            namespace: managed-services-production
+            operation: create
+            severity: info
+        - alert: KasFleetManagerKafkaCreationSuccessBudgetBurn
+          annotations:
+            message: "High 3d error budget burn for Fleet Manager Kafka create operations (current value: {{ $value }})"
+            dashboard: "https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#kafka-cluster-provisioning-correctness"
+          expr: |
+            sum(kas_fleet_manager_kafka_operations:burnrate6h{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="create"}) > (1.00 * (1-0.99000))
+            and
+            sum(kas_fleet_manager_kafka_operations:burnrate3d{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="create"}) > (1.00 * (1-0.99000))
+          for: 3h
+          labels:
+            service: kas-fleet-manager
+            namespace: managed-services-production
+            operation: create
+            severity: info
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_kafka_operations_success_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="create"}[1d]))
+              /
+              sum(rate(kas_fleet_manager_kafka_operations_total_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="create"}[1d]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            namespace: managed-services-production
+            operation: create
+          record: kas_fleet_manager_kafka_operations:burnrate1d
+        - expr: |
+            1 - ( 
+              sum(rate(kas_fleet_manager_kafka_operations_success_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="create"}[1h]))
+              /
+              sum(rate(kas_fleet_manager_kafka_operations_total_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="create"}[1h]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            namespace: managed-services-production
+            operation: create
+          record: kas_fleet_manager_kafka_operations:burnrate1h
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_kafka_operations_success_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="create"}[2h]))
+              /
+              sum(rate(kas_fleet_manager_kafka_operations_total_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="create"}[2h]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            namespace: managed-services-production
+            operation: create
+          record: kas_fleet_manager_kafka_operations:burnrate2h
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_kafka_operations_success_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="create"}[30m]))
+              /
+              sum(rate(kas_fleet_manager_kafka_operations_total_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="create"}[30m]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            namespace: managed-services-production
+            operation: create
+          record: kas_fleet_manager_kafka_operations:burnrate30m
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_kafka_operations_success_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="create"}[3d]))
+              /
+              sum(rate(kas_fleet_manager_kafka_operations_total_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="create"}[3d]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            namespace: managed-services-production
+            operation: create
+          record: kas_fleet_manager_kafka_operations:burnrate3d
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_kafka_operations_success_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="create"}[5m]))
+              /
+              sum(rate(kas_fleet_manager_kafka_operations_total_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="create"}[5m]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            namespace: managed-services-production
+            operation: create
+          record: kas_fleet_manager_kafka_operations:burnrate5m
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_kafka_operations_success_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="create"}[6h]))
+              /
+              sum(rate(kas_fleet_manager_kafka_operations_total_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="create"}[6h]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            namespace: managed-services-production
+            operation: create
+          record: kas_fleet_manager_kafka_operations:burnrate6h
+    - name: kas-fleet-manager-kafka-delete-correctness.slo.rules
+      rules:
+        - alert: KasFleetManagerKafkaDeleteSuccessBudgetBurn
+          annotations:
+            message: "High 6h error budget burn for Fleet Manager Kafka delete operations (current value: {{ $value }})"
+            dashboard: "https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#kafka-cluster-deletion-correctness"
+          expr: |
+            sum(kas_fleet_manager_kafka_operations:burnrate30m{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="delete"}) > (6.00 * (1-0.99000))
+            and
+            sum(kas_fleet_manager_kafka_operations:burnrate6h{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="delete"}) > (6.00 * (1-0.99000))
+          for: 15m
+          labels:
+            service: kas-fleet-manager
+            namespace: managed-services-production
+            operation: delete
+            severity: info
+        - alert: KasFleetManagerKafkaDeleteSuccessBudgetBurn
+          annotations:
+            message: "High 1d error budget burn for Fleet Manager Kafka delete operations (current value: {{ $value }})"
+            dashboard: "https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#kafka-cluster-deletion-correctness"
+          expr: |
+            sum(kas_fleet_manager_kafka_operations:burnrate2h{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="delete"}) > (3.00 * (1-0.99000))
+            and
+            sum(kas_fleet_manager_kafka_operations:burnrate1d{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="delete"}) > (3.00 * (1-0.99000))
+          for: 1h
+          labels:
+            service: kas-fleet-manager
+            namespace: managed-services-production
+            operation: delete
+            severity: info
+        - alert: KasFleetManagerKafkaDeleteSuccessBudgetBurn
+          annotations:
+            message: "High 3d error budget burn for Fleet Manager Kafka delete operations (current value: {{ $value }})"
+            dashboard: "https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#kafka-cluster-deletion-correctness"
+          expr: |
+            sum(kas_fleet_manager_kafka_operations:burnrate6h{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="delete"}) > (1.00 * (1-0.99000))
+            and
+            sum(kas_fleet_manager_kafka_operations:burnrate3d{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="delete"}) > (1.00 * (1-0.99000))
+          for: 3h
+          labels:
+            service: kas-fleet-manager
+            namespace: managed-services-production
+            operation: delete
+            severity: info
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_kafka_operations_success_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="delete"}[1d]))
+              /
+              sum(rate(kas_fleet_manager_kafka_operations_total_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="delete"}[1d]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            namespace: managed-services-production
+            operation: delete
+          record: kas_fleet_manager_kafka_operations:burnrate1d
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_kafka_operations_success_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="delete"}[1h]))
+              /
+              sum(rate(kas_fleet_manager_kafka_operations_total_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="delete"}[1h]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            namespace: managed-services-production
+            operation: delete
+          record: kas_fleet_manager_kafka_operations:burnrate1h
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_kafka_operations_success_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="delete"}[2h]))
+              /
+              sum(rate(kas_fleet_manager_kafka_operations_total_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="delete"}[2h]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            namespace: managed-services-production
+            operation: delete
+          record: kas_fleet_manager_kafka_operations:burnrate2h
+        - expr: |
+            1 - ( 
+              sum(rate(kas_fleet_manager_kafka_operations_success_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="delete"}[30m]))
+              /
+              sum(rate(kas_fleet_manager_kafka_operations_total_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="delete"}[30m]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            namespace: managed-services-production
+            operation: delete
+          record: kas_fleet_manager_kafka_operations:burnrate30m
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_kafka_operations_success_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="delete"}[3d]))
+              /
+              sum(rate(kas_fleet_manager_kafka_operations_total_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="delete"}[3d]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            namespace: managed-services-production
+            operation: delete
+          record: kas_fleet_manager_kafka_operations:burnrate3d
+        - expr: |
+            1 - ( 
+              sum(rate(kas_fleet_manager_kafka_operations_success_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="delete"}[5m]))
+              /
+              sum(rate(kas_fleet_manager_kafka_operations_total_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="delete"}[5m]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            namespace: managed-services-production
+            operation: delete
+          record: kas_fleet_manager_kafka_operations:burnrate5m
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_kafka_operations_success_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="delete"}[6h]))
+              /
+              sum(rate(kas_fleet_manager_kafka_operations_total_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation="delete"}[6h]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            namespace: managed-services-production
+            operation: delete
+          record: kas_fleet_manager_kafka_operations:burnrate6h
