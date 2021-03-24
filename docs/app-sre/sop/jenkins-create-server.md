@@ -55,6 +55,7 @@
       <permission>hudson.model.Item.Read:app-sre*ci-int-ro</permission>
       <permission>hudson.model.Item.Read:app-sre-bot</permission>
       <permission>hudson.model.Item.Workspace:app-sre-bot</permission>
+      <permission>hudson.model.Run.Delete:app-sre-bot</permission>
       <permission>hudson.model.View.Configure:app-sre-bot</permission>
       <permission>hudson.model.View.Create:app-sre-bot</permission>
       <permission>hudson.model.View.Delete:app-sre-bot</permission>
