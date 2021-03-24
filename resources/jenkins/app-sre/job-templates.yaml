@@ -271,6 +271,24 @@
     <<: *gh_timed
 
 - job-template:
+    id: 'jenkins-node-rhel-check'
+    name: 'jenkins-node-rhel-check'
+    node: '{node}'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    cron_expression: H */2 * * *
+    builders:
+    - shell: |
+        podman image rm rhel-subscription-check
+        cat > Dockerfile << EOF
+        registry.access.redhat.com/rhel7
+        RUN yum install -y git
+        EOF
+        podman build . -t rhel-subscription-check
+    <<: *gh_timed
+
+- job-template:
     id: 'gl-build-master-managed-tenants'
     name: '{gl_group}-{gl_project}-gl-build-{branch}-managed-tenants'
     wrappers:
