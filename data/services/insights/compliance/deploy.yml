@@ -74,36 +74,6 @@ resourceTemplates:
       DB_SECRET: compliance-db
       IMAGE_TAG: "3a34b0c"
       VERSION: "3"
-- name: compliance-redis
-  path: /templates/compliance/compliance-redis.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  targets:
-  - namespace:
-      $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
-    ref: 2539abbd7ce93cce4c5676d4080c6fe2ba9331bc
-    parameters:
-      IMAGE_TAG: latest
-      IMAGE: quay.io/cloudservices/redis
-      REPLICAS: '0'
-  - namespace:
-      $ref: /services/insights/compliance/namespaces/compliance-fedramp-stage.yml
-    ref: 2539abbd7ce93cce4c5676d4080c6fe2ba9331bc
-    parameters:
-      IMAGE_TAG: latest
-      IMAGE: quay.io/cloudservices/redis
-      REPLICAS: '0'
-  - namespace:
-      $ref: /services/insights/compliance/namespaces/compliance-prod.yml
-    ref: 2539abbd7ce93cce4c5676d4080c6fe2ba9331bc
-    parameters:
-      IMAGE_TAG: "5.0.9"
-      IMAGE: quay.io/cloudservices/redis
-      CPU_REQUEST: 1000m
-      CPU_LIMIT: 1000m
-      MEMORY_REQUEST: 6G
-      MEMORY_LIMIT: 6G
-      VOLUME_CAPACITY: 10Gi
-      REPLICAS: '0'
 - name: compliance-prometheus-exporter
   path: /templates/compliance/compliance-prometheus-exporter.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
@@ -256,38 +226,3 @@ resourceTemplates:
       MAX_REPLICAS: 6
       MIN_REPLICAS: 2
       PGSSLMODE: verify-full
-- name: compliance-sidekiq-new
-  # Side pod for draining old jobs using the original Redis pod
-  path: /templates/compliance/compliance-sidekiq-new.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  targets:
-  - namespace:
-      $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
-    ref: 2539abbd7ce93cce4c5676d4080c6fe2ba9331bc
-    parameters:
-      IMAGE_TAG: 13e0239
-      PGSSLMODE: verify-full
-      COMPLIANCE_REDIS: compliance-redis
-      COMPLIANCE_REDIS_CACHE: compliance-redis
-      MAX_REPLICAS: 0
-      MIN_REPLICAS: 0
-  - namespace:
-      $ref: /services/insights/compliance/namespaces/compliance-fedramp-stage.yml
-    ref: 2539abbd7ce93cce4c5676d4080c6fe2ba9331bc
-    parameters:
-      IMAGE_TAG: 13e0239
-      PGSSLMODE: verify-full
-      COMPLIANCE_REDIS: compliance-redis
-      COMPLIANCE_REDIS_CACHE: compliance-redis
-      MAX_REPLICAS: 0
-      MIN_REPLICAS: 0
-  - namespace:
-      $ref: /services/insights/compliance/namespaces/compliance-prod.yml
-    ref: 2539abbd7ce93cce4c5676d4080c6fe2ba9331bc
-    parameters:
-      IMAGE_TAG: 13e0239
-      PGSSLMODE: verify-full
-      COMPLIANCE_REDIS: compliance-redis
-      COMPLIANCE_REDIS_CACHE: compliance-redis
-      MAX_REPLICAS: 0
-      MIN_REPLICAS: 0
