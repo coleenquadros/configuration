@@ -279,6 +279,43 @@ resourceTemplates:
       MEMCACHED_EXPORTER_MEMORY_REQUEST: 50Mi
       MEMCACHED_EXPORTER_MEMORY_LIMIT: 200Mi
       SERVICE_ACCOUNT_NAME: observatorium-mst
+- name: telemeter
+  path: /resources/services/telemeter-template.yaml
+  url: https://gitlab.cee.redhat.com/observatorium/configuration
+  parameters:
+    # NOTICE: Please specify image tags for each environment separately.
+    # And sort them alphabetically.
+    IMAGE: quay.io/app-sre/telemeter
+    JAEGER_AGENT_IMAGE: quay.io/app-sre/jaegertracing-jaeger-agent
+    TELEMETER_SERVER_TOKEN_EXPIRE_SECONDS: 86400
+    MEMCACHED_EXPORTER_IMAGE: quay.io/prometheus/memcached-exporter
+    MEMCACHED_IMAGE: registry.redhat.io/rhel8/memcached
+  targets:
+  - namespace:
+      $ref: /services/telemeter/namespaces/telemeter-stage.yml
+    ref: 1281bd1a1b10d1c725cb6ec51f2c8c8152953037
+    parameters:
+      NAMESPACE: telemeter-stage
+      OBSERVATORIUM_METRICS_NAMESPACE: telemeter-stage
+      OBSERVATORIUM_LOGS_NAMESPACE: observatorium-logs-stage
+      IMAGE_TAG: '8e65e1c'
+      IMAGE_CANARY: quay.io/app-sre/telemeter
+      IMAGE_CANARY_TAG: 'b4f226c'
+      REPLICAS: 3
+      REPLICAS_CANARY: 0
+      JAEGER_AGENT_IMAGE_TAG: 1.22.0
+      MEMCACHED_EXPORTER_IMAGE_TAG: v0.6.0
+      MEMCACHED_EXPORTER_IMAGE: quay.io/prometheus/memcached-exporter
+      MEMCACHED_IMAGE_TAG: 1.5
+      MEMCACHED_IMAGE: registry.redhat.io/rhel8/memcached
+      PROMETHEUS_AMS_REMOTE_WRITE_PROXY_TARGET: 'observatorium-thanos-receive'
+      SERVICE_ACCOUNT_NAME: prometheus-telemeter
+      TELEMETER_FORWARD_URL: 'http://observatorium-observatorium-api.telemeter-stage.svc.cluster.local:8080/api/metrics/v1/telemeter/api/v1/receive'
+      TELEMETER_LOG_LEVEL: 'debug'
+      TELEMETER_SERVER_CPU_LIMIT: 1
+      TELEMETER_SERVER_CPU_REQUEST: 100m
+      TELEMETER_SERVER_MEMORY_LIMIT: 1Gi
+      TELEMETER_SERVER_MEMORY_REQUEST: 100Mi
 - name: observatorium
   path: /manifests/production/observatorium-template.yaml # TODO(kakkoyun): Deprecate.
   url: https://gitlab.cee.redhat.com/observatorium/configuration
