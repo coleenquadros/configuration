@@ -33,7 +33,7 @@ authentication:
     field: all
 
 resourceTemplates:
-- name: gremlin
+- name: gremlin-http
   url: https://github.com/fabric8-analytics/gremlin-docker
   path: /openshift/template.yaml
   parameters:
@@ -54,9 +54,34 @@ resourceTemplates:
     parameters:
       REPLICAS: 2
   - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-production.yml
+    ref: 7b564e1da157859673feeec27dd3f44fd05ed611
+    parameters:
+      REPLICAS: 10
+
+- name: gremlin-httpingestion
+  url: https://github.com/fabric8-analytics/gremlin-docker
+  path: /openshift/template.yaml
+  parameters:
+    CHANNELIZER: http
+    QUERY_ADMINISTRATION_REGION: ingestion
+    REST_VALUE: 1
+    DOCKER_REGISTRY: quay.io
+    DOCKER_IMAGE: app-sre/bayesian-gremlin
+    CPU_REQUEST: 100m
+    CPU_LIMIT: 300m
+    MEMORY_REQUEST: 1536Mi
+    MEMORY_LIMIT: 2688Mi
+    JAVA_OPTIONS: "-XX:+PrintFlagsFinal -Xms512m -Xmx1400m -XX:+PrintGCDetails -XX:+PrintGCDateStamps"
+  targets:
+  - namespace:
       $ref: /services/codeready-analytics/namespaces/bayesian-preview.yml
     ref: master
     upstream: fabric8-analytics-gremlin-docker-gh-build-master
     parameters:
       REPLICAS: 2
-      QUERY_ADMINISTRATION_REGION: ingestion
+  - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-production.yml
+    ref: 7b564e1da157859673feeec27dd3f44fd05ed611
+    parameters:
+      REPLICAS: 10
