@@ -1,0 +1,28 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: osd-operators-ecr-mirrors
+description: production namespace for the osd ecr mirror secrets
+
+cluster:
+  $ref: /openshift/app-sre-prod-04/cluster.yml
+
+app:
+  $ref: /services/osd-operators/app.yml
+
+environment:
+  $ref: /products/osdv4/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-04.yml
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: ecr
+  account: app-sre
+  region: us-east-1
+  identifier: managed-upgrade-operator
+  output_resource_name: managed-upgrade-operator-ecr
