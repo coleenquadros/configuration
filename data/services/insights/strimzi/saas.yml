@@ -25,6 +25,7 @@ managedResourceTypes:
 - Kafka
 - KafkaTopic
 - KafkaConnect
+- KafkaConnector
 - ConfigMap
 - Service
 - Deployment
@@ -122,6 +123,17 @@ resourceTemplates:
     ref: master
     parameters:
       BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9093
+- name: kafka-connector
+  path: /deploys/openshift/kafka-connectors.yaml
+  url: https://github.com/RedHatInsights/platform-mq
+  parameters:
+    S3_SINK_TOPICS: platform.insights.client-metrics
+    S3_SINK_BUCKET_NAME: insights-client-metrics-stage
+    S3_SINK_CONNECTOR_NAME: client-metrics-sink-stage
+  targets:
+  - namespace:
+      $ref: /services/insights/strimzi/namespaces/stage-platform-mq-stage.yml
+    ref: master
 - name: prometheus-kafka-consumer-group-exporter
   hash_length: 7
   path: /openshift.yaml
