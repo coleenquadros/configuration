@@ -1471,6 +1471,7 @@ In order to add or update an ECR repository, you need to add them to the `terraf
 - `account`: must be one of the AWS account names we manage. Current options:
   - `quayio-stage`
 - `identifier` - name of resource to create (or update)
+- `public`: (optional) - should the repository be public (COMING SOON!)
 - `output_resource_name`: name of Kubernetes Secret to be created.
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
