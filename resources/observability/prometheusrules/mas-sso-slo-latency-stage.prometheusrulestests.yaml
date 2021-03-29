@@ -1,0 +1,105 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /observability/prometheusrules/mas-sso-slo-latency-stage.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+  - interval: 1m
+  #test that we alert when we hit an error budget burn rate of 14.4 converts to > 0.14 over 5 mins and that the alert stops firing once the errors reduce
+    input_series:
+      - series: 'keycloak_request_duration_bucket{le="1000.0",namespace="mas-sso-stage"}'
+        values: '0+85x5 0+255x5' #a a+b a+(2*b) 0 85 170...
+      - series: keycloak_request_duration_count{namespace="mas-sso-stage"}
+        values: '0+100x10' # 0 100 200 300 400...
+      # Unit test for alerting rules.
+    alert_rule_test:
+        - eval_time: 5m
+          alertname: MasSSOLatency5mto1hrBudgetBurn
+          exp_alerts:
+              - exp_labels:
+                  namespace: mas-sso-stage
+                  route: keycloak
+                  service: mas-sso
+                  severity: info
+                  latency: 1 
+                exp_annotations:
+                  message: "High requests latency budget burn rate 1h/6h  (current value: 0.15)"
+                  dashboard: "https://grafana.stage.devshift.net/d/nzxiqJQMk/mas-sso-monitoring?orgId=1"
+                  runbook: ""
+        - eval_time: 10m
+          alertname: MasSSOLatency5mto1hrBudgetBurn                  
+  - interval: 1m
+  #test that we alert when we hit an error budget burn rate of 6 converts to >0.06 over 30 mins and that the alert stops firing once the errors reduce
+    input_series:
+      - series: 'keycloak_request_duration_bucket{le="1000.0",namespace="mas-sso-stage"}'
+        values: '0+93x30 0+2790x30' # 6 requests > 1000 for 30 mins 0 > 1000 for next 30 mins
+      - series: keycloak_request_duration_count{namespace="mas-sso-stage"}
+        values: '0+100x60' # 0 100 200 300 400...
+      # Unit test for alerting rules.
+    alert_rule_test:
+        - eval_time: 30m
+          alertname: MasSSOLatency30to6hrBudgetBurn
+          exp_alerts:
+              - exp_labels:
+                  namespace: mas-sso-stage
+                  route: keycloak
+                  service: mas-sso
+                  severity: info
+                  latency: 1 
+                exp_annotations:
+                  message: "High requests latency budget burn rate 30m/6h (current value: 0.07)"
+                  dashboard: "https://grafana.stage.devshift.net/d/nzxiqJQMk/mas-sso-monitoring?orgId=1"
+                  runbook: ""
+        - eval_time: 60m
+          alertname: MasSSOLatency30to6hrBudgetBurn
+  - interval: 1m
+  #test that we alert when we hit an error budget burn rate of 3 converts to > 0.03 over 2hrs and that the alert stops firing once the errors reduce
+    input_series:
+      - series: 'keycloak_request_duration_bucket{le="1000.0",namespace="mas-sso-stage"}'
+        values: '0+96x120 0+11520x120' # 4 out of every 100 requests > 1000 for 2hrs 0 > 1000 for a further 2hrs
+      - series: keycloak_request_duration_count{namespace="mas-sso-stage"}
+        values: '0+100x240' # 0 100 200 300 400... total requests
+      # Unit test for alerting rules.
+    alert_rule_test:
+        - eval_time: 2h
+          alertname: MasSSOLatency2hto1dBudgetBurn
+          exp_alerts:
+              - exp_labels:
+                  namespace: mas-sso-stage
+                  route: keycloak
+                  service: mas-sso
+                  severity: info
+                  latency: 1 
+                exp_annotations:
+                  message: "High requests latency budget burn rate 2h/1d (current value: 0.04)"
+                  dashboard: "https://grafana.stage.devshift.net/d/nzxiqJQMk/mas-sso-monitoring?orgId=1"
+                  runbook: ""
+        - eval_time: 4h
+          alertname: MasSSOLatency2hto1dBudgetBurn                                      
+  - interval: 1m
+  #test that we alert when we hit an error budget burn rate of 1 converts to > 0.01 over 2hrs and that the alert stops firing once the errors reduce
+    input_series:
+      - series: 'keycloak_request_duration_bucket{le="1000.0",namespace="mas-sso-stage"}'
+        values: '0+98x360 0+35280x360' # 2 requests > 1000 for 6h 0 > 1000 for next 6h mins
+      - series: keycloak_request_duration_count{namespace="mas-sso-stage"}
+        values: '0+100x720' # 0 100 200 300 400...
+      # Unit test for alerting rules.
+    alert_rule_test:
+        - eval_time: 6h
+          alertname: MasSSOLatency6hto3dBudgetBurn
+          exp_alerts:
+              - exp_labels:
+                  namespace: mas-sso-stage
+                  route: keycloak
+                  service: mas-sso
+                  severity: info
+                  latency: 1 
+                exp_annotations:
+                  message: "High requests latency budget burn rate 6h/3d (current value: 0.02)"
+                  dashboard: "https://grafana.stage.devshift.net/d/nzxiqJQMk/mas-sso-monitoring?orgId=1"
+                  runbook: ""
+        - eval_time: 12h
+          alertname: MasSSOLatency6hto3dBudgetBurn
