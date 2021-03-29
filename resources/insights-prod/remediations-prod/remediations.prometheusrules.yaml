@@ -25,6 +25,66 @@ spec:
         link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/cluster/projects/remediations-prod/workloads"
         message: "Remediations Alert. The remediations pod has been down in prod for two minutes."
 
+    - alert: RemediationsAvailability
+      expr: |
+       sum(increase(remediations_http_request_duration_seconds_count{namespace=~"remediations-prod", status_code=~"5[0-9]{2}"}[10m])) / sum(increase(remediations_http_request_duration_seconds_count{namespace=~"remediations-prod"}[10m])) > .05
+      for: 5m
+      labels:
+        severity: high
+        service: insights
+        env: prod
+        app_team: remediations
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/KDvc-DmWk/remediations?orgId=1"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/cluster/projects/remediations-prod/workloads"
+        message: "Remediations Alert. Availability SLO breach."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/app-sops/remediations/troubleshooting-steps.rst"
+
+    - alert: RemediationsLatency
+      expr: |
+        sum(increase(remediations_http_request_duration_seconds_bucket{namespace="remediations-prod", le="1.5"}[10m])) / sum(increase(remediations_http_request_duration_seconds_count{namespace=~"remediations-prod"}[10m])) < .95
+      for: 5m
+      labels:
+        severity: high
+        service: insights
+        env: prod
+        app_team: remediations
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/KDvc-DmWk/remediations?orgId=1"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/cluster/projects/remediations-prod/workloads"
+        message: "Remediations Alert. Latency SLO breach."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/app-sops/remediations/troubleshooting-steps.rst"
+
+    - alert: RemediationsConnectorAvailability
+      expr: |
+        sum(increase(remediations_connector_error{kubernetes_namespace="remediations-prod"}[10m]) or up * 0) / sum(increase(remediations_connector_summary_count[10m])) < .05
+      for: 5m
+      labels:
+        severity: high
+        service: insights
+        env: prod
+        app_team: remediations
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/KDvc-DmWk/remediations?orgId=1"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/cluster/projects/remediations-prod/workloads"
+        message: "Remediations Alert. Connector Availability SLO breach."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/app-sops/remediations/troubleshooting-steps.rst"
+
+    - alert: RemediationsProcessingMessages
+      expr: |
+        sum(increase(remediations_consumer_messages_total{namespace="remediations-prod"}[5m])) == 0
+      for: 5m
+      labels:
+        severity: high
+        service: insights
+        env: prod
+        app_team: remediations
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/KDvc-DmWk/remediations?orgId=1"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/cluster/projects/remediations-prod/workloads"
+        message: "Remediations Alert. Remediations not processing Kafka messages"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/app-sops/remediations/troubleshooting-steps.rst"
+
     - alert: RemediationsConsumerDown
       expr: |
         up{service="remediations-consumer", namespace="remediations-prod"} == 0
