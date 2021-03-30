@@ -1,5 +1,189 @@
 apiVersion: v1
 data:
+  sd-cicd-addon-weather-report.json: |-
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": "-- Grafana --",
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "editable": true,
+      "gnetId": null,
+      "graphTooltip": 0,
+      "id": 164,
+      "iteration": 1617045203242,
+      "links": [],
+      "panels": [
+        {
+          "datasource": "app-sre-prod-01-prometheus",
+          "description": "Passing tests divided by the number of non-skipped tests.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "links": [
+                {
+                  "targetBlank": true,
+                  "title": "${__field.labels.job} Prow History",
+                  "url": "https://prow.ci.openshift.org/job-history/gs/origin-ci-test/logs/${__field.labels.job}"
+                }
+              ],
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 0,
+            "y": 0
+          },
+          "id": 2,
+          "options": {
+            "displayMode": "gradient",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showUnfilled": true
+          },
+          "pluginVersion": "7.2.1",
+          "targets": [
+            {
+              "expr": "1 - (\n  sum by (job) (\n    count_over_time(\n      cicd_jUnitResult{job=~\".*-addon-[[addon]].*\", result=\"failed\"}[$__range]\n    )\n  ) / (\n    sum by (job) (\n      count_over_time(\n        cicd_jUnitResult{job=~\".*-addon-[[addon]].*\", result=~\"(failed|passed)\"}[$__range]\n      )\n    )\n  )\n)",
+              "instant": true,
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Addon Test Success Rate",
+          "type": "bargauge"
+        },
+        {
+          "datasource": "app-sre-prod-01-prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": null,
+                "filterable": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 12,
+            "y": 0
+          },
+          "id": 4,
+          "options": {
+            "displayMode": "gradient",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "max"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showUnfilled": true
+          },
+          "pluginVersion": "7.2.1",
+          "targets": [
+            {
+              "expr": "count by (testname) (cicd_jUnitResult{job=~\".*-addon-$addon.*\", result=\"failed\"})",
+              "instant": false,
+              "interval": "",
+              "legendFormat": "{{testname}}",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Failures by test case",
+          "type": "bargauge"
+        }
+      ],
+      "refresh": false,
+      "schemaVersion": 26,
+      "style": "dark",
+      "tags": [],
+      "templating": {
+        "list": [
+          {
+            "current": {
+              "selected": false,
+              "text": ".*",
+              "value": ".*"
+            },
+            "hide": 0,
+            "label": null,
+            "name": "addon",
+            "options": [
+              {
+                "selected": true,
+                "text": ".*",
+                "value": ".*"
+              }
+            ],
+            "query": ".*",
+            "skipUrlSync": false,
+            "type": "textbox"
+          }
+        ]
+      },
+      "time": {
+        "from": "now-24h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "",
+      "title": "Addon CI/CD Health",
+      "uid": "bgP2lxQGk",
+      "version": 12
+    }
   sd-cicd-weather-report.json: |-
     {
       "annotations": {
