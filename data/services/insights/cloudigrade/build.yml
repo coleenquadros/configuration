@@ -1,0 +1,47 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+# Labels are metadata useful for querying Qontract using GraphQL
+labels:
+  service: cloudigrade
+  platform: insights
+
+name: ci-ext-insights-cloudigrade
+
+description: 'Job for building cloud meter'
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+type: jobs
+
+config:
+- project:
+    name: cloudigrade
+    label: insights
+    node: insights
+    quay_org: cloudservices
+    gh_org: cloudigrade
+    gh_repo: cloudigrade
+    jobs:
+    ### Bring back when we are doing clowder.
+    # - gh-pr-check:
+    #     display_name: cloudigrade pr-check
+    #     pr_check_script_path: "./deployment/scripts/pr_check.sh"
+    #     branch: 738-aws
+    - gh-build-master:
+        display_name: cloudigrade build-master
+        build_deploy_script_path: "./deployment/scripts/build_deploy.sh"
+        branch: master
+
+- project:
+    name: houndigrade
+    label: insights
+    node: insights
+    quay_org: cloudservices
+    gh_org: cloudigrade
+    gh_repo: houndigrade
+    jobs:
+    - gh-build-master:
+        display_name: houndigrade build-master
+        branch: master

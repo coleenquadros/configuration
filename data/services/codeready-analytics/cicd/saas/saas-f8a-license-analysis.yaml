@@ -1,0 +1,61 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: codeready-analytics
+  component: f8a-license-service
+
+name: saas-codeready-analytics-f8a-license-analysis
+description: SaaS tracking file for codeready-analytics f8a-license-analysis
+
+app:
+  $ref: /services/codeready-analytics/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-codeready-analytics-info
+
+managedResourceTypes:
+- ServiceAccount
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/app-sre/f8a-license-analysis
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+resourceTemplates:
+- name: f8a-license-analysis
+  url: https://github.com/fabric8-analytics/fabric8-analytics-license-analysis
+  path: /openshift/template.yaml
+  parameters:
+    DOCKER_REGISTRY: quay.io
+    DOCKER_IMAGE: app-sre/f8a-license-analysis
+  targets:
+  - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-preview.yml
+    ref: master
+    upstream: fabric8-analytics-fabric8-analytics-license-analysis-gh-build-master
+    parameters:
+      REPLICAS: 1
+      CPU_REQUEST: 100m
+      CPU_LIMIT: 300m
+      MEMORY_REQUEST: 128Mi
+      MEMORY_LIMIT: 512Mi
+  - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-production.yml
+    ref: 2597b0b56e561d8d9c68dd687a5272f5297fe693
+    parameters:
+      REPLICAS: 1
+      CPU_REQUEST: 100m
+      CPU_LIMIT: 300m
+      MEMORY_REQUEST: 128Mi
+      MEMORY_LIMIT: 512Mi

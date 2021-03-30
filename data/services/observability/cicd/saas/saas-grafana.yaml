@@ -30,11 +30,15 @@ imagePatterns:
 - quay.io/app-sre
 - quay.io/pusher
 
-# required for insights private repositories
 authentication:
+  # required for insights private repositories
   code:
     path: app-sre/creds/github-app-sre-bot
     field: openshift-saas-deploy
+  # required for private images
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
 
 resourceTemplates:
 - name: grafana
@@ -48,13 +52,13 @@ resourceTemplates:
       REPLICAS: 1
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: a8fb366369cf5a808a7d995594fdd63e469a8888
+    ref: 4190cefb95b2d128308d04817742d5795295a7ff
     parameters:
       REPLICAS: 3
 # tenant dashboards
 - name: telemeter-dashboards
   url: https://gitlab.cee.redhat.com/observatorium/configuration
-  path: /manifests/production/grafana/observatorium
+  path: /resources/observability/grafana/observatorium
   provider: directory
   targets:
   - namespace:
@@ -62,7 +66,7 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: f4732955cbd9489d100bbe1360a6c4dc5f86d8b5
+    ref: 5193c77e078f7deec83f5ae81b1b71f11ddb1e07
 - name: observatorium-logs-dashboards
   url: https://gitlab.cee.redhat.com/observatorium/configuration
   path: /resources/observability/grafana/observatorium-logs/grafana-dashboards-template.yaml
@@ -70,14 +74,14 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-stage.yml
-    ref: c5cf4c7ab8ff6ba0984fec91c6cada0181292353
+    ref: 3449b4555dda51d8b2f9808304c490bebb235173
     parameters:
       OBSERVATORIUM_API_DATASOURCE: app-sre-stage-01-prometheus
       OBSERVATORIUM_API_NAMESPACE: telemeter-stage
       OBSERVATORIUM_LOGS_NAMESPACE: observatorium-logs-stage
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: c5cf4c7ab8ff6ba0984fec91c6cada0181292353
+    ref: 3449b4555dda51d8b2f9808304c490bebb235173
     parameters:
       OBSERVATORIUM_API_DATASOURCE: telemeter-prod-01-prometheus
       OBSERVATORIUM_API_NAMESPACE: telemeter-production
@@ -192,6 +196,17 @@ resourceTemplates:
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
     ref: fd149f0720c8a19a95001b6893ede8ee31bc3674
+- name: ingress-sideloader-dashboards
+  url: https://gitlab.cee.redhat.com/insights-platform/ingress-sideloader
+  path: /dashboards
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: 01b7aa492fce333a24f4dc7a4e507d6f134c7099
 - name: insights-puptoo-dashboards
   url: https://github.com/RedHatInsights/insights-puptoo
   path: /dashboards
@@ -324,6 +339,14 @@ resourceTemplates:
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
     ref: fbf5c9fbf8241fb4384981c0b896d0cc7ae9dd75
+- name: xjoin-operator-dashboards
+  url: https://github.com/RedHatInsights/xjoin-operator
+  path: /grafana
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: master
 - name: xjoin-dashboards
   url: https://github.com/RedHatInsights/xjoin-search
   path: /grafana
@@ -345,7 +368,7 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: 3c8685890493555c1c43aaa2149fb974a7a5ef24
+    ref: 7046dce6de1366ffc8e58051ad7bc500332b2e74
 - name: compliance-dashboards
   url: https://github.com/RedHatInsights/compliance-backend
   path: /dashboards
@@ -389,18 +412,7 @@ resourceTemplates:
       ref: master
     - namespace:
         $ref: /services/observability/namespaces/app-sre-observability-production.yml
-      ref: e34aaf449571b4556df7cba50c97d424a7695f9d
-- name: playbook-dispatcher-dashboards
-  url: https://github.com/RedHatInsights/playbook-artifact-validator
-  path: /grafana
-  provider: directory
-  targets:
-  - namespace:
-      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
-    ref: master
-  - namespace:
-      $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: 48194709f13987f8fbb120d2f3b9d5b656925d24
+      ref: 29a017139b6b59cdae3ba7e9aee6e1ff7379ccb9
 - name: cloudigrade-dashboards
   url: https://github.com/cloudigrade/cloudigrade
   path: /dashboards
@@ -412,4 +424,15 @@ resourceTemplates:
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
     ref: 2b1947e41325c543f45f97b2bec0a335d27ff28b
+- name: playbook-dispatcher-dashboards
+  url: https://github.com/RedHatInsights/playbook-dispatcher
+  path: /dashboard
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: c4b334b3071881ae22689d09f6b7ee4c89129625
 

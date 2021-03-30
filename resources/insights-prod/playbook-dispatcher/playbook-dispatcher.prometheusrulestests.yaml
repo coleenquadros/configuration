@@ -1,0 +1,545 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /insights-prod/playbook-dispatcher/playbook-dispatcher.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+
+# PlaybookDispatcherAbsent
+- interval: 1m
+  input_series:
+  - series: up{job="playbook-dispatcher-api"}
+    values: 1+0x10
+  - series: up{job="playbook-dispatcher-response-consumer"}
+    values: 1+0x10
+  - series: up{job="playbook-dispatcher-validator"}
+    values: 1+0x10
+  - series: up{job="playbook-dispatcher-connect-connect-metrics"}
+    values: 1+0x10
+  alert_rule_test:
+  - eval_time: 10m
+    alertname: PlaybookDispatcherAbsent
+
+- interval: 1m
+  input_series:
+  - series: up{job="playbook-dispatcher-api"}
+    values: 1+0x10
+  - series: up{job="playbook-dispatcher-response-consumer"}
+    values: 1+0x10
+  - series: up{job="playbook-dispatcher-validator"}
+    values: 1+0x10
+  - series: up{job="playbook-dispatcher-connect-connect-metrics"}
+    values: 1 1 1 1 1 1 0 0 0 0 1
+  alert_rule_test:
+  - eval_time: 10m
+    alertname: PlaybookDispatcherAbsent
+
+- interval: 1m
+  input_series:
+  - series: up{job="playbook-dispatcher-api"}
+    values: 1+0x10
+  - series: up{job="playbook-dispatcher-response-consumer"}
+    values: 1+0x10
+  - series: up{job="playbook-dispatcher-validator"}
+    values: 1+0x10
+  - series: up{job="playbook-dispatcher-connect-connect-metrics"}
+    values: 1 1 1 1 1 0 0 0 0 0 0
+  alert_rule_test:
+  - eval_time: 10m
+    alertname: PlaybookDispatcherAbsent
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/playbook-dispatcher-prod/deployments"
+        message: "playbook-dispatcher pod missing"
+
+# PlaybookDispatcherRestart
+- interval: 1m
+  input_series:
+  - series: kube_pod_container_status_restarts_total{container="playbook-dispatcher-api"}
+    values: 1+0x60
+  - series: kube_pod_container_status_restarts_total{container="playbook-dispatcher-response-consumer"}
+    values: 0+0x60
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: PlaybookDispatcherRestart
+
+- interval: 1m
+  input_series:
+  - series: kube_pod_container_status_restarts_total{container="playbook-dispatcher-api"}
+    values: 1+0x60
+  - series: kube_pod_container_status_restarts_total{container="playbook-dispatcher-response-consumer"}
+    values: 0+0x56 1+0x3
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: PlaybookDispatcherRestart
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+        container: playbook-dispatcher-response-consumer
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/playbook-dispatcher-prod/deployments"
+        message: "playbook-dispatcher container playbook-dispatcher-response-consumer restarting"
+
+# PlaybookDispatcherSLOAvailability
+- interval: 1m
+  input_series:
+  - series: echo_http_requests_total{status="2xx", service="playbook-dispatcher-api"}
+    values: 0+1x60
+  - series: echo_http_requests_total{status="5xx", service="playbook-dispatcher-api"}
+    values: 0+0x60
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: PlaybookDispatcherSLOAvailability
+
+- interval: 1m
+  input_series:
+  - series: echo_http_requests_total{status="2xx", service="playbook-dispatcher-api"}
+    values: 0+1x60
+  - series: echo_http_requests_total{status="5xx", service="playbook-dispatcher-api"}
+    values: 0+0x55 3+0x4
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: PlaybookDispatcherSLOAvailability
+
+- interval: 1m
+  input_series:
+  - series: echo_http_requests_total{status="2xx", service="playbook-dispatcher-api"}
+    values: 0+1x60
+  - series: echo_http_requests_total{status="5xx", service="playbook-dispatcher-api"}
+    values: 0+0x55 5+0x4
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: PlaybookDispatcherSLOAvailability
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/goto/af5247885c9c7957c76db8f5af36071f"
+        message: "playbook-dispatcher availability SLO breached: 0.9230769230769231"
+
+# PlaybookDispatcherSLOLatencyAPI
+- interval: 1m
+  input_series:
+  - series: echo_http_request_duration_seconds_bucket{le="2", service="playbook-dispatcher-api"}
+    values: 0+1x60
+  - series: echo_http_request_duration_seconds_bucket{le="+Inf", service="playbook-dispatcher-api"}
+    values: 0+1x60
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: PlaybookDispatcherSLOLatencyAPI
+
+- interval: 1m
+  input_series:
+  - series: echo_http_request_duration_seconds_bucket{le="2", service="playbook-dispatcher-api"}
+    values: 0+1x60
+  - series: echo_http_request_duration_seconds_bucket{le="+Inf", service="playbook-dispatcher-api"}
+    values: 0+1x55 0+2x4
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: PlaybookDispatcherSLOLatencyAPI
+
+- interval: 1m
+  input_series:
+  - series: echo_http_request_duration_seconds_bucket{le="2", service="playbook-dispatcher-api"}
+    values: 0+1x60
+  - series: echo_http_request_duration_seconds_bucket{le="+Inf", service="playbook-dispatcher-api"}
+    values: 0+2x60
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: PlaybookDispatcherSLOLatencyAPI
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/goto/af5247885c9c7957c76db8f5af36071f"
+        message: "playbook-dispatcher latency SLO breached: 0.5"
+
+# PlaybookDispatcherSLOLatencyKafka
+- interval: 1m
+  input_series:
+  - series: kafka_consumergroup_group_lag{group="playbook-dispatcher", topic="platform.playbook-dispatcher.runner-updates"}
+    values: 5000+0x60
+  - series: kafka_consumergroup_group_lag{group="playbook-dispatcher", topic="platform.upload.playbook"}
+    values: 5000+0x60
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: PlaybookDispatcherSLOLatencyKafka
+
+- interval: 1m
+  input_series:
+  - series: kafka_consumergroup_group_lag{group="playbook-dispatcher", topic="platform.playbook-dispatcher.runner-updates"}
+    values: 12000+0x1 5000+0x58
+  - series: kafka_consumergroup_group_lag{group="playbook-dispatcher", topic="platform.upload.playbook"}
+    values: 12000+0x1 5000+0x58
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: PlaybookDispatcherSLOLatencyKafka
+
+- interval: 1m
+  input_series:
+  - series: kafka_consumergroup_group_lag{group="playbook-dispatcher", topic="platform.playbook-dispatcher.runner-updates"}
+    values: 6000+0x60
+  - series: kafka_consumergroup_group_lag{group="playbook-dispatcher", topic="platform.upload.playbook"}
+    values: 6000+0x60
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: PlaybookDispatcherSLOLatencyKafka
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/playbook-dispatcher-prod/deployments"
+        message: "playbook-dispatcher latency SLO breached: 12000"
+
+- interval: 1m
+  input_series:
+  - series: kafka_consumergroup_group_lag{group="playbook-dispatcher", topic="platform.playbook-dispatcher.runner-updates"}
+    values: 8000+0x3 0+0x56
+  - series: kafka_consumergroup_group_lag{group="playbook-dispatcher", topic="platform.upload.playbook"}
+    values: 3000+0x3 0+0x56
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: PlaybookDispatcherSLOLatencyKafka
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/playbook-dispatcher-prod/deployments"
+        message: "playbook-dispatcher latency SLO breached: 11000"
+
+# PlaybookDispatcherAPI500
+- interval: 1m
+  input_series:
+  - series: echo_http_requests_total{status="5xx", service="playbook-dispatcher-api"}
+    values: 1+0x60
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: PlaybookDispatcherAPI500
+
+- interval: 1m
+  input_series:
+  - series: echo_http_requests_total{status="2xx", service="playbook-dispatcher-api"}
+    values: 1+0x60
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: PlaybookDispatcherAPI500
+
+- interval: 1m
+  input_series:
+  - series: echo_http_requests_total{status="5xx", service="playbook-dispatcher-api"}
+    values: 0 0 0 1 1 1
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: PlaybookDispatcherAPI500
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/goto/af5247885c9c7957c76db8f5af36071f"
+        message: "playbook-dispatcher-api 500"
+
+# PlaybookDispatcherConsumerError
+- interval: 1m
+  input_series:
+  - series: response_consumer_error_total{service="playbook-dispatcher-response-consumer", type="header_missing"}
+    values: 1+0x60
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: PlaybookDispatcherConsumerError
+
+- interval: 1m
+  input_series:
+  - series: response_consumer_error_total{service="playbook-dispatcher-response-consumer", type="header_missing"}
+    values: 0 0 0 0 1 1
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: PlaybookDispatcherConsumerError
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+        type: header_missing
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/goto/65ca3ce87c38e6cb2ef5e806fdb8252c"
+        message: "playbook-dispatcher-response-consumer error: header_missing"
+
+# PlaybookDispatcherConsumerValidationFailure
+- interval: 1m
+  input_series:
+  - series: response_consumer_validation_failure_total{service="playbook-dispatcher-response-consumer", type="json_unmarshall"}
+    values: 1+0x60
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: PlaybookDispatcherConsumerValidationFailure
+
+- interval: 1m
+  input_series:
+  - series: response_consumer_validation_failure_total{service="playbook-dispatcher-response-consumer", type="json_unmarshall"}
+    values: 0 0 0 0 1 1
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: PlaybookDispatcherConsumerValidationFailure
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+        type: json_unmarshall
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/goto/65ca3ce87c38e6cb2ef5e806fdb8252c"
+        message: "playbook-dispatcher-response-consumer validation failure: json_unmarshall"
+
+# PlaybookDispatcherConsumerLagIncreasing
+- interval: 1m
+  input_series:
+  - series: kafka_consumergroup_group_lag{topic="platform.playbook-dispatcher.runner-updates", group="playbook-dispatcher"}
+    values: 1+0x60
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: PlaybookDispatcherConsumerLagIncreasing
+
+- interval: 1m
+  input_series:
+  - series: kafka_consumergroup_group_lag{topic="platform.playbook-dispatcher.runner-updates", group="playbook-dispatcher", partition="0"}
+    values: 1+1x15 1+1x15 1+1x15 1+1x15
+  - series: kafka_consumergroup_group_lag{topic="platform.playbook-dispatcher.runner-updates", group="playbook-dispatcher", partition="1"}
+    values: 1+0x60
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: PlaybookDispatcherConsumerLagIncreasing
+
+- interval: 1m
+  input_series:
+  - series: kafka_consumergroup_group_lag{topic="platform.playbook-dispatcher.runner-updates", group="playbook-dispatcher", partition="0"}
+    values: 1+1x60
+  - series: kafka_consumergroup_group_lag{topic="platform.playbook-dispatcher.runner-updates", group="playbook-dispatcher", partition="1"}
+    values: 1000-2x60
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: PlaybookDispatcherConsumerLagIncreasing
+
+- interval: 1m
+  input_series:
+  - series: kafka_consumergroup_group_lag{topic="platform.playbook-dispatcher.runner-updates", group="playbook-dispatcher", partition="0"}
+    values: 1+0x20 1+1x39
+  - series: kafka_consumergroup_group_lag{topic="platform.playbook-dispatcher.runner-updates", group="playbook-dispatcher", partition="1"}
+    values: 1+0x60
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: PlaybookDispatcherConsumerLagIncreasing
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/playbook-dispatcher-prod/deployments"
+        message: "playbook-dispatcher-response-consumer lag keeps increasing for over 30 minutes"
+
+# PlaybookDispatcherValidatorFailure
+- interval: 1m
+  input_series:
+  - series: validator_failure_total{service="playbook-dispatcher-validator"}
+    values: 1+0x60
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: PlaybookDispatcherValidatorFailure
+
+- interval: 1m
+  input_series:
+  - series: validator_failure_total{service="playbook-dispatcher-validator"}
+    values: 0 0 0 0 1 1
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: PlaybookDispatcherValidatorFailure
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/goto/0dedce8b19a56d944f38d022e02909b5"
+        message: "playbook-dispatcher-validator failure"
+
+# PlaybookDispatcherValidatorError
+- interval: 1m
+  input_series:
+  - series: validator_error_total{service="playbook-dispatcher-validator"}
+    values: 1+0x60
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: PlaybookDispatcherValidatorError
+
+- interval: 1m
+  input_series:
+  - series: validator_error_total{service="playbook-dispatcher-validator", phase="s3fetch"}
+    values: 0 0 0 0 0 1
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: PlaybookDispatcherValidatorError
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+        phase: s3fetch
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/goto/0dedce8b19a56d944f38d022e02909b5"
+        message: "playbook-dispatcher-validator error: s3fetch"
+
+# PlaybookDispatcherValidatorProducerError
+- interval: 1m
+  input_series:
+  - series: validator_kafka_producer_error_total{service="playbook-dispatcher-validator"}
+    values: 1+0x60
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: PlaybookDispatcherValidatorProducerError
+
+- interval: 1m
+  input_series:
+  - series: validator_kafka_producer_error_total{service="playbook-dispatcher-validator"}
+    values: 0 0 0 0 0 1
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: PlaybookDispatcherValidatorProducerError
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/goto/0dedce8b19a56d944f38d022e02909b5"
+        message: "playbook-dispatcher-validator producer error"
+
+
+# PlaybookDispatcherValidatorLagIncreasing
+- interval: 1m
+  input_series:
+  - series: kafka_consumergroup_group_lag{topic="platform.upload.playbook", group="playbook-dispatcher"}
+    values: 1+0x60
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: PlaybookDispatcherValidatorLagIncreasing
+
+- interval: 1m
+  input_series:
+  - series: kafka_consumergroup_group_lag{topic="platform.upload.playbook", group="playbook-dispatcher", partition="0"}
+    values: 1+1x15 1+1x15 1+1x15 1+1x15
+  - series: kafka_consumergroup_group_lag{topic="platform.upload.playbook", group="playbook-dispatcher", partition="1"}
+    values: 1+0x60
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: PlaybookDispatcherValidatorLagIncreasing
+
+- interval: 1m
+  input_series:
+  - series: kafka_consumergroup_group_lag{topic="platform.upload.playbook", group="playbook-dispatcher", partition="0"}
+    values: 1+0x20 1+1x39
+  - series: kafka_consumergroup_group_lag{topic="platform.upload.playbook", group="playbook-dispatcher", partition="1"}
+    values: 1+0x60
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: PlaybookDispatcherValidatorLagIncreasing
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/playbook-dispatcher-prod/deployments"
+        message: "playbook-dispatcher-validator lag keeps increasing for over 30 minutes"
+
+
+# PlaybookDispatcherNoConnector
+- interval: 1m
+  input_series:
+  - series: kafka_connect_worker_connector_running_task_count{connector="playbook-dispatcher-event-interface"}
+    values: 1+0x60
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: PlaybookDispatcherNoConnector
+
+- interval: 1m
+  input_series:
+  - series: kafka_connect_worker_connector_running_task_count{connector="playbook-dispatcher-event-interface"}
+    values: 1+0x50 0+0x10
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: PlaybookDispatcherNoConnector
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/playbook-dispatcher-prod/kafka.strimzi.io~v1alpha1~KafkaConnector"
+        message: "playbook-dispatcher-event-interface not running"
+
+- interval: 1m
+  input_series:
+  - series: kafka_connect_worker_connector_running_task_count{connector="playbook-dispatcher-event-interface"}
+    values: 0+0x60
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: PlaybookDispatcherNoConnector
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/playbook-dispatcher-prod/kafka.strimzi.io~v1alpha1~KafkaConnector"
+        message: "playbook-dispatcher-event-interface not running"

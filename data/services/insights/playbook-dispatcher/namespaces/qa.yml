@@ -1,0 +1,50 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: insights
+
+name: playbook-dispatcher-qa
+description: Namespace where playbook dispatcher resources are deployed
+
+cluster:
+  $ref: /openshift/insights/cluster-insights-dev.yml
+
+app:
+  $ref: /services/insights/playbook-dispatcher/app.yml
+
+environment:
+  $ref: /products/insights/environments/qa.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/insights-dev/playbook-dispatcher-qa/playbook-dispatcher-db
+  version: 1
+- provider: vault-secret
+  path: insights/secrets/insights-dev/playbook-dispatcher-qa/auth-psk-test
+  version: 2
+- provider: vault-secret
+  path: insights/secrets/insights-dev/playbook-dispatcher-qa/auth-psk-remediations
+  version: 1
+- provider: vault-secret
+  path: insights/secrets/insights-dev/playbook-dispatcher-qa/auth-psk-config-manager
+  version: 1
+- provider: vault-secret
+  path: insights/secrets/insights-dev/playbook-dispatcher-qa/client-psk-cloud-connector
+  version: 1
+
+managedTerraformResources: false

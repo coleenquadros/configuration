@@ -45,8 +45,8 @@ spec:
   external_id: 59b2fbf5-6cd0-4fb0-b5f4-eef33b88fbf0
   provider: aws
   region: us-east-1
-  channel: stable
-  version: 4.6.8
+  channel: fast
+  version: 4.7.0
   initial_version: 4.4.11
   multi_az: true
   autoscale:
@@ -58,6 +58,8 @@ spec:
   private: true
   upgrade: batch2
   provision_shard_id: 0c7d42ee-d751-4e5e-928d-838c4141ec20
+
+machinePools: []
 
 externalConfiguration:
   labels:
@@ -90,6 +92,12 @@ awsInfrastructureAccess:
 - awsGroup:
     $ref: /aws/app-sre/groups/App-SRE-admin.yml
   accessLevel: network-mgmt
+- awsGroup:
+    $ref: /aws/app-sre/groups/Log-consumers.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/osd-privatelink-prod/groups/Admins.yml
+  accessLevel: read-only
 
 peering:
   connections:
@@ -106,4 +114,11 @@ peering:
     name: hivep02ue1_app-sre-prod-01
     cluster:
       $ref: /openshift/app-sre-prod-01/cluster.yml
+    manageRoutes: true
+  - provider: account-tgw
+    name: hivep02ue1
+    account:
+      $ref: /aws/osd-privatelink-prod/account.yml
+    tags:
+      osd: privatelink
     manageRoutes: true

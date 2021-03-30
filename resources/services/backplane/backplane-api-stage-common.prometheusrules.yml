@@ -11,57 +11,57 @@ spec:
   groups:
   - name: backplane-api-rules-{{{shard_name}}}
     rules:
-    - alert: BackplaneLoginSLOBudgetBurn
+    - alert: BackplaneLoginSLOBudgetBurn1Hour
       annotations:
-        message: "High error budget burn for backplane-api logins (current value: {{ $value }})  on stage - {{{shard_name}}}"
+        message: "High error budget burn for backplane-api logins (current value: {{ $value }})  on stage - {{{shard_name}}} over the last hour"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/BackplaneLoginSLOBudgetBurn.md"
       expr: |
-        sum(http_requests_total:burnrate5m{job="backplane-api",handler="login"}) > (14.40 * (1-0.95000))
+        sum(backplane_500_response:burnrate5m{job="backplane-api",route="api"}) > (14.40 * (1-0.95000))
         and
-        sum(http_requests_total:burnrate1h{job="backplane-api",handler="login"}) > (14.40 * (1-0.95000))
+        sum(backplane_500_response:burnrate1h{job="backplane-api",route="api"}) > (14.40 * (1-0.95000))
       for: 2m
       labels:
         job: backplane-api
-        severity: critical
+        severity: medium
         service: srep
-    - alert: BackplaneLoginSLOBudgetBurn
+    - alert: BackplaneLoginSLOBudgetBurn6hour
       annotations:
-        message: "High error budget burn for backplane-api logins (current value: {{ $value }})  on stage - {{{shard_name}}}"
+        message: "High error budget burn for backplane-api logins (current value: {{ $value }})  on stage - {{{shard_name}}} over the last 6 hours"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/BackplaneLoginSLOBudgetBurn.md"
       expr: |
-        sum(http_requests_total:burnrate30m{job="backplane-api",handler="login"}) > (6.00 * (1-0.95000))
+        sum(backplane_500_response:burnrate30m{job="backplane-api",route="api"}) > (6.00 * (1-0.95000))
         and
-        sum(http_requests_total:burnrate6h{job="backplane-api",handler="login"}) > (6.00 * (1-0.95000))
+        sum(backplane_500_response:burnrate6h{job="backplane-api",route="api"}) > (6.00 * (1-0.95000))
       for: 15m
       labels:
         job: backplane-api
-        severity: critical
+        severity: medium
         service: srep
-    - alert: BackplaneLoginSLOBudgetBurn
+    - alert: BackplaneLoginSLOBudgetBurn1Day
       annotations:
-        message: "High error budget burn for backplane-api logins (current value: {{ $value }})  on stage - {{{shard_name}}}"
+        message: "High error budget burn for backplane-api logins (current value: {{ $value }})  on stage - {{{shard_name}}} over the last day"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/BackplaneLoginSLOBudgetBurn.md"
       expr: |
-        sum(http_requests_total:burnrate2h{job="backplane-api",handler="login"}) > (3.00 * (1-0.95000))
+        sum(backplane_500_response:burnrate2h{job="backplane-api",route="api"}) > (3.00 * (1-0.95000))
         and
-        sum(http_requests_total:burnrate1d{job="backplane-api",handler="login"}) > (3.00 * (1-0.95000))
+        sum(backplane_500_response:burnrate1d{job="backplane-api",route="api"}) > (3.00 * (1-0.95000))
       for: 1h
       labels:
         job: backplane-api
-        severity: warning
+        severity: medium
         service: srep
-    - alert: BackplaneLoginSLOBudgetBurn
+    - alert: BackplaneLoginSLOBudgetBurn3Day
       annotations:
-        message: "High error budget burn for backplane-api logins (current value: {{ $value }})  on stage - {{{shard_name}}}"
+        message: "High error budget burn for backplane-api logins (current value: {{ $value }})  on stage - {{{shard_name}}} over the last 3 days"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/BackplaneLoginSLOBudgetBurn.md"
       expr: |
-        sum(http_requests_total:burnrate6h{job="backplane-api",handler="login"}) > (1.00 * (1-0.95000))
+        sum(backplane_500_response:burnrate6h{job="backplane-api",route="api"}) > (1.00 * (1-0.95000))
         and
-        sum(http_requests_total:burnrate3d{job="backplane-api",handler="login"}) > (1.00 * (1-0.95000))
+        sum(backplane_500_response:burnrate3d{job="backplane-api",route="api"}) > (1.00 * (1-0.95000))
       for: 3h
       labels:
         job: backplane-api
-        severity: critical
+        severity: medium
         service: srep
     - alert: Backplane API Target Down
       annotations:
@@ -74,58 +74,59 @@ spec:
         severity: critical
         service: srep
     - expr: |
-        sum(rate(http_requests_total{job="backplane-api",handler="login",code=~"5.."}[1d]))
+        sum(rate(haproxy_backend_http_responses_total{exported_namespace="backplane",route="api",code="5xx"}[1d]))
         /
-        sum(rate(http_requests_total{job="backplane-api",handler="login"}[1d]))
+        sum(rate(haproxy_backend_http_responses_total{exported_namespace="backplane",route="api"}[1d]))
       labels:
         job: backplane-api
-        handler: login
-      record: http_requests_total:burnrate1d
+        route: api
+      record: backplane_500_response:burnrate1d
     - expr: |
-        sum(rate(http_requests_total{job="backplane-api",handler="login",code=~"5.."}[1h]))
+        sum(rate(haproxy_backend_http_responses_total{exported_namespace="backplane",route="api",code="5xx"}[1h]))
         /
-        sum(rate(http_requests_total{job="backplane-api",handler="login"}[1h]))
+        sum(rate(haproxy_backend_http_responses_total{exported_namespace="backplane",route="api"}[1h]))
       labels:
         job: backplane-api
-        handler: login
-      record: http_requests_total:burnrate1h
+        route: api
+      record: backplane_500_response:burnrate1h
     - expr: |
-        sum(rate(http_requests_total{job="backplane-api",handler="login",code=~"5.."}[2h]))
+        sum(rate(haproxy_backend_http_responses_total{exported_namespace="backplane",route="api",code="5xx"}[2h]))
         /
-        sum(rate(http_requests_total{job="backplane-api",handler="login"}[2h]))
+        sum(rate(haproxy_backend_http_responses_total{exported_namespace="backplane",route="api"}[2h]))
       labels:
         job: backplane-api
-        handler: login
-      record: http_requests_total:burnrate2h
+        route: api
+      record: backplane_500_response:burnrate2h
     - expr: |
-        sum(rate(http_requests_total{job="backplane-api",handler="login",code=~"5.."}[30m]))
+        sum(rate(haproxy_backend_http_responses_total{exported_namespace="backplane",route="api",code="5xx"}[30m]))
         /
-        sum(rate(http_requests_total{job="backplane-api",handler="login"}[30m]))
+        sum(rate(haproxy_backend_http_responses_total{exported_namespace="backplane",route="api"}[30m]))
       labels:
         job: backplane-api
-        handler: login
-      record: http_requests_total:burnrate30m
+        route: api
+      record: backplane_500_response:burnrate30m
     - expr: |
-        sum(rate(http_requests_total{job="backplane-api",handler="login",code=~"5.."}[3d]))
+        sum(rate(haproxy_backend_http_responses_total{exported_namespace="backplane",route="api",code="5xx"}[3d]))
         /
-        sum(rate(http_requests_total{job="backplane-api",handler="login"}[3d]))
+        sum(rate(haproxy_backend_http_responses_total{exported_namespace="backplane",route="api"}[3d]))
       labels:
         job: backplane-api
-        handler: login
-      record: http_requests_total:burnrate3d
+        route: api
+      record: backplane_500_response:burnrate3d
     - expr: |
-        sum(rate(http_requests_total{job="backplane-api",handler="login",code=~"5.."}[5m]))
+        sum(rate(haproxy_backend_http_responses_total{exported_namespace="backplane",route="api",code="5xx"}[5m]))
         /
-        sum(rate(http_requests_total{job="backplane-api",handler="login"}[5m]))
+        sum(rate(haproxy_backend_http_responses_total{exported_namespace="backplane",route="api"}[5m]))
       labels:
         job: backplane-api
-        handler: login
-      record: http_requests_total:burnrate5m
+        route: api
+      record: backplane_500_response:burnrate5m
     - expr: |
-        sum(rate(http_requests_total{job="backplane-api",handler="login",code=~"5.."}[6h]))
+        sum(rate(haproxy_backend_http_responses_total{exported_namespace="backplane",route="api",code="5xx"}[6h]))
         /
-        sum(rate(http_requests_total{job="backplane-api",handler="login"}[6h]))
+        sum(rate(haproxy_backend_http_responses_total{exported_namespace="backplane",route="api"}[6h]))
       labels:
         job: backplane-api
-        handler: login
-      record: http_requests_total:burnrate6h
+        route: api
+      record: backplane_500_response:burnrate6h
+

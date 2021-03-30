@@ -33,6 +33,7 @@ managedResourceNames:
     - prometheus-additional-alertmanager-config
     - prometheus-additional-scrape-config
     - prometheus-auth-proxy
+    - prometheus-additional-scrape-config-2
 
 sharedResources:
 - $ref: /services/observability/shared-resources/cluster-alerts.yml
@@ -56,6 +57,13 @@ openshiftResources:
   type: extracurlyjinja2
   path: /observability/alertmanager/alertmanager-instance.secret.yaml
   validate_alertmanager_config: true
+### Prometheus AMS subscription_labels scrape config
+### Defines the job for scraping subscription_labels
+- provider: resource-template
+  type: jinja2
+  path: /observability/prometheus/prometheus-ams-subscription-labels-scrapeconfig.secret.yaml
+  variables:
+    namespace: uhc-production
 
 ## Servicemonitors
 ### All managed Prometheus Operators
@@ -66,11 +74,14 @@ openshiftResources:
   path: /observability/olm/catalog-operator.servicemonitor.yml
 - provider: resource
   path: /observability/olm/olm-operator.servicemonitor.yml
+### Limitador
+- provider: resource
+  path: /observability/servicemonitors/limitador.servicemonitor.yaml
 
 ## Prometheus Rules
 ### App SRE contract
 - provider: resource
-  path: /observability/prometheusrules/app-sre-contract.yaml
+  path: /observability/prometheusrules/app-sre-contract.prometheusrules.yaml
 ### Federated Kubernetes metrics
 - provider: resource
   path: /observability/prometheusrules/kube-metrics.prometheusrules.yaml
@@ -83,11 +94,23 @@ openshiftResources:
 ### OLM alerts
 - provider: resource
   path: /observability/olm/olm.prometheusrules.yaml
+### App SRE prometheus PVC metrics
+- provider: resource
+  path: /observability/prometheusrules/kube-metrics-pvc-observability.prometheusrules.yaml
 
 
 ### UHC Account Manager
-- provider: resource
-  path: /observability/prometheusrules/uhc-acct-mngr-production.prometheusrules.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/prometheusrules/uhc-acct-mngr.prometheusrules.yaml
+  variables:
+    environment: production
+    severity_ams_down: critical
+    severity_500_errors: high
+    severity_rhit_errors: high
+    severity_terms_errors: high
+    severity_pod_restart: medium
+    severity_pod_restart_many_times: high
 ### UHC Clusters Service
 - provider: resource
   path: /observability/prometheusrules/uhc-clusters-service-production.prometheusrules.yaml
@@ -107,6 +130,28 @@ openshiftResources:
 ### Assisted-Installer Service
 - provider: resource
   path: /observability/prometheusrules/assisted-installer-production.prometheusrules.yaml
+
+### OCM Clusters service SLO rules
+- provider: resource-template
+  path: /observability/prometheusrules/uhc-clusters-service-slo.prometheusrules.yaml
+  type: extracurlyjinja2
+  variables:
+    namespace: uhc-production
+
+### OCM Accounts mgmt SLO rules
+- provider: resource-template
+  path: /observability/prometheusrules/uhc-accounts-mgmt-slo.prometheusrules.yaml
+  type: extracurlyjinja2
+  variables:
+    namespace: uhc-production
+ 
+### Cincinnati SLO rules
+- provider: resource-template
+  path: /observability/prometheusrules/cincinnati-slo.prometheusrules.yaml
+  type: extracurlyjinja2
+  variables:
+    namespace: cincinnati-stage
+    route: cincinnati-route-prod
 
 ## ServiceMonitors
 ### UHC
@@ -133,6 +178,19 @@ openshiftResources:
 - provider: resource-template
   type: jinja2
   path: /observability/servicemonitors/uhc-account-manager-envoy.servicemonitor.yaml
+  variables:
+    environment: production
+    namespace: uhc-production
+#### OCM Service Log
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/ocm-service-log.servicemonitor.yaml
+  variables:
+    environment: production
+    namespace: uhc-production
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/ocm-service-log-envoy.servicemonitor.yaml
   variables:
     environment: production
     namespace: uhc-production
@@ -168,12 +226,6 @@ openshiftResources:
   path: /observability/prometheus/prometheus-ams.service.yaml
 - provider: resource
   path: /observability/servicemonitors/prometheus-ams.servicemonitor.yaml
-- provider: resource-template
-  type: jinja2
-  path: /observability/servicemonitors/ams-subscription-labels.servicemonitor.yaml
-  variables:
-    environment: production
-    namespace: uhc-production
 
 ### Sendgrid
 - provider: resource-template

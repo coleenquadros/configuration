@@ -1,0 +1,13 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2021-02-12-get-subswatch-applications-with-accounts-round2
+namespace:
+  $ref: /services/insights/sources/namespaces/sources-prod.yml
+identifier: sources-prod
+output: stdout
+query: |
+  SELECT t.EXTERNAL_TENANT account_number, a.id application_id, a.SOURCE_ID, a.AVAILABILITY_STATUS, a.AVAILABILITY_STATUS_ERROR
+  FROM APPLICATIONS a
+  JOIN TENANTS t ON t.id = a.TENANT_ID
+  WHERE a.APPLICATION_TYPE_ID IN ( SELECT id FROM APPLICATION_TYPES WHERE NAME = '/insights/platform/cloud-meter');

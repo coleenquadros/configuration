@@ -1,0 +1,73 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: insights
+
+name: playbook-dispatcher-prod
+description: Namespace where playbook dispatcher resources are deployed
+
+cluster:
+  $ref: /openshift/crcp01ue1/cluster.yml
+
+app:
+  $ref: /services/insights/playbook-dispatcher/app.yml
+
+environment:
+  $ref: /products/insights/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-prod.yml
+- $ref: /services/insights/turnpike/namespaces/prod-turnpike-prod.yml
+- $ref: /services/insights/remediations/namespaces/remediations-prod.yml
+#- $ref: /services/insights/config-manager/namespaces/config-manager-prod.yml
+
+managedRoles: true
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-prod/playbook-dispatcher-prod/auth-psk-remediations
+  version: 1
+- provider: vault-secret
+  path: insights/secrets/insights-prod/playbook-dispatcher-prod/auth-psk-config-manager
+  version: 1
+- provider: vault-secret
+  path: insights/secrets/insights-prod/playbook-dispatcher-prod/client-psk-cloud-connector
+  version: 1
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-prod
+  identifier: playbook-dispatcher-prod
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
+- provider: rds
+  account: insights-prod
+  identifier: playbook-dispatcher-prod
+  defaults: /terraform/resources/insights/production/rds/postgres12-rds-1.yml
+  overrides:
+    username: insights
+    allocated_storage: 300
+    name: insights
+    engine_version: "12.3"
+  parameter_group: /terraform/resources/insights/production/rds/postgres12-parameter-group-playbook-dispatcher-prod.yml
+  output_resource_name: playbook-dispatcher-db
+  enhanced_monitoring: true

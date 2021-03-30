@@ -28,12 +28,57 @@
       - vault-secrets:
           <<: *vault_defaults
           secrets:
+          - *ci_jenkins_token
+          - *gitlab_token
           - *backup_ecr_push_creds
           - *quay_secret_push
           - *app_sre_bot_push_token
           - *app_interface_creds
           - *managed_services_github_deploy_key
     <<: *gl_build_master
+
+- job-template:
+    id: managed-services-gl-build-test-branch
+    name: "{gl_group}-{gl_project}-gl-build-test-{branch}"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+          - *ci_jenkins_token
+          - *gitlab_token
+          - *backup_ecr_push_creds
+          - *quay_secret_push
+          - *app_sre_bot_push_token
+          - *app_interface_creds
+          - *managed_services_github_deploy_key
+          - *ci_ocm_token
+          - *ci_aws_keys
+          - *ci_observatorium
+          - *kas_fleetshard
+          - *ci_cd_quay
+    <<: *gl_build_master
+    parameters:
+    - bool:
+        name: RELEASE
+        default: '{release}'
+        description: 'indicates release build'
+    publishers:
+    - archive:
+        artifacts: "{archive_artifacts}"
+        allow-empty: true
+    - junit:
+        results: "{junit_results}"
+    - postbuildscript:
+        builders:
+            - role: SLAVE
+              build-on:
+                - NOT_BUILT
+                - ABORTED
+                - FAILURE
+              build-steps:
+                - shell: "{cleanup_script}"
 
 - job-template:
     id: managed-services-pull-upstream
@@ -125,8 +170,8 @@
                 - shell: "make ci/pipeline/cleanup"
 
 - job-template:
-    id: managed-kafka-security-scan
-    name: "managed-kafka-security-scan"
+    id: managed-services-security-scan
+    name: "{gl_project}-security-scan-{branch}"
     wrappers:
       - timeout_wrapper:
           timeout: "{timeout}"
@@ -267,8 +312,8 @@
     <<: *gl_build_master
 
 - job-template:
-    id: 'managed-services-api-tests'
-    name: 'managed-services-api-tests-stage'
+    id: 'kas-fleet-manager-tests'
+    name: 'kas-fleet-manager-tests-stage'
     publishers:
     - <<: *slack_notify
     wrappers:
@@ -278,12 +323,12 @@
       - vault-secrets:
           <<: *vault_defaults
           secrets:
-            - *managed_services_api_int_tests
+            - *kas_fleet_manager_int_tests
     <<: *gl_timed
 
 - job-template:
-    id: 'managed-services-api-cluster-extension'
-    name: 'managed-services-api-cluster-extension'
+    id: 'kas-fleet-manager-cluster-extension'
+    name: 'kas-fleet-manager-cluster-extension'
     publishers:
     - <<: *slack_notify
     wrappers:
@@ -309,7 +354,7 @@
           <<: *vault_defaults
           secrets:
             - *managed_services_sso_cluster_extension
-    <<: *gl_timed
+    <<: *gh_timed
 
 - job-template:
     id: gl-pr-check-apache-kafka
@@ -318,9 +363,19 @@
       - timeout_wrapper:
           timeout: "{timeout}"
       - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *app_interface_creds
+            - *quay_secret_push
+            - *ci_ocm_token
+            - *ci_aws_keys
     <<: *gl_pr_check
     artifacts_path: 'clients/build/reports/tests/unitTest/*.html'
     publishers:
+    - gitlab_message:
+        <<: *gitlab_message_defaults
+    - gitlab-notifier
     - archive:
         artifacts: '{artifacts_path}'
         allow-empty: true
@@ -336,8 +391,89 @@
           <<: *vault_defaults
           secrets:
             - *mk_e2e_test_suite_staging
+    ci_cmd: './pipeline.sh'
     <<: *gl_timed
     publishers:
     - archive:
-        artifacts: 'target/logs/**,target/surefire-reports/**'
+        artifacts: 'test-results/**'
         allow-empty: true
+
+- job-template:
+    id: managed-kafka-promote-ui
+    name: managed-kafka-promote-ui
+    wrappers: 
+    - timestamps
+    - timeout_wrapper:
+        timeout: "{timeout}"
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+          - *managed_services_github_deploy_key
+    parameters:
+    - string:
+        name: REPOSITORIES
+        default: 'https://github.com/RedHatInsights/rhosak-dashboard-build;https://github.com/RedHatInsights/rhoas-guides-build;https://github.com/RedHatInsights/rhosak-control-plane-ui-build;https://github.com/RedHatInsights/rhosak-data-plane-ui-build'
+        description: 'All repositories to promote'
+    - string:
+        name: FROM_BRANCH
+        default: qa-beta
+    - string:
+        name: TO_BRANCH
+        default: prod-beta
+    - string:
+        name: AUTHOR_NAME
+        default: Bot
+    - string:
+        name: AUTHOR_EMAIL
+        default: ms-devexp@redhat.com
+    - bool:
+        name: DRY_RUN
+        default: true
+        description: If true the changes are not pushed
+    <<: *gl_checkout
+    builders: 
+    - shell: ./script/promote-ui.sh
+
+- job-template:
+    id: mas-sso-build-template
+    name: "{gl_group}-{gl_project}-gl-build-{branch}"
+    description: "mass-sso build template"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *rhoas-quay-access
+            - *app_sre_bot_push_token
+#    publishers:
+#      - <<: *slack_notify
+    <<: *gl_build_master
+
+- job-template:
+    id: gl-build-master-kas-fleet-manager
+    name: "{gl_group}-{gl_project}-gl-build-{branch}"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+          - *quay_secret_push
+          - *rhoas-quay-access
+    <<: *gl_build_master
+
+- job-template:
+    id: 'gl-pr-check-mas-sso'
+    name: '{gl_group}-{gl_project}-gl-pr-check'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *rhoas-quay-access
+    <<: *gl_pr_check

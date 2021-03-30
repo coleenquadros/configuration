@@ -26,8 +26,8 @@ serviceOwners:
 - name: Keith Walsh
   email: kwalsh@redhat.com
 
-performanceParameters:
-  SLO: 90
+escalationPolicy:
+  $ref: /teams/insights/escalation-policies/crc-rbac-escalations.yml
 
 dependencies:
 - $ref: /dependencies/github/service.yml
@@ -42,19 +42,30 @@ quayRepos:
     $ref: /dependencies/quay/cloudservices.yml
   items:
   - name: rbac
-    public: false
-    description: Repo for the rbac Insights app
-  - name: rbac-config-cronjob
-    public: false
-    description: Repo for the rbac Insights app
-  - name: rbac-scheduler
-    public: false
-    description: Repo for the rbac Insights app
-  - name: rbac-worker
-    public: false
+    public: true
     description: Repo for the rbac Insights app
 
 codeComponents:
 - name: insights-rbac
   resource: upstream
   url: https://github.com/RedHatInsights/insights-rbac
+- name: rbac-config
+  resource: upstream
+  url: https://github.com/RedHatInsights/rbac-config
+
+sentryProjects:
+- team:
+    $ref: /dependencies/sentry/teams/insights-rbac-stage.yml
+  projects:
+  - name: insights-rbac-stage
+    description: "insights rbac service in stage"
+    email_prefix: "[insights-rbac stage]"
+    platform: python
+- team:
+    $ref: /dependencies/sentry/teams/insights-rbac-production.yml
+  projects:
+  - name: insights-rbac-production
+    description: "insights rbac service in production"
+    email_prefix: "[insights-rbac production]"
+    platform: python
+

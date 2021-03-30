@@ -1,0 +1,59 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: codeready-analytics
+  component: f8a-server-backbone
+
+name: saas-codeready-analytics-f8a-server-backbone
+description: SaaS tracking file for codeready-analytics f8a-server-backbone
+
+app:
+  $ref: /services/codeready-analytics/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-codeready-analytics-info
+
+managedResourceTypes:
+- ServiceAccount
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/app-sre/rhel-fabric8-analytics-f8a-server-backbone
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+resourceTemplates:
+- name: f8a-server-backbone
+  url: https://github.com/fabric8-analytics/f8a-server-backbone
+  path: /openshift/template.app-sre.yaml
+  parameters:
+    CPU_REQUEST: 0.25
+    CPU_LIMIT: 1
+    MEMORY_REQUEST: 512Mi
+    MEMORY_LIMIT: 1024Mi
+    FLASK_LOGGING_LEVEL: INFO
+    DOCKER_REGISTRY: quay.io
+    DOCKER_IMAGE: app-sre/rhel-fabric8-analytics-f8a-server-backbone
+    IMAGE_PULL_SECRET_NAME: appsre-quayio
+  targets:
+  - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-preview.yml
+    ref: master
+    upstream: fabric8-analytics-f8a-server-backbone-gh-build-master-rhel
+    parameters:
+      REPLICAS: 2
+  - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-production.yml
+    ref: f54392783f40307edfec3b05af3ef49a8c3441cf
+    parameters:
+      REPLICAS: 6

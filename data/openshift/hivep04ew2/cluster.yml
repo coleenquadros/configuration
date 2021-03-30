@@ -13,6 +13,11 @@ alertmanagerUrl: https://alertmanager.hivep04ew2.devshift.net
 serverUrl: https://api.hivep04ew2.byo5.p1.openshiftapps.com:6443
 elbFQDN: elb.apps.hivep04ew2.byo5.p1.openshiftapps.com
 
+managedClusterRoles: true
+
+observabilityNamespace:
+  $ref: /services/observability/namespaces/openshift-customer-monitoring.hivep04ew2.yml
+
 auth:
   service: github-org-team
   org: app-sre
@@ -23,12 +28,15 @@ ocm:
 
 managedGroups:
 - dedicated-admins
+- dedicated-readers
+- hive-admins
+- hive-readers
 
 spec:
   provider: aws
   region: eu-west-2
   channel: fast
-  version: 4.6.8
+  version: 4.7.0
   initial_version: 4.6.8-fast
   multi_az: true
   autoscale:
@@ -74,6 +82,12 @@ awsInfrastructureAccess:
 - awsGroup:
     $ref: /aws/app-sre/groups/App-SRE-admin.yml
   accessLevel: network-mgmt
+- awsGroup:
+    $ref: /aws/app-sre/groups/Log-consumers.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/osd-privatelink-prod/groups/Admins.yml
+  accessLevel: read-only
 
 peering:
   connections:
@@ -91,4 +105,11 @@ peering:
     name: hivep04ew2_app-sre-prod-01
     cluster:
       $ref: /openshift/app-sre-prod-01/cluster.yml
+    manageRoutes: true
+  - provider: account-tgw
+    name: hivep04ew2
+    account:
+      $ref: /aws/osd-privatelink-prod/account.yml
+    tags:
+      osd: privatelink
     manageRoutes: true

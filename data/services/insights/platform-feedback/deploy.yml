@@ -1,0 +1,49 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: platform-feedback
+  platform: insights
+
+name: platform-feedback
+description: Jira proxy for platform-feedback
+
+app:
+  $ref: /services/insights/rbac/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+timeout: 5
+
+managedResourceTypes:
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+
+resourceTemplates:
+- name: platform-feedback
+  path: /openshift/hermod-template.yaml
+  url: https://github.com/RedHatInsights/hermod
+  targets:
+  - namespace:
+      $ref: /services/insights/platform-feedback/namespaces/stage-platform-feedback-stage.yml
+    ref: master
+  - namespace:
+      $ref: /services/insights/platform-feedback/namespaces/platform-feedback-prod.yml
+    ref: 7e40ca416b10a426fffffce9d5020681d54c32b0

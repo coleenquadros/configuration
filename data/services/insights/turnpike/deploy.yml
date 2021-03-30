@@ -173,31 +173,29 @@ resourceTemplates:
           route: /api/notifications/
           origin: http://notifications-backend.notifications-stage.svc.cluster.local:8080/
           auth:
-            saml: "'crc-policies-team' in user['Role']"
+            saml: "'crc-notifications-team' in user['Role']"
+            x509: "True"
         - name: notifications-gw-stage
           route: /api/notifications-gw/
           origin: http://notifications-gw.notifications-stage.svc.cluster.local:8080/
           auth:
             saml: "True"
             x509: "True"
-        - name: cost-management-masu-download
-          route: /api/cost-management/v1/download/
-          origin: http://koku-masu.hccm-stage.svc.cluster.local:8080/api/cost-management/v1/download/
+        - name: cost-management-masu
+          route: /api/cost-management/v1/
+          origin: http://koku-masu.hccm-stage.svc.cluster.local:8080/api/cost-management/v1/
           auth:
             saml: "'cost-management-team' in user['Role']"
-        - name: cost-management-masu-resummary
-          route: /api/cost-management/v1/report_data/
-          origin: http://koku-masu.hccm-stage.svc.cluster.local:8080/api/cost-management/v1/report_data/
+            x509: "x509['subject_dn'] == '/DC=com/DC=redhat/OU=messaging/OU=serviceusers/UID=msg-cost-management-turnpike/L=Stage/CN=msg-cost-management-turnpike'"
+        - name: cost-management-sources
+          route: /api/cost-management/sources/v1/
+          origin: http://koku-sources.hccm-stage.svc.cluster.local:8080/api/cost-management/v1/
           auth:
             saml: "'cost-management-team' in user['Role']"
-        - name: cost-management-masu-acct-hierarchy
-          route: /api/cost-management/v1/crawl_account_hierarchy/
-          origin: http://koku-masu.hccm-stage.svc.cluster.local:8080/api/cost-management/v1/crawl_account_hierarchy/
-          auth:
-            saml: "'cost-management-team' in user['Role']"
+            x509: "x509['subject_dn'] == '/DC=com/DC=redhat/OU=messaging/OU=serviceusers/UID=msg-cost-management-turnpike/L=Stage/CN=msg-cost-management-turnpike'"
         - name: cost-management-koku-daily-ui
-          route: /api/cost-management/v1/koku-daily
-          origin: http://koku-daily.hccm-stage.svc.cluster.local:8080/api/cost-management/v1/koku-daily
+          route: /api/cost-management/v1/koku-daily/
+          origin: http://koku-daily.hccm-stage.svc.cluster.local:8080/api/cost-management/v1/koku-daily/
           auth:
             saml: "'cost-management-team' in user['Role']"
         - name: module-update-router-events
@@ -220,11 +218,33 @@ resourceTemplates:
           origin: http://cloudigrade-api.cloudigrade-stage.svc.cluster.local:80/internal/
           auth:
             saml: "'doppler-dev' in user['Role']"
+            x509: "x509['subject_dn'] == '/DC=com/DC=redhat/OU=messaging/OU=serviceusers/UID=msg-cloudigrade-turnpike/L=Stage/CN=msg-cloudigrade-turnpike'"
         - name: automation-analytics-oneview
           route: /api/automation-analytics/oneview
-          origin: http://automation-analytics-api-oneview.tower-analytics-stage.svc.cluster.local:8080/api/tower-analytics/oneview
+          origin: http://automation-analytics-api-oneview-v2.tower-analytics-stage.svc.cluster.local:8000/api/tower-analytics/oneview
           auth:
             saml: "'automation-analytics' in user['Role']"
+        - name: vmaas-reposcan
+          route: /api/vmaas
+          origin: http://vmaas-reposcan.vmaas-stage.svc.cluster.local:8081/api/vmaas
+          auth:
+            saml: "'vulnerability-admins' in user['Role']"
+        - name: patchman-engine-admin
+          route: /api/patch/
+          origin: http://patchman-engine-vmaas-sync.patchman-engine-stage.svc.cluster.local:9999/
+          auth:
+            saml: "'patch-administrators' in user['Role']"
+        - name: playbook-dispatcher-api
+          route: /api/playbook-dispatcher/api
+          origin: http://playbook-dispatcher-api.playbook-dispatcher-stage.svc.cluster.local:8000/internal
+          auth:
+            saml: "'crc-pipeline-team' in user['Role']"
+        - name: playbook-dispatcher-connect
+          route: /api/playbook-dispatcher/connect/
+          origin: http://playbook-dispatcher-connect-connect-api.playbook-dispatcher-stage.svc.cluster.local:8083/
+          auth:
+            saml: "'crc-pipeline-team' in user['Role']"
+
   - namespace:
       $ref: /services/insights/turnpike/namespaces/prod-turnpike-prod.yml
     ref: master
@@ -301,6 +321,7 @@ resourceTemplates:
           origin: http://web.turnpike-prod.svc.cluster.local:5000/api/turnpike
           auth:
             saml: "True"
+            x509: "True"
         - name: healthcheck
           route: /public/healthcheck/
           origin: http://web.turnpike-prod.svc.cluster.local:5000/_healthcheck/
@@ -324,19 +345,9 @@ resourceTemplates:
           origin: http://${RBAC_HOST}:8080/_private/api
           auth:
             saml: "'clouddot-infrastructure' in user['Role']"
-        - name: cost-management-masu-download
-          route: /api/cost-management/v1/download/
-          origin: http://koku-masu.hccm-prod.svc.cluster.local:8080/api/cost-management/v1/download/
-          auth:
-            saml: "'cost-management-team' in user['Role']"
-        - name: cost-management-masu-resummary
-          route: /api/cost-management/v1/report_data/
-          origin: http://koku-masu.hccm-prod.svc.cluster.local:8080/api/cost-management/v1/report_data/
-          auth:
-            saml: "'cost-management-team' in user['Role']"
-        - name: cost-management-masu-acct-hierarchy
-          route: /api/cost-management/v1/crawl_account_hierarchy/
-          origin: http://koku-masu.hccm-prod.svc.cluster.local:8080/api/cost-management/v1/crawl_account_hierarchy/
+        - name: cost-management-masu
+          route: /api/cost-management/v1/
+          origin: http://koku-masu.hccm-prod.svc.cluster.local:8080/api/cost-management/v1/
           auth:
             saml: "'cost-management-team' in user['Role']"
         - name: cost-management-koku-daily-ui
@@ -359,6 +370,18 @@ resourceTemplates:
           origin: http://policies-notifications.policies-prod.svc.cluster.local:8080/
           auth:
             saml: "'crc-policies-team' in user['Role']"
+        - name: notifications-prod
+          route: /api/notifications/
+          origin: http://notifications-backend.notifications-prod.svc.cluster.local:8080/
+          auth:
+            saml: "'crc-notifications-team' in user['Role']"
+            x509: "True"
+        - name: notifications-gw-prod
+          route: /api/notifications-gw/
+          origin: http://notifications-gw.notifications-prod.svc.cluster.local:8080/
+          auth:
+            saml: "True"
+            x509: "True"
         - name: module-update-router-events
           route: /api/module-update-router/v1/event
           origin: http://module-update-router.module-update-router-prod.svc.cluster.local:8080/api/module-update-router/v1/event
@@ -369,6 +392,7 @@ resourceTemplates:
           origin: http://cloudigrade-api.cloudigrade-prod.svc.cluster.local:80/internal/
           auth:
             saml: "'doppler-dev' in user['Role']"
+            x509: "x509['subject_dn'] == '/DC=com/DC=redhat/OU=messaging/OU=serviceusers/UID=msg-cloudigrade-turnpike/L=Prod/CN=msg-cloudigrade-turnpike'"
         - name: vulnerability-engine-admin
           route: /api/vulnerability
           origin: http://vulnerability-engine-manager-admin.vulnerability-engine-prod.svc.cluster.local:8443/api/vulnerability
@@ -376,9 +400,24 @@ resourceTemplates:
             saml: "'vulnerability-admins' in user['Role']"
         - name: automation-analytics-oneview
           route: /api/automation-analytics/oneview
-          origin: http://automation-analytics-api-oneview.tower-analytics-prod.svc.cluster.local:8080/api/tower-analytics/oneview
+          origin: http://automation-analytics-api-oneview-v2.tower-analytics-prod.svc.cluster.local:8000/api/tower-analytics/oneview
           auth:
             saml: "'automation-analytics' in user['Role']"
+        - name: vmaas-reposcan
+          route: /api/vmaas
+          origin: http://vmaas-reposcan.vmaas-prod.svc.cluster.local:8081/api/vmaas
+          auth:
+            saml: "'vulnerability-admins' in user['Role']"
+        - name: playbook-dispatcher-api
+          route: /api/playbook-dispatcher/api
+          origin: http://playbook-dispatcher-api.playbook-dispatcher-prod.svc.cluster.local:8000/internal
+          auth:
+            saml: "'crc-pipeline-team' in user['Role']"
+        - name: playbook-dispatcher-connect
+          route: /api/playbook-dispatcher/connect/
+          origin: http://playbook-dispatcher-connect-connect-api.playbook-dispatcher-prod.svc.cluster.local:8083/
+          auth:
+            saml: "'crc-pipeline-team' in user['Role']"
 - name: nginx-prometheus
   path: /templates/prometheus-nginx.yml
   url: https://github.com/RedHatInsights/turnpike

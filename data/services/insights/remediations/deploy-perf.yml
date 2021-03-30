@@ -1,0 +1,135 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: remediations
+  platform: insights
+
+name: remediations-perf
+description: remediations app on the Insights Platform
+
+app:
+  $ref: /services/insights/remediations/app.yml
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: proj-perf-insights-cluster
+
+timeout: 5
+
+managedResourceTypes:
+- Deployment
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: playbooks-ssg
+  path: /templates/remediations/playbooks-ssg.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  parameters:
+    LIMITS_CPU: '1'
+    REQUESTS_CPU: 250m
+    SSG_REPLICAS: 2
+  targets:
+  - namespace:
+      $ref: /services/insights/remediations/namespaces/perf-remediations-perf.yml
+    ref: 898a39bf99971da37fbd183df4086dd18b6b28e7
+    parameters:
+      IMAGE_TAG: b3f50c3
+      SSG_REPLICAS: 1
+
+- name: remediations-cleaner
+  path: /templates/remediations/remediations-cleaner.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  parameters:
+    CLEANER_SUSPEND: false
+    DB_SSL_ENABLED: true
+    LOG_CW_ENABLED: true
+    LOG_LEVEL: trace
+  targets:
+  - namespace:
+      $ref: /services/insights/remediations/namespaces/perf-remediations-perf.yml
+    ref: 898a39bf99971da37fbd183df4086dd18b6b28e7
+    parameters:
+      IMAGE_TAG: 7013373
+
+- name: remediations-consumer
+  path: /templates/remediations/remediations-consumer.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  parameters:
+    DB_SSL_ENABLED: true
+    LOG_CW_ENABLED: true
+    LOG_LEVEL: info
+    NUM_REPLICAS: 2
+  targets:
+  - namespace:
+      $ref: /services/insights/remediations/namespaces/perf-remediations-perf.yml
+    ref: 898a39bf99971da37fbd183df4086dd18b6b28e7
+    parameters:
+      IMAGE_TAG: 7013373
+      KAFKA_CONSUMER_GROUP: remediation-consumer-perf
+      NUM_REPLICAS: 1
+
+- name: remediations-update-consumer
+  path: /templates/remediations/remediations-update-consumer.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  parameters:
+    DB_SSL_ENABLED: true
+    LOG_CW_ENABLED: true
+    LOG_LEVEL: info
+    NUM_REPLICAS: 2
+  targets:
+  - namespace:
+      $ref: /services/insights/remediations/namespaces/perf-remediations-perf.yml
+    ref: 898a39bf99971da37fbd183df4086dd18b6b28e7
+    parameters:
+      IMAGE_TAG: 7013373
+      KAFKA_CONSUMER_GROUP: remediation-consumer-perf
+      NUM_REPLICAS: 1
+
+- name: remediations
+  path: /templates/remediations/remediations.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  parameters:
+    ADVISOR_IMPL: impl
+    COMPLIANCE_IMPL: impl
+    DB_SSL_ENABLED: true
+    IMAGE_CHANGE_TRIGGER: true
+    INVENTORY_IMPL: impl
+    LOG_CW_ENABLED: true
+    LOG_LEVEL: info
+    MAX_REPLICAS: 5
+    MIGRATION_COMMAND: npm run db:create; npm run db:migrate
+    MIN_REPLICAS: 2
+    PATCHMAN_IMPL: impl
+    PATH_PREFIX: /api
+    RBAC_IMPL: impl
+    RECEPTOR_IMPL: impl
+    REMEDIATIONS_REPLICAS: 2
+    SOURCES_IMPL: impl
+    SSG_IMPL: impl
+    SSG_HOST: http://playbooks-ssg:8080
+    STRATEGY: Rolling
+    TARGET_CPU_UTILIZATION: 80
+    USERS_IMPL: impl
+    VULNERABILITIES_IMPL: impl
+  targets:
+  - namespace:
+      $ref: /services/insights/remediations/namespaces/perf-remediations-perf.yml
+    ref: 898a39bf99971da37fbd183df4086dd18b6b28e7
+    parameters:
+      MAX_REPLICAS: 1
+      MIN_REPLICAS: 1
+      REMEDIATIONS_REPLICAS: 1
+      IMAGE_TAG: 200b242
+      XJOIN_SEARCH_URL: xjoin-search.xjoin-perf.svc.cluster.local

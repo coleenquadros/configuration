@@ -18,6 +18,10 @@ environment:
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
 - $ref: /services/observatorium/namespaces/observatorium-stage.yml
+# TODO(prekumar): Remove this after MST gets it's own Jaeger Collector.
+# To allow jaeger-agents in observatorium-mst-stage namespace to
+# write spans into jaeger-collector in telemeter-stage namespace.
+- $ref: /services/telemeter/namespaces/observatorium-mst-stage.yml
 
 grafanaUrl: https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-stage-prometheus&var-cluster=app-sre-stage&var-namespace=telemeter-stage
 
@@ -35,10 +39,14 @@ terraformResources:
 - provider: s3
   account: app-sre
   identifier: telemeter-thanos-stage
-  defaults: /terraform/resources/s3-private-1.yml
+  defaults: /terraform/resources/telemeter/s3-private-1.yml
   output_resource_name: telemeter-thanos-stage-s3
 
 openshiftResources:
+- provider: vault-secret
+  path: app-interface/global/quay/app-sre/quay.io
+  version: 2
+  type: kubernetes.io/dockercfg
 # NOTICE(kakkoyun): Seems unused.
 - provider: vault-secret
   path: app-interface/app-sre-stage/telemeter-stage/prometheus-telemeter-proxy
@@ -92,7 +100,7 @@ openshiftResources:
   version: 1
 - provider: vault-secret
   path: app-interface/app-sre-stage/telemeter-stage/observatorium-observatorium-api
-  version: 16
+  version: 19
   annotations:
     qontract.recycle: "true"
 - provider: vault-secret

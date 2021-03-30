@@ -225,6 +225,25 @@ spec:
       labels:
         exported_service: drift
 
+    - record: service:custom:reqcount:drift
+      expr: sum(increase(api_3scale_gateway_api_time_count{exported_service="drift"}[30d]))
+
+    - record: service:custom:errate:drift
+      expr: avg_over_time(service:sli:status_5xx:pctl5rate5m{exported_service="drift"}[30d])
+
+    - record: service:custom:latency:drift
+      expr: avg_over_time(service:helper:latency:drift[30d])
+
+    - record: service:helper:latency:drift
+      expr: service:custom:downtime:drift * 100 < bool service:constant:sli:pctlatency
+
+    - record: service:custom:downtime:drift
+      expr: 1 - (service:custom:uptime:drift)
+
+    - record: service:custom:uptime:drift
+      expr: sum(rate(api_3scale_gateway_api_time_bucket{exported_service="drift",le="4000.0"}[5m])) / sum(increase(api_3scale_gateway_api_time_count{exported_service="drift"}[5m]))
+
+
   #### entitlements ####
   - name: entitlements-sli
     rules:
@@ -496,12 +515,15 @@ spec:
         exported_service: rbac
 
     - record: service:custom:reqcount:rbac
-      expr: sum(django_http_requests_latency_including_middlewares_seconds_bucket{service="rbac"})
+      expr: sum(abs(delta(django_http_requests_latency_including_middlewares_seconds_bucket{service="rbac", le="+Inf"}[30d])))
 
     - record: service:custom:errate:rbac
-      expr: service:sli:status_5xx:pctl5rate5m{exported_service="rbac"}
+      expr: avg_over_time(service:sli:status_5xx:pctl5rate5m{exported_service="rbac"}[30d])
 
     - record: service:custom:latency:rbac
+      expr: avg_over_time(service:helper:latency:rbac[30d])
+
+    - record: service:helper:latency:rbac
       expr: service:custom:downtime:rbac * 100 < bool service:constant:sli:pctlatency
 
     - record: service:custom:downtime:rbac

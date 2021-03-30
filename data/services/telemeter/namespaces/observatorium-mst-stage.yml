@@ -1,0 +1,79 @@
+# TODO(kakkoyun): Move with CI/CD changes.
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: observatorium-mst-stage
+description: staging namespace for Observatorium Managed Service Tenants
+
+cluster:
+  $ref: /openshift/app-sre-stage-01/cluster.yml
+
+app:
+  $ref: /services/telemeter/app.yml
+
+environment:
+  $ref: /products/osdv4/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+- $ref: /services/telemeter/namespaces/telemeter-stage.yml
+
+grafanaUrl: https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-stage-prometheus&var-cluster=app-sre-stage&var-namespace=observatorium-mst-stage
+
+managedRoles: true
+
+managedResourceTypes:
+- Role
+- RoleBinding
+- ServiceAccount
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: s3
+  account: app-sre
+  identifier: observatorium-mst-thanos-stage
+  defaults: /terraform/resources/telemeter/s3-private-1.yml
+  output_resource_name: observatorium-mst-thanos-stage-s3
+
+openshiftResources:
+- provider: route
+  path: /app-sre-stage/telemeter-stage/observatorium-mst-api-stage.route.yaml
+  vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.api.stage.openshift.com
+  vault_tls_secret_version: 3
+- provider: vault-secret
+  path: app-interface/app-sre-stage/telemeter-stage/observatorium-mst-thanos-objectstorage
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre-stage/telemeter-stage/observatorium-api-proxy
+  version: 3
+- provider: vault-secret
+  path: app-interface/app-sre-stage/telemeter-stage/query-frontend-proxy
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre-stage/telemeter-stage/compact-proxy
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre-stage/telemeter-stage/query-proxy
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre-stage/telemeter-stage/observatorium-observatorium-mst-api
+  version: 8
+  annotations:
+    qontract.recycle: "true"
+
+# Serviceaccount for Observatorium platform, Cluster role to access OSD tenant namespace
+- provider: resource
+  path: /app-sre-stage/telemeter-stage/observatorium-mst.serviceaccount.yaml
+# NOTICE: This resource is deployed through the observatorium-cluster-scope-stage namespace file,
+# until https://issues.redhat.com/browse/APPSRE-2935 is fixed.
+# - provider: resource
+#   path: /app-sre-stage/telemeter-stage/observatorium-mst.clusterrole.yml
+
+# Stage port-forward for debugging
+- provider: resource
+  path: /app-sre-stage/telemeter-stage/observatorium-allow-port-forward.role.yaml
+- provider: resource
+  path: /app-sre-stage/telemeter-stage/observatorium-allow-port-forward.rolebinding.yaml

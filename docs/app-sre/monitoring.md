@@ -22,7 +22,6 @@
     - [Supported notification channels](#supported-notification-channels)
     - [Notification templates](#notification-templates)
     - [Alerting for your applications](#alerting-for-your-applications)
-      - [Adding alerting for an application from scratch](#adding-alerting-for-an-application-from-scratch)
     - [Alert Severities](#alert-severities)
     - [Recommended Alerts](#recommended-alerts)
     - [Availability](#availability)
@@ -33,10 +32,6 @@
     - [Adding dashboards](#adding-dashboards)
     - [Updating dashboards](#updating-dashboards)
   - [How-To](#how-to)
-    - [Define application performance Parameters](#define-application-performance-parameters)
-      - [Prequisites](#prequisites)
-      - [Process](#process)
-      - [App-Interface Performance Parameters Schema](#app-interface-performance-parameters-schema)
     - [Monitor a persistent volume's filesystem used/available space](#monitor-a-persistent-volumes-filesystem-usedavailable-space)
   - [Ask a question](#ask-a-question)
 
@@ -379,8 +374,6 @@ Currently added datasources:
 - `dsaas-graphite`: graphite (osd-monitor) on `app-sre-prod-03` cluster
 - `dsaas-bayesian-stage-graphite`: bayesian graphite (osd-monitor) on `app-sre-stage-02` cluster
 - `dsaas-bayesian-production-graphite`: bayesian graphite (osd-monitor) on `app-sre-prod-03` cluster
-- `starter-us-east-2-cluster-prometheus`: cluster prometheus on `starter-us-east-2-cluster` cluster
-- `starter-us-east-2a-cluster-prometheus`: cluster prometheus on `starter-us-east-2a-cluster` cluster
 - `elasticsearch-monitoring`: `.monitoring-es*` database on AWS elasitcsearch
 - `elasticsearch-logstash`: `.monitoring-logstash*` database on AWS elasitcsearch
 
@@ -439,32 +432,6 @@ To update a dashboard:
 * * *
 
 ## How-To
-
-* * *
-
-### Define application performance Parameters
-
-References
-
-- Service Delivery Vernacular
-
-#### Prequisites
-
-- App-SRE supported monitoring model with Prometheus
-- Application onboarded to App-SRE onboarding model
-- Application has metrics instrumentation and already being monitored by one of App-SRE's Prometheus instances
-
-#### Process
-
-- Service owners and product managers (along with SRE consultation) agree upon SLI's and SLO's. For quicker iterations, this can be a Google doc.
-- A template to get help new applications document their SLO's is provided here:
-- Once the SLI's and SLO's have been defined and reviewed by stakeholders, send a pull request to the app-interface.
-
-#### App-Interface Performance Parameters Schema
-
-The App-SRE team has created a schema that allows service owners to define their application's SLX in app-interface.  See this [doc](/docs/app-sre/sli-recording-rules-via-performance-parameters.md) for further information.
-
-* * *
 
 ### Monitor a persistent volume's filesystem used/available space
 

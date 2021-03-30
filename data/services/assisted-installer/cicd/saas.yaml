@@ -35,9 +35,9 @@ resourceTemplates:
     BASE_DNS_DOMAINS: assistedinstaller.sysdeseng.com:Z0705901344NMKJYA5RNZ/route53
     # OCM_BASE_URL is defined at the environment parameters level
     SERVICE_BASE_URL: ${OCM_BASE_URL}
-    JWKS_URL: https://api.openshift.com/.well-known/jwks.json #FIXME: remove?
+    JWKS_URL: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/certs
     ALLOWED_DOMAINS: https://qaprodauth.cloud.redhat.com
-    ENABLE_AUTH: true
+    AUTH_TYPE: rhsso
     SUPPORT_L2: true
     HW_VALIDATOR_MIN_RAM_GIB_MASTER: 16
     HW_VALIDATOR_MIN_CPU_CORES_MASTER: 4
@@ -47,30 +47,9 @@ resourceTemplates:
     HW_VALIDATOR_MIN_RAM_GIB: 8
     HW_VALIDATOR_MIN_DISK_SIZE_GIB: 20
     IMAGE_BUILDER: quay.io/app-sre/assisted-iso-create
+    IPV6_SUPPORT: false
 
   targets:
-  - namespace:
-      $ref: /services/assisted-installer/namespaces/assisted-installer-integration-v3.yml
-    ref: master
-    upstream: openshift-assisted-service-gh-build-master
-    parameters:
-      INSTALL_RH_CA: true
-      INSTALLER_IMAGE: quay.io/ocpmetal/assisted-installer:latest
-      CONTROLLER_IMAGE: quay.io/ocpmetal/assisted-installer-controller:latest
-      AGENT_DOCKER_IMAGE: quay.io/ocpmetal/assisted-installer-agent:latest
-      CONNECTIVITY_CHECK_IMAGE: quay.io/ocpmetal/assisted-installer-agent:latest
-      INVENTORY_IMAGE: quay.io/ocpmetal/assisted-installer-agent:latest
-      FREE_ADDRESSES_IMAGE: quay.io/ocpmetal/assisted-installer-agent:latest
-      DHCP_LEASE_ALLOCATOR_IMAGE: quay.io/ocpmetal/assisted-installer-agent:latest
-      API_VIP_CONNECTIVITY_CHECK_IMAGE: quay.io/ocpmetal/assisted-installer-agent:latest
-      NTP_SYNCHRONIZER_IMAGE: quay.io/ocpmetal/assisted-installer-agent:latest
-      FIO_PERF_CHECK_IMAGE: quay.io/ocpmetal/assisted-installer-agent:latest
-      OPENSHIFT_INSTALL_RELEASE_IMAGE: ""
-      PUBLIC_CONTAINER_REGISTRIES: quay.io,registry-proxy.engineering.redhat.com
-      RELEASE_TAG: master
-      REGISTRY_CREDS: qa@redhat.com:redhatqa
-      OCM_LOG_LEVEL: info
-      ADMIN_USERS: gamli75,yuvigold,ecohen+assistedinstaller,mfilanov-ai
   - namespace:
       $ref: /services/assisted-installer/namespaces/assisted-installer-integration.yml
     ref: master
@@ -81,40 +60,48 @@ resourceTemplates:
       CONTROLLER_IMAGE: quay.io/ocpmetal/assisted-installer-controller:latest
       AGENT_DOCKER_IMAGE: quay.io/ocpmetal/assisted-installer-agent:latest
       OPENSHIFT_INSTALL_RELEASE_IMAGE: ""
-      PUBLIC_CONTAINER_REGISTRIES: quay.io
+      PUBLIC_CONTAINER_REGISTRIES: quay.io,registry-proxy.engineering.redhat.com
       RELEASE_TAG: master
       REGISTRY_CREDS: qa@redhat.com:redhatqa
       OCM_LOG_LEVEL: info
+      WITH_AMS_SUBSCRIPTIONS: true
       ADMIN_USERS: gamli75,yuvigold,ecohen+assistedinstaller,mfilanov-ai
+      OPENSHIFT_VERSIONS: '{"4.6":{"display_name":"4.6.16","release_image":"quay.io/openshift-release-dev/ocp-release:4.6.16-x86_64","rhcos_image":"https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.6/4.6.8/rhcos-4.6.8-x86_64-live.x86_64.iso","rhcos_version":"46.82.202012051820-0","support_level":"production"},"4.7":{"display_name":"4.7.2","release_image":"quay.io/openshift-release-dev/ocp-release:4.7.2-x86_64","rhcos_image":"https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.7/4.7.0/rhcos-4.7.0-x86_64-live.x86_64.iso","rhcos_version":"47.83.202102090044-0","support_level":"production"},"4.8":{"display_name":"single-node-4.8-alpha","release_image":"quay.io/openshift-release-dev/ocp-release-nightly:4.8.0-0.nightly-2021-03-16-221720","rhcos_image":"https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.7/4.7.0/rhcos-4.7.0-x86_64-live.x86_64.iso","rhcos_version":"47.83.202102090044-0","support_level":"production"}}'
+      ENABLE_AUTH: false
+      CHECK_CLUSTER_VERSION: true
   - namespace:
       $ref: /services/assisted-installer/namespaces/assisted-installer-stage.yml
-    ref: c8530cc6dfbce535527f5abc5e6bf662e40601b0
+    ref: 58a6abd5c99d4e41d939be89cd0962433849a861
     parameters:
       INSTALL_RH_CA: true
-      CHECK_CLUSTER_VERSION: false
-      INSTALLER_IMAGE: registry-proxy.engineering.redhat.com/rh-osbs/openshift4-assisted-installer-rhel8:v4.6.0-82
-      CONTROLLER_IMAGE: registry-proxy.engineering.redhat.com/rh-osbs/openshift4-assisted-installer-reporter-rhel8:v4.6.0-81
-      AGENT_DOCKER_IMAGE: registry-proxy.engineering.redhat.com/rh-osbs/openshift4-assisted-installer-agent-rhel8:v4.6.0-86
+      CHECK_CLUSTER_VERSION: true
+      INSTALLER_IMAGE: registry-proxy.engineering.redhat.com/rh-osbs/openshift4-assisted-installer-rhel8:v1.0.0-19
+      CONTROLLER_IMAGE: registry-proxy.engineering.redhat.com/rh-osbs/openshift4-assisted-installer-reporter-rhel8:v1.0.0-20
+      AGENT_DOCKER_IMAGE: registry-proxy.engineering.redhat.com/rh-osbs/openshift4-assisted-installer-agent-rhel8:v1.0.0-19
       OPENSHIFT_INSTALL_RELEASE_IMAGE: ""
       PUBLIC_CONTAINER_REGISTRIES: quay.io,registry-proxy.engineering.redhat.com
-      RELEASE_TAG: v1.0.15.3
+      RELEASE_TAG: v1.0.17.3
       REGISTRY_CREDS: qa@redhat.com:redhatqa
       AGENT_TIMEOUT_START: 30m
-      ADMIN_USERS: yuvigold,ecohen+assistedinstaller,mfilanov-ai,rregev@redhat.com,lgamliel
+      ADMIN_USERS: yuvigold,ecohen+assistedinstaller,mfilanov-ai,rregev@redhat.com,lgamliel,gamli75
+      WITH_AMS_SUBSCRIPTIONS: true
+      ENABLE_AUTH: true
   - namespace:
       $ref: /services/assisted-installer/namespaces/assisted-installer-production.yml
-    ref: c8530cc6dfbce535527f5abc5e6bf662e40601b0
+    ref: 58a6abd5c99d4e41d939be89cd0962433849a861
     parameters:
       HW_VALIDATOR_MIN_DISK_SIZE_GIB: 120
       INSTALL_RH_CA: false
       ALLOWED_DOMAINS: https://cloud.redhat.com
-      INSTALLER_IMAGE: registry.redhat.io/openshift4/assisted-installer-rhel8:v4.6.0-82
-      CONTROLLER_IMAGE: registry.redhat.io/openshift4/assisted-installer-reporter-rhel8:v4.6.0-81
-      AGENT_DOCKER_IMAGE: registry.redhat.io/openshift4/assisted-installer-agent-rhel8:v4.6.0-86
+      INSTALLER_IMAGE: registry.redhat.io/openshift4/assisted-installer-rhel8:v1.0.0-19
+      CONTROLLER_IMAGE: registry.redhat.io/openshift4/assisted-installer-reporter-rhel8:v1.0.0-20
+      AGENT_DOCKER_IMAGE: registry.redhat.io/openshift4/assisted-installer-agent-rhel8:v1.0.0-19
       OPENSHIFT_INSTALL_RELEASE_IMAGE: ""
       PUBLIC_CONTAINER_REGISTRIES: quay.io
-      RELEASE_TAG: v1.0.15.3
+      RELEASE_TAG: v1.0.17.3
       REGISTRY_CREDS: ""
       AGENT_TIMEOUT_START: 30m
-      ADMIN_USERS: yuvigold,ecohen+assistedinstaller,mfilanov-ai,lgamliel+assistedinstaller, slavie+assistedinstaller
+      ADMIN_USERS: yuvigold,ecohen+assistedinstaller,mfilanov-ai,lgamliel+assistedinstaller, slavie+assistedinstaller,gamli75
       BASE_DNS_DOMAINS: "" # Emphasize the fact that route53 is disabled on prod.
+      WITH_AMS_SUBSCRIPTIONS: false
+      ENABLE_AUTH: true

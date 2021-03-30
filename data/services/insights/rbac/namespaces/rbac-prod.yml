@@ -21,6 +21,7 @@ networkPoliciesAllow:
 - $ref: /services/insights/gateway/namespaces/3scale-prod.yml
 - $ref: /services/insights/advisor/namespaces/advisor-prod.yml
 - $ref: /services/insights/compliance/namespaces/compliance-prod.yml
+- $ref: /services/insights/notifications/namespaces/notifications-prod.yml
 - $ref: /services/insights/policies/namespaces/policies-prod.yml
 - $ref: /services/insights/approval/namespaces/approval-prod.yml
 - $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
@@ -36,6 +37,7 @@ networkPoliciesAllow:
 - $ref: /services/insights/xavier/namespaces/xavier-prod.yml
 - $ref: /services/insights/turnpike/namespaces/prod-turnpike-prod.yml
 - $ref: /services/insights/host-inventory/namespaces/prod-host-inventory-prod.yml
+- $ref: /services/insights/playbook-dispatcher/namespaces/prod.yml
 
 managedRoles: true
 
@@ -61,13 +63,9 @@ openshiftResources:
   path: /insights-prod/rbac-prod/rbac-env.configmap.yml
 - provider: resource
   path: /insights-prod/rbac-prod/redis-config.configmap.yml
-- provider: resource
-  path: /insights-prod/rbac-prod/rbac-config.configmap.yml
-- provider: resource
-  path: /insights-prod/rbac-prod/model-access-permissions.configmap.yml
 - provider: vault-secret
   path: insights/secrets/insights-prod/rbac-prod/rbac-secret
-  version: 2
+  version: 3
   annotations:
     qontract.recycle: "true"
 - provider: vault-secret
@@ -89,7 +87,7 @@ terraformResources:
   account: insights-prod
   identifier: rbac-prod
   defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch-disabled
+  output_resource_name: cloudwatch
   es_identifier: kibana-elasticsearch
 - provider: rds
   account: insights-prod
@@ -101,3 +99,8 @@ terraformResources:
   output_resource_name: rbac-db
   output_resource_db_name: rbac
   parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-rbac-prod.yml
+- provider: elasticache
+  account: insights-prod
+  identifier: rbac-prod-elasticache
+  defaults: /terraform/resources/insights/production/elasticache/elasticache-rbac-1.yml
+  output_resource_name: in-memory-db

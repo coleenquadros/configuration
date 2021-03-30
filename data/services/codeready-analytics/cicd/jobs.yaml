@@ -1,0 +1,85 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+labels:
+  service: codeready-analytics
+
+name: ci-ext-codeready-analytics-jobs
+
+description: ''
+
+app:
+  $ref: /services/codeready-analytics/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+type: jobs
+
+config:
+# Standard images
+- project:
+    name: codeready-analytics
+    label: codeready-analytics
+    node: app-sre
+    gh_org: fabric8-analytics
+    quay_org: app-sre
+    build_deploy_script_path: ./build_deploy.sh
+    jobs:
+    - 'gh-build-master':
+        gh_repo: f8a-server-backbone
+        display_name: fabric8-analytics f8a-server-backbone build master
+    - 'gh-build-master':
+        gh_repo: fabric8-analytics-worker-base
+        display_name: fabric8-analytics fabric8-analytics-worker-base build master
+    - 'gh-build-master':
+        gh_repo: fabric8-analytics-worker
+        display_name: fabric8-analytics fabric8-analytics-worker build master
+    - 'gh-build-master':
+        gh_repo: f8a-stacks-report
+        display_name: fabric8-analytics f8a-stacks-report build master
+    - 'gh-build-master':
+        gh_repo: fabric8-analytics-server
+        display_name: fabric8-analytics fabric8-analytics-server build master
+    - 'gh-build-master':
+        gh_repo: gremlin-docker
+        display_name: fabric8-analytics gremlin-docker build master
+    - 'gh-build-master':
+        gh_repo: fabric8-analytics-license-analysis
+        display_name: fabric8-analytics license-analysis build master
+    - 'gh-build-master':
+        gh_repo: fabric8-analytics-data-model
+        display_name: fabric8-analytics data-model build master
+
+# RHEL images
+- project:
+    name: codeready-analytics-rhel
+    label: codeready-analytics
+    node: codeready-analytics
+    gh_org: fabric8-analytics
+    quay_org: app-sre
+    build_deploy_script_path: ./build_deploy.rhel.sh
+    # SEARCHME: gh-build-master-job-suffix
+    job_suffix: -rhel
+    jobs:
+    - 'gh-build-master':
+        gh_repo: f8a-server-backbone
+        display_name: fabric8-analytics f8a-server-backbone build master rhel
+    - 'gh-build-master':
+        gh_repo: fabric8-analytics-worker-base
+        display_name: fabric8-analytics fabric8-analytics-worker-base build master rhel
+    - 'gh-build-master':
+        gh_repo: fabric8-analytics-worker
+        display_name: fabric8-analytics fabric8-analytics-worker build master rhel
+#e2e test suite
+- project:
+    name: codeready-analytics-e2e-tests
+    label: codeready-analytics
+    node: codeready-analytics
+    gh_org: fabric8-analytics
+    quay_org: app-sre
+    build_deploy_script_path: ./integration-tests/build_deploy.sh
+    jobs:
+    -  'codeready-analytics-e2e':
+            gh_repo: fabric8-analytics-common
+            display_name: codeready-analytics-e2e build-push master

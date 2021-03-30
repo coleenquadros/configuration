@@ -1,0 +1,17 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2021-03-15-stats
+namespace:
+  $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
+identifier: patchman-prod
+output: stdout
+queries:
+    - select count(id) as last_patched from system_platform;
+    - select rh_account_id, count(id) as systems_count from system_platform group by rh_account_id order by systems_count desc limit 20;
+    - select count(system_id) as all_system_advisories from system_advisories;
+    - select system_id, count(advisory_id) as advisories_count from system_advisories group by system_id order by advisories_count desc limit 20;
+    - select avg(advisories_count) from (select system_id, count(advisory_id) as advisories_count from system_advisories group by system_id) t;
+    - select count(system_id) as all_system_packages from system_package;
+    - select system_id, count(package_id) as packages_count from system_package group by system_id order by packages_count desc limit 20;
+    - select avg(packages_count) from (select system_id, count(package_id) as packages_count from system_package group by system_id) t;

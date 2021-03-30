@@ -1,0 +1,90 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: insights
+
+name: advisor-prod
+description: Insights Advisor Stage for FedRAMP on prod
+
+cluster:
+  $ref: /openshift/insights/crcgovp01ue1/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
+
+quota:
+  $ref: /services/insights/advisor/advisor-quota.yml
+
+app:
+  $ref: /services/insights/advisor/app.yml
+
+environment:
+  $ref: /products/insights/environments/fedramp-production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcgovp01ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-fedramp-prod.yml
+
+managedRoles: true
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/platform-mq-prod/kafka-ca
+  version: 2
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/secrets/global/nachobot
+  version: 1
+  type: kubernetes.io/ssh-auth
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+- provider: vault-secret
+  path: insights/secrets/backoffice/preprod/insights-advisor-mailer
+  version: 2
+  name: backoffice
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/advisor-fedramp-prod/advisor-host-delete
+  version: 2
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-fedramp-prod
+  identifier: advisor-prod
+  defaults: /terraform/resources/insights/production/rds/rds-advisor-prod.yml
+  overrides:
+    username: "insightsapi"
+    allocated_storage: 500
+    name: "insightsapi"
+    engine_version: "12.3"
+  parameter_group: /terraform/resources/insights/production/rds/postgres12-parameter-group-advisor-prod.yml
+  output_resource_name: advisor-db
+  enhanced_monitoring: true
+# - provider: rds
+#   account: insights-fedramp-prod
+#   identifier: advisor-prod-readonly
+#   availability_zone: us-east-1d
+#   defaults: /terraform/resources/insights/production/rds/postgres12-rds-read-replica-advisor-prod.yml
+#   parameter_group: /terraform/resources/insights/production/rds/postgres12-parameter-group-advisor-prod-read-replica.yml
+#   output_resource_name: advisor-readonly-db
+- provider: cloudwatch
+  account: insights-fedramp-prod
+  identifier: advisor-prod
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch

@@ -1,0 +1,277 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: kas-fleet-manager-cluster-latency-stage
+spec:
+  groups:
+    - name: kas-fleet-manager-cluster-operations-latency-p90.rules
+      rules:
+        - alert: KasFleetManagerClustersOperationsLatencyP90BudgetBurn
+          annotations:
+            message: "High 6h clusters operations p90 latency budget burn for Kas Fleet Manager (current value: {{ $value }})"
+            dashboard: "https://grafana.stage.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#osd-cluster-provisioning-latency"
+          expr: |
+              latencytarget:kas_fleet_manager_worker_cluster_duration:rate6h{job="kas-fleet-manager-metrics",namespace="managed-services-stage",latency="2400",jobType="cluster_create"} > (6*(1-0.90000))
+              and
+              latencytarget:kas_fleet_manager_worker_cluster_duration:rate30m{job="kas-fleet-manager-metrics",namespace="managed-services-stage",latency="2400",jobType="cluster_create"} > (6*(1-0.90000))
+          labels:
+            service: kas-fleet-manager
+            latency: "2400"
+            quantile: "90"
+            namespace: managed-services-stage
+            jobType: cluster_create
+            severity: info
+        - alert: KasFleetManagerClustersOperationsLatencyP90BudgetBurn
+          annotations:
+            message: "High 1d/3d clusters operations p90 latency budget burn for Kas Fleet Manager (current value: {{ $value }})"
+            dashboard: "https://grafana.stage.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#osd-cluster-provisioning-latency"
+          expr: |
+            (
+              latencytarget:kas_fleet_manager_worker_cluster_duration:rate1d{job="kas-fleet-manager-metrics",namespace="managed-services-stage",latency="2400",jobType="cluster_create"} > (3*(1-0.90000))
+              and
+              latencytarget:kas_fleet_manager_worker_cluster_duration:rate2h{job="kas-fleet-manager-metrics",namespace="managed-services-stage",latency="2400",jobType="cluster_create"} > (3*(1-0.90000))
+            )
+            or
+            (
+              latencytarget:kas_fleet_manager_worker_cluster_duration:rate3d{job="kas-fleet-manager-metrics",namespace="managed-services-stage",latency="2400",jobType="cluster_create"} > (1*(1-0.90000))
+              and
+              latencytarget:kas_fleet_manager_worker_cluster_duration:rate6h{job="kas-fleet-manager-metrics",namespace="managed-services-stage",latency="2400",jobType="cluster_create"} > (1*(1-0.90000))
+            )
+          labels:
+            service: kas-fleet-manager
+            latency: "2400"
+            quantile: "90"
+            namespace: managed-services-stage
+            jobType: cluster_create
+            severity: info
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_worker_cluster_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-stage",le="2400",jobType="cluster_create"}[5m]))
+              /
+              sum(rate(kas_fleet_manager_worker_cluster_duration_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",jobType="cluster_create"}[5m]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            latency: "2400"
+            namespace: managed-services-stage
+            jobType: cluster_create
+          record: latencytarget:kas_fleet_manager_worker_cluster_duration:rate5m
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_worker_cluster_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-stage",le="2400",jobType="cluster_create"}[30m]))
+              /
+              sum(rate(kas_fleet_manager_worker_cluster_duration_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",jobType="cluster_create"}[30m]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            latency: "2400"
+            namespace: managed-services-stage
+            jobType: cluster_create
+          record: latencytarget:kas_fleet_manager_worker_cluster_duration:rate30m
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_worker_cluster_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-stage",le="2400",jobType="cluster_create"}[1h]))
+              /
+              sum(rate(kas_fleet_manager_worker_cluster_duration_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",jobType="cluster_create"}[1h]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            latency: "2400"
+            namespace: managed-services-stage
+            jobType: cluster_create
+          record: latencytarget:kas_fleet_manager_worker_cluster_duration:rate1h
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_worker_cluster_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-stage",le="2400",jobType="cluster_create"}[2h]))
+              /
+              sum(rate(kas_fleet_manager_worker_cluster_duration_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",jobType="cluster_create"}[2h]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            latency: "2400"
+            namespace: managed-services-stage
+            jobType: cluster_create
+          record: latencytarget:kas_fleet_manager_worker_cluster_duration:rate2h
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_worker_cluster_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-stage",le="2400",jobType="cluster_create"}[6h]))
+              /
+              sum(rate(kas_fleet_manager_worker_cluster_duration_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",jobType="cluster_create"}[6h]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            latency: "2400"
+            namespace: managed-services-stage
+            jobType: cluster_create
+          record: latencytarget:kas_fleet_manager_worker_cluster_duration:rate6h
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_worker_cluster_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-stage",le="2400",jobType="cluster_create"}[1d]))
+              /
+              sum(rate(kas_fleet_manager_worker_cluster_duration_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",jobType="cluster_create"}[1d]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            latency: "2400"
+            namespace: managed-services-stage
+            jobType: cluster_create
+          record: latencytarget:kas_fleet_manager_worker_cluster_duration:rate1d
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_worker_cluster_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-stage",le="2400",jobType="cluster_create"}[3d]))
+              /
+              sum(rate(kas_fleet_manager_worker_cluster_duration_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",jobType="cluster_create"}[3d]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            latency: "2400"
+            namespace: managed-services-stage
+            jobType: cluster_create
+          record: latencytarget:kas_fleet_manager_worker_cluster_duration:rate3d
+    - name: kas-fleet-manager-cluster-operations-latency-p99.rules
+      rules:
+        - alert: KasFleetManagerClustersOperationsLatencyP99BudgetBurn
+          annotations:
+            message: "High 1h/6h clusters operations p99 latency budget burn for Kas Fleet Manager (current value: {{ $value }})"
+            dashboard: "https://grafana.stage.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#osd-cluster-provisioning-latency"
+          expr: |
+              latencytarget:kas_fleet_manager_worker_cluster_duration:rate6h{job="kas-fleet-manager-metrics",namespace="managed-services-stage",latency="3600",jobType="cluster_create"} > (6*(1-0.99000))
+              and
+              latencytarget:kas_fleet_manager_worker_cluster_duration:rate30m{job="kas-fleet-manager-metrics",namespace="managed-services-stage",latency="3600",jobType="cluster_create"} > (6*(1-0.99000))
+          labels:
+            service: kas-fleet-manager
+            latency: "3600"
+            quantile: "99"
+            namespace: managed-services-stage
+            jobType: cluster_create
+            severity: info
+        - alert: KasFleetManagerClustersOperationsLatencyP99BudgetBurn
+          annotations:
+            message: "High 1d/3d clusters operations p99 latency budget burn for Kas Fleet Manager (current value: {{ $value }})"
+            dashboard: "https://grafana.stage.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#osd-cluster-provisioning-latency"
+          expr: |
+            (
+              latencytarget:kas_fleet_manager_worker_cluster_duration:rate1d{job="kas-fleet-manager-metrics",namespace="managed-services-stage",latency="3600",jobType="cluster_create"} > (3*(1-0.99000))
+              and
+              latencytarget:kas_fleet_manager_worker_cluster_duration:rate2h{job="kas-fleet-manager-metrics",namespace="managed-services-stage",latency="3600",jobType="cluster_create"} > (3*(1-0.99000))
+            )
+            or
+            (
+              latencytarget:kas_fleet_manager_worker_cluster_duration:rate3d{job="kas-fleet-manager-metrics",namespace="managed-services-stage",latency="3600",jobType="cluster_create"} > (1*(1-0.99000))
+              and
+              latencytarget:kas_fleet_manager_worker_cluster_duration:rate6h{job="kas-fleet-manager-metrics",namespace="managed-services-stage",latency="3600",jobType="cluster_create"} > (1*(1-0.99000))
+            )
+          labels:
+            service: kas-fleet-manager
+            latency: "3600"
+            quantile: "99"
+            namespace: managed-services-stage
+            jobType: cluster_create
+            severity: info
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_worker_cluster_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-stage",le="3600",jobType="cluster_create"}[5m]))
+              /
+              sum(rate(kas_fleet_manager_worker_cluster_duration_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",jobType="cluster_create"}[5m]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            latency: "3600"
+            namespace: managed-services-stage
+            jobType: cluster_create
+          record: latencytarget:kas_fleet_manager_worker_cluster_duration:rate5m
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_worker_cluster_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-stage",le="3600",jobType="cluster_create"}[30m]))
+              /
+              sum(rate(kas_fleet_manager_worker_cluster_duration_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",jobType="cluster_create"}[30m]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            latency: "3600"
+            namespace: managed-services-stage
+            jobType: cluster_create
+          record: latencytarget:kas_fleet_manager_worker_cluster_duration:rate30m
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_worker_cluster_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-stage",le="3600",jobType="cluster_create"}[1h]))
+              /
+              sum(rate(kas_fleet_manager_worker_cluster_duration_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",jobType="cluster_create"}[1h]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            latency: "3600"
+            namespace: managed-services-stage
+            jobType: cluster_create
+          record: latencytarget:kas_fleet_manager_worker_cluster_duration:rate1h
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_worker_cluster_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-stage",le="3600",jobType="cluster_create"}[2h]))
+              /
+              sum(rate(kas_fleet_manager_worker_cluster_duration_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",jobType="cluster_create"}[2h]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            latency: "3600"
+            namespace: managed-services-stage
+            jobType: cluster_create
+          record: latencytarget:kas_fleet_manager_worker_cluster_duration:rate2h
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_worker_cluster_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-stage",le="3600",jobType="cluster_create"}[6h]))
+              /
+              sum(rate(kas_fleet_manager_worker_cluster_duration_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",jobType="cluster_create"}[6h]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            latency: "3600"
+            namespace: managed-services-stage
+            jobType: cluster_create
+          record: latencytarget:kas_fleet_manager_worker_cluster_duration:rate6h
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_worker_cluster_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-stage",le="3600",jobType="cluster_create"}[1d]))
+              /
+              sum(rate(kas_fleet_manager_worker_cluster_duration_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",jobType="cluster_create"}[1d]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            latency: "3600"
+            namespace: managed-services-stage
+            jobType: cluster_create
+          record: latencytarget:kas_fleet_manager_worker_cluster_duration:rate1d
+        - expr: |
+            1 - (
+              sum(rate(kas_fleet_manager_worker_cluster_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-stage",le="3600",jobType="cluster_create"}[3d]))
+              /
+              sum(rate(kas_fleet_manager_worker_cluster_duration_count{job="kas-fleet-manager-metrics",namespace="managed-services-stage",jobType="cluster_create"}[3d]))
+            )
+          labels:
+            service: kas-fleet-manager
+            job: kas-fleet-manager-metrics
+            latency: "3600"
+            namespace: managed-services-stage
+            jobType: cluster_create
+          record: latencytarget:kas_fleet_manager_worker_cluster_duration:rate3d

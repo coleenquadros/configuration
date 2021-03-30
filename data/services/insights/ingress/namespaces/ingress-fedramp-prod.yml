@@ -1,0 +1,204 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: ingress
+
+name: ingress-prod
+description: Insights ingress for FedRAMP on prod
+
+cluster:
+  $ref: /openshift/insights/crcgovp01ue1/cluster.yml
+
+quota:
+  $ref: /services/insights/ingress/ingress-quota.yml
+
+app:
+  $ref: /services/insights/ingress/app.yml
+
+environment:
+  $ref: /products/insights/environments/fedramp-production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcgovp01ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-fedramp-prod.yml
+
+managedRoles: true
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-fedramp-prod
+  identifier: ingress-prod
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
+# - provider: sqs
+#   account: insights-prod
+#   identifier: insights-sideload-prod-sqs
+#   output_resource_name: insights-sideload-sqs
+#   specs:
+#   - defaults: /terraform/resources/insights/prod/sqs-insights-sideload-prod.yml
+#     queues:
+#     - key: name
+#       value: insights-sideload-aicoe-prod
+- provider: s3
+  account: insights-fedramp-prod
+  identifier: upload-fedramp-prod
+  defaults: /terraform/resources/s3-gdpr-1.yml
+  output_resource_name: upload-s3
+- provider: s3
+  account: insights-fedramp-prod
+  identifier: insights-ingress-archives-fedramp-prod
+  defaults: /terraform/resources/s3-gdpr-1.yml
+  output_resource_name: insights-ingress-archives
+- provider: s3
+  account: insights-fedramp-prod
+  identifier: insights-ingress-rejected-fedramp-prod
+  defaults: /terraform/resources/s3-gdpr-1.yml
+  output_resource_name: insights-ingress-rejected
+- provider: s3
+  account: insights-fedramp-prod
+  identifier: insights-buck-it-openshift-fedramp-prod
+  defaults: /terraform/resources/s3-gdpr-1.yml
+  # sqs_identifier: insights-buck-it-openshift-prod
+  # s3_events: ["s3:ObjectCreated:*"]
+  output_resource_name: insights-buck-it-openshift
+- provider: s3
+  account: insights-fedramp-prod
+  identifier: insights-buck-it-ansible-fedramp-prod
+  defaults: /terraform/resources/s3-gdpr-1.yml
+  output_resource_name: insights-buck-it-ansible
+- provider: s3
+  account: insights-fedramp-prod
+  identifier: insights-client-metrics-fedramp-prod
+  defaults: /terraform/resources/s3-gdpr-1.yml
+  output_resource_name: insights-client-metrics-bucket
+- provider: s3
+  account: insights-fedramp-prod
+  identifier: insights-sideload-aicoe-fedramp-prod
+  defaults: /terraform/resources/s3-gdpr-1.yml
+  # sqs_identifier: insights-sideload-aicoe-prod
+  # s3_events: ["s3:ObjectCreated:*"]
+  output_resource_name: insights-sideload-aicoe
+# - provider: aws-iam-service-account
+#   account: insights-prod
+#   identifier: ingress-buckets-read-write-prod
+#   variables:
+#     aws_region: us-east-1
+#   user_policy:
+#     {
+#       "Version": "2012-10-17",
+#       "Statement": [{
+#         "Effect": "Allow",
+#         "Action": [
+#           "s3:ListBucket",
+#         ],
+#         "Resource": [
+#           "arn:aws:s3:::upload-prod",
+#           "arn:aws:s3:::insights-ingress-rejected-prod",
+#           "arn:aws:s3:::insights-buck-it-openshift-prod",
+#           "arn:aws:s3:::insights-buck-it-ansible-prod",
+#           "arn:aws:s3:::insights-ingress-archives-prod",
+#           "arn:aws:s3:::insights-sideload-aicoe-prod",
+#         ]
+#       },
+#       {
+#         "Effect": "Allow",
+#         "Action": [
+#           "s3:*Object"
+#         ],
+#         "Resource": [
+#           "arn:aws:s3:::upload-prod/*",
+#           "arn:aws:s3:::insights-ingress-rejected-prod/*",
+#           "arn:aws:s3:::insights-buck-it-openshift-prod/*",
+#           "arn:aws:s3:::insights-buck-it-ansible-prod/*",
+#           "arn:aws:s3:::insights-ingress-archives-prod/*",
+#           "arn:aws:s3:::insights-sideload-aicoe-prod/*",
+#         ]
+#       }]
+#     }
+#   output_resource_name: ingress-buckets-read-write
+# - provider: aws-iam-service-account
+#   account: insights-prod
+#   identifier: ingress-buck-it-openshift-read-prod
+#   variables:
+#     aws_region: us-east-1
+#   user_policy:
+#     {
+#       "Version": "2012-10-17",
+#       "Statement": [{
+#         "Effect": "Allow",
+#         "Action": [
+#           "s3:ListBucket",
+#           "s3:GetObject"
+#         ],
+#         "Resource": [
+#           "arn:aws:s3:::insights-buck-it-openshift-prod",
+#           "arn:aws:s3:::insights-buck-it-openshift-prod/*"
+#         ]
+#       }]
+#     }
+#   output_resource_name: ingress-buck-it-openshift-read
+# - provider: aws-iam-service-account
+#   account: insights-prod
+#   identifier: ingress-buck-it-ansible-read-prod
+#   variables:
+#     aws_region: us-east-1
+#   user_policy:
+#     {
+#       "Version": "2012-10-17",
+#       "Statement": [{
+#         "Effect": "Allow",
+#         "Action": [
+#           "s3:ListBucket",
+#           "s3:GetObject"
+#         ],
+#         "Resource": [
+#           "arn:aws:s3:::insights-buck-it-ansible-prod",
+#           "arn:aws:s3:::insights-buck-it-ansible-prod/*"
+#         ]
+#       }]
+#     }
+#   output_resource_name: ingress-buck-it-ansible-read
+# - provider: aws-iam-service-account
+#   account: insights-prod
+#   identifier: ingress-data-hub-read-prod
+#   variables:
+#     aws_region: us-east-1
+#   user_policy:
+#     {
+#       "Version": "2012-10-17",
+#       "Statement": [{
+#         "Effect": "Allow",
+#         "Action": [
+#           "s3:ListBucket",
+#           "s3:GetObject"
+#         ],
+#         "Resource": [
+#           "arn:aws:s3:::upload-prod",
+#           "arn:aws:s3:::upload-prod/*",
+#           "arn:aws:s3:::insights-ingress-archives-prod",
+#           "arn:aws:s3:::insights-ingress-archives-prod/*",
+#         ]
+#       }]
+#     }
+#   output_resource_name: ingress-data-hub-read
+
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/platform-mq-prod/kafka-ca
+  version: 2
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull

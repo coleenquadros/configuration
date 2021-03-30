@@ -1,0 +1,41 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: github-mirror
+name: github-mirror-2021-03-01
+app:
+  $ref: /services/github-mirror/app.yml
+date: '2021-03-01'
+contentFormatVersion: 1.0.0
+content: |
+  production_promotions: null
+  merges_to_master:
+  - repo: https://github.com/app-sre/github-mirror
+    total: 4
+    success: 4
+  container_vulnerabilities:
+  - cluster: app-sre-stage-01
+    namespace: github-mirror-stage
+    vulnerabilities:
+      Medium: 61
+      High: 15
+      Low: 7
+  post_deploy_jobs:
+  - cluster: app-sre-stage-01
+    namespace: github-mirror-stage
+    post_deploy_job: true
+  - cluster: app-sre-prod-01
+    namespace: github-mirror-production
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: app-sre-prod-01
+    namespace: github-mirror-production
+    validations:
+      deployment_validation_operator_replica_validation:
+        Failed: 2
+        Passed: 2
+  - cluster: app-sre-stage-01
+    namespace: github-mirror-stage
+    validations:
+      deployment_validation_operator_replica_validation:
+        Failed: 2
+        Passed: 2

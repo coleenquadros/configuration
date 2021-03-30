@@ -22,8 +22,8 @@ serviceOwners:
   - name: Managed Kafka - Consoles & DevExp
     email: mas-devexp@redhat.com
 
-performanceParameters:
-  SLO: 90
+escalationPolicy:
+  $ref: /teams/managed-services/escalation-policies/kas-fleet-manager.yaml
 
 dependencies:
   - $ref: /dependencies/ci-int/service.yml
@@ -43,9 +43,12 @@ codeComponents:
   - name: strimzi-operator-bundle
     resource: upstream
     url: https://gitlab.cee.redhat.com/mk-ci-cd/strimzi-operator-bundle
-  - name: managed-services-api
+  - name: kas-fleetshard
     resource: upstream
-    url: https://gitlab.cee.redhat.com/service/managed-services-api
+    url: https://gitlab.cee.redhat.com/mk-ci-cd/kas-fleetshard
+  - name: kas-fleet-manager
+    resource: upstream
+    url: https://gitlab.cee.redhat.com/service/kas-fleet-manager
     gitlabRepoOwners: true
     gitlabHousekeeping:
       enabled: true
@@ -63,22 +66,22 @@ codeComponents:
   - name: kafka-monitoring-stuff
     resource: upstream
     url: https://github.com/RHCloudServices/kafka-monitoring-stuff
-  - name: strimzi-ui
+  - name: kafka-ui
     resource: upstream
-    url: https://gitlab.cee.redhat.com/mk-ci-cd/strimzi-ui
-  - name: mk-ui-frontend
+    url: https://gitlab.cee.redhat.com/mk-ci-cd/kafka-ui
+  - name: kas-ui
     resource: upstream
-    url: https://gitlab.cee.redhat.com/mk-ci-cd/mk-ui-frontend
+    url: https://gitlab.cee.redhat.com/mk-ci-cd/kas-ui
   - name: guides
     resource: upstream
     url: https://gitlab.cee.redhat.com/mk-ci-cd/guides
-  - name: mk-ui-host
+  - name: application-services-ui
     resource: upstream
-    url: https://gitlab.cee.redhat.com/mk-ci-cd/mk-ui-host
+    url: https://gitlab.cee.redhat.com/mk-ci-cd/application-services-ui
   - name: mk-e2e-test-suite
     resource: upstream
     url: https://gitlab.cee.redhat.com/mk-ci-cd/mk-e2e-test-suite
-    
+
 quayRepos:
   - org:
       $ref: /dependencies/quay/app-sre.yml
@@ -86,12 +89,10 @@ quayRepos:
     - permissions:
       - $ref: /dependencies/quay/permissions/quay-membership-app-sre-managed-services.yml
       role: read
+    # TODO: move these images to the RHOAS org
     items:
       - name: managed-kafka-kafka
         description: "Kafka image for managed kafka"
-        public: false
-      - name: managed-kafka-operator
-        description: "Operator image for managed kafka"
         public: false
       - name: managed-kafka-jmxtrans
         description: "JMXTrans image for managed kafka"
@@ -102,8 +103,10 @@ quayRepos:
       - name: managed-kafka-test-client
         description: "Test client image for managed kafka"
         public: false
+      # This should be "kas-fleet-manager" but we held renaming for now to avoid loosing existing images.
+      # See https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/14437#note_2097737 for more details.
       - name: managed-services-api
-        description: "The Managed Services API allows different customer types (Tire Kicker, Value Prod and Enterprise) to create instances of a Red Hat managed service"
+        description: "The Kafka Service Fleet Manager allows different customer types (Tire Kicker, Value Prod and Enterprise) to create instances of a Red Hat managed service"
         public: false
       - name: managed-kafka-strimzi-operator-bundle
         description: "Strimzi operator bundle image for managed kafka (https://gitlab.cee.redhat.com/mk-ci-cd/strimzi-operator-bundle)"
@@ -117,11 +120,41 @@ quayRepos:
       - name: mk-strimzi-operator
         description: "Managed services strimzi operator"
         public: false
-      - name: mk-strimzi-ui
-        description: Strimzi UI for managed kafka (https://gitlab.cee.redhat.com/mk-ci-cd/strimzi-ui)
+  - org:
+      $ref: /dependencies/quay/managedservices-bf2.yml
+    teams:
+    - permissions:
+      - $ref: /dependencies/quay/permissions/quay-membership-bf2-managed-services.yml
+      role: read
+    items:
+      - name: kas-fleetshard-operator
+        description: "Private repo for the kas-fleetshard-operator"
         public: false
-      - name: mk-ui-frontend
-        description: Control Plane UI (https://gitlab.cee.redhat.com/mk-ci-cd/mk-ui-frontend)
+
+  - org:
+      $ref: /dependencies/quay/managedservices-rhoas.yml
+    teams:
+    - permissions:
+      - $ref: /dependencies/quay/permissions/quay-membership-rhoas-managed-services.yml
+      role: read
+    items:
+      - name: service-operator
+        description: "Service binding operator"
+        public: true
+      - name: service-operator-bundle
+        description: "Operator bundle for the service binding operator"
+        public: true
+      - name: service-operator-registry
+        description: "Operator registry for the service binding operator"
+        public: true
+      - name: kas-fleet-manager-locust
+        description: "kas-fleet-manager-locust image for the performance test"
+        public: false
+      - name: kas-fleet-manager-token-refresh
+        description: "kas-fleet-manager-token-refresh image for the performance test"
+        public: false
+      - name: kas-fleet-manager
+        description: "The Kafka Service Fleet Manager allows different customer types (Tire Kicker, Value Prod and Enterprise) to create instances of a Red Hat managed service"
         public: false
 
 sentryProjects:
@@ -129,7 +162,7 @@ sentryProjects:
       $ref: /dependencies/sentry/teams/managed-services-stage.yml
     projects:
       - name: managed-services-stage
-        description: Managed Services Stage
+        description: Kafka Service Fleet Manager Stage
         email_prefix: mk-service-api
         platform: go
         auto_resolve_age: 168
@@ -140,7 +173,7 @@ sentryProjects:
       $ref: /dependencies/sentry/teams/managed-services-production.yml
     projects:
       - name: managed-services-prod
-        description: Managed Services Production
+        description: Kafka Service Fleet Manager Production
         email_prefix: mk-service-api
         platform: go
         auto_resolve_age: 168

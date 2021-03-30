@@ -25,6 +25,7 @@ managedResourceTypes:
 - Kafka
 - KafkaTopic
 - KafkaConnect
+- KafkaConnector
 - ConfigMap
 - Service
 - Deployment
@@ -46,7 +47,7 @@ resourceTemplates:
     ZK_VOL_SIZE: 50Gi
   targets:
   - namespace:
-      $ref: /services/insights/strimzi/namespaces/stage-platform-mq-stage.yml
+      $ref: /services/insights/strimzi/namespaces/platform-mq-fedramp-stage.yml
     ref: master
     parameters:
       KAFKA_CPU_REQUESTS: 2
@@ -58,29 +59,17 @@ resourceTemplates:
       KAFKA_HEAP_OPTS_XMX: 16g
       KAFKA_VOL_SIZE: 450Gi
   - namespace:
-      $ref: /services/insights/strimzi/namespaces/perf-platform-mq-perf.yml
+      $ref: /services/insights/strimzi/namespaces/stage-platform-mq-stage.yml
     ref: master
     parameters:
-      KAFKA_CPU_REQUESTS: 2
+      KAFKA_CPU_REQUESTS: 1
       KAFKA_CPU_LIMITS: 3
-      KAFKA_MEMORY_REQUESTS: 24Gi
-      KAFKA_MEMORY_LIMITS: 24Gi
+      KAFKA_MEMORY_REQUESTS: 12Gi
+      KAFKA_MEMORY_LIMITS: 20Gi
       KAFKA_NUM_REPLICAS: 3
       KAFKA_HEAP_OPTS_XMS: 6g
       KAFKA_HEAP_OPTS_XMX: 6g
       KAFKA_VOL_SIZE: 450Gi
-  - namespace:
-      $ref: /services/insights/strimzi/namespaces/fedramp-platform-mq-stage.yml
-    ref: master
-    parameters:
-      KAFKA_CPU_REQUESTS: 2
-      KAFKA_CPU_LIMITS: 3
-      KAFKA_MEMORY_REQUESTS: 12Gi
-      KAFKA_MEMORY_LIMITS: 24Gi
-      KAFKA_NUM_REPLICAS: 3
-      KAFKA_HEAP_OPTS_XMS: 8g
-      KAFKA_HEAP_OPTS_XMX: 16g
-      KAFKA_VOL_SIZE: 150Gi
   - namespace:
       $ref: /services/insights/strimzi/namespaces/platform-mq-prod.yml
     ref: 614acebc99f2f0a1c91b4794fb1ebe8399b56fe7
@@ -103,14 +92,21 @@ resourceTemplates:
       $ref: /services/insights/strimzi/namespaces/stage-platform-mq-stage.yml
     ref: master
   - namespace:
-      $ref: /services/insights/strimzi/namespaces/perf-platform-mq-perf.yml
-    ref: master
-  - namespace:
-      $ref: /services/insights/strimzi/namespaces/fedramp-platform-mq-stage.yml
+      $ref: /services/insights/strimzi/namespaces/platform-mq-fedramp-stage.yml
     ref: master
   - namespace:
       $ref: /services/insights/strimzi/namespaces/platform-mq-prod.yml
-    ref: ff7f796f7c1c3a3d4d75feaa662790a419da9da5 
+    ref: 55543cc4c5ff5d7db76beac9b018a4502402e773
+- name: kafka-metrics
+  path: /deploys/openshift/kafka-metrics-configmap.yaml
+  url: https://github.com/RedHatInsights/platform-mq
+  targets:
+  - namespace:
+      $ref: /services/insights/strimzi/namespaces/stage-platform-mq-stage.yml
+    ref: master
+  - namespace:
+      $ref: /services/insights/strimzi/namespaces/platform-mq-prod.yml
+    ref: 22ab8cdeaa1b5275731da5512784bf8f43f5939b
 - name: kafka-connect
   path: /deploys/openshift/kafka-connect.yaml
   url: https://github.com/RedHatInsights/platform-mq
@@ -122,6 +118,22 @@ resourceTemplates:
     ref: master
     parameters:
       BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9093
+  - namespace:
+      $ref: /services/insights/strimzi/namespaces/platform-mq-fedramp-stage.yml
+    ref: master
+    parameters:
+      BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9093
+- name: kafka-connector
+  path: /deploys/openshift/kafka-connectors.yaml
+  url: https://github.com/RedHatInsights/platform-mq
+  parameters:
+    S3_SINK_TOPICS: platform.insights.client-metrics
+    S3_SINK_BUCKET_NAME: insights-client-metrics-stage
+    S3_SINK_CONNECTOR_NAME: client-metrics-sink-stage
+  targets:
+  - namespace:
+      $ref: /services/insights/strimzi/namespaces/stage-platform-mq-stage.yml
+    ref: master
 - name: prometheus-kafka-consumer-group-exporter
   hash_length: 7
   path: /openshift.yaml
@@ -140,17 +152,17 @@ resourceTemplates:
   url: https://github.com/RedHatInsights/platform-mq
   targets:
   - namespace:
+      $ref: /services/insights/strimzi/namespaces/platform-mq-fedramp-stage.yml
+    ref: master
+    parameters:
+      APPSRE_ENV: stage
+  - namespace:
       $ref: /services/insights/strimzi/namespaces/stage-platform-mq-stage.yml
     ref: master
     parameters:
       APPSRE_ENV: stage
   - namespace:
-      $ref: /services/insights/strimzi/namespaces/perf-platform-mq-perf.yml
-    ref: master
-    parameters:
-      APPSRE_ENV: perf
-  - namespace:
       $ref: /services/insights/strimzi/namespaces/platform-mq-prod.yml
-    ref: 016b86c2bb7967176a177866182713bc5e03504d
+    ref: 02e00cd3789683b21f4add657c5cf367014b0fa4
     parameters:
       APPSRE_ENV: prod

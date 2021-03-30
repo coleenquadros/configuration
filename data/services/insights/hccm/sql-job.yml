@@ -1,0 +1,37 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+name: 2021-03-18-staging-db-settings
+labels: {}
+namespace:
+  $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
+identifier: koku-stage
+output: stdout
+# Required if output is encrypted
+# requestor: 
+#   $ref: <user-1.yml with public_gpg_key>
+# schedule: <if defined the output resource will be a CronJob instead of a Job>
+queries: 
+  - |
+    SELECT name,
+           setting as setting_ms,
+           setting::int / 60000::int as "setting_m",
+           setting::int / 3600000::int as "setting_h",
+           boot_val as boot_val_ms,
+           boot_val::int / 60000::int as "boot_val_m",
+           boot_val::int / 3600000::int as "boot_val_h",
+           reset_val as reset_val_ms,
+           reset_val::int / 60000::int as "reset_val_m",
+           reset_val::int / 3600000::int as "reset_val_h"
+      FROM pg_catalog.pg_settings
+     WHERE name = 'idle_in_transaction_session_timeout'
+     ORDER BY 1;
+  - |
+    SELECT name, setting
+      FROM pg_catalog.pg_settings
+     WHERE name = 'ssl'
+     ORDER BY 1;
+  - |
+    SELECT rolname, rolconfig
+      FROM pg_roles
+     WHERE rolname IN ('insights', 'hive')
+     ORDER BY 1;

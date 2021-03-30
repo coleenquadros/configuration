@@ -1,0 +1,55 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: module-update-router
+
+name: module-update-router-prod
+description: module-update-router for FedRAMP on prod
+
+cluster:
+  $ref: /openshift/insights/crcgovp01ue1/cluster.yml
+
+app:
+  $ref: /services/insights/module-update-router/app.yml
+
+environment:
+  $ref: /products/insights/environments/fedramp-production.yml
+
+networkPoliciesAllow:
+  - $ref: /services/observability/namespaces/openshift-customer-monitoring.crcgovp01ue1.yml
+  # - $ref: /services/insights/gateway/namespaces/3scale-fedramp-prod.yml
+  # - $ref: /services/insights/turnpike/namespaces/turnpike-fedramp-prod.yml
+
+managedRoles: true
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/module-update-router-fedramp-prod/accounts-modules
+  version: 2
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/platform-mq-prod/kafka-ca
+  version: 2
+  annotations:
+    qontract.recycle: "true"
+
+# managedTerraformResources: true
+
+# terraformResources:
+# - provider: rds
+#   account: insights-prod
+#   identifier: module-update-router-prod
+#   defaults: /terraform/resources/insights/production/rds/rds-module-update-router-prod.yml
+#   parameter_group: /terraform/resources/insights/production/rds/postgres12-parameter-group-module-update-router-prod.yml
+#   output_resource_name: module-update-router-db

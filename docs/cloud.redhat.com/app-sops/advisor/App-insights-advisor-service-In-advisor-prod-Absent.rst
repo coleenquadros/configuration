@@ -17,6 +17,8 @@ Impact
 Summary
 -------
 
+Note:  This service is deployed via `Clowder`_.
+
 This alert fires when the Advisor pod(s) drop and/or prometheus cannot scrape metrics.
 Usually caused caused by pods going offline or a prometheus problem.
 
@@ -41,3 +43,5 @@ Escalations
 
 
 .. _Incident Response Doc: https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE
+.. _Clowder: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/app-sops/clowder/clowder.rst
+

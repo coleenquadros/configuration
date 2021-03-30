@@ -1,0 +1,84 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: patchman
+
+name: patchman-engine-prod
+description: Insights patchman-engine for FedRAMP on prod
+
+cluster:
+  $ref: /openshift/insights/crcgovp01ue1/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/standard-resource-limits.yml
+
+quota:
+  $ref: /services/insights/default-quota.yml
+
+app:
+  $ref: /services/insights/patchman/app.yml
+
+environment:
+  $ref: /products/insights/environments/fedramp-production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcgovp01ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-fedramp-prod.yml
+- $ref: /services/insights/vulnerability/namespaces/vmaas-fedramp-prod.yml
+# - $ref: /services/insights/turnpike/namespaces/turnpike-fedramp-prod.yml
+- $ref: /services/insights/vulnerability/namespaces/vulnerability-engine-fedramp-prod.yml
+# - $ref: /services/insights/remediations/namespaces/remediations-fedramp-prod.yml
+
+managedRoles: true
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-fedramp-prod
+  identifier: patchman-prod
+  defaults: /terraform/resources/insights/production/rds/rds-patchman-engine-prod.yml
+  parameter_group: /terraform/resources/insights/production/rds/postgres12-parameter-group-patchman-prod.yml
+  output_resource_name: patchman-db
+  enhanced_monitoring: true
+- provider: aws-iam-service-account
+  account: insights-fedramp-prod
+  identifier: patchman-aws-prodee
+  policies:
+  - CloudWatchReadOnlyAccess
+  output_resource_name: patchman-aws
+- provider: cloudwatch
+  account: insights-fedramp-prod
+  identifier: patchman-prod
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/platform-mq-prod/kafka-ca
+  version: 2
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/patchman-engine-fedramp-prod/patchman-engine-database-passwords
+  version: 2
+  type: Opaque
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/vulnerability-engine-fedramp-prod/github-vulnerability-bot
+  version: 2
+  type: Opaque
+  annotations:
+    qontract.recycle: "true"

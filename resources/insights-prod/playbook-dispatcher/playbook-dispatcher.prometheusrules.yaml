@@ -1,0 +1,212 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: playbook-dispatcher-prod
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: playbook-dispatcher-prod
+    rules:
+
+    # Common alerts
+    - alert: PlaybookDispatcherAbsent
+      expr: |
+        absent(up{job="playbook-dispatcher-api"} == 1) OR
+        absent(up{job="playbook-dispatcher-response-consumer"} == 1) OR
+        absent(up{job="playbook-dispatcher-validator"} == 1) OR
+        absent(up{job="playbook-dispatcher-connect-connect-metrics"} == 1)
+      for: 5m
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/playbook-dispatcher-prod/deployments"
+        message: "playbook-dispatcher pod missing"
+
+    - alert: PlaybookDispatcherRestart
+      expr: |
+        sum(increase(kube_pod_container_status_restarts_total{container=~"playbook-dispatcher-.*"}[5m])) by (container) > 0
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/playbook-dispatcher-prod/deployments"
+        message: "playbook-dispatcher container {{ $labels.container }} restarting"
+
+    # SLOs
+    - alert: PlaybookDispatcherSLOAvailability
+      expr: |
+        1 - (sum(increase(echo_http_requests_total{status="5xx", service="playbook-dispatcher-api"}[1w])) / sum(increase(echo_http_requests_total{service="playbook-dispatcher-api"}[1w]))) < 0.95
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/goto/af5247885c9c7957c76db8f5af36071f"
+        message: "playbook-dispatcher availability SLO breached: {{ $value }}"
+
+    - alert: PlaybookDispatcherSLOLatencyAPI
+      expr: |
+        sum(increase(echo_http_request_duration_seconds_bucket{le="2", service="playbook-dispatcher-api"}[1w])) / sum(increase(echo_http_request_duration_seconds_bucket{le="+Inf", service="playbook-dispatcher-api"}[1w])) < 0.95
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/goto/af5247885c9c7957c76db8f5af36071f"
+        message: "playbook-dispatcher latency SLO breached: {{ $value }}"
+
+    - record: playbook_dispatcher:consumer_group_lag:sum
+      expr: |
+        sum(kafka_consumergroup_group_lag{group="playbook-dispatcher"})
+
+    - alert: PlaybookDispatcherSLOLatencyKafka
+      expr: |
+        quantile_over_time(0.95, playbook_dispatcher:consumer_group_lag:sum[1w]) > 10000
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/playbook-dispatcher-prod/deployments"
+        message: "playbook-dispatcher latency SLO breached: {{ $value }}"
+
+    # API
+    - alert: PlaybookDispatcherAPI500
+      expr: |
+        sum(increase(echo_http_requests_total{status="5xx", service="playbook-dispatcher-api"}[5m])) > 0
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/goto/af5247885c9c7957c76db8f5af36071f"
+        message: "playbook-dispatcher-api 500"
+
+    # Response consumer
+    - alert: PlaybookDispatcherConsumerError
+      expr: |
+        sum(increase(response_consumer_error_total{service="playbook-dispatcher-response-consumer"}[5m])) by (type) > 0
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/goto/65ca3ce87c38e6cb2ef5e806fdb8252c"
+        message: "playbook-dispatcher-response-consumer error: {{ $labels.type }}"
+
+    - alert: PlaybookDispatcherConsumerValidationFailure
+      expr: |
+        sum(increase(response_consumer_validation_failure_total{service="playbook-dispatcher-response-consumer"}[5m])) by (type) > 0
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/goto/65ca3ce87c38e6cb2ef5e806fdb8252c"
+        message: "playbook-dispatcher-response-consumer validation failure: {{ $labels.type }}"
+
+    - alert: PlaybookDispatcherConsumerLagIncreasing
+      expr: |
+        sum(delta(kafka_consumergroup_group_lag{topic="platform.playbook-dispatcher.runner-updates", group="playbook-dispatcher"}[5m])) > 0
+      for: 30m
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/playbook-dispatcher-prod/deployments"
+        message: "playbook-dispatcher-response-consumer lag keeps increasing for over 30 minutes"
+
+    # Validator
+    - alert: PlaybookDispatcherValidatorFailure
+      expr: |
+        sum(increase(validator_failure_total{service="playbook-dispatcher-validator"}[5m])) > 0
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/goto/0dedce8b19a56d944f38d022e02909b5"
+        message: "playbook-dispatcher-validator failure"
+
+    - alert: PlaybookDispatcherValidatorError
+      expr: |
+        sum(increase(validator_error_total{service="playbook-dispatcher-validator"}[5m])) by (phase) > 0
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/goto/0dedce8b19a56d944f38d022e02909b5"
+        message: "playbook-dispatcher-validator error: {{ $labels.phase }}"
+
+    - alert: PlaybookDispatcherValidatorProducerError
+      expr: |
+        sum(increase(validator_kafka_producer_error_total{service="playbook-dispatcher-validator"}[5m])) > 0
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/goto/0dedce8b19a56d944f38d022e02909b5"
+        message: "playbook-dispatcher-validator producer error"
+
+    - alert: PlaybookDispatcherValidatorLagIncreasing
+      expr: |
+        sum(delta(kafka_consumergroup_group_lag{topic="platform.upload.playbook", group="playbook-dispatcher"}[5m])) > 0
+      for: 30m
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/playbook-dispatcher-prod/deployments"
+        message: "playbook-dispatcher-validator lag keeps increasing for over 30 minutes"
+
+    # Event interface
+    - alert: PlaybookDispatcherNoConnector
+      expr: |
+        absent(kafka_connect_worker_connector_running_task_count{connector="playbook-dispatcher-event-interface"} == 1)
+      for: 5m
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/js1xeMwMz/playbook-dispatcher?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/playbook-dispatcher-prod/kafka.strimzi.io~v1alpha1~KafkaConnector"
+        message: "playbook-dispatcher-event-interface not running"

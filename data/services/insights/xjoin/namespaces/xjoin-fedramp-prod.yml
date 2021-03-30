@@ -1,0 +1,110 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: xjoin
+
+name: xjoin-prod
+description: Insights xjoin for FedRAMP on prod
+
+cluster:
+  $ref: /openshift/insights/crcgovp01ue1/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
+
+quota:
+  $ref: /services/insights/xjoin/xjoin-quota.yml
+
+app:
+  $ref: /services/insights/xjoin/app.yml
+
+environment:
+  $ref: /products/insights/environments/fedramp-production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcgovp01ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-fedramp-prod.yml
+# - $ref: /services/insights/host-inventory/namespaces/host-inventory-fedramp-prod.yml
+# - $ref: /services/insights/xjoin/namespaces/xjoin-jenkins-fedramp-prod.yml
+# - $ref: /services/insights/remediations/namespaces/remediations-fedramp-prod.yml
+- $ref: /openshift/insights/crcgovp01ue1/namespaces/openshift-operator-lifecycle-manager.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ConfigMap
+- Role
+- RoleBinding
+- Secret
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/platform-mq-prod/kafka-ca
+  version: 2
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+# - provider: vault-secret
+  # requires access to the host-inventory-db provisioned through the host-inventory-prod namespace
+  # path: app-sre/integrations-output/terraform-resources/crcgovp01ue1/host-inventory-prod/host-inventory-db
+  # version: 1
+  # name: host-inventory-db
+  # annotations:
+  #   qontract.recycle: "true"
+  #   qontract.ignore_reconcile_time: "true"
+- provider: resource
+  path: /insights-prod/xjoin-prod/kafka-connect.configmap.yml
+- provider: resource
+  path: /insights-prod/xjoin-prod/validation.configmap.yml
+- provider: resource
+  path: /insights-prod/xjoin-prod/xjoin-config.configmap.yml
+- provider: resource
+  path: /insights-prod/xjoin-prod/xjoin-jenkins.role.yml
+- provider: resource
+  path: /insights-prod/xjoin-prod/xjoin-jenkins.rolebinding.yml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-prod/xjoin-prod/syndication-test-db.secret.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-prod/xjoin-prod/advisor-db.secret.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-prod/xjoin-prod/patch-db.secret.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-prod/xjoin-prod/vulnerability-db.secret.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-prod/xjoin-prod/compliance-db.secret.yaml
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-fedramp-prod
+  identifier: xjoin-prod
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  es_identifier: kibana-elasticsearch
+  output_resource_name: cloudwatch
+# - provider: elasticsearch
+#   account: insights-fedramp-prod
+#   identifier: xjoin-elasticsearch
+#   defaults: /terraform/resources/insights/prod/elasticsearch/xjoin.yml
+#   output_resource_name: xjoin-elasticsearch
+- provider: rds
+  account: insights-fedramp-prod
+  identifier: cyndi-prod
+  defaults: /terraform/resources/insights/production/rds/rds-cyndi-prod.yml
+  enhanced_monitoring: true
+  output_resource_name: cyndi-db-rds
+  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-cyndi-prod.yml

@@ -1,0 +1,58 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: mas-sso-stage
+description: staging namespace for mas-sso
+
+cluster:
+  $ref: /openshift/app-sre-stage-01/cluster.yml
+
+app:
+  $ref: /services/mas-sso/app.yml
+
+environment:
+  $ref: /products/osdv4/environments/stage.yml
+
+networkPoliciesAllow:
+  - $ref: /openshift/app-sre-stage-01/namespaces/openshift-operator-lifecycle-manager.yml
+  - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+
+managedRoles: true
+
+managedResourceTypes:
+  - ServiceAccount
+  - Secret
+
+openshiftResources:
+- provider: vault-secret
+  path: managed-services/quay-org-accounts/rhoas/robots/rhoas-pull-docker
+  version: 1
+  type: kubernetes.io/dockercfg
+- provider: resource-template
+  path: /services/mas-sso/serviceaccount.yaml
+  variables:
+    name: default
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/mas-sso/mas-sso-db-config.secret.yaml
+# This route is just a temporary sanity check. It will be replaced in the future.
+# See https://issues.redhat.com/browse/MGDSTRM-1228
+- provider: route
+  path: /services/mas-sso/mas-sso.route.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/mas-sso/mas-sso-credentials.secret.yaml
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: app-sre
+  identifier: mas-sso-staging
+  defaults: /terraform/resources/app-sre/staging/rds-1.yml
+  output_resource_name: mas-sso-rds
+  overrides:
+    multi_az: true
+  enhanced_monitoring: true

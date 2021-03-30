@@ -7,7 +7,7 @@ labels:
 name: hives02ue1
 description: hives02ue1 cluster
 consoleUrl: https://console-openshift-console.apps.hives02ue1.j5l5.p1.openshiftapps.com
-kibanaUrl: https://kibana-openshift-logging.apps.hives02ue1.j5l5.p1.openshiftapps.com
+kibanaUrl: ''
 prometheusUrl: https://prometheus.hives02ue1.devshift.net
 alertmanagerUrl: https://alertmanager.hives02ue1.devshift.net
 serverUrl: https://api.hives02ue1.j5l5.p1.openshiftapps.com:6443
@@ -52,8 +52,8 @@ managedGroups:
 spec:
   provider: aws
   region: us-east-1
-  channel: fast
-  version: 4.6.13
+  channel: candidate
+  version: 4.7.3
   initial_version: 4.4.11
   multi_az: false
   autoscale:
@@ -63,7 +63,7 @@ spec:
   storage: 600
   load_balancers: 0
   private: true
-  upgrade: batch1
+  upgrade: batch0
   id: 1farlonnersks14ohfp155uoonupr9id
   external_id: 87e97ea3-792d-4aef-8ad2-2f495d7e8e33
   provision_shard_id: de4b0632-dca7-11ea-b3b9-8c1645a911be
@@ -105,6 +105,13 @@ peering:
     cluster:
       $ref: /openshift/app-sre-prod-01/cluster.yml
     manageRoutes: true
+  - provider: account-tgw
+    name: hives02ue1
+    account:
+      $ref: /aws/osd-privatelink-stage/account.yml
+    tags:
+      osd: privatelink
+    manageRoutes: true
 
 automationToken:
   path: app-sre/creds/kube-configs/hives02ue1
@@ -119,3 +126,12 @@ awsInfrastructureAccess:
 - awsGroup:
     $ref: /aws/app-sre/groups/App-SRE-admin.yml
   accessLevel: network-mgmt
+- awsGroup:
+    $ref: /aws/osd-privatelink-stage/groups/Admins.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/app-sre/groups/Log-consumers.yml
+  accessLevel: read-only
+
+addons:
+- $ref: /dependencies/ocm/addons/cluster-logging-operator.yml

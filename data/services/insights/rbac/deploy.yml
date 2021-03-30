@@ -26,6 +26,7 @@ managedResourceTypes:
 - DeploymentConfig
 - PersistentVolumeClaim
 - Service
+- ConfigMap
 
 imagePatterns:
 - quay.io/cloudservices
@@ -36,6 +37,70 @@ authentication:
     field: all
 
 resourceTemplates:
+- name: model-access-permissions-yml-ci
+  path: /_private/configmaps/ci/model-access-permissions.configmap.yml
+  url: https://github.com/RedHatInsights/rbac-config
+  targets:
+  - namespace:
+      $ref: /services/insights/rbac/namespaces/dev-rbac-ci.yml
+    ref: 478e827a2396a625b1631685d4f86d54524d96ec
+
+- name: rbac-config-yml-ci
+  path: /_private/configmaps/ci/rbac-config.yml
+  url: https://github.com/RedHatInsights/rbac-config
+  targets:
+  - namespace:
+      $ref: /services/insights/rbac/namespaces/dev-rbac-ci.yml
+    ref: 478e827a2396a625b1631685d4f86d54524d96ec
+
+- name: model-access-permissions-yml-qa
+  path: /_private/configmaps/qa/model-access-permissions.configmap.yml
+  url: https://github.com/RedHatInsights/rbac-config
+  targets:
+  - namespace:
+      $ref: /services/insights/rbac/namespaces/dev-rbac-qa.yml
+    ref: 0ecdd19e68b39689bb483bbd91ce3b43b7c7b5d4
+
+- name: rbac-config-yml-qa
+  path: /_private/configmaps/qa/rbac-config.yml
+  url: https://github.com/RedHatInsights/rbac-config
+  targets:
+  - namespace:
+      $ref: /services/insights/rbac/namespaces/dev-rbac-qa.yml
+    ref: 0ecdd19e68b39689bb483bbd91ce3b43b7c7b5d4
+
+- name: model-access-permissions-yml-stage
+  path: /_private/configmaps/stage/model-access-permissions.configmap.yml
+  url: https://github.com/RedHatInsights/rbac-config
+  targets:
+  - namespace:
+      $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
+    ref: 2ef6e6b5f523eaf02684343a1f0defffbd10b676
+
+- name: rbac-config-yml-stage
+  path: /_private/configmaps/stage/rbac-config.yml
+  url: https://github.com/RedHatInsights/rbac-config
+  targets:
+  - namespace:
+      $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
+    ref: 2ef6e6b5f523eaf02684343a1f0defffbd10b676
+
+- name: model-access-permissions-yml-prod
+  path: /_private/configmaps/prod/model-access-permissions.configmap.yml
+  url: https://github.com/RedHatInsights/rbac-config
+  targets:
+  - namespace:
+      $ref: /services/insights/rbac/namespaces/rbac-prod.yml
+    ref: 2ef6e6b5f523eaf02684343a1f0defffbd10b676
+
+- name: rbac-config-yml-prod
+  path: /_private/configmaps/prod/rbac-config.yml
+  url: https://github.com/RedHatInsights/rbac-config
+  targets:
+  - namespace:
+      $ref: /services/insights/rbac/namespaces/rbac-prod.yml
+    ref: 2ef6e6b5f523eaf02684343a1f0defffbd10b676
+
 - name: rbac
   path: /templates/rbac/rbac.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
@@ -48,43 +113,25 @@ resourceTemplates:
     PERMISSION_SEEDING_ENABLED: 'False'
     ROLE_SEEDING_ENABLED: 'False'
     GROUP_SEEDING_ENABLED: 'False'
+    CW_NULL_WORKAROUND: 'true'
   targets:
   - namespace:
-      $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
-    ref: b917810a8ddc1b4e77671b174812eb81d8a029d4
-    parameters:
-      IMAGE_TAG: fc901ec
-      HABERDASHER_EMITTER: kafka
-      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
-      HABERDASHER_KAFKA_TOPIC: platform.logging.logs
-      HABERDASHER_LABELS: {"app": "rbac"}
-      HABERDASHER_TAGS: ["rbac"]
-  - namespace:
-      $ref: /services/insights/rbac/namespaces/perf-rbac-perf.yml
-    ref: b917810a8ddc1b4e77671b174812eb81d8a029d4
-    parameters:
-      IMAGE_TAG: fc901ec
-      MAX_REPLICAS: 1
-      MIN_REPLICAS: 1
-      TESTING_APPLICATION: test
-      BYPASS_BOP_VERIFICATION: 'True'
-      HABERDASHER_EMITTER: kafka
-      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
-      HABERDASHER_KAFKA_TOPIC: platform.logging.logs
-      HABERDASHER_LABELS: {"app": "rbac"}
-      HABERDASHER_TAGS: ["rbac"]
-  - namespace:
-      $ref: /services/insights/rbac/namespaces/fedramp-rbac-stage.yml
-    ref: ac0bb2a9fc61be926c659fd34c71de3cb7e89a5d
-    parameters:
-      IMAGE_TAG: 1ebf91a
-  - namespace:
       $ref: /services/insights/rbac/namespaces/rbac-prod.yml
-    ref: b917810a8ddc1b4e77671b174812eb81d8a029d4
+    ref: 7d85e8f42b908c7ff96a4c7dacd093e12d94c17c
     parameters:
-      IMAGE_TAG: fc901ec
+      IMAGE_TAG: ebd29a5
       DB_SECRET_NAME: rbac-db
-      RBAC_DESTRUCTIVE_ENABLED_UNTIL: 01-08-2021
+      RBAC_DESTRUCTIVE_ENABLED_UNTIL: 03-25-2021
+      HABERDASHER_EMITTER: kafka
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+      HABERDASHER_KAFKA_TOPIC: platform.logging.logs
+      HABERDASHER_LABELS: {"app": "rbac"}
+      HABERDASHER_TAGS: ["rbac"]
+  - namespace:
+      $ref: /services/insights/rbac/namespaces/dev-rbac-sre-ci.yml
+    ref: 91011aa706772d4be92f93c7d6e984bc965d329d
+    parameters:
+      IMAGE_TAG: ebd29a5
       HABERDASHER_EMITTER: kafka
       HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
       HABERDASHER_KAFKA_TOPIC: platform.logging.logs
@@ -96,25 +143,10 @@ resourceTemplates:
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
   targets:
   - namespace:
-      $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
-    ref: f4514d1324c1f9e977f1f0dc6fb8aa21d6345fb7
-    parameters:
-      IMAGE_TAG: 8e729bc
-  - namespace:
-      $ref: /services/insights/rbac/namespaces/perf-rbac-perf.yml
-    ref: f4514d1324c1f9e977f1f0dc6fb8aa21d6345fb7
-    parameters:
-      IMAGE_TAG: 8e729bc
-  - namespace:
-      $ref: /services/insights/rbac/namespaces/fedramp-rbac-stage.yml
-    ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
-    parameters:
-      IMAGE_TAG: ddae941
-  - namespace:
       $ref: /services/insights/rbac/namespaces/rbac-prod.yml
-    ref: f4514d1324c1f9e977f1f0dc6fb8aa21d6345fb7
+    ref: 7d85e8f42b908c7ff96a4c7dacd093e12d94c17c
     parameters:
-      IMAGE_TAG: 8e729bc
+      IMAGE_TAG: ebd29a5
 
 - name: worker
   path: /templates/rbac/worker.yaml
@@ -123,26 +155,14 @@ resourceTemplates:
     PGSSLMODE: verify-full
   targets:
   - namespace:
-      $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
-    ref: a47921be6b032d8263acf963875a7ef421562454
-    parameters:
-      IMAGE_TAG: 8e729bc
-  - namespace:
-      $ref: /services/insights/rbac/namespaces/perf-rbac-perf.yml
-    ref: a47921be6b032d8263acf963875a7ef421562454
-    parameters:
-      IMAGE_TAG: 8e729bc
-  - namespace:
-      $ref: /services/insights/rbac/namespaces/fedramp-rbac-stage.yml
-    ref: a47921be6b032d8263acf963875a7ef421562454
-    parameters:
-      IMAGE_TAG: 1ebf91a
-  - namespace:
       $ref: /services/insights/rbac/namespaces/rbac-prod.yml
-    ref: a47921be6b032d8263acf963875a7ef421562454
+    ref: 7d85e8f42b908c7ff96a4c7dacd093e12d94c17c
     parameters:
-      IMAGE_TAG: 8e729bc
+      IMAGE_TAG: ebd29a5
       DB_SECRET_NAME: rbac-db
+      CELERY_WORKER_CPU_LIMIT: '1'
+      CELERY_WORKER_MEMORY_REQUEST: 512Mi
+      CELERY_WORKER_MEMORY_LIMIT: 1Gi
 
 - name: rbac-redis
   path: /templates/rbac/redis.yaml
@@ -153,14 +173,5 @@ resourceTemplates:
     IMAGE_TAG: latest
   targets:
   - namespace:
-      $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
-    ref: 8cd383a274464d16635ed6bfda0edfa1e8ae6657
-  - namespace:
-      $ref: /services/insights/rbac/namespaces/perf-rbac-perf.yml
-    ref: 8cd383a274464d16635ed6bfda0edfa1e8ae6657
-  - namespace:
-      $ref: /services/insights/rbac/namespaces/fedramp-rbac-stage.yml
-    ref: cea8038009353a1ea076cd2651b6d321fd58e2fc
-  - namespace:
       $ref: /services/insights/rbac/namespaces/rbac-prod.yml
-    ref: 8cd383a274464d16635ed6bfda0edfa1e8ae6657
+    ref: 7d85e8f42b908c7ff96a4c7dacd093e12d94c17c

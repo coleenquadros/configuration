@@ -18,6 +18,9 @@ environment:
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml
 
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+
 managedRoles: true
 
 managedTerraformResources: true
@@ -108,18 +111,16 @@ openshiftResources:
   path: /observability/pushgateway.route.yaml
   variables:
     host: pushgateway.app-sre.devshift.net
-## Zabbix impersonator
-- provider: resource-template
-  type: jinja2
-  path: /observability/zabbix-impersonator/zabbix-impersonator-exporter.route.yaml
-  variables:
-    host: zabbix-impersonator-exporter.devshift.net
 ## Jiralert
 - provider: resource-template
   type: jinja2
   path: /services/observability/jiralert/jiralert.route.yaml
   variables:
     host: jiralert.app-sre.devshift.net
+## OSD Observatorium Credentials
+- provider: vault-secret
+  path: osd-sre/hive-production/observatorium-tenant/grafana-proxy-credentials
+  version: 1
 
 # ConfigMaps
 ## Grafana Dashboards
@@ -131,6 +132,9 @@ openshiftResources:
   validate_json: true
 - provider: resource
   path: /observability/grafana/grafana-dashboard-appsre-rds.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-appsre-sqs.configmap.yaml
   validate_json: true
 - provider: resource
   path: /observability/grafana/grafana-dashboard-appsre-elasticache.configmap.yaml
@@ -229,13 +233,10 @@ openshiftResources:
   path: /observability/grafana/grafana-dashboard-clusters-service-valet.configmap.yaml
   validate_json: true
 - provider: resource
-  path: /observability/grafana/grafana-dashboard-osio-capacity.configmap.yaml
-  validate_json: true
-- provider: resource
-  path: /observability/grafana/grafana-dashboard-osio-gluster.configmap.yaml
-  validate_json: true
-- provider: resource
   path: /observability/grafana/grafana-dashboard-uhc-account-manager.configmap.yaml
+  validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-uhc-account-manager-jobs.configmap.yaml
   validate_json: true
 - provider: resource
   path: /observability/grafana/grafana-dashboard-uhc-gateway.configmap.yaml
@@ -253,7 +254,7 @@ openshiftResources:
   path: /observability/grafana/grafana-dashboard-pagerduty-operator.configmap.yaml
   validate_json: true
 - provider: resource
-  path: /observability/grafana/grafana-dashboard-certman-operator.configmap.yaml 
+  path: /observability/grafana/grafana-dashboard-certman-operator.configmap.yaml
   validate_json: true
 - provider: resource
   path: /observability/grafana/grafana-dashboard-elasticsearch.configmap.yaml
@@ -270,6 +271,9 @@ openshiftResources:
 - provider: resource
   path: /observability/grafana/grafana-dashboard-qontract-server.configmap.yaml
   validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-devfile-registry.configmap.yaml
+  validate_json: true
 ## Cloudwatch exporters
 - provider: resource
   path: /observability/cloudwatch-exporter/cloudwatch-exporter-config.configmap.yaml
@@ -282,9 +286,6 @@ openshiftResources:
 ### Insights CloudWatch Exporter
 - provider: resource
   path: /observability/cloudwatch-exporter/crc/cloudwatch-exporter-config.configmap.yaml
-## Zabbix impersonator
-- provider: resource
-  path: /observability/zabbix-impersonator/zabbix-impersonator.configmap.yaml
 ## Quay
 - provider: resource
   path: /observability/grafana/grafana-dashboard-quay.configmap.yaml
@@ -301,6 +302,16 @@ openshiftResources:
 - provider: resource
   path: /observability/grafana/grafana-dashboard-dashdotdb.configmap.yaml
   validate_json: true
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-rate-limiting.configmap.yaml
+  validate_json: true
+## OSD Adoption Metrics
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-osd-adoption.configmap.yaml
+  validate_json: true
+  ### Kas Fleet Manager
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-kas-fleet-manager-prod-slos.configmap.yaml
 
 # Secrets
 ## Blackbox Exporter
@@ -322,10 +333,6 @@ openshiftResources:
 - provider: vault-secret
   path: app-interface/app-sre/app-sre-observability-production/grafana/grafana-proxy-config-openshift
   version: 1
-## Online-registration-exporter
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /observability/online-registration-exporter/online-registration-exporter-config.secret.yaml
 ## Pushgateway
 - provider: vault-secret
   path: app-interface/app-sre/app-sre-observability-production/pushgateway

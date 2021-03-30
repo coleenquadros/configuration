@@ -23,6 +23,12 @@ timeout: 5
 
 managedResourceTypes:
 - ClowdApp
+- ClowdJobInvocation
+- Deployment
+- KafkaConnect
+- KafkaConnector
+- Service
+- ConfigMap
 
 imagePatterns:
 - quay.io/cloudservices
@@ -33,24 +39,6 @@ authentication:
     field: all
 
 resourceTemplates:
-- name: playbook-artifact-validator
-  path: /deploy/clowdapp.yaml
-  url: https://github.com/RedHatInsights/playbook-artifact-validator
-  targets:
-  - namespace:
-      $ref: /services/insights/playbook-dispatcher/namespaces/stage.yml
-    ref: master
-    upstream: RedHatInsights-playbook-artifact-validator-gh-build-master
-    parameters:
-      ENV_NAME: stage
-      LOG_LEVEL: debug
-  - namespace:
-      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
-    disable: true  # do not create an app-sre deploy job for ephemeral namespace
-    ref: internal  # populated by bonfire
-    parameters:
-      MIN_REPLICAS: 1
-
 - name: playbook-dispatcher
   path: /deploy/clowdapp.yaml
   url: https://github.com/RedHatInsights/playbook-dispatcher
@@ -60,11 +48,42 @@ resourceTemplates:
     ref: master
     upstream: RedHatInsights-playbook-dispatcher-gh-build-master
     parameters:
-      ENV_NAME: stage
       LOG_LEVEL: debug
+      RETURN_URL: https://stage.cloud.redhat.com/api/ingress/v1/upload
+  - namespace:
+      $ref: /services/insights/playbook-dispatcher/namespaces/prod.yml
+    ref: 929df515c42d641710e3ceff4c8184d9802f02a2
+    parameters:
+      LOG_LEVEL: info
+      RETURN_URL: https://cloud.redhat.com/api/ingress/v1/upload
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
     ref: internal  # populated by bonfire
     parameters:
       MIN_REPLICAS: 1
+      DB_SSLMODE: disable
+      RBAC_IMPL: mock
+      RBAC_HOST: foobar
+      PSK_AUTH_TEST: xwKhCUzgJ8
+
+- name: playbook-dispatcher-connect
+  path: /deploy/connect.yaml
+  url: https://github.com/RedHatInsights/playbook-dispatcher
+  targets:
+  - namespace:
+      $ref: /services/insights/playbook-dispatcher/namespaces/stage.yml
+    ref: master
+    upstream: RedHatInsights-playbook-dispatcher-gh-build-master
+  - namespace:
+      $ref: /services/insights/playbook-dispatcher/namespaces/prod.yml
+    ref: 929df515c42d641710e3ceff4c8184d9802f02a2
+
+- name: test-secret-psk
+  path: /deploy/secrets.yaml
+  url: https://github.com/RedHatInsights/playbook-dispatcher
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire

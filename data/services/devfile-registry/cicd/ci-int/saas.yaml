@@ -1,0 +1,58 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: devfile-registry
+
+name: saas-devfile-registry
+description: SaaS tracking file for devfile-registry
+
+app:
+  $ref: /services/devfile-registry/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-devfile-registry-alert
+
+managedResourceTypes:
+- Deployment
+- Service
+- ConfigMap
+
+imagePatterns:
+- quay.io/app-sre/devfile-index
+- quay.io/devfile/oci-registry
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+resourceTemplates:
+- name: devfile-registry
+  url: https://github.com/devfile/registry-support
+  path: /deploy/hosted-registry/devfile-registry.yaml
+  targets:
+  - namespace:
+      $ref: /services/devfile-registry/namespaces/devfile-registry-stage.yml
+    ref: master
+    upstream: devfile-registry-gh-build-master
+    parameters:
+      DEVFILE_INDEX_IMAGE: quay.io/app-sre/devfile-index
+      DEVFILE_INDEX_MEMORY_LIMIT: 256Mi
+      OCI_REGISTRY_MEMORY_LIMIT: 256Mi
+      REPLICAS: 3
+  - namespace:
+      $ref: /services/devfile-registry/namespaces/devfile-registry-production.yml
+    ref: fe55fdaa13e4f0cfc70f62bb5ac76343cb412b19
+    parameters:
+      DEVFILE_INDEX_IMAGE: quay.io/app-sre/devfile-index
+      DEVFILE_INDEX_IMAGE_TAG: a68cc40
+      DEVFILE_INDEX_MEMORY_LIMIT: 256Mi
+      OCI_REGISTRY_IMAGE_TAG: sha-7ffafef
+      OCI_REGISTRY_MEMORY_LIMIT: 256Mi
+      REPLICAS: 3

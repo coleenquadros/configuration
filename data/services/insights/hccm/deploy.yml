@@ -59,10 +59,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
     # This is a pinned ref for the saas-templates repo version of master that we want to use
-    ref: aeb1a8d8dd20e9c9f5ce7aedc4c11f24a8d8ede9
+    ref: 26b5f6dc2a77d6924d960c36172c87bc5e866245
     parameters:
       APP_DOMAIN: apps.crcs02ue1.urby.p1.openshiftapps.com
-      IMAGE_TAG: 3f533fd
+      IMAGE_TAG: 2e477be
       KOKU_SENTRY_ENV: stage
       DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
       INIT_CPU_REQUEST: 250m
@@ -70,19 +70,20 @@ resourceTemplates:
       INIT_MEMORY_REQUEST: 512Mi
       INIT_MEMORY_LIMIT: 1Gi
       CPU_REQUEST: 200m
-      CPU_LIMIT: 1
-      MEMORY_REQUEST: 1Gi
-      MEMORY_LIMIT: 2Gi
+      CPU_LIMIT: 500m
+      MEMORY_REQUEST: 256Mi
+      MEMORY_LIMIT: 512Mi
       UPDATE_TIMEOUT: 14400
       PROMETHEUS_PUSHGATEWAY: prometheus-push.insights-push-stage.svc.cluster.local:9091
       ENABLE_PARQUET_PROCESSING: 'False'
+      ENABLE_S3_ARCHIVING: 'True'
   # PRODUCTION
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: 06b3c640798c0b22a7aea0f5957a1b878b7b9796
+    ref: 26b5f6dc2a77d6924d960c36172c87bc5e866245
     parameters:
       APP_DOMAIN: apps.crcp01ue1.o9m8.p1.openshiftapps.com
-      IMAGE_TAG: c0e4748
+      IMAGE_TAG: 2e477be
       KOKU_SENTRY_ENV: prod
       DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
       INIT_CPU_REQUEST: 250m
@@ -107,19 +108,24 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
     # This is a pinned ref for the saas-templates repo version of master that we want to use
-    ref: aeb1a8d8dd20e9c9f5ce7aedc4c11f24a8d8ede9
+    ref: 26b5f6dc2a77d6924d960c36172c87bc5e866245
     parameters:
       APP_DOMAIN: apps.crcs02ue1.urby.p1.openshiftapps.com
-      IMAGE_TAG: 3f533fd
-      MASU_RETAIN_NUM_MONTHS: 2
+      IMAGE_TAG: 2e477be
+      RETAIN_NUM_MONTHS: 3
+      ENABLE_PARQUET_PROCESSING: 'False'
+      ENABLE_S3_ARCHIVING: 'True'
+      MEMORY_REQUEST: 256Mi
+      MEMORY_LIMIT: 512Mi
   # PRODUCTION
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: 06b3c640798c0b22a7aea0f5957a1b878b7b9796
+    ref: 26b5f6dc2a77d6924d960c36172c87bc5e866245
     parameters:
       APP_DOMAIN: apps.crcp01ue1.o9m8.p1.openshiftapps.com
-      IMAGE_TAG: c0e4748
-      MASU_RETAIN_NUM_MONTHS: 2
+      IMAGE_TAG: 2e477be
+      REPLICAS: 0
+      RETAIN_NUM_MONTHS: 3
 
 # template: koku-listener
 - name: koku-listener
@@ -130,23 +136,24 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
     # This is a pinned ref for the saas-templates repo version of master that we want to use
-    ref: aeb1a8d8dd20e9c9f5ce7aedc4c11f24a8d8ede9
+    ref: 26b5f6dc2a77d6924d960c36172c87bc5e866245
     parameters:
-      IMAGE_TAG: 3f533fd
+      IMAGE_TAG: 2e477be
       ENABLE_API_SENTRY: true
       KOKU_SENTRY_ENV: stage
       CPU_REQUEST: 200m
-      CPU_LIMIT: 1
-      MEMORY_REQUEST: 1Gi
-      MEMORY_LIMIT: 2Gi
+      CPU_LIMIT: 500m
+      MEMORY_REQUEST: 512Mi
+      MEMORY_LIMIT: 1Gi
       VOLUME_CAPACITY: 100Gi
       ENABLE_PARQUET_PROCESSING: 'False'
+      ENABLE_S3_ARCHIVING: 'True'
   # PRODUCTION
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: 06b3c640798c0b22a7aea0f5957a1b878b7b9796
+    ref: 26b5f6dc2a77d6924d960c36172c87bc5e866245
     parameters:
-      IMAGE_TAG: c0e4748
+      IMAGE_TAG: 2e477be
       ENABLE_API_SENTRY: true
       KOKU_SENTRY_ENV: prod
       CPU_REQUEST: 200m
@@ -165,31 +172,38 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
     # This is a pinned ref for the saas-templates repo version of master that we want to use
-    ref: aeb1a8d8dd20e9c9f5ce7aedc4c11f24a8d8ede9
+    ref: 26b5f6dc2a77d6924d960c36172c87bc5e866245
     parameters:
       APP_DOMAIN: apps.crcs02ue1.urby.p1.openshiftapps.com
       ENABLE_API_SENTRY: True
       KOKU_SENTRY_ENV: stage
-      IMAGE_TAG: 3f533fd
+      IMAGE_TAG: 2e477be
       DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
       CPU_REQUEST: 100m
       CPU_LIMIT: 250m
-      MEMORY_REQUEST: 1Gi
-      MEMORY_LIMIT: 2Gi
+      MEMORY_REQUEST: 200Mi
+      MEMORY_LIMIT: 400Mi
+      ENABLE_PARQUET_PROCESSING: 'False'
+      ENABLE_S3_ARCHIVING: 'True'
+      AUTO_DATA_INGEST: 'False'
   # PRODUCTION
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: 06b3c640798c0b22a7aea0f5957a1b878b7b9796
+    ref: 26b5f6dc2a77d6924d960c36172c87bc5e866245
     parameters:
       APP_DOMAIN: apps.crcp01ue1.o9m8.p1.openshiftapps.com
       ENABLE_API_SENTRY: True
       KOKU_SENTRY_ENV: prod
-      IMAGE_TAG: c0e4748
+      IMAGE_TAG: 2e477be
       DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
-      CPU_REQUEST: 100m
-      CPU_LIMIT: 250m
+      CPU_REQUEST: 250m
+      CPU_LIMIT: 500m
+      REPLICAS: 1
+      ENABLE_S3_ARCHIVING: 'False'
+      ENABLE_PARQUET_PROCESSING: 'False'
       MEMORY_REQUEST: 256Mi
-      MEMORY_LIMIT: 512Mi
+      MEMORY_LIMIT: 1Gi
+      AUTO_DATA_INGEST: 'True'
 
 # template: celery-scheduler
 - name: celery-scheduler
@@ -200,23 +214,29 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
     # This is a pinned ref for the saas-templates repo version of master that we want to use
-    ref: aeb1a8d8dd20e9c9f5ce7aedc4c11f24a8d8ede9
+    ref: 26b5f6dc2a77d6924d960c36172c87bc5e866245
     parameters:
-      IMAGE_TAG: 3f533fd
+      IMAGE_TAG: 2e477be
       ENABLE_PARQUET_PROCESSING: 'False'
       MEMORY_REQUEST: 256Mi
       MEMORY_LIMIT: 512Mi
       REPLICAS: 1
+      RETAIN_NUM_MONTHS: 3
+      VACUUM_DATA_DAY_OF_WEEK: 0
+      ENABLE_S3_ARCHIVING: 'True'
   # PRODUCTION
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: 06b3c640798c0b22a7aea0f5957a1b878b7b9796
+    ref: 26b5f6dc2a77d6924d960c36172c87bc5e866245
     parameters:
-      IMAGE_TAG: c0e4748
+      IMAGE_TAG: 2e477be
       ENABLE_PARQUET_PROCESSING: 'False'
-      REPLICAS: 1
+      REPLICAS: 0
       MEMORY_REQUEST: 256Mi
       MEMORY_LIMIT: 512Mi
+      RETAIN_NUM_MONTHS: 3
+      VACUUM_DATA_DAY_OF_WEEK: 0
+      SCHEDULE_CHECK_INTERVAL: 720
 
 # template: celery-worker
 - name: celery-worker
@@ -227,37 +247,128 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
     # This is a pinned ref for the saas-templates repo version of master that we want to use
-    ref: aeb1a8d8dd20e9c9f5ce7aedc4c11f24a8d8ede9
+    ref: 26b5f6dc2a77d6924d960c36172c87bc5e866245
     parameters:
-      IMAGE_TAG: 3f533fd
-      REPLICAS: 1
+      IMAGE_TAG: 2e477be
+      REPLICAS: 2
       KOKU_SENTRY_ENV: stage
       ENABLE_CELERY_SENTRY: true
       DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
       CPU_REQUEST: 200m
       CPU_LIMIT: 1
-      MEMORY_REQUEST: 1Gi
-      MEMORY_LIMIT: 2Gi
+      MEMORY_REQUEST: 2Gi
+      MEMORY_LIMIT: 4Gi
       PROMETHEUS_PUSHGATEWAY: prometheus-push.insights-push-stage.svc.cluster.local:9091
       ENABLE_PARQUET_PROCESSING: 'False'
-      MASU_RETAIN_NUM_MONTHS: 2
+      RETAIN_NUM_MONTHS: 3
+      ENABLE_S3_ARCHIVING: 'True'
+      ENABLE_TRINO_SOURCES: 'c9bd3e61-56ee-40e3-9469-ca8df49df4b0,dac934c4-1879-4a96-88fb-5bbcda9fc6f8,69583374-44ba-4af9-b2b9-5a7885f7fa8b,9a2ddd05-e519-49de-afbc-600a1c6e8fb6'
   # PRODUCTION
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: 06b3c640798c0b22a7aea0f5957a1b878b7b9796
+    ref: 26b5f6dc2a77d6924d960c36172c87bc5e866245
     parameters:
-      IMAGE_TAG: c0e4748
+      IMAGE_TAG: 2e477be
+      REPLICAS: 3
       KOKU_SENTRY_ENV: prod
       ENABLE_CELERY_SENTRY: true
       DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
       CPU_REQUEST: 200m
       CPU_LIMIT: 1
-      MEMORY_REQUEST: 1Gi
-      MEMORY_LIMIT: 2Gi
+      MEMORY_REQUEST: 2Gi
+      MEMORY_LIMIT: 4Gi
       VOLUME_CAPACITY: 100Gi
       PROMETHEUS_PUSHGATEWAY: prometheus-push.insights-push-prod.svc.cluster.local:9091
       ENABLE_PARQUET_PROCESSING: 'False'
-      MASU_RETAIN_NUM_MONTHS: 2
+      RETAIN_NUM_MONTHS: 3
+      ENABLE_TRINO_SOURCES: 'f71993c9-db47-4dcf-b375-c32d84502b13,118445f0-7304-4311-aa22-ed86b484f48d,79419ac3-cf38-450c-84cf-7d2accc2c293,889668d0-8bdc-4e96-84fe-4311b3514efb,b139babe-9f1a-4519-ae49-bfd4e06807a2'
+
+
+# template: celery-worker-ocp
+- name: celery-worker-ocp
+  path: /templates/hccm/celery-worker-ocp.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  # STAGING
+  - namespace:
+      $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
+    # This is a pinned ref for the saas-templates repo version of master that we want to use
+    ref: 26b5f6dc2a77d6924d960c36172c87bc5e866245
+    parameters:
+      IMAGE_TAG: 2e477be
+      REPLICAS: 1
+      KOKU_SENTRY_ENV: stage
+      ENABLE_CELERY_SENTRY: true
+      DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
+      CPU_REQUEST: 100m
+      CPU_LIMIT: 200m
+      MEMORY_REQUEST: 200Mi
+      MEMORY_LIMIT: 400Mi
+      PROMETHEUS_PUSHGATEWAY: prometheus-push.insights-push-stage.svc.cluster.local:9091
+      ENABLE_PARQUET_PROCESSING: 'False'
+      RETAIN_NUM_MONTHS: 3
+      ENABLE_S3_ARCHIVING: 'True'
+  # PRODUCTION
+  - namespace:
+      $ref: /services/insights/hccm/namespaces/hccm-prod.yml
+    # This is a pinned ref for the saas-templates repo version of master that we want to use
+    ref: 26b5f6dc2a77d6924d960c36172c87bc5e866245
+    parameters:
+      IMAGE_TAG: 2e477be
+      REPLICAS: 1
+      KOKU_SENTRY_ENV: prod
+      ENABLE_CELERY_SENTRY: true
+      DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
+      CPU_REQUEST: 100m
+      CPU_LIMIT: 200m
+      MEMORY_REQUEST: 200Mi
+      MEMORY_LIMIT: 400Mi
+      PROMETHEUS_PUSHGATEWAY: prometheus-push.insights-push-prod.svc.cluster.local:9091
+      ENABLE_PARQUET_PROCESSING: 'False'
+      RETAIN_NUM_MONTHS: 3
+
+# template: celery-worker-priority
+- name: celery-worker-priority
+  path: /templates/hccm/celery-worker-priority.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  # STAGING
+  - namespace:
+      $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
+    # This is a pinned ref for the saas-templates repo version of master that we want to use
+    ref: 26b5f6dc2a77d6924d960c36172c87bc5e866245
+    parameters:
+      IMAGE_TAG: 2e477be
+      REPLICAS: 1
+      KOKU_SENTRY_ENV: stage
+      ENABLE_CELERY_SENTRY: true
+      DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
+      CPU_REQUEST: 200m
+      CPU_LIMIT: 400m
+      MEMORY_REQUEST: 300Mi
+      MEMORY_LIMIT: 600Mi
+      PROMETHEUS_PUSHGATEWAY: prometheus-push.insights-push-stage.svc.cluster.local:9091
+      ENABLE_PARQUET_PROCESSING: 'False'
+      RETAIN_NUM_MONTHS: 3
+      ENABLE_S3_ARCHIVING: 'True'
+  # PRODUCTION
+  - namespace:
+      $ref: /services/insights/hccm/namespaces/hccm-prod.yml
+    # This is a pinned ref for the saas-templates repo version of master that we want to use
+    ref: 26b5f6dc2a77d6924d960c36172c87bc5e866245
+    parameters:
+      IMAGE_TAG: 2e477be
+      REPLICAS: 1
+      KOKU_SENTRY_ENV: prod
+      ENABLE_CELERY_SENTRY: true
+      DEMO_ACCOUNTS: '{"6193296":{"arn:aws:iam::589173575009:role/NisePopulatorAccessRole":{"report_prefix":"cur","report_name":"awscost"},"5d4eb34d-43c7-4b06-8257-1cb599b48d1e":{"report_prefix":"cur","report_name":"azurecost","container_name":"cur"}}}'
+      CPU_REQUEST: 200m
+      CPU_LIMIT: 400m
+      MEMORY_REQUEST: 300Mi
+      MEMORY_LIMIT: 600Mi
+      PROMETHEUS_PUSHGATEWAY: prometheus-push.insights-push-prod.svc.cluster.local:9091
+      ENABLE_PARQUET_PROCESSING: 'False'
+      RETAIN_NUM_MONTHS: 3
 
 # template: rabbitmq
 - name: rabbitmq
@@ -269,13 +380,13 @@ resourceTemplates:
     ref: 32b3172c74dcc4fb8bc72b62291b8ba96674c350
     parameters:
       IMAGE_TAG: 1023e4e
-      REPLICAS: 3
+      REPLICAS: 0
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
     ref: 32b3172c74dcc4fb8bc72b62291b8ba96674c350
     parameters:
       IMAGE_TAG: 1023e4e
-      REPLICAS: 3
+      REPLICAS: 0
 
 # template: nise-populator
 - name: nise-populator
@@ -286,7 +397,7 @@ resourceTemplates:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
     ref: 11d698338c2a2584d967fad6643887662173be83
     parameters:
-      IMAGE_TAG: e410e08
+      IMAGE_TAG: 95c999f
       CPU_REQUEST: 100m
       CPU_LIMIT: 250m
       MEMORY_REQUEST: 200Mi
@@ -295,7 +406,7 @@ resourceTemplates:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
     ref: 32b3172c74dcc4fb8bc72b62291b8ba96674c350
     parameters:
-      IMAGE_TAG: e410e08
+      IMAGE_TAG: 95c999f
       CPU_REQUEST: 100m
       CPU_LIMIT: 250m
       MEMORY_REQUEST: 200Mi

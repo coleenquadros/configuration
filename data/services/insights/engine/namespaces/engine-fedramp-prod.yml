@@ -1,0 +1,59 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: engine
+
+name: engine-prod
+description: Insights engine for FedRAMP on prod
+
+cluster:
+  $ref: /openshift/insights/crcgovp01ue1/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/standard-resource-limits.yml
+
+quota:
+  $ref: /services/insights/engine/engine-quota.yml
+
+app:
+  $ref: /services/insights/engine/app.yml
+
+environment:
+  $ref: /products/insights/environments/fedramp-production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcgovp01ue1.yml
+
+managedRoles: true
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/platform-mq-prod/kafka-ca
+  version: 2
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-fedramp-prod
+  identifier: engine-prod
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
+# - provider: elasticache
+#   account: insights-fedramp-prod
+#   identifier: engine-elasticache
+#   defaults: /terraform/resources/insights/prod/elasticache/elasticache-engine-1.yml
+#   output_resource_name: in-memory-db

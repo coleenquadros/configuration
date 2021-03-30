@@ -168,6 +168,8 @@ properties:
         enum:
         - 7c2626e2-da06-11ea-8f62-8c1645a911be
         - de4b0632-dca7-11ea-b3b9-8c1645a911be
+        - 07285129-332e-4bb8-a85b-a06f1a365554
+        - 03f35bb5-c700-4658-a8f2-c25b76107a63
         # hive-production v3
         - 0c7d42ee-d751-4e5e-928d-838c4141ec20
         # empty
@@ -239,16 +241,38 @@ properties:
       properties:
         id:
           type: string
-          maxLength: 30
+          maxLength: 15
         instance_type:
           type: string
           enum:
           - c5.4xlarge
           - m5.xlarge
+          - m5.2xlarge
+          - m5.4xlarge
         replicas:
           type: integer
         labels:
           "$ref": "/common-1.json#/definitions/labels"
+        taints:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              key:
+                type: string
+              value:
+                type: string
+              effect:
+                type: string
+                enum:
+                - NoSchedule
+                - NoExecute
+                - PreferNoSchedule
+            required:
+            - key
+            - value
+            - effect
       required:
       - id
       - instance_type
@@ -266,6 +290,8 @@ properties:
               type: string
               enum:
               - account-vpc
+              - account-vpc-mesh
+              - account-tgw
               - cluster-vpc-requester
               - cluster-vpc-accepter
             name:
@@ -276,6 +302,11 @@ properties:
             cluster:
               "$ref": "/common-1.json#/definitions/crossref"
               "$schemaRef": "/openshift/cluster-1.yml"
+            account:
+              "$ref": "/common-1.json#/definitions/crossref"
+              "$schemaRef": "/aws/account-1.yml"
+            tags:
+              type: object
             manageRoutes:
               type: boolean
             delete:
@@ -299,6 +330,46 @@ properties:
             - provider
             - name
             - vpc
+          - properties:
+              provider:
+                type: string
+                enum:
+                - account-vpc-mesh
+              name:
+                type: string
+              account:
+                "$ref": "/common-1.json#/definitions/crossref"
+                "$schemaRef": "/aws/account-1.yml"
+              tags:
+                type: object
+              manageRoutes:
+                type: boolean
+              delete:
+                type: boolean
+            required:
+            - provider
+            - name
+            - account
+          - properties:
+              provider:
+                type: string
+                enum:
+                - account-tgw
+              name:
+                type: string
+              account:
+                "$ref": "/common-1.json#/definitions/crossref"
+                "$schemaRef": "/aws/account-1.yml"
+              tags:
+                type: object
+              manageRoutes:
+                type: boolean
+              delete:
+                type: boolean
+            required:
+            - provider
+            - name
+            - account
           - properties:
               provider:
                 type: string
@@ -383,6 +454,7 @@ properties:
           - openshift-users
           - openshift-vault-secrets
           - openshift-routes
+          - openshift-network-policies
       e2eTests:
         type: array
         items:

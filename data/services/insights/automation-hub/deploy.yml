@@ -69,17 +69,17 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/automation-hub/namespaces/stage-automation-hub-stage.yml
-    ref: 7da0f76cb587c42ee599d9d0aaf158f421d84e4f
+    ref: d7efaffdb246d20790e066d0fb8d25af44ee5976
     parameters:
-      IMAGE_TAG: cbc5bc2
+      IMAGE_TAG: a0729ff
       CPU_LIMIT: "1"
       MEMORY_REQUEST: 1024Mi
       MEMORY_LIMIT: 1536Mi
   - namespace:
       $ref: /services/insights/automation-hub/namespaces/automation-hub-prod.yml
-    ref: 7da0f76cb587c42ee599d9d0aaf158f421d84e4f
+    ref: 8695671a70447c8ce8c9b9dea29ece4dc10984e3
     parameters:
-      IMAGE_TAG: cbc5bc2
+      IMAGE_TAG: a0729ff
       CPU_LIMIT: "1"
       MEMORY_REQUEST: 1024Mi
       MEMORY_LIMIT: 1536Mi
@@ -90,18 +90,19 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/automation-hub/namespaces/stage-automation-hub-stage.yml
-    ref: 7da0f76cb587c42ee599d9d0aaf158f421d84e4f
+    ref: d7efaffdb246d20790e066d0fb8d25af44ee5976
     parameters:
-      IMAGE_TAG: cbc5bc2
+      IMAGE_TAG: a0729ff
       MEMORY_REQUEST: 512Mi
       MEMORY_LIMIT: 512Mi
   - namespace:
       $ref: /services/insights/automation-hub/namespaces/automation-hub-prod.yml
-    ref: 7da0f76cb587c42ee599d9d0aaf158f421d84e4f
+    ref: 8695671a70447c8ce8c9b9dea29ece4dc10984e3
     parameters:
-      IMAGE_TAG: cbc5bc2
+      IMAGE_TAG: a0729ff
       MEMORY_REQUEST: 512Mi
       MEMORY_LIMIT: 512Mi
+      REPLICAS: 2
 
 - name: pulp-resource-manager
   path: /templates/automation-hub/pulp-resource-manager.yaml
@@ -109,19 +110,21 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/automation-hub/namespaces/stage-automation-hub-stage.yml
-    ref: 7da0f76cb587c42ee599d9d0aaf158f421d84e4f
+    ref: d7efaffdb246d20790e066d0fb8d25af44ee5976
     parameters:
-      IMAGE_TAG: cbc5bc2
+      IMAGE_TAG: a0729ff
       MEMORY_REQUEST: 256Mi
       MEMORY_LIMIT: 256Mi
       REPLICAS: 1
   - namespace:
       $ref: /services/insights/automation-hub/namespaces/automation-hub-prod.yml
-    ref: 7da0f76cb587c42ee599d9d0aaf158f421d84e4f
+    ref: 8695671a70447c8ce8c9b9dea29ece4dc10984e3
     parameters:
-      IMAGE_TAG: cbc5bc2
+      IMAGE_TAG: a0729ff
       MEMORY_REQUEST: 512Mi
       MEMORY_LIMIT: 1024Mi
+      CPU_REQUEST: "1000m"
+      CPU_LIMIT: "1500m"
       REPLICAS: 1
 
 - name: pulp-worker
@@ -130,20 +133,24 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/automation-hub/namespaces/stage-automation-hub-stage.yml
-    ref: 7da0f76cb587c42ee599d9d0aaf158f421d84e4f
+    ref: d7efaffdb246d20790e066d0fb8d25af44ee5976
     parameters:
       JOB_NAMESPACE: automation-hub-jobs-stage
-      IMAGE_TAG: cbc5bc2
+      IMAGE_TAG: a0729ff
       IMPORTER_JOB_API_CHECK_RETRIES: "1200"
       REPLICAS: 2
+      # Temporary workaround for bug in OpenShift template
+      IMPORTER_CPU_LIMIT: "750m"
   - namespace:
       $ref: /services/insights/automation-hub/namespaces/automation-hub-prod.yml
-    ref: 7da0f76cb587c42ee599d9d0aaf158f421d84e4f
+    ref: 8695671a70447c8ce8c9b9dea29ece4dc10984e3
     parameters:
       JOB_NAMESPACE: automation-hub-jobs-prod
-      IMAGE_TAG: cbc5bc2
+      IMAGE_TAG: a0729ff
       IMPORTER_JOB_API_CHECK_RETRIES: "1200"
       REPLICAS: 12
+      # Temporary workaround for bug in OpenShift template
+      IMPORTER_CPU_LIMIT: "750m"
 
 - name: automation-hub-redis
   path: /templates/automation-hub/redis.yaml
@@ -166,3 +173,20 @@ resourceTemplates:
       MEMORY_REQUEST: 2048Mi
       MEMORY_LIMIT: 2048Mi
       VOLUME_CAPACITY: 20Gi
+
+- name: automation-hub-database-migration
+  path: /openshift/database-migration.yaml
+  url: https://github.com/ansible/galaxy_ng
+  targets:
+  - namespace:
+      $ref: /services/insights/automation-hub/namespaces/stage-automation-hub-stage.yml
+    ref: 076419fddfee39ee4cadc1c4d2fc5487e11b24d6
+    parameters:
+      IMAGE: quay.io/cloudservices/automation-hub-galaxy-ng
+      IMAGE_TAG: a0729ff
+  # - namespace:
+  #     $ref: /services/insights/automation-hub/namespaces/automation-hub-prod.yml
+  #   ref: 076419fddfee39ee4cadc1c4d2fc5487e11b24d6
+  #   parameters:
+  #     IMAGE: quay.io/cloudservices/automation-hub-galaxy-ng
+  #     IMAGE_TAG: a0729ff

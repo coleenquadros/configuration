@@ -34,6 +34,9 @@ imagePatterns:
 - quay.io/cloudservices
 
 authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
   image:
     path: insights/quay/cloudservices-push
     field: all
@@ -42,72 +45,109 @@ parameters:
   PATH_PREFIX: /api
 
 resourceTemplates:
-- name: compliance-redis
-  path: /templates/compliance/compliance-redis.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+- name: cyndi-init
+  path: /openshift/cyndi-init.yml
+  url: https://github.com/redhatinsights/inventory-syndication
   targets:
   - namespace:
       $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
-    ref: 34914d3f399296d6ffb17989dd90efc1b9f51829
+    ref: 165cd33c70fd50be977a5584ab13b4f28502a442
     parameters:
-      IMAGE_TAG: latest
-      IMAGE: quay.io/cloudservices/redis
+      APP_NAME: compliance
+      APP_ROLE: postgres
+      DB_SECRET: compliance-db
+      IMAGE_TAG: "3a34b0c"
+  - namespace:
+      $ref: /services/insights/compliance/namespaces/compliance-fedramp-stage.yml
+    ref: 165cd33c70fd50be977a5584ab13b4f28502a442
+    parameters:
+      APP_NAME: compliance
+      APP_ROLE: postgres
+      DB_SECRET: compliance-db
+      IMAGE_TAG: "3a34b0c"
   - namespace:
       $ref: /services/insights/compliance/namespaces/compliance-prod.yml
-    ref: 34914d3f399296d6ffb17989dd90efc1b9f51829
+    ref: 165cd33c70fd50be977a5584ab13b4f28502a442
     parameters:
-      IMAGE_TAG: "5.0.9"
-      IMAGE: quay.io/cloudservices/redis
-      CPU_REQUEST: 1000m
-      CPU_LIMIT: 1000m
-      MEMORY_REQUEST: 6G
-      MEMORY_LIMIT: 6G
-      VOLUME_CAPACITY: 10Gi
+      APP_NAME: compliance
+      APP_ROLE: compliance1
+      DB_SECRET: compliance-db
+      IMAGE_TAG: "3a34b0c"
+      VERSION: "3"
 - name: compliance-prometheus-exporter
   path: /templates/compliance/compliance-prometheus-exporter.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
   targets:
   - namespace:
       $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
-    ref: 34914d3f399296d6ffb17989dd90efc1b9f51829
+    ref: 2539abbd7ce93cce4c5676d4080c6fe2ba9331bc
     parameters:
-      IMAGE_TAG: dd66f6a
+      IMAGE_TAG: 13e0239
+      PGSSLMODE: verify-full
+      POSTGRESQL_MAX_CONNECTIONS: "40"
+  - namespace:
+      $ref: /services/insights/compliance/namespaces/compliance-fedramp-stage.yml
+    ref: 2539abbd7ce93cce4c5676d4080c6fe2ba9331bc
+    parameters:
+      IMAGE_TAG: 13e0239
+      PGSSLMODE: verify-full
   - namespace:
       $ref: /services/insights/compliance/namespaces/compliance-prod.yml
-    ref: 34914d3f399296d6ffb17989dd90efc1b9f51829
+    ref: 2539abbd7ce93cce4c5676d4080c6fe2ba9331bc
     parameters:
-      IMAGE_TAG: dd66f6a
+      IMAGE_TAG: 13e0239
+      PGSSLMODE: verify-full
 - name: compliance-backend
   path: /templates/compliance/compliance-backend.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
   targets:
   - namespace:
       $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
-    ref: 34914d3f399296d6ffb17989dd90efc1b9f51829
+    ref: 2539abbd7ce93cce4c5676d4080c6fe2ba9331bc
     parameters:
-      IMAGE_TAG: dd66f6a
+      IMAGE_TAG: 13e0239
+      PGSSLMODE: verify-full
+      REDIS_SSL: 'true'
+  - namespace:
+      $ref: /services/insights/compliance/namespaces/compliance-fedramp-stage.yml
+    ref: 2539abbd7ce93cce4c5676d4080c6fe2ba9331bc
+    parameters:
+      IMAGE_TAG: 13e0239
+      PGSSLMODE: verify-full
+      REDIS_SSL: 'true'
   - namespace:
       $ref: /services/insights/compliance/namespaces/compliance-prod.yml
-    ref: 34914d3f399296d6ffb17989dd90efc1b9f51829
+    ref: 2539abbd7ce93cce4c5676d4080c6fe2ba9331bc
     parameters:
-      IMAGE_TAG: dd66f6a
+      IMAGE_TAG: 13e0239
       MAX_REPLICAS: 6
       MIN_REPLICAS: 2
+      PGSSLMODE: verify-full
+      REDIS_SSL: 'true'
 - name: compliance-import-remediations
   path: /templates/compliance/compliance-import-remediations.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
   targets:
   - namespace:
       $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
-    ref: 34914d3f399296d6ffb17989dd90efc1b9f51829
+    ref: 2539abbd7ce93cce4c5676d4080c6fe2ba9331bc
     parameters:
-      IMAGE_TAG: dd66f6a
+      IMAGE_TAG: 13e0239
+      PGSSLMODE: verify-full
+      REMEDIATIONS_URL: http://remediations.remediations-stage:9002
+  - namespace:
+      $ref: /services/insights/compliance/namespaces/compliance-fedramp-stage.yml
+    ref: 2539abbd7ce93cce4c5676d4080c6fe2ba9331bc
+    parameters:
+      IMAGE_TAG: 13e0239
+      PGSSLMODE: verify-full
       REMEDIATIONS_URL: http://remediations.remediations-stage:9002
   - namespace:
       $ref: /services/insights/compliance/namespaces/compliance-prod.yml
-    ref: 34914d3f399296d6ffb17989dd90efc1b9f51829
+    ref: 2539abbd7ce93cce4c5676d4080c6fe2ba9331bc
     parameters:
-      IMAGE_TAG: dd66f6a
+      IMAGE_TAG: 13e0239
+      PGSSLMODE: verify-full
       REMEDIATIONS_URL: http://remediations.remediations-prod:9002
 - name: compliance-import-ssg
   path: /templates/compliance/compliance-import-ssg.yaml
@@ -115,31 +155,24 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
-    ref: 34914d3f399296d6ffb17989dd90efc1b9f51829
+    ref: 2539abbd7ce93cce4c5676d4080c6fe2ba9331bc
     parameters:
-      IMAGE_TAG: dd66f6a
+      IMAGE_TAG: 13e0239
+      PGSSLMODE: verify-full
+      REMEDIATIONS_URL: http://remediations.remediations-stage:9002
+  - namespace:
+      $ref: /services/insights/compliance/namespaces/compliance-fedramp-stage.yml
+    ref: 2539abbd7ce93cce4c5676d4080c6fe2ba9331bc
+    parameters:
+      IMAGE_TAG: 13e0239
+      PGSSLMODE: verify-full
       REMEDIATIONS_URL: http://remediations.remediations-stage:9002
   - namespace:
       $ref: /services/insights/compliance/namespaces/compliance-prod.yml
-    ref: 34914d3f399296d6ffb17989dd90efc1b9f51829
+    ref: 2539abbd7ce93cce4c5676d4080c6fe2ba9331bc
     parameters:
-      IMAGE_TAG: dd66f6a
-      REMEDIATIONS_URL: http://remediations.remediations-prod:9002
-- name: compliance-inventory-sync
-  path: /templates/compliance/compliance-inventory-sync.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  targets:
-  - namespace:
-      $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
-    ref: 34914d3f399296d6ffb17989dd90efc1b9f51829
-    parameters:
-      IMAGE_TAG: dd66f6a
-      REMEDIATIONS_URL: http://remediations.remediations-stage:9002
-  - namespace:
-      $ref: /services/insights/compliance/namespaces/compliance-prod.yml
-    ref: 34914d3f399296d6ffb17989dd90efc1b9f51829
-    parameters:
-      IMAGE_TAG: dd66f6a
+      IMAGE_TAG: 13e0239
+      PGSSLMODE: verify-full
       REMEDIATIONS_URL: http://remediations.remediations-prod:9002
 - name: compliance-inventory
   path: /templates/compliance/compliance-inventory.yaml
@@ -147,27 +180,49 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
-    ref: 34914d3f399296d6ffb17989dd90efc1b9f51829
+    ref: 2539abbd7ce93cce4c5676d4080c6fe2ba9331bc
     parameters:
-      IMAGE_TAG: dd66f6a
+      IMAGE_TAG: 13e0239
+      PGSSLMODE: verify-full
+      REDIS_SSL: 'true'
+  - namespace:
+      $ref: /services/insights/compliance/namespaces/compliance-fedramp-stage.yml
+    ref: 2539abbd7ce93cce4c5676d4080c6fe2ba9331bc
+    parameters:
+      IMAGE_TAG: 13e0239
+      PGSSLMODE: verify-full
+      REDIS_SSL: 'true'
   - namespace:
       $ref: /services/insights/compliance/namespaces/compliance-prod.yml
-    ref: 34914d3f399296d6ffb17989dd90efc1b9f51829
+    ref: 2539abbd7ce93cce4c5676d4080c6fe2ba9331bc
     parameters:
-      IMAGE_TAG: dd66f6a
+      IMAGE_TAG: 13e0239
+      PGSSLMODE: verify-full
+      REDIS_SSL: 'true'
 - name: compliance-sidekiq
   path: /templates/compliance/compliance-sidekiq.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
   targets:
   - namespace:
       $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
-    ref: 34914d3f399296d6ffb17989dd90efc1b9f51829
+    ref: 2539abbd7ce93cce4c5676d4080c6fe2ba9331bc
     parameters:
-      IMAGE_TAG: dd66f6a
+      IMAGE_TAG: 13e0239
+      PGSSLMODE: verify-full
+      REDIS_SSL: 'true'
+  - namespace:
+      $ref: /services/insights/compliance/namespaces/compliance-fedramp-stage.yml
+    ref: 2539abbd7ce93cce4c5676d4080c6fe2ba9331bc
+    parameters:
+      IMAGE_TAG: 13e0239
+      PGSSLMODE: verify-full
+      REDIS_SSL: 'true'
   - namespace:
       $ref: /services/insights/compliance/namespaces/compliance-prod.yml
-    ref: 34914d3f399296d6ffb17989dd90efc1b9f51829
+    ref: 2539abbd7ce93cce4c5676d4080c6fe2ba9331bc
     parameters:
-      IMAGE_TAG: dd66f6a
+      IMAGE_TAG: 13e0239
+      REDIS_SSL: 'true'
       MAX_REPLICAS: 6
       MIN_REPLICAS: 2
+      PGSSLMODE: verify-full

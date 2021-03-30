@@ -1,0 +1,98 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /observability/prometheusrules/mas-sso-slo-availability-stage.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+  - interval: 1m
+  #test that we alert when we hit an error budget burn rate of 14.4 over 5 mins and that the alert stops firing once the errors reduce
+    input_series:
+      - series: 'haproxy_backend_http_responses_total{route="keycloak",exported_namespace="mas-sso-stage",code="5xx"}'
+        values: '0+17x5 85+0x5' # 17 500s in every 100 requests for 5 mins 0 500s for the next 5
+      - series: haproxy_backend_http_responses_total{route="keycloak",exported_namespace="mas-sso-stage", code="2xx"}
+        values: '0+100x10' # 0 100 200 300 400...
+      # Unit test for alerting rules.
+    alert_rule_test:
+        - eval_time: 5m
+          alertname: MasSSOAvailability5mto1hErrorBudgetBurn
+          exp_alerts:
+              - exp_labels:
+                  exported_namespace: mas-sso-stage
+                  route: keycloak
+                  service: mas-sso
+                  severity: info 
+                exp_annotations:
+                    message: "High 5m to 1h error budget burn for MAS SSO (current value: 0.15)"
+                    dashboard: "https://grafana.stage.devshift.net/d/nzxiqJQMk/mas-sso-monitoring?orgId=1"
+                    runbook: ""
+        - eval_time: 10m # should stop firing after ten minutes if we have dropped below the burnrate
+          alertname: MasSSOAvailability5mto1hErrorBudgetBurn
+  - interval: 1m
+  #test that we alert when we hit a error budget burn rate of 6 over 30 mins and that the alert stops firing once the errors reduce
+    input_series:
+      - series: 'haproxy_backend_http_responses_total{route="keycloak",exported_namespace="mas-sso-stage",code="5xx"}'
+        values: '0+7x30 210+0x30' # 7 500s in every 100 requests for 30 mins 0 500s for the next 30
+      - series: haproxy_backend_http_responses_total{route="keycloak",exported_namespace="mas-sso-stage", code="2xx"}
+        values: '0+100x60'
+    alert_rule_test:
+        - eval_time: 30m
+          alertname: MasSSOAvailability30mto6hErrorBudgetBurn
+          exp_alerts:
+              - exp_labels:
+                  exported_namespace: mas-sso-stage
+                  route: keycloak
+                  service: mas-sso
+                  severity: info 
+                exp_annotations:
+                    message: "High 6h error budget burn for MAS SSO (current value: 0.07)"
+                    dashboard: "https://grafana.stage.devshift.net/d/nzxiqJQMk/mas-sso-monitoring?orgId=1"
+                    runbook: ""
+        - eval_time: 1h # stop firing after 1h if we have dropped below the burnrate
+          alertname: MasSSOAvailability30mto6hErrorBudgetBurn
+  - interval: 1m
+  #test that we alert when we hit a burn rate of 3 over 3hrs and that the alert stops firing once the errors reduce
+    input_series:
+      - series: 'haproxy_backend_http_responses_total{route="keycloak",exported_namespace="mas-sso-stage",code="5xx"}'
+        values: '0+4x120 480+0x120' # 4 500s in every 100 requests for 2hrs 0 500s for the next 2hrs
+      - series: haproxy_backend_http_responses_total{route="keycloak",exported_namespace="mas-sso-stage", code="2xx"}
+        values: '0+100x240'
+    alert_rule_test:
+        - eval_time: 2h
+          alertname: MasSSOAvailability2hto1dErrorBudgetBurn
+          exp_alerts:
+              - exp_labels:
+                  exported_namespace: mas-sso-stage
+                  route: keycloak
+                  service: mas-sso
+                  severity: info 
+                exp_annotations:
+                    message: "High 1d error budget burn for MAS SSO (current value: 0.04)"
+                    dashboard: "https://grafana.stage.devshift.net/d/nzxiqJQMk/mas-sso-monitoring?orgId=1"
+                    runbook: ""
+        - eval_time: 4h
+          alertname: MasSSOAvailability2hto1dErrorBudgetBurn
+  - interval: 1m
+  #test that we alert when we hit a burn rate of 1 over 6hrs and that the alert stops firing once the errors reduce
+    input_series:
+      - series: 'haproxy_backend_http_responses_total{route="keycloak",exported_namespace="mas-sso-stage",code="5xx"}'
+        values: '0+2x360 720+0x360' # 2 500s in every 100 requests for 6hrs 0 500s for the next 6hrs
+      - series: haproxy_backend_http_responses_total{route="keycloak",exported_namespace="mas-sso-stage", code="2xx"}
+        values: '0+100x720'
+    alert_rule_test:
+        - eval_time: 6h
+          alertname: MasSSOAvailability6hto3dErrorBudgetBurn
+          exp_alerts:
+              - exp_labels:
+                  exported_namespace: mas-sso-stage
+                  route: keycloak
+                  service: mas-sso
+                  severity: info 
+                exp_annotations:
+                    message: "High 3d error budget burn for MAS SSO (current value: 0.02)"
+                    dashboard: "https://grafana.stage.devshift.net/d/nzxiqJQMk/mas-sso-monitoring?orgId=1"
+                    runbook: ""
+        - eval_time: 12h
+          alertname: MasSSOAvailability6hto3dErrorBudgetBurn

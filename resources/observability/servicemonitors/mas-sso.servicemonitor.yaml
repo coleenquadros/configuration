@@ -1,0 +1,24 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    prometheus: app-sre
+  name: servicemonitor-mas-sso-{{environment}}
+spec:
+  endpoints:
+  - interval: 30s
+    path: /auth/realms/master/metrics
+    port: keycloak
+    scheme: https
+    tlsConfig:
+      insecureSkipVerify: true
+  - interval: 30s
+    path: /metrics
+    port: keycloak-monitoring
+    scheme: http
+  namespaceSelector:
+    matchNames:
+    - {{namespace}}
+  selector:
+    matchLabels:
+      app: keycloak

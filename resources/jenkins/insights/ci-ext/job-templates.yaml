@@ -36,6 +36,11 @@
         - *insights_rh_registry_pull_secret
         - *quay_secret_push
         - *insights_minikube_ssh_key
+    publishers:
+    - junit:
+        results: 'artifacts/junit-*.xml'
+    - archive:
+        artifacts: 'artifacts/**/*'
     <<: *gh_pr_check
     builders:
     - *gpg_verify
@@ -62,6 +67,25 @@
         results: 'artifacts/junit-*.xml'
     - archive:
         artifacts: 'artifacts/**/*'
+    scm:
+    - git:
+        url: 'git@github.com:{gh_org}/{gh_repo}.git'
+        credentials-id: '{github_ssh_credentials}'
+        skip-tag: true
+        refspec: '+refs/pull/*:refs/remotes/origin/pr/*'
+        branches:
+        - '${{ghprbActualCommit}}'
+        merge:
+            remote: origin
+            branch: '{branch}'
+        git-config-name: "AppSRE"
+        git-config-email: "sd-app-sre@redhat.com"
+        included-regions:
+        - '{include_path}'
+        prune: true
+        clean:
+            before: true
+        wipe-workspace: true
     <<: *gh_pr_check
 
 - job-template:

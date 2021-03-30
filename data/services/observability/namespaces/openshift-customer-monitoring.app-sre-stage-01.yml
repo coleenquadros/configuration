@@ -33,6 +33,7 @@ managedResourceNames:
     - prometheus-additional-alertmanager-config
     - prometheus-additional-scrape-config
     - prometheus-auth-proxy
+    - prometheus-additional-scrape-config-2
 
 sharedResources:
 - $ref: /services/observability/shared-resources/cluster-alerts.yml
@@ -58,6 +59,13 @@ openshiftResources:
   type: extracurlyjinja2
   path: /observability/alertmanager/alertmanager-instance.secret.yaml
   validate_alertmanager_config: true
+### Prometheus AMS subscription_labels scrape config
+### Defines the job for scraping subscription_labels
+- provider: resource-template
+  type: jinja2
+  path: /observability/prometheus/prometheus-ams-subscription-labels-scrapeconfig.secret.yaml
+  variables:
+    namespace: uhc-stage
 
 ## Servicemonitors
 ### All managed Prometheus Operators
@@ -75,7 +83,7 @@ openshiftResources:
 ## Prometheus Rules
 ### App SRE contract
 - provider: resource
-  path: /observability/prometheusrules/app-sre-contract.yaml
+  path: /observability/prometheusrules/app-sre-contract.prometheusrules.yaml
 ### Federated Kubernetes metrics
 - provider: resource
   path: /observability/prometheusrules/kube-metrics.prometheusrules.yaml
@@ -88,6 +96,9 @@ openshiftResources:
 ### OLM alerts
 - provider: resource
   path: /observability/olm/olm.prometheusrules.yaml
+### App SRE prometheus PVC metrics
+- provider: resource
+  path: /observability/prometheusrules/kube-metrics-pvc-observability.prometheusrules.yaml
 
 
 ################## Add  any cluster-specific content below this line ##################
@@ -100,11 +111,23 @@ openshiftResources:
 - provider: resource
   path: /observability/prometheusrules/cincinnati-stage.prometheusrules.yaml
 ### UHC Account Manager
-- provider: resource
-  path: /observability/prometheusrules/uhc-acct-mngr-stage.prometheusrules.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/prometheusrules/uhc-acct-mngr.prometheusrules.yaml
+  variables:
+    environment: stage
+    severity_ams_down: medium
+    severity_500_errors: medium
+    severity_rhit_errors: medium
+    severity_terms_errors: medium
+    severity_pod_restart: info
+    severity_pod_restart_many_times: medium
 ### UHC Clusters Service
 - provider: resource
   path: /observability/prometheusrules/uhc-clusters-service-stage.prometheusrules.yaml
+  ### Job Queue
+- provider: resource
+  path: /observability/prometheusrules/job-queue-stage.prometheusrules.yaml
 ### Telemeter
 - provider: resource
   path: /observability/prometheusrules/telemeter-stage.prometheusrules.yaml
@@ -123,6 +146,9 @@ openshiftResources:
 #### API
 - provider: resource
   path: /observability/prometheusrules/observatorium-api-stage.prometheusrules.yaml
+#### Custom
+- provider: resource
+  path: /observability/prometheusrules/observatorium-custom-metrics-stage.prometheusrules.yaml
 #### Sendgrid Service
 - provider: resource
   path: /observability/prometheusrules/ocm-sendgrid-svc-stage.prometheusrules.yaml
@@ -132,21 +158,26 @@ openshiftResources:
   #### Gubernator (Rate limiting)
 - provider: resource
   path: /observability/prometheusrules/observatorium-gubernator-stage.prometheusrules.yaml
-### Managed Services
+### Kas Fleet Manager
 - provider: resource
-  path: /observability/prometheusrules/managed-services-cluster-correctness-stage.prometheusrules.yaml
+  path: /observability/prometheusrules/kas-fleet-manager-cluster-correctness-stage.prometheusrules.yaml
 - provider: resource
-  path: /observability/prometheusrules/managed-services-cluster-latency-stage.prometheusrules.yaml
+  path: /observability/prometheusrules/kas-fleet-manager-cluster-latency-stage.prometheusrules.yaml
 - provider: resource
-  path: /observability/prometheusrules/managed-services-slos-availability-stage.prometheusrules.yaml
+  path: /observability/prometheusrules/kas-fleet-manager-slos-availability-stage.prometheusrules.yaml
 - provider: resource
-  path: /observability/prometheusrules/managed-services-slos-kafka-correctness-stage.prometheusrules.yaml
+  path: /observability/prometheusrules/kas-fleet-manager-slos-kafka-correctness-stage.prometheusrules.yaml
 - provider: resource
-  path: /observability/prometheusrules/managed-services-slos-kafka-latency-stage.prometheusrules.yaml
+  path: /observability/prometheusrules/kas-fleet-manager-slos-kafka-latency-stage.prometheusrules.yaml
 - provider: resource
-  path: /observability/prometheusrules/managed-services-slos-latency-stage.prometheusrules.yaml
+  path: /observability/prometheusrules/kas-fleet-manager-slos-latency-stage.prometheusrules.yaml
 - provider: resource
-  path: /observability/prometheusrules/managed-services-stage.prometheusrules.yaml
+  path: /observability/prometheusrules/kas-fleet-manager-stage.prometheusrules.yaml
+### MAS SSO
+- provider: resource
+  path: /observability/prometheusrules/mas-sso-slo-availability-stage.prometheusrules.yaml
+- provider: resource
+  path: /observability/prometheusrules/mas-sso-slo-latency-stage.prometheusrules.yaml
 ### Qontract-reconcile SLOs
 - provider: resource-template
   path: /observability/prometheusrules/qontract-reconcile-time-to-reconcile-slo.prometheusrules.yaml
@@ -154,6 +185,29 @@ openshiftResources:
   variables:
     namespace: app-interface-stage
     severity: medium
+### OCM Clusters service SLO rules
+- provider: resource-template
+  path: /observability/prometheusrules/uhc-clusters-service-slo.prometheusrules.yaml
+  type: extracurlyjinja2
+  variables:
+    namespace: uhc-stage
+### OCM Accounts mgmt SLO rules
+- provider: resource-template
+  path: /observability/prometheusrules/uhc-accounts-mgmt-slo.prometheusrules.yaml
+  type: extracurlyjinja2
+  variables:
+    namespace: uhc-stage
+### Cincinnati SLO rules
+- provider: resource-template
+  path: /observability/prometheusrules/cincinnati-slo.prometheusrules.yaml
+  type: extracurlyjinja2
+  variables:
+    namespace: cincinnati-stage
+    route: cincinnati-route-stage
+### Devfile Registry
+- provider: resource
+  path: /observability/prometheusrules/devfile-registry-stage.prometheusrules.yaml
+
 ## ServiceMonitors
 ### Vault
 - provider: resource-template
@@ -217,6 +271,26 @@ openshiftResources:
   variables:
     environment: integration
     namespace: uhc-integration
+#### OCM Service Log
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/ocm-service-log.servicemonitor.yaml
+  variables:
+    environment: integration
+    namespace: uhc-integration
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/ocm-service-log-envoy.servicemonitor.yaml
+  variables:
+    environment: integration
+    namespace: uhc-integration
+#### Job Queue
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/job-queue.servicemonitor.yaml
+  variables:
+    environment: integration
+    namespace: uhc-integration
 #### UHC- Gateway Server
 - provider: resource-template
   type: jinja2
@@ -248,6 +322,26 @@ openshiftResources:
 - provider: resource-template
   type: jinja2
   path: /observability/servicemonitors/uhc-account-manager-envoy.servicemonitor.yaml
+  variables:
+    environment: stage
+    namespace: uhc-stage
+#### OCM Service Log
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/ocm-service-log.servicemonitor.yaml
+  variables:
+    environment: stage
+    namespace: uhc-stage
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/ocm-service-log-envoy.servicemonitor.yaml
+  variables:
+    environment: stage
+    namespace: uhc-stage
+#### Job Queue
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/job-queue.servicemonitor.yaml
   variables:
     environment: stage
     namespace: uhc-stage
@@ -307,19 +401,7 @@ openshiftResources:
   type: jinja2
   path: /observability/prometheus/ams.prometheus.yaml
   variables:
-    remoteWriteUrl: https://remote-write-proxy-telemeter-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
-- provider: resource-template
-  type: jinja2
-  path: /observability/servicemonitors/ams-subscription-labels.servicemonitor.yaml
-  variables:
-    environment: stage
-    namespace: uhc-stage
-- provider: resource-template
-  type: jinja2
-  path: /observability/servicemonitors/ams-subscription-labels.servicemonitor.yaml
-  variables:
-    environment: integration
-    namespace: uhc-integration
+    remoteWriteUrl: https://remote-write-proxy-telemeter-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com/api/v1/receive
 - provider: resource
   path: /observability/prometheus/prometheus-ams.service.yaml
 - provider: resource
@@ -357,7 +439,7 @@ openshiftResources:
     environment: stage
     namespace: deployment-validation-operator
 
-### Managed Services
+### Kas Fleet Manager
 - provider: resource-template
   type: jinja2
   path: /observability/servicemonitors/managed-services.servicemonitor.yaml
@@ -368,3 +450,19 @@ openshiftResources:
 ### Assisted-Installer Service
 - provider: resource
   path: /observability/prometheusrules/assisted-installer-stage.prometheusrules.yaml
+
+### Devfile Registry
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/devfile-registry.servicemonitor.yaml
+  variables:
+    environment: stage
+    namespace: devfile-registry-stage
+
+### MAS-SSO
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/mas-sso.servicemonitor.yaml
+  variables:
+    environment: stage
+    namespace: mas-sso-stage

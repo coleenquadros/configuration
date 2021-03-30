@@ -1,0 +1,70 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: xjoin-operator
+  platform: insights
+
+name: xjoin-operator
+description: xjoin operator on the Insights Platform
+
+app:
+  $ref: /services/insights/xjoin/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+timeout: 5
+
+managedResourceTypes:
+- ConfigMap
+- OperatorGroup
+- CatalogSource
+- Subscription
+- Service
+- XJoinPipeline
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+
+resourceTemplates:
+- name: xjoin-operator
+  path: /deploy/operator.yml
+  url: https://github.com/RedHatInsights/xjoin-operator
+  parameters:
+    RECONCILE_INTERVAL: "120"
+    VALIDATION_INTERVAL: "1800"
+    VALIDATION_ATTEMPTS_THRESHOLD: "2"
+    VALIDATION_ATTEMPTS_THRESHOLD_INIT: "30"
+    JENKINS_MANAGED_VERSION: "v1.160"
+    ES_CONNECTOR_TASKS_MAX: "50"
+    KAFKA_TOPIC_PARTITIONS: "500"
+    KAFKA_TOPIC_REPLICAS: "2"
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/stage-xjoin-operator-stage.yml
+    ref: master
+    upstream: RedHatInsights-xjoin-operator-gh-build-catalog-master-upstream-RedHatInsights-xjoin-operator-gh-build-master
+    parameters:
+      TARGET_NAMESPACE: xjoin-operator-stage
+- name: xjoin-pipeline
+  path: /deploy/pipeline.yml
+  url: https://github.com/RedHatInsights/xjoin-operator
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/stage-xjoin-operator-stage.yml
+    ref: master
+    upstream: RedHatInsights-xjoin-operator-gh-build-master

@@ -1,0 +1,61 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: kibana
+
+name: kibana-prod
+description: Insights Kibana for FedRAMP on prod
+
+cluster:
+  $ref: /openshift/insights/crcgovp01ue1/cluster.yml
+
+app:
+  $ref: /services/insights/kibana/app.yml
+
+environment:
+  $ref: /products/insights/environments/fedramp-production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcgovp01ue1.yml
+
+managedRoles: true
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/platform-mq-prod/kafka-ca
+  version: 2
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/kibana-fedramp-prod/es-cleanup-secret
+  version: 2
+- provider: vault-secret
+  path: insights/secrets/insights-fedramp-prod/kibana-fedramp-prod/kibana-cookie
+  version: 2
+  annotations:
+    qontract.recycle: "true"
+
+managedTerraformResources: true
+
+terraformResources:
+# - provider: cloudwatch
+#   account: insights-fedramp-prod
+#   identifier: kibana-prod
+#   defaults: /terraform/resources/insights/prod/cloudwatch/cloudwatch-1.yml
+#   output_resource_name: cloudwatch
+#   es_identifier: kibana-elasticsearch
+- provider: elasticsearch
+  account: insights-fedramp-prod
+  identifier: kibana-elasticsearch
+  defaults: /terraform/resources/insights/fedramp/prod/elasticsearch/elasticsearch-1.yml
+  output_resource_name: kibana-elasticsearch
