@@ -1677,6 +1677,8 @@ Notes:
   * `slack_username` - if it is different from `org_username`
   * `pagerduty_username` - if it is different from `org_username`
 
+4. **Add the group in the `managedUsergroups` section of the** [coreos slack](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/slack/coreos.yml) **dependency file**
+
 ### Manage Jenkins jobs configurations using jenkins-jobs
 
 Jenkins jobs configurations can be entirely self-serviced via App-Interface, and allows to define JJB Manifests to be used to bring up CI/CD/Automation pipelines or adhoc jobs in the internal and external Jenkins instance.
@@ -2076,7 +2078,7 @@ This will result in a Secret being created in the consuming namespace. The Secre
 
 We rely on Prometheus to generate alerts for our service using expressions that are difficult to test in real world as they are dependent on very specific conditions or that don't do what you expect. Luckily Prometheus developers have recognized this and [unit tests](https://prometheus.io/docs/prometheus/latest/configuration/unit_testing_rules/) can be written for Prometheus alert and recording rules.
 
-In app-interface prometheus rules that have the `/openshift/prometheus-rule-1.yml` will be validated using `promtool check rules` command that will be used from tests that have the `/app-interface/prometheus-rule-test-1.yml` schema that will be run using `promtool test rules` e.g. rules in [app-sre-contract.yaml](resources/observability/prometheusrules/app-sre-contract.yaml) are tested in the [app-sre-contract-test.yaml](resources/observability/prometheusrules/app-sre-contract-test.yaml) file.
+In app-interface prometheus rules that have the `/openshift/prometheus-rule-1.yml` will be validated using `promtool check rules` command that will be used from tests that have the `/app-interface/prometheus-rule-test-1.yml` schema that will be run using `promtool test rules` e.g. rules in [app-sre-contract.prometheusrules.yaml](resources/observability/prometheusrules/app-sre-contract.prometheusrules.yaml) are tested in the [app-sre-contract.prometheusrulestests.yaml](resources/observability/prometheusrules/app-sre-contract.prometheusrulestests.yaml) file.
 
 A few notes about the integration that run the tests:
 
@@ -2085,6 +2087,8 @@ A few notes about the integration that run the tests:
 - The prometheus test schema allows for multiple rule files in a test. This complicated the code to run the tests a lot so we allow for one test rule per test file.
 
 Writing tests can be difficult at the beginning. This [article](https://www.robustperception.io/unit-testing-rules-with-prometheus) is a nicer start than the official documentation.
+
+If your alerts are based on recording rules, do not write tests using the recorded series, use always the original metrics or you won't be testing the complete setup.
 
 ## Design
 

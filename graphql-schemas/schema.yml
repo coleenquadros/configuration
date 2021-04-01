@@ -435,6 +435,7 @@
     fieldMap:
       account-vpc: ClusterPeeringConnectionAccount_v1
       account-vpc-mesh: ClusterPeeringConnectionAccountVPCMesh_v1
+      account-tgw: ClusterPeeringConnectionAccountTGW_v1
       cluster-vpc-requester: ClusterPeeringConnectionClusterRequester_v1
       cluster-vpc-accepter: ClusterPeeringConnectionClusterAccepter_v1
   fields:
@@ -453,6 +454,16 @@
   - { name: delete, type: boolean }
 
 - name: ClusterPeeringConnectionAccountVPCMesh_v1
+  interface: ClusterPeeringConnection_v1
+  fields:
+  - { name: provider, type: string, isRequired: true }
+  - { name: name, type: string, isRequired: true }
+  - { name: account, type: AWSAccount_v1, isRequired: true }
+  - { name: tags, type: json }
+  - { name: manageRoutes, type: boolean }
+  - { name: delete, type: boolean }
+
+- name: ClusterPeeringConnectionAccountTGW_v1
   interface: ClusterPeeringConnection_v1
   fields:
   - { name: provider, type: string, isRequired: true }
@@ -847,6 +858,8 @@
   - { name: region, type: string }
   - { name: identifier, type: string, isRequired: true }
   - { name: output_resource_name, type: string }
+  - { name: mirror, type: ContainerImageMirror_v1, isRequired: false }
+
 
 - name: NamespaceTerraformResourceS3CloudFront_v1
   interface: NamespaceTerraformResource_v1
@@ -866,6 +879,7 @@
   - { name: account, type: string, isRequired: true }
   - { name: region, type: string }
   - { name: identifier, type: string, isRequired: true }
+  - { name: kms_encryption, type: boolean }
   - { name: defaults, type: string, isRequired: true }
   - { name: output_resource_name, type: string }
   - { name: storage_class, type: string }
@@ -1612,6 +1626,7 @@
   - { name: dns_zone_v1, type: DnsZone_v1, isList: true, datafileSchema: /dependencies/dns-zone-1.yml }
   - { name: slack_workspaces_v1, type: SlackWorkspace_v1, isList: true, datafileSchema: /dependencies/slack-workspace-1.yml }
   - { name: ocp_release_ecr_mirror_v1, type: OcpReleaseEcrMirror_v1, isList: true, datafileSchema: /dependencies/ocp-release-ecr-mirror-1.yml}
+  - { name: slo_document_v1, type: SLODocument_v1, isList: true, datafileSchema: /app-sre/slo-document-1.yml}
 
 - name: SentryTeam_v1
   fields:
@@ -1712,15 +1727,15 @@
 - name: SLODocumentSLO_v1
   fields:
   - { name: name, type: string, isRequired: true }
-  - { name: sli_type, type: string, isRequired: true }
-  - { name: sli_specification, type: string, isRequired: true }
-  - { name: slo_details, type: string, isRequired: true }
-  - { name: slo_target, type: float, isRequired: true }
-  - { name: slo_parameters, type: SLODocumentSLOSLOParameters_v1, isRequired: true }
+  - { name: SLIType, type: string, isRequired: true }
+  - { name: SLISpecification, type: string, isRequired: true }
+  - { name: SLODetails, type: string, isRequired: true }
+  - { name: SLOTarget, type: float, isRequired: true }
+  - { name: SLOParameters, type: SLODocumentSLOSLOParameters_v1, isRequired: true }
   - { name: expr, type: string, isRequired: true }
-  - { name: slo_target_unit, type: string, isRequired: true }
-  - { name: prometheus_rules, type: string, isRequired: true }
-  - { name: prometheus_rules_tests, type: string }
+  - { name: SLOTargetUnit, type: string, isRequired: true }
+  - { name: prometheusRules, type: string, isRequired: true }
+  - { name: prometheusRulesTests, type: string }
   - { name: dashboard, type: string, isRequired: true }
 
 - name: SLODocument_v1
@@ -1728,5 +1743,5 @@
   - { name: schema, type: string, isRequired: true }
   - { name: labels, type: json }
   - { name: name, type: string, isRequired: true }
-  - { name: namespaces, type: string, isList: true, isRequired: true }
+  - { name: namespaces, type: Namespace_v1, isList: true, isRequired: true }
   - { name: slos, type: SLODocumentSLO_v1, isList: true }

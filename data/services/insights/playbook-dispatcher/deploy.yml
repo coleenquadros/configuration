@@ -23,6 +23,7 @@ timeout: 5
 
 managedResourceTypes:
 - ClowdApp
+- ClowdJobInvocation
 - Deployment
 - KafkaConnect
 - KafkaConnector
@@ -47,8 +48,14 @@ resourceTemplates:
     ref: master
     upstream: RedHatInsights-playbook-dispatcher-gh-build-master
     parameters:
-      ENV_NAME: stage
       LOG_LEVEL: debug
+      RETURN_URL: https://stage.cloud.redhat.com/api/ingress/v1/upload
+  - namespace:
+      $ref: /services/insights/playbook-dispatcher/namespaces/prod.yml
+    ref: 929df515c42d641710e3ceff4c8184d9802f02a2
+    parameters:
+      LOG_LEVEL: info
+      RETURN_URL: https://cloud.redhat.com/api/ingress/v1/upload
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
@@ -68,6 +75,9 @@ resourceTemplates:
       $ref: /services/insights/playbook-dispatcher/namespaces/stage.yml
     ref: master
     upstream: RedHatInsights-playbook-dispatcher-gh-build-master
+  - namespace:
+      $ref: /services/insights/playbook-dispatcher/namespaces/prod.yml
+    ref: 929df515c42d641710e3ceff4c8184d9802f02a2
 
 - name: test-secret-psk
   path: /deploy/secrets.yaml

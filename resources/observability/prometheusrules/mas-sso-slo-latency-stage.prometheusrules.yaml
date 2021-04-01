@@ -1,0 +1,154 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: mas-sso-slo-latency-stage
+spec:
+  groups:
+  - name: mas-sso-slo-latency-stage
+    rules:
+    - alert: MasSSOLatency5mto1hrBudgetBurn
+      annotations:
+        message: 'High requests latency budget burn rate 1h/6h  (current value: {{ $value | printf "%.2f" }})'
+        dashboard: "https://grafana.stage.devshift.net/d/nzxiqJQMk/mas-sso-monitoring?orgId=1"
+        runbook: ""
+      expr: |
+        (
+        latencytarget:keycloak_request_duration_seconds:rate1h{service="mas-sso",latency="1", namespace="mas-sso-stage"} > (14.4* (1-0.99000)) #0.144
+        and
+        latencytarget:keycloak_request_duration_seconds:rate5m{service="mas-sso",latency="1",namespace="mas-sso-stage"} > (14.4* (1-0.99000))
+        )
+      labels:
+        service: mas-sso
+        route: keycloak
+        namespace: mas-sso-stage
+        severity: info
+    - alert: MasSSOLatency30to6hrBudgetBurn
+      annotations:
+        message: 'High requests latency budget burn rate 30m/6h (current value: {{ $value | printf "%.2f" }})'
+        dashboard: "https://grafana.stage.devshift.net/d/nzxiqJQMk/mas-sso-monitoring?orgId=1"
+        runbook: ""
+      expr: |
+        (
+          latencytarget:keycloak_request_duration_seconds:rate6h{service="mas-sso",latency="1", namespace="mas-sso-stage"} > (6* (1-0.99000)) #0.06
+          and
+          latencytarget:keycloak_request_duration_seconds:rate30m{service="mas-sso",latency="1", namespace="mas-sso-stage"} > (6* (1-0.99000))
+        )
+      labels:
+        service: mas-sso
+        route: keycloak
+        namespace: mas-sso-stage
+        severity: info
+    - alert: MasSSOLatency2hto1dBudgetBurn
+      annotations:
+        message: 'High requests latency budget burn rate 2h/1d (current value: {{ $value | printf "%.2f" }})'
+        dashboard: "https://grafana.stage.devshift.net/d/nzxiqJQMk/mas-sso-monitoring?orgId=1"
+        runbook: ""
+      expr: |
+        (
+        latencytarget:keycloak_request_duration_seconds:rate1d{service="mas-sso",latency="1", namespace="mas-sso-stage"} > (3* (1-0.99000)) #0.03
+        and
+        latencytarget:keycloak_request_duration_seconds:rate2h{service="mas-sso",latency="1", namespace="mas-sso-stage"} > (3* (1-0.99000))
+        )
+      labels:
+        service: mas-sso
+        route: keycloak
+        namespace: mas-sso-stage
+        severity: info
+    - alert: MasSSOLatency6hto3dBudgetBurn
+      annotations:
+        message: 'High requests latency budget burn rate 6h/3d (current value: {{ $value | printf "%.2f" }})'
+        dashboard: "https://grafana.stage.devshift.net/d/nzxiqJQMk/mas-sso-monitoring?orgId=1"
+        runbook: ""
+      expr: |
+        (
+         latencytarget:keycloak_request_duration_seconds:rate3d{service="mas-sso",latency="1",namespace="mas-sso-stage"} > (1 * (1-0.99000)) #0.01
+         and
+         latencytarget:keycloak_request_duration_seconds:rate6h{service="mas-sso",latency="1", namespace="mas-sso-stage"} > (1 * (1-0.99000))
+        )
+      labels:
+        service: mas-sso
+        route: keycloak
+        namespace: mas-sso-stage
+        severity: info
+    - expr: |
+        1 - (
+        sum(rate(keycloak_request_duration_bucket{le="1000.0",namespace="mas-sso-stage"}[5m]))
+        /
+        sum(rate(keycloak_request_duration_count{namespace="mas-sso-stage"}[5m]))
+        )
+      labels:
+        service: mas-sso
+        latency: "1"
+        namespace: mas-sso-stage
+      record: latencytarget:keycloak_request_duration_seconds:rate5m
+    - expr: |
+        1 - (
+        sum(rate(keycloak_request_duration_bucket{le="1000.0",namespace="mas-sso-stage"}[30m]))
+        /
+        sum(rate(keycloak_request_duration_count{namespace="mas-sso-stage"}[30m]))
+        )
+      labels:
+        service: mas-sso
+        latency: "1"
+        namespace: mas-sso-stage
+      record: latencytarget:keycloak_request_duration_seconds:rate30m
+    - expr: |
+        1 - (
+        sum(rate(keycloak_request_duration_bucket{le="1000.0",namespace="mas-sso-stage"}[1h])) # rate of all requests <= 1000
+        /
+        sum(rate(keycloak_request_duration_count{namespace="mas-sso-stage"}[1h])) # rate of all requests
+        )
+      labels:
+        service: mas-sso
+        latency: "1"
+        namespace: mas-sso-stage
+      record: latencytarget:keycloak_request_duration_seconds:rate1h
+    - expr: |
+        1 - (
+        sum(rate(keycloak_request_duration_bucket{le="1000.0",namespace="mas-sso-stage"}[2h]))
+        /
+        sum(rate(keycloak_request_duration_count{namespace="mas-sso-stage"}[2h]))
+        )
+      labels:
+        service: mas-sso
+        latency: "1"
+        namespace: mas-sso-stage
+      record: latencytarget:keycloak_request_duration_seconds:rate2h
+    - expr: |
+        1 - (
+        sum(rate(keycloak_request_duration_bucket{le="1000.0",namespace="mas-sso-stage"}[6h]))
+        /
+        sum(rate(keycloak_request_duration_count{namespace="mas-sso-stage"}[6h]))
+        )
+      labels:
+        service: mas-sso
+        latency: "1"
+        namespace: mas-sso-stage
+      record: latencytarget:keycloak_request_duration_seconds:rate6h
+    - expr: |
+        1 - (
+        sum(rate(keycloak_request_duration_bucket{le="1000.0",namespace="mas-sso-stage"}[1d]))
+        /
+        sum(rate(keycloak_request_duration_count{namespace="mas-sso-stage"}[1d]))
+        )
+      labels:
+        service: mas-sso
+        latency: "1"
+        namespace: mas-sso-stage
+      record: latencytarget:keycloak_request_duration_seconds:rate1d
+    - expr: |
+        1 - (
+        sum(rate(keycloak_request_duration_bucket{le="1000.0",namespace="mas-sso-stage"}[3d]))
+        /
+        sum(rate(keycloak_request_duration_count{namespace="mas-sso-stage"}[3d]))
+        )
+      labels:
+        service: mas-sso
+        latency: "1"
+        namespace: mas-sso-stage
+      record: latencytarget:keycloak_request_duration_seconds:rate3d

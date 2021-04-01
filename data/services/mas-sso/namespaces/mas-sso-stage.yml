@@ -33,10 +33,17 @@ openshiftResources:
 - provider: resource-template
   path: /services/mas-sso/serviceaccount.yaml
   variables:
-    name: mas-sso
+    name: default
 - provider: resource-template
   type: extracurlyjinja2
   path: /services/mas-sso/mas-sso-db-config.secret.yaml
+# This route is just a temporary sanity check. It will be replaced in the future.
+# See https://issues.redhat.com/browse/MGDSTRM-1228
+- provider: route
+  path: /services/mas-sso/mas-sso.route.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/mas-sso/mas-sso-credentials.secret.yaml
 
 managedTerraformResources: true
 
@@ -46,3 +53,6 @@ terraformResources:
   identifier: mas-sso-staging
   defaults: /terraform/resources/app-sre/staging/rds-1.yml
   output_resource_name: mas-sso-rds
+  overrides:
+    allocated_storage: 100
+  enhanced_monitoring: true

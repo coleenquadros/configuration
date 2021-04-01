@@ -1,0 +1,63 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: xjoin
+
+name: xjoin-operator-prod
+description: xjoin operator deployment for prod environment
+
+cluster:
+  $ref: /openshift/crcp01ue1/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
+
+quota:
+  $ref: /services/insights/default-quota.yml
+
+app:
+  $ref: /services/insights/xjoin/app.yml
+
+environment:
+  $ref: /products/insights/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
+- $ref: /openshift/crcp01ue1/namespaces/openshift-operator-lifecycle-manager.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  # requires access to the host-inventory-db provisioned through the host-inventory-prod namespace
+  path: app-sre/integrations-output/terraform-resources/crcp01ue1/platform-prod/host-inventory-db
+  version: 1
+  name: host-inventory-db
+  annotations:
+    qontract.recycle: "true"
+    qontract.ignore_reconcile_time: "true"
+- provider: vault-secret
+  # requires access to the elasticsearch instance provisioned through the xjoin-prod namespace
+  path: app-sre/integrations-output/terraform-resources/crcp01ue1/xjoin-prod/xjoin-elasticsearch
+  version: 1
+  name: xjoin-elasticsearch
+  annotations:
+    qontract.recycle: "true"
+    qontract.ignore_reconcile_time: "true"
+- provider: resource
+  path: /insights-prod/shared/private-image-puller.serviceaccount.yaml
+- provider: resource
+  path: /insights-prod/xjoin-operator-prod/xjoin-operator.serviceaccount.yml

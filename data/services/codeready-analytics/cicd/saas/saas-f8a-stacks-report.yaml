@@ -1,0 +1,143 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: codeready-analytics
+  component: f8a-stacks-report
+
+name: saas-codeready-analytics-f8a-stacks-report
+description: SaaS tracking file for codeready-analytics f8a-stacks-report
+
+app:
+  $ref: /services/codeready-analytics/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-codeready-analytics-info
+
+managedResourceTypes:
+- CronJob
+
+imagePatterns:
+- quay.io/app-sre/fabric8-analytics-f8a-stacks-report
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+parameters:
+  DOCKER_REGISTRY: quay.io
+  DOCKER_IMAGE: app-sre/fabric8-analytics-f8a-stacks-report
+  GITHUB_CVE_REPO: fabric8-analytics
+  SENTRY_API_ISSUES: "/api/0/projects/sentry/fabric8-analytics-production/issues/"
+  SENTRY_API_TAGS: "/api/0/issues/"
+  MEMORY_REQUEST: "2048Mi"
+  MEMORY_LIMIT: "2048Mi"
+
+resourceTemplates:
+- name: stacks-report-daily
+  url: https://github.com/fabric8-analytics/f8a-stacks-report
+  path: /openshift/template.yaml
+  parameters:
+    CRON_SCHEDULE: "30 0 * * *"
+    ENTRY_POINT: "f8a_report/stack_report_main.py"
+    SUFFIX: "stacks-report-daily"
+    GENERATE_MANIFESTS: "false"
+  targets:
+  - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-preview.yml
+    ref: master
+    upstream: fabric8-analytics-f8a-stacks-report-gh-build-master
+  - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-production.yml
+    ref: 5a3a3ad6a15ba4ddae4a7d829ea24053d6ce89ba
+
+- name: db-cleanup-daily
+  url: https://github.com/fabric8-analytics/f8a-stacks-report
+  path: /openshift/template.yaml
+  parameters:
+    CRON_SCHEDULE: "30 2 * * *"
+    ENTRY_POINT: "f8a_report/dbtable_cleanup_main.py"
+    SUFFIX: "dbtable-cleanup-daily"
+    GENERATE_MANIFESTS: "false"
+  targets:
+  - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-preview.yml
+    ref: master
+    upstream: fabric8-analytics-f8a-stacks-report-gh-build-master
+  - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-production.yml
+    ref: 5a3a3ad6a15ba4ddae4a7d829ea24053d6ce89ba
+
+- name: snyk-token-validation-daily
+  url: https://github.com/fabric8-analytics/f8a-stacks-report
+  path: /openshift/template.yaml
+  parameters:
+    CRON_SCHEDULE: "0 2 * * *"
+    ENTRY_POINT: "f8a_report/snyk_token_validation_main.py"
+    SUFFIX: "snyk-token-validation-daily"
+    GENERATE_MANIFESTS: "false"
+  targets:
+  - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-preview.yml
+    ref: master
+    upstream: fabric8-analytics-f8a-stacks-report-gh-build-master
+  - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-production.yml
+    ref: 5a3a3ad6a15ba4ddae4a7d829ea24053d6ce89ba
+
+- name: dynamic-manifest-weekly
+  url: https://github.com/fabric8-analytics/f8a-stacks-report
+  path: /openshift/template.yaml
+  parameters:
+    CRON_SCHEDULE: "30 4 * * 1"
+    ENTRY_POINT: "f8a_report/manifest_main.py"
+    SUFFIX: "dynamic-manifest-weekly"
+    GENERATE_MANIFESTS: "true"
+  targets:
+  - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-preview.yml
+    ref: master
+    upstream: fabric8-analytics-f8a-stacks-report-gh-build-master
+  - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-production.yml
+    ref: 5a3a3ad6a15ba4ddae4a7d829ea24053d6ce89ba
+
+- name: retraining-weekly
+  url: https://github.com/fabric8-analytics/f8a-stacks-report
+  path: /openshift/template.yaml
+  parameters:
+    CRON_SCHEDULE: "30 3 * * 5"
+    ENTRY_POINT: "f8a_report/retrain_main.py"
+    SUFFIX: "retraining-weekly"
+    GENERATE_MANIFESTS: "false"
+  targets:
+  - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-preview.yml
+    ref: master
+    upstream: fabric8-analytics-f8a-stacks-report-gh-build-master
+  - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-production.yml
+    ref: 5a3a3ad6a15ba4ddae4a7d829ea24053d6ce89ba
+
+- name: stacks-report-monthly
+  url: https://github.com/fabric8-analytics/f8a-stacks-report
+  path: /openshift/template.yaml
+  parameters:
+    CRON_SCHEDULE: "45 13 2 * *"
+    ENTRY_POINT: "f8a_report/monthly_stack_report_main.py"
+    SUFFIX: "stacks-report-monthly"
+    GENERATE_MANIFESTS: "false"
+  targets:
+  - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-preview.yml
+    ref: master
+    upstream: fabric8-analytics-f8a-stacks-report-gh-build-master
+  - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-production.yml
+    ref: 5a3a3ad6a15ba4ddae4a7d829ea24053d6ce89ba

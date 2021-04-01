@@ -1,0 +1,105 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: strimzi
+  platform: insights
+
+name: strimzi-perf
+description: strimzi
+
+app:
+  $ref: /services/insights/strimzi/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: proj-perf-insights-cluster
+
+timeout: 5
+
+managedResourceTypes:
+- Kafka
+- KafkaTopic
+- KafkaConnect
+- ConfigMap
+- Service
+- Deployment
+
+imagePatterns:
+- quay.io/cloudservices
+- quay.io/app-sre
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+
+resourceTemplates:
+- name: strimzi
+  path: /deploys/openshift/amq-streams.yaml
+  url: https://github.com/RedHatInsights/platform-mq
+  parameters:
+    ZK_VOL_SIZE: 50Gi
+  targets:
+  - namespace:
+      $ref: /services/insights/strimzi/namespaces/perf-platform-mq-perf.yml
+    ref: master
+    parameters:
+      KAFKA_CPU_REQUESTS: 2
+      KAFKA_CPU_LIMITS: 3
+      KAFKA_MEMORY_REQUESTS: 24Gi
+      KAFKA_MEMORY_LIMITS: 24Gi
+      KAFKA_NUM_REPLICAS: 3
+      KAFKA_HEAP_OPTS_XMS: 6g
+      KAFKA_HEAP_OPTS_XMX: 6g
+      KAFKA_VOL_SIZE: 450Gi
+
+- name: kafka-topics
+  path: /deploys/openshift/kafka-topics.yaml
+  url: https://github.com/RedHatInsights/platform-mq
+  parameters:
+    KAFKA_CLUSTER: platform-mq
+  targets:
+  - namespace:
+      $ref: /services/insights/strimzi/namespaces/perf-platform-mq-perf.yml
+    ref: master
+
+- name: kafka-connect
+  path: /deploys/openshift/kafka-connect.yaml
+  url: https://github.com/RedHatInsights/platform-mq
+  parameters:
+      KAFKA_CONNECT_IMAGE: quay.io/cloudservices/kafka-connect
+  targets:
+  - namespace:
+      $ref: /services/insights/strimzi/namespaces/perf-platform-mq-perf.yml
+    ref: master
+    parameters:
+      BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9093
+
+- name: prometheus-kafka-consumer-group-exporter
+  hash_length: 7
+  path: /openshift.yaml
+  url: https://github.com/RedHatInsights/prometheus-kafka-consumer-group-exporter
+  targets:
+  - namespace:
+      $ref: /services/insights/strimzi/namespaces/perf-platform-mq-perf.yml
+    ref: master
+    parameters:
+      BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9092
+      AUTO_OFFSET_RESET: latest
+      GROUP_ID: lag_exporter_perf
+      IMAGE: quay.io/app-sre/prometheus-kafka-consumer-group-exporter
+
+- name: lightbend-lag-exporter
+  path: /deploys/openshift/lightbend-lag-exporter.yaml
+  url: https://github.com/RedHatInsights/platform-mq
+  targets:
+  - namespace:
+      $ref: /services/insights/strimzi/namespaces/perf-platform-mq-perf.yml
+    ref: master
+    parameters:
+      APPSRE_ENV: perf

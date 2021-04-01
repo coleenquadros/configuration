@@ -1,0 +1,50 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: cloud-connector
+  platform: insights
+
+name: cloud-connector-dev
+description: cloud-connector app on the Insights Platform
+
+app:
+  $ref: /services/insights/cloud-connector/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+timeout: 5
+
+managedResourceTypes:
+- Deployment
+- Service
+- PersistentVolumeClaim
+
+imagePatterns:
+- quay.io/cloudservices
+- quay.io/debezium/postgres:12
+
+authentication:
+  image:
+    path: insights/secrets/global/rh-registry-pull
+    field: all
+
+resourceTemplates:
+- name: cloud-connector
+  path: /deploy/template.yml
+  url: https://github.com/RedHatInsights/cloud-connector
+  targets:
+  - namespace:
+      $ref: /services/insights/cloud-connector/namespaces/dev-connector-qa.yml
+    ref: 25df530df719cfef59baf9a201e8be119fcdebdd
+    upstream: RedHatInsights-cloud-connector-gh-build-master
+    parameters:
+      LOG_LEVEL: DEBUG
+      MQTT_BROKER_ADDRESS: wss://FIXME.connect.cloud.stage.redhat.com:443
+      MQTT_TOPIC_PREFIX: qa

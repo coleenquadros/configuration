@@ -40,7 +40,7 @@ imagePatterns:
 - quay.io/prometheus/memcached-exporter
 - registry.redhat.io/rhel8/memcached
 - quay.io/jpkroehling/all-in-one
-- quay.io/app-sre/loki
+- quay.io/openshift-logging/loki
 
 resourceTemplates:
 - name: observatorium-logs
@@ -75,8 +75,8 @@ resourceTemplates:
       MEMCACHED_EXPORTER_CPU_LIMIT: '200m'
       MEMCACHED_EXPORTER_MEMORY_REQUEST: '50Mi'
       MEMCACHED_EXPORTER_MEMORY_LIMIT: '200Mi'
-      LOKI_IMAGE_TAG: 2.1.0
-      LOKI_IMAGE: quay.io/app-sre/loki
+      LOKI_IMAGE_TAG: v2.2.0-1
+      LOKI_IMAGE: quay.io/openshift-logging/loki
       LOKI_S3_SECRET: observatorium-logs-stage-s3
       LOKI_COMPACTOR_CPU_REQUESTS: '1000m'
       LOKI_COMPACTOR_CPU_LIMITS: '2000m'
@@ -120,6 +120,75 @@ resourceTemplates:
       LOKI_RESULTS_CACHE_MEMORY_REQUESTS: '1329Mi'
       LOKI_RESULTS_CACHE_MEMORY_LIMITS: '1536Mi'
       LOKI_PVC_REQUEST: '50Gi'
+  - namespace:
+      $ref: /services/observatorium-logs/namespaces/observatorium-logs-production.yml
+    # Commit for gitlab.cee.redhat.com/observatorium/configuration repo. Keep it pinned, so we know what we can promote to production.
+    ref: 27fb842736320d85311f08bf3b3982274fe44b03
+    parameters:
+      NAMESPACE: observatorium-logs-production
+      JAEGER_AGENT_IMAGE_TAG: 1.16.0
+      JAEGER_COLLECTOR_NAMESPACE: telemeter-production
+      JAEGER_PROXY_CPU_REQUEST: '100m'
+      JAEGER_PROXY_CPU_LIMITS: '200m'
+      JAEGER_PROXY_MEMORY_REQUEST: '100Mi'
+      JAEGER_PROXY_MEMORY_LIMITS: '200Mi'
+      MEMCACHED_IMAGE: registry.redhat.io/rhel8/memcached
+      MEMCACHED_IMAGE_TAG: 1.5
+      MEMCACHED_EXPORTER_IMAGE: quay.io/prometheus/memcached-exporter
+      MEMCACHED_EXPORTER_IMAGE_TAG: v0.6.0
+      MEMCACHED_CPU_REQUEST: '500m'
+      MEMCACHED_CPU_LIMIT: '3000m'
+      MEMCACHED_MEMORY_REQUEST: '1329Mi'
+      MEMCACHED_MEMORY_LIMIT: '1844Mi'
+      MEMCACHED_EXPORTER_CPU_REQUEST: '50m'
+      MEMCACHED_EXPORTER_CPU_LIMIT: '200m'
+      MEMCACHED_EXPORTER_MEMORY_REQUEST: '50Mi'
+      MEMCACHED_EXPORTER_MEMORY_LIMIT: '200Mi'
+      LOKI_IMAGE_TAG: v2.2.0-1
+      LOKI_IMAGE: quay.io/openshift-logging/loki
+      LOKI_S3_SECRET: observatorium-logs-production-s3
+      LOKI_COMPACTOR_CPU_REQUESTS: '1000m'
+      LOKI_COMPACTOR_CPU_LIMITS: '2000m'
+      LOKI_COMPACTOR_MEMORY_REQUESTS: '2Gi'
+      LOKI_COMPACTOR_MEMORY_LIMITS: '4Gi'
+      LOKI_DISTRIBUTOR_REPLICAS: 3
+      LOKI_DISTRIBUTOR_CPU_REQUESTS: '500m'
+      LOKI_DISTRIBUTOR_CPU_LIMITS: '1000m'
+      LOKI_DISTRIBUTOR_MEMORY_REQUESTS: '500Mi'
+      LOKI_DISTRIBUTOR_MEMORY_LIMITS: '1Gi'
+      LOKI_INGESTER_REPLICAS: 3
+      LOKI_INGESTER_CPU_REQUESTS: '1000m'
+      LOKI_INGESTER_CPU_LIMITS: '2000m'
+      LOKI_INGESTER_MEMORY_REQUESTS: '5Gi'
+      LOKI_INGESTER_MEMORY_LIMITS: '10Gi'
+      LOKI_QUERIER_REPLICAS: 3
+      LOKI_QUERIER_CPU_REQUESTS: '1000m'
+      LOKI_QUERIER_CPU_LIMITS: '2000m'
+      LOKI_QUERIER_MEMORY_REQUESTS: '1Gi'
+      LOKI_QUERIER_MEMORY_LIMITS: '2Gi'
+      LOKI_QUERY_FRONTEND_REPLICAS: 2
+      LOKI_QUERY_FRONTEND_CPU_REQUESTS: '1000m'
+      LOKI_QUERY_FRONTEND_CPU_LIMITS: '2000m'
+      LOKI_QUERY_FRONTEND_MEMORY_REQUESTS: '600Mi'
+      LOKI_QUERY_FRONTEND_MEMORY_LIMITS: '1200Mi'
+      LOKI_QUERY_PARALLELISM: 2
+      LOKI_REPLICATION_FACTOR: 2
+      LOKI_CHUNK_CACHE_REPLICAS: 2
+      LOKI_CHUNK_CACHE_CPU_REQUESTS: '500m'
+      LOKI_CHUNK_CACHE_CPU_LIMITS: '3'
+      LOKI_CHUNK_CACHE_MEMORY_REQUESTS: '5016Mi'
+      LOKI_CHUNK_CACHE_MEMORY_LIMITS: '6Gi'
+      LOKI_INDEX_QUERY_CACHE_CPU_REQUESTS: '500m'
+      LOKI_INDEX_QUERY_CACHE_CPU_LIMITS: '3'
+      LOKI_INDEX_QUERY_CACHE_MEMORY_REQUESTS: '1329Mi'
+      LOKI_INDEX_QUERY_CACHE_MEMORY_LIMITS: '1536Mi'
+      LOKI_INDEX_QUERY_CACHE_REPLICAS: 2
+      LOKI_RESULTS_CACHE_REPLICAS: 2
+      LOKI_RESULTS_CACHE_CPU_REQUESTS: '500m'
+      LOKI_RESULTS_CACHE_CPU_LIMITS: '3'
+      LOKI_RESULTS_CACHE_MEMORY_REQUESTS: '1329Mi'
+      LOKI_RESULTS_CACHE_MEMORY_LIMITS: '1536Mi'
+      LOKI_PVC_REQUEST: '10Gi'
 - name: conprof-observatorium-logs-rbac
   path: /resources/services/conprof-observatorium-logs-rbac-template.yaml
   url: https://gitlab.cee.redhat.com/observatorium/configuration
@@ -131,3 +200,10 @@ resourceTemplates:
       IMAGE_TAG: 'master-2020-09-23-08090ad'
       NAMESPACE: telemeter-stage
       OBSERVATORIUM_LOGS_NAMESPACE: observatorium-logs-stage
+  - namespace:
+      $ref: /services/observatorium-logs/namespaces/observatorium-logs-production.yml
+    ref: 27fb842736320d85311f08bf3b3982274fe44b03
+    parameters:
+      IMAGE_TAG: 'master-2020-09-23-08090ad'
+      NAMESPACE: telemeter-production
+      OBSERVATORIUM_LOGS_NAMESPACE: observatorium-logs-production

@@ -10,8 +10,8 @@
 The database host url can be obtained from the only `-rds` secret in the `quay` namespace:
 
 ```shell
-RDS_SECRET=$(oc get -n quay secret --no-headers -o custom-columns=":metadata.name" | grep -- -rds$)
-$ oc get secret $RDS_SECRET -o json | jq -r '.data."db.host"|@base64d'
+RDS_SECRET=$(oc -n quay get quay secret --no-headers -o custom-columns=":metadata.name" | grep -- -rds$)
+$ oc -n quay get secret $RDS_SECRET -o json | jq -r '.data."db.host"|@base64d'
 ```
 
 Note this output down, we will refer to it as `<db_host>`
@@ -19,8 +19,8 @@ Note this output down, we will refer to it as `<db_host>`
 Now rsh into the diag-container and connect to the MySQL database:
 
 ```shell
-$ oc get -n app-sre get pods | grep diag-container
-$ oc rsh -n app-sre <diag-container-pod>
+$ oc -n app-sre get pods | grep diag-container
+$ oc -n app-sre rsh <diag-container-pod>
 
 # now in the diag-container
 $ export DB_HOST=<db_host>

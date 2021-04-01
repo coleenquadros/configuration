@@ -1,0 +1,52 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: engine
+  platform: insights
+
+name: engine-perf
+description: engine app on the Insights Platform
+
+app:
+  $ref: /services/insights/engine/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: proj-perf-insights-cluster
+
+timeout: 5
+
+managedResourceTypes:
+- Deployment
+- DeploymentConfig
+- Service
+- ConfigMap
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: insights-engine
+  path: /templates/deployment.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/insights-engine
+  targets:
+  - namespace:
+      $ref: /services/insights/engine/namespaces/perf-engine-perf.yml
+    ref: master
+    upstream: insights-platform-insights-engine-gl-build-master
+    parameters:
+      CLOUD_WATCH_LOG_GROUP: engine-perf
+      REPLICAS: "1"

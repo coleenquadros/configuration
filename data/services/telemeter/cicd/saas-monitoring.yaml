@@ -24,8 +24,22 @@ managedResourceTypes:
 imagePatterns: []
 
 resourceTemplates:
+- name: telemeter
+  path: /resources/services/telemeter-template.yaml
+  url: https://gitlab.cee.redhat.com/observatorium/configuration
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+    ref: master
+    parameters:
+      NAMESPACE: telemeter-stage
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.telemeter-prod-01.yml
+    ref: 1c9fcec6c27a47dc06c68e73a38c3ebb248add9e
+    parameters:
+      NAMESPACE: telemeter-production
 - name: observatorium
-  path: /manifests/production/observatorium-template.yaml
+  path: /resources/services/observatorium-template.yaml
   url: https://gitlab.cee.redhat.com/observatorium/configuration
   targets:
   - namespace:
@@ -36,12 +50,28 @@ resourceTemplates:
       MST_NAMESPACE: observatorium-mst-stage
   - namespace:
       $ref: /services/observability/namespaces/openshift-customer-monitoring.telemeter-prod-01.yml
-    ref: 6ae3603fa9465dc01eaae5820c7e712b6bba7209
+    ref: 1c9fcec6c27a47dc06c68e73a38c3ebb248add9e
+    parameters:
+      NAMESPACE: telemeter-production
+      MST_NAMESPACE: observatorium-mst-production
+- name: observatorium-metrics
+  path: /resources/services/observatorium-metrics-template.yaml
+  url: https://gitlab.cee.redhat.com/observatorium/configuration
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+    ref: master
+    parameters:
+      NAMESPACE: telemeter-stage
+      MST_NAMESPACE: observatorium-mst-stage
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.telemeter-prod-01.yml
+    ref: 1c9fcec6c27a47dc06c68e73a38c3ebb248add9e
     parameters:
       NAMESPACE: telemeter-production
       MST_NAMESPACE: observatorium-mst-production
 - name: observatorium-jaeger
-  path: /manifests/production/jaeger-template.yaml
+  path: /resources/services/jaeger-template.yaml
   url: https://gitlab.cee.redhat.com/observatorium/configuration
   targets:
   - namespace:
@@ -51,6 +81,6 @@ resourceTemplates:
       NAMESPACE: telemeter-stage
   - namespace:
       $ref: /services/observability/namespaces/openshift-customer-monitoring.telemeter-prod-01.yml
-    ref: 65d676f566f1738810c35171021d4c9e3688c151
+    ref: 1c9fcec6c27a47dc06c68e73a38c3ebb248add9e
     parameters:
       NAMESPACE: telemeter-production

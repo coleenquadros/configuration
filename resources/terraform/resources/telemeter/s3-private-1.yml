@@ -1,0 +1,14 @@
+acl: private
+server_side_encryption_configuration:
+  rule:
+    apply_server_side_encryption_by_default:
+      sse_algorithm: "AES256"
+lifecycle_rules:
+  # Due to versioning being enabled, blocks deleted by Thanos doesn't actually
+  # get deleted. This rule cleans up such blocks after the specified time period.
+  - id: cleanup_noncurrent_versions
+    enabled: true
+    noncurrent_version_expiration:
+      days: 14
+    expiration:
+      expired_object_delete_marker: true

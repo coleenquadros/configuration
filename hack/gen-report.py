@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import json
 import os
@@ -143,13 +143,13 @@ def main():
     if reports_dir:
         success_glob = glob(reports_dir + '/reconcile_reports_success/*.txt')
         fail_glob = glob(reports_dir + '/reconcile_reports_fail/*.txt')
-        reconcile_success = map(report_tuple, success_glob)
-        reconcile_fail = map(report_tuple, fail_glob)
+        reconcile_success = list(map(report_tuple, success_glob))
+        reconcile_fail = list(map(report_tuple, fail_glob))
     else:
         reconcile_success = []
         reconcile_fail = []
 
-    print template.render(
+    print(template.render(
         results_schemas=results_schemas,
         errors_schemas=errors_schemas,
         results_files=results_files,
@@ -158,7 +158,7 @@ def main():
         reconcile_success=reconcile_success,
         reconcile_fail=reconcile_fail,
         description=os.environ.get('DESCRIPTION')
-    )
+    ))
 
 
 if __name__ == '__main__':

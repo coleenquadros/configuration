@@ -41,13 +41,15 @@ resourceTemplates:
     IMAGE_REGISTRY: quay.io
     IMAGE_REPOSITORY: rhoas/kas-fleet-manager
     JWKS_URL: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/certs
-    MAS_SSO_BASE_URL: https://keycloak-edge-redhat-rhoam-user-sso.apps.mas-sso-stage.1gzl.s1.devshift.org
-    MAS_SSO_REALM: mas-sso-staging
+    MAS_SSO_BASE_URL: https://keycloak-mas-sso-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
+    MAS_SSO_REALM: rhoas
     REPLICAS: 6
     CLUSTER_OPENSHIFT_VERSION: ""
     CLUSTER_COMPUTE_MACHINE_TYPE: m5.4xlarge
-    # Change this to false if you want to disable the allow list feature feature 
+    # Change this to false if you want to disable the allow list feature feature
     ENABLE_ALLOW_LIST: true
+    # Change this to false if you want to disable the deny list feature feature
+    ENABLE_DENY_LIST: true
   targets:
   - namespace:
       $ref: /services/managed-services/namespaces/managed-services-stage.yml
@@ -55,7 +57,7 @@ resourceTemplates:
     upstream: service-kas-fleet-manager-gl-build-master
     parameters:
       # Realm name for the Data Plane OSD cluster Identity Provider
-      OSD_IDP_MAS_SSO_REALM: interim-test-realm 
+      OSD_IDP_MAS_SSO_REALM: rhoas-kafka-sre
       # Image tags for sub components
       KAFKA_ADMIN_SERVER_IMAGE: quay.io/sknot/kafka-admin-api:0.0.4
       # Log level
@@ -87,16 +89,21 @@ resourceTemplates:
       MAX_ALLOWED_INSTANCES: 1
       # Enable ManagedKafkaCR generation
       ENABLE_MANAGED_KAFKA_CR: true
-      # A list of allowed users in yaml format irrespective of their organisation. 
+      # Disable quota service integration for now
+      ENABLE_QUOTA_SERVICE: false
+      # MAXIMUM NUMBER OF ALLOWED KAFKAs
+      KAFKA_CAPACITY_MAX_CAPACITY: 45
+      MAS_SSO_ENABLE_AUTH: true
+      # A list of allowed users in yaml format irrespective of their organisation.
       # Empty for now, but in the future this may contain users and service accounts within or outside Red Hat.
       # Takes effect if `ENABLE_ALLOW_LIST` is set to true
       ALLOWED_SERVICE_ACCOUNTS:
           # RHOSAK PM
         - username: rhn-gps-ddoyle
-          max_allowed_instances: 1
+          max_allowed_instances: 2
         - username: kbabo1@redhat.com
           max_allowed_instances: 2
-          
+
           # ODH: Demos and PoCs for Managed ODH and Managed Kafka integration
         - username: cchase@redhat.com
           max_allowed_instances: 1
@@ -104,11 +111,11 @@ resourceTemplates:
           # Andrea Tarocchi: Testing Camel Kafka Connectors
         - username: atarocch@redhat.com
           max_allowed_instances: 1
-          
+
           # Daniele Zonca: Business Automation as a Service
         - username: dzonca@redhat.com
           max_allowed_instances: 1
-        
+
           # Clement Escoffier: Quarkus integration
         - username: cescoffi
           max_allowed_instances: 2
@@ -237,7 +244,31 @@ resourceTemplates:
         - username: kkhan1@redhat.com
           max_allowed_instances: 1
 
-      # A list of allowed users per organisation in yaml format. 
+          # Edward Brennan: Marketing operations development and troubleshooting
+        - username: ebrennan@redhat.com
+          max_allowed_instances: 1
+
+          # Bernard Tison: TMM Cloud Services BU
+        - username: btison
+          max_allowed_instances: 1
+
+          # Andrea Cosentino: For MCS and testing connector
+        - username: acosenti
+          max_allowed_instances: 1
+
+          # Pete TNC
+        - username: pmuir_tnc
+          max_allowed_instances: 1
+
+          # Joe O'Reilly
+        - username: joreilly
+          max_allowed_instances: 1
+
+          # Scaling testing user
+        - username: test_kafka_service
+          max_allowed_instances: 1500
+
+      # A list of allowed users per organisation in yaml format.
       # Takes effect if `ENABLE_ALLOW_LIST` is set to true
       ALLOWED_USERS_PER_ORGANISATION:
           # The Control Plane team
@@ -246,14 +277,14 @@ resourceTemplates:
           allow_all: true
           # Empty for now meaning all users allowed since "allow_all" is set to true.
           allowed_users: []
-          
+
           # The App SRE team
         - id: 12147054
           max_allowed_instances: 5
           allow_all: true
           # Empty for now meaning all users allowed since "allow_all" is set to true.
           allowed_users: []
-          
+
           # The Bin Packing team
         - id: 13639843
           max_allowed_instances: 3
@@ -274,6 +305,7 @@ resourceTemplates:
             - username: skaleta_mk-bin-packing
             - username: rareddy_mk-kafka
             - username: shawkins_mk-kafka
+            - username: ppatiern_mk-kafka-instances
 
           # The Consoles & Developer Experience team
         - id: 13838614
@@ -310,10 +342,14 @@ resourceTemplates:
             - username: pantinor_kafka_devexp
             - username: sisharma_kafka_devexp
             - username: jbyrne_kafka_devexp
+            - username: bmozaffa_kafka_devexp
+            - username: srambach_kafka_devexp
+            - username: oasaf_kafka_devexp
+            - username: mdawson_kafka_devexp
 
           # Red Hat Managed Application Services
         - id: 13645369
-          max_allowed_instances: 2
+          max_allowed_instances: 4
           allow_all: false
           allowed_users:
             - username: davmarti_kafka_sre
@@ -327,6 +363,23 @@ resourceTemplates:
             - username: rlawton_kafka_sre
             - username: robrien_kafka_sre
             - username: agullon_kafka_sre
+
+          # Red Hat Application Services TMMs
+        - id: 14410788
+          max_allowed_instances: 4
+          allow_all: false
+          allowed_users:
+            - username: ddoyle_kafka_tmm
+            - username: clin_kafka_tmm
+            - username: hguerrer_kafka_tmm
+            - username: kvarela_kafka_tmm
+            - username: edeandrea_kafka_tmm
+            - username: eshortis_kafka_tmm
+            - username: btison_kafka_tmm
+            - username: doh_kafka_tmm
+            - username: sshaaf_kafka_tmm
+            - username: sjayanti_kafka_tmm
+            - username: rmarins_kafka_tmm
 
           # Insights team
         - id: 7770862
@@ -356,6 +409,18 @@ resourceTemplates:
           allowed_users:
             - username: mciccone-openshift
             - username: mfreer-openshift
+
+          # RHN Support
+        - id: 1979710
+          allow_all: false
+          max_allowed_instances: 3
+          allowed_users:
+            - username: rhn-support-kboone
+            - username: rhn-support-aboucham
+            - username: rhn-support-fvaleri
+
+      # A list of usernames representing users who do not have access to the service
+      DENIED_USERS: []
 
       SUPPORTED_CLOUD_PROVIDERS:
         - name: aws
