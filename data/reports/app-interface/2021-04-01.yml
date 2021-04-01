@@ -1,0 +1,76 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: app-interface
+name: app-interface-2021-04-01
+app:
+  $ref: /services/app-interface/app.yml
+date: '2021-04-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions:
+    saas-qontract-server:
+    - env: app-interface-stage
+      cluster: app-sre-stage-01
+      namespace: app-interface-stage
+      total: 2
+      success: 2
+    - env: app-interface-production
+      cluster: app-sre-prod-01
+      namespace: app-interface-production
+      total: 2
+      success: 2
+    saas-qontract-reconcile:
+    - env: app-interface-stage
+      cluster: app-sre-stage-01
+      namespace: app-interface-stage
+      total: 49
+      success: 47
+    - env: app-interface-production
+      cluster: app-sre-prod-01
+      namespace: app-interface-production
+      total: 19
+      success: 19
+  merge_activities:
+    https://github.com/app-sre/container-images:
+    - branch: master
+      total: 1
+      success: 1
+    https://github.com/app-sre/qontract-server:
+    - branch: master
+      total: 1
+      success: 1
+    https://github.com/app-sre/qontract-reconcile:
+    - branch: master
+      total: 51
+      success: 51
+    https://github.com/app-sre/qontract-validator:
+    - branch: master
+      total: 1
+      success: 1
+    https://gitlab.cee.redhat.com/service/app-interface:
+    - branch: master
+      total: 739
+      success: 739
+    - branch: master
+      total: 733
+      success: 733
+  container_vulnerabilities: null
+  post_deploy_jobs:
+  - cluster: app-sre-stage-01
+    namespace: app-interface-stage
+    post_deploy_job: false
+  - cluster: app-sre-prod-01
+    namespace: app-interface-production
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: app-sre-prod-01
+    namespace: app-interface-production
+    validations:
+      deployment_validation_operator_replica_validation:
+        Failed: 260
+  service_slo:
+  - cluster: app-sre-prod-01
+    namespace: app-interface-production
+    slo_name: Reconciliation time of app-interface integrations
+    slo_value: 68.0
+    slo_target: 95.0

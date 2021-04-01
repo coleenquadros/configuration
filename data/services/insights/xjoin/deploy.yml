@@ -46,35 +46,41 @@ authentication:
 
 resourceTemplates:
 - name: xjoin-search
-  path: /templates/xjoin/xjoin-search.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  path: /deploy/template.yaml
+  url: https://github.com/RedHatInsights/xjoin-search
   parameters:
-    CPU_REQUESTS: 1
+    CPU_REQUESTS: 500m
     CPU_LIMITS: 1
     MEMORY_REQUESTS: 512Mi
     MEMORY_LIMITS: 512Mi
     MAX_REPLICAS: 4
+    LOG_LEVEL: info
   targets:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
-    ref: 7fa02b687dfa77fd71ae04f0a4fec2ba0145bcc9
+    ref: master
+    upstream: RedHatInsights-xjoin-search-gh-build-master
     parameters:
-      IMAGE_TAG: 125bfa5
-      LOG_LEVEL: info
       NUM_REPLICAS: 2
-  - namespace:
-      $ref: /services/insights/xjoin/namespaces/perf-xjoin-perf.yml
-    ref: 7fa02b687dfa77fd71ae04f0a4fec2ba0145bcc9
-    parameters:
-      IMAGE_TAG: 7a74950
-      LOG_LEVEL: info
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
-    ref: 7fa02b687dfa77fd71ae04f0a4fec2ba0145bcc9
+    ref: 3e363551559aa0f8d2c00cd57726a729b3eea386
     parameters:
-      IMAGE_TAG: 125bfa5
-      LOG_LEVEL: info
       NUM_REPLICAS: 2
+
+- name: xjoin-search-dev
+  path: /deploy/template-dev.yaml
+  url: https://github.com/RedHatInsights/xjoin-search
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/dev-xjoin-ci.yml
+    ref: master
+    upstream: RedHatInsights-xjoin-search-gh-build-master
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/dev-xjoin-qa.yml
+    ref: master
+    upstream: RedHatInsights-xjoin-search-gh-build-master
+
 - name: xjoin-kafka-connect
   path: /templates/xjoin/xjoin-kafka-connect.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
@@ -84,25 +90,13 @@ resourceTemplates:
     ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
     parameters:
       IMAGE_TAG: dc96729
-      NUM_REPLICAS: 7
-      CPU_REQUESTS: 500m
+      NUM_REPLICAS: 0
+      CPU_REQUESTS: 250m
       MEMORY_REQUESTS: 6Gi
       CPU_LIMITS: 3
       MEMORY_LIMITS: 8Gi
       HEAP_OPTS: -Xmx4G -Xms4G
       REST_ADVERTISED_HOST_NAME: xjoin-search.xjoin-stage.svc.cluster.local
-  - namespace:
-      $ref: /services/insights/xjoin/namespaces/perf-xjoin-perf.yml
-    ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
-    parameters:
-      IMAGE_TAG: dc96729
-      NUM_REPLICAS: 2
-      CPU_REQUESTS: 500m
-      MEMORY_REQUESTS: 6Gi
-      CPU_LIMITS: 3
-      MEMORY_LIMITS: 10Gi
-      HEAP_OPTS: -Xmx4G -Xms4G
-      REST_ADVERTISED_HOST_NAME: xjoin-search.xjoin-perf.svc.cluster.local
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
     ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
@@ -125,11 +119,6 @@ resourceTemplates:
     parameters:
       IMAGE_TAG: f621527
   - namespace:
-      $ref: /services/insights/xjoin/namespaces/perf-xjoin-perf.yml
-    ref: 7fa02b687dfa77fd71ae04f0a4fec2ba0145bcc9
-    parameters:
-      IMAGE_TAG: f621527
-  - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
     ref: 7fa02b687dfa77fd71ae04f0a4fec2ba0145bcc9
     parameters:
@@ -142,9 +131,6 @@ resourceTemplates:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-jenkins-stage.yml
     ref: master
   - namespace:
-      $ref: /services/insights/xjoin/namespaces/perf-xjoin-jenkins-perf.yml
-    ref: master
-  - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-jenkins-prod.yml
     ref: master
 
@@ -153,8 +139,6 @@ resourceTemplates:
   url: https://github.com/RedHatInsights/xjoin-kafka-connect
   parameters:
     VERSION: '2.5.0'
-    CPU_REQUESTS: 500m
-    MEMORY_REQUESTS: 6Gi
     CPU_LIMITS: 3
     MEMORY_LIMITS: 10Gi
     XMX: 8G
@@ -165,9 +149,13 @@ resourceTemplates:
     ref: master
     upstream: RedHatInsights-xjoin-kafka-connect-gh-build-master
     parameters:
-      NUM_REPLICAS: '3'
+      CPU_REQUESTS: 249m
+      NUM_REPLICAS: '7'
+      MEMORY_REQUESTS: 8Gi
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
     ref: 190a1aaef98d80772f50b66a5a54964f96eb4a43
     parameters:
+      CPU_REQUESTS: 250m
       NUM_REPLICAS: '7'
+      MEMORY_REQUESTS: 6Gi

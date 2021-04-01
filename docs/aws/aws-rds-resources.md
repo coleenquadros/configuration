@@ -15,7 +15,7 @@ One can retrieve the actual max_connections value by running the following SQL o
 
 ## RDSMaxConnections
 
-The AWS database is within 90% of it's _max_connections_ setting. As we typically use the AWS defaults for _max_connections_ this usually mean there is an issue with the application leaking connections or an unusual spike in traffic.
+The AWS database is within 90% of its _max_connections_ setting. As we typically use the AWS defaults for _max_connections_ this usually mean there is an issue with the application leaking connections or an unusual spike in traffic.
 
 The SRE should investigate if the application is running normally, receiving normal traffic (ie. no DDoS) attack.
 
@@ -25,6 +25,6 @@ If everything is running normally, the database instance might have to be scaled
 
 ## RDSStorageLow
 
-The AWS database is within 10% of it's allocated storage.
+The AWS database is within 10% of its allocated storage.
 
 The SRE should check with the service team if that usage seems normal. If the usage is determined to be normal or if the information cannot be verified, it may be desirable to increase the database allocated storage.

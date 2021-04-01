@@ -142,3 +142,23 @@
         - *app_interface_state
         - *app_interface_unleash
     <<: *qontract_reconcile
+
+
+- job-template:
+    id: 'app-interface-output-run'
+    job_name: 'app-interface-output-run'
+    name: '{job_name}'
+    wrappers:
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *reconcile_toml
+    publishers:
+    - git:
+        push-merge: false
+        push-only-if-success: true
+        branches:
+        - branch:
+            name: "master"
+    cron_expression: H/10 * * * *
+    <<: *gl_timed

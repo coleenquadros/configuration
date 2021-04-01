@@ -32,6 +32,7 @@ managedResourceTypes:
 
 imagePatterns:
 - quay.io/cloudservices
+- quay.io/observatorium
 
 authentication:
   image:
@@ -45,10 +46,6 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
-    ref: main
-    upstream: RedHatInsights-rhsm-subscriptions-egress-gh-build-main
-  - namespace:
-      $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
     ref: main
     upstream: RedHatInsights-rhsm-subscriptions-egress-gh-build-main
   - namespace:
@@ -68,9 +65,6 @@ resourceTemplates:
       $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
     ref: main
   - namespace:
-      $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
-    ref: main
-  - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
     ref: 9f71b040bc7379dd6efe4816c045da9c0a9656d2
 - name: rhsm-subscriptions-api
@@ -88,10 +82,6 @@ resourceTemplates:
     parameters:
       SERVER_MAX_HTTP_HEADER_SIZE: '47000'
   - namespace:
-      $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
-    ref: main
-    upstream: RedHatInsights-rhsm-subscriptions-gh-build-main
-  - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
     ref: 10a9cfc9d479aca497cb623d6eab4df2fcb02270
 - name: rhsm-subscriptions-capacity-ingress
@@ -103,10 +93,6 @@ resourceTemplates:
     ref: main
   - namespace:
       $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
-    ref: main
-    upstream: RedHatInsights-rhsm-subscriptions-gh-build-main
-  - namespace:
-      $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
     ref: main
     upstream: RedHatInsights-rhsm-subscriptions-gh-build-main
   - namespace:
@@ -124,12 +110,23 @@ resourceTemplates:
     ref: main
     upstream: RedHatInsights-rhsm-subscriptions-gh-build-main
   - namespace:
-      $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
+      $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
+    ref: 10a9cfc9d479aca497cb623d6eab4df2fcb02270
+- name: metrics-worker
+  path: /templates/metrics-worker.yml
+  url: https://github.com/RedHatInsights/rhsm-subscriptions
+  targets:
+  - namespace:
+      $ref: /services/insights/rhsm/namespaces/dev-rhsm-qa.yml
+    ref: main
+  - namespace:
+      $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
     ref: main
     upstream: RedHatInsights-rhsm-subscriptions-gh-build-main
   - namespace:
-      $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
-    ref: 10a9cfc9d479aca497cb623d6eab4df2fcb02270
+      $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
+    ref: main
+    upstream: RedHatInsights-rhsm-subscriptions-gh-build-main
 - name: rhsm-subscriptions-worker
   path: /templates/rhsm-subscriptions-worker.yml
   url: https://github.com/RedHatInsights/rhsm-subscriptions
@@ -148,16 +145,6 @@ resourceTemplates:
     parameters:
       CLOUDIGRADE_ENABLED: true
       CLOUDIGRADE_HOST: cloudigrade-api.cloudigrade-stage.svc.cluster.local
-      CLOUDIGRADE_PORT: 80
-      MEMORY_REQUEST: 2000Mi
-      MEMORY_LIMIT: 2744Mi
-  - namespace:
-      $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
-    ref: 10a9cfc9d479aca497cb623d6eab4df2fcb02270
-    upstream: RedHatInsights-rhsm-subscriptions-gh-build-main
-    parameters:
-      CLOUDIGRADE_ENABLED: true
-      CLOUDIGRADE_HOST: cloudigrade-api.cloudigrade-perf.svc.cluster.local
       CLOUDIGRADE_PORT: 80
       MEMORY_REQUEST: 2000Mi
       MEMORY_LIMIT: 2744Mi
@@ -190,14 +177,6 @@ resourceTemplates:
       PINHEAD_URL: https://systems.stage.api.redhat.com/v1
       RHSM_URL: https://api.rhsm.stage.redhat.com/v1
   - namespace:
-      $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
-    ref: main
-    upstream: RedHatInsights-rhsm-conduit-gh-build-main
-    parameters:
-      MEMORY_REQUEST: 1000Mi
-      PINHEAD_URL: https://systems.stage.api.redhat.com/v1
-      RHSM_URL: https://api.rhsm.stage.redhat.com/v1
-  - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
     ref: 8be26a2afffe58a5c215bd2d0d4791914c700c4b
     parameters:
@@ -215,13 +194,13 @@ resourceTemplates:
       USER_SERVICE_URL: https://user.qa.api.redhat.com/
   - namespace:
       $ref: /services/insights/rhsm/namespaces/dev-rhsm-qa.yml
-    ref: ed15a9885ff7af9121efe62173475d7a238b513e
+    ref: 09317b9724036cac5abfd958bffb8864d91bf139
     parameters:
       RHSM_SERVICE_URL: https://api.rhsm.qa.redhat.com/v1/cloud_access_providers/
       USER_SERVICE_URL: https://user.qa.api.redhat.com/
   - namespace:
       $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
-    ref: ed15a9885ff7af9121efe62173475d7a238b513e
+    ref: 09317b9724036cac5abfd958bffb8864d91bf139
     parameters:
       RHSM_SERVICE_URL: https://api.rhsm.stage.redhat.com/v1/cloud_access_providers/
       USER_SERVICE_URL: https://user.stage.api.redhat.com/

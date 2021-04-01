@@ -9,6 +9,8 @@ Incident Response Plan
 Summary
 -------
 
+Note:  This service is deployed via `Clowder`_.
+
 -  If the RBAC service is not running as expected, use these recommendations for troubleshooting
 
 Steps
@@ -22,3 +24,4 @@ Escalations
 -  Escalate to cloud.redhat.com engineering team per `Incident Response Doc`_
 
 .. _Incident Response Doc: https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE
+.. _Clowder: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/app-sops/clowder/clowder.rst

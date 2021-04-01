@@ -1,0 +1,53 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: subscriptions
+  platform: insights
+
+name: subscriptions-perf
+description: subscriptions app on the Insights Platform
+
+app:
+  $ref: /services/insights/subscriptions/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: proj-perf-insights-cluster
+
+timeout: 5
+
+managedResourceTypes:
+- Deployment
+- DeploymentConfig
+- HorizontalPodAutoscaler
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+- quay.io/prometheus/pushgateway
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: yupana
+  path: /templates/subscriptions/yupana.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/subscriptions/namespaces/perf-subscriptions-perf.yml
+    ref: 0ff10b4ecb27cb48a11983f08badec984786a01a
+    parameters:
+      IMAGE_TAG: f53e2c9
+      MEMORY_LIMIT: 11Gi
+      RETRIES_ALLOWED: 1
+      RETRY_TIME: 60
+      MINIMUM_REPLICAS: 1
+

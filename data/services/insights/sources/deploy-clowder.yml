@@ -22,10 +22,10 @@ slack:
 timeout: 5
 
 managedResourceTypes:
-  - ClowdApp
+- ClowdApp
 
 imagePatterns:
-  - quay.io/cloudservices
+- quay.io/cloudservices
 
 authentication:
   image:
@@ -33,30 +33,66 @@ authentication:
     field: all
 
 resourceTemplates:
-  - name: sources-api
-    path: /deploy/clowdapp.yaml
-    url: https://github.com/RedHatInsights/sources-api
+- name: sources-api
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/sources-api
+  parameters:
+    PATH_PREFIX: api
+    PGSSLMODE: verify-full
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true # tells app-sre to not actually run the deploy job for this target
+    ref: internal # altered by bonfire
     parameters:
-      PATH_PREFIX: api
-      PGSSLMODE: verify-full
-    targets:
-    - namespace:
-        $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
-      disable: true # tells app-sre to not actually run the deploy job for this target
-      ref: internal # altered by bonfire
-      parameters:
-        IMAGE_TAG: cee0984
-        LOG_LEVEL: WARN
-        MIN_REPLICAS: 1
-        SOURCES_ENV: stage
-        SOURCETYPE_SKIP_LIST: "my-source-type"
-  - name: sources-monitor
-    path: /deploy/clowdapp.yaml
-    url: https://github.com/RedHatInsights/sources-monitor
-    targets:
-    - namespace:
-        $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
-      disable: true # tells app-sre to not actually run the deploy job for this target
-      ref: internal # altered by bonfire
-      parameters:
-        IMAGE_TAG: 3ad621c
+      IMAGE_TAG: 25ec257
+      LOG_LEVEL: WARN
+      MIN_REPLICAS: 1
+      SOURCES_ENV: stage
+      SOURCETYPE_SKIP_LIST: "my-source-type"
+  - namespace:
+      $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
+    ref: 17b626cd6bfe77af90a2e6765a9456b9e34f9df5 # commit SHA of /deploy/clowdapp.yaml
+    parameters:
+      IMAGE_TAG: a65ebf2
+      KOKU_SOURCES_API_HOST: koku-sources.hccm-stage.svc.cluster.local
+      KOKU_SOURCES_API_PORT: '8080'
+      CLOUD_METER_API_HOST: cloudigrade-api.cloudigrade-stage.svc.cluster.local
+      CLOUD_METER_SOURCES_API_PORT: '80'
+      LOG_LEVEL: WARN
+      REPLICAS: "1"
+      SOURCES_ENV: stage
+      SOURCETYPE_SKIP_LIST: ""
+      RBAC_PORT: '8080'
+- name: sources-monitor
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/sources-monitor
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true # tells app-sre to not actually run the deploy job for this target
+    ref: internal # altered by bonfire
+    parameters:
+      IMAGE_TAG: 1e921ee
+  - namespace:
+      $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
+    ref: 5bab6654eef8d0934ba8d9ea958be40cf582e9e3 # commit SHA of /deploy/clowdapp.yaml
+    parameters:
+      IMAGE_TAG: 1e921ee
+- name: sources-superkey-worker
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/sources-superkey-worker
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true # tells app-sre to not actually run the deploy job for this target
+    ref: internal # altered by bonfire
+    parameters:
+      IMAGE_TAG: 5ab65ae
+  - namespace:
+      $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
+    ref: 84d930cf45b8cadc6ecb3a5fa38cf27fb46f7ee3 # commit SHA of /deploy/clowdapp.yaml
+    parameters:
+      IMAGE_TAG: 5ab65ae
+      LOG_LEVEL: WARN
+      REPLICAS: "1"

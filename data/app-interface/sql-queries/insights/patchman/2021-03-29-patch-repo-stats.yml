@@ -1,0 +1,12 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2021-03-29-patch-repo-stats
+namespace:
+  $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
+identifier: patchman-prod
+output: stdout
+queries:
+  - select 'system_repo stats:', min(cnt) as min, max(cnt) as max , avg(cnt) as avg from (select system_id, count(repo_id) as cnt from system_repo group by system_id) x;
+  - select 'system_repo stats:', percentile_disc(0.75) WITHIN GROUP (ORDER BY cnt) as pct75, percentile_disc(0.5) WITHIN GROUP (ORDER BY cnt) as pct50,  percentile_disc(0.25) WITHIN GROUP (ORDER BY cnt) as pct25 from  (select system_id, count(repo_id) as cnt from system_repo group by system_id) x;
+
