@@ -14,6 +14,7 @@ Describe the way of migrating a cluster from using EFK to CloudWatch log fowardi
     - remove the `openshift-logging` namespace file that belongs to the cluster
     - add the `cluster-logging-operator` addon to the cluster file
     - remove the `kibanaUrl` of the cluster
+    * Example merge request: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/17238
 1. Disable the `ocm-addons` integration and let the merge request get merged.
 1. Once the merge request is merged and the changes are reflected (tl;dr wait ~15 minutes), login to the cluster and clean up the `openshift-logging` namespace:
     ```sh
