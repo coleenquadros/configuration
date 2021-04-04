@@ -55,6 +55,7 @@ These instructions have been adapted from the [original google doc](https://docs
     *NOTE*: You can proceed with the rest of the SOP without waiting for the ticket to be complete.
 
 1. Configure VPC peering
+1. Configure TGW attachments to the appropriate PrivateLink AWS account (for example, production shards should be attached to the osd-privatelink-prod AWS account)
 1. Add hive-readers and hive-admins in `cluster.yml`
 1. Add External Configuration labels to the cluster:
     ```yaml
