@@ -1,29 +1,14 @@
 ---
-$schema: /openshift/namespace-1.yml
+$schema: /openshift/shared-resources-1.yml
 
 labels: {}
 
-name: hive
-description: production namespace for hive
-
-cluster:
-  $ref: /openshift/hive-production/cluster.yml
-
-app:
-  $ref: /services/hive/app.yml
-
-environment:
-  $ref: /products/osdv4/environments/production.yml
-
-networkPoliciesAllow:
-- $ref: /services/osd-operators/namespaces/olm-production.yml
-
-managedRoles: true
-
-managedResourceTypes:
-- HiveConfig
+name: hive-production-shared-resources
+description: shared resources for hive production namespaces
 
 openshiftResources:
+- provider: resource
+  path: /services/hive/production/hive.hiveconfig.yaml
 - provider: route
   path: /hive-common/hive/hive-controllers-metrics.route.yaml
 - provider: vault-secret
@@ -35,18 +20,8 @@ openshiftResources:
 - provider: vault-secret
   path: osd-sre/hive-production/hive-external-dns/google-cloud-dns-creds
   version: 2
-- provider: resource
-  path: /services/hive/v3/production/hive.hiveconfig.yaml
-
 # created with relation to http://github.com/openshift/ops-sop/tree/master/v4/howto/pull-ocp-secret.md
 - provider: vault-secret
   path: osd-sre/hive-production/hive-ci-global-pull-secret
   version: 3
   type: kubernetes.io/dockerconfigjson
-
-# terraformSecrets
-- provider: vault-secret
-  path: app-sre/integrations-output/terraform-resources/hivep01ue1/hive/s3-bucket-creds
-  version: 1
-  annotations:
-    qontract.ignore_reconcile_time: "true"
