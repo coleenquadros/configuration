@@ -21,7 +21,7 @@ Describe the way of migrating a cluster from using EFK to CloudWatch log fowardi
     $ oc -n openshift-logging delete clusterlogging instance
     $ oc -n openshift-logging delete subscription cluster-logging
     $ oc -n openshift-logging delete subscription elasticsearch-operator
-    $ oc -n openshift-logging get csv --no-headers | awk '{print$1}' | grep -e clusterlogging -e elasticsearch-operator | xargs oc -n openshift-logging delete
+    $ oc -n openshift-logging get csv --no-headers | awk '{print$1}' | grep -e clusterlogging -e elasticsearch-operator | xargs oc -n openshift-logging delete csv
     $ oc -n openshift-logging delete pvc --all
     ```
 1. Enable the `ocm-addons` integration. The installation should be reflected in the OCM console.
