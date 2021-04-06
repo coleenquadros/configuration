@@ -37,12 +37,12 @@ resourceTemplates:
   url: https://gitlab.cee.redhat.com/service/kas-fleet-manager
   path: /templates/service-template.yml
   parameters:
-    ENVIRONMENT: production
     IMAGE_REGISTRY: quay.io
     IMAGE_REPOSITORY: rhoas/kas-fleet-manager
     JWKS_URL: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/certs
     MAS_SSO_BASE_URL: https://keycloak-mas-sso-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
     MAS_SSO_REALM: rhoas
+    OSD_IDP_MAS_SSO_REALM: rhoas-kafka-sre
     REPLICAS: 6
     CLUSTER_OPENSHIFT_VERSION: ""
     CLUSTER_COMPUTE_MACHINE_TYPE: m5.4xlarge
@@ -50,20 +50,33 @@ resourceTemplates:
     ENABLE_ALLOW_LIST: true
     # Change this to false if you want to disable the deny list feature feature
     ENABLE_DENY_LIST: true
+    # Change this to false to disable sentry
+    ENABLE_SENTRY: true
+    # Change this to true to enable OSD Dataplace cluster auto-scaling feature
+    ENABLE_DYNAMIC_SCALING: false
+    # Enable ManagedKafkaCR generation
+    ENABLE_MANAGED_KAFKA_CR: true
+    # Disable quota service integration for now
+    ENABLE_QUOTA_SERVICE: false
+    # Enable the external Kafka certificate for all Kafka clusters
+    ENABLE_KAFKA_EXTERNAL_CERTIFICATE: true
+    # Enable the dedicate Ingress on the data plane clusters which all Kafka Clusters will use
+    ENABLE_DEDICATED_INGRESS: true
+    #The public HTTP host URL of the service
+    SERVICE_PUBLIC_HOST_URL: ${OCM_BASE_URL} 
+    # Image tags for sub components
+    KAFKA_ADMIN_SERVER_IMAGE: quay.io/sknot/kafka-admin-api:0.0.4
+    # Log level
+    GLOG_V: 5   
+    # Which channel (directory) within the config repo the Observability Operator should consume from
+    OBSERVABILITY_CONFIG_CHANNEL: resources   
   targets:
   - namespace:
       $ref: /services/managed-services/namespaces/managed-services-stage.yml
     ref: master
     upstream: service-kas-fleet-manager-gl-build-master
     parameters:
-      # Realm name for the Data Plane OSD cluster Identity Provider
-      OSD_IDP_MAS_SSO_REALM: rhoas-kafka-sre
-      # Image tags for sub components
-      KAFKA_ADMIN_SERVER_IMAGE: quay.io/sknot/kafka-admin-api:0.0.4
-      # Log level
-      GLOG_V: 5
-      # leaving sentry set to false, until sentry project/team/membership is setup
-      ENABLE_SENTRY: true
+      ENVIRONMENT: stage
       SENTRY_URL: sentry.stage.devshift.net
       SENTRY_PROJECT: 21
       # Dex identity service url
@@ -76,21 +89,9 @@ resourceTemplates:
       OBSERVATORIUM_TENANT: test
       # A URL to repository containing external Kafka Observability configuration info for Obs. Operator to consume
       OBSERVABILITY_CONFIG_REPO: https://api.github.com/repos/bf2fc6cc711aee1a0c2a/observability-resources-mk/contents
-      # Which channel (directory) within the config repo the Observability Operator should consume from
-      OBSERVABILITY_CONFIG_CHANNEL: staging
-      # Enable the external Kafka certificate for all Kafka clusters
-      ENABLE_KAFKA_EXTERNAL_CERTIFICATE: true
-      # Enable the dedicate Ingress on the data plane clusters which all Kafka Clusters will use
-      ENABLE_DEDICATED_INGRESS: true
-      #The public HTTP host URL of the service
-      SERVICE_PUBLIC_HOST_URL: ${OCM_BASE_URL}
       # The maximum number of instances that can be created by the user.
       # Takes effect if `ENABLE_ALLOW_LIST` is set to true
       MAX_ALLOWED_INSTANCES: 1
-      # Enable ManagedKafkaCR generation
-      ENABLE_MANAGED_KAFKA_CR: true
-      # Disable quota service integration for now
-      ENABLE_QUOTA_SERVICE: false
       # MAXIMUM NUMBER OF ALLOWED KAFKAs
       KAFKA_CAPACITY_MAX_CAPACITY: 45
       MAS_SSO_ENABLE_AUTH: true
@@ -422,6 +423,62 @@ resourceTemplates:
       # A list of usernames representing users who do not have access to the service
       DENIED_USERS: []
 
+      SUPPORTED_CLOUD_PROVIDERS:
+        - name: aws
+          default: true
+          regions:
+            - name: us-east-1
+              default: true
+  - namespace:
+      $ref: /services/managed-services/namespaces/managed-services-production.yml
+    # This commit sha will need to replaced to reference the latest working commit.
+    # Make sure that we've a docker image for this before it can be changed.
+    # When change this, make sure to also change the `IMAGE_TAG` to reference the first seven characters of the sha1.
+    # Commits can be found here https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/commits/master
+    # Inspect the recent merged MR from https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/merge_requests?scope=all&utf8=%E2%9C%93&state=merged to get the latest commit that has a docker image built from it. 
+    # e.g if we take https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/merge_requests/356/commits, the commit with a docker image in it will be 
+    # the very first commit i.e https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/merge_requests/356/commits?commit_id=f0fd63740464c5fa4bda395d5d31f675eff049ac 
+    # If in doubt, see with the control plane team.
+    # We are exploring into using automating this.
+    ref: 9d2372ed56b725eea9b6883b75416ca897aafd6c 
+    parameters:
+      ENVIRONMENT: production
+      # The image tag is the first seven characters of the #ref commit sha parameter. 
+      # Verify in https://quay.io/repository/rhoas/kas-fleet-manager?tab=tags to see if the tag exists.
+      IMAGE_TAG: 9d2372e
+      SENTRY_URL: sentry.devshift.net
+      SENTRY_PROJECT: 16
+      # Dex identity service url
+      DEX_URL: http://dex-dex.apps.pbraun-observatorium.observability.rhmw.io
+      # Dex identity service username
+      DEX_USERNAME: admin@example.com
+      # A URL to an Observatorium instance where observability metrics will sent to.
+      OBSERVATORIUM_GATEWAY: https://observatorium-observatorium.apps.pbraun-observatorium.observability.rhmw.io
+      # Observatorium tenant where observability metrics will sent to.
+      OBSERVATORIUM_TENANT: test
+      # A URL to repository containing external Kafka Observability configuration info for Obs. Operator to consume
+      OBSERVABILITY_CONFIG_REPO: https://api.github.com/repos/bf2fc6cc711aee1a0c2a/observability-resources-mk/contents
+      # The maximum number of instances that can be created by the user.
+      # Takes effect if `ENABLE_ALLOW_LIST` is set to true
+      MAX_ALLOWED_INSTANCES: 1
+      # MAXIMUM NUMBER OF ALLOWED KAFKAs
+      KAFKA_CAPACITY_MAX_CAPACITY: 1000
+      # A list of usernames representing users who do not have access to the service
+      DENIED_USERS: []
+      # A list of allowed users in yaml format irrespective of their organisation.
+      # Empty for now, but in the future this may contain users and service accounts within or outside Red Hat.
+      # Takes effect if `ENABLE_ALLOW_LIST` is set to true
+      ALLOWED_SERVICE_ACCOUNTS: []
+      # A list of allowed users per organisation in yaml format.
+      # Takes effect if `ENABLE_ALLOW_LIST` is set to true
+      ALLOWED_USERS_PER_ORGANISATION:
+          # The Control Plane team
+        - id: 13640203
+          max_allowed_instances: 5
+          allow_all: true
+          # Empty for now meaning all users allowed since "allow_all" is set to true.
+          allowed_users: []
+      # A list of supported cloud providers and region    
       SUPPORTED_CLOUD_PROVIDERS:
         - name: aws
           default: true
