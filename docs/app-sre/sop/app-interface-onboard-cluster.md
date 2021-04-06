@@ -148,7 +148,7 @@ This step should be performed in a single merge request.
 
 1. Once the cluster has finished installing, the following fields have to be updated in the `cluster.yml` file in the `spec` section:
     * `consoleUrl`: `https://console-openshift-console.apps.<cluster_name>.<base_domain>`
-    * `kibanaUrl`: `https://kibana-openshift-logging.apps.<cluster_name>.<base_domain>`
+    * `kibanaUrl`: `''`
     * `prometheusUrl`: `https://prometheus.<cluster_name>.devshift.net`
     * `alertmanagerUrl`: `https://alertmanager.<cluster_name>.devshift.net`
     * `serverUrl`: `https://api.<cluster_name>.<base_domain>:6443`
