@@ -46,8 +46,11 @@ resourceTemplates:
     REPLICAS: 6
     CLUSTER_OPENSHIFT_VERSION: ""
     CLUSTER_COMPUTE_MACHINE_TYPE: m5.4xlarge
-    # Change this to false if you want to disable the allow list feature feature
-    ENABLE_ALLOW_LIST: true
+    # Enforce instance limit control
+    ENABLE_INSTANCE_LIMIT_CONTROL: true
+    # The default maximum number of instances that can be created by a user/organisation.
+    # Takes effect if `ENABLE_INSTANCE_LIMIT_CONTROL` is set to true
+    MAX_ALLOWED_INSTANCES: 1
     # Change this to false if you want to disable the deny list feature feature
     ENABLE_DENY_LIST: true
     # Change this to false to disable sentry
@@ -91,9 +94,6 @@ resourceTemplates:
       OBSERVATORIUM_TENANT: test
       # A URL to repository containing external Kafka Observability configuration info for Obs. Operator to consume
       OBSERVABILITY_CONFIG_REPO: https://api.github.com/repos/bf2fc6cc711aee1a0c2a/observability-resources-mk/contents
-      # The maximum number of instances that can be created by the user.
-      # Takes effect if `ENABLE_ALLOW_LIST` is set to true
-      MAX_ALLOWED_INSTANCES: 1
       # MAXIMUM NUMBER OF ALLOWED KAFKAs
       KAFKA_CAPACITY_MAX_CAPACITY: 45
       # Changing this to true will delete all kafkas after their lifespan expired. The default is 48 hours.
@@ -101,9 +101,9 @@ resourceTemplates:
       MAS_SSO_ENABLE_AUTH: true
       # Enable using ths synchronizer module for kas-fleetshard-operator
       ENABLE_KAS_FLEETSHARD_OPERATOR_SYNC: true
+      # Only allow those who are listed in `ALLOWED_SERVICE_ACCOUNTS` and `ALLOWED_USERS_PER_ORGANISATION` to access the service
+      ALLOW_ANY_REGISTERED_USERS: false
       # A list of allowed users in yaml format irrespective of their organisation.
-      # Empty for now, but in the future this may contain users and service accounts within or outside Red Hat.
-      # Takes effect if `ENABLE_ALLOW_LIST` is set to true
       ALLOWED_SERVICE_ACCOUNTS:
           # RHOSAK PM
         - username: rhn-gps-ddoyle
@@ -276,7 +276,6 @@ resourceTemplates:
           max_allowed_instances: 1500
 
       # A list of allowed users per organisation in yaml format.
-      # Takes effect if `ENABLE_ALLOW_LIST` is set to true
       ALLOWED_USERS_PER_ORGANISATION:
           # The Control Plane team
         - id: 13640203
@@ -465,19 +464,17 @@ resourceTemplates:
       OBSERVATORIUM_TENANT: test
       # A URL to repository containing external Kafka Observability configuration info for Obs. Operator to consume
       OBSERVABILITY_CONFIG_REPO: https://api.github.com/repos/bf2fc6cc711aee1a0c2a/observability-resources-mk/contents
-      # The maximum number of instances that can be created by the user.
-      # Takes effect if `ENABLE_ALLOW_LIST` is set to true
-      MAX_ALLOWED_INSTANCES: 1
       # MAXIMUM NUMBER OF ALLOWED KAFKAs
       KAFKA_CAPACITY_MAX_CAPACITY: 1000
       # A list of usernames representing users who do not have access to the service
       DENIED_USERS: []
+      # Setting to false for now, will need to update to true once we're ready to open this to external users
+      ALLOW_ANY_REGISTERED_USERS: false
       # A list of allowed users in yaml format irrespective of their organisation.
-      # Empty for now, but in the future this may contain users and service accounts within or outside Red Hat.
-      # Takes effect if `ENABLE_ALLOW_LIST` is set to true
+      # If `ALLOW_ANY_REGISTERED_USERS` is set to true, the list will only be used to determine the `max_allowed_instances` each user can create.
       ALLOWED_SERVICE_ACCOUNTS: []
       # A list of allowed users per organisation in yaml format.
-      # Takes effect if `ENABLE_ALLOW_LIST` is set to true
+      # If `ALLOW_ANY_REGISTERED_USERS` is set to true, the list will only be used to determine the `max_allowed_instances` each organisation can create.
       ALLOWED_USERS_PER_ORGANISATION:
           # The Control Plane team
         - id: 13640203
