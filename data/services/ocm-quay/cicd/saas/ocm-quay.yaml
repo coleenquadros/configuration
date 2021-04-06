@@ -1,0 +1,118 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: ocm-quay
+
+name: ocm-quay
+description: regional quay instances for OCP/OSD content
+
+app:
+  $ref: /services/ocm-quay/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: oncall-quay
+  notifications:
+    start: true
+
+authentication:
+  image:
+    path: app-sre/integrations-output/aws-ecr-image-pull-secrets/quayio-prod/eu-central-1/basic-auth
+    field: all
+
+managedResourceTypes:
+- Deployment
+- Service
+- ServiceAccount
+- Role
+- RoleBinding
+- Job
+
+timeout: 45
+
+imagePatterns:
+- quay.io/app-sre
+- 206170669542.dkr.ecr.eu-central-1.amazonaws.com
+
+parameters:
+  IMAGE: 206170669542.dkr.ecr.eu-central-1.amazonaws.com/quayio-backup
+  QUAY_ENTRYPOINT: registry-nomigrate
+  QUAY_APP_CPU_REQUEST: 9
+  QUAY_APP_CPU_LIMIT: 13
+  QUAY_APP_MEMORY_REQUEST: 16Gi
+  QUAY_APP_MEMORY_LIMIT: 56Gi
+  QUAY_APP_DEPLOYMENT_PROGRESS_DEADLINE_SECONDS: 2700
+  QUAY_APP_DEPLOYMENT_STRATEGY_TYPE: RollingUpdate
+  QUAY_APP_DEPLOYMENT_MIN_READY_SECONDS: 5
+  QUAY_APP_DEPLOYMENT_MAX_UNAVAILABLE: 0
+  QUAY_APP_DEPLOYMENT_MAX_SURGE: 3
+  QUAY_APP_READINESS_PROBE_INITIAL_DELAY_SECONDS: 30
+  QUAY_APP_READINESS_PROBE_PERIOD_SECONDS: 15
+  QUAY_APP_READINESS_PROBE_TIMEOUT_SECONDS: 30
+  QUAY_APP_LIVENESS_PROBE_INITIAL_DELAY_SECONDS: 30
+  QUAY_APP_LIVENESS_PROBE_TIMEOUT_SECONDS: 30
+  QUAY_APP_LIVENESS_PROBE_PERIOD_SECONDS: 30
+  QUAY_APP_DEPLOYMENT_NAMESPACE: quay
+  DEBUGLOG: "false"
+  QUAY_APP_COMPONENT_ANNOTATIONS_KEY: "quay-app-deployment"
+  IMAGE_PULL_POLICY: IfNotPresent
+  CLOUDWATCH_SECRET: quay-cloudwatch-iam-user
+  SYSLOG_PORT: "5014"
+  QUAY_SYSLOG_MEMORY_REQUEST: 1Gi
+  QUAY_SYSLOG_CPU_REQUEST: 1
+  QUAY_SYSLOG_MEMORY_LIMIT: 2Gi
+  QUAY_SYSLOG_CPU_LIMIT: 1
+  QUAY_SYSLOG_LIVENESS_PROBE_INITIAL_DELAY_SECONDS: 5
+  QUAY_SYSLOG_LIVENESS_PROBE_PERIOD_SECONDS: 15
+  QUAY_SYSLOG_LIVENESS_PROBE_TIMEOUT_SECONDS: 5
+  QUAY_SYSLOG_READINESS_PROBE_INITIAL_DELAY_SECONDS: 5
+  QUAY_SYSLOG_READINESS_PROBE_PERIOD_SECONDS: 10
+  QUAY_SYSLOG_READINESS_PROBE_TIMEOUT_SECONDS: 5
+  SYSLOG_SERVER: localhost
+  SYSLOG_PROTO: udp
+  QUAY_LOGGING: syslog
+  SYSLOG_IMAGE: 206170669542.dkr.ecr.eu-central-1.amazonaws.com/syslog-cloudwatch-bridge-backup
+  SYSLOG_IMAGE_TAG: c19d7d1
+  QUAY_WORKER_MULTIPLIER_REGISTRY: 1
+  QUAY_WORKER_CONNECTION_COUNT_REGISTRY: 20
+
+resourceTemplates:
+- name: ocm-quay
+  path: /deploy/openshift/quay-app.yaml
+  url: https://github.com/quay/quay
+  targets:
+  # This is the Write-Only (technically still Read-Write) instance
+  - namespace:
+      $ref: /services/ocm-quay/namespaces/ocmquayrwp01ue1.yml
+    ref: 92550ebf50f8a02788f6d38f76c92f79f233fe87
+    parameters:
+      QUAY_APP_DEPLOYMENT_REPLICAS: 15
+      QUAY_APP_CONFIG_SECRET: quay-config-secret
+      QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "initial deploy"
+#  # These are the Read-Only instances
+#  - namespace:
+#      $ref: /services/ocm-quay/namespaces/ocmquayrop01ue1.yml
+#    ref: 92550ebf50f8a02788f6d38f76c92f79f233fe87
+#    parameters:
+#      QUAY_APP_DEPLOYMENT_REPLICAS: 15
+#      QUAY_APP_CONFIG_SECRET: quay-config-secret-readonly
+#      QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "initial deploy"
+#  - namespace:
+#      $ref: /services/ocm-quay/namespaces/ocmquayrop01ew1.yml
+#    ref: 92550ebf50f8a02788f6d38f76c92f79f233fe87
+#    parameters:
+#      QUAY_APP_DEPLOYMENT_REPLICAS: 15
+#      QUAY_APP_CONFIG_SECRET: quay-config-secret-readonly
+#      QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "initial deploy"
+#  - namespace:
+#      $ref: /services/ocm-quay/namespaces/ocmquayrop01uw1.yml
+#    ref: 92550ebf50f8a02788f6d38f76c92f79f233fe87
+#    parameters:
+#      QUAY_APP_DEPLOYMENT_REPLICAS: 15
+#      QUAY_APP_CONFIG_SECRET: quay-config-secret-readonly
+#      QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "initial deploy"
