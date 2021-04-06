@@ -13,20 +13,47 @@ unmanaged_record_names:
 - '^_acme-challenge.*'
 
 records:
-#- { name: c1, type: CNAME, _target_cluster: { $ref: /openshift/ocmquayrwp01ue1/cluster.yml } }
-- name: c1
-  type: CNAME
-  records:
-  - c1.quay.ipderp.com
+### Quay instances/clusters
+# R/W ocm quay
+- { name: ocmrw1, type: CNAME, _target_cluster: { $ref: /openshift/ocmquayrwp01ue1/cluster.yml } }
+# R/O ocm quay
+- { name: ocmro1, type: CNAME, _target_cluster: { $ref: /openshift/ocmquayrop01ue1/cluster.yml } }
+- { name: ocmro2, type: CNAME, _target_cluster: { $ref: /openshift/ocmquayrop01uw1/cluster.yml } }
+- { name: ocmro3, type: CNAME, _target_cluster: { $ref: /openshift/ocmquayrop01ew1/cluster.yml } }
 
-#- { name: c2, type: CNAME, _target_cluster: { $ref: /openshift/ocmquayrop01ue1/cluster.yml } }
-- name: c2
+### OCM Quay endpoints
+- name: push
   type: CNAME
-  records:
-  - c2.quay.ipderp.com
+  ttl: 5
+  weighted_routing_policy:
+    weight: 100
+  set_identifier: push-ocmrw1-quay-rhcloud-com
+  records: 
+  - ocmrw1.q1w2.quay.rhcloud.com
 
-#- { name: c3, type: CNAME, _target_cluster: { $ref: /openshift/ocmquayrop01ue2/cluster.yml } }
-- name: c3
+- name: pull
   type: CNAME
-  records:
-  - c3.quay.ipderp.com
+  ttl: 5
+  weighted_routing_policy:
+    weight: 100
+  set_identifier: pull-ocmro1-quay-rhcloud-com
+  records: 
+  - c2.q1w2.quay.rhcloud.com
+
+- name: pull
+  type: CNAME
+  ttl: 5
+  weighted_routing_policy:
+    weight: 100
+  set_identifier: pull-ocmro2-quay-rhcloud-com
+  records: 
+  - ocmro2.q1w2.quay.rhcloud.com
+
+- name: pull
+  type: CNAME
+  ttl: 5
+  weighted_routing_policy:
+    weight: 100
+  set_identifier: pull-ocmro3-quay-rhcloud-com
+  records: 
+  - ocmro3.q1w2.quay.rhcloud.com
