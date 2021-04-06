@@ -83,6 +83,16 @@ Here is an example to parameters defined for the [insights-stage](/data/products
 
 Environment parameters can be used to template saas file parameters. For example, if `ENV_PARAMETER` is defined in the environment file parameters, it can be reused in a saas file parameters: `SAAS_PARAMETER: ${ENV_PARAMETER}/api/example`.
 
+## Automatically generated parameters
+
+In addition to the supplied parameters, there are additional parameters which are generated automatically:
+
+- `IMAGE_TAG` - The AppSRE deployments rely on image tags which are the first N (see `hash_length`) characters of the git repository commit hash. This parameter will be populated according to that logic in order to deploy images by tags instead of `latest`.
+    * Note: The parameter will not be generated if it is explicitly specified in the SaaS file parameters.
+
+- `REPO_DIGEST` - This parameter will be populated in case an image needs to be deployed according to a digest and not a tag.
+    * Note: These parameters are mandatory for `REPO_DIGEST` to be generated: `REGISTRY_IMG`, `IMAGE_TAG` (according to previous section).
+
 ## How does it work?
 
 Every saas file contains a list of resources to deploy, and each resource contains a list of targets to deploy to.  Each target is a namespace, and each such namespace is associated to an environment.
