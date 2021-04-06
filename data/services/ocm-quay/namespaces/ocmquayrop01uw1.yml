@@ -1,0 +1,86 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: ocm-quay
+
+name: ocm-quay
+description: read-only namespace for ocm-quay
+
+cluster:
+  $ref: /openshift/ocmquayrop01uw1/cluster.yml
+
+app:
+  $ref: /services/ocm-quay/app.yml
+
+environment:
+  $ref: /products/ocm-quay/environments/read-only.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.ocmquayrop01uw1.yml
+
+managedRoles: true
+
+managedTerraformResources: true
+
+managedResourceTypes:
+- NetworkPolicy
+- Secret
+
+openshiftResources: []
+# - provider: resource-template
+#   type: extracurlyjinja2
+#   path: /quay-p/quay/quay-config.secret.yaml
+#   variables:
+#     recycle: false
+#     name: quay-config-secret-readonly
+#     vault_secret_version: 36
+#     version_label: v36
+#     readonly: true
+#     standby: true
+#     log_producer: kinesis_stream
+# - provider: vault-secret
+#   path: app-interface/quayio-prod-us-east-2/quay/quay-extra-ca-certs
+#   version: 1
+# - provider: vault-secret
+#   path: app-interface/quayio-prod-us-east-2/quay/quay-cloudwatch-iam-user
+#   version: 2
+# # ECR image pull secret
+# - provider: vault-secret
+#   path: app-sre/integrations-output/aws-ecr-image-pull-secrets/quayio-prod/eu-central-1/dockercfg
+#   version: 1
+#   type: kubernetes.io/dockerconfigjson
+#   name: quayio-backup-image-pull-secret
+#   annotations:
+#     qontract.ignore_reconcile_time: "true"
+# - provider: resource
+#   path: /quay-p/quay/quay.web-allow-external.networkpolicy.yaml
+
+terraformResources: []
+# - provider: rds
+#   account: ocm-quay
+#   identifier: ocm-quay-production-replica-uw1
+#   availability_zone: us-west-1a
+#   defaults: /terraform/resources/ocm-quay/rds-read-replica-us-west-1.yml
+#   parameter_group: /terraform/resources/ocm-quay/rds-parameter-group-read-replica-1.yml
+#   replica_source: ocm-quay-production
+#   replica_source: quayio-production
+# - provider: s3-cloudfront
+#   account: quayio-prod
+#   identifier: quayio-production-s3-backup
+#   region: us-east-2
+#   storage_class: onezone_ia
+#   defaults: /terraform/resources/quayio-production/s3-cloudfront-1.yml
+#   output_resource_name: quayio-s3-backup
+# - provider: kms
+#   account: quayio-prod
+#   identifier: quayio-prod-replica
+#   region: us-east-2
+#   defaults: /terraform/resources/quayio-production/kms-1.yml
+#   output_resource_name: quayio-kms
+# - provider: kinesis
+#   account: quayio-prod
+#   region: us-east-2
+#   identifier: quay-prod-logentry-stream-backup
+#   defaults: /terraform/resources/quayio-production/kinesis-2.yml
+#   output_resource_name: quayio-kinesis
