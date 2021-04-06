@@ -25,7 +25,7 @@ run_int() {
     $GITLAB_PR_SUBMITTER_QUEUE_URL_ENV \
     $APP_INTERFACE_STATE_ENV \
     -w / \
-    --memory 3g \
+    --memory 5g \
     ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
     qontract-reconcile --config /config/config.toml $NO_VALIDATE $DRY_RUN_FLAG $NO_GQL_SHA_URL_FLAG --no-gql-url-print $@ \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-${INTEGRATION_NAME}.txt

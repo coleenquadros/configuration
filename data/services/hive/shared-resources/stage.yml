@@ -1,0 +1,34 @@
+---
+$schema: /openshift/shared-resources-1.yml
+
+labels: {}
+
+name: hive-stage-shared-resources
+description: shared resources for hive stage namespaces
+
+openshiftResources:
+- provider: resource
+  path: /services/hive/stage/hive.hiveconfig.yaml
+- provider: route
+  path: /hive-common/hive/hive-controllers-metrics.route.yaml
+- provider: vault-secret
+  path: osd-sre/hive-stage/hive-external-dns/external-dns-route53-admin
+  version: 1
+- provider: vault-secret
+  path: osd-sre/hive-stage/hive-lets-encrypt-ca/letsencrypt-ca
+  version: 4
+- provider: vault-secret
+  path: osd-sre/hive-stage/hive-external-dns/google-cloud-dns-creds
+  version: 2
+# created with relation to http://github.com/openshift/ops-sop/tree/master/v4/howto/pull-ocp-secret.md
+# This valut secret was copied from hive-integration
+# see info on JIRA https://issues.redhat.com/browse/OSD-4481
+#
+# version 9  (2 in production) is now generated using
+# 1. pulling the secret from https://github.com/openshift/release/tree/master/services/osd-images
+# 2. wrapping via: `cat $DOCKER_CONFIG_FILE | jq '{auths: .}'`
+# 3. applying it to vault https://vault.devshift.net/
+- provider: vault-secret
+  path: osd-sre/hive-stage/hive-ci-global-pull-secret
+  version: 11
+  type: kubernetes.io/dockerconfigjson

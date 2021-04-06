@@ -1,0 +1,63 @@
+---
+$schema: /openshift/cluster-1.yml
+
+labels:
+  service: quayio
+
+name: ocmquayrop01uw1
+description: Read-Only cluster for ocm quay
+consoleUrl: https://console-openshift-console.apps.ocmquayrop01uw1.zqxk.p1.openshiftapps.com
+kibanaUrl: ''
+prometheusUrl: ''
+alertmanagerUrl: ''
+serverUrl: https://api.ocmquayrop01uw1.zqxk.p1.openshiftapps.com:6443
+elbFQDN: elb.apps.ocmquayrop01uw1.zqxk.p1.openshiftapps.com
+
+auth:
+  service: github-org-team
+  org: app-sre
+  team: ocmquayrop01uw1-cluster
+
+automationToken:
+  path: app-sre/creds/kube-configs/ocmquayrop01uw1
+  field: token
+
+managedClusterRoles: true
+
+ocm:
+  $ref: /dependencies/ocm/production.yml
+
+managedGroups:
+- dedicated-admins
+
+spec:
+  id: 1jsjdl0tmgk2jv72d75db0mkkngajgtu
+  external_id: 4d4d93da-ae8c-4d07-93bc-b44b6e7df2bc
+  provider: aws
+  region: us-west-1
+  channel: stable
+  version: 4.7.3
+  initial_version: 4.7.1
+  multi_az: true
+  nodes: 18
+  instance_type: m5.4xlarge
+  storage: 1100
+  load_balancers: 4
+  private: false
+  upgrade: batch1
+  provision_shard_id: de4b0632-dca7-11ea-b3b9-8c1645a911be
+
+network:
+  vpc: 10.12.0.0/16
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
+
+internal: false
+
+awsInfrastructureAccess:
+- awsGroup:
+    $ref: /aws/ocm-quay/groups/App-SRE-admin.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/ocm-quay/groups/App-SRE-admin.yml
+  accessLevel: network-mgmt
