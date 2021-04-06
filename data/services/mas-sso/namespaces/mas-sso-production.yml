@@ -1,0 +1,56 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: mas-sso-production
+description: production namespace for mas-sso
+
+cluster:
+  $ref: /openshift/app-sre-prod-04/cluster.yml
+
+app:
+  $ref: /services/mas-sso/app.yml
+
+environment:
+  $ref: /products/osdv4/environments/production.yml
+
+networkPoliciesAllow:
+  - $ref: /openshift/app-sre-prod-04/namespaces/openshift-operator-lifecycle-manager.yml
+  - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-04.yml
+
+managedRoles: true
+
+managedResourceTypes:
+  - ServiceAccount
+  - Secret
+
+openshiftResources:
+- provider: vault-secret
+  path: managed-services/quay-org-accounts/rhoas/robots/rhoas-pull-docker
+  version: 1
+  type: kubernetes.io/dockercfg
+  #TODO
+  #Add db config secret
+  #Add route
+- provider: resource-template
+  path: /services/mas-sso/production/mas-sso-serviceaccount-production.yaml
+  variables:
+    name: default
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/mas-sso/production/mas-sso-credentials-production.secret.yaml
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: app-sre
+  identifier: mas-sso-production
+  # From default: multi_az: true , backup_retention_period: 30 , storage_encrypted: true
+  defaults: /terraform/resources/app-sre/production/rds-1.yml
+  output_resource_name: mas-sso-rds
+  overrides:
+    allocated_storage: 100
+    engine_version: "12.5"
+  enhanced_monitoring: true
