@@ -87,8 +87,15 @@ Environment parameters can be used to template saas file parameters. For example
 
 In addition to the supplied parameters, there are additional parameters which are generated automatically:
 
-- `IMAGE_TAG` - The AppSRE deployments rely on image tags which are the first N (see `hash_length`) characters of the git repository commit hash. This parameter will be populated according to that logic in order to deploy images by tags instead of `latest`.
-    * Note: The parameter will not be generated if it is explicitly specified in the SaaS file parameters.
+- `IMAGE_TAG` - The AppSRE deployments rely on image tags in one of the following forms:
+  - `CHANNEL-{hash_substring}` if the saas file attribute `use_channel_in_image_tag` is set to `true`. In this case the `CHANNEL` parameter is mandatory.
+  - `{hash_substring}` if the `use_channel_in_image_tag` saas file attribute is `false` or absent.
+
+  where `{hash_substring}` is the first N (see `hash_length`) characters of the git repository commit hash.
+
+  This parameter will be populated according to the above logic in order to deploy images by tags instead of `latest`.
+
+  **Note**: The parameter will not be generated if it is explicitly specified in the SaaS file parameters.
 
 - `REPO_DIGEST` - This parameter will be populated in case an image needs to be deployed according to a digest and not a tag.
     * Note: These parameters are mandatory for `REPO_DIGEST` to be generated: `REGISTRY_IMG`, `IMAGE_TAG` (according to previous section).
