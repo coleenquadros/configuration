@@ -1182,20 +1182,29 @@ In order to import certificates stored in Vault into AWS Certificate Manager, yo
 - `provider`: must be `acm`
 - `account`: The AWS account you want to import certificates in.
 - `identifier` - name of resource to create (or update)
-- `secret`: Certificate store in Vault ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/dsaas/routes/_wildcard.api.openshift.io))
+- `secret`: Certificate store in Vault ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/dsaas/routes/_wildcard.api.openshift.io)) (optional)
   - `path`: vault path
   - `field`: `all`
   - `version`: (optional) for vault kv2
+- `domain`: The domain information for the certificate. (optional)
+  - `domain_name`: The name of the domain for which the certificate should be issued
+  - `alternate_names`: A list of domains to include as SANs in the certficate
 - `output_resource_name`: name of Kubernetes Secret to be created.
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-ssl" and `provider` is set to `acm`, the created Secret will be called `my-ssl-acm`.
+
+NOTE: Either `secret` or `domain_name` must be provided, but not both.  Use `secret` to import a certificate from vault, and `domain` for AWS to create a certifcate
 
 Once the changes are merged, the certificate will be imported into ACM and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
 The Secret will contain the following fields:
 
 - `arn` - Amazon Resource Name (ARN) of the Certificate.
+- `domain_name` - The name of the domain this Certification is valid for.
+- `status` - The status of the Certificate.
+
+If `secret` was set above, then these fields will also be included:
 - `key` - Certificate private key.
 - `certificate` - Certificate body.
 - `caCertificate` - Certificate chain if provided.
