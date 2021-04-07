@@ -14,7 +14,7 @@ At least one Kafka message processed every 5 minutes
 
 Availability: `sum(increase(remediations_http_request_duration_seconds_count{namespace=~"remediations-prod", status_code=~"5[0-9]{2}"}[10m])) / sum(increase(remediations_http_request_duration_seconds_count{namespace=~"remediations-prod"}[10m]))`
 
-Latency: `sum(increase(remediations_http_request_duration_seconds_bucket{namespace="remediations-prod", le="2.1"}[10m] or up * 0) / sum(increase(remediations_http_request_duration_seconds_count{namespace=~"remediations-prod"}[10m]))`
+Latency: `sum(increase(remediations_http_request_duration_seconds_bucket{namespace="remediations-prod", le="2.1"}[6h] or up * 0) / sum(increase(remediations_http_request_duration_seconds_count{namespace=~"remediations-prod"}[6h]))`
 
 Connector requests: `sum(increase(remediations_connector_error{kubernetes_namespace="remediations-prod"}[10m]) or up * 0) / sum(increase(remediations_connector_summary_count[10m]))`
 
