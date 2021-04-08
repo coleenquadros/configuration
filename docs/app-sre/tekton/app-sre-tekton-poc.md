@@ -12,7 +12,6 @@ In these two cases we are building images and pushing them to quay.io and are tr
  * Image pull secret to pull/push images to quay.io
  * Image pull secret stored in an OpenShift cluster (examples use secret name regcreds)
    * Secret is mounted for tasks and the pipeline
-
 ###  OpenShift Pipelines Operator (Tekton)
 
 ![OperatorHub](./assets/op1.png "OperatorHub")
@@ -20,6 +19,14 @@ In these two cases we are building images and pushing them to quay.io and are tr
 ![OpenShift Pipelines Install](./assets/op2.png "OpenShift Pipelines Install")
 
 ![Install Operator](./assets/op3.png "Install Operator")
+
+#### Post operator installation
+Once the Operator is installed you need to run the following command for the pipeline service account
+
+```sh
+oc adm policy add-scc-to-user -n <project-namespace> anyuid -z pipeline
+```
+
 ## Triggers
 
 Triggers have several components and a corresponding webhook has to be setup for github to trigger.
