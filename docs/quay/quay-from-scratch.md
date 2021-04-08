@@ -2,15 +2,39 @@
 
 ## Pre-requisites
 
-In order to create a configuration file for quay, RDS, Elasticache, ACR and Cloudfront/S3 must be configured and accesible in cluster.
+In order to create a configuration file for quay, RDS, Elasticache, ACM and Cloudfront/S3 must be configured and accesible in cluster.
 
 ## Create a configuration file
 
-## Create Cloudwatch IAM User
+## Create a Policy
 
-In AWS IAM console, create a new IAM user called `syslog-cloudwatch-bridge` and attach the `Cloudwatch Logs` with `Write` Access level.
+In the AWS IAM console, go to the `Policies` section and press the `Create policy` button.  Select the `JSON` tab and enter this:
 
-In the `Security credentials` tab press the `Create access key` button to create a new set of credentials.  Copy the `Access key ID` and `Secret access key ID` to [vault](https://vault.devshift.net) in a secret named `quay-cloudwatch-iam-user` with the following keys:
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": [
+                "arn:aws:logs:*:*:*"
+            ]
+        }
+    ]
+}
+```
+
+In the reveiw section, give the policy the name `syslog-cloudwatch-bridge`.
+
+## Create a Cloudwatch IAM User
+
+In AWS IAM console, go to the `Users` section and press the `Add user` button at the top to create a new IAM user.  `User name` should be `syslog-cloudwatch-bridge` and select `Programmatic access` for the `Access type`.  Select `Attach existing policies directly` and select the `syslog-cloudwatch-bridge` policy created above.  Click through the remaining screens to create the user.
+
+Copy the `Access key ID` and `Secret access key` to [vault](https://vault.devshift.net) in a secret named `quay-cloudwatch-iam-user` with the following keys:
 
   AWS_ACCESS_KEY_ID: `<Access key ID from AWS>`
   AWS_REGION: `us-east-1`
