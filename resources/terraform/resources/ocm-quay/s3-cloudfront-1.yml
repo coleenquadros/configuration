@@ -1,0 +1,53 @@
+get_object_enable_dirs: ["sharedimages", "sha256", "logarchive", "cnr", "userfiles"]
+acl: private
+versioning: true
+cors_rules:
+- allowed_origins: ["*"]
+  allowed_methods: ["GET"]
+  allowed_headers: ["Authorization"]
+  max_age_seconds: 3000
+- allowed_origins: ["*"]
+  allowed_methods: ["PUT"]
+  allowed_headers: ["Content-Type", "x-amz-acl", "origin"]
+  max_age_seconds: 3000
+lifecycle_rules:
+- id: abort_incomplete_multipart_upload
+  enabled: true
+  prefix: uploads/
+  expiration:
+    days: 2
+  abort_incomplete_multipart_upload_days: 2
+- id: expire_noncurrent_object_versions
+  enabled: true
+  noncurrent_version_expiration:
+    days: 5
+  expiration:
+    expired_object_delete_marker: true
+distribution_config:
+  default_cache_behavior:
+    cached_methods: ["GET", "HEAD"]
+    allowed_methods: ["GET", "HEAD", "OPTIONS"]
+    default_ttl: 31536000 # 1 year
+    min_ttl: 31536000 # 1 year
+    max_ttl: 31536000 # 1 year
+    forwarded_values:
+      query_string: false
+      cookies:
+        forward: "none"
+    # an origin will be created automatically
+    # to match the taget_origin_id
+    target_origin_id: S3-blob-bucket
+    trusted_signers: ["self"]
+    viewer_protocol_policy: https-only
+  enabled: true
+  http_version: http2
+  is_ipv6_enabled: false
+  restrictions:
+    geo_restriction:
+      restriction_type: "none"
+  viewer_certificate:
+    # cloudfront_default_certificate: true
+    acm_certificate_arn: "arn:aws:acm:us-east-1:719609279530:certificate/d8cafbed-9afe-4f36-b78e-879dcabdeb24"
+    minimum_protocol_version: TLSv1
+    ssl_support_method: sni-only
+  aliases: ["cdn01.q1w2.quay.rhcloud.com"]
