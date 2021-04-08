@@ -1,0 +1,22 @@
+# TODO Check if: https://issues.redhat.com/browse/OHSS-3439 is completed
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    haproxy.router.openshift.io/balance: leastconn
+    haproxy.router.openshift.io/pod-concurrent-connections: "8"
+    haproxy.router.openshift.io/timeout: 30s
+    kubernetes.io/tls-acme: "true"
+  labels:
+    app: keycloak
+  name: keycloak
+spec:
+  host: identity.api.openshift.com
+  port:
+    targetPort: keycloak
+  tls:
+    termination: reencrypt
+  to:
+    kind: Service
+    name: keycloak
+    weight: 100
