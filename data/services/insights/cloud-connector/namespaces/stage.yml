@@ -1,0 +1,74 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: insights
+
+name: cloud-connector-stage
+description: Namespace where playbook dispatcher resources are deployed
+
+cluster:
+  $ref: /openshift/crcs02ue1/cluster.yml
+
+app:
+  $ref: /services/insights/cloud-connector/app.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs02ue1.yml
+- $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
+- $ref: /services/insights/config-manager/namespaces/config-manager-stage.yml
+- $ref: /services/insights/playbook-dispatcher/namespaces/stage.yml
+- $ref: /services/insights/catalog-inventory/namespaces/stage-catalog-inventory-stage.yml
+
+managedRoles: true
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/cloud-connector-stage/cloud-connector-psks
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/cloud-connector-stage/cloud-connector-mqtt-credentials
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-stage
+  identifier: cloud-connector-stage
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
+- provider: rds
+  account: insights-stage
+  identifier: cloud-connector-stage
+  defaults: /terraform/resources/insights/stage/rds/postgres12-rds-1.yml
+  overrides:
+    username: insights
+    allocated_storage: 20
+    name: insights
+    engine_version: "12.3"
+  parameter_group: /terraform/resources/insights/stage/rds/postgres12-parameter-group-cloud-connector-stage.yml
+  output_resource_name: cloud-connector-db
+  enhanced_monitoring: true
