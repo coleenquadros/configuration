@@ -27,7 +27,7 @@ managedResourceTypes:
 - NetworkPolicy
 - Secret
 
-openshiftResources: []
+openshiftResources:
 # - provider: resource-template
 #   type: extracurlyjinja2
 #   path: /quay-p/quay/quay-config.secret.yaml
@@ -64,13 +64,13 @@ openshiftResources: []
 #   path: app-interface/quayio-prod-us-east-1/quay/quay-cloudwatch-iam-user
 #   version: 2
 # ECR image pull secret
-# - provider: vault-secret
-#   path: app-sre/integrations-output/aws-ecr-image-pull-secrets/quayio-prod/eu-central-1/dockercfg
-#   version: 1
-#   type: kubernetes.io/dockerconfigjson
-#   name: quayio-backup-image-pull-secret
-#   annotations:
-#     qontract.ignore_reconcile_time: "true"
+- provider: vault-secret
+  path: app-sre/integrations-output/aws-ecr-image-pull-secrets/quayio-prod/eu-central-1/dockercfg
+  version: 1
+  type: kubernetes.io/dockerconfigjson
+  name: quayio-backup-image-pull-secret
+  annotations:
+    qontract.ignore_reconcile_time: "true"
 # - provider: resource
 #   path: /quay-p/quay/quay.web-allow-external.networkpolicy.yaml
 
@@ -86,18 +86,18 @@ terraformResources:
   identifier: ocm-quay
   domain:
     domain_name: cdn01.q1w2.quay.rhcloud.com
-# - provider: elasticache
-#   account: quayio-prod
-#   identifier: quayio-production
-#   defaults: /terraform/resources/quayio-production/elasticache-1.yml
-#   parameter_group: /terraform/resources/quayio-production/elasticache-parameter-group-1.yml
-#   output_resource_name: quayio-elasticache
 - provider: s3-cloudfront
   account: ocm-quay
   identifier: ocm-quay-production-s3
   storage_class: intelligent_tiering
   defaults: /terraform/resources/ocm-quay/s3-cloudfront-1.yml
   output_resource_name: ocm-quay-s3
+- provider: elasticache
+  account: ocm-quay
+  identifier: ocm-quay-production
+  defaults: /terraform/resources/ocm-quay/elasticache-1.yml
+  parameter_group: /terraform/resources/ocm-quay/elasticache-parameter-group-1.yml
+  output_resource_name: ocm-quay-elasticache
 # - provider: ecr
 #   account: quayio-prod
 #   region: eu-central-1
