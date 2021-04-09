@@ -27,7 +27,10 @@ managedResourceTypes:
 - NetworkPolicy
 - Secret
 
-openshiftResources:
+sharedResources:
+- $ref: /services/ocm-quay/shared-resources/common.yml
+
+openshiftResources: []
 # - provider: resource-template
 #   type: extracurlyjinja2
 #   path: /quay-p/quay/quay-config.secret.yaml
@@ -63,14 +66,6 @@ openshiftResources:
 # - provider: vault-secret
 #   path: app-interface/quayio-prod-us-east-1/quay/quay-cloudwatch-iam-user
 #   version: 2
-# ECR image pull secret
-- provider: vault-secret
-  path: app-sre/integrations-output/aws-ecr-image-pull-secrets/quayio-prod/eu-central-1/dockercfg
-  version: 1
-  type: kubernetes.io/dockerconfigjson
-  name: quayio-backup-image-pull-secret
-  annotations:
-    qontract.ignore_reconcile_time: "true"
 # - provider: resource
 #   path: /quay-p/quay/quay.web-allow-external.networkpolicy.yaml
 
@@ -98,6 +93,27 @@ terraformResources:
   defaults: /terraform/resources/ocm-quay/elasticache-1.yml
   parameter_group: /terraform/resources/ocm-quay/elasticache-parameter-group-1.yml
   output_resource_name: ocm-quay-elasticache
+- provider: aws-iam-service-account
+  account: ocm-quay
+  identifier: syslog-cloudwatch-bridge
+  variables:
+    aws_region: us-east-1
+  user_policy:
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                ],
+                "Resource": [
+                    "arn:aws:logs:*:*:*"
+                ]
+            }
+        ]
+    }
 # - provider: ecr
 #   account: quayio-prod
 #   region: eu-central-1
