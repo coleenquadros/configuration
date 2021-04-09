@@ -1385,9 +1385,7 @@ IAM users to be used as service accounts can be entirely self-serviced via App-I
 In order to add or update a service account, you need to add them to the `terraformResources` field.
 
 - `provider`: must be `aws-iam-service-account`
-- `account`: must be one of the AWS account names we manage. Current options:
-  - `app-sre`
-  - `osio`
+- `account`: must be one of the AWS account names we manage.
 - `identifier`: name of resource to create (or update)
 - `variables`: list of key-value pairs to use for templating of `user_policy`. these pairs will also be added to the output resource.
 - `policies`: list of AWS policies you wish to attach to the service account user.
