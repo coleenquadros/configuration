@@ -4,9 +4,27 @@
 
 In order to create a configuration file for quay, RDS, Elasticache, ACM and Cloudfront/S3 must be configured and accesible in cluster.
 
+## Create SSL certs
+
+## Create IAM user for quay
+
+## Create Cloudfront Signing Keys
+
+The cloudwatch signing keys are needed to sign URLs. Follow the [Create a key pair for a trusted key group](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-trusted-signers.html) section to create a key pair to use with Cloudfront.  In the AWS Console, go to the Cloudfront area and under `Key Management` select `Public Keys`.  Click the `Add public key` button at the top and create a new public key to use with Cloudfront.  Give it a name and in the `Key value` field paste the contents of the public key file you just created.
+
+Store the `ID` for the public key in vault in the `quay-additional-config` secret with the key `cloudfront_key_id`.  Here is an [example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quayio-prod-us-east-1/quay/quay-additional-config).
+
+Store the public_key in vault in the `quay-additional-config` secret with the key `cloudfront_public_key_pem`.
+
+Store the private key in vault in the `quay-config-secret` secret with the key `cloudfront-signing-key.pem1.  Here is an [example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quayio-prod-us-east-1/quay/quay-config-secret).
+
 ## Create a configuration file
 
-## Create a Policy
+## Create syslog-cloudwatch-bridge IAM user
+
+The `syslog-cloudwatch-bridge` is used to push logs from the quay pods into cloudwatch.
+
+### Create an IAM Policy
 
 In the AWS IAM console, go to the `Policies` section and press the `Create policy` button.  Select the `JSON` tab and enter this:
 
@@ -30,16 +48,18 @@ In the AWS IAM console, go to the `Policies` section and press the `Create polic
 
 In the reveiw section, give the policy the name `syslog-cloudwatch-bridge`.
 
-## Create a Cloudwatch IAM User
+### Create IAM User
 
 In AWS IAM console, go to the `Users` section and press the `Add user` button at the top to create a new IAM user.  `User name` should be `syslog-cloudwatch-bridge` and select `Programmatic access` for the `Access type`.  Select `Attach existing policies directly` and select the `syslog-cloudwatch-bridge` policy created above.  Click through the remaining screens to create the user.
 
 Copy the `Access key ID` and `Secret access key` to [vault](https://vault.devshift.net) in a secret named `quay-cloudwatch-iam-user` with the following keys:
 
+  ```shell
   AWS_ACCESS_KEY_ID: `<Access key ID from AWS>`
   AWS_REGION: `us-east-1`
   AWS_SECRET_ACCESS_KEY: `<Secret access key ID from AWS>` 
   LOG_GROUP_NAME: `<log group to use in cloudwatch>`
+  ```
 
 This secret is usually stored in a cluster specific path like `app-interface/quayio-prod-us-east-1/quay/quay-cloudwatch-iam-user`.  Here's an [example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quayio-prod-us-east-1/quay/quay-cloudwatch-iam-user).
 
