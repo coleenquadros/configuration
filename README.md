@@ -1394,6 +1394,9 @@ In order to add or update a service account, you need to add them to the `terraf
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-user" and `provider` "aws-iam-service-account", the created Secret will be called `my-user-aws-iam-service-account`.
+- `aws_infrastructure_access`: (optional) grant the created IAM user AWS Infrastructure access via OCM:
+  - `cluster`: reference to the cluster you want to grant infrastructure access to
+  - `access_level`: level of access to grant (currently either read-only or network-mgmt)
 
 Once the changes are merged, the IAM resources will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
