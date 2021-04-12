@@ -38,3 +38,67 @@ terraformResources:
   identifier: hive-stage-storage-01
   defaults: /terraform/resources/s3-private-1.yml
   output_resource_name: s3-bucket-creds
+- provider: aws-iam-service-account
+  account: osd-privatelink-stage
+  identifier: hive-privatelink-stage
+  user_policy:
+      {
+            "Version": "2012-10-17",
+            "Statement": [{
+                "Action": [
+                    "ec2:DescribeVpcEndpointServices",
+                    "ec2:DescribeVpcEndpoints",
+                    "ec2:CreateVpcEndpoint",
+                    "ec2:DeleteVpcEndpoints",
+                    "route53:CreateHostedZone",
+                    "route53:GetHostedZone",
+                    "route53:ListHostedZonesByVPC",
+                    "route53:AssociateVPCWithHostedZone",
+                    "route53:DisassociateVPCFromHostedZone",
+                    "route53:CreateVPCAssociationAuthorization",
+                    "route53:DeleteVPCAssociationAuthorization",
+                    "route53:DeleteHostedZone"
+                ],
+                "Effect": "Allow",
+                "Resource": "*" 
+            }]
+      }
+  output_resource_name: hive-privatelink-creds
+- provider: aws-iam-service-account
+  account: app-sre
+  identifier: hive-vpc-hive-stage-01
+  user_policy:
+      {
+            "Version": "2012-10-17",
+            "Statement": [{
+                "Action": [
+                    "sts:AssumeRole"
+                ],
+                "Effect": "Allow",
+                "Resource": "*" 
+            }]
+      }
+  output_resource_name: hive-vpc-creds-hive-stage-01
+  aws_infrastructure_access:
+    cluster:
+      $ref: /openshift/hive-stage-01/cluster.yml
+    access_level: network-mgmt
+- provider: aws-iam-service-account
+  account: app-sre
+  identifier: hive-vpc-hives02ue1
+  user_policy:
+      {
+            "Version": "2012-10-17",
+            "Statement": [{
+                "Action": [
+                    "sts:AssumeRole"
+                ],
+                "Effect": "Allow",
+                "Resource": "*" 
+            }]
+      }
+  output_resource_name: hive-vpc-creds-hives02ue1
+  aws_infrastructure_access:
+    cluster:
+      $ref: /openshift/hives02ue1/cluster.yml
+    access_level: network-mgmt
