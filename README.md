@@ -1403,6 +1403,8 @@ Once the changes are merged, the IAM resources will be created (or updated) and 
 The Secret will contain the following fields:
 - `aws_access_key_id` - The access key ID.
 - `aws_secret_access_key` - The secret access key.
+- `role_arn` - (optional) the role ARN to assume if `aws_infrastructure_access` is defined.
+  * Note: this key will be added after the AWS infrastructure access is granted successfully.
 
 In addition, any additional key-value pairs defined under `variables` will be added to the Secret.
 
