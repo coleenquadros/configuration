@@ -6,6 +6,14 @@ In order to create a configuration file for quay, RDS, Elasticache, ACM and Clou
 
 ## Create SSL certs
 
+## Prepare Quay Database
+
+### Create the Database
+
+### Create Users
+
+Need to create read-write and read-only users
+
 ## Create IAM user for quay
 
 ## Create Cloudfront Signing Keys
