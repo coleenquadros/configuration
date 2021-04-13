@@ -6,10 +6,11 @@ In case we need to recycle the basic auth credentials for app-interface producti
 - https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-int/qontract-reconcile-toml
 - https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-ext/qontract-reconcile-toml
 - https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/app-interface/production/basic-auth
+- https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/visual-qontract-prod/visual-qontract
 
 In addition, submit a MR to app-interface to update the following secret versions:
-- https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/app-interface/namespaces/app-interface-production.yml#L43-45
-- https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/app-interface/namespaces/app-interface-production.yml#L48-50
+- https://gitlab.cee.redhat.com/service/app-interface/-/blob/30260ea6fae449ae8da8fab66c4707733e5f9f6b/data/services/app-interface/namespaces/app-interface-production.yml#L31-33
+- https://gitlab.cee.redhat.com/service/app-interface/-/blob/30260ea6fae449ae8da8fab66c4707733e5f9f6b/data/services/app-interface/namespaces/app-interface-production.yml#L43-45
 
 You may need to restart all the pods in the app-interface-production namespace.
 
