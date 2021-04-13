@@ -4,33 +4,6 @@ data:
   # https://github.com/keycloak/keycloak-operator/blob/master/pkg/model/monitoring_constants.go
   sso-mas-monitoring.json: |-
     {
-      "__inputs": [],
-      "__requires": [
-        {
-          "type": "grafana",
-          "id": "grafana",
-          "name": "Grafana",
-          "version": "6.2.1"
-        },
-        {
-          "type": "panel",
-          "id": "graph",
-          "name": "Graph",
-          "version": ""
-        },
-        {
-          "type": "datasource",
-          "id": "prometheus",
-          "name": "Prometheus",
-          "version": "1.0.0"
-        },
-        {
-          "type": "panel",
-          "id": "singlestat",
-          "name": "Singlestat",
-          "version": ""
-        }
-      ],
       "annotations": {
         "list": [
           {
@@ -48,17 +21,310 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 1,
-      "id": 2,
-      "iteration": 1613387898703,
+      "iteration": 1618215535513,
       "links": [],
       "panels": [
         {
+          "datasource": "$datasource",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "decimals": 2,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 98
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 0
+          },
+          "id": 57,
+          "options": {
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
+          },
+          "pluginVersion": "7.2.1",
+          "targets": [
+            {
+              "expr": "(sum(rate(haproxy_backend_http_responses_total{route=~\"^keycloak.*\",exported_namespace=\"$namespace\",code!=\"5xx\"}[$__range]))/sum(rate(haproxy_backend_http_responses_total{route=~\"^keycloak.*\",exported_namespace=\"$namespace\"}[$__range]))) * 100",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "SLO Availability",
+          "type": "gauge"
+        },
+        {
+          "datasource": "$datasource",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "decimals": 2,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 98
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 0
+          },
+          "id": 59,
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "/^Value$/",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
+          },
+          "pluginVersion": "7.2.1",
+          "targets": [
+            {
+              "expr": "(sum(rate(keycloak_request_duration_bucket{namespace=\"$namespace\",le=\"1000.0\"}[$__range]))/sum(rate(keycloak_request_duration_count{namespace=\"$namespace\"}[$__range]))) * 100",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "SLO Latency 99% < 1s",
+          "type": "gauge"
+        },
+        {
+          "datasource": "$datasource",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": null,
+                "filterable": false
+              },
+              "decimals": 0,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 0,
+            "y": 8
+          },
+          "id": 53,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "7.2.1",
+          "targets": [
+            {
+              "expr": "sum(increase(haproxy_backend_http_responses_total{exported_namespace=\"$namespace\",route=~\"^keycloak.*\"}[$__range]))",
+              "interval": "",
+              "legendFormat": "Total Requests",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(increase(haproxy_backend_http_responses_total{exported_namespace=\"$namespace\", code=\"5xx\" , route=~\"^keycloak.*\"}[$__range]))",
+              "interval": "",
+              "legendFormat": "5xx Errors",
+              "refId": "B"
+            },
+            {
+              "expr": "sum(increase(haproxy_backend_http_responses_total{exported_namespace=\"$namespace\", code=\"4xx\", route=~\"^keycloak.*\"}[$__range]))",
+              "interval": "",
+              "legendFormat": "4xx Errors",
+              "refId": "C"
+            },
+            {
+              "expr": "sum(increase(keycloak_request_duration_count{namespace=\"$namespace\"}[$__range])) - sum(increase(keycloak_request_duration_bucket{namespace=\"$namespace\", le=\"1000.0\"}[$__range]))",
+              "interval": "",
+              "legendFormat": "> 1s",
+              "refId": "D"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Total Increase Requests",
+          "type": "stat"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 9,
+            "w": 11,
+            "x": 12,
+            "y": 8
+          },
+          "hiddenSeries": false,
+          "id": 55,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.2.1",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.99, sum(rate(keycloak_request_duration_bucket{namespace=\"$namespace\"}[$__range])>0) by (le))",
+              "interval": "",
+              "legendFormat": "99th",
+              "refId": "A"
+            },
+            {
+              "expr": "histogram_quantile(0.90, sum(rate(keycloak_request_duration_bucket{namespace=\"$namespace\"}[$__range])>0) by (le))",
+              "interval": "",
+              "legendFormat": "90th",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Latency",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:396",
+              "format": "ms",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "$$hashKey": "object:397",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
           "collapsed": false,
+          "datasource": null,
           "gridPos": {
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 0
+            "y": 17
           },
           "id": 33,
           "panels": [],
@@ -71,13 +337,21 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
             "h": 8,
             "w": 5,
             "x": 0,
-            "y": 1
+            "y": 18
           },
+          "hiddenSeries": false,
           "id": 25,
           "legend": {
             "avg": false,
@@ -92,8 +366,11 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null as zero",
-          "options": {},
+          "options": {
+            "alertThreshold": true
+          },
           "percentage": false,
+          "pluginVersion": "7.2.1",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -169,13 +446,21 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
             "h": 8,
             "w": 10,
             "x": 5,
-            "y": 1
+            "y": 18
           },
+          "hiddenSeries": false,
           "id": 27,
           "legend": {
             "alignAsTable": false,
@@ -192,8 +477,11 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
-          "options": {},
+          "options": {
+            "alertThreshold": true
+          },
           "percentage": false,
+          "pluginVersion": "7.2.1",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -205,16 +493,19 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(increase(haproxy_backend_http_responses_total{route=\"keycloak\",exported_namespace=\"$namespace\", code=\"5xx\"}[30m])) by (route, code)",
+              "expr": "sum(rate(haproxy_backend_http_responses_total{route=~\"^keycloak.*\",exported_namespace=\"$namespace\", code=\"5xx\"}[$__range])) by ( code)",
               "format": "time_series",
+              "interval": "",
               "intervalFactor": 1,
-              "legendFormat": "",
+              "legendFormat": "5xx",
               "refId": "A"
             },
             {
-              "expr": "",
+              "expr": "sum(rate(haproxy_backend_http_responses_total{route=~\"^keycloak.*\",exported_namespace=\"$namespace\", code=\"4xx\"}[$__range])) by ( code)",
               "format": "time_series",
+              "interval": "",
               "intervalFactor": 1,
+              "legendFormat": "4xx",
               "refId": "B"
             }
           ],
@@ -222,7 +513,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Increase in 5xx HTTP Errors [30m]",
+          "title": "Error Request Rate",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -238,6 +529,7 @@ data:
           },
           "yaxes": [
             {
+              "$$hashKey": "object:1031",
               "format": "short",
               "label": "# of errors",
               "logBase": 1,
@@ -246,6 +538,7 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:1032",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -267,13 +560,21 @@ data:
           "dashes": false,
           "datasource": "$datasource",
           "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
             "h": 8,
             "w": 9,
             "x": 15,
-            "y": 1
+            "y": 18
           },
+          "hiddenSeries": false,
           "id": 51,
           "legend": {
             "avg": false,
@@ -288,9 +589,11 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
-          "options": {},
+          "options": {
+            "alertThreshold": true
+          },
           "percentage": false,
-          "pluginVersion": "6.2.4",
+          "pluginVersion": "7.2.1",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -300,47 +603,17 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(keycloak_request_duration_sum{namespace=\"$namespace\", route=~\".+/auth\"}[15m])) / sum(rate(keycloak_request_duration_count{namespace=\"$namespace\", route=~\".+/auth\"}[15m]))",
-              "format": "time_series",
-              "hide": true,
-              "instant": false,
-              "intervalFactor": 1,
-              "legendFormat": "/auth",
+              "expr": "sum(rate(haproxy_backend_http_responses_total{exported_namespace=\"$namespace\",route=~\"^keycloak.*\"}[$__range]))",
+              "interval": "",
+              "legendFormat": "Request Per Sec",
               "refId": "A"
-            },
-            {
-              "expr": "sum(rate(keycloak_request_duration_sum{namespace=\"$namespace\", route=~\".+/token\"}[15m])) / sum(rate(keycloak_request_duration_count{namespace=\"$namespace\", route=~\".+/token\"}[15m]))",
-              "format": "time_series",
-              "hide": true,
-              "instant": false,
-              "intervalFactor": 1,
-              "legendFormat": "/token",
-              "refId": "B"
-            },
-            {
-              "expr": "sum(rate(keycloak_request_duration_sum{namespace=\"$namespace\", route=~\".+/introspect\"}[15m])) / sum(rate(keycloak_request_duration_count{namespace=\"$namespace\", route=~\".+/introspect\"}[15m]))",
-              "format": "time_series",
-              "hide": true,
-              "instant": false,
-              "intervalFactor": 1,
-              "legendFormat": "/introspect",
-              "refId": "C"
-            },
-            {
-              "expr": "sum(rate(keycloak_request_duration_sum{namespace=\"$namespace\"}[15m])) / sum(rate(keycloak_request_duration_count{namespace=\"$namespace\"}[15m]))",
-              "format": "time_series",
-              "hide": false,
-              "instant": false,
-              "intervalFactor": 1,
-              "legendFormat": "ALL",
-              "refId": "C"
             }
           ],
           "thresholds": [],
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Avg Endpoint latency [15m]",
+          "title": "Request Rates",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -356,7 +629,8 @@ data:
           },
           "yaxes": [
             {
-              "format": "s",
+              "$$hashKey": "object:629",
+              "format": "short",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -364,6 +638,7 @@ data:
               "show": true
             },
             {
+              "$$hashKey": "object:630",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -379,11 +654,12 @@ data:
         },
         {
           "collapsed": false,
+          "datasource": null,
           "gridPos": {
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 9
+            "y": 26
           },
           "id": 35,
           "panels": [],
@@ -396,13 +672,21 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
             "h": 6,
             "w": 7,
             "x": 0,
-            "y": 10
+            "y": 27
           },
+          "hiddenSeries": false,
           "hideTimeOverride": false,
           "id": 12,
           "legend": {
@@ -423,8 +707,11 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "connected",
-          "options": {},
+          "options": {
+            "alertThreshold": true
+          },
           "percentage": false,
+          "pluginVersion": "7.2.1",
           "pointradius": 5,
           "points": false,
           "renderer": "flot",
@@ -523,13 +810,21 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
             "h": 6,
             "w": 5,
             "x": 7,
-            "y": 10
+            "y": 27
           },
+          "hiddenSeries": false,
           "id": 31,
           "legend": {
             "avg": false,
@@ -544,8 +839,11 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
-          "options": {},
+          "options": {
+            "alertThreshold": true
+          },
           "percentage": false,
+          "pluginVersion": "7.2.1",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -624,13 +922,21 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
             "h": 6,
             "w": 5,
             "x": 12,
-            "y": 10
+            "y": 27
           },
+          "hiddenSeries": false,
           "id": 37,
           "legend": {
             "avg": false,
@@ -645,9 +951,11 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null as zero",
-          "options": {},
+          "options": {
+            "alertThreshold": true
+          },
           "percentage": false,
-          "pluginVersion": "6.2.4",
+          "pluginVersion": "7.2.1",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -711,13 +1019,21 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
             "h": 6,
             "w": 7,
             "x": 17,
-            "y": 10
+            "y": 27
           },
+          "hiddenSeries": false,
           "id": 45,
           "legend": {
             "avg": false,
@@ -732,8 +1048,11 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
-          "options": {},
+          "options": {
+            "alertThreshold": true
+          },
           "percentage": false,
+          "pluginVersion": "7.2.1",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -839,13 +1158,21 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
             "h": 6,
             "w": 7,
             "x": 0,
-            "y": 16
+            "y": 33
           },
+          "hiddenSeries": false,
           "hideTimeOverride": false,
           "id": 39,
           "legend": {
@@ -866,8 +1193,11 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "connected",
-          "options": {},
+          "options": {
+            "alertThreshold": true
+          },
           "percentage": false,
+          "pluginVersion": "7.2.1",
           "pointradius": 5,
           "points": false,
           "renderer": "flot",
@@ -956,13 +1286,21 @@ data:
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
             "h": 6,
             "w": 5,
-            "x": 12,
-            "y": 16
+            "x": 7,
+            "y": 33
           },
+          "hiddenSeries": false,
           "id": 38,
           "legend": {
             "avg": false,
@@ -977,9 +1315,11 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null as zero",
-          "options": {},
+          "options": {
+            "alertThreshold": true
+          },
           "percentage": false,
-          "pluginVersion": "6.2.4",
+          "pluginVersion": "7.2.1",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -1040,210 +1380,25 @@ data:
         {
           "aliasColors": {},
           "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "$datasource",
-          "fill": 1,
-          "gridPos": {
-            "h": 6,
-            "w": 7,
-            "x": 17,
-            "y": 16
-          },
-          "id": 48,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "links": [],
-          "nullPointMode": "null",
-          "options": {},
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "wildfly_datasources_pool_active_count{namespace=\"$namespace\", xa_data_source=\"keycloak_postgresql-DB\"}",
-              "format": "time_series",
-              "intervalFactor": 1,
-              "legendFormat": "Active for {{pod}}",
-              "refId": "A"
-            },
-            {
-              "expr": "wildfly_datasources_pool_available_count{namespace=\"$namespace\", xa_data_source=\"keycloak_postgresql-DB\"}",
-              "format": "time_series",
-              "intervalFactor": 1,
-              "legendFormat": "Available for {{pod}}",
-              "refId": "B"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Number of database connections in pool",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": "$datasource",
-          "fill": 1,
-          "gridPos": {
-            "h": 6,
-            "w": 7,
-            "x": 17,
-            "y": 22
-          },
-          "id": 49,
-          "legend": {
-            "avg": false,
-            "current": false,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": false
-          },
-          "lines": true,
-          "linewidth": 1,
-          "links": [],
-          "nullPointMode": "null",
-          "options": {},
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "expr": "increase(wildfly_datasources_pool_xacommit_count{namespace=\"$namespace\", xa_data_source=\"keycloak_postgresql-DB\"}[30m])",
-              "format": "time_series",
-              "intervalFactor": 1,
-              "legendFormat": "Number of commits for {{pod}}",
-              "refId": "A"
-            },
-            {
-              "expr": "increase(wildfly_datasources_pool_xarollback_count{namespace=\"$namespace\", xa_data_source=\"keycloak_postgresql-DB\"}[30m])",
-              "format": "time_series",
-              "intervalFactor": 1,
-              "legendFormat": "Number of rollbacks for {{pod}}",
-              "refId": "B"
-            },
-            {
-              "expr": "increase(wildfly_datasources_pool_blocking_failure_count{namespace=\"$namespace\", xa_data_source=\"keycloak_postgresql-DB\"}[30m])",
-              "format": "time_series",
-              "intervalFactor": 1,
-              "legendFormat": "Number of failures for {{pod}}",
-              "refId": "C"
-            }
-          ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Number of transactions [30m]",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
           "cacheTimeout": null,
           "dashLength": 10,
           "dashes": false,
           "datasource": "$datasource",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
           "fill": 1,
+          "fillGradient": 0,
           "gridPos": {
             "h": 6,
             "w": 7,
-            "x": 17,
-            "y": 28
+            "x": 12,
+            "y": 33
           },
+          "hiddenSeries": false,
           "id": 50,
           "legend": {
             "avg": false,
@@ -1258,9 +1413,11 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
-          "options": {},
+          "options": {
+            "alertThreshold": true
+          },
           "percentage": false,
-          "pluginVersion": "6.2.4",
+          "pluginVersion": "7.2.1",
           "pointradius": 2,
           "points": false,
           "renderer": "flot",
@@ -1347,12 +1504,228 @@ data:
           }
         },
         {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 6,
+            "w": 7,
+            "x": 0,
+            "y": 39
+          },
+          "hiddenSeries": false,
+          "id": 49,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.2.1",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "increase(wildfly_datasources_pool_xacommit_count{namespace=\"$namespace\", xa_data_source=\"keycloak_postgresql-DB\"}[30m])",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "Number of commits for {{pod}}",
+              "refId": "A"
+            },
+            {
+              "expr": "increase(wildfly_datasources_pool_xarollback_count{namespace=\"$namespace\", xa_data_source=\"keycloak_postgresql-DB\"}[30m])",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "Number of rollbacks for {{pod}}",
+              "refId": "B"
+            },
+            {
+              "expr": "increase(wildfly_datasources_pool_blocking_failure_count{namespace=\"$namespace\", xa_data_source=\"keycloak_postgresql-DB\"}[30m])",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "Number of failures for {{pod}}",
+              "refId": "C"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Number of transactions [30m]",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 6,
+            "w": 7,
+            "x": 7,
+            "y": 39
+          },
+          "hiddenSeries": false,
+          "id": 48,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.2.1",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "wildfly_datasources_pool_active_count{namespace=\"$namespace\", xa_data_source=\"keycloak_postgresql-DB\"}",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "Active for {{pod}}",
+              "refId": "A"
+            },
+            {
+              "expr": "wildfly_datasources_pool_available_count{namespace=\"$namespace\", xa_data_source=\"keycloak_postgresql-DB\"}",
+              "format": "time_series",
+              "intervalFactor": 1,
+              "legendFormat": "Available for {{pod}}",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Number of database connections in pool",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
           "collapsed": true,
+          "datasource": null,
           "gridPos": {
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 34
+            "y": 45
           },
           "id": 41,
           "panels": [
@@ -1450,11 +1823,12 @@ data:
         },
         {
           "collapsed": true,
+          "datasource": null,
           "gridPos": {
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 35
+            "y": 46
           },
           "id": 43,
           "panels": [
@@ -1914,14 +2288,14 @@ data:
         }
       ],
       "refresh": false,
-      "schemaVersion": 18,
+      "schemaVersion": 26,
       "style": "dark",
       "tags": [],
       "templating": {
         "list": [
           {
             "current": {
-              "selected": true,
+              "selected": false,
               "text": "app-sre-stage-01-prometheus",
               "value": "app-sre-stage-01-prometheus"
             },
@@ -1941,9 +2315,9 @@ data:
           {
             "allValue": null,
             "current": {
-              "tags": [],
-              "text": "All",
-              "value": "$__all"
+              "selected": true,
+              "text": "mas-sso-stage",
+              "value": "mas-sso-stage"
             },
             "datasource": "$datasource",
             "definition": "label_values(keycloak_request_duration_count,namespace)",
@@ -1967,7 +2341,7 @@ data:
           {
             "allValue": null,
             "current": {
-              "tags": [],
+              "selected": false,
               "text": "All",
               "value": "$__all"
             },
@@ -1993,7 +2367,7 @@ data:
           {
             "allValue": null,
             "current": {
-              "tags": [],
+              "selected": false,
               "text": "All",
               "value": "$__all"
             },
@@ -2019,7 +2393,7 @@ data:
         ]
       },
       "time": {
-        "from": "now-15m",
+        "from": "now-3h",
         "to": "now"
       },
       "timepicker": {
@@ -2048,7 +2422,9 @@ data:
           "30d"
         ]
       },
+      "timezone": "",
       "title": "MAS SSO Monitoring",
+      "uid": "_LLa8q_Gk",
       "version": 1
     }
 kind: ConfigMap
