@@ -2,7 +2,7 @@
 
 ## Pre-requisites
 
-In order to create a configuration file for quay, RDS, Elasticache, ACM and Cloudfront/S3 must be configured and accesible in cluster.
+In order to create a configuration file for quay, RDS, Elasticache, ACM and CloudFront/S3 must be configured and accesible in cluster.
 
 ## Create SSL certs
 
@@ -12,19 +12,25 @@ In order to create a configuration file for quay, RDS, Elasticache, ACM and Clou
 
 ### Create Users
 
-Need to create read-write and read-only users
+Need to create read-write and read-only users and read-only keypair
 
 ## Create IAM user for quay
 
-## Create Cloudfront Signing Keys
+## Create CloudFront Signing Keys
 
-The cloudwatch signing keys are needed to sign URLs. Follow the [Create a key pair for a trusted key group](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-trusted-signers.html) section to create a key pair to use with Cloudfront.  In the AWS Console, go to the Cloudfront area and under `Key Management` select `Public Keys`.  Click the `Add public key` button at the top and create a new public key to use with Cloudfront.  Give it a name and in the `Key value` field paste the contents of the public key file you just created.
+The cloudwatch signing keys are needed to sign URLs. Follow the [Create a key pair for a trusted key group](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/private-content-trusted-signers.html) section to create a key pair to use with CloudFront.  In the AWS Console, go to the `CloudFront` area and under `Key Management` select `Public Keys`.  Click the `Add public key` button at the top and create a new public key to use with CloudFront.  Give it a name and in the `Key value` field paste the contents of the public key file you just created.
 
 Store the `ID` for the public key in vault in the `quay-additional-config` secret with the key `cloudfront_key_id`.  Here is an [example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quayio-prod-us-east-1/quay/quay-additional-config).
 
 Store the public_key in vault in the `quay-additional-config` secret with the key `cloudfront_public_key_pem`.
 
 Store the private key in vault in the `quay-config-secret` secret with the key `cloudfront-signing-key.pem1.  Here is an [example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quayio-prod-us-east-1/quay/quay-config-secret).
+
+### Attach Signing Key to Cloudwatch Distribution
+
+In order for cloudfront to use the public key created above we need to associate the key with the cloudfront distribution.  This currently must be done in the AWS console until terraform supports it.  See: https://github.com/hashicorp/terraform-provider-aws/pull/18644
+
+In the AWS console go to the `CloudFront` area and click on the `Distributions` section on the left.  Choose the CloudFront Distribution to be modified by clicking on the `ID` field.  Go to the `Behaviors` tab and select the listed behavior and `Edit` it.  Look for the `Restrict Viewer Access (Use Signed URLs or Signed Cookies)` section and select `Yes`.  This will create a new section called `Trusted Key Groups or Trusted Signer`.  Select `Trusted Key Groups` and choose the created key group from above in the drop down list then press `Add` next to the field.  The key group should then appear just below in the `Trusted Key Group Name` area.  When done, press the `Yes, Edit` button at the bottom of the screen.
 
 ## Create a configuration file
 
