@@ -26,6 +26,7 @@ managedResourceTypes:
 imagePatterns:
 - quay.io/rhoas/kas-fleet-manager
 - quay.io/centos/centos
+- quay.io/rhoas/envoyproxy
 
 authentication:
   image:
@@ -71,6 +72,14 @@ resourceTemplates:
     OBSERVABILITY_CONFIG_CHANNEL: resources
     # This value is the lifespan a kafka will have with the lifespan flag enabled. In hours.
     KAFKA_LIFE_SPAN: 48
+    # Capacity settings for the base Kafka type
+    KAFKA_CAPACITY_INGRESS_THROUGHPUT: "2Mi"
+    KAFKA_CAPACITY_TOTAL_MAX_CONNECTIONS: "100"
+    KAFKA_CAPACITY_MAX_DATA_RETENTION_SIZE: "60Gi"
+    KAFKA_CAPACITY_MAX_PARTITIONS: "100"
+    KAFKA_CAPACITY_MAX_DATA_RETENTION_PERIOD: "P14D"
+    # Image to be used by Envoy sidecar container
+    ENVOY_IMAGE: quay.io/rhoas/envoyproxy:v1.16.1
   targets:
   - namespace:
       $ref: /services/managed-services/namespaces/managed-services-stage.yml
@@ -279,6 +288,103 @@ resourceTemplates:
         - username: burrzinga
           max_allowed_instances: 2
 
+        - username: tnolan_razzle_dazzle
+          max_allowed_instances: 1
+        
+        #------------------ Users for e2e user testing ------------------
+
+        - username: kafka-allagash-tripel
+          max_allowed_instances: 1
+        
+        - username: kafka-amber-ale
+          max_allowed_instances: 1
+
+        - username: kafka-american-lager
+          max_allowed_instances: 1
+        
+        - username: kafka-ancient-saison
+          max_allowed_instances: 1
+        
+        - username: kafka-belgian-dubbel
+          max_allowed_instances: 1
+        
+        - username: kafka-black-ipa
+          max_allowed_instances: 1
+        
+        - username: kafka-blonde-ale
+          max_allowed_instances: 1
+        
+        - username: kafka-brown-ale
+          max_allowed_instances: 1
+
+        - username: kafka-coffee-stout
+          max_allowed_instances: 1
+
+        - username: kafka-cream-ale
+          max_allowed_instances: 1
+
+        - username: kafka-doppelbock
+          max_allowed_instances: 1
+        
+        - username: kafka-double-ipa
+          max_allowed_instances: 1
+
+        - username: kafka-extra-stout
+          max_allowed_instances: 1
+
+        - username: kafka-german-pilsner
+          max_allowed_instances: 1
+        
+        - username: kafka-golden-marzen
+          max_allowed_instances: 1
+        
+        - username: kafka-hefeweizen
+          max_allowed_instances: 1
+        
+        - username: kafka-helle-weisse
+          max_allowed_instances: 1
+
+        - username: kafka-irish-stout
+          max_allowed_instances: 1
+
+        - username: kafka-light-lager
+          max_allowed_instances: 1
+
+        - username: kafka-munich-dunkel
+          max_allowed_instances: 1
+
+        - username: kafka-oatmeal-stout
+          max_allowed_instances: 1
+        
+        - username: kafka-pale-ale
+          max_allowed_instances: 1
+
+        - username: kafka-peach-kolsch
+          max_allowed_instances: 1
+        
+        - username: kafka-perfect-pilsner
+          max_allowed_instances: 1
+
+        - username: kafka-premium-altbier
+          max_allowed_instances: 1
+        
+        - username: kafka-raspberry-lambic
+          max_allowed_instances: 1
+        
+        - username: kafka-schwarzbier
+          max_allowed_instances: 1
+        
+        - username: kafka-scotch-ale
+          max_allowed_instances: 1
+        
+        - username: kafka-sour-ale
+          max_allowed_instances: 1
+        
+        - username: kafka-strong-bitter
+          max_allowed_instances: 1
+
+        #----------------------------------------------------------------
+
       # A list of allowed users per organisation in yaml format.
       ALLOWED_USERS_PER_ORGANISATION:
           # The Workshop Test org
@@ -470,12 +576,12 @@ resourceTemplates:
     # the very first commit i.e https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/merge_requests/356/commits?commit_id=f0fd63740464c5fa4bda395d5d31f675eff049ac 
     # If in doubt, see with the control plane team.
     # We are exploring into using automating this.
-    ref: 30f4c123c3c1ab06e72c15d7ce26ddaaa7be69e1 
+    ref: d7207a040a0f1f784a0e6aae8dbf1244956739c7 
     parameters:
       ENVIRONMENT: production
       # The image tag is the first seven characters of the #ref commit sha parameter. 
       # Verify in https://quay.io/repository/rhoas/kas-fleet-manager?tab=tags to see if the tag exists.
-      IMAGE_TAG: 30f4c12
+      IMAGE_TAG: d7207a0
       SENTRY_URL: sentry.devshift.net
       SENTRY_PROJECT: 16
       MAS_SSO_BASE_URL: https://identity.api.openshift.com
@@ -500,13 +606,16 @@ resourceTemplates:
       ALLOW_ANY_REGISTERED_USERS: false
       # A list of allowed users in yaml format irrespective of their organisation.
       # If `ALLOW_ANY_REGISTERED_USERS` is set to true, the list will only be used to determine the `max_allowed_instances` each user can create.
-      ALLOWED_SERVICE_ACCOUNTS: []
+      ALLOWED_SERVICE_ACCOUNTS: 
+        # Scaling testing user
+        - username: test_kafka_service
+          max_allowed_instances: 1500
       # A list of allowed users per organisation in yaml format.
       # If `ALLOW_ANY_REGISTERED_USERS` is set to true, the list will only be used to determine the `max_allowed_instances` each organisation can create.
       ALLOWED_USERS_PER_ORGANISATION:
           # The Control Plane team
         - id: 13640203
-          max_allowed_instances: 5
+          max_allowed_instances: 1500
           allow_all: true
           # Empty for now meaning all users allowed since "allow_all" is set to true.
           allowed_users: []
@@ -524,4 +633,75 @@ resourceTemplates:
       DATAPLANE_CLUSTER_SCALING_TYPE: manual
 
       # cluster list if dataplane cluster scaling type is set to manual
-      CLUSTER_LIST: []
+      CLUSTER_LIST:
+        - name: mk-0413-093022
+          cluster_id: 1k1ghkb0rtrpfpc5k8jgo809epot422v
+          cloud_provider: aws
+          region: us-east-1
+          multi_az: true
+          schedulable: true # change this to false if you do not want the cluster to be schedulable
+          kafka_instance_limit: 150 # change this to match any value of configuration
+        - name: mk-0413-093120
+          cluster_id: 1k1ghn18nbmf4ofn1ffvkdbhfi3l7jar
+          cloud_provider: aws
+          region: us-east-1
+          multi_az: true
+          schedulable: true # change this to false if you do not want the cluster to be schedulable
+          kafka_instance_limit: 150 # change this to match any value of configuration
+        - name: mk-0413-093129
+          cluster_id: 1k1ghp5n06hqfh53007e61mf44er0920
+          cloud_provider: aws
+          region: us-east-1
+          multi_az: true
+          schedulable: true # change this to false if you do not want the cluster to be schedulable
+          kafka_instance_limit: 150 # change this to match any value of configuration
+        - name: mk-0413-093134
+          cluster_id: 1k1ghq9iq6r10c3qapikv6997svgql2v
+          cloud_provider: aws
+          region: us-east-1
+          multi_az: true
+          schedulable: true # change this to false if you do not want the cluster to be schedulable
+          kafka_instance_limit: 150 # change this to match any value of configuration
+        - name: mk-0413-093139
+          cluster_id: 1k1ghrjislpvgoqat7kee63du5a36tat
+          cloud_provider: aws
+          region: us-east-1
+          multi_az: true
+          schedulable: true # change this to false if you do not want the cluster to be schedulable
+          kafka_instance_limit: 150 # change this to match any value of configuration
+        - name: mk-0413-093144
+          cluster_id: 1k1ghsu0d15s5cf34o48k5jfut7qnlp6
+          cloud_provider: aws
+          region: us-east-1
+          multi_az: true
+          schedulable: true # change this to false if you do not want the cluster to be schedulable
+          kafka_instance_limit: 150 # change this to match any value of configuration
+        - name: mk-0413-093150
+          cluster_id: 1k1ghu1gptnbottn8luugfg0qdqiski4
+          cloud_provider: aws
+          region: us-east-1
+          multi_az: true
+          schedulable: true # change this to false if you do not want the cluster to be schedulable
+          kafka_instance_limit: 150 # change this to match any value of configuration
+        - name: mk-0413-093155
+          cluster_id: 1k1ghvjnv44hh7o0mae4p0dsa93a6bp9
+          cloud_provider: aws
+          region: us-east-1
+          multi_az: true
+          schedulable: true # change this to false if you do not want the cluster to be schedulable
+          kafka_instance_limit: 150 # change this to match any value of configuration
+        - name: mk-0413-093413
+          cluster_id: 1k1gj26k9pcl3ajqoov5dvaa9b9i58v8
+          cloud_provider: aws
+          region: us-east-1
+          multi_az: true
+          schedulable: true # change this to false if you do not want the cluster to be schedulable
+          kafka_instance_limit: 150 # change this to match any value of configuration
+        - name: mk-0413-093422
+          cluster_id: 1k1gj404f3lbe647u6imscvj9ce5mnbk
+          cloud_provider: aws
+          region: us-east-1
+          multi_az: true
+          schedulable: true # change this to false if you do not want the cluster to be schedulable
+          kafka_instance_limit: 150 # change this to match any value of configuration
+      

@@ -1,0 +1,37 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /insights-prod/playbook-dispatcher/playbook-dispatcher-rds.prometheusrules.yaml
+
+evaluation_interval: 10m
+
+tests:
+
+# RDSOutOfStorageSoon
+- interval: 10m
+  input_series:
+  - series: rdsosmetrics_fileSys_usedPercent{mount_point="/rdsdbdata", exported_instance="playbook-dispatcher-prod"}
+    values: 0+3x4 12-1x7
+  alert_rule_test:
+  - eval_time: 2h
+    alertname: RDSOutOfStorageSoon
+
+- interval: 10m
+  input_series:
+  - series: rdsosmetrics_fileSys_usedPercent{mount_point="/rdsdbdata", exported_instance="playbook-dispatcher-prod"}
+    values: 0+3x12
+  alert_rule_test:
+  - eval_time: 2h
+    alertname: RDSOutOfStorageSoon
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+        exported_instance: playbook-dispatcher-prod
+        mount_point: /rdsdbdata
+      exp_annotations:
+        link_url: "https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=playbook-dispatcher-prod;is-cluster=false;tab=monitoring"
+        message: "DB instance playbook-dispatcher-prod is about to run out of storage within 2 weeks."

@@ -385,12 +385,18 @@ Post RCA comms, followups:
     * Incident contact
     * Continuity plan reference
 
+Please refer to the [full onboarding document](https://service.pages.redhat.com/dev-guidelines/docs/appsre/onboarding/).
+
 ## Additional team process
 
 ### Git process
 
 ### Sprint process
 * [see process/sprint.md](process/sprint.md)
+
+### Handling of secrets
+
+Application-related secrets such as passwords, or tokens must be handled according to [this document](https://service.pages.redhat.com/dev-guidelines/docs/appsre/onboarding/adding-sensitive-data/).
 
 ## App-sre escalation to external teams
 

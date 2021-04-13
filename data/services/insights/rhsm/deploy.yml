@@ -105,13 +105,19 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/dev-rhsm-qa.yml
     ref: main
+    parameters:
+      OPENSHIFT_ENABLED_ACCOUNT_PROMQL: "group(min_over_time(subscription_labels{ebs_account != '', billing_model='marketplace'}[1h])) by (ebs_account)"
   - namespace:
       $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
     ref: main
     upstream: RedHatInsights-rhsm-subscriptions-gh-build-main
+    parameters:
+      OPENSHIFT_ENABLED_ACCOUNT_PROMQL: "group(min_over_time(subscription_labels{ebs_account != '', billing_model='marketplace'}[1h])) by (ebs_account)"
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
     ref: 10a9cfc9d479aca497cb623d6eab4df2fcb02270
+    parameters:
+      OPENSHIFT_ENABLED_ACCOUNT_PROMQL: "group(min_over_time(subscription_labels{ebs_account != '', billing_model='marketplace'}[1h])) by (ebs_account)"
 - name: metrics-worker
   path: /templates/metrics-worker.yml
   url: https://github.com/RedHatInsights/rhsm-subscriptions
@@ -201,27 +207,27 @@ resourceTemplates:
     upstream: RedHatInsights-rhsm-subscriptions-gh-build-main
     parameters:
       MARKETPLACE_MANUAL_SUBMISSION_ENABLED: 'true'
-      MARKETPLACE_DUMMY_ID: 603d3c95f7321c68769431eb
       HAWTIO_BASE_PATH: /app/rhsm-marketplace/actuator/hawtio
       SPLUNK_FORWARDER_MEMORY_LIMIT: 256Mi
+      SUBSCRIPTION_URL: https://subscription.qa.api.redhat.com/svcrest/subscription/v5
   - namespace:
       $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
     ref: main
     upstream: RedHatInsights-rhsm-subscriptions-gh-build-main
     parameters:
       MARKETPLACE_MANUAL_SUBMISSION_ENABLED: 'true'
-      MARKETPLACE_DUMMY_ID: 603d3c95f7321c68769431eb
       HAWTIO_BASE_PATH: /app/rhsm-marketplace/actuator/hawtio
       SPLUNK_FORWARDER_MEMORY_LIMIT: 256Mi
+      SUBSCRIPTION_URL: https://subscription.stage.api.redhat.com/svcrest/subscription/v5
   - namespace:
       $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
     ref: main
     upstream: RedHatInsights-rhsm-conduit-gh-build-main
     parameters:
       MARKETPLACE_MANUAL_SUBMISSION_ENABLED: 'true'
-      MARKETPLACE_DUMMY_ID: 603d3c95f7321c68769431eb
       HAWTIO_BASE_PATH: /app/rhsm-marketplace/actuator/hawtio
       SPLUNK_FORWARDER_MEMORY_LIMIT: 256Mi
+      SUBSCRIPTION_URL: https://subscription.stage.api.redhat.com/svcrest/subscription/v5
 - name: auto-registration-listener
   path: /deploy/listener.yml
   url: https://gitlab.cee.redhat.com/rhsm/automatic-registration
@@ -234,13 +240,13 @@ resourceTemplates:
       USER_SERVICE_URL: https://user.qa.api.redhat.com/
   - namespace:
       $ref: /services/insights/rhsm/namespaces/dev-rhsm-qa.yml
-    ref: 564e236040e5be689a6cd64bcbb2839b30e39c9d
+    ref: d98fcd25cb6f547d4296a9f4ff212814abf3c25c
     parameters:
       RHSM_SERVICE_URL: https://api.rhsm.qa.redhat.com/v1/cloud_access_providers/
       USER_SERVICE_URL: https://user.qa.api.redhat.com/
   - namespace:
       $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
-    ref: 564e236040e5be689a6cd64bcbb2839b30e39c9d
+    ref: d98fcd25cb6f547d4296a9f4ff212814abf3c25c
     parameters:
       RHSM_SERVICE_URL: https://api.rhsm.stage.redhat.com/v1/cloud_access_providers/
       USER_SERVICE_URL: https://user.stage.api.redhat.com/
@@ -248,7 +254,7 @@ resourceTemplates:
       ALLOWED_APPLICATION_TYPE_IDS: '3'
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
-    ref: ed15a9885ff7af9121efe62173475d7a238b513e
+    ref: d98fcd25cb6f547d4296a9f4ff212814abf3c25c
     parameters:
       RHSM_SERVICE_URL: https://api.rhsm.redhat.com/v1/cloud_access_providers/
       USER_SERVICE_URL: https://user.api.redhat.com/
