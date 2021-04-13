@@ -1,0 +1,12 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2021-04-13-rhel5-systems2
+namespace:
+  $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
+identifier: patchman-prod
+output: stdout
+queries:
+    - select 'systems with el5 packages', h.system_profile->'operating_system'->>'major' as os, count(sp.id) from package pkg join system_package spkg on pkg.id = spkg.package_id join system_platform sp on sp.rh_account_id = spkg.rh_account_id and sp.id = spkg.system_id join inventory.hosts h on sp.inventory_id = h.id where evra like '%el5%' group by h.system_profile->'operating_system'->>'major';
+    - select 'el5 package names on systems ', count(name_id) from (select p.name_id, count(id) from package p join system_package on p.id = system_package.package_id where evra like '%el5%' group by p.name_id) x;
+    - select 'el5 package names on systems ', pn.name, count(p.id) as cnt from package p join system_package on p.id = system_package.package_id join package_name pn on pn.id = p.name_id where evra like '%el5%' group by pn.name order by cnt desc limit 10;
