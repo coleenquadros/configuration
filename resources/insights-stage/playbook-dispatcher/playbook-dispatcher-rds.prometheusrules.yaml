@@ -1,0 +1,26 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: playbook-dispatcher-rds-stage
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: playbook-dispatcher-rds-stage
+    rules:
+
+    - alert: RDSOutOfStorageSoon
+      expr: |
+        predict_linear(rdsosmetrics_fileSys_usedPercent{mount_point="/rdsdbdata", exported_instance="playbook-dispatcher-stage"}[1h], 3600 * 24 * 14) > 100
+      for: 1h
+      labels:
+        severity: info
+        service: insights
+        env: stage
+        app_team: data-pipeline
+      annotations:
+        link_url: "https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=playbook-dispatcher-stage;is-cluster=false;tab=monitoring"
+        message: "DB instance {{ $labels.exported_instance }} is about to run out of storage within 2 weeks."
