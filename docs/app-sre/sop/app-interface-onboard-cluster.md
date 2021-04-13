@@ -88,7 +88,6 @@ This step should be performed in a single merge request.
       storage: (desired storage amount. ex: 600)
       load_balancers: (desired load-balancer count. ex: 0)
       private: false (or true for private clusters)
-      upgrade: (batch1 | batch2 | skip - generally stage is batch1, prod is batch2 and skip for special cases like quay as of 2020-08)
       provision_shard_id: (optional) specify hive shard ID to create the cluster in (IDs can be found in the uhc-production namespace file)
 
     upgradePolicy: # optional, specify an upgrade schedule
