@@ -1,0 +1,56 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: approval-process
+  platform: insights
+
+name: approval-process-clowder
+description: approval process app on the Insights Platform
+
+app:
+  $ref: /services/insights/approval-process/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+timeout: 5
+
+managedResourceTypes:
+  - ClowdApp
+
+imagePatterns:
+  - quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  CLOWDER_ENABLED: "true"
+
+resourceTemplates:
+  - name: approval-process
+    path: /deploy/clowdapp.yaml
+    url: https://github.com/RedHatInsights/approval-process
+    targets:
+    - namespace:
+        $ref: /services/insights/approval-process/namespaces/stage-approval-process-stage.yml
+      ref: master
+      upstream: RedHatInsights-approval-process-gh-build-master
+      parameters:
+        ENV_NAME: stage
+        PGSSLMODE: verify-full
+    - namespace:
+        $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+      disable: true
+      ref: internal
+      parameters:
+        LOG_LEVEL: WARN
+        MIN_REPLICAS: 1
