@@ -252,6 +252,11 @@ Every app-sre engineer should have access to the following
   - Feature toggle service to enable/disable features in runtime.
   - More details available [here](https://gitlab.cee.redhat.com/service/dev-guidelines/blob/master/unleash.md)
 
+- SendGrid
+  - You will be invited to a team, the current owner is [Craig Robinson](https://rover.redhat.com/people/profile/crarobin)
+  - It's not under Red Hat's SSO, you need to create your own username and password.
+  - You'll need yet another 2FA application on your phone
+
 ### Returning Red Hat Employee Gotchas
 
 - Accounts need to be re-enabled
