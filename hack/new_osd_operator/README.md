@@ -34,17 +34,13 @@ The utility takes one argument: the name of your operator. In this example, we'l
 organization -- so in this case, `github.com/openshift/my-wizbang-operator`.
 
 ```shell
-[.../app-interface]$ hack/new_osd_operator/new_operator.py my-wizbang-operator
+[.../app-interface]$ hack/new_osd_operator/new_operator.py my-wizbang-operator 
 Writing data/services/osd-operators/cicd/ci-int/jobs-my-wizbang-operator.yaml
 Writing data/services/osd-operators/cicd/saas/saas-my-wizbang-operator.yaml
-Writing data/services/osd-operators/namespaces/my-wizbang-operator-stage.yml # Skipped if using boilerplate
-Writing data/services/osd-operators/namespaces/my-wizbang-operator-integration.yml # Skipped if using boilerplate
-Writing data/services/osd-operators/namespaces/my-wizbang-operator-production.yml # Skipped if using boilerplate
 Writing data/teams/sd-sre/permissions/my-wizbang-operator-coreos-slack.yml
 Adding quayRepos entry for my-wizbang-operator
 Adding codeComponents entry for my-wizbang-operator
 Adding gitlab project saas-my-wizbang-operator-bundle to projectRequests.
-Adding pr-check entry for my-wizbang-operator # Skipped if using boilerplate
 Adding SAAS file entry for my-wizbang-operator
 Adding slack permissions entry for my-wizbang-operator
 Adding slack user group for my-wizbang-operator
@@ -62,11 +58,7 @@ Changes to be committed:
   (use "git restore --staged <file>..." to unstage)
 	modified:   data/dependencies/gitlab/gitlab.yml
 	modified:   data/services/osd-operators/app.yml
-	modified:   data/services/osd-operators/cicd/ci-ext/jobs.yaml # Skipped if using boilerplate
 	new file:   data/services/osd-operators/cicd/ci-int/jobs-my-wizbang-operator.yaml
-	new file:   data/services/osd-operators/namespaces/my-wizbang-operator-integration.yml # Skipped if using boilerplate
-	new file:   data/services/osd-operators/namespaces/my-wizbang-operator-production.yml # Skipped if using boilerplate
-	new file:   data/services/osd-operators/namespaces/my-wizbang-operator-stage.yml # Skipped if using boilerplate
 	new file:   data/teams/sd-sre/permissions/my-wizbang-operator-coreos-slack.yml
 ```
 
@@ -86,12 +78,26 @@ Untracked files:
   (use "git add <file>..." to include in what will be committed)
 	data/services/osd-operators/cicd/saas/saas-my-wizbang-operator.yaml	
 ```
+The first 2 MRs will only deploy your operator to Staging and Integration. To Deploy your operator in Production run
+```shell
+[.../app-interface]$ hack/new_osd_operator/new_operator.py my-wizbang-operator --prod
+```
+## Hive vs Cluster operators 
+The automation relies on the metadata of your operator's `hack/olm-registry/olm-artifacts-template.yaml` to determine
+the type of operator you are trying to deploy. 
+### For Cluster operators
+You have no template to update.
+
+### For Hive operators
+Prior to running the automation, you will need to update the [operator.tpl](operator.tpl) with resources you need deployed in
+your namespace: Secrets, ConfigMaps, ... Please refer to the app-interface README.md for information.
+
 
 ## Testing
 To test this script locally:
 - Create a temporary folder for the operator. For e.g `mkdir /tmp/my-wizbang-operator`
 - Add a olm-artifact-template file to `/tmp/my-wizbang-operator/hack/olm-registry/olm-artifacts-template.yaml` (must be valid)  
-- To simulate using boilerplate, crate the folder `/tmp/my-wizbang-operator/boilerplate`
+- To simulate using boilerplate, create the folder `/tmp/my-wizbang-operator/boilerplate`
 - Run `./hack/new_osd_operator/new_operator.py my-wizbang-operator -l /tmp/my-wizbang-operator`
 
 ## Support

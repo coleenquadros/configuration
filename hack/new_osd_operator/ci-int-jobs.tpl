@@ -21,7 +21,7 @@ config:
     gh_org: openshift
     gh_repo: {operator_name}
     quay_org: app-sre
-    build_deploy_script_path: '{command}'
+    build_deploy_script_path: 'make build-push'
     jobs:
     - 'gh-build-master':
         display_name: {operator_name} build master
