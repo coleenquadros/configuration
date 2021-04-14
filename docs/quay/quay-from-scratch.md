@@ -26,7 +26,7 @@ Store the public_key in vault in the `quay-additional-config` secret with the ke
 
 Store the private key in vault in the `quay-config-secret` secret with the key `cloudfront-signing-key.pem1.  Here is an [example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quayio-prod-us-east-1/quay/quay-config-secret).
 
-### Attach Signing Key to Cloudwatch Distribution
+### Attach Signing Key to CloudFront Distribution
 
 In order for cloudfront to use the public key created above we need to associate the key with the cloudfront distribution.  This currently must be done in the AWS console until terraform supports it.  See: https://github.com/hashicorp/terraform-provider-aws/pull/18644
 
@@ -80,5 +80,9 @@ This secret is usually stored in a cluster specific path like `app-interface/qua
 This secret will then need to be applied to the namespace where the quay pods will reside.  Like [this](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/quayio/namespaces/quayp05ue1.yml#L63).
 
 And lastly the name of the secret needs to be set in the saasfile like [this](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/quayio/saas/quayio.yaml#L64).
+
+## Create CloudWatch Log Group
+
+The log group that will be used by quay will need to be created in CloudWatch before deploying the pods.  This must be done in the AWS console.  Log into the AWS console and go to the `CloudWatch` section.  Press the `Create log group` button in the upper right hand corner and create the log group that is configured for use with quay.  For exmaple, if the configured log group is `cluster/quay/app` then create a log gropu with that exact name, ie `cluster/quay/app`.
 
 ## Deploy via saasfile
