@@ -54,7 +54,7 @@ parameters:
   value: 2000 # 2GB, Default unit of measurement is MB, Allowed values: 128-201326592
   apply_method: pending-reboot
 - name: max_wal_size
-  value: 6000 # 2GB, Default unit of measurement is MB, Allowed values: 128-201326592
+  value: 6000 # 6GB, Default unit of measurement is MB, Allowed values: 128-201326592
   apply_method: pending-reboot
 - name: checkpoint_completion_target
   value: 0.9
@@ -69,34 +69,34 @@ parameters:
   value: 200
   apply_method: pending-reboot
 
-### Tweak these based on total memory, now 16GB using pgconfig.org looking at DW
-### Keep on 25% of total memory
+### Tweak these based on total memory, now db.r5.4xlarge with 128GB RAM and 16vCPU using pgconfig.org looking at DW
+## [AWS RDS Defaults to 25% of total memory]. Keep on 25% of total memory
 - name: shared_buffers # Default values: {DBInstanceClassMemory/32768}
-  value: 500000 # 4GB, Default unit of measurement is 8kB, Allowed values: 16-1073741823
+  value: 4194304 # 32GB=32*1024*1024/8, Default unit of measurement is 8kB, Allowed values: 16-1073741823
   apply_method: pending-reboot
 ### Keep on 75% of total memory
 - name: effective_cache_size # Default values: {DBInstanceClassMemory/16384}
-  value: 1500000 # 12GB, Default unit of measurement is 8kB, Allowed values: 1-2147483647
+  value: 12582912 # 96GB=96*1024*1024/8, Default unit of measurement is 8kB, Allowed values: 1-2147483647
   apply_method: immediate
 ### Keep as 1/16 of total memory take autovacuum_max_worker increase in count
 - name: maintenance_work_mem # Default values: GREATEST({DBInstanceClassMemory*1024/63963136},65536)
-  value: 250000 # 2GB, Default unit of measurement is 8kB, Allowed values: Allowed values: 1024-2147483647
+  value: 262144 # 2GB=2*1024*1024/8, Default unit of measurement is 8kB, Allowed values: Allowed values: 1024-2147483647
   apply_method: immediate
 ### Lets increase 41MB per each 8GB of total memory. Also based on number of workers we'll have 
 - name: work_mem
-  value: 82000 # 82MB, Default unit of measurement is kB, Allowed values: 64-2147483647
+  value: 670720 # 655MB=655*1024, Default unit of measurement is kB, Allowed values: 64-2147483647
   apply_method: immediate
 
 ### Worker Processes. Tweak these based on number of vcpus now 2
 ### Same as number of of vcpus
 - name: max_worker_processes
-  value: 2
+  value: 16
   apply_method: pending-reboot
 ### Same as number of of vcpus / 2
 - name: max_parallel_workers_per_gather
-  value: 1
+  value: 8
   apply_method: pending-reboot
 ### Same as number of of vcpus
 - name: max_parallel_workers
-  value: 2
+  value: 16
   apply_method: pending-reboot
