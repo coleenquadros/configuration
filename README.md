@@ -2103,6 +2103,8 @@ Writing tests can be difficult at the beginning. This [article](https://www.robu
 
 If your alerts are based on recording rules, do not write tests using the recorded series, use always the original metrics or you won't be testing the complete setup.
 
+While writing tests, sometimes it is convenient to be able to run tests locally to avoid waiting for them to be run in Jenkins. Please follow [this guide](/docs/app-sre/running-prometheus-rules-locally.md) to know to do it.
+
 ## Design
 
 Additional design information: [here](docs/app-interface/design.md)
