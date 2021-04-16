@@ -7,6 +7,7 @@ import copy
 import subprocess
 import tempfile
 import os
+import pathlib
 
 if len(sys.argv) < 2:
     print(f'Usage: {sys.argv[0]} test_file <variables>')
@@ -42,7 +43,9 @@ with open(test_file, 'r') as f:
 
 test_yaml = yaml.safe_load(env.from_string(test_file_body).render(jinja2_vars))
 
-rule_file = f"resources/{test_yaml['rule_files'][0]}"
+root = pathlib.Path(__file__).parent.absolute() / '..'
+bundle_rule_path = pathlib.Path(test_yaml['rule_files'][0]).relative_to('/')
+rule_file = root / 'resources' / bundle_rule_path
 with open(rule_file, 'r') as f:
     rule_file_body = f.read()
 
@@ -59,13 +62,16 @@ with tempfile.NamedTemporaryFile(delete=False) as tp:
     tp.write(yaml.dump(copy_test_yaml).encode())
     temp_test_file_name = tp.name
 
-# check rule syntax
-cmd = ['promtool', 'check', 'rules', temp_rule_file_name]
-result = subprocess.run(cmd, check=True)
+try:
+    # check rule syntax
+    subprocess.run(['promtool', 'check', 'rules', temp_rule_file_name],
+                   check=True)
 
-# run test
-cmd = ['promtool', 'test', 'rules', temp_test_file_name]
-result = subprocess.run(cmd, check=True)
-
-os.unlink(temp_rule_file_name)
-os.unlink(temp_test_file_name)
+    # run tests
+    subprocess.run(['promtool', 'test', 'rules', temp_test_file_name],
+                   check=True)
+except Exception:
+    raise
+finally:
+    os.unlink(temp_rule_file_name)
+    os.unlink(temp_test_file_name)
