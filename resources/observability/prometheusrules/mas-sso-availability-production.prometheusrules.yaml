@@ -1,0 +1,55 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: mas-sso-availability-stage
+spec:
+  groups:
+      - name: mas-sso-availability-stage
+        rules:
+          - alert: MasSSOAvailabilityRHSSOPodsDown
+            annotations:
+              message: 'The number of ready MAS SSO Pods is less than expected for 10 minutes'
+              dashboard: "https://grafana.stage.devshift.net/d/nzxiqJQMk/mas-sso-monitoring?orgId=1"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/mas-sso/sop/mas-sso-availability/mas-sso-availability.md"
+            # Copied from https://gitlab.cee.redhat.com/service/app-interface/blob/master/resources/observability/prometheusrules/kube-metrics.prometheusrules.yaml#L71
+            expr: |
+              (
+                kube_statefulset_status_replicas_ready{job="kube-state-metrics",namespace="mas-sso-stage",statefulset="keycloak"}
+                  !=
+                kube_statefulset_status_replicas{job="kube-state-metrics",namespace="mas-sso-stage",statefulset="keycloak"}
+              ) and (
+                changes(kube_statefulset_status_replicas_updated{job="kube-state-metrics",namespace="mas-sso-stage",statefulset="keycloak"}[5m])
+                  ==
+                0
+              )
+            for: 10m
+            labels:
+              service: mas-sso
+              exported_namespace: mas-sso-stage
+              severity: info
+          - alert: MasSSOAvailabilityRHSSOOperatorPodDown
+            annotations:
+              message: 'The number of ready MAS SSO Operator Pods is less than expected for 10 minutes'
+              dashboard: "https://grafana.stage.devshift.net/d/nzxiqJQMk/mas-sso-monitoring?orgId=1"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/mas-sso/sop/mas-sso-availability/mas-sso-availability.md"
+              # Copied from https://gitlab.cee.redhat.com/service/app-interface/blob/master/resources/observability/prometheusrules/kube-metrics.prometheusrules.yaml#L53
+            expr: |
+              (
+                kube_deployment_spec_replicas{job="kube-state-metrics",namespace="mas-sso-stage",deployment="rhsso-operator"}
+                  !=
+                kube_deployment_status_replicas_available{job="kube-state-metrics",namespace="mas-sso-stage",deployment="rhsso-operator"}
+              ) and (
+                changes(kube_deployment_status_replicas_updated{job="kube-state-metrics",namespace="mas-sso-stage",deployment="rhsso-operator"}[5m])
+                  ==
+                0
+              )
+            for: 10m
+            labels:
+              service: mas-sso
+              exported_namespace: mas-sso-stage
+              severity: info
