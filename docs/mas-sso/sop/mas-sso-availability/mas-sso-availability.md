@@ -35,8 +35,9 @@ MAS SSO is an identity and access management component used by MAS. The alert fi
 fails to fulfil  valid request(s) i.e. responds (or received) with 5xx error codes.
  
 ## Prerequisites
+The mas-sso application information can be found at [mas-sso](https://visual-app-interface.devshift.net/services#/services/mas-sso/app.yml). 
 
-The namespace will be `mas-sso-stage` for staging environment and `mas-sso-prod` for the 
+The namespace will be `mas-sso-stage` for staging environment and `mas-sso-production` for the 
 production environment. Use the appropriate namespace in the commands.
 
 CLI required to complete this SOP:

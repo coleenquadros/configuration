@@ -1,7 +1,7 @@
 
 ## Gather logs
 Following is a list of useful logs that might come in handy for troubleshooting purposes.
-The namespace will be `mas-sso-stage` for staging environment and `mas-sso-prod` for the production environment. Use the appropriate namespace in the commands.
+The namespace will be `mas-sso-stage` for staging environment and `mas-sso-production` for the production environment. Use the appropriate namespace in the commands.
 
 ### RHSSO Operator logs
 `

@@ -33,8 +33,9 @@ MAS SSO is an identity and access management component used by MAS.
 The alert fires when MAS SSO service experiencing latency.
 
 ## Prerequisites
+The mas-sso application information can be found at [mas-sso](https://visual-app-interface.devshift.net/services#/services/mas-sso/app.yml). 
 
-The namespace will be `mas-sso-stage` for staging environment and `mas-sso-prod` for the production environment. Use the appropriate namespace in the commands.
+The namespace will be `mas-sso-stage` for staging environment and `mas-sso-production` for the production environment. Use the appropriate namespace in the commands.
 
 CLI required to complete this SOP:
 
