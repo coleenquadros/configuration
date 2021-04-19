@@ -221,8 +221,8 @@ Every app-sre engineer should have access to the following
   - Nothing to do. Obtained via a [role](data/teams/app-sre/roles/app-sre.yml)
 
 - Pagerduty
-  - ACCESS: Create a [Jira ticket](https://issues.redhat.com/) to request access to PagerDuty assign it to [Tony Beckham](https://rover.redhat.com/people/profile/cbeckham)
-  - you can clone this [example ticket](https://issues.redhat.com/browse/OHSS-2547)
+  - ACCESS: Create a [Jira ticket](https://issues.redhat.com/) to request access to PagerDuty assign it to [Meghna Gala](https://rover.redhat.com/people/profile/mgala)
+  - you can check this [example ticket](https://issues.redhat.com/browse/OHSS-2547), but double check the assignee before commiting.
 
 - App-sre shared folders
   - ACCESS: Go to the following folders and request access with your Red Hat Gsuite account
