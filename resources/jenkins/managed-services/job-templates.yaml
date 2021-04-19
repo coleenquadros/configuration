@@ -419,6 +419,24 @@
         allow-empty: true
 
 - job-template:
+    id: managed-kafka-e2e-test-suite-sandbox
+    name: managed-kafka-e2e-test-suite-sandbox
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *mk_e2e_test_suite_sandbox
+    ci_cmd: 'TESTCASE=QuarkusSampleTest ./pipeline.sh'
+    <<: *gl_timed
+    publishers:
+    - archive:
+        artifacts: 'test-results/**'
+        allow-empty: true
+
+- job-template:
     id: managed-kafka-promote-ui
     name: managed-kafka-promote-ui
     wrappers: 
