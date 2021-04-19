@@ -1,0 +1,26 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: edge-stage
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: edge-stage
+    rules:
+      # pagerduty
+      - alert: App-edge-api-service-In-edge-stage-Absent
+        expr: absent(up{service="edge-api-service", namespace="edge-stage"}) or up{service="edge-api-service", namespace="edge-stage"} == 0
+        for: 5m
+        labels:
+          severity: high
+          service: insights
+          env: stage
+          app_team: edge
+        annotations:
+          dashboard: "https://GRAFANA_URL"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/edge-stage/deployments"
+          message: "Metrics for edge-api-service in STAGE are absent"
