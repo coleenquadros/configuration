@@ -19,6 +19,7 @@ data:
       "gnetId": null,
       "graphTooltip": 0,
       "id": 174,
+      "iteration": 1618950570424,
       "links": [],
       "panels": [
         {
@@ -53,7 +54,7 @@ data:
                 "properties": [
                   {
                     "id": "custom.width",
-                    "value": 284
+                    "value": 398
                   }
                 ]
               }
@@ -61,7 +62,7 @@ data:
           },
           "gridPos": {
             "h": 9,
-            "w": 6,
+            "w": 7,
             "x": 0,
             "y": 0
           },
@@ -73,7 +74,7 @@ data:
           "pluginVersion": "7.2.1",
           "targets": [
             {
-              "expr": "sum by (appsre_env) (hive:global_capacity_used:percent) * 100",
+              "expr": "sum by (appsre_env) (hive:global_capacity_used:percent{appsre_env=~\"$environment\"}) * 100",
               "format": "table",
               "instant": true,
               "interval": "",
@@ -148,8 +149,8 @@ data:
           "fillGradient": 0,
           "gridPos": {
             "h": 9,
-            "w": 6,
-            "x": 6,
+            "w": 9,
+            "x": 7,
             "y": 0
           },
           "hiddenSeries": false,
@@ -180,7 +181,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum by (appsre_env) (hive:global_capacity_used:percent) * 100",
+              "expr": "sum by (appsre_env) (hive:global_capacity_used:percent{appsre_env=~\"$environment\"}) * 100",
               "format": "time_series",
               "instant": false,
               "interval": "",
@@ -195,7 +196,229 @@ data:
           "title": "Hive Capacity (per environment)",
           "tooltip": {
             "shared": true,
-            "sort": 0,
+            "sort": 2,
+            "value_type": "individual"
+          },
+          "transformations": [],
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "datasource": "app-sre-prod-01-prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": null,
+                "filterable": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Environment"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 190
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Shard"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 588
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 7,
+            "x": 0,
+            "y": 9
+          },
+          "id": 4,
+          "options": {
+            "showHeader": true,
+            "sortBy": []
+          },
+          "pluginVersion": "7.2.1",
+          "targets": [
+            {
+              "expr": "sum by (appsre_env, instance) (hive:shard_capacity_used:percent{appsre_env=~\"$environment\"}) * 100",
+              "format": "table",
+              "instant": true,
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Hive Capacity (per shard)",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                },
+                "indexByName": {},
+                "renameByName": {
+                  "Time": "",
+                  "Value": "Used %",
+                  "appsre_env": "Environment",
+                  "instance": "Shard"
+                }
+              }
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "app-sre-prod-01-prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": null,
+                "filterable": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Environment"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 284
+                  }
+                ]
+              }
+            ]
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 9,
+            "w": 9,
+            "x": 7,
+            "y": 9
+          },
+          "hiddenSeries": false,
+          "id": 5,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.2.1",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum by (appsre_env, instance) (hive:shard_capacity_used:percent{appsre_env=~\"$environment\"}) * 100",
+              "format": "time_series",
+              "instant": false,
+              "interval": "",
+              "legendFormat": "{{appsre_env}} - {{instance}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Hive Capacity (per shard)",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
             "value_type": "individual"
           },
           "transformations": [],
@@ -235,7 +458,52 @@ data:
       "style": "dark",
       "tags": [],
       "templating": {
-        "list": []
+        "list": [
+          {
+            "allValue": null,
+            "current": {
+              "selected": true,
+              "tags": [],
+              "text": [
+                "production",
+                "staging"
+              ],
+              "value": [
+                "production",
+                "staging"
+              ]
+            },
+            "datasource": "app-sre-prod-01-prometheus",
+            "definition": "label_values(hive:global_capacity_used:percent, appsre_env)",
+            "hide": 0,
+            "includeAll": false,
+            "label": null,
+            "multi": true,
+            "name": "environment",
+            "options": [
+              {
+                "selected": true,
+                "text": "production",
+                "value": "production"
+              },
+              {
+                "selected": true,
+                "text": "staging",
+                "value": "staging"
+              }
+            ],
+            "query": "label_values(hive:global_capacity_used:percent, appsre_env)",
+            "refresh": 0,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 1,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
+          }
+        ]
       },
       "time": {
         "from": "now-6h",
@@ -245,7 +513,7 @@ data:
       "timezone": "utc",
       "title": "Hive Capacity",
       "uid": "OgLHQ_XGz",
-      "version": 1
+      "version": 2
     }
 kind: ConfigMap
 metadata:
