@@ -19,7 +19,7 @@ data:
       "gnetId": null,
       "graphTooltip": 0,
       "id": 174,
-      "iteration": 1618950570424,
+      "iteration": 1618953122166,
       "links": [],
       "panels": [
         {
@@ -49,12 +49,24 @@ data:
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Environment"
+                  "options": "Clusters"
                 },
                 "properties": [
                   {
                     "id": "custom.width",
-                    "value": 398
+                    "value": 100
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Usage %"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 100
                   }
                 ]
               }
@@ -74,18 +86,30 @@ data:
           "pluginVersion": "7.2.1",
           "targets": [
             {
-              "expr": "sum by (appsre_env) (hive:global_capacity_used:percent{appsre_env=~\"$environment\"}) * 100",
+              "expr": "sum by (appsre_env) (hive_cluster_deployments{age_lt=\"+Inf\",appsre_env=~\"$environment\"})",
               "format": "table",
               "instant": true,
               "interval": "",
               "legendFormat": "",
               "refId": "A"
+            },
+            {
+              "expr": "sum by (appsre_env) (hive:global_capacity_used:percent{appsre_env=~\"$environment\"}) * 100",
+              "format": "table",
+              "instant": true,
+              "interval": "",
+              "legendFormat": "",
+              "refId": "B"
             }
           ],
           "timeFrom": null,
           "timeShift": null,
           "title": "Hive Capacity (per environment)",
           "transformations": [
+            {
+              "id": "merge",
+              "options": {}
+            },
             {
               "id": "organize",
               "options": {
@@ -96,6 +120,8 @@ data:
                 "renameByName": {
                   "Time": "",
                   "Value": "Used %",
+                  "Value #A": "Clusters",
+                  "Value #B": "Usage %",
                   "appsre_env": "Environment"
                 }
               }
@@ -258,24 +284,36 @@ data:
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Environment"
+                  "options": "Clusters"
                 },
                 "properties": [
                   {
                     "id": "custom.width",
-                    "value": 190
+                    "value": 100
                   }
                 ]
               },
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "Shard"
+                  "options": "Usage %"
                 },
                 "properties": [
                   {
                     "id": "custom.width",
-                    "value": 588
+                    "value": 100
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Environment"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 200
                   }
                 ]
               }
@@ -295,12 +333,20 @@ data:
           "pluginVersion": "7.2.1",
           "targets": [
             {
-              "expr": "sum by (appsre_env, instance) (hive:shard_capacity_used:percent{appsre_env=~\"$environment\"}) * 100",
+              "expr": "sum by (appsre_env, instance) (hive_cluster_deployments{age_lt=\"+Inf\",appsre_env=~\"$environment\"})",
               "format": "table",
               "instant": true,
               "interval": "",
               "legendFormat": "",
               "refId": "A"
+            },
+            {
+              "expr": "sum by (appsre_env, instance) (hive:shard_capacity_used:percent{appsre_env=~\"$environment\"}) * 100",
+              "format": "table",
+              "instant": true,
+              "interval": "",
+              "legendFormat": "",
+              "refId": "B"
             }
           ],
           "timeFrom": null,
@@ -308,15 +354,27 @@ data:
           "title": "Hive Capacity (per shard)",
           "transformations": [
             {
+              "id": "merge",
+              "options": {}
+            },
+            {
               "id": "organize",
               "options": {
                 "excludeByName": {
                   "Time": true
                 },
-                "indexByName": {},
+                "indexByName": {
+                  "Time": 0,
+                  "Value #A": 3,
+                  "Value #B": 4,
+                  "appsre_env": 1,
+                  "instance": 2
+                },
                 "renameByName": {
                   "Time": "",
                   "Value": "Used %",
+                  "Value #A": "Clusters",
+                  "Value #B": "Usage %",
                   "appsre_env": "Environment",
                   "instance": "Shard"
                 }
@@ -513,7 +571,7 @@ data:
       "timezone": "utc",
       "title": "Hive Capacity",
       "uid": "OgLHQ_XGz",
-      "version": 2
+      "version": 3
     }
 kind: ConfigMap
 metadata:
