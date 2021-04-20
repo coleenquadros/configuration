@@ -6,50 +6,83 @@ metadata:
   labels:
     prometheus: app-sre
     role: alert-rules
-  name: mas-sso-availability-stage
+  name: mas-sso-availability-production
 spec:
   groups:
-      - name: mas-sso-availability-stage
+      - name: mas-sso-availability-production
         rules:
           - alert: MasSSOAvailabilityRHSSOPodsDown
             annotations:
               message: 'The number of ready MAS SSO Pods is less than expected for 10 minutes'
-              dashboard: "https://grafana.stage.devshift.net/d/nzxiqJQMk/mas-sso-monitoring?orgId=1"
+              dashboard: "https://grafana.app-sre.devshift.net/d/_LLa8q_Gk/mas-sso-monitoring"
               runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/mas-sso/sop/mas-sso-availability/mas-sso-availability.md"
-            # Copied from https://gitlab.cee.redhat.com/service/app-interface/blob/master/resources/observability/prometheusrules/kube-metrics.prometheusrules.yaml#L71
             expr: |
               (
-                kube_statefulset_status_replicas_ready{job="kube-state-metrics",namespace="mas-sso-stage",statefulset="keycloak"}
+                kube_statefulset_status_replicas_ready{job="kube-state-metrics",namespace="mas-sso-production",statefulset="keycloak"}
                   !=
-                kube_statefulset_status_replicas{job="kube-state-metrics",namespace="mas-sso-stage",statefulset="keycloak"}
+                kube_statefulset_status_replicas{job="kube-state-metrics",namespace="mas-sso-production",statefulset="keycloak"}
               ) and (
-                changes(kube_statefulset_status_replicas_updated{job="kube-state-metrics",namespace="mas-sso-stage",statefulset="keycloak"}[5m])
+                changes(kube_statefulset_status_replicas_updated{job="kube-state-metrics",namespace="mas-sso-production",statefulset="keycloak"}[5m])
                   ==
                 0
               )
             for: 10m
             labels:
               service: mas-sso
-              exported_namespace: mas-sso-stage
+              exported_namespace: mas-sso-production
               severity: info
           - alert: MasSSOAvailabilityRHSSOOperatorPodDown
             annotations:
               message: 'The number of ready MAS SSO Operator Pods is less than expected for 10 minutes'
-              dashboard: "https://grafana.stage.devshift.net/d/nzxiqJQMk/mas-sso-monitoring?orgId=1"
+              dashboard: "https://grafana.app-sre.devshift.net/d/_LLa8q_Gk/mas-sso-monitoring"
               runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/mas-sso/sop/mas-sso-availability/mas-sso-availability.md"
-              # Copied from https://gitlab.cee.redhat.com/service/app-interface/blob/master/resources/observability/prometheusrules/kube-metrics.prometheusrules.yaml#L53
             expr: |
               (
-                kube_deployment_spec_replicas{job="kube-state-metrics",namespace="mas-sso-stage",deployment="rhsso-operator"}
+                kube_deployment_spec_replicas{job="kube-state-metrics",namespace="mas-sso-production",deployment="rhsso-operator"}
                   !=
-                kube_deployment_status_replicas_available{job="kube-state-metrics",namespace="mas-sso-stage",deployment="rhsso-operator"}
+                kube_deployment_status_replicas_available{job="kube-state-metrics",namespace="mas-sso-production",deployment="rhsso-operator"}
               ) and (
-                changes(kube_deployment_status_replicas_updated{job="kube-state-metrics",namespace="mas-sso-stage",deployment="rhsso-operator"}[5m])
+                changes(kube_deployment_status_replicas_updated{job="kube-state-metrics",namespace="mas-sso-production",deployment="rhsso-operator"}[5m])
                   ==
                 0
               )
             for: 10m
             labels:
               service: mas-sso
-              exported_namespace: mas-sso-stage
+              exported_namespace: mas-sso-production
               severity: info
+          - alert: MasSSOAvailabilityHigh500Count
+            # if there is a spike in 500s of > 2% of all requests for 10m let us know
+            annotations:
+              message: 'Spike in 500s ( {{$value | printf "%.2f"}}% of requests) over the last 10 mins'
+              dashboard: "https://grafana.app-sre.devshift.net/d/_LLa8q_Gk/mas-sso-monitoring"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/mas-sso/sop/mas-sso-availability/mas-sso-availability.md"
+            expr: |
+              (
+              sum(rate(haproxy_backend_http_responses_total{route=~"^keycloak.*",exported_namespace="mas-sso-production",code="5xx"}[5m]))
+              /
+              sum(rate(haproxy_backend_http_responses_total{route=~"^keycloak.*",exported_namespace="mas-sso-production"}[5m]))
+              ) * 100 > 2
+            for: 10m
+            labels:
+              service: mas-sso
+              exported_namespace: mas-sso-production
+              severity: info
+          - alert: MasSSOAvailabilityHigh400Count
+            # if there is a spike in 400s of > 5% of all requests for 10m let us know
+            annotations:
+              message: 'Spike in 400s ( {{$value | printf "%.2f"}}% of requests) over the last 10 mins'
+              dashboard: "https://grafana.app-sre.devshift.net/d/_LLa8q_Gk/mas-sso-monitoring"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/mas-sso/sop/mas-sso-availability/mas-sso-availability.md"
+            expr: |
+              (
+              sum(rate(haproxy_backend_http_responses_total{route=~"^keycloak.*",exported_namespace="mas-sso-production",code="4xx"}[5m]))
+              /
+              sum(rate(haproxy_backend_http_responses_total{route=~"^keycloak.*",exported_namespace="mas-sso-production"}[5m]))
+              ) * 100 > 5
+            for: 10m
+            labels:
+              service: mas-sso
+              exported_namespace: mas-sso-production
+              severity: info
+
