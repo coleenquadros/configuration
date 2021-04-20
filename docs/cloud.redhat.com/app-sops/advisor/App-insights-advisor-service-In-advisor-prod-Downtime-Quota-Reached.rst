@@ -31,6 +31,7 @@ Steps
 -  Check logs / events for pods in the advisor-prod namespace
 -  Check if there were any recent changes to the CR's in the namespace
 -  ``oc rsh`` into one of the containers if available
+-  Check `Kafka Lag`_ to rule out Kafka issues
 
 Escalations
 -----------
@@ -39,3 +40,4 @@ Escalations
 -  Ping the engineering team that owns the APP
 
 .. _Incident Response Doc: https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE
+.. _Kafka Lag: https://grafana.app-sre.devshift.net/d/KGbSSk6Wz/kafka-lag?orgId=1
