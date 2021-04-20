@@ -17,7 +17,7 @@ Impact
 Summary
 -------
 
-This alert fires when the Payload Tracker pod has downtime at or in excess of 2% of the past 24 hours.
+This alert fires when the Payload Tracker pod has downtime at or in excess of 5% of the past 24 hours.
 
 Access required
 ---------------
