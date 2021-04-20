@@ -43,6 +43,7 @@ for tracing the Payload through the Platform by using the same *request_id* and 
 -  Check oc logs for error messages of severity ERROR.
 -  Check for recent changes to the total memory consumption of the application
 -  Changes to the above should reflect service changes. Check the repo for code changes, and notify service owners.
+-  Check `Kafka Lag`_ to rule out Kafka issues
 
 Escalations
 -----------
@@ -52,4 +53,5 @@ Escalations
 .. _Incident Response Doc: https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE
 .. _Advisor dashboard: https://grafana.app-sre.devshift.net/d/s9df5udMk/advisor-service?orgId=1&refresh=5s&from=now-7d&to=now
 .. _Payload Tracker page: https://payload-tracker-frontend-payload-tracker-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com/track
+.. _Kafka Lag: https://grafana.app-sre.devshift.net/d/KGbSSk6Wz/kafka-lag?orgId=1
 
