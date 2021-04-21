@@ -171,14 +171,14 @@ spec:
         dashboard: 
         message: "ClowdApp not running"
     - alert: ClowderPodCount
-      expr: count by (pod) (clowd_app_managed_apps) == 0
+      expr: kube_deployment_status_replicas_available{namespace="clowder"} != 1
       for: 5m
       labels:
         severity: high
         service: insights
         env: {{{ env }}}
       annotations:
-        dashboard: 
+        dashboard: https://grafana.stage.devshift.net/d/VTSfF_0Gk/clowder-metrics?viewPanel=17&orgId=1
         message: "Clowder pod not running for 5minutes"
     - alert: ClowderContainerRestartCount
       expr: sum(increase(kube_pod_container_status_restarts_total{namespace="clowder", container="manager"}[5m])) > 10
