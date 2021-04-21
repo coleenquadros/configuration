@@ -52,7 +52,7 @@ Follow the steps in the below link to gather the necessary logs
   
   [Observability checks](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/mas-sso/sop/common/observability.md)
 
-- Check Sentry to investigate possible causes.
+- - Check Sentry to investigate possible causes. Project: mas-sso-stage (for stage) and mas-sso-production (for production).
   - Stage: https://sentry.stage.devshift.net
   - Production: https://sentry.devshift.net
 
