@@ -22,3 +22,6 @@ Note: We are using the same account for both production and staging. The offline
 
 1. Copy the token to the above Vault secret. There is no need to restart anything as the OCM integrations will pick up the new token on subsequent runs
 
+## Accepting terms and conditions
+
+When creating a new bot (user), we need to sign Red Hat Terms and Conditions. Log in as the bot and go to https://www.redhat.com/wapps/tnc/ackrequired?site=ocm&event=onlineService
