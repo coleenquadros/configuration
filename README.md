@@ -2101,6 +2101,7 @@ ocm:
 spec:
   provider: aws
   region: us-east-1
+  multi_az: true
 ```
 
 To define a consumer of the Kafka cluster, add the `kafkaCluster` reference to a namespace file. Example:
