@@ -1,7 +1,7 @@
 ---
 $schema: /app-interface/app-interface-sql-query-1.yml
 labels: {}
-name: 2021-04-21-1-explain-a-export-job-events-fk-alternative-stage
+name: 2021-04-21-2-explain-export-job-events-fk-stage
 namespace:
   $ref: /services/insights/tower-analytics/namespaces/stage-tower-analytics-stage.yml
 identifier: tower-analytics-stage
@@ -9,7 +9,7 @@ output: stdout
 overrides:
   db_name: tenant_13051866
 query: |
-  EXPLAIN ANALYZE SELECT y.created AS job_created, 
+  EXPLAIN SELECT y.created AS job_created, 
                  "job_events_fk".system_id         ,
                  "job_events_fk".id                ,
                  "job_events_fk".created           ,
@@ -32,14 +32,11 @@ query: |
                  "job_events_fk".duration          ,
                  "job_events_fk".warnings          ,
                  "job_events_fk".deprecations      ,
-                 "job_events_fk".system_label      ,
-                 "job_events_fk".task_action_label ,
-                 "job_events_fk".playbook_label    ,
-                 "job_events_fk".play_label        ,
-                 "job_events_fk".task_label        ,
-                 "job_events_fk".role_label        ,
-                 "job_events_fk".host_label        ,
-                 "job_events_fk".cluster_label     
+                 "system_system_id"."value" AS "system_label", 
+                 "task_action_task_action"."value" AS "task_action_label", 
+                 "playbook_playbook"."value" AS "playbook_label", "play_play"."value" AS "play_label", 
+                 "task_task"."value" AS "task_label", "role_role"."value" AS "role_label", 
+                 "host_host_name"."value" AS "host_label", "cluster_cluster_id"."value" AS "cluster_label"
   FROM (                          
           SELECT created, id, cluster_id FROM unified_jobs_fk                      
           WHERE unified_jobs_fk.model::text = 'job'::text AND
@@ -49,5 +46,20 @@ query: |
   JOIN job_events_fk ON job_events_fk.job_id = y.id AND        
                         job_events_fk.cluster_id = y.cluster_id
                                                                 
+      LEFT JOIN "system" AS "system_system_id"                          
+          ON "job_events_fk"."system_id"="system_system_id"."system_id"
+      LEFT JOIN "task_action" AS "task_action_task_action"
+          ON "job_events_fk"."task_action"="task_action_task_action"."id"
+      LEFT JOIN "playbook" AS "playbook_playbook"
+          ON "job_events_fk"."playbook"="playbook_playbook"."id"
+      LEFT JOIN "play" AS "play_play"
+          ON "job_events_fk"."play"="play_play"."id"
+      LEFT JOIN "task" AS "task_task"
+          ON "job_events_fk"."task"="task_task"."id"
+      LEFT JOIN "role" AS "role_role"
+          ON "job_events_fk"."role"="role_role"."id"
+      LEFT JOIN "host" AS "host_host_name"
+          ON "job_events_fk"."host_name"="host_host_name"."id"
+      LEFT JOIN "cluster" AS "cluster_cluster_id"
+          ON "job_events_fk"."cluster_id"="cluster_cluster_id"."cluster_id"
   ORDER BY y.created ASC;
-
