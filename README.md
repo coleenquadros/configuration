@@ -2101,6 +2101,7 @@ ocm:
 spec:
   provider: aws
   region: us-east-1
+  multi_az: true
 ```
 
 To define a consumer of the Kafka cluster, add the `kafkaCluster` reference to a namespace file. Example:
@@ -2111,6 +2112,8 @@ kafkaCluster:
 
 This will result in a Secret being created in the consuming namespace. The Secret will be called `kafka` and it will contain the following keys:
 - `bootstrapServerHost` - Bootstrap server hostname
+- `clientId` - Client ID to use for authentication
+- `clientSecret` - Client Secret to use for authentication
 
 * Note: The KAS Fleet Manager is not yet deployed to production, so this feature is not ready for usage yet.
 
