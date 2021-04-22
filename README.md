@@ -2110,6 +2110,13 @@ kafkaCluster:
   $ref: /kafka/example-kafka/cluster.yml
 ```
 
+To explicitly indicate that your service relies on the Kafka service, add the `kafka` dependency in the App file:
+```yaml
+dependencies:
+# existing dependencies
+- $ref: /dependencies/kafka/service.yml
+```
+
 This will result in a Secret being created in the consuming namespace. The Secret will be called `kafka` and it will contain the following keys:
 - `bootstrapServerHost` - Bootstrap server hostname (host:port)
 - `clientID` - Client ID to use for authentication
