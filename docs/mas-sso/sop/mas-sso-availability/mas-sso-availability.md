@@ -4,6 +4,7 @@
   - [Prerequisites](#prerequisites)
   - [Alert](#alert)
     - [Gather logs](#gather-logs)
+    - [Gather Thread Dump](#thread-dump)
     - [Monitoring checks](#monitoring-checks)
     - [Make changes to solve alert](#make-changes-to-solve-alert)
     - [RHSSO](#rhsso)
@@ -50,6 +51,12 @@ CLI required to complete this SOP:
 Follow the steps in the below link to gather the necessary logs
 
 [gather logs](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/mas-sso/sop/common/gather-logs.md)
+
+### Thread Dump
+
+Follow the steps in the below link to gather the thread dumps
+
+[thread-dump](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/mas-sso/sop/common/thread-dump.md)
 
 ### Monitoring checks
 - Follow the steps in below link to check observability parts of mas-sso
