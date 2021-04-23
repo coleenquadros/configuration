@@ -1,0 +1,37 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: host-inventory-rds-stage
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: host-inventory-rds-stage
+    rules:
+    - alert: HBIFreeSpaceLow
+      expr: |
+        predict_linear(rdsosmetrics_fileSys_usedPercent{mount_point="/rdsdbdata", exported_instance="host-inventory-stage"}[1h], 3600 * 24 * 14) > 100
+      for: 1h
+      labels:
+        severity: medium
+        service: insights
+        env: stage
+        app_team: platform
+      annotations:
+        link_url: "https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=host-inventory-stage;is-cluster=false;tab=monitoring"
+        message: "DB instance {{ $labels.exported_instance }} is about to run out of storage within 2 weeks."
+    - alert: HBIFreeSpaceVeryLow
+      expr: |
+        predict_linear(rdsosmetrics_fileSys_usedPercent{mount_point="/rdsdbdata", exported_instance="host-inventory-stage"}[1h], 3600 * 24) > 100
+      for: 1h
+      labels:
+        severity: high
+        service: insights
+        env: stage
+        app_team: platform
+      annotations:
+        link_url: "https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=host-inventory-stage;is-cluster=false;tab=monitoring"
+        message: "DB instance {{ $labels.exported_instance }} is about to run out of storage within 1 DAY."
