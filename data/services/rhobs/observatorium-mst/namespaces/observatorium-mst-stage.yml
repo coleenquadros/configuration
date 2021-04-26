@@ -1,4 +1,3 @@
-# TODO(kakkoyun): Move with CI/CD changes.
 ---
 $schema: /openshift/namespace-1.yml
 
@@ -11,12 +10,13 @@ cluster:
   $ref: /openshift/app-sre-stage-01/cluster.yml
 
 app:
-  $ref: /services/rhobs/telemeter/app.yml
+  $ref: /services/rhobs/observatorium-mst/app.yml
 
 environment:
   $ref: /products/osdv4/environments/stage.yml
 
 networkPoliciesAllow:
+# TODO(kakkoyun): Make sure network policies are aligned properly for migration period.
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
 - $ref: /services/rhobs/telemeter/namespaces/telemeter-stage.yml
 
@@ -40,9 +40,10 @@ terraformResources:
 
 openshiftResources:
 - provider: route
-  path: /app-sre-stage/telemeter-stage/observatorium-mst-api-stage.route.yaml
+  path: /app-sre-stage/observatorium-mst-stage/observatorium-mst-api-stage.route.yaml
   vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.api.stage.openshift.com
   vault_tls_secret_version: 3
+  # TODO(kakkoyun): Migrate secrets to correct namespace.
 - provider: vault-secret
   path: app-interface/app-sre-stage/telemeter-stage/observatorium-mst-thanos-objectstorage
   version: 1
@@ -66,14 +67,14 @@ openshiftResources:
 
 # Serviceaccount for Observatorium platform, Cluster role to access OSD tenant namespace
 - provider: resource
-  path: /app-sre-stage/telemeter-stage/observatorium-mst.serviceaccount.yaml
+  path: /app-sre-stage/observatorium-mst-stage/observatorium-mst.serviceaccount.yaml
 # NOTICE: This resource is deployed through the observatorium-cluster-scope-stage namespace file,
 # until https://issues.redhat.com/browse/APPSRE-2935 is fixed.
 # - provider: resource
-#   path: /app-sre-stage/telemeter-stage/observatorium-mst.clusterrole.yml
+#   path: /app-sre-stage/observatorium-mst-stage/observatorium-mst.clusterrole.yml
 
 # Stage port-forward for debugging
 - provider: resource
-  path: /app-sre-stage/telemeter-stage/observatorium-allow-port-forward.role.yaml
+  path: /app-sre-stage/observatorium-mst-stage/observatorium-allow-port-forward.role.yaml
 - provider: resource
-  path: /app-sre-stage/telemeter-stage/observatorium-allow-port-forward.rolebinding.yaml
+  path: /app-sre-stage/observatorium-mst-stage/observatorium-allow-port-forward.rolebinding.yaml
