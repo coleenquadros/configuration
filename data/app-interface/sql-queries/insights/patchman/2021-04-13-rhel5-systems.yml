@@ -1,0 +1,12 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2021-04-13-rhel5-systems
+namespace:
+  $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
+identifier: patchman-prod
+output: stdout
+queries:
+    - select 'inventory os major', count(id), system_profile->'operating_system'->>'major' from  inventory.hosts group by system_profile->'operating_system'->>'major';
+    - select 'el5 packages', count(id) from package where evra like '%el5%';
+    - select 'systems with el5 packages', count(id) from package join system_package on package.id = system_package.package_id where evra like '%el5%';

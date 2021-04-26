@@ -65,6 +65,34 @@ terraformResources:
   output_resource_name: ocm-service-log-rds
   overrides:
     engine_version: '12.5'
+- provider: sqs
+  account: app-sre
+  identifier: job-queue-service
+  output_resource_name: job-queue-service-sqs
+  specs:
+    - defaults: /terraform/resources/ocm/job-queue-service-heartbeat-sqs.yml
+      queues:
+        - key: job_queue_service_heartbeat
+          value: job-queue-service-heartbeat
+    - defaults: /terraform/resources/ocm/dlq-sqs.yml
+      queues:
+        - key: job_queue_service_heartbeat_dlq
+          value: job-queue-service-heartbeat-dlq
+- provider: aws-iam-service-account
+  account: osd-privatelink-prod
+  identifier: ocm-sts-access
+  user_policy:
+      {
+            "Version": "2012-10-17",
+            "Statement": [{
+                "Action": [
+                    "sts:AssumeRole"
+                ],
+                "Effect": "Allow",
+                "Resource": "arn:aws:iam::*:role/RH-Installer-Role" 
+            }]
+      }
+  output_resource_name: sts-credentials
 - provider: ecr
   account: app-sre
   region: eu-central-1

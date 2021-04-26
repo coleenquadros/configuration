@@ -1,0 +1,49 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /insights-prod/host-inventory-prod/host-inventory-rds.prometheusrules.yaml
+
+evaluation_interval: 10m
+
+tests:
+
+# HBIFreeSpaceLow
+- interval: 10m
+  input_series:
+  - series: rdsosmetrics_fileSys_usedPercent{mount_point="/rdsdbdata", exported_instance="host-inventory-prod"}
+    values: 0+.05x12
+  alert_rule_test:
+  - eval_time: 2h
+    alertname: HBIFreeSpaceLow
+    exp_alerts:
+    - exp_labels:
+        severity: high
+        service: insights
+        env: prod
+        app_team: platform
+        exported_instance: host-inventory-prod
+        mount_point: /rdsdbdata
+      exp_annotations:
+        link_url: "https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=host-inventory-prod;is-cluster=false;tab=monitoring"
+        message: "DB instance host-inventory-prod is about to run out of storage within 2 weeks."
+
+# HBIFreeSpaceVeryLow
+- interval: 10m
+  input_series:
+  - series: rdsosmetrics_fileSys_usedPercent{mount_point="/rdsdbdata", exported_instance="host-inventory-prod"}
+    values: 0+3x12
+  alert_rule_test:
+  - eval_time: 2h
+    alertname: HBIFreeSpaceVeryLow
+    exp_alerts:
+    - exp_labels:
+        severity: critical
+        service: insights
+        env: prod
+        app_team: platform
+        exported_instance: host-inventory-prod
+        mount_point: /rdsdbdata
+      exp_annotations:
+        link_url: "https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=host-inventory-prod;is-cluster=false;tab=monitoring"
+        message: "DB instance host-inventory-prod is about to run out of storage within 1 DAY."

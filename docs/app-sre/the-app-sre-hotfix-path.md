@@ -22,5 +22,7 @@ Note: as an example for this SOP, we will use qontract-reconcile, a service buil
     * Example: https://github.com/app-sre/qontract-reconcile/pull/1223
 1. Cherry-pick the changes from the main branch to the `hotfix` branch (this is to avoid regressions when returning to the main branch).
     * Example: https://github.com/app-sre/qontract-reconcile/pull/1224
+1. Add any required changes to keep version ordering in sync with the main branch. This is only relevant for operators.
+    * Example: https://github.com/openshift/hive/pull/832
 1. Once the changes are merged to the `hotfix` branch, submit a MR to app-interface to promote the changes to production using a commit sha from the `hotfix` branch.
     * Example: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/12773

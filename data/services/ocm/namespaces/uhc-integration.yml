@@ -70,10 +70,6 @@ openshiftResources:
 - provider: route
   path: /services/ocm/integration/accounts-mgmt.route.yaml
 - provider: route
-  path: /services/ocm/integration/accounts-mgmt-envoy.route.yaml
-- provider: route
-  path: /services/ocm/integration/service-logs-envoy.route.yaml
-- provider: route
   path: /services/ocm/integration/authorizations.route.yaml
 - provider: route
   path: /services/ocm/integration/service-logs.route.yaml
@@ -86,7 +82,7 @@ openshiftResources:
 - provider: resource
   path: /services/ocm/integration/gateway.configmap.yaml
 - provider: resource
-  path: /services/ocm/integration/clusters-service.configmap.yaml
+  path: /services/ocm/clusters-service.configmap.yaml
 - provider: resource
   path: /services/ocm/integration/clusters-service-envoy.configmap.yaml
 - provider: resource
@@ -120,18 +116,37 @@ terraformResources:
   output_resource_name: ocm-service-log-rds
 - provider: sqs
   account: app-sre
-  identifier: job-queue-service-integration-v4
+  identifier: job-queue-service-integration
   output_resource_name: job-queue-service-sqs
   specs:
-    - defaults: /terraform/resources/sqs-1.yml
+    - defaults: /terraform/resources/ocm/job-queue-service-heartbeat-sqs-integration.yml
       queues:
-        - key: name
-          value: job-queue-service-heartbeat
+        - key: job_queue_service_heartbeat_integration
+          value: job-queue-service-heartbeat-integration
+    - defaults: /terraform/resources/ocm/dlq-sqs.yml
+      queues:
+        - key: job_queue_service_heartbeat_integration_dlq
+          value: job-queue-service-heartbeat-integration-dlq
+- provider: aws-iam-service-account
+  account: osd-privatelink-int
+  identifier: ocm-sts-access
+  user_policy:
+      {
+            "Version": "2012-10-17",
+            "Statement": [{
+                "Action": [
+                    "sts:AssumeRole"
+                ],
+                "Effect": "Allow",
+                "Resource": "arn:aws:iam::*:role/RH-Installer-Role" 
+            }]
+      }
+  output_resource_name: sts-credentials
 
 openshiftServiceAccountTokens:
 # telemeter
 - namespace:
-    $ref: /services/telemeter/namespaces/telemeter-stage.yml
+    $ref: /services/rhobs/telemeter/namespaces/telemeter-stage.yml
   serviceAccountName: uhc-prometheus-access
 # hivei01ue1
 - namespace:

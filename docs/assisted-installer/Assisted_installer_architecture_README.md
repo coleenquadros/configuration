@@ -15,6 +15,20 @@
 * Agent - runs on-prem on each server.
 * Assisted controller - a job that runs on a newly-created cluster that approves nodes and reports final progress to the assisted service (needed because after all hosts boot from disk there are no agents running).
 
+* Storage units
+    * Postgres DB - stores all the users data, such as: clusters, hosts & events. The data is displayed in the OCM UI.
+                     If someone will delete the DB - we can restore it from RDS snapshots and if not - the user will not see his installed clusters but he can install new cluster.
+                     We now delete all data for a cluster which is inactive for 3 weeks. 
+        
+    * AWS buckets
+        * public - The public bucket has images related to specific versions that Assisted supports.  
+                     This is changed infrequently, no retention for it. If the images will be deleted from this bucket - The service automatically generates the needed objects when it starts up. 
+        
+        * private - We are saving sensitive data such as iso + pull secrets and kubeconfig files. Users generate ISOs.  The ISO contains the user's pull-secret which is used for authentication.  In addition, each installed cluster has its kubeconfig stored so that the user can download it.
+                      We now delete all data for a cluster which is inactive for 3 weeks.
+
+* Total disaster and recovery - In case of total disaster such as: DB or bucket deletion - the service automatically generates the DB & images. If the user started installation before the disaster - it will continue but the user won't be able to see it in the UI. However, the user can run a new cluster installation after the service will recover.    
+ 
 More data about architecture & design can be found in the [Assisted Installer HLD](https://docs.google.com/document/d/1jxNMTlotmJ0GFZ1GUEQ3hfOOVLzMT6mvY8Ufo5RdErY/edit) document
 
 

@@ -23,7 +23,7 @@ Successful processing is defined as insertion of the message’s into the databa
 2. `> 95%` of consumed messages are processed successfully based on SLI success criteria
 3. `> 95%` as derived from HTTP Server and Payload Processing SLOs
 4. Duration of an increase in Kafka lag should not exceed 2 hours
-5. `> 98%` uptime
+5. `> 95%` uptime
 
 ## Rationale
 The given SLIs were determined based on the necessary components of the Payload Tracker Service. Not only does the service process messages from the Kafka topic, but it also must serve HTTP requests. Database connection and successful operation, therefore, is paramount to the operability of the service on the whole. The SLO error budgets were determined by author definition.

@@ -11,9 +11,9 @@ spec:
   groups:
   - name: hive-stage-{{{shard_name}}}
     rules:
-    - alert: HiveDown - stage - {{{shard_name}}}
+    - alert: HiveControllersDown - stage - {{{shard_name}}}
       annotations:
-        message: "No targets found for Hive in namespace {{ $labels.namespace }}. Hive is down."
+        message: "No targets found for hive-controllers in namespace {{ $labels.namespace }}. hive-controllers is down."
         runbook: "https://github.com/openshift/hive-sops/blob/master/sop"
         dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
       expr: |
@@ -22,6 +22,28 @@ spec:
       labels:
         service: hive
         severity: high
+    - alert: HiveClusterSyncDown - stage - {{{shard_name}}}
+      annotations:
+        message: "No targets found for hive-clustersync in namespace {{ $labels.namespace }}. hive-clustersync is down."
+        runbook: "https://github.com/openshift/hive-sops/blob/master/sop"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
+      expr: |
+        absent(up{job="hive-clustersync"} == 1)
+      for: 5m
+      labels:
+        service: hive
+        severity: high
+    - alert: ClusterServiceVersionStuck - stage - {{{shard_name}}}
+      annotations:
+        message: "ClusterServiceVersion {{ $labels.name }} stuck in abnormal state: {{ $labels.reason }}"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/hive/sop/hive-olm-dance.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
+      expr: |
+        csv_abnormal{exported_namespace="hive"}
+      for: 10m
+      labels:
+        service: hive
+        severity: medium
     - alert: InstallJobDelayHigh - stage - {{{shard_name}}}
       annotations:
         message: "Time to start an install job is taking greater than 5 minutes"
@@ -68,7 +90,7 @@ spec:
       labels:
         service: hive
         severity: medium
-    - alert: ClusterProvisioningDelay - stage - {{{shard_name}}}
+    - alert: ClusterProvisioningDelaySREP - stage - {{{shard_name}}}
       annotations:
         message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.exported_namespace }} provisioning taking over 2 hours. Condition/Reason: {{ $labels.condition }} / {{ $labels.reason }}."
         runbook: "https://github.com/openshift/hive-sops/blob/master/sop/ClusterProvisioningDelay.md"
@@ -79,6 +101,22 @@ spec:
       labels:
         service: hive
         severity: medium
+        team: srep
+    - alert: ClusterProvisioningDelayHive - stage - {{{shard_name}}}
+      annotations:
+        message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.exported_namespace }} provisioning taking over 2 hours. Condition/Reason: {{ $labels.condition }} / {{ $labels.reason }}. "
+        runbook: "https://github.com/openshift/hive-sops/blob/master/sop/ClusterProvisioningDelay.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
+      # TODO: for hive team we skip alerts if it's been going over 24h, and if a reason has been auto-detected
+      expr: |
+        (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers",reason="Unknown"}/3600) > 2
+        and
+        (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers",reason="Unknown"}/3600) < 24
+      for: 5m
+      labels:
+        service: hive
+        severity: medium
+        team: hive
     - alert: ClusterProvisioningFailure - stage - {{{shard_name}}}
       annotations:
         message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.exported_namespace }} provisioning failed after 3 times retries. Condition/Reason: {{ $labels.condition }} / {{ $labels.reason }}."

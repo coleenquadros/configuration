@@ -24,7 +24,7 @@ openshiftResources:
       hive_cluster_api_url: https://api.hivep02ue1.p0r5.p1.openshiftapps.com:6443
       hive_cluster_api_url_slug: api-hivep02ue1-p0r5-p1-openshiftapps-com:6443
     - id: 07285129-332e-4bb8-a85b-a06f1a365554
-      status: active
+      status: maintenance
       hive_cluster_name: hivep03uw1
       hive_cluster_api_url: https://api.hivep03uw1.o2y3.p1.openshiftapps.com:6443
       hive_cluster_api_url_slug: api-hivep03uw1-o2y3-p1-openshiftapps-com:6443
@@ -46,6 +46,11 @@ openshiftResources:
   type: extracurlyjinja2
   path: /services/ocm/production/uhc-acct-mngr-templated.secret.yaml
 - provider: vault-secret
+  path: app-interface/app-sre/uhc-production/job-queue-service
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
   path: app-interface/app-sre/uhc-production/uhc-acct-mngr
   version: 18
 - provider: vault-secret
@@ -59,10 +64,6 @@ openshiftResources:
 - provider: route
   path: /services/ocm/production/accounts-mgmt.route.yaml
 - provider: route
-  path: /services/ocm/production/accounts-mgmt-envoy.route.yaml
-- provider: route
-  path: /services/ocm/production/service-logs-envoy.route.yaml
-- provider: route
   path: /services/ocm/production/authorizations.route.yaml
 - provider: route
   path: /services/ocm/production/gateway-server.route.yaml
@@ -70,6 +71,8 @@ openshiftResources:
   path: /services/ocm/production/portal-redirector.route.yaml
 - provider: route
   path: /services/ocm/production/service-logs.route.yaml
+- provider: route
+  path: /services/ocm/production/job-queue.route.yaml
 - provider: resource
   path: /services/ocm/production/portal-redirector-rewriterules.configmap.yaml
 - provider: resource-template
@@ -78,6 +81,8 @@ openshiftResources:
     name: uhc-portal-redirector
 - provider: resource
   path: /services/ocm/production/authentication.configmap.yaml
+- provider: resource
+  path: /services/ocm/production/clusters-service.configmap.yaml
 - provider: resource
   path: /services/ocm/production/gateway.configmap.yaml
 - provider: resource
@@ -96,7 +101,7 @@ openshiftResources:
 openshiftServiceAccountTokens:
 # telemeter
 - namespace:
-    $ref: /services/telemeter/namespaces/telemeter-production.yml
+    $ref: /services/rhobs/telemeter/namespaces/telemeter-production.yml
   serviceAccountName: uhc-prometheus-access
 # hive-production
 - namespace:

@@ -1,0 +1,86 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: telemeter
+
+name: saas-telemeter-monitoring
+description: SaaS tracking file for Telemeter monitoring resources
+
+app:
+  $ref: /services/rhobs/telemeter/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-monitoring-info
+
+managedResourceTypes:
+- ServiceMonitor
+
+imagePatterns: []
+
+resourceTemplates:
+- name: telemeter
+  path: /resources/services/telemeter-template.yaml
+  url: https://gitlab.cee.redhat.com/observatorium/configuration
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+    ref: master
+    parameters:
+      NAMESPACE: telemeter-stage
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.telemeter-prod-01.yml
+    ref: 1c9fcec6c27a47dc06c68e73a38c3ebb248add9e
+    parameters:
+      NAMESPACE: telemeter-production
+- name: observatorium
+  path: /resources/services/observatorium-template.yaml
+  url: https://gitlab.cee.redhat.com/observatorium/configuration
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+    ref: master
+    parameters:
+      NAMESPACE: telemeter-stage
+      MST_NAMESPACE: observatorium-mst-stage
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.telemeter-prod-01.yml
+    ref: 1c9fcec6c27a47dc06c68e73a38c3ebb248add9e
+    parameters:
+      NAMESPACE: telemeter-production
+      MST_NAMESPACE: observatorium-mst-production
+- name: observatorium-metrics
+  path: /resources/services/observatorium-metrics-template.yaml
+  url: https://gitlab.cee.redhat.com/observatorium/configuration
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+    ref: master
+    parameters:
+      NAMESPACE: telemeter-stage
+      MST_NAMESPACE: observatorium-mst-stage
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.telemeter-prod-01.yml
+    ref: 1c9fcec6c27a47dc06c68e73a38c3ebb248add9e
+    parameters:
+      NAMESPACE: telemeter-production
+      MST_NAMESPACE: observatorium-mst-production
+- name: observatorium-jaeger
+  path: /resources/services/jaeger-template.yaml
+  url: https://gitlab.cee.redhat.com/observatorium/configuration
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+    ref: master
+    parameters:
+      NAMESPACE: telemeter-stage
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.telemeter-prod-01.yml
+    ref: 1c9fcec6c27a47dc06c68e73a38c3ebb248add9e
+    parameters:
+      NAMESPACE: telemeter-production

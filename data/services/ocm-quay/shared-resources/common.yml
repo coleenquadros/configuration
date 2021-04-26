@@ -1,0 +1,22 @@
+---
+$schema: /openshift/shared-resources-1.yml
+
+labels: {}
+
+name: ocm-quay-common-shared-resources
+description: shared common resources for ocm-quay namespaces
+
+openshiftResources:
+# ECR image pull secret
+- provider: vault-secret
+  path: app-sre/integrations-output/aws-ecr-image-pull-secrets/quayio-prod/eu-central-1/dockercfg
+  version: 1
+  type: kubernetes.io/dockerconfigjson
+  name: quayio-backup-image-pull-secret
+  annotations:
+    qontract.ignore_reconcile_time: "true"
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /ocm-quay/ocm-quay-syslog-cloudwatch-bridge-secret.yaml
+- provider: resource
+  path: /ocm-quay/quay.web-allow-external.networkpolicy.yaml

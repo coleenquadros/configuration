@@ -32,9 +32,6 @@ managedResourceNames:
     - prometheus-additional-scrape-config
     - prometheus-auth-proxy
 
-sharedResources:
-- $ref: /services/observability/shared-resources/cluster-alerts.yml
-
 openshiftResources:
 # Observability
 
@@ -56,6 +53,8 @@ openshiftResources:
   type: extracurlyjinja2
   path: /observability/alertmanager/alertmanager-instance.secret.yaml
   validate_alertmanager_config: true
+  variables:
+    jiralert_host: jiralert.app-sre.devshift.net
 
 ## Servicemonitors
 ### All managed Prometheus Operators
@@ -123,6 +122,14 @@ openshiftResources:
     appsre_env: production
     max_clusters_per_shard: 500
     grafana_datasource: app-sre-prod-01-prometheus
+## hive-stage
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/prometheusrules/hive-stage-capacity.prometheusrules.yaml
+  variables:
+    appsre_env: staging
+    max_clusters_per_shard: 500
+    grafana_datasource: app-sre-prod-01-prometheus
 ### Hive (v3)
 ## hive-production
 - provider: resource-template
@@ -143,21 +150,6 @@ openshiftResources:
 ### Github Mirror Service
 - provider: resource
   path: /observability/prometheusrules/github-mirror-production.prometheusrules.yaml
-  ### Kas Fleet Manager
-- provider: resource
-  path: /observability/prometheusrules/kas-fleet-manager-cluster-correctness-production.prometheusrules.yaml
-- provider: resource
-  path: /observability/prometheusrules/kas-fleet-manager-cluster-latency-production.prometheusrules.yaml
-- provider: resource
-  path: /observability/prometheusrules/kas-fleet-manager-slos-availability-production.prometheusrules.yaml
-- provider: resource
-  path: /observability/prometheusrules/kas-fleet-manager-slos-kafka-correctness-production.prometheusrules.yaml
-- provider: resource
-  path: /observability/prometheusrules/kas-fleet-manager-slos-kafka-latency-production.prometheusrules.yaml
-- provider: resource
-  path: /observability/prometheusrules/kas-fleet-manager-slos-latency-production.prometheusrules.yaml
-- provider: resource
-  path: /observability/prometheusrules/kas-fleet-manager-production.prometheusrules.yaml
 ### Qontract-reconcile SLOs
 - provider: resource-template
   path: /observability/prometheusrules/qontract-reconcile-time-to-reconcile-slo.prometheusrules.yaml
@@ -165,6 +157,11 @@ openshiftResources:
   variables:
     namespace: app-interface-production
     severity: medium
+## Insights AWS rules
+- provider: resource
+  path: /insights-prod/playbook-dispatcher/playbook-dispatcher-rds.prometheusrules.yaml
+- provider: resource
+  path: /insights-prod/host-inventory-prod/host-inventory-rds.prometheusrules.yaml
 
 ## ServiceMonitors
 ### Vault
@@ -198,6 +195,18 @@ openshiftResources:
   variables:
     namespace: app-sre-observability-production
     name: cloudwatch-exporter-quay
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/cloudwatch-exporter.servicemonitor.yaml
+  variables:
+    namespace: app-sre-observability-production
+    name: cloudwatch-exporter-ocm-quay-us-east-1
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/cloudwatch-exporter.servicemonitor.yaml
+  variables:
+    namespace: app-sre-observability-production
+    name: cloudwatch-exporter-ocm-quay-eu-west-1
 - provider: resource-template
   type: jinja2
   path: /observability/servicemonitors/cloudwatch-exporter.servicemonitor.yaml
@@ -265,11 +274,3 @@ openshiftResources:
   variables:
     environment: production
     namespace: deployment-validation-operator
-
-  ### Kas Fleet Manager
-- provider: resource-template
-  type: jinja2
-  path: /observability/servicemonitors/managed-services.servicemonitor.yaml
-  variables:
-    environment: production
-    namespace: managed-services-production

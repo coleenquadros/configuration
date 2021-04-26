@@ -173,9 +173,11 @@ If all else fails, ping the interrupt catcher on #sd-app-sre
 
 If you have a `Route` for your application that's facing the internet, we can add a blackbox healthcheck that helps gather data around latency and availability.
 
-Please add a JIRA issue on the APPSRE board and we will create a blackbox exporter check for you.
+To add blackbox monitoring for your application:
+1. Add a scrape job for your application. Here is an [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/eea816c1299e80972e59aa1a441227a3e6651c0e/resources/observability/prometheus/prometheus-app-sre-additional-scrapeconfig.secret.yaml#L227-265).
+1. Add an alert that uses the created scrape job. Here is an [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/eea816c1299e80972e59aa1a441227a3e6651c0e/resources/observability/prometheusrules/blackbox-exporter.prometheusrules.yaml#L27-36).
 
-Also remember to point to any basic auth creds or a machine token if your application needs authentication to reach.
+If authentication is needed to reach the monitored application, please create a Jira ticket on the APPSRE board with all the details.
 
 * * *
 

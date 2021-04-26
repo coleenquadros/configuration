@@ -46,9 +46,9 @@ resourceTemplates:
     ref: master
     upstream: RedHatInsights-turnpike-gh-build-master
     parameters:
-      FLASK_SERVER_NAME: internal.cloud.stage.redhat.com
+      FLASK_SERVER_NAME: internal.${PLATFORM_HOSTNAME}
       FLASK_SERVICE_URL: http://web.turnpike-stage.svc.cluster.local:5000
-      NGINX_SERVER_NAME: internal.cloud.stage.redhat.com
+      NGINX_SERVER_NAME: internal.${PLATFORM_HOSTNAME}
   - namespace:
       $ref: /services/insights/turnpike/namespaces/prod-turnpike-prod.yml
     ref: master
@@ -67,20 +67,20 @@ resourceTemplates:
     upstream: RedHatInsights-turnpike-gh-build-master
     parameters:
       AUTH_DEBUG: "1"
-      FLASK_SERVER_NAME: internal.cloud.stage.redhat.com
+      FLASK_SERVER_NAME: internal.${PLATFORM_HOSTNAME}
       REDIS_SERVICE_NAME: redis.turnpike-stage.svc.cluster.local
       SETTINGS_JSON: |
         {
           "strict": true,
           "debug": true,
           "sp": {
-            "entityId": "https://internal.cloud.stage.redhat.com/saml/metadata.xml",
+            "entityId": "https://internal.${PLATFORM_HOSTNAME}/saml/metadata.xml",
             "assertionConsumerService": {
-              "url": "https://internal.cloud.stage.redhat.com/saml/acs/",
+              "url": "https://internal.${PLATFORM_HOSTNAME}/saml/acs/",
               "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
             },
             "singleLogoutService": {
-              "url": "https://internal.cloud.stage.redhat.com/saml/sls/",
+              "url": "https://internal.${PLATFORM_HOSTNAME}/saml/sls/",
               "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
             },
             "NameIDFormat": "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"
@@ -150,6 +150,18 @@ resourceTemplates:
         - name: rhsm-subscriptions
           route: /app/rhsm-subscriptions/actuator
           origin: http://rhsm-subscriptions-worker-monitoring.rhsm-stage.svc.cluster.local:8080/actuator
+          auth:
+            saml: "'subscription-watch-admins' in user['Role']"
+            x509: "x509['subject_dn'] in ['/DC=com/DC=redhat/OU=serviceaccounts/UID=nonprod-rhsmapi/Email=it-pnt@redhat.com/DC=com/DC=redhat/OU=serviceaccounts/CN=nonprod-rhsmapi', '/DC=com/DC=redhat/OU=serviceaccounts/UID=nonprod-itpntautomation/Email=it-pnt@redhat.com/DC=com/DC=redhat/OU=serviceaccounts/CN=nonprod-itpntautomation', '/DC=com/DC=redhat/OU=messaging/OU=serviceusers/UID=msg-subscription-watch-turnpike/L=stage/CN=msg-subscription-watch-turnpike']"
+        - name: rhsm-marketplace
+          route: /app/rhsm-marketplace/actuator
+          origin: http://marketplace-worker-monitoring.rhsm-stage.svc.cluster.local:8080/actuator
+          auth:
+            saml: "'subscription-watch-admins' in user['Role']"
+            x509: "x509['subject_dn'] == '/DC=com/DC=redhat/OU=messaging/OU=serviceusers/UID=msg-subscription-watch-turnpike/L=stage/CN=msg-subscription-watch-turnpike'"
+        - name: rhsm-metrics
+          route: /app/rhsm-metrics/actuator
+          origin: http://metrics-worker-monitoring.rhsm-stage.svc.cluster.local:8080/actuator
           auth:
             saml: "'subscription-watch-admins' in user['Role']"
             x509: "x509['subject_dn'] == '/DC=com/DC=redhat/OU=messaging/OU=serviceusers/UID=msg-subscription-watch-turnpike/L=stage/CN=msg-subscription-watch-turnpike'"
@@ -236,12 +248,17 @@ resourceTemplates:
             saml: "'patch-administrators' in user['Role']"
         - name: playbook-dispatcher-api
           route: /api/playbook-dispatcher/api
-          origin: http://playbook-dispatcher-api.playbook-dispatcher-stage.svc.cluster.local:8000/internal
+          origin: http://${PLAYBOOK_DISPATCHER_HOST}:8000/internal
           auth:
             saml: "'crc-pipeline-team' in user['Role']"
         - name: playbook-dispatcher-connect
           route: /api/playbook-dispatcher/connect/
           origin: http://playbook-dispatcher-connect-connect-api.playbook-dispatcher-stage.svc.cluster.local:8083/
+          auth:
+            saml: "'crc-pipeline-team' in user['Role']"
+        - name: xjoin-kafka-connect
+          route: /api/xjoin/connect/
+          origin: http://xjoin-kafka-connect-strimzi-connect-api.xjoin-stage.svc.cluster.local:8083/
           auth:
             saml: "'crc-pipeline-team' in user['Role']"
 
@@ -335,6 +352,17 @@ resourceTemplates:
           origin: http://rhsm-subscriptions-worker-monitoring.rhsm-prod.svc.cluster.local:8080/actuator
           auth:
             saml: "'subscription-watch-admins' in user['Role']"
+            x509: "x509['subject_dn'] in ['/DC=com/DC=redhat/OU=serviceaccounts/UID=rhsmapi/Email=it-pnt@redhat.com/DC=com/DC=redhat/OU=serviceaccounts/CN=rhsmapi']"
+        - name: rhsm-marketplace
+          route: /app/rhsm-marketplace/actuator
+          origin: http://marketplace-worker-monitoring.rhsm-prod.svc.cluster.local:8080/actuator
+          auth:
+            saml: "'subscription-watch-admins' in user['Role']"
+        - name: rhsm-metrics
+          route: /app/rhsm-metrics/actuator
+          origin: http://metrics-worker-monitoring.rhsm-prod.svc.cluster.local:8080/actuator
+          auth:
+            saml: "'subscription-watch-admins' in user['Role']"
         - name: rhsm-conduit
           route: /app/rhsm-conduit/actuator
           origin: http://rhsm-conduit.rhsm-prod.svc.cluster.local:8080/actuator
@@ -410,7 +438,7 @@ resourceTemplates:
             saml: "'vulnerability-admins' in user['Role']"
         - name: playbook-dispatcher-api
           route: /api/playbook-dispatcher/api
-          origin: http://playbook-dispatcher-api.playbook-dispatcher-prod.svc.cluster.local:8000/internal
+          origin: http://${PLAYBOOK_DISPATCHER_HOST}:8000/internal
           auth:
             saml: "'crc-pipeline-team' in user['Role']"
         - name: playbook-dispatcher-connect

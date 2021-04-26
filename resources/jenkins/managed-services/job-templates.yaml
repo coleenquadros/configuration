@@ -15,6 +15,9 @@
     <<: *gl_pr_check
     artifacts_path: 'test-results/**'
     publishers:
+    - gitlab_message:
+        <<: *gitlab_message_defaults
+    - gitlab-notifier
     - archive:
         artifacts: '{artifacts_path}'
         allow-empty: true
@@ -42,7 +45,7 @@
     name: "{gl_group}-{gl_project}-gl-build-test-{branch}"
     wrappers:
       - timeout_wrapper:
-          timeout: "{timeout}"
+          timeout: 360
       - vault-secrets:
           <<: *vault_defaults
           secrets:
@@ -64,6 +67,22 @@
         name: RELEASE
         default: '{release}'
         description: 'indicates release build'
+    - bool:
+        name: TEMP_CPAAS_BUILD
+        default: 'true'
+        description: 'whether to use scratch=true in CPaaS build'
+    - bool:
+        name: SKIP_BUILD
+        default: 'false'
+        description: 'true if you want to skip CPaaS build and use snapshot images defined in build_config.yaml for testing/releasing'
+    - string:
+        name: CPAAS_BUILD
+        default: ''
+        description: 'if you want to use existing CPaaS build (avoid triggering new build)'
+    - bool:
+        name: CLUSTER_CLEANUP
+        default: 'true'
+        description: 'include deletion of test cluster'
     publishers:
     - archive:
         artifacts: "{archive_artifacts}"
@@ -400,6 +419,24 @@
         allow-empty: true
 
 - job-template:
+    id: managed-kafka-e2e-test-suite-sandbox
+    name: managed-kafka-e2e-test-suite-sandbox
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *mk_e2e_test_suite_sandbox
+    ci_cmd: 'TESTCASE=QuarkusSampleTest ./pipeline.sh'
+    <<: *gl_timed
+    publishers:
+    - archive:
+        artifacts: 'test-results/**'
+        allow-empty: true
+
+- job-template:
     id: managed-kafka-promote-ui
     name: managed-kafka-promote-ui
     wrappers: 
@@ -464,8 +501,23 @@
           secrets:
           - *quay_secret_push
           - *rhoas-quay-access
+          - *kas_fleet_manager_pr_check
     <<: *gl_build_master
 
+- job-template:
+    id: gl-pr-check-kas-fleet-manager
+    name: "{gl_group}-{gl_project}-gl-pr-check"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+          - *quay_secret_push
+          - *rhoas-quay-access
+          - *kas_fleet_manager_pr_check
+    <<: *gl_pr_check
+        
 - job-template:
     id: 'gl-pr-check-mas-sso'
     name: '{gl_group}-{gl_project}-gl-pr-check'
