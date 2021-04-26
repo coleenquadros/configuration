@@ -26,7 +26,7 @@ The critical part of the migration is moving a namespace between clusters. a Mer
 
 Once the merge request is merged, the deployment jobs will be triggered. This is not optimal, but these jobs are triggered quickly (by design). At this point, some resources may already be deployed, but they are not expected to work. It is possible that the namespace on the target cluster does not exist yet, but the deployment jobs take that into account. Our integrations (openshift-resources, terraform-resources, etc), which are not as quick, will start applying required resources into the namespace after the deployment jobs. Most of these resources will cause pods to be restarted, which means that the state in the new namespace will be eventually consistent.
 
-At this point, the namespace on the source cluster still exists with the service running in it, but it is not managed by app-interface any longer. This is the main reason to migate "here-and-now".
+At this point, the namespace on the source cluster still exists with the service running in it, but it is not managed by app-interface any longer. This is the main reason to migrate "here-and-now".
 
 * Note: the other option would be do duplicate _a lot_ of resources, which is not beneficial in the writer's perspective.
 
