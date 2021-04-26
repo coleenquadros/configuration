@@ -271,6 +271,12 @@ At this point, the monitoring is all set, and you're ready to move on to the nex
 1. Update `clusters-service` secret to add new shards. Example: https://gitlab.cee.redhat.com/service/app-interface/-/blob/55beecac/data/services/ocm/shared-resources/production.yml#L31-35.
 1. The id field is set to a random uuid unique per shard (uuidgen can be used to generate one)
 
+## Adding the shard to support PrivateLink
+
+1. Add the shard's information to the relevant environment's HiveConfig (under .spec.awsPrivateLink.associatedVPCs).
+    * The VPC ID can be retreived from the cluster's AWS account using the AWS Infrastructure Access feature.
+    * The HiveConfig files live in app-interface and are referenced from the hive namespace files.
+
 ## Validations
 
 When creating clusters make sure that you're logged in the correct environment. Use the option `--url` of the `ocm login` command to connect to the proper environment.
