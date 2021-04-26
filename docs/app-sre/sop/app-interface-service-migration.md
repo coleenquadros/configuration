@@ -22,7 +22,7 @@ This is an SOP to list the actions to be performed to migrate a service between 
 
 The process from a high-level perspective is: setup, move, cleanup. The optimal way to migrate a service is "here-and-now". The process describes the move of a namespace between clusters, and not the copy and parallel run of a service on 2 clusters.
 
-The critical part of the migration is moving a namespace between clusters. a Merge request to do this action is very simple and includes only very few changes, but a lot is happenning behind the scenes.
+The critical part of the migration is moving a namespace between clusters. a Merge request to do this action is very simple and includes only very few changes (change cluster ref and observability namespace network policy), but a lot is happenning behind the scenes.
 
 Once the merge request is merged, the deployment jobs will be triggered. This is not optimal, but these jobs are triggered quickly (by design). At this point, some resources may already be deployed, but they are not expected to work. It is possible that the namespace on the target cluster does not exist yet, but the deployment jobs take that into account. Our integrations (openshift-resources, terraform-resources, etc), which are not as quick, will start applying required resources into the namespace after the deployment jobs. Most of these resources will cause pods to be restarted, which means that the state in the new namespace will be eventually consistent.
 
