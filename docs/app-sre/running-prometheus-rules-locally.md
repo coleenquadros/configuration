@@ -2,6 +2,20 @@
 
 You can use the script [`run-prometheus-test.py`](/hack/run-prometheus-test.py) for this matter. Do not try to run things via `promtool` as paths in the files do not correspond exactly to app-interface repository.
 
+```
+./hack/run-prometheus-test.py -h
+usage: run-prometheus-test.py [-h] [-v VARS_FILE] [-p] test_file
+
+positional arguments:
+  test_file             Prometheus test file
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v VARS_FILE, --vars-file VARS_FILE
+                        File with variables in yaml format
+  -p, --pretty-print    Pretty print prometheus test errors
+```
+
 In app-interface, [openshiftResouces](/README.md#manage-openshift-resources-via-app-interface-openshiftnamespace-1yml) can be straight yamls containing the openshift resources or jinja templates with variables that will be expanded with the `variables` set in the namespace file. If your prometheus rule file is a jinja template, your test will need to be a template too. When running the tests locally, we'll need to pass manually the variables that are usually passed via the namespace file definition.
 
 ## Requirements
@@ -37,7 +51,7 @@ variables:
 and then you can run your tests
 
 ```
-$ ./hack/run-prometheus-test.py resources/observability/prometheusrules/hive-production-capacity.prometheusrules-test.yaml  variables.yaml
+$ ./hack/run-prometheus-test.py -v variables.yaml resources/observability/prometheusrules/hive-production-capacity.prometheusrules-test.yaml
 Checking /var/folders/dx/y5_klhc1187gnzzmyb4pswb40000gn/T/tmpi58b5vwn
   SUCCESS: 3 rules found
 
