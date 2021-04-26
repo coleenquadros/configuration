@@ -214,7 +214,7 @@ roles:
 
 ### Logging into Vault
 
-To log into Vault, follow the instructions in [Vault's Readme](https://gitlab.cee.redhat.com/service/dev-guidelines/blob/master/vault.md).
+To log into Vault, follow the instructions in [Vault's Readme](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/vault.md#vault-user-guide).
 
 ### Updating Vault Secrets
 

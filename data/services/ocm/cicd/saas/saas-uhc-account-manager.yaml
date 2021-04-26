@@ -43,7 +43,9 @@ resourceTemplates:
     IMAGE_REGISTRY: quay.io
     IMAGE_REPOSITORY: app-sre/uhc-account-manager
     JWKS_URL: https://api.openshift.com/.well-known/jwks.json
+    # UHC_BASE_URL applies only to API pods with envoy running
     UHC_BASE_URL: ${OCM_BASE_URL}
+    CRONJOB_UHC_BASE_URL: ${OCM_BASE_URL}
     UHC_TOKEN_URL: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
     RHIT_BASE_USER_URL: https://user.api.redhat.com/v2/
     RHIT_BASE_SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5/
@@ -62,10 +64,13 @@ resourceTemplates:
     SUBSCRIPTION_STATUS_RECONCILER_DRY_RUN: "false"
     EBS_ACCOUNT_RECONCILER_DRY_RUN: "false"
     OCP_SKU_LIST_FILE: /configs/subscription-skus/ocp-skus.yaml
+    RHM_SKU_LIST_FILE: /configs/subscription-skus/rhm-skus.yaml
     USE_CANDLEPIN_BASIC_AUTH: "false"
     ENABLE_SENTRY: "true"
     ENABLE_TERMS_ENFORCEMENT: "true"
     RHIT_TIMEOUT: "30s"
+    RH_MARKETPLACE_QUOTA_RECONCILER_WORKER_COUNT: "1"
+    RH_MARKETPLACE_QUOTA_RECONCILER_CLIENT_CARDINALITY: "1"
     OCP_USAGE_RECONCILER_WORKER_COUNT: "1"
     OCP_USAGE_CLEANER_WORKER_COUNT: "1"
     OCP_USAGE_RECONCILER_ACTIVE_DEADLINE_SECONDS: "21600"
@@ -89,6 +94,10 @@ resourceTemplates:
     API_TARGET_AVERAGE_CPU_UTILIZATION: "80"
     API_TARGET_AVERAGE_MEMORY_UTILIZATION: "75"
     TARGET_CPU_UTILIZATION: "80"
+    SUBSCRIPTION_STATUS_RECONCILER_RELEASED_UNRELEASED_TRIGGER_DURATION: "120h"
+    SUBSCRIPTION_STATUS_RECONCILER_OSDTRIAL_EXPIRY_REMINDER_1_DURATION: "720h"
+    SUBSCRIPTION_STATUS_RECONCILER_OSDTRIAL_EXPIRY_REMINDER_2_DURATION: "336h"
+    SUBSCRIPTION_STATUS_RECONCILER_OSDTRIAL_EXPIRY_REMINDER_3_DURATION: "72h"
     # group cron schedules here
     SUBSCRIPTION_STATUS_RECONCILER_SCHEDULE_EXPRESSION: "6 * * * *"
     EBS_ACCOUNT_RECONCILER_CRON_SCHEDULE: "11 * * * *"
@@ -97,6 +106,7 @@ resourceTemplates:
     OCP_USAGE_RECONCILER_CRON_SCHEDULE: "26 */2 * * *"
     MOA_ENTITLEMENT_RECONCILER_CRON_SCHEDULE: "31 11 * * *"
     AUTO_ENTITLEMENT_RECONCILER_CRON_SCHEDULE: "31 11 * * *"
+    RH_MARKETPLACE_QUOTA_RECONCILER_CRON_SCHEDULE: "*/5 * * * *"
   targets:
   - namespace:
       $ref: /services/ocm/namespaces/uhc-integration-v3.yml
@@ -129,6 +139,7 @@ resourceTemplates:
       SUSPEND_OCP_USAGE_RECONCILER_CRON: "true"
       SUSPEND_OCP_USAGE_CLEANER_CRON: "true"
       SUSPEND_SUBSCRIPTION_BASED_DATA_RECONCILER_CRON: "false"
+      SUSPEND_RH_MARKETPLACE_QUOTA_RECONCILER_CRON: "false"
       SUSPEND_EBS_ACCOUNT_RECONCILER_CRON: "false"
       SUSPEND_SUBSCRIPTION_STATUS_RECONCILER_CRON: "false"
       # TODO un-suspend reg cred pool loader once issues are resolved
@@ -137,6 +148,7 @@ resourceTemplates:
       SUSPEND_AUTO_ENTITLEMENT_RECONCILER_CRON: "false"
       MOA_SKU: "SER0579"
       ACCOUNT_RECONCILER_DRY_RUN: "false"
+      RH_MARKETPLACE_QUOTA_RECONCILER_DRY_RUN: "true"
       REGISTRY_CREDENTIAL_POOL_LOADER_DRY_RUN: "false"
       REGISTRY_CREDENTIAL_POOL_LOADER_WORKER_COUNT: "1"
       REGISTRY_CREDENTIAL_POOL_LOADER_CARDINALITY: "5"
@@ -167,12 +179,13 @@ resourceTemplates:
       HYDRA_DEBUG: "false"
       RHIT_BASE_CANDLEPIN_URL: https://admin.rhsm.stage.redhat.com/candlepin
       USE_CANDLEPIN_BASIC_AUTH: "true"
+      # Set rate limits fairly high in integration to allow for scalability testing.
       CLUSTER_REG_RATE_LIMIT: 30000
+      ORG_CLUSTER_REG_RATE_LIMIT: 30000
       DB_MAX_OPEN_CONNS: 250
       SENTRY_URL: "sentry.autom8.in"
       SENTRY_PROJECT: "9"
       GLOG_V: 5
-      ORG_CLUSTER_REG_RATE_LIMIT: 50
       # Update the value to any random string to perform a rolling update of the deployment.
       UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_1
       SUBSCRIPTION_STATUS_RECONCILER_EVALUATION_DURATION: "24h"
@@ -184,13 +197,14 @@ resourceTemplates:
       SUSPEND_OCP_USAGE_RECONCILER_CRON: "true"
       SUSPEND_OCP_USAGE_CLEANER_CRON: "true"
       SUSPEND_SUBSCRIPTION_BASED_DATA_RECONCILER_CRON: "false"
+      SUSPEND_RH_MARKETPLACE_QUOTA_RECONCILER_CRON: "false"
       SUSPEND_EBS_ACCOUNT_RECONCILER_CRON: "false"
       SUSPEND_SUBSCRIPTION_STATUS_RECONCILER_CRON: "false"
-      # TODO un-suspend reg cred pool loader once issues are resolved
       SUSPEND_REGISTRY_CREDENTIAL_POOL_LOADER_CRON: "false"
       SUSPEND_MOA_ENTITLEMENT_RECONCILER_CRON: "false"
       SUSPEND_AUTO_ENTITLEMENT_RECONCILER_CRON: "false"
       MOA_SKU: "SER0579"
+      RH_MARKETPLACE_QUOTA_RECONCILER_DRY_RUN: "false"
       ACCOUNT_RECONCILER_DRY_RUN: "false"
       REGISTRY_CREDENTIAL_POOL_LOADER_DRY_RUN: "false"
       REGISTRY_CREDENTIAL_POOL_LOADER_WORKER_COUNT: "1"
@@ -237,6 +251,9 @@ resourceTemplates:
       UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_2
       SUBSCRIPTION_BASED_DATA_RECONCILER_CLIENT_CARDINALITY: "1"
       SUBSCRIPTION_STATUS_RECONCILER_RELEASED_UNRELEASED_TRIGGER_DURATION: "1h"
+      SUBSCRIPTION_STATUS_RECONCILER_OSDTRIAL_EXPIRY_REMINDER_1_DURATION: "1440h"
+      SUBSCRIPTION_STATUS_RECONCILER_OSDTRIAL_EXPIRY_REMINDER_2_DURATION: "1439h"
+      SUBSCRIPTION_STATUS_RECONCILER_OSDTRIAL_EXPIRY_REMINDER_3_DURATION: "1438h"
       # Don't run OCP Usage reconciliation jobs in stage, since they just fail anyway without a public rhsm stage endpoint
       # Suspension params should always be env specific
       SUSPEND_ACCOUNT_RECONCILER_CRON: "false"
@@ -244,14 +261,15 @@ resourceTemplates:
       SUSPEND_OCP_USAGE_RECONCILER_CRON: "true"
       SUSPEND_OCP_USAGE_CLEANER_CRON: "true"
       SUSPEND_SUBSCRIPTION_BASED_DATA_RECONCILER_CRON: "false"
+      SUSPEND_RH_MARKETPLACE_QUOTA_RECONCILER_CRON: "false"
       SUSPEND_EBS_ACCOUNT_RECONCILER_CRON: "false"
       SUSPEND_SUBSCRIPTION_STATUS_RECONCILER_CRON: "false"
-      # TODO un-suspend reg cred pool loader once issues are resolved
       SUSPEND_REGISTRY_CREDENTIAL_POOL_LOADER_CRON: "false"
       SUSPEND_MOA_ENTITLEMENT_RECONCILER_CRON: "false"
       SUSPEND_AUTO_ENTITLEMENT_RECONCILER_CRON: "false"
       MOA_ENTITLEMENT_RECONCILER_DRY_RUN: "false"
       AUTO_ENTITLEMENT_RECONCILER_DRY_RUN: "false"
+      RH_MARKETPLACE_QUOTA_RECONCILER_DRY_RUN: "false"
       MOA_SKU: "SER0579"
       REGISTRY_CREDENTIAL_POOL_LOADER_DRY_RUN: "false"
       REGISTRY_CREDENTIAL_POOL_LOADER_WORKER_COUNT: "1"
@@ -299,13 +317,14 @@ resourceTemplates:
       SUSPEND_OCP_USAGE_RECONCILER_CRON: "true"
       SUSPEND_OCP_USAGE_CLEANER_CRON: "true"
       SUSPEND_SUBSCRIPTION_BASED_DATA_RECONCILER_CRON: "true"
+      SUSPEND_RH_MARKETPLACE_QUOTA_RECONCILER_CRON: "true"
       SUSPEND_EBS_ACCOUNT_RECONCILER_CRON: "true"
       SUSPEND_SUBSCRIPTION_STATUS_RECONCILER_CRON: "true"
-      # TODO un-suspend reg cred pool loader once issues are resolved
       SUSPEND_REGISTRY_CREDENTIAL_POOL_LOADER_CRON: "true"
       SUSPEND_MOA_ENTITLEMENT_RECONCILER_CRON: "true"
       SUSPEND_AUTO_ENTITLEMENT_RECONCILER_CRON: "true"
       MOA_SKU: "SER0579"
+      RH_MARKETPLACE_QUOTA_RECONCILER_DRY_RUN: "false"
       REGISTRY_CREDENTIAL_POOL_LOADER_DRY_RUN: "false"
       REGISTRY_CREDENTIAL_POOL_LOADER_WORKER_COUNT: "1"
       REGISTRY_CREDENTIAL_POOL_LOADER_CARDINALITY: "5"
@@ -321,7 +340,7 @@ resourceTemplates:
       METRICS_BASE_URL: "uhc-acct-mngr-metrics.uhc-stage.svc.cluster.local"
   - namespace:
       $ref: /services/ocm/namespaces/uhc-production.yml
-    ref: fb0cb2a4ee7bbf7ec321de9193a828376df4ef44
+    ref: 49ff96be2249318592ce653d800b530faefb2465
     parameters:
       REPLICAS: 6
       # Set replica min and max to the same value to essentially disable the HPA due to https://bugzilla.redhat.com/show_bug.cgi?id=1867477
@@ -351,6 +370,7 @@ resourceTemplates:
       SUSPEND_OCP_USAGE_CLEANER_CRON: "false"
       SUSPEND_SUBSCRIPTION_STATUS_RECONCILER_CRON: "false"
       SUSPEND_SUBSCRIPTION_BASED_DATA_RECONCILER_CRON: "false"
+      SUSPEND_RH_MARKETPLACE_QUOTA_RECONCILER_CRON: "false"
       SUSPEND_EBS_ACCOUNT_RECONCILER_CRON: "false"
       SUSPEND_ACCOUNT_RECONCILER_CRON: "false"
       SUSPEND_REGISTRY_CREDENTIAL_POOL_LOADER_CRON: "false"
@@ -360,6 +380,7 @@ resourceTemplates:
       SUSPEND_FETCH_TELEMETER_METRICS_CRON: "false"
       MOA_ENTITLEMENT_RECONCILER_DRY_RUN: "false"
       AUTO_ENTITLEMENT_RECONCILER_DRY_RUN: "false"
+      RH_MARKETPLACE_QUOTA_RECONCILER_DRY_RUN: "false"
       MOA_SKU: "MW01369"
       # Update the value to any random string to perform a rolling update of the deployment.
       UPDATE_DEPLOYMENT_CONFIG_CHANGE: roll_for_certificate
@@ -369,12 +390,16 @@ resourceTemplates:
       TELEMETER_DEBUG: "true"
       QUAY_REGISTRY_TEAM_NAME: "installers"
       # group cron schedules
-      ACCOUNT_RECONCILER_CRON_SCHEDULE: "36 18 * * *"
+      ACCOUNT_RECONCILER_CRON_SCHEDULE: "36 15 * * *"
       DEPROVISION_OLD_SUBSCRIPTIONS_CRON_SCHEDULE: "36 17 * * *"
       SUBSCRIPTION_BASED_DATA_RECONCILER_CRON_SCHEDULE: "3-59/30 * * * *"
       REGISTRY_CREDENTIAL_POOL_LOADER_CRON_SCHEDULE: "46 * * * *"
       FETCH_TELEMETER_METRICS_CRON_SCHEDULE: "*/5 * * * *"
       METRICS_BASE_URL: "uhc-acct-mngr-metrics.uhc-production.svc.cluster.local"
+      # 5 minutes, 300 seconds in milliseconds
+      DB_QUERY_READ_TIMEOUT_SERVER: "300000"
+      # 1 minute, 60 seconds in milliseconds
+      DB_QUERY_WRITE_TIMEOUT_SERVER: "60000"
   - namespace:
       $ref: /services/ocm/namespaces/uhc-stage-sso-test.yml
     ref: master
@@ -417,9 +442,9 @@ resourceTemplates:
       SUSPEND_OCP_USAGE_CLEANER_CRON: "true"
       # Suspend RHIT-based reconciliation jobs in sso-test since they won't work anyway without proper certs
       SUSPEND_SUBSCRIPTION_BASED_DATA_RECONCILER_CRON: "true"
+      SUSPEND_RH_MARKETPLACE_QUOTA_RECONCILER_CRON: "true"
       SUSPEND_EBS_ACCOUNT_RECONCILER_CRON: "true"
       SUSPEND_SUBSCRIPTION_STATUS_RECONCILER_CRON: "false"
-      # TODO un-suspend reg cred pool loader once issues are resolved
       SUSPEND_REGISTRY_CREDENTIAL_POOL_LOADER_CRON: "false"
       SUSPEND_MOA_ENTITLEMENT_RECONCILER_CRON: "true"
       SUSPEND_AUTO_ENTITLEMENT_RECONCILER_CRON: "true"

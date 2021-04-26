@@ -115,8 +115,23 @@ spec:
       labels:
         group: insights-storage-broker
         topic: platform.inventory.events
+    - record: is_us_summer_time
+      expr: |
+        (vector(1) and (month() > 3 and month() < 10))
+        or
+        (vector(1) and (month() == 3 and (day_of_month() - day_of_week()) >= 10) and absent((day_of_month() >= 10) and (day_of_week() == 0)))
+        or
+        (vector(1) and (month() == 10 and (day_of_month() - day_of_week()) < 10) and absent((day_of_month() >= 10) and (day_of_week() == 0)))
+        or
+        (vector(1) and ((month() == 10 and hour() < 1) or (month() == 3 and hour() > 0)) and ((day_of_month() >= 10) and (day_of_week() == 0)))
+        or
+        vector(0)
+    - record: us_time
+      expr: time() - 14400 * is_us_summer_time
+    - record: us_hour
+      expr: hour(us_time)
     - alert: KafkaLagFast
-      expr: LagGauge > LAG_THRESHOLD and LagDelta > 1000
+      expr: LagGauge > LAG_THRESHOLD and LagDelta > 1000 and (us_hour >= 9 or us_hour <= 22)
       for: 15m
       labels:
         severity: critical
@@ -127,7 +142,7 @@ spec:
         message: "High Lag for {{ $labels.topic }} : {{ $labels.group }}"
         runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/kafka-lag.rst
     - alert: KafkaLag
-      expr: LagGauge > LAG_THRESHOLD and LagDelta > 0
+      expr: LagGauge > LAG_THRESHOLD and LagDelta > 0 and (us_hour >= 9 or us_hour <= 22)
       for: 1h
       labels:
         severity: critical
@@ -171,14 +186,14 @@ spec:
         dashboard: 
         message: "ClowdApp not running"
     - alert: ClowderPodCount
-      expr: count by (pod) (clowd_app_managed_apps) == 0
+      expr: kube_deployment_status_replicas_available{namespace="clowder"} != 1
       for: 5m
       labels:
         severity: high
         service: insights
         env: {{{ env }}}
       annotations:
-        dashboard: 
+        dashboard: https://grafana.stage.devshift.net/d/VTSfF_0Gk/clowder-metrics?viewPanel=17&orgId=1
         message: "Clowder pod not running for 5minutes"
     - alert: ClowderContainerRestartCount
       expr: sum(increase(kube_pod_container_status_restarts_total{namespace="clowder", container="manager"}[5m])) > 10

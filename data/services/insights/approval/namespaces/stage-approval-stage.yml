@@ -28,6 +28,7 @@ networkPoliciesAllow:
 - $ref: /services/insights/topological-inventory/namespaces/stage-topological-inventory-stage.yml
 - $ref: /services/insights/catalog/namespaces/stage-catalog-stage.yml
 - $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
+- $ref: /services/insights/approval-process/namespaces/stage-approval-process-stage.yml
 
 managedRoles: true
 
@@ -46,26 +47,14 @@ openshiftResources:
     qontract.recycle: "true"
 - provider: vault-secret
   path: insights/secrets/insights-stage/approval-stage/approval-pam-secrets
-  version: 2
-  annotations:
-    qontract.recycle: "true"
-- provider: vault-secret
-  path: insights/secrets/insights-stage/approval-stage/keystore
   version: 3
   annotations:
     qontract.recycle: "true"
-- provider: resource-template
-  path: /insights-stage/approval-stage/kie-pam-config.secret.yml
 - provider: vault-secret
   path: insights/quay/quay.io
   version: 3
   type: kubernetes.io/dockerconfigjson
   name: quay-cloudservices-pull
-- provider: vault-secret
-  path: insights/secrets/global/rds-client-ca
-  version: 1
-  annotations:
-    qontract.recycle: "true"
 
 managedTerraformResources: true
 
@@ -79,16 +68,6 @@ terraformResources:
     name: "approval_production"
   parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-approval-stage.yml
   output_resource_name: approval-db
-  enhanced_monitoring: true
-- provider: rds
-  account: insights-stage
-  identifier: approval-pam-stage
-  defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
-  overrides:
-    username: "insights"
-    name: "pam_production"
-  parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-approval-stage.yml
-  output_resource_name: pam-db
   enhanced_monitoring: true
 - provider: cloudwatch
   account: insights-stage

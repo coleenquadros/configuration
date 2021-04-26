@@ -1,0 +1,45 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2021-04-21-2-explain-export-job-events-fk-alternative-stage
+namespace:
+  $ref: /services/insights/tower-analytics/namespaces/stage-tower-analytics-stage.yml
+identifier: tower-analytics-stage
+output: stdout
+overrides:
+  db_name: tenant_13051866
+query: |
+  EXPLAIN SELECT y.created AS job_created, 
+                 "job_events_fk".system_id         ,
+                 "job_events_fk".id                ,
+                 "job_events_fk".created           ,
+                 "job_events_fk".uuid              ,
+                 "job_events_fk".parent_uuid       ,
+                 "job_events_fk".event             ,
+                 "job_events_fk".task_action       ,
+                 "job_events_fk".failed            ,
+                 "job_events_fk".changed           ,
+                 "job_events_fk".playbook          ,
+                 "job_events_fk".play              ,
+                 "job_events_fk".task              ,
+                 "job_events_fk".role              ,
+                 "job_events_fk".job_id            ,
+                 "job_events_fk".host_id           ,
+                 "job_events_fk".host_name         ,
+                 "job_events_fk".cluster_id        ,
+                 "job_events_fk".start             ,
+                 "job_events_fk".end               ,
+                 "job_events_fk".duration          ,
+                 "job_events_fk".warnings          ,
+                 "job_events_fk".deprecations      
+                
+  FROM (                          
+          SELECT created, id, cluster_id FROM unified_jobs_fk                      
+          WHERE unified_jobs_fk.model::text = 'job'::text AND
+                unified_jobs_fk.created >= '2020-08-26'::date::timestamp AND
+                unified_jobs_fk.created <= ('2020-08-26'::date::date + interval '1 day - 1 microsecond')::timestamp
+  ) y                                                                                                              
+  JOIN job_events_fk ON job_events_fk.job_id = y.id AND        
+                        job_events_fk.cluster_id = y.cluster_id
+                                                                
+  ORDER BY y.created ASC;

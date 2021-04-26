@@ -241,10 +241,22 @@
   - { name: labels, type: json }
   - { name: name, type: string, isRequired: true }
   - { name: description, type: string, isRequired: true }
+  - { name: mirror, type: QuayOrg_v1 }
+  - { name: managedRepos, type: boolean, isRequired: true }
+  - { name: instance, type: QuayInstance_v1, isRequired: true }
   - { name: serverUrl, type: string }
   - { name: managedTeams, type: string, isList: true, isRequired: true }
   - { name: automationToken, type: VaultSecret_v1 }
   - { name: pushCredentials, type: VaultSecret_v1 }
+
+- name: QuayInstance_v1
+  fields:
+  - { name: schema, type: string, isRequired: true }
+  - { name: path, type: string, isRequired: true }
+  - { name: labels, type: json }
+  - { name: name, type: string, isRequired: true }
+  - { name: description, type: string, isRequired: true }
+  - { name: url, type: string, isRequired: true }
 
 - name: JenkinsInstance_v1
   fields:
@@ -373,6 +385,7 @@
   fields:
   - { name: provider, type: string, isRequired: true }
   - { name: region, type: string, isRequired: true }
+  - { name: multi_az, type: boolean, isRequired: true }
 
 - name: ClusterSpec_v1
   fields:
@@ -389,7 +402,6 @@
   - { name: storage, type: int, isRequired: true }
   - { name: load_balancers, type: int, isRequired: true }
   - { name: private, type: boolean, isRequired: true }
-  - { name: upgrade, type: string, isRequired: true }
   - { name: provision_shard_id, type: string }
   - { name: autoscale, type: ClusterSpecAutoScale_v1 }
 
@@ -471,6 +483,8 @@
   - { name: account, type: AWSAccount_v1, isRequired: true }
   - { name: tags, type: json }
   - { name: manageRoutes, type: boolean }
+  - { name: manageSecurityGroups, type: boolean }
+  - { name: cidrBlock, type: string }
   - { name: delete, type: boolean }
 
 - name: ClusterPeeringConnectionClusterRequester_v1
@@ -667,6 +681,11 @@
   - { name: description, type: string }
   - { name: region, type: string, isRequired: true }
 
+- name: ACMDomain_v1
+  fields:
+  - { name: domain_name, type: string, isRequired: true }
+  - { name: alternate_names, type: string, isList: true }
+
 - name: NamespaceOpenshiftResource_v1
   isInterface: true
   interfaceResolve:
@@ -740,10 +759,21 @@
       elasticsearch: NamespaceTerraformResourceElasticSearch_v1
       acm: NamespaceTerraformResourceACM_v1
       kinesis: NamespaceTerraformResourceKinesis_v1
+      s3-cloudfront-public-key: NamespaceTerraformResourceS3CloudFrontPublicKey_v1
   fields:
   - { name: provider, type: string, isRequired: true }
   - { name: account, type: string, isRequired: true }
   - { name: identifier, type: string, isRequired: true }
+  - { name: output_resource_name, type: string }
+
+- name: NamespaceTerraformResourceS3CloudFrontPublicKey_v1
+  interface: NamespaceTerraformResource_v1
+  fields:
+  - { name: provider, type: string, isRequired: true }
+  - { name: account, type: string, isRequired: true }
+  - { name: region, type: string }
+  - { name: identifier, type: string, isRequired: true }
+  - { name: secret, type: VaultSecret_v1 }
   - { name: output_resource_name, type: string }
 
 - name: NamespaceTerraformResourceACM_v1
@@ -753,7 +783,8 @@
   - { name: account, type: string, isRequired: true }
   - { name: region, type: string }
   - { name: identifier, type: string, isRequired: true }
-  - { name: secret, type: VaultSecret_v1, isRequired: true }
+  - { name: secret, type: VaultSecret_v1 }
+  - { name: domain, type: ACMDomain_v1 }
   - { name: output_resource_name, type: string }
 
 - name: NamespaceTerraformResourceElasticSearch_v1
@@ -797,6 +828,11 @@
   - { name: output_resource_name, type: string }
   - { name: storage_class, type: string }
 
+- name: NamespaceTerraformResourceServiceAccountAWSInfrastructureAccess_v1
+  fields:
+  - { name: cluster, type: Cluster_v1, isRequired: true }
+  - { name: access_level, type: string, isRequired: true }
+
 - name: NamespaceTerraformResourceServiceAccount_v1
   interface: NamespaceTerraformResource_v1
   fields:
@@ -807,6 +843,7 @@
   - { name: policies, type: string, isList: true }
   - { name: user_policy, type: json }
   - { name: output_resource_name, type: string }
+  - { name: aws_infrastructure_access, type: NamespaceTerraformResourceServiceAccountAWSInfrastructureAccess_v1 }
 
 - name: NamespaceTerraformResourceElastiCache_v1
   interface: NamespaceTerraformResource_v1
@@ -859,6 +896,7 @@
   - { name: identifier, type: string, isRequired: true }
   - { name: output_resource_name, type: string }
   - { name: mirror, type: ContainerImageMirror_v1, isRequired: false }
+  - { name: public, type: boolean }
 
 
 - name: NamespaceTerraformResourceS3CloudFront_v1
@@ -1058,12 +1096,13 @@
   - { name: public, type: boolean, isRequired: true }
   - { name: mirror, type: ContainerImageMirror_v1, isRequired: false }
 
-- name: OcpReleaseEcrMirror_v1
+- name: OcpReleaseMirror_v1
   fields:
   - { name: hiveCluster, type: Cluster_v1, isRequired: true }
   - { name: ecrResourcesNamespace, type: Namespace_v1, isRequired: true}
   - { name: ocpReleaseEcrIdentifier, type: string, isRequired: true }
   - { name: ocpArtDevEcrIdentifier, type: string, isRequired: true }
+  - { name: quayTargetOrgs, type: QuayOrg_v1, isRequired: true, isList: true}
 
 - name: ContainerImageMirror_v1
   fields:
@@ -1086,7 +1125,7 @@
 
 - name: AppQuayReposTeams_v1
   fields:
-  - { name: permissions, type: PermissionGithubOrgTeam_v1, isList: true, isRequired: true }
+  - { name: permissions, type: PermissionQuayOrgTeam_v1, isList: true, isRequired: true }
   - { name: role, type: string, isRequired: true }
 
 - name: AppQuayReposNotifications_v1
@@ -1182,9 +1221,9 @@
   - { name: name, type: string, isRequired: true }
   - { name: description, type: string, isRequired: true }
   - { name: onboardingStatus, type: string, isRequired: true }
-  - { name: grafanaUrl, type: string }
-  - { name: sopsUrl, type: string }
-  - { name: architectureDocument, type: string }
+  - { name: grafanaUrl, type: string, isRequired: true }
+  - { name: sopsUrl, type: string, isRequired: true }
+  - { name: architectureDocument, type: string, isRequired: true }
   - { name: parentApp, type: App_v1 }
   - { name: serviceDocs, type: string, isList: true }
   - { name: serviceOwners, type: Owner_v1, isList: true, isRequired: true }
@@ -1192,7 +1231,7 @@
   - { name: dependencies, type: Dependency_v1, isList: true }
   - { name: gcrRepos, type: AppGcrRepos_v1, isList: true }
   - { name: quayRepos, type: AppQuayRepos_v1, isList: true }
-  - { name: escalationPolicy, type: AppEscalationPolicy_v1 }
+  - { name: escalationPolicy, type: AppEscalationPolicy_v1, isRequired: true }
   - { name: endPoints, type: AppEndPoints_v1, isList: true }
   - { name: codeComponents, type: AppCodeComponents_v1, isList: true }
   - { name: sentryProjects, type: AppSentryProjects_v1, isList: true }
@@ -1246,6 +1285,7 @@
   - { name: compare, type: boolean }
   - { name: timeout, type: int }
   - { name: publishJobLogs, type: boolean }
+  - { name: use_channel_in_image_tag, type: boolean }
   - name: roles
     type: Role_v1
     isList: true
@@ -1403,7 +1443,7 @@
   - { name: name, type: string, isRequired: true }
   - { name: description, type: string, isRequired: true }
   - { name: service, type: string, isRequired: true }
-  - { name: org, type: string, isRequired: true }
+  - { name: quayOrg, type: QuayOrg_v1, isRequired: true }
   - { name: team, type: string, isRequired: true }
 
 - name: ExternalUser_v1
@@ -1596,6 +1636,7 @@
   - { name: namespaces_v1, type: Namespace_v1, isList: true, datafileSchema: /openshift/namespace-1.yml }
   - { name: gcp_projects_v1, type: GcpProject_v1, isList: true, datafileSchema: /dependencies/gcp-project-1.yml }
   - { name: quay_orgs_v1, type: QuayOrg_v1, isList: true, datafileSchema: /dependencies/quay-org-1.yml }
+  - { name: quay_instances_v1, type: QuayInstance_v1, isList: true, datafileSchema: /dependencies/quay-instance-1.yml }
   - { name: jenkins_instances_v1, type: JenkinsInstance_v1, isList: true, datafileSchema: /dependencies/jenkins-instance-1.yml }
   - { name: jenkins_configs_v1, type: JenkinsConfig_v1, isList: true, datafileSchema: /dependencies/jenkins-config-1.yml }
   - { name: jira_servers_v1, type: JiraServer_v1, isList: true, datafileSchema: /dependencies/jira-server-1.yml }
@@ -1625,7 +1666,7 @@
   - { name: unleash_instances_v1, type: UnleashInstance_v1, isList: true, datafileSchema: /app-sre/unleash-instance-1.yml }
   - { name: dns_zone_v1, type: DnsZone_v1, isList: true, datafileSchema: /dependencies/dns-zone-1.yml }
   - { name: slack_workspaces_v1, type: SlackWorkspace_v1, isList: true, datafileSchema: /dependencies/slack-workspace-1.yml }
-  - { name: ocp_release_ecr_mirror_v1, type: OcpReleaseEcrMirror_v1, isList: true, datafileSchema: /dependencies/ocp-release-ecr-mirror-1.yml}
+  - { name: ocp_release_mirror_v1, type: OcpReleaseMirror_v1, isList: true, datafileSchema: /dependencies/ocp-release-mirror-1.yml}
   - { name: slo_document_v1, type: SLODocument_v1, isList: true, datafileSchema: /app-sre/slo-document-1.yml}
 
 - name: SentryTeam_v1

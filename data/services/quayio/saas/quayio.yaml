@@ -86,6 +86,7 @@ resourceTemplates:
   path: /deploy/openshift/quay-app.yaml
   url: https://github.com/quay/quay
   targets:
+  # Staging
   - namespace:
       $ref: /services/quayio/namespaces/quays02ue1.yml
     ref: quayio
@@ -105,23 +106,29 @@ resourceTemplates:
       QUAY_APP_DEPLOYMENT_NAMESPACE: quay
       QUAY_APP_CONFIG_SECRET: quay-config-secret
       DEBUGLOG: "true"
-      QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "update_me_when_secret_changes_v41"
+      QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "update_me_when_secret_changes_v42"
       QUAY_WORKER_MULTIPLIER_REGISTRY: 1
       QUAY_WORKER_CONNECTION_COUNT_REGISTRY: 80
+      # Canary deployment
+      IMAGE_CANARY: 206170669542.dkr.ecr.eu-central-1.amazonaws.com/quayio-backup
+      IMAGE_TAG_CANARY: latest
+      QUAY_APP_DEPLOYMENT_REPLICAS_CANARY: 1
+      QUAY_APP_CONFIG_SECRET_CANARY: quay-config-secret-canary
+
   # These two are primary.  Keep ref and secret version in sync at a minimum
   - namespace:
       $ref: /services/quayio/namespaces/quayp03ue1.yml
     ref: 92550ebf50f8a02788f6d38f76c92f79f233fe87
     parameters:
       QUAY_APP_DEPLOYMENT_REPLICAS: 30
-      QUAY_APP_CONFIG_SECRET: quay-config-secret-readonly
+      QUAY_APP_CONFIG_SECRET: quay-config-secret
       QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "update_smtp_creds_bounce_pods_projquay_1423_v2"
   - namespace:
       $ref: /services/quayio/namespaces/quayp05ue1.yml
     ref: 92550ebf50f8a02788f6d38f76c92f79f233fe87
     parameters:
       QUAY_APP_DEPLOYMENT_REPLICAS: 33
-      QUAY_APP_CONFIG_SECRET: quay-config-secret-readonly
+      QUAY_APP_CONFIG_SECRET: quay-config-secret
       QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "update_smtp_creds_bounce_pods_projquay_1423_v2"
   # This is the backup region
   - namespace:
@@ -139,7 +146,7 @@ resourceTemplates:
       $ref: /services/quayio/namespaces/quays02ue1.yml
     ref: b01dcb1e602a909604244eb147a6958978ea7ecd
     parameters:
-      JOB_NAME: "2021-01-27" # provide_a_unique_job_name_to_trigger_job
+      JOB_NAME: "2021-04-13" # provide_a_unique_job_name_to_trigger_job
       ACTIVE_DEADLINE_SECONDS: "600"
       REDIS_SECRET: "quayio-stage-elasticache"
       IMAGE: "quay.io/app-sre/flush-redis"
@@ -153,4 +160,4 @@ resourceTemplates:
       ACTIVE_DEADLINE_SECONDS: "600"
       REDIS_SECRET: "quayio-elasticache"
       IMAGE: "quay.io/app-sre/flush-redis"
-      JOB_NAME: "flush-redis-prod-2020-10-27"
+      JOB_NAME: "flush-redis-prod-2021-04-13"

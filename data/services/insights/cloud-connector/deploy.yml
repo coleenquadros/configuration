@@ -1,0 +1,59 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: cloud-connector
+  platform: insights
+
+name: cloud-connector
+description: cloud-connector app on the Insights Platform
+
+app:
+  $ref: /services/insights/cloud-connector/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+timeout: 5
+
+managedResourceTypes:
+- Deployment
+- Service
+- CronJob
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: cloud-connector
+  path: /deploy/template-prod.yml
+  url: https://github.com/RedHatInsights/cloud-connector
+  targets:
+  - namespace:
+      $ref: /services/insights/cloud-connector/namespaces/stage.yml
+    ref: b2c9dd620dad9e6ed017479961adc8ec114be32c
+    parameters:
+      LOG_LEVEL: DEBUG
+      MQTT_BROKER_ADDRESS: wss://connect.${PLATFORM_HOSTNAME}:443
+      MQTT_TOPIC_PREFIX: redhat
+      AUTH_GATEWAY_URL: http://apicast.3scale-stage.svc.cluster.local:8892/internal/certauth
+      SOURCES_BASE_URL: http://${SOURCES_HOST}:${SOURCES_PORT}
+  - namespace:
+      $ref: /services/insights/cloud-connector/namespaces/prod.yml
+    ref: 07bd2746e8359d2f4bf20fc5413c0f5e4a2bb085
+    parameters:
+      LOG_LEVEL: DEBUG
+      MQTT_BROKER_ADDRESS: wss://FAKEconnect.cloud.redhat.com:443
+      MQTT_TOPIC_PREFIX: redhat
+      AUTH_GATEWAY_URL: http://apicast.3scale-prod.svc.cluster.local:8893/internal/certauth
+      SOURCES_BASE_URL: http://${SOURCES_HOST}:${SOURCES_PORT}

@@ -79,6 +79,7 @@ this repository.
       - [Manage DynamoDB tables via App-Interface (`/openshift/namespace-1.yml`)](#manage-dynamodb-tables-via-app-interface-openshiftnamespace-1yml)
       - [Manage ECR repositories via App-Interface (`/openshift/namespace-1.yml`)](#manage-ecr-repositories-via-app-interface-openshiftnamespace-1yml)
       - [Manage stacks of S3 bucket and CloudFront distribution via App-Interface (`/openshift/namespace-1.yml`)](#manage-stacks-of-s3-bucket-and-cloudfront-distribution-via-app-interface-openshiftnamespace-1yml)
+      - [Manage CloudFront Public Keys via App-Interface (`/openshift/namespace-1.yml`)](#manage-cloudfront-public-keys-via-app-interface-openshiftnamespace-1yml)
       - [Manage CloudWatch Log Groups via App-Interface (`/openshift/namespace-1.yml`)](#manage-cloudwatch-log-groups-via-app-interface-openshiftnamespace-1yml)
       - [Manage Key Management Service Keys via App-Interface (`/openshift/namespace-1.yml`)](#manage-key-management-service-keys-via-app-interface-openshiftnamespace-1yml)
       - [Manage Kinesis Streams via App-Interface (`/openshift/namespace-1.yml`)](#manage-kinesis-streams-via-app-interface-openshiftnamespace-1yml)
@@ -1182,20 +1183,29 @@ In order to import certificates stored in Vault into AWS Certificate Manager, yo
 - `provider`: must be `acm`
 - `account`: The AWS account you want to import certificates in.
 - `identifier` - name of resource to create (or update)
-- `secret`: Certificate store in Vault ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/dsaas/routes/_wildcard.api.openshift.io))
+- `secret`: Certificate store in Vault ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/dsaas/routes/_wildcard.api.openshift.io)) (optional)
   - `path`: vault path
   - `field`: `all`
   - `version`: (optional) for vault kv2
+- `domain`: The domain information for the certificate. (optional)
+  - `domain_name`: The name of the domain for which the certificate should be issued
+  - `alternate_names`: A list of domains to include as SANs in the certficate
 - `output_resource_name`: name of Kubernetes Secret to be created.
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-ssl" and `provider` is set to `acm`, the created Secret will be called `my-ssl-acm`.
+
+NOTE: Either `secret` or `domain_name` must be provided, but not both.  Use `secret` to import a certificate from vault, and `domain` for AWS to create a certifcate
 
 Once the changes are merged, the certificate will be imported into ACM and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
 The Secret will contain the following fields:
 
 - `arn` - Amazon Resource Name (ARN) of the Certificate.
+- `domain_name` - The name of the domain this Certification is valid for.
+- `status` - The status of the Certificate.
+
+If `secret` was set above, then these fields will also be included:
 - `key` - Certificate private key.
 - `certificate` - Certificate body.
 - `caCertificate` - Certificate chain if provided.
@@ -1376,9 +1386,7 @@ IAM users to be used as service accounts can be entirely self-serviced via App-I
 In order to add or update a service account, you need to add them to the `terraformResources` field.
 
 - `provider`: must be `aws-iam-service-account`
-- `account`: must be one of the AWS account names we manage. Current options:
-  - `app-sre`
-  - `osio`
+- `account`: must be one of the AWS account names we manage.
 - `identifier`: name of resource to create (or update)
 - `variables`: list of key-value pairs to use for templating of `user_policy`. these pairs will also be added to the output resource.
 - `policies`: list of AWS policies you wish to attach to the service account user.
@@ -1387,12 +1395,17 @@ In order to add or update a service account, you need to add them to the `terraf
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-user" and `provider` "aws-iam-service-account", the created Secret will be called `my-user-aws-iam-service-account`.
+- `aws_infrastructure_access`: (optional) grant the created IAM user AWS Infrastructure access via OCM:
+  - `cluster`: reference to the cluster you want to grant infrastructure access to
+  - `access_level`: level of access to grant (currently either read-only or network-mgmt)
 
 Once the changes are merged, the IAM resources will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
 The Secret will contain the following fields:
 - `aws_access_key_id` - The access key ID.
 - `aws_secret_access_key` - The secret access key.
+- `role_arn` - (optional) the role ARN to assume if `aws_infrastructure_access` is defined.
+  * Note: this key will be added after the AWS infrastructure access is granted successfully.
 
 In addition, any additional key-value pairs defined under `variables` will be added to the Secret.
 
@@ -1471,6 +1484,7 @@ In order to add or update an ECR repository, you need to add them to the `terraf
 - `account`: must be one of the AWS account names we manage. Current options:
   - `quayio-stage`
 - `identifier` - name of resource to create (or update)
+- `public`: (optional) - should the repository be public (requires AWS provider plugin version 3.30.0 or above)
 - `output_resource_name`: name of Kubernetes Secret to be created.
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
@@ -1490,7 +1504,7 @@ Stacks of an S3 bucket with a CloudFront distribution can be entirely self-servi
 
 In order to add or update an S3+CloudFront stack, you need to add them to the `terraformResources` field.
 
-- `provider`: must be `s3-cloudrfont`
+- `provider`: must be `s3-cloudfront`
 - `account`: must be one of the AWS account names we manage. Current options:
   - `quayio-stage`
   - `quayio-prod`
@@ -1513,6 +1527,32 @@ The Secret will contain the following fields:
 - `s3_canonical_user_id` - The Amazon S3 canonical user ID for the origin access identity.
 - `distribution_domain` - The domain name corresponding to the distribution.
 - `origin_access_identity` - The origin access identity in the form of `origin-access-identity/cloudfront/<cloud_front_origin_access_identity_id>`.
+
+#### Manage CloudFront Public Keys via App-Interface (`/openshift/namespace-1.yml`)
+
+CloudFront Public Keys can be self-serviced via App-Interface.  Once created in AWS, the public key will need to be manually associated with a `Key group` and then that `Key group` manually associated with a CloudFront Distribution to sign URLs or cookies.
+
+- `provider`: must be `s3-cloudfront-public-key`
+- `account`: The AWS account you want to import certificates into.
+- `identifier`: name of resource to create (or update)
+- `secret`: Certificate store in Vault
+  - `path`: vault path
+  - `field`: `all`
+  - `version`: (optional) for vault kv2
+- `output_resource_name`: name of Kubernetes Secret to be created.
+  - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
+  - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
+    - For example, for a resource with `identifier` "my-key" and `provider` is set to `s3-cloudfront-public-key`, the created Secret will be called `my-key-s3-cloudfront-public-key`
+
+The `secret` must have the key `cloudfront_public_key` that contains the public key to be uploaded to AWS.
+
+Once the changes are merged, the public key will be imported into CloudFront Public Keys and a Kubernetes Secret will be created in the same namespace with all relevant details.
+
+The Secret will contain the following fields:
+
+- `id` - The AWS identifier for the public key.
+- `etag` - The current version of the public key.
+- `key` - The public key.
 
 #### Manage CloudWatch Log Groups via App-Interface (`/openshift/namespace-1.yml`)
 
@@ -2061,6 +2101,7 @@ ocm:
 spec:
   provider: aws
   region: us-east-1
+  multi_az: true
 ```
 
 To define a consumer of the Kafka cluster, add the `kafkaCluster` reference to a namespace file. Example:
@@ -2069,10 +2110,17 @@ kafkaCluster:
   $ref: /kafka/example-kafka/cluster.yml
 ```
 
-This will result in a Secret being created in the consuming namespace. The Secret will be called `kafka` and it will contain the following keys:
-- `bootstrapServerHost` - Bootstrap server hostname
+To explicitly indicate that your service relies on the Kafka service, add the `kafka` dependency in the App file:
+```yaml
+dependencies:
+# existing dependencies
+- $ref: /dependencies/kafka/service.yml
+```
 
-* Note: The KAS Fleet Manager is not yet deployed to production, so this feature is not ready for usage yet.
+This will result in a Secret being created in the consuming namespace. The Secret will be called `kafka` and it will contain the following keys:
+- `bootstrapServerHost` - Bootstrap server hostname (host:port)
+- `clientID` - Client ID to use for authentication
+- `clientSecret` - Client Secret to use for authentication
 
 ### Write and run Prometheus rules tests
 
@@ -2089,6 +2137,8 @@ A few notes about the integration that run the tests:
 Writing tests can be difficult at the beginning. This [article](https://www.robustperception.io/unit-testing-rules-with-prometheus) is a nicer start than the official documentation.
 
 If your alerts are based on recording rules, do not write tests using the recorded series, use always the original metrics or you won't be testing the complete setup.
+
+While writing tests, sometimes it is convenient to be able to run tests locally to avoid waiting for them to be run in Jenkins. Please follow [this guide](/docs/app-sre/running-prometheus-rules-locally.md) to know to do it.
 
 ## Design
 

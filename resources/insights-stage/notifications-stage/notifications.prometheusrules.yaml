@@ -1,0 +1,28 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: notifications-stage
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: notifications-stage
+    rules:
+      - alert: NotificationsBackendDownStage
+        expr: kube_endpoint_address_available{endpoint='notifications-backend',namespace='notifications-stage'}
+        for: 5m
+        labels:
+          severity: medium
+          service: insights
+          env: stage
+          app_team: notifications
+        annotations:
+          dashboard: "https://grafana.stage.devshift.net/d/KQIVyFuMk/notifications-dashboard"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/notifications-stage/deployments"
+          message: "Notifications Backend Alert (Stage)"
+          description: "Notifications Backend: Down in Stage for 5 minutes."
+          runbook: "https://core-platform-apps.pages.redhat.com/notifications-docs/dev/runbooks/alerts/NotificationsBackendDownProd.html"
+

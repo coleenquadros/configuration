@@ -47,9 +47,9 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/patchman/namespaces/stage-patchman-engine-stage.yml
-    ref: c94f69a1b9dff62cf22244fba998eade7a83b912
+    ref: d17072cde6208cfea2e3eeb396af13f11a3c6a9c
     parameters:
-      IMAGE_TAG: ea44ecc # 1.7.9
+      IMAGE_TAG: 5c52146 # 1.9.5
       ENABLE_CYNDI_TAGS: "true"
       DISABLE_CACHE_COUNTS: "true"
       RES_CPU: "256m"
@@ -63,9 +63,9 @@ resourceTemplates:
       CW_AWS_ACCESS_KEY_ID: ""
   - namespace:
       $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
-    ref: c94f69a1b9dff62cf22244fba998eade7a83b912
+    ref: d17072cde6208cfea2e3eeb396af13f11a3c6a9c
     parameters:
-      IMAGE_TAG: ea44ecc # 1.7.9
+      IMAGE_TAG: 5c52146 # 1.9.5
       ENABLE_CYNDI_TAGS: "true"
       DISABLE_CACHE_COUNTS: "true"
       RES_CPU: "999m"
@@ -77,17 +77,18 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/patchman/namespaces/stage-patchman-engine-stage.yml
-    ref: c94f69a1b9dff62cf22244fba998eade7a83b912
+    ref: d17072cde6208cfea2e3eeb396af13f11a3c6a9c
     parameters:
-      IMAGE_TAG: ea44ecc # 1.7.9
+      IMAGE_TAG: e9370e5 # 1.9.3
       RES_CPU: "256m"
       REPLICAS: 1
   - namespace:
       $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
-    ref: c94f69a1b9dff62cf22244fba998eade7a83b912
+    ref: d17072cde6208cfea2e3eeb396af13f11a3c6a9c
     parameters:
-      IMAGE_TAG: ea44ecc # 1.7.9
+      IMAGE_TAG: 701b872 # 1.9.2-1 - fixed nettle, gnutls vulnerabilities
       REPLICAS: 1
+      CONSUMER_COUNT: "1"
 
 - name: patchman-engine-evaluator-upload
   path: /templates/patchman/patchman-engine-evaluator-upload.yaml
@@ -97,21 +98,25 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/patchman/namespaces/stage-patchman-engine-stage.yml
-    ref: c94f69a1b9dff62cf22244fba998eade7a83b912
+    ref: d17072cde6208cfea2e3eeb396af13f11a3c6a9c
     parameters:
-      IMAGE_TAG: ea44ecc # 1.7.9
+      IMAGE_TAG: e9370e5 # 1.9.3
+      ENABLE_LAZY_PACKAGE_SAVE: "false"
       RES_CPU: "256m"
       VMAAS_ADDRESS: http://vmaas-webapp.vmaas-stage.svc.cluster.local:8080
       REPLICAS: 1
   - namespace:
       $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
-    ref: c94f69a1b9dff62cf22244fba998eade7a83b912
+    ref: d17072cde6208cfea2e3eeb396af13f11a3c6a9c
     parameters:
-      IMAGE_TAG: ea44ecc # 1.7.9
+      IMAGE_TAG: 701b872 # 1.9.2-1 - fixed nettle, gnutls vulnerabilities
+      ENABLE_LAZY_PACKAGE_SAVE: "false"
       RES_MEMORY: 3Gi
       VMAAS_ADDRESS: http://vmaas-webapp.vmaas-prod.svc.cluster.local:8080
       ENABLE_PACKAGE_ANALYSIS: "true"
-      REPLICAS: 3
+      REPLICAS: 1
+      CONSUMER_COUNT: "1"
+      GOMAXPROCS: "4"
 
 - name: patchman-engine-evaluator-recalc
   path: /templates/patchman/patchman-engine-evaluator-recalc.yaml
@@ -121,23 +126,26 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/patchman/namespaces/stage-patchman-engine-stage.yml
-    ref: c94f69a1b9dff62cf22244fba998eade7a83b912
+    ref: d17072cde6208cfea2e3eeb396af13f11a3c6a9c
     parameters:
-      IMAGE_TAG: ea44ecc # 1.7.9
+      IMAGE_TAG: e9370e5 # 1.9.3
+      ENABLE_LAZY_PACKAGE_SAVE: "false"
       RES_CPU: "256m"
       VMAAS_ADDRESS: http://vmaas-webapp.vmaas-stage.svc.cluster.local:8080
       ENABLE_STALE_SYSTEM_EVALUATION: "false"
       REPLICAS: 1
   - namespace:
       $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
-    ref: c94f69a1b9dff62cf22244fba998eade7a83b912
+    ref: d17072cde6208cfea2e3eeb396af13f11a3c6a9c
     parameters:
-      IMAGE_TAG: ea44ecc # 1.7.9
+      IMAGE_TAG: 701b872 # 1.9.2-1 - fixed nettle, gnutls vulnerabilities
+      ENABLE_LAZY_PACKAGE_SAVE: "false"
       VMAAS_ADDRESS: http://vmaas-webapp.vmaas-prod.svc.cluster.local:8080
       ENABLE_STALE_SYSTEM_EVALUATION: "false"
       ENABLE_PACKAGE_ANALYSIS: "true"
       REPLICAS: 1
-      CONSUMER_COUNT: "4"
+      CONSUMER_COUNT: "1"
+      GOMAXPROCS: "4"
 
 - name: patchman-engine-vmaas-sync
   path: /templates/patchman/patchman-engine-vmaas-sync.yaml
@@ -148,17 +156,19 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/patchman/namespaces/stage-patchman-engine-stage.yml
-    ref: c94f69a1b9dff62cf22244fba998eade7a83b912
+    ref: d17072cde6208cfea2e3eeb396af13f11a3c6a9c
     parameters:
-      IMAGE_TAG: ea44ecc # 1.7.9
+      IMAGE_TAG: e9370e5 # 1.9.3
       VMAAS_ADDRESS: http://vmaas-webapp.vmaas-stage.svc.cluster.local:8080
       VMAAS_WS_ADDRESS: ws://vmaas-websocket.vmaas-stage.svc.cluster.local:8082
       REPLICAS: 1
   - namespace:
       $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
-    ref: c94f69a1b9dff62cf22244fba998eade7a83b912
+    ref: d17072cde6208cfea2e3eeb396af13f11a3c6a9c
     parameters:
-      IMAGE_TAG: ea44ecc # 1.7.9
+      IMAGE_TAG: 701b872 # 1.9.2-1 - fixed nettle, gnutls vulnerabilities
+      ENABLE_SYNC_ON_START: "false"
+      ENABLE_RECALC_ON_START: "false"
       DELETE_CULLED_SYSTEMS_LIMIT: "2000"
       RES_MEMORY: 1024Mi
       VMAAS_ADDRESS: http://vmaas-webapp.vmaas-prod.svc.cluster.local:8080
@@ -171,12 +181,13 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/patchman/namespaces/stage-patchman-engine-stage.yml
-    ref: c94f69a1b9dff62cf22244fba998eade7a83b912
+    ref: d17072cde6208cfea2e3eeb396af13f11a3c6a9c
     parameters:
-      IMAGE_TAG: ea44ecc # 1.7.9
+      IMAGE_TAG: e9370e5 # 1.9.3
+      REPLICAS: 1
   - namespace:
       $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
-    ref: c94f69a1b9dff62cf22244fba998eade7a83b912
+    ref: d17072cde6208cfea2e3eeb396af13f11a3c6a9c
     parameters:
-      IMAGE_TAG: ea44ecc # 1.7.9
+      IMAGE_TAG: 701b872 # 1.9.2-1 - fixed nettle, gnutls vulnerabilities
       REPLICAS: 1

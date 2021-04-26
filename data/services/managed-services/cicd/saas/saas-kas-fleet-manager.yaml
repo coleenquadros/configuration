@@ -26,6 +26,7 @@ managedResourceTypes:
 imagePatterns:
 - quay.io/rhoas/kas-fleet-manager
 - quay.io/centos/centos
+- quay.io/rhoas/envoyproxy
 
 authentication:
   image:
@@ -37,35 +38,64 @@ resourceTemplates:
   url: https://gitlab.cee.redhat.com/service/kas-fleet-manager
   path: /templates/service-template.yml
   parameters:
-    ENVIRONMENT: production
     IMAGE_REGISTRY: quay.io
     IMAGE_REPOSITORY: rhoas/kas-fleet-manager
     JWKS_URL: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/certs
-    MAS_SSO_BASE_URL: https://keycloak-mas-sso-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
-    MAS_SSO_REALM: rhoas
-    REPLICAS: 6
     CLUSTER_OPENSHIFT_VERSION: ""
     CLUSTER_COMPUTE_MACHINE_TYPE: m5.4xlarge
-    # Change this to false if you want to disable the allow list feature feature
-    ENABLE_ALLOW_LIST: true
+    # Enforce instance limit control
+    ENABLE_INSTANCE_LIMIT_CONTROL: true
+    # The default maximum number of instances that can be created by a user/organisation.
+    # Takes effect if `ENABLE_INSTANCE_LIMIT_CONTROL` is set to true
+    MAX_ALLOWED_INSTANCES: 1
+    # Change this to false if you want the users to be able to use the service without accepting any terms
+    ENABLE_TERMS_ACCEPTANCE: true
     # Change this to false if you want to disable the deny list feature feature
     ENABLE_DENY_LIST: true
+    # Change this to false to disable sentry
+    ENABLE_SENTRY: true
+    # Enable ManagedKafkaCR generation
+    ENABLE_MANAGED_KAFKA_CR: true
+    # Disable quota service integration for now
+    ENABLE_QUOTA_SERVICE: false
+    # Enable the external Kafka certificate for all Kafka clusters
+    ENABLE_KAFKA_EXTERNAL_CERTIFICATE: true
+    # Enable the dedicate Ingress on the data plane clusters which all Kafka Clusters will use
+    ENABLE_DEDICATED_INGRESS: true
+    #The public HTTP host URL of the service
+    SERVICE_PUBLIC_HOST_URL: ${OCM_BASE_URL}
+    # Image tags for sub components
+    KAFKA_ADMIN_SERVER_IMAGE: quay.io/sknot/kafka-admin-api:0.0.4
+    # Log level
+    GLOG_V: 5
+    # A URL to repository containing external Kafka Observability configuration info for Obs. Operator to consume
+    OBSERVABILITY_CONFIG_REPO: https://api.github.com/repos/bf2fc6cc711aee1a0c2a/observability-resources-mk/contents
+    # Which channel (directory) within the config repo the Observability Operator should consume from
+    OBSERVABILITY_CONFIG_CHANNEL: resources
+    # This value is the lifespan a kafka will have with the lifespan flag enabled. In hours.
+    KAFKA_LIFE_SPAN: 48
+    # Capacity settings for the base Kafka type
+    KAFKA_CAPACITY_INGRESS_THROUGHPUT: "2Mi"
+    KAFKA_CAPACITY_TOTAL_MAX_CONNECTIONS: "100"
+    KAFKA_CAPACITY_MAX_DATA_RETENTION_SIZE: "60Gi"
+    KAFKA_CAPACITY_MAX_PARTITIONS: "100"
+    KAFKA_CAPACITY_MAX_DATA_RETENTION_PERIOD: "P14D"
+    KAFKA_CAPACITY_MAX_CONNECTION_ATTEMPTS_PER_SEC: "50"
+    # Image to be used by Envoy sidecar container
+    ENVOY_IMAGE: quay.io/rhoas/envoyproxy:v1.16.1
   targets:
   - namespace:
       $ref: /services/managed-services/namespaces/managed-services-stage.yml
     ref: master
     upstream: service-kas-fleet-manager-gl-build-master
     parameters:
-      # Realm name for the Data Plane OSD cluster Identity Provider
-      OSD_IDP_MAS_SSO_REALM: rhoas-kafka-sre
-      # Image tags for sub components
-      KAFKA_ADMIN_SERVER_IMAGE: quay.io/sknot/kafka-admin-api:0.0.4
-      # Log level
-      GLOG_V: 5
-      # leaving sentry set to false, until sentry project/team/membership is setup
-      ENABLE_SENTRY: true
+      ENVIRONMENT: stage
+      REPLICAS: 6
       SENTRY_URL: sentry.stage.devshift.net
       SENTRY_PROJECT: 21
+      MAS_SSO_BASE_URL: https://identity.api.stage.openshift.com
+      MAS_SSO_REALM: rhoas
+      OSD_IDP_MAS_SSO_REALM: rhoas-kafka-sre
       # Dex identity service url
       DEX_URL: http://dex-dex.apps.pbraun-observatorium.observability.rhmw.io
       # Dex identity service username
@@ -74,35 +104,32 @@ resourceTemplates:
       OBSERVATORIUM_GATEWAY: https://observatorium-observatorium.apps.pbraun-observatorium.observability.rhmw.io
       # Observatorium tenant where observability metrics will sent to.
       OBSERVATORIUM_TENANT: test
-      # A URL to repository containing external Kafka Observability configuration info for Obs. Operator to consume
-      OBSERVABILITY_CONFIG_REPO: https://api.github.com/repos/bf2fc6cc711aee1a0c2a/observability-resources-mk/contents
-      # Which channel (directory) within the config repo the Observability Operator should consume from
-      OBSERVABILITY_CONFIG_CHANNEL: staging
-      # Enable the external Kafka certificate for all Kafka clusters
-      ENABLE_KAFKA_EXTERNAL_CERTIFICATE: true
-      # Enable the dedicate Ingress on the data plane clusters which all Kafka Clusters will use
-      ENABLE_DEDICATED_INGRESS: true
-      #The public HTTP host URL of the service
-      SERVICE_PUBLIC_HOST_URL: ${OCM_BASE_URL}
-      # The maximum number of instances that can be created by the user.
-      # Takes effect if `ENABLE_ALLOW_LIST` is set to true
-      MAX_ALLOWED_INSTANCES: 1
-      # Enable ManagedKafkaCR generation
-      ENABLE_MANAGED_KAFKA_CR: true
-      # Disable quota service integration for now
-      ENABLE_QUOTA_SERVICE: false
+      # Release tag within Config Repo to use for pulling index information
+      OBSERVABILITY_CONFIG_TAG: v1.3.1-staging
       # MAXIMUM NUMBER OF ALLOWED KAFKAs
-      KAFKA_CAPACITY_MAX_CAPACITY: 45
+      KAFKA_CAPACITY_MAX_CAPACITY: 28
+      # Changing this to true will delete all kafkas after their lifespan expired. The default is 48 hours.
+      ENABLE_KAFKA_LIFE_SPAN: true
       MAS_SSO_ENABLE_AUTH: true
+      # Max allowed service accounts created by users
+      MAX_ALLOWED_SERVICE_ACCOUNTS: 2
+      # Max limit for the fetching the clients from mas-sso
+      MAX_LIMIT_FOR_SSO_GET_CLIENTS: 100
+      # Enable using ths synchronizer module for kas-fleetshard-operator
+      ENABLE_KAS_FLEETSHARD_OPERATOR_SYNC: true
+      # Set domain name for Kafka instances
+      KAFKA_DOMAIN_NAME: "kafka.devshift.org"
+      # Only allow those who are listed in `ALLOWED_SERVICE_ACCOUNTS` and `ALLOWED_USERS_PER_ORGANISATION` to access the service
+      ALLOW_ANY_REGISTERED_USERS: false
       # A list of allowed users in yaml format irrespective of their organisation.
-      # Empty for now, but in the future this may contain users and service accounts within or outside Red Hat.
-      # Takes effect if `ENABLE_ALLOW_LIST` is set to true
       ALLOWED_SERVICE_ACCOUNTS:
           # RHOSAK PM
         - username: rhn-gps-ddoyle
           max_allowed_instances: 2
         - username: kbabo1@redhat.com
           max_allowed_instances: 2
+        - username: rhn-support-bibryam
+          max_allowed_instances: 1
 
           # ODH: Demos and PoCs for Managed ODH and Managed Kafka integration
         - username: cchase@redhat.com
@@ -154,7 +181,7 @@ resourceTemplates:
 
           # Evan Shortis: Summit demo
         - username: eshortis
-          max_allowed_instances: 1
+          max_allowed_instances: 2
 
           # Luis Garcia Acosta: Connector Service development
         - username: lgarciaac
@@ -268,12 +295,255 @@ resourceTemplates:
         - username: test_kafka_service
           max_allowed_instances: 1500
 
+          # Burr Sutter
+        - username: burrzinga
+          max_allowed_instances: 2
+
+          # Tiffany Nolan: UXD
+        - username: tnolan_razzle_dazzle
+          max_allowed_instances: 1
+
+          # Don Schenck: developers.redhat.com
+        - username: rhn-engineering-dschenck
+          max_allowed_instances: 1
+
+          # Emmanuel Bernard
+        - username: rhn-engineering-ebernard
+          max_allowed_instances: 1
+
+          # Julian Coleman: Testing quickstarts
+        - username: jcoleman-csqe
+          max_allowed_instances: 1
+
+          # Yu Zhao: Investigate the UI/UX workflow
+        - username: yuzhao583
+          max_allowed_instances: 1
+
+          # Evan Wilkinson: Troubleshooting bug for Summit reported in PatternFly UI 
+        - username: evwilkin
+          max_allowed_instances: 1
+
+          # Joshua Pinkney: Testing rhoas cli in the Web Terminal Operator for summit
+        - username: jpinkney-1
+          max_allowed_instances: 1
+
+        #------------------ Summit21 Keynote demo ------------------
+        - username: eshortis-summit21-main
+          max_allowed_instances: 2
+
+        - username: eshortis-summit21-secondary
+          max_allowed_instances: 1
+        #------------------------------------------------------------
+        
+        #------------------ Users for e2e user testing ------------------
+
+        - username: kafka-allagash-tripel
+          max_allowed_instances: 1
+        
+        - username: kafka-amber-ale
+          max_allowed_instances: 1
+
+        - username: kafka-american-lager
+          max_allowed_instances: 1
+        
+        - username: kafka-ancient-saison
+          max_allowed_instances: 1
+        
+        - username: kafka-belgian-dubbel
+          max_allowed_instances: 1
+        
+        - username: kafka-black-ipa
+          max_allowed_instances: 1
+        
+        - username: kafka-blonde-ale
+          max_allowed_instances: 1
+        
+        - username: kafka-brown-ale
+          max_allowed_instances: 1
+
+        - username: kafka-coffee-stout
+          max_allowed_instances: 1
+
+        - username: kafka-cream-ale
+          max_allowed_instances: 1
+
+        - username: kafka-doppelbock
+          max_allowed_instances: 1
+        
+        - username: kafka-double-ipa
+          max_allowed_instances: 1
+
+        - username: kafka-extra-stout
+          max_allowed_instances: 1
+
+        - username: kafka-german-pilsner
+          max_allowed_instances: 1
+        
+        - username: kafka-golden-marzen
+          max_allowed_instances: 1
+        
+        - username: kafka-hefeweizen
+          max_allowed_instances: 1
+        
+        - username: kafka-helle-weisse
+          max_allowed_instances: 1
+
+        - username: kafka-irish-stout
+          max_allowed_instances: 1
+
+        - username: kafka-light-lager
+          max_allowed_instances: 1
+
+        - username: kafka-munich-dunkel
+          max_allowed_instances: 1
+
+        - username: kafka-oatmeal-stout
+          max_allowed_instances: 1
+        
+        - username: kafka-pale-ale
+          max_allowed_instances: 1
+
+        - username: kafka-peach-kolsch
+          max_allowed_instances: 1
+        
+        - username: kafka-perfect-pilsner
+          max_allowed_instances: 1
+
+        - username: kafka-premium-altbier
+          max_allowed_instances: 1
+        
+        - username: kafka-raspberry-lambic
+          max_allowed_instances: 1
+        
+        - username: kafka-schwarzbier
+          max_allowed_instances: 1
+        
+        - username: kafka-scotch-ale
+          max_allowed_instances: 1
+        
+        - username: kafka-sour-ale
+          max_allowed_instances: 1
+        
+        - username: kafka-strong-bitter
+          max_allowed_instances: 1
+
+        - username: kafka-black-walnut
+          max_allowed_instances: 1
+        
+        - username: kafka-banana-nut-fudge
+          max_allowed_instances: 1
+        
+        - username: kafka-burgundy-cherry
+          max_allowed_instances: 1
+        
+        - username: kafka-butterscotch-ribbon
+          max_allowed_instances: 1
+
+        - username: kafka-cherry-macaron
+          max_allowed_instances: 1
+        
+        - username: kafka-chocolate
+          max_allowed_instances: 1
+
+        - username: kafka-chocolate-almond
+          max_allowed_instances: 1
+
+        - username: kafka-chocolate-chip
+          max_allowed_instances: 1
+
+        - username: kafka-chocolate-fudge
+          max_allowed_instances: 1
+        
+        - username: kafka-mint
+          max_allowed_instances: 1
+        
+        - username: kafka-chocolate-ribbon
+          max_allowed_instances: 1
+        
+        - username: kafka-coffee
+          max_allowed_instances: 1
+
+        - username: kafka-coffee-candy
+          max_allowed_instances: 1
+        
+        - username: kafka-date-nut
+          max_allowed_instances: 1
+        
+        - username: kafka-eggnog
+          max_allowed_instances: 1
+        
+        - username: kafka-french-vanilla
+          max_allowed_instances: 1
+        
+        - username: kafka-green-mint-stick
+          max_allowed_instances: 1
+
+        - username: kafka-lemon-crisp
+          max_allowed_instances: 1
+
+        - username: kafka-lemon-custard
+          max_allowed_instances: 1
+        
+        - username: kafka-lemon-sherbet
+          max_allowed_instances: 1
+        
+        - username: kafka-maple-nut
+          max_allowed_instances: 1
+        
+        - username: kafka-orange-sherbet
+          max_allowed_instances: 1
+
+        - username: kafka-peach
+          max_allowed_instances: 1
+        
+        - username: kafka-peppermint-stick
+          max_allowed_instances: 1
+        
+        - username: kafka-pineapple-sherbet
+          max_allowed_instances: 1
+        
+        - username: kafka-raspberry-sherbet
+          max_allowed_instances: 1
+
+        - username: kafka-rocky-road
+          max_allowed_instances: 1
+        
+        - username: kafka-strawberry
+          max_allowed_instances: 1
+        
+        - username: kafka-vanilla
+          max_allowed_instances: 1
+        
+        - username: kafka-vanilla-burnt-almond
+          max_allowed_instances: 1
+
+        #----------------------------------------------------------------
+        #----------------------------- UXD ------------------------------
+        - username: ajay_kafka_neworg
+          max_allowed_instances: 1
+        
+        - username: jenn_kafka_neworg
+          max_allowed_instances: 1
+
+        - username: christie_kafka_neworg
+          max_allowed_instances: 1
+        
+        - username: immanew-summitkafka
+          max_allowed_instances: 1
+        #----------------------------------------------------------------
+
+
       # A list of allowed users per organisation in yaml format.
-      # Takes effect if `ENABLE_ALLOW_LIST` is set to true
       ALLOWED_USERS_PER_ORGANISATION:
+          # The Workshop Test org
+        - id: 14405348
+          max_allowed_instances: 150
+          allow_all: true
+          allowed_users: []
+
           # The Control Plane team
         - id: 13640203
-          max_allowed_instances: 3
+          max_allowed_instances: 1500 # increased for pre-Summit scale testing
           allow_all: true
           # Empty for now meaning all users allowed since "allow_all" is set to true.
           allowed_users: []
@@ -306,10 +576,11 @@ resourceTemplates:
             - username: rareddy_mk-kafka
             - username: shawkins_mk-kafka
             - username: ppatiern_mk-kafka-instances
+            - username: medgar_mk-kafka-instances
 
           # The Consoles & Developer Experience team
         - id: 13838614
-          max_allowed_instances: 8
+          max_allowed_instances: 16
           allow_all: false
           allowed_users:
             - username: wtrocki_kafka_devexp
@@ -346,6 +617,8 @@ resourceTemplates:
             - username: srambach_kafka_devexp
             - username: oasaf_kafka_devexp
             - username: mdawson_kafka_devexp
+            - username: dhawkins_kafka_devexp
+            - username: sharedaccount_kafka_devexp
 
           # Red Hat Managed Application Services
         - id: 13645369
@@ -395,6 +668,19 @@ resourceTemplates:
             - username: mk-test-user
             - username: mk-test-user-e2e-primary
             - username: mk-test-user-e2e-secondary
+            - username: mk-test-user+webui
+            - username: dbizzarr_kafka_test
+            - username: hzrncik_kafka_test
+            - username: mk-test-user-e2e-sandbox
+            - username: mk-test-user-webui-stage
+            - username: mk-test-user-webui-production
+            - username: mk-test-user-webui-outage
+            - username: mk-test-user-webui-smoke
+            - username: mk-test-user+email@redhat.com
+            - username: mk-test-user+myhorse
+            - username: mk-test-user+plus
+            - username: mk-test-user-@
+            - username: mk.test.user@redhat.com
 
           # The Security team
         - id: 13785172
@@ -418,9 +704,22 @@ resourceTemplates:
             - username: rhn-support-kboone
             - username: rhn-support-aboucham
             - username: rhn-support-fvaleri
+        
+          # CSQE
+        - id: 13108479
+          allow_all: false
+          max_allowed_instances: 3
+          allowed_users:
+            - username: trepel-csqe
+            - username: psturc-csqe
+            - username: mhesko-csqe
 
       # A list of usernames representing users who do not have access to the service
       DENIED_USERS: []
+      
+      # A list of long lived kafkas by ID, that should not be deleted after expiration time period
+      LONG_LIVED_KAFKAS:
+        - "1rWgutAakduzKKa4MugsFeOAjDG"
 
       SUPPORTED_CLOUD_PROVIDERS:
         - name: aws
@@ -428,3 +727,749 @@ resourceTemplates:
           regions:
             - name: us-east-1
               default: true
+
+      #manual: use data plane config file, auto: use kas-fleet-shard
+      DATAPLANE_CLUSTER_SCALING_TYPE: manual
+
+      # cluster list if dataplane cluster scaling type is set to manual
+      CLUSTER_LIST:
+        - name: Stage Cluster
+          cluster_id: 1ieq35mpf26sq2r246sbffuvg9s380sp
+          cloud_provider: aws
+          region: us-east-1
+          multi_az: true
+          schedulable: true
+          kafka_instance_limit: 28
+
+  - namespace:
+      $ref: /services/managed-services/namespaces/managed-services-production.yml
+    # This commit sha will need to replaced to reference the latest working commit.
+    # Make sure that we've a docker image for this before it can be changed.
+    # When change this, make sure to also change the `IMAGE_TAG` to reference the first seven characters of the sha1.
+    # Commits can be found here https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/commits/master
+    # Inspect the recent merged MR from https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/merge_requests?scope=all&utf8=%E2%9C%93&state=merged to get the latest commit that has a docker image built from it. 
+    # e.g if we take https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/merge_requests/356/commits, the commit with a docker image in it will be 
+    # the very first commit i.e https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/merge_requests/356/commits?commit_id=f0fd63740464c5fa4bda395d5d31f675eff049ac 
+    # If in doubt, see with the control plane team.
+    # We are exploring into using automating this.
+    ref: 1a9e6d96b340a1aec512734c11bf830108928d10
+    parameters:
+      ENVIRONMENT: production
+      # The image tag is the first seven characters of the #ref commit sha parameter.
+      # Verify in https://quay.io/repository/rhoas/kas-fleet-manager?tab=tags to see if the tag exists.
+      IMAGE_TAG: 1a9e6d9
+      SENTRY_URL: sentry.devshift.net
+      SENTRY_PROJECT: 16
+      MAS_SSO_BASE_URL: https://identity.api.openshift.com
+      MAS_SSO_REALM: rhoas
+      OSD_IDP_MAS_SSO_REALM: rhoas-kafka-sre
+      # Max allowed service accounts created by users
+      MAX_ALLOWED_SERVICE_ACCOUNTS: 2
+       # Max limit for the fetching the clients from mas-sso
+      MAX_LIMIT_FOR_SSO_GET_CLIENTS: 100
+      REPLICAS: 6
+      # Dex identity service url
+      DEX_URL: https://dex-dex.apps.mk-observe.trii.p1.openshiftapps.com
+      # Dex identity service username
+      DEX_USERNAME: admin@example.com
+      # A URL to an Observatorium instance where observability metrics will sent to.
+      OBSERVATORIUM_GATEWAY: https://observatorium-observatorium.apps.mk-observe.trii.p1.openshiftapps.com
+      # Observatorium tenant where observability metrics will sent to.
+      OBSERVATORIUM_TENANT: kasdataplane
+      # Release tag within Config Repo to use for pulling index information
+      OBSERVABILITY_CONFIG_TAG: v1.3.0-prod
+      # MAXIMUM NUMBER OF ALLOWED KAFKAs
+      KAFKA_CAPACITY_MAX_CAPACITY: 100
+      # A list of usernames representing users who do not have access to the service
+      DENIED_USERS: []
+      # A list of long lived kafkas by ID, that should not be deleted after expiration time period
+      LONG_LIVED_KAFKAS:
+        - "1rWgrOo4vaxhYsXu913Vpj4oa3i"
+      # Setting to false for now, will need to update to true once we're ready to open this to external users
+      ALLOW_ANY_REGISTERED_USERS: true
+      # Enable using ths synchronizer module for kas-fleetshard-operator
+      ENABLE_KAS_FLEETSHARD_OPERATOR_SYNC: true
+      # Set domain name for Kafka instances
+      KAFKA_DOMAIN_NAME: "bf2.kafka.rhcloud.com"
+      # A list of allowed users in yaml format irrespective of their organisation.
+      # If `ALLOW_ANY_REGISTERED_USERS` is set to true, the list will only be used to determine the `max_allowed_instances` each user can create.
+      ALLOWED_SERVICE_ACCOUNTS:
+          # RHOSAK PM
+        - username: rhn-gps-ddoyle
+          max_allowed_instances: 2
+        - username: kbabo1@redhat.com
+          max_allowed_instances: 2
+        - username: rhn-support-bibryam
+          max_allowed_instances: 1
+
+          # ODH: Demos and PoCs for Managed ODH and Managed Kafka integration
+        - username: cchase@redhat.com
+          max_allowed_instances: 1
+
+          # Andrea Tarocchi: Testing Camel Kafka Connectors
+        - username: atarocch@redhat.com
+          max_allowed_instances: 1
+
+          # Daniele Zonca: Business Automation as a Service
+        - username: dzonca@redhat.com
+          max_allowed_instances: 1
+
+          # Clement Escoffier: Quarkus integration
+        - username: cescoffi
+          max_allowed_instances: 2
+
+          # Matthias Wessendorf: KNative Eventing's Kafka components
+        - username: mwessend@redhat.com
+          max_allowed_instances: 1
+
+          # Ruben Romero Montes: BAaaS
+        - username: rhn-support-rromerom
+          max_allowed_instances: 1
+
+          # Fred Bricon: VS Code tools support
+        - username: fbricon@redhat.com
+          max_allowed_instances: 3
+
+          # Nicola Ferraro: Camel K interop and integration
+        - username: nicolaferraro
+          max_allowed_instances: 1
+
+          # Ben Hardesty: Testing and documentation
+        - username: behardesty
+          max_allowed_instances: 1
+
+          # Luca Burgazzoli: Connector Service development
+        - username: lburgazz@redhat.com
+          max_allowed_instances: 1
+
+          # Paul Mellor: CCS
+        - username: ccs-amq-account
+          max_allowed_instances: 1
+
+          # Dhiraj Bokde: Managed Connector Service development
+        - username: dbokde
+          max_allowed_instances: 1
+
+          # Evan Shortis: Summit demo
+        - username: eshortis
+          max_allowed_instances: 2
+
+          # Luis Garcia Acosta: Connector Service development
+        - username: lgarciaac
+          max_allowed_instances: 1
+
+          # Scott Creeley: project collaboration with OCTO and exploring the service and evaluating
+        - username: screeley@redhat.com
+          max_allowed_instances: 1
+
+          # René Kerner: MGDSTRM-1043: Creating a demo/example of using Managed Kafka with Debezium on OpenShift with AMQ Streams
+        - username: rk3rn3r
+          max_allowed_instances: 1
+
+          # Tim Sawicki: Production data ETL work for Red Hat Marketing Operations
+        - username: tsawicki
+          max_allowed_instances: 3
+
+          # Christina Lin: Kicking the tires, gives feedback and see how it can work with current product (RHI)
+        - username: clin@redhat.com
+          max_allowed_instances: 1
+
+          # Juan Hernández: Member of Service Delivery, needs access to help diagnose an issue
+        - username: jhernand-rh
+          max_allowed_instances: 1
+
+          # Jaivardhan Kumar: Dev Console team, Kafka Sources usecases in KNative Eventing
+        - username: jakumar
+          max_allowed_instances: 1
+
+          # Guy Margalit: OCTO, Managed Data Replication based on the Scribe project.
+        - username: gmargali
+          max_allowed_instances: 1
+
+          # Riccardo Forina: FUSE for MK
+        - username: rforina
+          max_allowed_instances: 1
+
+          # Martin Murphy: Training/practice/reproducer environment for CEE/support delivery
+        - username: rhn-plm-mmurphy
+          max_allowed_instances: 1
+
+          # Angelo Souza: Training/practice/reproducer environment for CEE/support delivery
+        - username: asouza@redhat.com
+          max_allowed_instances: 1
+
+          # Kamesh Sampath: Managed and Developer Services Product Manager for APAC
+        - username: ksampath@redhat.com
+          max_allowed_instances: 1
+
+          # Hugo Guerrero: TMM, demo's and stuff
+        - username: hguerrer
+          max_allowed_instances: 1
+
+          # Clayton Coleman
+        - username: ccoleman1@redhat.com
+          max_allowed_instances: 3
+
+          # Vikram Raj: OpenShift Developer Console
+        - username: viraj-1
+          max_allowed_instances: 1
+
+          # Gabor Burges: I will be working on getting the MK service to work with the Insights platform (and Clowder) environments
+        - username: gburges@redhat.com
+          max_allowed_instances: 1
+
+          # Lukas Berk: Helping support a summit demo and ensuring I can properly reproduce the serverless eventing setup with a kafka backed broker
+        - username: lberk
+          max_allowed_instances: 1
+
+          # Ashique Ansari: Working with Debezium team and I need Kafka Cluster to use https://gitlab.cee.redhat.com/mk-ci-cd/application-services-ui as per the documentation https://docs.google.com/document/d/1MuHZU93X4PdtsI76VGiM8zmgbG-0sqV3F-LHZg0QNBE/
+        - username: asansari@redhat.com
+          max_allowed_instances: 1
+
+          # Mark Drilling: debezium ui development
+        - username: mdrillin1@redhat.com
+          max_allowed_instances: 1
+
+          # Jason Sherman: Product Experience/Support Readiness
+        - username: rhn-support-jsherman
+          max_allowed_instances: 1
+
+          # Ben Turner: Insights Platform Messaging
+        - username: rhn-support-bturner
+          max_allowed_instances: 1
+
+          # Indra Raj Shukla: I am working with Debezium team and I need this to test Control Plane UI
+        - username: ishukla
+          max_allowed_instances: 1
+
+          # Kabir Khan: I am working on the Red Hat JBoss Enterprise Platform integration with RHOSAK
+        - username: kkhan1@redhat.com
+          max_allowed_instances: 1
+
+          # Edward Brennan: Marketing operations development and troubleshooting
+        - username: ebrennan@redhat.com
+          max_allowed_instances: 1
+
+          # Bernard Tison: TMM Cloud Services BU
+        - username: btison
+          max_allowed_instances: 1
+
+          # Andrea Cosentino: For MCS and testing connector
+        - username: acosenti
+          max_allowed_instances: 1
+
+          # Pete TNC
+        - username: pmuir_tnc
+          max_allowed_instances: 1
+
+          # Joe O'Reilly
+        - username: joreilly
+          max_allowed_instances: 1
+
+          # Scaling testing user
+        - username: test_kafka_service
+          max_allowed_instances: 1500
+
+          # Burr Sutter
+        - username: burrzinga
+          max_allowed_instances: 2
+
+          # Tiffany Nolan: UXD
+        - username: tnolan_razzle_dazzle
+          max_allowed_instances: 1
+
+          # Don Schenck: developers.redhat.com
+        - username: rhn-engineering-dschenck
+          max_allowed_instances: 1
+
+          # Emmanuel Bernard
+        - username: rhn-engineering-ebernard
+          max_allowed_instances: 1
+
+          # Julian Coleman: Testing quickstarts
+        - username: jcoleman-csqe
+          max_allowed_instances: 1
+
+          # Yu Zhao: Investigate the UI/UX workflow
+        - username: yuzhao583
+          max_allowed_instances: 1
+
+          # Evan Wilkinson: Troubleshooting bug for Summit reported in PatternFly UI 
+        - username: evwilkin
+          max_allowed_instances: 1
+
+          # Joshua Pinkney: Testing rhoas cli in the Web Terminal Operator for summit
+        - username: jpinkney-1
+          max_allowed_instances: 1
+
+        #------------------ Summit21 Keynote demo ------------------
+        - username: eshortis-summit21-main
+          max_allowed_instances: 2
+
+        - username: eshortis-summit21-secondary
+          max_allowed_instances: 1
+        #------------------------------------------------------------
+        
+        #------------------ Users for e2e user testing ------------------
+
+        - username: kafka-allagash-tripel
+          max_allowed_instances: 1
+        
+        - username: kafka-amber-ale
+          max_allowed_instances: 1
+
+        - username: kafka-american-lager
+          max_allowed_instances: 1
+        
+        - username: kafka-ancient-saison
+          max_allowed_instances: 1
+        
+        - username: kafka-belgian-dubbel
+          max_allowed_instances: 1
+        
+        - username: kafka-black-ipa
+          max_allowed_instances: 1
+        
+        - username: kafka-blonde-ale
+          max_allowed_instances: 1
+        
+        - username: kafka-brown-ale
+          max_allowed_instances: 1
+
+        - username: kafka-coffee-stout
+          max_allowed_instances: 1
+
+        - username: kafka-cream-ale
+          max_allowed_instances: 1
+
+        - username: kafka-doppelbock
+          max_allowed_instances: 1
+        
+        - username: kafka-double-ipa
+          max_allowed_instances: 1
+
+        - username: kafka-extra-stout
+          max_allowed_instances: 1
+
+        - username: kafka-german-pilsner
+          max_allowed_instances: 1
+        
+        - username: kafka-golden-marzen
+          max_allowed_instances: 1
+        
+        - username: kafka-hefeweizen
+          max_allowed_instances: 1
+        
+        - username: kafka-helle-weisse
+          max_allowed_instances: 1
+
+        - username: kafka-irish-stout
+          max_allowed_instances: 1
+
+        - username: kafka-light-lager
+          max_allowed_instances: 1
+
+        - username: kafka-munich-dunkel
+          max_allowed_instances: 1
+
+        - username: kafka-oatmeal-stout
+          max_allowed_instances: 1
+        
+        - username: kafka-pale-ale
+          max_allowed_instances: 1
+
+        - username: kafka-peach-kolsch
+          max_allowed_instances: 1
+        
+        - username: kafka-perfect-pilsner
+          max_allowed_instances: 1
+
+        - username: kafka-premium-altbier
+          max_allowed_instances: 1
+        
+        - username: kafka-raspberry-lambic
+          max_allowed_instances: 1
+        
+        - username: kafka-schwarzbier
+          max_allowed_instances: 1
+        
+        - username: kafka-scotch-ale
+          max_allowed_instances: 1
+        
+        - username: kafka-sour-ale
+          max_allowed_instances: 1
+        
+        - username: kafka-strong-bitter
+          max_allowed_instances: 1
+
+        - username: kafka-black-walnut
+          max_allowed_instances: 1
+        
+        - username: kafka-banana-nut-fudge
+          max_allowed_instances: 1
+        
+        - username: kafka-burgundy-cherry
+          max_allowed_instances: 1
+        
+        - username: kafka-butterscotch-ribbon
+          max_allowed_instances: 1
+
+        - username: kafka-cherry-macaron
+          max_allowed_instances: 1
+        
+        - username: kafka-chocolate
+          max_allowed_instances: 1
+
+        - username: kafka-chocolate-almond
+          max_allowed_instances: 1
+
+        - username: kafka-chocolate-chip
+          max_allowed_instances: 1
+
+        - username: kafka-chocolate-fudge
+          max_allowed_instances: 1
+        
+        - username: kafka-mint
+          max_allowed_instances: 1
+        
+        - username: kafka-chocolate-ribbon
+          max_allowed_instances: 1
+        
+        - username: kafka-coffee
+          max_allowed_instances: 1
+
+        - username: kafka-coffee-candy
+          max_allowed_instances: 1
+        
+        - username: kafka-date-nut
+          max_allowed_instances: 1
+        
+        - username: kafka-eggnog
+          max_allowed_instances: 1
+        
+        - username: kafka-french-vanilla
+          max_allowed_instances: 1
+        
+        - username: kafka-green-mint-stick
+          max_allowed_instances: 1
+
+        - username: kafka-lemon-crisp
+          max_allowed_instances: 1
+
+        - username: kafka-lemon-custard
+          max_allowed_instances: 1
+        
+        - username: kafka-lemon-sherbet
+          max_allowed_instances: 1
+        
+        - username: kafka-maple-nut
+          max_allowed_instances: 1
+        
+        - username: kafka-orange-sherbet
+          max_allowed_instances: 1
+
+        - username: kafka-peach
+          max_allowed_instances: 1
+        
+        - username: kafka-peppermint-stick
+          max_allowed_instances: 1
+        
+        - username: kafka-pineapple-sherbet
+          max_allowed_instances: 1
+        
+        - username: kafka-raspberry-sherbet
+          max_allowed_instances: 1
+
+        - username: kafka-rocky-road
+          max_allowed_instances: 1
+        
+        - username: kafka-strawberry
+          max_allowed_instances: 1
+        
+        - username: kafka-vanilla
+          max_allowed_instances: 1
+        
+        - username: kafka-vanilla-burnt-almond
+          max_allowed_instances: 1
+
+        #----------------------------------------------------------------
+        #----------------------------- UXD ------------------------------
+        - username: ajay_kafka_neworg
+          max_allowed_instances: 1
+        
+        - username: jenn_kafka_neworg
+          max_allowed_instances: 1
+
+        - username: christie_kafka_neworg
+          max_allowed_instances: 1
+        
+        - username: immanew-summitkafka
+          max_allowed_instances: 1
+        #----------------------------------------------------------------
+
+
+      # A list of allowed users per organisation in yaml format.
+      ALLOWED_USERS_PER_ORGANISATION:
+          # The Workshop Test org
+        - id: 14405348
+          max_allowed_instances: 150
+          allow_all: true
+          allowed_users: []
+
+          # The Control Plane team
+        - id: 13640203
+          max_allowed_instances: 1500 # increased for pre-Summit scale testing
+          allow_all: true
+          # Empty for now meaning all users allowed since "allow_all" is set to true.
+          allowed_users: []
+
+          # The App SRE team
+        - id: 12147054
+          max_allowed_instances: 5
+          allow_all: true
+          # Empty for now meaning all users allowed since "allow_all" is set to true.
+          allowed_users: []
+
+          # The Bin Packing team
+        - id: 13639843
+          max_allowed_instances: 3
+          allow_all: false
+          allowed_users:
+            - username: kwall_mk-bin-packing
+            - username: obabec_mk-bin-packing
+            - username: dkornel_mk-bin-packing
+            - username: mwagner_mk-bin-packing
+            - username: sknot_mk-bin-packing
+            - username: jstejska_mk-bin-packing
+            - username: vbusch_mk-bin-packing
+            - username: vkapalav_mk-bin-packing
+            - username: grdryn_mk-bin-packing
+            - username: jscholz_mk-bin-packing
+            - username: stethoma_mk-bin-packing
+            - username: trdoyle_mk-bin-packing
+            - username: skaleta_mk-bin-packing
+            - username: rareddy_mk-kafka
+            - username: shawkins_mk-kafka
+            - username: ppatiern_mk-kafka-instances
+
+          # The Consoles & Developer Experience team
+        - id: 13838614
+          max_allowed_instances: 16
+          allow_all: false
+          allowed_users:
+            - username: wtrocki_kafka_devexp
+            - username: ephelan_kafka_devexp
+            - username: pemuir_kafka_devexp
+            - username: jgiardin_kafka_devexp
+            - username: sanjekum_kafka_devexp
+            - username: apratap_kafka_devexp
+            - username: anujha_kafka_devexp
+            - username: dbizzarr_kafka_devexp
+            - username: rkubis_kafka_devexp
+            - username: supittma_kafka_devexp
+            - username: mmclaugh_kafka_devexp
+            - username: eshortis_kafka_devexp
+            - username: jciroli_kafka_devexp
+            - username: crobson_kafka_devexp
+            - username: tnolan_kafka_devexp
+            - username: ldimaggi_kafka_devexp
+            - username: cmolloy_kafka_devexp
+            - username: aglass_kafka_devexp
+            - username: jschuler_kafka_devexp
+            - username: dffrench_kafka_devexp
+            - username: jawright_kafka_devexp
+            - username: dlabaj_kafka_devexp
+            - username: dgutride_kafka_devexp
+            - username: rpattnai_kafka_devexp
+            - username: mmusil_kafka_devexp
+            - username: sterobin_kafka_devexp
+            - username: rpetrie_kafka_devexp
+            - username: pantinor_kafka_devexp
+            - username: sisharma_kafka_devexp
+            - username: jbyrne_kafka_devexp
+            - username: bmozaffa_kafka_devexp
+            - username: srambach_kafka_devexp
+            - username: oasaf_kafka_devexp
+            - username: mdawson_kafka_devexp
+            - username: dhawkins_kafka_devexp
+            - username: sharedaccount_kafka_devexp
+
+          # Red Hat Managed Application Services
+        - id: 13645369
+          max_allowed_instances: 4
+          allow_all: false
+          allowed_users:
+            - username: davmarti_kafka_sre
+            - username: damurphy_kafka_sre
+            - username: rshelly_kafka_sre
+            - username: tdavidso_kafka_sre
+            - username: stobin_rhmi
+            - username: rarangan_rhmi
+            - username: kkakarla_kafka_sre
+            - username: mmikhail_kafka_sre
+            - username: rlawton_kafka_sre
+            - username: robrien_kafka_sre
+            - username: agullon_kafka_sre
+
+          # Red Hat Application Services TMMs
+        - id: 14410788
+          max_allowed_instances: 4
+          allow_all: false
+          allowed_users:
+            - username: ddoyle_kafka_tmm
+            - username: clin_kafka_tmm
+            - username: hguerrer_kafka_tmm
+            - username: kvarela_kafka_tmm
+            - username: edeandrea_kafka_tmm
+            - username: eshortis_kafka_tmm
+            - username: btison_kafka_tmm
+            - username: doh_kafka_tmm
+            - username: sshaaf_kafka_tmm
+            - username: sjayanti_kafka_tmm
+            - username: rmarins_kafka_tmm
+
+          # MK Test
+        - id: 14014161
+          max_allowed_instances: 8
+          allow_all: false
+          allowed_users:
+            - username: mk-test-user
+            - username: mk-test-user-e2e-primary
+            - username: mk-test-user-e2e-secondary
+            - username: mk-test-user+webui
+            - username: dbizzarr_kafka_test
+            - username: hzrncik_kafka_test
+            - username: mk-test-user-e2e-sandbox
+            - username: mk-test-user-webui-stage
+            - username: mk-test-user-webui-production
+            - username: mk-test-user-webui-outage
+            - username: mk-test-user-webui-smoke
+            - username: mk-test-user+email@redhat.com
+            - username: mk-test-user+myhorse
+            - username: mk-test-user+plus
+            - username: mk-test-user-@
+            - username: mk.test.user@redhat.com
+
+          # The Security team
+        - id: 13785172
+          allow_all: true
+          max_allowed_instances: 1
+          allowed_users: []
+
+          # CS-SRE
+        - id: 12961970
+          allow_all: false
+          max_allowed_instances: 3
+          allowed_users:
+            - username: mciccone-openshift
+            - username: mfreer-openshift
+
+          # RHN Support
+        - id: 1979710
+          allow_all: false
+          max_allowed_instances: 5
+          allowed_users:
+            - username: rhn-support-kboone
+            - username: rhn-support-aboucham
+            - username: rhn-support-fvaleri
+            - username: rhn-support-shiggs
+            - username: rhn-support-jsherman
+            - username: rhn-support-mmurphy
+
+          # CSQE
+        - id: 13108479
+          allow_all: false
+          max_allowed_instances: 3
+          allowed_users:
+            - username: trepel-csqe
+            - username: psturc-csqe
+            - username: mhesko-csqe
+
+
+      # A list of supported cloud providers and region    
+      SUPPORTED_CLOUD_PROVIDERS:
+        - name: aws
+          default: true
+          regions:
+            - name: us-east-1
+              default: true
+
+      # Changing this to true will delete all kafkas after their lifespan expired. The default is 48 hours.
+      ENABLE_KAFKA_LIFE_SPAN: true
+
+      #manual: use data plane config file, auto: use kas-fleet-shard
+      DATAPLANE_CLUSTER_SCALING_TYPE: manual
+
+      # cluster list if dataplane cluster scaling type is set to manual
+      CLUSTER_LIST: 
+        - name: mk-0419-204008
+          cluster_id: 1k5ot6e86c6itcqqsrs019bngqc7cjin
+          cloud_provider: aws
+          region: us-east-1
+          multi_az: true
+          schedulable: true # change this to false if you do not want the cluster to be schedulable
+          kafka_instance_limit: 110 # change this to match any value of configuration
+        - name: mk-0426-093712
+          cluster_id: 1ka2recin9i6nkj3bt813cu11mgkgdbu
+          cloud_provider: aws
+          region: us-east-1
+          multi_az: true
+          schedulable: true # change this to false if you do not want the cluster to be schedulable
+          kafka_instance_limit: 110 # change this to match any value of configuration
+        - name: mk-0426-093715
+          cluster_id: 1ka2revfmsq6jp3le5vsrnlfvampcdmh
+          cloud_provider: aws
+          region: us-east-1
+          multi_az: true
+          schedulable: true # change this to false if you do not want the cluster to be schedulable
+          kafka_instance_limit: 110 # change this to match any value of configuration
+        - name: mk-0426-093717
+          cluster_id: 1ka2rfhe337nq72qi3d12orsimtqqsmj
+          cloud_provider: aws
+          region: us-east-1
+          multi_az: true
+          schedulable: true # change this to false if you do not want the cluster to be schedulable
+          kafka_instance_limit: 110 # change this to match any value of configuration
+        - name: mk-0426-093719
+          cluster_id: 1ka2rfragqrc218m3db4b691e1tmst6v
+          cloud_provider: aws
+          region: us-east-1
+          multi_az: true
+          schedulable: true # change this to false if you do not want the cluster to be schedulable
+          kafka_instance_limit: 110 # change this to match any value of configuration
+        - name: mk-0426-093720
+          cluster_id: 1ka2rgev80tccd0fai7c53pofiv41vrb
+          cloud_provider: aws
+          region: us-east-1
+          multi_az: true
+          schedulable: true # change this to false if you do not want the cluster to be schedulable
+          kafka_instance_limit: 110 # change this to match any value of configuration
+        - name: mk-0426-093722
+          cluster_id: 1ka2rgjv4l63v8procrvh7gko6bn8fdr
+          cloud_provider: aws
+          region: us-east-1
+          multi_az: true
+          schedulable: true # change this to false if you do not want the cluster to be schedulable
+          kafka_instance_limit: 110 # change this to match any value of configuration
+        - name: mk-0426-093723
+          cluster_id: 1ka2rh398uop3q4ncmcm4r1f2q0pvmtv
+          cloud_provider: aws
+          region: us-east-1
+          multi_az: true
+          schedulable: true # change this to false if you do not want the cluster to be schedulable
+          kafka_instance_limit: 110 # change this to match any value of configuration
+        - name: mk-0426-093725
+          cluster_id: 1ka2rh90fnn9pkbobkg4j7vpij915jaq
+          cloud_provider: aws
+          region: us-east-1
+          multi_az: true
+          schedulable: true # change this to false if you do not want the cluster to be schedulable
+          kafka_instance_limit: 110 # change this to match any value of configuration
+        - name: mk-0426-093727
+          cluster_id: 1ka2rhoaitisnjbeco9r6u3apfaocrb2
+          cloud_provider: aws
+          region: us-east-1
+          multi_az: true
+          schedulable: true # change this to false if you do not want the cluster to be schedulable
+          kafka_instance_limit: 110 # change this to match any value of configuration
+          

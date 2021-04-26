@@ -35,9 +35,6 @@ managedResourceNames:
     - prometheus-auth-proxy
     - prometheus-additional-scrape-config-2
 
-sharedResources:
-- $ref: /services/observability/shared-resources/cluster-alerts.yml
-
 openshiftResources:
 # Observability
 
@@ -59,6 +56,9 @@ openshiftResources:
   type: extracurlyjinja2
   path: /observability/alertmanager/alertmanager-instance.secret.yaml
   validate_alertmanager_config: true
+  variables:
+    jiralert_host: jiralert.app-sre-stage.devshift.net
+
 ### Prometheus AMS subscription_labels scrape config
 ### Defines the job for scraping subscription_labels
 - provider: resource-template
@@ -177,6 +177,8 @@ openshiftResources:
 - provider: resource
   path: /observability/prometheusrules/mas-sso-slo-availability-stage.prometheusrules.yaml
 - provider: resource
+  path: /observability/prometheusrules/mas-sso-availability-stage.prometheusrules.yaml
+- provider: resource
   path: /observability/prometheusrules/mas-sso-slo-latency-stage.prometheusrules.yaml
 ### Qontract-reconcile SLOs
 - provider: resource-template
@@ -207,6 +209,11 @@ openshiftResources:
 ### Devfile Registry
 - provider: resource
   path: /observability/prometheusrules/devfile-registry-stage.prometheusrules.yaml
+## Insights AWS rules
+- provider: resource
+  path: /insights-stage/playbook-dispatcher/playbook-dispatcher-rds.prometheusrules.yaml
+- provider: resource
+  path: /insights-stage/host-inventory-stage/host-inventory-rds.prometheusrules.yaml
 
 ## ServiceMonitors
 ### Vault

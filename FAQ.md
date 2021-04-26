@@ -96,6 +96,7 @@ To get access to CloudWatch on a cluster's AWS account, follow these steps (exam
 
 1. Submit a MR to app-interface to add the [log-consumer](https://gitlab.cee.redhat.com/service/app-interface/-/blob/f0ca82a2253b4c213c8b438408f68113a662d6c1/data/aws/app-sre/roles/log-consumer.yml) role to your user file. You will also need to [add your public GPG key](https://gitlab.cee.redhat.com/service/app-interface#adding-your-public-gpg-key) (if you havn't already) in the same MR.
 1. Once the MR is merged you will get an email invitation to join the AWS account (in this example - the `app-sre` account). Follow the instructions in the email to login to the account.
+    * Note: in case you did not get an invitation, the login details can be obtained from the [Terraform-users Credentials](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/terraform-users-credentials.md) page.
 1. Once you are logged in, go to [Security Credentials page](https://console.aws.amazon.com/iam/home?#/security_credentials) and enable Multi-factor authentication (MFA).
 1. Logout and login to the account again using the configured MFA device.
 1. Once you are logged in, navigate to the Switch Role link obtained from the [ocm-aws-infrastructure-access-switch-role-links](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/ocm-aws-infrastructure-access-switch-role-links.md) page (suggestion: add to bookmarks).
@@ -122,12 +123,12 @@ In the Cluster page, you can find links to the cluster's Console and to the clus
 ### Can you restart my pods
 
 There are a couple of choices depending on the state of onboarding the service is in currently
-[here](https://visual-app-interface.devshift.net/services)  
+[here](https://visual-app-interface.devshift.net/services)
 _Note: To the right of the search for services the drop down defaults to "show child apps" you can choose to hide these by selecting the "hide child apps" option_
 
 #### OnBoarded Services
 
-__Example service:__ [quay.io](https://visual-app-interface.devshift.net/services#/services/quayio/app.yml)  
+__Example service:__ [quay.io](https://visual-app-interface.devshift.net/services#/services/quayio/app.yml)
 If the service is OnBoarded you can contact @app-sre-ic in the #sd-app-sre channel with the reason why you are requesting to "bounce" a pod, (which is actually deleting the pod.)
 We also require a Jira ticket in the backlog of the development team that owns the service to automate pod restarting via liveliness probes or health checks so manual intervention is not required.
 You may also want to collect information from the the cluster and namespace.  Clusters are listed [here](https://visual-app-interface.devshift.net/clusters) ex. [quayp05ue1](https://visual-app-interface.devshift.net/clusters#/openshift/quayp05ue1/cluster.yml). If the application team still needs help to retrieve debugging information please let the @app-sre-ic team know before we "bounce" the pod.
@@ -142,7 +143,7 @@ In cases where pods get into an unhealthy state and may require a restart. Below
 
 Now that the fire is out, please work towards not having to do this again. The solution depends on the underlying issue, but here are some common cases:
 1. A dependency of the pod is not responding (example: Kafka). You may want to consider using Kubernetes health probes. We can highly recommend:
-A liveness probe that checks your container's health thoroughly; on a liveness probe failure, Kubernetes restarts the container. A readiness probe that takes a container out of service if it is not healthy. 
+A liveness probe that checks your container's health thoroughly; on a liveness probe failure, Kubernetes restarts the container. A readiness probe that takes a container out of service if it is not healthy.
 2. A new version of a Secret/ConfigMap has been rolled out. You may use the `qontract.recycle: "true"` annotation to indicate that any pods using these resources should be restarted upon update. More information [here](/README.md#manage-openshift-resources-via-app-interface-openshiftnamespace-1yml).
 
 ### Jenkins is going to shutdown
@@ -163,13 +164,13 @@ Add `concurrent_build: true` to your job definition. [example](https://gitlab.ce
 
 Start by accessing the Visual App-Interface at https://visual-app-interface.devshift.net.  Using the side bar, navigate to the [Services](https://visual-app-interface.devshift.net/services) section.
 
-Choose the relevant service from the list. For example, [telemeter](https://visual-app-interface.devshift.net/services#/services/telemeter/app.yml).
+Choose the relevant service from the list. For example, [telemeter](https://visual-app-interface.devshift.net/services#/services/rhobs/telemeter/app.yml).
 
 Choosing the service will take you to the the service's page, in which you can view a list of `Namespaces` which are related to this service.  In this example the namespaces are:
 - `telemeter-production`
 - `telemeter-stage`
 
-Choose the namespace for which you would like to see the users. For this example, choose [telemeter-production](https://visual-app-interface.devshift.net/namespaces#/services/telemeter/namespaces/telemeter-production.yml).
+Choose the namespace for which you would like to see the users. For this example, choose [telemeter-production](https://visual-app-interface.devshift.net/namespaces#/services/rhobs/telemeter/namespaces/telemeter-production.yml).
 
 Choosing the namespace will take you to the namespace's page, in which you can view a list of `Roles` which are associated with this namespace.  Some of the roles in this namespace are:
 - `dev`

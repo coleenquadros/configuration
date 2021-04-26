@@ -22,6 +22,10 @@ In the event of a complete loss of Quay, please see the [disaster recovery guide
 
 ![](images/quayio-prod.png)
 
+## Quay Configuration
+
+Configuration values for Quay can be found [here](https://docs.projectquay.io/manage_quay.html#quay-schema)
+
 ## Debugging Quay issues
 
 See [Debugging Quay](issues/overview.md) for the general guide.

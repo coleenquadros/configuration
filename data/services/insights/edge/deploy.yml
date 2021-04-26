@@ -1,0 +1,52 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: edge
+  platform: insights
+
+name: edge
+description: edge app on the Insights Platform
+
+app:
+  $ref: /services/insights/edge/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+timeout: 5
+
+managedResourceTypes:
+- ClowdApp
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: edge-api
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/edge-api
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+    parameters:
+      MIN_REPLICAS: 1
+  - namespace:
+      $ref: /services/insights/edge/namespaces/stage-edge-stage.yml
+    ref: main
+    upstream: RedHatInsights-edge-api-gh-build-main
+    parameters:
+      MIN_REPLICAS: 3
+      ENV_NAME: stage

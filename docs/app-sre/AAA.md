@@ -221,8 +221,8 @@ Every app-sre engineer should have access to the following
   - Nothing to do. Obtained via a [role](data/teams/app-sre/roles/app-sre.yml)
 
 - Pagerduty
-  - ACCESS: Create a [Jira ticket](https://issues.redhat.com/) to request access to PagerDuty assign it to [Tony Beckham](https://rover.redhat.com/people/profile/cbeckham)
-  - you can clone this [example ticket](https://issues.redhat.com/browse/OHSS-2547)
+  - ACCESS: Create a [Jira ticket](https://issues.redhat.com/) to request access to PagerDuty assign it to [Meghna Gala](https://rover.redhat.com/people/profile/mgala)
+  - you can check this [example ticket](https://issues.redhat.com/browse/OHSS-2547), but double check the assignee before commiting.
 
 - App-sre shared folders
   - ACCESS: Go to the following folders and request access with your Red Hat Gsuite account
@@ -251,6 +251,11 @@ Every app-sre engineer should have access to the following
 - Unleash:
   - Feature toggle service to enable/disable features in runtime.
   - More details available [here](https://gitlab.cee.redhat.com/service/dev-guidelines/blob/master/unleash.md)
+
+- SendGrid
+  - You will be invited to a team, the current owner is [Craig Robinson](https://rover.redhat.com/people/profile/crarobin)
+  - It's not under Red Hat's SSO, you need to create your own username and password.
+  - You'll need yet another 2FA application on your phone
 
 ### Returning Red Hat Employee Gotchas
 
@@ -385,12 +390,18 @@ Post RCA comms, followups:
     * Incident contact
     * Continuity plan reference
 
+Please refer to the [full onboarding document](https://service.pages.redhat.com/dev-guidelines/docs/appsre/onboarding/).
+
 ## Additional team process
 
 ### Git process
 
 ### Sprint process
 * [see process/sprint.md](process/sprint.md)
+
+### Handling of secrets
+
+Application-related secrets such as passwords, or tokens must be handled according to [this document](https://service.pages.redhat.com/dev-guidelines/docs/appsre/onboarding/adding-sensitive-data/).
 
 ## App-sre escalation to external teams
 

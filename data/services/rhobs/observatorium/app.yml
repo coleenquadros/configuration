@@ -1,0 +1,64 @@
+---
+$schema: /app-sre/app-1.yml
+
+labels:
+  service: observatorium
+
+name: observatorium
+
+description: |
+  Observatorium is a complete observability solution based on several open-source (Thanos, Loki) projects,
+  to allow multiple instances of OCP clusters store their observability signals into a
+  central location. Main backend installation for Red Hat Observability Service.
+
+architectureDocument: https://TODO
+sopsUrl: https://gitlab.cee.redhat.com/TODO
+onboardingStatus: InProgress
+
+parentApp:
+  $ref: /services/rhobs/app.yml
+
+grafanaUrl: https://grafana.app-sre.devshift.net/dashboards/f/xIQ-GuaGk/observatorium
+
+serviceOwners:
+- name: Observability Platform Team
+  email: team-observability-platform@redhat.com
+
+serviceNotifications:
+- name: Red Hat Outage List
+  email: outage-list@redhat.com
+
+serviceDocs:
+- /observatorium/readme.md
+
+dependencies:
+- $ref: /dependencies/aws/service.yml
+- $ref: /dependencies/ci-int/service.yml
+- $ref: /dependencies/github/service.yml
+- $ref: /dependencies/gitlab/service.yml
+- $ref: /dependencies/quay/service.yml
+- $ref: /dependencies/openshift/service.yml
+- $ref: /dependencies/sso/service.yml
+
+# TODO(kakkoyun): Add an endpoint!
+# endPoints:
+# - name: infogw
+#   description: observatorium-server
+#   url: https://infogw.api.openshift.com/
+
+codeComponents:
+- name: observatorium-cicd
+  resource: cicd
+  url: https://ci.ext.devshift.net/view/observatorium
+- name: observatorium
+  resource: upstream
+  url: https://github.com/observatorium/deployments
+- name: configuration
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/observatorium/configuration
+- name: observatorium-api
+  resource: upstream
+  url: https://github.com/observatorium/observatorium
+
+escalationPolicy:
+  $ref: /teams/rhobs/escalation-policies/general.yaml

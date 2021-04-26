@@ -1,0 +1,11 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2021-04-22-updatedata-stats
+namespace:
+  $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
+identifier: patchman-prod
+output: stdout
+queries:
+    - select 'update_data', count(system_id), sum(length(e::text)) from (select system_id, rh_account_id, package_id, jsonb_array_elements(update_data) as e from system_package order by system_id, rh_account_id, package_id) x;
+    - select 'update_data deduplicated', count(system_id), sum(length(e::text)) from (select distinct system_id, rh_account_id, package_id, jsonb_array_elements(update_data) as e from system_package order by system_id, rh_account_id, package_id) x;

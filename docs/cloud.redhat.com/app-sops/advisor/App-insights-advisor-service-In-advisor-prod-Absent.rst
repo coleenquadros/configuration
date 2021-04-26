@@ -33,7 +33,8 @@ Steps
 -  Log into the console / namespace and verify if pods are up / stuck / etc
 -  Check logs / events for pods in the Advisor(-environment) namespace
 -  Check if there were any recent changes to the CR's in the namespace
--  ``oc rsh`` into one of the continers if available
+-  ``oc rsh`` into one of the containers if available
+-  Check `Kafka Lag`_ to rule out Kafka issues
 
 Escalations
 -----------
@@ -44,4 +45,5 @@ Escalations
 
 .. _Incident Response Doc: https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE
 .. _Clowder: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/app-sops/clowder/clowder.rst
+.. _Kafka Lag: https://grafana.app-sre.devshift.net/d/KGbSSk6Wz/kafka-lag?orgId=1
 

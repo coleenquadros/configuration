@@ -41,7 +41,7 @@ spec:
   provider: aws
   region: us-east-1
   channel: candidate
-  version: 4.7.4
+  version: 4.7.7
   initial_version: 4.5.11-fast
   multi_az: false
   autoscale:
@@ -51,7 +51,6 @@ spec:
   storage: 100
   load_balancers: 0
   private: true
-  upgrade: batch0
   id: 1g268u7pp694gj152nj16me4sv615lpv
   external_id: c64ef416-699d-411d-9ab8-e2b54f65079a
   provision_shard_id: de4b0632-dca7-11ea-b3b9-8c1645a911be
@@ -86,6 +85,15 @@ peering:
     cluster:
       $ref: /openshift/app-sre-stage-01/cluster.yml
     manageRoutes: true
+  - provider: account-tgw
+    name: hivei01ue1
+    account:
+      $ref: /aws/osd-privatelink-int/account.yml
+    tags:
+      osd: privatelink
+    manageRoutes: true
+    manageSecurityGroups: true
+    cidrBlock: 172.16.0.0/12
 
 automationToken:
   path: app-sre/creds/kube-configs/hivei01ue1
@@ -111,6 +119,9 @@ awsInfrastructureAccess:
   accessLevel: network-mgmt
 - awsGroup:
     $ref: /aws/app-sre/groups/Log-consumers.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/osd-privatelink-int/groups/Admins.yml
   accessLevel: read-only
 
 addons:

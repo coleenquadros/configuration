@@ -1,0 +1,43 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: ocm-quay
+
+name: ocm-quay
+description: read-only namespace for ocm-quay
+
+cluster:
+  $ref: /openshift/ocmquayrop01ue1/cluster.yml
+
+app:
+  $ref: /services/ocm-quay/app.yml
+
+environment:
+  $ref: /products/ocm-quay/environments/read-only.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.ocmquayrop01ue1.yml
+
+managedRoles: true
+
+managedTerraformResources: true
+
+managedResourceTypes:
+- NetworkPolicy
+- Secret
+
+sharedResources:
+- $ref: /services/ocm-quay/shared-resources/common.yml
+- $ref: /services/ocm-quay/shared-resources/read-only.yml
+
+openshiftResources: []
+
+terraformResources:
+- provider: rds
+  account: ocm-quay
+  identifier: ocmquayrop01ue1
+  availability_zone: us-east-1a
+  defaults: /terraform/resources/ocm-quay/rds-read-replica-us-east-1.yml
+  parameter_group: /terraform/resources/ocm-quay/rds-parameter-group-read-replica-1.yml
+  replica_source: ocm-quay-production

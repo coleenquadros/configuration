@@ -55,6 +55,7 @@ These instructions have been adapted from the [original google doc](https://docs
     *NOTE*: You can proceed with the rest of the SOP without waiting for the ticket to be complete.
 
 1. Configure VPC peering
+1. Configure TGW attachments to the appropriate PrivateLink AWS account (for example, production shards should be attached to the osd-privatelink-prod AWS account)
 1. Add hive-readers and hive-admins in `cluster.yml`
 1. Add External Configuration labels to the cluster:
     ```yaml
@@ -80,7 +81,9 @@ These instructions have been adapted from the [original google doc](https://docs
 
 Provisioning hive is a multi-step process:
 1. Create a new environment for this hive cluster in [/data/products/osdv4/environments](/data/products/osdv4/environments) and make sure that the namespaces created from this moment on in the new cluster belong to it.
-1. Add the hive namespaces. Add a new directory named after shard in [`/data/services/hive/namespaces`](/data/services/hive/namespaces) and copy the contents of another shard from the same hive environment (production, staging, etc)
+1. Add the hive namespaces. Add a new directory named after shard in [`/data/services/hive/namespaces`](/data/services/hive/namespaces) and copy the contents of another shard from the same hive environment (production, staging, etc) example [1](https://gitlab.cee.redhat.com/service/app-interface/-/blob/12523a31d486a691568045c9484389d2a8d266de/data/openshift/hivep04ew2/cluster.yml#L88-90) [2](https://gitlab.cee.redhat.com/service/app-interface/-/blob/12523a31d486a691568045c9484389d2a8d266de/data/openshift/hivep04ew2/cluster.yml#L109-116)
+1. Add an AWS IAM service account for PrivateLink access for the new shard. [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/12523a31d486a691568045c9484389d2a8d266de/data/services/hive/namespaces/hivep01ue1/hive-production.yml#L124-142)
+1. Add all existing AWS IAM service account secrets to the new shard. [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/12523a31d486a691568045c9484389d2a8d266de/data/services/hive/namespaces/hivep04ew2/hive-production.yml#L40-64)
 1. Hive is deployed using a saas file. In order to deploy to a new shard, a new target must be added to the Hive saas file located here: [`/data/services/hive/cicd/ci-int/saas-hive.yaml`](/data/services/hive/cicd/ci-int/saas-hive.yaml)
 
 1. Assign hive permissions in
@@ -174,7 +177,12 @@ To deploy ClusterImageSets to a new cluster, add a target in the matching saas f
 
 #### Managed-tenants
 
-To deploy the managed-tenants SelectorSyncSets, add a target in the managed-tenants saas file: [`/data/services/addons/cicd/ci-int/saas-managed-tenants.yaml`](/data/services/app-sre/cicd/ci-int/saas-managed-tenants.yaml)
+To deploy the managed-tenants manifests, add a target in the managed-tenants
+saas files:
+
+* [`/data/services/addons/cicd/ci-int/saas-mt-SelectorSyncSet.yaml`](/data/services/addons/cicd/ci-int/saas-mt-SelectorSyncSet.yaml)
+* [`/data/services/addons/cicd/ci-int/saas-mt-PagerDutyIntegration.yaml`](/data/services/addons/cicd/ci-int/saas-mt-PagerDutyIntegration.yaml)
+* [`/data/services/addons/cicd/ci-int/saas-mt-DeadmansSnitchIntegration.yaml`](/data/services/addons/cicd/ci-int/saas-mt-DeadmansSnitchIntegration.yaml)
 
 ## Provisioning backplane
 
@@ -262,6 +270,12 @@ At this point, the monitoring is all set, and you're ready to move on to the nex
 1. Add Service Account references to hive, aws-account-opeator and gcp-project-operator namespaces from the uhc namespaces. Example: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/7655
 1. Update `clusters-service` secret to add new shards. Example: https://gitlab.cee.redhat.com/service/app-interface/-/blob/55beecac/data/services/ocm/shared-resources/production.yml#L31-35.
 1. The id field is set to a random uuid unique per shard (uuidgen can be used to generate one)
+
+## Adding the shard to support PrivateLink
+
+1. Add the shard's information to the relevant environment's HiveConfig (under .spec.awsPrivateLink.associatedVPCs).
+    * The VPC ID can be retreived from the cluster's AWS account using the AWS Infrastructure Access feature.
+    * The HiveConfig files live in app-interface and are referenced from the hive namespace files.
 
 ## Validations
 
