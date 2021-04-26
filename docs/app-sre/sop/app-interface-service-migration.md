@@ -12,7 +12,7 @@ This is an SOP to list the actions to be performed to migrate a service between 
 
 ## Considerations in migrating a service
 
-1. Check if the service communicates to other services on the same cluster. If so, should the 2 services be colocated? This may indicate that to migrate service A, service B should also be migrated. Suspect this is the case when there is a `networkPoliciesAllow` section in the namespace.
+1. Check if the service communicates to other services on the same cluster. If so, should the 2 services be colocated? This may indicate that to migrate service A, service B should also be migrated. Suspect this is the case when there is a `networkPoliciesAllow` section in the namespace to a namespace different `openshift-customer-monitoring`.
 1. Check if the service communicates to other services in a different cluster. This may mean that a VPC peering should be set up prior to the migration of the service.
 1. Check if the service communicates to external resources, such as RDS. This may mean that a VPC peering and Security Group rules should be set up prior to the migration of the service.
 1. Check if the service has DNS entries (either managed by SREP or by app-interface). This means that the service migration will include DNS updates.
