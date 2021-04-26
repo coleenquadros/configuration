@@ -20,7 +20,7 @@ This is an SOP to list the actions to be performed to migrate a service between 
 
 ## What to expect
 
-The process from a high-level perspective is: setup, move, cleanup. The optimal way to migrate a service is "here-and-now". The process describes the move of a namespace between clusters, and not the copy and parallel run of a service on 2 clusters.
+The process from a high-level perspective is: setup, move, cleanup. The optimal way to migrate a service is "here-and-now" (i.e. don't take your time and do this migration over 3 months). The process describes the move of a namespace between clusters, and not the copy and parallel run of a service on 2 clusters.
 
 The critical part of the migration is moving a namespace between clusters. a Merge request to do this action is very simple and includes only very few changes (change cluster ref and observability namespace network policy), but a lot is happenning behind the scenes.
 
