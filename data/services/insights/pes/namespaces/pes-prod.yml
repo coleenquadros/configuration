@@ -1,0 +1,58 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: pes
+
+name: pes-prod
+description: Package Evolution Service - prod
+
+cluster:
+  $ref: /openshift/crcs02ue1/cluster.yml
+
+app:
+  $ref: /services/insights/pes/app.yml
+
+environment:
+  $ref: /products/insights/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs02ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-prod.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-prod/shared/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-prod
+  identifier: pes-prod
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
+- provider: rds
+  account: insights-prod
+  identifier: pes-prod
+  defaults: /terraform/resources/insights/production/rds/postgres11-rds-1.yml
+  overrides:
+    engine_version: "11.2"
+  parameter_group: /terraform/resources/insights/production/rds/postgres11-parameter-group-pes-prod.yml
+  output_resource_name: pes-prod-db
+  enhanced_monitoring: true
