@@ -1,0 +1,27 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: notifications-prod
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: notifications-prod
+    rules:
+      - alert: NotificationsBackendDownProd
+        expr: up{endpoint='notifications-backend',namespace='notifications-prod'} == 0
+        for: 5m
+        labels:
+          severity: medium
+          service: insights
+          env: prod
+          app_team: notifications
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/KQIVyFuMk/notifications-dashboard?var-kubernetes_namespace=notifications-prod"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/notifications-prod/deployments"
+          message: "Notifications Backend Alert (Prod)"
+          description: "Notifications Backend: Down in Prod for 5 minutes."
+          runbook: "https://core-platform-apps.pages.redhat.com/notifications-docs/dev/runbooks/alerts/NotificationsBackendDownProd.html"
