@@ -215,3 +215,15 @@ spec:
       annotations:
         dashboard: 
         message: "Clowder Work Queue depth too deep "
+# BlackBox Monitor alert
+  - name: DevProd BlackBox Monitor
+    rules:
+    - alert: BlackBox Monitor offline
+      expr: kube_replicationcontroller_status_ready_replicas{namespace="blackbox-monitor-stage"} != 1
+      for: 5m
+      labels:
+        severity: medium
+        service: insights
+        env: {{{ env }}}
+      annotations:
+        message: "BlackBox Monitor stage is offline"
