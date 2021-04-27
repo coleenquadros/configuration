@@ -11,6 +11,8 @@ import pathlib
 import re
 import argparse
 
+PROMTOOL_VERSION = "2.26.0"
+
 def parse_equals(string):
     return re.split(',\s*', string.replace('\\"', ''))
 
@@ -59,6 +61,14 @@ if args.vars_file:
                   "variables parameter copied as-is")
             raise
 
+# Check we have promtool installed and it matches the desired version
+result = subprocess.run(['promtool', '--version'], stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE, check=True)
+if f"promtool, version {PROMTOOL_VERSION}" not in result.stdout.decode():
+    print(f"promtool version must be {PROMTOOL_VERSION}")
+    sys.exit(1)
+
+# Rules and tests are extracurlyjinja2 templates
 extra_curly_env = {
     'block_start_string': '{{%',
     'block_end_string': '%}}',
@@ -68,7 +78,6 @@ extra_curly_env = {
     'comment_end_string': '#}}'
 }
 env = jinja2.Environment(undefined=jinja2.StrictUndefined, **extra_curly_env)
-
 
 with open(args.test_file, 'r') as f:
     test_file_body = f.read()
