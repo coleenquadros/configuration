@@ -2,4 +2,4 @@
 
 <!-- TOC depthTo:2 -->
 
-Observatorium logs SOP moved [here](https://gitlab.cee.redhat.com/observatorium/configuration/tree/master/docs)
+Observatorium logs SOP moved [here](https://github.com/rhobs/configuration/tree/main/docs)
