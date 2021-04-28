@@ -96,13 +96,21 @@ resourceTemplates:
       IMAGE_TAG: 5ab65ae
       LOG_LEVEL: WARN
       REPLICAS: "1"
-#- name: sources-satellite
-#  path: /deploy/clowdapp.yaml
-#  url: https://github.com/RedHatInsights/sources-satellite
-#  targets:
+# Svc depends on receptor which is not migrated to the Clowder
+- name: sources-satellite
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/sources-satellite
+  targets:
 #  - namespace:
 #      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
 #    disable: true # tells app-sre to not actually run the deploy job for this target
 #    ref: internal # altered by bonfire
 #    parameters:
 #      IMAGE_TAG: xxxxxx
+  - namespace:
+      $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
+    ref: 8dc8342843d9d729089b96e50ad27e3f142a5b75 # commit SHA of /deploy/clowdapp.yaml
+    parameters:
+      IMAGE_TAG: 649d8a0
+      RECEPTOR_CONTROLLER_SECRET_NAME: sources-psk
+      RECEPTOR_CONTROLLER_SECRET_KEY_PSK: client-psk

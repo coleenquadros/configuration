@@ -23,6 +23,18 @@ spec:
           dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-30m&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-api"
           message: "[Stage] Sources: API: All pods have been down for two minutes"
+      - alert: SourcesSatelliteOperationsSvcAbsent
+        expr: absent(up{job="sources-satellite-operations",namespace="sources-stage"}==1)
+        for: 2m
+        labels:
+          severity: info # high
+          service: insights
+          env: stage
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-30m&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-satellite-operations"
+          message: "[Stage] Sources: Satellite Operations: All pods have been down for two minutes"
   - name: sources-kafka-lag-stage
     rules:
       - alert: SourcesKafkaLag
@@ -40,7 +52,7 @@ spec:
   - name: sources-restarts-stage
     rules:
       - alert: SourcesApiRestarts
-        expr: round(sum(increase(kube_pod_container_status_restarts_total{container="sources-api", namespace="sources-stage"}[30m]))) > 5
+        expr: round(sum(increase(kube_pod_container_status_restarts_total{container="sources-api-svc", namespace="sources-stage"}[30m]))) > 5
         for: 1h
         labels:
           severity: info
@@ -49,8 +61,20 @@ spec:
           app_team: topo-sources
         annotations:
           dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
-          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-api"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-api-svc"
           message: "[Stage] Sources API: Pod was restarted more than 5 times in 30 minutes for the last 1 hour"
+      - alert: SourcesSatelliteOperationsRestarts
+        expr: sum(increase(kube_pod_container_status_restarts_total{container="sources-satellite-operations",namespace="sources-stage"}[1h])) > 5
+        for: 30m
+        labels:
+          severity: info
+          service: insights
+          env: stage
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-satellite-operations"
+          message: "[Stage] Sources Satellite Operations: Restarted at least 5x/1h for the last 30 minutes"
   - name: sources-api-stage
     rules:
       - alert: SourcesApi5xxErrors
@@ -77,3 +101,17 @@ spec:
           dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-15m&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-api"
           message: "[Stage] Sources API's Average Request Duration > 500 ms for the last 10 minutes"
+  - name: sources-operations-stage
+    rules:
+    - alert: SourcesSatelliteOperationsErrors
+      expr: round(sum(increase(sources_satellite_operations_errors_total{namespace="sources-stage"}[10m])))+round(sum(increase(sources_satellite_operations_status_counter{status="error",namespace="sources-stage"}[10m]))) > 10
+      for: 30m
+      labels:
+        severity: info
+        service: insights
+        env: stage
+        app_team: topo-sources
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-15m&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-satellite-operations"
+        message: "[Stage] Sources Satellite Operations: Average number of errors was > 10 per 10 mins for the last 30 minutes"
