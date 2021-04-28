@@ -17,6 +17,10 @@
     - [Update DNS](#update-dns)
       - [Find the Quay ELB Endpoint](#find-the-quay-elb-endpoint)
       - [Create the DNS Record](#create-the-dns-record)
+    - [Add Observability](#add-observability)
+      - [Add Cloudwatch Exporter](#add-cloudwatch-exporter)
+      - [Add Quay App Monitoring](#add-quay-app-monitoring)
+      - [Add Quay Namespace to Monitored Namespaces](#add-quay-namespace-to-monitored-namespaces)
 
 # Deploying a New OCM-Quay Cluster
 
@@ -170,3 +174,19 @@ The endpoint for the ELB servicing quay is needed in order to create a new DNS e
 Add a new record in this [section](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre/dns/q1w2.quay.rhcloud.com.yaml) with a unique name that points to the ELB for the new cluster.
 
 Then add a policy for that route below similar to the other read-only [policies](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre/dns/q1w2.quay.rhcloud.com.yaml#L49-56)
+
+### Add Observability
+
+Each cluster needs to have observability configured.  OCM-Quay uses the same observability setup as quay.io.
+
+#### Add Cloudwatch Exporter
+
+Create a new [cloudwatch exporter](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/namespaces/app-sre-observability-production.yml#L290) and [service monitor](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml#L198-203)for the new cluster.
+
+#### Add Quay App Monitoring
+
+Update the [openshift-customer-monitoring](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/namespaces/openshift-customer-monitoring.ocmquayrop01ew1.yml) configuration file that was created for the cluster with the [quay app](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/namespaces/openshift-customer-monitoring.ocmquayrop01ew1.yml#L92-133) monitoring bits.
+
+#### Add Quay Namespace to Monitored Namespaces
+
+Add the new cluster to the list of [monitored-namespaces](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/roles/app-sre-osdv4-monitored-namespaces-view.yml#L68).
