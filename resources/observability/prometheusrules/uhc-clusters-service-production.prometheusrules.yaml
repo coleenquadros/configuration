@@ -24,16 +24,16 @@ spec:
         email: service-development-a
     - alert: UHC clusters service 5xx Errors High - production
       annotations:
-        message: "UHC clusters service is returning errors for {{ $labels.code }} for {{ $value | humanize }}% of requests."
+        message: "UHC clusters service is returning errors for {{ $value | humanize }}% of requests."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
       expr: |
-        sum without(instance, pod, job, code) (rate(api_inbound_request_count{code=~"^(?:5..)$",namespace="uhc-production",service="clusters-service-metrics"}[5m]))
+        sum(rate(haproxy_backend_http_responses_total{route="clusters-mgmt",exported_namespace="uhc-production",code="5xx"}[5m]))
         /
-        sum without(instance, pod, job, code) (rate(api_inbound_request_count{namespace="uhc-production",service="clusters-service-metrics"}[5m])) * 100 > 5
+        sum(rate(haproxy_backend_http_responses_total{route="clusters-mgmt",exported_namespace="uhc-production"}[5m])) * 100 > 5
       for: 10m
       labels:
         service: uhc-clusters-service
-        severity: medium
+        severity: critical
         email: service-development-a
     - alert: UHC clusters service Latency High - production
       annotations:
