@@ -4,24 +4,22 @@ $schema: /openshift/namespace-1.yml
 labels:
   service: insights
 
-name: cloud-connector-prod
-description: Namespace where playbook dispatcher resources are deployed
+name: config-manager-prod
+description: Namespace where config-manager is deployed
 
 cluster:
   $ref: /openshift/crcp01ue1/cluster.yml
 
 app:
-  $ref: /services/insights/cloud-connector/app.yml
+  $ref: /services/insights/config-manager/app.yml
 
 environment:
   $ref: /products/insights/environments/production.yml
 
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-prod.yml
 - $ref: /services/insights/remediations/namespaces/remediations-prod.yml
-- $ref: /services/insights/playbook-dispatcher/namespaces/prod.yml
-#- $ref: /services/insights/catalog-inventory/namespaces/prod-catalog-inventory-prod.yml
-- $ref: /services/insights/config-manager/namespaces/config-manager-prod.yml
 
 managedRoles: true
 
@@ -36,17 +34,15 @@ openshiftResources:
   type: kubernetes.io/dockerconfigjson
   name: quay-cloudservices-pull
 - provider: vault-secret
+  path: insights/secrets/insights-prod/playbook-dispatcher-prod/auth-psk-config-manager
+  name: psk-playbook-dispatcher
+  version: 1
+- provider: vault-secret
+  path: insights/secrets/insights-prod/cloud-connector-prod/config-manager-psk
+  name: psk-cloud-connector
+  version: 1
+- provider: vault-secret
   path: insights/secrets/global/rds-client-ca
-  version: 1
-  annotations:
-    qontract.recycle: "true"
-- provider: vault-secret
-  path: insights/secrets/insights-prod/cloud-connector-prod/cloud-connector-psks
-  version: 1
-  annotations:
-    qontract.recycle: "true"
-- provider: vault-secret
-  path: insights/secrets/insights-prod/cloud-connector-prod/cloud-connector-mqtt-credentials
   version: 1
   annotations:
     qontract.recycle: "true"
@@ -56,19 +52,18 @@ managedTerraformResources: true
 terraformResources:
 - provider: cloudwatch
   account: insights-prod
-  identifier: cloud-connector-prod
+  identifier: config-manager-prod
   defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
   output_resource_name: cloudwatch
   es_identifier: kibana-elasticsearch
 - provider: rds
   account: insights-prod
-  identifier: cloud-connector-prod
-  defaults: /terraform/resources/insights/production/rds/postgres12-rds-1.yml
+  identifier: config-manager-prod
+  defaults: /terraform/resources/insights/production/rds/postgres10-rds-1.yml
   overrides:
     username: insights
-    allocated_storage: 100
+    allocated_storage: 300
     name: insights
-    engine_version: "12.3"
-  parameter_group: /terraform/resources/insights/production/rds/postgres12-parameter-group-cloud-connector-prod.yml
-  output_resource_name: cloud-connector-db
+  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-config-manager-prod.yml
+  output_resource_name: config-manager-db
   enhanced_monitoring: true
