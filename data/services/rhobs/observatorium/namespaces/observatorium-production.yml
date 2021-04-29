@@ -1,0 +1,43 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: observatorium-production
+description: Production namespace for Observatorium (API and common components).
+
+cluster:
+  $ref: /openshift/telemeter-prod-01/cluster.yml
+
+app:
+  $ref: /services/rhobs/observatorium/app.yml
+
+environment:
+  $ref: /products/osdv4/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.telemeter-prod-01.yml
+# TODO(kakkoyun): Make sure network policies are aligned properly for migration period.
+- $ref: /services/rhobs/observatorium/observatorium-metrics/namespaces/observatorium-metrics-production.yml
+- $ref: /services/rhobs/telemeter/namespaces/telemeter-production.yml
+
+grafanaUrl: https://grafana.app-sre.devshift.net/dashboards/f/xIQ-GuaGk/observatorium
+
+managedRoles: true
+
+managedResourceTypes:
+- Role
+- RoleBinding
+- ServiceAccount
+# TODO(kakkoyun): Uncomment while migrating the namespaces.
+# - Route
+# - ServiceMonitor
+# - ClusterRole
+
+managedTerraformResources: true
+
+# TODO(kakkoyun): Fill in while migrating the namespaces.
+
+terraformResources: []
+
+openshiftResources: []
