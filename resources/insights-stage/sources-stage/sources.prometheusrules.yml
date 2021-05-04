@@ -35,6 +35,18 @@ spec:
           dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-30m&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-satellite-operations"
           message: "[Stage] Sources: Satellite Operations: All pods have been down for two minutes"
+      - alert: SourcesSuperKeyWorkerSvcAbsent
+        expr: absent(up{job="sources-superkey-worker-svc",namespace="sources-stage"}==1)
+        for: 2m
+        labels:
+          severity: info # high
+          service: insights
+          env: stage
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-30m&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-superkey-worker-svc"
+          message: "[Stage] Sources: SuperKey Worker: All pods have been down for two minutes"
   - name: sources-kafka-lag-stage
     rules:
       - alert: SourcesKafkaLag
@@ -75,6 +87,18 @@ spec:
           dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-satellite-operations"
           message: "[Stage] Sources Satellite Operations: Restarted at least 5x/1h for the last 30 minutes"
+      - alert: SourcesSuperKeyWorkersRestarts
+        expr: sum(increase(kube_pod_container_status_restarts_total{container="sources-superkey-worker-svc",namespace="sources-stage"}[1h])) > 5
+        for: 30m
+        labels:
+          severity: info
+          service: insights
+          env: stage
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-superkey-worker-svc"
+          message: "[Stage] Sources SuperKey Worker: Restarted at least 5x/1h for the last 30 minutes"
   - name: sources-api-stage
     rules:
       - alert: SourcesApi5xxErrors
