@@ -1,0 +1,49 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: tower-analytics
+  platform: insights
+
+name: tower-analytics-test
+description: tower-analytics post deployment tests
+
+app:
+  $ref: /services/insights/tower-analytics/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+managedResourceTypes:
+- Job
+
+publishJobLogs: true
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: tower-analytics
+  path: /saas-templates/deploy-acceptance.yml
+  url: https://gitlab.cee.redhat.com/automation-analytics/automation-analytics-backend
+  targets:
+  - namespace:
+      $ref: /services/insights/tower-analytics/namespaces/stage-tower-analytics-stage.yml
+    ref: main
+    upstream: openshift-saas-deploy-tower-analytics-clowder-insights-stage
+    parameters:
+      ENV_NAME: stage
+    promotion:
+      publish:
+      - automation-analytics-stage-post-deploy-tests-success-channel
+
