@@ -272,7 +272,7 @@ Each app team needs to migrate their alerts from e2e-deploy to app-interface.  A
 
 Alert annotations are used to render action buttons in Slack alert messages:
 
-- `dashboard`: Link to corresponding grafana dashboard. Can put in placeholder "https://GRAFANA_URL" for now.
+- `dashboard`: Link to corresponding grafana dashboard.
 - `link_url`: Link to project in Openshift console
 - `message`: The message you want to display in slack or pagerduy
 - `runbook`: Link to SOP in platform-docs or app-interface
