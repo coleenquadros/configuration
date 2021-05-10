@@ -12,7 +12,7 @@ spec:
   - name: sources-services-up-prod
     rules:
       - alert: SourcesApiSvcAbsent
-        expr: absent(up{job="sources-api",namespace="sources-prod"}==1)
+        expr: absent(up{job="sources-api-svc",namespace="sources-prod"}==1)
         for: 2m
         labels:
           severity: critical
@@ -21,9 +21,35 @@ spec:
           app_team: topo-sources # Slack channel for app_team defined in resources/observability/alertmanager/alertmanager-instance.secret.yaml
         annotations:
           dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-30m&to=now&var-Datasource=crcp01ue1-prometheus&var-controller=All&var-action=All"
-          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/sources-prod/deployments/sources-api"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/sources-prod/deployments/sources-api-svc"
           message: "[Prod] Sources: API: All pods have been down for two minutes"
           runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/cloud.redhat.com/app-sops/sources/SourcesApiSvcAbsent.rst"
+      - alert: SourcesSatelliteOperationsSvcAbsent
+        expr: absent(up{job="sources-satellite-operations",namespace="sources-prod"}==1)
+        for: 2m
+        labels:
+          severity: high
+          service: insights
+          env: prod
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-30m&to=now&var-Datasource=crcp01ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/sources-prod/deployments/sources-satellite-operations"
+          message: "[Prod] Sources: Satellite Operations: All pods have been down for two minutes"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/cloud.redhat.com/app-sops/sources/SourcesSatelliteOperationsSvcAbsent.rst"
+      - alert: SourcesSuperKeyWorkerSvcAbsent
+        expr: absent(up{job="sources-superkey-worker-svc",namespace="sources-prod"}==1)
+        for: 2m
+        labels:
+          severity: high
+          service: insights
+          env: prod
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-30m&to=now&var-Datasource=crcp01ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/sources-prod/deployments/sources-superkey-worker-svc"
+          message: "[Prod] Sources: SuperKey Worker: All pods have been down for two minutes"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/cloud.redhat.com/app-sops/sources/SourcesSuperKeyWorkerSvcAbsent.rst"
   - name: sources-kafka-lag-prod # TODO: replace with alerts for our consumers only (after topo+clowder+satellite migrations)
     rules:
       - alert: SourcesKafkaLagSourcesStatus
@@ -41,7 +67,7 @@ spec:
   - name: sources-restarts-prod
     rules:
       - alert: SourcesApiRestarts
-        expr: round(sum(increase(kube_pod_container_status_restarts_total{container="sources-api", namespace="sources-prod"}[30m]))) > 5
+        expr: round(sum(increase(kube_pod_container_status_restarts_total{container="sources-api-svc", namespace="sources-prod"}[30m]))) > 5
         for: 1h
         labels:
           severity: info
@@ -50,8 +76,32 @@ spec:
           app_team: topo-sources
         annotations:
           dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-1h&to=now&var-Datasource=crcp01ue1-prometheus&var-controller=All&var-action=All"
-          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/sources-prod/deployments/sources-api"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/sources-prod/deployments/sources-api-svc"
           message: "[Prod] Sources API: Pod was restarted more than 5 times in 30 minutes for the last 1 hour"
+      - alert: SourcesSatelliteOperationsRestarts
+        expr: sum(increase(kube_pod_container_status_restarts_total{container="sources-satellite-operations",namespace="sources-prod"}[1h])) > 5
+        for: 30m
+        labels:
+          severity: info
+          service: insights
+          env: prod
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-1h&to=now&var-Datasource=crcp01ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/sources-prod/deployments/sources-satellite-operations"
+          message: "[Prod] Sources Satellite Operations: Restarted at least 5x/1h for the last 30 minutes"
+      - alert: SourcesSuperKeyWorkersRestarts
+        expr: sum(increase(kube_pod_container_status_restarts_total{container="sources-superkey-worker-svc",namespace="sources-prod"}[1h])) > 5
+        for: 30m
+        labels:
+          severity: info
+          service: insights
+          env: prod
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-1h&to=now&var-Datasource=crcp01ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/sources-prod/deployments/sources-superkey-worker-svc"
+          message: "[Prod] Sources SuperKey Worker: Restarted at least 5x/1h for the last 30 minutes"
   - name: sources-api-prod
     rules:
       - alert: SourcesApi5xxErrors
@@ -79,3 +129,17 @@ spec:
           dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-15m&to=now&var-Datasource=crcp01ue1-prometheus&var-controller=All&var-action=All"
           link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-api"
           message: "[Prod] Sources API's Average Request Duration > 500 ms for the last 10 minutes"
+  - name: sources-operations-prod
+    rules:
+    - alert: SourcesSatelliteOperationsErrors
+      expr: round(sum(increase(sources_satellite_operations_errors_total{namespace="sources-prod"}[10m])))+round(sum(increase(sources_satellite_operations_status_counter{status="error",namespace="sources-prod"}[10m]))) > 10
+      for: 30m
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: topo-sources
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-15m&to=now&var-Datasource=crcp01ue1-prometheus&var-controller=All&var-action=All"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/sources-prod/deployments/sources-satellite-operations"
+        message: "[Prod] Sources Satellite Operations: Average number of errors was > 10 per 10 mins for the last 30 minutes"
