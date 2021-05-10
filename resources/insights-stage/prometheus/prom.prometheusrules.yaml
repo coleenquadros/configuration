@@ -131,7 +131,7 @@ spec:
     - record: us_hour
       expr: hour(us_time)
     - alert: KafkaLagFast
-      expr: LagGauge > LAG_THRESHOLD and LagDelta > 1000 and (us_hour >= 9 or us_hour <= 22)
+      expr: LagGauge > LAG_THRESHOLD and LagDelta > 1000 and (us_hour >= 9 and us_hour <= 22)
       for: 15m
       labels:
         severity: critical
@@ -142,7 +142,7 @@ spec:
         message: "High Lag for {{ $labels.topic }} : {{ $labels.group }}"
         runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/kafka-lag.rst
     - alert: KafkaLag
-      expr: LagGauge > LAG_THRESHOLD and LagDelta > 0 and (us_hour >= 9 or us_hour <= 22)
+      expr: LagGauge > LAG_THRESHOLD and LagDelta > 0 and (us_hour >= 9 and us_hour <= 22)
       for: 1h
       labels:
         severity: critical
@@ -152,6 +152,16 @@ spec:
         dashboard: "https://grafana.stage.devshift.net"
         message: "High Lag for {{ $labels.topic }} : {{ $labels.group }}"
         runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/kafka-lag.rst
+    - alert: KafkaLagExporterDown
+      expr: up{namespace="platform-mq-stage", container="kafka-lag-exporter-stage"} != 1 
+      for: 15m
+      labels:
+        severity: high
+        service: insights
+        env: {{{ env }}}
+      annotations:
+        dashboard: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/platform-mq-stage/pods"
+        message: "Kafka Lag Exporter pod down for the last 15minutes"
 # TODO create and add runbook for the Clowder alerts
   - name: clowder alerts
     rules:
