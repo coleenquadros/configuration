@@ -97,7 +97,12 @@ In addition to the supplied parameters, there are additional parameters which ar
 
   **Note**: The parameter will not be generated if it is explicitly specified in the SaaS file parameters.
 
-- `REPO_DIGEST` - This parameter will be populated in case an image needs to be deployed according to a digest and not a tag.
+- `REPO_DIGEST` - The full by-digest URI of a repository image.
+  Equivalent to `{REGISTRY_IMG}:{IMAGE_DIGEST}`.
+  This parameter will be populated in case an image needs to be deployed according to a digest and not a tag.
+    * Note: These parameters are mandatory for `REPO_DIGEST` to be generated: `REGISTRY_IMG`, `IMAGE_TAG` (according to previous section).
+- `IMAGE_DIGEST` - The digest of a repository image, in `{algorithm}:{hash}` form.
+  This parameter will be populated in case an image needs to be deployed according to a digest and not a tag.
     * Note: These parameters are mandatory for `REPO_DIGEST` to be generated: `REGISTRY_IMG`, `IMAGE_TAG` (according to previous section).
 
 ## How does it work?
