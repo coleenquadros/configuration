@@ -1,0 +1,56 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: app-interface-production
+description: production namespace for app-interface
+
+cluster:
+  $ref: /openshift/appsrep05ue1/cluster.yml
+
+app:
+  $ref: /services/app-interface/app.yml
+
+environment:
+  $ref: /products/app-interface/environments/production.yml
+
+networkPoliciesAllow: []
+
+managedRoles: true
+
+managedResourceTypes:
+- ConfigMap
+
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+
+openshiftResources:
+- provider: resource
+  path: /app-sre/app-interface-production/app-interface.configmap.yaml
+- provider: vault-secret
+  path: app-interface/app-sre/app-interface-production/app-interface
+  version: 6
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: app-interface/app-sre/app-interface-production/qontract-reconcile-toml
+  version: 4
+- name: unleash
+  provider: vault-secret
+  path: app-sre/unleash/app-interface-token
+  version: 1
+- provider: vault-secret
+  name: dashdotdb
+  path: app-sre/dashdot/dashdotdb-production
+  version: 1
+- provider: vault-secret
+  path: app-sre/integrations-output/terraform-resources/app-sre-prod-01/app-interface-production/app-interface-cloudwatch
+  version: 1
+  annotations:
+    qontract.ignore_reconcile_time: "true"
+- provider: vault-secret
+  path: app-sre/integrations-output/terraform-resources/app-sre-prod-01/app-interface-production/app-interface-sqs
+  version: 1
+  annotations:
+    qontract.ignore_reconcile_time: "true"
