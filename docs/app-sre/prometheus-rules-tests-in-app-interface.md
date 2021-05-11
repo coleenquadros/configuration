@@ -44,7 +44,7 @@ While writing tests, sometimes it is convenient to be able to run tests locally 
 
 ```
 ./hack/run-prometheus-test.py -h
-usage: run-prometheus-test.py [-h] [-v VARS_FILE] [-p] test_file
+usage: run-prometheus-test.py [-h] [-v VARS_FILE] [-p] [-k] test_file
 
 positional arguments:
   test_file             Prometheus test file
@@ -54,6 +54,8 @@ optional arguments:
   -v VARS_FILE, --vars-file VARS_FILE
                         File with variables in yaml format
   -p, --pretty-print    Pretty print prometheus test errors
+  -k, --keep-temp-files
+                        Pretty print prometheus test errors
 ```
 
 In app-interface, [openshiftResouces](/README.md#manage-openshift-resources-via-app-interface-openshiftnamespace-1yml) can be straight yamls containing the openshift resources or jinja templates with variables that will be expanded with the `variables` set in the namespace file. If your prometheus rule file is a jinja template, your test will need to be a template too. When running the tests locally, we'll need to pass manually the variables that are usually passed via the namespace file definition.
