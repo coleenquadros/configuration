@@ -1,0 +1,68 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: catalog-inventory
+
+name: catalog-inventory-prod
+description: Insights catalog-inventory-prod on the Prod v4 cluster
+
+cluster:
+  $ref: /openshift/crcp01ue1/cluster.yml
+
+app:
+  $ref: /services/insights/catalog-inventory/app.yml
+
+environment:
+  $ref: /products/insights/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-prod.yml
+- $ref: /services/insights/catalog/namespaces/catalog-prod.yml
+- $ref: /services/insights/catalog-tower-persister/namespaces/catalog-tower-persister-prod.yml
+- $ref: /services/insights/sources/namespaces/sources-prod.yml
+
+managedRoles: true
+
+managedResourceTypes: []
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/insights-prod/catalog-inventory-prod/catalog-inventory-secrets
+  version: 1
+- provider: vault-secret
+  path: insights/secrets/insights-prod/cloud-connector-prod/catalog-inventory-psk
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-prod
+  identifier: catalog-inventory-prod
+  defaults: /terraform/resources/insights/production/rds/postgres12-rds-1.yml
+  overrides:
+    username: "insights"
+    name: "catalog_inventory_production"
+    engine_version: "12.5"
+  parameter_group: /terraform/resources/insights/production/rds/postgres12-parameter-group-catalog-inventory-prod.yml
+  enhanced_monitoring: true
+  output_resource_name: catalog-inventory-db
+- provider: cloudwatch
+  account: insights-prod
+  identifier: catalog-inventory-prod
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
