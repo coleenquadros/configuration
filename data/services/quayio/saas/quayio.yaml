@@ -48,7 +48,7 @@ parameters:
   QUAY_APP_MEMORY_LIMIT: 56Gi
   QUAY_APP_DEPLOYMENT_PROGRESS_DEADLINE_SECONDS: 2700
   QUAY_APP_DEPLOYMENT_STRATEGY_TYPE: RollingUpdate
-  QUAY_APP_DEPLOYMENT_MIN_READY_SECONDS: 5
+  QUAY_APP_DEPLOYMENT_MIN_READY_SECONDS: 45
   QUAY_APP_DEPLOYMENT_MAX_UNAVAILABLE: 0
   QUAY_APP_DEPLOYMENT_MAX_SURGE: 3
   QUAY_APP_READINESS_PROBE_INITIAL_DELAY_SECONDS: 30
@@ -80,6 +80,8 @@ parameters:
   SYSLOG_IMAGE_TAG: c19d7d1
   QUAY_WORKER_MULTIPLIER_REGISTRY: 1
   QUAY_WORKER_CONNECTION_COUNT_REGISTRY: 20
+  # Blue deployment
+  IMAGE_BLUE: 206170669542.dkr.ecr.eu-central-1.amazonaws.com/quayio-backup
 
 resourceTemplates:
 - name: quayio-app
@@ -109,27 +111,36 @@ resourceTemplates:
       QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "update_me_when_secret_changes_v42"
       QUAY_WORKER_MULTIPLIER_REGISTRY: 1
       QUAY_WORKER_CONNECTION_COUNT_REGISTRY: 80
-      # Canary deployment
-      IMAGE_CANARY: 206170669542.dkr.ecr.eu-central-1.amazonaws.com/quayio-backup
-      IMAGE_TAG_CANARY: latest
-      QUAY_APP_DEPLOYMENT_REPLICAS_CANARY: 1
-      QUAY_APP_CONFIG_SECRET_CANARY: quay-config-secret-canary
+      # Blue deployment
+      IMAGE_TAG_BLUE: 2540ecc
+      QUAY_APP_DEPLOYMENT_REPLICAS_BLUE: 1
+      QUAY_APP_CONFIG_SECRET_BLUE: quay-config-secret-blue
 
   # These two are primary.  Keep ref and secret version in sync at a minimum
   - namespace:
       $ref: /services/quayio/namespaces/quayp03ue1.yml
-    ref: 92550ebf50f8a02788f6d38f76c92f79f233fe87
+    ref: f0d6370f2f9e1f134bbbd86c8b79a9bc07a14802
+    parameters:
+      QUAY_APP_DEPLOYMENT_REPLICAS: 27
+      QUAY_APP_CONFIG_SECRET: quay-config-secret
+      QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "update_smtp_creds_bounce_pods_projquay_1423_v2"
+      IMAGE_TAG: 92550eb
+      # Blue deployment
+      IMAGE_TAG_BLUE: f0d6370
+      QUAY_APP_DEPLOYMENT_REPLICAS_BLUE: 3
+      QUAY_APP_CONFIG_SECRET_BLUE: quay-config-secret-blue
+  - namespace:
+      $ref: /services/quayio/namespaces/quayp05ue1.yml
+    ref: f0d6370f2f9e1f134bbbd86c8b79a9bc07a14802
     parameters:
       QUAY_APP_DEPLOYMENT_REPLICAS: 30
       QUAY_APP_CONFIG_SECRET: quay-config-secret
-      QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "update_smtp_creds_bounce_pods_projquay_1423_v2"
-  - namespace:
-      $ref: /services/quayio/namespaces/quayp05ue1.yml
-    ref: 92550ebf50f8a02788f6d38f76c92f79f233fe87
-    parameters:
-      QUAY_APP_DEPLOYMENT_REPLICAS: 33
-      QUAY_APP_CONFIG_SECRET: quay-config-secret
-      QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "update_smtp_creds_bounce_pods_projquay_1423_v2"
+      QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "quay-pod-bounce-2021-05-07"
+      IMAGE_TAG: 92550eb
+      # Blue deployment
+      IMAGE_TAG_BLUE: f0d6370
+      QUAY_APP_DEPLOYMENT_REPLICAS_BLUE: 3
+      QUAY_APP_CONFIG_SECRET_BLUE: quay-config-secret-blue
   # This is the backup region
   - namespace:
       $ref: /services/quayio/namespaces/quayp04ue2.yml
@@ -138,26 +149,3 @@ resourceTemplates:
       QUAY_APP_DEPLOYMENT_REPLICAS: 30
       QUAY_APP_CONFIG_SECRET: quay-config-secret-readonly
       QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "kinesis_ue2"
-- name: flush-redis
-  path: /openshift.yml
-  url: https://github.com/app-sre/flush-redis
-  targets:
-  - namespace:
-      $ref: /services/quayio/namespaces/quays02ue1.yml
-    ref: b01dcb1e602a909604244eb147a6958978ea7ecd
-    parameters:
-      JOB_NAME: "2021-04-13" # provide_a_unique_job_name_to_trigger_job
-      ACTIVE_DEADLINE_SECONDS: "600"
-      REDIS_SECRET: "quayio-stage-elasticache"
-      IMAGE: "quay.io/app-sre/flush-redis"
-  # ONLY RUN IT ON ONE PROD CLUSTER
-  # UNCOMMENT WHEN YOU NEED THIS JOB TO RUN.
-  # ONCE UNCOMMENTED IT CAN BE LEFT UNCOMMENTED
-  - namespace:
-      $ref: /services/quayio/namespaces/quayp03ue1.yml
-    ref: b01dcb1e602a909604244eb147a6958978ea7ecd
-    parameters:
-      ACTIVE_DEADLINE_SECONDS: "600"
-      REDIS_SECRET: "quayio-elasticache"
-      IMAGE: "quay.io/app-sre/flush-redis"
-      JOB_NAME: "flush-redis-prod-2021-04-13"

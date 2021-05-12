@@ -49,11 +49,6 @@ resourceTemplates:
   path: /deploy/template.yaml
   url: https://github.com/RedHatInsights/xjoin-search
   parameters:
-    CPU_REQUESTS: 500m
-    CPU_LIMITS: 1
-    MEMORY_REQUESTS: 512Mi
-    MEMORY_LIMITS: 512Mi
-    MAX_REPLICAS: 4
     LOG_LEVEL: info
   targets:
   - namespace:
@@ -62,11 +57,21 @@ resourceTemplates:
     upstream: RedHatInsights-xjoin-search-gh-build-master
     parameters:
       NUM_REPLICAS: 2
+      MAX_REPLICAS: 4
+      MEMORY_REQUESTS: 512Mi
+      MEMORY_LIMITS: 512Mi
+      CPU_REQUESTS: 500m
+      CPU_LIMITS: 1
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
     ref: 3e363551559aa0f8d2c00cd57726a729b3eea386
     parameters:
+      CPU_REQUESTS: 500m
+      CPU_LIMITS: 2
       NUM_REPLICAS: 2
+      MAX_REPLICAS: 6
+      MEMORY_REQUESTS: 512Mi
+      MEMORY_LIMITS: 1Gi
 
 - name: xjoin-search-dev
   path: /deploy/template-dev.yaml
@@ -112,7 +117,6 @@ resourceTemplates:
   parameters:
     VERSION: '2.5.0'
     CPU_LIMITS: 3
-    MEMORY_LIMITS: 10Gi
     XMX: 8G
     XMS: 8G
   targets:
@@ -121,13 +125,15 @@ resourceTemplates:
     ref: master
     upstream: RedHatInsights-xjoin-kafka-connect-gh-build-master
     parameters:
-      CPU_REQUESTS: 249m
-      NUM_REPLICAS: '7'
-      MEMORY_REQUESTS: 8Gi
-  - namespace:
-      $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
-    ref: fec3a0d18810319614504acac908b17c4196b885
-    parameters:
       CPU_REQUESTS: 250m
       NUM_REPLICAS: '7'
-      MEMORY_REQUESTS: 6Gi
+      MEMORY_REQUESTS: 8Gi
+      MEMORY_LIMITS: 10Gi
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
+    ref: 0c7c2619c4d6ebccaf3fe4c7a86d4ff9c3188e1b
+    parameters:
+      CPU_REQUESTS: 249m
+      NUM_REPLICAS: '13'
+      MEMORY_REQUESTS: 8Gi
+      MEMORY_LIMITS: 12Gi

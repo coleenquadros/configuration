@@ -1,0 +1,47 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: automation-hub
+  platform: insights
+
+name: automation-hub-clowder
+description: automation-hub app on the Insights Platform
+
+app:
+  $ref: /services/insights/automation-hub/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+managedResourceTypes:
+- ClowdApp
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  CLOUD_WATCH_LOG_GROUP: automation-hub-stage
+
+resourceTemplates:
+  - name: automation-hub
+    path: /openshift/clowder/clowd-app.yaml
+    url: https://github.com/ansible/galaxy_ng
+    targets:
+    - namespace:
+        $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+      disable: true  # do not create an app-sre deploy job for ephemeral namespace
+      ref: internal  # populated by bonfire
+      parameters:
+        REPLICAS: 1

@@ -2124,21 +2124,7 @@ This will result in a Secret being created in the consuming namespace. The Secre
 
 ### Write and run Prometheus rules tests
 
-We rely on Prometheus to generate alerts for our service using expressions that are difficult to test in real world as they are dependent on very specific conditions or that don't do what you expect. Luckily Prometheus developers have recognized this and [unit tests](https://prometheus.io/docs/prometheus/latest/configuration/unit_testing_rules/) can be written for Prometheus alert and recording rules.
-
-In app-interface prometheus rules that have the `/openshift/prometheus-rule-1.yml` will be validated using `promtool check rules` command that will be used from tests that have the `/app-interface/prometheus-rule-test-1.yml` schema that will be run using `promtool test rules` e.g. rules in [app-sre-contract.prometheusrules.yaml](resources/observability/prometheusrules/app-sre-contract.prometheusrules.yaml) are tested in the [app-sre-contract.prometheusrulestests.yaml](resources/observability/prometheusrules/app-sre-contract.prometheusrulestests.yaml) file.
-
-A few notes about the integration that run the tests:
-
-- Since prometheus rules can be templates, prometheus tests need to be templates (`extracurlyjinja2` type). The variables the template will expand are the same that the prometheus rule it tests.
-- Tests will be run for every namespace where the rules are defined. This is needed as rules can have a different shape from one namespace to other.
-- The prometheus test schema allows for multiple rule files in a test. This complicated the code to run the tests a lot so we allow for one test rule per test file.
-
-Writing tests can be difficult at the beginning. This [article](https://www.robustperception.io/unit-testing-rules-with-prometheus) is a nicer start than the official documentation.
-
-If your alerts are based on recording rules, do not write tests using the recorded series, use always the original metrics or you won't be testing the complete setup.
-
-While writing tests, sometimes it is convenient to be able to run tests locally to avoid waiting for them to be run in Jenkins. Please follow [this guide](/docs/app-sre/running-prometheus-rules-locally.md) to know to do it.
+Please follow [this guide](/docs/app-sre/prometheus-rules-tests-in-app-interface.md) to know to do it.
 
 ## Design
 

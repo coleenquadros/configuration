@@ -1,0 +1,70 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: app-interface-stage
+description: staging namespace for app-interface
+
+cluster:
+  $ref: /openshift/appsres03ue1/cluster.yml
+
+app:
+  $ref: /services/app-interface/app.yml
+
+environment:
+  $ref: /products/app-interface/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.appsres03ue1.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ConfigMap
+
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+
+openshiftResources:
+- provider: resource
+  path: /app-sre-stage/app-interface-stage/app-interface.configmap.yaml
+- provider: resource
+  path: /app-sre-stage/app-interface-stage/qontract-api.configmap.yaml
+- provider: vault-secret
+  path: app-interface/app-sre-stage/app-interface-stage/app-interface
+  version: 5
+- provider: vault-secret
+  path: app-interface/app-sre-stage/app-interface-stage/qontract-api
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: app-interface/app-sre-stage/app-interface-stage/qontract-reconcile-toml
+  version: 3
+- provider: vault-secret
+  path: app-interface/app-sre-stage/app-interface-stage/qontract-api-toml
+  version: 5
+- name: unleash
+  provider: vault-secret
+  path: app-sre/unleash/app-interface-token
+  version: 1
+- provider: vault-secret
+  name: dashdotdb
+  path: app-sre/dashdot/dashdotdb-stage
+  version: 1
+- provider: vault-secret
+  name: auth-proxy
+  path: app-sre/dashdot/auth-proxy-stage
+  version: 1
+# terraformResources
+- provider: vault-secret
+  path: app-sre/integrations-output/terraform-resources/app-sre-stage-01/app-interface-stage/app-interface-cloudwatch
+  version: 1
+  annotations:
+    qontract.ignore_reconcile_time: "true"
+- provider: vault-secret
+  path: app-sre/integrations-output/terraform-resources/app-sre-stage-01/app-interface-stage/app-interface-sqs
+  version: 1
+  annotations:
+    qontract.ignore_reconcile_time: "true"
