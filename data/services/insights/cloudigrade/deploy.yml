@@ -52,9 +52,9 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml
-    ref: 91b7ef6db071c2198f2121a83fb758f6a8281eb0
+    ref: 214b97dfa58a7478ae907cc15ef2a3e24c1a0b27
     parameters:  # all other parameters have default values
-      IMAGE_TAG: 0.4.3
+      IMAGE_TAG: 0.5.0
       OSD_REDEPLOY_TRIGGER: 202105111424
       API_REPLICA_COUNT_MAX: '8'
       API_TARGET_AVERAGE_CPU_UTILIZATION: '50'
@@ -62,10 +62,10 @@ resourceTemplates:
       SCHEDULE_VERIFY_VERIFY_TASKS_INTERVAL: '300'
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
-    ref: c19e12bfb97a28b662d66a96c77412eb0e5ea009
+    ref: 5772f78a1072742d7326eaccc77b64a8282be9a7
     parameters:  # all other parameters have default values
-      IMAGE_TAG: 0.4.2
-      OSD_REDEPLOY_TRIGGER: 2
+      IMAGE_TAG: 0.4.4
+      OSD_REDEPLOY_TRIGGER: 3
       API_SENTRY_ENVIRONMENT: prod
       API_SENTRY_RELEASE: prod
       AWS_CLOUDTRAIL_EVENT_URL: https://sqs.us-east-1.amazonaws.com/998366406740/prod-cloudigrade-trails
@@ -83,6 +83,7 @@ resourceTemplates:
       LISTENER_GROUP_ID: cloudmeter_prod
       LISTENER_SENTRY_ENVIRONMENT: prod
       LISTENER_SENTRY_RELEASE: prod
+      POSTIGRADE_HOST: postigrade.cloudigrade-prod.svc.cluster.local
       SOURCES_ENABLE_DATA_MANAGEMENT_FROM_KAFKA: "true"
       API_REPLICA_COUNT_MAX: '16'
       API_TARGET_AVERAGE_CPU_UTILIZATION: '35'
@@ -101,15 +102,17 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml
-    ref: 91b7ef6db071c2198f2121a83fb758f6a8281eb0
+    ref: 214b97dfa58a7478ae907cc15ef2a3e24c1a0b27
     parameters: # all other parameters have default values
-      IMAGE_TAG: 0.4.3
+      IMAGE_TAG: 0.5.0
       OSD_REDEPLOY_TRIGGER: 202105111424
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
-    ref: c19e12bfb97a28b662d66a96c77412eb0e5ea009
+    ref: 5772f78a1072742d7326eaccc77b64a8282be9a7
     parameters:  # all other parameters have default values
-      IMAGE_TAG: 0.4.2
+      IMAGE_TAG: 0.4.4
+      POSTIGRADE_HOST: postigrade.cloudigrade-prod.svc.cluster.local
+      OSD_REDEPLOY_TRIGGER: 3
 
 - name: cloudigrade-listener
   path: /templates/cloudigrade/cloudigrade-listener.yaml
@@ -123,16 +126,18 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml
-    ref: 91b7ef6db071c2198f2121a83fb758f6a8281eb0
+    ref: 214b97dfa58a7478ae907cc15ef2a3e24c1a0b27
     parameters: # all other parameters have default values
-      IMAGE_TAG: 0.4.3
+      IMAGE_TAG: 0.5.0
       LISTENER_WORKER_REPLICA_COUNT: 1
       OSD_REDEPLOY_TRIGGER: 202105111424
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
-    ref: c19e12bfb97a28b662d66a96c77412eb0e5ea009
+    ref: 5772f78a1072742d7326eaccc77b64a8282be9a7
     parameters:  # all other parameters have default values
-      IMAGE_TAG: 0.4.2
+      IMAGE_TAG: 0.4.4
+      POSTIGRADE_HOST: postigrade.cloudigrade-prod.svc.cluster.local
+      OSD_REDEPLOY_TRIGGER: 3
 
 - name: cloudigrade-worker
   path: /templates/cloudigrade/cloudigrade-worker.yaml
@@ -147,14 +152,37 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml
-    ref: 91b7ef6db071c2198f2121a83fb758f6a8281eb0
+    ref: 214b97dfa58a7478ae907cc15ef2a3e24c1a0b27
     parameters: # all other parameters have default values
-      IMAGE_TAG: 0.4.3
+      IMAGE_TAG: 0.5.0
       OSD_REDEPLOY_TRIGGER: 202105111424
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
-    ref: c19e12bfb97a28b662d66a96c77412eb0e5ea009
+    ref: 5772f78a1072742d7326eaccc77b64a8282be9a7
     parameters:  # all other parameters have default values
-      IMAGE_TAG: 0.4.2
+      IMAGE_TAG: 0.4.4
       CELERY_WORKER_REPLICA_COUNT: '8'
       CELERY_WORKER_REPLICA_COUNT_MAX: '24'
+      POSTIGRADE_HOST: postigrade.cloudigrade-prod.svc.cluster.local
+      OSD_REDEPLOY_TRIGGER: 3
+
+- name: postigrade
+  path: /templates/cloudigrade/postigrade.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  parameters:
+    HABERDASHER_EMITTER: kafka
+    HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+    HABERDASHER_KAFKA_TOPIC: platform.logging.logs
+    HABERDASHER_LABELS: {"app": "cloudigrade"}
+    HABERDASHER_TAGS: ["cloudigrade", "postigrade"]
+  targets:
+  - namespace:
+      $ref: /services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml
+    ref: 214b97dfa58a7478ae907cc15ef2a3e24c1a0b27
+    parameters: # all other parameters have default values
+      IMAGE_TAG: 1.0.1
+  - namespace:
+      $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
+    ref: 5772f78a1072742d7326eaccc77b64a8282be9a7
+    parameters: # all other parameters have default values
+      IMAGE_TAG: 1.0.1
