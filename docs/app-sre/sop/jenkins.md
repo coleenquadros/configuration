@@ -9,6 +9,7 @@
   - [JenkinsExecutorSaturation](#jenkinsexecutorsaturation)
   - [JenkinsJvmMemoryStarvation](#jenkinsjvmmemorystarvation)
   - [JenkinsJvmCPUStarvation](#jenkinsjvmcpustarvation)
+- [JenkinsRestart](#Restarting-ci-int)
 
 <!-- /TOC -->
 
@@ -127,5 +128,28 @@ TODO
 ### Steps:
 
 TODO
+
+# Restarting ci-int
+
+Basicaly there are 3 methods of restarting ci-int, depending on severity of problems with service:
+
+## Safe reboot via [Jenkins UI](https://ci.int.devshift.net/safeRestart) - use it only for configuration changes and updating plugins, as it's not a full JVM restart
+
+## Systemd service restart - use it when you can ssh to instance
+
+1. If ci-int UI is responsive, login to UI and hit [Prepare for Shutdown](https://ci.int.devshift.net/prepareShutdown) then wait several minutes for jobs finishing and cancel remaining
+2. ssh to instance and run cleanup commands for removing old builds:
+- `/usr/local/bin/old-build-discarder.sh`
+- `JOB=* DAYS=15 /usr/local/bin/old-build-discarder.sh`
+- `JOB=*-pr-check DAYS=7 /usr/local/bin/old-build-discarder.sh`
+- `JOB=qontract-reconcile-timed-* DAYS=1 /usr/local/bin/old-build-discarder.sh`
+3. Restart Jenkins service: `sudo systemctl restart jenkins`
+
+## OpenStack instance reboot
+
+1. Login to [Open Stack](https://rhos-d.infra.prod.upshift.rdu2.redhat.com/dashboard) with your Kerberos credentials
+1. Navigate to [Compute -> Instances](https://rhos-d.infra.prod.upshift.rdu2.redhat.com/dashboard/project/instances/ec831410-8b9f-4d44-97e6-fbfc3d9817f8/)
+1. Try to 'Soft Rebot Instance'. If it doesnt help try to 'Hard Reboot Instance' and wait several minutes.
+1. If reboot isn't successful add teammates to call or try Stop/Start cycle on instance.
 
 ---
