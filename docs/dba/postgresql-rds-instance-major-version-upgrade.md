@@ -148,6 +148,15 @@ Note: When you run `tf-r`, it will fail because it won't be able to delete the c
 [2020-09-23 10:09:32] [ERROR] [terraform_client.py:check_output:346] - [insights-prod] above and apply again to incrementally change your infrastructure.
 ```
 
+In case previous step can't modify instance you can temporary switch instance to use copied version of parameter group:
+
+1. Copy current parameter group and append something to it's name, like '-copy'
+1. Modify RDS instance to use new copied parameter grpup
+1. Wait for 'pending-reboot' status for paremeter group in the configuration tab
+1. Reboot the instance
+1. Re-run terraform-resource integration, this time it should success
+1. Don't forget to delete copied patameter group after execution of actual upgrade
+
 #### Apply RDS Modifications
 
 NOTE: Create access key in AWS console and configure your AWS CLI prior to running the following command.

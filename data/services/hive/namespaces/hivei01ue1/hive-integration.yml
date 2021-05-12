@@ -26,6 +26,7 @@ managedRoles: true
 
 managedResourceTypes:
 - HiveConfig
+- Secret
 
 openshiftResources:
 - provider: route
@@ -47,6 +48,9 @@ openshiftResources:
   type: kubernetes.io/dockerconfigjson
 - provider: resource
   path: /services/hive/integration/hive.hiveconfig.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/hive/integration/aws-service-provider-secret.yaml
 
 managedTerraformResources: true
 
@@ -105,3 +109,17 @@ terraformResources:
     cluster:
       $ref: /openshift/hivei01ue1/cluster.yml
     access_level: network-mgmt
+- provider: aws-iam-service-account
+  account: osd-privatelink-int
+  identifier: hive-aws-service-provider-integration
+  user_policy:
+      {
+            "Version": "2012-10-17",
+            "Statement": [{
+                "Action": [
+                    "sts:AssumeRole"
+                ],
+                "Effect": "Allow",
+                "Resource": "arn:aws:iam::*:role/RH-OpenShift-Dedicated-Installer-Access" 
+            }]
+      }

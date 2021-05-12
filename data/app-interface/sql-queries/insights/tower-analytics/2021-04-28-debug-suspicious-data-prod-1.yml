@@ -1,0 +1,70 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2021-04-28-debug-suspicious-data-prod-1
+namespace:
+  $ref: /services/insights/tower-analytics/namespaces/tower-analytics-prod.yml
+identifier: tower-analytics-prod
+output: stdout
+overrides:
+  db_name: tenant_11009103
+queries:
+  - |
+    SELECT cluster_id, value, install_uuid FROM cluster 
+    WHERE cluster_id IN (
+      SELECT cluster_id FROM yearly_job_explorer_rollup
+      WHERE template_id IN ( 
+        SELECT id FROM job WHERE value ILIKE 'Ethermine - Miner Status'
+      )
+      GROUP BY cluster_id
+    );
+    
+  - |
+    SELECT id, value FROM organization 
+    WHERE id IN (
+      SELECT org_id FROM yearly_job_explorer_rollup
+      WHERE template_id IN ( 
+        SELECT id FROM job WHERE value ILIKE 'Ethermine - Miner Status'
+      )
+      GROUP BY org_id
+    );
+
+  - |
+    SELECT id, value FROM inventory 
+    WHERE id IN (
+      SELECT inventory_id FROM yearly_job_explorer_rollup
+      WHERE template_id IN ( 
+        SELECT id FROM job WHERE value ILIKE 'Ethermine - Miner Status'
+      )
+      GROUP BY inventory_id
+    );
+
+  - |
+    SELECT id, value FROM task_action 
+    WHERE id IN (
+      SELECT task_action_id FROM yearly_event_explorer_rollup
+      WHERE template_id IN ( 
+        SELECT id FROM job WHERE value ILIKE 'Ethermine - Miner Status'
+      )
+      GROUP BY task_action_id
+    );
+
+  - |
+    SELECT id, value FROM task 
+    WHERE id IN (
+      SELECT task_id FROM yearly_event_explorer_rollup
+      WHERE template_id IN ( 
+        SELECT id FROM job WHERE value ILIKE 'Ethermine - Miner Status'
+      )
+      GROUP BY task_id
+    );
+
+  - |
+    SELECT id, value FROM host 
+    WHERE id IN (
+      SELECT host_id FROM yearly_host_explorer_rollup
+      WHERE template_id IN ( 
+        SELECT id FROM job WHERE value ILIKE 'Ethermine - Miner Status'
+      )
+      GROUP BY host_id
+    );

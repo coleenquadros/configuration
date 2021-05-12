@@ -1,0 +1,79 @@
+---
+$schema: /openshift/cluster-1.yml
+
+labels:
+  service: ci-int
+  environment: production
+
+name: appsrep05ue1
+description: AppSRE internal CI production cluster
+consoleUrl: https://console-openshift-console.apps.appsrep05ue1.zqxk.p1.openshiftapps.com
+kibanaUrl: ''
+prometheusUrl: ''
+alertmanagerUrl: ''
+serverUrl: https://api.appsrep05ue1.zqxk.p1.openshiftapps.com:6443
+elbFQDN: elb.apps.appsrep05ue1.zqxk.p1.openshiftapps.com
+ocm:
+  $ref: /dependencies/ocm/production.yml
+
+auth:
+  service: github-org-team
+  org: app-sre
+  team: appsrep05ue1-cluster
+
+observabilityNamespace:
+  $ref: /services/observability/namespaces/openshift-customer-monitoring.appsrep05ue1.yml
+
+managedGroups:
+- dedicated-admins
+
+managedClusterRoles: true
+
+spec:
+  provider: aws
+  region: us-east-1
+  channel: candidate
+  version: 4.7.0
+  initial_version: 4.7.0-candidate
+  multi_az: true
+  nodes: 9
+  instance_type: m5.xlarge
+  storage: 100
+  load_balancers: 0
+  private: true
+  id: 1kk1b4q1osjiklo0tl6lk1cgfsl2ln57
+  external_id: 0c5e83d4-ac7b-47c4-86cb-975579723213
+  provision_shard_id: de4b0632-dca7-11ea-b3b9-8c1645a911be
+
+network:
+  vpc: 10.29.84.0/22
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
+
+internal: true
+
+automationToken:
+  path: app-sre/creds/kube-configs/appsrep05ue1
+  field: token
+
+awsInfrastructureAccess:
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: network-mgmt
+
+peering:
+  connections:
+  - provider: account-tgw
+    name: appsrep05ue1
+    account:
+      $ref: /aws/app-sre/account.yml
+    tags:
+      service: ci-int
+    manageRoutes: true
+    cidrBlock: 10.0.0.0/8
+
+addons:
+- $ref: /dependencies/ocm/addons/cluster-logging-operator.yml

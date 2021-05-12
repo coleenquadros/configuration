@@ -34,8 +34,8 @@ authentication:
 
 resourceTemplates:
 - name: playbooks-ssg
-  path: /templates/remediations/playbooks-ssg.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  path: /deployment/playbooks-ssg.yaml
+  url: https://github.com/RedHatInsights/insights-remediations
   parameters:
     LIMITS_CPU: '1'
     REQUESTS_CPU: 250m
@@ -43,17 +43,17 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
-    ref: bedc8539dc72f06797e210ec094be83b493a3d86
+    ref: 851b37039d0c9b63b00f23c67c17a48be2eeab0f
     parameters:
       IMAGE_TAG: b3f50c3
   - namespace:
       $ref: /services/insights/remediations/namespaces/remediations-prod.yml
-    ref: 898a39bf99971da37fbd183df4086dd18b6b28e7
+    ref: 851b37039d0c9b63b00f23c67c17a48be2eeab0f
     parameters:
       IMAGE_TAG: b3f50c3
 - name: remediations-cleaner
-  path: /templates/remediations/remediations-cleaner.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  path: /deployment/remediations-cleaner.yaml
+  url: https://github.com/RedHatInsights/remediations-consumer
   parameters:
     CLEANER_SUSPEND: false
     DB_SSL_ENABLED: true
@@ -62,17 +62,17 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
-    ref: bedc8539dc72f06797e210ec094be83b493a3d86
+    ref: f40a63289dedff07c0776ca03bee6d3deef8798f
     parameters:
       IMAGE_TAG: 46904e4
   - namespace:
       $ref:  /services/insights/remediations/namespaces/remediations-prod.yml
-    ref: 920fb1feec9391a808caea5160bacc805e38587b
+    ref: f40a63289dedff07c0776ca03bee6d3deef8798f
     parameters:
       IMAGE_TAG: 46904e4
 - name: remediations-consumer
-  path: /templates/remediations/remediations-consumer.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  path: /deployment/remediations-consumer.yaml
+  url: https://github.com/RedHatInsights/remediations-consumer
   parameters:
     DB_SSL_ENABLED: true
     LOG_CW_ENABLED: true
@@ -81,36 +81,36 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
-    ref: bedc8539dc72f06797e210ec094be83b493a3d86
+    ref: f40a63289dedff07c0776ca03bee6d3deef8798f
     parameters:
       IMAGE_TAG: 46904e4
   - namespace:
       $ref: /services/insights/remediations/namespaces/remediations-prod.yml
-    ref: 920fb1feec9391a808caea5160bacc805e38587b
+    ref: f40a63289dedff07c0776ca03bee6d3deef8798f
     parameters:
       IMAGE_TAG: 46904e4
 - name: remediations-update-consumer
-  path: /templates/remediations/remediations-update-consumer.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  path: /deployment/remediations-update-consumer.yaml
+  url: https://github.com/RedHatInsights/remediations-consumer
   parameters:
     DB_SSL_ENABLED: true
     LOG_CW_ENABLED: true
     LOG_LEVEL: info
-    NUM_REPLICAS: 2
+    NUM_REPLICAS: 12
   targets:
   - namespace:
       $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
-    ref: bedc8539dc72f06797e210ec094be83b493a3d86
+    ref: f40a63289dedff07c0776ca03bee6d3deef8798f
     parameters:
       IMAGE_TAG: 46904e4
   - namespace:
       $ref: /services/insights/remediations/namespaces/remediations-prod.yml
-    ref: 920fb1feec9391a808caea5160bacc805e38587b
+    ref: f40a63289dedff07c0776ca03bee6d3deef8798f
     parameters:
       IMAGE_TAG: 46904e4
 - name: remediations
-  path: /templates/remediations/remediations.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  path: /deployment/deploy.yml
+  url: https://github.com/RedHatInsights/insights-remediations
   parameters:
     ADVISOR_IMPL: impl
     COMPLIANCE_IMPL: impl
@@ -134,18 +134,29 @@ resourceTemplates:
     TARGET_CPU_UTILIZATION: 80
     USERS_IMPL: impl
     VULNERABILITIES_IMPL: impl
+    BACKOFFICE_HOST: backoffice-proxy-insights-services.ext.us-east.aws.preprod.paas.redhat.com
   targets:
   - namespace:
       $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
-    ref: bedc8539dc72f06797e210ec094be83b493a3d86
+    ref: 5d6ef14b1773fb841fcfbc2479d8f6477537c0dd
     parameters:
-      IMAGE_TAG: e391d50
-      PLATFORM_HOSTNAME: cert.${PLATFORM_HOSTNAME}
+      IMAGE_TAG: 19b308b
+      PLATFORM_HOSTNAME: cert.cloud.stage.redhat.com
+      CONFIG_MANAGER_HOST: config-manager-service.config-manager-stage.svc.cluster.local
+      CONFIG_MANAGER_PORT: '8000'
       XJOIN_SEARCH_URL: xjoin-search.xjoin-stage.svc.cluster.local
   - namespace:
       $ref: /services/insights/remediations/namespaces/remediations-prod.yml
-    ref: 920fb1feec9391a808caea5160bacc805e38587b
+    ref: 5d6ef14b1773fb841fcfbc2479d8f6477537c0dd
     parameters:
-      IMAGE_TAG: cea991b
+      IMAGE_TAG: 19b308b
       PLATFORM_HOSTNAME: cert.cloud.redhat.com
+      CONFIG_MANAGER_HOST: config-manager-service.config-manager-prod.svc.cluster.local
+      CONFIG_MANAGER_PORT: '8000'
       XJOIN_SEARCH_URL: xjoin-search.xjoin-prod.svc.cluster.local
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true
+    ref: internal
+    parameters:
+      REPLICAS: 1

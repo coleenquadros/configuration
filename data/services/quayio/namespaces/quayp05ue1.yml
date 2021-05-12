@@ -52,6 +52,17 @@ openshiftResources:
     log_producer: kinesis_stream
 - provider: resource-template
   type: extracurlyjinja2
+  path: /quay-p/quay/quay-config-blue.secret.yaml
+  variables:
+    recycle: true
+    name: quay-config-secret-blue
+    vault_secret_version: 36
+    version_label: v36
+    readonly: false
+    standby: false
+    log_producer: kinesis_stream
+- provider: resource-template
+  type: extracurlyjinja2
   path: /quay-p/quay/quay-db-config.secret.yaml
   variables:
     recycle: true
@@ -89,6 +100,12 @@ terraformResources:
   defaults: /terraform/resources/quayio-production/elasticache-1.yml
   parameter_group: /terraform/resources/quayio-production/elasticache-parameter-group-1.yml
   output_resource_name: quayio-elasticache
+- provider: elasticache
+  account: quayio-prod
+  identifier: quayio-production-modelcache
+  defaults: /terraform/resources/quayio-production/elasticache-modelcache-1.yml
+  parameter_group: /terraform/resources/quayio-production/elasticache-modelcache-parameter-group-1.yml
+  output_resource_name: quayio-elasticache-modelcache
 - provider: s3-cloudfront
   account: quayio-prod
   identifier: quayio-production-s3
