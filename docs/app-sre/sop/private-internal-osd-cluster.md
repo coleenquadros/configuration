@@ -39,6 +39,7 @@ Previous work that resulted in this SOP:
     * Note: use one of the unused CIDR blocks mentioned in the VPN section above
 1. Once the cluster is created, add a `peering` section with the `account-tgw` provider to create all required attachments to the Transit Gateway created in the VPN setup (depends on an `awsInfrastructureAccess` section already merged).
     * Example: https://gitlab.cee.redhat.com/service/app-interface/-/blob/c6738f53b71748f1accd72aa31f0fc84aa09f4a8/data/openshift/appsrep05ue1/cluster.yml#L62-71
+    * Docs: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/app-interface-tgw-attachments.md
 1. Update the DNS operator to add routing to internal Red Hat resources (`openshift-dns` namespace file).
     * Example: https://gitlab.cee.redhat.com/service/app-interface/-/blob/c6738f53b71748f1accd72aa31f0fc84aa09f4a8/data/openshift/appsrep05ue1/namespaces/openshift-dns.yaml
 
