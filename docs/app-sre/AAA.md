@@ -257,6 +257,9 @@ Every app-sre engineer should have access to the following
   - It's not under Red Hat's SSO, you need to create your own username and password.
   - You'll need yet another 2FA application on your phone
 
+- Deadman's snitch
+  - Ask somebody in the team to invite you to the organization. You'll receive an e-mail with a link to the invite. Create a new account then, it will be added automatically to the organization and you'll see all the heartbeats we have configured. You'll also be able to create even more.
+
 ### Returning Red Hat Employee Gotchas
 
 - Accounts need to be re-enabled
