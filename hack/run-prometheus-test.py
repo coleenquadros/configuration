@@ -48,7 +48,11 @@ parser.add_argument("-v", "--vars-file",
                     help="File with variables in yaml format")
 parser.add_argument("-p", "--pretty-print", action="store_true",
                     help="Pretty print prometheus test errors")
+parser.add_argument("-k", "--keep-temp-files", action="store_true",
+                    help="Pretty print prometheus test errors")
 args = parser.parse_args()
+
+print(args.keep_temp_files)
 
 jinja2_vars = {}
 if args.vars_file:
@@ -112,8 +116,9 @@ try:
 except subprocess.CalledProcessError as e:
     print(e.stdout.decode(), end='')
     print(e.stderr.decode(), end='')
-    os.unlink(temp_rule_file_name)
-    os.unlink(temp_test_file_name)
+    if not args.keep_temp_files:
+        os.unlink(temp_rule_file_name)
+        os.unlink(temp_test_file_name)
     sys.exit(1)
 
 print(check.stdout.decode(), end='')
@@ -130,7 +135,8 @@ except subprocess.CalledProcessError as e:
         if args.pretty_print else print(e.stderr.decode())
     sys.exit(1)
 finally:
-    os.unlink(temp_rule_file_name)
-    os.unlink(temp_test_file_name)
+    if not args.keep_temp_files:
+        os.unlink(temp_rule_file_name)
+        os.unlink(temp_test_file_name)
 
 print(result.stdout.decode(), end='')
