@@ -32,7 +32,7 @@ sed -i$SED_OPT "s/^export RECONCILE_IMAGE_TAG=.*$/export RECONCILE_IMAGE_TAG=$NE
 sed -E -i$SED_OPT "s/^(\s+qontract_reconcile_image_tag:).*$/\1 '$NEW_COMMIT'/" $JENKINS_FILE
 
 if [ "$NEW_SHA" != "$OLD_SHA" ]; then
-    sed -i$SED_OPT "s/$OLD_SHA/$NEW_SHA/" $SAAS_FILE $SAAS_FILE_INT
+    sed -i$SED_OPT "s/$OLD_SHA/$NEW_SHA/" $SAAS_FILE # $SAAS_FILE_INT
 fi
 
 if [ -n "$DO_COMMIT" ]; then
