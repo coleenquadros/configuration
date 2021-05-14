@@ -18,7 +18,7 @@ $ source venv/bin/activate
 # make sure you are running the latest setuptools
 $ python3 -m pip install --upgrade pip setuptools
 # install development packages
-$ python3 setup.py depvelop
+$ python3 setup.py develop
 ```
 
 3. **Configure qontract-reconcile**
