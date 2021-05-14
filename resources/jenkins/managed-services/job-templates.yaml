@@ -100,6 +100,61 @@
                 - shell: "{cleanup_script}"
 
 - job-template:
+    id: mk-nightly-build-test-branch
+    name: "{gl_group}-{gl_project}-gl-build-test-nightly-{branch}"
+    wrappers:
+      - timeout_wrapper:
+          timeout: 360
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+          - *ci_jenkins_token
+          - *gitlab_token
+          - *backup_ecr_push_creds
+          - *quay_secret_push
+          - *app_sre_bot_push_token
+          - *app_interface_creds
+          - *managed_services_github_deploy_key
+          - *ci_ocm_token
+          - *ci_aws_keys
+          - *ci_observatorium
+          - *kas_fleetshard
+          - *ci_cd_quay
+    <<: *gl_timed
+    parameters:
+    - hidden:
+        name: RELEASE
+        default: 'false'
+        description: 'true = snapshot+release, false = nightly'
+    - bool:
+        name: SKIP_BUILD
+        default: 'false'
+        description: 'true if you want to skip CPaaS build and use snapshot images defined in build_config.yaml for testing/releasing'
+    - string:
+        name: CPAAS_BUILD
+        default: ''
+        description: 'if you want to use existing CPaaS build (avoid triggering new build)'
+    - bool:
+        name: CLUSTER_CLEANUP
+        default: 'true'
+        description: 'include deletion of test cluster'
+    publishers:
+    - archive:
+        artifacts: "{archive_artifacts}"
+        allow-empty: true
+    - junit:
+        results: "{junit_results}"
+    - postbuildscript:
+        builders:
+            - role: SLAVE
+              build-on:
+                - NOT_BUILT
+                - ABORTED
+                - FAILURE
+              build-steps:
+                - shell: "{cleanup_script}"
+                
+- job-template:
     id: managed-services-pull-upstream
     name: 'managed-services-pull-upstream'
     description: "[managed-services] pull changes from all upstreams specified in {gl_group}/{gl_project}/script/repo-config.yaml"
