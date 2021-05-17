@@ -1,4 +1,4 @@
-# Anthology of App-SRE Axioms
+# Anthology of AppSRE Axioms
 
 Anthology: *a published collection of poems or other pieces of writing*
 ---
@@ -9,7 +9,7 @@ Axiom: *a statement or proposition which is regarded as being established, accep
 
 <!-- TOC -->
 
-- [Anthology of App-SRE Axioms](#anthology-of-app-sre-axioms)
+- [Anthology of AppSRE Axioms](#anthology-of-app-sre-axioms)
   - [Anthology: *a published collection of poems or other pieces of writing*](#anthology-a-published-collection-of-poems-or-other-pieces-of-writing)
   - [Axiom: *a statement or proposition which is regarded as being established, accepted, or self-evidently true.*](#axiom-a-statement-or-proposition-which-is-regarded-as-being-established-accepted-or-self-evidently-true)
   - [Index](#index)
@@ -62,14 +62,14 @@ Axiom: *a statement or proposition which is regarded as being established, accep
 
 ## Preface
 
-This documents is for App-sre engineer consumption and aims to ensure agreement around and govern the App-sre continuity and readiness plan.
-It serves as the top node and authorative source for documentation around App-sre process.
+This documents is for AppSRE engineer consumption and aims to ensure agreement around and govern the AppSRE continuity and readiness plan.
+It serves as the top node and authorative source for documentation around AppSRE process.
 
-The document itself consists of two main sections, the first details prerequisites and process pieces that every App-sre engineer needs to have in place.  This serves as a checklist for access and details contact points on how to aquire any lacking access.
+The document itself consists of two main sections, the first details prerequisites and process pieces that every AppSRE engineer needs to have in place. This serves as a checklist for access and details contact points on how to aquire any lacking access.
 
 The second section consists of operational procedures and documentation that serves as references during incident work.
 
-Information within this document aims to be he authorative source for process and (until further notice) contacts.  For details on the specifics of the operational environment the app-interface supercedes this document - hence this should be viewed as complementary and authorative only concerning process.  Content in this document should aim to reference the app-interface schemas as opposed to duplicating it, where possible.
+Information within this document aims to be he authorative source for process and (until further notice) contacts. For details on the specifics of the operational environment the app-interface supercedes this document - hence this should be viewed as complementary and authorative only concerning process. Content in this document should aim to reference the app-interface schemas as opposed to duplicating it, where possible.
 
 Additionally there is a contact section near the end which details the escalations and contact for external groups and dependencies.
 The goal is to move this to the app-interface itself as it matures.
@@ -78,14 +78,14 @@ The goal is to move this to the app-interface itself as it matures.
 
 - This document was created and maintained using vscode, using [Markdown ToC plugin](https://marketplace.visualstudio.com/items?itemName=AlanWalk.markdown-toc)
 - Merge requests are accepted but require team lead signoff
-- As it is important to communicate and gain common aknowledgement of process captured within, this document will be reviewed every sprint retro when there are changes.  If you can not attend a sprint retro, make sure you review this document before going on call.
+- As it is important to communicate and gain common aknowledgement of process captured within, this document will be reviewed every sprint retro when there are changes. If you can not attend a sprint retro, make sure you review this document before going on call.
 - Prior to each
 
 ## Other sources of documentation you might be looking for:
 
 - The app-interface: https://gitlab.cee.redhat.com/service/app-interface
 - The developers guide: https://gitlab.cee.redhat.com/service/dev-guidelines
-- App-sre team drive: https://drive.google.com/drive/u/0/folders/0B9akCOYRTJW_TFAxOUtEaWtRZWs
+- AppSRE team drive: https://drive.google.com/drive/u/0/folders/0B9akCOYRTJW_TFAxOUtEaWtRZWs
 
 ## Example user manifest with minimum viable roles for an AppSRE team member
 
@@ -122,7 +122,7 @@ public_gpg_key: |
 
 ## Access and surfaces list
 
-Every app-sre engineer should have access to the following
+Every AppSRE engineer should have access to the following
 
 - Github / LDAP username
   - If needed can reset KRB password [here](https://password.corp.redhat.com/changepassword)
@@ -196,7 +196,7 @@ Every app-sre engineer should have access to the following
   - ACCESS: https://source.redhat.com/groups/public/atomicopenshift/atomicopenshift_wiki/openshift_onboarding_checklist_for_github
   - Ping [Bill Dettelback](https://rover.redhat.com/people/profile/bdettelb) on slack or mail for access to [quay github org](https://github.com/quay)
 
-- App-SRE OCM org (https://cloud.redhat.com/openshift)
+- AppSRE OCM org (https://cloud.redhat.com/openshift)
   - Access is [configured manually by an org administrator](/docs/app-sre/sop/ocm-appsre-org-access.md)
 
 - AWS
@@ -215,7 +215,7 @@ Every app-sre engineer should have access to the following
 - Bugzilla
   - ACCESS: Ensure you have access to [bugzilla](https://bugzilla.redhat.com)
     - Login as Red Hat Associate with kerberos credentials
-  - Verify you have permissions to view private and private_comment.  This should be provided as part of the redhat group.  See [here](https://mojo.redhat.com/docs/DOC-1197751) for group information.
+  - Verify you have permissions to view private and private_comment. This should be provided as part of the redhat group. See [here](https://mojo.redhat.com/docs/DOC-1197751) for group information.
 
 - Dedicated admin on openshift clusters
   - Nothing to do. Obtained via a [role](data/teams/app-sre/roles/app-sre.yml)
@@ -224,11 +224,11 @@ Every app-sre engineer should have access to the following
   - ACCESS: Create a [Jira ticket](https://issues.redhat.com/) to request access to PagerDuty assign it to [Meghna Gala](https://rover.redhat.com/people/profile/mgala)
   - you can check this [example ticket](https://issues.redhat.com/browse/OHSS-2547), but double check the assignee before commiting.
 
-- App-sre shared folders
+- AppSRE shared folders
   - ACCESS: Go to the following folders and request access with your Red Hat Gsuite account
     * [Public Top Level Directory](https://drive.google.com/drive/u/1/folders/1sQGfo57eU7UAKfbBy8LgwxhMdnzXc0KZ) (contains RCAs, etc)
     * [Private](https://drive.google.com/drive/u/1/folders/0B9akCOYRTJW_TFAxOUtEaWtRZWs) (for AppSRE Team members only)
-    
+
 - App SRE infrastructure managed by ansible
   - Access is managed by adding ssh keys to the [admin-list](https://gitlab.cee.redhat.com/app-sre/infra/blob/master/ansible/hosts/group_vars/all#L4) and applying the `baseline` role to all hosts. It is recommended that ssh key is RSA, 4096-sized and password-protected as those are the [requirements for Tier 1 Bastion keys](https://mojo.redhat.com/docs/DOC-1144200#jive_content_id_Tier_1)
 
@@ -265,13 +265,13 @@ Every app-sre engineer should have access to the following
 - Accounts need to be re-enabled
   - Bugzilla
     - Send e-mail to bugzilla-owner@redhat.com or create ticket at the [Help Portal](https://help.redhat.com/)
-    - It is likely the re-activated account will not have the needed permissions.  Request access to the devel group by following the directions [here](https://mojo.redhat.com/docs/DOC-1197751)
+    - It is likely the re-activated account will not have the needed permissions. Request access to the devel group by following the directions [here](https://mojo.redhat.com/docs/DOC-1197751)
   - Bluejeans
     - Create an IT ticket
 
 ## On call
 
-The App-sre on call schedule is a rotation to ensure handling of service outages and incidents for our application owners.
+The AppSRE on call schedule is a rotation to ensure handling of service outages and incidents for our application owners.
 Schedule of past, current and future on call rotation can be viewed @ pagerduty: https://redhat.pagerduty.com/
 
 The on call includes three tiers of response, detailed below.
@@ -284,7 +284,7 @@ The on call includes three tiers of response, detailed below.
 ### Pagerduty set up
 
 Ensure you are listed with the appropriate contact detail in your Pagerduty profile.
-The recommended setup includes the pagerduty app on your mobile phone.  From the website you can test notifications to ensure that you have correctly set up the application to override any do not disturb settings.
+The recommended setup includes the pagerduty app on your mobile phone. From the website you can test notifications to ensure that you have correctly set up the application to override any do not disturb settings.
 
 For notification troubleshooting see: https://support.pagerduty.com/docs/notification-troubleshooting
 
@@ -294,7 +294,7 @@ The follow the sun cycle (FTS) is an on-call rotation to ensure that the first p
 
 ### Primary on-call
 
-The primary on-call is a 24/7 on-call rotation assigned on a weekly basis.  The engineer assigned is required to be available for the initial response within 30 minutes of the page.
+The primary on-call is a 24/7 on-call rotation assigned on a weekly basis. The engineer assigned is required to be available for the initial response within 30 minutes of the page.
 
 Pages for primary on-calls should be be kept at a minimum and are reserved for critical issues in production environments which need immediate attention.
 
@@ -406,7 +406,7 @@ Please refer to the [full onboarding document](https://service.pages.redhat.com/
 
 Application-related secrets such as passwords, or tokens must be handled according to [this document](https://service.pages.redhat.com/dev-guidelines/docs/appsre/onboarding/adding-sensitive-data/).
 
-## App-sre escalation to external teams
+## AppSRE escalation to external teams
 
 ### PnT Devops
 
@@ -523,7 +523,7 @@ The IT Platform team runs components like:
 
 - `sso.redhat.com`
   - C1 SLA (see resources below)
-  - Quick link to [blackbox poll Prometheus data](https://prometheus.app-sre-prod-01.devshift.net/graph?g0.range_input=2h&g0.stacked=1&g0.expr=probe_success%7Binstance%3D~%22.*sso.redhat.com.*%22%7D&g0.tab=0) for sso.redhat.com 
+  - Quick link to [blackbox poll Prometheus data](https://prometheus.app-sre-prod-01.devshift.net/graph?g0.range_input=2h&g0.stacked=1&g0.expr=probe_success%7Binstance%3D~%22.*sso.redhat.com.*%22%7D&g0.tab=0) for sso.redhat.com
   - In order to escalate a production incident this email can be used: `it-es-platform-page@redhat.com`.
   - To get ahold of a person directly to follow up on an escalation or incident connect to the [IT/ISO Google chat](https://chat.google.com/room/AAAAiUsrxXk)
   - Resources: [Applications and Systems Criticality Classification](https://mojo.redhat.com/docs/DOC-1171238) and [Business Resilience Glossary](https://mojo.redhat.com/docs/DOC-1136493).
@@ -533,11 +533,11 @@ The IT Platform team runs components like:
 
 The telemetry-dev team has an oncall rotation that must be used to escalate incidents to the development team under the following conditions:
 
-- App-SRE will remain the first responder for telemetry incidents
-- Every alert with severity `critical` on telemetry will engage both the App-SRE and telemeter-dev escalation policies
+- AppSRE will remain the first responder for telemetry incidents
+- Every alert with severity `critical` on telemetry will engage both the AppSRE and telemeter-dev escalation policies
 - The telemeter-dev escalation policy only pages a developer on call after *30 min* since the incident was triggered
-- If determined by the app-sre oncall, the telemeter-dev can be engaged earlier than 30 minutes into the incident with a manual page to the telemeter-dev oncall *via pagerduty*
-- The app-sre oncall should continue to work on the incident and peer with the oncall developer.
+- If determined by the AppSRE oncall, the telemeter-dev can be engaged earlier than 30 minutes into the incident with a manual page to the telemeter-dev oncall *via pagerduty*
+- The AppSRE oncall should continue to work on the incident and peer with the oncall developer.
 
 Note: This escalation policy is a temporary status with the short term goal to improve incident-runbooks, stability and availability.
 
@@ -564,8 +564,8 @@ Products & Technolgies, essentially Paul Cormier’s entire 7000 person org.
 
 ## PnT Ops
 
-Product & Technologies Business Operations lead by VP Katrinka McCallum (non-technical team).  This is where all the Program Managers and metrics people hangout.
+Product & Technologies Business Operations lead by VP Katrinka McCallum (non-technical team). This is where all the Program Managers and metrics people hangout.
 
 ## PnT DevOps
 
-Old Jay Ferrandini's team, made up of 5 pillars (SysOps, Labs, RCM, DevTools, AutomationQE).  This team handles hundreds of tools ranging from Jira & Bugzilla to platforms like CentralCI and UpShift. The SysOps pillar is most likely working on whatever is happening as they also maintain a huge pile of Jenkins boxes.  That team is lead by David Mair.
+Old Jay Ferrandini's team, made up of 5 pillars (SysOps, Labs, RCM, DevTools, AutomationQE). This team handles hundreds of tools ranging from Jira & Bugzilla to platforms like CentralCI and UpShift. The SysOps pillar is most likely working on whatever is happening as they also maintain a huge pile of Jenkins boxes. That team is lead by David Mair.
