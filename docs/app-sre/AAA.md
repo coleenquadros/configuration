@@ -340,9 +340,9 @@ Similarly as with the access pieces:
 
 * All escalation channels are referenced from the specific `app-1.yml` file of the service in App-Interface.
 
-### Following Incident Procedure
+### Following Incident Process
 
-All AppSRE team members will follow the [Incident procedure](#incident-procedure) documented in this file as accurately as possible, raise any concers and keep it up to date.
+All AppSRE team members will follow the [Incident Process](./incident-process.md) as accurately as possible, raise any concers and keep it up to date.
 
 ### SRE Checkpoints
 
