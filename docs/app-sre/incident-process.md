@@ -26,13 +26,13 @@ If the incident does not qualify as a major incident, there is no need to follow
 
 ## AppSRE Internal Escalations
 
-**During working hours**
+### During working hours
 
 The **First Responder** may ask other AppSRE team members to join with the incident effort. The **Incident Tech Lead** role will default to the **First Responder**, unless otherwise explicitely stated during the initial moments of the incident. At least one more person will be involved which will be made the **Incident Commander**. Depending on the severity of the issue, other people may join to act as a **PI**.
 
 The team manager and the team lead must be notified of these incidents.
 
-**Outside of working hours**
+### Outside of working hours
 
 The **First Responder**, acting as the **Incident Tech Lead**, will try to resolve the incident by themselves. If assistance is needed due to the complexity or criticality of the issue, the **First Responder** may escalate to the **Secondary On-Call**, to the team manager or to the team lead via PagerDuty (create issue in PD and assign to them).
 
@@ -50,7 +50,7 @@ The **First Responder**, acting as the **Incident Tech Lead**, will try to resol
 
 As soon as the **Incident Commander** is nominated, which should be 10 minutes after the start of the incident, and which defaults to the **First Responder** in the event that no other AppSRE engineers are available, they must carry out these tasks:
 
-**Incident Management**
+### Incident Management
 
 * Nominate any additional Parallel Investigators.
 * Ensure there is an incident continuity plan, so the incident continues to be investigated after the current shift ends.
@@ -58,7 +58,7 @@ As soon as the **Incident Commander** is nominated, which should be 10 minutes a
 * Escalate to managers.
 * Ensure the incident is actively being investigated, mitigated and resolved.
 
-**Immediate Communication**
+### Immediate Communication
 
 * Create a JIRA with type `Task`, with label `type/incident` in the [APPSRE board].
 * Create slack channel for the incident, referencing the JIRA and the bridge ([zti]).
@@ -71,7 +71,7 @@ As soon as the **Incident Commander** is nominated, which should be 10 minutes a
   relevant. The email should include: Service Name, Impact, JIRA, and incident
   slack channel.
 
-**Continuous Communication (every 30 minutes)**
+### Continuous Communication (every 30 minutes)
 
 This section needs to be carried out every 30 minutes.
 
@@ -80,7 +80,7 @@ This section needs to be carried out every 30 minutes.
 * Update #sd-org channel with current state of the incident, including impact.
 * Send update to the email thread created in the first step.
 
-**Resolution**
+### Resolution
 
 Upon resolution, this should be notified to all the surfaces that were used to report the incident:
 
@@ -88,7 +88,7 @@ Upon resolution, this should be notified to all the surfaces that were used to r
 * #sd-org slack channel.
 * Email thread created in the first step.
 
-## External Escalation*
+## External Escalations
 
 If the AppSRE engineer is not able to resolve the issue, it is a good idea to escalate it to the service team, especially during business hours.
 
