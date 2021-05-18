@@ -35,6 +35,30 @@ spec:
         service: hive
         severity: critical
         team: appsre
+    - alert: HiveOperatorDown - production - {{{shard_name}}}
+      annotations:
+        message: "No targets found for hive-operator in namespace {{ $labels.namespace }}. hive-operator is down."
+        runbook: "https://github.com/openshift/hive-sops/blob/master/sop"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
+      expr: |
+        absent(up{job="openshift-customer-monitoring/hive-operator"} == 1)
+      for: 5m
+      labels:
+        service: hive
+        severity: critical
+        team: appsre
+    - alert: HiveDeploymentFailed - production - {{{shard_name}}}
+      annotations:
+        message: "hive deployment has failed. Condition/Reason: {{ $labels.condition }} / {{ $labels.reason }}."
+        runbook: "https://github.com/openshift/hive-sops/blob/master/sop"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
+      expr: |
+        hive_hiveconfig_conditions{condition="Ready"} == 0
+      for: 5m
+      labels:
+        service: hive
+        severity: critical
+        team: appsre  
     - alert: ClusterServiceVersionStuck - production - {{{shard_name}}}
       annotations:
         message: "ClusterServiceVersion {{ $labels.name }} stuck in abnormal state: {{ $labels.reason }}"
