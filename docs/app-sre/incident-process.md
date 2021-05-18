@@ -16,8 +16,11 @@
         - [Continuous Communication (every 30 minutes)](#continuous-communication-every-30-minutes)
         - [Resolution](#resolution)
     - [External Escalations](#external-escalations)
-    - [Resolution](#resolution-1)
-    - [Tecnical Resolution of the Issue](#tecnical-resolution-of-the-issue)
+    - [Post Mortem](#post-mortem)
+    - [Technical Incident Checklist](#technical-incident-checklist)
+        - [Collect Information](#collect-information)
+        - [Service Documention and SOPs](#service-documention-and-sops)
+        - [Common Causes](#common-causes)
 
 <!-- /TOC -->
 
@@ -128,7 +131,7 @@ Once the issue has been mitigated and resolved, the **Incident Owner** (defaults
 * Driving any follow-up activity linked to the incident.
 * Cleaning up after the incident is fully closed, like archiving the slack channel.
 
-## Tecnical Resolution of the Issue
+## Technical Incident Checklist
 
 The **Incident Tech Lead** (defaults to **First Responder**) and **Parellel Investigator(s)** are responsible for the investigation, mitigation and resolution of the incident.
 
