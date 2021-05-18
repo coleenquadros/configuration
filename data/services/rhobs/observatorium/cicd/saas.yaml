@@ -1,0 +1,91 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: observatorium
+
+name: saas-observatorium
+description: SaaS tracking file for Observatorium
+
+app:
+  $ref: /services/rhobs/observatorium/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-monitoring-info
+
+authentication:
+  image:
+    path: app-sre/ci-int/redhat-registry-io-pull
+    field: all
+
+managedResourceTypes:
+- Deployment
+- Service
+- StatefulSet
+- ConfigMap
+- Role
+- RoleBinding
+- ServiceAccount
+- PodDisruptionBudget
+- PersistentVolumeClaim
+- PrometheusRule # Adding everything that exists. This will be moved to a separate saas file.
+
+imagePatterns:
+- quay.io/conprof/conprof
+- quay.io/observatorium
+- quay.io/app-sre
+- quay.io/openshift/origin-oauth-proxy
+- quay.io/prometheus/memcached-exporter
+- registry.redhat.io/rhel8/memcached
+- quay.io/jpkroehling/all-in-one
+- quay.io/app-sre/gubernator
+
+parameters:
+  OAUTH_PROXY_IMAGE: quay.io/openshift/origin-oauth-proxy
+  OAUTH_PROXY_IMAGE_TAG: 4.9.0
+
+resourceTemplates:
+- name: jaeger
+  path: /resources/services/jaeger-template.yaml
+  url: https://github.com/rhobs/configuration
+  parameters:
+    IMAGE: quay.io/app-sre/jaegertracing-all-in-one
+  targets:
+  - namespace:
+      $ref: /services/rhobs/telemeter/namespaces/telemeter-stage.yml
+    ref: 3830f23a4af9f3ce972413c05d2047a95951c001
+    parameters:
+      NAMESPACE: telemeter-stage
+      IMAGE_TAG: '1.22.0'
+      REPLICAS: '1'
+      JAEGER_CPU_REQUEST: '100m'
+      JAEGER_MEMORY_REQUEST: '1Gi'
+      JAEGER_CPU_LIMITS: '500m'
+      JAEGER_MEMORY_LIMITS: '4Gi'
+      SERVICE_ACCOUNT_NAME: prometheus-telemeter
+- name: conprof
+  path: /resources/services/conprof-template.yaml
+  url: https://github.com/rhobs/configuration
+  parameters:
+    IMAGE: quay.io/conprof/conprof
+  targets:
+  - namespace:
+      $ref: /services/rhobs/telemeter/namespaces/telemeter-stage.yml
+    ref: 3830f23a4af9f3ce972413c05d2047a95951c001
+    parameters:
+      NAMESPACE: telemeter-stage
+      OBSERVATORIUM_METRICS_NAMESPACE: telemeter-stage
+      OBSERVATORIUM_MST_NAMESPACE: observatorium-mst-stage
+      OBSERVATORIUM_LOGS_NAMESPACE: observatorium-logs-stage
+      IMAGE_TAG: 'master-2021-02-24-33f5514'
+      CONPROF_REPLICAS: '1'
+      CONPROF_CPU_REQUEST: '100m'
+      CONPROF_MEMORY_REQUEST: '1Gi'
+      CONPROF_CPU_LIMITS: '500m'
+      CONPROF_MEMORY_LIMITS: '4Gi'
+      SERVICE_ACCOUNT_NAME: prometheus-telemeter
