@@ -15,7 +15,7 @@ Note: The following credentials should only be used in break glass situations
 
 1) Find the cluster's shard and namespace according to the [find a cluster's shard and namespace](#how-to-find-a-clusters-shard-and-namespace) section.
 
-1) List the secrets under the cluster namespace and make note of the secrets prefix that looks like *<cluster-name>-<number>-<short-id>-* (ex: quayp03ue1-0-vsscf-admin-kubeconfig)
+1) List the secrets under the cluster namespace and make note of the secrets prefix that looks like *<cluster-name>-<number>-<short-id>-* (ex: quayp05ue1-0-vsscf-admin-kubeconfig)
 
         oc -n <cluster_ns> get secrets
 
