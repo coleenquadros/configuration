@@ -1,9 +1,7 @@
 # Anthology of AppSRE Axioms
 
-Anthology: *a published collection of poems or other pieces of writing*
----
-Axiom: *a statement or proposition which is regarded as being established, accepted, or self-evidently true.*
----
+* Anthology: *a published collection of poems or other pieces of writing*
+* Axiom: *a statement or proposition which is regarded as being established, accepted, or self-evidently true.*
 
 ## Index
 
