@@ -134,13 +134,13 @@ The **Incident Tech Lead** (defaults to **First Responder**) and **Parellel Inve
 
 The goal of this section is to propose some actions, and to list some resources, that may help with the resolution of the incident.
 
-**Collect Information**
+### Collect Information
 
 * Log into the cluster with the `oc` cli tool, and then run the [must-gather] script to collect data.
 * Access the AppSRE grafana and look for the relevant [dashboard](https://grafana.app-sre.devshift.net/dashboards).
 * Fetch pod logs with `oc logs`. If you need older data, it can be accessed via CloudWatch, following the [Log Forwarding] FAQ.
 
-**Service Documention and SOPs**
+### Service Documention and SOPs
 
 * Find the service in [Visual App-Interface](https://visual-app-interface.devshift.net/services).
 * `sopsUrl` field of the corresponding `app-1.yml` file. TODO: Add to Visual-App-Interface.
@@ -148,7 +148,7 @@ The goal of this section is to propose some actions, and to list some resources,
 * Many services have placed their SOPs in the [App-Interface docs] folder.
 * Onboarding questionnaire for the service. This can be found referenced by an [Onboarding Epic].
 
-**Common Causes**
+### Common Causes
 
 This section aims to give some ideas of possible generic underlying causes.
 
