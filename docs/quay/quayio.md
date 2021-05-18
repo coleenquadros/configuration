@@ -26,7 +26,7 @@ Account ID: quayio
 | Environment | Namespace |
 | --- | --- |
 |Stage|[Prometheus](https://prometheus.quays02ue1.devshift.net/graph)|
-|Production (us-east-1)|[Prometheus](https://prometheus.quayp03ue1.devshift.net/graph)|
+|Production (us-east-1)|[Prometheus](https://prometheus.quayp05ue1.devshift.net/graph)|
 |Production (us-east-2)|[Prometheus](https://prometheus.quayp04ue2.devshift.net/graph)|
 
 ## Quay Dashboards
@@ -102,7 +102,7 @@ Secrets' exact location can be found in the files namespaces
 | Environment | Namespace |
 | --- | --- |
 |Stage|https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/quayio/namespaces/quays02ue1.yml|
-|Production (us-east-1)|https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/quayio/namespaces/quayp03ue1.yml|
+|Production (us-east-1)|https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/quayio/namespaces/quayp05ue1.yml|
 |Production (us-east-2)|https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/quayio/namespaces/quayp04ue2.yml|
 
 Once updated the secret, update the secret's version number to the version of secret you want on the cluster and raise a merge request for AppSRE team to review and merge.
