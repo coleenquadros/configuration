@@ -242,68 +242,7 @@ Schedule: https://redhat.pagerduty.com/schedules#PSTVSQD
 
 ## Incident Process
 
-What constitutes an incident:
-
-If any of the following is true, the event is an incident:
-
-- Is the outage visible to customers (internal or external)?
-- Do you need to involve a second team in fixing the problem?
-- Does the outage result in breach of Service SLO's?
-
-Tracking:
-
-- Start off by creating a JIRA issue for the incident on the [Incident board](https://issues.redhat.com/secure/RapidBoard.jspa?rapidView=5146)
-  - Issue type: `Task`
-  - Labels: `type/incident`
-
-- Create a Google doc for live incident status and RCA:
-  - Clone the [incident RCA template](https://docs.google.com/document/d/12ZVT35yApp7D-uT4p29cEhS9mpzin4Z-Ufh9eOiiaKU/edit)
-  - Add Incident title and JIRA link
-  - Post the doc link back into the JIRA ticket
-  - Guidelines on how to write the incident report are available in the [Google Doc](https://docs.google.com/document/d/165eDunz6yy9uIi2XXxWaEpODCVFp9tYhnBF607qVexg/edit)
-
-Initiate incident communications:
-
-- Send message to the #sd-org slack channel. Keep it updated with the incident progress.
-- If deemed appropriate, a new channel can be created in slack: #incident-app-sre-<JIRAID>. This channel should be linked from #sd-org.
-- If applicable, update the service statuspage following the available SOP:
-  - [Updating status.quay.io](https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/quay/statuspage.md)
-  - [Updating status.redhat.com](https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/statuspage.md)
-- Send email to:
-  - [serviceOwners](https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/app-sre/app-1.yml)
-  - [serviceNotifications](https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/app-sre/app-1.yml). This list may include `outage-list@redhat.com`, make sure an email is sent to that list if it's a major outage and if that list includes the outage list.
-  - sd-notifications@redhat.com
-  - sd-org@redhat.com (major outage)
-
-Email template:
-
-```text
-Subject: `<YYYY-MM-DD> Incident: <ServiceName> <Optional highlights>`
-
-Hello team,
-
-We are investigating an ongoing incident affecting <ServiceName>.
-
-Impacted users: <Internal/External>
-
-App-SRE tracking JIRA: <Link for JIRA ticket created above>
-
-We will provide updates in the #sd-org slack channel as the incident progresses.
-```
-
-During the incident:
-
-- Join the [App-SRE Meet Bridge](https://meet.google.com/zti-gkvy-pvn) or [App-SRE Bluejeans Bridge](https://bluejeans.com/994349364/8531) in case Meet is down
-  - If the incident investigation needs assistance from the developer teams, also send them the link and ask to join in
-
-Post incident comms, followups:
-
-- After the incident has been confirmed as resolved, send an email indicating that the incident has been resolved / mitigated
-- Create issues from the action items on the respective team JIRA boards, link them back to the incident tracker
-
-Post RCA comms, followups:
-
-- After the RCA is finished, post a link to it in #sd-org, and emails to the `serviceOwners` (and to `sd-org` in case of a major outage).
+Documented in the [Incident Process](./incident-process.md) SOP.
 
 ## Service Onboarding
 
@@ -401,9 +340,9 @@ Similarly as with the access pieces:
 
 * All escalation channels are referenced from the specific `app-1.yml` file of the service in App-Interface.
 
-### Following Incident Procedure
+### Following Incident Process
 
-All AppSRE team members will follow the [Incident procedure](#incident-procedure) documented in this file as accurately as possible, raise any concers and keep it up to date.
+All AppSRE team members will follow the [Incident Process](./incident-process.md) as accurately as possible, raise any concers and keep it up to date.
 
 ### SRE Checkpoints
 
