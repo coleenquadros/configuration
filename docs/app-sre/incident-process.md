@@ -112,11 +112,22 @@ Upon resolution, this should be notified to all the surfaces that were used to r
 
 ## External Escalations
 
-If the AppSRE engineer is not able to resolve the issue, it is a good idea to escalate it to the service team, especially during business hours.
+### Service Development Team
 
-Outside business hours, the AppSRE engineer may escalate to the developer oncall if the escalation policy has been provided and documented in App-Interface in the `escalationPolicy` field of the corresponding `app-1.yml` file.
+**During Business Hours**
 
-Additionally, if there is any indication that the incident may be caused by an infrastructure issue, the incident team should escalate to the oncall SREP, by pinging `@sre-platform-primary` in the `#sd-sre-platform` channel, or by creating a PD incident and assigning to them.
+The incident should be escalated to the Service development team within 30 minutes.
+
+**Outside of Business Hours**
+
+The incident should be escalated to the Service development team within 1 hour, or sooner if the AppSRE engineer considers the SOPs have been exhausted.
+
+In order to escalate to the developer oncall, the escalation policy must have been provided and documented in
+App-Interface in the `escalationPolicy` field of the corresponding `app-1.yml` file.
+
+### SREP Team - OSD infrastructure
+
+If there is any indication that the incident may have been caused by an OSD infrastructure issue, the incident must be escalated oncall SREP team immediately, by pinging `@sre-platform-primary` in the `#sd-sre-platform` channel, or by creating a PD incident and assigning to them.
 
 ## Post Mortem
 
