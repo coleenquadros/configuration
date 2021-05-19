@@ -16,6 +16,8 @@
         - [Continuous Communication (every 30 minutes)](#continuous-communication-every-30-minutes)
         - [Resolution](#resolution)
     - [External Escalations](#external-escalations)
+        - [Service Development Team](#service-development-team)
+        - [SREP Team - OSD infrastructure](#srep-team---osd-infrastructure)
     - [Post Mortem](#post-mortem)
     - [Technical Incident Checklist](#technical-incident-checklist)
         - [Collect Information](#collect-information)
