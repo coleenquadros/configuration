@@ -97,7 +97,8 @@ As soon as the **Incident Commander** is nominated, which should be 10 minutes a
 
 ### Continuous Communication (every 30 minutes)
 
-This section needs to be carried out every 30 minutes.
+This section needs to be carried out every 30 minutes, while the service is
+degraded.
 
 * [Updating status.redhat.com] if relevant.
 * [Updating status.quay.io] if relevant.
