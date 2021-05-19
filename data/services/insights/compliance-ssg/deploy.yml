@@ -22,42 +22,28 @@ slack:
 timeout: 5
 
 managedResourceTypes:
-- Deployment
-- Service
+- ClowdApp
 
 imagePatterns:
 - quay.io/cloudservices
 
 authentication:
-  code:
-    path: app-sre/creds/github-app-sre-bot
-    field: openshift-saas-deploy
   image:
     path: insights/quay/cloudservices-push
     field: all
 
+parameters:
+  CLOWDER_ENABLED: "true"
+
 resourceTemplates:
 
 - name: compliance-ssg
-  path: /templates/compliance/compliance-prometheus-exporter.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  path: /clowdapp.yaml
+  url: https://github.com/RedHatInsights/compliance-ssg
   targets:
   - namespace:
-      $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
-    ref: 00597fef4c3c01f9a5f2447291b30fc3120c870c
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
     parameters:
-      IMAGE_TAG: b00c742
-      PGSSLMODE: verify-full
-      POSTGRESQL_MAX_CONNECTIONS: "40"
-  - namespace:
-      $ref: /services/insights/compliance/namespaces/compliance-fedramp-stage.yml
-    ref: 00597fef4c3c01f9a5f2447291b30fc3120c870c
-    parameters:
-      IMAGE_TAG: b00c742
-      PGSSLMODE: verify-full
-  - namespace:
-      $ref: /services/insights/compliance/namespaces/compliance-prod.yml
-    ref: 751f170e7bd8d3bebd3ce535bf9395c0a626419b
-    parameters:
-      IMAGE_TAG: 8753f33
-      PGSSLMODE: verify-full
+      MIN_REPLICAS: 1
