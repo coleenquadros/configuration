@@ -1,0 +1,63 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: compliance-ssg
+  platform: insights
+
+name: compliance-ssg
+description: Compliance SSG playbooks app on the Insights Platform
+
+app:
+  $ref: /services/insights/compliance-ssg/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+timeout: 5
+
+managedResourceTypes:
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+
+- name: compliance-ssg
+  path: /templates/compliance/compliance-prometheus-exporter.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
+    ref: 00597fef4c3c01f9a5f2447291b30fc3120c870c
+    parameters:
+      IMAGE_TAG: b00c742
+      PGSSLMODE: verify-full
+      POSTGRESQL_MAX_CONNECTIONS: "40"
+  - namespace:
+      $ref: /services/insights/compliance/namespaces/compliance-fedramp-stage.yml
+    ref: 00597fef4c3c01f9a5f2447291b30fc3120c870c
+    parameters:
+      IMAGE_TAG: b00c742
+      PGSSLMODE: verify-full
+  - namespace:
+      $ref: /services/insights/compliance/namespaces/compliance-prod.yml
+    ref: 751f170e7bd8d3bebd3ce535bf9395c0a626419b
+    parameters:
+      IMAGE_TAG: 8753f33
+      PGSSLMODE: verify-full
