@@ -89,11 +89,9 @@ As soon as the **Incident Commander** is nominated, which should be 10 minutes a
 * Start the RCA, by creating a copy of the [RCA template]. Attach to the JIRA.
 * Post a message to #sd-org with: link to bridge ([zti]), JIRA, and short description of the issue.
 * Send email to [serviceOwners], [serviceNotifications],
-  [sd-org@redhat.com](mailto:sd-org@redhat.com),
-  [sd-notifications@redhat.com](mailto:sd-notifications@redhat.com) and
-  optionally [outage-list@redhat.com](mailto:outage-list@redhat.com) if
-  relevant. The email should include: Service Name, Impact, JIRA, and incident
-  slack channel.
+  [sd-org@redhat.com](mailto:sd-org@redhat.com) and to
+  [sd-notifications@redhat.com](mailto:sd-notifications@redhat.com). The email
+  should include: Service Name, Impact, JIRA, and incident slack channel.
 
 ### Continuous Communication (every 30 minutes)
 
