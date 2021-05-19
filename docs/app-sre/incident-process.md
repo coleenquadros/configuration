@@ -42,17 +42,17 @@ If the incident does not qualify as a major incident, there is no need to follow
 
 ## Incident Roles in the AppSRE team
 
-* **First Responder**: Oncall engineer, by default FTS, Primary or Secondary, in that order.
+* **First Responder**: Oncall engineer, by default FTS, Primary or Secondary, in that order. Their role in the incident will be defined in the first moments of it from the roles below.
 * **Incident Tech Lead**: In charge of the technical resolution of the incident: investigation, mitigation and resolution. It defaults to **First Responder**. A different person may be chosen by the **Incident Commander**, or by the team manager or by the team lead.
 * **Incident Commander**: In charge of communications, fallout and ensuring continuity of the incident investigations. Nominated by the **First Responder**, or by the team manager or by the team lead. In case of an incident outside of working hours, where no one else is available, this role defaults to the **First Responder**.
-* **PI (Parallel Investigator)**: An additional engineer that will support the **Incident Tech Lead** to assist with the issue investigation, mitigation and resolution.
-* **Incident Owner**: Responsible for the incident after the incident has been resolved. Defaults to **First Responder**. Can be changed by the team manager or team lead, but requires explicit acknowledgement of the change.
+* **Parallel Investigator**: An additional engineer that will support the **Incident Tech Lead** to assist with the issue investigation, mitigation and resolution.
+* **Incident Owner**: Responsible for the incident after it has been resolved, being responsible for RCA and agreeing follow-up actions with all stakeholders. Defaults to **First Responder**. Can be changed by the team manager or team lead, but requires explicit acknowledgement of the change.
 
 ## AppSRE Internal Escalations
 
 ### During working hours
 
-The **First Responder** may ask other AppSRE team members to join with the incident effort. The **Incident Tech Lead** role will default to the **First Responder**, unless otherwise explicitely stated during the initial moments of the incident. At least one more person will be involved which will be made the **Incident Commander**. Depending on the severity of the issue, other people may join to act as a **PI**.
+The **First Responder** may ask other AppSRE team members to join with the incident effort. The **Incident Tech Lead** role will default to the **First Responder**, unless otherwise explicitely stated during the initial moments of the incident. At least one more person will be involved which will be made the **Incident Commander**. Depending on the severity of the issue, other people may join to act as a **Parallel Investigator**.
 
 The team manager and the team lead must be notified of these incidents.
 
