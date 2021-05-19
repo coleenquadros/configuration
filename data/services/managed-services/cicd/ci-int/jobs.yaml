@@ -29,11 +29,20 @@ config:
             display_name: mk-strimzi-operator pr-check
         - 'managed-services-gl-build-test-branch':
             branch: mk-release
-            display_name: mk-strimzi-operator build and test mk-release
+            display_name: mk-strimzi-operator release
             archive_artifacts: 'test-results/**'
             junit_results: 'test-results/strimzi-operator/failsafe-reports/*.xml'
             cleanup_script: './build_cleanup.sh'
             release: true
+        - 'mk-nightly-build-test-branch':
+            branch: mk-master
+            display_name: mk-strimzi-operator nightly
+            archive_artifacts: 'test-results/**'
+            junit_results: 'test-results/strimzi-operator/failsafe-reports/*.xml'
+            cleanup_script: './build_cleanup.sh'
+            ci_cmd: './build_deploy.sh nightly'
+            cron_expression: 'H 5 * * 1,2,3,4,5' # mon-fri early morning
+            backup_ecr_push_creds_account_region: "quayio-prod/eu-central-1"
         - 'managed-services-security-scan':
             display_name: mk-strimzi-operator security-scan
             branch: mk-master
@@ -271,7 +280,7 @@ config:
             branch: main
             display_name: periodic sandbox mk-e2e tests
             timeout: 30
-            cron_expression: '30 */1 * * *' # At 30 minutes past the hour
+            cron_expression: '30 */6 * * *' # At minute 30 past every 6th hour
 
   - project:
       name: managed-services-sso

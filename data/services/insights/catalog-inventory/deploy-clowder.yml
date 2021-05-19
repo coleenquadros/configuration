@@ -43,18 +43,26 @@ resourceTemplates:
     parameters:
       PATH_PREFIX: api
     targets:
-    - namespace:
-        $ref: /services/insights/catalog-inventory/namespaces/stage-catalog-inventory-stage.yml
-      ref: main
-      upstream: RedHatInsights-catalog_inventory-api-gh-build-main
-      parameters:
-        ENV_NAME: stage
-        CATALOG_INVENTORY_EXTERNAL_HOST: ${PLATFORM_HOSTNAME}
-        MIN_REPLICAS: 3
-    - namespace:
-        $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
-      disable: true
-      ref: internal
-      parameters:
-        LOG_LEVEL: WARN
-        MIN_REPLICAS: 1
+      - namespace:
+          $ref: /services/insights/catalog-inventory/namespaces/catalog-inventory-prod.yml
+        ref: 574ffe0ca316fa6e86c40c54a74e3521f4eefe07
+        parameters:
+          ENV_NAME: prod
+          CATALOG_INVENTORY_EXTERNAL_HOST: ${PLATFORM_HOSTNAME}
+          MIN_REPLICAS: 3
+          PROMETHEUS_PUSH_GATEWAY: prometheus-push.insights-push-prod.svc.cluster.local:9091
+      - namespace:
+          $ref: /services/insights/catalog-inventory/namespaces/stage-catalog-inventory-stage.yml
+        ref: main
+        upstream: RedHatInsights-catalog_inventory-api-gh-build-main
+        parameters:
+          ENV_NAME: stage
+          CATALOG_INVENTORY_EXTERNAL_HOST: ${PLATFORM_HOSTNAME}
+          MIN_REPLICAS: 3
+      - namespace:
+          $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+        disable: true
+        ref: internal
+        parameters:
+          LOG_LEVEL: WARN
+          MIN_REPLICAS: 1

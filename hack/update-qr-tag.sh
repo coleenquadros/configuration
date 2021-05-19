@@ -1,114 +1,42 @@
-#!/bin/sh
+#!/bin/bash
 
-# standalone qontract-reconcile tag auto-updater
-# if DO_COMMIT env var is set to any value, this will automatically commit
-
-# set GHTOKEN to github token or place in $GHTOKEN_FILE
-GHTOKEN_FILE="${HOME}/.ssh/.github-token"
-# github org/repo
-QREPO="app-sre/qontract-reconcile"
-# curl connect timeout
-TIMEOUT="5"
-
-# location of files needing update
 ENV_FILE=".env"
-SAAS_FILE="data/services/app-interface/cicd/ci-ext/saas-qontract-reconcile.yaml" 
-JENK_FILE="resources/jenkins/global/defaults.yaml"
+JENKINS_FILE="resources/jenkins/global/defaults.yaml"
+SAAS_FILE="data/services/app-interface/cicd/ci-ext/saas-qontract-reconcile.yaml"
+SAAS_FILE_INT="data/services/app-interface/cicd/ci-int/saas-qontract-reconcile-int.yaml"
 
-# Required dependencies
-REQUIRES="curl"
-
-function check_depends {
-  for cmd in ${REQUIRES}; do
-    cmdloc=$(which ${cmd})
-    if [ ${?} -ne 0 ]; then
-      echo "Error, ${cmd} not found in path. Please install."
-      exit 1
-    fi
-  done
-}
-
-function curl_status {
-  # check return code from curl
-  if [ ${1} -ne 0 ]; then
-    echo "Curl error"
-    exit ${1} 
-  fi
-}
-
-function hash_status {
-  # Hasheseses info
-  echo "Current Hash (${HASH_SHORT}) [${HASH}]"
-  if [ -z "${HASH}" ] || [ -z "${HASH_SHORT}" ]; then
-    echo "Holdupaminute.. something is wrong with the current hash value"
-    git status
-    exit 1
-  fi
-  echo ""
-  echo "${COMMIT_MESSAGE}" | awk '{print "    "$0}'
-  echo ""
-  if [ "${HASH}" == "${NEWHASH}" ] || [ "${HASH_SHORT}" == "${NEWHASH_SHORT}" ]; then
-    echo "Holdupaminute.. hash already applied?"
-    git status
-    exit 1
-  fi
-  echo "New Hash (${NEWHASH_SHORT}) [${NEWHASH}]"
-  echo ""
-  echo "${NEWCOMMIT_MESSAGE}" | awk '{print "    "$0}'
-  echo ""
-  echo "---"
-}
-
-function update_files {
-  echo "Updating envfile (${ENV_FILE})"
-  # export RECONCILE_IMAGE_TAG=nnn
-  sed -i -c -E 's/^(export RECONCILE_IMAGE_TAG=).*$/\1'${NEWHASH_SHORT}'/g' ${ENV_FILE}
-  echo "Updating saasfile (${SAAS_FILE})"
-  # ref: nnn
-  sed -i -c -e 's/'${HASH}'/'${NEWHASH}'/g' ${SAAS_FILE}
-  echo "Updating jenkinsfile (${JENK_FILE})"
-  # qontract_reconcile_image_tag: 'nnn'
-  sed -i -c -e 's/'${HASH_SHORT}'/'${NEWHASH_SHORT}'/g' ${JENK_FILE}
-}
-  
-
-if [ -z "${GHTOKEN}" ] && [ -e "${GHTOKEN_FILE}" ]; then
-  GHTOKEN=$(cat ${GHTOKEN_FILE})
+if [ `uname` = "Darwin" ]; then
+    SED_OPT=".bk"
 fi
 
-if [ ! -z "${GHTOKEN}" ]; then
-  GHAUTH="-H \"Authorization: token ${GHTOKEN}\""
+if [ -z "$1" ]; then
+    NEW_SHA=$(curl -s -H "Accept: application/vnd.github.v3+json" \
+        https://api.github.com/repos/app-sre/qontract-reconcile/commits | \
+        jq -r '.[1]|.sha')
 else
-  echo "No GHTOKEN set or FILE (${GHTOKEN_FILE}) not found"
-  echo "Using anonymous github account (may fail due to rate limits)"
-  GHAUTH=""
+    NEW_SHA="$1"
 fi
 
-CURLCMD="curl -s --connect-timeout ${TIMEOUT}"
+NEW_COMMIT=${NEW_SHA::7}
+OLD_SHA=$(awk '{if ($1 == "ref:" && $2 ~ /^[a-f0-9]{40}$/){print $2}}' $SAAS_FILE)
 
-if [ -z "${NEWHASH}" ]; then
-  echo "Tag not provided, gathering latest commit"
-  NEWHASH=$(${CURLCMD} ${GHAUTH} "https://api.github.com/repos/${QREPO}/commits?sha=master&per_page=1" | jq -r '.[0].sha')
-  curl_status ${?}
+TAG_STATUS=$(curl -s https://quay.io/api/v1/repository/app-sre/qontract-reconcile/tag/$NEW_COMMIT/images | \
+    jq .status)
+
+if [ "$TAG_STATUS" = "404" ]; then
+    echo "quay.io/app-sre/qontract-reconcile:$NEW_COMMIT not found"
+    exit 1
 fi
-NEWCOMMIT_MESSAGE=$(${CURLCMD} ${GHAUTH} "https://api.github.com/repos/${QREPO}/commits/${NEWHASH}" | jq -r '.commit.message')
-curl_status ${?}
-NEWHASH_SHORT="${NEWHASH:0:7}"
 
-HASH_SHORT=$(awk -F\= '($0~/^export RECONCILE_IMAGE_TAG=/) {print $NF}' ${ENV_FILE})
-HASH=$(awk -F\: '($0~/ref: '${HASH_SHORT}'/) { gsub(/ /,"",$NF); print $NF}' ${SAAS_FILE})
-COMMIT_MESSAGE=$(${CURLCMD} ${GHAUTH} "https://api.github.com/repos/${QREPO}/commits/${HASH}" | jq -r '.commit.message')
-curl_status ${?}
+sed -i$SED_OPT "s/^export RECONCILE_IMAGE_TAG=.*$/export RECONCILE_IMAGE_TAG=$NEW_COMMIT/" $ENV_FILE
+sed -E -i$SED_OPT "s/^(\s+qontract_reconcile_image_tag:).*$/\1 '$NEW_COMMIT'/" $JENKINS_FILE
 
-check_depends
-hash_status
-update_files
-echo ""
-git diff
-echo ""
-if [ ! -z "${DO_COMMIT}" ]; then
-  git commit -a -m "qontract production promotion ${HASH_SHORT} to ${NEWHASH_SHORT}"
-else
-  echo "If you're satsified, git commit and enjoy!"
-  echo "  git commit -a -m \"qontract production promotion ${HASH_SHORT} to ${NEWHASH_SHORT}\""
+if [ "$NEW_SHA" != "$OLD_SHA" ]; then
+    sed -i$SED_OPT "s/$OLD_SHA/$NEW_SHA/" $SAAS_FILE # $SAAS_FILE_INT
+fi
+
+if [ -n "$DO_COMMIT" ]; then
+    git add $ENV_FILE $SAAS_FILE $JENKINS_FILE
+    git commit -m "qontract production promotion ${OLD_COMMIT} to ${NEW_COMMIT}"
+    git --no-pager show -U0 HEAD
 fi

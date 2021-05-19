@@ -30,6 +30,50 @@ tests:
 
 - interval: 1m
   input_series:
+  - series: up{job="openshift-customer-monitoring/hive-operator"}
+    values: 1+0x10 0+0x10 # 1 for the first 10 minutes, 0 for the next 10 minutes
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: HiveOperatorDown - production - {{{shard_name}}}
+    exp_alerts:
+  - eval_time: 18m
+    alertname: HiveOperatorDown - production - {{{shard_name}}}
+    exp_alerts:
+    - exp_labels:
+        severity: critical
+        team: appsre
+        service: hive
+      exp_annotations:
+        message: "No targets found for hive-operator in namespace . hive-operator is down."
+        runbook: "https://github.com/openshift/hive-sops/blob/master/sop"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
+
+
+- interval: 1m
+  input_series:
+  - series: hive_hiveconfig_conditions{condition="Ready", job="openshift-customer-monitoring/hive-operator", reason="ErrorDeployingHive"}
+    values: 1+0x10 0+0x10 # 1 for the first 10 minutes, 0 for the next 10 minutes
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: HiveDeploymentFailed - production - {{{shard_name}}}
+    exp_alerts:
+  - eval_time: 18m
+    alertname: HiveDeploymentFailed - production - {{{shard_name}}}
+    exp_alerts:
+    - exp_labels:
+        severity: critical
+        service: hive
+        team: appsre
+        job: openshift-customer-monitoring/hive-operator
+        condition: Ready
+        reason: ErrorDeployingHive
+      exp_annotations:
+        message: "hive deployment has failed. Condition/Reason: Ready / ErrorDeployingHive."
+        runbook: "https://github.com/openshift/hive-sops/blob/master/sop"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
+
+- interval: 1m
+  input_series:
   - series: csv_abnormal{exported_namespace="hive", name="hive-operator", reason="Pending"}
     values: 0+0x10 1+0x30 # 0 for the first 10 minutes, 1 for the next 30 minutes
   alert_rule_test:

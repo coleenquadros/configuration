@@ -21,3 +21,16 @@ spec:
       labels:
         service: uhc-gateway
         severity: high
+
+    - alert: UHC gateway 5xx errors high - stage
+      annotations:
+        message: "UHC gateway is returning code 5xx for {{ $value | humanizePercentage }} of requests."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
+      expr: |
+        sum(increase(haproxy_backend_http_responses_total{route="gateway-server",exported_namespace="uhc-stage",code="5xx"}[5m])) /
+        sum(increase(haproxy_backend_http_responses_total{route="gateway-server",exported_namespace="uhc-stage"}[5m]))
+        > 0.05
+      for: 10m
+      labels:
+        service: uhc-gateway
+        severity: high

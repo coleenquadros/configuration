@@ -20,12 +20,19 @@ slack:
 
 managedResourceTypes:
 - Deployment
+- StatefulSet
 - Service
 
 imagePatterns:
 - quay.io/app-sre/qontract-reconcile
 - quay.io/app-sre/fluentd
 - quay.io/app-sre/ubi8-ubi-minimal
+- quay.io/app-sre/internal-redhat-ca
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
 
 resourceTemplates:
 - name: qontract-reconcile
@@ -36,20 +43,31 @@ resourceTemplates:
     BUSYBOX_IMAGE_TAG: 8.2
     FLUENTD_IMAGE_PULL_POLICY: IfNotPresent
     FLUENTD_IMAGE_TAG: 8e1d986
+    INTERNAL_CERTIFICATES_IMAGE_TAG: 0.1.1
     SLACK_ICON_EMOJI: ':app-sre:'
-    APP_INTERFACE_PROJECT_ID: "13582"
+    APP_INTERFACE_PROJECT_ID: '13582'
   targets:
   - namespace:
       $ref: /services/app-interface/namespaces/app-interface-stage-int.yml
-    ref: 683a46dfdb4535d2556549bd55bd4a9d3bfa3e1e
+    # this is not pinned to 'master' because this deployment runs in ci-int
+    # but the build job runs in ci-ext.
+    # if we use 'master' we will get a race condition when we try to deploy
+    # something that was not built yet, or has failed.
+    # instead, we use automated promotion based on the success of the external
+    # stage deployment.
+    ref: 864a5d500da0300177004d1ef411013297a8e6d3
     parameters:
       DRY_RUN: --dry-run
       GITHUB_API: https://github-mirror.stage.devshift.net
       SLACK_CHANNEL: sd-app-sre-reconcile-stage
       SLEEP_DURATION_SECS: 600
+    promotion:
+      auto: true
+      subscribe:
+      - qontract-reconcile-stage-post-deploy-success-channel
   - namespace:
       $ref: /services/app-interface/namespaces/app-interface-production-int.yml
-    ref: 78f135c2f2a458beb952aad87321f29bf9910527
+    ref: 864a5d500da0300177004d1ef411013297a8e6d3
     parameters:
       DRY_RUN: --no-dry-run
       GITHUB_API: https://github-mirror.devshift.net

@@ -45,23 +45,23 @@ resourceTemplates:
       CLEANUP_DAYS: 7
       IMAGE_TAG: "0.4.0"
       LIMITS: |
-        # Limit OCM clusters management service cluster registrations to 650
-        # per minute in the integration environment. This allows Performance
-        # & Scale testing at 30/second with a little extra cushion.
-        # TODO: Lower this when performance & scale testing is finished.
+        # AMS calls CS to register clusters. The limit provided here must be
+        # greater than whatever limit is in front of AMS's API.
+        # Telemetry calls AMS to register clusters and provide metrics.
+        # Too strict limiting will cause telemetry to fail which leads to a buildup
+        # of requests and eventual denial of service.
         - namespace: integration:clusters_mgmt
           name: register_cluster
-          max_value: 650
+          max_value: 30000
           seconds: 60
           conditions:
           - path == register_cluster
           variables:
           - path
-        # Limit OCM clusters management service cluster registrations to 50
-        # per minute in the stage environment:
+        # See comments above regarding AMS calling CS to register clusters
         - namespace: stage:clusters_mgmt
           name: register_cluster
-          max_value: 50
+          max_value: 30000
           seconds: 60
           conditions:
           - path == register_cluster
@@ -123,10 +123,13 @@ resourceTemplates:
       CLEANUP_DAYS: 7
       IMAGE_TAG: "0.3.0"
       LIMITS: |
-        # Limit OCM clusters management service cluster registrations to 50
-        # per minute in the production environment:
+        # AMS calls CS to register clusters. The limit provided here must be
+        # greater than whatever limit is in front of AMS's API.
+        # Telemetry calls AMS to register clusters and provide metrics.
+        # Too strict limiting will cause telemetry to fail which leads to a buildup
+        # of requests and eventual denial of service.
         - namespace: production:clusters_mgmt
-          max_value: 50
+          max_value: 30000
           seconds: 60
           conditions:
           - path == register_cluster

@@ -39,4 +39,4 @@ server: bundle validate
 		$(QONTRACT_SERVER_IMAGE):$(QONTRACT_SERVER_IMAGE_TAG)
 
 qr-promote:
-	./hack/update-qr-tag.sh
+	@./hack/update-qr-tag.sh
