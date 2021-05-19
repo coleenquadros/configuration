@@ -126,7 +126,7 @@ Once the issue has been mitigated and resolved, the **Incident Owner** (defaults
 
 * Understanding the course of the incident and its technical details from start to finish.
 * Organizing and driving the PMR meeting in the 5 business days after recovery.
-* Is accountable to ensure that full RCA documentation is written up and making sure it contains all the corrective actions.
+* Is accountable to ensure that full RCA documentation is written up and making sure it contains all the corrective actions. Impact, detection and mitigation should be documented within 24 hours of the incident.
 * Being the main point of reference for the incident when there are follow-up questions about it.
 * Driving any follow-up activity linked to the incident.
 * Cleaning up after the incident is fully closed, like archiving the slack channel.
