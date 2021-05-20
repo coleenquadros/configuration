@@ -1,0 +1,58 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: rhsm-api-proxy
+  platform: insights
+
+name: rhsm-api-proxy-clowder
+description: rbac app on the Insights Platform
+
+app:
+  $ref: /services/insights/rhsm-api-proxy/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+timeout: 5
+
+managedResourceTypes:
+- ClowdApp
+- ConfigMap
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  CLOWDER_ENABLED: "true"
+
+resourceTemplates:
+- name: rhsm-api-proxy
+  path: /deploy/clowdapp.yml
+  url: https://github.com/RedHatInsights/rhsm-api-proxy
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    ref: internal  # populated by bonfire
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    parameters:
+      MIN_REPLICAS: 1
+      PROXY_TLS_SECRET: rhsm-api-proxy-client-tls
+      RHSM_API_HOST: api.rhsm.dev.redhat.com
+  - namespace:
+      $ref: /services/insights/rhsm-api-proxy/namespaces/stage-rhsm-api-proxy-stage.yml
+    ref: main
+    upstream: RedHatInsights-rhsm-api-proxy-gh-build-main
+    parameters:
+      ENV_NAME: stage
+      RHSM_API_HOST: api.rhsm.stage.redhat.com
