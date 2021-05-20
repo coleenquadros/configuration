@@ -1,0 +1,61 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: hccm
+  platform: insights
+
+name: hccm-clowder
+description: hccm app on the Insights Platform deployed with Clowder
+
+app:
+  $ref: /services/insights/hccm/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+timeout: 5
+
+managedResourceTypes:
+- ClowdApp
+- PersistentVolumeClaim
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  CLOWDER_ENABLED: true
+
+resourceTemplates:
+- name: hccm
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/project-koku/koku
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true # tells app-sre to not actually run the deploy job for this target
+    ref: internal # altered by bonfire
+    parameters:
+      KOKU_MIN_REPLICAS: 1
+      LISTENER_MIN_REPLICAS: 1
+      MASU_MIN_REPLICAS: 1
+      SCHEDULER_MIN_REPLICAS: 1
+      SOURCES_CLIENT_MIN_REPLICAS: 1
+      SOURCES_LISTENER_MIN_REPLICAS: 1
+      WORKER_CELERY_MIN_REPLICAS: 1
+      WORKER_COST_MODEL_MIN_REPLICAS: 1
+      WORKER_DOWNLOAD_MIN_REPLICAS: 1
+      WORKER_OCP_MIN_REPLICAS: 1
+      WORKER_PRIORITY_MIN_REPLICAS: 1
+      WORKER_REFRESH_MIN_REPLICAS: 1
+      WORKER_SUMMARY_MIN_REPLICAS: 1
