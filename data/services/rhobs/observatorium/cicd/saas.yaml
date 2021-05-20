@@ -1,0 +1,163 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: observatorium
+
+name: saas-observatorium
+description: SaaS tracking file for Observatorium
+
+app:
+  $ref: /services/rhobs/observatorium/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-monitoring-info
+
+authentication:
+  image:
+    path: app-sre/ci-int/redhat-registry-io-pull
+    field: all
+
+managedResourceTypes:
+- Deployment
+- Service
+- StatefulSet
+- ConfigMap
+- Role
+- RoleBinding
+- ServiceAccount
+- PodDisruptionBudget
+- PersistentVolumeClaim
+- PrometheusRule # Adding everything that exists. This will be moved to a separate saas file.
+
+imagePatterns:
+- quay.io/conprof/conprof
+- quay.io/observatorium
+- quay.io/app-sre
+- quay.io/openshift/origin-oauth-proxy
+- quay.io/prometheus/memcached-exporter
+- registry.redhat.io/rhel8/memcached
+- quay.io/jpkroehling/all-in-one
+- quay.io/app-sre/gubernator
+
+parameters:
+  OAUTH_PROXY_IMAGE: quay.io/openshift/origin-oauth-proxy
+  OAUTH_PROXY_IMAGE_TAG: 4.9.0
+
+resourceTemplates:
+- name: observatorium-common
+  path: /resources/services/observatorium-template.yaml
+  url: https://github.com/rhobs/configuration
+  parameters:
+    # NOTICE: Please specify image tags for each environment separately.
+    # And sort them alphabetically.
+    AMS_URL: ${OCM_BASE_URL}
+    AUTHORIZE_URL: ${OCM_BASE_URL}/api/accounts_mgmt/v1/cluster_registrations
+    GUBERNATOR_IMAGE: 'quay.io/app-sre/gubernator'
+    JAEGER_AGENT_IMAGE: quay.io/app-sre/jaegertracing-jaeger-agent
+    MEMCACHED_EXPORTER_IMAGE: quay.io/prometheus/memcached-exporter
+    MEMCACHED_IMAGE: registry.redhat.io/rhel8/memcached
+    OBSERVATORIUM_API_IMAGE: quay.io/observatorium/observatorium
+    OPA_AMS_IMAGE: quay.io/observatorium/opa-ams
+  targets:
+  - namespace:
+      $ref: /services/rhobs/telemeter/namespaces/telemeter-stage.yml
+    ref: 1281bd1a1b10d1c725cb6ec51f2c8c8152953037
+    parameters:
+      NAMESPACE: telemeter-stage
+      OBSERVATORIUM_METRICS_NAMESPACE: telemeter-stage
+      OBSERVATORIUM_LOGS_NAMESPACE: observatorium-logs-stage
+      OPA_AMS_IMAGE_TAG: master-2021-02-24-fc0d722
+      GUBERNATOR_IMAGE_TAG: 1.0.0-rc.1
+      JAEGER_AGENT_IMAGE_TAG: 1.22.0
+      MEMCACHED_EXPORTER_IMAGE_TAG: v0.6.0
+      MEMCACHED_IMAGE_TAG: 1.5
+      OBSERVATORIUM_API_IMAGE_TAG: master-2021-03-26-v0.1.1-200-gea0242a
+      SERVICE_ACCOUNT_NAME: prometheus-telemeter
+      DPTP_ORGANIZATION_ID: 1oZtjZXK3EP4kJSaYXwMmorAqnS
+  - namespace:
+      $ref: /services/rhobs/telemeter/namespaces/telemeter-production.yml
+    ref: 1281bd1a1b10d1c725cb6ec51f2c8c8152953037
+    parameters:
+      NAMESPACE: telemeter-production
+      OBSERVATORIUM_METRICS_NAMESPACE: telemeter-production
+      OBSERVATORIUM_LOGS_NAMESPACE: observatorium-logs-production
+      OPA_AMS_IMAGE_TAG: master-2021-02-24-fc0d722
+      GUBERNATOR_IMAGE_TAG: 1.0.0-rc.1
+      JAEGER_AGENT_IMAGE_TAG: 1.22.0
+      MEMCACHED_EXPORTER_IMAGE_TAG: v0.6.0
+      MEMCACHED_IMAGE_TAG: 1.5
+      OBSERVATORIUM_API_IMAGE_TAG: master-2021-03-09-v0.1.1-198-g937be40
+      SERVICE_ACCOUNT_NAME: prometheus-telemeter
+      DPTP_ORGANIZATION_ID: 1oZsAlLo1Nzt3LlyUnHQU13LWJK
+- name: jaeger
+  path: /resources/services/jaeger-template.yaml
+  url: https://github.com/rhobs/configuration
+  parameters:
+    IMAGE: quay.io/app-sre/jaegertracing-all-in-one
+  targets:
+  - namespace:
+      $ref: /services/rhobs/telemeter/namespaces/telemeter-stage.yml
+    ref: 3830f23a4af9f3ce972413c05d2047a95951c001
+    parameters:
+      NAMESPACE: telemeter-stage
+      IMAGE_TAG: '1.22.0'
+      REPLICAS: '1'
+      JAEGER_CPU_REQUEST: '100m'
+      JAEGER_MEMORY_REQUEST: '1Gi'
+      JAEGER_CPU_LIMITS: '500m'
+      JAEGER_MEMORY_LIMITS: '4Gi'
+      SERVICE_ACCOUNT_NAME: prometheus-telemeter
+  - namespace:
+      $ref: /services/rhobs/telemeter/namespaces/telemeter-production.yml
+    ref: 3830f23a4af9f3ce972413c05d2047a95951c001
+    parameters:
+      NAMESPACE: telemeter-production
+      IMAGE_TAG: '1.22.0'
+      REPLICAS: '1'
+      JAEGER_CPU_REQUEST: '1'
+      JAEGER_MEMORY_REQUEST: '4Gi'
+      JAEGER_CPU_LIMITS: '2'
+      JAEGER_MEMORY_LIMITS: '8Gi'
+      SERVICE_ACCOUNT_NAME: prometheus-telemeter
+- name: conprof
+  path: /resources/services/conprof-template.yaml
+  url: https://github.com/rhobs/configuration
+  parameters:
+    IMAGE: quay.io/conprof/conprof
+  targets:
+  - namespace:
+      $ref: /services/rhobs/telemeter/namespaces/telemeter-stage.yml
+    ref: 3830f23a4af9f3ce972413c05d2047a95951c001
+    parameters:
+      NAMESPACE: telemeter-stage
+      OBSERVATORIUM_METRICS_NAMESPACE: telemeter-stage
+      OBSERVATORIUM_MST_NAMESPACE: observatorium-mst-stage
+      OBSERVATORIUM_LOGS_NAMESPACE: observatorium-logs-stage
+      IMAGE_TAG: 'master-2021-02-24-33f5514'
+      CONPROF_REPLICAS: '1'
+      CONPROF_CPU_REQUEST: '100m'
+      CONPROF_MEMORY_REQUEST: '1Gi'
+      CONPROF_CPU_LIMITS: '500m'
+      CONPROF_MEMORY_LIMITS: '4Gi'
+      SERVICE_ACCOUNT_NAME: prometheus-telemeter
+  - namespace:
+      $ref: /services/rhobs/telemeter/namespaces/telemeter-production.yml
+    ref: 3830f23a4af9f3ce972413c05d2047a95951c001
+    parameters:
+      NAMESPACE: telemeter-production
+      OBSERVATORIUM_METRICS_NAMESPACE: telemeter-production
+      OBSERVATORIUM_MST_NAMESPACE: observatorium-mst-production
+      OBSERVATORIUM_LOGS_NAMESPACE: observatorium-logs-production
+      IMAGE_TAG: 'master-2021-02-24-33f5514'
+      CONPROF_REPLICAS: '1'
+      CONPROF_CPU_REQUEST: '1'
+      CONPROF_MEMORY_REQUEST: '8Gi'
+      CONPROF_CPU_LIMITS: '2'
+      CONPROF_MEMORY_LIMITS: '16Gi'
+      SERVICE_ACCOUNT_NAME: prometheus-telemeter

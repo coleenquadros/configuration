@@ -1,0 +1,40 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /observability/prometheusrules/observatorium-logs-production.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+- interval: 1m
+  input_series:
+    # One tenant reporting loki_discarded_samples_total every minute:
+    # From 1m..15m 10 discarded lines in total (below limit of 100)
+    # From 16m..30m 100 discarded lines in total (at the limit of 100)
+    # From 31m..90m 1000 disccarded lines in total (above limit of 100)
+  - series: loki_discarded_samples_total{namespace="observatorium-logs-production",tenant="tenant-a",reason="stream_limit"}
+    values: '10+0x15 100+0x15 1000+1000x60'
+  alert_rule_test:
+  - eval_time: 15m
+    alertname: LokiTenantRateLimitWarning
+    exp_alerts: [] # No alerts (yet)
+  - eval_time: 20m
+    alertname: LokiTenantRateLimitWarning
+    exp_alerts: [] # No alerts (yet)
+  - eval_time: 60m
+    alertname: LokiTenantRateLimitWarning
+    exp_alerts:
+    - exp_labels:
+        alertname: LokiTenantRateLimitWarning
+        service: observatorium-logs
+        severity: info
+        reason: stream_limit
+        tenant: tenant-a
+        namespace: observatorium-logs-production
+      exp_annotations:
+        message: |
+          tenant-a is experiencing rate limiting for reason 'stream_limit': 482
+        runbook: https://github.com/rhobs/configuration/blob/main/docs/sop/observatorium.md#lokitenantratelimitwarning
+        dashboard:
+          https://grafana.app-sre.devshift.net/d/f6fe30815b172c9da7e813c15ddfe607/loki_tenant_alerts?orgId=1&refresh=10s&var-metrics=telemeter-prod-01-prometheus&var-namespace=observatorium-logs-production

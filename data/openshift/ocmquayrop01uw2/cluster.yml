@@ -6,15 +6,15 @@ labels:
 
 name: ocmquayrop01uw2
 description: Read-Only cluster for ocm quay
-consoleUrl: https://console-openshift-console.apps.ohlz.p1.openshiftapps.com
+consoleUrl: https://console-openshift-console.apps.ocmquayrop01uw2.ohlz.p1.openshiftapps.com
 kibanaUrl: ''
 prometheusUrl: https://prometheus.ocmquayrop01uw2.devshift.net
 alertmanagerUrl: https://alertmanager.ocmquayrop01uw2.devshift.net
 serverUrl: https://api.ocmquayrop01uw2.ohlz.p1.openshiftapps.com:6443
 elbFQDN: elb.apps.ocmquayrop01uw2.ohlz.p1.openshiftapps.com
 
-# observabilityNamespace:
-#   $ref: ''
+observabilityNamespace:
+  $ref: /services/observability/namespaces/openshift-customer-monitoring.ocmquayrop01uw2.yml
 
 auth:
   service: github-org-team
@@ -59,14 +59,18 @@ network:
 
 internal: false
 
-# TODO: Need to create the VPC manually first
-# peering:
-#   connections:
-#   - provider: account-vpc
-#     name: ocmquayrop01uw2_ocm-quay
-#     vpc:
-#       $ref: /aws/ocm-quay/vpcs/us-west-2.yml
-#     manageRoutes: true
+peering:
+  connections:
+  - provider: account-vpc
+    name: ocmquayrop01uw2_ocm-quay-ue1
+    vpc:
+      $ref: /aws/ocm-quay/vpcs/us-east-1.yml
+    manageRoutes: true
+  - provider: account-vpc
+    name: ocmquayrop01uw2_ocm-quay-uw2
+    vpc:
+      $ref: /aws/ocm-quay/vpcs/us-west-2.yml
+    manageRoutes: true
 
 awsInfrastructureAccess:
 - awsGroup:
@@ -75,3 +79,6 @@ awsInfrastructureAccess:
 - awsGroup:
     $ref: /aws/ocm-quay/groups/App-SRE-admin.yml
   accessLevel: network-mgmt
+
+addons:
+  - $ref: /dependencies/ocm/addons/cluster-logging-operator.yml

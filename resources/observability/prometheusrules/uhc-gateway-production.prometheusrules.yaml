@@ -11,6 +11,7 @@ spec:
   groups:
   - name: uhc-gateway-prod
     rules:
+
     - alert: UHC gateway DOWN - production
       annotations:
         message: "No targets found for UHC gateway {{ $labels.namespace }}; it is down."
@@ -21,3 +22,16 @@ spec:
       labels:
         service: uhc-gateway
         severity: critical
+
+    - alert: UHC gateway 5xx errors high - production
+      annotations:
+        message: "UHC gateway is returning code 5xx for {{ $value | humanizePercentage }} of requests."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
+      expr: |
+        sum(increase(haproxy_backend_http_responses_total{route="gateway-server",exported_namespace="uhc-production",code="5xx"}[5m])) /
+        sum(increase(haproxy_backend_http_responses_total{route="gateway-server",exported_namespace="uhc-production"}[5m]))
+        > 0.05
+      for: 10m
+      labels:
+        service: uhc-gateway
+        severity: high

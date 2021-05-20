@@ -369,8 +369,8 @@ Currently added datasources:
 - `app-sre-prod-01-cluster-prometheus`: cluster prometehus for `app-sre-prod-01` cluster
 - `app-sre-prod-03-prometheus`: app-sre managed prometheus for `app-sre-prod-03` cluster
 - `app-sre-prod-03-cluster-prometheus`: cluster prometehus for `app-sre-prod-03` cluster
-- `quayiop03ue1-prometheus`: app-sre managed prometheus for `quayp03ue1` cluster
 - `quayiop04ue2-prometheus`: app-sre managed prometheus for `quayp04ue2` cluster
+- `quayiop05ue1-prometheus`: app-sre managed prometheus for `quayp05ue1` cluster
 - `quays02ue1-prometheus`: app-sre managed prometheus for `quays02ue1` cluster
 - `AWS app-sre`: cloudwatch AWS appsre
 - `dsaas-graphite`: graphite (osd-monitor) on `app-sre-prod-03` cluster

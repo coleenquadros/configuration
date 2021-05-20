@@ -1,0 +1,33 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /observability/prometheusrules/uhc-gateway-stage.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+
+- interval: 1m
+  input_series:
+  - series: haproxy_backend_http_responses_total{code="5xx",exported_namespace="uhc-stage",route="gateway-server",pod="gateway-server-57766fcbff-4brtz"}
+    values: 0+0x5 0+1x15
+  - series: haproxy_backend_http_responses_total{code="5xx",exported_namespace="uhc-stage",route="gateway-server",pod="gateway-server-57766fcbff-bbznx"}
+    values: 0+0x5 0+1x15
+  - series: haproxy_backend_http_responses_total{code="2xx",exported_namespace="uhc-stage",route="gateway-server",pod="gateway-server-57766fcbff-4brtz"}
+    values: 0+6x20
+  - series: haproxy_backend_http_responses_total{code="2xx",exported_namespace="uhc-stage",route="gateway-server",pod="gateway-server-57766fcbff-bbznx"}
+    values: 0+2x20
+  alert_rule_test:
+  - eval_time: 10m
+    alertname: UHC gateway 5xx errors high - stage
+    exp_alerts: []
+  - eval_time: 20m
+    alertname: UHC gateway 5xx errors high - stage
+    exp_alerts:
+    - exp_labels:
+        service: uhc-gateway
+        severity: high
+      exp_annotations:
+        message: "UHC gateway is returning code 5xx for 20% of requests."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"

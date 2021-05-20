@@ -1,0 +1,22 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  labels:
+    prometheus: app-sre
+  name: hive-operator
+spec:
+  podMetricsEndpoints:
+  - interval: 30s
+    path: /metrics
+    port: metrics
+    scheme: http
+    metricRelabelings:
+    - sourceLabels: [__name__]
+      regex: '^rest_client_.*'
+      action: drop
+  namespaceSelector:
+    matchNames:
+    - {{{ namespace }}}
+  selector:
+    matchLabels:
+      control-plane: hive-operator
