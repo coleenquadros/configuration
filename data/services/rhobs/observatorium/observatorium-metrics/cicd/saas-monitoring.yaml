@@ -1,0 +1,36 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: observatorium-metrics
+
+name: saas-observatorium-metrics-monitoring
+description: SaaS tracking file for Observatorium Metrics monitoring resources
+
+app:
+  $ref: /services/rhobs/observatorium/observatorium-metrics/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-monitoring-info
+
+managedResourceTypes:
+- ServiceMonitor
+
+imagePatterns: []
+
+resourceTemplates:
+- name: observatorium-metrics
+  path: /resources/services/observatorium-metrics-template.yaml
+  url: https://github.com/rhobs/configuration
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+    ref: 1c9fcec6c27a47dc06c68e73a38c3ebb248add9e
+    parameters:
+      NAMESPACE: telemeter-stage
+      MST_NAMESPACE: observatorium-mst-stage
