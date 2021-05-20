@@ -8,4 +8,4 @@ When an IAM user tries to create an MFA device and they click cancel or the sess
 
 ## Resolution
 
-Login into the AWS account as administrator and temporarily assign MFA to the user facing the issue. Once the MFA is assigned successfully, remove it. Now the user will be able to configure MFA for their IAM user.
+Login into the AWS account as administrator and temporarily assign an MFA to the user facing the issue. The MFA you add MUST be the same type of MFA that the user attempted to add (ie if the user tried to add a virtual MFA, a virtual MFA must be used for this process). Once the MFA is assigned successfully, remove it. Now the user will be able to configure MFA for their IAM user.

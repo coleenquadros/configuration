@@ -355,11 +355,9 @@ At this point you should be able to access the cluster via the console / `oc` cl
         - key: `deadmanssnitch-<cluster_name>-url`
         - value: the `Unique Snitch URL` from deadmanssnitch
 
-    1. Ensure `enhanced-dedicated-admin` is enabled on the cluster.  Details for this are [here](#enable-enhanced-dedicated-admin)
-
     1. As of OpenShift 4.6.17, UWM (user-workload-monitoring) is enabled by default on OSD, replacing `openshift-customer-monitoring`. App-SRE still uses `openshift-customer-monitoring` and as such we need to ask SREP to disable UWM for us so we can use the current monitoring configs as described below. We need to create a ticket in OHSS and ask for UWM to be disabled.
 
-    1. Create an `openshift-customer-monitoring` namespace file for that specific cluster, please use the template provided and replace CLUSTERNAME with the actual cluster name:
+    1. Create an `openshift-customer-monitoring` namespace file for that specific cluster, please use the template provided, replace CLUSTERNAME with the actual cluster name and `PHASE` with either `app-sre` or `app-sre-staging` for production or staging clusters:
 
         - Template: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/boilerplates/openshift-customer-monitoring.clustername.yml
         - Ex: https://gitlab.cee.redhat.com/service/app-interface/blob/master/data/services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml.
@@ -516,7 +514,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
     ```
 
     If the `openshift-operator-lifecycle-manager` namespace is not yet defined in
-    app-interface, follow [Step 4](step-4---operator-lifecycle-manager)
+    app-interface, follow [Step 4](#step-4-operator-lifecycle-manager)
 
     1. Add the new `container-security-operator` namespace to the target
     namespaces in the
@@ -552,7 +550,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
    The Deployment Validation Opreator inspects wordloads in a cluster and evaluates them against know best practices.  It generates metric information about which workloads in which namespaces do not meet specific guidelines.  This information is presented in tenant dashboards and in monthly reports.
 
-    1. Create an `app-sre-dvo-per-cluster` namespace file for that specific
+    1. Create a `deployment-validationoperator-per-cluster` namespace file for that specific
     cluster. Example:
 
     ```yaml
@@ -580,12 +578,12 @@ At this point you should be able to access the cluster via the console / `oc` cl
     managedRoles: true
     ```
 
-    *NOTE*: This file goes in the `data/openshift<cluster>/namespaces directory` [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/openshift/app-sre-stage-01/namespaces/app-sre-dvo-per-cluster.yml)
+    *NOTE*: This file goes in the `data/openshift<cluster>/namespaces directory` [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/openshift/app-sre-stage-01/namespaces/deployment-validation-operator-per-cluster.yml)
 
     *NOTE*: If the `openshift-operator-lifecycle-manager` namespace is not yet defined in
-    app-interface, follow [Step 4](step-4---operator-lifecycle-manager
+    app-interface, follow [Step 4](#step-4-operator-lifecycle-manager)
 
-    1. Add a service monitor for the Deployment Validation Operator to the `openshift-customer-monitoring/<cluster>.yml` file:
+    1. Add a service monitor for the Deployment Validation Operator to the `openshift-customer-monitoring.<cluster>.yml` file:
 
     ```yaml
     ### Deployment Validation Operator
@@ -599,7 +597,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
     *Note*: [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml)
 
-    1. Add the new `deployment-validation-operator` namespace to the target
+    1. WIP: Add the new `deployment-validation-operator` namespace to the target
     namespaces in the
     [saas.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/deployment-validation-operator/cicd/saas.yaml)
     to deploy the Deployment Validation Operator. Example:

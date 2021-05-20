@@ -51,28 +51,24 @@ resourceTemplates:
 - name: insights-inventory-reaper
   path: /templates/inventory/insights-inventory-reaper.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  parameters:
+    REAPER_SUSPEND: 'false'
   targets:
   - namespace:
       $ref: /services/insights/host-inventory/namespaces/prod-host-inventory-prod.yml
     ref: d30172549b7a8a3474183cb87e72ad3bdbf044ae
     parameters:
       IMAGE_TAG: 8bec9ab
-      REAPER_SUSPEND: 'false'
-      PROMETHEUS_PUSHGATEWAY: 'prometheus-push.insights-push-prod.svc.cluster.local:9091'
   - namespace:
       $ref: /services/insights/host-inventory/namespaces/stage-host-inventory-stage.yml
     ref: d30172549b7a8a3474183cb87e72ad3bdbf044ae
     parameters:
       IMAGE_TAG: 27aff5f
-      REAPER_SUSPEND: 'false'
-      PROMETHEUS_PUSHGATEWAY: 'prometheus-push.insights-push-stage.svc.cluster.local:9091'
   - namespace:
       $ref: /services/insights/host-inventory/namespaces/host-inventory-fedramp-stage.yml
     ref: 0149510198876fae430a6be09f9ea73ee2017797
     parameters:
       IMAGE_TAG: 2b7d0cd
-      REAPER_SUSPEND: 'false'
-      PROMETHEUS_PUSHGATEWAY: 'prometheus-push.insights-push-stage.svc.cluster.local:9091'
       KAFKA_SECURITY_PROTOCOL: 'SSL'
 - name: insights-inventory-mq-service
   path: /templates/inventory/insights-inventory-mq-service.yaml
@@ -81,8 +77,6 @@ resourceTemplates:
     REPLICAS: 3
     REPLICAS_P1: 5
     REPLICAS_SP: 2
-    KAFKA_HOST_EGRESS_TOPIC: 'platform.inventory.events'
-    SECONDARY_TOPIC_ENABLED: 'false'
   targets:
   - namespace:
       $ref: /services/insights/host-inventory/namespaces/prod-host-inventory-prod.yml
@@ -108,34 +102,27 @@ resourceTemplates:
     MAX_REPLICAS: 25
     MEMORY_LIMIT: 2Gi
     MIN_REPLICAS: 25
-    REST_POST_ENABLED: 'false'
     RBAC_ENFORCED: 'true'
+    BULK_QUERY_SOURCE: xjoin
+    BULK_QUERY_SOURCE_BETA: xjoin
   targets:
   - namespace:
       $ref: /services/insights/host-inventory/namespaces/prod-host-inventory-prod.yml
     ref: d30172549b7a8a3474183cb87e72ad3bdbf044ae
     parameters:
       IMAGE_TAG: 8bec9ab
-      BULK_QUERY_SOURCE: xjoin
-      BULK_QUERY_SOURCE_BETA: xjoin
       XJOIN_SEARCH_URL: http://xjoin-search.xjoin-prod.svc.cluster.local.:4000/graphql
       URLLIB3_LOG_LEVEL: DEBUG
   - namespace:
       $ref: /services/insights/host-inventory/namespaces/stage-host-inventory-stage.yml
-    ref: d30172549b7a8a3474183cb87e72ad3bdbf044ae
+    ref: 0101b993f9b178836c81a3d613104444ed0b6c97
     parameters:
       IMAGE_TAG: 27aff5f
-      BULK_QUERY_SOURCE: xjoin
-      BULK_QUERY_SOURCE_BETA: xjoin
-      XJOIN_SEARCH_URL: http://xjoin-search.xjoin-stage.svc.cluster.local.:4000/graphql
   - namespace:
       $ref: /services/insights/host-inventory/namespaces/host-inventory-fedramp-stage.yml
-    ref: 0149510198876fae430a6be09f9ea73ee2017797
+    ref: 0101b993f9b178836c81a3d613104444ed0b6c97
     parameters:
       IMAGE_TAG: 2b7d0cd
-      BULK_QUERY_SOURCE: xjoin
-      BULK_QUERY_SOURCE_BETA: xjoin
-      XJOIN_SEARCH_URL: http://xjoin-search.xjoin-stage.svc.cluster.local.:4000/graphql
       KAFKA_SECURITY_PROTOCOL: 'SSL'
 - name: inventory-sp-validator
   path: /templates/inventory/inventory-sp-validator.yaml

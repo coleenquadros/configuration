@@ -60,44 +60,6 @@ config:
         job_type: app-interface-reporter
         ci_cmd: ./hack/app-interface-reporter.sh
         cron_expression: 'H 1 1 * *'
-    - 'qontract-reconcile-with-upstream':
-        display_name: qontract-reconcile openshift-saas-deploy-trigger-configs
-        job_type: trigger-configs
-        integrations: openshift-saas-deploy-trigger-configs
-        upstream: service-app-interface-gl-build-master
-        concurrent_build: true
-    - 'qontract-reconcile-timed':
-        display_name: qontract-reconcile openshift-saas-deploy-trigger-moving-commits
-        job_type: trigger-moving-commits
-        integrations: openshift-saas-deploy-trigger-moving-commits
-        cron_expression: '* * * * *'
-    - 'qontract-reconcile-timed':
-        display_name: qontract-reconcile gitlab-housekeeping
-        job_type: gitlab-housekeeping
-        integrations: gitlab-housekeeping
-        cron_expression: '* * * * *'
-        options: '--wait-for-pipeline'
-    # - 'qontract-reconcile-timed':
-    #     display_name: qontract-reconcile slack-usergroups
-    #     job_type: slack-usergroups
-    #     integrations: slack-usergroups
-    #     cron_expression: 'H/5 * * * *'
-    - 'qontract-reconcile-timed':
-        display_name: qontract-reconcile openshift-serviceaccount-tokens
-        job_type: openshift-serviceaccount-tokens
-        integrations: openshift-serviceaccount-tokens
-        options: '--vault-output-path app-sre/integrations-output'
-        cron_expression: 'H/5 * * * *'
-    - 'qontract-reconcile-timed':
-        display_name: qontract-reconcile jenkins-job-builder
-        job_type: jenkins-job-builder
-        integrations: jenkins-job-builder jenkins-job-cleaner
-        cron_expression: 'H/5 * * * *'
-    - 'qontract-reconcile-timed':
-        display_name: qontract-reconcile gitlab-owners
-        job_type: gitlab-owners
-        integrations: gitlab-owners
-        cron_expression: 'H/5 * * * *'
 
 - project:
     name: qontract-api
@@ -121,3 +83,16 @@ config:
     jobs:
     - 'app-interface-output-run':
         display_name: app-interface-output run
+
+- project:
+    name: container-images-internal
+    label: app-interface
+    node: app-interface
+    gl_group: app-sre
+    gl_project: container-images
+    quay_org: app-sre
+    jobs:
+    - 'gl-build-master':
+        display_name: container-images build master
+    - 'gl-pr-check':
+        display_name: container-images pr-check
