@@ -41,7 +41,6 @@ spec:
     rules:
     - alert: S3SuddenIncreaseBytesUsed
       labels:
-        jiralert: ASIC
         severity: warning
       expr: (avg_over_time(aws_s3_bucket_size_bytes_average{job=~"cloudwatch-exporter.*"}[1d]) / avg_over_time(aws_s3_bucket_size_bytes_average{job=~"cloudwatch-exporter.*"}[1d] offset 1d) -1) * 100 > 20 and (aws_s3_bucket_size_bytes_average{job=~"cloudwatch-exporter.*"} - aws_s3_bucket_size_bytes_average{job=~"cloudwatch-exporter.*"} offset 1d) / 1000 / 1000 > 1000
       annotations:
@@ -52,7 +51,6 @@ spec:
     rules:
     - alert: RDSHighCPUUtilization
       labels:
-        jiralert: ASIC
         severity: warning
       expr: aws_rds_cpuutilization_average{job=~"cloudwatch-exporter.*"} offset 10m > 85
       for: 15m
@@ -62,7 +60,6 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net"
     - alert: RDSLowFreeMemory
       labels:
-        jiralert: ASIC
         severity: warning
       expr: aws_rds_freeable_memory_average{job=~"cloudwatch-exporter.*"} offset 10m < (200 * 1024^2)
       annotations:
@@ -71,7 +68,6 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net"
     - alert: RDSLowStorageSpace
       labels:
-        jiralert: ASIC
         severity: warning
       expr: aws_rds_free_storage_space_average{job=~"cloudwatch-exporter.*"} offset 10m < (1 * 1024^3)
       for: 30m
@@ -82,7 +78,6 @@ spec:
     - alert: RDSPredictOutOfStorage
       labels:
         severity: high
-        jiralert: ASIC
       expr: predict_linear(aws_rds_free_storage_space_average[1h], 3600 * 24 * 3) < 0
       for: 1h
       annotations:
@@ -91,7 +86,6 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net"
     - alert: RDSPredictOutOfBurstBalance
       labels:
-        jiralert: ASIC
         severity: high
       expr: predict_linear(aws_rds_burst_balance_average[1h], 3600 * 8) < 0
       for: 5m
@@ -100,7 +94,6 @@ spec:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/sop/rds-burst-balance.md"
     - alert: RDSHighAverageReadLatency
       labels:
-        jiralert: ASIC
         severity: warning
       expr: aws_rds_read_latency_average{job=~"cloudwatch-exporter.*"} offset 10m >= 1
       annotations:
@@ -109,7 +102,6 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net"
     - alert: RDSHighAverageWriteLatency
       labels:
-        jiralert: ASIC
         severity: warning
       expr: aws_rds_write_latency_average{job=~"cloudwatch-exporter.*"} offset 10m >= 1.1
       for: 10m
@@ -121,7 +113,6 @@ spec:
     rules:
     - alert: EC2HighCPUUtilization
       labels:
-        jiralert: ASIC
         severity: warning
       expr: aws_ec2_cpuutilization_average{job=~"cloudwatch-exporter.*"} offset 10m > 85
       for: 60m
