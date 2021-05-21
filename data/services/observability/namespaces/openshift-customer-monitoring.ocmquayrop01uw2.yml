@@ -15,12 +15,6 @@ app:
 environment:
   $ref: /products/app-sre/environments/production.yml
 
-managedResourceTypes:
-- Secret
-- PrometheusRule
-- ServiceMonitor
-- Service
-
 managedResourceNames:
 # https://github.com/openshift/managed-cluster-config/blob/master/deploy/osd-customer-monitoring/05-role.yaml#L24-L37
 - resource: Secret
@@ -32,6 +26,13 @@ managedResourceNames:
     - prometheus-additional-alertmanager-config
     - prometheus-additional-scrape-config
     - prometheus-auth-proxy
+
+managedResourceTypes:
+- ServiceMonitor
+- PrometheusRule
+- Service
+- Prometheus
+- Secret
 
 openshiftResources:
 # Observability
@@ -51,6 +52,7 @@ openshiftResources:
 - provider: resource-template
   type: extracurlyjinja2
   path: /observability/alertmanager/alertmanager-instance.secret.yaml
+  validate_alertmanager_config: true
   variables:
     jiralert_host: jiralert.app-sre.devshift.net
 
