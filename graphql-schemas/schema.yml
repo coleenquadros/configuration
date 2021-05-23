@@ -1306,7 +1306,7 @@
   - { name: name, type: string, isRequired: true, isSearchable: true, isUnique: true }
   - { name: description, type: string, isRequired: true }
   - { name: app, type: App_v1, isRequired: true }
-  - { name: pipelinesNamespace, type: Namespace_v1, isRequired: true }
+  - { name: pipelinesProvider, type: PipelinesProvider_v1, isRequired: true, isInterface: true }
   - { name: managedResourceTypes, type: string, isRequired: true, isList: true }
   - { name: authentication, type: SaasFileAuthentication_v1 }
   - { name: parameters, type: json }
@@ -1366,6 +1366,32 @@
   - { name: auto, type: boolean }
   - { name: publish, type: string, isList: true }
   - { name: subscribe, type: string, isList: true }
+
+- name: PipelinesProvider_v1
+  isInterface: true
+  interfaceResolve:
+    strategy: fieldMap
+    field: provider
+    fieldMap:
+      tekton: PipelinesProviderTekton_v1
+  fields:
+  - { name: schema, type: string, isRequired: true }
+  - { name: path, type: string, isRequired: true }
+  - { name: labels, type: json }
+  - { name: name, type: string, isRequired: true }
+  - { name: description, type: string, isRequired: true }
+  - { name: provider, type: string, isRequired: true }
+
+- name: PipelinesProviderTekton_v1
+  interface: PipelinesProvider_v1
+  fields:
+  - { name: schema, type: string, isRequired: true }
+  - { name: path, type: string, isRequired: true }
+  - { name: labels, type: json }
+  - { name: name, type: string, isRequired: true }
+  - { name: description, type: string, isRequired: true }
+  - { name: provider, type: string, isRequired: true }
+  - { name: namespace, type: Namespace_v1, isRequired: true }
 
 - name: Permission_v1
   isInterface: true
@@ -1695,6 +1721,7 @@
   - { name: app_interface_sql_queries_v1, type: AppInterfaceSqlQuery_v1, isList: true, datafileSchema: /app-interface/app-interface-sql-query-1.yml }
   - { name: saas_files_v1, type: SaasFile_v1, isList: true, datafileSchema: /app-sre/saas-file-1.yml }
   - { name: saas_files_v2, type: SaasFile_v2, isList: true, datafileSchema: /app-sre/saas-file-2.yml }
+  - { name: pipelines_providers_v1, type: PipelinesProvider_v1, isList: true, isInterface: true, datafileSchema: /app-sre/pipelines-provider-1.yml }
   - { name: unleash_instances_v1, type: UnleashInstance_v1, isList: true, datafileSchema: /app-sre/unleash-instance-1.yml }
   - { name: dns_zone_v1, type: DnsZone_v1, isList: true, datafileSchema: /dependencies/dns-zone-1.yml }
   - { name: slack_workspaces_v1, type: SlackWorkspace_v1, isList: true, datafileSchema: /dependencies/slack-workspace-1.yml }
