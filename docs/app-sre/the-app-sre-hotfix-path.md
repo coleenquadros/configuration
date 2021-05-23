@@ -16,6 +16,8 @@ Note: as an example for this SOP, we will use qontract-reconcile, a service buil
     * Example:
         - Deployed commit in app-interface: https://gitlab.cee.redhat.com/service/app-interface/-/blob/6656277adbc1321b0c553253a32360a35cc730f1/data/services/app-interface/cicd/ci-ext/saas-qontract-reconcile.yaml#L53
         - Actual commit: https://github.com/app-sre/qontract-reconcile/commit/1a4ed92195f7e8fdd0f2c6a498118eb48d49e0fe
+1. For operators deployed via OLM (such as [Hive](https://github.com/openshift/hive)) the `hotfix` branch should be aligned with saas bundle ordering so it can be deployed to the existing environments. This change assumes that the `hotfix` branch will never be merged into the main branch and that changes to the `hotfix` branch are always cherry-picked from main branch.
+    * Example: https://github.com/openshift/hive/pull/832
 1. Create a job to build an image on merges to the `hotfix` branch:
     * Example: https://gitlab.cee.redhat.com/service/app-interface/-/blob/492a7e51315f396e8fcecfc0c3a29e8b044f7281/data/services/app-interface/cicd/ci-ext/jobs.yaml#L49-51
 1. Merge the hotfix changes (according to your process) to the main branch and test the changes in the stage environment.
