@@ -30,5 +30,5 @@ managedResourceTypes:
 
 openshiftResources:
 - provider: resource
-  path: /setup/tekton/openshift-pipelines-operator-rh.subscription.yaml
+  path: /tekton/openshift-pipelines-operator-rh.subscription.yaml
 ```
