@@ -1,0 +1,92 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2021-05-24-cloudigrade-stage-1
+namespace:
+  $ref: /services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml
+identifier: cloudigrade-stage
+output: stdout
+queries:
+  - "select
+      au.id as django_user_id,
+      ca.id as cloud_account_id,
+      aca.id as aws_cloud_account_id,
+      i.id as instance_id,
+      ai.id as aws_instance_id,
+      ai.ec2_instance_id as ec2_instance_id,
+      mi.id as machine_image_id,
+      mi.name as machine_image_name,
+      mi.status as machine_image_status,
+      ami.id as aws_machine_image_id,
+      ami.ec2_ami_id as ec2_ami_id,
+      r.id as run_id,
+      r.start_time as run_start_time
+  from
+      auth_user au
+      join api_cloudaccount ca on au.id = ca.user_id
+      join api_awscloudaccount aca on aca.id = ca.object_id
+      join api_instance i on i.cloud_account_id = ca.id
+      join api_awsinstance ai on ai.id = i.object_id
+      join api_run r on r.instance_id = i.id
+      join api_machineimage mi on mi.id = r.machineimage_id
+      join api_awsmachineimage ami on ami.id = mi.object_id
+  where
+      username = '6362142'
+      AND r.end_time is null
+  order by
+      r.start_time desc;"
+  - "select
+      au.id as django_user_id,
+      ca.id as cloud_account_id,
+      aca.id as aws_cloud_account_id,
+      i.id as instance_id,
+      ai.id as aws_instance_id,
+      ai.ec2_instance_id as ec2_instance_id,
+      mi.id as machine_image_id,
+      mi.name as machine_image_name,
+      mi.status as machine_image_status,
+      ami.id as aws_machine_image_id,
+      ami.ec2_ami_id as ec2_ami_id,
+      r.id as run_id,
+      r.start_time as run_start_time
+  from
+      auth_user au
+      join api_cloudaccount ca on au.id = ca.user_id
+      join api_awscloudaccount aca on aca.id = ca.object_id
+      join api_instance i on i.cloud_account_id = ca.id
+      join api_awsinstance ai on ai.id = i.object_id
+      join api_run r on r.instance_id = i.id
+      join api_machineimage mi on mi.id = r.machineimage_id
+      join api_awsmachineimage ami on ami.id = mi.object_id
+  where
+      username = '6362142'
+      AND r.start_time <= '2021-05-17 00:00:00'
+      AND coalesce(r.end_time, '2021-05-17 00:00:01') > '2021-05-17 00:00:00'
+  order by
+      r.start_time desc;"
+  - "select
+      au.id as django_user_id,
+      ca.id as cloud_account_id,
+      i.id as instance_id,
+      r.machineimage_id as machine_image_id,
+      r.id as run_id,
+      r.start_time as run_start_time,
+      ie.id as instance_event_id,
+      ie.occurred_at as instance_event_occurred_at,
+      ie.event_type as instance_event_event_type
+  from
+      auth_user au
+      join api_cloudaccount ca on au.id = ca.user_id
+      join api_instance i on i.cloud_account_id = ca.id
+      join api_run r on r.instance_id = i.id
+      join api_instanceevent ie on
+          ie.instance_id = i.id
+          and ie.occurred_at >= r.start_time
+          and ie.occurred_at <= coalesce(r.end_time, now())
+  where
+      username = '6362142'
+      AND r.start_time <= '2021-05-17 00:00:00'
+      AND coalesce(r.end_time, '2021-05-17 00:00:01') > '2021-05-17 00:00:00'
+  order by
+      r.start_time desc,
+      ie.occurred_at;"
