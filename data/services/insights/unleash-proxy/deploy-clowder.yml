@@ -1,0 +1,50 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: unleash-proxy
+  platform: insights
+
+name: unleash-proxy-clowder
+description: unleash-proxy app on the Insights Platform
+
+app:
+  $ref: /services/insights/unleash-proxy/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+managedResourceTypes:
+- ClowdApp
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  CLOUD_WATCH_LOG_GROUP: unleash-proxy-stage
+
+resourceTemplates:
+- name: unleash-proxy-clowdapp
+  path: /deploy/clowdapp.yml
+  url: https://gitlab.cee.redhat.com/automation-analytics/unleash-proxy
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+  - namespace:
+      $ref: /services/insights/unleash-proxy/namespaces/unleash-proxy-stage.yml
+    ref: main
+    parameters:
+      ENV_NAME: stage
