@@ -96,7 +96,7 @@ Perform the following actions in a single MR:
     role: tekton-trigger-access
   ```
 
-  * copy the file as is and change only the service_name and the namespace references to match the location of the pipelines namespace file.
+  * copy the file as is and change only the `service_name` and the `namespace` references to match the location of the pipelines namespace file.
   * add this role under the `roles` section of the team's user files, or add the `access` entries to an existing role.
 
 
