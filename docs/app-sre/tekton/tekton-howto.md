@@ -17,7 +17,7 @@ This work was tracked in https://issues.redhat.com/browse/APPSRE-3187
 
 In this section you will create:
 - a Namespace to host your Tekton Pipelines
-- a Pipeline Proivder to reference from SaaS files
+- a Pipeline Provider to reference from SaaS files
 - a Role to obtain access to the Namespace
 
 Perform the following actions in a single MR:
