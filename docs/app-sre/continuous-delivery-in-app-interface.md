@@ -9,13 +9,13 @@ This functionality replaces the saasherder flow described [here](https://github.
 
 In order to define Continuous Delivery pipelines in app-interface, define a SaaS file with the following structure -
 
-* `$schema` - should be `/app-sre/saas-file-1.yml`
+* `$schema` - should be `/app-sre/saas-file-1.yml` (Jenkins provider) or `/app-sre/saas-file-2.yml` (Tekton provider)
 * `labels` - a map of labels (currently not used by automation)
 * `name` - name of saas file (usually starts with `saas-` and contains the name of the deployed app/service/component)
 * `description` - description of the saas file (what is being deployed in this file)
 * `app` - a reference to the application that this deployment is a part of
     * reference an app file, usually located under `/data/services/<service_name>/`
-* `instance` - Jenkins instance where generated deployment jobs run
+* `instance` - (v1 SaaS file) Jenkins instance where generated deployment jobs run
     * options -
         - /dependencies/ci-ext/ci-ext.yml
         - /dependencies/ci-int/ci-int.yml
@@ -26,6 +26,7 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
             - the manifests to be deployed are in a gitlab repository
             - the manifests to be deployed are in a private github repository
         * otherwise, use ci-ext
+* `pipelinesProvider` - (v2 SaaS file) A reference to a Pipelines Provider file created in a Tekton [bootstrap](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/tekton/tekton-howto.md#bootstrap) phase.
 * `slack` - configure where to send notifications of success/failure of deployments
     * `output` - a type of output to use
         - `publish` - (default) publish jenkins job results using the slack publisher
@@ -33,6 +34,7 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
     * `workspace` - a reference to a slack workspace
         * currently only `/dependencies/slack/coreos.yml` is supported.
     * `channel` - channel to send notifications to
+    * not yet supported for v2 SaaS files.
 * `managedResourceTypes` - a list of resource types to deploy (indicates that any other type is filtered out)
 * `takeover` - (optional) if set to true, the specified `managedResourceTypes` will be managed exclusively
 * `compare` - (optional) if set to true, the job compares desired to current resource and only applies if it has changed
@@ -68,6 +70,7 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
                 * or any other script that should run prior to deployment
                 * see [Continuous Integration in App-interface](/docs/app-sre/continuous-integration-in-app-interface.md) for more details
             * the `instance` should match the one where the upstream job runs.
+            * not yet supported for v2 SaaS files.
         * `disable` - (optional) if set to `true`, target will be skipped during deployment.
     * `hash_length` - (optional) if `IMAGE_TAG` should be set according to the referenced target, specify a length to use from the commit hash.
         * default is set in [app-interface settings](/data/app-interface/app-interface-settings.yml#L31).
@@ -109,11 +112,29 @@ In addition to the supplied parameters, there are additional parameters which ar
 
 Every saas file contains a list of resources to deploy, and each resource contains a list of targets to deploy to.  Each target is a namespace, and each such namespace is associated to an environment.
 
-A Jenkins job will be automatically created for each saas file and for each environment.  Each job executes an app-interface integration called `openshift-saas-deploy` for the specific saas file and environment.  The output will be similar to output you see in other app-interface integrations.
+For v1 SaaS files, A Jenkins job will be automatically created for each saas file and for each environment.  Each job executes an app-interface integration called `openshift-saas-deploy` for the specific saas file and environment.  The output will be similar to output you see in other app-interface integrations.
 
-## Triggering jobs
+For v2 SaaS files, A generic Tekton Pipeline will be automatically created in the pipelines namespace ([bootstrap tekton](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/tekton/tekton-howto.md#bootstrap)). A Tekton PipelineRun will be created (deployment will be triggered) for each saas file and for each environment.  Each run executes an app-interface integration called `openshift-saas-deploy` for the specific saas file and environment.  The output will be similar to output you see in other app-interface integrations.
+
+## Migrating from saas-file-1 (Jenkins provider) to saas-file-2 (Tekton-provider)
+
+Follow the migration instructions in https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/tekton/tekton-howto.md#migration
+
+## Triggering jobs in Jenkins
 
 Whenever changes are detected for an environment, a saas file, a resource template or a target, the corresponding Jenkins job will be triggered automatically.
+
+To trigger a job manually, log in to Jenkins and hit "Build".
+
+Jobs are not being triggered? [follow this SOP](/docs/app-sre/sop/app-interface-saas-deploy-triggers-debug.md)
+
+## Triggering PipelineRuns in Tekton
+
+Whenever changes are detected for an environment, a saas file, a resource template or a target, the corresponding Tekton Pipeline will be triggered automatically by an automated creation of a PipelineRun resource.
+
+To trigger a pipeline manually, log in to OpenShift, navigate to the Pipelines page, find the `openshift-saas-deploy` Pipeline in your pipelines namespace and from the top right corner choose "Actions -> Start". Supply the name of the SaaS file and the name of the environment to deploy to.
+
+For more information on Environments: [Products, Environments, Namespaces and Apps](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-interface/api/entities-and-relations.md#products-environments-namespaces-and-apps)
 
 Jobs are not being triggered? [follow this SOP](/docs/app-sre/sop/app-interface-saas-deploy-triggers-debug.md)
 
@@ -156,10 +177,6 @@ Examples:
 * Subscribe: [github-mirror production deployment](https://gitlab.cee.redhat.com/service/app-interface/-/blob/fe22ed43d0cb46f1ac708cf86f9f569c1ffa5b68/data/services/github-mirror/cicd/deploy.yaml#L49-51)
 
 To make the promotion process automated, set `promotion.auto` to `true`.
-
-## Where do I sign?
-
-The App SRE team will contact you directly to migrate any saas repos you have to saas files.
 
 ## Questions?
 
