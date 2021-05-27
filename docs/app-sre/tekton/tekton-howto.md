@@ -102,6 +102,8 @@ Perform the following actions in a single MR:
 
 ### Usage
 
+Perform the following actions in a separate MR from the bootstrap MR:
+
 1. Add a `pipelinesProvider` section to your SaaS file (only available for the `saas-file-2` schema):
   ```yaml
   pipelinesProvider:
@@ -115,6 +117,8 @@ Perform the following actions in a single MR:
 TODO
 
 ### Migration
+
+Perform the following actions in a separate MR from the bootstrap MR:
 
 1. Change the SaaS file schema from `saas-file-1` to `saas-file-2`.
 2. Replace the `instance` section with a `pipelinesProvider` as described in the Usage section.
