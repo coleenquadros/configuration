@@ -6,8 +6,9 @@ This job triggers Jenkins jobs to deploy changes declared in saas files in app-i
 The job runs once a minute and executes the [periodic_saas_deploy_triggers.sh](/hack/periodic_saas_deploy_triggers.sh) script.
 
 This script runs the following integrations:
-- `openshift-saas-deploy-moving-commits` - Trigger a job in case a commit changed under a reference such as `master`.
-- `openshift-saas-deploy-configs` - Trigger a job in case a configuration changed in app-interface (new target, updated ref, etc).  In case a configuration changes during a run of an upstream job, the trigger will be sent and the job should wait for upstream job to succeed.
+- `openshift-saas-deploy-trigger-moving-commits` - Trigger a deployment in case a commit changed under a reference such as `master`.
+- `openshift-saas-deploy-trigger-configs` - Trigger a deployment in case a configuration changed in app-interface (new target, updated ref, etc).
+- `openshift-saas-deploy-trigger-upstream-jobs` - Trigger a deployment in case an upstream job was successfully built.
 
 ## Purpose
 
