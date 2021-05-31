@@ -122,8 +122,6 @@ Perform the following actions in a separate MR from the bootstrap MR:
 
 1. Change the SaaS file schema from `saas-file-1` to `saas-file-2`.
 2. Replace the `instance` section with a `pipelinesProvider` as described in the Usage section.
-
-Notes:
-* Usage of target `upstream` is not yet supported.
-* Slack success/failure messages is not yet supported.
-* [Continuous Testing in App-interface](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-testing-in-app-interface.md) is not yet supported.
+3. Replace every `upstream` field with an `upstream` section:
+  * `instance` - reference to Jenkins instance where upstream job exists
+  * `name` - name of the Jenkins job to use as upstream (deploy upon build success)

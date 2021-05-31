@@ -65,11 +65,15 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
             * `publish` - a list of channels to publish the success of the deployment
             * `subscribe` - before deploying, validate that the current commit sha has been successfully deployed and published to the specified channels
         * `parameters` - (optional) parameters for `oc process` to be used when deploying to the current namespace
-        * `upstream` - (optional) name of Jenkins job to build after.
+        * `upstream` - (optional):
             * use this option in the case a docker image should be built before deployment
                 * or any other script that should run prior to deployment
                 * see [Continuous Integration in App-interface](/docs/app-sre/continuous-integration-in-app-interface.md) for more details
-            * the `instance` should match the one where the upstream job runs.
+            - (v1 SaaS file) name of Jenkins job to build after.
+                *  the `instance` should match the one where the upstream job runs.
+            - (v2 SaaS file) instance reference and job name to build after:
+                * `instance` - reference to Jenkins instance where upstream job exists
+                * `name` - name of the Jenkins job to use as upstream
             * not yet supported for v2 SaaS files.
         * `disable` - (optional) if set to `true`, target will be skipped during deployment.
     * `hash_length` - (optional) if `IMAGE_TAG` should be set according to the referenced target, specify a length to use from the commit hash.
