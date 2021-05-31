@@ -246,6 +246,57 @@ data:
                       prefix_rewrite: /auth/realms/redhat-external/protocol/openid-connect/certs
                       auto_host_rewrite: true
 
+                  # Generate directly the API metadata response body containing the list of
+                  # available services. This is used by the web page to populate the list
+                  # of OpenAPI specifications.
+                  - name: api
+                    match:
+                      path: /api
+                    response_headers_to_add:
+                    - header:
+                        key: content-type
+                        value: application/json
+                    direct_response:
+                      status: 200
+                      body:
+                        inline_string: |
+                          {
+                            "services": [
+                              {
+                                "id": "clusters_mgmt",
+                                "name": "Clusters management service"
+                              },
+                              {
+                                "id": "accounts_mgmt",
+                                "name": "Accounts management service"
+                              },
+                              {
+                                "id": "authorizations",
+                                "name": "Authorization service"
+                              },
+                              {
+                                "id": "service_logs",
+                                "name": "Service logs"
+                              },
+                              {
+                                "id": "upgrades_info",
+                                "name": "Upgrades information service"
+                              },
+                              {
+                                "id": "assisted-install",
+                                "name": "assisted-service service"
+                              },
+                              {
+                                "id": "managed-services-api",
+                                "name": "managed-services-api service"
+                              },
+                              {
+                                "id": "kafkas_mgmt",
+                                "name": "kafka service fleet manager service"
+                              }
+                            ]
+                          }
+
                   # Route for the `upgrades_info` service:
                   - name: upgrades_info
                     match:
