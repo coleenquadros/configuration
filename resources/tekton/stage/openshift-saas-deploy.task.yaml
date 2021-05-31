@@ -22,7 +22,7 @@ spec:
   - name: qontract-reconcile
     image: quay.io/app-sre/qontract-reconcile:{{ qontract_reconcile_image_tag }}
     command: ["/bin/sh", "-c"]
-    args: ['qontract-reconcile --config config.toml --dry-run openshift-saas-deploy --saas-file-name $(params.saas_file_name) --env-name $(params.env_name)']
+    args: ['qontract-reconcile --config config.toml --dry-run openshift-saas-deploy --saas-file-name $(params.saas_file_name) --env-name $(params.env_name) --io-dir throughput/']
     env:
     - name: APP_INTERFACE_STATE_BUCKET
       valueFrom:
@@ -44,3 +44,7 @@ spec:
         secretKeyRef:
           name: qontract-reconcile
           key: github.api.url
+  - name: qontract-reconcile-publish
+    image: quay.io/app-sre/qontract-reconcile:{{ qontract_reconcile_image_tag }}
+    command: ["/bin/sh", "-c"]
+    args: ['[ -d "throughput/" ] && tail throughput/*']
