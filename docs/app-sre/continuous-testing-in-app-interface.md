@@ -18,5 +18,6 @@ In order to define Continuous Testing pipelines in app-interface:
     * `publishJobLogs` - (optional) if this is a [saas file running post-deployment tests](), set this to `true` to publish Jobs' pods logs.
 
 2. Define an [automated promotion](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-delivery-in-app-interface.md#automatedgated-promotions) based on the results of the stage deployment.
+    * Note: The usage of `upstream` to link post-deployment tests to a deployment job should be updated to use automated promotions. For more information: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/19968
 
 A complete example for github-mirror can be found [here](/data/services/github-mirror/cicd/test.yaml).
