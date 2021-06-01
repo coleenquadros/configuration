@@ -125,3 +125,5 @@ Perform the following actions in a separate MR from the bootstrap MR:
 3. Replace every `upstream` field with an `upstream` section:
   * `instance` - reference to Jenkins instance where upstream job exists
   * `name` - name of the Jenkins job to use as upstream (deploy upon build success)
+
+Note: to receive Slack notifications, invite @app-sre-bot to the channel specified in the slack section of the SaaS file.
