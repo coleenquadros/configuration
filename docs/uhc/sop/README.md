@@ -305,7 +305,7 @@ Users will not be able to access services that use the gateway. That doesn't
 include the OCM services because those use an OpenShift path route, so the
 communication goes directly from the OpenShift router to the pods. But it does
 affect services like the upgrades information service (a.k.a. Cincinnati), the
-assistend install service and the Kafka management service.
+assisted install service and the Kafka management service.
 
 To find out which services are affected exactly check the configuration of the
 Envoy proxy of the affected environment. For example, these are the Envoy
