@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: app-interface
@@ -10,8 +10,8 @@ description: 'SaaS tracking file for App-interface'
 app:
   $ref: /services/app-interface/app.yml
 
-instance:
-  $ref: /dependencies/ci-ext/ci-ext.yml
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
@@ -42,7 +42,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/app-interface/namespaces/app-interface-stage.yml
     ref: master
-    upstream: app-sre-qontract-reconcile-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: app-sre-qontract-reconcile-gh-build-master
     parameters:
       DRY_RUN: --dry-run
       GITHUB_API: https://github-mirror.stage.devshift.net
