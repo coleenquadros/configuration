@@ -9,6 +9,10 @@ spec:
   - name: env_name
     type: string
   steps:
+  - name: qontract-reconcile-prepare
+    image: quay.io/app-sre/qontract-reconcile:{{ qontract_reconcile_image_tag }}
+    command: ["/bin/sh", "-c"]
+    args: ['mkdir artifacts']
   - name: qontract-reconcile-config
     image: quay.io/app-sre/qontract-reconcile:{{ qontract_reconcile_image_tag }}
     command: ["/bin/sh", "-c"]
@@ -22,7 +26,7 @@ spec:
   - name: qontract-reconcile
     image: quay.io/app-sre/qontract-reconcile:{{ qontract_reconcile_image_tag }}
     command: ["/bin/sh", "-c"]
-    args: ['qontract-reconcile --config config.toml --dry-run openshift-saas-deploy --saas-file-name $(params.saas_file_name) --env-name $(params.env_name) --io-dir throughput/']
+    args: ['qontract-reconcile --config config.toml --dry-run openshift-saas-deploy --saas-file-name $(params.saas_file_name) --env-name $(params.env_name) --io-dir artifacts/']
     env:
     - name: APP_INTERFACE_STATE_BUCKET
       valueFrom:
@@ -47,4 +51,4 @@ spec:
   - name: qontract-reconcile-publish
     image: quay.io/app-sre/qontract-reconcile:{{ qontract_reconcile_image_tag }}
     command: ["/bin/sh", "-c"]
-    args: ['[ "$(ls throughput/ | wc -l)" != "0" ] && tail throughput/*']
+    args: ['[ "$(ls artifacts/ | wc -l)" != "0" ] && tail artifacts/*']
