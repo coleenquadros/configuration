@@ -23,81 +23,84 @@ In this section you will create:
 Perform the following actions in a single MR:
 
 1. Create a Namespace file:
-  ```yaml
-  ---
-  $schema: /openshift/namespace-1.yml
 
-  labels:
-    provider: tekton
+    ```yaml
+    ---
+    $schema: /openshift/namespace-1.yml
 
-  name: <service_name>-pipelines
-  description: <service_name> pipelines namespace
+    labels:
+      provider: tekton
 
-  cluster:
-    $ref: /openshift/appsrep05ue1/cluster.yml
+    name: <service_name>-pipelines
+    description: <service_name> pipelines namespace
 
-  app:
-    $ref: /services/app-sre/app.yml
+    cluster:
+      $ref: /openshift/appsrep05ue1/cluster.yml
 
-  environment:
-    $ref: /products/app-sre/environments/production.yml
+    app:
+      $ref: /services/app-sre/app.yml
 
-  managedRoles: true
+    environment:
+      $ref: /products/app-sre/environments/production.yml
 
-  managedResourceTypes:
-  - Secret
-  - Task
-  - Pipeline
-  - ClusterRole
+    managedRoles: true
 
-  sharedResources:
-  - $ref: /services/app-interface/shared-resources/app-sre-pipelines.yml
-  ```
+    managedResourceTypes:
+    - Secret
+    - Task
+    - Pipeline
+    - ClusterRole
 
-  * this file should be placed under `data/services/<service_name>/namespaces`.
-  * copy the file as is and change only the service_name and the cluster:
-    * use `appsre05ue1` for internal workloads (behind RH VPN, has access to gitlab). this will replace ci-int.
-    * use `app-sre-prod-01` for external workloads. this will replace ci-ext.
+    sharedResources:
+    - $ref: /services/app-interface/shared-resources/app-sre-pipelines.yml
+    ```
+
+    * this file should be placed under `data/services/<service_name>/namespaces`.
+    * copy the file as is and change only the service_name and the cluster:
+        * use `appsre05ue1` for internal workloads (behind RH VPN, has access to gitlab). this will replace ci-int.
+        * use `app-sre-prod-01` for external workloads. this will replace ci-ext.
 
 2. Create a Pipelines Provider to reference the pipelines namespace:
-  ```yaml
-  ---
-  $schema: /app-sre/pipelines-provider-1.yml
 
-  labels: {}
+    ```yaml
+    ---
+    $schema: /app-sre/pipelines-provider-1.yml
 
-  name: tekton-<service_name>-pipelines-appsrep05ue1
-  description: tekton provider in the <service_name>-pipelines namespace in the appsrep05ue1 cluster
+    labels: {}
 
-  provider: tekton
-  namespace:
-    $ref: /services/<service_name>/namespaces/<service_name>-pipelines.appsrep05ue1.yaml
-  ```
+    name: tekton-<service_name>-pipelines-appsrep05ue1
+    description: tekton provider in the <service_name>-pipelines namespace in the appsrep05ue1 cluster
 
-  * this file should be placed under `data/services/<service_name>/pipelines`.
-  * copy the file as is and change only the service_name and the namespace reference to match the location of the pipelines namespace file.
+    provider: tekton
+    namespace:
+      $ref: /services/<service_name>/namespaces/<service_name>-pipelines.appsrep05ue1.yaml
+    ```
+
+    * this file should be placed under `data/services/<service_name>/pipelines`.
+    * copy the file as is and change only the service_name and the namespace reference to match the location of the pipelines namespace file.
 
 3. Create a Role to obtain access to view the pipelines namespace and to trigger deployments:
-  ```yaml
-  ---
-  $schema: /access/role-1.yml
 
-  labels: {}
-  name: <service_name>-pipelines-appsrep05ue1-access
+    ```yaml
+    ---
+    $schema: /access/role-1.yml
 
-  permissions: []
+    labels: {}
+    name: <service_name>-pipelines-appsrep05ue1-access
 
-  access:
-  - namespace:
-      $ref: /services/<service_name>/namespaces/<service_name>-pipelines.appsrep05ue1.yaml
-    role: view
-  - namespace:
-      $ref: /services/<service_name>/namespaces/<service_name>-pipelines.appsrep05ue1.yaml
-    role: tekton-trigger-access
-  ```
+    permissions: []
 
-  * copy the file as is and change only the `service_name` and the `namespace` references to match the location of the pipelines namespace file.
-  * add this role under the `roles` section of the team's user files, or add the `access` entries to an existing role.
+    access:
+    - namespace:
+        $ref: /services/<service_name>/namespaces/<service_name>-pipelines.appsrep05ue1.yaml
+      role: view
+    - namespace:
+        $ref: /services/<service_name>/namespaces/<service_name>-pipelines.appsrep05ue1.yaml
+      role: tekton-trigger-access
+    ```
+
+    * copy the file as is and change only the `service_name` and the `namespace` references to match the location of the pipelines namespace file.
+    * add this role under the `roles` section of the team's user files, or add the `access` entries to an existing role.
 
 
 ### Usage
@@ -105,12 +108,13 @@ Perform the following actions in a single MR:
 Perform the following actions in a separate MR from the bootstrap MR:
 
 1. Add a `pipelinesProvider` section to your SaaS file (only available for the `saas-file-2` schema):
-  ```yaml
-  pipelinesProvider:
-    $ref: /services/<service_name>/pipelines/<service_name>-pipelines.appsrep05ue1.yaml
-  ```
 
-  * for more information of SaaS files please follow [Continuous Delivery in App-interface](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-delivery-in-app-interface.md).
+    ```yaml
+    pipelinesProvider:
+      $ref: /services/<service_name>/pipelines/<service_name>-pipelines.appsrep05ue1.yaml
+    ```
+
+    * for more information of SaaS files please follow [Continuous Delivery in App-interface](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-delivery-in-app-interface.md).
 
 ### Monitoring
 
@@ -122,8 +126,8 @@ Perform the following actions in a separate MR from the bootstrap MR:
 
 1. Change the SaaS file schema from `saas-file-1` to `saas-file-2`.
 2. Replace the `instance` section with a `pipelinesProvider` as described in the Usage section.
+3. Replace every `upstream` field with an `upstream` section:
+    * `instance` - reference to Jenkins instance where upstream job exists
+    * `name` - name of the Jenkins job to use as upstream (deploy upon build success)
 
-Notes:
-* Usage of target `upstream` is not yet supported.
-* Slack success/failure messages is not yet supported.
-* [Continuous Testing in App-interface](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-testing-in-app-interface.md) is not yet supported.
+Note: to receive Slack notifications, invite @app-sre-bot to the channel specified in the slack section of the SaaS file.

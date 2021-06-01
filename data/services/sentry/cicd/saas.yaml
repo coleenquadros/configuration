@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: sentry
@@ -10,8 +10,8 @@ description: SaaS tracking file for Sentry
 app:
   $ref: /services/sentry/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
@@ -44,7 +44,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/sentry/namespaces/sentry-stage.yaml
     ref: master
-    upstream: app-sre-sentry-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: app-sre-sentry-gh-build-master
     parameters:
       CLEANUP_DAYS: 7
   - namespace:
