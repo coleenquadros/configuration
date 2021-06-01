@@ -18,25 +18,36 @@ type: jobs
 
 config:
   - project:
-      name: srs-multitenant-registry # this projects builds both the service-registry main server and the tenant manager api
-      label: srs-multitenant-registry
+      name: srs-service-registry
+      label: service-registry
+      # TODO: request for a dedicated slave node for service-registry
       node: managed-services
       gl_group: service-registry
       gl_project: srs-service-registry
+      quay_org: rhoas
+      build_deploy_script_path: './build-deploy-srs-service-registry.sh'
+      pr_check_script_path: './pr-check.sh'
       jobs:
+        # using global job-template
+        # object definition at /resources/jenkins/global/templates.yaml
         - 'gl-pr-check':
             display_name: srs-service-registry pr-check
             concurrent_build: true
+        # using custom job-template
+        # object definition at /resources/jenkins/service-registry/job-templates.yaml
         - 'gl-build-master-srs-projects':
             display_name: srs-service-registry build master
             branch: master
 
   - project:
       name: srs-fleet-manager
-      label: srs-fleet-manager
+      label: service-registry
       node: managed-services
       gl_group: service-registry
       gl_project: srs-fleet-manager
+      quay_org: rhoas
+      build_deploy_script_path: './build-deploy-srs-fleet-manager.sh'
+      pr_check_script_path: './pr-check.sh'
       jobs:
         - 'gl-pr-check':
             display_name: srs-fleet-manager pr-check
@@ -44,3 +55,20 @@ config:
         - 'gl-build-master-srs-projects':
             display_name: srs-fleet-manager build master
             branch: master
+
+  #- project:
+  #    name: srs-tenant-manager
+  #    label: service-registry
+  #    node: managed-services
+  #    gl_group: service-registry
+  #    gl_project: srs-service-registry
+  #    quay_org: rhoas
+  #    build_deploy_script_path: './build-deploy-srs-tenant-manager.sh'
+  #    pr_check_script_path: './pr-check.sh'
+  #    jobs:
+  #      - 'gl-pr-check':
+  #          display_name: srs-tenant-manager pr-check
+  #          concurrent_build: true
+  #      - 'gl-build-master-srs-projects':
+  #          display_name: srs-tenant-manager build master
+  #          branch: master
