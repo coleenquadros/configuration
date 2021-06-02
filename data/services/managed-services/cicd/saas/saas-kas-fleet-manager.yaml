@@ -54,8 +54,6 @@ resourceTemplates:
     ENABLE_DENY_LIST: true
     # Change this to false to disable sentry
     ENABLE_SENTRY: true
-    # Disable quota service integration for now
-    ENABLE_QUOTA_SERVICE: false
     # Enable the external Kafka certificate for all Kafka clusters
     ENABLE_KAFKA_EXTERNAL_CERTIFICATE: true
     # Enable the dedicate Ingress on the data plane clusters which all Kafka Clusters will use
@@ -94,6 +92,8 @@ resourceTemplates:
       MAS_SSO_BASE_URL: https://identity.api.stage.openshift.com
       MAS_SSO_REALM: rhoas
       OSD_IDP_MAS_SSO_REALM: rhoas-kafka-sre
+      # Use the allow list based quota management service
+      QUOTA_TYPE: allow-list
       # Dex identity service url
       DEX_URL: http://dex-dex.apps.pbraun-observatorium.observability.rhmw.io
       # Dex identity service username
@@ -768,6 +768,9 @@ resourceTemplates:
     ref: 087b47812216e094ab798eab42af0ec7d900ce18
     parameters:
       ENVIRONMENT: production
+      # Disable quota service integration for now since the current production setup is using the AMS with an incomplete integration
+      # This parameter should be change to `QUOTA_TYPE: allow-list` when bumping to latest commit ref that includes - https://github.com/bf2fc6cc711aee1a0c2a/kas-fleet-manager/pull/340.        
+      ENABLE_QUOTA_SERVICE: false
       # The image tag is the first seven characters of the #ref commit sha parameter.
       # Verify in https://quay.io/repository/rhoas/kas-fleet-manager?tab=tags to see if the tag exists.
       IMAGE_TAG: 087b478
