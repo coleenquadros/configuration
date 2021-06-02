@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: ingress
@@ -11,8 +11,8 @@ description: ingress app on the Insights Platform via clowder
 app:
   $ref: /services/insights/ingress/app.yml
 
-instance:
-  $ref: /dependencies/ci-ext/ci-ext.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
@@ -44,7 +44,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/ingress/namespaces/stage-ingress-stage.yml
     ref: master
-    upstream: RedHatInsights-insights-puptoo-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-puptoo-gh-build-master
     parameters:
       MIN_REPLICAS: 4
       ENV_NAME: stage
@@ -54,7 +57,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/ingress/namespaces/ingress-fedramp-stage.yml
     ref: master
-    upstream: RedHatInsights-insights-puptoo-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-puptoo-gh-build-master
     parameters:
       MIN_REPLICAS: 4
       HABERDASHER_EMITTER: kafka
@@ -83,14 +89,20 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/ingress/namespaces/stage-ingress-stage.yml
     ref: master
-    upstream: RedHatInsights-insights-ingress-go-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-ingress-go-gh-build-master
     parameters:
       ENV_NAME: stage
       INGRESS_STAGEBUCKET: upload-stage
   - namespace:
       $ref: /services/insights/ingress/namespaces/ingress-fedramp-stage.yml
     ref: master
-    upstream: RedHatInsights-insights-ingress-go-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-ingress-go-gh-build-master
     parameters:
       INGRESS_STAGEBUCKET: upload-fedramp-stage
   - namespace:
@@ -113,7 +125,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/ingress/namespaces/stage-ingress-stage.yml
     ref: master
-    upstream: RedHatInsights-insights-storage-broker-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-storage-broker-gh-build-master
     parameters:
       MIN_REPLICAS: 4
       ENV_NAME: stage
@@ -128,7 +143,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/ingress/namespaces/ingress-fedramp-stage.yml
     ref: master
-    upstream: RedHatInsights-insights-storage-broker-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-storage-broker-gh-build-master
     parameters:
       MIN_REPLICAS: 4
       OPENSHIFT_BUCKET: insights-buck-it-openshift-fedramp-stage
