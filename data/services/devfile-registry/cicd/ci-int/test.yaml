@@ -1,0 +1,44 @@
+
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: devfile-registry
+
+name: saas-devfile-registry-post-deploy
+description: 'SaaS tracking file for devfile-registry post deployment tests'
+
+app:
+  $ref: /services/devfile-registry/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-devfile-registry-alert
+
+managedResourceTypes:
+- Job
+
+publishJobLogs: true
+
+imagePatterns:
+- quay.io/devfile/devfile-registry-integration
+
+resourceTemplates:
+- name: devfile-registry
+  url: https://github.com/devfile/registry-support
+  path: /deploy/hosted-registry/devfile-registry-acceptance.yaml
+  targets:
+  - namespace:
+      $ref: /services/devfile-registry/namespaces/devfile-registry-stage.yml
+    ref: master
+    upstream: openshift-saas-deploy-saas-devfile-registry-devfile-registry-stage
+    parameters:
+      REGISTRY: https://registry.stage.devfile.io
+      IMAGE_TAG: next
+    promotion:
+      publish:
+      - devfile-registry-stage-post-deploy-tests-success-channel
