@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: app-sre-observability
@@ -10,8 +10,8 @@ description: saas-aws-resource-exporter
 app:
   $ref: /services/observability/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
@@ -37,7 +37,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-stage.yml
     ref: master
-    upstream: app-sre-aws-resource-exporter-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: app-sre-aws-resource-exporter-gh-build-master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
     ref: 4b7540df5bfd53ba7b3261b93aa82d11ac26aed1
@@ -52,7 +55,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-stage.yml
     ref: master
-    upstream: app-sre-aws-resource-exporter-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: app-sre-aws-resource-exporter-gh-build-master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
     ref: 4b7540df5bfd53ba7b3261b93aa82d11ac26aed1
