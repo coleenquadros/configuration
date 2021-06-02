@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: backplane
@@ -10,8 +10,8 @@ description: Incident Management Service - Backplane
 app:
   $ref: /services/backplane/app.yaml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/backplane/pipelines/tekton.backplane-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
@@ -53,15 +53,24 @@ resourceTemplates:
   - namespace:
       $ref: /services/backplane/namespaces/backplane-stage-hive-stage-01.yml
     ref: master
-    upstream: service-backplane-api-gl-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-backplane-api-gl-build-master
   - namespace:
       $ref: /services/backplane/namespaces/backplane-stage-hives02ue1.yml
     ref: master
-    upstream: service-backplane-api-gl-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-backplane-api-gl-build-master
   - namespace:
       $ref: /services/backplane/namespaces/backplane-int-hivei01ue1.yml
     ref: master
-    upstream: service-backplane-api-gl-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-backplane-api-gl-build-master
   - namespace:
       $ref: /services/backplane/namespaces/backplane-prod-hivep01ue1.yml
     ref: 698decf74d1368ba585885a3d355d16cdf1d305d
