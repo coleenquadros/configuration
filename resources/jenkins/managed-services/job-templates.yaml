@@ -387,6 +387,24 @@
     <<: *gl_timed
 
 - job-template:
+    id: kas-fleet-manager-perf-test
+    name: kas-fleet-manager-perf-test-stage
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *kas_fleet_manager_perf_test_stage
+    ci_cmd: './perf_test.sh'
+    <<: *gl_timed
+    publishers:
+    - archive:
+        artifacts: 'test/performance/reports/**'
+        allow-empty: true
+
+- job-template:
     id: 'kas-fleet-manager-cluster-extension'
     name: 'kas-fleet-manager-cluster-extension'
     publishers:
