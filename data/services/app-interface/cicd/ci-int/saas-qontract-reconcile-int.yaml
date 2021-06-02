@@ -49,22 +49,16 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/app-interface/namespaces/app-interface-stage-int.yml
-    # this is not pinned to 'master' because this deployment runs in ci-int
-    # but the build job runs in ci-ext.
-    # if we use 'master' we will get a race condition when we try to deploy
-    # something that was not built yet, or has failed.
-    # instead, we use automated promotion based on the success of the external
-    # stage deployment.
-    ref: f1130d627182f75763e1677b1e6b7208d758fee4
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: app-sre-qontract-reconcile-gh-build-master
     parameters:
       DRY_RUN: --dry-run
       GITHUB_API: https://github-mirror.stage.devshift.net
       SLACK_CHANNEL: sd-app-sre-reconcile-stage
       SLEEP_DURATION_SECS: 600
-    promotion:
-      auto: true
-      subscribe:
-      - qontract-reconcile-stage-post-deploy-success-channel
   - namespace:
       $ref: /services/app-interface/namespaces/app-interface-production-int.yml
     ref: f1130d627182f75763e1677b1e6b7208d758fee4
