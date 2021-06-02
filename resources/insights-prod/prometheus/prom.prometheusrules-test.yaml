@@ -1,0 +1,33 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+  - /insights-prod/prometheus/prom.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+    - interval: 1m
+      input_series: 
+        - series: service:constant:sli:pcterror
+          values: "5"
+        - series: service:constant:sli:pctlatency
+          values: "10"
+        - series: service:custom:reqcount:rbac
+          values: "1+0x10"
+      promql_expr_test:
+        - expr: service:constant:sli:pcterror
+          eval_time: 1m
+          exp_samples:
+              - labels: 'service:constant:sli:pcterror'
+                value: 5
+        - expr: service:constant:sli:pctlatency
+          eval_time: 1m
+          exp_samples:
+              - labels: 'service:constant:sli:pctlatency'
+                value: 10
+        - expr: service:custom:reqcount:rbac
+          eval_time: 5m
+          exp_samples:
+              - labels: 'service:custom:reqcount:rbac'
+                value: 1
