@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: image-builder
@@ -12,10 +12,10 @@ description: image-builder service deployment
 app:
   $ref: /services/insights/image-builder/app.yml
 
-# Deploys are carried out by a Jenkins job. We have to specify which Jenkins
-# instance will do our deploys for us.
-instance:
-  $ref: /dependencies/ci-ext/ci-ext.yml
+# Deploys are carried out by a Tekton Pipeline. We have to specify which pipelines
+# provider will do our deploys for us.
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
 
 # Every time a deploy is attempted, updates are fed to the CoreOS Slack instance
 # in the #team-insights-info channel.
@@ -66,7 +66,10 @@ resourceTemplates:
       # the name of the Jenkins job that performs the build for us. It's the
       # composition of the values of the gh_org, gh_repo, and build job name
       # from our build.yml file
-      upstream: osbuild-image-builder-gh-build-main
+      upstream:
+        instance:
+          $ref: /dependencies/ci-ext/ci-ext.yml
+        name: osbuild-image-builder-gh-build-main
       parameters:
         # Parameters for the OpenShift template processing. These also inherit
         # all values from the environment you're deploying into as well as a

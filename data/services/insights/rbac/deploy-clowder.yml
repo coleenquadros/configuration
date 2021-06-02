@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: rbac
@@ -11,8 +11,8 @@ description: rbac app on the Insights Platform
 app:
   $ref: /services/insights/rbac/app.yml
 
-instance:
-  $ref: /dependencies/ci-ext/ci-ext.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
@@ -72,7 +72,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
     ref: master
-    upstream: RedHatInsights-insights-rbac-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-rbac-gh-build-master
     parameters:
       ENV_NAME: stage
       HABERDASHER_EMITTER: kafka
@@ -89,7 +92,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/rbac/namespaces/rbac-fedramp-stage.yml
     ref: master
-    upstream: RedHatInsights-insights-rbac-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-rbac-gh-build-master
     parameters:
       HABERDASHER_EMITTER: kafka
       HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
@@ -105,7 +111,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/rbac/namespaces/rbac-prod.yml
     ref: fa13bb2dda425b445141257978d87dd5793ab324
-    upstream: RedHatInsights-insights-rbac-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-rbac-gh-build-master
     parameters:
       ENV_NAME: prod
       HABERDASHER_EMITTER: kafka
