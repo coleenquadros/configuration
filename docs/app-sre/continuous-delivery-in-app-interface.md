@@ -136,13 +136,33 @@ Jobs are not being triggered? [follow this SOP](/docs/app-sre/sop/app-interface-
 
 Whenever changes are detected for an environment, a saas file, a resource template or a target, the corresponding Tekton Pipeline will be triggered automatically by an automated creation of a PipelineRun resource.
 
-To trigger a deployment manually, log in to OpenShift, navigate to the Pipelines page, find the `openshift-saas-deploy` Pipeline in your pipelines namespace and from the top right corner choose "Actions -> Start". Supply the name of the SaaS file and the name of the environment to deploy to.
+To trigger a deployment manually, log in to OpenShift, navigate to the Pipelines page, find the `openshift-saas-deploy` Pipeline in your pipelines namespace and from the top right corner choose "Actions -> Start". Supply the name of the SaaS file and the name of the environment to deploy to. :warning: **NOTE:** In current versions of OpenShift 4.7, developers may not be able to trigger PipelineRuns via the web console due to a [known bug](https://bugzilla.redhat.com/show_bug.cgi?id=1949935). As a workaround, you can [use the `tkn` CLI tool](#triggering-pipelineruns-using-the-tkn-cli-tool).
 
 To cancel a deployment manually, delete the active offending PipelineRun resource.
 
 For more information on Environments: [Products, Environments, Namespaces and Apps](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-interface/api/entities-and-relations.md#products-environments-namespaces-and-apps)
 
 Jobs are not being triggered? [follow this SOP](/docs/app-sre/sop/app-interface-saas-deploy-triggers-debug.md)
+
+### Triggering PipelineRuns using the `tkn` CLI tool
+The `tkn` tool provides an intuitive approach for managing Tekton pipelines from the command line and can be used to trigger new pipeline runs.
+
+1. From the OpenShift console, open the Help menu and select the **Command line tools** option.
+2. Download and extract the `oc` and `tkn` packages to a location in your binary path.
+3. Follow the *Copy Login Command* link from the CLI tools page and login to the cluster using the provided `oc` command.
+4. Use the `tkn pipeline start` command to trigger a new pipeline run.
+    * For SaaS deploy pipelines, use: `tkn pipeline start openshift-saas-deploy -p saas_file_name=<saas_file_name> -p env_name=<environment> -n <openshift_project>`
+5. Follow the progress of the pipeline run via the `tkn pipelinerun logs` command provided or via the OpenShift console.
+
+An example manual pipeline run:
+```bash
+$ tkn pipeline start openshift-saas-deploy -p saas_file_name=rhsm-api-proxy-clowder -p env_name=insights-stage -n crc-pipelines
+PipelineRun started: openshift-saas-deploy-run-r2mkz
+
+In order to track the PipelineRun progress run:
+tkn pipelinerun logs openshift-saas-deploy-run-r2mkz -f -n crc-pipelines
+
+```
 
 ## Approval process
 
