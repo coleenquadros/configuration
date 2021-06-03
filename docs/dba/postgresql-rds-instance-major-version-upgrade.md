@@ -72,6 +72,10 @@ Make changes in following order.
    SELECT * FROM pg_replication_slots;
    SELECT pg_drop_replication_slot(slot_name);
 ```
+In case the slot can not be dropped with the following error: `ERROR:  replication slot "slot_name" is active for PID XXXXX`:
+```
+   SELECT pg_cancel_backend(pid);
+```
 
 Example MR: [Terminate read-replica](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/9692)
 
