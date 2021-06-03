@@ -53,7 +53,7 @@ spec:
   - name: sources-kafka-lag-stage
     rules:
       - alert: SourcesKafkaLag
-        expr: sum(kafka_consumergroup_group_lag{topic=~'platform.sources..*',namespace='platform-mq-stage'}) by (group, topic) > 1000
+        expr: sum(kafka_consumergroup_group_lag{topic='platform.sources.status',namespace='platform-mq-stage'}) by (group, topic) > 1000
         for: 10m
         labels:
           severity: info
@@ -63,7 +63,21 @@ spec:
         annotations:
           dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-api"
-          message: "[Stage] Sources API: Kafka Lag reached {{ $value }} (limit is 1000) for the last 10 minutes"
+          message: "[Stage] Sources API: platform.sources.status Kafka Lag reached {{ $value }} (limit is 1000) for the last 10 minutes"
+  - name: sources-superkey-worker-kafka-lag-stage
+    rules:
+      - alert: SourcesKafkaLagSuperkeyRequetes
+        expr: sum(kafka_consumergroup_group_lag{topic='platform.sources.superkey-requests',namespace='platform-mq-stage'}) by (group, topic) > 100
+        for: 10m
+        labels:
+          severity: info
+          service: insights
+          env: stage
+          app_team: topo-sources # Slack channel for app_team defined in resources/observability/alertmanager/alertmanager-instance.secret.yaml
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-api"
+          message: "[Stage] Sources SuperKey Worker: platform.sources.superkey-requests Kafka Lag reached {{ $value }} (limit is 100) for the last 10 minutes"
   - name: sources-restarts-stage
     rules:
       - alert: SourcesApiRestarts
