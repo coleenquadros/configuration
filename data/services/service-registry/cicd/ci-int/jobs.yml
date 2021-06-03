@@ -18,14 +18,13 @@ type: jobs
 
 config:
   - project:
-      name: srs-service-registry
+      name: multitenant-service-registry
       label: service-registry
-      # TODO: request for a dedicated slave node for service-registry
       node: managed-services
       gl_group: service-registry
       gl_project: srs-service-registry
       #quay_org: rhoas
-      build_deploy_script_path: './build-deploy-srs-service-registry.sh'
+      build_deploy_script_path: './build-deploy.sh'
       pr_check_script_path: './pr-check.sh'
       jobs:
         # using global job-template
@@ -33,8 +32,8 @@ config:
         - 'gl-pr-check':
             display_name: srs-service-registry pr-check
             concurrent_build: true
-        # using custom job-template
-        # object definition at /resources/jenkins/service-registry/job-templates.yaml
+        # using custom job-template. definition at /resources/jenkins/service-registry/job-templates.yaml
+        # builds and pushes images for both srs-service-registry and srs-tenant-manager
         - 'gl-build-master-srs-projects':
             display_name: srs-service-registry build master
             branch: master
@@ -46,7 +45,7 @@ config:
       gl_group: service-registry
       gl_project: srs-fleet-manager
       #quay_org: rhoas
-      build_deploy_script_path: './build-deploy-srs-fleet-manager.sh'
+      build_deploy_script_path: './build-deploy.sh'
       pr_check_script_path: './pr-check.sh'
       jobs:
         - 'gl-pr-check':
@@ -55,21 +54,4 @@ config:
         - 'gl-build-master-srs-projects':
             display_name: srs-fleet-manager build master
             branch: master
-
-  - project:
-      name: srs-tenant-manager
-      label: service-registry
-      node: managed-services
-      gl_group: service-registry
-      gl_project: srs-service-registry
-      #quay_org: rhoas
-      build_deploy_script_path: './build-deploy-srs-tenant-manager.sh'
-      pr_check_script_path: './pr-check.sh'
-      jobs:
-      # This job is not required, since pr-check job is already defined for srs-service-registry, which srs-tenant-manager is part of
-        #- 'gl-pr-check':
-        #    display_name: srs-tenant-manager pr-check
-        #    concurrent_build: true
-        - 'gl-build-master-srs-projects':
-            display_name: srs-tenant-manager build master
-            branch: master
+            
