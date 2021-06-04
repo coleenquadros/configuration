@@ -1,0 +1,33 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+labels:
+  service: status-board
+
+name: ci-int-status-board-jobs
+
+description: 'Build the Status Board'
+
+app:
+  $ref: /services/status-board/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+type: jobs
+
+config:
+- project:
+    name: status-board
+    label: status-board
+    node: rhel8
+    gl_group: service
+    gl_project: status-board
+    pr_check_script_path: './pr_test.sh'
+    build_deploy_script_path: './build_deploy.sh'
+    quay_org: app-sre
+    jobs:
+    - 'gl-build-master':
+        display_name: Status Board build master
+    - 'gl-pr-check':
+        display_name: Status Board pr-check
