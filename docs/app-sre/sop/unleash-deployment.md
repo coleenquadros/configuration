@@ -1,7 +1,7 @@
 # Unleash Deployment
 
 Tenants will request an instance of Unleash following the
-[steps here](https://gitlab.cee.redhat.com/service/dev-guidelines/blob/master/unleash.md).
+[steps here](https://gitlab.cee.redhat.com/service/dev-guidelines/-/blob/master/content/en/docs/AppSRE/Advanced/feature-toggles.md).
 
 This document describes how to deploy the requested instance using App
 Interface.
