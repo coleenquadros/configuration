@@ -34,4 +34,18 @@ StatefulSet is running with under 3 replicas.
 
 ### Knwon Cases Steps
 
+#### hccm-prod/hive-metastore
+
+Alert message:
+
+```
+StatefulSet hccm-prod/hive-metastore has 1 replicas (< 3)
+```
+
+Steps:
+
+* Check the status of the ticket [https://issues.redhat.com/browse/COST-1351](https://issues.redhat.com/browse/COST-1351).
+* Ping the owners if you see fit.
+* Silence the alert for 7d.
+
 ---
