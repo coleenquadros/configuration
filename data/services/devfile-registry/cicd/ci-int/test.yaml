@@ -1,6 +1,6 @@
 
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: devfile-registry
@@ -11,8 +11,8 @@ description: 'SaaS tracking file for devfile-registry post deployment tests'
 app:
   $ref: /services/devfile-registry/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/devfile-registry/pipelines/tekton.devfile-registry-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
@@ -34,11 +34,13 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/devfile-registry/namespaces/devfile-registry-stage.yml
-    ref: master
-    upstream: openshift-saas-deploy-saas-devfile-registry-devfile-registry-stage
+    ref: e90825181600a98421a7f6ee63881fa45704dc8d
     parameters:
       REGISTRY: https://registry.stage.devfile.io
       IMAGE_TAG: next
     promotion:
+      auto: true
+      subscribe:
+      - devfile-registry-stage-deploy-success-channel
       publish:
       - devfile-registry-stage-post-deploy-tests-success-channel
