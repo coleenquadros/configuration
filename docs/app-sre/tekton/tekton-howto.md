@@ -128,8 +128,8 @@ For every PipelineRun completed there's a metric that is pushed to Prometheus: `
 
 The most important labels to identify our PipelineRun are:
 
-* `saas_file`: The `name` key in the saas file yaml definition
-* `env`: The namespace where it happened
+* `saas_file_name`: The `name` key in the saas file yaml definition.
+* `env_name`: The environment associated to every namespace where the pipeline run deployed openshift objects.
 
 Those two will help you to identify the pipelinerun associated to the deployment.
 
@@ -139,20 +139,21 @@ This is an example of a time series metric from a pipelinerun:
 app_sre_tekton_pipelinerun_task_status{
   container="pushgateway",
   endpoint="scrape",
-  env="app-interface-production",
+  env_name="app-interface-production",
   job="openshift-saas-deploy-push-metric",
   namespace="app-sre-observability-production",
-  pipeline="openshift-saas-deploy",
-  pipelinerun="saas-qontract-reconcile-app-interface-production-202106070856",
-  pod="pushgateway-5-dkksf",saas_file="saas-qontract-reconcile",
+  pipeline_name="openshift-saas-deploy",
+  pipelinerun_name="saas-qontract-reconcile-app-interface-production-202106070856",
+  pod="pushgateway-5-dkksf",
+  saas_file_name="saas-qontract-reconcile",
   service="pushgateway-nginx-gate",
-  task="openshift-saas-deploy"}
+  task_name="openshift-saas-deploy"}
 ```
 
 In order to properly search for it you have to use the above labels:
 
 ```
-app_sre_tekton_pipelinerun_task_status{saas_file="saas-qontract-reconcile",env="app-interface-production"}
+app_sre_tekton_pipelinerun_task_status{saas_file_name="saas-qontract-reconcile",env_name="app-interface-production"}
 ```
 
 The `pipelinerun` label will help you identify the specific pipelinerun associated to this metric, but since this is a metric that is added to Prometheus via the PushGateway, it will be overwritten by subsequent runs of the saas deploy pipeline run so it is not a good candidate to build a query.
