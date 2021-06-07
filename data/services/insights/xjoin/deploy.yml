@@ -30,6 +30,7 @@ managedResourceTypes:
 - ConfigMap
 - Job
 - KafkaConnect
+- ClowdApp
 
 imagePatterns:
 - quay.io/cloudservices
@@ -75,6 +76,27 @@ resourceTemplates:
       MAX_REPLICAS: 6
       MEMORY_REQUESTS: 512Mi
       MEMORY_LIMITS: 1Gi
+
+resourceTemplates:
+- name: xjoin-search-clowder
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/xjoin-search
+  parameters:
+    LOG_LEVEL: info
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-xjoin-search-gh-build-master
+    parameters:
+      NUM_REPLICAS: 2
+      MEMORY_REQUESTS: 512Mi
+      MEMORY_LIMITS: 512Mi
+      CPU_REQUESTS: 500m
+      CPU_LIMITS: 1
 
 - name: xjoin-search-dev
   path: /deploy/template-dev.yaml
