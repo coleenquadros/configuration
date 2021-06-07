@@ -118,7 +118,49 @@ Perform the following actions in a separate MR from the bootstrap MR:
 
 ### Monitoring
 
-TODO
+For every PipelineRun completed there's a metric that is pushed to Prometheus: `app_sre_tekton_pipelinerun_task_status`. It keeps a translation of the tekton status:
+
+|Tekton Status|Prometheus value|
+|-------------|----------------|
+| Succeeded   | 0              |
+| Failed      | 1              |
+| None        | 3              |
+
+The most important labels to identify our PipelineRun are:
+
+* `saas_file`: The `name` key in the saas file yaml definition
+* `env`: The namespace where it happened
+
+Those two will help you to identify the pipelinerun associated to the deployment.
+
+This is an example of a time series metric from a pipelinerun:
+
+```
+app_sre_tekton_pipelinerun_task_status{
+  container="pushgateway",
+  endpoint="scrape",
+  env="app-interface-production",
+  job="openshift-saas-deploy-push-metric",
+  namespace="app-sre-observability-production",
+  pipeline="openshift-saas-deploy",
+  pipelinerun="saas-qontract-reconcile-app-interface-production-202106070856",
+  pod="pushgateway-5-dkksf",saas_file="saas-qontract-reconcile",
+  service="pushgateway-nginx-gate",
+  task="openshift-saas-deploy"}
+```
+
+In order to properly search for it you have to use the above labels:
+
+```
+app_sre_tekton_pipelinerun_task_status{saas_file="saas-qontract-reconcile",env="app-interface-production"}
+```
+
+The `pipelinerun` label will help you identify the specific pipelinerun associated to this metric, but since this is a metric that is added to Prometheus via the PushGateway, it will be overwritten by subsequent runs of the saas deploy pipeline run so it is not a good candidate to build a query.
+
+[Here](/resources/observability/prometheusrules/app-sre-openshift-saas-deployment-jobs.prometheusrules.yaml) you have an example an example of an alert based on the above metric. There are two important details about it:
+
+* Since the PushGateway runs in [`app-sre-prod-01`](/data/openshift/app-sre-prod-01/cluster.yml), the PrometheusRule will need to be deployed in that cluster.
+* The pipelines provider associated to your saas file will tell you exactly where to look for details on your pipeline runs.
 
 ### Migration
 
