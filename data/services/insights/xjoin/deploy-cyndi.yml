@@ -54,6 +54,7 @@ resourceTemplates:
     VALIDATION_INTERVAL: "1800"
     VALIDATION_ATTEMPTS_THRESHOLD: "2"
     VALIDATION_ATTEMPTS_THRESHOLD_INIT: "30"
+    CONNECTOR_ALLOWLIST_SP: "sap_system,sap_sids,operating_system,owner_id,rhsm,bios_vendor,bios_version,bios_release_date,infrastructure_type"
   targets:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
@@ -64,14 +65,26 @@ resourceTemplates:
       name: RedHatInsights-cyndi-operator-gh-build-catalog-master-upstream-RedHatInsights-cyndi-operator-gh-build-master
     parameters:
       TARGET_NAMESPACE: xjoin-stage
-      CONNECTOR_ALLOWLIST_SP: "sap_system,sap_sids,operating_system,owner_id,rhsm,bios_vendor,bios_version,bios_release_date,infrastructure_type"
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/cyndi-fedramp-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-cyndi-operator-gh-build-catalog-master-upstream-RedHatInsights-cyndi-operator-gh-build-master
+    parameters:
+      TARGET_NAMESPACE: cyndi
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
     ref: f26255210db45d7adb6668d01bb9ed71f7f56fc6
     parameters:
       TARGET_NAMESPACE: xjoin-prod
-      CONNECTOR_ALLOWLIST_SP: "sap_system,sap_sids,operating_system,owner_id,rhsm,bios_vendor,bios_version,bios_release_date,infrastructure_type"
       MAX_AGE: "46"
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/cyndi-fedramp-prod.yml
+    ref: f26255210db45d7adb6668d01bb9ed71f7f56fc6
+    parameters:
+      TARGET_NAMESPACE: cyndi
 
 # Unlike in stable environments where the operator is deployed in SingleNamespace mode,
 # AllNamespaces (i.e. cluster-wide) mode is used in ephemeral environments
