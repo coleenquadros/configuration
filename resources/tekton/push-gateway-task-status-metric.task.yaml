@@ -38,6 +38,13 @@ spec:
           key: credentials_b64
     script: |
       #!/usr/bin/env bash
+      #
+      # This script pushes a metric such as:
+      # app_sre_tekton_pipelinerun_task_status{container="pushgateway",endpoint="scrape",env="insights-production",job="openshift-saas-deploy-push-metric",namespace="app-sre-observability-production",pipeline="openshift-saas-deploy",pipelinerun="xjoin-operator-insights-production-20210504152500",pod="pushgateway-5-dkksf",saas_file="xjoin-operator",service="pushgateway-nginx-gate",task="openshift-saas-deploy"}
+      # into Prometheus PushGateway
+      # There is an important detail here: We'll push into a group identified by the combination of saas_file_name and env_name,
+      # which we know it is unique. Even if we are pushing metrics with a different pipelinerun, the PushGateway will only keep
+      # one metric per group, the last one.
 
       function log() {
           echo "`date '+%Y-%m-%d %H:%M:%S'` -- $@" 1>&2
@@ -56,16 +63,12 @@ spec:
       *)           STATUS=9;;
       esac
 
-      # PipelineRuns are named: a-big-long-name-<timestamp>. We'll strip out the timestamp
-      # See https://github.com/app-sre/qontract-reconcile/blob/4a1f27b13d101a3cf7ca6a453e230fab29cbd037/reconcile/openshift_saas_deploy_trigger_base.py#L91
-      PIPELINERUN_NAME=$(params.pipelinerun_name)
-      PIPELINERUN_PREFIX=${PIPELINERUN_NAME%-*}
+      GROUP_URL="$PUSHGW_URL/metrics/job/$(params.job_name)/saas_file/$(params.saas_file_name)/env/$(params.env_name)"
+      PUSH_METRIC="$(params.metric_name){saas_file=\"$(params.saas_file_name)\", env=\"$(params.env_name)\", pipeline=\"$(params.pipeline_name)\", pipelinerun=\"$(params.pipelinerun_name)\", task=\"$(params.task_name)\"}"
 
-      PUSH_METRIC="$(params.metric_name){saas_file_name=\"$(params.saas_file_name)\", env_name=\"$(params.env_name)\", pipeline=\"$(params.pipeline_name)\", pipelinerun_prefix=\"$PIPELINERUN_PREFIX\", task_name=\"$(params.task_name)\"}"
+      log "pushing '$PUSH_METRIC $STATUS' to $GROUP_URL"
 
-      log "pushing $PUSH_METRIC $STATUS"
-
-      HTTP_RESPONSE_CODE=$(curl -X POST -m 10 -sS -w '%{http_code}' -o /dev/null -H "Authorization: Basic $PUSHGW_CREDS_B64" --data-binary @- $PUSHGW_URL/metrics/job/$(params.job_name) <<EOF
+      HTTP_RESPONSE_CODE=$(curl -X POST -m 10 -sS -w '%{http_code}' -o /dev/null -H "Authorization: Basic $PUSHGW_CREDS_B64" --data-binary @- "$GROUP_URL" <<EOF
       # TYPE $(params.metric_name) gauge
       $PUSH_METRIC $STATUS
       EOF
