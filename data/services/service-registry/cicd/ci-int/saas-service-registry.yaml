@@ -1,0 +1,61 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: service-registry
+
+name: saas-service-registry
+description: 'SaaS tracking file for Managed Service Registry'
+
+app:
+  $ref: /services/service-registry/app.yml
+
+pipelinesProvider:
+  $ref: /services/service-registry/pipelines/tekton.service-registry-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: service-registry
+
+managedResourceTypes:
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/rhoas/srs-service-registry
+- quay.io/rhoas/srs-tenant-manager
+- quay.io/rhoas/srs-fleet-manager
+
+authentication:
+  image:
+    path: managed-services/quay-org-accounts/rhoas/robots/rhoas-pull
+    field: all
+
+parameters:
+  IMAGE_REGISTRY: quay.io
+
+resourceTemplates:
+
+- name: multitenant-service-registry
+  url: https://gitlab.cee.redhat.com/service-registry/srs-service-registry
+  path: distro/openshift-template/mt/apicurio-registry-mt-template.yaml
+  targets:
+  - namespace:
+      $ref: /services/service-registry/namespaces/service-registry-stage.yml
+    ref: master
+  parameters:
+    APICURIO_REGISTRY_IMAGE_REPOSITORY: rhoas/srs-service-registry
+    TENANT_MANAGER_IMAGE_REPOSITORY: rhoas/srs-tenant-manager
+    DATABASE_SECRET_NAME: srs-service-registry-rds
+
+- name: srs-fleet-manager
+  url: https://gitlab.cee.redhat.com/service-registry/srs-fleet-manager
+  path: templates/srs-fleet-manager-template.yaml
+  targets:
+  - namespace:
+      $ref: /services/service-registry/namespaces/service-registry-stage.yml
+    ref: master
+  parameters:
+    IMAGE_REPOSITORY: rhoas/srs-service-registry
+    DATABASE_SECRET_NAME: srs-fleet-manager-rds

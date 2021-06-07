@@ -22,3 +22,25 @@ openshiftResources:
   path: managed-services/quay-org-accounts/rhoas/robots/rhoas-pull-docker
   version: 1
   type: kubernetes.io/dockercfg
+- provider: route
+  path: /services/service-registry/stage/srs-service-registry.route.yaml
+- provider: route
+  path: /services/service-registry/stage/srs-fleet-manager.route.yaml
+
+managedTerraformResources: true
+
+terraformResources:
+# Data Plane database
+- provider: rds
+  account: app-sre
+  identifier: srs-service-registry
+  defaults: /terraform/resources/service-registry/staging/rds-2-cloudwatch-enabled.yml
+  parameter_group: /terraform/resources/service-registry/staging/service-registry-stage-rds-parameter-group-pg12.yml
+  output_resource_name: srs-service-registry-rds
+# Control Plane database -- TODO verify , is correct to have two databases with the same "defaults" and "parameter_group"?
+- provider: rds
+  account: app-sre
+  identifier: srs-fleet-manager
+  defaults: /terraform/resources/service-registry/staging/rds-2-cloudwatch-enabled.yml
+  parameter_group: /terraform/resources/service-registry/staging/service-registry-stage-rds-parameter-group-pg12.yml
+  output_resource_name: srs-fleet-manager-rds
