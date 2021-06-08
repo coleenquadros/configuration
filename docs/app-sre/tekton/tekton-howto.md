@@ -77,7 +77,7 @@ Perform the following actions in a single MR:
 
     retention:
       days: 7 # maximum number of days to retain deployments
-      min: 100 # minimum number of deployments to retain
+      minimum: 100 # minimum number of deployments to retain
     ```
 
     * this file should be placed under `data/services/<service_name>/pipelines`.
