@@ -74,6 +74,10 @@ Perform the following actions in a single MR:
     provider: tekton
     namespace:
       $ref: /services/<service_name>/namespaces/<service_name>-pipelines.appsrep05ue1.yaml
+
+    retention:
+      days: 7 # maximum number of days to retain deployments
+      min: 100 # minimum number of deployments to retain
     ```
 
     * this file should be placed under `data/services/<service_name>/pipelines`.
