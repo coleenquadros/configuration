@@ -151,7 +151,9 @@ app_sre_tekton_pipelinerun_task_status{
   pod="pushgateway-5-dkksf",
   saas_file_name="saas-qontract-reconcile",
   service="pushgateway-nginx-gate",
-  task_name="openshift-saas-deploy"}
+  task_name="openshift-saas-deploy",
+  tkn_cluster_console_url="https://console-openshift-console.apps.appsrep05ue1.zqxk.p1.openshiftapps.com",
+  tkn_namespace_name="app-sre-pipelines"}
 ```
 
 In order to properly search for it you have to use the above labels:
@@ -166,6 +168,7 @@ The `pipelinerun` label will help you identify the specific pipelinerun associat
 
 * Since the PushGateway runs in [`app-sre-prod-01`](/data/openshift/app-sre-prod-01/cluster.yml), the PrometheusRule will need to be deployed in that cluster.
 * The pipelines provider associated to your saas file will tell you exactly where to look for details on your pipeline runs.
+* Alternatively, you have the `tkn_cluster_console_url` and the `tkn_namespace_name` labels to have those details. The alert above uses them to build a direct access to the PipelineRun associated to the metric.
 
 ### Migration
 
