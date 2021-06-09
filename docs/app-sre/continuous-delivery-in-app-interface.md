@@ -151,12 +151,26 @@ The `tkn` tool provides an intuitive approach for managing Tekton pipelines from
 2. Download and extract the `oc` and `tkn` packages to a location in your binary path.
 3. Follow the *Copy Login Command* link from the CLI tools page and login to the cluster using the provided `oc` command.
 4. Use the `tkn pipeline start` command to trigger a new pipeline run.
-    * For SaaS deploy pipelines, use: `tkn pipeline start openshift-saas-deploy -p saas_file_name=<saas_file_name> -p env_name=<environment> -n <openshift_project>`
+  * For SaaS deploy pipelines, use:
+  ```
+  tkn pipeline start openshift-saas-deploy \
+    -p saas_file_name=<saas_file_name> \
+    -p env_name=<environment> \
+    -p tkn_cluster_console_url=<cluster console root url> \
+    -p tkn_namespace_name=<namespace where the pipeline runs> \
+    -n <openshift_project>
+  ```
+  The `tkn_cluster_console_url` and `tkn_namespace_name` can be found in app-interface through the Pipelines provider. They are only used in the metric emitted at the end of the pipeline run, so placeholders may be used if you're in a rush.
 5. Follow the progress of the pipeline run via the `tkn pipelinerun logs` command provided or via the OpenShift console.
 
 An example manual pipeline run:
 ```bash
-$ tkn pipeline start openshift-saas-deploy -p saas_file_name=rhsm-api-proxy-clowder -p env_name=insights-stage -n crc-pipelines
+$ tkn pipeline start openshift-saas-deploy \
+      -p saas_file_name=rhsm-api-proxy-clowder \
+      -p env_name=insights-stage \
+      -p tkn_cluster_console_url=https://console-openshift-console.apps.app-sre-prod-01.i7w5.p1.openshiftapps.co \
+      -p tkn_namespace_name=crc-pipelines \
+      -n crc-pipelines
 PipelineRun started: openshift-saas-deploy-run-r2mkz
 
 In order to track the PipelineRun progress run:
