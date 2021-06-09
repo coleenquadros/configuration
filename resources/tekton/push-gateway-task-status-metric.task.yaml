@@ -22,6 +22,10 @@ spec:
     type: string
   - name: retry_cooldown_seconds
     type: string
+  - name: tkn_cluster_console_url
+    type: string
+  - name: tkn_namespace_name
+    type: string
   steps:
   - name: push-gateway-task-status-metric
     image: quay.io/app-sre/ubi8-ubi-minimal:{{ ubi8_ubi_minimal_image_tag }}
@@ -40,7 +44,7 @@ spec:
       #!/usr/bin/env bash
       #
       # This script pushes a metric such as:
-      # app_sre_tekton_pipelinerun_task_status{container="pushgateway",endpoint="scrape",env_name="insights-production",job="openshift-saas-deploy-push-metric",namespace="app-sre-observability-production",pipeline_name="openshift-saas-deploy",pipelinerun_name="xjoin-operator-insights-production-20210504152500",pod="pushgateway-5-dkksf",saas_file_name="xjoin-operator",service="pushgateway-nginx-gate",task_name="openshift-saas-deploy"}
+      # app_sre_tekton_pipelinerun_task_status{container="pushgateway",endpoint="scrape",env_name="insights-production",job="openshift-saas-deploy-push-metric",namespace="app-sre-observability-production",pipeline_name="openshift-saas-deploy",pipelinerun_name="xjoin-operator-insights-production-20210504152500",pod="pushgateway-5-dkksf",saas_file_name="xjoin-operator",service="pushgateway-nginx-gate",task_name="openshift-saas-deploy",tkn_namespace_name="app-sre-pipelines",tkn_cluster_console_url="https://console-openshift-console.apps.appsrep05ue1.zqxk.p1.openshiftapps.com"}
       # into Prometheus PushGateway
       # There is an important detail here: We'll push into a group identified by the combination of saas_file_name and env_name,
       # which we know it is unique. Even if we are pushing metrics with a different pipelinerun, the PushGateway will only keep
@@ -64,7 +68,7 @@ spec:
       esac
 
       GROUP_URL="$PUSHGW_URL/metrics/job/$(params.job_name)/saas_file_name/$(params.saas_file_name)/env_name/$(params.env_name)"
-      PUSH_METRIC="$(params.metric_name){saas_file_name=\"$(params.saas_file_name)\", env_name=\"$(params.env_name)\", pipeline_name=\"$(params.pipeline_name)\", pipelinerun_name=\"$(params.pipelinerun_name)\", task_name=\"$(params.task_name)\"}"
+      PUSH_METRIC="$(params.metric_name){saas_file_name=\"$(params.saas_file_name)\",env_name=\"$(params.env_name)\",pipeline_name=\"$(params.pipeline_name)\",pipelinerun_name=\"$(params.pipelinerun_name)\",task_name=\"$(params.task_name)\",tkn_cluster_console_url=\"$(params.tkn_cluster_console_url)\",tkn_namespace_name=\"$(params.tkn_namespace_name)\"}"
 
       log "pushing '$PUSH_METRIC $STATUS' to $GROUP_URL"
 
