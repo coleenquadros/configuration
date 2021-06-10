@@ -1,0 +1,16 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2021-06-08-check-no-dash-account-number
+namespace:
+  $ref: /services/insights/host-inventory/namespaces/prod-host-inventory-prod.yml
+identifier: host-inventory-prod
+output: stdout
+query: |
+  SELECT account, count(id) FROM hosts
+  WHERE canonical_facts->>'rhel_machine_id' !~ '-'
+  OR canonical_facts->>'insights_id' !~ '-'
+  OR canonical_facts->>'bios_uuid' !~ '-'
+  OR canonical_facts->>'subscription_manager_id' !~ '-'
+  OR canonical_facts->>'satellite_id' !~ '-'
+  GROUP BY account;
