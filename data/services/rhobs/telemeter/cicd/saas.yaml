@@ -110,3 +110,21 @@ resourceTemplates:
       TELEMETER_SERVER_CPU_REQUEST: 100m
       TELEMETER_SERVER_MEMORY_LIMIT: 1Gi
       TELEMETER_SERVER_MEMORY_REQUEST: 100Mi
+- name: token-refresher
+  path: /resources/services/token-refresher-template.yaml
+  url: https://github.com/rhobs/configuration
+  parameters:
+    # NOTICE: Please specify image tags for each environment separately.
+    # And sort them alphabetically.
+    TOKEN_REFRESHER_SECRET_NAME: token-refrsher-oidc
+  targets:
+  - namespace:
+      $ref: /services/rhobs/telemeter/namespaces/telemeter-stage.yml
+    ref: a513f3676c8430265208111048dec36ea86fcd56 # TODO(prekumar): Update after https://github.com/rhobs/configuration/pull/33 gets merged.
+    parameters:
+      NAMESPACE: telemeter-stage
+      OAUTH_PROXY_IMAGE_TAG: 4.7.0
+      OBSERVATORIUM_NAMESPACE: telemeter-stage # TODO(prekumar): Change to observatorium-stage after migration.
+      SERVICE_ACCOUNT_NAME: prometheus-telemeter
+      TOKEN_REFRESHER_IMAGE_TAG: master-2021-06-03-a835a06
+
