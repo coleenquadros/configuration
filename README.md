@@ -46,7 +46,7 @@ this repository.
       - [Manage Routes via App-Interface (`/openshift/namespace-1.yml`) using Vault](#manage-routes-via-app-interface-openshiftnamespace-1yml-using-vault)
       - [Validate JSON in Secrets and ConfigMaps](#validate-json-in-secrets-and-configmaps)
       - [Validate AlertManager configuration in Secrets and ConfigMaps](#validate-alertmanager-configuration-in-secrets-and-configmaps)
-    - [Manage openshift-acme deployments via App-Interface (`/openshift/acme-1.yml`)](#manage-openshift-acme-deployments-via-app-interface-openshiftacme-1yml)
+    - [Manage openshift-acme deployments via App-Interface](#manage-openshift-acme-deployments-via-app-interface)
     - [Manage OpenShift Groups association via App-Interface (`/openshift/cluster-1.yml`)](#manage-openshift-groups-association-via-app-interface-openshiftcluster-1yml)
     - [Manage OpenShift LimitRanges via App-Interface (`/openshift/limitrange-1.yml`)](#manage-openshift-limitranges-via-app-interface-openshiftlimitrange-1yml)
     - [Manage OpenShift ResourceQuotas via App-Interface (`/openshift/quota-1.yml`)](#manage-openshift-resourcequotas-via-app-interface-openshiftquota-1yml)
@@ -751,7 +751,7 @@ If a key of a Secret or ConfigMap keys is a JSON, you can add the option `valida
 
 If a key of a Secret or ConfigMap keys is a JSON, you can add the option `validate_alertmanager_config` to the openshift resource definition in order to make sure it is valid alertmanager config. The integration will look into the `alertmanager.yaml` key of the secret to look for it unless `alertmanager_config_key` is specified.
 
-### Manage openshift-acme deployments via App-Interface (`/openshift/acme-1.yml`)
+### Manage openshift-acme deployments via App-Interface
 
 This integration allows namespace owners to deploy openshift-acme to their namespaces.
 
