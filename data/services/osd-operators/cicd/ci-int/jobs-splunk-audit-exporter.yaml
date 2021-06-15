@@ -1,0 +1,34 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+labels:
+  service: osd-operators
+
+name: ci-int-osd-operators-splunk-audit-exporter-jobs
+
+description: ''
+
+app:
+  $ref: /services/osd-operators/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+type: jobs
+
+config:
+- project:
+    name: splunk-audit-exporter
+    label: osd-operators
+    node: osd-operators
+    gl_group: service
+    gl_project: splunk-audit-exporter
+    quay_org: app-sre
+    build_deploy_script_path: 'make image push'
+    pr_check_script_path: 'make image'
+    backup_ecr_push_creds_account_region: 'app-sre/us-east-1'
+    jobs:
+    - 'gl-build-master':
+        display_name: splunk-audit-exporter build master
+    - 'gl-pr-check':
+        display_name: splunk-audit-exporter-images pr check
