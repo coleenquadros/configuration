@@ -82,27 +82,17 @@ Most of the resources required as an AppSRE will be obtained via a user definiti
 
 ### Surfaces
 
-Every AppSRE engineer should have access to the following:
+Every AppSRE/MT-SRE engineer should have access to the following:
 
 * LDAP
   * If needed can reset KRB password
     [here](https://password.corp.redhat.com/changepassword).
-* GitHub
-  * GitHub profile must include `Company: Red Hat`.
-  * Verify inclusion in all github orgs listed
-    [here](https://visual-app-interface.devshift.net/githuborgs).
-* Gitlab:
-  * https://gitlab.cee.redhat.com/app-sre
-    * Access to all repositories is managed via this group.
-    * Obtained via this [role](/data/teams/app-sre/roles/app-sre.yml).
-  * https://gitlab.cee.redhat.com/service/app-interface
   * https://gitlab.cee.redhat.com/app-sre/infra: keeps our Ansible and Terraform bits and bobs.
 * Slack: coreos.slack.com
   * #sd-app-sre-teamchat (private channel): speak to any team member to get an
     invitation.
   * User groups: @app-sre-team: obtained via this
-    [permission](/data/teams/app-sre/permissions/app-sre-team-coreos-slack.yml)
-    in the [AppSRE role](/data/teams/app-sre/roles/app-sre.yml).
+    [permission](/data/teams/app-sre/permissions/app-sre-team-coreos-slack.yml).
 * Internal IRC (irc.devel.redhat.com):
   * **#appsre**: backup channel if Slack is down or if sensitive content must be addressed.
   * **#servicedelivery**: backup channel for service delivery org if Slack is down.
@@ -143,19 +133,6 @@ Every AppSRE engineer should have access to the following:
 * github.com/openshift
   * ACCESS: https://source.redhat.com/groups/public/atomicopenshift/atomicopenshift_wiki/openshift_onboarding_checklist_for_github
   * Ping [Bill Dettelback](https://rover.redhat.com/people/profile/bdettelb) on slack or mail for access to [quay github org](https://github.com/quay)
-* AppSRE OCM org (https://cloud.redhat.com/openshift)
-  * Access is [configured manually by an org administrator](/docs/app-sre/sop/ocm-appsre-org-access.md)
-* AWS
-  * Nothing to do. Access obtained via a [role](/data/teams/app-sre/roles/app-sre.yml)
-  * Make sure you enable MFA in **all** your AWS accounts.
-* Vault
-  * Access obtained via a [role](/data/teams/app-sre/roles/app-sre.yml)
-    * [setup instructions](https://service.pages.redhat.com/dev-guidelines/docs/appsre/onboarding/adding-sensitive-data/#getting-access-to-vault)
-* Quay
-  * Login to/Create account at https://quay.io
-    * Attach with Red Hat SSO.
-  * Access obtained via a [role](/data/teams/app-sre/roles/app-sre.yml)
-  * Add `quay_username` in the [user file](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/teams/app-sre/users) and populate with quay user.
 * Bugzilla
   * ACCESS: Ensure you have access to [bugzilla](https://bugzilla.redhat.com)
     * Login as Red Hat Associate with kerberos credentials
@@ -167,6 +144,31 @@ Every AppSRE engineer should have access to the following:
   * ACCESS: Go to the following folders and request access with your Red Hat Gsuite account
     * [Public Top Level Directory](https://drive.google.com/drive/u/1/folders/1sQGfo57eU7UAKfbBy8LgwxhMdnzXc0KZ) (contains RCAs, etc)
     * [Private](https://drive.google.com/drive/u/1/folders/0B9akCOYRTJW_TFAxOUtEaWtRZWs) (for AppSRE Team members only)
+* Vault
+  * Access obtained via a [role](/data/teams/app-sre/roles/app-sre.yml)
+    * [setup instructions](https://service.pages.redhat.com/dev-guidelines/docs/appsre/onboarding/adding-sensitive-data/#getting-access-to-vault)
+* Quay
+  * Login to/Create account at https://quay.io
+    * Attach with Red Hat SSO.
+  * Access obtained via a [role](/data/teams/app-sre/roles/app-sre.yml)
+  * Add `quay_username` in the [user file](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/teams/app-sre/users) and populate with quay user.
+
+Every AppSRE engineer should have access to the following:
+
+* GitHub
+  * GitHub profile must include `Company: Red Hat`.
+  * Verify inclusion in all github orgs listed
+    [here](https://visual-app-interface.devshift.net/githuborgs).
+* Gitlab:
+  * https://gitlab.cee.redhat.com/app-sre
+    * Access to all repositories is managed via this group.
+    * Obtained via this [role](/data/teams/app-sre/roles/app-sre.yml).
+  * https://gitlab.cee.redhat.com/service/app-interface
+* AppSRE OCM org (https://cloud.redhat.com/openshift)
+  * Access is [configured manually by an org administrator](/docs/app-sre/sop/ocm-appsre-org-access.md)
+* AWS
+  * Nothing to do. Access obtained via a [role](/data/teams/app-sre/roles/app-sre.yml)
+  * Make sure you enable MFA in **all** your AWS accounts.
 * App SRE infrastructure managed by ansible
   * Access is managed by adding ssh keys to the [admin-list](https://gitlab.cee.redhat.com/app-sre/infra/blob/master/ansible/hosts/group_vars/all#L4) and applying the `baseline` role to all hosts. It is recommended that ssh key is RSA, 4096-sized and password-protected as those are the [requirements for Tier 1 Bastion keys](https://source.redhat.com/groups/public/openshiftplatformsre/wiki/faq_openshift_tiered_access_overview_for_osd3#jive_content_id_Tier_1)
 * OpenStack Project infrastructure
