@@ -78,6 +78,29 @@ data:
                     address: gateway-site
                     port_value: 8000
 
+      # Cluster for the `status-board` service:
+      - name: status-board
+        connect_timeout: 2s
+        type: STRICT_DNS
+        lb_policy: ROUND_ROBIN
+        load_assignment:
+          cluster_name: status-board
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: ay5etdjiipvutxw.api.stage.openshift.com
+                    port_value: 443
+        transport_socket:
+          name: envoy.transport_sockets.tls
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+            common_tls_context:
+              validation_context:
+                trusted_ca:
+                  filename: /etc/ssl/certs/ca-certificates.crt
+
       # Cluster for the `upgrades_info` service:
       - name: upgrades_info
         connect_timeout: 2s
@@ -297,6 +320,10 @@ data:
                                 "name": "Service logs"
                               },
                               {
+                                "id": "status-board",
+                                "name": "Status Board service"
+                              },
+                              {
                                 "id": "upgrades_info",
                                 "name": "Upgrades information service"
                               },
@@ -318,6 +345,15 @@ data:
                               }
                             ]
                           }
+
+                  # Route for the `status-board` service:
+                  - name: status-board
+                    match:
+                      prefix: /api/status-board
+                    route:
+                      cluster: status-board
+                      auto_host_rewrite: true
+                      timeout: 30s
 
                   # Route for the `upgrades_info` service:
                   - name: upgrades_info
