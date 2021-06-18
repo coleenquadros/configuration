@@ -10,8 +10,19 @@ if [ $? != 0 ]; then
     exit 1
 fi
 
-set -exvo pipefail
+lintyamls() {
+    toplevel=$(git rev-parse --show-toplevel)
+    what=$(git diff-tree --name-status -r origin/master..HEAD -- '*yml' '*yaml'|
+               awk -F'\t' '$1 ~ /M|A/{print $2}')
+    if [ ! -z "$what" ]
+    then
+        # Handle file names with whitespaces
+        echo "$what"|xargs -d '\n' yamllint
+    fi
+}
 
+set -exvo pipefail
+lintyamls
 # Setup vars and clean files
 export TEMP_DIR=$(realpath -s temp)
 rm -rf $TEMP_DIR; mkdir -p $TEMP_DIR $TEMP_DIR/reports
