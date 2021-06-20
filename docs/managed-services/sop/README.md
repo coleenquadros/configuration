@@ -355,7 +355,9 @@ kas-fleet-manager-rds
 
 ### Steps
 
-refer to the steps [Kafka cluster provisioning latency](#kafka-cluster-provisioning-latency)
+This alert is currently silenced until the failed status of a Kafka cluster reported by the fleetshard operator is terminal. If this alert fires, it should be silenced again.
+
+~~refer to the steps [Kafka cluster provisioning latency](#kafka-cluster-provisioning-latency)~~
  
 ---
 
