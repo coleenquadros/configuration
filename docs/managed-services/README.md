@@ -1,22 +1,25 @@
 # Kafka Service Fleet Manager
 
-Kafka Service Fleet Manager is a service for provisioning and managing fleets of Kafka instances.
+Kafka Service Fleet Manager is a service for provisioning and managing fleets of Kafka instances. 
 
 
 ## Kafka Service Architecture
+The Kafka service fleet manager is a Golang service which exposes an API using mux for users to create and delete Kafka instances. It also exposes endpoints for the fleetshard data plane components to communicate, similar to the k8s agent/control plane architecture. It also serves as the public API for users to create, delete and reset credentials for service accounts in MAS-SSO.
 
-[Kafka Service Architecture](https://drive.google.com/drive/u/0/folders/1Z8_DJ4oFrwjCGx9iGkc3WSNbkPd40uNX)
+### Service Diagram
+![Kafka Service Fleet Manager Component Architecture](https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/raw/main/docs/images/kas-fleet-manager-component-architecture.png)
 
-The architecture diagram is scoped to what will be in place for our public evaluation release at Red Hat Summit. 
-Additional components such as *Connector Types Services* will be added in the control plane in the future. 
+### Routes
+All user routes are viewable from the [swagger UI in api.openshift.com](https://api.openshift.com/?urls.primaryName=kafka%20service%20fleet%20manager%20service)
 
+All fleetshard routes are viewable from the [private-api OpenAPI spec](https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/blob/main/openapi/kas-fleet-manager-private.yaml). This endpoints are public but the authentication is through MAS-SSO instead of sso.redhat.com
 ### Dependencies
 
 This part will focus on what KAS Fleet Manager uses these dependencies
 1. *Cluster Service*: 
    Used for OSD cluster creation, addon installation, IDP setup, trusted datapath (SyncSets) and scaling compute nodes
 2. *Account Management Service*: 
-   Access Control, Quota reconciliation, Quota consumption, Terms Acceptance, Export Control
+   Quota reconciliation, Quota consumption, Terms Acceptance, Export Control
 3. *MAS-SSO*: 
    Authentication for subset of endpoints, creation of users service accounts, creation of clients for internal use and as the Kafka SRE identity provider
 4. *Observatorium*: 
@@ -28,50 +31,78 @@ This part will focus on what KAS Fleet Manager uses these dependencies
 7. *AWS RDS*:
    PostgreSQL database to persists kafka instances records    
 
-## Kafka Service Fleet Manager Component Architecture
 
-![Kafka Service Fleet Manager Component Architecture](https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/raw/master/docs/images/kas-fleet-manager-component-architecture.png)
 
-The kas-fleet-manager offers three main core functions.
+### Components 
+#### Envoy container
+All traffic goes through the envoy container, which sends requests to the 3scale limitador instance for global rate limiting across all API endpoints
 
-### API 
+**Impact if not available:**
+If limitador is unavailable, the envoy configuration is setup to forward all requests to the kas-fleet-manager container. If the envoy container itself was unavailable, the API would be unavailable.
 
-Customer endpoints for kafkas, service accounts and connectors. Internal endpoints for fleetshard operator communication. 
+#### Kas-fleet-manager container
+Customer endpoints for kafkas, service accounts. Internal endpoints for fleetshard operator communication. 
 
-The API endpoints are exposed via a swagger-ui, see the below example images. 
+##### API
+The API endpoints are exposed via the swagger-ui in [api.openshift.com](https://api.openshift.com/?urls.primaryName=kafka%20service%20fleet%20manager%20service).
 
-1. Kafka user facing endpoints. 
+**Impact if not available:**
+If any of the portion of the API is unavailable, the service would be unavailable for all users. There is an API availability SLO which measures this.
+
+###### Kafka user facing endpoints. 
 
 These endpoints are used for Kafka Management, Kafka Metrics, Supported Cloud Providers and Regions. 
-A live preview of the these endpoints is available on [api.stage.openshift.com swagger docs](https://api.stage.openshift.com/?urls.primaryName=managed-services-api%20service).
-Authentication is provided via *sso.redhat.com* whilst authorization checks are done via AMS.
+A live preview of the these endpoints is available on [api.stage.openshift.com swagger docs](https://api.openshift.com/?urls.primaryName=kafka%20service%20fleet%20manager%20service).
+Authentication is provided via *sso.redhat.com* whilst authorization checks are done internally in kas-fleet-manager.
 
-2. Service accounts user facing endpoints
+###### Service accounts user facing endpoints
 
 These endpoints are used for Kafka Service Account Management.  
-A live preview of the these endpoints is available on [api.stage.openshift.com swagger docs](https://api.stage.openshift.com/?urls.primaryName=managed-services-api%20service).
-Authentication is provided via *sso.redhat.com*. Custom authorization checks for public evaluation.
+A live preview of the these endpoints is available on [api.stage.openshift.com swagger docs](https://api.openshift.com/?urls.primaryName=kafka%20service%20fleet%20manager%20service).
+Authentication is provided via *sso.redhat.com* whilst authorization checks are done internally in kas-fleet-manager.
 
-3. Agents Endpoints
+###### Fleetshard data plane endpoints
 
-Direct communication endpoints from the data plane agent. 
+Direct communication endpoints from the data plane fleetshard component. 
 Authentication is done via *MAS-SSO*. Authorization is done via Keycloak roles and custom claim checks. 
->NOTE: The Agents can be found in our [repo](https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/blob/master/openapi/kas-fleet-manager-private.yaml) 
+>NOTE: The agnet endpoints can be found in our [repo](https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/blob/main/openapi/kas-fleet-manager-private.yaml) 
 
-### Kafka reconciler
+#### Reconcilers
+In order to check which pod is the leader of a specific reconciler, you can check the leader pods panel in the [Grafana dashboard](https://grafana.app-sre.devshift.net/d/WLBv_KuMz/kas-fleet-manager-metrics?orgId=1&var-datasource=app-sre-prod-04-prometheus&var-consoleurl=https:%2F%2Fconsole-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com)
 
-The Kafka reconciler is a background job that handles asynchronous operations for Kafka instances based on user API requests. 
-The reconciler is responsible for handling provisioning and deprovisioning jobs of kafka instances. 
-There is one leader across replicas. The leader is elected via the distributed leader election algorithm. 
+**Impact if not available:**
+If any of the reconcilers are unavailable, parts of the service would be unavailable for all users. For example, if the preparing Kafka reconciler is unavailable, all new Kafka instances would be stuck in a `preparing` status. the Kafka creation latency SLO will pick up on this scenario.
+##### Kafka reconcilers
 
-### OSD cluster reconciler
+The Kafka reconcilers are a background job that handles asynchronous operations for Kafka instances based on user API requests.
+There is one leader per reconciler across all replicas. The leader is elected via the distributed leader election algorithm. 
 
+There are 6 Kafka reconcilers in total, each covering a particular Kafka instance state.
+- accepted worker
+- preparing worker
+- provisioning worker
+- ready worker
+- deleting worker
+- general worker
+
+##### OSD cluster reconciler
 The OSD cluster reconciler is responsible for dynamic OSD cluster provisioning, terraforming and scaling. 
 It also handles deprovioning of OSD clusters when demands decreases.
-There is one leader across replicas. The leader is elected via the distributed leader election algorithm. 
+There is one leader across all replicas. The leader is elected via the distributed leader election algorithm. 
 
-## Postgres Database
+Terraforming in this context is the provisioning of all additional Managed Kafka components on the OSD cluster after cluster service reports it is ready. This mainly includes the fleetshard operator, observability operator and Kafka SRE IDP.
 
+### Application Success Criteria
+- Successfully instantiate a Kafka cluster on the data plane OSD clusters
+- Allow a Kafka owner to retrieve Kafka cluster details such as the bootstrap server host
+- Allow a Kafka owner to delete their Kafka cluster which will trigger the associated instantiated resources on the data plane OSD clusters to be modified/deleted.
+- Allow a Kafka owner to create, delete and reset credentials of service accounts which are used for authenticating with their Kafka instance
+- Ensure there is always at least one cluster available in each cloud provider region with enough capacity to meet the demand of incoming Managed Kafka creation requests
+- Successful scaling of nodes on the data plane OSD clusters
+- Successfully terraform the OSD clusters so they are ready for Kafka clusters to be instantiated. Terraforming includes but is not limited to installing the Strimzi operator and the necessary monitoring resources on the OSD cluster.
+
+### State
+#### Postgres Database 
 We use AWS RDS instance. Before each deployment, we perform migrations via [Gorm](https://gorm.io/), which are rolled back in case of failures. 
 The services constitutes of the following tables:
 1. `kafka_requests`
@@ -81,53 +112,16 @@ The services constitutes of the following tables:
 
 We use [Gorm](https://gorm.io/), for every interaction with the database.
 
-## Alerts and SLOs
+#### Persistent Volumes
+None are used
+### Performance Testing
 
-We have 7 alerts in total. 6 of them are based on the SLOs and cluster SLIs shown in tables below. One alert is based on if the service is down. 
-Alerts definition are based on [multiwindow, multi-burn rate](https://sre.google/workbook/alerting-on-slos/) and are unit tested. 
-
-Resources: 
-
-1. https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/resources/observability/prometheusrules all kas-fleet-manager-*
-2. https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/managed-services/sop
-
-### API SLIs and SLOs
-   
-| SLI Definition 	|  SLI Implementation	| SLO 	|
-|-	|-	|-	|
-|  **API Availability**: Based on the 5xx status code in the API responses 	| Count of non 5xx status code divided by count of all requests<br> *metric: haproxy_backend_http_responses_total* |  **99%**	|
-| **API Latency**: The proportion of sufficiently fast successful requests 	|  Count of successful requests with a duration that are less or equal to 100ms (or 200ms) divided by the count of all requests<br>*metric: api_inbound_request_duration*|  **90% of requests < 100ms** <br>**99% of requests < 1000ms**|
-
-<br>
-
-### Kafka Cluster SLIs and SLOs
-   
-| SLI Definition 	|  SLI Implementation	| SLO 	|
-|-	|-	|-	|
-|  **Kafka Cluster Provisioning Latency**: The proportion of sufficiently fast successful Kafka cluster creation 	| Count of successful provisioning with a duration that are less or equal to 4m30s (or 6m) divided by the count of all provisioning <br>*metric: kas_fleet_manager_worker_kafka_duration* | **90% < 4 minutes, 30 seconds**<br>**99% < 6 minutes**|
-| **Kafka Cluster Lifecycle Correctness**: The proportion of successful Kafka cluster provisioning or deletion  operations that are performed by our service background worker	|  Count of successful provisioning (or deletion) operations divided by the count of total Kafka provisioning operations <br>*kas_fleet_manager_kafka_operations_success_count*|  **99%**|
-
-<br>
-
-### OSD Cluster SLIs
-   
-| SLI Definition 	|  SLI Implementation	| SLO 	|
-|-	|-	|-	|
-|  **OSD Cluster Provisioning Latency**: The proportion of sufficiently fast successful OSD cluster creation | Count of successful provisioning with a duration that are less or equal to 40m (or 60m) divided by the count of all provisioning.  <br>*metric: kas_fleet_manager_worker_cluster_duration* | No SLO|
-| **OSD Cluster Provisioning Correctness**: The proportion of successful OSD cluster provisioning operations that are performed by our service background worker |  Count of successful OSD cluster provisioning requests divided by the count of total OSD cluster provisioning requests <br>*kas_fleet_manager_cluster_operations_success_count*|  No SLO |
-
-<br>
-
-## Performance Testing
-
-See the [performance testing guide in our repo](https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/blob/master/test/performance/README.md) for more information.
+See the [performance testing guide in our repo](https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/blob/main/test/performance/README.md) for more information.
 
 ## Support Rota for Stage
 
-Support documentation and [rota](https://docs.google.com/spreadsheets/d/1ElYIlJ4YqhM7vxywH5Hmtej7vpPF6ggmv0e1pGZuN4M/edit#gid=0) in place to address issues in the stage environment. Each week there are two team members of rota. The first one as Primary and the second member as Secondary. 
-At the end of the week, the Primary member sends out the report of what happened and becomes Secondary on the next week. 
+Every control plane team member will take support responsibility for two weeks. The 1st week, they act as the primary, in the 2nd week, they will act as a secondary. The schedule for the rota is in [PagerDuty](https://redhat.pagerduty.com/teams/P7FY0UF). Please refer to the is [comprehensive suport guide](https://docs.google.com/document/d/1xklhSgyWZKcxv2_PV2KIhreIpAtnGnoXS-3D_nXs6xA/edit#) for the full responsibilities, daily health checks and debugging issues
 
 The main responsibility of Primary are: 
-
 1. To shield other team members from unplanned work
 2. To perform daily health-check (action alerts, sentry, CI failures) and to action them whenever possible.
