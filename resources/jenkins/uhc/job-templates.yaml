@@ -26,6 +26,27 @@
     <<: *gl_build_master
 
 - job-template:
+    id: 'ocm-integration-full-cycle-tests'
+    name: 'ocm-integration-full-cycle-tests-{environment}'
+    node: '{node}'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *uhc_integration_tests
+    publishers:
+    - junit:
+        results: '**/**/fullcycle_junit.xml'
+        test-stability: true
+        claim-build: true
+        measurement-plots: true
+        flaky-test-reports: true
+        junit-attachments: true
+    <<: *gl_build_master
+
+- job-template:
     id: 'ocm-portal-deploy'
     name: 'ocm-portal-deploy-{mode}'
     wrappers:
