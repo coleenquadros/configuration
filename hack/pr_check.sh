@@ -12,7 +12,7 @@ fi
 
 lintyamls() {
     toplevel=$(git rev-parse --show-toplevel)
-    what=$(git diff-tree --name-status -r origin/master..HEAD -- '*yml' '*yaml'|
+    what=$(git diff-tree --name-status -r origin/master..HEAD -- 'data/*yml' 'data/*yaml'|
                awk -F'\t' '$1 ~ /M|A/{print $2}')
     if [ ! -z "$what" ]
     then
