@@ -1,0 +1,35 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: insights-legacy
+
+name: insights-qa
+description: Insights insights-legacy QA on the PROD cluster
+
+cluster:
+  $ref: /openshift/insights/cluster-insights-prod.yml
+
+app:
+  $ref: /services/insights/insights-legacy/app.yml
+
+environment:
+  $ref: /products/insights/environments/qa.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource
+  path: /insights-prod/shared/private-image-puller.serviceaccount.yaml
