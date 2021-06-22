@@ -67,7 +67,7 @@ resourceTemplates:
     # Which channel (directory) within the config repo the Observability Operator should consume from
     OBSERVABILITY_CONFIG_CHANNEL: resources
     # This value is the lifespan a kafka will have with the lifespan flag enabled. In hours.
-    KAFKA_LIFE_SPAN: 48
+    KAFKA_LIFE_SPAN: 0
     # Capacity settings for the base Kafka type
     KAFKA_CAPACITY_INGRESS_THROUGHPUT: "2Mi"
     KAFKA_CAPACITY_TOTAL_MAX_CONNECTIONS: "100"
@@ -118,6 +118,8 @@ resourceTemplates:
       KAFKA_DOMAIN_NAME: "kafka.devshift.org"
       # Only allow those who are listed in `ALLOWED_SERVICE_ACCOUNTS` and `ALLOWED_USERS_PER_ORGANISATION` to access the service
       ALLOW_ANY_REGISTERED_USERS: false
+      STRIMZI_OPERATOR_ADDON_ID: managed-kafka-qe
+      KAS_FLEETSHARD_ADDON_ID: kas-fleetshard-operator-qe
       # A list of allowed users in yaml format irrespective of their organisation.
       ALLOWED_SERVICE_ACCOUNTS:
           # RHOSAK PM
@@ -745,8 +747,7 @@ resourceTemplates:
         - "kchernou"
 
       # A list of long lived kafkas by ID, that should not be deleted after expiration time period
-      LONG_LIVED_KAFKAS:
-        - "1rWgutAakduzKKa4MugsFeOAjDG"
+      LONG_LIVED_KAFKAS: []
 
       SUPPORTED_CLOUD_PROVIDERS:
         - name: aws
@@ -765,7 +766,14 @@ resourceTemplates:
           cloud_provider: aws
           region: us-east-1
           multi_az: true
-          schedulable: true
+          schedulable: false
+          kafka_instance_limit: 28
+        - name: Stage Cluster (In OSD Prod)
+          cluster_id: 1lfl3g1vdea86ghh26vkmbqjkain900q
+          cloud_provider: aws
+          region: us-east-1
+          multi_az: true
+          schedulable: false
           kafka_instance_limit: 28
 
   - namespace:
