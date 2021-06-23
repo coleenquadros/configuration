@@ -1,0 +1,133 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /insights-prod/image-builder-prod/image-builder-prometheusrules.yml
+
+evaluation_interval: 5m
+
+tests:
+
+# ImagebuilderNoPodsFound
+- interval: 5m
+  input_series:
+  - series: up{namespace="image-builder-prod"}
+    values: 0+0x4
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: ImageBuilderNoPodsFound
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: image-builder
+      exp_annotations:
+        message: "No pods found in the namespace"
+
+- interval: 5m
+  input_series:
+  - series: up{namespace="image-builder-prod"}
+    values: 1+1x4
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: ImageBuilderNoPodsFound
+    exp_alerts: []
+
+# ImageBuilderPodDown
+- interval: 5m
+  input_series:
+  - series: up{namespace="image-builder-prod", pod="pod-1"}
+    values: 1+1x4
+  - series: up{namespace="image-builder-prod", pod="pod-2"}
+    values: 0+0x4
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: ImageBuilderPodDown
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: image-builder
+        pod: pod-2
+      exp_annotations:
+        message: "Pod (pod-2) down!"
+
+- interval: 5m
+  input_series:
+  - series: up{namespace="image-builder-prod", pod="pod-1"}
+    values: 1+1x4
+  - series: up{namespace="image-builder-prod", pod="pod-2"}
+    values: 1+1x4
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: ImageBuilderPodDown
+    exp_alerts: []
+
+# ImageBuilderInternalErrors 100% failure rate
+- interval: 5m
+  input_series:
+  - series: image_builder_compose_errors
+    values: 10+10x4
+  - series: image_builder_compose_requests_total
+    values: 10+10x4
+  alert_rule_test:
+  - eval_time: 24h
+    alertname: ImageBuilderInternalErrors
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: image-builder
+      exp_annotations:
+        message: "Less than 85% of compose requests are successful"
+
+# ImageBuilderInternalErrors 10% failure rate
+- interval: 5m
+  input_series:
+  - series: image_builder_compose_errors
+    values: 1+1x4
+  - series: image_builder_compose_requests_total
+    values: 10+10x4
+  alert_rule_test:
+  - eval_time: 24h
+    alertname: ImageBuilderInternalErrors
+    exp_alerts: []
+
+# ImageBuilderSlowComposeResponse: 6 seconds per compose req
+- interval: 5m
+  input_series:
+  - series: image_builder_http_duration_seconds_sum{path="/api/image-builder/v1/compose", job="image-builder"}
+    values: 6+6x4
+  - series: image_builder_http_duration_seconds_count{path="/api/image-builder/v1/compose", job="image-builder"}
+    values: 1+1x4
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: ImageBuilderSlowComposeResponse
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: image-builder
+        job: image-builder
+      exp_annotations:
+        message: "Average compose request response time is over 5 seconds"
+
+# ImageBuilderSlowComposeResponse: 3.5 seconds per compose req across pods
+- interval: 5m
+  input_series:
+  - series: image_builder_http_duration_seconds_sum{path="/api/image-builder/v1/compose", job="image-builder", pod="pod-1"}
+    values: 6+6x4
+  - series: image_builder_http_duration_seconds_count{path="/api/image-builder/v1/compose", job="image-builder", pod="pod-1"}
+    values: 1+1x4
+  - series: image_builder_http_duration_seconds_sum{path="/api/image-builder/v1/compose", job="image-builder", pod="pod-2"}
+    values: 1+1x4
+  - series: image_builder_http_duration_seconds_count{path="/api/image-builder/v1/compose", job="image-builder", pod="pod-2"}
+    values: 1+1x4
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: ImageBuilderSlowComposeResponse
+    exp_alerts: []
