@@ -38,36 +38,51 @@ resourceTemplates:
   url: https://gitlab.cee.redhat.com/service/kas-fleet-manager
   path: /templates/service-template.yml
   parameters:
+    # Global parameter - Affects Production and Stage
     IMAGE_REGISTRY: quay.io
+    # Global parameter - Affects Production and Stage
     IMAGE_REPOSITORY: rhoas/kas-fleet-manager
+    # Global parameter - Affects Production and Stage
     JWKS_URL: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/certs
+    # Global parameter - Affects Production and Stage
     CLUSTER_OPENSHIFT_VERSION: ""
+    # Global parameter - Affects Production and Stage
     CLUSTER_COMPUTE_MACHINE_TYPE: m5.4xlarge
+    # Global parameter - Affects Production and Stage
     # Enforce instance limit control
     ENABLE_INSTANCE_LIMIT_CONTROL: true
+    # Global parameter - Affects Production and Stage
     # The default maximum number of instances that can be created by a user/organisation.
     # Takes effect if `ENABLE_INSTANCE_LIMIT_CONTROL` is set to true
     MAX_ALLOWED_INSTANCES: 1
+    # Global parameter - Affects Production and Stage
     # Change this to false if you want the users to be able to use the service without accepting any terms
     ENABLE_TERMS_ACCEPTANCE: true
+    # Global parameter - Affects Production and Stage
     # Change this to false if you want to disable the deny list feature feature
     ENABLE_DENY_LIST: true
+    # Global parameter - Affects Production and Stage
     # Change this to false to disable sentry
     ENABLE_SENTRY: true
+    # Global parameter - Affects Production and Stage
     # Enable the external Kafka certificate for all Kafka clusters
     ENABLE_KAFKA_EXTERNAL_CERTIFICATE: true
+    # Global parameter - Affects Production and Stage
     # Enable the dedicate Ingress on the data plane clusters which all Kafka Clusters will use
     ENABLE_DEDICATED_INGRESS: true
+    # Global parameter - Affects Production and Stage
     #The public HTTP host URL of the service
     SERVICE_PUBLIC_HOST_URL: ${OCM_BASE_URL}
+    # Global parameter - Affects Production and Stage
     # Log level
     GLOG_V: 5
+    # Global parameter - Affects Production and Stage
     # A URL to repository containing external Kafka Observability configuration info for Obs. Operator to consume
     OBSERVABILITY_CONFIG_REPO: https://api.github.com/repos/bf2fc6cc711aee1a0c2a/observability-resources-mk/contents
+    # Global parameter - Affects Production and Stage
     # Which channel (directory) within the config repo the Observability Operator should consume from
     OBSERVABILITY_CONFIG_CHANNEL: resources
-    # This value is the lifespan a kafka will have with the lifespan flag enabled. In hours.
-    KAFKA_LIFE_SPAN: 48
+    # Global parameters - Affects Production and Stage
     # Capacity settings for the base Kafka type
     KAFKA_CAPACITY_INGRESS_THROUGHPUT: "2Mi"
     KAFKA_CAPACITY_TOTAL_MAX_CONNECTIONS: "100"
@@ -75,6 +90,7 @@ resourceTemplates:
     KAFKA_CAPACITY_MAX_PARTITIONS: "100"
     KAFKA_CAPACITY_MAX_DATA_RETENTION_PERIOD: "P14D"
     KAFKA_CAPACITY_MAX_CONNECTION_ATTEMPTS_PER_SEC: "50"
+    # Global parameter - Affects Production and Stage
     # Image to be used by Envoy sidecar container
     ENVOY_IMAGE: quay.io/rhoas/envoyproxy:v1.16.1
   targets:
@@ -93,6 +109,7 @@ resourceTemplates:
       MAS_SSO_BASE_URL: https://identity.api.stage.openshift.com
       MAS_SSO_REALM: rhoas
       OSD_IDP_MAS_SSO_REALM: rhoas-kafka-sre
+      OCM_URL: https://api.openshift.com
       # Use the allow list based quota management service
       QUOTA_TYPE: allow-list
       # Dex identity service url
@@ -109,15 +126,19 @@ resourceTemplates:
       KAFKA_CAPACITY_MAX_CAPACITY: 21
       # Changing this to true will delete all kafkas after their lifespan expired. The default is 48 hours.
       ENABLE_KAFKA_LIFE_SPAN: true
+      # This value is the lifespan a kafka will have with the lifespan flag enabled. In hours.
+      KAFKA_LIFE_SPAN: 48
       MAS_SSO_ENABLE_AUTH: true
       # Max allowed service accounts created by users
       MAX_ALLOWED_SERVICE_ACCOUNTS: 50
       # Max limit for the fetching the clients from mas-sso
       MAX_LIMIT_FOR_SSO_GET_CLIENTS: 100
       # Set domain name for Kafka instances
-      KAFKA_DOMAIN_NAME: "kafka.devshift.org"
+      KAFKA_DOMAIN_NAME: "bf2.kafka-stage.rhcloud.com"
       # Only allow those who are listed in `ALLOWED_SERVICE_ACCOUNTS` and `ALLOWED_USERS_PER_ORGANISATION` to access the service
       ALLOW_ANY_REGISTERED_USERS: false
+      STRIMZI_OPERATOR_ADDON_ID: managed-kafka-qe
+      KAS_FLEETSHARD_ADDON_ID: kas-fleetshard-operator-qe
       # A list of allowed users in yaml format irrespective of their organisation.
       ALLOWED_SERVICE_ACCOUNTS:
           # RHOSAK PM
@@ -745,8 +766,7 @@ resourceTemplates:
         - "kchernou"
 
       # A list of long lived kafkas by ID, that should not be deleted after expiration time period
-      LONG_LIVED_KAFKAS:
-        - "1rWgutAakduzKKa4MugsFeOAjDG"
+      LONG_LIVED_KAFKAS: []
 
       SUPPORTED_CLOUD_PROVIDERS:
         - name: aws
@@ -760,8 +780,8 @@ resourceTemplates:
 
       # cluster list if dataplane cluster scaling type is set to manual
       CLUSTER_LIST:
-        - name: Stage Cluster
-          cluster_id: 1ieq35mpf26sq2r246sbffuvg9s380sp
+        - name: Stage Cluster (In OSD Prod)
+          cluster_id: 1lfl3g1vdea86ghh26vkmbqjkain900q
           cloud_provider: aws
           region: us-east-1
           multi_az: true
@@ -782,6 +802,7 @@ resourceTemplates:
     ref: 85efe17c79d90ff17590a18bc7614eed2c23343c
     parameters:
       ENVIRONMENT: production
+      KAFKA_LIFE_SPAN: 48
       QUOTA_TYPE: allow-list
       # The image tag is the first seven characters of the #ref commit sha parameter.
       # Verify in https://quay.io/repository/rhoas/kas-fleet-manager?tab=tags to see if the tag exists.
@@ -807,7 +828,7 @@ resourceTemplates:
       # Release tag within Config Repo to use for pulling index information
       OBSERVABILITY_CONFIG_TAG: v1.4.0-prod
       # MAXIMUM NUMBER OF ALLOWED KAFKAs
-      KAFKA_CAPACITY_MAX_CAPACITY: 110
+      KAFKA_CAPACITY_MAX_CAPACITY: 220
       # A list of usernames representing users who do not have access to the service
       DENIED_USERS: []
       # A list of users with read-only permissions for data plane clusters
@@ -1494,4 +1515,10 @@ resourceTemplates:
           multi_az: true
           schedulable: true # change this to false if you do not want the cluster to be schedulable
           kafka_instance_limit: 110 # change this to match any value of configuration
-          
+        - name: mk-0621-081057
+          cluster_id: 1lf37kc4arh4o6e6bgo502t25rgjigp7
+          cloud_provider: aws
+          region: us-east-1
+          multi_az: true
+          schedulable: true # change this to false if you do not want the cluster to be schedulable
+          kafka_instance_limit: 110 # change this to match any value of configuration

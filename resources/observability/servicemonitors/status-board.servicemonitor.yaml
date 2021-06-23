@@ -1,18 +1,19 @@
----
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: cyndi-operator
   labels:
     prometheus: app-sre
+  name: status-board-{{environment}}
 spec:
   endpoints:
-  - interval: 15s
+  - interval: 30s
     path: /metrics
-    port: https
+    port: metrics
+    scheme: http
   namespaceSelector:
     matchNames:
-    - xjoin-prod
+    - {{namespace}}
   selector:
     matchLabels:
-      control-plane: controller-manager
+      app: status-board
+      port: metrics

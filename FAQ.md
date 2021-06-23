@@ -6,6 +6,7 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
 
 ## ToC
 
+- [Can you merge my MR?](#can-you-merge-my-mr)
 - [Contacting AppSRE](#contacting-appsre)
 - [How can I get access to X](#how-can-i-get-access-to-x)
 - [I can not access X](#i-can-not-access-x)
@@ -27,6 +28,12 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
 - [Visual App-Interface](https://visual-app-interface.devshift.net)
 
 ## Topics
+
+### Can you merge my MR
+
+The App-SRE IC (interrupt catcher) periodically reviews the MRs in the app-interface repository. There is no need to ping us to let us know you've opened a MR.
+
+If your MR is urgent or time sensitive requests, see [contacting AppSRE](#contacting-appsre)
 
 ### Contacting AppSRE
 

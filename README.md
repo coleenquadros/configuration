@@ -28,7 +28,7 @@ this repository.
   - [Entities and relations](#entities-and-relations)
   - [Howto](#howto)
     - [Add or modify a user (`/access/users-1.yml`)](#add-or-modify-a-user-accessusers-1yml)
-    - [Get notified of events involving a service, or it's dependencies](#get-notified-of-events-involving-a-service-or-its-dependencies)
+    - [Get notified of events involving a service, or its dependencies](#get-notified-of-events-involving-a-service-or-its-dependencies)
     - [Define an escalation policy for a service](#define-an-escalation-policy-for-a-service)
       - [Prerequisites: The team's slack channel and Pagerduty schedule are defined in app-interface](#prerequisites-the-teams-slack-channel-and-pagerduty-schedule-are-defined-in-app-interface)
       - [Step 1: Define escalation policies for the team:](#step-1-define-escalation-policies-for-the-team)

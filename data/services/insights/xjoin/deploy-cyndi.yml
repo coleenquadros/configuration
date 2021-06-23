@@ -64,6 +64,7 @@ resourceTemplates:
         $ref: /dependencies/ci-int/ci-int.yml
       name: RedHatInsights-cyndi-operator-gh-build-catalog-master-upstream-RedHatInsights-cyndi-operator-gh-build-master
     parameters:
+      SOURCE_NAMESPACE: xjoin-stage
       TARGET_NAMESPACE: xjoin-stage
   - namespace:
       $ref: /services/insights/xjoin/namespaces/cyndi-fedramp-stage.yml
@@ -73,30 +74,28 @@ resourceTemplates:
         $ref: /dependencies/ci-int/ci-int.yml
       name: RedHatInsights-cyndi-operator-gh-build-catalog-master-upstream-RedHatInsights-cyndi-operator-gh-build-master
     parameters:
-      TARGET_NAMESPACE: cyndi
       CONNECT_CLUSTER: cyndi-connect
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
-    ref: 787d56ba9eccaa7534e3a46ce96cd752609557b2
+    ref: 2ff1150956219b270e3dc49469fdc44b0ed8008c
     parameters:
+      SOURCE_NAMESPACE: xjoin-prod
       TARGET_NAMESPACE: xjoin-prod
       MAX_AGE: "46"
   - namespace:
       $ref: /services/insights/xjoin/namespaces/cyndi-fedramp-prod.yml
-    ref: 787d56ba9eccaa7534e3a46ce96cd752609557b2
+    ref: 2ff1150956219b270e3dc49469fdc44b0ed8008c
     parameters:
-      TARGET_NAMESPACE: cyndi
       CONNECT_CLUSTER: cyndi-connect
-
-# Unlike in stable environments where the operator is deployed in SingleNamespace mode,
-# AllNamespaces (i.e. cluster-wide) mode is used in ephemeral environments
-- name: cyndi-operator-global
-  path: /deploy/operator-global.yml
-  url: https://github.com/RedHatInsights/cyndi-operator
-  targets:
+  # Ephemeral cluster
+  # Unlike in stable environments where the operator is deployed in SingleNamespace mode,
+  # AllNamespaces (i.e. cluster-wide) mode is used in ephemeral environments
   - namespace:
       $ref: /services/insights/xjoin/namespaces/cyndi-ephemeral.yml
     ref: master
+    parameters:
+      TARGET_NAMESPACE: ""
+      SSL_MODE: disable
     upstream:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
@@ -130,9 +129,7 @@ resourceTemplates:
       name: RedHatInsights-xjoin-kafka-connect-gh-build-master
   - namespace:
       $ref: /services/insights/xjoin/namespaces/cyndi-fedramp-prod.yml
-    ref: 5828b98941ca1cc0608ad3e6fcf817de6772f54f
-    parameters:
-      LOG_LEVEL: WARN
+    ref: 24dc95a8dc26b82879ac213d6b92bbf803137aa7
 
 - name: cyndi-kafka-user
   path: /deploy/kafka-user.yaml
@@ -145,7 +142,13 @@ resourceTemplates:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: RedHatInsights-xjoin-kafka-connect-gh-build-master
+  - namespace:
+      $ref: /services/insights/strimzi/namespaces/platform-mq-fedramp-prod.yml
+    ref: de99f3ae9590d61e9a654cd068a503011819af14
 
+#
+# CyndiPipeline definitions below
+#
 - name: cyndi-pipeline-test
   path: /deploy/pipeline.yml
   url: https://github.com/RedHatInsights/cyndi-operator
@@ -205,6 +208,13 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-cyndi-operator-gh-build-master
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/cyndi-fedramp-stage.yml
     ref: master
     upstream:
       instance:
