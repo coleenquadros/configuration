@@ -82,9 +82,6 @@ resourceTemplates:
     # Global parameter - Affects Production and Stage
     # Which channel (directory) within the config repo the Observability Operator should consume from
     OBSERVABILITY_CONFIG_CHANNEL: resources
-    # Global parameter - Affects Production and Stage
-    # This value is the lifespan a kafka will have with the lifespan flag enabled. In hours.
-    KAFKA_LIFE_SPAN: 0
     # Global parameters - Affects Production and Stage
     # Capacity settings for the base Kafka type
     KAFKA_CAPACITY_INGRESS_THROUGHPUT: "2Mi"
@@ -112,7 +109,7 @@ resourceTemplates:
       MAS_SSO_BASE_URL: https://identity.api.stage.openshift.com
       MAS_SSO_REALM: rhoas
       OSD_IDP_MAS_SSO_REALM: rhoas-kafka-sre
-      OCM_URL: ${OCM_BASE_URL}
+      OCM_URL: https://api.openshift.com
       # Use the allow list based quota management service
       QUOTA_TYPE: allow-list
       # Dex identity service url
@@ -129,13 +126,15 @@ resourceTemplates:
       KAFKA_CAPACITY_MAX_CAPACITY: 21
       # Changing this to true will delete all kafkas after their lifespan expired. The default is 48 hours.
       ENABLE_KAFKA_LIFE_SPAN: true
+      # This value is the lifespan a kafka will have with the lifespan flag enabled. In hours.
+      KAFKA_LIFE_SPAN: 48
       MAS_SSO_ENABLE_AUTH: true
       # Max allowed service accounts created by users
       MAX_ALLOWED_SERVICE_ACCOUNTS: 50
       # Max limit for the fetching the clients from mas-sso
       MAX_LIMIT_FOR_SSO_GET_CLIENTS: 100
       # Set domain name for Kafka instances
-      KAFKA_DOMAIN_NAME: "kafka.devshift.org"
+      KAFKA_DOMAIN_NAME: "bf2.kafka-stage.rhcloud.com"
       # Only allow those who are listed in `ALLOWED_SERVICE_ACCOUNTS` and `ALLOWED_USERS_PER_ORGANISATION` to access the service
       ALLOW_ANY_REGISTERED_USERS: false
       STRIMZI_OPERATOR_ADDON_ID: managed-kafka-qe
@@ -786,7 +785,7 @@ resourceTemplates:
           cloud_provider: aws
           region: us-east-1
           multi_az: true
-          schedulable: false
+          schedulable: true
           kafka_instance_limit: 28
 
   - namespace:
