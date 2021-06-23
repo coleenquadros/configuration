@@ -62,6 +62,27 @@ resourceTemplates:
       URLLIB3_LOG_LEVEL: DEBUG
       INVENTORY_DB_SSL_MODE: verify-full
   - namespace:
+      $ref: /services/insights/host-inventory/namespaces/prod-host-inventory-prod.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-host-inventory-gh-build-master
+    parameters:
+      REPLICAS_P1: 1
+      REPLICAS_PMIN: 1
+      REPLICAS_SVC: 1
+      CPU_LIMIT: 1
+      MEMORY_LIMIT: 2Gi
+      SECONDARY_TOPIC_ENABLED: 'false'
+      REST_POST_ENABLED: 'false'
+      RBAC_ENFORCED: 'true'
+      BULK_QUERY_SOURCE: xjoin
+      BULK_QUERY_SOURCE_BETA: xjoin 
+      # TODO: change the log level to a desired one when near completion of this deployment task
+      URLLIB3_LOG_LEVEL: DEBUG
+      INVENTORY_DB_SSL_MODE: verify-full
+  - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
     ref: internal  # populated by bonfire
