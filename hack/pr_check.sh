@@ -16,7 +16,7 @@ lintyamls() {
     what=$(git diff-tree --name-status -r origin/master..HEAD -- '*yml' '*yaml'|
                awk -F'\t' '$1 ~ /M|A/{print $2}'|grep -v ^resources/
                true) # This one to keep -o pipefail happy
-    if [ ! -z "$what" ]
+    if [ -n "$what" ]
     then
         # Handle file names with whitespaces
         echo "$what"|xargs -d '\n' yamllint
