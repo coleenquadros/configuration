@@ -1,0 +1,66 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: edge
+
+name: edge-prod
+description: Insights edge-prod on the Prod cluster under clowder management
+
+cluster:
+  $ref: /openshift/crcp01ue1/cluster.yml
+
+app:
+  $ref: /services/insights/edge/app.yml
+
+environment:
+  $ref: /products/insights/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-prod.yml
+- $ref: /services/insights/playbook-dispatcher/namespaces/prod.yml
+
+managedRoles: true
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-prod
+  identifier: edge-prod
+  defaults: /terraform/resources/insights/production/rds/postgres12-rds-1.yml
+  overrides:
+    username: "insights"
+    name: "edge"
+  parameter_group: /terraform/resources/insights/production/rds/postgres12-parameter-group-edge-prod.yml
+  output_resource_name: edge-db
+  enhanced_monitoring: true
+- provider: cloudwatch
+  account: insights-prod
+  identifier: edge-prod
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
+- provider: s3
+  account: insights-prod
+  identifier: rh-edge-tarballs-prod
+  defaults: /terraform/resources/s3-private-1.yml
+  output_resource_name: rh-edge-tarballs
+
