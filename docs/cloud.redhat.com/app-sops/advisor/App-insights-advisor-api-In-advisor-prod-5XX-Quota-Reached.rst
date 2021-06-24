@@ -1,8 +1,8 @@
 App-insights-advisor-api-In-advisor-prod-5XX-Quota-Reached
 =============================================================
 
-Severity: High
---------------
+Severity: Pagerduty
+-------------------
 
 Incident Response Plan
 ----------------------
@@ -12,12 +12,13 @@ Incident Response Plan
 Impact
 ------
 
--  The HCCM worker queues have experienced a high backlog over the last hour. This could cause a lag in customer data processing.
+-  The Insights Advisor API has been unreachable for significant portions of the past 24 hours.
 
 Summary
 -------
 
-This alert fires when the HCCM worker queues have had more than 1000in the past 24 hours.
+This alert fires when the Insights Advisor API has returned a quantity of API responses with statuses
+in the 500-599 range at or in excess of 5% of the total number of API responses in the past 24 hours.
 
 Access required
 ---------------
