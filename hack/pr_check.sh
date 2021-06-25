@@ -10,6 +10,12 @@ if [ $? != 0 ]; then
     exit 1
 fi
 
+if git diff-tree --name-only -r remotes/origin/master..HEAD|grep -q ' '
+then
+    echo "This patch introduces filenames with whitespaces. Aborting."
+    exit 1
+fi
+
 lintyamls() {
     toplevel=$(git rev-parse --show-toplevel)
     # Find new or modified YAML files that are unlikely to be Jinja templates
