@@ -121,6 +121,34 @@ resourceTemplates:
       PV_SIZE: 20Gi
 
 - name: xjoin-kafka-connect-strimzi
+  path: /deploy/kafka-connect-fedramp.yml
+  url: https://github.com/RedHatInsights/xjoin-kafka-connect
+  parameters:
+    VERSION: '2.5.0'
+    KAFKA_BOOTSTRAP_PORT: '9093'
+    GROUP_ID: xjoin
+    STORAGE_TOPIC_PREFIX: xjoin
+    NAME_PREFIX: xjoin-connect
+    KAFKA_USER: kafka-xjoin
+    LOG_LEVEL: INFO
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/xjoin-fedramp-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-xjoin-kafka-connect-fedramp-gh-build-master
+    parameters:
+      CPU_LIMITS: 3
+      XMX: 8G
+      XMS: 8G
+      CPU_REQUESTS: 250m
+      NUM_REPLICAS: '1'
+      MEMORY_REQUESTS: 8Gi
+      MEMORY_LIMITS: 10Gi
+
+- name: xjoin-kafka-connect-strimzi
   path: /deploy/kafka-connect.yml
   url: https://github.com/RedHatInsights/xjoin-kafka-connect
   parameters:
@@ -149,3 +177,15 @@ resourceTemplates:
       NUM_REPLICAS: '13'
       MEMORY_REQUESTS: 8Gi
       MEMORY_LIMITS: 12Gi
+
+- name: xjoin-kafka-user
+  path: /deploy/kafka-user.yml
+  url: https://github.com/RedHatInsights/xjoin-operator
+  targets:
+  - namespace:
+      $ref: /services/insights/strimzi/namespaces/platform-mq-fedramp-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-xjoin-kafka-connect-gh-build-master
