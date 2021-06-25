@@ -62,7 +62,7 @@ resourceTemplates:
       GODEBUG: "x509ignoreCN=0"
   - namespace:
       $ref: /services/insights/patchman/namespaces/patchman-engine-fedramp-stage.yml
-    ref: edbeaecca2a5ff5b7cbcc3f4dae689f6ce642392
+    ref: 340d420dcdbd49de0fe5df7cad82baba990890fd
     parameters:
       IMAGE_TAG: 68c515c # 1.12.4
       ENABLE_CYNDI_TAGS: "true"
@@ -71,13 +71,14 @@ resourceTemplates:
       REPLICAS: 1
   - namespace:
       $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
-    ref: 046cda3d808d37b43c439463162efe906081440b
+    ref: 340d420dcdbd49de0fe5df7cad82baba990890fd
     parameters:
       IMAGE_TAG: d9d4102 # 1.12.2
       ENABLE_CYNDI_TAGS: "true"
       DISABLE_CACHE_COUNTS: "true"
       RES_CPU: "999m"
       REPLICAS: 1
+      GODEBUG: "x509ignoreCN=0"
 
 - name: patchman-engine-listener
   path: /templates/patchman/patchman-engine-listener.yaml
@@ -93,19 +94,21 @@ resourceTemplates:
       GODEBUG: "x509ignoreCN=0"
   - namespace:
       $ref: /services/insights/patchman/namespaces/patchman-engine-fedramp-stage.yml
-    ref: edbeaecca2a5ff5b7cbcc3f4dae689f6ce642392
+    ref: 340d420dcdbd49de0fe5df7cad82baba990890fd
     parameters:
       IMAGE_TAG: 68c515c # 1.12.4
       RES_CPU: "256m"
       REPLICAS: 1
       ENABLE_KAFKA_SSL: "true"
+      KAFKA_SSL_SKIP_VERIFY: "true"
   - namespace:
       $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
-    ref: 046cda3d808d37b43c439463162efe906081440b
+    ref: 340d420dcdbd49de0fe5df7cad82baba990890fd
     parameters:
       IMAGE_TAG: d9d4102 # 1.12.2
       REPLICAS: 1
       CONSUMER_COUNT: "1"
+      GODEBUG: "x509ignoreCN=0"
 
 - name: patchman-engine-evaluator-upload
   path: /templates/patchman/patchman-engine-evaluator-upload.yaml
@@ -125,7 +128,7 @@ resourceTemplates:
       GODEBUG: "x509ignoreCN=0"
   - namespace:
       $ref: /services/insights/patchman/namespaces/patchman-engine-fedramp-stage.yml
-    ref: edbeaecca2a5ff5b7cbcc3f4dae689f6ce642392
+    ref: 340d420dcdbd49de0fe5df7cad82baba990890fd
     parameters:
       IMAGE_TAG: 68c515c # 1.12.4
       ENABLE_LAZY_PACKAGE_SAVE: "false"
@@ -133,9 +136,10 @@ resourceTemplates:
       VMAAS_ADDRESS: http://vmaas-webapp.vmaas-stage.svc.cluster.local:8080
       REPLICAS: 1
       ENABLE_KAFKA_SSL: "true"
+      KAFKA_SSL_SKIP_VERIFY: "true"
   - namespace:
       $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
-    ref: 046cda3d808d37b43c439463162efe906081440b
+    ref: 340d420dcdbd49de0fe5df7cad82baba990890fd
     parameters:
       IMAGE_TAG: d9d4102 # 1.12.2
       ENABLE_LAZY_PACKAGE_SAVE: "false"
@@ -145,6 +149,7 @@ resourceTemplates:
       REPLICAS: 1
       CONSUMER_COUNT: "1"
       GOMAXPROCS: "4"
+      GODEBUG: "x509ignoreCN=0"
 
 - name: patchman-engine-evaluator-recalc
   path: /templates/patchman/patchman-engine-evaluator-recalc.yaml
@@ -165,7 +170,7 @@ resourceTemplates:
       GODEBUG: "x509ignoreCN=0"
   - namespace:
       $ref: /services/insights/patchman/namespaces/patchman-engine-fedramp-stage.yml
-    ref: edbeaecca2a5ff5b7cbcc3f4dae689f6ce642392
+    ref: 340d420dcdbd49de0fe5df7cad82baba990890fd
     parameters:
       IMAGE_TAG: 68c515c # 1.12.4
       ENABLE_LAZY_PACKAGE_SAVE: "false"
@@ -174,9 +179,10 @@ resourceTemplates:
       ENABLE_STALE_SYSTEM_EVALUATION: "false"
       REPLICAS: 1
       ENABLE_KAFKA_SSL: "true"
+      KAFKA_SSL_SKIP_VERIFY: "false" # to show failing for invalid certificate
   - namespace:
       $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
-    ref: 046cda3d808d37b43c439463162efe906081440b
+    ref: 340d420dcdbd49de0fe5df7cad82baba990890fd
     parameters:
       IMAGE_TAG: d9d4102 # 1.12.2
       ENABLE_LAZY_PACKAGE_SAVE: "false"
@@ -186,6 +192,7 @@ resourceTemplates:
       REPLICAS: 1
       CONSUMER_COUNT: "1"
       GOMAXPROCS: "4"
+      GODEBUG: "x509ignoreCN=0"
 
 - name: patchman-engine-vmaas-sync
   path: /templates/patchman/patchman-engine-vmaas-sync.yaml
@@ -205,15 +212,18 @@ resourceTemplates:
       GODEBUG: "x509ignoreCN=0"
   - namespace:
       $ref: /services/insights/patchman/namespaces/patchman-engine-fedramp-stage.yml
-    ref: edbeaecca2a5ff5b7cbcc3f4dae689f6ce642392
+    ref: 340d420dcdbd49de0fe5df7cad82baba990890fd
     parameters:
       IMAGE_TAG: 68c515c # 1.12.4
       VMAAS_ADDRESS: http://vmaas-webapp.vmaas-stage.svc.cluster.local:8080
       VMAAS_WS_ADDRESS: ws://vmaas-websocket.vmaas-stage.svc.cluster.local:8082
       REPLICAS: 1
+      ENABLE_KAFKA_SSL: "true"
+      KAFKA_SSL_SKIP_VERIFY: "true"
+      ENABLE_SYNC_ON_START: "true" # to test vmaas call with istio enabled
   - namespace:
       $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
-    ref: 046cda3d808d37b43c439463162efe906081440b
+    ref: 340d420dcdbd49de0fe5df7cad82baba990890fd
     parameters:
       IMAGE_TAG: d9d4102 # 1.12.2
       ENABLE_SYNC_ON_START: "true"
@@ -226,6 +236,7 @@ resourceTemplates:
       VMAAS_ADDRESS: http://vmaas-webapp.vmaas-prod.svc.cluster.local:8080
       VMAAS_WS_ADDRESS: ws://vmaas-websocket.vmaas-prod.svc.cluster.local:8082
       REPLICAS: 1
+      GODEBUG: "x509ignoreCN=0"
 
 - name: patchman-engine-database-admin
   path: /templates/patchman/patchman-engine-database-admin.yaml
@@ -240,13 +251,14 @@ resourceTemplates:
       GODEBUG: "x509ignoreCN=0"
   - namespace:
       $ref: /services/insights/patchman/namespaces/patchman-engine-fedramp-stage.yml
-    ref: edbeaecca2a5ff5b7cbcc3f4dae689f6ce642392
+    ref: 340d420dcdbd49de0fe5df7cad82baba990890fd
     parameters:
       IMAGE_TAG: 68c515c # 1.12.4
       REPLICAS: 1
   - namespace:
       $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
-    ref: 046cda3d808d37b43c439463162efe906081440b
+    ref: 340d420dcdbd49de0fe5df7cad82baba990890fd
     parameters:
       IMAGE_TAG: d9d4102 # 1.12.2
       REPLICAS: 1
+      GODEBUG: "x509ignoreCN=0"
