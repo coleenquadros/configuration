@@ -19,13 +19,14 @@ fi
 lintyamls() {
     toplevel=$(git rev-parse --show-toplevel)
     # Find new or modified YAML files that are unlikely to be Jinja templates
-    what=$(git diff-tree --name-status -r remotes/origin/master..HEAD -- '*yml' '*yaml'|
-               awk -F'\t' '$1 ~ /M|A/{print $2}'|grep -v ^resources/
-               true) # This one to keep -o pipefail happy
+    what=$(git diff-tree --name-status -r remotes/origin/master..HEAD -- '*yml' '*yaml' |
+               awk -F'\t' '$1 ~ /M|A/{print $2}' | grep -v ^resources/
+           true
+        ) # This one to keep -o pipefail happy
     if [ -n "$what" ]
     then
         # Handle file names with whitespaces
-        echo "$what"|xargs -d '\n' yamllint
+        echo "$what" | xargs yamllint
     fi
 }
 
