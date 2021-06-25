@@ -1,0 +1,67 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: insights
+
+name: xjoin-operator-stage
+description: xjoin operator deployment for fedramp stage environment
+
+cluster:
+  $ref: /openshift/insights/crcgovs02ue1/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
+
+quota:
+  $ref: /services/insights/xjoin/xjoin-operator-quota.yml
+
+app:
+  $ref: /services/insights/xjoin/app.yml
+
+environment:
+  $ref: /products/insights/environments/fedramp-stage.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- Secret
+
+networkPoliciesAllow:
+- $ref: /openshift/insights/crcgovs02ue1/namespaces/openshift-operator-lifecycle-manager.yml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcgovs02ue1.yml
+
+sharedResources:
+- $ref: /services/insights/shared-resources/fedramp-stage.yml
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-fedramp-stage/cyndi/compliance-db.secret.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-fedramp-stage/cyndi/vulnerability-db.secret.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-fedramp-stage/platform-mq/kafka-cyndi.secret.yaml
+- provider: vault-secret
+  # requires access to the host-inventory-db provisioned through the host-inventory-stage namespace
+  path: app-sre/integrations-output/terraform-resources/crcgovs02ue1/host-inventory-stage/host-inventory-db
+  version: 1
+  name: host-inventory-db
+  annotations:
+    qontract.recycle: "true"
+    qontract.ignore_reconcile_time: "true"
+- provider: vault-secret
+  # requires access to the elasticsearch instance provisioned through the xjoin-prod namespace
+  path: app-sre/integrations-output/terraform-resources/crcgovs02ue1/xjoin-stage/xjoin-elasticsearch
+  version: 1
+  name: xjoin-elasticsearch
+  annotations:
+    qontract.recycle: "true"
+    qontract.ignore_reconcile_time: "true"
+- provider: resource
+  path: /insights-prod/xjoin-operator-prod/xjoin-operator.serviceaccount.yml
