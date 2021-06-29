@@ -16,27 +16,65 @@ The `sso.redhat.com` is registered as an Identity Provider (IdP), this enables R
 
 - Managed Kafka Service Control Plane
   - Control Plane of the Kafka Service.
-  - UI for Kafka cluster
   - "Kas-Fleet-Manager (Kafka Service API) - Public API
   - Kafka Service UI - Terraforming of Kafka clusters, create/delete Kafka cluster
   
 - Managed Kafka Service Data Plane
+  - Kafka Cluster UI - This allows performing Kafka admin operations by requesting the Kafka cluster Admin API.
   - Kafka cluster Admin API - This allows performing Kafka admin operations 
     - ex: create/delete a topic
 
-UI and CLI perform authentication across `sso.redhat.com` and `MAS SSO`. They maintain two different tokens.
+[Kas UI or Kafka Service UI](cloud.redhat.com/beta/application-services/openshift-streams/kafkas) and [CLI](https://github.com/redhat-developer/app-services-cli) perform authentication across `sso.redhat.com` and `MAS SSO`. They maintain two different tokens.
 For the control plane, they would use sso.redhat.com token, and if they want to interact with the data plane MAS SSO token is used.
+
+For an end-user/customer, Kafka Service UI & Kafka Cluster UI are same. First, they will see the Kafka Service UI: which will allow terraforming the Kafka instance & once it is ready. Kafka Cluster UI is used to manage the ready state Kafka cluster. They can also MAS CLI to manage their Kafka clusters from the command line and also provide a better user experience.
+
+MAS-SSO and `sso.redhat.com` both are [Keycloak](https://www.keycloak.org/) deployments. But why mas-sso is required?
+
+MAS-SSO is a fill-gap solution to some of the restrictions imposed by `sso.redhat.com`.
+- Service account with privileged realm-manage roles (example: manage-clients)
+- Dynamic clients/service accounts creation
+- Dynamic realm role creation and assign to service accounts
+- Custom attributes/token/role claims added to the dynamic service accounts
+
+MAS-SSO register `sso.redhat.com` as an [Identity Provider](https://en.wikipedia.org/wiki/Identity_provider):
+- This ensures that any Red Hat Customer Portal Account user can log in into MAS-SSO without doing another registration or double login. 
+
+Two types of token: token from `sso.redhat.com` and MAS-SSO.
+
+- The Control Plane is secured using `sso.redhat.com`. So, the user will need a token from the `sso.redhat.com` to perform operations like Create Kafka Cluster, Create Service Accounts.
+
+- The Data plane(Kafka cluster) is secured using MAS SSO. So, the user will need a token from the MAS SSO to perform operations like create topic/delete topic, produce/consume messages.
+
+
+- [Kas UI or Kafka Service UI](cloud.redhat.com/beta/application-services/openshift-streams/kafkas) maintains two types of the token. One from `sso.redhat.com` and another from MAS SSO.
+
+- User/Customer can also get a MAS SSO token by generating a service account.
+Generating a service account from the [Kafka Service UI](https://cloud.redhat.com/beta/application-services/streams/service-accounts)
 
 ## MAS SSO - Interaction with the Managed Kafka Control Plane
 The below diagram illustrates the control plane authentication flow
 ![Control Plane authentication flow](./images/control-plane-authentication-flow.png)
 
 - Users are first authenticated against sso.redhat.com - User login
-- UI/CLI - custom logic does an Identity brokering login with MAS SSO
+- [Kas UI or Kafka Service UI](cloud.redhat.com/beta/application-services/openshift-streams/kafkas) and [CLI](https://github.com/redhat-developer/app-services-cli) - Performs a [Proof Key for Code Exchange by OAuth Public Clients
+](https://datatracker.ietf.org/doc/html/rfc7636) mechanism to login into `sso.redhat.com` and also into MAS-SSO
   - Users registered with sso.redhat.com are created in MAS SSO behind the scenes
 - Users once authenticated can create/delete Kafka clusters from the Kafka UI
 
-TODO - Address comments in [MGDSTRM-4138](https://issues.redhat.com/browse/MGDSTRM-4138)
+Example flow: Create a Kafka cluster
+- Visit: https://cloud.redhat.com/beta/application-services/openshift-streams/kafkas
+- Redirect to `sso.redhat.com` login screen
+- Use an existing Red Hat user or create a new account.
+- Login with your Red Hat user credentials
+- Click on the `Create Kafka Instance` button in Kafka Service UI
+- You can use the instance once status is ready.
+
+Create a Kafka cluster using Control Plane API
+
+```
+$ curl -v -XPOST -H "Authorization: Bearer $(ocm token)" https://api.openshift.com/api/kafkas_mgmt/v1/kafkas?async=true -d '{ "region": "us-east-1", "cloud_provider": "aws",  "name": "test-kafka", "multi_az":true}'
+```
 
 ## MAS SSO - Interaction with the Managed Kafka Data Plane 
 The below diagram illustrates the data plane authentication flow
@@ -55,7 +93,53 @@ Custom claim check - This was added Kafka specific to restrict the actions on th
   - configured users Org ID and User ID are used to verify the token claim.
   - At present only the owner of the Kafka cluster can create a service account for that cluster
 
-TODO - Address comments in [MGDSTRM-4138](https://issues.redhat.com/browse/MGDSTRM-4138)
+Example: Create a topic
+- Once the Kafka instance is ready (please refer Create a Kafka cluster example)
+- Click on the instance name
+- Redirects to the Kafka cluster UI: https://cloud.redhat.com/beta/application-services/streams/kafkas/<kafka-id>
+- You can click on the `Create Topic` button
+to create new topics
+
+Example: Create a service account
+- https://cloud.redhat.com/beta/application-services/streams/service-accounts
+- Click on `create service account` button
+
+Example: Create a service account using rhoas-cli
+```
+rhoas serviceaccount create
+```
+
+Creating a service account via curl
+```
+$ curl -v -XPOST -H "Authorization: Bearer $(ocm token)" https://api.openshift.com/api/kafkas_mgmt/v1/service_accounts/ -d '{  "name": "service-acc-1"}'
+```
+
+Example: Produce/Consume messages to Kafka Cluster
+- Copy the bootstrap url from connection section in https://cloud.redhat.com/beta/application-services/streams/kafkas
+- Create a config file
+- Configure the service account details
+- Use Kafka Cli tools to perform produce/consume
+
+Create a jaas-config file
+```
+$ touch jaas-config.txt
+```
+Copy paste the content and configure the generate service account
+```
+security.protocol=SASL_SSL
+sasl.mechanism=PLAIN
+ssl.protocol=TLSv1.3
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="srvc-acct-" password="<secret>";
+```
+
+Create Topic
+```
+kafka-topics --create --topic test --bootstrap-server <bootstrapurl>:443 --command-config ./config.txt
+```
+Kafka Console producer
+``` 
+$ kafka-console-producer --bootstrap-server <bootstrap url>:443 --producer.config ./config.txt --topic test
+```
 
 ## Routes
 
