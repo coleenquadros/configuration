@@ -1,0 +1,74 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: insights-ephemeral
+
+name: ocm
+description: Insights OCM namespace
+
+cluster:
+  $ref: /openshift/insights/c-rh-c-eph/cluster.yml
+
+app:
+  $ref: /services/insights/ephemeral/app.yml
+
+environment:
+  $ref: /products/insights/environments/ephemeral.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+- Role
+- RoleBinding
+
+openshiftResources:
+- provider: resource
+  path: /insights-ephemeral/ephemeral-bot.serviceaccount.yaml
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-common/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
+  path: insights/secrets/global/nachobot
+  version: 1
+  type: kubernetes.io/ssh-auth
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+
+# allows labelling of namespaces
+- provider: resource
+  path: /insights-ephemeral/namespace-editor.rolebinding.yaml
+- provider: resource
+  path: /insights-ephemeral/namespace-editor.role.yaml
+
+# marketplace
+- provider: vault-secret
+  path: insights/secrets/ephemeral/marketplace/marketplace-secret
+  version: 1
+
+# 3scale
+- provider: vault-secret
+  path: insights/secrets/ephemeral/3scale/apicast-configuration-url-secret
+  version: 1
+- provider: vault-secret
+  path: insights/secrets/ephemeral/3scale/apicast-insights-3scale-config
+  version: 8
+- provider: vault-secret
+  path: insights/secrets/ephemeral/3scale/apicast-insights-services-ephemeral-jwt-pub-key
+  version: 2
+- provider: vault-secret
+  path: insights/secrets/ephemeral/3scale/gateway-server
+  version: 2
+
+# rhsm-api-proxy
+- provider: vault-secret
+  path: insights/secrets/ephemeral/rhsm-api-proxy/proxy-client-tls
+  name: rhsm-api-proxy-client-tls
+  version: 1

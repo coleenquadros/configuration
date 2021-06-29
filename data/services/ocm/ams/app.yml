@@ -1,0 +1,78 @@
+---
+$schema: /app-sre/app-1.yml
+
+labels:
+  service: ocm
+
+name: ams
+
+description: |
+  Account Manager Service
+
+parentApp:
+  $ref: /services/ocm/app.yml
+
+architectureDocument: https://TODO
+sopsUrl: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/uhc/sop
+grafanaUrl: https://grafana.app-sre.devshift.net/d/uhc-account-manager/uhc-account-manager
+onboardingStatus: OnBoarded
+
+serviceOwners:
+- name: SDB team
+  email: sd-mp-devel@redhat.com
+
+serviceNotifications:
+- name: Red Hat Outage List
+  email: outage-list@redhat.com
+
+escalationPolicy:
+  $ref: /teams/ocm/escalation-policies/sdb.yaml
+
+dependencies:
+- $ref: /dependencies/aws/service.yml
+- $ref: /dependencies/ci-int/service.yml
+- $ref: /dependencies/gitlab/service.yml
+- $ref: /dependencies/quay/service.yml
+- $ref: /dependencies/openshift/service.yml
+- $ref: /dependencies/sso/service.yml
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/app-sre.yml
+  teams:
+  - permissions:
+    - $ref: /dependencies/quay/permissions/quay-membership-app-sre-uhc.yml
+    role: read
+  items:
+  - name: uhc-account-manager
+    description: ''
+    public: false
+
+sentryProjects:
+- team:
+    $ref: /dependencies/sentry/teams/service-development-stage.yml
+  projects:
+  - name: uhc-acct-mngr-stage
+    description: OCM Stage Account Management and Authorizations API
+    email_prefix: sd-devel
+    platform: go
+    auto_resolve_age: 168
+    allowed_domains:
+    - '*'
+- team:
+    $ref: /dependencies/sentry/teams/service-development-production.yml
+  projects:
+  - name: ocm-acct-mngr-prod
+    description: OCM Production Account Management and Authorizations API
+    email_prefix: sd-devel
+    platform: go
+    auto_resolve_age: 168
+    allowed_domains:
+    - '*'
+
+codeComponents:
+- name: uhc-account-manager
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/service/uhc-account-manager
+  jira:
+    $ref: /dependencies/jira/issues-redhat-com.yaml

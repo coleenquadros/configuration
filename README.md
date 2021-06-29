@@ -212,13 +212,31 @@ The output will be JSON document, so you can pipe it with `jq`, example:
 
 Instructions in [this document](/docs/app-sre/sop/running-integrations-manually.md).
 
+## Visual App-interface
+
+Visual App-interface is a visual representation of the data in this repository.
+Source code can be found here: https://github.com/app-sre/visual-qontract
+
+An internal instance is reachable (behind the VPN) here:
+<https://visual-app-interface.apps.appsrep05ue1.zqxk.p1.openshiftapps.com/graphql>.
+
+A public instance is rechable (authentication via GH) here:
+<https://visual-app-interface.devshift.net>.
+
 ## Querying the App-interface
 
 The contract can be queried programmatically using a
 [GraphQL](<https://graphql.org/learn/>) API.
 
-The GraphQL endpoint is reachable here:
+The GraphQL internal endpoint is reachable (behind the VPN) here:
+<https://app-interface.apps.appsrep05ue1.zqxk.p1.openshiftapps.com/graphql>.
+
+The GraphQL public endpoint is reachable (with authentication) here:
 <https://app-interface.devshift.net/graphql>.
+
+**IMPORTANT**: in order to use the GraphQL UI you need to click on the Settings
+wheel icon (top-right corner) and replace `omit` with `include` in
+`request.credentials`.
 
 To get credentials to query app-interface, submit a Credentials Request form in a merge request.
 The request itself is a file with the following structure:
@@ -253,10 +271,6 @@ credentials: app-interface-production-dev-access
 ```
 
 Please create the request file [here](/data/app-interface/requests).
-
-**IMPORTANT**: in order to use the GraphQL UI you need to click on the Settings
-wheel icon (top-right corner) and replace `omit` with `include` in
-`request.credentials`.
 
 ## Features
 

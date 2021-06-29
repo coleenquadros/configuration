@@ -1,0 +1,83 @@
+---
+$schema: /app-sre/app-1.yml
+
+labels:
+  service: ocm
+
+name: jqs
+
+description: |
+  Job Queue Service
+
+parentApp:
+  $ref: /services/ocm/app.yml
+
+architectureDocument: https://docs.google.com/document/d/1-bZWjDHks7WZOO_VYV1FyD3IRiTI83ITrsHr7Mfbdhc
+sopsUrl: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/uhc/sop/job-queue-readme.md
+grafanaUrl: https://TODO
+onboardingStatus: OnBoarded
+
+serviceOwners:
+- name: SDB team
+  email: sd-mp-devel@redhat.com
+
+serviceNotifications:
+- name: Red Hat Outage List
+  email: outage-list@redhat.com
+
+escalationPolicy:
+  $ref: /teams/ocm/escalation-policies/sdb.yaml
+
+dependencies:
+- $ref: /dependencies/aws/service.yml
+- $ref: /dependencies/ci-int/service.yml
+- $ref: /dependencies/gitlab/service.yml
+- $ref: /dependencies/quay/service.yml
+- $ref: /dependencies/openshift/service.yml
+- $ref: /dependencies/sso/service.yml
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/app-sre.yml
+  teams:
+  - permissions:
+    - $ref: /dependencies/quay/permissions/quay-membership-app-sre-uhc.yml
+    role: read
+  items:
+  - name: job-queue-service
+    description: Provide coordination and fault tolerance for background job execution
+    public: false
+
+sentryProjects:
+- team:
+    $ref: /dependencies/sentry/teams/service-development-stage.yml
+  projects:
+  - name: job-queue-service-stage
+    description: OCM Stage Job Queue Service API
+    email_prefix: sd-devel
+    platform: go
+    auto_resolve_age: 168
+    allowed_domains:
+    - '*'
+- team:
+    $ref: /dependencies/sentry/teams/service-development-production.yml
+  projects:
+  - name: job-queue-service-prod
+    description: OCM Production Job Queue Service API
+    email_prefix: sd-devel
+    platform: go
+    auto_resolve_age: 168
+    allowed_domains:
+    - '*'
+
+codeComponents:
+- name: job-queue-service
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/service/job-queue-service
+  jira:
+    $ref: /dependencies/jira/issues-redhat-com.yaml
+- name: job-queue-client
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/service/job-queue-client
+  jira:
+    $ref: /dependencies/jira/issues-redhat-com.yaml

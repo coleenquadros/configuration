@@ -1,0 +1,45 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+labels:
+  service: ocm
+
+name: ci-int-jqs-jobs
+
+description: ''
+
+app:
+  $ref: /services/ocm/jqs/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+type: jobs
+
+config:
+- project:
+      name: job-queue-service
+      label: sd-uhc
+      node: sd-service-development-b
+      gl_group: service
+      gl_project: job-queue-service
+      quay_org: app-sre
+      backup_ecr_push_creds_account_region: "app-sre/eu-central-1"
+      jobs:
+      - 'ocm-pr-check':
+            display_name: Job Queue Service check merge request
+            concurrent_build: true
+      - 'gl-build-master':
+            display_name: Job Queue Service build master
+
+- project:
+      name: job-queue-client
+      label: sd-uhc
+      node: sd-service-development-b
+      gl_group: service
+      gl_project: job-queue-client
+      backup_ecr_push_creds_account_region: "app-sre/eu-central-1"
+      jobs:
+      - 'ocm-pr-check':
+            display_name: Job Queue Client check merge request
+            concurrent_build: true
