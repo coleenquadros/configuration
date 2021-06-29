@@ -50,16 +50,6 @@ resourceTemplates:
       MIN_REPLICAS: 16
       ENV_NAME: stage
   - namespace:
-      $ref: /services/insights/engine/namespaces/engine-fedramp-stage.yml
-    ref: master
-    upstream:
-      instance:
-        $ref: /dependencies/ci-int/ci-int.yml
-      name: insights-platform-insights-engine-gl-build-master
-    parameters:
-      MIN_REPLICAS: 16
-      SSL_ENABLED: "true"
-  - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
     ref: internal  # populated by bonfire
@@ -72,3 +62,17 @@ resourceTemplates:
       MIN_REPLICAS: "64"
       MEMORY_LIMIT: 2Gi
       ENV_NAME: prod
+- name: insights-engine-fedramp
+  path: /deploy/clowdapp-fedramp.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/insights-engine
+  targets:
+  - namespace:
+      $ref: /services/insights/engine/namespaces/engine-fedramp-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: insights-platform-insights-engine-gl-build-master
+    parameters:
+      MIN_REPLICAS: 16
+      SSL_ENABLED: "true"
