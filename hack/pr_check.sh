@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -exvo pipefail
 CURRENT_DIR=$(dirname "$0")
 
 # Check EOF newline
@@ -25,12 +26,10 @@ lintyamls() {
         ) # This one to keep -o pipefail happy
     if [ -n "$what" ]
     then
-        # Handle file names with whitespaces
         echo "$what" | xargs yamllint
     fi
 }
 
-set -exvo pipefail
 lintyamls
 # Setup vars and clean files
 export TEMP_DIR=$(realpath -s temp)
