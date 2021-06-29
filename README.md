@@ -217,8 +217,15 @@ Instructions in [this document](/docs/app-sre/sop/running-integrations-manually.
 The contract can be queried programmatically using a
 [GraphQL](<https://graphql.org/learn/>) API.
 
-The GraphQL endpoint is reachable here:
+The GraphQL internal endpoint is reachable (behind the VPN) here:
+<https://app-interface.apps.appsrep05ue1.zqxk.p1.openshiftapps.com/graphql>.
+
+The GraphQL public endpoint is reachable (with authentication) here:
 <https://app-interface.devshift.net/graphql>.
+
+**IMPORTANT**: in order to use the GraphQL UI you need to click on the Settings
+wheel icon (top-right corner) and replace `omit` with `include` in
+`request.credentials`.
 
 To get credentials to query app-interface, submit a Credentials Request form in a merge request.
 The request itself is a file with the following structure:
@@ -253,10 +260,6 @@ credentials: app-interface-production-dev-access
 ```
 
 Please create the request file [here](/data/app-interface/requests).
-
-**IMPORTANT**: in order to use the GraphQL UI you need to click on the Settings
-wheel icon (top-right corner) and replace `omit` with `include` in
-`request.credentials`.
 
 ## Features
 
