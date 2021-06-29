@@ -11,22 +11,8 @@ spec:
   groups:
   - name: insights-hccm-stage
     rules:
-    - alert: InsightsCostManagementPodDown
-      expr: |
-        up{service="koku", namespace="hccm-stage"} == 0
-      for: 2m
-      labels:
-        severity: high
-        service: insights
-        env: stage
-        app_team: costmanagement-staging
-      annotations:
-        dashboard: "https://GRAFANA_URL"
-        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
-        message: "Insights Cost Management Alert. At least one hccm pod has been down for two minutes."
-
-    - alert: App-koku-In-hccm-stage-Absent
-      expr: absent(up{service="koku", namespace="hccm-stage"})
+    - alert: App-koku-api-In-hccm-Absent
+      expr: absent(up{service="koku", namespace="hccm-stage"}) or up{service="koku", namespace="hccm-stage"} == 0
       for: 5m
       labels:
         severity: high
@@ -34,9 +20,10 @@ spec:
         env: stage
         app_team: costmanagement-staging
       annotations:
-        dashboard: "https://GRAFANA_URL"
+        dashboard: "https://grafana.stage.devshift.net/d/k8s-compute-resources-namespace-pods/kubernetes-compute-resources-namespace-pods"
         link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
-        message: "Insights Cost Management Alert. At least one hccm pod has been down for 5 minutes."
+        message: "Insights Cost Management Alert. At least one API pod has been down for 5 minutes in the stage environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/cloud.redhat.com/app-sops/hccm/App-koku-api-In-hccm-Absent.rst"
 
     - alert: App-koku-5xx-In-hccm-stage
       expr: rate(django_http_responses_total_by_status_total{status=~"5[0-9]{2}", namespace="hccm-stage"}[5m]) > 0
