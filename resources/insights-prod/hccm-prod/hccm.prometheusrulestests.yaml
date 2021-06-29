@@ -1,0 +1,32 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /insights-prod/hccm-prod/hccm.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+- interval: 2h
+  input_series:
+  - series: refresh_backlog{kubernetes_namespace="hccm-prod"}
+    values: 1001 20 # 1001 during one hour then 20
+
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: App-cost-refresh-queue-overload-In-hccm-prod
+    exp_alerts:
+    - exp_labels:
+        severity: high
+        service: insights
+        env: prod
+        app_team: costmanagement
+        kubernetes_namespace: hccm-prod
+      exp_annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/hccm-prod/deployments"
+        message: "Insights Cost Management Alert. Experiencing high refresh queue backlog in production."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/cloud.redhat.com/app-sops/hccm/App-insights-hccm-worker-queue-overload.rst"
+  - eval_time: 2h
+    alertname: App-cost-refresh-queue-overload-In-hccm-prod
+    exp_alerts:
