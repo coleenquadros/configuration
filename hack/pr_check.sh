@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -exvo pipefail
 CURRENT_DIR=$(dirname "$0")
 
 # Check EOF newline
@@ -10,8 +11,32 @@ if [ $? != 0 ]; then
     exit 1
 fi
 
-set -exvo pipefail
+if ! hash yamllint > /dev/null
+then
+    echo "YAML linter not available. Aborting PR check"
+    exit 1
+fi
 
+if git diff-tree --name-only -r remotes/origin/master..HEAD|grep -q ' '
+then
+    echo "This patch introduces filenames with whitespaces. Aborting."
+    exit 1
+fi
+
+lintyamls() {
+    toplevel=$(git rev-parse --show-toplevel)
+    # Find new or modified YAML files that are unlikely to be Jinja templates
+    what=$(git diff-tree --name-status -r remotes/origin/master..HEAD -- '*yml' '*yaml' |
+               awk -F'\t' '$1 ~ /M|A/{print $2}' | grep -v ^resources/
+           true
+        ) # This one to keep -o pipefail happy
+    if [ -n "$what" ]
+    then
+        echo "$what" | xargs yamllint
+    fi
+}
+
+lintyamls
 # Setup vars and clean files
 export TEMP_DIR=$(realpath -s temp)
 rm -rf $TEMP_DIR; mkdir -p $TEMP_DIR $TEMP_DIR/reports
