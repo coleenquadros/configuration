@@ -11,6 +11,12 @@ if [ $? != 0 ]; then
     exit 1
 fi
 
+if ! hash yamllint > /dev/null
+then
+    echo "YAML linter not available. Aborting PR check"
+    exit 1
+fi
+
 if git diff-tree --name-only -r remotes/origin/master..HEAD|grep -q ' '
 then
     echo "This patch introduces filenames with whitespaces. Aborting."
