@@ -212,6 +212,17 @@ The output will be JSON document, so you can pipe it with `jq`, example:
 
 Instructions in [this document](/docs/app-sre/sop/running-integrations-manually.md).
 
+## Visual App-interface
+
+Visual App-interface is a visual representation of the data in this repository.
+Source code can be found here: https://github.com/app-sre/visual-qontract
+
+An internal instance is reachable (behind the VPN) here:
+<https://visual-app-interface.apps.appsrep05ue1.zqxk.p1.openshiftapps.com/graphql>.
+
+A public instance is rechable (authentication via GH) here:
+<https://visual-app-interface.devshift.net>.
+
 ## Querying the App-interface
 
 The contract can be queried programmatically using a
