@@ -61,16 +61,32 @@ slos:
   dashboard: https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1&var-datasource=app-sre-prod-04-prometheus
 
 
-- name: Kafka Cluster Lifecycle Corectness
+- name: Kafka Cluster Creation Corectness
   SLIType: correctness
-  SLISpecification: Percentage of Kafka instances successful created and deleted
+  SLISpecification: Percentage of Kafka instances successful created
   SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/managed-services/slos/kas-fleet-manager-kafka-cluster-lifecycle-correctness.md
   SLOParameters:
     window: 28d
   expr: |
-    sum(rate(kas_fleet_manager_kafka_operations_success_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation=~"create|delete"}[{{window}}]))
+    sum(rate(kas_fleet_manager_kafka_operations_success_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation=~"create"}[{{window}}]))
     /
-    sum(rate(kas_fleet_manager_kafka_operations_total_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation=~"create|delete"}[{{window}}]))
+    sum(rate(kas_fleet_manager_kafka_operations_total_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation=~"create"}[{{window}}]))
+  SLOTarget: 0.99
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/kas-fleet-manager-slos-kafka-correctness-production.prometheusrules.yaml
+  prometheusRulesTests: /to/do
+  dashboard: https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1&var-datasource=app-sre-prod-04-prometheus
+
+- name: Kafka Cluster Deletion Corectness
+  SLIType: correctness
+  SLISpecification: Percentage of Kafka instances successful deleted
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/managed-services/slos/kas-fleet-manager-kafka-cluster-lifecycle-correctness.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(kas_fleet_manager_kafka_operations_success_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation=~"delete"}[{{window}}]))
+    /
+    sum(rate(kas_fleet_manager_kafka_operations_total_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation=~"delete"}[{{window}}]))
   SLOTarget: 0.99
   SLOTargetUnit: percent_0_1
   prometheusRules: /observability/prometheusrules/kas-fleet-manager-slos-kafka-correctness-production.prometheusrules.yaml
