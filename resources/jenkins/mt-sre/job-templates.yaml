@@ -3,7 +3,7 @@
     name: '{gl_group}-{gl_project}-gl-build-{branch}-managed-tenants'
     wrappers:
     - timeout_wrapper:
-        timeout: 60
+        timeout: '{timeout}'
     - vault-secrets:
         <<: *vault_defaults
         secrets:
@@ -32,6 +32,13 @@
         echo "$QUAY_DOCKER_CONFIG_JSON" | base64 -d > $DOCKER_CONF/config.json
 
         ./build_deploy.sh
+    publishers:
+    - slack:
+        room: '{slack_channel_notification}'
+        notify-start: False
+        notify-success: True
+        notify-failure: True
+        notify-repeated-failure: True
     <<: *gl_build_master
 
 - job-template:
