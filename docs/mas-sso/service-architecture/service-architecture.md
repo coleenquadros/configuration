@@ -164,14 +164,13 @@ This list of dependencies for MAS SSO
 
 ## Service forecast
 
-TODO - Current capacity and expected forecast [MGDSTRM-3344](https://issues.redhat.com/browse/MGDSTRM-3344)
-
+MAS SSO has been tested for 1000 Kafka clusters with the existing configuration. We do not at the moment 
+anticipate a significant change in the requirements i.e. more than a 1000 Kafka clusters. 
 
 ## State
 ### Postgres Database
 
-TODO
-
+MAS SSO uses Amazon RDS Postgres service for its persistence storage. The database service is used to store and consume data such as user credentials, service accounts, client information, etc. These are essential for the normal operation of MAS SSO. A non-availability of the RDS would mean the service cannot function normally and having a cascading effect on other services that depend on MAS SSO, e.g. user logins for Kafka would not work. Data in RDS is regularly backed up for this purpose and has Multi Availability Zone (AZ) configured. 
 
 ## MAS SSO Admin Credentials in Vault
 
