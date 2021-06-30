@@ -162,35 +162,6 @@ This list of dependencies for MAS SSO
 5. *Let's Encrypyt*:
    Lets Encrypt from ACME is used for certifcate management.
 
-## Twelve-factor compliance
-- Codebase: One codebase tracked in revision control, many deploys
-  - Yes. [Codebase](https://gitlab.cee.redhat.com/service/saas-mas-sso)
-- Dependencies: Explicitly declare and isolate dependencies
-  - Done
-- Config: Store config in the environment
-  - TODO
-- Backing services: Treat backing services as attached resources
-  - AWS RDS - acts as a datastore for the service, and it is backed up regularly.
-- Build, release, run: Strictly separate build and run stages
-  - Done
-- Processes: Execute the app as one or more stateless processes
-  - Done  
-- Port binding: Export services via port binding
-  - TODO   
-- Concurrency: Scale-out via the process model
-  - TODO
-- Disposability: Maximize robustness with fast startup and graceful shutdown
-  - TODO
-- Dev/prod parity: Keep development, staging, and production as similar as possible
-  - Done
-- Logs: Treat logs as event streams
-  - Done
-- Admin processes: Run admin/management tasks as one-off processes
-  - TODO
-
-TODO - Will be covered under [MGDSTRM-3349](https://issues.redhat.com/browse/MGDSTRM-3349)
-
-
 ## Service forecast
 
 TODO - Current capacity and expected forecast [MGDSTRM-3344](https://issues.redhat.com/browse/MGDSTRM-3344)
