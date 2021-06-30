@@ -7,9 +7,11 @@ We are measuring the creation time of all successful Kafka provisioning, startin
 The time to readiness of a new Kafka instance is integral to the user experience of our Managed Kafka service.
 
 ## Implementation details
-There are two SLIs backing this SLO. Both use the same metric with a different request duration value for the p90 and p99 of requests. We use the `kas_fleet_manager_worker_kafka_duration_bucket` histogram metric as the base of this SLO. 
+There are two SLIs backing this SLO. Both use the same metric with a different duration value for the p90 and p99 of Kafka creation duration. We use the `kas_fleet_manager_worker_kafka_duration_bucket` histogram metric as the base of this SLO. 
 
 The implementation includes the following labels `job="kas-fleet-manager-metrics", namespace="managed-services-production",jobType="kafka_create"` for the histogram metric.
+
+The Kafka creation duration is added to the `kas_fleet_manager_worker_kafka_duration_bucket` metric when the Kafka instance changes to a ready state which is reported from the `fleetshard-operator` in the data plane.
 
 The p99 SLI implementation is the count of successful Kafka creations with a duration that is less than or equal to 30 minutes divided by the count of all successful Kafka creations.
 

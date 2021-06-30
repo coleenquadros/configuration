@@ -11,7 +11,11 @@ There are two SLIs backing this SLO. Both use the same metric with a different `
 
 The implementation includes the following labels `job="kas-fleet-manager-metrics",namespace="managed-services-production"` for the counter metric.
 
-The counter is only increased for this SLI if it is a non user error.
+The `kas_fleet_manager_kafka_operations_success_count` counter is incremented for `create` when the Kafka instance changes to a ready state which is reported from the `fleetshard-operator` in the data plane.
+
+The `kas_fleet_manager_kafka_operations_success_count` counter is incremented for `delete` when the Kafka instance has been soft deleted from the database which occurs after all associated resources and dependencies have been removed.
+
+The `kas_fleet_manager_kafka_operations_total_count` counter is incremented in both scenarios above and also when the Kafka instance changes to a failed state which is reported from the `fleetshard-operator` in the data plane.
 
 ## SLO Rationale
 Kafka instance creations and deletions are expected to be succcessful 99 percent of the time. This has been proven while observing the SLO in production and during scale testing.
