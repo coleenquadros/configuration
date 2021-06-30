@@ -14,7 +14,7 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
 - [Tagging options in app-interface](#tagging-options-in-app-interface)
 - [Gating production promotions in app-interface](#gating-production-promotions-in-app-interface)
 - [Get access to cluster logs via Log Forwarding](#get-access-to-cluster-logs-via-log-forwarding)
-- [What is the Console or Kibana URL for a service](#what-is-the-console-or-kibana-url-for-a-service)
+- [What is the Console or Prometheus URL for a service](#what-is-the-console-or-prometheus-url-for-a-service)
 - [Can you restart my pods](#can-you-restart-my-pods)
 - [Jenkins is going to shut down](#jenkins-is-going-to-shutdown)
 - [How can I make my PR check job run concurrently](#how-can-i-make-my-pr-check-job-run-concurrently)
@@ -95,9 +95,7 @@ To gate production promotions, follow these steps:
 
 ### Get access to cluster logs via Log Forwarding
 
-The App SRE logging stack is currently an EFK (ElasticSearch, Fluentd, Kibana) stack installed on each cluster.
-
-We are starting a migration towards a Log Forwarding solution, in which all logs from a cluster will be forwarded to AWS CloudWatch on the cluster's AWS account.
+The App SRE team uses the CloudWatch Log Forwarding Addon to forward Application and Infra logs to AWS CloudWatch on the cluster's AWS account.
 
 To get access to CloudWatch on a cluster's AWS account, follow these steps (examples for `app-sre-stage-01`):
 
@@ -112,7 +110,7 @@ To get access to CloudWatch on a cluster's AWS account, follow these steps (exam
 1. In the Switch Role page, select a name for this role (suggestion: `<cluster_name>-read-only`) and click "Switch Role" (Account and Role should be filled automatically).
 1. You are now logged in to the cluster's AWS account. Go to the [CloudWatch console](https://console.aws.amazon.com/cloudwatch/home?#logsV2:log-groups) and get your logs!
 
-### What is the Console or Kibana URL for a service
+### What is the Console or Prometheus URL for a service
 
 Start by accessing the Visual App-Interface at https://visual-app-interface.devshift.net.  Using the side bar, navigate to the [Services](https://visual-app-interface.devshift.net/services) section.
 
@@ -122,11 +120,11 @@ Choosing the service will take you to the the service's page, in which you can v
 - `cincinnati-production`
 - `cincinnati-stage`
 
-Choose the namespace for which you would like to find the Console/Kibana URL. For this example, choose [cincinnati-stage](https://visual-app-interface.devshift.net/namespaces#/services/cincinnati/namespaces/cincinnati-stage.yml).
+Choose the namespace for which you would like to find the Console/Prometheus URL. For this example, choose [cincinnati-stage](https://visual-app-interface.devshift.net/namespaces#/services/cincinnati/namespaces/cincinnati-stage.yml).
 
 Choosing the namespace will take you to the namespace's page, in which you can find a link to the cluster running this namespace.
 
-In the Cluster page, you can find links to the cluster's Console and to the cluster's Kibana.
+In the Cluster page, you can find links to the cluster's Console and to the cluster's Prometheus.
 
 ### Can you restart my pods
 
