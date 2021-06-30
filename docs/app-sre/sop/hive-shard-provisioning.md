@@ -88,12 +88,13 @@ Provisioning hive is a multi-step process:
 
 1. Assign hive permissions in
 
-    | Role file                            | Staging                                 | Production                               |
-    |----------------------------------------|-----------------------------------------|------------------------------------------|
-    | `data/teams/hive/roles/dev.yml`        | hive-admins<br>View access to namespace | hive-readers<br>View access to namespace |
-    | `data/teams/hive/roles/qe.yml`         | hive-admins                             | hive-readers                             |
-    | `data/teams/ocm/roles/dev.yml`         | hive-readers                            | hive-readers                             |
-    | `data/teams/app-sre/roles/app-sre.yml` | hive-admins                             | hive-admins                              |
+    | Role file                                    | Staging                                 | Production                               |
+    |----------------------------------------------|-----------------------------------------|------------------------------------------|
+    | `data/teams/hive/roles/dev.yml`              | hive-admins<br>View access to namespace | hive-readers<br>View access to namespace |
+    | `data/teams/hive/roles/qe.yml`               | hive-admins                             | hive-readers                             |
+    | `data/teams/ocm/roles/dev.yml`               | hive-readers                            | hive-readers                             |
+    | `data/teams/app-sre/roles/app-sre.yml`       | hive-admins                             | hive-admins                              |
+    | `data/teams/sd-sre/roles/sre-breakglass.yml` | -                                       | hive-frontend                            |
 
 ## Provisioning OSD operators
 
