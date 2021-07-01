@@ -10,6 +10,8 @@ In case of a mismatch, the current instance skips the resource, as it is managed
 
 This pattern allows us to manage resources of the same integration from different instances in the same namespace.
 
+> Note: Comparing the caller is only done if the resource is managed by the same integration. Even if the same caller is used from different integrations, there will not be a conflict. This is how integrations can manage the same resource kind in the same namespace.
+
 ## The Wrapper pattern
 
 In this pattern, we wrap the `run` method of an integration with a new integration called by the same name and appended with `-wrapper`.
