@@ -27,9 +27,25 @@ slos:
   dashboard: https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1&var-datasource=app-sre-prod-04-prometheus
 
 
-- name: API Latency
+- name: API Latency 90%
   SLIType: latency
-  SLISpecification: p90 of the successful requests served under 100ms and p99 of the successful requests served under 1000ms
+  SLISpecification: 90% of the successful requests served under 100ms
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/managed-services/slos/kas-fleet-manager-api-latency.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(api_inbound_request_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-production",le="0.1",code!~"5.."}[{{window}}]))
+    /
+    sum(rate(api_inbound_request_duration_count{job="kas-fleet-manager-metrics",namespace="managed-services-production"}[{{window}}]))
+  SLOTarget: 0.90
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/kas-fleet-manager-slos-latency-production.prometheusrules.yaml
+  prometheusRulesTests: /to/do
+  dashboard: https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1&var-datasource=app-sre-prod-04-prometheus
+
+- name: API Latency 99%
+  SLIType: latency
+  SLISpecification: 99% of the successful requests served under 1000ms
   SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/managed-services/slos/kas-fleet-manager-api-latency.md
   SLOParameters:
     window: 28d
@@ -44,9 +60,25 @@ slos:
   dashboard: https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1&var-datasource=app-sre-prod-04-prometheus
 
 
-- name: Kafka Cluster Provisioning Latency
+- name: Kafka Cluster Provisioning Latency 90%
   SLIType: latency
-  SLISpecification: p90 of the Kafkas created must be completed under 15m and p99 of the Kafkas created must be completed under 30m
+  SLISpecification: 90% of the Kafkas created must be ready in under 15m
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/managed-services/slos/kas-fleet-manager-kafka-cluster-provisioning-latency.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(kas_fleet_manager_worker_kafka_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-production",le="900",jobType="kafka_create"}[{{window}}]))
+    /
+    sum(rate(kas_fleet_manager_worker_kafka_duration_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",jobType="kafka_create"}[{{window}}]))
+  SLOTarget: 0.90
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/kas-fleet-manager-slos-kafka-latency-production.prometheusrules.yaml
+  prometheusRulesTests: /to/do
+  dashboard: https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1&var-datasource=app-sre-prod-04-prometheus
+
+- name: Kafka Cluster Provisioning Latency 99%
+  SLIType: latency
+  SLISpecification: 99% of the Kafkas created must be ready in under 30m
   SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/managed-services/slos/kas-fleet-manager-kafka-cluster-provisioning-latency.md
   SLOParameters:
     window: 28d
