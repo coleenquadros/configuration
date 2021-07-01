@@ -12,7 +12,7 @@ fi
 if [ -z "$1" ]; then
     NEW_SHA=$(curl -s -H "Accept: application/vnd.github.v3+json" \
         https://api.github.com/repos/app-sre/qontract-reconcile/commits | \
-        jq -r '.[1]|.sha')
+        jq -r '.[0]|.sha')
 else
     NEW_SHA="$1"
 fi
