@@ -1,6 +1,8 @@
 - [Info](#info)
 - [Process](#process)
   - [VPC Peerings](#vpc-peerings)
+- [Additional information](#additional-information)
+  - [Leader election in CS](#leader-election-in-cs)
 
 # Info
 
@@ -31,3 +33,11 @@
             * VPC CIDR block: 10.121.0.0/16
     - Create an OHSS ticket for SREP to accept the peering connection request in the v3 Hive cluster's AWS account and add the requester's CIDR block to the accepter's route table. Example: [OHSS-4942](https://issues.redhat.com/browse/OHSS-4942)
     - Once the peering connection is accepted, add the v3 Hive cluster's CIDR block to the public Route table in the OCM cluster's AWS account.
+
+# Additional information
+
+## Leader election in CS
+
+There are two types of leader election in CS:
+1. Kubernetes Controllers - the elected leader is responsible for interacting with a Hive shard. The election is managed in the `uhc-leadership` namespace in each of the Hive shards. This implies that there may be a different leader (pod) per Hive shard, but also that there will be a single leader across clusters.
+2. Background jobs - the elected leader is responsible for controlling where background jobs are executed. The election is managed in the same namespace as the one where CS is running. This implies there can only be one leader in a namespace, but there will be a leader in each cluster where OCM is running. To prevent that from happenning, setting the `LEADERSHIP_ENABLED` parameter to "false" will exclude all pods from participating in the leader election process.
