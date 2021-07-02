@@ -2,6 +2,7 @@
 
 ENV_FILE=".env"
 JENKINS_FILE="resources/jenkins/global/defaults.yaml"
+TEKTON_TEMPLATE="data/services/app-interface/shared-resources/app-sre-pipelines.yml"
 SAAS_FILE="data/services/app-interface/cicd/ci-ext/saas-qontract-reconcile.yaml"
 SAAS_FILE_INT="data/services/app-interface/cicd/ci-int/saas-qontract-reconcile-int.yaml"
 
@@ -18,7 +19,6 @@ else
 fi
 
 NEW_COMMIT=${NEW_SHA::7}
-OLD_SHA=$(awk '{if ($1 == "ref:" && $2 ~ /^[a-f0-9]{40}$/){print $2}}' $SAAS_FILE)
 
 TAG_STATUS=$(curl -s https://quay.io/api/v1/repository/app-sre/qontract-reconcile/tag/$NEW_COMMIT/images | \
     jq .status)
@@ -28,15 +28,33 @@ if [ "$TAG_STATUS" = "404" ]; then
     exit 1
 fi
 
-sed -i$SED_OPT "s/^export RECONCILE_IMAGE_TAG=.*$/export RECONCILE_IMAGE_TAG=$NEW_COMMIT/" $ENV_FILE
-sed -E -i$SED_OPT "s/^(\s+qontract_reconcile_image_tag:).*$/\1 '$NEW_COMMIT'/" $JENKINS_FILE
+OLD_COMMIT=$(awk '{gsub("\047", "", $2); if ($1 == "qontract_reconcile_image_tag:" && $2 ~ /^[a-f0-9]{7}$/){print $2}}' $JENKINS_FILE)
+if [ "$NEW_COMMIT" != "$OLD_COMMIT" ]; then
+    sed -i$SED_OPT "s/$OLD_COMMIT/$NEW_COMMIT/" $JENKINS_FILE
+fi
 
+OLD_COMMIT=$(awk '{gsub("\047", "", $2); if ($1 == "qontract_reconcile_image_tag:" && $2 ~ /^[a-f0-9]{7}$/){print $2}}' $TEKTON_TEMPLATE)
+if [ "$NEW_COMMIT" != "$OLD_COMMIT" ]; then
+    sed -i$SED_OPT "s/$OLD_COMMIT/$NEW_COMMIT/" $TEKTON_TEMPLATE
+fi
+
+OLD_COMMIT=$(awk -F "=" '{if ($1 == "export RECONCILE_IMAGE_TAG" && $2 ~ /^[a-f0-9]{7}$/){print $2}}' $ENV_FILE)
+if [ "$NEW_COMMIT" != "$OLD_COMMIT" ]; then
+    sed -i$SED_OPT "s/$OLD_COMMIT/$NEW_COMMIT/" $ENV_FILE
+fi
+
+OLD_SHA=$(awk '{if ($1 == "ref:" && $2 ~ /^[a-f0-9]{40}$/){print $2}}' $SAAS_FILE)
 if [ "$NEW_SHA" != "$OLD_SHA" ]; then
-    sed -i$SED_OPT "s/$OLD_SHA/$NEW_SHA/" $SAAS_FILE # $SAAS_FILE_INT
+    sed -i$SED_OPT "s/$OLD_SHA/$NEW_SHA/" $SAAS_FILE
+fi
+
+OLD_SHA=$(awk '{if ($1 == "ref:" && $2 ~ /^[a-f0-9]{40}$/){print $2}}' $SAAS_FILE_INT)
+if [ "$NEW_SHA" != "$OLD_SHA" ]; then
+    sed -i$SED_OPT "s/$OLD_SHA/$NEW_SHA/" $SAAS_FILE_INT
 fi
 
 if [ -n "$DO_COMMIT" ]; then
-    git add $ENV_FILE $SAAS_FILE $JENKINS_FILE
+    git add $ENV_FILE $JENKINS_FILE $TEKTON_TEMPLATE $SAAS_FILE $SAAS_FILE_INT
     git commit -m "qontract production promotion ${OLD_COMMIT} to ${NEW_COMMIT}"
     git --no-pager show -U0 HEAD
 fi
