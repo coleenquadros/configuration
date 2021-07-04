@@ -27,9 +27,6 @@ There are 3 stages when running our integrations:
 ## Special Merge Request titles
 
 Some of our integrations shouldn't run in every merge request. The current mechanism to determine if such an integration should run is done by using the MR title:
-- if the title contains "slack" - the slack-usergroups integration is executed
-- if the title contains "mirror" - the quay-mirror integration is executed
-- if the title contains "sentry" - the sentry-config integration is executed
 - if the title contains "saas-deploy-full" - the openshift-saas-deploy integration is executed for all saas files
 
 ## Failure scenarions
