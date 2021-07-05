@@ -112,7 +112,6 @@ Add a new directory named after the shard name here: [`/data/services/osd-operat
 The `OpenShift_SRE` IDP associated to every OSD is configured via a SelectorSyncSet in hive:
 
 - `osd-google-secret` for production environments, e.g. [/data/services/osd-operators/namespaces/hivep01ue1/cluster-scope.yml](/data/services/osd-operators/namespaces/hivep01ue1/cluster-scope.yml)
-- `osd-ldap-secret` for staging and integration, e.g. [/data/services/osd-operators/namespaces/hives02ue1/cluster-scope.yml](/data/services/osd-operators/namespaces/hives02ue1/cluster-scope.yml)
 
 Make sure that the SSS deployed corresponds to your environment
 
