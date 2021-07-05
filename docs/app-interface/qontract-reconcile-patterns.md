@@ -21,3 +21,15 @@ The wrapper integration calls the integration's run method in parallel for multi
 This is implemented for openshift-saas-deploy (openshift-saas-deploy-wrapper) to help us support running openshift-saas-deploy in pr-checks only for specific saas files.
 
 A run of openshift-saas-deploy for all saas files will... never end.
+
+## The Delete pattern
+
+In this pattern, we handle the deletion of resources that are not kept in any sort of state.
+
+Most of our integrations are stateless, and compare the desired state against the current state to understand what actions should be carried out to fulfill the desired state. The current state depends on the integration, and can be OpenShift resources, Jenkins jobs, Vault secret engines, etc.
+
+In all these cases, if a resource is deleted from app-interface, it is still found in the "current state" and can be deleted.
+
+There are cases when removing a resource from app-interface means that we lose knowledge of it and can not delete it. This is where the Delete pattern comes into play.
+
+By adding (and implementing) a `delete: true` section to any resource, we still keep track of it in our desired state, while at the same time we understand that it should be deleted. After the resource was deleted, it should be safe to remove the entire deleted section from app-interface.
