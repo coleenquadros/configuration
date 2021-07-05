@@ -76,6 +76,7 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
                 * `name` - name of the Jenkins job to use as upstream
             * not yet supported for v2 SaaS files.
         * `disable` - (optional) if set to `true`, target will be skipped during deployment.
+        * `delete` - (optional) if set to `true`, resources coming from this target will be deleted.
     * `hash_length` - (optional) if `IMAGE_TAG` should be set according to the referenced target, specify a length to use from the commit hash.
         * default is set in [app-interface settings](/data/app-interface/app-interface-settings.yml#L31).
 

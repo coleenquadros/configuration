@@ -16,6 +16,7 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
 - [Get access to cluster logs via Log Forwarding](#get-access-to-cluster-logs-via-log-forwarding)
 - [What is the Console or Prometheus URL for a service](#what-is-the-console-or-prometheus-url-for-a-service)
 - [Can you restart my pods](#can-you-restart-my-pods)
+- [Delete target from SaaS file](#delete-target-from-saas-file)
 - [Jenkins is going to shut down](#jenkins-is-going-to-shutdown)
 - [How can I make my PR check job run concurrently](#how-can-i-make-my-pr-check-job-run-concurrently)
 - [How can I see who has access to a service](#how-can-i-see-who-has-access-to-a-service)
@@ -131,6 +132,12 @@ In the Cluster page, you can find links to the cluster's Console and to the clus
 There are a couple of choices depending on the state of onboarding the service is in currently
 [here](https://visual-app-interface.devshift.net/services)
 _Note: To the right of the search for services the drop down defaults to "show child apps" you can choose to hide these by selecting the "hide child apps" option_
+
+### Delete target from SaaS file
+
+To delete a target from a SaaS file, set `delete: true` in the target you wish to delete. This will cause all associated resources to be deleted in the next deployment. Follow this up with another MR to delete the target from the SaaS file.
+
+More information: [Continuous Delivery in App-interface](/docs/app-sre/continuous-delivery-in-app-interface.md)
 
 #### OnBoarded Services
 
