@@ -58,6 +58,13 @@ resourceTemplates:
     DATABASE_SECRET_NAME: srs-service-registry-rds
     REPLICAS: 3
     ENVOY_CONFIG_CM_NAME: srs-service-registry-envoy-config
+    AUTH_ENABLED: "true"
+    KEYCLOAK_URL: https://identity.api.stage.openshift.com/auth
+    KEYCLOAK_REALM: rhoas
+    KEYCLOAK_API_CLIENT_ID: registry-api
+    REGISTRY_AUTHZ_ENABLED: "true"
+    AUTHZ_ENABLED: "true"
+    TENANT_MANAGER_CLIENT_SECRET_NAME: srs-tenant-manager-credentials
 
 - name: srs-fleet-manager
   url: https://gitlab.cee.redhat.com/service-registry/srs-fleet-manager
@@ -73,10 +80,21 @@ resourceTemplates:
   parameters:
     IMAGE_REPOSITORY: rhoas/srs-fleet-manager
     DATABASE_SECRET_NAME: srs-fleet-manager-rds
-    REPLICAS: 3
+    # temporal scale down
+    REPLICAS: 1
     ENVOY_CONFIG_CM_NAME: srs-fleet-manager-envoy-config
     # List of static service-registry deployments, will be used as target to provision registry tenants
     REGISTRY_DEPLOYMENTS_LIST:
       - name: registry-stage-1
         registryDeploymentUrl: https://service-registry-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
         tenantManagerUrl: http://tenant-manager:8585
+    # Auth config
+    AUTH_ENABLED: "true"
+    KEYCLOAK_REALM: redhat-external
+    KEYCLOAK_URL: https://sso.redhat.com/auth
+    KEYCLOAK_API_CLIENT_ID: srs-fleet-manager-api-prod
+    TENANT_MANAGER_AUTH_SERVER_URL: https://identity.api.stage.openshift.com/auth
+    TENANT_MANAGER_AUTH_SERVER_REALM: rhoas
+    TENANT_MANAGER_AUTH_SECRET_NAME: srs-tenant-manager-credentials
+    # temporal config for upgrade
+    SRS_FLEET_MANAGER_DELETE_ALL: "true"
