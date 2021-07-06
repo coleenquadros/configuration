@@ -91,6 +91,8 @@ Here is an example to parameters defined for the [insights-stage](/data/products
 
 Environment parameters can be used to template saas file parameters. For example, if `ENV_PARAMETER` is defined in the environment file parameters, it can be reused in a saas file parameters: `SAAS_PARAMETER: ${ENV_PARAMETER}/api/example`.
 
+Environment parameters must not be duplicated. If defined in an environment file they cannot be defined again with the same value in a saas file consuming the environment.
+
 ## Automatically generated parameters
 
 In addition to the supplied parameters, there are additional parameters which are generated automatically:
