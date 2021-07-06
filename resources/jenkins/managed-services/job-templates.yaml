@@ -246,73 +246,49 @@
     - <<: *slack_notify
 
 - job-template:
-    id: managed-kafka-chaos
-    name: "managed-kafka-chaos"
+    id: managed-kafka-fault-tests
+    name: "managed-kafka-fault-tests"
     wrappers:
       - timestamps
       - timeout_wrapper:
           timeout: "{timeout}"
       - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *ci_ocm_token
+            - *ci_aws_keys
     parameters:
     - string:
-        name: OSD_CLUSTER_API
+        name: OCM_CLUSTER_REGION
+        default: 'eu-west-1'
+        description: '[REQUIRED] AWS region for OSD cluster'
+    - string:
+        name: OCM_CLUSTER_NAME
         default: ''
-        description: '[REQUIRED] api server of the osd cluster hosting the managed kafka service'
-    - password:
-        name: OSD_API_TOKEN
-        default: ''
-        description: '[REQUIRED] kubeadmin token for osd cluster'
+        description: 'OSD cluster name (if not defined, a ramdom name will be set)'
+    - string:
+        name: COMPUTE_NODES_COUNT
+        default: '4'
+        description: '[REQUIRED] OSD worker nodes for kafka cluster'
+    - choice:
+        name: TEST_LAYER
+        description: '[REQUIRED] Select the set of tests to be executed'
+        choices:
+          - all
+          - cloud
+          - openshift
+          - kafka
     <<: *gh_checkout
     builders:
       - shell: |
-          oc login --server=$OSD_CLUSTER_API --token=$OSD_API_TOKEN --insecure-skip-tls-verify
-          cd install
-          make test/chaos
-    artifacts_path: 'chaos-results/**'
+          ./pipeline/fault_pipeline.sh
+    artifacts_path: 'fault-results/**,pipeline/delorean/ocm/**'
     publishers:
     - archive:
         artifacts: '{artifacts_path}'
         allow-empty: true
     - <<: *slack_notify
-
-- job-template:
-    id: managed-kafka-litmus-test-run
-    name: "managed-kafka-litmus-test-run"
-    wrappers:
-      - timestamps
-      - timeout_wrapper:
-          timeout: "{timeout}"
-      - ansicolor
-    parameters:
-    - string:
-        name: OSD_CLUSTER_API
-        default: ''
-        description: '[REQUIRED] api server of the osd cluster hosting the managed kafka service'
-    - password:
-        name: OSD_API_TOKEN
-        default: ''
-        description: '[REQUIRED] kubeadmin token for osd cluster'
-    - bool:
-        name: INSTALL_LITMUS
-        default: False
-        description: 'Select if you want to install Litmus and run Litmus test. KAFKA must be selected if not already installed on the cluster'
-    - choice:
-        name: LITMUS_TEST
-        description: '[REQUIRED] The litmus test you want to run. You need to specify which'
-        choices:
-          - chaosengine/pod-delete-brokers
-          - chaosengine/az-down
-          - chaosschedule/pod-delete-brokers
-          - chaosschedule/pod-delete-zookeepers
-    <<: *gh_checkout
-    builders:
-      - shell: |
-          ./install/resources/testing-chaos/scripts/run-litmus-test.sh
-    artifacts_path: 'litmus-results/**'
-    publishers:
-    - archive:
-        artifacts: '{artifacts_path}'
-        allow-empty: true
 
 - job-template:
     id: strimzi-operator-test
