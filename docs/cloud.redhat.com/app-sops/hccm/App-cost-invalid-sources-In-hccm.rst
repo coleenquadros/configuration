@@ -1,8 +1,8 @@
-App-insights-hccm-worker-queue-overload
+App-cost-invalid-sources-In-hccm
 =======================================
 
-Severity: High
---------------
+Severity: Warning
+-----------------
 
 Incident Response Plan
 ----------------------
@@ -12,12 +12,12 @@ Incident Response Plan
 Impact
 ------
 
--  The HCCM worker queues have experienced a high backlog over the last hour. This could cause a lag in customer data processing.
+-  Sources are defined to allow Cost Management APP to obtain cost data from public cloud provider or expect data from customer OCP clusters.
 
 Summary
 -------
 
-This alert fires when the HCCM worker queues have had more than 1000 tasks in the queues in the past hour.
+This alert fires when its found that a source is missing basic reference data like source ID, account, or cost management ID 
 
 Access required
 ---------------
@@ -28,10 +28,9 @@ Access required
 Steps
 -----
 
--  Log into the console / namespace and verify if worker pods are up / stuck / etc
+-  Log into the console / namespace and verify if sources worker pods are up / stuck / etc
 -  Check oc logs for error messages with severity of ERROR
--  Check recent PR for changes made to the celery workers.
--  Scaling the workers should improve report processing throughput if its not a bug.
+-  Check recent PR for changes made to the sources workers.
 -  Notify service owners if changes have occurred in the above
 
 Escalations

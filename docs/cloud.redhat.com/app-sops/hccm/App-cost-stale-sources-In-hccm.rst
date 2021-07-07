@@ -1,7 +1,7 @@
-App-insights-hccm-worker-queue-overload
+App-cost-stale-sources-In-hccm
 =======================================
 
-Severity: High
+Severity: Info
 --------------
 
 Incident Response Plan
@@ -12,12 +12,12 @@ Incident Response Plan
 Impact
 ------
 
--  The HCCM worker queues have experienced a high backlog over the last hour. This could cause a lag in customer data processing.
+-  The data from customer source has not been processed in the last 48 hours. This may point to a bug in  data processing problem.
 
 Summary
 -------
 
-This alert fires when the HCCM worker queues have had more than 1000 tasks in the queues in the past hour.
+This alert fires when its found that a source has not had its data processed in the last 48 hours.
 
 Access required
 ---------------
@@ -31,7 +31,6 @@ Steps
 -  Log into the console / namespace and verify if worker pods are up / stuck / etc
 -  Check oc logs for error messages with severity of ERROR
 -  Check recent PR for changes made to the celery workers.
--  Scaling the workers should improve report processing throughput if its not a bug.
 -  Notify service owners if changes have occurred in the above
 
 Escalations
