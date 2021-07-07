@@ -25,10 +25,8 @@ environment:
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.crcgovp01ue1.yml
 - $ref: /services/insights/gateway/namespaces/3scale-fedramp-prod.yml
-# - $ref: /services/insights/host-inventory/namespaces/host-inventory-fedramp-prod.yml
-# - $ref: /services/insights/xjoin/namespaces/xjoin-jenkins-fedramp-prod.yml
-# - $ref: /services/insights/remediations/namespaces/remediations-fedramp-prod.yml
 - $ref: /openshift/insights/crcgovp01ue1/namespaces/openshift-operator-lifecycle-manager.yml
+- $ref: /services/insights/xjoin/namespaces/xjoin-operator-fedramp-prod.yml
 
 sharedResources:
 - $ref: /services/insights/shared-resources/fedramp-prod.yml
@@ -36,9 +34,6 @@ sharedResources:
 managedRoles: true
 
 managedResourceTypes:
-- ConfigMap
-- Role
-- RoleBinding
 - Secret
 
 openshiftResources:
@@ -54,37 +49,16 @@ openshiftResources:
 - provider: vault-secret
   path: insights/secrets/global/rds-client-ca
   version: 1
-# - provider: vault-secret
-  # requires access to the host-inventory-db provisioned through the host-inventory-prod namespace
-  # path: app-sre/integrations-output/terraform-resources/crcgovp01ue1/host-inventory-prod/host-inventory-db
-  # version: 1
-  # name: host-inventory-db
-  # annotations:
-  #   qontract.recycle: "true"
-  #   qontract.ignore_reconcile_time: "true"
-- provider: resource
-  path: /insights-prod/xjoin-prod/validation.configmap.yml
-- provider: resource
-  path: /insights-prod/xjoin-prod/xjoin-config.configmap.yml
-- provider: resource
-  path: /insights-prod/xjoin-prod/xjoin-jenkins.role.yml
-- provider: resource
-  path: /insights-prod/xjoin-prod/xjoin-jenkins.rolebinding.yml
+- provider: vault-secret
+  path: app-sre/integrations-output/terraform-resources/crcgovp01ue1/host-inventory-prod/host-inventory-db
+  version: 1
+  name: host-inventory-db
+  annotations:
+    qontract.recycle: "true"
+    qontract.ignore_reconcile_time: "true"
 - provider: resource-template
   type: extracurlyjinja2
-  path: /insights-prod/xjoin-prod/syndication-test-db.secret.yaml
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /insights-prod/xjoin-prod/advisor-db.secret.yaml
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /insights-prod/xjoin-prod/patch-db.secret.yaml
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /insights-prod/xjoin-prod/vulnerability-db.secret.yaml
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /insights-prod/xjoin-prod/compliance-db.secret.yaml
+  path: /insights-fedramp-prod/platform-mq/kafka-xjoin.secret.yaml
 
 managedTerraformResources: true
 
