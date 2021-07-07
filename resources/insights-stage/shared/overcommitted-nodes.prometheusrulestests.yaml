@@ -8,6 +8,27 @@ evaluation_interval: 1m
 
 tests:
 
+# PodMemoryHighRatio
+- interval: 1m
+  input_series:
+    - series: 'kube_pod_container_resource_limits{resource="memory", unit="byte", namespace="ns-1", pod="pod-1"}'
+      values: '1000+0x10'
+    - series: 'kube_pod_status_phase{phase="Running", namespace="ns-1", pod="pod-1"}'
+      values: '1+0x5 0+0x5'
+    - series: 'kube_pod_container_resource_requests{resource="memory", unit="byte", namespace="ns-1", pod="pod-1"}'
+      values: '250+0x10'
+  promql_expr_test:
+    - expr: node_overcommitted:pod_memory:ratio
+      eval_time: 1m
+      exp_samples:
+        - labels: 'node_overcommitted:pod_memory:ratio{namespace="ns-1", pod="pod-1"}'
+          value: 4
+    - expr: node_overcommitted:pod_memory:ratio
+      eval_time: 6m
+      exp_samples:
+        - labels: 'node_overcommitted:pod_memory:ratio{namespace="ns-1", pod="pod-1"}'
+          value: 0
+
 # NodeOverCommittedMemory
 - interval: 1m
   input_series:
