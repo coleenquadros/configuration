@@ -1,8 +1,8 @@
-App-insights-hccm-worker-queue-overload
+App-cost-incomplete-manifests-In-hccm
 =======================================
 
-Severity: High
---------------
+Severity: Warning
+-----------------
 
 Incident Response Plan
 ----------------------
@@ -12,12 +12,12 @@ Incident Response Plan
 Impact
 ------
 
--  The HCCM worker queues have experienced a high backlog over the last hour. This could cause a lag in customer data processing.
+-  The Cost Management APP process cost reports from public cloud providers. These reports can be large and made of numerous files. Completeing the processing of these files is what drives cost data into the application and makes it visible to customers.
 
 Summary
 -------
 
-This alert fires when the HCCM worker queues have had more than 1000 tasks in the queues in the past hour.
+This alert fires when it is taking longer than 10 minutes to process a single file for a current cost report. Slow processing or a bug in processing could lead to an overall lag for all customer data processing.
 
 Access required
 ---------------

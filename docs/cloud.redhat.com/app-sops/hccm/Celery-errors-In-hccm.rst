@@ -1,5 +1,5 @@
-App-insights-hccm-worker-queue-overload
-=======================================
+Celery-errors-In-hccm
+=====================
 
 Severity: High
 --------------
@@ -12,12 +12,12 @@ Incident Response Plan
 Impact
 ------
 
--  The HCCM worker queues have experienced a high backlog over the last hour. This could cause a lag in customer data processing.
+-  The HCCM worker use Celery to drive tasks for data processing. Errors mean a backlog in customer data processing maybe occurring.
 
 Summary
 -------
 
-This alert fires when the HCCM worker queues have had more than 1000 tasks in the queues in the past hour.
+This alert fires when the HCCM workers have experiencing errors over the last 5 minutes.
 
 Access required
 ---------------
@@ -31,7 +31,6 @@ Steps
 -  Log into the console / namespace and verify if worker pods are up / stuck / etc
 -  Check oc logs for error messages with severity of ERROR
 -  Check recent PR for changes made to the celery workers.
--  Scaling the workers should improve report processing throughput if its not a bug.
 -  Notify service owners if changes have occurred in the above
 
 Escalations

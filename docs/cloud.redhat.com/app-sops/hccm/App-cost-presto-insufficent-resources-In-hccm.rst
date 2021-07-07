@@ -1,5 +1,5 @@
-App-insights-hccm-worker-queue-overload
-=======================================
+App-cost-presto-insufficent-resources-In-hccm
+=============================================
 
 Severity: High
 --------------
@@ -12,12 +12,12 @@ Incident Response Plan
 Impact
 ------
 
--  The HCCM worker queues have experienced a high backlog over the last hour. This could cause a lag in customer data processing.
+-  The HCCM presto worker requests have been failing due to insufficient resources the last 5 minutes. This could cause a lag in customer data processing if enough workers requests cannot complete.
 
 Summary
 -------
 
-This alert fires when the HCCM worker queues have had more than 1000 tasks in the queues in the past hour.
+This alert fires when the HCCM presto worker requests fail due to insufficent resources in the past 5 minutes.
 
 Access required
 ---------------
@@ -28,10 +28,10 @@ Access required
 Steps
 -----
 
--  Log into the console / namespace and verify if worker pods are up / stuck / etc
+-  Log into the console / namespace and verify if presto worker pods are up / stuck / etc
 -  Check oc logs for error messages with severity of ERROR
--  Check recent PR for changes made to the celery workers.
--  Scaling the workers should improve report processing throughput if its not a bug.
+-  Check recent PR for changes made to the presto workers.
+-  Increase the CPU or Memory Limit if its not a bug and redeploy.
 -  Notify service owners if changes have occurred in the above
 
 Escalations

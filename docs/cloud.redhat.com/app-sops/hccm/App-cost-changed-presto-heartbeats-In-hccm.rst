@@ -1,5 +1,5 @@
-App-insights-hccm-worker-queue-overload
-=======================================
+App-cost-changed-presto-heartbeats-In-hccm
+==========================================
 
 Severity: High
 --------------
@@ -12,12 +12,12 @@ Incident Response Plan
 Impact
 ------
 
--  The HCCM worker queues have experienced a high backlog over the last hour. This could cause a lag in customer data processing.
+-  The HCCM presto worker count has changed the last 5 minutes. This could cause a lag in customer data processing if enough workers aren't running.
 
 Summary
 -------
 
-This alert fires when the HCCM worker queues have had more than 1000 tasks in the queues in the past hour.
+This alert fires when the HCCM presto worker count has changed in the past 5 minutes.
 
 Access required
 ---------------
@@ -28,10 +28,10 @@ Access required
 Steps
 -----
 
--  Log into the console / namespace and verify if worker pods are up / stuck / etc
+-  Log into the console / namespace and verify if presto worker pods are up / stuck / etc
 -  Check oc logs for error messages with severity of ERROR
--  Check recent PR for changes made to the celery workers.
--  Scaling the workers should improve report processing throughput if its not a bug.
+-  Check recent PR for changes made to the presto workers.
+-  Scaling or restart the presto workers improve if its not a bug and processing is impacted.
 -  Notify service owners if changes have occurred in the above
 
 Escalations

@@ -1,8 +1,8 @@
-App-insights-hccm-worker-queue-overload
-=======================================
+App-cost-upload-lag-In-hccm
+=============================
 
-Severity: High
---------------
+Severity: Warning
+-----------------
 
 Incident Response Plan
 ----------------------
@@ -12,12 +12,12 @@ Incident Response Plan
 Impact
 ------
 
--  The HCCM worker queues have experienced a high backlog over the last hour. This could cause a lag in customer data processing.
+-  The HCCM OpenShift cluster upload queue is growing, if data is not processed within 48 hours it could be lost. An increasing processing queue also cretes lag on when customers can see data.
 
 Summary
 -------
 
-This alert fires when the HCCM worker queues have had more than 1000 tasks in the queues in the past hour.
+This alert fires when the upload queue exceeds 100 for the last 10 minutes.
 
 Access required
 ---------------
@@ -28,10 +28,10 @@ Access required
 Steps
 -----
 
--  Log into the console / namespace and verify if worker pods are up / stuck / etc
+-  Log into the console / namespace and verify if listener pods are up / stuck / etc
 -  Check oc logs for error messages with severity of ERROR
--  Check recent PR for changes made to the celery workers.
--  Scaling the workers should improve report processing throughput if its not a bug.
+-  Check recent PR for changes made to the deployments
+-  Scale up the deployment in order to handle the increase in uploads
 -  Notify service owners if changes have occurred in the above
 
 Escalations

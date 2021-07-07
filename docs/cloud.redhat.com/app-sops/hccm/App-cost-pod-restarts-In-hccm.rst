@@ -1,5 +1,5 @@
-App-insights-hccm-worker-queue-overload
-=======================================
+App-cost-pod-restarts-In-hccm
+=============================
 
 Severity: High
 --------------
@@ -12,12 +12,12 @@ Incident Response Plan
 Impact
 ------
 
--  The HCCM worker queues have experienced a high backlog over the last hour. This could cause a lag in customer data processing.
+-  The HCCM pods are crash looping which could impact customer data processing or the viewing of data depending on the component crashing.
 
 Summary
 -------
 
-This alert fires when the HCCM worker queues have had more than 1000 tasks in the queues in the past hour.
+This alert fires when pod restarts are occurring more than 5x/1h for the last 30 minutes.
 
 Access required
 ---------------
@@ -28,10 +28,10 @@ Access required
 Steps
 -----
 
--  Log into the console / namespace and verify if worker pods are up / stuck / etc
+-  Log into the console / namespace and verify if pods are up / stuck / etc
 -  Check oc logs for error messages with severity of ERROR
--  Check recent PR for changes made to the celery workers.
--  Scaling the workers should improve report processing throughput if its not a bug.
+-  Check recent PR for changes made to the deployments
+-  Check events for resource limits being hit and if so redeploy with increased limits
 -  Notify service owners if changes have occurred in the above
 
 Escalations
