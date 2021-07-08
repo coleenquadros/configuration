@@ -1,0 +1,38 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: certman-operator
+description: staging namespace for certman-operator
+
+cluster:
+  $ref: /openshift/hivep05ue1/cluster.yml
+
+app:
+  $ref: /services/osd-operators/app.yml
+
+environment:
+  $ref: /products/osdv4/environments/production-hivep05ue1.yml
+
+networkPoliciesAllow:
+- $ref: /openshift/hivep05ue1/namespaces/openshift-operator-lifecycle-manager.yml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.hivep05ue1.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ConfigMap
+
+openshiftResources:
+- provider: vault-secret
+  path: osd-sre/hive-production/certman-operator/lets-encrypt-account-staging
+  version: 2
+- provider: vault-secret
+  path: osd-sre/hive-production/certman-operator/lets-encrypt-account-production
+  version: 2
+- provider: vault-secret
+  path: osd-sre/hive-production/certman-operator/certman-operator-aws-credentials
+  version: 1
+- provider: resource
+  path: /hive-production/certman-operator/certman-operator.configmap.yaml
