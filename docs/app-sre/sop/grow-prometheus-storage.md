@@ -20,3 +20,8 @@ This is an SOP intended for use by an AppSRE team member to increase storage in 
     $ oc delete pod prometheus-app-sre-0
     $ oc delete pod prometheus-app-sre-1
     ```
+1. Verify that the new storage size is reflected properly in the prometheus pods:
+    ```sh
+    $ oc rsh -c prometheus prometheus-app-sre-0 df -h /prometheus
+    $ oc rsh -c prometheus prometheus-app-sre-1 df -h /prometheus
+    ```
