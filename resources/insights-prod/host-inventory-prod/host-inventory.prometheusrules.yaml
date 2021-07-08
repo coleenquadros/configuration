@@ -14,7 +14,7 @@ spec:
     rules:
     # pagerduty
     - alert: App-host-inventory-service-In-host-inventory-prod-Absent
-      expr: absent(up{service="host-inventory-service", namespace="host-inventory-prod"}) or up{service="host-inventory-service", namespace="host-inventory-prod"} == 0
+      expr: absent(up{service="host-inventory-service", namespace="host-inventory-prod"}) or sum(up{namespace="host-inventory-prod",service="host-inventory-service"}) < 5
       for: 5m
       labels:
         severity: critical
@@ -42,6 +42,19 @@ spec:
         link_url: https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/host-inventory-prod/deployments
         message: 'Insights Inventory Alert (Prod). Insights Inventory error rate > 10% for 5 minutes'
     #Not pagerduty
+    - alert: App-host-inventory-service-In-host-inventory-prod-availability
+      expr: count(up{namespace="host-inventory-prod",service="host-inventory-service"} == 0) > 1
+      for: 10m
+      labels:
+        severity: medium
+        service: insights
+        env: prod
+        app_team: inventory
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/host-inventory-prod/deployments"
+        message: "Host inventory availability issues in production"
+        runbook: "https://clouddot.pages.redhat.com/docs/dev/developer-references/sop/inventory.html"
     - alert: InventoryHttp5xx
       expr: sum(rate(inventory_http_request_total{namespace="host-inventory-prod", service="host-inventory-service", status=~"5[0-9]{2}"}[10m])) by (namespace) / sum(rate(inventory_http_request_total{namespace="host-inventory-prod", service="host-inventory-service"}[10m])) by (namespace) * 100  > 5
       labels:
