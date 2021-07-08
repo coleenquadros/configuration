@@ -15,7 +15,8 @@ This is an SOP intended for use by an AppSRE team member to increase storage in 
     $ oc edit pvc prometheus-app-sre-db-prometheus-app-sre-1
     ```
     > Note: this is needed due to https://github.com/prometheus-operator/prometheus-operator/issues/4079
-1. Delete the StatefulSet, which will cause pods to restart and for PVCs to be grown to new size:
+1. Delete the pods one by one, which will cause PVCs to be grown to the new size. Wait for each one to be Ready to avoid downtime:
     ```sh
-    $ oc delete sts prometheus-app-sre
+    $ oc delete pod prometheus-app-sre-0
+    $ oc delete pod prometheus-app-sre-1
     ```
