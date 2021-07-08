@@ -70,9 +70,9 @@ spec:
       GROUP_URL="$PUSHGW_URL/metrics/job/$(params.job_name)/saas_file_name/$(params.saas_file_name)/env_name/$(params.env_name)"
       PUSH_METRIC="$(params.metric_name){saas_file_name=\"$(params.saas_file_name)\",env_name=\"$(params.env_name)\",pipeline_name=\"$(params.pipeline_name)\",pipelinerun_name=\"$(params.pipelinerun_name)\",task_name=\"$(params.task_name)\",tkn_cluster_console_url=\"$(params.tkn_cluster_console_url)\",tkn_namespace_name=\"$(params.tkn_namespace_name)\"}"
 
-      log "pushing '$PUSH_METRIC $STATUS' to $GROUP_URL"
+      log "PUTting '$PUSH_METRIC $STATUS' to $GROUP_URL"
 
-      HTTP_RESPONSE_CODE=$(curl -X POST -m 10 -sS -w '%{http_code}' -o /dev/null -H "Authorization: Basic $PUSHGW_CREDS_B64" --data-binary @- "$GROUP_URL" <<EOF
+      HTTP_RESPONSE_CODE=$(curl -X PUT -m 10 -sS -w '%{http_code}' -o /dev/null -H "Authorization: Basic $PUSHGW_CREDS_B64" --data-binary @- "$GROUP_URL" <<EOF
       # TYPE $(params.metric_name) gauge
       $PUSH_METRIC $STATUS
       EOF
