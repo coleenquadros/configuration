@@ -133,12 +133,6 @@ There are a couple of choices depending on the state of onboarding the service i
 [here](https://visual-app-interface.devshift.net/services)
 _Note: To the right of the search for services the drop down defaults to "show child apps" you can choose to hide these by selecting the "hide child apps" option_
 
-### Delete target from SaaS file
-
-To delete a target from a SaaS file, set `delete: true` in the target you wish to delete. This will cause all associated resources to be deleted in the next deployment. Follow this up with another MR to delete the target from the SaaS file.
-
-More information: [Continuous Delivery in App-interface](/docs/app-sre/continuous-delivery-in-app-interface.md)
-
 #### OnBoarded Services
 
 __Example service:__ [quay.io](https://visual-app-interface.devshift.net/services#/services/quayio/app.yml)
@@ -158,6 +152,12 @@ Now that the fire is out, please work towards not having to do this again. The s
 1. A dependency of the pod is not responding (example: Kafka). You may want to consider using Kubernetes health probes. We can highly recommend:
 A liveness probe that checks your container's health thoroughly; on a liveness probe failure, Kubernetes restarts the container. A readiness probe that takes a container out of service if it is not healthy.
 2. A new version of a Secret/ConfigMap has been rolled out. You may use the `qontract.recycle: "true"` annotation to indicate that any pods using these resources should be restarted upon update. More information [here](/README.md#manage-openshift-resources-via-app-interface-openshiftnamespace-1yml).
+
+### Delete target from SaaS file
+
+To delete a target from a SaaS file, set `delete: true` in the target you wish to delete. This will cause all associated resources to be deleted in the next deployment. Follow this up with another MR to delete the target from the SaaS file.
+
+More information: [Continuous Delivery in App-interface](/docs/app-sre/continuous-delivery-in-app-interface.md)
 
 ### Jenkins is going to shutdown
 
