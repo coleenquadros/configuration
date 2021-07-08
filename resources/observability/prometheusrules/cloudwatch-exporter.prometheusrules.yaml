@@ -13,6 +13,7 @@ spec:
     rules:
     - alert: CloudWatchExporterDown
       labels:
+        service: app-sre-observability
         severity: critical
       expr: absent(up{job=~"cloudwatch-exporter.*"} == 1)
       for: 5m
@@ -22,6 +23,7 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net"
     - alert: CloudWatchExporterScrapeError
       labels:
+        service: app-sre-observability
         severity: medium
       expr: cloudwatch_exporter_scrape_error{job=~"cloudwatch-exporter.*"} != 0
       for: 5m
@@ -31,6 +33,7 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net"
     - alert: CloudWatchExporterScrapeDuration
       labels:
+        service: app-sre-observability
         severity: warning
       expr: cloudwatch_exporter_scrape_duration_seconds{job=~"cloudwatch-exporter.*"} >= 15
       annotations:
@@ -41,6 +44,7 @@ spec:
     rules:
     - alert: S3SuddenIncreaseBytesUsed
       labels:
+        service: app-sre-observability
         severity: warning
       expr: (avg_over_time(aws_s3_bucket_size_bytes_average{job=~"cloudwatch-exporter.*"}[1d]) / avg_over_time(aws_s3_bucket_size_bytes_average{job=~"cloudwatch-exporter.*"}[1d] offset 1d) -1) * 100 > 20 and (aws_s3_bucket_size_bytes_average{job=~"cloudwatch-exporter.*"} - aws_s3_bucket_size_bytes_average{job=~"cloudwatch-exporter.*"} offset 1d) / 1000 / 1000 > 1000
       annotations:
@@ -51,6 +55,7 @@ spec:
     rules:
     - alert: RDSHighCPUUtilization
       labels:
+        service: app-sre-observability
         severity: warning
       expr: aws_rds_cpuutilization_average{job=~"cloudwatch-exporter.*"} offset 10m > 85
       for: 15m
@@ -60,6 +65,7 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net"
     - alert: RDSLowFreeMemory
       labels:
+        service: app-sre-observability
         severity: warning
       expr: aws_rds_freeable_memory_average{job=~"cloudwatch-exporter.*"} offset 10m < (200 * 1024^2)
       annotations:
@@ -68,6 +74,7 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net"
     - alert: RDSLowStorageSpace
       labels:
+        service: app-sre-observability
         severity: warning
       expr: aws_rds_free_storage_space_average{job=~"cloudwatch-exporter.*"} offset 10m < (1 * 1024^3)
       for: 30m
@@ -77,6 +84,7 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net"
     - alert: RDSPredictOutOfStorage
       labels:
+        service: app-sre-observability
         severity: high
       expr: predict_linear(aws_rds_free_storage_space_average[1h], 3600 * 24 * 3) < 0
       for: 1h
@@ -86,6 +94,7 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net"
     - alert: RDSPredictOutOfBurstBalance
       labels:
+        service: app-sre-observability
         severity: high
       expr: predict_linear(aws_rds_burst_balance_average[1h], 3600 * 8) < 0
       for: 5m
@@ -94,6 +103,7 @@ spec:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/sop/rds-burst-balance.md"
     - alert: RDSHighAverageReadLatency
       labels:
+        service: app-sre-observability
         severity: warning
       expr: aws_rds_read_latency_average{job=~"cloudwatch-exporter.*"} offset 10m >= 1
       annotations:
@@ -102,6 +112,7 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net"
     - alert: RDSHighAverageWriteLatency
       labels:
+        service: app-sre-observability
         severity: warning
       expr: aws_rds_write_latency_average{job=~"cloudwatch-exporter.*"} offset 10m >= 1.1
       for: 10m
@@ -113,6 +124,7 @@ spec:
     rules:
     - alert: EC2HighCPUUtilization
       labels:
+        service: app-sre-observability
         severity: warning
       expr: aws_ec2_cpuutilization_average{job=~"cloudwatch-exporter.*"} offset 10m > 85
       for: 60m
