@@ -1,4 +1,4 @@
-App-cost-upload-lag-In-hccm
+App-cost-sources-lag-In-hccm
 =============================
 
 Severity: Warning
@@ -12,12 +12,12 @@ Incident Response Plan
 Impact
 ------
 
--  The HCCM OpenShift cluster upload queue is growing, if data is not processed within 48 hours it could be lost. An increasing processing queue also cretes lag on when customers can see data.
+-  The HCCM Sources queue is growing, if events are not processed in a reasonable period of time source create, update, and deletes will not be handled, which could impact data processing for the source. 
 
 Summary
 -------
 
-This alert fires when the upload queue exceeds 100 for the last 10 minutes.
+This alert fires when the sources event queue exceeds 800 for the last 10 minutes.
 
 Access required
 ---------------
@@ -28,11 +28,11 @@ Access required
 Steps
 -----
 
--  Log into the console / namespace and verify if listener pods are up / stuck / etc
+-  Log into the console / namespace and verify if sources pods are up / stuck / etc
 -  Check oc logs for error messages with severity of ERROR
 -  Check recent PR for changes made to the deployments
 -  Check for blocking DB queries or slow queries that may need canceling
--  Scale up the deployment in order to handle the increase in uploads
+-  Scale up the deployment in order to handle the increase in events
 -  Notify service owners if changes have occurred in the above
 
 Escalations
@@ -42,3 +42,4 @@ Escalations
 -  Ping the engineering team that owns the APP
 
 .. _Incident Response Doc: https://docs.google.com/document/d/1ztiNN7PiAsbr0GUSKjiLiS1_TGVpw7nd_OFWMskWD8w/edit?usp=sharing
+
