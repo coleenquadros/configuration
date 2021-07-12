@@ -147,30 +147,6 @@ data:
                 trusted_ca:
                   filename: /etc/ssl/certs/ca-certificates.crt
 
-      # Cluster for the `managed-services-api` service:
-      # TODO Remove this as part of https://issues.redhat.com/browse/MGDSTRM-3465
-      - name: managed-services-api
-        connect_timeout: 2s
-        type: STRICT_DNS
-        lb_policy: ROUND_ROBIN
-        load_assignment:
-          cluster_name: managed-services-api
-          endpoints:
-          - lb_endpoints:
-            - endpoint:
-                address:
-                  socket_address:
-                    address: 3hax1xs5qgrci1r.api.stage.openshift.com
-                    port_value: 443
-        transport_socket:
-          name: envoy.transport_sockets.tls
-          typed_config:
-            "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
-            common_tls_context:
-              validation_context:
-                trusted_ca:
-                  filename: /etc/ssl/certs/ca-certificates.crt
-
       # Cluster for the `kafkas_mgmt` service:
       - name: kafkas_mgmt
         connect_timeout: 2s
@@ -332,10 +308,6 @@ data:
                                 "name": "assisted-service service"
                               },
                               {
-                                "id": "managed-services-api",
-                                "name": "managed-services-api service"
-                              },
-                              {
                                 "id": "kafkas_mgmt",
                                 "name": "kafka service fleet manager service"
                               },
@@ -372,16 +344,6 @@ data:
                       cluster: assisted-install
                       auto_host_rewrite: true
                       timeout: 180s
-
-                  # Route for the `managed-services-api` service:
-                  # TODO Remove this as part of https://issues.redhat.com/browse/MGDSTRM-3465
-                  - name: managed-services-api
-                    match:
-                      prefix: /api/managed-services-api
-                    route:
-                      cluster: managed-services-api
-                      auto_host_rewrite: true
-                      timeout: 30s
 
                   # Route for the `kafkas_mgmt` service:
                   - name: kafkas_mgmt
