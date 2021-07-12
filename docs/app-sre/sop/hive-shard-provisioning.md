@@ -460,23 +460,6 @@ osd2e2e tests use `osdctl` to create new clusters periodically and run validatio
     $ oc get pods -n aws-account-operator
     ```
 
-1. Deploy an AccountPool CR in the new hive shard
-
-    Apply to the new shard an [AccountPool CR](https://github.com/openshift/aws-account-operator/blob/master/deploy/crds/aws_v1alpha1_accountpool_cr.yaml) with PoolSize = 50
-
-    [Card to automate this step](https://issues.redhat.com/browse/OSD-4602)
-
-1. Apply AWSFederatedRoles
-
-    Apply all AWSFederatedRoles from the [deploy/crds](https://github.com/openshift/aws-account-operator/tree/master/deploy/crds) folder, using:
-
-    ```
-    $ osdctl federatedrole apply -f aws_v1alpha1_awsfederatedrole_networkmgmt_cr.yaml
-    $ osdctl federatedrole apply -f aws_v1alpha1_awsfederatedrole_readonly_cr.yaml
-    ```
-
-    [Card to automate this step](https://issues.redhat.com/browse/OSD-4603)
-
 1. Validate - Confirm accounts have been created to fill the Pool
 
     Check the account CRs in the new shard have been created, initialized and have EnterpriseSupport on, by checking the account CRs. Account creation and initialization takes around 1min/account, so initializing the initial pool of 50 accounts will take close to 1hour. After this period you’ll notice the account CRs will be moved to the PendingVerification status:
