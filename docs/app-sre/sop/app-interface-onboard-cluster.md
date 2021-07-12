@@ -108,13 +108,6 @@ This step should be performed in a single merge request.
     addons: # optional, specify addons to be installed
     - $ref: /dependencies/ocm/addons/<addon_name>.yml
 
-    disable:
-      e2eTests:
-      - create-namespace
-      - dedicated-admin-rolebindings
-      - default-network-policies
-      - default-project-labels
-
     internal: false
 
     awsInfrastructureAccess:
@@ -312,19 +305,6 @@ At this point you should be able to access the cluster via the console / `oc` cl
       path: /setup/self-provisioners.clusterrolebinding.yaml
     - provider: resource
       path: /setup/dedicated-readers.clusterrolebinding.yaml
-    ```
-
-1. Re-enable e2e tests on the cluster by removing the following lines from the cluster definition:
-
-    ```yaml
-    # /data/openshift/<cluster_name>/cluster.yml
-    ...
-    disable:
-      e2eTests:
-      - create-namespace
-      - dedicated-admin-rolebindings
-      - default-network-policies
-      - default-project-label
     ```
 
 1. Send the MR, wait for the check to pass and merge.
