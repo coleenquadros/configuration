@@ -12,7 +12,7 @@ Incident Response Plan
 Impact
 ------
 
--  The Cost Management APP provide cost data around OpenShift clustes and public cloud infrastructure. If the API component is down or absent then not data is available to customers.
+-  The Cost Management APP provide cost data around OpenShift clustes and public cloud infrastructure. If the API component is down or absent then no data is available to customers.
 
 Summary
 -------
