@@ -108,14 +108,6 @@ Add a new directory named after the shard name here: [`/data/services/osd-operat
 * It is typical to copy the content from another shard of the same environment as we are re-using the same configs and secrets for all shards. Unless instructed otherwise, start with a prod as an example as it will have a really working setup.
 * Make sure that the namespaces belong to the environment created above.
 
-#### SREP IDP SelectorSyncSets
-
-The `OpenShift_SRE` IDP associated to every OSD is configured via a SelectorSyncSet in hive:
-
-- `osd-google-secret` for production environments, e.g. [/data/services/osd-operators/namespaces/hivep01ue1/cluster-scope.yml](/data/services/osd-operators/namespaces/hivep01ue1/cluster-scope.yml)
-
-Make sure that the SSS deployed corresponds to your environment
-
 #### saas deploy jobs
 
 OSD operator are deployed using saas-file. In order to deploy to a new shard, a new target must be added to all of the OSD operators saas files located here: [`/data/services/osd-operators/cicd/saas`](/data/services/osd-operators/cicd/saas)
@@ -467,23 +459,6 @@ osd2e2e tests use `osdctl` to create new clusters periodically and run validatio
     ```
     $ oc get pods -n aws-account-operator
     ```
-
-1. Deploy an AccountPool CR in the new hive shard
-
-    Apply to the new shard an [AccountPool CR](https://github.com/openshift/aws-account-operator/blob/master/deploy/crds/aws_v1alpha1_accountpool_cr.yaml) with PoolSize = 50
-
-    [Card to automate this step](https://issues.redhat.com/browse/OSD-4602)
-
-1. Apply AWSFederatedRoles
-
-    Apply all AWSFederatedRoles from the [deploy/crds](https://github.com/openshift/aws-account-operator/tree/master/deploy/crds) folder, using:
-
-    ```
-    $ osdctl federatedrole apply -f aws_v1alpha1_awsfederatedrole_networkmgmt_cr.yaml
-    $ osdctl federatedrole apply -f aws_v1alpha1_awsfederatedrole_readonly_cr.yaml
-    ```
-
-    [Card to automate this step](https://issues.redhat.com/browse/OSD-4603)
 
 1. Validate - Confirm accounts have been created to fill the Pool
 
