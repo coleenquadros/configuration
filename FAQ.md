@@ -104,6 +104,7 @@ To get access to CloudWatch on a cluster's AWS account, follow these steps (exam
     * For cloud.redhat.com use the [log-consumer-crc](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre/roles/log-consumer-crc.yml) role.
 1. Once the MR is merged you will get an email invitation to join the AWS account (in this example - the `app-sre` account). Follow the instructions in the email to login to the account.
     * Note: in case you did not get an invitation, the login details can be obtained from the [Terraform-users Credentials](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/terraform-users-credentials.md) page.
+    * Note: to decrypt the password: `echo <password> | base64 -d | gpg -d - && echo` (you will be asked to provide your passphrase to unlock the secret) 
 1. Once you are logged in, go to [Security Credentials page](https://console.aws.amazon.com/iam/home?#/security_credentials) and enable Multi-factor authentication (MFA).
 1. Logout and login to the account again using the configured MFA device.
 1. Once you are logged in, navigate to the Switch Role link obtained from the [ocm-aws-infrastructure-access-switch-role-links](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/ocm-aws-infrastructure-access-switch-role-links.md) page (suggestion: add to bookmarks).
