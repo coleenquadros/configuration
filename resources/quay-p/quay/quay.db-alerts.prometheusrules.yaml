@@ -1,0 +1,35 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: quay-db-alerts
+spec:
+  groups:
+  - name: quay-db-alerts
+    rules:
+    - alert: QuayDatabaseConnectionsHigh
+      expr: |
+        aws_rds_database_connections_average{job="cloudwatch-exporter-quay",dbinstance_identifier="quayio-production"} >= 5000
+      for: 5m
+      labels:
+        severity: high # TODO: change to critical once the alert is proven in APPSRE-3300
+        service: quay
+      annotations:
+        message: "quayio-production database connections is over 5000 for 5 minutes"
+        dashboard: "https://grafana.app-sre.devshift.net/d/_BkydJaWqprod1234/quay-aws-resources-us-east-1?orgId=1&refresh=1m"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/issues/high-database-connections.md"
+    - alert: QuayDatabaseConnectionsCritical
+      expr: |
+        aws_rds_database_connections_average{job="cloudwatch-exporter-quay",dbinstance_identifier="quayio-production"} >= 7000
+      for: 2m
+      labels:
+        severity: critical
+        service: quay
+      annotations:
+        message: "quayio-production database connections is over 7000 for 2 minutes"
+        dashboard: "https://grafana.app-sre.devshift.net/d/_BkydJaWqprod1234/quay-aws-resources-us-east-1?orgId=1&refresh=1m"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/issues/high-database-connections.md"
