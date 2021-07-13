@@ -152,6 +152,9 @@ Every AppSRE/MT-SRE engineer should have access to the following:
     * Attach with Red Hat SSO.
   * Access obtained via a [role](/data/teams/app-sre/roles/app-sre.yml)
   * Add `quay_username` in the [user file](https://gitlab.cee.redhat.com/service/app-interface/tree/master/data/teams/app-sre/users) and populate with quay user.
+* ssh access to jenkins related instances
+  * Via MR to [app-sre/infra repo](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ansible/hosts/group_vars/all)
+    * add username and public part of your ssh key like [here](https://gitlab.cee.redhat.com/app-sre/infra/-/merge_requests/144)
 
 Every AppSRE engineer should have access to the following:
 
