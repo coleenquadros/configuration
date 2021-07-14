@@ -53,3 +53,62 @@ resourceTemplates:
     parameters:
       MIN_REPLICAS: "1"
       HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+
+- name: insights-result-aggregator
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/insights-results-aggregator/
+  targets:
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
+    ref: 65839fa15c22bf2d422442386d48cd496b8af071
+    parameters:
+      IMAGE_TAG: 4f5ce4c
+      MIN_REPLICAS: "2"
+      MAX_REPLICAS: "6"
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true
+    ref: internal
+    parameters:
+      MIN_REPLICAS: "1"
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+
+- name: ccx-insights-result-db-writer
+  path: /deploy/irdb_clowdapp.yaml
+  url: https://github.com/RedHatInsights/insights-results-aggregator/
+  targets:
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
+    ref: 65839fa15c22bf2d422442386d48cd496b8af071
+    parameters:
+      IMAGE_TAG: 4f5ce4c
+      MIN_REPLICAS: "1"
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true
+    ref: internal
+    parameters:
+      MIN_REPLICAS: "1"
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+
+- name: insights-results-smart-proxy
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/insights-results-smart-proxy
+  targets:
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
+    ref: 2f057d251d119678be9e7be7ea3d6b61071eeb70
+    parameters:
+      IMAGE_TAG: 318df37
+      MIN_REPLICAS: "2"
+      MAX_REPLICAS: "6"
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true
+    ref: internal
+    parameters:
+      MIN_REPLICAS: "1"
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
