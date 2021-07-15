@@ -625,6 +625,8 @@ At this point you should be able to access the cluster via the console / `oc` cl
       path: app-sre/creds/kube-configs/<cluster_name>-cluster-admin
       field: token
 
+1. Remove yourself from the cluster-admin group via OCM.
+
 # Additional configurations
 
 ## Selecting a Machine CIDR for VPC peerings
