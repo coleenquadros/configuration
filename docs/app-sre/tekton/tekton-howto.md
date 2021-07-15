@@ -45,6 +45,12 @@ Perform the following actions in a single MR:
 
     managedRoles: true
 
+    # choose a size suitable for the amount of deployed resources
+    # the bigger the template, the bigger the size
+    # start with large and grow if you see OOMKill events
+    limitRanges:
+      $ref: /dependencies/openshift/limitranges/pipelines-resource-limits-large.yml
+
     managedResourceTypes:
     - Secret
     - Task
