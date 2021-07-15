@@ -1,4 +1,4 @@
-# Service Registry Service Tenant Manager API - Availability SLO/SLI
+# Service Registry Service - Tenant Manager API - Availability SLO/SLI
 
 ## SLI description
 We are measuring the proportion of requests that resulted in a successful response from the endpoints external users can interact with.
