@@ -83,34 +83,37 @@ resourceTemplates:
       REDIS_SECRET: "quayio-elasticache"
       IMAGE: "quay.io/app-sre/flush-redis"
       JOB_NAME: "flush-redis-prod-2021-07-01"
+
 - name: quayio-recovery-endpoint
   path: /deploy/openshift/quay-recovery-endpoint.yaml
   url: https://github.com/quay/quay
+  parameters:
+    IMAGE: quay.io/app-sre/quay
+    IMAGE_TAG: a07b2c9
+    QUAY_ENTRYPOINT: registry
+    QUAY_APP_DEPLOYMENT_REPLICAS: 1
+    QUAY_APP_CPU_REQUEST: 1
+    QUAY_APP_CPU_LIMIT: 5
+    QUAY_APP_MEMORY_REQUEST: 4Gi
+    QUAY_APP_MEMORY_LIMIT: 24Gi
+    QUAY_APP_DEPLOYMENT_PROGRESS_DEADLINE_SECONDS: 1800
+    QUAY_APP_DEPLOYMENT_MAX_SURGE: 1
+    QUAY_APP_READINESS_PROBE_TIMEOUT_SECONDS: 20
+    QUAY_APP_LIVENESS_PROBE_TIMEOUT_SECONDS: 20
+    QUAY_APP_LIVENESS_PROBE_PERIOD_SECONDS: 15
+    QUAY_APP_DEPLOYMENT_NAMESPACE: quay
+    QUAY_APP_COMPONENT_LABEL_VALUE: app-recovery
+    QUAY_APP_CONFIG_SECRET: quay-config-recovery-secret
+    DEBUGLOG: "true"
+    QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "update_me_when_secret_changes_v2"
+    QUAY_WORKER_MULTIPLIER_REGISTRY: 1
+    QUAY_WORKER_CONNECTION_COUNT_REGISTRY: 80
+    SYSLOG_IMAGE: quay.io/app-sre/syslog-cloudwatch-bridge
+    SYSLOG_IMAGE_TAG: c19d7d1
   targets:
   - namespace:
       $ref: /services/quayio/namespaces/quays02ue1.yml
     ref: a07b2c9c7cf9ddac9c79ba7f1023b4fcc013327b
-    parameters:
-      IMAGE: quay.io/app-sre/quay
-      IMAGE_TAG: a07b2c9
-      QUAY_ENTRYPOINT: registry
-      QUAY_APP_DEPLOYMENT_REPLICAS: 1
-      QUAY_APP_CPU_REQUEST: 1
-      QUAY_APP_CPU_LIMIT: 5
-      QUAY_APP_MEMORY_REQUEST: 4Gi
-      QUAY_APP_MEMORY_LIMIT: 24Gi
-      QUAY_APP_DEPLOYMENT_PROGRESS_DEADLINE_SECONDS: 1800
-      QUAY_APP_DEPLOYMENT_MAX_SURGE: 1
-      QUAY_APP_READINESS_PROBE_TIMEOUT_SECONDS: 20
-      QUAY_APP_LIVENESS_PROBE_TIMEOUT_SECONDS: 20
-      QUAY_APP_LIVENESS_PROBE_PERIOD_SECONDS: 15
-      QUAY_APP_DEPLOYMENT_NAMESPACE: quay
-      QUAY_APP_COMPONENT_LABEL_VALUE: app-recovery
-      QUAY_APP_CONFIG_SECRET: quay-config-secret-recovery
-      DEBUGLOG: "true"
-      QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "update_me_when_secret_changes_v1"
-      QUAY_WORKER_MULTIPLIER_REGISTRY: 1
-      QUAY_WORKER_CONNECTION_COUNT_REGISTRY: 80
-      SYSLOG_IMAGE: quay.io/app-sre/syslog-cloudwatch-bridge
-      SYSLOG_IMAGE_TAG: c19d7d1
-
+  - namespace:
+      $ref: /services/quayio/namespaces/quayp05ue1.yml
+    ref: a07b2c9c7cf9ddac9c79ba7f1023b4fcc013327b
