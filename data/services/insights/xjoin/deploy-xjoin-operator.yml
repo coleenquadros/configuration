@@ -117,6 +117,29 @@ resourceTemplates:
     parameters:
       TARGET_NAMESPACE: xjoin
       SOURCE_NAMESPACE: xjoin
+      # Temporary until https://github.com/RedHatInsights/clowder/pull/390 is merged and released
+      DEBEZIUM_CONNECTOR_CONFIG: '{
+        "tasks.max": "{{.DebeziumTasksMax}}",
+        "database.hostname": "{{.HBIDBHost}}",
+        "database.port": "{{.HBIDBPort}}",
+        "database.user": "{{.HBIDBUser}}",
+        "database.password": "{{.HBIDBPassword}}",
+        "database.dbname": "{{.HBIDBName}}",
+        "database.server.name": "{{.ResourceNamePrefix}}.{{.Version}}",
+        "database.sslmode": "{{.HBIDBSSLMode}}",
+        "database.sslrootcert": "{{.HBIDBSSLRootCert}}",
+        "table.whitelist": "public.hosts",
+        "plugin.name": "pgoutput",
+        "transforms": "unwrap",
+        "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+        "transforms.unwrap.delete.handling.mode": "rewrite",
+        "errors.log.enable": {{.DebeziumErrorsLogEnable}},
+        "errors.log.include.messages": true,
+        "slot.name": "{{.ReplicationSlotName}}",
+        "max.queue.size": {{.DebeziumQueueSize}},
+        "max.batch.size": {{.DebeziumMaxBatchSize}},
+        "poll.interval.ms": {{.DebeziumPollIntervalMS}}
+      }'
     upstream:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
