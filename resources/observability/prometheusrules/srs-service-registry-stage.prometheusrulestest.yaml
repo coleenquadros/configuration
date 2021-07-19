@@ -1,0 +1,30 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+  - /observability/prometheusrules/srs-service-registry-stage.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+  - interval: 1m
+    input_series:
+      # 0m  - 20m Pod not absent
+      # 20m - 40m Pod absent
+      - series: 'up{job="apicurio-registry",namespace="service-registry-stage"}'
+        values: '1+0x20 0+0x20'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: SRSServiceRegistryDown - stage
+        exp_alerts:
+      - eval_time: 40m
+        alertname: SRSServiceRegistryDown - stage
+        exp_alerts:
+          - exp_labels:
+              alertname: SRSServiceRegistryDown - stage
+              service: srs-service-registry
+              severity: info
+            exp_annotations:
+              message: "No targets found for Service Registry in namespace . Service Registry is down."
+              dashboard: "https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?orgId=1"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/service-registry/sop#service-registry-down"
