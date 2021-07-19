@@ -117,10 +117,52 @@ resourceTemplates:
     parameters:
       TARGET_NAMESPACE: xjoin
       SOURCE_NAMESPACE: xjoin
+      # Temporary until https://github.com/RedHatInsights/clowder/pull/390 is merged and released
+      DEBEZIUM_CONNECTOR_CONFIG: '{
+        "tasks.max": "{{.DebeziumTasksMax}}",
+        "database.hostname": "{{.HBIDBHost}}",
+        "database.port": "{{.HBIDBPort}}",
+        "database.user": "{{.HBIDBUser}}",
+        "database.password": "{{.HBIDBPassword}}",
+        "database.dbname": "{{.HBIDBName}}",
+        "database.server.name": "{{.ResourceNamePrefix}}.{{.Version}}",
+        "database.sslmode": "{{.HBIDBSSLMode}}",
+        "database.sslrootcert": "{{.HBIDBSSLRootCert}}",
+        "table.whitelist": "public.hosts",
+        "plugin.name": "pgoutput",
+        "transforms": "unwrap",
+        "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+        "transforms.unwrap.delete.handling.mode": "rewrite",
+        "errors.log.enable": {{.DebeziumErrorsLogEnable}},
+        "errors.log.include.messages": true,
+        "slot.name": "{{.ReplicationSlotName}}",
+        "max.queue.size": {{.DebeziumQueueSize}},
+        "max.batch.size": {{.DebeziumMaxBatchSize}},
+        "poll.interval.ms": {{.DebeziumPollIntervalMS}}
+      }'
     upstream:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: RedHatInsights-xjoin-operator-gh-build-catalog-master-upstream-RedHatInsights-xjoin-operator-gh-build-master
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/xjoin-operator-fedramp-prod.yml
+    ref: 5a7ea46cfd034026e666437aa20b6d264a9477d0
+    parameters:
+      CONNECT_CLUSTER: xjoin-connect
+      TARGET_NAMESPACE: xjoin-operator-prod
+      SOURCE_NAMESPACE: xjoin-operator-prod
+      LOG_LEVEL: "info"
+      VALIDATION_PERIOD_MINUTES: "90"
+      VALIDATION_LAG_COMPENSATION_SECONDS: "600"
+      VALIDATION_ATTEMPTS_THRESHOLD: "2"
+      VALIDATION_INTERVAL: "600"
+      VALIDATION_INTERVAL_INIT: "60"
+      VALIDATION_ATTEMPTS_THRESHOLD_INIT: "30"
+      MANAGER_POD_MEM_LIMIT: "16Gi"
+      MANAGER_POD_CPU_LIMIT: "4"
+      MANAGER_POD_MEM_REQUESTS: "2Gi"
+      MANAGER_POD_CPU_REQUESTS: "1"
+      FULL_VALIDATION_ENABLED: "true"
 
 - name: xjoin-pipeline
   path: /deploy/pipeline.yml
@@ -148,6 +190,14 @@ resourceTemplates:
       name: RedHatInsights-xjoin-operator-gh-build-catalog-master-upstream-RedHatInsights-xjoin-operator-gh-build-master
     parameters:
       CONNECT_CLUSTER: "xjoin-connect"
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/xjoin-operator-fedramp-prod.yml
+    ref: 5a7ea46cfd034026e666437aa20b6d264a9477d0
+    parameters:
+      CONNECT_CLUSTER: "xjoin-connect"
+      KAFKA_CLUSTER_NAMESPACE: "platform-mq-prod"
+      CONNECT_CLUSTER_NAMESPACE: "xjoin-prod"
+
 - name: xjoin-kafka-user
   path: /deploy/kafka-user.yml
   url: https://github.com/RedHatInsights/xjoin-operator
@@ -159,3 +209,6 @@ resourceTemplates:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: RedHatInsights-xjoin-kafka-connect-gh-build-master
+  - namespace:
+      $ref: /services/insights/strimzi/namespaces/platform-mq-fedramp-prod.yml
+    ref: 02bfa8cc97dc7125f1c42b1feea6b711e182482f
