@@ -5,6 +5,17 @@ Service owners are able to define their deployment flow using a SaaS file.
 
 This functionality replaces the saasherder flow described [here](https://github.com/openshiftio/saasherder#the-process).
 
+## Overview
+
+A deployment process for a service is defined using a SaaS file. In a saas file, you define a list of resource templates to be deployed. For each such resource template, you define a url and path where the template can be found. You then define targets (namespaces) to deploy this template to.
+
+You would usually define the main branch as the ref to be deployed to stage, and a specific commit sha as the ref to be deployed to production. This means that a template's location is defined once, and deployed to multiple targets.
+
+This structure -
+- provides a notion of promotion - the same template is promoted across different environments (every targets is a namespace, and every namespace is associated to an environment)
+- adds confidence that what worked in stage will also work in production and
+- prevents inconsistencies between the resources deployed to each environment
+
 ## SaaS file structure
 
 In order to define Continuous Delivery pipelines in app-interface, define a SaaS file with the following structure -
