@@ -7,7 +7,7 @@ This functionality replaces the saasherder flow described [here](https://github.
 
 ## Overview
 
-A deployment process for a service is defined using a SaaS file. In a saas file, you define a list of resource templates to be deployed. For each such resource template, you define a url and path where the template can be found. You then define targets (namespaces) to deploy this template to.
+A deployment process for a service is defined using a SaaS file. In a SaaS file, you define a list of resource templates to be deployed. For each such resource template, you define a url and path where the template can be found. You then define targets (namespaces) to deploy this template to.
 
 You would usually define the main branch as the ref to be deployed to stage, and a specific commit sha as the ref to be deployed to production. This means that a template's location is defined once, and deployed to multiple targets.
 
