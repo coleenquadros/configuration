@@ -9,6 +9,8 @@ This functionality replaces the saasherder flow described [here](https://github.
 
 A deployment process for a service is defined using a SaaS file. In a SaaS file, you define a list of resource templates to be deployed. For each such resource template, you define a url and path where the template can be found. You then define targets (namespaces) to deploy this template to.
 
+In this context, deploying a resource template will usually consist in processing the Openshift template  via `oc process` and deploy it via `oc apply`. There is a way to deploy raw Openshift manifests, look below for the `provider` option.
+
 You would usually define the main branch as the ref to be deployed to stage, and a specific commit SHA as the ref to be deployed to production. This means that a template's location is defined once, and deployed to multiple targets.
 
 This structure -
