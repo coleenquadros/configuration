@@ -1,0 +1,110 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: srs-service-registry
+
+name: srs-service-registry
+
+namespaces:
+#TODO change the SLOs to use production namespace when created
+- $ref: /services/service-registry/namespaces/service-registry-stage.yml
+
+slos:
+- name: Service Registry API availability
+  SLIType: availability
+  SLISpecification: Percentage of service-registry requests that are served successfully (status code != 5xx)
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/service-registry/slos/srs-service-registry-api-availability.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(haproxy_backend_http_responses_total{route="service-registry-stage",exported_namespace="service-registry-stage",code!="5xx"}[{{window}}]))
+    /
+    sum(rate(haproxy_backend_http_responses_total{route="service-registry-stage",exported_namespace="service-registry-stage"}[{{window}}]))
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/srs-service-registry-slos-availability-stage.prometheusrules.yaml
+  prometheusRulesTests: /observability/prometheusrules/srs-service-registry-slos-availability-stage.prometheusrulestest.yaml
+  dashboard: https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?orgId=1
+
+- name: Service Registry API Latency 90%
+  SLIType: latency
+  SLISpecification: Percentage of the successful service-registry requests served under 100ms
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/service-registry/slos/srs-service-registry-api-latency.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(rest_requests_seconds_bucket{job="apicurio-registry",namespace="service-registry-stage",le="0.1",status_code_group!~"5xx"}[{{window}}]))
+    /
+    sum(rate(rest_requests_seconds_count{job="apicurio-registry",namespace="service-registry-stage"}[{{window}}]))
+  SLOTarget: 0.90
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/srs-service-registry-slos-latency-stage.prometheusrules.yaml
+  prometheusRulesTests: /observability/prometheusrules/srs-service-registry-slos-latency-stage.prometheusrulestest.yaml
+  dashboard: https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?orgId=1
+
+- name: Service Registry API Latency 99%
+  SLIType: latency
+  SLISpecification: Percentage of the successful service-registry requests served under 1000ms
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/service-registry/slos/srs-service-registry-api-latency.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(rest_requests_seconds_bucket{job="apicurio-registry",namespace="service-registry-stage",le="1.0",status_code_group!~"5xx"}[{{window}}]))
+    /
+    sum(rate(rest_requests_seconds_count{job="apicurio-registry",namespace="service-registry-stage"}[{{window}}]))
+  SLOTarget: 0.99
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/srs-service-registry-slos-latency-stage.prometheusrules.yaml
+  prometheusRulesTests: /observability/prometheusrules/srs-service-registry-slos-latency-stage.prometheusrulestest.yaml
+  dashboard: https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?orgId=1
+
+
+- name: Tenant Manager API availability
+  SLIType: availability
+  SLISpecification: Percentage of tenant-manager requests that are served successfully (status code != 5xx)
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/service-registry/slos/srs-tenant-manager-api-availability.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(rest_requests_count_total{job="tenant-manager",namespace="service-registry-stage",status_code_group!="5xx"}[{{window}}]))
+    /
+    sum(rate(rest_requests_count_total{job="tenant-manager",namespace="service-registry-stage"}[{{window}}]))
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/srs-tenant-manager-slos-availability-stage.prometheusrules.yaml
+  prometheusRulesTests: /observability/prometheusrules/srs-tenant-manager-slos-availability-stage.prometheusrulestest.yaml
+  dashboard: https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?orgId=1
+
+- name: Tenant Manager API Latency 90%
+  SLIType: latency
+  SLISpecification: Percentage of the successful tenant-manager requests served under 100ms
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/service-registry/slos/srs-tenant-manager-api-latency.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(rest_requests_seconds_bucket{job="tenant-manager",namespace="service-registry-stage",le="0.1",status_code_group!~"5xx"}[{{window}}]))
+    /
+    sum(rate(rest_requests_seconds_count{job="tenant-manager",namespace="service-registry-stage"}[{{window}}]))
+  SLOTarget: 0.90
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/srs-tenant-manager-slos-latency-stage.prometheusrules.yaml
+  prometheusRulesTests: /observability/prometheusrules/srs-tenant-manager-slos-latency-stage.prometheusrulestest.yaml
+  dashboard: https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?orgId=1
+
+- name: Tenant Manager API Latency 99%
+  SLIType: latency
+  SLISpecification: Percentage of the successful tenant-manager requests served under 1000ms
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/service-registry/slos/srs-tenant-manager-api-latency.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(rest_requests_seconds_bucket{job="tenant-manager",namespace="service-registry-stage",le="1.0",status_code_group!~"5xx"}[{{window}}]))
+    /
+    sum(rate(rest_requests_seconds_count{job="tenant-manager",namespace="service-registry-stage"}[{{window}}]))
+  SLOTarget: 0.99
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/srs-tenant-manager-slos-latency-stage.prometheusrules.yaml
+  prometheusRulesTests: /observability/prometheusrules/srs-tenant-manager-slos-latency-stage.prometheusrulestest.yaml
+  dashboard: https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?orgId=1
+

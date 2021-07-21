@@ -55,10 +55,9 @@ fi
 
 "$DELETE" || echo "Not going to delete resources"
 
-SUBSCRIPTION=$(oc get sub -n ${NAMESPACE} -o jsonpath={.items[].metadata.name})
-CATALOG_SOURCE=$(oc get catalogsource -n ${NAMESPACE} -o jsonpath={.items[].metadata.name})
-OPERATOR_GROUP=$(oc get og -n ${NAMESPACE} -o jsonpath={.items[].metadata.name})
-
+SUBSCRIPTION=$(oc get sub -n ${NAMESPACE} -o jsonpath={.items[].metadata.name} | grep hive)
+CATALOG_SOURCE=$(oc get catalogsource -n ${NAMESPACE} -o jsonpath={.items[].metadata.name} | grep hive)
+OPERATOR_GROUP=$(oc get og -n ${NAMESPACE} -o jsonpath={.items[].metadata.name} | grep hive)
 
 if $DELETE; then
   echo "Deteting subscription: ${SUBSCRIPTION}"
@@ -74,7 +73,7 @@ else
 fi
 
 $DELETE || echo "Will detete CSVs:"
-for csv in $(oc get csv -n "${NAMESPACE}" -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}')
+for csv in $(oc get csv -n "${NAMESPACE}" -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | grep hive)
 do
   if $DELETE; then
     echo "Deteting CSV: ${csv}"
