@@ -53,6 +53,7 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
 * `compare` - (optional) if set to true, the job compares desired to current resource and only applies if it has changed
 * `timeout` - (optional) set a timeout in minutes for the deployment job ([default](https://gitlab.cee.redhat.com/service/app-interface/-/blob/2581e30973e9ead6611d6fa1b0fa7dc34d41e63d/resources/jenkins/global/defaults.yaml#L24))
 * `publishJobLogs` - (optional) if this is a [saas file running post-deployment tests](/docs/app-sre/continuous-testing-in-app-interface.md), set this to `true` to publish Jobs' pods logs as artifacts in the Jenkins job.
+* `clusterAdmin` - (optional) set this to `true` if the resources deployed in the saas file require cluster-admin permissions (CRDs for example).
 * `imagePatterns` - a list of strings specifying allowed images to deploy
     * examples: `quay.io/app-sre`, `quay.io/prom/prometheus`
 * `authentication` - specify credentials required to authenticate to `code` repository or to `image` registry

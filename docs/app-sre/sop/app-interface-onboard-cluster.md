@@ -8,6 +8,7 @@
   - [Step 5 - Container Security Operator](#step-5-container-security-operator)
   - [Step 6 - Logging](#step-6-logging)
   - [Step 7 - Deployment Validation Operator (DVO)](#step-7-deployment-validation-operator-dvo)
+  - [Step 8 - Obtain cluster-admin](#step-8-obtain-cluster-admin)
 - [Additional configurations](#additional-configurations)
   - [Selecting a Machine CIDR for VPC peerings](#selecting-a-machine-cidr-for-vpc-peerings)
   - [VPC peering with app-interface](#vpc-peering-with-app-interface)
@@ -594,6 +595,37 @@ At this point you should be able to access the cluster via the console / `oc` cl
         ref: <commit_hash>
         upstream: app-sre-deployment-validation-operator-gh-build-catalog-master-upstream-app-sre-deployment-validation-operator-gh-build-master
     ```
+
+## Step 8 - Obtain cluster-admin
+
+1. Create an OHSS ticket to enable cluster-admin in the cluster. Example: [OHSS-5302](https://issues.redhat.com/browse/OHSS-5302)
+
+1. Once the ticket is Done, add yourself (temporarily) to the cluster-admin group via OCM: https://docs.openshift.com/dedicated/4/administering_a_cluster/cluster-admin-role.html
+
+1. Login to the cluster and create a cluster-admin ServiceAccount:
+  ```sh
+  $ oc new-project app-sre
+  $ oc -n app-sre create sa app-sre-cluster-admin-bot
+  $ oc -n app-sre sa get-token app-sre-cluster-admin-bot
+  ```
+
+1. Add the `app-sre-cluster-admin-bot` credentials to vault at https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/kube-configs
+
+   Create a secret named after the <cluster_name>-cluster-admin:
+
+       server: https://api.<cluster_name>.<cluster_id>.p1.openshiftapps.com:6443
+       token: <token>
+       username: app-sre/app-sre-cluster-admin-bot # not used by automation
+
+1. Add the `app-sre-cluster-admin-bot` credentials to the cluster file in app-interface
+
+    ```yaml
+    # /data/openshift/<cluster_name>/cluster.yml
+    clusterAdminAutomationToken:
+      path: app-sre/creds/kube-configs/<cluster_name>-cluster-admin
+      field: token
+
+1. Remove yourself from the cluster-admin group via OCM.
 
 # Additional configurations
 
