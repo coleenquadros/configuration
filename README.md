@@ -105,7 +105,7 @@ this repository.
 This repository contains of a collection of files under the `data` folder.
 Whatever is present inside that folder constitutes the App-SRE contract.
 
-These files can be `yaml` or `json` files, and they must validate against the some
+These files can be `yaml` or `json` files, and they must validate against some
 [well-defined json schemas][schemas].
 
 The path of the files do not have any effect on the integrations (automation
@@ -115,6 +115,9 @@ will all contain:
 - `$schema`: which maps to a well defined schema [schema][schemas].
 - `labels`: arbitrary labels that can be used to perform queries, etc.
 - Additional data specific to the resource in question.
+
+Continuous delivery is managed using the
+[SaaS files](docs/app-sre/continuous-delivery-in-app-interface.md).
 
 ## Components
 
