@@ -1855,7 +1855,7 @@ To get access to the project, if required, contact the App SRE team.
 
 ### Add a Grafana Dashboard
 
-1. Add manually your dashboard following [these instructions](/docs/app-sre/monitoring.md#Addingdashboards)
+* Add manually your dashboard following [these instructions](/docs/app-sre/monitoring.md#Addingdashboards)
   * Note: Each dashboard ConfigMap should have the following section under `metadata`:
     ```yaml
     labels:
@@ -1863,13 +1863,33 @@ To get access to the project, if required, contact the App SRE team.
     annotations:
       grafana-folder: /grafana-dashboard-definitions/<app_name>
     ```
-    * app_name should be defined in the [grafana dashboards ConfigMap](/resources/observability/grafana/grafana-dashboards.configmap.yaml)
+    * `app_name` should be defined in the [grafana dashboards ConfigMap](/resources/observability/grafana/grafana-dashboards.configmap.yaml)
 
-1. Add the graph json to `/resources/observability/grafana/`. Please follow the naming convention
+* Add the dashboard configmap in a folder in your upstream repository.
 
-1. Add the graph to the resources list at `/data/services/observability/namespaces/app-sre-observability-ENV.yml`, `ENV` being both production AND stage. It is mandatory that both environments are added or one of the deployments will eventually fail.
+* Add a `resourceTemplate` entry in the [grafana dashboard saas file](/data/services/observability/cicd/saas/saas-grafana.yaml) to deploy your dashboard in staging, e.g.
+  ```yaml
+  - name: your-service-dashboards
+    url: https://gitlab.cee.redhat.com/service-registry/your-service
+    path: /dashboards
+    provider: directory
+    targets:
+    - namespace:
+        $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+      ref: master
+  ```
+  * Note: with this configuration, every time you merge changes in your dashboard it will be deployed in stage. Read [this guide](/docs/app-sre/continuous-delivery-in-app-interface.md) to know more about saas files.
 
-1. Wait for the configmap has been merged and applied to the cluster(s).
+* Once your MR is merged, your dashboard will be deployed to stage and will be accessible in https://grafana.stage.devshift.net.
+
+* Add a new target in the above resource template to deploy to prod, e.g.
+  ```yaml
+  targets:
+  (...)
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: <your-service-repo-commit-sha>
+  ```
 
 ### Execute a SQL Query on an App Interface controlled RDS instance
 
