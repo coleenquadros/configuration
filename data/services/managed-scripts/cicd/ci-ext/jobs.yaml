@@ -1,0 +1,33 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+labels:
+  service: backplane-managed-scripts
+
+name: sre-ssh-proxy
+
+description: 'Builds the sre-ssh-proxy image'
+
+app:
+  $ref: /services/srep-sshd/app.yaml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+type: jobs
+
+config:
+- project:
+    name: sre-ssh-proxy
+    label: sre-ssh-proxy
+    node: app-sre
+    gh_org: openshift
+    gh_repo: sre-ssh-proxy-container
+    quay_org: app-sre
+    pr_check_script_path: './hack/app_sre_pr_check.sh'
+    build_deploy_script_path: './hack/app_sre_build_deploy.sh'
+    jobs:
+      - 'gh-build-master':
+          display_name: sre-ssh-proxy build master
+      - 'gh-pr-check':
+          display_name: sre-ssh-proxy pr-check
