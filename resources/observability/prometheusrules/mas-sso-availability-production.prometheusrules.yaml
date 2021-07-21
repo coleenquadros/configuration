@@ -85,4 +85,25 @@ spec:
               service: mas-sso
               exported_namespace: mas-sso-production
               severity: info
-
+          - alert: MasSSOMultiAZPodDistribution
+            # If all the keycloak(MAS SSO/RHSSO) pods end up in the same Availability zone
+            annotations: 
+              message: 'All the MAS SSO Pods are distributed in the same Availability Zone'
+              dashboard: "https://grafana.app-sre.devshift.net/d/_LLa8q_Gk/mas-sso-monitoring"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/mas-sso/sop/mas-sso-availability/mas-sso-multi-az-pod-distribution.md"
+            expr: |
+              mas_sso:multi_az_pod_distribution{service="mas-sso",exported_namespace="mas-sso-production"} == 1
+            for: 5m
+            labels:
+              service: mas-sso
+              exported_namespace: mas-sso-production
+              severity: high
+              # we need cluster = "" to filter out the v3 clusters in stage env. Their nodes are not labelled with `label_topology_kubernetes_io_zone`.              
+          - expr: |
+              count (sum by (label_topology_kubernetes_io_zone) 
+              (kube_pod_info{created_by_kind != "<none>",created_by_name="keycloak",namespace="mas-sso-production"} * on(node) 
+              group_left(label_topology_kubernetes_io_zone) kube_node_labels{label_topology_kubernetes_io_zone != "", cluster =""}))
+            labels:
+              service: mas-sso
+              exported_namespace: mas-sso-production
+            record: mas_sso:multi_az_pod_distribution
