@@ -53,25 +53,6 @@ spec:
       labels:
         service: openshift
         severity: high
-    - alert: KubeDeploymentReplicasMismatch
-      annotations:
-        message: ({{ $labels.cluster }}/{{ $labels.namespace }}) Deployment {{ $labels.deployment }} has not
-          matched the expected number of replicas for longer than 15 minutes.
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeDeploymentReplicasMismatch.md
-      expr: |
-        (
-          kube_deployment_spec_replicas{job="kube-state-metrics",namespace!~"^openshift-.*$"}
-            !=
-          kube_deployment_status_replicas_available{job="kube-state-metrics",namespace!~"^openshift-.*$"}
-        ) and (
-          changes(kube_deployment_status_replicas_updated{job="kube-state-metrics",namespace!~"^openshift-.*$"}[5m])
-            ==
-          0
-        )
-      for: 15m
-      labels:
-        service: openshift
-        severity: high
     - alert: KubeStatefulSetReplicasMismatch
       annotations:
         message: ({{ $labels.cluster }}/{{ $labels.namespace }}) StatefulSet {{ $labels.statefulset }} has not
