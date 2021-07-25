@@ -18,4 +18,6 @@ The mirror acts only on GET requests, by-passing other HTTP methods.
 2. Submit a MR to add a GitHub user (bot) which you are going to use: https://gitlab.cee.redhat.com/service/app-interface/-/blob/92052baa487e3faead1dfe9e22e0536e5a3259c2/data/services/github-mirror/cicd/deploy.yaml#L30
 3. Switch from using https://api.github.com to https://github-mirror.devshift.net
 
+Example ticket: https://issues.redhat.com/browse/APPSRE-3506
+
 Example MR: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/22562
