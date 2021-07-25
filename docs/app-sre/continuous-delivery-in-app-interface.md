@@ -50,7 +50,7 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
     * not yet supported for v2 SaaS files.
 * `managedResourceTypes` - a list of resource types to deploy (indicates that any other type is filtered out)
 * `takeover` - (optional) if set to true, the specified `managedResourceTypes` will be managed exclusively
-* `compare` - (optional) if set to true, the job compares desired to current resource and only applies if it has changed
+* `compare` - (optional) if set to false, the job does not compare desired to current resource and applies all resources even if they have not changed
 * `timeout` - (optional) set a timeout in minutes for the deployment job ([default](https://gitlab.cee.redhat.com/service/app-interface/-/blob/2581e30973e9ead6611d6fa1b0fa7dc34d41e63d/resources/jenkins/global/defaults.yaml#L24))
 * `publishJobLogs` - (optional) if this is a [saas file running post-deployment tests](/docs/app-sre/continuous-testing-in-app-interface.md), set this to `true` to publish Jobs' pods logs as artifacts in the Jenkins job.
 * `clusterAdmin` - (optional) set this to `true` if the resources deployed in the saas file require cluster-admin permissions (CRDs for example).
