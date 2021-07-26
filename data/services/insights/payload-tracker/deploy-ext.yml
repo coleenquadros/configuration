@@ -20,7 +20,10 @@ slack:
   channel: team-clouddot-info
 
 managedResourceTypes:
+- CronJob
 - Deployment
+- DeploymentConfig
+- HorizontalPodAutoscaler
 - Service
 - ServiceAccount
 - Route
@@ -39,22 +42,38 @@ parameters:
   OAUTH_IMAGE_TAG: 4.4.0
 
 resourceTemplates:
-- name: payload-tracker-frontend
-  path: /templates/payload-tracker/payload-tracker-frontend.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+- name: payload-tracker
+  path: /deploy/deploy.yml
+  url: https://github.com/RedHatInsights/payload-tracker
+  parameters:
+    CPU_LIMIT: '1'
+    MEMORY_LIMIT: 1Gi
+    UPDATE_TIMEOUT: 7200
   targets:
   - namespace:
       $ref: /services/insights/payload-tracker/namespaces/stage-payload-tracker-stage.yml
-    ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-payload-tracker-gh-build-master
     parameters:
-      IMAGE_TAG: ba3e85f
+      IMAGE_TAG: 7b3597d
+      USE_REDIS: 'true'
   - namespace:
       $ref: /services/insights/payload-tracker/namespaces/payload-tracker-fedramp-stage.yml
-    ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
+    ref: 953bfbcc4449fc885fe7b8d9caa7d25add7b5063
     parameters:
-      IMAGE_TAG: ba3e85f
+      IMAGE_TAG: 7b3597d
+      USE_REDIS: 'true'
   - namespace:
       $ref: /services/insights/payload-tracker/namespaces/payload-tracker-prod.yml
-    ref: 768e6fe1e8283d3e4c0f8d0fabfbf0b74a5174ef
+    ref: 953bfbcc4449fc885fe7b8d9caa7d25add7b5063
     parameters:
-      IMAGE_TAG: ba3e85f
+      IMAGE_TAG: 7b3597d
+      USE_REDIS: 'false'
+      MAX_REPLICAS: '8'
+      MIN_REPLICAS: '8'
+      MAXIMUM_RUNNING_TASKS: '500'
+      SECONDS_TO_LIVE: '3600'
+      RETENTION_DAYS: '5'
