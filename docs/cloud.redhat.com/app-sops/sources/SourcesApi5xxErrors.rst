@@ -46,4 +46,4 @@ Escalations
 
 .. _Incident Response Doc: https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE
 .. _Workstreams: https://source.redhat.com/groups/public/cloud-services-platform-cloudredhatcom/cloudredhatcom_wiki/insights_platform_workstreams
-.. _Ansible Slack: https://app.slack.com/client/T026NJJ6Z/CKJF47RS9
+.. _CoreOS Slack: https://app.slack.com/client/T027F3GAJ/C0246P60U8H
