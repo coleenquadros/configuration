@@ -390,7 +390,7 @@ you want the user to belong to. Roles can be associated with the services:
 `teams/<name>/roles/<rolename>.yml`. Check out the currently defined roles to
 know which one to add.
 
-### Get notified of events involving a service, or it's dependencies
+### Get notified of events involving a service, or its dependencies
 
 There are three ways a user or group can get notified of service events (e.g. planned maintenance, outages):
 
