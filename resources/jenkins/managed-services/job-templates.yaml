@@ -258,11 +258,12 @@
           secrets:
             - *ci_ocm_token
             - *ci_aws_keys
+            - *managed_services_github_deploy_key
     parameters: 
     - string:
         name: BRANCH
         default: '{default_branch}'
-        description: 'The branch of kafka-fault-tests repo you want to run the pipeline against. Defaults to main'
+        description: 'The branch of kas-fault-tests repo you want to run the pipeline against. Defaults to main'
     - choice:
         name: OCM_CLUSTER_REGION
         description: '[REQUIRED] AWS region for the OSD cluster'
@@ -287,10 +288,10 @@
     - string:
         name: OCM_CLUSTER_NAME
         default: ''
-        description: 'OSD cluster name (if not defined, a random name will be set)'
+        description: 'OSD cluster name (if not defined, a random name will be set), max name length is 14 characters'
     - string:
         name: COMPUTE_NODES_COUNT
-        default: '4'
+        default: '3'
         description: '[REQUIRED] OSD worker nodes for kafka cluster. If you select multi-az you must have a multiple of 3 for COMPUTE_NODES_COUNT'
     - bool:
         name: MULTI_AZ
@@ -300,6 +301,14 @@
         name: PROVISION_CLUSTER
         default: true
         description: If true a cluster will be provisioned. Set to false if you already have a cluster provisioned.
+    - bool:
+        name: DEPROVISION_CLUSTER
+        default: true
+        description: If true the provisioned or provided cluster will be deleted.
+    - bool:
+        name: INSTALL_KAFKA
+        default: true
+        description: If true a kafka instance will be installed in the cluster
     - choice:
         name: TEST_LAYER
         description: '[REQUIRED] Select the set of tests to be executed'
@@ -308,10 +317,7 @@
           - cloud
           - openshift
           - kafka
-    - bool:
-        name: DEPROVISION_CLUSTER
-        default: true
-        description: If true the provisioned or provided cluster will be deleted.
+          - none
     branch: '${{BRANCH}}'
     <<: *gh_checkout
     builders:
@@ -323,7 +329,6 @@
         artifacts: '{artifacts_path}'
         allow-empty: true
     - <<: *slack_notify
-
 - job-template:
     id: strimzi-operator-test
     name: "strimzi-operator-test"
