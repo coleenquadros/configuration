@@ -1,6 +1,6 @@
-# cloud.redhat.com Developer Onboarding
+# console.redhat.com Developer Onboarding
 
-- [cloud.redhat.com Developer Onboarding](#cloudredhatcom-developer-onboarding)
+- [console.redhat.com Developer Onboarding](#cloudredhatcom-developer-onboarding)
   - [Quick Links](#quick-links)
   - [Asking for Help](#asking-for-help)
   - [Forking the app-interface GitLab Repo](#forking-the-app-interface-gitlab-repo)
@@ -113,18 +113,18 @@ proxy=http://squid.corp.redhat.com:3128
 ## Accessing Production Environment
 
 * visual app interface (common across envs): https://visual-app-interface.devshift.net/
-* UI: https://cloud.redhat.com (with special cookie)
+* UI: https://console.redhat.com (with special cookie)
 * Openshift console: go to [Clusters](https://visual-app-interface.devshift.net/clusters) > Search "crc" > Choose cluster that says "Production cluster" (click first link with URL in it for console, not 'details' link!)
 * Prometheus: [Clusters](https://visual-app-interface.devshift.net/clusters) > Search "crc" > Choose cluster that says "stage cluster" > Details > Prometheus
-* Set cookie: https://cloud.redhat.com/yOM53v3hTsaKDZJoVAtZ7r2or79PuzWI
+* Set cookie: https://console.redhat.com/yOM53v3hTsaKDZJoVAtZ7r2or79PuzWI
 * Kibana: https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/
 * payload tracker: https://payload-tracker-frontend-payload-tracker-prod.apps.crcp01ue1.o9m8.p1.openshiftapps.com/
 
-Accessing the new production environment is done with the same URLs as our current production environment, but all your requests must contain the `x-rh-prod-v4` cookie.  Go [here](https://cloud.redhat.com/yOM53v3hTsaKDZJoVAtZ7r2or79PuzWI) to set the cookie in your browser.  This will keep the cookie set until your delete your cookies for cloud.redhat.com.
+Accessing the new production environment is done with the same URLs as our current production environment, but all your requests must contain the `x-rh-prod-v4` cookie.  Go [here](https://console.redhat.com/yOM53v3hTsaKDZJoVAtZ7r2or79PuzWI) to set the cookie in your browser.  This will keep the cookie set until your delete your cookies for console.redhat.com.
 
 Example curl:
 ```
-curl -u '<user>:<password>' -b "x-rh-prod-v4=1" https://cloud.redhat.com/api/topological-inventory/
+curl -u '<user>:<password>' -b "x-rh-prod-v4=1" https://console.redhat.com/api/topological-inventory/
 ```
 
 Note that the old v3 cluster is also in app-interface, but it uses the prefix `insights` instead of `crc`.
@@ -222,7 +222,7 @@ To log into Vault, follow the instructions in [Vault's Readme](https://gitlab.ce
 
 2. Navigate to your secret within the UI:
 
-    1. Click on `insights/secrets/` to get to where cloud.redhat.com secrets are stored.
+    1. Click on `insights/secrets/` to get to where console.redhat.com secrets are stored.
 
     2. Click on `insights-prod/` or `insights-stage/`, depending on which environment's secrets you want to modify.
 

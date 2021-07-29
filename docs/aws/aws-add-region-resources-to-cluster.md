@@ -33,7 +33,7 @@ Creating the peering connection and route table entries requires a few steps:
 
 ### Assuming the Network Management Role
 
-In order to intiate the VPC peering connection and modify the route tables used by the openshift cluster you have to assume a role in AWS.  To do this, log into [OCM](https://cloud.redhat.com/openshift) and select the cluster you wish to modify.  In the cluster details there should be a tab called `Access Control`.  Select it and scroll down to the `AWS infrastructure access` section.  Look for the ARN that corresponds to your user account and find the role called `Network management`.  Click on `Copy URL to clipboard` and then go to the AWS console and log into the account where the new resources will be created.
+In order to intiate the VPC peering connection and modify the route tables used by the openshift cluster you have to assume a role in AWS.  To do this, log into [OCM](https://console.redhat.com/openshift) and select the cluster you wish to modify.  In the cluster details there should be a tab called `Access Control`.  Select it and scroll down to the `AWS infrastructure access` section.  Look for the ARN that corresponds to your user account and find the role called `Network management`.  Click on `Copy URL to clipboard` and then go to the AWS console and log into the account where the new resources will be created.
 
 Once logged into the AWS account, paste the `Network management` role link from OCM.  Click the `Switch Role` button and now you have access to modify the network configuration for the cluster AWS account.
 

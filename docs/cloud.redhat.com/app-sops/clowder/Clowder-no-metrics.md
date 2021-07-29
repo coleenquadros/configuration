@@ -7,7 +7,7 @@ Severity: Pagerduty
 Incident Response Plan
 ----------------------
 
-[Incident Response Doc for cloud.redhat.com](https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE)
+[Incident Response Doc for console.redhat.com](https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE)
 
 Impact
 ------

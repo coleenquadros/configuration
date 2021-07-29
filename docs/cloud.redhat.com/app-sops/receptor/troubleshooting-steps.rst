@@ -4,7 +4,7 @@ Receptor-Controller Troubleshooting
 Incident Response Plan
 ----------------------
 
-`Incident Response Doc`_ for cloud.redhat.com
+`Incident Response Doc`_ for console.redhat.com
 
 Summary
 -------
@@ -19,6 +19,6 @@ Steps
 Escalations
 -----------
 
--  Escalate to cloud.redhat.com engineering team per `Incident Response Doc`_
+-  Escalate to console.redhat.com engineering team per `Incident Response Doc`_
 
 .. _Incident Response Doc: https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE

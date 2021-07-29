@@ -7,12 +7,12 @@ Severity: Pagerduty
 Incident Response Plan
 ----------------------
 
-`Incident Response Doc`_ for cloud.redhat.com
+`Incident Response Doc`_ for console.redhat.com
 
 Impact
 ------
 
--  Receptor-Controller Gateway is an application used to maintain long standing websocket connections that connect on-premise Satellite instance to cloud.redhat.com.
+-  Receptor-Controller Gateway is an application used to maintain long standing websocket connections that connect on-premise Satellite instance to console.redhat.com.
 
 Summary
 -------

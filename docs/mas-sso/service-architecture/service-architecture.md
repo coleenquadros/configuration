@@ -24,7 +24,7 @@ The `sso.redhat.com` is registered as an Identity Provider (IdP), this enables R
   - Kafka cluster Admin API - This allows performing Kafka admin operations 
     - ex: create/delete a topic
 
-[Kas UI or Kafka Service UI](cloud.redhat.com/beta/application-services/openshift-streams/kafkas) and [CLI](https://github.com/redhat-developer/app-services-cli) perform authentication across `sso.redhat.com` and `MAS SSO`. They maintain two different tokens.
+[Kas UI or Kafka Service UI](console.redhat.com/beta/application-services/openshift-streams/kafkas) and [CLI](https://github.com/redhat-developer/app-services-cli) perform authentication across `sso.redhat.com` and `MAS SSO`. They maintain two different tokens.
 For the control plane, they would use sso.redhat.com token, and if they want to interact with the data plane MAS SSO token is used.
 
 For an end-user/customer, Kafka Service UI & Kafka Cluster UI are same. First, they will see the Kafka Service UI: which will allow terraforming the Kafka instance & once it is ready. Kafka Cluster UI is used to manage the ready state Kafka cluster. They can also MAS CLI to manage their Kafka clusters from the command line and also provide a better user experience.
@@ -47,23 +47,23 @@ Two types of token: token from `sso.redhat.com` and MAS-SSO.
 - The Data plane(Kafka cluster) is secured using MAS SSO. So, the user will need a token from the MAS SSO to perform operations like create topic/delete topic, produce/consume messages.
 
 
-- [Kas UI or Kafka Service UI](cloud.redhat.com/beta/application-services/openshift-streams/kafkas) maintains two types of the token. One from `sso.redhat.com` and another from MAS SSO.
+- [Kas UI or Kafka Service UI](console.redhat.com/beta/application-services/openshift-streams/kafkas) maintains two types of the token. One from `sso.redhat.com` and another from MAS SSO.
 
 - User/Customer can also get a MAS SSO token by generating a service account.
-Generating a service account from the [Kafka Service UI](https://cloud.redhat.com/beta/application-services/streams/service-accounts)
+Generating a service account from the [Kafka Service UI](https://console.redhat.com/beta/application-services/streams/service-accounts)
 
 ## MAS SSO - Interaction with the Managed Kafka Control Plane
 The below diagram illustrates the control plane authentication flow
 ![Control Plane authentication flow](./images/control-plane-authentication-flow.png)
 
 - Users are first authenticated against sso.redhat.com - User login
-- [Kas UI or Kafka Service UI](cloud.redhat.com/beta/application-services/openshift-streams/kafkas) and [CLI](https://github.com/redhat-developer/app-services-cli) - Performs a [Proof Key for Code Exchange by OAuth Public Clients
+- [Kas UI or Kafka Service UI](console.redhat.com/beta/application-services/openshift-streams/kafkas) and [CLI](https://github.com/redhat-developer/app-services-cli) - Performs a [Proof Key for Code Exchange by OAuth Public Clients
 ](https://datatracker.ietf.org/doc/html/rfc7636) mechanism to login into `sso.redhat.com` and also into MAS-SSO
   - Users registered with sso.redhat.com are created in MAS SSO behind the scenes
 - Users once authenticated can create/delete Kafka clusters from the Kafka UI
 
 Example flow: Create a Kafka cluster
-- Visit: https://cloud.redhat.com/beta/application-services/openshift-streams/kafkas
+- Visit: https://console.redhat.com/beta/application-services/openshift-streams/kafkas
 - Redirect to `sso.redhat.com` login screen
 - Use an existing Red Hat user or create a new account.
 - Login with your Red Hat user credentials
@@ -96,12 +96,12 @@ Custom claim check - This was added Kafka specific to restrict the actions on th
 Example: Create a topic
 - Once the Kafka instance is ready (please refer Create a Kafka cluster example)
 - Click on the instance name
-- Redirects to the Kafka cluster UI: https://cloud.redhat.com/beta/application-services/streams/kafkas/<kafka-id>
+- Redirects to the Kafka cluster UI: https://console.redhat.com/beta/application-services/streams/kafkas/<kafka-id>
 - You can click on the `Create Topic` button
 to create new topics
 
 Example: Create a service account
-- https://cloud.redhat.com/beta/application-services/streams/service-accounts
+- https://console.redhat.com/beta/application-services/streams/service-accounts
 - Click on `create service account` button
 
 Example: Create a service account using rhoas-cli
@@ -115,7 +115,7 @@ $ curl -v -XPOST -H "Authorization: Bearer $(ocm token)" https://api.openshift.c
 ```
 
 Example: Produce/Consume messages to Kafka Cluster
-- Copy the bootstrap url from connection section in https://cloud.redhat.com/beta/application-services/streams/kafkas
+- Copy the bootstrap url from connection section in https://console.redhat.com/beta/application-services/streams/kafkas
 - Create a config file
 - Configure the service account details
 - Use Kafka Cli tools to perform produce/consume

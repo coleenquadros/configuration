@@ -66,8 +66,8 @@
 
 No incoming request can be received or processed. 
 The existing registered Service Registry provisioning jobs will not be able to be processed.  
-Users will not be able to retrive their Service Registry instances status and connection details.
-Service Registry UI in cloud.redhat.com will not work properly, because of errors in API calls.
+Users will not be able to retrieve their Service Registry instances status and connection details.
+Service Registry UI in console.redhat.com will not work properly, because of errors in API calls.
 
 ### Summary
 
@@ -175,7 +175,7 @@ refer to the steps in [SRS Fleet Manager availability](#srs-fleet-manager-availa
 
 No incoming request can be received or processed.
 Service Registry Service users cannot use the service, requests to Service Registry Apicurio Registry will get rejected.
-Service Registry Data Plane UI in cloud.redhat.com will not work properly, because of errors in API calls.
+Service Registry Data Plane UI in console.redhat.com will not work properly, because of errors in API calls.
 
 ### Summary
 

@@ -7,7 +7,7 @@ Severity: Pagerduty
 Incident Response Plan
 ----------------------
 
-`Incident Response Doc`_ for cloud.redhat.com
+`Incident Response Doc`_ for console.redhat.com
 
 Impact
 ------
@@ -19,7 +19,7 @@ Impact
 Summary
 -------
 
-The network-check script is a simple python app deployed into the cloud.redhat.com stage/production
+The network-check script is a simple python app deployed into the console.redhat.com stage/production
 clusters that runs the following every 5 seconds:
 
 1. a test HTTP call to `HTTP_URL` using the requests library

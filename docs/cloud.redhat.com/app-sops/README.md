@@ -1,4 +1,4 @@
-# cloud.redhat.com Platform App SOPs
+# console.redhat.com Platform App SOPs
 
 ###### Adding Apps
 

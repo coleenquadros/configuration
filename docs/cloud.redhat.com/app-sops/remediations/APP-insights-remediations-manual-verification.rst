@@ -7,7 +7,7 @@ Severity: Pagerduty
 Incident Response Plan
 ----------------------
 
-`Incident Response Doc`_ for cloud.redhat.com
+`Incident Response Doc`_ for console.redhat.com
 
 Impact
 ------
@@ -24,13 +24,13 @@ Access required
 ---------------
 
 -  Console access to the cluster+namespace pods are running in.
--  Registerd account on cloud.redhat.com.
+-  Registered account on console.redhat.com.
 -  Access to the Remediations grafana dashboard.
 
 Steps
 -----
 
--  Log onto cloud.redhat.com and make your way to the insights bundle.
+-  Log onto console.redhat.com and make your way to the insights bundle.
 -  Navigate to any of the applications that report to remediations (vulnerabilites, advisor, compliance, patchman) or the inventory
    service.
 -  Find an issue or advisory that you would like to remediate and go through the remediations wizard to create a playbook.
