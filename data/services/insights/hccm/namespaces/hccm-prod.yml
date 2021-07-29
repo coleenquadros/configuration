@@ -139,6 +139,27 @@ terraformResources:
   identifier: hccm-prod-s3
   defaults: /terraform/resources/s3-private-1.yml
   output_resource_name: hccm-s3
+- provider: aws-iam-service-account
+  account: insights-prod
+  identifier: hccm-s3-read-prod
+  variables:
+    aws_region: us-east-1
+  user_policy:
+    {
+      "Version": "2012-10-17",
+      "Statement": [{
+        "Effect": "Allow",
+        "Action": [
+          "s3:ListBucket",
+          "s3:GetObject"
+        ],
+        "Resource": [
+          "arn:aws:s3:::hccm-prod-s3",
+          "arn:aws:s3:::hccm-prod-s3/*"
+        ]
+      }]
+    }
+  output_resource_name: hccm-prod-s3-read
 - provider: elasticache  # TODO remove after clowder
   account: insights-prod
   identifier: cost-management-prod-elasticache
