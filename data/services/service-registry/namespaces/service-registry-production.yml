@@ -1,0 +1,70 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: service-registry
+
+name: service-registry-production
+
+description: Production namespace for Service Registry
+
+cluster:
+  $ref: /openshift/app-sre-prod-04/cluster.yml
+
+app:
+  $ref: /services/service-registry/app.yml
+
+environment:
+  $ref: /products/service-registry/environments/production.yml
+
+networkPoliciesAllow:
+  - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-04.yml
+
+managedRoles: true
+
+managedResourceTypes:
+  - ServiceAccount
+  - ConfigMap
+
+openshiftResources:
+- provider: vault-secret
+  path: managed-services/quay-org-accounts/rhoas/robots/rhoas-pull-docker
+  version: 1
+  type: kubernetes.io/dockercfg
+- provider: route
+  path: /services/service-registry/production/srs-service-registry.route.yaml
+- provider: route
+  path: /services/service-registry/production/srs-fleet-manager.route.yaml
+- provider: resource-template
+  path: /services/service-registry/serviceaccount.yaml
+  variables:
+    name: rhoas-puller
+- provider: resource
+  path: /services/service-registry/production/srs-fleet-manager-envoy.configmap.yaml
+- provider: resource
+  path: /services/service-registry/production/srs-service-registry-envoy.configmap.yaml
+# - provider: vault-secret
+#   name: srs-tenant-manager-credentials
+#   # //TODO create in vault
+#   path:  app-interface/service-registry/production/tenant-manager/credentials
+#   version: 1
+#   annotations:
+#     qontract.recycle: "true"
+
+managedTerraformResources: true
+
+terraformResources:
+# Data Plane database
+- provider: rds
+  account: app-sre
+  identifier: srs-service-registry
+  defaults: /terraform/resources/service-registry/production/rds-2-cloudwatch-enabled.yml
+  parameter_group: /terraform/resources/service-registry/production/service-registry-production-rds-parameter-group-pg12.yml
+  output_resource_name: srs-service-registry-rds
+# Control Plane database
+- provider: rds
+  account: app-sre
+  identifier: srs-fleet-manager
+  defaults: /terraform/resources/service-registry/production/rds-2-cloudwatch-enabled.yml
+  parameter_group: /terraform/resources/service-registry/production/service-registry-production-rds-parameter-group-pg12.yml
+  output_resource_name: srs-fleet-manager-rds
