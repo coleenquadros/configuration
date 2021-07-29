@@ -50,7 +50,6 @@ terraformResources:
   parameter_group: /terraform/resources/insights/production/rds/postgres11-parameter-group-rhsm-prod.yml
 
 managedResourceTypes:
-- Secret
 - ServiceAccount
 
 openshiftResources:
@@ -85,9 +84,13 @@ openshiftResources:
     qontract.recycle: "true"
 - provider: resource
   path: /insights-prod/shared/private-image-puller.serviceaccount.yaml
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /insights-prod/rhsm/inventory-db-readonly.secret.yaml
+- provider: vault-secret
+  name: host-inventory-db-readonly
+  path: app-sre/integrations-output/terraform-resources/crcp01ue1/host-inventory-prod/host-inventory-db-readonly-rds
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+    qontract.ignore_reconcile_time: "true"
 - provider: vault-secret
   path: insights/secrets/insights-prod/rhsm-prod/token-refresher
   version: 2

@@ -27,9 +27,9 @@ Action items:
 
 ### Telemeter
 
-```
-@kasingh @ccoleman @cvogel
-```
+Access to Telemeter is approved by the telemetry-sme list: telemetry-sme <telemetry-sme@redhat.com> 
+
+The best way to request access is to email that list, point at the MR and ask for approval.
 
 ### Insights cluster access:
 

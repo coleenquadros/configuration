@@ -62,7 +62,7 @@ resourceTemplates:
       $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
     ref: d176abbf48721f5f49e865de16c8f90115e36b12
     parameters:
-      IMAGE_TAG: 787e926
+      IMAGE_TAG: 9284882
       MIN_REPLICAS: "2"
       MAX_REPLICAS: "6"
       DB_WRITER_REPLICAS: "1"
@@ -84,7 +84,7 @@ resourceTemplates:
       $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
     ref: 0e9dcc7f7f9346ff226dd9f15fd79c82f5d2c688
     parameters:
-      IMAGE_TAG: 318df37
+      IMAGE_TAG: b282709
       MIN_REPLICAS: "2"
       MAX_REPLICAS: "6"
       HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
@@ -95,3 +95,38 @@ resourceTemplates:
     parameters:
       MIN_REPLICAS: "1"
       HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+
+- name: insights-aggregator-cleaner
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/insights-results-aggregator-cleaner
+  targets:
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
+    ref: 4234b02831b2fec0333b434dee5bb411009b8327
+    parameters:
+      IMAGE_TAG: 2e2f22b
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true
+    ref: internal
+    parameters:
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+
+- name: insights-content-service
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/insights-content-service
+  targets:
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
+    ref: 4f3f577a23df94d459af07d6f7a78e3f70476edf
+    parameters:
+      IMAGE_TAG: 4f3f577
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true
+    ref: internal
+    parameters:
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+
