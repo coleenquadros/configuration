@@ -162,3 +162,25 @@
             name: "master"
     cron_expression: H/10 * * * *
     <<: *gl_timed
+
+
+- job-template:
+    id: 'sd-sos-notifier'
+    job_name: 'sd-sos-notifier'
+    name: '{job_name}'
+    branch: master
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *reconcile_toml
+        - *gitlab_pr_submitter
+    triggers:
+        - github-pull-request:
+              status-context: "ci.centos.org PR (notifier)"
+              <<: *github_pull_request_defaults
+    builders:
+        - shell: 'python notifier.py'
+    <<: *gl_timed
