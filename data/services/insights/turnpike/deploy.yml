@@ -378,30 +378,6 @@ resourceTemplates:
           origin: http://platform-docs.platform-docs-stage.svc.cluster.local/
           auth:
             saml: "True"
-        - name: rhsm-subscriptions
-          route: /app/rhsm-subscriptions/actuator
-          origin: http://rhsm-subscriptions-worker-monitoring.rhsm-stage.svc.cluster.local:8080/actuator
-          auth:
-            saml: "'subscription-watch-admins' in user['Role']"
-            x509: "x509['subject_dn'] in ['/DC=com/DC=redhat/OU=serviceaccounts/UID=nonprod-rhsmapi/Email=it-pnt@redhat.com/DC=com/DC=redhat/OU=serviceaccounts/CN=nonprod-rhsmapi', '/DC=com/DC=redhat/OU=serviceaccounts/UID=nonprod-itpntautomation/Email=it-pnt@redhat.com/DC=com/DC=redhat/OU=serviceaccounts/CN=nonprod-itpntautomation', '/DC=com/DC=redhat/OU=messaging/OU=serviceusers/UID=msg-subscription-watch-turnpike/L=stage/CN=msg-subscription-watch-turnpike']"
-        - name: rhsm-marketplace
-          route: /app/rhsm-marketplace/actuator
-          origin: http://marketplace-worker-monitoring.rhsm-stage.svc.cluster.local:8080/actuator
-          auth:
-            saml: "'subscription-watch-admins' in user['Role']"
-            x509: "x509['subject_dn'] == '/DC=com/DC=redhat/OU=messaging/OU=serviceusers/UID=msg-subscription-watch-turnpike/L=stage/CN=msg-subscription-watch-turnpike'"
-        - name: rhsm-metrics
-          route: /app/rhsm-metrics/actuator
-          origin: http://metrics-worker-monitoring.rhsm-stage.svc.cluster.local:8080/actuator
-          auth:
-            saml: "'subscription-watch-admins' in user['Role']"
-            x509: "x509['subject_dn'] == '/DC=com/DC=redhat/OU=messaging/OU=serviceusers/UID=msg-subscription-watch-turnpike/L=stage/CN=msg-subscription-watch-turnpike'"
-        - name: rhsm-conduit
-          route: /app/rhsm-conduit/actuator
-          origin: http://rhsm-conduit.rhsm-stage.svc.cluster.local:8080/actuator
-          auth:
-            saml: "'subscription-watch-admins' in user['Role']"
-            x509: "x509['subject_dn'] == '/DC=com/DC=redhat/OU=messaging/OU=serviceusers/UID=msg-subscription-watch-turnpike/L=stage/CN=msg-subscription-watch-turnpike'"
         - name: policies-engine-stage
           route: /api/policies-engine/
           origin: http://policies-engine.policies-stage.svc.cluster.local:8080/
@@ -412,35 +388,6 @@ resourceTemplates:
           origin: http://policies-ui-backend.policies-stage.svc.cluster.local:8080/
           auth:
             saml: "'crc-policies-team' in user['Role']"
-        - name: notifications-stage
-          route: /api/notifications/
-          origin: http://notifications-backend.notifications-stage.svc.cluster.local:8080/
-          auth:
-            saml: "'crc-notifications-team' in user['Role']"
-            x509: "True"
-        - name: notifications-gw-stage
-          route: /api/notifications-gw/
-          origin: http://notifications-gw.notifications-stage.svc.cluster.local:8080/
-          auth:
-            saml: "True"
-            x509: "True"
-        - name: cost-management-masu
-          route: /api/cost-management/v1/
-          origin: http://koku-clowder-masu.hccm-stage.svc.cluster.local:8000/api/cost-management/v1/
-          auth:
-            saml: "'cost-management-team' in user['Role']"
-            x509: "x509['subject_dn'] == '/DC=com/DC=redhat/OU=messaging/OU=serviceusers/UID=msg-cost-management-turnpike/L=Stage/CN=msg-cost-management-turnpike'"
-        - name: cost-management-sources
-          route: /api/cost-management/sources/v1/
-          origin: http://koku-clowder-sources-client.hccm-stage.svc.cluster.local:8000/api/cost-management/v1/
-          auth:
-            saml: "'cost-management-team' in user['Role']"
-            x509: "x509['subject_dn'] == '/DC=com/DC=redhat/OU=messaging/OU=serviceusers/UID=msg-cost-management-turnpike/L=Stage/CN=msg-cost-management-turnpike'"
-        - name: cost-management-koku-daily-ui
-          route: /api/cost-management/v1/koku-daily/
-          origin: http://koku-daily.hccm-stage.svc.cluster.local:8080/api/cost-management/v1/koku-daily/
-          auth:
-            saml: "'cost-management-team' in user['Role']"
         - name: module-update-router-events
           route: /api/module-update-router/v1/event
           origin: http://module-update-router.module-update-router-stage.svc.cluster.local:8080/api/module-update-router/v1/event
@@ -456,17 +403,6 @@ resourceTemplates:
           origin: http://vulnerability-engine-manager-admin.vulnerability-engine-stage.svc.cluster.local:8443/api/vulnerability
           auth:
             saml: "'vulnerability-admins' in user['Role']"
-        - name: cloudigrade-internal
-          route: /api/cloudigrade/internal/
-          origin: http://cloudigrade-api.cloudigrade-stage.svc.cluster.local:80/internal/
-          auth:
-            saml: "'doppler-dev' in user['Role']"
-            x509: "x509['subject_dn'] == '/DC=com/DC=redhat/OU=messaging/OU=serviceusers/UID=msg-cloudigrade-turnpike/L=Stage/CN=msg-cloudigrade-turnpike'"
-        - name: automation-analytics-oneview
-          route: /api/automation-analytics/oneview
-          origin: http://automation-analytics-api-oneview-v2.tower-analytics-stage.svc.cluster.local:8000/api/tower-analytics/oneview
-          auth:
-            saml: "'automation-analytics' in user['Role']"
         - name: vmaas-reposcan
           route: /api/vmaas
           origin: http://vmaas-reposcan.vmaas-stage.svc.cluster.local:8081/api/vmaas
@@ -485,11 +421,6 @@ resourceTemplates:
         - name: playbook-dispatcher-connect
           route: /api/playbook-dispatcher/connect/
           origin: http://playbook-dispatcher-connect-connect-api.playbook-dispatcher-stage.svc.cluster.local:8083/
-          auth:
-            saml: "'crc-pipeline-team' in user['Role']"
-        - name: xjoin-kafka-connect
-          route: /api/xjoin/connect/
-          origin: http://xjoin-kafka-connect-strimzi-connect-api.xjoin-stage.svc.cluster.local:8083/
           auth:
             saml: "'crc-pipeline-team' in user['Role']"
         - name: ingress
