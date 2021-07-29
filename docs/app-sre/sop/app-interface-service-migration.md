@@ -18,6 +18,8 @@ This is an SOP to list the actions to be performed to migrate a service between 
     * Note: moving a terraform resource (such as RDS) between namespaces is safe and only changes tags on the resource in AWS.
 1. Check if the service has DNS entries (either managed by SREP or by app-interface). This means that the service migration will include DNS updates.
 1. Check if the service can run in parallel in different clusters. Some things to look for: Is the service using a DB? If so, how are DB migrations performed (DB locking)? If the service can not run in parallel, a migration would probably mean down time for the migration.
+1. Check if the service requires static egress IPs to talk with any other services, such as those inside the VPN. New IPs will be issued.
+   * Note, OCM is one of the services that requires this for communication with the RH UMB: [OCM HA Setup](/docs/app-sre/sop/ocm-ha-setup.md:45)
 
 ## What to expect
 
