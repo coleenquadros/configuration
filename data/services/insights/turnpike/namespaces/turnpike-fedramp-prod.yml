@@ -4,8 +4,8 @@ $schema: /openshift/namespace-1.yml
 labels:
   service: turnpike
 
-name: turnpike-stage
-description: Turnpike gateway on the fedramp staging cluster
+name: turnpike-prod
+description: Turnpike gateway on the fedramp prod cluster
 
 cluster:
   $ref: /openshift/insights/crcgovp01ue1/cluster.yml
@@ -17,7 +17,7 @@ app:
   $ref: /services/insights/turnpike/app.yml
 
 environment:
-  $ref: /products/insights/environments/stage.yml
+  $ref: /products/insights/environments/production.yml
 
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.crcgovp01ue1.yml
@@ -39,26 +39,26 @@ openshiftResources:
   type: kubernetes.io/dockerconfigjson
   name: quay-cloudservices-pull
 - provider: resource
-  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
+  path: /insights-prod/shared/private-image-puller.serviceaccount.yaml
 - provider: resource
-  path: /insights-stage/turnpike-stage/turnpike-stage.route.yml
+  path: /insights-prod/turnpike-prod/turnpike-prod.route.yml
 - provider: vault-secret
-  path: insights/secrets/insights-stage/turnpike-stage/secret-key
+  path: insights/secrets/insights-prod/turnpike-prod/secret-key
   version: 1
   annotations:
     qontract.recycle: "true"
 - provider: vault-secret
-  path: insights/secrets/insights-stage/turnpike-stage/redis-password
+  path: insights/secrets/insights-prod/turnpike-prod/redis-password
   version: 1
   annotations:
     qontract.recycle: "true"
 - provider: vault-secret
-  path: insights/secrets/insights-stage/turnpike-stage/saml-signing
-  version: 4
+  path: insights/secrets/insights-prod/turnpike-prod/saml-signing
+  version: 1
   annotations:
     qontract.recycle: "true"
 - provider: vault-secret
-  path: insights/secrets/insights-stage/turnpike-stage/gateway-secret
+  path: insights/secrets/insights-prod/turnpike-prod/gateway-secret
   version: 1
   annotations:
     qontract.recycle: "true"
@@ -67,9 +67,9 @@ managedTerraformResources: true
 
 terraformResources:
 - provider: cloudwatch
-  account: insights-fedramp-stage
-  identifier: turnpike-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  account: insights-fedramp-prod
+  identifier: turnpike-prod
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
   output_resource_name: cloudwatch
   es_identifier: kibana-elasticsearch
 
