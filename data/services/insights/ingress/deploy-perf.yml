@@ -20,9 +20,7 @@ slack:
   channel: proj-perf-insights-cluster
 
 managedResourceTypes:
-- Deployment
-- DeploymentConfig
-- Service
+- ClowdApp
 - ConfigMap
 
 imagePatterns:
@@ -34,59 +32,68 @@ authentication:
     field: all
 
 parameters:
-  LOG_GROUP: platform
+  CLOWDER_ENABLED: "true"
 
 resourceTemplates:
-- name: insights-storage-broker
-  path: /templates/ingress/insights-storage-broker.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+- name: ingress-sideloader
+  path: /deploy/clowdapp.yml
+  url: https://gitlab.cee.redhat.com/insights-platform/ingress-sideloader
   targets:
-  # - namespace:
-  #     $ref: /services/insights/ingress/namespaces/stage-ingress-stage.yml
-  #   ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
-  #   parameters:
-  #     IMAGE_TAG: 6ba430c
-  #     OPENSHIFT_BUCKET: insights-buck-it-openshift-stage
-  #     ANSIBLE_BUCKET: insights-buck-it-ansible-stage
-  # - namespace:
-  #     $ref: /services/insights/ingress/namespaces/fedramp-ingress-stage.yml
-  #   ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
-  #   parameters:
-  #     IMAGE_TAG: 6ba430c
-  #     OPENSHIFT_BUCKET: insights-buck-it-openshift-stage-fedramp
-  #     ANSIBLE_BUCKET: insights-buck-it-ansible-stage-fedramp
   - namespace:
       $ref: /services/insights/ingress/namespaces/perf-ingress-perf.yml
-    ref: c4399a3b234690a0b070b9dc75986bf3e8bf5d29
-    delete: true
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: insights-platform-ingress-sideloader-gl-build-master
     parameters:
-      IMAGE_TAG: 6ba430c
-      REPLICAS: 2
-      REJECT_BUCKET: insights-ingress-rejected-perf
+      MIN_REPLICAS: 2
+      ENV_NAME: perf
+- name: puptoo
+  path: /deployment.yaml
+  url: https://github.com/RedHatInsights/insights-puptoo
+  targets:
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/perf-ingress-perf.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-puptoo-gh-build-master
+    parameters:
+      MIN_REPLICAS: 2
+      ENV_NAME: perf
+- name: ingress
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/insights-ingress-go
+  targets:
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/perf-ingress-perf.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-ingress-go-gh-build-master
+    parameters:
+      ENV_NAME: perf
+      INGRESS_STAGEBUCKET: upload-perf
+      INGRESS_PAYLOADTRACKERURL: http://payload-tracker.payload-tracker-perf.svc.cluster.local:8080/v1/payloads/
+- name: storage-broker
+  path: /deploy/clowdapp.yml
+  url: https://github.com/RedHatInsights/insights-storage-broker
+  targets:
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/perf-ingress-perf.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-storage-broker-gh-build-master
+    parameters:
+      MIN_REPLICAS: 2
+      ENV_NAME: perf
       OPENSHIFT_BUCKET: insights-buck-it-openshift-perf
       ANSIBLE_BUCKET: insights-buck-it-ansible-perf
-  
-
-- name: ingress
-  path: /templates/ingress/ingress.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  targets:
-  - namespace:
-      $ref: /services/insights/ingress/namespaces/perf-ingress-perf.yml
-    ref: a76e6b78b467ba53072c2141ba02dfe459f12bd4
-    delete: true
-    parameters:
-      IMAGE_TAG: ea99e26
-      INGRESS_INVENTORYURL: http://insights-inventory.host-inventory-perf.svc:8080/api/inventory/v1/hosts
-
-- name: insights-puptoo
-  path: /templates/ingress/insights-puptoo.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  targets:
-  - namespace:
-      $ref: /services/insights/ingress/namespaces/perf-ingress-perf.yml
-    ref: 86163a9321ba60fe79fde69522ebb67cc104ebf5
-    delete: true
-    parameters:
-      IMAGE_TAG: 6db3c80
-      REPLICAS: 2
+      PERM_BUCKET: upload-perf
+      REJECT_BUCKET: insights-ingress-rejected-perf
+      BUCKET_MAP_FILE: /var/config.yaml

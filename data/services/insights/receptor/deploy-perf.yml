@@ -20,10 +20,7 @@ slack:
   channel: proj-perf-insights-cluster
 
 managedResourceTypes:
-- Deployment
-- DeploymentConfig
-- Service
-- CronJob
+- ClowdApp
 
 imagePatterns:
 - quay.io/cloudservices
@@ -35,28 +32,16 @@ authentication:
 
 resourceTemplates:
 - name: receptor-gateway
-  path: /templates/receptor/receptor-gateway.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  path: /deploy/clowdapp.yml
+  url: https://github.com/RedHatInsights/platform-receptor-controller
   targets:
   - namespace:
       $ref: /services/insights/receptor/namespaces/perf-receptor-perf.yml
-    ref: 51feeed82c093f99ba24f69848431836e25cc96a
-    delete: true
+    ref: master
     parameters:
-      IMAGE_TAG: 86ab072
+      IMAGE: quay.io/cloudservices/receptor-gateway
+      IMAGE_TAG: 4b7479d
+      ENV_NAME: perf
       GATEWAY_CONNECTION_REGISTRAR_IMPL: redis
       SUSPEND_STALE_CONN_JOB: true
       PROMETHEUS_PUSH_GATEWAY: ${PROMETHEUS_PUSHGATEWAY}
-
-- name: receptor-switch
-  path: /templates/receptor/receptor-switch.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  targets:
-  - namespace:
-      $ref: /services/insights/receptor/namespaces/perf-receptor-perf.yml
-    ref: cefab6af5cc7e6bdf16524178f90fc9fe304c192
-    delete: true
-    parameters:
-      IMAGE_TAG: 86ab072
-      SWITCH_REPLICAS: 1
-

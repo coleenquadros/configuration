@@ -20,35 +20,32 @@ slack:
   channel: proj-perf-insights-cluster
 
 managedResourceTypes:
-- Deployment
-- DeploymentConfig
-- Service
 - ConfigMap
+- ClowdApp
 
 imagePatterns:
 - quay.io/cloudservices
 
 authentication:
-  code:
-    path: app-sre/creds/github-app-sre-bot
-    field: openshift-saas-deploy
   image:
     path: insights/quay/cloudservices-push
     field: all
 
+parameters:
+  CLOWDER_ENABLED: "true"
+
 resourceTemplates:
-- name: insights-engine
-  path: /templates/deployment.yaml
+- name: engine
+  path: /deploy/clowdapp.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/insights-engine
   targets:
   - namespace:
       $ref: /services/insights/engine/namespaces/perf-engine-perf.yml
     ref: master
-    delete: true
     upstream:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: insights-platform-insights-engine-gl-build-master
     parameters:
-      CLOUD_WATCH_LOG_GROUP: engine-perf
-      REPLICAS: "1"
+      MIN_REPLICAS: 2
+      ENV_NAME: perf
