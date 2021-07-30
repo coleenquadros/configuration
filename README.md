@@ -2097,6 +2097,8 @@ repositories:
     - `limit` - limit number of merges/rebases to avoid load (default: 1)
     - `days_interval` - number of days to consider an item as stale (default: 15)
     - `enable_closing` - enable closing of stale items after two stale periods (default: disabled)
+    - `pipeline_timeout` - number of minutes that determine if a pending pipeline is to be canceled.
+    If not set, no pipeline will be canceled.
 - `jira`: Value as `$ref: /path/to/jira-server.yaml` will enable the
   Gitlab/JIRA integration, that links Merge Requests mentioning JIRA tickets
   to the mentioned JIRA ticket.
