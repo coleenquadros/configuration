@@ -634,3 +634,39 @@
         secrets:
         - *rhoas-quay-access
     <<: *gl_pr_check
+
+- job-template:
+    id: gl-pr-check-kas-upgrade-configurations
+    name: "{gl_group}-{gl_project}-gl-pr-check"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *app_interface_creds
+            - *quay_secret_push
+            - *kas_fleet_manager_admin_staging
+            - *kas_fleet_manager_admin_prod
+    <<: *gl_pr_check
+    publishers:
+    - gitlab_message:
+        <<: *gitlab_message_defaults
+    - gitlab-notifier
+
+- job-template:
+    id: gl-build-main-kas-upgrade-configurations
+    name: "{gl_group}-{gl_project}-gl-build-{branch}"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *app_interface_creds
+            - *quay_secret_push
+            - *kas_fleet_manager_admin_staging
+            - *kas_fleet_manager_admin_prod
+    <<: *gl_build_master
+
