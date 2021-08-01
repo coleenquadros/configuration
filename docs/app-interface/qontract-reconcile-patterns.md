@@ -24,6 +24,17 @@ There are cases when removing a resource from app-interface means that we lose k
 
 By adding (and implementing) a `delete: true` section to any resource, we still keep track of it in our desired state, while at the same time we understand that it should be deleted. After the resource was deleted, it should be safe to remove the entire deleted section from app-interface.
 
+## The Provider pattern
+
+In this pattern, we allow defining items in a similar way while handling them differently behind the scenes.
+
+For example, to apply OpenShift resources to a namespace (via a namespace file), we allow defining resources under `openshiftResources` with a `provider` key, indicating if the resource:
+- comes from Vault (vault-secret)
+- comes from the resources directory (resource)
+- comes from the resources directory and includes templating (resource-template)
+
+Each item is handled a bit differently in our integrations, while allowing users to define all resources in a similar way or even in a single location.
+
 ## The Wrapper pattern
 
 In this pattern, we wrap the `run` method of an integration with a new integration called by the same name and appended with `-wrapper`.
