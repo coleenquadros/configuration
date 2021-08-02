@@ -27,9 +27,6 @@
     - [Incident Process](#incident-process)
         - [Generic Resources](#generic-resources)
     - [Contract](#contract)
-    - [External Teams](#external-teams)
-        - [Reporting an Issue](#reporting-an-issue)
-        - [EXD Infra](#exd-infra)
 
 <!-- /TOC -->
 
@@ -289,32 +286,3 @@ All Services must satisfy the list of ACs (Acceptance Criteria): [acs.html](http
 
 The process for Service Onboarding is documented here:
 https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/content/service/service_onboarding_flow.md
-
-## External Teams
-
-### Reporting an Issue
-
-1. Create a case: [Service Now (snow) - PnT General Request](https://redhat.service-now.com/help?id=sc_cat_item&sys_id=4c66fd3a1bfbc4d0ebbe43f8bc4bcb6a)
-
-    1.1. For CEE GitLab:
-
-       - Impact: 2 - Affects all of Red Hat
-       - Urgency: 2 - No workaround; blocks business-critical processes
-       - Application: DevOps - GitLab
-       - Assign to this group - CI/CD PNT (Should auto-fill)
-       - Mention `https://gitlab.cee.redhat.com` is inaccessible in the description
-
-    1.2. For CentralCI Jenkins:
-
-       - Category: `Virtualization/Cloud`
-       - Item: `CI-RHOS`
-       - Hostname Affected: `https://ci.int.devshift.net`
-
-2. If this is a weekend (Saturday / Sunday), escalate issue following the [PnT DevOps - Issue Escalation Procedure](https://docs.engineering.redhat.com/pages/viewpage.action?pageId=140541042).
-3. Join the PnT DevOps Google Chat room https://chat.google.com/u/0/room/AAAA6BChWkY
-4. Join the Red Hat IT Ops Google Chat room https://chat.google.com/u/0/room/AAAAiUsrxXk
-5. Join the Red Hat IT Outage Google Chat room https://chat.google.com/u/0/room/AAAA5dCEP_Q
-
-### EXD Infra
-
-They run GitLab. They can be found in the [exd-infra-escalation](https://chat.google.com/u/0/room/AAAA6BChWkY) channel. Contact: [Savitoj Singh](mailto:savsingh@redhat.com).
