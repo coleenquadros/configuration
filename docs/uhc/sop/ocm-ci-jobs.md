@@ -32,9 +32,9 @@ If the `hive-frontend` or `aws-account-operator` SAs are invalidated, they will 
 - Step 1. [AppSRE team] Copy the secret from `integration-output` to a path that the OCM team has access to:
 
 ```
-AWS_TOKEN=$(vault read -field token app-sre/integrations-output/openshift-serviceaccount-tokens/hive-integration/uhc-integration/hive-integration-aws-account-operator-aws-account-operator-client)
-HIVE_TOKEN=$(vault read -field token app-sre/integrations-output/openshift-serviceaccount-tokens/hive-integration/uhc-integration/hive-integration-hive-hive-frontend)
-GCP_TOKEN=$(vault read -field token app-sre/integrations-output/openshift-serviceaccount-tokens/hive-integration/uhc-integration/hive-integration-gcp-project-operator-gcp-project-operator-client)
+AWS_TOKEN=$(vault read -field token app-sre/integrations-output/openshift-serviceaccount-tokens/app-sre-stage-01/uhc-integration/hive-integration-aws-account-operator-aws-account-operator-client)
+HIVE_TOKEN=$(vault read -field token app-sre/integrations-output/openshift-serviceaccount-tokens/app-sre-stage-01/uhc-integration/hive-integration-hive-hive-frontend)
+GCP_TOKEN=$(vault read -field token app-sre/integrations-output/openshift-serviceaccount-tokens/app-sre-stage-01/uhc-integration/hive-integration-gcp-project-operator-gcp-project-operator-client)
 vault write sd-uhc/sandbox-tokens aws-account-operator-client-token=$AWS_TOKEN hive-frontend-token=$HIVE_TOKEN gcp-project-operator-token=$GCP_TOKEN
 ```
 
