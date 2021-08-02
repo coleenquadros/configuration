@@ -20,7 +20,7 @@
             - [Introduction](#introduction)
             - [Training Resources](#training-resources)
             - [Deep Dive sessions](#deep-dive-sessions)
-            - [Practical Training](#practical-training)
+            - [Practical Training Syllabus](#practical-training-syllabus)
     - [On call](#on-call)
     - [Incident Process](#incident-process)
         - [Generic Resources](#generic-resources)
@@ -248,7 +248,28 @@ Those sessions are tracked in this document: [AppSRE Deep Dives](https://docs.go
 
 Every AppSRE member that identifies any knowledge gaps in our documentation / resources has the responsibility of adding new proposals to the Deep Dives list of proposals.
 
-#### Practical training
+#### Practical training Syllabus
+
+Or: How to become a contributing AppSRE team member
+
+This section guides a new team member in carrying out tasks that are:
+- beneficial for the new team member
+- beneficial for the team
+
+As long as we can find tasks that match the learning criteria, we'll prefer to do them over doing an exercise task.
+
+The assumption behind the structure of the syllabus is that there is a limited amount of information that is understood in every task, especially during the first period with the team. to have an experience in which the team member gets as much out of every task, we will want to make each task as narrow as possible. following tasks will assume the knowledge from previous tasks and expand around it. this essentially means that we are doing more [DFS than BFS](https://www.geeksforgeeks.org/difference-between-bfs-and-dfs).
+
+Since every project, small or large, goes through app-interface in some way, the first few tasks will focus on day to day activities in app-interface, such as CI/CD and integrations. With this knowledge gained very early in the on-boarding process of a new team member, many requests in #sd-app-sre will already be understandable.
+
+A big part of being an SRE is to work through toil items. We want to encourage new team members to contribute to refactors, cleanups, and any other toil item. We want to encourage everyone to do that! chop wood, carry water.
+
+The practical training is a really a fancy name for working on tickets. Tickets to get started on are usually labeled as a `good-first-issue`, and some will contain an additional label `ai#n` to indicate the difficulty level:
+
+[AI #1](https://issues.redhat.com/issues/?jql=project%20%3D%20APPSRE%20AND%20status%20%3D%20%22To%20Do%22%20AND%20labels%20%3D%20%22ai%231%22)
+[AI #2](https://issues.redhat.com/issues/?jql=project%20%3D%20APPSRE%20AND%20status%20%3D%20%22To%20Do%22%20AND%20labels%20%3D%20%22ai%232%22)
+[AI #3](https://issues.redhat.com/issues/?jql=project%20%3D%20APPSRE%20AND%20status%20%3D%20%22To%20Do%22%20AND%20labels%20%3D%20%22ai%233%22)
+[AI #4](https://issues.redhat.com/issues/?jql=project%20%3D%20APPSRE%20AND%20status%20%3D%20%22To%20Do%22%20AND%20labels%20%3D%20%22ai%234%22)
 
 ## On call
 
