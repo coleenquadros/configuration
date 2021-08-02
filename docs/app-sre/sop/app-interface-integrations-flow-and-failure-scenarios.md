@@ -59,28 +59,28 @@ happens:
 1. Generate the terraform configuration for this account.  On your
    local machine, spawn a qontract server and run the integration in
    dry-run mode:
-``` bash
+   ``` bash
     # From app-interface's top-level:
     make server
-qontract-reconcile --config config.debug.toml --dry-run terraform-resources --print-only --account-name $account_name |sed 1d > config.tf.json
-```
+    qontract-reconcile --config config.debug.toml --dry-run terraform-resources --print-only --account-name $account_name |sed 1d > config.tf.json
+    ```
     (please remember, you can find the config.debug.toml file in
    vault, path `app-sre/ci-int/qontract-reconcile-toml` - field
    local_data)
 1. Initialize terraform and see its plan
-``` bash
-terraform init
-terraform plan
-```
+   ``` bash
+   terraform init
+   terraform plan
+   ```
     You'll see it lists a lot of resources, even if it eventually
     fails:
-``` bash
-aws_elasticache_parameter_group.quay-orchestrator-parameters: Refreshing state... [id=quay-orchestrator-parameters]
-aws_cloudfront_origin_access_identity.quayio-stage-s3: Refreshing state... [id=E3BFM0BD46CWH4]
-aws_iam_role.quayio-stage-s3_quayio-stage-backup: Refreshing state... [id=quayio-stage-backup_iam_role]
-aws_iam_user.aws-cloudwatch-exporter-quay-stage-01: Refreshing state... [id=aws-cloudwatch-exporter-quay-stage-01]
-[...]
-```
+    ``` bash
+    aws_elasticache_parameter_group.quay-orchestrator-parameters: Refreshing state... [id=quay-orchestrator-parameters]
+    aws_cloudfront_origin_access_identity.quayio-stage-s3: Refreshing state... [id=E3BFM0BD46CWH4]
+    aws_iam_role.quayio-stage-s3_quayio-stage-backup: Refreshing state... [id=quayio-stage-backup_iam_role]
+    aws_iam_user.aws-cloudwatch-exporter-quay-stage-01: Refreshing state... [id=aws-cloudwatch-exporter-quay-stage-01]
+    [...]
+    ```
     Identify the one that matches what was modified manually.
 1. Ask for help! Ask for a team member with experience on terraform
    and these integrations to re-check what you're doing! Our next
@@ -88,6 +88,6 @@ aws_iam_user.aws-cloudwatch-exporter-quay-stage-01: Refreshing state... [id=aws-
 1. Check why the state doesn't match, and run the appropriate
    `terraform state` subcommand. For instance, if you deleted a
    parameter group, you may want to do:
-``` bash
-terraform state rm $parameter_group
-```
+   ``` bash
+   terraform state rm $parameter_group
+   ```
