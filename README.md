@@ -1401,6 +1401,9 @@ The Secret will contain the following fields:
 - `db.port` - The database port.
 - `db.auth_token` - Authentication token for in-transit encryption, if `transit_encryption_enabled` is set to `true`.
 
+Notes:
+- To provision an instance with cluster mode enabled, it is mandatory to define `cluster_mode.num_node_groups` and `cluster_mode.replicas_per_node_group` in the defaults file.
+
 #### Manage IAM Service account users via App-Interface (`/openshift/namespace-1.yml`)
 
 IAM users to be used as service accounts can be entirely self-serviced via App-Interface.
