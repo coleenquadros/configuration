@@ -25,9 +25,9 @@
             - [Deep Dive sessions](#deep-dive-sessions)
     - [On call](#on-call)
     - [Incident Process](#incident-process)
+        - [Generic Resources](#generic-resources)
     - [Contract](#contract)
     - [External Teams](#external-teams)
-        - [Generic Resources](#generic-resources)
         - [Reporting an Issue](#reporting-an-issue)
         - [EXD Infra](#exd-infra)
 
@@ -274,6 +274,12 @@ Documented in the [On Call rotation](./on-call.md) SOP.
 
 Documented in the [Incident Process](./incident-process.md) SOP.
 
+### Generic Resources
+
+* [PnT DevOps - Issue Escalation Procedure](https://docs.engineering.redhat.com/pages/viewpage.action?pageId=140541042)
+* [Red Hat Major Incident Management (MIM)](https://source.redhat.com/groups/public/it-major-incident-management)
+* [IT ISO (IT Operations)](https://source.redhat.com/groups/public/iso/it_operations_iso_wiki/welcome_to_it_iso_it_operations)
+
 ## Contract
 
 AppSRE establishes a contract with the tenants. The contract is live here:
@@ -285,12 +291,6 @@ The process for Service Onboarding is documented here:
 https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/content/service/service_onboarding_flow.md
 
 ## External Teams
-
-### Generic Resources
-
-* [PnT DevOps - Issue Escalation Procedure](https://docs.engineering.redhat.com/pages/viewpage.action?pageId=140541042)
-* [Red Hat Major Incident Management (MIM)](https://source.redhat.com/groups/public/it-major-incident-management)
-* [IT ISO (IT Operations)](https://source.redhat.com/groups/public/iso/it_operations_iso_wiki/welcome_to_it_iso_it_operations)
 
 ### Reporting an Issue
 
