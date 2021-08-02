@@ -11,10 +11,9 @@
     - [Index](#index)
     - [Preface](#preface)
     - [Complementary Documentation and Resources](#complementary-documentation-and-resources)
-    - [AppSRE Engineer Setup](#appsre-engineer-setup)
+    - [AppSRE Engineer Onboarding](#appsre-engineer-onboarding)
         - [Registering the user in App-Interface](#registering-the-user-in-app-interface)
-    - [Access and Surfaces list](#access-and-surfaces-list)
-        - [Surfaces](#surfaces)
+        - [Access and Surfaces list](#access-and-surfaces-list)
         - [Returning Red Hat Employee Gotchas](#returning-red-hat-employee-gotchas)
     - [On call](#on-call)
         - [Pagerduty set up](#pagerduty-set-up)
@@ -61,7 +60,7 @@ surfaces and processes, including incident management.
   Drive](https://drive.google.com/drive/u/0/folders/0B9akCOYRTJW_TFAxOUtEaWtRZWs).
   Viewable and editable by AppSRE members only.
 
-## AppSRE Engineer Setup
+## AppSRE Engineer Onboarding
 
 ### Registering the user in App-Interface
 
@@ -78,9 +77,7 @@ Most of the resources required as an AppSRE will be obtained via a user definiti
 * Make sure your user file includes the `public_gpg_key` field.
   [Instructions](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master#adding-your-public-gpg-key).
 
-## Access and Surfaces list
-
-### Surfaces
+### Access and Surfaces list
 
 Every AppSRE/MT-SRE engineer should have access to the following:
 
