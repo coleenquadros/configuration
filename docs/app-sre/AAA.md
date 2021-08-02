@@ -137,6 +137,9 @@ Every AppSRE/MT-SRE engineer should have access to the following:
 * Pagerduty
   * ACCESS: Create a [Jira ticket](https://issues.redhat.com/) in the OHSS board to request access to PagerDuty, and assign it to [Meghna Gala](https://rover.redhat.com/people/profile/mgala)
   * you can check this [example ticket](https://issues.redhat.com/browse/OHSS-2547), but double check the assignee before commiting.
+  * Ensure you are listed with the appropriate contact detail in your Pagerduty profile.
+  * The recommended setup includes the Pagerduty app on your mobile phone. From the website you can test notifications to ensure that you have correctly set up the application to override any do not disturb settings.
+  * For notification troubleshooting see: https://support.pagerduty.com/docs/notification-troubleshooting
 * AppSRE shared folders
   * ACCESS: Go to the following folders and request access with your Red Hat Gsuite account
     * [Public Top Level Directory](https://drive.google.com/drive/u/1/folders/1sQGfo57eU7UAKfbBy8LgwxhMdnzXc0KZ) (contains RCAs, etc)
@@ -207,40 +210,7 @@ Every AppSRE engineer should have access to the following:
 
 ## On call
 
-The AppSRE on call schedule is a rotation to ensure handling of service outages
-and incidents for our application owners. Schedule of past, current and future
-on call rotation can be viewed @ pagerduty: https://redhat.pagerduty.com/
-
-### Pagerduty set up
-
-Ensure you are listed with the appropriate contact detail in your Pagerduty profile.
-The recommended setup includes the pagerduty app on your mobile phone. From the website you can test notifications to ensure that you have correctly set up the application to override any do not disturb settings.
-
-For notification troubleshooting see: https://support.pagerduty.com/docs/notification-troubleshooting
-
-### Follow the sun
-
-The follow the sun cycle (FTS) is an on-call rotation to ensure that the first page triggered by an alert goes to an engineer who, at the time, is within regular working hours. This is to prevent direct pages to the primary on-call within the regular hours of others. If there is no engineer available within their regular hours the page will go directly to the primary on-call.
-
-Schedule: https://redhat.pagerduty.com/schedules#PQ022DV
-
-Any person currently active as the FTS, will also be the IC (Interrupt Catcher), documented [here](/docs/app-sre/interrupt-catching.md).
-
-### Primary on-call
-
-The primary on-call is a 24/7 on-call rotation assigned on a weekly basis. The engineer assigned is required to be available for the initial response within 30 minutes of the page.
-
-Pages for primary on-calls should be be kept at a minimum and are reserved for critical issues in production environments which need immediate attention.
-
-The primary on-call also acts as the interrupt-catcher during their work hours that cycle.
-
-Schedule: https://redhat.pagerduty.com/schedules#PHS3079
-
-### Secondary on-call
-
-The secondary on-call is a 24/7 on-call rotation that serves as backup and support function for the primary on-call. The secondary on-call will be paged if the primary on-call does not aknowledge the incident via Pagerduty (via app, slack integration or other means). The engineer assigned is required to be available for the initial response within 30 minutes of the page.
-
-Schedule: https://redhat.pagerduty.com/schedules#PSTVSQD
+Documented in the [On Call rotation](./on-call.md) SOP.
 
 ## Incident Process
 
