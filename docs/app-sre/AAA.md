@@ -16,10 +16,11 @@
         - [Access and Surfaces list](#access-and-surfaces-list)
             - [Returning Red Hat Employee Gotchas](#returning-red-hat-employee-gotchas)
             - [Maintaining access pieces](#maintaining-access-pieces)
-        - [Knowledge Sharing](#knowledge-sharing)
+        - [Knowledge Sharing and Training](#knowledge-sharing-and-training)
             - [Introduction](#introduction)
             - [Training Resources](#training-resources)
             - [Deep Dive sessions](#deep-dive-sessions)
+            - [Practical Training](#practical-training)
     - [On call](#on-call)
     - [Incident Process](#incident-process)
         - [Generic Resources](#generic-resources)
@@ -205,7 +206,7 @@ Access pieces are a very quickly moving target, and they change very frequently.
 * If an AppSRE team member gains access to something and it's not linked from in this list, it's their responsibility to add it there.
 * This list is actively reviewed by onboarding AppSRE members.
 
-### Knowledge Sharing
+### Knowledge Sharing and Training
 
 This section documents the specific processes related to knowledge sharing by
 the AppSRE team in order to maintain a high level of accuracy and coverage of
@@ -246,6 +247,8 @@ On a periodical basis, the AppSRE team will hold "Deep Dive sessions". These ses
 Those sessions are tracked in this document: [AppSRE Deep Dives](https://docs.google.com/document/d/1T4QNO2qQYpBl4uhiNdr2iP7LO1pfmCVkzyWHgHDIIJA/edit).
 
 Every AppSRE member that identifies any knowledge gaps in our documentation / resources has the responsibility of adding new proposals to the Deep Dives list of proposals.
+
+#### Practical training
 
 ## On call
 
