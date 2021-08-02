@@ -24,12 +24,7 @@
             - [Training Resources](#training-resources)
             - [Deep Dive sessions](#deep-dive-sessions)
     - [On call](#on-call)
-        - [Pagerduty set up](#pagerduty-set-up)
-        - [Follow the sun](#follow-the-sun)
-        - [Primary on-call](#primary-on-call)
-        - [Secondary on-call](#secondary-on-call)
     - [Incident Process](#incident-process)
-    - [Service Onboarding](#service-onboarding)
     - [Contract](#contract)
     - [External Teams](#external-teams)
         - [Generic Resources](#generic-resources)
@@ -280,17 +275,15 @@ Documented in the [On Call rotation](./on-call.md) SOP.
 
 Documented in the [Incident Process](./incident-process.md) SOP.
 
-## Service Onboarding
-
-The process for Service Onboarding is documented here:
-https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/content/service/service_onboarding_flow.md
-
 ## Contract
 
 AppSRE establishes a contract with the tenants. The contract is live here:
 https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/README.md
 
 All Services must satisfy the list of ACs (Acceptance Criteria): [acs.html](https://app-sre.pages.redhat.com/contract/acs.html) and [acs.txt](https://app-sre.pages.redhat.com/contract/acs.txt)
+
+The process for Service Onboarding is documented here:
+https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/content/service/service_onboarding_flow.md
 
 ## External Teams
 
