@@ -1,0 +1,41 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: assisted-installer
+
+name: assisted-installer
+
+namespaces:
+- $ref: /services/assisted-installer/namespaces/assisted-installer-production.yml
+
+slos:
+- name: latency
+  SLIType: latency
+  SLISpecification: 99% of the requests' latency must be under 1 seconds
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/assisted-installer/SLO_README.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(http_request_duration_seconds_bucket{endpoint="assisted-svc", namespace="assisted-installer-production", le="1"})
+    /
+    sum(http_request_duration_seconds_count{endpoint="assisted-svc", namespace="assisted-installer-production"})
+  SLOTarget: 0.99
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/assisted-installer-production.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/dashboards/f/7a2fxwZ7k/assisted-installer
+
+- name: availability
+  SLIType: availability
+  SLISpecification: 85% of the requests should succeed
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/assisted-installer/SLO_README.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(haproxy_backend_http_responses_total{route="assisted-service",exported_namespace="assisted-installer-production",code!~"5xx"})
+    /
+    sum(haproxy_backend_http_responses_total{route="assisted-service",exported_namespace="assisted-installer-production"})
+  SLOTarget: 0.85
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/assisted-installer-production.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/dashboards/f/7a2fxwZ7k/assisted-installer
