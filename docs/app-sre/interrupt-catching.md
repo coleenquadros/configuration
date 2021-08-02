@@ -52,6 +52,7 @@ PRs should be reviewed and potentially merged by the IC according to the [AppSRE
     * In case the request included work from App SRE side that is more then reviewing PRs.
 - Search the backlog for IC issues created by our tenants and move them to the ASIC board.
     * Will usually appear at the bottom of the APPSRE backlog.
+- Search the ASIC board for any requests that require development/reasearch and move them to the APPSRE board.
 
 #### Incidents / Maintenance
 
