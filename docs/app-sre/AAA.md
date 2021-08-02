@@ -18,7 +18,6 @@
             - [Maintaining access pieces](#maintaining-access-pieces)
         - [Knowledge Sharing](#knowledge-sharing)
             - [Introduction](#introduction)
-            - [Maintaining escalation channels](#maintaining-escalation-channels)
             - [SRE Checkpoints](#sre-checkpoints)
             - [Training Resources](#training-resources)
             - [Deep Dive sessions](#deep-dive-sessions)
@@ -227,12 +226,6 @@ has a very clear mission with regard to knowledge sharing:
   the implemented processes and channels.
 * Each AppSRE member has the right to raise any concerns about any knowledge
   gaps and the team will prioritize filling in those gaps.
-
-#### Maintaining escalation channels
-
-Similarly as with the access pieces:
-
-* All escalation channels are referenced from the specific `app-1.yml` file of the service in App-Interface.
 
 #### SRE Checkpoints
 
