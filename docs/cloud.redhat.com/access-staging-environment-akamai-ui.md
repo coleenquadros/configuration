@@ -1,4 +1,4 @@
-# Accessing cloud.redhat.com Staging Environment
+# Accessing console.redhat.com Staging Environment
 
 Note: This SOP is not for accessing the OpenShift cluster but the UI & c.rh.c services running in staging environment.
 

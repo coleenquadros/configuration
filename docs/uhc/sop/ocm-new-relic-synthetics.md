@@ -15,7 +15,7 @@ The monitor is used in [cloud.redhat.com-OCM New Relic policy](https://one.newre
 ## Access required
 
 * [New Relic Synthetics](https://one.newrelic.com/launcher/synthetics-nerdlets.home?platform[accountId]=2409290)
-* [OCM page in cloud.redhat.com](https://cloud.redhat.com/openshift) with your app-sre account
+* [OCM page in console.redhat.com](https://console.redhat.com/openshift) with your app-sre account
 
 ## Steps
 

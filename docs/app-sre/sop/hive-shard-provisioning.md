@@ -123,7 +123,7 @@ Ensure that the new hive shard's egress gateway IP is listed in
 In order to get this, you have to access the hive shard cluster AWS account
 through a impersonation link. There are two ways to get the impersonation link:
 
-* OCM console: Go to https://cloud.redhat.com/openshift, then click into your
+* OCM console: Go to https://console.redhat.com/openshift, then click into your
 cluster and then you will get the details under "AWS infrastructure access" in
 the "Access Control" section.
 

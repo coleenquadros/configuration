@@ -7,12 +7,12 @@ Severity: Info
 Incident Response Plan
 ----------------------
 
-`Incident Response Doc <https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE>`_ for cloud.redhat.com
+`Incident Response Doc <https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE>`_ for console.redhat.com
 
 Impact
 ------
 
-Excessive latency cascades to user interfaces making certain cloud.redhat.com applications (host-inventory, remediations, ...) hard to use.
+Excessive latency cascades to user interfaces making certain console.redhat.com applications (host-inventory, remediations, ...) hard to use.
 A very high latency may cause certain requests to time out causing a partial outage.
 
 Summary

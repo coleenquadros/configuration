@@ -48,7 +48,7 @@ If you are using `us-east-1`, the default account limits are not enough to deplo
 
 ### Obtain Installer
 
-Log into [OCM](https://cloud.redhat.com/) to download the OCP installer for AWS (with Installer-Provisioned Infrastructure) and pull secrets. You will also need the OpenShift command-line tools which can be downloaded from the same page.
+Log into [OCM](https://console.redhat.com/) to download the OCP installer for AWS (with Installer-Provisioned Infrastructure) and pull secrets. You will also need the OpenShift command-line tools which can be downloaded from the same page.
 
 ### Installer Configuration File
 

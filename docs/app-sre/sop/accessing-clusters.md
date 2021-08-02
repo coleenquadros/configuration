@@ -21,7 +21,7 @@ Install OCM CLI, if it's not installed already. Or update it prior to starting o
 go get -u github.com/openshift-online/ocm-cli/cmd/ocm
 ```
 
-Get your [offline access token](https://cloud.redhat.com/openshift/token).
+Get your [offline access token](https://console.redhat.com/openshift/token).
 
 Note that you need to use your `<kerberos_id>+sd-app-sre` ID to be able to log in and see all our clusters
 
@@ -69,7 +69,7 @@ If the command takes too long, try passing the `--managed` flag:
 ocm cluster list --managed | grep <TRUNCATED_CLUSTERNAME>
 ```
 
-An alternative is browsing at https://cloud.redhat.com/openshift and use the _Filter_ field.
+An alternative is browsing at https://console.redhat.com/openshift and use the _Filter_ field.
 
 ### Web Console
 

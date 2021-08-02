@@ -7,12 +7,12 @@ Severity: Pagerduty
 Incident Response Plan
 ----------------------
 
-`Incident Response Doc`_ for cloud.redhat.com
+`Incident Response Doc`_ for console.redhat.com
 
 Impact
 ------
 
--  Receptor-Controller switch is an application that allows internal cloud.redhat.com applications to pass messages
+-  Receptor-Controller switch is an application that allows internal console.redhat.com applications to pass messages
    to on-premise receptor nodes.  The on-premise receptor nodes are usually Satellite instances.
 
 Summary

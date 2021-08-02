@@ -4,7 +4,7 @@ Yupana
 Incident Response Plan
 ----------------------
 
-`Incident Response Doc`_ for cloud.redhat.com
+`Incident Response Doc`_ for console.redhat.com
 
 Summary
 -------

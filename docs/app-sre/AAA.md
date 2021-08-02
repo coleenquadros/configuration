@@ -167,7 +167,7 @@ Every AppSRE engineer should have access to the following:
     * Access to all repositories is managed via this group.
     * Obtained via this [role](/data/teams/app-sre/roles/app-sre.yml).
   * https://gitlab.cee.redhat.com/service/app-interface
-* AppSRE OCM org (https://cloud.redhat.com/openshift)
+* AppSRE OCM org (https://console.redhat.com/openshift)
   * Access is [configured manually by an org administrator](/docs/app-sre/sop/ocm-appsre-org-access.md)
 * AWS
   * Nothing to do. Access obtained via a [role](/data/teams/app-sre/roles/app-sre.yml)
@@ -184,7 +184,7 @@ Every AppSRE engineer should have access to the following:
   * Access process is documented [here](https://source.redhat.com/groups/public/openshiftplatformsre/wiki/faq_openshift_tiered_access_overview_for_osd3)
     * You should request Tier1
 * Pendo:
-  * This is necessary to post maintenance and outage messages in https://cloud.redhat.com/openshift
+  * This is necessary to post maintenance and outage messages in https://console.redhat.com/openshift
   * Access is provided via email to Allie Higgins <ahiggins@redhat.com>.
   * [Logging](https://app.pendo.io/login) in is done using the full Red Hat email.
 * Unleash:
