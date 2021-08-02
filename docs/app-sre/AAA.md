@@ -15,6 +15,14 @@
         - [Registering the user in App-Interface](#registering-the-user-in-app-interface)
         - [Access and Surfaces list](#access-and-surfaces-list)
         - [Returning Red Hat Employee Gotchas](#returning-red-hat-employee-gotchas)
+        - [Knowledge Sharing](#knowledge-sharing)
+            - [Introduction](#introduction)
+            - [Maintaining access pieces](#maintaining-access-pieces)
+            - [Maintaining escalation channels](#maintaining-escalation-channels)
+            - [Following Incident Procedure](#following-incident-procedure)
+            - [SRE Checkpoints](#sre-checkpoints)
+            - [Training Resources](#training-resources)
+            - [Deep Dive sessions](#deep-dive-sessions)
     - [On call](#on-call)
         - [Pagerduty set up](#pagerduty-set-up)
         - [Follow the sun](#follow-the-sun)
@@ -28,14 +36,6 @@
         - [Reporting an Issue](#reporting-an-issue)
         - [EXD Infra](#exd-infra)
         - [IT Platform Team](#it-platform-team)
-    - [Knowledge Sharing](#knowledge-sharing)
-        - [Introduction](#introduction)
-        - [Maintaining access pieces](#maintaining-access-pieces)
-        - [Maintaining escalation channels](#maintaining-escalation-channels)
-        - [Following Incident Procedure](#following-incident-procedure)
-        - [SRE Checkpoints](#sre-checkpoints)
-        - [Training Resources](#training-resources)
-        - [Deep Dive sessions](#deep-dive-sessions)
 
 <!-- /TOC -->
 
@@ -208,6 +208,70 @@ Every AppSRE engineer should have access to the following:
   * Bluejeans
     * Create an IT ticket
 
+### Knowledge Sharing
+
+This section documents the specific processes related to knowledge sharing by
+the AppSRE team in order to maintain a high level of accuracy and coverage of
+all the knowledge within AppSRE.
+
+#### Introduction
+
+The purpose of this section is to document how knowledge is shared by the
+AppSRE, both internally and externally.
+
+Before diving into specific processes, it is important to state that the team
+has a very clear mission with regard to knowledge sharing:
+
+* There are no single owners or SMEs for any of the components and processes
+  owned or implemented by the AppSRE team.
+* It is the responsibility of every AppSRE member to make sure no knowledge is
+  siloed, and to share any new knowledge piece with the rest of the team using
+  the implemented processes and channels.
+* Each AppSRE member has the right to raise any concerns about any knowledge
+  gaps and the team will prioritize filling in those gaps.
+
+#### Maintaining access pieces
+
+Access pieces are a very quickly moving target, and they change very frequently. In order to maintain an accurate list of access pieces these actions must be followed by the each AppSRE team member:
+
+* All access pieces are documented in the [Access and surfaces list](#access-and-surfaces-list) section.
+* If an AppSRE team member gains access to something and it's not linked from in this list, it's their responsibility to add it there.
+* This list is actively reviewed by onboarding AppSRE members.
+
+#### Maintaining escalation channels
+
+Similarly as with the access pieces:
+
+* All escalation channels are referenced from the specific `app-1.yml` file of the service in App-Interface.
+
+#### Following Incident Process
+
+All AppSRE team members will follow the [Incident Process](./incident-process.md) as accurately as possible, raise any concers and keep it up to date.
+
+#### SRE Checkpoints
+
+All Services will receive an SRE Checkpoint periodically. Each SRE Checkpoint will take 1 day, and each AppSRE engineer will conduct one per sprint. [Further information](https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/content/process/sre_checkpoints.md).
+
+#### Training Resources
+
+The AppSRE team will maintains an index of training resources. All AppSRE members must go through those training documents:
+https://source.redhat.com/groups/public/sre-services/sre_services_wiki/appsre_introduction#jive_content_id_AppSRE_Training
+
+#### Deep Dive sessions
+
+On a periodical basis, the AppSRE team will hold "Deep Dive sessions". These sessions have the following characteristics:
+
+* The main goal is to share knowledge within the AppSRE team.
+* Periodicity: every 6 weeks.
+* 1h sessions.
+* Presentations should have an accompanying slide deck and must be well prepared.
+* Any topics that are directly related to the AppSRE day-to-day will be prioritized over general knowledge ones.
+* Attendance from all the team members is strongly encouraged, as well as participation and making the sessions dynamic.
+
+Those sessions are tracked in this document: [AppSRE Deep Dives](https://docs.google.com/document/d/1T4QNO2qQYpBl4uhiNdr2iP7LO1pfmCVkzyWHgHDIIJA/edit).
+
+Every AppSRE member that identifies any knowledge gaps in our documentation / resources has the responsibility of adding new proposals to the Deep Dives list of proposals.
+
 ## On call
 
 Documented in the [On Call rotation](./on-call.md) SOP.
@@ -276,66 +340,3 @@ The IT Platform team runs components like:
   * In order to escalate a production incident this email can be used: `it-es-platform-page@redhat.com`.
   * To get ahold of a person directly to follow up on an escalation or incident connect to the [IT/ISO Google chat](https://chat.google.com/u/0/room/AAAAiUsrxXk)
 
-## Knowledge Sharing
-
-This section documents the specific processes related to knowledge sharing by
-the AppSRE team in order to maintain a high level of accuracy and coverage of
-all the knowledge within AppSRE.
-
-### Introduction
-
-The purpose of this section is to document how knowledge is shared by the
-AppSRE, both internally and externally.
-
-Before diving into specific processes, it is important to state that the team
-has a very clear mission with regard to knowledge sharing:
-
-* There are no single owners or SMEs for any of the components and processes
-  owned or implemented by the AppSRE team.
-* It is the responsibility of every AppSRE member to make sure no knowledge is
-  siloed, and to share any new knowledge piece with the rest of the team using
-  the implemented processes and channels.
-* Each AppSRE member has the right to raise any concerns about any knowledge
-  gaps and the team will prioritize filling in those gaps.
-
-### Maintaining access pieces
-
-Access pieces are a very quickly moving target, and they change very frequently. In order to maintain an accurate list of access pieces these actions must be followed by the each AppSRE team member:
-
-* All access pieces are documented in the [Access and surfaces list](#access-and-surfaces-list) section.
-* If an AppSRE team member gains access to something and it's not linked from in this list, it's their responsibility to add it there.
-* This list is actively reviewed by onboarding AppSRE members.
-
-### Maintaining escalation channels
-
-Similarly as with the access pieces:
-
-* All escalation channels are referenced from the specific `app-1.yml` file of the service in App-Interface.
-
-### Following Incident Process
-
-All AppSRE team members will follow the [Incident Process](./incident-process.md) as accurately as possible, raise any concers and keep it up to date.
-
-### SRE Checkpoints
-
-All Services will receive an SRE Checkpoint periodically. Each SRE Checkpoint will take 1 day, and each AppSRE engineer will conduct one per sprint. [Further information](https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/content/process/sre_checkpoints.md).
-
-### Training Resources
-
-The AppSRE team will maintains an index of training resources. All AppSRE members must go through those training documents:
-https://source.redhat.com/groups/public/sre-services/sre_services_wiki/appsre_introduction#jive_content_id_AppSRE_Training
-
-### Deep Dive sessions
-
-On a periodical basis, the AppSRE team will hold "Deep Dive sessions". These sessions have the following characteristics:
-
-* The main goal is to share knowledge within the AppSRE team.
-* Periodicity: every 6 weeks.
-* 1h sessions.
-* Presentations should have an accompanying slide deck and must be well prepared.
-* Any topics that are directly related to the AppSRE day-to-day will be prioritized over general knowledge ones.
-* Attendance from all the team members is strongly encouraged, as well as participation and making the sessions dynamic.
-
-Those sessions are tracked in this document: [AppSRE Deep Dives](https://docs.google.com/document/d/1T4QNO2qQYpBl4uhiNdr2iP7LO1pfmCVkzyWHgHDIIJA/edit).
-
-Every AppSRE member that identifies any knowledge gaps in our documentation / resources has the responsibility of adding new proposals to the Deep Dives list of proposals.
