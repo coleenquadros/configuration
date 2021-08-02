@@ -18,13 +18,13 @@
             - [Maintaining access pieces](#maintaining-access-pieces)
         - [Knowledge Sharing](#knowledge-sharing)
             - [Introduction](#introduction)
-            - [SRE Checkpoints](#sre-checkpoints)
             - [Training Resources](#training-resources)
             - [Deep Dive sessions](#deep-dive-sessions)
     - [On call](#on-call)
     - [Incident Process](#incident-process)
         - [Generic Resources](#generic-resources)
     - [Contract](#contract)
+        - [SRE Checkpoints](#sre-checkpoints)
 
 <!-- /TOC -->
 
@@ -227,10 +227,6 @@ has a very clear mission with regard to knowledge sharing:
 * Each AppSRE member has the right to raise any concerns about any knowledge
   gaps and the team will prioritize filling in those gaps.
 
-#### SRE Checkpoints
-
-All Services will receive an SRE Checkpoint periodically. Each SRE Checkpoint will take 1 day, and each AppSRE engineer will conduct one per sprint. [Further information](https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/content/process/sre_checkpoints.md).
-
 #### Training Resources
 
 The AppSRE team will maintains an index of training resources. All AppSRE members must go through those training documents:
@@ -276,3 +272,7 @@ All Services must satisfy the list of ACs (Acceptance Criteria): [acs.html](http
 
 The process for Service Onboarding is documented here:
 https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/content/service/service_onboarding_flow.md
+
+### SRE Checkpoints
+
+All Services will receive an SRE Checkpoint periodically. Each SRE Checkpoint will take 1 day, and each AppSRE engineer will conduct one per sprint. [Further information](https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/content/process/sre_checkpoints.md).
