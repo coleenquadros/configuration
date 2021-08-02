@@ -56,12 +56,13 @@ strange errors about mismatching or missing resources. When that
 happens:
 
 1. Diagnose the account for which the problem is happening.
-1. Generate the terraform configuration for this account, on your
-   local machine, spawn a qontract server
+1. Generate the terraform configuration for this account.  On your
+   local machine, spawn a qontract server and run the integration in
+   dry-run mode:
 ``` bash
     # From app-interface's top-level:
     make server
-qontract-reconcile --config config.debug.toml --dry-run terraform-resources --print-only --account-name $account_name > config.tf.json
+qontract-reconcile --config config.debug.toml --dry-run terraform-resources --print-only --account-name $account_name |sed 1d > config.tf.json
 ```
     (please remember, you can find the config.debug.toml file in vault)
 1. Initialize terraform and see its plan
@@ -79,8 +80,9 @@ aws_iam_user.aws-cloudwatch-exporter-quay-stage-01: Refreshing state... [id=aws-
 [...]
 ```
     Identify the one that matches what was modified manually.
-1. Ask for help! Ask for a team member to re-check what you're
-   doing! Our next steps are **very** dangerous!!
+1. Ask for help! Ask for a team member with experience on terraform
+   and these integrations to re-check what you're doing! Our next
+   steps are **very** dangerous!!
 1. Check why the state doesn't match, and run the appropriate
    `terraform state` subcommand. For instance, if you deleted a
    parameter group, you may want to do:
