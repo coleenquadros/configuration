@@ -24,4 +24,4 @@ Escalations
 -  Escalate to console.redhat.com engineering team per `Incident Response Doc`_
 
 .. _Incident Response Doc: https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE
-.. _Clowder: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/app-sops/clowder/clowder.rst
+.. _Clowder: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/clowder/clowder.rst
