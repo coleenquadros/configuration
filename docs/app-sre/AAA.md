@@ -14,12 +14,11 @@
     - [AppSRE Engineer Onboarding](#appsre-engineer-onboarding)
         - [Registering the user in App-Interface](#registering-the-user-in-app-interface)
         - [Access and Surfaces list](#access-and-surfaces-list)
-        - [Returning Red Hat Employee Gotchas](#returning-red-hat-employee-gotchas)
+            - [Returning Red Hat Employee Gotchas](#returning-red-hat-employee-gotchas)
+            - [Maintaining access pieces](#maintaining-access-pieces)
         - [Knowledge Sharing](#knowledge-sharing)
             - [Introduction](#introduction)
-            - [Maintaining access pieces](#maintaining-access-pieces)
             - [Maintaining escalation channels](#maintaining-escalation-channels)
-            - [Following Incident Procedure](#following-incident-procedure)
             - [SRE Checkpoints](#sre-checkpoints)
             - [Training Resources](#training-resources)
             - [Deep Dive sessions](#deep-dive-sessions)
@@ -187,7 +186,7 @@ Every AppSRE engineer should have access to the following:
 * Deadman's snitch
   * Ask somebody in the team to invite you to the organization. You'll receive an e-mail with a link to the invite. Create a new account then, it will be added automatically to the organization and you'll see all the heartbeats we have configured. You'll also be able to create even more.
 
-### Returning Red Hat Employee Gotchas
+#### Returning Red Hat Employee Gotchas
 
 * Accounts need to be re-enabled
   * Bugzilla
@@ -198,6 +197,14 @@ Every AppSRE engineer should have access to the following:
       [here](https://docs.engineering.redhat.com/display/OMEGA/Group+Membership+Policy)
   * Bluejeans
     * Create an IT ticket
+
+#### Maintaining access pieces
+
+Access pieces are a very quickly moving target, and they change very frequently. In order to maintain an accurate list of access pieces these actions must be followed by the each AppSRE team member:
+
+* All access pieces are documented in the [Access and surfaces list](#access-and-surfaces-list) section.
+* If an AppSRE team member gains access to something and it's not linked from in this list, it's their responsibility to add it there.
+* This list is actively reviewed by onboarding AppSRE members.
 
 ### Knowledge Sharing
 
@@ -221,23 +228,11 @@ has a very clear mission with regard to knowledge sharing:
 * Each AppSRE member has the right to raise any concerns about any knowledge
   gaps and the team will prioritize filling in those gaps.
 
-#### Maintaining access pieces
-
-Access pieces are a very quickly moving target, and they change very frequently. In order to maintain an accurate list of access pieces these actions must be followed by the each AppSRE team member:
-
-* All access pieces are documented in the [Access and surfaces list](#access-and-surfaces-list) section.
-* If an AppSRE team member gains access to something and it's not linked from in this list, it's their responsibility to add it there.
-* This list is actively reviewed by onboarding AppSRE members.
-
 #### Maintaining escalation channels
 
 Similarly as with the access pieces:
 
 * All escalation channels are referenced from the specific `app-1.yml` file of the service in App-Interface.
-
-#### Following Incident Process
-
-All AppSRE team members will follow the [Incident Process](./incident-process.md) as accurately as possible, raise any concers and keep it up to date.
 
 #### SRE Checkpoints
 
@@ -268,6 +263,8 @@ Every AppSRE member that identifies any knowledge gaps in our documentation / re
 Documented in the [On Call rotation](./on-call.md) SOP.
 
 ## Incident Process
+
+All AppSRE team members will follow the Incident Process as accurately as possible, raise any concers and keep it up to date.
 
 Documented in the [Incident Process](./incident-process.md) SOP.
 
