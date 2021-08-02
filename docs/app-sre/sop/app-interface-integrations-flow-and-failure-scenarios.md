@@ -64,7 +64,9 @@ happens:
     make server
 qontract-reconcile --config config.debug.toml --dry-run terraform-resources --print-only --account-name $account_name |sed 1d > config.tf.json
 ```
-    (please remember, you can find the config.debug.toml file in vault)
+    (please remember, you can find the config.debug.toml file in
+   vault, path `app-sre/ci-int/qontract-reconcile-toml` - field
+   local_data)
 1. Initialize terraform and see its plan
 ``` bash
 terraform init
@@ -89,5 +91,3 @@ aws_iam_user.aws-cloudwatch-exporter-quay-stage-01: Refreshing state... [id=aws-
 ``` bash
 terraform state rm $parameter_group
 ```
-
-   
