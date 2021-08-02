@@ -30,7 +30,6 @@
         - [Generic Resources](#generic-resources)
         - [Reporting an Issue](#reporting-an-issue)
         - [EXD Infra](#exd-infra)
-        - [IT Platform Team](#it-platform-team)
 
 <!-- /TOC -->
 
@@ -319,17 +318,3 @@ https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/content/service/ser
 ### EXD Infra
 
 They run GitLab. They can be found in the [exd-infra-escalation](https://chat.google.com/u/0/room/AAAA6BChWkY) channel. Contact: [Savitoj Singh](mailto:savsingh@redhat.com).
-
-### IT Platform Team
-
-Manager: https://mojo.redhat.com/people/aowens
-TL: https://mojo.redhat.com/people/jblashka
-
-The IT Platform team runs components like:
-
-* `sso.redhat.com`
-  * C1 SLA (see resources below)
-  * Quick link to [blackbox poll Prometheus data](https://prometheus.app-sre-prod-01.devshift.net/graph?g0.range_input=2h&g0.stacked=1&g0.expr=probe_success%7Binstance%3D~%22.*sso.redhat.com.*%22%7D&g0.tab=0) for sso.redhat.com
-  * In order to escalate a production incident this email can be used: `it-es-platform-page@redhat.com`.
-  * To get ahold of a person directly to follow up on an escalation or incident connect to the [IT/ISO Google chat](https://chat.google.com/u/0/room/AAAAiUsrxXk)
-
