@@ -91,7 +91,7 @@ If service is up you should get a list of clusters, might be [] if you never cre
 
 You can also check the assisted-service using the UI:
 * Stage: https://qaprodauth.cloud.redhat.com/openshift/assisted-installer/clusters/?env=staging 
-* Production: https://cloud.redhat.com/openshift/assisted-installer/clusters 
+* Production: https://console.redhat.com/openshift/assisted-installer/clusters 
 
 You should see the list of clusters that you created and you can create a new cluster to make sure that the service is functioning properly.
 
