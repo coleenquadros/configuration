@@ -11,32 +11,21 @@
     - [Index](#index)
     - [Preface](#preface)
     - [Complementary Documentation and Resources](#complementary-documentation-and-resources)
-    - [AppSRE Engineer Setup](#appsre-engineer-setup)
+    - [AppSRE Engineer Onboarding](#appsre-engineer-onboarding)
         - [Registering the user in App-Interface](#registering-the-user-in-app-interface)
-    - [Access and Surfaces list](#access-and-surfaces-list)
-        - [Surfaces](#surfaces)
-        - [Returning Red Hat Employee Gotchas](#returning-red-hat-employee-gotchas)
+        - [Access and Surfaces list](#access-and-surfaces-list)
+            - [Returning Red Hat Employee Gotchas](#returning-red-hat-employee-gotchas)
+            - [Maintaining access pieces](#maintaining-access-pieces)
+        - [Knowledge Sharing and Training](#knowledge-sharing-and-training)
+            - [Introduction](#introduction)
+            - [Training Resources](#training-resources)
+            - [Deep Dive sessions](#deep-dive-sessions)
+            - [Practical Training Syllabus](#practical-training-syllabus)
     - [On call](#on-call)
-        - [Pagerduty set up](#pagerduty-set-up)
-        - [Follow the sun](#follow-the-sun)
-        - [Primary on-call](#primary-on-call)
-        - [Secondary on-call](#secondary-on-call)
     - [Incident Process](#incident-process)
-    - [Service Onboarding](#service-onboarding)
-    - [Contract](#contract)
-    - [External Teams](#external-teams)
         - [Generic Resources](#generic-resources)
-        - [Reporting an Issue](#reporting-an-issue)
-        - [EXD Infra](#exd-infra)
-        - [IT Platform Team](#it-platform-team)
-    - [Knowledge Sharing](#knowledge-sharing)
-        - [Introduction](#introduction)
-        - [Maintaining access pieces](#maintaining-access-pieces)
-        - [Maintaining escalation channels](#maintaining-escalation-channels)
-        - [Following Incident Procedure](#following-incident-procedure)
+    - [Contract](#contract)
         - [SRE Checkpoints](#sre-checkpoints)
-        - [Training Resources](#training-resources)
-        - [Deep Dive sessions](#deep-dive-sessions)
 
 <!-- /TOC -->
 
@@ -61,7 +50,7 @@ surfaces and processes, including incident management.
   Drive](https://drive.google.com/drive/u/0/folders/0B9akCOYRTJW_TFAxOUtEaWtRZWs).
   Viewable and editable by AppSRE members only.
 
-## AppSRE Engineer Setup
+## AppSRE Engineer Onboarding
 
 ### Registering the user in App-Interface
 
@@ -78,9 +67,7 @@ Most of the resources required as an AppSRE will be obtained via a user definiti
 * Make sure your user file includes the `public_gpg_key` field.
   [Instructions](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master#adding-your-public-gpg-key).
 
-## Access and Surfaces list
-
-### Surfaces
+### Access and Surfaces list
 
 Every AppSRE/MT-SRE engineer should have access to the following:
 
@@ -140,6 +127,9 @@ Every AppSRE/MT-SRE engineer should have access to the following:
 * Pagerduty
   * ACCESS: Create a [Jira ticket](https://issues.redhat.com/) in the OHSS board to request access to PagerDuty, and assign it to [Meghna Gala](https://rover.redhat.com/people/profile/mgala)
   * you can check this [example ticket](https://issues.redhat.com/browse/OHSS-2547), but double check the assignee before commiting.
+  * Ensure you are listed with the appropriate contact detail in your Pagerduty profile.
+  * The recommended setup includes the Pagerduty app on your mobile phone. From the website you can test notifications to ensure that you have correctly set up the application to override any do not disturb settings.
+  * For notification troubleshooting see: https://support.pagerduty.com/docs/notification-troubleshooting
 * AppSRE shared folders
   * ACCESS: Go to the following folders and request access with your Red Hat Gsuite account
     * [Public Top Level Directory](https://drive.google.com/drive/u/1/folders/1sQGfo57eU7UAKfbBy8LgwxhMdnzXc0KZ) (contains RCAs, etc)
@@ -196,7 +186,7 @@ Every AppSRE engineer should have access to the following:
 * Deadman's snitch
   * Ask somebody in the team to invite you to the organization. You'll receive an e-mail with a link to the invite. Create a new account then, it will be added automatically to the organization and you'll see all the heartbeats we have configured. You'll also be able to create even more.
 
-### Returning Red Hat Employee Gotchas
+#### Returning Red Hat Employee Gotchas
 
 * Accounts need to be re-enabled
   * Bugzilla
@@ -208,114 +198,21 @@ Every AppSRE engineer should have access to the following:
   * Bluejeans
     * Create an IT ticket
 
-## On call
+#### Maintaining access pieces
 
-The AppSRE on call schedule is a rotation to ensure handling of service outages
-and incidents for our application owners. Schedule of past, current and future
-on call rotation can be viewed @ pagerduty: https://redhat.pagerduty.com/
+Access pieces are a very quickly moving target, and they change very frequently. In order to maintain an accurate list of access pieces these actions must be followed by the each AppSRE team member:
 
-### Pagerduty set up
+* All access pieces are documented in the [Access and surfaces list](#access-and-surfaces-list) section.
+* If an AppSRE team member gains access to something and it's not linked from in this list, it's their responsibility to add it there.
+* This list is actively reviewed by onboarding AppSRE members.
 
-Ensure you are listed with the appropriate contact detail in your Pagerduty profile.
-The recommended setup includes the pagerduty app on your mobile phone. From the website you can test notifications to ensure that you have correctly set up the application to override any do not disturb settings.
-
-For notification troubleshooting see: https://support.pagerduty.com/docs/notification-troubleshooting
-
-### Follow the sun
-
-The follow the sun cycle (FTS) is an on-call rotation to ensure that the first page triggered by an alert goes to an engineer who, at the time, is within regular working hours. This is to prevent direct pages to the primary on-call within the regular hours of others. If there is no engineer available within their regular hours the page will go directly to the primary on-call.
-
-Schedule: https://redhat.pagerduty.com/schedules#PQ022DV
-
-Any person currently active as the FTS, will also be the IC (Interrupt Catcher), documented [here](/docs/app-sre/interrupt-catching.md).
-
-### Primary on-call
-
-The primary on-call is a 24/7 on-call rotation assigned on a weekly basis. The engineer assigned is required to be available for the initial response within 30 minutes of the page.
-
-Pages for primary on-calls should be be kept at a minimum and are reserved for critical issues in production environments which need immediate attention.
-
-The primary on-call also acts as the interrupt-catcher during their work hours that cycle.
-
-Schedule: https://redhat.pagerduty.com/schedules#PHS3079
-
-### Secondary on-call
-
-The secondary on-call is a 24/7 on-call rotation that serves as backup and support function for the primary on-call. The secondary on-call will be paged if the primary on-call does not aknowledge the incident via Pagerduty (via app, slack integration or other means). The engineer assigned is required to be available for the initial response within 30 minutes of the page.
-
-Schedule: https://redhat.pagerduty.com/schedules#PSTVSQD
-
-## Incident Process
-
-Documented in the [Incident Process](./incident-process.md) SOP.
-
-## Service Onboarding
-
-The process for Service Onboarding is documented here:
-https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/content/service/service_onboarding_flow.md
-
-## Contract
-
-AppSRE establishes a contract with the tenants. The contract is live here:
-https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/README.md
-
-All Services must satisfy the list of ACs (Acceptance Criteria): [acs.html](https://app-sre.pages.redhat.com/contract/acs.html) and [acs.txt](https://app-sre.pages.redhat.com/contract/acs.txt)
-
-## External Teams
-
-### Generic Resources
-
-* [PnT DevOps - Issue Escalation Procedure](https://docs.engineering.redhat.com/pages/viewpage.action?pageId=140541042)
-* [Red Hat Major Incident Management (MIM)](https://source.redhat.com/groups/public/it-major-incident-management)
-* [IT ISO (IT Operations)](https://source.redhat.com/groups/public/iso/it_operations_iso_wiki/welcome_to_it_iso_it_operations)
-
-### Reporting an Issue
-
-1. Create a case: [Service Now (snow) - PnT General Request](https://redhat.service-now.com/help?id=sc_cat_item&sys_id=4c66fd3a1bfbc4d0ebbe43f8bc4bcb6a)
-
-    1.1. For CEE GitLab:
-
-       - Impact: 2 - Affects all of Red Hat
-       - Urgency: 2 - No workaround; blocks business-critical processes
-       - Application: DevOps - GitLab
-       - Assign to this group - CI/CD PNT (Should auto-fill)
-       - Mention `https://gitlab.cee.redhat.com` is inaccessible in the description
-
-    1.2. For CentralCI Jenkins:
-
-       - Category: `Virtualization/Cloud`
-       - Item: `CI-RHOS`
-       - Hostname Affected: `https://ci.int.devshift.net`
-
-2. If this is a weekend (Saturday / Sunday), escalate issue following the [PnT DevOps - Issue Escalation Procedure](https://docs.engineering.redhat.com/pages/viewpage.action?pageId=140541042).
-3. Join the PnT DevOps Google Chat room https://chat.google.com/u/0/room/AAAA6BChWkY
-4. Join the Red Hat IT Ops Google Chat room https://chat.google.com/u/0/room/AAAAiUsrxXk
-5. Join the Red Hat IT Outage Google Chat room https://chat.google.com/u/0/room/AAAA5dCEP_Q
-
-### EXD Infra
-
-They run GitLab. They can be found in the [exd-infra-escalation](https://chat.google.com/u/0/room/AAAA6BChWkY) channel. Contact: [Savitoj Singh](mailto:savsingh@redhat.com).
-
-### IT Platform Team
-
-Manager: https://mojo.redhat.com/people/aowens
-TL: https://mojo.redhat.com/people/jblashka
-
-The IT Platform team runs components like:
-
-* `sso.redhat.com`
-  * C1 SLA (see resources below)
-  * Quick link to [blackbox poll Prometheus data](https://prometheus.app-sre-prod-01.devshift.net/graph?g0.range_input=2h&g0.stacked=1&g0.expr=probe_success%7Binstance%3D~%22.*sso.redhat.com.*%22%7D&g0.tab=0) for sso.redhat.com
-  * In order to escalate a production incident this email can be used: `it-es-platform-page@redhat.com`.
-  * To get ahold of a person directly to follow up on an escalation or incident connect to the [IT/ISO Google chat](https://chat.google.com/u/0/room/AAAAiUsrxXk)
-
-## Knowledge Sharing
+### Knowledge Sharing and Training
 
 This section documents the specific processes related to knowledge sharing by
 the AppSRE team in order to maintain a high level of accuracy and coverage of
 all the knowledge within AppSRE.
 
-### Introduction
+#### Introduction
 
 The purpose of this section is to document how knowledge is shared by the
 AppSRE, both internally and externally.
@@ -331,34 +228,12 @@ has a very clear mission with regard to knowledge sharing:
 * Each AppSRE member has the right to raise any concerns about any knowledge
   gaps and the team will prioritize filling in those gaps.
 
-### Maintaining access pieces
-
-Access pieces are a very quickly moving target, and they change very frequently. In order to maintain an accurate list of access pieces these actions must be followed by the each AppSRE team member:
-
-* All access pieces are documented in the [Access and surfaces list](#access-and-surfaces-list) section.
-* If an AppSRE team member gains access to something and it's not linked from in this list, it's their responsibility to add it there.
-* This list is actively reviewed by onboarding AppSRE members.
-
-### Maintaining escalation channels
-
-Similarly as with the access pieces:
-
-* All escalation channels are referenced from the specific `app-1.yml` file of the service in App-Interface.
-
-### Following Incident Process
-
-All AppSRE team members will follow the [Incident Process](./incident-process.md) as accurately as possible, raise any concers and keep it up to date.
-
-### SRE Checkpoints
-
-All Services will receive an SRE Checkpoint periodically. Each SRE Checkpoint will take 1 day, and each AppSRE engineer will conduct one per sprint. [Further information](https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/content/process/sre_checkpoints.md).
-
-### Training Resources
+#### Training Resources
 
 The AppSRE team will maintains an index of training resources. All AppSRE members must go through those training documents:
 https://source.redhat.com/groups/public/sre-services/sre_services_wiki/appsre_introduction#jive_content_id_AppSRE_Training
 
-### Deep Dive sessions
+#### Deep Dive sessions
 
 On a periodical basis, the AppSRE team will hold "Deep Dive sessions". These sessions have the following characteristics:
 
@@ -372,3 +247,58 @@ On a periodical basis, the AppSRE team will hold "Deep Dive sessions". These ses
 Those sessions are tracked in this document: [AppSRE Deep Dives](https://docs.google.com/document/d/1T4QNO2qQYpBl4uhiNdr2iP7LO1pfmCVkzyWHgHDIIJA/edit).
 
 Every AppSRE member that identifies any knowledge gaps in our documentation / resources has the responsibility of adding new proposals to the Deep Dives list of proposals.
+
+#### Practical training Syllabus
+
+Or: How to become a contributing AppSRE team member
+
+This section guides a new team member in carrying out tasks that are:
+- beneficial for the new team member
+- beneficial for the team
+
+As long as we can find tasks that match the learning criteria, we'll prefer to do them over doing an exercise task.
+
+The assumption behind the structure of the syllabus is that there is a limited amount of information that is understood in every task, especially during the first period with the team. to have an experience in which the team member gets as much out of every task, we will want to make each task as narrow as possible. following tasks will assume the knowledge from previous tasks and expand around it. this essentially means that we are doing more [DFS than BFS](https://www.geeksforgeeks.org/difference-between-bfs-and-dfs).
+
+Since every project, small or large, goes through app-interface in some way, the first few tasks will focus on day to day activities in app-interface, such as CI/CD and integrations. With this knowledge gained very early in the on-boarding process of a new team member, many requests in #sd-app-sre will already be understandable.
+
+A big part of being an SRE is to work through toil items. We want to encourage new team members to contribute to refactors, cleanups, and any other toil item. We want to encourage everyone to do that! chop wood, carry water.
+
+The practical training is a really a fancy name for working on tickets. Tickets to get started on are usually labeled as a `good-first-issue`, and some will contain an additional label `ai#n` to indicate the difficulty level:
+
+[AI #1](https://issues.redhat.com/issues/?jql=project%20%3D%20APPSRE%20AND%20status%20%3D%20%22To%20Do%22%20AND%20labels%20%3D%20%22ai%231%22)
+[AI #2](https://issues.redhat.com/issues/?jql=project%20%3D%20APPSRE%20AND%20status%20%3D%20%22To%20Do%22%20AND%20labels%20%3D%20%22ai%232%22)
+[AI #3](https://issues.redhat.com/issues/?jql=project%20%3D%20APPSRE%20AND%20status%20%3D%20%22To%20Do%22%20AND%20labels%20%3D%20%22ai%233%22)
+[AI #4](https://issues.redhat.com/issues/?jql=project%20%3D%20APPSRE%20AND%20status%20%3D%20%22To%20Do%22%20AND%20labels%20%3D%20%22ai%234%22)
+
+Some of these tickets may be related to qontract-reconcile, which will require a development environment setup: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/app-sre/dev-setup.
+
+## On call
+
+Documented in the [On Call rotation](./on-call.md) SOP.
+
+## Incident Process
+
+All AppSRE team members will follow the Incident Process as accurately as possible, raise any concers and keep it up to date.
+
+Documented in the [Incident Process](./incident-process.md) SOP.
+
+### Generic Resources
+
+* [PnT DevOps - Issue Escalation Procedure](https://docs.engineering.redhat.com/pages/viewpage.action?pageId=140541042)
+* [Red Hat Major Incident Management (MIM)](https://source.redhat.com/groups/public/it-major-incident-management)
+* [IT ISO (IT Operations)](https://source.redhat.com/groups/public/iso/it_operations_iso_wiki/welcome_to_it_iso_it_operations)
+
+## Contract
+
+AppSRE establishes a contract with the tenants. The contract is live here:
+https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/README.md
+
+All Services must satisfy the list of ACs (Acceptance Criteria): [acs.html](https://app-sre.pages.redhat.com/contract/acs.html) and [acs.txt](https://app-sre.pages.redhat.com/contract/acs.txt)
+
+The process for Service Onboarding is documented here:
+https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/content/service/service_onboarding_flow.md
+
+### SRE Checkpoints
+
+All Services will receive an SRE Checkpoint periodically. Each SRE Checkpoint will take 1 day, and each AppSRE engineer will conduct one per sprint. [Further information](https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/content/process/sre_checkpoints.md).
