@@ -271,6 +271,8 @@ The practical training is a really a fancy name for working on tickets. Tickets 
 [AI #3](https://issues.redhat.com/issues/?jql=project%20%3D%20APPSRE%20AND%20status%20%3D%20%22To%20Do%22%20AND%20labels%20%3D%20%22ai%233%22)
 [AI #4](https://issues.redhat.com/issues/?jql=project%20%3D%20APPSRE%20AND%20status%20%3D%20%22To%20Do%22%20AND%20labels%20%3D%20%22ai%234%22)
 
+Some of these tickets may be related to qontract-reconcile, which will require a development environment setup: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/app-sre/dev-setup.
+
 ## On call
 
 Documented in the [On Call rotation](./on-call.md) SOP.
