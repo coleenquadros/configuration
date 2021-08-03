@@ -219,3 +219,7 @@ As a result from this upgrade, jobs may fail due to not being able to read secre
 In case of any other issues, please reach out to @app-sre-ic on #sd-app-sre in CoreOS slack.
 
 Related Jira ticket: https://issues.redhat.com/browse/APPSRE-947
+
+### I didn't receive my invite for the Github organization
+
+Check your mailbox! It should be there! If not, ask the IC to review [the AppSRE organization](https://github.com/orgs/app-sre/people) and see if your invite is pending or failed. They can cancel the pending invite and send a new one to you.
