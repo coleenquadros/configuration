@@ -10,7 +10,7 @@ The email address pattern to use is [<ldap_user>+sd-app-sre@redhat.com]() (basic
 
 **Note:** Using an incognito browser window is recommended to avoid conflicts with existing sessions in OCM, SSO, RedHat customer portal
 
-1. Login to https://cloud.redhat.com/
+1. Login to https://console.redhat.com/
 
 1. Click the [cogwheel](https://console.redhat.com/settings/) in the top right
 
