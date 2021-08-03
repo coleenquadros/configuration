@@ -35,37 +35,6 @@ authentication:
     field: all
 
 resourceTemplates:
-- name: playbooks-ssg
-  path: /deployment/playbooks-ssg.yaml
-  url: https://github.com/RedHatInsights/insights-remediations
-  parameters:
-    LIMITS_CPU: '1'
-    REQUESTS_CPU: 250m
-    SSG_REPLICAS: 2
-  targets:
-  - namespace:
-      $ref: /services/insights/remediations/namespaces/perf-remediations-perf.yml
-    ref: 851b37039d0c9b63b00f23c67c17a48be2eeab0f
-    parameters:
-      IMAGE_TAG: 48db510
-      SSG_REPLICAS: 1
-
-- name: remediations-cleaner
-  path: /deployment/remediations-cleaner.yaml
-  url: https://github.com/RedHatInsights/remediations-consumer
-  parameters:
-    CLEANER_SUSPEND: false
-    DB_SSL_ENABLED: true
-    LOG_CW_ENABLED: true
-    LOG_LEVEL: trace
-  targets:
-  - namespace:
-      $ref: /services/insights/remediations/namespaces/perf-remediations-perf.yml
-    ref: c89e982b1883970181360143a485fe8bf1f94fdc
-    parameters:
-      CLEANER_SUSPEND: true
-      IMAGE_TAG: c89e982
-
 - name: remediations-consumer
   path: /deployment/remediations-consumer-clowdapp.yaml
   url: https://github.com/RedHatInsights/remediations-consumer
@@ -81,6 +50,7 @@ resourceTemplates:
     parameters:
       IMAGE_TAG: b225d14
       NUM_REPLICAS: 1
+      ENV_NAME: perf
 
 - name: remediations-update-consumer
   path: /deployment/remediations-update-consumer-clowdapp.yaml
@@ -97,6 +67,7 @@ resourceTemplates:
     parameters:
       IMAGE_TAG: b225d14
       NUM_REPLICAS: 1
+      ENV_NAME: perf
 
 - name: remediations
   path: /deployment/clowdapp.yml
@@ -134,6 +105,4 @@ resourceTemplates:
       REMEDIATIONS_REPLICAS: 1
       IMAGE_TAG: 6403fa2
       PLATFORM_HOSTNAME_URL: "cert.${PLATFORM_HOSTNAME}"
-
-
-
+      ENV_NAME: perf
