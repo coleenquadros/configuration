@@ -39,6 +39,7 @@
           - *app_interface_creds
           - *managed_services_github_deploy_key
           - *rhoas-quay-access
+          - *ci_cd_quay
     <<: *gl_build_master
 
 - job-template:
@@ -137,7 +138,7 @@
                 - FAILURE
               build-steps:
                 - shell: "{cleanup_script}"
-                
+
 - job-template:
     id: managed-services-pull-upstream
     name: 'managed-services-pull-upstream'
@@ -154,9 +155,9 @@
     publishers:
       - <<: *slack_notify
     <<: *gl_timed
-    
-    
-- job-template:   
+
+
+- job-template:
     id: 'managed-kafka-performance'
     name: 'managed-kafka-performance-{mk_perf_type}'
     wrappers:
@@ -259,7 +260,7 @@
             - *ci_ocm_token
             - *ci_aws_keys
             - *managed_services_github_deploy_key
-    parameters: 
+    parameters:
     - string:
         name: BRANCH
         default: '{default_branch}'
@@ -332,7 +333,7 @@
 - job-template:
     id: strimzi-operator-test
     name: "strimzi-operator-test"
-    wrappers: 
+    wrappers:
     - timestamps
     - timeout_wrapper:
         timeout: "{timeout}"
@@ -365,7 +366,7 @@
         default: 'sob-test-$BUILD_NUMBER'
         description: 'Name of the cluster to be provisioned'
     <<: *gl_checkout
-    builders: 
+    builders:
     - shell: ./pr_check.sh
     artifacts_path: 'test-results/**'
     publishers:
@@ -620,7 +621,7 @@
           - *rhoas-quay-access
           - *kas_fleet_manager_pr_check
     <<: *gl_pr_check
-        
+
 - job-template:
     id: 'gl-pr-check-mas-sso'
     name: '{gl_group}-{gl_project}-gl-pr-check'
