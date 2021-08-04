@@ -1,0 +1,36 @@
+# resources/observability/prometheusrules/mt-sre-ci-int.prometheusrulestests.yaml
+
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /observability/prometheusrules/mt-sre-ci-int.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+- interval: 1m
+  input_series:
+  - series: app_sre_tekton_pipelinerun_task_status{saas_file_name="saas-mt-sss",tkn_namespace_name="mt-pipelines",tkn_cluster_console_url="https://example.com",env_name="test-env",pipelinerun_name="test-pipelinerun"}
+    values: 0 0 0 0 1
+
+  alert_rule_test:
+    # No alert
+  - eval_time: 1m
+    alertname: SaaSSelectorSyncSetFailure
+    exp_alerts:
+
+    # Alert
+  - eval_time: 5m
+    alertname: SaaSSelectorSyncSetFailure
+    exp_alerts:
+    - exp_labels:
+        saas_file_name: saas-mt-sss
+        tkn_namespace_name: mt-pipelines
+        env_name: test-env
+        tkn_cluster_console_url: https://example.com
+        pipelinerun_name: test-pipelinerun
+        service: addons
+        severity: critical
+      exp_annotations:
+        message: "saas-mt-sss Tekton PipelineRun deployment job for test-env has not been successful: Failed to apply SelectorSyncSet"
+        link_url: "https://example.com/k8s/ns/mt-pipelines/tekton.dev~v1beta1~PipelineRun/test-pipelinerun"
