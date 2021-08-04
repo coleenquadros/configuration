@@ -64,6 +64,27 @@ openshiftResources:
 managedTerraformResources: true
 
 terraformResources:
+- provider: rds
+  account: insights-perf
+  identifier: host-inventory-perf
+  defaults: /terraform/resources/insights/perf/rds/postgres13-rds-1.yml
+  overrides:
+    username: "insights"
+    name: "insights"
+  parameter_group: /terraform/resources/insights/perf/rds/postgres13-parameter-group-host-inventory-perf.yml
+  output_resource_name: host-inventory-db
+  enhanced_monitoring: true
+- provider: rds
+  account: insights-perf
+  identifier: host-inventory-perf-readonly
+  replica_source: host-inventory-perf
+  availability_zone: us-east-1d
+  defaults: /terraform/resources/insights/perf/rds/postgres13-rds-host-inventory-perf-read-replica.yml
+  overrides:
+    username: "insights"
+    name: "insights"
+  parameter_group: /terraform/resources/insights/perf/rds/postgres13-parameter-group-host-inventory-perf-readonly.yml
+  output_resource_name: host-inventory-readonly-db
 - provider: cloudwatch
   account: insights-perf
   identifier: host-inventory-perf
