@@ -1,0 +1,33 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: token-refresher-production
+spec:
+  groups:
+  - name: token-refresher-production
+    rules:
+    - alert: TokenRefresherDown - production
+      annotations:
+        message: "No targets found for Token Refresher in namespace {{ $labels.namespace }}. Token Refresher is down."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#token-refresher-down"
+      expr: |
+        absent(up{job="token-refresher",namespace="managed-services-production"} == 1)
+      for: 15m
+      labels:
+        service: token-refresher
+        severity: critical
+    - alert: TokenRefresherNon200Status - production
+      annotations:
+        message: "Kas fleet manager in namespace {{ $labels.namespace }} is receiving status codes other then 2xx. Token Refresher is failing."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#token-refresher-down"
+      expr: |
+        kas_fleet_manager_observatorium_request_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",code!="200"}
+      for: 15m
+      labels:
+        service: token-refresher
+        severity: critical     
