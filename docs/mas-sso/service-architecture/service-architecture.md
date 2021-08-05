@@ -216,5 +216,4 @@ Resources:
 
 ## Load Testing
 
-TODO - Covered in [MGDSTRM-3347](https://issues.redhat.com/browse/MGDSTRM-3347)
-
+Load test instructions can be found [here](https://gitlab.cee.redhat.com/service/saas-mas-sso/-/blob/master/sop/performance-test.md)
