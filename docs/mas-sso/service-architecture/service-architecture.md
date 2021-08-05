@@ -216,4 +216,4 @@ Resources:
 
 ## Load Testing
 
-Load test instructions can be found [here](https://gitlab.cee.redhat.com/service/saas-mas-sso/-/blob/master/sop/performance-test.md
+Load test instructions can be found [here](https://gitlab.cee.redhat.com/service/saas-mas-sso/-/blob/master/sop/performance-test.md)
