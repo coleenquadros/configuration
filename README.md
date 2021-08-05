@@ -2101,11 +2101,11 @@ codeComponents:
 
 App Interface has several features that can be enabled for the Gitlab
 repositories:
-- `gitlabRepoOwners`: Value `true` will enable the `gitlab-repo-owners`,
-  integration, that evaluates the `OWNERS`/`OWNERS_ALIASES` files in that
-  repository to post comments to the Merge Requests reporting the required
-  approvals, ultimately labeling the Merge Request, making it up for
-  auto-merge.
+- `gitlabRepoOwners`: Value `enabled: true` will enable the
+  `gitlab-repo-owners`, integration, that evaluates the
+  `OWNERS`/`OWNERS_ALIASES` files in that repository to post comments to the
+  Merge Requests reporting the required approvals, ultimately labeling the
+  Merge Request, making it up for auto-merge.
 - `gitlabHousekeeping`:  Value `enabled: true` will enable the
   `gitlab-housekeeping` integration, that auto-merges Merge Requests that are
   labelled as such. It also rebases the Merge Requests that are not rebased
@@ -2128,7 +2128,8 @@ codeComponents:
 - name: managed-tenants
   resource: upstream
   url: https://gitlab.cee.redhat.com/service/managed-tenants
-  gitlabRepoOwners: true
+  gitlabRepoOwners:
+    enabled: true
   gitlabHousekeeping:
     enabled: true
     rebase: false
