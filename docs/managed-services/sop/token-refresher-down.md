@@ -2,7 +2,7 @@
 
 ### Impact
 
-No data can be sent or received from Observatorium, directly impacting dashboards as well as user facing metrics via the Kas fleet manager API.
+No data can be sent or received from Observatorium. Which directly impacts dashboards as well as user facing metrics used by the Kas fleet manager API.
 
 ### Summary
 
@@ -17,11 +17,11 @@ The Managed Services Token refresher (Pod) is down.
 
 ### Steps
 
-1. Check the events for any errors
+1. Check the events for any errors.
 2. Check the token refresher deployment ensuring the pod count is 1 and and if any conditions have failed.
 3. Check the status located in the deployment yaml.
 
 ## Escalations
 
-If problem cannot not be solved escalate the issue to the Control Plane team 
+If problem cannot not be solved escalate the issue to the Control Plane team. Escalation policy can be found [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/teams/managed-services/escalation-policies/kas-fleet-manager.yaml)
 

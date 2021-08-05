@@ -1,0 +1,51 @@
+## Observatorium sending status codes other than 2xx
+
+### Impact
+
+No data can be sent or received from Observatorium. Which directly impacts dashboards as well as user facing metrics used by the Kas fleet manager API.
+
+### Summary
+
+Observatorium is not able to send or receive metrics. Resulting in status codes other than 2xx being sent.
+
+### Access required
+
+- OSD console access to the cluster that runs the Managed services token refresher.
+- Access to Grafana dashboards.
+- Access to cluster resources: Pods/Secrets/Network policies.
+
+### Relevant secrets
+
+### Steps
+
+1. Check the pod logs for any errors
+2. Check the observatorium url is correct.
+    Stage: `https://observatorium-mst.api.stage.openshift.com/api/metrics/v1/managedkafka`
+    Production: `https://observatorium-mst.api.production.openshift.com/api/metrics/v1/managedkafka`
+3. Check Client ID, Client Secret and Issuer URL are being populated.
+4. A Status code of 0 are sent when a request timeout is reached in this case ensure the network policy `token-refresher` is not misconfigured.
+
+    Target pods: 
+    ```
+    Pod selector:
+    app.kubernetes.io/component=authentication-proxy
+    app.kubernetes.io/name=token-refresher
+    ```
+    From:
+    ```
+    Namespace:
+    managed-services-stage
+    Pod selector:
+    app=kas-fleet-manager, operator.prometheus.io/name=app-sre
+    ```
+    To ports:
+    `Any port`
+    
+5. Ensure the status of the observatorium instance is up and running
+
+- In the Observatorium [Dashboard](https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADX/api?orgId=1&refresh=1m),  /query and /query_range panels are important as these are the endpoints the Kas Fleet manager uses.
+
+## Escalations
+
+If problem cannot not be solved escalate the issue to the Control Plane team. Escalation policy can be found [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/teams/managed-services/escalation-policies/kas-fleet-manager.yaml).
+
