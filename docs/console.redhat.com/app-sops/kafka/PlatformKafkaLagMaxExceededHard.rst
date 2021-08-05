@@ -58,6 +58,6 @@ Escalations
 .. _production Openshift Cluster: https://console.insights.openshift.com/console/catalog
 .. _Kibana instance: https://kibana-kibana.1b13.insights.openshiftapps.com/app/kibana
 .. _PlatformKafkaLagMaxExceeded dashboard: https://metrics.1b13.insights.openshiftapps.com/d/F1dMmgiMz/platformkafkalagmaxexceededhard?orgId=1&from=now-3h&to=now
-.. _Kafka troubleshooting doc: https://platform-docs.cloud.paas.psi.redhat.com/backend/kafka.html#troubleshooting
+.. _Kafka troubleshooting doc: https://clouddot.pages.redhat.com/docs/dev/services/kafka.html#_troubleshooting
 
 .. _Incident Response Doc: https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE
