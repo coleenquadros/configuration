@@ -1,0 +1,45 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: osd-operators
+
+name: saas-compliance-operator-catalog
+description: SaaS tracking file for compliance-operator-catalog
+
+app:
+  $ref: /services/osd-operators/app.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-srep-info
+
+managedResourceTypes:
+- SelectorSyncSet
+
+imagePatterns:
+- quay.io/app-sre/compliance-operator-catalog
+
+resourceTemplates:
+- name: compliance-operator-catalog
+  url: https://gitlab.cee.redhat.com/service/compliance-operator-catalog
+  path: /hack/olm-registry/olm-artifacts-template.yaml
+  parameters:
+    REGISTRY_IMG: quay.io/app-sre/compliance-operator-catalog
+    CHANNEL: release-0.1
+    SREP_LEGAL_ENTITY_ID: 1HELaFOf2YHWwwvt3XMbT5Mja7M
+  targets:
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-stage-01/cluster-scope.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: gl-build-master-custom-catalog-source
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hives02ue1/cluster-scope.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: gl-build-master-custom-catalog-source
