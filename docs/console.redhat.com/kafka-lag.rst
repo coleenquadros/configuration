@@ -66,5 +66,5 @@ Escalations
 - Ping the engineering team that owns the APP
 
 .. _Kibana instance: https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/app/kibana
-.. _Kafka troubleshooting doc: https://platform-docs.cloud.paas.psi.redhat.com/backend/kafka.html#troubleshooting
+.. _Kafka troubleshooting doc: https://clouddot.pages.redhat.com/docs/dev/services/kafka.html#_troubleshooting
 .. _Incident Response Doc: https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE
