@@ -20,12 +20,7 @@ slack:
   channel: proj-perf-insights-cluster
 
 managedResourceTypes:
-- Deployment
-- DeploymentConfig
-- Service
-- HorizontalPodAutoscaler
-- CronJob
-- Job
+- ClowdApp
 
 imagePatterns:
 - quay.io/cloudservices
@@ -36,58 +31,38 @@ authentication:
     field: all
 
 parameters:
-  INVENTORY_DB_SSL_MODE: verify-full
-  LOG_GROUP: platform
   KAFKA_PRODUCER_RETRIES: '8'
   KAFKA_PRODUCER_RETRY_BACKOFF_MS: '250'
 
 
 resourceTemplates:
-- name: insights-inventory-reaper
-  path: /templates/inventory/insights-inventory-reaper.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  targets:
-  - namespace:
-      $ref: /services/insights/host-inventory/namespaces/perf-host-inventory-perf.yml
-    ref: d30172549b7a8a3474183cb87e72ad3bdbf044ae
-    parameters:
-      IMAGE_TAG: 4f5fb2b
-      REAPER_SUSPEND: 'false'
-
-- name: insights-inventory-mq-service
-  path: /templates/inventory/insights-inventory-mq-service.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+- name: host-inventory
+  path: /deployment.yaml
+  url: https://github.com/RedHatInsights/insights-host-inventory
   parameters:
-    REPLICAS: 3
+    CLOWDER_ENABLED: 'true'
     REPLICAS_P1: 5
-    REPLICAS_SP: 2
-  targets:
-  - namespace:
-      $ref: /services/insights/host-inventory/namespaces/perf-host-inventory-perf.yml
-    ref: d30172549b7a8a3474183cb87e72ad3bdbf044ae
-    parameters:
-      REPLICAS: 1
-      REPLICAS_P1: 1
-      IMAGE_TAG: 4f5fb2b
-
-- name: insights-inventory
-  path: /templates/inventory/insights-inventory.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  parameters:
+    REPLICAS_PMIN: 3
     CPU_LIMIT: 1
-    MAX_REPLICAS: 25
     MEMORY_LIMIT: 2Gi
-    MIN_REPLICAS: 25
     RBAC_ENFORCED: 'true'
     BULK_QUERY_SOURCE: xjoin
     BULK_QUERY_SOURCE_BETA: xjoin
+    URLLIB3_LOG_LEVEL: DEBUG
   targets:
   - namespace:
       $ref: /services/insights/host-inventory/namespaces/perf-host-inventory-perf.yml
-    ref: d30172549b7a8a3474183cb87e72ad3bdbf044ae
+    ref: 64c70b41608ba7911dc7d19dfa9bc626a31c07cd
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-host-inventory-gh-build-master
     parameters:
-      MAX_REPLICAS: 1
-      MIN_REPLICAS: 1
-      IMAGE_TAG: 4f5fb2b
-      XJOIN_SEARCH_URL: http://${XJOIN_SEARCH_HOST}.:4000/graphql
-      URLLIB3_LOG_LEVEL: DEBUG
+      ENV_NAME: perf
+      REPLICAS_SVC: 25
+      INVENTORY_DB_SSL_MODE: verify-full
+      REAPER_SUSPEND: 'false'
+      SP_VALIDATOR_SUSPEND: 'false'
+      PENDO_SYNCHER_SUSPEND: 'false'
+      PENDO_CRON_SCHEDULE: '@daily'
+      PENDO_SYNC_ACTIVE: 'true'

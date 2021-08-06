@@ -18,6 +18,7 @@ The IC schedule matches the AppSRE escalation policy in Pager Duty, which is [Fo
 
 ### Jira
 
+- [App-SRE Interrupt Catcher](https://issues.redhat.com/projects/ASIC/issues?filter=allopenissues)
 - [App-SRE Scrum](https://jira.coreos.com/secure/RapidBoard.jspa?rapidView=92&view=planning)
 - [App-SRE Incident (KanBan)](https://jira.coreos.com/secure/RapidBoard.jspa?rapidView=145&view=detail)
 
@@ -47,9 +48,11 @@ PRs should be reviewed and potentially merged by the IC according to the [AppSRE
 
 #### Requests / Support
 
-- Record each request and action performed by the IC as a Jira issue with the `Interrupt-catcher` label.
+- Record each request and action performed by the IC as a Jira issue on the ASIC board.
     * In case the request included work from App SRE side that is more then reviewing PRs.
-- Search the backlog for IC issues created by our tenants.
+- Search the backlog for IC issues created by our tenants and move them to the ASIC board.
+    * Will usually appear at the bottom of the APPSRE backlog.
+- Search the ASIC board for any requests that require development/reasearch and move them to the APPSRE board.
 
 #### Incidents / Maintenance
 

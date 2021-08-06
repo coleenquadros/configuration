@@ -164,9 +164,9 @@ spec:
         runbook: "https://github.com/openshift/hive-sops/blob/master/sop/ClusterProvisioningDelay.md"
         dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
       expr: |
-        (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers",cluster_type="managed-byoc"}/3600) > 2
+        (max without (instance,pod) (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers",cluster_type="managed-byoc"} ) /3600) > 2
         and
-        (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers",cluster_type="managed-byoc"}/3600) < 168
+        ( max without (instance,pod) (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers",cluster_type="managed-byoc"} ) /3600) < 168
       for: 10m
       labels:
         service: hive
@@ -285,4 +285,12 @@ spec:
         service: srep
         severity: high
         team: srep
-
+    - alert: CertmanCertExpires5Days - {{{shard_name}}}
+      annotations:
+        message: "certificate {{ $labels.cn }} from hive-{{{shard_name}}} expires in 5 days and has not renewed"
+        runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/CertmanCertExpires5Days.md"
+      expr: |
+        certman_operator_certificate_valid_duration_days <= 5
+      labels:
+        severity: critical
+        service: srep

@@ -39,6 +39,7 @@
           - *app_interface_creds
           - *managed_services_github_deploy_key
           - *rhoas-quay-access
+          - *ci_cd_quay
     <<: *gl_build_master
 
 - job-template:
@@ -137,7 +138,7 @@
                 - FAILURE
               build-steps:
                 - shell: "{cleanup_script}"
-                
+
 - job-template:
     id: managed-services-pull-upstream
     name: 'managed-services-pull-upstream'
@@ -154,9 +155,9 @@
     publishers:
       - <<: *slack_notify
     <<: *gl_timed
-    
-    
-- job-template:   
+
+
+- job-template:
     id: 'managed-kafka-performance'
     name: 'managed-kafka-performance-{mk_perf_type}'
     wrappers:
@@ -259,14 +260,31 @@
             - *ci_ocm_token
             - *ci_aws_keys
             - *managed_services_github_deploy_key
+            - *ci_cd_quay
     parameters: 
     - string:
         name: BRANCH
         default: '{default_branch}'
         description: 'The branch of kas-fault-tests repo you want to run the pipeline against. Defaults to main'
+    - string:
+        name: OCM_CLUSTER_NAME
+        default: ''
+        description: 'OSD cluster name (if not defined, a random name will be set), max name length is 14 characters'
+    - choice:
+        name: COMPUTE_MACHINE_TYPE
+        description: '[REQUIRED] node type of cluster compute nodes'
+        choices:
+            - m5.xlarge
+            - m5.2xlarge
+            - m5.4xlarge
+            - m5.8xlarge
+    - string:
+        name: COMPUTE_NODES_COUNT
+        default: '3'
+        description: '[REQUIRED] OSD worker nodes for kafka cluster. If you select multi-az you must have a multiple of 3 for COMPUTE_NODES_COUNT'
     - choice:
         name: OCM_CLUSTER_REGION
-        description: '[REQUIRED] AWS region for the OSD cluster'
+        description: '[REQUIRED] AWS region for the OSD cluster. If executing cloud layer tests, ensure that the cluster is in a region where no other clusters are deployed'
         choices:
             - us-east-1
             - us-east-2
@@ -285,39 +303,31 @@
             - eu-west-3
             - eu-north-1
             - sa-east-1
-    - string:
-        name: OCM_CLUSTER_NAME
-        default: ''
-        description: 'OSD cluster name (if not defined, a random name will be set), max name length is 14 characters'
-    - string:
-        name: COMPUTE_NODES_COUNT
-        default: '3'
-        description: '[REQUIRED] OSD worker nodes for kafka cluster. If you select multi-az you must have a multiple of 3 for COMPUTE_NODES_COUNT'
     - bool:
         name: MULTI_AZ
         default: false
         description: If true the cluster will be provisioned with multiple AZ, if false for only one AZ.
     - bool:
         name: PROVISION_CLUSTER
-        default: true
+        default: false
         description: If true a cluster will be provisioned. Set to false if you already have a cluster provisioned.
     - bool:
         name: DEPROVISION_CLUSTER
-        default: true
+        default: false
         description: If true the provisioned or provided cluster will be deleted.
     - bool:
         name: INSTALL_KAFKA
-        default: true
+        default: false
         description: If true a kafka instance will be installed in the cluster
     - choice:
         name: TEST_LAYER
         description: '[REQUIRED] Select the set of tests to be executed'
         choices:
+          - none
           - all
           - cloud
           - openshift
           - kafka
-          - none
     branch: '${{BRANCH}}'
     <<: *gh_checkout
     builders:
@@ -329,10 +339,11 @@
         artifacts: '{artifacts_path}'
         allow-empty: true
     - <<: *slack_notify
+
 - job-template:
     id: strimzi-operator-test
     name: "strimzi-operator-test"
-    wrappers: 
+    wrappers:
     - timestamps
     - timeout_wrapper:
         timeout: "{timeout}"
@@ -365,7 +376,7 @@
         default: 'sob-test-$BUILD_NUMBER'
         description: 'Name of the cluster to be provisioned'
     <<: *gl_checkout
-    builders: 
+    builders:
     - shell: ./pr_check.sh
     artifacts_path: 'test-results/**'
     publishers:
@@ -620,7 +631,7 @@
           - *rhoas-quay-access
           - *kas_fleet_manager_pr_check
     <<: *gl_pr_check
-        
+
 - job-template:
     id: 'gl-pr-check-mas-sso'
     name: '{gl_group}-{gl_project}-gl-pr-check'
@@ -633,3 +644,41 @@
         secrets:
         - *rhoas-quay-access
     <<: *gl_pr_check
+
+- job-template:
+    id: gl-pr-check-kas-upgrade-configurations
+    name: "{gl_group}-{gl_project}-gl-pr-check"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *app_interface_creds
+            - *quay_secret_push
+            - *gitlab_token
+            - *kas_fleet_manager_admin_staging
+            - *kas_fleet_manager_admin_prod
+    <<: *gl_pr_check
+    publishers:
+    - gitlab_message:
+        <<: *gitlab_message_defaults
+    - gitlab-notifier
+
+- job-template:
+    id: gl-build-main-kas-upgrade-configurations
+    name: "{gl_group}-{gl_project}-gl-build-{branch}"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *app_interface_creds
+            - *quay_secret_push
+            - *gitlab_token
+            - *kas_fleet_manager_admin_staging
+            - *kas_fleet_manager_admin_prod
+    <<: *gl_build_master
+

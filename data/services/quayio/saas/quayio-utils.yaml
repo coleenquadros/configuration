@@ -31,7 +31,7 @@ imagePatterns:
 - quay.io/app-sre/flush-redis
 - quay.io/app-sre/quay
 - quay.io/app-sre/syslog-cloudwatch-bridge
-
+- quay.io/app-sre/quay-service-tool
 parameters:
   IMAGE: "quay.io/app-sre/quayio-update-banner-job"
 
@@ -44,22 +44,32 @@ resourceTemplates:
       $ref: /services/quayio/namespaces/quays02ue1.yml
     ref: f1491c0657ae75aab55d4ea7faec1e82393dc9af
     parameters:
-      JOB_NAME: "2021-06-24-sso-banner-update-1" # provide_a_unique_job_name_to_trigger_job
+      JOB_NAME: "2021-08-03-sso-banner-update-1" # provide_a_unique_job_name_to_trigger_job
       ACTIVE_DEADLINE_SECONDS: "600"
       DB_HOST_SECRET: "quayio-stage-57-rds"
       DB_CREDS_SECRET: "quayio-stage-57-rds"
-      MESSAGE: "On August 1st 2021, Quay.io will transition to Red Hat Single Sign-On Services exclusively. You need to link your Quay.io login to a redhat.com account by this date, in order to be able to login to the web interface. CLI tokens and robot accounts are not impacted. Read more about this change in the [FAQ.](https://access.redhat.com/articles/5925591)"
+      MESSAGE: "Quay.io now supports Red Hat Single Sign-On Services exclusively. If you haven't done so already, you need to link your Quay.io login to a redhat.com account in order to be able to login to the web interface by going to the [recovery endpoint](https://recovery.stage.quay.io). CLI tokens and robot accounts are not impacted. Read more about this change in the [FAQ.](https://access.redhat.com/articles/5925591)."
       SEVERITY: "info"
   - namespace:
       $ref: /services/quayio/namespaces/quayp05ue1.yml
     ref: f1491c0657ae75aab55d4ea7faec1e82393dc9af
     parameters:
-      JOB_NAME: "2021-07-20-sso-banner-update-1" # provide_a_unique_job_name_to_trigger_job
+      JOB_NAME: "2021-08-05-sso-banner-update-1" # provide_a_unique_job_name_to_trigger_job
       ACTIVE_DEADLINE_SECONDS: "600"
       DB_HOST_SECRET: "quay-db-config-secret"
       DB_CREDS_SECRET: "quay-db-config-secret"
-      MESSAGE: "On August 1st 2021, Quay.io will transition to Red Hat Single Sign-On Services exclusively. You need to link your Quay.io login to a redhat.com account by this date, in order to be able to login to the web interface. CLI tokens and robot accounts are not impacted. Read more about this change in the [FAQ](https://access.redhat.com/articles/5925591)."
-      SEVERITY: "warning"
+      MESSAGE: "Quay.io now supports Red Hat Single Sign-On Services exclusively. If you haven't done so already, you need to link your Quay.io login to a redhat.com account in order to be able to login to the web interface by going to the [recovery endpoint](https://recovery.quay.io/signin). CLI tokens and robot accounts are not impacted. Read more about this change in the [FAQ.](https://access.redhat.com/articles/5925591)."
+      SEVERITY: "info"
+- name: quayio-service-tool
+  path: /openshift.yml
+  url: https://github.com/quay/quay-service-tool
+  targets:
+  - namespace:
+      $ref: /services/quayio/namespaces/quays02ue1.yml
+    ref: b420a0e6cbc09aa4afcdaac095ccb9c519067bda
+    parameters:
+      QUAY_SEVICE_TOOL_CONFIG_SECRET: "quay-service-tool-config"
+      IMAGE: "quay.io/app-sre/quay-service-tool"
 - name: flush-redis
   path: /openshift.yml
   url: https://github.com/app-sre/flush-redis
@@ -89,7 +99,7 @@ resourceTemplates:
   url: https://github.com/quay/quay
   parameters:
     IMAGE: quay.io/app-sre/quay
-    IMAGE_TAG: 0af8900
+    IMAGE_TAG: 0fdae23
     QUAY_ENTRYPOINT: registry
     QUAY_APP_DEPLOYMENT_REPLICAS: 1
     QUAY_APP_CPU_REQUEST: 1
@@ -113,7 +123,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/quayio/namespaces/quays02ue1.yml
-    ref: a07b2c9c7cf9ddac9c79ba7f1023b4fcc013327b
+    ref: c4a964ec5c4a442b3700c495153d26bad099025d
   - namespace:
       $ref: /services/quayio/namespaces/quayp05ue1.yml
-    ref: a07b2c9c7cf9ddac9c79ba7f1023b4fcc013327b
+    ref: c4a964ec5c4a442b3700c495153d26bad099025d

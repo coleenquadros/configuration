@@ -20,10 +20,7 @@ slack:
   channel: proj-perf-insights-cluster
 
 managedResourceTypes:
-- Deployment
-- DeploymentConfig
-- PersistentVolumeClaim
-- Service
+- ClowdApp
 - ConfigMap
 
 imagePatterns:
@@ -35,94 +32,38 @@ authentication:
     field: all
 
 resourceTemplates:
-- name: model-access-permissions-yml-perf
-  path: /_private/configmaps/stage/model-access-permissions.configmap.yml
-  url: https://github.com/RedHatInsights/rbac-config
-  targets:
-  - namespace:
-      $ref: /services/insights/rbac/namespaces/perf-rbac-perf.yml
-    ref: 9edc3ffef993fb1ebfdfab3bacea9e99ac0955ab
-
-- name: rbac-config-yml-perf
-  path: /_private/configmaps/stage/rbac-config.yml
-  url: https://github.com/RedHatInsights/rbac-config
-  targets:
-  - namespace:
-      $ref: /services/insights/rbac/namespaces/perf-rbac-perf.yml
-    ref: 9edc3ffef993fb1ebfdfab3bacea9e99ac0955ab
-
 - name: rbac
-  path: /templates/rbac/rbac.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  path: /deploy/rbac-clowdapp.yml
+  url: https://github.com/RedHatInsights/insights-rbac
   parameters:
-    CPU_LIMIT: '2'
+    CPU_LIMIT: '1'
     MAX_REPLICAS: 5
-    MEMORY_LIMIT: 4Gi
+    MEMORY_LIMIT: 1Gi
     MIN_REPLICAS: 2
     PGSSLMODE: verify-full
     PERMISSION_SEEDING_ENABLED: 'False'
     ROLE_SEEDING_ENABLED: 'False'
     GROUP_SEEDING_ENABLED: 'False'
-    CW_NULL_WORKAROUND: 'true'
   targets:
-#  - namespace:
-#      $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
-#    ref: 91011aa706772d4be92f93c7d6e984bc965d329d
-#    parameters:
-#      IMAGE_TAG: ebd29a5
-#      HABERDASHER_EMITTER: kafka
-#      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
-#      HABERDASHER_KAFKA_TOPIC: platform.logging.logs
-#      HABERDASHER_LABELS: {"app": "rbac"}
-#      HABERDASHER_TAGS: ["rbac"]
   - namespace:
       $ref: /services/insights/rbac/namespaces/perf-rbac-perf.yml
-    ref: 7d85e8f42b908c7ff96a4c7dacd093e12d94c17c
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-rbac-gh-build-master
     parameters:
-      IMAGE_TAG: 9d5db3a
-      DB_SECRET_NAME: rbac-db
-      MAX_REPLICAS: 2
-      MIN_REPLICAS: 2
+      ENV_NAME: perf
       HABERDASHER_EMITTER: kafka
       HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
       HABERDASHER_KAFKA_TOPIC: platform.logging.logs
       HABERDASHER_LABELS: {"app": "rbac"}
       HABERDASHER_TAGS: ["rbac"]
-
-- name: scheduler
-  path: /templates/rbac/scheduler.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  targets:
-  - namespace:
-      $ref: /services/insights/rbac/namespaces/perf-rbac-perf.yml
-    ref: e358fcb6ef63aa63c8a1632d488705e91372e308
-    parameters:
-      IMAGE_TAG: 9d5db3a
-
-- name: worker
-  path: /templates/rbac/worker.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  parameters:
-    PGSSLMODE: verify-full
-  targets:
-  - namespace:
-      $ref: /services/insights/rbac/namespaces/perf-rbac-perf.yml
-    ref: e358fcb6ef63aa63c8a1632d488705e91372e308
-    parameters:
-      IMAGE_TAG: 9d5db3a
-      DB_SECRET_NAME: rbac-db
-      CELERY_WORKER_CPU_LIMIT: '1'
-      CELERY_WORKER_MEMORY_REQUEST: 512Mi
-      CELERY_WORKER_MEMORY_LIMIT: 1Gi
-
-- name: rbac-redis
-  path: /templates/rbac/redis.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  parameters:
-    VOLUME_CAPACITY: 10Gi
-    IMAGE: quay.io/cloudservices/redis
-    IMAGE_TAG: latest
-  targets:
-  - namespace:
-      $ref: /services/insights/rbac/namespaces/perf-rbac-perf.yml
-    ref: 7d85e8f42b908c7ff96a4c7dacd093e12d94c17c
+      DISABLE_MIGRATE: "True"
+      EPH_ENV: "False"
+      CLOWDER_ENABLED: "true"
+      PERMISSION_SEEDING_ENABLED: 'False'
+      ROLE_SEEDING_ENABLED: 'False'
+      GROUP_SEEDING_ENABLED: 'False'
+      CELERY_WORKER_CPU_LIMIT: '700m'
+      CELERY_WORKER_MEMORY_LIMIT: '1Gi'

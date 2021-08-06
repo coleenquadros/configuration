@@ -64,13 +64,23 @@ resourceTemplates:
       NGINX_SERVER_NAME: internal.${PLATFORM_HOSTNAME}
 
   - namespace:
-      $ref: /services/insights/turnpike/namespaces/prod-turnpike-prod.yml
+      $ref: /services/insights/turnpike/namespaces/turnpike-fedramp-prod.yml
     ref: master
     parameters:
-      IMAGE_TAG: f450147
+      IMAGE_TAG: 6d03c56
       FLASK_SERVER_NAME: internal.${PLATFORM_HOSTNAME}
       FLASK_SERVICE_URL: http://web.turnpike-prod.svc.cluster.local:5000
       NGINX_SERVER_NAME: internal.${PLATFORM_HOSTNAME}
+
+  - namespace:
+      $ref: /services/insights/turnpike/namespaces/prod-turnpike-prod.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 6d03c56
+      FLASK_SERVER_NAME: internal.${PLATFORM_HOSTNAME}
+      FLASK_SERVICE_URL: http://web.turnpike-prod.svc.cluster.local:5000
+      NGINX_SERVER_NAME: internal.${PLATFORM_HOSTNAME}
+
 - name: web
   path: /templates/web.yml
   url: https://github.com/RedHatInsights/turnpike
@@ -159,220 +169,6 @@ resourceTemplates:
         - name: healthcheck
           route: /public/healthcheck/
           origin: http://web.turnpike-stage.svc.cluster.local:5000/_healthcheck/
-        - name: platform-docs
-          route: /docs/
-          origin: http://platform-docs.platform-docs-stage.svc.cluster.local/
-          auth:
-            saml: "True"
-        - name: rhsm-subscriptions
-          route: /app/rhsm-subscriptions/actuator
-          origin: http://rhsm-subscriptions-worker-monitoring.rhsm-stage.svc.cluster.local:8080/actuator
-          auth:
-            saml: "'subscription-watch-admins' in user['Role']"
-            x509: "x509['subject_dn'] in ['/DC=com/DC=redhat/OU=serviceaccounts/UID=nonprod-rhsmapi/Email=it-pnt@redhat.com/DC=com/DC=redhat/OU=serviceaccounts/CN=nonprod-rhsmapi', '/DC=com/DC=redhat/OU=serviceaccounts/UID=nonprod-itpntautomation/Email=it-pnt@redhat.com/DC=com/DC=redhat/OU=serviceaccounts/CN=nonprod-itpntautomation', '/DC=com/DC=redhat/OU=messaging/OU=serviceusers/UID=msg-subscription-watch-turnpike/L=stage/CN=msg-subscription-watch-turnpike']"
-        - name: rhsm-marketplace
-          route: /app/rhsm-marketplace/actuator
-          origin: http://marketplace-worker-monitoring.rhsm-stage.svc.cluster.local:8080/actuator
-          auth:
-            saml: "'subscription-watch-admins' in user['Role']"
-            x509: "x509['subject_dn'] == '/DC=com/DC=redhat/OU=messaging/OU=serviceusers/UID=msg-subscription-watch-turnpike/L=stage/CN=msg-subscription-watch-turnpike'"
-        - name: rhsm-metrics
-          route: /app/rhsm-metrics/actuator
-          origin: http://metrics-worker-monitoring.rhsm-stage.svc.cluster.local:8080/actuator
-          auth:
-            saml: "'subscription-watch-admins' in user['Role']"
-            x509: "x509['subject_dn'] == '/DC=com/DC=redhat/OU=messaging/OU=serviceusers/UID=msg-subscription-watch-turnpike/L=stage/CN=msg-subscription-watch-turnpike'"
-        - name: rhsm-conduit
-          route: /app/rhsm-conduit/actuator
-          origin: http://rhsm-conduit.rhsm-stage.svc.cluster.local:8080/actuator
-          auth:
-            saml: "'subscription-watch-admins' in user['Role']"
-            x509: "x509['subject_dn'] == '/DC=com/DC=redhat/OU=messaging/OU=serviceusers/UID=msg-subscription-watch-turnpike/L=stage/CN=msg-subscription-watch-turnpike'"
-        - name: policies-engine-stage
-          route: /api/policies-engine/
-          origin: http://policies-engine.policies-stage.svc.cluster.local:8080/
-          auth:
-            saml: "'crc-policies-team' in user['Role']"
-        - name: policies-ui-backend-stage
-          route: /api/policies-ui-backend/
-          origin: http://policies-ui-backend.policies-stage.svc.cluster.local:8080/
-          auth:
-            saml: "'crc-policies-team' in user['Role']"
-        - name: notifications-stage
-          route: /api/notifications/
-          origin: http://notifications-backend.notifications-stage.svc.cluster.local:8080/
-          auth:
-            saml: "'crc-notifications-team' in user['Role']"
-            x509: "True"
-        - name: notifications-gw-stage
-          route: /api/notifications-gw/
-          origin: http://notifications-gw.notifications-stage.svc.cluster.local:8080/
-          auth:
-            saml: "True"
-            x509: "True"
-        - name: cost-management-masu
-          route: /api/cost-management/v1/
-          origin: http://koku-clowder-masu.hccm-stage.svc.cluster.local:8000/api/cost-management/v1/
-          auth:
-            saml: "'cost-management-team' in user['Role']"
-            x509: "x509['subject_dn'] == '/DC=com/DC=redhat/OU=messaging/OU=serviceusers/UID=msg-cost-management-turnpike/L=Stage/CN=msg-cost-management-turnpike'"
-        - name: cost-management-sources
-          route: /api/cost-management/sources/v1/
-          origin: http://koku-clowder-sources-client.hccm-stage.svc.cluster.local:8000/api/cost-management/v1/
-          auth:
-            saml: "'cost-management-team' in user['Role']"
-            x509: "x509['subject_dn'] == '/DC=com/DC=redhat/OU=messaging/OU=serviceusers/UID=msg-cost-management-turnpike/L=Stage/CN=msg-cost-management-turnpike'"
-        - name: cost-management-koku-daily-ui
-          route: /api/cost-management/v1/koku-daily/
-          origin: http://koku-daily.hccm-stage.svc.cluster.local:8080/api/cost-management/v1/koku-daily/
-          auth:
-            saml: "'cost-management-team' in user['Role']"
-        - name: module-update-router-events
-          route: /api/module-update-router/v1/event
-          origin: http://module-update-router.module-update-router-stage.svc.cluster.local:8080/api/module-update-router/v1/event
-          auth:
-            saml: "'clouddot-data' in user['Role']"
-        - name: rbac
-          route: /api/rbac
-          origin: http://${RBAC_HOST}:8080/_private/api
-          auth:
-            saml: "'clouddot-infrastructure' in user['Role']"
-        - name: vulnerability-engine-admin
-          route: /api/vulnerability
-          origin: http://vulnerability-engine-manager-admin.vulnerability-engine-stage.svc.cluster.local:8443/api/vulnerability
-          auth:
-            saml: "'vulnerability-admins' in user['Role']"
-        - name: cloudigrade-internal
-          route: /api/cloudigrade/internal/
-          origin: http://cloudigrade-api.cloudigrade-stage.svc.cluster.local:80/internal/
-          auth:
-            saml: "'doppler-dev' in user['Role']"
-            x509: "x509['subject_dn'] == '/DC=com/DC=redhat/OU=messaging/OU=serviceusers/UID=msg-cloudigrade-turnpike/L=Stage/CN=msg-cloudigrade-turnpike'"
-        - name: automation-analytics-oneview
-          route: /api/automation-analytics/oneview
-          origin: http://automation-analytics-api-oneview-v2.tower-analytics-stage.svc.cluster.local:8000/api/tower-analytics/oneview
-          auth:
-            saml: "'automation-analytics' in user['Role']"
-        - name: vmaas-reposcan
-          route: /api/vmaas
-          origin: http://vmaas-reposcan.vmaas-stage.svc.cluster.local:8081/api/vmaas
-          auth:
-            saml: "'vulnerability-admins' in user['Role']"
-        - name: patchman-engine-admin
-          route: /api/patch/
-          origin: http://patchman-engine-vmaas-sync.patchman-engine-stage.svc.cluster.local:9999/
-          auth:
-            saml: "'patch-administrators' in user['Role']"
-        - name: playbook-dispatcher-api
-          route: /api/playbook-dispatcher/api
-          origin: http://${PLAYBOOK_DISPATCHER_HOST}:8000/internal
-          auth:
-            saml: "'crc-pipeline-team' in user['Role']"
-        - name: playbook-dispatcher-connect
-          route: /api/playbook-dispatcher/connect/
-          origin: http://playbook-dispatcher-connect-connect-api.playbook-dispatcher-stage.svc.cluster.local:8083/
-          auth:
-            saml: "'crc-pipeline-team' in user['Role']"
-        - name: xjoin-kafka-connect
-          route: /api/xjoin/connect/
-          origin: http://xjoin-kafka-connect-strimzi-connect-api.xjoin-stage.svc.cluster.local:8083/
-          auth:
-            saml: "'crc-pipeline-team' in user['Role']"
-        - name: ingress
-          route: /api/ingress/v1/
-          origin: http://ingress-service.ingress-stage.svc.cluster.local:8000/api/ingress/v1/
-          auth:
-            saml: "True"
-
-  - namespace:
-      $ref: /services/insights/turnpike/namespaces/turnpike-fedramp-stage.yml
-    ref: master
-    upstream:
-      instance:
-        $ref: /dependencies/ci-int/ci-int.yml
-      name: RedHatInsights-turnpike-gh-build-master
-    parameters:
-      AUTH_DEBUG: "1"
-      FLASK_SERVER_NAME: internal.${PLATFORM_HOSTNAME}
-      REDIS_SERVICE_NAME: redis.turnpike-stage.svc.cluster.local
-      SETTINGS_JSON: |
-        {
-          "strict": true,
-          "debug": true,
-          "sp": {
-            "entityId": "https://internal.${PLATFORM_HOSTNAME}/saml/metadata.xml",
-            "assertionConsumerService": {
-              "url": "https://internal.${PLATFORM_HOSTNAME}/saml/acs/",
-              "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
-            },
-            "singleLogoutService": {
-              "url": "https://internal.${PLATFORM_HOSTNAME}/saml/sls/",
-              "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-            },
-            "NameIDFormat": "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"
-          },
-          "idp": {
-            "entityId": "https://auth.stage.redhat.com/auth/realms/EmployeeIDP",
-            "singleSignOnService": {
-              "url": "https://auth.stage.redhat.com/auth/realms/EmployeeIDP/protocol/saml",
-              "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-            },
-            "singleLogoutService": {
-              "url": "https://auth.stage.redhat.com/auth/realms/EmployeeIDP/protocol/saml",
-              "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
-            },
-            "x509cert": "MIIE+zCCA+OgAwIBAgIED/4AJTANBgkqhkiG9w0BAQsFADBBMRAwDgYDVQQKDAdSZWQgSGF0MQ0wCwYDVQQLDARwcm9kMR4wHAYDVQQDDBVDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMTcwNjIwMTI1MTEwWhcNMjIwNjE5MTI1MTEwWjCBqjELMAkGA1UEBhMCVVMxFzAVBgNVBAgMDk5vcnRoIENhcm9saW5hMRAwDgYDVQQHDAdSYWxlaWdoMRYwFAYDVQQKDA1SZWQgSGF0LCBJbmMuMQwwCgYDVQQLDANJQU0xIzAhBgNVBAMMGlJlZCBIYXQgU3RhZ2UgRW1wbG95ZWUgU1NPMSUwIwYJKoZIhvcNAQkBFhZzZXJ2aWNlZGVza0ByZWRoYXQuY29tMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAwKVe5MH66uvRvs7NnVNrhlEwd45kJmaen5Digf4PcB8IxY4a9MrXD7xuhTPPZuNX0lLNuWDvBkQNzY0DwsHvLW3mTAZLnQG90EWMFWziQJfSAQ60epGkSlMkd4IL9HUuZa2/tGDy9Bt5pdSfqhrbAA932Zg1BGCL9cY20lfc+4arqY1qUyMkMz210RG3yLWq80dXKD8ziEeRbzGv8V1HBJE0M15GsKxcfD/tzx95E3WTcGxJJhqnFFEEdVgB/yvMM4E2WlyI+XWmHhIe2NCmhofD7wdOokpuAKhgdIUlsKi79o760F123DbzWk7sprErG6p0VkJ+LZESv8/mqtlEXHz8zgzTkDhlUH3IJm829ouGXFSRoRDEea6We8VHJbLODSAlIeAAXylnsg9czVdnkXqBBnnHkeERblpccTfMysTFWYMeTykHIitnINBoTOz/7jLNf/TgvTFwHHL6TvD5TSq5FsID9YJ60kyucqWELEVt18VMgy3O8HA4B4kxL4hpSoO+7a2ahOROTvdDEP2ZyE7jsIL4mmSUrsEthM+9jFIPRjDHJD40uTbHEXhImKFPQ3nqHi8SgI4qSoZ5YE+3RO1ZnqtMoSP1C6TvPKo0ymH9xWXpvAmyX5afcKNXD00wcjgAgRkF0oAbSp4IuAO7Zw6wNCKDuc5HmGgW29FSifECAwEAAaOBkDCBjTAfBgNVHSMEGDAWgBR72gn1SV3Z11zJNvhV0huXnhEvfjA7BggrBgEFBQcBAQQvMC0wKwYIKwYBBQUHMAGGH2h0dHA6Ly9vY3NwLnJlZGhhdC5jb20vY2Evb2NzcC8wDgYDVR0PAQH/BAQDAgTwMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjANBgkqhkiG9w0BAQsFAAOCAQEARAXHV66CAJp8MqvNBw+/I1DRmnpF0J+LDlGBHgYPNJfVSJwVsZVTcQz+0RT267pNJ7grg3iXbiGXf3tA4CAePxBalQM81GwQcHebbQ0ndFEw4TJEBwTx+q9CoIDGt4HH9qPAIZMYFmzZxgToWAyJXuGCfENtHtYWKbfnSZHbMs1Ern8AM3YmP9g7sFzqBkZLjE07LytmkFBx9DOJBdU48IVpCFCrDpyQ49pU/aLYEKWJlCLdbDxDHVPbt6DVQqf6occXOMcg5mDYOTUmMECiADPEojVuOZ9+Qegtd/NA8AZgzX0EAcUxhJqJ+oIGAbQ8lzN1mMc7EqQYLeXOnlA01A=="
-          }
-        }
-      ADVANCED_SETTINGS_JSON: |
-        {
-          "security": {
-            "nameIdEncrypted": false,
-            "authnRequestsSigned": true,
-            "logoutRequestSigned": false,
-            "logoutResponseSigned": false,
-            "signMetadata": false,
-            "wantMessagesSigned": false,
-            "wantAssertionsSigned": false,
-            "wantNameId" : true,
-            "wantNameIdEncrypted": false,
-            "wantAssertionsEncrypted": false,
-            "signatureAlgorithm": "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
-            "digestAlgorithm": "http://www.w3.org/2001/04/xmlenc#sha256"
-          },
-          "contactPerson": {
-            "technical": {
-              "givenName": "Cloud Services Platform Infrastructure",
-                  "emailAddress": "clouddot-infrastructure@redhat.com"
-              },
-              "support": {
-                  "givenName": "Cloud Services Platform Infrastructure",
-                  "emailAddress": "clouddot-infrastructure@redhat.com"
-              }
-          },
-          "organization": {
-            "en-US": {
-              "name": "Red Hat Cloud Services Platform Staging",
-              "displayname": "RH CSP Stage",
-              "url": "https://${PLATFORM_HOSTNAME}/"
-            }
-          }
-        }
-      BACKEND_ROUTES: |
-        - name: turnpike
-          route: /api/turnpike
-          origin: http://web.turnpike-stage.svc.cluster.local:5000/api/turnpike
-          auth:
-            saml: "True"
-            x509: "True"
-        - name: healthcheck
-          route: /public/healthcheck/
-          origin: http://web.turnpike-stage.svc.cluster.local:5000/_healthcheck/
-        - name: platform-docs
-          route: /docs/
-          origin: http://platform-docs.platform-docs-stage.svc.cluster.local/
-          auth:
-            saml: "True"
         - name: rhsm-subscriptions
           route: /app/rhsm-subscriptions/actuator
           origin: http://rhsm-subscriptions-worker-monitoring.rhsm-stage.svc.cluster.local:8080/actuator
@@ -494,15 +290,140 @@ resourceTemplates:
             saml: "True"
         - name: drift
           route: /api/drift/admin/
-          origin: http://drift-backend.drift-stage.svc.cluster.local:8080/api/admin/
+          origin: http://drift-backend.drift-stage.svc.cluster.local:8080/admin/
           auth:
             saml: "'crc-drift-team' in user['Role']"
 
   - namespace:
-      $ref: /services/insights/turnpike/namespaces/prod-turnpike-prod.yml
+      $ref: /services/insights/turnpike/namespaces/turnpike-fedramp-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-turnpike-gh-build-master
+    parameters:
+      AUTH_DEBUG: "1"
+      FLASK_SERVER_NAME: internal.${PLATFORM_HOSTNAME}
+      REDIS_SERVICE_NAME: redis.turnpike-stage.svc.cluster.local
+      SETTINGS_JSON: |
+        {
+          "strict": true,
+          "debug": true,
+          "sp": {
+            "entityId": "https://internal.${PLATFORM_HOSTNAME}/saml/metadata.xml",
+            "assertionConsumerService": {
+              "url": "https://internal.${PLATFORM_HOSTNAME}/saml/acs/",
+              "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+            },
+            "singleLogoutService": {
+              "url": "https://internal.${PLATFORM_HOSTNAME}/saml/sls/",
+              "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+            },
+            "NameIDFormat": "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"
+          },
+          "idp": {
+            "entityId": "https://auth.stage.redhat.com/auth/realms/EmployeeIDP",
+            "singleSignOnService": {
+              "url": "https://auth.stage.redhat.com/auth/realms/EmployeeIDP/protocol/saml",
+              "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+            },
+            "singleLogoutService": {
+              "url": "https://auth.stage.redhat.com/auth/realms/EmployeeIDP/protocol/saml",
+              "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+            },
+            "x509cert": "MIIE+zCCA+OgAwIBAgIED/4AJTANBgkqhkiG9w0BAQsFADBBMRAwDgYDVQQKDAdSZWQgSGF0MQ0wCwYDVQQLDARwcm9kMR4wHAYDVQQDDBVDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMTcwNjIwMTI1MTEwWhcNMjIwNjE5MTI1MTEwWjCBqjELMAkGA1UEBhMCVVMxFzAVBgNVBAgMDk5vcnRoIENhcm9saW5hMRAwDgYDVQQHDAdSYWxlaWdoMRYwFAYDVQQKDA1SZWQgSGF0LCBJbmMuMQwwCgYDVQQLDANJQU0xIzAhBgNVBAMMGlJlZCBIYXQgU3RhZ2UgRW1wbG95ZWUgU1NPMSUwIwYJKoZIhvcNAQkBFhZzZXJ2aWNlZGVza0ByZWRoYXQuY29tMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAwKVe5MH66uvRvs7NnVNrhlEwd45kJmaen5Digf4PcB8IxY4a9MrXD7xuhTPPZuNX0lLNuWDvBkQNzY0DwsHvLW3mTAZLnQG90EWMFWziQJfSAQ60epGkSlMkd4IL9HUuZa2/tGDy9Bt5pdSfqhrbAA932Zg1BGCL9cY20lfc+4arqY1qUyMkMz210RG3yLWq80dXKD8ziEeRbzGv8V1HBJE0M15GsKxcfD/tzx95E3WTcGxJJhqnFFEEdVgB/yvMM4E2WlyI+XWmHhIe2NCmhofD7wdOokpuAKhgdIUlsKi79o760F123DbzWk7sprErG6p0VkJ+LZESv8/mqtlEXHz8zgzTkDhlUH3IJm829ouGXFSRoRDEea6We8VHJbLODSAlIeAAXylnsg9czVdnkXqBBnnHkeERblpccTfMysTFWYMeTykHIitnINBoTOz/7jLNf/TgvTFwHHL6TvD5TSq5FsID9YJ60kyucqWELEVt18VMgy3O8HA4B4kxL4hpSoO+7a2ahOROTvdDEP2ZyE7jsIL4mmSUrsEthM+9jFIPRjDHJD40uTbHEXhImKFPQ3nqHi8SgI4qSoZ5YE+3RO1ZnqtMoSP1C6TvPKo0ymH9xWXpvAmyX5afcKNXD00wcjgAgRkF0oAbSp4IuAO7Zw6wNCKDuc5HmGgW29FSifECAwEAAaOBkDCBjTAfBgNVHSMEGDAWgBR72gn1SV3Z11zJNvhV0huXnhEvfjA7BggrBgEFBQcBAQQvMC0wKwYIKwYBBQUHMAGGH2h0dHA6Ly9vY3NwLnJlZGhhdC5jb20vY2Evb2NzcC8wDgYDVR0PAQH/BAQDAgTwMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjANBgkqhkiG9w0BAQsFAAOCAQEARAXHV66CAJp8MqvNBw+/I1DRmnpF0J+LDlGBHgYPNJfVSJwVsZVTcQz+0RT267pNJ7grg3iXbiGXf3tA4CAePxBalQM81GwQcHebbQ0ndFEw4TJEBwTx+q9CoIDGt4HH9qPAIZMYFmzZxgToWAyJXuGCfENtHtYWKbfnSZHbMs1Ern8AM3YmP9g7sFzqBkZLjE07LytmkFBx9DOJBdU48IVpCFCrDpyQ49pU/aLYEKWJlCLdbDxDHVPbt6DVQqf6occXOMcg5mDYOTUmMECiADPEojVuOZ9+Qegtd/NA8AZgzX0EAcUxhJqJ+oIGAbQ8lzN1mMc7EqQYLeXOnlA01A=="
+          }
+        }
+      ADVANCED_SETTINGS_JSON: |
+        {
+          "security": {
+            "nameIdEncrypted": false,
+            "authnRequestsSigned": true,
+            "logoutRequestSigned": false,
+            "logoutResponseSigned": false,
+            "signMetadata": false,
+            "wantMessagesSigned": false,
+            "wantAssertionsSigned": false,
+            "wantNameId" : true,
+            "wantNameIdEncrypted": false,
+            "wantAssertionsEncrypted": false,
+            "signatureAlgorithm": "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
+            "digestAlgorithm": "http://www.w3.org/2001/04/xmlenc#sha256"
+          },
+          "contactPerson": {
+            "technical": {
+              "givenName": "Cloud Services Platform Infrastructure",
+                  "emailAddress": "clouddot-infrastructure@redhat.com"
+              },
+              "support": {
+                  "givenName": "Cloud Services Platform Infrastructure",
+                  "emailAddress": "clouddot-infrastructure@redhat.com"
+              }
+          },
+          "organization": {
+            "en-US": {
+              "name": "Red Hat Cloud Services Platform Staging",
+              "displayname": "RH CSP Stage",
+              "url": "https://${PLATFORM_HOSTNAME}/"
+            }
+          }
+        }
+      BACKEND_ROUTES: |
+        - name: turnpike
+          route: /api/turnpike
+          origin: http://web.turnpike-stage.svc.cluster.local:5000/api/turnpike
+          auth:
+            saml: "True"
+            x509: "True"
+        - name: healthcheck
+          route: /public/healthcheck/
+          origin: http://web.turnpike-stage.svc.cluster.local:5000/_healthcheck/
+        - name: policies-engine-stage
+          route: /api/policies-engine/
+          origin: http://policies-engine.policies-stage.svc.cluster.local:8080/
+          auth:
+            saml: "'crc-policies-team' in user['Role']"
+        - name: policies-ui-backend-stage
+          route: /api/policies-ui-backend/
+          origin: http://policies-ui-backend.policies-stage.svc.cluster.local:8080/
+          auth:
+            saml: "'crc-policies-team' in user['Role']"
+        - name: module-update-router-events
+          route: /api/module-update-router/v1/event
+          origin: http://module-update-router.module-update-router-stage.svc.cluster.local:8080/api/module-update-router/v1/event
+          auth:
+            saml: "'clouddot-data' in user['Role']"
+        - name: rbac
+          route: /api/rbac
+          origin: http://${RBAC_HOST}:8080/_private/api
+          auth:
+            saml: "'clouddot-infrastructure' in user['Role']"
+        - name: vulnerability-engine-admin
+          route: /api/vulnerability
+          origin: http://vulnerability-engine-manager-admin.vulnerability-engine-stage.svc.cluster.local:8443/api/vulnerability
+          auth:
+            saml: "'vulnerability-admins' in user['Role']"
+        - name: vmaas-reposcan
+          route: /api/vmaas
+          origin: http://vmaas-reposcan.vmaas-stage.svc.cluster.local:8081/api/vmaas
+          auth:
+            saml: "'vulnerability-admins' in user['Role']"
+        - name: patchman-engine-admin
+          route: /api/patch/
+          origin: http://patchman-engine-vmaas-sync.patchman-engine-stage.svc.cluster.local:9999/
+          auth:
+            saml: "'patch-administrators' in user['Role']"
+        - name: ingress
+          route: /api/ingress/v1/
+          origin: http://ingress-service.ingress-stage.svc.cluster.local:8000/api/ingress/v1/
+          auth:
+            saml: "True"
+
+  - namespace:
+      $ref: /services/insights/turnpike/namespaces/turnpike-fedramp-prod.yml
     ref: master
     parameters:
-      IMAGE_TAG: f450147
+      IMAGE_TAG: 6d03c56
       FLASK_SERVER_NAME: internal.${PLATFORM_HOSTNAME}
       REDIS_SERVICE_NAME: redis.turnpike-prod.svc.cluster.local
       SETTINGS_JSON: |
@@ -578,11 +499,87 @@ resourceTemplates:
         - name: healthcheck
           route: /public/healthcheck/
           origin: http://web.turnpike-prod.svc.cluster.local:5000/_healthcheck/
-        - name: platform-docs
-          route: /docs/
-          origin: http://platform-docs.platform-docs-prod.svc.cluster.local/
+
+  - namespace:
+      $ref: /services/insights/turnpike/namespaces/prod-turnpike-prod.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 6d03c56
+      FLASK_SERVER_NAME: internal.${PLATFORM_HOSTNAME}
+      REDIS_SERVICE_NAME: redis.turnpike-prod.svc.cluster.local
+      SETTINGS_JSON: |
+        {
+          "strict": true,
+          "debug": true,
+          "sp": {
+            "entityId": "https://internal.${PLATFORM_HOSTNAME}/saml/metadata.xml",
+            "assertionConsumerService": {
+              "url": "https://internal.${PLATFORM_HOSTNAME}/saml/acs/",
+              "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+            },
+            "singleLogoutService": {
+              "url": "https://internal.${PLATFORM_HOSTNAME}/saml/sls/",
+              "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+            },
+            "NameIDFormat": "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"
+          },
+          "idp": {
+            "entityId": "https://auth.redhat.com/auth/realms/EmployeeIDP",
+            "singleSignOnService": {
+              "url": "https://auth.redhat.com/auth/realms/EmployeeIDP/protocol/saml",
+              "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+            },
+            "singleLogoutService": {
+              "url": "https://auth.redhat.com/auth/realms/EmployeeIDP/protocol/saml",
+              "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+            },
+            "x509cert": "MIIE+jCCA+KgAwIBAgIED/4AJzANBgkqhkiG9w0BAQsFADBBMRAwDgYDVQQKDAdSZWQgSGF0MQ0wCwYDVQQLDARwcm9kMR4wHAYDVQQDDBVDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMTcwNjIwMTI1MTQwWhcNMjIwNjE5MTI1MTQwWjCBqTELMAkGA1UEBhMCVVMxFzAVBgNVBAgMDk5vcnRoIENhcm9saW5hMRAwDgYDVQQHDAdSYWxlaWdoMRYwFAYDVQQKDA1SZWQgSGF0LCBJbmMuMQwwCgYDVQQLDANJQU0xIjAgBgNVBAMMGVJlZCBIYXQgUHJvZCBFbXBsb3llZSBTU08xJTAjBgkqhkiG9w0BCQEWFnNlcnZpY2VkZXNrQHJlZGhhdC5jb20wggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQC089RqFDc8mGgKpKy9ZOdH+arhvDg94+kGCNCVFXNQFnBbmxwodtRnF0r2pGFfd+Yw7PRU3cfgD7WVq6cInPnpuVAU3H0+Fni+RrzeoKs2O2WvmVBmxFK4JQ7bzeAnfTd92pCGaua95VnfgqVRt6FzL+bvWc/3YCr+KcgI3lcOZdEPJ3/WMOXWhPpcKYRo7rsu/vI9R19NBHwN+/DjyWeq6kVLp1tjdA07RgcihqeZ5f3BqjcMuKhcEQVjwiwcqKbSUBW2VCJ5YKXmOv1R6asjHMJsiRPBWSPIzhAyhw0GGXvM6F8q3w0EExUDOet08Ffl1Sl73paoKcNQ7hR9ljobpsy7Hhq0j4Ink0XR+pSVUQT+yCeyO4aaSxOc+75CAzvqvMSLrUP+UST0sW+1mv0jCvWJabng63isNyHx0aLTC8p9MWOxskNBZ6ce3+n70kGk3cMbhveAB/RgMs232XhUKcJApsuGjPL83vhE9n23t15IXuv+2X68ECGuoGW4VNq7Diq3QoZSHAa2gwa9bcLYRoOgGtWdysQ++Kks+XXPgL4UHcKWULKJlzOh20Jypi9N2KBU5IGccRve1jCfIQ0w246aRfTthsUF62vMD6T28e5XHijBPlNPAA+Vx3uCECZYpAksmyqK+wuUscOAH3FW0yrbSftROjzNvd0/wpnwXQIDAQABo4GQMIGNMB8GA1UdIwQYMBaAFHvaCfVJXdnXXMk2+FXSG5eeES9+MDsGCCsGAQUFBwEBBC8wLTArBggrBgEFBQcwAYYfaHR0cDovL29jc3AucmVkaGF0LmNvbS9jYS9vY3NwLzAOBgNVHQ8BAf8EBAMCBPAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMA0GCSqGSIb3DQEBCwUAA4IBAQDBPTR0hAB/LTUWzi5jOG8Ni54gl6GDu/klaoOXjXzOUJY4keiNKKytyec9nEhUrUfuSMXGrteGnUc+8xq1WNmY9qHeaKHU2u8wsA8ekvmhSx550qZ1nocOumbswNKzSknTU9l1TH/GONgZwW99xxpbAmj6g7CjrsfQ2mESNkEzTT373eRUJriz/AgfxxgSyvBoxbNPx6IoekNUL8d/kHy1Jd7rOXbqBmYjeI7tMtidzezWDFAJkoQ05I3pDYvJfL999pYj/ykbqHg8Hkv/P+zLWSUuoI8ReIUCQDIO57+PTUMM9q7LwMX/viyym6jv2dKzDTGrB3AEYkRbBKxKng+u"
+          }
+        }
+      ADVANCED_SETTINGS_JSON: |
+        {
+          "security": {
+            "nameIdEncrypted": false,
+            "authnRequestsSigned": true,
+            "logoutRequestSigned": false,
+            "logoutResponseSigned": false,
+            "signMetadata": false,
+            "wantMessagesSigned": false,
+            "wantAssertionsSigned": false,
+            "wantNameId" : true,
+            "wantNameIdEncrypted": false,
+            "wantAssertionsEncrypted": false,
+            "signatureAlgorithm": "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
+            "digestAlgorithm": "http://www.w3.org/2001/04/xmlenc#sha256"
+          },
+          "contactPerson": {
+            "technical": {
+                  "givenName": "Cloud Services Platform Infrastructure",
+                  "emailAddress": "clouddot-infrastructure@redhat.com"
+              },
+              "support": {
+                  "givenName": "Cloud Services Platform Infrastructure",
+                  "emailAddress": "clouddot-infrastructure@redhat.com"
+              }
+          },
+          "organization": {
+            "en-US": {
+              "name": "Red Hat Cloud Services Platform",
+              "displayname": "RH CSP",
+              "url": "https://${PLATFORM_HOSTNAME}/"
+            }
+          }
+        }
+      BACKEND_ROUTES: |
+        - name: turnpike
+          route: /api/turnpike
+          origin: http://web.turnpike-prod.svc.cluster.local:5000/api/turnpike
           auth:
             saml: "True"
+            x509: "True"
+        - name: healthcheck
+          route: /public/healthcheck/
+          origin: http://web.turnpike-prod.svc.cluster.local:5000/_healthcheck/
         - name: rhsm-subscriptions
           route: /app/rhsm-subscriptions/actuator
           origin: http://rhsm-subscriptions-worker-monitoring.rhsm-prod.svc.cluster.local:8080/actuator
@@ -611,7 +608,7 @@ resourceTemplates:
             saml: "'clouddot-infrastructure' in user['Role']"
         - name: cost-management-masu
           route: /api/cost-management/v1/
-          origin: http://koku-masu.hccm-prod.svc.cluster.local:8080/api/cost-management/v1/
+          origin: http://koku-clowder-masu.hccm-prod.svc.cluster.local:8000/api/cost-management/v1/
           auth:
             saml: "'cost-management-team' in user['Role']"
             x509: "x509['subject_dn'] == '/DC=com/DC=redhat/OU=messaging/OU=serviceusers/UID=msg-cost-management-turnpike/L=Prod/CN=msg-cost-management-turnpike'"
@@ -683,6 +680,7 @@ resourceTemplates:
           origin: http://ingress-service.ingress-prod.svc.cluster.local:8000/api/ingress/v1/
           auth:
             saml: "True"
+
 - name: nginx-prometheus
   path: /templates/prometheus-nginx.yml
   url: https://github.com/RedHatInsights/turnpike
@@ -700,5 +698,20 @@ resourceTemplates:
       $ref: /services/insights/turnpike/namespaces/prod-turnpike-prod.yml
     ref: 921dcae65b9b74b855d094f5bfa350d8fb55cbaa
     parameters:
-      IMAGE_TAG: 921dcae
+      IMAGE_TAG: 6d03c56
+      REPLICAS: 0
+  - namespace:
+      $ref: /services/insights/turnpike/namespaces/turnpike-fedramp-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-turnpike-gh-build-master
+    parameters:
+      REPLICAS: 0
+  - namespace:
+      $ref: /services/insights/turnpike/namespaces/turnpike-fedramp-prod.yml
+    ref: 921dcae65b9b74b855d094f5bfa350d8fb55cbaa
+    parameters:
+      IMAGE_TAG: 6d03c56
       REPLICAS: 0

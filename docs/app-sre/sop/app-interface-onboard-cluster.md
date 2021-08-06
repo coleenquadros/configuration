@@ -26,7 +26,7 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
 
 This step should be performed in a single merge request.
 
-1. Login to https://cloud.redhat.com/openshift
+1. Login to https://console.redhat.com/openshift
 
 1. Click `Subscriptions` and ensure you have enough quota to provision a cluster
     - Must have at least 1 cluster of the desired type
@@ -652,7 +652,7 @@ Note that the host prefix must be set to /23.
 ## Additional steps for clusters for specific services
 
 1. If the cluster is a hive shard, follow the [Hive shard provisioning SOP](/docs/app-sre/sop/hive-shard-provisioning.md)
-1. If the cluster is a cloud.redhat.com (crc) cluster, perform the following steps:
+1. If the cluster is a console.redhat.com (crc) cluster, perform the following steps:
   * Deploy [3rd party operators](/data/services/insights/third-party-operators) (includes AMQ streams operator)
   * Deploy [Clowder operator](/data/services/insights/clowder)
 
@@ -687,7 +687,7 @@ To off-board an OSDv4 cluster from app-interface, perform the following operatio
 
 1. Delete the cluster from the Dead Man's Snitch console: https://deadmanssnitch.com/cases/0693dfc1-40e9-4e84-89b2-30d696e77e06/snitches?tags=app-sre
 
-1. Delete the cluster from the OCM console: https://cloud.redhat.com/openshift
+1. Delete the cluster from the OCM console: https://console.redhat.com/openshift
 
 1. Delete the cluster credentials from Vault (verify that no secrets are in use):
   - https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/kube-configs/

@@ -20,6 +20,8 @@ slack:
   channel: proj-perf-insights-cluster
 
 managedResourceTypes:
+- ClowdApp
+- CronJob
 - Deployment
 - DeploymentConfig
 - Service
@@ -33,73 +35,43 @@ authentication:
     field: all
 
 resourceTemplates:
-- name: playbooks-ssg
-  path: /templates/remediations/playbooks-ssg.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  parameters:
-    LIMITS_CPU: '1'
-    REQUESTS_CPU: 250m
-    SSG_REPLICAS: 2
-  targets:
-  - namespace:
-      $ref: /services/insights/remediations/namespaces/perf-remediations-perf.yml
-    ref: 898a39bf99971da37fbd183df4086dd18b6b28e7
-    parameters:
-      IMAGE_TAG: b3f50c3
-      SSG_REPLICAS: 1
-
-- name: remediations-cleaner
-  path: /templates/remediations/remediations-cleaner.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  parameters:
-    CLEANER_SUSPEND: false
-    DB_SSL_ENABLED: true
-    LOG_CW_ENABLED: true
-    LOG_LEVEL: trace
-  targets:
-  - namespace:
-      $ref: /services/insights/remediations/namespaces/perf-remediations-perf.yml
-    ref: 898a39bf99971da37fbd183df4086dd18b6b28e7
-    parameters:
-      IMAGE_TAG: 7013373
-
 - name: remediations-consumer
-  path: /templates/remediations/remediations-consumer.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  path: /deployment/remediations-consumer-clowdapp.yaml
+  url: https://github.com/RedHatInsights/remediations-consumer
   parameters:
     DB_SSL_ENABLED: true
     LOG_CW_ENABLED: true
     LOG_LEVEL: info
-    NUM_REPLICAS: 2
+    NUM_REPLICAS: 3
   targets:
   - namespace:
       $ref: /services/insights/remediations/namespaces/perf-remediations-perf.yml
-    ref: 898a39bf99971da37fbd183df4086dd18b6b28e7
+    ref: b225d1496348346692f79f7a4d010b0411af4cbe
     parameters:
-      IMAGE_TAG: 7013373
-      KAFKA_CONSUMER_GROUP: remediation-consumer-perf
+      IMAGE_TAG: b225d14
       NUM_REPLICAS: 1
+      ENV_NAME: perf
 
 - name: remediations-update-consumer
-  path: /templates/remediations/remediations-update-consumer.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  path: /deployment/remediations-update-consumer-clowdapp.yaml
+  url: https://github.com/RedHatInsights/remediations-consumer
   parameters:
     DB_SSL_ENABLED: true
     LOG_CW_ENABLED: true
     LOG_LEVEL: info
-    NUM_REPLICAS: 2
+    NUM_REPLICAS: 3
   targets:
   - namespace:
       $ref: /services/insights/remediations/namespaces/perf-remediations-perf.yml
-    ref: 898a39bf99971da37fbd183df4086dd18b6b28e7
+    ref: b225d1496348346692f79f7a4d010b0411af4cbe
     parameters:
-      IMAGE_TAG: 7013373
-      KAFKA_CONSUMER_GROUP: remediation-consumer-perf
+      IMAGE_TAG: b225d14
       NUM_REPLICAS: 1
+      ENV_NAME: perf
 
 - name: remediations
-  path: /templates/remediations/remediations.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  path: /deployment/clowdapp.yml
+  url: https://github.com/RedHatInsights/insights-remediations
   parameters:
     ADVISOR_IMPL: impl
     COMPLIANCE_IMPL: impl
@@ -126,10 +98,11 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/remediations/namespaces/perf-remediations-perf.yml
-    ref: 898a39bf99971da37fbd183df4086dd18b6b28e7
+    ref: 6403fa2ed67b1a79fcf4775f7027b1d4acd2abfb
     parameters:
       MAX_REPLICAS: 1
       MIN_REPLICAS: 1
       REMEDIATIONS_REPLICAS: 1
-      IMAGE_TAG: 200b242
-      XJOIN_SEARCH_URL: ${XJOIN_SEARCH_HOST}
+      IMAGE_TAG: 6403fa2
+      PLATFORM_HOSTNAME_URL: "cert.${PLATFORM_HOSTNAME}"
+      ENV_NAME: perf

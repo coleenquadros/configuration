@@ -1211,6 +1211,7 @@ In order to import certificates stored in Vault into AWS Certificate Manager, yo
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-ssl" and `provider` is set to `acm`, the created Secret will be called `my-ssl-acm`.
+- `annotations`: additional annotations to add to the output resource
 
 NOTE: Either `secret` or `domain_name` must be provided, but not both.  Use `secret` to import a certificate from vault, and `domain` for AWS to create a certifcate
 
@@ -1241,6 +1242,7 @@ In order to add or update Amazon Elasticsearch Service, you need to add them to 
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-service" and `provider` is set to `elasticsearch`, the created Secret will be called `my-service-elasticsearch`.
+- `annotations`: additional annotations to add to the output resource
 
 Once the changes are merged, the Amazon Elasticsearch Service will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
@@ -1270,6 +1272,7 @@ In order to create or update an RDS database, you need to add them to the `terra
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-instance" and `provider` "rds", the created Secret will be called `my-instance-rds`.
+- `annotations`: additional annotations to add to the output resource
 - `enhanced_monitoring`: (optional) Setting it to `true` will enable enhanced monitoring for the database instance. Learn more about enhanced monitoring [here](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_Monitoring.OS.html).
 - `output_resource_db_name`: (optional) set the `db.name` key in the output Secret (does not affect actual terraform resource).
 - `reset_password`: (optional) add or update this field to a random string to trigger a database password reset.
@@ -1360,6 +1363,7 @@ In order to add or update an S3 bucket, you need to add them to the `terraformRe
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-bucket" and `provider` "s3", the created Secret will be called `my-bucket-s3`.
+- `annotations`: additional annotations to add to the output resource
 
 Once the changes are merged, the S3 bucket will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
@@ -1388,6 +1392,7 @@ In order to add or update an ElastiCache database, you need to add them to the `
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-cluster" and `provider` "elasticache", the created Secret will be called `my-cluster-elasticache`.
+- `annotations`: additional annotations to add to the output resource
 
 Once the changes are merged, the ElastiCache clusters will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
@@ -1395,6 +1400,9 @@ The Secret will contain the following fields:
 - `db.endpoint` - The configuration endpoint of the ElastiCache cluster.
 - `db.port` - The database port.
 - `db.auth_token` - Authentication token for in-transit encryption, if `transit_encryption_enabled` is set to `true`.
+
+Notes:
+- To provision an instance with cluster mode enabled, it is mandatory to define `cluster_mode.num_node_groups` and `cluster_mode.replicas_per_node_group` in the defaults file.
 
 #### Manage IAM Service account users via App-Interface (`/openshift/namespace-1.yml`)
 
@@ -1412,6 +1420,7 @@ In order to add or update a service account, you need to add them to the `terraf
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-user" and `provider` "aws-iam-service-account", the created Secret will be called `my-user-aws-iam-service-account`.
+- `annotations`: additional annotations to add to the output resource
 - `aws_infrastructure_access`: (optional) grant the created IAM user AWS Infrastructure access via OCM:
   - `cluster`: reference to the cluster you want to grant infrastructure access to
   - `access_level`: level of access to grant (currently either read-only or network-mgmt)
@@ -1443,6 +1452,7 @@ In order to add or update an SQS queue, you need to add them to the `terraformRe
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-queue" and `provider` "sqs", the created Secret will be called `my-queue-sqs`.
+- `annotations`: additional annotations to add to the output resource
 - `specs`: list of queue specifications to create:
   - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options:](/resources/terraform/resources/)
   - `queues`: list of queues to create according to the defined defaults:
@@ -1475,6 +1485,7 @@ In order to add or update a DynamoDB table, you need to add them to the `terrafo
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-table" and `provider` "dynamodb", the created Secret will be called `my-table-dynamodb`.
+- `annotations`: additional annotations to add to the output resource
 - `specs`: list of table specifications to create:
   - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options:](/resources/terraform/resources/)
   - `tables`: list of tables to create according to the defined defaults:
@@ -1506,6 +1517,7 @@ In order to add or update an ECR repository, you need to add them to the `terraf
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-repo" and `provider` "ecr", the created Secret will be called `my-repo-ecr`.
+- `annotations`: additional annotations to add to the output resource
 
 Once the changes are merged, the ECR repository will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
@@ -1531,6 +1543,7 @@ In order to add or update an S3+CloudFront stack, you need to add them to the `t
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-s3-cf-stack" and `provider` "s3-cloudfront", the created Secret will be called `my-s3-cf-stack-s3-cloudfront`.
+- `annotations`: additional annotations to add to the output resource
 
 Once the changes are merged, the resources will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
@@ -1560,6 +1573,7 @@ CloudFront Public Keys can be self-serviced via App-Interface.  Once created in 
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-key" and `provider` is set to `s3-cloudfront-public-key`, the created Secret will be called `my-key-s3-cloudfront-public-key`
+- `annotations`: additional annotations to add to the output resource
 
 The `secret` must have the key `cloudfront_public_key` that contains the public key to be uploaded to AWS.
 
@@ -1587,6 +1601,7 @@ In order to add or update an CloudWatch Log Group, you need to add them to the `
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-log-group" and `provider` "cloudwatch", the created Secret will be called `my-log-group-cloudwatch`.
+- `annotations`: additional annotations to add to the output resource
 
 Once the changes are merged, the CloudWatch Log Group will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
@@ -1610,6 +1625,7 @@ In order to add or update a Key Management Service key, you need to add them to 
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-key" and `provider` "kms", the created Secret will be called `my-key-kms`.
+- `annotations`: additional annotations to add to the output resource
 
 Once the changes are merged, the Key Management Service key will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
@@ -1630,6 +1646,7 @@ In order to add or update a Kinesis Stream, you need to add them to the `terrafo
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-stream" and `provider` "kinesis", the created Secret will be called `my-stream-kinesis`.
+- `annotations`: additional annotations to add to the output resource
 
 Once the changes are merged, the Kinesis Stream will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
@@ -2084,11 +2101,11 @@ codeComponents:
 
 App Interface has several features that can be enabled for the Gitlab
 repositories:
-- `gitlabRepoOwners`: Value `true` will enable the `gitlab-repo-owners`,
-  integration, that evaluates the `OWNERS`/`OWNERS_ALIASES` files in that
-  repository to post comments to the Merge Requests reporting the required
-  approvals, ultimately labeling the Merge Request, making it up for
-  auto-merge.
+- `gitlabRepoOwners`: Value `enabled: true` will enable the
+  `gitlab-repo-owners`, integration, that evaluates the
+  `OWNERS`/`OWNERS_ALIASES` files in that repository to post comments to the
+  Merge Requests reporting the required approvals, ultimately labeling the
+  Merge Request, making it up for auto-merge.
 - `gitlabHousekeeping`:  Value `enabled: true` will enable the
   `gitlab-housekeeping` integration, that auto-merges Merge Requests that are
   labelled as such. It also rebases the Merge Requests that are not rebased
@@ -2097,6 +2114,8 @@ repositories:
     - `limit` - limit number of merges/rebases to avoid load (default: 1)
     - `days_interval` - number of days to consider an item as stale (default: 15)
     - `enable_closing` - enable closing of stale items after two stale periods (default: disabled)
+    - `pipeline_timeout` - number of minutes that determine if a pending pipeline is to be canceled.
+    If not set, no pipeline will be canceled.
 - `jira`: Value as `$ref: /path/to/jira-server.yaml` will enable the
   Gitlab/JIRA integration, that links Merge Requests mentioning JIRA tickets
   to the mentioned JIRA ticket.
@@ -2109,7 +2128,8 @@ codeComponents:
 - name: managed-tenants
   resource: upstream
   url: https://gitlab.cee.redhat.com/service/managed-tenants
-  gitlabRepoOwners: true
+  gitlabRepoOwners:
+    enabled: true
   gitlabHousekeeping:
     enabled: true
     rebase: false

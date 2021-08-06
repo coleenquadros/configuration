@@ -16,9 +16,9 @@ Offline token:
 
 Note: We are using the same account for both production and staging. The offline token is also the same.
 
-1. Login to https://cloud.redhat.com/openshift with the above credentials
+1. Login to https://console.redhat.com/openshift with the above credentials
 
-1. Navigate to https://cloud.redhat.com/openshift/token
+1. Navigate to https://console.redhat.com/openshift/token
 
 1. Copy the token to the above Vault secret. There is no need to restart anything as the OCM integrations will pick up the new token on subsequent runs
 

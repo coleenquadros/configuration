@@ -355,8 +355,32 @@ kas-fleet-manager-rds
 
 ### Steps
 
-This alert is currently silenced until the failed status of a Kafka cluster reported by the fleetshard operator is terminal. If this alert fires, it should be silenced again.
+NOTE: This SLO is currently not active. More details here: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/19100 and https://issues.redhat.com/browse/MGDSTRM-2940.
+The alerts are firing because The Kafka instance can go into a failed state during creation but will eventually provision successfully. Our Kafka correctness (create) SLO only makes sense if a Kafka instance stays in a failed state.
 
+Based on the conversation with the Instance Team, it was the intention that a "Failed" state from the fleetshard would be terminal. There are a couple of Strimzi defects currently that cause the fleetshard to report failed during creation when it shouldn't.
+
+https://github.com/strimzi/strimzi-kafka-operator/issues/4855
+https://github.com/strimzi/strimzi-kafka-operator/issues/4856
+https://github.com/strimzi/strimzi-kafka-operator/issues/4869
+https://github.com/strimzi/strimzi-kafka-operator/issues/4872
+
+Until these issues are resolved which will likely take weeks or 1-2 months, we need to turn this alert off in stage and prod. We do so by silencing this alert here:
+https://alertmanager.app-sre-prod-04.devshift.net/#/silences/
+
+```
+alertname=~KasFleetManagerKafkaCreationSuccess.*
+cluster=app-sre-prod-04
+environment=production
+namespace=managed-services-production
+operation=create
+prometheus=openshift-customer-monitoring/app-sre
+service=kas-fleet-manager
+severity=info
+infoalertname=~KasFleetManagerKafkaCreationSuccess.*
+```
+
+Once these issues have been fixed, this note can be removed, the silenced alert removed, and the steps mentioned below unstriked.
 ~~refer to the steps [Kafka cluster provisioning latency](#kafka-cluster-provisioning-latency)~~
  
 ---
