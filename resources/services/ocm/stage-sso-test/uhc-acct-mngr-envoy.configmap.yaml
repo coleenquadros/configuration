@@ -164,6 +164,32 @@ data:
                 trusted_ca:
                   filename: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
 
+        # This cluster will be used for any request that we need to send to
+        # the SSO service, in particular the requests to download the JSON
+        # web key set used to verify the signatures of JSON web tokens used
+        # for authentication.
+        - name: sso
+          connect_timeout: 2s
+          type: STRICT_DNS
+          lb_policy: ROUND_ROBIN
+          load_assignment:
+            cluster_name: sso
+            endpoints:
+            - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: sso.redhat.com
+                      port_value: 443
+          transport_socket:
+            name: envoy.transport_sockets.tls
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+              common_tls_context:
+                validation_context:
+                  trusted_ca:
+                    filename: /etc/ssl/certs/ca-certificates.crt
+
       listeners:
 
       # This listener is used to accept /metrics and /ready requests.
@@ -249,6 +275,14 @@ data:
                         - generic_key:
                             descriptor_key: path
                             descriptor_value: cluster_registrations
+                        - metadata:
+                            descriptor_key: user
+                            metadata_key:
+                              key: envoy.filters.http.jwt_authn
+                              path:
+                              - key: payload
+                              - key: username
+                            default_value: unknown
 
                   # Everything else not matching one of the rules above goes
                   # directly to the backend, without rate limits.
@@ -260,6 +294,31 @@ data:
 
               http_filters:
 
+              # This is needed to extract the JWT from the request so that
+              # the identity of the user will be available for other
+              # filters, in particular for the rate limiting filter.
+              - name: envoy.filters.http.jwt_authn
+                typed_config:
+                  "@type": type.googleapis.com/envoy.extensions.filters.http.jwt_authn.v3.JwtAuthentication
+                  providers:
+                    sso:
+                      issuer: https://sso.redhat.com/auth/realms/redhat-external
+                      remote_jwks:
+                        http_uri:
+                          uri: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/certs
+                          cluster: sso
+                          timeout: 1s
+                      forward: true
+                      payload_in_metadata: payload
+                  rules:
+                  - match:
+                      prefix: /
+                    requires:
+                      requires_any:
+                        requirements:
+                        - provider_name: sso
+                        - allow_missing_or_failed: {}
+                        
               # This is needed to enable the rate limiter, and to specify how
               # and where to connect to it.
               - name: envoy.filters.http.ratelimit
