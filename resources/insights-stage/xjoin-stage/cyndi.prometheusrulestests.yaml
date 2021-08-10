@@ -1,0 +1,114 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /insights-stage/xjoin-stage/cyndi.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+
+# CyndiLagTooHigh
+- interval: 1m
+  input_series:
+  - series: kafka_consumergroup_group_lag{topic="platform.inventory.events", group="connect-cyndi-1"}
+    values: 20000+0x10
+  alert_rule_test:
+  - eval_time: 15m
+    alertname: CyndiLagTooHigh
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: stage
+        app_team: data-pipeline
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/fF9U-h7Mk/cyndi?orgId=1&refresh=1m&var-datasource=crcs02ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/api-resource/ns/xjoin-stage/cyndi.cloud.redhat.com~v1alpha1~CyndiPipeline/instances"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/cyndi/CyndiLagTooHigh.rst"
+        message: "Consumer lag for  reached 20000 messages (limit is 10000)"
+
+# CyndiErrorDLQ
+- interval: 1m
+  input_series:
+  - series: kafka_server_brokertopicmetrics_messagesin_total{kubernetes_namespace="platform-mq-stage", topic="platform.cyndi.dlq"}
+    values: 1+1x6
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: CyndiErrorDLQ
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: stage
+        app_team: data-pipeline
+        kubernetes_namespace: platform-mq-stage
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/fF9U-h7Mk/cyndi?orgId=1&refresh=1m&var-datasource=crcs02ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/api-resource/ns/xjoin-stage/cyndi.cloud.redhat.com~v1alpha1~CyndiPipeline/instances"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/cyndi/CyndiErrorDLQ.rst"
+        message: "5 new messages written to DLQ topic"
+
+# CyndiNoRunningConnectors
+- interval: 1m
+  input_series:
+  - series: kafka_connect_worker_connector_running_task_count{connector="cyndi-test"}
+    values: 0+0x6
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: CyndiNoRunningConnectors
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: stage
+        app_team: data-pipeline
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/fF9U-h7Mk/cyndi?orgId=1&refresh=1m&var-datasource=crcs02ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/api-resource/ns/xjoin-stage/cyndi.cloud.redhat.com~v1alpha1~CyndiPipeline/instances"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/cyndi/CyndiNoRunningConnectors.rst"
+        message: "No connectors are running for "
+
+# CyndiPipelineNotValid
+- interval: 1m
+  input_series:
+  - series: cyndi_inconsistency_ratio{app="test"}
+    values: 11+0x40
+  - series: cyndi_inconsistency_threshold{app="test"}
+    values: 10+0x40
+  alert_rule_test:
+  - eval_time: 30m
+    alertname: CyndiPipelineNotValid
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: stage
+        app_team: data-pipeline
+        app: test
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/fF9U-h7Mk/cyndi?orgId=1&refresh=1m&var-datasource=crcs02ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/api-resource/ns/xjoin-stage/cyndi.cloud.redhat.com~v1alpha1~CyndiPipeline/instances"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/cyndi/CyndiPipelineNotValid.rst"
+        message: "Cyndi Pipeline for test is not valid. Inconsistency ratio reached 11"
+
+# CyndiPipelineRefreshing
+- interval: 1m
+  input_series:
+  - series: cyndi_refresh_total{app="test"}
+    values: 1+1x181
+  alert_rule_test:
+  - eval_time: 4h
+    alertname: CyndiPipelineRefreshing
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: stage
+        app_team: data-pipeline
+        app: test
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/fF9U-h7Mk/cyndi?orgId=1&refresh=1m&var-datasource=crcs02ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/api-resource/ns/xjoin-stage/cyndi.cloud.redhat.com~v1alpha1~CyndiPipeline/instances"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/cyndi/CyndiPipelineRefreshing.rst"
+        message: "Cyndi Pipeline for test is being refreshed too often (1.5 times within past 5 hours)"
