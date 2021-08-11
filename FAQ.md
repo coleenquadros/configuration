@@ -8,19 +8,19 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
 
 - [Can you merge my MR?](#can-you-merge-my-mr)
 - [Contacting AppSRE](#contacting-appsre)
-- [How can I get access to X](#how-can-i-get-access-to-x)
+- [How can I get access to X?](#how-can-i-get-access-to-x)
 - [I can not access X](#i-can-not-access-x)
+- [I need help with something AWS related](#i-need-help-with-something-aws-related)
 - [I can not access ci-ext](#i-can-not-access-ci-ext)
 - [Tagging options in app-interface](#tagging-options-in-app-interface)
 - [Gating production promotions in app-interface](#gating-production-promotions-in-app-interface)
 - [Get access to cluster logs via Log Forwarding](#get-access-to-cluster-logs-via-log-forwarding)
-- [What is the Console or Prometheus URL for a service](#what-is-the-console-or-prometheus-url-for-a-service)
-- [Can you restart my pods](#can-you-restart-my-pods)
+- [What is the Console or Prometheus URL for a service?](#what-is-the-console-or-prometheus-url-for-a-service)
+- [Can you restart my pods?](#can-you-restart-my-pods)
 - [Delete target from SaaS file](#delete-target-from-saas-file)
 - [Jenkins is going to shut down](#jenkins-is-going-to-shutdown)
-- [How can I make my PR check job run concurrently](#how-can-i-make-my-pr-check-job-run-concurrently)
-- [How can I see who has access to a service](#how-can-i-see-who-has-access-to-a-service)
-- [How to determine my AWS permissions](#how-to-determine-my-aws-permissions)
+- [How can I make my PR check job run concurrently?](#how-can-i-make-my-pr-check-job-run-concurrently)
+- [How can I see who has access to a service?](#how-can-i-see-who-has-access-to-a-service)
 - [Accessing DataHub](#accessing-datahub)
 - [Jenkins Vault plugin upgrade](#jenkins-vault-plugin-upgrade)
 
@@ -49,7 +49,7 @@ If you have an urgent matter affecting production that needs to be addressed as 
 - Ping `@app-sre-emea` or `@app-sre-nasa` depending on the time of the day.
 - If you get no response, and if it's truly critical follow the [Paging AppSRE team](docs/app-sre/paging-appsre-oncall.md) guide.
 
-### How can I get access to X
+### How can I get access to X?
 
 Start by accessing the Visual App-Interface at https://visual-app-interface.devshift.net.  Using the side bar, navigate to the [Permissions](https://visual-app-interface.devshift.net/permissions) section.
 
@@ -63,6 +63,10 @@ This may be caused due to several reasons. Follow this procedure:
 
 1. Follow the "How can I get access to X" story and make sure you are assigned a role that enables the desired access.
 2. Be sure to accept the GitHub invitation at https://github.com/app-sre
+
+### I need help with something AWS related
+
+Please check our [AWS docs](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/aws).
 
 ### I can not access ci-ext
 
@@ -112,7 +116,7 @@ To get access to CloudWatch on a cluster's AWS account, follow these steps (exam
 1. In the Switch Role page, select a name for this role (suggestion: `<cluster_name>-read-only`) and click "Switch Role" (Account and Role should be filled automatically).
 1. You are now logged in to the cluster's AWS account. Go to the [CloudWatch console](https://console.aws.amazon.com/cloudwatch/home?#logsV2:log-groups) and get your logs!
 
-### What is the Console or Prometheus URL for a service
+### What is the Console or Prometheus URL for a service?
 
 Start by accessing the Visual App-Interface at https://visual-app-interface.devshift.net.  Using the side bar, navigate to the [Services](https://visual-app-interface.devshift.net/services) section.
 
@@ -128,7 +132,7 @@ Choosing the namespace will take you to the namespace's page, in which you can f
 
 In the Cluster page, you can find links to the cluster's Console and to the cluster's Prometheus.
 
-### Can you restart my pods
+### Can you restart my pods?
 
 There are a couple of choices depending on the state of onboarding the service is in currently
 [here](https://visual-app-interface.devshift.net/services)
@@ -194,21 +198,9 @@ Choosing a role will take you to the Role's page, in which you can view a list o
 
 The users in this page are granted a `view` permission in the `telemeter-production` namespace through the `dev` role.
 
-### How to determine my AWS permissions
-
-Your user file contains a list of `roles`. Each AWS related role contains a list of AWS groups and/or AWS user policies.
-To determine what are your permissions, follow the `$ref` to the AWS group or user policy, and read the description field.
-
-For example:
-
-The role `/teams/devtools/roles/f8a-dev-osio-dev.yml` leads to the [corresponding role file](/data/teams/devtools/roles/f8a-dev-osio-dev.yml).
-This role file has the user policy `/aws/osio-dev/policies/OwnResourcesFullAccess.yml`, which leads to the [corresponding user policy file](/data/aws/osio-dev/policies/OwnResourcesFullAccess.yml).
-This user policy file a description, which explains the permissions allowed by this user policy.
-
 ### Accessing DataHub
 
 DataHub is not managed by the AppSRE team, but you can find the process to [request access here](https://help.datahub.redhat.com/docs/interacting-with-telemetry-data). To report issues with Datahub (ex: timeouts with telemeter-lts-dashboards.datahub.redhat.com) see [this help page](https://help.datahub.redhat.com/docs/data-hub-report-issues) or reach out to [#forum-telemetry](https://coreos.slack.com/messages/forum-telemetry) on Slack for additional info.
-
 
 ### Jenkins Vault plugin upgrade
 
