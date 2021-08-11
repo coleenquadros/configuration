@@ -5,7 +5,9 @@ labels:
   service: hive
 
 name: saas-hive
-description: SaaS tracking file for Hive
+description: SaaS tracking file for Hive (direct deployments)
+
+clusterAdmin: true
 
 app:
   $ref: /services/hive/app.yml
@@ -19,13 +21,20 @@ slack:
   channel: team-hive-info
 
 managedResourceTypes:
-- CatalogSource
 - ConfigMap
-- OperatorGroup
-- Subscription
+- CustomResourceDefinition
+- ServiceAccount
+- ClusterRole
+- ClusterRoleBinding
+- Deployment
 
 imagePatterns:
-- quay.io/app-sre/hive-registry
+- quay.io/app-sre/hive
+
+# ADDING NEW SHARDS:
+# - Update data/openshift/$SHARD/cluster.yml file like 7aa095b did
+# - Delete the OLM deployment by adding `delete: true` to the env in
+#   saas-hive-olm.yaml (not by deleting the stanza).
 
 resourceTemplates:
 - name: hive-additional-install-log-regexes
@@ -39,73 +48,16 @@ resourceTemplates:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: openshift-hive-gh-build-master
-  - namespace:
-      $ref: /services/hive/namespaces/hive-stage-01/hive-stage.yml
-    ref: master
-    upstream:
-      instance:
-        $ref: /dependencies/ci-int/ci-int.yml
-      name: openshift-hive-gh-build-master
-  - namespace:
-      $ref: /services/hive/namespaces/hives02ue1/hive-stage.yml
-    ref: master
-    upstream:
-      instance:
-        $ref: /dependencies/ci-int/ci-int.yml
-      name: openshift-hive-gh-build-master
-  - namespace:
-      $ref: /services/hive/namespaces/ssotest01ue1/hive-stage.yml
-    ref: master
-    upstream:
-      instance:
-        $ref: /dependencies/ci-int/ci-int.yml
-      name: openshift-hive-gh-build-master
 
 - name: hive
   url: https://github.com/openshift/hive
-  path: /hack/olm-registry/olm-artifacts-template.yaml
+  path: /hack/app-sre/saas-template.yaml
   parameters:
-    REGISTRY_IMG: quay.io/app-sre/hive-registry
+    REGISTRY_IMG: quay.io/app-sre/hive
     ADDITIONAL_CERTIFICATE_AUTHORITY: letsencrypt-ca
   targets:
   - namespace:
       $ref: /services/hive/namespaces/hivei01ue1/hive-integration.yml
-    ref: master
-    upstream:
-      instance:
-        $ref: /dependencies/ci-int/ci-int.yml
-      name: openshift-hive-gh-build-master
-  - namespace:
-      $ref: /services/hive/namespaces/hive-stage-01/hive-stage.yml
-    ref: master
-    upstream:
-      instance:
-        $ref: /dependencies/ci-int/ci-int.yml
-      name: openshift-hive-gh-build-master
-  - namespace:
-      $ref: /services/hive/namespaces/hives02ue1/hive-stage.yml
-    ref: master
-    upstream:
-      instance:
-        $ref: /dependencies/ci-int/ci-int.yml
-      name: openshift-hive-gh-build-master
-  - namespace:
-      $ref: /services/hive/namespaces/hivep01ue1/hive-production.yml
-    ref: aad9706a13e0eb163231fe10a79dc239246a16a6
-  - namespace:
-      $ref: /services/hive/namespaces/hivep02ue1/hive-production.yml
-    ref: aad9706a13e0eb163231fe10a79dc239246a16a6
-  - namespace:
-      $ref: /services/hive/namespaces/hivep03uw1/hive-production.yml
-    ref: aad9706a13e0eb163231fe10a79dc239246a16a6
-  - namespace:
-      $ref: /services/hive/namespaces/hivep04ew2/hive-production.yml
-    ref: aad9706a13e0eb163231fe10a79dc239246a16a6
-  - namespace:
-      $ref: /services/hive/namespaces/hivep05ue1/hive-production.yml
-    ref: aad9706a13e0eb163231fe10a79dc239246a16a6
-  - namespace:
-      $ref: /services/hive/namespaces/ssotest01ue1/hive-stage.yml
     ref: master
     upstream:
       instance:

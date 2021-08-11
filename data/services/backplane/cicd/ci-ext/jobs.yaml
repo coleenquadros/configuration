@@ -1,0 +1,33 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+labels:
+  service: managed-scripts
+
+name: managed-scripts
+
+description: 'Builds the backplane-managed-scripts image'
+
+app:
+  $ref: /services/backplane/app.yaml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+type: jobs
+
+config:
+- project:
+    name: backplane-managed-scripts
+    label: managed-scripts
+    node: backplane
+    gh_org: openshift
+    gh_repo: managed-scripts
+    quay_org: app-sre
+    pr_check_script_path: './hack/app_sre_pr_check.sh'
+    build_deploy_script_path: './hack/app_sre_build_deploy.sh'
+    jobs:
+      - 'gh-build-master':
+          display_name: managed-scripts build master
+      - 'gh-pr-check':
+          display_name: managed-scripts pr-check
