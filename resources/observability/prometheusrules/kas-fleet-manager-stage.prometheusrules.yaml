@@ -22,3 +22,13 @@ spec:
       labels:
         service: kas-fleet-manager
         severity: high
+    - alert: ObservatoriumNon200Status - stage
+      annotations:
+        message: "Kas fleet manager in namespace {{ $labels.namespace }} is receiving status codes other than 2xx from Observatorium."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop/observatorium-status-code.md"
+      expr: |
+       increase(kas_fleet_manager_observatorium_request_count{pod=~"kas-fleet-manager.*",namespace="managed-services-stage", code!="200"}[1m])>0
+      for: 5m
+      labels:
+        service: kas-fleet-manager
+        severity: critical           
