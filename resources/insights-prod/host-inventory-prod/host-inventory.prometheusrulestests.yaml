@@ -1,0 +1,87 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /insights-prod/host-inventory-prod/host-inventory.prometheusrules.yaml
+
+evaluation_interval: 10m
+
+tests:
+- interval: 30s
+  input_series:
+  - series: up{namespace="host-inventory-prod", service="host-inventory-service"}
+    values: '0+0x20'
+  alert_rule_test:
+  - eval_time: 10m
+    alertname: App-host-inventory-service-In-host-inventory-prod-Absent
+    exp_alerts:
+    - exp_labels:
+        severity: critical
+        service: insights
+        env: prod
+        app_team: platform
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/host-inventory-prod/deployments"
+        message: "Host inventory pods are missing in production"
+        runbook: "https://clouddot.pages.redhat.com/docs/dev/developer-references/sop/inventory.html"
+
+- interval: 1m
+  input_series:
+  - series: api_3scale_gateway_api_status{status="5xx",exported_service="inventory"}
+    values: 0+1x30
+  - series: api_3scale_gateway_api_status{exported_service="inventory"}
+    values: 100+0x30
+  alert_rule_test:
+  - eval_time: 30m
+    alertname: InsightsInventoryErrorRateProd
+    exp_alerts:
+    - exp_labels:
+        severity: critical
+        service: insights
+        env: prod
+        app_team: platform
+      exp_annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcp01ue1-prometheus
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/host-inventory-prod/deployments"
+        message: "Insights Inventory Alert (Prod). Insights Inventory error rate > 10% for 5 minutes"
+
+
+- interval: 30s
+  input_series:
+  - series: inventory_ingress_message_handler_failures_total
+    values: 0+20x20
+  alert_rule_test:
+  - eval_time: 10m
+    alertname: InventoryMqHandlerErrorsCritical
+    exp_alerts:
+    - exp_labels:
+        severity: high # Upgrade to critical after validation
+        service: insights
+        env: prod
+        app_team: platform
+      exp_annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcp01ue1-prometheus
+        link_url: "https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(columns:!(_source),filters:!(),index:'43c5fed0-d5ce-11ea-b58c-a7c95afd7a5d',interval:auto,query:(language:lucene,query:'@log_stream:%20%22host-inventory-mq%22%20AND%20levelname:%20ERROR%20AND%20msg:%20%22Unable%20to%20process%20message%22'),sort:!(!('@timestamp',desc)))"
+        message: "HBI Prod consumer error rate critically high"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/host-inventory/App-insights-inventory-In-platform-prod-Mq-Errors.rst"
+
+- interval: 30s
+  input_series:
+  - series: inventory_ingress_add_host_successes_total{namespace="host-inventory-prod"}
+    values: 0+0x60
+  alert_rule_test:
+  - eval_time: 30m
+    alertname: InventoryMqNotProcessingCritical
+    exp_alerts:
+    - exp_labels:
+        severity: high # Upgrade to critical after validation
+        service: insights
+        env: prod
+        namespace: host-inventory-prod
+        app_team: platform
+      exp_annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcp01ue1-prometheus
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/host-inventory-prod/deployments/host-inventory-mq-pmin"
+        message: "HBI Prod consumer not processing (0 messages processed in last 30 minutes)"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/host-inventory/App-insights-inventory-In-platform-prod-Mq-Not-Processing.rst"
