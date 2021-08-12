@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: strimzi
@@ -11,25 +11,16 @@ description: strimzi
 app:
   $ref: /services/insights/strimzi/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
 
-timeout: 5
-
 managedResourceTypes:
-- Kafka
-- KafkaTopic
-- KafkaUser
 - KafkaConnect
-- KafkaConnector
-- ConfigMap
-- Service
-- Deployment
 
 imagePatterns:
 - quay.io/cloudservices
@@ -41,58 +32,6 @@ authentication:
     field: openshift-saas-deploy
 
 resourceTemplates:
-- name: strimzi
-  path: /deploys/openshift/amq-streams.yaml
-  url: https://github.com/RedHatInsights/platform-mq
-  parameters:
-    ZK_VOL_SIZE: 50Gi
-  targets:
-  - namespace:
-      $ref: /services/insights/strimzi/namespaces/stage-platform-mq-stage.yml
-    ref: master
-    parameters:
-      KAFKA_CPU_REQUESTS: 1
-      KAFKA_CPU_LIMITS: 3
-      KAFKA_MEMORY_REQUESTS: 12Gi
-      KAFKA_MEMORY_LIMITS: 20Gi
-      KAFKA_NUM_REPLICAS: 3
-      KAFKA_HEAP_OPTS_XMS: 6g
-      KAFKA_HEAP_OPTS_XMX: 6g
-      KAFKA_VOL_SIZE: 450Gi
-  - namespace:
-      $ref: /services/insights/strimzi/namespaces/platform-mq-prod.yml
-    ref: a3bca905ceafe8696a5222711365d4f7b7f4f6b4
-    parameters:
-      KAFKA_CPU_REQUESTS: 2
-      KAFKA_CPU_LIMITS: 4
-      KAFKA_MEMORY_REQUESTS: 24Gi
-      KAFKA_MEMORY_LIMITS: 24Gi
-      KAFKA_NUM_REPLICAS: 3
-      KAFKA_HEAP_OPTS_XMS: 6g
-      KAFKA_HEAP_OPTS_XMX: 6g
-      KAFKA_VOL_SIZE: 600Gi
-- name: kafka-topics
-  path: /deploys/openshift/kafka-topics.yaml
-  url: https://github.com/RedHatInsights/platform-mq
-  parameters:
-    KAFKA_CLUSTER: platform-mq
-  targets:
-  - namespace:
-      $ref: /services/insights/strimzi/namespaces/stage-platform-mq-stage.yml
-    ref: master
-  - namespace:
-      $ref: /services/insights/strimzi/namespaces/platform-mq-prod.yml
-    ref: e6e95f3bef4729eaabdef70aaa27a7f52dc5c114
-- name: kafka-metrics
-  path: /deploys/openshift/kafka-metrics-configmap.yaml
-  url: https://github.com/RedHatInsights/platform-mq
-  targets:
-  - namespace:
-      $ref: /services/insights/strimzi/namespaces/stage-platform-mq-stage.yml
-    ref: master
-  - namespace:
-      $ref: /services/insights/strimzi/namespaces/platform-mq-prod.yml
-    ref: 22ab8cdeaa1b5275731da5512784bf8f43f5939b
 - name: kafka-connect
   path: /deploys/openshift/kafka-connect.yaml
   url: https://github.com/RedHatInsights/platform-mq
@@ -104,53 +43,14 @@ resourceTemplates:
     ref: master
     parameters:
       BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9093
-- name: kafka-connector
-  path: /deploys/openshift/kafka-connectors.yaml
+- name: kafka-connect
+  path: /deploys/openshift/kafka-connect.yaml
   url: https://github.com/RedHatInsights/platform-mq
   parameters:
-    S3_SINK_TOPICS: platform.insights.client-metrics
-    S3_SINK_BUCKET_NAME: insights-client-metrics-stage
-    S3_SINK_CONNECTOR_NAME: client-metrics-sink-stage
+      KAFKA_CONNECT_IMAGE: quay.io/cloudservices/kafka-connect
   targets:
-  - namespace:
-      $ref: /services/insights/strimzi/namespaces/stage-platform-mq-stage.yml
-    ref: master
-- name: prometheus-kafka-consumer-group-exporter
-  hash_length: 7
-  path: /openshift.yaml
-  url: https://github.com/RedHatInsights/prometheus-kafka-consumer-group-exporter
-  targets:
-  - namespace:
-      $ref: /services/insights/strimzi/namespaces/stage-platform-mq-stage.yml
-    ref: master
-    parameters:
-      BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9092
-      AUTO_OFFSET_RESET: latest
-      GROUP_ID: lag_exporter_stage
-      IMAGE: quay.io/app-sre/prometheus-kafka-consumer-group-exporter
-- name: lightbend-lag-exporter
-  path: /deploys/openshift/lightbend-lag-exporter.yaml
-  url: https://github.com/RedHatInsights/platform-mq
-  targets:
-  - namespace:
-      $ref: /services/insights/strimzi/namespaces/platform-mq-fedramp-stage.yml
-    ref: master
-    parameters:
-      APPSRE_ENV: stage
-  - namespace:
-      $ref: /services/insights/strimzi/namespaces/stage-platform-mq-stage.yml
-    ref: master
-    parameters:
-      APPSRE_ENV: stage
   - namespace:
       $ref: /services/insights/strimzi/namespaces/platform-mq-prod.yml
-    ref: 02e00cd3789683b21f4add657c5cf367014b0fa4
+    ref: 4002fea9c157a3b4209651e57cb7c082cc5448f6
     parameters:
-      APPSRE_ENV: prod
-- name: kafka-superuser
-  path: /deploys/superuser.yaml
-  url: https://github.com/RedHatInsights/platform-mq
-  targets:
-  - namespace:
-      $ref: /services/insights/strimzi/namespaces/platform-mq-fedramp-stage.yml
-    ref: master
+      BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9093

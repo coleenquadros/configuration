@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: quarkus
@@ -10,8 +10,8 @@ description: 'SaaS tracking file for Quarkus Red Hat'
 app:
   $ref: /services/quarkus/app.yml
 
-instance:
-  $ref: /dependencies/ci-ext/ci-ext.yml
+pipelinesProvider:
+  $ref: /services/quarkus/pipelines/tekton.code-quarkus-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
@@ -36,7 +36,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/quarkus/namespaces/code-quarkus-redhat-stage.yml
     ref: main
-    upstream: redhat-developer-code.quarkus.redhat.com-gh-build-main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: redhat-developer-code.quarkus.redhat.com-gh-build-main
     parameters:
       REPLICAS: 1
       IO_QUARKUS_CODE_HOSTNAME: code.quarkus.stage.redhat.com
@@ -46,7 +49,7 @@ resourceTemplates:
       IO_QUARKUS_CODE_GA_EXTENSION_QUANTITY_INDEX: 8
   - namespace:
       $ref: /services/quarkus/namespaces/code-quarkus-redhat-production.yml
-    ref: f589f857a9a5ef489970036271914dc5fd8e705a
+    ref: 36ae52d6dbb454487cdc5c8df0a1b0e5bbea882f
     parameters:
       REPLICAS: 3
       IO_QUARKUS_CODE_HOSTNAME: code.quarkus.redhat.com

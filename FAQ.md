@@ -6,19 +6,21 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
 
 ## ToC
 
+- [Can you merge my MR?](#can-you-merge-my-mr)
 - [Contacting AppSRE](#contacting-appsre)
-- [How can I get access to X](#how-can-i-get-access-to-x)
+- [How can I get access to X?](#how-can-i-get-access-to-x)
 - [I can not access X](#i-can-not-access-x)
+- [I need help with something AWS related](#i-need-help-with-something-aws-related)
 - [I can not access ci-ext](#i-can-not-access-ci-ext)
 - [Tagging options in app-interface](#tagging-options-in-app-interface)
 - [Gating production promotions in app-interface](#gating-production-promotions-in-app-interface)
 - [Get access to cluster logs via Log Forwarding](#get-access-to-cluster-logs-via-log-forwarding)
-- [What is the Console or Kibana URL for a service](#what-is-the-console-or-kibana-url-for-a-service)
-- [Can you restart my pods](#can-you-restart-my-pods)
+- [What is the Console or Prometheus URL for a service?](#what-is-the-console-or-prometheus-url-for-a-service)
+- [Can you restart my pods?](#can-you-restart-my-pods)
+- [Delete target from SaaS file](#delete-target-from-saas-file)
 - [Jenkins is going to shut down](#jenkins-is-going-to-shutdown)
-- [How can I make my PR check job run concurrently](#how-can-i-make-my-pr-check-job-run-concurrently)
-- [How can I see who has access to a service](#how-can-i-see-who-has-access-to-a-service)
-- [How to determine my AWS permissions](#how-to-determine-my-aws-permissions)
+- [How can I make my PR check job run concurrently?](#how-can-i-make-my-pr-check-job-run-concurrently)
+- [How can I see who has access to a service?](#how-can-i-see-who-has-access-to-a-service)
 - [Accessing DataHub](#accessing-datahub)
 - [Jenkins Vault plugin upgrade](#jenkins-vault-plugin-upgrade)
 
@@ -27,6 +29,12 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
 - [Visual App-Interface](https://visual-app-interface.devshift.net)
 
 ## Topics
+
+### Can you merge my MR
+
+The App-SRE IC (interrupt catcher) periodically reviews the MRs in the app-interface repository. There is no need to ping us to let us know you've opened a MR.
+
+If your MR is urgent or time sensitive requests, see [contacting AppSRE](#contacting-appsre)
 
 ### Contacting AppSRE
 
@@ -41,7 +49,7 @@ If you have an urgent matter affecting production that needs to be addressed as 
 - Ping `@app-sre-emea` or `@app-sre-nasa` depending on the time of the day.
 - If you get no response, and if it's truly critical follow the [Paging AppSRE team](docs/app-sre/paging-appsre-oncall.md) guide.
 
-### How can I get access to X
+### How can I get access to X?
 
 Start by accessing the Visual App-Interface at https://visual-app-interface.devshift.net.  Using the side bar, navigate to the [Permissions](https://visual-app-interface.devshift.net/permissions) section.
 
@@ -55,6 +63,10 @@ This may be caused due to several reasons. Follow this procedure:
 
 1. Follow the "How can I get access to X" story and make sure you are assigned a role that enables the desired access.
 2. Be sure to accept the GitHub invitation at https://github.com/app-sre
+
+### I need help with something AWS related
+
+Please check our [AWS docs](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/aws).
 
 ### I can not access ci-ext
 
@@ -88,16 +100,15 @@ To gate production promotions, follow these steps:
 
 ### Get access to cluster logs via Log Forwarding
 
-The App SRE logging stack is currently an EFK (ElasticSearch, Fluentd, Kibana) stack installed on each cluster.
-
-We are starting a migration towards a Log Forwarding solution, in which all logs from a cluster will be forwarded to AWS CloudWatch on the cluster's AWS account.
+The App SRE team uses the CloudWatch Log Forwarding Addon to forward Application and Infra logs to AWS CloudWatch on the cluster's AWS account.
 
 To get access to CloudWatch on a cluster's AWS account, follow these steps (examples for `app-sre-stage-01`):
 
 1. Submit a MR to app-interface to add the [log-consumer](https://gitlab.cee.redhat.com/service/app-interface/-/blob/f0ca82a2253b4c213c8b438408f68113a662d6c1/data/aws/app-sre/roles/log-consumer.yml) role to your user file. You will also need to [add your public GPG key](https://gitlab.cee.redhat.com/service/app-interface#adding-your-public-gpg-key) (if you havn't already) in the same MR.
-    * For cloud.redhat.com use the [log-consumer-crc](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre/roles/log-consumer-crc.yml) role.
+    * For console.redhat.com use the [log-consumer-crc](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre/roles/log-consumer-crc.yml) role.
 1. Once the MR is merged you will get an email invitation to join the AWS account (in this example - the `app-sre` account). Follow the instructions in the email to login to the account.
     * Note: in case you did not get an invitation, the login details can be obtained from the [Terraform-users Credentials](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/terraform-users-credentials.md) page.
+    * Note: to decrypt the password: `echo <password> | base64 -d | gpg -d - && echo` (you will be asked to provide your passphrase to unlock the secret) 
 1. Once you are logged in, go to [Security Credentials page](https://console.aws.amazon.com/iam/home?#/security_credentials) and enable Multi-factor authentication (MFA).
 1. Logout and login to the account again using the configured MFA device.
 1. Once you are logged in, navigate to the Switch Role link obtained from the [ocm-aws-infrastructure-access-switch-role-links](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/ocm-aws-infrastructure-access-switch-role-links.md) page (suggestion: add to bookmarks).
@@ -105,7 +116,7 @@ To get access to CloudWatch on a cluster's AWS account, follow these steps (exam
 1. In the Switch Role page, select a name for this role (suggestion: `<cluster_name>-read-only`) and click "Switch Role" (Account and Role should be filled automatically).
 1. You are now logged in to the cluster's AWS account. Go to the [CloudWatch console](https://console.aws.amazon.com/cloudwatch/home?#logsV2:log-groups) and get your logs!
 
-### What is the Console or Kibana URL for a service
+### What is the Console or Prometheus URL for a service?
 
 Start by accessing the Visual App-Interface at https://visual-app-interface.devshift.net.  Using the side bar, navigate to the [Services](https://visual-app-interface.devshift.net/services) section.
 
@@ -115,13 +126,13 @@ Choosing the service will take you to the the service's page, in which you can v
 - `cincinnati-production`
 - `cincinnati-stage`
 
-Choose the namespace for which you would like to find the Console/Kibana URL. For this example, choose [cincinnati-stage](https://visual-app-interface.devshift.net/namespaces#/services/cincinnati/namespaces/cincinnati-stage.yml).
+Choose the namespace for which you would like to find the Console/Prometheus URL. For this example, choose [cincinnati-stage](https://visual-app-interface.devshift.net/namespaces#/services/cincinnati/namespaces/cincinnati-stage.yml).
 
 Choosing the namespace will take you to the namespace's page, in which you can find a link to the cluster running this namespace.
 
-In the Cluster page, you can find links to the cluster's Console and to the cluster's Kibana.
+In the Cluster page, you can find links to the cluster's Console and to the cluster's Prometheus.
 
-### Can you restart my pods
+### Can you restart my pods?
 
 There are a couple of choices depending on the state of onboarding the service is in currently
 [here](https://visual-app-interface.devshift.net/services)
@@ -146,6 +157,12 @@ Now that the fire is out, please work towards not having to do this again. The s
 1. A dependency of the pod is not responding (example: Kafka). You may want to consider using Kubernetes health probes. We can highly recommend:
 A liveness probe that checks your container's health thoroughly; on a liveness probe failure, Kubernetes restarts the container. A readiness probe that takes a container out of service if it is not healthy.
 2. A new version of a Secret/ConfigMap has been rolled out. You may use the `qontract.recycle: "true"` annotation to indicate that any pods using these resources should be restarted upon update. More information [here](/README.md#manage-openshift-resources-via-app-interface-openshiftnamespace-1yml).
+
+### Delete target from SaaS file
+
+To delete a target from a SaaS file, set `delete: true` in the target you wish to delete. This will cause all associated resources to be deleted in the next deployment. Follow this up with another MR to delete the target from the SaaS file.
+
+More information: [Continuous Delivery in App-interface](/docs/app-sre/continuous-delivery-in-app-interface.md)
 
 ### Jenkins is going to shutdown
 
@@ -181,21 +198,9 @@ Choosing a role will take you to the Role's page, in which you can view a list o
 
 The users in this page are granted a `view` permission in the `telemeter-production` namespace through the `dev` role.
 
-### How to determine my AWS permissions
-
-Your user file contains a list of `roles`. Each AWS related role contains a list of AWS groups and/or AWS user policies.
-To determine what are your permissions, follow the `$ref` to the AWS group or user policy, and read the description field.
-
-For example:
-
-The role `/teams/devtools/roles/f8a-dev-osio-dev.yml` leads to the [corresponding role file](/data/teams/devtools/roles/f8a-dev-osio-dev.yml).
-This role file has the user policy `/aws/osio-dev/policies/OwnResourcesFullAccess.yml`, which leads to the [corresponding user policy file](/data/aws/osio-dev/policies/OwnResourcesFullAccess.yml).
-This user policy file a description, which explains the permissions allowed by this user policy.
-
 ### Accessing DataHub
 
 DataHub is not managed by the AppSRE team, but you can find the process to [request access here](https://help.datahub.redhat.com/docs/interacting-with-telemetry-data). To report issues with Datahub (ex: timeouts with telemeter-lts-dashboards.datahub.redhat.com) see [this help page](https://help.datahub.redhat.com/docs/data-hub-report-issues) or reach out to [#forum-telemetry](https://coreos.slack.com/messages/forum-telemetry) on Slack for additional info.
-
 
 ### Jenkins Vault plugin upgrade
 
@@ -206,3 +211,7 @@ As a result from this upgrade, jobs may fail due to not being able to read secre
 In case of any other issues, please reach out to @app-sre-ic on #sd-app-sre in CoreOS slack.
 
 Related Jira ticket: https://issues.redhat.com/browse/APPSRE-947
+
+### I didn't receive my invite for the Github organization
+
+Check your mailbox! It should be there! If not, ask the IC to review [the AppSRE organization](https://github.com/orgs/app-sre/people) and see if your invite is pending or failed. They can cancel the pending invite and send a new one to you.

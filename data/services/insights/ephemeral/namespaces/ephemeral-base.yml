@@ -22,10 +22,13 @@ managedResourceTypes:
 - ServiceAccount
 - Role
 - RoleBinding
+- Secret
 
 openshiftResources:
 - provider: resource
   path: /insights-ephemeral/ephemeral-bot.serviceaccount.yaml
+- provider: resource
+  path: /insights-ephemeral/iqe-mr-check-bot.serviceaccount.yaml
 - provider: vault-secret
   path: insights/secrets/global/rh-registry-pull
   version: 2
@@ -41,6 +44,9 @@ openshiftResources:
   version: 3
   type: kubernetes.io/dockerconfigjson
   name: quay-cloudservices-pull
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-common/iqe-vault.secret.yaml
 
 # allows labelling of namespaces
 - provider: resource
@@ -59,7 +65,7 @@ openshiftResources:
   version: 1
 - provider: vault-secret
   path: insights/secrets/ephemeral/3scale/apicast-insights-3scale-config
-  version: 7
+  version: 9
 - provider: vault-secret
   path: insights/secrets/ephemeral/3scale/apicast-insights-services-ephemeral-jwt-pub-key
   version: 2
@@ -72,3 +78,28 @@ openshiftResources:
   path: insights/secrets/ephemeral/rhsm-api-proxy/proxy-client-tls
   name: rhsm-api-proxy-client-tls
   version: 1
+
+# vulnerability
+- provider: vault-secret
+  path: insights/secrets/insights-stage/vulnerability-engine-stage/github-vulnerability-bot
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+
+# drift
+- provider: vault-secret
+  path: insights/secrets/insights-dev/drift-ci/drift-interpod-comms
+  name: drift-interpod-comms
+  version: 2
+
+# hccm (cost-management)
+- provider: vault-secret
+  path: insights/secrets/ephemeral/hccm/koku-aws
+  version: 2
+  annotations:
+    bonfire.ignore: "true"
+- provider: vault-secret
+  path: insights/secrets/ephemeral/hccm/koku-gcp
+  version: 1
+  annotations:
+    bonfire.ignore: "true"

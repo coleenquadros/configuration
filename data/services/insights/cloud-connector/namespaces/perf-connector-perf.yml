@@ -1,0 +1,65 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: cloud-connector
+
+name: cloud-connector-perf
+description: Namespace where cloud-connector resources are deployed
+
+cluster:
+  $ref: /openshift/insights/cluster-insights-perf.yml
+
+app:
+  $ref: /services/insights/cloud-connector/app.yml
+
+environment:
+  $ref: /products/insights/environments/perf.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-perf/shared/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
+  path: insights/secrets/insights-dev/cloud-connector-perf/cloud-connector-psks
+  version: 2
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-dev/cloud-connector-perf/cloud-connector-mqtt-credentials
+  version: 2
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-perf
+  identifier: cloud-connector-perf
+  defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+- provider: rds
+  account: insights-perf
+  identifier: cloud-connector-perf
+  defaults: /terraform/resources/insights/perf/rds/postgres12-rds-1.yml
+  overrides:
+    username: insights
+    allocated_storage: 20
+    name: insights
+  parameter_group: /terraform/resources/insights/perf/rds/postgres12-parameter-group-cloud-connector-perf.yml
+  output_resource_name: cloud-connector-db
+  enhanced_monitoring: true

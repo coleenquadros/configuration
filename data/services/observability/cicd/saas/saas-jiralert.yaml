@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: app-sre-observability
@@ -10,8 +10,8 @@ description: saas-jiralert
 app:
   $ref: /services/observability/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
@@ -33,22 +33,14 @@ resourceTemplates:
   path: /openshift/jiralert.template.yaml
   url: https://gitlab.cee.redhat.com/service/app-sre-observability
   parameters:
-      NAME: "jiralert"
-      APPLICATION_PORT: "9091"
+    IMAGE_GATE_TAG: bfa0da9
+    IMAGE_TAG: 1.1-rc1
   targets:
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-stage.yml
     ref: master
     parameters:
-      IMAGE: "quay.io/app-sre/jiralert"
-      IMAGE_TAG: 1.1-rc1
-      LOG_LEVEL: info
       REPLICAS: 1
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: 809e7aee345ef5f2b912a4163d5b5cc22ba9f693
-    parameters:
-      IMAGE: "quay.io/app-sre/jiralert"
-      IMAGE_TAG: 1.1-rc1
-      LOG_LEVEL: info
-      REPLICAS: 3
+    ref: e59594da342697aa3dab987e7c4b3431ff76e374

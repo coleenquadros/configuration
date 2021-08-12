@@ -18,25 +18,6 @@ type: jobs
 
 config:
 - project:
-    name: uhc-clusters-service
-    label: sd-uhc
-    node: rhel8
-    gl_group: service
-    gl_project: uhc-clusters-service
-    quay_org: app-sre
-    backup_ecr_push_creds_account_region: "app-sre/eu-central-1"
-    jobs:
-    - 'ocm-pr-check':
-        display_name: UHC clusters service check merge request
-        html_publisher_dir: '.'
-        concurrent_build: false
-    - 'gl-build-master':
-        display_name: UHC clusters service build master branch
-    - 'gl-build-master':
-        display_name: UHC clusters service build hotfix branch
-        branch: 'hotfix'
-
-- project:
     name: uhc-integration-tests
     label: sd-uhc
     node: rhel8
@@ -49,37 +30,15 @@ config:
         upstream: service-uhc-clusters-service-gl-build-master
 
 - project:
-    name: uhc-gateway
+    name: full-cycle-tests
     label: sd-uhc
     node: rhel8
     gl_group: service
-    gl_project: uhc-gateway
-    quay_org: app-sre
-    backup_ecr_push_creds_account_region: "app-sre/eu-central-1"
+    gl_project: uhc-clusters-service
     jobs:
-    - 'gl-pr-check':
-        display_name: UHC API gateway check merge request
-    - 'gl-build-master':
-        display_name: UHC API gateway deploy to staging
-
-- project:
-    name: uhc-account-manager
-    label: sd-uhc
-    node: sd-service-development-b
-    gl_group: service
-    gl_project: uhc-account-manager
-    quay_org: app-sre
-    backup_ecr_push_creds_account_region: "app-sre/eu-central-1"
-    jobs:
-    - 'ocm-pr-check':
-        display_name: UHC Account Manager check merge request
-        concurrent_build: true
-        timeout: 90
-    - 'gl-build-master':
-        display_name: UHC Account Manager push image
-    - 'gl-build-master':
-        display_name: UHC Account Manager push hotfix branch image
-        branch: 'hotfix'
+    - 'ocm-integration-full-cycle-tests':
+        display_name: Full Cycle Tests periodic stage
+        environment: staging
 
 - project:
     name: uhc-portal
@@ -104,46 +63,6 @@ config:
         display_name: OCM UI deploy to cloud.redhat.com (prod-stable)
         mode: stable
         branch: "stable"
-
-- project:
-    name: uhc-apache-exporter
-    label: sd-uhc
-    node: rhel8
-    gl_group: service
-    gl_project: uhc-apache-exporter
-    quay_org: app-sre
-    backup_ecr_push_creds_account_region: "app-sre/eu-central-1"
-    jobs:
-    - 'gl-pr-check':
-        display_name: UHC apache-exporter check merge request
-    - 'gl-build-master':
-        display_name: UHC apache-exporter build image
-
-- project:
-    name: uhc-portal-redirector
-    label: sd-uhc
-    node: rhel8
-    gl_group: service
-    gl_project: uhc-portal-redirector
-    quay_org: app-sre
-    backup_ecr_push_creds_account_region: "app-sre/eu-central-1"
-    jobs:
-    - 'gl-build-master':
-        display_name: UHC portal redirector deploy to staging
-
-- project:
-    name: uhc-clusters-cleaner
-    label: sd-uhc
-    node: rhel8
-    gl_group: service
-    gl_project: uhc-clusters-cleaner
-    quay_org: app-sre
-    backup_ecr_push_creds_account_region: "app-sre/eu-central-1"
-    jobs:
-    - 'gl-pr-check':
-        display_name: UHC clusters cleaner check merge request
-    - 'gl-build-master':
-        display_name: UHC clusters cleaner build master
 
 - project:
     name: ocm-resources
@@ -201,36 +120,6 @@ config:
         upstream: openshift-saas-deploy-saas-uhc-account-manager-osd-production
         ci_cmd: ./periodic_check.sh api-tests-prod https://api.openshift.com  1 1
         disable: false
-
-- project:
-    name: ocm-service-log
-    label: sd-uhc
-    node: sd-service-development-b
-    gl_group: service
-    gl_project: ocm-service-log
-    quay_org: app-sre
-    backup_ecr_push_creds_account_region: "app-sre/eu-central-1"
-    jobs:
-    - 'ocm-pr-check':
-        display_name: OCM service log check merge request
-        concurrent_build: true
-    - 'gl-build-master':
-        display_name: OCM service log build master
-
-- project:
-      name: job-queue-service
-      label: sd-uhc
-      node: sd-service-development-b
-      gl_group: service
-      gl_project: job-queue-service
-      quay_org: app-sre
-      backup_ecr_push_creds_account_region: "app-sre/eu-central-1"
-      jobs:
-      - 'ocm-pr-check':
-            display_name: Job Queue Service check merge request
-            concurrent_build: true
-      - 'gl-build-master':
-            display_name: Job Queue Service build master
 
 - project:
     name: ocm-envoy

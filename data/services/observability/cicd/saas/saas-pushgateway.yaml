@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: app-sre-observability
@@ -10,8 +10,8 @@ description: saas-pushgateway
 app:
   $ref: /services/observability/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
@@ -19,8 +19,8 @@ slack:
   channel: sd-app-sre-info
 
 managedResourceTypes:
-- DeploymentConfig
 - Service
+- StatefulSet
 
 imagePatterns:
 - quay.io/app-sre
@@ -35,6 +35,7 @@ resourceTemplates:
   path: /openshift/pushgateway.template.yaml
   url: https://gitlab.cee.redhat.com/service/app-sre-observability
   parameters:
+    IMAGE_TAG: v1.4.1
     IMAGE_GATE_TAG: bfa0da9
   targets:
   - namespace:
@@ -42,4 +43,6 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: 5a9eda36cb0846c697d8afa7d4b75d7f534cce2b
+    ref: 47c033c6973c8e303856edb670c3bff38574dc5a
+    parameters:
+      PUSHGATEWAY_VOLUME_SIZE: 30Gi

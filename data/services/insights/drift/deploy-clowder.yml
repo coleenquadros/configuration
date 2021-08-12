@@ -1,0 +1,76 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: drift
+  platform: insights
+
+name: drift-clowder
+description: drift app deployed via clowder
+
+app:
+  $ref: /services/insights/drift/app.yml
+
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+managedResourceTypes:
+- ClowdApp
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: drift-backend
+  path: /clowdapp.yaml
+  url: https://github.com/RedHatInsights/drift-backend
+  parameters:
+    CLOWDER_ENABLED: 'True'
+    DRIFT_ENABLE_RBAC: 'True'
+    ENABLE_SMART_MANAGEMENT_ENTITLEMENT_CHECK: 'False'
+    MAX_REPLIACAS: 2
+    MIN_REPLIACAS: 2
+  targets:
+  - namespace:
+      $ref: /services/insights/drift/namespaces/stage-drift-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-drift-backend-gh-build-master
+    parameters:
+      SYSTEM_BASELINE_HOST: system-baseline-backend.system-baseline-prod.svc.cluster.local
+  - namespace:
+      $ref: /services/insights/drift/namespaces/drift-fedramp-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-drift-backend-gh-build-master
+    parameters:
+      SYSTEM_BASELINE_HOST: system-baseline-backend.system-baseline-prod.svc.cluster.local
+  - namespace:
+      $ref: /services/insights/drift/namespaces/drift-prod.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-drift-backend-gh-build-master
+    parameters:
+      SYSTEM_BASELINE_HOST: system-baseline-backend.system-baseline-prod.svc.cluster.local
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+    parameters:
+      SYSTEM_BASELINE_HOST: system-baseline-backend.system-baseline-prod.svc.cluster.local

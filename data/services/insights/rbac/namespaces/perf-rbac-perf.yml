@@ -11,7 +11,7 @@ cluster:
   $ref: /openshift/insights/cluster-insights-perf.yml
 
 limitRanges:
-  $ref: /dependencies/openshift/limitranges/standard-resource-limits.yml
+  $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
 
 quota:
   $ref: /services/insights/rbac/rbac-quota.yml
@@ -22,7 +22,8 @@ app:
 environment:
   $ref: /products/insights/environments/perf.yml
 
-networkPoliciesAllow: []
+networkPoliciesAllow:
+- $ref: /services/insights/host-inventory/namespaces/perf-host-inventory-perf.yml
 # - $ref: /services/insights/patchman/namespaces/perf-patchman-engine-perf.yml
 # - $ref: /services/insights/remediations/namespaces/perf-remediations-perf.yml
 # - $ref: /services/insights/vulnerability/namespaces/perf-vulnerability-engine-perf.yml
@@ -44,18 +45,14 @@ openshiftResources:
   path: /insights-perf/rbac-perf/rbac-env.configmap.yml
 - provider: resource
   path: /insights-perf/rbac-perf/redis-config.configmap.yml
-- provider: resource
-  path: /insights-stage/rbac-stage/rbac-config.configmap.yml
-- provider: resource
-  path: /insights-stage/rbac-stage/model-access-permissions.configmap.yml
 - provider: vault-secret
   path: insights/secrets/insights-stage/rbac-stage/rbac-secret
-  version: 9
+  version: 10
   annotations:
     qontract.recycle: "true"
 - provider: vault-secret
   path: insights/secrets/insights-stage/rbac-stage/rbac-psks
-  version: 2
+  version: 3
   annotations:
     qontract.recycle: "true"
 - provider: vault-secret
@@ -78,9 +75,17 @@ terraformResources:
   defaults: /terraform/resources/insights/perf/rds/postgres10-rds-1.yml
   parameter_group: /terraform/resources/insights/perf/rds/postgres10-parameter-group-rbac-perf.yml
   output_resource_name: rbac-db
+  overrides:
+    instance_class: db.m5.xlarge
+    allocated_storage: 400
   enhanced_monitoring: true
 - provider: cloudwatch
   account: insights-perf
   identifier: rbac-perf
   defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch-disabled
+  output_resource_name: cloudwatch
+- provider: elasticache
+  account: insights-perf
+  identifier: rbac-perf-elasticache
+  defaults: /terraform/resources/insights/perf/elasticache/elasticache-rbac-1.yml
+  output_resource_name: in-memory-db

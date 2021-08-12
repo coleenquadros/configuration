@@ -1,0 +1,67 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cloud-connector
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: cloud-connector
+    rules:
+    - alert: CloudConnectorAPIDown
+      expr: |
+        up{service="cloud-connector", namespace="cloud-connector-stage"} == 0
+      for: 2m
+      labels:
+        severity: info
+        service: insights
+        env: stage
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/cloud-connector-stage/deployments"
+        message: "cloud-connector Alert. The cloud-connector-api pod has been down for two minutes."
+
+    - alert: CloudConnectorAPIContainerRestart
+      expr: |
+        sum(increase(kube_pod_container_status_restarts_total{container="cloud-connector-api"}[5m])) by (namespace) > 0
+      labels:
+        severity: info
+        service: insights
+        env: stage
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/cloud-connector-stage/deployments"
+        message: "Cloud-Connector Alert. The cloud-connector-api pod has been restarting."
+
+    - alert: CloudConnectorMQTTPublishErrors
+      expr: |
+        sum(increase(cloud_connector_mqtt_message_published_failure_count[5m])) by (kubernetes_namespace) > 0
+      for: 2m
+      labels:
+        severity: info
+        service: insights
+        env: stage
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/cloud-connector-stage/deployments"
+        message: "Cloud-Connector Alert. Cloud-Connector failed to publish to MQTT"
+
+    - alert: CloudConnectorInventoryKafkaProducerErrors
+      expr: |
+        sum(increase(cloud_connector_inventory_kafka_writer_failure_count[5m])) by (kubernetes_namespace) > 0
+      for: 2m
+      labels:
+        severity: info
+        service: insights
+        env: stage
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/cloud-connector-stage/deployments"
+        message: "Cloud-Connector Alert. Cloud-Connector failed to write inventory messages to kafka."

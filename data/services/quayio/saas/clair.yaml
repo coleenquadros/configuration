@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: quayio
@@ -10,8 +10,8 @@ description: SaaS tracking file for clair
 app:
   $ref: /services/quayio/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/quayio/pipelines/tekton.quayio-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
@@ -33,7 +33,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/quayio/namespaces/clair-stage.yaml
     ref: main
-    upstream: quay-clair-gh-build-main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: quay-clair-gh-build-main
     parameters:
       # indexer params
       INDEXER_DEPLOYMENT_REPLICAS: "1"

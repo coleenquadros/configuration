@@ -7,7 +7,7 @@ name: managed-services-production
 description: production namespace for managed-services
 
 cluster:
-    $ref: /openshift/app-sre-prod-04/cluster.yml
+  $ref: /openshift/app-sre-prod-04/cluster.yml
 
 app:
   $ref: /services/managed-services/app.yml
@@ -23,6 +23,7 @@ managedRoles: true
 managedResourceTypes:
   - ServiceAccount
   - ConfigMap
+  - NetworkPolicy
 
 openshiftResources:
 - provider: route
@@ -38,7 +39,7 @@ openshiftResources:
 - provider: vault-secret
   name: kas-fleet-manager
   path:  app-interface/managed-service-api/production/service/credentials
-  version: 16
+  version: 18
   annotations:
     qontract.recycle: "true"
 - provider: vault-secret
@@ -47,8 +48,29 @@ openshiftResources:
   version: 2
   annotations:
     qontract.recycle: "true"
+- provider: vault-secret
+  name: kas-fleet-manager-observatorium-configuration-red-hat-sso
+  path:  app-interface/managed-service-api/production/service/observatorium
+  version: 5
+  annotations:
+    qontract.recycle: "true"
 - provider: resource
   path: /services/managed-services/production/kas-fleet-manager-envoy.configmap.yaml
+- provider: vault-secret
+  path: app-sre/unleash/managed-services-unleash-token
+  version: 1
+- provider: resource
+  path: /services/managed-services/stage/connector-catalog-camel-aws.configmap.yaml
+- provider: resource
+  path: /services/managed-services/stage/connector-catalog-camel-misc.configmap.yaml
+- provider: resource
+  path: /services/managed-services/stage/connector-catalog-debezium-mongodb.configmap.yaml
+- provider: resource
+  path: /services/managed-services/stage/connector-catalog-debezium-mysql.configmap.yaml
+- provider: resource
+  path: /services/managed-services/stage/connector-catalog-debezium-postgres.configmap.yaml
+- provider: resource
+  path: /services/managed-services/production/observatorium-token-refresher.networkpolicy.yaml
 
 managedTerraformResources: true
 

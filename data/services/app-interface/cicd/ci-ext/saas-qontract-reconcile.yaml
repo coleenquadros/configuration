@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: app-interface
@@ -10,8 +10,8 @@ description: 'SaaS tracking file for App-interface'
 app:
   $ref: /services/app-interface/app.yml
 
-instance:
-  $ref: /dependencies/ci-ext/ci-ext.yml
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
@@ -42,22 +42,29 @@ resourceTemplates:
   - namespace:
       $ref: /services/app-interface/namespaces/app-interface-stage.yml
     ref: master
-    upstream: app-sre-qontract-reconcile-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: app-sre-qontract-reconcile-gh-build-master
     parameters:
       DRY_RUN: --dry-run
       GITHUB_API: https://github-mirror.stage.devshift.net
       SLACK_CHANNEL: sd-app-sre-reconcile-stage
       SLEEP_DURATION_SECS: 600
-    promotion:
-      publish:
-      - qontract-reconcile-stage-post-deploy-success-channel
   - namespace:
       $ref: /services/app-interface/namespaces/app-interface-production.yml
-    ref: 791893f46338ca88dca6c85627e0addfd0ebb3c2
+    ref: c3ee9f5da6ea77535a3c25fcf2f291fb29cc0497
     parameters:
       DRY_RUN: --no-dry-run
       GITHUB_API: https://github-mirror.devshift.net
       SLACK_CHANNEL: sd-app-sre-reconcile
-      SLEEP_DURATION_SECS: 30
+      SLEEP_DURATION_SECS: 60
       LOG_SLOW_OC_RECONCILE: "true"
       SLOW_OC_RECONCILE_THRESHOLD: 0
+      OPENSHIFT_VAULT_SECRETS_MEMORY_REQUEST: 800Mi
+      OPENSHIFT_VAULT_SECRETS_MEMORY_LIMIT: 1000Mi
+      TERRAFORM_RESOURCES_WRAPPER_MEMORY_REQUEST: 1500Mi
+      TERRAFORM_RESOURCES_WRAPPER_MEMORY_LIMIT: 2000Mi
+      GITHUB_OWNERS_MEMORY_LIMIT: 160Mi
+      GITHUB_OWNERS_MEMORY_REQUEST: 100Mi
+

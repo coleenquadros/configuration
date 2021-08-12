@@ -50,6 +50,14 @@ openshiftResources:
 - provider: vault-secret
   path: insights/secrets/insights-prod/host-inventory-prod/dippy-bot
   version: 1
+- provider: vault-secret
+  path: insights/secrets/insights-prod/host-inventory-prod/kafka-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-prod/host-inventory-prod/pendo-creds
+  version: 1
 
 managedTerraformResources: true
 
@@ -68,14 +76,15 @@ terraformResources:
     snapshot_identifier: host-inventory-migration-prod
   enhanced_monitoring: true
   output_resource_name: host-inventory-db
-  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-host-inventory-prod.yml
+  parameter_group: /terraform/resources/insights/production/rds/postgres13-parameter-group-host-inventory-prod.yml
 - provider: rds
   account: insights-prod
   identifier: host-inventory-prod-readonly
+  replica_source: host-inventory-prod
   availability_zone: us-east-1d
   defaults: /terraform/resources/insights/production/rds/rds-host-inventory-prod-readonly.yml
   overrides:
     monitoring_interval: 60
   output_resource_name: host-inventory-db-readonly-rds
   enhanced_monitoring: true
-  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-host-inventory-prod-readonly.yml
+  parameter_group: /terraform/resources/insights/production/rds/postgres13-parameter-group-host-inventory-prod-readonly.yml

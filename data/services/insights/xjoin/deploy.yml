@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: xjoin
@@ -11,15 +11,13 @@ description: xjoin app on the Insights Platform
 app:
   $ref: /services/insights/xjoin/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
-
-timeout: 5
 
 managedResourceTypes:
 - Deployment
@@ -30,6 +28,7 @@ managedResourceTypes:
 - ConfigMap
 - Job
 - KafkaConnect
+- ClowdApp
 
 imagePatterns:
 - quay.io/cloudservices
@@ -45,8 +44,8 @@ authentication:
     field: openshift-saas-deploy
 
 resourceTemplates:
-- name: xjoin-search
-  path: /deploy/template.yaml
+- name: xjoin-search-clowder
+  path: /deploy/clowdapp.yaml
   url: https://github.com/RedHatInsights/xjoin-search
   parameters:
     LOG_LEVEL: info
@@ -54,22 +53,46 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
     ref: master
-    upstream: RedHatInsights-xjoin-search-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-xjoin-search-gh-build-master
     parameters:
       NUM_REPLICAS: 2
-      MAX_REPLICAS: 4
+      MEMORY_REQUESTS: 512Mi
+      MEMORY_LIMITS: 512Mi
+      CPU_REQUESTS: 500m
+      CPU_LIMITS: 1
+      LOG_LEVEL: debug
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
+    ref: 47a42a2744198d5c472194404b9fab24f0ecbc79
+    parameters:
+      CPU_REQUESTS: 500m
+      CPU_LIMITS: 2
+      NUM_REPLICAS: 4
+      MEMORY_REQUESTS: 512Mi
+      MEMORY_LIMITS: 1Gi
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/xjoin-fedramp-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-xjoin-stage-fedramp-gh-build-master
+    parameters:
+      NUM_REPLICAS: 2
       MEMORY_REQUESTS: 512Mi
       MEMORY_LIMITS: 512Mi
       CPU_REQUESTS: 500m
       CPU_LIMITS: 1
   - namespace:
-      $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
-    ref: 304637b606b92945b89fba6d61fc4d40c6ce080d
+      $ref: /services/insights/xjoin/namespaces/xjoin-fedramp-prod.yml
+    ref: 47a42a2744198d5c472194404b9fab24f0ecbc79
     parameters:
       CPU_REQUESTS: 500m
       CPU_LIMITS: 2
-      NUM_REPLICAS: 2
-      MAX_REPLICAS: 6
+      NUM_REPLICAS: 4
       MEMORY_REQUESTS: 512Mi
       MEMORY_LIMITS: 1Gi
 
@@ -80,11 +103,17 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/dev-xjoin-ci.yml
     ref: master
-    upstream: RedHatInsights-xjoin-search-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-xjoin-search-gh-build-master
   - namespace:
       $ref: /services/insights/xjoin/namespaces/dev-xjoin-qa.yml
     ref: master
-    upstream: RedHatInsights-xjoin-search-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-xjoin-search-gh-build-master
 
 - name: xjoin-es-exporter
   path: /templates/xjoin/xjoin-es-exporter.yaml
@@ -107,17 +136,59 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-jenkins-stage.yml
     ref: master
+    parameters:
+      NUM_REPLICAS: '0'
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-jenkins-prod.yml
     ref: master
     parameters:
       PV_SIZE: 20Gi
+      NUM_REPLICAS: '0'
+
+- name: xjoin-kafka-connect-strimzi
+  path: /deploy/kafka-connect-fedramp.yml
+  url: https://github.com/RedHatInsights/xjoin-kafka-connect
+  parameters:
+    VERSION: '2.5.0'
+    KAFKA_BOOTSTRAP_PORT: '9093'
+    GROUP_ID: xjoin
+    STORAGE_TOPIC_PREFIX: xjoin
+    NAME_PREFIX: xjoin-connect
+    KAFKA_USER: kafka-xjoin
+    LOG_LEVEL: INFO
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/xjoin-fedramp-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-xjoin-kafka-connect-fedramp-gh-build-master
+    parameters:
+      CPU_LIMITS: 3
+      XMX: 4G
+      XMS: 4G
+      CPU_REQUESTS: 250m
+      NUM_REPLICAS: '5'
+      MEMORY_REQUESTS: 6Gi
+      MEMORY_LIMITS: 10Gi
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/xjoin-fedramp-prod.yml
+    ref: 182ab8b1b311fb449917c363f4564b8e569ac606
+    parameters:
+      CPU_LIMITS: 3
+      XMX: 4G
+      XMS: 4G
+      CPU_REQUESTS: 249m
+      NUM_REPLICAS: '5'
+      MEMORY_REQUESTS: 6Gi
+      MEMORY_LIMITS: 10Gi
 
 - name: xjoin-kafka-connect-strimzi
   path: /deploy/kafka-connect.yml
   url: https://github.com/RedHatInsights/xjoin-kafka-connect
   parameters:
-    VERSION: '2.5.0'
+    VERSION: '2.6.2'
     CPU_LIMITS: 3
     XMX: 8G
     XMS: 8G
@@ -125,17 +196,20 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
     ref: master
-    upstream: RedHatInsights-xjoin-kafka-connect-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-xjoin-kafka-connect-gh-build-master
     parameters:
-      CPU_REQUESTS: 250m
+      CPU_REQUESTS: 249m
       NUM_REPLICAS: '7'
       MEMORY_REQUESTS: 8Gi
       MEMORY_LIMITS: 10Gi
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
-    ref: 0c7c2619c4d6ebccaf3fe4c7a86d4ff9c3188e1b
+    ref: 182ab8b1b311fb449917c363f4564b8e569ac606
     parameters:
-      CPU_REQUESTS: 249m
+      CPU_REQUESTS: 250m
       NUM_REPLICAS: '13'
       MEMORY_REQUESTS: 8Gi
       MEMORY_LIMITS: 12Gi

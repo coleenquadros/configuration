@@ -258,6 +258,11 @@
   - { name: description, type: string, isRequired: true }
   - { name: url, type: string, isRequired: true }
 
+- name: JenkinsInstanceBuildsCleanupRules_v1
+  fields:
+  - { name: name, type: string, isRequired: true }
+  - { name: keep_hours, type: int, isRequired: true }
+
 - name: JenkinsInstance_v1
   fields:
   - { name: schema, type: string, isRequired: true }
@@ -271,6 +276,7 @@
   - { name: plugins, type: string, isList: true }
   - { name: deleteMethod, type: string }
   - { name: managedProjects, type: string, isList: true }
+  - { name: buildsCleanupRules, type: JenkinsInstanceBuildsCleanupRules_v1, isList: true }
 
 - name: JenkinsConfig_v1
   fields:
@@ -364,7 +370,7 @@
   - { name: token, type: VaultSecret_v1, isRequired: true }
   - { name: sslVerify, type: boolean }
 
-- name: PagerDutyTarget_v1
+- name: PagerDutyInstance_v1
   fields:
   - { name: schema, type: string, isRequired: true }
   - { name: path, type: string, isRequired: true }
@@ -372,6 +378,15 @@
   - { name: name, type: string, isRequired: true }
   - { name: description, type: string, isRequired: true }
   - { name: token, type: VaultSecret_v1, isRequired: true }
+
+- name: PagerDutyTarget_v1
+  fields:
+  - { name: schema, type: string, isRequired: true }
+  - { name: path, type: string, isRequired: true }
+  - { name: labels, type: json }
+  - { name: name, type: string, isRequired: true }
+  - { name: description, type: string, isRequired: true }
+  - { name: instance, type: PagerDutyInstance_v1, isRequired: true }
   - { name: scheduleID, type: string }
   - { name: escalationPolicyID, type: string }
 
@@ -413,6 +428,11 @@
 - name: ClusterExternalConfiguration_v1
   fields:
   - { name: labels, type: json, isRequired: true }
+
+- name: ClusterAdditionalRouter_v1
+  fields:
+  - { name: private, type: boolean, isRequired: true }
+  - { name: route_selectors, type: json }
 
 - name: ClusterUpgradePolicy_v1
   fields:
@@ -536,12 +556,14 @@
   - { name: spec, type: ClusterSpec_v1 }
   - { name: externalConfiguration, type: ClusterExternalConfiguration_v1 }
   - { name: upgradePolicy, type: ClusterUpgradePolicy_v1 }
+  - { name: additionalRouters, type: ClusterAdditionalRouter_v1, isList: true }
   - { name: network, type: ClusterNetwork_v1 }
   - { name: machinePools, type: ClusterMachinePool_v1, isList: true }
   - { name: peering, type: ClusterPeering_v1 }
   - { name: addons, type: ClusterAddon_v1, isList: true }
   - { name: jumpHost, type: ClusterJumpHost_v1 }
   - { name: automationToken, type: VaultSecret_v1 }
+  - { name: clusterAdminAutomationToken, type: VaultSecret_v1 }
   - { name: internal, type: boolean }
   - { name: disable, type: DisableClusterAutomations_v1 }
   - { name: awsInfrastructureAccess, type: AWSInfrastructureAccess_v1, isList: true }
@@ -765,6 +787,7 @@
   - { name: account, type: string, isRequired: true }
   - { name: identifier, type: string, isRequired: true }
   - { name: output_resource_name, type: string }
+  - { name: annotations, type: json }
 
 - name: NamespaceTerraformResourceS3CloudFrontPublicKey_v1
   interface: NamespaceTerraformResource_v1
@@ -775,6 +798,7 @@
   - { name: identifier, type: string, isRequired: true }
   - { name: secret, type: VaultSecret_v1 }
   - { name: output_resource_name, type: string }
+  - { name: annotations, type: json }
 
 - name: NamespaceTerraformResourceACM_v1
   interface: NamespaceTerraformResource_v1
@@ -786,6 +810,7 @@
   - { name: secret, type: VaultSecret_v1 }
   - { name: domain, type: ACMDomain_v1 }
   - { name: output_resource_name, type: string }
+  - { name: annotations, type: json }
 
 - name: NamespaceTerraformResourceElasticSearch_v1
   interface: NamespaceTerraformResource_v1
@@ -796,6 +821,7 @@
   - { name: identifier, type: string, isRequired: true }
   - { name: defaults, type: string, isRequired: true }
   - { name: output_resource_name, type: string }
+  - { name: annotations, type: json }
 
 - name: NamespaceTerraformResourceRDS_v1
   interface: NamespaceTerraformResource_v1
@@ -812,6 +838,7 @@
   - { name: reset_password, type: string }
   - { name: enhanced_monitoring, type: boolean }
   - { name: replica_source, type: string }
+  - { name: annotations, type: json }
 
 - name: NamespaceTerraformResourceS3_v1
   interface: NamespaceTerraformResource_v1
@@ -827,6 +854,7 @@
   - { name: bucket_policy, type: json }
   - { name: output_resource_name, type: string }
   - { name: storage_class, type: string }
+  - { name: annotations, type: json }
 
 - name: NamespaceTerraformResourceServiceAccountAWSInfrastructureAccess_v1
   fields:
@@ -844,6 +872,7 @@
   - { name: user_policy, type: json }
   - { name: output_resource_name, type: string }
   - { name: aws_infrastructure_access, type: NamespaceTerraformResourceServiceAccountAWSInfrastructureAccess_v1 }
+  - { name: annotations, type: json }
 
 - name: NamespaceTerraformResourceElastiCache_v1
   interface: NamespaceTerraformResource_v1
@@ -856,6 +885,7 @@
   - { name: region, type: string }
   - { name: overrides, type: json }
   - { name: output_resource_name, type: string }
+  - { name: annotations, type: json }
 
 - name: SQSQueuesSpecs_v1
   fields:
@@ -871,6 +901,7 @@
   - { name: identifier, type: string, isRequired: true }
   - { name: output_resource_name, type: string }
   - { name: specs, type: SQSQueuesSpecs_v1, isRequired: true, isList: true }
+  - { name: annotations, type: json }
 
 - name: DynamoDBTableSpecs_v1
   fields:
@@ -886,6 +917,7 @@
   - { name: identifier, type: string, isRequired: true }
   - { name: output_resource_name, type: string }
   - { name: specs, type: DynamoDBTableSpecs_v1, isRequired: true, isList: true }
+  - { name: annotations, type: json }
 
 - name: NamespaceTerraformResourceECR_v1
   interface: NamespaceTerraformResource_v1
@@ -897,6 +929,7 @@
   - { name: output_resource_name, type: string }
   - { name: mirror, type: ContainerImageMirror_v1, isRequired: false }
   - { name: public, type: boolean }
+  - { name: annotations, type: json }
 
 
 - name: NamespaceTerraformResourceS3CloudFront_v1
@@ -909,6 +942,7 @@
   - { name: defaults, type: string, isRequired: true }
   - { name: output_resource_name, type: string }
   - { name: storage_class, type: string }
+  - { name: annotations, type: json }
 
 - name: NamespaceTerraformResourceS3SQS_v1
   interface: NamespaceTerraformResource_v1
@@ -921,6 +955,7 @@
   - { name: defaults, type: string, isRequired: true }
   - { name: output_resource_name, type: string }
   - { name: storage_class, type: string }
+  - { name: annotations, type: json }
 
 - name: NamespaceTerraformResourceCloudWatch_v1
   interface: NamespaceTerraformResource_v1
@@ -933,6 +968,7 @@
   - { name: es_identifier, type: string }
   - { name: filter_pattern, type: string }
   - { name: output_resource_name, type: string }
+  - { name: annotations, type: json }
 
 - name: NamespaceTerraformResourceKMS_v1
   interface: NamespaceTerraformResource_v1
@@ -944,6 +980,7 @@
   - { name: defaults, type: string, isRequired: true }
   - { name: overrides, type: json }
   - { name: output_resource_name, type: string }
+  - { name: annotations, type: json }
 
 - name: NamespaceTerraformResourceKinesis_v1
   interface: NamespaceTerraformResource_v1
@@ -955,28 +992,7 @@
   - { name: defaults, type: string, isRequired: true }
   - { name: overrides, type: json }
   - { name: output_resource_name, type: string }
-
-- name: OpenshiftAcmeOverrides_v1
-  fields:
-  - { name: deploymentName, type: string }
-  - { name: roleName, type: string }
-  - { name: rolebindingName, type: string }
-  - { name: serviceaccountName, type: string }
-  - { name: rbacApiVersion, type: string }
-
-- name: OpenshiftAcmeConfig_v1
-  fields:
-  - { name: schema, type: string, isRequired: true }
-  - { name: labels, type: json }
-  - { name: name, type: string, isRequired: true }
-  - { name: description, type: string, isRequired: true }
-  - { name: image, type: string, isRequired: true }
-  - { name: overrides, type: OpenshiftAcmeOverrides_v1 }
-
-- name: OpenshiftAcme_v1
-  fields:
-  - { name: config, type: OpenshiftAcmeConfig_v1, isRequired: true }
-  - { name: accountSecret, type: NamespaceOpenshiftResourceVaultSecret_v1 }
+  - { name: annotations, type: json }
 
 - name: ResourceValues_v1
   fields:
@@ -1039,7 +1055,7 @@
   - { name: schema, type: string, isRequired: true }
   - { name: path, type: string, isRequired: true }
   - { name: labels, type: json }
-  - { name: name, type: string, isRequired: true }
+  - { name: name, type: string, isRequired: true, isSearchable: true, isUnique: true }
   - { name: description, type: string, isRequired: true }
   - { name: openshiftResources, type: NamespaceOpenshiftResource_v1, isList: true, isInterface: true, isRequired: true }
   - { name: openshiftServiceAccountTokens, type: ServiceAccountTokenSpec_v1, isList: true }
@@ -1059,7 +1075,6 @@
   - { name: limitRanges, type: LimitRange_v1 }
   - { name: quota, type: ResourceQuota_v1 }
   - { name: networkPoliciesAllow, type: Namespace_v1, isList: true }
-  - { name: openshiftAcme, type: OpenshiftAcme_v1 }
   - { name: managedRoles, type: boolean }
   - { name: managedResourceTypes, type: string, isList: true }
   - { name: managedResourceTypeOverrides, type: NamespaceManagedResourceTypeOverrides_v1, isList: true }
@@ -1169,6 +1184,10 @@
   - { name: description, type: string, isRequired: true }
   - { name: url, type: string, isRequired: true }
 
+- name: CodeComponentGitlabOwners_v1
+  fields:
+    - { name: enabled, type: boolean, isRequired: true }
+
 - name: CodeComponentGitlabHousekeeping_v1
   fields:
   - { name: enabled, type: boolean, isRequired: true }
@@ -1176,13 +1195,14 @@
   - { name: days_interval, type: int }
   - { name: limit, type: int }
   - { name: enable_closing, type: boolean }
+  - { name: pipeline_timeout, type: int }
 
 - name: AppCodeComponents_v1
   fields:
   - { name: name, type: string, isRequired: true }
   - { name: resource, type: string, isRequired: true }
   - { name: url, type: string, isRequired: true }
-  - { name: gitlabRepoOwners, type: boolean, isRequired: false }
+  - { name: gitlabRepoOwners, type: CodeComponentGitlabOwners_v1 }
   - { name: gitlabHousekeeping, type: CodeComponentGitlabHousekeeping_v1 }
   - { name: jira, type: JiraServer_v1 }
 
@@ -1264,6 +1284,12 @@
     synthetic:
       schema: /app-sre/saas-file-1.yml
       subAttr: app
+  - name: saasFilesV2
+    type: SaasFile_v2
+    isList: true
+    synthetic:
+      schema: /app-sre/saas-file-2.yml
+      subAttr: app
   - name: sreCheckpoints
     type: SRECheckpoint_v1
     isList: true
@@ -1290,6 +1316,7 @@
   - { name: compare, type: boolean }
   - { name: timeout, type: int }
   - { name: publishJobLogs, type: boolean }
+  - { name: clusterAdmin, type: boolean }
   - { name: use_channel_in_image_tag, type: boolean }
   - name: roles
     type: Role_v1
@@ -1306,16 +1333,17 @@
   - { name: name, type: string, isRequired: true, isSearchable: true, isUnique: true }
   - { name: description, type: string, isRequired: true }
   - { name: app, type: App_v1, isRequired: true }
-  - { name: pipelinesNamespace, type: Namespace_v1, isRequired: true }
+  - { name: pipelinesProvider, type: PipelinesProvider_v1, isRequired: true, isInterface: true }
+  - { name: slack, type: SlackOutput_v1, isRequired: true }
   - { name: managedResourceTypes, type: string, isRequired: true, isList: true }
   - { name: authentication, type: SaasFileAuthentication_v1 }
   - { name: parameters, type: json }
-  - { name: resourceTemplates, type: SaasResourceTemplate_v1, isRequired: true, isList: true }
+  - { name: resourceTemplates, type: SaasResourceTemplate_v2, isRequired: true, isList: true }
   - { name: imagePatterns, type: string, isRequired: true, isList: true }
   - { name: takeover, type: boolean }
   - { name: compare, type: boolean }
-  - { name: timeout, type: int }
   - { name: publishJobLogs, type: boolean }
+  - { name: clusterAdmin, type: boolean }
   - { name: use_channel_in_image_tag, type: boolean }
   - name: roles
     type: Role_v1
@@ -1352,6 +1380,16 @@
   - { name: parameters, type: json }
   - { name: targets, type: SaasResourceTemplateTarget_v1, isRequired: true, isList: true }
 
+- name: SaasResourceTemplate_v2
+  fields:
+  - { name: name, type: string, isRequired: true }
+  - { name: url, type: string, isRequired: true }
+  - { name: path, type: string, isRequired: true }
+  - { name: provider, type: string }
+  - { name: hash_length, type: int }
+  - { name: parameters, type: json }
+  - { name: targets, type: SaasResourceTemplateTarget_v2, isRequired: true, isList: true }
+
 - name: SaasResourceTemplateTarget_v1
   fields:
   - { name: namespace, type: Namespace_v1, isRequired: true }
@@ -1360,12 +1398,61 @@
   - { name: parameters, type: json }
   - { name: upstream, type: string }
   - { name: disable, type: boolean }
+  - { name: delete, type: boolean }
+
+- name: SaasResourceTemplateTarget_v2
+  fields:
+  - { name: namespace, type: Namespace_v1, isRequired: true }
+  - { name: ref, type: string, isRequired: true }
+  - { name: promotion, type: SaasResourceTemplateTargetPromotion_v1 }
+  - { name: parameters, type: json }
+  - { name: upstream, type: SaasResourceTemplateTargetUpstream_v1 }
+  - { name: disable, type: boolean }
+  - { name: delete, type: boolean }
+
+- name: SaasResourceTemplateTargetUpstream_v1
+  fields:
+  - { name: instance, type: JenkinsInstance_v1, isRequired: true }
+  - { name: name, type: string, isRequired: true }
 
 - name: SaasResourceTemplateTargetPromotion_v1
   fields:
   - { name: auto, type: boolean }
   - { name: publish, type: string, isList: true }
   - { name: subscribe, type: string, isList: true }
+
+- name: PipelinesProvider_v1
+  isInterface: true
+  interfaceResolve:
+    strategy: fieldMap
+    field: provider
+    fieldMap:
+      tekton: PipelinesProviderTekton_v1
+  fields:
+  - { name: schema, type: string, isRequired: true }
+  - { name: path, type: string, isRequired: true }
+  - { name: labels, type: json }
+  - { name: name, type: string, isRequired: true }
+  - { name: description, type: string, isRequired: true }
+  - { name: provider, type: string, isRequired: true }
+  - { name: retention, type: PipelinesProviderRetention_v1 }
+
+- name: PipelinesProviderTekton_v1
+  interface: PipelinesProvider_v1
+  fields:
+  - { name: schema, type: string, isRequired: true }
+  - { name: path, type: string, isRequired: true }
+  - { name: labels, type: json }
+  - { name: name, type: string, isRequired: true }
+  - { name: description, type: string, isRequired: true }
+  - { name: provider, type: string, isRequired: true }
+  - { name: namespace, type: Namespace_v1, isRequired: true }
+  - { name: retention, type: PipelinesProviderRetention_v1 }
+
+- name: PipelinesProviderRetention_v1
+  fields:
+  - { name: days, type: int }
+  - { name: minimum, type: int }
 
 - name: Permission_v1
   isInterface: true
@@ -1501,6 +1588,18 @@
   - { name: tag_on_merge_requests, type: boolean }
   - { name: tag_on_cluster_updates, type: boolean }
   - { name: roles, type: Role_v1, isList: true }
+  - name: requests
+    type: CredentialsRequest_v1
+    isList: true
+    synthetic:
+      schema: /app-interface/credentials-request-1.yml
+      subAttr: user
+  - name: queries
+    type: AppInterfaceSqlQuery_v1
+    isList: true
+    synthetic:
+      schema: /app-interface/app-interface-sql-query-1.yml
+      subAttr: user
 
 - name: Bot_v1
   fields:
@@ -1695,11 +1794,14 @@
   - { name: app_interface_sql_queries_v1, type: AppInterfaceSqlQuery_v1, isList: true, datafileSchema: /app-interface/app-interface-sql-query-1.yml }
   - { name: saas_files_v1, type: SaasFile_v1, isList: true, datafileSchema: /app-sre/saas-file-1.yml }
   - { name: saas_files_v2, type: SaasFile_v2, isList: true, datafileSchema: /app-sre/saas-file-2.yml }
+  - { name: pipelines_providers_v1, type: PipelinesProvider_v1, isList: true, isInterface: true, datafileSchema: /app-sre/pipelines-provider-1.yml }
   - { name: unleash_instances_v1, type: UnleashInstance_v1, isList: true, datafileSchema: /app-sre/unleash-instance-1.yml }
   - { name: dns_zone_v1, type: DnsZone_v1, isList: true, datafileSchema: /dependencies/dns-zone-1.yml }
   - { name: slack_workspaces_v1, type: SlackWorkspace_v1, isList: true, datafileSchema: /dependencies/slack-workspace-1.yml }
   - { name: ocp_release_mirror_v1, type: OcpReleaseMirror_v1, isList: true, datafileSchema: /dependencies/ocp-release-mirror-1.yml}
   - { name: slo_document_v1, type: SLODocument_v1, isList: true, datafileSchema: /app-sre/slo-document-1.yml}
+  - { name: shared_resources_v1, type: SharedResources_v1, isList: true, datafileSchema: /openshift/shared-resources-1.yml }
+  - { name: pagerduty_instances_v1, type: PagerDutyInstance_v1, isList: true, datafileSchema: /dependencies/pagerduty-instance-1.yml }
 
 - name: SentryTeam_v1
   fields:

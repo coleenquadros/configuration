@@ -2,7 +2,7 @@
 
 include .env
 
-CONTAINER_ENGINE ?= $(shell which podman &>/dev/null && echo podman || echo docker)
+CONTAINER_ENGINE ?= $(shell which podman >/dev/null 2>&1 && echo podman || echo docker)
 OUTPUT_DIR ?= $(shell pwd)
 OUTPUT_DIR := $(shell realpath $(OUTPUT_DIR))
 BUNDLE_FILENAME ?= data.json

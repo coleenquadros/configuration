@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: policies
@@ -11,23 +11,19 @@ description: policies app on the Insights Platform
 app:
   $ref: /services/insights/policies/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
 
-timeout: 5
-
 managedResourceTypes:
 - Deployment
 - DeploymentConfig
 - Service
 - PersistentVolumeClaim
-
-timeout: 10
 
 imagePatterns:
 - quay.io/cloudservices
@@ -38,95 +34,97 @@ authentication:
     field: all
 
 resourceTemplates:
-- name: policies-notifications
-  path: /templates/policies/policies-notifications.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  targets:
-  - namespace:
-      $ref: /services/insights/policies/namespaces/stage-policies-stage.yml
-    ref: 57e13ffb057665e90fab1baadd8454faf2890fca
-    parameters:
-      IMAGE_TAG: 945facd
-      DB_SECRET_NAME: policies-notifications-db
-      CLOUD_WATCH_LOG_GROUP: policies-stage
-      REPLICAS: 0
-  - namespace:
-      $ref: /services/insights/policies/namespaces/policies-prod.yml
-    ref: 57e13ffb057665e90fab1baadd8454faf2890fca
-    parameters:
-      IMAGE_TAG: 945facd
-      DB_SECRET_NAME: policies-notifications-db
-      CLOUD_WATCH_LOG_GROUP: policies-prod
-      REPLICAS: 0
 - name: policies-engine
   path: /templates/policies/policies-engine.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
   targets:
   - namespace:
       $ref: /services/insights/policies/namespaces/stage-policies-stage.yml
-    ref: 652ceda6473eb28f8ea8eed0ec101b54f91a74e8
+    ref: 8675b56b3d3c79e744b4ade03477871db5db38ae
     parameters:
-      IMAGE_TAG: 5c22ac3
+      IMAGE_TAG: c959a2f
+      DB_SECRET_NAME: policies-ui-backend-db
       INFINISPAN_STORAGE: 200Gi
-      CLOUD_WATCH_LOG_GROUP: policies-stage
       CLOUDWATCH_LOGGING_ENABLED: true
-      SENTRY_ENV: stage
-      SENTRY_ENABLED: false
-      REPLICAS: 1
+      SENTRY_ENABLED: true
   - namespace:
       $ref: /services/insights/policies/namespaces/policies-prod.yml
-    ref: 652ceda6473eb28f8ea8eed0ec101b54f91a74e8
+    ref: 8675b56b3d3c79e744b4ade03477871db5db38ae
     parameters:
-      IMAGE_TAG: 5c22ac3
+      IMAGE_TAG: c959a2f
+      DB_SECRET_NAME: policies-ui-backend-db
       INFINISPAN_STORAGE: 500Gi
-      CLOUD_WATCH_LOG_GROUP: policies-prod
       CLOUDWATCH_LOGGING_ENABLED: true
-      SENTRY_ENV: prod
       MEMORY_LIMIT: 15Gi
       CPU_LIMIT: 3
       SENTRY_ENABLED: true
       REPLICAS: 1
   - namespace:
       $ref: /services/insights/policies/namespaces/policies-fedramp-stage.yml
-    ref: e99fe6d95ce7e29ae3bacae060ee4afe89dd38d1
+    ref: 8675b56b3d3c79e744b4ade03477871db5db38ae
     parameters:
-      IMAGE_TAG: 9e52647
+      IMAGE_TAG: c959a2f
+      DB_SECRET_NAME: policies-ui-backend-db
       INFINISPAN_STORAGE: 200Gi
-      SENTRY_ENV: fedramp-stage
+      CLOUDWATCH_LOGGING_ENABLED: true
       SENTRY_ENABLED: false
+      KAFKA_SECURITY_PROTOCOL: SASL_SSL
+      KAFKA_SASL_MECHANISM: SCRAM-SHA-512
+      KAFKA_SASL_JAAS_CONFIG: org.apache.kafka.common.security.scram.ScramLoginModule
+        required username="${KAFKA_SASL_USERNAME}" password="${KAFKA_SASL_PASSWORD}";
+  - namespace:
+      $ref: /services/insights/policies/namespaces/policies-fedramp-prod.yml
+    ref: 8675b56b3d3c79e744b4ade03477871db5db38ae
+    parameters:
+      IMAGE_TAG: c959a2f
+      DB_SECRET_NAME: policies-ui-backend-db
+      INFINISPAN_STORAGE: 500Gi
+      CLOUDWATCH_LOGGING_ENABLED: true
+      MEMORY_REQUEST: 4Gi
+      MEMORY_LIMIT: 8Gi
+      CPU_LIMIT: 3
+      SENTRY_ENABLED: false
+      KAFKA_SECURITY_PROTOCOL: SASL_SSL
+      KAFKA_SASL_MECHANISM: SCRAM-SHA-512
+      KAFKA_SASL_JAAS_CONFIG: org.apache.kafka.common.security.scram.ScramLoginModule
+        required username="${KAFKA_SASL_USERNAME}" password="${KAFKA_SASL_PASSWORD}";
 - name: policies-ui-backend
   path: /templates/policies/policies-ui-backend.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
   targets:
   - namespace:
       $ref: /services/insights/policies/namespaces/stage-policies-stage.yml
-    ref: 652ceda6473eb28f8ea8eed0ec101b54f91a74e8
+    ref: 8675b56b3d3c79e744b4ade03477871db5db38ae
     parameters:
-      IMAGE_TAG: 3a19b7e
+      IMAGE_TAG: 60bced4
       DB_SECRET_NAME: policies-ui-backend-db
-      CLOUD_WATCH_LOG_GROUP: policies-stage
       CLOUDWATCH_LOGGING_ENABLED: true
-      SENTRY_ENV: stage
-      SENTRY_ENABLED: false
+      SENTRY_ENABLED: true
       NOTIFICATIONS_MP_REST_URL: http://notifications-backend.notifications-stage.svc.cluster.local:8080
-      REPLICAS: 1
   - namespace:
       $ref: /services/insights/policies/namespaces/policies-prod.yml
-    ref: 652ceda6473eb28f8ea8eed0ec101b54f91a74e8
+    ref: 8675b56b3d3c79e744b4ade03477871db5db38ae
     parameters:
-      IMAGE_TAG: 3a19b7e
+      IMAGE_TAG: 60bced4
       DB_SECRET_NAME: policies-ui-backend-db
-      CLOUD_WATCH_LOG_GROUP: policies-prod
       CLOUDWATCH_LOGGING_ENABLED: true
-      SENTRY_ENV: prod
       SENTRY_ENABLED: true
       NOTIFICATIONS_MP_REST_URL: http://notifications-backend.notifications-prod.svc.cluster.local:8080
   - namespace:
       $ref: /services/insights/policies/namespaces/policies-fedramp-stage.yml
-    ref: e99fe6d95ce7e29ae3bacae060ee4afe89dd38d1
+    ref: 8675b56b3d3c79e744b4ade03477871db5db38ae
     parameters:
-      IMAGE_TAG: 4840187
+      IMAGE_TAG: 60bced4
       DB_SECRET_NAME: policies-ui-backend-db
-      SENTRY_ENV: fedramp-stage
+      CLOUDWATCH_LOGGING_ENABLED: true
       SENTRY_ENABLED: false
-      REPLICAS: 1
+      PGSSLMODE: verify-full
+  - namespace:
+      $ref: /services/insights/policies/namespaces/policies-fedramp-prod.yml
+    ref: 8675b56b3d3c79e744b4ade03477871db5db38ae
+    parameters:
+      IMAGE_TAG: 60bced4
+      DB_SECRET_NAME: policies-ui-backend-db
+      CLOUDWATCH_LOGGING_ENABLED: true
+      SENTRY_ENABLED: false
+      PGSSLMODE: verify-full

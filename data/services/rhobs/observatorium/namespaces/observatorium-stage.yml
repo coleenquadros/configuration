@@ -17,9 +17,12 @@ environment:
 
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
-# TODO(kakkoyun): Make sure network policies are aligned properly for migration period.
-# - $ref: /services/rhobs/observatorium/namespaces/observatorium-stage.yml
-# - $ref: /services/rhobs/telemeter/namespaces/telemeter-stage.yml
+- $ref: /services/rhobs/observatorium/observatorium-metrics/namespaces/observatorium-metrics-stage.yml
+- $ref: /services/rhobs/telemeter/namespaces/telemeter-stage.yml
+# TODO(prekumar): Remove this after MST gets it's own Jaeger Collector.
+# To allow jaeger-agents in observatorium-mst-stage namespace to
+# write spans into jaeger-collector in telemeter-stage namespace.
+- $ref: /services/rhobs/observatorium-mst/namespaces/observatorium-mst-stage.yml
 
 grafanaUrl: https://grafana.app-sre.devshift.net/dashboards/f/xIQ-GuaGk/observatorium
 
@@ -29,14 +32,6 @@ managedResourceTypes:
 - Role
 - RoleBinding
 - ServiceAccount
-# TODO(kakkoyun): Uncomment while migrating to prodcution.
-# - Route
-# - ServiceMonitor
-# - ClusterRole
-
-managedTerraformResources: true
-
-terraformResources: []
 
 openshiftResources:
 # TODO(kakkoyun): Move secrets update namespaces. telemeter-stage -> observatorium-stage
@@ -46,7 +41,7 @@ openshiftResources:
   version: 3
 - provider: vault-secret
   path: app-interface/app-sre-stage/telemeter-stage/observatorium-observatorium-api
-  version: 16
+  version: 19
   annotations:
     qontract.recycle: "true"
 - provider: vault-secret

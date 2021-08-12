@@ -1,0 +1,489 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: ocm
+
+name: saas-ocm-service-log
+description: 'SaaS tracking file for OCM Service Log'
+
+app:
+  $ref: /services/ocm/app.yml
+
+pipelinesProvider:
+  $ref: /services/ocm/pipelines/tekton.ocm-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-uhc-info
+
+managedResourceTypes:
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/app-sre/ocm-service-log
+- quay.io/app-sre/centos
+- quay.io/centos/centos
+- quay.io/app-sre/envoyproxy
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+resourceTemplates:
+- name: ocm-service-log
+  url: https://gitlab.cee.redhat.com/service/ocm-service-log
+  path: /templates/service-template.yml
+  parameters:
+    ENVIRONMENT: production
+    IMAGE_REGISTRY: quay.io
+    IMAGE_REPOSITORY: app-sre/ocm-service-log
+    JWKS_URL: https://api.openshift.com/.well-known/jwks.json
+    REPLICAS: 3
+    ENABLE_TRIGGERS: true
+    RATE_LIMIT: 1000
+    # After openshift upgrade, we're seeing sporadic "http2: server: error reading preface"
+    # errors in log, source IP is openshift router.
+    GODEBUG: http2server=0
+    MEMORY_REQUEST: 200Mi
+    MEMORY_LIMIT: 1Gi
+    CPU_LIMIT: 1
+    CPU_REQUEST: 200m
+  targets:
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-ocm-service-log-gl-build-master
+    parameters:
+      GLOG_V: 5
+      ENABLE_SENTRY: true
+      SENTRY_URL: sentry.stage.devshift.net
+      SENTRY_PROJECT: 15
+      UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_3
+      WEBHOOK_ADDITIONAL_CA_FILE: "/config/service-ca/service-ca.crt"
+      RATE_LIMIT: 1000
+      ENABLE_JQS: true
+      JOB_QUEUE_NAME: "job-queue-osl-staging.fifo"
+      # Defining the triggers in stage for OSL
+      TRIGGERS_CONFIG:
+        - name: "SendGrid Service Webhook"
+          criteria: "Summary like '%RHMI%' or Summary like '%API Management%' or Summary like '%Cluster deleted%'"
+          owner: "pamccart@redhat.com"
+          action:
+            type: "webhook"
+            webhook_parameters:
+              url: "https://ocm-sendgrid-service.sendgrid-stage.svc:8000/api/ocm-sendgrid-service/v1/webhook"
+              verify_ssl: true
+              authentication:
+                method: "none"
+        - name: "Development Example Email"
+          criteria: "Summary = 'Development Test Log - Email'"
+          owner: "tiwillia@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "ocm-basic-log-notification"
+              subject: "A new log has been created against your OpenShift cluster"
+              bcc_address: "tiwillia+osl_trigger_dev@redhat.com"
+              mandrill_global_merge_vars:
+                - name: "TEST_TAG"
+                  content: "foo bar baz buzz"
+        - name: "Basic Event Notification Example Email"
+          criteria: "Summary like '%basic event notification%'"
+          owner: "tiwillia@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              # No template name provided results in the default 'service-log-default' template being used
+              # Subjects sent to mandrill can include dynamic content - mandrill will perform the substitution
+              subject: "*|LOG_SUMMARY|*"
+        - name: "Upgrade maintenance scheduled"
+          criteria: "Summary = 'Upgrade maintenance scheduled'"
+          owner: "wgordon@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "upgrade-scheduled-template"
+              bcc_address: "sd-customer-notifications+upgrades@redhat.com"
+              subject: "*|LOG_SUMMARY|*"
+        - name: "Upgrade maintenance reminder"
+          criteria: "Summary = 'Upgrade maintenance reminder'"
+          owner: "wgordon@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "upgrade-scheduled-template"
+              bcc_address: "sd-customer-notifications+upgrades@redhat.com"
+              subject: "*|LOG_SUMMARY|*"
+        - name: "Upgrade maintenance beginning"
+          criteria: "Summary = 'Upgrade maintenance beginning'"
+          owner: "wgordon@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "upgrade-scheduled-template"
+              bcc_address: "sd-customer-notifications+upgrades@redhat.com"
+              subject: "*|LOG_SUMMARY|*"
+        - name: "Upgrade maintenance delayed"
+          criteria: "Summary = 'Upgrade maintenance delayed'"
+          owner: "wgordon@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "upgrade-ended-template"
+              bcc_address: "sd-customer-notifications+upgrades@redhat.com"
+              subject: "*|LOG_SUMMARY|*"
+        - name: "Upgrade maintenance completed"
+          criteria: "Summary = 'Upgrade maintenance completed'"
+          owner: "wgordon@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "upgrade-ended-template"
+              bcc_address: "sd-customer-notifications+upgrades@redhat.com"
+              subject: "*|LOG_SUMMARY|*"
+        - name: "Upgrade maintenance cancelled"
+          criteria: "Summary = 'Upgrade maintenance cancelled'"
+          owner: "wgordon@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "upgrade-ended-template"
+              bcc_address: "sd-customer-notifications+upgrades@redhat.com"
+              subject: "*|LOG_SUMMARY|*"
+        - name: "Upgrade maintenance failed"
+          criteria: "Summary = 'Upgrade maintenance failed'"
+          owner: "wgordon@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "upgrade-ended-template"
+              bcc_address: "sd-customer-notifications+upgrades@redhat.com"
+              subject: "Upgrade maintenance cancelled"
+        - name: "Upgrade maintenance rescheduled"
+          criteria: "Summary = 'Upgrade maintenance rescheduled'"
+          owner: "wgordon@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "upgrade-ended-template"
+              bcc_address: "sd-customer-notifications+upgrades@redhat.com"
+              subject: "*|LOG_SUMMARY|*"
+        - name: "Generic cluster notification: incident or action required"
+          criteria: "service_name = 'SREManualAction'"
+          owner: "aweiteka@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "generic-sre-notification-template"
+              bcc_address: "sd-customer-notifications+incident@redhat.com"
+              subject: "*|LOG_SUMMARY|*"
+        - name: "Upgrade version available"
+          criteria: "Summary like '%upgrade version available%'"
+          owner: "aweiteka@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "generic-sre-notification-template"
+              bcc_address: "sd-customer-notifications+upgrades@redhat.com"
+              subject: "*|LOG_SUMMARY|*"
+        - name: "Version end of support lifecycle"
+          criteria: "Summary like '%end of supported life cycle%'"
+          owner: "aweiteka@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "generic-sre-notification-template"
+              bcc_address: "sd-customer-notifications+upgrades@redhat.com"
+              subject: "*|LOG_SUMMARY|*"
+        - name: "Email Notification for failed clusters deletion in Openshift Cluster Manager"
+          criteria: "Summary = 'Error deleting cluster in Openshift Cluster Manager'"
+          owner: "pvasanth@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "generic-sre-notification-template"
+              subject: "*|LOG_SUMMARY|*"
+              bcc_address: "sda-devel+delete@redhat.com"  
+        # OSD Trial Related Emails
+        - name: "OSD Trial Cluster Created"
+          criteria: "Summary = 'Trial cluster created'"
+          owner: "tiwillia@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "osd-trial-creation-template"
+              subject: "An OSD Trial Cluster Has Been Created"
+              include_red_hat_associates: true
+              bcc_address: "kstevens@redhat.com"
+        - name: "OSD Trial Cluster Expiration Reminder"
+          criteria: "Summary = 'Trial cluster expiration reminder'"
+          owner: "tiwillia@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "osd-trial-reminder-template"
+              subject: "OSD Trial Cluster Expiration Reminder"
+        - name: "OSD Trial Cluster Expired"
+          criteria: "Summary = 'Trial cluster expired'"
+          owner: "tiwillia@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "osd-trial-deletion-template"
+              subject: "OSD Trial Cluster Has Expired"
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-stage-appsres04ue2.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-ocm-service-log-gl-build-master
+    parameters:
+      GLOG_V: 5
+      ENABLE_SENTRY: true
+      SENTRY_URL: sentry.stage.devshift.net
+      SENTRY_PROJECT: 15
+      UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_3
+      WEBHOOK_ADDITIONAL_CA_FILE: "/config/service-ca/service-ca.crt"
+      ENABLE_JQS: false
+      JOB_QUEUE_NAME: "job-queue-osl-staging.fifo"
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-integration.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-ocm-service-log-gl-build-master
+    parameters:
+      GLOG_V: 5
+      UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_3
+      WEBHOOK_ADDITIONAL_CA_FILE: "/config/service-ca/service-ca.crt"
+      # Resources are lower in INT env since it does not have to be prod-like and there is significantly lower traffic
+      MEMORY_REQUEST: 100Mi
+      MEMORY_LIMIT: 512Mi
+      CPU_REQUEST: 100m
+      CPU_LIMIT: 500m
+      ENABLE_JQS: false
+      JOB_QUEUE_NAME: "job-queue-osl-int.fifo"
+      # Defining the triggers in integration for OSL
+      TRIGGERS_CONFIG:
+        - name: "Example Webhook"
+          criteria: "summary is 'test webhook trigger log'"
+          owner: "tiwillia@redhat.com"
+          action:
+            type: "webhook"
+            webhook_parameters:
+              url: "http://127.0.0.1/webhook"
+              verify_ssl: true
+              authentication:
+                method: "none"
+        - name: "Development Example Email"
+          criteria: "Summary = 'test email include_redhat_associates flag'"
+          owner: "tiwillia@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "ocm-basic-log-notification"
+              subject: "A new log has been created against your OpenShift cluster including redhat associates"
+              bcc_address: "tiwillia+osl_trigger_dev@redhat.com"
+              include_red_hat_associates: true
+              mandrill_global_merge_vars:
+                - name: "TEST_TAG"
+                  content: "foo bar baz buzz"
+        - name: "Email Notification for failed cluster deletion in Openshift Cluster Manager"
+          criteria: "Summary = 'Error deleting cluster in Openshift Cluster Manager'"
+          owner: "pvasanth@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "generic-sre-notification-template"
+              subject: "*|LOG_SUMMARY|*"
+              bcc_address: "sda-devel+delete@redhat.com"
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-production.yml
+    ref: cdea961842ee4b315465d458619b301dec362f47
+    parameters:
+      UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_2
+      GLOG_V: 1
+      ENABLE_SENTRY: true
+      SENTRY_URL: sentry.devshift.net
+      SENTRY_PROJECT: 4
+      WEBHOOK_ADDITIONAL_CA_FILE: "/config/service-ca/service-ca.crt"
+      RATE_LIMIT: 1000
+      ENABLE_JQS: false
+      JOB_QUEUE_NAME: "job-queue-osl-prod.fifo"
+      # Defining the triggers in production for OSL
+      TRIGGERS_CONFIG:
+        - name: "SendGrid Service Webhook"
+          criteria: "Summary like '%RHMI%' or Summary like '%API Management%' or Summary like '%Cluster deleted%'"
+          owner: "pamccart@redhat.com"
+          action:
+            type: "webhook"
+            webhook_parameters:
+              url: "https://ocm-sendgrid-service.sendgrid-production.svc:8000/api/ocm-sendgrid-service/v1/webhook"
+              verify_ssl: true
+              authentication:
+                method: "none"
+        - name: "Development Example Email"
+          criteria: "Summary = 'Development Test Log - Email'"
+          owner: "tiwillia@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "ocm-basic-log-notification"
+              subject: "A new log has been created against your OpenShift cluster"
+              bcc_address: "tiwillia+osl_trigger_dev@redhat.com"
+              mandrill_global_merge_vars:
+                - name: "TEST_TAG"
+                  content: "foo bar baz buzz"
+        - name: "Basic Event Notification Example Email"
+          criteria: "Summary like '%basic event notification%'"
+          owner: "tiwillia@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              # No template name provided results in the default 'service-log-default' template being used
+              # Subjects sent to mandrill can include dynamic content - mandrill will perform the substitution
+              subject: "*|LOG_SUMMARY|*"
+        - name: "Upgrade maintenance scheduled"
+          criteria: "Summary = 'Upgrade maintenance scheduled'"
+          owner: "wgordon@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "upgrade-scheduled-template"
+              bcc_address: "sd-customer-notifications+upgrades@redhat.com"
+              subject: "*|LOG_SUMMARY|*"
+        - name: "Upgrade maintenance reminder"
+          criteria: "Summary = 'Upgrade maintenance reminder'"
+          owner: "wgordon@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "upgrade-scheduled-template"
+              bcc_address: "sd-customer-notifications+upgrades@redhat.com"
+              subject: "*|LOG_SUMMARY|*"
+        - name: "Upgrade maintenance beginning"
+          criteria: "Summary = 'Upgrade maintenance beginning'"
+          owner: "wgordon@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "upgrade-scheduled-template"
+              bcc_address: "sd-customer-notifications+upgrades@redhat.com"
+              subject: "*|LOG_SUMMARY|*"
+        - name: "Upgrade maintenance delayed"
+          criteria: "Summary = 'Upgrade maintenance delayed'"
+          owner: "wgordon@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "upgrade-ended-template"
+              bcc_address: "sd-customer-notifications+upgrades@redhat.com"
+              subject: "*|LOG_SUMMARY|*"
+        - name: "Upgrade maintenance completed"
+          criteria: "Summary = 'Upgrade maintenance completed'"
+          owner: "wgordon@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "upgrade-ended-template"
+              bcc_address: "sd-customer-notifications+upgrades@redhat.com"
+              subject: "*|LOG_SUMMARY|*"
+        - name: "Upgrade maintenance cancelled"
+          criteria: "Summary = 'Upgrade maintenance cancelled'"
+          owner: "wgordon@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "upgrade-ended-template"
+              bcc_address: "sd-customer-notifications+upgrades@redhat.com"
+              subject: "*|LOG_SUMMARY|*"
+        - name: "Upgrade maintenance rescheduled"
+          criteria: "Summary = 'Upgrade maintenance rescheduled'"
+          owner: "wgordon@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "upgrade-ended-template"
+              bcc_address: "sd-customer-notifications+upgrades@redhat.com"
+              subject: "*|LOG_SUMMARY|*"
+        - name: "Upgrade maintenance failed"
+          criteria: "Summary = 'Upgrade maintenance failed'"
+          owner: "wgordon@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "upgrade-ended-template"
+              bcc_address: "sd-customer-notifications+upgrades@redhat.com"
+              subject: "Upgrade maintenance cancelled"
+        - name: "Generic cluster notification: incident or action required"
+          criteria: "service_name = 'SREManualAction'"
+          owner: "wgordon@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "generic-sre-notification-template"
+              bcc_address: "sd-customer-notifications+incident@redhat.com"
+              subject: "*|LOG_SUMMARY|*"
+        - name: "Upgrade version available"
+          criteria: "Summary like '%upgrade version available%'"
+          owner: "aweiteka@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "generic-sre-notification-template"
+              bcc_address: "sd-customer-notifications+upgrades@redhat.com"
+              subject: "*|LOG_SUMMARY|*"
+        - name: "Version end of support lifecycle"
+          criteria: "Summary like '%end of supported life cycle%'"
+          owner: "aweiteka@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "generic-sre-notification-template"
+              bcc_address: "sd-customer-notifications+upgrades@redhat.com"
+              subject: "*|LOG_SUMMARY|*"
+        - name: "CA Cert Auto Renewal"
+          criteria: "Summary like '%CA certificate automatic renewal%'"
+          owner: "aweiteka@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "ca-cert-auto-renewal"
+              bcc_address: "sd-customer-notifications+cacert@redhat.com"
+              subject: "*|LOG_SUMMARY|*"
+        # OSD Trial Related Emails
+        - name: "OSD Trial Cluster Created"
+          criteria: "Summary = 'Trial cluster created'"
+          owner: "tiwillia@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "osd-trial-creation-template"
+              subject: "An OSD Trial Cluster Has Been Created"
+              include_red_hat_associates: true
+              bcc_address: "kstevens@redhat.com"
+        - name: "OSD Trial Cluster Expiration Reminder"
+          criteria: "Summary = 'Trial cluster expiration reminder'"
+          owner: "tiwillia@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "osd-trial-reminder-template"
+              subject: "OSD Trial Cluster Expiration Reminder"
+        - name: "OSD Trial Cluster Expired"
+          criteria: "Summary = 'Trial cluster expired'"
+          owner: "tiwillia@redhat.com"
+          action:
+            type: "email"
+            email_parameters:
+              mandrill_template_name: "osd-trial-deletion-template"
+              subject: "OSD Trial Cluster Has Expired"

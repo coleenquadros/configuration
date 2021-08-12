@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: ocm-sendgrid
@@ -10,8 +10,8 @@ description: 'SaaS tracking file for OCM Sengrid Service'
 app:
   $ref: /services/sendgrid/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/sendgrid/pipelines/tekton.sendgrid-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
@@ -45,7 +45,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/sendgrid/namespaces/sendgrid-stage.yml
     ref: master
-    upstream: service-ocm-sendgrid-service-gl-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-ocm-sendgrid-service-gl-build-master
     parameters:
       GLOG_V: 5
       # leaving sentry set to false, until sentry project/team/membership is setup
@@ -53,14 +56,17 @@ resourceTemplates:
   - namespace:
       $ref: /services/sendgrid/namespaces/sendgrid-stage-appsres04ue2.yml
     ref: master
-    upstream: service-ocm-sendgrid-service-gl-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-ocm-sendgrid-service-gl-build-master
     parameters:
       GLOG_V: 5
       # leaving sentry set to false, until sentry project/team/membership is setup
       ENABLE_SENTRY: false
   - namespace:
       $ref: /services/sendgrid/namespaces/sendgrid-production.yml
-    ref: 15cebc44f1fd78f17a5d1c0e5111ba0daeb3d881
+    ref: c43064b1c3bd1356886c4ce3926ccf5267855c9e
     parameters:
       GLOG_V: 5
       # leaving sentry set to false, until sentry project/team/membership is setup

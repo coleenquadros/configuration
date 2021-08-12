@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: approval
@@ -11,15 +11,13 @@ description: Approval app on the Insights Platform
 app:
   $ref: /services/insights/approval/app.yml
 
-instance:
-  $ref: /dependencies/ci-ext/ci-ext.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
-
-timeout: 5
 
 managedResourceTypes:
   - ClowdApp
@@ -46,14 +44,20 @@ resourceTemplates:
     - namespace:
         $ref: /services/insights/approval/namespaces/approval-prod.yml
       ref: d7392ae49bd92df3ee11e702cb957d5507cf8ddd
-      upstream: RedHatInsights-approval-api-gh-build-main
+      upstream:
+        instance:
+          $ref: /dependencies/ci-ext/ci-ext.yml
+        name: RedHatInsights-approval-api-gh-build-main
       parameters:
         ENV_NAME: prod
         MIN_REPLICAS: 3
     - namespace:
         $ref: /services/insights/approval/namespaces/stage-approval-stage.yml
       ref: main
-      upstream: RedHatInsights-approval-api-gh-build-main
+      upstream:
+        instance:
+          $ref: /dependencies/ci-ext/ci-ext.yml
+        name: RedHatInsights-approval-api-gh-build-main
       parameters:
         ENV_NAME: stage
         MIN_REPLICAS: 1

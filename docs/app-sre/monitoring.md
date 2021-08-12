@@ -374,8 +374,6 @@ Currently added datasources:
 - `quays02ue1-prometheus`: app-sre managed prometheus for `quays02ue1` cluster
 - `AWS app-sre`: cloudwatch AWS appsre
 - `dsaas-graphite`: graphite (osd-monitor) on `app-sre-prod-03` cluster
-- `dsaas-bayesian-stage-graphite`: bayesian graphite (osd-monitor) on `app-sre-stage-02` cluster
-- `dsaas-bayesian-production-graphite`: bayesian graphite (osd-monitor) on `app-sre-prod-03` cluster
 - `elasticsearch-monitoring`: `.monitoring-es*` database on AWS elasitcsearch
 - `elasticsearch-logstash`: `.monitoring-logstash*` database on AWS elasitcsearch
 

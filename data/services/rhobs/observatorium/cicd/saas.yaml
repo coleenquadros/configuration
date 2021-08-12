@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: observatorium
@@ -10,8 +10,8 @@ description: SaaS tracking file for Observatorium
 app:
   $ref: /services/rhobs/observatorium/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/rhobs/observatorium/pipelines/observatorium-pipeline.app-sre-prod-01.yaml
 
 slack:
   workspace:
@@ -62,25 +62,26 @@ resourceTemplates:
     JAEGER_AGENT_IMAGE: quay.io/app-sre/jaegertracing-jaeger-agent
     MEMCACHED_EXPORTER_IMAGE: quay.io/prometheus/memcached-exporter
     MEMCACHED_IMAGE: registry.redhat.io/rhel8/memcached
-    OBSERVATORIUM_API_IMAGE: quay.io/observatorium/observatorium
+    OBSERVATORIUM_API_IMAGE: quay.io/observatorium/api
     OPA_AMS_IMAGE: quay.io/observatorium/opa-ams
   targets:
   - namespace:
-      $ref: /services/rhobs/telemeter/namespaces/telemeter-stage.yml
-    ref: 1281bd1a1b10d1c725cb6ec51f2c8c8152953037
+      $ref: /services/rhobs/observatorium/namespaces/observatorium-stage.yml
+    ref: ecf1be463385c766b203575633657855c15e1452
     parameters:
-      NAMESPACE: telemeter-stage
-      OBSERVATORIUM_METRICS_NAMESPACE: telemeter-stage
+      NAMESPACE: observatorium-stage
+      OBSERVATORIUM_METRICS_NAMESPACE: observatorium-metrics-stage
       OBSERVATORIUM_LOGS_NAMESPACE: observatorium-logs-stage
-      OPA_AMS_IMAGE_TAG: master-2021-02-24-fc0d722
+      OPA_AMS_IMAGE_TAG: master-2021-07-14-d517f70
       GUBERNATOR_IMAGE_TAG: 1.0.0-rc.1
       JAEGER_AGENT_IMAGE_TAG: 1.22.0
       MEMCACHED_EXPORTER_IMAGE_TAG: v0.6.0
       MEMCACHED_IMAGE_TAG: 1.5
-      OBSERVATORIUM_API_IMAGE_TAG: master-2021-03-26-v0.1.1-200-gea0242a
-      SERVICE_ACCOUNT_NAME: prometheus-telemeter
+      OBSERVATORIUM_API_IMAGE_TAG: master-2021-06-23-v0.1.2-11-g5219f94
+      SERVICE_ACCOUNT_NAME: observatorium
       DPTP_ORGANIZATION_ID: 1oZtjZXK3EP4kJSaYXwMmorAqnS
-  - namespace:
+      JAEGER_COLLECTOR_NAMESPACE: observatorium-stage
+  - namespace: # TODO(kakkoyun): Remove after migration.
       $ref: /services/rhobs/telemeter/namespaces/telemeter-production.yml
     ref: 1281bd1a1b10d1c725cb6ec51f2c8c8152953037
     parameters:
@@ -92,7 +93,7 @@ resourceTemplates:
       JAEGER_AGENT_IMAGE_TAG: 1.22.0
       MEMCACHED_EXPORTER_IMAGE_TAG: v0.6.0
       MEMCACHED_IMAGE_TAG: 1.5
-      OBSERVATORIUM_API_IMAGE_TAG: master-2021-03-09-v0.1.1-198-g937be40
+      OBSERVATORIUM_API_IMAGE_TAG: master-2021-06-23-v0.1.2-11-g5219f94
       SERVICE_ACCOUNT_NAME: prometheus-telemeter
       DPTP_ORGANIZATION_ID: 1oZsAlLo1Nzt3LlyUnHQU13LWJK
 - name: jaeger
@@ -102,18 +103,18 @@ resourceTemplates:
     IMAGE: quay.io/app-sre/jaegertracing-all-in-one
   targets:
   - namespace:
-      $ref: /services/rhobs/telemeter/namespaces/telemeter-stage.yml
-    ref: 3830f23a4af9f3ce972413c05d2047a95951c001
+      $ref: /services/rhobs/observatorium/namespaces/observatorium-stage.yml
+    ref: 2cb8cf57e2d7b94fc577288913cc9e77de49b8f2
     parameters:
-      NAMESPACE: telemeter-stage
+      NAMESPACE: observatorium-stage
       IMAGE_TAG: '1.22.0'
       REPLICAS: '1'
       JAEGER_CPU_REQUEST: '100m'
       JAEGER_MEMORY_REQUEST: '1Gi'
       JAEGER_CPU_LIMITS: '500m'
       JAEGER_MEMORY_LIMITS: '4Gi'
-      SERVICE_ACCOUNT_NAME: prometheus-telemeter
-  - namespace:
+      SERVICE_ACCOUNT_NAME: observatorium
+  - namespace: # TODO(kakkoyun): Remove after migration.
       $ref: /services/rhobs/telemeter/namespaces/telemeter-production.yml
     ref: 3830f23a4af9f3ce972413c05d2047a95951c001
     parameters:
@@ -132,11 +133,11 @@ resourceTemplates:
     IMAGE: quay.io/conprof/conprof
   targets:
   - namespace:
-      $ref: /services/rhobs/telemeter/namespaces/telemeter-stage.yml
-    ref: 3830f23a4af9f3ce972413c05d2047a95951c001
+      $ref: /services/rhobs/observatorium/namespaces/observatorium-stage.yml
+    ref: a513f3676c8430265208111048dec36ea86fcd56
     parameters:
-      NAMESPACE: telemeter-stage
-      OBSERVATORIUM_METRICS_NAMESPACE: telemeter-stage
+      NAMESPACE: observatorium-stage
+      OBSERVATORIUM_METRICS_NAMESPACE: observatorium-metrics-stage
       OBSERVATORIUM_MST_NAMESPACE: observatorium-mst-stage
       OBSERVATORIUM_LOGS_NAMESPACE: observatorium-logs-stage
       IMAGE_TAG: 'master-2021-02-24-33f5514'
@@ -145,8 +146,8 @@ resourceTemplates:
       CONPROF_MEMORY_REQUEST: '1Gi'
       CONPROF_CPU_LIMITS: '500m'
       CONPROF_MEMORY_LIMITS: '4Gi'
-      SERVICE_ACCOUNT_NAME: prometheus-telemeter
-  - namespace:
+      SERVICE_ACCOUNT_NAME: observatorium
+  - namespace: # TODO(kakkoyun): Remove after migration.
       $ref: /services/rhobs/telemeter/namespaces/telemeter-production.yml
     ref: 3830f23a4af9f3ce972413c05d2047a95951c001
     parameters:

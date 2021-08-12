@@ -11,9 +11,9 @@ spec:
   groups:
     - name: kas-fleet-manager-kafka-operations-latency-p90.slo.rules
       rules:
-        - alert: KasFleetManagerKafkaOperationsLatencyP90BudgetBurn
+        - alert: KasFleetManagerKafkaOperationsLatency30mto6hP90BudgetBurn
           annotations:
-            message: "High 6h Kafka operations p90 latency budget burn for Kas Fleet Manager (current value: {{ $value }})"
+            message: "High 6h Kafka operations p90 latency budget burn for Kas Fleet Manager (current value: {{ $value | humanize }})"
             dashboard: "https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
             runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#kafka-cluster-provisioning-latency"
           expr: |
@@ -26,10 +26,10 @@ spec:
             quantile: "90"
             namespace: managed-services-production
             jobType: kafka_create
-            severity: info
-        - alert: KasFleetManagerKafkaOperationsLatencyP90BudgetBurn
+            severity: critical
+        - alert: KasFleetManagerKafkaOperationsLatency2hto1dor6hto3dP90BudgetBurn
           annotations:
-            message: "High 1d/3d Kafka operations p90 latency budget burn for Kas Fleet Manager API p99 (current value: {{ $value }})"
+            message: "High 1d/3d Kafka operations p90 latency budget burn for Kas Fleet Manager API p99 (current value: {{ $value | humanize }})"
             dashboard: "https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
             runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#kafka-cluster-provisioning-latency"
           expr: |
@@ -50,7 +50,7 @@ spec:
             quantile: "90"
             namespace: managed-services-production
             jobType: kafka_create
-            severity: info
+            severity: high
         - expr: |
             1 - (
               sum(rate(kas_fleet_manager_worker_kafka_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-production",le="900",jobType="kafka_create"}[5m]))
@@ -144,9 +144,9 @@ spec:
           record: latencytarget:kas_fleet_manager_worker_kafka_duration:rate3d
     - name: kas-fleet-manager-kafka-operations-latency-p99.slo.rules
       rules:
-        - alert: KasFleetManagerKafkaOperationsLatencyP99BudgetBurn
+        - alert: KasFleetManagerKafkaOperationsLatency30mto6hP99BudgetBurn
           annotations:
-            message: "High 6h Kafka operations p99 latency budget burn for Kas Fleet Manager (current value: {{ $value }})"
+            message: "High 6h Kafka operations p99 latency budget burn for Kas Fleet Manager (current value: {{ $value | humanize }})"
             dashboard: "https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
             runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#kafka-cluster-provisioning-latency"
           expr: |
@@ -159,10 +159,10 @@ spec:
             quantile: "99"
             namespace: managed-services-production
             jobType: kafka_create
-            severity: info
-        - alert: KasFleetManagerKafkaOperationsLatencyP99BudgetBurn
+            severity: critical
+        - alert: KasFleetManagerKafkaOperationsLatency2hto1dor6hto3dP99BudgetBurn
           annotations:
-            message: "High 1d/3d Kafka operations p99 latency budget burn for Kas Fleet Manager API p99 (current value: {{ $value }})"
+            message: "High 1d/3d Kafka operations p99 latency budget burn for Kas Fleet Manager API p99 (current value: {{ $value | humanize }})"
             dashboard: "https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
             runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#kafka-cluster-provisioning-latency"
           expr: |
@@ -183,7 +183,7 @@ spec:
             quantile: "99"
             namespace: managed-services-production
             jobType: kafka_create
-            severity: info
+            severity: high
         - expr: |
             1 - (
               sum(rate(kas_fleet_manager_worker_kafka_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-production",le="1800",jobType="kafka_create"}[5m]))

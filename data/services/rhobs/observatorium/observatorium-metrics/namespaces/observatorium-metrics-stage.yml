@@ -28,10 +28,6 @@ managedResourceTypes:
 - Role
 - RoleBinding
 - ServiceAccount
-# TODO(kakkoyun): Uncomment while migrating the namespaces.
-# - Route
-# - ServiceMonitor
-# - ClusterRole
 
 managedTerraformResources: true
 
@@ -39,15 +35,15 @@ terraformResources:
 - provider: s3
   account: app-sre
   identifier: telemeter-thanos-stage
-  defaults: /terraform/resources/s3-private-1.yml
+  defaults: /terraform/resources/telemeter/s3-private-1.yml
   output_resource_name: telemeter-thanos-stage-s3
 
 openshiftResources:
 # Secrets
 # TODO(kakkoyun): Move secrets update namespaces. telemeter-stage -> observatorium-metrics-stage
-# - provider: vault-secret
-#   path: app-interface/app-sre-stage/telemeter-stage/thanos-objectstorage
-#   version: 1
+- provider: vault-secret
+  path: app-interface/app-sre-stage/telemeter-stage/thanos-objectstorage
+  version: 1
 - provider: vault-secret
   path: app-interface/app-sre-stage/telemeter-stage/query-frontend-proxy
   version: 1
@@ -58,10 +54,6 @@ openshiftResources:
   path: app-interface/app-sre-stage/telemeter-stage/compact-proxy
   version: 1
 # Routes
-- provider: route
-  path: /app-sre-stage/observatorium-metrics-stage/infogw-data.route.yaml
-  vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.api.stage.openshift.com
-  vault_tls_secret_version: 3
 - provider: route
   path: /app-sre-stage/observatorium-metrics-stage/observatorium-thanos-compact-stage.route.yaml
   vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.api.stage.openshift.com

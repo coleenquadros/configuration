@@ -1,0 +1,41 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: app-interface
+
+name: saas-visual-app-interface-internal
+description: 'SaaS tracking file for Visual App-interface'
+
+app:
+  $ref: /services/visual-app-interface.devshift.net/app.yml
+
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/app-sre/visual-qontract
+- quay.io/pusher/oauth2_proxy
+
+resourceTemplates:
+- name: visual-qontract
+  url: https://github.com/app-sre/visual-qontract
+  path: /openshift/visual-qontract.yaml
+  parameters:
+    MEMORY_REQUESTS: 64Mi
+    MEMORY_LIMIT: 96Mi
+    CPU_REQUESTS: 100m
+    CPU_LIMIT: 200m
+  targets:
+  - namespace:
+      $ref: /services/visual-app-interface.devshift.net/namespaces/visual-qontract-production-internal.yml
+    ref: 5b8c9a5e96706687c3d4c8930a70de6f035ef42d

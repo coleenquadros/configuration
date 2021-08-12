@@ -1,0 +1,68 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+  - /observability/prometheusrules/kas-fleet-manager-slos-availability-stage.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+  - interval: 1m
+    input_series:
+      # 0m  - 30m   all good
+      # 30m - 60m   20% error rate
+      # 60m - 100m  50% error rate
+      - series: 'haproxy_backend_http_responses_total{route="kas-fleet-manager",exported_namespace="managed-services-stage",code="5xx"}'
+        values: '0+0x30   0+2x30    62+5x40'
+      - series: 'haproxy_backend_http_responses_total{route="kas-fleet-manager",exported_namespace="managed-services-stage",code="2xx"}'
+        values: '0+1x30   31+8x30   279+5x40'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: KasFleetManagerAPI30mto6hErrorBudgetBurn
+        exp_alerts: [ ]
+      - eval_time: 60m
+        alertname: KasFleetManagerAPI30mto6hErrorBudgetBurn
+        exp_alerts: [ ]
+      - eval_time: 100m
+        alertname: KasFleetManagerAPI30mto6hErrorBudgetBurn
+        exp_alerts:
+          - exp_labels:
+              alertname: KasFleetManagerAPI30mto6hErrorBudgetBurn
+              exported_namespace: managed-services-stage
+              route: kas-fleet-manager
+              service: kas-fleet-manager
+              severity: high
+            exp_annotations:
+              dashboard: "https://grafana.stage.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
+              message: "High 6h error budget burn for Kafka Service Fleet Manager in the last 6 hours (current value: 500m)"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#kas-fleet-manager-availability"
+  - interval: 1m
+    input_series:
+      # 0m  - 60m   all good
+      # 60m - 90m   10% error rate
+      # 90m - 220m  20% error rate
+      - series: 'haproxy_backend_http_responses_total{route="kas-fleet-manager",exported_namespace="managed-services-stage",code="5xx"}'
+        values: '0+0x60   0+1x30    31+2x130'
+      - series: 'haproxy_backend_http_responses_total{route="kas-fleet-manager",exported_namespace="managed-services-stage",code="2xx"}'
+        values: '0+1x60   61+9x30   340+8x130'
+    alert_rule_test:
+      - eval_time: 60m
+        alertname: KasFleetManagerAPI2hto1dErrorBudgetBurn
+        exp_alerts: [ ]
+      - eval_time: 90m
+        alertname: KasFleetManagerAPI2hto1dErrorBudgetBurn
+        exp_alerts: [ ]
+      - eval_time: 220m
+        alertname: KasFleetManagerAPI2hto1dErrorBudgetBurn
+        exp_alerts:
+          - exp_labels:
+              alertname: KasFleetManagerAPI2hto1dErrorBudgetBurn
+              exported_namespace: managed-services-stage
+              route: kas-fleet-manager
+              service: kas-fleet-manager
+              severity: high
+            exp_annotations:
+              dashboard: "https://grafana.stage.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
+              message: "High 1d error budget burn for Kafka Service Fleet Manager (current value: 200m)"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#kas-fleet-manager-availability"
+

@@ -1,0 +1,23 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  creationTimestamp: null
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: app-sre-openshift-saas-deployment-jobs
+spec:
+  groups:
+  - name: app-sre-openshift-saas-deployment-jobs
+    rules:
+    - alert: AppSRESaasQontractReconcileNotSuccessfulPipelineRun
+      expr: app_sre_tekton_pipelinerun_task_status{saas_file_name="saas-qontract-reconcile",env_name="app-interface-production"} > 0
+      labels:
+        severity: medium
+        service: app-interface
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
+        message: "{{ $labels.saas_file_name }} Tekton PipelineRun deployment job for {{ $labels.env_name }} has not been successful"
+        link_url: "{{ $labels.tkn_cluster_console_url }}/k8s/ns/{{ $labels.tkn_namespace_name }}/tekton.dev~v1beta1~PipelineRun/{{ $labels.pipelinerun_name }}"

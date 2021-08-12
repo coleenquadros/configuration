@@ -1,0 +1,46 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+# Labels are metadata useful for querying Qontract using GraphQL
+labels:
+  service: compliance
+  platform: insights
+
+name: ci-int-insights-compliance
+description: 'Job for building Insights Compliance app'
+
+app:
+  $ref: /services/insights/compliance/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+type: jobs
+
+config:
+- project:
+    name: compliance-backend
+    label: insights
+    node: insights
+    quay_org: cloudservices
+    gh_org: RedHatInsights
+    gh_repo: compliance-backend
+    jobs:
+    - "insights-gh-pr-check":
+        display_name: compliance-backend pr-check
+    - "insights-gh-build-master":
+        display_name: compliance-backend build-master
+- project:
+    name: compliance-ssg
+    label: insights
+    node: rhel8
+    quay_org: cloudservices
+    gl_group: insights-platform
+    gl_project: compliance-ssg
+    jobs:
+    - "insights-gl-pr-check":
+        display_name: compliance-ssg pr-check
+        branch: "main"
+    - "insights-gl-build-master":
+        display_name: compliance-ssg build-master
+        branch: "main"

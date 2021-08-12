@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: module-update-router
@@ -11,15 +11,13 @@ description: module-update-router
 app:
   $ref: /services/insights/module-update-router/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
-
-timeout: 5
 
 managedResourceTypes:
   - Service
@@ -48,11 +46,17 @@ resourceTemplates:
       - namespace:
           $ref: /services/insights/module-update-router/namespaces/stage-module-update-router-stage.yml
         ref: master
-        upstream: RedHatInsights-module-update-router-gh-build-master
+        upstream:
+          instance:
+            $ref: /dependencies/ci-int/ci-int.yml
+          name: RedHatInsights-module-update-router-gh-build-master
       - namespace:
           $ref: /services/insights/module-update-router/namespaces/module-update-router-fedramp-stage.yml
         ref: master
-        upstream: RedHatInsights-module-update-router-gh-build-master
+        upstream:
+          instance:
+            $ref: /dependencies/ci-int/ci-int.yml
+          name: RedHatInsights-module-update-router-gh-build-master
       - namespace:
           $ref: /services/insights/module-update-router/namespaces/module-update-router-prod.yml
         ref: 608a22c0ddbf16a626ae1dc7806e8705a7825ccf

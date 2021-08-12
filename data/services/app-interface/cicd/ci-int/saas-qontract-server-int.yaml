@@ -1,0 +1,50 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: app-interface
+
+name: saas-qontract-server-int
+description: 'SaaS tracking file for App-interface'
+
+app:
+  $ref: /services/app-interface/app.yml
+
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+- PodDisruptionBudget
+
+imagePatterns:
+- quay.io/app-sre/qontract-server
+- quay.io/app-sre/nginx-gate
+- quay.io/app-sre/s3-reload
+- quay.io/app-sre/busybox
+
+resourceTemplates:
+- name: qontract-server
+  url: https://github.com/app-sre/qontract-server
+  path: /openshift/app-interface.yaml
+  parameters:
+    IMAGE_GATE_TAG: bfa0da9
+    CPU_REQUESTS: 600m
+    CPU_LIMIT: 900m
+    MEMORY_REQUESTS: 512Mi
+    MEMORY_LIMIT: 1Gi
+    S3RELOADER_CPU_REQUESTS: 15m
+    S3RELOADER_CPU_LIMIT: 30m
+    REPLICAS: 1
+  targets:
+  - namespace:
+      $ref: /services/app-interface/namespaces/app-interface-production-int.yml
+    ref: f998217441a95f5853e82c04bfd8c21f9399818e
+    parameters:
+      REPLICAS: 3

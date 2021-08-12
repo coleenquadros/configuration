@@ -10,11 +10,11 @@ description: Insights platform-mq-perf on the Stage cluster under e2e-deploy/ocd
 cluster:
   $ref: /openshift/insights/cluster-insights-perf.yml
 
-#limitRanges:
-#  $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
+# limitRanges:
+#   $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
 
-#quota:
-#  $ref: /services/insights/strimzi/strimzi-quota.yml
+# quota:
+#   $ref: /services/insights/strimzi/strimzi-quota.yml
 
 app:
   $ref: /services/insights/strimzi/app.yml
@@ -33,15 +33,54 @@ networkPoliciesAllow: []
 
 managedRoles: true
 
-#managedTerraformResources: true
+managedTerraformResources: true
 
-# terraformResources:
+terraformResources:
 # - provider: cloudwatch
-#   account: insights-stage
-#   identifier: platform-mq-stage
-#   defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+#   account: insights-perf
+#   identifier: platform-mq-perf
+#   defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
 #   output_resource_name: cloudwatch
-#   es_identifier: kibana-elasticsearch
+- provider: s3
+  account: insights-perf
+  identifier: insights-client-metrics-perf
+  defaults: /terraform/resources/s3-gdpr-1.yml
+  output_resource_name: insights-client-metrics-strimzi-bucket
+- provider: s3
+  account: insights-perf
+  identifier: insights-warehouse-perf
+  defaults: /terraform/resources/s3-gdpr-1.yml
+  output_resource_name: insights-warehouse-strimzi-bucket
+- provider: aws-iam-service-account
+  account: insights-perf
+  identifier: strimzi-bucket-read-write
+  variables:
+    aws_region: us-east-1
+  user_policy:
+    {
+      "Version": "2012-10-17",
+      "Statement": [{
+        "Effect": "Allow",
+        "Action": [
+          "s3:ListBucket",
+        ],
+        "Resource": [
+          "arn:aws:s3:::insights-client-metrics-perf",
+          "arn:aws:s3:::insights-warehouse-perf",
+        ]
+      },
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "s3:*Object"
+                      ],
+                      "Resource": [
+                        "arn:aws:s3:::insights-client-metrics-perf/*",
+                        "arn:aws:s3:::insights-warehouse-perf/*",
+                      ]
+                    }]
+    }
+  output_resource_name: strimzi-bucket-read-write
 
 managedResourceTypes:
 - ServiceAccount
@@ -59,7 +98,7 @@ openshiftResources:
   type: kubernetes.io/dockerconfigjson
   name: quay-cloudservices-pull
 - provider: resource
-  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
+  path: /insights-perf/shared/private-image-puller.serviceaccount.yaml
 - provider: resource
   path: /insights-stage/strimzi/xjoin-jenkins.role.yaml
 - provider: resource
@@ -68,3 +107,6 @@ openshiftResources:
   path: app-interface/global/quay/app-sre/quay.io
   version: 2
   type: kubernetes.io/dockercfg
+# - provider: resource-template
+#   type: extracurlyjinja2
+#   path: /insights-stage/platform-mq-stage/kafka-cyndi.secret.yaml

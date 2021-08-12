@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: ingress
@@ -11,15 +11,13 @@ description: ingress app on the Insights Platform via clowder
 app:
   $ref: /services/insights/ingress/app.yml
 
-instance:
-  $ref: /dependencies/ci-ext/ci-ext.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
-
-timeout: 5
 
 managedResourceTypes:
 - ClowdApp
@@ -44,32 +42,40 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/ingress/namespaces/stage-ingress-stage.yml
     ref: master
-    upstream: RedHatInsights-insights-puptoo-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-puptoo-gh-build-master
     parameters:
       MIN_REPLICAS: 4
       ENV_NAME: stage
-      HABERDASHER_EMITTER: kafka
-      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
-      HABERDASHER_KAFKA_TOPIC: platform.logging.logs
   - namespace:
       $ref: /services/insights/ingress/namespaces/ingress-fedramp-stage.yml
     ref: master
-    upstream: RedHatInsights-insights-puptoo-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-puptoo-gh-build-master
     parameters:
       MIN_REPLICAS: 4
-      HABERDASHER_EMITTER: kafka
-      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
-      HABERDASHER_KAFKA_TOPIC: platform.logging.logs
+      KAFKA_LOGGER: DEBUG
   - namespace:
       $ref: /services/insights/ingress/namespaces/ingress-prod.yml
-    ref: b1c838bc8056f409d0b98e7b3b2e9403a52d7ba0
+    ref: 48c425813d79054c3417ca6fbccf1f071bb9507c
     parameters:
       MIN_REPLICAS: 64
       ENV_NAME: prod
-      HABERDASHER_EMITTER: kafka
-      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
-      HABERDASHER_KAFKA_TOPIC: platform.logging.logs
       MEMORY_LIMIT: 2Gi
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ocm.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-puptoo-ocm
+    parameters:
+      ENV_NAME: env-ocm
+      MIN_REPLICAS: 4
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
@@ -83,23 +89,40 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/ingress/namespaces/stage-ingress-stage.yml
     ref: master
-    upstream: RedHatInsights-insights-ingress-go-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-ingress-go-gh-build-master
     parameters:
       ENV_NAME: stage
       INGRESS_STAGEBUCKET: upload-stage
+      INGRESS_PAYLOADTRACKERURL: http://payload-tracker.payload-tracker-stage.svc.cluster.local:8080/v1/payloads/
   - namespace:
       $ref: /services/insights/ingress/namespaces/ingress-fedramp-stage.yml
     ref: master
-    upstream: RedHatInsights-insights-ingress-go-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-ingress-go-gh-build-master
     parameters:
       INGRESS_STAGEBUCKET: upload-fedramp-stage
   - namespace:
       $ref: /services/insights/ingress/namespaces/ingress-prod.yml
-    ref: ce29e784b7b253387a6b827e178069bde6d45724
+    ref: fe9508cd4b9750098b40c804c5510e647c161381
     parameters:
       ENV_NAME: prod
       INGRESS_STAGEBUCKET: insights-ingress-prod
+      INGRESS_PAYLOADTRACKERURL: http://payload-tracker.payload-tracker-prod.svc.cluster.local:8080/v1/payloads/
       MIN_REPLICAS: 10
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ocm.yml
+    ref: master
+    parameters:
+      ENV_NAME: env-ocm
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-ingress-ocm
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
@@ -113,7 +136,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/ingress/namespaces/stage-ingress-stage.yml
     ref: master
-    upstream: RedHatInsights-insights-storage-broker-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-storage-broker-gh-build-master
     parameters:
       MIN_REPLICAS: 4
       ENV_NAME: stage
@@ -122,13 +148,13 @@ resourceTemplates:
       PERM_BUCKET: upload-stage
       REJECT_BUCKET: insights-ingress-rejected-stage
       BUCKET_MAP_FILE: /var/config.yaml
-      HABERDASHER_EMITTER: kafka
-      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
-      HABERDASHER_KAFKA_TOPIC: platform.logging.logs
   - namespace:
       $ref: /services/insights/ingress/namespaces/ingress-fedramp-stage.yml
     ref: master
-    upstream: RedHatInsights-insights-storage-broker-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-storage-broker-gh-build-master
     parameters:
       MIN_REPLICAS: 4
       OPENSHIFT_BUCKET: insights-buck-it-openshift-fedramp-stage
@@ -136,12 +162,9 @@ resourceTemplates:
       PERM_BUCKET: upload-fedramp-stage
       REJECT_BUCKET: insights-ingress-rejected-fedramp-stage
       BUCKET_MAP_FILE: /var/config.yaml
-      HABERDASHER_EMITTER: kafka
-      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
-      HABERDASHER_KAFKA_TOPIC: platform.logging.logs
   - namespace:
       $ref: /services/insights/ingress/namespaces/ingress-prod.yml
-    ref: fa2402079a9cc5ce46724087b4b66a22616aa23a
+    ref: 07c4163522ac2baa89c75c15c34888d02665b5b6
     parameters:
       MIN_REPLICAS: 3
       ENV_NAME: prod
@@ -150,17 +173,16 @@ resourceTemplates:
       ANSIBLE_BUCKET: insights-buck-it-ansible-prod
       PERM_BUCKET: insights-ingress-prod
       BUCKET_MAP_FILE: /var/config.yaml
-      HABERDASHER_EMITTER: kafka
-      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
-      HABERDASHER_KAFKA_TOPIC: platform.logging.logs
-  # - namespace:
-  #     $ref: /services/insights/ingress/namespaces/ingress-prod.yml
-  #   ref: 40409bc602ed1908d838e32ccf59b689141c799f
-  #   parameters:
-  #     MIN_REPLICAS: 64
-  #     ENV_NAME: prod
-  #     OPENSHIFT_BUCKET: insights-buck-it-openshift-prod
-  #     ANSIBLE_BUCKET: insights-buck-it-ansible-prod
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ocm.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-storage-broker-ocm
+    parameters:
+      ENV_NAME: env-ocm
+      MIN_REPLICAS: 4
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace

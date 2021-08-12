@@ -15,7 +15,7 @@ spec:
         expr: absent(up{job="sources-api-svc",namespace="sources-prod"}==1)
         for: 2m
         labels:
-          severity: critical
+          severity: high
           service: insights
           env: prod
           app_team: topo-sources # Slack channel for app_team defined in resources/observability/alertmanager/alertmanager-instance.secret.yaml
@@ -23,7 +23,7 @@ spec:
           dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-30m&to=now&var-Datasource=crcp01ue1-prometheus&var-controller=All&var-action=All"
           link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/sources-prod/deployments/sources-api-svc"
           message: "[Prod] Sources: API: All pods have been down for two minutes"
-          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/cloud.redhat.com/app-sops/sources/SourcesApiSvcAbsent.rst"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/sources/SourcesApiSvcAbsent.rst"
       - alert: SourcesSatelliteOperationsSvcAbsent
         expr: absent(up{job="sources-satellite-operations",namespace="sources-prod"}==1)
         for: 2m
@@ -36,7 +36,7 @@ spec:
           dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-30m&to=now&var-Datasource=crcp01ue1-prometheus&var-controller=All&var-action=All"
           link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/sources-prod/deployments/sources-satellite-operations"
           message: "[Prod] Sources: Satellite Operations: All pods have been down for two minutes"
-          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/cloud.redhat.com/app-sops/sources/SourcesSatelliteOperationsSvcAbsent.rst"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/sources/SourcesSatelliteOperationsSvcAbsent.rst"
       - alert: SourcesSuperKeyWorkerSvcAbsent
         expr: absent(up{job="sources-superkey-worker-svc",namespace="sources-prod"}==1)
         for: 2m
@@ -49,11 +49,11 @@ spec:
           dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-30m&to=now&var-Datasource=crcp01ue1-prometheus&var-controller=All&var-action=All"
           link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/sources-prod/deployments/sources-superkey-worker-svc"
           message: "[Prod] Sources: SuperKey Worker: All pods have been down for two minutes"
-          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/cloud.redhat.com/app-sops/sources/SourcesSuperKeyWorkerSvcAbsent.rst"
-  - name: sources-kafka-lag-prod # TODO: replace with alerts for our consumers only (after topo+clowder+satellite migrations)
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/sources/SourcesSuperKeyWorkerSvcAbsent.rst"
+  - name: sources-kafka-lag-prod
     rules:
-      - alert: SourcesKafkaLagSourcesStatus
-        expr: sum(kafka_consumergroup_group_lag{topic=~'platform.sources..*',namespace='platform-mq-prod'}) by (group, topic) > 1000
+      - alert: SourcesKafkaLag
+        expr: sum(kafka_consumergroup_group_lag{topic='platform.sources.status',namespace='platform-mq-prod'}) by (group, topic) > 1000
         for: 10m
         labels:
           severity: info
@@ -63,7 +63,21 @@ spec:
         annotations:
           dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-1h&to=now&var-Datasource=crcp01ue1-prometheus&var-controller=All&var-action=All"
           link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/sources-prod/deployments/sources-api"
-          message: "[Prod] Sources API: Kafka Lag reached {{ $value }} (limit is 1000) for the last 10 minutes"
+          message: "[Prod] Sources API: platform.sources.status Kafka Lag reached {{ $value }} (limit is 1000) for the last 10 minutes"
+  - name: sources-superkey-worker-kafka-lag-prod
+    rules:
+      - alert: SourcesKafkaLagSuperkeyRequests
+        expr: sum(kafka_consumergroup_group_lag{topic='platform.sources.superkey-requests',namespace='platform-mq-prod'}) by (group, topic) > 100
+        for: 10m
+        labels:
+          severity: info
+          service: insights
+          env: prod
+          app_team: topo-sources
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-1h&to=now&var-Datasource=crcp01ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/sources-prod/deployments/sources-superkey-worker"
+          message: "[Prod] Sources SuperKey Worker: platform.sources.superkey-requests Kafka Lag reached {{ $value }} (limit is 100) for the last 10 minutes"
   - name: sources-restarts-prod
     rules:
       - alert: SourcesApiRestarts
@@ -116,7 +130,7 @@ spec:
           dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-15m&to=now&var-Datasource=crcp01ue1-prometheus&var-controller=All&var-action=All"
           link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-api"
           message: "[Prod] Sources API. Error rate > 10% for 5 minutes"
-          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/cloud.redhat.com/app-sops/sources/SourcesApi5xxErrors.rst"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/sources/SourcesApi5xxErrors.rst"
       - alert: SourcesApiRequestDuration
         expr: avg(rate(sources_api_http_duration_seconds_sum{controller!="status", namespace="sources-prod"}[5m]) / rate(sources_api_http_duration_seconds_count{controller!="status",namespace="sources-prod"}[5m]) > 0) * 100 > 500
         for: 10m

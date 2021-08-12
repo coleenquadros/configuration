@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: image-builder
@@ -12,10 +12,10 @@ description: image-builder service deployment
 app:
   $ref: /services/insights/image-builder/app.yml
 
-# Deploys are carried out by a Jenkins job. We have to specify which Jenkins
-# instance will do our deploys for us.
-instance:
-  $ref: /dependencies/ci-ext/ci-ext.yml
+# Deploys are carried out by a Tekton Pipeline. We have to specify which pipelines
+# provider will do our deploys for us.
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
 
 # Every time a deploy is attempted, updates are fed to the CoreOS Slack instance
 # in the #team-insights-info channel.
@@ -23,8 +23,6 @@ slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
-
-timeout: 5
 
 # Like in the namespace definition, for integrity purposes, we enumerate what
 # types of OpenShift resources we're expecting to be created in the templates
@@ -66,7 +64,10 @@ resourceTemplates:
       # the name of the Jenkins job that performs the build for us. It's the
       # composition of the values of the gh_org, gh_repo, and build job name
       # from our build.yml file
-      upstream: osbuild-image-builder-gh-build-main
+      upstream:
+        instance:
+          $ref: /dependencies/ci-ext/ci-ext.yml
+        name: osbuild-image-builder-gh-build-main
       parameters:
         # Parameters for the OpenShift template processing. These also inherit
         # all values from the environment you're deploying into as well as a
@@ -77,8 +78,8 @@ resourceTemplates:
         OSBUILD_URL: "https://external.staging.composer.osbuild.org:9876"
     - namespace:
         $ref: /services/insights/image-builder/namespaces/prod-image-builder-prod.yml
-      ref: eb9c0059c45c0a71ee04eef4ec50b83400228491
+      ref: b63c134b529fe0cdfd8804b6e029d153af2f7918
       parameters:
-        ALLOWED_ORG_IDS: "11009103;13076175;7895931;7946803;6340056;1979710;1212729;5318211;5894300;7975524;7271256;8077332;13476200;711497;5318290;5625941;11789772;5493883;6385621;4785711;7117736;4522757;13959588"
-        ALLOWED_ACCOUNT_NUMBERS: "5874230"
+        ALLOWED_ORG_IDS: "11009103;13076175;7895931;7946803;6340056;1979710;1212729;5318211;5894300;7975524;7271256;8077332;13476200;711497;5318290;5625941;11789772;5493883;6385621;4785711;7117736;4522757;13959588;6207063;6394654;7768261;6856506;5427447;7989767"
+        ALLOWED_ACCOUNT_NUMBERS: "5874230;5387712;6994093;6628941;5910538;5910538;5713084"
         OSBUILD_URL: "https://external.composer.osbuild.org:9876"

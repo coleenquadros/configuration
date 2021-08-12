@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: host-inventory
@@ -11,15 +11,13 @@ description: host-inventory app deployed via clowder
 app:
   $ref: /services/insights/host-inventory/app.yml
 
-instance:
-  $ref: /dependencies/ci-ext/ci-ext.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
-
-timeout: 5
 
 managedResourceTypes:
 - ClowdApp
@@ -42,37 +40,64 @@ resourceTemplates:
   url: https://github.com/RedHatInsights/insights-host-inventory
   parameters:
     CLOWDER_ENABLED: 'true'
+    REPLICAS_P1: 5
+    REPLICAS_PMIN: 3
+    CPU_LIMIT: 1
+    MEMORY_LIMIT: 2Gi
+    RBAC_ENFORCED: 'true'
+    BULK_QUERY_SOURCE: xjoin
+    BULK_QUERY_SOURCE_BETA: xjoin 
+    URLLIB3_LOG_LEVEL: DEBUG
   targets:
   - namespace:
       $ref: /services/insights/host-inventory/namespaces/stage-host-inventory-stage.yml
     ref: master
-    upstream: RedHatInsights-insights-host-inventory-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-host-inventory-gh-build-master
     parameters:
-      REPLICAS_P1: 1
-      REPLICAS_PMIN: 1
-      REPLICAS_SVC: 5
-      CPU_LIMIT: 1
-      MEMORY_LIMIT: 2Gi
-      SECONDARY_TOPIC_ENABLED: 'false'
-      REST_POST_ENABLED: 'false'
-      RBAC_ENFORCED: 'true'
-      BULK_QUERY_SOURCE: db
-      BULK_QUERY_SOURCE_BETA: db
-      URLLIB3_LOG_LEVEL: DEBUG
+      MEMORY_LIMIT: 1Gi
+      REPLICAS_SVC: 10
       INVENTORY_DB_SSL_MODE: verify-full
+      REAPER_SUSPEND: 'false'
+  - namespace:
+      $ref: /services/insights/host-inventory/namespaces/prod-host-inventory-prod.yml
+    ref: 64c70b41608ba7911dc7d19dfa9bc626a31c07cd
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-host-inventory-gh-build-master
+    parameters:
+      REPLICAS_SVC: 25
+      INVENTORY_DB_SSL_MODE: verify-full
+      REAPER_SUSPEND: 'false'
+      SP_VALIDATOR_SUSPEND: 'false'
+      PENDO_SYNCHER_SUSPEND: 'false'
+      PENDO_CRON_SCHEDULE: '@daily'
+      PENDO_SYNC_ACTIVE: 'true'
+  - namespace:
+      $ref: /services/insights/host-inventory/namespaces/host-inventory-fedramp-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-host-inventory-gh-build-master
+    parameters:
+      MEMORY_LIMIT: 1Gi
+      REPLICAS_SVC: 10
+      INVENTORY_DB_SSL_MODE: verify-full
+      KAFKA_SECURITY_PROTOCOL: 'SASL_SSL'
+      KAFKA_SASL_MECHANISM: 'SCRAM-SHA-512'
+      REAPER_SUSPEND: 'false'
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
     ref: internal  # populated by bonfire
     parameters:
+      MEMORY_LIMIT: 1Gi
       REPLICAS_P1: 1
       REPLICAS_PMIN: 1
       REPLICAS_SVC: 1
-      CPU_LIMIT: 1
-      MEMORY_LIMIT: 2Gi
-      SECONDARY_TOPIC_ENABLED: 'false'
-      REST_POST_ENABLED: 'false'
-      RBAC_ENFORCED: 'true'
       BULK_QUERY_SOURCE: db
       BULK_QUERY_SOURCE_BETA: db
-      URLLIB3_LOG_LEVEL: DEBUG

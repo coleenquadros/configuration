@@ -64,6 +64,19 @@ openshiftResources:
   variables:
     identifier: insights
     host: insights.unleash.devshift.net
+### managed-services
+- provider: vault-secret
+  path: app-sre/unleash/managed-services-config
+  version: 1
+- provider: vault-secret
+  path: app-sre/unleash/managed-services-unleash-token
+  version: 1
+- provider: resource-template
+  type: jinja2
+  path: /services/unleash/unleash.route.yaml
+  variables:
+    identifier: managed-services
+    host: managed-services.unleash.devshift.net
 
 managedTerraformResources: true
 
@@ -88,3 +101,11 @@ terraformResources:
   output_resource_name: insights-unleash-rds
   overrides:
     engine_version: '12.5'
+# Managed-services
+- provider: rds
+  account: app-sre
+  identifier: managed-services-unleash
+  defaults: /terraform/resources/unleash/rds-1.yml
+  output_resource_name: managed-services-unleash-rds
+  overrides:
+    engine_version: '13.2'

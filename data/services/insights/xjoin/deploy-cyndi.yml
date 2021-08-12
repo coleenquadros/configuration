@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: xjoin
@@ -11,15 +11,13 @@ description: cyndi app on the Insights Platform
 app:
   $ref: /services/insights/xjoin/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
-
-timeout: 5
 
 managedResourceTypes:
 - CatalogSource
@@ -28,6 +26,9 @@ managedResourceTypes:
 - ConfigMap
 - Service
 - CyndiPipeline
+- KafkaConnect
+- KafkaUser
+- Job
 
 imagePatterns:
 - quay.io/cloudservices
@@ -54,33 +55,121 @@ resourceTemplates:
     VALIDATION_INTERVAL: "1800"
     VALIDATION_ATTEMPTS_THRESHOLD: "2"
     VALIDATION_ATTEMPTS_THRESHOLD_INIT: "30"
+    CONNECTOR_ALLOWLIST_SP: "sap_system,sap_sids,operating_system,owner_id,rhsm,bios_vendor,bios_version,bios_release_date,infrastructure_type"
   targets:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
     ref: master
-    upstream: RedHatInsights-cyndi-operator-gh-build-catalog-master-upstream-RedHatInsights-cyndi-operator-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-cyndi-operator-gh-build-catalog-master-upstream-RedHatInsights-cyndi-operator-gh-build-master
     parameters:
+      SOURCE_NAMESPACE: xjoin-stage
       TARGET_NAMESPACE: xjoin-stage
-      CONNECTOR_ALLOWLIST_SP: "sap_system,sap_sids,operating_system,owner_id,rhsm"
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/cyndi-fedramp-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-cyndi-operator-gh-build-catalog-master-upstream-RedHatInsights-cyndi-operator-gh-build-master
+    parameters:
+      CONNECT_CLUSTER: cyndi-connect
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
-    ref: f26255210db45d7adb6668d01bb9ed71f7f56fc6
+    ref: 2ff1150956219b270e3dc49469fdc44b0ed8008c
     parameters:
+      SOURCE_NAMESPACE: xjoin-prod
       TARGET_NAMESPACE: xjoin-prod
-      CONNECTOR_ALLOWLIST_SP: "sap_system,sap_sids,operating_system,owner_id,rhsm"
       MAX_AGE: "46"
-
-# Unlike in stable environments where the operator is deployed in SingleNamespace mode,
-# AllNamespaces (i.e. cluster-wide) mode is used in ephemeral environments
-- name: cyndi-operator-global
-  path: /deploy/operator-global.yml
-  url: https://github.com/RedHatInsights/cyndi-operator
-  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/cyndi-fedramp-prod.yml
+    ref: 2ff1150956219b270e3dc49469fdc44b0ed8008c
+    parameters:
+      CONNECT_CLUSTER: cyndi-connect
+  # Ephemeral cluster
+  # Unlike in stable environments where the operator is deployed in SingleNamespace mode,
+  # AllNamespaces (i.e. cluster-wide) mode is used in ephemeral environments
   - namespace:
       $ref: /services/insights/xjoin/namespaces/cyndi-ephemeral.yml
     ref: master
-    upstream: RedHatInsights-cyndi-operator-gh-build-catalog-master-upstream-RedHatInsights-cyndi-operator-gh-build-master
+    parameters:
+      TARGET_NAMESPACE: ""
+      SSL_MODE: disable
+      EPHEMERAL: "true"
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-cyndi-operator-gh-build-catalog-master-upstream-RedHatInsights-cyndi-operator-gh-build-master
 
+- name: cyndi-kafka-connect
+  path: /deploy/kafka-connect-fedramp.yml
+  url: https://github.com/RedHatInsights/xjoin-kafka-connect
+  parameters:
+    VERSION: '2.5.0'
+    CPU_LIMITS: 3
+    XMX: 8G
+    XMS: 8G
+    CPU_REQUESTS: 250m
+    NUM_REPLICAS: '1'
+    MEMORY_REQUESTS: 8Gi
+    MEMORY_LIMITS: 10Gi
+    KAFKA_BOOTSTRAP_PORT: '9093'
+    GROUP_ID: cyndi
+    STORAGE_TOPIC_PREFIX: cyndi
+    NAME_PREFIX: cyndi-connect
+    KAFKA_USER: kafka-cyndi
+    LOG_LEVEL: INFO
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/cyndi-fedramp-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-xjoin-kafka-connect-gh-build-master
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/cyndi-fedramp-prod.yml
+    ref: 182ab8b1b311fb449917c363f4564b8e569ac606
+
+- name: cyndi-kafka-user
+  path: /deploy/kafka-user.yaml
+  url: https://github.com/RedHatInsights/cyndi-operator
+  targets:
+  - namespace:
+      $ref: /services/insights/strimzi/namespaces/platform-mq-fedramp-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-xjoin-kafka-connect-gh-build-master
+  - namespace:
+      $ref: /services/insights/strimzi/namespaces/platform-mq-fedramp-prod.yml
+    ref: de99f3ae9590d61e9a654cd068a503011819af14
+
+# Job to initialize database schemas and roles
+- name: cyndi-init
+  path: /openshift/cyndi-init.yml
+  url: https://github.com/redhatinsights/inventory-syndication
+  parameters:
+    APP_NAME: syndication-test
+    APP_ROLE: postgres
+    DB_SECRET: cyndi-db-rds
+    IMAGE_TAG: "3a34b0c"
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/xjoin-fedramp-stage.yml
+    ref: 165cd33c70fd50be977a5584ab13b4f28502a442
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/xjoin-fedramp-prod.yml
+    ref: 165cd33c70fd50be977a5584ab13b4f28502a442
+    parameters:
+      VERSION: "2"
+
+#
+# CyndiPipeline definitions below
+#
 - name: cyndi-pipeline-test
   path: /deploy/pipeline.yml
   url: https://github.com/RedHatInsights/cyndi-operator
@@ -90,7 +179,20 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
     ref: master
-    upstream: RedHatInsights-cyndi-operator-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-cyndi-operator-gh-build-master
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/cyndi-fedramp-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-cyndi-operator-gh-build-master
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/cyndi-fedramp-prod.yml
+    ref: 2ff1150956219b270e3dc49469fdc44b0ed8008c
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
     ref: d0caf4e6144b6951623ab516852a3a7862a1238e
@@ -104,7 +206,17 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
     ref: master
-    upstream: RedHatInsights-cyndi-operator-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-cyndi-operator-gh-build-master
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/cyndi-fedramp-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-cyndi-operator-gh-build-master
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
     ref: d0caf4e6144b6951623ab516852a3a7862a1238e
@@ -118,7 +230,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
     ref: master
-    upstream: RedHatInsights-cyndi-operator-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-cyndi-operator-gh-build-master
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
     ref: d0caf4e6144b6951623ab516852a3a7862a1238e
@@ -132,7 +247,17 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
     ref: master
-    upstream: RedHatInsights-cyndi-operator-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-cyndi-operator-gh-build-master
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/cyndi-fedramp-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-cyndi-operator-gh-build-master
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
     ref: d0caf4e6144b6951623ab516852a3a7862a1238e
@@ -147,8 +272,31 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
     ref: master
-    upstream: RedHatInsights-cyndi-operator-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-cyndi-operator-gh-build-master
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
     ref: d0caf4e6144b6951623ab516852a3a7862a1238e
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/cyndi-fedramp-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-cyndi-operator-gh-build-master
 
+- name: malware-detection-pipeline
+  path: /deploy/pipeline.yml
+  url: https://github.com/RedHatInsights/cyndi-operator
+  parameters:
+    APP_NAME: malware-detection
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/stage-xjoin-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-cyndi-operator-gh-build-master

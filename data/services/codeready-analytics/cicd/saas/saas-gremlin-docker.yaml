@@ -5,7 +5,7 @@ labels:
   service: codeready-analytics
   component: gremlin-docker
 
-name: saas-codeready-analytics-gremlin-docker
+name: saas-crda-gremlin-docker
 description: SaaS tracking file for codeready-analytics gremlin-docker
 
 app:
@@ -41,11 +41,12 @@ resourceTemplates:
     REST_VALUE: 1
     DOCKER_REGISTRY: quay.io
     DOCKER_IMAGE: app-sre/bayesian-gremlin
-    CPU_REQUEST: 100m
-    CPU_LIMIT: 300m
+    CPU_REQUEST: 1000m
+    CPU_LIMIT: 1000m
     MEMORY_REQUEST: 1536Mi
     MEMORY_LIMIT: 2688Mi
     JAVA_OPTIONS: "-XX:+PrintFlagsFinal -Xms512m -Xmx1400m -XX:+PrintGCDetails -XX:+PrintGCDateStamps"
+    THREAD_POOL: 2
   targets:
   - namespace:
       $ref: /services/codeready-analytics/namespaces/bayesian-preview.yml
@@ -55,22 +56,23 @@ resourceTemplates:
       REPLICAS: 2
   - namespace:
       $ref: /services/codeready-analytics/namespaces/bayesian-production.yml
-    ref: 4b431c0180397e056fd5f46d88d95f2de09254b2
+    ref: b6eddfe755d127cd6d901f07d196aa42dd78ea80
     parameters:
-      REPLICAS: 10
+      REPLICAS: 20
+      DEPLOYMENT_CONTROLLER: "false"
 
 - name: gremlin-httpingestion
   url: https://github.com/fabric8-analytics/gremlin-docker
-  path: /openshift/template.yaml
+  path: /openshift/ingestion-template.yaml
   parameters:
     CHANNELIZER: http
     QUERY_ADMINISTRATION_REGION: ingestion
     REST_VALUE: 1
     DOCKER_REGISTRY: quay.io
     DOCKER_IMAGE: app-sre/bayesian-gremlin
-    CPU_REQUEST: 100m
-    CPU_LIMIT: 300m
-    MEMORY_REQUEST: 1536Mi
+    CPU_REQUEST: 500m
+    CPU_LIMIT: 1000m
+    MEMORY_REQUEST: 2536Mi
     MEMORY_LIMIT: 2688Mi
     JAVA_OPTIONS: "-XX:+PrintFlagsFinal -Xms512m -Xmx1400m -XX:+PrintGCDetails -XX:+PrintGCDateStamps"
   targets:
@@ -82,35 +84,9 @@ resourceTemplates:
       REPLICAS: 2
   - namespace:
       $ref: /services/codeready-analytics/namespaces/bayesian-production.yml
-    ref: 4b431c0180397e056fd5f46d88d95f2de09254b2
+    ref: b6eddfe755d127cd6d901f07d196aa42dd78ea80
     parameters:
       REPLICAS: 10
+      DEPLOYMENT_CONTROLLER: "false"
 
-- name: gremlin-osa-http
-  url: https://github.com/fabric8-analytics/gremlin-docker
-  path: /openshift/template.yaml
-  parameters:
-    CHANNELIZER: http
-    REST_VALUE: 1
-    DOCKER_REGISTRY: quay.io
-    DOCKER_IMAGE: app-sre/bayesian-gremlin
-    CPU_REQUEST: 100m
-    CPU_LIMIT: 300m
-    MEMORY_REQUEST: 1536Mi
-    MEMORY_LIMIT: 2688Mi
-    JAVA_OPTIONS: "-XX:+PrintFlagsFinal -Xms512m -Xmx1400m -XX:+PrintGCDetails -XX:+PrintGCDateStamps"
-    DYNAMODB_INSTANCE_PREFIX: "osa"
-    DYNAMODB_SECRET_NAME: "aws-dynamodb-osa"
-    DYNAMODB_PREFIX_KEY: "osa-dynamodb-prefix"
-  targets:
-  - namespace:
-      $ref: /services/codeready-analytics/namespaces/bayesian-preview.yml
-    ref: master
-    upstream: fabric8-analytics-gremlin-docker-gh-build-master
-    parameters:
-      REPLICAS: 3
-  - namespace:
-      $ref: /services/codeready-analytics/namespaces/bayesian-production.yml
-    ref: 4b431c0180397e056fd5f46d88d95f2de09254b2
-    parameters:
-      REPLICAS: 3
+

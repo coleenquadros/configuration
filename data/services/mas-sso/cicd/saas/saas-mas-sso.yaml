@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: mas-sso
@@ -10,8 +10,8 @@ description: 'MAS SSO'
 app:
   $ref: /services/mas-sso/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/mas-sso/pipelines/tekton.mas-sso-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
@@ -57,10 +57,13 @@ resourceTemplates:
     ref: master
     parameters:
       NAMESPACE: mas-sso-stage
-    upstream: service-saas-mas-sso-gl-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-saas-mas-sso-gl-build-master
   - namespace:
       $ref: /services/mas-sso/namespaces/mas-sso-production.yml
-    ref: 620c932841068b6c4e54f12f2f1f927c709669cf
+    ref: 1871d6a5f7fce5f4c90e777918047b18ffb8b570
     parameters:
       NAMESPACE: mas-sso-production
       CR_INSTANCES: 3

@@ -1,4 +1,11 @@
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-uhc-gateway
+  labels:
+    grafana_dashboard: "true"
+  annotations:
+    grafana-folder: /grafana-dashboard-definitions/OCM
 data:
   grafana-dashboard-uhc-gateway.json: |-
     {
@@ -40,7 +47,7 @@ data:
       "gnetId": null,
       "graphTooltip": 0,
       "id": null,
-      "iteration": 1615914921132,
+      "iteration": 1622457885482,
       "links": [],
       "panels": [
         {
@@ -65,13 +72,13 @@ data:
             "y": 0
           },
           "hiddenSeries": false,
-          "id": 2,
+          "id": 7,
           "legend": {
             "avg": false,
             "current": false,
             "max": false,
             "min": false,
-            "show": false,
+            "show": true,
             "total": false,
             "values": false
           },
@@ -93,9 +100,11 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(apache_accesses_total{job=\"gateway-server-metrics\",namespace=\"$namespace\"}[5m]))",
+              "expr": "sum(rate(envoy_cluster_upstream_rq_total{namespace=\"$namespace\",service=\"gateway-envoy-metrics\",envoy_cluster_name!~\"^(admin|site|sso)$\"}[10m])) by (envoy_cluster_name)",
               "format": "time_series",
+              "interval": "",
               "intervalFactor": 1,
+              "legendFormat": "{{ envoy_cluster_name }}",
               "refId": "A"
             }
           ],
@@ -103,7 +112,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Server Request Rate",
+          "title": "Envoy Request Rate",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -164,13 +173,13 @@ data:
             "y": 10
           },
           "hiddenSeries": false,
-          "id": 3,
+          "id": 8,
           "legend": {
             "avg": false,
             "current": false,
             "max": false,
             "min": false,
-            "show": false,
+            "show": true,
             "total": false,
             "values": false
           },
@@ -188,7 +197,9 @@ data:
           "renderer": "flot",
           "seriesOverrides": [
             {
-              "$$hashKey": "object:931"
+              "$$hashKey": "object:931",
+              "alias": "Downstream",
+              "linewidth": 3
             }
           ],
           "spaceLength": 10,
@@ -196,17 +207,27 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(avg_over_time(apache_connections{job=\"gateway-server-metrics\",namespace=\"$namespace\",state=\"total\"}[5m]))",
+              "expr": "sum(avg_over_time(envoy_listener_downstream_cx_active{namespace=\"$namespace\",service=\"gateway-envoy-metrics\"}[5m]))",
               "format": "time_series",
+              "interval": "",
               "intervalFactor": 1,
+              "legendFormat": "Downstream",
               "refId": "A"
+            },
+            {
+              "expr": "sum(avg_over_time(envoy_cluster_upstream_cx_active{namespace=\"$namespace\",service=\"gateway-envoy-metrics\",envoy_cluster_name!~\"^(admin|site|sso)$\"}[5m])) by (envoy_cluster_name)",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Upstream - {{ envoy_cluster_name }}",
+              "refId": "B"
             }
           ],
           "thresholds": [],
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Server Connections",
+          "title": "Envoy Connections",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -267,7 +288,7 @@ data:
             "y": 20
           },
           "hiddenSeries": false,
-          "id": 4,
+          "id": 9,
           "legend": {
             "avg": false,
             "current": true,
@@ -312,7 +333,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"$namespace\",pod=~\"^gateway-.*$\",container=\"server\"}[5m])) by(pod) * 1000",
+              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"$namespace\",pod=~\"^gateway-envoy-.*$\"}[5m])) by(pod) * 1000",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -320,13 +341,13 @@ data:
               "refId": "A"
             },
             {
-              "expr": "max(kube_pod_container_resource_limits_cpu_cores{namespace=\"$namespace\",pod=~\"^gateway-.*$\",container=\"server\"}) * 1000",
+              "expr": "max(kube_pod_container_resource_limits_cpu_cores{namespace=\"$namespace\",pod=~\"^gateway-envoy-.*$\"}) * 1000",
               "interval": "",
               "legendFormat": "Limit",
               "refId": "B"
             },
             {
-              "expr": "max(kube_pod_container_resource_requests_cpu_cores{namespace=\"$namespace\",pod=~\"^gateway-.*$\",container=\"server\"}) * 1000",
+              "expr": "max(kube_pod_container_resource_requests_cpu_cores{namespace=\"$namespace\",pod=~\"^gateway-envoy-.*$\"}) * 1000",
               "interval": "",
               "legendFormat": "Request",
               "refId": "C"
@@ -336,7 +357,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Server CPU",
+          "title": "Envoy CPU",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -397,7 +418,7 @@ data:
             "y": 20
           },
           "hiddenSeries": false,
-          "id": 5,
+          "id": 10,
           "legend": {
             "avg": false,
             "current": true,
@@ -442,7 +463,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(container_memory_working_set_bytes{namespace=\"$namespace\",pod=~\"^gateway-.*\",container=\"server\"}) by(pod)",
+              "expr": "sum(container_memory_working_set_bytes{namespace=\"$namespace\",pod=~\"^gateway-envoy-.*\"}) by(pod)",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -450,13 +471,13 @@ data:
               "refId": "A"
             },
             {
-              "expr": "max(kube_pod_container_resource_requests_memory_bytes{namespace=\"$namespace\",pod=~\"^gateway-.*$\",container=\"server\"})",
+              "expr": "max(kube_pod_container_resource_requests_memory_bytes{namespace=\"$namespace\",pod=~\"^gateway-envoy-.*$\"})",
               "interval": "",
               "legendFormat": "Request",
               "refId": "B"
             },
             {
-              "expr": "max(kube_pod_container_resource_limits_memory_bytes{namespace=\"$namespace\",pod=~\"^gateway-.*$\",container=\"server\"})",
+              "expr": "max(kube_pod_container_resource_limits_memory_bytes{namespace=\"$namespace\",pod=~\"^gateway-envoy-.*$\"})",
               "interval": "",
               "legendFormat": "Limit",
               "refId": "C"
@@ -466,7 +487,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Server Memory",
+          "title": "Envoy Memory",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -527,7 +548,7 @@ data:
             "y": 20
           },
           "hiddenSeries": false,
-          "id": 6,
+          "id": 11,
           "legend": {
             "avg": false,
             "current": true,
@@ -555,7 +576,7 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(container_network_receive_bytes_total{namespace=\"$namespace\",pod=~\"^gateway-.*\",interface=\"eth0\"}[10m]))",
+              "expr": "sum(rate(container_network_receive_bytes_total{namespace=\"$namespace\",pod=~\"^gateway-envoy-.*\",interface=\"eth0\"}[10m]))",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -563,7 +584,7 @@ data:
               "refId": "A"
             },
             {
-              "expr": "sum(rate(container_network_transmit_bytes_total{namespace=\"$namespace\",pod=~\"^gateway-.*\",interface=\"eth0\"}[10m]))",
+              "expr": "sum(rate(container_network_transmit_bytes_total{namespace=\"$namespace\",pod=~\"^gateway-envoy-.*\",interface=\"eth0\"}[10m]))",
               "interval": "",
               "legendFormat": "Transmit",
               "refId": "B"
@@ -573,7 +594,7 @@ data:
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Server Network",
+          "title": "Envoy Network",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -627,7 +648,7 @@ data:
             },
             "hide": 0,
             "includeAll": false,
-            "label": null,
+            "label": "Datasource",
             "multi": false,
             "name": "datasource",
             "options": [],
@@ -640,16 +661,21 @@ data:
           {
             "allValue": null,
             "current": {
-              "selected": false,
+              "selected": true,
               "text": "uhc-production",
               "value": "uhc-production"
             },
             "hide": 0,
             "includeAll": false,
-            "label": null,
+            "label": "Namespace",
             "multi": false,
             "name": "namespace",
             "options": [
+              {
+                "selected": false,
+                "text": "uhc-integration",
+                "value": "uhc-integration"
+              },
               {
                 "selected": false,
                 "text": "uhc-stage",
@@ -661,14 +687,15 @@ data:
                 "value": "uhc-production"
               }
             ],
-            "query": "uhc-stage,uhc-production",
+            "query": "uhc-integration,uhc-stage,uhc-production",
+            "queryValue": "",
             "skipUrlSync": false,
             "type": "custom"
           }
         ]
       },
       "time": {
-        "from": "now-24h",
+        "from": "now-6h",
         "to": "now"
       },
       "timepicker": {
@@ -696,15 +723,8 @@ data:
           "30d"
         ]
       },
-      "timezone": "",
-      "title": "UHC Gateway",
+      "timezone": "utc",
+      "title": "OCM Gateway",
       "uid": "uhc-gateway",
       "version": 1
     }
-kind: ConfigMap
-metadata:
-  name: grafana-dashboard-uhc-gateway
-  labels:
-    grafana_dashboard: "true"
-  annotations:
-    grafana-folder: /grafana-dashboard-definitions/OCM

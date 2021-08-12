@@ -1,0 +1,133 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: hccm
+
+name: hccm-perf
+description: Insights hccm-perf on the Performance cluster under app-sre management
+
+cluster:
+  $ref: /openshift/insights/cluster-insights-perf.yml
+
+app:
+  $ref: /services/insights/hccm/app.yml
+
+environment:
+  $ref: /products/insights/environments/perf.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ConfigMap
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
+# configmaps
+- provider: resource
+  path: /insights-perf/hccm/koku-app.configmap.yaml
+- provider: resource
+  path: /insights-perf/hccm/koku-auth.configmap.yaml
+- provider: resource
+  path: /insights-perf/hccm/koku-debug.configmap.yaml
+- provider: resource
+  path: /insights-perf/hccm/koku-logging.configmap.yaml
+- provider: resource
+  path: /insights-perf/hccm/koku-messaging.configmap.yaml
+- provider: resource
+  path: /insights-perf/hccm/koku-monitoring.configmap.yaml
+- provider: resource
+  path: /insights-perf/hccm/koku-processor.configmap.yaml
+- provider: resource
+  path: /insights-perf/hccm/koku-upload.configmap.yaml
+
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/insights-stage/hccm-stage/koku-aws
+  version: 2
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/hccm-stage/koku-gcp
+  version: 2
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/hccm-stage/koku-secret
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/hccm-stage/hadoop-config
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/hccm-stage/presto-catalog-config
+  version: 5
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/hccm-stage/hive-db
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/hccm-stage/koku-sentry
+  version: 3
+  annotations:
+    qontract.recycle: "true"
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-perf
+  identifier: koku-perf
+  defaults: /terraform/resources/insights/perf/rds/postgres12-rds-cost-management-perf.yml
+  overrides:
+    username: "insights"
+    name: "koku"
+  output_resource_name: koku-db
+  enhanced_monitoring: true
+  parameter_group: /terraform/resources/insights/perf/rds/postgres12-parameter-group-cost-management-perf.yml
+- provider: cloudwatch
+  account: insights-perf
+  identifier: hccm-perf
+  defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+- provider: s3
+  account: insights-perf
+  identifier: hccm-perf-s3
+  defaults: /terraform/resources/s3-private-1.yml
+  output_resource_name: hccm-s3
+- provider: elasticache # TODO: remove after switch to clowder
+  account: insights-perf
+  identifier: cost-management-perf-elasticache
+  defaults: /terraform/resources/insights/perf/elasticache/elasticache-hccm-1.yml
+  output_resource_name: elasticache-redis
+- provider: elasticache # TODO: remove after switch to clowder
+  account: insights-perf
+  identifier: cost-management-perf-elasticache-api
+  defaults: /terraform/resources/insights/perf/elasticache/elasticache-hccm-2.yml
+  output_resource_name: elasticache-redis-api
+- provider: elasticache
+  account: insights-perf
+  identifier: cost-management-perf-redis-clowder
+  defaults: /terraform/resources/insights/perf/elasticache/elasticache-hccm-3.yml
+  output_resource_name: in-memory-db

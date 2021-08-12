@@ -8,6 +8,7 @@
   - [Step 5 - Container Security Operator](#step-5-container-security-operator)
   - [Step 6 - Logging](#step-6-logging)
   - [Step 7 - Deployment Validation Operator (DVO)](#step-7-deployment-validation-operator-dvo)
+  - [Step 8 - Obtain cluster-admin](#step-8-obtain-cluster-admin)
 - [Additional configurations](#additional-configurations)
   - [Selecting a Machine CIDR for VPC peerings](#selecting-a-machine-cidr-for-vpc-peerings)
   - [VPC peering with app-interface](#vpc-peering-with-app-interface)
@@ -25,7 +26,7 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
 
 This step should be performed in a single merge request.
 
-1. Login to https://cloud.redhat.com/openshift
+1. Login to https://console.redhat.com/openshift
 
 1. Click `Subscriptions` and ensure you have enough quota to provision a cluster
     - Must have at least 1 cluster of the desired type
@@ -107,13 +108,6 @@ This step should be performed in a single merge request.
 
     addons: # optional, specify addons to be installed
     - $ref: /dependencies/ocm/addons/<addon_name>.yml
-
-    disable:
-      e2eTests:
-      - create-namespace
-      - dedicated-admin-rolebindings
-      - default-network-policies
-      - default-project-labels
 
     internal: false
 
@@ -291,7 +285,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
     # when using `oc`, use the override as the kind instead of the resource
     managedResourceTypeOverrides:
     - resource: Project
-      override: project.config.openshift.io
+      override: Project.config.openshift.io
 
     managedResourceNames:
     # https://github.com/openshift/managed-cluster-config/blob/master/deploy/osd-project-request-template/02-role.dedicated-admins-project-request.yaml#L12
@@ -312,19 +306,6 @@ At this point you should be able to access the cluster via the console / `oc` cl
       path: /setup/self-provisioners.clusterrolebinding.yaml
     - provider: resource
       path: /setup/dedicated-readers.clusterrolebinding.yaml
-    ```
-
-1. Re-enable e2e tests on the cluster by removing the following lines from the cluster definition:
-
-    ```yaml
-    # /data/openshift/<cluster_name>/cluster.yml
-    ...
-    disable:
-      e2eTests:
-      - create-namespace
-      - dedicated-admin-rolebindings
-      - default-network-policies
-      - default-project-label
     ```
 
 1. Send the MR, wait for the check to pass and merge.
@@ -355,7 +336,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
         - key: `deadmanssnitch-<cluster_name>-url`
         - value: the `Unique Snitch URL` from deadmanssnitch
 
-    1. As of OpenShift 4.6.17, UWM (user-workload-monitoring) is enabled by default on OSD, replacing `openshift-customer-monitoring`. App-SRE still uses `openshift-customer-monitoring` and as such we need to ask SREP to disable UWM for us so we can use the current monitoring configs as described below. We need to create a ticket in OHSS and ask for UWM to be disabled.
+    1. As of OpenShift 4.6.17, UWM (user-workload-monitoring) is enabled by default on OSD, replacing `openshift-customer-monitoring`. App-SRE still uses `openshift-customer-monitoring` and as such we need to disable UWM for us so we can use the current monitoring configs as described below. This is done through the OCM console (Settings -> uncheck "Enable user workload monitoring" -> Save) and pending automation in https://issues.redhat.com/browse/APPSRE-3345.
 
     1. Create an `openshift-customer-monitoring` namespace file for that specific cluster, please use the template provided, replace CLUSTERNAME with the actual cluster name and `PHASE` with either `app-sre` or `app-sre-staging` for production or staging clusters:
 
@@ -615,6 +596,37 @@ At this point you should be able to access the cluster via the console / `oc` cl
         upstream: app-sre-deployment-validation-operator-gh-build-catalog-master-upstream-app-sre-deployment-validation-operator-gh-build-master
     ```
 
+## Step 8 - Obtain cluster-admin
+
+1. Create an OHSS ticket to enable cluster-admin in the cluster. Example: [OHSS-5302](https://issues.redhat.com/browse/OHSS-5302)
+
+1. Once the ticket is Done, add yourself (temporarily) to the cluster-admin group via OCM: https://docs.openshift.com/dedicated/4/administering_a_cluster/cluster-admin-role.html
+
+1. Login to the cluster and create a cluster-admin ServiceAccount:
+  ```sh
+  $ oc new-project app-sre
+  $ oc -n app-sre create sa app-sre-cluster-admin-bot
+  $ oc -n app-sre sa get-token app-sre-cluster-admin-bot
+  ```
+
+1. Add the `app-sre-cluster-admin-bot` credentials to vault at https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/kube-configs
+
+   Create a secret named after the <cluster_name>-cluster-admin:
+
+       server: https://api.<cluster_name>.<cluster_id>.p1.openshiftapps.com:6443
+       token: <token>
+       username: app-sre/app-sre-cluster-admin-bot # not used by automation
+
+1. Add the `app-sre-cluster-admin-bot` credentials to the cluster file in app-interface
+
+    ```yaml
+    # /data/openshift/<cluster_name>/cluster.yml
+    clusterAdminAutomationToken:
+      path: app-sre/creds/kube-configs/<cluster_name>-cluster-admin
+      field: token
+
+1. Remove yourself from the cluster-admin group via OCM.
+
 # Additional configurations
 
 ## Selecting a Machine CIDR for VPC peerings
@@ -640,7 +652,7 @@ Note that the host prefix must be set to /23.
 ## Additional steps for clusters for specific services
 
 1. If the cluster is a hive shard, follow the [Hive shard provisioning SOP](/docs/app-sre/sop/hive-shard-provisioning.md)
-1. If the cluster is a cloud.redhat.com (crc) cluster, perform the following steps:
+1. If the cluster is a console.redhat.com (crc) cluster, perform the following steps:
   * Deploy [3rd party operators](/data/services/insights/third-party-operators) (includes AMQ streams operator)
   * Deploy [Clowder operator](/data/services/insights/clowder)
 
@@ -675,7 +687,7 @@ To off-board an OSDv4 cluster from app-interface, perform the following operatio
 
 1. Delete the cluster from the Dead Man's Snitch console: https://deadmanssnitch.com/cases/0693dfc1-40e9-4e84-89b2-30d696e77e06/snitches?tags=app-sre
 
-1. Delete the cluster from the OCM console: https://cloud.redhat.com/openshift
+1. Delete the cluster from the OCM console: https://console.redhat.com/openshift
 
 1. Delete the cluster credentials from Vault (verify that no secrets are in use):
   - https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/kube-configs/

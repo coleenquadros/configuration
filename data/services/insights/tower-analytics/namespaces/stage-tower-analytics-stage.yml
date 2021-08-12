@@ -13,9 +13,6 @@ cluster:
 limitRanges:
   $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
 
-quota:
-  $ref: /services/insights/tower-analytics/tower-analytics-quota.yml
-
 app:
   $ref: /services/insights/tower-analytics/app.yml
 
@@ -31,6 +28,10 @@ managedRoles: true
 
 managedResourceTypes:
 - ServiceAccount
+- Secret
+
+sharedResources:
+- $ref: /services/app-interface/shared-resources/post-deployment-tests-utils.yml
 
 openshiftResources:
 - provider: vault-secret
@@ -47,6 +48,11 @@ openshiftResources:
 - provider: vault-secret
   path: insights/secrets/insights-stage/tower-analytics-stage/django
   version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/tower-analytics-stage/servicekey
+  version: 2
   annotations:
     qontract.recycle: "true"
 - provider: vault-secret
@@ -67,6 +73,9 @@ openshiftResources:
 - provider: vault-secret
   path: app-sre/unleash/insights-stage-unleash-token
   version: 1
+- provider: vault-secret
+  path: insights/secrets/insights-stage/tower-analytics-stage/iqe-testing-config
+  version: 5
 
 managedTerraformResources: true
 
@@ -75,7 +84,7 @@ terraformResources:
   account: insights-stage
   identifier: tower-analytics-stage
   defaults: /terraform/resources/insights/stage/rds/rds-tower-analytics-stage.yml
-  parameter_group: /terraform/resources/insights/stage/rds/postgres11-parameter-group-tower-analytics-stage.yml
+  parameter_group: /terraform/resources/insights/stage/rds/postgres13-parameter-group-tower-analytics-stage.yml
   output_resource_name: automation-analytics-db
   enhanced_monitoring: true
 - provider: s3
@@ -83,6 +92,11 @@ terraformResources:
   identifier: tower-analytics-dbdumps-stage-s3
   defaults: /terraform/resources/s3-private-1.yml
   output_resource_name: tower-analytics-dbdumps
+- provider: s3
+  account: insights-stage
+  identifier: tower-analytics-recovery-stage-s3
+  defaults: /terraform/resources/s3-all-expires-90-days.yml
+  output_resource_name: tower-analytics-recovery
 - provider: cloudwatch
   account: insights-stage
   identifier: tower-analytics-stage

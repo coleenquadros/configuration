@@ -9,7 +9,7 @@ name: image-builder-stage
 description: Image Builder staging
 
 # This references which cluster to create the namespace on. This value is for
-# the stage cluster. The production cluster for cloud.redhat.com is crcp01ue1
+# the stage cluster. The production cluster for console.redhat.com is crcp01ue1
 cluster:
   $ref: /openshift/crcs02ue1/cluster.yml
 
@@ -23,11 +23,18 @@ app:
 environment:
   $ref: /products/insights/environments/stage.yml
 
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/standard-resource-limits.yml
+
+quota:
+  $ref: /services/insights/default-quota.yml
+
 # Every namespace must explicitly allow workloads running in other namespaces
 # to make network connections to it.
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs02ue1.yml
 - $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+- $ref: /services/insights/edge/namespaces/stage-edge-stage.yml 
 
 # If true, managedRoles will ensure that users with roles granting permission
 # to this namespace are able to access it.
@@ -62,7 +69,7 @@ openshiftResources:
 #   vault kv get insights/secrets/insights-stage/image-builder-stage/composer-secrets/
 - provider: vault-secret
   path: insights/secrets/insights-stage/image-builder-stage/composer-secrets
-  version: 4
+  version: 5
 
 # app-interface uses Terraform to manage non-OpenShift resources, like AWS
 # resources

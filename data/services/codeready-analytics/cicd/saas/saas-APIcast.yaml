@@ -1,0 +1,48 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: codeready-analytics
+  component: APIcast
+
+name: saas-crda-APIcast
+description: SaaS tracking file for codeready-analytics APIcast
+
+app:
+  $ref: /services/codeready-analytics/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-codeready-analytics-info
+
+managedResourceTypes:
+- ServiceAccount
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/app-sre/apicast
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+resourceTemplates:
+- name: APIcast
+  url: https://github.com/fabric8-analytics/APIcast
+  path: /openshift/apicast-template.yml
+  parameters:
+    IMAGE_NAME: quay.io/app-sre/apicast:3scale-2.10.0-GA
+    IMAGE_PULL_SECRET_NAME: appsre-quayio
+  targets:
+  - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-preview.yml
+    ref: master
+  - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-production.yml
+    ref: d6352eb8e795666f6b62c8595f1d5e0e9956d36c

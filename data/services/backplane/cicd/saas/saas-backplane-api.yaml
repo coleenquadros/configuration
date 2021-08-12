@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: backplane
@@ -10,8 +10,8 @@ description: Incident Management Service - Backplane
 app:
   $ref: /services/backplane/app.yaml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/backplane/pipelines/tekton.backplane-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
@@ -43,7 +43,8 @@ resourceTemplates:
     IMAGE_REGISTRY: quay.io
     IMAGE_REPOSITORY: app-sre
     IMAGE_NAME: backplane-api
-    JWKS_URL: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/certs
+    # SSO_BASE_URL is defined at the environment parameters level
+    JWKS_URL: ${SSO_BASE_URL}/protocol/openid-connect/certs
     AUDIT_MAX_BACKUPS: 10
     AUDIT_MAX_SIZE: 10
     LOG_LEVEL: 1
@@ -53,24 +54,36 @@ resourceTemplates:
   - namespace:
       $ref: /services/backplane/namespaces/backplane-stage-hive-stage-01.yml
     ref: master
-    upstream: service-backplane-api-gl-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-backplane-api-gl-build-master
   - namespace:
       $ref: /services/backplane/namespaces/backplane-stage-hives02ue1.yml
     ref: master
-    upstream: service-backplane-api-gl-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-backplane-api-gl-build-master
   - namespace:
       $ref: /services/backplane/namespaces/backplane-int-hivei01ue1.yml
     ref: master
-    upstream: service-backplane-api-gl-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-backplane-api-gl-build-master
   - namespace:
       $ref: /services/backplane/namespaces/backplane-prod-hivep01ue1.yml
-    ref: 070cdfaf9ef63cafd95630ae2fa80116bd975e14
+    ref: 612566b9c49bd7760ad51a24b965de2b8309acfb
   - namespace:
       $ref: /services/backplane/namespaces/backplane-prod-hivep02ue1.yml
-    ref: 070cdfaf9ef63cafd95630ae2fa80116bd975e14
+    ref: 612566b9c49bd7760ad51a24b965de2b8309acfb
   - namespace:
       $ref: /services/backplane/namespaces/backplane-prod-hivep03uw1.yml
-    ref: 070cdfaf9ef63cafd95630ae2fa80116bd975e14
+    ref: 612566b9c49bd7760ad51a24b965de2b8309acfb
   - namespace:
       $ref: /services/backplane/namespaces/backplane-prod-hivep04ew2.yml
-    ref: 070cdfaf9ef63cafd95630ae2fa80116bd975e14
+    ref: 612566b9c49bd7760ad51a24b965de2b8309acfb
+  - namespace:
+      $ref: /services/backplane/namespaces/backplane-prod-hivep05ue1.yml
+    ref: 612566b9c49bd7760ad51a24b965de2b8309acfb

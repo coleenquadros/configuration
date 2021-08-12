@@ -1,0 +1,41 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: mas-sso
+
+name: mas-sso
+
+namespaces:
+- $ref: /services/mas-sso/namespaces/mas-sso-production.yml
+        
+slos:
+- name: SSO API Latency
+  SLIType: latency
+  SLISpecification: Percentage of the requests  that are served under 1000 milliseconds 
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/mas-sso/slos/mas-sso-latency.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    (sum(rate(keycloak_request_duration_bucket{namespace="mas-sso-production",le="1000.0"}[{{window}}]))
+    /
+    sum(rate(keycloak_request_duration_count{namespace="mas-sso-production"}[{{window}}])))
+  SLOTarget: 0.99
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/mas-sso-availability-production.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/_LLa8q_Gk/mas-sso-monitoring?orgId=1
+
+- name: SSO API Availability
+  SLIType: availability
+  SLISpecification: Percentage of requests that are served successfully (status code != 5xx) 
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/mas-sso/slos/mas-sso-availability.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(haproxy_backend_http_responses_total{route=~"^keycloak.*",exported_namespace="mas-sso-production",code!="5xx"}[{{window}}]))
+    /
+    sum(rate(haproxy_backend_http_responses_total{route=~"^keycloak.*",exported_namespace="mas-sso-production"}[{{window}}]))
+  SLOTarget: 0.99
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/mas-sso-availability-production.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/_LLa8q_Gk/mas-sso-monitoring?orgId=1

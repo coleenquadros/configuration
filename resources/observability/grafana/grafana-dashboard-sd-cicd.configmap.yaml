@@ -1,5 +1,724 @@
 apiVersion: v1
 data:
+  sd-cicd-database-powered-global-health-dashboard: |-
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": "-- Grafana --",
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "description": "A broad summary of the health of all CI/CD jobs managed by the Service Delivery CI/CD team. Only intended for consumption by those with a lot of context about our pipelines and their various purposes.",
+      "editable": true,
+      "gnetId": null,
+      "graphTooltip": 0,
+      "id": 182,
+      "links": [],
+      "panels": [
+        {
+          "datasource": "sd_cicd_job_result_database",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "displayName": "$__cell_0",
+              "mappings": [
+                {
+                  "from": "",
+                  "id": 1,
+                  "text": "empty",
+                  "to": "",
+                  "type": 1,
+                  "value": ""
+                }
+              ],
+              "thresholds": {
+                "mode": "percentage",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 80
+                  },
+                  {
+                    "color": "green",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 16,
+            "w": 12,
+            "x": 0,
+            "y": 0
+          },
+          "id": 7,
+          "options": {
+            "displayMode": "lcd",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "limit": 1000,
+              "values": true
+            },
+            "showUnfilled": true
+          },
+          "pluginVersion": "7.2.1",
+          "targets": [
+            {
+              "format": "table",
+              "group": [],
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "with counts as (\n\tselect\n\t\tjobs.job_name,\n\t\tcount(case when jobs.result='passed' then 1 end) as passed,\n\t\tcount(case when jobs.result='failed' then 1 end) as failed,\n\t\tcount(case when jobs.result='aborted' then 1 end) as aborted\n\tfrom\n\t\tjobs\n\twhere\n\t\t$__timeFilter(jobs.started)\n\t\tand jobs.job_name != ''\n\tgroup by\n\t\tjobs.job_name\n)\nselect\n\tjob_name,\n\t(passed::float)/(greatest(failed+aborted+passed,1)::float) as pass_rate\nfrom counts\norder by pass_rate desc\n;",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "value"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "timeColumn": "time",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Job Overall Pass Rate",
+          "type": "bargauge"
+        },
+        {
+          "datasource": "sd_cicd_job_result_database",
+          "description": "The percentage of non-skipped tests executed within a given pipeline that passed.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": null,
+                "displayMode": "color-text",
+                "filterable": false
+              },
+              "displayName": "$__cell_0",
+              "mappings": [],
+              "max": 1,
+              "min": 0,
+              "thresholds": {
+                "mode": "percentage",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 90
+                  },
+                  {
+                    "color": "green",
+                    "value": 98
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 0
+          },
+          "id": 4,
+          "options": {
+            "displayMode": "lcd",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": true
+            },
+            "showUnfilled": true
+          },
+          "pluginVersion": "7.2.1",
+          "targets": [
+            {
+              "format": "table",
+              "group": [],
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "with recent_tests as (\n\tselect\n\t\tjobs.*,\n\t\ttestcases.result as testresult\n\tfrom\n\t\ttestcases\n\t\tjoin jobs on jobs.id = testcases.job_id\n\twhere\n\t\t$__timeFilter(jobs.started)\n\t\tand jobs.job_name != ''\n),\ncounts as (\n\tselect\n\t\trecent_tests.job_name,\n\t\tcount(case when recent_tests.testresult='failure' then 1 end) as failure,\n\t\tcount(case when recent_tests.testresult='error' then 1 end) as error,\n\t\tcount(case when recent_tests.testresult='passed' then 1 end) as passed,\n\t\tcount(case when recent_tests.testresult='skipped' then 1 end) as skipped\n\tfrom\n\t\trecent_tests\n\tgroup by\n\t\trecent_tests.job_name\n)\nselect\n\tjob_name as name,\n\t(passed::float)/(greatest(failure+error+passed,1)::float) as metric\nfrom counts\norder by metric\n;\n",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "value"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "timeColumn": "time",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Job Testcase Pass Rates",
+          "type": "bargauge"
+        },
+        {
+          "datasource": "sd_cicd_job_result_database",
+          "description": "This shows the percentage of test cases skipped by each pipeline. A certain amount of skipping is expected, as some tests do not apply to some pipelines. However, pipelines skipping most of their tests deserve investigation.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": null,
+                "displayMode": "color-text",
+                "filterable": false
+              },
+              "displayName": "$__cell_0",
+              "mappings": [],
+              "max": 1,
+              "min": 0,
+              "thresholds": {
+                "mode": "percentage",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 35
+                  },
+                  {
+                    "color": "red",
+                    "value": 50
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 8
+          },
+          "id": 5,
+          "options": {
+            "displayMode": "lcd",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": true
+            },
+            "showUnfilled": true
+          },
+          "pluginVersion": "7.2.1",
+          "targets": [
+            {
+              "format": "table",
+              "group": [],
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "with recent_tests as (\n\tselect\n\t\tjobs.*,\n\t\ttestcases.result as testresult\n\tfrom\n\t\ttestcases\n\t\tjoin jobs on jobs.id = testcases.job_id\n\twhere\n\t\t$__timeFilter(jobs.started)\n\t\tand jobs.job_name != ''\n),\ncounts as (\n\tselect\n\t\trecent_tests.job_name,\n\t\tcount(case when recent_tests.testresult='failure' then 1 end) as failure,\n\t\tcount(case when recent_tests.testresult='error' then 1 end) as error,\n\t\tcount(case when recent_tests.testresult='passed' then 1 end) as passed,\n\t\tcount(case when recent_tests.testresult='skipped' then 1 end) as skipped\n\tfrom\n\t\trecent_tests\n\tgroup by\n\t\trecent_tests.job_name\n)\nselect\n\tjob_name as name,\n\t(skipped::float)/(greatest(failure+error+passed+skipped,1)::float) as metric\nfrom counts\norder by metric\n;\n",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "value"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "timeColumn": "time",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Job Testcase Skip Rates",
+          "type": "bargauge"
+        },
+        {
+          "datasource": "sd_cicd_job_result_database",
+          "description": "The percentage of jobs with a given install version that passed.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "displayName": "$__cell_0",
+              "mappings": [],
+              "thresholds": {
+                "mode": "percentage",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 80
+                  },
+                  {
+                    "color": "green",
+                    "value": 95
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 16
+          },
+          "id": 14,
+          "options": {
+            "displayMode": "lcd",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": true
+            },
+            "showUnfilled": true
+          },
+          "pluginVersion": "7.2.1",
+          "targets": [
+            {
+              "format": "table",
+              "group": [],
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "with counts as (\n\tselect\n\t\tjobs.cluster_version,\n\t\tcount(case when jobs.result='passed' then 1 end) as passed,\n\t\tcount(case when jobs.result='failed' then 1 end) as failed,\n\t\tcount(case when jobs.result='aborted' then 1 end) as aborted\n\tfrom\n\t\tjobs\n\twhere\n\t\t$__timeFilter(jobs.started)\n\t\tand jobs.job_name != ''\n\tgroup by\n\t\tjobs.cluster_version\n)\nselect\n\tcluster_version,\n\t(passed::float)/(greatest(failed+aborted+passed,1)::float) as pass_rate\nfrom counts\norder by pass_rate asc\n;",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "value"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "timeColumn": "time",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Install Version Pass Rate (by Job)",
+          "type": "bargauge"
+        },
+        {
+          "datasource": "sd_cicd_job_result_database",
+          "description": "The percentage of clusters that failed to get a cluster ID.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "displayName": "$__cell_0",
+              "mappings": [],
+              "max": 1,
+              "min": 0,
+              "thresholds": {
+                "mode": "percentage",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 5
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 2,
+            "w": 12,
+            "x": 12,
+            "y": 16
+          },
+          "id": 9,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "vertical",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": true
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "7.2.1",
+          "targets": [
+            {
+              "format": "table",
+              "group": [],
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "select\n\tfailures.environment,\n\tfailures.count::float / total.count::float as rate\nfrom\n(\n\tselect\n\t\tenvironment,\n\t\tcount(*)\n\tfrom\n\t\tjobs\n\twhere\n\t\t$__timeFilter(jobs.started)\n\t\tand jobs.cluster_id like ''\n\t\tand jobs.job_name != ''\n\tgroup by\n\t\tenvironment\n) as failures\njoin (\n\tselect\n\t\tenvironment,\n\t\tcount(*)\n\tfrom\n\t\tjobs\n\twhere\n\t\t$__timeFilter(jobs.started)\n\tgroup by\n\t\tenvironment\n) as total\non failures.environment = total.environment\n;",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "value"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "timeColumn": "time",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Cluster Provisioning Failure By Environment",
+          "type": "stat"
+        },
+        {
+          "datasource": "sd_cicd_job_result_database",
+          "description": "Testcases that fail more than once in the given time window, along with the number of times they failed.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "displayName": "$__cell_0",
+              "mappings": [],
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 5
+                  },
+                  {
+                    "color": "red",
+                    "value": 10
+                  }
+                ]
+              },
+              "unit": "failures"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 18
+          },
+          "id": 12,
+          "options": {
+            "displayMode": "basic",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": true
+            },
+            "showUnfilled": true
+          },
+          "pluginVersion": "7.2.1",
+          "targets": [
+            {
+              "format": "table",
+              "group": [],
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "with recent_tests as (\n    select \n        jobs.*,\n        regexp_replace(name, '\\[(install|upgrade)\\] (.*)', '\\2') as name,\n        testcases.result as testresult\n    from jobs\n        join testcases\n        on jobs.id = testcases.job_id\n    where\n        -- filter kinds of test we do not care about\n        testcases.name !~ '.*\\[Suite: (informing|addons|conformance)\\].*'\n        -- ensure this test does belong to a suite\n        and testcases.name ~ '.*\\[Suite:.*'\n        and testcases.name !~ '.*sig-.*'\n        and $__timeFilter(jobs.started)\n        -- filter out osde2e's own CI jobs\n        and jobs.job_id != '-1'\n), counts as (\n        -- synthesize a table with the name of a test and columns counting how often it has resulted\n        -- in each result type\n        select\n            name,\n            count(CASE WHEN recent_tests.testresult='failure' THEN 1 END) as failure,\n            count(CASE WHEN recent_tests.testresult='error' THEN 1 END) as error\n        from recent_tests\n        group by name\n)\nselect \n    counts.name,\n    (counts.error + counts.failure) as problems\nfrom\n    counts\nwhere counts.error + counts.failure > 1\norder by problems desc\n;",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "value"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "timeColumn": "time",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Problematic Test Failures",
+          "type": "bargauge"
+        },
+        {
+          "datasource": "sd_cicd_job_result_database",
+          "description": "The percentage of testcases with a given install version that passed.",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "displayName": "$__cell_0",
+              "mappings": [],
+              "thresholds": {
+                "mode": "percentage",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 80
+                  },
+                  {
+                    "color": "green",
+                    "value": 95
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 24
+          },
+          "id": 15,
+          "options": {
+            "displayMode": "lcd",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": true
+            },
+            "showUnfilled": true
+          },
+          "pluginVersion": "7.2.1",
+          "targets": [
+            {
+              "format": "table",
+              "group": [],
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "with recent_tests as (\n\tselect\n\t\tjobs.*,\n\t\ttestcases.result as testresult\n\tfrom\n\t\ttestcases\n\t\tjoin jobs on jobs.id = testcases.job_id\n\twhere\n\t\t$__timeFilter(jobs.started)\n\t\tand jobs.job_name != ''\n),\ncounts as (\n\tselect\n\t\trecent_tests.cluster_version,\n\t\tcount(case when recent_tests.testresult='failure' then 1 end) as failure,\n\t\tcount(case when recent_tests.testresult='error' then 1 end) as error,\n\t\tcount(case when recent_tests.testresult='passed' then 1 end) as passed,\n\t\tcount(case when recent_tests.testresult='skipped' then 1 end) as skipped\n\tfrom\n\t\trecent_tests\n\tgroup by\n\t\trecent_tests.cluster_version\n)\nselect\n\tcluster_version,\n\t(passed::float)/(greatest(failure+error+passed,1)::float) as pass_rate\nfrom counts\norder by pass_rate\n;\n",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "value"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "timeColumn": "time",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Install Version Pass Rate (by Testcase)",
+          "type": "bargauge"
+        },
+        {
+          "datasource": "sd_cicd_job_result_database",
+          "description": "The number of times each job has failed to report testcase results (excluding jobs that failed to provision a cluster).",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {},
+              "displayName": "$__cell_0",
+              "mappings": [],
+              "min": 0,
+              "noValue": "0",
+              "thresholds": {
+                "mode": "percentage",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 26
+          },
+          "id": 10,
+          "options": {
+            "displayMode": "lcd",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": true
+            },
+            "showUnfilled": true
+          },
+          "pluginVersion": "7.2.1",
+          "targets": [
+            {
+              "format": "table",
+              "group": [],
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "\nselect\n\tjob_name,\n\tcount(*)\nfrom\n\tjobs\n\tleft join testcases\n\ton testcases.job_id = jobs.id\nwhere\n\t$__timeFilter(jobs.started)\n\tand testcases.id IS NULL\n\tand cluster_id IS NOT NULL and cluster_id not like ''\n\tand jobs.job_name != ''\ngroup by job_name\norder by count desc\n;",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "value"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "timeColumn": "time",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Jobs Failing to Post Results",
+          "type": "bargauge"
+        }
+      ],
+      "schemaVersion": 26,
+      "style": "dark",
+      "tags": [],
+      "templating": {
+        "list": []
+      },
+      "time": {
+        "from": "now-6h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "",
+      "title": "SD CI/CD Global Health Dashboard",
+      "uid": "JqU_Pzz7z",
+      "version": 6
+    }
   sd-cicd-addon-weather-report.json: |-
     {
       "annotations": {

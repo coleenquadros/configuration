@@ -55,7 +55,7 @@ spec:
       annotations:
         dashboard: "https://grafana.app-sre.devshift.net/d/6Y8XkcHGz/network-check?orgId=1"
         message: "insights network-check HTTP check has ongoing failures for the last 5min"
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/network-check.rst
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/network-check.rst
     - alert: GetentFailuresAlert
       expr: GetentFailuresLast1Min > 0
       for: 5m
@@ -66,7 +66,7 @@ spec:
       annotations:
         dashboard: "https://grafana.app-sre.devshift.net/d/6Y8XkcHGz/network-check?orgId=1"
         message: "insights network-check getent check has ongoing failures for the last 5min"
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/network-check.rst
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/network-check.rst
   - name: lag
     rules:
     - record: LagGauge
@@ -98,8 +98,23 @@ spec:
       labels:
         group: insights-storage-broker
         topic: platform.inventory.events
+    - record: is_us_summer_time
+      expr: |
+        (vector(1) and (month() > 3 and month() < 10))
+        or
+        (vector(1) and (month() == 3 and (day_of_month() - day_of_week()) >= 10) and absent((day_of_month() >= 10) and (day_of_week() == 0)))
+        or
+        (vector(1) and (month() == 10 and (day_of_month() - day_of_week()) < 10) and absent((day_of_month() >= 10) and (day_of_week() == 0)))
+        or
+        (vector(1) and ((month() == 10 and hour() < 1) or (month() == 3 and hour() > 0)) and ((day_of_month() >= 10) and (day_of_week() == 0)))
+        or
+        vector(0)
+    - record: us_time
+      expr: time() - 14400 * is_us_summer_time
+    - record: us_hour
+      expr: hour(us_time)
     - alert: KafkaLagFast
-      expr: LagGauge > LAG_THRESHOLD and LagDelta > 1000
+      expr: LagGauge > LAG_THRESHOLD and LagDelta > 1000 and (us_hour >= 9 and us_hour <= 22)
       for: 15m
       labels:
         severity: critical
@@ -108,9 +123,9 @@ spec:
       annotations:
         dashboard: "https://grafana.stage.devshift.net"
         message: "High Lag for {{ $labels.topic }} : {{ $labels.group }}"
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/kafka-lag.rst
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/kafka-lag.rst
     - alert: KafkaLag
-      expr: LagGauge > LAG_THRESHOLD and LagDelta > 0
+      expr: LagGauge > LAG_THRESHOLD and LagDelta > 0 and (us_hour >= 9 and us_hour <= 22)
       for: 1h
       labels:
         severity: critical
@@ -119,4 +134,4 @@ spec:
       annotations:
         dashboard: "https://grafana.stage.devshift.net"
         message: "High Lag for {{ $labels.topic }} : {{ $labels.group }}"
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/kafka-lag.rst
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/kafka-lag.rst

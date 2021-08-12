@@ -1,0 +1,68 @@
+---
+$schema: /app-sre/app-1.yml
+
+labels:
+  service: service-registry
+
+name: service-registry
+
+description: |
+    Multitenant Schema Registy based on upstream Apicurio Registry. Used in conjunction with Kafka and other softwares to hold text based schema defintions. 
+
+architectureDocument: https://docs.google.com/document/d/1b0Uc-ZEaM7h_Qy8trg-Pkx_Ldws5l9OKJfbhZYIw5dg
+sopsUrl: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/service-registry/sop
+grafanaUrl: https://grafana.stage.devshift.net/dashboards/f/fIWCrRi7z/serviceregistry
+
+onboardingStatus: InProgress
+
+serviceOwners:
+- name: Service Registry Team
+  # TODO: create mailing list srs-supporting-services@redhat.com
+  email: service-registry-dev@redhat.com
+
+escalationPolicy:
+  $ref: /teams/service-registry/escalation-policies/general-policy.yml
+
+dependencies:
+- $ref: /dependencies/ci-int/service.yml
+- $ref: /dependencies/gitlab/service.yml
+- $ref: /dependencies/quay/service.yml
+- $ref: /dependencies/openshift/service.yml
+- $ref: /dependencies/aws/service.yml
+- $ref: /dependencies/sso/service.yml
+
+codeComponents:
+- name: srs-fleet-manager
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/service-registry/srs-fleet-manager
+  gitlabRepoOwners:
+    enabled: true
+  gitlabHousekeeping:
+    enabled: true
+    rebase: true
+- name: srs-service-registry
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/service-registry/srs-service-registry
+  gitlabRepoOwners:
+    enabled: true
+  gitlabHousekeeping:
+    enabled: true
+    rebase: true
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/managedservices-rhoas.yml
+  teams:
+  - permissions:
+    - $ref: /dependencies/quay/permissions/quay-membership-rhoas-managed-services.yml
+    role: read
+  items:
+  - name: srs-fleet-manager
+    description: Private repo for the Service Registry Fleet Manager
+    public: false
+  - name: srs-tenant-manager
+    description: Private repo for the Service Registry Tenant Manager
+    public: false
+  - name: srs-service-registry
+    description: Private repo for the Service Registry Multitenant
+    public: false

@@ -1,0 +1,102 @@
+family: postgres12
+description: Parameter Group for PostgreSQL 12
+parameters:
+- name: log_statement
+  value: none
+  apply_method: immediate
+- name: rds.force_ssl
+  value: 1
+  apply_method: immediate
+- name: autovacuum_max_workers
+  value: 4
+  apply_method: pending-reboot
+- name: autovacuum_vacuum_cost_limit
+  value: 2400
+  apply_method: immediate
+- name: log_min_error_statement
+  value: error
+  apply_method: immediate
+- name: log_min_duration_statement
+  value: 4000
+  apply_method: immediate
+- name: shared_preload_libraries
+  value: pg_stat_statements
+  apply_method: pending-reboot
+- name: pg_stat_statements.max
+  value: 1000
+  apply_method: pending-reboot
+- name: pg_stat_statements.track
+  value: top
+  apply_method: immediate
+- name: pg_stat_statements.track_utility
+  value: 0
+  apply_method: immediate
+- name: track_activity_query_size
+  value: 2048
+  apply_method: pending-reboot
+
+# Partitionwise join/group planning can use significantly more CPU time and memory during planning, the default is off.
+# Observe the metrics once we introduce partitions
+- name: enable_partitionwise_join
+  value: 1
+  apply_method: pending-reboot
+- name: enable_partitionwise_aggregate
+  value: 1
+  apply_method: pending-reboot
+
+# This won't be very effective until we increase the number of worker processes
+- name: parallel_tuple_cost
+  value: 0.01
+  apply_method: pending-reboot
+
+### Params based on pgconfig.org looking at DW (data warehouse)
+- name: min_wal_size
+  value: 2000 # 2GB, Default unit of measurement is MB, Allowed values: 128-201326592
+  apply_method: pending-reboot
+- name: max_wal_size
+  value: 6000 # 6GB, Default unit of measurement is MB, Allowed values: 128-201326592
+  apply_method: pending-reboot
+- name: checkpoint_completion_target
+  value: 0.9
+  apply_method: pending-reboot
+- name: wal_buffers
+  value: 2000 # 16MB, Default unit of measurement is 8kB, Allowed values -1-262143
+  apply_method: pending-reboot
+- name: random_page_cost
+  value: 1.1
+  apply_method: pending-reboot
+- name: effective_io_concurrency
+  value: 200
+  apply_method: pending-reboot
+
+### Tweak these based on total memory, now db.r5.4xlarge with 128GB RAM and 16vCPU using pgconfig.org looking at DW
+## [AWS RDS Defaults to 25% of total memory]. Keep on 25% of total memory
+- name: shared_buffers # Default values: {DBInstanceClassMemory/32768}
+  value: 4194304 # 32GB=32*1024*1024/8, Default unit of measurement is 8kB, Allowed values: 16-1073741823
+  apply_method: pending-reboot
+### Keep on 75% of total memory
+- name: effective_cache_size # Default values: {DBInstanceClassMemory/16384}
+  value: 12582912 # 96GB=96*1024*1024/8, Default unit of measurement is 8kB, Allowed values: 1-2147483647
+  apply_method: immediate
+### Keep as 1/16 of total memory take autovacuum_max_worker increase in count
+- name: maintenance_work_mem # Default values: GREATEST({DBInstanceClassMemory*1024/63963136},65536)
+  value: 262144 # 2GB=2*1024*1024/8, Default unit of measurement is 8kB, Allowed values: Allowed values: 1024-2147483647
+  apply_method: immediate
+### Lets increase 41MB per each 8GB of total memory. Also based on number of workers we'll have 
+- name: work_mem
+  value: 670720 # 655MB=655*1024, Default unit of measurement is kB, Allowed values: 64-2147483647
+  apply_method: immediate
+
+### Worker Processes. Tweak these based on number of vcpus now 2
+### Same as number of of vcpus
+- name: max_worker_processes
+  value: 16
+  apply_method: pending-reboot
+### Same as number of of vcpus / 2
+- name: max_parallel_workers_per_gather
+  value: 8
+  apply_method: pending-reboot
+### Same as number of of vcpus
+- name: max_parallel_workers
+  value: 16
+  apply_method: pending-reboot

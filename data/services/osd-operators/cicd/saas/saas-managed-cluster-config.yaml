@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: osd-operators
@@ -10,8 +10,8 @@ description: SaaS tracking file for managed-cluster-config
 app:
   $ref: /services/osd-operators/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/osd-operators/pipelines/tekton.osd-operators-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
@@ -31,6 +31,28 @@ imagePatterns:
 - quay.io/openshift/origin-cli
 
 parameters:
+  # NOTE: ALLOWED_CIDR_BLOCKS is currently specified explicitly in
+  # each environment's parameter list. This means the bastion CIDRs
+  # are duplicated.
+  #
+  # Resist the temptation to DRY these!
+  #
+  # Absent a mechanism to aggregate variables*, the repetition is
+  # necessary so we don't have to include all of the v4 NATs in every
+  # environment. When we do that, we start exceeding the maximum
+  # number of rules per security group. See the following issues:
+  #
+  # - https://issues.redhat.com/browse/OSD-4840
+  # - https://issues.redhat.com/browse/OSD-5679
+  #
+  # *Please don't try to implement such a mechanism. Every time we
+  # touch the logic around this, we break something. We can take
+  # another look at simplifying this once we've retired the v3 envs.
+  #
+  #
+  # Turn this on by default. Below we turn it off explicitly for the
+  # v3 shards. See OHSS-909.
+  ENABLE_MANAGEMENT_API_SERVER_INGRESS: true
   OBSERVATORIUM_LEGALENTITY_IDS: ["1ep4WsPDKikDQCFLsi2yKdzH8xB", "1aV37K1VQv2zSStwSkdwBNOUBGI", "1V97SrKxtAKGZyNo2H8G3QfOaiS", "1OAqHaUmVnfTJ1PariqvRqJ2nvq", "1adeEj3FFUxuhmjsUgvGWCtZJuD"]
   IDENTITY_ATTR_EMAIL: mail
   IDENTITY_ATTR_ID: uid
@@ -42,116 +64,24 @@ parameters:
   IDENTITY_MAPPING_METHOD: claim
   IDENTITY_SRE_GOOGLE_CLIENTID: 211953714079-afmg28lojv8m2vv97b56s64ivm5ercn4.apps.googleusercontent.com
   SREP_USERS:
-  - aabhishe@redhat.com
-  - achvatal@redhat.com
-  - ahubenko@redhat.com
-  - alima@redhat.com
-  - anaik@redhat.com
-  - anjoshi@redhat.com
-  - aweiteka@redhat.com
   - bdematte@redhat.com
-  - bembery@redhat.com
   - bmeng@redhat.com
-  - bmontgom@redhat.com
-  - bmorriso@redhat.com
-  - bngoy@redhat.com
-  - bseref@redhat.com
-  - cattias@redhat.com
-  - cbeckham@redhat.com
-  - cblecker@redhat.com
-  - cbrumm@redhat.com
-  - chcollin@redhat.com
   - cshereme@redhat.com
-  - dedgar@redhat.com
-  - dkeohane@redhat.com
-  - dofinn@redhat.com
-  - dranders@redhat.com
-  - drow@redhat.com
-  - efried@redhat.com
-  - ehuang@redhat.com
-  - gsleeman@redhat.com
-  - haowang@redhat.com
-  - jaharrin@redhat.com
-  - jburrell@redhat.com
-  - jroche@redhat.com
   - kbater@redhat.com
-  - khnguyen@redhat.com
-  - kramraja@redhat.com
-  - lfalconm@redhat.com
-  - lseelye@redhat.com
   - mbargenq@redhat.com
-  - mbarnes@redhat.com
-  - mdewald@redhat.com
   - mmazur@redhat.com
-  - mwhittin@redhat.com
-  - mwoodson@redhat.com
-  - nbauer@redhat.com
-  - nmalik@redhat.com
-  - pgeorgia@redhat.com
-  - prani@redhat.com
-  - pratis@redhat.com
-  - pyates@redhat.com
-  - razevedo@redhat.com
-  - rbastos@redhat.com
-  - rbutter@redhat.com
-  - revyas@redhat.com
-  - rogreen@redhat.com
-  - rrackow@redhat.com
-  - siwu@redhat.com
-  - sulmer@redhat.com
-  - tfahlman@redhat.com
-  - tgabriel@redhat.com
-  - tnierman@redhat.com
-  - travi@redhat.com
-  - treymer@redhat.com
-  - uschlute@redhat.com
-  - wadhwani@redhat.com
-  - whearn@redhat.com
-  - todabasi@redhat.com
   CS_SRE_USERS:
-  - amoran@redhat.com
-  - crarobin@redhat.com
-  - gchaturv@redhat.com
   - hlipsig@redhat.com
   - jcueto@redhat.com
-  - mciccone@redhat.com
-  - mfreer@redhat.com
   - pcremin@redhat.com
   - psaggu@redhat.com
-  - raananda@redhat.com
-  - sclarkso@redhat.com
   CEE_USERS:
-  - apurty@redhat.com
-  - asheth@redhat.com
   - bmchugh@redhat.com
-  - bshirren@redhat.com
-  - dcaldwel@redhat.com
   - dsquirre@redhat.com
-  - grodrigu@redhat.com
-  - ksalunkh@redhat.com
   - maupadhy@redhat.com
-  - mdhanve@redhat.com
-  - pkanthal@redhat.com
-  - zhigwang@redhat.com
-  - amdas@redhat.com
-  - jcantril@redhat.com
-  - ewolinet@redhat.com
-  - ikarpukh@redhat.com
-  - cabeywar@redhat.com
-  - avilatus@redhat.com
-  - cpalmieri@redhat.com
-  - cvajjhal@redhat.com
-  - ekonecsn@redhat.com
-  - gpereira@redhat.com
-  - keprice@redhat.com
-  - sillumin@redhat.com
-  - spoole@redhat.com
-  - thobson@redhat.com
-  - tkonishi@redhat.com
   - tkimura@redhat.com
-  - dumilbur@redhat.com
-  - sthaha@redhat.com
-
+  - rmundhe@redhat.com
+  - crairobi@redhat.com
 resourceTemplates:
 - name: managed-cluster-config-integration
   url: https://github.com/openshift/managed-cluster-config
@@ -161,13 +91,32 @@ resourceTemplates:
     SREP_LEGAL_ENTITY_ID: 1Os4bwGWzUrgiS9svdWjfsFO14y
   targets:
   - namespace:
-      $ref: /services/osd-operators/namespaces/hive-integration-cluster-scope.yml
-    ref: master
-    upstream: openshift-managed-cluster-config-gh-build-master
-  - namespace:
       $ref: /services/osd-operators/namespaces/hivei01ue1/cluster-scope.yml
     ref: master
-    upstream: openshift-managed-cluster-config-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: openshift-managed-cluster-config-gh-build-master
+    parameters:
+      ALLOWED_CIDR_BLOCKS:
+      # These are the NAT IPs for hivei01ue1 (v4 integration shard)
+      - 54.146.138.135/32
+      # bastion-nasa-1.ops.openshift.com
+      - 52.70.201.140/32
+      # bastion-nasa-2.ops.openshift.com
+      - 52.6.0.240/32
+      # bastion-useast2-1.ops.openshift.com
+      - 18.216.250.44/32
+      # bastion-useast2-2.ops.openshift.com
+      - 52.14.88.51/32
+      # bastion-euwest2-1.ops.openshift.com
+      - 18.130.14.59/32
+      # bastion-euwest2-2.ops.openshift.com
+      - 35.178.149.126/32
+      # bastion-apnortheast1-1.ops.openshift.com
+      - 52.196.174.210/32
+      # bastion-apnortheast1-2.ops.openshift.com
+      - 54.168.53.242/32
 
 - name: managed-cluster-config-stage
   url: https://github.com/openshift/managed-cluster-config
@@ -177,21 +126,86 @@ resourceTemplates:
     SREP_LEGAL_ENTITY_ID: 1HELaFOf2YHWwwvt3XMbT5Mja7M
   targets:
   - namespace:
-      $ref: /services/osd-operators/namespaces/hive-stage-cluster-scope.yml
-    ref: master
-    upstream: openshift-managed-cluster-config-gh-build-master
-  - namespace:
       $ref: /services/osd-operators/namespaces/hive-stage-01/cluster-scope.yml
     ref: master
-    upstream: openshift-managed-cluster-config-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: openshift-managed-cluster-config-gh-build-master
+    parameters:
+      ALLOWED_CIDR_BLOCKS:
+      # These are the NAT IPs for hive-stage-01 (v4 stage shard)
+      - 54.227.5.10/32
+      # bastion-nasa-1.ops.openshift.com
+      - 52.70.201.140/32
+      # bastion-nasa-2.ops.openshift.com
+      - 52.6.0.240/32
+      # bastion-useast2-1.ops.openshift.com
+      - 18.216.250.44/32
+      # bastion-useast2-2.ops.openshift.com
+      - 52.14.88.51/32
+      # bastion-euwest2-1.ops.openshift.com
+      - 18.130.14.59/32
+      # bastion-euwest2-2.ops.openshift.com
+      - 35.178.149.126/32
+      # bastion-apnortheast1-1.ops.openshift.com
+      - 52.196.174.210/32
+      # bastion-apnortheast1-2.ops.openshift.com
+      - 54.168.53.242/32
   - namespace:
       $ref: /services/osd-operators/namespaces/hives02ue1/cluster-scope.yml
     ref: master
-    upstream: openshift-managed-cluster-config-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: openshift-managed-cluster-config-gh-build-master
+    parameters:
+      ALLOWED_CIDR_BLOCKS:
+      # These are the NAT IPs for hives02ue1 (v4 stage shard)
+      - 52.21.184.148/32
+      # bastion-nasa-1.ops.openshift.com
+      - 52.70.201.140/32
+      # bastion-nasa-2.ops.openshift.com
+      - 52.6.0.240/32
+      # bastion-useast2-1.ops.openshift.com
+      - 18.216.250.44/32
+      # bastion-useast2-2.ops.openshift.com
+      - 52.14.88.51/32
+      # bastion-euwest2-1.ops.openshift.com
+      - 18.130.14.59/32
+      # bastion-euwest2-2.ops.openshift.com
+      - 35.178.149.126/32
+      # bastion-apnortheast1-1.ops.openshift.com
+      - 52.196.174.210/32
+      # bastion-apnortheast1-2.ops.openshift.com
+      - 54.168.53.242/32
   - namespace:
       $ref: /services/osd-operators/namespaces/ssotest01ue1/cluster-scope.yml
     ref: master
-    upstream: openshift-managed-cluster-config-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: openshift-managed-cluster-config-gh-build-master
+    parameters:
+      ALLOWED_CIDR_BLOCKS:
+      # bastion-nasa-1.ops.openshift.com
+      - 52.70.201.140/32
+      # bastion-nasa-2.ops.openshift.com
+      - 52.6.0.240/32
+      # bastion-useast2-1.ops.openshift.com
+      - 18.216.250.44/32
+      # bastion-useast2-2.ops.openshift.com
+      - 52.14.88.51/32
+      # bastion-euwest2-1.ops.openshift.com
+      - 18.130.14.59/32
+      # bastion-euwest2-2.ops.openshift.com
+      - 35.178.149.126/32
+      # bastion-apnortheast1-1.ops.openshift.com
+      - 52.196.174.210/32
+      # bastion-apnortheast1-2.ops.openshift.com
+      - 54.168.53.242/32
+      # These are the NAT IPs for ssotest01ue1
+      - 54.237.41.201/32
 
 - name: managed-cluster-config-production
   url: https://github.com/openshift/managed-cluster-config
@@ -201,17 +215,126 @@ resourceTemplates:
     SREP_LEGAL_ENTITY_ID: 1HXb66dsiQCFcwk3tN64c55KORn
   targets:
   - namespace:
-      $ref: /services/osd-operators/namespaces/hive-production-cluster-scope.yml
-    ref: 3aedc94ed4381e98cfe2bf51a8920dc5340a2b44
-  - namespace:
       $ref: /services/osd-operators/namespaces/hivep01ue1/cluster-scope.yml
-    ref: 3aedc94ed4381e98cfe2bf51a8920dc5340a2b44
+    ref: 66038a32ad8419020887890dd4ac6bbdeab9e930
+    parameters:
+      ALLOWED_CIDR_BLOCKS:
+      # These are the NAT IPs for hivep01ue1 (v4 prod shard)
+      - 23.21.239.1/32
+      - 52.20.145.130/32
+      - 54.157.89.24/32
+      # bastion-nasa-1.ops.openshift.com
+      - 52.70.201.140/32
+      # bastion-nasa-2.ops.openshift.com
+      - 52.6.0.240/32
+      # bastion-useast2-1.ops.openshift.com
+      - 18.216.250.44/32
+      # bastion-useast2-2.ops.openshift.com
+      - 52.14.88.51/32
+      # bastion-euwest2-1.ops.openshift.com
+      - 18.130.14.59/32
+      # bastion-euwest2-2.ops.openshift.com
+      - 35.178.149.126/32
+      # bastion-apnortheast1-1.ops.openshift.com
+      - 52.196.174.210/32
+      # bastion-apnortheast1-2.ops.openshift.com
+      - 54.168.53.242/32
   - namespace:
       $ref: /services/osd-operators/namespaces/hivep02ue1/cluster-scope.yml
-    ref: 3aedc94ed4381e98cfe2bf51a8920dc5340a2b44
+    ref: 66038a32ad8419020887890dd4ac6bbdeab9e930
+    parameters:
+      ALLOWED_CIDR_BLOCKS:
+      # These are the NAT IPs for hivep02ue1 (v4 prod shard)
+      - 3.223.147.2/32
+      - 107.22.162.110/32
+      - 54.88.225.66/32
+      # bastion-nasa-1.ops.openshift.com
+      - 52.70.201.140/32
+      # bastion-nasa-2.ops.openshift.com
+      - 52.6.0.240/32
+      # bastion-useast2-1.ops.openshift.com
+      - 18.216.250.44/32
+      # bastion-useast2-2.ops.openshift.com
+      - 52.14.88.51/32
+      # bastion-euwest2-1.ops.openshift.com
+      - 18.130.14.59/32
+      # bastion-euwest2-2.ops.openshift.com
+      - 35.178.149.126/32
+      # bastion-apnortheast1-1.ops.openshift.com
+      - 52.196.174.210/32
+      # bastion-apnortheast1-2.ops.openshift.com
+      - 54.168.53.242/32
   - namespace:
       $ref: /services/osd-operators/namespaces/hivep03uw1/cluster-scope.yml
-    ref: 3aedc94ed4381e98cfe2bf51a8920dc5340a2b44
+    ref: 66038a32ad8419020887890dd4ac6bbdeab9e930
+    parameters:
+      ALLOWED_CIDR_BLOCKS:
+      # These are the NAT IPs for hivep03uw1 (v4 prod shard)
+      - 54.177.143.128/32
+      - 54.219.250.189/32
+      # bastion-nasa-1.ops.openshift.com
+      - 52.70.201.140/32
+      # bastion-nasa-2.ops.openshift.com
+      - 52.6.0.240/32
+      # bastion-useast2-1.ops.openshift.com
+      - 18.216.250.44/32
+      # bastion-useast2-2.ops.openshift.com
+      - 52.14.88.51/32
+      # bastion-euwest2-1.ops.openshift.com
+      - 18.130.14.59/32
+      # bastion-euwest2-2.ops.openshift.com
+      - 35.178.149.126/32
+      # bastion-apnortheast1-1.ops.openshift.com
+      - 52.196.174.210/32
+      # bastion-apnortheast1-2.ops.openshift.com
+      - 54.168.53.242/32
   - namespace:
       $ref: /services/osd-operators/namespaces/hivep04ew2/cluster-scope.yml
-    ref: 3aedc94ed4381e98cfe2bf51a8920dc5340a2b44
+    ref: 66038a32ad8419020887890dd4ac6bbdeab9e930
+    parameters:
+      ALLOWED_CIDR_BLOCKS:
+      # These are the NAT IPs for hivep04ew2 (v4 prod shard)
+      - 3.11.51.55/32
+      - 18.135.14.84/32
+      - 18.135.218.119/32
+      # bastion-nasa-1.ops.openshift.com
+      - 52.70.201.140/32
+      # bastion-nasa-2.ops.openshift.com
+      - 52.6.0.240/32
+      # bastion-useast2-1.ops.openshift.com
+      - 18.216.250.44/32
+      # bastion-useast2-2.ops.openshift.com
+      - 52.14.88.51/32
+      # bastion-euwest2-1.ops.openshift.com
+      - 18.130.14.59/32
+      # bastion-euwest2-2.ops.openshift.com
+      - 35.178.149.126/32
+      # bastion-apnortheast1-1.ops.openshift.com
+      - 52.196.174.210/32
+      # bastion-apnortheast1-2.ops.openshift.com
+      - 54.168.53.242/32
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hivep05ue1/cluster-scope.yml
+    ref: 66038a32ad8419020887890dd4ac6bbdeab9e930
+    parameters:
+      ALLOWED_CIDR_BLOCKS:
+      # These are the NAT IPs for hivep05ue1 (v4 prod shard)
+      - 3.233.86.181/32
+      - 34.226.229.129/32
+      - 44.194.44.138/32
+      # bastion-nasa-1.ops.openshift.com
+      - 52.70.201.140/32
+      # bastion-nasa-2.ops.openshift.com
+      - 52.6.0.240/32
+      # bastion-useast2-1.ops.openshift.com
+      - 18.216.250.44/32
+      # bastion-useast2-2.ops.openshift.com
+      - 52.14.88.51/32
+      # bastion-euwest2-1.ops.openshift.com
+      - 18.130.14.59/32
+      # bastion-euwest2-2.ops.openshift.com
+      - 35.178.149.126/32
+      # bastion-apnortheast1-1.ops.openshift.com
+      - 52.196.174.210/32
+      # bastion-apnortheast1-2.ops.openshift.com
+      - 54.168.53.242/32

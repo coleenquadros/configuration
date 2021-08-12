@@ -10,11 +10,11 @@ The email address pattern to use is [<ldap_user>+sd-app-sre@redhat.com]() (basic
 
 **Note:** Using an incognito browser window is recommended to avoid conflicts with existing sessions in OCM, SSO, RedHat customer portal
 
-1. Login to https://cloud.redhat.com/
+1. Login to https://console.redhat.com/
 
-1. Click the [cogwheel](https://cloud.redhat.com/settings/) in the top right
+1. Click the [cogwheel](https://console.redhat.com/settings/) in the top right
 
-1. Go to [Users](https://cloud.redhat.com/settings/rbac/users)
+1. Go to [Users](https://console.redhat.com/settings/rbac/users)
 
 1. Click [User management list](https://www.redhat.com/wapps/ugc/protected/usermgt/userList.html)
 
@@ -27,4 +27,4 @@ The email address pattern to use is [<ldap_user>+sd-app-sre@redhat.com]() (basic
 
 1. Click "Invite New Users"
 
-1. Once the invite is accepted by the user, they should see the App-SRE clusters listed at https://cloud.redhat.com/openshift/
+1. Once the invite is accepted by the user, they should see the App-SRE clusters listed at https://console.redhat.com/openshift/

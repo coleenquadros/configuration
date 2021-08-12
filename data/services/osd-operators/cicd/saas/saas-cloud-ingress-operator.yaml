@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: osd-operators
@@ -10,8 +10,8 @@ description: SaaS tracking file for cloud-ingress-operator
 app:
   $ref: /services/osd-operators/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/osd-operators/pipelines/tekton.osd-operators-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
@@ -54,34 +54,12 @@ resourceTemplates:
     ENABLE_MANAGEMENT_API_SERVER_INGRESS: true
   targets:
   - namespace:
-      $ref: /services/osd-operators/namespaces/hive-integration-cluster-scope.yml
-    ref: master
-    upstream: openshift-cloud-ingress-operator-gh-build-master
-    parameters:
-      ENABLE_MANAGEMENT_API_SERVER_INGRESS: false
-      ALLOWED_CIDR_BLOCKS:
-      # These are the NAT IPs for hivei01ue1 (v4 integration shard), backplane need this.
-      - 54.146.138.135/32
-      # bastion-nasa-1.ops.openshift.com
-      - 52.70.201.140/32
-      # bastion-nasa-2.ops.openshift.com
-      - 52.6.0.240/32
-      # bastion-useast2-1.ops.openshift.com
-      - 18.216.250.44/32
-      # bastion-useast2-2.ops.openshift.com
-      - 52.14.88.51/32
-      # bastion-euwest2-1.ops.openshift.com
-      - 18.130.14.59/32
-      # bastion-euwest2-2.ops.openshift.com
-      - 35.178.149.126/32
-      # bastion-apnortheast1-1.ops.openshift.com
-      - 52.196.174.210/32
-      # bastion-apnortheast1-2.ops.openshift.com
-      - 54.168.53.242/32
-  - namespace:
       $ref: /services/osd-operators/namespaces/hivei01ue1/cluster-scope.yml
     ref: master
-    upstream: openshift-cloud-ingress-operator-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: openshift-cloud-ingress-operator-gh-build-master
     parameters:
       ALLOWED_CIDR_BLOCKS:
       # These are the NAT IPs for hivei01ue1 (v4 integration shard)
@@ -103,32 +81,12 @@ resourceTemplates:
       # bastion-apnortheast1-2.ops.openshift.com
       - 54.168.53.242/32
   - namespace:
-      $ref: /services/osd-operators/namespaces/hive-stage-cluster-scope.yml
-    ref: master
-    upstream: openshift-cloud-ingress-operator-gh-build-master
-    parameters:
-      ENABLE_MANAGEMENT_API_SERVER_INGRESS: false
-      ALLOWED_CIDR_BLOCKS:
-      # bastion-nasa-1.ops.openshift.com
-      - 52.70.201.140/32
-      # bastion-nasa-2.ops.openshift.com
-      - 52.6.0.240/32
-      # bastion-useast2-1.ops.openshift.com
-      - 18.216.250.44/32
-      # bastion-useast2-2.ops.openshift.com
-      - 52.14.88.51/32
-      # bastion-euwest2-1.ops.openshift.com
-      - 18.130.14.59/32
-      # bastion-euwest2-2.ops.openshift.com
-      - 35.178.149.126/32
-      # bastion-apnortheast1-1.ops.openshift.com
-      - 52.196.174.210/32
-      # bastion-apnortheast1-2.ops.openshift.com
-      - 54.168.53.242/32
-  - namespace:
       $ref: /services/osd-operators/namespaces/hive-stage-01/cluster-scope.yml
     ref: master
-    upstream: openshift-cloud-ingress-operator-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: openshift-cloud-ingress-operator-gh-build-master
     parameters:
       ALLOWED_CIDR_BLOCKS:
       # These are the NAT IPs for hive-stage-01 (v4 stage shard)
@@ -152,7 +110,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/osd-operators/namespaces/hives02ue1/cluster-scope.yml
     ref: master
-    upstream: openshift-cloud-ingress-operator-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: openshift-cloud-ingress-operator-gh-build-master
     parameters:
       ALLOWED_CIDR_BLOCKS:
       # These are the NAT IPs for hives02ue1 (v4 stage shard)
@@ -174,34 +135,8 @@ resourceTemplates:
       # bastion-apnortheast1-2.ops.openshift.com
       - 54.168.53.242/32
   - namespace:
-      $ref: /services/osd-operators/namespaces/hive-production-cluster-scope.yml
-    ref: 066a65ef97c627c2cbc62e5e1b3dbebe216e5b11
-    parameters:
-      ENABLE_MANAGEMENT_API_SERVER_INGRESS: false
-      ALLOWED_CIDR_BLOCKS:
-      # These are the NAT IPs for hivep01ue1 (v4 prod shard), backplane need this
-      - 23.21.239.1/32
-      - 52.20.145.130/32
-      - 54.157.89.24/32
-      # bastion-nasa-1.ops.openshift.com
-      - 52.70.201.140/32
-      # bastion-nasa-2.ops.openshift.com
-      - 52.6.0.240/32
-      # bastion-useast2-1.ops.openshift.com
-      - 18.216.250.44/32
-      # bastion-useast2-2.ops.openshift.com
-      - 52.14.88.51/32
-      # bastion-euwest2-1.ops.openshift.com
-      - 18.130.14.59/32
-      # bastion-euwest2-2.ops.openshift.com
-      - 35.178.149.126/32
-      # bastion-apnortheast1-1.ops.openshift.com
-      - 52.196.174.210/32
-      # bastion-apnortheast1-2.ops.openshift.com
-      - 54.168.53.242/32
-  - namespace:
       $ref: /services/osd-operators/namespaces/hivep01ue1/cluster-scope.yml
-    ref: 066a65ef97c627c2cbc62e5e1b3dbebe216e5b11
+    ref: cb00603627f555ee8e3a9f6e49094daaedb3a93f
     parameters:
       ALLOWED_CIDR_BLOCKS:
       # These are the NAT IPs for hivep01ue1 (v4 prod shard)
@@ -226,7 +161,7 @@ resourceTemplates:
       - 54.168.53.242/32
   - namespace:
       $ref: /services/osd-operators/namespaces/hivep02ue1/cluster-scope.yml
-    ref: 066a65ef97c627c2cbc62e5e1b3dbebe216e5b11
+    ref: cb00603627f555ee8e3a9f6e49094daaedb3a93f
     parameters:
       ALLOWED_CIDR_BLOCKS:
       # These are the NAT IPs for hivep02ue1 (v4 prod shard)
@@ -251,7 +186,7 @@ resourceTemplates:
       - 54.168.53.242/32
   - namespace:
       $ref: /services/osd-operators/namespaces/hivep03uw1/cluster-scope.yml
-    ref: 066a65ef97c627c2cbc62e5e1b3dbebe216e5b11
+    ref: cb00603627f555ee8e3a9f6e49094daaedb3a93f
     parameters:
       ALLOWED_CIDR_BLOCKS:
       # These are the NAT IPs for hivep03uw1 (v4 prod shard)
@@ -275,7 +210,7 @@ resourceTemplates:
       - 54.168.53.242/32
   - namespace:
       $ref: /services/osd-operators/namespaces/hivep04ew2/cluster-scope.yml
-    ref: 066a65ef97c627c2cbc62e5e1b3dbebe216e5b11
+    ref: cb00603627f555ee8e3a9f6e49094daaedb3a93f
     parameters:
       ALLOWED_CIDR_BLOCKS:
       # These are the NAT IPs for hivep04ew2 (v4 prod shard)
@@ -299,9 +234,37 @@ resourceTemplates:
       # bastion-apnortheast1-2.ops.openshift.com
       - 54.168.53.242/32
   - namespace:
+      $ref: /services/osd-operators/namespaces/hivep05ue1/cluster-scope.yml
+    ref: 602eba67c2892ef2ee939c0776b07d3978e1c698
+    parameters:
+      ALLOWED_CIDR_BLOCKS:
+      # These are the NAT IPs for hivep05ue1 (v4 prod shard)
+      - 3.233.86.181/32
+      - 34.226.229.129/32
+      - 44.194.44.138/32
+      # bastion-nasa-1.ops.openshift.com
+      - 52.70.201.140/32
+      # bastion-nasa-2.ops.openshift.com
+      - 52.6.0.240/32
+      # bastion-useast2-1.ops.openshift.com
+      - 18.216.250.44/32
+      # bastion-useast2-2.ops.openshift.com
+      - 52.14.88.51/32
+      # bastion-euwest2-1.ops.openshift.com
+      - 18.130.14.59/32
+      # bastion-euwest2-2.ops.openshift.com
+      - 35.178.149.126/32
+      # bastion-apnortheast1-1.ops.openshift.com
+      - 52.196.174.210/32
+      # bastion-apnortheast1-2.ops.openshift.com
+      - 54.168.53.242/32
+  - namespace:
       $ref: /services/osd-operators/namespaces/ssotest01ue1/cluster-scope.yml
     ref: master
-    upstream: openshift-cloud-ingress-operator-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: openshift-cloud-ingress-operator-gh-build-master
     parameters:
       ALLOWED_CIDR_BLOCKS:
       # bastion-nasa-1.ops.openshift.com

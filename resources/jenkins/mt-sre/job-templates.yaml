@@ -1,0 +1,54 @@
+- job-template:
+    id: 'gl-build-master-managed-tenants'
+    name: '{gl_group}-{gl_project}-gl-build-{branch}-managed-tenants'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *app_sre_bot_key
+        - *quay_secret_osd_addons_push
+        - *addons_flow_ocm_token
+        - *gitlab_token
+    builders:
+    - shell: |
+        export SSH_PRIVATE_KEY_B64="$APP_SRE_BOT_KEY"
+
+        TMP_DIR=$(mktemp -d -p .)
+        trap "rm -rf $TMP_DIR" EXIT SIGINT
+
+        export SSH_KEY_FILE="$TMP_DIR/id_rsa"
+        echo "$SSH_PRIVATE_KEY_B64" | base64 -d > "$SSH_KEY_FILE"
+        chmod 700 "$TMP_DIR"
+        chmod 600 "$SSH_KEY_FILE"
+
+        export DOCKER_CONF=$PWD/.docker
+        mkdir -p $DOCKER_CONF
+        echo "$QUAY_DOCKER_CONFIG_JSON" | base64 -d > $DOCKER_CONF/config.json
+
+        ./build_deploy.sh
+    publishers:
+    - slack:
+        room: '{slack_channel_notification}'
+        notify-start: False
+        notify-success: True
+        notify-failure: True
+        notify-repeated-failure: True
+    <<: *gl_build_master
+
+- job-template:
+    id: 'gl-pr-check-managed-tenants'
+    name: '{gl_group}-{gl_project}-gl-pr-check'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *3scale_api
+        - *addons_flow_ocm_token
+        - *reconcile_toml
+        - *gitlab_token
+    <<: *gl_pr_check

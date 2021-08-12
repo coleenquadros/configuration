@@ -1,0 +1,14 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2021-07-01-pkg-versions
+namespace:
+  $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
+identifier: patchman-prod
+output: stdout
+queries:
+  - |
+   select max(pkg_id_cnt), min(pkg_id_cnt), avg(pkg_id_cnt) from (
+    select rh_account_id, name_id, count(package_id) as pkg_id_cnt from (
+      select distinct rh_account_id, name_id, package_id from system_package) t
+    group by rh_account_id, name_id) tt;

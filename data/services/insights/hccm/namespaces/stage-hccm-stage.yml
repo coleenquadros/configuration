@@ -5,16 +5,16 @@ labels:
   service: hccm
 
 name: hccm-stage
-description: Insights hccm-stage on the Stage cluster under e2e-deploy/ocdeployer management
+description: Insights hccm-stage on the Stage cluster under clowder / app interface management
 
 cluster:
   $ref: /openshift/crcs02ue1/cluster.yml
 
-limitRanges:
-  $ref: /dependencies/openshift/limitranges/standard-resource-limits.yml
+# limitRanges:
+#   $ref: /dependencies/openshift/limitranges/standard-resource-limits.yml
 
-quota:
-  $ref: /services/insights/hccm/hccm-quota.yml
+# quota:
+#   $ref: /services/insights/hccm/hccm-quota.yml
 
 app:
   $ref: /services/insights/hccm/app.yml
@@ -114,6 +114,11 @@ openshiftResources:
   version: 1
   annotations:
     qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/hccm-stage/koku-report-emailer-secret
+  version: 1
+  annotations:
+    qontract.recycle: "true"
 
 managedTerraformResources: true
 
@@ -128,6 +133,8 @@ terraformResources:
   output_resource_name: koku-db
   enhanced_monitoring: true
   parameter_group: /terraform/resources/insights/stage/rds/postgres12-parameter-group-cost-management-stage.yml
+  annotations:
+    clowder/database: "koku"
 - provider: cloudwatch
   account: insights-stage
   identifier: hccm-stage
@@ -139,16 +146,21 @@ terraformResources:
   identifier: hccm-stage-s3
   defaults: /terraform/resources/s3-private-1.yml
   output_resource_name: hccm-s3
-- provider: elasticache
+- provider: elasticache # TODO remove after clowder
   account: insights-stage
   identifier: cost-management-stage-elasticache
   defaults: /terraform/resources/insights/stage/elasticache/elasticache-hccm-1.yml
   output_resource_name: elasticache-redis
-- provider: elasticache
+- provider: elasticache # TODO remove after clowder
   account: insights-stage
   identifier: cost-management-stage-elasticache-api
   defaults: /terraform/resources/insights/stage/elasticache/elasticache-hccm-2.yml
   output_resource_name: elasticache-redis-api
+- provider: elasticache
+  account: insights-stage
+  identifier: cost-management-redis-clowder
+  defaults: /terraform/resources/insights/stage/elasticache/elasticache-hccm-3.yml
+  output_resource_name: in-memory-db
 
 kafkaCluster:
   $ref: /kafka/crcs02ue1k/cluster.yml

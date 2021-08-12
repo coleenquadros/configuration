@@ -67,6 +67,18 @@ openshiftResources:
     name: quay-config-secret-v57
     vault_secret_version: 57
     version_label: v57
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /quayio-stage/quay/quay-config-recovery.secret.yaml
+  variables:
+    name: quay-config-recovery-secret
+    vault_secret_version: 57
+    version_label: v57
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /quayio-stage/quay/quay-service-tool-config.secret.yaml
+  variables:
+    name: quay-service-tool-config
 - provider: resource
   path: /quayio-stage/quay/quay-envoy-proxy-config.configmap.yaml
 - provider: vault-secret
@@ -74,6 +86,13 @@ openshiftResources:
   version: 1
 - provider: resource
   path: /quayio-stage/quay/quay.web-allow-external.networkpolicy.yaml
+- provider: resource
+  path: /quayio-stage/quay/quay-recovery.web-allow-external.networkpolicy.yaml
+- provider: route
+  path: /quayio-stage/quay/quay-service-tool.route.yaml
+  vault_tls_secret_path: app-interface/quayio-stage/quayio-stage/routes/quay-service-tool
+  vault_tls_secret_version: 1
+
 
 terraformResources:
 - provider: rds
@@ -94,6 +113,11 @@ terraformResources:
   identifier: quayio-stage
   defaults: /terraform/resources/quayio-stage/elasticache-1.yml
   parameter_group: /terraform/resources/quayio-stage/elasticache-parameter-group-1.yml
+- provider: elasticache
+  account: quayio-stage
+  identifier: quayio-stage-modelcache
+  defaults: /terraform/resources/quayio-stage/elasticache-modelcache-1.yml
+  parameter_group: /terraform/resources/quayio-stage/elasticache-modelcache-parameter-group-1.yml
 # - provider: rds
 #   account: quayio-stage
 #   identifier: quayio-dev

@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: automation-hub
@@ -11,15 +11,13 @@ description: automation-hub app on the Insights Platform
 app:
   $ref: /services/insights/automation-hub/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
-
-timeout: 5
 
 managedResourceTypes:
 - Deployment
@@ -48,16 +46,17 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/automation-hub/namespaces/stage-automation-hub-stage.yml
-    ref: b9399cc8f6a13292232cfd6711984e7dbe020605
+    ref: 6208d157a46fb43e4179068f35e73422c12a7c1d
     parameters:
-      IMAGE_TAG: 1ad74f2
+      IMAGE_TAG: 10f2865
+      REPLICAS: 0
       MEMORY_REQUEST: 100Mi
       MEMORY_LIMIT: 100Mi
   - namespace:
       $ref: /services/insights/automation-hub/namespaces/automation-hub-prod.yml
-    ref: b9399cc8f6a13292232cfd6711984e7dbe020605
+    ref: 6208d157a46fb43e4179068f35e73422c12a7c1d
     parameters:
-      IMAGE_TAG: 1ad74f2
+      IMAGE_TAG: 10f2865
       MEMORY_REQUEST: 100Mi
       MEMORY_LIMIT: 100Mi
 
@@ -69,10 +68,10 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/automation-hub/namespaces/stage-automation-hub-stage.yml
-    ref: 4e51d9e712665270d4c769111014838bb41d877b
+    ref: 1367dfaa3ae7b242fda4ce00544958d7af01cfe6
     parameters:
-      IMAGE_TAG: 6d6a53a
-      REPLICAS: 1
+      IMAGE_TAG: 5947968
+      REPLICAS: 0
       CPU_REQUEST: "200m"
       CPU_LIMIT: "1"
       MEMORY_REQUEST: 1024Mi
@@ -80,14 +79,15 @@ resourceTemplates:
       REDIS_TLS: "true"
   - namespace:
       $ref: /services/insights/automation-hub/namespaces/automation-hub-prod.yml
-    ref: d7efaffdb246d20790e066d0fb8d25af44ee5976
+    ref: 1367dfaa3ae7b242fda4ce00544958d7af01cfe6
     parameters:
-      IMAGE_TAG: 59b8cf7
+      IMAGE_TAG: 9ac306d
       REPLICAS: 2
       CPU_REQUEST: "500m"
       CPU_LIMIT: "1"
       MEMORY_REQUEST: 1200Mi
       MEMORY_LIMIT: 1600Mi
+      REDIS_TLS: "true"
 
 - name: pulp-content-app
   path: /templates/automation-hub/pulp-content-app.yaml
@@ -95,22 +95,24 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/automation-hub/namespaces/stage-automation-hub-stage.yml
-    ref: 4e51d9e712665270d4c769111014838bb41d877b
+    ref: 1367dfaa3ae7b242fda4ce00544958d7af01cfe6
     parameters:
+      IMAGE_TAG: 5947968
+      REPLICAS: 0
       CPU_REQUEST: "400m"
       CPU_LIMIT: "600m"
-      IMAGE_TAG: 6d6a53a
       MEMORY_REQUEST: 1024Mi
       MEMORY_LIMIT: 1024Mi
       REDIS_TLS: "true"
   - namespace:
       $ref: /services/insights/automation-hub/namespaces/automation-hub-prod.yml
-    ref: d7efaffdb246d20790e066d0fb8d25af44ee5976
+    ref: 1367dfaa3ae7b242fda4ce00544958d7af01cfe6
     parameters:
-      IMAGE_TAG: 59b8cf7
+      IMAGE_TAG: 9ac306d
       MEMORY_REQUEST: 512Mi
       MEMORY_LIMIT: 512Mi
       REPLICAS: 2
+      REDIS_TLS: "true"
 
 - name: pulp-resource-manager
   path: /templates/automation-hub/pulp-resource-manager.yaml
@@ -118,23 +120,24 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/automation-hub/namespaces/stage-automation-hub-stage.yml
-    ref: 4e51d9e712665270d4c769111014838bb41d877b
+    ref: 1367dfaa3ae7b242fda4ce00544958d7af01cfe6
     parameters:
-      IMAGE_TAG: 6d6a53a
+      IMAGE_TAG: 5947968
+      REPLICAS: 0
       MEMORY_REQUEST: 256Mi
       MEMORY_LIMIT: 256Mi
       REDIS_TLS: "true"
-      REPLICAS: 1
   - namespace:
       $ref: /services/insights/automation-hub/namespaces/automation-hub-prod.yml
-    ref: d7efaffdb246d20790e066d0fb8d25af44ee5976
+    ref: 1367dfaa3ae7b242fda4ce00544958d7af01cfe6
     parameters:
-      IMAGE_TAG: 59b8cf7
+      IMAGE_TAG: 9ac306d
       MEMORY_REQUEST: 512Mi
       MEMORY_LIMIT: 1024Mi
       CPU_REQUEST: "1000m"
       CPU_LIMIT: "1500m"
       REPLICAS: 1
+      REDIS_TLS: "true"
 
 - name: pulp-worker
   path: /templates/automation-hub/pulp-worker.yaml
@@ -142,47 +145,26 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/automation-hub/namespaces/stage-automation-hub-stage.yml
-    ref: 4e51d9e712665270d4c769111014838bb41d877b
+    ref: 1367dfaa3ae7b242fda4ce00544958d7af01cfe6
     parameters:
+      IMAGE_TAG: 5947968
+      REPLICAS: 0
       JOB_NAMESPACE: automation-hub-jobs-stage
-      IMAGE_TAG: 6d6a53a
       IMPORTER_JOB_API_CHECK_RETRIES: "1200"
       REDIS_TLS: "true"
-      REPLICAS: 2
       # Temporary workaround for bug in OpenShift template
       IMPORTER_CPU_LIMIT: "750m"
   - namespace:
       $ref: /services/insights/automation-hub/namespaces/automation-hub-prod.yml
-    ref: d7efaffdb246d20790e066d0fb8d25af44ee5976
+    ref: 1367dfaa3ae7b242fda4ce00544958d7af01cfe6
     parameters:
       JOB_NAMESPACE: automation-hub-jobs-prod
-      IMAGE_TAG: 59b8cf7
+      IMAGE_TAG: 9ac306d
       IMPORTER_JOB_API_CHECK_RETRIES: "1200"
+      REDIS_TLS: "true"
       REPLICAS: 12
       # Temporary workaround for bug in OpenShift template
       IMPORTER_CPU_LIMIT: "750m"
-
-- name: automation-hub-redis
-  path: /templates/automation-hub/redis.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  targets:
-  - namespace:
-      $ref: /services/insights/automation-hub/namespaces/stage-automation-hub-stage.yml
-    ref: 4e51d9e712665270d4c769111014838bb41d877b
-    parameters:
-      IMAGE_TAG: latest
-      IMAGE: quay.io/cloudservices/redis
-      MEMORY_REQUEST: 512Mi
-      MEMORY_LIMIT: 768Mi
-  - namespace:
-      $ref: /services/insights/automation-hub/namespaces/automation-hub-prod.yml
-    ref: b9399cc8f6a13292232cfd6711984e7dbe020605
-    parameters:
-      IMAGE_TAG: latest
-      IMAGE: quay.io/cloudservices/redis
-      MEMORY_REQUEST: 2048Mi
-      MEMORY_LIMIT: 2048Mi
-      VOLUME_CAPACITY: 20Gi
 
 - name: automation-hub-database-migration
   path: /openshift/database-migration.yaml
@@ -193,12 +175,12 @@ resourceTemplates:
     ref: b5a4056b6cab46a0cad43010b93119ab1ff3ef73
     parameters:
       IMAGE: quay.io/cloudservices/automation-hub-galaxy-ng
-      IMAGE_TAG: 6d6a53a
+      IMAGE_TAG: 5947968
   - namespace:
       $ref: /services/insights/automation-hub/namespaces/automation-hub-prod.yml
     ref: b5a4056b6cab46a0cad43010b93119ab1ff3ef73
     parameters:
       IMAGE: quay.io/cloudservices/automation-hub-galaxy-ng
-      IMAGE_TAG: 59b8cf7
+      IMAGE_TAG: 9ac306d
       MEMORY_REQUEST: 1024Mi
       MEMORY_LIMIT: 2048Mi

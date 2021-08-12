@@ -1,0 +1,54 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: status-board
+
+name: saas-status-board # usually starts with `saas-` and contains the name of the deployed app/service/component
+description: SaaS tracking file for Status Board
+
+app:
+  $ref: /services/status-board/app.yml
+
+pipelinesProvider:
+  $ref: /services/status-board/pipelines/tekton.status-board-pipelines.appsrep05ue1.yaml
+
+slack: # configure where to send notifications of success/failure of deployments
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-ops-services-dev
+
+managedResourceTypes:
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/app-sre/status-board
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+resourceTemplates: # a list of configurations of OpenShift templates to deploy
+- name: service-template.yaml
+  path: /templates/service-template.yaml
+  url: https://gitlab.cee.redhat.com/service/status-board
+  parameters:
+    OCM_BASE_URL: https://api.stage.openshift.com
+    IMAGE_REGISTRY: quay.io
+    IMAGE_REPOSITORY: app-sre/status-board
+    SENTRY_ENABLE: true
+    SENTRY_PROJECT: 29
+    SENTRY_URL: https://sentry.stage.devshift.net
+  targets:
+  - namespace:
+      $ref: /services/status-board/namespaces/stage.yml
+    ref: main
+# - name: secrets-template.yaml
+#   url: https://gitlab.cee.redhat.com/service/status-board
+#   path: /templates/secrets-template.yaml
+#   targets:
+#   - namespace:
+#       $ref: /services/status-board/namespaces/stage.yaml
+#     ref: main

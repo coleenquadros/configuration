@@ -20,6 +20,7 @@ spec:
         * 60 * 5 > 0'
       for: 15m
       labels:
+        service: openshift
         severity: high
     - alert: KubePodNotReady
       annotations:
@@ -36,6 +37,7 @@ spec:
         ) > 0
       for: 15m
       labels:
+        service: openshift
         severity: high
     - alert: KubeDeploymentGenerationMismatch
       annotations:
@@ -49,24 +51,7 @@ spec:
         kube_deployment_metadata_generation{job="kube-state-metrics",namespace!~"^openshift-.*$"}
       for: 15m
       labels:
-        severity: high
-    - alert: KubeDeploymentReplicasMismatch
-      annotations:
-        message: ({{ $labels.cluster }}/{{ $labels.namespace }}) Deployment {{ $labels.deployment }} has not
-          matched the expected number of replicas for longer than 15 minutes.
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeDeploymentReplicasMismatch.md
-      expr: |
-        (
-          kube_deployment_spec_replicas{job="kube-state-metrics",namespace!~"^openshift-.*$"}
-            !=
-          kube_deployment_status_replicas_available{job="kube-state-metrics",namespace!~"^openshift-.*$"}
-        ) and (
-          changes(kube_deployment_status_replicas_updated{job="kube-state-metrics",namespace!~"^openshift-.*$"}[5m])
-            ==
-          0
-        )
-      for: 15m
-      labels:
+        service: openshift
         severity: high
     - alert: KubeStatefulSetReplicasMismatch
       annotations:
@@ -85,6 +70,7 @@ spec:
         )
       for: 15m
       labels:
+        service: openshift
         severity: high
     - alert: KubeStatefulSetGenerationMismatch
       annotations:
@@ -98,6 +84,7 @@ spec:
         kube_statefulset_metadata_generation{job="kube-state-metrics",namespace!~"^openshift-.*$"}
       for: 15m
       labels:
+        service: openshift
         severity: high
     - alert: KubeStatefulSetUpdateNotRolledOut
       annotations:
@@ -123,6 +110,7 @@ spec:
         )
       for: 15m
       labels:
+        service: openshift
         severity: high
     - alert: KubeDaemonSetRolloutStuck
       annotations:
@@ -135,6 +123,7 @@ spec:
         kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics",namespace!~"^openshift-.*$"} < 1.00
       for: 15m
       labels:
+        service: openshift
         severity: high
     - alert: KubeContainerWaiting
       annotations:
@@ -146,6 +135,7 @@ spec:
         > 0'
       for: 15m
       labels:
+        service: openshift
         severity: high
     - alert: KubeDaemonSetNotScheduled
       annotations:
@@ -158,6 +148,7 @@ spec:
         kube_daemonset_status_current_number_scheduled{job="kube-state-metrics",namespace!~"^openshift-.*$"} > 0
       for: 10m
       labels:
+        service: openshift
         severity: high
     - alert: KubeDaemonSetMisScheduled
       annotations:
@@ -167,6 +158,7 @@ spec:
       expr: 'kube_daemonset_status_number_misscheduled{job="kube-state-metrics",namespace!~"^openshift-.*$"} > 0'
       for: 15m
       labels:
+        service: openshift
         severity: high
   - name: kubernetes-resources
     rules:
@@ -183,6 +175,7 @@ spec:
         (count(kube_node_status_allocatable_cpu_cores)-1) / count(kube_node_status_allocatable_cpu_cores)
       for: 5m
       labels:
+        service: openshift
         severity: high
     - alert: KubeMemoryOvercommit
       annotations:
@@ -199,6 +192,7 @@ spec:
         count(kube_node_status_allocatable_memory_bytes)
       for: 5m
       labels:
+        service: openshift
         severity: high
     - alert: KubeCPUQuotaOvercommit
       annotations:
@@ -211,6 +205,7 @@ spec:
           > 1.5
       for: 5m
       labels:
+        service: openshift
         severity: high
     - alert: KubeMemoryQuotaOvercommit
       annotations:
@@ -223,6 +218,7 @@ spec:
           > 1.5
       for: 5m
       labels:
+        service: openshift
         severity: high
     - alert: KubeQuotaExceeded
       annotations:
@@ -236,6 +232,7 @@ spec:
           > 1
       for: 15m
       labels:
+        service: openshift
         severity: high
   - name: kubernetes-storage
     rules:
@@ -251,6 +248,7 @@ spec:
           < 3
       for: 10m
       labels:
+        service: openshift
         severity: critical
     - alert: KubePersistentVolumeFullInFourDays
       annotations:
@@ -267,6 +265,7 @@ spec:
         predict_linear(kubelet_volume_stats_available_bytes{job="kubelet"}[6h], 4 * 24 * 3600) < 0
       for: 5m
       labels:
+        service: openshift
         severity: high
     - alert: KubePersistentVolumeErrors
       annotations:
@@ -276,45 +275,5 @@ spec:
         kube_persistentvolume_status_phase{phase=~"Failed|Pending",job="kube-state-metrics",namespace!~"^(uhc-.*|openshift)-.*$"} > 0
       for: 5m
       labels:
-        severity: high
-  - name: kubernetes-system-kubelet
-    rules:
-    - alert: KubeNodeNotReady
-      annotations:
-        message: "{{ $labels.node }} has been unready for more than 5 minutes."
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeNodeNotReady.md
-      expr: 'kube_node_status_condition{job="kube-state-metrics",condition="Ready",status="true"}
-        == 0'
-      for: 5m
-      labels:
-        severity: high
-    - alert: KubeNodeUnreachable
-      annotations:
-        message: "{{ $labels.node }} is unreachable and some workloads may be rescheduled."
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeNodeUnreachable.md
-      expr: '(kube_node_spec_taint{job="kube-state-metrics",key="node.kubernetes.io/unreachable",effect="NoSchedule"}
-        unless ignoring(key,value) kube_node_spec_taint{job="kube-state-metrics",key="ToBeDeletedByClusterAutoscaler"})
-        == 1'
-      labels:
-        severity: high
-    - alert: KubeletTooManyPods
-      annotations:
-        message: Kubelet '{{ $labels.node }}' is running at {{ $value | humanizePercentage
-          }} of its Pod capacity.
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeletTooManyPods.md
-      expr: 'max(max(kubelet_running_pod_count{job="kubelet"}) by(instance) * on(instance)
-        group_left(node) kubelet_node_name{job="kubelet"}) by(node) / max(kube_node_status_capacity_pods{job="kube-state-metrics"}
-        != 1) by(node) > 0.95'
-      for: 15m
-      labels:
-        severity: high
-    - alert: KubeNodeReadinessFlapping
-      annotations:
-        message: The readiness status of node {{ $labels.node }} has changed {{ $value
-          }} times in the last 15 minutes.
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubeNodeReadinessFlapping.md
-      expr: 'sum(changes(kube_node_status_condition{status="true",condition="Ready"}[15m]))
-        by (node) > 2'
-      for: 15m
-      labels:
+        service: openshift
         severity: high

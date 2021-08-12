@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: rhsm
@@ -11,15 +11,13 @@ description: Backend components for Subscription Watch
 app:
   $ref: /services/insights/rhsm/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
-
-timeout: 5
 
 managedResourceTypes:
 - ConfigMap
@@ -47,10 +45,13 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
     ref: main
-    upstream: RedHatInsights-rhsm-subscriptions-egress-gh-build-main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-rhsm-subscriptions-egress-gh-build-main
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
-    ref: feb8a96628244e6c6f7b78b1ad9fab5813fe58b9
+    ref: 00d8001356ddd2b53e7cb6a3000c27212ab708bd
 - name: swatch-product-allowlist
   path: /templates/capacity-allowlist.yml
   url: https://gitlab.cee.redhat.com/rhsm/swatch-product-allowlist
@@ -66,7 +67,7 @@ resourceTemplates:
     ref: main
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
-    ref: 687af30bdcc4a71abd7793c924b9f17b284c4832
+    ref: 98eaf7598ffed86360c6ff6883803844470aad4e
 - name: rhsm-subscriptions-api
   path: /templates/rhsm-subscriptions-api.yml
   url: https://github.com/RedHatInsights/rhsm-subscriptions
@@ -74,16 +75,22 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/dev-rhsm-qa.yml
     ref: main
-    upstream: RedHatInsights-rhsm-subscriptions-gh-build-main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-rhsm-subscriptions-gh-build-main
   - namespace:
       $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
     ref: main
-    upstream: RedHatInsights-rhsm-subscriptions-gh-build-main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-rhsm-subscriptions-gh-build-main
     parameters:
       SERVER_MAX_HTTP_HEADER_SIZE: '47000'
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
-    ref: 630e933585bebe5a241d0f55b978d9ddbe1ec999
+    ref: 2b803d1db76128082fe051b07a1799395dfe710a
 - name: rhsm-subscriptions-capacity-ingress
   path: /templates/rhsm-subscriptions-capacity-ingress.yml
   url: https://github.com/RedHatInsights/rhsm-subscriptions
@@ -94,10 +101,13 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
     ref: main
-    upstream: RedHatInsights-rhsm-subscriptions-gh-build-main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-rhsm-subscriptions-gh-build-main
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
-    ref: 630e933585bebe5a241d0f55b978d9ddbe1ec999
+    ref: 2b803d1db76128082fe051b07a1799395dfe710a
 - name: rhsm-subscriptions-scheduler
   path: /templates/rhsm-subscriptions-scheduler.yml
   url: https://github.com/RedHatInsights/rhsm-subscriptions
@@ -110,12 +120,15 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
     ref: main
-    upstream: RedHatInsights-rhsm-subscriptions-gh-build-main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-rhsm-subscriptions-gh-build-main
     parameters:
       OPENSHIFT_ENABLED_ACCOUNT_PROMQL: "group(min_over_time(subscription_labels{ebs_account != '', billing_model='marketplace'}[1h])) by (ebs_account)"
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
-    ref: 630e933585bebe5a241d0f55b978d9ddbe1ec999
+    ref: 2b803d1db76128082fe051b07a1799395dfe710a
     parameters:
       OPENSHIFT_ENABLED_ACCOUNT_PROMQL: "group(min_over_time(subscription_labels{ebs_account != '', billing_model='marketplace'}[1h])) by (ebs_account)"
 - name: metrics-worker
@@ -133,7 +146,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
     ref: main
-    upstream: RedHatInsights-rhsm-subscriptions-gh-build-main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-rhsm-subscriptions-gh-build-main
     parameters:
       HAWTIO_BASE_PATH: /app/rhsm-metrics/actuator/hawtio
       SPLUNK_FORWARDER_MEMORY_LIMIT: 256Mi
@@ -141,14 +157,17 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
     ref: main
-    upstream: RedHatInsights-rhsm-subscriptions-gh-build-main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-rhsm-subscriptions-gh-build-main
     parameters:
       HAWTIO_BASE_PATH: /app/rhsm-metrics/actuator/hawtio
       SPLUNK_FORWARDER_MEMORY_LIMIT: 256Mi
       USER_HOST: user.stage.api.redhat.com
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
-    ref: 630e933585bebe5a241d0f55b978d9ddbe1ec999
+    ref: 2b803d1db76128082fe051b07a1799395dfe710a
     parameters:
       USER_HOST: user.api.redhat.com
 - name: rhsm-subscriptions-worker
@@ -166,7 +185,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
     ref: main
-    upstream: RedHatInsights-rhsm-subscriptions-gh-build-main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-rhsm-subscriptions-gh-build-main
     parameters:
       CLOUDIGRADE_ENABLED: true
       CLOUDIGRADE_HOST: cloudigrade-api.cloudigrade-stage.svc.cluster.local
@@ -176,7 +198,7 @@ resourceTemplates:
       MEMORY_LIMIT: 2744Mi
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
-    ref: 630e933585bebe5a241d0f55b978d9ddbe1ec999
+    ref: 2b803d1db76128082fe051b07a1799395dfe710a
     parameters:
       CLOUDIGRADE_ENABLED: true
       CLOUDIGRADE_HOST: cloudigrade-api.cloudigrade-prod.svc.cluster.local
@@ -192,21 +214,27 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/dev-rhsm-qa.yml
     ref: main
-    upstream: RedHatInsights-rhsm-subscriptions-gh-build-main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-rhsm-subscriptions-gh-build-main
     parameters:
       PINHEAD_URL: https://systems.qa.api.redhat.com/v1
       RHSM_URL: https://api.rhsm.qa.redhat.com/v1
   - namespace:
       $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
     ref: main
-    upstream: RedHatInsights-rhsm-subscriptions-gh-build-main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-rhsm-subscriptions-gh-build-main
     parameters:
       MEMORY_REQUEST: 1000Mi
       PINHEAD_URL: https://systems.stage.api.redhat.com/v1
       RHSM_URL: https://api.rhsm.stage.redhat.com/v1
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
-    ref: 630e933585bebe5a241d0f55b978d9ddbe1ec999
+    ref: 2b803d1db76128082fe051b07a1799395dfe710a
     parameters:
       PINHEAD_URL: https://systems.api.redhat.com/v1
       RHSM_URL: https://api.rhsm.redhat.com/v1
@@ -217,36 +245,49 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/dev-rhsm-qa.yml
     ref: main
-    upstream: RedHatInsights-rhsm-subscriptions-gh-build-main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-rhsm-subscriptions-gh-build-main
     parameters:
       MARKETPLACE_MANUAL_SUBMISSION_ENABLED: 'true'
       HAWTIO_BASE_PATH: /app/rhsm-marketplace/actuator/hawtio
       SPLUNK_FORWARDER_MEMORY_LIMIT: 256Mi
       SUBSCRIPTION_URL: https://subscription.qa.api.redhat.com/svcrest/subscription/v5
+      USER_HOST: user.qa.api.redhat.com
   - namespace:
       $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
     ref: main
-    upstream: RedHatInsights-rhsm-subscriptions-gh-build-main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-rhsm-subscriptions-gh-build-main
     parameters:
       MARKETPLACE_MANUAL_SUBMISSION_ENABLED: 'true'
       MARKETPLACE_MAX_ATTEMPTS: 2
       HAWTIO_BASE_PATH: /app/rhsm-marketplace/actuator/hawtio
       SPLUNK_FORWARDER_MEMORY_LIMIT: 256Mi
       SUBSCRIPTION_URL: https://subscription.stage.api.redhat.com/svcrest/subscription/v5
+      USER_HOST: user.stage.api.redhat.com
   - namespace:
       $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
     ref: main
-    upstream: RedHatInsights-rhsm-conduit-gh-build-main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-rhsm-conduit-gh-build-main
     parameters:
       MARKETPLACE_MANUAL_SUBMISSION_ENABLED: 'true'
       HAWTIO_BASE_PATH: /app/rhsm-marketplace/actuator/hawtio
       SPLUNK_FORWARDER_MEMORY_LIMIT: 256Mi
       SUBSCRIPTION_URL: https://subscription.stage.api.redhat.com/svcrest/subscription/v5
+      USER_HOST: user.stage.api.redhat.com
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
-    ref: 630e933585bebe5a241d0f55b978d9ddbe1ec999
+    ref: 2b803d1db76128082fe051b07a1799395dfe710a
     parameters:
       SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5
+      USER_HOST: user.api.redhat.com
 - name: auto-registration-listener
   path: /deploy/listener.yml
   url: https://gitlab.cee.redhat.com/rhsm/automatic-registration

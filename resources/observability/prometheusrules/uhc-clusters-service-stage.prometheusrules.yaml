@@ -61,7 +61,7 @@ spec:
       annotations:
         message: OCM clusters service cluster installation failed in '{{ $labels.namespace }}'.
         runbook: https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop
-      expr: increase(cluster_installation_error{job="clusters-service-metrics", namespace="uhc-stage"}[5m]) > 0
+      expr: increase(cluster_installation_error{job="clusters-service-metrics", state!="error", namespace="uhc-stage"}[5m]) > 0
       for: 5m
       labels:
         service: uhc-clusters-service
@@ -88,4 +88,18 @@ spec:
       labels:
         service: uhc-clusters-service
         severity: info
+        email: service-development-a
+
+    - alert: OCMClustersMgmtCrashing - stage
+      annotations:
+        message: OCM stage clusters management service container '{{ $labels.container }}' of pod '{{ $labels.pod }}' is crashing
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop
+      expr: |
+        sum(increase(kube_pod_container_status_restarts_total{namespace="uhc-stage",pod=~"^clusters-service-.*$"}[10m]))
+        by (pod,container)
+        >= 2
+      for: 1m
+      labels:
+        service: uhc-clusters-service
+        severity: medium
         email: service-development-a

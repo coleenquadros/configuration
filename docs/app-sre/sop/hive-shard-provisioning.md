@@ -88,12 +88,14 @@ Provisioning hive is a multi-step process:
 
 1. Assign hive permissions in
 
-    | Role file                            | Staging                                 | Production                               |
-    |----------------------------------------|-----------------------------------------|------------------------------------------|
-    | `data/teams/hive/roles/dev.yml`        | hive-admins<br>View access to namespace | hive-readers<br>View access to namespace |
-    | `data/teams/hive/roles/qe.yml`         | hive-admins                             | hive-readers                             |
-    | `data/teams/ocm/roles/dev.yml`         | hive-readers                            | hive-readers                             |
-    | `data/teams/app-sre/roles/app-sre.yml` | hive-admins                             | hive-admins                              |
+    | Role file                                    | Staging                                 | Production                               |
+    |----------------------------------------------|-----------------------------------------|------------------------------------------|
+    | `data/teams/hive/roles/dev.yml`              | hive-admins<br>View access to namespace | hive-readers<br>View access to namespace |
+    | `data/teams/hive/roles/qe.yml`               | hive-admins                             | hive-readers                             |
+    | `data/teams/ocm/roles/dev.yml`               | hive-readers                            | hive-readers                             |
+    | `data/teams/app-sre/roles/app-sre.yml`       | hive-admins                             | hive-admins                              |
+    | `data/teams/sd-sre/roles/sre.yml`            | dedicated-readers                       | dedicated-readers                        |
+    | `data/teams/sd-sre/roles/sre-breakglass.yml` | -                                       | hive-frontend                            |
 
 ## Provisioning OSD operators
 
@@ -105,15 +107,6 @@ Add a new directory named after the shard name here: [`/data/services/osd-operat
 
 * It is typical to copy the content from another shard of the same environment as we are re-using the same configs and secrets for all shards. Unless instructed otherwise, start with a prod as an example as it will have a really working setup.
 * Make sure that the namespaces belong to the environment created above.
-
-#### SREP IDP SelectorSyncSets
-
-The `OpenShift_SRE` IDP associated to every OSD is configured via a SelectorSyncSet in hive:
-
-- `osd-google-secret` for production environments, e.g. [/data/services/osd-operators/namespaces/hivep01ue1/cluster-scope.yml](/data/services/osd-operators/namespaces/hivep01ue1/cluster-scope.yml)
-- `osd-ldap-secret` for staging and integration, e.g. [/data/services/osd-operators/namespaces/hives02ue1/cluster-scope.yml](/data/services/osd-operators/namespaces/hives02ue1/cluster-scope.yml)
-
-Make sure that the SSS deployed corresponds to your environment
 
 #### saas deploy jobs
 
@@ -130,7 +123,7 @@ Ensure that the new hive shard's egress gateway IP is listed in
 In order to get this, you have to access the hive shard cluster AWS account
 through a impersonation link. There are two ways to get the impersonation link:
 
-* OCM console: Go to https://cloud.redhat.com/openshift, then click into your
+* OCM console: Go to https://console.redhat.com/openshift, then click into your
 cluster and then you will get the details under "AWS infrastructure access" in
 the "Access Control" section.
 
@@ -466,23 +459,6 @@ osd2e2e tests use `osdctl` to create new clusters periodically and run validatio
     ```
     $ oc get pods -n aws-account-operator
     ```
-
-1. Deploy an AccountPool CR in the new hive shard
-
-    Apply to the new shard an [AccountPool CR](https://github.com/openshift/aws-account-operator/blob/master/deploy/crds/aws_v1alpha1_accountpool_cr.yaml) with PoolSize = 50
-
-    [Card to automate this step](https://issues.redhat.com/browse/OSD-4602)
-
-1. Apply AWSFederatedRoles
-
-    Apply all AWSFederatedRoles from the [deploy/crds](https://github.com/openshift/aws-account-operator/tree/master/deploy/crds) folder, using:
-
-    ```
-    $ osdctl federatedrole apply -f aws_v1alpha1_awsfederatedrole_networkmgmt_cr.yaml
-    $ osdctl federatedrole apply -f aws_v1alpha1_awsfederatedrole_readonly_cr.yaml
-    ```
-
-    [Card to automate this step](https://issues.redhat.com/browse/OSD-4603)
 
 1. Validate - Confirm accounts have been created to fill the Pool
 

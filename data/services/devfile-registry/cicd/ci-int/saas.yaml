@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: devfile-registry
@@ -10,8 +10,8 @@ description: SaaS tracking file for devfile-registry
 app:
   $ref: /services/devfile-registry/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/devfile-registry/pipelines/tekton.devfile-registry-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
@@ -35,29 +35,39 @@ authentication:
 
 resourceTemplates:
 - name: devfile-registry
-  url: https://github.com/devfile/registry-support
-  path: /deploy/hosted-registry/devfile-registry.yaml
+  url: https://github.com/devfile/registry
+  path: /.ci/deploy/devfile-registry.yaml
   targets:
   - namespace:
       $ref: /services/devfile-registry/namespaces/devfile-registry-stage.yml
-    ref: master
-    upstream: devfile-registry-gh-build-master
+    ref: main
+    promotion:
+      publish:
+      - devfile-registry-stage-deploy-success-channel
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: devfile-registry-gh-build-main
     parameters:
       DEVFILE_INDEX_IMAGE: quay.io/app-sre/devfile-index
       DEVFILE_INDEX_MEMORY_LIMIT: 256Mi
       OCI_REGISTRY_MEMORY_LIMIT: 256Mi
-      OCI_REGISTRY_IMAGE_TAG: sha-7ffafef
+      OCI_REGISTRY_IMAGE_TAG: sha-5b2b807
       REPLICAS: 3
   - namespace:
       $ref: /services/devfile-registry/namespaces/devfile-registry-production.yml
-    ref: 3df5a8e53d81be5eda593f267bfd28cc879257eb
+    ref: 66665c732f0369fc92100760778879f11fdbf966
     parameters:
       DEVFILE_INDEX_IMAGE: quay.io/app-sre/devfile-index
-      DEVFILE_INDEX_IMAGE_TAG: 7bc06c6
+      DEVFILE_INDEX_IMAGE_TAG: 66665c7
       DEVFILE_INDEX_MEMORY_LIMIT: 256Mi
-      OCI_REGISTRY_IMAGE_TAG: sha-7ffafef
+      OCI_REGISTRY_IMAGE_TAG: sha-5b2b807
       OCI_REGISTRY_MEMORY_LIMIT: 256Mi
       REPLICAS: 3
+    promotion:
+      auto: false
+      subscribe:
+      - devfile-registry-stage-post-deploy-tests-success-channel
 - name: devfile-io-redirector
   url: https://github.com/devfile/registry-support
   path: /deploy/hosted-registry/redirector/redirector.yaml

@@ -1,7 +1,7 @@
 # Unleash Deployment
 
 Tenants will request an instance of Unleash following the
-[steps here](https://gitlab.cee.redhat.com/service/dev-guidelines/blob/master/unleash.md).
+[steps here](https://gitlab.cee.redhat.com/service/dev-guidelines/-/blob/master/content/en/docs/AppSRE/Advanced/feature-toggles.md).
 
 This document describes how to deploy the requested instance using App
 Interface.
@@ -52,6 +52,11 @@ details of the new Unleash application. Example:
 
 **NOTE:** The `Authorization callback URL` is always the instance URL followed
 by `/api/auth/callback`.
+
+**NOTE:** When doing first login to UI, you (as a service owner) need to 'grant'
+Organization access for new oAuth app
+
+![](images/gh_grant.png)
 
 After clicking `Register application`, you will be given the `Client ID`
 and the `Client Secret`. Those values will be placed in the

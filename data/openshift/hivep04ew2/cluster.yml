@@ -31,12 +31,22 @@ managedGroups:
 - dedicated-readers
 - hive-admins
 - hive-readers
+###################################################################
+# The following groups should only be managed in hive-integration #
+# Reference: https://issues.redhat.com/browse/APPSRE-961          #
+# Except for usage by SRE-P if OCM is down (hive-frontend only)   #
+# Reference: https://issues.redhat.com/browse/OSD-6475            #
+# - hive-frontend                                                 #
+# - aws-account-operator-client                                   #
+# Reference: https://issues.redhat.com/browse/APPSRE-2509         #
+# - gcp-project-operator-client                                   #
+###################################################################
 
 spec:
   provider: aws
   region: eu-west-2
   channel: fast
-  version: 4.7.0
+  version: 4.8.2
   initial_version: 4.6.8-fast
   multi_az: true
   autoscale:
@@ -114,6 +124,11 @@ peering:
     manageRoutes: true
     manageSecurityGroups: true
     cidrBlock: 172.16.0.0/12
+  - provider: cluster-vpc-requester
+    name: hivep04ew2_appsrep05ue1
+    cluster:
+      $ref: /openshift/appsrep05ue1/cluster.yml
+    manageRoutes: true
 
 addons:
 - $ref: /dependencies/ocm/addons/cluster-logging-operator.yml

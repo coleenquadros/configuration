@@ -1,0 +1,52 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: unleash
+
+name: managed-services-unleash
+description: 'SaaS tracking file for Unleash'
+
+app:
+  $ref: /services/unleash/app.yml
+
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/app-sre/unleash
+
+resourceTemplates:
+- name: unleash
+  url: https://github.com/app-sre/unleash
+  path: /openshift/unleash.yaml
+  targets:
+  - namespace:
+      $ref: /services/unleash/namespaces/app-sre-stage-01.yml
+    ref: 84443c38c936d73ff5b2b4c6efb87beec9d5a20b
+    parameters:
+      identifier: managed-services-stage
+      configSecret: managed-services-stage-config
+      tokenSecret: managed-services-stage-unleash-token
+      databaseSecret: managed-services-stage-unleash-rds
+      org: app-sre
+      team: managed-services-stage-unleash
+  - namespace:
+      $ref: /services/unleash/namespaces/app-sre-prod-01.yml
+    ref: 84443c38c936d73ff5b2b4c6efb87beec9d5a20b
+    parameters:
+      identifier: managed-services
+      configSecret: managed-services-config
+      tokenSecret: managed-services-unleash-token
+      databaseSecret: managed-services-unleash-rds
+      org: app-sre
+      team: managed-services-unleash

@@ -23,9 +23,30 @@
         measurement-plots: true
         flaky-test-reports: true
         junit-attachments: true
-    - email:
-        recipients: sda-devel@redhat.com
     <<: *gl_build_master
+
+- job-template:
+    id: 'ocm-integration-full-cycle-tests'
+    name: 'ocm-integration-full-cycle-tests-{environment}'
+    node: '{node}'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *uhc_integration_tests
+    ci_cmd: './run_integration_full_cycle_tests.sh'
+    cron_expression: '0 2 * * *'
+    publishers:
+    - junit:
+        results: '**/**/fullcycle_junit.xml'
+        test-stability: true
+        claim-build: true
+        measurement-plots: true
+        flaky-test-reports: true
+        junit-attachments: true
+    <<: *gl_timed
 
 - job-template:
     id: 'ocm-portal-deploy'

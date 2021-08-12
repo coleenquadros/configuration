@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: app-interface
@@ -10,8 +10,8 @@ description: 'SaaS tracking file for App-interface'
 app:
   $ref: /services/app-interface/app.yml
 
-instance:
-  $ref: /dependencies/ci-ext/ci-ext.yml
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
@@ -41,14 +41,15 @@ resourceTemplates:
     MEMORY_LIMIT: 1Gi
     S3RELOADER_CPU_REQUESTS: 15m
     S3RELOADER_CPU_LIMIT: 30m
-    REPLICAS: 1
+    REPLICAS: 3
   targets:
   - namespace:
       $ref: /services/app-interface/namespaces/app-interface-stage.yml
     ref: master
-    upstream: app-sre-qontract-server-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: app-sre-qontract-server-gh-build-master
   - namespace:
       $ref: /services/app-interface/namespaces/app-interface-production.yml
     ref: f998217441a95f5853e82c04bfd8c21f9399818e
-    parameters:
-      REPLICAS: 3

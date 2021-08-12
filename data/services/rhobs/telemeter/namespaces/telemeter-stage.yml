@@ -32,15 +32,9 @@ managedResourceTypes:
 - RoleBinding
 - Route
 - ServiceAccount
+- Secret
 
 managedTerraformResources: true
-
-terraformResources:
-- provider: s3
-  account: app-sre
-  identifier: telemeter-thanos-stage
-  defaults: /terraform/resources/telemeter/s3-private-1.yml
-  output_resource_name: telemeter-thanos-stage-s3
 
 openshiftResources:
 - provider: vault-secret
@@ -78,52 +72,16 @@ openshiftResources:
   path: /app-sre-stage/telemeter-stage/observatorium-thanos-querier-cache-stage.route.yaml
   vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.api.stage.openshift.com
   vault_tls_secret_version: 3
-# TODO(kakkoyun): Delete after migration.
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /app-sre-stage/telemeter-stage/telemeter-token-refresher-oidc.secret.yaml
+  variables:
+    vault_secret_version: 4
 - provider: vault-secret
-  path: app-interface/app-sre-stage/telemeter-stage/thanos-objectstorage
-  version: 1
-- provider: vault-secret
-  path: app-interface/app-sre-stage/telemeter-stage/query-proxy
-  version: 1
-- provider: vault-secret
-  path: app-interface/app-sre-stage/telemeter-stage/conprof-proxy
-  version: 1
-# NOTICE(kakkoyun): Keep. The code is disabled in template temporarily.
-- provider: vault-secret
-  path: app-interface/app-sre-stage/telemeter-stage/observatorium-api-proxy
-  version: 3
-- provider: vault-secret
-  path: app-interface/app-sre-stage/telemeter-stage/query-frontend-proxy
-  version: 1
-- provider: vault-secret
-  path: app-interface/app-sre-stage/telemeter-stage/compact-proxy
-  version: 1
-- provider: vault-secret
-  path: app-interface/app-sre-stage/telemeter-stage/observatorium-observatorium-api
-  version: 19
-  annotations:
-    qontract.recycle: "true"
-- provider: vault-secret
-  path: app-interface/app-sre-stage/telemeter-stage/jaeger-proxy
-  version: 1
+  path: app-interface/app-sre-stage/telemeter-stage/token-refresher-proxy
+  version: 2
 - provider: route
   path: /app-sre-stage/telemeter-stage/infogw-data.route.yaml
-  vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.api.stage.openshift.com
-  vault_tls_secret_version: 3
-- provider: route
-  path: /app-sre-stage/telemeter-stage/observatorium-jaeger-stage.route.yaml
-  vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.api.stage.openshift.com
-  vault_tls_secret_version: 3
-- provider: route
-  path: /app-sre-stage/telemeter-stage/conprof.route.yaml
-  vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.api.stage.openshift.com
-  vault_tls_secret_version: 3
-- provider: route
-  path: /app-sre-stage/telemeter-stage/observatorium-api-stage.route.yaml
-  vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.api.stage.openshift.com
-  vault_tls_secret_version: 3
-- provider: route
-  path: /app-sre-stage/telemeter-stage/observatorium-thanos-compact-stage.route.yaml
   vault_tls_secret_path: app-interface/app-sre-stage/routes/_wildcard.api.stage.openshift.com
   vault_tls_secret_version: 3
 - provider: resource

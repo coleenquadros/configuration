@@ -1,0 +1,62 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: devfile-registry
+
+name: saas-redhat-devfile-registry
+description: SaaS tracking file for Red Hat product devfile-registry
+
+app:
+  $ref: /services/devfile-registry/app.yml
+
+pipelinesProvider:
+  $ref: /services/devfile-registry/pipelines/tekton.devfile-registry-pipelines.app-sre-prod-01.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-devfile-registry-alert
+
+managedResourceTypes:
+- Deployment
+- Service
+- ConfigMap
+
+imagePatterns:
+- quay.io/app-sre/redhat-devfile-index
+- quay.io/devfile/oci-registry
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+resourceTemplates:
+- name: redhat-devfile-registry
+  url: https://github.com/redhat-developer/devfile-registry
+  path: /.ci/deploy/devfile-registry.yaml
+  targets:
+  - namespace:
+      $ref: /services/devfile-registry/namespaces/devfile-registry-redhat-stage.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: devfile-registry-gh-build-main
+    parameters:
+      DEVFILE_INDEX_IMAGE: quay.io/app-sre/redhat-devfile-index
+      DEVFILE_INDEX_MEMORY_LIMIT: 256Mi
+      OCI_REGISTRY_MEMORY_LIMIT: 256Mi
+      OCI_REGISTRY_IMAGE_TAG: sha-5b2b807
+      REPLICAS: 3
+  - namespace:
+      $ref: /services/devfile-registry/namespaces/devfile-registry-redhat-production.yml
+    ref: 3c51c2d588435cd4c764da41052e942a2cb884ac
+    parameters:
+      DEVFILE_INDEX_IMAGE: quay.io/app-sre/redhat-devfile-index
+      DEVFILE_INDEX_IMAGE_TAG: 3c51c2d
+      DEVFILE_INDEX_MEMORY_LIMIT: 256Mi
+      OCI_REGISTRY_IMAGE_TAG: sha-5b2b807
+      OCI_REGISTRY_MEMORY_LIMIT: 256Mi
+      REPLICAS: 3

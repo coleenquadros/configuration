@@ -2,7 +2,7 @@
 
 OSDv4 clusters are managed via OCM.
 
-- Production: https://cloud.redhat.com/openshift
+- Production: https://console.redhat.com/openshift
 - Staging: https://qaprodauth.cloud.redhat.com/openshift
 
 ## Creating an Account
@@ -42,7 +42,7 @@ For more information look at [How to request quota for creating OpenShift Dedica
 OCM provides a CLI. It's a binary file that can be executed directly:
 https://github.com/openshift-online/ocm-cli
 
-In order to login the a token must be obtained from https://cloud.redhat.com/openshift/token.
+In order to login the a token must be obtained from https://console.redhat.com/openshift/token.
 
 Example:
 

@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: app-interface
@@ -10,8 +10,8 @@ description: internal SaaS tracking file for App-interface
 app:
   $ref: /services/app-interface/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
@@ -22,6 +22,7 @@ managedResourceTypes:
 - Deployment
 - StatefulSet
 - Service
+- CronJob
 
 imagePatterns:
 - quay.io/app-sre/qontract-reconcile
@@ -49,27 +50,26 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/app-interface/namespaces/app-interface-stage-int.yml
-    # this is not pinned to 'master' because this deployment runs in ci-int
-    # but the build job runs in ci-ext.
-    # if we use 'master' we will get a race condition when we try to deploy
-    # something that was not built yet, or has failed.
-    # instead, we use automated promotion based on the success of the external
-    # stage deployment.
-    ref: a47d44588dccdcc97676a83e0a0fdb4b1e795eef
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: app-sre-qontract-reconcile-gh-build-master
     parameters:
       DRY_RUN: --dry-run
       GITHUB_API: https://github-mirror.stage.devshift.net
       SLACK_CHANNEL: sd-app-sre-reconcile-stage
+      SLACK_CHANNEL_TRIGGER: sd-app-sre-triggers-stage
       SLEEP_DURATION_SECS: 600
-    promotion:
-      auto: true
-      subscribe:
-      - qontract-reconcile-stage-post-deploy-success-channel
   - namespace:
       $ref: /services/app-interface/namespaces/app-interface-production-int.yml
-    ref: 791893f46338ca88dca6c85627e0addfd0ebb3c2
+    ref: c3ee9f5da6ea77535a3c25fcf2f291fb29cc0497
     parameters:
       DRY_RUN: --no-dry-run
       GITHUB_API: https://github-mirror.devshift.net
       SLACK_CHANNEL: sd-app-sre-reconcile
-      SLEEP_DURATION_SECS: 30
+      SLACK_CHANNEL_TRIGGER: sd-app-sre-triggers
+      SLEEP_DURATION_SECS: 60
+      GITLAB_HOUSEKEEPING_SLEEP_DURATION_SECS: 0
+      OPENSHIFT_SAAS_DEPLOY_TRIGGER_CONFIGS_MEMORY_REQUEST: 1000Mi
+      OPENSHIFT_SAAS_DEPLOY_TRIGGER_CONFIGS_MEMORY_LIMIT: 1200Mi

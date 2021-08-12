@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: uhc-auth-proxy
@@ -11,15 +11,13 @@ description: uhc-auth-proxy app on the Insights Platform
 app:
   $ref: /services/insights/uhc-auth-proxy/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
-
-timeout: 5
 
 managedResourceTypes:
 - Deployment
@@ -40,7 +38,7 @@ resourceTemplates:
 - name: uhc-auth-proxy
   path: /openshift/uhc-auth-proxy-template.yaml
   url: https://github.com/RedHatInsights/uhc-auth-proxy
-  parameters: 
+  parameters:
     REGISTRY_IMG: quay.io/cloudservices/uhc-auth-proxy
   targets:
   - namespace:
@@ -48,6 +46,9 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/insights/uhc-auth-proxy/namespaces/uhc-auth-proxy-prod.yml
-    ref: d5efeafad75e76fe5a380520f0b905aacfd2332d
-    parameters: 
+    ref: 9bdca679b1c453529ac36cbfb74b2c552932b952
+    parameters:
       REPLICAS: 3
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ocm.yml
+    ref: master

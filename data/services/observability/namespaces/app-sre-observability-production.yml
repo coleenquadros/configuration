@@ -127,6 +127,11 @@ openshiftResources:
 - provider: vault-secret
   path: osd-sre/hive-production/observatorium-tenant/grafana-proxy-credentials
   version: 1
+## Managed Services Managed Kafka Observatorium credentials
+- provider: vault-secret
+  path: managed-services-ci/observatorium-token-refresher/production
+  version: 1
+  name: mk-token-refresher
 
 # ConfigMaps
 ## Grafana Dashboards
@@ -251,7 +256,7 @@ openshiftResources:
   path: /observability/grafana/grafana-dashboard-uhc-gateway.configmap.yaml
   validate_json: true
 - provider: resource
-  path: /observability/grafana/grafana-dashboard-bayesian-graphite.configmap.yaml
+  path: /observability/grafana/grafana-dashboard-bayesian-monitoring.configmap.yaml
   validate_json: true
 - provider: resource
   path: /observability/grafana/grafana-dashboard-bayesian-availability.configmap.yaml
@@ -308,6 +313,13 @@ openshiftResources:
   path: /observability/cloudwatch-exporter/cloudwatch-exporter-config-ocm-quay.configmap.yaml
   variables:
     environment: production
+    region: us-west-2
+    rds_delay_seconds: 120
+- provider: resource-template
+  type: jinja2
+  path: /observability/cloudwatch-exporter/cloudwatch-exporter-config-ocm-quay.configmap.yaml
+  variables:
+    environment: production
     region: eu-west-1
     rds_delay_seconds: 120
 ### Insights CloudWatch Exporter
@@ -352,6 +364,10 @@ openshiftResources:
 - provider: resource
   path: /observability/grafana/grafana-dashboard-osd-adoption.configmap.yaml
   validate_json: true
+## OSD SLO Dashboard
+- provider: resource
+  path: /observability/grafana/grafana-dashboard-osd-slo.configmap.yaml
+  validate_json: true
   ### Kas Fleet Manager
 - provider: resource
   path: /observability/grafana/grafana-dashboard-kas-fleet-manager-prod-slos.configmap.yaml
@@ -395,6 +411,9 @@ openshiftResources:
 - provider: resource-template
   type: extracurlyjinja2
   path: /services/observability/jiralert/jiralert-config.secret.yaml
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-observability-production/jiralert
+  version: 1
 ## Common (delete?)
 - provider: vault-secret
   path: app-interface/app-sre/app-sre-observability-production/app-sre-observability-htpasswd

@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: cloud-connector
@@ -11,15 +11,13 @@ description: cloud-connector app on the Insights Platform
 app:
   $ref: /services/insights/cloud-connector/app.yml
 
-instance:
-  $ref: /dependencies/ci-ext/ci-ext.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
-
-timeout: 5
 
 managedResourceTypes:
 - Deployment
@@ -41,7 +39,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/cloud-connector/namespaces/stage.yml
-    ref: 95f352441c4993498d4728e1f625cdbacd355454
+    ref: 2a9c55f68955dabb904e31df18d2192d51d3de1e
     parameters:
       LOG_LEVEL: DEBUG
       MQTT_BROKER_ADDRESS: wss://connect.${PLATFORM_HOSTNAME}:443
@@ -50,10 +48,10 @@ resourceTemplates:
       SOURCES_BASE_URL: http://${SOURCES_HOST}:${SOURCES_PORT}
   - namespace:
       $ref: /services/insights/cloud-connector/namespaces/prod.yml
-    ref: 95f352441c4993498d4728e1f625cdbacd355454
+    ref: d91ca9871ec9c8d62a9d7d21a479aa5e4e15cb23
     parameters:
       LOG_LEVEL: DEBUG
-      MQTT_BROKER_ADDRESS: wss://connect.cloud.redhat.com:443
+      MQTT_BROKER_ADDRESS: wss://connect.${PLATFORM_HOSTNAME}:443
       MQTT_TOPIC_PREFIX: redhat
       AUTH_GATEWAY_URL: http://apicast.3scale-prod.svc.cluster.local:8893/internal/certauth
       SOURCES_BASE_URL: http://${SOURCES_HOST}:${SOURCES_PORT}

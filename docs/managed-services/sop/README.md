@@ -52,7 +52,6 @@
     - [Relevant secrets](#relevant-secrets-7)
     - [Steps](#steps-7)
   - [Escalations](#escalations)
-  - [Contacts](#contacts)
 
 <!-- /TOC -->
 
@@ -72,26 +71,26 @@ Kafka Service Fleet Manager (all of the replicas or pods) are down.
 
 ### Access required
 
-- OSD console access to the cluster that runs the Kafka Service Fleet Manager .
+- OSD console access to the cluster that runs the Kafka Service Fleet Manager.
 - Access to cluster resources: Pods/Deployments/Events
 
 ### Relevant secrets
 
 ### Steps
 
-- Check Deployments/kas-fleet-manager: check details page to make sure pods are configured and started; make sure pod number is configured to default: 3.
+- Check Deployments/kas-fleet-manager: check details page to make sure pods are configured and started; make sure pod number is configured to default: 6.
 - Check cluster event logs to ensure there is no abnormality in the cluster level that could impact Manager Services API.
   - Search Error/exception events with keywords "Kafka Service Fleet Manager " and with text "image", "deployment" etc.
 - Investigate the metrics in Grafana for any possible evidences of the crash.
   - Application: Volume, Latency, Error
       - Stage: https://grafana.stage.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1
-      - Production: TODO
+      - Production: https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1&var-datasource=app-sre-prod-04-prometheus
   - CPU, Network, Memory, IO
-      - Stage: TODO
-      - Production: TODO
+      - Stage: https://grafana.stage.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-stage-01-prometheus&var-namespace=managed-services-stage
+      - Production: https://grafana.app-sre.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-prod-04-prometheus&var-namespace=managed-services-production
 - Check Sentry to investigate possible causes of the crash.  
-  - Stage: https://sentry.stage.devshift.net
-  - Production: https://sentry.devshift.net
+  - Stage: https://sentry.stage.devshift.net/sentry/managed-services-stage/
+  - Production: https://sentry.devshift.net/sentry/managed-services-prod/
 - If necessary, escalate the incident to the corresponding teams.  
   - Check [Escalations](#escalations) section below.
 
@@ -101,7 +100,7 @@ Kafka Service Fleet Manager (all of the replicas or pods) are down.
 
 ### Impact
 
-Possible SLO breach, for users are getting numerous amount of errors on API requests.
+Users are getting numerous amount of errors on API requests.
 
 ### Summary
 
@@ -119,16 +118,15 @@ Kafka Service Fleet Manager is not performing normally and is returning an abnor
 - Investigate the metrics in Grafana for any possible cause of the issue
   - Application: Volume, Latency, Error
       - Stage: https://grafana.stage.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1
-      - Production: TODO
+      - Production: https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1&var-datasource=app-sre-prod-04-prometheus
   - CPU, Network, Memory, IO
-      - Stage: TODO
-      - Production: TODO
+      - Stage: https://grafana.stage.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-stage-01-prometheus&var-namespace=managed-services-stage
+      - Production: https://grafana.app-sre.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-prod-04-prometheus&var-namespace=managed-services-production
 - If there are container performance issue are identified (e.g.: CPU spike, high Latency etc), increase the number of replicas.
-  - (TODO enhancement is needed for Service API to scale the background workers.)
-- Check Sentry to investigate possible causes.
-  - Stage: https://sentry.stage.devshift.net
-  - Production: https://sentry.devshift.net
-- Check Deployments/kas-fleet-manager, check details page to make sure pods are configured and started. Start the pod if none is running (default:3).
+- Check Sentry to investigate possible causes of the crash.  
+  - Stage: https://sentry.stage.devshift.net/sentry/managed-services-stage/
+  - Production: https://sentry.devshift.net/sentry/managed-services-prod/
+- Check Deployments/kas-fleet-manager, check details page to make sure pods are configured and started. Start the pod if none is running (default:6).
 - Check if the Kafka Service Fleet Manager pods are running and verify the logs.
     ```
     #example
@@ -189,10 +187,10 @@ Kafka Service Fleet Manager is not provisioning OSD cluster normally and is not 
 kas-fleet-manager-rds
 
 ### Steps
-
+- Check the Dependencies: OCM Cluster Service panel in the Kas Fleet Manager Metrics dasboard - https://grafana.app-sre.devshift.net/d/WLBv_KuMz/kas-fleet-manager-metrics?orgId=1&var-datasource=app-sre-prod-04-prometheus&var-consoleurl=https:%2F%2Fconsole-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com
 - Check Sentry to investigate possible causes.
-  - Stage: https://sentry.stage.devshift.net
-  - Production: https://sentry.devshift.net
+  - Stage: https://sentry.stage.devshift.net/sentry/managed-services-stage/
+  - Production: https://sentry.devshift.net/sentry/managed-services-prod/
 - Check if the Kafka Service Fleet Manager pods are running and verify the logs.
     ```
     #example
@@ -282,8 +280,8 @@ kas-fleet-manager-rds
 ### Steps
 
 - Check Sentry to investigate possible causes.
-  - Stage: https://sentry.stage.devshift.net
-  - Production: https://sentry.devshift.net
+  - Stage: https://sentry.stage.devshift.net/sentry/managed-services-stage/
+  - Production: https://sentry.devshift.net/sentry/managed-services-prod/
 - Check if the Kafka Service Fleet Manager pods are running and verify the logs.
     ```
     #example
@@ -357,7 +355,33 @@ kas-fleet-manager-rds
 
 ### Steps
 
-refer to the steps [Kafka cluster provisioning latency](#kafka-cluster-provisioning-latency)
+NOTE: This SLO is currently not active. More details here: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/19100 and https://issues.redhat.com/browse/MGDSTRM-2940.
+The alerts are firing because The Kafka instance can go into a failed state during creation but will eventually provision successfully. Our Kafka correctness (create) SLO only makes sense if a Kafka instance stays in a failed state.
+
+Based on the conversation with the Instance Team, it was the intention that a "Failed" state from the fleetshard would be terminal. There are a couple of Strimzi defects currently that cause the fleetshard to report failed during creation when it shouldn't.
+
+https://github.com/strimzi/strimzi-kafka-operator/issues/4855
+https://github.com/strimzi/strimzi-kafka-operator/issues/4856
+https://github.com/strimzi/strimzi-kafka-operator/issues/4869
+https://github.com/strimzi/strimzi-kafka-operator/issues/4872
+
+Until these issues are resolved which will likely take weeks or 1-2 months, we need to turn this alert off in stage and prod. We do so by silencing this alert here:
+https://alertmanager.app-sre-prod-04.devshift.net/#/silences/
+
+```
+alertname=~KasFleetManagerKafkaCreationSuccess.*
+cluster=app-sre-prod-04
+environment=production
+namespace=managed-services-production
+operation=create
+prometheus=openshift-customer-monitoring/app-sre
+service=kas-fleet-manager
+severity=info
+infoalertname=~KasFleetManagerKafkaCreationSuccess.*
+```
+
+Once these issues have been fixed, this note can be removed, the silenced alert removed, and the steps mentioned below unstriked.
+~~refer to the steps [Kafka cluster provisioning latency](#kafka-cluster-provisioning-latency)~~
  
 ---
 
@@ -393,7 +417,3 @@ refer to the steps [Kafka cluster provisioning latency](#kafka-cluster-provision
 - Error/exception events found in the OSD cluster level, check with OCM support.
 - Error/exception related to Kafka or strimzi-operator, check with Data Plane or MK SRE support.
 - Otherwise, or if unsure about the reason, escalate the issue to the Control Plane team 
-
-## Contacts
-
-TODO: Slack/emails etc

@@ -1,0 +1,88 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2021-06-04-cloudigrade-prod-1
+namespace:
+  $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
+identifier: cloudigrade-prod
+output: stdout
+queries:
+  # get count of all users
+  - "select count(1) as total_user_count from auth_user;"
+  # get count of all aws cloud acounts
+  - "select count(1) as total_cloud_account_count from api_awscloudaccount;"
+  # get count of all aws instances
+  - "select count(1) as total_instance_count from api_awsinstance;"
+  # get count of all aws images
+  - "select count(1) as total_image_count from api_awsmachineimage;"
+  # for each red hat account, count the instances
+  - "select
+    au.username, count(distinct i.id) as instances_count_per_user
+    from
+    api_cloudaccount ca
+    join auth_user au on au.id = ca.user_id
+    join api_instance i on ca.id = i.cloud_account_id
+    group by au.username
+    order by instances_count_per_user desc;"
+  # for each cloud account in each red hat account, count the instances
+  - "select au.username, ca.id, count(1) as instance_count_per_cloud_account
+    from
+    api_cloudaccount ca
+    join auth_user au on au.id = ca.user_id
+    join api_instance i on ca.id = i.cloud_account_id
+    group by au.username, ca.id
+    order by instance_count_per_cloud_account desc;"
+  # for each red hat account, count the images
+  - "select
+    au.username, count(distinct i.machine_image_id) as image_count_per_user
+    from
+    api_cloudaccount ca
+    join auth_user au on au.id = ca.user_id
+    join api_instance i on ca.id = i.cloud_account_id
+    group by au.username
+    order by image_count_per_user desc;"
+  # for each cloud account in each red hat account, count the images
+  - "select
+    au.username, ca.id,
+    count(distinct i.machine_image_id) as image_count_per_cloud_account
+    from
+    api_cloudaccount ca
+    join auth_user au on au.id = ca.user_id
+    join api_instance i on ca.id = i.cloud_account_id
+    group by au.username, ca.id
+    order by image_count_per_cloud_account desc;"
+  # for each status for each red hat account, count the images
+  - "select au.username, mi.status, count(distinct mi.id) as image_count_per_status_per_user
+    from
+    api_cloudaccount ca
+    join auth_user au on au.id = ca.user_id
+    join api_instance i on ca.id = i.cloud_account_id
+    join api_machineimage mi on i.machine_image_id = mi.id
+    group by au.username, mi.status
+    order by mi.status, image_count_per_status_per_user desc;"
+  # for each red hat account, count the marketplace images
+  - "select
+    au.username,
+    count(distinct i.machine_image_id) as marketplace_image_count_per_user
+    from
+    api_cloudaccount ca
+    join auth_user au on au.id = ca.user_id
+    join api_instance i on ca.id = i.cloud_account_id
+    join api_machineimage mi on i.machine_image_id = mi.id
+    join api_awsmachineimage ami on mi.object_id = ami.id
+    where ami.aws_marketplace_image is true
+    group by au.username
+    order by marketplace_image_count_per_user desc;"
+  # for each red hat account, count the instances using marketplace images
+  - "select
+    au.username,
+    count(distinct i.id) as marketplace_image_instance_count_per_user
+    from
+    api_cloudaccount ca
+    join auth_user au on au.id = ca.user_id
+    join api_instance i on ca.id = i.cloud_account_id
+    join api_machineimage mi on i.machine_image_id = mi.id
+    join api_awsmachineimage ami on mi.object_id = ami.id
+    where ami.aws_marketplace_image is true
+    group by au.username
+    order by marketplace_image_instance_count_per_user desc;"

@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: quayio
@@ -10,8 +10,8 @@ description: quayio utilities
 app:
   $ref: /services/quayio/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/quayio/pipelines/tekton.quayio-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
@@ -19,12 +19,19 @@ slack:
   channel: oncall-quay
 
 managedResourceTypes:
+- Deployment
+- Service
+- ServiceAccount
+- Role
+- RoleBinding
 - Job
 
 imagePatterns:
 - quay.io/app-sre/quayio-update-banner-job
 - quay.io/app-sre/flush-redis
-
+- quay.io/app-sre/quay
+- quay.io/app-sre/syslog-cloudwatch-bridge
+- quay.io/app-sre/quay-service-tool
 parameters:
   IMAGE: "quay.io/app-sre/quayio-update-banner-job"
 
@@ -37,22 +44,32 @@ resourceTemplates:
       $ref: /services/quayio/namespaces/quays02ue1.yml
     ref: f1491c0657ae75aab55d4ea7faec1e82393dc9af
     parameters:
-      JOB_NAME: "2021-05-12-sso-banner-update-1" # provide_a_unique_job_name_to_trigger_job
+      JOB_NAME: "2021-08-03-sso-banner-update-1" # provide_a_unique_job_name_to_trigger_job
       ACTIVE_DEADLINE_SECONDS: "600"
       DB_HOST_SECRET: "quayio-stage-57-rds"
       DB_CREDS_SECRET: "quayio-stage-57-rds"
-      MESSAGE: "On July 1st 2021, Quay.io will transition to Red Hat Single Sign-On Services exclusively. You need to link your Quay.io login to a redhat.com account by this date, in order to be able to login to the web interface. CLI tokens and robot accounts are not impacted. Read more about this change in the [FAQ.](https://access.redhat.com/articles/5925591)"
+      MESSAGE: "Quay.io now supports Red Hat Single Sign-On Services exclusively. If you haven't done so already, you need to link your Quay.io login to a redhat.com account in order to be able to login to the web interface by going to the [recovery endpoint](https://recovery.stage.quay.io). CLI tokens and robot accounts are not impacted. Read more about this change in the [FAQ.](https://access.redhat.com/articles/5925591)."
       SEVERITY: "info"
   - namespace:
       $ref: /services/quayio/namespaces/quayp05ue1.yml
     ref: f1491c0657ae75aab55d4ea7faec1e82393dc9af
     parameters:
-      JOB_NAME: "2021-05-12-sso-banner-update-1" # provide_a_unique_job_name_to_trigger_job
+      JOB_NAME: "2021-08-05-sso-banner-update-1" # provide_a_unique_job_name_to_trigger_job
       ACTIVE_DEADLINE_SECONDS: "600"
       DB_HOST_SECRET: "quay-db-config-secret"
       DB_CREDS_SECRET: "quay-db-config-secret"
-      MESSAGE: "On July 1st 2021, Quay.io will transition to Red Hat Single Sign-On Services exclusively. You need to link your Quay.io login to a redhat.com account by this date, in order to be able to login to the web interface. CLI tokens and robot accounts are not impacted. Read more about this change in the [FAQ.](https://access.redhat.com/articles/5925591)"
+      MESSAGE: "Quay.io now supports Red Hat Single Sign-On Services exclusively. If you haven't done so already, you need to link your Quay.io login to a redhat.com account in order to be able to login to the web interface by going to the [recovery endpoint](https://recovery.quay.io/signin). CLI tokens and robot accounts are not impacted. Read more about this change in the [FAQ.](https://access.redhat.com/articles/5925591)."
       SEVERITY: "info"
+- name: quayio-service-tool
+  path: /openshift.yml
+  url: https://github.com/quay/quay-service-tool
+  targets:
+  - namespace:
+      $ref: /services/quayio/namespaces/quays02ue1.yml
+    ref: 244bc3a1ffa3ab4f1e6e956764b9ed2db08c1469
+    parameters:
+      QUAY_SEVICE_TOOL_CONFIG_SECRET: "quay-service-tool-config"
+      IMAGE: "quay.io/app-sre/quay-service-tool"
 - name: flush-redis
   path: /openshift.yml
   url: https://github.com/app-sre/flush-redis
@@ -75,4 +92,38 @@ resourceTemplates:
       ACTIVE_DEADLINE_SECONDS: "600"
       REDIS_SECRET: "quayio-elasticache"
       IMAGE: "quay.io/app-sre/flush-redis"
-      JOB_NAME: "flush-redis-prod-2021-05-07"
+      JOB_NAME: "flush-redis-prod-2021-07-23"
+
+- name: quayio-recovery-endpoint
+  path: /deploy/openshift/quay-recovery-endpoint.yaml
+  url: https://github.com/quay/quay
+  parameters:
+    IMAGE: quay.io/app-sre/quay
+    IMAGE_TAG: 0fdae23
+    QUAY_ENTRYPOINT: registry
+    QUAY_APP_DEPLOYMENT_REPLICAS: 1
+    QUAY_APP_CPU_REQUEST: 1
+    QUAY_APP_CPU_LIMIT: 5
+    QUAY_APP_MEMORY_REQUEST: 4Gi
+    QUAY_APP_MEMORY_LIMIT: 24Gi
+    QUAY_APP_DEPLOYMENT_PROGRESS_DEADLINE_SECONDS: 1800
+    QUAY_APP_DEPLOYMENT_MAX_SURGE: 1
+    QUAY_APP_READINESS_PROBE_TIMEOUT_SECONDS: 20
+    QUAY_APP_LIVENESS_PROBE_TIMEOUT_SECONDS: 20
+    QUAY_APP_LIVENESS_PROBE_PERIOD_SECONDS: 15
+    QUAY_APP_DEPLOYMENT_NAMESPACE: quay
+    QUAY_APP_COMPONENT_LABEL_VALUE: app-recovery
+    QUAY_APP_CONFIG_SECRET: quay-config-recovery-secret
+    DEBUGLOG: "true"
+    QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "update_me_when_secret_changes_v2"
+    QUAY_WORKER_MULTIPLIER_REGISTRY: 1
+    QUAY_WORKER_CONNECTION_COUNT_REGISTRY: 80
+    SYSLOG_IMAGE: quay.io/app-sre/syslog-cloudwatch-bridge
+    SYSLOG_IMAGE_TAG: c19d7d1
+  targets:
+  - namespace:
+      $ref: /services/quayio/namespaces/quays02ue1.yml
+    ref: c4a964ec5c4a442b3700c495153d26bad099025d
+  - namespace:
+      $ref: /services/quayio/namespaces/quayp05ue1.yml
+    ref: c4a964ec5c4a442b3700c495153d26bad099025d

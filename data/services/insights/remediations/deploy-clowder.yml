@@ -1,0 +1,128 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: remediations
+  platform: insights
+
+name: remediations-clowder
+description: remediations app deployed via clowder
+
+app:
+  $ref: /services/insights/remediations/app.yml
+
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-remediations
+
+managedResourceTypes:
+- ClowdApp
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+resourceTemplates:
+- name: remediations-consumer
+  path: /deployment/remediations-consumer-clowdapp.yaml
+  url: https://github.com/RedHatInsights/remediations-consumer
+  parameters:
+    DB_SSL_ENABLED: true
+    LOG_CW_ENABLED: true
+    LOG_LEVEL: info
+    NUM_REPLICAS: 3
+  targets:
+  - namespace:
+      $ref: /services/insights/remediations/namespaces/remediations-prod.yml
+    ref: b225d1496348346692f79f7a4d010b0411af4cbe
+    parameters:
+      IMAGE_TAG: b225d14
+  - namespace:
+      $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
+    ref: b225d1496348346692f79f7a4d010b0411af4cbe
+    parameters:
+      IMAGE_TAG: b225d14
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true
+    ref: internal
+    parameters:
+      DB_SSL_ENABLED: false
+- name: remediations-update-consumer
+  path: /deployment/remediations-update-consumer-clowdapp.yaml
+  url: https://github.com/RedHatInsights/remediations-consumer
+  parameters:
+    DB_SSL_ENABLED: true
+    LOG_CW_ENABLED: true
+    LOG_LEVEL: info
+    NUM_REPLICAS: 3
+  targets:
+  - namespace:
+      $ref: /services/insights/remediations/namespaces/remediations-prod.yml
+    ref: b225d1496348346692f79f7a4d010b0411af4cbe
+    parameters:
+      IMAGE_TAG: b225d14
+  - namespace:
+      $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
+    ref: b225d1496348346692f79f7a4d010b0411af4cbe
+    parameters:
+      IMAGE_TAG: b225d14
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true
+    ref: internal
+    parameters:
+      DB_SSL_ENABLED: false
+- name: remediations
+  path: /deployment/clowdapp.yml
+  url: https://github.com/RedHatInsights/insights-remediations
+  parameters:
+    ADVISOR_IMPL: impl
+    COMPLIANCE_IMPL: impl
+    DB_SSL_ENABLED: true
+    IMAGE_CHANGE_TRIGGER: true
+    INVENTORY_IMPL: impl
+    LOG_CW_ENABLED: true
+    LOG_LEVEL: info
+    MAX_REPLICAS: 5
+    MIGRATION_COMMAND: npm run db:create; npm run db:migrate
+    MIN_REPLICAS: 2
+    PATCHMAN_IMPL: impl
+    PATH_PREFIX: /api
+    RBAC_IMPL: impl
+    RECEPTOR_IMPL: impl
+    REMEDIATIONS_REPLICAS: 2
+    SOURCES_IMPL: impl
+    SSG_IMPL: impl
+    SSG_HOST: http://playbooks-ssg:8080
+    STRATEGY: Rolling
+    TARGET_CPU_UTILIZATION: 80
+    USERS_IMPL: impl
+    VULNERABILITIES_IMPL: impl
+  targets:
+  - namespace:
+      $ref: /services/insights/remediations/namespaces/remediations-prod.yml
+    ref: 6403fa2ed67b1a79fcf4775f7027b1d4acd2abfb
+    parameters:
+      IMAGE_TAG: 2ba12e9
+      PLATFORM_HOSTNAME_URL: "cert.${PLATFORM_HOSTNAME}"
+  - namespace:
+      $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
+    ref: 6403fa2ed67b1a79fcf4775f7027b1d4acd2abfb
+    parameters:
+      IMAGE_TAG: 2ba12e9
+      PLATFORM_HOSTNAME_URL: "cert.${PLATFORM_HOSTNAME}"
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true
+    ref: internal
+    parameters:
+      REMEDIATIONS_REPLICAS: 2

@@ -1,0 +1,63 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: srs-fleet-manager
+
+name: srs-fleet-manager
+
+namespaces:
+#TODO change the SLOs to use production namespace when created
+- $ref: /services/service-registry/namespaces/service-registry-stage.yml
+
+slos:
+- name: API availability
+  SLIType: availability
+  SLISpecification: Percentage of requests that are served successfully (status code != 5xx)
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/service-registry/slos/srs-fleet-manager-api-availability.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(haproxy_backend_http_responses_total{route="srs-fleet-manager",exported_namespace="service-registry-stage",code!="5xx"}[{{window}}]))
+    /
+    sum(rate(haproxy_backend_http_responses_total{route="srs-fleet-manager",exported_namespace="service-registry-stage"}[{{window}}]))
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/srs-fleet-manager-slos-availability-stage.prometheusrules.yaml
+  prometheusRulesTests: /observability/prometheusrules/srs-fleet-manager-slos-availability-stage.prometheusrulestest.yaml
+  dashboard: https://grafana.stage.devshift.net/d/Tbw1Eg2Mz/srs-fleet-manager-metrics
+
+
+- name: API Latency 90%
+  SLIType: latency
+  SLISpecification: Percentage of the successful requests served under 100ms
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/service-registry/slos/srs-fleet-manager-api-latency.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(http_server_requests_seconds_bucket{job="srs-fleet-manager-metrics",namespace="service-registry-stage",le="0.1",status!~"5.."}[{{window}}]))
+    /
+    sum(rate(http_server_requests_seconds_count{job="srs-fleet-manager-metrics",namespace="service-registry-stage"}[{{window}}]))
+  SLOTarget: 0.90
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/srs-fleet-manager-slos-latency-stage.prometheusrules.yaml
+  prometheusRulesTests: /observability/prometheusrules/srs-fleet-manager-slos-latency-stage.prometheusrulestest.yaml
+  dashboard: https://grafana.stage.devshift.net/d/Tbw1Eg2Mz/srs-fleet-manager-metrics
+
+- name: API Latency 99%
+  SLIType: latency
+  SLISpecification: Percentage of the successful requests served under 1000ms
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/service-registry/slos/srs-fleet-manager-api-latency.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(http_server_requests_seconds_bucket{job="srs-fleet-manager-metrics",namespace="service-registry-stage",le="1.0",status!~"5.."}[{{window}}]))
+    /
+    sum(rate(http_server_requests_seconds_count{job="srs-fleet-manager-metrics",namespace="service-registry-stage"}[{{window}}]))
+  SLOTarget: 0.99
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/srs-fleet-manager-slos-latency-stage.prometheusrules.yaml
+  prometheusRulesTests: /observability/prometheusrules/srs-fleet-manager-slos-latency-stage.prometheusrulestest.yaml
+  dashboard: https://grafana.stage.devshift.net/d/Tbw1Eg2Mz/srs-fleet-manager-metrics
+
+#TODO add registry provisioning latency and creation/deletion correctness metrics

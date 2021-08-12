@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: rhsm
@@ -11,15 +11,13 @@ description: Backend components for Subscription Watch
 app:
   $ref: /services/insights/rhsm/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: proj-perf-insights-cluster
-
-timeout: 5
 
 managedResourceTypes:
 - ConfigMap
@@ -32,6 +30,7 @@ managedResourceTypes:
 
 imagePatterns:
 - quay.io/cloudservices
+- quay.io/observatorium
 
 authentication:
   image:
@@ -46,7 +45,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
     ref: main
-    upstream: RedHatInsights-rhsm-subscriptions-egress-gh-build-main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-rhsm-subscriptions-egress-gh-build-main
 - name: swatch-product-allowlist
   path: /templates/capacity-allowlist.yml
   url: https://gitlab.cee.redhat.com/rhsm/swatch-product-allowlist
@@ -54,6 +56,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
     ref: main
+    
 - name: rhsm-subscriptions-api
   path: /templates/rhsm-subscriptions-api.yml
   url: https://github.com/RedHatInsights/rhsm-subscriptions
@@ -61,7 +64,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
     ref: main
-    upstream: RedHatInsights-rhsm-subscriptions-gh-build-main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-rhsm-subscriptions-gh-build-main
 - name: rhsm-subscriptions-capacity-ingress
   path: /templates/rhsm-subscriptions-capacity-ingress.yml
   url: https://github.com/RedHatInsights/rhsm-subscriptions
@@ -69,7 +75,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
     ref: main
-    upstream: RedHatInsights-rhsm-subscriptions-gh-build-main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-rhsm-subscriptions-gh-build-main
 - name: rhsm-subscriptions-scheduler
   path: /templates/rhsm-subscriptions-scheduler.yml
   url: https://github.com/RedHatInsights/rhsm-subscriptions
@@ -77,7 +86,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
     ref: main
-    upstream: RedHatInsights-rhsm-subscriptions-gh-build-main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-rhsm-subscriptions-gh-build-main
 - name: rhsm-subscriptions-worker
   path: /templates/rhsm-subscriptions-worker.yml
   url: https://github.com/RedHatInsights/rhsm-subscriptions
@@ -85,7 +97,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
     ref: 10a9cfc9d479aca497cb623d6eab4df2fcb02270
-    upstream: RedHatInsights-rhsm-subscriptions-gh-build-main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-rhsm-subscriptions-gh-build-main
     parameters:
       CLOUDIGRADE_ENABLED: true
       CLOUDIGRADE_HOST: cloudigrade-api.cloudigrade-perf.svc.cluster.local
@@ -99,7 +114,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
     ref: main
-    upstream: RedHatInsights-rhsm-conduit-gh-build-main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-rhsm-conduit-gh-build-main
     parameters:
       MEMORY_REQUEST: 1000Mi
       PINHEAD_URL: https://systems.stage.api.redhat.com/v1

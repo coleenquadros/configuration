@@ -26,7 +26,7 @@ rules:
 
 ## example
 ```
-# on hive-integration cluster
+# on app-sre-stage-01 cluster
 oc -n uhc-integration create -f exec-role.yaml
 oc adm policy add-role-to-user exec-role jhernand --role-namespace=uhc-integration -n uhc-integration
 ```

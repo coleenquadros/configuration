@@ -1,0 +1,43 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: node-overcommitted
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: node-overcommitted
+    rules:
+
+    - record: node_overcommitted:pod_memory:ratio
+      expr: |
+        sum(kube_pod_container_resource_limits{resource="memory", unit="byte"}) by (namespace, pod)
+        * sum(kube_pod_status_phase{phase="Running"}) by (namespace, pod)
+        / sum(kube_pod_container_resource_requests{resource="memory", unit="byte"}) by (namespace, pod)
+    
+    - record: node_overcommitted:memory_allocated:ratio
+      expr: |
+        sum(
+          sum(kube_pod_container_resource_limits{resource="memory", unit="byte"}) by (namespace, pod, node)
+          * ignoring(node) group_right(node) sum(kube_pod_status_phase{phase="Running"}) by (namespace, pod)
+        ) by (node)
+        /
+        sum(kube_node_status_allocatable{resource="memory", unit="byte"}) by (node)
+    
+    - alert: NodeOvercommittedMemory
+      expr: |
+        node_overcommitted:memory_allocated:ratio * 100 > 110
+      for: 2m
+      labels:
+        severity: medium
+        service: insights
+        env: stage
+        app_team: platform
+      annotations:
+        dashboard: "https://grafana.stage.devshift.net/d/k8s-compute-resources-node-pods/kubernetes-compute-resources-node-pods?orgId=1&refresh=10s&var-datasource=crcs02ue1-cluster-prometheus&var-cluster=&from=now-1h&to=now&var-node={{ $labels.node }}"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/cluster/nodes/{{ $labels.node }}"
+        message: "Node {{ $labels.node }} is committed at {{ printf `%0.2f` $value }}%"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/node-memory-overcommit.rst"

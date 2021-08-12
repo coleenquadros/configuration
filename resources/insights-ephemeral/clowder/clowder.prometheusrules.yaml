@@ -1,0 +1,81 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: clowder
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: clowder
+    rules:
+      - alert: Clowder-no-metrics
+        expr: absent(up{service="clowder-controller-manager"}) or sum(up{service="clowder-controller-manager"}) == 0
+        for: 5m
+        labels:
+          severity: medium
+          service: insights
+          env: ephemeral
+          app_team: platform
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/VTSfF_0Gk/clowder-metrics?var-datasource=c-rh-c-eph-prometheus"
+          link_url: "https://console-openshift-console.apps.c-rh-c-eph.8p0c.p1.openshiftapps.com/k8s/ns/clowder-system/deployments"
+          message: "Clowder metrics are no longer being scraped."
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/clowder/Clowder-no-metrics.md"
+      - alert: ClowderReconciliationRate
+        expr: sum(rate(controller_runtime_reconcile_total{service="clowder-controller-manager"}[5m])) > 1
+        for: 5m
+        labels:
+          severity: medium
+          service: insights
+          env: ephemeral
+          app_team: platform
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/VTSfF_0Gk/clowder-metrics?viewPanel=6&orgId=1&var-datasource=c-rh-c-eph-prometheus"
+          message: "Clowder Reconciliation Rate too high"
+      - alert: ClowdAppsCount
+        expr: sum(clowd_app_managed_apps) == 0
+        for: 5m
+        labels:
+          severity: medium
+          service: insights
+          env: ephemeral
+          app_team: platform
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/VTSfF_0Gk/clowder-metrics?var-datasource=c-rh-c-eph-prometheus"
+          message: "Zero ClowdApps reported present. Possible leader election failure?"
+      - alert: ClowderPodCount
+        expr: kube_deployment_status_replicas_available{deployment="clowder-controller-manager"} != 1 or absent(kube_deployment_status_replicas_available{deployment="clowder-controller-manager"}) == 1
+        for: 5m
+        labels:
+          severity: medium
+          service: insights
+          env: ephemeral
+          app_team: platform
+        annotations:
+          dashboard: https://grafana.app-sre.devshift.net/d/VTSfF_0Gk/clowder-metrics?viewPanel=17&orgId=1&var-datasource=c-rh-c-eph-prometheus
+          message: "Deployment issue with Clowder"
+      - alert: ClowderContainerRestartCount
+        expr: sum(increase(kube_pod_container_status_restarts_total{namespace="clowder-system", container="manager"}[5m])) > 1
+        for: 5m
+        labels:
+          severity: medium
+          service: insights
+          env: ephemeral
+          app_team: platform
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/VTSfF_0Gk/clowder-metrics?var-datasource=c-rh-c-eph-prometheus"
+          message: "Clowder container crashed"
+      - alert: ClowderWorkQueueDepth
+        expr: sum(workqueue_depth{service="clowder-controller-manager"}) by (name) > 5
+        for: 5m
+        labels:
+          severity: medium
+          service: insights
+          env: ephemeral
+          app_team: platform
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/VTSfF_0Gk/clowder-metrics?var-datasource=c-rh-c-eph-prometheus"
+          message: "Clowder Work Queue depth too deep"
