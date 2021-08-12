@@ -9,12 +9,4 @@ output: stdout
 query: |
   select 'account' as owner, 'rolebinding' as kind, rb.role_id as kind_additional, rb.deleted_at is not null as deleted, a.id as owner_id, a.username as owner_name, count(*) as count
   from accounts a join role_bindings rb on rb.account_id = a.id
-  group by owner, kind, kind_additional, deleted, a.id, a.username
-  union
-  select 'organization' as owner,'subscription' as kind, s.plan_id as kind_additional, s.deleted_at is not null as deleted, o.id as owner_id, o.name as owner_name, count(*) as count
-  from organizations o join subscriptions s on s.organization_id = o.id
-  group by owner, kind, kind_additional, deleted, o.id, o.name
-  union
-  select 'account' as owner, 'subscription' as kind, s.plan_id as kind_additional, s.deleted_at is not null as deleted, a.id as owner_id, a.username as owner_name, count(*) as count
-  from accounts a join subscriptions s on s.creator_id = a.id
   group by owner, kind, kind_additional, deleted, a.id, a.username;
