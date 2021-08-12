@@ -84,3 +84,22 @@ tests:
         link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/host-inventory-prod/deployments/host-inventory-mq-pmin"
         message: "HBI Prod consumer not processing (0 messages processed in last 30 minutes)"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/host-inventory/App-insights-inventory-In-platform-prod-Mq-Not-Processing.rst"
+
+- interval: 30s
+  input_series:
+  - series: inventory_event_producer_failures_total{event_type="updated"}
+    values: 0+1x20
+  alert_rule_test:
+  - eval_time: 10m
+    alertname: InventoryMqEventProducerErrors
+    exp_alerts:
+    - exp_labels:
+        severity: medium
+        service: insights
+        env: prod
+        event_type: updated
+        app_team: inventory
+      exp_annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcp01ue1-prometheus
+        link_url: https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-30m,to:now))&_a=(columns:!(_source),filters:!(),index:'43c5fed0-d5ce-11ea-b58c-a7c95afd7a5d',interval:auto,query:(language:kuery,query:'@log_group:%20%22host-inventory-prod%22%20and%20%22NOT%20PRODUCED%22'),sort:!())
+        message: 'Prod event producer failed to produce a(n) updated event'
