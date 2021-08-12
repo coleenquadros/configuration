@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: assisted-installer
@@ -10,8 +10,8 @@ description: 'SaaS tracking file for assisted-installer'
 app:
   $ref: /services/assisted-installer/app.yml
 
-instance:
-  $ref: /dependencies/ci-ext/ci-ext.yml
+pipelinesProvider:
+  $ref: /services/assisted-installer/pipelines/tekton.assisted-installer-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
@@ -35,18 +35,13 @@ resourceTemplates:
     BASE_DNS_DOMAINS: assistedinstaller.sysdeseng.com:Z0705901344NMKJYA5RNZ/route53
     # OCM_BASE_URL is defined at the environment parameters level
     SERVICE_BASE_URL: ${OCM_BASE_URL}
-    JWKS_URL: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/certs
-    ALLOWED_DOMAINS: https://qaprodauth.cloud.redhat.com
+    # SSO_BASE_URL is defined at the environment parameters level
+    JWKS_URL: ${SSO_BASE_URL}/protocol/openid-connect/certs
+    ALLOWED_DOMAINS: https://qaprodauth.cloud.redhat.com,https://prod.foo.redhat.com:1337,https://console.stage.redhat.com
     AUTH_TYPE: rhsso
     SUPPORT_L2: true
     CHECK_CLUSTER_VERSION: true
-    HW_VALIDATOR_MIN_RAM_GIB_MASTER: 16
-    HW_VALIDATOR_MIN_CPU_CORES_MASTER: 4
-    HW_VALIDATOR_MIN_CPU_CORES_WORKER: 2
-    HW_VALIDATOR_MIN_RAM_GIB_WORKER: 8
-    HW_VALIDATOR_MIN_CPU_CORES: 2
-    HW_VALIDATOR_MIN_RAM_GIB: 8
-    HW_VALIDATOR_MIN_DISK_SIZE_GIB: 20
+    MUST_GATHER_IMAGES: '{"4.7":{"cnv":"registry.redhat.io/container-native-virtualization/cnv-must-gather-rhel8:v2.6.5","ocs":"registry.redhat.io/ocs4/ocs-must-gather-rhel8","lso":"registry.redhat.io/openshift4/ose-local-storage-mustgather-rhel8"},"4.8":{"cnv":"registry.redhat.io/container-native-virtualization/cnv-must-gather-rhel8:v2.6.5","ocs":"registry.redhat.io/ocs4/ocs-must-gather-rhel8","lso":"registry.redhat.io/openshift4/ose-local-storage-mustgather-rhel8"}}'
     HW_VALIDATOR_REQUIREMENTS: |
       [{
           "version": "default",
@@ -54,23 +49,38 @@ resourceTemplates:
             "cpu_cores": 4,
             "ram_mib": 16384,
             "disk_size_gb": 20,
-            "installation_disk_speed_threshold_ms": 10
+            "installation_disk_speed_threshold_ms": 10,
+            "network_latency_threshold_ms": 100,
+            "packet_loss_percentage": 0
           },
           "worker": {
             "cpu_cores": 2,
             "ram_mib": 8192,
             "disk_size_gb": 20,
+            "installation_disk_speed_threshold_ms": 10,
+            "network_latency_threshold_ms": 1000,
+            "packet_loss_percentage": 10
+          },
+          "sno": {
+            "cpu_cores": 8,
+            "ram_mib": 32768,
+            "disk_size_gb": 20,
             "installation_disk_speed_threshold_ms": 10
           }
         }]
-    IMAGE_BUILDER: quay.io/app-sre/assisted-iso-create
     IPV6_SUPPORT: false
 
   targets:
   - namespace:
       $ref: /services/assisted-installer/namespaces/assisted-installer-integration.yml
     ref: master
-    upstream: openshift-assisted-service-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: openshift-assisted-service-gh-build-master
+    promotion:
+      publish:
+      - assisted-installer-integration-deploy-success-channel
     parameters:
       INSTALL_RH_CA: true
       INSTALLER_IMAGE: quay.io/ocpmetal/assisted-installer:latest
@@ -81,31 +91,34 @@ resourceTemplates:
       RELEASE_TAG: master
       REGISTRY_CREDS: qa@redhat.com:redhatqa
       OCM_LOG_LEVEL: info
-      ADMIN_USERS: gamli75,yuvigold,ecohen+assistedinstaller,mfilanov-ai
-      WITH_AMS_SUBSCRIPTIONS: true
+      ADMIN_USERS: gamli75,yuvigold,ecohen+assistedinstaller,mfilanov-ai,alazar+penttest.rw@redhat.com
       ENABLE_AUTH: false
   - namespace:
       $ref: /services/assisted-installer/namespaces/assisted-installer-stage.yml
-    ref: 1c6848303059ce74a5b00386d692d3185a3b844b
+    ref: 7c32a070b52962e9cee86f8498c3c087938a6847
+    promotion:
+      publish:
+      - assisted-installer-stage-deploy-success-channel
     parameters:
       INSTALL_RH_CA: true
-      INSTALLER_IMAGE: registry-proxy.engineering.redhat.com/rh-osbs/openshift4-assisted-installer-rhel8:v1.0.0-46
-      CONTROLLER_IMAGE: registry-proxy.engineering.redhat.com/rh-osbs/openshift4-assisted-installer-reporter-rhel8:v1.0.0-47
-      AGENT_DOCKER_IMAGE: registry-proxy.engineering.redhat.com/rh-osbs/openshift4-assisted-installer-agent-rhel8:v1.0.0-37
+      INSTALLER_IMAGE: registry-proxy.engineering.redhat.com/rh-osbs/openshift4-assisted-installer-rhel8:v1.0.0-81
+      CONTROLLER_IMAGE: registry-proxy.engineering.redhat.com/rh-osbs/openshift4-assisted-installer-reporter-rhel8:v1.0.0-82
+      AGENT_DOCKER_IMAGE: registry-proxy.engineering.redhat.com/rh-osbs/openshift4-assisted-installer-agent-rhel8:v1.0.0-54
       OPENSHIFT_INSTALL_RELEASE_IMAGE: ""
       PUBLIC_CONTAINER_REGISTRIES: quay.io,registry-proxy.engineering.redhat.com
-      RELEASE_TAG: v1.0.20.3
+      RELEASE_TAG: v1.0.24.2
       REGISTRY_CREDS: qa@redhat.com:redhatqa
       AGENT_TIMEOUT_START: 30m
-      ADMIN_USERS: yuvigold,ecohen+assistedinstaller,mfilanov-ai,rregev@redhat.com,lgamliel,gamli75
-      WITH_AMS_SUBSCRIPTIONS: true
+      ADMIN_USERS: yuvigold,ecohen+assistedinstaller,mfilanov-ai,lgamliel,gamli75,alazar+penttest.rw@redhat.com
       ENABLE_AUTH: true
       ENABLE_DEREGISTER_INACTIVE_GC: 168h
   - namespace:
       $ref: /services/assisted-installer/namespaces/assisted-installer-production.yml
-    ref: 1c6848303059ce74a5b00386d692d3185a3b844b
+    ref: 7c32a070b52962e9cee86f8498c3c087938a6847
+    promotion:
+      publish:
+      - assisted-installer-production-deploy-success-channel
     parameters:
-      HW_VALIDATOR_MIN_DISK_SIZE_GIB: 120
       HW_VALIDATOR_REQUIREMENTS: |
         [{
             "version": "default",
@@ -113,26 +126,36 @@ resourceTemplates:
               "cpu_cores": 4,
               "ram_mib": 16384,
               "disk_size_gb": 120,
-              "installation_disk_speed_threshold_ms": 10
+              "installation_disk_speed_threshold_ms": 10,
+              "network_latency_threshold_ms": 100,
+              "packet_loss_percentage": 0
             },
             "worker": {
               "cpu_cores": 2,
               "ram_mib": 8192,
+              "disk_size_gb": 120,
+              "installation_disk_speed_threshold_ms": 10,
+              "network_latency_threshold_ms": 1000,
+              "packet_loss_percentage": 10
+            },
+            "sno": {
+              "cpu_cores": 8,
+              "ram_mib": 32768,
               "disk_size_gb": 120,
               "installation_disk_speed_threshold_ms": 10
             }
           }]
       INSTALL_RH_CA: false
       BASE_DNS_DOMAINS: "" # Emphasize the fact that route53 is disabled on prod.
-      ALLOWED_DOMAINS: https://cloud.redhat.com
-      INSTALLER_IMAGE: registry.redhat.io/rhai-tech-preview/assisted-installer-rhel8:v1.0.0-46
-      CONTROLLER_IMAGE: registry.redhat.io/rhai-tech-preview/assisted-installer-reporter-rhel8:v1.0.0-47
-      AGENT_DOCKER_IMAGE: registry.redhat.io/rhai-tech-preview/assisted-installer-agent-rhel8:v1.0.0-37
+      ALLOWED_DOMAINS: https://cloud.redhat.com,https://console.redhat.com
+      INSTALLER_IMAGE: registry.redhat.io/rhai-tech-preview/assisted-installer-rhel8:v1.0.0-81
+      CONTROLLER_IMAGE: registry.redhat.io/rhai-tech-preview/assisted-installer-reporter-rhel8:v1.0.0-82
+      AGENT_DOCKER_IMAGE: registry.redhat.io/rhai-tech-preview/assisted-installer-agent-rhel8:v1.0.0-54
       OPENSHIFT_INSTALL_RELEASE_IMAGE: ""
       PUBLIC_CONTAINER_REGISTRIES: quay.io
-      RELEASE_TAG: v1.0.20.3
+      RELEASE_TAG: v1.0.24.2
       REGISTRY_CREDS: ""
       AGENT_TIMEOUT_START: 30m
-      ADMIN_USERS: yuvigold,ecohen+assistedinstaller,mfilanov-ai,lgamliel+assistedinstaller, slavie+assistedinstaller,gamli75
-      WITH_AMS_SUBSCRIPTIONS: false
+      ADMIN_USERS: yuvigold,ecohen+assistedinstaller,mfilanov-ai,lgamliel+assistedinstaller, slavie+assistedinstaller,gamli75,alazar+penttest.rw@redhat.com
+      DISABLED_HOST_VALIDATIONS: sufficient-network-latency-requirement-for-role,sufficient-packet-loss-requirement-for-role,has-default-route
       ENABLE_AUTH: true

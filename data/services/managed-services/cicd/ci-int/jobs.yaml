@@ -34,21 +34,28 @@ config:
             junit_results: 'test-results/strimzi-operator/failsafe-reports/*.xml'
             cleanup_script: './build_cleanup.sh'
             release: true
-        - 'mk-nightly-build-test-branch':
-            branch: mk-master
-            display_name: mk-strimzi-operator nightly
+        - 'managed-services-gl-build-test-branch':
+            branch: mk-release-0.23.x
+            display_name: mk-strimzi-operator 0.23.x release
             archive_artifacts: 'test-results/**'
             junit_results: 'test-results/strimzi-operator/failsafe-reports/*.xml'
             cleanup_script: './build_cleanup.sh'
-            ci_cmd: './build_deploy.sh nightly'
-            cron_expression: 'H 5 * * 1,2,3,4,5' # mon-fri early morning
-            backup_ecr_push_creds_account_region: "quayio-prod/eu-central-1"
+            release: true
         - 'managed-services-security-scan':
             display_name: mk-strimzi-operator security-scan
             branch: mk-master
             ci_cmd: 'make scan_project'
             slack_channel_notification: mk-ci-cd
             cron_expression: 'H 6 * * *'
+        # - 'mk-nightly-build-test-branch':
+        #     branch: mk-master
+        #     display_name: mk-strimzi-operator nightly
+        #     archive_artifacts: 'test-results/**'
+        #     junit_results: 'test-results/strimzi-operator/failsafe-reports/*.xml'
+        #     cleanup_script: './build_cleanup.sh'
+        #     ci_cmd: './build_deploy.sh nightly'
+        #     cron_expression: 'H 5 * * 1,2,3,4,5' # mon-fri early morning
+        #     backup_ecr_push_creds_account_region: "quayio-prod/eu-central-1"
 
   - project:
       name: mk-apache-kafka-midstream
@@ -103,6 +110,18 @@ config:
             display_name: guides build-mk-release
 
   - project:
+      name: cli-midstream
+      label: managed-services
+      node: managed-services
+      gl_group: mk-ci-cd
+      gl_project: cli
+      jobs:
+        - 'gl-build-master-managed-services':
+            display_name: cli build-main
+            branch: main
+            build_deploy_script_path: './hack/build_deploy.sh'
+
+  - project:
       name: kas-ui-midstream
       label: managed-services
       node: managed-services
@@ -115,6 +134,32 @@ config:
         - 'gl-build-master-managed-services':
             branch: mk-release
             display_name: kas-ui build-mk-release
+  - project:
+      name: srs-ui-midstream
+      label: managed-services
+      node: managed-services
+      gl_group: mk-ci-cd
+      gl_project: srs-ui
+      jobs:
+        - 'gl-pr-check':
+            display_name: srs-ui pr-check
+            concurrent_build: true
+        - 'gl-build-master-managed-services':
+            branch: mk-release
+            display_name: srs-ui build-mk-release
+  - project:
+      name: sr-ui-midstream
+      label: managed-services
+      node: managed-services
+      gl_group: mk-ci-cd
+      gl_project: sr-ui
+      jobs:
+        - 'gl-pr-check':
+            display_name: sr-ui pr-check
+            concurrent_build: true
+        - 'gl-build-master-managed-services':
+            branch: mk-release
+            display_name: sr-ui build-mk-release
 
   - project:
       name: application-services-ui-midstream
@@ -181,26 +226,23 @@ config:
         - 'gl-pr-check-kas-fleet-manager':
             display_name: kas-fleet-manager pr-check
             concurrent_build: true
-        - 'gl-build-master-kas-fleet-manager':
-            display_name: kas-fleet-manager build master
-            branch: master
+        - 'gl-build-main-kas-fleet-manager':
+            display_name: kas-fleet-manager build main
+            branch: main
         - 'kas-fleet-manager-tests':
             display_name: KasFleetManager Tests periodic stage
             timeout: 7200
             disable: false
             cron_expression: 'H 6 * * 1-5'
             ci_cmd: './pr_check.sh'
-            slack_channel_notification: managed-services-api
-        # At the moment, there is no other way to have an OSD cluster running longer than 7 days, hence the automation here.
-        # This will be removed once we have a production cluster, or have a better way to have OSD clusters that can last longer.
-        # See https://issues.redhat.com/browse/MGDSTRM-878
-        - 'kas-fleet-manager-cluster-extension':
-            display_name: KasFleetManager Extend Staging Cluster Lifetime
+            slack_channel_notification: mk-kas-fleet-manager
+            branch: main
+        - 'kas-fleet-manager-perf-test':
+            branch: main
+            display_name: kas-fleet-manager API perf test
             timeout: 7200
-            disable: false
-            cron_expression: '0 10 * * *' # Every morning at 10am. This will ensure there is always 7 days until the cluster is expired.
-            ci_cmd: './scripts/extend_staging_osd.sh'
-            slack_channel_notification: managed-services-api
+            slack_channel_notification: mk-kas-fleet-manager
+            cron_expression: 'H 7 * * 2-5' # 7am UTC Tuesday to Friday
 
   - project:
       name: managed-services-kafka-performance-tests
@@ -234,32 +276,26 @@ config:
             ci_cmd: 'make pull/upstream/all'
             slack_channel_notification: mk-ci-cd
             cron_expression: '0 */1 * * *' # Every 1h
-        - 'managed-kafka-promote-ui':
-            display_name: managed-kafka promote ui components
+        - 'managed-kafka-promote-ui-beta':
+            display_name: managed-kafka promote ui components to beta
+            timeout: 120
+        - 'managed-kafka-promote-ui-stable':
+            display_name: managed-kafka promote ui components to stable
             timeout: 120
 
   - project:
-      name: managed-services-kafka-chaos-tests
+      name: managed-services-kafka-fault-tests
       label: managed-services
       node: managed-services
       gh_org: bf2fc6cc711aee1a0c2a
       gh_repo: kas-fault-tests
       jobs:
-        - 'managed-kafka-chaos':
-            display_name: 'managed-kafka-chaos pod-delete'
+        - 'managed-kafka-fault-tests':
+            default_branch: main
+            display_name: 'managed-kafka-fault-tests'
             timeout: 3600
             slack_channel_notification: forum-managed-kafka
-
-  - project:
-      name: managed-services-kafka-litmus-test-run
-      label: managed-services
-      node: managed-services
-      gh_org: bf2fc6cc711aee1a0c2a
-      gh_repo: kas-fault-tests
-      jobs:
-        - 'managed-kafka-litmus-test-run':
-            display_name: 'managed-kafka-litmus-test-run'
-            timeout: 900
+            cron_expression: 'H 4 * * 1-5' # At 04:00 on every day-of-week from Monday through Friday
 
   - project:
       name: mk-e2e-test-suite
@@ -275,24 +311,67 @@ config:
             branch: main
             display_name: periodic mk-e2e tests
             timeout: 60
-            cron_expression: '0 */1 * * *' # Every 1h
+            cron_expression: '5 */1 * * *' # At 5 minute past every 1 hour
         - 'managed-kafka-e2e-test-suite-sandbox':
             branch: main
             display_name: periodic sandbox mk-e2e tests
             timeout: 30
-            cron_expression: '30 */6 * * *' # At minute 30 past every 6th hour
-
+            cron_expression: '35 */6 * * *' # At 35 minute past every 6 hour
   - project:
-      name: managed-services-sso
+      name: kas-upgrade-configurations
+      label: kas-upgrade-configurations
+      node: managed-services
+      gl_group: mk-ci-cd
+      gl_project: kas-upgrade-configurations
+      jobs:
+        - 'gl-pr-check-kas-upgrade-configurations':
+            display_name: kas-upgrade-configurations pr-check
+            pr_check_script_path: './hack/pr_check.sh'
+        - 'gl-build-main-kas-upgrade-configurations':
+            display_name: kas-upgrade-configurations deploy
+            build_deploy_script_path: './hack/deploy.sh'
+            branch: main
+  - project:
+      name: mk-token-refresher
       label: managed-services
       node: managed-services
-      gh_org: RHCloudServices
-      gh_repo: kafka-monitoring-stuff
+      gl_group: mk-ci-cd
+      gl_project: mk-token-refresher
       jobs:
-        - 'managed-services-sso-cluster-extension':
-            display_name: Managed Services SSO Extend Staging Cluster Lifetime
-            timeout: 7200
-            disable: false
-            cron_expression: '0 10 * * *' # Every morning at 10am. This will ensure there is always 7 days until the cluster is expired.
-            ci_cmd: './scripts/extend_staging_osd.sh'
-            slack_channel_notification: forum-managed-kafka
+        - 'gl-pr-check':
+            display_name: mk-token-refresher pr-check
+            pr_check_script_path: './pr_check.sh'
+        - 'gl-build-master-managed-services':
+            display_name: mk-token-refresher build master
+            build_deploy_script_path: './build_deploy.sh'
+            branch: master
+
+  - project:
+      name: mk-client-examples
+      label: managed-services
+      node: managed-services
+      gl_group: mk-ci-cd
+      gl_project: client-examples
+      jobs:
+        - 'gl-pr-check-managed-services':
+            display_name: mk-client-examples pr-check
+            pr_check_script_path: './pr_check.sh'
+        - 'gl-build-master-managed-services':
+            display_name: mk-client-examples build mk-release-0.23.x
+            build_deploy_script_path: './build_deploy.sh'
+            branch: mk-release-0.23.x
+  - project:
+      name: kas-abnormal-workloads
+      label: managed-services
+      node: managed-services
+      gl_group: mk-ci-cd
+      gl_project: kas-abnormal-workloads
+      quay_org: app-sre
+      jobs:
+        - 'gl-pr-check-managed-services':
+            display_name: kas-abnormal-workloads pr-check
+            pr_check_script_path: './pr_check.sh'
+        - 'gl-build-master-managed-services':
+            display_name: kas-abnormal-workloads build master
+            build_deploy_script_path: './build_deploy.sh'
+            branch: master

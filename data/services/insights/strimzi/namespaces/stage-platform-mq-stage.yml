@@ -34,7 +34,6 @@ networkPoliciesAllow:
 - $ref: /services/insights/policies/namespaces/stage-policies-stage.yml
 - $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
 - $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
-- $ref: /services/insights/topological-inventory/namespaces/stage-topological-inventory-stage.yml
 - $ref: /services/insights/tower-analytics/namespaces/stage-tower-analytics-stage.yml
 - $ref: /services/insights/vulnerability/namespaces/stage-vulnerability-engine-stage.yml
 - $ref: /services/insights/vulnerability/namespaces/stage-vmaas-stage.yml
@@ -43,6 +42,7 @@ networkPoliciesAllow:
 - $ref: /services/insights/xavier/namespaces/stage-xavier-stage.yml
 - $ref: /services/insights/playbook-dispatcher/namespaces/stage.yml
 - $ref: /services/insights/cloud-connector/namespaces/stage.yml
+- $ref: /services/insights/notifications/namespaces/notifications-mirror-stage.yml
 
 managedRoles: true
 
@@ -60,11 +60,46 @@ terraformResources:
   identifier: insights-client-metrics-stage
   defaults: /terraform/resources/s3-gdpr-1.yml
   output_resource_name: insights-client-metrics-strimzi-bucket
+- provider: s3
+  account: insights-stage
+  identifier: insights-warehouse-stage
+  defaults: /terraform/resources/s3-gdpr-1.yml
+  output_resource_name: insights-warehouse-strimzi-bucket
+- provider: aws-iam-service-account
+  account: insights-stage
+  identifier: strimzi-bucket-read-write
+  variables:
+    aws_region: us-east-1
+  user_policy:
+    {
+      "Version": "2012-10-17",
+      "Statement": [{
+        "Effect": "Allow",
+        "Action": [
+          "s3:ListBucket",
+        ],
+        "Resource": [
+          "arn:aws:s3:::insights-client-metrics-stage",
+          "arn:aws:s3:::insights-warehouse-stage",
+        ]
+      }, {
+        "Effect": "Allow",
+        "Action": [
+          "s3:*Object"
+        ],
+        "Resource": [
+          "arn:aws:s3:::insights-client-metrics-stage/*",
+          "arn:aws:s3:::insights-warehouse-stage/*",
+        ]
+      }]
+    }
+  output_resource_name: strimzi-bucket-read-write
 
 managedResourceTypes:
 - ServiceAccount
 - Role
 - RoleBinding
+- Secret
 
 openshiftResources:
 - provider: vault-secret
@@ -90,3 +125,6 @@ openshiftResources:
   path: app-interface/global/quay/app-sre/quay.io
   version: 2
   type: kubernetes.io/dockercfg
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-stage/platform-mq-stage/kafka-cyndi.secret.yaml

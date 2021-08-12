@@ -1,0 +1,68 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+labels:
+  service: service-registry
+
+name: ci-int-service-registry-jobs
+
+description: ''
+
+app:
+  $ref: /services/service-registry/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+type: jobs
+
+config:
+  - project:
+      name: multitenant-service-registry
+      label: service-registry
+      node: managed-services
+      gl_group: service-registry
+      gl_project: srs-service-registry
+      #quay_org: rhoas
+      build_deploy_script_path: './build-deploy.sh'
+      pr_check_script_path: './pr-check.sh'
+      jobs:
+        # using global job-template
+        # object definition at /resources/jenkins/global/templates.yaml
+        - 'gl-pr-check':
+            display_name: srs-service-registry pr-check
+            concurrent_build: true
+        # using custom job-template. definition at /resources/jenkins/service-registry/job-templates.yaml
+        # builds and pushes images for both srs-service-registry and srs-tenant-manager
+        - 'gl-build-master-srs-projects':
+            display_name: srs-service-registry build master
+            branch: master
+        - 'managed-services-security-scan':
+            display_name: srs-service-registry security-scan
+            branch: master
+            ci_cmd: './security-scan.sh'
+            cron_expression: 'H 0 * * 1,4'
+            slack_channel_notification: appsre-service-registry-ci-cd
+
+  - project:
+      name: srs-fleet-manager
+      label: service-registry
+      node: managed-services
+      gl_group: service-registry
+      gl_project: srs-fleet-manager
+      #quay_org: rhoas
+      build_deploy_script_path: './build-deploy.sh'
+      pr_check_script_path: './pr-check.sh'
+      jobs:
+        - 'gl-pr-check-srs-fleet-manager':
+            display_name: srs-fleet-manager pr-check
+            concurrent_build: true
+        - 'gl-build-master-srs-projects':
+            display_name: srs-fleet-manager build master
+            branch: master
+        - 'managed-services-security-scan':
+            display_name: srs-fleet-manager security-scan
+            branch: master
+            ci_cmd: './security-scan.sh'
+            cron_expression: 'H 0 * * 1,4'
+            slack_channel_notification: appsre-service-registry-ci-cd

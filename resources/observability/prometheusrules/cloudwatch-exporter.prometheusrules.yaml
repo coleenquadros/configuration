@@ -11,8 +11,9 @@ spec:
   groups:
   - name: cloudwatch-exporter.rules
     rules:
-    - alert: CloudWatchDown
+    - alert: CloudWatchExporterDown
       labels:
+        service: app-sre-observability
         severity: critical
       expr: absent(up{job=~"cloudwatch-exporter.*"} == 1)
       for: 5m
@@ -20,8 +21,9 @@ spec:
         message: 'Cloudwatch exporter instances have been down for 5m+.'
         runbook: "https://github.com/rhobs/configuration/tree/main/docs/sop"
         dashboard: "https://grafana.app-sre.devshift.net"
-    - alert: CloudWatchScrapeError
+    - alert: CloudWatchExporterScrapeError
       labels:
+        service: app-sre-observability
         severity: medium
       expr: cloudwatch_exporter_scrape_error{job=~"cloudwatch-exporter.*"} != 0
       for: 5m
@@ -29,8 +31,9 @@ spec:
         message: 'There was an error scraping metrics from the cloudwatch exporter.'
         runbook: "https://github.com/rhobs/configuration/tree/main/docs/sop"
         dashboard: "https://grafana.app-sre.devshift.net"
-    - alert: CloudWatchScrapeDuration
+    - alert: CloudWatchExporterScrapeDuration
       labels:
+        service: app-sre-observability
         severity: warning
       expr: cloudwatch_exporter_scrape_duration_seconds{job=~"cloudwatch-exporter.*"} >= 15
       annotations:
@@ -39,9 +42,9 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net"
   - name: cloudwatch-exporter-s3.rules
     rules:
-    - alert: SuddenIncreaseBytesUsed
+    - alert: S3SuddenIncreaseBytesUsed
       labels:
-        jiralert: ASIC
+        service: app-sre-observability
         severity: warning
       expr: (avg_over_time(aws_s3_bucket_size_bytes_average{job=~"cloudwatch-exporter.*"}[1d]) / avg_over_time(aws_s3_bucket_size_bytes_average{job=~"cloudwatch-exporter.*"}[1d] offset 1d) -1) * 100 > 20 and (aws_s3_bucket_size_bytes_average{job=~"cloudwatch-exporter.*"} - aws_s3_bucket_size_bytes_average{job=~"cloudwatch-exporter.*"} offset 1d) / 1000 / 1000 > 1000
       annotations:
@@ -50,9 +53,9 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net"
   - name: cloudwatch-exporter-rds.rules
     rules:
-    - alert: HighCPUUtilization
+    - alert: RDSHighCPUUtilization
       labels:
-        jiralert: ASIC
+        service: app-sre-observability
         severity: warning
       expr: aws_rds_cpuutilization_average{job=~"cloudwatch-exporter.*"} offset 10m > 85
       for: 15m
@@ -60,18 +63,18 @@ spec:
         message: 'Average CPU utilization of RDS instance {{$labels.dbinstance_identifier}} above 85% for the past 15 minutes.'
         runbook: "https://github.com/rhobs/configuration/tree/main/docs/sop"
         dashboard: "https://grafana.app-sre.devshift.net"
-    - alert: LowFreeMemory
+    - alert: RDSLowFreeMemory
       labels:
-        jiralert: ASIC
+        service: app-sre-observability
         severity: warning
       expr: aws_rds_freeable_memory_average{job=~"cloudwatch-exporter.*"} offset 10m < (200 * 1024^2)
       annotations:
         message: 'The current free(able) memory of DB instance {{ $labels.dbinstance_identifier }} is under 200 MB.'
         runbook: "https://github.com/rhobs/configuration/tree/main/docs/sop"
         dashboard: "https://grafana.app-sre.devshift.net"
-    - alert: LowStorageSpace
+    - alert: RDSLowStorageSpace
       labels:
-        jiralert: ASIC
+        service: app-sre-observability
         severity: warning
       expr: aws_rds_free_storage_space_average{job=~"cloudwatch-exporter.*"} offset 10m < (1 * 1024^3)
       for: 30m
@@ -79,37 +82,37 @@ spec:
         message: 'The current free storage space of DB instance {{ $labels.dbinstance_identifier }} is under 1 GB.'
         runbook: "https://github.com/rhobs/configuration/tree/main/docs/sop"
         dashboard: "https://grafana.app-sre.devshift.net"
-    - alert: PredictOutOfStorage
+    - alert: RDSPredictOutOfStorage
       labels:
+        service: app-sre-observability
         severity: high
-        jiralert: ASIC
       expr: predict_linear(aws_rds_free_storage_space_average[1h], 3600 * 24 * 3) < 0
       for: 1h
       annotations:
         message: 'DB instance {{ $labels.dbinstance_identifier }} storage will be full within 2 days.'
         runbook: "https://github.com/rhobs/configuration/tree/main/docs/sop"
         dashboard: "https://grafana.app-sre.devshift.net"
-    - alert: PredictRDSOutOfBurstBalance
+    - alert: RDSPredictOutOfBurstBalance
       labels:
-        jiralert: ASIC
+        service: app-sre-observability
         severity: high
       expr: predict_linear(aws_rds_burst_balance_average[1h], 3600 * 8) < 0
       for: 5m
       annotations:
         message: "DB instance '{{ $labels.dbinstance_identifier }}' storage will be out of burst balance in 8 hours"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/sop/rds-burst-balance.md"
-    - alert: HighAverageReadLatency
+    - alert: RDSHighAverageReadLatency
       labels:
-        jiralert: ASIC
+        service: app-sre-observability
         severity: warning
       expr: aws_rds_read_latency_average{job=~"cloudwatch-exporter.*"} offset 10m >= 1
       annotations:
         message: 'The average read latency of DB instance {{ $labels.dbinstance_identifier }} is over 1s.'
         runbook: "https://github.com/rhobs/configuration/tree/main/docs/sop"
         dashboard: "https://grafana.app-sre.devshift.net"
-    - alert: HighAverageWriteLatency
+    - alert: RDSHighAverageWriteLatency
       labels:
-        jiralert: ASIC
+        service: app-sre-observability
         severity: warning
       expr: aws_rds_write_latency_average{job=~"cloudwatch-exporter.*"} offset 10m >= 1.1
       for: 10m
@@ -119,9 +122,9 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net"
   - name: cloudwatch-exporter-ec2.rules
     rules:
-    - alert: HighCPUUtilization
+    - alert: EC2HighCPUUtilization
       labels:
-        jiralert: ASIC
+        service: app-sre-observability
         severity: warning
       expr: aws_ec2_cpuutilization_average{job=~"cloudwatch-exporter.*"} offset 10m > 85
       for: 60m

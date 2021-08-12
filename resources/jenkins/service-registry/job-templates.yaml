@@ -1,0 +1,45 @@
+# currently not using this. alternatively, using the global job-template 'gl-pr-check'
+- job-template:
+    id: gl-pr-check-srs-service-registry
+    name: "{gl_group}-{gl_project}-gl-pr-check"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+          - *quay_secret_push
+          - *rhoas-quay-access
+    <<: *gl_pr_check
+
+- job-template:
+    id: gl-pr-check-srs-fleet-manager
+    name: "{gl_group}-{gl_project}-gl-pr-check"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+          - *quay_secret_push
+          - *rhoas-quay-access
+          - *srs_fleet_manager_pr_check
+    <<: *gl_pr_check
+
+- job-template:
+    id: gl-build-master-srs-projects
+    name: "{name}-gl-build-{branch}"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+          - *rhoas-quay-access
+          - *ci_jenkins_token
+          - *gitlab_token
+          - *backup_ecr_push_creds
+          - *quay_secret_push
+          - *app_sre_bot_push_token
+          - *app_interface_creds
+    <<: *gl_build_master

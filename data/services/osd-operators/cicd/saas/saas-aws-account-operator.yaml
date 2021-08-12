@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: osd-operators
@@ -10,8 +10,8 @@ description: SaaS tracking file for aws-account-operator
 app:
   $ref: /services/osd-operators/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/osd-operators/pipelines/tekton.osd-operators-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
@@ -39,51 +39,30 @@ resourceTemplates:
     REGISTRY_IMG: quay.io/app-sre/aws-account-operator-registry
   targets:
   - namespace:
-      $ref: /services/osd-operators/namespaces/aws-account-operator-integration.yml
-    ref: master
-    upstream: openshift-aws-account-operator-gh-build-master
-    parameters:
-      ACCOUNT_LIMIT: "4950"
-      ROOT_OU_ID: r-0wd6
-      BASE_OU_ID: ou-0wd6-oq5d7v8g
-      ACCOUNT_POOL_SIZE: 0
-      ACCOUNT_POOL_NAME: osd-integration-accountpool
-      STS_JUMP_ROLE: arn:aws:iam::644306948063:role/RH-Managed-OpenShift-Installer
-      SUPPORT_JUMP_ROLE: arn:aws:iam::644306948063:role/RH-Customer-Support-Access
-      AWS_MANAGED_TAGS: |
-          red-hat-managed=true
-  - namespace:
       $ref: /services/osd-operators/namespaces/hivei01ue1/aws-account-operator.yml
     ref: master
-    upstream: openshift-aws-account-operator-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: openshift-aws-account-operator-gh-build-master
     parameters:
       ACCOUNT_LIMIT: "7000"
       ROOT_OU_ID: r-0wd6
       BASE_OU_ID: ou-0wd6-oq5d7v8g
       ACCOUNT_POOL_SIZE: 50
       ACCOUNT_POOL_NAME: hivei01ue1
-      STS_JUMP_ROLE: arn:aws:iam::644306948063:role/RH-Managed-OpenShift-Installer
-      SUPPORT_JUMP_ROLE: arn:aws:iam::644306948063:role/RH-Customer-Support-Access
+      STS_JUMP_ROLE: arn:aws:iam::896164604406:role/RH-Managed-OpenShift-Installer
+      SUPPORT_JUMP_ROLE: arn:aws:iam::896164604406:role/RH-Technical-Support-Access
+      SHARD_NAME: hivei01ue1
       AWS_MANAGED_TAGS: |
-          red-hat-managed=true
-  - namespace:
-      $ref: /services/osd-operators/namespaces/aws-account-operator-stage.yml
-    ref: master
-    upstream: openshift-aws-account-operator-gh-build-master
-    parameters:
-      ACCOUNT_LIMIT: "4950"
-      ROOT_OU_ID: r-0wd6
-      BASE_OU_ID: ou-0wd6-tmsbvahq
-      ACCOUNT_POOL_SIZE: 0
-      ACCOUNT_POOL_NAME: example-accountpool
-      STS_JUMP_ROLE: arn:aws:iam::644306948063:role/RH-Managed-OpenShift-Installer
-      SUPPORT_JUMP_ROLE: arn:aws:iam::644306948063:role/RH-Customer-Support-Access
-      AWS_MANAGED_TAGS: |
-          red-hat-managed=true
+          aws-account-operator=owned
   - namespace:
       $ref: /services/osd-operators/namespaces/hive-stage-01/aws-account-operator.yml
     ref: master
-    upstream: openshift-aws-account-operator-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: openshift-aws-account-operator-gh-build-master
     parameters:
       ACCOUNT_LIMIT: "7000"
       ROOT_OU_ID: r-0wd6
@@ -91,13 +70,17 @@ resourceTemplates:
       ACCOUNT_POOL_SIZE: 50
       ACCOUNT_POOL_NAME: hive-stage-01
       STS_JUMP_ROLE: arn:aws:iam::644306948063:role/RH-Managed-OpenShift-Installer
-      SUPPORT_JUMP_ROLE: arn:aws:iam::644306948063:role/RH-Customer-Support-Access
+      SUPPORT_JUMP_ROLE: arn:aws:iam::644306948063:role/RH-Technical-Support-Access
+      SHARD_NAME: hive-stage-01 
       AWS_MANAGED_TAGS: |
-          red-hat-managed=true
+          aws-account-operator=owned
   - namespace:
       $ref: /services/osd-operators/namespaces/hives02ue1/aws-account-operator.yml
     ref: master
-    upstream: openshift-aws-account-operator-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: openshift-aws-account-operator-gh-build-master
     parameters:
       ACCOUNT_LIMIT: "7000"
       ROOT_OU_ID: r-0wd6
@@ -105,13 +88,17 @@ resourceTemplates:
       ACCOUNT_POOL_SIZE: 50
       ACCOUNT_POOL_NAME: hives02ue1
       STS_JUMP_ROLE: arn:aws:iam::644306948063:role/RH-Managed-OpenShift-Installer
-      SUPPORT_JUMP_ROLE: arn:aws:iam::644306948063:role/RH-Customer-Support-Access
+      SUPPORT_JUMP_ROLE: arn:aws:iam::644306948063:role/RH-Technical-Support-Access
+      SHARD_NAME: hives02ue1
       AWS_MANAGED_TAGS: |
-          red-hat-managed=true
+          aws-account-operator=owned
   - namespace:
       $ref: /services/osd-operators/namespaces/ssotest01ue1/aws-account-operator.yml
     ref: master
-    upstream: openshift-aws-account-operator-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: openshift-aws-account-operator-gh-build-master
     parameters:
       ACCOUNT_LIMIT: "5350"
       ROOT_OU_ID: r-0wd6
@@ -119,71 +106,76 @@ resourceTemplates:
       ACCOUNT_POOL_SIZE: 5
       ACCOUNT_POOL_NAME: ssotest01ue1
       STS_JUMP_ROLE: arn:aws:iam::644306948063:role/RH-Managed-OpenShift-Installer
-      SUPPORT_JUMP_ROLE: arn:aws:iam::644306948063:role/RH-Customer-Support-Access
+      SUPPORT_JUMP_ROLE: arn:aws:iam::644306948063:role/RH-Technical-Support-Access
       AWS_MANAGED_TAGS: |
-          red-hat-managed=true
-  - namespace:
-      $ref: /services/osd-operators/namespaces/aws-account-operator-production.yml
-    ref: 50eb9ff378800d214bb58f7f7722bedd6679157a
-    parameters:
-      ACCOUNT_LIMIT: "3300"
-      ROOT_OU_ID: r-jtfp
-      BASE_OU_ID: ou-jtfp-w0octtat
-      ACCOUNT_POOL_SIZE: 0
-      ACCOUNT_POOL_NAME: osd-accountpool
-      STS_JUMP_ROLE: arn:aws:iam::710019948333:role/RH-Managed-OpenShift-Installer
-      SUPPORT_JUMP_ROLE: arn:aws:iam::710019948333:role/RH-Customer-Support-Access
-      AWS_MANAGED_TAGS: |
-          red-hat-managed=true
+          aws-account-operator=owned
   - namespace:
       $ref: /services/osd-operators/namespaces/hivep01ue1/aws-account-operator.yml
-    ref: 50eb9ff378800d214bb58f7f7722bedd6679157a
+    ref: 0eb7d50527058d5bf501139c793911cfc2cb9b88
     parameters:
-      ACCOUNT_LIMIT: "3300"
+      ACCOUNT_LIMIT: "3700"
       ROOT_OU_ID: r-jtfp
       BASE_OU_ID: ou-jtfp-w0octtat
       ACCOUNT_POOL_SIZE: 30
       ACCOUNT_POOL_NAME: accountpool
       STS_JUMP_ROLE: arn:aws:iam::710019948333:role/RH-Managed-OpenShift-Installer
-      SUPPORT_JUMP_ROLE: arn:aws:iam::710019948333:role/RH-Customer-Support-Access
+      SUPPORT_JUMP_ROLE: arn:aws:iam::710019948333:role/RH-Technical-Support-Access
+      SHARD_NAME: hivep01ue1
       AWS_MANAGED_TAGS: |
-          red-hat-managed=true
+          aws-account-operator=owned
   - namespace:
       $ref: /services/osd-operators/namespaces/hivep02ue1/aws-account-operator.yml
-    ref: 50eb9ff378800d214bb58f7f7722bedd6679157a
+    ref: 0eb7d50527058d5bf501139c793911cfc2cb9b88
     parameters:
-      ACCOUNT_LIMIT: "3300"
+      ACCOUNT_LIMIT: "3700"
       ROOT_OU_ID: r-jtfp
       BASE_OU_ID: ou-jtfp-w0octtat
       ACCOUNT_POOL_SIZE: 30
       ACCOUNT_POOL_NAME: accountpool
       STS_JUMP_ROLE: arn:aws:iam::710019948333:role/RH-Managed-OpenShift-Installer
-      SUPPORT_JUMP_ROLE: arn:aws:iam::710019948333:role/RH-Customer-Support-Access
+      SUPPORT_JUMP_ROLE: arn:aws:iam::710019948333:role/RH-Technical-Support-Access
+      SHARD_NAME: hivep02ue1
       AWS_MANAGED_TAGS: |
-          red-hat-managed=true
+          aws-account-operator=owned
   - namespace:
       $ref: /services/osd-operators/namespaces/hivep03uw1/aws-account-operator.yml
-    ref: 50eb9ff378800d214bb58f7f7722bedd6679157a
+    ref: 0eb7d50527058d5bf501139c793911cfc2cb9b88
     parameters:
-      ACCOUNT_LIMIT: "3300"
+      ACCOUNT_LIMIT: "3700"
       ROOT_OU_ID: r-jtfp
       BASE_OU_ID: ou-jtfp-w0octtat
       ACCOUNT_POOL_SIZE: 30
       ACCOUNT_POOL_NAME: accountpool
       STS_JUMP_ROLE: arn:aws:iam::710019948333:role/RH-Managed-OpenShift-Installer
-      SUPPORT_JUMP_ROLE: arn:aws:iam::710019948333:role/RH-Customer-Support-Access
+      SUPPORT_JUMP_ROLE: arn:aws:iam::710019948333:role/RH-Technical-Support-Access
+      SHARD_NAME: hivep03uw1
       AWS_MANAGED_TAGS: |
-          red-hat-managed=true
+          aws-account-operator=owned
   - namespace:
       $ref: /services/osd-operators/namespaces/hivep04ew2/aws-account-operator.yml
-    ref: 50eb9ff378800d214bb58f7f7722bedd6679157a
+    ref: 0eb7d50527058d5bf501139c793911cfc2cb9b88
     parameters:
-      ACCOUNT_LIMIT: "3300"
+      ACCOUNT_LIMIT: "3700"
       ROOT_OU_ID: r-jtfp
       BASE_OU_ID: ou-jtfp-w0octtat
       ACCOUNT_POOL_SIZE: 30
       ACCOUNT_POOL_NAME: accountpool
       STS_JUMP_ROLE: arn:aws:iam::710019948333:role/RH-Managed-OpenShift-Installer
-      SUPPORT_JUMP_ROLE: arn:aws:iam::710019948333:role/RH-Customer-Support-Access
+      SUPPORT_JUMP_ROLE: arn:aws:iam::710019948333:role/RH-Technical-Support-Access
+      SHARD_NAME: hivep04ew2
       AWS_MANAGED_TAGS: |
-          red-hat-managed=true
+          aws-account-operator=owned
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hivep05ue1/aws-account-operator.yml
+    ref: 0eb7d50527058d5bf501139c793911cfc2cb9b88
+    parameters:
+      ACCOUNT_LIMIT: "3730"
+      ROOT_OU_ID: r-jtfp
+      BASE_OU_ID: ou-jtfp-w0octtat
+      ACCOUNT_POOL_SIZE: 30
+      ACCOUNT_POOL_NAME: accountpool
+      STS_JUMP_ROLE: arn:aws:iam::710019948333:role/RH-Managed-OpenShift-Installer
+      SUPPORT_JUMP_ROLE: arn:aws:iam::710019948333:role/RH-Technical-Support-Access
+      SHARD_NAME: hivep05ue1
+      AWS_MANAGED_TAGS: |
+          aws-account-operator=owned

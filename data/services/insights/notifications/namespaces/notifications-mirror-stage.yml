@@ -1,0 +1,39 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: notifications
+
+name: notifications-mirror-stage
+description: Namespace where MirrorMaker for notification messages is deployed
+
+cluster:
+  $ref: /openshift/crcs02ue1/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
+
+quota:
+  $ref: /services/insights/default-quota.yml
+
+app:
+  $ref: /services/insights/notifications/app.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs02ue1.yml
+- $ref: /services/insights/turnpike/namespaces/stage-turnpike-stage.yml
+
+managedRoles: true
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/insights-stage/notifications-stage/poc-mirror-cert
+  version: 1
+- provider: vault-secret
+  path: insights/secrets/insights-stage/notifications-stage/poc-mirror-credentials
+  version: 1
+
+managedTerraformResources: false

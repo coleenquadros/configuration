@@ -5,7 +5,7 @@ labels:
   service: hccm
 
 name: hccm-prod
-description: Insights hccm-prod on the PROD cluster under app-interface management
+description: Insights hccm-prod on the PROD cluster under clowder / app-interface management
 
 cluster:
   $ref: /openshift/crcp01ue1/cluster.yml
@@ -109,6 +109,11 @@ openshiftResources:
   version: 1
   annotations:
     qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-prod/hccm-prod/koku-report-emailer-secret
+  version: 1
+  annotations:
+    qontract.recycle: "true"
 
 managedTerraformResources: true
 
@@ -129,18 +134,46 @@ terraformResources:
   output_resource_name: koku-db
   output_resource_db_name: koku
   parameter_group: /terraform/resources/insights/production/rds/postgres12-parameter-group-cost-management-prod.yml
+  annotations:
+    clowder/database: koku
 - provider: s3
   account: insights-prod
   identifier: hccm-prod-s3
   defaults: /terraform/resources/s3-private-1.yml
   output_resource_name: hccm-s3
-- provider: elasticache
+- provider: aws-iam-service-account
+  account: insights-prod
+  identifier: hccm-s3-read-prod
+  variables:
+    aws_region: us-east-1
+  user_policy:
+    {
+      "Version": "2012-10-17",
+      "Statement": [{
+        "Effect": "Allow",
+        "Action": [
+          "s3:ListBucket",
+          "s3:GetObject"
+        ],
+        "Resource": [
+          "arn:aws:s3:::hccm-prod-s3",
+          "arn:aws:s3:::hccm-prod-s3/*"
+        ]
+      }]
+    }
+  output_resource_name: hccm-prod-s3-read
+- provider: elasticache  # TODO remove after clowder
   account: insights-prod
   identifier: cost-management-prod-elasticache
   defaults: /terraform/resources/insights/production/elasticache/elasticache-hccm-1.yml
   output_resource_name: elasticache-redis
-- provider: elasticache
+- provider: elasticache  # TODO remove after clowder
   account: insights-prod
   identifier: cost-management-prod-elasticache-api
   defaults: /terraform/resources/insights/production/elasticache/elasticache-hccm-2.yml
   output_resource_name: elasticache-redis-api
+- provider: elasticache
+  account: insights-prod
+  identifier: cost-management-prod-redis-clowder
+  defaults: /terraform/resources/insights/production/elasticache/elasticache-hccm-3.yml
+  output_resource_name: in-memory-db

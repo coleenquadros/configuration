@@ -101,3 +101,49 @@ tests:
       # An extra minute to switch the alert off
       - eval_time: 12m
         alertname: MasSSOAvailabilityHigh500Count
+  # MasSSOMultiAZPodDistribution alert is expected when all keycloak pods are in the same actavailability zone
+  - interval: 1m
+    input_series:
+      - series: 'kube_pod_info{created_by_kind="StatefulSet",created_by_name="keycloak",namespace="mas-sso-production",node="node1",pod="keycloak-0"}'
+        values: '1'
+      - series: 'kube_pod_info{created_by_kind="StatefulSet",created_by_name="keycloak",namespace="mas-sso-production",node="node2",pod="keycloak-1"}'
+        values: '1'
+      - series: 'kube_pod_info{created_by_kind="StatefulSet",created_by_name="keycloak",namespace="mas-sso-production",node="node3",pod="keycloak-2"}'
+        values: '1'
+      - series: 'kube_node_labels{label_topology_kubernetes_io_zone="us-east-1a",node="node1"}'
+        values: '1'
+      - series: 'kube_node_labels{label_topology_kubernetes_io_zone="us-east-1a",node="node2"}'
+        values: '1'
+      - series: 'kube_node_labels{label_topology_kubernetes_io_zone="us-east-1a",node="node3"}'
+        values: '1'
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: MasSSOMultiAZPodDistribution
+        exp_alerts:
+          - exp_labels:
+              exported_namespace: mas-sso-production
+              service: mas-sso
+              severity: high
+            exp_annotations:
+              message: "All the MAS SSO Pods are distributed in the same Availability Zone"
+              dashboard: "https://grafana.app-sre.devshift.net/d/_LLa8q_Gk/mas-sso-monitoring"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/mas-sso/sop/mas-sso-availability/mas-sso-multi-az-pod-distribution.md"
+  # MasSSOMultiAZPodDistribution alert is NOT expected when all keycloak pods are more than in  one  availability zone              
+  - interval: 1m
+    input_series:
+      - series: 'kube_pod_info{created_by_kind="StatefulSet",created_by_name="keycloak",namespace="mas-sso-production",node="nodeA",pod="keycloak-0"}'
+        values: '1'
+      - series: 'kube_pod_info{created_by_kind="StatefulSet",created_by_name="keycloak",namespace="mas-sso-production",node="nodeB",pod="keycloak-1"}'
+        values: '1'
+      - series: 'kube_pod_info{created_by_kind="StatefulSet",created_by_name="keycloak",namespace="mas-sso-production",node="nodeC",pod="keycloak-2"}'
+        values: '1'
+      - series: 'kube_node_labels{label_topology_kubernetes_io_zone="us-east-1a",node="nodeA"}'
+        values: '1'
+      - series: 'kube_node_labels{label_topology_kubernetes_io_zone="us-east-1a",node="nodeB"}'
+        values: '1'
+      - series: 'kube_node_labels{label_topology_kubernetes_io_zone="us-east-1b",node="nodeC"}'
+        values: '1'
+    alert_rule_test:
+      # No alert - 2 different AZs now
+      - eval_time: 6m
+        alertname: MasSSOMultiAZPodDistribution

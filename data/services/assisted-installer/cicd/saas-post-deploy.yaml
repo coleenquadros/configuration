@@ -1,18 +1,17 @@
-
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: assisted-installer
 
 name: saas-assisted-installer-post-deploy
-description: 'SaaS tracking file for assisted-installer post deployment tests'
+description: SaaS tracking file for assisted-installer post deployment tests
 
 app:
   $ref: /services/assisted-installer/app.yml
 
-instance:
-  $ref: /dependencies/ci-ext/ci-ext.yml
+pipelinesProvider:
+  $ref: /services/assisted-installer/pipelines/tekton.assisted-installer-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
@@ -34,13 +33,22 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/assisted-installer/namespaces/assisted-installer-integration.yml
-    ref: master
-    upstream: openshift-saas-deploy-assisted-installer-osd-integration
+    ref: 63d3a9be36f32fe4557d6e51a7217852d1763240
+    promotion:
+      auto: true
+      subscribe:
+      - assisted-installer-integration-deploy-success-channel
   - namespace:
       $ref: /services/assisted-installer/namespaces/assisted-installer-stage.yml
-    ref: master
-    upstream: openshift-saas-deploy-assisted-installer-osd-stage
+    ref: 7c32a070b52962e9cee86f8498c3c087938a6847
+    promotion:
+      auto: true
+      subscribe:
+      - assisted-installer-stage-deploy-success-channel
   - namespace:
       $ref: /services/assisted-installer/namespaces/assisted-installer-production.yml
-    ref: master
-    upstream: openshift-saas-deploy-assisted-installer-osd-production
+    ref: 7c32a070b52962e9cee86f8498c3c087938a6847
+    promotion:
+      auto: true
+      subscribe:
+      - assisted-installer-production-deploy-success-channel

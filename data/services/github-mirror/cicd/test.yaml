@@ -1,17 +1,17 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: github-mirror
 
 name: saas-github-mirror-test
-description: 'SaaS tracking file for GitHub Mirror post deployment tests'
+description: SaaS tracking file for GitHub Mirror post deployment tests
 
 app:
   $ref: /services/github-mirror/app.yml
 
-instance:
-  $ref: /dependencies/ci-ext/ci-ext.yml
+pipelinesProvider:
+  $ref: /services/github-mirror/pipelines/tekton.github-mirror-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
@@ -33,12 +33,14 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/github-mirror/namespaces/github-mirror-stage.yaml
-    ref: master
-    upstream: openshift-saas-deploy-saas-github-mirror-App-SRE-stage
+    ref: 69247583c358eb1bdcf3eee5623537f5921ac529
     parameters:
       IMAGE: quay.io/app-sre/github-mirror
       GITHUB_MIRROR_URL: https://github-mirror.stage.devshift.net
       CLIENT_TOKEN_SECRET: acceptance-tests
     promotion:
+      auto: true
+      subscribe:
+      - github-mirror-stage-deploy-success-channel
       publish:
       - github-mirror-stage-post-deploy-tests-success-channel

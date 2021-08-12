@@ -1,0 +1,24 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: srs-service-registry-stage
+spec:
+  groups:
+  - name: srs-service-registry-stage
+    rules:
+    - alert: SRSServiceRegistryDown - stage
+      annotations:
+        message: "No targets found for Service Registry in namespace {{ $labels.namespace }}. Service Registry is down."
+        dashboard: "https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?orgId=1"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/service-registry/sop#service-registry-down"
+      expr: |
+        absent(up{job="apicurio-registry",namespace="service-registry-stage"} == 1)
+      for: 15m
+      labels:
+        service: srs-service-registry
+        severity: info

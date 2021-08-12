@@ -27,9 +27,6 @@ There are 3 stages when running our integrations:
 ## Special Merge Request titles
 
 Some of our integrations shouldn't run in every merge request. The current mechanism to determine if such an integration should run is done by using the MR title:
-- if the title contains "slack" - the slack-usergroups integration is executed
-- if the title contains "mirror" - the quay-mirror integration is executed
-- if the title contains "sentry" - the sentry-config integration is executed
 - if the title contains "saas-deploy-full" - the openshift-saas-deploy integration is executed for all saas files
 
 ## Failure scenarions
@@ -49,3 +46,48 @@ Mostly fails if baseline collection phase was not succesfull.
 This is usually due to a data reload in the Graphql production endpoint.
 
 Solution: `/retest`
+
+### Unfucking terraform
+
+When a manual intervention has forced us to change an AWS resource,
+terraform may find a discrepancy between its stored state and
+reality. In such an event, `terraform-resources-wrapper` may show
+strange errors about mismatching or missing resources. When that
+happens:
+
+1. Diagnose the account for which the problem is happening.
+1. Generate the terraform configuration for this account.  On your
+   local machine, spawn a qontract server and run the integration in
+   dry-run mode:
+   ``` bash
+    # From app-interface's top-level:
+    make server
+    qontract-reconcile --config config.debug.toml --dry-run terraform-resources --print-only --account-name $account_name |sed 1d > config.tf.json
+    ```
+    (please remember, you can find the config.debug.toml file in
+   vault, path `app-sre/ci-int/qontract-reconcile-toml` - field
+   local_data)
+1. Initialize terraform and see its plan
+   ``` bash
+   terraform init
+   terraform plan
+   ```
+    You'll see it lists a lot of resources, even if it eventually
+    fails:
+    ``` bash
+    aws_elasticache_parameter_group.quay-orchestrator-parameters: Refreshing state... [id=quay-orchestrator-parameters]
+    aws_cloudfront_origin_access_identity.quayio-stage-s3: Refreshing state... [id=E3BFM0BD46CWH4]
+    aws_iam_role.quayio-stage-s3_quayio-stage-backup: Refreshing state... [id=quayio-stage-backup_iam_role]
+    aws_iam_user.aws-cloudwatch-exporter-quay-stage-01: Refreshing state... [id=aws-cloudwatch-exporter-quay-stage-01]
+    [...]
+    ```
+    Identify the one that matches what was modified manually.
+1. Ask for help! Ask for a team member with experience on terraform
+   and these integrations to re-check what you're doing! Our next
+   steps are **very** dangerous!!
+1. Check why the state doesn't match, and run the appropriate
+   `terraform state` subcommand. For instance, if you deleted a
+   parameter group, you may want to do:
+   ``` bash
+   terraform state rm $parameter_group
+   ```

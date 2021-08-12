@@ -20,6 +20,7 @@ spec:
         prometheus_config_last_reload_successful == 0
       for: 10m
       labels:
+        service: prometheus
         severity: high
     - alert: PrometheusNotificationQueueRunningFull
       annotations:
@@ -31,6 +32,7 @@ spec:
         predict_linear(prometheus_notifications_queue_length[5m], 60 * 30) > prometheus_notifications_queue_capacity
       for: 10m
       labels:
+        service: prometheus
         severity: high
     - alert: PrometheusErrorSendingAlerts
       annotations:
@@ -42,6 +44,7 @@ spec:
         rate(prometheus_notifications_errors_total[5m]) / rate(prometheus_notifications_sent_total[5m]) > 0.01
       for: 10m
       labels:
+        service: prometheus
         severity: high
     - alert: PrometheusErrorSendingAlerts
       annotations:
@@ -53,6 +56,7 @@ spec:
         rate(prometheus_notifications_errors_total[5m]) / rate(prometheus_notifications_sent_total[5m]) > 0.03
       for: 10m
       labels:
+        service: prometheus
         severity: critical
     # This is currently only the app-sre prometheus instance
     - alert: PrometheusNotConnectedToAlertmanagers
@@ -65,6 +69,7 @@ spec:
         prometheus_notifications_alertmanagers_discovered{namespace="app-sre-observability-production"} < 1
       for: 10m
       labels:
+        service: prometheus
         severity: high
     - alert: PrometheusTSDBReloadsFailing
       annotations:
@@ -76,6 +81,7 @@ spec:
         increase(prometheus_tsdb_reloads_failures_total[2h]) > 0
       for: 12h
       labels:
+        service: prometheus
         severity: high
     - alert: PrometheusTSDBCompactionsFailing
       annotations:
@@ -87,6 +93,7 @@ spec:
         increase(prometheus_tsdb_compactions_failed_total[2h]) > 0
       for: 12h
       labels:
+        service: prometheus
         severity: high
     - alert: PrometheusTSDBWALCorruptions
       annotations:
@@ -98,6 +105,7 @@ spec:
         tsdb_wal_corruptions_total > 0
       for: 4h
       labels:
+        service: prometheus
         severity: high
     - alert: PrometheusNotIngestingSamples
       annotations:
@@ -109,6 +117,7 @@ spec:
         rate(prometheus_tsdb_head_samples_appended_total[5m]) <= 0
       for: 10m
       labels:
+        service: prometheus
         severity: high
     - alert: PrometheusTargetScrapesDuplicate
       annotations:
@@ -120,6 +129,7 @@ spec:
         increase(prometheus_target_scrapes_sample_duplicate_timestamp_total[5m]) > 0
       for: 10m
       labels:
+        service: prometheus
         severity: high
     - alert: PrometheusRemoteStorageFailures
       annotations:
@@ -139,6 +149,7 @@ spec:
         > 1
       for: 15m
       labels:
+        service: prometheus
         severity: high
     - alert: PrometheusRemoteWriteBehind
       annotations:
@@ -155,6 +166,7 @@ spec:
         > 120
       for: 15m
       labels:
+        service: prometheus
         severity: high
 
   - name: prometheus-operator
@@ -168,6 +180,7 @@ spec:
         rate(prometheus_operator_reconcile_errors_total[5m]) > 0.1
       for: 10m
       labels:
+        service: prometheus
         severity: medium
     - alert: PrometheusOperatorNodeLookupErrors
       annotations:
@@ -177,4 +190,5 @@ spec:
         rate(prometheus_operator_node_address_lookup_errors_total[5m]) > 0.1
       for: 10m
       labels:
+        service: prometheus
         severity: high

@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: marketplace
@@ -11,15 +11,13 @@ description: marketplace app on the Insights Platform
 app:
   $ref: /services/insights/marketplace/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
-
-timeout: 5
 
 managedResourceTypes:
 - Deployment
@@ -49,7 +47,7 @@ resourceTemplates:
     ref: 2fdd8b85766383a53f4dd499aae4fc2c9d3a7017
     parameters:
       IMAGE_TAG: 9abb720
-      PROMETHEUS_PUSH_GATEWAY: prometheus-push.insights-push-stage.svc.cluster.local:9091
+      PROMETHEUS_PUSH_GATEWAY: ${PROMETHEUS_PUSHGATEWAY}
       PENDO_AGGREGATION_QUERY: '{"response":{"mimeType":"application/json"},"request":{"name":"page-data","pipeline":[{"source":{"pages":{"appId":6245718179446784}}},{"eval":{"pageId":"id"}},{"merge":{"fields":["pageId"],"mappings":{"numVisitors":"numVisitors","numAccounts":"numAccounts","pageLoads":"pageLoads","avgTime":"(totalTime/dailyVisitors)*60*1000"},"pipeline":[{"source":{"pageEvents":{"eventClass":["web","ios"],"appId":6245718179446784},"timeSeries":{"period":"dayRange","first":"now()","count":-1}}},{"identified":"visitorId"},{"group":{"group":["pageId"],"fields":[{"numAccounts":{"count":"accountId"}},{"numVisitors":{"count":"visitorId"}},{"dailyVisitors":{"count":["visitorId","day"]}},{"pageLoads":{"sum":"numEvents"}},{"totalTime":{"sum":"numMinutes"}}]}}]}},{"eval":{"numVisitors":"if(isNil(numVisitors), 0, numVisitors)","numAccounts":"if(isNil(numAccounts), 0, numAccounts)","pageLoads":"if(isNil(pageLoads), 0, pageLoads)","avgTime":"if(isNil(avgTime), 0, avgTime)"}}],"requestId":"page-data"}}'
       PENDO_AGGREGATION_FILTER: '{"name":[{"startswith":"_"},{"in":["cost management","automation"]}],"kind":[{"equal":"Page"}]}'
       PROMETHEUS_METRICS_MAP: '{"numAccounts":{"type":"gauge","metric_name":"pendo_num_accounts_per_day_for_page","description":"The number of accounts viewing a page in a day.","labels":{"page_id":"id","page_name":"name","namespace":"namespace"}},"numVisitors":{"type":"gauge","metric_name":"pendo_num_visitors_per_day_for_page","description":"The number of visitors viewing a page in a day.","labels":{"page_id":"id","page_name":"name","namespace":"namespace"}},"pageLoads":{"type":"gauge","metric_name":"pendo_num_views_per_day_for_page","description":"The number of page views in a day.","labels":{"page_id":"id","page_name":"name","namespace":"namespace"}},"avgTime":{"type":"gauge","metric_name":"pendo_avg_time_per_day_for_page","description":"The average time view a page each day.","labels":{"page_id":"id","page_name":"name","namespace":"namespace"}}}'
@@ -60,7 +58,7 @@ resourceTemplates:
     ref: 2fdd8b85766383a53f4dd499aae4fc2c9d3a7017
     parameters:
       IMAGE_TAG: 9abb720
-      PROMETHEUS_PUSH_GATEWAY: prometheus-push.insights-push-prod.svc.cluster.local:9091
+      PROMETHEUS_PUSH_GATEWAY: ${PROMETHEUS_PUSHGATEWAY}
       PENDO_AGGREGATION_QUERY: '{"response":{"mimeType":"application/json"},"request":{"name":"page-data","pipeline":[{"source":{"pages":{"appId":6245718179446784}}},{"eval":{"pageId":"id"}},{"merge":{"fields":["pageId"],"mappings":{"numVisitors":"numVisitors","numAccounts":"numAccounts","pageLoads":"pageLoads","avgTime":"(totalTime/dailyVisitors)*60*1000"},"pipeline":[{"source":{"pageEvents":{"eventClass":["web","ios"],"appId":6245718179446784},"timeSeries":{"period":"dayRange","first":"now()","count":-1}}},{"identified":"visitorId"},{"group":{"group":["pageId"],"fields":[{"numAccounts":{"count":"accountId"}},{"numVisitors":{"count":"visitorId"}},{"dailyVisitors":{"count":["visitorId","day"]}},{"pageLoads":{"sum":"numEvents"}},{"totalTime":{"sum":"numMinutes"}}]}}]}},{"eval":{"numVisitors":"if(isNil(numVisitors), 0, numVisitors)","numAccounts":"if(isNil(numAccounts), 0, numAccounts)","pageLoads":"if(isNil(pageLoads), 0, pageLoads)","avgTime":"if(isNil(avgTime), 0, avgTime)"}}],"requestId":"page-data"}}'
       PENDO_AGGREGATION_FILTER: '{"name":[{"startswith":"_"},{"in":["cost management","automation"]}],"kind":[{"equal":"Page"}]}'
       PROMETHEUS_METRICS_MAP: '{"numAccounts":{"type":"gauge","metric_name":"pendo_num_accounts_per_day_for_page","description":"The number of accounts viewing a page in a day.","labels":{"page_id":"id","page_name":"name","namespace":"namespace"}},"numVisitors":{"type":"gauge","metric_name":"pendo_num_visitors_per_day_for_page","description":"The number of visitors viewing a page in a day.","labels":{"page_id":"id","page_name":"name","namespace":"namespace"}},"pageLoads":{"type":"gauge","metric_name":"pendo_num_views_per_day_for_page","description":"The number of page views in a day.","labels":{"page_id":"id","page_name":"name","namespace":"namespace"}},"avgTime":{"type":"gauge","metric_name":"pendo_avg_time_per_day_for_page","description":"The average time view a page each day.","labels":{"page_id":"id","page_name":"name","namespace":"namespace"}}}'

@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: xjoin-operator
@@ -11,15 +11,13 @@ description: xjoin operator on the Insights Platform
 app:
   $ref: /services/insights/xjoin/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
-
-timeout: 5
 
 managedResourceTypes:
 - ConfigMap
@@ -28,6 +26,7 @@ managedResourceTypes:
 - Subscription
 - Service
 - XJoinPipeline
+- KafkaUser
 
 imagePatterns:
 - quay.io/cloudservices
@@ -46,9 +45,6 @@ resourceTemplates:
   url: https://github.com/RedHatInsights/xjoin-operator
   parameters:
     RECONCILE_INTERVAL: "120"
-    VALIDATION_INTERVAL: "1800"
-    VALIDATION_ATTEMPTS_THRESHOLD: "2"
-    VALIDATION_ATTEMPTS_THRESHOLD_INIT: "30"
     ES_CONNECTOR_TASKS_MAX: "50"
     KAFKA_TOPIC_PARTITIONS: "500"
     KAFKA_TOPIC_REPLICAS: "2"
@@ -56,22 +52,119 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-operator-stage.yml
     ref: master
-    upstream: RedHatInsights-xjoin-operator-gh-build-catalog-master-upstream-RedHatInsights-xjoin-operator-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-xjoin-operator-gh-build-catalog-master-upstream-RedHatInsights-xjoin-operator-gh-build-master
     parameters:
       TARGET_NAMESPACE: xjoin-operator-stage
-      JENKINS_MANAGED_VERSION: "v1.160"
+      SOURCE_NAMESPACE: xjoin-operator-stage
       LOG_LEVEL: "info"
+      VALIDATION_INTERVAL: "1800"
+      VALIDATION_ATTEMPTS_THRESHOLD: "2"
+      VALIDATION_ATTEMPTS_THRESHOLD_INIT: "30"
+      MANAGER_POD_MEM_LIMIT: "8Gi"
+      MANAGER_POD_CPU_LIMIT: "4"
+      MANAGER_POD_MEM_REQUESTS: "512Mi"
+      MANAGER_POD_CPU_REQUESTS: "250m"
+      FULL_VALIDATION_ENABLED: "true"
+      HBI_DB_SSL_MODE: "verify-full"
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-operator-prod.yml
-    ref: f5098362a3757966c251e2ff86063150c29428a3
+    ref: e7fadc7ac9c5c3d55f097f739d008f5a811f195f
     parameters:
+      HBI_DB_SSL_MODE: "disable"
       TARGET_NAMESPACE: xjoin-operator-prod
-      JENKINS_MANAGED_VERSION: "v1.9"
+      SOURCE_NAMESPACE: xjoin-operator-prod
+      VALIDATION_PERIOD_MINUTES: "90"
+      VALIDATION_LAG_COMPENSATION_SECONDS: "600"
       VALIDATION_ATTEMPTS_THRESHOLD: "2"
       VALIDATION_INTERVAL: "600"
       VALIDATION_INTERVAL_INIT: "60"
       VALIDATION_ATTEMPTS_THRESHOLD_INIT: "30"
       LOG_LEVEL: "info"
+      MANAGER_POD_MEM_LIMIT: "16Gi"
+      MANAGER_POD_CPU_LIMIT: "4"
+      MANAGER_POD_MEM_REQUESTS: "2Gi"
+      MANAGER_POD_CPU_REQUESTS: "1"
+      FULL_VALIDATION_ENABLED: "true"
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/xjoin-operator-fedramp-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-xjoin-operator-gh-build-catalog-master-upstream-RedHatInsights-xjoin-operator-gh-build-master
+    parameters:
+      CONNECT_CLUSTER: xjoin-connect
+      TARGET_NAMESPACE: xjoin-operator-stage
+      SOURCE_NAMESPACE: xjoin-operator-stage
+      LOG_LEVEL: "info"
+      VALIDATION_INTERVAL: "1800"
+      VALIDATION_ATTEMPTS_THRESHOLD: "2"
+      VALIDATION_ATTEMPTS_THRESHOLD_INIT: "30"
+      MANAGER_POD_MEM_LIMIT: "8Gi"
+      MANAGER_POD_CPU_LIMIT: "4"
+      MANAGER_POD_MEM_REQUESTS: "512Mi"
+      MANAGER_POD_CPU_REQUESTS: "250m"
+      FULL_VALIDATION_ENABLED: "true"
+  # Ephemeral cluster
+  # Unlike in stable environments where the operator is deployed in SingleNamespace mode,
+  # AllNamespaces (i.e. cluster-wide) mode is used in ephemeral environments
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/xjoin-ephemeral.yml
+    ref: master
+    parameters:
+      LOG_LEVEL: "debug"
+      TARGET_NAMESPACE: xjoin
+      SOURCE_NAMESPACE: xjoin
+      # Temporary until https://github.com/RedHatInsights/clowder/pull/390 is merged and released
+      DEBEZIUM_CONNECTOR_CONFIG: '{
+        "tasks.max": "{{.DebeziumTasksMax}}",
+        "database.hostname": "{{.HBIDBHost}}",
+        "database.port": "{{.HBIDBPort}}",
+        "database.user": "{{.HBIDBUser}}",
+        "database.password": "{{.HBIDBPassword}}",
+        "database.dbname": "{{.HBIDBName}}",
+        "database.server.name": "{{.ResourceNamePrefix}}.{{.Version}}",
+        "database.sslmode": "{{.HBIDBSSLMode}}",
+        "database.sslrootcert": "{{.HBIDBSSLRootCert}}",
+        "table.whitelist": "public.hosts",
+        "plugin.name": "pgoutput",
+        "transforms": "unwrap",
+        "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+        "transforms.unwrap.delete.handling.mode": "rewrite",
+        "errors.log.enable": {{.DebeziumErrorsLogEnable}},
+        "errors.log.include.messages": true,
+        "slot.name": "{{.ReplicationSlotName}}",
+        "max.queue.size": {{.DebeziumQueueSize}},
+        "max.batch.size": {{.DebeziumMaxBatchSize}},
+        "poll.interval.ms": {{.DebeziumPollIntervalMS}}
+      }'
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-xjoin-operator-gh-build-catalog-master-upstream-RedHatInsights-xjoin-operator-gh-build-master
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/xjoin-operator-fedramp-prod.yml
+    ref: e7fadc7ac9c5c3d55f097f739d008f5a811f195f
+    parameters:
+      CONNECT_CLUSTER: xjoin-connect
+      TARGET_NAMESPACE: xjoin-operator-prod
+      SOURCE_NAMESPACE: xjoin-operator-prod
+      LOG_LEVEL: "info"
+      VALIDATION_PERIOD_MINUTES: "90"
+      VALIDATION_LAG_COMPENSATION_SECONDS: "600"
+      VALIDATION_ATTEMPTS_THRESHOLD: "2"
+      VALIDATION_INTERVAL: "600"
+      VALIDATION_INTERVAL_INIT: "60"
+      VALIDATION_ATTEMPTS_THRESHOLD_INIT: "30"
+      MANAGER_POD_MEM_LIMIT: "16Gi"
+      MANAGER_POD_CPU_LIMIT: "4"
+      MANAGER_POD_MEM_REQUESTS: "2Gi"
+      MANAGER_POD_CPU_REQUESTS: "1"
+      FULL_VALIDATION_ENABLED: "true"
+
 - name: xjoin-pipeline
   path: /deploy/pipeline.yml
   url: https://github.com/RedHatInsights/xjoin-operator
@@ -79,10 +172,44 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/stage-xjoin-operator-stage.yml
     ref: master
-    upstream: RedHatInsights-xjoin-operator-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-xjoin-operator-gh-build-master
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-operator-prod.yml
-    ref: 685ea35d121f9da4e36cb41ca7d75362d96d48bd
+    ref: e7fadc7ac9c5c3d55f097f739d008f5a811f195f
     parameters:
       KAFKA_CLUSTER_NAMESPACE: "platform-mq-prod"
       CONNECT_CLUSTER_NAMESPACE: "xjoin-prod"
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/xjoin-operator-fedramp-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-xjoin-operator-gh-build-catalog-master-upstream-RedHatInsights-xjoin-operator-gh-build-master
+    parameters:
+      CONNECT_CLUSTER: "xjoin-connect"
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/xjoin-operator-fedramp-prod.yml
+    ref: e7fadc7ac9c5c3d55f097f739d008f5a811f195f
+    parameters:
+      CONNECT_CLUSTER: "xjoin-connect"
+      KAFKA_CLUSTER_NAMESPACE: "platform-mq-prod"
+      CONNECT_CLUSTER_NAMESPACE: "xjoin-prod"
+
+- name: xjoin-kafka-user
+  path: /deploy/kafka-user.yml
+  url: https://github.com/RedHatInsights/xjoin-operator
+  targets:
+  - namespace:
+      $ref: /services/insights/strimzi/namespaces/platform-mq-fedramp-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-xjoin-kafka-connect-gh-build-master
+  - namespace:
+      $ref: /services/insights/strimzi/namespaces/platform-mq-fedramp-prod.yml
+    ref: e7fadc7ac9c5c3d55f097f739d008f5a811f195f

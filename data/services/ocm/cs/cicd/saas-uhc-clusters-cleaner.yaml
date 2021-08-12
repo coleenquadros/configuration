@@ -1,0 +1,66 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: uhc
+
+name: saas-uhc-clusters-cleaner
+description: SaaS tracking file for UHC Clusters cleaner
+
+app:
+  $ref: /services/ocm/cs/app.yml
+
+pipelinesProvider:
+  $ref: /services/ocm/pipelines/tekton.ocm-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-uhc-info
+
+managedResourceTypes:
+- CronJob
+
+imagePatterns:
+- quay.io/app-sre/uhc-clusters-cleaner
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+resourceTemplates:
+- name: uhc-clusters-cleaner
+  url: https://gitlab.cee.redhat.com/service/uhc-clusters-cleaner
+  path: /cleaner-template.yml
+  parameters:
+    IMAGE_REGISTRY: quay.io
+    IMAGE_REPOSITORY: app-sre/uhc-clusters-cleaner
+    # SSO_BASE_URL is defined at the environment parameters level
+    API_TOKEN_URL: ${SSO_BASE_URL}/protocol/openid-connect/token
+    API_CLIENT_ID: cloud-services
+    API_URL: ${OCM_BASE_URL}
+    VERSION: latest
+  targets:
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-integration.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-uhc-clusters-cleaner-gl-build-master
+    parameters:
+      LOG_LEVEL: info
+      SCHEDULE: "*/10 * * * *"
+      MAX_DURATION_HOURS: 168
+      ENVIRONMENT: "integration"
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-uhc-clusters-cleaner-gl-build-master
+    parameters:
+      LOG_LEVEL: info
+      SCHEDULE: "*/10 * * * *"

@@ -72,7 +72,7 @@ spec:
       annotations:
         dashboard: "https://grafana.app-sre.devshift.net/d/6Y8XkcHGz/network-check?orgId=1"
         message: "insights network-check HTTP check has ongoing failures for the last 5min"
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/network-check.rst
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/network-check.rst
     - alert: GetentFailuresAlert
       expr: GetentFailuresLast1Min > 0
       for: 5m
@@ -83,7 +83,7 @@ spec:
       annotations:
         dashboard: "https://grafana.app-sre.devshift.net/d/6Y8XkcHGz/network-check?orgId=1"
         message: "insights network-check getent check has ongoing failures for the last 5min"
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/network-check.rst
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/network-check.rst
   - name: lag
     rules:
     - record: LagGauge
@@ -140,7 +140,7 @@ spec:
       annotations:
         dashboard: "https://grafana.stage.devshift.net"
         message: "High Lag for {{ $labels.topic }} : {{ $labels.group }}"
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/kafka-lag.rst
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/kafka-lag.rst
     - alert: KafkaLag
       expr: LagGauge > LAG_THRESHOLD and LagDelta > 0 and (us_hour >= 9 and us_hour <= 22)
       for: 1h
@@ -151,7 +151,7 @@ spec:
       annotations:
         dashboard: "https://grafana.stage.devshift.net"
         message: "High Lag for {{ $labels.topic }} : {{ $labels.group }}"
-        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/cloud.redhat.com/kafka-lag.rst
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/kafka-lag.rst
     - alert: KafkaLagExporterDown
       expr: up{namespace="platform-mq-stage", container="kafka-lag-exporter-stage"} != 1 
       for: 15m
@@ -162,78 +162,16 @@ spec:
       annotations:
         dashboard: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/platform-mq-stage/pods"
         message: "Kafka Lag Exporter pod down for the last 15minutes"
-# TODO create and add runbook for the Clowder alerts
-  - name: clowder alerts
-    rules:
-    - alert: ClowderReconciliationRate
-      expr: rate(controller_runtime_reconcile_total[5m]) > 10
-      for: 5m
-      labels:
-        severity: high
-        service: insights
-        env: {{{ env }}}
-      annotations:
-        dashboard: https://grafana.stage.devshift.net/d/VTSfF_0Gk/clowder-metrics?viewPanel=6&orgId=1&var-datasource=crcs02ue1-prometheus
-        message: "Clowder Reconciliation Rate too high"
-    - alert: ClowderReconciliationErrorRate
-      expr: sum(rate(controller_runtime_reconcile_total{controller=~"clowdenvironment|clowdapp",result="error"}[10m])) by (controller) > 0.05
-      for: 10m
-      labels:
-        severity: high
-        service: insights
-        env: {{{ env }}}
-      annotations:
-        dashboard: https://grafana.stage.devshift.net/d/VTSfF_0Gk/clowder-metrics?orgId=1&var-datasource=crcs02ue1-prometheus
-        message: "Clowder Reconciliation Error Rate too high"
-    - alert: ClowdAppsCount
-      expr: sum(clowd_app_managed_apps) == 0
-      for: 5m
-      labels:
-        severity: high
-        service: insights
-        env: {{{ env }}}
-      annotations:
-        dashboard: 
-        message: "ClowdApp not running"
-    - alert: ClowderPodCount
-      expr: kube_deployment_status_replicas_available{namespace="clowder"} != 1 or absent(kube_deployment_status_replicas_available{namespace="clowder"}) == 1
-      for: 5m
-      labels:
-        severity: high
-        service: insights
-        env: {{{ env }}}
-      annotations:
-        dashboard: https://grafana.stage.devshift.net/d/VTSfF_0Gk/clowder-metrics?viewPanel=17&orgId=1
-        message: "Clowder pod not running for 5minutes"
-    - alert: ClowderContainerRestartCount
-      expr: sum(increase(kube_pod_container_status_restarts_total{namespace="clowder", container="manager"}[5m])) > 10
-      for: 5m
-      labels:
-        severity: high
-        service: insights
-        env: {{{ env }}}
-      annotations:
-        dashboard: 
-        message: "Too many Clowder pod restarts"
-    - alert: ClowderWorkQueueDepth
-      expr: sum(workqueue_depth{service="clowder-controller-manager"}) by (name) > 20
-      for: 5m
-      labels:
-        severity: high
-        service: insights
-        env: {{{ env }}}
-      annotations:
-        dashboard: 
-        message: "Clowder Work Queue depth too deep "
 # BlackBox Monitor alert
   - name: DevProd BlackBox Monitor
     rules:
     - alert: BlackBox Monitor offline
-      expr: kube_replicationcontroller_status_ready_replicas{namespace="blackbox-monitor-stage"} != 1
-      for: 5m
+      expr: sum(kube_replicationcontroller_status_ready_replicas{namespace="blackbox-monitor-stage"}) < 1
+      for: 15m
       labels:
         severity: medium
         service: insights
         env: {{{ env }}}
       annotations:
         message: "BlackBox Monitor stage is offline"
+        runbook: "https://clouddot.pages.redhat.com/docs/dev/developer-references/sop/blackbox-monitor.html"

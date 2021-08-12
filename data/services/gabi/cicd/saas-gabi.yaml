@@ -1,0 +1,55 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: gabi
+
+name: saas-gabi
+description: 'SaaS file for Gabi'
+
+app:
+  $ref: /services/gabi/app.yml
+
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.app-sre-prod-01.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- Deployment
+- Service
+- Route
+- ServiceAccount
+- ClusterRole
+- ClusterRoleBinding
+
+imagePatterns:
+- quay.io/app-sre/gabi
+- quay.io/openshift/origin-oauth-proxy
+
+resourceTemplates:
+- name: gabi
+  url: https://github.com/app-sre/gabi
+  path: /openshift/gabi.template.yaml
+  targets:
+  - namespace:
+      $ref: /services/gabi/namespaces/gabi-cloudigrade-stage.yml
+    ref: main
+    parameters:
+      HOST: 'gabi-cloudigrade-stage.apps.crcs02ue1.urby.p1.openshiftapps.com'
+      NAMESPACE: 'gabi-cloudigrade-stage'
+  - namespace:
+      $ref: /services/gabi/namespaces/gabi-dashdotdb-stage.yml
+    ref: main
+    parameters:
+      HOST: 'gabi-dashdotdb-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com'
+      NAMESPACE: 'gabi-dashdotdb-stage'
+  - namespace:
+      $ref: /services/gabi/namespaces/gabi-dashdotdb-production.yml
+    ref: main
+    parameters:
+      HOST: 'gabi-dashdotdb-production.apps.app-sre-prod-01.i7w5.p1.openshiftapps.com'
+      NAMESPACE: 'gabi-dashdotdb-production'

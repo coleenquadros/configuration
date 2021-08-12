@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: quarkus
@@ -10,8 +10,8 @@ description: 'SaaS tracking file for Quarkus'
 app:
   $ref: /services/quarkus/app.yml
 
-instance:
-  $ref: /dependencies/ci-ext/ci-ext.yml
+pipelinesProvider:
+  $ref: /services/quarkus/pipelines/tekton.code-quarkus-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
@@ -35,7 +35,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/quarkus/namespaces/code-quarkus-stage.yml
     ref: main
-    upstream: quarkusio-code.quarkus.io-gh-build-main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: quarkusio-code.quarkus.io-gh-build-main
     parameters:
       REPLICAS: 1
       IO_QUARKUS_CODE_HOSTNAME: stage.code.quarkus.io
@@ -44,9 +47,10 @@ resourceTemplates:
       IO_QUARKUS_CODE_GA_BUILD_TOOL_DIMENSION_INDEX: 7
       IO_QUARKUS_CODE_GA_EXTENSION_QUANTITY_INDEX: 8
       IO_QUARKUS_CODE_GA_BATCHING_ENABLED: "false"
+      IO_QUARKUS_CODE_QUARKUS_PLATFORMS_RELOAD_CRON_EXPR: "0 */5 * * * ?"
   - namespace:
       $ref: /services/quarkus/namespaces/code-quarkus-production.yml
-    ref: bf9cb9bbc4890140c768eeafa30ec7c9a3ba28ae
+    ref: b2b44ea14ca5550b141e1763fa1151533428d885
     parameters:
       REPLICAS: 3
       IO_QUARKUS_CODE_HOSTNAME: code.quarkus.io
@@ -55,3 +59,4 @@ resourceTemplates:
       IO_QUARKUS_CODE_GA_BUILD_TOOL_DIMENSION_INDEX: 5
       IO_QUARKUS_CODE_GA_EXTENSION_QUANTITY_INDEX: 6
       IO_QUARKUS_CODE_LOG_LEVEL: inherit
+      IO_QUARKUS_CODE_QUARKUS_PLATFORMS_RELOAD_CRON_EXPR: "0 */30 * * * ?"

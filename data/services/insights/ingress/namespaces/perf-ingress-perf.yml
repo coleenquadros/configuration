@@ -35,6 +35,15 @@ terraformResources:
   identifier: ingress-perf
   defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
   output_resource_name: cloudwatch
+- provider: sqs
+  account: insights-perf
+  identifier: insights-sideload-perf-sqs
+  output_resource_name: insights-sideload-sqs
+  specs:
+  - defaults: /terraform/resources/insights/perf/sqs-insights-sideload-perf.yml
+    queues:
+    - key: name
+      value: insights-sideload-aicoe-perf
 - provider: s3
   account: insights-perf
   identifier: upload-perf
@@ -62,9 +71,11 @@ terraformResources:
   output_resource_name: insights-buck-it-ansible
 - provider: s3
   account: insights-perf
-  identifier: insights-client-metrics-perf
+  identifier: insights-sideload-aicoe-perf
   defaults: /terraform/resources/s3-gdpr-1.yml
-  output_resource_name: insights-client-metrics-bucket
+  # sqs_identifier: insights-sideload-aicoe-perf
+  # s3_events: ["s3:ObjectCreated:*"]
+  output_resource_name: insights-sideload-aicoe
 - provider: aws-iam-service-account
   account: insights-perf
   identifier: ingress-buckets-read-write-perf
@@ -73,32 +84,34 @@ terraformResources:
   user_policy:
     {
       "Version": "2012-10-17",
-      "Statement": [{
-        "Effect": "Allow",
-        "Action": [
-          "s3:ListBucket",
-        ],
-        "Resource": [
-          "arn:aws:s3:::upload-perf",
-          "arn:aws:s3:::insights-ingress-rejected-perf",
-          "arn:aws:s3:::insights-buck-it-openshift-perf",
-          "arn:aws:s3:::insights-buck-it-ansible-perf",
-          "arn:aws:s3:::insights-ingress-archives-perf"
-        ]
-      },
-      {
-        "Effect": "Allow",
-        "Action": [
-          "s3:*Object"
-        ],
-        "Resource": [
-          "arn:aws:s3:::upload-perf/*",
-          "arn:aws:s3:::insights-ingress-rejected-perf/*",
-          "arn:aws:s3:::insights-buck-it-openshift-perf/*",
-          "arn:aws:s3:::insights-buck-it-ansible-perf/*",
-          "arn:aws:s3:::insights-ingress-archives-perf/*"
-        ]
-      }]
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:ListBucket",
+          ],
+          "Resource": [
+            "arn:aws:s3:::upload-perf",
+            "arn:aws:s3:::insights-ingress-rejected-perf",
+            "arn:aws:s3:::insights-buck-it-openshift-perf",
+            "arn:aws:s3:::insights-buck-it-ansible-perf",
+            "arn:aws:s3:::insights-ingress-archives-perf"
+          ]
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:*Object"
+          ],
+          "Resource": [
+            "arn:aws:s3:::upload-perf/*",
+            "arn:aws:s3:::insights-ingress-rejected-perf/*",
+            "arn:aws:s3:::insights-buck-it-openshift-perf/*",
+            "arn:aws:s3:::insights-buck-it-ansible-perf/*",
+            "arn:aws:s3:::insights-ingress-archives-perf/*"
+          ]
+        }
+      ]
     }
   output_resource_name: ingress-buckets-read-write
 - provider: aws-iam-service-account

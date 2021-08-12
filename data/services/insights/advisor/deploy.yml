@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: advisor
@@ -11,15 +11,13 @@ description: advisor app on the Insights Platform
 app:
   $ref: /services/insights/advisor/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
-
-timeout: 5
 
 managedResourceTypes:
 - Deployment
@@ -74,20 +72,20 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/advisor/namespaces/stage-advisor-stage.yml
-    ref: b0d963dbdcf900f3ba9b5a876414a82aa06f29a3
+    ref: 12bb2bec78fb6065b6c6498b2e86e7caba97698d
     parameters:
       ADVISOR_ENV: stage
-      IMAGE_TAG: d0c319d
+      IMAGE_TAG: cd17611
       CW_LOG_STREAM: advisor-stage
       MAX_REPLICAS: 5
       MIN_REPLICAS: 5
       NOTIFICATIONS_TOPIC: platform.notifications.ingress
   - namespace:
       $ref: /services/insights/advisor/namespaces/advisor-fedramp-stage.yml
-    ref: 9a57483f395dad302a703883aaddca4cc6fa04e7
+    ref: 5485eaf9352882e39a88019b26410e26f632d45d
     parameters:
       ADVISOR_ENV: stage
-      IMAGE_TAG: 9037fee
+      IMAGE_TAG: bb97d56
       CW_LOG_STREAM: advisor-stage
       MAX_REPLICAS: 5
       MIN_REPLICAS: 5
@@ -95,10 +93,10 @@ resourceTemplates:
       ENABLE_KAFKA_SSL: true
   - namespace:
       $ref: /services/insights/advisor/namespaces/advisor-prod.yml
-    ref: b0d963dbdcf900f3ba9b5a876414a82aa06f29a3
+    ref: 12bb2bec78fb6065b6c6498b2e86e7caba97698d
     parameters:
       ADVISOR_ENV: prod
-      IMAGE_TAG: d0c319d
+      IMAGE_TAG: cd17611
       CW_LOG_STREAM: advisor-prod
       MAX_REPLICAS: 10
       MIN_REPLICAS: 10
@@ -126,25 +124,22 @@ resourceTemplates:
       $ref: /services/insights/advisor/namespaces/stage-advisor-stage.yml
     ref: master
     parameters:
-      IMAGE_TAG: 327218e
+      IMAGE_TAG: ee4de02
       CW_LOG_STREAM: advisor-stage
-      PROMETHEUS_PUSHGATEWAY: prometheus-push.insights-push-stage.svc.cluster.local:9091
   - namespace:
       $ref: /services/insights/advisor/namespaces/advisor-fedramp-stage.yml
     ref: master
     parameters:
-      IMAGE_TAG: 327218e
+      IMAGE_TAG: ee4de02
       CW_LOG_STREAM: advisor-stage
-      PROMETHEUS_PUSHGATEWAY: prometheus-push.insights-push-stage.svc.cluster.local:9091
   - namespace:
       $ref: /services/insights/advisor/namespaces/advisor-prod.yml
-    ref: acb9cb0b3528952655a40ee8514844e6e6365fa1
+    ref: 3e292656d480f96cfecd607288744ae3015e188b
     parameters:
-      IMAGE_TAG: 327218e
+      IMAGE_TAG: ee4de02
       CW_LOG_STREAM: advisor-prod
       SUSPEND_WEEKLY_REPORT_JOB: 'false'
       MIDDLEWARE_HOST_URL: https://${BACKOFFICE_HOST}/v1
-      PROMETHEUS_PUSHGATEWAY: prometheus-push.insights-push-prod.svc.cluster.local:9091
       SUSPEND_COMPARE_ACTIVE_RULES: 'false'
       WEEKLY_REPORT_JOB_SCHEDULE: "1 11 * * 1"
 - name: cyndi-init
@@ -161,6 +156,14 @@ resourceTemplates:
       IMAGE_TAG: "3a34b0c"
   - namespace:
       $ref: /services/insights/advisor/namespaces/advisor-prod.yml
+    ref: 1da34cd701ca9bca732e7a3eaaff516dd2b6402b
+    parameters:
+      APP_NAME: advisor
+      APP_ROLE: insightsapi
+      DB_SECRET: advisor-db
+      IMAGE_TAG: "3a34b0c"
+  - namespace:
+      $ref: /services/insights/advisor/namespaces/advisor-fedramp-stage.yml
     ref: 1da34cd701ca9bca732e7a3eaaff516dd2b6402b
     parameters:
       APP_NAME: advisor

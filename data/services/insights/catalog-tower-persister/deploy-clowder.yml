@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: catalog-tower-persister
@@ -11,15 +11,13 @@ description: catalog-tower-persister app on the Insights Platform
 app:
   $ref: /services/insights/catalog-tower-persister/app.yml
 
-instance:
-  $ref: /dependencies/ci-ext/ci-ext.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
-
-timeout: 5
 
 managedResourceTypes:
   - ClowdApp
@@ -49,7 +47,10 @@ resourceTemplates:
       - namespace:
           $ref: /services/insights/catalog-tower-persister/namespaces/stage-catalog-tower-persister-stage.yml
         ref: main
-        upstream: RedHatInsights-catalog_tower_persister-gh-build-main
+        upstream:
+          instance:
+            $ref: /dependencies/ci-ext/ci-ext.yml
+          name: RedHatInsights-catalog_tower_persister-gh-build-main
         parameters:
           ENV_NAME: stage
           MIN_REPLICAS: 3

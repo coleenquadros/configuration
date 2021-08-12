@@ -11,51 +11,51 @@ spec:
   groups:
     - name: kas-fleet-manager-availability.slo.rules
       rules:
-        - alert: KasFleetManagerAPIErrorBudgetBurn
+        - alert: KasFleetManagerAPI30mto6hErrorBudgetBurn
           annotations:
-            message: "High 6h error budget burn for Kafka Service Fleet Manager in the last 6 hours (current value: {{ $value }})"
+            message: "High 6h error budget burn for Kafka Service Fleet Manager in the last 6 hours (current value: {{ $value | humanize }})"
             dashboard: "https://grafana.stage.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
             runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#kas-fleet-manager-availability"
           expr: |
-            sum(haproxy_backend_http_responses_total:burnrate30m{route="kas-fleet-manager",exported_namespace="managed-services-stage"}) > (6.00 * (1-0.99000))
+            sum(haproxy_backend_http_responses_total:burnrate30m{route="kas-fleet-manager",exported_namespace="managed-services-stage"}) > (6.00 * (1-0.95000))
             and
-            sum(haproxy_backend_http_responses_total:burnrate6h{route="kas-fleet-manager",exported_namespace="managed-services-stage"}) > (6.00 * (1-0.99000))
+            sum(haproxy_backend_http_responses_total:burnrate6h{route="kas-fleet-manager",exported_namespace="managed-services-stage"}) > (6.00 * (1-0.95000))
           for: 15m
           labels:
             service: kas-fleet-manager
             route: kas-fleet-manager
             exported_namespace: managed-services-stage
-            severity: info
-        - alert: KasFleetManagerAPIErrorBudgetBurn
+            severity: high
+        - alert: KasFleetManagerAPI2hto1dErrorBudgetBurn
           annotations:
-            message: "High 1d error budget burn for Kafka Service Fleet Manager (current value: {{ $value }})"
+            message: "High 1d error budget burn for Kafka Service Fleet Manager (current value: {{ $value | humanize }})"
             dashboard: "https://grafana.stage.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
             runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#kas-fleet-manager-availability"
           expr: |
-            sum(haproxy_backend_http_responses_total:burnrate2h{route="kas-fleet-manager",exported_namespace="managed-services-stage"}) > (3.00 * (1-0.99000))
+            sum(haproxy_backend_http_responses_total:burnrate2h{route="kas-fleet-manager",exported_namespace="managed-services-stage"}) > (3.00 * (1-0.95000))
             and
-            sum(haproxy_backend_http_responses_total:burnrate1d{route="kas-fleet-manager",exported_namespace="managed-services-stage"}) > (3.00 * (1-0.99000))
+            sum(haproxy_backend_http_responses_total:burnrate1d{route="kas-fleet-manager",exported_namespace="managed-services-stage"}) > (3.00 * (1-0.95000))
           for: 1h
           labels:
             service: kas-fleet-manager
             route: kas-fleet-manager
             exported_namespace: managed-services-stage
-            severity: info
-        - alert: KasFleetManagerAPIErrorBudgetBurn
+            severity: high
+        - alert: KasFleetManagerAPI6hto3dErrorBudgetBurn
           annotations:
-            message: "High 3d error budget burn for Kafka Service Fleet Manager (current value: {{ $value }})"
+            message: "High 3d error budget burn for Kafka Service Fleet Manager (current value: {{ $value | humanize }})"
             dashboard: "https://grafana.stage.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
             runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#kas-fleet-manager-availability"
           expr: |
-            sum(haproxy_backend_http_responses_total:burnrate6h{route="kas-fleet-manager",exported_namespace="managed-services-stage"}) > (1.00 * (1-0.99000))
+            sum(haproxy_backend_http_responses_total:burnrate6h{route="kas-fleet-manager",exported_namespace="managed-services-stage"}) > (1.00 * (1-0.95000))
             and
-            sum(haproxy_backend_http_responses_total:burnrate3d{route="kas-fleet-manager",exported_namespace="managed-services-stage"}) > (1.00 * (1-0.99000))
+            sum(haproxy_backend_http_responses_total:burnrate3d{route="kas-fleet-manager",exported_namespace="managed-services-stage"}) > (1.00 * (1-0.95000))
           for: 3h
           labels:
             service: kas-fleet-manager
             route: kas-fleet-manager
             exported_namespace: managed-services-stage
-            severity: info
+            severity: high
         - expr: |
             sum(rate(haproxy_backend_http_responses_total{route="kas-fleet-manager",exported_namespace="managed-services-stage",code="5xx"}[1d]))
             /

@@ -12,23 +12,21 @@ spec:
   groups:
   - name: insights-host-inventory
     rules:
-    # pagerduty
-    - alert: App-insights-inventory-In-host-inventory-stage-Absent
-      expr: absent(up{service="insights-inventory", namespace="host-inventory-stage"}) or up{service="insights-inventory", namespace="host-inventory-stage"} == 0
+    - alert: App-host-inventory-service-In-host-inventory-stage-Absent
+      expr: absent(up{service="host-inventory-service", namespace="host-inventory-stage"}) or up{service="host-inventory-service", namespace="host-inventory-stage"} == 0
       for: 5m
       labels:
-        severity: critical
+        severity: high
         service: insights
         env: stage
         app_team: platform
       annotations:
-        dashboard: "https://GRAFANA_URL"
+        dashboard: "https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcs02ue1-prometheus"
         link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/host-inventory-stage/deployments"
         message: "Host inventory pods are missing in stage"
-        runbook: "https://platform-docs.cloud.paas.psi.redhat.com/sop/App-insights-inventory-In-platform-prod-Absent.html"
-    #Not pagerduty
+        runbook: "https://clouddot.pages.redhat.com/docs/dev/developer-references/sop/inventory.html"
     - alert: InventoryHttp5xx
-      expr: sum(rate(inventory_http_request_total{namespace="host-inventory-stage", service="insights-inventory", status=~"5[0-9]{2}"}[10m])) by (namespace) / sum(rate(inventory_http_request_total{namespace="host-inventory-stage", service="insights-inventory"}[10m])) by (namespace) * 100  > 5
+      expr: sum(rate(inventory_http_request_total{namespace="host-inventory-stage", service="host-inventory-service", status=~"5[0-9]{2}"}[10m])) by (namespace) / sum(rate(inventory_http_request_total{namespace="host-inventory-stage", service="host-inventory-service"}[10m])) by (namespace) * 100  > 5
       labels:
         severity: medium
         service: insights
@@ -36,7 +34,7 @@ spec:
         app_team: inventory
       annotations:
         dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcs02ue1-prometheus
-        link_url: https://kibana.apps.crcs02ue1.urby.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(columns:!(_source),filters:!(),index:'6c31b1b0-d854-11ea-9f21-6b7e641a18be',interval:auto,query:(language:lucene,query:'(@log_stream:%20%223scale%22%20AND%20gateway.application:%20%22inventory%22%20AND%20gateway.status:%20%5B500%20TO%20599%5D)%20OR%20(@log_stream:%20%22insights-inventory-*%22%20AND%20levelname:%20%22ERROR%22)'),sort:!(!('@timestamp',desc)))
+        link_url: https://kibana.apps.crcs02ue1.urby.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(columns:!(_source),filters:!(),index:'6c31b1b0-d854-11ea-9f21-6b7e641a18be',interval:auto,query:(language:lucene,query:'(@log_stream:%20%223scale%22%20AND%20gateway.application:%20%22inventory%22%20AND%20gateway.status:%20%5B500%20TO%20599%5D)%20OR%20(@log_stream:%20%22host-inventory-service-*%22%20AND%20levelname:%20%22ERROR%22)'),sort:!(!('@timestamp',desc)))
         message: '{{ $labels.namespace }} 5xx responses observed'
     - alert: InventoryHttpLatency
       expr: (sum(rate(inventory_http_request_duration_seconds_bucket{namespace="host-inventory-stage", le="7.5"} [30m])) / sum(rate(inventory_http_request_duration_seconds_count{namespace="host-inventory-stage"} [30m])) < 0.95) and (sum(rate(inventory_http_request_duration_seconds_count{namespace="host-inventory-stage"} [30m])) > 0.7)
@@ -50,7 +48,7 @@ spec:
         link_url: https://kibana.apps.crcs02ue1.urby.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-10m,to:now))&_a=(columns:!(_source),filters:!(),index:'6c31b1b0-d854-11ea-9f21-6b7e641a18be',interval:auto,query:(language:lucene,query:'@log_stream:%20%223scale%22%20AND%20gateway.application:%20%22inventory%22%20AND%20gateway.time_taken:%20%5B2.5%20TO%20*%5D'),sort:!(!('@timestamp',desc)))
         message: '{{ $labels.namespace }} showing response times longer than 7.5 seconds'
     - alert: InventoryMqErrors
-      expr: sum(rate(inventory_ingress_add_host_failures_total{cause="Exception", namespace=~"platform-.*"}[5m])) by (namespace) > 0
+      expr: sum(rate(inventory_ingress_add_host_failures_total{cause="Exception", namespace=~"host-inventory-stage"}[5m])) by (namespace) > 0
       labels:
         severity: medium
         service: insights
@@ -60,6 +58,17 @@ spec:
         dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcs02ue1-prometheus
         link_url: https://kibana.apps.crcs02ue1.urby.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-30m,to:now))&_a=(columns:!(_source),filters:!(),index:'6c31b1b0-d854-11ea-9f21-6b7e641a18be',interval:auto,query:(language:lucene,query:'@log_stream:%20%22inventory-mq%22%20AND%20levelname:%20ERROR'),sort:!(!('@timestamp',desc)))
         message: '{{ $labels.namespace }} consumer errors'
+    - alert: InventoryMqHandlerErrors
+      expr: sum(increase(inventory_ingress_message_handler_failures_total[10m])) > 30
+      labels:
+        severity: medium
+        service: insights
+        env: prod
+        app_team: inventory
+      annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcs02ue1-prometheus
+        link_url: https://kibana.apps.crcs02ue1.urby.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(columns:!(_source),filters:!(),index:'43c5fed0-d5ce-11ea-b58c-a7c95afd7a5d',interval:auto,query:(language:lucene,query:'@log_stream:%20%22host-inventory-mq%22%20AND%20levelname:%20ERROR%20AND%20msg:%20%22Unable%20to%20process%20message%22'),sort:!(!('@timestamp',desc)))
+        message: '{{ $labels.namespace }}: consumer error rate too high'
     - alert: InventoryMqEventProducerErrors
       expr: sum(increase(inventory_event_producer_failures_total[5m])) by (namespace, topic, event_type) > 0
       labels:
@@ -72,18 +81,7 @@ spec:
         link_url: https://kibana.apps.crcs02ue1.urby.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-30m,to:now))&_a=(columns:!(_source),filters:!(),index:'6c31b1b0-d854-11ea-9f21-6b7e641a18be',interval:auto,query:(language:lucene,query:'@log_stream:%20%22inventory-mq%22%20AND%20levelname:%20ERROR%20AND%20(msg:%20%22Unable%20to%20process%20message%22%20OR%20msg:%20%22Error%20adding%20host%22)'),sort:!(!('@timestamp',desc)))
         message: '{{ $labels.namespace }} event producer errors Event producer failed to produce a(n) {{ $labels.event_type }} event on {{ $labels.topic }}'
     - alert: InventoryMqNotProcessing
-      expr: sum(increase(inventory_ingress_add_host_successes_total{namespace="platform-stage"}[5m])) by (namespace) < 1
-      labels:
-        severity: high
-        service: insights
-        env: stage
-        app_team: inventory
-      annotations:
-        dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcs02ue1-prometheus
-        link_url: https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/host-inventory-stage/deployments/inventory-mq-pmin
-        message: '{{ $labels.namespace }} consumer not processing (0 messages processed in last 5 minutes)'
-    - alert: InventoryContainerRestart
-      expr: sum(rate(kube_pod_container_status_restarts_total{container=~"insights-inventory.*", namespace=~"platform.*"}[5m])) by (namespace, container) > 0
+      expr: sum(increase(inventory_ingress_add_host_successes_total{namespace="host-inventory-stage"}[6h])) by (namespace) < 1
       labels:
         severity: medium
         service: insights
@@ -91,10 +89,21 @@ spec:
         app_team: inventory
       annotations:
         dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcs02ue1-prometheus
-        link_url: https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/host-inventory-stage/deployments/insights-inventory
+        link_url: https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/host-inventory-stage/deployments/host-inventory-mq-pmin
+        message: '{{ $labels.namespace }} consumer not processing (0 messages processed in last 6 hours)'
+    - alert: InventoryContainerRestart
+      expr: sum(rate(kube_pod_container_status_restarts_total{container=~"host-inventory.*", namespace=~"host-inventory-stage"}[5m])) by (namespace, container) > 0
+      labels:
+        severity: medium
+        service: insights
+        env: stage
+        app_team: inventory
+      annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcs02ue1-prometheus
+        link_url: https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/host-inventory-stage/deployments/host-inventory-service
         message: '{{ $labels.namespace }} ContainerRestart {{ $labels.container }}'
     - alert: InventoryReaperFailure
-      expr: sum(sum_over_time(kube_pod_status_phase{phase="Failed", namespace=~"platform-.*", pod=~"inventory-reaper.*"}[30m:5m]) < 3) by (pod, namespace) > 0
+      expr: sum(sum_over_time(kube_pod_status_phase{phase="Failed", namespace=~"host-inventory-stage", pod=~"host-inventory-reaper.*"}[30m:5m]) < 3) by (pod, namespace) > 0
       labels:
         severity: medium
         service: insights
@@ -102,5 +111,5 @@ spec:
         app_team: inventory
       annotations:
         dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcs02ue1-prometheus
-        link_url: https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/host-inventory-stage/cronjobs/inventory-reaper/
+        link_url: https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/host-inventory-stage/cronjobs/host-inventory-reaper/
         message: '{{ $labels.namespace }} ReaperFailed | {{ $labels.pod }} failed to run'

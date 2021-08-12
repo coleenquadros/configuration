@@ -31,3 +31,55 @@ tests:
       exp_annotations:
         message: "UHC gateway is returning code 5xx for 20% of requests."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop"
+
+# Check that gateway down alert fires if there aren't any pods reporting the live metric:
+- interval: 1m
+  input_series: []
+
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: OCM gateway DOWN - stage
+    exp_alerts:
+    - exp_labels:
+        service: uhc-gateway
+        severity: high
+      exp_annotations:
+        message: No targets found for OCM gateway stage; it is down.
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop
+
+# Check that gateway down alert doesn't fire when there is one pod reporting the live metric:
+- interval: 1m
+  input_series:
+  - series: envoy_server_live{namespace="uhc-stage",service="gateway-envoy-metrics",pod="gateway-envoy-123-456"}
+    values: 1 1 1 1 1
+
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: OCM gateway DOWN - stage
+    exp_alerts: []
+
+# Check that gateway down alert doesn't fire when there is one pod reporting the live metric but
+# another pod isn't. Note that in reality the metric of the second pod will just be missing, but in
+# order to test it we have to report it with zero values.
+- interval: 1m
+  input_series:
+  - series: envoy_server_live{namespace="uhc-stage",service="gateway-envoy-metrics",pod="gateway-envoy-123-456"}
+    values: 1 1 1 1 1
+  - series: envoy_server_live{namespace="uhc-stage",service="gateway-envoy-metrics",pod="gateway-envoy-123-789"}
+    values: 0 0 0 0 0
+
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: OCM gateway DOWN - stage
+    exp_alerts: []
+
+# Check that gateway down alert clears when one pod has resumed reporting the live metric:
+- interval: 1m
+  input_series:
+  - series: envoy_server_live{namespace="uhc-stage",service="gateway-envoy-metrics",pod="gateway-envoy-123-456"}
+    values: 0 0 0 0 0 1 1 1 1 1
+
+  alert_rule_test:
+  - eval_time: 10m
+    alertname: OCM gateway DOWN - stage
+    exp_alerts: []

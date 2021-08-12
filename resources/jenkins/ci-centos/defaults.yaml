@@ -40,7 +40,6 @@
         - DhritiShikhar
         - dlabrecq
         - dmytro-ndp
-        - dvandra
         - ebaron
         - edewit
         - evidolob
@@ -73,7 +72,6 @@
         - piyush-garg
         - pmacik
         - ppitonak
-        - prashbnair
         - Preeticp
         - quintesse
         - RhCheGithubBot
@@ -82,7 +80,6 @@
         - rohitkrai03
         - rohanKanojia
         - rupalibehera
-        - rajusem
         - sahil143
         - sanketpathak
         - sawood14012
@@ -93,7 +90,6 @@
         - skryzhny
         - sthaha
         - stooke
-        - tinakurian
         - tisnik
         - tradej
         - tsmaeder
@@ -1561,38 +1557,6 @@
     <<: *fabric8-analytics-tests-template
 
 - job-template:
-    name: 'osd-monitor-analytics-build-master'
-    saasherder_prepare: |
-        SAAS_ENV=staging
-        PATH=~/bin/:$PATH:~/.local/bin/
-        CONTEXT=$(echo $SAAS_GIT | sed 's/.*://')
-        SAAS_GIT=$(echo $SAAS_GIT | sed 's/:.*//')
-        git clone --depth 1 https://github.com/openshiftio/$SAAS_GIT saas.git
-        cd saas.git
-        [ "$CONTEXT" != "$SAAS_GIT" ] && saasherder --context $CONTEXT config get-contexts > /dev/null
-
-        if [ "$(saasherder --environment $SAAS_ENV get hash_length|sort -u|wc -l)" != "1" ]; then
-            echo "In the ike-prow-plugins context all the tag lengths should be the same"
-            exit 1
-        fi
-
-        export DEVSHIFT_TAG_LEN=$(saasherder --environment $SAAS_ENV get hash_length|head -n1)
-        cd ..
-
-    saasherder_deploy: |
-        cd saas.git
-        for SAAS_SERVICE_NAME in $(saasherder --environment $SAAS_ENV get-services); do
-            saasherder --environment $SAAS_ENV update hash $SAAS_SERVICE_NAME $GIT_COMMIT
-            saasherder --environment $SAAS_ENV pull $SAAS_SERVICE_NAME
-            saasherder --environment $SAAS_ENV template --filter Route --output-dir $GIT_REPO-processed tag $SAAS_SERVICE_NAME
-            oc --server="$KUBE_SERVER" --token="$KUBE_TOKEN" apply -f $GIT_REPO-processed/$SAAS_SERVICE_NAME.yaml -n $PRJ_NAME
-        done
-        rtn_code=$?
-        cd ..
-    <<: *job_template_build_master
-
-
-- job-template:
     name: '{ci_project}-test-end-to-end-prod-fabric8-analytics'
     disabled: '{obj:disabled}'
     triggers:
@@ -1961,7 +1925,7 @@
             url: https://github.com/{git_organization}/{git_repo}.git
             shallow_clone: true
             branches:
-                - master
+                - main
 
     <<: *eclipse-che-automation-template
 

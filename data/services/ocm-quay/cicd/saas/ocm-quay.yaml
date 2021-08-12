@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: ocm-quay
@@ -10,15 +10,13 @@ description: regional quay instances for OCP/OSD content
 app:
   $ref: /services/ocm-quay/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
-  channel: oncall-quay
-  notifications:
-    start: true
+  channel: sd-app-sre-info
 
 authentication:
   image:
@@ -32,8 +30,6 @@ managedResourceTypes:
 - Role
 - RoleBinding
 - Job
-
-timeout: 45
 
 imagePatterns:
 - quay.io/app-sre
@@ -91,7 +87,7 @@ resourceTemplates:
       $ref: /services/ocm-quay/namespaces/ocmquayrwp01ue1.yml
     ref: 92550ebf50f8a02788f6d38f76c92f79f233fe87
     parameters:
-      QUAY_APP_DEPLOYMENT_REPLICAS: 15
+      QUAY_APP_DEPLOYMENT_REPLICAS: 6
       QUAY_APP_CONFIG_SECRET: quay-config-secret
       QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "initial deploy"
   # These are the Read-Only instances
@@ -99,14 +95,14 @@ resourceTemplates:
       $ref: /services/ocm-quay/namespaces/ocmquayrop01ue1.yml
     ref: 92550ebf50f8a02788f6d38f76c92f79f233fe87
     parameters:
-      QUAY_APP_DEPLOYMENT_REPLICAS: 15
+      QUAY_APP_DEPLOYMENT_REPLICAS: 6
       QUAY_APP_CONFIG_SECRET: quay-config-secret-readonly
       QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "initial deploy"
   - namespace:
       $ref: /services/ocm-quay/namespaces/ocmquayrop01ew1.yml
     ref: 92550ebf50f8a02788f6d38f76c92f79f233fe87
     parameters:
-      QUAY_APP_DEPLOYMENT_REPLICAS: 15
+      QUAY_APP_DEPLOYMENT_REPLICAS: 6
       QUAY_APP_CONFIG_SECRET: quay-config-secret-readonly
       QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "initial deploy"
   - namespace:

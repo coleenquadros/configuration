@@ -23,7 +23,7 @@ spec:
           dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-30m&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-api-svc"
           message: "[Stage] Sources: API: All pods have been down for two minutes"
-          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/cloud.redhat.com/app-sops/sources/SourcesApiSvcAbsent.rst"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/sources/SourcesApiSvcAbsent.rst"
       - alert: SourcesSatelliteOperationsSvcAbsent
         expr: absent(up{job="sources-satellite-operations",namespace="sources-stage"}==1)
         for: 2m
@@ -36,7 +36,7 @@ spec:
           dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-30m&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-satellite-operations"
           message: "[Stage] Sources: Satellite Operations: All pods have been down for two minutes"
-          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/cloud.redhat.com/app-sops/sources/SourcesSatelliteOperationsSvcAbsent.rst"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/sources/SourcesSatelliteOperationsSvcAbsent.rst"
       - alert: SourcesSuperKeyWorkerSvcAbsent
         expr: absent(up{job="sources-superkey-worker-svc",namespace="sources-stage"}==1)
         for: 2m
@@ -49,11 +49,11 @@ spec:
           dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-30m&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-superkey-worker-svc"
           message: "[Stage] Sources: SuperKey Worker: All pods have been down for two minutes"
-          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/cloud.redhat.com/app-sops/sources/SourcesSuperKeyWorkerSvcAbsent.rst"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/sources/SourcesSuperKeyWorkerSvcAbsent.rst"
   - name: sources-kafka-lag-stage
     rules:
       - alert: SourcesKafkaLag
-        expr: sum(kafka_consumergroup_group_lag{topic=~'platform.sources..*',namespace='platform-mq-stage'}) by (group, topic) > 1000
+        expr: sum(kafka_consumergroup_group_lag{topic='platform.sources.status',namespace='platform-mq-stage'}) by (group, topic) > 1000
         for: 10m
         labels:
           severity: info
@@ -63,7 +63,21 @@ spec:
         annotations:
           dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-api"
-          message: "[Stage] Sources API: Kafka Lag reached {{ $value }} (limit is 1000) for the last 10 minutes"
+          message: "[Stage] Sources API: platform.sources.status Kafka Lag reached {{ $value }} (limit is 1000) for the last 10 minutes"
+  - name: sources-superkey-worker-kafka-lag-stage
+    rules:
+      - alert: SourcesKafkaLagSuperkeyRequetes
+        expr: sum(kafka_consumergroup_group_lag{topic='platform.sources.superkey-requests',namespace='platform-mq-stage'}) by (group, topic) > 100
+        for: 10m
+        labels:
+          severity: info
+          service: insights
+          env: stage
+          app_team: topo-sources # Slack channel for app_team defined in resources/observability/alertmanager/alertmanager-instance.secret.yaml
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-1h&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-api"
+          message: "[Stage] Sources SuperKey Worker: platform.sources.superkey-requests Kafka Lag reached {{ $value }} (limit is 100) for the last 10 minutes"
   - name: sources-restarts-stage
     rules:
       - alert: SourcesApiRestarts
@@ -116,7 +130,7 @@ spec:
           dashboard: "https://grafana.app-sre.devshift.net/d/zxZKNnAMz/sources?orgId=1&from=now-15m&to=now&var-Datasource=crcs02ue1-prometheus&var-controller=All&var-action=All"
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/sources-stage/deployments/sources-api"
           message: "[Stage] Sources API. Error rate > 10% for 5 minutes"
-          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/cloud.redhat.com/app-sops/sources/SourcesApi5xxErrors.rst"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/sources/SourcesApi5xxErrors.rst"
       - alert: SourcesApiRequestDuration
         expr: avg(rate(sources_api_http_duration_seconds_sum{controller!="status", namespace="sources-stage"}[5m]) / rate(sources_api_http_duration_seconds_count{controller!="status",namespace="sources-stage"}[5m]) > 0) * 100 > 500
         for: 10m

@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: cloud-connector
@@ -11,15 +11,13 @@ description: cloud-connector app on the Insights Platform
 app:
   $ref: /services/insights/cloud-connector/app.yml
 
-instance:
-  $ref: /dependencies/ci-ext/ci-ext.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
-
-timeout: 5
 
 managedResourceTypes:
 - Deployment
@@ -43,11 +41,16 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/cloud-connector/namespaces/dev-connector-qa.yml
-    ref: 95f352441c4993498d4728e1f625cdbacd355454
-    upstream: RedHatInsights-cloud-connector-gh-build-master
+    ref: 2a9c55f68955dabb904e31df18d2192d51d3de1e
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-cloud-connector-gh-build-master
     parameters:
       LOG_LEVEL: DEBUG
       MQTT_BROKER_ADDRESS: wss://connect.cloud.dev.redhat.com:443
       MQTT_TOPIC_PREFIX: redhat
       AUTH_GATEWAY_URL: http://apicast.3scale-staging.svc.cluster.local:8890/internal/certauth
       SOURCES_BASE_URL: http://${SOURCES_HOST}.cluster.local:${SOURCES_PORT}
+      CONNECTION_PER_ACCOUNT_REPORTER_SCHEDULE: "*/10 * * * *"
+      CONNECTION_PER_ACCOUNT_REPORTER_LOG_FORMAT: "text"

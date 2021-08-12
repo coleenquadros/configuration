@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: clowder
@@ -11,15 +11,13 @@ description: Deploy ClowdEnvironment resources
 app:
   $ref: /services/insights/clowder/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
-
-timeout: 5
 
 managedResourceTypes:
 - ClowdEnvironment
@@ -45,10 +43,31 @@ resourceTemplates:
     ref: master
     parameters:
       ENV_NAME: fedramp-stage
+      TARGET_NAMESPACE: clowder-system
+      PULL_SECRET_NAMESPACE: clowder-system
+  - namespace:
+      $ref: /services/insights/clowder/namespaces/fedramp-prod.yml
+    ref: 4dc7cf89c0841f97f9ac84ed5f8109302e39c6ad
+    parameters:
+      ENV_NAME: fedramp-prod
+      KAFKA_NAMESPACE: platform-mq-prod
+      TARGET_NAMESPACE: clowder-system
+      PULL_SECRET_NAMESPACE: clowder-system
 - name: clowder-env
   path: /env.yml
   url: https://gitlab.cee.redhat.com/insights-platform/clowd-environments
   targets:
+    # Perf Cluster
+  - namespace:
+      $ref: /services/insights/clowder/namespaces/perf-clowder-perf.yml
+    ref: master
+    parameters:
+      ENV_NAME: perf
+      KAFKA_NAMESPACE: platform-mq-perf
+      IN_MEMORY_DB: elasticache
+      TARGET_NAMESPACE: clowder-system
+      PULL_SECRET_NAMESPACE: clowder-system
+    # crcs02ue1
   - namespace:
       $ref: /services/insights/clowder/namespaces/stage.yml
     ref: master
@@ -56,10 +75,15 @@ resourceTemplates:
       ENV_NAME: stage
       KAFKA_NAMESPACE: platform-mq-stage
       IN_MEMORY_DB: elasticache
+      TARGET_NAMESPACE: clowder-system
+      PULL_SECRET_NAMESPACE: clowder-system
+    # crcp01ue1
   - namespace:
       $ref: /services/insights/clowder/namespaces/prod.yml
-    ref: 75dd89373271756fa93d4911c3405ea7dd39a8fa
+    ref: 4dc7cf89c0841f97f9ac84ed5f8109302e39c6ad
     parameters:
       ENV_NAME: prod
       KAFKA_NAMESPACE: platform-mq-prod
       IN_MEMORY_DB: elasticache
+      TARGET_NAMESPACE: clowder-system
+      PULL_SECRET_NAMESPACE: clowder-system

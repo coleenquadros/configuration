@@ -7,23 +7,24 @@ labels:
 name: managed-services
 
 description: |
-  Allow different customer types (Tire Kicker, Value Prod and Enterprise) to create instances of a Red Hat managed service. Includes the service API and build/deployment pipelines for managed services.
+  The Kafka Service Fleet Manager creates and manages a fleet of Kafka instances as part of the Red Hat OpenShift Streams for Apache Kakfa offering.
 
-architectureDocument: https://TODO
-sopsUrl: https://gitlab.cee.redhat.com/TODO
-grafanaUrl: https://TODO
-onboardingStatus: InProgress
-
-parentApp:
-  $ref: /services/ocm/app.yml
+architectureDocument: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/managed-services
+sopsUrl: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/managed-services/sop
+grafanaUrl: https://grafana.app-sre.devshift.net/d/WLBv_KuMz/kas-fleet-manager-metrics?search=open&folder=current&orgId=1
+onboardingStatus: OnBoarded
 
 serviceOwners:
 - name: Managed Services CI/CD
   email: mk-ci-cd@redhat.com
-- name: Managed Kafka - Service API Team
+- name: Managed Kafka - Control Plane Team
   email: mk-service-api@redhat.com
 - name: Managed Kafka - Consoles & DevExp
   email: mas-devexp@redhat.com
+
+serviceNotifications:
+- name: Red Hat Outage List
+  email: outage-list@redhat.com
 
 escalationPolicy:
   $ref: /teams/managed-services/escalation-policies/kas-fleet-manager.yaml
@@ -35,6 +36,7 @@ dependencies:
 - $ref: /dependencies/openshift/service.yml
 - $ref: /dependencies/aws/service.yml
 - $ref: /dependencies/github/service.yml
+- $ref: /dependencies/sso/service.yml
 
 codeComponents:
 - name: strimzi-operator
@@ -52,7 +54,8 @@ codeComponents:
 - name: kas-fleet-manager
   resource: upstream
   url: https://gitlab.cee.redhat.com/service/kas-fleet-manager
-  gitlabRepoOwners: true
+  gitlabRepoOwners:
+    enabled: true
   gitlabHousekeeping:
     enabled: true
     rebase: true
@@ -62,7 +65,8 @@ codeComponents:
 - name: mk-ci-tools
   resource: upstream
   url: https://gitlab.cee.redhat.com/mk-ci-cd/mk-ci-tools
-  gitlabRepoOwners: true
+  gitlabRepoOwners:
+    enabled: true
   gitlabHousekeeping:
     enabled: true
     rebase: true
@@ -78,6 +82,12 @@ codeComponents:
 - name: kas-ui
   resource: upstream
   url: https://gitlab.cee.redhat.com/mk-ci-cd/kas-ui
+- name: cli
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/mk-ci-cd/cli
+  gitlabHousekeeping:
+    enabled: true
+    rebase: true
 - name: guides
   resource: upstream
   url: https://gitlab.cee.redhat.com/mk-ci-cd/guides
@@ -87,6 +97,29 @@ codeComponents:
 - name: mk-e2e-test-suite
   resource: upstream
   url: https://gitlab.cee.redhat.com/mk-ci-cd/mk-e2e-test-suite
+- name: srs-ui
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/mk-ci-cd/srs-ui
+- name: sr-ui
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/mk-ci-cd/sr-ui
+- name: kas-upgrade-configurations
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/mk-ci-cd/kas-upgrade-configurations
+  gitlabRepoOwners:
+    enabled: true
+  gitlabHousekeeping:
+    enabled: true
+    rebase: true
+- name: token-refresher
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/mk-ci-cd/mk-token-refresher
+- name: mk-client-examples
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/mk-ci-cd/client-examples
+- name: kas-abnormal-workloads
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/mk-ci-cd/kas-abnormal-workloads
 
 quayRepos:
 - org:
@@ -128,6 +161,9 @@ quayRepos:
   - name: mk-strimzi-operator
     description: Managed services strimzi operator
     public: false
+  - name: kas-abnormal-workloads
+    description: Test applications to simulate poorly configured kafka clients
+    public: false
 
 - org:
     $ref: /dependencies/quay/managedservices-bf2.yml
@@ -145,6 +181,9 @@ quayRepos:
   - name: kas-fleetshard-sync
     description: Private repo for the kas-fleetshard-sync
     public: false
+  - name: openmessaging-benchmark
+    description: Repository Open Messaging Benchmark(omb)
+    public: true
   - name: observability-operator
     description: Private repo for the observability-operator
     public: true
@@ -153,6 +192,41 @@ quayRepos:
     public: true
   - name: observability-operator-index
     description: OLM index of the observability-operator
+    public: true
+  - name: cos-fleet-manager
+    description: Private repo for the cos-fleet-manager
+    public: false
+  - name: cos-fleet-catalog-camel
+    description: Private repo for the cos-fleet-catalog-camel
+    public: false
+  - name: cos-fleetshard-meta-camel
+    description: Private repo for the cos-fleetshard-meta-camel
+    public: false
+  - name: cos-ui
+    description: Private repo for the cos-ui
+    public: false
+  - name: cos-fleetshard
+    description: Private repo for the cos-fleetshard operator
+    public: false
+  - name: cos-fleet-catalog-debezium
+    description: Private repo for the cos-fleet-catalog-debezium
+    public: false
+  - name: cos-fleetshard-meta-debezium
+    description: Private repo for the cos-fleetshard-meta-debezium
+    public: false
+  - name: cos-fleetshard-bundle
+    description: Private repo for the cos-fleetshard-bundle
+    public: false
+  - name: cos-fleetshard-index
+    description: Private repo for the cos-fleetshard-index
+    public: false
+  - name: kas-fleet-manager
+    description: The Kafka Service Fleet Manager allows different customer types (Tire
+      Kicker, Value Prod and Enterprise) to create instances of a Red Hat managed
+      service
+    public: false
+  - name: mk-token-refresher
+    description: Helper image that fetches and refreshes OAuth2 tokens via OIDC
     public: true
 
 
@@ -164,7 +238,7 @@ quayRepos:
     role: read
   items:
   - name: rhoas-quarkus-kafka-quickstart
-    description: Quickstart for RHOAS Kafka including SBO 
+    description: Quickstart for RHOAS Kafka including SBO
     public: true
   - name: service-operator
     description: Service binding operator
@@ -177,10 +251,16 @@ quayRepos:
     public: true
   - name: kas-fleet-manager-locust
     description: kas-fleet-manager-locust image for the performance test
-    public: false
+    public: true
   - name: kas-fleet-manager-token-refresh
     description: kas-fleet-manager-token-refresh image for the performance test
-    public: false
+    public: true
+  - name: kas-fleet-manager-perf-results
+    description: kas-fleet-manager-perf-results image used to process perf test results
+    public: true
+  - name: kas-fleet-manager-perf-test-backup
+    description: kas-fleet-manager-perf-test backup cronjob image
+    public: true
   - name: kas-fleet-manager
     description: The Kafka Service Fleet Manager allows different customer types (Tire
       Kicker, Value Prod and Enterprise) to create instances of a Red Hat managed
@@ -201,8 +281,54 @@ quayRepos:
   - name: observability-operator-index
     description: OLM index of the observability-operator
     public: false
-
-
+  - name: kafka-admin-api
+    description: Private repo for the Kafka Admin Server
+    public: false
+  - name: kas-fleetshard-operator
+    description: Private repo for the kas-fleetshard-operator
+    public: false
+  - name: kas-fleetshard-sync
+    description: Private repo for the kas-fleetshard-sync
+    public: false
+  - name: strimzi-drain-cleaner
+    description: Private repo for the Strimzi Drain Cleaner
+    public: false
+  - name: cos-fleet-manager
+    description: Private repo for the cos-fleet-manager
+    public: false
+  - name: cos-fleet-catalog-camel
+    description: Private repo for the cos-fleet-catalog-camel
+    public: false
+  - name: cos-fleetshard-meta-camel
+    description: Private repo for the cos-fleetshard-meta-camel
+    public: false
+  - name: cos-ui
+    description: Private repo for the cos-ui
+    public: false
+  - name: cos-fleetshard
+    description: Private repo for the cos-fleetshard operator
+    public: false
+  - name: cos-fleet-catalog-debezium
+    description: Private repo for the cos-fleet-catalog-debezium
+    public: false
+  - name: cos-fleetshard-meta-debezium
+    description: Private repo for the cos-fleetshard-meta-debezium
+    public: false
+  - name: application-services-ui
+    description: Private repo for the application-services-ui
+    public: false
+  - name: kas-ui
+    description: Private repo for the kas-ui
+    public: false
+  - name: kafka-ui
+    description: Private repo for the kafka-ui
+    public: false
+  - name: guides
+    description: Private repo for the guides
+    public: false
+  - name: debezium-strimzi-kafka
+    description: Private repo for the debezium-strimzi-kafka
+    public: false    
 sentryProjects:
 - team:
     $ref: /dependencies/sentry/teams/managed-services-stage.yml

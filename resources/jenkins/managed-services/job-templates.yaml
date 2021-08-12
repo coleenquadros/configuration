@@ -38,6 +38,8 @@
           - *app_sre_bot_push_token
           - *app_interface_creds
           - *managed_services_github_deploy_key
+          - *rhoas-quay-access
+          - *ci_cd_quay
     <<: *gl_build_master
 
 - job-template:
@@ -59,14 +61,21 @@
           - *ci_ocm_token
           - *ci_aws_keys
           - *ci_observatorium
-          - *kas_fleetshard
           - *ci_cd_quay
+          - *mk_e2e_test_suite_staging
     <<: *gl_build_master
     parameters:
     - bool:
         name: RELEASE
         default: '{release}'
         description: 'indicates release build'
+    - choice:
+        name: TEST_STRATEGY
+        description: 'Strimzi Operators system tests to be executed'
+        choices:
+            - acceptance
+            - minimal
+            - regression
     - bool:
         name: TEMP_CPAAS_BUILD
         default: 'true'
@@ -118,8 +127,8 @@
           - *ci_ocm_token
           - *ci_aws_keys
           - *ci_observatorium
-          - *kas_fleetshard
           - *ci_cd_quay
+          - *mk_e2e_test_suite_staging
     <<: *gl_timed
     publishers:
     - archive:
@@ -136,7 +145,7 @@
                 - FAILURE
               build-steps:
                 - shell: "{cleanup_script}"
-                
+
 - job-template:
     id: managed-services-pull-upstream
     name: 'managed-services-pull-upstream'
@@ -153,9 +162,9 @@
     publishers:
       - <<: *slack_notify
     <<: *gl_timed
-    
-    
-- job-template:   
+
+
+- job-template:
     id: 'managed-kafka-performance'
     name: 'managed-kafka-performance-{mk_perf_type}'
     wrappers:
@@ -245,29 +254,93 @@
     - <<: *slack_notify
 
 - job-template:
-    id: managed-kafka-chaos
-    name: "managed-kafka-chaos"
+    id: managed-kafka-fault-tests
+    name: "managed-kafka-fault-tests"
     wrappers:
       - timestamps
       - timeout_wrapper:
           timeout: "{timeout}"
       - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *ci_test_token
+            - *ci_aws_keys
+            - *managed_services_github_deploy_key
+            - *ci_cd_quay
     parameters:
     - string:
-        name: OSD_CLUSTER_API
+        name: BRANCH
+        default: '{default_branch}'
+        description: 'The branch of kas-fault-tests repo you want to run the pipeline against. Defaults to main'
+    - string:
+        name: OCM_CLUSTER_NAME
         default: ''
-        description: '[REQUIRED] api server of the osd cluster hosting the managed kafka service'
-    - password:
-        name: OSD_API_TOKEN
-        default: ''
-        description: '[REQUIRED] kubeadmin token for osd cluster'
+        description: 'OSD cluster name (if not defined, a random name will be set), max name length is 14 characters'
+    - choice:
+        name: COMPUTE_MACHINE_TYPE
+        description: '[REQUIRED] node type of cluster compute nodes'
+        choices:
+            - m5.xlarge
+            - m5.2xlarge
+            - m5.4xlarge
+            - m5.8xlarge
+    - string:
+        name: COMPUTE_NODES_COUNT
+        default: '3'
+        description: '[REQUIRED] OSD worker nodes for kafka cluster. If you select multi-az you must have a multiple of 3 for COMPUTE_NODES_COUNT'
+    - choice:
+        name: OCM_CLUSTER_REGION
+        description: '[REQUIRED] AWS region for the OSD cluster. If executing cloud layer tests, ensure that the cluster is in a region where no other clusters are deployed'
+        choices:
+            - us-east-1
+            - us-east-2
+            - us-west-1
+            - us-west-2
+            - ap-south-1
+            - ap-northeast-1
+            - ap-northeast-2
+            - ap-northeast-3
+            - ap-southeast-1
+            - ap-southeast-2
+            - ca-central-1
+            - eu-central-1
+            - eu-west-1
+            - eu-west-2
+            - eu-west-3
+            - eu-north-1
+            - sa-east-1
+    - bool:
+        name: MULTI_AZ
+        default: false
+        description: If true the cluster will be provisioned with multiple AZ, if false for only one AZ.
+    - bool:
+        name: PROVISION_CLUSTER
+        default: false
+        description: If true a cluster will be provisioned. Set to false if you already have a cluster provisioned.
+    - bool:
+        name: DEPROVISION_CLUSTER
+        default: false
+        description: If true the provisioned or provided cluster will be deleted.
+    - bool:
+        name: INSTALL_KAFKA
+        default: false
+        description: If true a kafka instance will be installed in the cluster
+    - choice:
+        name: TEST_LAYER
+        description: '[REQUIRED] Select the set of tests to be executed'
+        choices:
+          - none
+          - all
+          - cloud
+          - openshift
+          - kafka
+    branch: '${{BRANCH}}'
     <<: *gh_checkout
     builders:
       - shell: |
-          oc login --server=$OSD_CLUSTER_API --token=$OSD_API_TOKEN --insecure-skip-tls-verify
-          cd install
-          make test/chaos
-    artifacts_path: 'chaos-results/**'
+          ./pipeline/fault_pipeline.sh
+    artifacts_path: 'fault-results/**,pipeline/delorean/ocm/**'
     publishers:
     - archive:
         artifacts: '{artifacts_path}'
@@ -275,48 +348,9 @@
     - <<: *slack_notify
 
 - job-template:
-    id: managed-kafka-litmus-test-run
-    name: "managed-kafka-litmus-test-run"
-    wrappers:
-      - timestamps
-      - timeout_wrapper:
-          timeout: "{timeout}"
-      - ansicolor
-    parameters:
-    - string:
-        name: OSD_CLUSTER_API
-        default: ''
-        description: '[REQUIRED] api server of the osd cluster hosting the managed kafka service'
-    - password:
-        name: OSD_API_TOKEN
-        default: ''
-        description: '[REQUIRED] kubeadmin token for osd cluster'
-    - bool:
-        name: INSTALL_LITMUS
-        default: False
-        description: 'Select if you want to install Litmus and run Litmus test. KAFKA must be selected if not already installed on the cluster'
-    - choice:
-        name: LITMUS_TEST
-        description: '[REQUIRED] The litmus test you want to run. You need to specify which'
-        choices:
-          - chaosengine/pod-delete-brokers
-          - chaosengine/az-down
-          - chaosschedule/pod-delete-brokers
-          - chaosschedule/pod-delete-zookeepers
-    <<: *gh_checkout
-    builders:
-      - shell: |
-          ./install/resources/testing-chaos/scripts/run-litmus-test.sh
-    artifacts_path: 'litmus-results/**'
-    publishers:
-    - archive:
-        artifacts: '{artifacts_path}'
-        allow-empty: true
-
-- job-template:
     id: strimzi-operator-test
     name: "strimzi-operator-test"
-    wrappers: 
+    wrappers:
     - timestamps
     - timeout_wrapper:
         timeout: "{timeout}"
@@ -349,7 +383,7 @@
         default: 'sob-test-$BUILD_NUMBER'
         description: 'Name of the cluster to be provisioned'
     <<: *gl_checkout
-    builders: 
+    builders:
     - shell: ./pr_check.sh
     artifacts_path: 'test-results/**'
     publishers:
@@ -385,34 +419,22 @@
     <<: *gl_timed
 
 - job-template:
-    id: 'kas-fleet-manager-cluster-extension'
-    name: 'kas-fleet-manager-cluster-extension'
-    publishers:
-    - <<: *slack_notify
+    id: kas-fleet-manager-perf-test
+    name: kas-fleet-manager-perf-test-stage
     wrappers:
       - timeout_wrapper:
-          timeout: '{timeout}'
+          timeout: "{timeout}"
       - ansicolor
       - vault-secrets:
           <<: *vault_defaults
           secrets:
-            - *managed_services_cluster_extension
+            - *kas_fleet_manager_perf_test_stage
+    ci_cmd: './perf_test.sh'
     <<: *gl_timed
-
-- job-template:
-    id: 'managed-services-sso-cluster-extension'
-    name: 'managed-services-sso-cluster-extension'
     publishers:
-    - <<: *slack_notify
-    wrappers:
-      - timeout_wrapper:
-          timeout: '{timeout}'
-      - ansicolor
-      - vault-secrets:
-          <<: *vault_defaults
-          secrets:
-            - *managed_services_sso_cluster_extension
-    <<: *gh_timed
+    - archive:
+        artifacts: 'test/performance/reports/**'
+        allow-empty: true
 
 - job-template:
     id: gl-pr-check-apache-kafka
@@ -477,7 +499,31 @@
 - job-template:
     id: managed-kafka-promote-ui
     name: managed-kafka-promote-ui
-    wrappers: 
+    wrappers:
+    - timestamps
+    - timeout_wrapper:
+        timeout: "{timeout}"
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+          - *managed_services_github_deploy_key
+    parameters:
+    - bool:
+        name: DRY_RUN
+        default: true
+        description: If true the changes are not pushed
+    builders:
+    - trigger-builds:
+      - project:
+          - "managed-kafka-promote-ui-stable"
+          - "managed-kafka-promote-ui-beta"
+        current-parameters: true
+
+- job-template:
+    id: managed-kafka-promote-ui-beta
+    name: managed-kafka-promote-ui-beta
+    wrappers:
     - timestamps
     - timeout_wrapper:
         timeout: "{timeout}"
@@ -508,7 +554,44 @@
         default: true
         description: If true the changes are not pushed
     <<: *gl_checkout
-    builders: 
+    builders:
+    - shell: ./script/promote-ui.sh
+
+- job-template:
+    id: managed-kafka-promote-ui-stable
+    name: managed-kafka-promote-ui-stable
+    wrappers:
+    - timestamps
+    - timeout_wrapper:
+        timeout: "{timeout}"
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+          - *managed_services_github_deploy_key
+    parameters:
+    - string:
+        name: REPOSITORIES
+        default: 'https://github.com/RedHatInsights/rhosak-dashboard-build'
+        description: 'All repositories to promote'
+    - string:
+        name: FROM_BRANCH
+        default: prod-beta
+    - string:
+        name: TO_BRANCH
+        default: prod-stable
+    - string:
+        name: AUTHOR_NAME
+        default: Bot
+    - string:
+        name: AUTHOR_EMAIL
+        default: ms-devexp@redhat.com
+    - bool:
+        name: DRY_RUN
+        default: true
+        description: If true the changes are not pushed
+    <<: *gl_checkout
+    builders:
     - shell: ./script/promote-ui.sh
 
 - job-template:
@@ -529,7 +612,7 @@
     <<: *gl_build_master
 
 - job-template:
-    id: gl-build-master-kas-fleet-manager
+    id: gl-build-main-kas-fleet-manager
     name: "{gl_group}-{gl_project}-gl-build-{branch}"
     wrappers:
       - timeout_wrapper:
@@ -555,7 +638,7 @@
           - *rhoas-quay-access
           - *kas_fleet_manager_pr_check
     <<: *gl_pr_check
-        
+
 - job-template:
     id: 'gl-pr-check-mas-sso'
     name: '{gl_group}-{gl_project}-gl-pr-check'
@@ -568,3 +651,40 @@
         secrets:
         - *rhoas-quay-access
     <<: *gl_pr_check
+
+- job-template:
+    id: gl-pr-check-kas-upgrade-configurations
+    name: "{gl_group}-{gl_project}-gl-pr-check"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *app_interface_creds
+            - *quay_secret_push
+            - *gitlab_token
+            - *kas_fleet_manager_admin_staging
+            - *kas_fleet_manager_admin_prod
+    <<: *gl_pr_check
+    publishers:
+    - gitlab_message:
+        <<: *gitlab_message_defaults
+    - gitlab-notifier
+
+- job-template:
+    id: gl-build-main-kas-upgrade-configurations
+    name: "{gl_group}-{gl_project}-gl-build-{branch}"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *app_interface_creds
+            - *quay_secret_push
+            - *gitlab_token
+            - *kas_fleet_manager_admin_staging
+            - *kas_fleet_manager_admin_prod
+    <<: *gl_build_master

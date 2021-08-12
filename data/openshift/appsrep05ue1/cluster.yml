@@ -9,8 +9,8 @@ name: appsrep05ue1
 description: AppSRE internal CI production cluster
 consoleUrl: https://console-openshift-console.apps.appsrep05ue1.zqxk.p1.openshiftapps.com
 kibanaUrl: ''
-prometheusUrl: ''
-alertmanagerUrl: ''
+prometheusUrl: https://prometheus.appsrep05ue1.devshift.net
+alertmanagerUrl: https://alertmanager.appsrep05ue1.devshift.net
 serverUrl: https://api.appsrep05ue1.zqxk.p1.openshiftapps.com:6443
 elbFQDN: elb.apps.appsrep05ue1.zqxk.p1.openshiftapps.com
 ocm:
@@ -26,6 +26,7 @@ observabilityNamespace:
 
 managedGroups:
 - dedicated-admins
+- dedicated-readers
 
 managedClusterRoles: true
 
@@ -33,10 +34,12 @@ spec:
   provider: aws
   region: us-east-1
   channel: candidate
-  version: 4.7.0
+  version: 4.8.2
   initial_version: 4.7.0-candidate
   multi_az: true
-  nodes: 9
+  autoscale:
+    min_replicas: 9
+    max_replicas: 15
   instance_type: m5.xlarge
   storage: 600
   load_balancers: 0
@@ -74,6 +77,50 @@ peering:
       service: ci-int
     manageRoutes: true
     cidrBlock: 10.0.0.0/8
+  - provider: cluster-vpc-accepter
+    name: appsrep05ue1_hivei01ue1
+    cluster:
+      $ref: /openshift/hivei01ue1/cluster.yml
+    manageRoutes: true
+  - provider: cluster-vpc-accepter
+    name: appsrep05ue1_hive-stage-01
+    cluster:
+      $ref: /openshift/hive-stage-01/cluster.yml
+  - provider: cluster-vpc-accepter
+    name: appsrep05ue1_hives02ue1
+    cluster:
+      $ref: /openshift/hives02ue1/cluster.yml
+    manageRoutes: true
+  - provider: cluster-vpc-accepter
+    name: appsrep05ue1_hivep01ue1
+    cluster:
+      $ref: /openshift/hivep01ue1/cluster.yml
+    manageRoutes: true
+  - provider: cluster-vpc-accepter
+    name: appsrep05ue1_hivep02ue1
+    cluster:
+      $ref: /openshift/hivep02ue1/cluster.yml
+    manageRoutes: true
+  - provider: cluster-vpc-accepter
+    name: appsrep05ue1_hivep03uw1
+    cluster:
+      $ref: /openshift/hivep03uw1/cluster.yml
+    manageRoutes: true
+  - provider: cluster-vpc-accepter
+    name: appsrep05ue1_hivep04ew2
+    cluster:
+      $ref: /openshift/hivep04ew2/cluster.yml
+    manageRoutes: true
+  - provider: cluster-vpc-accepter
+    name: appsrep05ue1_hivep05ue1
+    cluster:
+      $ref: /openshift/hivep05ue1/cluster.yml
+    manageRoutes: true
+  - provider: cluster-vpc-accepter
+    name: appsrep05ue1_ssotest01ue1
+    cluster:
+      $ref: /openshift/ssotest01ue1/cluster.yml
+    manageRoutes: true
 
 addons:
 - $ref: /dependencies/ocm/addons/cluster-logging-operator.yml

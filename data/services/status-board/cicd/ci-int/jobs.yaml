@@ -1,0 +1,38 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+labels:
+  service: status-board
+
+name: ci-int-status-board-jobs
+
+description: 'Build the Status Board'
+
+app:
+  $ref: /services/status-board/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+type: jobs
+
+config:
+- project:
+    name: status-board
+    label: status-board
+    node: rhel8
+    gl_group: service
+    gl_project: status-board
+    pr_check_script_path: './pr_test.sh'
+    quay_org: app-sre
+    jobs:
+    - 'gl-build-master':
+        display_name: Status Board build main
+        branch: main
+    - 'gl-pr-check':
+        display_name: Status Board pr-check
+    - 'gl-timed':
+        branch: main
+        display_name: Status Board end-to-end test
+        cron_expression: 'H/15 * * * *'
+        ci_cmd: './end2end-curl.sh'

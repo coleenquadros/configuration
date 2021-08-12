@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: clowder
@@ -11,15 +11,13 @@ description: Deploy clowder OLM resources
 app:
   $ref: /services/insights/clowder/app.yml
 
-instance:
-  $ref: /dependencies/ci-ext/ci-ext.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
-  channel: team-clouddot-info
-
-timeout: 5
+  channel: team-clouddot-devprod
 
 managedResourceTypes:
 - CatalogSource
@@ -47,18 +45,43 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/clowder/namespaces/fedramp-stage.yml
     ref: master
-    upstream: RedHatInsights-clowder-gh-build-catalog-master-upstream-RedHatInsights-clowder-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-clowder-gh-build-catalog-master-upstream-RedHatInsights-clowder-gh-build-master
+    parameters:
+      WATCH_STRIMZI_RESOURCES: "true"
+      CREATE_SERVICE_MONITORS: "true"
+      TARGET_NAMESPACE: "clowder-system"
   - namespace:
       $ref: /services/insights/clowder/namespaces/stage.yml
     ref: master
-    upstream: RedHatInsights-clowder-gh-build-catalog-master-upstream-RedHatInsights-clowder-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-clowder-gh-build-catalog-master-upstream-RedHatInsights-clowder-gh-build-master
+    parameters:
+      TARGET_NAMESPACE: "clowder-system"
   - namespace:
       $ref: /services/insights/clowder/namespaces/ephem.yml
     ref: master
-    upstream: RedHatInsights-clowder-gh-build-catalog-master-upstream-RedHatInsights-clowder-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-clowder-gh-build-catalog-master-upstream-RedHatInsights-clowder-gh-build-master
+    parameters:
+      WATCH_STRIMZI_RESOURCES: "true"
+      CREATE_SERVICE_MONITORS: "true"
+      TARGET_NAMESPACE: "clowder-system"
   - namespace:
       $ref: /services/insights/clowder/namespaces/prod.yml
-    ref: e51e32996179fc02aa22c8c098cb9ac22e6f447d
+    ref: bd3455e5b1d0d1087af409fba008c96922a1cd66
+    parameters:
+      TARGET_NAMESPACE: "clowder-system"
   - namespace:
       $ref: /services/insights/clowder/namespaces/fedramp-prod.yml
-    ref: e51e32996179fc02aa22c8c098cb9ac22e6f447d
+    ref: bd3455e5b1d0d1087af409fba008c96922a1cd66
+    parameters:
+      WATCH_STRIMZI_RESOURCES: "true"
+      CREATE_SERVICE_MONITORS: "true"
+      TARGET_NAMESPACE: "clowder-system"

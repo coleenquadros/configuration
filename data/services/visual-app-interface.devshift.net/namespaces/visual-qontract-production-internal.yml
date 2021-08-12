@@ -1,0 +1,38 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: visual-qontract-prod
+description: production namespace for visual-qontract
+
+cluster:
+  $ref: /openshift/appsrep05ue1/cluster.yml
+
+app:
+  $ref: /services/visual-app-interface.devshift.net/app.yml
+
+environment:
+  $ref: /products/app-interface/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.appsrep05ue1.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ConfigMap
+
+openshiftResources:
+- provider: vault-secret
+  path: app-interface/app-sre/visual-qontract-prod/oauth2-proxy
+  version: 2
+- provider: vault-secret
+  path: app-interface/app-sre/visual-qontract-prod/visual-qontract
+  version: 4
+- provider: resource
+  path: /app-sre/visual-qontract-prod/visual-qontract.configmap.yaml
+- provider: resource
+  path: /app-sre/visual-qontract-prod/visual-qontract.oauth2-proxy.configmap.yaml
+- provider: route
+  path: /app-sre/visual-qontract-prod/visual-qontract-internal.route.yaml

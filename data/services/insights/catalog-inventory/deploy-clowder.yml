@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: catalog-inventory
@@ -11,15 +11,13 @@ description: catalog-inventory app on the Insights Platform
 app:
   $ref: /services/insights/catalog-inventory/app.yml
 
-instance:
-  $ref: /dependencies/ci-ext/ci-ext.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
-
-timeout: 5
 
 managedResourceTypes:
   - ClowdApp
@@ -45,16 +43,19 @@ resourceTemplates:
     targets:
       - namespace:
           $ref: /services/insights/catalog-inventory/namespaces/catalog-inventory-prod.yml
-        ref: 574ffe0ca316fa6e86c40c54a74e3521f4eefe07
+        ref: 9b3ac3ed497f64116746c72528f04b459ffb4551
         parameters:
           ENV_NAME: prod
           CATALOG_INVENTORY_EXTERNAL_HOST: ${PLATFORM_HOSTNAME}
           MIN_REPLICAS: 3
-          PROMETHEUS_PUSH_GATEWAY: prometheus-push.insights-push-prod.svc.cluster.local:9091
+          PROMETHEUS_PUSH_GATEWAY: ${PROMETHEUS_PUSHGATEWAY}
       - namespace:
           $ref: /services/insights/catalog-inventory/namespaces/stage-catalog-inventory-stage.yml
         ref: main
-        upstream: RedHatInsights-catalog_inventory-api-gh-build-main
+        upstream:
+          instance:
+            $ref: /dependencies/ci-ext/ci-ext.yml
+          name: RedHatInsights-catalog_inventory-api-gh-build-main
         parameters:
           ENV_NAME: stage
           CATALOG_INVENTORY_EXTERNAL_HOST: ${PLATFORM_HOSTNAME}

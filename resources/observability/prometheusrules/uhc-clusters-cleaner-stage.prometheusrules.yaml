@@ -1,0 +1,24 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: uhc-clusters-cleaner-stage
+spec:
+  groups:
+  - name: uhc-clusters-cleaner-stage
+    rules:
+    - alert: OCM Cluster Cleaner Failing - stage
+      annotations:
+        message: OCM stage clusters cleaner is failing
+        runbook: https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop
+      expr: |
+        sum(sum_over_time(kube_job_status_succeeded{namespace="uhc-stage",job_name=~"^clusters-cleaner-.*$"}[10m])) < 1
+      for: 1m
+      labels:
+        service: uhc-clusters-cleaner
+        severity: medium
+        email: service-development-a

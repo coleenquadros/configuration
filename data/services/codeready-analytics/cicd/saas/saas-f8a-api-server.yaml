@@ -5,7 +5,7 @@ labels:
   service: codeready-analytics
   component: f8a-api-server
 
-name: saas-codeready-analytics-f8a-api-server
+name: saas-crda-f8a-api-server
 description: SaaS tracking file for codeready-analytics f8a-api-server
 
 app:
@@ -23,6 +23,7 @@ managedResourceTypes:
 - ServiceAccount
 - DeploymentConfig
 - Service
+- PersistentVolumeClaim
 
 imagePatterns:
 - quay.io/app-sre/fabric8-analytics-server
@@ -47,8 +48,19 @@ resourceTemplates:
     upstream: fabric8-analytics-fabric8-analytics-server-gh-build-master
     parameters:
       REPLICAS: 2
+      FLASK_LOGGING_LEVEL: "INFO"
+      PREMIUM_URL: "http://crda-api-bayesian-preview.apps.app-sre-stage-0.e9a2.p1.openshiftapps.com/api/v2/"
   - namespace:
       $ref: /services/codeready-analytics/namespaces/bayesian-production.yml
-    ref: 3f6df57c0a0b65bd16ac734a52cc02b0d96caca2
+    ref: 58d190b5ff8d23bfd6635d879a0de54379e9fe63
     parameters:
-      REPLICAS: 6
+      REPLICAS: 2
+      FLASK_LOGGING_LEVEL: "INFO"
+      ENABLE_USER_CACHING: "true"
+      ENABLE_BOOK_KEEPING_FLOW: "false"
+      CPU_REQUEST: '3'
+      CPU_LIMIT: '3'
+      MEMORY_REQUEST: '4Gi'
+      MEMORY_LIMIT: '5Gi'
+      WORKER_COUNT: '6'
+      WORKER_CONNECTIONS: '33000'

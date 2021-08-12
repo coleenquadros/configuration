@@ -28,20 +28,23 @@ networkPoliciesAllow:
 # - $ref: /services/insights/catalog/namespaces/prod-catalog-prod.yml
 # - $ref: /services/insights/compliance/namespaces/prod-compliance-prod.yml
 # - $ref: /services/insights/engine/namespaces/prod-engine-prod.yml
-# - $ref: /services/insights/host-inventory/namespaces/prod-host-inventory-prod.yml
+- $ref: /services/insights/host-inventory/namespaces/host-inventory-fedramp-prod.yml
 # - $ref: /services/insights/ingress/namespaces/prod-ingress-prod.yml
 # - $ref: /services/insights/patchman/namespaces/prod-patchman-engine-prod.yml
 # - $ref: /services/insights/policies/namespaces/prod-policies-prod.yml
 # - $ref: /services/insights/remediations/namespaces/prod-remediations-prod.yml
 # - $ref: /services/insights/sources/namespaces/prod-sources-prod.yml
-# - $ref: /services/insights/topological-inventory/namespaces/prod-topological-inventory-prod.yml
 # - $ref: /services/insights/tower-analytics/namespaces/prod-tower-analytics-prod.yml
 # - $ref: /services/insights/vulnerability/namespaces/prod-vulnerability-engine-prod.yml
 # - $ref: /services/insights/vulnerability/namespaces/prod-vmaas-prod.yml
-# - $ref: /services/insights/xjoin/namespaces/prod-xjoin-prod.yml
+- $ref: /services/insights/xjoin/namespaces/xjoin-fedramp-prod.yml
 # - $ref: /services/insights/hccm/namespaces/prod-hccm-prod.yml
 # - $ref: /services/insights/xavier/namespaces/prod-xavier-prod.yml
 # - $ref: /services/insights/playbook-dispatcher/namespaces/prod.yml
+- $ref: /services/insights/xjoin/namespaces/cyndi-fedramp-prod.yml
+
+sharedResources:
+- $ref: /services/insights/shared-resources/fedramp-prod.yml
 
 managedRoles: true
 
@@ -58,13 +61,11 @@ terraformResources:
 managedResourceTypes:
 - Role
 - RoleBinding
+# Secret management is disabled in this namespace due to https://github.com/strimzi/strimzi-kafka-operator/issues/5129
+# Fix is coming in https://github.com/strimzi/strimzi-kafka-operator/issues/5141
+# - Secret
 
 openshiftResources:
-- provider: vault-secret
-  path: insights/secrets/insights-fedramp-prod/platform-mq-prod/kafka-ca
-  version: 2
-  annotations:
-    qontract.recycle: "true"
 - provider: vault-secret
   path: insights/secrets/global/rh-registry-pull
   version: 2
@@ -78,3 +79,9 @@ openshiftResources:
   path: /insights-prod/strimzi/xjoin-jenkins.role.yaml
 - provider: resource
   path: /insights-prod/strimzi/xjoin-jenkins.rolebinding.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-fedramp-prod/platform-mq/kafka-cyndi.secret.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-fedramp-prod/platform-mq/kafka-xjoin.secret.yaml

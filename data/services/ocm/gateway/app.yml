@@ -1,0 +1,54 @@
+---
+$schema: /app-sre/app-1.yml
+
+labels:
+  service: ocm
+
+name: ocm-gateway
+
+description: |
+  OCM Gateway
+
+parentApp:
+  $ref: /services/ocm/app.yml
+
+architectureDocument: https://TODO
+sopsUrl: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/uhc/sop
+grafanaUrl: https://grafana.app-sre.devshift.net/d/uhc-gateway/ocm-gateway
+onboardingStatus: OnBoarded
+
+serviceOwners:
+- name: SDA team
+  email: sda-devel@redhat.com
+
+serviceNotifications:
+- name: Red Hat Outage List
+  email: outage-list@redhat.com
+
+escalationPolicy:
+  $ref: /teams/ocm/escalation-policies/sda.yaml
+
+dependencies:
+- $ref: /dependencies/aws/service.yml
+- $ref: /dependencies/ci-int/service.yml
+- $ref: /dependencies/gitlab/service.yml
+- $ref: /dependencies/quay/service.yml
+- $ref: /dependencies/openshift/service.yml
+- $ref: /dependencies/sso/service.yml
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/app-sre.yml
+  teams:
+  - permissions:
+    - $ref: /dependencies/quay/permissions/quay-membership-app-sre-uhc.yml
+    role: read
+  items:
+  - name: uhc-gateway
+    description: ''
+    public: true
+
+codeComponents:
+- name: uhc-gateway
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/service/uhc-gateway

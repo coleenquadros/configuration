@@ -1,0 +1,67 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: app-interface
+name: app-interface-2021-06-01
+app:
+  $ref: /services/app-interface/app.yml
+date: '2021-06-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions:
+    saas-qontract-reconcile:
+    - env: app-interface-stage
+      cluster: app-sre-stage-01
+      namespace: app-interface-stage
+      total: 55
+      success: 52
+    - env: app-interface-production
+      cluster: app-sre-prod-01
+      namespace: app-interface-production
+      total: 17
+      success: 17
+  merge_activities:
+    https://github.com/app-sre/container-images:
+    - branch: master
+      total: 5
+      success: 5
+    https://github.com/app-sre/qontract-reconcile:
+    - branch: master
+      total: 53
+      success: 53
+    https://gitlab.cee.redhat.com/service/app-interface:
+    - branch: master
+      total: 547
+      success: 547
+    - branch: master
+      total: 545
+      success: 544
+    https://gitlab.cee.redhat.com/app-sre/container-images:
+    - branch: master
+      total: 4
+      success: 3
+  container_vulnerabilities:
+  - cluster: app-sre-stage-01
+    namespace: app-interface-stage
+    vulnerabilities:
+      Medium: 2039
+      High: 242
+      Low: 437
+  post_deploy_jobs:
+  - cluster: app-sre-stage-01
+    namespace: app-interface-stage
+    post_deploy_job: false
+  - cluster: app-sre-prod-01
+    namespace: app-interface-production
+    post_deploy_job: false
+  deployment_validations:
+  - cluster: app-sre-stage-01
+    namespace: app-interface-stage
+    validations:
+      deployment_validation_operator_replica_validation:
+        Failed: 828
+  service_slo:
+  - cluster: app-sre-prod-01
+    namespace: app-interface-production
+    slo_name: Reconciliation time of app-interface integrations
+    slo_value: 44.0
+    slo_target: 95.0

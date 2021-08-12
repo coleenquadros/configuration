@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: kas-fleet-manager
@@ -10,13 +10,13 @@ description: 'SaaS tracking file for Kafka Service Fleet Manager'
 app:
   $ref: /services/managed-services/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/managed-services/pipelines/tekton.kas-fleet-manager-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
-  channel: managed-services-api
+  channel: mk-kas-fleet-manager
 
 managedResourceTypes:
 - Deployment
@@ -27,6 +27,7 @@ imagePatterns:
 - quay.io/rhoas/kas-fleet-manager
 - quay.io/centos/centos
 - quay.io/rhoas/envoyproxy
+- quay.io/observatorium/token-refresher
 
 authentication:
   image:
@@ -34,60 +35,96 @@ authentication:
     field: all
 
 resourceTemplates:
+- name: observatorium-token-refresher
+  url: https://gitlab.cee.redhat.com/service/kas-fleet-manager
+  path: /templates/observatorium-token-refresher.yml
+  targets:
+  - namespace:
+      $ref: /services/managed-services/namespaces/managed-services-stage.yml
+    ref: main
+    parameters:
+      ISSUER_URL: ${SSO_BASE_URL}
+      OBSERVATORIUM_URL: https://observatorium-mst.api.stage.openshift.com/api/metrics/v1/managedkafka
+  - namespace:
+      $ref: /services/managed-services/namespaces/managed-services-production.yml
+    # Please note the following before updating this 'ref' property:
+    # - The commit sha specified here should always be the same commit sha specified for the kas-fleet-manager ref in production.
+    #   e.g. If the kas-fleet-manager version was updated in production, the value of this ref property must also be updated to match the new commit hash.
+    # - Commits can be found here: https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/commits/main
+    # If in doubt, please check with the MK Control Plane team.
+    # We are exploring how to automate this in the future.
+    ref: 9c1df7e81e04a4a1788bb1af7b9bca3e51502ba9
+    parameters:
+      ISSUER_URL: ${SSO_BASE_URL}
+      OBSERVATORIUM_URL: https://observatorium-mst.api.openshift.com/api/metrics/v1/managedkafka
 - name: kas-fleet-manager
   url: https://gitlab.cee.redhat.com/service/kas-fleet-manager
   path: /templates/service-template.yml
   parameters:
+    # Global parameter - Affects Production and Stage
     IMAGE_REGISTRY: quay.io
+    # Global parameter - Affects Production and Stage
     IMAGE_REPOSITORY: rhoas/kas-fleet-manager
-    JWKS_URL: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/certs
+    # Global parameter - Affects Production and Stage
+    # SSO_BASE_URL is defined at the environment parameters level
+    JWKS_URL: ${SSO_BASE_URL}/protocol/openid-connect/certs
+    # Global parameter - Affects Production and Stage
     CLUSTER_OPENSHIFT_VERSION: ""
+    # Global parameter - Affects Production and Stage
     CLUSTER_COMPUTE_MACHINE_TYPE: m5.4xlarge
+    # Global parameter - Affects Production and Stage
     # Enforce instance limit control
     ENABLE_INSTANCE_LIMIT_CONTROL: true
+    # Global parameter - Affects Production and Stage
     # The default maximum number of instances that can be created by a user/organisation.
     # Takes effect if `ENABLE_INSTANCE_LIMIT_CONTROL` is set to true
     MAX_ALLOWED_INSTANCES: 1
+    # Global parameter - Affects Production and Stage
     # Change this to false if you want the users to be able to use the service without accepting any terms
     ENABLE_TERMS_ACCEPTANCE: true
+    # Global parameter - Affects Production and Stage
     # Change this to false if you want to disable the deny list feature feature
     ENABLE_DENY_LIST: true
+    # Global parameter - Affects Production and Stage
     # Change this to false to disable sentry
     ENABLE_SENTRY: true
-    # Enable ManagedKafkaCR generation
-    ENABLE_MANAGED_KAFKA_CR: true
-    # Disable quota service integration for now
-    ENABLE_QUOTA_SERVICE: false
+    # Global parameter - Affects Production and Stage
     # Enable the external Kafka certificate for all Kafka clusters
     ENABLE_KAFKA_EXTERNAL_CERTIFICATE: true
+    # Global parameter - Affects Production and Stage
     # Enable the dedicate Ingress on the data plane clusters which all Kafka Clusters will use
     ENABLE_DEDICATED_INGRESS: true
+    # Global parameter - Affects Production and Stage
     #The public HTTP host URL of the service
     SERVICE_PUBLIC_HOST_URL: ${OCM_BASE_URL}
-    # Image tags for sub components
-    KAFKA_ADMIN_SERVER_IMAGE: quay.io/sknot/kafka-admin-api:0.0.4
+    # Global parameter - Affects Production and Stage
     # Log level
     GLOG_V: 5
+    # Global parameter - Affects Production and Stage
     # A URL to repository containing external Kafka Observability configuration info for Obs. Operator to consume
     OBSERVABILITY_CONFIG_REPO: https://api.github.com/repos/bf2fc6cc711aee1a0c2a/observability-resources-mk/contents
+    # Global parameter - Affects Production and Stage
     # Which channel (directory) within the config repo the Observability Operator should consume from
     OBSERVABILITY_CONFIG_CHANNEL: resources
-    # This value is the lifespan a kafka will have with the lifespan flag enabled. In hours.
-    KAFKA_LIFE_SPAN: 48
+    # Global parameters - Affects Production and Stage
     # Capacity settings for the base Kafka type
-    KAFKA_CAPACITY_INGRESS_THROUGHPUT: "2Mi"
-    KAFKA_CAPACITY_TOTAL_MAX_CONNECTIONS: "100"
-    KAFKA_CAPACITY_MAX_DATA_RETENTION_SIZE: "60Gi"
-    KAFKA_CAPACITY_MAX_PARTITIONS: "100"
+    KAFKA_CAPACITY_INGRESS_THROUGHPUT: "30Mi"
+    KAFKA_CAPACITY_TOTAL_MAX_CONNECTIONS: "500"
+    KAFKA_CAPACITY_MAX_DATA_RETENTION_SIZE: "1000Gi"
+    KAFKA_CAPACITY_MAX_PARTITIONS: "500"
     KAFKA_CAPACITY_MAX_DATA_RETENTION_PERIOD: "P14D"
-    KAFKA_CAPACITY_MAX_CONNECTION_ATTEMPTS_PER_SEC: "50"
+    KAFKA_CAPACITY_MAX_CONNECTION_ATTEMPTS_PER_SEC: "100"
+    # Global parameter - Affects Production and Stage
     # Image to be used by Envoy sidecar container
     ENVOY_IMAGE: quay.io/rhoas/envoyproxy:v1.16.1
   targets:
   - namespace:
       $ref: /services/managed-services/namespaces/managed-services-stage.yml
-    ref: master
-    upstream: service-kas-fleet-manager-gl-build-master
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-kas-fleet-manager-gl-build-main
     parameters:
       ENVIRONMENT: stage
       REPLICAS: 6
@@ -96,6 +133,11 @@ resourceTemplates:
       MAS_SSO_BASE_URL: https://identity.api.stage.openshift.com
       MAS_SSO_REALM: rhoas
       OSD_IDP_MAS_SSO_REALM: rhoas-kafka-sre
+      OCM_URL: https://api.openshift.com
+      # AMS
+      AMS_URL: ${OCM_BASE_URL}
+      # Use the allow list based quota management service
+      QUOTA_TYPE: ams
       # Dex identity service url
       DEX_URL: http://dex-dex.apps.pbraun-observatorium.observability.rhmw.io
       # Dex identity service username
@@ -104,23 +146,39 @@ resourceTemplates:
       OBSERVATORIUM_GATEWAY: https://observatorium-observatorium.apps.pbraun-observatorium.observability.rhmw.io
       # Observatorium tenant where observability metrics will sent to.
       OBSERVATORIUM_TENANT: test
+      # The value of this auth type ( "dex" or "redhat" ) will determine the auth type ( Dex or Red Hat SSO) implemented for the observability stack
+      OBSERVATORIUM_AUTH_TYPE: dex
+      # Token Refresher URL
+      OBSERVATORIUM_TOKEN_REFRESHER_URL: http://token-refresher.managed-services-stage.svc.cluster.local
       # Release tag within Config Repo to use for pulling index information
-      OBSERVABILITY_CONFIG_TAG: v1.3.2-staging
+      OBSERVABILITY_CONFIG_TAG: v1.8.1-staging
+      # Observatorium Red Hat SSO tenant for observability stack
+      OBSERVATORIUM_RHSSO_TENANT: managedkafka
+      # Red Hat SSO Observability gateway
+      OBSERVATORIUM_RHSSO_GATEWAY: https://observatorium-mst.api.stage.openshift.com 
+      # Red Hat SSO Observability realm
+      OBSERVATORIUM_RHSSO_REALM: redhat-external
+      # Red Hat SSO Observability auth server url
+      OBSERVATORIUM_RHSSO_AUTH_SERVER_URL: https://sso.redhat.com/auth
       # MAXIMUM NUMBER OF ALLOWED KAFKAs
-      KAFKA_CAPACITY_MAX_CAPACITY: 21
+      KAFKA_CAPACITY_MAX_CAPACITY: 12
       # Changing this to true will delete all kafkas after their lifespan expired. The default is 48 hours.
       ENABLE_KAFKA_LIFE_SPAN: true
+      # This value is the lifespan a kafka will have with the lifespan flag enabled. In hours.
+      KAFKA_LIFE_SPAN: 48
       MAS_SSO_ENABLE_AUTH: true
       # Max allowed service accounts created by users
       MAX_ALLOWED_SERVICE_ACCOUNTS: 50
       # Max limit for the fetching the clients from mas-sso
       MAX_LIMIT_FOR_SSO_GET_CLIENTS: 100
-      # Enable using ths synchronizer module for kas-fleetshard-operator
-      ENABLE_KAS_FLEETSHARD_OPERATOR_SYNC: true
       # Set domain name for Kafka instances
-      KAFKA_DOMAIN_NAME: "kafka.devshift.org"
+      KAFKA_DOMAIN_NAME: "bf2.kafka-stage.rhcloud.com"
       # Only allow those who are listed in `ALLOWED_SERVICE_ACCOUNTS` and `ALLOWED_USERS_PER_ORGANISATION` to access the service
       ALLOW_ANY_REGISTERED_USERS: false
+      STRIMZI_OPERATOR_ADDON_ID: managed-kafka-qe
+      KAS_FLEETSHARD_ADDON_ID: kas-fleetshard-operator-qe
+      # The Cluster Logging Operator ID. An empty string indicates that the operator should not be installed.
+      CLUSTER_LOGGING_OPERATOR_ADDON_ID: ""
       # A list of allowed users in yaml format irrespective of their organisation.
       ALLOWED_SERVICE_ACCOUNTS:
           # RHOSAK PM
@@ -517,6 +575,14 @@ resourceTemplates:
         - username: kafka-vanilla-burnt-almond
           max_allowed_instances: 1
 
+        # ------------------------- QE Users ----------------------------
+
+        - username: dbizzarr_kafka_test
+          max_allowed_instances: 1
+        
+        - username: hzrncik_kafka_test
+          max_allowed_instances: 1
+
         #----------------------------------------------------------------
         #----------------------------- UXD ------------------------------
         - username: ajay_kafka_neworg
@@ -578,6 +644,7 @@ resourceTemplates:
             - username: ppatiern_mk-kafka-instances
             - username: medgar_mk-kafka-instances
             - username: npecka_mk-kafka-instances
+            - username: kchernou_mk-kafka-instances
 
           # The Consoles & Developer Experience team
         - id: 13838614
@@ -620,6 +687,8 @@ resourceTemplates:
             - username: mdawson_kafka_devexp
             - username: dhawkins_kafka_devexp
             - username: sharedaccount_kafka_devexp
+            - username: juntwang_kafka_devexp
+            - username: stmccart_kafka_devexp
 
           # Red Hat Managed Application Services
         - id: 13645369
@@ -627,13 +696,11 @@ resourceTemplates:
           allow_all: false
           allowed_users:
             - username: davmarti_kafka_sre
-            - username: damurphy_kafka_sre
             - username: rshelly_kafka_sre
             - username: tdavidso_kafka_sre
             - username: stobin_rhmi
             - username: rarangan_rhmi
             - username: kkakarla_kafka_sre
-            - username: mmikhail_kafka_sre
             - username: rlawton_kafka_sre
             - username: robrien_kafka_sre
             - username: agullon_kafka_sre
@@ -663,15 +730,13 @@ resourceTemplates:
             - username: klape-insights
           # MK Test
         - id: 14014161
-          max_allowed_instances: 8
+          max_allowed_instances: 12
           allow_all: false
           allowed_users:
             - username: mk-test-user
             - username: mk-test-user-e2e-primary
             - username: mk-test-user-e2e-secondary
             - username: mk-test-user+webui
-            - username: dbizzarr_kafka_test
-            - username: hzrncik_kafka_test
             - username: mk-test-user-e2e-sandbox
             - username: mk-test-user-webui-stage
             - username: mk-test-user-webui-production
@@ -682,6 +747,8 @@ resourceTemplates:
             - username: mk-test-user+plus
             - username: mk-test-user-@
             - username: mk.test.user@redhat.com
+            - username: mk-test-user-radim
+            - username: mk-test-user-marek
 
           # The Security team
         - id: 13785172
@@ -714,13 +781,50 @@ resourceTemplates:
             - username: trepel-csqe
             - username: psturc-csqe
             - username: mhesko-csqe
+        
+          # Service Registry dev team
+        - id: 14221005
+          allow_all: true
+          max_allowed_instances: 1
+          allowed_users: []
 
       # A list of usernames representing users who do not have access to the service
       DENIED_USERS: []
-      
+
+      # A list of users with read-only permissions for data plane clusters
+      READ_ONLY_USERS:
+        - "dsaridak"
+        - "rareddy"
+        - "medgar"
+        - "tcooper"
+
+     # A list of kafka-sre users with cluster-admin permissions for data plane clusters
+      KAFKA_SRE_USERS:
+        - "agullon"
+        - "davmarti"
+        - "rlawton"
+        - "robrien"
+        - "rshelly"
+        - "stobin"
+        - "tdavidso"
+        - "kchernou"
+        - "dffrench"
+        - "weil"
+        - "jbriones"
+        - "mziccard"
+        - "akoserwa"
+        - "ppaszki"
+        - "pbraun"
+        - "msoriano"
+        - "mchitimb"
+        - "npecka"
+        - "ppatiern"
+        - "shawkins"
+        - "kwall"
+        - "gryan"
+
       # A list of long lived kafkas by ID, that should not be deleted after expiration time period
-      LONG_LIVED_KAFKAS:
-        - "1rWgutAakduzKKa4MugsFeOAjDG"
+      LONG_LIVED_KAFKAS: []
 
       SUPPORTED_CLOUD_PROVIDERS:
         - name: aws
@@ -734,36 +838,44 @@ resourceTemplates:
 
       # cluster list if dataplane cluster scaling type is set to manual
       CLUSTER_LIST:
-        - name: Stage Cluster
-          cluster_id: 1ieq35mpf26sq2r246sbffuvg9s380sp
+        - name: Stage Cluster (In OSD Prod)
+          cluster_id: 1lfl3g1vdea86ghh26vkmbqjkain900q
           cloud_provider: aws
           region: us-east-1
           multi_az: true
           schedulable: true
-          kafka_instance_limit: 28
+          kafka_instance_limit: 12
 
   - namespace:
       $ref: /services/managed-services/namespaces/managed-services-production.yml
     # This commit sha will need to replaced to reference the latest working commit.
     # Make sure that we've a docker image for this before it can be changed.
     # When change this, make sure to also change the `IMAGE_TAG` to reference the first seven characters of the sha1.
-    # Commits can be found here https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/commits/master
+    # Commits can be found here https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/commits/main
     # Inspect the recent merged MR from https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/merge_requests?scope=all&utf8=%E2%9C%93&state=merged to get the latest commit that has a docker image built from it. 
     # e.g if we take https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/merge_requests/356/commits, the commit with a docker image in it will be 
     # the very first commit i.e https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/merge_requests/356/commits?commit_id=f0fd63740464c5fa4bda395d5d31f675eff049ac 
     # If in doubt, see with the control plane team.
     # We are exploring into using automating this.
-    ref: e5963c0cc9dd5fe936ad3a8d363d8e95942dae21
+    ref: 9c1df7e81e04a4a1788bb1af7b9bca3e51502ba9
     parameters:
       ENVIRONMENT: production
+      KAFKA_LIFE_SPAN: 48
+      QUOTA_TYPE: ams
       # The image tag is the first seven characters of the #ref commit sha parameter.
       # Verify in https://quay.io/repository/rhoas/kas-fleet-manager?tab=tags to see if the tag exists.
-      IMAGE_TAG: e5963c0
+      IMAGE_TAG: 9c1df7e
+      STRIMZI_OPERATOR_ADDON_ID: managed-kafka
+      KAS_FLEETSHARD_ADDON_ID: kas-fleetshard-operator
       SENTRY_URL: sentry.devshift.net
       SENTRY_PROJECT: 16
       MAS_SSO_BASE_URL: https://identity.api.openshift.com
       MAS_SSO_REALM: rhoas
       OSD_IDP_MAS_SSO_REALM: rhoas-kafka-sre
+      # The Cluster Logging Operator ID. An empty string indicates that the operator should not be installed.
+      CLUSTER_LOGGING_OPERATOR_ADDON_ID: "cluster-logging-operator"
+      OCM_URL: ${OCM_BASE_URL}
+      AMS_URL: ${OCM_BASE_URL}
       # Max allowed service accounts created by users
       MAX_ALLOWED_SERVICE_ACCOUNTS: 2
        # Max limit for the fetching the clients from mas-sso
@@ -777,27 +889,90 @@ resourceTemplates:
       OBSERVATORIUM_GATEWAY: https://observatorium-observatorium.apps.mk-observe.trii.p1.openshiftapps.com
       # Observatorium tenant where observability metrics will sent to.
       OBSERVATORIUM_TENANT: kasdataplane
+      # The value of this auth type ( "dex" or "redhat" ) will determine the auth type ( Dex or Red Hat SSO) implemented for the observability
+      OBSERVATORIUM_AUTH_TYPE: dex
+      # Token Refresher URL
+      OBSERVATORIUM_TOKEN_REFRESHER_URL: http://token-refresher.managed-services-stage.svc.cluster.local
+      # Observatorium Red Hat SSO tenant for observability stack
+      OBSERVATORIUM_RHSSO_TENANT: managedkafka
+      # Red Hat SSO Observability gateway
+      OBSERVATORIUM_RHSSO_GATEWAY: https://observatorium-mst.api.stage.openshift.com
+      # Red Hat SSO Observability realm
+      OBSERVATORIUM_RHSSO_REALM: redhat-external
+      # Red Hat SSO Observability auth server url
+      OBSERVATORIUM_RHSSO_AUTH_SERVER_URL: https://sso.redhat.com/auth
       # Release tag within Config Repo to use for pulling index information
-      OBSERVABILITY_CONFIG_TAG: v1.3.2-prod
+      OBSERVABILITY_CONFIG_TAG: v1.8.0-prod
       # MAXIMUM NUMBER OF ALLOWED KAFKAs
-      KAFKA_CAPACITY_MAX_CAPACITY: 110
+      KAFKA_CAPACITY_MAX_CAPACITY: 120
       # A list of usernames representing users who do not have access to the service
       DENIED_USERS: []
+      # A list of users with read-only permissions for data plane clusters
+      READ_ONLY_USERS:
+        - "cbyrne"
+        - "dffrench"
+        - "dimaggio"
+        - "dingham"
+        - "dsaridak"
+        - "ebernard"
+        - "gryan"
+        - "jmadigan"
+        - "jmernin"
+        - "johnfriz"
+        - "jsarnovs"
+        - "kwall"
+        - "medgar"
+        - "msoriano"
+        - "pbraun"
+        - "ppaszki"
+        - "ppatiern"
+        - "rareddy"
+        - "rgodfrey"
+        - "shawkins"
+        - "swoodman"
+        - "tcooper"
+        - "weil"
+      # CEE Engineers
+        - "aboucham"
+        - "agagliar"
+        - "asouza"
+        - "cpandey"
+        - "dhawkins"
+        - "fvaleri"
+        - "hnaram"
+        - "jsherman"
+        - "kboone"
+        - "kkakarla"
+        - "mmurphy"
+        - "qluo"
+        - "shiggs"
+        - "toross"
+      # A list of kafka-sre users with cluster-admin permissions for data plane clusters
+      KAFKA_SRE_USERS:
+        - "agullon"
+        - "davmarti"
+        - "rlawton"
+        - "robrien"
+        - "rshelly"
+        - "stobin"
+        - "tdavidso"
+        - "kchernou"
+        - "npecka"
       # A list of long lived kafkas by ID, that should not be deleted after expiration time period
       LONG_LIVED_KAFKAS:
-          # AppSRE Kafka instance used for the cloud.redhat.com stage environment
-        - "1s4AWmiWtkwV38slVndEX67vUpL"
-          # Request from Ben Turner of the cloud.redhat.com team
+          # AppSRE Kafka instance used for the console.redhat.com stage environment
+        - "1vtfOyH6PBL2LLNnyYCqFdbh1bh"
+          # Request from Ben Turner of the console.redhat.com team
         - "1sAUFaj2Cw2GWj91lMbtjwE4JMN"
           # Kakfa SRE/Running the Service Team reference cluster. 
           # Details in Vault https://vault.devshift.net/ui/vault/secrets/managed-services/show/rts/rhosak-long-running-instance
-        - "1sWzX8n759eMZNt30Ro8MlVdPIm"
+        - "1vfA8Vm83xoODSSDgAFNo09lrXy"
           # Marketing Data Ops: internal customer.
-        - "1sfNMnSAm2SLSKhlcufSUF6mgAd"
+        - "1vaV4vJU4iy1CQn5Eev82ua4stb"
+        # Subscription Management Team: internal customer.
+        - "1va6Cdio0n36j5Je6P1aaDn7wJL"
       # Setting to false for now, will need to update to true once we're ready to open this to external users
       ALLOW_ANY_REGISTERED_USERS: true
-      # Enable using ths synchronizer module for kas-fleetshard-operator
-      ENABLE_KAS_FLEETSHARD_OPERATOR_SYNC: true
       # Set domain name for Kafka instances
       KAFKA_DOMAIN_NAME: "bf2.kafka.rhcloud.com"
       # A list of allowed users in yaml format irrespective of their organisation.
@@ -1261,6 +1436,7 @@ resourceTemplates:
             - username: shawkins_mk-kafka
             - username: ppatiern_mk-kafka-instances
             - username: npecka_mk-kafka-instances
+            - username: kchernou_mk-kafka-instances
 
           # The Consoles & Developer Experience team
         - id: 13838614
@@ -1303,6 +1479,8 @@ resourceTemplates:
             - username: mdawson_kafka_devexp
             - username: dhawkins_kafka_devexp
             - username: sharedaccount_kafka_devexp
+            - username: juntwang_kafka_devexp
+            - username: stmccart_kafka_devexp
 
           # Red Hat Managed Application Services
         - id: 13645369
@@ -1310,13 +1488,11 @@ resourceTemplates:
           allow_all: false
           allowed_users:
             - username: davmarti_kafka_sre
-            - username: damurphy_kafka_sre
             - username: rshelly_kafka_sre
             - username: tdavidso_kafka_sre
             - username: stobin_rhmi
             - username: rarangan_rhmi
             - username: cbyrne_kafka_sre
-            - username: mmikhail_kafka_sre
             - username: rlawton_kafka_sre
             - username: robrien_kafka_sre
             - username: agullon_kafka_sre
@@ -1347,8 +1523,6 @@ resourceTemplates:
             - username: mk-test-user-e2e-primary
             - username: mk-test-user-e2e-secondary
             - username: mk-test-user+webui
-            - username: dbizzarr_kafka_test
-            - username: hzrncik_kafka_test
             - username: mk-test-user-e2e-sandbox
             - username: mk-test-user-webui-stage
             - username: mk-test-user-webui-production
@@ -1359,6 +1533,8 @@ resourceTemplates:
             - username: mk-test-user+plus
             - username: mk-test-user-@
             - username: mk.test.user@redhat.com
+            - username: mk-test-user-radim
+            - username: mk-test-user-marek
 
           # The Security team
         - id: 13785172
@@ -1418,5 +1594,4 @@ resourceTemplates:
           region: us-east-1
           multi_az: true
           schedulable: true # change this to false if you do not want the cluster to be schedulable
-          kafka_instance_limit: 110 # change this to match any value of configuration
-          
+          kafka_instance_limit: 60 # change this to match any value of configuration

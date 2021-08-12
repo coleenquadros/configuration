@@ -11,34 +11,27 @@ spec:
   groups:
   - name: app-interface-cronjob
     rules:
-    - alert: KubeJobFailed
+    - alert: ECRImagePullSecretsKubeJobFailed
       annotations:
         message: Job {{ $labels.namespace }}/{{ $labels.job_name }} failed to complete in {{ $labels.namespace }}.
       expr: |
-        kube_job_status_failed{job="kube-state-metrics",namespace="app-interface-production"}  > 0
+        kube_job_status_failed{job="kube-state-metrics",namespace="app-interface-production",job_name=~"qontract-reconcile-aws-ecr-image-pull-secrets.*"}  > 0
       for: 5m
       labels:
+        service: app-interface
         severity: high
   - name: qontract-reconcile
     interval: 1m
     rules:
     - alert: QontractReconcileError
       labels:
+        service: app-interface
         severity: high
-      expr: sum(increase(qontract_reconcile_run_status_total{status!~"0|3|-9"}[5m])) by (integration, shards, shard_id, status) > 0
-      for: 5m
+        jiralert: ASIC
+      expr: qontract_reconcile_last_run_status > 0
+      for: 1h
       annotations:
-        runbook: ""
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/app-interface-integrations-flow-and-failure-scenarios.md"
         dashboard: "https://grafana.app-sre.devshift.net/d/Integrations/integrations"
-        message: "Integration: {{ $labels.integration }} has failed with exit code {{ $labels.status }}"
-        link_url: ""
-    - alert: QontractReconcileOomKiller
-      labels:
-        severity: high
-      expr: sum(increase(qontract_reconcile_run_status_total{status="-9"}[5m])) by (integration, shards, shard_id, status) > 0
-      for: 5m
-      annotations:
-        runbook: ""
-        dashboard: "https://grafana.app-sre.devshift.net/d/Integrations/integrations"
-        message: "Integration: {{ $labels.integration }} has been OOM-Killed"
+        message: "Integration: {{ $labels.integration }} (shard {{ $labels.shard_id }}) has failed with exit code {{ $value }}"
         link_url: ""

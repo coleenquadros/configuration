@@ -1,0 +1,41 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: notifications
+  platform: insights
+
+name: notifications-mirrormaker
+description: notifications-mirrormaker app on the Insights Platform
+
+app:
+  $ref: /services/insights/notifications/app.yml
+
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+managedResourceTypes:
+- KafkaMirrorMaker2
+
+imagePatterns:
+- registry.redhat.io/amq7
+
+resourceTemplates:
+- name: notifications-mirrormaker
+  path: /deploy/template.yaml
+  url: https://github.com/RedHatInsights/notifications-mirrormaker
+  targets:
+  - namespace:
+      $ref: /services/insights/notifications/namespaces/notifications-mirror-stage.yml
+    ref: 5f3caf6b1b713aca7cd9a5cde270033032f7abd7
+    parameters:
+      SOURCE_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:${KAFKA_BOOTSTRAP_PORT}
+      TARGET_BOOTSTRAP_SERVERS: platform-mq-kafka-bootstrap-kafka.apps.integrations.w3us.s1.devshift.org:443
+      TARGET_PASSWORD_SECRET: poc-mirror-credentials
+      TARGET_CERT_SECRET: poc-mirror-cert
+      TOPIC_PATTERN: platform.notifications.ingress

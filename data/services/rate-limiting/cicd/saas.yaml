@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: rate-limiting
@@ -10,8 +10,8 @@ description: Per cluster rate-limiting
 app:
   $ref: /services/rate-limiting/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
@@ -116,6 +116,24 @@ resourceTemplates:
           - path == kas_fleet_manager_v1
           variables:
           - path
+        # Limit SRS Fleet Manager managed service v1 endpoint
+        # to 6000 per 10 seconds (stage)
+        - namespace: stage:srs_fleet_manager
+          max_value: 6000
+          seconds: 10
+          conditions:
+          - path == srs_fleet_manager_v1
+          variables:
+          - path
+        # Limit SRS Service Registry API for each tenant to 150 req/s
+        - namespace: stage:srs_service_registry
+          max_value: 1500
+          seconds: 10
+          conditions:
+          - component == srs_service_registry
+          variables:
+          - component
+          - tenant_id
   - namespace:
       $ref: /openshift/app-sre-prod-04/namespaces/app-sre-rate-limiting.yml
     ref: ad4fada6d3a76933650f3ab4f21116f1f55df9d3
@@ -162,3 +180,21 @@ resourceTemplates:
           - path == kas_fleet_manager_v1
           variables:
           - path
+        # Limit SRS Fleet Manager managed service v1 endpoint
+        # to 6000 per 10 seconds (production)
+        - namespace: production:srs_fleet_manager
+          max_value: 6000
+          seconds: 10
+          conditions:
+          - path == srs_fleet_manager_v1
+          variables:
+          - path
+        # Limit SRS Service Registry API for each tenant to 150 req/s
+        - namespace: production:srs_service_registry
+          max_value: 1500
+          seconds: 10
+          conditions:
+          - component == srs_service_registry
+          variables:
+          - component
+          - tenant_id

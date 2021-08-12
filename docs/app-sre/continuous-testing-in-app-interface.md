@@ -11,11 +11,13 @@ The Jobs to deploy should be defined in a separate OpenShift template, and each 
 
 ## Define post-deployment testing SaaS file
 
-In order to define Continuous Testing pipelines in app-interface, define a SaaS file with a structure according to the [SaaS file structure](/docs/app-sre/continuous-delivery-in-app-interface.md#saas-file-structure), with the following specifications:
-* `managedResourceTypes` - should be only `Job`
-* `publishJobLogs` - (optional) if this is a [saas file running post-deployment tests](), set this to `true` to publish Jobs' pods logs as artifacts in the Jenkins job.
-* `resourceTemplates.target.upstream` - set this to the name of the deployment job (`openshift-saas-deploy-<saas_file_name>-<environment_name>`)
-    * `saas_file_name` is the name of the SaaS file deploying the application.
-    * `environment_name` is the name of the environment that the namespace (to which the application is being deployed) is a part of. Read more on [Environments](/docs/app-interface/api/entities-and-relations.md).
+In order to define Continuous Testing pipelines in app-interface:
+
+1. Define a SaaS file with a structure according to the [SaaS file structure](/docs/app-sre/continuous-delivery-in-app-interface.md#saas-file-structure), with the following specifications:
+    * `managedResourceTypes` - should be only `Job`
+    * `publishJobLogs` - (optional) if this is a [saas file running post-deployment tests](), set this to `true` to publish Jobs' pods logs.
+
+2. Define an [automated promotion](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-delivery-in-app-interface.md#automatedgated-promotions) based on the results of the stage deployment.
+    * Note: The usage of `upstream` to link post-deployment tests to a deployment job should be updated to use automated promotions. For more information: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/19968
 
 A complete example for github-mirror can be found [here](/data/services/github-mirror/cicd/test.yaml).

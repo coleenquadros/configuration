@@ -34,43 +34,21 @@ All AppSRE team members must read this process.
 
 ## Major Incident Definition Criteria
 
-This process must be followed for major incidents, classified as such if _any_ of the following criteria are met:
+The Major Incident process is only applicable to services that are used by customers: internal or external. Internal tooling is excluded.
 
-* The outage is visible to customers (internal or external).
-* Another team besides AppSRE is needed in order to fix the incident.
-* The Service is breaching its SLOs.
+A Major Incident is defined as such if any of the following statements apply:
 
-If the incident does not qualify as a major incident, there is no need to follow this process.
+* Full outage or heavy degradation of one or multiple services impacting one or several customers.
+* Duration of the incident is greater than 4 hours.
+* Multiple layers and SRE teams are impacted (platform, application, ...).
 
 ## Incident Roles in the AppSRE team
 
 * **First Responder**: Oncall engineer, by default FTS, Primary or Secondary, in that order. Their role in the incident will be defined in the first moments of it from the roles below.
-* **Incident Tech Lead**: In charge of the technical resolution of the incident: investigation, mitigation and resolution. It defaults to **First Responder**. A different person may be chosen by the **Incident Commander**, or by the team manager or by the team lead.
-* **Incident Commander**: In charge of communications, fallout and ensuring continuity of the incident investigations. Nominated by the **First Responder**, or by the team manager or by the team lead. In case of an incident outside of working hours, where no one else is available, this role defaults to the **First Responder**.
-* **Parallel Investigator**: An additional engineer that will support the **Incident Tech Lead** to assist with the issue investigation, mitigation and resolution.
+* **Incident Commander**: In charge of communications, fallout and ensuring continuity of the incident investigation. Usually the team manager. Outside of working hours, this role defaults to **First Responder**.
+* **Incident Tech Lead**: In charge of the technical resolution of the incident: investigation, mitigation and resolution. Defaults to **First Responder**. The **Incident Commander** may assign this role to a different person.
+* **Parallel Investigator**: An additional engineer that will support the **Incident Tech Lead** to assist with the issue investigation, mitigation and resolution. Nominated by the **Incident Commander**.
 * **Incident Owner**: Responsible for the incident after it has been resolved, being responsible for RCA and agreeing follow-up actions with all stakeholders. Defaults to **First Responder**. Can be changed by the team manager or team lead, but requires explicit acknowledgement of the change.
-
-## AppSRE Internal Escalations
-
-### During working hours
-
-The **First Responder** may ask other AppSRE team members to join with the incident effort. The **Incident Tech Lead** role will default to the **First Responder**, unless otherwise explicitely stated during the initial moments of the incident. At least one more person will be involved which will be made the **Incident Commander**. Depending on the severity of the issue, other people may join to act as a **Parallel Investigator**.
-
-The team manager and the team lead must be notified of these incidents.
-
-### Outside of working hours
-
-The **First Responder**, acting as the **Incident Tech Lead**, will try to resolve the incident by themselves. If assistance is needed due to the complexity or criticality of the issue, the **First Responder** may escalate to the **Secondary On-Call**, to the team manager or to the team lead via PagerDuty (create issue in PD and assign to them).
-
-## Specific AppSRE Flow
-
-1. Initial Response:
-  * AppSRE engineer on call (FTS, Primary, Secondary) becomes the **First Responder**.
-  * Continue debugging the issue.
-2. 10 minutes later:
-  * Nominate **Incident Commander** (defaults to **First Responder** if outside of working hours).
-  * Join the AppSRE bridge [zti].
-  * Continue debugging the issue.
 
 ## Incident Commander Responsibilities
 
@@ -89,11 +67,11 @@ As soon as the **Incident Commander** is nominated, which should be 10 minutes a
 * Create a JIRA with type `Task`, with label `type/incident` in the [APPSRE board].
 * Create slack channel for the incident, referencing the JIRA and the bridge ([zti]).
 * Start the RCA, by creating a copy of the [RCA template]. Attach to the JIRA.
-* Post a message to #sd-org with: link to bridge ([zti]), JIRA, and short description of the issue.
+* Post a message to #sd-org with: Service Name, short description of the issue, impact, JIRA and link to bridge ([zti]).
 * Send email to [serviceOwners], [serviceNotifications],
   [sd-org@redhat.com](mailto:sd-org@redhat.com) and to
   [sd-notifications@redhat.com](mailto:sd-notifications@redhat.com). The email
-  should include: Service Name, Impact, JIRA, and incident slack channel.
+  should include: Service Name, short description of the issue, impact and JIRA.
 
 ### Continuous Communication (every 30 minutes)
 
@@ -107,11 +85,25 @@ degraded.
 
 ### Resolution
 
-Upon resolution, this should be notified to all the surfaces that were used to report the incident:
+Upon resolution, all the surfaces that were used to report the incident should be notified:
 
 * Incident slack channel.
 * #sd-org slack channel.
 * Email thread created in the first step.
+
+## AppSRE Internal Escalations
+
+### During working hours
+
+The **First Responder** may ask other AppSRE team members to join with the incident effort. The **Incident Tech Lead** role will default to the **First Responder**, unless otherwise explicitely stated during the initial moments of the incident. At least one more person will be involved which will be made the **Incident Commander** (usually team manager). Depending on the severity of the issue, other people may join to act as a **Parallel Investigator**.
+
+The team manager and the team lead must be notified of these incidents.
+
+### Outside of working hours
+
+The **First Responder**, acting as the **Incident Tech Lead**, will also become the **Incident Commander**. They try to resolve the incident by themselves. If assistance is needed due to the complexity or criticality of the issue, theymay escalate to the **Secondary On-Call**, or to the team manager (create issue in PD and assign to them).
+
+Note: currently there is no on-call rotation for team managers. This will be created in the future.
 
 ## External Escalations
 
@@ -128,11 +120,21 @@ The incident should be escalated to the Service development team within 1 hour, 
 In order to escalate to the developer oncall, the escalation policy must have been provided and documented in
 App-Interface in the `escalationPolicy` field of the corresponding `app-1.yml` file.
 
-If there is no `escalationPolicy`, the incident should be escalated to the AppSRE manager.
+If there is no `escalationPolicy`, the incident should be escalated to the team manager.
 
 ### SREP Team - OSD infrastructure
 
 If there is any indication that the incident may have been caused by an OSD infrastructure issue, the incident must be escalated oncall SREP team immediately, by pinging `@sre-platform-primary` in the `#sd-sre-platform` channel, or by creating a PD incident and assigning to them.
+
+## Specific AppSRE Flow
+
+1. Initial Response:
+  * AppSRE engineer on call (FTS, Primary, Secondary) becomes the **First Responder**.
+  * Continue debugging the issue.
+2. 10 minutes later:
+  * Nominate **Incident Commander** (usually team manager - or **First Responder** if outside of working hours).
+  * Join the AppSRE bridge [zti].
+  * Continue debugging the issue.
 
 ## Post Mortem
 

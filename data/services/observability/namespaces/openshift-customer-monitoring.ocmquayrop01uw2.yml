@@ -15,11 +15,6 @@ app:
 environment:
   $ref: /products/app-sre/environments/production.yml
 
-managedResourceTypes:
-- Secret
-- PrometheusRule
-- ServiceMonitor
-
 managedResourceNames:
 # https://github.com/openshift/managed-cluster-config/blob/master/deploy/osd-customer-monitoring/05-role.yaml#L24-L37
 - resource: Secret
@@ -31,6 +26,13 @@ managedResourceNames:
     - prometheus-additional-alertmanager-config
     - prometheus-additional-scrape-config
     - prometheus-auth-proxy
+
+managedResourceTypes:
+- ServiceMonitor
+- PrometheusRule
+- Service
+- Prometheus
+- Secret
 
 openshiftResources:
 # Observability
@@ -50,6 +52,7 @@ openshiftResources:
 - provider: resource-template
   type: extracurlyjinja2
   path: /observability/alertmanager/alertmanager-instance.secret.yaml
+  validate_alertmanager_config: true
   variables:
     jiralert_host: jiralert.app-sre.devshift.net
 
@@ -79,6 +82,52 @@ openshiftResources:
 ### OLM alerts
 - provider: resource
   path: /observability/olm/olm.prometheusrules.yaml
+### App SRE prometheus PVC metrics
+- provider: resource
+  path: /observability/prometheusrules/kube-metrics-pvc-observability.prometheusrules.yaml
 
 
 ################## Add  any cluster-specific content below this line ##################
+
+# ServiceMonitor
+## Quay
+- provider: resource
+  path: /ocm-quay/quay.app-sre.servicemonitor.yaml
+- provider: resource
+  path: /ocm-quay/quay.aggregation.servicemonitor.yaml
+- provider: resource
+  path: /quay-p/quay/quay.aggregation.federation.servicemonitor.yaml
+
+
+# PrometheusRule
+## OCM-Quay
+- provider: resource
+  path: /ocm-quay/quay.alerts.prometheusrules.yaml
+- provider: resource
+  path: /ocm-quay/quay.aggregation.prometheusrules.yaml
+- provider: resource
+  path: /observability/prometheusrules/kube-cronjob.prometheusrules.yaml
+
+# Prometheus
+## Quay Aggregation Prometheus
+- provider: resource-template
+  type: jinja2
+  path: /quay-p/quay/quay.aggregation.prometheus.yaml
+  variables:
+    version: v2.15.2
+    retention: 1h
+    tempfsSize: 5Gi
+    walCompression: true
+
+# Service
+## Quay Aggregation Prometheus
+- provider: resource
+  path: /quay-p/quay/quay.aggregation.service.yaml
+
+### Deployment Validation Operator
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/deployment-validation-operator.servicemonitor.yaml
+  variables:
+    environment: production
+    namespace: deployment-validation-operator

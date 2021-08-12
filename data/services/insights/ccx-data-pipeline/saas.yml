@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: ccx-data-pipeline
@@ -11,21 +11,20 @@ description: ccx-data-pipeline app on the Insights Platform
 app:
   $ref: /services/insights/ccx-data-pipeline/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
 
-timeout: 5
-
 managedResourceTypes:
 - ConfigMap
 - Deployment
 - HorizontalPodAutoscaler
 - Service
+- CronJob
 
 imagePatterns:
 - quay.io/cloudservices
@@ -43,69 +42,110 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
-    ref: 3ce41a45f38a335deb9badbf7ccd9e94ad4498a0
+    delete: true
+    ref: c1643379f40b711454ceb65e763a8ed561219c59
     parameters:
-      IMAGE_TAG: 13a5bb7
+      IMAGE_TAG: 85c4a83
       MIN_REPLICAS: "2"
-      MAX_REPLICAS: "16"
-      HABERDASHER_KAFKA_BOOTSTRAP: "platform-mq-kafka-bootstrap.platform-mq-stage.svc.cluster.local:9092"
+      MAX_REPLICAS: "3"
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: 3ce41a45f38a335deb9badbf7ccd9e94ad4498a0
+    ref: c1643379f40b711454ceb65e763a8ed561219c59
     parameters:
-      IMAGE_TAG: 13a5bb7
+      IMAGE_TAG: 85c4a83
       MIN_REPLICAS: "2"
       MAX_REPLICAS: "16"
-      HABERDASHER_KAFKA_BOOTSTRAP: "platform-mq-kafka-bootstrap.platform-mq-prod.svc.cluster.local:9092"
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+
 - name: insights-results-aggregator
   path: /templates/ccx-data-pipeline/insights-results-aggregator.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
   targets:
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
-    ref: 8a78af23065d7e03138e43e50bbfe4cd4be53f1d
+    delete: true
+    ref: d8a8f36655cabdcc1694c7b70d1d5d360c0b6391
     parameters:
-      IMAGE_TAG: 4284b79
+      IMAGE_TAG: f0ec801
       MIN_REPLICAS: "2"
       MAX_REPLICAS: "6"
-      HABERDASHER_KAFKA_BOOTSTRAP: "platform-mq-kafka-bootstrap.platform-mq-stage.svc.cluster.local:9092"
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: 8a78af23065d7e03138e43e50bbfe4cd4be53f1d
+    ref: d8a8f36655cabdcc1694c7b70d1d5d360c0b6391
     parameters:
-      IMAGE_TAG: 4284b79
+      IMAGE_TAG: 9284882
       MIN_REPLICAS: "2"
       MAX_REPLICAS: "6"
-      HABERDASHER_KAFKA_BOOTSTRAP: "platform-mq-kafka-bootstrap.platform-mq-prod.svc.cluster.local:9092"
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+
 - name: ccx-insights-content-service
   path: /templates/ccx-data-pipeline/ccx-insights-content-service.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
   targets:
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
-    ref: 3ce41a45f38a335deb9badbf7ccd9e94ad4498a0
+    delete: true
+    ref: e9d487aa43f848260b174d8df3b249b020990385
     parameters:
-      IMAGE_TAG: 9c3b40c
+      IMAGE_TAG: a0aaa5e
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: 3ce41a45f38a335deb9badbf7ccd9e94ad4498a0
+    ref: e9d487aa43f848260b174d8df3b249b020990385
     parameters:
-      IMAGE_TAG: 9c3b40c
+      IMAGE_TAG: a0aaa5e
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+
 - name: ccx-smart-proxy
   path: /templates/ccx-data-pipeline/ccx-smart-proxy.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
   targets:
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
-    ref: 8a78af23065d7e03138e43e50bbfe4cd4be53f1d
+    delete: true
+    ref: e9d487aa43f848260b174d8df3b249b020990385
     parameters:
-      IMAGE_TAG: bd58859
+      IMAGE_TAG: f7bac52
       MIN_REPLICAS: "2"
       MAX_REPLICAS: "6"
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: 8a78af23065d7e03138e43e50bbfe4cd4be53f1d
+    ref: e9d487aa43f848260b174d8df3b249b020990385
     parameters:
-      IMAGE_TAG: bd58859
+      IMAGE_TAG: f7bac52
       MIN_REPLICAS: "2"
       MAX_REPLICAS: "6"
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+
+- name: ccx-notification-writer
+  path: /templates/ccx-data-pipeline/ccx-notification-writer.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
+    ref: e9fc230c8dfc48f1ae95986222e47b580f1f274a
+    parameters:
+      IMAGE_TAG: e9e3c85
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
+    ref: e9fc230c8dfc48f1ae95986222e47b580f1f274a
+    parameters:
+      IMAGE_TAG: e9e3c85
+
+- name: ccx-notification-service
+  path: /templates/ccx-data-pipeline/ccx-notification-service.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
+    ref: e9fc230c8dfc48f1ae95986222e47b580f1f274a
+    parameters:
+      IMAGE_TAG: 5dde7d3
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
+    ref: 35e9242a7a60b37b263f37aded4a2907891b3f17
+    parameters:
+      IMAGE_TAG: 5dde7d3

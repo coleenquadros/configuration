@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: config-manager
@@ -11,15 +11,13 @@ description: The Config Manager service allows users to set a service configurat
 app:
   $ref: /services/insights/config-manager/app.yml
 
-instance:
-  $ref: /dependencies/ci-ext/ci-ext.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
-
-timeout: 5
 
 managedResourceTypes:
 - ClowdApp
@@ -40,25 +38,35 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/config-manager/namespaces/config-manager-stage.yml
     ref: master
-    upstream: RedHatInsights-config-manager-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-config-manager-gh-build-master
     parameters:
       LOG_LEVEL: debug
       CM_DISPATCHER_HOST: http://${PLAYBOOK_DISPATCHER_HOST}:${PLAYBOOK_DISPATCHER_PORT}
-      CM_INVENTORY_HOST: http://${HOST_INVENTORY_HOST}:8080
+      CM_INVENTORY_HOST: http://${HOST_INVENTORY_HOST}:8000
       CM_CLOUD_CONNECTOR_HOST: http://${CLOUD_CONNECTOR_HOST}:${CLOUD_CONNECTOR_PORT}
       CM_PLAYBOOK_HOST: https://cert.${PLATFORM_HOSTNAME}
   - namespace:
       $ref: /services/insights/config-manager/namespaces/config-manager-prod.yml
-    ref: fde6d4a94f9bb3a29a39d501ba485dbe2f9d2ed9
+    ref: a1988a8ff4f7e8b13675681dd8c995bb9109c70f
     parameters:
       LOG_LEVEL: debug
       CM_DISPATCHER_HOST: http://${PLAYBOOK_DISPATCHER_HOST}:${PLAYBOOK_DISPATCHER_PORT}
-      CM_INVENTORY_HOST: http://${HOST_INVENTORY_HOST}:8080
+      CM_INVENTORY_HOST: http://${HOST_INVENTORY_HOST}:8000
       CM_CLOUD_CONNECTOR_HOST: http://${CLOUD_CONNECTOR_HOST}:${CLOUD_CONNECTOR_PORT}
-      CM_PLAYBOOK_HOST: https://cert.cloud.redhat.com
+      CM_PLAYBOOK_HOST: https://cert.${PLATFORM_HOSTNAME}
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
     ref: internal  # populated by bonfire
     parameters:
       MIN_REPLICAS: 1
+      CM_DISPATCHER_IMPL: mock
+      CM_CLOUD_CONNECTOR_IMPL: mock
+      CM_INVENTORY_IMPL: mock
+      CM_DISPATCHER_HOST: mock
+      CM_CLOUD_CONNECTOR_HOST: mock
+      CM_INVENTORY_HOST: mock
+      CM_PLAYBOOK_HOST: mock

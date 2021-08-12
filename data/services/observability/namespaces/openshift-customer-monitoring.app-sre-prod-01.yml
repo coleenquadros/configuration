@@ -85,7 +85,12 @@ openshiftResources:
 ### App SRE prometheus PVC metrics
 - provider: resource
   path: /observability/prometheusrules/kube-metrics-pvc-observability.prometheusrules.yaml
-
+#### AppSRE tekton openshift saas deployments
+- provider: resource
+  path: /observability/prometheusrules/app-sre-openshift-saas-deployment-jobs.prometheusrules.yaml
+### MT-SRE tekton openshift saas deployments
+- provider: resource
+  path: /observability/prometheusrules/mt-sre-ci-int.prometheusrules.yaml
 
 ################## Add  any cluster-specific content below this line ##################
 
@@ -130,23 +135,6 @@ openshiftResources:
     appsre_env: staging
     max_clusters_per_shard: 500
     grafana_datasource: app-sre-prod-01-prometheus
-### Hive (v3)
-## hive-production
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /observability/prometheusrules/hive-production-v3.prometheusrules.yaml
-  variables:
-    shard_name: production
-    aws_account_operator_accounts_threshold: 2851
-    grafana_datasource: app-sre-prod-01-prometheus
-## hive-stage (v3)
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /observability/prometheusrules/hive-stage-v3.prometheusrules.yaml
-  variables:
-    shard_name: stage
-    aws_account_operator_accounts_threshold: 4950
-    grafana_datasource: app-sre-prod-01-prometheus    
 ### Github Mirror Service
 - provider: resource
   path: /observability/prometheusrules/github-mirror-production.prometheusrules.yaml
@@ -212,6 +200,12 @@ openshiftResources:
   path: /observability/servicemonitors/cloudwatch-exporter.servicemonitor.yaml
   variables:
     namespace: app-sre-observability-production
+    name: cloudwatch-exporter-ocm-quay-us-west-2
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/cloudwatch-exporter.servicemonitor.yaml
+  variables:
+    namespace: app-sre-observability-production
     name: cloudwatch-exporter-crc
 - provider: resource-template
   type: jinja2
@@ -254,7 +248,19 @@ openshiftResources:
 ### Dashdotdb
 - provider: resource-template
   type: jinja2
-  path: /observability/servicemonitors/dashdotdb.servicemonitor.yaml
+  path: /observability/servicemonitors/dashdotdb-cso.servicemonitor.yaml
+  variables:
+    environment: production
+    namespace: dashdot
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/dashdotdb-slo.servicemonitor.yaml
+  variables:
+    environment: production
+    namespace: dashdot
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/dashdotdb-dvo.servicemonitor.yaml
   variables:
     environment: production
     namespace: dashdot

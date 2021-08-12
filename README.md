@@ -28,7 +28,7 @@ this repository.
   - [Entities and relations](#entities-and-relations)
   - [Howto](#howto)
     - [Add or modify a user (`/access/users-1.yml`)](#add-or-modify-a-user-accessusers-1yml)
-    - [Get notified of events involving a service, or it's dependencies](#get-notified-of-events-involving-a-service-or-its-dependencies)
+    - [Get notified of events involving a service, or its dependencies](#get-notified-of-events-involving-a-service-or-its-dependencies)
     - [Define an escalation policy for a service](#define-an-escalation-policy-for-a-service)
       - [Prerequisites: The team's slack channel and Pagerduty schedule are defined in app-interface](#prerequisites-the-teams-slack-channel-and-pagerduty-schedule-are-defined-in-app-interface)
       - [Step 1: Define escalation policies for the team:](#step-1-define-escalation-policies-for-the-team)
@@ -46,7 +46,7 @@ this repository.
       - [Manage Routes via App-Interface (`/openshift/namespace-1.yml`) using Vault](#manage-routes-via-app-interface-openshiftnamespace-1yml-using-vault)
       - [Validate JSON in Secrets and ConfigMaps](#validate-json-in-secrets-and-configmaps)
       - [Validate AlertManager configuration in Secrets and ConfigMaps](#validate-alertmanager-configuration-in-secrets-and-configmaps)
-    - [Manage openshift-acme deployments via App-Interface (`/openshift/acme-1.yml`)](#manage-openshift-acme-deployments-via-app-interface-openshiftacme-1yml)
+    - [Manage openshift-acme deployments via App-Interface](#manage-openshift-acme-deployments-via-app-interface)
     - [Manage OpenShift Groups association via App-Interface (`/openshift/cluster-1.yml`)](#manage-openshift-groups-association-via-app-interface-openshiftcluster-1yml)
     - [Manage OpenShift LimitRanges via App-Interface (`/openshift/limitrange-1.yml`)](#manage-openshift-limitranges-via-app-interface-openshiftlimitrange-1yml)
     - [Manage OpenShift ResourceQuotas via App-Interface (`/openshift/quota-1.yml`)](#manage-openshift-resourcequotas-via-app-interface-openshiftquota-1yml)
@@ -105,7 +105,7 @@ this repository.
 This repository contains of a collection of files under the `data` folder.
 Whatever is present inside that folder constitutes the App-SRE contract.
 
-These files can be `yaml` or `json` files, and they must validate against the some
+These files can be `yaml` or `json` files, and they must validate against some
 [well-defined json schemas][schemas].
 
 The path of the files do not have any effect on the integrations (automation
@@ -115,6 +115,9 @@ will all contain:
 - `$schema`: which maps to a well defined schema [schema][schemas].
 - `labels`: arbitrary labels that can be used to perform queries, etc.
 - Additional data specific to the resource in question.
+
+Continuous delivery is managed using the
+[SaaS files](docs/app-sre/continuous-delivery-in-app-interface.md).
 
 ## Components
 
@@ -212,13 +215,31 @@ The output will be JSON document, so you can pipe it with `jq`, example:
 
 Instructions in [this document](/docs/app-sre/sop/running-integrations-manually.md).
 
+## Visual App-interface
+
+Visual App-interface is a visual representation of the data in this repository.
+Source code can be found here: https://github.com/app-sre/visual-qontract
+
+An internal instance is reachable (behind the VPN) here:
+<https://visual-app-interface.apps.appsrep05ue1.zqxk.p1.openshiftapps.com/graphql>.
+
+A public instance is rechable (authentication via GH) here:
+<https://visual-app-interface.devshift.net>.
+
 ## Querying the App-interface
 
 The contract can be queried programmatically using a
 [GraphQL](<https://graphql.org/learn/>) API.
 
-The GraphQL endpoint is reachable here:
+The GraphQL internal endpoint is reachable (behind the VPN) here:
+<https://app-interface.apps.appsrep05ue1.zqxk.p1.openshiftapps.com/graphql>.
+
+The GraphQL public endpoint is reachable (with authentication) here:
 <https://app-interface.devshift.net/graphql>.
+
+**IMPORTANT**: in order to use the GraphQL UI you need to click on the Settings
+wheel icon (top-right corner) and replace `omit` with `include` in
+`request.credentials`.
 
 To get credentials to query app-interface, submit a Credentials Request form in a merge request.
 The request itself is a file with the following structure:
@@ -253,10 +274,6 @@ credentials: app-interface-production-dev-access
 ```
 
 Please create the request file [here](/data/app-interface/requests).
-
-**IMPORTANT**: in order to use the GraphQL UI you need to click on the Settings
-wheel icon (top-right corner) and replace `omit` with `include` in
-`request.credentials`.
 
 ## Features
 
@@ -341,7 +358,7 @@ To learn more about the different entities and their relations:
 
 ## Howto
 
-### Add or modify a user (`/access/users-1.yml`)
+### Add or modify a user (`/access/user-1.yml`)
 
 You will want to do this when you want to add a user or grant / revoke
 permissions for that user.
@@ -353,10 +370,10 @@ directory structure as something that is only useful for human consumption.
 Write the file in yaml format with `.yml` extension. The contents must validate
 against the current [user schema][userschema].
 
-Make sure you define `$schema: /access/users-1.yml` inside the file.
+Make sure you define `$schema: /access/user-1.yml` inside the file.
 
 The `roles` property is the most complex property to understand. If you look at
-the `/access/users-1.yml` you will see that it's a list of [crossrefs][crossref].
+the `/access/user-1.yml` you will see that it's a list of [crossrefs][crossref].
 The `$ref` property points to another file, in this case it must be a
 [role][role]. The role file is essentially a collection of
 [permissions][permission]. Permissions contain a mandatory property called
@@ -373,7 +390,7 @@ you want the user to belong to. Roles can be associated with the services:
 `teams/<name>/roles/<rolename>.yml`. Check out the currently defined roles to
 know which one to add.
 
-### Get notified of events involving a service, or it's dependencies
+### Get notified of events involving a service, or its dependencies
 
 There are three ways a user or group can get notified of service events (e.g. planned maintenance, outages):
 
@@ -751,7 +768,7 @@ If a key of a Secret or ConfigMap keys is a JSON, you can add the option `valida
 
 If a key of a Secret or ConfigMap keys is a JSON, you can add the option `validate_alertmanager_config` to the openshift resource definition in order to make sure it is valid alertmanager config. The integration will look into the `alertmanager.yaml` key of the secret to look for it unless `alertmanager_config_key` is specified.
 
-### Manage openshift-acme deployments via App-Interface (`/openshift/acme-1.yml`)
+### Manage openshift-acme deployments via App-Interface
 
 This integration allows namespace owners to deploy openshift-acme to their namespaces.
 
@@ -1194,6 +1211,7 @@ In order to import certificates stored in Vault into AWS Certificate Manager, yo
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-ssl" and `provider` is set to `acm`, the created Secret will be called `my-ssl-acm`.
+- `annotations`: additional annotations to add to the output resource
 
 NOTE: Either `secret` or `domain_name` must be provided, but not both.  Use `secret` to import a certificate from vault, and `domain` for AWS to create a certifcate
 
@@ -1224,6 +1242,7 @@ In order to add or update Amazon Elasticsearch Service, you need to add them to 
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-service" and `provider` is set to `elasticsearch`, the created Secret will be called `my-service-elasticsearch`.
+- `annotations`: additional annotations to add to the output resource
 
 Once the changes are merged, the Amazon Elasticsearch Service will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
@@ -1253,6 +1272,7 @@ In order to create or update an RDS database, you need to add them to the `terra
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-instance" and `provider` "rds", the created Secret will be called `my-instance-rds`.
+- `annotations`: additional annotations to add to the output resource
 - `enhanced_monitoring`: (optional) Setting it to `true` will enable enhanced monitoring for the database instance. Learn more about enhanced monitoring [here](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_Monitoring.OS.html).
 - `output_resource_db_name`: (optional) set the `db.name` key in the output Secret (does not affect actual terraform resource).
 - `reset_password`: (optional) add or update this field to a random string to trigger a database password reset.
@@ -1343,6 +1363,7 @@ In order to add or update an S3 bucket, you need to add them to the `terraformRe
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-bucket" and `provider` "s3", the created Secret will be called `my-bucket-s3`.
+- `annotations`: additional annotations to add to the output resource
 
 Once the changes are merged, the S3 bucket will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
@@ -1371,6 +1392,7 @@ In order to add or update an ElastiCache database, you need to add them to the `
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-cluster" and `provider` "elasticache", the created Secret will be called `my-cluster-elasticache`.
+- `annotations`: additional annotations to add to the output resource
 
 Once the changes are merged, the ElastiCache clusters will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
@@ -1378,6 +1400,9 @@ The Secret will contain the following fields:
 - `db.endpoint` - The configuration endpoint of the ElastiCache cluster.
 - `db.port` - The database port.
 - `db.auth_token` - Authentication token for in-transit encryption, if `transit_encryption_enabled` is set to `true`.
+
+Notes:
+- To provision an instance with cluster mode enabled, it is mandatory to define `cluster_mode.num_node_groups` and `cluster_mode.replicas_per_node_group` in the defaults file.
 
 #### Manage IAM Service account users via App-Interface (`/openshift/namespace-1.yml`)
 
@@ -1395,6 +1420,7 @@ In order to add or update a service account, you need to add them to the `terraf
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-user" and `provider` "aws-iam-service-account", the created Secret will be called `my-user-aws-iam-service-account`.
+- `annotations`: additional annotations to add to the output resource
 - `aws_infrastructure_access`: (optional) grant the created IAM user AWS Infrastructure access via OCM:
   - `cluster`: reference to the cluster you want to grant infrastructure access to
   - `access_level`: level of access to grant (currently either read-only or network-mgmt)
@@ -1426,6 +1452,7 @@ In order to add or update an SQS queue, you need to add them to the `terraformRe
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-queue" and `provider` "sqs", the created Secret will be called `my-queue-sqs`.
+- `annotations`: additional annotations to add to the output resource
 - `specs`: list of queue specifications to create:
   - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options:](/resources/terraform/resources/)
   - `queues`: list of queues to create according to the defined defaults:
@@ -1458,6 +1485,7 @@ In order to add or update a DynamoDB table, you need to add them to the `terrafo
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-table" and `provider` "dynamodb", the created Secret will be called `my-table-dynamodb`.
+- `annotations`: additional annotations to add to the output resource
 - `specs`: list of table specifications to create:
   - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options:](/resources/terraform/resources/)
   - `tables`: list of tables to create according to the defined defaults:
@@ -1489,6 +1517,7 @@ In order to add or update an ECR repository, you need to add them to the `terraf
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-repo" and `provider` "ecr", the created Secret will be called `my-repo-ecr`.
+- `annotations`: additional annotations to add to the output resource
 
 Once the changes are merged, the ECR repository will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
@@ -1514,6 +1543,7 @@ In order to add or update an S3+CloudFront stack, you need to add them to the `t
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-s3-cf-stack" and `provider` "s3-cloudfront", the created Secret will be called `my-s3-cf-stack-s3-cloudfront`.
+- `annotations`: additional annotations to add to the output resource
 
 Once the changes are merged, the resources will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
@@ -1543,6 +1573,7 @@ CloudFront Public Keys can be self-serviced via App-Interface.  Once created in 
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-key" and `provider` is set to `s3-cloudfront-public-key`, the created Secret will be called `my-key-s3-cloudfront-public-key`
+- `annotations`: additional annotations to add to the output resource
 
 The `secret` must have the key `cloudfront_public_key` that contains the public key to be uploaded to AWS.
 
@@ -1570,6 +1601,7 @@ In order to add or update an CloudWatch Log Group, you need to add them to the `
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-log-group" and `provider` "cloudwatch", the created Secret will be called `my-log-group-cloudwatch`.
+- `annotations`: additional annotations to add to the output resource
 
 Once the changes are merged, the CloudWatch Log Group will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
@@ -1593,6 +1625,7 @@ In order to add or update a Key Management Service key, you need to add them to 
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-key" and `provider` "kms", the created Secret will be called `my-key-kms`.
+- `annotations`: additional annotations to add to the output resource
 
 Once the changes are merged, the Key Management Service key will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
@@ -1613,6 +1646,7 @@ In order to add or update a Kinesis Stream, you need to add them to the `terrafo
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
     - For example, for a resource with `identifier` "my-stream" and `provider` "kinesis", the created Secret will be called `my-stream-kinesis`.
+- `annotations`: additional annotations to add to the output resource
 
 Once the changes are merged, the Kinesis Stream will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
@@ -1841,7 +1875,7 @@ To get access to the project, if required, contact the App SRE team.
 
 ### Add a Grafana Dashboard
 
-1. Add manually your dashboard following [these instructions](/docs/app-sre/monitoring.md#Addingdashboards)
+* Add manually your dashboard following [these instructions](/docs/app-sre/monitoring.md#Addingdashboards)
   * Note: Each dashboard ConfigMap should have the following section under `metadata`:
     ```yaml
     labels:
@@ -1849,13 +1883,33 @@ To get access to the project, if required, contact the App SRE team.
     annotations:
       grafana-folder: /grafana-dashboard-definitions/<app_name>
     ```
-    * app_name should be defined in the [grafana dashboards ConfigMap](/resources/observability/grafana/grafana-dashboards.configmap.yaml)
+    * `app_name` should be defined in the [grafana dashboards ConfigMap](/resources/observability/grafana/grafana-dashboards.configmap.yaml)
 
-1. Add the graph json to `/resources/observability/grafana/`. Please follow the naming convention
+* Add the dashboard configmap in a folder in your upstream repository.
 
-1. Add the graph to the resources list at `/data/services/observability/namespaces/app-sre-observability-ENV.yml`, `ENV` being both production AND stage. It is mandatory that both environments are added or one of the deployments will eventually fail.
+* Add a `resourceTemplate` entry in the [grafana dashboard saas file](/data/services/observability/cicd/saas/saas-grafana.yaml) to deploy your dashboard in staging, e.g.
+  ```yaml
+  - name: your-service-dashboards
+    url: https://gitlab.cee.redhat.com/service-registry/your-service
+    path: /dashboards
+    provider: directory
+    targets:
+    - namespace:
+        $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+      ref: master
+  ```
+  * Note: with this configuration, every time you merge changes in your dashboard it will be deployed in stage. Read [this guide](/docs/app-sre/continuous-delivery-in-app-interface.md) to know more about saas files.
 
-1. Wait for the configmap has been merged and applied to the cluster(s).
+* Once your MR is merged, your dashboard will be deployed to stage and will be accessible in https://grafana.stage.devshift.net.
+
+* Add a new target in the above resource template to deploy to prod, e.g.
+  ```yaml
+  targets:
+  (...)
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: <your-service-repo-commit-sha>
+  ```
 
 ### Execute a SQL Query on an App Interface controlled RDS instance
 
@@ -2047,11 +2101,11 @@ codeComponents:
 
 App Interface has several features that can be enabled for the Gitlab
 repositories:
-- `gitlabRepoOwners`: Value `true` will enable the `gitlab-repo-owners`,
-  integration, that evaluates the `OWNERS`/`OWNERS_ALIASES` files in that
-  repository to post comments to the Merge Requests reporting the required
-  approvals, ultimately labeling the Merge Request, making it up for
-  auto-merge.
+- `gitlabRepoOwners`: Value `enabled: true` will enable the
+  `gitlab-repo-owners`, integration, that evaluates the
+  `OWNERS`/`OWNERS_ALIASES` files in that repository to post comments to the
+  Merge Requests reporting the required approvals, ultimately labeling the
+  Merge Request, making it up for auto-merge.
 - `gitlabHousekeeping`:  Value `enabled: true` will enable the
   `gitlab-housekeeping` integration, that auto-merges Merge Requests that are
   labelled as such. It also rebases the Merge Requests that are not rebased
@@ -2060,6 +2114,8 @@ repositories:
     - `limit` - limit number of merges/rebases to avoid load (default: 1)
     - `days_interval` - number of days to consider an item as stale (default: 15)
     - `enable_closing` - enable closing of stale items after two stale periods (default: disabled)
+    - `pipeline_timeout` - number of minutes that determine if a pending pipeline is to be canceled.
+    If not set, no pipeline will be canceled.
 - `jira`: Value as `$ref: /path/to/jira-server.yaml` will enable the
   Gitlab/JIRA integration, that links Merge Requests mentioning JIRA tickets
   to the mentioned JIRA ticket.
@@ -2072,7 +2128,8 @@ codeComponents:
 - name: managed-tenants
   resource: upstream
   url: https://gitlab.cee.redhat.com/service/managed-tenants
-  gitlabRepoOwners: true
+  gitlabRepoOwners:
+    enabled: true
   gitlabHousekeeping:
     enabled: true
     rebase: false

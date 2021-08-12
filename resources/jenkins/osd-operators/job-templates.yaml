@@ -7,3 +7,61 @@
         secrets:
         - *osd-operator-status-telemeter
     <<: *gl_timed
+
+- job-template:
+    id: 'gl-pr-check-osd-aws-privatelink-terraform'
+    name: 'gl-pr-check-osd-aws-privatelink-terraform'
+    pr_check_script_path: ./scripts/cicd.sh check
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *srep_privatelink_aws_credentials
+        - *srep_pagerduty_credentials
+    <<: *gl_pr_check
+
+- job-template:
+    id: 'gl-build-master-osd-aws-privatelink-terraform'
+    name: 'gl-build-master-osd-aws-privatelink-terraform'
+    build_deploy_script_path: ./scripts/cicd.sh apply
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *srep_privatelink_aws_credentials
+        - *srep_pagerduty_credentials
+    <<: *gl_build_master
+
+- job-template:
+    id: 'gl-build-master-custom-catalog-source'
+    name: 'gl-build-master-custom-catalog-source'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *redhat-registry-io-pull
+        - *quay_secret_push
+    <<: *gl_build_master
+
+- job-template:
+    id: 'gl-update-operator-version-custom-catalog-source'
+    name: 'gl-update-operator-version-custom-catalog-source'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *app_sre_bot_push_token
+        - *custom-catalog-source-credentials
+    <<: *gl_timed

@@ -28,7 +28,6 @@ networkPoliciesAllow:
 - $ref: /services/insights/policies/namespaces/policies-prod.yml
 - $ref: /services/insights/remediations/namespaces/remediations-prod.yml
 # - $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
-# - $ref: /services/insights/topological-inventory/namespaces/stage-topological-inventory-stage.yml
 # - $ref: /services/insights/tower-analytics/namespaces/stage-tower-analytics-stage.yml
 # - $ref: /services/insights/vulnerability/namespaces/stage-vulnerability-engine-stage.yml
 - $ref: /services/insights/vulnerability/namespaces/vmaas-prod.yml
@@ -56,10 +55,46 @@ terraformResources:
   identifier: insights-client-metrics-prod
   defaults: /terraform/resources/s3-gdpr-1.yml
   output_resource_name: insights-client-metrics-strimzi-bucket
+- provider: s3
+  account: insights-prod
+  identifier: insights-warehouse-prod
+  defaults: /terraform/resources/s3-gdpr-1.yml
+  output_resource_name: insights-warehouse-strimzi-bucket
+- provider: aws-iam-service-account
+  account: insights-prod
+  identifier: strimzi-bucket-read-write
+  variables:
+    aws_region: us-east-1
+  user_policy:
+    {
+      "Version": "2012-10-17",
+      "Statement": [{
+        "Effect": "Allow",
+        "Action": [
+          "s3:ListBucket",
+        ],
+        "Resource": [
+          "arn:aws:s3:::insights-client-metrics-prod",
+          "arn:aws:s3:::insights-warehouse-prod",
+        ]
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
+          "s3:*Object"
+        ],
+        "Resource": [
+          "arn:aws:s3:::insights-client-metrics-prod/*",
+          "arn:aws:s3:::insights-warehouse-prod/*",
+        ]
+      }]
+    }
+  output_resource_name: strimzi-bucket-read-write
 
 managedResourceTypes:
 - Role
 - RoleBinding
+- Secret
 
 openshiftResources:
 - provider: resource
@@ -70,3 +105,6 @@ openshiftResources:
   path: app-interface/global/quay/app-sre/quay.io
   version: 2
   type: kubernetes.io/dockercfg
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-prod/platform-mq-prod/kafka-cyndi.secret.yaml

@@ -152,39 +152,27 @@ Sendgrid Subaccount or Credentials will not be created or synced to the cluster.
 
 ### Steps
 
-- Find max attempt value from Sendgrid Service Vault key `secrets/scheduler.maxRetry` : https://vault.devshift.net/ui/vault/secrets/app-interface/list/ocm-sendgrid-service/
-- Find api key value from Sendgrid Service Vault key `secrets/sendgrid.key` : https://vault.devshift.net/ui/vault/secrets/app-interface/list/ocm-sendgrid-service/
-- From the Sendgrid Service RDS instance (`ocm-sendgrid-service-<staging|production>`), find the cluster ids of all jobs that have reached the maximum retry 
-  ```
-  SELECT cluster_id FROM sendgrid_jobs WHERE attempts=<secrets/scheduler.maxRetry>;
-  ```
-- For each `cluster_id`
-  - Ensure ocm is signed into the correct stage|production url:
+- The service will automatically retry failed jobs once they have reached their backoff duration, typically resolving the alert in the process
+  - Configured backoff duration can be found via [vault](https://vault.devshift.net/ui/vault/secrets/app-interface/list/ocm-sendgrid-service/) 
+- Logs can be watched at `deployment/ocm-sendgrid-service` for the service to execute job 
+- Jobs will always retry even if they reached their maximum attempts due to [MGDAPI-1304](https://issues.redhat.com/browse/MGDAPI-1304) as failed jobs will be reset after the backoff duration (likely the maximum backoff duration as configured in [vault](https://vault.devshift.net/ui/vault/secrets/app-interface/list/ocm-sendgrid-service/)). This will effectively resolve the alert, however if the job is continuously reaching the maximum number of attempts, verify that no other service interruptions are occurring. Some possible interruptions include:
+  - Cluster is not in a ready state (i.e. Stuck in an uninstalling state)
+    - This can checked via `ocm get /api/clusters_mgmt/v1/clusters/<cluster_id>`. A cluster will an expiration date well in the past and still uninstalling is an indication that the cluster is stuck 
     ```
-    ocm account status
+    "expiration_timestamp": "2021-06-19T00:45:13Z",
+    ...
+    status": {
+        "state": "uninstalling",
+        "dns_ready": true,
+        "provision_error_message": "",
+        "provision_error_code": "",
+        "configuration_mode": "full"
+      },
     ```
-  - Check cluster if failed job exists:
-    ```
-    ocm get /api/clusters_mgmt/v1/clusters/<cluster_id>
-    ```
-  - If **cluster exists** - reset the attempts to 0 for the failed job:
-    ```
-    UPDATE sendgrid_jobs SET attempts=0 WHERE attempts=<secrets/scheduler.maxRetry> AND cluster_id=<cluster_id>;
-    ```
-  - If **cluster does not exist** - verify credentials are removed from sendgrid:
-    ```
-    curl -X "GET" "https://api.sendgrid.com/v3/subusers?username=<cluster_id>" -H "Authorization: Bearer <secrets/sendgrid.key>" -H "Content-Type: application/json"
-    ```
-    - If **sendgrid credential exist** (curl output was a non-emtpy array with a single entry with details of the subuser), reset attempts to 0 and mark job for deletion:
-      ```
-      UPDATE sendgrid_jobs SET attempts=0, remove=true WHERE attempts=<secrets/scheduler.maxRetry> AND cluster_id=<cluster_id>;
-      ```
-    - If **sendgrid credential does not exist** (curl output was an emtpy array - `[]%`), remove the failed job from the DB:
-      ```
-      DELETE FROM sendgrid_jobs WHERE attempts=<secrets/scheduler.maxRetry> AND cluster_id=<cluster_id>;
-      ```
-- Watch the logs for `deployment/ocm-sendgrid-service` for the service to execute job 
-- If the job is continuously reaching the maximum number of attempts, verify that no other service interruptions are occurring
+    - List of failed jobs can be found via the `sendgrid_service_job_max_retries` prometheus metric
+  - Sendgrid service provider is down 
+    - High 4xx or 5xx alert will likely be firing 
+    - Provider status page - https://status.sendgrid.com/
 - Finally, escalate to the RHMI team (see escalation contacts), including the copied logs
 
 ---

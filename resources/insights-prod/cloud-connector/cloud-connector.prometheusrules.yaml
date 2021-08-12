@@ -1,0 +1,101 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cloud-connector
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: cloud-connector
+    rules:
+    - alert: App-insights-cloud-connector-api-In-cloud-connector-prod-Downtime-Quota-Reached
+      expr: avg(avg_over_time(up{service="cloud-connector", namespace="cloud-connector-prod"}[24h])) <= 0.98
+      for: 5m
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/FRmd1NeWk1/cloud-connector?orgId=1"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/cloud-connector-prod/deployments/cloud-connector-api"
+        message: "cloud-connector Gateway Alert. cloud-connector api has exceeded its 2% downtime quota for the past 24 hours."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/cloud-connector/App-insights-cloud-connector-gateway-In-cloud-connector-prod-Downtime-Quota-Reached.rst"
+
+
+    - alert: App-insights-cloud-connector-In-cloud-connector-prod-5XX-API-Quota-Reached
+      expr: sum(increase(cloud_connector_http_status_code_counter{service="cloud-connector", status_code!~"5.*"}[24h])) / sum(increase(cloud_connector_http_status_code_counter{service="cloud-connector"}[24h])) <= 0.95
+      for: 5m
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/FRmd1NeWk1/cloud-connector?orgId=1"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/cloud-connector-prod/deployments/cloud-connector-api"
+        message: "cloud-connector Switch Alert.  cloud-connector api has exceeded 5% 5XX API response quota."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/cloud-connector/App-insights-cloud-connector-In-cloud-connector-prod-5XX-API-Quota-Reached.rst"
+
+
+    - alert: App-insights-cloud-connector-gateway-In-cloud-connector-prod-Response-Delivery-Error-Quota-Reached
+      expr: sum(increase(cloud_connector_inventory_kafka_writer_success_count[24h])) / (sum(increase(cloud_connector_inventory_kafka_writer_success_count[24h])) + sum(increase(cloud_connector_inventory_kafka_writer_failure_count[24h]))) <= 0.95
+      for: 5m
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/FRmd1NeWk1/cloud-connector?orgId=1"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/cloud-connector-prod/deployments/cloud-connector-api"
+        message: "cloud-connector Gateway Alert. cloud-connector-api has exceeded 5% failure quota for delivering inventory messages to Kafka in the last 24 hours."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/cloud-connector/App-insights-cloud-connector-gateway-In-cloud-connector-prod-Response-Delivery-Error-Quota-Reached.rst"
+
+
+    - alert: App-insights-cloud-connector-api-In-cloud-connector-prod-Absent
+      expr: up{service="cloud-connector", namespace="cloud-connector-prod"} == 0
+      for: 2m
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/FRmd1NeWk1/cloud-connector?orgId=1"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/cloud-connector-prod/deployments/cloud-connector-api"
+        message: "cloud-connector Alert. The cloud-connector-api pod has been down for two minutes."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/cloud-connector/App-insights-cloud-connector-api-In-cloud-connector-prod-Absent.rst"
+
+
+    - alert: CloudConnectorAPIContainerRestart
+      expr: |
+        sum(increase(kube_pod_container_status_restarts_total{container="cloud-connector-api"}[5m])) by (namespace) > 0
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/FRmd1NeWk1/cloud-connector?orgId=1"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/cloud-connector-prod/deployments/cloud-connector-api"
+        message: "cloud-connector Alert. The cloud-connector-api pod has been restarting."
+
+
+    - alert: CloudConnectorInventoryKafkaProducerErrors
+      expr: |
+        sum(increase(cloud_connector_inventory_kafka_writer_failure_count[5m])) by (kubernetes_namespace) > 0
+      for: 2m
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/FRmd1NeWk1/cloud-connector?orgId=1"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/cloud-connector-prod/deployments/cloud-connector-api"
+        message: "cloud-connector Alert. The cloud-connector failed to write inventory messages to kafka."
+

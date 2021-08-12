@@ -1,0 +1,31 @@
+---
+$schema: /openshift/shared-resources-1.yml
+
+labels:
+  provider: tekton
+
+name: app-sre-pipelines-shared-resources
+description: shared resources for pipelines namespaces
+
+openshiftResources:
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /tekton/qontract-reconcile.secret.yaml
+- provider: resource-template
+  type: jinja2
+  path: /tekton/openshift-saas-deploy.task.yaml
+  variables:
+    qontract_reconcile_image_tag: 'c3ee9f5'
+- provider: resource
+  path: /tekton/openshift-saas-deploy.pipeline.yaml
+- provider: resource
+  path: /tekton/trigger-access.clusterrole.yaml
+- provider: vault-secret
+  path: app-sre/creds/push-gateway/production/basic-auth
+  name: push-gateway-basic-auth
+  version: 1
+- provider: resource-template
+  type: jinja2
+  path: /tekton/push-gateway-task-status-metric.task.yaml
+  variables:
+    ubi8_ubi_minimal_image_tag: 8.4-7

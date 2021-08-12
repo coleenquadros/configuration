@@ -2,12 +2,12 @@
 $schema: /app-sre/app-1.yml
 
 labels:
-  service: uhc
+  service: ocm
 
-name: uhc
+name: ocm
 
 description: |
-  OpenShift Unified Hybrid Cloud
+  OpenShift Cluster Manager
 
 architectureDocument: https://TODO
 sopsUrl: https://gitlab.cee.redhat.com/TODO
@@ -15,7 +15,7 @@ grafanaUrl: https://TODO
 onboardingStatus: OnBoarded
 
 serviceOwners:
-- name: SDA team
+- name: Service Delivery team
   email: sd-mp-devel@redhat.com
 
 serviceNotifications:
@@ -43,35 +43,8 @@ quayRepos:
     - $ref: /dependencies/quay/permissions/quay-membership-app-sre-uhc.yml
     role: read
   items:
-  - name: uhc-apache-exporter
-    description: ''
-    public: true
-  - name: uhc-gateway
-    description: ''
-    public: true
-  - name: uhc-clusters-service
-    description: OpenShift Unified Hybrid Cloud Clusters Service
-    public: false
-  - name: ocm-clusters-service-sandbox
-    description: |-
-      Place to push OCM clusters service images that will be tested in
-      the sandbox
-    public: false
-  - name: uhc-account-manager
-    description: ''
-    public: false
-  - name: uhc-portal-redirector
-    description: uhc-portal-redirector
-    public: true
-  - name: uhc-clusters-cleaner
-    description: Cleans up expired clusters
-    public: true
   - name: ocm-api-tests
     description: Runs API tests using OCM SDK
-    public: false
-  - name: ocm-service-log
-    description: Ingest and provide logs from various internal sources related to
-      OpenShift clusters
     public: false
   - name: centos
     description: Mirror of the upstream docker.io/centos repository
@@ -95,9 +68,6 @@ quayRepos:
     public: true
     mirror:
       $ref: /dependencies/image-mirrors/docker.io/golangci/golangci-lint.yml
-  - name: job-queue-service
-    description: Provide coordination and fault tolerance for background job execution
-    public: false
   - name: ocm-envoy
     description: Envoy proxy used by the OCM services
     public: true
@@ -110,32 +80,11 @@ sentryProjects:
 - team:
     $ref: /dependencies/sentry/teams/service-development-stage.yml
   projects:
-  - name: uhc-acct-mngr-stage
-    description: OCM Stage Account Management and Authorizations API
-    email_prefix: sd-devel
-    platform: go
-    auto_resolve_age: 168
-    allowed_domains:
-    - '*'
   - name: stage-sso-test
     description: OCM Stage API SSO Test environment
     email_prefix: sd-devel
     platform: go
     auto_resolve_age: 30
-    allowed_domains:
-    - '*'
-  - name: ocm-clusters-service-stage
-    description: OCM clusters service stage
-    email_prefix: sd-devel
-    platform: go
-    auto_resolve_age: 168
-    allowed_domains:
-    - '*'
-  - name: ocm-service-log-stage
-    description: OCM Stage Service Log API
-    email_prefix: sd-devel
-    platform: go
-    auto_resolve_age: 168
     allowed_domains:
     - '*'
   - name: ocm-ui-stage
@@ -147,13 +96,6 @@ sentryProjects:
     - cloud.redhat.com
     - qaprodauth.cloud.redhat.com
     - qa.foo.redhat.com
-  - name: job-queue-service-stage
-    description: OCM Stage Job Queue Service API
-    email_prefix: sd-devel
-    platform: go
-    auto_resolve_age: 168
-    allowed_domains:
-    - '*'
   - name: ocm-cronjobs-failures-stage
     description: OCM Stage Cronjobs Failures
     email_prefix: sd-devel
@@ -164,20 +106,6 @@ sentryProjects:
 - team:
     $ref: /dependencies/sentry/teams/service-development-production.yml
   projects:
-  - name: ocm-acct-mngr-prod
-    description: OCM Production Account Management and Authorizations API
-    email_prefix: sd-devel
-    platform: go
-    auto_resolve_age: 168
-    allowed_domains:
-    - '*'
-  - name: ocm-service-log-prod
-    description: OCM Production Service Log API
-    email_prefix: sd-devel
-    platform: go
-    auto_resolve_age: 168
-    allowed_domains:
-    - '*'
   - name: ocm-resources
     description: OCM Resources
     email_prefix: sd-devel
@@ -187,13 +115,6 @@ sentryProjects:
     - '*'
   - name: api-tests
     description: API Tests
-    email_prefix: sd-devel
-    platform: go
-    auto_resolve_age: 168
-    allowed_domains:
-    - '*'
-  - name: ocm-clusters-service-prod
-    description: OCM clusters service stage
     email_prefix: sd-devel
     platform: go
     auto_resolve_age: 168
@@ -215,45 +136,11 @@ sentryProjects:
     auto_resolve_age: 168
     allowed_domains:
     - '*'
-  - name: job-queue-service-prod
-    description: OCM Production Job Queue Service API
-    email_prefix: sd-devel
-    platform: go
-    auto_resolve_age: 168
-    allowed_domains:
-    - '*'
+
 codeComponents:
-- name: uhc-clusters-service
-  resource: upstream
-  url: https://gitlab.cee.redhat.com/service/uhc-clusters-service
-  jira:
-    $ref: /dependencies/jira/issues-redhat-com.yaml
-- name: uhc-account-manager
-  resource: upstream
-  url: https://gitlab.cee.redhat.com/service/uhc-account-manager
-  jira:
-    $ref: /dependencies/jira/issues-redhat-com.yaml
-- name: uhc-gateway
-  resource: upstream
-  url: https://gitlab.cee.redhat.com/service/uhc-gateway
 - name: uhc-portal
   resource: upstream
   url: https://gitlab.cee.redhat.com/service/uhc-portal
-  jira:
-    $ref: /dependencies/jira/issues-redhat-com.yaml
-- name: uhc-clusters-cleaner
-  resource: upstream
-  url: https://gitlab.cee.redhat.com/service/uhc-clusters-cleaner
-  jira:
-    $ref: /dependencies/jira/issues-redhat-com.yaml
-- name: uhc-portal-redirector
-  resource: upstream
-  url: https://gitlab.cee.redhat.com/service/uhc-portal-redirector
-  jira:
-    $ref: /dependencies/jira/issues-redhat-com.yaml
-- name: uhc-apache-exporter
-  resource: upstream
-  url: https://gitlab.cee.redhat.com/service/uhc-apache-exporter
   jira:
     $ref: /dependencies/jira/issues-redhat-com.yaml
 - name: ocm-sdk-go
@@ -276,21 +163,6 @@ codeComponents:
 - name: api-tests
   resource: upstream
   url: https://gitlab.cee.redhat.com/service/api-tests
-  jira:
-    $ref: /dependencies/jira/issues-redhat-com.yaml
-- name: ocm-service-log
-  resource: upstream
-  url: https://gitlab.cee.redhat.com/service/ocm-service-log
-  jira:
-    $ref: /dependencies/jira/issues-redhat-com.yaml
-- name: job-queue-service
-  resource: upstream
-  url: https://gitlab.cee.redhat.com/service/job-queue-service
-  jira:
-    $ref: /dependencies/jira/issues-redhat-com.yaml
-- name: job-queue-client
-  resource: upstream
-  url: https://gitlab.cee.redhat.com/service/job-queue-client
   jira:
     $ref: /dependencies/jira/issues-redhat-com.yaml
 - name: ocm-envoy

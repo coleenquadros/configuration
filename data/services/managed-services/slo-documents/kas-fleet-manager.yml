@@ -1,0 +1,128 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: kas-fleet-manager
+
+name: kas-fleet-manager
+
+namespaces:
+- $ref: /services/managed-services/namespaces/managed-services-production.yml
+
+slos:
+- name: API availability
+  SLIType: availability
+  SLISpecification: Percentage of requests that are served successfully (status code != 5xx)
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/managed-services/slos/kas-fleet-manager-api-availability.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(haproxy_backend_http_responses_total{route="kas-fleet-manager",exported_namespace="managed-services-production",code!="5xx"}[{{window}}]))
+    /
+    sum(rate(haproxy_backend_http_responses_total{route="kas-fleet-manager",exported_namespace="managed-services-production"}[{{window}}]))
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/kas-fleet-manager-slos-availability-production.prometheusrules.yaml
+  prometheusRulesTests: /observability/prometheusrules/kas-fleet-manager-slos-availability-production.prometheusrulestest.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1&var-datasource=app-sre-prod-04-prometheus
+
+
+- name: API Latency 90%
+  SLIType: latency
+  SLISpecification: Percentage of the successful requests served under 100ms
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/managed-services/slos/kas-fleet-manager-api-latency.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(api_inbound_request_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-production",le="0.1",code!~"5.."}[{{window}}]))
+    /
+    sum(rate(api_inbound_request_duration_count{job="kas-fleet-manager-metrics",namespace="managed-services-production"}[{{window}}]))
+  SLOTarget: 0.90
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/kas-fleet-manager-slos-latency-production.prometheusrules.yaml
+  prometheusRulesTests: /observability/prometheusrules/kas-fleet-manager-slos-latency-production.prometheusrulestest.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1&var-datasource=app-sre-prod-04-prometheus
+
+- name: API Latency 99%
+  SLIType: latency
+  SLISpecification: Percentage of the successful requests served under 1000ms
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/managed-services/slos/kas-fleet-manager-api-latency.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(api_inbound_request_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-production",le="1",code!~"5.."}[{{window}}]))
+    /
+    sum(rate(api_inbound_request_duration_count{job="kas-fleet-manager-metrics",namespace="managed-services-production"}[{{window}}]))
+  SLOTarget: 0.99
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/kas-fleet-manager-slos-latency-production.prometheusrules.yaml
+  prometheusRulesTests: /observability/prometheusrules/kas-fleet-manager-slos-latency-production.prometheusrulestest.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1&var-datasource=app-sre-prod-04-prometheus
+
+
+- name: Kafka Cluster Provisioning Latency 90%
+  SLIType: latency
+  SLISpecification: Percentage of the created Kafkas ready in under 15m
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/managed-services/slos/kas-fleet-manager-kafka-cluster-provisioning-latency.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(kas_fleet_manager_worker_kafka_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-production",le="900",jobType="kafka_create"}[{{window}}]))
+    /
+    sum(rate(kas_fleet_manager_worker_kafka_duration_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",jobType="kafka_create"}[{{window}}]))
+  SLOTarget: 0.90
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/kas-fleet-manager-slos-kafka-latency-production.prometheusrules.yaml
+  prometheusRulesTests: /observability/prometheusrules/kas-fleet-manager-slos-kafka-latency-production.prometheusrulestest.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1&var-datasource=app-sre-prod-04-prometheus
+
+- name: Kafka Cluster Provisioning Latency 99%
+  SLIType: latency
+  SLISpecification: Percentage of the created Kafkas ready in under 30m
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/managed-services/slos/kas-fleet-manager-kafka-cluster-provisioning-latency.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(kas_fleet_manager_worker_kafka_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-production",le="1800",jobType="kafka_create"}[{{window}}]))
+    /
+    sum(rate(kas_fleet_manager_worker_kafka_duration_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",jobType="kafka_create"}[{{window}}]))
+  SLOTarget: 0.99
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/kas-fleet-manager-slos-kafka-latency-production.prometheusrules.yaml
+  prometheusRulesTests: /observability/prometheusrules/kas-fleet-manager-slos-kafka-latency-production.prometheusrulestest.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1&var-datasource=app-sre-prod-04-prometheus
+
+
+- name: Kafka Cluster Creation Corectness
+  SLIType: correctness
+  SLISpecification: Percentage of Kafka instances successful created
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/managed-services/slos/kas-fleet-manager-kafka-cluster-lifecycle-correctness.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(kas_fleet_manager_kafka_operations_success_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation=~"create"}[{{window}}]))
+    /
+    sum(rate(kas_fleet_manager_kafka_operations_total_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation=~"create"}[{{window}}]))
+  SLOTarget: 0.99
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/kas-fleet-manager-slos-kafka-correctness-production.prometheusrules.yaml
+  prometheusRulesTests: /observability/prometheusrules/kas-fleet-manager-slos-kafka-correctness-production.prometheusrulestest.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1&var-datasource=app-sre-prod-04-prometheus
+
+- name: Kafka Cluster Deletion Corectness
+  SLIType: correctness
+  SLISpecification: Percentage of Kafka instances successful deleted
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/managed-services/slos/kas-fleet-manager-kafka-cluster-lifecycle-correctness.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(kas_fleet_manager_kafka_operations_success_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation=~"delete"}[{{window}}]))
+    /
+    sum(rate(kas_fleet_manager_kafka_operations_total_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",operation=~"delete"}[{{window}}]))
+  SLOTarget: 0.99
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/kas-fleet-manager-slos-kafka-correctness-production.prometheusrules.yaml
+  prometheusRulesTests: /observability/prometheusrules/kas-fleet-manager-slos-kafka-correctness-production.prometheusrulestest.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1&var-datasource=app-sre-prod-04-prometheus
+
+

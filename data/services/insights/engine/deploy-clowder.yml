@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: engine
@@ -11,15 +11,13 @@ description: ingress app on the Insights Platform via clowder
 app:
   $ref: /services/insights/engine/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
-
-timeout: 5
 
 managedResourceTypes:
 - ConfigMap
@@ -37,33 +35,42 @@ parameters:
   CLOWDER_ENABLED: "true"
 
 resourceTemplates:
-- name: insights-engine
+- name: engine
   path: /deploy/clowdapp.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/insights-engine
   targets:
   - namespace:
       $ref: /services/insights/engine/namespaces/stage-engine-stage.yml
     ref: master
-    upstream: insights-platform-insights-engine-gl-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: insights-platform-insights-engine-gl-build-master
     parameters:
       MIN_REPLICAS: 16
       ENV_NAME: stage
   - namespace:
+      $ref: /services/insights/engine/namespaces/engine-prod.yml
+    ref: f3e2f1d5c69befd68b516ec29125b3aa4eccc11d
+    parameters:
+      MIN_REPLICAS: "64"
+      MEMORY_LIMIT: 2Gi
+      ENV_NAME: prod
+  - namespace:
       $ref: /services/insights/engine/namespaces/engine-fedramp-stage.yml
     ref: master
-    upstream: insights-platform-insights-engine-gl-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: insights-platform-insights-engine-gl-build-master
     parameters:
+      ENV_NAME: fedramp
       MIN_REPLICAS: 16
+      SSL_ENABLED: "true"
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
     ref: internal  # populated by bonfire
     parameters:
       MIN_REPLICAS: 1
-  - namespace:
-      $ref: /services/insights/engine/namespaces/engine-prod.yml
-    ref: 3819500204c5fa56bbe0e89d5ded6d7486089028
-    parameters:
-      MIN_REPLICAS: "64"
-      MEMORY_LIMIT: 2Gi
-      ENV_NAME: prod
+

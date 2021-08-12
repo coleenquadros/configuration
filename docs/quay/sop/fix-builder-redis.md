@@ -8,7 +8,10 @@ If no builds are running:
 
 Run the following query in the database:
 
-`select * from queueitem where queue_name like 'dockerfilebuild/%' and available=1 and retries_remaining > 0 and processing_expires > now()`
+```
+use quay;
+select * from queueitem where queue_name like 'dockerfilebuild/%' and available=1 and retries_remaining > 0 and processing_expires > now();
+```
 
 If there are *many* builds and their `available_at` *keeps moving forward*, you likely have a Redis lockup.
 

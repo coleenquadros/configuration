@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: observatorium
@@ -10,8 +10,8 @@ description: SaaS tracking file for Observatorium Metrics monitoring resources
 app:
   $ref: /services/rhobs/observatorium/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/rhobs/observatorium/pipelines/observatorium-pipeline.app-sre-prod-01.yaml
 
 slack:
   workspace:
@@ -30,16 +30,25 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
-    ref: 1c9fcec6c27a47dc06c68e73a38c3ebb248add9e
+    ref: 5d11715a370c21ba6564f1db474139c7b71c9ea1
     parameters:
-      NAMESPACE: telemeter-stage
-      MST_NAMESPACE: observatorium-mst-stage
+      NAMESPACES: '["observatorium-stage", "observatorium-mst-stage"]'
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.telemeter-prod-01.yml
+    ref: 5d11715a370c21ba6564f1db474139c7b71c9ea1
+    parameters:
+      NAMESPACES: '["telemeter-production", "observatorium-production", "observatorium-mst-production"]'
 - name: observatorium-jaeger
   path: /resources/services/jaeger-template.yaml
   url: https://github.com/rhobs/configuration
   targets:
   - namespace:
       $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
-    ref: 1c9fcec6c27a47dc06c68e73a38c3ebb248add9e
+    ref: a513f3676c8430265208111048dec36ea86fcd56
     parameters:
-      NAMESPACE: telemeter-stage
+      NAMESPACES: '["observatorium-stage", "observatorium-mst-stage"]'
+  - namespace:
+      $ref: /services/observability/namespaces/openshift-customer-monitoring.telemeter-prod-01.yml
+    ref: a513f3676c8430265208111048dec36ea86fcd56
+    parameters:
+      NAMESPACES: '["telemeter-production", "observatorium-production", "observatorium-mst-production"]'

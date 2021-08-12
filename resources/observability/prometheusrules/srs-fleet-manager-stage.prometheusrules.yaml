@@ -1,0 +1,24 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: srs-fleet-manager-stage
+spec:
+  groups:
+  - name: srs-fleet-manager-stage
+    rules:
+    - alert: SRSFleetManagerDown - stage
+      annotations:
+        message: "No targets found for SRS Fleet Manager in namespace {{ $labels.namespace }}. SRS Fleet Manager is down."
+        dashboard: "https://grafana.stage.devshift.net/d/Tbw1Eg2Mz/srs-fleet-manager-metrics"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/service-registry/sop#srs-fleet-manager-down"
+      expr: |
+        absent(up{job="srs-fleet-manager-metrics",namespace="service-registry-stage"} == 1)
+      for: 15m
+      labels:
+        service: srs-fleet-manager
+        severity: info

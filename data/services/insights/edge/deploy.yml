@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: edge
@@ -11,15 +11,13 @@ description: edge app on the Insights Platform
 app:
   $ref: /services/insights/edge/app.yml
 
-instance:
-  $ref: /dependencies/ci-ext/ci-ext.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
-
-timeout: 5
 
 managedResourceTypes:
 - ClowdApp
@@ -31,6 +29,9 @@ authentication:
   image:
     path: insights/quay/cloudservices-push
     field: all
+
+parameters:
+  S3_AWS_REGION: us-east-1
 
 resourceTemplates:
 - name: edge-api
@@ -46,7 +47,38 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/edge/namespaces/stage-edge-stage.yml
     ref: main
-    upstream: RedHatInsights-edge-api-gh-build-main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-edge-api-gh-build-main
     parameters:
       MIN_REPLICAS: 3
+      EDGE_TARBALLS_BUCKET: rh-edge-tarballs-stage
       ENV_NAME: stage
+      IMAGEBUILDER_URL: http://${IMAGEBUILDER_HOST}:${IMAGEBUILDER_PORT}
+      S3_PROXY_URL: https://${EDGE_TARBALLS_BUCKET}.s3.${S3_AWS_REGION}.amazonaws.com
+      INVENTORYURL: http://${HOST_INVENTORY_HOST}:${HOST_INVENTORY_PORT}
+      PLAYBOOKDISPATCHERURL: http://${PLAYBOOK_DISPATCHER_HOST}:${PLAYBOOK_DISPATCHER_PORT}
+  - namespace:
+      $ref: /services/insights/edge/namespaces/edge-prod.yml
+    ref: d1d138867c0b2d2c46acf529280a698db1551caa
+    parameters:
+      MIN_REPLICAS: 3
+      EDGE_TARBALLS_BUCKET: rh-edge-tarballs-prod
+      ENV_NAME: prod
+      S3_AWS_REGION: us-east-1
+      IMAGEBUILDER_URL: http://${IMAGEBUILDER_HOST}:${IMAGEBUILDER_PORT}
+      S3_PROXY_URL: https://${EDGE_TARBALLS_BUCKET}.s3.${S3_AWS_REGION}.amazonaws.com
+      INVENTORYURL: http://${HOST_INVENTORY_HOST}:${HOST_INVENTORY_PORT}
+      PLAYBOOKDISPATCHERURL: http://${PLAYBOOK_DISPATCHER_HOST}:${PLAYBOOK_DISPATCHER_PORT}
+  - namespace:
+      $ref: /services/insights/edge/namespaces/perf-edge-perf.yml
+    ref: d1d138867c0b2d2c46acf529280a698db1551caa
+    parameters:
+      MIN_REPLICAS: 3
+      EDGE_TARBALLS_BUCKET: rh-edge-tarballs-perf
+      ENV_NAME: perf
+      IMAGEBUILDER_URL: http://${IMAGEBUILDER_HOST}:${IMAGEBUILDER_PORT}
+      S3_PROXY_URL: https://${EDGE_TARBALLS_BUCKET}.s3.${S3_AWS_REGION}.amazonaws.com
+      INVENTORYURL: http://${HOST_INVENTORY_HOST}:${HOST_INVENTORY_PORT}
+      PLAYBOOKDISPATCHERURL: http://${PLAYBOOK_DISPATCHER_HOST}:${PLAYBOOK_DISPATCHER_PORT}

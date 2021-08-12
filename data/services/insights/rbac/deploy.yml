@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: rbac
@@ -11,15 +11,13 @@ description: rbac app on the Insights Platform
 app:
   $ref: /services/insights/rbac/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
-
-timeout: 5
 
 managedResourceTypes:
 - Deployment
@@ -43,7 +41,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/rbac/namespaces/dev-rbac-ci.yml
-    ref: 87344b34aef94e2833fae485ac6307de9ca796e3
+    ref: b1f72274677414b7bfaebd084994978e92fb64b7
 
 - name: rbac-config-yml-ci
   path: /_private/configmaps/ci/rbac-config.yml
@@ -51,7 +49,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/rbac/namespaces/dev-rbac-ci.yml
-    ref: 87344b34aef94e2833fae485ac6307de9ca796e3
+    ref: b1f72274677414b7bfaebd084994978e92fb64b7
 
 - name: model-access-permissions-yml-qa
   path: /_private/configmaps/qa/model-access-permissions.configmap.yml
@@ -59,7 +57,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/rbac/namespaces/dev-rbac-qa.yml
-    ref: 87344b34aef94e2833fae485ac6307de9ca796e3
+    ref: b1f72274677414b7bfaebd084994978e92fb64b7
 
 - name: rbac-config-yml-qa
   path: /_private/configmaps/qa/rbac-config.yml
@@ -67,7 +65,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/rbac/namespaces/dev-rbac-qa.yml
-    ref: 87344b34aef94e2833fae485ac6307de9ca796e3
+    ref: b1f72274677414b7bfaebd084994978e92fb64b7
 
 - name: model-access-permissions-yml-stage
   path: /_private/configmaps/stage/model-access-permissions.configmap.yml
@@ -75,7 +73,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
-    ref: 87344b34aef94e2833fae485ac6307de9ca796e3
+    ref: b1f72274677414b7bfaebd084994978e92fb64b7
 
 - name: rbac-config-yml-stage
   path: /_private/configmaps/stage/rbac-config.yml
@@ -83,7 +81,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
-    ref: 87344b34aef94e2833fae485ac6307de9ca796e3
+    ref: b1f72274677414b7bfaebd084994978e92fb64b7
 
 - name: model-access-permissions-yml-prod
   path: /_private/configmaps/prod/model-access-permissions.configmap.yml
@@ -91,7 +89,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/rbac/namespaces/rbac-prod.yml
-    ref: 87344b34aef94e2833fae485ac6307de9ca796e3
+    ref: b1f72274677414b7bfaebd084994978e92fb64b7
 
 - name: rbac-config-yml-prod
   path: /_private/configmaps/prod/rbac-config.yml
@@ -99,79 +97,4 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/rbac/namespaces/rbac-prod.yml
-    ref: 87344b34aef94e2833fae485ac6307de9ca796e3
-
-- name: rbac
-  path: /templates/rbac/rbac.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  parameters:
-    CPU_LIMIT: '1'
-    MAX_REPLICAS: 5
-    MEMORY_LIMIT: 1Gi
-    MIN_REPLICAS: 2
-    PGSSLMODE: verify-full
-    PERMISSION_SEEDING_ENABLED: 'False'
-    ROLE_SEEDING_ENABLED: 'False'
-    GROUP_SEEDING_ENABLED: 'False'
-    CW_NULL_WORKAROUND: 'true'
-  targets:
-  - namespace:
-      $ref: /services/insights/rbac/namespaces/rbac-prod.yml
-    ref: 7d85e8f42b908c7ff96a4c7dacd093e12d94c17c
-    parameters:
-      IMAGE_TAG: c057425
-      DB_SECRET_NAME: rbac-db
-      RBAC_DESTRUCTIVE_ENABLED_UNTIL: 05-20-2021
-      HABERDASHER_EMITTER: kafka
-      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
-      HABERDASHER_KAFKA_TOPIC: platform.logging.logs
-      HABERDASHER_LABELS: {"app": "rbac"}
-      HABERDASHER_TAGS: ["rbac"]
-  - namespace:
-      $ref: /services/insights/rbac/namespaces/dev-rbac-sre-ci.yml
-    ref: 91011aa706772d4be92f93c7d6e984bc965d329d
-    parameters:
-      IMAGE_TAG: ebd29a5
-      HABERDASHER_EMITTER: kafka
-      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
-      HABERDASHER_KAFKA_TOPIC: platform.logging.logs
-      HABERDASHER_LABELS: {"app": "rbac"}
-      HABERDASHER_TAGS: ["rbac"]
-
-- name: scheduler
-  path: /templates/rbac/scheduler.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  targets:
-  - namespace:
-      $ref: /services/insights/rbac/namespaces/rbac-prod.yml
-    ref: e358fcb6ef63aa63c8a1632d488705e91372e308
-    parameters:
-      IMAGE_TAG: c057425
-
-- name: worker
-  path: /templates/rbac/worker.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  parameters:
-    PGSSLMODE: verify-full
-  targets:
-  - namespace:
-      $ref: /services/insights/rbac/namespaces/rbac-prod.yml
-    ref: e358fcb6ef63aa63c8a1632d488705e91372e308
-    parameters:
-      IMAGE_TAG: c057425
-      DB_SECRET_NAME: rbac-db
-      CELERY_WORKER_CPU_LIMIT: '1'
-      CELERY_WORKER_MEMORY_REQUEST: 512Mi
-      CELERY_WORKER_MEMORY_LIMIT: 1Gi
-
-- name: rbac-redis
-  path: /templates/rbac/redis.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  parameters:
-    VOLUME_CAPACITY: 10Gi
-    IMAGE: quay.io/cloudservices/redis
-    IMAGE_TAG: latest
-  targets:
-  - namespace:
-      $ref: /services/insights/rbac/namespaces/rbac-prod.yml
-    ref: 7d85e8f42b908c7ff96a4c7dacd093e12d94c17c
+    ref: b1f72274677414b7bfaebd084994978e92fb64b7

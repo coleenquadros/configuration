@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: cincinnati
@@ -10,8 +10,8 @@ description: SaaS tracking file for Cincinnati
 app:
   $ref: /services/cincinnati/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/cincinnati/pipelines/tekton.cincinnati-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
@@ -40,14 +40,17 @@ resourceTemplates:
   - namespace:
       $ref: /services/cincinnati/namespaces/cincinnati-stage.yml
     ref: master
-    upstream: openshift-cincinnati-gh-build-master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: openshift-cincinnati-gh-build-master
     parameters:
       GB_LOG_VERBOSITY: "vvv"
       PE_LOG_VERBOSITY: "vv"
       REPLICAS: 2
   - namespace:
       $ref: /services/cincinnati/namespaces/cincinnati-production.yml
-    ref: fb5f49cd530a8a8a9ec2ba0ecacf6ba06de92be1
+    ref: 9ec5bbce380059a7253a26a2b4329ba9eb8ce9b4
     parameters:
       GB_LOG_VERBOSITY: "v"
       PE_LOG_VERBOSITY: "v"

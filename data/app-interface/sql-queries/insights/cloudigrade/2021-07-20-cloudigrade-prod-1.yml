@@ -1,0 +1,92 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2021-07-20-cloudigrade-prod-1
+namespace:
+  $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
+identifier: cloudigrade-prod
+output: stdout
+queries:
+  # get count of all users
+  - "select count(1) as total_user_count from auth_user;"
+  # get count of all aws cloud acounts
+  - "select count(1) as total_cloud_account_count from api_awscloudaccount;"
+  # get count of all aws instances
+  - "select count(1) as total_instance_count from api_awsinstance;"
+  # get count of all aws images
+  - "select count(1) as total_image_count from api_awsmachineimage;"
+  # get count of all runs
+  - "select count(1) as total_run_count from api_run;"
+  # get count of all events
+  - "select count(1) as total_event_count from api_instanceevent;"
+  # get count of all events by type
+  - "select event_type, count(1) as total_event_count_per_type from api_instanceevent group by event_type;"
+  # for each red hat account, count the instances
+  - "select
+    au.username, count(distinct i.id) as instances_count_per_user
+    from
+    api_cloudaccount ca
+    join auth_user au on au.id = ca.user_id
+    join api_instance i on ca.id = i.cloud_account_id
+    group by au.username
+    order by instances_count_per_user desc;"
+  # for each cloud account in each red hat account, count the instances
+  - "select au.username, ca.id as cloud_account_id, count(1) as instance_count_per_cloud_account
+    from
+    api_cloudaccount ca
+    join auth_user au on au.id = ca.user_id
+    join api_instance i on ca.id = i.cloud_account_id
+    group by au.username, ca.id
+    order by instance_count_per_cloud_account desc;"
+  # for each cloud account in each red hat account, count the runs
+  - "select au.username, ca.id as cloud_account_id, count(1) as run_count_per_cloud_account
+    from
+    api_cloudaccount ca
+    join auth_user au on au.id = ca.user_id
+    join api_instance i on ca.id = i.cloud_account_id
+    join api_run r on i.id = r.instance_id
+    group by au.username, ca.id
+    order by run_count_per_cloud_account desc;"
+  # for each cloud account in each red hat account, count the events
+  - "select au.username, ca.id as cloud_account_id, count(1) as event_count_per_cloud_account
+    from
+    api_cloudaccount ca
+    join auth_user au on au.id = ca.user_id
+    join api_instance i on ca.id = i.cloud_account_id
+    join api_instanceevent e on i.id = e.instance_id
+    group by au.username, ca.id
+    order by event_count_per_cloud_account desc;"
+  # for each cloud account in each red hat account, count the events by type
+  - "select au.username, ca.id as cloud_account_id, e.event_type, count(1) as event_count_per_type_per_cloud_account
+    from
+    api_cloudaccount ca
+    join auth_user au on au.id = ca.user_id
+    join api_instance i on ca.id = i.cloud_account_id
+    join api_instanceevent e on i.id = e.instance_id
+    group by au.username, ca.id, e.event_type
+    order by event_count_per_type_per_cloud_account desc;"
+  # count how many events appear to exist outside of a run
+  - "explain select count(1) as event_count_not_in_run from api_instanceevent e
+    where not exists (
+      select 1 from api_run r
+      where r.instance_id = e.instance_id and e.occurred_at between r.start_time and coalesce(r.end_time, now())
+    );"
+  - "select now();"
+  - "explain analyze select count(1) as event_count_not_in_run from api_instanceevent e
+    where not exists (
+      select 1 from api_run r
+      where r.instance_id = e.instance_id and e.occurred_at between r.start_time and coalesce(r.end_time, now())
+    );"
+  - "select now();"
+  - "select count(1) as event_count_not_in_run from api_instanceevent e
+    where not exists (
+      select 1 from api_run r
+      where r.instance_id = e.instance_id and e.occurred_at between r.start_time and coalesce(r.end_time, now())
+    );"
+  - "select now();"
+  # alternate version of the above query
+  - "explain select count(1) as event_count_not_in_run
+    from api_instanceevent e
+    left join api_run r on e.instance_id = r.instance_id and e.occurred_at between r.start_time and coalesce(r.end_time, now())
+    where r.id is null;"
+

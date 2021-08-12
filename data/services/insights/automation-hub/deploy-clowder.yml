@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: automation-hub
@@ -11,8 +11,8 @@ description: automation-hub app on the Insights Platform
 app:
   $ref: /services/insights/automation-hub/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
@@ -22,6 +22,7 @@ slack:
 managedResourceTypes:
 - ClowdApp
 - Service
+- ConfigMap
 
 imagePatterns:
 - quay.io/cloudservices
@@ -45,3 +46,23 @@ resourceTemplates:
       ref: internal  # populated by bonfire
       parameters:
         REPLICAS: 1
+    - namespace:
+        $ref: /services/insights/automation-hub/namespaces/stage-automation-hub-stage.yml
+      ref: f55885a71d963c87f1924e4f9e18f578a7fcaa98
+      parameters:
+        REPLICAS: 1
+        IMAGE_TAG: f55885a
+        SUFFIX: '-cwa'
+
+        NGINX_IMAGE_TAG: c86da3a
+        NGINX_CPU_REQUEST: 100m
+        NGINX_MEMORY_REQUEST: 128Mi
+
+        GALAXY_API_CPU_REQUEST: 200m
+        GALAXY_API_CPU_LIMIT: 600m
+        GALAXY_API_MEMORY_REQUEST: 1536Mi
+        GALAXY_API_MEMORY_LIMIT: 1536Mi
+
+        CONTENT_ORIGIN: 'https://console.stage.redhat.com/'
+        IMPORTER_JOB_NAMESPACE: automation-hub-jobs-stage
+        REDIS_SSL: 'true'

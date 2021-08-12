@@ -1,0 +1,91 @@
+---
+$schema: /app-sre/app-1.yml
+
+labels:
+  service: ocm
+
+name: cs
+
+description: |
+  Cluster Manager Service
+
+parentApp:
+  $ref: /services/ocm/app.yml
+
+architectureDocument: https://TODO
+sopsUrl: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/uhc/sop
+grafanaUrl: https://grafana.app-sre.devshift.net/d/uhc-clusters-service/uhc-clusters-service
+onboardingStatus: OnBoarded
+
+serviceOwners:
+- name: SDA team
+  email: sda-devel@redhat.com
+
+serviceNotifications:
+- name: Red Hat Outage List
+  email: outage-list@redhat.com
+
+escalationPolicy:
+  $ref: /teams/ocm/escalation-policies/sda.yaml
+
+dependencies:
+- $ref: /dependencies/aws/service.yml
+- $ref: /dependencies/ci-int/service.yml
+- $ref: /dependencies/gitlab/service.yml
+- $ref: /dependencies/quay/service.yml
+- $ref: /dependencies/openshift/service.yml
+- $ref: /dependencies/sso/service.yml
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/app-sre.yml
+  teams:
+  - permissions:
+    - $ref: /dependencies/quay/permissions/quay-membership-app-sre-uhc.yml
+    role: read
+  items:
+  - name: uhc-clusters-service
+    description: OpenShift Unified Hybrid Cloud Clusters Service
+    public: false
+  - name: ocm-clusters-service-sandbox
+    description: |-
+      Place to push OCM clusters service images that will be tested in
+      the sandbox
+    public: false
+  - name: uhc-clusters-cleaner
+    description: Cleans up expired clusters
+    public: true
+
+sentryProjects:
+- team:
+    $ref: /dependencies/sentry/teams/service-development-stage.yml
+  projects:
+  - name: ocm-clusters-service-stage
+    description: OCM clusters service stage
+    email_prefix: sd-devel
+    platform: go
+    auto_resolve_age: 168
+    allowed_domains:
+    - '*'
+- team:
+    $ref: /dependencies/sentry/teams/service-development-production.yml
+  projects:
+  - name: ocm-clusters-service-prod
+    description: OCM clusters service stage
+    email_prefix: sd-devel
+    platform: go
+    auto_resolve_age: 168
+    allowed_domains:
+    - '*'
+
+codeComponents:
+- name: uhc-clusters-service
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/service/uhc-clusters-service
+  jira:
+    $ref: /dependencies/jira/issues-redhat-com.yaml
+- name: uhc-clusters-cleaner
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/service/uhc-clusters-cleaner
+  jira:
+    $ref: /dependencies/jira/issues-redhat-com.yaml

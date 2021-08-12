@@ -1,0 +1,217 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /insights-prod/xjoin-operator-prod/xjoin-operator.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+
+# XJoinOperatorAbsent
+- interval: 1m
+  input_series:
+  - series: up{service="xjoin-operator"}
+    values: 0+0x10
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: XJoinOperatorAbsent
+    exp_alerts:
+    - exp_labels:
+        service: xjoin-operator
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      exp_annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/xjoin/XJoinOperatorAbsent.rst"
+        message: "xjoin-operator pod missing"
+        dashboard: "https://grafana.app-sre.devshift.net/d/eBkBKUPGz/xjoinoperator?orgId=1&refresh=1m&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/xjoin-operator-prod/deployments/xjoin-operator-controller-manager"
+
+# XJoinOperatorContainerRestart
+- interval: 1m
+  input_series:
+  - series: kube_pod_container_status_restarts_total{pod="xjoin-operator-controller-manager"}
+    values: 1+1x120
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: XJoinOperatorContainerRestart
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/eBkBKUPGz/xjoinoperator?orgId=1&refresh=1m&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/xjoin-operator-prod/deployments/xjoin-operator-controller-manager"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/xjoin/XJoinOperatorContainerRestart.rst"
+        message: "xjoin-operator container restarting"
+
+# XJoinOperatorNoReconciles
+- interval: 1m
+  input_series:
+  - series: controller_runtime_reconcile_total{controller="xjoin-validation"}
+    values: 0+0x60
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: XJoinOperatorNoReconciles
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        controller: xjoin-validation
+        app_team: data-pipeline
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/eBkBKUPGz/xjoinoperator?orgId=1&refresh=1m&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/xjoin-operator-prod/deployments/xjoin-operator-controller-manager"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/xjoin/XJoinOperatorNoReconciles.rst"
+        message: "xjoin-operator is not running"
+          
+# XJoinPipelineCountNotValid
+- interval: 1m
+  input_series:
+  - series: xjoin_inconsistency_threshold
+    values: 0.05+0x60
+  - series: xjoin_count_inconsistency_ratio
+    values: 0.5+0x60
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: XJoinPipelineCountNotValid
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/eBkBKUPGz/xjoinoperator?orgId=1&refresh=1m&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/api-resource/ns/xjoin-operator-prod/xjoin.cloud.redhat.com~v1alpha1~XJoinPipeline/instances"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/xjoin/XJoinPipelineNotValid.rst"
+        message: "XJoin Pipeline is not valid. Count inconsistency ratio reached 0.5"
+          
+# XJoinPipelineFullNotValid
+- interval: 1m
+  input_series:
+  - series: xjoin_inconsistency_threshold
+    values: 0.05+0x60
+  - series: xjoin_full_inconsistency_ratio
+    values: 0.5+0x60
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: XJoinPipelineFullNotValid
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/eBkBKUPGz/xjoinoperator?orgId=1&refresh=1m&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/api-resource/ns/xjoin-operator-prod/xjoin.cloud.redhat.com~v1alpha1~XJoinPipeline/instances"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/xjoin/XJoinPipelineNotValid.rst"
+        message: "XJoin Pipeline is not valid. Full inconsistency ratio reached 0.5"
+          
+# XJoinPipelineIDNotValid
+- interval: 1m
+  input_series:
+  - series: xjoin_inconsistency_threshold
+    values: 0.05+0x60
+  - series: xjoin_id_inconsistency_ratio
+    values: 0.5+0x60
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: XJoinPipelineIDNotValid
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/eBkBKUPGz/xjoinoperator?orgId=1&refresh=1m&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/api-resource/ns/xjoin-operator-prod/xjoin.cloud.redhat.com~v1alpha1~XJoinPipeline/instances"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/xjoin/XJoinPipelineNotValid.rst"
+        message: "XJoin Pipeline is not valid. ID inconsistency ratio reached 0.5"
+          
+# XJoinPipelineRefreshing
+- interval: 1m
+  input_series:
+  - series: xjoin_refresh_total
+    values: 1+1x120
+  alert_rule_test:
+  - eval_time: 2h
+    alertname: XJoinPipelineRefreshing
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      exp_annotations:
+        message: "XJoin Pipeline is being refreshed too often (15 times within past 1 hours)"
+        dashboard: "https://grafana.app-sre.devshift.net/d/eBkBKUPGz/xjoinoperator?orgId=1&refresh=1m&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/api-resource/ns/xjoin-operator-prod/xjoin.cloud.redhat.com~v1alpha1~XJoinPipeline/instances"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/xjoin/XJoinPipelineRefreshing.rst"
+
+# XJoinConnectorRestarting
+- interval: 1m
+  input_series:
+  - series: xjoin_connector_task_restart_total
+    values: 1+1x120
+  alert_rule_test:
+  - eval_time: 2h
+    alertname: XJoinConnectorRestarting
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      exp_annotations:
+        message: "XJoin Pipeline is being refreshed too often (15 times within past 1 hours)"
+        dashboard: "https://grafana.app-sre.devshift.net/d/eBkBKUPGz/xjoinoperator?orgId=1&refresh=1m&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/api-resource/ns/xjoin-operator-prod/xjoin.cloud.redhat.com~v1alpha1~XJoinPipeline/instances"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/xjoin/XJoinKafkaConnectorTasksRestarting.rst"
+
+# XJoinConnectRestarting
+- interval: 1m
+  input_series:
+  - series: xjoin_connect_restart_total
+    values: 1+1x120
+  alert_rule_test:
+  - eval_time: 2h
+    alertname: XJoinConnectRestarting
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      exp_annotations:
+        message: "XJoin Connect instance is being restarted too often (15 times within past 1 hours)"
+        dashboard: "https://grafana.app-sre.devshift.net/d/eBkBKUPGz/xjoinoperator?orgId=1&refresh=1m&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/xjoin-operator-prod/deployments/xjoin-operator-controller-manager"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/xjoin/XJoinKafkaConnectRestarting.rst"
+
+# XJoinStaleResource
+- interval: 1m
+  input_series:
+  - series: xjoin_stale_resource_count
+    values: 1+1x120
+  alert_rule_test:
+  - eval_time: 2h
+    alertname: XJoinStaleResource
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/eBkBKUPGz/xjoinoperator?orgId=1&refresh=1m&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/xjoin-operator-prod/deployments/xjoin-operator-controller-manager"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/xjoin/XJoinStaleResource.rst"
+        message: "XJoin has a stale resource for more than an hour"

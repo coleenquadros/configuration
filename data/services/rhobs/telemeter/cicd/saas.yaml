@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: telemeter
@@ -10,8 +10,8 @@ description: SaaS tracking file for Telemeter services
 app:
   $ref: /services/rhobs/telemeter/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/rhobs/observatorium/pipelines/observatorium-pipeline.app-sre-prod-01.yaml
 
 slack:
   workspace:
@@ -67,10 +67,11 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/rhobs/telemeter/namespaces/telemeter-stage.yml
-    ref: 1281bd1a1b10d1c725cb6ec51f2c8c8152953037
+    ref: ecf1be463385c766b203575633657855c15e1452
     parameters:
       NAMESPACE: telemeter-stage
-      OBSERVATORIUM_METRICS_NAMESPACE: telemeter-stage
+      OBSERVATORIUM_NAMESPACE: observatorium-stage
+      OBSERVATORIUM_METRICS_NAMESPACE: observatorium-metrics-stage
       OBSERVATORIUM_LOGS_NAMESPACE: observatorium-logs-stage
       IMAGE_TAG: '8e65e1c'
       IMAGE_CANARY_TAG: 'b4f226c'
@@ -81,17 +82,24 @@ resourceTemplates:
       MEMCACHED_IMAGE_TAG: 1.5
       PROMETHEUS_AMS_REMOTE_WRITE_PROXY_TARGET: 'observatorium-thanos-receive'
       SERVICE_ACCOUNT_NAME: prometheus-telemeter
-      TELEMETER_FORWARD_URL: 'http://observatorium-observatorium-api.telemeter-stage.svc.cluster.local:8080/api/metrics/v1/telemeter/api/v1/receive'
+      TELEMETER_FORWARD_URL: 'http://observatorium-observatorium-api.observatorium-stage.svc.cluster.local:8080/api/metrics/v1/telemeter/api/v1/receive'
       TELEMETER_LOG_LEVEL: 'debug'
       TELEMETER_SERVER_CPU_LIMIT: 1
       TELEMETER_SERVER_CPU_REQUEST: 100m
       TELEMETER_SERVER_MEMORY_LIMIT: 1Gi
       TELEMETER_SERVER_MEMORY_REQUEST: 100Mi
+      TOKEN_REFRESHER_IMAGE_TAG: master-2021-06-17-7761b62
+      TOKEN_REFRESHER_LOG_LEVEL: debug
+      THANOS_STORE_INDEX_CACHE_CONNECTION_LIMIT: 5000
+      THANOS_STORE_INDEX_CACHE_MEMORY_LIMIT_MB: 3072
+      THANOS_STORE_INDEX_CACHE_MEMCACHED_CPU_LIMIT: 1
+      THANOS_STORE_INDEX_CACHE_MEMCACHED_MEMORY_LIMIT: '3Gi'
   - namespace:
       $ref: /services/rhobs/telemeter/namespaces/telemeter-production.yml
-    ref: 1281bd1a1b10d1c725cb6ec51f2c8c8152953037
+    ref: ecf1be463385c766b203575633657855c15e1452
     parameters:
       NAMESPACE: telemeter-production
+      OBSERVATORIUM_NAMESPACE: telemeter-production
       OBSERVATORIUM_METRICS_NAMESPACE: telemeter-production
       OBSERVATORIUM_LOGS_NAMESPACE: observatorium-logs-production
       IMAGE_TAG: '8e65e1c'
@@ -110,3 +118,4 @@ resourceTemplates:
       TELEMETER_SERVER_CPU_REQUEST: 100m
       TELEMETER_SERVER_MEMORY_LIMIT: 1Gi
       TELEMETER_SERVER_MEMORY_REQUEST: 100Mi
+      TOKEN_REFRESHER_IMAGE_TAG: master-2021-06-17-7761b62

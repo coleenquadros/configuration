@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: receptor
@@ -11,15 +11,13 @@ description: receptor app on the Insights Platform
 app:
   $ref: /services/insights/receptor/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: proj-perf-insights-cluster
-
-timeout: 5
 
 managedResourceTypes:
 - Deployment
@@ -42,12 +40,14 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/receptor/namespaces/perf-receptor-perf.yml
-    ref: 51feeed82c093f99ba24f69848431836e25cc96a
+    ref: 3b3bb38e61eab535e5f108af4545c173c84e53ba
     parameters:
-      IMAGE_TAG: 86ab072
+      IMAGE_TAG: 4b7479d
       GATEWAY_CONNECTION_REGISTRAR_IMPL: redis
-      SUSPEND_STALE_CONN_JOB: true
-      PROMETHEUS_PUSH_GATEWAY: "prometheus-push.insights-push-perf.svc.cluster.local:9091"
+      SUSPEND_STALE_CONN_JOB: false
+      PROMETHEUS_PUSH_GATEWAY: ${PROMETHEUS_PUSHGATEWAY}
+      GATEWAY_REPLICAS: 1
+
 
 - name: receptor-switch
   path: /templates/receptor/receptor-switch.yaml
@@ -55,8 +55,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/receptor/namespaces/perf-receptor-perf.yml
-    ref: cefab6af5cc7e6bdf16524178f90fc9fe304c192
+    ref: 3b3bb38e61eab535e5f108af4545c173c84e53ba
     parameters:
-      IMAGE_TAG: 86ab072
+      IMAGE_TAG: 4b7479d
       SWITCH_REPLICAS: 1
-

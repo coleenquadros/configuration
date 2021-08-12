@@ -11,22 +11,8 @@ spec:
   groups:
   - name: insights-hccm-stage
     rules:
-    - alert: InsightsCostManagementPodDown
-      expr: |
-        up{service="koku", namespace="hccm-stage"} == 0
-      for: 2m
-      labels:
-        severity: high
-        service: insights
-        env: stage
-        app_team: costmanagement-staging
-      annotations:
-        dashboard: "https://GRAFANA_URL"
-        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
-        message: "Insights Cost Management Alert. At least one hccm pod has been down for two minutes."
-
-    - alert: App-koku-In-hccm-stage-Absent
-      expr: absent(up{service="koku", namespace="hccm-stage"})
+    - alert: App-koku-api-In-hccm-Absent
+      expr: absent(up{service="koku-clowder-api", namespace="hccm-stage"}) or up{service="koku-clowder-api", namespace="hccm-stage"} == 0
       for: 5m
       labels:
         severity: high
@@ -34,35 +20,41 @@ spec:
         env: stage
         app_team: costmanagement-staging
       annotations:
-        dashboard: "https://GRAFANA_URL"
+        dashboard: "https://grafana.stage.devshift.net/d/k8s-compute-resources-namespace-pods/kubernetes-compute-resources-namespace-pods"
         link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
-        message: "Insights Cost Management Alert. At least one hccm pod has been down for 5 minutes."
+        message: "Insights Cost Management Alert. At least one API pod has been down for 5 minutes in the stage environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-koku-api-In-hccm-Absent.rst"
 
-    - alert: App-koku-5xx-In-hccm-stage
-      expr: rate(django_http_responses_total_by_status_total{status=~"5[0-9]{2}", namespace="hccm-stage"}[5m]) > 0
+    - alert: App-koku-5xx-In-hccm
+      expr: |
+        sum(rate(api_3scale_gateway_api_status{status="5xx",exported_service="cost-management"}[30m])) / sum(rate(api_3scale_gateway_api_status{exported_service="cost-management"}[30m])) > .1
+      for: 5m
       labels:
         severity: warning
         service: insights
         env: stage
         app_team: costmanagement-staging
       annotations:
-        dashboard: "https://GRAFANA_URL"
+        dashboard: "https://grafana.stage.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&var-datasource=crcs02ue1-prometheus&var-label=cost-management"
         link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
-        message: "Insights Cost Management Alert. 5xx repsponses observed in the last 5 minutes."
+        message: "Insights Cost Management Alert. 5xx responses observed; error rate > 10% for 5 minutes in stage environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-koku-5xx-In-hccm.rst"
 
-    - alert: Celery-errors-In-hccm-stage
+    - alert: Celery-errors-In-hccm
       expr: rate(celery_errors_total{namespace="hccm-stage"}[5m]) > 0
       labels:
-        severity: warning
+        severity: high
         service: insights
         env: stage
         app_team: costmanagement-staging
       annotations:
-        dashboard: "https://GRAFANA_URL"
+        dashboard: "https://grafana.stage.devshift.net/d/R0HueuFGk/cost-management?orgId=1&var-Datasource=crcs02ue1-prometheus&var-namespace=hccm-stage&var-db_instance=cost-management-stage&var-rds_datasource=app-sre-stage-01-prometheus"
         link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
-        message: "Insights Cost Management Alert. Celery errors observed in the last 5 minutes."
+        message: "Insights Cost Management Alert. Celery errors observed in the last 5 minutes in stage environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/Celery-errors-In-hccm.rst"
 
-    - alert: App-cost-stale-sources-In-hccm-stage
+
+    - alert: App-cost-stale-sources-In-hccm
       expr: sum(hccm_count_stale_providers{namespace="hccm-stage"}) - sum(hccm_count_stale_providers{namespace="hccm-stage"} offset 1h) > 0
       labels:
         severity: info
@@ -70,35 +62,38 @@ spec:
         env: stage
         app_team: costmanagement-staging
       annotations:
-        dashboard: "https://GRAFANA_URL"
+        dashboard: "https://grafana.stage.devshift.net/d/R0HueuFGk/cost-management?orgId=1&var-Datasource=crcs02ue1-prometheus&var-namespace=hccm-stage&var-db_instance=cost-management-stage&var-rds_datasource=app-sre-stage-01-prometheus"
         link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
-        message: "Insights Cost Management Alert. Stale sources observed in the last hour."
+        message: "Insights Cost Management Alert. Stale sources observed in the last hour in stage environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-cost-stale-sources-In-hccm.rst"
 
-    - alert: App-cost-invalid-sources-In-hccm-stage
+    - alert: App-cost-invalid-sources-In-hccm
       expr: sum(hccm_count_invalid_sources{namespace="hccm-stage"}) - sum(hccm_count_invalid_sources{namespace="hccm-stage"} offset 1h) > 0
       labels:
-        severity: info
+        severity: warning
         service: insights
         env: stage
         app_team: costmanagement-staging
       annotations:
-        dashboard: "https://GRAFANA_URL"
+        dashboard: "https://grafana.stage.devshift.net/d/R0HueuFGk/cost-management?orgId=1&var-Datasource=crcs02ue1-prometheus&var-namespace=hccm-stage&var-db_instance=cost-management-stage&var-rds_datasource=app-sre-stage-01-prometheus"
         link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
-        message: "Insights Cost Management Alert. Invalid sources observed in the last hour."
+        message: "Insights Cost Management Alert. Invalid sources observed in the last hour in stage environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-cost-invalid-sources-In-hccm.rst"
 
-    - alert: App-cost-incomplete-manifests-In-hccm-stage
+    - alert: App-cost-incomplete-manifests-In-hccm
       expr: sum(hccm_count_incomplete_manifests{namespace="hccm-stage"}) - sum(hccm_count_incomplete_manifests{namespace="hccm-stage"} offset 1h) > 0
       labels:
-        severity: info
+        severity: warning
         service: insights
         env: stage
         app_team: costmanagement-staging
       annotations:
-        dashboard: "https://GRAFANA_URL"
+        dashboard: "https://grafana.stage.devshift.net/d/R0HueuFGk/cost-management?orgId=1&var-Datasource=crcs02ue1-prometheus&var-namespace=hccm-stage&var-db_instance=cost-management-stage&var-rds_datasource=app-sre-stage-01-prometheus"
         link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
-        message: "Insights Cost Management Alert. Incomplete manifests observed in the last hour."
+        message: "Insights Cost Management Alert. Incomplete manifests observed in the last hour in stage environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-cost-incomplete-manifests-In-hccm.rst"
 
-    - alert: App-cost-changed-heartbeats-In-hccm-stage
+    - alert: App-cost-changed-presto-heartbeats-In-hccm
       expr: idelta(presto_heartbeatdetector_activecount{namespace="hccm-stage"}[5m]) != 0
       labels:
         severity: high
@@ -106,19 +101,140 @@ spec:
         env: stage
         app_team: costmanagement-staging
       annotations:
-        dashboard: "https://GRAFANA_URL"
+        dashboard: "https://grafana.stage.devshift.net/d/6WhuBODGk/cost-management-presto?orgId=1&var-Datasource=crcs02ue1-prometheus&var-namespace=hccm-stage"
         link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
-        message: "Insights Cost Management Alert. Change in number of active presto worker heartbeats observed."
+        message: "Insights Cost Management Alert. Change in number of active presto worker heartbeats observed in stage environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-cost-changed-presto-heartbeats-In-hccm.rst"
 
-    - alert: App-cost-changed-heartbeats-In-hccm-stage
+    - alert: App-cost-presto-insufficent-resources-In-hccm
       expr: idelta(presto_execution_querymanager_insufficientresourcesfailures_totalcount_total{namespace="hccm-stage"}[5m]) != 0
+      labels:
+        severity: high
+        service: insights
+        env: stage
+        app_team: costmanagement-staging
+      annotations:
+        dashboard: "https://grafana.stage.devshift.net/d/6WhuBODGk/cost-management-presto?orgId=1&var-Datasource=crcs02ue1-prometheus&var-namespace=hccm-stage"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
+        message: "Insights Cost Management Alert. Presto queries have insufficient resources in stage environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-cost-presto-insufficent-resources-In-hccm.rst"
+
+    - alert: App-cost-download-queue-overload-In-hccm
+      expr:  avg_over_time(download_backlog{namespace="hccm-stage"}[1h]) > 500
+      labels:
+        severity: high
+        service: insights
+        env: stage
+        app_team: costmanagement-staging
+      annotations:
+        dashboard: "https://grafana.stage.devshift.net/d/R0HueuFGk/cost-management?orgId=1&var-Datasource=crcs02ue1-prometheus&var-namespace=hccm-stage&var-db_instance=cost-management-stage&var-rds_datasource=app-sre-stage-01-prometheus"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
+        message: "Insights Cost Management Alert. Experiencing high download queue backlog in stage environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-insights-hccm-worker-queue-overload.rst"
+
+    - alert: App-cost-summary-queue-overload-In-hccm
+      expr:  avg_over_time(summary_backlog{namespace="hccm-stage"}[1h]) > 500
+      labels:
+        severity: high
+        service: insights
+        env: stage
+        app_team: costmanagement-staging
+      annotations:
+        dashboard: "https://grafana.stage.devshift.net/d/R0HueuFGk/cost-management?orgId=1&var-Datasource=crcs02ue1-prometheus&var-namespace=hccm-stage&var-db_instance=cost-management-stage&var-rds_datasource=app-sre-stage-01-prometheus"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
+        message: "Insights Cost Management Alert. Experiencing high summary queue backlog in stage environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-insights-hccm-worker-queue-overload.rst"
+
+    - alert: App-cost-priority-queue-overload-In-hccm
+      expr:  avg_over_time(priority_backlog{namespace="hccm-stage"}[1h]) > 500
+      labels:
+        severity: high
+        service: insights
+        env: stage
+        app_team: costmanagement-staging
+      annotations:
+        dashboard: "https://grafana.stage.devshift.net/d/R0HueuFGk/cost-management?orgId=1&var-Datasource=crcs02ue1-prometheus&var-namespace=hccm-stage&var-db_instance=cost-management-stage&var-rds_datasource=app-sre-stage-01-prometheus"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
+        message: "Insights Cost Management Alert. Experiencing high priority queue backlog in stage environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-insights-hccm-worker-queue-overload.rst"
+
+    - alert: App-cost-refresh-queue-overload-In-hccm
+      expr:  avg_over_time(refresh_backlog{namespace="hccm-stage"}[1h]) > 500
+      labels:
+        severity: high
+        service: insights
+        env: stage
+        app_team: costmanagement-staging
+      annotations:
+        dashboard: "https://grafana.stage.devshift.net/d/R0HueuFGk/cost-management?orgId=1&var-Datasource=crcs02ue1-prometheus&var-namespace=hccm-stage&var-db_instance=cost-management-stage&var-rds_datasource=app-sre-stage-01-prometheus"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
+        message: "Insights Cost Management Alert. Experiencing high refresh queue backlog in stage environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-insights-hccm-worker-queue-overload.rst"
+
+    - alert: App-cost-cost-model-queue-overload-In-hccm
+      expr:  avg_over_time(cost_model_backlog{namespace="hccm-stage"}[1h]) > 500
+      labels:
+        severity: high
+        service: insights
+        env: stage
+        app_team: costmanagement-staging
+      annotations:
+        dashboard: "https://grafana.stage.devshift.net/d/R0HueuFGk/cost-management?orgId=1&var-Datasource=crcs02ue1-prometheus&var-namespace=hccm-stage&var-db_instance=cost-management-stage&var-rds_datasource=app-sre-stage-01-prometheus"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
+        message: "Insights Cost Management Alert. Experiencing high cost-model queue backlog in stage environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-insights-hccm-worker-queue-overload.rst"
+
+    - alert: App-cost-celery-queue-overload-In-hccm
+      expr:  avg_over_time(celery_backlog{namespace="hccm-stage"}[1h]) > 500
+      labels:
+        severity: high
+        service: insights
+        env: stage
+        app_team: costmanagement-staging
+      annotations:
+        dashboard: "https://grafana.stage.devshift.net/d/R0HueuFGk/cost-management?orgId=1&var-Datasource=crcs02ue1-prometheus&var-namespace=hccm-stage&var-db_instance=cost-management-stage&var-rds_datasource=app-sre-stage-01-prometheus"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
+        message: "Insights Cost Management Alert. Experiencing high celery (default) queue backlog in staging."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-insights-hccm-worker-queue-overload.rst"
+
+    - alert: App-cost-pod-restarts-In-hccm
+      expr: sum(increase(kube_pod_container_status_restarts_total{namespace="hccm-stage"}[1h])) > 5
+      for: 30m
+      labels:
+        severity: high
+        service: insights
+        env: stage
+        app_team: costmanagement-staging
+      annotations:
+        dashboard: "https://grafana.stage.devshift.net/d/k8s-compute-resources-namespace-pods/kubernetes-compute-resources-namespace-pods"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
+        message: "Insights Cost Management Alert. Pod restarts occurring more than 5x/1h for the last 30 minutes in stage environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-cost-pod-restarts-In-hccm.rst"
+
+    - alert: App-cost-upload-lag-In-hccm
+      expr: sum(kafka_consumergroup_group_lag{topic="platform.upload.hccm", group="hccm-group"}) by (group) > 100
+      for: 10m
       labels:
         severity: warning
         service: insights
         env: stage
         app_team: costmanagement-staging
       annotations:
-        dashboard: "https://GRAFANA_URL"
+        dashboard: "https://grafana.stage.devshift.net/d/8wCTC5Tmz/strimzi-kafka?orgId=1&var-namespace=platform-mq-stage&var-strimzi_cluster_name=platform-mq&var-kafka_broker=All&var-kafka_topic=platform.upload.hccm&var-kafka_partition=All&var-datasource=crcs02ue1-prometheus"
         link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
-        message: "Insights Cost Management Alert. Presto queries have insufficient resources."
+        message: "Kafka lag for cost management uploads in hccm topic exceeded 100 in stage environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-cost-upload-lag-In-hccm.rst"
 
+    - alert: App-cost-sources-lag-In-hccm
+      expr: sum(kafka_consumergroup_group_lag{topic="platform.sources.event-stream", group="hccm-sources"}) by (group) > 800
+      for: 10m
+      labels:
+        severity: warning
+        service: insights
+        env: stage
+        app_team: costmanagement-staging
+      annotations:
+        dashboard: "https://grafana.stage.devshift.net/d/8wCTC5Tmz/strimzi-kafka?orgId=1&var-namespace=platform-mq-stage&var-strimzi_cluster_name=platform-mq&var-kafka_broker=All&var-kafka_topic=platform.sources.event-stream&var-kafka_partition=All&var-datasource=crcs02ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
+        message: "Kafka lag for cost management sources in hccm-sources group exceeded 800 in stage environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-cost-sources-lag-In-hccm.rst"

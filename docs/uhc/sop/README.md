@@ -301,9 +301,17 @@ Clusters service API is returning an abnormally high number of 5xx Error request
 
 ### Impact:
 
-UHC users will not be able to access any service (including the accounts
-management service, the clusters management service and the upgrades information
-service) and therefore they will not be able to use the UI or the API.
+Users will not be able to access services that use the gateway. That doesn't
+include the OCM services because those use an OpenShift path route, so the
+communication goes directly from the OpenShift router to the pods. But it does
+affect services like the upgrades information service (a.k.a. Cincinnati), the
+assisted install service and the Kafka management service.
+
+To find out which services are affected exactly check the configuration of the
+Envoy proxy of the affected environment. For example, these are the Envoy
+upstream clusters of the production environment at the time this was written:
+
+https://gitlab.cee.redhat.com/service/app-interface/-/blob/9e4295cb7f531991ef2fc18f87ab794a6bfd4b82/resources/services/ocm/production/gateway-envoy.configmap.yaml#L81-172
 
 ### Summary:
 
@@ -318,8 +326,8 @@ Gateway is down
 
 ### Steps:
 
-- Check `deployment/gateway-server` logs to determine why pods are down.
-- Contact Service Development A team on #service-delivery, sd-mp-devel@redhat.com.
+- Check `deployment/gateway-envoy` logs to determine why pods are down.
+- Contact Service Development A team on #service-development, sd-mp-devel@redhat.com.
 - Inform the greater service delivery team.
 
 ---

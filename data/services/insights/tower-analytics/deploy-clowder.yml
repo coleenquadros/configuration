@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: tower-analytics
@@ -11,13 +11,13 @@ description: tower-analytics app on the Insights Platform
 app:
   $ref: /services/insights/tower-analytics/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
-  channel: team-clouddot-info
+  channel: aa-cicd-events
 
 managedResourceTypes:
 - ClowdApp
@@ -54,18 +54,22 @@ resourceTemplates:
       REPLICAS_ONEVIEW: 2
       REPLICAS_ROLLUP: 3
       REPLICAS_PROCESSOR: 3
+      REPLICAS_EXPORTER: 1
       RBAC_ENABLED: 'True'
       KAFKA_GROUPID: processor-stage
-      PROMETHEUS_PUSH_GATEWAY: prometheus-push.insights-push-stage.svc.cluster.local:9091
+      PROMETHEUS_PUSH_GATEWAY: ${PROMETHEUS_PUSHGATEWAY}
       BUNDLES_BUCKET_NAME: upload-stage
       BUNDLES_SECRET_NAME: upload-s3
-      CRON_SCHEDULE_MSG_RECOVERY: "0 11,23 * * *"
-      CRON_SCHEDULE_USER_METRICS: "0 10 * * *"
+      CRON_SCHEDULE_MSG_RECOVERY: 0 11,23 * * *
+      CRON_SCHEDULE_USER_METRICS: 0 10 * * *
       DATA_EXPORT_BUCKET_NAME: tower-analytics-dbdumps-stage-s3
       DATA_EXPORT_ENABLED: 'True'
+    promotion:
+      publish:
+      - automation-analytics-stage-deploy-success-channel
   - namespace:
       $ref: /services/insights/tower-analytics/namespaces/tower-analytics-prod.yml
-    ref: df19f2d8b80f67dfcfe86d8184514dd6ddaf932a
+    ref: 652950bc0ed681ee60179611d0572c830d63ef09
     parameters:
       ENV_NAME: prod
       REPLICAS_API: 20
@@ -74,13 +78,13 @@ resourceTemplates:
       REPLICAS_PROCESSOR: 3
       REPLICAS_EXPORTER: 8
       MEMORY_LIMIT_EXPORTER: 4Gi
-      RBAC_ENABLED: 'false'
+      RBAC_ENABLED: 'True'
       KAFKA_GROUPID: processor
-      PROMETHEUS_PUSH_GATEWAY: prometheus-push.insights-push-prod.svc.cluster.local:9091
+      PROMETHEUS_PUSH_GATEWAY: ${PROMETHEUS_PUSHGATEWAY}
       BUNDLES_BUCKET_NAME: insights-ingress-prod
       BUNDLES_SECRET_NAME: upload-s3
-      CRON_SCHEDULE_MSG_RECOVERY: "0 11,23 * * *"
-      CRON_SCHEDULE_USER_METRICS: "* 10 * * *"
+      CRON_SCHEDULE_MSG_RECOVERY: 0 11,23 * * *
+      CRON_SCHEDULE_USER_METRICS: '* 10 * * *'
       DATA_EXPORT_BUCKET_NAME: tower-analytics-dbdumps-prod
       DATA_EXPORT_ENABLED: 'True'
       JOBS_LOG_LEVEL: INFO

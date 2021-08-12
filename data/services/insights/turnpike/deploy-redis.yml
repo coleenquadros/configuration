@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: turnpike
@@ -11,15 +11,13 @@ description: Turnpike API Gateway (Redis deploy)
 app:
   $ref: /services/insights/turnpike/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
-
-timeout: 5
 
 managedResourceTypes:
 - Deployment
@@ -46,6 +44,16 @@ resourceTemplates:
       IMAGE_TAG: 1-91
   - namespace:
       $ref: /services/insights/turnpike/namespaces/prod-turnpike-prod.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 1-91
+  - namespace:
+      $ref: /services/insights/turnpike/namespaces/turnpike-fedramp-stage.yml
+    ref: master
+    parameters:
+      IMAGE_TAG: 1-91
+  - namespace:
+      $ref: /services/insights/turnpike/namespaces/turnpike-fedramp-prod.yml
     ref: master
     parameters:
       IMAGE_TAG: 1-91

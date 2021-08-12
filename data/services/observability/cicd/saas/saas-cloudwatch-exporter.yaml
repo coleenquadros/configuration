@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: app-sre-observability
@@ -10,8 +10,8 @@ description: saas-cloudwatch-exporter
 app:
   $ref: /services/observability/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
@@ -130,6 +130,24 @@ resourceTemplates:
     CLOUDWATCH_EXPORTER: cloudwatch-exporter-ocm-quay-eu-west-1
     AWS_SECRET_NAME: aws-cloudwatch-exporter-ocm-quay
     CLOUDWATCH_EXPORTER_CONFIGMAP: cloudwatch-exporter-config-ocm-quay-eu-west-1
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: master
+    parameters:
+      REPLICAS: 1
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: 4748e1b47e0a3611c5aa0b08f77624e1e590ba1d
+    parameters:
+      REPLICAS: 1
+- name: cloudwatch-exporter-ocm-quay-us-west-2
+  path: /openshift/cloudwatch-exporter.template.yaml
+  url: https://gitlab.cee.redhat.com/service/app-sre-observability
+  parameters:
+    CLOUDWATCH_EXPORTER: cloudwatch-exporter-ocm-quay-us-west-2
+    AWS_SECRET_NAME: aws-cloudwatch-exporter-ocm-quay
+    CLOUDWATCH_EXPORTER_CONFIGMAP: cloudwatch-exporter-config-ocm-quay-us-west-2
   targets:
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-stage.yml

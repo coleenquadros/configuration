@@ -1,0 +1,145 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+  - /observability/prometheusrules/kas-fleet-manager-cluster-latency-production.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+  - interval: 1m
+    input_series:
+      # 0m  - 30m   all good
+      # 30m - 60m   50% of requests degraded to 3600le bucket
+      # 60m - 120m  75% of requests degraded to 3600le bucket
+      - series: 'kas_fleet_manager_worker_cluster_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-production",le="2400",jobType="cluster_create"}'
+        values: '0+1x30   31+10x30  331+5x60'
+      - series: 'kas_fleet_manager_worker_cluster_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-production",le="3600",jobType="cluster_create"}'
+        values: '0+1x30   31+10x30  331+15x60'
+      - series: 'kas_fleet_manager_worker_cluster_duration_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",jobType="cluster_create"}'
+        values: '0+1x30   31+20x30  631+20x60'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: KasFleetManagerClustersOperationsLatency30mto6hP90BudgetBurn
+        exp_alerts: [ ]
+      - eval_time: 60m
+        alertname: KasFleetManagerClustersOperationsLatency30mto6hP90BudgetBurn
+        exp_alerts: [ ]
+      - eval_time: 120m
+        alertname: KasFleetManagerClustersOperationsLatency30mto6hP90BudgetBurn
+        exp_alerts:
+          - exp_labels:
+              alertname: KasFleetManagerClustersOperationsLatency30mto6hP90BudgetBurn
+              job: kas-fleet-manager-metrics
+              jobType: cluster_create
+              latency: 2400
+              namespace: managed-services-production
+              quantile: 90
+              service: kas-fleet-manager
+              severity: info
+            exp_annotations:
+              dashboard: "https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
+              message: "High 6h clusters operations p90 latency budget burn for Kas Fleet Manager (current value: 652.2m)"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#osd-cluster-provisioning-latency"
+  - interval: 1m
+    input_series:
+      # 0m    - 120m   all good
+      # 120m  - 240m   5% of requests degraded to 3600le bucket
+      # 240m  - 300m   30% of requests degraded to 3600le bucket
+      - series: 'kas_fleet_manager_worker_cluster_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-production",le="2400",jobType="cluster_create"}'
+        values: '0+1x120  121+18x120  2281+13x60'
+      - series: 'kas_fleet_manager_worker_cluster_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-production",le="3600",jobType="cluster_create"}'
+        values: '0+1x120  121+2x120   361+7x60'
+      - series: 'kas_fleet_manager_worker_cluster_duration_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",jobType="cluster_create"}'
+        values: '0+1x120  121+20x120  2521+20x60'
+    alert_rule_test:
+      - eval_time: 120m
+        alertname: KasFleetManagerClustersOperationsLatency2hto1dor6hto3dP90BudgetBurn
+        exp_alerts: [ ]
+      - eval_time: 240m
+        alertname: KasFleetManagerClustersOperationsLatency2hto1dor6hto3dP90BudgetBurn
+        exp_alerts: [ ]
+      - eval_time: 300m
+        alertname: KasFleetManagerClustersOperationsLatency2hto1dor6hto3dP90BudgetBurn
+        exp_alerts:
+          - exp_labels:
+              alertname: KasFleetManagerClustersOperationsLatency2hto1dor6hto3dP90BudgetBurn
+              job: kas-fleet-manager-metrics
+              jobType: cluster_create
+              latency: 2400
+              namespace: managed-services-production
+              quantile: 90
+              service: kas-fleet-manager
+              severity: info
+            exp_annotations:
+              dashboard: "https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
+              message: "High 1d/3d clusters operations p90 latency budget burn for Kas Fleet Manager (current value: 174.5m)"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#osd-cluster-provisioning-latency"
+  - interval: 1m
+    input_series:
+      # 0m  - 30m   all good
+      # 30m - 90m   5% of requests degraded to 4800le bucket
+      # 90m - 120m  10% of requests degraded to 4800le bucket
+      - series: 'kas_fleet_manager_worker_cluster_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-production",le="3600",jobType="cluster_create"}'
+        values: '0+1x30   31+19x60  1171+18x30'
+      - series: 'kas_fleet_manager_worker_cluster_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-production",le="4800",jobType="cluster_create"}'
+        values: '0+1x30   31+1x60   91+2x30'
+      - series: 'kas_fleet_manager_worker_cluster_duration_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",jobType="cluster_create"}'
+        values: '0+1x30   31+20x60  1231+20x30'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: KasFleetManagerClustersOperationsLatency30mto6hP99BudgetBurn
+        exp_alerts: [ ]
+      - eval_time: 90m
+        alertname: KasFleetManagerClustersOperationsLatency30mto6hP99BudgetBurn
+        exp_alerts: [ ]
+      - eval_time: 120m
+        alertname: KasFleetManagerClustersOperationsLatency30mto6hP99BudgetBurn
+        exp_alerts:
+          - exp_labels:
+              alertname: KasFleetManagerClustersOperationsLatency30mto6hP99BudgetBurn
+              job: kas-fleet-manager-metrics
+              jobType: cluster_create
+              latency: 3600
+              namespace: managed-services-production
+              quantile: 99
+              service: kas-fleet-manager
+              severity: info
+            exp_annotations:
+              dashboard: "https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
+              message: "High 1h/6h clusters operations p99 latency budget burn for Kas Fleet Manager (current value: 64.37m)"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#osd-cluster-provisioning-latency"
+  - interval: 1m
+    input_series:
+      # 0m    - 120m   all good
+      # 120m  - 240m   1% of requests degraded to 4800le bucket
+      # 240m  - 480m   4% of requests degraded to 4800le bucket
+      - series: 'kas_fleet_manager_worker_cluster_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-production",le="3600",jobType="cluster_create"}'
+        values: '0+1x120  121+99x120    12001+96x240'
+      - series: 'kas_fleet_manager_worker_cluster_duration_bucket{job="kas-fleet-manager-metrics",namespace="managed-services-production",le="4800",jobType="cluster_create"}'
+        values: '0+1x120  121+1x120     241+4x240'
+      - series: 'kas_fleet_manager_worker_cluster_duration_count{job="kas-fleet-manager-metrics",namespace="managed-services-production",jobType="cluster_create"}'
+        values: '0+1x120  121+100x120   12121+100x240'
+    alert_rule_test:
+      - eval_time: 120m
+        alertname: KasFleetManagerClustersOperationsLatency2hto1dor6hto3dP99BudgetBurn
+        exp_alerts: [ ]
+      - eval_time: 240m
+        alertname: KasFleetManagerClustersOperationsLatency2hto1dor6hto3dP99BudgetBurn
+        exp_alerts: [ ]
+      - eval_time: 480m
+        alertname: KasFleetManagerClustersOperationsLatency2hto1dor6hto3dP99BudgetBurn
+        exp_alerts:
+          - exp_labels:
+              alertname: KasFleetManagerClustersOperationsLatency2hto1dor6hto3dP99BudgetBurn
+              job: kas-fleet-manager-metrics
+              jobType: cluster_create
+              latency: 3600
+              namespace: managed-services-production
+              quantile: 99
+              service: kas-fleet-manager
+              severity: info
+            exp_annotations:
+              dashboard: "https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
+              message: "High 1d/3d clusters operations p99 latency budget burn for Kas Fleet Manager (current value: 29.81m)"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#osd-cluster-provisioning-latency"

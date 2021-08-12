@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: sources
@@ -11,15 +11,13 @@ description: sources app on the Insights Platform
 app:
   $ref: /services/insights/sources/app.yml
 
-instance:
-  $ref: /dependencies/ci-ext/ci-ext.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
-
-timeout: 5
 
 managedResourceTypes:
 - ClowdApp
@@ -45,36 +43,37 @@ resourceTemplates:
     disable: true # tells app-sre to not actually run the deploy job for this target
     ref: internal # altered by bonfire
     parameters:
-      IMAGE_TAG: 915a1e6
+      IMAGE_TAG: ee5ffe5
       LOG_LEVEL: WARN
       MIN_REPLICAS: 1
       SOURCES_ENV: stage
       SOURCETYPE_SKIP_LIST: "my-source-type"
   - namespace:
       $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
-    ref: 400a49fd3741532bfbc0cc087d40ad0fc4bbde6f # commit SHA of /deploy/clowdapp.yaml
+    ref: e5cff57a9bac728aed7487bc4508debf9a56ba1a
     parameters:
-      IMAGE_TAG: 915a1e6
-      KOKU_SOURCES_API_HOST: koku-sources.hccm-stage.svc.cluster.local
-      KOKU_SOURCES_API_PORT: '8080'
+      IMAGE_TAG: ee5ffe5
+      KOKU_SOURCES_API_HOST: koku-clowder-sources-client.hccm-stage.svc.cluster.local
       CLOUD_METER_API_HOST: cloudigrade-api.cloudigrade-stage.svc.cluster.local
       CLOUD_METER_SOURCES_API_PORT: '80'
       LOG_LEVEL: WARN
+      CONTAINER_LOG_LEVEL: DEBUG
       MIN_REPLICAS: 1
       SOURCES_ENV: stage
       SOURCETYPE_SKIP_LIST: ""
       RBAC_PORT: '8080'
   - namespace:
       $ref: /services/insights/sources/namespaces/sources-prod.yml
-    ref: 16ec616d68cdb30a3967f0947c91a9b23d61d6de
+    ref: 01fb5564ec6cc3ea705f0a560c1c6e525086a9fb
     parameters:
       MIN_REPLICAS: 3
-      IMAGE_TAG: ca86414
-      KOKU_SOURCES_API_HOST: koku-sources.hccm-prod.svc.cluster.local
-      KOKU_SOURCES_API_PORT: '8080'
+      SIDEKIQ_REPLICAS: 3
+      IMAGE_TAG: a8a7dd3
+      KOKU_SOURCES_API_HOST: koku-clowder-sources-client.hccm-prod.svc.cluster.local
       CLOUD_METER_API_HOST: cloudigrade-api.cloudigrade-prod.svc.cluster.local
       CLOUD_METER_SOURCES_API_PORT: '80'
       LOG_LEVEL: WARN
+      CONTAINER_LOG_LEVEL: INFO
       SOURCES_ENV: prod
       SOURCETYPE_SKIP_LIST: ""
       RBAC_PORT: '8080'
@@ -87,17 +86,17 @@ resourceTemplates:
     disable: true # tells app-sre to not actually run the deploy job for this target
     ref: internal # altered by bonfire
     parameters:
-      IMAGE_TAG: eb00167
+      IMAGE_TAG: b05dc1c
   - namespace:
       $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
-    ref: 5bab6654eef8d0934ba8d9ea958be40cf582e9e3 # commit SHA of /deploy/clowdapp.yaml
+    ref: 3b0561f7735b9366f1f9de711e59a57d42cd574a # commit SHA of /deploy/clowdapp.yaml
     parameters:
-      IMAGE_TAG: eb00167
+      IMAGE_TAG: b05dc1c
   - namespace:
       $ref: /services/insights/sources/namespaces/sources-prod.yml
     ref: 5bab6654eef8d0934ba8d9ea958be40cf582e9e3 # commit SHA of /deploy/clowdapp.yaml
     parameters:
-      IMAGE_TAG: d0b2f02
+      IMAGE_TAG: cbdfc46
 - name: sources-superkey-worker
   path: /deploy/clowdapp.yaml
   url: https://github.com/RedHatInsights/sources-superkey-worker
@@ -107,21 +106,23 @@ resourceTemplates:
     disable: true # tells app-sre to not actually run the deploy job for this target
     ref: internal # altered by bonfire
     parameters:
-      IMAGE_TAG: f77f1d9
+      IMAGE_TAG: a9b3a9e
   - namespace:
       $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
-    ref: 84d930cf45b8cadc6ecb3a5fa38cf27fb46f7ee3 # commit SHA of /deploy/clowdapp.yaml
+    ref: faa8e29808b4d05b6b10962043b616ac5c87f4d6
     parameters:
-      IMAGE_TAG: f77f1d9
+      IMAGE_TAG: a9b3a9e
       LOG_LEVEL: WARN
       MIN_REPLICAS: 1
+      MEMORY_LIMIT: 150Mi
   - namespace:
       $ref: /services/insights/sources/namespaces/sources-prod.yml
-    ref: 84d930cf45b8cadc6ecb3a5fa38cf27fb46f7ee3
+    ref: 06472e031cc0b769ed7a10467a23e314d16f5c8e
     parameters:
-      IMAGE_TAG: f77f1d9
+      IMAGE_TAG: 0b10dcc
       LOG_LEVEL: WARN
-      MIN_REPLICAS: 1
+      MIN_REPLICAS: 3
+      MEMORY_LIMIT: 150Mi
 # Svc depends on receptor which is not migrated to the Clowder
 - name: sources-satellite
   path: /deploy/clowdapp.yaml
@@ -135,9 +136,9 @@ resourceTemplates:
 #      IMAGE_TAG: xxxxxx
   - namespace:
       $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
-    ref: 8dc8342843d9d729089b96e50ad27e3f142a5b75 # commit SHA of /deploy/clowdapp.yaml
+    ref: 397fe4f090c15f50e12b2278278e4d373626055b
     parameters:
-      IMAGE_TAG: becc74f
+      IMAGE_TAG: e5d8636
       RECEPTOR_CONTROLLER_SECRET_NAME: sources-psk
       RECEPTOR_CONTROLLER_SECRET_KEY_PSK: client-psk
       UPDATE_SOURCES_VIA_API: '1'
@@ -145,7 +146,7 @@ resourceTemplates:
       $ref: /services/insights/sources/namespaces/sources-prod.yml
     ref: 8dc8342843d9d729089b96e50ad27e3f142a5b75 # commit SHA of /deploy/clowdapp.yaml
     parameters:
-      MIN_REPLICAS: 1
+      MIN_REPLICAS: 3
       UPDATE_SOURCES_VIA_API: '1'
       IMAGE_TAG: becc74f
       RECEPTOR_CONTROLLER_SECRET_NAME: sources-psk

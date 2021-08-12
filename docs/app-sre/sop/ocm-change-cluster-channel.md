@@ -15,7 +15,7 @@ This SOP explains how to change an App SRE cluster's channel in OCM.
         - The cluster does not have existing upgrade policies
 1. If the cluster has an `upgradePolicy`:
     1. Disable the `ocm-upgrade-scheduler` integration in [Unleash](https://app-interface.unleash.devshift.net)
-    1. Log in to the [OCM console](https://cloud.redhat.com/openshift) and delete the automatic upgrade policy for the cluster
+    1. Log in to the [OCM console](https://console.redhat.com/openshift) and delete the automatic upgrade policy for the cluster
 1. Get the MR reviewed and merged.
     * Note: the `ocm-clusters` integration is expected to attempt to update the cluster a few times until the changes are reflected in OCM (more info in [SDA-3297](https://issues.redhat.com/browse/SDA-3297)).
 1. Once the changes are reflected (indicated by the `ocm-clusters` integration going silent), enable the `ocm-upgrade-scheduler` integration in [Unleash](https://app-interface.unleash.devshift.net).

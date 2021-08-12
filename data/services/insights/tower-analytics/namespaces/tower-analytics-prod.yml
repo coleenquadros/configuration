@@ -39,6 +39,11 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 - provider: vault-secret
+  path: insights/secrets/insights-prod/tower-analytics-prod/servicekey
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
   path: insights/secrets/global/rds-client-ca
   version: 1
 - provider: vault-secret
@@ -70,13 +75,18 @@ terraformResources:
   identifier: tower-analytics-dbdumps-prod
   defaults: /terraform/resources/s3-private-1.yml
   output_resource_name: tower-analytics-dbdumps-s3
+- provider: s3
+  account: insights-prod
+  identifier: tower-analytics-recovery-prod
+  defaults: /terraform/resources/s3-all-expires-90-days.yml
+  output_resource_name: tower-analytics-recovery-s3
 - provider: rds
   account: insights-prod
   identifier: tower-analytics-prod
   defaults: /terraform/resources/insights/production/rds/rds-tower-analytics-prod.yml
   overrides:
     snapshot_identifier: tower-analytics-prod-migration
-  parameter_group: /terraform/resources/insights/production/rds/postgres11-parameter-group-tower-analytics-prod.yml
+  parameter_group: /terraform/resources/insights/production/rds/postgres13-parameter-group-tower-analytics-prod.yml
   output_resource_name: automation-analytics-db
   output_resource_db_name: tower_analytics_backend
   enhanced_monitoring: true

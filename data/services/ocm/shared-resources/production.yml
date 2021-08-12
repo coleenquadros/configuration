@@ -33,12 +33,11 @@ openshiftResources:
       hive_cluster_name: hivep04ew2
       hive_cluster_api_url: https://api.hivep04ew2.byo5.p1.openshiftapps.com:6443
       hive_cluster_api_url_slug: api-hivep04ew2-byo5-p1-openshiftapps-com:6443
-    # hive-production v3 shard
-    - id: 0c7d42ee-d751-4e5e-928d-838c4141ec20
-      status: maintenance
-      hive_cluster_name: hive-production
-      hive_cluster_api_url: https://api.hive-production.openshift.com:443
-      hive_cluster_api_url_slug: api-hive-production-openshift-com:443
+    - id: b26159a7-aaef-4303-89a0-6713ad9f1090
+      status: active
+      hive_cluster_name: hivep05ue1
+      hive_cluster_api_url: https://api.hivep05ue1.pfj0.p1.openshiftapps.com:6443
+      hive_cluster_api_url_slug: api-hivep05ue1-pfj0-p1-openshiftapps-com:6443
     # this is a workaround to use the vault function inside the for loop in the template
     current_hive_cluster:
       name: 'workaround'
@@ -52,7 +51,7 @@ openshiftResources:
     qontract.recycle: "true"
 - provider: vault-secret
   path: app-interface/app-sre/uhc-production/uhc-acct-mngr
-  version: 18
+  version: 20
 - provider: vault-secret
   path: app-interface/app-sre/uhc-production/ocm-service-log
   version: 4
@@ -68,23 +67,15 @@ openshiftResources:
 - provider: route
   path: /services/ocm/production/gateway-server.route.yaml
 - provider: route
-  path: /services/ocm/production/portal-redirector.route.yaml
-- provider: route
   path: /services/ocm/production/service-logs.route.yaml
 - provider: route
   path: /services/ocm/production/job-queue.route.yaml
-- provider: resource
-  path: /services/ocm/production/portal-redirector-rewriterules.configmap.yaml
-- provider: resource-template
-  path: /services/ocm/serviceaccount.yaml
-  variables:
-    name: uhc-portal-redirector
 - provider: resource
   path: /services/ocm/production/authentication.configmap.yaml
 - provider: resource
   path: /services/ocm/production/clusters-service.configmap.yaml
 - provider: resource
-  path: /services/ocm/production/gateway.configmap.yaml
+  path: /services/ocm/production/gateway-envoy.configmap.yaml
 - provider: resource
   path: /services/ocm/production/clusters-service-envoy.configmap.yaml
 - provider: resource
@@ -103,16 +94,6 @@ openshiftServiceAccountTokens:
 - namespace:
     $ref: /services/rhobs/telemeter/namespaces/telemeter-production.yml
   serviceAccountName: uhc-prometheus-access
-# hive-production
-- namespace:
-    $ref: /services/hive/namespaces/hive-production.yml
-  serviceAccountName: hive-frontend
-- namespace:
-    $ref: /services/osd-operators/namespaces/aws-account-operator-production.yml
-  serviceAccountName: aws-account-operator-client
-- namespace:
-    $ref: /services/osd-operators/namespaces/gcp-project-operator-production.yml
-  serviceAccountName: gcp-project-operator-client
 # hivep01ue1
 - namespace:
     $ref: /services/hive/namespaces/hivep01ue1/hive-production.yml
@@ -152,4 +133,14 @@ openshiftServiceAccountTokens:
   serviceAccountName: aws-account-operator-client
 - namespace:
     $ref: /services/osd-operators/namespaces/hivep04ew2/gcp-project-operator.yml
+  serviceAccountName: gcp-project-operator-client
+# hivep05ue1
+- namespace:
+    $ref: /services/hive/namespaces/hivep05ue1/hive-production.yml
+  serviceAccountName: hive-frontend
+- namespace:
+    $ref: /services/osd-operators/namespaces/hivep05ue1/aws-account-operator.yml
+  serviceAccountName: aws-account-operator-client
+- namespace:
+    $ref: /services/osd-operators/namespaces/hivep05ue1/gcp-project-operator.yml
   serviceAccountName: gcp-project-operator-client

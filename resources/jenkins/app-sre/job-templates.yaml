@@ -180,7 +180,7 @@
         eval `ssh-agent -s`
         ssh-add app-sre-bot.key
         ansible -u ${{APP_SRE_BOT_USERNAME}} --key-file app-sre-bot.key -m shell -a 'sudo /opt/clean-up-scripts/prune-docker-images.sh' ci-int-jenkins-slave,ci-ext-jenkins-slave,ci-ext-jenkins
-        ansible -u ${{APP_SRE_BOT_USERNAME}} --key-file app-sre-bot.key -m shell -a 'sudo -u jenkins /opt/clean-up-scripts/prune-podman-images.sh' ci-int-jenkins-slave-uhc,ci-int-jenkins-slave-rhel8
+        ansible -u ${{APP_SRE_BOT_USERNAME}} --key-file app-sre-bot.key -m shell -a 'sudo -u jenkins /opt/clean-up-scripts/prune-podman-images.sh' ci-int-jenkins-slave-uhc,ci-ext-jenkins-slave-rhel8,ci-int-jenkins-slave-rhel8
     cron_expression: H */6 * * *
     <<: *gl_timed
 
@@ -239,8 +239,6 @@
         <<: *vault_defaults
         secrets:
         - *app_sre_bot_key
-        - *kube_config_hive_int
-        - *kube_config_hive_stage
         - *kube_config_hive_stage_01
         - *kube_config_hive_prod
         - *slack_hook_url
@@ -271,61 +269,15 @@
     <<: *gh_timed
 
 - job-template:
-    id: 'gl-build-master-managed-tenants'
-    name: '{gl_group}-{gl_project}-gl-build-{branch}-managed-tenants'
+    id: 'sd-sos-notifier'
+    job_name: 'sd-sos-notifier'
+    name: 'sd-sos-notifier'
+    branch: master
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'
     - vault-secrets:
         <<: *vault_defaults
         secrets:
-        - *app_sre_bot_key
-        - *kube_config_hive_int
-        - *kube_config_hive_stage
-        - *kube_config_hive_stage_01
-        - *kube_config_hive_prod
-        - *quay_secret_push
-        - *addons_flow_ocm_token
-        - *gitlab_token
-    builders:
-    - shell: |
-        export JUMPHOST="ci.ext.devshift.net"
-        export JUMPHOST_USER="$APP_SRE_BOT_USERNAME"
-        export SSH_PRIVATE_KEY_B64="$APP_SRE_BOT_KEY"
-        export KUBE_SERVER="$KUBE_SERVER_HIVE_STAGE"
-        export KUBE_TOKEN="$KUBE_TOKEN_HIVE_STAGE"
-
-        TMP_DIR=$(mktemp -d -p .)
-        trap "rm -rf $TMP_DIR" EXIT SIGINT
-
-        export SSH_KEY_FILE="$TMP_DIR/id_rsa"
-        echo "$SSH_PRIVATE_KEY_B64" | base64 -d > "$SSH_KEY_FILE"
-        chmod 700 "$TMP_DIR"
-        chmod 600 "$SSH_KEY_FILE"
-
-        export DOCKER_CONF=$PWD/.docker
-        mkdir -p $DOCKER_CONF
-        echo "$QUAY_DOCKER_CONFIG_JSON" | base64 -d > $DOCKER_CONF/config.json
-
-        ./build_deploy.sh
+        - *sd_sos
     <<: *gl_build_master
-
-- job-template:
-    id: 'gl-pr-check-managed-tenants'
-    name: '{gl_group}-{gl_project}-gl-pr_check'
-    wrappers:
-    - timeout_wrapper:
-        timeout: '{timeout}'
-    - ansicolor
-    - vault-secrets:
-        <<: *vault_defaults
-        secrets:
-        - *3scale_api
-        - *addons_flow_ocm_token
-        - *reconcile_toml
-        - *kube_config_hive_int
-        - *kube_config_hive_stage
-        - *kube_config_hive_stage_01
-        - *kube_config_hive_prod
-        - *gitlab_token
-    <<: *gl_pr_check

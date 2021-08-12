@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: notifications
@@ -11,15 +11,13 @@ description: notifications app on the Insights Platform
 app:
   $ref: /services/insights/notifications/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: team-clouddot-info
-
-timeout: 5
 
 managedResourceTypes:
 - Deployment
@@ -34,7 +32,7 @@ authentication:
   image:
     path: insights/quay/cloudservices-push
     field: all
-  
+
 resourceTemplates:
 - name: notifications-backend
   path: /templates/notifications/notifications-backend.yaml
@@ -42,31 +40,26 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
-    ref: 471b20855014636f74b74869a67301714fd75249
+    ref: 82208c514c87bda3737df6ccffbbb85914e9e902
     parameters:
-      IMAGE_TAG: 04f6c1e
+      IMAGE_TAG: 97db004
       DB_SECRET_NAME: notifications-backend-db
-      SENTRY_ENV: stage
-      SENTRY_ENABLED: false
-      CLOUD_WATCH_LOG_GROUP: notifications-stage
+      SENTRY_ENABLED: true
       CLOUDWATCH_LOGGING_ENABLED: true
       COMPONENT_DEBUG_LEVEL: DEBUG
       PROCESSOR_EMAIL_NO_REPLY: no-reply-stage@redhat.com
       REPLICAS: 1
   - namespace:
       $ref: /services/insights/notifications/namespaces/notifications-prod.yml
-    ref: 652ceda6473eb28f8ea8eed0ec101b54f91a74e8
+    ref: fecfb7b60b152d3d1a569a79a0fb79ff5aaccc3a
     parameters:
-      IMAGE_TAG: c81f4d7
+      IMAGE_TAG: 97db004
       DB_SECRET_NAME: notifications-backend-db
-      SENTRY_ENV: prod
       SENTRY_ENABLED: true
-      CLOUD_WATCH_LOG_GROUP: notifications-prod
       CLOUDWATCH_LOGGING_ENABLED: true
       COMPONENT_DEBUG_LEVEL: DEBUG
       PROCESSOR_EMAIL_NO_REPLY: no-reply@redhat.com
       REPLICAS: 1
-      POLICYNOTIFICATIONS_MP_REST_URL: http://policies-notifications.policies-prod.svc.cluster.local:8080
       MEMORY_LIMIT: 4Gi
       CPU_LIMIT: 3
 - name: notifications-gw
@@ -75,23 +68,19 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
-    ref: 652ceda6473eb28f8ea8eed0ec101b54f91a74e8
+    ref: fecfb7b60b152d3d1a569a79a0fb79ff5aaccc3a
     parameters:
-      IMAGE_TAG: "0053047"
-      SENTRY_ENV: stage
-      SENTRY_ENABLED: false
-      CLOUD_WATCH_LOG_GROUP: notifications-stage
+      IMAGE_TAG: 3634ea1
+      SENTRY_ENABLED: true
       CLOUDWATCH_LOGGING_ENABLED: true
       COMPONENT_DEBUG_LEVEL: DEBUG
       REPLICAS: 1
   - namespace:
       $ref: /services/insights/notifications/namespaces/notifications-prod.yml
-    ref: 652ceda6473eb28f8ea8eed0ec101b54f91a74e8
+    ref: fecfb7b60b152d3d1a569a79a0fb79ff5aaccc3a
     parameters:
-      IMAGE_TAG: "0053047"
-      SENTRY_ENV: prod
+      IMAGE_TAG: 3634ea1
       SENTRY_ENABLED: true
-      CLOUD_WATCH_LOG_GROUP: notifications-prod
       CLOUDWATCH_LOGGING_ENABLED: true
       COMPONENT_DEBUG_LEVEL: DEBUG
       REPLICAS: 1
