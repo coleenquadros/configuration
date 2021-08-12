@@ -347,3 +347,68 @@ resourceTemplates:
     parameters:
       COST_MGMT_RECIPIENTS: '{"dmcpherscc":{"cc":["jkoehler@redhat.com", "dgutride@redhat.com"]}, "muhlcc":{}, "clovecc":{}, "gbuchanacc":{}}'
       EMAIL_SCHEDULE: '0 13 * * 1'
+
+- name: koku-daily
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/project-koku/koku-daily
+  targets:
+  - namespace:
+      $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
+    ref: master
+    parameters:
+      PROMETHEUS_PUSH_GATEWAY: ${PROMETHEUS_PUSHGATEWAY}
+      REPLICAS: 1
+      APP_URL_PREFIX: /api/cost-management/v1/koku-daily/
+      CPU_REQUEST: 100m
+      CPU_LIMIT: 250m
+      MEMORY_REQUEST: 200Mi
+      MEMORY_LIMIT: 250Mi
+  # - namespace:
+  #     $ref: /services/insights/hccm/namespaces/hccm-prod.yml
+  #   ref: main
+  #   parameters:
+  #     IMAGE_TAG: b07f065
+  #     PROMETHEUS_PUSH_GATEWAY: ${PROMETHEUS_PUSHGATEWAY}
+  #     REPLICAS: 1
+  #     APP_URL_PREFIX: /api/cost-management/v1/koku-daily/
+  #     CPU_REQUEST: 100m
+  #     CPU_LIMIT: 250m
+  #     MEMORY_REQUEST: 200Mi
+  #     MEMORY_LIMIT: 250Mi
+
+- name: nise-populator
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/project-koku/nise-populator
+  targets:
+  - namespace:
+      $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
+    ref: master
+    parameters:
+      CPU_REQUEST: 100m
+      CPU_LIMIT: 250m
+      MEMORY_REQUEST: 200Mi
+      MEMORY_LIMIT: 250Mi
+  # - namespace:
+  #     $ref: /services/insights/hccm/namespaces/hccm-prod.yml
+  #   ref: main
+  #   parameters:
+  #     IMAGE_TAG: 59620cb
+  #     CPU_REQUEST: 100m
+  #     CPU_LIMIT: 250m
+  #     MEMORY_REQUEST: 200Mi
+  #     MEMORY_LIMIT: 250Mi
+
+- name: parquet-compactor
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/project-koku/parquet-compactor
+  targets:
+  - namespace:
+      $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
+    ref: main
+    parameters:
+      S3_BUCKET_NAME: hccm-stage-s3
+  # - namespace:
+  #     $ref: /services/insights/hccm/namespaces/hccm-prod.yml
+  #   ref: main
+  #   parameters:
+  #     S3_BUCKET_NAME: hccm-prod-s3
