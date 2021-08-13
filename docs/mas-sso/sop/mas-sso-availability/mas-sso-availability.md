@@ -25,10 +25,10 @@
   - **Severity:** critical
   - **Potential Customer Impact:** High
 - MasSSOAvailability2hto1dErrorBudgetBurn
-  - **Severity:** critical
+  - **Severity:** high
   - **Potential Customer Impact:** Low
 - MasSSOAvailability6hto3dErrorBudgetBurn
-  - **Severity:** critical
+  - **Severity:** warning
   - **Potential Customer Impact:** Low
   
 ## Overview
