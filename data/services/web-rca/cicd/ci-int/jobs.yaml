@@ -1,0 +1,39 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+labels:
+  service: web-rca
+
+name: ci-int-web-rca-jobs
+
+description: 'Build the Web RCA'
+
+app:
+  $ref: /services/web-rca/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+type: jobs
+
+config:
+- project:
+    name: web-rca
+    label: web-rca
+    node: rhel8
+    gl_group: service
+    gl_project: web-rca
+    pr_check_script_path: './pr_test.sh'
+    quay_org: app-sre
+    jobs:
+    - 'gl-build-master':
+        display_name: Web RCA build main
+        branch: main
+    - 'gl-pr-check':
+        display_name: Web RCA pr-check
+# FIXME: we don't have an end-to-end test for Web RCA yet
+#    - 'gl-timed':
+#        branch: main
+#        display_name: Web RCA end-to-end test
+#        cron_expression: 'H/15 * * * *'
+#        ci_cmd: './end2end-curl.sh'
