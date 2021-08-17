@@ -23,10 +23,10 @@
   - **Severity:** critical
   - **Potential Customer Impact:** High
 - MasSSOLatency2hto1dBudgetBurn
-  - **Severity:** critical
+  - **Severity:** high
   - **Potential Customer Impact:** Low
 - MasSSOLatency6hto3dBudgetBurn
-  - **Severity:** critical
+  - **Severity:** warning
   - **Potential Customer Impact:** Low
 
 ## Overview

@@ -18,17 +18,17 @@
 
 ## List of alerts
 
-- ManagedSSOAPI1hErrorBudgetBurn
+- MasSSOAvailability5mto1hErrorBudgetBurn
   - **Severity:** critical
   - **Potential Customer Impact:** High
-- ManagedSSOAPI6hErrorBudgetBurn
+- MasSSOAvailability30mto6hErrorBudgetBurn
   - **Severity:** critical
   - **Potential Customer Impact:** High
-- ManagedSSOAPI1dErrorBudgetBurn
-  - **Severity:** critical
+- MasSSOAvailability2hto1dErrorBudgetBurn
+  - **Severity:** high
   - **Potential Customer Impact:** Low
-- ManagedSSOAPI3dErrorBudgetBurn
-  - **Severity:** critical
+- MasSSOAvailability6hto3dErrorBudgetBurn
+  - **Severity:** warning
   - **Potential Customer Impact:** Low
   
 ## Overview
