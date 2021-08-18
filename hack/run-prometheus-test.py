@@ -52,8 +52,6 @@ parser.add_argument("-k", "--keep-temp-files", action="store_true",
                     help="Pretty print prometheus test errors")
 args = parser.parse_args()
 
-print(args.keep_temp_files)
-
 jinja2_vars = {}
 if args.vars_file:
     with open(args.vars_file, 'r') as f:
