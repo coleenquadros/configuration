@@ -34,24 +34,21 @@ tests:
     input_series:
       # 0m  - 10m Status 200 code
       # 10m - 20m Status 400 code
-      - series: kas_fleet_manager_observatorium_request_count{namespace="managed-services-stage",pod="kas-fleet-manager-54694f8585-j7ks5",code="200"}
-        values: 0+1x10 11+0x10
-      - series: kas_fleet_manager_observatorium_request_count{namespace="managed-services-stage",pod="kas-fleet-manager-54694f8585-j7ks5",code="400"}
-        values: 0+0x10 0+1x10
+      - series: kas_fleet_manager_observatorium_request_count{namespace="managed-services-stage",code="400"}
+        values: 0+0x10 1+4x10
+      - series: kas_fleet_manager_observatorium_request_count{namespace="managed-services-stage"}
+        values: 1+1x10 11+6x10
     alert_rule_test:
       - eval_time: 10m
-        alertname: ObservatoriumNon200Status - stage 
+        alertname: KasFleetManagerObservatoriumNon200Status - stage 
         exp_alerts: []
       - eval_time: 20m
-        alertname: ObservatoriumNon200Status - stage 
+        alertname: KasFleetManagerObservatoriumNon200Status - stage 
         exp_alerts:
           - exp_labels:
-              alertname: ObservatoriumNon200Status - stage
+              alertname: KasFleetManagerObservatoriumNon200Status - stage
               service: kas-fleet-manager
               severity: critical
-              code: "400"
-              namespace: "managed-services-stage"
-              pod: "kas-fleet-manager-54694f8585-j7ks5"
             exp_annotations:
               message: "Kas fleet manager in namespace managed-services-stage is receiving status codes other than 2xx from Observatorium."
               runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop/observatorium-status-code.md"
