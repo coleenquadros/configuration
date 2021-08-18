@@ -602,10 +602,11 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
 1. Once the ticket is Done, add yourself (temporarily) to the cluster-admin group via OCM: https://docs.openshift.com/dedicated/4/administering_a_cluster/cluster-admin-role.html
 
-1. Login to the cluster and create a cluster-admin ServiceAccount:
+1. Login to the cluster, create a cluster-admin ServiceAccount, grant it the cluster-admin role and obtain its token:
   ```sh
   $ oc new-project app-sre
   $ oc -n app-sre create sa app-sre-cluster-admin-bot
+  $ oc adm policy add-cluster-role-to-user cluster-admin -z app-sre-cluster-admin-bot
   $ oc -n app-sre sa get-token app-sre-cluster-admin-bot
   ```
 

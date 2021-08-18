@@ -12,7 +12,7 @@ AWS RDS - PostgreSQL is used for persistent storage.
 ![MAS SSO Service Architecture](./images/mas-sso-architecture.png)
 
 This is a simplified view of MAS SSO. It details its interaction with different components in the Managed Kafka ecosystem.
-The `sso.redhat.com` is registered as an Identity Provider (IdP), this enables Red Hat customer users to interact with the Managed Kafka service.
+The `sso.redhat.com` is registered as an Identity Provider (IdP) in MAS SSO, this enables Red Hat customer users to interact with the Managed Kafka service.
 
 - Managed Kafka Service Control Plane
   - Control Plane of the Kafka Service.
@@ -155,8 +155,8 @@ This list of dependencies for MAS SSO
    Used for OSD cluster creation, add-on installation, IDP setup, trusted data path (SyncSets), and scaling compute nodes
 2. *sso.redhat.com*:
    Identity federation
-3. *AWS Route 53*:
-   Creation of route for MAS SSO instance
+3. *AWS Route 53*:  
+    Creation of DNS for MAS SSO instance
 4. *AWS RDS*:
    PostgreSQL database that acts as the datastore for MAS SSO
 5. *Let's Encrypyt*:
@@ -216,4 +216,6 @@ Resources:
 
 ## Load Testing
 
-Load test instructions can be found [here](https://gitlab.cee.redhat.com/service/saas-mas-sso/-/blob/master/sop/performance-test.md)
+Load test instructions can be found [here](https://gitlab.cee.redhat.com/service/saas-mas-sso/-/blob/master/sop/performance-test.md).
+
+The load test results from the latest run can be found [here](https://drive.google.com/drive/folders/11xQaK_MJimOo_kU9tNllP7pmGc4GWIgJ?usp=sharing)
