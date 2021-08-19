@@ -24,30 +24,49 @@ managedResourceTypes:
 
 imagePatterns:
 - quay.io/quarkus/code-quarkus-app
+- quay.io/quarkus/code-quarkus-api
+- quay.io/quarkus/code-quarkus-frontend
 
 resourceTemplates:
+- name: code-quarkus-api
+  url: https://github.com/quarkusio/code.quarkus.io
+  path: /openshift/code-quarkus-api.yaml
+  parameters:
+    IO_QUARKUS_CODE_FEATURES: support-button
+  targets:
+    - namespace:
+        $ref: /services/quarkus/namespaces/code-quarkus-stage.yml
+      ref: main
+      upstream:
+        instance:
+          $ref: /dependencies/ci-ext/ci-ext.yml
+        name: quarkusio-code.quarkus.io-gh-build-main
+      parameters:
+        REPLICAS: 1
+        IO_QUARKUS_CODE_HOSTNAME: stage.code.quarkus.io
+        IO_QUARKUS_CODE_GA_EXTENSIONS_DIMENSION_INDEX: 5
+        IO_QUARKUS_CODE_GA_QUARKUS_VERSION_DIMENSION_INDEX: 6
+        IO_QUARKUS_CODE_GA_BUILD_TOOL_DIMENSION_INDEX: 7
+        IO_QUARKUS_CODE_GA_EXTENSION_QUANTITY_INDEX: 8
+        IO_QUARKUS_CODE_GA_BATCHING_ENABLED: "false"
+        IO_QUARKUS_CODE_QUARKUS_PLATFORMS_RELOAD_CRON_EXPR: "0 */5 * * * ?"
+- name: code-quarkus-frontend
+  url: https://github.com/quarkusio/code.quarkus.io
+  path: /openshift/code-quarkus-frontend.yaml
+  targets:
+    - namespace:
+        $ref: /services/quarkus/namespaces/code-quarkus-stage.yml
+      ref: main
+      upstream:
+        instance:
+          $ref: /dependencies/ci-ext/ci-ext.yml
+        name: quarkusio-code.quarkus.io-gh-build-main
 - name: code-quarkus
   url: https://github.com/quarkusio/code.quarkus.io
   path: /openshift/template.yaml
   parameters:
     IO_QUARKUS_CODE_FEATURES: support-button
   targets:
-  - namespace:
-      $ref: /services/quarkus/namespaces/code-quarkus-stage.yml
-    ref: main
-    upstream:
-      instance:
-        $ref: /dependencies/ci-ext/ci-ext.yml
-      name: quarkusio-code.quarkus.io-gh-build-main
-    parameters:
-      REPLICAS: 1
-      IO_QUARKUS_CODE_HOSTNAME: stage.code.quarkus.io
-      IO_QUARKUS_CODE_GA_EXTENSIONS_DIMENSION_INDEX: 5
-      IO_QUARKUS_CODE_GA_QUARKUS_VERSION_DIMENSION_INDEX: 6
-      IO_QUARKUS_CODE_GA_BUILD_TOOL_DIMENSION_INDEX: 7
-      IO_QUARKUS_CODE_GA_EXTENSION_QUANTITY_INDEX: 8
-      IO_QUARKUS_CODE_GA_BATCHING_ENABLED: "false"
-      IO_QUARKUS_CODE_QUARKUS_PLATFORMS_RELOAD_CRON_EXPR: "0 */5 * * * ?"
   - namespace:
       $ref: /services/quarkus/namespaces/code-quarkus-production.yml
     ref: b2b44ea14ca5550b141e1763fa1151533428d885
