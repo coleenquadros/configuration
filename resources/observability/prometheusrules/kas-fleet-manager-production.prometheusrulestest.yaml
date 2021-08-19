@@ -28,26 +28,3 @@ tests:
               message: "No targets found for Kas Fleet Manager in namespace . Kas Fleet Manager is down."
               dashboard: "https://grafana.app-sre.devshift.net/d/Tbw1EgoMz/kas-fleet-manager-slos?orgId=1"
               runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop#kas-fleet-manager-down"
-  - interval: 1m
-    input_series:
-      # 0m  - 10m Status 200 code
-      # 10m - 20m Status 400 code
-      - series: kas_fleet_manager_observatorium_request_count{namespace="managed-services-production",code="400"}
-        values: 0+0x10 1+4x10
-      - series: kas_fleet_manager_observatorium_request_count{namespace="managed-services-production"}
-        values: 1+1x10 11+6x10
-    alert_rule_test:
-      - eval_time: 10m
-        alertname: KasFleetManagerObservatoriumNon200Status - production 
-        exp_alerts: []
-      - eval_time: 20m
-        alertname: KasFleetManagerObservatoriumNon200Status - production 
-        exp_alerts:
-          - exp_labels:
-              alertname: KasFleetManagerObservatoriumNon200Status - production
-              service: kas-fleet-manager
-              severity: critical
-            exp_annotations:
-              message: "Kas fleet manager in namespace managed-services-production is receiving status codes other than 2xx from Observatorium."
-              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop/observatorium-status-code.md"
-              
