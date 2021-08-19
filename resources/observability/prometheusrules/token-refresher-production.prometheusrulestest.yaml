@@ -1,0 +1,27 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+  - /observability/prometheusrules/token-refresher-production.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+  - interval: 1m
+    input_series:
+      # 0m  - 20m Pod not absent
+      # 20m - 40m Pod absent
+      - series: 'up{job="token-refresher",namespace="managed-services-production"}'
+        values: '1+0x20 0+0x20'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: KasFleetManagerTokenRefresherDown - production
+      - eval_time: 40m
+        alertname: KasFleetManagerTokenRefresherDown - production
+        exp_alerts:
+          - exp_labels:
+              service: kas-fleet-manager
+              severity: critical
+            exp_annotations:
+              message: "No targets found for Token Refresher in namespace . Token Refresher is down."
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/managed-services/sop/token-refresher-down.md"

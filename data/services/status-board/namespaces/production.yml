@@ -1,0 +1,43 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: status-board
+
+name: status-board-production
+
+description: Production namespace for the Status Board service
+
+cluster:
+  $ref: /openshift/app-sre-prod-04/cluster.yml
+
+app:
+  $ref: /services/status-board/app.yml
+
+environment:
+  $ref: /products/status-board/environments/production.yml
+
+managedRoles: true
+
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-04.yml
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: app-sre
+  identifier: status-board-production
+  defaults: /terraform/resources/app-sre/production/rds-3-pg13.yml
+
+# FIXME: enable when we have vault ready for production
+#openshiftResources:
+#- provider: vault-secret
+#  path: app-interface/status-board/stage/runtime
+#  version: 2
+# FIXME: nable when ready
+# - provider: route
+#   path: /status-board/stage/status-board.route.yaml

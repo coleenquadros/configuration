@@ -213,8 +213,7 @@ Sendgrid SubAccount Quota is low
 
 ### Alerts
 
-- OCM dependencies - Sendgrid SubAccount Quota less than 100
-- OCM dependencies - Sendgrid SubAccount Quota less than 20
+- OCM dependencies - Sendgrid SubAccount Quota less than <N>
 
 ### Impact
 
