@@ -24,6 +24,7 @@ managedResourceTypes:
 - DeploymentConfig
 - Service
 - PersistentVolumeClaim
+- CronJob
 
 imagePatterns:
 - quay.io/cloudservices
@@ -62,6 +63,21 @@ resourceTemplates:
       REPLICAS: 1
       MEMORY_LIMIT: 4Gi
       CPU_LIMIT: 3
+- name: notifications-aggregator
+  path: /templates/notifications/notifications-aggregator.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
+  targets:
+    - namespace:
+        $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
+      ref: 26d0f2a187f815de6eff97deef48871716f56a7a
+      parameters:
+        IMAGE_TAG: 602c34d
+        DB_SECRET_NAME: notifications-backend-db
+        SENTRY_ENABLED: true
+        CLOUDWATCH_LOGGING_ENABLED: true
+        COMPONENT_DEBUG_LEVEL: DEBUG
+        PROCESSOR_EMAIL_NO_REPLY: no-reply-stage@redhat.com
+        REPLICAS: 1
 - name: notifications-gw
   path: /templates/notifications/notifications-gw.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
