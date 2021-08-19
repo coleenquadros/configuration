@@ -1,0 +1,43 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: web-rca
+
+name: web-rca-stage
+
+description: Staging namespace for the Web RCA service
+
+cluster:
+  $ref: /openshift/app-sre-stage-01/cluster.yml
+
+app:
+  $ref: /services/web-rca/app.yml
+
+environment:
+  $ref: /products/web-rca/environments/stage.yml # or production.yml
+
+managedRoles: true
+
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: app-sre
+  identifier: web-rca-stage
+  # we start with the same small DB that we have for Status Board
+  defaults: /terraform/resources/app-sre/staging/rds-3-pg13.yml
+
+# FIXME: to be added later
+#openshiftResources:
+#- provider: vault-secret
+#  path: app-interface/status-board/stage/runtime
+#  version: 2
+#- provider: route
+#  path: /status-board/stage/status-board.route.yaml
