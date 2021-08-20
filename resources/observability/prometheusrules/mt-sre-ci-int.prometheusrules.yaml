@@ -25,20 +25,6 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net"
         message: "{{ $labels.saas_file_name }} Tekton PipelineRun deployment job for {{ $labels.env_name }} has not been successful: Failed to apply SelectorSyncSet"
         link_url: "{{ $labels.tkn_cluster_console_url }}/k8s/ns/{{ $labels.tkn_namespace_name }}/tekton.dev~v1beta1~PipelineRun/{{ $labels.pipelinerun_name }}"
-  # Check if ci.int is present
-  - name: jenkins-job-presence.rules
-    rules:
-    - alert: JenkinsDown
-      labels:
-        severity: critical
-        service: addons
-      expr: absent(up{job="jenkins_int"} == 1)
-      for: 5m
-      annotations:
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/CentralCIInstanceDown.md"
-        dashboard: "https://grafana.app-sre.devshift.net"
-        message: "{{ $labels.instance }}: Jenkins scrape failed. "
-        link_url: "http://ci.int.devshift.net/"
   # Alerting for Jenkins build failure
   - name: jenkins-jobs.rules
     rules:
@@ -52,4 +38,3 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net"
         message: "{{ $labels.jenkins_job }} Jenkins job latest build has failed."
         link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"
-
