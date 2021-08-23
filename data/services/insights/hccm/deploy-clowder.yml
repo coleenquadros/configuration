@@ -47,26 +47,98 @@ resourceTemplates:
     disable: true # tells app-sre to not actually run the deploy job for this target
     ref: internal # altered by bonfire
     parameters:
+      ENABLE_PARQUET_PROCESSING: False
+      ENABLE_S3_ARCHIVING: False
+      ENABLE_TRINO_SOURCES: ''
+      ENABLE_TRINO_SOURCE_TYPE: 'GCP'
+      ENABLE_TRINO_ACCOUNTS: ''
+      AUTO_DATA_INGEST: True
+      RETAIN_NUM_MONTHS: 3
+      PARQUET_PROCESSING_BATCH_SIZE: "500000"
+      TRINO_DATE_STEP: 31
+      PRESTO_HOST: trino-coordinator
+      # Deployment specific variables:
+      # koku-api
       KOKU_MIN_REPLICAS: 1
-      LISTENER_MIN_REPLICAS: 1
+      KOKU_CPU_REQUEST: 500m
+      KOKU_CPU_LIMIT: 1
+      KOKU_MEMORY_REQUEST: 512Mi
+      KOKU_MEMORY_LIMIT: 1Gi
+      # listener
+      LISTENER_MIN_REPLICAS: 2
+      LISTENER_CPU_REQUEST: 200m
+      LISTENER_CPU_LIMIT: 500m
+      LISTENER_MEMORY_REQUEST: 512Mi
+      LISTENER_MEMORY_LIMIT: 1Gi
+      # masu
       MASU_MIN_REPLICAS: 1
+      MASU_MEMORY_REQUEST: 256Mi
+      MASU_MEMORY_LIMIT: 512Mi
+      # scheduler
       SCHEDULER_MIN_REPLICAS: 1
+      SCHEDULER_MEMORY_REQUEST: 256Mi
+      SCHEDULER_MEMORY_LIMIT: 512Mi
+      # sources-client
       SOURCES_CLIENT_MIN_REPLICAS: 1
+      SOURCES_CLIENT_CPU_REQUEST: 100m
+      SOURCES_CLIENT_CPU_LIMIT: 250m
+      SOURCES_CLIENT_MEMORY_REQUEST: 200Mi
+      SOURCES_CLIENT_MEMORY_LIMIT: 400Mi
+      # sources-listener
       SOURCES_LISTENER_MIN_REPLICAS: 1
+      SOURCES_LISTENER_CPU_REQUEST: 100m
+      SOURCES_LISTENER_CPU_LIMIT: 250m
+      SOURCES_LISTENER_MEMORY_REQUEST: 200Mi
+      SOURCES_LISTENER_MEMORY_LIMIT: 400Mi
+      # worker-celery
       WORKER_CELERY_MIN_REPLICAS: 1
+      WORKER_CELERY_CPU_REQUEST: 200m
+      WORKER_CELERY_CPU_LIMIT: 250m
+      WORKER_CELERY_MEMORY_REQUEST: 512Mi
+      WORKER_CELERY_MEMORY_LIMIT: 1Gi
+      # worker-cost-model
       WORKER_COST_MODEL_MIN_REPLICAS: 1
-      WORKER_DOWNLOAD_MIN_REPLICAS: 1
+      WORKER_COST_MODEL_CPU_REQUEST: 100m
+      WORKER_COST_MODEL_CPU_LIMIT: 200m
+      WORKER_COST_MODEL_MEMORY_REQUEST: 200Mi
+      WORKER_COST_MODEL_MEMORY_LIMIT: 400Mi
+      # worker-download
+      WORKER_DOWNLOAD_MIN_REPLICAS: 2
+      WORKER_DOWNLOAD_CPU_REQUEST: 500m
+      WORKER_DOWNLOAD_CPU_LIMIT: 1
+      WORKER_DOWNLOAD_MEMORY_REQUEST: 2Gi
+      WORKER_DOWNLOAD_MEMORY_LIMIT: 4Gi
+      # worker-ocp
       WORKER_OCP_MIN_REPLICAS: 1
+      WORKER_OCP_CPU_REQUEST: 100m
+      WORKER_OCP_CPU_LIMIT: 200m
+      WORKER_OCP_MEMORY_REQUEST: 200Mi
+      WORKER_OCP_MEMORY_LIMIT: 400Mi
+      # worker-priority
       WORKER_PRIORITY_MIN_REPLICAS: 1
+      WORKER_PRIORITY_CPU_REQUEST: 250m
+      WORKER_PRIORITY_CPU_LIMIT: 500m
+      WORKER_PRIORITY_MEMORY_REQUEST: 1Gi
+      WORKER_PRIORITY_MEMORY_LIMIT: 2Gi
+      # worker-refresh
       WORKER_REFRESH_MIN_REPLICAS: 1
+      WORKER_REFRESH_CPU_REQUEST: 100m
+      WORKER_REFRESH_CPU_LIMIT: 200m
+      WORKER_REFRESH_MEMORY_REQUEST: 200Mi
+      WORKER_REFRESH_MEMORY_LIMIT: 400Mi
+      # worker-summary
       WORKER_SUMMARY_MIN_REPLICAS: 1
+      WORKER_SUMMARY_CPU_REQUEST: 100m
+      WORKER_SUMMARY_CPU_LIMIT: 200m
+      WORKER_SUMMARY_MEMORY_REQUEST: 200Mi
+      WORKER_SUMMARY_MEMORY_LIMIT: 400Mi
 
   # Staging:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: 95343a5dabce56c44d58d0fc875784c62f68b96c
+    ref: bb3fbfb7d05d326d2a34e5b34e019204f9d2b39e
     parameters:
-      IMAGE_TAG: 95343a5
+      IMAGE_TAG: bb3fbfb
       APP_DOMAIN: apps.crcs02ue1.urby.p1.openshiftapps.com
       S3_BUCKET_NAME: hccm-stage-s3
       KOKU_SENTRY_ENV: stage
@@ -82,6 +154,8 @@ resourceTemplates:
       UPDATE_TIMEOUT: 14400
       RETAIN_NUM_MONTHS: 3
       VACUUM_DATA_DAY_OF_WEEK: 0
+      PARQUET_PROCESSING_BATCH_SIZE: "500000"
+      PRESTO_HOST: trino-coordinator
       # Deployment specific variables:
       # koku-api
       KOKU_MIN_REPLICAS: 3
@@ -161,9 +235,9 @@ resourceTemplates:
   # Production:
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: 95343a5dabce56c44d58d0fc875784c62f68b96c
+    ref: 7ad04e6e87d8093805ebee6f43decf43bc3aaba3
     parameters:
-      IMAGE_TAG: 95343a5
+      IMAGE_TAG: 7ad04e6
       APP_DOMAIN: apps.crcp01ue1.o9m8.p1.openshiftapps.com
       S3_BUCKET_NAME: hccm-prod-s3
       KOKU_SENTRY_ENV: prod
@@ -185,11 +259,11 @@ resourceTemplates:
       VACUUM_DATA_DAY_OF_WEEK: 0
       # Deployment specific variables:
       # koku-api
-      KOKU_MIN_REPLICAS: 5
-      KOKU_CPU_REQUEST: 200m
+      KOKU_MIN_REPLICAS: 8
+      KOKU_CPU_REQUEST: 500m
       KOKU_CPU_LIMIT: 1
-      KOKU_MEMORY_REQUEST: 1Gi
-      KOKU_MEMORY_LIMIT: 2Gi
+      KOKU_MEMORY_REQUEST: 2Gi
+      KOKU_MEMORY_LIMIT: 4Gi
       # listener
       LISTENER_MIN_REPLICAS: 2
       LISTENER_CPU_REQUEST: 200m
@@ -301,14 +375,27 @@ resourceTemplates:
     disable: true # tells app-sre to not actually run the deploy job for this target
     ref: internal # altered by bonfire
     parameters:
-      IMAGE_TAG: 348-003
+      IMAGE_TAG: 360-001
       S3_BUCKET_NAME: hccm-eph-s3
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: 7fde696eecd680ccb60cc5ba11359887997e48b1
+    ref: 409e8635dbfa0036713e963197d2db36c508f014
     parameters:
-      IMAGE_TAG: 348-003
+      IMAGE_TAG: 360-001
       S3_BUCKET_NAME: hccm-stage-s3
+      COORDINATOR_REPLICAS: 1
+      WORKER_REPLICAS: 3
+      COORDINATOR_CPU_REQUEST: 200m
+      COORDINATOR_CPU_LIMIT: 500m
+      COORDINATOR_MEMORY_REQUEST: 8Gi
+      COORDINATOR_MEMORY_LIMIT: 16Gi
+      WORKER_CPU_REQUEST: 200m
+      WORKER_CPU_LIMIT: 1
+      WORKER_MEMORY_REQUEST: 4Gi
+      WORKER_MEMORY_LIMIT: 8Gi
+      QUERY_MAX_MEMORY: 8GB
+      QUERY_MAX_MEMORY_PER_NODE: 2GB
+      QUERY_MAX_TOTAL_MEMORY_PER_NODE: 4GB
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
     ref: 7fde696eecd680ccb60cc5ba11359887997e48b1
@@ -347,3 +434,69 @@ resourceTemplates:
     parameters:
       COST_MGMT_RECIPIENTS: '{"dmcpherscc":{"cc":["jkoehler@redhat.com", "dgutride@redhat.com"]}, "muhlcc":{}, "clovecc":{}, "gbuchanacc":{}}'
       EMAIL_SCHEDULE: '0 13 * * 1'
+
+- name: koku-daily
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/project-koku/koku-daily
+  targets:
+  - namespace:
+      $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
+    ref: master
+    parameters:
+      PROMETHEUS_PUSH_GATEWAY: ${PROMETHEUS_PUSHGATEWAY}
+      REPLICAS: 1
+      APP_URL_PREFIX: /api/cost-management/v1/koku-daily/
+      CPU_REQUEST: 125m
+      CPU_LIMIT: 250m
+      MEMORY_REQUEST: 250Mi
+      MEMORY_LIMIT: 500Mi
+      EMAIL_GROUPS: {"engineering": "cost-mgmt-metrics-eng@redhat.com", "marketing": "cost-mgmt-metrics-mkt@redhat.com"}
+  # - namespace:
+  #     $ref: /services/insights/hccm/namespaces/hccm-prod.yml
+  #   ref: main
+  #   parameters:
+  #     IMAGE_TAG: b07f065
+  #     PROMETHEUS_PUSH_GATEWAY: ${PROMETHEUS_PUSHGATEWAY}
+  #     REPLICAS: 1
+  #     APP_URL_PREFIX: /api/cost-management/v1/koku-daily/
+  #     CPU_REQUEST: 100m
+  #     CPU_LIMIT: 250m
+  #     MEMORY_REQUEST: 200Mi
+  #     MEMORY_LIMIT: 250Mi
+
+- name: nise-populator
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/project-koku/nise-populator
+  targets:
+  - namespace:
+      $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
+    ref: master
+    parameters:
+      CPU_REQUEST: 100m
+      CPU_LIMIT: 250m
+      MEMORY_REQUEST: 200Mi
+      MEMORY_LIMIT: 250Mi
+  # - namespace:
+  #     $ref: /services/insights/hccm/namespaces/hccm-prod.yml
+  #   ref: main
+  #   parameters:
+  #     IMAGE_TAG: 59620cb
+  #     CPU_REQUEST: 100m
+  #     CPU_LIMIT: 250m
+  #     MEMORY_REQUEST: 200Mi
+  #     MEMORY_LIMIT: 250Mi
+
+- name: parquet-compactor
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/project-koku/parquet-compactor
+  targets:
+  - namespace:
+      $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
+    ref: main
+    parameters:
+      S3_BUCKET_NAME: hccm-stage-s3
+  # - namespace:
+  #     $ref: /services/insights/hccm/namespaces/hccm-prod.yml
+  #   ref: main
+  #   parameters:
+  #     S3_BUCKET_NAME: hccm-prod-s3

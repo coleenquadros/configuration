@@ -1,0 +1,97 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: remediations
+
+name: remediations-stage
+description: Insights remediations for FedRAMP on stage
+
+cluster:
+  $ref: /openshift/insights/crcgovs02ue1/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/standard-resource-limits.yml
+
+quota:
+  $ref: /services/insights/remediations/remediations-quota.yml
+
+app:
+  $ref: /services/insights/remediations/app.yml
+
+environment:
+  $ref: /products/insights/environments/fedramp-stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcgovs02ue1.yml
+- $ref: /services/insights/advisor/namespaces/advisor-fedramp-stage.yml
+- $ref: /services/insights/gateway/namespaces/3scale-fedramp-stage.yml
+- $ref: /services/insights/compliance/namespaces/compliance-fedramp-stage.yml
+- $ref: /services/insights/xjoin/namespaces/xjoin-fedramp-stage.yml
+# - $ref: /services/insights/config-manager/namespaces/config-manager-fedramp-stage.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
+  path: insights/secrets/insights-stage/remediations-stage/redis
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/backoffice/preprod/remediations
+  version: 2
+  name: backoffice
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/insights-stage/playbook-dispatcher-stage/auth-psk-remediations
+  name: psk-playbook-dispatcher
+  version: 1
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-fedramp-stage
+  identifier: remediations-stage
+  defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
+  overrides:
+    username: "insights"
+    name: "remediations"
+  parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-remediations-stage.yml
+  output_resource_name: remediations-db
+  enhanced_monitoring: true
+- provider: cloudwatch
+  account: insights-fedramp-stage
+  identifier: remediations-stage
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
+- provider: elasticache
+  account: insights-fedramp-stage
+  identifier: remediations-elasticache
+  defaults: /terraform/resources/insights/fedramp/stage/elasticache/elasticache-remediations-1.yml
+  output_resource_name: in-memory-db
+
+kafkaCluster:
+  $ref: /kafka/crcs02ue1k/cluster.yml

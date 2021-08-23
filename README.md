@@ -1736,6 +1736,8 @@ To manage a User group via App-Interface:
 
 3. **Add this permission to the desired `roles`, or create a new `role` with this permission only (mandatory).**
 
+4. **Add the group in the `managedUsergroups` section of the** [coreos slack](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/slack/coreos.yml) **dependency file**
+
 Examples:
 * An example for the `app-sre-team` User group permission can be found [here](/data/teams/app-sre/permissions/app-sre-team-coreos-slack.yml)
 * An example for a role that has this permission can be found [here](/data/teams/app-sre/roles/app-sre.yml)
@@ -1750,8 +1752,6 @@ Notes:
 * In order to be able to use the `pagerduty` attribute of a `permission`, the relevant users (ones from that PagerDuty schedule) should have the following attributes in their user files:
   * `slack_username` - if it is different from `org_username`
   * `pagerduty_username` - if it is different from `org_username`
-
-4. **Add the group in the `managedUsergroups` section of the** [coreos slack](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/slack/coreos.yml) **dependency file**
 
 ### Manage Jenkins jobs configurations using jenkins-jobs
 

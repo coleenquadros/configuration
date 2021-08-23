@@ -41,6 +41,30 @@ spec:
         dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcp01ue1-prometheus
         link_url: https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/host-inventory-prod/deployments
         message: 'Insights Inventory Alert (Prod). Insights Inventory error rate > 10% for 5 minutes'
+    - alert: InventoryMqHandlerErrorsCritical
+      expr: sum(increase(inventory_ingress_message_handler_failures_total[10m])) > 2000
+      labels:
+        severity: critical
+        service: insights
+        env: prod
+        app_team: platform
+      annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcp01ue1-prometheus
+        link_url: https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(columns:!(_source),filters:!(),index:'43c5fed0-d5ce-11ea-b58c-a7c95afd7a5d',interval:auto,query:(language:lucene,query:'@log_stream:%20%22host-inventory-mq%22%20AND%20levelname:%20ERROR%20AND%20msg:%20%22Unable%20to%20process%20message%22'),sort:!(!('@timestamp',desc)))
+        message: 'HBI Prod consumer error rate critically high'
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/host-inventory/App-insights-inventory-In-platform-prod-Mq-Errors.rst"
+    - alert: InventoryMqNotProcessingCritical
+      expr: sum(increase(inventory_ingress_add_host_successes_total{namespace="host-inventory-prod"}[30m])) by (namespace) < 1
+      labels:
+        severity: critical
+        service: insights
+        env: prod
+        app_team: platform
+      annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcp01ue1-prometheus
+        link_url: https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/host-inventory-prod/deployments/host-inventory-mq-pmin
+        message: 'HBI Prod consumer not processing (0 messages processed in last 30 minutes)'
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/host-inventory/App-insights-inventory-In-platform-prod-Mq-Not-Processing.rst"
     #Not pagerduty
     - alert: App-host-inventory-service-In-host-inventory-prod-availability
       expr: count(up{namespace="host-inventory-prod",service="host-inventory-service"} == 0) > 1
@@ -91,8 +115,20 @@ spec:
         link_url: https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(columns:!(_source),filters:!(),index:'43c5fed0-d5ce-11ea-b58c-a7c95afd7a5d',interval:auto,query:(language:lucene,query:'@log_stream:%20%22host-inventory-mq%22%20AND%20levelname:%20ERROR'),sort:!(!('@timestamp',desc)))
         message: '{{ $labels.namespace }} consumer errors'
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/host-inventory/App-insights-inventory-In-platform-prod-Mq-Errors.rst"
+    - alert: InventoryMqHandlerErrors
+      expr: sum(increase(inventory_ingress_message_handler_failures_total[10m])) > 500
+      labels:
+        severity: high
+        service: insights
+        env: prod
+        app_team: inventory
+      annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcp01ue1-prometheus
+        link_url: https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(columns:!(_source),filters:!(),index:'43c5fed0-d5ce-11ea-b58c-a7c95afd7a5d',interval:auto,query:(language:lucene,query:'@log_stream:%20%22host-inventory-mq%22%20AND%20levelname:%20ERROR%20AND%20msg:%20%22Unable%20to%20process%20message%22'),sort:!(!('@timestamp',desc)))
+        message: '{{ $labels.namespace }}: consumer error rate too high'
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/host-inventory/App-insights-inventory-In-platform-prod-Mq-Errors.rst"
     - alert: InventoryMqEventProducerErrors
-      expr: sum(increase(inventory_event_producer_failures_total[5m])) by (namespace, topic, event_type) > 0
+      expr: sum(increase(inventory_event_producer_failures_total[5m])) by (event_type) > 0
       labels:
         severity: medium
         service: insights
@@ -100,8 +136,8 @@ spec:
         app_team: inventory
       annotations:
         dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcp01ue1-prometheus
-        link_url: https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-30m,to:now))&_a=(columns:!(msg),filters:!(),index:'43c5fed0-d5ce-11ea-b58c-a7c95afd7a5d',interval:auto,query:(language:lucene,query:'@log_stream:%20%22host-inventory-mq%22%20AND%20levelname:%20ERROR%20AND%20(msg:%20%22Unable%20to%20process%20message%22%20OR%20msg:%20%22Error%20adding%20host%22)'),sort:!(!('@timestamp',desc)))
-        message: '{{ $labels.namespace }} event producer errors Event producer failed to produce a(n) {{ $labels.event_type }} event on {{ $labels.topic }}'
+        link_url: https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-30m,to:now))&_a=(columns:!(_source),filters:!(),index:'43c5fed0-d5ce-11ea-b58c-a7c95afd7a5d',interval:auto,query:(language:kuery,query:'@log_group:%20%22host-inventory-prod%22%20and%20%22NOT%20PRODUCED%22'),sort:!())
+        message: 'Prod event producer failed to produce a(n) {{ $labels.event_type }} event'
     - alert: InventoryMqNotProcessing
       expr: sum(increase(inventory_ingress_add_host_successes_total{namespace="host-inventory-prod"}[5m])) by (namespace) < 1
       labels:

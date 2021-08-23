@@ -1,0 +1,61 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: xjoin
+
+name: xjoin-operator-perf
+description: xjoin operator deployment for performance environment
+
+cluster:
+  $ref: /openshift/insights/cluster-insights-perf.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
+
+quota:
+  $ref: /services/insights/xjoin/xjoin-operator-quota.yml
+
+app:
+  $ref: /services/insights/xjoin/app.yml
+
+environment:
+  $ref: /products/insights/environments/perf.yml
+
+networkPoliciesAllow: []
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  # requires access to the host-inventory-db provisioned through the host-inventory namespace
+  path: app-sre/integrations-output/terraform-resources/insights-perf/host-inventory-perf/host-inventory-db
+  version: 1
+  name: host-inventory-db
+  annotations:
+    qontract.recycle: "true"
+    qontract.ignore_reconcile_time: "true"
+- provider: vault-secret
+  # requires access to the elasticsearch instance provisioned through the xjoin namespace
+  path: app-sre/integrations-output/terraform-resources/insights-perf/xjoin-perf/xjoin-elasticsearch
+  version: 1
+  name: xjoin-elasticsearch
+  annotations:
+    qontract.recycle: "true"
+    qontract.ignore_reconcile_time: "true"
+- provider: resource
+  path: /insights-prod/shared/private-image-puller.serviceaccount.yaml
+- provider: resource
+  path: /insights-prod/xjoin-operator-prod/xjoin-operator.serviceaccount.yml

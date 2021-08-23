@@ -1,0 +1,47 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /insights-stage/host-inventory-stage/host-inventory.prometheusrules.yaml
+
+evaluation_interval: 10m
+
+tests:
+- interval: 30s
+  input_series:
+  - series: up{namespace="host-inventory-stage", service="host-inventory-service"}
+    values: '0+0x20'
+  alert_rule_test:
+  - eval_time: 10m
+    alertname: App-host-inventory-service-In-host-inventory-stage-Absent
+    exp_alerts:
+    - exp_labels:
+        severity: high
+        service: insights
+        env: stage
+        app_team: platform
+        namespace: host-inventory-stage
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcs02ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/host-inventory-stage/deployments"
+        message: "Host inventory pods are missing in stage"
+        runbook: "https://clouddot.pages.redhat.com/docs/dev/developer-references/sop/inventory.html"
+
+- interval: 30s
+  input_series:
+  - series: inventory_event_producer_failures_total{event_type="updated"}
+    values: 0+1x20
+  alert_rule_test:
+  - eval_time: 10m
+    alertname: InventoryMqEventProducerErrors
+    exp_alerts:
+    - exp_labels:
+        severity: medium
+        service: insights
+        env: stage
+        event_type: updated
+        app_team: inventory
+      exp_annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcs02ue1-prometheus
+        link_url: https://kibana.apps.crcs02ue1.urby.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-30m,to:now))&_a=(columns:!(_source),filters:!(),index:'43c5fed0-d5ce-11ea-b58c-a7c95afd7a5d',interval:auto,query:(language:kuery,query:'@log_group:%20%22host-inventory-prod%22%20and%20%22NOT%20PRODUCED%22'),sort:!())
+        message: 'Stage event producer failed to produce a(n) updated event'

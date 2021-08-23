@@ -1,0 +1,54 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: app-interface
+
+name: saas-vault-manager
+description: 'SaaS tracking file for vault manager'
+
+app:
+  $ref: /services/app-interface/app.yml
+
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.app-sre-prod-01.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- Deployment
+
+imagePatterns:
+- quay.io/app-sre/vault-manager
+
+resourceTemplates:
+- name: vault-manager
+  url: https://github.com/app-sre/vault-manager
+  path: /openshift/vault-manager.template.yaml
+  targets:
+  - namespace:
+      $ref: /services/app-interface/namespaces/app-interface-stage.yml
+    ref: master
+    parameters:
+      DRY_RUN: true
+      THREAD_POOL_SIZE: '10'
+      RECONCILE_SLEEP_TIME: 15m
+      VAULT_SECRET_NAME: vault-creds
+      VAULT_ADDR: https://vault.devshift.net
+      GQL_SECRET_NAME: gql-creds
+      GRAPHQL_QUERY_FILE: /query.graphql
+  - namespace:
+      $ref: /services/app-interface/namespaces/app-interface-production.yml
+    ref: master
+    parameters:
+      DRY_RUN: false
+      THREAD_POOL_SIZE: '10'
+      RECONCILE_SLEEP_TIME: 2m
+      VAULT_SECRET_NAME: vault-creds
+      VAULT_ADDR: https://vault.devshift.net
+      GQL_SECRET_NAME: gql-creds
+      GRAPHQL_QUERY_FILE: /query.graphql
+

@@ -65,6 +65,14 @@ openshiftResources:
   path: /services/common/serviceaccount.yaml
   variables:
     name: qontract-reconcile
+- provider: vault-secret
+  path: app-sre/creds/app-interface/stage/basic-auth
+  version: 1
+  name: gql-creds
+- provider: vault-secret
+  path: app-sre/ci-int/vault-manager-creds
+  version: 1
+  name: vault-creds
 
 managedTerraformResources: true
 
@@ -78,11 +86,13 @@ terraformResources:
   user_policy:
     {
       "Version": "2012-10-17",
-      "Statement": [{
+      "Statement": [
+        {
           "Effect": "Allow",
           "Action": "sqs:ReceiveMessage",
           "Resource": "arn:aws:sqs:*:950916221866:app-interface-gitlab-pr-submitter"
-      }]
+        }
+      ]
     }
   output_resource_name: app-interface-sqs
 - provider: cloudwatch

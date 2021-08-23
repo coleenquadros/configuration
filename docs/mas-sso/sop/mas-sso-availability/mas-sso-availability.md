@@ -4,7 +4,7 @@
   - [Prerequisites](#prerequisites)
   - [Alert](#alert)
     - [Gather logs](#gather-logs)
-    - [Gather Thread Dump](#thread-dump)
+    - [Thread Dump](#thread-dump)
     - [Monitoring checks](#monitoring-checks)
     - [Make changes to solve alert](#make-changes-to-solve-alert)
     - [RHSSO](#rhsso)
@@ -18,17 +18,17 @@
 
 ## List of alerts
 
-- ManagedSSOAPI1hErrorBudgetBurn
+- MasSSOAvailability5mto1hErrorBudgetBurn
   - **Severity:** critical
   - **Potential Customer Impact:** High
-- ManagedSSOAPI6hErrorBudgetBurn
+- MasSSOAvailability30mto6hErrorBudgetBurn
   - **Severity:** critical
   - **Potential Customer Impact:** High
-- ManagedSSOAPI1dErrorBudgetBurn
-  - **Severity:** critical
+- MasSSOAvailability2hto1dErrorBudgetBurn
+  - **Severity:** high
   - **Potential Customer Impact:** Low
-- ManagedSSOAPI3dErrorBudgetBurn
-  - **Severity:** critical
+- MasSSOAvailability6hto3dErrorBudgetBurn
+  - **Severity:** warning
   - **Potential Customer Impact:** Low
   
 ## Overview
@@ -62,10 +62,6 @@ Follow the steps in the below link to gather the thread dumps
 - Follow the steps in below link to check observability parts of mas-sso
   
   [Observability checks](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/mas-sso/sop/common/observability.md)
-
-- Check Sentry to investigate possible causes. Project: mas-sso-stage (for stage) and mas-sso-production (for production).
-  - Stage: https://sentry.stage.devshift.net
-  - Production: https://sentry.devshift.net
 
 ### Make changes to solve alert
 
