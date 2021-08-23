@@ -185,6 +185,7 @@ Every AppSRE engineer should have access to the following:
   * Nothing to do, granted by `sendgrid_accounts` in the [AppSRE role](data/teams/app-sre/roles/app-sre.yml).
 * Deadman's snitch
   * Ask somebody in the team to invite you to the organization. You'll receive an e-mail with a link to the invite. Create a new account then, it will be added automatically to the organization and you'll see all the heartbeats we have configured. You'll also be able to create even more.
+* app-sre kube-configs: https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/kube-configs/
 
 #### Returning Red Hat Employee Gotchas
 
