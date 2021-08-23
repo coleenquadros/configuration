@@ -32,9 +32,13 @@ imagePatterns:
 - quay.io/app-sre/hive
 
 # ADDING NEW SHARDS:
-# - Update data/openshift/$SHARD/cluster.yml file like 7aa095b did
-# - Delete the OLM deployment by adding `delete: true` to the env in
-#   saas-hive-olm.yaml (not by deleting the stanza).
+# - Delete the OLM deployment by adding `delete: true` to the target in
+#   saas-hive-olm.yaml.
+# - In a *subsequent* MR, once the jobs have successfully scrubbed the
+#   OLM resources:
+#   - Copy the target from saas-hive-olm.yaml into this file's
+#     resourceTemplates, omitting `delete: true`.
+#   - remove the target completely from saas-hive-olm.yaml
 
 resourceTemplates:
 - name: hive
@@ -53,6 +57,13 @@ resourceTemplates:
       name: openshift-hive-gh-build-master
   - namespace:
       $ref: /services/hive/namespaces/hives02ue1/hive-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: openshift-hive-gh-build-master
+  - namespace:
+      $ref: /services/hive/namespaces/hive-stage-01/hive-stage.yml
     ref: master
     upstream:
       instance:
