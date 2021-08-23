@@ -598,9 +598,9 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
 ## Step 8 - Obtain cluster-admin
 
-1. Create an OHSS ticket to enable cluster-admin in the cluster. Example: [OHSS-5302](https://issues.redhat.com/browse/OHSS-5302)
+1. Create an OHSS ticket to enable cluster-admin in the cluster. Examples: [OHSS-5302](https://issues.redhat.com/browse/OHSS-5302), [OHSS-5939](https://issues.redhat.com/browse/OHSS-5939)
 
-1. Once the ticket is Done, add yourself (temporarily) to the cluster-admin group via OCM: https://docs.openshift.com/dedicated/4/administering_a_cluster/cluster-admin-role.html
+1. Once the ticket is Done, add yourself (temporarily) to the cluster-admin group via OCM: https://docs.openshift.com/dedicated/administering_a_cluster/osd-admin-roles.html
 
 1. Login to the cluster, create a cluster-admin ServiceAccount, grant it the cluster-admin role and obtain its token:
   ```sh
