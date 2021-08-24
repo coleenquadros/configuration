@@ -72,6 +72,7 @@ Provisioning hive is a multi-step process:
 1. Add the hive namespaces. Add a new directory named after shard in [`/data/services/hive/namespaces`](/data/services/hive/namespaces) and copy the contents of another shard from the same hive environment (production, staging, etc) example [1](https://gitlab.cee.redhat.com/service/app-interface/-/blob/12523a31d486a691568045c9484389d2a8d266de/data/openshift/hivep04ew2/cluster.yml#L88-90) [2](https://gitlab.cee.redhat.com/service/app-interface/-/blob/12523a31d486a691568045c9484389d2a8d266de/data/openshift/hivep04ew2/cluster.yml#L109-116)
 1. Add an AWS IAM service account for PrivateLink access for the new shard. [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/12523a31d486a691568045c9484389d2a8d266de/data/services/hive/namespaces/hivep01ue1/hive-production.yml#L124-142)
 1. Add all existing AWS IAM service account secrets to the new shard. [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/12523a31d486a691568045c9484389d2a8d266de/data/services/hive/namespaces/hivep04ew2/hive-production.yml#L40-64)
+    * For production, use the [shared-resources](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/hive/shared-resources/production-terraform-output-secrets.yml) file.
 1. Hive is deployed using a saas file. In order to deploy to a new shard, a new target must be added to the Hive saas file located here: [`/data/services/hive/cicd/ci-int/saas-hive.yaml`](/data/services/hive/cicd/ci-int/saas-hive.yaml)
 
 1. Assign hive permissions in
