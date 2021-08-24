@@ -46,14 +46,6 @@ These instructions have been adapted from the [original google doc](https://docs
     | Machine CIRD               | See note    | See note   |
     | Privacy                    | Private     | Private    |
 
-1. Request that the cluster's Master nodes be adjusted to m5.2xlarge
-
-    Create a ticket to [OHSS](https://issues.redhat.com/secure/CreateIssue.jspa?pid=12323823&issuetype=3) requesting to change the Master nodes instance type to m5.2xlarge (provide the cluster id).
-
-    Here's an [example](https://issues.redhat.com/browse/OHSS-2552)
-
-    *NOTE*: You can proceed with the rest of the SOP without waiting for the ticket to be complete.
-
 1. Configure VPC peering
 1. Configure TGW attachments to the appropriate PrivateLink AWS account (for example, production shards should be attached to the osd-privatelink-prod AWS account)
 1. Add hive-readers and hive-admins in `cluster.yml`
@@ -63,10 +55,6 @@ These instructions have been adapted from the [original google doc](https://docs
     labels:
         ext-managed.openshift.io/hive-shard: "true"
     ```
-1. Add `ClusterRoleBinding` (required?)
-
-   - Example: https://issues.redhat.com/projects/OHSS/issues/OHSS-495
-
 ## Label cluster as CCS
 
 1. Label cluster as CCS
