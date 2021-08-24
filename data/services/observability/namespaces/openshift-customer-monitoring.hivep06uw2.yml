@@ -1,0 +1,84 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: openshift-customer-monitoring
+description: App-SRE OpenShift Application monitoring
+
+cluster:
+  $ref: /openshift/hivep06uw2/cluster.yml
+
+app:
+  $ref: /services/observability/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/production.yml
+
+managedResourceTypes:
+- Secret
+- PrometheusRule
+- ServiceMonitor
+
+managedResourceNames:
+# https://github.com/openshift/managed-cluster-config/blob/master/deploy/osd-customer-monitoring/05-role.yaml#L24-L37
+- resource: Secret
+  resourceNames:
+    - alertmanager-auth-proxy
+    - alertmanager-instance
+    - alertmanager-main
+    - alertmanager-main-proxy
+    - prometheus-additional-alertmanager-config
+    - prometheus-additional-scrape-config
+    - prometheus-auth-proxy
+
+openshiftResources:
+# Observability
+
+## Secrets
+### Prometheus additional alertmanager config
+### Defines what alertmanager Prometheus fires alerts to
+- provider: vault-secret
+  path: app-interface/global/observability/prometheus-additional-alertmanager-config
+  version: 1
+### Prometheus additional scrape config
+### Defines any additional jobs that don't fit into the servicemonitor model
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/prometheus/prometheus-app-sre-additional-scrapeconfig-federate-only.secret.yaml
+### Alertmanager configuration
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/alertmanager/alertmanager-instance.secret.yaml
+  validate_alertmanager_config: true
+  variables:
+    jiralert_host: jiralert.app-sre.devshift.net
+
+## Servicemonitors
+### All managed Prometheus Operators
+- provider: resource
+  path: /observability/servicemonitors/prometheus-operators-production.servicemonitor.yaml
+### OLM
+- provider: resource
+  path: /observability/olm/catalog-operator.servicemonitor.yml
+- provider: resource
+  path: /observability/olm/olm-operator.servicemonitor.yml
+
+## Prometheus Rules
+### Federated Kubernetes metrics
+- provider: resource
+  path: /observability/prometheusrules/kube-metrics.prometheusrules.yaml
+### OCM metrics
+- provider: resource
+  path: /observability/prometheusrules/ocm-metrics.prometheusrules.yaml
+### Prometheus mixin alerts
+- provider: resource
+  path: /observability/prometheusrules/prometheus-mixin.prometheusrules.yaml
+### OLM alerts
+- provider: resource
+  path: /observability/olm/olm.prometheusrules.yaml
+### App SRE prometheus PVC metrics
+- provider: resource
+  path: /observability/prometheusrules/kube-metrics-pvc-observability.prometheusrules.yaml
+
+################## Add  any cluster-specific content below this line ##################
