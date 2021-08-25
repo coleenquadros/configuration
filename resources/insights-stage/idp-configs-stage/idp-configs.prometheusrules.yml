@@ -1,0 +1,26 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: idp-configs-stage
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: idp-configs-stage
+    rules:
+      # pagerduty
+      - alert: App-idp-configs-api-service-In-idp-configs-stage-Absent
+        expr: absent(up{service="idp-configs-api-service", namespace="idp-configs-stage"}) or up{service="idp-configs-api-service", namespace="idp-configs-stage"} == 0
+        for: 5m
+        labels:
+          severity: high
+          service: insights
+          env: stage
+          app_team: acm-cloud-services
+        annotations:
+          dashboard: "https://GRAFANA_URL"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/idp-configs-stage/deployments"
+          message: "Metrics for idp-configs-api-service in STAGE are absent"
