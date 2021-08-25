@@ -1,0 +1,13 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2021-08-25-check-subscription-manager-id
+namespace:
+  $ref: /services/insights/host-inventory/namespaces/prod-host-inventory-prod.yml
+identifier: host-inventory-prod
+output: stdout
+query: |
+  SELECT reporter,
+  CASE WHEN canonical_facts->>'subscription_manager_id' is null THEN 'n/a'
+  WHEN canonical_facts->>'subscription_manager_id' ~ '-' THEN 'dashes' ELSE 'no_dashes'
+  END case_result, count(id) FROM hosts GROUP BY reporter, case_result;
