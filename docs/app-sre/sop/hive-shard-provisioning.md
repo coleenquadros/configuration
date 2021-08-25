@@ -180,9 +180,15 @@ All v4 hive shards (clusters) are monitored with their own workload prometheus, 
 
 1. Check that an `openshift-customer-monitoring` namespace file exists for the specific hive cluster. This is usually done as part of [onboarding any new cluster](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/app-interface-onboard-cluster.md#step-4-observability)
 
-1. Use the hive monitoring boilerplate to add hive specific monitoring rules and servicemonitors to the `openshift-customer-monitoring` namespace file for the specific hive cluster:
+1. Use the hive  & backplane monitoring boilerplate to add hive specific monitoring rules and servicemonitors to the `openshift-customer-monitoring` namespace file for the specific hive cluster:
 
 ```
+managedResourceTypes:
+- ...
+- PodMonitor
+
+...
+
 # ServiceMonitor
 ## Hive
 - provider: resource-template
@@ -215,7 +221,20 @@ All v4 hive shards (clusters) are monitored with their own workload prometheus, 
   path: /services/osd-operators/hive-operator-generic.servicemonitor.yaml
   variables:
     operator_name: pagerduty-operator
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/backplane/backplane-api-servicemonitor.yaml
+  variables:
+    namespace: backplane
+    app: backplane-api
 
+# PodMonitor
+## Hive
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/hive/hive-operator.podmonitor.yaml
+  variables:
+    namespace: hive
 
 # PrometheusRule
 ## SHARDNAME
@@ -226,7 +245,14 @@ All v4 hive shards (clusters) are monitored with their own workload prometheus, 
     shard_name: SHARDNAME
     aws_account_operator_accounts_threshold: 4950
     grafana_datasource: SHARDNAME-prometheus
-
+    certman_operator_openshift_apps_com_issuance_rate_threshold: 6000
+    certman_operator_devshift_org_issuance_rate_threshold: 6000
+## backplane-api
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/backplane/backplane-api-prod-common.prometheusrules.yml
+  variables:
+    shard_name: SHARDNAME
 ```
 
 1. Make sure you're using the correct rules depending on the environment (integration/stage/production). Pay close attention to the value for aws_account_operator_accounts_threshold, which depends on the environment.
