@@ -1,0 +1,158 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: openshift-customer-monitoring
+description: App-SRE OpenShift Application monitoring
+
+cluster:
+  $ref: /openshift/hivep06uw2/cluster.yml
+
+app:
+  $ref: /services/observability/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/production.yml
+
+managedResourceTypes:
+- Secret
+- PrometheusRule
+- ServiceMonitor
+- PodMonitor
+
+managedResourceNames:
+# https://github.com/openshift/managed-cluster-config/blob/master/deploy/osd-customer-monitoring/05-role.yaml#L24-L37
+- resource: Secret
+  resourceNames:
+    - alertmanager-auth-proxy
+    - alertmanager-instance
+    - alertmanager-main
+    - alertmanager-main-proxy
+    - prometheus-additional-alertmanager-config
+    - prometheus-additional-scrape-config
+    - prometheus-auth-proxy
+
+openshiftResources:
+# Observability
+
+## Secrets
+### Prometheus additional alertmanager config
+### Defines what alertmanager Prometheus fires alerts to
+- provider: vault-secret
+  path: app-interface/global/observability/prometheus-additional-alertmanager-config
+  version: 1
+### Prometheus additional scrape config
+### Defines any additional jobs that don't fit into the servicemonitor model
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/prometheus/prometheus-app-sre-additional-scrapeconfig-federate-only.secret.yaml
+### Alertmanager configuration
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/alertmanager/alertmanager-instance.secret.yaml
+  validate_alertmanager_config: true
+  variables:
+    jiralert_host: jiralert.app-sre.devshift.net
+
+## Servicemonitors
+### All managed Prometheus Operators
+- provider: resource
+  path: /observability/servicemonitors/prometheus-operators-production.servicemonitor.yaml
+### OLM
+- provider: resource
+  path: /observability/olm/catalog-operator.servicemonitor.yml
+- provider: resource
+  path: /observability/olm/olm-operator.servicemonitor.yml
+
+## Prometheus Rules
+### Federated Kubernetes metrics
+- provider: resource
+  path: /observability/prometheusrules/kube-metrics.prometheusrules.yaml
+### OCM metrics
+- provider: resource
+  path: /observability/prometheusrules/ocm-metrics.prometheusrules.yaml
+### Prometheus mixin alerts
+- provider: resource
+  path: /observability/prometheusrules/prometheus-mixin.prometheusrules.yaml
+### OLM alerts
+- provider: resource
+  path: /observability/olm/olm.prometheusrules.yaml
+### App SRE prometheus PVC metrics
+- provider: resource
+  path: /observability/prometheusrules/kube-metrics-pvc-observability.prometheusrules.yaml
+
+################## Add  any cluster-specific content below this line ##################
+
+# ServiceMonitor
+## Hive
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/hive/hive-controllers.servicemonitor.yaml
+  variables:
+    namespace: hive
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/hive/hive-clustersync.servicemonitor.yaml
+  variables:
+    namespace: hive
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/osd-operators/hive-operator-generic.servicemonitor.yaml
+  variables:
+    operator_name: aws-account-operator
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/osd-operators/hive-operator-generic.servicemonitor.yaml
+  variables:
+    operator_name: certman-operator
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/osd-operators/hive-operator-generic.servicemonitor.yaml
+  variables:
+    operator_name: deadmanssnitch-operator
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/osd-operators/hive-operator-generic.servicemonitor.yaml
+  variables:
+    operator_name: pagerduty-operator
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/backplane/backplane-api-servicemonitor.yaml
+  variables:
+    namespace: backplane
+    app: backplane-api
+
+# PodMonitor
+## Hive
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/hive/hive-operator.podmonitor.yaml
+  variables:
+    namespace: hive
+
+# PrometheusRule
+## hivep06uw2
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/hive/hive-production-common.prometheusrules.yaml
+  variables:
+    shard_name: hivep06uw2
+    aws_account_operator_accounts_threshold: 4950
+    grafana_datasource: hivep06uw2-prometheus
+    certman_operator_openshift_apps_com_issuance_rate_threshold: 6000
+    certman_operator_devshift_org_issuance_rate_threshold: 6000
+## backplane-api
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/backplane/backplane-api-prod-common.prometheusrules.yml
+  variables:
+    shard_name: hivep06uw2
+
+### Deployment Validation Operator
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/deployment-validation-operator.servicemonitor.yaml
+  variables:
+    environment: production
+    namespace: deployment-validation-operator

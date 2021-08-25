@@ -1,0 +1,140 @@
+---
+$schema: /openshift/cluster-1.yml
+
+labels:
+  service: hive
+
+name: hivep06uw2
+description: hivep06uw2 cluster
+consoleUrl: https://console-openshift-console.apps.hivep06uw2.bjee.p1.openshiftapps.com
+kibanaUrl: ''
+prometheusUrl: https://prometheus.hivep06uw2.devshift.net
+alertmanagerUrl: https://alertmanager.hivep06uw2.devshift.net
+serverUrl: https://api.hivep06uw2.bjee.p1.openshiftapps.com:6443
+elbFQDN: elb.apps.hivep06uw2.bjee.p1.openshiftapps.com
+
+observabilityNamespace:
+  $ref: /services/observability/namespaces/openshift-customer-monitoring.hivep06uw2.yml
+
+auth:
+  service: github-org-team
+  org: app-sre
+  team: hivep06uw2-cluster
+
+ocm:
+  $ref: /dependencies/ocm/production.yml
+
+managedGroups:
+- dedicated-admins
+- dedicated-readers
+- hive-admins
+- hive-readers
+###################################################################
+# The following groups should only be managed in hive-integration #
+# Reference: https://issues.redhat.com/browse/APPSRE-961          #
+# Except for usage by SRE-P if OCM is down (hive-frontend only)   #
+# Reference: https://issues.redhat.com/browse/OSD-6475            #
+# - hive-frontend                                                 #
+# - aws-account-operator-client                                   #
+# Reference: https://issues.redhat.com/browse/APPSRE-2509         #
+# - gcp-project-operator-client                                   #
+###################################################################
+
+managedClusterRoles: true
+
+spec:
+  id: 1mp4ouvt6u2jjunmj7ac4rre0om272l6
+  external_id: c380dc45-aa7c-4aba-980d-11f4e58200bd
+  provider: aws
+  region: us-west-2
+  channel: fast
+  version: 4.8.2
+  initial_version: 4.8.2-fast
+  multi_az: true
+  autoscale:
+    min_replicas: 9
+    max_replicas: 27
+  instance_type: m5.xlarge
+  storage: 600
+  load_balancers: 0
+  private: true
+  provision_shard_id: de4b0632-dca7-11ea-b3b9-8c1645a911be
+
+machinePools: []
+
+externalConfiguration:
+  labels:
+    ext-managed.openshift.io/hive-shard: 'true'
+
+network:
+  vpc: 10.135.0.0/16
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
+
+internal: false
+
+automationToken:
+  path: app-sre/creds/kube-configs/hivep06uw2
+  field: token
+
+clusterAdminAutomationToken:
+  path: app-sre/creds/kube-configs/hivep06uw2-cluster-admin
+  field: token
+
+jumpHost:
+  hostname: bastion.ci.ext.devshift.net
+  knownHosts: /jump-host/known-hosts/bastion.ci.ext.devshift.net
+  user: app-sre-bot
+  identity:
+    path: app-sre/ansible/roles/app-sre-bot
+    field: identity
+    format: base64
+
+awsInfrastructureAccess:
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: network-mgmt
+- awsGroup:
+    $ref: /aws/app-sre/groups/Log-consumers.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/osd-privatelink-prod/groups/Admins.yml
+  accessLevel: read-only
+
+peering:
+  connections:
+  - provider: account-vpc
+    name: hivep06uw2_app-sre
+    vpc:
+      $ref: /aws/app-sre/vpcs/app-sre-vpc-02-ci-ext.yml
+    manageRoutes: true
+  - provider: cluster-vpc-requester
+    name: hivep06uw2_app-sre-prod-04
+    cluster:
+      $ref: /openshift/app-sre-prod-04/cluster.yml
+    manageRoutes: true
+  - provider: cluster-vpc-requester
+    name: hivep06uw2_app-sre-prod-01
+    cluster:
+      $ref: /openshift/app-sre-prod-01/cluster.yml
+    manageRoutes: true
+  - provider: account-tgw
+    name: hivep06uw2
+    account:
+      $ref: /aws/osd-privatelink-prod/account.yml
+    tags:
+      osd: privatelink
+    manageRoutes: true
+    manageSecurityGroups: true
+    cidrBlock: 172.16.0.0/12
+  - provider: cluster-vpc-requester
+    name: hivep06uw2_appsrep05ue1
+    cluster:
+      $ref: /openshift/appsrep05ue1/cluster.yml
+    manageRoutes: true
+
+addons:
+- $ref: /dependencies/ocm/addons/cluster-logging-operator.yml

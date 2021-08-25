@@ -46,14 +46,6 @@ These instructions have been adapted from the [original google doc](https://docs
     | Machine CIRD               | See note    | See note   |
     | Privacy                    | Private     | Private    |
 
-1. Request that the cluster's Master nodes be adjusted to m5.2xlarge
-
-    Create a ticket to [OHSS](https://issues.redhat.com/secure/CreateIssue.jspa?pid=12323823&issuetype=3) requesting to change the Master nodes instance type to m5.2xlarge (provide the cluster id).
-
-    Here's an [example](https://issues.redhat.com/browse/OHSS-2552)
-
-    *NOTE*: You can proceed with the rest of the SOP without waiting for the ticket to be complete.
-
 1. Configure VPC peering
 1. Configure TGW attachments to the appropriate PrivateLink AWS account (for example, production shards should be attached to the osd-privatelink-prod AWS account)
 1. Add hive-readers and hive-admins in `cluster.yml`
@@ -63,10 +55,6 @@ These instructions have been adapted from the [original google doc](https://docs
     labels:
         ext-managed.openshift.io/hive-shard: "true"
     ```
-1. Add `ClusterRoleBinding` (required?)
-
-   - Example: https://issues.redhat.com/projects/OHSS/issues/OHSS-495
-
 ## Label cluster as CCS
 
 1. Label cluster as CCS
@@ -84,6 +72,7 @@ Provisioning hive is a multi-step process:
 1. Add the hive namespaces. Add a new directory named after shard in [`/data/services/hive/namespaces`](/data/services/hive/namespaces) and copy the contents of another shard from the same hive environment (production, staging, etc) example [1](https://gitlab.cee.redhat.com/service/app-interface/-/blob/12523a31d486a691568045c9484389d2a8d266de/data/openshift/hivep04ew2/cluster.yml#L88-90) [2](https://gitlab.cee.redhat.com/service/app-interface/-/blob/12523a31d486a691568045c9484389d2a8d266de/data/openshift/hivep04ew2/cluster.yml#L109-116)
 1. Add an AWS IAM service account for PrivateLink access for the new shard. [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/12523a31d486a691568045c9484389d2a8d266de/data/services/hive/namespaces/hivep01ue1/hive-production.yml#L124-142)
 1. Add all existing AWS IAM service account secrets to the new shard. [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/12523a31d486a691568045c9484389d2a8d266de/data/services/hive/namespaces/hivep04ew2/hive-production.yml#L40-64)
+    * For production, use the [shared-resources](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/hive/shared-resources/production-terraform-output-secrets.yml) file.
 1. Hive is deployed using a saas file. In order to deploy to a new shard, a new target must be added to the Hive saas file located here: [`/data/services/hive/cicd/ci-int/saas-hive.yaml`](/data/services/hive/cicd/ci-int/saas-hive.yaml)
 
 1. Assign hive permissions in
@@ -191,9 +180,15 @@ All v4 hive shards (clusters) are monitored with their own workload prometheus, 
 
 1. Check that an `openshift-customer-monitoring` namespace file exists for the specific hive cluster. This is usually done as part of [onboarding any new cluster](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/app-interface-onboard-cluster.md#step-4-observability)
 
-1. Use the hive monitoring boilerplate to add hive specific monitoring rules and servicemonitors to the `openshift-customer-monitoring` namespace file for the specific hive cluster:
+1. Use the hive  & backplane monitoring boilerplate to add hive specific monitoring rules and servicemonitors to the `openshift-customer-monitoring` namespace file for the specific hive cluster:
 
 ```
+managedResourceTypes:
+- ...
+- PodMonitor
+
+...
+
 # ServiceMonitor
 ## Hive
 - provider: resource-template
@@ -226,7 +221,20 @@ All v4 hive shards (clusters) are monitored with their own workload prometheus, 
   path: /services/osd-operators/hive-operator-generic.servicemonitor.yaml
   variables:
     operator_name: pagerduty-operator
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/backplane/backplane-api-servicemonitor.yaml
+  variables:
+    namespace: backplane
+    app: backplane-api
 
+# PodMonitor
+## Hive
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/hive/hive-operator.podmonitor.yaml
+  variables:
+    namespace: hive
 
 # PrometheusRule
 ## SHARDNAME
@@ -237,7 +245,14 @@ All v4 hive shards (clusters) are monitored with their own workload prometheus, 
     shard_name: SHARDNAME
     aws_account_operator_accounts_threshold: 4950
     grafana_datasource: SHARDNAME-prometheus
-
+    certman_operator_openshift_apps_com_issuance_rate_threshold: 6000
+    certman_operator_devshift_org_issuance_rate_threshold: 6000
+## backplane-api
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/backplane/backplane-api-prod-common.prometheusrules.yml
+  variables:
+    shard_name: SHARDNAME
 ```
 
 1. Make sure you're using the correct rules depending on the environment (integration/stage/production). Pay close attention to the value for aws_account_operator_accounts_threshold, which depends on the environment.

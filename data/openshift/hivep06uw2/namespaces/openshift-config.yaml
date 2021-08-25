@@ -1,0 +1,46 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: openshift-config
+description: hivep06uw2 openshift-config namespace
+
+cluster:
+  $ref: /openshift/hivep06uw2/cluster.yml
+
+app:
+  $ref: /services/app-sre/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/production.yml
+
+managedResourceTypes:
+- Template
+- Project
+- ClusterRoleBinding
+
+# when using `oc`, use the override as the kind instead of the resource
+managedResourceTypeOverrides:
+- resource: Project
+  override: Project.config.openshift.io
+
+managedResourceNames:
+# https://github.com/openshift/managed-cluster-config/blob/master/deploy/osd-project-request-template/02-role.dedicated-admins-project-request.yaml#L12
+- resource: Template
+  resourceNames:
+    - project-request
+- resource: Project
+  resourceNames:
+    - cluster
+
+openshiftResources:
+- provider: resource
+  path: /setup/project-request.v4.template.yaml
+# these are cluster scoped resources, but this should work for now
+- provider: resource
+  path: /setup/cluster.project.v4.yaml
+- provider: resource
+  path: /setup/self-provisioners.clusterrolebinding.yaml
+- provider: resource
+  path: /setup/dedicated-readers.clusterrolebinding.yaml
