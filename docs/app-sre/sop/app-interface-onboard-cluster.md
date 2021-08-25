@@ -596,11 +596,21 @@ At this point you should be able to access the cluster via the console / `oc` cl
         upstream: app-sre-deployment-validation-operator-gh-build-catalog-master-upstream-app-sre-deployment-validation-operator-gh-build-master
     ```
 
+    1. Grant view permissions to the openshift-customer-monitoring/prometheus-k8s service account in [app-sre-osdv4-monitored-namespaces-view.yml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/roles/app-sre-osdv4-monitored-namespaces-view.yml)
+
+    ```yaml
+    # deployment-validation-operator
+    ...
+    - namespace:
+        $ref: /openshift/<cluster>/namespaces/deployment-validation-operator-per-cluster.yml
+      role: view
+    ```
+
 ## Step 8 - Obtain cluster-admin
 
-1. Create an OHSS ticket to enable cluster-admin in the cluster. Example: [OHSS-5302](https://issues.redhat.com/browse/OHSS-5302)
+1. Create an OHSS ticket to enable cluster-admin in the cluster. Examples: [OHSS-5302](https://issues.redhat.com/browse/OHSS-5302), [OHSS-5939](https://issues.redhat.com/browse/OHSS-5939)
 
-1. Once the ticket is Done, add yourself (temporarily) to the cluster-admin group via OCM: https://docs.openshift.com/dedicated/4/administering_a_cluster/cluster-admin-role.html
+1. Once the ticket is Done, add yourself (temporarily) to the cluster-admin group via OCM: https://docs.openshift.com/dedicated/administering_a_cluster/osd-admin-roles.html
 
 1. Login to the cluster, create a cluster-admin ServiceAccount, grant it the cluster-admin role and obtain its token:
   ```sh

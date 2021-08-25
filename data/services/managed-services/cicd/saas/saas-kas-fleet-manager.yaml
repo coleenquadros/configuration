@@ -28,6 +28,7 @@ imagePatterns:
 - quay.io/centos/centos
 - quay.io/rhoas/envoyproxy
 - quay.io/observatorium/token-refresher
+- quay.io/rhoas/mk-token-refresher
 
 authentication:
   image:
@@ -45,6 +46,8 @@ resourceTemplates:
     parameters:
       ISSUER_URL: ${SSO_BASE_URL}
       OBSERVATORIUM_URL: https://observatorium-mst.api.stage.openshift.com/api/metrics/v1/managedkafka
+      OBSERVATORIUM_TOKEN_REFRESHER_IMAGE: quay.io/rhoas/mk-token-refresher
+      OBSERVATORIUM_TOKEN_REFRESHER_IMAGE_TAG: e85bec4
   - namespace:
       $ref: /services/managed-services/namespaces/managed-services-production.yml
     # Please note the following before updating this 'ref' property:
@@ -53,10 +56,12 @@ resourceTemplates:
     # - Commits can be found here: https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/commits/main
     # If in doubt, please check with the MK Control Plane team.
     # We are exploring how to automate this in the future.
-    ref: 716e2bfd0b915d1b69b2b39ba60c552894257ff5
+    ref: 56f1af262cfa2996bb4e521f2645b16ee18b9778
     parameters:
       ISSUER_URL: ${SSO_BASE_URL}
       OBSERVATORIUM_URL: https://observatorium-mst.api.openshift.com/api/metrics/v1/managedkafka
+      OBSERVATORIUM_TOKEN_REFRESHER_IMAGE: quay.io/rhoas/mk-token-refresher
+      OBSERVATORIUM_TOKEN_REFRESHER_IMAGE_TAG: e85bec4
 - name: kas-fleet-manager
   url: https://gitlab.cee.redhat.com/service/kas-fleet-manager
   path: /templates/service-template.yml
@@ -98,9 +103,6 @@ resourceTemplates:
     #The public HTTP host URL of the service
     SERVICE_PUBLIC_HOST_URL: ${OCM_BASE_URL}
     # Global parameter - Affects Production and Stage
-    # Log level
-    GLOG_V: 5
-    # Global parameter - Affects Production and Stage
     # A URL to repository containing external Kafka Observability configuration info for Obs. Operator to consume
     OBSERVABILITY_CONFIG_REPO: https://api.github.com/repos/bf2fc6cc711aee1a0c2a/observability-resources-mk/contents
     # Global parameter - Affects Production and Stage
@@ -134,6 +136,8 @@ resourceTemplates:
       MAS_SSO_REALM: rhoas
       OSD_IDP_MAS_SSO_REALM: rhoas-kafka-sre
       OCM_URL: https://api.openshift.com
+      # Log level
+      GLOG_V: 10
       # AMS
       AMS_URL: ${OCM_BASE_URL}
       # Use the allow list based quota management service
@@ -823,6 +827,7 @@ resourceTemplates:
         - "shawkins"
         - "kwall"
         - "gryan"
+        - "mcampbel"
 
       # A list of long lived kafkas by ID, that should not be deleted after expiration time period
       LONG_LIVED_KAFKAS: []
@@ -858,14 +863,14 @@ resourceTemplates:
     # the very first commit i.e https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/merge_requests/356/commits?commit_id=f0fd63740464c5fa4bda395d5d31f675eff049ac 
     # If in doubt, see with the control plane team.
     # We are exploring into using automating this.
-    ref: 716e2bfd0b915d1b69b2b39ba60c552894257ff5
+    ref: 56f1af262cfa2996bb4e521f2645b16ee18b9778
     parameters:
       ENVIRONMENT: production
       KAFKA_LIFE_SPAN: 48
       QUOTA_TYPE: ams
       # The image tag is the first seven characters of the #ref commit sha parameter.
       # Verify in https://quay.io/repository/rhoas/kas-fleet-manager?tab=tags to see if the tag exists.
-      IMAGE_TAG: 716e2bf
+      IMAGE_TAG: 56f1af2
       STRIMZI_OPERATOR_ADDON_ID: managed-kafka
       KAS_FLEETSHARD_ADDON_ID: kas-fleetshard-operator
       SENTRY_URL: sentry.devshift.net
@@ -873,6 +878,8 @@ resourceTemplates:
       MAS_SSO_BASE_URL: https://identity.api.openshift.com
       MAS_SSO_REALM: rhoas
       OSD_IDP_MAS_SSO_REALM: rhoas-kafka-sre
+      # Log level
+      GLOG_V: 5
       # The Cluster Logging Operator ID. An empty string indicates that the operator should not be installed.
       CLUSTER_LOGGING_OPERATOR_ADDON_ID: "cluster-logging-operator"
       OCM_URL: ${OCM_BASE_URL}
@@ -959,6 +966,7 @@ resourceTemplates:
         - "tdavidso"
         - "kchernou"
         - "npecka"
+        - "mcampbel"
       # A list of long lived kafkas by ID, that should not be deleted after expiration time period
       LONG_LIVED_KAFKAS:
           # AppSRE Kafka instance used for the console.redhat.com stage environment
