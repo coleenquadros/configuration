@@ -52,23 +52,40 @@ resourceTemplates:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: multitenant-service-registry-gl-build-master
+    parameters:
+      REGISTRY_LOG_LEVEL: DEBUG
+      REGISTRY_QUARKUS_LOG_LEVEL: INFO
+      TENANT_MANAGER_LOG_LEVEL: DEBUG
+      TENANT_MANAGER_QUARKUS_LOG_LEVEL: DEBUG
+      AUTH_ENABLED: "true"
+      KEYCLOAK_URL: https://identity.api.stage.openshift.com/auth
+      KEYCLOAK_REALM: rhoas
+      KEYCLOAK_API_CLIENT_ID: registry-api
+      REGISTRY_AUTHZ_ENABLED: "true"
+      AUTHZ_ENABLED: "true"
+      TENANT_MANAGER_CLIENT_SECRET_NAME: srs-tenant-manager-credentials
+  - namespace:
+      $ref: /services/service-registry/namespaces/service-registry-production.yml
+    # this is the SHA256 of the commit that will be deployed, make sure this have been built and there is an image with this tag
+    ref: df433b5f087f9b2b8851170fe4dee08699a82818
+    parameters:
+      REGISTRY_LOG_LEVEL: DEBUG
+      REGISTRY_QUARKUS_LOG_LEVEL: INFO
+      TENANT_MANAGER_LOG_LEVEL: DEBUG
+      TENANT_MANAGER_QUARKUS_LOG_LEVEL: DEBUG
+      AUTH_ENABLED: "true"
+      KEYCLOAK_URL: https://identity.api.openshift.com/auth
+      KEYCLOAK_REALM: rhoas
+      KEYCLOAK_API_CLIENT_ID: registry-api
+      REGISTRY_AUTHZ_ENABLED: "true"
+      AUTHZ_ENABLED: "true"
+      TENANT_MANAGER_CLIENT_SECRET_NAME: srs-tenant-manager-credentials
   parameters:
-    REGISTRY_LOG_LEVEL: DEBUG
-    REGISTRY_QUARKUS_LOG_LEVEL: INFO
-    TENANT_MANAGER_LOG_LEVEL: DEBUG
-    TENANT_MANAGER_QUARKUS_LOG_LEVEL: DEBUG
     APICURIO_REGISTRY_IMAGE_REPOSITORY: rhoas/srs-service-registry
     TENANT_MANAGER_IMAGE_REPOSITORY: rhoas/srs-tenant-manager
     DATABASE_SECRET_NAME: srs-service-registry-rds
     REPLICAS: 3
     ENVOY_CONFIG_CM_NAME: srs-service-registry-envoy-config
-    AUTH_ENABLED: "true"
-    KEYCLOAK_URL: https://identity.api.stage.openshift.com/auth
-    KEYCLOAK_REALM: rhoas
-    KEYCLOAK_API_CLIENT_ID: registry-api
-    REGISTRY_AUTHZ_ENABLED: "true"
-    AUTHZ_ENABLED: "true"
-    TENANT_MANAGER_CLIENT_SECRET_NAME: srs-tenant-manager-credentials
 
 - name: srs-fleet-manager
   url: https://gitlab.cee.redhat.com/service-registry/srs-fleet-manager
@@ -81,26 +98,42 @@ resourceTemplates:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: srs-fleet-manager-gl-build-master
+    parameters:
+      TENANT_MANAGER_AUTH_SERVER_URL: https://identity.api.stage.openshift.com/auth
+      TENANT_MANAGER_AUTH_SERVER_REALM: rhoas
+      TENANT_MANAGER_AUTH_SECRET_NAME: srs-tenant-manager-credentials
+      FLEET_MANAGER_AUTH_SECRET_NAME: srs-fleet-manager-credentials
+      AMS_URL: https://api.stage.openshift.com
+      SSO_TOKEN_ENDPOINT: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
+      # List of static service-registry deployments, will be used as target to provision registry tenants
+      REGISTRY_DEPLOYMENTS_LIST:
+        - name: registry-stage-1
+          registryDeploymentUrl: https://service-registry-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
+          tenantManagerUrl: http://tenant-manager:8585
+  - namespace:
+      $ref: /services/service-registry/namespaces/service-registry-production.yml
+    # this is the SHA256 of the commit that will be deployed, make sure this have been built and there is an image with this tag
+    ref: 75da2861e38c0501d56fe52eb4a730b53798f3f5
+    parameters:
+      TENANT_MANAGER_AUTH_SERVER_URL: https://identity.api.openshift.com/auth
+      TENANT_MANAGER_AUTH_SERVER_REALM: rhoas
+      TENANT_MANAGER_AUTH_SECRET_NAME: srs-tenant-manager-credentials
+      FLEET_MANAGER_AUTH_SECRET_NAME: srs-fleet-manager-credentials
+      AMS_URL: https://api.openshift.com
+      SSO_TOKEN_ENDPOINT: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
+      # TODO get registry prod url and set it up here
+      # REGISTRY_DEPLOYMENTS_LIST:
+      #   - name: registry-prod-1
+      #     registryDeploymentUrl: https://service-registry-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
+      #     tenantManagerUrl: http://tenant-manager:8585
   parameters:
     IMAGE_REPOSITORY: rhoas/srs-fleet-manager
     DATABASE_SECRET_NAME: srs-fleet-manager-rds
     REPLICAS: 3
     ENVOY_CONFIG_CM_NAME: srs-fleet-manager-envoy-config
-    # List of static service-registry deployments, will be used as target to provision registry tenants
-    REGISTRY_DEPLOYMENTS_LIST:
-      - name: registry-stage-1
-        registryDeploymentUrl: https://service-registry-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
-        tenantManagerUrl: http://tenant-manager:8585
     # Auth config
     AUTH_ENABLED: "true"
     KEYCLOAK_REALM: redhat-external
     KEYCLOAK_URL: https://sso.redhat.com/auth
     KEYCLOAK_API_CLIENT_ID: srs-fleet-manager-api-prod
-    TENANT_MANAGER_AUTH_SERVER_URL: https://identity.api.stage.openshift.com/auth
-    TENANT_MANAGER_AUTH_SERVER_REALM: rhoas
-    TENANT_MANAGER_AUTH_SECRET_NAME: srs-tenant-manager-credentials
-    FLEET_MANAGER_AUTH_SECRET_NAME: srs-fleet-manager-credentials
-    AMS_URL: https://api.stage.openshift.com
-    SSO_TOKEN_ENDPOINT: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
-    # warning use this config only in stage
-    SRS_FLEET_MANAGER_DELETE_ALL: "false"
+
