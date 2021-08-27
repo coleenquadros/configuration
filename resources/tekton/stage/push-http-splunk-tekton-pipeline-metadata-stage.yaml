@@ -1,0 +1,64 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: push-http-splunk-tekton-pipeleine-metadata
+spec:
+  params:
+  - name: saas_file_name
+    type: string
+  - name: env_name
+    type: string
+  - name: aggregate_task_status
+    type: string
+  - name: tkn_cluster_console_url
+    type: string
+  - name: tkn_namespace_name
+    type: string
+  steps:
+  - name: push-http-splunk-tekton-pipeleine-metadata-stage
+    image: quay.io/app-sre/ubi8-ubi-minimal:{{ ubi8_ubi_minimal_image_tag }}
+    env:
+    - name: SPLUNK_URL
+      valueFrom:
+        secretKeyRef:
+          name: tekton-pipelines-splunk
+          key: endpoint
+    - name: SPLUNK_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: tekton-pipelines-splunk
+          key: token
+    - name: INTERNAL
+      valueFrom:
+        secretKeyRef:
+          name: tekton-pipelines-splunk
+          kjey: internal
+    script: |
+      #!/usr/bin/env bash
+      #
+      # This script pushes pipeline execution metadata
+      # to Splunk.
+
+      function log() {
+          echo "`date '+%Y-%m-%d %H:%M:%S'` -- $@" 1>&2
+      }
+
+      log "PUTting 'Tekton Pipeline Run Metadata: $task_name $task_status' to $SPLUNK_URL"
+
+      # Splunk index values set by IT
+      if [ "$INTERNAL" = true ]; then
+        INDEX="rh_tekton_pipeline"
+      else
+        INDEX="rh_tekton_pipelines"
+      fi
+
+      TIMESTAMP=$(date +%s)
+
+      SPLUNK_EVENT='{"saas_file_name":"'${saas_file_name}'","env_name":"'${env_name}'","aggregate_task_status":"'${aggregate_task_status}'",,"tkn_cluster_console_url":"'${tkn_cluster_console_url}'","tkn_namespace_name":"'${tkn_namespace_name}'"}'
+      
+      HTTP_RESPONSE_CODE=$(curl -k -w '%{http_code}' -o /dev/null -u "tekton-pipelines-splunk:${SPLUNK_TOKEN}" $SPLUNK_URL/services/collector/event -d '{"event":'${SPLUNK_EVENT}',"time":'$TIMESTAMP',"host":"'${tkn_cluster_console_url}'","source":"app-sre-tekton-pipelines-'${env_name}'","sourcetype":"json","index":'$INDEX'"}')
+
+      EXIT_RC=$?
+
+      log "exiting with return code $EXIT_RC"
+      exit "$EXIT_RC"
