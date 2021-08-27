@@ -43,7 +43,7 @@ spec:
           echo "`date '+%Y-%m-%d %H:%M:%S'` -- $@" 1>&2
       }
 
-      log "PUTting 'Tekton Pipeline Run Metadata: $task_name $task_status' to $SPLUNK_URL"
+      log "PUTting Tekton Pipeline Run Metadata: $task_name $task_status to $SPLUNK_URL"
 
       # Splunk index values set by IT
       if [ "$INTERNAL" = true ]; then
@@ -54,11 +54,13 @@ spec:
 
       TIMESTAMP=$(date +%s)
 
-      SPLUNK_EVENT='{"saas_file_name":"'${saas_file_name}'","env_name":"'${env_name}'","aggregate_task_status":"'${aggregate_task_status}'",,"tkn_cluster_console_url":"'${tkn_cluster_console_url}'","tkn_namespace_name":"'${tkn_namespace_name}'"}'
+      SPLUNK_EVENT='{"saas_file_name":"'${saas_file_name}'","env_name":"'${env_name}'","aggregate_task_status":"'${aggregate_task_status}'","tkn_cluster_console_url":"'${tkn_cluster_console_url}'","tkn_namespace_name":"'${tkn_namespace_name}'"}'
       
-      HTTP_RESPONSE_CODE=$(curl -k -w '%{http_code}' -o /dev/null -u "tekton-pipelines-splunk:${SPLUNK_TOKEN}" $SPLUNK_URL/services/collector/event -d '{"event":'${SPLUNK_EVENT}',"time":'$TIMESTAMP',"host":"'${tkn_cluster_console_url}'","source":"app-sre-tekton-pipelines-'${env_name}'","sourcetype":"json","index":'$INDEX'"}')
+      HTTP_RESPONSE_CODE=$(curl -k -w '%{http_code}' -o /dev/null -u "tekton-pipelines-splunk:${SPLUNK_TOKEN}" $SPLUNK_URL/services/collector/event -d '{"event":'${SPLUNK_EVENT}',"time":'$TIMESTAMP',"host":"'${tkn_cluster_console_url}'","source":"app-sre-tekton-pipelines-'${env_name}'","sourcetype":"json","index":'${INDEX}'"}')
 
       EXIT_RC=$?
 
+      log "EVENT: $SPLUNK_EVENT INDEX: $INDEX"
+      log "HTTP RESPONSE CODE: $HTTP_RESPONSE_CODE"
       log "exiting with return code $EXIT_RC"
       exit "$EXIT_RC"
