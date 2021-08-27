@@ -1,0 +1,78 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: push-http-splunk-tekton-pipeline-metadata
+spec:
+  params:
+  - name: saas_file_name
+    type: string
+  - name: env_name
+    type: string
+  - name: aggregate_task_status
+    type: string
+  - name: tkn_cluster_console_url
+    type: string
+  - name: tkn_namespace_name
+    type: string
+  steps:
+  - name: push-http-splunk-tekton-pipeline-metadata
+    image: quay.io/app-sre/ubi8-ubi-minimal:{{ ubi8_ubi_minimal_image_tag }}
+    env:
+    - name: SPLUNK_URL
+      valueFrom:
+        secretKeyRef:
+          name: tekton-pipelines-splunk
+          key: endpoint
+    - name: SPLUNK_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: tekton-pipelines-splunk
+          key: token
+    - name: INTERNAL
+      valueFrom:
+        secretKeyRef:
+          name: tekton-pipelines-splunk
+          key: internal
+    - name: saas_file_name
+      value: $(params.saas_file_name)
+    - name: env_name
+      value: $(params.env_name)
+    - name: aggregate_task_status
+      value: $(params.aggregate_task_status)
+    - name: tkn_cluster_console_url
+      value: $(params.tkn_cluster_console_url)
+    - name: tkn_namespace_name
+      value: $(params.tkn_namespace_name)
+    script: |
+      #!/usr/bin/env bash
+      #
+      # This script pushes pipeline execution metadata
+      # to Splunk.
+
+      function log() {
+          echo "`date '+%Y-%m-%d %H:%M:%S'` -- $@" 1>&2
+      }
+
+      log "PUTting Tekton Pipeline Run Metadata to $SPLUNK_URL"
+
+      # Splunk index values set by IT
+      if [ "$INTERNAL" = true ]; then
+        SOURCE_POSTFIX="internal"
+        INDEX="rh_tekton_pipeline"
+      else
+        SOURCE_POSTFIX="production"
+        INDEX="rh_tekton_pipelines"
+      fi
+
+      TIMESTAMP=$(date +%s)
+      
+      HTTP_RESPONSE_CODE=$(curl -k -w '%{http_code}' -o /dev/null -H "Authorization: Splunk ${SPLUNK_TOKEN}" --header "Content-Type: application/json" "$SPLUNK_URL/services/collector/event" --data-binary @- <<DATA
+      {"event":{"saas_file_name":"${saas_file_name}","env_name":"${env_name}","aggregate_task_status":"${aggregate_task_status}","tkn_cluster_console_url":"${tkn_cluster_console_url}","tkn_namespace_name":"${tkn_namespace_name}"},"time":"$TIMESTAMP","host":"${tkn_cluster_console_url}","source":"app-sre-tekton-pipelines-$SOURCE_POSTFIX","sourcetype":"json","index":"$INDEX"}
+      DATA
+      )
+
+      EXIT_RC=$?
+
+      log "HTTP RESPONSE CODE: $HTTP_RESPONSE_CODE"
+      log "exiting with return code $EXIT_RC"
+      exit "$EXIT_RC"
