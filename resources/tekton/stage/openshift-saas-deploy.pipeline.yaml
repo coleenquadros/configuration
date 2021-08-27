@@ -8,6 +8,10 @@ spec:
     type: string
   - name: env_name
     type: string
+  - name: tkn_cluster_console_url
+    type: string
+  - name: tkn_namespace_name
+    type: string
   tasks:
   - name: openshift-saas-deploy
     taskRef:
@@ -17,3 +21,18 @@ spec:
       value: "$(params.saas_file_name)"
     - name: env_name
       value: "$(params.env_name)"
+  finally:
+  - name: push-http-splunk-tekton-pipeleine-metadata-stage
+    taskRef:
+      name: push-http-splunk-tekton-pipeleine-metadata-stage
+    params:
+    - name: saas_file_name
+      value: "$(params.saas_file_name)"
+    - name: env_name
+      value: "$(params.env_name)"
+    - name: aggregate_task_status
+      value: "$(tasks.status)"
+    - name: tkn_cluster_console_url
+      value: "$(params.tkn_cluster_console_url)"
+    - name: tkn_namespace_name
+      value: "$(params.tkn_namespace_name)"
