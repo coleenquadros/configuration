@@ -33,6 +33,16 @@ spec:
         secretKeyRef:
           name: tekton-pipelines-splunk
           key: internal
+    - name: saas_file_name
+      value: $(params.saas_file_name)
+    - name: env_name
+      value: $(params.env_name)
+    - name: aggregate_task_status
+      value: $(params.aggregate_task_status)
+    - name: tkn_cluster_console_url
+      value: $(params.tkn_cluster_console_url)
+    - name: tkn_namespace_name
+      value: $(params.tkn_namespace_name)
     script: |
       #!/usr/bin/env bash
       #
@@ -43,7 +53,7 @@ spec:
           echo "`date '+%Y-%m-%d %H:%M:%S'` -- $@" 1>&2
       }
 
-      log "PUTting Tekton Pipeline Run Metadata: $task_name $task_status to $SPLUNK_URL"
+      log "PUTting Tekton Pipeline Run Metadata to $SPLUNK_URL"
 
       # Splunk index values set by IT
       if [ "$INTERNAL" = true ]; then
@@ -53,14 +63,14 @@ spec:
       fi
 
       TIMESTAMP=$(date +%s)
-
-      SPLUNK_EVENT='{"saas_file_name":"'${saas_file_name}'","env_name":"'${env_name}'","aggregate_task_status":"'${aggregate_task_status}'","tkn_cluster_console_url":"'${tkn_cluster_console_url}'","tkn_namespace_name":"'${tkn_namespace_name}'"}'
       
-      HTTP_RESPONSE_CODE=$(curl -k -w '%{http_code}' -o /dev/null -u "tekton-pipelines-splunk:${SPLUNK_TOKEN}" $SPLUNK_URL/services/collector/event -d '{"event":'${SPLUNK_EVENT}',"time":'$TIMESTAMP',"host":"'${tkn_cluster_console_url}'","source":"app-sre-tekton-pipelines-'${env_name}'","sourcetype":"json","index":'${INDEX}'"}')
+      HTTP_RESPONSE_CODE=$(curl -k -w '%{http_code}' -o /dev/null -H "Authorization: Splunk ${SPLUNK_TOKEN}" --header "Content-Type: application/json" "$SPLUNK_URL/services/collector/event" --data-binary @- <<DATA
+      {"event":{"saas_file_name":"${saas_file_name}","env_name":"${env_name}","aggregate_task_status":"${aggregate_task_status}","tkn_cluster_console_url":"${tkn_cluster_console_url}","tkn_namespace_name":"${tkn_namespace_name}"},"time":"$TIMESTAMP","host":"${tkn_cluster_console_url}","source":"app-sre-tekton-pipelines-staging","sourcetype":"json","index":"$INDEX"}
+      DATA
+      )
 
       EXIT_RC=$?
 
-      log "EVENT: $SPLUNK_EVENT INDEX: $INDEX"
       log "HTTP RESPONSE CODE: $HTTP_RESPONSE_CODE"
       log "exiting with return code $EXIT_RC"
       exit "$EXIT_RC"
