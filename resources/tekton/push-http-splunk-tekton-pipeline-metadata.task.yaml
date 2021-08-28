@@ -14,6 +14,8 @@ spec:
     type: string
   - name: tkn_namespace_name
     type: string
+  - name: pipelinerun_name
+    type: string
   steps:
   - name: push-http-splunk-tekton-pipeline-metadata
     image: quay.io/app-sre/ubi8-ubi-minimal:{{ ubi8_ubi_minimal_image_tag }}
@@ -43,6 +45,8 @@ spec:
       value: $(params.tkn_cluster_console_url)
     - name: tkn_namespace_name
       value: $(params.tkn_namespace_name)
+    - name: pipelinerun_name
+      value: $(params.pipelinerun_name)
     script: |
       #!/usr/bin/env bash
       #
@@ -67,7 +71,7 @@ spec:
       TIMESTAMP=$(date +%s)
       
       HTTP_RESPONSE_CODE=$(curl -k -w '%{http_code}' -o /dev/null -H "Authorization: Splunk ${SPLUNK_TOKEN}" --header "Content-Type: application/json" "$SPLUNK_URL/services/collector/event" --data-binary @- <<DATA
-      {"event":{"saas_file_name":"${saas_file_name}","env_name":"${env_name}","aggregate_task_status":"${aggregate_task_status}","tkn_cluster_console_url":"${tkn_cluster_console_url}","tkn_namespace_name":"${tkn_namespace_name}"},"time":"$TIMESTAMP","host":"${tkn_cluster_console_url}","source":"app-sre-tekton-pipelines-$SOURCE_POSTFIX","sourcetype":"json","index":"$INDEX"}
+      {"event":{"saas_file_name":"${saas_file_name}","env_name":"${env_name}","aggregate_task_status":"${aggregate_task_status}","tkn_cluster_console_url":"${tkn_cluster_console_url}","tkn_namespace_name":"${tkn_namespace_name}","pipelinerun_name":"${pipelinerun_name}"},"time":"$TIMESTAMP","host":"${tkn_cluster_console_url}","source":"app-sre-tekton-pipelines-$SOURCE_POSTFIX","sourcetype":"json","index":"$INDEX"}
       DATA
       )
 
