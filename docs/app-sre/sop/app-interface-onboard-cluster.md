@@ -92,8 +92,10 @@ This step should be performed in a single merge request.
       provision_shard_id: (optional) specify hive shard ID to create the cluster in (IDs can be found in the uhc-production namespace file)
 
     upgradePolicy: # optional, specify an upgrade schedule
-      schedule_type: automatic
+      workloads: [] # workloads running in this cluster
       schedule: '0 10 * * 4' # choose a cron expression to upgrade on
+      conditions:
+        soakDays: N # number of days a version should run on other clusters with similar workloads before this cluster is upgraded to it
 
     network:
       vpc: (desired machine CIDR. ex: 10.123.0.0/16)
