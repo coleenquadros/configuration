@@ -559,9 +559,19 @@ At this point you should be able to access the cluster via the console / `oc` cl
     - $ref: /services/observability/namespaces/openshift-customer-monitoring.<cluster>.yml
 
     managedRoles: true
+
+    managedResourceTypes:
+    - ConfigMap
+    - Service
+
+    openshiftResources:
+    - provider: resource
+      path: /app-sre[-stage]/deployment-validation-operator/dvo.configmap.yaml
+    - provider: resource
+      path: /app-sre[-stage]/deployment-validation-operator/dvo.service.yaml
     ```
 
-    *NOTE*: This file goes in the `data/openshift<cluster>/namespaces directory` [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/openshift/app-sre-stage-01/namespaces/deployment-validation-operator-per-cluster.yml)
+    *NOTE*: This file goes in the `data/openshift/<cluster>/namespaces directory` [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/openshift/app-sre-stage-01/namespaces/deployment-validation-operator-per-cluster.yml)
 
     *NOTE*: If the `openshift-operator-lifecycle-manager` namespace is not yet defined in
     app-interface, follow [Step 4](#step-4-operator-lifecycle-manager)
@@ -580,7 +590,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
     *Note*: [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml)
 
-    1. WIP: Add the new `deployment-validation-operator` namespace to the target
+    1. Add the new `deployment-validation-operator` namespace to the target
     namespaces in the
     [saas.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/deployment-validation-operator/cicd/saas.yaml)
     to deploy the Deployment Validation Operator. Example:
@@ -595,7 +605,15 @@ At this point you should be able to access the cluster via the console / `oc` cl
       - namespace:
           $ref: /openshift/<cluster>/namespaces/app-sre-dvo-per-cluster.yml
         ref: <commit_hash>
-        upstream: app-sre-deployment-validation-operator-gh-build-catalog-master-upstream-app-sre-deployment-validation-operator-gh-build-master
+    ```
+
+    *NOTE*: For stage clusters, add the following to the namespace target:
+
+    ```yaml
+        upstream:
+          instance:
+            $ref: /dependencies/ci-int/ci-int.yml
+          name: app-sre-deployment-validation-operator-gh-build-master
     ```
 
     1. Grant view permissions to the openshift-customer-monitoring/prometheus-k8s service account in [app-sre-osdv4-monitored-namespaces-view.yml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/roles/app-sre-osdv4-monitored-namespaces-view.yml)
