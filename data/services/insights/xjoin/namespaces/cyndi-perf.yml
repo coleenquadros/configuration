@@ -1,0 +1,46 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: insights
+
+name: cyndi-perf
+description: Namespace where Cyndi operator is deployed in the performance cluster
+
+cluster:
+  $ref: /openshift/insights/cluster-insights-perf.yml
+
+app:
+  $ref: /services/insights/xjoin/app.yml
+
+environment:
+  $ref: /products/insights/environments/perf.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- Secret
+
+networkPoliciesAllow: []
+
+openshiftResources:
+#- provider: resource-template
+  #type: extracurlyjinja2
+  #path: /insights-perf/cyndi/compliance-db.secret.yaml
+#- provider: resource-template
+  #type: extracurlyjinja2
+  #path: /insights-perf/cyndi/vulnerability-db.secret.yaml
+#- provider: resource-template
+  #type: extracurlyjinja2
+  #path: /insights-perf/cyndi/syndication-test-db.secret.yaml
+#- provider: resource-template
+  #type: extracurlyjinja2
+  #path: /insights-perf/cyndi/advisor-db.secret.yaml
+- provider: vault-secret
+  # requires access to the host-inventory-db provisioned through the host-inventory namespace
+  path: app-sre/integrations-output/terraform-resources/insights-perf/host-inventory-perf/host-inventory-db
+  version: 1
+  name: host-inventory-db
+  annotations:
+    qontract.recycle: "true"
+    qontract.ignore_reconcile_time: "true"
