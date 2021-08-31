@@ -1,0 +1,47 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: web-rca
+
+name: saas-web-rca # usually starts with `saas-` and contains the name of the deployed app/service/component
+description: SaaS tracking file for Status Board
+
+app:
+  $ref: /services/web-rca/app.yml
+
+pipelinesProvider:
+  $ref: /services/web-rca/pipelines/tekton.web-rca-pipelines.appsrep05ue1.yaml
+
+slack: # configure where to send notifications of success/failure of deployments
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-ops-services-dev
+
+managedResourceTypes:
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/app-sre/web-rca
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+resourceTemplates: # a list of configurations of OpenShift templates to deploy
+- name: service-template.yaml
+  path: /templates/service-template.yaml
+  url: https://gitlab.cee.redhat.com/service/web-rca
+  parameters:
+    OCM_BASE_URL: https://api.stage.openshift.com
+    IMAGE_REGISTRY: quay.io
+    IMAGE_REPOSITORY: app-sre/web-rca
+    SENTRY_ENABLE: true
+    SENTRY_PROJECT: 29 # together with Status Board, TODO: add a separate project for Web RCA
+    SENTRY_URL: https://sentry.stage.devshift.net
+  targets:
+  - namespace:
+      $ref: /services/web-rca/namespaces/stage.yml
+    ref: main
