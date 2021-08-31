@@ -1,0 +1,17 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2021-08-31-no-dash-insights-id-created-by-puptoo
+namespace:
+  $ref: /services/insights/host-inventory/namespaces/prod-host-inventory-prod.yml
+identifier: host-inventory-prod
+output: stdout
+query: |
+  SELECT 
+    created_on, modified_on, canonical_facts ->> 'insights_id', id, account, stale_timestamp, reporter 
+  FROM 
+    hosts 
+  WHERE 
+    canonical_facts->>'insights_id' !~ '-' AND reporter = 'puptoo' 
+  ORDER BY 
+    created_on desc;
