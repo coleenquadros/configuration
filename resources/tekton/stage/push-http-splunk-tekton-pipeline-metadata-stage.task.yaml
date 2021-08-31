@@ -55,17 +55,10 @@ spec:
 
       log "PUTting Tekton Pipeline Run Metadata to $SPLUNK_URL"
 
-      # Splunk index values set by IT
-      if [ "$INTERNAL" = true ]; then
-        INDEX="rh_tekton_pipeline"
-      else
-        INDEX="rh_tekton_pipelines"
-      fi
-
       TIMESTAMP=$(date +%s)
       
       HTTP_RESPONSE_CODE=$(curl -k -w '%{http_code}' -o /dev/null -H "Authorization: Splunk ${SPLUNK_TOKEN}" --header "Content-Type: application/json" "$SPLUNK_URL/services/collector/event" --data-binary @- <<DATA
-      {"event":{"saas_file_name":"${saas_file_name}","env_name":"${env_name}","aggregate_task_status":"${aggregate_task_status}","tkn_cluster_console_url":"${tkn_cluster_console_url}","tkn_namespace_name":"${tkn_namespace_name}"},"time":"$TIMESTAMP","host":"${tkn_cluster_console_url}","source":"app-sre-tekton-pipelines-staging","sourcetype":"json","index":"$INDEX"}
+      {"event":{"saas_file_name":"${saas_file_name}","env_name":"${env_name}","aggregate_task_status":"${aggregate_task_status}","tkn_cluster_console_url":"${tkn_cluster_console_url}","tkn_namespace_name":"${tkn_namespace_name}"},"time":"$TIMESTAMP","host":"${tkn_cluster_console_url}","source":"app-sre-tekton-pipelines-staging","sourcetype":"json","index":"rh_tekton_pipeline"}
       DATA
       )
 
