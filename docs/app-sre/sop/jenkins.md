@@ -138,11 +138,7 @@ Basicaly there are 3 methods of restarting ci-int, depending on severity of prob
 ## Systemd service restart - use it when you can ssh to instance
 
 1. If ci-int UI is responsive, login to UI and hit [Prepare for Shutdown](https://ci.int.devshift.net/prepareShutdown) then wait several minutes for jobs finishing and cancel remaining
-2. ssh to instance and run cleanup commands for removing old builds:
-- `/usr/local/bin/old-build-discarder.sh`
-- `JOB=* DAYS=15 /usr/local/bin/old-build-discarder.sh`
-- `JOB=*-pr-check DAYS=7 /usr/local/bin/old-build-discarder.sh`
-- `JOB=qontract-reconcile-timed-* DAYS=1 /usr/local/bin/old-build-discarder.sh`
+2. ssh to instance `ssh ci.int.devshift.net`
 3. Restart Jenkins service: `sudo systemctl restart jenkins`
 
 ## OpenStack instance reboot
