@@ -694,3 +694,86 @@
             - *kas_fleet_manager_admin_staging
             - *kas_fleet_manager_admin_prod
     <<: *gl_build_master
+
+- job-template:
+    id: managed-kafka-client-workloads
+    name: managed-kafka-client-workloads
+    wrappers:
+      - timestamps
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *quay_secret_pull
+            - *ci_test_token
+            - *ci_aws_keys
+            - *ci_kas_workloads_sa
+    concurrent: true
+    parameters:
+    - string:
+        name: BRANCH
+        default: '{default_branch}'
+        description: 'The branch of kas-abnormal-workloads repo'
+    - string:
+          name: COMPUTE_NODES_COUNT
+          default: '2'
+          description: 'OSD worker nodes, min(default) value is 2'
+    - string:
+          name: PODS
+          default: '1'
+          description: 'Number of pods running in parallel for each workload scenario'
+    - string:
+          name: TEST_DURATION
+          default: '30'
+          description: 'Test duration in minutes'
+    - choice:
+        name: CLIENT_TYPE
+        description: 'Kafka client type'
+        choices:
+            - both
+            - producer
+            - consumer
+    - string:
+        name: CLIENT_APPS
+        default: 'jvm'
+        description: 'Kafka client libraries separated by comma(,)'
+    - string:
+          name: THREADS
+          default: '5'
+          description: 'Workload application concurent threads'
+    - string:
+          name: SCENARIOS
+          default: 'bl'
+          description: 'List of workload scenarios to run separated by comma(,)'
+    - string:
+          name: CONSUMER_GROUP_MEMBERS_PERCENTAGE
+          default: '20'
+          description: 'How many consumer groups to be used for client type consumer'
+    - string:
+          name: TOPIC
+          default: ''
+          description: 'Specify an existing topic name if it should be reused'
+    - string:
+          name: BOOTSTRAP
+          description: '[REQUIRED] Kafka Bootstrap Server'
+    - choice:
+        name: ENV
+        description: 'RHOSAK service account env to get a secret'
+        choices:
+            - stage
+    - bool:
+        name: CLUSTER_CLEANUP
+        default: 'true'
+        description: 'Include deletion of OSD cluster'
+    branch: '${{BRANCH}}'
+    sa_secret_env: '${{ENV}}'
+    <<: *gl_checkout
+    builders:
+    - shell: ./pipeline-configs/run_workloads.sh
+    artifacts_path: 'test-results/**'
+    publishers:
+    - archive:
+        artifacts: '{artifacts_path}'
+        allow-empty: true
