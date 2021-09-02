@@ -162,6 +162,49 @@ A liveness probe that checks your container's health thoroughly; on a liveness p
 
 To delete a target from a SaaS file, set `delete: true` in the target you wish to delete. This will cause all associated resources to be deleted in the next deployment. Follow this up with another MR to delete the target from the SaaS file.
 
+For example, to delete the stage deployment from this saas-file:
+```
+(top of the file)
+resourceTemplates:
+- name: exampleApp
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/exampleApp
+  targets:
+  - namespace:
+      $ref: /services/insights/example/namespaces/example-stage.yml
+    ref: b17281f74dea89f0834c34f697ea257445f3c195
+  - namespace:
+      $ref: /services/insights/example/namespaces/example-prod.yml
+    ref: b17281f74dea89f0834c34f697ea257445f3c195
+```
+Open an MR, add `delete: true` to the target you wish to delete:
+```
+(top of the file)
+resourceTemplates:
+- name: exampleApp
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/exampleApp
+  targets:
+  - namespace:
+      $ref: /services/insights/example/namespaces/example-stage.yml
+    ref: b17281f74dea89f0834c34f697ea257445f3c195
+    delete: true # deleting from the namespace - will remove in followup MR.
+  - namespace:
+      $ref: /services/insights/example/namespaces/example-prod.yml
+    ref: b17281f74dea89f0834c34f697ea257445f3c195
+```
+Then open up a follow-up MR to delete the target from the saas file:
+```
+(top of the file)
+resourceTemplates:
+- name: exampleApp
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/exampleApp
+  - namespace:
+      $ref: /services/insights/example/namespaces/example-prod.yml
+    ref: b17281f74dea89f0834c34f697ea257445f3c195
+```
+
 More information: [Continuous Delivery in App-interface](/docs/app-sre/continuous-delivery-in-app-interface.md)
 
 ### Jenkins is going to shutdown
