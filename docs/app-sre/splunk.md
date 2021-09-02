@@ -31,17 +31,19 @@ There is a company mandate that any system that has the ability to touch code mu
 
 IT manages Splunk access requests through a ServiceNow portal, ["Access to Monitoring Platform"](https://redhat.service-now.com/help?id=sc_cat_item&sys_id=ed13c6af1b2a2c50e43942a7bc4bcbc3).
 
+If a user lacks read-access to App-SRE Splunk events, one may submit one of these requests for that user to be associated with the following 'CMDB Access Codes': `App-SRE CI-int`, `App-SRE CI-ext`, `App-SRE Tekton pipelines`. (This list may expand in the future if app-sre begins to own additional splunk-indices).
+
 For critical needs or continuing established direct support threads, there is a direct communication channel through Google Chats. The direct link to the chat space is [here](https://mail.google.com/chat/u/0/#chat/space/AAAAvuMOFCY). Alternatively, you can visit [Google Chat](https://mail.google.com/chat/), find the "Rooms" section in the left navigation pane, and click the "+" add icon, and search for the "Splunk" chat room.
 
 ## Implementation Details
 
-Adding Splunk logging to an exisitng application is technically straightforward. Events are sent over HTTP to a HTTP Event Collector (HEC) endpoint with a required JSON format and application-specific index. 
+Adding Splunk logging to an existing application is technically straightforward. Events are sent over HTTP to a HTTP Event Collector (HEC) endpoint with a required JSON format and application-specific index. 
 
 Collector endpoint selection depends on the volume of data consumed by that collector and where the submitter lives in relation to the VPN. Internal and external endpoints are available.
 
 Indexes are the core pivot for data flowing into Splunk and must be created through collaboration with Corporate IT before said events will show in Splunk searches.
 
-Splunk collectors require an access token to send an event payload to the collector. Access tokens are bound to specific indicies. Future applications wishing to send events to Splunk must work with IT to generate a token that allows writing events to a specified index. If an existing index makes sense for the application, then an existing token/index combination can be used.
+Splunk collectors require an access token to send an event payload to the collector. Access tokens are bound to specific indices. Future applications wishing to send events to Splunk must work with IT to generate a token that allows writing events to a specified index. If an existing index makes sense for the application, then an existing token/index combination can be used.
 
 ### Vault Secrets
 
@@ -49,7 +51,7 @@ Splunk secrets are housed in Vault at this path: `app-sre/creds/splunk/<applicat
 
 ### Indexes
 
-A Splunk [index](https://docs.splunk.com/Splexicon:Index) is a repository for data. Indexes allows partitioning of data on index keys, allowing efficient retrieval of data associated with a given index. For app-sre applications, we have two separate indices for our current use cases. Future expansion of app-sre Splunk usage means additional indicies must be created to partition data properly. Alternatively, we can use an existing index that matches the application, given we have access tokens that permit writing to an index.
+A Splunk [index](https://docs.splunk.com/Splexicon:Index) is a repository for data. Indices allows partitioning of data on index keys, allowing efficient retrieval of data associated with a given index. For app-sre applications, we have two separate indices for our current use cases. Future expansion of app-sre Splunk usage means additional indices must be created to partition data properly. Alternatively, we can use an existing index that matches the application, given we have access tokens that permit writing to an index.
 
 * ci-int / ci-ext: `index="jenkins"`
 * tekton-pipelines: `index="rh_tekton_pipeline"`
@@ -79,7 +81,7 @@ Example Curl Payload
 {"event":{"saas_file_name":"${saas_file_name}","env_name":"${env_name}","aggregate_task_status":"${aggregate_task_status}","tkn_cluster_console_url":"${tkn_cluster_console_url}","tkn_namespace_name":"${tkn_namespace_name}","pipelinerun_name":"${pipelinerun_name}"},"time":"$TIMESTAMP","host":"${tkn_cluster_console_url}","source":"app-sre-tekton-pipelines-$SOURCE_POSTFIX","sourcetype":"json","index":"rh_tekton_pipeline"}
 ```
 
-Example implemenation
+Example implementation
 
 ```
 #!/usr/bin/env bash
@@ -101,7 +103,7 @@ fi
 
 TIMESTAMP=$(date +%s)
 
-HTTP_RESPONSE_CODE=$(curl -k -w '%{http_code}' -o /dev/null -H "Authorization: Splunk ${SPLUNK_TOKEN}" --header "Content-Type: application/json" "$SPLUNK_URL/services/collector/event" --data-binary @- <<DATA
+HTTP_RESPONSE_CODE=$(curl -k -w '%{http_code}' -o /dev/null -H "Authorization: Splunk ${SPLUNK_TOKEN}" --header "Content-Type: application/json" "$SPLUNK_HEC_URL/services/collector/event" --data-binary @- <<DATA
 {"event":{"saas_file_name":"${saas_file_name}","env_name":"${env_name}","aggregate_task_status":"${aggregate_task_status}","tkn_cluster_console_url":"${tkn_cluster_console_url}","tkn_namespace_name":"${tkn_namespace_name}","pipelinerun_name":"${pipelinerun_name}"},"time":"$TIMESTAMP","host":"${tkn_cluster_console_url}","source":"app-sre-tekton-pipelines-$SOURCE_POSTFIX","sourcetype":"json","index":"rh_tekton_pipeline"}
 DATA
 )
