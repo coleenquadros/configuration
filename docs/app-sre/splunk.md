@@ -9,7 +9,11 @@
 
 ## Overview
 
-[Splunk Enterprise](https://splunk.corp.redhat.com/) is a data search / analysis / visualization tool that is administered by Red Hat Corporate IT. Raw event data is sent to one of multiple event collectors and is made available to multiple Splunk applications for consumption. One common application is Splunk search, allowing users a time-based parameter search to find occurences of an event with specified search parameters. See more details about Splunk Enterprise on their [documentation website](https://docs.splunk.com/Documentation/Splunk/8.2.2/Overview/AboutSplunkEnterprise).
+[Splunk Enterprise](https://splunk.corp.redhat.com/) is a data search / analysis / visualization tool that is administered by Red Hat Corporate IT. Raw event data is sent to one of multiple event collectors and is made available to multiple Splunk applications for consumption.
+
+One common application is Splunk search, allowing users a time-based parameter search to find occurences of an event with specified search parameters. [Here](https://splunk.corp.redhat.com/en-US/app/search/search?earliest=-1d%40d&latest=now&q=search%20index%3D%22rh_tekton_pipeline%22&display.page.search.mode=smart&dispatch.sample_ratio=1&display.page.search.tab=events&display.general.type=events&display.prefs.statistics.count=100&sid=1630595865.174779_225B9C90-BB47-4B35-96FA-2279639EFCC3) is an example search of all events in the `rh_tekton_pipeline` index over the last 24 hours.
+
+See more details about Splunk Enterprise on their [documentation website](https://docs.splunk.com/Documentation/Splunk/8.2.2/Overview/AboutSplunkEnterprise).
 
 ## Current Application
 
