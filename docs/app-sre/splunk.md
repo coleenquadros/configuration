@@ -43,7 +43,7 @@ For critical needs or continuing established direct support threads, there is a 
 
 Adding Splunk logging to an existing application is technically straightforward. Events are sent over HTTP to a HTTP Event Collector (HEC) endpoint with a required JSON format and application-specific index. 
 
-Collector endpoint selection depends on the volume of data consumed by that collector and where the submitter lives in relation to the VPN. Internal and external endpoints are available.
+Collector endpoint selection depends on the volume of data consumed by that collector and where the submitter lives in relation to the VPN. In practice, `ci-int` and tekton pipelines in private clusters send data to PHX2 HEC (https://splunk-hec.util.phx2.redhat.com:8088), while `ci-ext` and tekton pipelines in internet facing clusters send data to Public(External) HEC (https://splunk-hec.redhat.com:8088). Currently, app-sre does not have a use case for the high-volume HEC endpoints, which are intended for syslog consumption.
 
 Indexes are the core pivot for data flowing into Splunk and must be created through collaboration with Corporate IT before said events will show in Splunk searches.
 
@@ -100,9 +100,9 @@ function log() {
 log "PUTting Tekton Pipeline Run Metadata to $SPLUNK_URL"
 
 if [ "$INTERNAL" = true ]; then
-SOURCE_POSTFIX="internal"
+    SOURCE_POSTFIX="internal"
 else
-SOURCE_POSTFIX="production"
+    SOURCE_POSTFIX="production"
 fi
 
 TIMESTAMP=$(date +%s)
