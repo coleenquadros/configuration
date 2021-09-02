@@ -1,7 +1,40 @@
 apiVersion: v1
 data:
-  versionUpgradeDashboard.json: |
+  kas-fleet-manager-version-info.json: |
     {
+      "__inputs": [],
+      "__requires": [
+        {
+          "type": "grafana",
+          "id": "grafana",
+          "name": "Grafana",
+          "version": "7.2.1"
+        },
+        {
+          "type": "panel",
+          "id": "graph",
+          "name": "Graph",
+          "version": ""
+        },
+        {
+          "type": "datasource",
+          "id": "prometheus",
+          "name": "Prometheus",
+          "version": "1.0.0"
+        },
+        {
+          "type": "panel",
+          "id": "stat",
+          "name": "Stat",
+          "version": ""
+        },
+        {
+          "type": "panel",
+          "id": "table",
+          "name": "Table",
+          "version": ""
+        }
+      ],
       "annotations": {
         "list": [
           {
@@ -18,16 +51,130 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 0,
-      "id": 194,
+      "id": 201,
+      "iteration": 1630588712670,
       "links": [],
       "panels": [
         {
+          "collapsed": false,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 6,
+          "panels": [],
+          "title": "Strimzi Versions",
+          "type": "row"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
           "datasource": "$datasource",
+          "description": "Count of actual Strimzi versions",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 0,
+            "y": 1
+          },
+          "hiddenSeries": false,
+          "id": 10,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.2.1",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "count(count(strimzi_version{type=\"actual\",version!=\"\"}) by (kafka_id, version)) by (version)",
+              "interval": "",
+              "legendFormat": "{{version}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Strimzi Versions Count",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:159",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "$$hashKey": "object:160",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "datasource": "$datasource",
+          "description": "The actual and desired version of Strimzi per Kafka",
           "fieldConfig": {
             "defaults": {
               "custom": {
                 "align": null,
-                "filterable": false
+                "filterable": true
               },
               "mappings": [],
               "thresholds": {
@@ -48,9 +195,9 @@ data:
           },
           "gridPos": {
             "h": 7,
-            "w": 24,
-            "x": 0,
-            "y": 0
+            "w": 12,
+            "x": 12,
+            "y": 1
           },
           "id": 4,
           "options": {
@@ -67,25 +214,17 @@ data:
               "refId": "A"
             },
             {
-              "expr": "count(label_replace(strimzi_version{type=\"desired\"}, \"desired_version\", \"$1\", \"version\", \"(.*)\")) by (kafka_id, type, desired_version) ",
+              "expr": "count(label_replace(strimzi_version{type=\"desired\"}, \"desired_version\", \"$1\", \"version\", \"(.*)\")) by (kafka_id, type, desired_version)",
               "format": "table",
               "instant": true,
               "interval": "",
               "legendFormat": "",
               "refId": "B"
-            },
-            {
-              "expr": "count(label_replace(strimzi_version{type=\"upgrade\"}, \"upgrade\", \"$1\", \"version\", \"(.*)\")) by (kafka_id, type, upgrade)",
-              "format": "table",
-              "instant": true,
-              "interval": "",
-              "legendFormat": "",
-              "refId": "C"
             }
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Strimzi Version Upgrade Information",
+          "title": "Strimzi Version Per Kafka",
           "transformations": [
             {
               "id": "seriesToColumns",
@@ -100,26 +239,11 @@ data:
                   "Time": true,
                   "Value #A": true,
                   "Value #B": true,
-                  "Value #C": true,
-                  "desired_version": false,
-                  "type": true,
-                  "version": false
+                  "type": true
                 },
-                "indexByName": {
-                  "Time": 2,
-                  "Value #A": 5,
-                  "Value #B": 7,
-                  "Value #C": 8,
-                  "cluster_id": 0,
-                  "desired_version": 6,
-                  "kafka_id": 1,
-                  "type": 3,
-                  "version": 4
-                },
+                "indexByName": {},
                 "renameByName": {
-                  "cluster_id": "Cluster ID",
                   "desired_version": "Desired Version",
-                  "kafka_id": "Kafka ID",
                   "version": "Actual Version"
                 }
               }
@@ -128,13 +252,111 @@ data:
           "type": "table"
         },
         {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
           "datasource": "$datasource",
-          "description": "This panel shows Kafka version upgrade information.",
+          "description": "Count of Strimzi that are being upgraded",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 0,
+            "y": 8
+          },
+          "hiddenSeries": false,
+          "id": 12,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.2.1",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "count(count(strimzi_version{type=\"upgrade\",version!=\"\"}) by (kafka_id, version)) by (version)",
+              "interval": "",
+              "legendFormat": "{{version}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Upgrading Strimzi Count",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:159",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "$$hashKey": "object:160",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "datasource": "$datasource",
+          "description": "Strimzi instances that are being upgraded",
           "fieldConfig": {
             "defaults": {
               "custom": {
                 "align": null,
-                "filterable": false
+                "filterable": true
               },
               "mappings": [],
               "thresholds": {
@@ -154,12 +376,199 @@ data:
             "overrides": []
           },
           "gridPos": {
-            "h": 8,
+            "h": 7,
+            "w": 12,
+            "x": 12,
+            "y": 8
+          },
+          "id": 11,
+          "options": {
+            "showHeader": true
+          },
+          "pluginVersion": "7.2.1",
+          "targets": [
+            {
+              "expr": "count(strimzi_version{type=\"upgrade\"}) by (cluster_id, kafka_id, type, version) ",
+              "format": "table",
+              "instant": true,
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Upgrading Strimzi",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": true,
+                  "type": true
+                },
+                "indexByName": {
+                  "Time": 0,
+                  "Value": 5,
+                  "cluster_id": 2,
+                  "kafka_id": 1,
+                  "type": 3,
+                  "version": 4
+                },
+                "renameByName": {
+                  "version": "upgrade to version"
+                }
+              }
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "collapsed": false,
+          "datasource": null,
+          "gridPos": {
+            "h": 1,
             "w": 24,
             "x": 0,
-            "y": 7
+            "y": 15
           },
-          "id": 2,
+          "id": 8,
+          "panels": [],
+          "title": "Kafka Versions",
+          "type": "row"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "description": "Count of actual Kafka versions",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 0,
+            "y": 16
+          },
+          "hiddenSeries": false,
+          "id": 13,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.2.1",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "count(count(kafka_version{type=\"actual\",version!=\"\"}) by (kafka_id, version)) by (version)",
+              "interval": "",
+              "legendFormat": "{{version}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Kafka Versions Count",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:159",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "$$hashKey": "object:160",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "datasource": "$datasource",
+          "description": "The actual and desired version of Kafka",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": null,
+                "filterable": true
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 12,
+            "y": 16
+          },
+          "id": 14,
           "options": {
             "showHeader": true
           },
@@ -174,25 +583,17 @@ data:
               "refId": "A"
             },
             {
-              "expr": "count(label_replace(kafka_version{type=\"desired\"}, \"desired_version\", \"$1\", \"version\", \"(.*)\")) by (kafka_id, type, desired_version) ",
+              "expr": "count(label_replace(kafka_version{type=\"desired\"}, \"desired_version\", \"$1\", \"version\", \"(.*)\")) by (kafka_id, type, desired_version)",
               "format": "table",
               "instant": true,
               "interval": "",
               "legendFormat": "",
               "refId": "B"
-            },
-            {
-              "expr": "count(label_replace(kafka_version{type=\"upgrade\"}, \"upgrade\", \"$1\", \"version\", \"(.*)\")) by (kafka_id, type, upgrade)",
-              "format": "table",
-              "instant": true,
-              "interval": "",
-              "legendFormat": "",
-              "refId": "C"
             }
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Kafka Version Upgrade Information",
+          "title": "Kafka Version Per Kafka",
           "transformations": [
             {
               "id": "seriesToColumns",
@@ -209,22 +610,183 @@ data:
                   "Value #B": true,
                   "type": true
                 },
+                "indexByName": {},
+                "renameByName": {
+                  "desired_version": "Desired Version",
+                  "version": "Actual Version"
+                }
+              }
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$datasource",
+          "description": "Count of Kafka that are being upgraded",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 0,
+            "y": 23
+          },
+          "hiddenSeries": false,
+          "id": 15,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "7.2.1",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "count(count(kafka_version{type=\"upgrade\",version!=\"\"}) by (kafka_id, version)) by (version)",
+              "interval": "",
+              "legendFormat": "{{version}}",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Upgrading Kafka Count",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:159",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "$$hashKey": "object:160",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "datasource": "$datasource",
+          "description": "Kafka instances that are being upgraded",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": null,
+                "filterable": true
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 12,
+            "y": 23
+          },
+          "id": 16,
+          "options": {
+            "showHeader": true
+          },
+          "pluginVersion": "7.2.1",
+          "targets": [
+            {
+              "expr": "count(kafka_version{type=\"upgrade\"}) by (cluster_id, kafka_id, type, version) ",
+              "format": "table",
+              "instant": true,
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Upgrading Kafka",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value": true,
+                  "type": true
+                },
                 "indexByName": {
-                  "Time": 2,
-                  "Value #A": 5,
-                  "Value #B": 7,
-                  "cluster_id": 0,
-                  "desired_version": 6,
+                  "Time": 0,
+                  "Value": 5,
+                  "cluster_id": 2,
                   "kafka_id": 1,
                   "type": 3,
                   "version": 4
                 },
                 "renameByName": {
-                  "cluster_id": "Cluster ID",
-                  "desired_version": "Desired Version",
-                  "kafka_id": "Kafka ID",
-                  "type": "Type",
-                  "version": "Actual Version"
+                  "version": "upgrade to version"
                 }
               }
             }
@@ -234,12 +796,14 @@ data:
       ],
       "schemaVersion": 26,
       "style": "dark",
-      "tags": [],
+      "tags": [
+        "kas-fleet-manager"
+      ],
       "templating": {
-        "list": []
+        "list": [
           {
             "current": {
-              "selected": false,
+              "selected": true,
               "text": "app-sre-stage-01-prometheus",
               "value": "app-sre-stage-01-prometheus"
             },
@@ -256,6 +820,7 @@ data:
             "skipUrlSync": false,
             "type": "datasource"
           }
+        ]
       },
       "time": {
         "from": "now-6h",
@@ -263,13 +828,15 @@ data:
       },
       "timepicker": {},
       "timezone": "",
-      "title": "Kafka and Strimzi Version Upgrade Information",
+      "title": "Strimzi and Kafka Version Upgrade Information",
       "uid": "-FHxB9n7z",
-      "version": 7
+      "version": 1
     }
 kind: ConfigMap
 metadata:
   creationTimestamp: null
-  name: grafana-dashboard-kas-fleet-manager-kafka-and-strimzi-version-upgrade-information
+  name: grafana-dashboard-kas-fleet-manager-version-information
+  labels:
+    grafana_dashboard: "true"
   annotations:
     grafana-folder: /grafana-dashboard-definitions/RHOSAK
