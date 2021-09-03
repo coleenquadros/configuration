@@ -278,3 +278,9 @@ The App SRE team recommends transitioning to using containerized builds over try
 Information about multi-stage container builds can be found [here](https://docs.docker.com/develop/develop-images/multistage-build).  Here's an simple [example](https://github.com/app-sre/deployment-validation-operator/blob/master/build/Dockerfile) of a Dockerfile using multi-stage build.
 
 If using a containerized build is not possible, please submit an MR to the [infra](https://gitlab.cee.redhat.com/app-sre/infra) repo and ping the IC.
+
+### My configuration is merged into app-interface but it isn't applied!
+
+Check your namespace and your saas file! Is your new configuration's type listed in the `managedResourceTypes` field? For instance, if you have submitted a new `ConfigMap` for a namespace, its namespace file must list `ConfigMap` in its `managedResourceTypes`.
+
+Review #sd-app-sre-reconcile in slack for messages related to your configuration, it should tell you if it is applying it or it is skipping it. See [this ticket](https://issues.redhat.com/browse/APPSRE-3668)
