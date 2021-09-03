@@ -10,7 +10,10 @@ chore: update kas-fleet-manager <prod/stage> version to <new-version>
 ## Merge request description template
 ```
 ## Manual Verification
+- Verify that the dashboards in [Staging envrionment](https://grafana.stage.devshift.net/dashboards/f/zz2SVP47k/rhosak) have not been broken.
+
 <state any manual verification steps here if required>
+
 
 ## Passing E2E Tests in Stage:
 <link-to-report-portal-e2e-tests>
