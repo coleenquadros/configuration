@@ -21,9 +21,9 @@ Considering the multitude of monitoring and logging solutions that app-sre uses 
 
 There is a company mandate that any system that has the ability to touch code must be logged to Splunk. As such, app-sre sends Splunk events for the following services:
 
-* ci-int
-* ci-ext
-* tekton-pipelines (for all tenants)
+* ci-int ([Jenkins Plugin](https://plugins.jenkins.io/splunk-devops/))
+* ci-ext ([Jenkins Plugin](https://plugins.jenkins.io/splunk-devops/))
+* tekton-pipelines, for all tenants (Custom Pipeline Task: [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/resources/tekton/push-http-splunk-tekton-pipeline-metadata.task.yaml))
 
 ## Corporate Guides
 
