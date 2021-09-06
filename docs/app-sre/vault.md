@@ -282,3 +282,14 @@ The token returned above is the root token that can now be used to operate vault
 
 **NOTE**: After the emergency, please revoke the token by running: `vault token revoke <TOKEN>`.
 
+## Reading Audit Logs
+
+All audit log entries are structured like the following:
+`<TIMESTAMP> s3.vault.audit <JSON>`.
+
+In the JSON structure, you will see that `.client_token` and `.accessor` are actually obfuscated. Instead of logging the actual values, it logs the salted hmac-sha256 value.
+
+In order to obtain the salted values, it must be done using the following command:
+`vault write sys/audit-hash/file input=<TOKEN>`
+
+That will output the hmac-sha256 value which can be found in the logs. This obviously works both for the token and for the accessor.
