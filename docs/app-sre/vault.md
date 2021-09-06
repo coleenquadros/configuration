@@ -231,3 +231,54 @@ Example: `vault write -f auth/approle/role/<ROLE_NAME>/secret-id`.
 3. Update the matching secrets in Vault.
 
 Make sure you include: `role_id` and `secret_id`.
+
+## Generate Emergency Root Token
+
+This vault instance currently does not have a root token. If one is needed during an emergency, it can be generated **using seal keys**.
+
+The process is properly documented [here](https://learn.hashicorp.com/tutorials/vault/generate-root#use-one-time-password-otp), or by running `vault operator generate-root --help`.
+
+Example generation:
+
+```
+$ vault operator generate-root -generate-otp
+<OTP_TOKEN>
+
+$ vault operator generate-root -init -otp="<OTP_TOKEN>"
+Nonce         REDACTED
+Started       true
+Progress      0/3
+Complete      false
+OTP Length    26
+
+# Repeat this command 3 times. The command will
+# prompt for a seal key. Introduce 3 different seal keys.
+$ vault operator generate-root -otp="<OTP_TOKEN>"
+```
+
+On the third iteration of the last command, the output will look like:
+
+```
+$ vault operator generate-root -otp="<OTP_TOKEN>"
+Operation nonce: REDACTED
+Unseal Key (will be hidden):
+Nonce            REDACTED
+Started          true
+Progress         3/3
+Complete         true
+Encoded Token    <ENCODED_TOKEN>
+```
+
+Next step is to decode the token:
+
+```
+$ vault operator generate-root \
+  -decode=<ENCODED_TOKEN> \
+  -otp=<OTP_TOKEN>
+<TOKEN>
+```
+
+The token returned above is the root token that can now be used to operate vault. Simply enter it after doing: `vault login`.
+
+**NOTE**: After the emergency, please revoke the token by running: `vault token revoke <TOKEN>`.
+
