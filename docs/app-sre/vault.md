@@ -71,7 +71,7 @@ To upgrade Vault version please submit MR against [saas-vault-devshift-net](<htt
 6. Upgrade the prod instance
 7. Repeat step 3
 
-## Vaut configuration automation with app-interface and vault-manager 
+## Vault configuration automation with app-interface and vault-manager
 vault.devshift.net is entirely managed via [app-interface](https://gitlab.cee.redhat.com/service/app-interface/blob/master/README.md#manage-vault-configurations-via-app-interface) using [vault-manager](https://github.com/app-sre/vault-manager) reconcile tool.
 
 ## Vault monitoring
@@ -155,19 +155,19 @@ That Vault approle has access to anything under `app-sre/ansible`. A good practi
 - Create [Personal Account Token](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/), with org:read access
 - Copy access token
 - Browse to https://vault.devshift.net/ui/vault/auth?with=github
-- Apply token  
+- Apply token
 ## Set up CLI
 - Download Vault CLI https://www.vaultproject.io/downloads.html and unzip to a binath path
 - Set env var: export VAULT_ADDR="https://vault.devshift.net/"
 - Login: vault login -method=github using your github access token
-- Test listing key names: vault list devtools-osio-ci  
+- Test listing key names: vault list devtools-osio-ci
 ## Set a secret
-vault kv put foopath1/foopath2/fooname @data.json  
-or  
-echo -n "asecret" | vault kv put foopath1/foopath2/fooname value=-  
-or  
-echo -n '{"value":"asecret"}' | vault kv put foopath1/fooname -  
-## Get a secret  
+vault kv put foopath1/foopath2/fooname @data.json
+or
+echo -n "asecret" | vault kv put foopath1/foopath2/fooname value=-
+or
+echo -n '{"value":"asecret"}' | vault kv put foopath1/fooname -
+## Get a secret
 vault kv get foopath1/foopath2/fooname
 
 ## Login to Vault when GitHub is down
@@ -231,3 +231,65 @@ Example: `vault write -f auth/approle/role/<ROLE_NAME>/secret-id`.
 3. Update the matching secrets in Vault.
 
 Make sure you include: `role_id` and `secret_id`.
+
+## Generate Emergency Root Token
+
+This vault instance currently does not have a root token. If one is needed during an emergency, it can be generated **using seal keys**.
+
+The process is properly documented [here](https://learn.hashicorp.com/tutorials/vault/generate-root#use-one-time-password-otp), or by running `vault operator generate-root --help`.
+
+Example generation:
+
+```
+$ vault operator generate-root -generate-otp
+<OTP_TOKEN>
+
+$ vault operator generate-root -init -otp="<OTP_TOKEN>"
+Nonce         REDACTED
+Started       true
+Progress      0/3
+Complete      false
+OTP Length    26
+
+# Repeat this command 3 times. The command will
+# prompt for a seal key. Introduce 3 different seal keys.
+$ vault operator generate-root -otp="<OTP_TOKEN>"
+```
+
+On the third iteration of the last command, the output will look like:
+
+```
+$ vault operator generate-root -otp="<OTP_TOKEN>"
+Operation nonce: REDACTED
+Unseal Key (will be hidden):
+Nonce            REDACTED
+Started          true
+Progress         3/3
+Complete         true
+Encoded Token    <ENCODED_TOKEN>
+```
+
+Next step is to decode the token:
+
+```
+$ vault operator generate-root \
+  -decode=<ENCODED_TOKEN> \
+  -otp=<OTP_TOKEN>
+<TOKEN>
+```
+
+The token returned above is the root token that can now be used to operate vault. Simply enter it after doing: `vault login`.
+
+**NOTE**: After the emergency, please revoke the token by running: `vault token revoke <TOKEN>`.
+
+## Reading Audit Logs
+
+All audit log entries are structured like the following:
+`<TIMESTAMP> s3.vault.audit <JSON>`.
+
+In the JSON structure, you will see that `.client_token` and `.accessor` are actually obfuscated. Instead of logging the actual values, it logs the salted hmac-sha256 value.
+
+In order to obtain the salted values, it must be done using the following command:
+`vault write sys/audit-hash/file input=<TOKEN>`
+
+That will output the hmac-sha256 value which can be found in the logs. This obviously works both for the token and for the accessor.
