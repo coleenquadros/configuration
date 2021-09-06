@@ -155,19 +155,19 @@ That Vault approle has access to anything under `app-sre/ansible`. A good practi
 - Create [Personal Account Token](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/), with org:read access
 - Copy access token
 - Browse to https://vault.devshift.net/ui/vault/auth?with=github
-- Apply token  
+- Apply token
 ## Set up CLI
 - Download Vault CLI https://www.vaultproject.io/downloads.html and unzip to a binath path
 - Set env var: export VAULT_ADDR="https://vault.devshift.net/"
 - Login: vault login -method=github using your github access token
-- Test listing key names: vault list devtools-osio-ci  
+- Test listing key names: vault list devtools-osio-ci
 ## Set a secret
-vault kv put foopath1/foopath2/fooname @data.json  
-or  
-echo -n "asecret" | vault kv put foopath1/foopath2/fooname value=-  
-or  
-echo -n '{"value":"asecret"}' | vault kv put foopath1/fooname -  
-## Get a secret  
+vault kv put foopath1/foopath2/fooname @data.json
+or
+echo -n "asecret" | vault kv put foopath1/foopath2/fooname value=-
+or
+echo -n '{"value":"asecret"}' | vault kv put foopath1/fooname -
+## Get a secret
 vault kv get foopath1/foopath2/fooname
 
 ## Login to Vault when GitHub is down
