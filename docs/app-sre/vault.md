@@ -71,7 +71,7 @@ To upgrade Vault version please submit MR against [saas-vault-devshift-net](<htt
 6. Upgrade the prod instance
 7. Repeat step 3
 
-## Vaut configuration automation with app-interface and vault-manager 
+## Vault configuration automation with app-interface and vault-manager
 vault.devshift.net is entirely managed via [app-interface](https://gitlab.cee.redhat.com/service/app-interface/blob/master/README.md#manage-vault-configurations-via-app-interface) using [vault-manager](https://github.com/app-sre/vault-manager) reconcile tool.
 
 ## Vault monitoring
