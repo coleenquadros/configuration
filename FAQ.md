@@ -6,23 +6,31 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
 
 ## ToC
 
-- [Can you merge my MR?](#can-you-merge-my-mr)
-- [Contacting AppSRE](#contacting-appsre)
-- [How can I get access to X?](#how-can-i-get-access-to-x)
-- [I can not access X](#i-can-not-access-x)
-- [I need help with something AWS related](#i-need-help-with-something-aws-related)
-- [I can not access ci-ext](#i-can-not-access-ci-ext)
-- [Tagging options in app-interface](#tagging-options-in-app-interface)
-- [Gating production promotions in app-interface](#gating-production-promotions-in-app-interface)
-- [Get access to cluster logs via Log Forwarding](#get-access-to-cluster-logs-via-log-forwarding)
-- [What is the Console or Prometheus URL for a service?](#what-is-the-console-or-prometheus-url-for-a-service)
-- [Can you restart my pods?](#can-you-restart-my-pods)
-- [Delete target from SaaS file](#delete-target-from-saas-file)
-- [Jenkins is going to shut down](#jenkins-is-going-to-shutdown)
-- [How can I make my PR check job run concurrently?](#how-can-i-make-my-pr-check-job-run-concurrently)
-- [How can I see who has access to a service?](#how-can-i-see-who-has-access-to-a-service)
-- [Accessing DataHub](#accessing-datahub)
-- [Jenkins Vault plugin upgrade](#jenkins-vault-plugin-upgrade)
+- [App-Interface Frequently Asked Questions](#app-interface-frequently-asked-questions)
+	- [ToC](#toc)
+	- [Useful links](#useful-links)
+	- [Topics](#topics)
+		- [Can you merge my MR](#can-you-merge-my-mr)
+		- [Contacting AppSRE](#contacting-appsre)
+		- [How can I get access to X?](#how-can-i-get-access-to-x)
+		- [I can not access X](#i-can-not-access-x)
+		- [I need help with something AWS related](#i-need-help-with-something-aws-related)
+		- [I can not access ci-ext](#i-can-not-access-ci-ext)
+		- [Tagging options in app-interface](#tagging-options-in-app-interface)
+		- [Gating production promotions in app-interface](#gating-production-promotions-in-app-interface)
+		- [Get access to cluster logs via Log Forwarding](#get-access-to-cluster-logs-via-log-forwarding)
+		- [What is the Console or Prometheus URL for a service?](#what-is-the-console-or-prometheus-url-for-a-service)
+		- [Can you restart my pods?](#can-you-restart-my-pods)
+			- [OnBoarded Services](#onboarded-services)
+			- [Services not yet OnBoarded](#services-not-yet-onboarded)
+		- [Delete target from SaaS file](#delete-target-from-saas-file)
+		- [Jenkins is going to shutdown](#jenkins-is-going-to-shutdown)
+		- [How can I make my PR check job run concurrently](#how-can-i-make-my-pr-check-job-run-concurrently)
+		- [How can I see who has access to a service](#how-can-i-see-who-has-access-to-a-service)
+		- [Accessing DataHub](#accessing-datahub)
+		- [Jenkins Vault plugin upgrade](#jenkins-vault-plugin-upgrade)
+		- [I didn't receive my invite for the Github organization](#i-didnt-receive-my-invite-for-the-github-organization)
+		- [I need to add a package to a jenkins slave](#i-need-to-add-a-package-to-a-jenkins-slave)
 
 ## Useful links
 
@@ -258,3 +266,15 @@ Related Jira ticket: https://issues.redhat.com/browse/APPSRE-947
 ### I didn't receive my invite for the Github organization
 
 Check your mailbox! It should be there! If not, ask the IC to review [the AppSRE organization](https://github.com/orgs/app-sre/people) and see if your invite is pending or failed. They can cancel the pending invite and send a new one to you.
+
+### I need to add a package to a jenkins slave
+
+The App SRE team recommends transitioning to using containerized builds over trying to load specific packages onto a jenkins slave.  Containerized builds provide numerous advantageous to our users including:
+
+- Control over the build dependencies
+- Idempotency
+- Portability
+
+Information about multi-stage container builds can be found [here](https://docs.docker.com/develop/develop-images/multistage-build).  Here's an simple [example](https://github.com/app-sre/deployment-validation-operator/blob/master/build/Dockerfile) of a Dockerfile using multi-stage build.
+
+If using a containerized build is not possible, please submit an MR to the [infra](https://gitlab.cee.redhat.com/app-sre/infra) repo and ping the IC.
