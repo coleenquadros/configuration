@@ -19,18 +19,54 @@ networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.telemeter-prod-01.yml
 - $ref: /services/rhobs/observatorium/observatorium-metrics/namespaces/observatorium-metrics-production.yml
 - $ref: /services/rhobs/telemeter/namespaces/telemeter-production.yml
+# TODO(prekumar): Remove this after MST gets it's own Jaeger Collector.
+# To allow jaeger-agents in observatorium-mst-production namespace to
+# write spans into jaeger-collector in observatorium-production namespace.
+- $ref: /services/rhobs/observatorium-mst/namespaces/observatorium-mst-production.yml
 
 grafanaUrl: https://grafana.app-sre.devshift.net/dashboards/f/xIQ-GuaGk/observatorium
 
 managedRoles: true
 
 managedResourceTypes:
-- Role
-- RoleBinding
 - ServiceAccount
-# TODO(kakkoyun): Uncomment while migrating the namespaces.
-# - Route
-# - ServiceMonitor
-# - ClusterRole
 
-openshiftResources: []
+openshiftResources:
+# TODO(prekumar): Move secrets update namespaces. telemeter-production -> observatorium-production
+- provider: vault-secret
+  path: app-interface/app-sre/telemeter-production/observatorium-observatorium-api
+  version: 7
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: app-interface/app-sre/telemeter-production/observatorium-api-proxy
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre/telemeter-production/jaeger-proxy
+  version: 1
+- provider: vault-secret
+  path: app-interface/app-sre/telemeter-production/conprof-proxy
+  version: 1
+
+# Routes
+- provider: route
+  path: /app-sre/observatorium-production/observatorium-jaeger-production.route.yaml
+  vault_tls_secret_path: app-interface/app-sre/routes/_wildcard.api.openshift.com
+  vault_tls_secret_version: 5
+- provider: route
+  path: /app-sre/observatorium-production/observatorium-conprof.route.yaml
+  vault_tls_secret_path: app-interface/app-sre/routes/_wildcard.api.openshift.com
+  vault_tls_secret_version: 5
+- provider: route
+  path: /app-sre/observatorium-production/observatorium-api-production.route.yaml
+  vault_tls_secret_path: app-interface/app-sre/routes/_wildcard.api.openshift.com
+  vault_tls_secret_version: 5
+
+# observatorium ServiceAccount
+# Required for authn/authz by openshift-oauth-proxy containers
+- provider: resource
+  path: /app-sre/observatorium-production/observatorium.serviceaccount.yaml
+# NOTICE: Managed by /app-interface/data/services/rhobs/observatorium/namespaces/observatorium-cluster-scope-production.yml
+# Until https://issues.redhat.com/browse/APPSRE-2935 is fixed.
+# - provider: resource
+#   path: /app-sre/observatorium-production/observatorium.clusterrole.yml
