@@ -18,6 +18,7 @@ this repository.
   - [Local validation of datafile modifications / contract amendment](#local-validation-of-datafile-modifications--contract-amendment)
     - [JSON schema validation](#json-schema-validation)
     - [Running integrations locally with `--dry-run`](#running-integrations-locally-with---dry-run)
+  - [Visual App-interface](#visual-app-interface)
   - [Querying the App-interface](#querying-the-app-interface)
   - [Features](#features)
     - [Existing Features](#existing-features)
@@ -27,7 +28,7 @@ this repository.
     - [Planned integrations](#planned-integrations)
   - [Entities and relations](#entities-and-relations)
   - [Howto](#howto)
-    - [Add or modify a user (`/access/users-1.yml`)](#add-or-modify-a-user-accessusers-1yml)
+    - [Add or modify a user (`/access/user-1.yml`)](#add-or-modify-a-user-accessuser-1yml)
     - [Get notified of events involving a service, or its dependencies](#get-notified-of-events-involving-a-service-or-its-dependencies)
     - [Define an escalation policy for a service](#define-an-escalation-policy-for-a-service)
       - [Prerequisites: The team's slack channel and Pagerduty schedule are defined in app-interface](#prerequisites-the-teams-slack-channel-and-pagerduty-schedule-are-defined-in-app-interface)
@@ -1945,7 +1946,7 @@ output: <filesystem or stdout or encrypted>
 # Required if output is encrypted
 requestor: 
   $ref: <user-1.yml with public_gpg_key>
-schedule: <if defined the output resource will be a CronJob instead of a Job>
+schedule: < In UTC time - if defined the output resource will be a CronJob instead of a Job >
 queries:
   - <sql query 1>
   - <sql query 2>
