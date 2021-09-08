@@ -2,7 +2,6 @@
 $schema: /app-interface/prometheus-rule-test-1.yml
 
 rule_files:
-  - /insights-stage/prometheus/prom.prometheusrules.yaml
   - /insights-stage/prometheus/prom.prometheusapp-slo.yaml
 
 evaluation_interval: 1m
@@ -10,23 +9,9 @@ evaluation_interval: 1m
 tests:
     - interval: 1m
       input_series: 
-        - series: service:constant:sli:pcterror
-          values: "5"
-        - series: service:constant:sli:pctlatency
-          values: "10"
         - series: 'django_http_requests_latency_including_middlewares_seconds_bucket{service="rbac-service", le="+Inf"}'
           values: '10+10x2 30+20x5' # 10 20 30 30 50 70 90 110 130
       promql_expr_test:
-        - expr: service:constant:sli:pcterror
-          eval_time: 1m
-          exp_samples:
-              - labels: 'service:constant:sli:pcterror'
-                value: 5
-        - expr: service:constant:sli:pctlatency
-          eval_time: 1m
-          exp_samples:
-              - labels: 'service:constant:sli:pctlatency'
-                value: 10
         - expr: service:custom:reqcount:rbac
           eval_time: 1m
           exp_samples:
