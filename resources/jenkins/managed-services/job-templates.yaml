@@ -717,16 +717,16 @@
     - string:
           name: PODS
           default: '1'
-          description: 'Number of pods running in parallel for each workload scenario'
+          description: 'Number of pods running in parallel for each workload scenario (batch job parallelism)'
     - string:
           name: TEST_DURATION
           default: '30'
-          description: 'Test duration in minutes'
+          description: 'Test duration in minutes, cluster lifespan will be extended if (now + TEST_DURATION + 30mins) > clusters expiration_timestamp'
     - choice:
         name: CLIENT_TYPE
         description: 'Kafka client type'
         choices:
-            - both
+            - producer,consumer
             - producer
             - consumer
     - string:
@@ -742,9 +742,9 @@
           default: 'bl'
           description: 'List of workload scenarios to run separated by comma(,)'
     - string:
-          name: CONSUMER_GROUP_MEMBERS_PERCENTAGE
-          default: '20'
-          description: 'How many consumer groups to be used for client type consumer'
+          name: CONSUMER_GROUPS
+          default: '1'
+          description: 'How many consumer groups to be used by consumer clients'
     - string:
           name: TOPIC
           default: ''
@@ -757,16 +757,12 @@
         description: 'RHOSAK service account env to get a secret'
         choices:
             - stage
-    - bool:
-        name: CLUSTER_CLEANUP
-        default: 'true'
-        description: 'Include deletion of OSD cluster'
     branch: '${{BRANCH}}'
     sa_secret_env: '${{ENV}}'
     <<: *gl_checkout
     builders:
-    - shell: ./pipeline-configs/run_workloads.sh
-    artifacts_path: 'test-results/**'
+    - shell: ./pipeline/deploy.sh
+    artifacts_path: 'pipeline/results/logs/**,pipeline/results/delorean/cluster-details.json'
     publishers:
     - archive:
         artifacts: '{artifacts_path}'
