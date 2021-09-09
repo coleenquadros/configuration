@@ -76,6 +76,7 @@ this repository.
       - [Manage S3 buckets via App-Interface (`/openshift/namespace-1.yml`)](#manage-s3-buckets-via-app-interface-openshiftnamespace-1yml)
       - [Manage ElastiCache databases via App-Interface (`/openshift/namespace-1.yml`)](#manage-elasticache-databases-via-app-interface-openshiftnamespace-1yml)
       - [Manage IAM Service account users via App-Interface (`/openshift/namespace-1.yml`)](#manage-iam-service-account-users-via-app-interface-openshiftnamespace-1yml)
+      - [Manage IAM Roles via App-Interface (`/openshift/namespace-1.yml`)](#manage-iam-roles-via-app-interface-openshiftnamespace-1yml)
       - [Manage SQS queues via App-Interface (`/openshift/namespace-1.yml`)](#manage-sqs-queues-via-app-interface-openshiftnamespace-1yml)
       - [Manage DynamoDB tables via App-Interface (`/openshift/namespace-1.yml`)](#manage-dynamodb-tables-via-app-interface-openshiftnamespace-1yml)
       - [Manage ECR repositories via App-Interface (`/openshift/namespace-1.yml`)](#manage-ecr-repositories-via-app-interface-openshiftnamespace-1yml)
@@ -1435,6 +1436,27 @@ The Secret will contain the following fields:
   * Note: this key will be added after the AWS infrastructure access is granted successfully.
 
 In addition, any additional key-value pairs defined under `variables` will be added to the Secret.
+
+#### Manage IAM Roles via App-Interface (`/openshift/namespace-1.yml`)
+
+Roles to be assumed can be entirely self-serviced via App-Interface.
+
+In order to add or update a role, you need to add them to the `terraformResources` field.
+
+- `provider`: must be `aws-iam-role`
+- `account`: must be one of the AWS account names we manage.
+- `identifier`: name of resource to create (or update)
+- `inline_policy`: an AWS policy to create and attach to the role.
+- `output_resource_name`: name of Kubernetes Secret to be created.
+  - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
+  - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
+    - For example, for a resource with `identifier` "my-role" and `provider` "aws-iam-role", the created Secret will be called `my-role-aws-iam-role`.
+- `annotations`: additional annotations to add to the output resource
+
+Once the changes are merged, the IAM resources will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
+
+The Secret will contain the following fields:
+- `role_arn` - the role ARN to assume
 
 #### Manage SQS queues via App-Interface (`/openshift/namespace-1.yml`)
 
