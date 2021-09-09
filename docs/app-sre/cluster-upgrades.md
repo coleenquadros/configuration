@@ -51,3 +51,21 @@ Notes:
 - Regex expressions are supported.
 - These steps will also cause existing upgrades to be cancelled if time allows.
 - All AppSRE clusters are provisioned in the [OCM production instance](https://gitlab.cee.redhat.com/service/app-interface/-/blob/2860db033ff2cc88aadf6b655d8ced7ac66746d3/data/dependencies/ocm/production.yml#L18).
+
+
+## Upgrade strategy
+
+### Hive
+
+The first clusters to be upgraded belong to the integration and SSO test environments (hivei01ue1, ssotest01ue1).
+
+Once a version has soaked for 10 days, the stage clusters will be upgraded (hive-stage-01, hives02ue1).
+
+Once a version has soaked for 20 days, it will begin rolling out to the production clusters. Start with the least critical ones:
+- hivep04 will go first as it's a hot standby and holds no customer clusters.
+- hivep06 is going to replace hivep03 (2 AZs), and currently also has no customer clusters
+- hivep03 has very few customer clusters and is not being scheduled with any new ones until it's deprecation
+
+All other Hive production clusters (01, 02, 05) hold most customer clusters and are the only ones being scheduled with new customer clusters.
+
+We choose different soak days to give some interval between upgrades. Should anything go wrong - we will have some time to intervene, block versions, only handle one issue at a time, etc.
