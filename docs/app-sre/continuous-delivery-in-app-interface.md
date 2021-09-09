@@ -207,7 +207,7 @@ Each user with this role can approve MRs by adding a `/lgtm` comment in the MR i
     - `ref`
     - `parameters`
     - `disable`
-- all tests are passing succesfully 
+- all tests are passing successfully
 - approving user is an owner of the saas file in a merged version in app-interface (prevent privilege escalation). [Read more](/docs/app-sre/sop/app-interface-integrations-flow-and-failure-scenarios.md)
 
 If a `/lgtm` comment is added and all conditions are valid, an `approved` label will be automatically added to the MR, and it will be automatically rebased and merged within a few minutes.
