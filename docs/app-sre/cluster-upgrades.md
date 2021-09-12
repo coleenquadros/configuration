@@ -69,3 +69,9 @@ Once a version has soaked for 20 days, it will begin rolling out to the producti
 All other Hive production clusters (01, 02, 05) hold most customer clusters and are the only ones being scheduled with new customer clusters.
 
 We choose different soak days to give some interval between upgrades. Should anything go wrong - we will have some time to intervene, block versions, only handle one issue at a time, etc.
+
+### AppSRE
+
+The first clusters to be upgraded belong to the stage environments (app-sre-stage-01, appsres03ue1).
+
+Once a version has soaked for 7 days, the production clusters will be upgraded (app-sre-prod-01, appsrep05ue1).
