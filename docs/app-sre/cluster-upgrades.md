@@ -75,3 +75,9 @@ We choose different soak days to give some interval between upgrades. Should any
 The first clusters to be upgraded belong to the stage environments (app-sre-stage-01, appsres03ue1).
 
 Once a version has soaked for 7 days, the production clusters will be upgraded (app-sre-prod-01, appsrep05ue1).
+
+### CodeReady Dependency Analytics (CRDA)
+
+The first clusters to be upgraded belong to the stage environments (app-sre-stage-02).
+
+Once a version has soaked for 3 days, the production clusters will be upgraded (app-sre-prod-03).
