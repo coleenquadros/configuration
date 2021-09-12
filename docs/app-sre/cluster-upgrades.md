@@ -87,3 +87,11 @@ Once a version has soaked for 3 days, the production cluster will be upgraded (a
 The first cluster to be upgraded belongs to the stage environment (crcs02ue1). It is upgraded once a week.
 
 Once a version has soaked for 6 days, the production cluster will be upgraded (crcp01ue1).
+
+### OCM-Quay
+
+The first clusters to be upgraded are the read-only ocm-quay clusters.
+
+The first one is upgraded with every new version. The second after the version has soaked for a day, the third after 2 days.
+
+Once a version has soaked for 7 days, the read-write clsuter will be upgraded.
