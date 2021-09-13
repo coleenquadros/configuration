@@ -12,14 +12,14 @@ namespaces:
 slos:
 - name: latency
   SLIType: latency
-  SLISpecification: 90% of the requests' latency must be under 1 seconds
+  SLISpecification: 90% of the succesful requests' latency must be under 1 seconds
   SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/assisted-installer/slos/assisted-installer-latency.md
   SLOParameters:
     window: 28d
   expr: |
-    sum(http_request_duration_seconds_bucket{endpoint="assisted-svc", namespace="assisted-installer-production", le="1"})
+    sum(rate(http_request_duration_seconds_bucket{endpoint="assisted-svc", namespace="assisted-installer-production", le="1", code!~"5.."}[{{ window }}]))
     /
-    sum(http_request_duration_seconds_count{endpoint="assisted-svc", namespace="assisted-installer-production"})
+    sum(rate(http_request_duration_seconds_count{endpoint="assisted-svc", namespace="assisted-installer-production", code!~"5.."}[{{ window }}]))
   SLOTarget: 0.90
   SLOTargetUnit: percent_0_1
   prometheusRules: /observability/prometheusrules/assisted-installer-production.prometheusrules.yaml
@@ -32,9 +32,9 @@ slos:
   SLOParameters:
     window: 28d
   expr: |
-    sum(haproxy_backend_http_responses_total{route="assisted-service",exported_namespace="assisted-installer-production",code!~"5xx"})
+    sum(rate(haproxy_backend_http_responses_total{route="assisted-service",exported_namespace="assisted-installer-production",code!~"5xx"}[{{ window }}]))
     /
-    sum(haproxy_backend_http_responses_total{route="assisted-service",exported_namespace="assisted-installer-production"})
+    sum(rate(haproxy_backend_http_responses_total{route="assisted-service",exported_namespace="assisted-installer-production"}[{{ window }}]))
   SLOTarget: 0.85
   SLOTargetUnit: percent_0_1
   prometheusRules: /observability/prometheusrules/assisted-installer-production.prometheusrules.yaml
