@@ -605,6 +605,10 @@ In order to get access to Sentry, a user has to have:
 
 Namespaces declaration enforce [this JSON schema](/schemas/openshift/namespace-1.yml). Note that it contains a reference to the cluster in which the namespace exists.
 
+A namespace declaration can contain labels. These will be applied as kubernetes labels on the namespace resource. Note that
+* labels must conform to [Kubernetes Labels constraints](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#syntax-and-character-set).
+* labels set by other means (eg an operator) will not be overriden. If a conflict exists, an error will be thrown. 
+
 Notes:
 * If the resource already exists in the namespace, the PR check will fail. Please get in contact with App-SRE team to import resources to be under the control of App-Interface.
 * Manual changes to resources will be overridden by App-Interface in each run.
