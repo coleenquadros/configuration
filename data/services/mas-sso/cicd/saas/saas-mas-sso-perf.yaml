@@ -1,0 +1,50 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: mas-sso
+
+name: saas-mas-sso-perf
+description: 'MAS SSO Perf Test'
+
+app:
+  $ref: /services/mas-sso/app.yml
+
+pipelinesProvider:
+  $ref: /services/mas-sso/pipelines/tekton.mas-sso-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: mas-sso
+
+managedResourceTypes:
+- Job
+
+publishJobLogs: true
+
+authentication:
+  image:
+    path: managed-services/quay-org-accounts/rhoas/robots/rhoas-pull
+    field: all
+
+imagePatterns:
+- quay.io/rhoas/mas-sso-perf-test
+
+resourceTemplates:
+- name: saas-mas-sso-perf
+  url: https://gitlab.cee.redhat.com/service/saas-mas-sso
+  path: /deploy/openshift/mas-sso-perf-template.yaml
+  targets:
+  - namespace:
+      $ref: /services/mas-sso/namespaces/mas-sso-stage.yml
+    ref: master
+    parameters:
+      IMAGE: quay.io/rhoas/mas-sso-perf-test
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: mas-sso-build-template
+    promotion:
+      publish:
+      - mas-sso-stage-perf-tests-success-channel
