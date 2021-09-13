@@ -1,0 +1,13 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2021-09-13-host-last-boot-time
+namespace:
+  $ref: /services/insights/host-inventory/namespaces/prod-host-inventory-prod.yml
+identifier: host-inventory-prod
+output: stdout
+query: |
+  SELECT id, account, reporter, display_name, canonical_facts ->> 'insights_id', canonical_facts ->> 'subscription_manager_id', system_profile_facts ->> 'last_boot_time', system_profile_facts ->> 'captured_date', stale_timestamp, created_on, modified_on
+  FROM hosts
+  WHERE system_profile_facts ->> 'last_boot_time' IS NOT NULL
+  ORDER BY created_on desc;
