@@ -29,6 +29,7 @@
   - [Visualization with Grafana](#visualization-with-grafana)
     - [Configuring grafana](#configuring-grafana)
     - [Adding datasources](#adding-datasources)
+      - [Adding a Postgres DB as a data source](#adding-a-postgres-db-as-a-data-source)
     - [Adding dashboards](#adding-dashboards)
     - [Updating dashboards](#updating-dashboards)
   - [How-To](#how-to)
@@ -380,6 +381,11 @@ Currently added datasources:
 For those clusters that have a `-prometheus` and `-cluster-prometheus` datasources, app-sre managed services will keep its data on the `-prometheus` ones as the other is managed by OSD and used for cluster internal metrics.
 
 In case of doubt, the [grafana datasources file](/resources/observability/grafana/grafana-datasources.secret.yaml) is the source of truth and the place to get all the details on every datasource.
+
+#### Adding a Postgres DB as a data source
+
+1. Submit a MR to app-interface to add a read replica for your RDS instance. Example: https://gitlab.cee.redhat.com/service/app-interface/-/blob/6f6e26253356a63853c9b4424a81bb5919f851b8/data/services/assisted-installer/namespaces/assisted-installer-production.yml#L90-98
+1. Once the MR is merged and the read replica is provisioned, submit another MR to add the read replica as a data source to Grafana. Example: https://gitlab.cee.redhat.com/service/app-interface/-/blob/6f6e26253356a63853c9b4424a81bb5919f851b8/resources/observability/grafana/grafana-datasources.secret.yaml#L1182-1198
 
 ### Adding dashboards
 
