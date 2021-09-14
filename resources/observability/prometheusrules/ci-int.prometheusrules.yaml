@@ -76,6 +76,25 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net"
         message: "{% raw %} {{ $labels.jenkins_job }} Jenkins job latest build failure {% endraw %}"
         link_url: "{% raw %} https://{{ $labels.instance }}/job/{{ $labels.jenkins_job }} {% endraw %}"
+    # RHEL ci-int nodes subscription
+    - alert: RHEL7Subscription
+      expr: "default_jenkins_builds_last_build_result_ordinal{jenkins_job='jenkins-node-rhel7-check',job='jenkins_int'} > 0"
+      for: 130m
+      labels:
+        severity: high
+        service: ci-int
+      annotations:
+        summary: "{% raw %}RHEL7 subscription isn't valid (instance {{ $labels.instance }}){% endraw %}"
+        message: "{% raw %}RHEL7 subscription has problems, docker builds aren't possible{% endraw %}"
+    - alert: RHEL8Subscription
+      expr: "default_jenkins_builds_last_build_result_ordinal{jenkins_job='jenkins-node-rhel8-check',job='jenkins_int'} > 0"
+      for: 130m
+      labels:
+        severity: high
+        service: ci-int
+      annotations:
+        summary: "{% raw %}RHEL8 subscription isn't valid (instance {{ $labels.instance }}){% endraw %}"
+        message: "{% raw %}RHEL8 subscription has problems, docker builds aren't possible{% endraw %}"
 
     # ClusterImageSets jenkins job alerts
     - alert: JenkinsLastBuildFailed
