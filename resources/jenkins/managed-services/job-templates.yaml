@@ -164,9 +164,39 @@
     publishers:
       - <<: *slack_notify
     <<: *gl_timed
+    
+- job-template:   
+    id: 'managed-services-pull-upstream-tag'
+    name: 'managed-services-pull-upstream-tag'
+    description: "[managed-services] pull upstream tag for specified project (that must be specified in {gl_group}/{gl_project}/script/repo-config.yaml)"
+    wrappers:
+    - timestamps
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+          - *gitlab_token
+          - *app_sre_bot_push_token
+    parameters:
+    - string:
+        name: PROJECT_NAME
+        default: ''
+        description: 'project name, has to be the same as in config file'
+    - string:
+        name: UPSTREAM_TAG
+        default: ''
+        description: 'tag name, e.i. upstream release version'
+    - string:
+        name: PREVIOUS_RELEASE_BRANCH
+        default: ''
+        description: '(optional) name of the branch to import the ci-cd files from'
+    <<: *gl_checkout
+    builders:
+      - shell: "{ci_cmd}" 
 
-
-- job-template:
+- job-template:   
     id: 'managed-kafka-performance'
     name: 'managed-kafka-performance-{mk_perf_type}'
     wrappers:
