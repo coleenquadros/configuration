@@ -1,0 +1,53 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: codeready-analytics
+  component: fabric8-analytics-github-refresh-cronjob
+
+name: saas-crda-fabric8-analytics-github-refresh-cronjob
+description: SaaS tracking file for codeready-analytics fabric8-analytics-github-refresh-cronjob
+
+app:
+  $ref: /services/codeready-analytics/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-codeready-analytics-info
+
+managedResourceTypes:
+- CronJob
+
+imagePatterns:
+- quay.io/app-sre/fabric8-analytics-github-refresh-cronjob
+
+resourceTemplates:
+- name: fabric8-analytics-github-refresh-cronjob
+  url: https://github.com/fabric8-analytics/fabric8-analytics-github-refresh-cronjob
+  path: /openshift/template.yaml
+  parameters:
+    DOCKER_REGISTRY: quay.io
+    DOCKER_IMAGE: app-sre/fabric8-analytics-github-refresh-cronjob
+  targets:
+  - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-preview.yml
+    ref: master
+    upstream: fabric8-analytics-fabric8-analytics-github-refresh-cronjob build master
+    parameters:
+      AWS_S3_BUCKET_NAME: "stage-developer-analytics-audit-report"
+      CRON_SCHEDULE: "0 7 * * *"
+      JOB_LOGGING_LEVEL: "DEBUG"
+      SUSPEND: "false"
+  # - namespace:
+  #     $ref: /services/codeready-analytics/namespaces/bayesian-production.yml
+  #   ref: 4c4cb739c50235a05fd705022e56ca60f8d8f188
+  #   parameters:
+  #     AWS_S3_BUCKET_NAME: "prod-developer-analytics-audit-report"
+  #     CRON_SCHEDULE: "0 0 6 */1 *"
+  #     JOB_LOGGING_LEVEL: "INFO"
+  #     SUSPEND: "false"
+  
