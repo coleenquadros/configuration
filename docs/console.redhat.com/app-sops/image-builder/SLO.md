@@ -2,35 +2,26 @@
 
 ## SLO
 
-1. Uptime: 90%
-2. Processing of compose requests: 85% should succeed over 24h
-3. Responsiveness:
-   * Under 8 seconds for compose requests
-   * Under 200ms for all other requests
+1. Processing of compose requests: 85% should succeed
+2. Responsiveness: 90% of requests should be fast
 
 ## SLIs
-1. Percentage of time that the pod is in the `up` state
-```
-avg(avg_over_time(up{service="image-builder"}[24h])) >= 0.90
-```
-2. Percentage of successful (non-5xx) compose requests
+1. Percentage of successful (non-5xx) compose requests
 ```
 1 - (sum by (job) (increase(image_builder_compose_errors[24h])) / sum by (job)
 (increase(image_builder_compose_requests_total[24h]))) >= 0.85
 ```
-3. Average time to handle request:
+2. Average time to handle request:
    * Compose requests:
 ```
-(sum by (job)
-(rate(image_builder_http_duration_seconds_sum{path=~".*compose"}[1h])) / sum by
-(job) (rate(image_builder_http_duration_seconds_count{path=~".*compose"}[1h])))
-<= 8
+histogram_quantile(0.90,
+sum(rate(image_builder_http_duration_seconds_bucket{path=~".*compose"}[1h])) by (le))
+<= 12
 ```
    * Non-compose requests:
 ```
-(sum by (job)
-(rate(image_builder_http_duration_seconds_sum{path!~".*compose"}[1h])) / sum by
-(job) (rate(image_builder_http_duration_seconds_count{path!~".*compose"}[1h])))
+histogram_quantile(0.90,
+sum(rate(image_builder_http_duration_seconds_bucket{path!~".*compose"}[1h])) by (le))
 <= 0.2
 ```
 
