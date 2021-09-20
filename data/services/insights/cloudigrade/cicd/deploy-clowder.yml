@@ -34,23 +34,56 @@ parameters:
   CLOWDER_ENABLED: "true"
 
 resourceTemplates:
+# Cloudigrade
 - name: cloudigrade
   path: /deployment/clowdapp.yaml
   url: https://github.com/cloudigrade/cloudigrade
   targets:
+  # Ephemeral
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
     ref: internal  # populated by bonfire
     parameters:
       REPLICAS: 1
+  # Stage
+  - namespace:
+      $ref: /services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: cloudigrade-cloudigrade-gh-build-master
+    promotion:
+      publish:
+      - cloudigrade-stage-deploy-success-channel
+    parameters:
+      API_REPLICA_COUNT_MAX: '8'
+      API_SENTRY_ENVIRONMENT: stage
+      CELERY_SENTRY_ENVIRONMENT: stage
+      CLOUDIGRADE_CW_STREAM_NAME: cloudigrade-stage
+      CLOUDIGRADE_ENVIRONMENT: stage
+      HOUNDIGRADE_SENTRY_ENVIRONMENT: stage
+      LISTENER_GROUP_ID: cloudmeter_stage
+      LISTENER_SENTRY_ENVIRONMENT: stage
+      POSTIGRADE_HOST: postigrade.cloudigrade-stage.svc.cluster.local
+      SCHEDULE_CONCURRENT_USAGE_CALCULATION_DELAY: '300'
+      SCHEDULE_VERIFY_VERIFY_TASKS_INTERVAL: '300'
+      VERBOSE_SOURCES_NOTIFICATION_LOGGING: 'true'
+      WATCHTOWER_MAX_BATCH_COUNT: 10
+# Postigrade
 - name: postigrade
   path: /deployment/clowdapp.yaml
   url: https://github.com/cloudigrade/postigrade
   targets:
+  # Ephemeral
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
     ref: internal  # populated by bonfire
     parameters:
       REPLICAS: 1
+  # Stage
+  - namespace:
+      $ref: /services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml
+    ref: master
