@@ -24,7 +24,7 @@ Access required
 ---------------
 
 -  Console access to the cluster+namespace pods are running in.
--  Repo access to the insights-advisor-api (https://github.com/RedHatInsights/insights-advisor-api)
+-  Repo access to the advisor-backend (https://gitlab.cee.redhat.com/insights-platform/advisor-backend)
 
 Steps
 -----
