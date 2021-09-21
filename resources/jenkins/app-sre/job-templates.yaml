@@ -254,3 +254,25 @@
         secrets:
         - *sd_sos
     <<: *gl_build_master
+
+- job-template:
+    id: 'gl-timed-sd-sos'
+    name: 'sd-sos-cron'
+    node: '{node}'
+    environment: production
+    branch: master
+    cron_expression: '1 0 * * FRI'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *sd_sos
+    builders:
+        - shell: |
+              python3 -m venv venv
+              source venv/bin/activate
+              pip3 install -r requirements.txt
+              python3 weekly_data.py
+    <<: *gl_timed
