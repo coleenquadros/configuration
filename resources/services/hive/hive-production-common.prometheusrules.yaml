@@ -11,6 +11,7 @@ spec:
   groups:
   - name: hive-production-{{{shard_name}}}
     rules:
+    # Hive team + AppSRE care about these:
     - alert: HiveControllersDown - production - {{{shard_name}}}
       annotations:
         message: "No targets found for hive-controllers in namespace {{ $labels.namespace }}. hive-controllers is down."
@@ -119,18 +120,6 @@ spec:
         service: hive
         severity: medium
         team: appsre
-    - alert: ClusterProvisioningDelaySREP - production - {{{shard_name}}}
-      annotations:
-        message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.exported_namespace }} provisioning taking over 2 hours. Condition/Reason: {{ $labels.condition }} / {{ $labels.reason }}. SOP: https://github.com/openshift/hive-sops/blob/master/sop/ClusterProvisioningDelay.md"
-        runbook: "https://github.com/openshift/hive-sops/blob/master/sop/ClusterProvisioningDelay.md"
-        dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
-      expr: |
-        (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers",cluster_type="managed"}/3600) > 2
-      for: 5m
-      labels:
-        service: hive
-        severity: medium
-        team: srep
     - alert: ClusterProvisioningDelayHive - production - {{{shard_name}}}
       annotations:
         message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.exported_namespace }} provisioning taking over 2 hours. Condition/Reason: {{ $labels.condition }} / {{ $labels.reason }}."
@@ -146,6 +135,21 @@ spec:
         service: hive
         severity: medium
         team: hive
+    # end hive + AppSRE section
+
+    # SREP cares about the below alerts
+    - alert: ClusterProvisioningDelaySREP - production - {{{shard_name}}}
+      annotations:
+        message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.exported_namespace }} provisioning taking over 2 hours. Condition/Reason: {{ $labels.condition }} / {{ $labels.reason }}. SOP: https://github.com/openshift/hive-sops/blob/master/sop/ClusterProvisioningDelay.md"
+        runbook: "https://github.com/openshift/hive-sops/blob/master/sop/ClusterProvisioningDelay.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
+      expr: |
+        (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers",cluster_type="managed"}/3600) > 2
+      for: 5m
+      labels:
+        service: hive
+        severity: medium
+        team: srep
     - alert: ClusterProvisioningFailure - production - {{{shard_name}}}
       annotations:
         message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.exported_namespace }} provisioning failed after 3 times retries. Condition/Reason: {{ $labels.condition }} / {{ $labels.reason }}. SOP: https://github.com/openshift/hive-sops/blob/master/sop/ClusterProvisioningFailure.md"
