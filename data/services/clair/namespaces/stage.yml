@@ -9,9 +9,39 @@ name: clair-stage
 description: Namespace to house clair staging resources
 
 cluster:
-  $ref: /openshift/TODO/cluster.yml
+  $ref: /openshift/quays02ue1/cluster.yml
 
 app:
   $ref: /services/clair/app.yml
 environment:
   $ref: /products/quay/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.quays02ue1.yml
+- $ref: /services/quayio/namespaces/quays02ue1.yml
+
+managedRoles: true
+
+managedTerraformResources: true
+
+  
+openshiftResources:
+  - provider: vault-secret
+    path: app-interface/quayio-stage/clair #TODO (crozzy): This needs to be moved to the clair vault
+    version: 7
+    labels:
+      version: v7
+
+terraformResources:
+  - provider: rds
+    account: quayio-stage
+    identifier: clair-indexer-rds
+    defaults: /terraform/resources/quayio-stage/clair-indexer-rds-1.yml
+  - provider: rds
+    account: quayio-stage
+    identifier: clair-matcher-rds
+    defaults: /terraform/resources/quayio-stage/clair-matcher-rds-1.yml
+  - provider: rds
+    account: quayio-stage
+    identifier: clair-notifier-rds
+    defaults: /terraform/resources/quayio-stage/clair-notifier-rds-1.yml
