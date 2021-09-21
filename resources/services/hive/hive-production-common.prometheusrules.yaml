@@ -140,8 +140,8 @@ spec:
     # SREP cares about the below alerts
     - alert: ClusterProvisioningDelay - production
       annotations:
-        message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.exported_namespace }} provisioning taking over 2 hours. Condition/Reason: {{ $labels.condition }} / {{ $labels.reason }}. SOP: https://github.com/openshift/hive-sops/blob/master/sop/ClusterProvisioningDelay.md"
-        runbook: "https://github.com/openshift/hive-sops/blob/master/sop/ClusterProvisioningDelay.md"
+        message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.exported_namespace }} provisioning taking over 2 hours. Condition/Reason: {{ $labels.condition }} / {{ $labels.reason }}. SOP: https://github.com/openshift/ops-sop/blob/master/v4/alerts/ClusterProvisioningFailure.md"
+        runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/ClusterProvisioningFailure.md"
         dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
       expr: |
         (max without (instance,pod,cluster_type) (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers",reason!~"AWSAPIRateLimitExceeded|AWSVPCLimitExceeded|S3BucketsLimitExceeded|InvalidCredentials|EIPAddressLimitExceeded|NoWorkerNodes|AWSNATGatewayLimitExceeded|InvalidInstallConfigSubnet|PendingVerification|GCPInstanceTypeNotFound|GCPPreconditionFailed|GCPQuotaSSDTotalGBExceeded|GCPComputeQuotaExceeded|GCPServiceAccountQuotaExceeded|InvalidAWSTags"} ) /3600) > 2
