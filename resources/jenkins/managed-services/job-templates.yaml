@@ -64,7 +64,7 @@
           - *ci_aws_keys
           - *ci_observatorium
           - *ci_cd_quay
-          - *mk_e2e_test_suite_staging
+          - *managed_services_reportportal
     <<: *gl_build_master
     parameters:
     - bool:
@@ -130,7 +130,7 @@
           - *ci_aws_keys
           - *ci_observatorium
           - *ci_cd_quay
-          - *mk_e2e_test_suite_staging
+          - *managed_services_reportportal
     <<: *gl_timed
     publishers:
     - archive:
@@ -578,8 +578,7 @@
 - job-template:
     profile: stage
     id: managed-services-e2e-test-suite
-    name: "managed-services-e2e-test-suite-{profile}-{secret_path}"
-    e2e_test_suite_secret_path: "managed-services-ci/e2e-test-suite/{secret_path}"
+    name: "managed-services-e2e-test-suite-{profile}-{secret}"
     wrappers:
       - timeout_wrapper:
           timeout: "{timeout}"
@@ -587,7 +586,8 @@
       - vault-secrets:
           <<: *vault_defaults
           secrets:
-            - *e2e_test_suite
+            - *managed_services_e2e_test_suite
+            - *managed_services_reportportal
     ci_cmd: "PROFILE={profile} ./pipeline.sh"
     <<: *gl_timed
     publishers:
