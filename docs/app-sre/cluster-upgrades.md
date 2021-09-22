@@ -33,6 +33,13 @@ For each cluster with an `upgradePolicy`, we check that the following conditions
 
 The versions to upgrade to are iterated over in reverse order, so it is assumed that the latest version that meets the conditions is chosen.
 
+The accounted soak days:
+- are accumulated from all clusters running that workload on that version
+- also account cluster/workload which have had that version running in the past
+The more clusters have that version, the faster the number of soaking days is increasing.
+
+Note that clusters also follow different upgrade channels. Clusters following different channels don't get the same version available at the same time.
+
 ## Version history
 
 Information on how long a version has been running in our clusters can be found in the `version-history` app-interface-output page: https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/version-history.md
@@ -88,6 +95,15 @@ The first cluster to be upgraded belongs to the stage environment (crcs02ue1). I
 
 Once a version has soaked for 6 days, the production cluster will be upgraded (crcp01ue1).
 
+### OCM
+
+OCM runs on 3 clusters with 0 soakdays, getting upgrades from the candidate channel:
+- app-sre-stage-01
+- appsres04ue2
+- ssotest01ue1
+
+Then the production cluster app-sre-prod-04 will be upgraded from the stable channel after 18 soakdays. Since soakdays are cumulated with each cluster running the workload, the ocm soakdays number will grow fast: it should get upgraded after 18/3=6 days, provided the version is available in the stable channel. 
+
 ### OCM-Quay
 
 The first clusters to be upgraded are the read-only ocm-quay clusters.
@@ -95,3 +111,17 @@ The first clusters to be upgraded are the read-only ocm-quay clusters.
 The first one is upgraded with every new version. The second after the version has soaked for a day, the third after 2 days.
 
 Once a version has soaked for 7 days, the read-write clsuter will be upgraded.
+
+### Quay
+
+The first cluster to be upgraded is the stage environment cluster quays02ue1, on the candidate channel. It is upgraded with every new version.
+
+Then the 2 production clusters are upgraded after
+- 6 days for quayp04ue2 (stable channel).
+- 11 days for quayp05ue1 (stable channel). This should allow some delay between the two clusters, even if the first one is being done late, on a Monday for example.
+
+### Telemeter
+
+The first cluster with telemeter workload is app-sre-stage-01 which also host other workloads (See [](#AppSRE)). This cluster will be upgraded on every new version in the candidate channel.
+
+Then the telemeter-prod-01 cluster will be upgraded from the fast channel if the version remains up for 6 days.
