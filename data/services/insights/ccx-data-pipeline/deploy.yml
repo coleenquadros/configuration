@@ -69,6 +69,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
+    delete: true
     ref: 6459b5b54754d94de57c6bfebe6014aa48b20725
     parameters:
       IMAGE_TAG: 354380e
@@ -92,6 +93,21 @@ resourceTemplates:
     ref: internal
     parameters:
       MIN_REPLICAS: "1"
+      DB_WRITER_REPLICAS: "1"
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+
+- name: ccx-insights-results
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/insights-results-aggregator
+  targets:
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
+    delete: false
+    ref: 6459b5b54754d94de57c6bfebe6014aa48b20725
+    parameters:
+      IMAGE_TAG: 354380e
+      MIN_REPLICAS: "2"
+      MAX_REPLICAS: "6"
       DB_WRITER_REPLICAS: "1"
       HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
 
