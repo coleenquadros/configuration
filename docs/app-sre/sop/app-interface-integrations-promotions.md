@@ -12,12 +12,12 @@ App-interface integrations are being executed in multiple locations in multiple 
    a single environment, or for a better understanding of what `qr-promote` is 
    doing, see [Updating specific environments](#updating-specific-environments).
 
-2. Team members should push their own changes to production. In some 
-   cases, there might be changes queued up from multiple team members. **If 
-   your promotion will include changes from other team members, it is a 
-   courtesy to notify these team members.** Acknowledgements from team members 
-   will not block the promotion because merging a change indicates that it is 
-   production-ready.
+2. Team members should deploy their own changes to production shortly after 
+   merging. In some cases, there might be changes queued up from multiple team 
+   members. **If your promotion will include changes from other team 
+   members, it is a courtesy to notify those team members.** Acknowledgements
+   from team members will not block the promotion because merging a change 
+   indicates that it is production-ready.
 
 3. Add a **lgtm** label to the MR via the GitLab website once all engineers 
    have signed off on their changes going to production. The change will 
