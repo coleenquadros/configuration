@@ -17,7 +17,7 @@ pipelinesProvider:
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
-  channel: team-clouddot-info
+  channel: cloudigrade-cicd-events
 
 managedResourceTypes:
 - ClowdApp
@@ -74,6 +74,26 @@ resourceTemplates:
       SOURCES_PSK_SECRET_KEY: sources-psk
       VERBOSE_SOURCES_NOTIFICATION_LOGGING: 'true'
       WATCHTOWER_MAX_BATCH_COUNT: 10
+  # Production
+  - namespace:
+      $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
+    ref: 3ee5f30bfef50a721d2cbcb094a693b7e7108fac
+    parameters:  # all other parameters have default values
+      API_REPLICA_COUNT_MAX: '16'
+      API_SENTRY_ENVIRONMENT: prod
+      API_TARGET_AVERAGE_CPU_UTILIZATION: '35'
+      CELERY_SENTRY_ENVIRONMENT: prod
+      CELERY_WORKER_REPLICA_COUNT: '8'
+      CELERY_WORKER_REPLICA_COUNT_MAX: '24'
+      CLOUDIGRADE_CW_STREAM_NAME: cloudigrade-prod
+      CLOUDIGRADE_ENVIRONMENT: prod
+      HOUNDIGRADE_SENTRY_ENVIRONMENT: prod
+      LISTENER_GROUP_ID: cloudmeter_prod
+      LISTENER_SENTRY_ENVIRONMENT: prod
+      POSTIGRADE_HOST: postigrade.cloudigrade-prod.svc.cluster.local
+      SOURCES_ENABLE_DATA_MANAGEMENT_FROM_KAFKA: "true"
+      SOURCES_PSK_SECRET_NAME: sources-psk
+      WATCHTOWER_MAX_BATCH_COUNT: 10
 # Postigrade
 - name: postigrade
   path: /deployment/clowdapp.yaml
@@ -96,4 +116,12 @@ resourceTemplates:
       name: cloudigrade-postigrade-gh-build-master
     promotion:
       publish:
+      - postigrade-stage-deploy-success-channel
+  # Production
+  - namespace:
+      $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
+    ref: 9976dc7f1d6c9e95aadde14c30cca9292972ee07
+    promotion:
+      auto: false
+      subscribe:
       - postigrade-stage-deploy-success-channel
