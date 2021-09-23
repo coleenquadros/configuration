@@ -21,4 +21,4 @@ Steps
 Escalations
 -----------
 
--  Ping the engineering team who own the app (#osbuild on CoreOS Slack).
+See https://visual-app-interface.devshift.net/services#/services/insights/image-builder/app.yml
