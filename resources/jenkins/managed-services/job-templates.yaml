@@ -197,6 +197,36 @@
       - shell: "{ci_cmd}" 
 
 - job-template:   
+    id: 'managed-services-prepare-cpaas-pipelines'
+    name: 'managed-services-prepare-cpaas-pipelines'
+    description: "[managed-services] prepare CPaaS pipelines for specified project (that must be specified in {gl_group}/{gl_project}/script/repo-config.yaml)"
+    wrappers:
+    - timestamps
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+          - *app_sre_bot_push_token
+    parameters:
+    - string:
+        name: PROJECT_NAME
+        default: ''
+        description: 'project name, has to be the same as in config file'
+    - string:
+        name: RHOSAK_VERSION
+        default: ''
+        description: 'rhosak bundle version'
+    - string:
+        name: RELEASE_VERSION
+        default: ''
+        description: 'version of the project'
+    <<: *gl_checkout
+    builders:
+      - shell: "{ci_cmd}" 
+
+- job-template:   
     id: 'managed-kafka-performance'
     name: 'managed-kafka-performance-{mk_perf_type}'
     wrappers:
