@@ -9,6 +9,7 @@ usage() {
     usage: $0 [ OPTION ]
     Options - The following argument is required 
     -n         Namespace - Operator namespace where OLM components are installed
+    -n         Subscription - The subscription name of the operator you want to redeploy
 EOF
 }
 
@@ -22,10 +23,13 @@ if ( ! getopts ":n:dh" opt); then
     exit 1 
 fi
 
-while getopts ":n:dh" opt; do
+while getopts ":n:s:dh" opt; do
     case $opt in
         n)
             NAMESPACE="$OPTARG"
+            ;;
+        s)
+            SUBSCRIPTION="$OPTARG"
             ;;
         d)
             DELETE=true
@@ -48,16 +52,16 @@ while getopts ":n:dh" opt; do
     esac
 done
 
-if [ -z "$NAMESPACE" ]; then
+if [ -z "$NAMESPACE" ] || [ -z "$SUBSCRIPTION" ]; then
     usage
     exit 1
 fi
 
 "$DELETE" || echo "Not going to delete resources"
 
-SUBSCRIPTION=$(oc get sub -n ${NAMESPACE} -o jsonpath={.items[].metadata.name} | grep hive)
-CATALOG_SOURCE=$(oc get catalogsource -n ${NAMESPACE} -o jsonpath={.items[].metadata.name} | grep hive)
-OPERATOR_GROUP=$(oc get og -n ${NAMESPACE} -o jsonpath={.items[].metadata.name} | grep hive)
+SUBSCRIPTION=$(oc get sub -n "${NAMESPACE}" -o jsonpath='{.items[].metadata.name}' | grep "${SUBSCRIPTION}")
+CATALOG_SOURCE=$(oc get catalogsource -n "${NAMESPACE}" -o jsonpath='{.items[].metadata.name}' | grep "${SUBSCRIPTION}")
+OPERATOR_GROUP=$(oc get og -n "${NAMESPACE}" -o jsonpath='{.items[].metadata.name}' | grep "${SUBSCRIPTION}")
 
 if $DELETE; then
   echo "Deteting subscription: ${SUBSCRIPTION}"
@@ -65,7 +69,7 @@ if $DELETE; then
   echo "Deteting subscription: ${CATALOG_SOURCE}"
   oc delete catalogsource "${CATALOG_SOURCE}" -n "${NAMESPACE}" 
   echo "Deteting subscription: ${SUBSCRIPTION}"
-  oc delete og ${OPERATOR_GROUP} -n "${NAMESPACE}" 
+  oc delete og "${OPERATOR_GROUP}" -n "${NAMESPACE}" 
 else
   echo "Will detete subscription: ${SUBSCRIPTION}"
   echo "Will detete catalogSource: ${CATALOG_SOURCE}"
@@ -73,11 +77,11 @@ else
 fi
 
 $DELETE || echo "Will detete CSVs:"
-for csv in $(oc get csv -n "${NAMESPACE}" -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | grep hive)
+for csv in $(oc get csv -n "${NAMESPACE}" -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | grep "${SUBSCRIPTION}")
 do
   if $DELETE; then
     echo "Deteting CSV: ${csv}"
-    oc delete csv $csv -n "${NAMESPACE}"
+    oc delete csv "${csv}" -n "${NAMESPACE}"
   else
     echo -e "\t${csv}"
   fi
