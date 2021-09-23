@@ -27,4 +27,4 @@ sum(rate(image_builder_http_duration_seconds_bucket{path!~".*compose"}[1h])) by 
 
 ## Dashboards
 
-[Image Builder Grafana dashboard]()
+[Image Builder Grafana dashboard](https://gitlab.cee.redhat.com/tgunders/app-interface/-/merge_requests/new?merge_request%5Bsource_branch%5D=image-builder-sop)
