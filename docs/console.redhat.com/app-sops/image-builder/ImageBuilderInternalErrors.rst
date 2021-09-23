@@ -1,13 +1,8 @@
 ImageBuilderInternalErrors
-=============
+==========================
 
 Severity: Info
 --------------
-
-Incident Response Plan
-----------------------
-
-`Incident Response Doc`_ for console.redhat.com
 
 Impact
 ------
@@ -23,9 +18,9 @@ out too much.
 Access required
 ---------------
 
--  Access to the `(Production|Stage) Openshift cluster`_ to view the image-builder-(prod|stage) namespace.
--  Access to the `Kibana instance`_ in order to review logs.
--  Access to the `(Production|Stage) Grafana instance`_ to see the current failure rate on the dashboard.
+-  Access to the (Production|Stage) Openshift cluster to view the image-builder-(prod|stage) namespace.
+-  Access to the Kibana instance in order to review logs.
+-  Access to the (Production|Stage) Grafana instance to see the current failure rate on the dashboard.
 
 Steps
 -----

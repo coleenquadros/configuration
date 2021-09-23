@@ -1,13 +1,8 @@
 ImageBuilderNoPodsUp
-=============
+====================
 
 Severity: Info
 --------------
-
-Incident Response Plan
-----------------------
-
-`Incident Response Doc`_ for console.redhat.com
 
 Impact
 ------
@@ -22,8 +17,8 @@ This alert fires when no pods are up.
 Access required
 ---------------
 
--  Access to the `(Production|Stage) Openshift cluster`_ to view the image-builder-(prod|stage) namespace.
--  Access to the `Kibana instance`_ in order to review logs.
+-  Access to the (Production|Stage) Openshift cluster to view the image-builder-(prod|stage) namespace.
+-  Access to the Kibana instance in order to review logs.
 
 Steps
 -----

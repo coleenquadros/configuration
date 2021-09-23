@@ -1,11 +1,6 @@
 Disaster Recovery
 =================
 
-Incident Response Plan
-----------------------
-
-`Incident Response Doc`_ for console.redhat.com
-
 Impact
 ------
 
