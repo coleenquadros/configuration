@@ -17,8 +17,7 @@ App-interface integrations are being executed in multiple locations in multiple 
    members, it is a courtesy to notify those team members.** Acknowledgements
    from team members will not block the promotion because merging a change 
    indicates that it is production-ready.
-3. Add a **lgtm** label to the MR via the GitLab website once all engineers 
-   have signed off on their changes going to production. The change will 
+3. Add a **lgtm** label to the MR via the GitLab website. The change will 
    be merged as per the standard 
    [continuous delivery process](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-delivery-in-app-interface.md).
 
