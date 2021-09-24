@@ -424,31 +424,33 @@
     concurrent: true
     parameters:
     - string:
+        name: BRANCH
+        default: '{default_branch}'
+        description: 'The branch of mk-performance-tests repo you want to run the pipeline against. Defaults to master'
+    - string:
         name: TESTCASE
         default: 'io.kafka.performance.KafkaInstanceScalingSmallTestDecoupled#testClusterMaxKafkaValueProdBinPacking'
         description: 'maven parameter for executing specific tests'
     - string:
         name: KAFKA_OSD_CLUSTER_CONFIG
-        default: 'OCM_CLUSTER_NAME: mk-perf-kafka,
-         COMPUTE_NODES_COUNT: 2,
-         COMPUTE_MACHINE_TYPE: m5.4xlarge,
-         OCM_CLUSTER_REGION: us-east-1,
-         MULTI_AZ: true'
+        default: 'COMPUTE_NODES_COUNT=6,
+         COMPUTE_MACHINE_TYPE=m5.4xlarge,
+         OCM_CLUSTER_REGION=us-east-1,
+         MULTI_AZ=true'
         description: 'The variables needed to provision an OSD where kafka will be installed'
     - string:
         name: OMB_OSD_CLUSTER_CONFIG
-        default: 'OCM_CLUSTER_NAME: mk-perf-omb,
-         COMPUTE_NODES_COUNT: 2,
-         COMPUTE_MACHINE_TYPE: m5.4xlarge,
-         OCM_CLUSTER_REGION: us-east-1,
-         MULTI_AZ: false'
+        default: 'COMPUTE_NODES_COUNT=2,
+         COMPUTE_MACHINE_TYPE=m5.4xlarge,
+         OCM_CLUSTER_REGION=us-east-1,
+         MULTI_AZ=false'
         description: 'The variables needed to provision an OSD where OMB will be installed'
     branch: '${{BRANCH}}'
     <<: *gl_checkout
     builders:
       - shell: |
           ./scripts/pipeline_kas_perf_tests.sh
-    artifacts_path: 'fault-results/**'
+    artifacts_path: 'target/logs/**, outcharts/**'
     publishers:
     - archive:
         artifacts: '{artifacts_path}'
