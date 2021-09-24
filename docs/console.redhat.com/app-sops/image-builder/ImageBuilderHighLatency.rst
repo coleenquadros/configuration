@@ -1,5 +1,5 @@
-ImageBuilderNoPodsUp
-====================
+ImageBuilderHighLatency
+=======================
 
 Severity: Info
 --------------
@@ -12,18 +12,21 @@ Impact
 Summary
 -------
 
-This alert fires when no pods are up.
+This alert fires when the latency of our API calls are too high. In the case of the compose request, we
+allow 12s, but in all other cases we expect less than 200ms.
 
 Access required
 ---------------
 
 -  Access to the (Production|Stage) Openshift cluster to view the image-builder-(prod|stage) namespace.
 -  Access to the Kibana instance in order to review logs.
+-  Access to the (Production|Stage) Grafana instance to see the current failure rate on the dashboard.
 
 Steps
 -----
 
--  Check logs / events for pods in the image-builder-(prod|stage) namespace
+-  Check the dashboard for a quick status.
+-  Check logs / events for pods in the image-builder-(prod|stage) namespace.
 -  Check where the errors are occuring, either in Image Builder or in the Composer
    service it depends on.
 
