@@ -31,6 +31,8 @@ $ yum install centos-release-openstack-rocky
 $ yum install python2-openstackclient
 ```
 
+Or, in recent Fedora with `dnf -y install python3-openstackclient`.
+
 This tool requires that you `export OS_CLOUD=openstack` first. Then you can use like this:
 
 ```shell
