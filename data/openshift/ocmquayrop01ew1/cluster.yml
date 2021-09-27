@@ -1,0 +1,90 @@
+---
+$schema: /openshift/cluster-1.yml
+
+labels:
+  service: ocm-quay
+
+name: ocmquayrop01ew1
+description: Read-Only cluster for ocm quay
+consoleUrl: https://console-openshift-console.apps.ocmquayrop01ew1.o9if.p1.openshiftapps.com
+kibanaUrl: ''
+prometheusUrl: ''
+alertmanagerUrl: ''
+serverUrl: ''
+elbFQDN: ''
+
+# observabilityNamespace:
+#   $ref: /services/observability/namespaces/openshift-customer-monitoring.ocmquayrop01ew1.yml
+
+auth:
+  service: github-org-team
+  org: app-sre
+  team: ocmquayrop01ew1-cluster
+
+# automationToken:
+#   path: app-sre/creds/kube-configs/ocmquayrop01ew1
+#   field: token
+
+#managedClusterRoles: true
+
+ocm:
+  $ref: /dependencies/ocm/production.yml
+
+managedGroups:
+- dedicated-admins
+# - dedicated-readers
+
+spec:
+  id: ''
+  external_id: ''
+  provider: aws
+  region: eu-west-1
+  channel: stable
+  version: 4.8.10
+  initial_version: 4.8.10
+  multi_az: false
+  nodes: 4
+  instance_type: m5.xlarge
+  storage: 1100
+  load_balancers: 4
+  private: false
+  provision_shard_id: 07285129-332e-4bb8-a85b-a06f1a365554
+
+upgradePolicy:
+  workloads:
+  - ocm-quay
+  schedule: 0 10 * * 1-5
+  conditions:
+    soakDays: 0
+
+network:
+  vpc: 10.13.0.0/16
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
+
+internal: false
+
+# peering:
+#   connections:
+#   - provider: account-vpc
+#     name: ocmquayrop01ew1_ocm-quay-ue1
+#     vpc:
+#       $ref: /aws/ocm-quay/vpcs/us-east-1.yml
+#     manageRoutes: true
+#   - provider: account-vpc
+#     name: ocmquayrop01ew1_ocm-quay-ew1
+#     vpc:
+#       $ref: /aws/ocm-quay/vpcs/eu-west-1.yml
+#     manageRoutes: true
+
+awsInfrastructureAccess:
+- awsGroup:
+    $ref: /aws/ocm-quay/groups/App-SRE-admin.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/ocm-quay/groups/App-SRE-admin.yml
+  accessLevel: network-mgmt
+
+addons:
+- $ref: /dependencies/ocm/addons/cluster-logging-operator.yml
+
