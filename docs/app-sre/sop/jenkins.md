@@ -55,19 +55,26 @@ Things to check:
 
 ### Impact:
 
-TODO
+Degraded or even unavailable CI service. PR and MR checks fail,
+tenants can't build new images of their applications.
 
 ### Summary:
 
-TODO
+A Jenkins executor is not responding to SSH and thus can't receive
+jobs. The integration service is degraded.
 
 ### Access required:
 
-TODO
+See [the general openstack SOP](openstack-ci-int.md).
 
 ### Steps:
 
-TODO
+Reboot or restart all the affected nodes. Identify their names from
+the alert, and then use `openstack server reboot --hard $server_name`.
+
+If they don't come back, escalate to PSI. Cut a [Service Now
+ticket](https://redhat.service-now.com/help?id=sc_cat_item&sys_id=4c66fd3a1bfbc4d0ebbe43f8bc4bcb6a)
+-- yes, really. Mark impact as 3, and urgency as 3 or 2.
 
 ---
 
