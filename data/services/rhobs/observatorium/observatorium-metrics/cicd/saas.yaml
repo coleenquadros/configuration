@@ -59,7 +59,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/rhobs/observatorium/observatorium-metrics/namespaces/observatorium-metrics-stage.yml
-    ref: 3978c8609271eb30fe16492af5f6b507ea86e139
+    ref: 6f0cf49234c2568ef6aae92e57893b944b94cb2c
     parameters:
       NAMESPACE: observatorium-metrics-stage
       THANOS_CONFIG_SECRET: thanos-objectstorage
@@ -159,4 +159,31 @@ resourceTemplates:
       THANOS_STORE_INDEX_CACHE_MEMORY_LIMIT_MB: 4096
       THANOS_STORE_INDEX_CACHE_MEMCACHED_CPU_LIMIT: 3
       THANOS_STORE_INDEX_CACHE_MEMCACHED_MEMORY_LIMIT: '4Gi'
+      SERVICE_ACCOUNT_NAME: observatorium-metrics
+- name: metric-federation-rule
+  path: /resources/services/metric-federation-rule-template.yaml
+  url: https://github.com/rhobs/configuration
+  parameters:
+    JAEGER_AGENT_IMAGE: quay.io/app-sre/jaegertracing-jaeger-agent
+    THANOS_IMAGE: quay.io/thanos/thanos
+    STORAGE_CLASS: "gp2"
+  targets:
+  - namespace:
+      $ref: /services/rhobs/observatorium/observatorium-metrics/namespaces/observatorium-metrics-stage.yml
+    ref: 6f0cf49234c2568ef6aae92e57893b944b94cb2c
+    parameters:
+      NAMESPACE: observatorium-metrics-stage
+      THANOS_CONFIG_SECRET: thanos-objectstorage
+      THANOS_S3_SECRET: telemeter-thanos-stage-s3
+      THANOS_IMAGE_TAG: v0.23.0-rc.0
+      THANOS_QUERIER_NAMESPACE: observatorium-mst-stage
+      THANOS_RULER_LOG_LEVEL: 'debug'
+      THANOS_RULER_REPLICAS: 2
+      THANOS_RULER_CPU_REQUEST: '500m'
+      THANOS_RULER_CPU_LIMIT: '1'
+      THANOS_RULER_MEMORY_REQUEST: '2Gi'
+      THANOS_RULER_MEMORY_LIMIT: '2Gi'
+      THANOS_RULER_PVC_REQUEST: '50Gi'
+      JAEGER_AGENT_IMAGE_TAG: 1.22.0
+      JAEGER_COLLECTOR_NAMESPACE: observatorium-stage
       SERVICE_ACCOUNT_NAME: observatorium-metrics
