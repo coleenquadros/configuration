@@ -72,7 +72,9 @@ See [the general openstack SOP](openstack-ci-int.md).
 Reboot or restart all the affected nodes. Identify their names from
 the alert, and then use `openstack server reboot --hard $server_name`.
 
-If they don't come back, escalate to PSI **TODO:** How do we reach them?
+If they don't come back, escalate to PSI. Cut a [Service Now
+ticket](https://redhat.service-now.com/help?id=sc_cat_item&sys_id=4c66fd3a1bfbc4d0ebbe43f8bc4bcb6a)
+-- yes, really. Mark impact as 3, and urgency as 3 or 2.
 
 ---
 
