@@ -1283,7 +1283,13 @@ In order to create or update an RDS database, you need to add them to the `terra
 - `output_resource_db_name`: (optional) set the `db.name` key in the output Secret (does not affect actual terraform resource).
 - `reset_password`: (optional) add or update this field to a random string to trigger a database password reset.
   - Note: removing this field will lead to a recycle of the pods using the output resource.
-- `ca_cert`: (optional) specify `path`, `field` and `version` of a secret in vault containing a CA certificate to be added to the output Secret.
+- `ca_cert`: (optional) specify `path`, `field` and `version` of a secret in vault containing a CA certificate to be added to the output Secret. Unless there is a good reason not to, use these settings:
+  ```yaml
+    ca_cert:
+    path: app-interface/global/rds-ca-cert
+    field: us-east-1 # region of the DB
+    version: 2 # the latest available, search the repo for usage
+  ```
 
 Once the changes are merged, the RDS instance will be created (or updated) and a Kubernetes Secret will be created in the same namespace with following details.
 
