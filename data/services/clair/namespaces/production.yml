@@ -1,0 +1,54 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: clair
+
+name: clair-production
+
+description: Namespace to house clair production resources
+
+cluster:
+  $ref: /openshift/clairp01ue1/cluster.yml
+
+
+app:
+  $ref: /services/clair/app.yml
+environment:
+  $ref: /products/quay/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+
+managedRoles: true
+
+managedTerraformResources: true
+
+  
+openshiftResources:
+  - provider: vault-secret
+    path: app-interface/clair/production/config
+    version: 1
+    labels:
+      version: v1
+  - provider: route
+    path: /clair/production/clair.indexer.route.yaml
+  - provider: route
+    path: /clair/production/clair.matcher.route.yaml
+  - provider: route
+    path: /clair/production/clair.notifier.route.yaml
+
+
+terraformResources:
+  - provider: rds
+    account: quayio-production
+    identifier: clair-indexer-rds
+    defaults: /terraform/resources/quayio-production/clair-indexer-rds-1.yml
+  - provider: rds
+    account: quayio-production
+    identifier: clair-matcher-rds
+    defaults: /terraform/resources/quayio-production/clair-matcher-rds-1.yml
+  - provider: rds
+    account: quayio-production
+    identifier: clair-notifier-rds
+    defaults: /terraform/resources/quayio-production/clair-notifier-rds-1.yml
