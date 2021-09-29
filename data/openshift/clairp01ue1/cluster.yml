@@ -1,0 +1,97 @@
+---
+$schema: /openshift/cluster-1.yml
+
+labels:
+  service: clair  # TODO: or quayio ?
+
+name: clairp01ue1
+description: clairp01ue1 cluster
+consoleUrl: ''
+kibanaUrl: ''
+prometheusUrl: ''
+alertmanagerUrl: ''
+serverUrl: ''
+elbFQDN: ''
+
+auth:
+  service: github-org-team
+  org: app-sre
+  team: clairp01ue1-cluster
+
+ocm:
+  $ref: /dependencies/ocm/production.yml
+
+managedGroups:
+- dedicated-admins
+- dedicated-readers   # this is set on quayp05ue1, guessing it should be on that clair cluster as well
+
+# managedClusterRoles: true  # set on quayp05ue1
+
+
+spec:
+  provider: aws
+  region: us-east-1
+  channel: stable  # TODO: as quayp05ue1, or should we use 'fast' ?
+  version: 4.8.11
+  initial_version: 4.8.11  # currently on quayp05ue1
+  multi_az: true
+  nodes: 4
+  # autoscale: # optional. nodes should not be defined if autoscale is defined
+  #   min_replicas: 4  # seems to be the minimal min_replicas elsewhere
+  #   max_replicas: 39
+  instance_type: c5.2xlarge
+  storage: 1100 # needed at least for openshift-monitoring + clair indexers
+  load_balancers: 4
+  private: false
+  provision_shard_id: b26159a7-aaef-4303-89a0-6713ad9f1090  # TODO: check if it's fine to reuse Quay's shard id here
+
+upgradePolicy:
+  workloads:
+  - quay
+  schedule: '0 6 * * 1-4'
+  conditions:
+    soakDays: 9
+
+network:
+  vpc: 10.26.0.0/16
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
+
+# machinePools: # optional, specify additional Machine Pools to be provisioned
+# - id: (machine pool name, should be unique per cluster)
+#   instance_type: (desired instance type. m5.xlarge for example)
+#   replicas: (desired number of instances in the pool)
+#   labels: {}
+
+# peerings copied (and renamed) from quayp05ue1
+peering:
+  connections:
+  - provider: account-vpc
+    name: clairp01ue1-QuayVPC
+    vpc:
+      $ref: /aws/quayio-prod/vpcs/QuayVPC.yml
+#    manageRoutes: true
+# The following is set on Quay, but does not seem needed on Clair
+#   - provider: account-vpc
+#     name: clairp01ue1-StatefulVPC
+#     vpc:
+#       $ref: /aws/quayio-prod/vpcs/StatefulVPC.yml
+# #    manageRoutes: true
+
+# to be filled in a second step
+# automationToken:
+#   path: app-sre/creds/kube-configs/quayp05ue1
+#   field: token
+
+# addons: # optional, specify addons to be installed
+# - $ref: /dependencies/ocm/addons/<addon_name>.yml
+
+internal: false
+
+awsInfrastructureAccess:
+- awsGroup:  # TODO: check it's ok to keep the link to quayio-prod there
+    $ref: /aws/quayio-prod/groups/App-SRE-admin.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/quayio-prod/groups/App-SRE-admin.yml
+  accessLevel: network-mgmt
