@@ -42,71 +42,6 @@ authentication:
     field: openshift-saas-deploy
 
 resourceTemplates:
-- name: content-server
-  path: /templates/advisor/content-server.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  targets:
-  - namespace:
-      $ref: /services/insights/advisor/namespaces/advisor-fedramp-stage.yml
-    ref: e4b1253d20cb01a0a62ba4955960f597b2b8de6e
-    parameters:
-      IMAGE_TAG: 565bdc9
-      CONTENT_PUSH_JOB_SCHEDULE: "45 23,5,11,17 * * *"
-- name: insights-advisor-service
-  path: /templates/advisor/insights-advisor-service.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  parameters:
-    THREAD_POOL_SIZE: '2'
-    CPU_LIMIT: '2'
-    # autoscaling on this app based on cpu is not working, so pinning replicas.
-  targets:
-  - namespace:
-      $ref: /services/insights/advisor/namespaces/advisor-fedramp-stage.yml
-    ref: 5485eaf9352882e39a88019b26410e26f632d45d
-    parameters:
-      ADVISOR_ENV: stage
-      IMAGE_TAG: bb97d56
-      CW_LOG_STREAM: advisor-stage
-      MAX_REPLICAS: 5
-      MIN_REPLICAS: 5
-      KAFKA_BOOTSTRAP_PORT: 9093
-      ENABLE_KAFKA_SSL: true
-- name: insights-advisor-api
-  path: /templates/advisor/insights-advisor-api.yaml
-  url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
-  parameters:
-    CPU_LIMIT: '1'
-    INVENTORY_CONCURRENCY_LEVEL: 20
-    MAX_REPLICAS: 12
-    MIN_REPLICAS: 4
-    SUSPEND_COMPARE_ACTIVE_RULES: 'true'
-    SUSPEND_STALE_HOST_JOB: 'true'
-    SUSPEND_VACUUM_JOB: 'false'
-    SUSPEND_WARM_CACHE: 'true'
-    SUSPEND_WEEKLY_REPORT_JOB: 'true'
-    MIDDLEWARE_HOST_URL: ''
-    USE_CLOUDWATCH_LOGGING: 'true'
-    USE_NEWRELIC: 'true'
-    USE_PROMETHEUS: 'true'
-  targets:
-  - namespace:
-      $ref: /services/insights/advisor/namespaces/advisor-fedramp-stage.yml
-    ref: master
-    parameters:
-      IMAGE_TAG: 44b0305
-      CW_LOG_STREAM: advisor-stage
-- name: cyndi-init
-  path: /openshift/cyndi-init.yml
-  url: https://github.com/RedHatInsights/inventory-syndication
-  targets:
-  - namespace:
-      $ref: /services/insights/advisor/namespaces/advisor-fedramp-stage.yml
-    ref: 1da34cd701ca9bca732e7a3eaaff516dd2b6402b
-    parameters:
-      APP_NAME: advisor
-      APP_ROLE: insightsapi
-      DB_SECRET: advisor-db
-      IMAGE_TAG: "3a34b0c"
 - name: advisor-backend
   path: /clowdapp.yml
   url: https://gitlab.cee.redhat.com/insights-platform/advisor-backend
@@ -135,6 +70,7 @@ resourceTemplates:
     SVC_CPU_LIMIT: '1'
     SVC_MEMORY_REQUEST: '256Mi'
     SVC_MEMORY_LIMIT: '1Gi'
+    NOTIFICATIONS_TOPIC: platform.notifications.ingress
   targets:
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
@@ -165,7 +101,6 @@ resourceTemplates:
       ENV_NAME: stage
       API_MIN_REPLICAS: 5
       SVC_MIN_REPLICAS: 5
-      NOTIFICATIONS_TOPIC: platform.notifications.ingress
   - namespace:
       $ref: /services/insights/advisor/namespaces/advisor-prod.yml
     ref: 6f38270d233316a6a5d5b25a36e77cfc0fe86c0b
@@ -182,4 +117,16 @@ resourceTemplates:
       WEEKLY_REPORT_JOB_SCHEDULE: "11 11 * * 1"
       CONTENT_PUSH_JOB_SCHEDULE: "15 */6 * * *"
       HANDLE_LEGACY_DELETE: 'true'
-      NOTIFICATIONS_TOPIC: platform.notifications.ingress
+  - namespace:
+      $ref: /services/insights/advisor/namespaces/advisor-fedramp-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: insights-platform-advisor-backend-gl-build-master
+    parameters:
+      ENV_NAME: fedramp-stage
+      API_MIN_REPLICAS: 5
+      SVC_MIN_REPLICAS: 5
+      KAFKA_BOOTSTRAP_PORT: 9093
+      ENABLE_KAFKA_SSL: true
