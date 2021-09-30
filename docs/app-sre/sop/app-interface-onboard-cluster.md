@@ -437,26 +437,10 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
     The Operator Lifecycle Manager is responsible for managing operator lifecycles.  It will install and update operators using a subscription.
 
-    1. Create an `openshift-operator-lifecycle-manager.yml` namespace file for the cluster:
+    1. Create an `openshift-operator-lifecycle-manager.yml` namespace file for the cluster with this command:
 
-    ```yaml
-    ---
-    $schema: /openshift/namespace-1.yml
-
-    labels: {}
-
-    name: openshift-operator-lifecycle-manager
-
-    cluster:
-      $ref: /openshift/<cluster>/cluster.yml
-
-    app:
-      $ref: /services/app-sre/app.yml
-
-    environment:
-      $ref: /products/app-sre/environments/production.yml
-
-    description: openshift-operator-lifecycle-manager namespace
+    ```bash
+    hack/cluster_provision.py [--datadir=data directory] create-olm-ns <cluster-name>
     ```
 
 ## Step 5 - Container Security Operator
