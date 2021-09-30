@@ -1290,7 +1290,6 @@ In order to create or update an RDS database, you need to add them to the `terra
     field: us-east-1 # region of the DB
     version: 2 # the latest available, search the repo for usage
   ```
-  * Note: if this section is added to an existing RDS definition, consult https://issues.redhat.com/browse/APPSRE-3867.
 
 Once the changes are merged, the RDS instance will be created (or updated) and a Kubernetes Secret will be created in the same namespace with following details.
 
