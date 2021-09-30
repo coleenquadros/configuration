@@ -101,12 +101,12 @@ Every AppSRE/MT-SRE engineer should have access to the following:
 * Mailing lists:
   * http://groups.google.com/: new mailing list manager
     * [sd-app-sre-announce](https://groups.google.com/u/0/a/redhat.com/g/sd-app-sre-announce)
+    * [outage-list](https://groups.google.com/a/redhat.com/g/outage-list/about)
   * https://post-office.corp.redhat.com/mailman/listinfo: old mailing list central
     * ACCESS: sd-app-sre. Speak to @jonathan beakley.
     * ACCESS: sd-notifications. Subscribe from UI.
     * ACCESS: sd-org. Subscribe from UI.
     * ACCESS: sres. Subscribe from UI.
-    * ACCESS: outage-list. Subscribe from UI.
     * ACCESS: it-iam-announce-list. Subscribe from UI.
     * ACCESS: it-platform-community-list (useful for SSO). Subscribe from UI.
   * Optional - Additional information surfaces, subscription not mandatory
