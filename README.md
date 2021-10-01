@@ -1029,7 +1029,8 @@ For more information please see [vault secrets engines documentation](https://ww
 
 ### Manage DNS Zones via App-Interface (`/aws/dns-zone-1.yml`) using Terraform
 
-DNS Zones can be managed in app-interface. A DNS zone follows [this JSON schema](/schemas/dependencies/dns-zone-1.yml)
+DNS Zones can be managed in app-interface. A DNS zone follows [this
+JSON schema](/schemas/dependencies/dns-zone-1.yml).
 
 - `name`: A name for the DNS zone
 - `description`: Description for the DNS zone
@@ -1041,6 +1042,8 @@ DNS Zones can be managed in app-interface. A DNS zone follows [this JSON schema]
 Additional special fields:
 - `_target_cluster`: A `$ref` to an OpenShift cluster definition. The value of `elbFQDN` on the cluster definition will be used as a target on the record
 - `_healthcheck`: Allows defining a health check resource that will be assigned to the record. The parameters from Terraform's [aws_route53_health_check resource](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_health_check) are permitted.
+
+**NOTE:** If you need a record under the `api.openshift.com` zone you have to cut a ticket to OHSS and get either Paul Bergene's or Karanbir Singh's approval.
 
 Example DNS zone resource:
 ```yaml
