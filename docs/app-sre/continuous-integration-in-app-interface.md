@@ -36,7 +36,7 @@ In order to define Continuous Integration pipelines in app-interface, define a J
     * `jobs` - a list of jobs to create in this project. each job -
         * `<job_template_name>` - job template to be used. Options can be found [here](/schemas/dependencies/jenkins-config-1.yml#L113-304).
             * `display_name` - display name of the Jenkins job
-            * additional optional fields can be found in [advanced usage](https - //gitlab.cee.redhat.com/service/dev-guidelines#cicd).
+            * additional optional fields can be found in [advanced usage](https://gitlab.cee.redhat.com/service/dev-guidelines#cicd).
 
 A complete example for github-mirror can be found [here](/data/services/github-mirror/cicd/deploy.yaml).
 
@@ -48,6 +48,6 @@ Every jenkins config file contains a list of projects, and each project contains
 
 Add the repository to a `codeComponents` section in the matching application's app file.
 
-ci-ext - follow these [requirements](https - //gitlab.cee.redhat.com/service/dev-guidelines/blob/master/ci-ext.md#requirements).
+ci-ext - follow these [requirements](https://gitlab.cee.redhat.com/service/dev-guidelines/-/blob/master/content/en/docs/AppSRE/Onboarding/continuous-integration.md#configuring-a-repo-to-work-with-ci-ext).
 
 ci-int - add the `devtools-bot` as a Maintainer to your project.
