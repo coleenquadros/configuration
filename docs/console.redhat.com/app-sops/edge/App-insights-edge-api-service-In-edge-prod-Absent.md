@@ -4,7 +4,7 @@ Severity: Pagerduty
 
 ## Incident Response Plan
 
-`Incident Response Doc` (1) for console.redhat.com
+ [`Incident Response Doc`](https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE) for console.redhat.com ```
 
 ## Impact
 
