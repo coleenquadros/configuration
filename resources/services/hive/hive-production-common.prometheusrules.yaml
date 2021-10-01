@@ -132,10 +132,16 @@ spec:
         message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.exported_namespace }} provisioning taking over 2 hours. Condition/Reason: {{ $labels.condition }} / {{ $labels.reason }}. SOP: https://github.com/openshift/ops-sop/blob/master/v4/alerts/ClusterProvisioningFailure.md"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/ClusterProvisioningFailure.md"
         dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
+      # filter out all OCM3xxx codes except these --
+      # they require SRE response because they indicate provisioning infra problems:
+      # AWSUnableToFindMatchingRouteTable
+      # DNSAlreadyExists
+      # NoMatchingRoute53Zone
+      # GCPInvalidProjectID
       expr: |
-        (max without (instance,pod,cluster_type) (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers",reason!~"AWSAPIRateLimitExceeded|AWSVPCLimitExceeded|S3BucketsLimitExceeded|InvalidCredentials|EIPAddressLimitExceeded|NoWorkerNodes|AWSNATGatewayLimitExceeded|InvalidInstallConfigSubnet|PendingVerification|GCPInstanceTypeNotFound|GCPPreconditionFailed|GCPQuotaSSDTotalGBExceeded|GCPComputeQuotaExceeded|GCPServiceAccountQuotaExceeded|InvalidAWSTags"} ) /3600) > 2
+        (max without (instance,pod,cluster_type) (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers",reason!~"AWSAPIRateLimitExceeded|AWSVPCLimitExceeded|S3BucketsLimitExceeded|InvalidCredentials|EIPAddressLimitExceeded|NoWorkerNodes|AWSNATGatewayLimitExceeded|InvalidInstallConfigSubnet|PendingVerification|GCPInstanceTypeNotFound|GCPPreconditionFailed|GCPQuotaSSDTotalGBExceeded|GCPComputeQuotaExceeded|GCPServiceAccountQuotaExceeded|InvalidAWSTags|MissingPublicSubnetForZone|PrivateSubnetInMultipleZones|ErrorDeletingIAMRole|AWSSubnetDoesNotExist|AWSInsufficientPermissions|VcpuLimitExceeded|UserInitiatedShutdown"} ) /3600) > 2
         and
-        (max without (instance,pod,cluster_type) (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers",reason!~"AWSAPIRateLimitExceeded|AWSVPCLimitExceeded|S3BucketsLimitExceeded|InvalidCredentials|EIPAddressLimitExceeded|NoWorkerNodes|AWSNATGatewayLimitExceeded|InvalidInstallConfigSubnet|PendingVerification|GCPInstanceTypeNotFound|GCPPreconditionFailed|GCPQuotaSSDTotalGBExceeded|GCPComputeQuotaExceeded|GCPServiceAccountQuotaExceeded|InvalidAWSTags"} ) /3600) < 168
+        (max without (instance,pod,cluster_type) (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers",reason!~"AWSAPIRateLimitExceeded|AWSVPCLimitExceeded|S3BucketsLimitExceeded|InvalidCredentials|EIPAddressLimitExceeded|NoWorkerNodes|AWSNATGatewayLimitExceeded|InvalidInstallConfigSubnet|PendingVerification|GCPInstanceTypeNotFound|GCPPreconditionFailed|GCPQuotaSSDTotalGBExceeded|GCPComputeQuotaExceeded|GCPServiceAccountQuotaExceeded|InvalidAWSTags|MissingPublicSubnetForZone|PrivateSubnetInMultipleZones|ErrorDeletingIAMRole|AWSSubnetDoesNotExist|AWSInsufficientPermissions|VcpuLimitExceeded|UserInitiatedShutdown"} ) /3600) < 168
       for: 10m
       labels:
         service: hive
