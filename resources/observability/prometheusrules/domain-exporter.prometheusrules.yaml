@@ -1,0 +1,40 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  creationTimestamp: null
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: domain-exporter
+spec:
+  groups:
+  # Pingdom-style 2xx checks
+  - name: domain-expiration.rules
+    interval: 1m
+    rules:
+    - alert: Domain expiring in less than 60 days - Warning
+      labels:
+        service: app-sre-observability
+        severity: warning
+        jiralert: ASIC
+      expr: domain_expiry_days < 60
+      for: 5m
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/sop/domain-exporter-domain-expiring.md"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "{{ $labels.domain }} will expire in less than 60 days."
+        link_url: "{{ $labels.domain }}"
+    - alert: Domain expiring in less than 7 days - High
+      labels:
+        service: app-sre-observability
+        severity: critical-fts
+        jiralert: ASIC
+      expr: domain_expiry_days < 7
+      for: 5m
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/sop/domain-exporter-domain-expiring.md"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "{{ $labels.domain }} will expire in less than 7 days."
+        link_url: "{{ $labels.domain }}"
