@@ -1,4 +1,4 @@
-# App-edge-api-service-In-edge-prod-Error-Rate-Is-High
+# App-edge-api-service-In-edge-prod-Absent
 
 Severity: Pagerduty
 
@@ -32,8 +32,7 @@ Usually caused caused by pods going offline or a Prometheus problem.
 
 ## Escalations
 
--  Ping more team members if available
--  Ping the engineering team that owns the APP
+https://visual-app-interface.devshift.net/services#/services/insights/edge/app.yml
 
 ## Related links
 
