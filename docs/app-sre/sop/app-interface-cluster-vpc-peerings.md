@@ -11,7 +11,7 @@ To add a VPC peering between an OSDv4 cluster and an AWS account managed in app-
     * Note: the cluster has to be managed by `ocm` (an `ocm` section must exist).
     * The peering name should follow this convention: `<cluster-name>_<aws-account-name>`.
     * `managedRoutes` set to `true` will make the integration create the VPC routes in the cluster side.  Routes in the existing AWS account will be created outside app-interface (see below note about additional resources).
-    * Make sure cluster has `awsGroup` that allow management of AWS cluster in `awsInfrastructureAccess` section, e.g. this will make possible for users in the `App-SRE-admin` group from `app-sre` account to assume `read-only` or `network-mgmt` roles in the cluster where this is added:
+    * Make sure cluster has `awsGroup` that allow management of AWS cluster in `awsInfrastructureAccess` section, e.g. this will make possible for users in the `App-SRE-admin` group from `app-sre` account to assume `read-only` or `network-mgmt` roles in the cluster where this is added (and currently it also makes terraform user in `app-sre` account to be able to switch to network-mgmt in the cluster account).
     ```
     - awsGroup:
         $ref: /aws/app-sre/groups/App-SRE-admin.yml
