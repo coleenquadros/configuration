@@ -4,7 +4,7 @@ Severity: Pagerduty
 
 ## Incident Response Plan
 
- [`Incident Response Doc`](https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE) for console.redhat.com ```
+ [Incident Response Doc](https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE) for console.redhat.com
 
 ## Impact
 
@@ -12,7 +12,7 @@ Severity: Pagerduty
 
 ## Summary
 
-Note:  This service is deployed via `Clowder` (2).
+Note:  This service is deployed via [Clowder](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/clowder/clowder.rst).
 
 This alert fires when the Edge pod(s) drop and/or Prometheus cannot scrape metrics.
 Usually caused caused by pods going offline or a Prometheus problem.
@@ -23,18 +23,13 @@ Usually caused caused by pods going offline or a Prometheus problem.
 
 ## Steps
 
--  Log into the console / namespace and verify if pods are up / stuck / etc
--  Check logs / events for pods in the Advisor(-environment) namespace
--  Check if there were any recent changes to the CR's in the namespace
--  If this was caused by a deployment, mitigate the incident by doing a rollback to the latest working deployment. If this works, the alert should be resolved and the team must be contacted to fix the new application version.
--  If not, investigate if this could be a infrastructure incident
--  Gather all information and escale the alert properly if needed
+-  Log into the console / namespace and verify if all pods are running and receiving requests.
+-  Check logs / events for Edge API pods.
+-  Check if any deployments or changes in the application happened closer to the time the error started.
+-  Check infrastructure metrics on the OpenShift console for edge-api-service (Deployments -> edge-api-service -> Metrics) and take notes.
+-  Escalate the alert with all the information available to the engineering team that is responsible for the app.
 
 ## Escalations
 
-https://visual-app-interface.devshift.net/services#/services/insights/edge/app.yml
+-  https://visual-app-interface.devshift.net/services#/services/insights/edge/app.yml
 
-## Related links
-
-- (1) Incident Response Doc: https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE(!)
-- (2) Clowder: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/clowder/clowder.rst

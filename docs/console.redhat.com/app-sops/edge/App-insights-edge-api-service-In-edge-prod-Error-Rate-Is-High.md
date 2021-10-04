@@ -4,7 +4,7 @@ Severity: Pagerduty
 
 ## Incident Response Plan
 
-`Incident Response Doc` (1) for console.redhat.com
+[Incident Response Doc](https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE(!)) for console.redhat.com
 
 ## Impact
 
@@ -13,9 +13,9 @@ Severity: Pagerduty
 
 ## Summary
 
-Note:  This service is deployed via `Clowder` (2).
+Note:  This service is deployed via [Clowder](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/clowder/clowder.rst).
 
-This alert fires when #TODO
+This alert fires when Edge API has been throwing 5xx errors more than 50% of the time for the last 10 minutes which can be a problem for our Availability SLO in the long term.
 
 ## Access required
 
@@ -23,20 +23,12 @@ This alert fires when #TODO
 
 ## Steps
 
--  Log into the console / namespace and verify if pods are up / stuck / etc
--  Check logs / events for pods in the Advisor(-environment) namespace
--  Check if there were any recent changes to the CR's in the namespace
--  Check infrastructure metrics (CPU, memory)
--  Investigate app logs on Kibana to get to the offensor endpoint, if any
--  ``oc rsh`` into one of the containers if available and investigate further
--  Contact the engineering team that owns the APP
+-  Log into the console / namespace and verify if all pods are running and receiving requests.
+-  Check logs / events for Edge API pods.
+-  Check if any deployments or changes in the application happened closer to the time the requests started to return errors.
+-  Check infrastructure metrics on the OpenShift console for edge-api-service (Deployments -> edge-api-service -> Metrics) and take notes.
+-  Escalate the alert with all the information available to the engineering team that is responsible for the app.
 
 ## Escalations
 
--  Ping more team members if available
--  Ping the engineering team that owns the APP
-
-## Related links
-
-- (1) Incident Response Doc: https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE
-- (2) Clowder: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/clowder/clowder.rst
+-  https://visual-app-interface.devshift.net/services#/services/insights/edge/app.yml
