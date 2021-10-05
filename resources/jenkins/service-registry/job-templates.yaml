@@ -43,3 +43,19 @@
           - *app_sre_bot_push_token
           - *app_interface_creds
     <<: *gl_build_master
+
+- job-template:
+    id: service-registry-perf-test
+    name: service-registry-perf-test-stage
+    publishers:
+    - <<: *slack_notify
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *service_registry_perf_test_stage
+    ci_cmd: './perf_test.sh'
+    <<: *gh_timed
