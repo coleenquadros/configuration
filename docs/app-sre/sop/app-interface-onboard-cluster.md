@@ -147,7 +147,7 @@ This step should be performed in a single merge request.
         group: dedicated-readers
     ```
 
-1. Send the MR. The build may fail in the `openshift-clusterrolebindings` integration due to `[CLUSTER] has no automation token`. If that's the only error reported, merge. The ocm-clusters integration will create your cluster. You can view the progress in OCM. Proceed with the following steps after the cluster's installation is complete.
+1. Send the MR, wait for the check to pass and merge. The ocm-clusters integration will create your cluster. You can view the progress in OCM. Proceed with the following steps after the cluster's installation is complete.
 
     * Note: during the installation it is expected that other ocm integrations will fail.
 
