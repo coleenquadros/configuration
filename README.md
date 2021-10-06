@@ -1043,7 +1043,8 @@ Additional special fields:
 - `_target_cluster`: A `$ref` to an OpenShift cluster definition. The value of `elbFQDN` on the cluster definition will be used as a target on the record
 - `_healthcheck`: Allows defining a health check resource that will be assigned to the record. The parameters from Terraform's [aws_route53_health_check resource](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_health_check) are permitted.
 
-**NOTE:** If you need a record under the `api.openshift.com` zone you have to cut a ticket to OHSS and get either Paul Bergene's or Karanbir Singh's approval.
+**NOTE:** If you need a record under the `api.openshift.com` zone
+[please go to this document](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/add-route-for-ocm-component.md)
 
 Example DNS zone resource:
 ```yaml
