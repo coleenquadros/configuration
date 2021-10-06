@@ -1,0 +1,14 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+name: 2021-10-06-upstream-profiles-with-rules-prod
+labels: {}
+namespace:
+  $ref: /services/insights/compliance/namespaces/compliance-prod.yml
+identifier: compliance-prod
+output: stdout
+query: >-
+  SELECT "profiles"."id", "profiles"."ref_id", "benchmarks"."ref_id" AS "benchmark_ref_id", "benchmarks"."version" FROM "profiles"
+  INNER JOIN "profiles" "parent" ON "parent"."id" = "profiles"."parent_profile_id"
+  INNER JOIN "benchmarks" ON "benchmarks"."id" = "profiles"."benchmark_id"
+  LEFT OUTER JOIN "test_results" ON "test_results"."profile_id" = "profiles"."id"
+  WHERE "profiles"."parent_profile_id" IS NOT NULL AND "parent"."upstream" = TRUE AND "test_results"."id" IS NOT NULL;
