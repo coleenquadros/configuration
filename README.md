@@ -29,6 +29,7 @@ this repository.
   - [Entities and relations](#entities-and-relations)
   - [Howto](#howto)
     - [Add or modify a user (`/access/user-1.yml`)](#add-or-modify-a-user-accessuser-1yml)
+      - [User off-boarding / revalidation loop](#user-off-boarding--revalidation-loop)
     - [Get notified of events involving a service, or its dependencies](#get-notified-of-events-involving-a-service-or-its-dependencies)
     - [Define an escalation policy for a service](#define-an-escalation-policy-for-a-service)
       - [Prerequisites: The team's slack channel and Pagerduty schedule are defined in app-interface](#prerequisites-the-teams-slack-channel-and-pagerduty-schedule-are-defined-in-app-interface)
@@ -391,6 +392,21 @@ you want the user to belong to. Roles can be associated with the services:
 `service/<name>/roles/<rolename>.yml`, or to teams:
 `teams/<name>/roles/<rolename>.yml`. Check out the currently defined roles to
 know which one to add.
+
+#### User off-boarding / revalidation loop
+
+The
+[ldap-users](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/ldap_users.py)
+integration continuously checks the presence of users in the corporate LDAP
+(ldap.rdu.redhat.com). If the user does no longer exist in LDAP, this process
+will submit a MR removing the affected user's file from App-Interface. This MR
+will be automatically merged.
+
+Once the user file is removed from App-Interface all access granted to the user
+will be immediately revoked. Since all access granted by AppSRE is granted
+through the presence of this file, this effectively removes all access.
+
+This integration currently runs as a CronJob every hour.
 
 ### Get notified of events involving a service, or its dependencies
 
