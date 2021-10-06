@@ -331,8 +331,8 @@ At this point you should be able to access the cluster via the console / `oc` cl
         ```yaml
         ...
         records:
-        - { name: prometheus.<cluster_name>, type: CNAME, target_cluster: { $ref: /openshift/<cluster_name>/cluster.yml } }
-        - { name: alertmanager.<cluster_name>, type: CNAME, target_cluster: { $ref: /openshift/<cluster_name>/cluster.yml } }
+        - { name: prometheus.<cluster_name>, type: CNAME, _target_cluster: { $ref: /openshift/<cluster_name>/cluster.yml } }
+        - { name: alertmanager.<cluster_name>, type: CNAME, _target_cluster: { $ref: /openshift/<cluster_name>/cluster.yml } }
         ```
 
     1. Configure a [deadmanssnitch](https://deadmanssnitch.com/) snitch for the new cluster. The snitch settings should be as follow:
