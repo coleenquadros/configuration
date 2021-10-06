@@ -90,6 +90,7 @@ this repository.
     - [Manage Slack User groups via App-Interface](#manage-slack-user-groups-via-app-interface)
     - [Manage Jenkins jobs configurations using jenkins-jobs](#manage-jenkins-jobs-configurations-using-jenkins-jobs)
     - [Delete AWS IAM access keys via App-Interface](#delete-aws-iam-access-keys-via-app-interface)
+    - [Reset AWS IAM user passwords via App-Interface](#reset-aws-iam-user-passwords-via-app-interface)
     - [AWS garbage collection](#aws-garbage-collection)
     - [GitHub user profile compliance](#github-user-profile-compliance)
     - [Manage GitLab group members](#manage-gitlab-group-members)
