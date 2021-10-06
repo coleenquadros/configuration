@@ -25,4 +25,17 @@ spec:
           message: "Notifications Backend Alert (Stage)"
           description: "Notifications Backend: Down in Stage for 5 minutes."
           runbook: "https://core-platform-apps.pages.redhat.com/notifications-docs/dev/runbooks/alerts/NotificationsBackendDownProd.html"
-
+      - alert: StoppedReceivingNotificationsEvents
+        expr: increase(input_consumed_seconds_count[5m]) == 0
+        for: 5m
+        labels:
+          severity: medium
+          service: insights
+          env: stage
+          app_team: notifications
+        annotations:
+          dashboard: "https://grafana.stage.devshift.net/d/KQIVyFuMk/notifications-dashboard"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/notifications-stage/deployments"
+          message: "Stopped receiving notifications events from: {{ $labels.bundle }}/{{ $labels.application }}"
+          description: "Stopped receiving notifications events from: {{ $labels.bundle }}/{{ $labels.application }} for 5 minutes."
+          runbook: "https://core-platform-apps.pages.redhat.com/notifications-docs/dev/runbooks/alerts/StoppedReceivingNotificationsEvents.html"
