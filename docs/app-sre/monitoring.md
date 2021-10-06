@@ -275,9 +275,9 @@ This allows us to see the behaviour of alert in practice, and build confidence a
 One mandate for the alerts being promoted to a severity that involves the App-SRE team is adding a standard operating procedure for each alert. An example can be seen [here](https://github.com/rhobs/configuration/blob/main/docs/sop/telemeter.md#sop--openshift-telemeter)
 
 - `critical` alerts go to App-SRE's Pagerduty. Note that this MUST meet the conditions stated above, and should relate to a degraded customer experience that's imminent already ongoing. Please reach out to the App-SRE team before you set an alert with this Severity.
+- `critical-fts` alerts go to AppSRE's PagerDuty, triggering only the follow the sun policy. This will not trigger a page outside of working hours. This is an internal alerting level for AppSRE.
 - `high` alerts go to your team's slack channel, and also to App-SRE team's slack. These are alerts where either of the teams will take action according to the SOP, but the other team also needs to be in the loop for escalations
 - `medium` alerts go only to your team's slack channel. These are alerts that the engineering team doesn't necessarily require SRE intervention on. The team may reach out to SRE out of the loop if there's any blockers in resolution
-
 - `info` We optionally provide an `info` severity that's mostly informational for the team. App-SRE doesn't act on any alerts of this severity. We recommend isolating these notifications to a channel separate from the alerts channel to avoid notification fatigue
 
 If you want to set the alert severity to below medium, you should consider if the condition is something you want to alert a developer on, because interrupt fatigue is a common situation and we'd like to avoid that.

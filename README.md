@@ -90,6 +90,7 @@ this repository.
     - [Manage Slack User groups via App-Interface](#manage-slack-user-groups-via-app-interface)
     - [Manage Jenkins jobs configurations using jenkins-jobs](#manage-jenkins-jobs-configurations-using-jenkins-jobs)
     - [Delete AWS IAM access keys via App-Interface](#delete-aws-iam-access-keys-via-app-interface)
+    - [Reset AWS IAM user passwords via App-Interface](#reset-aws-iam-user-passwords-via-app-interface)
     - [AWS garbage collection](#aws-garbage-collection)
     - [GitHub user profile compliance](#github-user-profile-compliance)
     - [Manage GitLab group members](#manage-gitlab-group-members)
@@ -1860,6 +1861,32 @@ For example, merging [this](/data/aws/osio/account.yml#L11) line will delete the
 
 One use case this is useful for is leaked keys.
 
+
+### Reset AWS IAM user passwords via App-Interface
+
+AWS IAM user passwords can be entirely self-serviced via App-Interface.
+
+To reset a user's password in an AWS account, submit a MR with a new entry to the `resetPasswords` list in the AWS Account file:
+```yaml
+- user:
+    $ref: /path/to/user/file.yaml
+  requestId: <some_unique_value_without_spaces>
+```
+
+The user's new password should appear GPG encrypted within 30 minutes in app-interface-output: [terraform-users-credentials](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/terraform-users-credentials.md)
+
+To decrypt password: `echo <password> | base64 -d | gpg -d - && echo` (you will be asked to provide your passphrase to unlock the secret)
+
+
+Behind the scenes:
+
+Once the MR is merged, an integration called `aws-iam-password-reset` will delete the user's login profile. At this point, the user can not login to the account.
+
+A different integration, called `terraform-users` will realize that the user does not have a login profile and will re-create it. At this point, the user has a new random password.
+
+The curious reader can follow #sd-app-sre-reconcile to see when these two actions have completed.
+
+Once the new password is in place, it needs to be picked up by a app-interface-output by a qontract-cli command called `terraform-users-credentials` (the repository is refreshed once every 10 minutes).
 
 ### AWS garbage collection
 

@@ -19,6 +19,7 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
         - [I need help with something AWS related](#i-need-help-with-something-aws-related)
         - [I can not access ci-ext](#i-can-not-access-ci-ext)
         - [Tagging options in app-interface](#tagging-options-in-app-interface)
+        - [Can you reset my AWS password?](#can-you-reset-my-aws-password)
         - [Gating production promotions in app-interface](#gating-production-promotions-in-app-interface)
         - [Get access to cluster logs via Log Forwarding](#get-access-to-cluster-logs-via-log-forwarding)
         - [What is the Console or Prometheus URL for a service?](#what-is-the-console-or-prometheus-url-for-a-service)
@@ -97,6 +98,12 @@ Managed to log in but having issues? Maybe even seeing this error message? `"Acc
 GitLab: Users are not being tagged by default for SaaS file reviews. To be tagged on MRs for SaaS files you own, add `tag_on_merge_requests: true` to your user file.
 
 Slack: Users are being tagged by default for cluster updates in clusters they have access to (through membership in a Slack usergroup called <cluster_name>-cluster). To be removed from those usergroups, add `tag_on_cluster_updates: false` to your user file.
+
+### Can you reset my AWS password?
+
+We've got you.
+
+Follow these instructions: https://gitlab.cee.redhat.com/service/app-interface#reset-aws-iam-user-passwords-via-app-interface
 
 ### Gating production promotions in app-interface
 
