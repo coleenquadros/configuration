@@ -165,8 +165,8 @@
     publishers:
       - <<: *slack_notify
     <<: *gl_timed
-    
-- job-template:   
+
+- job-template:
     id: 'managed-services-pull-upstream-tag'
     name: 'managed-services-pull-upstream-tag'
     description: "[managed-services] pull upstream tag for specified project (that must be specified in {gl_group}/{gl_project}/script/repo-config.yaml)"
@@ -195,9 +195,9 @@
         description: '(optional) name of the branch to import the ci-cd files from'
     <<: *gl_checkout
     builders:
-      - shell: "{ci_cmd}" 
+      - shell: "{ci_cmd}"
 
-- job-template:   
+- job-template:
     id: 'managed-services-prepare-cpaas-pipelines'
     name: 'managed-services-prepare-cpaas-pipelines'
     description: "[managed-services] prepare CPaaS pipelines for specified project (that must be specified in {gl_group}/{gl_project}/script/repo-config.yaml)"
@@ -225,9 +225,9 @@
         description: 'version of the project'
     <<: *gl_checkout
     builders:
-      - shell: "{ci_cmd}" 
+      - shell: "{ci_cmd}"
 
-- job-template:   
+- job-template:
     id: 'managed-kafka-performance'
     name: 'managed-kafka-performance-{mk_perf_type}'
     wrappers:
@@ -340,9 +340,9 @@
         default: ''
         description: 'OSD cluster name (if not defined, a random name will be set), max name length is 14 characters. If the cluster already exists, it will be used. Otherwise, it will be provisioned'
     - string:
-          name: KAFKA_CLUSTER_NAMESPACE
-          default: ''
-          description: 'The namespace of an existing Kafka cluster you want to run the pipeline against. Not required if the pipeline is installing Kafka using the INSTALL_KAFKA parameter'
+          name: KAFKA_INSTANCE_NAME
+          default: 'kafka-instance'
+          description: 'The namespace of an existing Kafka instance you want to run the pipeline against. Not required if the pipeline is installing Kafka using the INSTALL_KAFKA parameter'
     - string:
           name: COMPUTE_NODES_COUNT
           default: '3'
@@ -351,10 +351,9 @@
         name: COMPUTE_MACHINE_TYPE
         description: '[REQUIRED] node type of cluster compute nodes'
         choices:
-            - m5.xlarge
-            - m5.2xlarge
             - m5.4xlarge
-            - m5.8xlarge
+            - m5.2xlarge
+            - m5.xlarge
     - choice:
         name: OCM_CLUSTER_REGION
         description: '[REQUIRED] AWS region for the OSD cluster. If executing cloud layer tests, ensure that the cluster is in a region where no other clusters are deployed'
@@ -447,6 +446,27 @@
          OCM_CLUSTER_REGION=us-east-1,
          MULTI_AZ=false'
         description: 'The variables needed to provision an OSD where OMB will be installed'
+    - string:
+        name: KAFKA_CAPACITY_CONFIG
+        default: 'KAFKA_CAPACITY_INGRESS_THROUGHPUT=30Mi,
+         KAFKA_CAPACITY_TOTAL_MAX_CONNECTIONS=500,
+         KAFKA_CAPACITY_MAX_DATA_RETENTION_SIZE=1000Gi,
+         KAFKA_CAPACITY_MAX_PARTITIONS=500,
+         KAFKA_CAPACITY_MAX_DATA_RETENTION_PERIOD=P14D,
+         KAFKA_CAPACITY_MAX_CONNECTION_ATTEMPTS_PER_SEC=100'
+        description: 'The variables needed to configure the kafka installation'
+    - string:
+        name: TEST_EXECUTION_CONFIG
+        default: 'OMB_TEST_DURATION=PT15M, 
+         TARGET_RATE=29, 
+         WORKERS_PER_INSTANCE=2, 
+         TOPICS_PER_KAFKA=1, 
+         PRODUCERS_PER_TOPIC=1, 
+         PAYLOAD_FILE_SIZE=1013Ki,
+         PARTITIONS_PER_TOPIC=9,
+         SUBSCRIPTIONS_PER_TOPIC=1,
+         CONSUMER_PER_SUBSCRIPTION=1'
+        description: 'The variables needed to configure the test case to be executed'
     branch: '${{BRANCH}}'
     <<: *gl_checkout
     builders:
@@ -803,57 +823,58 @@
     concurrent: true
     parameters:
     - string:
-        name: BRANCH
-        default: '{default_branch}'
-        description: 'The branch of kas-abnormal-workloads repo'
-    - string:
-          name: COMPUTE_NODES_COUNT
-          default: '2'
-          description: 'OSD worker nodes, min(default) value is 2'
-    - string:
-          name: PODS
-          default: '1'
-          description: 'Number of pods running in parallel for each workload scenario (batch job parallelism)'
-    - string:
-          name: TEST_DURATION
-          default: '30'
-          description: 'Test duration in minutes, cluster lifespan will be extended if (now + TEST_DURATION + 30mins) > clusters expiration_timestamp'
-    - choice:
-        name: CLIENT_TYPE
-        description: 'Kafka client type'
-        choices:
-            - producer,consumer
-            - producer
-            - consumer
-    - string:
         name: CLIENT_APPS
         default: 'jvm'
-        description: 'Kafka client libraries separated by comma(,)'
+        description: 'Kafka client libraries separated by comma (,)'
+    - bool:
+        name: PRODUCER
+        default: 'true'
+        description: 'Provision Producer Apps'
     - string:
-          name: THREADS
-          default: '5'
-          description: 'Workload application concurent threads'
+        name: PRODUCER_SCENARIOS
+        default: 'bl'
+        description: 'List of workload scenarios to run separated by comma (bl,na,dc,nb,ps)'
+    - bool:
+        name: CONSUMER
+        default: 'true'
+        description: 'Provision Consumer Apps'
     - string:
-          name: SCENARIOS
-          default: 'bl'
-          description: 'List of workload scenarios to run separated by comma(,)'
+        name: CONSUMER_SCENARIOS
+        default: 'bl'
+        description: 'List of workload scenarios to run separated by comma (bl,ccg,gpc,mo,rp)'
     - string:
-          name: CONSUMER_GROUPS
-          default: '1'
-          description: 'How many consumer groups to be used by consumer clients'
+        name: CONSUMER_GROUPS
+        default: '1'
+        description: 'How many consumer groups to be used by consumer clients'
     - string:
-          name: TOPIC
-          default: ''
-          description: 'Specify an existing topic name if it should be reused'
+        name: THREADS
+        default: '5'
+        description: 'Workload application concurent threads'
     - string:
-          name: BOOTSTRAP
-          description: '[REQUIRED] Kafka Bootstrap Server'
+        name: PODS
+        default: '1'
+        description: 'Number of pods running in parallel for each workload scenario (batch job parallelism)'
+    - string:
+        name: TEST_DURATION
+        default: '30'
+        description: 'Test duration in minutes, cluster lifespan will be extended if (now + TEST_DURATION + 30mins) > clusters expiration_timestamp'
+    - string:
+        name: TOPIC
+        default: ''
+        description: 'Specify an existing topic name if it should be reused'
+    - string:
+        name: BOOTSTRAP
+        description: '[REQUIRED] Kafka Bootstrap Server'
     - choice:
         name: SASL_MODE
         description: 'Which SASL mode should be used'
         choices:
-            - PLAIN
-            - OAUTHBEARER
+          - PLAIN
+          - OAUTHBEARER
+    - string:
+        name: BRANCH
+        default: '{default_branch}'
+        description: 'The branch of kas-abnormal-workloads repo for pipeline scripts'
     branch: '${{BRANCH}}'
     <<: *gl_checkout
     builders:

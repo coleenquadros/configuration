@@ -49,6 +49,9 @@ resourceTemplates:
         IO_QUARKUS_CODE_GA_EXTENSION_QUANTITY_INDEX: 8
         IO_QUARKUS_CODE_GA_BATCHING_ENABLED: "false"
         IO_QUARKUS_CODE_QUARKUS_PLATFORMS_RELOAD_CRON_EXPR: "0 */5 * * * ?"
+      promotion:
+        publish:
+          - code-quarkus-api-stage-deploy-success-channel
     - namespace:
         $ref: /services/quarkus/namespaces/code-quarkus-production.yml
       ref: 6c0043d44b5337660b13a41366708d33eecfbe78
@@ -61,6 +64,10 @@ resourceTemplates:
         IO_QUARKUS_CODE_GA_EXTENSION_QUANTITY_INDEX: 6
         IO_QUARKUS_CODE_LOG_LEVEL: inherit
         IO_QUARKUS_CODE_QUARKUS_PLATFORMS_RELOAD_CRON_EXPR: "0 */5 * * * ?"
+      promotion:
+        auto: true
+        subscribe:
+          - code-quarkus-stage-post-deploy-tests-success-channel
 - name: code-quarkus-frontend
   url: https://github.com/quarkusio/code.quarkus.io
   path: /openshift/code-quarkus-frontend.yaml
@@ -72,8 +79,15 @@ resourceTemplates:
         instance:
           $ref: /dependencies/ci-ext/ci-ext.yml
         name: quarkusio-code.quarkus.io-gh-build-main
+      promotion:
+        publish:
+          - code-quarkus-frontend-stage-deploy-success-channel
     - namespace:
         $ref: /services/quarkus/namespaces/code-quarkus-production.yml
       ref: 6c0043d44b5337660b13a41366708d33eecfbe78
       parameters:
         REPLICAS: 3
+      promotion:
+        auto: true
+        subscribe:
+          - code-quarkus-stage-post-deploy-tests-success-channel

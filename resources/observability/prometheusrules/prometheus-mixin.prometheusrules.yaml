@@ -114,7 +114,15 @@ spec:
         summary: Prometheus isn't ingesting samples
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/prometheus/prometheus-PrometheusNotIngestingSamples.md"
       expr: |
-        rate(prometheus_tsdb_head_samples_appended_total[5m]) <= 0
+        (
+          rate(prometheus_tsdb_head_samples_appended_total[5m]) <= 0
+        and
+          (
+            sum without(scrape_job) (prometheus_target_metadata_cache_entries) > 0
+          or
+            sum without(rule_group) (prometheus_rule_group_rules) > 0
+          )
+        )
       for: 10m
       labels:
         service: prometheus

@@ -118,8 +118,10 @@ spec:
         message: "Insights Cost Management Alert. Presto queries have insufficient resources in prod environment."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-cost-presto-insufficent-resources-In-hccm.rst"
 
+    - record: koku:celery:download_queue
+      expr: max(download_backlog{namespace="hccm-prod", pod=~".+worker.+"})
     - alert: App-cost-download-queue-overload-In-hccm
-      expr:  max(download_backlog{namespace="hccm-prod", pod=~".+worker.+"}) > 500
+      expr: koku:celery:download_queue > 550
       for: 10m
       labels:
         severity: high
@@ -132,8 +134,10 @@ spec:
         message: "Insights Cost Management Alert. Experiencing high download queue backlog in production."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-insights-hccm-worker-queue-overload.rst"
 
+    - record: koku:celery:summary_queue
+      expr: max(summary_backlog{namespace="hccm-prod", pod=~".+worker.+"})
     - alert: App-cost-summary-queue-overload-In-hccm
-      expr:  max(summary_backlog{namespace="hccm-prod", pod=~".+worker.+"}) > 500
+      expr: koku:celery:summary_queue > 100
       for: 10m
       labels:
         severity: high
@@ -146,8 +150,10 @@ spec:
         message: "Insights Cost Management Alert. Experiencing high summary queue backlog in production."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-insights-hccm-worker-queue-overload.rst"
 
+    - record: koku:celery:priority_queue
+      expr: max(priority_backlog{namespace="hccm-prod", pod=~".+worker.+"})
     - alert: App-cost-priority-queue-overload-In-hccm
-      expr:  max(priority_backlog{namespace="hccm-prod", pod=~".+worker.+"}) > 500
+      expr: koku:celery:priority_queue > 100
       for: 10m
       labels:
         severity: high
@@ -160,8 +166,10 @@ spec:
         message: "Insights Cost Management Alert. Experiencing high priority queue backlog in production."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-insights-hccm-worker-queue-overload.rst"
 
+    - record: koku:celery:refresh_queue
+      expr: max(refresh_backlog{namespace="hccm-prod", pod=~".+worker.+"})
     - alert: App-cost-refresh-queue-overload-In-hccm
-      expr:  max(refresh_backlog{namespace="hccm-prod", pod=~".+worker.+"}) > 500
+      expr: koku:celery:refresh_queue > 100
       for: 10m
       labels:
         severity: high
@@ -174,8 +182,10 @@ spec:
         message: "Insights Cost Management Alert. Experiencing high refresh queue backlog in production."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-insights-hccm-worker-queue-overload.rst"
 
+    - record: koku:celery:cost_model_queue
+      expr: max(cost_model_backlog{namespace="hccm-prod", pod=~".+worker.+"})
     - alert: App-cost-cost-model-queue-overload-In-hccm
-      expr:  max(cost_model_backlog{namespace="hccm-prod", pod=~".+worker.+"}) > 500
+      expr: koku:celery:cost_model_queue > 100
       for: 10m
       labels:
         severity: high
@@ -188,8 +198,10 @@ spec:
         message: "Insights Cost Management Alert. Experiencing high cost-model queue backlog in production."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-insights-hccm-worker-queue-overload.rst"
 
+    - record: koku:celery:default_celery_queue
+      expr: max(default_backlog{namespace="hccm-prod", pod=~".+worker.+"})
     - alert: App-cost-celery-queue-overload-In-hccm
-      expr:  max(celery_backlog{namespace="hccm-prod", pod=~".+worker.+"}) > 500
+      expr: koku:celery:default_celery_queue > 100
       for: 10m
       labels:
         severity: high
@@ -200,6 +212,22 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net/d/R0HueuFGk/cost-management?orgId=1&var-Datasource=crcp01ue1-prometheus&var-namespace=hccm-prod&var-db_instance=cost-management-prod&var-rds_datasource=app-sre-prod-01-prometheus"
         link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/hccm-prod/deployments"
         message: "Insights Cost Management Alert. Experiencing high celery (default) queue backlog in production."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-insights-hccm-worker-queue-overload.rst"
+
+    - record: koku:celery:ocp_queue
+      expr: max(ocp_backlog{namespace="hccm-prod", pod=~".+worker.+"})
+    - alert: App-cost-celery-queue-overload-In-hccm
+      expr: koku:celery:ocp_queue > 100
+      for: 10m
+      labels:
+        severity: high
+        service: insights
+        env: prod
+        app_team: costmanagement
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/R0HueuFGk/cost-management?orgId=1&var-Datasource=crcp01ue1-prometheus&var-namespace=hccm-prod&var-db_instance=cost-management-prod&var-rds_datasource=app-sre-prod-01-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/hccm-prod/deployments"
+        message: "Insights Cost Management Alert. Experiencing high OCP queue backlog in production."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-insights-hccm-worker-queue-overload.rst"
 
     - alert: App-cost-pod-restarts-In-hccm
