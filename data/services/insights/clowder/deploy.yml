@@ -31,6 +31,7 @@ managedResourceTypes:
 - ServiceAccount
 - RoleBinding
 - ClusterRoleBinding
+- ValidatingWebhookConfiguration
 
 authentication:
   image:
@@ -50,6 +51,17 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/clowder/namespaces/fedramp-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-clowder-gh-build-catalog-master-upstream-RedHatInsights-clowder-gh-build-master
+    parameters:
+      WATCH_STRIMZI_RESOURCES: "true"
+      CREATE_SERVICE_MONITORS: "true"
+      TARGET_NAMESPACE: "clowder-system"
+  - namespace:
+      $ref: /services/insights/clowder/namespaces/ephem.yml
     ref: master
     upstream:
       instance:

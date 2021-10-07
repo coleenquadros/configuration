@@ -21,6 +21,7 @@ slack:
 
 managedResourceTypes:
 - ClowdApp
+- ConfigMap
 
 imagePatterns:
 - quay.io/cloudservices
@@ -43,21 +44,20 @@ resourceTemplates:
     disable: true # tells app-sre to not actually run the deploy job for this target
     ref: internal # altered by bonfire
     parameters:
-      IMAGE_TAG: 0e5117a
+      IMAGE_TAG: 318536c
       LOG_LEVEL: WARN
       MIN_REPLICAS: 1
       SOURCES_ENV: stage
       SOURCETYPE_SKIP_LIST: "my-source-type"
   - namespace:
       $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
-    ref: d8f4a619101c4d1357920f63fa13432ceaef688c
+    ref: cd276777a716ef39f889bc5a49974f82c068fa96
     parameters:
-      IMAGE_TAG: 0e5117a
+      IMAGE_TAG: 318536c
       KOKU_SOURCES_API_HOST: koku-clowder-sources-client.hccm-stage.svc.cluster.local
       CLOUD_METER_API_HOST: cloudigrade-api.cloudigrade-stage.svc.cluster.local
       LOG_LEVEL: WARN
       CONTAINER_LOG_LEVEL: DEBUG
-      DISABLE_ORG_ADMIN: "true"
       MIN_REPLICAS: 1
       SOURCES_ENV: stage
       SOURCETYPE_SKIP_LIST: ""
@@ -77,6 +77,21 @@ resourceTemplates:
       SOURCES_ENV: prod
       SOURCETYPE_SKIP_LIST: ""
       RBAC_PORT: '8080'
+- name: sources-api-go
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/sources-api-go
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true # tells app-sre to not actually run the deploy job for this target
+    ref: internal # altered by bonfire
+    parameters:
+      IMAGE_TAG: 5344b9b
+  - namespace:
+      $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
+    ref: b4eb57d8102ef4b63016c91a9f5d8786e9f6edb7
+    parameters:
+      IMAGE_TAG: 5344b9b
 - name: sources-monitor-go
   path: /deploy/clowdapp.yaml
   url: https://github.com/RedHatInsights/sources-monitor-go
