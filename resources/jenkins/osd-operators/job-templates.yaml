@@ -39,6 +39,21 @@
     <<: *gl_build_master
 
 - job-template:
+    id: 'gl-build-master-osd-backplane-bastion-infra-packer'
+    name: 'gl-build-master-osd-backplane-bastion-infra-packer'
+    build_deploy_script_path: ./packer/scripts/build.sh
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *srep_privatelink_aws_credentials
+        - *srep_backplane_bastion_ldap_creds
+    <<: *gl_timed
+
+- job-template:
     id: 'gl-build-master-custom-catalog-source'
     name: 'gl-build-master-custom-catalog-source'
     wrappers:
