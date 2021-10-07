@@ -331,8 +331,8 @@ At this point you should be able to access the cluster via the console / `oc` cl
         ```yaml
         ...
         records:
-        - { name: prometheus.<cluster_name>, type: CNAME, target_cluster: { $ref: /openshift/<cluster_name>/cluster.yml } }
-        - { name: alertmanager.<cluster_name>, type: CNAME, target_cluster: { $ref: /openshift/<cluster_name>/cluster.yml } }
+        - { name: prometheus.<cluster_name>, type: CNAME, _target_cluster: { $ref: /openshift/<cluster_name>/cluster.yml } }
+        - { name: alertmanager.<cluster_name>, type: CNAME, _target_cluster: { $ref: /openshift/<cluster_name>/cluster.yml } }
         ```
 
     1. Configure a [deadmanssnitch](https://deadmanssnitch.com/) snitch for the new cluster. The snitch settings should be as follow:
@@ -361,20 +361,20 @@ At this point you should be able to access the cluster via the console / `oc` cl
         # Prometheus
         ...
         - namespace:
-          $ref: /services/observability/namespaces/openshift-customer-monitoring.<cluster_name>.yml
-        ref: <sha>  # Use the same sha that existing entries are using
-        parameters:
-          CLUSTER_LABEL: <cluster_name>
-          ENVIRONMENT: The environment, usually one of [integration|staging|production]
-          EXTERNAL_URL: https://prometheus.<cluster_name>.devshift.net
+            $ref: /services/observability/namespaces/openshift-customer-monitoring.<cluster_name>.yml
+          ref: <sha>  # Use the same sha that existing entries are using
+          parameters:
+            CLUSTER_LABEL: <cluster_name>
+            ENVIRONMENT: The environment, usually one of [integration|staging|production]
+            EXTERNAL_URL: https://prometheus.<cluster_name>.devshift.net
         ...
         # Alertmanager
         - namespace:
-          $ref: /services/observability/namespaces/openshift-customer-monitoring.<cluster_name>.yml
-        ref: <sha>  # Use the same sha that existing entries are using
-        parameters:
-          ENVIRONMENT: The environment, usually one of [integration|staging|production]
-          EXTERNAL_URL: https://alertmanager.<cluster_name>.devshift.net
+            $ref: /services/observability/namespaces/openshift-customer-monitoring.<cluster_name>.yml
+          ref: <sha>  # Use the same sha that existing entries are using
+          parameters:
+            ENVIRONMENT: The environment, usually one of [integration|staging|production]
+            EXTERNAL_URL: https://alertmanager.<cluster_name>.devshift.net
         ```
 
         Note: The only entry that should not be using a specific SHA should be the app-sre-stage-01 cluster.  That cluster should be using a ref of master.
