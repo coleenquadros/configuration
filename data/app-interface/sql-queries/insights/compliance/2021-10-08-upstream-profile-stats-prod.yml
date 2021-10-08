@@ -1,0 +1,39 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+name: 2021-10-08-upstream-profile-stats-prod
+labels: {}
+namespace:
+  $ref: /services/insights/compliance/namespaces/compliance-prod.yml
+identifier: compliance-prod
+output: stdout
+queries:
+  - >-
+      SELECT "accounts"."account_number", "policies"."id" as "policy_id", "policies"."name" as "policy_name", COUNT("policy_hosts"."id") as "host_count" FROM "profiles"
+      INNER JOIN "profiles" "parent" ON "parent"."id" = "profiles"."parent_profile_id"
+      INNER JOIN "accounts" ON "accounts"."id" = "profiles"."account_id"
+      INNER JOIN "policies" ON "policies"."id" = "profiles"."policy_id"
+      INNER JOIN "policy_hosts" ON "policies"."id" = "policy_hosts"."policy_id"
+      INNER JOIN "test_results" ON "test_results"."profile_id" = "profiles"."id"
+      WHERE "profiles"."parent_profile_id" IS NOT NULL AND "parent"."upstream" = TRUE
+      GROUP BY "accounts"."account_number", "policies"."id", "policies"."name";
+  - >-
+      SELECT "accounts"."account_number", "policies"."id" as "policy_id", "policies"."name" as "policy_name", "profiles"."ref_id", COUNT("profile_rules"."id") as "rule_count", COUNT("policy_hosts"."id") as "host_count" FROM "profiles"
+      INNER JOIN "accounts" ON "accounts"."id" = "profiles"."account_id"
+      INNER JOIN "profile_rules" ON "profile_rules"."profile_id" = "profiles"."id"
+      INNER JOIN "rules" ON "rules"."id" = "profile_rules"."rule_id"
+      INNER JOIN "policies" ON "policies"."id" = "profiles"."policy_id"
+      INNER JOIN "policy_hosts" ON "policies"."id" = "policy_hosts"."policy_id"
+      WHERE "profiles"."parent_profile_id" IS NOT NULL AND "rules"."upstream" = FALSE
+      GROUP BY "accounts"."account_number", "policies"."id", "policies"."name", "profiles"."ref_id";
+  - >-
+      SELECT "rule_results"."result", COUNT("rule_results"."id") FROM "rule_results"
+      INNER JOIN "rules" ON "rules"."id" = "rule_results"."id"
+      WHERE "rules"."upstream" = TRUE GROUP BY "rule_results"."result";
+  - >-
+      SELECT COUNT("profiles"."id") as "old_upstream_profiles_without_results" FROM "profiles"
+      INNER JOIN "profiles" "parent" ON "parent"."id" = "profiles"."parent_profile_id"
+      LEFT OUTER JOIN "test_results" ON "test_results"."profile_id" = "profiles"."id"
+      WHERE "profiles"."parent_profile_id" IS NOT NULL
+        AND "parent"."upstream" = TRUE
+        AND "test_results"."id" IS NULL
+        AND "profiles"."updated_at" < date_trunc('day', NOW() - interval '6 month');
