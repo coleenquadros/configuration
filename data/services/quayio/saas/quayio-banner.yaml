@@ -1,0 +1,54 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: quayio
+
+name: quayio-banner
+description: quayio banner
+
+app:
+  $ref: /services/quayio/app.yml
+
+pipelinesProvider:
+  $ref: /services/quayio/pipelines/tekton.quayio-pipelines.app-sre-prod-01.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: oncall-quay
+
+managedResourceTypes:
+- Job
+
+imagePatterns:
+- quay.io/app-sre/quayio-update-banner-job
+
+parameters:
+  IMAGE: "quay.io/app-sre/quayio-update-banner-job"
+
+resourceTemplates:
+- name: quayio-update-banner-job
+  path: /openshift.yml
+  url: https://github.com/quay/update-banner-job
+  targets:
+  - namespace:
+      $ref: /services/quayio/namespaces/quays02ue1.yml
+    ref: 8020adaf3fc80aa4277efd58eca6b2a7a443362f
+    parameters:
+      JOB_NAME: "2021-10-09-banner-update-1" # provide_a_unique_job_name_to_trigger_job
+      ACTIVE_DEADLINE_SECONDS: "600"
+      DB_HOST_SECRET: "quayio-stage-57-rds"
+      DB_CREDS_SECRET: "quayio-stage-57-rds"
+      MESSAGES: "[\"On 1st November, 2021, 9:00 AM EST, Quay.io will be undergoing a READ-ONLY maintenance for 24 hours. During this time, pulls will work normally but other features like pushes, builders, new security scans will be unavailable\", \"Quay.io now supports Red Hat Single Sign-On Services exclusively. If you haven't done so already, you need to link your Quay.io login to a redhat.com account in order to be able to login to the web interface by going to the [recovery endpoint](https://recovery.stage.quay.io). CLI tokens and robot accounts are not impacted. Read more about this change in the [FAQ.](https://access.redhat.com/articles/5925591).\"]"
+      SEVERITY: "info"
+  - namespace:
+      $ref: /services/quayio/namespaces/quayp05ue1.yml
+    ref: 8020adaf3fc80aa4277efd58eca6b2a7a443362f
+    parameters:
+      JOB_NAME: "2021-10-09-banner-update-1" # provide_a_unique_job_name_to_trigger_job
+      ACTIVE_DEADLINE_SECONDS: "600"
+      DB_HOST_SECRET: "quay-db-config-secret"
+      DB_CREDS_SECRET: "quay-db-config-secret"
+      MESSAGES: "[\"On 1st November, 2021, 9:00 AM EST, Quay.io will be undergoing a READ-ONLY maintenance for 24 hours. During this time, pulls will work normally but other features like pushes, builders, new security scans will be unavailable.\", \"Quay.io now supports Red Hat Single Sign-On Services exclusively. If you haven't done so already, you need to link your Quay.io login to a redhat.com account in order to be able to login to the web interface by going to the [recovery endpoint](https://recovery.quay.io). CLI tokens and robot accounts are not impacted. Read more about this change in the [FAQ.](https://access.redhat.com/articles/5925591)\"]"
+      SEVERITY: "info"
