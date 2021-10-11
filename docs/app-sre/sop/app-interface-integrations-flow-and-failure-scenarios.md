@@ -91,3 +91,11 @@ happens:
    ``` bash
    terraform state rm $parameter_group
    ```
+
+### Delete terraform resources
+
+Terraform managed resources are not deleted during normal reconcile runs. If resources need to be deleted, the
+`terraform-resources` integration will complain about `deletion action not enabled`.
+
+Follow the [How to safely delete terraform managed resources](delete-terraform-resources.md) guide to resolve
+this situation.
