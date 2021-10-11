@@ -41,6 +41,11 @@ Merge the MR.
 Look up the account(s) from the `terraformResources` affected by the MR. Each account will be used as `<account>`
 within the commands used in this guide.
 
+> ***NOTE***
+>
+> If the config.toml points to a local `qontract-server` make sure to pull latest `app-interface`
+> changes to your local repo.
+
 Run the following command and look for common errors.
 
 ```bash
