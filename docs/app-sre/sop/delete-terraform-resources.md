@@ -19,7 +19,7 @@ resource deletion.
 
 > ***NOTE***
 > 
-> While the terraform-resources and terraform-resources-wrapper integrations are disabled, problematic app-interface
+> While the `terraform-resources` and `terraform-resources-wrapper` integrations are disabled, problematic app-interface
 > changes handled by those integrations are not detected during PR checks and therefore would not prevent a merge.
 > Disabling the `gitlab-housekeeping` integration prevents automatic merges for the time being. Try to finish your
 > changes in a timely manner.
@@ -61,7 +61,7 @@ resources.
 > ***NOTE***
 > 
 > Since the local `qontract-reconcile` run does not specify any environment variables to configure
-> [unleash](https://app-interface.unleash.devshift.net/), the terraform-resources integration can be executed 
+> [unleash](https://app-interface.unleash.devshift.net/), the `terraform-resources` integration can be executed 
 > locally without being affected by the disabled feature flag.
 
 When you are confident, that only the "right" terraform managed resources are going to be deleted, execute the following
@@ -81,7 +81,7 @@ proceed with the following fallback procedure. This procedure is not without ris
 another team member.
 
 First use `qontract-reconcile` with the `--print-only` option to generate the terraform file into a freshly 
-created directly
+created directory.
 
 ```bash
 mkdir <a-tmp-dir>
