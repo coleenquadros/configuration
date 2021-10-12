@@ -119,7 +119,6 @@ Every AppSRE/MT-SRE engineer should have access to the following:
     * Jira boards [Sprint Board](https://issues.redhat.com/secure/RapidBoard.jspa?rapidView=5536) & [SD Epics](https://issues.redhat.com/projects/SDE)
 * github.com/openshift
   * ACCESS: https://source.redhat.com/groups/public/atomicopenshift/atomicopenshift_wiki/openshift_onboarding_checklist_for_github
-  * Ping [Bill Dettelback](https://rover.redhat.com/people/profile/bdettelb) on slack or mail for access to [quay github org](https://github.com/quay)
 * Bugzilla
   * ACCESS: Ensure you have access to [bugzilla](https://bugzilla.redhat.com)
     * Login as Red Hat Associate with kerberos credentials
