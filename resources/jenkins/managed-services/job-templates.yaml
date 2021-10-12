@@ -476,6 +476,80 @@
         description: 'The variables needed to configure the test case to be executed'
     branch: '${{BRANCH}}'
     <<: *gl_checkout
+    builders:
+      - shell: |
+          ./scripts/pipeline_kas_perf_tests.sh
+    artifacts_path: 'target/logs/**, output_charts/**'
+    publishers:
+    - archive:
+        artifacts: '{artifacts_path}'
+        allow-empty: true
+    - <<: *slack_notify
+
+- job-template:
+    id: managed-kafka-perf-tests-1hr-integration
+    name: "managed-kafka-perf-tests-1hr-integration"
+    wrappers:
+      - timestamps
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *ci_test_token
+            - *fault_tests_secret
+            - *github_token
+    concurrent: true
+    parameters:
+    - string:
+        name: BRANCH
+        default: '{default_branch}'
+        description: 'The branch of mk-performance-tests repo you want to run the pipeline against. Defaults to master'
+    - string:
+        name: TESTCASE
+        default: 'io.kafka.performance.KafkaInstanceScalingSmallTestDecoupled#testClusterMaxKafkaValueProdBinPacking'
+        description: 'maven parameter for executing specific tests'
+    - string:
+        name: KAFKA_OSD_CLUSTER_CONFIG
+        default: 'COMPUTE_NODES_COUNT=6,
+         COMPUTE_MACHINE_TYPE=m5.4xlarge,
+         OCM_CLUSTER_REGION=us-east-1,
+         MULTI_AZ=true'
+        description: 'The variables needed to provision an OSD where kafka will be installed'
+    - string:
+        name: OMB_OSD_CLUSTER_CONFIG
+        default: 'COMPUTE_NODES_COUNT=2,
+         COMPUTE_MACHINE_TYPE=m5.4xlarge,
+         OCM_CLUSTER_REGION=us-east-1,
+         MULTI_AZ=false'
+        description: 'The variables needed to provision an OSD where OMB will be installed'
+    - string:
+        name: NUMBER_OF_KAFKA_INSTANCES
+        default: '1'
+    - string:
+        name: KAFKA_CAPACITY_CONFIG
+        default: 'INGRESS_THROUGHPUT=30Mi,
+         TOTAL_MAX_CONNECTIONS=500,
+         MAX_DATA_RETENTION_SIZE=1000Gi,
+         MAX_PARTITIONS=500,
+         MAX_DATA_RETENTION_PERIOD=P14D,
+         MAX_CONNECTION_ATTEMPTS_PER_SEC=100'
+        description: 'The variables needed to configure the kafka installation'
+    - string:
+        name: TEST_EXECUTION_CONFIG
+        default: 'OMB_TEST_DURATION=PT60M, 
+         TARGET_RATE=29, 
+         WORKERS_PER_INSTANCE=2, 
+         TOPICS_PER_KAFKA=1, 
+         PRODUCERS_PER_TOPIC=1, 
+         PAYLOAD_FILE_SIZE=1013Ki,
+         PARTITIONS_PER_TOPIC=9,
+         SUBSCRIPTIONS_PER_TOPIC=1,
+         CONSUMER_PER_SUBSCRIPTION=1'
+        description: 'The variables needed to configure the test case to be executed'
+    branch: '${{BRANCH}}'
+    <<: *gl_checkout
     <<: *gl_timed
     builders:
       - shell: |
