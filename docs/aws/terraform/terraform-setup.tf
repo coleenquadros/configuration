@@ -21,7 +21,7 @@ output "terraform-aws_secret_access_key" {
 }
 
 resource "aws_s3_bucket" "terraform-bucket" {
-  bucket = "<terraform_bucket_name>"
+  bucket = "<terraform_bucket_name>" # usually "terraform-<account_name>"
   acl = "private"
 
   versioning {

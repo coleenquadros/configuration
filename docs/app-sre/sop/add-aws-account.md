@@ -17,7 +17,7 @@ Once this information is obtained the process is basically a few steps:
 
 ## Bootstrap terraform
 
-See https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/aws/terraform
+See [Terraform init via terraform](docs/aws/terraform)
 
 ## Create a vault secret with AWS credential information
 
