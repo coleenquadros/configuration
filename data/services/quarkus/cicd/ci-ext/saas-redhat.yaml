@@ -5,7 +5,7 @@ labels:
   service: quarkus
 
 name: saas-quarkus-redhat
-description: 'SaaS tracking file for Quarkus Red Hat'
+description: SaaS tracking file for Quarkus Red Hat
 
 app:
   $ref: /services/quarkus/app.yml
@@ -24,14 +24,47 @@ managedResourceTypes:
 
 imagePatterns:
 - quay.io/redhat-developer/code-quarkus
+- quay.io/quarkus/code-quarkus-api
 
 resourceTemplates:
-- name: code-quarkus-redhat
+# Backend
+- name: code-quarkus-api
+  url: https://github.com/quarkusio/code.quarkus.io
+  path: /openshift/code-quarkus-api.yaml
+  targets:
+  - namespace:
+      $ref: /services/quarkus/namespaces/code-quarkus-redhat-stage.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: quarkusio-code.quarkus.io-gh-build-main
+    parameters:
+      REPLICAS: 1
+      IO_QUARKUS_CODE_HOSTNAME: code.quarkus.stage.redhat.com
+      IO_QUARKUS_CODE_GA_EXTENSIONS_DIMENSION_INDEX: 5
+      IO_QUARKUS_CODE_GA_QUARKUS_VERSION_DIMENSION_INDEX: 6
+      IO_QUARKUS_CODE_GA_BUILD_TOOL_DIMENSION_INDEX: 7
+      IO_QUARKUS_CODE_GA_EXTENSION_QUANTITY_INDEX: 8
+      IO_QUARKUS_CODE_GA_BATCHING_ENABLED: "false"
+    promotion:
+      publish:
+        - code-quarkus-redhat-api-stage-deploy-success-channel
+  - namespace:
+      $ref: /services/quarkus/namespaces/code-quarkus-redhat-production.yml
+    ref: e899b9a0df993ffb9d274c775c933172abc6b973
+    parameters:
+      REPLICAS: 3
+      IO_QUARKUS_CODE_HOSTNAME: code.quarkus.redhat.com
+      IO_QUARKUS_CODE_GA_EXTENSIONS_DIMENSION_INDEX: 1
+      IO_QUARKUS_CODE_GA_QUARKUS_VERSION_DIMENSION_INDEX: 2
+      IO_QUARKUS_CODE_GA_BUILD_TOOL_DIMENSION_INDEX: 3
+      IO_QUARKUS_CODE_GA_EXTENSION_QUANTITY_INDEX: 4
+
+# Frontend
+- name: code-quarkus-redhat-frontend
   url: https://github.com/redhat-developer/code.quarkus.redhat.com
-  path: /code.quarkus.io/openshift/template.yaml
-  parameters:
-    IMAGE: quay.io/redhat-developer/code-quarkus
-    IO_QUARKUS_CODE_GA_BATCHING_ENABLED: "false"
+  path: /openshift/code-quarkus-frontend.yaml
   targets:
   - namespace:
       $ref: /services/quarkus/namespaces/code-quarkus-redhat-stage.yml
@@ -40,13 +73,23 @@ resourceTemplates:
       instance:
         $ref: /dependencies/ci-ext/ci-ext.yml
       name: redhat-developer-code.quarkus.redhat.com-gh-build-main
+    promotion:
+      publish:
+        - code-quarkus-redhat-frontend-stage-deploy-success-channel
+  - namespace:
+      $ref: /services/quarkus/namespaces/code-quarkus-redhat-production.yml
+    ref: e10a641d8388489b7bbbee33849a1bdfc897ea92
     parameters:
-      REPLICAS: 1
-      IO_QUARKUS_CODE_HOSTNAME: code.quarkus.stage.redhat.com
-      IO_QUARKUS_CODE_GA_EXTENSIONS_DIMENSION_INDEX: 5
-      IO_QUARKUS_CODE_GA_QUARKUS_VERSION_DIMENSION_INDEX: 6
-      IO_QUARKUS_CODE_GA_BUILD_TOOL_DIMENSION_INDEX: 7
-      IO_QUARKUS_CODE_GA_EXTENSION_QUANTITY_INDEX: 8
+      REPLICAS: 3
+
+# Legacy
+- name: code-quarkus-redhat
+  url: https://github.com/redhat-developer/code.quarkus.redhat.com
+  path: /code.quarkus.io/openshift/template.yaml
+  parameters:
+    IMAGE: quay.io/redhat-developer/code-quarkus
+    IO_QUARKUS_CODE_GA_BATCHING_ENABLED: "false"
+  targets:
   - namespace:
       $ref: /services/quarkus/namespaces/code-quarkus-redhat-production.yml
     ref: 36ae52d6dbb454487cdc5c8df0a1b0e5bbea882f
@@ -57,3 +100,4 @@ resourceTemplates:
       IO_QUARKUS_CODE_GA_QUARKUS_VERSION_DIMENSION_INDEX: 2
       IO_QUARKUS_CODE_GA_BUILD_TOOL_DIMENSION_INDEX: 3
       IO_QUARKUS_CODE_GA_EXTENSION_QUANTITY_INDEX: 4
+
