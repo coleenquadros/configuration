@@ -94,14 +94,14 @@ Switch to this directory, initialize terraform and execute the plan command
 ```bash
 cd <a-tmp-dir>
 terraform init
-terraform -out plan <account>
+terraform plan -out output-plan-file
 ```
 
 Check for hints about what resources are going to be destroyed and then continue with the actual resource deletion
 with terraform apply:
 
 ```bash
-terraform apply <account
+terraform apply output-plan-file
 ```
 
 ## Re-enable integrations
