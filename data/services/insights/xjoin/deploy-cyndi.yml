@@ -42,7 +42,7 @@ authentication:
     field: openshift-saas-deploy
 
 parameters:
-  VALIDATION_THRESHOLD: "1"
+  VALIDATION_THRESHOLD: "5"
   INSIGHTS_ONLY: "true"
   MAX_AGE: "45"
 
@@ -65,6 +65,8 @@ resourceTemplates:
         $ref: /dependencies/ci-int/ci-int.yml
       name: RedHatInsights-cyndi-operator-gh-build-catalog-master-upstream-RedHatInsights-cyndi-operator-gh-build-master
     parameters:
+      REFRESH: "1633013215"
+      SSL_MODE: require
       SOURCE_NAMESPACE: xjoin-stage
       TARGET_NAMESPACE: xjoin-stage
   - namespace:
@@ -78,15 +80,23 @@ resourceTemplates:
       CONNECT_CLUSTER: cyndi-connect
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
-    ref: 2ff1150956219b270e3dc49469fdc44b0ed8008c
+    ref: 8e1a85d2f428435914e5fc6d92ef21950df9268f
     parameters:
+      SSL_MODE: require
       SOURCE_NAMESPACE: xjoin-prod
       TARGET_NAMESPACE: xjoin-prod
       MAX_AGE: "46"
   - namespace:
       $ref: /services/insights/xjoin/namespaces/cyndi-fedramp-prod.yml
-    ref: 2ff1150956219b270e3dc49469fdc44b0ed8008c
+    ref: 8e1a85d2f428435914e5fc6d92ef21950df9268f
     parameters:
+      CONNECT_CLUSTER: cyndi-connect
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/cyndi-perf.yml
+    ref: 8e1a85d2f428435914e5fc6d92ef21950df9268f
+    parameters:
+      SOURCE_NAMESPACE: cyndi-perf
+      TARGET_NAMESPACE: cyndi-perf
       CONNECT_CLUSTER: cyndi-connect
   # Ephemeral cluster
   # Unlike in stable environments where the operator is deployed in SingleNamespace mode,
@@ -104,10 +114,10 @@ resourceTemplates:
       name: RedHatInsights-cyndi-operator-gh-build-catalog-master-upstream-RedHatInsights-cyndi-operator-gh-build-master
 
 - name: cyndi-kafka-connect
-  path: /deploy/kafka-connect-fedramp.yml
+  path: /deploy/kafka-connect-fedramp-cyndi.yml
   url: https://github.com/RedHatInsights/xjoin-kafka-connect
   parameters:
-    VERSION: '2.5.0'
+    VERSION: '2.7.0'
     CPU_LIMITS: 3
     XMX: 8G
     XMS: 8G
@@ -131,7 +141,34 @@ resourceTemplates:
       name: RedHatInsights-xjoin-kafka-connect-gh-build-master
   - namespace:
       $ref: /services/insights/xjoin/namespaces/cyndi-fedramp-prod.yml
-    ref: 182ab8b1b311fb449917c363f4564b8e569ac606
+    ref: 347c7728000e8f3edb930e98a0588af53f4ebd99
+    parameters:
+      IMAGE_TAG: 347c772
+
+- name: cyndi-kafka-connect
+  path: /deploy/kafka-connect.yml
+  url: https://github.com/RedHatInsights/xjoin-kafka-connect
+  parameters:
+    VERSION: '2.7.0'
+    CPU_LIMITS: 3
+    XMX: 1G
+    XMS: 1G
+    CPU_REQUESTS: 250m
+    NUM_REPLICAS: '1'
+    MEMORY_REQUESTS: 1Gi
+    MEMORY_LIMITS: 2Gi
+    KAFKA_BOOTSTRAP_PORT: '9092'
+    GROUP_ID: cyndi
+    STORAGE_TOPIC_PREFIX: cyndi
+    NAME_PREFIX: cyndi-connect
+    KAFKA_USER: kafka-cyndi
+    LOG_LEVEL: INFO
+  targets:
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/cyndi-perf.yml
+    ref: 347c7728000e8f3edb930e98a0588af53f4ebd99
+    parameters:
+      IMAGE_TAG: 347c772
 
 - name: cyndi-kafka-user
   path: /deploy/kafka-user.yaml

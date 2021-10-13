@@ -45,6 +45,7 @@ resourceTemplates:
     ref: internal  # populated by bonfire
     parameters:
       KAFKA_GROUPID: processor-pr
+      RBAC_URL: 'http://rbac-service:8000'
   - namespace:
       $ref: /services/insights/tower-analytics/namespaces/stage-tower-analytics-stage.yml
     ref: main
@@ -55,6 +56,7 @@ resourceTemplates:
       REPLICAS_ROLLUP: 3
       REPLICAS_PROCESSOR: 3
       REPLICAS_EXPORTER: 1
+      REPLICAS_DEBUG: 1
       RBAC_ENABLED: 'True'
       KAFKA_GROUPID: processor-stage
       PROMETHEUS_PUSH_GATEWAY: ${PROMETHEUS_PUSHGATEWAY}
@@ -64,12 +66,13 @@ resourceTemplates:
       CRON_SCHEDULE_USER_METRICS: 0 10 * * *
       DATA_EXPORT_BUCKET_NAME: tower-analytics-dbdumps-stage-s3
       DATA_EXPORT_ENABLED: 'True'
+      RECOVERY_BUCKET_NAME: tower-analytics-recovery-stage-s3
     promotion:
       publish:
       - automation-analytics-stage-deploy-success-channel
   - namespace:
       $ref: /services/insights/tower-analytics/namespaces/tower-analytics-prod.yml
-    ref: 652950bc0ed681ee60179611d0572c830d63ef09
+    ref: 3bab548ad61f5cc49df3e0060a24d609f9b47558
     parameters:
       ENV_NAME: prod
       REPLICAS_API: 20
@@ -77,6 +80,7 @@ resourceTemplates:
       REPLICAS_ROLLUP: 3
       REPLICAS_PROCESSOR: 3
       REPLICAS_EXPORTER: 8
+      REPLICAS_DEBUG: 0
       MEMORY_LIMIT_EXPORTER: 4Gi
       RBAC_ENABLED: 'True'
       KAFKA_GROUPID: processor
@@ -88,3 +92,4 @@ resourceTemplates:
       DATA_EXPORT_BUCKET_NAME: tower-analytics-dbdumps-prod
       DATA_EXPORT_ENABLED: 'True'
       JOBS_LOG_LEVEL: INFO
+      RECOVERY_BUCKET_NAME: tower-analytics-recovery-prod

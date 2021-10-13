@@ -10,13 +10,16 @@ The `Account ID` and the `AccessKey` and `SecretAccessKey` information should be
 
 Once this information is obtained the process is basically a few steps:
 
+1. Bootstrap terraform
 1. Create a vault secret with AWS credential information
-1. Create the terraform user for our integrations
-1. Create an S3 bucket for terraform state
 1. Add the AWS account information to app-interface
 1. Update the credentials in vault to use those from the terraform user
 
-## Create Vault secret
+## Bootstrap terraform
+
+See [Terraform init via terraform](docs/aws/terraform)
+
+## Create a vault secret with AWS credential information
 
 The authentication information for AWS used by our integrations is located in [vault](https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/terraform).  Each AWS account is a separate secret under this path.  Create a new secret here named like:
 
@@ -25,17 +28,6 @@ app-sre/creds/terraform/<account_name>/config
 ```
 
 You can copy all the fields from another secret except for the 3 fields that are unique: aws_access_key_id, aws_secret_access_key, bucket.  Those three keys must be specific to this AWS account. Set the `aws_access_key_id` key to the `AccessKey` and the `aws_secret_access_key` to the `SecretAccessKey` from the admin account provided by whomever setup the AWS account.  The `bucket` key generally follows the convention of `<account_name>-tf-state`, but can valid S3 bucket name.  Usually terraform state buckets are in the `us-east-1` region so it's okay to copy that value as is from another config.  However, if the state bucket is to be in any other region then make sure to update the `region` key in the secret to the appropriate region and provide that region below when creating/updating the bucket.
-
-## Create the S3 terraform bucket
-
-Use the aws cli to create the S3 terraform state bucket with versioning enabled:
-
-```shell
-aws --profile ocm-quay s3api create-bucket --bucket <bucket> --region <region>
-aws --profile ocm-quay s3api put-bucket-versioning --bucket <bucket> --region <region> --versioning-configuration Status=Enabled
-```
-
-The `<bucket>` name and the `<region>` are the same as what was created in the vault secret in the previous step.
 
 ## Add the AWS account information to app-interface
 
@@ -191,7 +183,3 @@ Add this role to the compansion AppSRE user's file.  The AppSRE user will then b
 Once this AppSRE team member has access to the AWS account, follow the steps to create the [terraform user](#create-terraform-user-account) and cycle credentials in vault.  Once the `terraform` user account has been created and the credentials updated in vault, delete the user account causing problems.
 
 Now follow the steps to [add all AppSRE users](#add-appsre-users) to the aws account and remove the temporary role file created in step.
-
-## Create terraform user account
-
-At this point you should be able to log into the AWS account with your own credentials as an Admin user.  Create a user with the name `terraform` with AWS access type: `Programmatic access`.  On the set permissions screen select `Attach existing policies directly` and choose `AdministratorAccess`.  When this user is created an `AccessKey` and `SecretAccessKey` will the provided on screen.  Copy these values and replace them with the ones set in vault.

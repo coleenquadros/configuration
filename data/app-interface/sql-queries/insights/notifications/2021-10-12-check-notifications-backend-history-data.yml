@@ -1,0 +1,11 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2021-10-12-check-notifications-backend-history-data
+namespace:
+  $ref: /services/insights/notifications/namespaces/notifications-prod.yml
+identifier: notifications-backend-prod
+output: stdout
+queries:
+  # Identify the endpoints histories that may have caused a production outage.
+  - "select nh.endpoint_id, e.account_id, count(nh.id) from notification_history nh, endpoints e where nh.endpoint_id = e.id group by nh.endpoint_id, e.account_id order by count(nh.id) desc limit 20;"

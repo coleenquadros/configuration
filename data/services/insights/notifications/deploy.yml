@@ -41,61 +41,83 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
-    ref: 4c52038cac4be74c3b53f16de488296b7bc90d53
+    ref: 62c1841cf57c1d12bb4518bbe4a98f43de350596
     parameters:
-      IMAGE_TAG: e948364
+      IMAGE_TAG: 5b55031
       DB_SECRET_NAME: notifications-backend-db
       SENTRY_ENABLED: true
       CLOUDWATCH_LOGGING_ENABLED: true
+      CRONJOB_ENABLED: false
       COMPONENT_DEBUG_LEVEL: DEBUG
       PROCESSOR_EMAIL_NO_REPLY: no-reply-stage@redhat.com
-      REPLICAS: 1
+      REPLICAS: 3
+      CPU_REQUEST: 200m
+      MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_INTERVAL_MS: 1200000
+      MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_RECORDS: 100
+    promotion:
+      publish:
+      - notifications-stage-deploy-success-channel
   - namespace:
       $ref: /services/insights/notifications/namespaces/notifications-prod.yml
-    ref: fecfb7b60b152d3d1a569a79a0fb79ff5aaccc3a
+    ref: 48e58cc841fbb917b21884b6577899cff8f88d82
     parameters:
-      IMAGE_TAG: 97db004
+      IMAGE_TAG: 3637eaa
       DB_SECRET_NAME: notifications-backend-db
       SENTRY_ENABLED: true
       CLOUDWATCH_LOGGING_ENABLED: true
+      CRONJOB_ENABLED: false
       COMPONENT_DEBUG_LEVEL: DEBUG
       PROCESSOR_EMAIL_NO_REPLY: no-reply@redhat.com
       REPLICAS: 1
       MEMORY_LIMIT: 4Gi
       CPU_LIMIT: 3
+      MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_INTERVAL_MS: 1200000
+      MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_RECORDS: 100
 - name: notifications-aggregator
   path: /templates/notifications/notifications-aggregator.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
   targets:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
-    ref: 26d0f2a187f815de6eff97deef48871716f56a7a
+    ref: 62c1841cf57c1d12bb4518bbe4a98f43de350596
     parameters:
-      IMAGE_TAG: 602c34d
+      IMAGE_TAG: 5b55031
+      CRONTAB_AGGREGATION_JOB: 0 * * * *
       DB_SECRET_NAME: notifications-backend-db
       SENTRY_ENABLED: true
       CLOUDWATCH_LOGGING_ENABLED: true
+      CRONJOB_ENABLED: true
       COMPONENT_DEBUG_LEVEL: DEBUG
-      PROCESSOR_EMAIL_NO_REPLY: no-reply-stage@redhat.com
-      REPLICAS: 1
+      CPU_REQUEST: 200m
+  - namespace:
+      $ref: /services/insights/notifications/namespaces/notifications-prod.yml
+    ref: 56301cd3dbf085fdff509ffdd0319b8848ecc887
+    parameters:
+      IMAGE_TAG: 51f2362
+      DB_SECRET_NAME: notifications-backend-db
+      SENTRY_ENABLED: true
+      CLOUDWATCH_LOGGING_ENABLED: true
+      CRONJOB_ENABLED: true
+      COMPONENT_DEBUG_LEVEL: DEBUG
 - name: notifications-gw
   path: /templates/notifications/notifications-gw.yaml
   url: https://gitlab.cee.redhat.com/insights-platform/saas-templates
   targets:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
-    ref: 4c52038cac4be74c3b53f16de488296b7bc90d53
+    ref: 62c1841cf57c1d12bb4518bbe4a98f43de350596
     parameters:
-      IMAGE_TAG: 1d3c45f
+      IMAGE_TAG: 9d42ee0
       SENTRY_ENABLED: true
       CLOUDWATCH_LOGGING_ENABLED: true
       COMPONENT_DEBUG_LEVEL: DEBUG
-      REPLICAS: 1
+      REPLICAS: 3
+      CPU_REQUEST: 200m
   - namespace:
       $ref: /services/insights/notifications/namespaces/notifications-prod.yml
-    ref: fecfb7b60b152d3d1a569a79a0fb79ff5aaccc3a
+    ref: 56301cd3dbf085fdff509ffdd0319b8848ecc887
     parameters:
-      IMAGE_TAG: 3634ea1
+      IMAGE_TAG: 9d42ee0
       SENTRY_ENABLED: true
       CLOUDWATCH_LOGGING_ENABLED: true
       COMPONENT_DEBUG_LEVEL: DEBUG

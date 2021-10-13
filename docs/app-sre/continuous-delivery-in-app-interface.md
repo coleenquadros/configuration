@@ -52,7 +52,7 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
 * `takeover` - (optional) if set to true, the specified `managedResourceTypes` will be managed exclusively
 * `compare` - (optional) if set to false, the job does not compare desired to current resource and applies all resources even if they have not changed
 * `timeout` - (optional) set a timeout in minutes for the deployment job ([default](https://gitlab.cee.redhat.com/service/app-interface/-/blob/2581e30973e9ead6611d6fa1b0fa7dc34d41e63d/resources/jenkins/global/defaults.yaml#L24))
-* `publishJobLogs` - (optional) if this is a [saas file running post-deployment tests](/docs/app-sre/continuous-testing-in-app-interface.md), set this to `true` to publish Jobs' pods logs as artifacts in the Jenkins job.
+* `publishJobLogs` - (optional) if this is a [saas file running post-deployment tests](/docs/app-sre/continuous-testing-in-app-interface.md), set this to `true` to publish Job's pods logs as artifacts in the Jenkins job.
 * `clusterAdmin` - (optional) set this to `true` if the resources deployed in the saas file require cluster-admin permissions (CRDs for example).
 * `imagePatterns` - a list of strings specifying allowed images to deploy
     * examples: `quay.io/app-sre`, `quay.io/prom/prometheus`
@@ -207,10 +207,12 @@ Each user with this role can approve MRs by adding a `/lgtm` comment in the MR i
     - `ref`
     - `parameters`
     - `disable`
-- all tests are passing succesfully 
+- all tests are passing successfully
 - approving user is an owner of the saas file in a merged version in app-interface (prevent privilege escalation). [Read more](/docs/app-sre/sop/app-interface-integrations-flow-and-failure-scenarios.md)
 
 If a `/lgtm` comment is added and all conditions are valid, an `approved` label will be automatically added to the MR, and it will be automatically rebased and merged within a few minutes.
+
+If any of the above conditions is not met, a member of the App SRE team needs to review the MR and label it with `lgtm` when it is good to go. Reviews are being performed regularly during working hours. As mentioned in the [app-interface etiquette](/README.md#app-interface-etiquette), no need to ping any App SRE team member.
 
 Can I get pinged on merge requests updating saas files I am an approver for? Yes! Add `tag_on_merge_requests: true` to your user file.
 

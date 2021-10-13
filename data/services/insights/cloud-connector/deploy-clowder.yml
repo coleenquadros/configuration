@@ -21,6 +21,7 @@ slack:
 
 managedResourceTypes:
 - ClowdApp
+- Service
 
 imagePatterns:
 - quay.io/cloudservices
@@ -35,33 +36,44 @@ resourceTemplates:
   path: /deploy/clowdapp.yml
   url: https://github.com/RedHatInsights/cloud-connector
   targets:
-#   - namespace:
-#       $ref: /services/insights/cloud-connector/namespaces/stage-cloud-connector-stage.yml
-#     ref: master
-#     parameters:
-#       IMAGE: quay.io/cloudservices/cloud-connector-gateway
-#       IMAGE_TAG: ce142de
-#       ENV_NAME: stage
-#       GATEWAY_CONNECTION_REGISTRAR_IMPL: redis
-#       SUSPEND_STALE_CONN_JOB: true
-#       PROMETHEUS_PUSH_GATEWAY: ${PROMETHEUS_PUSHGATEWAY}
-  # - namespace:
-  #     $ref: /services/insights/cloud-connector/namespaces/perf-cloud-connector-perf.yml
-  #   ref: 51feeed82c093f99ba24f69848431836e25cc96a
-  #   parameters:
-  #     IMAGE_TAG: 86ab072
-  #     GATEWAY_CONNECTION_REGISTRAR_IMPL: redis
-  #     SUSPEND_STALE_CONN_JOB: true
-  #     PROMETHEUS_PUSH_GATEWAY: "prometheus-push.insights-push-perf.svc.cluster.local:9091"
-  # - namespace:
-  #     $ref: /services/insights/cloud-connector/namespaces/cloud-connector-prod.yml
-  #   ref: 65812ddd67aa00f33329fc26aaac52ae55940164
-  #   parameters:
-  #     IMAGE_TAG: 86ab072
-  #     GATEWAY_CONNECTION_REGISTRAR_IMPL: redis
-  #     SUSPEND_STALE_CONN_JOB: false
-  #     PROMETHEUS_PUSH_GATEWAY: "prometheus-push.insights-push-prod.svc.cluster.local:9091"
-  #     GATEWAY_REPLICAS: 3
+  - namespace:
+      $ref: /services/insights/cloud-connector/namespaces/stage.yml
+    ref: 0578bb793f53f4d3adc06f6823bea0894d209df7
+    parameters:
+      IMAGE: quay.io/cloudservices/cloud-connector
+      IMAGE_TAG: 0578bb7
+      ENV_NAME: stage
+      LOG_LEVEL: DEBUG
+      MQTT_BROKER_ADDRESS: wss://connect.${PLATFORM_HOSTNAME}:443
+      MQTT_TOPIC_PREFIX: redhat
+      AUTH_GATEWAY_URL: http://apicast.3scale-stage.svc.cluster.local:8892/internal/certauth
+      SOURCES_BASE_URL: http://${SOURCES_HOST}:${SOURCES_PORT}
+      CLIENT_ID_TO_ACCOUNT_ID_IMPL: bop
+      SOURCES_RECORDER_IMPL: sources
+      CONNECTED_CLIENT_RECORDER_IMPL: inventory
+      CONNECTION_PER_ACCOUNT_REPORTER_SCHEDULE: "*/5 * * * *"
+      API_REPLICAS: 1
+      MQTT_CONSUMER_REPLICAS: 1
+      KAFKA_CONSUMER_REPLICAS: 1
+      RHC_MESSAGE_KAFKA_BATCH_SIZE: 1
+  - namespace:
+      $ref: /services/insights/cloud-connector/namespaces/prod.yml
+    ref: 13bd88e45806d7cda2edfc5f2b9035deba4c2ccd
+    parameters:
+      IMAGE: quay.io/cloudservices/cloud-connector
+      IMAGE_TAG: 7fa4c67
+      ENV_NAME: prod
+      LOG_LEVEL: DEBUG
+      MQTT_BROKER_ADDRESS: wss://connect.${PLATFORM_HOSTNAME}:443
+      MQTT_TOPIC_PREFIX: redhat
+      AUTH_GATEWAY_URL: http://apicast.3scale-prod.svc.cluster.local:8893/internal/certauth
+      SOURCES_BASE_URL: http://${SOURCES_HOST}:${SOURCES_PORT}
+      CLIENT_ID_TO_ACCOUNT_ID_IMPL: bop
+      SOURCES_RECORDER_IMPL: sources
+      CONNECTED_CLIENT_RECORDER_IMPL: inventory
+      REPLICAS_API: 1
+      CONNECTION_PER_ACCOUNT_REPORTER_SCHEDULE: "0 14 * * *"
+      CONNECTION_COUNT_PER_ACCOUNT_REPORT_OUTPUT_DESTINATION: "pendo"
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
@@ -69,3 +81,17 @@ resourceTemplates:
     parameters:
       MIN_REPLICAS: 1
       LOG_FORMAT: "TEXT"
+      MQTT_BROKER_TLS_SKIP_VERIFY: true
+      MQTT_BROKER_ADDRESS: tcp://mosquitto:1883
+      CLIENT_ID_TO_ACCOUNT_ID_IMPL: config_file_based
+      SOURCES_RECORDER_IMPL: fake
+      CONNECTED_CLIENT_RECORDER_IMPL: inventory
+
+- name: mosquitto
+  path: /deploy/mosquitto.yml
+  url: https://github.com/RedHatInsights/cloud-connector
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire

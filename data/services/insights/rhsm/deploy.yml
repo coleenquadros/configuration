@@ -67,7 +67,7 @@ resourceTemplates:
     ref: main
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
-    ref: 98eaf7598ffed86360c6ff6883803844470aad4e
+    ref: c8334649626708e83cb3586f280573ee11830e46
 - name: rhsm-subscriptions-api
   path: /templates/rhsm-subscriptions-api.yml
   url: https://github.com/RedHatInsights/rhsm-subscriptions
@@ -90,7 +90,7 @@ resourceTemplates:
       SERVER_MAX_HTTP_HEADER_SIZE: '47000'
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
-    ref: 2b803d1db76128082fe051b07a1799395dfe710a
+    ref: 30fd79539fa46ba9fb9c5a19f250f69e61aa89dc
 - name: rhsm-subscriptions-capacity-ingress
   path: /templates/rhsm-subscriptions-capacity-ingress.yml
   url: https://github.com/RedHatInsights/rhsm-subscriptions
@@ -98,6 +98,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/dev-rhsm-qa.yml
     ref: main
+    parameters:
+      SUBSCRIPTION_SYNC_ENABLED: false
+      PRODUCT_URL: https://product.qa.api.redhat.com/svcrest/product/v3
+      SUBSCRIPTION_URL: https://subscription.qa.api.redhat.com/svcrest/subscription/v5
   - namespace:
       $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
     ref: main
@@ -105,9 +109,17 @@ resourceTemplates:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: RedHatInsights-rhsm-subscriptions-gh-build-main
+    parameters:
+      SUBSCRIPTION_SYNC_ENABLED: false
+      PRODUCT_URL: https://product.stage.api.redhat.com/svcrest/product/v3
+      SUBSCRIPTION_URL: https://subscription.stage.api.redhat.com/svcrest/subscription/v5
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
-    ref: 2b803d1db76128082fe051b07a1799395dfe710a
+    ref: 30fd79539fa46ba9fb9c5a19f250f69e61aa89dc
+    parameters:
+      SUBSCRIPTION_SYNC_ENABLED: false
+      PRODUCT_URL: https://product.api.redhat.com/svcrest/product/v3
+      SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5
 - name: rhsm-subscriptions-scheduler
   path: /templates/rhsm-subscriptions-scheduler.yml
   url: https://github.com/RedHatInsights/rhsm-subscriptions
@@ -116,6 +128,7 @@ resourceTemplates:
       $ref: /services/insights/rhsm/namespaces/dev-rhsm-qa.yml
     ref: main
     parameters:
+      SUBSCRIPTION_SYNC_ENABLED: false
       OPENSHIFT_ENABLED_ACCOUNT_PROMQL: "group(min_over_time(subscription_labels{ebs_account != '', billing_model='marketplace'}[1h])) by (ebs_account)"
   - namespace:
       $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
@@ -125,11 +138,13 @@ resourceTemplates:
         $ref: /dependencies/ci-int/ci-int.yml
       name: RedHatInsights-rhsm-subscriptions-gh-build-main
     parameters:
+      SUBSCRIPTION_SYNC_ENABLED: false
       OPENSHIFT_ENABLED_ACCOUNT_PROMQL: "group(min_over_time(subscription_labels{ebs_account != '', billing_model='marketplace'}[1h])) by (ebs_account)"
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
-    ref: 2b803d1db76128082fe051b07a1799395dfe710a
+    ref: 30fd79539fa46ba9fb9c5a19f250f69e61aa89dc
     parameters:
+      SUBSCRIPTION_SYNC_ENABLED: false
       OPENSHIFT_ENABLED_ACCOUNT_PROMQL: "group(min_over_time(subscription_labels{ebs_account != '', billing_model='marketplace'}[1h])) by (ebs_account)"
 - name: metrics-worker
   path: /templates/metrics-worker.yml
@@ -156,7 +171,7 @@ resourceTemplates:
       USER_HOST: user.stage.api.redhat.com
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
-    ref: 2b803d1db76128082fe051b07a1799395dfe710a
+    ref: 30fd79539fa46ba9fb9c5a19f250f69e61aa89dc
     parameters:
       USER_HOST: user.api.redhat.com
 - name: rhsm-subscriptions-worker
@@ -169,7 +184,7 @@ resourceTemplates:
     parameters:
       CLOUDIGRADE_ENABLED: true
       CLOUDIGRADE_HOST: cloudigrade-api.cloudigrade-qa.svc.cluster.local
-      CLOUDIGRADE_PORT: 80
+      CLOUDIGRADE_PORT: 8000
       USER_HOST: user.qa.api.redhat.com
   - namespace:
       $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
@@ -181,17 +196,17 @@ resourceTemplates:
     parameters:
       CLOUDIGRADE_ENABLED: true
       CLOUDIGRADE_HOST: cloudigrade-api.cloudigrade-stage.svc.cluster.local
-      CLOUDIGRADE_PORT: 80
+      CLOUDIGRADE_PORT: 8000
       USER_HOST: user.stage.api.redhat.com
       MEMORY_REQUEST: 2000Mi
       MEMORY_LIMIT: 2744Mi
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
-    ref: 2b803d1db76128082fe051b07a1799395dfe710a
+    ref: 30fd79539fa46ba9fb9c5a19f250f69e61aa89dc
     parameters:
       CLOUDIGRADE_ENABLED: true
       CLOUDIGRADE_HOST: cloudigrade-api.cloudigrade-prod.svc.cluster.local
-      CLOUDIGRADE_PORT: 80
+      CLOUDIGRADE_PORT: 8000
       USER_HOST: user.api.redhat.com
       MEMORY_REQUEST: 3000Mi
       MEMORY_LIMIT: 3744Mi
@@ -223,7 +238,7 @@ resourceTemplates:
       RHSM_URL: https://api.rhsm.stage.redhat.com/v1
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
-    ref: 2b803d1db76128082fe051b07a1799395dfe710a
+    ref: 30fd79539fa46ba9fb9c5a19f250f69e61aa89dc
     parameters:
       PINHEAD_URL: https://systems.api.redhat.com/v1
       RHSM_URL: https://api.rhsm.redhat.com/v1
@@ -260,7 +275,7 @@ resourceTemplates:
       USER_HOST: user.stage.api.redhat.com
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
-    ref: 2b803d1db76128082fe051b07a1799395dfe710a
+    ref: 30fd79539fa46ba9fb9c5a19f250f69e61aa89dc
     parameters:
       SUBSCRIPTION_URL: https://subscription.api.redhat.com/svcrest/subscription/v5
       USER_HOST: user.api.redhat.com
@@ -276,13 +291,13 @@ resourceTemplates:
       USER_SERVICE_URL: https://user.qa.api.redhat.com/
   - namespace:
       $ref: /services/insights/rhsm/namespaces/dev-rhsm-qa.yml
-    ref: d98fcd25cb6f547d4296a9f4ff212814abf3c25c
+    ref: 56b845f3dd6734fdf7104862fc3ff7594596a421
     parameters:
       RHSM_SERVICE_URL: https://api.rhsm.qa.redhat.com/v1/cloud_access_providers/
       USER_SERVICE_URL: https://user.qa.api.redhat.com/
   - namespace:
       $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
-    ref: d98fcd25cb6f547d4296a9f4ff212814abf3c25c
+    ref: 56b845f3dd6734fdf7104862fc3ff7594596a421
     parameters:
       RHSM_SERVICE_URL: https://api.rhsm.stage.redhat.com/v1/cloud_access_providers/
       USER_SERVICE_URL: https://user.stage.api.redhat.com/
@@ -290,7 +305,7 @@ resourceTemplates:
       ALLOWED_APPLICATION_TYPE_IDS: '3'
   - namespace:
       $ref: /services/insights/rhsm/namespaces/rhsm-prod.yml
-    ref: d98fcd25cb6f547d4296a9f4ff212814abf3c25c
+    ref: 56b845f3dd6734fdf7104862fc3ff7594596a421
     parameters:
       RHSM_SERVICE_URL: https://api.rhsm.redhat.com/v1/cloud_access_providers/
       USER_SERVICE_URL: https://user.api.redhat.com/

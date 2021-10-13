@@ -41,7 +41,7 @@ spec:
   provider: aws
   region: us-east-1
   channel: candidate
-  version: 4.8.5
+  version: 4.9.0-rc.7
   initial_version: 4.5.11-fast
   multi_az: false
   autoscale:
@@ -60,8 +60,11 @@ externalConfiguration:
     ext-managed.openshift.io/hive-shard: 'true'
 
 upgradePolicy:
-  schedule_type: automatic
+  workloads:
+  - hive
   schedule: 0 7 * * 1-5
+  conditions:
+    soakDays: 0
 
 network:
   vpc: 10.164.0.0/16
@@ -94,6 +97,13 @@ peering:
     manageRoutes: true
     manageSecurityGroups: true
     cidrBlock: 172.16.0.0/12
+  - provider: account-vpc-mesh
+    name: hivei01ue1_osd-bastion-int
+    account:
+      $ref: /aws/osd-bastion-int/account.yml
+    tags:
+      osd: backplane
+    manageRoutes: true
   - provider: cluster-vpc-requester
     name: hivei01ue1_appsrep05ue1
     cluster:
@@ -128,6 +138,9 @@ awsInfrastructureAccess:
   accessLevel: network-mgmt
 - awsGroup:
     $ref: /aws/osd-privatelink-int/groups/Admins.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/osd-bastion-int/groups/Admins.yml
   accessLevel: read-only
 - awsGroup:
     $ref: /aws/app-sre/groups/Log-consumers.yml

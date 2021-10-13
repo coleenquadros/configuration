@@ -46,34 +46,84 @@ openshiftResources:
   name: quayio-backup-image-pull-secret
   annotations:
     qontract.ignore_reconcile_time: "true"
+
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /quayio-stage/quay/quay-config.secret.yaml
+  variables:
+    name: quay-config-secret-readonly-replica
+    vault_secret_version: 61
+    version_label: v61
+    enable_redis_modelcache: true
+    readonly: true
+    account_recovery_mode: false
+    read_from_rds_replica: true
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /quayio-stage/quay/quay-config.secret.yaml
+  variables:
+    name: quay-config-secret-readonly
+    vault_secret_version: 61
+    version_label: v61
+    enable_redis_modelcache: true
+    readonly: true
+    account_recovery_mode: false
+    read_from_rds_replica: false
 - provider: resource-template
   type: extracurlyjinja2
   path: /quayio-stage/quay/quay-config.secret.yaml
   variables:
     name: quay-config-secret
-    vault_secret_version: 57
-    version_label: v57
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /quayio-stage/quay/quay-config-blue.secret.yaml
-  variables:
-    name: quay-config-secret-blue
-    vault_secret_version: 57
-    version_label: v57
+    vault_secret_version: 61
+    version_label: v61
+    enable_redis_modelcache: true
+    readonly: false
+    account_recovery_mode: false
+    read_from_rds_replica: false
 - provider: resource-template
   type: extracurlyjinja2
   path: /quayio-stage/quay/quay-config.secret.yaml
   variables:
-    name: quay-config-secret-v57
-    vault_secret_version: 57
-    version_label: v57
+    name: quay-config-secret-blue
+    vault_secret_version: 61
+    version_label: v61
+    enable_redis_modelcache: true
+    readonly: false
+    account_recovery_mode: false
+    read_from_rds_replica: false
 - provider: resource-template
   type: extracurlyjinja2
-  path: /quayio-stage/quay/quay-config-recovery.secret.yaml
+  path: /quayio-stage/quay/quay-config.secret.yaml
+  variables:
+    name: quay-config-secret-py3-canary
+    vault_secret_version: 61
+    version_label: v61
+    enable_redis_modelcache: true
+    readonly: true
+    account_recovery_mode: false
+    read_from_rds_replica: false
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /quayio-stage/quay/quay-config.secret.yaml
+  variables:
+    name: quay-config-secret-v61
+    vault_secret_version: 61
+    version_label: v61
+    enable_redis_modelcache: true
+    readonly: false
+    account_recovery_mode: false
+    read_from_rds_replica: false
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /quayio-stage/quay/quay-config.secret.yaml
   variables:
     name: quay-config-recovery-secret
-    vault_secret_version: 57
-    version_label: v57
+    vault_secret_version: 61
+    version_label: v61
+    account_recovery_mode: true
+    enable_redis_modelcache: false
+    readonly: false
+    read_from_rds_replica: false
 - provider: resource-template
   type: extracurlyjinja2
   path: /quayio-stage/quay/quay-service-tool-config.secret.yaml
@@ -107,6 +157,12 @@ terraformResources:
   availability_zone: us-east-2b
   defaults: /terraform/resources/quayio-stage/rds-read-replica-us-east-2.yml
   replica_source: quayio-stage-57
+  parameter_group: /terraform/resources/quayio-stage/rds-parameter-group-1.yml
+- provider: rds
+  account: quayio-stage
+  identifier: quayio-stage-57-replica-ue1
+  availability_zone: us-east-1a
+  defaults: /terraform/resources/quayio-stage/rds-read-replica-us-east-1.yml
   parameter_group: /terraform/resources/quayio-stage/rds-parameter-group-1.yml
 - provider: elasticache
   account: quayio-stage
@@ -147,3 +203,4 @@ terraformResources:
   region: us-east-2
   defaults: /terraform/resources/quayio-stage/kms-1.yml
   output_resource_name: quayio-kms
+

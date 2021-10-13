@@ -18,7 +18,9 @@ environment:
 networkPoliciesAllow:
 # TODO(kakkoyun): Make sure network policies are aligned properly for migration period.
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
-- $ref: /services/rhobs/telemeter/namespaces/telemeter-stage.yml
+- $ref: /services/rhobs/observatorium/namespaces/observatorium-stage.yml
+# NOTICE(prekumar): For allowing metric federation using Thanos Ruler running in observatoium-metrics-stage.
+- $ref: /services/rhobs/observatorium/observatorium-metrics/namespaces/observatorium-metrics-stage.yml
 
 grafanaUrl: https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-stage-prometheus&var-cluster=app-sre-stage&var-namespace=observatorium-mst-stage
 
@@ -65,14 +67,14 @@ openshiftResources:
   version: 1
 - provider: vault-secret
   path: app-interface/app-sre-stage/telemeter-stage/observatorium-observatorium-mst-api
-  version: 8
+  version: 9
   annotations:
     qontract.recycle: "true"
 
 # Serviceaccount for Observatorium platform, Cluster role to access OSD tenant namespace
 - provider: resource
   path: /app-sre-stage/observatorium-mst-stage/observatorium-mst.serviceaccount.yaml
-# NOTICE: This resource is deployed through the observatorium-cluster-scope-stage namespace file,
+# NOTICE: This resource is deployed through the observatorium-mst-cluster-scope-stage namespace file,
 # until https://issues.redhat.com/browse/APPSRE-2935 is fixed.
 # - provider: resource
 #   path: /app-sre-stage/observatorium-mst-stage/observatorium-mst.clusterrole.yml

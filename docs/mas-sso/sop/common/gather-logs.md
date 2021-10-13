@@ -1,4 +1,3 @@
-
 ## Gather logs
 Following is a list of useful logs that might come in handy for troubleshooting purposes.
 The namespace will be `mas-sso-stage` for staging environment and `mas-sso-production` for the production environment. Use the appropriate namespace in the commands.
@@ -17,5 +16,5 @@ oc get pods -n <namespace>
 For each POD NAME run the following command:
 
 `
-oc logs $(oc get pods -n <namespace> | grep <POD NAME> | awk '{print $1}') -n <namespace> > mas-sso-<POD NAME>-logs.txt
+oc logs <POD NAME> -n <namespace> > mas-sso-<POD NAME>-logs.txt
 `

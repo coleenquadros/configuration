@@ -101,12 +101,12 @@ Every AppSRE/MT-SRE engineer should have access to the following:
 * Mailing lists:
   * http://groups.google.com/: new mailing list manager
     * [sd-app-sre-announce](https://groups.google.com/u/0/a/redhat.com/g/sd-app-sre-announce)
+    * [outage-list](https://groups.google.com/a/redhat.com/g/outage-list/about)
   * https://post-office.corp.redhat.com/mailman/listinfo: old mailing list central
     * ACCESS: sd-app-sre. Speak to @jonathan beakley.
     * ACCESS: sd-notifications. Subscribe from UI.
     * ACCESS: sd-org. Subscribe from UI.
     * ACCESS: sres. Subscribe from UI.
-    * ACCESS: outage-list. Subscribe from UI.
     * ACCESS: it-iam-announce-list. Subscribe from UI.
     * ACCESS: it-platform-community-list (useful for SSO). Subscribe from UI.
   * Optional - Additional information surfaces, subscription not mandatory
@@ -119,7 +119,6 @@ Every AppSRE/MT-SRE engineer should have access to the following:
     * Jira boards [Sprint Board](https://issues.redhat.com/secure/RapidBoard.jspa?rapidView=5536) & [SD Epics](https://issues.redhat.com/projects/SDE)
 * github.com/openshift
   * ACCESS: https://source.redhat.com/groups/public/atomicopenshift/atomicopenshift_wiki/openshift_onboarding_checklist_for_github
-  * Ping [Bill Dettelback](https://rover.redhat.com/people/profile/bdettelb) on slack or mail for access to [quay github org](https://github.com/quay)
 * Bugzilla
   * ACCESS: Ensure you have access to [bugzilla](https://bugzilla.redhat.com)
     * Login as Red Hat Associate with kerberos credentials

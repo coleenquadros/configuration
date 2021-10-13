@@ -47,7 +47,7 @@ imagePatterns:
 
 parameters:
   OAUTH_PROXY_IMAGE: quay.io/openshift/origin-oauth-proxy
-  OAUTH_PROXY_IMAGE_TAG: 4.9.0
+  OAUTH_PROXY_IMAGE_TAG: 4.8.0 # Pinning version before 4.9.0 due to https://github.com/openshift/oauth-proxy/issues/229.
 
 resourceTemplates:
 - name: observatorium-common
@@ -67,7 +67,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/rhobs/observatorium/namespaces/observatorium-stage.yml
-    ref: ecf1be463385c766b203575633657855c15e1452
+    ref: dd3d303c1bc1d5878090001842221da56c622fbb
     parameters:
       NAMESPACE: observatorium-stage
       OBSERVATORIUM_METRICS_NAMESPACE: observatorium-metrics-stage
@@ -77,26 +77,26 @@ resourceTemplates:
       JAEGER_AGENT_IMAGE_TAG: 1.22.0
       MEMCACHED_EXPORTER_IMAGE_TAG: v0.6.0
       MEMCACHED_IMAGE_TAG: 1.5
-      OBSERVATORIUM_API_IMAGE_TAG: master-2021-06-23-v0.1.2-11-g5219f94
+      OBSERVATORIUM_API_IMAGE_TAG: main-2021-09-10-v0.1.2-52-ga24d7d2
       SERVICE_ACCOUNT_NAME: observatorium
       DPTP_ORGANIZATION_ID: 1oZtjZXK3EP4kJSaYXwMmorAqnS
       JAEGER_COLLECTOR_NAMESPACE: observatorium-stage
-  - namespace: # TODO(kakkoyun): Remove after migration.
-      $ref: /services/rhobs/telemeter/namespaces/telemeter-production.yml
-    ref: ecf1be463385c766b203575633657855c15e1452
+  - namespace:
+      $ref: /services/rhobs/observatorium/namespaces/observatorium-production.yml
+    ref: ea919b8a1d529aa9a08a4daa8a7751ea716f195e
     parameters:
-      NAMESPACE: telemeter-production
-      OBSERVATORIUM_METRICS_NAMESPACE: telemeter-production
+      NAMESPACE: observatorium-production
+      OBSERVATORIUM_METRICS_NAMESPACE: observatorium-metrics-production
       OBSERVATORIUM_LOGS_NAMESPACE: observatorium-logs-production
       OPA_AMS_IMAGE_TAG: master-2021-07-14-d517f70
       GUBERNATOR_IMAGE_TAG: 1.0.0-rc.1
       JAEGER_AGENT_IMAGE_TAG: 1.22.0
       MEMCACHED_EXPORTER_IMAGE_TAG: v0.6.0
       MEMCACHED_IMAGE_TAG: 1.5
-      OBSERVATORIUM_API_IMAGE_TAG: master-2021-06-23-v0.1.2-11-g5219f94
-      SERVICE_ACCOUNT_NAME: prometheus-telemeter
+      OBSERVATORIUM_API_IMAGE_TAG: main-2021-09-10-v0.1.2-52-ga24d7d2
+      SERVICE_ACCOUNT_NAME: observatorium
       DPTP_ORGANIZATION_ID: 1oZsAlLo1Nzt3LlyUnHQU13LWJK
-      JAEGER_COLLECTOR_NAMESPACE: telemeter-production
+      JAEGER_COLLECTOR_NAMESPACE: observatorium-production
 - name: jaeger
   path: /resources/services/jaeger-template.yaml
   url: https://github.com/rhobs/configuration
@@ -115,18 +115,18 @@ resourceTemplates:
       JAEGER_CPU_LIMITS: '500m'
       JAEGER_MEMORY_LIMITS: '4Gi'
       SERVICE_ACCOUNT_NAME: observatorium
-  - namespace: # TODO(kakkoyun): Remove after migration.
-      $ref: /services/rhobs/telemeter/namespaces/telemeter-production.yml
+  - namespace:
+      $ref: /services/rhobs/observatorium/namespaces/observatorium-production.yml
     ref: 3830f23a4af9f3ce972413c05d2047a95951c001
     parameters:
-      NAMESPACE: telemeter-production
+      NAMESPACE: observatorium-production
       IMAGE_TAG: '1.22.0'
       REPLICAS: '1'
       JAEGER_CPU_REQUEST: '1'
       JAEGER_MEMORY_REQUEST: '4Gi'
       JAEGER_CPU_LIMITS: '2'
       JAEGER_MEMORY_LIMITS: '8Gi'
-      SERVICE_ACCOUNT_NAME: prometheus-telemeter
+      SERVICE_ACCOUNT_NAME: observatorium
 - name: conprof
   path: /resources/services/conprof-template.yaml
   url: https://github.com/rhobs/configuration
@@ -134,26 +134,11 @@ resourceTemplates:
     IMAGE: quay.io/conprof/conprof
   targets:
   - namespace:
-      $ref: /services/rhobs/observatorium/namespaces/observatorium-stage.yml
-    ref: a513f3676c8430265208111048dec36ea86fcd56
-    parameters:
-      NAMESPACE: observatorium-stage
-      OBSERVATORIUM_METRICS_NAMESPACE: observatorium-metrics-stage
-      OBSERVATORIUM_MST_NAMESPACE: observatorium-mst-stage
-      OBSERVATORIUM_LOGS_NAMESPACE: observatorium-logs-stage
-      IMAGE_TAG: 'master-2021-02-24-33f5514'
-      CONPROF_REPLICAS: '1'
-      CONPROF_CPU_REQUEST: '100m'
-      CONPROF_MEMORY_REQUEST: '1Gi'
-      CONPROF_CPU_LIMITS: '500m'
-      CONPROF_MEMORY_LIMITS: '4Gi'
-      SERVICE_ACCOUNT_NAME: observatorium
-  - namespace: # TODO(kakkoyun): Remove after migration.
-      $ref: /services/rhobs/telemeter/namespaces/telemeter-production.yml
+      $ref: /services/rhobs/observatorium/namespaces/observatorium-production.yml
     ref: 3830f23a4af9f3ce972413c05d2047a95951c001
     parameters:
-      NAMESPACE: telemeter-production
-      OBSERVATORIUM_METRICS_NAMESPACE: telemeter-production
+      NAMESPACE: observatorium-production
+      OBSERVATORIUM_METRICS_NAMESPACE: observatorium-metrics-production
       OBSERVATORIUM_MST_NAMESPACE: observatorium-mst-production
       OBSERVATORIUM_LOGS_NAMESPACE: observatorium-logs-production
       IMAGE_TAG: 'master-2021-02-24-33f5514'
@@ -162,4 +147,25 @@ resourceTemplates:
       CONPROF_MEMORY_REQUEST: '8Gi'
       CONPROF_CPU_LIMITS: '2'
       CONPROF_MEMORY_LIMITS: '16Gi'
-      SERVICE_ACCOUNT_NAME: prometheus-telemeter
+      SERVICE_ACCOUNT_NAME: observatorium
+- name: parca
+  path: /resources/services/parca-template.yaml
+  url: https://github.com/rhobs/configuration
+  parameters:
+    IMAGE: quay.io/observatorium/parca
+  targets:
+  - namespace:
+      $ref: /services/rhobs/observatorium/namespaces/observatorium-stage.yml
+    ref: b0bcd819f6ee081dc08a0609c7776d0d20ad71cc
+    parameters:
+      NAMESPACE: observatorium-stage
+      OBSERVATORIUM_METRICS_NAMESPACE: observatorium-metrics-stage
+      OBSERVATORIUM_MST_NAMESPACE: observatorium-mst-stage
+      OBSERVATORIUM_LOGS_NAMESPACE: observatorium-logs-stage
+      IMAGE_TAG: 'v0.1.0'
+      PARCA_REPLICAS: '1'
+      PARCA_CPU_REQUEST: '200m'
+      PARCA_MEMORY_REQUEST: '1Gi'
+      PARCA_CPU_LIMITS: '500m'
+      PARCA_MEMORY_LIMITS: '4Gi'
+      SERVICE_ACCOUNT_NAME: observatorium

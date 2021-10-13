@@ -37,15 +37,27 @@ spec:
   provider: aws
   region: us-east-1
   channel: candidate
-  version: 4.8.2
+  version: 4.9.0-rc.7
   initial_version: 4.2.7
   multi_az: true
-  nodes: 24
+  autoscale:
+    min_replicas: 21
+    max_replicas: 30
   instance_type: m5.2xlarge
   storage: 3100
   load_balancers: 4
   private: false
   provision_shard_id: b26159a7-aaef-4303-89a0-6713ad9f1090
+
+upgradePolicy:
+  workloads:
+  - ocm
+  - telemeter
+  - appsre
+  - clair
+  schedule: 0 12 * * 1-5
+  conditions:
+    soakDays: 0
 
 network:
   vpc: 10.112.0.0/16
@@ -72,6 +84,11 @@ peering:
     cluster:
       $ref: /openshift/hivei01ue1/cluster.yml
     manageRoutes: true
+  - provider: account-vpc
+    name: app-sre-stage-01_quayio-stage
+    vpc:
+      $ref: /aws/quayio-stage/vpcs/default.yml
+    manageRoutes: true
 
 automationToken:
   path: app-sre/creds/kube-configs/app-sre-stage-01
@@ -93,6 +110,15 @@ awsInfrastructureAccess:
 - awsGroup:
     $ref: /aws/app-sre/groups/Log-consumers.yml
   accessLevel: read-only
+- awsGroup:
+    $ref: /aws/quayio-stage/groups/App-SRE-admin.yml
+  accessLevel: read-only
+# This is going to be assigned anyway by the integration and it is
+# currently making the integration to try to add this into the
+# above related hive clusters that have cluster peering.
+#- awsGroup:
+#    $ref: /aws/quayio-stage/groups/App-SRE-admin.yml
+#  accessLevel: network-mgmt
 
 addons:
 - $ref: /dependencies/ocm/addons/cluster-logging-operator.yml

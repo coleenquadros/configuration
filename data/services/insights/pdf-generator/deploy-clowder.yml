@@ -1,0 +1,58 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: pdf-generator
+  platform: insights
+
+name: pdf-generator-clowder
+description: pdf-generator app on the Insights Platform
+
+app:
+  $ref: /services/insights/pdf-generator/app.yml
+
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+managedResourceTypes:
+- ClowdApp
+- Service
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  CLOUD_WATCH_LOG_GROUP: pdf-generator-stage
+
+resourceTemplates:
+- name: pdf-generator
+  path: /deploy/clowdapp.yml
+  url: https://gitlab.cee.redhat.com/automation-analytics/pdf-generator
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+  - namespace:
+      $ref: /services/insights/pdf-generator/namespaces/pdf-generator-stage.yml
+    ref: main
+    parameters:
+      ENV_NAME: stage 
+      API_PREFIX: /api/featureflags/v0
+      LOG_LEVEL: debug
+  - namespace:
+      $ref: /services/insights/pdf-generator/namespaces/pdf-generator-prod.yml
+    ref: dfd681562219ed8cfb9f626b9972d368ffbbba5c
+    parameters:
+      ENV_NAME: prod
+      PROMETHEUS_PUSH_GATEWAY: ${PROMETHEUS_PUSHGATEWAY}

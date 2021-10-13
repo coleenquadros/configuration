@@ -1,0 +1,15 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+name: 2021-10-05-get-emptystring-account-details-prod
+labels: {}
+namespace:
+  $ref: /services/insights/compliance/namespaces/compliance-prod.yml
+identifier: compliance-prod
+output: stdout
+queries:
+  - >-
+    SELECT COUNT("inventory"."hosts"."id") as "hosts" FROM "accounts" INNER JOIN "inventory"."hosts" ON "inventory"."hosts"."account" = "accounts"."account_number" WHERE "accounts"."account_number" = '';
+  - >-
+    SELECT "ref_id" FROM "accounts" INNER JOIN "profiles" ON "profiles"."account_id" = "accounts"."id" WHERE "accounts"."account_number" = '';
+  - >-
+    SELECT COUNT("test_results"."id") as "test_results" FROM "policies" INNER JOIN "profiles" ON "profiles"."policy_id" = "policies"."id" INNER JOIN "test_results" ON "test_results"."profile_id" = "profiles"."id" WHERE "policies"."account_id" IN (SELECT "accounts"."id" FROM "accounts" WHERE "accounts"."account_number" = '');

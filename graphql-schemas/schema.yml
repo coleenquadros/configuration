@@ -329,8 +329,24 @@
   - { name: name, type: string, isRequired: true }
   - { name: description, type: string, isRequired: true }
   - { name: token, type: VaultSecret_v1, isRequired: true }
+  - { name: api_client, type: SlackWorkspaceApiClient_v1 }
   - { name: integrations, type: SlackWorkspaceIntegration_v1, isList: true}
   - { name: managedUsergroups, type: string, isList: true, isRequired: true }
+
+- name: SlackWorkspaceApiClient_v1
+  fields:
+  - { name: global, type: SlackWorkspaceApiClientGlobalConfig_v1 }
+  - { name: methods, type: SlackWorkspaceApiClientMethodConfig_v1, isList: true }
+
+- name: SlackWorkspaceApiClientGlobalConfig_v1
+  fields:
+  - { name: max_retries, type: int }
+  - { name: timeout, type: int }
+
+- name: SlackWorkspaceApiClientMethodConfig_v1
+  fields:
+  - { name: name, type: string, isRequired: true }
+  - { name: args, type: json, isRequired: true }
 
 - name: SlackWorkspaceIntegration_v1
   fields:
@@ -435,10 +451,16 @@
   - { name: private, type: boolean, isRequired: true }
   - { name: route_selectors, type: json }
 
+- name: ClusterUpgradePolicyConditions_v1
+  fields:
+  - { name: soakDays, type: int }
+
 - name: ClusterUpgradePolicy_v1
   fields:
-  - { name: schedule_type, type: string }
-  - { name: schedule, type: string }
+  - { name: schedule_type, type: string } # deprecated
+  - { name: schedule, type: string, isRequired: true }
+  - { name: workloads, type: string, isList: true, isRequired: true }
+  - { name: conditions, type: ClusterUpgradePolicyConditions_v1, isRequired: true }
 
 - name: ClusterNetwork_v1
   fields:
@@ -507,6 +529,7 @@
   - { name: manageSecurityGroups, type: boolean }
   - { name: cidrBlock, type: string }
   - { name: delete, type: boolean }
+  - { name: assumeRole, type: string }
 
 - name: ClusterPeeringConnectionClusterRequester_v1
   interface: ClusterPeeringConnection_v1
@@ -592,6 +615,11 @@
       schema: /openshift/namespace-1.yml
       subAttr: kafkaCluster
 
+- name: VersionSignal_v1
+  fields:
+  - { name: database, type: VaultSecret_v1, isRequired: true }
+  - { name: query, type: string, isRequired: true }
+
 - name: OpenShiftClusterManager_v1
   fields:
   - { name: schema, type: string, isRequired: true }
@@ -603,6 +631,8 @@
   - { name: accessTokenClientId, type: string, isRequired: true }
   - { name: accessTokenUrl, type: string, isRequired: true }
   - { name: offlineToken, type: VaultSecret_v1 }
+  - { name: blockedVersions, type: string, isList: true }
+  - { name: versionSignal, type: VersionSignal_v1 }
   - name: clusters
     type: Cluster_v1
     isList: true
@@ -648,6 +678,7 @@
   - { name: enableDeletion, type: boolean }
   - { name: disable, type: DisableClusterAutomations_v1 }
   - { name: deleteKeys, type: string, isList: true }
+  - { name: resetPasswords, type: AWSAccountResetPassword_v1, isList: true }
   - { name: premiumSupport, type: boolean, isRequired: true }
   - name: ecrs
     type: AWSECR_v1
@@ -672,6 +703,11 @@
       schema: /access/role-1.yml
       subAttr: aws_groups
 
+- name: AWSAccountResetPassword_v1
+  fields:
+  - { name: user, type: User_v1, isRequired: true }
+  - { name: requestId, type: string, isRequired: true }
+
 - name: AWSUserPolicy_v1
   fields:
   - { name: schema, type: string, isRequired: true }
@@ -693,6 +729,11 @@
   - { name: vpc_id, type: string, isRequired: true }
   - { name: cidr_block, type: string, isRequired: true }
   - { name: region, type: string, isRequired: true }
+  - { name: subnets, type: AWSSubnet_v1, isList: true }
+
+- name: AWSSubnet_v1
+  fields:
+  - { name: id, type: string, isRequired: true }
 
 - name: AWSECR_v1
   fields:
@@ -772,6 +813,7 @@
       s3: NamespaceTerraformResourceS3_v1
       elasticache: NamespaceTerraformResourceElastiCache_v1
       aws-iam-service-account: NamespaceTerraformResourceServiceAccount_v1
+      aws-iam-role: NamespaceTerraformResourceRole_v1
       sqs: NamespaceTerraformResourceSQS_v1
       dynamodb: NamespaceTerraformResourceDynamoDB_v1
       ecr: NamespaceTerraformResourceECR_v1
@@ -783,6 +825,7 @@
       acm: NamespaceTerraformResourceACM_v1
       kinesis: NamespaceTerraformResourceKinesis_v1
       s3-cloudfront-public-key: NamespaceTerraformResourceS3CloudFrontPublicKey_v1
+      alb: NamespaceTerraformResourceALB_v1
   fields:
   - { name: provider, type: string, isRequired: true }
   - { name: account, type: string, isRequired: true }
@@ -839,6 +882,7 @@
   - { name: reset_password, type: string }
   - { name: enhanced_monitoring, type: boolean }
   - { name: replica_source, type: string }
+  - { name: ca_cert, type: VaultSecret_v1 }
   - { name: annotations, type: json }
 
 - name: NamespaceTerraformResourceS3_v1
@@ -859,8 +903,9 @@
 
 - name: NamespaceTerraformResourceServiceAccountAWSInfrastructureAccess_v1
   fields:
-  - { name: cluster, type: Cluster_v1, isRequired: true }
-  - { name: access_level, type: string, isRequired: true }
+  - { name: cluster, type: Cluster_v1 }
+  - { name: access_level, type: string }
+  - { name: assume_role, type: string }
 
 - name: NamespaceTerraformResourceServiceAccount_v1
   interface: NamespaceTerraformResource_v1
@@ -873,6 +918,17 @@
   - { name: user_policy, type: json }
   - { name: output_resource_name, type: string }
   - { name: aws_infrastructure_access, type: NamespaceTerraformResourceServiceAccountAWSInfrastructureAccess_v1 }
+  - { name: annotations, type: json }
+
+- name: NamespaceTerraformResourceRole_v1
+  interface: NamespaceTerraformResource_v1
+  fields:
+  - { name: provider, type: string, isRequired: true }
+  - { name: account, type: string, isRequired: true }
+  - { name: identifier, type: string, isRequired: true }
+  - { name: assume_role, type: string, isRequired: true }
+  - { name: inline_policy, type: json }
+  - { name: output_resource_name, type: string }
   - { name: annotations, type: json }
 
 - name: NamespaceTerraformResourceElastiCache_v1
@@ -995,6 +1051,38 @@
   - { name: output_resource_name, type: string }
   - { name: annotations, type: json }
 
+- name: NamespaceTerraformResourceALB_v1
+  interface: NamespaceTerraformResource_v1
+  fields:
+  - { name: provider, type: string, isRequired: true }
+  - { name: account, type: string, isRequired: true }
+  - { name: identifier, type: string, isRequired: true }
+  - { name: region, type: string }
+  - { name: vpc, type: AWSVPC_v1, isRequired: true }
+  - { name: certificate_arn, type: string, isRequired: true }
+  - { name: targets, type: NamespaceTerraformResourceALBTargets_v1, isRequired: true, isList: true }
+  - { name: paths, type: NamespaceTerraformResourceALBPaths_v1 }
+  - { name: vpc, type: AWSVPC_v1, isRequired: true }
+  - { name: output_resource_name, type: string }
+  - { name: annotations, type: json }
+
+- name: NamespaceTerraformResourceALBTargets_v1
+  fields:
+  - { name: name, type: string, isRequired: true }
+  - { name: default, type: boolean, isRequired: true }
+  - { name: weights, type: NamespaceTerraformResourceALBTargetWeights_v1, isRequired: true }
+  - { name: ips, type: string, isRequired: true, isList: true }
+
+- name: NamespaceTerraformResourceALBTargetWeights_v1
+  fields:
+  - { name: read, type: int, isRequired: true }
+  - { name: write, type: int, isRequired: true }
+
+- name: NamespaceTerraformResourceALBPaths_v1
+  fields:
+  - { name: read, type: string, isList: true }
+  - { name: write, type: string, isList: true }
+
 - name: ResourceValues_v1
   fields:
   - { name: cpu, type: string }
@@ -1068,6 +1156,7 @@
   - { name: path, type: string, isRequired: true }
   - { name: labels, type: json }
   - { name: name, type: string, isRequired: true }
+  - { name: delete, type: boolean }
   - { name: description, type: string, isRequired: true }
   - { name: grafanaUrl, type: string }
   - { name: cluster, type: Cluster_v1, isRequired: true }
@@ -1119,6 +1208,7 @@
   - { name: ocpReleaseEcrIdentifier, type: string, isRequired: true }
   - { name: ocpArtDevEcrIdentifier, type: string, isRequired: true }
   - { name: quayTargetOrgs, type: QuayOrg_v1, isRequired: true, isList: true}
+  - { name: mirrorChannels, type: string, isRequired: true, isList: true }
 
 - name: ContainerImageMirror_v1
   fields:
@@ -1539,6 +1629,19 @@
   - { name: pagerduty, type: PagerDutyTarget_v1, isList: true }
   - { name: channels, type: string, isList: true }
   - { name: ownersFromRepos, type: string, isList: true }
+  - { name: schedule, type: Schedule_v1 }
+
+- name: Schedule_v1
+  fields:
+  - { name: name, type: string, isRequired: true }
+  - { name: description, type: string }
+  - { name: schedule, type: ScheduleEntry_v1, isRequired: true, isList: true }
+
+- name: ScheduleEntry_v1
+  fields:
+  - { name: start, type: string, isRequired: true }
+  - { name: end, type: string, isRequired: true }
+  - { name: users, type: User_v1, isRequired: true, isList: true }
 
 - name: VaultPolicyMapping_v1
   fields:
@@ -1803,6 +1906,7 @@
   - { name: slo_document_v1, type: SLODocument_v1, isList: true, datafileSchema: /app-sre/slo-document-1.yml}
   - { name: shared_resources_v1, type: SharedResources_v1, isList: true, datafileSchema: /openshift/shared-resources-1.yml }
   - { name: pagerduty_instances_v1, type: PagerDutyInstance_v1, isList: true, datafileSchema: /dependencies/pagerduty-instance-1.yml }
+  - { name: ocm_instances_v1, type: OpenShiftClusterManager_v1, isList: true, datafileSchema: /openshift/openshift-cluster-manager-1.yml }
 
 - name: SentryTeam_v1
   fields:

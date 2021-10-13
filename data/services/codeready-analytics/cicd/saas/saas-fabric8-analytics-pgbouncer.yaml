@@ -1,0 +1,45 @@
+---
+$schema: /app-sre/saas-file-1.yml
+
+labels:
+  service: codeready-analytics
+  component: fabric8-analytics-pgbouncer
+
+name: saas-crda-fabric8-analytics-pgbouncer
+description: SaaS tracking file for codeready-analytics fabric8-analytics-pgbouncer
+
+app:
+  $ref: /services/codeready-analytics/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-codeready-analytics-info
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/app-sre/fabric8-analytics-fabric8-analytics-pgbouncer
+
+resourceTemplates:
+- name: fabric8-analytics-pgbouncer
+  url: https://github.com/fabric8-analytics/fabric8-analytics-pgbouncer
+  path: /openshift/template.yaml
+  parameters:
+    DOCKER_REGISTRY: quay.io
+    DOCKER_IMAGE: app-sre/fabric8-analytics-fabric8-analytics-pgbouncer
+  targets:
+  - namespace:
+      $ref: /services/codeready-analytics/namespaces/bayesian-preview.yml
+    ref: master
+    upstream: fabric8-analytics-fabric8-analytics-pgbouncer-gh-build-master
+  # - namespace:
+  #     $ref: /services/codeready-analytics/namespaces/bayesian-production.yml
+  #   ref: cc1a70dd12f7ae0fa617eecc4c4177998586a99d
+  #   parameters:
+  #     PGBOUNCER_DEFAULT_POOL_SIZE: 500

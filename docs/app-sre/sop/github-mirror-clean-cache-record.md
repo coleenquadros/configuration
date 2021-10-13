@@ -19,6 +19,12 @@ corrupted data.
 
 ## Steps
 
+- Find the url that you want to clear from the cache. You could inspect the
+  GH Mirror logs, the integration logs. This will be our below `url`.
+- Find the token that's being used to query GitHub's API. It will usually
+  be one of the tokens that are included in the organization files in
+  [/data/dependencies/github](/data/dependencies/github).
+  That will be our below `token`.
 - Gain terminal access to one of the github-mirror pods.
 - Execute:
 
@@ -48,7 +54,8 @@ Inspect the response object:
 Delete the cache record:
 
 ```bash
->>> cache.wr_cache.delete(cache_key)
+>>> redis_key = cache._serialize(cache_key)
+>>> cache.wr_cache.delete(redis_key)
 ```
 
 Next call from the client should then cache a fresh response from the GitHub

@@ -14,3 +14,42 @@ accessTokenUrl: https://sso.redhat.com/auth/realms/redhat-external/protocol/open
 offlineToken:
   path: app-sre/creds/ocm/sd-app-sre-ocm-app-interface
   field: offline_token
+
+blockedVersions:
+- '^.*-fc\..*$'
+
+versionSignal:
+  database:
+    path: osde2e/cicd_job_result_database
+    field: all
+  query: |
+    with recent_tests as (
+      select
+        jobs.cluster_version,
+        testcases.result as testresult
+      from
+        testcases
+        join jobs on jobs.id = testcases.job_id
+      where
+        jobs.job_name != ''
+        and jobs.cluster_version like 'openshift-v{}%' -- VERSION
+        and jobs.channel = '{}' -- CHANNEL
+    ),
+    counts as (
+      select
+        recent_tests.cluster_version,
+        count(case when recent_tests.testresult='failure' then 1 end) as failure,
+        count(case when recent_tests.testresult='error' then 1 end) as error,
+        count(case when recent_tests.testresult='passed' then 1 end) as passed,
+        count(case when recent_tests.testresult='skipped' then 1 end) as skipped
+      from
+        recent_tests
+      group by
+        recent_tests.cluster_version
+    )
+    select
+      cluster_version,
+      (passed::float)/(greatest(failure+error+passed,1)::float) as pass_rate
+    from counts
+    order by pass_rate
+    ;

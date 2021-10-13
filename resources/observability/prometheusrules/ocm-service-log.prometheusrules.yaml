@@ -1,0 +1,49 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: ocm-service-log-{{{environment}}}
+spec:
+  groups:
+  - name: ocm-service-log-{{{environment}}}
+    rules:
+    # Service log traffic can come from the outside (router) or from internal OCM services
+    # Internal traffic is measured from the outbound traffic of any envoy proxy that has
+    # a properly configured label. This label is something to check in the future.
+    # OR on() vector(0) is used to make sure non-existing metrics are added as 0 constant vectors
+    # If we don't do this, Prometheus will not add the two vectors and will return empty.
+    # This can happen if there's no traffic from the router or envoy.
+    - record: status_class_5xx:http_requests_total:rate5m
+      expr: |
+        sum(rate(haproxy_backend_http_responses_total{route="service-logs",exported_namespace="uhc-{{{environment}}}",code="5xx"}[5m])) OR on() vector(0)
+        +
+        sum(rate(envoy_cluster_upstream_rq{envoy_cluster_name="service_logs",envoy_response_code=~"^5..",namespace="uhc-{{{environment}}}"}[5m])) OR on() vector(0)
+      labels:
+        service: ocm-service-log
+        namespace: uhc-{{{environment}}}
+    - record: all:http_requests_total:rate5m
+      expr: |
+        sum(rate(haproxy_backend_http_responses_total{route="service-logs",exported_namespace="uhc-{{{environment}}}"}[5m])) OR on() vector(0)
+        +
+        sum(rate(envoy_cluster_upstream_rq{envoy_cluster_name="service_logs",namespace="uhc-{{{environment}}}"}[5m])) OR on() vector(0)
+      labels:
+        service: ocm-service-log
+        namespace: uhc-{{{environment}}}
+    - alert: OCM service log 5xx Errors High - {{{environment}}}
+      annotations:
+        message: "OCM service log is returning code 5xx for {{ $value | humanize }}% of requests."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop/ocm-service-log.md"
+      expr: |
+        100 * status_class_5xx:http_requests_total:rate5m{service="ocm-service-log",namespace="uhc-{{{environment}}}"}
+              /
+              all:http_requests_total:rate5m{service="ocm-service-log",namespace="uhc-{{{environment}}}"}
+        > 5
+      for: 10m
+      labels:
+        service: ocm-service-log
+        severity: {{{severity_500_errors}}}
+

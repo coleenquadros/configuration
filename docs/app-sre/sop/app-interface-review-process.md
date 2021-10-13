@@ -8,7 +8,7 @@ This is a WIP SOP intended for use by App SRE team members acting as Interrupt C
 2. Verify that the `app-interface JSON validation` report is as expected due to the changes introduced in the MR.
 3. Check specific review instructions (see #specific-review-instructions)
 4. If any additional reviewers are required, ping them on the MR (see #additional-reviewers).
-5. Once the MR looks good to you, add the `lgtm` label or comment `/label lgtm`. The MR will be merged automatically within minutes.
+5. Once the MR looks good to you, add the `lgtm` label or comment `/label lgtm`. The MR will be merged automatically within minutes. See also the documented [approval process](/docs/app-sre/continuous-delivery-in-app-interface.md#approval-process)
 
 ## Notes
 

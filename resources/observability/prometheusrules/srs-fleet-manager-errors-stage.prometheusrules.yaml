@@ -1,0 +1,22 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: srs-fleet-manager-errors-stage
+spec:
+  groups:
+  - name: srs-fleet-manager-errors-ams-stage
+    rules:
+    - alert: SRSFleetManagerAMSClient403Error - stage
+      annotations:
+        message: "SRS Fleet Manager - Call to AMS failed (HTTP code 403)"
+        dashboard: "https://grafana.stage.devshift.net/d/Tbw1Eg2Mz/srs-fleet-manager-metrics"
+      expr: |
+        increase(srs_fleet_manager_ams_client_errors_total{job="srs-fleet-manager-metrics",namespace="service-registry-stage",statusCode="403"}[5m]) > 0
+      labels:
+        service: srs-fleet-manager
+        severity: info

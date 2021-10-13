@@ -21,3 +21,8 @@ The mirror acts only on GET requests, by-passing other HTTP methods.
 Example ticket: https://issues.redhat.com/browse/APPSRE-3506
 
 Example MR: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/22562
+
+## SOPs
+
+* [GitHub Mirror is Down](/docs/app-sre/sop/GithubMirrorIsDown.md)
+* [Clean cache record from Redis](/docs/app-sre/sop/github-mirror-clean-cache-record.md)

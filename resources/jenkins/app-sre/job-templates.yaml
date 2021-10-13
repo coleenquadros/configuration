@@ -41,41 +41,12 @@
     <<: *gl_timed
 
 - job-template:
-    id: 'gl-build-master-jjb'
-    name: '{gl_group}-{gl_project}-gl-build-{branch}-jjb'
-    wrappers:
-    - timeout_wrapper:
-        timeout: '{timeout}'
-    - vault-secrets:
-        <<: *vault_defaults
-        secrets:
-        - *jjb_ini
-        - *jjb_ini_ext
-    <<: *gl_build_master
-
-- job-template:
     id: 'gl-build-master-osio-scan'
     name: '{gl_group}-{gl_project}-gl-build-{branch}'
     publishers:
     - archive:
         artifacts: 'reports/**'
     <<: *gl_build_master
-
-- job-template:
-    id: 'gl-pr-check-jjb'
-    name: '{gl_group}-{gl_project}-gl-pr-check'
-    wrappers:
-    - timeout_wrapper:
-        timeout: '{timeout}'
-    - ansicolor
-    publishers:
-    - gitlab_message:
-        <<: *gitlab_message_defaults
-    - gitlab-notifier
-    - archive:
-        artifacts: 'reports/**'
-        allow-empty: yes
-    <<: *gl_pr_check
 
 - job-template:
     id: pagerditty
@@ -180,7 +151,7 @@
         eval `ssh-agent -s`
         ssh-add app-sre-bot.key
         ansible -u ${{APP_SRE_BOT_USERNAME}} --key-file app-sre-bot.key -m shell -a 'sudo /opt/clean-up-scripts/prune-docker-images.sh' ci-int-jenkins-slave,ci-ext-jenkins-slave,ci-ext-jenkins
-        ansible -u ${{APP_SRE_BOT_USERNAME}} --key-file app-sre-bot.key -m shell -a 'sudo -u jenkins /opt/clean-up-scripts/prune-podman-images.sh' ci-int-jenkins-slave-uhc,ci-ext-jenkins-slave-rhel8,ci-int-jenkins-slave-rhel8
+        ansible -u ${{APP_SRE_BOT_USERNAME}} --key-file app-sre-bot.key -m shell -a 'sudo -i -u jenkins /opt/clean-up-scripts/prune-podman-images.sh' ci-int-jenkins-slave-uhc,ci-ext-jenkins-slave-rhel8,ci-int-jenkins-slave-rhel8
     cron_expression: H */6 * * *
     <<: *gl_timed
 
@@ -213,6 +184,8 @@
     job_name: 'clusterimageset-run'
     name: '{job_name}'
     wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
     - vault-secrets:
         <<: *vault_defaults
         secrets:
@@ -281,3 +254,25 @@
         secrets:
         - *sd_sos
     <<: *gl_build_master
+
+- job-template:
+    id: 'gl-timed-sd-sos'
+    name: 'sd-sos-cron'
+    node: '{node}'
+    environment: production
+    branch: master
+    cron_expression: '1 0 * * FRI'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *sd_sos
+    builders:
+        - shell: |
+              python3 -m venv venv
+              source venv/bin/activate
+              pip3 install -r requirements.txt
+              python3 weekly_data.py
+    <<: *gl_timed

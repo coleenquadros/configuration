@@ -1,0 +1,46 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+labels:
+  service: mt-sre
+
+name: ci-ext-mt-sre-jobs
+
+description: ''
+
+app:
+  $ref: /services/addons/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+type: jobs
+
+config:
+- project:
+    name: managed-tenants-cli
+    label: addons
+    node: app-interface
+    gh_org: mt-sre
+    gh_repo: managed-tenants-cli
+    white_list_target_branches: main
+    jobs:
+    - 'gh-pr-check':
+        display_name: managed-tenants-cli pr-check
+        branch: main
+    - 'gh-build-tag':
+        display_name: managed-tenants-cli publish to pypi
+        branch: main
+- project:
+    name: addon-metadata-operator
+    label: addons
+    node: app-interface
+    gh_org: mt-sre
+    gh_repo: addon-metadata-operator
+    jobs:
+    - 'gh-pr-check':
+        display_name: addon-metadata-operator pr-check
+    - 'gh-build-tag':
+        display_name: addon-metadata-operator build tag
+    - 'gh-build-master':
+        display_name: addon-metadata-operator build master

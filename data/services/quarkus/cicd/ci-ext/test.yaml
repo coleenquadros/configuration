@@ -1,0 +1,46 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: quarkus
+
+name: saas-quarkus-acceptance-test
+description: SaaS tracking file for Quarkus post deployment acceptance test
+
+app:
+  $ref: /services/quarkus/app.yml
+
+pipelinesProvider:
+  $ref: /services/quarkus/pipelines/tekton.code-quarkus-pipelines.app-sre-prod-01.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- Job
+
+publishJobLogs: true
+
+imagePatterns:
+- quay.io/quarkus/code-quarkus-acceptance-test
+
+resourceTemplates:
+- name: code-quarkus-acceptance-test
+  url: https://github.com/quarkusio/code.quarkus.io
+  path: /openshift/code-quarkus-acceptance-test.yaml
+  targets:
+  - namespace:
+      $ref: /services/quarkus/namespaces/code-quarkus-stage.yml
+    ref: e899b9a0df993ffb9d274c775c933172abc6b973
+    parameters:
+      IMAGE: quay.io/quarkus/code-quarkus-acceptance-test
+      CODE_QUARKUS_STAGING_URL: https://stage.code.quarkus.io
+    promotion:
+      auto: true
+      subscribe:
+      - code-quarkus-api-stage-deploy-success-channel
+      - code-quarkus-frontend-stage-deploy-success-channel
+      publish:
+      - code-quarkus-stage-post-deploy-tests-success-channel

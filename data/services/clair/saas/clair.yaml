@@ -1,0 +1,101 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: clair
+
+name: saas-clair
+description: SaaS tracking file for clair
+
+app:
+  $ref: /services/clair/app.yml
+
+pipelinesProvider:
+  $ref: /services/quayio/pipelines/tekton.quayio-pipelines.app-sre-prod-01.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: oncall-quay
+  notifications:
+    start: true
+
+managedResourceTypes:
+- Deployment
+- Service
+- StatefulSet
+
+imagePatterns:
+- quay.io/app-sre/clair
+
+parameters:
+  CLAIR_SECRET: "clair"
+  CLAIR_IMAGE: "quay.io/app-sre/clair"
+  IMAGE_TAG: "latest"
+
+resourceTemplates:
+- name: clair
+  path: /contrib/openshift/manifests/manifests.yaml
+  url: https://github.com/quay/clair
+  targets:
+  - namespace:
+      $ref: /services/clair/namespaces/stage.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: ci-ext-clair-jobs
+    parameters:
+      # indexer params
+      INDEXER_DEPLOYMENT_REPLICAS: "4"
+      INDEXER_CPU_LIMITS: "4"
+      INDEXER_CPU_REQS: "2"
+      INDEXER_MEM_LIMITS: "8192Mi"
+      INDEXER_MEM_REQS: "4096Mi"
+      INDEXER_STORAGE_REQS: "200Gi"
+      # matcher params
+      MATCHER_DEPLOYMENT_REPLICAS: "1"
+      MATCHER_CPU_LIMITS: "4"
+      MATCHER_CPU_REQS: "2"
+      MATCHER_MEM_LIMITS: "8192Mi"
+      MATCHER_MEM_REQS: "4096Mi"
+      # notifier params
+      NOTIFIER_DEPLOYMENT_REPLICAS: "1"
+      NOTIFIER_CPU_LIMITS: "4"
+      NOTIFIER_CPU_REQS: "2"
+      NOTIFIER_MEM_LIMITS: "8192Mi"
+      NOTIFIER_MEM_REQS: "4096Mi"
+      # shared params
+      CLAIR_IMAGE: "quay.io/app-sre/clair"
+      IMAGE_TAG: "latest"
+  # - namespace:
+  #     $ref: /services/clair/namespaces/production.yml # Doesn't exist yet
+  #   ref: main
+  #   upstream:
+  #     instance:
+  #       $ref: /dependencies/ci-ext/ci-ext.yml
+  #     name: ci-ext-clair-jobs
+  #   parameters:
+  #     # indexer params
+  #     INDEXER_DEPLOYMENT_REPLICAS: "40"
+  #     INDEXER_CPU_LIMITS: "4"
+  #     INDEXER_CPU_REQS: "2"
+  #     INDEXER_MEM_LIMITS: "8192Mi"
+  #     INDEXER_MEM_REQS: "4096Mi"
+  #     INDEXER_STORAGE_REQS: "200Gi"
+  #     # matcher params
+  #     MATCHER_DEPLOYMENT_REPLICAS: "10"
+  #     MATCHER_CPU_LIMITS: "4"
+  #     MATCHER_CPU_REQS: "2"
+  #     MATCHER_MEM_LIMITS: "8192Mi"
+  #     MATCHER_MEM_REQS: "4096Mi"
+  #     # notifier params
+  #     NOTIFIER_DEPLOYMENT_REPLICAS: "10"
+  #     NOTIFIER_CPU_LIMITS: "4"
+  #     NOTIFIER_CPU_REQS: "2"
+  #     NOTIFIER_MEM_LIMITS: "8192Mi"
+  #     NOTIFIER_MEM_REQS: "4096Mi"
+  #     # shared params
+  #     CLAIR_SECRET: "config"
+  #     CLAIR_IMAGE: "quay.io/app-sre/clair"
+  #     IMAGE_TAG: "latest"

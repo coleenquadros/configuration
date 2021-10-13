@@ -132,6 +132,7 @@ properties:
       instance_type:
         type: string
         enum:
+        - c5.2xlarge
         - m5.xlarge
         - m5.2xlarge
         - m5.4xlarge
@@ -151,6 +152,7 @@ properties:
         - 3100
         - 3600
         - 4100
+        - 7100
       load_balancers:
         type: integer
         enum:
@@ -176,6 +178,7 @@ properties:
         properties:
           min_replicas:
             type: integer
+            minimum: 4
           max_replicas:
             type: integer
         required:
@@ -215,9 +218,32 @@ properties:
       schedule:
         type: string
         pattern: '(((\d+,)+\d+|(\d+(\/|-)\d+)|\d+|\*) ?){5}'
+      workloads:
+        type: array
+        items:
+          type: string
+          enum:
+          - appsre
+          - clair
+          - crc
+          - crda
+          - hive
+          - ocm
+          - quay
+          - telemeter
+          - ocm-quay
+      conditions:
+        additionalProperties: false
+        properties:
+          soakDays:
+            type: integer
+        oneOf:
+        - required:
+          - soakDays
     required:
-    - schedule_type
+    - workloads
     - schedule
+    - conditions
   additionalRouters:
     type: array
     maxItems: 1
@@ -253,6 +279,7 @@ properties:
         instance_type:
           type: string
           enum:
+          - c5.2xlarge
           - c5.4xlarge
           - m5.xlarge
           - m5.2xlarge
@@ -323,6 +350,8 @@ properties:
               type: string
             delete:
               type: boolean
+            assumeRole:
+              type: string
           oneOf:
           - properties:
               provider:
@@ -382,6 +411,8 @@ properties:
                 type: string
               delete:
                 type: boolean
+              assumeRole:
+                type: string
             required:
             - provider
             - name
@@ -467,6 +498,7 @@ properties:
           enum:
           - openshift-groups
           - openshift-namespaces
+          - openshift-namespace-labels
           - openshift-resources
           - openshift-rolebindings
           - openshift-users

@@ -117,6 +117,15 @@ resourceTemplates:
       HEARTBEAT_SUSPEND: 'false'
       HEARTBEAT_SCHEDULE: '@daily'
 
+- name: xjoin-search-ephemeral
+  path: /deploy/ephemeral.yaml
+  url: https://github.com/RedHatInsights/xjoin-search
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+
 - name: xjoin-search-dev
   path: /deploy/template-dev.yaml
   url: https://github.com/RedHatInsights/xjoin-search
@@ -167,10 +176,10 @@ resourceTemplates:
       NUM_REPLICAS: '0'
 
 - name: xjoin-kafka-connect-strimzi
-  path: /deploy/kafka-connect-fedramp.yml
+  path: /deploy/kafka-connect-fedramp-xjoin.yml
   url: https://github.com/RedHatInsights/xjoin-kafka-connect
   parameters:
-    VERSION: '2.5.0'
+    VERSION: '2.7.0'
     KAFKA_BOOTSTRAP_PORT: '9093'
     GROUP_ID: xjoin
     STORAGE_TOPIC_PREFIX: xjoin
@@ -189,14 +198,15 @@ resourceTemplates:
       CPU_LIMITS: 3
       XMX: 4G
       XMS: 4G
-      CPU_REQUESTS: 250m
+      CPU_REQUESTS: 249m
       NUM_REPLICAS: '5'
       MEMORY_REQUESTS: 6Gi
       MEMORY_LIMITS: 10Gi
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-fedramp-prod.yml
-    ref: 182ab8b1b311fb449917c363f4564b8e569ac606
+    ref: 347c7728000e8f3edb930e98a0588af53f4ebd99
     parameters:
+      IMAGE_TAG: 347c772
       CPU_LIMITS: 3
       XMX: 4G
       XMS: 4G
@@ -209,7 +219,7 @@ resourceTemplates:
   path: /deploy/kafka-connect.yml
   url: https://github.com/RedHatInsights/xjoin-kafka-connect
   parameters:
-    VERSION: '2.6.2'
+    VERSION: '2.7.0'
     CPU_LIMITS: 3
     XMX: 8G
     XMS: 8G
@@ -222,22 +232,24 @@ resourceTemplates:
         $ref: /dependencies/ci-int/ci-int.yml
       name: RedHatInsights-xjoin-kafka-connect-gh-build-master
     parameters:
-      CPU_REQUESTS: 250m
+      CPU_REQUESTS: 249m
       NUM_REPLICAS: '7'
       MEMORY_REQUESTS: 8Gi
       MEMORY_LIMITS: 10Gi
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
-    ref: 182ab8b1b311fb449917c363f4564b8e569ac606
+    ref: 347c7728000e8f3edb930e98a0588af53f4ebd99
     parameters:
+      IMAGE_TAG: 347c772
       CPU_REQUESTS: 250m
-      NUM_REPLICAS: '13'
+      NUM_REPLICAS: '17'
       MEMORY_REQUESTS: 8Gi
       MEMORY_LIMITS: 12Gi
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-perf.yml
-    ref: 182ab8b1b311fb449917c363f4564b8e569ac606
+    ref: 347c7728000e8f3edb930e98a0588af53f4ebd99
     parameters:
+      IMAGE_TAG: 347c772
       CPU_REQUESTS: 250m
       NUM_REPLICAS: '7'
       MEMORY_REQUESTS: 8Gi

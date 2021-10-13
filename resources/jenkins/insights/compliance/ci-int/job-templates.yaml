@@ -1,0 +1,58 @@
+- job-template:
+    id: 'insights-compliance-gh-pr-check'
+    name: '{gh_org}-{gh_repo}-pr-check'
+    status_context: "ci.int.devshift.net PR build"
+    branch: "master"
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_ephemeral_oc_login
+        - *app_interface_creds
+        - *insights_rh_registry_pull_secret
+        - *quay_secret_push
+        - *insightsdroid_github
+        - *insights_compliance_codecov_token
+    publishers:
+    - junit:
+        results: 'artifacts/junit-*.xml'
+    - archive:
+        artifacts: 'artifacts/**/*'
+    <<: *gh_properties
+    scm:
+    - git:
+        url: 'git@github.com:{gh_org}/{gh_repo}.git'
+        credentials-id: '{github_ssh_credentials}'
+        skip-tag: true
+        refspec: '+refs/pull/*:refs/remotes/origin/pr/*'
+        branches:
+        - '${{ghprbActualCommit}}'
+        merge:
+            remote: origin
+            branch: '{branch}'
+        git-config-name: "AppSRE"
+        git-config-email: "sd-app-sre@redhat.com"
+        included-regions:
+        - '{include_path}'
+        prune: true
+        clean:
+            before: true
+        wipe-workspace: true
+    triggers:
+        - github-pull-request:
+            cron: '* * * * *'
+            github-hooks: false
+            permit-all: false
+            trigger-phrase: '(?ms).*^(\[test\]|\/retest|\/lgtm|\/lgtm cancel|\/hold|\/hold cancel)\s*$.*'
+            org-list:
+            - app-sre
+            - openshift
+            - RedHatInsights
+            allow-whitelist-orgs-as-admins: true
+            status-context: '{status_context}'
+            white-list-target-branches:
+            - '{white_list_target_branches}'
+    <<: *pr_check_template

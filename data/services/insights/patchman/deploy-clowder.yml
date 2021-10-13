@@ -48,7 +48,7 @@ resourceTemplates:
     ref: internal
     parameters:
       MEMORY_LIMIT: '2Gi'
-  - namespace:
+  - namespace: # STAGE
       $ref: /services/insights/patchman/namespaces/stage-patchman-engine-stage.yml
     ref: master
     upstream:
@@ -57,34 +57,106 @@ resourceTemplates:
       name: RedHatInsights-patchman-engine-gh-build-master
     parameters:
       # Manager
-      REPLICAS_MANAGER: '0'
-      IMAGE_TAG_MANAGER: 7bec099 # 1.15.3
-      LOG_LEVEL_MANAGER: debug
+      REPLICAS_MANAGER: '1'
+      IMAGE_TAG_MANAGER: bdb4621 # 1.17.7
+      DB_DEBUG_MANAGER: 'true'
+      LOG_LEVEL_MANAGER: info
+      RES_MEM_MANAGER: 2Gi
+      ADVISORY_DETAIL_CACHE_SIZE: '60000' # Advisories count (46k) + some reserve
 
       # Listener
-      REPLICAS_LISTENER: '0'
-      IMAGE_TAG_LISTENER: 7bec099 # 1.15.3
-      LOG_LEVEL_LISTENER: debug
+      REPLICAS_LISTENER: '1'
+      IMAGE_TAG_LISTENER: bdb4621 # 1.17.7
+      LOG_LEVEL_LISTENER: info
 
       # Evaluator - upload
-      REPLICAS_EVALUATOR_UPLOAD: '0'
-      IMAGE_TAG_EVALUATOR_UPLOAD: 7bec099 # 1.15.3
-      LOG_LEVEL_EVALUATOR_UPLOAD: debug
+      REPLICAS_EVALUATOR_UPLOAD: '1'
+      IMAGE_TAG_EVALUATOR_UPLOAD: bdb4621 # 1.17.7
+      LOG_LEVEL_EVALUATOR_UPLOAD: info
+      ENABLE_LAZY_PACKAGE_SAVE_EVALUATOR_UPLOAD: 'true'
+      CONSUMER_COUNT_EVALUATOR_UPLOAD: "1"
+      GOMAXPROCS_EVALUATOR_UPLOAD: "4"
+      RES_CPU_EVALUATOR_UPLOAD: 500m
+      RES_MEM_EVALUATOR_UPLOAD: 2Gi
 
       # Evaluator - recalc
-      REPLICAS_EVALUATOR_RECALC: '0'
-      IMAGE_TAG_EVALUATOR_RECALC: 7bec099 # 1.15.3
-      LOG_LEVEL_EVALUATOR_RECALC: debug
+      REPLICAS_EVALUATOR_RECALC: '1'
+      IMAGE_TAG_EVALUATOR_RECALC: bdb4621 # 1.17.7
+      LOG_LEVEL_EVALUATOR_RECALC: info
+      ENABLE_LAZY_PACKAGE_SAVE_EVALUATOR_RECALC: 'true'
+      CONSUMER_COUNT_EVALUATOR_RECALC: "1"
+      GOMAXPROCS_EVALUATOR_RECALC: "4"
+      RES_CPU_EVALUATOR_RECALC: 500m
+      RES_MEM_EVALUATOR_RECALC: 2Gi
 
       # VMaaS sync
-      REPLICAS_VMAAS_SYNC: '0'
-      IMAGE_TAG_VMAAS_SYNC: 7bec099 # 1.15.3
-      LOG_LEVEL_VMAAS_SYNC: debug
+      REPLICAS_VMAAS_SYNC: '1'
+      IMAGE_TAG_VMAAS_SYNC: bdb4621 # 1.17.7
+      LOG_LEVEL_VMAAS_SYNC: info
 
       # Database admin
-      REPLICAS_DATABASE_ADMIN: '0'
-      IMAGE_TAG_DATABASE_ADMIN: 7bec099 # 1.15.3
-      LOG_LEVEL_DATABASE_ADMIN: debug
+      REPLICAS_DATABASE_ADMIN: '1'
+      IMAGE_TAG_DATABASE_ADMIN: bdb4621 # 1.17.7
+      LOG_LEVEL_DATABASE_ADMIN: info
 
       # Common parameters
-      CMD_WRAPPER: ''
+      # ...
+  - namespace: # PRODUCTION
+      $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
+    ref: 125567f6b4a40b8acda130c27a3ddaf352190385 # 1.16.2
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-patchman-engine-gh-build-master
+    parameters:
+      # Manager
+      REPLICAS_MANAGER: '1'
+      IMAGE_TAG_MANAGER: 9ec9b6c # 1.17.0
+      LOG_LEVEL_MANAGER: info
+      RES_CPU_MANAGER: 1000m
+      RES_MEM_MANAGER: 2Gi
+      ADVISORY_DETAIL_CACHE_SIZE: '60000' # Advisories count (46k) + some reserve
+
+      # Listener
+      REPLICAS_LISTENER: '1'
+      IMAGE_TAG_LISTENER: 9ec9b6c # 1.17.0
+      LOG_LEVEL_LISTENER: info
+      CONSUMER_COUNT_LISTENER: "1"
+
+      # Evaluator - upload
+      REPLICAS_EVALUATOR_UPLOAD: '1'
+      IMAGE_TAG_EVALUATOR_UPLOAD: 9ec9b6c # 1.17.0
+      LOG_LEVEL_EVALUATOR_UPLOAD: info
+      ENABLE_LAZY_PACKAGE_SAVE_EVALUATOR_UPLOAD: 'true'
+      CONSUMER_COUNT_EVALUATOR_UPLOAD: "1"
+      GOMAXPROCS_EVALUATOR_UPLOAD: "4"
+      RES_CPU_EVALUATOR_UPLOAD: 500m
+      RES_MEM_EVALUATOR_UPLOAD: 2Gi
+
+      # Evaluator - recalc
+      REPLICAS_EVALUATOR_RECALC: '1'
+      IMAGE_TAG_EVALUATOR_RECALC: 9ec9b6c # 1.17.0
+      LOG_LEVEL_EVALUATOR_RECALC: info
+      ENABLE_LAZY_PACKAGE_SAVE_EVALUATOR_RECALC: 'true'
+      CONSUMER_COUNT_EVALUATOR_RECALC: "1"
+      GOMAXPROCS_EVALUATOR_RECALC: "4"
+      RES_CPU_EVALUATOR_RECALC: 500m
+      RES_MEM_EVALUATOR_RECALC: 2Gi
+
+      # VMaaS sync
+      REPLICAS_VMAAS_SYNC: '1'
+      IMAGE_TAG_VMAAS_SYNC: 9ec9b6c # 1.17.0
+      LOG_LEVEL_VMAAS_SYNC: info
+      VMAAS_WS_ADDRESS: ws://vmaas-websocket.vmaas-prod.svc.cluster.local:8082 # since vmaas is not deployed with clowder
+      DELETE_CULLED_SYSTEMS_LIMIT: "2000"
+      ERRATA_PAGE_SIZE: "5000"
+      RES_MEM_VMAAS_SYNC: 1024Mi
+
+      # Database admin
+      REPLICAS_DATABASE_ADMIN: '1'
+      IMAGE_TAG_DATABASE_ADMIN: 9ec9b6c # 1.17.0
+      LOG_LEVEL_DATABASE_ADMIN: info
+
+      # Common parameters
+      # ...
+      VMAAS_ADDRESS: http://vmaas-webapp.vmaas-prod.svc.cluster.local:8080 # since vmaas is not deployed with clowder
