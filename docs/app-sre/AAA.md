@@ -12,6 +12,7 @@
     - [Preface](#preface)
     - [Complementary Documentation and Resources](#complementary-documentation-and-resources)
     - [AppSRE Engineer Onboarding](#appsre-engineer-onboarding)
+        - [Laptop security](#laptop-security)
         - [Registering the user in App-Interface](#registering-the-user-in-app-interface)
         - [Access and Surfaces list](#access-and-surfaces-list)
             - [Returning Red Hat Employee Gotchas](#returning-red-hat-employee-gotchas)
@@ -51,6 +52,10 @@ surfaces and processes, including incident management.
   Viewable and editable by AppSRE members only.
 
 ## AppSRE Engineer Onboarding
+
+### Laptop security
+
+You have a new, shiny laptop. Now, make sure you comply with [the laptop security guidelines](https://source.redhat.com/departments/it/it-information-security/wiki/laptop_security).
 
 ### Registering the user in App-Interface
 
