@@ -5,7 +5,7 @@ labels:
   service: quarkus
 
 name: saas-quarkus
-description: 'SaaS tracking file for Quarkus'
+description: SaaS tracking file for Quarkus
 
 app:
   $ref: /services/quarkus/app.yml
@@ -21,6 +21,7 @@ slack:
 managedResourceTypes:
 - DeploymentConfig
 - Service
+- ConfigMap
 
 imagePatterns:
 - quay.io/quarkus/code-quarkus-app
@@ -28,53 +29,67 @@ imagePatterns:
 - quay.io/quarkus/code-quarkus-frontend
 
 resourceTemplates:
+# Backend
 - name: code-quarkus-api
   url: https://github.com/quarkusio/code.quarkus.io
   path: /openshift/code-quarkus-api.yaml
-  parameters:
-    IO_QUARKUS_CODE_FEATURES: support-button
   targets:
-    - namespace:
-        $ref: /services/quarkus/namespaces/code-quarkus-stage.yml
-      ref: main
-      upstream:
-        instance:
-          $ref: /dependencies/ci-ext/ci-ext.yml
-        name: quarkusio-code.quarkus.io-gh-build-main
-      parameters:
-        REPLICAS: 1
-        IO_QUARKUS_CODE_HOSTNAME: stage.code.quarkus.io
-        IO_QUARKUS_CODE_GA_EXTENSIONS_DIMENSION_INDEX: 5
-        IO_QUARKUS_CODE_GA_QUARKUS_VERSION_DIMENSION_INDEX: 6
-        IO_QUARKUS_CODE_GA_BUILD_TOOL_DIMENSION_INDEX: 7
-        IO_QUARKUS_CODE_GA_EXTENSION_QUANTITY_INDEX: 8
-        IO_QUARKUS_CODE_GA_BATCHING_ENABLED: "false"
-        IO_QUARKUS_CODE_QUARKUS_PLATFORMS_RELOAD_CRON_EXPR: "0 */5 * * * ?"
-    - namespace:
-        $ref: /services/quarkus/namespaces/code-quarkus-production.yml
-      ref: 49d8a599cfd02a204acf2bedf882fd40df7bd7cb
-      parameters:
-        REPLICAS: 3
-        IO_QUARKUS_CODE_HOSTNAME: code.quarkus.io
-        IO_QUARKUS_CODE_GA_EXTENSIONS_DIMENSION_INDEX: 3
-        IO_QUARKUS_CODE_GA_QUARKUS_VERSION_DIMENSION_INDEX: 4
-        IO_QUARKUS_CODE_GA_BUILD_TOOL_DIMENSION_INDEX: 5
-        IO_QUARKUS_CODE_GA_EXTENSION_QUANTITY_INDEX: 6
-        IO_QUARKUS_CODE_LOG_LEVEL: inherit
-        IO_QUARKUS_CODE_QUARKUS_PLATFORMS_RELOAD_CRON_EXPR: "0 */30 * * * ?"
+  - namespace:
+      $ref: /services/quarkus/namespaces/code-quarkus-stage.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: quarkusio-code.quarkus.io-gh-build-main
+    parameters:
+      REPLICAS: 1
+      IO_QUARKUS_CODE_HOSTNAME: stage.code.quarkus.io
+      IO_QUARKUS_CODE_GA_EXTENSIONS_DIMENSION_INDEX: 5
+      IO_QUARKUS_CODE_GA_QUARKUS_VERSION_DIMENSION_INDEX: 6
+      IO_QUARKUS_CODE_GA_BUILD_TOOL_DIMENSION_INDEX: 7
+      IO_QUARKUS_CODE_GA_EXTENSION_QUANTITY_INDEX: 8
+      IO_QUARKUS_CODE_GA_BATCHING_ENABLED: 'false'
+    promotion:
+      publish:
+      - code-quarkus-api-stage-deploy-success-channel
+  - namespace:
+      $ref: /services/quarkus/namespaces/code-quarkus-production.yml
+    ref: e899b9a0df993ffb9d274c775c933172abc6b973
+    parameters:
+      REPLICAS: 3
+      IO_QUARKUS_CODE_HOSTNAME: code.quarkus.io
+      IO_QUARKUS_CODE_GA_EXTENSIONS_DIMENSION_INDEX: 3
+      IO_QUARKUS_CODE_GA_QUARKUS_VERSION_DIMENSION_INDEX: 4
+      IO_QUARKUS_CODE_GA_BUILD_TOOL_DIMENSION_INDEX: 5
+      IO_QUARKUS_CODE_GA_EXTENSION_QUANTITY_INDEX: 6
+      IO_QUARKUS_CODE_LOG_LEVEL: inherit
+      IO_QUARKUS_CODE_QUARKUS_PLATFORMS_RELOAD_CRON_EXPR: 0 */5 * * * ?
+    promotion:
+      auto: true
+      subscribe:
+      - code-quarkus-stage-post-deploy-tests-success-channel
+
+# Frontend
 - name: code-quarkus-frontend
   url: https://github.com/quarkusio/code.quarkus.io
   path: /openshift/code-quarkus-frontend.yaml
   targets:
-    - namespace:
-        $ref: /services/quarkus/namespaces/code-quarkus-stage.yml
-      ref: main
-      upstream:
-        instance:
-          $ref: /dependencies/ci-ext/ci-ext.yml
-        name: quarkusio-code.quarkus.io-gh-build-main
-    - namespace:
-        $ref: /services/quarkus/namespaces/code-quarkus-production.yml
-      ref: 49d8a599cfd02a204acf2bedf882fd40df7bd7cb
-      parameters:
-        REPLICAS: 3
+  - namespace:
+      $ref: /services/quarkus/namespaces/code-quarkus-stage.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: quarkusio-code.quarkus.io-gh-build-main
+    promotion:
+      publish:
+      - code-quarkus-frontend-stage-deploy-success-channel
+  - namespace:
+      $ref: /services/quarkus/namespaces/code-quarkus-production.yml
+    ref: e899b9a0df993ffb9d274c775c933172abc6b973
+    parameters:
+      REPLICAS: 3
+    promotion:
+      auto: true
+      subscribe:
+      - code-quarkus-stage-post-deploy-tests-success-channel

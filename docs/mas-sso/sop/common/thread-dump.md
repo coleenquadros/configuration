@@ -1,27 +1,44 @@
-## Thread Dump for MAS SSO
-When a critical alert is firing, a thread dump should be part of the information gathered. Below are the commands to get this thread dump from MAS SSO
+- [Thread Dump for MAS SSO](#thread-dump-for-mas-sso)
+   - [Prerequisites](#prerequisites)
+   - [Running the Script](#running-the-script)
+   - [Gather Logs](#gather-logs)
+
+
+# Thread Dump for MAS SSO
+ When a critical alert is firing, a thread dump should be part of the information gathered. Below are the details to get this thread dump from MAS SSO.
+
+## Prerequisites
+The mas-sso application information can be found at [mas-sso](https://visual-app-interface.devshift.net/services#/services/mas-sso/app.yml).
+
+
 The namespace will be `mas-sso-stage` for staging environment and `mas-sso-production` for the production environment. Use the appropriate namespace in the commands.
 
+CLI required to complete this SOP:
+- oc
+- Appropiate permissions on the OSD cluster
+- [thead-dump-capture.sh](https://gitlab.cee.redhat.com/service/saas-mas-sso/-/blob/master/scripts/thread-dump-capture.sh)
 
-### RHSSO Thread Dumps
+## Running the Script
 
-MAS SSO is a java based product. Run the following commands to get a thread dump from each container running SSO within the keycloak pods
+- Login to OSD cluster.
+- Run the following command against your target cluster to get a thread dump from each container running SSO within the keycloak pods. 
+  
+```
+Ex:   ./thread-dump-capture.sh -n <NAMESPACE> -d <OUTPUT_DIR>
 
-Get the Java Process PID from each container:
+      ./thread-dump-capture.sh -n mas-sso-stage -d /home/Documents/Threaddump-folder/
 
-`for p in $(oc get --no-headers=true pods -o name | awk -F "/" '{print $2}' | grep keycloak); do echo $p; oc exec $p -c keycloak -it -- pgrep -f java; done;`
+   OPTIONS:
+   -h, --help      Help instructions
+   -n, --param     Namespace
+   -d, --param     Output_Dir
 
-Next put the pids in an array in the order they were outputted
+```
 
-`
-pids=(<PIDS in order>) # E.G pids=(799 799 800)
-`
-Next run the jstack command in each SSO container and send the output to a local file.
+`<NAMESPACE>` parameter is required, must enter an appropiate namespace `mas-sso-stage` or `mas-sso-production`
 
-`
-for i in ${!pids[@]}; do oc exec keycloak-$i -c keycloak -it -- jstack ${pids[$i]} > keycloak-$i-dump.txt; done
-`
+`<OUTPUT_DIR>` parameter is optional, If no path is supplied, thread-dump-*.txt are created in the output directory.
 
-Finally upload this info to accessible place such as a Jira.`
-`
+### Gather logs
 
+After successful execution of the script, a file for each keycloak process Id thread dump is created. Finally, upload this info to accessible place such as a Jira.

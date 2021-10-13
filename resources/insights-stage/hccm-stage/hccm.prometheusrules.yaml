@@ -119,8 +119,11 @@ spec:
         message: "Insights Cost Management Alert. Presto queries have insufficient resources in stage environment."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-cost-presto-insufficent-resources-In-hccm.rst"
 
+    - record: koku:celery:download_queue
+      expr: max(download_backlog{namespace="hccm-stage", pod=~".+worker.+"})
     - alert: App-cost-download-queue-overload-In-hccm
-      expr:  max(avg_over_time(download_backlog{namespace="hccm-stage"}[1h])) > 500
+      expr: koku:celery:download_queue > 550
+      for: 10m
       labels:
         severity: high
         service: insights
@@ -132,8 +135,11 @@ spec:
         message: "Insights Cost Management Alert. Experiencing high download queue backlog in stage environment."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-insights-hccm-worker-queue-overload.rst"
 
+    - record: koku:celery:summary_queue
+      expr: max(summary_backlog{namespace="hccm-stage", pod=~".+worker.+"})
     - alert: App-cost-summary-queue-overload-In-hccm
-      expr:  max(avg_over_time(summary_backlog{namespace="hccm-stage"}[1h])) > 500
+      expr: koku:celery:summary_queue > 100
+      for: 10m
       labels:
         severity: high
         service: insights
@@ -145,8 +151,11 @@ spec:
         message: "Insights Cost Management Alert. Experiencing high summary queue backlog in stage environment."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-insights-hccm-worker-queue-overload.rst"
 
+    - record: koku:celery:priority_queue
+      expr: max(priority_backlog{namespace="hccm-stage", pod=~".+worker.+"})
     - alert: App-cost-priority-queue-overload-In-hccm
-      expr:  max(avg_over_time(priority_backlog{namespace="hccm-stage"}[1h])) > 500
+      expr: koku:celery:priority_queue > 100
+      for: 10m
       labels:
         severity: high
         service: insights
@@ -158,8 +167,11 @@ spec:
         message: "Insights Cost Management Alert. Experiencing high priority queue backlog in stage environment."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-insights-hccm-worker-queue-overload.rst"
 
+    - record: koku:celery:refresh_queue
+      expr: max(refresh_backlog{namespace="hccm-stage", pod=~".+worker.+"})
     - alert: App-cost-refresh-queue-overload-In-hccm
-      expr:  max(avg_over_time(refresh_backlog{namespace="hccm-stage"}[1h])) > 500
+      expr: koku:celery:refresh_queue > 100
+      for: 10m
       labels:
         severity: high
         service: insights
@@ -171,8 +183,11 @@ spec:
         message: "Insights Cost Management Alert. Experiencing high refresh queue backlog in stage environment."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-insights-hccm-worker-queue-overload.rst"
 
+    - record: koku:celery:cost_model_queue
+      expr: max(cost_model_backlog{namespace="hccm-stage", pod=~".+worker.+"})
     - alert: App-cost-cost-model-queue-overload-In-hccm
-      expr:  max(avg_over_time(cost_model_backlog{namespace="hccm-stage"}[1h])) > 500
+      expr: koku:celery:cost_model_queue > 100
+      for: 10m
       labels:
         severity: high
         service: insights
@@ -184,8 +199,11 @@ spec:
         message: "Insights Cost Management Alert. Experiencing high cost-model queue backlog in stage environment."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-insights-hccm-worker-queue-overload.rst"
 
+    - record: koku:celery:default_celery_queue
+      expr: max(default_backlog{namespace="hccm-stage", pod=~".+worker.+"})
     - alert: App-cost-celery-queue-overload-In-hccm
-      expr:  max(avg_over_time(celery_backlog{namespace="hccm-stage"}[1h])) > 500
+      expr: koku:celery:default_celery_queue > 100
+      for: 10m
       labels:
         severity: high
         service: insights
@@ -195,6 +213,22 @@ spec:
         dashboard: "https://grafana.stage.devshift.net/d/R0HueuFGk/cost-management?orgId=1&var-Datasource=crcs02ue1-prometheus&var-namespace=hccm-stage&var-db_instance=cost-management-stage&var-rds_datasource=app-sre-stage-01-prometheus"
         link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
         message: "Insights Cost Management Alert. Experiencing high celery (default) queue backlog in staging."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-insights-hccm-worker-queue-overload.rst"
+
+    - record: koku:celery:ocp_queue
+      expr: max(ocp_backlog{namespace="hccm-stage", pod=~".+worker.+"})
+    - alert: App-cost-ocp-celery-queue-overload-In-hccm
+      expr: koku:celery:ocp_queue > 100
+      for: 10m
+      labels:
+        severity: high
+        service: insights
+        env: stage
+        app_team: costmanagement-staging
+      annotations:
+        dashboard: "https://grafana.stage.devshift.net/d/R0HueuFGk/cost-management?orgId=1&var-Datasource=crcs02ue1-prometheus&var-namespace=hccm-stage&var-db_instance=cost-management-stage&var-rds_datasource=app-sre-stage-01-prometheus"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
+        message: "Insights Cost Management Alert. Experiencing high OCP queue backlog in staging."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-insights-hccm-worker-queue-overload.rst"
 
     - alert: App-cost-pod-restarts-In-hccm
@@ -238,3 +272,16 @@ spec:
         link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-stage/deployments"
         message: "Kafka lag for cost management sources in hccm-sources group exceeded 800 in stage environment."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-cost-sources-lag-In-hccm.rst"
+
+    - alert: App-job-failures-In-hccm
+      expr: sum(kube_job_status_failed{namespace="hccm-stage"}) - sum(kube_job_status_failed{namespace="hccm-stage"} offset 1h) > 0
+      labels:
+        severity: warning
+        service: insights
+        env: stage
+        app_team: costmanagement-staging
+      annotations:
+        dashboard: "https://grafana.stage.devshift.net/d/R0HueuFGk/cost-management?orgId=1&var-Datasource=crcs02ue1-prometheus&var-namespace=hccm-stage&var-db_instance=cost-management-stage&var-rds_datasource=app-sre-stage-01-prometheus"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/hccm-stage/jobs"
+        message: "Cost management job failures occuring in stage environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/hccm/App-job-failures-In-hccm.rst"

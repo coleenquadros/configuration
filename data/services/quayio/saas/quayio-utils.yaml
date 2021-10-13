@@ -27,39 +27,14 @@ managedResourceTypes:
 - Job
 
 imagePatterns:
-- quay.io/app-sre/quayio-update-banner-job
 - quay.io/app-sre/flush-redis
 - quay.io/app-sre/quay
 - quay.io/app-sre/syslog-cloudwatch-bridge
 - quay.io/app-sre/quay-service-tool
-parameters:
-  IMAGE: "quay.io/app-sre/quayio-update-banner-job"
+- quay.io/app-sre/quayio-update-py2-db
+- quay.io/app-sre/quayio-update-ro-keys-job
 
 resourceTemplates:
-- name: quayio-update-banner-job
-  path: /openshift.yml
-  url: https://github.com/quay/update-banner-job
-  targets:
-  - namespace:
-      $ref: /services/quayio/namespaces/quays02ue1.yml
-    ref: f1491c0657ae75aab55d4ea7faec1e82393dc9af
-    parameters:
-      JOB_NAME: "2021-08-03-sso-banner-update-1" # provide_a_unique_job_name_to_trigger_job
-      ACTIVE_DEADLINE_SECONDS: "600"
-      DB_HOST_SECRET: "quayio-stage-57-rds"
-      DB_CREDS_SECRET: "quayio-stage-57-rds"
-      MESSAGE: "Quay.io now supports Red Hat Single Sign-On Services exclusively. If you haven't done so already, you need to link your Quay.io login to a redhat.com account in order to be able to login to the web interface by going to the [recovery endpoint](https://recovery.stage.quay.io). CLI tokens and robot accounts are not impacted. Read more about this change in the [FAQ.](https://access.redhat.com/articles/5925591)."
-      SEVERITY: "info"
-  - namespace:
-      $ref: /services/quayio/namespaces/quayp05ue1.yml
-    ref: f1491c0657ae75aab55d4ea7faec1e82393dc9af
-    parameters:
-      JOB_NAME: "2021-08-05-sso-banner-update-1" # provide_a_unique_job_name_to_trigger_job
-      ACTIVE_DEADLINE_SECONDS: "600"
-      DB_HOST_SECRET: "quay-db-config-secret"
-      DB_CREDS_SECRET: "quay-db-config-secret"
-      MESSAGE: "Quay.io now supports Red Hat Single Sign-On Services exclusively. If you haven't done so already, you need to link your Quay.io login to a redhat.com account in order to be able to login to the web interface by going to the [recovery endpoint](https://recovery.quay.io/signin). CLI tokens and robot accounts are not impacted. Read more about this change in the [FAQ.](https://access.redhat.com/articles/5925591)."
-      SEVERITY: "info"
 - name: quayio-service-tool
   path: /openshift.yml
   url: https://github.com/quay/quay-service-tool
@@ -127,3 +102,31 @@ resourceTemplates:
   - namespace:
       $ref: /services/quayio/namespaces/quayp05ue1.yml
     ref: c4a964ec5c4a442b3700c495153d26bad099025d
+
+- name: quayio-update-py2-db
+  path: /openshift.yml
+  url: https://github.com/quay/update-py2-db
+  targets:
+  - namespace:
+      $ref: /services/quayio/namespaces/quays02ue1.yml
+    ref: 291c5d34de480ec220af5050aea0086e89c2f857
+    parameters:
+      IMAGE: "quay.io/app-sre/quayio-update-py2-db"
+      JOB_NAME: "2021-10-12-update-db-1" # provide_a_unique_job_name_to_trigger_job
+      DB_HOST_SECRET: "quayio-stage-57-rds"
+      DB_CREDS_SECRET: "quayio-stage-57-rds"
+
+- name: quayio-update-ro-keys-job
+  path: /openshift.yml
+  url: https://github.com/quay/update-ro-keys-job
+  targets:
+  - namespace:
+      $ref: /services/quayio/namespaces/quays02ue1.yml
+    ref: 402b545eef9b6b97cfad9eac7c700a5d6ed6a182
+    parameters:
+      IMAGE: "quay.io/app-sre/quayio-update-ro-keys-job"
+      JOB_NAME: "2021-10-11-update-ro-keys-staging-3" # provide_a_unique_job_name_to_trigger_job
+      KEY_NAME: "quayio-stage-migration-ro-key"
+      QUAY_APP_CONFIG_SECRET: "quay-config-secret"
+      DB_HOST_SECRET: "quayio-stage-57-rds"
+      EXPIRY_DATE: "2022-10-11"

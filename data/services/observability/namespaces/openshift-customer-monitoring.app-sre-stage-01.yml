@@ -51,6 +51,7 @@ openshiftResources:
   path: /observability/prometheus/prometheus-app-sre-additional-scrapeconfig.secret.yaml
   variables:
     blackbox_exporter_svc_url: blackbox-exporter.app-sre-observability-stage.svc.cluster.local:9115
+    domain_exporter_svc_url: domain-exporter.app-sre-observability-stage.svc.cluster.local:9222
 ### Alertmanager configuration
 - provider: resource-template
   type: extracurlyjinja2
@@ -81,9 +82,6 @@ openshiftResources:
   path: /observability/servicemonitors/limitador.servicemonitor.yaml
 
 ## Prometheus Rules
-### App SRE contract
-- provider: resource
-  path: /observability/prometheusrules/app-sre-contract.prometheusrules.yaml
 ### Federated Kubernetes metrics
 - provider: resource
   path: /observability/prometheusrules/kube-metrics.prometheusrules.yaml
@@ -126,6 +124,13 @@ openshiftResources:
     severity_terms_errors: medium
     severity_pod_restart: info
     severity_pod_restart_many_times: medium
+### OCM Service Log
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/prometheusrules/ocm-service-log.prometheusrules.yaml
+  variables:
+    environment: stage
+    severity_500_errors: medium
 ### UHC Clusters Service
 - provider: resource
   path: /observability/prometheusrules/uhc-clusters-service-stage.prometheusrules.yaml
@@ -155,6 +160,9 @@ openshiftResources:
 #### API
 - provider: resource
   path: /observability/prometheusrules/observatorium-api-stage.prometheusrules.yaml
+#### Tenants
+- provider: resource
+  path: /observability/prometheusrules/observatorium-tenants-stage.prometheusrules.yaml
 #### Custom
 - provider: resource
   path: /observability/prometheusrules/observatorium-custom-metrics-stage.prometheusrules.yaml
@@ -195,6 +203,11 @@ openshiftResources:
 ### Status Board
 - provider: resource
   path: /observability/prometheusrules/status-board-stage.prometheusrules.yaml
+- provider: resource
+  path: /status-board/stage/status-board-rds.prometheusrules.yaml
+#### Web RCA
+#- provider: resource # FIXME: enable later
+#  path: /observability/prometheusrules/web-rca-stage.prometheusrules.yaml
 ### Qontract-reconcile SLOs
 - provider: resource-template
   path: /observability/prometheusrules/qontract-reconcile-time-to-reconcile-slo.prometheusrules.yaml
@@ -224,6 +237,8 @@ openshiftResources:
 ### Devfile Registry
 - provider: resource
   path: /observability/prometheusrules/devfile-registry-stage.prometheusrules.yaml
+- provider: resource
+  path: /observability/prometheusrules/devfile-registry-redhat-stage.prometheusrules.yaml
 ## Insights AWS rules
 - provider: resource
   path: /insights-stage/playbook-dispatcher/playbook-dispatcher-rds.prometheusrules.yaml
@@ -236,6 +251,8 @@ openshiftResources:
   path: /observability/prometheusrules/srs-fleet-manager-slos-latency-stage.prometheusrules.yaml
 - provider: resource
   path: /observability/prometheusrules/srs-fleet-manager-stage.prometheusrules.yaml
+- provider: resource
+  path: /observability/prometheusrules/srs-fleet-manager-errors-stage.prometheusrules.yaml
 - provider: resource
   path: /observability/prometheusrules/srs-service-registry-slos-availability-stage.prometheusrules.yaml
 - provider: resource
@@ -515,6 +532,12 @@ openshiftResources:
   variables:
     environment: stage
     namespace: devfile-registry-stage
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/devfile-registry-redhat.servicemonitor.yaml
+  variables:
+    environment: stage
+    namespace: devfile-registry-redhat-stage
 
 ### MAS-SSO
 - provider: resource-template
@@ -531,6 +554,14 @@ openshiftResources:
   variables:
     environment: stage
     namespace: status-board-stage
+
+### Web RCA
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/web-rca.servicemonitor.yaml
+  variables:
+    environment: stage
+    namespace: web-rca-stage
 
 ### SRS Fleet Manager
 - provider: resource-template
@@ -555,3 +586,18 @@ openshiftResources:
   variables:
     environment: stage
     namespace: service-registry-stage
+
+### App-SRE PushGateway
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/pushgateway.servicemonitor.yaml
+  variables:
+    namespace: app-sre-observability-stage
+
+### Clair stage
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/clair.servicemonitor.yaml
+  variables:
+    environment: stage
+    namespace: clair-stage

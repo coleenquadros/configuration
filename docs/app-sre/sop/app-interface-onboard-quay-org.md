@@ -2,10 +2,11 @@
 
 To on-board a new Quay org to app-interface, perform the following operations:
 
-1. Create an automation token for this org:
+1. Create an automation token for this org. 
+    * Since tokens in quay are tied to the person who created them, we suggest using bot acccout, either yours or ours [sd_app_sre_quay_bot](https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/app-sre-quay-bot). Invite bot to the quay-org and login as bot.
     * Go to `Applications` in Quay (https://quay.io/organization/**my-quay-org**?tab=applications).
     * Create an application called `automationToken`.
-    * Generate a token for the application with `Administer Organization` permissions and have it stored in Vault.
+    * Generate a token for the application with `Administer Organization` permissions and have it stored in Vault (include `Administer Repositories` if you need to config repository with [team permissions](https://gitlab.cee.redhat.com/service/app-interface#create-a-quay-repository-for-an-onboarded-app-app-sreapp-1yml)).
 
 2. To add the Quay org to app-interface, submit a merge request:
     * Add the Quay org to app-interface:
@@ -21,6 +22,8 @@ To on-board a new Quay org to app-interface, perform the following operations:
         * [example](/data/dependencies/quay/app-sre.yml)
     * Create new permissions to allow adding users to teams in this org. [example](/data/dependencies/quay/permissions/quay-membership-app-sre-telemeter.yml)
     * Add the new permissions to roles as required.
+    * Add role to users, including the bot user.
+    * [example MR](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/26367)
 
 ## Pushing and pulling images during CI
 

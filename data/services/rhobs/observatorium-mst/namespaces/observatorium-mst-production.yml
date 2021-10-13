@@ -17,7 +17,9 @@ environment:
 
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.telemeter-prod-01.yml
-- $ref: /services/rhobs/telemeter/namespaces/telemeter-production.yml
+- $ref: /services/rhobs/observatorium/namespaces/observatorium-production.yml
+# NOTICE(prekumar): For allowing metric federation using Thanos Ruler running in observatoium-metrics-production.
+- $ref: /services/rhobs/observatorium/observatorium-metrics/namespaces/observatorium-metrics-production.yml
 
 grafanaUrl: https://grafana.app-sre.devshift.net/d/Tg-mH0rizaSJDKSADJ/telemeter?orgId=1&var-datasource=app-sre-prometheus&var-cluster=app-sre&var-namespace=telemeter-production
 
@@ -40,6 +42,10 @@ terraformResources:
 openshiftResources:
 - provider: route
   path: /app-sre/telemeter-production/observatorium-mst-api-production.route.yaml
+  vault_tls_secret_path: app-interface/app-sre/routes/_wildcard.api.openshift.com
+  vault_tls_secret_version: 5
+- provider: route
+  path: /app-sre/telemeter-production/observatorium-mst-thanos-compact.route.yaml
   vault_tls_secret_path: app-interface/app-sre/routes/_wildcard.api.openshift.com
   vault_tls_secret_version: 5
 - provider: vault-secret
@@ -66,8 +72,12 @@ openshiftResources:
 # Serviceaccount for Observatorium platform, Cluster role to access OSD tenant namespace
 - provider: resource
   path: /app-sre/telemeter-production/observatorium-mst.serviceaccount.yaml
+# NOTICE: This resource is deployed through the observatorium-mst-cluster-scope-production namespace file,
+# until https://issues.redhat.com/browse/APPSRE-2935 is fixed.
+# - provider: resource
+#   path: /app-sre/telemeter-production/observatorium-mst.clusterrole.yml
 
-# proruction port-forward for debugging
+# production port-forward for debugging
 - provider: resource
   path: /app-sre/telemeter-production/observatorium-allow-port-forward.role.yaml
 - provider: resource

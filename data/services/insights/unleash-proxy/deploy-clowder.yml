@@ -35,7 +35,7 @@ parameters:
   CLOUD_WATCH_LOG_GROUP: unleash-proxy-stage
 
 resourceTemplates:
-- name: unleash-proxy-clowdapp
+- name: unleash-proxy
   path: /deploy/clowdapp.yml
   url: https://gitlab.cee.redhat.com/automation-analytics/unleash-proxy
   targets:
@@ -43,6 +43,11 @@ resourceTemplates:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
     ref: internal  # populated by bonfire
+    parameters:
+      API_PREFIX: /api/featureflags/v0
+      LOG_LEVEL: debug
+      UNLEASH_LOGLEVEL: debug
+
   - namespace:
       $ref: /services/insights/unleash-proxy/namespaces/unleash-proxy-stage.yml
     ref: main
@@ -50,9 +55,10 @@ resourceTemplates:
       ENV_NAME: stage
       API_PREFIX: /api/featureflags/v0
       LOG_LEVEL: debug
+
   - namespace:
       $ref: /services/insights/unleash-proxy/namespaces/unleash-proxy-prod.yml
-    ref: 73b697760e2e2968cc59f23fae16be243ee410bd
+    ref: 3980200ad5fc884691c7ba4cdc4c3a17b3541625
     parameters:
       ENV_NAME: prod
       API_PREFIX: /api/featureflags/v0

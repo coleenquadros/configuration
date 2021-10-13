@@ -1,0 +1,37 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+name: 2021-10-06-upstream-profile-relationships-stage
+labels: {}
+namespace:
+  $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
+identifier: compliance-stage
+output: stdout
+queries:
+  - >-
+      SELECT COUNT("profiles"."id") as "old_upstream_profiles_without_results" FROM "profiles"
+      INNER JOIN "profiles" "parent" ON "parent"."id" = "profiles"."parent_profile_id"
+      LEFT OUTER JOIN "test_results" ON "test_results"."profile_id" = "profiles"."id"
+      WHERE "profiles"."parent_profile_id" IS NOT NULL
+        AND "parent"."upstream" = TRUE
+        AND "test_results"."id" IS NULL
+        AND "profiles"."updated_at" < date_trunc('day', NOW() - interval '1 month');
+  - >-
+      SELECT COUNT("profiles"."id") as "new_upstream_profiles_without_results" FROM "profiles"
+      INNER JOIN "profiles" "parent" ON "parent"."id" = "profiles"."parent_profile_id"
+      LEFT OUTER JOIN "test_results" ON "test_results"."profile_id" = "profiles"."id"
+      WHERE "profiles"."parent_profile_id" IS NOT NULL
+        AND "parent"."upstream" = TRUE
+        AND "test_results"."id" IS NULL
+        AND "profiles"."updated_at" >= date_trunc('day', NOW() - interval '1 month');
+  - >-
+      SELECT COUNT("profiles"."id") as "upstream_profiles_with_results" FROM "profiles"
+      INNER JOIN "profiles" "parent" ON "parent"."id" = "profiles"."parent_profile_id"
+      LEFT OUTER JOIN "test_results" ON "test_results"."profile_id" = "profiles"."id"
+      WHERE "profiles"."parent_profile_id" IS NOT NULL AND "parent"."upstream" = TRUE AND "test_results"."id" IS NOT NULL;
+  - >-
+      SELECT "profiles"."ref_id", "profiles"."updated_at", "profiles"."created_at", COUNT("policy_hosts"."host_id") as "host_count" FROM "profiles"
+      INNER JOIN "profiles" "parent" ON "parent"."id" = "profiles"."parent_profile_id"
+      INNER JOIN "policies" ON "policies"."id" = "profiles"."policy_id"
+      INNER JOIN "policy_hosts" ON "policy_hosts"."policy_id" = "policies"."id"
+      WHERE "parent"."upstream" = TRUE
+      GROUP BY "policy_hosts"."policy_id", "profiles"."ref_id", "profiles"."created_at", "profiles"."updated_at";

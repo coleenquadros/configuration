@@ -1,0 +1,131 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: cloudigrade
+  platform: insights
+
+name: cloudigrade-clowder
+description: cloudigrade app on the Insights Platform via clowder
+
+app:
+  $ref: /services/insights/cloudigrade/app.yml
+
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: cloudigrade-cicd-events
+
+managedResourceTypes:
+- ClowdApp
+- HorizontalPodAutoscaler
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+
+parameters:
+  CLOWDER_ENABLED: 'true'
+
+resourceTemplates:
+# Cloudigrade
+- name: cloudigrade
+  path: /deployment/clowdapp.yaml
+  url: https://github.com/cloudigrade/cloudigrade
+  targets:
+  # Ephemeral
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+    parameters:
+      REPLICAS: 1
+  # Stage
+  - namespace:
+      $ref: /services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: cloudigrade-cloudigrade-gh-build-master
+    promotion:
+      publish:
+      - cloudigrade-stage-deploy-success-channel
+    parameters:
+      API_REPLICA_COUNT_MAX: '2'
+      API_SENTRY_ENVIRONMENT: stage
+      CELERY_SENTRY_ENVIRONMENT: stage
+      CELERY_WORKER_REPLICA_COUNT_MAX: '4'
+      CLOUDIGRADE_CW_STREAM_NAME: cloudigrade-stage
+      CLOUDIGRADE_ENABLE_CLOUDWATCH: 'true'
+      CLOUDIGRADE_ENVIRONMENT: stage
+      HOUNDIGRADE_SENTRY_ENVIRONMENT: stage
+      LISTENER_GROUP_ID: cloudmeter_stage
+      LISTENER_SENTRY_ENVIRONMENT: stage
+      POSTIGRADE_HOST: postigrade.cloudigrade-stage.svc.cluster.local
+      SCHEDULE_CONCURRENT_USAGE_CALCULATION_DELAY: '300'
+      SCHEDULE_VERIFY_VERIFY_TASKS_INTERVAL: '300'
+      SOURCES_PSK_SECRET_NAME: cloudigrade-app-secret
+      SOURCES_PSK_SECRET_KEY: sources-psk
+      VERBOSE_SOURCES_NOTIFICATION_LOGGING: 'true'
+      WATCHTOWER_MAX_BATCH_COUNT: 10
+  # Production
+  - namespace:
+      $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
+    ref: a37f9cb8c731fadfc32e6b200d4ceb721573ccce
+    parameters:  # all other parameters have default values
+      API_REPLICA_COUNT_MAX: '2'
+      API_SENTRY_ENVIRONMENT: prod
+      API_TARGET_AVERAGE_CPU_UTILIZATION: '35'
+      CELERY_SENTRY_ENVIRONMENT: prod
+      CELERY_WORKER_REPLICA_COUNT: '8'
+      CELERY_WORKER_REPLICA_COUNT_MAX: '12'
+      CLOUDIGRADE_CW_STREAM_NAME: cloudigrade-prod
+      CLOUDIGRADE_ENABLE_CLOUDWATCH: 'true'
+      CLOUDIGRADE_ENVIRONMENT: prod
+      HOUNDIGRADE_SENTRY_ENVIRONMENT: prod
+      LISTENER_GROUP_ID: cloudmeter_prod
+      LISTENER_SENTRY_ENVIRONMENT: prod
+      POSTIGRADE_HOST: postigrade.cloudigrade-prod.svc.cluster.local
+      SOURCES_ENABLE_DATA_MANAGEMENT_FROM_KAFKA: 'true'
+      SOURCES_PSK_SECRET_NAME: cloudigrade-app-secret
+      SOURCES_PSK_SECRET_KEY: sources-psk
+      WATCHTOWER_MAX_BATCH_COUNT: 10
+# Postigrade
+- name: postigrade
+  path: /deployment/clowdapp.yaml
+  url: https://github.com/cloudigrade/postigrade
+  targets:
+  # Ephemeral
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+    parameters:
+      REPLICAS: 1
+  # Stage
+  - namespace:
+      $ref: /services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: cloudigrade-postigrade-gh-build-master
+    promotion:
+      publish:
+      - postigrade-stage-deploy-success-channel
+  # Production
+  - namespace:
+      $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
+    ref: 909534eea8f6d14990f9726c26ffb7940a8db0f6
+    promotion:
+      auto: true
+      subscribe:
+      - postigrade-stage-deploy-success-channel

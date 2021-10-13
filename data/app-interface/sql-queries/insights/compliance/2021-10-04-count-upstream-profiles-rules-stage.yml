@@ -1,0 +1,20 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+name: 2021-10-04-count-upstream-profiles-rules-stage
+labels: {}
+namespace:
+  $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
+identifier: compliance-stage
+output: stdout
+queries:
+  - >-
+      SELECT "profiles"."ref_id", COUNT("profiles"."id") FROM "profiles"
+      INNER JOIN "profiles" "parent" ON "parent"."id" = "profiles"."parent_profile_id"
+      WHERE "profiles"."parent_profile_id" IS NOT NULL AND "parent"."upstream" = true
+      GROUP BY "profiles"."ref_id";
+  - >-
+      SELECT "rules"."ref_id", COUNT("rules"."id") FROM "profiles"
+      INNER JOIN "profile_rules" ON "profile_rules"."profile_id" = "profiles"."id"
+      INNER JOIN "rules" ON "rules"."id" = "profile_rules"."rule_id"
+      WHERE "profiles"."parent_profile_id" IS NOT NULL AND "rules"."upstream" = true
+      GROUP BY "rules"."ref_id";

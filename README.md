@@ -18,6 +18,7 @@ this repository.
   - [Local validation of datafile modifications / contract amendment](#local-validation-of-datafile-modifications--contract-amendment)
     - [JSON schema validation](#json-schema-validation)
     - [Running integrations locally with `--dry-run`](#running-integrations-locally-with---dry-run)
+  - [Visual App-interface](#visual-app-interface)
   - [Querying the App-interface](#querying-the-app-interface)
   - [Features](#features)
     - [Existing Features](#existing-features)
@@ -27,7 +28,8 @@ this repository.
     - [Planned integrations](#planned-integrations)
   - [Entities and relations](#entities-and-relations)
   - [Howto](#howto)
-    - [Add or modify a user (`/access/users-1.yml`)](#add-or-modify-a-user-accessusers-1yml)
+    - [Add or modify a user (`/access/user-1.yml`)](#add-or-modify-a-user-accessuser-1yml)
+      - [User off-boarding / revalidation loop](#user-off-boarding--revalidation-loop)
     - [Get notified of events involving a service, or its dependencies](#get-notified-of-events-involving-a-service-or-its-dependencies)
     - [Define an escalation policy for a service](#define-an-escalation-policy-for-a-service)
       - [Prerequisites: The team's slack channel and Pagerduty schedule are defined in app-interface](#prerequisites-the-teams-slack-channel-and-pagerduty-schedule-are-defined-in-app-interface)
@@ -75,6 +77,7 @@ this repository.
       - [Manage S3 buckets via App-Interface (`/openshift/namespace-1.yml`)](#manage-s3-buckets-via-app-interface-openshiftnamespace-1yml)
       - [Manage ElastiCache databases via App-Interface (`/openshift/namespace-1.yml`)](#manage-elasticache-databases-via-app-interface-openshiftnamespace-1yml)
       - [Manage IAM Service account users via App-Interface (`/openshift/namespace-1.yml`)](#manage-iam-service-account-users-via-app-interface-openshiftnamespace-1yml)
+      - [Manage IAM Roles via App-Interface (`/openshift/namespace-1.yml`)](#manage-iam-roles-via-app-interface-openshiftnamespace-1yml)
       - [Manage SQS queues via App-Interface (`/openshift/namespace-1.yml`)](#manage-sqs-queues-via-app-interface-openshiftnamespace-1yml)
       - [Manage DynamoDB tables via App-Interface (`/openshift/namespace-1.yml`)](#manage-dynamodb-tables-via-app-interface-openshiftnamespace-1yml)
       - [Manage ECR repositories via App-Interface (`/openshift/namespace-1.yml`)](#manage-ecr-repositories-via-app-interface-openshiftnamespace-1yml)
@@ -87,6 +90,7 @@ this repository.
     - [Manage Slack User groups via App-Interface](#manage-slack-user-groups-via-app-interface)
     - [Manage Jenkins jobs configurations using jenkins-jobs](#manage-jenkins-jobs-configurations-using-jenkins-jobs)
     - [Delete AWS IAM access keys via App-Interface](#delete-aws-iam-access-keys-via-app-interface)
+    - [Reset AWS IAM user passwords via App-Interface](#reset-aws-iam-user-passwords-via-app-interface)
     - [AWS garbage collection](#aws-garbage-collection)
     - [GitHub user profile compliance](#github-user-profile-compliance)
     - [Manage GitLab group members](#manage-gitlab-group-members)
@@ -390,6 +394,21 @@ you want the user to belong to. Roles can be associated with the services:
 `teams/<name>/roles/<rolename>.yml`. Check out the currently defined roles to
 know which one to add.
 
+#### User off-boarding / revalidation loop
+
+The
+[ldap-users](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/ldap_users.py)
+integration continuously checks the presence of users in the corporate LDAP
+(ldap.rdu.redhat.com). If the user does no longer exist in LDAP, this process
+will submit a MR removing the affected user's file from App-Interface. This MR
+will be automatically merged.
+
+Once the user file is removed from App-Interface all access granted to the user
+will be immediately revoked. Since all access granted by AppSRE is granted
+through the presence of this file, this effectively removes all access.
+
+This integration currently runs as a CronJob every hour.
+
 ### Get notified of events involving a service, or its dependencies
 
 There are three ways a user or group can get notified of service events (e.g. planned maintenance, outages):
@@ -602,6 +621,10 @@ In order to get access to Sentry, a user has to have:
 [services](/data/services) contains all the services that are being run by the App-SRE team. Inside of those directories, there is a `namespaces` folder that lists all the `namespaces` that are linked to that service.
 
 Namespaces declaration enforce [this JSON schema](/schemas/openshift/namespace-1.yml). Note that it contains a reference to the cluster in which the namespace exists.
+
+A namespace declaration can contain labels. These will be applied as kubernetes labels on the namespace resource. Note that
+* labels must conform to [Kubernetes Labels constraints](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#syntax-and-character-set).
+* labels set by other means (eg an operator) will not be overriden. If a conflict exists, an error will be thrown. 
 
 Notes:
 * If the resource already exists in the namespace, the PR check will fail. Please get in contact with App-SRE team to import resources to be under the control of App-Interface.
@@ -1006,7 +1029,8 @@ For more information please see [vault secrets engines documentation](https://ww
 
 ### Manage DNS Zones via App-Interface (`/aws/dns-zone-1.yml`) using Terraform
 
-DNS Zones can be managed in app-interface. A DNS zone follows [this JSON schema](/schemas/dependencies/dns-zone-1.yml)
+DNS Zones can be managed in app-interface. A DNS zone follows [this
+JSON schema](/schemas/dependencies/dns-zone-1.yml).
 
 - `name`: A name for the DNS zone
 - `description`: Description for the DNS zone
@@ -1018,6 +1042,9 @@ DNS Zones can be managed in app-interface. A DNS zone follows [this JSON schema]
 Additional special fields:
 - `_target_cluster`: A `$ref` to an OpenShift cluster definition. The value of `elbFQDN` on the cluster definition will be used as a target on the record
 - `_healthcheck`: Allows defining a health check resource that will be assigned to the record. The parameters from Terraform's [aws_route53_health_check resource](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_health_check) are permitted.
+
+**NOTE:** If you need a record under the `api.openshift.com` zone
+[please go to this document](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/add-route-for-ocm-component.md)
 
 Example DNS zone resource:
 ```yaml
@@ -1277,6 +1304,13 @@ In order to create or update an RDS database, you need to add them to the `terra
 - `output_resource_db_name`: (optional) set the `db.name` key in the output Secret (does not affect actual terraform resource).
 - `reset_password`: (optional) add or update this field to a random string to trigger a database password reset.
   - Note: removing this field will lead to a recycle of the pods using the output resource.
+- `ca_cert`: (optional) specify `path`, `field` and `version` of a secret in vault containing a CA certificate to be added to the output Secret. Unless there is a good reason not to, use these settings:
+  ```yaml
+    ca_cert:
+    path: app-interface/global/rds-ca-cert
+    field: us-east-1 # region of the DB
+    version: 2 # the latest available, search the repo for usage
+  ```
 
 Once the changes are merged, the RDS instance will be created (or updated) and a Kubernetes Secret will be created in the same namespace with following details.
 
@@ -1285,6 +1319,7 @@ Once the changes are merged, the RDS instance will be created (or updated) and a
 - `db.name` - The database name.
 - `db.user` - The master username for the database.
 - `db.password` - Password for the master DB user.
+- `db.ca_cert` - CA certificate for the DB (if `ca_cert` is defined).
 
 ##### Reset RDS database password
 
@@ -1434,6 +1469,27 @@ The Secret will contain the following fields:
   * Note: this key will be added after the AWS infrastructure access is granted successfully.
 
 In addition, any additional key-value pairs defined under `variables` will be added to the Secret.
+
+#### Manage IAM Roles via App-Interface (`/openshift/namespace-1.yml`)
+
+Roles to be assumed can be entirely self-serviced via App-Interface.
+
+In order to add or update a role, you need to add them to the `terraformResources` field.
+
+- `provider`: must be `aws-iam-role`
+- `account`: must be one of the AWS account names we manage.
+- `identifier`: name of resource to create (or update)
+- `inline_policy`: an AWS policy to create and attach to the role.
+- `output_resource_name`: name of Kubernetes Secret to be created.
+  - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
+  - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
+    - For example, for a resource with `identifier` "my-role" and `provider` "aws-iam-role", the created Secret will be called `my-role-aws-iam-role`.
+- `annotations`: additional annotations to add to the output resource
+
+Once the changes are merged, the IAM resources will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
+
+The Secret will contain the following fields:
+- `role_arn` - the role ARN to assume
 
 #### Manage SQS queues via App-Interface (`/openshift/namespace-1.yml`)
 
@@ -1810,6 +1866,32 @@ For example, merging [this](/data/aws/osio/account.yml#L11) line will delete the
 One use case this is useful for is leaked keys.
 
 
+### Reset AWS IAM user passwords via App-Interface
+
+AWS IAM user passwords can be entirely self-serviced via App-Interface.
+
+To reset a user's password in an AWS account, submit a MR with a new entry to the `resetPasswords` list in the AWS Account file:
+```yaml
+- user:
+    $ref: /path/to/user/file.yaml
+  requestId: <some_unique_value_without_spaces>
+```
+
+The user's new password should appear GPG encrypted within 30 minutes in app-interface-output: [terraform-users-credentials](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/terraform-users-credentials.md)
+
+To decrypt password: `echo <password> | base64 -d | gpg -d - && echo` (you will be asked to provide your passphrase to unlock the secret)
+
+
+Behind the scenes:
+
+Once the MR is merged, an integration called `aws-iam-password-reset` will delete the user's login profile. At this point, the user can not login to the account.
+
+A different integration, called `terraform-users` will realize that the user does not have a login profile and will re-create it. At this point, the user has a new random password.
+
+The curious reader can follow #sd-app-sre-reconcile to see when these two actions have completed.
+
+Once the new password is in place, it needs to be picked up by a app-interface-output by a qontract-cli command called `terraform-users-credentials` (the repository is refreshed once every 10 minutes).
+
 ### AWS garbage collection
 
 To enable garbage collection in an AWS account, add `garbageCollection: true` to the account file. [example](/data/aws/osio-dev/account.yml#L20)
@@ -1945,7 +2027,7 @@ output: <filesystem or stdout or encrypted>
 # Required if output is encrypted
 requestor: 
   $ref: <user-1.yml with public_gpg_key>
-schedule: <if defined the output resource will be a CronJob instead of a Job>
+schedule: < In UTC time - if defined the output resource will be a CronJob instead of a Job >
 queries:
   - <sql query 1>
   - <sql query 2>

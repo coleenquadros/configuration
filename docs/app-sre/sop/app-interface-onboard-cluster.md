@@ -92,8 +92,10 @@ This step should be performed in a single merge request.
       provision_shard_id: (optional) specify hive shard ID to create the cluster in (IDs can be found in the uhc-production namespace file)
 
     upgradePolicy: # optional, specify an upgrade schedule
-      schedule_type: automatic
+      workloads: [] # workloads running in this cluster
       schedule: '0 10 * * 4' # choose a cron expression to upgrade on
+      conditions:
+        soakDays: N # number of days a version should run on other clusters with similar workloads before this cluster is upgraded to it
 
     network:
       vpc: (desired machine CIDR. ex: 10.123.0.0/16)
@@ -123,7 +125,7 @@ This step should be performed in a single merge request.
     * Note: Cluster name should follow naming convention [here](https://docs.google.com/document/d/1OIe4JGbScz57dIGZztThLTvji056OBCfaHSvGAo7Hao)
     * Note: The cluster ID is not known at this point so we do not add a `consoleUrl` and `serverUrl` yet
 
-1. Grant dedicated-admin access to App-SRE team
+1. Grant `dedicated-admin` and `dedicated-reader` access to App-SRE team
 
     ```yaml
     # /data/teams/app-sre/roles/app-sre.yml
@@ -133,6 +135,16 @@ This step should be performed in a single merge request.
         - cluster:
             $ref: /openshift/<cluster_name>/cluster.yml
         group: dedicated-admins
+    ```
+
+    ```yaml
+    # /data/teams/app-sre/roles/app-sre-dedicated-reader.yml
+    ...
+    access:
+        ...
+        - cluster:
+            $ref: /openshift/<cluster_name>/cluster.yml
+        group: dedicated-readers
     ```
 
 1. Send the MR, wait for the check to pass and merge. The ocm-clusters integration will create your cluster. You can view the progress in OCM. Proceed with the following steps after the cluster's installation is complete.
@@ -319,8 +331,8 @@ At this point you should be able to access the cluster via the console / `oc` cl
         ```yaml
         ...
         records:
-        - { name: prometheus.<cluster_name>, type: CNAME, target_cluster: { $ref: /openshift/<cluster_name>/cluster.yml } }
-        - { name: alertmanager.<cluster_name>, type: CNAME, target_cluster: { $ref: /openshift/<cluster_name>/cluster.yml } }
+        - { name: prometheus.<cluster_name>, type: CNAME, _target_cluster: { $ref: /openshift/<cluster_name>/cluster.yml } }
+        - { name: alertmanager.<cluster_name>, type: CNAME, _target_cluster: { $ref: /openshift/<cluster_name>/cluster.yml } }
         ```
 
     1. Configure a [deadmanssnitch](https://deadmanssnitch.com/) snitch for the new cluster. The snitch settings should be as follow:
@@ -349,20 +361,20 @@ At this point you should be able to access the cluster via the console / `oc` cl
         # Prometheus
         ...
         - namespace:
-          $ref: /services/observability/namespaces/openshift-customer-monitoring.<cluster_name>.yml
-        ref: <sha>  # Use the same sha that existing entries are using
-        parameters:
-          CLUSTER_LABEL: <cluster_name>
-          ENVIRONMENT: The environment, usually one of [integration|staging|production]
-          EXTERNAL_URL: https://prometheus.<cluster_name>.devshift.net
+            $ref: /services/observability/namespaces/openshift-customer-monitoring.<cluster_name>.yml
+          ref: <sha>  # Use the same sha that existing entries are using
+          parameters:
+            CLUSTER_LABEL: <cluster_name>
+            ENVIRONMENT: The environment, usually one of [integration|staging|production]
+            EXTERNAL_URL: https://prometheus.<cluster_name>.devshift.net
         ...
         # Alertmanager
         - namespace:
-          $ref: /services/observability/namespaces/openshift-customer-monitoring.<cluster_name>.yml
-        ref: <sha>  # Use the same sha that existing entries are using
-        parameters:
-          ENVIRONMENT: The environment, usually one of [integration|staging|production]
-          EXTERNAL_URL: https://alertmanager.<cluster_name>.devshift.net
+            $ref: /services/observability/namespaces/openshift-customer-monitoring.<cluster_name>.yml
+          ref: <sha>  # Use the same sha that existing entries are using
+          parameters:
+            ENVIRONMENT: The environment, usually one of [integration|staging|production]
+            EXTERNAL_URL: https://alertmanager.<cluster_name>.devshift.net
         ```
 
         Note: The only entry that should not be using a specific SHA should be the app-sre-stage-01 cluster.  That cluster should be using a ref of master.
@@ -435,26 +447,10 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
     The Operator Lifecycle Manager is responsible for managing operator lifecycles.  It will install and update operators using a subscription.
 
-    1. Create an `openshift-operator-lifecycle-manager.yml` namespace file for the cluster:
+    1. Create an `openshift-operator-lifecycle-manager.yml` namespace file for the cluster with this command:
 
-    ```yaml
-    ---
-    $schema: /openshift/namespace-1.yml
-
-    labels: {}
-
-    name: openshift-operator-lifecycle-manager
-
-    cluster:
-      $ref: /openshift/<cluster>/cluster.yml
-
-    app:
-      $ref: /services/app-sre/app.yml
-
-    environment:
-      $ref: /products/app-sre/environments/production.yml
-
-    description: openshift-operator-lifecycle-manager namespace
+    ```bash
+    hack/cluster_provision.py [--datadir=data directory] create-olm-ns <cluster-name>
     ```
 
 ## Step 5 - Container Security Operator
@@ -557,9 +553,19 @@ At this point you should be able to access the cluster via the console / `oc` cl
     - $ref: /services/observability/namespaces/openshift-customer-monitoring.<cluster>.yml
 
     managedRoles: true
+
+    managedResourceTypes:
+    - ConfigMap
+    - Service
+
+    openshiftResources:
+    - provider: resource
+      path: /app-sre[-stage]/deployment-validation-operator/dvo.configmap.yaml
+    - provider: resource
+      path: /app-sre[-stage]/deployment-validation-operator/dvo.service.yaml
     ```
 
-    *NOTE*: This file goes in the `data/openshift<cluster>/namespaces directory` [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/openshift/app-sre-stage-01/namespaces/deployment-validation-operator-per-cluster.yml)
+    *NOTE*: This file goes in the `data/openshift/<cluster>/namespaces directory` [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/openshift/app-sre-stage-01/namespaces/deployment-validation-operator-per-cluster.yml)
 
     *NOTE*: If the `openshift-operator-lifecycle-manager` namespace is not yet defined in
     app-interface, follow [Step 4](#step-4-operator-lifecycle-manager)
@@ -578,7 +584,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
     *Note*: [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml)
 
-    1. WIP: Add the new `deployment-validation-operator` namespace to the target
+    1. Add the new `deployment-validation-operator` namespace to the target
     namespaces in the
     [saas.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/deployment-validation-operator/cicd/saas.yaml)
     to deploy the Deployment Validation Operator. Example:
@@ -593,7 +599,15 @@ At this point you should be able to access the cluster via the console / `oc` cl
       - namespace:
           $ref: /openshift/<cluster>/namespaces/app-sre-dvo-per-cluster.yml
         ref: <commit_hash>
-        upstream: app-sre-deployment-validation-operator-gh-build-catalog-master-upstream-app-sre-deployment-validation-operator-gh-build-master
+    ```
+
+    *NOTE*: For stage clusters, add the following to the namespace target:
+
+    ```yaml
+        upstream:
+          instance:
+            $ref: /dependencies/ci-int/ci-int.yml
+          name: app-sre-deployment-validation-operator-gh-build-master
     ```
 
     1. Grant view permissions to the openshift-customer-monitoring/prometheus-k8s service account in [app-sre-osdv4-monitored-namespaces-view.yml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/roles/app-sre-osdv4-monitored-namespaces-view.yml)
@@ -690,9 +704,6 @@ To off-board an OSDv4 cluster from app-interface, perform the following operatio
       Once that MR has merged, run the `terraform-vpc-peerings` integration with `--enable-deletion` to remove the peering connections.  Once the peering connections are removed it is safe to delete the cluster.
 
       *NOTE*: How to run an integration is documented [here](https://github.com/app-sre/qontract-reconcile#usage)
-      *NOTE*: If the cluster had `manageRoutes: true` for one or more peering connections, then those routes will have to be deleted manually.  To delete these routes:
-          1. Log a ticket with [SREP](https://issues.redhat.com/secure/CreateIssue.jspa?pid=12323823&issuetype=3) to remove the peering connections.  Give the subnets that are to be removed.  [Example](https://issues.redhat.com/browse/OHSS-718)
-          1. Use `terraform state rm` to remove the routes from the terraform state file.  If unsure how to do this, ask Maor Friedman or Rob Rati.
 
 1. Merge the merge request before proceeding.
 

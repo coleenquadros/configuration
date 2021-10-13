@@ -1,0 +1,58 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: clair
+
+name: clair-stage
+
+description: Namespace to house clair staging resources
+
+cluster:
+  $ref: /openshift/app-sre-stage-01/cluster.yml
+
+
+app:
+  $ref: /services/clair/app.yml
+environment:
+  $ref: /products/quay/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+
+managedResourceTypes:
+  - Secret
+
+managedRoles: true
+
+managedTerraformResources: true
+
+openshiftResources:
+  - provider: resource-template
+    type: extracurlyjinja2
+    path: /clair/stage/clair-config-secret.yaml
+    variables:
+      recycle: true
+      name: config
+      vault_secret_version: 1
+      version_label: v1
+  - provider: route
+    path: /clair/stage/clair.indexer.route.yaml
+  - provider: route
+    path: /clair/stage/clair.matcher.route.yaml
+  - provider: route
+    path: /clair/stage/clair.notifier.route.yaml
+
+terraformResources:
+- provider: rds
+  account: quayio-stage
+  identifier: clair-indexer-stage
+  defaults: /terraform/resources/quayio-stage/clair-indexer-stage-1.yml
+- provider: rds
+  account: quayio-stage
+  identifier: clair-matcher-stage
+  defaults: /terraform/resources/quayio-stage/clair-matcher-stage-1.yml
+- provider: rds
+  account: quayio-stage
+  identifier: clair-notifier-stage
+  defaults: /terraform/resources/quayio-stage/clair-notifier-stage-1.yml

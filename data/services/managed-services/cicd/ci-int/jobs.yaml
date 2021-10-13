@@ -116,6 +116,10 @@ config:
       gl_group: mk-ci-cd
       gl_project: cli
       jobs:
+        - 'gl-pr-check':
+            display_name: cli pr-check
+            concurrent_build: true
+            pr_check_script_path: './hack/pr_check.sh'
         - 'gl-build-master-managed-services':
             display_name: cli build-main
             branch: main
@@ -201,19 +205,22 @@ config:
       jobs:
         - 'gl-pr-check':
             display_name: kas-fleetshard pr-check
+            pr_check_script_path: './cicd/pr_check.sh'
         - 'managed-services-gl-build-test-branch':
             branch: mk-main
             display_name: kas-fleetshard build and test mk-main
+            build_deploy_script_path: './cicd/build_deploy.sh'
             archive_artifacts: 'systemtest/target/logs/**,systemtest/target/failsafe-reports/**'
             junit_results: 'systemtest/target/failsafe-reports/*.xml'
-            cleanup_script: 'make ci/pipeline/cleanup'
+            cleanup_script: 'make -C cicd ci/pipeline/cleanup'
             release: false
         - 'managed-services-gl-build-test-branch':
             branch: mk-release
             display_name: kas-fleetshard build and test mk-release
+            build_deploy_script_path: './cicd/build_deploy.sh'
             archive_artifacts: 'systemtest/target/logs/**,systemtest/target/failsafe-reports/**'
             junit_results: 'systemtest/target/failsafe-reports/*.xml'
-            cleanup_script: 'make ci/pipeline/cleanup'
+            cleanup_script: 'make -C cicd ci/pipeline/cleanup'
             release: true
 
   - project:
@@ -264,6 +271,11 @@ config:
       node: managed-services
       gl_group: mk-ci-cd
       gl_project: mk-ci-tools
+      ui_promotions:
+        - sr:
+            repositories: 'https://github.com/RedHatInsights/sr-ui-build;https://github.com/RedHatInsights/srs-ui-build'
+        - kafka:
+            repositories: 'https://github.com/RedHatInsights/rhosak-dashboard-build;https://github.com/RedHatInsights/rhoas-guides-build;https://github.com/RedHatInsights/rhosak-control-plane-ui-build;https://github.com/RedHatInsights/rhosak-data-plane-ui-build'
       jobs:
         - 'gl-pr-check':
             display_name: managed-service-ci-tools pr-check
@@ -276,12 +288,18 @@ config:
             ci_cmd: 'make pull/upstream/all'
             slack_channel_notification: mk-ci-cd
             cron_expression: '0 */1 * * *' # Every 1h
-        - 'managed-kafka-promote-ui-beta':
+        - 'managed-{ui_promotions}-promote-ui-beta':
             display_name: managed-kafka promote ui components to beta
             timeout: 120
         - 'managed-kafka-promote-ui-stable':
             display_name: managed-kafka promote ui components to stable
             timeout: 120
+        - 'managed-services-pull-upstream-tag':
+            display_name: managed services pull upstream tag
+            ci_cmd: 'make pull/upstream/tag'
+        - 'managed-services-prepare-cpaas-pipelines':
+            display_name: managed services prepare cpaas pipelines
+            ci_cmd: 'make prepare/cpaas/pipelines'
 
   - project:
       name: managed-services-kafka-fault-tests
@@ -295,7 +313,34 @@ config:
             display_name: 'managed-kafka-fault-tests'
             timeout: 3600
             slack_channel_notification: forum-managed-kafka
-            cron_expression: 'H 4 * * 1-5' # At 04:00 on every day-of-week from Monday through Friday
+            cron_expression: 'H 19 * * 1-5' # At 19:00 on every day-of-week from Monday through Friday
+
+  - project:
+      name: managed-services-kafka-perf-tests
+      label: managed-services
+      node: managed-services
+      gl_group: mk-bin-packing
+      gl_project: mk-performance-tests
+      jobs:
+        - 'managed-kafka-perf-tests':
+            default_branch: master
+            display_name: 'managed-kafka-perf-tests'
+            timeout: 3600
+            slack_channel_notification: forum-managed-kafka
+
+  - project:
+      name: managed-services-kafka-perf-1hr-integration
+      label: managed-services
+      node: managed-services
+      gl_group: mk-bin-packing
+      gl_project: mk-performance-tests
+      jobs:
+        - 'managed-kafka-perf-tests-1hr-integration':
+            default_branch: master
+            display_name: 'managed-kafka-perf-tests-1hr-integration'
+            timeout: 3600
+            slack_channel_notification: forum-managed-kafka
+            cron_expression: 'H 14 * * 1-5' # At 14:00 on every day-of-week from Monday through Friday
 
   - project:
       name: mk-e2e-test-suite
@@ -307,14 +352,18 @@ config:
         - 'gl-pr-check':
             display_name: mk-e2e-test-suite pr-check
             pr_check_script_path: './pr_check.sh'
-        - 'managed-kafka-e2e-test-suite':
+        - 'managed-services-e2e-test-suite':
             branch: main
-            display_name: periodic mk-e2e tests
+            profile: default
+            secret: stage
+            display_name: stage managed services e2e tests
             timeout: 60
             cron_expression: '5 */1 * * *' # At 5 minute past every 1 hour
-        - 'managed-kafka-e2e-test-suite-sandbox':
+        - 'managed-services-e2e-test-suite':
             branch: main
-            display_name: periodic sandbox mk-e2e tests
+            profile: sandbox
+            secret: sandbox
+            display_name: sandbox managed services e2e tests
             timeout: 30
             cron_expression: '35 */6 * * *' # At 35 minute past every 6 hour
   - project:
@@ -394,7 +443,7 @@ config:
       gl_group: mk-ci-cd
       gl_project: client-examples
       jobs:
-        - 'gl-pr-check-managed-services':
+        - 'gl-pr-check':
             display_name: mk-client-examples pr-check
             pr_check_script_path: './pr_check.sh'
         - 'gl-build-master-managed-services':
@@ -410,6 +459,90 @@ config:
       quay_org: app-sre
       jobs:
         - 'gl-build-master-managed-services':
-            display_name: kas-abnormal-workloads build master
-            build_deploy_script_path: './pipeline-configs/build_deploy.sh'
+            display_name: kas-abnormal-workloads build mk-main
+            build_deploy_script_path: './pipeline/build.sh'
             branch: mk-main
+        - 'managed-kafka-client-workloads':
+            display_name: kas-abnormal-workloads deploy
+            default_branch: mk-main
+            timeout: 3600
+            env: stage
+  - project:
+      name: mas-sso
+      label: mas-sso
+      node: managed-services
+      gl_group: service
+      gl_project: saas-mas-sso
+      jobs:
+        - 'mas-sso-perf-tests':
+            branch: master
+            display_name: 'saas-mas-sso performance test'
+            timeout: 1800
+            cron_expression: 'H 5 * * *' # At 05:00am every day
+  - project:
+      name: mk-strimzi-drain-cleaner
+      label: managed-services
+      node: managed-services
+      gl_group: mk-ci-cd
+      gl_project: strimzi-drain-cleaner
+      jobs:
+        - 'gl-pr-check':
+            display_name: mk-strimzi-drain-cleaner pr-check
+            pr_check_script_path: './cicd/pr_check.sh'
+        - 'managed-services-gl-build-test-branch':
+            display_name: mk-strimzi-drain-cleaner build mk-main
+            branch: mk-main
+            build_deploy_script_path: './cicd/build.sh'
+            archive_artifacts: 'target/surefire-reports/**'
+            junit_results: 'target/surefire-reports/*.xml'
+            cleanup_script: './cicd/cleanup.sh'
+            release: false
+        - 'managed-services-gl-build-test-branch':
+            display_name: mk-strimzi-drain-cleaner build mk-release-0.2
+            branch: mk-release-0.2
+            build_deploy_script_path: './cicd/build.sh'
+            archive_artifacts: 'target/surefire-reports/**'
+            junit_results: 'target/surefire-reports/*.xml'
+            cleanup_script: './cicd/cleanup.sh'
+            release: true
+
+  - project:
+      name: mk-must-gather
+      label: managed-services
+      node: managed-services
+      gl_group: mk-ci-cd
+      gl_project: must-gather
+      jobs:
+        - 'gl-pr-check':
+            display_name: mk-must-gather pr-check
+            pr_check_script_path: './ci/pr_check.sh'
+        - 'gl-build-master-managed-services':
+            display_name: mk-must-gather build master
+            build_deploy_script_path: './ci/build_deploy.sh'
+            branch: master
+  - project:
+      name: mk-strimzi-canary
+      label: managed-services
+      node: managed-services
+      gl_group: mk-ci-cd
+      gl_project: strimzi-canary
+      jobs:
+        - 'gl-pr-check':
+            display_name: mk-strimzi-canary pr-check
+            pr_check_script_path: './cicd/pr_check.sh'
+        - 'managed-services-gl-build-test-branch':
+            display_name: mk-strimzi-canary build mk-main
+            branch: mk-main
+            build_deploy_script_path: './cicd/build.sh'
+            archive_artifacts: 'target/surefire-reports/**'
+            junit_results: 'target/surefire-reports/*.xml'
+            cleanup_script: './cicd/cleanup.sh'
+            release: false
+        - 'managed-services-gl-build-test-branch':
+            display_name: mk-strimzi-canary build mk-release-0.0
+            branch: mk-release-0.0
+            build_deploy_script_path: './cicd/build.sh'
+            archive_artifacts: 'target/surefire-reports/**'
+            junit_results: 'target/surefire-reports/*.xml'
+            cleanup_script: './cicd/cleanup.sh'
+            release: true

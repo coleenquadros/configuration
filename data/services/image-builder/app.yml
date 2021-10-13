@@ -7,7 +7,7 @@ labels:
 name: image-builder
 
 description: |
-  The Image Builder parent application.
+  The Image Builder application.
 
 architectureDocument: |
   https://osbuild.pages.redhat.com/internal-guides/image-builder/image-builder.html
@@ -26,4 +26,26 @@ serviceOwners:
 - name: Tom Gundersen
   email: tgunders@redhat.com
 
-dependencies: []
+dependencies:
+- $ref: /dependencies/ci-ext/service.yml
+- $ref: /dependencies/github/service.yml
+- $ref: /dependencies/quay/service.yml
+- $ref: /dependencies/openshift/service.yml
+- $ref: /dependencies/aws/service.yml
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/app-sre.yml
+  teams:
+  - permissions:
+    - $ref: /dependencies/quay/permissions/quay-membership-app-sre-prodsec.yml
+    role: read
+  items:
+  - name: composer
+    public: true
+    description: composer component of the image-builder service
+
+codeComponents:
+- name: osbuild-composer
+  resource: upstream
+  url: https://github.com/osbuild/osbuild-composer

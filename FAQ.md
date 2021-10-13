@@ -6,23 +6,37 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
 
 ## ToC
 
-- [Can you merge my MR?](#can-you-merge-my-mr)
-- [Contacting AppSRE](#contacting-appsre)
-- [How can I get access to X?](#how-can-i-get-access-to-x)
-- [I can not access X](#i-can-not-access-x)
-- [I need help with something AWS related](#i-need-help-with-something-aws-related)
-- [I can not access ci-ext](#i-can-not-access-ci-ext)
-- [Tagging options in app-interface](#tagging-options-in-app-interface)
-- [Gating production promotions in app-interface](#gating-production-promotions-in-app-interface)
-- [Get access to cluster logs via Log Forwarding](#get-access-to-cluster-logs-via-log-forwarding)
-- [What is the Console or Prometheus URL for a service?](#what-is-the-console-or-prometheus-url-for-a-service)
-- [Can you restart my pods?](#can-you-restart-my-pods)
-- [Delete target from SaaS file](#delete-target-from-saas-file)
-- [Jenkins is going to shut down](#jenkins-is-going-to-shutdown)
-- [How can I make my PR check job run concurrently?](#how-can-i-make-my-pr-check-job-run-concurrently)
-- [How can I see who has access to a service?](#how-can-i-see-who-has-access-to-a-service)
-- [Accessing DataHub](#accessing-datahub)
-- [Jenkins Vault plugin upgrade](#jenkins-vault-plugin-upgrade)
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+
+- [App-Interface Frequently Asked Questions](#app-interface-frequently-asked-questions)
+    - [ToC](#toc)
+    - [Useful links](#useful-links)
+    - [Topics](#topics)
+        - [Can you merge my MR](#can-you-merge-my-mr)
+        - [Contacting AppSRE](#contacting-appsre)
+        - [How can I get access to X?](#how-can-i-get-access-to-x)
+        - [I can not access X](#i-can-not-access-x)
+        - [I need help with something AWS related](#i-need-help-with-something-aws-related)
+        - [I can not access ci-ext](#i-can-not-access-ci-ext)
+        - [Tagging options in app-interface](#tagging-options-in-app-interface)
+        - [Can you reset my AWS password?](#can-you-reset-my-aws-password)
+        - [Gating production promotions in app-interface](#gating-production-promotions-in-app-interface)
+        - [Get access to cluster logs via Log Forwarding](#get-access-to-cluster-logs-via-log-forwarding)
+        - [What is the Console or Prometheus URL for a service?](#what-is-the-console-or-prometheus-url-for-a-service)
+        - [Can you restart my pods?](#can-you-restart-my-pods)
+            - [OnBoarded Services](#onboarded-services)
+            - [Services not yet OnBoarded](#services-not-yet-onboarded)
+        - [Delete target from SaaS file](#delete-target-from-saas-file)
+        - [Jenkins is going to shutdown](#jenkins-is-going-to-shutdown)
+        - [How can I make my PR check job run concurrently](#how-can-i-make-my-pr-check-job-run-concurrently)
+        - [How can I see who has access to a service](#how-can-i-see-who-has-access-to-a-service)
+        - [Accessing DataHub](#accessing-datahub)
+        - [Jenkins Vault plugin upgrade](#jenkins-vault-plugin-upgrade)
+        - [I didn't receive my invite for the Github organization](#i-didnt-receive-my-invite-for-the-github-organization)
+        - [I need to add a package to a jenkins slave](#i-need-to-add-a-package-to-a-jenkins-slave)
+        - [My configuration is merged into app-interface but it isn't applied!](#my-configuration-is-merged-into-app-interface-but-it-isnt-applied)
+
+<!-- markdown-toc end -->
 
 ## Useful links
 
@@ -84,6 +98,12 @@ Managed to log in but having issues? Maybe even seeing this error message? `"Acc
 GitLab: Users are not being tagged by default for SaaS file reviews. To be tagged on MRs for SaaS files you own, add `tag_on_merge_requests: true` to your user file.
 
 Slack: Users are being tagged by default for cluster updates in clusters they have access to (through membership in a Slack usergroup called <cluster_name>-cluster). To be removed from those usergroups, add `tag_on_cluster_updates: false` to your user file.
+
+### Can you reset my AWS password?
+
+We've got you.
+
+Follow these instructions: https://gitlab.cee.redhat.com/service/app-interface#reset-aws-iam-user-passwords-via-app-interface
 
 ### Gating production promotions in app-interface
 
@@ -162,6 +182,49 @@ A liveness probe that checks your container's health thoroughly; on a liveness p
 
 To delete a target from a SaaS file, set `delete: true` in the target you wish to delete. This will cause all associated resources to be deleted in the next deployment. Follow this up with another MR to delete the target from the SaaS file.
 
+For example, to delete the stage deployment from this saas-file:
+```
+(top of the file)
+resourceTemplates:
+- name: exampleApp
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/exampleApp
+  targets:
+  - namespace:
+      $ref: /services/insights/example/namespaces/example-stage.yml
+    ref: b17281f74dea89f0834c34f697ea257445f3c195
+  - namespace:
+      $ref: /services/insights/example/namespaces/example-prod.yml
+    ref: b17281f74dea89f0834c34f697ea257445f3c195
+```
+Open an MR, add `delete: true` to the target you wish to delete:
+```
+(top of the file)
+resourceTemplates:
+- name: exampleApp
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/exampleApp
+  targets:
+  - namespace:
+      $ref: /services/insights/example/namespaces/example-stage.yml
+    ref: b17281f74dea89f0834c34f697ea257445f3c195
+    delete: true # deleting from the namespace - will remove in followup MR.
+  - namespace:
+      $ref: /services/insights/example/namespaces/example-prod.yml
+    ref: b17281f74dea89f0834c34f697ea257445f3c195
+```
+Then open up a follow-up MR to delete the target from the saas file:
+```
+(top of the file)
+resourceTemplates:
+- name: exampleApp
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/exampleApp
+  - namespace:
+      $ref: /services/insights/example/namespaces/example-prod.yml
+    ref: b17281f74dea89f0834c34f697ea257445f3c195
+```
+
 More information: [Continuous Delivery in App-interface](/docs/app-sre/continuous-delivery-in-app-interface.md)
 
 ### Jenkins is going to shutdown
@@ -215,3 +278,21 @@ Related Jira ticket: https://issues.redhat.com/browse/APPSRE-947
 ### I didn't receive my invite for the Github organization
 
 Check your mailbox! It should be there! If not, ask the IC to review [the AppSRE organization](https://github.com/orgs/app-sre/people) and see if your invite is pending or failed. They can cancel the pending invite and send a new one to you.
+
+### I need to add a package to a jenkins slave
+
+The App SRE team recommends transitioning to using containerized builds over trying to load specific packages onto a jenkins slave.  Containerized builds provide numerous advantageous to our users including:
+
+- Control over the build dependencies
+- Idempotency
+- Portability
+
+Information about multi-stage container builds can be found [here](https://docs.docker.com/develop/develop-images/multistage-build).  Here's an simple [example](https://github.com/app-sre/deployment-validation-operator/blob/master/build/Dockerfile) of a Dockerfile using multi-stage build.
+
+If using a containerized build is not possible, please submit an MR to the [infra](https://gitlab.cee.redhat.com/app-sre/infra) repo and ping the IC.
+
+### My configuration is merged into app-interface but it isn't applied!
+
+Check your namespace and your saas file! Is your new configuration's type listed in the `managedResourceTypes` field? For instance, if you have submitted a new `ConfigMap` for a namespace, its namespace file must list `ConfigMap` in its `managedResourceTypes`.
+
+Review #sd-app-sre-reconcile in slack for messages related to your configuration, it should tell you if it is applying it or it is skipping it. See [this ticket](https://issues.redhat.com/browse/APPSRE-3668)

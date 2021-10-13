@@ -49,7 +49,7 @@ imagePatterns:
 
 parameters:
   OAUTH_PROXY_IMAGE: quay.io/openshift/origin-oauth-proxy
-  OAUTH_PROXY_IMAGE_TAG: 4.9.0
+  OAUTH_PROXY_IMAGE_TAG: 4.8.0 # Pinning version before 4.9.0 due to https://github.com/openshift/oauth-proxy/issues/229.
 
 resourceTemplates:
 - name: telemeter
@@ -67,7 +67,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/rhobs/telemeter/namespaces/telemeter-stage.yml
-    ref: ecf1be463385c766b203575633657855c15e1452
+    ref: 63644eb348b6cf14355257999bad7d69a1e68262
     parameters:
       NAMESPACE: telemeter-stage
       OBSERVATORIUM_NAMESPACE: observatorium-stage
@@ -81,7 +81,7 @@ resourceTemplates:
       MEMCACHED_EXPORTER_IMAGE_TAG: v0.6.0
       MEMCACHED_IMAGE_TAG: 1.5
       PROMETHEUS_AMS_REMOTE_WRITE_PROXY_TARGET: 'observatorium-thanos-receive'
-      SERVICE_ACCOUNT_NAME: prometheus-telemeter
+      SERVICE_ACCOUNT_NAME: telemeter
       TELEMETER_FORWARD_URL: 'http://observatorium-observatorium-api.observatorium-stage.svc.cluster.local:8080/api/metrics/v1/telemeter/api/v1/receive'
       TELEMETER_LOG_LEVEL: 'debug'
       TELEMETER_SERVER_CPU_LIMIT: 1
@@ -96,11 +96,11 @@ resourceTemplates:
       THANOS_STORE_INDEX_CACHE_MEMCACHED_MEMORY_LIMIT: '3Gi'
   - namespace:
       $ref: /services/rhobs/telemeter/namespaces/telemeter-production.yml
-    ref: ecf1be463385c766b203575633657855c15e1452
+    ref: 63644eb348b6cf14355257999bad7d69a1e68262
     parameters:
       NAMESPACE: telemeter-production
-      OBSERVATORIUM_NAMESPACE: telemeter-production
-      OBSERVATORIUM_METRICS_NAMESPACE: telemeter-production
+      OBSERVATORIUM_NAMESPACE: observatorium-production
+      OBSERVATORIUM_METRICS_NAMESPACE: observatorium-metrics-production
       OBSERVATORIUM_LOGS_NAMESPACE: observatorium-logs-production
       IMAGE_TAG: '8e65e1c'
       IMAGE_CANARY_TAG: '8e65e1c'
@@ -111,8 +111,8 @@ resourceTemplates:
       MEMCACHED_IMAGE_TAG: 1.5
       MEMCACHED_IMAGE: registry.redhat.io/rhel8/memcached
       PROMETHEUS_AMS_REMOTE_WRITE_PROXY_TARGET: 'observatorium-thanos-receive'
-      SERVICE_ACCOUNT_NAME: prometheus-telemeter
-      TELEMETER_FORWARD_URL: 'http://observatorium-observatorium-api.telemeter-production.svc.cluster.local:8080/api/metrics/v1/telemeter/api/v1/receive'
+      SERVICE_ACCOUNT_NAME: telemeter
+      TELEMETER_FORWARD_URL: 'http://observatorium-observatorium-api.observatorium-production.svc.cluster.local:8080/api/metrics/v1/telemeter/api/v1/receive'
       TELEMETER_LOG_LEVEL: 'warn'
       TELEMETER_SERVER_CPU_LIMIT: 1500m
       TELEMETER_SERVER_CPU_REQUEST: 100m

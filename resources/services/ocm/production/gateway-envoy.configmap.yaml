@@ -78,6 +78,29 @@ data:
                     address: gateway-site
                     port_value: 8000
 
+      # Cluster for the `status-board` service:
+      - name: status-board
+        connect_timeout: 2s
+        type: STRICT_DNS
+        lb_policy: ROUND_ROBIN
+        load_assignment:
+          cluster_name: status-board
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: 7xgbvicx49d9j58.api.openshift.com
+                    port_value: 443
+        transport_socket:
+          name: envoy.transport_sockets.tls
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+            common_tls_context:
+              validation_context:
+                trusted_ca:
+                  filename: /etc/ssl/certs/ca-certificates.crt
+
       # Cluster for the `upgrades_info` service:
       - name: upgrades_info
         connect_timeout: 2s
@@ -137,6 +160,29 @@ data:
                 address:
                   socket_address:
                     address: ko23k3u1sh9ub9ir3a.api.openshift.com
+                    port_value: 443
+        transport_socket:
+          name: envoy.transport_sockets.tls
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+            common_tls_context:
+              validation_context:
+                trusted_ca:
+                  filename: /etc/ssl/certs/ca-certificates.crt
+
+      # Cluster for the `serviceregistry_mgmt` service:
+      - name: serviceregistry_mgmt
+        connect_timeout: 2s
+        type: STRICT_DNS
+        lb_policy: ROUND_ROBIN
+        load_assignment:
+          cluster_name: serviceregistry_mgmt
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: epyl0jenyjuzxubqyz.api.openshift.com
                     port_value: 443
         transport_socket:
           name: envoy.transport_sockets.tls
@@ -260,9 +306,26 @@ data:
                               {
                                 "id": "kafkas_mgmt",
                                 "name": "kafka service fleet manager service"
+                              },
+                              {
+                                "id": "status-board",
+                                "name": "Status Board service"
+                              },
+                              {
+                                "id": "serviceregistry_mgmt",
+                                "name": "Service Registry service fleet manager service"
                               }
                             ]
                           }
+
+                  # Route for the `status-board` service:
+                  - name: status-board
+                    match:
+                      prefix: /api/status-board
+                    route:
+                      cluster: status-board
+                      auto_host_rewrite: true
+                      timeout: 30s
 
                   # Route for the `upgrades_info` service:
                   - name: upgrades_info
@@ -288,6 +351,15 @@ data:
                       prefix: /api/kafkas_mgmt
                     route:
                       cluster: kafkas_mgmt
+                      auto_host_rewrite: true
+                      timeout: 30s
+
+                  # Route for the `serviceregistry_mgmt` service:
+                  - name: serviceregistry_mgmt
+                    match:
+                      prefix: /api/serviceregistry_mgmt
+                    route:
+                      cluster: serviceregistry_mgmt
                       auto_host_rewrite: true
                       timeout: 30s
 

@@ -53,7 +53,7 @@ spec:
   provider: aws
   region: us-east-1
   channel: candidate # TODO(mafriedm): move to fast
-  version: 4.8.2
+  version: 4.9.0-rc.4
   initial_version: 4.4.11
   multi_az: false
   autoscale:
@@ -66,6 +66,13 @@ spec:
   id: 1farlonnersks14ohfp155uoonupr9id
   external_id: 87e97ea3-792d-4aef-8ad2-2f495d7e8e33
   provision_shard_id: de4b0632-dca7-11ea-b3b9-8c1645a911be
+
+upgradePolicy:
+  workloads:
+  - hive
+  schedule: 0 16 * * 1-5
+  conditions:
+    soakDays: 10
 
 externalConfiguration:
   labels:
@@ -109,6 +116,13 @@ peering:
     manageRoutes: true
     manageSecurityGroups: true
     cidrBlock: 172.16.0.0/12
+  - provider: account-vpc-mesh
+    name: hives02ue1_osd-bastion-stage
+    account:
+      $ref: /aws/osd-bastion-stage/account.yml
+    tags:
+      osd: backplane
+    manageRoutes: true
   - provider: cluster-vpc-requester
     name: hives02ue1_appsrep05ue1
     cluster:
@@ -134,6 +148,9 @@ awsInfrastructureAccess:
   accessLevel: network-mgmt
 - awsGroup:
     $ref: /aws/osd-privatelink-stage/groups/Admins.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/osd-bastion-stage/groups/Admins.yml
   accessLevel: read-only
 - awsGroup:
     $ref: /aws/app-sre/groups/Log-consumers.yml

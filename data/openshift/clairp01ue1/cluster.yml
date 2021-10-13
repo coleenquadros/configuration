@@ -1,0 +1,101 @@
+---
+$schema: /openshift/cluster-1.yml
+
+labels:
+  service: clair
+
+name: clairp01ue1
+description: clairp01ue1 cluster
+consoleUrl: https://console-openshift-console.apps.clairp01ue1.qtmm.p1.openshiftapps.com
+kibanaUrl: ''
+prometheusUrl: https://prometheus.clairp01ue1.devshift.net
+alertmanagerUrl: https://alertmanager.clairp01ue1.devshift.net
+serverUrl: https://api.clairp01ue1.qtmm.p1.openshiftapps.com:6443
+elbFQDN: elb.apps.clairp01ue1.qtmm.p1.openshiftapps.com
+
+observabilityNamespace:
+  $ref: /services/observability/namespaces/openshift-customer-monitoring.clairp01ue1.yml
+
+auth:
+  service: github-org-team
+  org: app-sre
+  team: clairp01ue1-cluster
+
+ocm:
+  $ref: /dependencies/ocm/production.yml
+
+managedGroups:
+- dedicated-admins
+- dedicated-readers
+
+managedClusterRoles: true
+
+spec:
+  provider: aws
+  region: us-east-1
+  channel: fast
+  version: 4.8.11
+  initial_version: 4.8.11-fast
+  multi_az: true
+  nodes: 9
+  # autoscale: # optional. nodes should not be defined if autoscale is defined
+  #   min_replicas: 4  # seems to be the minimal min_replicas elsewhere
+  #   max_replicas: 39
+  instance_type: c5.2xlarge
+  storage: 1600
+  load_balancers: 4
+  private: false
+
+  id: 1nlhdk7ofkd8du2bu4q1bodqijasc8b1
+  external_id: 18198df6-fe62-4128-a8ba-e7bb82696648
+  provision_shard_id: de4b0632-dca7-11ea-b3b9-8c1645a911be
+upgradePolicy:
+  workloads:
+  - clair
+  schedule: 0 6 * * 1-4
+  conditions:
+    soakDays: 9
+
+network:
+  vpc: 10.26.0.0/16
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
+
+peering:
+  connections:
+  # - provider: account-vpc
+  #   name: clairp01ue1-QuayVPC
+  #   vpc:
+  #     $ref: /aws/quayio-prod/vpcs/QuayVPC.yml
+  #   # manageRoutes: true
+  - provider: account-vpc
+    name: clairp01ue1-StatefulVPC
+    vpc:
+      $ref: /aws/quayio-prod/vpcs/StatefulVPC.yml
+    manageRoutes: true
+  - provider: account-vpc
+    name: clairp01ue1-ClairVPC
+    vpc:
+      $ref: /aws/quayio-prod/vpcs/ClairVPC.yml
+    manageRoutes: true
+
+automationToken:
+  path: app-sre/creds/kube-configs/clairp01ue1
+  field: token
+
+clusterAdminAutomationToken:
+  path: app-sre/creds/kube-configs/clairp01ue1-cluster-admin
+  field: token
+
+addons:
+- $ref: /dependencies/ocm/addons/cluster-logging-operator.yml
+
+internal: false
+
+awsInfrastructureAccess:
+- awsGroup:
+    $ref: /aws/quayio-prod/groups/App-SRE-admin.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/quayio-prod/groups/App-SRE-admin.yml
+  accessLevel: network-mgmt

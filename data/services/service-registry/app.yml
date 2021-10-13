@@ -11,14 +11,18 @@ description: |
 
 architectureDocument: https://docs.google.com/document/d/1b0Uc-ZEaM7h_Qy8trg-Pkx_Ldws5l9OKJfbhZYIw5dg
 sopsUrl: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/service-registry/sop
-grafanaUrl: https://grafana.stage.devshift.net/dashboards/f/fIWCrRi7z/serviceregistry
+grafanaUrl: https://grafana.app-sre.devshift.net/?query=serviceregistry&search=open&orgId=1
 
-onboardingStatus: InProgress
+onboardingStatus: TransitionPeriod
 
 serviceOwners:
 - name: Service Registry Team
   # TODO: create mailing list srs-supporting-services@redhat.com
   email: service-registry-dev@redhat.com
+
+serviceNotifications:
+- name: Red Hat Outage List
+  email: outage-list@redhat.com
 
 escalationPolicy:
   $ref: /teams/service-registry/escalation-policies/general-policy.yml
@@ -30,6 +34,7 @@ dependencies:
 - $ref: /dependencies/openshift/service.yml
 - $ref: /dependencies/aws/service.yml
 - $ref: /dependencies/sso/service.yml
+- $ref: /dependencies/github/service.yml
 
 codeComponents:
 - name: srs-fleet-manager
@@ -48,6 +53,9 @@ codeComponents:
   gitlabHousekeeping:
     enabled: true
     rebase: true
+- name: apicurio-perf
+  resource: upstream
+  url: https://github.com/Apicurio/apicurio-perf
 
 quayRepos:
 - org:
@@ -66,3 +74,25 @@ quayRepos:
   - name: srs-service-registry
     description: Private repo for the Service Registry Multitenant
     public: false
+
+sentryProjects:
+- team:
+    $ref: /dependencies/sentry/teams/service-registry-stage.yml
+  projects:
+  - name: service-registry-stage
+    description: Service Registry Stage
+    email_prefix: service-registry
+    platform: java
+    auto_resolve_age: 168
+    allowed_domains:
+    - '*'
+- team:
+    $ref: /dependencies/sentry/teams/service-registry-production.yml
+  projects:
+  - name: service-registry-production
+    description: Service Registry Production
+    email_prefix: service-registry
+    platform: java
+    auto_resolve_age: 168
+    allowed_domains:
+    - '*'

@@ -32,6 +32,7 @@ config:
         - 'gl-pr-check':
             display_name: srs-service-registry pr-check
             concurrent_build: true
+            timeout: 60
         # using custom job-template. definition at /resources/jenkins/service-registry/job-templates.yaml
         # builds and pushes images for both srs-service-registry and srs-tenant-manager
         - 'gl-build-master-srs-projects':
@@ -66,3 +67,17 @@ config:
             ci_cmd: './security-scan.sh'
             cron_expression: 'H 0 * * 1,4'
             slack_channel_notification: appsre-service-registry-ci-cd
+
+  - project:
+      name: service-registry-perf-test
+      label: service-registry
+      node: managed-services
+      gh_org: Apicurio
+      gh_repo: apicurio-perf
+      jobs:
+        - 'service-registry-perf-test':
+            branch: main
+            display_name: 'service-registry performance tests'
+            timeout: 3600
+            slack_channel_notification: appsre-service-registry-ci-cd
+            cron_expression: 'H 7 * * 2-5' # 7am UTC Tuesday to Friday

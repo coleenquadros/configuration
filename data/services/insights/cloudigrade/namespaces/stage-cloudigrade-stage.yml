@@ -31,7 +31,13 @@ networkPoliciesAllow:
 
 managedRoles: true
 
+managedResourceTypes:
+- Secret
+
 openshiftResources:
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-common/iqe-vault.secret.yaml
 - provider: vault-secret
   path: insights/secrets/global/rh-registry-pull
   version: 2
@@ -42,12 +48,17 @@ openshiftResources:
   type: kubernetes.io/dockerconfigjson
   name: quay-cloudservices-pull
 - provider: vault-secret
-  path: insights/secrets/insights-stage/cloudigrade-stage/cloudigrade
+  path: insights/secrets/insights-stage/cloudigrade-stage/cloudigrade-azure
   version: 3
   annotations:
     qontract.recycle: "true"
 - provider: vault-secret
-  path: insights/secrets/insights-stage/cloudigrade-stage/cloudigrade-azure
+  path: insights/secrets/insights-stage/cloudigrade-stage/cloudigrade-aws
+  version: 3
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/cloudigrade-stage/cloudigrade-app-secret
   version: 1
   annotations:
     qontract.recycle: "true"
@@ -61,6 +72,8 @@ terraformResources:
   defaults: /terraform/resources/insights/stage/rds/postgres11-rds-1.yml
   output_resource_name: cloudigrade-rds
   enhanced_monitoring: true
+  annotations:
+    clowder/database: cloudigrade
 - provider: cloudwatch
   account: insights-stage
   identifier: cloudigrade-stage

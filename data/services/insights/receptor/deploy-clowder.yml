@@ -21,6 +21,7 @@ slack:
 
 managedResourceTypes:
 - ClowdApp
+- Service
 
 imagePatterns:
 - quay.io/cloudservices
@@ -40,28 +41,23 @@ resourceTemplates:
     ref: master
     parameters:
       IMAGE: quay.io/cloudservices/receptor-gateway
-      IMAGE_TAG: ce142de
+      IMAGE_TAG: 01b764a
       ENV_NAME: stage
       GATEWAY_CONNECTION_REGISTRAR_IMPL: redis
       SUSPEND_STALE_CONN_JOB: true
       PROMETHEUS_PUSH_GATEWAY: ${PROMETHEUS_PUSHGATEWAY}
-  # - namespace:
-  #     $ref: /services/insights/receptor/namespaces/perf-receptor-perf.yml
-  #   ref: 51feeed82c093f99ba24f69848431836e25cc96a
-  #   parameters:
-  #     IMAGE_TAG: 86ab072
-  #     GATEWAY_CONNECTION_REGISTRAR_IMPL: redis
-  #     SUSPEND_STALE_CONN_JOB: true
-  #     PROMETHEUS_PUSH_GATEWAY: "prometheus-push.insights-push-perf.svc.cluster.local:9091"
-  # - namespace:
-  #     $ref: /services/insights/receptor/namespaces/receptor-prod.yml
-  #   ref: 65812ddd67aa00f33329fc26aaac52ae55940164
-  #   parameters:
-  #     IMAGE_TAG: 86ab072
-  #     GATEWAY_CONNECTION_REGISTRAR_IMPL: redis
-  #     SUSPEND_STALE_CONN_JOB: false
-  #     PROMETHEUS_PUSH_GATEWAY: "prometheus-push.insights-push-prod.svc.cluster.local:9091"
-  #     GATEWAY_REPLICAS: 3
+  - namespace:
+      $ref: /services/insights/receptor/namespaces/receptor-prod.yml
+    ref: 8a60dc475e5ffb7837678f5c4f76fbaf86402744
+    parameters:
+      IMAGE: quay.io/cloudservices/receptor-gateway
+      IMAGE_TAG: 8a60dc4
+      ENV_NAME: prod
+      GATEWAY_CONNECTION_REGISTRAR_IMPL: redis
+      SUSPEND_STALE_CONN_JOB: false
+      PROMETHEUS_PUSH_GATEWAY: ${PROMETHEUS_PUSHGATEWAY}
+      GATEWAY_REPLICAS: 3
+      SWITCH_REPLICAS: 3
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace

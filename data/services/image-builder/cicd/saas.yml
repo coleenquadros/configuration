@@ -1,0 +1,44 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: image-builder
+
+name: image-builder-saas
+description: SaaS tracking file for image-builder
+
+app:
+  $ref: /services/image-builder/app.yml
+
+pipelinesProvider:
+  $ref: /services/image-builder/pipelines/tekton.image-builder-pipelines.app-sre-prod-01.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: osbuild-image-builder-service
+
+managedResourceTypes:
+- ConfigMap
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/app-sre/composer
+
+authentication: {}
+
+resourceTemplates:
+- name: composer
+  url: https://github.com/osbuild/osbuild-composer
+  path: /templates/composer.yml
+  targets:
+    - namespace:
+        $ref: /services/image-builder/namespaces/composer-stage.yml
+      upstream:
+        instance:
+          $ref: /dependencies/ci-ext/ci-ext.yml
+        name: osbuild-osbuild-composer-gh-build-main
+      ref: main
+      parameters:
+        PGSSLMODE: "require"

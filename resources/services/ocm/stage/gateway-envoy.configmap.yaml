@@ -101,6 +101,29 @@ data:
                 trusted_ca:
                   filename: /etc/ssl/certs/ca-certificates.crt
 
+      # Cluster for the `web-rca` service:
+      - name: web-rca
+        connect_timeout: 2s
+        type: STRICT_DNS
+        lb_policy: ROUND_ROBIN
+        load_assignment:
+          cluster_name: web-rca
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: qf6gtsaomwu9oys.api.stage.openshift.com
+                    port_value: 443
+        transport_socket:
+          name: envoy.transport_sockets.tls
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+            common_tls_context:
+              validation_context:
+                trusted_ca:
+                  filename: /etc/ssl/certs/ca-certificates.crt
+
       # Cluster for the `upgrades_info` service:
       - name: upgrades_info
         connect_timeout: 2s
@@ -300,6 +323,10 @@ data:
                                 "name": "Status Board service"
                               },
                               {
+                                "id": "web-rca",
+                                "name": "Web RCA service"
+                              },
+                              {
                                 "id": "upgrades_info",
                                 "name": "Upgrades information service"
                               },
@@ -324,6 +351,15 @@ data:
                       prefix: /api/status-board
                     route:
                       cluster: status-board
+                      auto_host_rewrite: true
+                      timeout: 30s
+
+                  # Route for the `web-rca` service:
+                  - name: web-rca
+                    match:
+                      prefix: /api/web-rca
+                    route:
+                      cluster: web-rca
                       auto_host_rewrite: true
                       timeout: 30s
 

@@ -52,23 +52,69 @@ resourceTemplates:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: multitenant-service-registry-gl-build-master
+    parameters:
+      REGISTRY_LOG_LEVEL: INFO
+      REGISTRY_QUARKUS_LOG_LEVEL: INFO
+      TENANT_MANAGER_LOG_LEVEL: INFO
+      TENANT_MANAGER_QUARKUS_LOG_LEVEL: INFO
+      AUTH_ENABLED: "true"
+      KEYCLOAK_URL: https://identity.api.stage.openshift.com/auth
+      KEYCLOAK_REALM: rhoas
+      KEYCLOAK_API_CLIENT_ID: registry-api
+      REGISTRY_AUTH_RBAC_ENABLED: "true"
+      REGISTRY_AUTH_ROLE_SOURCE: "application"
+      REGISTRY_AUTH_TENANT_OWNER_IS_ADMIN: "true"
+      REGISTRY_AUTH_ADMIN_OVERRIDE_ENABLED: "true"
+      REGISTRY_AUTH_ADMIN_OVERRIDE_FROM: "token"
+      REGISTRY_AUTH_ADMIN_OVERRIDE_TYPE: "claim"
+      REGISTRY_AUTH_ADMIN_OVERRIDE_CLAIM: "is_org_admin"
+      REGISTRY_AUTH_ADMIN_OVERRIDE_CLAIM_VALUE: "true"
+      TENANT_MANAGER_CLIENT_SECRET_NAME: srs-tenant-manager-credentials
+      ENABLE_SENTRY: "true"
+      SENTRY_DSN_SECRET_NAME: sentry-dsn-secret
+      # rds ssl
+      DATABASE_SSL_CA_SECRET_NAME: rds-ssl-ca
+  - namespace:
+      $ref: /services/service-registry/namespaces/service-registry-production.yml
+    # this is the SHA256 of the commit that will be deployed, make sure this have been built and there is an image with this tag
+    ref: bb0923196aee7c2e517f5255a6b697198166b6ce
+    parameters:
+      REGISTRY_LOG_LEVEL: INFO
+      REGISTRY_QUARKUS_LOG_LEVEL: INFO
+      TENANT_MANAGER_LOG_LEVEL: INFO
+      TENANT_MANAGER_QUARKUS_LOG_LEVEL: INFO
+      AUTH_ENABLED: "true"
+      KEYCLOAK_URL: https://identity.api.openshift.com/auth
+      KEYCLOAK_REALM: rhoas
+      KEYCLOAK_API_CLIENT_ID: registry-api
+      # IMPORTANT RBAC disabled, will be enabled in the future
+      REGISTRY_AUTH_RBAC_ENABLED: "false"
+      REGISTRY_AUTH_ROLE_SOURCE: "application"
+      REGISTRY_AUTH_TENANT_OWNER_IS_ADMIN: "true"
+      REGISTRY_AUTH_ADMIN_OVERRIDE_ENABLED: "true"
+      REGISTRY_AUTH_ADMIN_OVERRIDE_FROM: "token"
+      REGISTRY_AUTH_ADMIN_OVERRIDE_TYPE: "claim"
+      REGISTRY_AUTH_ADMIN_OVERRIDE_CLAIM: "is_org_admin"
+      REGISTRY_AUTH_ADMIN_OVERRIDE_CLAIM_VALUE: "true"
+      TENANT_MANAGER_CLIENT_SECRET_NAME: srs-tenant-manager-credentials
+      ENABLE_SENTRY: "true"
+      SENTRY_DSN_SECRET_NAME: sentry-dsn-secret
+      # rds ssl
+      DATABASE_SSL_CA_SECRET_NAME: rds-ssl-ca
   parameters:
-    REGISTRY_LOG_LEVEL: DEBUG
-    REGISTRY_QUARKUS_LOG_LEVEL: INFO
-    TENANT_MANAGER_LOG_LEVEL: DEBUG
-    TENANT_MANAGER_QUARKUS_LOG_LEVEL: DEBUG
     APICURIO_REGISTRY_IMAGE_REPOSITORY: rhoas/srs-service-registry
     TENANT_MANAGER_IMAGE_REPOSITORY: rhoas/srs-tenant-manager
     DATABASE_SECRET_NAME: srs-service-registry-rds
     REPLICAS: 3
     ENVOY_CONFIG_CM_NAME: srs-service-registry-envoy-config
-    AUTH_ENABLED: "true"
-    KEYCLOAK_URL: https://identity.api.stage.openshift.com/auth
-    KEYCLOAK_REALM: rhoas
-    KEYCLOAK_API_CLIENT_ID: registry-api
-    REGISTRY_AUTHZ_ENABLED: "true"
-    AUTHZ_ENABLED: "true"
-    TENANT_MANAGER_CLIENT_SECRET_NAME: srs-tenant-manager-credentials
+    APICURIO_REGISTRY_MEMORY_REQUEST: 600Mi
+    APICURIO_REGISTRY_MEMORY_LIMIT: 1300Mi
+    APICURIO_REGISTRY_CPU_REQUEST: 500m
+    APICURIO_REGISTRY_CPU_LIMIT: 2000m
+    TENANT_MANAGER_MEMORY_REQUEST: 600Mi
+    TENANT_MANAGER_MEMORY_LIMIT: 1000Mi
+    TENANT_MANAGER_CPU_REQUEST: 300m
+    TENANT_MANAGER_CPU_LIMIT: 600m
 
 - name: srs-fleet-manager
   url: https://gitlab.cee.redhat.com/service-registry/srs-fleet-manager
@@ -81,23 +127,66 @@ resourceTemplates:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: srs-fleet-manager-gl-build-master
+    parameters:
+      LOG_LEVEL: INFO
+      SRS_LOG_LEVEL: INFO
+      REPLICAS: 3
+      TENANT_MANAGER_AUTH_SERVER_URL: https://identity.api.stage.openshift.com/auth
+      TENANT_MANAGER_AUTH_SERVER_REALM: rhoas
+      TENANT_MANAGER_AUTH_SECRET_NAME: srs-tenant-manager-credentials
+      FLEET_MANAGER_AUTH_SECRET_NAME: srs-fleet-manager-credentials
+      AMS_URL: https://api.stage.openshift.com
+      SSO_TOKEN_ENDPOINT: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
+      EVAL_RESOURCE_NAME: rhosr
+      EVAL_PRODUCT_ID: RHOSRTrial
+      REGISTRY_INSTANCES_EVAL_LIFETIME_SECONDS: 5356800 # 2 months = 2 * 31 * 24 * 60 * 60 = 5356800 seconds
+      REGISTRY_BROWSER_URL: "https://qaprodauth.cloud.redhat.com/beta/application-services/service-registry/t/TENANT_ID"
+      REGISTRY_INSTANCES_EVAL_ONLY: "false"
+      # List of static service-registry deployments, will be used as target to provision registry tenants
+      REGISTRY_DEPLOYMENTS_LIST:
+        - name: registry-stage-1
+          registryDeploymentUrl: https://service-registry-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
+          tenantManagerUrl: http://tenant-manager:8585
+      # sentry
+      ENABLE_SENTRY: "true"
+      SENTRY_DSN_SECRET_NAME: sentry-dsn-secret
+      # rds ssl
+      DATABASE_SSL_CA_SECRET_NAME: rds-ssl-ca
+  - namespace:
+      $ref: /services/service-registry/namespaces/service-registry-production.yml
+    # this is the SHA256 of the commit that will be deployed, make sure this has been built and there is an image with this tag
+    ref: 9ea1e2983e37919d52c24293fc2d1799b54e4985
+    parameters:
+      LOG_LEVEL: INFO
+      SRS_LOG_LEVEL: INFO
+      REPLICAS: 3
+      TENANT_MANAGER_AUTH_SERVER_URL: https://identity.api.openshift.com/auth
+      TENANT_MANAGER_AUTH_SERVER_REALM: rhoas
+      TENANT_MANAGER_AUTH_SECRET_NAME: srs-tenant-manager-credentials
+      FLEET_MANAGER_AUTH_SECRET_NAME: srs-fleet-manager-credentials
+      AMS_URL: https://api.openshift.com
+      SSO_TOKEN_ENDPOINT: https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token
+      EVAL_RESOURCE_NAME: rhosr
+      EVAL_PRODUCT_ID: RHOSRTrial
+      REGISTRY_INSTANCES_EVAL_LIFETIME_SECONDS: 5356800 # 2 months = 2 * 31 * 24 * 60 * 60 = 5356800 seconds
+      REGISTRY_BROWSER_URL: "https://console.redhat.com/beta/application-services/service-registry/t/TENANT_ID"
+      REGISTRY_INSTANCES_EVAL_ONLY: "false"
+      REGISTRY_DEPLOYMENTS_LIST:
+        - name: registry-prod-1
+          registryDeploymentUrl: https://service-registry-service-registry-production.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com
+          tenantManagerUrl: http://tenant-manager:8585
+      # sentry
+      ENABLE_SENTRY: "true"
+      SENTRY_DSN_SECRET_NAME: sentry-dsn-secret
+      # rds ssl
+      DATABASE_SSL_CA_SECRET_NAME: rds-ssl-ca
   parameters:
     IMAGE_REPOSITORY: rhoas/srs-fleet-manager
     DATABASE_SECRET_NAME: srs-fleet-manager-rds
-    REPLICAS: 3
     ENVOY_CONFIG_CM_NAME: srs-fleet-manager-envoy-config
-    # List of static service-registry deployments, will be used as target to provision registry tenants
-    REGISTRY_DEPLOYMENTS_LIST:
-      - name: registry-stage-1
-        registryDeploymentUrl: https://service-registry-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
-        tenantManagerUrl: http://tenant-manager:8585
     # Auth config
     AUTH_ENABLED: "true"
     KEYCLOAK_REALM: redhat-external
     KEYCLOAK_URL: https://sso.redhat.com/auth
     KEYCLOAK_API_CLIENT_ID: srs-fleet-manager-api-prod
-    TENANT_MANAGER_AUTH_SERVER_URL: https://identity.api.stage.openshift.com/auth
-    TENANT_MANAGER_AUTH_SERVER_REALM: rhoas
-    TENANT_MANAGER_AUTH_SECRET_NAME: srs-tenant-manager-credentials
-    # warning use this config only in stage
-    SRS_FLEET_MANAGER_DELETE_ALL: "false"
+

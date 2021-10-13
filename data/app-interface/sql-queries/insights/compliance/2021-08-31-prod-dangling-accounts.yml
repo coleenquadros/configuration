@@ -1,0 +1,17 @@
+$schema: /app-interface/app-interface-sql-query-1.yml
+name: 2021-08-31-prod-dangling-accounts
+labels: {}
+namespace:
+  $ref: /services/insights/compliance/namespaces/compliance-prod.yml
+identifier: compliance-prod
+output: stdout
+query: >-
+  SELECT COUNT("id") FROM "accounts"
+  WHERE "accounts"."account_number" NOT IN (
+    SELECT DISTINCT "inventory"."hosts"."account" FROM "inventory"."hosts"
+    WHERE (
+      "inventory"."hosts"."id" IN (SELECT "policy_hosts"."host_id" FROM "policy_hosts")
+      OR
+      "inventory"."hosts"."id" IN (SELECT "test_results"."host_id" FROM "test_results")
+    )
+  );

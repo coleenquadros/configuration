@@ -1,0 +1,59 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /observability/prometheusrules/blackbox-exporter.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+- interval: 5m
+  input_series:
+  - series: up{job="blackbox_2xx_unleash_stage",instance="unleash-stage-test"}
+    values: 1 1 1 0 0
+  - series: probe_success{job="blackbox_2xx_unleash_stage",instance="unleash-stage-test"}
+    values: 1 1 1 0 0
+
+  alert_rule_test:
+  - eval_time: 10m
+    alertname: 2xxProbeFailing - Unleash - Stage - Warning
+    exp_alerts: []
+  - eval_time: 20m
+    alertname: 2xxProbeFailing - Unleash - Stage - Warning
+    exp_alerts:
+    - exp_labels:
+        instance: unleash-stage-test
+        job: blackbox_2xx_unleash_stage
+        service: app-sre-observability
+        severity: warning
+      exp_annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/blackbox-exporter-2xxProbeFailing.md"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "unleash-stage-test has been unreachable for 5 minutes."
+        link_url: "unleash-stage-test"
+
+- interval: 5m
+  input_series:
+  - series: up{job="blackbox_2xx_unleash_production",instance="unleash-production-test"}
+    values: 1 1 1 0 0
+  - series: probe_success{job="blackbox_2xx_unleash_production",instance="unleash-production-test"}
+    values: 1 1 1 0 0
+
+  alert_rule_test:
+  - eval_time: 10m
+    alertname: 2xxProbeFailing - Unleash - Production
+    exp_alerts: []
+  - eval_time: 20m
+    alertname: 2xxProbeFailing - Unleash - Production
+    exp_alerts:
+    - exp_labels:
+        instance: unleash-production-test
+        job: blackbox_2xx_unleash_production
+        service: app-sre-observability
+        severity: high
+      exp_annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/blackbox-exporter-2xxProbeFailing.md#unleash-production-test"
+        dashboard: "https://grafana.app-sre.devshift.net"
+        message: "unleash-production-test has been unreachable for 5 minutes."
+        link_url: "unleash-production-test"
+

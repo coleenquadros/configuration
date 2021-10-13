@@ -44,16 +44,12 @@ managedRoles: true
 # you will be creating for use by workloads in this namespace. For now, this
 # is empty. But if we needed to create a ServiceAccount, for example, that would
 # go here.
-managedResourceTypes: []
+managedResourceTypes:
+- ConfigMap
 
 # You can enumerate the common resources available to workloads in this
 # namespace, including Vault secrets, ConfigMaps, and more.
 openshiftResources:
-# To pull images from the Red Hat Container Registry, include this secret
-- provider: vault-secret
-  path: insights/secrets/global/rh-registry-pull
-  version: 2
-  type: kubernetes.io/dockerconfigjson
 # To pull images from the Quay image registry, include this secret
 - provider: vault-secret
   path: insights/quay/quay.io
@@ -70,6 +66,10 @@ openshiftResources:
 - provider: vault-secret
   path: insights/secrets/insights-stage/image-builder-stage/composer-secrets
   version: 5
+# ConfigMap
+- provider: resource
+  path: /insights-stage/image-builder-stage/accounts_quotas.configmap.yml
+  validate_json: true
 
 # app-interface uses Terraform to manage non-OpenShift resources, like AWS
 # resources

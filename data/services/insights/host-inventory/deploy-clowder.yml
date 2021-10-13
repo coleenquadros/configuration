@@ -21,8 +21,6 @@ slack:
 
 managedResourceTypes:
 - ClowdApp
-- ConfigMap
-- PersistentVolumeClaim
 
 imagePatterns:
 - quay.io/cloudservices
@@ -59,13 +57,16 @@ resourceTemplates:
         $ref: /dependencies/ci-ext/ci-ext.yml
       name: RedHatInsights-insights-host-inventory-gh-build-master
     parameters:
+      CJI_RANDOM_SUFFIX: 'mj-1'
       MEMORY_LIMIT: 1Gi
+      DEDUP_MEMORY_LIMIT: 5Gi
       REPLICAS_SVC: 10
+      MEMORY_REQUEST: 3Gi
       INVENTORY_DB_SSL_MODE: verify-full
       REAPER_SUSPEND: 'false'
   - namespace:
       $ref: /services/insights/host-inventory/namespaces/prod-host-inventory-prod.yml
-    ref: 64c70b41608ba7911dc7d19dfa9bc626a31c07cd
+    ref: e5a48b31947dd7a0921c37c80898428ce3045f66
     upstream:
       instance:
         $ref: /dependencies/ci-ext/ci-ext.yml
@@ -78,6 +79,7 @@ resourceTemplates:
       PENDO_SYNCHER_SUSPEND: 'false'
       PENDO_CRON_SCHEDULE: '@daily'
       PENDO_SYNC_ACTIVE: 'true'
+      DEDUP_MEMORY_LIMIT: 5Gi
   - namespace:
       $ref: /services/insights/host-inventory/namespaces/host-inventory-fedramp-stage.yml
     ref: master

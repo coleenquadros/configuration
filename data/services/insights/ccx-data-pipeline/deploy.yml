@@ -41,17 +41,17 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
-    ref: f2403f4c5efb8192d0fb07478c35b1b9f2c03172
+    ref: master
     parameters:
-      IMAGE_TAG: 85c4a83
+      IMAGE_TAG: b220e1c
       MIN_REPLICAS: "2"
       MAX_REPLICAS: "3"
       HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
   - namespace:
       $ref:  /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    ref: f2403f4c5efb8192d0fb07478c35b1b9f2c03172
+    ref: 9be3c1636cbf41fbe6034fd456fa739b09975f7d
     parameters:
-      IMAGE_TAG: b524747
+      IMAGE_TAG: 7b8982a
       MIN_REPLICAS: "16"
       MAX_REPLICAS: "16"
       HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
@@ -65,23 +65,47 @@ resourceTemplates:
 
 - name: insights-results
   path: /deploy/clowdapp.yaml
-  url: https://github.com/RedHatInsights/insights-results-aggregator/
+  url: https://github.com/RedHatInsights/insights-results-aggregator
   targets:
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
-    ref: d176abbf48721f5f49e865de16c8f90115e36b12
+    delete: true
+    ref: 3ed48c3c32ebb807b58155dd02e0c73ee010e7d2
     parameters:
-      IMAGE_TAG: 912a225
+      IMAGE_TAG: 9a5d345
       MIN_REPLICAS: "2"
       MAX_REPLICAS: "6"
       DB_WRITER_REPLICAS: "1"
       HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
-    delete: true
-    ref: d176abbf48721f5f49e865de16c8f90115e36b12
+    delete: false
+    ref: 3ed48c3c32ebb807b58155dd02e0c73ee010e7d2
     parameters:
-      IMAGE_TAG: 9284882
+      IMAGE_TAG: 9a5d345
+      MIN_REPLICAS: "2"
+      MAX_REPLICAS: "6"
+      DB_WRITER_REPLICAS: "1"
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true
+    ref: internal
+    parameters:
+      MIN_REPLICAS: "1"
+      DB_WRITER_REPLICAS: "1"
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+
+- name: ccx-insights-results
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/insights-results-aggregator
+  targets:
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
+    delete: false
+    ref: 3ed48c3c32ebb807b58155dd02e0c73ee010e7d2
+    parameters:
+      IMAGE_TAG: 9a5d345
       MIN_REPLICAS: "2"
       MAX_REPLICAS: "6"
       DB_WRITER_REPLICAS: "1"
@@ -101,12 +125,24 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
-    ref: 5b780e92bef6f3986408afb66c58cadf2077a877
+    ref: 4a54373b39a38b0977e0901d0447445efaf16435
     parameters:
-      IMAGE_TAG: e8b5f9b
+      IMAGE_TAG: 469a53b
       MIN_REPLICAS: "2"
       MAX_REPLICAS: "6"
       HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+      IRSP_ENABLE_INTERNAL_ORGANIZATIONS: true
+      IRSP_INTERNAL_RULES_ORGANIZATIONS_CSV_FILE: "/cdapp/internal_rules_organizations.csv"
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
+    ref: 6fb562f4217fdf2e2c15fead5d1b9cae2142a47c
+    delete: false
+    parameters:
+      IMAGE_TAG: c81a874
+      MIN_REPLICAS: "2"
+      MAX_REPLICAS: "6"
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+      DEBUG: false
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true
@@ -121,9 +157,15 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
-    ref: 4234b02831b2fec0333b434dee5bb411009b8327
+    ref: 37cd4ab94d59ad9ce9f09cca24848ad044443966
     parameters:
-      IMAGE_TAG: 2e2f22b
+      IMAGE_TAG: d02301d
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
+    ref: 37cd4ab94d59ad9ce9f09cca24848ad044443966
+    parameters:
+      IMAGE_TAG: d02301d
       HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
@@ -138,9 +180,16 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
-    ref: 4f3f577a23df94d459af07d6f7a78e3f70476edf
+    ref: master
     parameters:
-      IMAGE_TAG: a0aaa5e
+      IMAGE_TAG: 32962c3
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
+    ref: c6f4cd17c9c0e6cddda59e7fabfef05b791acbfa
+    delete: false
+    parameters:
+      IMAGE_TAG: a60966c
       HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml

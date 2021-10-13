@@ -1,3 +1,71 @@
+- [OLM Dance](#olm-dance)
+  - [Manual Steps](#manual-steps)
+  - [Using Script](#using-script)
+    - [Dry Run](#dry-run)
+    - [Do the Dance](#do-the-dance)
+  - [Trigger the saas deploy job](#trigger-the-saas-deploy-job)
+- [OLM catalog (registry) troubleshooting](#olm-catalog-registry-troubleshooting)
+
+# OLM Dance
+
+The OLM "dance" is when you delete the CSV and the Subscription and redeploy with the saas job. It is safe to do so.
+
+## Manual Steps
+
+```sh
+oc project <project_name>
+oc delete catalogsource <name>
+oc delete subscription <name>
+oc delete csv <name>
+```
+
+Trigger the saas deploy job. See: [Trigger the saas deploy job](#trigger-the-saas-deploy-job)
+
+## Using Script
+
+Run the [olm-dance.sh](olm-dance.sh) script from your machine.
+
+### Dry Run
+
+```sh
+./olm-dance.sh -n <namespace> -s <subscription>
+```
+
+### Do the Dance
+
+Adding `-d` will enable delete mode
+
+```sh
+./olm-dance.sh -n <namespace> -s <subscription> -d
+```
+
+Example Output:
+
+```sh
+Deteting subscription: hive
+subscription.operators.coreos.com "hive" deleted
+Deteting subscription: hive-catalog
+catalogsource.operators.coreos.com "hive-catalog" deleted
+Deteting subscription: hive
+operatorgroup.operators.coreos.com "hive-og" deleted
+Deteting CSV: hive-operator.v0.1.2202-sha86cd1c9
+clusterserviceversion.operators.coreos.com "hive-operator.v0.1.2202-sha86cd1c9" deleted
+Deteting CSV: hive-operator.v0.1.2257-sha0f9c2b4
+clusterserviceversion.operators.coreos.com "hive-operator.v0.1.2257-sha0f9c2b4" deleted
+Deteting CSV: hive-operator.v0.1.2274-sha0e29757
+clusterserviceversion.operators.coreos.com "hive-operator.v0.1.2274-sha0e29757" deleted
+```
+
+Trigger the saas deploy job. See: [Trigger the saas deploy job](#trigger-the-saas-deploy-job)
+
+## Trigger the saas deploy job
+
+- Find the service which has the operator you want to redeploy here https://visual-app-interface.devshift.net/services
+- Find the pipeline for the service/operator which you want to redeploy under the `Saas Files` section of the service details page
+- Clicking the pipelinerun in visual-app-interface will take you to the Tekton Pipeline on the CI cluster
+- Search for the latest run
+- Click the 3-dots menu on the right of the job and click  ̀Rerun`
+
 # OLM catalog (registry) troubleshooting
 
 ̀`hive` is used as an example here. Substitute names as needed.
