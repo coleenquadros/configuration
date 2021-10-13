@@ -5,6 +5,7 @@ import logging
 import sys
 import click
 
+import cluster_provision.dvo as dvo
 import cluster_provision.olm as olm
 
 
@@ -38,6 +39,16 @@ def cli(ctx, datadir):
 def create_olm_ns(ctx, cluster):
     """ Generates Operator lifecycle manager manifest"""
     olm.create_namespace(ctx.obj["datadir"], cluster)
+
+
+@cli.command()
+@click.argument("cluster")
+@click.option('--environment', required=True,
+              type=click.Choice(['production', 'stage']))
+@click.pass_context
+def create_dvo_cluster_config(ctx, cluster, environment):
+    """ Generates Deployment Validation Operator (DVO) configs for a cluster"""
+    dvo.main(ctx.obj['datadir'], cluster, environment)
 
 
 if __name__ == "__main__":
