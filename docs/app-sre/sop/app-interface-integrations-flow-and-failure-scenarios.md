@@ -47,7 +47,7 @@ This is usually due to a data reload in the Graphql production endpoint.
 
 Solution: `/retest`
 
-### Unfucking terraform
+### Fixing invalid terraform state
 
 When a manual intervention has forced us to change an AWS resource,
 terraform may find a discrepancy between its stored state and
