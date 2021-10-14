@@ -20,13 +20,14 @@ spec:
             service: insights
             env: prod
             app_team: edge
+            namespace: edge=prod
           annotations:
             dashboard: "https://grafana.app-sre.devshift.net/d/k8s-compute-resources-namespace-pods/kubernetes-compute-resources-namespace-pods"
             link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/edge-prod/deployments"
             message: "Metrics for edge-api-service in PROD are absent"
             runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/console.redhat.com/app-sops/App-insights-edge-api-service-In-edge-prod-Absent.md"
         - alert: App-insights-edge-api-service-In-edge-prod-Latency-Is-High
-          expr: sum(rate(api_3scale_gateway_api_time_bucket{exported_service="edge",le="2000.0"}[5m]))/sum(rate(api_3scale_gateway_api_time_count{exported_service="edge"}[5m])) < 0.5
+          expr: sum(rate(api_3scale_gateway_api_time_bucket{exported_service="edge",le="2000.0"}[5m]))/sum(rate(api_3scale_gateway_api_time_count{exported_service="edge"}[5m])) <= 0.5
           for: 10m
           # The sum of the rate of requests over 5 minutes within the time bucket with the upper limit of 2000ms
           # Is more than half of the sum of the rate of total requests happening on edge api over 5 minutes
@@ -36,13 +37,14 @@ spec:
             service: insights
             env: prod
             app_team: edge
+            namespace: edge-prod
           annotations:
             dashboard: "https://grafana.app-sre.devshift.net/d/k8s-compute-resources-namespace-pods/kubernetes-compute-resources-namespace-pods"
             link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/edge-prod/deployments"
             message: "Edge API is having more than 50% of requests that are > 2s for the last 10 minutes"
             runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/console.redhat.com/app-sops/App-insights-edge-api-service-In-edge-prod-Latency-Is-High.md"
         - alert: App-insights-edge-api-service-In-edge-prod-Error-Rate-Is-High
-          expr: (sum(rate(api_3scale_gateway_api_status{exported_service="edge",status="5xx"}[5m])) / sum(rate(api_3scale_gateway_api_status{exported_service="edge"}[5m]))) > 0.5
+          expr: (sum(rate(api_3scale_gateway_api_status{exported_service="edge",status="5xx"}[5m])) / sum(rate(api_3scale_gateway_api_status{exported_service="edge"}[5m]))) >= 0.5
           for: 10m
           # The sum of the rate of requests over 5 minutes that are giving a 500 status code
           # Is more than half of the sum of the rate of total requests happening on edge api over 5 minutes
@@ -52,6 +54,7 @@ spec:
             service: insights
             env: prod
             app_team: edge
+            namespace: edge-prod
           annotations:
             dashboard: "https://grafana.app-sre.devshift.net/d/k8s-compute-resources-namespace-pods/kubernetes-compute-resources-namespace-pods"
             link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/edge-prod/deployments"
