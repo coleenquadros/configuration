@@ -47,7 +47,7 @@ This is usually due to a data reload in the Graphql production endpoint.
 
 Solution: `/retest`
 
-### Unfucking terraform
+### Fixing invalid terraform state
 
 When a manual intervention has forced us to change an AWS resource,
 terraform may find a discrepancy between its stored state and
@@ -91,3 +91,11 @@ happens:
    ``` bash
    terraform state rm $parameter_group
    ```
+
+### Delete terraform resources
+
+Terraform managed resources are not deleted during normal reconcile runs. If resources need to be deleted, the
+`terraform-resources` integration will complain about `deletion action not enabled`.
+
+Follow the [How to safely delete terraform managed resources](delete-terraform-resources.md) guide to resolve
+this situation.

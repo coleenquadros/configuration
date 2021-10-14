@@ -1218,6 +1218,31 @@ Notes:
 * Manual changes to AWS resources will be overridden by App-Interface in each run.
 * To be able to use this feature, the `managedTerraformResources` field must exist and equal to `true`.
 
+#### Manage shared AWS resources via App-interface (`/openshift/namespace-1.yml`) using Terraform
+
+In the time of this writing, Terraform resources can not be added to a [shared resources file](#manage-shared-openshift-resources-via-app-interface-openshiftnamespace-1yml).
+
+The work to enable that is tracked in https://issues.redhat.com/browse/APPSRE-2614.
+
+To achieve a similar result, we can define a Terraform resource in a single namespace and add only the output Secret to other namespaces.
+
+Instructions:
+
+1. Submit a MR adding the resource to the `terraformResources` section in one of the namespace files. Once the MR is merged, the output secret will be placed in the namespace AND in Vault.
+  * The Vault secret has a predefined path: `app-sre/integrations-output/terraform-resources/<cluster_name>/<namespace_name>/<output_resource_name>`
+1. Submit another MR [adding the Vault secret](#manage-secrets-via-app-interface-openshiftnamespace-1yml-using-vault) to the `openshiftResources` section in all other namespace files:
+  ```yaml
+  - provider: vault-secret
+    path: app-sre/integrations-output/terraform-resources/<cluster_name>/<namespace_name>/<output_resource_name>
+    version: 1
+    annotations:
+      qontract.ignore_reconcile_time: "true"
+  ```
+
+Bonus points:
+
+Add the Vault secret to an `openshiftResources` section in a [shared resources file](#manage-shared-openshift-resources-via-app-interface-openshiftnamespace-1yml) and reference it from the `sharedResources` section of all other namespace files.
+
 #### Manage AWS Certificate via App-Interface (`/openshift/namespace-1.yml`)
 
 [AWS Certificate Manager](https://aws.amazon.com/certificate-manager/) AWS Certificate Manager is a service that lets you easily provision, manage, and deploy public and private Secure Sockets Layer/Transport Layer Security (SSL/TLS) certificates.
@@ -1852,8 +1877,7 @@ External reference:
 - [Jenkins Job Builder](https://docs.openstack.org/infra/jenkins-job-builder/)
 
 Notes:
-- To use a KV v1 secret engine in a secret, the `secret-path` should be `<secret_engine>/<path_to_secret>`.
-- To use a KV v2 secret engine in a secret, the `secret-path` should be `<secret_engine>/data/<path_to_secret>`.
+- To consume a secret from Vault, a KV v1 secret engine must be used.
 
 
 ### Delete AWS IAM access keys via App-Interface
