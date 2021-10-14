@@ -1,0 +1,28 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2021-10-14-host-count-overall
+namespace:
+  $ref: /services/insights/host-inventory/namespaces/prod-host-inventory-prod.yml
+identifier: host-inventory-prod
+output: stdout
+query: SELECT count(*) FROM hosts;
+
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2021-10-14-host-count-reported-by-puptoo
+namespace:
+  $ref: /services/insights/host-inventory/namespaces/prod-host-inventory-prod.yml
+identifier: host-inventory-prod
+output: stdout
+queries: 
+  - SELECT count(*) FROM hosts WHERE reporter='puptoo';
+  - SELECT count(*) FROM hosts WHERE reporter='cloud-connector';
+  - SELECT count(*) FROM hosts WHERE reporter='yupana';
+  - SELECT count(*) FROM hosts WHERE reporter='rhsm-conduit';
+  - SELECT count(*), account 
+    FROM hosts
+    WHERE system_profile_facts->>'is_marketplace' = 'true'
+    GROUP BY account
+    ORDER BY count desc;
