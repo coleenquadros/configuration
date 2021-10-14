@@ -6,9 +6,8 @@
   - [Step 3 - Observability](#step-3-observability)
   - [Step 4 - Operator Lifecycle Manager](#step-4-operator-lifecycle-manager)
   - [Step 5 - Container Security Operator](#step-5-container-security-operator)
-  - [Step 6 - Logging](#step-6-logging)
-  - [Step 7 - Deployment Validation Operator (DVO)](#step-7-deployment-validation-operator-dvo)
-  - [Step 8 - Obtain cluster-admin](#step-8-obtain-cluster-admin)
+  - [Step 6 - Deployment Validation Operator (DVO)](#step-7-deployment-validation-operator-dvo)
+  - [Step 7 - Obtain cluster-admin](#step-8-obtain-cluster-admin)
 - [Additional configurations](#additional-configurations)
   - [Selecting a Machine CIDR for VPC peerings](#selecting-a-machine-cidr-for-vpc-peerings)
   - [VPC peering with app-interface](#vpc-peering-with-app-interface)
@@ -108,8 +107,8 @@ This step should be performed in a single merge request.
       replicas: (desired number of instances in the pool)
       labels: {}
 
-    addons: # optional, specify addons to be installed
-    - $ref: /dependencies/ocm/addons/<addon_name>.yml
+    addons: # enable log forwarding to the cluster's AWS account
+    - $ref: /dependencies/ocm/addons/cluster-logging-operator.yml
 
     internal: false
 
@@ -510,18 +509,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
         ref: <commit_hash>
     ```
 
-## Step 6 - Logging
-
-1. Enable logging (CloudWatch log forwarding)
-
-    1. Add the following section to the cluster file to enable log forwarding to the cluster's AWS account:
-
-    ```yaml
-    addons:
-    - $ref: /dependencies/ocm/addons/cluster-logging-operator.yml
-    ```
-
-## Step 7 - Deployment Validation Operator (DVO)
+## Step 6 - Deployment Validation Operator (DVO)
 
 The Deployment Validation Operator inspects workloads in a cluster and evaluates them against know best practices.  It generates metric information about which workloads in which namespaces do not meet specific guidelines.  This information is presented in tenant dashboards and in monthly reports.
 
@@ -531,7 +519,7 @@ To create the DVO operator configs, run the following command:
 hack/cluster_provision.py [--datadir=data directory] create-dvo-cluster-config <cluster-name> --environment <stage|production>
 ```
 
-## Step 8 - Obtain cluster-admin
+## Step 7 - Obtain cluster-admin
 
 1. Create an OHSS ticket to enable cluster-admin in the cluster. Examples: [OHSS-5302](https://issues.redhat.com/browse/OHSS-5302), [OHSS-5939](https://issues.redhat.com/browse/OHSS-5939)
 
