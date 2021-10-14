@@ -6,9 +6,8 @@
   - [Step 3 - Observability](#step-3-observability)
   - [Step 4 - Operator Lifecycle Manager](#step-4-operator-lifecycle-manager)
   - [Step 5 - Container Security Operator](#step-5-container-security-operator)
-  - [Step 6 - Logging](#step-6-logging)
-  - [Step 7 - Deployment Validation Operator (DVO)](#step-7-deployment-validation-operator-dvo)
-  - [Step 8 - Obtain cluster-admin](#step-8-obtain-cluster-admin)
+  - [Step 6 - Deployment Validation Operator (DVO)](#step-7-deployment-validation-operator-dvo)
+  - [Step 7 - Obtain cluster-admin](#step-8-obtain-cluster-admin)
 - [Additional configurations](#additional-configurations)
   - [Selecting a Machine CIDR for VPC peerings](#selecting-a-machine-cidr-for-vpc-peerings)
   - [VPC peering with app-interface](#vpc-peering-with-app-interface)
@@ -108,8 +107,8 @@ This step should be performed in a single merge request.
       replicas: (desired number of instances in the pool)
       labels: {}
 
-    addons: # optional, specify addons to be installed
-    - $ref: /dependencies/ocm/addons/<addon_name>.yml
+    addons: # enable log forwarding to the cluster's AWS account
+    - $ref: /dependencies/ocm/addons/cluster-logging-operator.yml
 
     internal: false
 
@@ -510,117 +509,17 @@ At this point you should be able to access the cluster via the console / `oc` cl
         ref: <commit_hash>
     ```
 
-## Step 6 - Logging
+## Step 6 - Deployment Validation Operator (DVO)
 
-1. Enable logging (CloudWatch log forwarding)
+The Deployment Validation Operator inspects workloads in a cluster and evaluates them against know best practices.  It generates metric information about which workloads in which namespaces do not meet specific guidelines.  This information is presented in tenant dashboards and in monthly reports.
 
-    1. Add the following section to the cluster file to enable log forwarding to the cluster's AWS account:
+To create the DVO operator configs, run the following command:
 
-    ```yaml
-    addons:
-    - $ref: /dependencies/ocm/addons/cluster-logging-operator.yml
-    ```
+```bash
+hack/cluster_provision.py [--datadir=data directory] create-dvo-cluster-config <cluster-name> --environment <stage|production>
+```
 
-## Step 7 - Deployment Validation Operator (DVO)
-
-1. Install the Deployment Validation Operator
-
-   The Deployment Validation Opreator inspects wordloads in a cluster and evaluates them against know best practices.  It generates metric information about which workloads in which namespaces do not meet specific guidelines.  This information is presented in tenant dashboards and in monthly reports.
-
-    1. Create a `deployment-validationoperator-per-cluster` namespace file for that specific
-    cluster. Example:
-
-    ```yaml
-    ---
-    $schema: /openshift/namespace-1.yml
-
-    labels: {}
-
-    name: deployment-validation-operator
-    description: namespace for the app-sre per-cluster Deployment Validation Operator
-
-    cluster:
-      $ref: /openshift/<cluster>/cluster.yml
-
-    app:
-      $ref: /services/deployment-validation-operator/app.yml
-
-    environment:
-      $ref: /products/app-sre/environments/stage.yml
-
-    networkPoliciesAllow:
-    - $ref: /openshift/<cluster>/namespaces/openshift-operator-lifecycle-manager.yml
-    - $ref: /services/observability/namespaces/openshift-customer-monitoring.<cluster>.yml
-
-    managedRoles: true
-
-    managedResourceTypes:
-    - ConfigMap
-    - Service
-
-    openshiftResources:
-    - provider: resource
-      path: /app-sre[-stage]/deployment-validation-operator/dvo.configmap.yaml
-    - provider: resource
-      path: /app-sre[-stage]/deployment-validation-operator/dvo.service.yaml
-    ```
-
-    *NOTE*: This file goes in the `data/openshift/<cluster>/namespaces directory` [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/openshift/app-sre-stage-01/namespaces/deployment-validation-operator-per-cluster.yml)
-
-    *NOTE*: If the `openshift-operator-lifecycle-manager` namespace is not yet defined in
-    app-interface, follow [Step 4](#step-4-operator-lifecycle-manager)
-
-    1. Add a service monitor for the Deployment Validation Operator to the `openshift-customer-monitoring.<cluster>.yml` file:
-
-    ```yaml
-    ### Deployment Validation Operator
-    - provider: resource-template
-      type: jinja2
-      path: /observability/servicemonitors/deployment-validation-operator.servicemonitor.yaml
-      variables:
-        environment: <production|stage>
-        namespace: deployment-validation-operator
-    ```
-
-    *Note*: [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml)
-
-    1. Add the new `deployment-validation-operator` namespace to the target
-    namespaces in the
-    [saas.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/deployment-validation-operator/cicd/saas.yaml)
-    to deploy the Deployment Validation Operator. Example:
-
-    ```yaml
-    resourceTemplates:
-    - name: deployment-validation-operator
-      url: https://github.com/app-sre/deployment-validation-operator
-      path: /deploy/openshift/deployment-validation-operator-olm.yaml
-      targets:
-      ...
-      - namespace:
-          $ref: /openshift/<cluster>/namespaces/app-sre-dvo-per-cluster.yml
-        ref: <commit_hash>
-    ```
-
-    *NOTE*: For stage clusters, add the following to the namespace target:
-
-    ```yaml
-        upstream:
-          instance:
-            $ref: /dependencies/ci-int/ci-int.yml
-          name: app-sre-deployment-validation-operator-gh-build-master
-    ```
-
-    1. Grant view permissions to the openshift-customer-monitoring/prometheus-k8s service account in [app-sre-osdv4-monitored-namespaces-view.yml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/roles/app-sre-osdv4-monitored-namespaces-view.yml)
-
-    ```yaml
-    # deployment-validation-operator
-    ...
-    - namespace:
-        $ref: /openshift/<cluster>/namespaces/deployment-validation-operator-per-cluster.yml
-      role: view
-    ```
-
-## Step 8 - Obtain cluster-admin
+## Step 7 - Obtain cluster-admin
 
 1. Create an OHSS ticket to enable cluster-admin in the cluster. Examples: [OHSS-5302](https://issues.redhat.com/browse/OHSS-5302), [OHSS-5939](https://issues.redhat.com/browse/OHSS-5939)
 
