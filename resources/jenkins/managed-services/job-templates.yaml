@@ -211,14 +211,10 @@
         secrets:
           - *app_sre_bot_push_token
     parameters:
-    - choice:
+    - string:
         name: PROJECT_NAME
-        description: 'project name, has to be the same as in the config file'
-        choices:
-            - kas-fleetshard
-            - kafka-admin-api
-            - strimzi-canary
-            - strimzi-drain-cleaner
+        default: ''
+        description: 'project name, has to be the same as in config file'
     - string:
         name: RHOSAK_VERSION
         default: ''
@@ -228,13 +224,9 @@
         default: ''
         description: 'version of the project'
     - bool:
-        name: PREPARE_PIPELINE_CONFIGS
-        default: true
-        description: "prepare *-pipeline-configs for the project & version"
-    - bool:
-        name: PREPARE_CPAAS_PRODUCTS
-        default: true
-        description: "prepare cpaas-products/rhosak for the project & version"
+        name: SKIP_PIPELINE_CONFIGS
+        default: false
+        description: prepare only cpaas-products/rhosak (skip *-pipeline-configs)
     <<: *gl_checkout
     builders:
       - shell: "{ci_cmd}"
@@ -330,7 +322,7 @@
 
 - job-template:
     id: managed-kafka-fault-tests
-    name: "{display_name}"
+    name: "managed-kafka-fault-tests"
     wrappers:
       - timestamps
       - timeout_wrapper:
@@ -389,22 +381,22 @@
             - sa-east-1
     - bool:
         name: MULTI_AZ
-        default: true
+        default: false
         description: If true the cluster will be provisioned with multiple AZ, if false for only one AZ
     - bool:
         name: DEPROVISION_CLUSTER
-        default: true
+        default: false
         description: If true the provisioned or provided cluster will be deleted
     - bool:
         name: INSTALL_KAFKA
-        default: true
+        default: false
         description: If true a kafka instance will be installed in the cluster
     - choice:
         name: TEST_LAYER
         description: '[REQUIRED] Select the set of tests to be executed'
         choices:
-          - all
           - none
+          - all
           - cloud
           - openshift
           - kafka
@@ -522,14 +514,14 @@
         name: KAFKA_OSD_CLUSTER_CONFIG
         default: 'COMPUTE_NODES_COUNT=6,
          COMPUTE_MACHINE_TYPE=m5.4xlarge,
-         OCM_CLUSTER_REGION=eu-west-1,
+         OCM_CLUSTER_REGION=us-east-1,
          MULTI_AZ=true'
         description: 'The variables needed to provision an OSD where kafka will be installed'
     - string:
         name: OMB_OSD_CLUSTER_CONFIG
         default: 'COMPUTE_NODES_COUNT=2,
          COMPUTE_MACHINE_TYPE=m5.4xlarge,
-         OCM_CLUSTER_REGION=eu-west-1,
+         OCM_CLUSTER_REGION=us-east-1,
          MULTI_AZ=false'
         description: 'The variables needed to provision an OSD where OMB will be installed'
     - string:
@@ -546,12 +538,12 @@
         description: 'The variables needed to configure the kafka installation'
     - string:
         name: TEST_EXECUTION_CONFIG
-        default: 'OMB_TEST_DURATION=PT50M, 
-         TARGET_RATE=15, 
+        default: 'OMB_TEST_DURATION=PT60M, 
+         TARGET_RATE=29, 
          WORKERS_PER_INSTANCE=2, 
          TOPICS_PER_KAFKA=1, 
          PRODUCERS_PER_TOPIC=1, 
-         PAYLOAD_FILE_SIZE=512Ki,
+         PAYLOAD_FILE_SIZE=1013Ki,
          PARTITIONS_PER_TOPIC=9,
          SUBSCRIPTIONS_PER_TOPIC=1,
          CONSUMER_PER_SUBSCRIPTION=1'
@@ -568,6 +560,23 @@
         artifacts: '{artifacts_path}'
         allow-empty: true
     - <<: *slack_notify
+
+- job-templete:
+    id: aws-purge-velero-backup
+    name: "aws-purge-velero-backup"
+    wrappers:
+    - timestamps
+    - timeout_wrapper:
+          timeout: "{timeout}"
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+          - *fault_tests_secret
+    <<: *gl_checkout
+    builders:
+      - shell:
+          ./scripts/purge_verlero_backup.sh
 
 - job-template:
     id: strimzi-operator-test
@@ -657,7 +666,6 @@
     - archive:
         artifacts: 'test/performance/reports/**'
         allow-empty: true
-    - <<: *slack_notify
 
 - job-template:
     id: gl-pr-check-apache-kafka
@@ -704,8 +712,32 @@
         allow-empty: true
 
 - job-template:
-    id: managed-{ui_promotions}-promote-ui
-    name: managed-{ui_promotions}-promote-ui
+    id: managed-kafka-promote-ui
+    name: managed-kafka-promote-ui
+    wrappers:
+    - timestamps
+    - timeout_wrapper:
+        timeout: "{timeout}"
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+          - *managed_services_github_deploy_key
+    parameters:
+    - bool:
+        name: DRY_RUN
+        default: true
+        description: If true the changes are not pushed
+    builders:
+    - trigger-builds:
+      - project:
+          - "managed-kafka-promote-ui-stable"
+          - "managed-kafka-promote-ui-beta"
+        current-parameters: true
+
+- job-template:
+    id: managed-{ui_promotions}-promote-ui-beta
+    name: managed-{ui_promotions}-promote-ui-beta
     wrappers:
     - timestamps
     - timeout_wrapper:
@@ -720,6 +752,55 @@
         name: REPOSITORIES
         default: "{repositories}"
         description: 'All repositories to promote'
+    - string:
+        name: FROM_BRANCH
+        default: qa-beta
+    - string:
+        name: TO_BRANCH
+        default: prod-beta
+    - string:
+        name: AUTHOR_NAME
+        default: Bot
+    - string:
+        name: AUTHOR_EMAIL
+        default: ms-devexp@redhat.com
+    - bool:
+        name: DRY_RUN
+        default: true
+        description: If true the changes are not pushed
+    <<: *gl_checkout
+    builders:
+    - shell: ./script/promote-ui.sh
+
+- job-template:
+    id: managed-kafka-promote-ui-stable
+    name: managed-kafka-promote-ui-stable
+    wrappers:
+    - timestamps
+    - timeout_wrapper:
+        timeout: "{timeout}"
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+          - *managed_services_github_deploy_key
+    parameters:
+    - string:
+        name: REPOSITORIES
+        default: 'https://github.com/RedHatInsights/rhosak-dashboard-build'
+        description: 'All repositories to promote'
+    - string:
+        name: FROM_BRANCH
+        default: prod-beta
+    - string:
+        name: TO_BRANCH
+        default: prod-stable
+    - string:
+        name: AUTHOR_NAME
+        default: Bot
+    - string:
+        name: AUTHOR_EMAIL
+        default: ms-devexp@redhat.com
     - bool:
         name: DRY_RUN
         default: true
