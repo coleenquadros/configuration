@@ -703,32 +703,8 @@
         allow-empty: true
 
 - job-template:
-    id: managed-kafka-promote-ui
-    name: managed-kafka-promote-ui
-    wrappers:
-    - timestamps
-    - timeout_wrapper:
-        timeout: "{timeout}"
-    - ansicolor
-    - vault-secrets:
-        <<: *vault_defaults
-        secrets:
-          - *managed_services_github_deploy_key
-    parameters:
-    - bool:
-        name: DRY_RUN
-        default: true
-        description: If true the changes are not pushed
-    builders:
-    - trigger-builds:
-      - project:
-          - "managed-kafka-promote-ui-stable"
-          - "managed-kafka-promote-ui-beta"
-        current-parameters: true
-
-- job-template:
-    id: managed-{ui_promotions}-promote-ui-beta
-    name: managed-{ui_promotions}-promote-ui-beta
+    id: managed-{ui_promotions}-promote-ui
+    name: managed-{ui_promotions}-promote-ui
     wrappers:
     - timestamps
     - timeout_wrapper:
@@ -743,55 +719,6 @@
         name: REPOSITORIES
         default: "{repositories}"
         description: 'All repositories to promote'
-    - string:
-        name: FROM_BRANCH
-        default: qa-beta
-    - string:
-        name: TO_BRANCH
-        default: prod-beta
-    - string:
-        name: AUTHOR_NAME
-        default: Bot
-    - string:
-        name: AUTHOR_EMAIL
-        default: ms-devexp@redhat.com
-    - bool:
-        name: DRY_RUN
-        default: true
-        description: If true the changes are not pushed
-    <<: *gl_checkout
-    builders:
-    - shell: ./script/promote-ui.sh
-
-- job-template:
-    id: managed-kafka-promote-ui-stable
-    name: managed-kafka-promote-ui-stable
-    wrappers:
-    - timestamps
-    - timeout_wrapper:
-        timeout: "{timeout}"
-    - ansicolor
-    - vault-secrets:
-        <<: *vault_defaults
-        secrets:
-          - *managed_services_github_deploy_key
-    parameters:
-    - string:
-        name: REPOSITORIES
-        default: 'https://github.com/RedHatInsights/rhosak-dashboard-build'
-        description: 'All repositories to promote'
-    - string:
-        name: FROM_BRANCH
-        default: prod-beta
-    - string:
-        name: TO_BRANCH
-        default: prod-stable
-    - string:
-        name: AUTHOR_NAME
-        default: Bot
-    - string:
-        name: AUTHOR_EMAIL
-        default: ms-devexp@redhat.com
     - bool:
         name: DRY_RUN
         default: true
