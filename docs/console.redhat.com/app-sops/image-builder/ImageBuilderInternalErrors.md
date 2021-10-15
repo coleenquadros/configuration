@@ -7,8 +7,8 @@ Severity: Info
 Impact
 ------
 
--   Image Builder is a service used to build images. It acts as an
-    interface for composer.
+-   Image Builder is a service used to build images. It acts as an interface for composer. If image
+    builds are failing, the core feature of this service is in bad shape.
 
 Summary
 -------

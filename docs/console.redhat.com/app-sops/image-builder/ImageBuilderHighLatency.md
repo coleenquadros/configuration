@@ -7,8 +7,9 @@ Severity: Info
 Impact
 ------
 
--   Image Builder is a service used to build images. It acts as an
-    interface for composer.
+-   Image Builder is a service used to build images. It acts as an interface for composer. Slow
+    compose requests might result in requests timing out. Slow non-compose requests just make the
+    user experience less pleasant.
 
 Summary
 -------
