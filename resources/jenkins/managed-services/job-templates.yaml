@@ -211,10 +211,14 @@
         secrets:
           - *app_sre_bot_push_token
     parameters:
-    - string:
+    - choice:
         name: PROJECT_NAME
-        default: ''
-        description: 'project name, has to be the same as in config file'
+        description: 'project name, has to be the same as in the config file'
+        choices:
+            - kas-fleetshard
+            - kafka-admin-api
+            - strimzi-canary
+            - strimzi-drain-cleaner
     - string:
         name: RHOSAK_VERSION
         default: ''
@@ -224,9 +228,13 @@
         default: ''
         description: 'version of the project'
     - bool:
-        name: SKIP_PIPELINE_CONFIGS
-        default: false
-        description: prepare only cpaas-products/rhosak (skip *-pipeline-configs)
+        name: PREPARE_PIPELINE_CONFIGS
+        default: true
+        description: "prepare *-pipeline-configs for the project & version"
+    - bool:
+        name: PREPARE_CPAAS_PRODUCTS
+        default: true
+        description: "prepare cpaas-products/rhosak for the project & version"
     <<: *gl_checkout
     builders:
       - shell: "{ci_cmd}"
@@ -322,7 +330,7 @@
 
 - job-template:
     id: managed-kafka-fault-tests
-    name: "managed-kafka-fault-tests"
+    name: "{display_name}"
     wrappers:
       - timestamps
       - timeout_wrapper:
@@ -381,22 +389,22 @@
             - sa-east-1
     - bool:
         name: MULTI_AZ
-        default: false
+        default: true
         description: If true the cluster will be provisioned with multiple AZ, if false for only one AZ
     - bool:
         name: DEPROVISION_CLUSTER
-        default: false
+        default: true
         description: If true the provisioned or provided cluster will be deleted
     - bool:
         name: INSTALL_KAFKA
-        default: false
+        default: true
         description: If true a kafka instance will be installed in the cluster
     - choice:
         name: TEST_LAYER
         description: '[REQUIRED] Select the set of tests to be executed'
         choices:
-          - none
           - all
+          - none
           - cloud
           - openshift
           - kafka
@@ -649,6 +657,7 @@
     - archive:
         artifacts: 'test/performance/reports/**'
         allow-empty: true
+    - <<: *slack_notify
 
 - job-template:
     id: gl-pr-check-apache-kafka
