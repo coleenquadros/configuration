@@ -1813,6 +1813,7 @@ To manage a User group via App-Interface:
   the `OWNERS` files to extract `approvers`/`reviewers` from. Only the root
   `OWNERS` file is considered. The `OWNERS_ALIASES` is respected.
     - Note: optionally add `:<branch>` to use a specific branch. For example: `https://github.com/openshift/osde2e:main`.
+- `schedule`: a reference to a file representing a schedule.
 - `channels`: a list of channels to add to the User group
 
 3. **Add this permission to the desired `roles`, or create a new `role` with this permission only (mandatory).**
@@ -1827,6 +1828,7 @@ Examples:
 * An example for a PagerDuty escalation policy file can be found [here](/data/dependencies/pagerduty/app-sre-escalation-policy.yml).
 * An example for a GitHub `OWNERS` file can be found [here](/data/teams/sd-sre/permissions/aws-account-operator-coreos-slack.yml).
 * An example for a GitHub `OWNERS_ALIASES` file can be found [here](/data/teams/sd-sre/permissions/managed-velero-operator-coreos-slack.yml).
+* An example for a schedule can be found [here](/data/teams/app-sre/schedules/app-sre-onboarding-ic.yml).
 
 Notes:
 * Please make sure that the slack user group exists in slack before creating the merge request, otherwise the automated build job will fail.
