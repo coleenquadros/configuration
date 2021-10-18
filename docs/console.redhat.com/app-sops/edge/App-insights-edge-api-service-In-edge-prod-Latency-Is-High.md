@@ -14,7 +14,7 @@ Severity: Pagerduty
 
 Note:  This service is deployed via [Clowder](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/clowder/clowder.rst).
 
-This alert fires when more than 50% of requests in the last 5 min are slower than 2000ms for at least 10 minutes, which can impact our latency SLO in the long term.
+This alert fires when at least 50% of requests in the last 5 min are slower than 2000ms for at least 10 minutes, which can impact our latency SLO in the long term.
 
 ## Access required
 

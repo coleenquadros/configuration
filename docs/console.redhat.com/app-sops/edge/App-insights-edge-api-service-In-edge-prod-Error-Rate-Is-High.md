@@ -15,7 +15,7 @@ Severity: Pagerduty
 
 Note:  This service is deployed via [Clowder](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/clowder/clowder.rst).
 
-This alert fires when Edge API has been throwing 5xx errors more than 50% of the time for the last 10 minutes which can be a problem for our Availability SLO in the long term.
+This alert fires when Edge API has been throwing 5xx errors at least 50% of the time for the last 10 minutes which can be a problem for our Availability SLO in the long term.
 
 ## Access required
 
