@@ -34,7 +34,7 @@ In order to define Continuous Integration pipelines in app-interface, define a J
     * `gh_repo`/`gl_project` - name of repository (a project in gitlab)
     * `quay_org` - if this jobs builds and pushes a docker image, specify the destination Quay organization
     * `jobs` - a list of jobs to create in this project. each job -
-        * `<job_template_name>` - job template to be used. Options can be found [here](/schemas/dependencies/jenkins-config-1.yml#L113-304).
+        * `<job_template_name>` - job template to be used.
             * `display_name` - display name of the Jenkins job
             * additional optional fields can be found in [advanced usage](https://gitlab.cee.redhat.com/service/dev-guidelines#cicd).
 
