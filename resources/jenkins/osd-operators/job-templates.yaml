@@ -54,9 +54,9 @@
     <<: *gl_timed
 
 - job-template:
-    id: 'gl-build-master-osd-backplane-bastion-infra-terraform'
-    name: 'gl-build-master-osd-backplane-bastion-infra-terraform'
-    ci_cmd: ./terraform/scripts/build.sh
+    id: 'gl-pr-check-osd-backplane-bastion-infra-terraform'
+    name: 'gl-pr-check-osd-backplane-bastion-infra-terraform'
+    pr_check_script_path: ./terraform/scripts/pr-check.sh
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'
@@ -66,7 +66,22 @@
         secrets:
         - *srep_privatelink_aws_credentials
         - *srep_backplane_bastion_ldap_creds
-    <<: *gl_timed
+    <<: *gl_pr_check
+
+- job-template:
+    id: 'gl-build-master-osd-backplane-bastion-infra-terraform'
+    name: 'gl-build-master-osd-backplane-bastion-infra-terraform'
+    build_deploy_script_path: ./terraform/scripts/build.sh
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *srep_privatelink_aws_credentials
+        - *srep_backplane_bastion_ldap_creds
+    <<: *gl_build_master
 
 - job-template:
     id: 'gl-build-master-custom-catalog-source'
