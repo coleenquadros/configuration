@@ -167,6 +167,22 @@
     <<: *gl_timed
 
 - job-template:
+    id: managed-services-merge-pulled-upstreams
+    name: 'managed-services-merge-pulled-upstreams'
+    description: "[managed-services] merge pulled changes from all upstreams specified in {gl_group}/{gl_project}/script/repo-config.yaml"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *app_sre_bot_push_token
+    publishers:
+      - <<: *slack_notify
+    <<: *gl_timed
+
+- job-template:
     id: 'managed-services-pull-upstream-tag'
     name: 'managed-services-pull-upstream-tag'
     description: "[managed-services] pull upstream tag for specified project (that must be specified in {gl_group}/{gl_project}/script/repo-config.yaml)"
