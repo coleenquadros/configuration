@@ -100,6 +100,10 @@ This step should be performed in a single merge request.
       vpc: (desired machine CIDR. ex: 10.123.0.0/16)
       service: (desired service CIDR. ex: 172.30.0.0/16)
       pod: (desired pod CIDR. ex: 10.128.0.0/14)
+   
+    automationToken:
+      path: app-sre/creds/kube-configs/<cluster_name>
+      field: token
 
     machinePools: # optional, specify additional Machine Pools to be provisioned
     - id: (machine pool name, should be unique per cluster)
@@ -218,22 +222,13 @@ At this point you should be able to access the cluster via the console / `oc` cl
     oc -n dedicated-admin sa get-token app-sre-bot
     ```
 
-1. Add the `app-sre-bot` credentials to vault at https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/kube-configs
+1. Add the `app-sre-bot` credentials to [vault](https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/kube-configs). qontract-reconcile integrations errors indicating that the token wasn't found will clear once the credentials are in the vault.
 
    Create a secret named after the <cluster_name>
 
        server: https://api.<cluster_name>.<cluster_id>.p1.openshiftapps.com:6443
        token: <token>
        username: dedicated-admin/app-sre-bot # not used by automation
-
-1. Add the `app-sre-bot` credentials to the cluster file in app-interface
-   Create a secret named after the <cluster_name>
-
-    ```yaml
-    # /data/openshift/<cluster_name>/cluster.yml
-    automationToken:
-      path: app-sre/creds/kube-configs/<cluster_name>
-      field: token
 
 1. If the cluster is private, the following lines must be added
 
