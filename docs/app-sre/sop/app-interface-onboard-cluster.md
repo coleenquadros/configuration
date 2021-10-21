@@ -121,8 +121,9 @@ This step should be performed in a single merge request.
       accessLevel: network-mgmt
     ```
 
-    * Note: Cluster name should follow naming convention [here](https://docs.google.com/document/d/1OIe4JGbScz57dIGZztThLTvji056OBCfaHSvGAo7Hao)
-    * Note: The cluster ID is not known at this point so we do not add a `consoleUrl` and `serverUrl` yet
+    * Note: Cluster name should follow naming convention
+      [here](https://docs.google.com/document/d/1OIe4JGbScz57dIGZztThLTvji056OBCfaHSvGAo7Hao)
+    * Note: The `id`, `consoleUrl`, `serverUrl`, `external_id` and `elbFQDN` will be added automatically at a later stage. Don't worry about them.
 
 1. Grant `dedicated-admin` and `dedicated-reader` access to App-SRE team
 
@@ -150,15 +151,16 @@ This step should be performed in a single merge request.
 
     * Note: during the installation it is expected that other ocm integrations will fail.
 
-1. Once the cluster has finished installing, the following fields have to be updated in the `cluster.yml` file in the `spec` section:
-    * `consoleUrl`: `https://console-openshift-console.apps.<cluster_name>.<base_domain>`
-    * `kibanaUrl`: `''`
-    * `prometheusUrl`: `https://prometheus.<cluster_name>.devshift.net`
+1. Once the cluster has finished installing, the following fields will be updated automatically in the `cluster.yml` file in the:
+    * `consoleUrl` 
+    * `serverUrl`
+    * `kibanaUrl`
+    * `elbFQDN`
+    * `id` (in the `spec` section)
+    * `external_id` (in the `spec` section)
+1. Now, you can add these URLs manually (we'll automate this step in the future):
     * `alertmanagerUrl`: `https://alertmanager.<cluster_name>.devshift.net`
-    * `serverUrl`: `https://api.<cluster_name>.<base_domain>:6443`
-    * `elbFQDN`: `elb.apps.<cluster_name>.<base_domain>`
-    * `id`: This ID can be seen as part of the URL when navigating to cluster page in OCM as well as when using the [ocm cli](https://github.com/openshift-online/ocm-cli). This field should have been automatically added.
-    * `external_id`: This is a  UUID which can be seen in cluster page in OCM as `Cluster ID` well as when using the [ocm cli](https://github.com/openshift-online/ocm-cli). This field should have been automatically added.
+    * `prometheusUrl`: `https://prometheus.<cluster_name>.devshift.net`
 
     *Note*: The `<cluster_name>` and `<base_domain>` of a cluster can be retrieved using the [ocm cli](https://github.com/openshift-online/ocm-cli)
 
