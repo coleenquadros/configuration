@@ -1,0 +1,35 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: clowder
+
+name: clowder
+
+namespaces:
+- $ref: /services/insights/clowder/namespaces/prod.yml
+
+slos:
+- name: clowder availability
+  SLIType: availability
+  SLISpecification: Availability (measured as the product of errors and latency) has to be met a certain target of the last days
+  SLODetails: Clowder is an operator that should be up all the time
+  SLOParameters:
+    window: 28d
+  expr: kube_deployment_status_replicas_available{namespace="clowder-system"}
+  SLOTarget: 0.99
+  SLOTargetUnit: percent_0_1
+  prometheusRules: resources/insights-prod/clowder/clowder.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/VTSfF_0Gk/clowder-metrics?var-datasource=crcp01ue1-prometheus&editPanel=17
+
+- name: clowder reconciliation
+  SLIType: correctness
+  SLISpecification: Correctness 
+  SLODetails: Clowder is constantly reconciling apps, but if the rate goes up for too long time that means the workqueue depth got becked up
+  SLOParameters:
+    window: 28d
+  expr: sum(increase(controller_runtime_reconcile_total{controller=~"clowdenvironment|clowdapp"}[1m])) by (controller)
+  SLOTarget: 0.99
+  SLOTargetUnit: percent_0_1
+  prometheusRules: resources/insights-prod/clowder/clowder.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/VTSfF_0Gk/clowder-metrics?var-datasource=crcp01ue1-prometheus&viewPanel=6
