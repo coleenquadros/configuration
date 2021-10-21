@@ -1994,7 +1994,6 @@ To get access to the project, if required, contact the App SRE team.
     * `app_name` should be defined in the [grafana dashboards ConfigMap](/resources/observability/grafana/grafana-dashboards.configmap.yaml)
 
 * Add the dashboard configmap in a folder in your upstream repository.
-
 * Add a `resourceTemplate` entry in the [grafana dashboard saas file](/data/services/observability/cicd/saas/saas-grafana.yaml) to deploy your dashboard in staging, e.g.
   ```yaml
   - name: your-service-dashboards
