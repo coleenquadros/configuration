@@ -20,37 +20,42 @@ slack:
   channel: team-clouddot-info
 
 managedResourceTypes:
-- Deployment
+- ClowdApp
 - Service
-- PersistentVolumeClaim
 
 imagePatterns:
 - quay.io/cloudservices
-- quay.io/debezium/postgres:12
 
 authentication:
   image:
-    path: insights/secrets/global/rh-registry-pull
+    path: insights/quay/cloudservices-push
     field: all
 
 resourceTemplates:
-- name: cloud-connector
-  path: /deploy/template.yml
+- name: cloud-connector-api
+  path: /deploy/clowdapp.yml
   url: https://github.com/RedHatInsights/cloud-connector
   targets:
   - namespace:
       $ref: /services/insights/cloud-connector/namespaces/perf-connector-perf.yml
-    ref: aef75045f098db6ea7d9aac8c9d3bb787acc80b7
-    upstream:
-      instance:
-        $ref: /dependencies/ci-ext/ci-ext.yml
-      name: RedHatInsights-cloud-connector-gh-build-master
+    ref: f05bc0872629c774db0f2a2f98e6f3f035786f21
     parameters:
+      IMAGE: quay.io/cloudservices/cloud-connector
+      IMAGE_TAG: f05bc08
+      ENV_NAME: perf
       LOG_LEVEL: DEBUG
       LOG_FORMAT: text
-      CLIENT_ID_TO_ACCOUNT_ID_IMPL: config_file_based
       MQTT_BROKER_ADDRESS: wss://connect.cloud.stage.redhat.com:443
       MQTT_TOPIC_PREFIX: perf
       AUTH_GATEWAY_URL: NA
-      SOURCES_RECORDER_IMPL: fake
       SOURCES_BASE_URL: NA
+      CLIENT_ID_TO_ACCOUNT_ID_IMPL: config_file_based
+      SOURCES_RECORDER_IMPL: fake
+      CONNECTED_CLIENT_RECORDER_IMPL: inventory
+      CONNECTION_PER_ACCOUNT_REPORTER_SCHEDULE: "*/5 * * * *"
+      CONNECTION_PER_ACCOUNT_REPORTER_SUSPEND: true
+      STALE_TIMESTAMP_UPDATER_SUSPEND: true
+      API_REPLICAS: 1
+      MQTT_CONSUMER_REPLICAS: 1
+      KAFKA_CONSUMER_REPLICAS: 1
+      RHC_MESSAGE_KAFKA_BATCH_SIZE: 1
