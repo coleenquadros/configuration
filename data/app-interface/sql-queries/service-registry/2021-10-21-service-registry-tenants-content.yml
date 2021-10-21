@@ -1,0 +1,17 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2021-10-21-service-registry-tenants-content
+namespace:
+  $ref: /services/service-registry/namespaces/service-registry-stage.yml
+identifier: srs-service-registry
+output: stdout
+queries:
+  - |
+    SELECT COUNT(c.contentId) as total_content FROM content c;
+  - |
+    SELECT COUNT(DISTINCT(v.tenantId)) as total_tenants FROM versions v;
+  - |
+    SELECT v.tenantId, COUNT(v.contentId) as tenant_artifact_versions FROM versions v GROUP BY v.tenantId;
+  - |
+    SELECT DISTINCT(v.tenantId), v.contentId, c.canonicalHash, c.contentHash FROM versions v , content c WHERE v.contentId = c.contentId;
