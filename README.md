@@ -2006,6 +2006,7 @@ To get access to the project, if required, contact the App SRE team.
         $ref: /services/observability/namespaces/app-sre-observability-stage.yml
       ref: master
   ```
+  * Note: remember to add `ConfigMap` to the `managedResourceTypes` section.
   * Note: with this configuration, every time you merge changes in your dashboard it will be deployed in stage. Read [this guide](/docs/app-sre/continuous-delivery-in-app-interface.md) to know more about saas files.
 
 * Once your MR is merged, your dashboard will be deployed to stage and will be accessible in https://grafana.stage.devshift.net.
