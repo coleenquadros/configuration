@@ -1983,7 +1983,7 @@ To get access to the project, if required, contact the App SRE team.
 
 ### Add a Grafana Dashboard
 
-* Add manually your dashboard following [these instructions](/docs/app-sre/monitoring.md#Addingdashboards)
+* Add (or update) the dashboard file (a ConfigMap containing the json data) in your service code repository. The dashboards must be in a separate directory, such as `/dashboards`.
   * Note: Each dashboard ConfigMap should have the following section under `metadata`:
     ```yaml
     labels:
@@ -1993,8 +1993,9 @@ To get access to the project, if required, contact the App SRE team.
     ```
     * `app_name` should be defined in the [grafana dashboards ConfigMap](/resources/observability/grafana/grafana-dashboards.configmap.yaml)
 
-* Add the dashboard configmap in a folder in your upstream repository.
-* Add a `resourceTemplate` entry in the [grafana dashboard saas file](/data/services/observability/cicd/saas/saas-grafana.yaml) to deploy your dashboard in staging, e.g.
+  * Note: [additional information](/docs/app-sre/monitoring.md#Addingdashboards)
+
+* Add a `resourceTemplate` entry in the your service's saas file to deploy your dashboard in staging, e.g.
   ```yaml
   - name: your-service-dashboards
     url: https://gitlab.cee.redhat.com/service-registry/your-service
@@ -2017,6 +2018,8 @@ To get access to the project, if required, contact the App SRE team.
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
     ref: <your-service-repo-commit-sha>
   ```
+  * Note: with this configuration, you can promote changes to your dashboards along with the code changes that created them.
+
 
 ### Execute a SQL Query on an App Interface controlled RDS instance
 
