@@ -290,3 +290,19 @@ spec:
         labels:
           severity: info
           service: assisted-installer
+      - alert: Assisted Installer - Memory usage is above 90%
+        annotations:
+          message: Assisted Installer Pod {{ $labels.pod }} on namespace {{ $labels.namespace }} usages is above 90%({{ $value }})
+        expr: sum(container_memory_working_set_bytes{namespace="assisted-installer-production", container="assisted-service"}) by (pod, namespace) / sum(kube_pod_container_resource_limits{namespace="assisted-installer-production", container="assisted-service", resource="memory"}) BY (pod, namespace) * 100 > 90
+        for: 1m
+        labels:
+          severity: warning
+          service: assisted-installer
+      - alert: Assisted Installer - Memory usage is above 80%
+        annotations:
+          message: Assisted Installer Pod {{ $labels.pod }} on namespace {{ $labels.namespace }} usages is above 80%({{ $value }})
+        expr: sum(container_memory_working_set_bytes{namespace="assisted-installer-production", container="assisted-service"}) by (pod, namespace) / sum(kube_pod_container_resource_limits{namespace="assisted-installer-production", container="assisted-service", resource="memory"}) BY (pod, namespace) * 100 > 80
+        for: 1m
+        labels:
+          severity: info
+          service: assisted-installer
