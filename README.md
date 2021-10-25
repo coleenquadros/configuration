@@ -1993,7 +1993,7 @@ To get access to the project, if required, contact the App SRE team.
     ```
     * `app_name` should be defined in the [grafana dashboards ConfigMap](/resources/observability/grafana/grafana-dashboards.configmap.yaml)
 
-  * Note: [additional information](/docs/app-sre/monitoring.md#Addingdashboards)
+  * Note: [additional information](docs/app-sre/monitoring.md#Addingdashboards)
 
 * Add a `resourceTemplate` entry in the your service's saas file to deploy your dashboard in staging, e.g.
   ```yaml
