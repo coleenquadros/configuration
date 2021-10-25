@@ -47,7 +47,7 @@ if [ "$NEW_COMMIT" != "$OLD_COMMIT" ]; then
     sed -i$SED_OPT "s/$OLD_COMMIT/$NEW_COMMIT/" $ENV_FILE
 fi
 
-OLD_SHA=$(awk '{if ($1 == "ref:" && $2 ~ /^[a-f0-9]{40}$/){print $2}}' $SAAS_FILE)
+OLD_SHA=$(awk '/^- name: / {currentResource=$3} /^    ref: / {if (currentResource == "qontract-reconcile" && $2 ~ /^[a-f0-9]{40}$/){print $2}}' $SAAS_FILE)
 if [ "$NEW_SHA" != "$OLD_SHA" ]; then
     sed -i$SED_OPT "s/$OLD_SHA/$NEW_SHA/" $SAAS_FILE
 fi
