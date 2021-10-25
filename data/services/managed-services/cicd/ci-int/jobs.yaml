@@ -405,7 +405,7 @@ config:
         - 'notification-payloads-main-build':
             display_name: notification-payloads deploy
             build_deploy_script_path: './main_trigger.sh'
-            branch: main            
+            branch: main
   - project:
       name: mk-token-refresher
       label: managed-services
@@ -521,7 +521,7 @@ config:
             build_deploy_script_path: './cicd/build.sh'
             archive_artifacts: 'target/surefire-reports/**'
             junit_results: 'target/surefire-reports/*.xml'
-            cleanup_script: './cicd/cleanup.sh'
+            cleanup_script: './cicd/build.sh cleanup'
             release: false
         - 'managed-services-gl-build-test-branch':
             display_name: mk-strimzi-drain-cleaner build mk-release-0.2
@@ -529,7 +529,7 @@ config:
             build_deploy_script_path: './cicd/build.sh'
             archive_artifacts: 'target/surefire-reports/**'
             junit_results: 'target/surefire-reports/*.xml'
-            cleanup_script: './cicd/cleanup.sh'
+            cleanup_script: './cicd/build.sh cleanup'
             release: true
 
   - project:
@@ -585,3 +585,21 @@ config:
         - 'gl-build-master-managed-services':
             branch: mk-release
             display_name: cos-ui build-mk-release
+  - project:
+      name: kafka-admin-api
+      label: managed-services
+      node: managed-services
+      gl_group: mk-ci-cd
+      gl_project: kafka-admin-api
+      jobs:
+        - 'gl-pr-check':
+            display_name: kafka-admin-api pr-check
+            pr_check_script_path: './cicd/pr_check.sh'
+        - 'managed-services-gl-build-test-branch':
+            display_name: kafka-admin-api build mk-main
+            branch: add-cicd-image-testing
+            build_deploy_script_path: './cicd/build.sh'
+            archive_artifacts: 'target/surefire-reports/**'
+            junit_results: 'target/surefire-reports/*.xml'
+            cleanup_script: './cicd/build.sh cleanup'
+            release: false
