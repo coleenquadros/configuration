@@ -279,3 +279,14 @@ spec:
         labels:
           severity: info
           service: assisted-installer
+      # A short period alter (auto-resolved) to send a message to the AI triage team about a stopped pod.
+      # This event can be a result of an AI upgrade which is a desired behaviour
+      # so if this alter has triggered, the triage team should figure out if this pod has stopped by a bug or by a manual action.
+      - alert: Assisted Installer - Pod has stopped
+        annotations:
+          message: Assisted Installer Pod {{ $labels.pod }} on namespace {{ $labels.namespace }} has stopped
+        expr: rate(up{job="assisted-service",namespace="assisted-installer-production"}[5m]) unless up{job="assisted-service",namespace="assisted-installer-production"}
+        for: 3m
+        labels:
+          severity: info
+          service: assisted-installer

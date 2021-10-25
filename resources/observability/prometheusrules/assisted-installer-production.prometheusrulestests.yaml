@@ -1,0 +1,36 @@
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /observability/prometheusrules/assisted-installer-production.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+- interval: 1m
+  input_series:
+  - series: up{pod="pod1", job="assisted-service",namespace="assisted-installer-production"}
+    values: 1 1 1 1 1 1 1 1 1 1
+  - series: up{pod="pod2", job="assisted-service",namespace="assisted-installer-production"}
+    values: 1 1 1 1 0 0 0 0 0 0
+  - series: up{pod="pod3", job="assisted-service",namespace="assisted-installer-production"}
+    values: 1 1 1 1 stale stale stale stale stale stale
+  - series: up{pod="pod4", job="assisted-service",namespace="assisted-installer-production"}
+    values: _ _ _ _ _ 1 1 1 1 1
+
+  alert_rule_test:
+  # Test the no alert case
+  - eval_time: 4m
+    alertname: Assisted Installer - Pod has stopped
+    exp_alerts:
+  # Test pod has stopped and
+  - eval_time: 7m
+    alertname: Assisted Installer - Pod has stopped
+    exp_alerts:
+    - exp_labels:
+        pod: pod3
+        service: assisted-installer
+        severity: info
+        job: assisted-service
+        namespace: assisted-installer-production
+      exp_annotations:
+        message: "Assisted Installer Pod pod3 on namespace assisted-installer-production has stopped"
