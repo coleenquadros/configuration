@@ -3,7 +3,6 @@
 ENV_FILE=".env"
 JENKINS_FILE="resources/jenkins/global/defaults.yaml"
 TEKTON_TEMPLATE="data/services/app-interface/shared-resources/app-sre-pipelines.yml \
-data/services/telemeter-ocp-dashboards/namespaces/telemeter-ocp-dashboards-pipelines.appsrep05ue1.yaml \
 data/services/github-mirror/shared-resources/github-mirror-pipelines.yml"
 SAAS_FILE="data/services/app-interface/cicd/ci-ext/saas-qontract-reconcile.yaml"
 SAAS_FILE_INT="data/services/app-interface/cicd/ci-int/saas-qontract-reconcile-int.yaml"
