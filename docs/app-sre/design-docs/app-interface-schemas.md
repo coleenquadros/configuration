@@ -33,7 +33,7 @@ Move schemas to a dedicated repository, qontract-schemas.
 
 This repository will contain both schemas and graphql schemas and will be the single source of truth for all app-interface instances. On each merge to the repository, an image containing the schemas will be built and pushed.
 
-The image may be public as long as we maintain an open source approach and not add any AppSRE specific enum values to it. A possible hurdle will be in keeping a single version of the schemas, as different app-interface repositories are in different phases, include different content and are running only some integrations. This means that we will likely find ourselves hardening our code where our schemas were protecting us until now.
+The repository and image may be public (following the same outline as qontract-reconcile) as long as we maintain an open source approach and not add any AppSRE specific enum values to it. A possible hurdle will be in keeping a single version of the schemas, as different app-interface repositories are in different phases, include different content and are running only some integrations. This means that we will likely find ourselves hardening our code where our schemas were protecting us until now.
 
 This repository will be referenced from different app-interface repositories in the same way we reference qontract-server (`.env` file).
 
