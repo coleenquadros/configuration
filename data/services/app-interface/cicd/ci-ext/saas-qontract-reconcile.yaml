@@ -22,6 +22,7 @@ managedResourceTypes:
 - Deployment
 - Service
 - CronJob
+- ConfigMap
 
 imagePatterns:
 - quay.io/app-sre/qontract-reconcile
@@ -53,7 +54,7 @@ resourceTemplates:
       SLEEP_DURATION_SECS: 600
   - namespace:
       $ref: /services/app-interface/namespaces/app-interface-production.yml
-    ref: 6d24b8c6e4a7f30318cb0a24e88881c1d60626cc
+    ref: 5e170ef4b372f158b2c3e1d44afd198f78e0e81f
     parameters:
       DRY_RUN: --no-dry-run
       GITHUB_API: https://github-mirror.devshift.net
@@ -68,3 +69,14 @@ resourceTemplates:
       GITHUB_OWNERS_MEMORY_LIMIT: 160Mi
       GITHUB_OWNERS_MEMORY_REQUEST: 100Mi
 
+- name: grafana-qontract-reconcile
+  url: https://github.com/app-sre/qontract-reconcile
+  path: /grafana-dashboards
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: 5e170ef4b372f158b2c3e1d44afd198f78e0e81f
