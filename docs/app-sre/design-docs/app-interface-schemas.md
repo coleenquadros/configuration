@@ -25,6 +25,7 @@ Another goal is to keep the development process of app-interface integrations al
 * Automating the generation of the graphql schema based on the json schema ([APPSRE-155](https://issues.redhat.com/browse/APPSRE-155))
 * Schema documentation and validation ([APPSRE-2694](https://issues.redhat.com/browse/APPSRE-2694), [APPSRE-3865](https://issues.redhat.com/browse/APPSRE-3865))
 * Consolidate development documentation
+* Automate testing of schemas across different app-interface instances
 
 ## Proposal
 
