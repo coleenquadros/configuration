@@ -116,3 +116,28 @@ tests:
   - eval_time: 3m
     alertname: Assisted Installer - Memory usage is above 80%
     exp_alerts:
+- interval: 30s
+  input_series:
+  - series: container_cpu_usage_seconds_total{container="assisted-service", pod="pod1",namespace="assisted-installer-stage"}
+    values: 0 21 48 70 100 130 157 160 163
+  alert_rule_test:
+  # before - No alert
+  - eval_time: 1m
+    alertname: Assisted Installer - CPU usage is above 90%
+    exp_alerts:
+  # 90s with high CPU usage - Alert
+  - eval_time: 3m
+    alertname: Assisted Installer - CPU usage is above 90%
+    exp_alerts:
+    - exp_labels:
+        pod: pod1
+        severity: warning
+        service: assisted-installer
+        namespace: assisted-installer-stage
+        container: assisted-service
+      exp_annotations:
+        message: "Assisted Installer Container CPU usages (pod pod1, namespace assisted-installer-stage) is above 90%(96.67%)"
+    # CPU usage isn't high - No alert
+  - eval_time: 4m
+    alertname: Assisted Installer - CPU usage is above 90%
+    exp_alerts:
