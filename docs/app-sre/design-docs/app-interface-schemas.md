@@ -45,7 +45,7 @@ To allow local development, we will need to support two main workflows which tea
 
 To achieve this goal, we will add a `make schemas` command in app-interface and in qontract-server, which will be explicitly added to the `make server` / `make dev` commands. It will also need to be added to any script or document in app-interface (this is as simple as searching for `make bundle` and replacing it with `make schemas bundle`).
 
-To make things consistent, `make server` will include pulling the schemas, and we will add a new `make dev` command that will generate the bundle based on the current schemas (including local changes).
+To make things consistent, `make server` will include pulling the schemas, and we will add a new `make dev` command that will generate the bundle based on the current schemas (including local changes). `make dev` will also allow configuring of the qontract-schemas local location.
 
 ## Alternatives considered
 
