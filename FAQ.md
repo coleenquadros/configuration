@@ -18,6 +18,7 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
         - [I can not access X](#i-can-not-access-x)
         - [I need help with something AWS related](#i-need-help-with-something-aws-related)
         - [I can not access ci-ext](#i-can-not-access-ci-ext)
+        - [I can not access Grafana](#i-can-not-access-grafana)
         - [Tagging options in app-interface](#tagging-options-in-app-interface)
         - [Can you reset my AWS password?](#can-you-reset-my-aws-password)
         - [Gating production promotions in app-interface](#gating-production-promotions-in-app-interface)
@@ -92,6 +93,14 @@ Managed to log in but having issues? Maybe even seeing this error message? `"Acc
 
 1. Log out and log in again.
 2. Revoke the `jenkins-ci-ext` Authorized OAuth app in [GitHub settings](https://github.com/settings/applications) and log in again.
+
+### I can not access Grafana
+
+The AppSRE Grafana instance is available at https://grafana.app-sre.devshift.net.
+
+Access is managed via app-interface. The role that grants access is [observability-access](data/services/observability/roles/observability-access.yml).
+
+If you are a member of the OpenShift GitHub organization, you can use https://grafana.openshift-app-sre.devshift.net instead (does not require a user file).
 
 ### Tagging options in app-interface
 
