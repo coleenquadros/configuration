@@ -34,29 +34,34 @@ resourceTemplates:
 - name: gabi
   url: https://github.com/app-sre/gabi
   path: /openshift/gabi.template.yaml
+  parameters:
+    SPLUNK_SECRET_NAME: splunk-creds
+    SPLUNK_INDEX: rh_app_sre
   targets:
   - namespace:
       $ref: /services/gabi/namespaces/gabi-cloudigrade-stage.yml
     ref: 991275129ac4506343bc7b2a789b47eac4e0b565
     parameters:
-      HOST: 'gabi-cloudigrade-stage.apps.crcs02ue1.urby.p1.openshiftapps.com'
-      NAMESPACE: 'gabi-cloudigrade-stage'
-      SPLUNK_INDEX: 'rh_app_sre'
+      HOST: gabi-cloudigrade-stage.apps.crcs02ue1.urby.p1.openshiftapps.com
+      NAMESPACE: gabi-cloudigrade-stage
   - namespace:
-      $ref: /services/gabi/namespaces/gabi-dashdotdb-stage.yml
+      $ref: /services/dashdot/namespaces/app-sre-stage-01.yml
     ref: main
     upstream:
       instance:
         $ref: /dependencies/ci-ext/ci-ext.yml
       name: app-sre-gabi-gh-build-master
     parameters:
-      HOST: 'gabi-dashdotdb-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com'
-      NAMESPACE: 'gabi-dashdotdb-stage'
-      SPLUNK_INDEX: 'rh_app_sre'
+      HOST: gabi-dashdotdb-stage.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com
+      NAMESPACE: dashdot
+      AWS_RDS_SECRET_NAME: dashdotdb-rds
+      USERS_CONFIGMAP_NAME: gabi-dashdotdb
   - namespace:
-      $ref: /services/gabi/namespaces/gabi-dashdotdb-production.yml
+      $ref: /services/dashdot/namespaces/app-sre-prod-01.yml
     ref: 991275129ac4506343bc7b2a789b47eac4e0b565
+    delete: true
     parameters:
-      HOST: 'gabi-dashdotdb-production.apps.app-sre-prod-01.i7w5.p1.openshiftapps.com'
-      NAMESPACE: 'gabi-dashdotdb-production'
-      SPLUNK_INDEX: 'rh_app_sre'
+      HOST: gabi-dashdotdb-production.apps.app-sre-prod-01.i7w5.p1.openshiftapps.com
+      NAMESPACE: dashdot
+      AWS_RDS_SECRET_NAME: dashdotdb-rds
+      USERS_CONFIGMAP_NAME: gabi-dashdotdb

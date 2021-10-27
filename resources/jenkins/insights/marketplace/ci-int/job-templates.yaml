@@ -1,0 +1,61 @@
+
+
+
+- job-template:
+    id: 'insights-marketplace-gh-pr-check'
+    name: '{gh_org}-{gh_repo}-pr-check'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_ephemeral_oc_login
+        - *app_interface_creds
+        - *insights_rh_registry_pull_secret
+        - *quay_secret_push
+        - *quay_api_token
+        - *insightsdroid_github
+        - *insights_marketplace_sonarqube_token
+    publishers:
+    - junit:
+        results: 'artifacts/junit-*.xml'
+    - archive:
+        artifacts: 'artifacts/**/*'
+    scm:
+    - git:
+        url: 'git@github.com:{gh_org}/{gh_repo}.git'
+        credentials-id: '{github_ssh_credentials}'
+        skip-tag: true
+        refspec: '+refs/pull/*:refs/remotes/origin/pr/*'
+        branches:
+        - '${{ghprbActualCommit}}'
+        merge:
+            remote: origin
+            branch: '{branch}'
+        git-config-name: "AppSRE"
+        git-config-email: "sd-app-sre@redhat.com"
+        included-regions:
+        - '{include_path}'
+        prune: true
+        clean:
+            before: true
+        wipe-workspace: true
+    <<: *gh_pr_check
+
+- job-template:
+    id: 'insights-marketplace-gh-build-master'
+    name: '{gh_org}-{gh_repo}-gh-build-{branch}'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_rh_registry_pull_secret
+        - *quay_secret_push
+        - *quay_api_token
+        - *insights_marketplace_sonarqube_token
+    <<: *gh_build_master

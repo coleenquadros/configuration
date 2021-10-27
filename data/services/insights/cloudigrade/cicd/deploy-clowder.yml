@@ -86,7 +86,7 @@ resourceTemplates:
       API_TARGET_AVERAGE_CPU_UTILIZATION: '35'
       CELERY_SENTRY_ENVIRONMENT: prod
       CELERY_WORKER_REPLICA_COUNT: '8'
-      CELERY_WORKER_REPLICA_COUNT_MAX: '12'
+      CELERY_WORKER_REPLICA_COUNT_MAX: '32'
       CLOUDIGRADE_CW_STREAM_NAME: cloudigrade-prod
       CLOUDIGRADE_ENABLE_CLOUDWATCH: 'true'
       CLOUDIGRADE_ENVIRONMENT: prod
@@ -114,6 +114,8 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml
     ref: master
+    parameters:
+      POSTIGRADE_MIN_REPLICAS: '2'
     upstream:
       instance:
         $ref: /dependencies/ci-ext/ci-ext.yml
@@ -124,7 +126,9 @@ resourceTemplates:
   # Production
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
-    ref: 909534eea8f6d14990f9726c26ffb7940a8db0f6
+    ref: b964e87c2845157cbce9888a6386711cae0a3d7b
+    parameters:
+      POSTIGRADE_MIN_REPLICAS: '8'
     promotion:
       auto: true
       subscribe:
