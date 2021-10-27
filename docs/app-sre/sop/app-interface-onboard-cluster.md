@@ -89,6 +89,7 @@ This step should be performed in a single merge request.
       load_balancers: (desired load-balancer count. ex: 0)
       private: false (or true for private clusters)
       provision_shard_id: (optional) specify hive shard ID to create the cluster in (IDs can be found in the uhc-production namespace file)
+      disable_user_workload_monitoring: true
 
     upgradePolicy: # optional, specify an upgrade schedule
       workloads: [] # workloads running in this cluster
@@ -156,7 +157,7 @@ This step should be performed in a single merge request.
     * Note: during the installation it is expected that other ocm integrations will fail.
 
 1. Once the cluster has finished installing, the following fields will be updated automatically in the `cluster.yml` file in the:
-    * `consoleUrl` 
+    * `consoleUrl`
     * `serverUrl`
     * `kibanaUrl`
     * `elbFQDN`
