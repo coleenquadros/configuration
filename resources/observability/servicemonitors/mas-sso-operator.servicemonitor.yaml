@@ -1,0 +1,27 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    prometheus: app-sre
+  name: servicemonitor-mas-sso-operator-{{environment}}
+spec:
+  endpoints:
+  - interval: 30s
+    path: /metrics
+    port: cr-metrics
+    scheme: http
+  - interval: 30s
+    path: /healthz
+    port: http-metrics
+    scheme: http
+  - interval: 30s
+    path: /metrics
+    port: http-metrics
+    scheme: http
+  namespaceSelector:
+    matchNames:
+    - {{namespace}}
+  selector:
+    matchLabels:
+      monitoring-key: middleware
+      name: rhsso-operator
