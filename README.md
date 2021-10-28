@@ -61,6 +61,7 @@ this repository.
       - [Manage vault roles (`/vault-config/role-1.yml`)](#manage-vault-roles-vault-configrole-1yml)
       - [Manage vault secret-engines (`/vault-config/secret-engine-1.yml`)](#manage-vault-secret-engines-vault-configsecret-engine-1yml)
     - [Manage DNS Zones via App-Interface (`/aws/dns-zone-1.yml`) using Terraform](#manage-dns-zones-via-app-interface-awsdns-zone-1yml-using-terraform)
+    - [Manage Dyn DNS Traffic Director via App-Interface (`/dependencies/dyn-traffic-director-1.yml`)](#manage-dyn-dns-traffic-director-via-app-interface-dependenciesdyn-traffic-director-1yml)
     - [Manage AWS access via App-Interface (`/aws/group-1.yml`) using Terraform](#manage-aws-access-via-app-interface-awsgroup-1yml-using-terraform)
       - [Manage AWS users via App-Interface (`/aws/group-1.yml`) using Terraform](#manage-aws-users-via-app-interface-awsgroup-1yml-using-terraform)
       - [Generating a GPG key](#generating-a-gpg-key)
@@ -1150,6 +1151,39 @@ records:
   - ns-508.awsdns-63.com
   - ns-1265.awsdns-30.org
   - ns-1880.awsdns-43.co.uk
+```
+
+### Manage Dyn DNS Traffic Director via App-Interface (`/dependencies/dyn-traffic-director-1.yml`)
+
+Dyn DNS Traffic Director is a service offered by Oracle Dyn DNS that allows for returning different DNS responses based on weights and rules. It is used by AppSRE to do DNS-based traffic balancing to multiple clusters.
+
+We currently support configuring Traffic Director services under the following two hostnames:
+- gslb.stage.openshift.com
+- gslb.openshift.com
+
+- `name`: A name for the Traffic Director service. We require that this is the same name as the DNS entry to be used. (eg: foo.gslb.stage.openshift.com)
+- `ttl`: The default TTL for the Traffic Director records
+- `records`: A list of `record` (currently only CNAMEs are supported)
+  - One of the following:
+    - `hostname`: The hostname for the CNAME record 
+    - `cluster`:  A reference to a cluster file. The cluster's ELB hostname will then be used as the hostname for the record
+  - `weight`: The weight for the record. Responses will be proportional to the weight of all other records
+
+Example:
+```yaml
+---
+$schema: /dependencies/dyn-traffic-director-1.yml
+
+name: api.gslb.stage.openshift.com
+ttl: 30
+
+records:
+- cluster:
+    $ref: /openshift/app-sre-stage-01/cluster.yml 
+  weight: 100
+- cluster:
+    $ref: /openshift/appsres04ue2/cluster.yml
+  weight: 100
 ```
 
 ### Manage AWS access via App-Interface (`/aws/group-1.yml`) using Terraform
