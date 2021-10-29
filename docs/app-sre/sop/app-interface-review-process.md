@@ -48,7 +48,6 @@ The following folks can be asked to review MR when in doubt:
 ```
 - @klape
 - @bturner
-- @aprice
 - @mafriedm
 ```
 
