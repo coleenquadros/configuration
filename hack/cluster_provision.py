@@ -44,12 +44,10 @@ def create_olm_ns(ctx, cluster):
 
 @cli.command()
 @click.argument("cluster")
-@click.option('--environment', required=True,
-              type=click.Choice(['production', 'stage']))
 @click.pass_context
-def create_dvo_cluster_config(ctx, cluster: str, environment: str) -> None:
+def create_dvo_cluster_config(ctx, cluster: str) -> None:
     """ Generates Deployment Validation Operator (DVO) configs for a cluster"""
-    dvo.main(ctx.obj['datadir'], cluster, environment)
+    dvo.main(ctx.obj['datadir'], cluster)
 
 @cli.command()
 @click.argument("cluster")

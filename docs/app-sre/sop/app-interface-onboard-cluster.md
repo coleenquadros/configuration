@@ -469,7 +469,7 @@ The Deployment Validation Operator inspects workloads in a cluster and evaluates
 To create the DVO operator configs, run the following command:
 
 ```bash
-hack/cluster_provision.py [--datadir=data directory] create-dvo-cluster-config <cluster-name> --environment <stage|production>
+hack/cluster_provision.py [--datadir=data directory] create-dvo-cluster-config <cluster-name>
 ```
 
 ## Step 7 - Obtain cluster-admin
