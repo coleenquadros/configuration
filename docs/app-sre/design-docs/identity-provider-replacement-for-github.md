@@ -60,6 +60,7 @@ Current options being analyzed and one to be selected:
     - The options could be (to be checked):
       - Use Rover group management if an API exist. Contact point: Nicholas Forrer, and Philip Meilleur
         - Quote from Nicholas on 27OCT: "we do have an api that allows that, although i'm not sure if we've opened that up for other teams to hit"
+        - 28OCT Contacting Philip Meilleur on that topic
       - Dustin Minnich (IAM) also reported that an API managed by his group directly would be soon available, and used by Rover group management. So we could end up using that as well:
         > I talked to Matthew Carpenter on my team about the group API he is writing.  One of the goals of the API is to
         > "Allow serviceaccounts to be the sole thing that can create/modify groups with specific prefixes".
