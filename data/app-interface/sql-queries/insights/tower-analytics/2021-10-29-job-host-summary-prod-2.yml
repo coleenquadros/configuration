@@ -1,0 +1,40 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2021-10-29-job-host-summary-prod-2
+namespace:
+  $ref: /services/insights/tower-analytics/namespaces/tower-analytics-prod.yml
+identifier: tower-analytics-prod
+output: stdout
+overrides:
+  db_name: tenant_5822142
+query: |
+  SELECT h.value as host_name,
+         ansible_version.value as ansible_version,
+         y.name as job_name,
+         y.status as job_status,
+         y.failed as job_failed,
+         z.job_id,
+         z.id as job_events_fk_id,
+         z.cluster_id,
+         z.host_name as host_id,
+         s.event_id as jhs_event_id,
+         s.changed, s.dark, s.failures, s.ok, s.processed, s.skipped, s.ignored, s.rescued
+  FROM (
+           SELECT id, cluster_id, name, status, failed, ansible_version_id
+           FROM unified_jobs_fk
+           WHERE unified_jobs_fk.model = 'job'
+       ) y
+  JOIN job_events_fk z
+      ON z.job_id = y.id AND
+          z.cluster_id = y.cluster_id AND
+          z.host_name IS NOT NULL AND
+          z.event = ANY (ARRAY ['runner_on_ok', 'runner_on_failed', 'runner_on_unreachable',
+                      'runner_on_skipped', 'runner_retry'])
+  LEFT JOIN job_host_summary s
+      ON z.cluster_id = s.cluster_id AND
+      z.job_id = s.job_id AND
+      z.host_name = s.host_id
+  LEFT JOIN host h ON h.id=z.host_name
+  LEFT JOIN ansible_version ON ansible_version.id = y.ansible_version_id
+  WHERE z.cluster_id=1 AND s.host_id IN (13, 104988);
