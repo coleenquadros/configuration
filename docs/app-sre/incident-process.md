@@ -183,8 +183,8 @@ This section aims to give some ideas of possible generic underlying causes.
 [APPSRE board]: https://issues.redhat.com/projects/APPSRE/
 [Updating status.quay.io]: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/quay/statuspage.md
 [Updating status.redhat.com]: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/statuspage.md
-[serviceOwners]: https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/app-sre/app-1.yml
-[serviceNotifications]: https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/app-sre/app-1.yml
+[serviceOwners]: https://github.com/app-sre/qontract-schemas/blob/main/schemas/app-sre/app-1.yml
+[serviceNotifications]: https://github.com/app-sre/qontract-schemas/blob/main/schemas/app-sre/app-1.yml
 [must-gather]: https://gitlab.cee.redhat.com/app-sre/must-gather#usage
 [Log Forwarding]: https://gitlab.cee.redhat.com/service/app-interface/blob/master/FAQ.md#get-access-to-cluster-logs-via-log-forwarding
 [App-Interface docs]: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs

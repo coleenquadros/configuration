@@ -20,10 +20,10 @@ Available options:
 
 - Cluster:
     * disable `integrations` and/or `e2e-tests`
-    * [[schema](/schemas/openshift/cluster-1.yml#L103-125)]
-    * [[example](/data/openshift/insights/cluster.yml#L20-27)]
+    * [schema](https://github.com/app-sre/qontract-schemas/blob/7780755424781d8b88839d2c37e32ccb45fc52da/schemas/openshift/cluster-1.yml#L437-L466)]
+    * [example](/data/openshift/insights/cluster.yml#L20-27)]
 
 - AWS account:
     * disable `integrations`
-    * [[schema](/schemas/aws/account-1.yml#L29-38)]
-    * [[example](/data/aws/osio-dev/account.yml#L16-18)]
+    * [schema](https://github.com/app-sre/qontract-schemas/blob/7780755424781d8b88839d2c37e32ccb45fc52da/schemas/aws/account-1.yml#L52-L62)]
+    * [example](/data/aws/osio-dev/account.yml#L16-18)]
