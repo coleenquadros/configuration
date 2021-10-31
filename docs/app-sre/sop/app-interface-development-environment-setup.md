@@ -119,6 +119,18 @@ It is encouraged that development work is done using this repository and not usi
     $ qontract-reconcile --config config.dev.toml --dry-run --log-level DEBUG <integration-name>
     ```
 
+## Creating a new integration
+
+An integration is **any** piece of software that has the following properties:
+
+- Its goal is to configure a third-party service or tool to match whatever is defined in the app-interface datafiles.
+- It can query a running `qontract-server` using a GraphQL client library to obtain the DESIRED state.
+- It can retrieve the CURRENT state by using APIs or whatever technique of the third-party service that needs to be configured.
+- Capable of diffing the CURRENT and DESIRED state.
+- It can perform any required actions to evolve the CURRENT state into the DESIRED state.
+- Supports `--dry-run` option (or similar) to simulate any changes without applying them.
+- It MUST be developed using IDEMPOTENCY principles, so if the integration is run several times, it will not fail.
+
 ## Managing remote best practices
 
 Manage your remote repo as following to avoid confusion of "origin"

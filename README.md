@@ -110,13 +110,13 @@ This repository contains of a collection of files under the `data` folder.
 Whatever is present inside that folder constitutes the App-SRE contract.
 
 These files can be `yaml` or `json` files, and they must validate against some
-[well-defined json schemas][schemas].
+[well-defined json schemas][https://github.com/app-sre/qontract-schemas].
 
 The path of the files do not have any effect on the integrations (automation
 components that feed off the contract), but the contents of the files do. They
 will all contain:
 
-- `$schema`: which maps to a well defined schema [schema][schemas].
+- `$schema`: which maps to a well defined schema [schema][https://github.com/app-sre/qontract-schemas].
 - `labels`: arbitrary labels that can be used to perform queries, etc.
 - Additional data specific to the resource in question.
 
@@ -127,8 +127,10 @@ Continuous delivery is managed using the
 
 Main App-Interface contract components:
 
-- <https://gitlab.cee.redhat.com/service/app-interface>: datafiles (schema
-  implementations) that define the contract. JSON and GraphQL schemas of the datafiles.
+- <https://gitlab.cee.redhat.com/service/app-interface>: data files
+  that implement the contract.
+- <https://github.com/app-sre/qontract-schemas>: schema file
+  that define the contract. JSON and GraphQL schemas of the data files.
 - <https://github.com/app-sre/qontract-server>: The GraphQL component developed
   in this repository will make the datafiles queryable.
 
@@ -154,7 +156,7 @@ amendment. Some examples would be:
 
 All contract amendments must be formally defined. Formal definitions are
 expressed as json schemas. You can find the supported schemas here:
-[schemas][schemas].
+[schemas][https://github.com/app-sre/qontract-schemas].
 
 1. The interested party will:
 
@@ -2298,7 +2300,7 @@ Please follow [this guide](/docs/app-sre/prometheus-rules-tests-in-app-interface
 
 Additional design information: [here](docs/app-interface/design.md)
 
-[schemas]: </schemas>
+[schemas]: <https://github.com/app-sre/qontract-schemas>
 [userschema]: <https://github.com/app-sre/qontract-schemas/blob/main/schemas/access/user-1.yml>
 [crossref]: <https://github.com/app-sre/qontract-schemas/blob/main/schemas/common-1.json#L58-L86>
 [role]: <https://github.com/app-sre/qontract-schemas/blob/main/schemas/access/role-1.yml>
@@ -2306,7 +2308,7 @@ Additional design information: [here](docs/app-interface/design.md)
 
 ## Developer Guide
 
-More information [here](docs/app-interface/developer.md).
+More information [here](docs/app-sre/sop/app-interface/development-environment-setup.md).
 
 ## Quay Documentation
 
