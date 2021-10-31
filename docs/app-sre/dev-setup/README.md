@@ -2,13 +2,18 @@
 
 ## Setup Repo
 
-1. Fork [app-interface](https://gitlab.cee.redhat.com/service/app-interface), [qontract-server](https://github.com/app-sre/qontract-server/), [qontract-reconcile](https://github.com/app-sre/qontract-reconcile).
+1. Fork the following repositories:
+    * [app-interface](https://gitlab.cee.redhat.com/service/app-interface)
+    * [qontract-server](https://github.com/app-sre/qontract-server)
+    * [qontract-reconcile](https://github.com/app-sre/qontract-reconcile)
+    * [qontract-schemas](https://github.com/app-sre/qontract-schemas)
 1. Clone the repo from your fork repo.
 
 ```sh
 $ mkdir dev && cd dev
 $ git clone git@github.com:<github_username>/qontract-server ./app-sre/qontract-server  
 $ git clone git@github.com:<github_username>/qontract-reconcile ./app-sre/qontract-reconcile  
+$ git clone git@github.com:<github_username>/qontract-schemas ./app-sre/qontract-schemas  
 $ git clone git@gitlab.cee.redhat.com:<redhat_username>/app-interface ./service/app-interface
 ```
 
@@ -19,10 +24,11 @@ $ tree -L 2
 .
 ├── app-sre
 │   ├── qontract-reconcile
+│   ├── qontract-schemas
 │   └── qontract-server
 └── service
     └── app-interface
-5 directories, 0 files
+6 directories, 0 files
 ```
 
 
@@ -43,7 +49,7 @@ Best Practice: manage your remote repo as following to avoid confusion of "origi
 ## Setup qontract-server
 
 1. Install [docker](https://www.docker.com/products/docker-desktop).
-1. In `app-interface` directory, run `make server` command.
+1. In `app-interface` directory, run `make dev` command.
 
 > Optionally, if you want to specify the path for the app-interface repo on your local filesystem, you can use the parameter:
 >*  `APP_INTERFACE_PATH` - (optional) path to a local app-interface repo (Default: `$PWD/../../service/app-interface`).
@@ -68,6 +74,17 @@ $ python3 -m pip install --upgrade pip setuptools
 $ python3 setup.py develop
 ```
 
+## Setup qontract-schemas
+
+1. Nothing to do here!
+
+Note that when running `make dev` in qontract-server, it will use the schemas in the cloned directory.
+
+This allows local development of schemas and logic (qontract-reconcile).
+
+> Optionally, if you want to specify the path for the qontract-schemas repo on your local filesystem, you can use the parameter:
+>*  `SCHEMAS_PATH` - (optional) path to a local qontract-schemas repo (Default: `$PWD/../qontract-schemas`)
+
 ## Configure qontract-reconcile
 
 1. Generate a new Github [Personal access tokens](https://github.com/settings/tokens) for [Vault](https://vault.devshift.net) access. Only `read:org` is required for scopes.
@@ -81,6 +98,4 @@ $ python3 setup.py develop
 ```sh
 $ cd qontract-reconcile
 $ qontract-reconcile --config config.debug.toml --dry-run --log-level DEBUG <integration-name>
-# review output and run without `--dry-run` to perform actual changes
-$ qontract-reconcile --config config.toml --log-level INFO <integration-name>
 ```
