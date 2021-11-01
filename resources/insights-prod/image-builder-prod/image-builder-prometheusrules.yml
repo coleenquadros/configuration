@@ -37,7 +37,8 @@ spec:
     
     - alert: ImageBuilderComposeErrors_2PercentBurn
       annotations:
-        message: "High burn rate: 2% of the period's compose error budget has been consumed"
+        message: "High burn rate: {{ $value | humanizePercentage }} of compose requests are failing"
+        description: "{{ $value | humanizePercentage }} of compose requests have failed over the past hour"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/image-builder/ImageBuilderInternalErrors.md"
       expr: |
         sum(image_builder_compose_errors:burnrate5m{exported_service="image-builder"}) > (13.44 * (1-0.95))
@@ -51,7 +52,8 @@ spec:
         app_team: image-builder
     - alert: ImageBuilderComposeErrors_5PercentBurn
       annotations:
-        message: "High burn rate: 5% of the period's compose error budget has been consumed"
+        message: "High burn rate: {{ $value | humanizePercentage }} of compose requests are failing"
+        description: "{{ $value | humanizePercentage }} of compose requests have failed over the past 6 hours"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/image-builder/ImageBuilderInternalErrors.md"
       expr: |
         sum(image_builder_compose_errors:burnrate30m{exported_service="image-builder"}) > (5.6 * (1-0.95))
@@ -65,7 +67,8 @@ spec:
         app_team: image-builder
     - alert: ImageBuilderComposeErrors_10PercentBurn
       annotations:
-        message: "High burn rate: 10% of the period's compose error budget has been consumed"
+        message: "High burn rate: {{ $value | humanizePercentage }} of compose requests are failing"
+        description: "{{ $value | humanizePercentage }} of compose requests have failed over the past day"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/image-builder/ImageBuilderInternalErrors.md"
       expr: |
         (
@@ -137,7 +140,8 @@ spec:
 
     - alert: ImageBuilderInternalErrors_2PercentBurn
       annotations:
-        message: "High burn rate: 2% of the period's error budget has been consumed"
+        message: "High burn rate: {{ $value | humanizePercentage }} of requests are internal errors"
+        description: "{{ $value | humanizePercentage }} of requests are internal errors over the past hour"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/image-builder/ImageBuilderInternalErrors.md"
       expr: |
         sum(image_builder_internal_errors:burnrate5m{exported_service="image-builder"}) > (13.44 * (1-0.95))
@@ -151,7 +155,8 @@ spec:
         app_team: image-builder
     - alert: ImageBuilderInternalErrors_5PercentBurn
       annotations:
-        message: "High burn rate: 5% of the period's error budget has been consumed"
+        message: "High burn rate: {{ $value | humanizePercentage }} of requests are internal errors"
+        description: "{{ $value | humanizePercentage }} of requests are internal errors over the past 6 hours"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/image-builder/ImageBuilderInternalErrors.md"
       expr: |
         sum(image_builder_internal_errors:burnrate30m{exported_service="image-builder"}) > (5.6 * (1-0.95))
@@ -165,7 +170,8 @@ spec:
         app_team: image-builder
     - alert: ImageBuilderInternalErrors_10PercentBurn
       annotations:
-        message: "High burn rate: 10% of the period's error budget has been consumed"
+        message: "High burn rate: {{ $value | humanizePercentage }} of requests are internal errors"
+        description: "{{ $value | humanizePercentage }} of requests are internal errors over the past day"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/image-builder/ImageBuilderInternalErrors.md"
       expr: |
         (
@@ -237,7 +243,7 @@ spec:
 
     - alert: ImageBuilderSlowResponse_FastBurn
       annotations:
-        message: 'High requests latency budget burn for non-compose requests (current value: {{ $value }})'
+        message: 'High burn rate: {{ $value | humanizePercentage }} of non-compose requests are slower than 200ms'
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/image-builder/ImageBuilderHighLatency.md"
       expr: |
         (
@@ -259,7 +265,7 @@ spec:
         app_team: image-builder
     - alert: ImageBuilderSlowResponse_SlowBurn
       annotations:
-        message: 'High requests latency budget burn for non-compose requests (current value: {{ $value }})'
+        message: 'High burn rate: {{ $value | humanizePercentage }} of non-compose requests are slower than 200ms'
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/image-builder/ImageBuilderHighLatency.md"
       expr: |
         (
@@ -269,9 +275,9 @@ spec:
         )
         or
         (
-          image_builder_non_compose_requests:latency_rate3d{latency="0.2"} > (1 - 0.9)
+          image_builder_non_compose_requests:latency_rate3d{latency="0.2"} > (2.8*(1 - 0.9))
           and
-          image_builder_non_compose_requests:latency_rate6h{latency="0.2"} > (1 - 0.9)
+          image_builder_non_compose_requests:latency_rate6h{latency="0.2"} > (2.8*(1 - 0.9))
         )
       labels:
         latency: "0.2"
@@ -345,7 +351,7 @@ spec:
 
     - alert: ImageBuilderSlowComposeResponse_FastBurn
       annotations:
-        message: 'High requests latency budget burn for compose requests (current value: {{ $value }})'
+        message: 'High burn rate: {{ $value | humanizePercentage }} of compose requests are slower than 12s'
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/image-builder/ImageBuilderHighLatency.md"
       expr: |
         (
@@ -367,7 +373,7 @@ spec:
         app_team: image-builder
     - alert: ImageBuilderSlowComposeResponse_SlowBurn
       annotations:
-        message: 'High requests latency budget burn for compose requests (current value: {{ $value }})'
+        message: 'High burn rate: {{ $value | humanizePercentage }} of compose requests are slower than 12s'
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/image-builder/ImageBuilderHighLatency.md"
       expr: |
         (
@@ -377,9 +383,9 @@ spec:
         )
         or
         (
-          image_builder_compose_requests:latency_rate3d{latency="12"} > (1 - 0.9)
+          image_builder_compose_requests:latency_rate3d{latency="12"} > (2.8*(1 - 0.9))
           and
-          image_builder_compose_requests:latency_rate6h{latency="12"} > (1 - 0.9)
+          image_builder_compose_requests:latency_rate6h{latency="12"} > (2.8*(1 - 0.9))
         )
       labels:
         latency: "12"
