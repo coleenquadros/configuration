@@ -119,6 +119,15 @@ It is encouraged that development work is done using this repository and not usi
     $ qontract-reconcile --config config.dev.toml --dry-run --log-level DEBUG <integration-name>
     ```
 
+The development environment currently has actual resources behind it: an OSD cluster and an AWS account; But we can't commit changes to a public repository with real information.
+
+To make the required changes to work with those resources, run the following commands in the `app-interface` directory:
+
+    ```sh
+    sed -i 's|serverUrl.*|serverUrl: https://api.appint-ex-01.e7t8.p1.openshiftapps.com:6443|g' data/clusters/appint-ex-01/cluster.yml
+    sed -i 's|012345678910|249118421612|g' data/aws/app-int-example/account.yml
+    ```
+
 ## Creating a new integration
 
 An integration is **any** piece of software that has the following properties:
