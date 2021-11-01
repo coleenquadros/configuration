@@ -6,8 +6,8 @@
   - [Step 3 - Observability](#step-3-observability)
   - [Step 4 - Operator Lifecycle Manager](#step-4-operator-lifecycle-manager)
   - [Step 5 - Container Security Operator](#step-5-container-security-operator)
-  - [Step 6 - Deployment Validation Operator (DVO)](#step-7-deployment-validation-operator-dvo)
-  - [Step 7 - Obtain cluster-admin](#step-8-obtain-cluster-admin)
+  - [Step 6 - Deployment Validation Operator (DVO)](#step-6-deployment-validation-operator-dvo)
+  - [Step 7 - Obtain cluster-admin](#step-7-obtain-cluster-admin)
 - [Additional configurations](#additional-configurations)
   - [Selecting a Machine CIDR for VPC peerings](#selecting-a-machine-cidr-for-vpc-peerings)
   - [VPC peering with app-interface](#vpc-peering-with-app-interface)
@@ -452,60 +452,15 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
 ## Step 5 - Container Security Operator
 
-1. Install the Container Security Operator
+The Container Security Operator (CSO) brings Quay and Clair metadata to
+Kubernetes / OpenShift. We use the vulnerabilities information in the tenants
+dashboard and in the monthly reports.
 
-    The Container Security Operator (CSO) brings Quay and Clair metadata to
-    Kubernetes / OpenShift. We use the vulnerabilities information in the tenants
-    dashboard and in the monthly reports.
+To create the CSO operator configs, run the following command:
 
-    1. Create an `container-security-operator` namespace file for that specific
-    cluster. Example:
-
-    File name: `app-sre-cso-per-cluster.yml`
-
-    Content:
-
-    ```yaml
-    ---
-    $schema: /openshift/namespace-1.yml
-
-    labels: {}
-
-    name: container-security-operator
-    description: namespace for the app-sre per-cluster Container Security Operator
-
-    cluster:
-      $ref: /openshift/<cluster>/cluster.yml
-
-    app:
-      $ref: /services/container-security-operator/app.yml
-
-    environment:
-      $ref: /products/dashdot/environments/production.yml
-
-    networkPoliciesAllow:
-    - $ref: /openshift/<cluster>/namespaces/openshift-operator-lifecycle-manager.yml
-    ```
-
-    If the `openshift-operator-lifecycle-manager` namespace is not yet defined in
-    app-interface, follow [Step 4](#step-4-operator-lifecycle-manager)
-
-    1. Add the new `container-security-operator` namespace to the target
-    namespaces in the
-    [saas.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/container-security-operator/cicd/saas.yaml)
-    to deploy the Container Security Operator. Example:
-
-    ```yaml
-    resourceTemplates:
-    - name: container-security-operator
-      url: https://github.com/app-sre/container-security-operator
-      path: /openshift/container-security-operator.yaml
-      targets:
-      ...
-      - namespace:
-          $ref: /openshift/<cluster>/namespaces/app-sre-cso-per-cluster.yml
-        ref: <commit_hash>
-    ```
+```bash
+hack/cluster_provision.py [--datadir=data directory] create-cso-cluster-config <cluster-name>
+```
 
 ## Step 6 - Deployment Validation Operator (DVO)
 

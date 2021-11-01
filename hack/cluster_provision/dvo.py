@@ -5,12 +5,10 @@ import os
 from pathlib import Path
 from typing import Dict, Any, Mapping, MutableMapping
 
-from .common import read_yaml_from_file, write_yaml_to_file, get_base_yaml
+from .common import STAGE, read_yaml_from_file, write_yaml_to_file, \
+    get_base_yaml, cluster_config_exists
 
 log = logging.getLogger(__name__)
-
-PRODUCTION = 'production'
-STAGE = 'stage'
 
 DVO_FILENAME = 'openshift/{cluster}/namespaces/' \
                'deployment-validation-operator-per-cluster.yml'
@@ -209,6 +207,11 @@ def main(data_dir: str, cluster: str, environment: str) -> None:
 
     if not os.path.exists(data_dir):
         raise FileNotFoundError(f"{data_dir} does not exist")
+
+    if not cluster_config_exists(data_dir, cluster):
+        raise FileNotFoundError(f"Cluster configuration doesn't exist for "
+                                f"{cluster}, check if the cluster name was "
+                                f"mistyped")
 
     # Create the deployment-validation-operator-per-cluster.yml namespace file
     # for the cluster.
