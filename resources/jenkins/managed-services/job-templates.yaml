@@ -682,6 +682,28 @@
     - <<: *slack_notify
 
 - job-template:
+    id: aws-purge-velero-backup
+    name: "aws-purge-velero-backup"
+    parameters:
+    - string:
+        name: AWS_REGION
+        default: 'us-east-1'
+        description: 'The target AWS region for the velero_backups you want to remove.'
+    wrappers:
+      - timestamps
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *aws-rhosak-3
+    <<: *gl_checkout
+    builders:
+      - shell: |
+          ./scripts/purge_velero_backup.sh
+
+- job-template:
     id: strimzi-operator-test
     name: "strimzi-operator-test"
     wrappers:
