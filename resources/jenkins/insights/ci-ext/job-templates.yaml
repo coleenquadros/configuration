@@ -112,6 +112,9 @@
     id: 'insights-deploy-ephemeral'
     name: '{name}-ephemeral'
     node: '{node}'
+    ci_cmd: ./ephemeral.sh
+    gh_org: '{gh_org}'
+    gh_repo: '{gh_repo}'
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'
@@ -120,6 +123,7 @@
         <<: *vault_defaults
         secrets:
         - *insights_ephemeral_oc_login
+    <<: *gh_checkout
     parameters:
     - string:
         name: APP_NAME
@@ -154,36 +158,5 @@
         default: 7a70ff1
         description: "(optional, default matches GIT_COMMIT_INPUT) image tag for the version being tested"
     builders:
-    - shell: |
-        #!/bin/bash
-
-        echo "Job started by user: $BUILD_USER, id: $BUILD_USER_ID"
-
-        CICD_URL=https://raw.githubusercontent.com/RedHatInsights/bonfire/master/cicd
-        curl -s "$CICD_URL/bootstrap.sh" > .cicd_bootstrap.sh
-        source .cicd_bootstrap.sh
-
-        export GIT_COMMIT=$GIT_COMMIT_INPUT
-        if [ ! -z "$IMAGE_TAG_INPUT" ]; then
-            export IMAGE_TAG=$(echo $GIT_COMMIT_INPUT | head -c7)
-        else
-            export IMAGE_TAG=$IMAGE_TAG_INPUT
-        fi
-
-        # source $CICD_ROOT/deploy_ephemeral_env.sh
-        source $CICD_ROOT/_common_deploy_logic.sh
-        export NAMESPACE=$(bonfire namespace reserve)
-
-        echo "Deploying $APP_NAME to $NAMESPACE"
-
-        bonfire deploy \
-            $APP_NAME \
-            --source=appsre \
-            --ref-env insights-stage \
-            --set-template-ref $COMPONENT_NAME=$GIT_COMMIT \
-            --set-image-tag $IMAGE=$IMAGE_TAG \
-            --namespace $NAMESPACE \
-            --timeout $DEPLOY_TIMEOUT \
-            $COMPONENTS_ARG \
-            $COMPONENTS_RESOURCES_ARG \
-            --set-parameter "$COMPONENT_NAME/IMPORTER_JOB_NAMESPACE=$NAMESPACE"
+    - shell:
+        command: "{ci_cmd}"
