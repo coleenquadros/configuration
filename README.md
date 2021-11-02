@@ -2026,7 +2026,7 @@ To get access to the project, if required, contact the App SRE team.
 
 ### Execute a SQL Query on an App Interface controlled RDS instance
 
-To execute an SQL Query, you you have to commit to the app-interface an YAML
+To execute an SQL Query, you have to commit to the app-interface an YAML
 file with the following content:
 
 ```yaml
