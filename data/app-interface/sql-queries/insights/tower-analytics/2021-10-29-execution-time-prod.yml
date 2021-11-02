@@ -1,0 +1,79 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2021-10-29-execution-time-prod
+namespace:
+  $ref: /services/insights/tower-analytics/namespaces/tower-analytics-prod.yml
+identifier: tower-analytics-prod
+output: stdout
+overrides:
+  db_name: tenant_4522757
+query: |
+       EXPLAIN ANALYZE SELECT
+            template_id,
+            average_duration_per_task,
+            peer_hosts_stats
+       FROM (
+            SELECT
+                template_id,
+                    COALESCE(SUM(q.duration) / SUM(q.host_task_count), 0.0) AS average_duration_per_task,
+                    (SELECT ARRAY(
+                        SELECT JSON_BUILD_OBJECT(
+                            'host_id', z.host_id,
+                            'host_avg_duration_per_task', SUM(z.duration) / SUM( z.host_task_count),
+                            'host_status', z.host_status,
+                            'task_timestamp_min', MAX(z.task_timestamp_min),
+                            'task_timestamp_max', MAX(z.task_timestamp_max),
+                            'host_runs', SUM(z.host_count),
+                            'tasks_run', SUM(z.host_task_count),
+                            'duration', SUM(duration),
+                            'anomaly', CASE
+                                WHEN SUM(z.duration) / SUM( z.host_task_count) = 0 THEN FALSE
+                                WHEN SUM(z.duration) / SUM( z.host_task_count) <
+                                    COALESCE(
+                                        (SELECT AVG(n) + STDDEV(n)
+                                        FROM
+                                            (SELECT
+                                                UNNEST(
+                                                    ARRAY(
+                                                        SELECT SUM(z.duration) / SUM(z.host_task_count)
+                                                        FROM "daily_host_explorer_rollup" z
+                                                        WHERE "z".created_date >= ('2021-08-29'::date)::date
+                                                        AND "z".created_date <= ('2021-10-29'::date)::date
+                                                        AND "z"."type" = ANY(ARRAY['job'])
+                                                        AND "z"."status" = ANY(ARRAY['successful'])
+                                                        AND "z".host_status = ANY(ARRAY['changed'])
+                                                        AND z.status <> 'canceled'
+                                                        AND q.template_id = z.template_id
+                                                        GROUP BY z.host_id, z.host_status
+                                                        ORDER BY MAX(z.task_timestamp_max) DESC
+                                                    )
+                                                ) AS n
+                                            ) s_inner
+                                        ),
+                                    NULL) THEN FALSE
+                                    ELSE TRUE
+                                END
+                        ) s_inner2
+                        FROM "daily_host_explorer_rollup" z
+                        WHERE "z".created_date >= ('2021-08-29'::date)::date
+                        AND "z".created_date <= ('2021-10-29'::date)::date
+                        AND "z"."type" = ANY(ARRAY['job'])
+                        AND "z"."status" = ANY(ARRAY['successful'])
+                        AND "z".host_status = ANY(ARRAY['changed'])
+                        AND z.status <> 'canceled'
+                        AND q.template_id = z.template_id
+                        GROUP BY z.host_id, z.host_status
+                        ORDER BY MAX(z.task_timestamp_max) DESC
+                    ) s_inner3
+                ) AS peer_hosts_stats
+            FROM "daily_host_explorer_rollup" q
+            WHERE "q".created_date >= ('2021-08-29'::date)::date
+            AND "q".created_date <= ('2021-10-29'::date)::date
+            AND "q"."type" = ANY(ARRAY['job'])
+            AND "q"."status" = ANY(ARRAY['successful'])
+            GROUP BY template_id
+        ) s_outer
+        ORDER BY average_duration_per_task DESC
+        OFFSET 0
+        LIMIT 25;

@@ -27,20 +27,33 @@ imagePatterns:
 - quay.io/quarkus/code-quarkus-acceptance-test
 
 resourceTemplates:
-- name: code-quarkus-acceptance-test
+- name: code-quarkus-api-acceptance-test
   url: https://github.com/quarkusio/code.quarkus.io
-  path: /openshift/code-quarkus-acceptance-test.yaml
+  path: /openshift/code-quarkus-api-acceptance-test.yaml
   targets:
   - namespace:
       $ref: /services/quarkus/namespaces/code-quarkus-stage.yml
-    ref: f11be7f3c3d364c193c44cca0973c65bd80dac95
+    ref: 871ca0bb3c8e9a0421e471ce257bc06b43b5f518
     parameters:
-      IMAGE: quay.io/quarkus/code-quarkus-acceptance-test
       CODE_QUARKUS_STAGING_URL: https://stage.code.quarkus.io
     promotion:
       auto: true
       subscribe:
       - code-quarkus-api-stage-deploy-success-channel
+      publish:
+      - code-quarkus-api-stage-post-deploy-tests-success-channel
+- name: code-quarkus-frontend-acceptance-test
+  url: https://github.com/quarkusio/code.quarkus.io
+  path: /openshift/code-quarkus-frontend-acceptance-test.yaml
+  targets:
+  - namespace:
+      $ref: /services/quarkus/namespaces/code-quarkus-stage.yml
+    ref: 871ca0bb3c8e9a0421e471ce257bc06b43b5f518
+    parameters:
+      CODE_QUARKUS_STAGING_URL: https://stage.code.quarkus.io
+    promotion:
+      auto: true
+      subscribe:
       - code-quarkus-frontend-stage-deploy-success-channel
       publish:
-      - code-quarkus-stage-post-deploy-tests-success-channel
+      - code-quarkus-frontend-stage-post-deploy-tests-success-channel

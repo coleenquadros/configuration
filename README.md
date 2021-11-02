@@ -110,13 +110,13 @@ This repository contains of a collection of files under the `data` folder.
 Whatever is present inside that folder constitutes the App-SRE contract.
 
 These files can be `yaml` or `json` files, and they must validate against some
-[well-defined json schemas][schemas].
+[well-defined json schemas][https://github.com/app-sre/qontract-schemas].
 
 The path of the files do not have any effect on the integrations (automation
 components that feed off the contract), but the contents of the files do. They
 will all contain:
 
-- `$schema`: which maps to a well defined schema [schema][schemas].
+- `$schema`: which maps to a well defined schema [schema][https://github.com/app-sre/qontract-schemas].
 - `labels`: arbitrary labels that can be used to perform queries, etc.
 - Additional data specific to the resource in question.
 
@@ -127,8 +127,10 @@ Continuous delivery is managed using the
 
 Main App-Interface contract components:
 
-- <https://gitlab.cee.redhat.com/service/app-interface>: datafiles (schema
-  implementations) that define the contract. JSON and GraphQL schemas of the datafiles.
+- <https://gitlab.cee.redhat.com/service/app-interface>: data files
+  that implement the contract.
+- <https://github.com/app-sre/qontract-schemas>: schema file
+  that define the contract. JSON and GraphQL schemas of the data files.
 - <https://github.com/app-sre/qontract-server>: The GraphQL component developed
   in this repository will make the datafiles queryable.
 
@@ -154,7 +156,7 @@ amendment. Some examples would be:
 
 All contract amendments must be formally defined. Formal definitions are
 expressed as json schemas. You can find the supported schemas here:
-[schemas][schemas].
+[schemas][https://github.com/app-sre/qontract-schemas].
 
 1. The interested party will:
 
@@ -620,7 +622,7 @@ In order to get access to Sentry, a user has to have:
 
 [services](/data/services) contains all the services that are being run by the App-SRE team. Inside of those directories, there is a `namespaces` folder that lists all the `namespaces` that are linked to that service.
 
-Namespaces declaration enforce [this JSON schema](/schemas/openshift/namespace-1.yml). Note that it contains a reference to the cluster in which the namespace exists.
+Namespaces declaration enforce [this JSON schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/openshift/namespace-1.yml). Note that it contains a reference to the cluster in which the namespace exists.
 
 A namespace declaration can contain labels. These will be applied as kubernetes labels on the namespace resource. Note that
 * labels must conform to [Kubernetes Labels constraints](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#syntax-and-character-set).
@@ -632,7 +634,7 @@ Notes:
 * If a resource has a `qontract.recycle: "true"` annotation, all pods using that resource will be recycled on every update.
   * Supported resources: Secrets, ConfigMaps
 
-OpenShift resources can be entirely self-serviced via App-Interface. A list of supported resource types can be found [here](/schemas/openshift/namespace-1.yml#L46).
+OpenShift resources can be entirely self-serviced via App-Interface. A list of supported resource types can be found [here](https://github.com/app-sre/qontract-schemas/blob/main/schemas/openshift/namespace-1.yml#L46).
 
 Some resources have special characteristics and are described further below. These have a specific `provider` value.
 - `Secret`
@@ -809,7 +811,7 @@ use `ref` master for stage namespaces and a commit hash as exists in other `ref`
 
 [openshift](/data/openshift) contains all the clusters that are managed by the App-SRE team. Inside of those directories, there is a `cluster.yml` file that describes the cluster.
 
-Clusters declaration enforce [this JSON schema](/schemas/openshift/cluster-1.yml).
+Clusters declaration enforce [this JSON schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/openshift/cluster-1.yml).
 
 OpenShift group association can be self-serviced via App-Interface.
 
@@ -1030,7 +1032,7 @@ For more information please see [vault secrets engines documentation](https://ww
 ### Manage DNS Zones via App-Interface (`/aws/dns-zone-1.yml`) using Terraform
 
 DNS Zones can be managed in app-interface. A DNS zone follows [this
-JSON schema](/schemas/dependencies/dns-zone-1.yml).
+JSON schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/dependencies/dns-zone-1.yml).
 
 - `name`: A name for the DNS zone
 - `description`: Description for the DNS zone
@@ -1141,7 +1143,7 @@ records:
 
 [teams](/data/teams) contains all the teams that are being services by the App-SRE team. Inside of those directories, there is a `users` folder that lists all the `users` that are linked to that team. Each `user` has a list of assiciated `roles`. A `role` can be used to grant AWS access to a user, by adding the `user` to an AWS `group`.
 
-Groups declaration enforce [this JSON schema](/schemas/aws/group-1.yml). Note that it contains a reference to the AWS account in which the group exists.
+Groups declaration enforce [this JSON schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/aws/group-1.yml). Note that it contains a reference to the AWS account in which the group exists.
 
 Notes:
 * Manual changes to AWS resources will be overridden by App-Interface in each run.
@@ -1212,7 +1214,7 @@ Example: https://gitlab.cee.redhat.com/service/app-interface/blob/f40e0f27eacf55
 
 [services](/data/services) contains all the services that are being run by the App-SRE team. Inside of those directories, there is a `namespaces` folder that lists all the `namespaces` that are linked to that service.
 
-Namespaces declaration enforce [this JSON schema](/schemas/openshift/namespace-1.yml). Note that it contains a reference to the cluster in which the namespace exists.
+Namespaces declaration enforce [this JSON schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/openshift/namespace-1.yml). Note that it contains a reference to the cluster in which the namespace exists.
 
 Notes:
 * Manual changes to AWS resources will be overridden by App-Interface in each run.
@@ -1314,7 +1316,7 @@ RDS instances can be entirely self-serviced via App-Interface.
 In order to create or update an RDS database, you need to add them to the `terraformResources` field.
 
 - `provider`: must be `rds`
-- `account`: must be one of the AWS account names managed by app-interface. Account values can be found [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/schemas/aws/tenant_accounts-1.yml).
+- `account`: must be one of the AWS account names managed by app-interface. Account values can be found [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/masterhttps://github.com/app-sre/qontract-schemas/blob/main/schemas/aws/tenant_accounts-1.yml).
 - `identifier` - name of database instance to create (or update). Must be unique across all RDS instances in the AWS account.
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options](/resources/terraform/resources/)
 - `parameter_group`: (optional) path relative to [resources](/resources) to a file with parameter group values. Note that it starts with `/`.
@@ -1673,7 +1675,7 @@ CloudWatch Log Groups can be entirely self-serviced via App-Interface.
 In order to add or update an CloudWatch Log Group, you need to add them to the `terraformResources` field.
 
 - `provider`: must be `cloudwatch`
-- `account`: must be one of the AWS account names we manage. [Current options](/schemas/openshift/namespace-1.yml#L502)
+- `account`: must be one of the AWS account names we manage. [Current options](https://github.com/app-sre/qontract-schemas/blob/main/schemas/openshift/namespace-1.yml#L502)
 - `identifier` - name of resource to create (or update)
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options:](/resources/terraform/resources/)
 - `es_identifier`: identifier of a existing elasticsearch. It will create a AWS lambda to stream logs to elasticsearch service. This field is optional.
@@ -1699,7 +1701,7 @@ Key Management Service keys can be entirely self-serviced via App-Interface.
 In order to add or update a Key Management Service key, you need to add them to the `terraformResources` field.
 
 - `provider`: must be `kms`
-- `account`: must be one of the AWS account names we manage. [Current options](/schemas/openshift/namespace-1.yml#L502)
+- `account`: must be one of the AWS account names we manage. [Current options](https://github.com/app-sre/qontract-schemas/blob/main/schemas/openshift/namespace-1.yml#L502)
 - `identifier` - name of resource to create (or update)
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options:](/resources/terraform/resources/)
 - `output_resource_name`: name of Kubernetes Secret to be created.
@@ -2298,15 +2300,15 @@ Please follow [this guide](/docs/app-sre/prometheus-rules-tests-in-app-interface
 
 Additional design information: [here](docs/app-interface/design.md)
 
-[schemas]: </schemas>
-[userschema]: </schemas/access/user-1.yml>
-[crossref]: </schemas/common-1.json#L58-L86>
-[role]: </schemas/access/role-1.yml>
-[permission]: </schemas/access/permission-1.yml>
+[schemas]: <https://github.com/app-sre/qontract-schemas>
+[userschema]: <https://github.com/app-sre/qontract-schemas/blob/main/schemas/access/user-1.yml>
+[crossref]: <https://github.com/app-sre/qontract-schemas/blob/main/schemas/common-1.json#L58-L86>
+[role]: <https://github.com/app-sre/qontract-schemas/blob/main/schemas/access/role-1.yml>
+[permission]: <https://github.com/app-sre/qontract-schemas/blob/main/schemas/access/permission-1.yml>
 
 ## Developer Guide
 
-More information [here](docs/app-interface/developer.md).
+More information [here](docs/app-sre/sop/app-interface/development-environment-setup.md).
 
 ## Quay Documentation
 

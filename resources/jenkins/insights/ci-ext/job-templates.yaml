@@ -106,3 +106,57 @@
         - *quay_secret_push
         - *quay_api_token
     <<: *gh_build_master
+
+
+- job-template:
+    id: 'insights-deploy-ephemeral'
+    name: '{name}-ephemeral'
+    node: '{node}'
+    ci_cmd: ./ephemeral.sh
+    gh_org: '{gh_org}'
+    gh_repo: '{gh_repo}'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_ephemeral_oc_login
+    <<: *gh_checkout
+    parameters:
+    - string:
+        name: APP_NAME
+        default: automation-hub
+        description: "(REQUIRED) name of app-sre 'application' folder this component lives in"
+    - string:
+        name: COMPONENT_NAME
+        default: automation-hub
+        description: "(REQUIRED) name of app-sre 'resourceTemplate' in deploy.yaml for this component"
+    - string:
+        name: IMAGE
+        default: "quay.io/cloudservices/automation-hub-galaxy-ng"
+        description: "(REQUIRED) image location on quay"
+    - string:
+        name: COMPONENTS
+        default: ""
+        description: "(optional, default: all) space separated components to deploy"
+    - string:
+        name: COMPONENTS_W_RESOURCES
+        default: "all"
+        description: "(optional, default: none) space separated components which should preserve resource settings"
+    - string:
+        name: DEPLOY_TIMEOUT
+        default: ""
+        description: "(optional, default: 300) bonfire deployment timeout parameter in seconds"
+    - string:
+        name: GIT_COMMIT_INPUT
+        default: 7a70ff118ad599cb29503d56c8caf8e550ecb5fc
+        description: "(REQUIRED) full git commit hash of the version being tested"
+    - string:
+        name: IMAGE_TAG_INPUT
+        default: 7a70ff1
+        description: "(optional, default matches GIT_COMMIT_INPUT) image tag for the version being tested"
+    builders:
+    - shell:
+        command: "{ci_cmd}"

@@ -8,7 +8,7 @@ This SOP describes how to safely delete managed terraform resources.
 * Make sure your local terraform binary matches the version we are using and configure AWS credentials following
   [this guide](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/terraform-quickstart.md)
 * Make sure you have a qontract-reconcile development environment as described
-  in [this guide](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/app-sre/dev-setup).
+  in [this guide](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/app-sre/sop/app-interface-development-environment-setup.md).
 
 ## Disable integrations in Unleash
 

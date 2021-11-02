@@ -41,6 +41,13 @@ config:
             junit_results: 'test-results/strimzi-operator/failsafe-reports/*.xml'
             cleanup_script: './build_cleanup.sh'
             release: true
+        - 'managed-services-gl-build-test-branch':
+            branch: mk-release-2.8-0.23.x
+            display_name: mk-strimzi-operator 2.8 0.23.x release
+            archive_artifacts: 'test-results/**'
+            junit_results: 'test-results/strimzi-operator/failsafe-reports/*.xml'
+            cleanup_script: './build_cleanup.sh'
+            release: true
         - 'managed-services-security-scan':
             display_name: mk-strimzi-operator security-scan
             branch: mk-master
@@ -240,7 +247,7 @@ config:
             display_name: KasFleetManager Tests periodic stage
             timeout: 7200
             disable: false
-            cron_expression: 'H 6 * * 1-5'
+            cron_expression: 'H 8 * * 1-5' # ~8am UTC Monday to Friday
             ci_cmd: './pr_check.sh'
             slack_channel_notification: mk-kas-fleet-manager
             branch: main
@@ -257,7 +264,7 @@ config:
             display_name: kas-fleet-manager API perf test
             timeout: 7200
             slack_channel_notification: mk-kas-fleet-manager
-            cron_expression: 'H 7 * * 2-5' # 7am UTC Tuesday to Friday
+            cron_expression: 'H 7 * * 2-5' # ~7am UTC Tuesday to Friday
 
   - project:
       name: managed-services-kafka-performance-tests
@@ -367,6 +374,17 @@ config:
             slack_channel_notification: forum-managed-kafka
             cron_expression: 'H 4 * * 1-5' # At 04:00 on every day-of-week from Monday through Friday
 
+  - project:
+      name: purge-velero-backups
+      label: managed-services
+      node: managed-services
+      gl_group: mk-bin-packing
+      gl_project: mk-performance-tests
+      jobs:
+        - 'aws-purge-velero-backup':
+            display_name: 'aws-purge-velero-backup'
+            timeout: 3600
+  
   - project:
       name: mk-e2e-test-suite
       label: managed-services

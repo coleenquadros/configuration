@@ -49,7 +49,7 @@ RESULTS=$TEMP_DIR/reports/results.json
 REPORT=$TEMP_DIR/reports/index.html
 
 # Run validator
-OUTPUT_DIR=${TEMP_DIR}/validate make bundle
+OUTPUT_DIR=${TEMP_DIR}/validate make schemas bundle
 
 set +e
 OUTPUT_DIR=${TEMP_DIR}/validate make validate | tee ${RESULTS}

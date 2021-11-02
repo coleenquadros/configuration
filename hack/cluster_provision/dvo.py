@@ -5,12 +5,10 @@ import os
 from pathlib import Path
 from typing import Dict, Any, Mapping, MutableMapping
 
-from .common import read_yaml_from_file, write_yaml_to_file, get_base_yaml
+from .common import STAGE, read_yaml_from_file, write_yaml_to_file, \
+    get_base_yaml, cluster_config_exists
 
 log = logging.getLogger(__name__)
-
-PRODUCTION = 'production'
-STAGE = 'stage'
 
 DVO_FILENAME = 'openshift/{cluster}/namespaces/' \
                'deployment-validation-operator-per-cluster.yml'
@@ -39,7 +37,7 @@ app:
   $ref: /services/deployment-validation-operator/app.yml
 
 environment:
-  $ref: /products/app-sre/environments/{environment}.yml
+  $ref: /products/app-sre/environments/production.yml
 
 networkPoliciesAllow:
 - $ref: /openshift/{cluster}/namespaces/openshift-operator-lifecycle-manager.yml
@@ -53,9 +51,9 @@ managedResourceTypes:
 
 openshiftResources:
 - provider: resource
-  path: /app-sre{stage_path_suffix}/deployment-validation-operator/dvo.configmap.yaml
+  path: /app-sre/deployment-validation-operator/dvo.configmap.yaml
 - provider: resource
-  path: /app-sre{stage_path_suffix}/deployment-validation-operator/dvo.service.yaml
+  path: /app-sre/deployment-validation-operator/dvo.service.yaml
 """
 
 SERVICE_MONITOR = """
@@ -65,7 +63,7 @@ provider: resource-template
 type: jinja2
 path: /observability/servicemonitors/deployment-validation-operator.servicemonitor.yaml
 variables:
-  environment: {environment}
+  environment: production
   namespace: deployment-validation-operator
 """
 
@@ -89,35 +87,28 @@ role: view
 """
 
 
-def create_dvo_per_cluster(cluster: str, environment: str) -> Dict[str, Any]:
+def create_dvo_per_cluster(cluster: str) -> Dict[str, Any]:
     """
     Generates the DVO configuration for a cluster.
     :param cluster: the cluster name
-    :param environment: production or stage
     :return: DVO configuration data for the cluster
     """
-    if environment == STAGE:
-        stage_path_suffix = '-stage'
-    else:
-        stage_path_suffix = ''
 
     yaml = get_base_yaml()
     dvo_template = yaml.load(
-        DVO_TEMPLATE.format(cluster=cluster, environment=environment,
-                            stage_path_suffix=stage_path_suffix)
+        DVO_TEMPLATE.format(cluster=cluster)
     )
     return dvo_template
 
 
-def add_dvo_service_monitor(data: Mapping, environment: str) -> bool:
+def add_dvo_service_monitor(data: Mapping) -> bool:
     """
     Add a service monitor for DVO.
     :param data: cluster data
-    :param environment: production or stage
     :return: whether the resource changed or not
     """
     yaml = get_base_yaml()
-    service_monitor = yaml.load(SERVICE_MONITOR.format(environment=environment))
+    service_monitor = yaml.load(SERVICE_MONITOR)
 
     openshift_resources = data['openshiftResources']
 
@@ -130,35 +121,29 @@ def add_dvo_service_monitor(data: Mapping, environment: str) -> bool:
         return True
 
 
-def add_saas_target(data: Mapping, cluster: str, environment: str) -> bool:
+def add_saas_target(data: Mapping, cluster: str) -> bool:
     """
     Adds a target to the DVO SaaS configuration.
     :param data: SaaS configuration data
     :param cluster: cluster name
-    :param environment: production or stage
     :return: whether the data change or not
     """
     yaml = get_base_yaml()
 
-    stage = True if environment == STAGE else False
     targets = data['resourceTemplates'][0]['targets']
 
-    if stage:
-        template = SAAS_TARGET_TEMPLATE + SAAS_TARGET_STAGE_UPSTREAM
-        commit_hash = 'master'
-    else:
-        template = SAAS_TARGET_TEMPLATE
-        commit_hashes = {t['ref'] for t in targets if t['ref'] != 'master'}
+    template = SAAS_TARGET_TEMPLATE
+    commit_hashes = {t['ref'] for t in targets if t['ref'] != 'master'}
 
-        # Currently production uses the same commit hash and stage uses
-        # 'master', so we can easily detect this. New logic will need to be
-        # implemented in the future if this isn't a safe assumption.
-        if len(commit_hashes) > 1:
-            raise ValueError('Could not determine which commit to use for '
-                             'the SaaS target, more than one option: '
-                             f'{commit_hashes}')
+    # Currently production uses the same commit hash and stage uses
+    # 'master', so we can easily detect this. New logic will need to be
+    # implemented in the future if this isn't a safe assumption.
+    if len(commit_hashes) > 1:
+        raise ValueError('Could not determine which commit to use for '
+                         'the SaaS target, more than one option: '
+                         f'{commit_hashes}')
 
-        commit_hash = commit_hashes.pop()
+    commit_hash = commit_hashes.pop()
 
     saas_target_entry = yaml.load(template.format(
         cluster=cluster, commit_hash=commit_hash))
@@ -205,15 +190,20 @@ def grant_service_account_perms(data: MutableMapping, cluster: str) -> bool:
         return True
 
 
-def main(data_dir: str, cluster: str, environment: str) -> None:
+def main(data_dir: str, cluster: str) -> None:
 
     if not os.path.exists(data_dir):
         raise FileNotFoundError(f"{data_dir} does not exist")
 
+    if not cluster_config_exists(data_dir, cluster):
+        raise FileNotFoundError(f"Cluster configuration doesn't exist for "
+                                f"{cluster}, check if the cluster name was "
+                                f"mistyped")
+
     # Create the deployment-validation-operator-per-cluster.yml namespace file
     # for the cluster.
     log.info('Creating deployment-validation-operator-per-cluster.yml')
-    dvo_per_cluster = create_dvo_per_cluster(cluster, environment)
+    dvo_per_cluster = create_dvo_per_cluster(cluster)
     dvo_cluster_path = Path(data_dir, DVO_FILENAME.format(cluster=cluster))
     write_yaml_to_file(str(dvo_cluster_path), dvo_per_cluster)
 
@@ -221,14 +211,14 @@ def main(data_dir: str, cluster: str, environment: str) -> None:
     customer_mon_path = Path(data_dir, CUSTOMER_MON_FILENAME.format(
         cluster=cluster))
     customer_mon_data = read_yaml_from_file(str(customer_mon_path))
-    if add_dvo_service_monitor(customer_mon_data, environment):
+    if add_dvo_service_monitor(customer_mon_data):
         write_yaml_to_file(str(customer_mon_path), customer_mon_data)
 
     # Update the DVO SaaS file to add the new namespace to the target
     # namespaces.
     saas_path = Path(data_dir, SAAS_FILENAME)
     saas_data = read_yaml_from_file(str(saas_path))
-    if add_saas_target(saas_data, cluster, environment):
+    if add_saas_target(saas_data, cluster):
         write_yaml_to_file(str(saas_path), saas_data)
 
     # Grant view permissions to the appropriate service accounts.
