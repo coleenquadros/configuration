@@ -85,3 +85,27 @@ terraformResources:
   identifier: insights-metrics-export-prod
   defaults: /terraform/resources/s3-all-expires-7-days.yml
   output_resource_name: insights-metrics-export-prod
+- provider: aws-iam-service-account
+  account: insights-prod
+  identifier: floorist-metrics-exporter-production-s3-reader
+  variables:
+    bucket: insights-metrics-export-prod
+    region: us-east-1
+    endpoint: s3.us-east-1.amazonaws.com
+  user_policy:
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": ["s3:ListBucket"],
+          "Resource": ["arn:aws:s3:::${bucket}"]
+        },
+        {
+          "Effect": "Allow",
+          "Action": ["s3:GetObject"],
+          "Resource": ["arn:aws:s3:::${bucket}/*"]
+        }
+      ]
+    }
+  output_resource_name: floorist-metrics-exporter-s3-reader
