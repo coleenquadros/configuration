@@ -1,0 +1,13 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+name: 2021-11-03-list-upstream-rule-links-prod
+labels: {}
+namespace:
+  $ref: /services/insights/compliance/namespaces/compliance-prod.yml
+identifier: compliance-prod
+output: stdout
+query: >-
+  SELECT "profiles"."ref_id", "rules"."ref_id" as "rule_ref_id", "profiles"."benchmark_id" FROM "profiles"
+  INNER JOIN "profile_rules" ON "profile_rules"."profile_id" = "profiles"."id"
+  INNER JOIN "rules" ON "rules"."id" = "profile_rules"."rule_id"
+  WHERE "profiles"."parent_profile_id" IS NULL AND (profiles.upstream = FALSE AND rules.upstream = TRUE);
