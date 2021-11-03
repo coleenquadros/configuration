@@ -4,6 +4,8 @@ Github Mirror is a service built and run by the AppSRE team: https://github.com/
 
 This service acts as a GitHub API mirror that caches the responses and implements conditional requests: https://docs.github.com/en/rest/overview/resources-in-the-rest-api#conditional-requests
 
+Check out the [SRE tale: making 100k calls/h to the GitHub API](https://www.youtube.com/watch?v=s3xguA495jg)!
+
 ## Overview
 
 With conditional requests, all the calls are forwarded to the Github API, but when the GitHub API replies with a 304 HTTP code, meaning that the resource has not changed, we serve the client with the previously cached response.
