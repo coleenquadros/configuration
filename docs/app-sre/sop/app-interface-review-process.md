@@ -16,6 +16,10 @@ This is a WIP SOP intended for use by App SRE team members acting as Interrupt C
 
 ## Specific review instructions
 
+### InProgress Services
+
+InProgress services are in the process of being onboarded. **@app-sre-ic** should only add the ~onboarding label to these MRs so that they can be reviewed by the **@app-sre-onboarding-ic**.
+
 ### saas-deploy image_pattern
 
 This change indicates that an additional component will be allowed to be deployed to a production namespace.
