@@ -229,7 +229,7 @@
     parameters:
     - choice:
         name: PROJECT_NAME
-        description: 'project name, has to be the same as in the config file'
+        description: 'currently supported projects (those which have templates in *-pipeline-configs and cpaas-products/rhosak repos)'
         choices:
             - kas-fleetshard
             - kafka-admin-api
@@ -251,6 +251,36 @@
         name: PREPARE_CPAAS_PRODUCTS
         default: true
         description: "prepare cpaas-products/rhosak for the project & version"
+    <<: *gl_checkout
+    builders:
+      - shell: "{ci_cmd}"
+
+- job-template:
+    id: 'managed-services-patch-latest-midstream'
+    name: 'managed-services-patch-latest-midstream'
+    description: "[managed-services] patches (tag with next sequence) latest commit on midstream for specified project and updates CPaaS configs (project must be specified in {gl_group}/{gl_project}/script/repo-config.yaml)"
+    wrappers:
+    - timestamps
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+          - *app_sre_bot_push_token
+    parameters:
+    - choice:
+        name: PROJECT_NAME
+        description: 'currently supported projects (those which have templates in *-pipeline-configs repo)'
+        choices:
+            - kas-fleetshard
+            - kafka-admin-api
+            - strimzi-canary
+            - strimzi-drain-cleaner
+    - string:
+        name: RELEASE_VERSION
+        default: ''
+        description: 'version of the project that will be patched'
     <<: *gl_checkout
     builders:
       - shell: "{ci_cmd}"
