@@ -6,7 +6,7 @@ labels:
   platform: insights
 
 name: notifications-clowder
-description: notifications app on the Insights Platform
+description: notifications app on the Insights Platform deployed with Clowder
 
 app:
   $ref: /services/insights/notifications/app.yml
@@ -21,6 +21,7 @@ slack:
 
 managedResourceTypes:
 - ClowdApp
+- ClowdJobInvocation
 
 imagePatterns:
 - quay.io/cloudservices
@@ -31,23 +32,149 @@ authentication:
     field: all
 
 resourceTemplates:
+
+# notifications-backend
 - name: notifications-backend
-  path: /.rhcicd/clowdapp.yaml
+  path: /.rhcicd/clowdapp-backend.yaml
   url: https://github.com/RedHatInsights/notifications-backend
   targets:
+
+  # ephemeral
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
-    disable: true  # do not create an app-sre deploy job for ephemeral namespace
-    ref: internal  # populated by bonfire
+    # app-sre will not deploy this target
+    disable: true
+    # populated by bonfire
+    ref: internal
     parameters:
+      RBAC_AUTHENTICATION_READ_TIMEOUT: 10000
+
+  # stage
+  - namespace:
+      $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
+    # app-sre will not deploy this target
+    disable: true
+    # notifications-backend commit hash that determines the clowdapp-backend.yaml version
+    ref: a103e4cd771007814295860501fc8d8fa0ed5d01
+    parameters:
+      # quay.io tag that will be deployed
+      IMAGE_TAG: 0765ce5
+      CLOUDWATCH_ENABLED: true
+      CPU_REQUEST: 200m
+      MIN_REPLICAS: 3
+      MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_INTERVAL_MS: 1200000
+      MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_RECORDS: 100
+      NOTIFICATIONS_LOG_LEVEL: DEBUG
+      PROCESSOR_EMAIL_NO_REPLY: no-reply-stage@redhat.com
+      RBAC_S2S_READ_TIMEOUT: 120000
+      SENTRY_ENABLED: true
+
+  # prod
+  - namespace:
+      $ref: /services/insights/notifications/namespaces/notifications-prod.yml
+    # app-sre will not deploy this target
+    disable: true
+    # notifications-backend commit hash that determines the clowdapp-backend.yaml version
+    ref: a103e4cd771007814295860501fc8d8fa0ed5d01
+    parameters:
+      # quay.io tag that will be deployed
+      IMAGE_TAG: 0765ce5
+      CLOUDWATCH_ENABLED: true
+      CPU_LIMIT: 3
+      MEMORY_LIMIT: 4Gi
       MIN_REPLICAS: 1
+      MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_INTERVAL_MS: 1200000
+      MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_RECORDS: 100
+      NOTIFICATIONS_LOG_LEVEL: DEBUG
+      PROCESSOR_EMAIL_NO_REPLY: no-reply@redhat.com
+      RBAC_S2S_READ_TIMEOUT: 120000
+      SENTRY_ENABLED: true
+
+# notifications-aggregator
+- name: notifications-aggregator
+  path: /.rhcicd/clowdapp-aggregator.yaml
+  url: https://github.com/RedHatInsights/notifications-backend
+  targets:
+
+  # ephemeral
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    # app-sre will not deploy this target
+    disable: true
+    # populated by bonfire
+    ref: internal
+
+  # stage
+  - namespace:
+      $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
+    # app-sre will not deploy this target
+    disable: true
+    # notifications-backend commit hash that determines the clowdapp-aggregator.yaml version
+    ref: a103e4cd771007814295860501fc8d8fa0ed5d01
+    parameters:
+      # quay.io tag that will be deployed
+      IMAGE_TAG: 0765ce5
+      CLOUDWATCH_ENABLED: true
+      CPU_REQUEST: 200m
+      CRONTAB_AGGREGATION_JOB: 0 * * * *
+      NOTIFICATIONS_LOG_LEVEL: DEBUG
+      SENTRY_ENABLED: true
+
+  # prod
+  - namespace:
+      $ref: /services/insights/notifications/namespaces/notifications-prod.yml
+    # app-sre will not deploy this target
+    disable: true
+    # notifications-backend commit hash that determines the clowdapp-aggregator.yaml version
+    ref: a103e4cd771007814295860501fc8d8fa0ed5d01
+    parameters:
+      # quay.io tag that will be deployed
+      IMAGE_TAG: 0765ce5
+      CLOUDWATCH_ENABLED: true
+      NOTIFICATIONS_LOG_LEVEL: DEBUG
+      SENTRY_ENABLED: true
+
+# notifications-gw
 - name: notifications-gw
   path: /.rhcicd/clowdapp.yaml
   url: https://github.com/RedHatInsights/notifications-gw
   targets:
+
+  # ephemeral
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
-    disable: true  # do not create an app-sre deploy job for ephemeral namespace
-    ref: internal  # populated by bonfire
+    # app-sre will not deploy this target
+    disable: true
+    # populated by bonfire
+    ref: internal
+
+  # stage
+  - namespace:
+      $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
+    # app-sre will not deploy this target
+    disable: true
+    # notifications-gw commit hash that determines the clowdapp.yaml version
+    ref: 5149ae8d4d9fb9206ad3a58273a5cdc89704b80f
     parameters:
+      # quay.io tag that will be deployed
+      IMAGE_TAG: 5f56984
+      CLOUDWATCH_ENABLED: true
+      CPU_REQUEST: 200m
+      MIN_REPLICAS: 3
+      NOTIFICATIONS_LOG_LEVEL: DEBUG
+      SENTRY_ENABLED: true
+
+  # prod
+  - namespace:
+      $ref: /services/insights/notifications/namespaces/notifications-prod.yml
+    # app-sre will not deploy this target
+    disable: true
+    # notifications-gw commit hash that determines the clowdapp.yaml version
+    ref: 5149ae8d4d9fb9206ad3a58273a5cdc89704b80f
+    parameters:
+      # quay.io tag that will be deployed
+      IMAGE_TAG: 5f56984
+      CLOUDWATCH_ENABLED: true
       MIN_REPLICAS: 1
+      NOTIFICATIONS_LOG_LEVEL: DEBUG
+      SENTRY_ENABLED: true
