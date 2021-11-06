@@ -4,10 +4,38 @@ These terraform files in this folder are used to set up the initial user and S3 
 
 The s3 backend is used to share state and is set up with a bucket policy allowing strict access as the state files have highly sensitive content including keys.
 
-To get started point the config.tf file to a profile in [~/.aws/credentials](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) that has access to create IAM users and S3 buckets. For the initial setup you also need to hard code the ARN of the creating user in bucket policy in terraform-setup.tf - terraform will refuse to lock you out of the bucket.
+The bootstrapped terraform state will use a local backend for storage, meaning the output of the terraform operations will be saved locally to disk as `terraform.tfstate`. After you have captured the access key id and secret key id in the final step, you should delete this file.
 
-Make sure you have terraform 0.13.5 from https://www.terraform.io/downloads.html and execute the following
+## Prerequisites
 
-    terraform init
-    terraform plan
-    terraform apply 
+1. aws-cli installed locally
+1. terraform CLI version matching the version used by Qontract-Reconcile (check `TERRAFORM_VERSION` [here](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/cli.py)). You can download Terraform from https://www.terraform.io/downloads.html.
+1. decrypted AWS account access credentials + details
+
+## Walkthrough
+
+### Create a new aws cli profile for your new cluster
+
+* Edit `~/.aws/config` and `~/.aws/credentials`, creating a new profile (i.e. `bootstrap-image-builder-stage`) using the decrypted access key id + secret access key. You'll need to reference this profile name in `config.tf` in the next step.
+
+### Edit config.tf
+
+* Edit line 3, changing `<bootstrap_profile_name>` to the new aws cli profile name you created, i.e. `bootstrap-image-builder-stage`
+* Edit line 7, changing `<account_uid>` to the AWS account number, i.e. `123456789`
+
+### Edit terraform-setup.tf
+
+* Edit line 24, changing `<terraform_bucket_name>` to reference the new AWS account name, i.e. `terraform-image-builder-stage`
+* Edit line 44, changing `<bootstraper_user_arn>` to a proper AWS IAM ARN, i.e. `arn:aws:iam::<AWS_ACCOUNT_NUMBER>:user/<ROOT_ACCOUNT_USERNAME>`
+
+### Perform a terraform run
+
+After saving the changes above, let's apply these changes to the live AWS account through terraform.
+
+* `terraform init`
+* `terraform plan`: the output of this step should show a new user, `terraform`, created in the account, as well as new S3 buckets
+* `terraform apply`: this will reconcile the expected state (as shown in plan) with reality. The result of this operation is a new local state file, `terraform.tfstate`, which contains all details and secrets related to the creation of the new user and S3 bucket. 
+
+### Capture the terraform user's AWS keys for later use
+
+Run `terraform show`, and capture the access key id and secret access key. You will need these to continue adding a new AWS account to app-interface. After you have captured the access key id and secret key id, you should delete `terraform.tfstate`.
