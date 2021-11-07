@@ -28,11 +28,20 @@ terraformResources:
   output_resource_name: quay-mysql-diag-s3
 
 openshiftResources:
-- provider: vault-secret
-  path: app-interface/quayio-prod-us-east-1/quay/quay-config-secret
-  version: 33
-  labels:
-    version: v33
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /quay-p/quay/quay-config.secret.yaml
+  variables:
+    recycle: true
+    name: quay-config-secret
+    vault_secret_version: 36
+    version_label: v36
+    readonly: false
+    standby: false
+    log_producer: kinesis_stream
+    enable_redis_modelcache: true
+    account_recovery_mode: false
+    read_from_rds_replica: false
 - provider: vault-secret
   path: app-interface/quayio-prod-us-east-1/quay-mysql-diag/app-sre-diag-mysql-defaults-extra-file
   version: 1
