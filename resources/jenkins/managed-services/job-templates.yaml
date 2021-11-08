@@ -591,12 +591,16 @@
         description: 'The branch of mk-performance-tests repo you want to run the pipeline against. Defaults to master'
     - string:
         name: OPENSHIFT_VERSION
-        default: '4.8.15'
-        description: 'The version of openshift to be used when deploying the OSD cluster. Default 4.8.15'
+        default: ''
+        description: 'The version of openshift to be used when deploying the OSD cluster. Default latest (empty)'
     - string:
         name: TESTCASE
         default: 'io.kafka.performance.KafkaInstanceScalingSmallTestDecoupled#testClusterMaxKafkaValueProdBinPacking'
         description: 'maven parameter for executing specific tests'
+    - string:
+        name: KAFKA_CLUSTER_NAME
+        default: ''
+        description: 'OSD cluster name (if not defined, a random name will be set), max name length is 14 characters. If the cluster already exists, it will be used. Otherwise, it will be provisioned'
     - string:
         name: KAFKA_OSD_CLUSTER_CONFIG
         default: 'COMPUTE_NODES_COUNT=6,
@@ -604,6 +608,10 @@
          OCM_CLUSTER_REGION=us-east-1,
          MULTI_AZ=true'
         description: 'The variables needed to provision an OSD where kafka will be installed'
+    - string:
+        name: OMB_CLUSTER_NAME
+        default: ''
+        description: 'OSD cluster name (if not defined, a random name will be set), max name length is 14 characters. If the cluster already exists, it will be used. Otherwise, it will be provisioned'
     - string:
         name: OMB_OSD_CLUSTER_CONFIG
         default: 'COMPUTE_NODES_COUNT=2,
@@ -614,6 +622,10 @@
     - string:
         name: NUMBER_OF_KAFKA_INSTANCES
         default: '1'
+    - string:
+        name: KAFKA_INSTANCE_NAME
+        default: 'instance'
+        description: 'The namespace of an existing Kafka instance you want to run the pipeline against. If there are more than one instace, a random string will be suffixed'
     - string:
         name: KAFKA_CAPACITY_CONFIG
         default: 'INGRESS_THROUGHPUT=30Mi,
@@ -635,6 +647,10 @@
          SUBSCRIPTIONS_PER_TOPIC=1,
          CONSUMER_PER_SUBSCRIPTION=1'
         description: 'The variables needed to configure the test case to be executed'
+    - bool:
+        name: DEPROVISION_CLUSTER
+        default: true
+        description: If true the provisioned or provided cluster will be deleted
     branch: '${{BRANCH}}'
     <<: *gl_checkout
     builders:
@@ -677,12 +693,20 @@
         default: 'io.kafka.performance.KafkaInstanceScalingSmallTestDecoupled#testClusterMaxKafkaValueProdBinPacking'
         description: 'maven parameter for executing specific tests'
     - string:
+        name: KAFKA_CLUSTER_NAME
+        default: ''
+        description: 'OSD cluster name (if not defined, a random name will be set), max name length is 14 characters. If the cluster already exists, it will be used. Otherwise, it will be provisioned'
+    - string:
         name: KAFKA_OSD_CLUSTER_CONFIG
         default: 'COMPUTE_NODES_COUNT=6,
          COMPUTE_MACHINE_TYPE=m5.4xlarge,
          OCM_CLUSTER_REGION=us-east-1,
          MULTI_AZ=true'
         description: 'The variables needed to provision an OSD where kafka will be installed'
+    - string:
+        name: OMB_CLUSTER_NAME
+        default: ''
+        description: 'OSD cluster name (if not defined, a random name will be set), max name length is 14 characters. If the cluster already exists, it will be used. Otherwise, it will be provisioned'
     - string:
         name: OMB_OSD_CLUSTER_CONFIG
         default: 'COMPUTE_NODES_COUNT=2,
@@ -693,6 +717,10 @@
     - string:
         name: NUMBER_OF_KAFKA_INSTANCES
         default: '1'
+    - string:
+        name: KAFKA_INSTANCE_NAME
+        default: 'instance'
+        description: 'The namespace of an existing Kafka instance you want to run the pipeline against.'
     - string:
         name: KAFKA_CAPACITY_CONFIG
         default: 'INGRESS_THROUGHPUT=30Mi,
@@ -714,6 +742,10 @@
          SUBSCRIPTIONS_PER_TOPIC=1,
          CONSUMER_PER_SUBSCRIPTION=1'
         description: 'The variables needed to configure the test case to be executed'
+    - bool:
+        name: DEPROVISION_CLUSTER
+        default: true
+        description: If true the provisioned or provided cluster will be deleted
     branch: '${{BRANCH}}'
     <<: *gl_checkout
     <<: *gl_timed
