@@ -1,0 +1,55 @@
+---
+$schema: /openshift/cluster-1.yml
+
+labels:
+  service: insights
+
+name: crcd01ue1
+description: Insights CCS cluster for development testing
+consoleUrl: https://console-openshift-console.apps.crcd01ue1.zmsj.p1.openshiftapps.com/
+kibanaUrl: ''
+prometheusUrl: ''
+alertmanagerUrl: ''
+serverUrl: https://api.crcd01ue1.zmsj.p1.openshiftapps.com:6443
+elbFQDN: elb.apps.crcd01ue1.zmsj.p1.openshiftapps.com
+
+#observabilityNamespace:
+#  $ref: /services/observability/namespaces/openshift-customer-monitoring.crcd01ue1.yml
+
+
+automationToken:
+  path: insights/creds/kube-configs/crcd01ue1
+  field: token
+
+clusterAdminAutomationToken:
+  path: insights/creds/kube-configs/crcd01ue1-cluster-admin
+  field: token
+
+# this cluster is a CCS cluster and app-sre does not have ocm access,
+# so app-interface cannot create an IDP for it.
+#auth:
+#  service: github-org-team
+#  org: app-sre
+#  team: insights-crcd01ue1-cluster
+
+managedGroups:
+- dedicated-readers
+
+internal: false
+
+managedClusterRoles: true
+
+disable:
+  integrations:
+  - openshift-users
+  # - openshift-groups
+  # - openshift-resources
+  # - openshift-rolebindings
+  # - openshift-network-policies
+  # - openshift-namespaces
+  # - openshift-namespace-labels
+  e2eTests:
+  - create-namespace
+  - dedicated-admin-rolebindings
+  - default-network-policies
+  - default-project-labels
