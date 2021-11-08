@@ -220,6 +220,15 @@
     ci_cmd: ./ephemeral.sh
     gl_group: insights-platform
     gl_project: cicd-common
+    app_name: '{app_name}'
+    component_name: '{component_name}'
+    image: '{image}'
+    git_commit: '{git_commit}'
+    image_tag: '{image_tag}'
+    components: '{components}'
+    components_w_resources: '{components_w_resources}'
+    deploy_timeout: '{deploy_timeout}'
+    additional_arg: '{additional_arg}'
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'
@@ -236,42 +245,54 @@
     parameters:
     - string:
         name: APP_NAME
-        default: automation-hub
+        default: '{app_name}'
         description: "(REQUIRED) name of app-sre 'application' folder this component lives in"
     - string:
         name: COMPONENT_NAME
-        default: automation-hub
+        default: '{component_name}'
         description: "(REQUIRED) name of app-sre 'resourceTemplate' in deploy.yaml for this component"
     - string:
         name: IMAGE
-        default: "quay.io/cloudservices/automation-hub-galaxy-ng"
+        default: '{image}'
         description: "(REQUIRED) image location on quay"
     - string:
-        name: COMPONENTS
-        default: ""
-        description: "(optional, default: all) space separated components to deploy"
-    - string:
-        name: COMPONENTS_W_RESOURCES
-        default: "all"
-        description: "(optional, default: none) space separated components which should preserve resource settings"
-    - string:
-        name: DEPLOY_TIMEOUT
-        default: ""
-        description: "(optional, default: 300) bonfire deployment timeout parameter in seconds"
-    - string:
         name: GIT_COMMIT_INPUT
-        default: 7a70ff118ad599cb29503d56c8caf8e550ecb5fc
+        default: '{git_commit}'
         description: "(REQUIRED) full git commit hash of the version being tested"
     - string:
         name: IMAGE_TAG_INPUT
-        default: 7a70ff1
-        description: "(optional, default matches GIT_COMMIT_INPUT) image tag for the version being tested"
+        default: '{image_tag}'
+        description: "(optional, default matches short GIT_COMMIT_INPUT) image tag for the version being tested"
+    - string:
+        name: COMPONENTS
+        default: '{components}'
+        description: "(optional, default: all) space separated components to deploy"
+    - string:
+        name: COMPONENTS_W_RESOURCES
+        default: '{components_w_resources}'
+        description: "(optional, default: none) space separated components which should preserve resource settings"
+    - string:
+        name: DEPLOY_TIMEOUT
+        default: '{deploy_timeout}'
+        description: "(optional, default: 300) bonfire deployment timeout parameter in seconds"
+    - string:
+        name: ADDITIONAL_ARG
+        default: '{additional_arg}'
+        description: "(optional, default: none) additional arguments passed to the bonfire deployment"
     - choice:
         name: RESERVATION_DURATION
         choices:
           - "1"
           - "2"
         description: "Number of hours for which the ephemeral namespace is reserved"
+    - bool:
+        name: RELEASE_NAMESPACE
+        default: false
+        description: "(optional) Release a previously reserved namespace, instead of deploying a new release"
+    - string:
+        name: NAMESPACE
+        default: ""
+        description: "(REQUIRED only if RELEASE_NAMESPACE=true) Namespace number to release. E.g. if the namepace is ephemeral-01, please enter: 01"
     builders:
     - shell:
         command: "{ci_cmd}"
