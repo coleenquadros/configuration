@@ -87,7 +87,7 @@ There are 6 Kafka reconcilers in total, each covering a particular Kafka instanc
 
 ##### OSD cluster reconciler
 The OSD cluster reconciler is responsible for dynamic OSD cluster provisioning, terraforming and scaling. 
-It also handles deprovioning of OSD clusters when demands decreases.
+It also handles deprovisioning of OSD clusters when demands decreases.
 There is one leader across all replicas. The leader is elected via the distributed leader election algorithm. 
 
 Terraforming in this context is the provisioning of all additional Managed Kafka components on the OSD cluster after cluster service reports it is ready. This mainly includes the fleetshard operator, observability operator and Kafka SRE IDP.
