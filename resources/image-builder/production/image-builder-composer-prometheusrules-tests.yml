@@ -7,6 +7,63 @@ rule_files:
 evaluation_interval: 5m
 
 tests:
+
+# ComposerNoPodsFound
+- interval: 5m
+  input_series:
+  - series: up{namespace="composer-production"}
+    values: 0+0x4
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: ComposerNoPodsFound
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: image-builder
+        env: prod
+        app_team: image-builder
+      exp_annotations:
+        message: "No pods found in the namespace"
+
+- interval: 5m
+  input_series:
+  - series: up{namespace="composer-production"}
+    values: 1+1x4
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: ComposerNoPodsFound
+    exp_alerts: []
+
+# ComposerPodDown
+- interval: 5m
+  input_series:
+  - series: up{namespace="composer-production", pod="pod-1"}
+    values: 1+1x4
+  - series: up{namespace="composer-production", pod="pod-2"}
+    values: 0+0x4
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: ComposerPodDown
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: image-builder
+        env: prod
+        app_team: image-builder
+        pod: pod-2
+      exp_annotations:
+        message: "Pod (pod-2) down!"
+
+- interval: 5m
+  input_series:
+  - series: up{namespace="composer-production", pod="pod-1"}
+    values: 1+1x4
+  - series: up{namespace="composer-production", pod="pod-2"}
+    values: 1+1x4
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: ComposerPodDown
+
 # 2% composer error budget consumption / 13.44 burn rate
 - interval: 5m
   input_series:

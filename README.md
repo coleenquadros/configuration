@@ -2312,7 +2312,7 @@ Additional design information: [here](docs/app-interface/design.md)
 
 ## Developer Guide
 
-More information [here](docs/app-sre/sop/app-interface/development-environment-setup.md).
+More information [here](docs/app-sre/sop/app-interface-development-environment-setup.md)
 
 ## Quay Documentation
 

@@ -4,7 +4,7 @@
 We are measuring the proportion of Kafka instance lifecycle operations (creation and deletion) that were successful.
 
 ## SLI Rationale
-Ensuring that a Kafka instance has been created or deleted sucessfully is integral to ensuring good user experience. 
+Ensuring that a Kafka instance has been created or deleted successfully is integral to ensuring good user experience. 
 
 ## Implementation details
 There are two SLIs backing this SLO. Both use the same metric with a different `operation` label for differentiating between `create` and `delete`. This SLI uses the `kas_fleet_manager_kafka_operations_success_count` and `kas_fleet_manager_kafka_operations_total_count` metrics.
@@ -18,7 +18,7 @@ The `kas_fleet_manager_kafka_operations_success_count` counter is incremented fo
 The `kas_fleet_manager_kafka_operations_total_count` counter is incremented in both scenarios above and also when the Kafka instance changes to a failed state which is reported from the `fleetshard-operator` in the data plane.
 
 ## SLO Rationale
-Kafka instance creations and deletions are expected to be succcessful 99 percent of the time. This has been proven while observing the SLO in production and during scale testing.
+Kafka instance creations and deletions are expected to be successful 99 percent of the time. This has been proven while observing the SLO in production and during scale testing.
 
 ## Alerts
 All alerts are multiwindow, multi-burn-rate alerts. The following are the list of alerts that are associated with this SLO.

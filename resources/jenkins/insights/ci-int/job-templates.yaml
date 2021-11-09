@@ -215,6 +215,7 @@
 
 - job-template:
     id: 'insights-deploy-ephemeral'
+    description: 'To 1) reserve and deploy an Insight app to ephemeral cluster 2) release namespaces the user has reserved.'
     name: '{name}-ephemeral'
     node: '{node}'
     ci_cmd: ./ephemeral.sh
@@ -243,10 +244,22 @@
         - *insightsdroid_github
     <<: *gl_checkout
     parameters:
+    - bool:
+        name: RELEASE_NAMESPACE
+        default: false
+        description: "(optional) Release a previously reserved namespace. Selecting this will not deploy anything"
+    - string:
+        name: NAMESPACE
+        default: ""
+        description: "(REQUIRED only if RELEASE_NAMESPACE=true) Namespace number to release. E.g. if the namepace is ephemeral-01, please enter: 01. Enter 'all' to release all of current user's"
     - string:
         name: APP_NAME
         default: '{app_name}'
         description: "(REQUIRED) name of app-sre 'application' folder this component lives in"
+    - bool:
+        name: INCLUDE_UI
+        default: {include_ui}
+        description: "(optional) if selected, UI will be deployed as well"
     - string:
         name: COMPONENT_NAME
         default: '{component_name}'
@@ -285,14 +298,6 @@
           - "1"
           - "2"
         description: "Number of hours for which the ephemeral namespace is reserved"
-    - bool:
-        name: RELEASE_NAMESPACE
-        default: false
-        description: "(optional) Release a previously reserved namespace, instead of deploying a new release"
-    - string:
-        name: NAMESPACE
-        default: ""
-        description: "(REQUIRED only if RELEASE_NAMESPACE=true) Namespace number to release. E.g. if the namepace is ephemeral-01, please enter: 01"
     builders:
     - shell:
         command: "{ci_cmd}"
