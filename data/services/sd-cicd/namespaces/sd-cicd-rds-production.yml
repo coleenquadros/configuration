@@ -1,0 +1,30 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: sd-cicd
+description: namespace for sd-cicd
+
+cluster:
+  $ref: /openshift/app-sre-prod-01/cluster.yml
+
+app:
+  $ref: /services/sd-cicd/app.yml
+
+environment:
+  $ref: /products/app-interface/environments/production.yml
+
+managedRoles: true
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: app-sre
+  identifier: sd-cicd-data
+  defaults: /terraform/resources/sd-cicd/postgres12-group-sd-cicd-engine-prod.yml
+  overrides:
+    snapshot_identifier: cicd-data-1-2021-11-08-app-interface
+  output_resource_name: sd-cicd-data
+  enhanced_monitoring: true
