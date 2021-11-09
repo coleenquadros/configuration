@@ -1,7 +1,7 @@
 # Kafka Service Fleet Manager - Kafka Provisioning Latency SLO/SLI
 
 ## SLI description
-We are measuring the creation time of all successful Kafka provisioning, starting from the time a Kafka creation request is receieved until the Kafka instance changes to a `ready` state.
+We are measuring the creation time of all successful Kafka provisioning, starting from the time a Kafka creation request is received until the Kafka instance changes to a `ready` state.
 
 ## SLI Rationale
 The time to readiness of a new Kafka instance is integral to the user experience of our Managed Kafka service.
