@@ -39,6 +39,32 @@ A new provider must be put in place, fulfilling our needs in terms of usage and 
 - bot
   - we currently have a bot taking actions on Jenkins. This could be replaced by a local token bot and does not need to be part of the new authentication solution.
 
+### Jenkins Configuration
+
+Sources of information:
+* https://source.redhat.com/groups/public/identity-access-management/identity__access_management_wiki/jenkins_saml_enablement_notes
+* https://docs.engineering.redhat.com/pages/viewpage.action?spaceKey=RHELPLAN&title=Jenkins+Maintenance#JenkinsMaintenance-Step4.JenkinsconfigurationtouseSAML
+
+Install the SAML v2 plugin on Jenkins
+
+Then in the `Configure Global Security` section of the Jenkins configuration:
+* Set `Security Realm` to `SAML v2.0`
+* Set `IdP metadata URL` to
+  * stage:  https://auth.stage.redhat.com/auth/realms/EmployeeIDP/protocol/saml/descriptor
+  * prod: 
+* `Display Name Attribute`
+  * `urn:oid:2.5.4.3`
+* `Group Attribute`
+  * `Role`
+* `Maximum Authentication Lifetime`
+  * `43200`
+* `Username Attribute`
+  * `rhatUUID` or `uid` ? 
+* `Email Attribute`
+  * `urn:oid:1.2.840.113549.1.9.1`
+
+Test
+
 ## Non-objectives
 - We do not seek at replacing our current setup of Jenkins or Vault. Bringing this topic up because it was mentioned in some discussion.
 
