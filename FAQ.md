@@ -165,7 +165,6 @@ Choose the namespace for which you would like to find the Console/Prometheus URL
 Choosing the namespace will take you to the namespace's page, in which you can find a link to the cluster running this namespace.
 
 In the Cluster page, you can find links to the cluster's Console and to the cluster's Prometheus.
-
  
 ### Can you restart my pods?
 
