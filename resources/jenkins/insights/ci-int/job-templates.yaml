@@ -215,21 +215,22 @@
 
 - job-template:
     id: 'insights-deploy-ephemeral'
-    description: 'To 1) reserve and deploy an Insight app to ephemeral cluster 2) release namespaces the user has reserved.'
+    description: 'To 1) reserve and deploy an Insight app to ephemeral cluster 2) release namespaces the user has reserved. For additional documentation and usage instructions please see: https://docs.google.com/document/d/1f6D1ZwE40QuyoqsfuXpqPlCqOVwssGNEwr-iGDOYvVY/'
     name: '{name}-ephemeral'
     node: '{node}'
     ci_cmd: ./ephemeral.sh
     gl_group: insights-platform
     gl_project: cicd-common
-    app_name: '{app_name}'
-    component_name: '{component_name}'
-    image: '{image}'
-    git_commit: '{git_commit}'
-    image_tag: '{image_tag}'
-    components: '{components}'
-    components_w_resources: '{components_w_resources}'
-    deploy_timeout: '{deploy_timeout}'
-    additional_arg: '{additional_arg}'
+    app_name: ""
+    component_name: ""
+    image: ""
+    git_commit: ""
+    image_tag: ""
+    components: ""
+    components_w_resources: ""
+    deploy_timeout: ""
+    additional_arg: ""
+    post_deployment_script: ""
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'
@@ -292,11 +293,19 @@
         name: ADDITIONAL_ARG
         default: '{additional_arg}'
         description: "(optional, default: none) additional arguments passed to the bonfire deployment"
+    - string:
+        name: POST_DEPLOYMENT_SCRIPT
+        default: '{post_deployment_script}'
+        description: "(optional, default: none) a post deployment script to run from the cicd-common/app_scripts directory."
     - choice:
         name: RESERVATION_DURATION
         choices:
           - "1"
           - "2"
+          - "4"
+          - "12"
+          - "24"
+          - "72"
         description: "Number of hours for which the ephemeral namespace is reserved"
     builders:
     - shell:
