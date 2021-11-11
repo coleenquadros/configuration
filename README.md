@@ -2059,6 +2059,13 @@ schedule: <if defined the output resource will be a CronJob instead of a Job>
 query: <sql query>
 ```
 
+**Note:** Query files are only executed once unless a `schedule` is defined
+(mentioned later in this section). The query file execution status is tracked
+using the `name` field. If you wish to run an existing query file a second time
+(possibly including modifications to the queries), you must change the `name`
+field. This can be achieved by copying the existing file to a new file with a
+new `name`, or reusing the existing file and changing the query `name`.
+
 If you want to run multiple queries in the same spec, you can define the
 `queries` list instead of the `query` string. Example:
 
