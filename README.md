@@ -74,6 +74,7 @@ this repository.
         - [Publishing Database Log Files to CloudWatch](#publishing-database-log-files-to-cloudwatch)
         - [Publishing MySQL Logs to CloudWatch Logs](#publishing-mysql-logs-to-cloudwatch-logs)
         - [Publishing PostgreSQL Logs to CloudWatch Logs](#publishing-postgresql-logs-to-cloudwatch-logs)
+        - [Configuring access policies for Performance Insights(#configuring-access-policies-for-performance-insights)
       - [Manage S3 buckets via App-Interface (`/openshift/namespace-1.yml`)](#manage-s3-buckets-via-app-interface-openshiftnamespace-1yml)
       - [Manage ElastiCache databases via App-Interface (`/openshift/namespace-1.yml`)](#manage-elasticache-databases-via-app-interface-openshiftnamespace-1yml)
       - [Manage IAM Service account users via App-Interface (`/openshift/namespace-1.yml`)](#manage-iam-service-account-users-via-app-interface-openshiftnamespace-1yml)
@@ -1405,6 +1406,16 @@ The `log_min_duration_statement` parameter sets the limit in milliseconds of a s
 After you complete the configuration, Amazon RDS publishes the log events to log streams within a CloudWatch log group. For example, the PostgreSQL log data is stored within the log group `/aws/rds/instance/my_instance/postgresql`.
 
 Additonal details can be found in AWS [documentation](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_LogAccess.Concepts.PostgreSQL.html#USER_LogAccess.PostgreSQL.Query_Logging).
+
+##### Configuring access policies for Performance Insights
+
+To access Performance Insights you should have a `role` assigned to your user file with a `user_policies` section that includes a reference to a `performance-insights-access` AWS user policy.
+
+If the policy does not exist for the AWS account, add it.
+
+[Example](/data/aws/insights-prod/policies/PerformanceInsights.yml) for a `performance-insights-access` AWS policy.
+
+Additional details can be found in AWS [documentation](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.access-control.html).
 
 #### Manage S3 buckets via App-Interface (`/openshift/namespace-1.yml`)
 
