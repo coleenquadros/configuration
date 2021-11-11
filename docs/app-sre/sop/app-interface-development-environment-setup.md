@@ -123,10 +123,10 @@ The development environment currently has actual resources behind it: an OSD clu
 
 To make the required changes to work with those resources, run the following commands in the `app-interface` directory:
 
-    ```sh
-    sed -i 's|serverUrl.*|serverUrl: https://api.appint-ex-01.e7t8.p1.openshiftapps.com:6443|g' data/clusters/appint-ex-01/cluster.yml
-    sed -i 's|012345678910|249118421612|g' data/aws/app-int-example/account.yml
-    ```
+```sh
+sed -i 's|serverUrl.*|serverUrl: https://api.appint-ex-01.e7t8.p1.openshiftapps.com:6443|g' data/clusters/appint-ex-01/cluster.yml
+sed -i 's|012345678910|249118421612|g' data/aws/app-int-example/account.yml
+```
 
 ## Creating a new integration
 
@@ -144,16 +144,16 @@ An integration is **any** piece of software that has the following properties:
 
 Manage your remote repo as following to avoid confusion of "origin"
 
-    ```sh
-    $ git remote -v
-    <redhat_username>   git@gitlab.cee.redhat.com:<redhat_username>/app-interface.git (fetch)
-    <redhat_username>   git@gitlab.cee.redhat.com:<redhat_username>/app-interface.git (push)
-    upstream	git@gitlab.cee.redhat.com:service/app-interface (fetch)
-    upstream	git@gitlab.cee.redhat.com:service/app-interface (push)
-    ```
+```sh
+$ git remote -v
+<redhat_username>   git@gitlab.cee.redhat.com:<redhat_username>/app-interface.git (fetch)
+<redhat_username>   git@gitlab.cee.redhat.com:<redhat_username>/app-interface.git (push)
+upstream	git@gitlab.cee.redhat.com:service/app-interface (fetch)
+upstream	git@gitlab.cee.redhat.com:service/app-interface (push)
+```
 
 To keep your repo up to date:
 
-    ```sh
-    $ git pull upstream master && git push <redhat_username> master
-    ```
+```sh
+$ git pull upstream master && git push <redhat_username> master
+```
