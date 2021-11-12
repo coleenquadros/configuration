@@ -28,7 +28,9 @@ The "Red Hat Internal / Employee SSO" is auth.redhat.com. It is the SSO service 
 
 auth.redhat.com is actually implemented with the product [Red Hat SSO](https://access.redhat.com/products/red-hat-single-sign-on). The upstream community project is [KeyCloak](https://www.keycloak.org/) ([GitHub](https://github.com/keycloak/keycloak)). This implementation uses the Red Hat corporate LDAP (ldap.corp.redhat.com) as a backend. It allows to build an SSO solution with standards like [SAML](https://en.wikipedia.org/wiki/Security_Assertion_Markup_Language) and [OpenID Connect (aka OIDC)](https://openid.net/connect/).
 
-The IAM team is working on an API which should allow to manage groups in auth.redhat.com. See the documentation here: https://source.redhat.com/groups/public/identity-access-management/identity__access_management_wiki/enterprise_iam_user_documentation#jive_content_id_Group_Management
+The IAM team is working on an API which should allow to manage groups in auth.redhat.com. See the documentation here: https://source.redhat.com/groups/public/identity-access-management/identity__access_management_wiki/enterprise_iam_user_documentation#jive_content_id_Group_Management.
+
+Discussions are ongoing to see when we'd be able to really use this API. Their current wish is to wait for Rover Groups to implement that API first. This is to avoid group name clash or mistakenly overridden by Rover Groups. Rover Group (Philip Meilleur) stated they wish to finish that migration by the end of 2021. This means we'd be able to use the IAM API beginning of 2022. There are no commitments there. We're also discussing if we can accept that group name clash risk.
 
 New integrations need to be requested via ServiceNow with a [SSO Enablement Request request](https://redhat.service-now.com/help?id=sc_cat_item&sys_id=7ab45993131c9380196f7e276144b054) like [RITM1027367](https://redhat.service-now.com/help?id=rh_ticket&table=sc_req_item&sys_id=b3f807d61be7f850c57c3224cc4bcb49)
 
