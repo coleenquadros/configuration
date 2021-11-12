@@ -637,11 +637,11 @@
         description: 'The variables needed to configure the kafka installation'
     - string:
         name: TEST_EXECUTION_CONFIG
-        default: 'OMB_TEST_DURATION=PT15M, 
-         TARGET_RATE=29, 
-         WORKERS_PER_INSTANCE=2, 
-         TOPICS_PER_KAFKA=1, 
-         PRODUCERS_PER_TOPIC=1, 
+        default: 'OMB_TEST_DURATION=PT15M,
+         TARGET_RATE=29,
+         WORKERS_PER_INSTANCE=2,
+         TOPICS_PER_KAFKA=1,
+         PRODUCERS_PER_TOPIC=1,
          PAYLOAD_FILE_SIZE=1013Ki,
          PARTITIONS_PER_TOPIC=9,
          SUBSCRIPTIONS_PER_TOPIC=1,
@@ -732,11 +732,11 @@
         description: 'The variables needed to configure the kafka installation'
     - string:
         name: TEST_EXECUTION_CONFIG
-        default: 'OMB_TEST_DURATION=PT60M, 
-         TARGET_RATE=29, 
-         WORKERS_PER_INSTANCE=2, 
-         TOPICS_PER_KAFKA=1, 
-         PRODUCERS_PER_TOPIC=1, 
+        default: 'OMB_TEST_DURATION=PT60M,
+         TARGET_RATE=29,
+         WORKERS_PER_INSTANCE=2,
+         TOPICS_PER_KAFKA=1,
+         PRODUCERS_PER_TOPIC=1,
          PAYLOAD_FILE_SIZE=1013Ki,
          PARTITIONS_PER_TOPIC=9,
          SUBSCRIPTIONS_PER_TOPIC=1,
@@ -1085,30 +1085,43 @@
             - *ci_kas_abnormal_workloads
     concurrent: true
     parameters:
-    - string:
-        name: CLIENT_APPS
-        default: 'jvm'
-        description: 'Kafka client libraries separated by comma (,)'
+    - choice:
+        name: CLIENT_APP
+        description: 'Kafka client libraries to be used for scenarios execution'
+        choices:
+          - jvm
+          - librdkafka-py
+          - native-py
     - bool:
         name: PRODUCER
         default: 'true'
         description: 'Provision Producer Apps'
-    - string:
-        name: PRODUCER_SCENARIOS
-        default: 'bl'
-        description: 'List of workload scenarios to run separated by comma (bl,na,dc,nb,ps)'
+    - choice:
+        name: PRODUCER_SCENARIO
+        description: 'Abnormal producer workload scenario to be executed'
+        choices:
+          - bl
+          - na
+          - dc
+          - nb
+          - ps
     - bool:
         name: CONSUMER
         default: 'true'
         description: 'Provision Consumer Apps'
-    - string:
-        name: CONSUMER_SCENARIOS
-        default: 'bl'
-        description: 'List of workload scenarios to run separated by comma (bl,ccg,gpc,mo,rp)'
+    - choice:
+        name: CONSUMER_SCENARIO
+        description: 'Abnormal consumer workload scenario to be executed'
+        choices:
+          - bl
+          - ccg
+          - gpc
+          - mo
+          - rp
     - string:
         name: CONSUMER_GROUPS
         default: '1'
-        description: 'How many consumer groups to be used by consumer clients'
+        description: 'How many consumer groups to be used by consumer clients, clients are split equally between groups'
     - string:
         name: THREADS
         default: '5'
@@ -1120,7 +1133,7 @@
     - string:
         name: TEST_DURATION
         default: '30'
-        description: 'Test duration in minutes, cluster lifespan will be extended if (now + TEST_DURATION + 30mins) > clusters expiration_timestamp'
+        description: 'Test duration in minutes, cluster lifespan will be extended if (now + TEST_DURATION + 60mins) > clusters expiration_timestamp'
     - string:
         name: TOPIC
         default: ''
