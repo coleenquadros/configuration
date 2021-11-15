@@ -74,6 +74,7 @@ this repository.
         - [Publishing Database Log Files to CloudWatch](#publishing-database-log-files-to-cloudwatch)
         - [Publishing MySQL Logs to CloudWatch Logs](#publishing-mysql-logs-to-cloudwatch-logs)
         - [Publishing PostgreSQL Logs to CloudWatch Logs](#publishing-postgresql-logs-to-cloudwatch-logs)
+        - [Configuring access policies for Performance Insights(#configuring-access-policies-for-performance-insights)
       - [Manage S3 buckets via App-Interface (`/openshift/namespace-1.yml`)](#manage-s3-buckets-via-app-interface-openshiftnamespace-1yml)
       - [Manage ElastiCache databases via App-Interface (`/openshift/namespace-1.yml`)](#manage-elasticache-databases-via-app-interface-openshiftnamespace-1yml)
       - [Manage IAM Service account users via App-Interface (`/openshift/namespace-1.yml`)](#manage-iam-service-account-users-via-app-interface-openshiftnamespace-1yml)
@@ -86,7 +87,8 @@ this repository.
       - [Manage CloudWatch Log Groups via App-Interface (`/openshift/namespace-1.yml`)](#manage-cloudwatch-log-groups-via-app-interface-openshiftnamespace-1yml)
       - [Manage Key Management Service Keys via App-Interface (`/openshift/namespace-1.yml`)](#manage-key-management-service-keys-via-app-interface-openshiftnamespace-1yml)
       - [Manage Kinesis Streams via App-Interface (`/openshift/namespace-1.yml`)](#manage-kinesis-streams-via-app-interface-openshiftnamespace-1yml)
-      - [Manage VPCs via App-Interface (`/openshift/cluster-1.yml`)](#manage-vpcs-via-app-interface-openshiftcluster-1yml)
+      - [Manage VPC peerings via App-Interface (`/openshift/cluster-1.yml`)](#manage-vpc-peerings-via-app-interface-openshiftcluster-1yml)
+      - [Manage Application Load Balancers via App-Interface (`/openshift/cluster-1.yml`)](#manage-application-load-balancers-via-app-interface-openshiftcluster-1yml)
     - [Manage Slack User groups via App-Interface](#manage-slack-user-groups-via-app-interface)
     - [Manage Jenkins jobs configurations using jenkins-jobs](#manage-jenkins-jobs-configurations-using-jenkins-jobs)
     - [Delete AWS IAM access keys via App-Interface](#delete-aws-iam-access-keys-via-app-interface)
@@ -110,13 +112,13 @@ This repository contains of a collection of files under the `data` folder.
 Whatever is present inside that folder constitutes the App-SRE contract.
 
 These files can be `yaml` or `json` files, and they must validate against some
-[well-defined json schemas][schemas].
+[well-defined json schemas][https://github.com/app-sre/qontract-schemas].
 
 The path of the files do not have any effect on the integrations (automation
 components that feed off the contract), but the contents of the files do. They
 will all contain:
 
-- `$schema`: which maps to a well defined schema [schema][schemas].
+- `$schema`: which maps to a well defined schema [schema][https://github.com/app-sre/qontract-schemas].
 - `labels`: arbitrary labels that can be used to perform queries, etc.
 - Additional data specific to the resource in question.
 
@@ -127,8 +129,10 @@ Continuous delivery is managed using the
 
 Main App-Interface contract components:
 
-- <https://gitlab.cee.redhat.com/service/app-interface>: datafiles (schema
-  implementations) that define the contract. JSON and GraphQL schemas of the datafiles.
+- <https://gitlab.cee.redhat.com/service/app-interface>: data files
+  that implement the contract.
+- <https://github.com/app-sre/qontract-schemas>: schema file
+  that define the contract. JSON and GraphQL schemas of the data files.
 - <https://github.com/app-sre/qontract-server>: The GraphQL component developed
   in this repository will make the datafiles queryable.
 
@@ -154,7 +158,7 @@ amendment. Some examples would be:
 
 All contract amendments must be formally defined. Formal definitions are
 expressed as json schemas. You can find the supported schemas here:
-[schemas][schemas].
+[schemas][https://github.com/app-sre/qontract-schemas].
 
 1. The interested party will:
 
@@ -620,7 +624,7 @@ In order to get access to Sentry, a user has to have:
 
 [services](/data/services) contains all the services that are being run by the App-SRE team. Inside of those directories, there is a `namespaces` folder that lists all the `namespaces` that are linked to that service.
 
-Namespaces declaration enforce [this JSON schema](/schemas/openshift/namespace-1.yml). Note that it contains a reference to the cluster in which the namespace exists.
+Namespaces declaration enforce [this JSON schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/openshift/namespace-1.yml). Note that it contains a reference to the cluster in which the namespace exists.
 
 A namespace declaration can contain labels. These will be applied as kubernetes labels on the namespace resource. Note that
 * labels must conform to [Kubernetes Labels constraints](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#syntax-and-character-set).
@@ -632,7 +636,7 @@ Notes:
 * If a resource has a `qontract.recycle: "true"` annotation, all pods using that resource will be recycled on every update.
   * Supported resources: Secrets, ConfigMaps
 
-OpenShift resources can be entirely self-serviced via App-Interface. A list of supported resource types can be found [here](/schemas/openshift/namespace-1.yml#L46).
+OpenShift resources can be entirely self-serviced via App-Interface. A list of supported resource types can be found [here](https://github.com/app-sre/qontract-schemas/blob/main/schemas/openshift/namespace-1.yml#L46).
 
 Some resources have special characteristics and are described further below. These have a specific `provider` value.
 - `Secret`
@@ -809,7 +813,7 @@ use `ref` master for stage namespaces and a commit hash as exists in other `ref`
 
 [openshift](/data/openshift) contains all the clusters that are managed by the App-SRE team. Inside of those directories, there is a `cluster.yml` file that describes the cluster.
 
-Clusters declaration enforce [this JSON schema](/schemas/openshift/cluster-1.yml).
+Clusters declaration enforce [this JSON schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/openshift/cluster-1.yml).
 
 OpenShift group association can be self-serviced via App-Interface.
 
@@ -1030,7 +1034,7 @@ For more information please see [vault secrets engines documentation](https://ww
 ### Manage DNS Zones via App-Interface (`/aws/dns-zone-1.yml`) using Terraform
 
 DNS Zones can be managed in app-interface. A DNS zone follows [this
-JSON schema](/schemas/dependencies/dns-zone-1.yml).
+JSON schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/dependencies/dns-zone-1.yml).
 
 - `name`: A name for the DNS zone
 - `description`: Description for the DNS zone
@@ -1141,7 +1145,7 @@ records:
 
 [teams](/data/teams) contains all the teams that are being services by the App-SRE team. Inside of those directories, there is a `users` folder that lists all the `users` that are linked to that team. Each `user` has a list of assiciated `roles`. A `role` can be used to grant AWS access to a user, by adding the `user` to an AWS `group`.
 
-Groups declaration enforce [this JSON schema](/schemas/aws/group-1.yml). Note that it contains a reference to the AWS account in which the group exists.
+Groups declaration enforce [this JSON schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/aws/group-1.yml). Note that it contains a reference to the AWS account in which the group exists.
 
 Notes:
 * Manual changes to AWS resources will be overridden by App-Interface in each run.
@@ -1212,7 +1216,7 @@ Example: https://gitlab.cee.redhat.com/service/app-interface/blob/f40e0f27eacf55
 
 [services](/data/services) contains all the services that are being run by the App-SRE team. Inside of those directories, there is a `namespaces` folder that lists all the `namespaces` that are linked to that service.
 
-Namespaces declaration enforce [this JSON schema](/schemas/openshift/namespace-1.yml). Note that it contains a reference to the cluster in which the namespace exists.
+Namespaces declaration enforce [this JSON schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/openshift/namespace-1.yml). Note that it contains a reference to the cluster in which the namespace exists.
 
 Notes:
 * Manual changes to AWS resources will be overridden by App-Interface in each run.
@@ -1314,7 +1318,7 @@ RDS instances can be entirely self-serviced via App-Interface.
 In order to create or update an RDS database, you need to add them to the `terraformResources` field.
 
 - `provider`: must be `rds`
-- `account`: must be one of the AWS account names managed by app-interface. Account values can be found [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/schemas/aws/tenant_accounts-1.yml).
+- `account`: must be one of the AWS account names managed by app-interface. Account values can be found [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/masterhttps://github.com/app-sre/qontract-schemas/blob/main/schemas/aws/tenant_accounts-1.yml).
 - `identifier` - name of database instance to create (or update). Must be unique across all RDS instances in the AWS account.
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options](/resources/terraform/resources/)
 - `parameter_group`: (optional) path relative to [resources](/resources) to a file with parameter group values. Note that it starts with `/`.
@@ -1402,6 +1406,16 @@ The `log_min_duration_statement` parameter sets the limit in milliseconds of a s
 After you complete the configuration, Amazon RDS publishes the log events to log streams within a CloudWatch log group. For example, the PostgreSQL log data is stored within the log group `/aws/rds/instance/my_instance/postgresql`.
 
 Additonal details can be found in AWS [documentation](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_LogAccess.Concepts.PostgreSQL.html#USER_LogAccess.PostgreSQL.Query_Logging).
+
+##### Configuring access policies for Performance Insights
+
+To access Performance Insights you should have a `role` assigned to your user file with a `user_policies` section that includes a reference to a `performance-insights-access` AWS user policy.
+
+If the policy does not exist for the AWS account, add it.
+
+[Example](/data/aws/insights-prod/policies/PerformanceInsights.yml) for a `performance-insights-access` AWS policy.
+
+Additional details can be found in AWS [documentation](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.access-control.html).
 
 #### Manage S3 buckets via App-Interface (`/openshift/namespace-1.yml`)
 
@@ -1673,7 +1687,7 @@ CloudWatch Log Groups can be entirely self-serviced via App-Interface.
 In order to add or update an CloudWatch Log Group, you need to add them to the `terraformResources` field.
 
 - `provider`: must be `cloudwatch`
-- `account`: must be one of the AWS account names we manage. [Current options](/schemas/openshift/namespace-1.yml#L502)
+- `account`: must be one of the AWS account names we manage. [Current options](https://github.com/app-sre/qontract-schemas/blob/main/schemas/openshift/namespace-1.yml#L502)
 - `identifier` - name of resource to create (or update)
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options:](/resources/terraform/resources/)
 - `es_identifier`: identifier of a existing elasticsearch. It will create a AWS lambda to stream logs to elasticsearch service. This field is optional.
@@ -1699,7 +1713,7 @@ Key Management Service keys can be entirely self-serviced via App-Interface.
 In order to add or update a Key Management Service key, you need to add them to the `terraformResources` field.
 
 - `provider`: must be `kms`
-- `account`: must be one of the AWS account names we manage. [Current options](/schemas/openshift/namespace-1.yml#L502)
+- `account`: must be one of the AWS account names we manage. [Current options](https://github.com/app-sre/qontract-schemas/blob/main/schemas/openshift/namespace-1.yml#L502)
 - `identifier` - name of resource to create (or update)
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options:](/resources/terraform/resources/)
 - `output_resource_name`: name of Kubernetes Secret to be created.
@@ -1737,7 +1751,7 @@ The Secret will contain the following fields:
 - `aws_access_key_id` - The access key ID.
 - `aws_secret_access_key` - The secret access key.
 
-#### Manage VPCs via App-Interface (`/openshift/cluster-1.yml`)
+#### Manage VPC peerings via App-Interface (`/openshift/cluster-1.yml`)
 
 VPC peerings can be entirely self-services via App-Interface.
 
@@ -1782,6 +1796,9 @@ peering:
       $ref: /openshift/hive-stage-01/cluster.yml
 ```
 
+#### Manage Application Load Balancers via App-Interface (`/openshift/cluster-1.yml`)
+
+Please follow the dev-guidelines: https://service.pages.redhat.com/dev-guidelines/docs/appsre/advanced/manage-application-load-balancer
 
 
 ### Manage Slack User groups via App-Interface
@@ -1813,6 +1830,7 @@ To manage a User group via App-Interface:
   the `OWNERS` files to extract `approvers`/`reviewers` from. Only the root
   `OWNERS` file is considered. The `OWNERS_ALIASES` is respected.
     - Note: optionally add `:<branch>` to use a specific branch. For example: `https://github.com/openshift/osde2e:main`.
+- `schedule`: a reference to a file representing a schedule.
 - `channels`: a list of channels to add to the User group
 
 3. **Add this permission to the desired `roles`, or create a new `role` with this permission only (mandatory).**
@@ -1827,6 +1845,7 @@ Examples:
 * An example for a PagerDuty escalation policy file can be found [here](/data/dependencies/pagerduty/app-sre-escalation-policy.yml).
 * An example for a GitHub `OWNERS` file can be found [here](/data/teams/sd-sre/permissions/aws-account-operator-coreos-slack.yml).
 * An example for a GitHub `OWNERS_ALIASES` file can be found [here](/data/teams/sd-sre/permissions/managed-velero-operator-coreos-slack.yml).
+* An example for a schedule can be found [here](/data/teams/app-sre/schedules/app-sre-onboarding-ic.yml).
 
 Notes:
 * Please make sure that the slack user group exists in slack before creating the merge request, otherwise the automated build job will fail.
@@ -1981,7 +2000,7 @@ To get access to the project, if required, contact the App SRE team.
 
 ### Add a Grafana Dashboard
 
-* Add manually your dashboard following [these instructions](/docs/app-sre/monitoring.md#Addingdashboards)
+* Add (or update) the dashboard file (a ConfigMap containing the json data) in your service code repository. The dashboards must be in a separate directory, such as `/dashboards`.
   * Note: Each dashboard ConfigMap should have the following section under `metadata`:
     ```yaml
     labels:
@@ -1991,9 +2010,9 @@ To get access to the project, if required, contact the App SRE team.
     ```
     * `app_name` should be defined in the [grafana dashboards ConfigMap](/resources/observability/grafana/grafana-dashboards.configmap.yaml)
 
-* Add the dashboard configmap in a folder in your upstream repository.
+  * Note: [additional information](docs/app-sre/monitoring.md#Addingdashboards)
 
-* Add a `resourceTemplate` entry in the [grafana dashboard saas file](/data/services/observability/cicd/saas/saas-grafana.yaml) to deploy your dashboard in staging, e.g.
+* Add a `resourceTemplate` entry in the your service's saas file to deploy your dashboard in staging, e.g.
   ```yaml
   - name: your-service-dashboards
     url: https://gitlab.cee.redhat.com/service-registry/your-service
@@ -2004,6 +2023,7 @@ To get access to the project, if required, contact the App SRE team.
         $ref: /services/observability/namespaces/app-sre-observability-stage.yml
       ref: master
   ```
+  * Note: remember to add `ConfigMap` to the `managedResourceTypes` section.
   * Note: with this configuration, every time you merge changes in your dashboard it will be deployed in stage. Read [this guide](/docs/app-sre/continuous-delivery-in-app-interface.md) to know more about saas files.
 
 * Once your MR is merged, your dashboard will be deployed to stage and will be accessible in https://grafana.stage.devshift.net.
@@ -2016,10 +2036,12 @@ To get access to the project, if required, contact the App SRE team.
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
     ref: <your-service-repo-commit-sha>
   ```
+  * Note: with this configuration, you can promote changes to your dashboards along with the code changes that created them.
+
 
 ### Execute a SQL Query on an App Interface controlled RDS instance
 
-To execute an SQL Query, you you have to commit to the app-interface an YAML
+To execute an SQL Query, you have to commit to the app-interface an YAML
 file with the following content:
 
 ```yaml
@@ -2036,6 +2058,13 @@ requestor:
 schedule: <if defined the output resource will be a CronJob instead of a Job>
 query: <sql query>
 ```
+
+**Note:** Query files are only executed once unless a `schedule` is defined
+(mentioned later in this section). The query file execution status is tracked
+using the `name` field. If you wish to run an existing query file a second time
+(possibly including modifications to the queries), you must change the `name`
+field. This can be achieved by copying the existing file to a new file with a
+new `name`, or reusing the existing file and changing the query `name`.
 
 If you want to run multiple queries in the same spec, you can define the
 `queries` list instead of the `query` string. Example:
@@ -2293,15 +2322,15 @@ Please follow [this guide](/docs/app-sre/prometheus-rules-tests-in-app-interface
 
 Additional design information: [here](docs/app-interface/design.md)
 
-[schemas]: </schemas>
-[userschema]: </schemas/access/user-1.yml>
-[crossref]: </schemas/common-1.json#L58-L86>
-[role]: </schemas/access/role-1.yml>
-[permission]: </schemas/access/permission-1.yml>
+[schemas]: <https://github.com/app-sre/qontract-schemas>
+[userschema]: <https://github.com/app-sre/qontract-schemas/blob/main/schemas/access/user-1.yml>
+[crossref]: <https://github.com/app-sre/qontract-schemas/blob/main/schemas/common-1.json#L58-L86>
+[role]: <https://github.com/app-sre/qontract-schemas/blob/main/schemas/access/role-1.yml>
+[permission]: <https://github.com/app-sre/qontract-schemas/blob/main/schemas/access/permission-1.yml>
 
 ## Developer Guide
 
-More information [here](docs/app-interface/developer.md).
+More information [here](docs/app-sre/sop/app-interface-development-environment-setup.md)
 
 ## Quay Documentation
 

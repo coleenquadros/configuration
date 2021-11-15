@@ -35,6 +35,7 @@ authentication:
   image:
     path: insights/quay/cloudservices-push
     field: all
+    version: 3
   code:
     path: app-sre/creds/github-app-sre-bot
     field: openshift-saas-deploy
@@ -65,10 +66,10 @@ resourceTemplates:
       VALIDATION_ATTEMPTS_THRESHOLD: "2"
       VALIDATION_ATTEMPTS_THRESHOLD_INIT: "30"
       FULL_VALIDATION_NUM_THREADS: "9"
-      MANAGER_POD_MEM_LIMIT: "8Gi"
-      MANAGER_POD_CPU_LIMIT: "4"
-      MANAGER_POD_MEM_REQUESTS: "512Mi"
-      MANAGER_POD_CPU_REQUESTS: "250m"
+      MANAGER_POD_MEM_LIMIT: "4Gi"
+      MANAGER_POD_CPU_LIMIT: "2"
+      MANAGER_POD_MEM_REQUESTS: "2Gi"
+      MANAGER_POD_CPU_REQUESTS: "1"
       FULL_VALIDATION_ENABLED: "true"
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-operator-prod.yml
@@ -86,8 +87,8 @@ resourceTemplates:
       LOG_LEVEL: "info"
       MANAGER_POD_MEM_LIMIT: "16Gi"
       MANAGER_POD_CPU_LIMIT: "4"
-      MANAGER_POD_MEM_REQUESTS: "2Gi"
-      MANAGER_POD_CPU_REQUESTS: "1"
+      MANAGER_POD_MEM_REQUESTS: "8Gi"
+      MANAGER_POD_CPU_REQUESTS: "2"
       FULL_VALIDATION_ENABLED: "true"
       FULL_VALIDATION_NUM_THREADS: "20"
       FULL_VALIDATION_CHUNK_SIZE: "50"
@@ -107,9 +108,367 @@ resourceTemplates:
       LOG_LEVEL: "info"
       MANAGER_POD_MEM_LIMIT: "16Gi"
       MANAGER_POD_CPU_LIMIT: "4"
-      MANAGER_POD_MEM_REQUESTS: "2Gi"
-      MANAGER_POD_CPU_REQUESTS: "1"
+      MANAGER_POD_MEM_REQUESTS: "8Gi"
+      MANAGER_POD_CPU_REQUESTS: "2"
       FULL_VALIDATION_ENABLED: "true"
+      ELASTICSEARCH_INDEX_TEMPLATE: '
+      {
+        "dynamic": false,
+        "properties": {
+          "ingest_timestamp": {
+            "type": "date"
+          },
+          "id": {
+            "type": "keyword"
+          },
+          "account": {
+            "type": "keyword"
+          },
+          "display_name": {
+            "type": "keyword",
+            "fields": {
+              "lowercase": {
+                "type": "keyword",
+                "normalizer": "case_insensitive"
+              }
+            }
+          },
+          "created_on": {
+            "type": "date_nanos"
+          },
+          "modified_on": {
+            "type": "date_nanos"
+          },
+          "stale_timestamp": {
+            "type": "date_nanos"
+          },
+          "ansible_host": {
+            "type": "keyword"
+          },
+          "canonical_facts": {
+            "type": "object",
+            "properties": {
+              "fqdn": {
+                "type": "keyword"
+              },
+              "insights_id": {
+                "type": "keyword"
+              },
+              "satellite_id": {
+                "type": "keyword"
+              },
+              "provider_type": {
+                "type": "keyword"
+              },
+              "provider_id": {
+                "type": "keyword"
+              }
+            }
+          },
+          "system_profile_facts": {
+            "properties": {
+              "owner_id": {
+                "type": "keyword"
+              },
+              "rhc_client_id": {
+                "type": "keyword"
+              },
+              "rhc_config_state": {
+                "type": "keyword"
+              },
+              "cpu_model": {
+                "type": "keyword"
+              },
+              "number_of_cpus": {
+                "type": "integer"
+              },
+              "number_of_sockets": {
+                "type": "integer"
+              },
+              "cores_per_socket": {
+                "type": "integer"
+              },
+              "system_memory_bytes": {
+                "type": "integer"
+              },
+              "infrastructure_type": {
+                "type": "keyword"
+              },
+              "infrastructure_vendor": {
+                "type": "keyword"
+              },
+              "network_interfaces": {
+                "type": "object",
+                "properties": {
+                  "ipv4_addresses": {
+                    "type": "keyword"
+                  },
+                  "ipv6_addresses": {
+                    "type": "keyword"
+                  },
+                  "mtu": {
+                    "type": "integer"
+                  },
+                  "mac_address": {
+                    "type": "keyword"
+                  },
+                  "name": {
+                    "type": "keyword"
+                  },
+                  "state": {
+                    "type": "keyword"
+                  },
+                  "type": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "disk_devices": {
+                "type": "object",
+                "properties": {
+                  "device": {
+                    "type": "keyword"
+                  },
+                  "label": {
+                    "type": "text"
+                  },
+                  "mount_point": {
+                    "type": "keyword"
+                  },
+                  "type": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "bios_vendor": {
+                "type": "keyword"
+              },
+              "bios_version": {
+                "type": "keyword"
+              },
+              "cpu_flags": {
+                "type": "keyword"
+              },
+              "operating_system": {
+                "type": "object",
+                "properties": {
+                  "major": {
+                    "type": "integer"
+                  },
+                  "minor": {
+                    "type": "integer"
+                  },
+                  "name": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "os_release": {
+                "type": "keyword"
+              },
+              "os_kernel_version": {
+                "type": "keyword"
+              },
+              "arch": {
+                "type": "keyword"
+              },
+              "kernel_modules": {
+                "type": "keyword"
+              },
+              "last_boot_time": {
+                "type": "keyword"
+              },
+              "subscription_status": {
+                "type": "keyword"
+              },
+              "subscription_auto_attach": {
+                "type": "keyword"
+              },
+              "katello_agent_running": {
+                "type": "boolean"
+              },
+              "satellite_managed": {
+                "type": "boolean"
+              },
+              "cloud_provider": {
+                "type": "keyword"
+              },
+              "dnf_modules": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "keyword"
+                  },
+                  "stream": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "installed_products": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "keyword"
+                  },
+                  "id": {
+                    "type": "keyword"
+                  },
+                  "status": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "insights_client_version": {
+                "type": "keyword"
+              },
+              "insights_egg_version": {
+                "type": "keyword"
+              },
+              "captured_date": {
+                "type": "keyword"
+              },
+              "installed_packages": {
+                "type": "keyword"
+              },
+              "gpg_pubkeys": {
+                "type": "keyword"
+              },
+              "installed_services": {
+                "type": "keyword"
+              },
+              "enabled_services": {
+                "type": "keyword"
+              },
+              "sap_system": {
+                "type": "boolean"
+              },
+              "sap_sids": {
+                "type": "keyword"
+              },
+              "sap_instance_number": {
+                "type": "keyword"
+              },
+              "sap_version": {
+                "type": "keyword"
+              },
+              "tuned_profile": {
+                "type": "keyword"
+              },
+              "selinux_current_mode": {
+                "type": "keyword"
+              },
+              "selinux_config_file": {
+                "type": "keyword"
+              },
+              "is_marketplace": {
+                "type": "boolean"
+              },
+              "host_type": {
+                "type": "keyword"
+              },
+              "greenboot_status": {
+                "type": "keyword"
+              },
+              "greenboot_fallback_detected": {
+                "type": "boolean"
+              },
+              "rpm_ostree_deployments": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "keyword"
+                  },
+                  "checksum": {
+                    "type": "keyword"
+                  },
+                  "origin": {
+                    "type": "keyword"
+                  },
+                  "osname": {
+                    "type": "keyword"
+                  },
+                  "version": {
+                    "type": "keyword"
+                  },
+                  "booted": {
+                    "type": "boolean"
+                  },
+                  "pinned": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "rhsm": {
+                "type": "object",
+                "properties": {
+                  "version": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "system_purpose": {
+                "type": "object",
+                "properties": {
+                  "usage": {
+                    "type": "keyword"
+                  },
+                  "role": {
+                    "type": "keyword"
+                  },
+                  "sla": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "ansible": {
+                "type": "object",
+                "properties": {
+                  "controller_version": {
+                    "type": "keyword"
+                  },
+                  "hub_version": {
+                    "type": "keyword"
+                  },
+                  "catalog_worker_version": {
+                    "type": "keyword"
+                  },
+                  "sso_version": {
+                    "type": "keyword"
+                  }
+                }
+              }
+            }
+          },
+          "tags_structured": {
+            "type": "nested",
+            "properties": {
+              "namespace": {
+                "type": "keyword",
+                "null_value": "$$_XJOIN_SEARCH_NULL_VALUE"
+              },
+              "key": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "keyword",
+                "null_value": "$$_XJOIN_SEARCH_NULL_VALUE"
+              }
+            }
+          },
+          "tags_string": {
+            "type": "keyword"
+          },
+          "tags_search": {
+            "type": "keyword",
+            "fields": {
+              "lowercase": {
+                "type": "keyword",
+                "normalizer": "case_insensitive"
+              }
+            }
+          }
+        }
+      }'
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-operator-fedramp-stage.yml
     ref: master
@@ -126,10 +485,10 @@ resourceTemplates:
       VALIDATION_INTERVAL: "1800"
       VALIDATION_ATTEMPTS_THRESHOLD: "2"
       VALIDATION_ATTEMPTS_THRESHOLD_INIT: "30"
-      MANAGER_POD_MEM_LIMIT: "8Gi"
-      MANAGER_POD_CPU_LIMIT: "4"
-      MANAGER_POD_MEM_REQUESTS: "512Mi"
-      MANAGER_POD_CPU_REQUESTS: "250m"
+      MANAGER_POD_MEM_LIMIT: "4Gi"
+      MANAGER_POD_CPU_LIMIT: "2"
+      MANAGER_POD_MEM_REQUESTS: "2Gi"
+      MANAGER_POD_CPU_REQUESTS: "1"
       FULL_VALIDATION_ENABLED: "true"
 
   # Ephemeral cluster
@@ -165,6 +524,10 @@ resourceTemplates:
         "max.batch.size": {{.DebeziumMaxBatchSize}},
         "poll.interval.ms": {{.DebeziumPollIntervalMS}}
       }'
+      MANAGER_POD_MEM_LIMIT: "8Gi"
+      MANAGER_POD_CPU_LIMIT: "2"
+      MANAGER_POD_MEM_REQUESTS: "4Gi"
+      MANAGER_POD_CPU_REQUESTS: "1"
     upstream:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
@@ -184,9 +547,9 @@ resourceTemplates:
       VALIDATION_INTERVAL: "600"
       VALIDATION_INTERVAL_INIT: "60"
       VALIDATION_ATTEMPTS_THRESHOLD_INIT: "30"
-      MANAGER_POD_MEM_LIMIT: "16Gi"
-      MANAGER_POD_CPU_LIMIT: "4"
-      MANAGER_POD_MEM_REQUESTS: "2Gi"
+      MANAGER_POD_MEM_LIMIT: "8Gi"
+      MANAGER_POD_CPU_LIMIT: "2"
+      MANAGER_POD_MEM_REQUESTS: "4Gi"
       MANAGER_POD_CPU_REQUESTS: "1"
       FULL_VALIDATION_ENABLED: "true"
 

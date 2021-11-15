@@ -176,15 +176,16 @@ This section aims to give some ideas of possible generic underlying causes.
 * Killing the pods (if the service is stateless), may fix the issue or help uncover the root cause.
 * Many issues are related to lack of resources. OOMKills are usually a tell-tale sign of this. Increasing `requests` and `limits` in the OpenShift manifest via parameters in the `saas-file` could fix the issue. It is important to support that theory with data, usually obtained from Grafana.
 * Underlying infrastructure issues should be ruled out. For example, if all crashing pods are in the same node. If this is the case it should be escalated to SREP.
-* RDS should be ruled out as the cause. It is recommended to look at the datavase through the AWS Console. In particular: CPU and memory load, IOPS and burst quota. When in doubt, AWS Performance Insights can be enabled to obtain further data about the database, including long running issues. Note that rebooting the database is not recommended by default.
+* RDS should be ruled out as the cause. It is recommended to look at the database through the AWS Console. In particular: CPU and memory load, IOPS and burst quota. When in doubt, AWS Performance Insights can be enabled to obtain further data about the database, including long running issues. Note that rebooting the database is not recommended by default.
+* In case the service is under load, consider adding more replicas to handle it. It is important to support that theory with data, usually obtained from Grafana.
 
 [RCA Template]: https://docs.google.com/document/d/12ZVT35yApp7D-uT4p29cEhS9mpzin4Z-Ufh9eOiiaKU/edit
 [zti]: https://meet.google.com/zti-gkvy-pvn
 [APPSRE board]: https://issues.redhat.com/projects/APPSRE/
 [Updating status.quay.io]: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/quay/statuspage.md
 [Updating status.redhat.com]: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/statuspage.md
-[serviceOwners]: https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/app-sre/app-1.yml
-[serviceNotifications]: https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/app-sre/app-1.yml
+[serviceOwners]: https://github.com/app-sre/qontract-schemas/blob/main/schemas/app-sre/app-1.yml
+[serviceNotifications]: https://github.com/app-sre/qontract-schemas/blob/main/schemas/app-sre/app-1.yml
 [must-gather]: https://gitlab.cee.redhat.com/app-sre/must-gather#usage
 [Log Forwarding]: https://gitlab.cee.redhat.com/service/app-interface/blob/master/FAQ.md#get-access-to-cluster-logs-via-log-forwarding
 [App-Interface docs]: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs

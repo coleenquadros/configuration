@@ -28,7 +28,7 @@ This document explains how to vertically scale an RDS instance managed through a
     * Example - defaults file: [app-sre/production/rds defaults](/resources/terraform/resources/app-sre/production/rds-1.yml)
 4. To vertically scale, you can change one of the following attributes under `overrides`:
     * `instance_class` - select a supported instance class.
-    > Note: instance class selection is limited in [app-interface schema](/schemas/openshift/namespace-1.yml#L193).
+    > Note: instance class selection is limited in [app-interface schema](https://github.com/app-sre/qontract-schemas/blob/7780755424781d8b88839d2c37e32ccb45fc52da/schemas/openshift/terraform-resource-1.yml#L198-L221).
     * `allocated_storage` - increase allocated storage for the instance.
 5. Create a Merge Request to app-interface with these changes.
 6. Verify in the `terraform-resources` integration output that the change that is about to happen is of type `update` and not `replace`.

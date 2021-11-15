@@ -1,0 +1,18 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+name: 2021-11-03-upstream-profile-accounts-prod
+labels: {}
+namespace:
+  $ref: /services/insights/compliance/namespaces/compliance-prod.yml
+identifier: compliance-prod
+output: stdout
+query: >-
+  SELECT "accounts"."account_number", "policies"."id" as "policy_id", "policies"."name" as "policy_name", COUNT("policy_hosts"."id") as "host_count",
+  MAX("test_results"."created_at") as "last_created_at", MAX("test_results"."updated_at") as "last_updated_at" FROM "profiles"
+  INNER JOIN "profiles" "parent" ON "parent"."id" = "profiles"."parent_profile_id"
+  INNER JOIN "accounts" ON "accounts"."id" = "profiles"."account_id"
+  INNER JOIN "policies" ON "policies"."id" = "profiles"."policy_id"
+  INNER JOIN "policy_hosts" ON "policies"."id" = "policy_hosts"."policy_id"
+  INNER JOIN "test_results" ON "test_results"."profile_id" = "profiles"."id"
+  WHERE "profiles"."parent_profile_id" IS NOT NULL AND "parent"."upstream" = TRUE
+  GROUP BY "accounts"."account_number", "policies"."id", "policies"."name";

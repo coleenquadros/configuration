@@ -20,7 +20,7 @@ compare: false
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
-  channel: team-clouddot-devprod
+  channel: team-consoledot-devprod
 
 managedResourceTypes:
 - CustomResourceDefinition
@@ -38,6 +38,7 @@ authentication:
   image:
     path: insights/quay/cloudservices-push
     field: all
+    version: 3
   code:
     path: app-sre/creds/github-app-sre-bot
     field: openshift-saas-deploy
@@ -73,11 +74,27 @@ resourceTemplates:
       CREATE_SERVICE_MONITORS: "true"
       TARGET_NAMESPACE: "clowder-system"
   - namespace:
+      $ref: /services/insights/clowder/namespaces/crcd01ue1.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-clowder-gh-build-master
+    parameters:
+      WATCH_STRIMZI_RESOURCES: "true"
+      CREATE_SERVICE_MONITORS: "true"
+      TARGET_NAMESPACE: "clowder-system"
+  - namespace:
       $ref: /services/insights/clowder/namespaces/stage.yml
     ref: master
     upstream:
       instance:
         $ref: /dependencies/ci-ext/ci-ext.yml
       name: RedHatInsights-clowder-gh-build-master
+    parameters:
+      TARGET_NAMESPACE: "clowder-system"
+  - namespace:
+      $ref: /services/insights/clowder/namespaces/prod.yml
+    ref: 051c48630555d3d8e3ea182a1a314c12c4063f0b
     parameters:
       TARGET_NAMESPACE: "clowder-system"

@@ -216,6 +216,52 @@ data:
                 trusted_ca:
                   filename: /etc/ssl/certs/ca-certificates.crt
 
+      # Cluster for the `image-builder-composer` service:
+      - name: image-builder-composer
+        connect_timeout: 2s
+        type: STRICT_DNS
+        lb_policy: ROUND_ROBIN
+        load_assignment:
+          cluster_name: image-builder-composer
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: s66hwsqb07woxyt.api.stage.openshift.com
+                    port_value: 443
+        transport_socket:
+          name: envoy.transport_sockets.tls
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+            common_tls_context:
+              validation_context:
+                trusted_ca:
+                  filename: /etc/ssl/certs/ca-certificates.crt
+
+      # Cluster for the `image-builder-worker` service:
+      - name: image-builder-worker
+        connect_timeout: 2s
+        type: STRICT_DNS
+        lb_policy: ROUND_ROBIN
+        load_assignment:
+          cluster_name: image-builder-worker
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: 4fx6t9iy0x8ja3q.api.stage.openshift.com
+                    port_value: 443
+        transport_socket:
+          name: envoy.transport_sockets.tls
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+            common_tls_context:
+              validation_context:
+                trusted_ca:
+                  filename: /etc/ssl/certs/ca-certificates.crt
+
       listeners:
 
       # This listener is used to support probes and metrics.
@@ -341,6 +387,15 @@ data:
                               {
                                 "id": "serviceregistry_mgmt",
                                 "name": "Service Registry service fleet manager service"
+                              },
+                              {
+                                "id": "image-builder-composer",
+                                "version": "v2",
+                                "name": "Image Builder service"
+                              },
+                              {
+                                "id": "image-builder-worker",
+                                "name": "Image Builder workers"
                               }
                             ]
                           }
@@ -396,6 +451,24 @@ data:
                       prefix: /api/serviceregistry_mgmt
                     route:
                       cluster: serviceregistry_mgmt
+                      auto_host_rewrite: true
+                      timeout: 30s
+
+                  # Route for the `image-builder-composer` service:
+                  - name: image-builder-composer
+                    match:
+                      prefix: /api/image-builder-composer
+                    route:
+                      cluster: image-builder-composer
+                      auto_host_rewrite: true
+                      timeout: 120s
+
+                  # Route for the `image-builder-worker` service:
+                  - name: image-builder-worker
+                    match:
+                      prefix: /api/image-builder-worker
+                    route:
+                      cluster: image-builder-worker
                       auto_host_rewrite: true
                       timeout: 30s
 

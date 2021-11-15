@@ -34,44 +34,96 @@ openshiftResources:
   variables:
     recycle: false
     name: quay-config-secret-readonly
-    vault_secret_version: 36
+    config_vault_secret_version: 36
+    additional_config_vault_secret_version: 2
     version_label: v36
     readonly: true
     standby: false
     log_producer: kinesis_stream
+    enable_redis_modelcache: true
+    account_recovery_mode: false
+    read_from_rds_replica: false
+
 - provider: resource-template
   type: extracurlyjinja2
   path: /quay-p/quay/quay-config.secret.yaml
   variables:
     recycle: true
     name: quay-config-secret
-    vault_secret_version: 36
+    config_vault_secret_version: 36
+    additional_config_vault_secret_version: 2
     version_label: v36
     readonly: false
     standby: false
     log_producer: kinesis_stream
+    enable_redis_modelcache: true
+    account_recovery_mode: false
+    read_from_rds_replica: false
+
 - provider: resource-template
   type: extracurlyjinja2
-  path: /quay-p/quay/quay-config-blue.secret.yaml
+  path: /quay-p/quay/quay-config.secret.yaml
+  variables:
+    recycle: true
+    name: quay-py3-config-secret
+    config_vault_secret_version: 36
+    additional_config_vault_secret_version: 2
+    version_label: v36
+    readonly: true
+    standby: false
+    log_producer: kinesis_stream
+    enable_redis_modelcache: true
+    account_recovery_mode: false
+    read_from_rds_replica: false
+
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /quay-p/quay/quay-config.secret.yaml
   variables:
     recycle: true
     name: quay-config-secret-blue
-    vault_secret_version: 36
+    config_vault_secret_version: 36
+    additional_config_vault_secret_version: 2
     version_label: v36
     readonly: false
     standby: false
     log_producer: kinesis_stream
+    enable_redis_modelcache: true
+    account_recovery_mode: false
+    read_from_rds_replica: false
+
 - provider: resource-template
   type: extracurlyjinja2
-  path: /quay-p/quay/quay-config-recovery.secret.yaml
+  path: /quay-p/quay/quay-config.secret.yaml
   variables:
     recycle: true
     name: quay-config-recovery-secret
-    vault_secret_version: 36
+    config_vault_secret_version: 36
+    additional_config_vault_secret_version: 2
     version_label: v36
     readonly: false
     standby: false
     log_producer: kinesis_stream
+    enable_redis_modelcache: false
+    account_recovery_mode: true
+    read_from_rds_replica: false
+
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /quay-p/quay/quay-config.secret.yaml
+  variables:
+    recycle: true
+    name: quay-config-secret-readonly-replica
+    config_vault_secret_version: 36
+    additional_config_vault_secret_version: 2
+    version_label: v36
+    readonly: true
+    standby: false
+    log_producer: kinesis_stream
+    enable_redis_modelcache: true
+    account_recovery_mode: false
+    read_from_rds_replica: true
+
 - provider: resource-template
   type: extracurlyjinja2
   path: /quay-p/quay/quay-db-config.secret.yaml
@@ -79,6 +131,7 @@ openshiftResources:
     recycle: true
     name: quay-db-config-secret
     version_label: v36
+    additional_config_vault_secret_version: 2
 - provider: vault-secret
   path: app-interface/quayio-prod-us-east-1/quay/quay-extra-ca-certs
   version: 1
@@ -105,6 +158,14 @@ terraformResources:
   availability_zone: us-east-1a
   defaults: /terraform/resources/quayio-production/rds-1.yml
   parameter_group: /terraform/resources/quayio-production/rds-parameter-group-1.yml
+  overrides:
+    apply_immediately: true
+- provider: rds
+  account: quayio-prod
+  identifier: quayio-production-py3
+  availability_zone: us-east-1a
+  defaults: /terraform/resources/quayio-production/rds-1.yml
+  parameter_group: /terraform/resources/quayio-production/rds-parameter-group-readwrite-replica-1.yml
   overrides:
     apply_immediately: true
 - provider: rds
@@ -137,6 +198,11 @@ terraformResources:
   region: eu-central-1
   identifier: quayio-backup
   output_resource_name: quayio-backup
+- provider: ecr
+  account: quayio-prod
+  region: eu-central-1
+  identifier: quayio-py3-backup
+  output_resource_name: quayio-py3-backup
 - provider: ecr
   account: quayio-prod
   region: eu-central-1

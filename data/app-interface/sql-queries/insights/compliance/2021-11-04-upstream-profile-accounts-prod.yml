@@ -1,0 +1,14 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+name: 2021-11-04-upstream-profile-accounts-prod
+labels: {}
+namespace:
+  $ref: /services/insights/compliance/namespaces/compliance-prod.yml
+identifier: compliance-prod
+output: stdout
+query: >-
+  SELECT DISTINCT "profiles"."id", "accounts"."account_number" FROM "profiles"
+  INNER JOIN "accounts" ON "accounts"."id" = "profiles"."account_id"
+  INNER JOIN "profiles" "parent_profiles_profiles" ON "parent_profiles_profiles"."id" = "profiles"."parent_profile_id"
+  INNER JOIN "test_results" ON "test_results"."profile_id" = "profiles"."id"
+  WHERE "profiles"."parent_profile_id" IS NOT NULL AND "parent_profiles_profiles"."upstream" = TRUE;

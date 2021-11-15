@@ -163,16 +163,17 @@ spec:
         service: hive
         severity: medium
         team: srep
-    - alert: AWSAccountLimit - stage - {{{shard_name}}}
+    - alert: AWSAccountOperator AccountPool Depletion - {{{shard_name}}}
       annotations:
-        message: "AWS Account Operator is about to reach account limit"
-        runbook: "https://github.com/openshift/hive-sops/blob/master/sop/AWSAccountLimit.md"
-        dashboard: "https://grafana.app-sre.devshift.net/d/WPRpa7HWz/aws-account-operator?orgId=1&var-datasource={{{grafana_datasource}}}&var-environment=hive-aws-account-operator"
+        message: "AWS Account Operator's AccountPool is nearing depletion."
+        runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/AWSAccountOperatorAccountPoolDepleted.md"
+        dashboard: "https://grafana.app-sre.devshift.net/explore?orgId=1&left=%5B%22now-7d%22,%22now%22,%22{{{shard_name}}}-prometheus%22,%7B%22expr%22:%22aws_account_operator_available_non_ccs_accounts%20%2B%20aws_account_operator_accounts_progressing%20without%20(instance,%20pod)%5Cn%5Cn%22,%22requestId%22:%22Q-8ea2341f-51e8-4e34-aa3a-6469db5fcf6d-0A%22,%22format%22:%22time_series%22,%22instant%22:false,%22refId%22:%22A%22,%22exemplar%22:true,%22range%22:true%7D%5D"
       expr: |
-        aws_account_operator_aws_accounts{job="aws-account-operator"} > {{{aws_account_operator_accounts_threshold}}}
+        aws_account_operator_available_non_ccs_accounts + aws_account_operator_accounts_progressing < (aws_account_operator_account_pool_size / 10)
       labels:
-        severity: high
         service: srep
+        severity: high
+        team: srep
     - alert: AWSAccountOperator Target Down - stage - {{{shard_name}}}
       annotations:
         message: "No targets found for AWS Account Operator on hive-{{{shard_name}}}"

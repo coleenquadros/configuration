@@ -1,0 +1,32 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+labels:
+  service: automation-hub
+
+name: ci-int-automation-hub-jobs
+description: automation-hub ci-int jobs
+
+app:
+  $ref: /services/insights/automation-hub/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+type: jobs
+
+config:
+- project:
+    name: automation-hub
+    label: insights
+    node: insights
+    app_name: automation-hub
+    component_name: automation-hub
+    image: "quay.io/cloudservices/automation-hub-galaxy-ng"
+    git_commit: master
+    image_tag: latest
+    components_w_resources: all
+    additional_arg: '--set-parameter $COMPONENT_NAME/IMPORTER_JOB_NAMESPACE=$NAMESPACE'
+    jobs:
+    - "insights-deploy-ephemeral":
+        display_name: automation-hub ephemeral

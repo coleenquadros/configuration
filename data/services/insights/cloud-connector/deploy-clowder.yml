@@ -30,6 +30,7 @@ authentication:
   image:
     path: insights/quay/cloudservices-push
     field: all
+    version: 3
 
 resourceTemplates:
 - name: cloud-connector-api
@@ -38,10 +39,10 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/cloud-connector/namespaces/stage.yml
-    ref: 0578bb793f53f4d3adc06f6823bea0894d209df7
+    ref: de7b209ee6632bbe0f880a07d46390484ac074e1
     parameters:
       IMAGE: quay.io/cloudservices/cloud-connector
-      IMAGE_TAG: 0578bb7
+      IMAGE_TAG: de7b209
       ENV_NAME: stage
       LOG_LEVEL: DEBUG
       MQTT_BROKER_ADDRESS: wss://connect.${PLATFORM_HOSTNAME}:443
@@ -58,10 +59,10 @@ resourceTemplates:
       RHC_MESSAGE_KAFKA_BATCH_SIZE: 1
   - namespace:
       $ref: /services/insights/cloud-connector/namespaces/prod.yml
-    ref: 13bd88e45806d7cda2edfc5f2b9035deba4c2ccd
+    ref: f22253d207db7fbe30203b13ba980bfecfb231ea
     parameters:
       IMAGE: quay.io/cloudservices/cloud-connector
-      IMAGE_TAG: 7fa4c67
+      IMAGE_TAG: f22253d
       ENV_NAME: prod
       LOG_LEVEL: DEBUG
       MQTT_BROKER_ADDRESS: wss://connect.${PLATFORM_HOSTNAME}:443
@@ -71,9 +72,12 @@ resourceTemplates:
       CLIENT_ID_TO_ACCOUNT_ID_IMPL: bop
       SOURCES_RECORDER_IMPL: sources
       CONNECTED_CLIENT_RECORDER_IMPL: inventory
-      REPLICAS_API: 1
       CONNECTION_PER_ACCOUNT_REPORTER_SCHEDULE: "0 14 * * *"
       CONNECTION_COUNT_PER_ACCOUNT_REPORT_OUTPUT_DESTINATION: "pendo"
+      API_REPLICAS: 1
+      MQTT_CONSUMER_REPLICAS: 1
+      KAFKA_CONSUMER_REPLICAS: 1
+      RHC_MESSAGE_KAFKA_BATCH_SIZE: 1
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace

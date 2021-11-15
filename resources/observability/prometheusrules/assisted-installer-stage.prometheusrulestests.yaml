@@ -1,0 +1,143 @@
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /observability/prometheusrules/assisted-installer-stage.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+- interval: 1m
+  input_series:
+  - series: up{pod="pod1", job="assisted-service",namespace="assisted-installer-stage"}
+    values: 1 1 1 1 1 1 1 1 1 1
+  - series: up{pod="pod2", job="assisted-service",namespace="assisted-installer-stage"}
+    values: 1 1 1 1 0 0 0 0 0 0
+  - series: up{pod="pod3", job="assisted-service",namespace="assisted-installer-stage"}
+    values: 1 1 1 1 stale stale stale stale stale stale
+  - series: up{pod="pod4", job="assisted-service",namespace="assisted-installer-stage"}
+    values: _ _ _ _ _ 1 1 1 1 1
+
+  alert_rule_test:
+  # Test the no alert case
+  - eval_time: 4m
+    alertname: Assisted Installer - Pod has stopped
+    exp_alerts:
+  # Test pod has stopped and
+  - eval_time: 7m
+    alertname: Assisted Installer - Pod has stopped
+    exp_alerts:
+    - exp_labels:
+        pod: pod3
+        service: assisted-installer
+        severity: info
+        job: assisted-service
+        namespace: assisted-installer-stage
+      exp_annotations:
+        message: "Assisted Installer Pod pod3 on namespace assisted-installer-stage has stopped"
+- interval: 30s
+  input_series:
+  - series: container_memory_working_set_bytes{container="assisted-service", pod="pod1", job="assisted-service",namespace="assisted-installer-stage"}
+    values: 500000 500000 910000 930000 930000 800000 800000
+  - series: kube_pod_container_resource_limits{container="assisted-service", pod="pod1", job="assisted-service",namespace="assisted-installer-stage", resource="memory"}
+    values: 1000000 1000000 1000000 1000000 1000000 1000000 1000000
+  alert_rule_test:
+  # before - No alert
+  - eval_time: 30s
+    alertname: Assisted Installer - Memory usage is above 90%
+    exp_alerts:
+  # only 30s with high memory usage - No alert
+  - eval_time: 1m30s
+    alertname: Assisted Installer - Memory usage is above 90%
+    exp_alerts:
+  # 60s with high memory usage - Alert
+  - eval_time: 2m
+    alertname: Assisted Installer - Memory usage is above 90%
+    exp_alerts:
+    - exp_labels:
+        pod: pod1
+        severity: warning
+        service: assisted-installer
+        namespace: assisted-installer-stage
+      exp_annotations:
+        message: "Assisted Installer Pod pod1 on namespace assisted-installer-stage usages is above 90%(93)"
+  # 90s with high memory usage - Alert
+  - eval_time: 2m30s
+    alertname: Assisted Installer - Memory usage is above 90%
+    exp_alerts: 
+    - exp_labels:
+        pod: pod1
+        severity: warning
+        service: assisted-installer
+        namespace: assisted-installer-stage
+      exp_annotations:
+        message: "Assisted Installer Pod pod1 on namespace assisted-installer-stage usages is above 90%(93)"
+  # Memory usage isn't high - No alert
+  - eval_time: 3m
+    alertname: Assisted Installer - Memory usage is above 90%
+    exp_alerts:
+- interval: 30s
+  input_series:
+  - series: container_memory_working_set_bytes{container="assisted-service", pod="pod1", job="assisted-service",namespace="assisted-installer-stage"}
+    values: 500000 500000 810000 830000 830000 700000 700000
+  - series: kube_pod_container_resource_limits{container="assisted-service", pod="pod1", job="assisted-service",namespace="assisted-installer-stage", resource="memory"}
+    values: 1000000 1000000 1000000 1000000 1000000 1000000 1000000
+  alert_rule_test:
+  # before - No alert
+  - eval_time: 30s
+    alertname: Assisted Installer - Memory usage is above 80%
+    exp_alerts:
+  # only 30s with high memory usage - No alert
+  - eval_time: 1m30s
+    alertname: Assisted Installer - Memory usage is above 80%
+    exp_alerts:
+  # 60s with high memory usage - Alert
+  - eval_time: 2m
+    alertname: Assisted Installer - Memory usage is above 80%
+    exp_alerts:
+    - exp_labels:
+        pod: pod1
+        severity: info
+        service: assisted-installer
+        namespace: assisted-installer-stage
+      exp_annotations:
+        message: "Assisted Installer Pod pod1 on namespace assisted-installer-stage usages is above 80%(83)"
+  # 90s with high memory usage - Alert
+  - eval_time: 2m30s
+    alertname: Assisted Installer - Memory usage is above 80%
+    exp_alerts:
+    - exp_labels:
+        pod: pod1
+        severity: info
+        service: assisted-installer
+        namespace: assisted-installer-stage
+      exp_annotations:
+        message: "Assisted Installer Pod pod1 on namespace assisted-installer-stage usages is above 80%(83)"
+  # Memory usage isn't high - No alert
+  - eval_time: 3m
+    alertname: Assisted Installer - Memory usage is above 80%
+    exp_alerts:
+- interval: 30s
+  input_series:
+  - series: container_cpu_usage_seconds_total{container="assisted-service", pod="pod1",namespace="assisted-installer-stage"}
+    values: 0 21 48 70 100 130 157 160 163
+  alert_rule_test:
+  # before - No alert
+  - eval_time: 1m
+    alertname: Assisted Installer - CPU usage is above 90%
+    exp_alerts:
+  # 90s with high CPU usage - Alert
+  - eval_time: 3m
+    alertname: Assisted Installer - CPU usage is above 90%
+    exp_alerts:
+    - exp_labels:
+        pod: pod1
+        severity: warning
+        service: assisted-installer
+        namespace: assisted-installer-stage
+        container: assisted-service
+      exp_annotations:
+        message: "Assisted Installer Container CPU usages (pod pod1, namespace assisted-installer-stage) is above 90%(96.67%)"
+    # CPU usage isn't high - No alert
+  - eval_time: 4m
+    alertname: Assisted Installer - CPU usage is above 90%
+    exp_alerts:

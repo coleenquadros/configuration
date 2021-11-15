@@ -22,6 +22,7 @@ managedResourceTypes:
 - Deployment
 - Service
 - PodDisruptionBudget
+- ConfigMap
 
 imagePatterns:
 - quay.io/app-sre/github-mirror
@@ -51,7 +52,7 @@ resourceTemplates:
       - github-mirror-stage-deploy-success-channel
   - namespace:
       $ref: /services/github-mirror/namespaces/github-mirror-production.yaml
-    ref: aceeb02d595d92b7ef4052897bc585e04be7def6
+    ref: ac11f026eee1840ba211b36d5acca2bf607ec721
     promotion:
       auto: true
       subscribe:
@@ -62,3 +63,24 @@ resourceTemplates:
       # use dedicated reader endpoint if cluster size > 2
       READER_ENDPOINT: replica.ghmirror-redis-production.huo5rn.use1.cache.amazonaws.com
       REPLICAS: 5
+
+- name: github-mirror-dashboards
+  url: https://github.com/app-sre/github-mirror
+  path: /dashboards
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: app-sre-github-mirror-gh-build-master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: ac11f026eee1840ba211b36d5acca2bf607ec721
+    promotion:
+      auto: true
+      subscribe:
+      - github-mirror-stage-post-deploy-tests-success-channel
+

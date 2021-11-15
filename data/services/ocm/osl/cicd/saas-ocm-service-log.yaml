@@ -21,6 +21,7 @@ slack:
 managedResourceTypes:
 - Deployment
 - Service
+- ConfigMap
 
 imagePatterns:
 - quay.io/app-sre/ocm-service-log
@@ -34,6 +35,17 @@ authentication:
     field: all
 
 resourceTemplates:
+- name: grafana-dashboard-ocm-service-log
+  url: https://gitlab.cee.redhat.com/service/ocm-service-log
+  path: /dashboards
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: 04c8656bf4d0446af56630105c7e107ebe055c67
 - name: ocm-service-log
   url: https://gitlab.cee.redhat.com/service/ocm-service-log
   path: /templates/service-template.yml
@@ -325,7 +337,7 @@ resourceTemplates:
               bcc_address: "sda-devel+delete@redhat.com"
   - namespace:
       $ref: /services/ocm/namespaces/uhc-production.yml
-    ref: cdea961842ee4b315465d458619b301dec362f47
+    ref: 1081e287da6a6887b615d877ed7b856ee82af687
     parameters:
       UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_2
       GLOG_V: 1

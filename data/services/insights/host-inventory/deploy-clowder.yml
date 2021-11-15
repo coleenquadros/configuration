@@ -29,12 +29,21 @@ authentication:
   image:
     path: insights/quay/cloudservices-push
     field: all
+    version: 3
 
 parameters:
   KAFKA_PRODUCER_RETRIES: '8'
   KAFKA_PRODUCER_RETRY_BACKOFF_MS: '250'
 
 resourceTemplates:
+- name: host-inventory-frontend
+  path: /deploy/frontend.yaml
+  url: https://github.com/RedHatInsights/insights-inventory-frontend
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
 - name: host-inventory
   path: /deployment.yaml
   url: https://github.com/RedHatInsights/insights-host-inventory
@@ -65,7 +74,7 @@ resourceTemplates:
       REAPER_SUSPEND: 'false'
   - namespace:
       $ref: /services/insights/host-inventory/namespaces/prod-host-inventory-prod.yml
-    ref: e5a48b31947dd7a0921c37c80898428ce3045f66
+    ref: 7b582a4f071fa7ddd0bef8579acafc8a04301f32
     upstream:
       instance:
         $ref: /dependencies/ci-ext/ci-ext.yml
@@ -97,11 +106,14 @@ resourceTemplates:
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
     ref: internal  # populated by bonfire
     parameters:
-      MEMORY_LIMIT: 1Gi
+      MEMORY_LIMIT: 512Mi
+      MEMORY_REQUEST: 256Mi
       REPLICAS_P1: 1
       REPLICAS_SP: 1
       REPLICAS_PMIN: 1
       REPLICAS_SVC: 1
-      BULK_QUERY_SOURCE: db
-      BULK_QUERY_SOURCE_BETA: db
+      BULK_QUERY_SOURCE: xjoin
+      BULK_QUERY_SOURCE_BETA: xjoin
       BYPASS_RBAC: 'true'
+      XJOIN_SEARCH_HOST: xjoin-search
+      XJOIN_SEARCH_PORT: 4000

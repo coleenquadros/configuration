@@ -58,6 +58,7 @@ openshiftResources:
     readonly: true
     account_recovery_mode: false
     read_from_rds_replica: true
+
 - provider: resource-template
   type: extracurlyjinja2
   path: /quayio-stage/quay/quay-config.secret.yaml
@@ -69,6 +70,7 @@ openshiftResources:
     readonly: true
     account_recovery_mode: false
     read_from_rds_replica: false
+
 - provider: resource-template
   type: extracurlyjinja2
   path: /quayio-stage/quay/quay-config.secret.yaml
@@ -80,6 +82,19 @@ openshiftResources:
     readonly: false
     account_recovery_mode: false
     read_from_rds_replica: false
+
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /quayio-stage/quay/quay-config.secret.yaml
+  variables:
+    name: quay-py3-config-secret
+    vault_secret_version: 61
+    version_label: v61
+    enable_redis_modelcache: true
+    readonly: true
+    account_recovery_mode: false
+    read_from_rds_replica: false
+
 - provider: resource-template
   type: extracurlyjinja2
   path: /quayio-stage/quay/quay-config.secret.yaml
@@ -91,17 +106,7 @@ openshiftResources:
     readonly: false
     account_recovery_mode: false
     read_from_rds_replica: false
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /quayio-stage/quay/quay-config.secret.yaml
-  variables:
-    name: quay-config-secret-py3-canary
-    vault_secret_version: 61
-    version_label: v61
-    enable_redis_modelcache: true
-    readonly: true
-    account_recovery_mode: false
-    read_from_rds_replica: false
+
 - provider: resource-template
   type: extracurlyjinja2
   path: /quayio-stage/quay/quay-config.secret.yaml
@@ -113,6 +118,7 @@ openshiftResources:
     readonly: false
     account_recovery_mode: false
     read_from_rds_replica: false
+
 - provider: resource-template
   type: extracurlyjinja2
   path: /quayio-stage/quay/quay-config.secret.yaml
@@ -124,11 +130,13 @@ openshiftResources:
     enable_redis_modelcache: false
     readonly: false
     read_from_rds_replica: false
+
 - provider: resource-template
   type: extracurlyjinja2
   path: /quayio-stage/quay/quay-service-tool-config.secret.yaml
   variables:
     name: quay-service-tool-config
+    vault_secret_version: 6
 - provider: resource
   path: /quayio-stage/quay/quay-envoy-proxy-config.configmap.yaml
 - provider: vault-secret
@@ -160,9 +168,18 @@ terraformResources:
   parameter_group: /terraform/resources/quayio-stage/rds-parameter-group-1.yml
 - provider: rds
   account: quayio-stage
-  identifier: quayio-stage-57-replica-ue1
+  identifier: quayio-stage-57-py3
   availability_zone: us-east-1a
-  defaults: /terraform/resources/quayio-stage/rds-read-replica-us-east-1.yml
+  defaults: /terraform/resources/quayio-stage/rds-1.yml
+  parameter_group: /terraform/resources/quayio-stage/rds-parameter-group-readwrite-replica-1.yml
+  overrides:
+    apply_immediately: true
+- provider: rds
+  account: quayio-stage
+  identifier: quayio-stage-57-py3-replica
+  availability_zone: us-east-2b
+  defaults: /terraform/resources/quayio-stage/rds-read-replica-us-east-2.yml
+  replica_source: quayio-stage-57-py3
   parameter_group: /terraform/resources/quayio-stage/rds-parameter-group-1.yml
 - provider: elasticache
   account: quayio-stage

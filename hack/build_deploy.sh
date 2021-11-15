@@ -17,7 +17,7 @@ source $CURRENT_DIR/runners.sh
 mkdir -p validate reports
 
 # Create data bundle
-OUTPUT_DIR=validate make bundle validate
+OUTPUT_DIR=validate make schemas bundle validate
 
 upload_s3 validate/data.json
 echo "bundle uploaded to $ENVIRONMENT" > reports/report
