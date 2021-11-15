@@ -172,3 +172,62 @@ resourceTemplates:
       VMAAS_ADDRESS: http://vmaas-webapp.vmaas-prod.svc.cluster.local:8080 # use it if vmaas is not deployed with clowder
       KAFKA_READER_MAX_ATTEMPTS: '60'
       KAFKA_WRITER_MAX_ATTEMPTS: '60'
+
+  - namespace: # FEDRAMP-STAGE
+      $ref: /services/insights/patchman/namespaces/patchman-engine-fedramp-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-patchman-engine-gh-build-master
+    parameters:
+      # Manager
+      REPLICAS_MANAGER: '2'
+      IMAGE_TAG_MANAGER: 75d4b2d # 1.18.2
+      LOG_LEVEL_MANAGER: info
+      RES_CPU_MANAGER: 1000m
+      RES_MEM_MANAGER: 2Gi
+      ADVISORY_DETAIL_CACHE_SIZE: '60000' # Advisories count (46k) + some reserve
+
+      # Listener
+      REPLICAS_LISTENER: '1'
+      IMAGE_TAG_LISTENER: 75d4b2d # 1.18.2
+      LOG_LEVEL_LISTENER: info
+      CONSUMER_COUNT_LISTENER: "1"
+
+      # Evaluator - upload
+      REPLICAS_EVALUATOR_UPLOAD: '1'
+      IMAGE_TAG_EVALUATOR_UPLOAD: 75d4b2d # 1.18.2
+      LOG_LEVEL_EVALUATOR_UPLOAD: debug
+      ENABLE_LAZY_PACKAGE_SAVE_EVALUATOR_UPLOAD: 'true'
+      CONSUMER_COUNT_EVALUATOR_UPLOAD: "1"
+      GOMAXPROCS_EVALUATOR_UPLOAD: "4"
+      RES_CPU_EVALUATOR_UPLOAD: 500m
+      RES_MEM_EVALUATOR_UPLOAD: 2Gi
+
+      # Evaluator - recalc
+      REPLICAS_EVALUATOR_RECALC: '1'
+      IMAGE_TAG_EVALUATOR_RECALC: 75d4b2d # 1.18.2
+      LOG_LEVEL_EVALUATOR_RECALC: info
+      ENABLE_LAZY_PACKAGE_SAVE_EVALUATOR_RECALC: 'true'
+      CONSUMER_COUNT_EVALUATOR_RECALC: "1"
+      GOMAXPROCS_EVALUATOR_RECALC: "4"
+      RES_CPU_EVALUATOR_RECALC: 500m
+      RES_MEM_EVALUATOR_RECALC: 2Gi
+
+      # VMaaS sync
+      REPLICAS_VMAAS_SYNC: '1'
+      IMAGE_TAG_VMAAS_SYNC: 75d4b2d # 1.18.2
+      LOG_LEVEL_VMAAS_SYNC: info
+      DELETE_CULLED_SYSTEMS_LIMIT: "2000"
+      ERRATA_PAGE_SIZE: "5000"
+      RES_MEM_VMAAS_SYNC: 1024Mi
+
+      # Database admin
+      REPLICAS_DATABASE_ADMIN: '1'
+      IMAGE_TAG_DATABASE_ADMIN: 75d4b2d # 1.18.2
+      LOG_LEVEL_DATABASE_ADMIN: info
+
+      # Common parameters
+      KAFKA_READER_MAX_ATTEMPTS: '60'
+      KAFKA_WRITER_MAX_ATTEMPTS: '60'
