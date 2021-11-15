@@ -1,0 +1,34 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: cyndi
+
+name: cyndi
+
+namespaces:
+- $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
+
+slos:
+- name: Data consistency
+  dashboard: https://grafana.app-sre.devshift.net/d/fF9U-h7Mk/cyndi?orgId=1&refresh=1m&var-datasource=crcp01ue1-prometheus
+  SLIType: correctness
+  SLISpecification: Percentage of data in sync between the HBI and the App database
+  SLOTarget: 0.99
+  SLOTargetUnit: percent_0_1
+  SLOParameters:
+    window: 28d
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/cyndi/consistency-slo-details.md
+  expr: 1 - max(quantile_over_time(0.95, cyndi_inconsistency_ratio[1w])) by (app, namespace)
+  prometheusRules: /insights-prod/xjoin-prod/cyndi.prometheusrules.yaml
+- name: Latency
+  dashboard: https://grafana.app-sre.devshift.net/d/fF9U-h7Mk/cyndi?orgId=1&refresh=1m&var-datasource=crcp01ue1-prometheus
+  SLIType: latency
+  SLISpecification: Amount of lag, in number of messages, between HBI and the App database
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  SLOParameters:
+    window: 28d
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/cyndi/latency-slo-details.md
+  expr: quantile_over_time(0.95, cyndi:consumer_group_lag:min_per_app[1w])
+  prometheusRules: /insights-prod/xjoin-prod/cyndi.prometheusrules.yaml
