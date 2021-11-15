@@ -1,0 +1,48 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: web-rca
+
+name: web-rca-production
+
+description: Production namespace for the Web RCA service
+
+cluster:
+  $ref: /openshift/app-sre-prod-04/cluster.yml
+
+app:
+  $ref: /services/web-rca/app.yml
+
+environment:
+  $ref: /products/web-rca/environments/production.yml
+
+managedRoles: true
+
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-04.yml
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: app-sre
+  identifier: web-rca-production
+  defaults: /terraform/resources/app-sre/production/rds-3-pg13.yml
+- provider: s3
+  account: app-sre
+  identifier: web-rca-s3-prod
+  defaults: /terraform/resources/s3-private-1.yml
+  output_resource_name: web-rca-s3
+
+openshiftResources:
+- provider: vault-secret
+  path: app-interface/web-rca/production/runtime
+  version: 2
+- provider: route
+  path: /web-rca/production/web-rca.route.yaml
+- provider: route
+  path: /web-rca/production/web-rca-ui.route.yaml

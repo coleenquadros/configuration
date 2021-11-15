@@ -18,10 +18,12 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
         - [I can not access X](#i-can-not-access-x)
         - [I need help with something AWS related](#i-need-help-with-something-aws-related)
         - [I can not access ci-ext](#i-can-not-access-ci-ext)
+        - [I can not access Grafana](#i-can-not-access-grafana)
         - [Tagging options in app-interface](#tagging-options-in-app-interface)
         - [Can you reset my AWS password?](#can-you-reset-my-aws-password)
         - [Gating production promotions in app-interface](#gating-production-promotions-in-app-interface)
         - [Get access to cluster logs via Log Forwarding](#get-access-to-cluster-logs-via-log-forwarding)
+        - [User unable to assume IAM role in the AWS Console](#user-unable-to-assume-iam-role-in-the-aws-console)
         - [What is the Console or Prometheus URL for a service?](#what-is-the-console-or-prometheus-url-for-a-service)
         - [Can you restart my pods?](#can-you-restart-my-pods)
             - [OnBoarded Services](#onboarded-services)
@@ -93,6 +95,14 @@ Managed to log in but having issues? Maybe even seeing this error message? `"Acc
 1. Log out and log in again.
 2. Revoke the `jenkins-ci-ext` Authorized OAuth app in [GitHub settings](https://github.com/settings/applications) and log in again.
 
+### I can not access Grafana
+
+The AppSRE Grafana instance is available at https://grafana.app-sre.devshift.net.
+
+Access is managed via app-interface. The role that grants access is [observability-access](data/services/observability/roles/observability-access.yml).
+
+If you are a member of the OpenShift GitHub organization, you can use https://grafana.openshift-app-sre.devshift.net instead (does not require a user file).
+
 ### Tagging options in app-interface
 
 GitLab: Users are not being tagged by default for SaaS file reviews. To be tagged on MRs for SaaS files you own, add `tag_on_merge_requests: true` to your user file.
@@ -136,6 +146,10 @@ To get access to CloudWatch on a cluster's AWS account, follow these steps (exam
 1. In the Switch Role page, select a name for this role (suggestion: `<cluster_name>-read-only`) and click "Switch Role" (Account and Role should be filled automatically).
 1. You are now logged in to the cluster's AWS account. Go to the [CloudWatch console](https://console.aws.amazon.com/cloudwatch/home?#logsV2:log-groups) and get your logs!
 
+### User unable to assume IAM role in the AWS Console
+
+If the `Invalid information in one or more fields. Check your information or contact your administrator.` error is displayed when trying to assume a different IAM role, make sure [to enable MFA on your user AWS Account](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_enable_virtual.html). After MFA is enabled, log out and back in. 
+
 ### What is the Console or Prometheus URL for a service?
 
 Start by accessing the Visual App-Interface at https://visual-app-interface.devshift.net.  Using the side bar, navigate to the [Services](https://visual-app-interface.devshift.net/services) section.
@@ -151,7 +165,7 @@ Choose the namespace for which you would like to find the Console/Prometheus URL
 Choosing the namespace will take you to the namespace's page, in which you can find a link to the cluster running this namespace.
 
 In the Cluster page, you can find links to the cluster's Console and to the cluster's Prometheus.
-
+ 
 ### Can you restart my pods?
 
 There are a couple of choices depending on the state of onboarding the service is in currently
@@ -239,7 +253,7 @@ If a job is pending and need to be rushed, contact the App SRE team for assitanc
 
 ### How can I make my PR check job run concurrently
 
-Add `concurrent_build: true` to your job definition. [example](https://gitlab.cee.redhat.com/service/app-interface/blob/9e1185d/data/services/ocm/cicd/ci-int/jobs.yaml#L143)
+Add `concurrent_build: true` to your job definition. [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/2d18ad87e9775cfefa0a18be77c9b795eb81b730/data/services/app-interface/cicd/ci-ext/jobs.yaml#L59)
 
 ### How can I see who has access to a service
 

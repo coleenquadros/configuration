@@ -8,7 +8,7 @@ App-interface integrations are being executed in multiple locations in multiple 
 
 1. Create a MR in app-interface to promote your changes from staging to
    production. `make qr-promote` automates getting the latest commit 
-   checksum and updating the necessary files. If there is a need to promote to
+   checksum and updating the necessary files. Running `make qr-promote` will also update the `ref` field within our [saas-qontract-reconcile](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-interface/cicd/ci-ext/saas-qontract-reconcile.yaml) file.  If there is a need to promote to
    a single environment, or for a better understanding of what `qr-promote` is 
    doing, see [Updating specific environments](#updating-specific-environments).
 2. Team members should deploy their own changes to production shortly after 

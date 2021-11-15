@@ -101,6 +101,29 @@ data:
                 trusted_ca:
                   filename: /etc/ssl/certs/ca-certificates.crt
 
+      # Cluster for the `web-rca` service:
+      - name: web-rca
+        connect_timeout: 2s
+        type: STRICT_DNS
+        lb_policy: ROUND_ROBIN
+        load_assignment:
+          cluster_name: web-rca
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: aieet2z20kldyke.api.openshift.com
+                    port_value: 443
+        transport_socket:
+          name: envoy.transport_sockets.tls
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+            common_tls_context:
+              validation_context:
+                trusted_ca:
+                  filename: /etc/ssl/certs/ca-certificates.crt
+
       # Cluster for the `upgrades_info` service:
       - name: upgrades_info
         connect_timeout: 2s
@@ -183,6 +206,52 @@ data:
                 address:
                   socket_address:
                     address: epyl0jenyjuzxubqyz.api.openshift.com
+                    port_value: 443
+        transport_socket:
+          name: envoy.transport_sockets.tls
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+            common_tls_context:
+              validation_context:
+                trusted_ca:
+                  filename: /etc/ssl/certs/ca-certificates.crt
+
+      # Cluster for the `image-builder-composer` service:
+      - name: image-builder-composer
+        connect_timeout: 2s
+        type: STRICT_DNS
+        lb_policy: ROUND_ROBIN
+        load_assignment:
+          cluster_name: image-builder-composer
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: jjgrs6byc8virun.api.openshift.com
+                    port_value: 443
+        transport_socket:
+          name: envoy.transport_sockets.tls
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+            common_tls_context:
+              validation_context:
+                trusted_ca:
+                  filename: /etc/ssl/certs/ca-certificates.crt
+
+      # Cluster for the `image-builder-worker` service:
+      - name: image-builder-worker
+        connect_timeout: 2s
+        type: STRICT_DNS
+        lb_policy: ROUND_ROBIN
+        load_assignment:
+          cluster_name: image-builder-worker
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: jdtctdnzh7wn6j7.api.openshift.com
                     port_value: 443
         transport_socket:
           name: envoy.transport_sockets.tls
@@ -312,8 +381,21 @@ data:
                                 "name": "Status Board service"
                               },
                               {
+                                "id": "web-rca",
+                                "name": "Web RCA service"
+                              },
+                              {
                                 "id": "serviceregistry_mgmt",
                                 "name": "Service Registry service fleet manager service"
+                              },
+                              {
+                                "id": "image-builder-composer",
+                                "version": "v2",
+                                "name": "Image Builder service"
+                              },
+                              {
+                                "id": "image-builder-worker",
+                                "name": "Image Builder workers"
                               }
                             ]
                           }
@@ -324,6 +406,15 @@ data:
                       prefix: /api/status-board
                     route:
                       cluster: status-board
+                      auto_host_rewrite: true
+                      timeout: 30s
+
+                  # Route for the `web-rca` service:
+                  - name: web-rca
+                    match:
+                      prefix: /api/web-rca
+                    route:
+                      cluster: web-rca
                       auto_host_rewrite: true
                       timeout: 30s
 
@@ -360,6 +451,24 @@ data:
                       prefix: /api/serviceregistry_mgmt
                     route:
                       cluster: serviceregistry_mgmt
+                      auto_host_rewrite: true
+                      timeout: 30s
+
+                  # Route for the `image-builder-composer` service:
+                  - name: image-builder-composer
+                    match:
+                      prefix: /api/image-builder-composer
+                    route:
+                      cluster: image-builder-composer
+                      auto_host_rewrite: true
+                      timeout: 120s
+
+                  # Route for the `image-builder-worker` service:
+                  - name: image-builder-worker
+                    match:
+                      prefix: /api/image-builder-worker
+                    route:
+                      cluster: image-builder-worker
                       auto_host_rewrite: true
                       timeout: 30s
 

@@ -242,24 +242,7 @@ Grafana dashboards must move from saas-templates to each app's respective source
 
 ### How to add a Grafana dashboard
 
-1. Add (or update) the dashboard file (a ConfigMap containing the json data) in your app's source repository. The dashboards must be in their own separate directory, such as `/dashboards`. If the observability configuration has already been added, each merge to this repository will deploy the dashboards to the [Grafana stage instance](https://grafana.stage.devshift.net/).
-
-    - Note: Each dashboard ConfigMap should have the following section under `metadata`:
-
-    ```yaml
-    labels:
-      grafana_dashboard: "true"
-    annotations:
-      grafana-folder: /grafana-dashboard-definitions/Insights
-    ```
-
-2. If you haven't already added the required observability configuration, create an app-interface MR to add it to [saas-grafana.yml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/cicd/saas/saas-grafana.yaml) by copying one of the existing entries (such as “insights-dashboards” or “telemeter-dashboards”). Modify the following fields:
-    - name: The app’s name, adding “-dashboards” to the end. For example, “advisor-dashboards”.
-    - url: The URL for the application’s source repository. For example, <https://gitlab.cee.redhat.com/insights-platform/advisor-backend>.
-    - path: The repo’s local path to the folder containing the dashboards. For example, “/api/dashboards”.
-    - The last “ref” field (the one for the Production namespace) should be set to the commit hash for the app repo’s latest commit. As an example, here’s the value used by insights-dashboards.
-
-3. Once you've verified the changes look good on the stage grafana, open an MR updating the SHA to the latest commit in your repository to promote the dashboard changes to the [Grafana production instance](https://grafana.app-sre.devshift.net/). For example, updating [this line](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/cicd/saas/saas-grafana.yaml#L70) would update the (now-deprecated) insights-dashboards folder in Production Grafana.
+Follow the procedure explained in https://gitlab.cee.redhat.com/service/app-interface#add-a-grafana-dashboard.
 
 ### Adding Alerts
 

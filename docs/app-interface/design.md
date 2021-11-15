@@ -13,24 +13,24 @@ JSON schemas will:
 Example:
 
 ```
-qontract-server/schemas/access/bot-1.yml
+qontract-schemas/schemas/access/bot-1.yml
 3:version: "1.0"
 
-qontract-server/schemas/access/user-1.yml
+qontract-schemas/schemas/access/user-1.yml
 3:version: "1.0"
 
-qontract-server/schemas/access/role-1.yml
+qontract-schemas/schemas/access/role-1.yml
 3:version: "1.0"
 
-qontract-server/schemas/access/permission-1.yml
+qontract-schemas/schemas/access/permission-1.yml
 3:version: "1.0"
 
-qontract-server/schemas/app-sre/app-1.yml
+qontract-schemas/schemas/app-sre/app-1.yml
 3:version: "1.0"
 ```
 
 Note that the version **MUST** be a string (see
-[here](<https://gitlab.cee.redhat.com/service/app-interface/blob/master/schemas/common-1.json#L16-L19>)).
+[here](<https://github.com/app-sre/qontract-schemas/blob/main/schemas/common-1.json#L16-L19>)).
 
 Additionally **all** the resources created in the GraphQL schemas will have the
 `_v<number>` suffix. Example:

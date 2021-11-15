@@ -8,7 +8,7 @@
 
 # OLM Dance
 
-The OLM "dance" is when you delete the CSV and the Subscription and redeploy with the saas job. It is safe to do so.
+The OLM "dance" is when you delete the CSV and the Subscription and redeploy with the saas job. It is safe to do so. See [background information](#background-information) for more information about why this is necessary.
 
 ## Manual Steps
 
@@ -136,3 +136,9 @@ Trigger the saas deploy job. See: [Trigger the saas deploy job](#trigger-the-saa
     ```sh
     ./grpcurl -plaintext -d '{"csvName":"hive-operator.v0.1.2928-shac6ca3dd","pkgName":"hive-operator","channelName":"production"}' localhost:50051 api.Registry/GetBundleThatReplaces
     ```
+
+# Background Information
+
+# Why is this necessary?
+
+1. OLM does not support recovery from upgrade failures that result in terminal states. Specifically, InstallPlans were designed to run once. In these scenarios, OLM expects the cluster administrator to fix any problems and reinstall. This is discussed in more depth in this [Bugzilla](https://bugzilla.redhat.com/show_bug.cgi?id=2006773).

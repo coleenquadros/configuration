@@ -6,8 +6,8 @@
   - [Step 3 - Observability](#step-3-observability)
   - [Step 4 - Operator Lifecycle Manager](#step-4-operator-lifecycle-manager)
   - [Step 5 - Container Security Operator](#step-5-container-security-operator)
-  - [Step 6 - Deployment Validation Operator (DVO)](#step-7-deployment-validation-operator-dvo)
-  - [Step 7 - Obtain cluster-admin](#step-8-obtain-cluster-admin)
+  - [Step 6 - Deployment Validation Operator (DVO)](#step-6-deployment-validation-operator-dvo)
+  - [Step 7 - Obtain cluster-admin](#step-7-obtain-cluster-admin)
 - [Additional configurations](#additional-configurations)
   - [Selecting a Machine CIDR for VPC peerings](#selecting-a-machine-cidr-for-vpc-peerings)
   - [VPC peering with app-interface](#vpc-peering-with-app-interface)
@@ -89,6 +89,7 @@ This step should be performed in a single merge request.
       load_balancers: (desired load-balancer count. ex: 0)
       private: false (or true for private clusters)
       provision_shard_id: (optional) specify hive shard ID to create the cluster in (IDs can be found in the uhc-production namespace file)
+      disable_user_workload_monitoring: true
 
     upgradePolicy: # optional, specify an upgrade schedule
       workloads: [] # workloads running in this cluster
@@ -100,6 +101,10 @@ This step should be performed in a single merge request.
       vpc: (desired machine CIDR. ex: 10.123.0.0/16)
       service: (desired service CIDR. ex: 172.30.0.0/16)
       pod: (desired pod CIDR. ex: 10.128.0.0/14)
+   
+    automationToken:
+      path: app-sre/creds/kube-configs/<cluster_name>
+      field: token
 
     machinePools: # optional, specify additional Machine Pools to be provisioned
     - id: (machine pool name, should be unique per cluster)
@@ -121,8 +126,9 @@ This step should be performed in a single merge request.
       accessLevel: network-mgmt
     ```
 
-    * Note: Cluster name should follow naming convention [here](https://docs.google.com/document/d/1OIe4JGbScz57dIGZztThLTvji056OBCfaHSvGAo7Hao)
-    * Note: The cluster ID is not known at this point so we do not add a `consoleUrl` and `serverUrl` yet
+    * Note: Cluster name should follow naming convention
+      [here](https://docs.google.com/document/d/1OIe4JGbScz57dIGZztThLTvji056OBCfaHSvGAo7Hao)
+    * Note: The `id`, `consoleUrl`, `serverUrl`, `external_id` and `elbFQDN` will be added automatically at a later stage. Don't worry about them.
 
 1. Grant `dedicated-admin` and `dedicated-reader` access to App-SRE team
 
@@ -150,15 +156,16 @@ This step should be performed in a single merge request.
 
     * Note: during the installation it is expected that other ocm integrations will fail.
 
-1. Once the cluster has finished installing, the following fields have to be updated in the `cluster.yml` file in the `spec` section:
-    * `consoleUrl`: `https://console-openshift-console.apps.<cluster_name>.<base_domain>`
-    * `kibanaUrl`: `''`
-    * `prometheusUrl`: `https://prometheus.<cluster_name>.devshift.net`
+1. Once the cluster has finished installing, the following fields will be updated automatically in the `cluster.yml` file in the:
+    * `consoleUrl`
+    * `serverUrl`
+    * `kibanaUrl`
+    * `elbFQDN`
+    * `id` (in the `spec` section)
+    * `external_id` (in the `spec` section)
+1. Now, you can add these URLs manually (we'll automate this step in the future):
     * `alertmanagerUrl`: `https://alertmanager.<cluster_name>.devshift.net`
-    * `serverUrl`: `https://api.<cluster_name>.<base_domain>:6443`
-    * `elbFQDN`: `elb.apps.<cluster_name>.<base_domain>`
-    * `id`: This ID can be seen as part of the URL when navigating to cluster page in OCM as well as when using the [ocm cli](https://github.com/openshift-online/ocm-cli). This field should have been automatically added.
-    * `external_id`: This is a  UUID which can be seen in cluster page in OCM as `Cluster ID` well as when using the [ocm cli](https://github.com/openshift-online/ocm-cli). This field should have been automatically added.
+    * `prometheusUrl`: `https://prometheus.<cluster_name>.devshift.net`
 
     *Note*: The `<cluster_name>` and `<base_domain>` of a cluster can be retrieved using the [ocm cli](https://github.com/openshift-online/ocm-cli)
 
@@ -216,22 +223,13 @@ At this point you should be able to access the cluster via the console / `oc` cl
     oc -n dedicated-admin sa get-token app-sre-bot
     ```
 
-1. Add the `app-sre-bot` credentials to vault at https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/kube-configs
+1. Add the `app-sre-bot` credentials to [vault](https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/kube-configs). qontract-reconcile integrations errors indicating that the token wasn't found will clear once the credentials are in the vault.
 
    Create a secret named after the <cluster_name>
 
        server: https://api.<cluster_name>.<cluster_id>.p1.openshiftapps.com:6443
        token: <token>
        username: dedicated-admin/app-sre-bot # not used by automation
-
-1. Add the `app-sre-bot` credentials to the cluster file in app-interface
-   Create a secret named after the <cluster_name>
-
-    ```yaml
-    # /data/openshift/<cluster_name>/cluster.yml
-    automationToken:
-      path: app-sre/creds/kube-configs/<cluster_name>
-      field: token
 
 1. If the cluster is private, the following lines must be added
 
@@ -342,7 +340,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
         - Alert email: sd-app-sre@redhat.com
         - Notes: Runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/prometheus/prometheus-deadmanssnitch.md
 
-    1. Add the deadmanssnitch URL to this secret in Vault: https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/alertmanager-integration
+    1. Add the deadmanssnitch URL to this secret in Vault: https://vault.devshift.net/ui/vault/secrets/app-sre/show/integrations-input/alertmanager-integration
 
         - key: `deadmanssnitch-<cluster_name>-url`
         - value: the `Unique Snitch URL` from deadmanssnitch
@@ -454,60 +452,15 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
 ## Step 5 - Container Security Operator
 
-1. Install the Container Security Operator
+The Container Security Operator (CSO) brings Quay and Clair metadata to
+Kubernetes / OpenShift. We use the vulnerabilities information in the tenants
+dashboard and in the monthly reports.
 
-    The Container Security Operator (CSO) brings Quay and Clair metadata to
-    Kubernetes / OpenShift. We use the vulnerabilities information in the tenants
-    dashboard and in the monthly reports.
+To create the CSO operator configs, run the following command:
 
-    1. Create an `container-security-operator` namespace file for that specific
-    cluster. Example:
-
-    File name: `app-sre-cso-per-cluster.yml`
-
-    Content:
-
-    ```yaml
-    ---
-    $schema: /openshift/namespace-1.yml
-
-    labels: {}
-
-    name: container-security-operator
-    description: namespace for the app-sre per-cluster Container Security Operator
-
-    cluster:
-      $ref: /openshift/<cluster>/cluster.yml
-
-    app:
-      $ref: /services/container-security-operator/app.yml
-
-    environment:
-      $ref: /products/dashdot/environments/production.yml
-
-    networkPoliciesAllow:
-    - $ref: /openshift/<cluster>/namespaces/openshift-operator-lifecycle-manager.yml
-    ```
-
-    If the `openshift-operator-lifecycle-manager` namespace is not yet defined in
-    app-interface, follow [Step 4](#step-4-operator-lifecycle-manager)
-
-    1. Add the new `container-security-operator` namespace to the target
-    namespaces in the
-    [saas.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/container-security-operator/cicd/saas.yaml)
-    to deploy the Container Security Operator. Example:
-
-    ```yaml
-    resourceTemplates:
-    - name: container-security-operator
-      url: https://github.com/app-sre/container-security-operator
-      path: /openshift/container-security-operator.yaml
-      targets:
-      ...
-      - namespace:
-          $ref: /openshift/<cluster>/namespaces/app-sre-cso-per-cluster.yml
-        ref: <commit_hash>
-    ```
+```bash
+hack/cluster_provision.py [--datadir=data directory] create-cso-cluster-config <cluster-name>
+```
 
 ## Step 6 - Deployment Validation Operator (DVO)
 
@@ -516,7 +469,7 @@ The Deployment Validation Operator inspects workloads in a cluster and evaluates
 To create the DVO operator configs, run the following command:
 
 ```bash
-hack/cluster_provision.py [--datadir=data directory] create-dvo-cluster-config <cluster-name> --environment <stage|production>
+hack/cluster_provision.py [--datadir=data directory] create-dvo-cluster-config <cluster-name>
 ```
 
 ## Step 7 - Obtain cluster-admin
@@ -613,7 +566,7 @@ To off-board an OSDv4 cluster from app-interface, perform the following operatio
 1. Delete the cluster credentials from Vault (verify that no secrets are in use):
   - https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/kube-configs/
   - https://vault.devshift.net/ui/vault/secrets/app-interface/list/<cluster_name>/
-  - https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/alertmanager-integration
+  - https://vault.devshift.net/ui/vault/secrets/app-sre/show/integrations-input/alertmanager-integration
   - https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre/app-sre-observability-production/grafana/datasources
 
 

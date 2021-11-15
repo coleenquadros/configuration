@@ -39,6 +39,7 @@ authentication:
   image:
     path: insights/quay/cloudservices-push
     field: all
+    version: 3
   code:
     path: app-sre/creds/github-app-sre-bot
     field: openshift-saas-deploy
@@ -68,7 +69,7 @@ resourceTemplates:
       HEARTBEAT_SCHEDULE: '@daily'
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-perf.yml
-    ref: 1a6105add07bc7edb47b1031a0c2c2cda94df03a
+    ref: 7add93a18d3e2288d9ae110f9a6c76deae922614
     parameters:
       ENV_NAME: perf
       CPU_REQUESTS: 500m
@@ -80,7 +81,7 @@ resourceTemplates:
       HEARTBEAT_SCHEDULE: '@daily'
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
-    ref: 1a6105add07bc7edb47b1031a0c2c2cda94df03a
+    ref: 7add93a18d3e2288d9ae110f9a6c76deae922614
     parameters:
       CPU_REQUESTS: 500m
       CPU_LIMITS: 2
@@ -107,7 +108,7 @@ resourceTemplates:
       HEARTBEAT_SCHEDULE: '@daily'
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-fedramp-prod.yml
-    ref: 1a6105add07bc7edb47b1031a0c2c2cda94df03a
+    ref: 7add93a18d3e2288d9ae110f9a6c76deae922614
     parameters:
       CPU_REQUESTS: 500m
       CPU_LIMITS: 2
@@ -117,7 +118,7 @@ resourceTemplates:
       HEARTBEAT_SUSPEND: 'false'
       HEARTBEAT_SCHEDULE: '@daily'
 
-- name: xjoin-search-ephemeral
+- name: xjoin-search
   path: /deploy/ephemeral.yaml
   url: https://github.com/RedHatInsights/xjoin-search
   targets:
@@ -245,11 +246,21 @@ resourceTemplates:
       NUM_REPLICAS: '17'
       MEMORY_REQUESTS: 8Gi
       MEMORY_LIMITS: 12Gi
+
+- name: xjoin-kafka-connect-strimzi
+  path: /deploy/kafka-connect-perf.yml
+  url: https://github.com/RedHatInsights/xjoin-kafka-connect
+  parameters:
+    VERSION: '2.7.0'
+    CPU_LIMITS: 3
+    XMX: 8G
+    XMS: 8G
+  targets:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-perf.yml
-    ref: 347c7728000e8f3edb930e98a0588af53f4ebd99
+    ref: 84b4fb157f833f07f80845b8edbd65f0da542e1f
     parameters:
-      IMAGE_TAG: 347c772
+      IMAGE_TAG: 84b4fb1
       CPU_REQUESTS: 250m
       NUM_REPLICAS: '7'
       MEMORY_REQUESTS: 8Gi

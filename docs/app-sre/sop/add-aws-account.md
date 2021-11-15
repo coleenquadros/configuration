@@ -1,37 +1,122 @@
 # Add a new AWS account to app-interface
 
-In order to add an AWS account to app-interace, you need a few things up front:
+This SOP describes adding a new AWS account to App Interface. This workflow applies when the following conditions are met:
 
-1. An AWS account created
-1. The `Account ID` for the AWS account
-1. `AccessKey` and `SecretAccessKey` information for an admin user in that AWS account
+1. You are onboarding a new service
+1. The AWS account is for stage or production environments only
 
-The `Account ID` and the `AccessKey` and `SecretAccessKey` information should be provided by whomever creates the AWS account for us.  Usually SREP creates the AWS accounts for us.  Contact James Harrington (@jharrington on slack) for help if needed.
+If your use case does not meet these criteria, please reach out to other App-SRE team members for further discussion.
 
-Once this information is obtained the process is basically a few steps:
+## Prerequisites
+
+In order to add a new AWS account to app-interface, you need a few things up front:
+
+1. A new AWS account with admin level access created
+1. A set of credentials and details to access the account, provided by the party responsible for creating the account. The account details should come as an encrypted message.
+1. aws-cli installed locally
+1. terraform CLI version matching the version used by Qontract-Reconcile (check `TERRAFORM_VERSION` [here](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/cli.py)). You can download Terraform from https://www.terraform.io/downloads.html.
+
+Accounts can be created by creating a ticket in the [OHSS Jira project](https://issues.redhat.com/projects/OHSS/).
+
+
+## Encrypted Account Details
+
+The account details will include the following information:
+
+* Account #, a.k.a. account uid
+* Root administrator account, aka user
+* password
+* access key id
+* secret access key
+
+After decrypting the message, you'll see output similar to the following: 
+
+```
+# staging
+account #: 123456789
+
+user: tpate
+password: Password123
+access key ID: AAAAAAAAAAAAAAAAAAAAA
+secret access key: AAAAAAAAAAAAAAAAAAAAAA
+```
+
+# Walkthrough
+
+Once you have decrypted the account details, the process is as follows:
 
 1. Bootstrap terraform
+1. Capture `terraform` user's access key and secret key via `terraform show`
+1. [If user === existing app-sre username] Rename root administrator user
 1. Create a vault secret with AWS credential information
 1. Add the AWS account information to app-interface
-1. Update the credentials in vault to use those from the terraform user
+1. Delete the original user account
 
 ## Bootstrap terraform
 
-See [Terraform init via terraform](docs/aws/terraform)
+Follow the [Terraform init via terraform](docs/aws/terraform) instructions to set up the terraform AWS user and S3 bucket.
+
+## Capture `terraform` user's credentials
+
+In the same directory as the terraform bootstrap process, run 
+
+```
+terraform show
+```
+
+and capture the access key ID and secret access key for the `terraform` user. If terraform apply ran properly, then a new AWS user, `terraform` will exist in the new account with Administrator privileges. We will use these secrets to populate Vault in a forthcoming step. After you have saved the secrets in vault, you should delete `terraform.tfstate` from your local directory.
+
+## Rename root administrator user (if necessary)
+
+In the case that the root username for the new AWS account is exactly the same as an existing App-SRE team member's username in app-interface, reconciliation will fail due to a naming collision. In this case, automated emails will NOT be sent to team members as expected. However, all of the encrypted passwords will still be available to access in app-interface-output after the merge.
+
+In order to fix this potential issue, we can rename the original admin account after the `terraform` AWS user is created.
+
+Using the aws-cli profile setup in the bootstrap terraform step, run the following:
+
+```
+AWS_PROFILE=<profile_name_here> aws iam update-user --user-name tpate --new-user-name temp-tpate
+```
+
+This will retain the root administrator account until no longer needed, and avoid naming collisions that will disrupt reconciliation. 
 
 ## Create a vault secret with AWS credential information
 
-The authentication information for AWS used by our integrations is located in [vault](https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/terraform).  Each AWS account is a separate secret under this path.  Create a new secret here named like:
+The authentication information for AWS used by our integrations is located in [vault](https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/terraform).  Each AWS account is a separate secret under this path.
 
-```shell
-app-sre/creds/terraform/<account_name>/config
+* Before creating your new secret, view an existing terraform secret for another account. Click the "JSON" toggle, and copy the contents to your clipboard.
+* Now, create a new secret with the following path: `app-sre/creds/terraform/<account_name>/config`.
+* Toggle "JSON", and paste the copied contents to a new secret.
+* Modify the copied contents, updating fields as necessary. See more detail below.
+* Save the new secret.
+
+### Updating secret fields
+
+You can copy all the fields from another secret, updating the values of all keys to reference your new account name and new credentials.
+
+Example:
+
+```
+{
+  "aws_access_key_id": "<>",
+  "aws_secret_access_key": "<>",
+  "bucket": "terraform-image-builder-stage",
+  "key": "image-builder-stage.tfstate",
+  "region": "us-east-1",
+  "terraform_aws_route53_key": "image-builder-stage-aws-route53.tfstate",
+  "terraform_resources_key": "image-builder-stage.tfstate",
+  "terraform_users_key": "image-builder-stage-users.tfstate",
+  "terraform_vpc_peerings_key": "image-builder-stage-vpc-peerings.tfstate"
+}
 ```
 
-You can copy all the fields from another secret except for the 3 fields that are unique: aws_access_key_id, aws_secret_access_key, bucket.  Those three keys must be specific to this AWS account. Set the `aws_access_key_id` key to the `AccessKey` and the `aws_secret_access_key` to the `SecretAccessKey` from the admin account provided by whomever setup the AWS account.  The `bucket` key generally follows the convention of `<account_name>-tf-state`, but can valid S3 bucket name.  Usually terraform state buckets are in the `us-east-1` region so it's okay to copy that value as is from another config.  However, if the state bucket is to be in any other region then make sure to update the `region` key in the secret to the appropriate region and provide that region below when creating/updating the bucket.
+Set the `aws_access_key_id` key to `AccessKey` and the `aws_secret_access_key` to `SecretAccessKey` to the output recorded from `terraform show`, referencing the new `terraform` AWS administrator user.
+
+The `bucket` key generally follows the convention of `terraform-<account_name>`, but can be any valid S3 bucket name. Usually, terraform state buckets are in the `us-east-1` region so it's okay to copy that value as is from another config. However, if the state bucket is to be in any other region then make sure to update the `region` key in the secret to the appropriate region and provide that region below when creating/updating the bucket.
 
 ## Add the AWS account information to app-interface
 
-Now that the vault secret has been created and the S3 bucket created for terraform's state we can add the aws account information into app-interface.  This combined with the role defintions will give users access to the AWS account.
+Now that the vault secret has been created and the S3 bucket created for terraform's state, we can add the aws account information into app-interface.
 
 ### Create the AWS account yaml
 
@@ -113,73 +198,38 @@ description: |
     Allows a user to view AWS billing related data
 
 policy:
-    {
-        "Version": "2012-10-17",
-        "Statement": [
-            {
-                "Action": [
-                    "aws-portal:ViewAccount",
-                    "aws-portal:ViewBilling",
-                    "aws-portal:ViewPaymentMethods",
-                    "aws-portal:ViewUsage"
-            ],
-            "Effect": "Allow",
-            "Resource": "*"
-            }
-        ]
-    }
+  {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Action": [
+          "aws-portal:ViewAccount",
+          "aws-portal:ViewBilling",
+          "aws-portal:ViewPaymentMethods",
+          "aws-portal:ViewUsage"
+        ],
+        "Effect": "Allow",
+        "Resource": "*"
+      }
+    ]
+  }
 ```
 
 ### Add AppSRE users
 
 Lastly add the created admin group and policy to the [app-sre.yml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/teams/app-sre/roles/app-sre.yml) role.
 
-NOTE: If the admin account provided by the AWS account creator is the same as your AppSRE account then you will need to follow a separate procedure to add all AppSRE users.  This is because the integration will fail when it tries to add your account and it already exists, which results in none of the accounts being added to the AWS account.  Follow [this](#special-case-for-user-as-admin) with an additional AppSRE team member to get things going.
-
-```yaml
-data/teams/app-sre/roles/app-sre.yml
-
----
-$schema: /access/role-1.yml
-
-labels: {}
-name: app-sre
-
-...
-aws_groups:
-- $ref: /aws/<aws_account>/groups/App-SRE-admin.yml
-
-user_policies:
-- $ref: /aws/<aws_account>/policies/BillingViewAccess.yml
-```
-
 ### Wait for the e-mails for access to the AWS account
 
 Once the MR is merged with all the above changes, AppSRE members should receive e-mails with credentials to log into the AWS account.  The integration to watch for users to be added is the `terraform-users` integration.
 
-### Special case for user as admin
+## Delete the original user account
 
-In this instance the admin account provided by the AWS account creator is one of the AppSRE members, so we need to add only 1 AppSRE user to the AWS account and do some slightly different steps.
+After you have received your automated email, decrypted the contents, logged into the AWS console, and updated your password, you are almost done! (In case you did not receive an invitation email, read [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/aws/aws-management-console.md#how-do-i-sign-into-the-aws-management-console-for-the-first-time)).
 
-Create a new role file in data/teams/app-sre/roles with only:
+Finally, we need to delete the original account used to bootstrap the AWS account.
 
-```yaml
----
-$schema: /access/role-1.yml
-labels: {}
-name: app-sre
-
-permissions: []
-
-aws_groups:
-- $ref: /aws/ocm-quay/groups/App-SRE-admin.yml
-
-user_policies:
-- $ref: /aws/ocm-quay/policies/BillingViewAccess.yml
-```
-
-Add this role to the compansion AppSRE user's file.  The AppSRE user will then be added to the AWS account as an admin and receive an e-mail for access, just like other aws account access.
-
-Once this AppSRE team member has access to the AWS account, follow the steps to create the [terraform user](#create-terraform-user-account) and cycle credentials in vault.  Once the `terraform` user account has been created and the credentials updated in vault, delete the user account causing problems.
-
-Now follow the steps to [add all AppSRE users](#add-appsre-users) to the aws account and remove the temporary role file created in step.
+* Log into the console
+* Navigate to IAM > Users
+* Look for the original account name, either as provided to you or the temp-<account> renamed version
+* Delete the user (confirm by typing in the user name)

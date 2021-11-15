@@ -30,6 +30,7 @@ authentication:
   image:
     path: insights/quay/cloudservices-push
     field: all
+    version: 3
 
 parameters:
   CLOUD_WATCH_LOG_GROUP: tower-analytics-stage
@@ -45,7 +46,21 @@ resourceTemplates:
     ref: internal  # populated by bonfire
     parameters:
       KAFKA_GROUPID: processor-pr
-      RBAC_URL: 'http://rbac-service:8000'
+      RBAC_URL: http://rbac-service:8000
+      MEMORY_REQUEST_ONEVIEW: 400Mi
+      MEMORY_LIMIT_ONEVIEW: 800Mi
+      MEMORY_REQUEST_FASTAPI: 512Mi
+      MEMORY_LIMIT_FASTAPI: 1Gi
+      MEMORY_REQUEST_PROCESSOR: 1Gi
+      MEMORY_LIMIT_PROCESSOR: 2Gi
+      MEMORY_REQUEST_RECOVERY: 1Gi
+      MEMORY_LIMIT_RECOVERY: 2Gi
+      MEMORY_REQUEST_EXPORTER: 1Gi
+      MEMORY_LIMIT_EXPORTER: 2Gi
+      MEMORY_REQUEST_USER_METRICS: 400Mi
+      MEMORY_LIMIT_USER_METRICS: 800Mi
+      MEMORY_REQUEST_ROLLUPS: 400Mi
+      MEMORY_LIMIT_ROLLUPS: 800Mi
   - namespace:
       $ref: /services/insights/tower-analytics/namespaces/stage-tower-analytics-stage.yml
     ref: main
@@ -67,12 +82,14 @@ resourceTemplates:
       DATA_EXPORT_BUCKET_NAME: tower-analytics-dbdumps-stage-s3
       DATA_EXPORT_ENABLED: 'True'
       RECOVERY_BUCKET_NAME: tower-analytics-recovery-stage-s3
+      FASTAPI_HOST: automation-analytics-api-fastapi-v2.tower-analytics-stage.svc.cluster.local
+      FASTAPI_PORT: 8000
     promotion:
       publish:
       - automation-analytics-stage-deploy-success-channel
   - namespace:
       $ref: /services/insights/tower-analytics/namespaces/tower-analytics-prod.yml
-    ref: fb172935cf8dd82f1e039384583b485d0db5b002
+    ref: ea1889170330c0b0970ece48a019622538a33ca4
     parameters:
       ENV_NAME: prod
       REPLICAS_API: 20
@@ -93,3 +110,9 @@ resourceTemplates:
       DATA_EXPORT_ENABLED: 'True'
       JOBS_LOG_LEVEL: INFO
       RECOVERY_BUCKET_NAME: tower-analytics-recovery-prod
+      FASTAPI_HOST: automation-analytics-api-fastapi-v2.tower-analytics-prod.svc.cluster.local
+      FASTAPI_PORT: 8000
+    promotion:
+      auto: true
+      subscribe:
+      - automation-analytics-stage-post-deploy-tests-success-channel

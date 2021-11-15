@@ -34,21 +34,21 @@ spec:
   provider: aws
   region: us-east-1
   channel: fast
-  version: 4.8.11
+  version: 4.9.6
   initial_version: 4.8.11-fast
   multi_az: true
-  nodes: 9
-  # autoscale: # optional. nodes should not be defined if autoscale is defined
-  #   min_replicas: 4  # seems to be the minimal min_replicas elsewhere
-  #   max_replicas: 39
+  autoscale:
+    min_replicas: 9
+    max_replicas: 39
   instance_type: c5.2xlarge
-  storage: 1600
+  storage: 7100
   load_balancers: 4
   private: false
 
   id: 1nlhdk7ofkd8du2bu4q1bodqijasc8b1
   external_id: 18198df6-fe62-4128-a8ba-e7bb82696648
   provision_shard_id: de4b0632-dca7-11ea-b3b9-8c1645a911be
+  disable_user_workload_monitoring: true
 upgradePolicy:
   workloads:
   - clair
@@ -63,16 +63,12 @@ network:
 
 peering:
   connections:
-  # - provider: account-vpc
-  #   name: clairp01ue1-QuayVPC
-  #   vpc:
-  #     $ref: /aws/quayio-prod/vpcs/QuayVPC.yml
-  #   # manageRoutes: true
   - provider: account-vpc
     name: clairp01ue1-StatefulVPC
     vpc:
       $ref: /aws/quayio-prod/vpcs/StatefulVPC.yml
     manageRoutes: true
+    delete: true
   - provider: account-vpc
     name: clairp01ue1-ClairVPC
     vpc:
@@ -99,3 +95,6 @@ awsInfrastructureAccess:
 - awsGroup:
     $ref: /aws/quayio-prod/groups/App-SRE-admin.yml
   accessLevel: network-mgmt
+- awsGroup:
+    $ref: /aws/app-sre/groups/Log-consumers.yml
+  accessLevel: read-only

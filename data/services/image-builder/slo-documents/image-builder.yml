@@ -1,0 +1,34 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: image-builder
+
+name: image-builder-composer
+
+namespaces:
+- $ref: /services/image-builder/namespaces/composer-production.yml
+
+slos:
+- name: composer success rate
+  SLIType: availability
+  SLISpecification: 95% of compose requests must succeed
+  SLODetails: https://gitlab.cee.redhat.com/osbuild/internal-guides/-/blob/main/src/image-builder-service/slos/composer/success_rate.md
+  SLOParameters:
+    window: 28d
+  expr: 1 - (sum by (job) (increase(total_failed_compose_requests[{{window}}])) / sum by (job) (increase(total_compose_requests[{{window}}])))
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /image-builder/production/image-builder-composer-prometheusrules.yml
+  dashboard: https://grafana.app-sre.devshift.net/d/cNGfs4Knz/image-builder-composer?orgId=1
+- name: composer request latency
+  SLIType: latency
+  SLISpecification: 95% of the latency of compose requests must be under 200 milliseconds
+  SLODetails: https://gitlab.cee.redhat.com/osbuild/internal-guides/-/blob/main/src/image-builder-service/slos/composer/request_latency.md
+  SLOParameters:
+    window: 28d
+  expr: sum(rate(composer_http_duration_seconds_bucket{le="0.2"}[{{window}}]))/sum(rate(composer_http_duration_seconds_count[{{window}}]))
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /image-builder/production/image-builder-composer-prometheusrules.yml
+  dashboard: https://grafana.app-sre.devshift.net/d/cNGfs4Knz/image-builder-composer?orgId=1

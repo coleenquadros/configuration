@@ -5,6 +5,7 @@ import logging
 import sys
 import click
 
+import cluster_provision.cso as cso
 import cluster_provision.dvo as dvo
 import cluster_provision.olm as olm
 
@@ -22,7 +23,7 @@ def init_logging() -> None:
 
 @click.group()
 @click.option('--datadir',
-              default="../data",
+              default="data",
               show_default=True,
               help='Path of app-interface data directory')
 @click.pass_context
@@ -43,12 +44,17 @@ def create_olm_ns(ctx, cluster):
 
 @cli.command()
 @click.argument("cluster")
-@click.option('--environment', required=True,
-              type=click.Choice(['production', 'stage']))
 @click.pass_context
-def create_dvo_cluster_config(ctx, cluster, environment):
+def create_dvo_cluster_config(ctx, cluster: str) -> None:
     """ Generates Deployment Validation Operator (DVO) configs for a cluster"""
-    dvo.main(ctx.obj['datadir'], cluster, environment)
+    dvo.main(ctx.obj['datadir'], cluster)
+
+@cli.command()
+@click.argument("cluster")
+@click.pass_context
+def create_cso_cluster_config(ctx, cluster: str) -> None:
+    """Generates Container Security Operator (CSO) configs for a cluster"""
+    cso.main(ctx.obj['datadir'], cluster)
 
 
 if __name__ == "__main__":

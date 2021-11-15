@@ -30,6 +30,7 @@ authentication:
   image:
     path: insights/quay/cloudservices-push
     field: all
+    version: 3
 
 parameters:
   CLOWDER_ENABLED: 'true'
@@ -79,17 +80,25 @@ resourceTemplates:
   # Production
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
-    ref: a37f9cb8c731fadfc32e6b200d4ceb721573ccce
+    ref: 677cc56781dc7a3a733dcc6727db24638d974486
+    promotion:
+      auto: true
+      subscribe:
+      - cloudigrade-stage-post-deploy-tests-success-channel
     parameters:  # all other parameters have default values
       API_REPLICA_COUNT_MAX: '2'
       API_SENTRY_ENVIRONMENT: prod
       API_TARGET_AVERAGE_CPU_UTILIZATION: '35'
       CELERY_SENTRY_ENVIRONMENT: prod
+      CELERY_SENTRY_SAMPLE_RATE_DEFAULT: '0.01'
       CELERY_WORKER_REPLICA_COUNT: '8'
-      CELERY_WORKER_REPLICA_COUNT_MAX: '12'
+      CELERY_WORKER_REPLICA_COUNT_MAX: '32'
       CLOUDIGRADE_CW_STREAM_NAME: cloudigrade-prod
       CLOUDIGRADE_ENABLE_CLOUDWATCH: 'true'
       CLOUDIGRADE_ENVIRONMENT: prod
+      DJANGO_SENTRY_SAMPLE_RATE_DEFAULT: '0.1'
+      DJANGO_SENTRY_SAMPLE_RATE_BY_VIEW_NAME: '{"v2-concurrent-list": 0.01,"internal-availability-status":
+        0.02,"health_check:health_check_home": 0.0}'
       HOUNDIGRADE_SENTRY_ENVIRONMENT: prod
       LISTENER_GROUP_ID: cloudmeter_prod
       LISTENER_SENTRY_ENVIRONMENT: prod
@@ -114,6 +123,8 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml
     ref: master
+    parameters:
+      POSTIGRADE_MIN_REPLICAS: '2'
     upstream:
       instance:
         $ref: /dependencies/ci-ext/ci-ext.yml
@@ -124,7 +135,9 @@ resourceTemplates:
   # Production
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
-    ref: 909534eea8f6d14990f9726c26ffb7940a8db0f6
+    ref: b964e87c2845157cbce9888a6386711cae0a3d7b
+    parameters:
+      POSTIGRADE_MIN_REPLICAS: '8'
     promotion:
       auto: true
       subscribe:

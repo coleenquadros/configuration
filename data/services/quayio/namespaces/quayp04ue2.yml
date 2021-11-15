@@ -32,13 +32,18 @@ openshiftResources:
   type: extracurlyjinja2
   path: /quay-p/quay/quay-config.secret.yaml
   variables:
-    recycle: false
+    recycle: true
     name: quay-config-secret-readonly
-    vault_secret_version: 36
+    config_vault_secret_version: 36
+    additional_config_vault_secret_version: 2
     version_label: v36
     readonly: true
     standby: true
     log_producer: kinesis_stream
+    enable_redis_modelcache: false
+    account_recovery_mode: false
+    read_from_rds_replica: false
+
 - provider: vault-secret
   path: app-interface/quayio-prod-us-east-2/quay/quay-extra-ca-certs
   version: 1
@@ -64,6 +69,13 @@ terraformResources:
   defaults: /terraform/resources/quayio-production/rds-read-replica-us-east-2.yml
   parameter_group: /terraform/resources/quayio-production/rds-parameter-group-read-replica-1.yml
   replica_source: quayio-production
+- provider: rds
+  account: quayio-prod
+  identifier: quayio-production-57-py3-replica
+  availability_zone: us-east-2a
+  defaults: /terraform/resources/quayio-production/rds-read-replica-us-east-2.yml
+  parameter_group: /terraform/resources/quayio-production/rds-parameter-group-read-replica-1.yml
+  replica_source: quayio-production-py3
 - provider: s3-cloudfront
   account: quayio-prod
   identifier: quayio-production-s3-backup

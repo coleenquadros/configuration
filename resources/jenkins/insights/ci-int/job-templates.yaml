@@ -212,3 +212,101 @@
             white-list-target-branches:
             - '{white_list_target_branches}'
     <<: *pr_check_template
+
+- job-template:
+    id: 'insights-deploy-ephemeral'
+    description: 'To 1) reserve and deploy an Insight app to ephemeral cluster 2) release namespaces the user has reserved. For additional documentation and usage instructions please see: https://docs.google.com/document/d/1f6D1ZwE40QuyoqsfuXpqPlCqOVwssGNEwr-iGDOYvVY/'
+    name: '{name}-ephemeral'
+    node: '{node}'
+    ci_cmd: ./ephemeral.sh
+    gl_group: insights-platform
+    gl_project: cicd-common
+    app_name: ""
+    component_name: ""
+    image: ""
+    git_commit: ""
+    image_tag: ""
+    components: ""
+    components_w_resources: ""
+    deploy_timeout: ""
+    additional_arg: ""
+    post_deployment_script: ""
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_ephemeral_oc_login
+        - *app_interface_creds
+        - *insights_rh_registry_pull_secret
+        - *quay_secret_push
+        - *insightsdroid_github
+    <<: *gl_checkout
+    parameters:
+    - bool:
+        name: RELEASE_NAMESPACE
+        default: false
+        description: "(optional) Release a previously reserved namespace. Selecting this will not deploy anything"
+    - string:
+        name: NAMESPACE
+        default: ""
+        description: "(REQUIRED only if RELEASE_NAMESPACE=true) Namespace number to release. E.g. if the namepace is ephemeral-01, please enter: 01. Enter 'all' to release all of current user's"
+    - string:
+        name: APP_NAME
+        default: '{app_name}'
+        description: "(REQUIRED) name of app-sre 'application' folder this component lives in"
+    - bool:
+        name: INCLUDE_UI
+        default: {obj:include_ui}
+        description: "(optional) if selected, UI will be deployed as well"
+    - string:
+        name: COMPONENT_NAME
+        default: '{component_name}'
+        description: "(REQUIRED) name of app-sre 'resourceTemplate' in deploy.yaml for this component"
+    - string:
+        name: IMAGE
+        default: '{image}'
+        description: "(REQUIRED) image location on quay"
+    - string:
+        name: GIT_COMMIT_INPUT
+        default: '{git_commit}'
+        description: "(REQUIRED) full git commit hash of the version being tested"
+    - string:
+        name: IMAGE_TAG_INPUT
+        default: '{image_tag}'
+        description: "(optional, default matches short GIT_COMMIT_INPUT) image tag for the version being tested"
+    - string:
+        name: COMPONENTS
+        default: '{components}'
+        description: "(optional, default: all) space separated components to deploy"
+    - string:
+        name: COMPONENTS_W_RESOURCES
+        default: '{components_w_resources}'
+        description: "(optional, default: none) space separated components which should preserve resource settings"
+    - string:
+        name: DEPLOY_TIMEOUT
+        default: '{deploy_timeout}'
+        description: "(optional, default: 300) bonfire deployment timeout parameter in seconds"
+    - string:
+        name: ADDITIONAL_ARG
+        default: '{additional_arg}'
+        description: "(optional, default: none) additional arguments passed to the bonfire deployment"
+    - string:
+        name: POST_DEPLOYMENT_SCRIPT
+        default: '{post_deployment_script}'
+        description: "(optional, default: none) a post deployment script to run from the cicd-common/app_scripts directory."
+    - choice:
+        name: RESERVATION_DURATION
+        choices:
+          - "1"
+          - "2"
+          - "4"
+          - "12"
+          - "24"
+          - "72"
+        description: "Number of hours for which the ephemeral namespace is reserved"
+    builders:
+    - shell:
+        command: "{ci_cmd}"

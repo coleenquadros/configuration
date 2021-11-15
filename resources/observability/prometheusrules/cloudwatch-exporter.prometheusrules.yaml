@@ -40,17 +40,6 @@ spec:
         message: 'Cloudwatch exporter took more than 15 seconds to scrape AWS Cloudwatch.'
         runbook: "https://github.com/rhobs/configuration/tree/main/docs/sop"
         dashboard: "https://grafana.app-sre.devshift.net"
-  - name: cloudwatch-exporter-s3.rules
-    rules:
-    - alert: S3SuddenIncreaseBytesUsed
-      labels:
-        service: app-sre-observability
-        severity: warning
-      expr: (avg_over_time(aws_s3_bucket_size_bytes_average{job=~"cloudwatch-exporter.*"}[1d]) / avg_over_time(aws_s3_bucket_size_bytes_average{job=~"cloudwatch-exporter.*"}[1d] offset 1d) -1) * 100 > 20 and (aws_s3_bucket_size_bytes_average{job=~"cloudwatch-exporter.*"} - aws_s3_bucket_size_bytes_average{job=~"cloudwatch-exporter.*"} offset 1d) / 1000 / 1000 > 1000
-      annotations:
-        message: 'Bucket {{$labels.bucket_name}} size has grown by {{ $value }}% within the last day'
-        runbook: "https://github.com/rhobs/configuration/tree/main/docs/sop"
-        dashboard: "https://grafana.app-sre.devshift.net"
   - name: cloudwatch-exporter-rds.rules
     rules:
     - alert: RDSLowStorageSpace

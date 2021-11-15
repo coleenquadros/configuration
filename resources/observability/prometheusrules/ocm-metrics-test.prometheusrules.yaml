@@ -10,7 +10,7 @@ tests:
 - interval: 1m
   input_series:
   - series: openshift_clusterresourcequota_usage{cluster='app-sre-stage-01',name="persistent-volume-quota",type="used"}
-    values: 95+0x15
+    values: 105+0x15
   - series: openshift_clusterresourcequota_usage{cluster='app-sre-stage-01',name="persistent-volume-quota",type="hard"}
     values: 100+0x15
   - series: openshift_clusterresourcequota_usage{cluster='app-sre-stage-01',name="loadbalancer-quota",type="used"}
@@ -20,13 +20,14 @@ tests:
 
   alert_rule_test:
   - eval_time: 15m
-    alertname: ClusterResourceQuotaAlmostFull
+    alertname: ClusterResourceQuotaOverUtilization
     exp_alerts:
     - exp_labels:
         cluster: app-sre-stage-01
         name: persistent-volume-quota
-        severity: high
+        severity: critical-fts
+        jiralert: ASIC
         service: app-sre-observability
       exp_annotations:
         runbook: https://docs.openshift.com/dedicated/4/getting_started/scaling-your-cluster.html
-        message: "cluster app-sre-stage-01 is using 95% of its persistent-volume-quota"
+        message: "cluster app-sre-stage-01 is using 105% of its persistent-volume-quota"

@@ -32,6 +32,7 @@ authentication:
   image:
     path: insights/quay/cloudservices-push
     field: all
+    version: 3
 
 parameters: {}
 
@@ -58,7 +59,7 @@ resourceTemplates:
     parameters:
       # Manager
       REPLICAS_MANAGER: '1'
-      IMAGE_TAG_MANAGER: bdb4621 # 1.17.7
+      IMAGE_TAG_MANAGER: abde8d3 # 1.18.4
       DB_DEBUG_MANAGER: 'true'
       LOG_LEVEL_MANAGER: info
       RES_MEM_MANAGER: 2Gi
@@ -66,12 +67,12 @@ resourceTemplates:
 
       # Listener
       REPLICAS_LISTENER: '1'
-      IMAGE_TAG_LISTENER: bdb4621 # 1.17.7
+      IMAGE_TAG_LISTENER: abde8d3 # 1.18.4
       LOG_LEVEL_LISTENER: info
 
       # Evaluator - upload
       REPLICAS_EVALUATOR_UPLOAD: '1'
-      IMAGE_TAG_EVALUATOR_UPLOAD: bdb4621 # 1.17.7
+      IMAGE_TAG_EVALUATOR_UPLOAD: abde8d3 # 1.18.4
       LOG_LEVEL_EVALUATOR_UPLOAD: info
       ENABLE_LAZY_PACKAGE_SAVE_EVALUATOR_UPLOAD: 'true'
       CONSUMER_COUNT_EVALUATOR_UPLOAD: "1"
@@ -81,7 +82,7 @@ resourceTemplates:
 
       # Evaluator - recalc
       REPLICAS_EVALUATOR_RECALC: '1'
-      IMAGE_TAG_EVALUATOR_RECALC: bdb4621 # 1.17.7
+      IMAGE_TAG_EVALUATOR_RECALC: abde8d3 # 1.18.4
       LOG_LEVEL_EVALUATOR_RECALC: info
       ENABLE_LAZY_PACKAGE_SAVE_EVALUATOR_RECALC: 'true'
       CONSUMER_COUNT_EVALUATOR_RECALC: "1"
@@ -91,27 +92,34 @@ resourceTemplates:
 
       # VMaaS sync
       REPLICAS_VMAAS_SYNC: '1'
-      IMAGE_TAG_VMAAS_SYNC: bdb4621 # 1.17.7
+      IMAGE_TAG_VMAAS_SYNC: abde8d3 # 1.18.4
       LOG_LEVEL_VMAAS_SYNC: info
+      PACKAGES_PAGE_SIZE: '100'
+      ENABLE_PKG_TREE_SYNC: 'false' # use /pkglist vmaas endpoint
+      ENABLE_MODIFIED_SINCE_SYNC: 'true'
 
       # Database admin
       REPLICAS_DATABASE_ADMIN: '1'
-      IMAGE_TAG_DATABASE_ADMIN: bdb4621 # 1.17.7
+      IMAGE_TAG_DATABASE_ADMIN: abde8d3 # 1.18.4
       LOG_LEVEL_DATABASE_ADMIN: info
 
       # Common parameters
-      # ...
+      KAFKA_READER_MAX_ATTEMPTS: '60'
+      KAFKA_WRITER_MAX_ATTEMPTS: '60'
+      VMAAS_CALL_MAX_RETRIES: '600' # 1 s period is hardcoded, so restart once per 10min
+      VMAAS_CALL_USE_EXP_RETRY: 'false' # use constant retry policy
+
   - namespace: # PRODUCTION
       $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
-    ref: 125567f6b4a40b8acda130c27a3ddaf352190385 # 1.16.2
+    ref: 2a1c9256166a6050666c6e3f8804e72567bd09e2 # 1.17.14
     upstream:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: RedHatInsights-patchman-engine-gh-build-master
     parameters:
       # Manager
-      REPLICAS_MANAGER: '1'
-      IMAGE_TAG_MANAGER: bdb4621 # 1.17.7
+      REPLICAS_MANAGER: '2'
+      IMAGE_TAG_MANAGER: 2b0bff3 # 1.18.0
       LOG_LEVEL_MANAGER: info
       RES_CPU_MANAGER: 1000m
       RES_MEM_MANAGER: 2Gi
@@ -119,14 +127,14 @@ resourceTemplates:
 
       # Listener
       REPLICAS_LISTENER: '1'
-      IMAGE_TAG_LISTENER: bdb4621 # 1.17.7
+      IMAGE_TAG_LISTENER: 2b0bff3 # 1.18.0
       LOG_LEVEL_LISTENER: info
       CONSUMER_COUNT_LISTENER: "1"
 
       # Evaluator - upload
       REPLICAS_EVALUATOR_UPLOAD: '1'
-      IMAGE_TAG_EVALUATOR_UPLOAD: bdb4621 # 1.17.7
-      LOG_LEVEL_EVALUATOR_UPLOAD: info
+      IMAGE_TAG_EVALUATOR_UPLOAD: 2b0bff3 # 1.18.0
+      LOG_LEVEL_EVALUATOR_UPLOAD: debug
       ENABLE_LAZY_PACKAGE_SAVE_EVALUATOR_UPLOAD: 'true'
       CONSUMER_COUNT_EVALUATOR_UPLOAD: "1"
       GOMAXPROCS_EVALUATOR_UPLOAD: "4"
@@ -135,7 +143,7 @@ resourceTemplates:
 
       # Evaluator - recalc
       REPLICAS_EVALUATOR_RECALC: '1'
-      IMAGE_TAG_EVALUATOR_RECALC: bdb4621 # 1.17.7
+      IMAGE_TAG_EVALUATOR_RECALC: 2b0bff3 # 1.18.0
       LOG_LEVEL_EVALUATOR_RECALC: info
       ENABLE_LAZY_PACKAGE_SAVE_EVALUATOR_RECALC: 'true'
       CONSUMER_COUNT_EVALUATOR_RECALC: "1"
@@ -145,18 +153,19 @@ resourceTemplates:
 
       # VMaaS sync
       REPLICAS_VMAAS_SYNC: '1'
-      IMAGE_TAG_VMAAS_SYNC: bdb4621 # 1.17.7
+      IMAGE_TAG_VMAAS_SYNC: 2b0bff3 # 1.18.0
       LOG_LEVEL_VMAAS_SYNC: info
-      VMAAS_WS_ADDRESS: ws://vmaas-websocket.vmaas-prod.svc.cluster.local:8082 # since vmaas is not deployed with clowder
+      VMAAS_WS_ADDRESS: ws://vmaas-websocket.vmaas-prod.svc.cluster.local:8082 # use it if vmaas is not deployed with clowder
       DELETE_CULLED_SYSTEMS_LIMIT: "2000"
       ERRATA_PAGE_SIZE: "5000"
       RES_MEM_VMAAS_SYNC: 1024Mi
 
       # Database admin
       REPLICAS_DATABASE_ADMIN: '1'
-      IMAGE_TAG_DATABASE_ADMIN: bdb4621 # 1.17.7
+      IMAGE_TAG_DATABASE_ADMIN: 2b0bff3 # 1.18.0
       LOG_LEVEL_DATABASE_ADMIN: info
 
       # Common parameters
-      # ...
-      VMAAS_ADDRESS: http://vmaas-webapp.vmaas-prod.svc.cluster.local:8080 # since vmaas is not deployed with clowder
+      VMAAS_ADDRESS: http://vmaas-webapp.vmaas-prod.svc.cluster.local:8080 # use it if vmaas is not deployed with clowder
+      KAFKA_READER_MAX_ATTEMPTS: '60'
+      KAFKA_WRITER_MAX_ATTEMPTS: '60'

@@ -40,6 +40,7 @@ authentication:
   image:
     path: insights/quay/cloudservices-push
     field: all
+    version: 3
 
 parameters:
   PATH_PREFIX: /api
@@ -57,31 +58,31 @@ resourceTemplates:
       MIN_REPLICAS: 1
   - namespace:
       $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
-    ref: 016e1d587bd7afa817b69fc8c9aae75dc8180841
+    ref: a3836111b113939fc8c8bf0f537c1e169546387c
     upstream:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: insights-platform-compliance-ssg-gl-build-main
     parameters:
-      IMAGE_TAG: 016e1d5
+      IMAGE_TAG: a383611
   - namespace:
       $ref: /services/insights/compliance/namespaces/compliance-fedramp-stage.yml
-    ref: 016e1d587bd7afa817b69fc8c9aae75dc8180841
+    ref: a3836111b113939fc8c8bf0f537c1e169546387c
     upstream:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: insights-platform-compliance-ssg-gl-build-main
     parameters:
-      IMAGE_TAG: 016e1d5
+      IMAGE_TAG: a383611
   - namespace:
       $ref: /services/insights/compliance/namespaces/compliance-prod.yml
-    ref: 016e1d587bd7afa817b69fc8c9aae75dc8180841
+    ref: a3836111b113939fc8c8bf0f537c1e169546387c
     upstream:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: insights-platform-compliance-ssg-gl-build-main
     parameters:
-      IMAGE_TAG: 016e1d5
+      IMAGE_TAG: a383611
 - name: compliance
   path: /clowdapp.yaml
   url: https://github.com/redhatinsights/compliance-backend
@@ -95,32 +96,46 @@ resourceTemplates:
       REPLICAS_SIDEKIQ: 1
       REDIS_SSL: 'false'
       SETTINGS__REPORT_DOWNLOAD_SSL_ONLY: 'false'
+      FLOORIST_SCHEDULE: '0 0 * * *'
   - namespace:
       $ref: /services/insights/compliance/namespaces/stage-compliance-stage.yml
-    ref: f5a61a688c92d2d4469cef72c0623b207289d92e
+    ref: be6649bbe15d0e5be68327009ff1e38df7f1f038
     upstream:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: RedHatInsights-compliance-backend-gh-build-master
     parameters:
-      IMAGE_TAG: f5a61a6
+      IMAGE_TAG: be6649b
+      SETTINGS__FORCE_IMPORT_SSGS: 'true'
+      FLOORIST_SUSPEND: 'false'
+      FLOORIST_IMAGE_TAG: b57a5a8
+      FLOORIST_BUCKET_SECRET_NAME: insights-metrics-export-stage
+      FLOORIST_SCHEDULE: '10 0 * * *'
   - namespace:
       $ref: /services/insights/compliance/namespaces/compliance-fedramp-stage.yml
-    ref: f5a61a688c92d2d4469cef72c0623b207289d92e
+    ref: be6649bbe15d0e5be68327009ff1e38df7f1f038
     upstream:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: RedHatInsights-compliance-backend-gh-build-master
     parameters:
-      IMAGE_TAG: f5a61a6
+      IMAGE_TAG: be6649b
+      SETTINGS__FORCE_IMPORT_SSGS: 'true'
+      FLOORIST_IMAGE_TAG: b57a5a8
+      FLOORIST_SCHEDULE: '10 0 * * *'
   - namespace:
       $ref: /services/insights/compliance/namespaces/compliance-prod.yml
-    ref: f5a61a688c92d2d4469cef72c0623b207289d92e
+    ref: be6649bbe15d0e5be68327009ff1e38df7f1f038
     upstream:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: RedHatInsights-compliance-backend-gh-build-master
     parameters:
-      IMAGE_TAG: f5a61a6
+      IMAGE_TAG: be6649b
+      SETTINGS__FORCE_IMPORT_SSGS: 'true'
       REPLICAS_BACKEND: 6
       REPLICAS_SIDEKIQ: 6
+      FLOORIST_SUSPEND: 'false'
+      FLOORIST_IMAGE_TAG: b57a5a8
+      FLOORIST_BUCKET_SECRET_NAME: insights-metrics-export-prod
+      FLOORIST_SCHEDULE: '10 0 * * *'
