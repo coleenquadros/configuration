@@ -62,6 +62,58 @@
     <<: *pr_check_template
 
 - job-template:
+    id: 'insights-sources-sonarqube-analysis'
+    name: '{gh_org}-{gh_repo}-sonarqube-analysis'
+    status_context: "ci.int.devshift.net PR build"
+    branch: "master"
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_ephemeral_oc_login
+        - *app_interface_creds
+        - *insights_rh_registry_pull_secret
+        - *quay_secret_push
+        - *insightsdroid_github
+        - *quay_api_token
+        - *insights_sources_sonarqube_cli_url
+        - *insights_sources_sonarqube_token
+        - *insights_sources_sonarqube_report_url
+        - *insights_sources_rh_it_root_ca_cert_url
+    publishers:
+    - junit:
+        results: 'artifacts/junit-*.xml'
+    - archive:
+        artifacts: 'artifacts/**/*'
+    <<: *gh_properties
+    scm:
+    - git:
+        url: 'git@github.com:{gh_org}/{gh_repo}.git'
+        credentials-id: '{github_ssh_credentials}'
+        skip-tag: true
+        refspec: '+refs/pull/*:refs/remotes/origin/pr/*'
+        branches:
+        - '${{ghprbActualCommit}}'
+        merge:
+            remote: origin
+            branch: '{branch}'
+        git-config-name: "AppSRE"
+        git-config-email: "sd-app-sre@redhat.com"
+        included-regions:
+        - '{include_path}'
+        prune: true
+        clean:
+            before: true
+        wipe-workspace: true
+    triggers:
+        - reverse:
+            jobs: 'insights-sources-gh-pr-check'
+    <<: *pr_check_template
+
+- job-template:
     id: 'insights-sources-gh-build-master'
     name: '{gh_org}-{gh_repo}-gh-build-{branch}'
     wrappers:
