@@ -11,7 +11,7 @@ spec:
   groups:
   - name: cluster-resource-quota
     rules:
-    - alert: ClusterResourceQuotaAlmostFull
+    - alert: ClusterResourceQuotaOverUtilization
       annotations:
         message: cluster {{ $labels.cluster }} is using {{ $value | humanizePercentage }} of its {{ $labels.name }}
         runbook: https://docs.openshift.com/dedicated/4/getting_started/scaling-your-cluster.html
@@ -19,9 +19,9 @@ spec:
         openshift_clusterresourcequota_usage{type="used"}
           / ignoring(type)
         (openshift_clusterresourcequota_usage{type="hard"} > 0)
-          > 0.9
+          > 1.0
       for: 15m
       labels:
         service: app-sre-observability
-        severity: medium
+        severity: critical-fts
         jiralert: ASIC
