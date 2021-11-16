@@ -45,8 +45,7 @@
     <<: *gl_build_master
 
 - job-template:
-    id: service-registry-perf-test
-    name: service-registry-perf-test-stage
+    id: service-registry-periodic-test
     publishers:
     - <<: *slack_notify
     wrappers:
@@ -57,5 +56,17 @@
           <<: *vault_defaults
           secrets:
           - *service_registry_perf_test_stage
-    ci_cmd: './perf_test.sh'
     <<: *gh_timed
+
+- job-template:
+    id: service-registry-triggered-test
+    publishers:
+    - <<: *slack_notify
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+          - *service_registry_perf_test_stage

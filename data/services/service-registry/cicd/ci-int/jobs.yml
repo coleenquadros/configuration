@@ -81,9 +81,30 @@ config:
             display_name: apicurio-perf build master
         - 'gh-pr-check':
             display_name: apicurio-perf pr-check
-        - 'service-registry-perf-test':
+        # periodic performance tests - e2e
+        - 'service-registry-periodic-test':
+            name: 'service-registry-perf-test-stage'
             branch: main
             display_name: 'service-registry performance tests'
             timeout: 3600
             slack_channel_notification: appsre-service-registry-ci-cd
             cron_expression: 'H 7 * * 2-5' # 7am UTC Tuesday to Friday
+            ci_cmd: './perf_test.sh'
+        # periodic performance tests - control plane
+        - 'service-registry-periodic-test':
+            name: 'srs-fleet-manager-perf-test-stage'
+            branch: main
+            display_name: 'srs-fleet-manager performance tests'
+            timeout: 3600
+            slack_channel_notification: appsre-service-registry-ci-cd
+            cron_expression: 'H 5 * * 2-5' # 5am UTC Tuesday to Friday
+            ci_cmd: './cp_perf_test.sh'
+        # triggered smoke tests after every successful deployment to stage
+        - 'service-registry-triggered-test':
+            name: 'service-registry-post-deploy-smoke-test-stage'
+            branch: main
+            display_name: stage post-deploy smoke tests
+            timeout: 1800
+            slack_channel_notification: appsre-service-registry-ci-cd
+            upstream: openshift-saas-deploy-saas-service-registry-osd-stage # TODO don't know if this name is correct
+            ci_cmd: './smoke_test.sh'
