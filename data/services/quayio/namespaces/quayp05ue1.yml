@@ -258,3 +258,32 @@ terraformResources:
   parameter_group: /terraform/resources/quayio-production/rds-parameter-group-1.yml
   output_resource_name: clair-backfiller
   enhanced_monitoring: true
+- provider: alb
+  account: quayio-prod
+  identifier: quayio-production-alb01
+  output_resource_name: quayio-production-alb
+  vpc:
+    $ref: /aws/quayio-prod/vpcs/QuayVPC.yml
+  certificate_arn: arn:aws:acm:us-east-1:206170669542:certificate/8a4a9a8b-d06b-46f6-a234-e7ef2ec657cf
+  targets:
+  - name: quayio-production-py2
+    default: true
+    weights:
+      read: 100
+      write: 100
+    ips:
+    - 10.25.77.88
+    - 10.25.4.33
+    - 10.25.62.183
+  - name: quayio-production-py3
+    default: false
+    weights:
+      read: 0
+      write: 0
+    ips:
+    - 10.25.66.227
+    - 10.25.21.221
+    - 10.25.62.47
+  paths:
+    read:
+    - /v2/*
