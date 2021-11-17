@@ -1377,6 +1377,13 @@ terraformResources:
   enhanced_monitoring: true
 ```
 
+If you're restoring a large database, please consider adding a timeout larger than the default (40m) to the parameters using the `timeout` option in the `defaults` or in the `overrides`, e.g:
+
+```yaml
+timeout:
+  create: 2h
+```
+
 ##### Publishing Database Log Files to CloudWatch
 
 Database logs for MySQL and PostgreSQL can be configured to be published to CloudWatch where developers can look at the logs to identify & troubleshoot slow queries.
