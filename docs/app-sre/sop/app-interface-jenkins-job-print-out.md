@@ -22,8 +22,6 @@ $ python3 -m pip install --upgrade pip setuptools
 $ sudo dnf install python-devel
 # install qontract-reconcile
 $ python3 -m pip install qontract-reconcile
-# export venv's bin path to be able to type the qontract-reconcile command directly
-$ export PATH=$PATH:$(pwd)/venv/bin
 ```
 
 The `python-devel` package is required for the `mmh3` module compilation, which takes place when installing the
