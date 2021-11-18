@@ -66,6 +66,7 @@ this repository.
       - [Generating a GPG key](#generating-a-gpg-key)
       - [Adding your public GPG key](#adding-your-public-gpg-key)
     - [Manage AWS resources via App-Interface (`/openshift/namespace-1.yml`) using Terraform](#manage-aws-resources-via-app-interface-openshiftnamespace-1yml-using-terraform)
+      - [Manage shared AWS resources via App-interface (`/openshift/namespace-1.yml`) using Terraform](#manage-shared-aws-resources-via-app-interface-openshiftnamespace-1yml-using-terraform)
       - [Manage AWS Certificate via App-Interface (`/openshift/namespace-1.yml`)](#manage-aws-certificate-via-app-interface-openshiftnamespace-1yml)
       - [Manage ElasticSearch via App-Interface (`/openshift/namespace-1.yml`)](#manage-elasticsearch-via-app-interface-openshiftnamespace-1yml)
       - [Manage RDS databases via App-Interface (`/openshift/namespace-1.yml`)](#manage-rds-databases-via-app-interface-openshiftnamespace-1yml)
@@ -74,7 +75,7 @@ this repository.
         - [Publishing Database Log Files to CloudWatch](#publishing-database-log-files-to-cloudwatch)
         - [Publishing MySQL Logs to CloudWatch Logs](#publishing-mysql-logs-to-cloudwatch-logs)
         - [Publishing PostgreSQL Logs to CloudWatch Logs](#publishing-postgresql-logs-to-cloudwatch-logs)
-        - [Configuring access policies for Performance Insights(#configuring-access-policies-for-performance-insights)
+        - [Configuring access policies for Performance Insights](#configuring-access-policies-for-performance-insights)
       - [Manage S3 buckets via App-Interface (`/openshift/namespace-1.yml`)](#manage-s3-buckets-via-app-interface-openshiftnamespace-1yml)
       - [Manage ElastiCache databases via App-Interface (`/openshift/namespace-1.yml`)](#manage-elasticache-databases-via-app-interface-openshiftnamespace-1yml)
       - [Manage IAM Service account users via App-Interface (`/openshift/namespace-1.yml`)](#manage-iam-service-account-users-via-app-interface-openshiftnamespace-1yml)
@@ -1377,6 +1378,13 @@ terraformResources:
   enhanced_monitoring: true
 ```
 
+If you're restoring a large database, please consider adding a timeout larger than the default (40m) to the parameters using the `timeout` option in the `defaults` or in the `overrides`, e.g:
+
+```yaml
+timeout:
+  create: 2h
+```
+
 ##### Publishing Database Log Files to CloudWatch
 
 Database logs for MySQL and PostgreSQL can be configured to be published to CloudWatch where developers can look at the logs to identify & troubleshoot slow queries.
@@ -1834,6 +1842,7 @@ To manage a User group via App-Interface:
 - `channels`: a list of channels to add to the User group
 
 3. **Add this permission to the desired `roles`, or create a new `role` with this permission only (mandatory).**
+**Note:** Skip this step if the user group is not populated based on app-interface. i.e. if it is populated based on an external source of truth, such as an OWNERS file or PagerDuty.
 
 4. **Add the group in the `managedUsergroups` section of the** [coreos slack](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/slack/coreos.yml) **dependency file**
 
