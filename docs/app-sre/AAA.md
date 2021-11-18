@@ -293,6 +293,8 @@ Documented in the [Incident Process](./incident-process.md) SOP.
 * [PnT DevOps - Issue Escalation Procedure](https://docs.engineering.redhat.com/pages/viewpage.action?pageId=140541042)
 * [Red Hat Major Incident Management (MIM)](https://source.redhat.com/groups/public/it-major-incident-management)
 * [IT ISO (IT Operations)](https://source.redhat.com/groups/public/iso/it_operations_iso_wiki/welcome_to_it_iso_it_operations)
+* PnT-Infra-Escalation google chat group to escalate issues regarding Openstack, OCP, etc...
+* [People Index for PnT-EXD](https://docs.engineering.redhat.com/pages/viewpage.action?spaceKey=EXDINFRA&title=EXD+Infrastructure+People+Index)
 
 ## Contract
 
