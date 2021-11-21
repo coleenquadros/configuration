@@ -11,15 +11,21 @@ Your Qontract GraphQL server will available at `http://localhost:4000/graphql`
 2. **Setup qontract-reconcile**
 
 Clone [qontract-reconcile](https://github.com/app-sre/qontract-reconcile).
+
 ```sh
 # create and enter the virtualenv environment
 $ python3 -m venv venv
 $ source venv/bin/activate
 # make sure you are running the latest setuptools
 $ python3 -m pip install --upgrade pip setuptools
-# install development packages
-$ python3 setup.py develop
+# install the required python-devel package
+$ sudo dnf install python-devel
+# install qontract-reconcile
+$ python3 -m pip install qontract-reconcile
 ```
+
+The `python-devel` package is required for the `mmh3` module compilation, which takes place when installing the
+`qontract-reconcile` package via `pip`.
 
 3. **Configure qontract-reconcile**
 
