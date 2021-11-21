@@ -1110,6 +1110,8 @@ records:
     zone_id: THISISNOTAZONEID
     evaluate_target_health: true
 
+> Note: You can not use `ttl` or `records` with `alias`.
+
 # Records with healthcheck (foo.example.com will be returned if healthy, otherwise bar.example.com will be returned)
 - name: my-healthy-record
   type: CNAME
