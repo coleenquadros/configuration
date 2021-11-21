@@ -1102,6 +1102,14 @@ records:
   records:
   - subB.example.com
 
+# Records with aliases (let you route traffic to selected AWS resources or from one record in a hosted zone to another record)
+- name: my-aliased-record
+  type: A
+  alias:
+    name: example.cloudfront.net
+    zone_id: THISISNOTAZONEID
+    evaluate_target_health: true
+
 # Records with healthcheck (foo.example.com will be returned if healthy, otherwise bar.example.com will be returned)
 - name: my-healthy-record
   type: CNAME
