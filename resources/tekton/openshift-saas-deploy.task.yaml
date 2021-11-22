@@ -13,10 +13,24 @@ spec:
     image: quay.io/app-sre/qontract-reconcile:{{ qontract_reconcile_image_tag }}
     command: ["/bin/sh", "-c"]
     args: ['mkdir artifacts']
+    resources:
+      requests:
+        cpu: 20m
+        memory: 30Mi
+      limits:
+        cpu: 20m
+        memory: 30Mi
   - name: qontract-reconcile-config
     image: quay.io/app-sre/qontract-reconcile:{{ qontract_reconcile_image_tag }}
     command: ["/bin/sh", "-c"]
     args: ['echo "$(CONFIG_TOML)" | base64 -d > config.toml']
+    resources:
+      requests:
+        cpu: 20m
+        memory: 30Mi
+      limits:
+        cpu: 20m
+        memory: 30Mi
     env:
     - name: CONFIG_TOML
       valueFrom:
@@ -26,7 +40,11 @@ spec:
   - name: qontract-reconcile
     image: quay.io/app-sre/qontract-reconcile:{{ qontract_reconcile_image_tag }}
     command: ["/bin/sh", "-c"]
+    {%- if dry_run is defined and dry_run %}
+    args: ['qontract-reconcile --config config.toml --dry-run openshift-saas-deploy --saas-file-name $(params.saas_file_name) --env-name $(params.env_name) --io-dir artifacts/']
+    {%- else %}
     args: ['qontract-reconcile --config config.toml openshift-saas-deploy --saas-file-name $(params.saas_file_name) --env-name $(params.env_name) --io-dir artifacts/']
+    {%- endif %}
     env:
     - name: APP_INTERFACE_STATE_BUCKET
       valueFrom:
@@ -52,3 +70,10 @@ spec:
     image: quay.io/app-sre/qontract-reconcile:{{ qontract_reconcile_image_tag }}
     command: ["/bin/sh", "-c"]
     args: ['for f in $(find artifacts/ -type f); do echo $f; cat $f; done']
+    resources:
+      requests:
+        cpu: 20m
+        memory: 30Mi
+      limits:
+        cpu: 20m
+        memory: 30Mi
