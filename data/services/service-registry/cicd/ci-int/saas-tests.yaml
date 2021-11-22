@@ -1,0 +1,46 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: service-registry
+
+name: saas-service-registry-smoke-tests
+description: 'SaaS tracking file for Managed Service Registry - post-deploy smoke tests'
+
+app:
+  $ref: /services/service-registry/app.yml
+
+pipelinesProvider:
+  $ref: /services/service-registry/pipelines/tekton.service-registry-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: service-registry
+
+managedResourceTypes:
+- Job
+
+publishJobLogs: true
+
+imagePatterns:
+- quay.io/rhoas/apicurio-perf
+
+authentication:
+  image:
+    path: managed-services/quay-org-accounts/rhoas/robots/rhoas-pull
+    field: all
+
+resourceTemplates:
+- name: saas-srs-perf-test
+  url: https://github.com/Apicurio/apicurio-perf
+  path: /.ci/openshift/apicurio-perf-job.yaml
+  targets:
+  - namespace:
+      $ref: /services/service-registry/namespaces/service-registry-stage.yml
+    ref: bcb319d3e1f800c161a5092b47c118b5f1880323
+    parameters:
+      IMAGE: quay.io/rhoas/apicurio-perf
+    promotion:
+      subscribe:
+      - service-registry-stage-deploy-success-channel
