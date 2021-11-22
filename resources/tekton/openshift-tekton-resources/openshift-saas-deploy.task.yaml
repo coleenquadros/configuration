@@ -40,7 +40,11 @@ spec:
   - name: qontract-reconcile
     image: quay.io/app-sre/qontract-reconcile:{{ qontract_reconcile_image_tag }}
     command: ["/bin/sh", "-c"]
+    {%- if dry_run is defined and dry_run %}
+    args: ['qontract-reconcile --config config.toml --dry-run openshift-saas-deploy --saas-file-name $(params.saas_file_name) --env-name $(params.env_name) --io-dir artifacts/']
+    {%- else %}
     args: ['qontract-reconcile --config config.toml openshift-saas-deploy --saas-file-name $(params.saas_file_name) --env-name $(params.env_name) --io-dir artifacts/']
+    {%- endif %}
     env:
     - name: APP_INTERFACE_STATE_BUCKET
       valueFrom:
