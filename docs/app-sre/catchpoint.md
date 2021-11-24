@@ -153,6 +153,7 @@ found here:
 * PagerDuty how to send alerts - https://developer.pagerduty.com/docs/ZG9jOjExMDI5NTgx-send-an-alert-event
 * Catchpoint - PagerDuty integration guide - https://support.catchpoint.com/hc/en-us/articles/203351619
 * Catchpoint makros usable in templates - https://support.catchpoint.com/hc/en-us/articles/210003423-Alert-Webhook-Macro-Index
+* Catchpoint - switch-case and if-else syntax - https://support.catchpoint.com/hc/en-us/articles/202419719
 
 ## Send Synthetic metrics to SignalFX
 Metrics about Synthetics can be forwarded to SignalFX for dashboarding or analytics.
