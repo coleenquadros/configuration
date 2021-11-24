@@ -55,6 +55,11 @@ to be 2xx and expects a following JSON payload:
 }
 ```
 
+Instead of pure javascript, selenium can also be used to write the actual check,
+but it is usually best used to Web Synthetics where a browser needs to be remote
+controlled.
+See https://support.catchpoint.com/hc/en-us/articles/4403261576461
+
 ## Update a status page component with a Synthetic check
 To use the results of the check as Synthetic check to flip the state of a status page
 component, an alerting rule needs to be defined. For that, the automation email address for
