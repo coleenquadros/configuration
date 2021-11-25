@@ -83,7 +83,7 @@ select your Synthetic. The scatterplot visualization nicely shows failed vs succ
 ## Forward an alert to PagerDuty
 Alerts from multiple Synthetics can be forwarded to a PagerDuty service. To integrate a PagerDuty service
 as an alert target in Catchpoint, Catchpoint admin permissions are required. Permissions can be
-granted by Artem Savenkov or Shane Newman.
+granted by Artem Savenkov (@asavenko) or Shane Newman (@shnewman).
 
 To receive Catchpoint alerts on a PagerDuty service, it must have the Event API V2 integration enabled.
 Extract the "Integration Key" and “Integration URL (Alert Events)” from that service.
