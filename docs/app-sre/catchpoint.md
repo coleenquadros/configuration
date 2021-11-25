@@ -90,7 +90,7 @@ This requires PagerDuty administrative permissions, e.g. by AppSRE managers.
 Extract the "Integration Key" and “Integration URL (Alert Events)” from that service.
 
 Catchpoint alerts can be forwarded to PagerDuty with alert webhooks. For each PagerDuty service,
-a dedicated alert webhook must be created because the required "Integration Key" is part of the template
+a dedicated alert webhook must be created beforehand because the required "Integration Key" is part of the template
 used
 
 * Navigate to "Settings" > "API" in the left side menu (admin permissions required)
