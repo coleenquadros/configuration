@@ -1,0 +1,35 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: service-registry
+
+name: saas-service-registry-observability
+description: SaaS tracking file for Managed Service Registry - observability configurations
+
+app:
+  $ref: /services/service-registry/app.yml
+
+pipelinesProvider:
+  $ref: /services/service-registry/pipelines/tekton.service-registry-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: service-registry
+
+managedResourceTypes:
+- ConfigMap
+
+resourceTemplates:
+- name: service-registry-dashboards
+  url: https://gitlab.cee.redhat.com/service-registry/srs-observability
+  path: /dashboards
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: 1a118ab992665f92a6e0299817d81eed5243caae
