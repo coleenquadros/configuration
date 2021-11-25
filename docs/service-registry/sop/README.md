@@ -22,6 +22,7 @@
       - [Relevant secrets](#relevant-secrets-2)
       - [Steps](#steps-2)
   - [SOP : Service Registry Service Data Plane](#sop--service-registry)
+    - [SRS Service Registry Smoke Testing](#service-registry-smoke-tests)
     - [SRS Service Registry Down](#service-registry-down)
       - [Impact](#impact-3)
       - [Summary](#summary-3)
@@ -168,6 +169,10 @@ refer to the steps in [SRS Fleet Manager availability](#srs-fleet-manager-availa
 ---
 
 # SOP : Service Registry Service Data Plane
+
+## SRS Service Registry Smoke Testing
+
+- More information on how to perform some smoke test to verify the service functionality can be found [here](https://gitlab.cee.redhat.com/service-registry/srs-sops/-/blob/master/check_basic_functionality/README.md).
 
 ## SRS Service Registry Down
 
