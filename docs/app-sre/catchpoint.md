@@ -86,6 +86,7 @@ as an alert target in Catchpoint, Catchpoint admin permissions are required. Per
 granted by Artem Savenkov (@asavenko) or Shane Newman (@shnewman).
 
 To receive Catchpoint alerts on a PagerDuty service, it must have the Event API V2 integration enabled.
+This requires PagerDuty administrative permissions, e.g. by AppSRE managers.
 Extract the "Integration Key" and “Integration URL (Alert Events)” from that service.
 
 Catchpoint alerts can be forwarded to PagerDuty with alert webhooks. For each PagerDuty service,
