@@ -63,7 +63,7 @@ See https://support.catchpoint.com/hc/en-us/articles/4403261576461
 ## Update a status page component with a Synthetic check
 To use the results of the check as Synthetic check to flip the state of a status page
 component, an alerting rule needs to be defined. For that, the automation email address for
-a status component is required.
+a status component is required. See next section on how to get it
 
 * [Log into the status page](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/statuspage.md)
 and get the automation email address for the component that should be automated
