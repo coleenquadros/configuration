@@ -76,8 +76,8 @@ ${switch('${NotificationLevelId}','0','DOWN','1','DOWN','3','UP')} - ${TestName}
 * Add a simple alerting rule based on "Test Failure" specifying the number of failed runs
   that will trigger an alert
 
-You can check about current alerts by navigating the left sidemenu to "Alerts" > "Alert Log".
-To see how your test is doing in general, navigate the left sidemenu to "Analysis" > "Explorer" and
+You can check about current alerts by navigating the left side menu to "Alerts" > "Alert Log".
+To see how your test is doing in general, navigate the left side menu to "Analysis" > "Explorer" and
 select your Synthetic. The scatterplot visualization nicely shows failed vs successful tests over time.
 
 ## Forward an alert to PagerDuty
@@ -92,7 +92,7 @@ Catchpoint alerts can be forwarded to PagerDuty with alert webhooks. For each Pa
 a dedicated alert webhook must be created because the required "Integration Key" is part of the template
 used
 
-* Navigate to "Settings" > "API" in the left sidemenu (admin permissions required)
+* Navigate to "Settings" > "API" in the left side menu (admin permissions required)
 * Click “Add URL” at the bottom of the “Alert Webhook” section
 * Give the Alert Webhook a unique name like "AppSRE PagerDuty ${PagerDuty Service Name}"
 * Copy the “Integration URL (Alert Events)” to the URL of the new web hook config
