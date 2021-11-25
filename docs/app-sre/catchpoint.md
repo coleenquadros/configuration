@@ -55,8 +55,8 @@ to be 2xx and expects a following JSON payload:
 }
 ```
 
-Instead of pure javascript, selenium can also be used to write the actual check,
-but it is usually best used to Web Synthetics where a browser needs to be remote
+Instead of pure javascript, selenium syntax can also be used to write the actual check,
+but it is usually best used to write Web Synthetics where a browser needs to be remote
 controlled.
 See https://support.catchpoint.com/hc/en-us/articles/4403261576461
 
