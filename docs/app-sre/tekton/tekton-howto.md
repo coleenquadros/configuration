@@ -45,16 +45,8 @@ Perform the following actions in a single MR:
 
     managedRoles: true
 
-    # choose a size suitable for the amount of deployed resources
-    # the bigger the template, the bigger the size
-    # start with large and grow if you see OOMKill events
-    limitRanges:
-      $ref: /dependencies/openshift/limitranges/pipelines-resource-limits-large.yml
-
     managedResourceTypes:
     - Secret
-    - Task
-    - Pipeline
     - ClusterRole
 
     sharedResources:
@@ -84,10 +76,43 @@ Perform the following actions in a single MR:
     retention:
       days: 7 # maximum number of days to retain deployments
       minimum: 100 # minimum number of deployments to retain
+
+    taskTemplates:
+    - name: openshift-saas-deploy
+      type: onePerSaasFile
+      path: /tekton/openshift-saas-deploy.task.yaml
+      variables:
+        qontract_reconcile_image_tag: latest
+    - name: push-gateway-openshift-saas-deploy-task-status-metric
+      type: onePerNamespace
+      path: /tekton/push-gateway-task-status-metric.task.yaml
+      variables:
+        ubi8_ubi_minimal_image_tag: 8.4-7
+    - name: push-http-splunk-tekton-pipeline-metadata
+      type: onePerNamespace
+      path: /tekton/push-http-splunk-tekton-pipeline-metadata.task.yaml
+      variables:
+        ubi8_ubi_minimal_image_tag: 8.4-7
+
+    pipelineTemplates:
+      openshiftSaasDeploy:
+        name: openshift-saas-deploy
+        type: onePerSaasFile
+        path: /tekton/openshift-saas-deploy.pipeline.yaml
     ```
 
     * this file should be placed under `data/services/<service_name>/pipelines`.
-    * copy the file as is and change only the service_name and the namespace reference to match the location of the pipelines namespace file.
+    * copy the file as is and change only the `service_name` and the namespace reference to match the location of the pipelines namespace file.
+    * The tekton Tasks that will be created by this pipelines' provider will have resources requests and limits added by [default](https://github.com/app-sre/qontract-reconcile/blob/7cf76d53a5d1b09aa8a503eaa2fdbc0041b16e83/reconcile/openshift_tekton_resources.py#L28-L31). If you see OOMs or CPU throttling you can change it by setting a `deployResources` section in the tekton provider (which will affect all its saas files) or at the saas file level, e.g.
+    ```yaml
+    deployResources:
+      requests:
+        cpu: 200m
+        memory: 300Mi
+      limits:
+        cpu: 200m
+        memory: 300Mi
+    ```
 
 3. Create a Role to obtain access to view the pipelines namespace and to trigger deployments:
 
@@ -122,6 +147,8 @@ Perform the following actions in a separate MR from the bootstrap MR:
     ```yaml
     pipelinesProvider:
       $ref: /services/<service_name>/pipelines/<service_name>-pipelines.appsrep05ue1.yaml
+
+    configurableResources: true
     ```
 
     * for more information of SaaS files please follow [Continuous Delivery in App-interface](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-delivery-in-app-interface.md).
