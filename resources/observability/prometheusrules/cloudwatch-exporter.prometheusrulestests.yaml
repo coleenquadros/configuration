@@ -9,8 +9,10 @@ evaluation_interval: 1m
 tests:
 - interval: 1m
   input_series:
-  - series: aws_rds_burst_balance_average{dbinstance_identifier="bursting"}
-    values: 100+0x60 100-0.5x120 # 100 during one hour then 100 99.5 99 98.5...
+  - series: aws_rds_burst_balance_average{dbinstance_identifier="sustained-burst"}
+    values: 100+0x59 100-0.5x119 # 100 during one hour then 100 99.5 99 98.5...
+  - series: aws_rds_burst_balance_average{dbinstance_identifier="spiky-burst"}
+    values: 100+0x59 100-5x9 50+0.1x109 # 100, then write burst and slow recover
 
   alert_rule_test:
   - eval_time: 1h
@@ -20,9 +22,9 @@ tests:
     alertname: RDSPredictOutOfBurstBalance
     exp_alerts:
     - exp_labels:
-        dbinstance_identifier: bursting
+        dbinstance_identifier: sustained-burst
         severity: high
         service: app-sre-observability
       exp_annotations:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/sop/rds-burst-balance.md"
-        message: "DB instance 'bursting' storage will be out of burst balance in 8 hours"
+        message: "DB instance 'sustained-burst' storage will be out of burst balance in 8 hours"
