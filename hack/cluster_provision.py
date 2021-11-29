@@ -71,7 +71,8 @@ def create_obs_dns_records(ctx, cluster: str) -> None:
 @click.argument("cluster")
 @click.argument("environment")
 @click.pass_context
-def create_obs_customer_monitoring(ctx, cluster: str, environment: str) -> None:
+def create_obs_customer_monitoring(ctx, cluster: str,
+                                   environment: str) -> None:
     """Generates APP-SRE observability config for a cluster"""
     observability.configure_customer_monitoring(ctx.obj['datadir'],
                                                 cluster, environment)
