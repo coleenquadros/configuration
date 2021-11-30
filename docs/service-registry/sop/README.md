@@ -88,12 +88,12 @@ SRS Fleet Manager (all of the replicas or pods) are down.
   - Search Error/exception events with keywords "SRS Fleet Manager " and with text "image", "deployment" etc.
 - Investigate the metrics in Grafana for any possible evidences of the crash.
   - Application: Volume, Latency, Error
-      - Stage: https://grafana.stage.devshift.net/d/Tbw1Eg2Mz/srs-fleet-manager-metrics
-      - Production: TODO
+      - Stage: https://grafana.stage.devshift.net/d/Tbw1Eg2Mz/srs-fleet-manager-metrics?var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage
+      - Production: https://grafana.app-sre.devshift.net/d/Tbw1Eg2Mz/srs-fleet-manager-metrics?var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production
   - CPU, Network, Memory, IO
       - Stage: https://grafana.stage.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage
       - Production: https://grafana.app-sre.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production
-- Sentry -- TODO
+- Sentry -- https://sentry.devshift.net/sentry/service-registry-production/
 - If necessary, escalate the incident to the corresponding teams.  
   - Check [Escalations](#escalations) section below.
 
@@ -120,13 +120,13 @@ SRS Fleet Manager is not performing normally and is returning an abnormally high
 
 - Investigate the metrics in Grafana for any possible cause of the issue
   - Application: Volume, Latency, Error
-      - Stage: https://grafana.stage.devshift.net/d/Tbw1Eg2Mz/srs-fleet-manager-metrics
-      - Production: TODO
+      - Stage: https://grafana.stage.devshift.net/d/Tbw1Eg2Mz/srs-fleet-manager-metrics?var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage
+      - Production: https://grafana.app-sre.devshift.net/d/Tbw1Eg2Mz/srs-fleet-manager-metrics?var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production
   - CPU, Network, Memory, IO
       - Stage: https://grafana.stage.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage
       - Production: https://grafana.app-sre.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production
 - If there are container performance issue are identified (e.g.: CPU spike, high Latency etc), increase the number of replicas.
-- Sentry -- TODO
+- Sentry -- https://sentry.devshift.net/sentry/service-registry-production/
 - Check Deployments/srs-fleet-manager, check details page to make sure pods are configured and started. Start the pod if none is running (default:3).
 - Check if the SRS Fleet Manager pods are running and verify the logs.
     ```
@@ -200,12 +200,12 @@ SRS Service Registry (all of the replicas or pods) are down.
   - Search Error/exception events with keywords "Apicurio Registry" and with text "image", "deployment" etc.
 - Investigate the metrics in Grafana for any possible evidences of the crash.
   - Application: Volume, Latency, Error
-      - Stage: https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?orgId=1
-      - Production: TODO
+      - Stage: https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage&var-routeName=service-registry-bu98-stage
+      - Production: https://grafana.app-sre.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production&var-routeName=service-registry-bu98
   - CPU, Network, Memory, IO
       - Stage: https://grafana.stage.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage
       - Production: https://grafana.app-sre.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production
-- Sentry -- TODO
+- Sentry -- https://sentry.devshift.net/sentry/service-registry-production/
 - If necessary, escalate the incident to the corresponding teams.
   - Check [Escalations](#escalations) section below.
 
@@ -232,13 +232,13 @@ SRS Service Registry is not performing normally and is returning an abnormally h
 
 - Investigate the metrics in Grafana for any possible cause of the issue
   - Application: Volume, Latency, Error
-      - Stage: https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?orgId=1
-      - Production: TODO
+      - Stage: https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage&var-routeName=service-registry-bu98-stage
+      - Production: https://grafana.app-sre.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production&var-routeName=service-registry-bu98
   - CPU, Network, Memory, IO
       - Stage: https://grafana.stage.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage
       - Production: https://grafana.app-sre.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production
 - If there are container performance issue are identified (e.g.: CPU spike, high Latency etc), increase the number of replicas.
-- Sentry -- TODO
+- Sentry -- https://sentry.devshift.net/sentry/service-registry-production/
 - Check Deployments/apicurio-registry, check details page to make sure pods are configured and started. Start the pod if none is running (default:3).
 - Check if the SRS Service Registry pods are running and verify the logs.
     ```
