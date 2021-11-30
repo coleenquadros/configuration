@@ -375,7 +375,7 @@ config:
             display_name: 'managed-kafka-perf-tests-1hr-integration'
             timeout: 3600
             slack_channel_notification: forum-managed-kafka
-            cron_expression: 'H 2 * * 1-5' # At 02:00 on every day-of-week from Monday through Friday
+            cron_expression: 'H 2 * * 1,4' # At 02:00 on every day-of-week from Monday through Friday
 
   - project:
       name: purge-velero-backups
@@ -615,6 +615,14 @@ config:
             cleanup_script: './cicd/cleanup.sh'
             release: false
         - 'managed-services-gl-build-test-branch':
+            display_name: mk-strimzi-canary build mk-release-0.1
+            branch: mk-release-0.1.x
+            build_deploy_script_path: './cicd/build.sh'
+            archive_artifacts: 'target/surefire-reports/**'
+            junit_results: 'target/surefire-reports/*.xml'
+            cleanup_script: './cicd/cleanup.sh'
+            release: true
+        - 'managed-services-gl-build-test-branch':
             display_name: mk-strimzi-canary build mk-release-0.0
             branch: mk-release-0.0
             build_deploy_script_path: './cicd/build.sh'
@@ -653,3 +661,13 @@ config:
             junit_results: 'target/surefire-reports/*.xml'
             cleanup_script: './cicd/build.sh cleanup'
             release: true
+  - project:
+      name: zookeeper
+      label: managed-services
+      node: managed-services
+      gl_group: mk-ci-cd
+      gl_project: zookeeper
+      jobs:
+        - 'gl-pr-check':
+            display_name: zookeeper pr-check
+            pr_check_script_path: './cicd/pr_check.sh'

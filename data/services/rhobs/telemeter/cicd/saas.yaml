@@ -20,7 +20,7 @@ slack:
 
 authentication:
   image:
-    path: app-sre/ci-int/redhat-registry-io-pull
+    path: app-sre/quay/app-sre-pull
     field: all
 
 managedResourceTypes:
@@ -43,7 +43,7 @@ imagePatterns:
 - quay.io/app-sre
 - quay.io/openshift/origin-oauth-proxy
 - quay.io/prometheus/memcached-exporter
-- registry.redhat.io/rhel8/memcached
+- quay.io/app-sre/memcached
 - quay.io/jpkroehling/all-in-one
 - quay.io/app-sre/gubernator
 
@@ -60,14 +60,14 @@ resourceTemplates:
     # And sort them alphabetically.
     IMAGE: quay.io/app-sre/telemeter
     JAEGER_AGENT_IMAGE: quay.io/app-sre/jaegertracing-jaeger-agent
-    TELEMETER_SERVER_TOKEN_EXPIRE_SECONDS: 86400
-    MEMCACHED_IMAGE: registry.redhat.io/rhel8/memcached
+    MEMCACHED_IMAGE: quay.io/app-sre/memcached
     MEMCACHED_EXPORTER_IMAGE: quay.io/prometheus/memcached-exporter
     IMAGE_CANARY: quay.io/app-sre/telemeter
+    TELEMETER_SERVER_TOKEN_EXPIRE_SECONDS: 86400
   targets:
   - namespace:
       $ref: /services/rhobs/telemeter/namespaces/telemeter-stage.yml
-    ref: 508c23feffbc44f417e4d906c921231de01fb171
+    ref: e883161d38f58a1d6f1dcc3a3ab270e84279845b
     parameters:
       NAMESPACE: telemeter-stage
       OBSERVATORIUM_NAMESPACE: observatorium-stage
@@ -96,7 +96,7 @@ resourceTemplates:
       THANOS_STORE_INDEX_CACHE_MEMCACHED_MEMORY_LIMIT: '3Gi'
   - namespace:
       $ref: /services/rhobs/telemeter/namespaces/telemeter-production.yml
-    ref: 508c23feffbc44f417e4d906c921231de01fb171
+    ref: e883161d38f58a1d6f1dcc3a3ab270e84279845b
     parameters:
       NAMESPACE: telemeter-production
       OBSERVATORIUM_NAMESPACE: observatorium-production
@@ -109,7 +109,6 @@ resourceTemplates:
       JAEGER_AGENT_IMAGE_TAG: 1.22.0
       MEMCACHED_EXPORTER_IMAGE_TAG: v0.6.0
       MEMCACHED_IMAGE_TAG: 1.5
-      MEMCACHED_IMAGE: registry.redhat.io/rhel8/memcached
       PROMETHEUS_AMS_REMOTE_WRITE_PROXY_TARGET: 'observatorium-thanos-receive'
       SERVICE_ACCOUNT_NAME: telemeter
       TELEMETER_FORWARD_URL: 'http://observatorium-observatorium-api.observatorium-production.svc.cluster.local:8080/api/metrics/v1/telemeter/api/v1/receive'

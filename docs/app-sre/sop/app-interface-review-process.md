@@ -37,6 +37,14 @@ Insights MRs should be approved as follows:
 
 **Note:** the reviewers above are able to add lgtm labels in GitLab
 
+### Status Page Component
+If a status page component is newly introduced by an MR, check if the `displayName` references only an existing component on the status page.
+If that is the case, the app-interface managed component will take ownership of the existing component on the page. Check the `app-1.yml` that
+references the `status-page-component-1.yml` and verify that this is legit.
+
+On status.redhat.com, components are mostly placed in the existing groups depending on top level redhat.com domain they belong to. If a
+component should be placed outside of any groups, check for the reasons.
+
 ## Additional Reviewers
 
 ### Telemeter access

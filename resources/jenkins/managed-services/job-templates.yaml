@@ -62,7 +62,6 @@
           - *managed_services_github_deploy_key
           - *ci_ocm_token
           - *ci_aws_keys
-          - *ci_observatorium
           - *ci_cd_quay
           - *managed_services_reportportal
     <<: *gl_build_master
@@ -129,7 +128,6 @@
           - *managed_services_github_deploy_key
           - *ci_ocm_token
           - *ci_aws_keys
-          - *ci_observatorium
           - *ci_cd_quay
           - *managed_services_reportportal
     <<: *gl_timed
@@ -298,7 +296,6 @@
         secrets:
         - *ci_ocm_token
         - *ci_aws_keys
-        - *ci_observatorium
     parameters:
     - string:
         name: TESTCASE
@@ -518,8 +515,8 @@
         name: OCM_CLUSTER_REGION
         description: '[REQUIRED] AWS region for the OSD cluster. If executing cloud layer tests, ensure that the cluster is in a region where no other clusters are deployed'
         choices:
-            - us-east-1
             - us-east-2
+            - us-east-1
             - us-west-1
             - us-west-2
             - ap-south-1
@@ -605,7 +602,7 @@
         name: KAFKA_OSD_CLUSTER_CONFIG
         default: 'COMPUTE_NODES_COUNT=6,
          COMPUTE_MACHINE_TYPE=m5.4xlarge,
-         OCM_CLUSTER_REGION=us-east-1,
+         OCM_CLUSTER_REGION=us-east-2,
          MULTI_AZ=true'
         description: 'The variables needed to provision an OSD where kafka will be installed'
     - string:
@@ -616,7 +613,7 @@
         name: OMB_OSD_CLUSTER_CONFIG
         default: 'COMPUTE_NODES_COUNT=2,
          COMPUTE_MACHINE_TYPE=m5.4xlarge,
-         OCM_CLUSTER_REGION=us-east-1,
+         OCM_CLUSTER_REGION=us-east-2,
          MULTI_AZ=false'
         description: 'The variables needed to provision an OSD where OMB will be installed'
     - string:
@@ -638,11 +635,11 @@
     - string:
         name: TEST_EXECUTION_CONFIG
         default: 'OMB_TEST_DURATION=PT15M,
-         TARGET_RATE=29,
+         TARGET_RATE=15,
          WORKERS_PER_INSTANCE=2,
          TOPICS_PER_KAFKA=1,
          PRODUCERS_PER_TOPIC=1,
-         PAYLOAD_FILE_SIZE=1013Ki,
+         PAYLOAD_FILE_SIZE=512Ki,
          PARTITIONS_PER_TOPIC=9,
          SUBSCRIPTIONS_PER_TOPIC=1,
          CONSUMER_PER_SUBSCRIPTION=1'
@@ -700,7 +697,7 @@
         name: KAFKA_OSD_CLUSTER_CONFIG
         default: 'COMPUTE_NODES_COUNT=6,
          COMPUTE_MACHINE_TYPE=m5.4xlarge,
-         OCM_CLUSTER_REGION=us-east-1,
+         OCM_CLUSTER_REGION=us-east-2,
          MULTI_AZ=true'
         description: 'The variables needed to provision an OSD where kafka will be installed'
     - string:
@@ -711,7 +708,7 @@
         name: OMB_OSD_CLUSTER_CONFIG
         default: 'COMPUTE_NODES_COUNT=2,
          COMPUTE_MACHINE_TYPE=m5.4xlarge,
-         OCM_CLUSTER_REGION=us-east-1,
+         OCM_CLUSTER_REGION=us-east-2,
          MULTI_AZ=false'
         description: 'The variables needed to provision an OSD where OMB will be installed'
     - string:
@@ -733,11 +730,11 @@
     - string:
         name: TEST_EXECUTION_CONFIG
         default: 'OMB_TEST_DURATION=PT60M,
-         TARGET_RATE=29,
+         TARGET_RATE=15,
          WORKERS_PER_INSTANCE=2,
          TOPICS_PER_KAFKA=1,
          PRODUCERS_PER_TOPIC=1,
-         PAYLOAD_FILE_SIZE=1013Ki,
+         PAYLOAD_FILE_SIZE=512Ki,
          PARTITIONS_PER_TOPIC=9,
          SUBSCRIPTIONS_PER_TOPIC=1,
          CONSUMER_PER_SUBSCRIPTION=1'
@@ -841,6 +838,9 @@
     name: 'kas-fleet-manager-tests-stage'
     publishers:
     - <<: *slack_notify
+    - archive:
+        artifacts: 'data/results/**'
+        allow-empty: true
     wrappers:
       - timeout_wrapper:
           timeout: '{timeout}'
@@ -1123,9 +1123,9 @@
         default: '1'
         description: 'How many consumer groups to be used by consumer clients, clients are split equally between groups'
     - string:
-        name: THREADS
+        name: CLIENTS_PER_POD
         default: '5'
-        description: 'Workload application concurent threads'
+        description: 'Workload application concurent client instances'
     - string:
         name: PODS
         default: '1'

@@ -20,7 +20,7 @@ slack:
 
 authentication:
   image:
-    path: app-sre/ci-int/redhat-registry-io-pull
+    path: app-sre/quay/app-sre-pull
     field: all
 
 managedResourceTypes:
@@ -41,7 +41,7 @@ imagePatterns:
 - quay.io/app-sre
 - quay.io/openshift/origin-oauth-proxy
 - quay.io/prometheus/memcached-exporter
-- registry.redhat.io/rhel8/memcached
+- quay.io/app-sre/memcached
 - quay.io/jpkroehling/all-in-one
 - quay.io/openshift/origin-configmap-reloader
 
@@ -52,14 +52,14 @@ resourceTemplates:
   parameters:
     AUTHORIZE_URL: ${OCM_BASE_URL}/api/accounts_mgmt/v1/cluster_registrations
     JAEGER_AGENT_IMAGE: quay.io/app-sre/jaegertracing-jaeger-agent
+    MEMCACHED_IMAGE: quay.io/app-sre/memcached
     MEMCACHED_EXPORTER_IMAGE: quay.io/prometheus/memcached-exporter
-    MEMCACHED_IMAGE: registry.redhat.io/rhel8/memcached
     THANOS_IMAGE: quay.io/thanos/thanos
     STORAGE_CLASS: "gp2"
   targets:
   - namespace:
       $ref: /services/rhobs/observatorium/observatorium-metrics/namespaces/observatorium-metrics-stage.yml
-    ref: 6f0cf49234c2568ef6aae92e57893b944b94cb2c
+    ref: 3d759a0c002913fc0b26d7e2a5ad2c354e3c216c
     parameters:
       NAMESPACE: observatorium-metrics-stage
       THANOS_CONFIG_SECRET: thanos-objectstorage
@@ -71,6 +71,7 @@ resourceTemplates:
       THANOS_QUERIER_CPU_LIMIT: '1'
       THANOS_QUERIER_MEMORY_REQUEST: '4Gi'
       THANOS_QUERIER_MEMORY_LIMIT: '8Gi'
+      THANOS_QUERIER_FILE_SD_TARGETS: '["dnssrv+_grpc._tcp.observatorium-thanos-metric-federation-rule.observatorium-metrics-stage.svc.cluster.local"]'
       THANOS_QUERY_FRONTEND_REPLICAS: 3
       THANOS_QUERY_FRONTEND_CPU_REQUEST: '100m'
       THANOS_QUERY_FRONTEND_CPU_LIMIT: '1'
@@ -111,7 +112,7 @@ resourceTemplates:
       SERVICE_ACCOUNT_NAME: observatorium-metrics
   - namespace:
       $ref: /services/rhobs/observatorium/observatorium-metrics/namespaces/observatorium-metrics-production.yml
-    ref: 6f0cf49234c2568ef6aae92e57893b944b94cb2c
+    ref: 3d759a0c002913fc0b26d7e2a5ad2c354e3c216c
     parameters:
       NAMESPACE: observatorium-metrics-production
       THANOS_CONFIG_SECRET: thanos-objectstorage
@@ -125,6 +126,7 @@ resourceTemplates:
       THANOS_QUERIER_CPU_LIMIT: '3'
       THANOS_QUERIER_MEMORY_REQUEST: '10Gi'
       THANOS_QUERIER_MEMORY_LIMIT: '32Gi'
+      THANOS_QUERIER_FILE_SD_TARGETS: '["dnssrv+_grpc._tcp.observatorium-thanos-metric-federation-rule.observatorium-metrics-production.svc.cluster.local"]'
       THANOS_QUERY_FRONTEND_REPLICAS: 3
       THANOS_QUERY_FRONTEND_CPU_REQUEST: '100m'
       THANOS_QUERY_FRONTEND_CPU_LIMIT: '1'

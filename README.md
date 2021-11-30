@@ -61,11 +61,13 @@ this repository.
       - [Manage vault roles (`/vault-config/role-1.yml`)](#manage-vault-roles-vault-configrole-1yml)
       - [Manage vault secret-engines (`/vault-config/secret-engine-1.yml`)](#manage-vault-secret-engines-vault-configsecret-engine-1yml)
     - [Manage DNS Zones via App-Interface (`/aws/dns-zone-1.yml`) using Terraform](#manage-dns-zones-via-app-interface-awsdns-zone-1yml-using-terraform)
+    - [Manage Dyn DNS Traffic Director via App-Interface (`/dependencies/dyn-traffic-director-1.yml`)](#manage-dyn-dns-traffic-director-via-app-interface-dependenciesdyn-traffic-director-1yml)
     - [Manage AWS access via App-Interface (`/aws/group-1.yml`) using Terraform](#manage-aws-access-via-app-interface-awsgroup-1yml-using-terraform)
       - [Manage AWS users via App-Interface (`/aws/group-1.yml`) using Terraform](#manage-aws-users-via-app-interface-awsgroup-1yml-using-terraform)
       - [Generating a GPG key](#generating-a-gpg-key)
       - [Adding your public GPG key](#adding-your-public-gpg-key)
     - [Manage AWS resources via App-Interface (`/openshift/namespace-1.yml`) using Terraform](#manage-aws-resources-via-app-interface-openshiftnamespace-1yml-using-terraform)
+      - [Manage shared AWS resources via App-interface (`/openshift/namespace-1.yml`) using Terraform](#manage-shared-aws-resources-via-app-interface-openshiftnamespace-1yml-using-terraform)
       - [Manage AWS Certificate via App-Interface (`/openshift/namespace-1.yml`)](#manage-aws-certificate-via-app-interface-openshiftnamespace-1yml)
       - [Manage ElasticSearch via App-Interface (`/openshift/namespace-1.yml`)](#manage-elasticsearch-via-app-interface-openshiftnamespace-1yml)
       - [Manage RDS databases via App-Interface (`/openshift/namespace-1.yml`)](#manage-rds-databases-via-app-interface-openshiftnamespace-1yml)
@@ -74,7 +76,7 @@ this repository.
         - [Publishing Database Log Files to CloudWatch](#publishing-database-log-files-to-cloudwatch)
         - [Publishing MySQL Logs to CloudWatch Logs](#publishing-mysql-logs-to-cloudwatch-logs)
         - [Publishing PostgreSQL Logs to CloudWatch Logs](#publishing-postgresql-logs-to-cloudwatch-logs)
-        - [Configuring access policies for Performance Insights(#configuring-access-policies-for-performance-insights)
+        - [Configuring access policies for Performance Insights](#configuring-access-policies-for-performance-insights)
       - [Manage S3 buckets via App-Interface (`/openshift/namespace-1.yml`)](#manage-s3-buckets-via-app-interface-openshiftnamespace-1yml)
       - [Manage ElastiCache databases via App-Interface (`/openshift/namespace-1.yml`)](#manage-elasticache-databases-via-app-interface-openshiftnamespace-1yml)
       - [Manage IAM Service account users via App-Interface (`/openshift/namespace-1.yml`)](#manage-iam-service-account-users-via-app-interface-openshiftnamespace-1yml)
@@ -1101,6 +1103,16 @@ records:
   records:
   - subB.example.com
 
+# Records with aliases (let you route traffic to selected AWS resources or from one record in a hosted zone to another record)
+- name: my-aliased-record
+  type: A
+  alias:
+    name: example.cloudfront.net
+    zone_id: THISISNOTAZONEID
+    evaluate_target_health: true
+
+> Note: You can not use `ttl` or `records` with `alias`.
+
 # Records with healthcheck (foo.example.com will be returned if healthy, otherwise bar.example.com will be returned)
 - name: my-healthy-record
   type: CNAME
@@ -1139,6 +1151,39 @@ records:
   - ns-508.awsdns-63.com
   - ns-1265.awsdns-30.org
   - ns-1880.awsdns-43.co.uk
+```
+
+### Manage Dyn DNS Traffic Director via App-Interface (`/dependencies/dyn-traffic-director-1.yml`)
+
+Dyn DNS Traffic Director is a service offered by Oracle Dyn DNS that allows for returning different DNS responses based on weights and rules. It is used by AppSRE to do DNS-based traffic balancing to multiple clusters.
+
+We currently support configuring Traffic Director services under the following two hostnames:
+- gslb.stage.openshift.com
+- gslb.openshift.com
+
+- `name`: A name for the Traffic Director service. We require that this is the same name as the DNS entry to be used. (eg: foo.gslb.stage.openshift.com)
+- `ttl`: The default TTL for the Traffic Director records
+- `records`: A list of `record` (currently only CNAMEs are supported)
+  - One of the following:
+    - `hostname`: The hostname for the CNAME record 
+    - `cluster`:  A reference to a cluster file. The cluster's ELB hostname will then be used as the hostname for the record
+  - `weight`: The weight for the record. Responses will be proportional to the weight of all other records
+
+Example:
+```yaml
+---
+$schema: /dependencies/dyn-traffic-director-1.yml
+
+name: api.gslb.stage.openshift.com
+ttl: 30
+
+records:
+- cluster:
+    $ref: /openshift/app-sre-stage-01/cluster.yml 
+  weight: 100
+- cluster:
+    $ref: /openshift/appsres04ue2/cluster.yml
+  weight: 100
 ```
 
 ### Manage AWS access via App-Interface (`/aws/group-1.yml`) using Terraform
@@ -1375,6 +1420,13 @@ terraformResources:
   parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-system-baseline-prod.yml
   output_resource_name: system-baseline-db-rds
   enhanced_monitoring: true
+```
+
+If you're restoring a large database, please consider adding a timeout larger than the default (40m) to the parameters using the `timeout` option in the `defaults` or in the `overrides`, e.g:
+
+```yaml
+timeout:
+  create: 2h
 ```
 
 ##### Publishing Database Log Files to CloudWatch
@@ -1834,6 +1886,7 @@ To manage a User group via App-Interface:
 - `channels`: a list of channels to add to the User group
 
 3. **Add this permission to the desired `roles`, or create a new `role` with this permission only (mandatory).**
+**Note:** Skip this step if the user group is not populated based on app-interface. i.e. if it is populated based on an external source of truth, such as an OWNERS file or PagerDuty.
 
 4. **Add the group in the `managedUsergroups` section of the** [coreos slack](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/slack/coreos.yml) **dependency file**
 

@@ -13,6 +13,16 @@ app:
 pipelinesProvider:
   $ref: /services/assisted-installer/pipelines/tekton.assisted-installer-pipelines.app-sre-prod-01.yaml
 
+configurableResources: true
+
+deployResources:
+  requests:
+    cpu: 200m
+    memory: 500Mi
+  limits:
+    cpu: 200m
+    memory: 500Mi
+
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
@@ -23,11 +33,13 @@ managedResourceTypes:
 - Service
 - ConfigMap
 - PodDisruptionBudget
+- StatefulSet
 
 imagePatterns:
 - quay.io/app-sre/bm-inventory
 - quay.io/app-sre/assisted-service
 - quay.io/app-sre/assisted-events-scrape
+- quay.io/app-sre/assisted-image-service
 
 resourceTemplates:
 - name: assisted-events-scrape
@@ -48,6 +60,22 @@ resourceTemplates:
   parameters:
     ES_INDEX: intagration-cluster-events
 
+- name: assisted-image-service
+  url: https://github.com/openshift/assisted-image-service
+  path: /deploy/template.yaml
+  provider: openshift-template
+  targets:
+  - namespace:
+      $ref: /services/assisted-installer/namespaces/assisted-installer-integration.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: openshift-assisted-image-service-gh-build-main
+    promotion:
+      publish:
+      - assisted-image-service-integration-deploy-success-channel
+
 - name: assisted-service
   url: https://github.com/openshift/assisted-service
   path: /openshift/template.yaml
@@ -57,7 +85,8 @@ resourceTemplates:
     SERVICE_BASE_URL: ${OCM_BASE_URL}
     # SSO_BASE_URL is defined at the environment parameters level
     JWKS_URL: ${SSO_BASE_URL}/protocol/openid-connect/certs
-    ALLOWED_DOMAINS: https://qaprodauth.cloud.redhat.com,https://prod.foo.redhat.com:1337,https://console.stage.redhat.com
+    # CONSOLE_BASE_URL is defined at the environment parameters level
+    ALLOWED_DOMAINS: ${CONSOLE_BASE_URL},https://prod.foo.redhat.com:1337,https://console.stage.redhat.com
     AUTH_TYPE: rhsso
     SUPPORT_L2: true
     CHECK_CLUSTER_VERSION: true
@@ -112,20 +141,21 @@ resourceTemplates:
       OCM_LOG_LEVEL: info
       ADMIN_USERS: gamli75,odepaz,ecohen+assistedinstaller,mfilanov-ai,alazar+penttest.rw@redhat.com
       ENABLE_AUTH: false
+      IMAGE_SERVICE_BASE_URL: ${OCM_BASE_URL}/api/assisted-images
   - namespace:
       $ref: /services/assisted-installer/namespaces/assisted-installer-stage.yml
-    ref: cee60b869ee7e4d7259a35bd6a2debf8093cb425
+    ref: 39f91788d9ddae295d03988b4a25608e3df1c5ad
     promotion:
       publish:
       - assisted-installer-stage-deploy-success-channel
     parameters:
       INSTALL_RH_CA: true
-      INSTALLER_IMAGE: registry-proxy.engineering.redhat.com/rh-osbs/openshift4-assisted-installer-rhel8:v1.0.0-106
-      CONTROLLER_IMAGE: registry-proxy.engineering.redhat.com/rh-osbs/openshift4-assisted-installer-reporter-rhel8:v1.0.0-138
+      INSTALLER_IMAGE: registry-proxy.engineering.redhat.com/rh-osbs/openshift4-assisted-installer-rhel8:v1.0.0-112
+      CONTROLLER_IMAGE: registry-proxy.engineering.redhat.com/rh-osbs/openshift4-assisted-installer-reporter-rhel8:v1.0.0-145
       AGENT_DOCKER_IMAGE: registry-proxy.engineering.redhat.com/rh-osbs/openshift4-assisted-installer-agent-rhel8:v1.0.0-76
       OPENSHIFT_INSTALL_RELEASE_IMAGE: ""
       PUBLIC_CONTAINER_REGISTRIES: quay.io,registry-proxy.engineering.redhat.com
-      RELEASE_TAG: v1.0.27.4
+      RELEASE_TAG: v1.0.27.6
       OPENSHIFT_VERSIONS: ""
       OS_IMAGES: |
         [
@@ -241,13 +271,14 @@ resourceTemplates:
           }]
       INSTALL_RH_CA: false
       BASE_DNS_DOMAINS: "" # Emphasize the fact that route53 is disabled on prod.
-      ALLOWED_DOMAINS: https://cloud.redhat.com,https://console.redhat.com
-      INSTALLER_IMAGE: registry.redhat.io/rhai-tech-preview/assisted-installer-rhel8:v1.0.0-106
-      CONTROLLER_IMAGE: registry.redhat.io/rhai-tech-preview/assisted-installer-reporter-rhel8:v1.0.0-138
+      # CONSOLE_BASE_URL is defined at the environment parameters level
+      ALLOWED_DOMAINS: ${CONSOLE_BASE_URL},https://cloud.redhat.com
+      INSTALLER_IMAGE: registry.redhat.io/rhai-tech-preview/assisted-installer-rhel8:v1.0.0-112
+      CONTROLLER_IMAGE: registry.redhat.io/rhai-tech-preview/assisted-installer-reporter-rhel8:v1.0.0-145
       AGENT_DOCKER_IMAGE: registry.redhat.io/rhai-tech-preview/assisted-installer-agent-rhel8:v1.0.0-76
       OPENSHIFT_INSTALL_RELEASE_IMAGE: ""
       PUBLIC_CONTAINER_REGISTRIES: quay.io
-      RELEASE_TAG: v1.0.27.4
+      RELEASE_TAG: v1.0.27.5
       OPENSHIFT_VERSIONS: ""
       OS_IMAGES: |
         [
