@@ -346,10 +346,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
     * If the cluster is not private, it adds the `app-sre-observability-per-cluster` namespace to the target namespaces in [saas-openshift-acme.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-sre/cicd/ci-int/saas-openshift-acme.yaml) to deploy openshift-acme.
         * Note: A private cluster can not use openshift-acme since it is not exposed to the public internet. Routes should still work, but the certificate will be invalid.
 
-3. **IMOPORTANT**: Merge the changes and check that the integrations have ran successfully. Check that `https://<prometheus|alertmanager>.<cluster_name>.devshift.net` have valid ssl certificates by accessing the URLs. If no security warning is given and the connection is secure as notifed by the browser.
-
-
-4. Add the new grafana datasources for the new cluster:
+3. Add the new grafana datasources for the new cluster:
   [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/667dde06bb4c2b27656791ca05d5b7ba47b9d432/resources/observability/grafana/grafana-datasources.secret.yaml#L13-42)
   You can do that with this command:
   ```bash
@@ -357,6 +354,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
   ```
   **Double check the changes introduced, the destination file could have been modified with manual changes**
 
+4. **IMOPORTANT**: Merge the changes and check that the integrations have ran successfully. Check that `https://<prometheus|alertmanager>.<cluster_name>.devshift.net` have valid ssl certificates by accessing the URLs. If no security warning is given and the connection is secure as notifed by the browser.
 
 5. Configure a [deadmanssnitch](https://deadmanssnitch.com/) snitch for the new cluster. The snitch settings should be as follow:
     - Name: prometheus.<cluster_name>.devshift.net
