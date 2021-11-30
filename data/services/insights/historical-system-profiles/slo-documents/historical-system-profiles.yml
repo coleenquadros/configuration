@@ -1,0 +1,35 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: historical-system-profiles
+
+name: historical-system-profiles
+
+namespaces:
+- $ref: /services/insights/historical-system-profiles/namespaces/historical-system-profiles-prod.yml
+
+slos:
+- name: hsp availability
+  SLIType: availability
+  SLISpecification: ratio of HTTP response codes that are not 5xx
+  SLODetails: https://github.com/RedHatInsights/historical-system-profiles-backend
+  SLOParameters:
+    window: 28d
+  expr: 1.00 - (sum(rate(api_3scale_gateway_api_status{exported_service="historical-system-profiles", status="5xx"}[5m])) / sum(rate(api_3scale_gateway_api_status{exported_service="historical-system-profiles"}[5m])))
+  SLOTarget: 0.90
+  SLOTargetUnit: percent_0_1
+  prometheusRules: resources/insights-prod/historical-system-profiles-prod/historical-system-profiles-prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&var-datasource=crcp01ue1-prometheus&var-label=historical-system-profiles&viewPanel=36
+
+- name: hsp latency
+  SLIType: latency
+  SLISpecification: ratio of services request durations under 2 seconds 
+  SLODetails: https://github.com/RedHatInsights/historical-system-profiles-backend
+  SLOParameters:
+    window: 28d
+  expr: sum(rate(api_3scale_gateway_api_time_bucket{le="2000.0", exported_service="historical-system-profiles"}[5m])) > 0
+  SLOTarget: 0.90
+  SLOTargetUnit: percent_0_1
+  prometheusRules: resources/insights-prod/historical-system-profiles-prod/historical-system-profiles-prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&var-datasource=crcp01ue1-prometheus&var-label=historical-system-profiles&viewPanel=32

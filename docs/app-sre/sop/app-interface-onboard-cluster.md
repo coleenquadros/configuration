@@ -376,9 +376,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
 
         Note: The only entry that should not be using a specific SHA should be the app-sre-stage-01 cluster.  That cluster should be using a ref of master.
 
-    1. Add the `cluster-monitoring-view` ClusterRole for the cluster to https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/roles/app-sre-osdv4-monitored-namespaces-view.yml.
-
-       *Note*: This file will need to be updated again once application namespaces are applied to the cluster. (Ex. https://gitlab.cee.redhat.com/service/app-interface/-/blob/445d7650cd5da4033fb6fb24b9be54403b710228/data/services/observability/roles/app-sre-osdv4-monitored-namespaces-view.yml#L139-153)
+    1. Add the `cluster-monitoring-view` ClusterRole for the cluster to https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/roles/app-sre-osdv4-monitored-clusters-view.yml.
 
     1. Add `managedClusterRoles: true` to the `cluster.yml` file
 

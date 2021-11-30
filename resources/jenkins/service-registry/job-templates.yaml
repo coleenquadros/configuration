@@ -45,8 +45,8 @@
     <<: *gl_build_master
 
 - job-template:
-    id: service-registry-perf-test
-    name: service-registry-perf-test-stage
+    id: service-registry-periodic-test
+    name: "{component}-periodic-test"
     publishers:
     - <<: *slack_notify
     wrappers:
@@ -57,5 +57,17 @@
           <<: *vault_defaults
           secrets:
           - *service_registry_perf_test_stage
-    ci_cmd: './perf_test.sh'
     <<: *gh_timed
+
+- job-template:
+    id: gh-build-master-srs-projects
+    name: "{name}-gh-build-{branch}"
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+          - *rhoas-quay-access
+          - *quay_secret_push
+    <<: *gh_build_master

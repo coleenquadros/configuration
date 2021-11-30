@@ -1,0 +1,22 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: observatorium-http-traffic-production
+spec:
+  groups:
+  - name: observatorium-http-traffic
+    rules:
+    - alert: ObservatoriumHttpTrafficErrorRateHigh
+      annotations:
+        message: Observatorium route  {{$labels.route}}  are failing to handle {{$value | humanize}}% of requests.
+        runbook: https://github.com/rhobs/configuration/blob/main/docs/sop/observatorium.md#observatoriumhttptrafficerrorratehigh
+      expr: |
+        (sum by (route) (rate(haproxy_backend_http_responses_total{route=~"observatorium.*|telemeter.*|infogw.*", code="5xx"} [5m])) / sum by (route) (rate(haproxy_backend_http_responses_total{route=~"observatorium.*|telemeter.*|infogw.*"}[5m]))) * 100 > 25
+      labels:
+        service: telemeter
+        severity: medium

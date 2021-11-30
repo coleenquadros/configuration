@@ -20,7 +20,7 @@ slack:
 
 authentication:
   image:
-    path: app-sre/ci-int/redhat-registry-io-pull
+    path: app-sre/quay/app-sre-pull
     field: all
 
 managedResourceTypes:
@@ -41,7 +41,7 @@ imagePatterns:
 - quay.io/app-sre
 - quay.io/openshift/origin-oauth-proxy
 - quay.io/prometheus/memcached-exporter
-- registry.redhat.io/rhel8/memcached
+- quay.io/app-sre/memcached
 - quay.io/jpkroehling/all-in-one
 - quay.io/app-sre/gubernator
 - quay.io/jaegertracing/all-in-one
@@ -49,7 +49,6 @@ imagePatterns:
 parameters:
   OAUTH_PROXY_IMAGE: quay.io/openshift/origin-oauth-proxy
   OAUTH_PROXY_IMAGE_TAG: 4.8.0 # Pinning version before 4.9.0 due to https://github.com/openshift/oauth-proxy/issues/229.
-
 resourceTemplates:
 - name: observatorium-common
   path: /resources/services/observatorium-template.yaml
@@ -61,14 +60,14 @@ resourceTemplates:
     AUTHORIZE_URL: ${OCM_BASE_URL}/api/accounts_mgmt/v1/cluster_registrations
     GUBERNATOR_IMAGE: 'quay.io/app-sre/gubernator'
     JAEGER_AGENT_IMAGE: quay.io/app-sre/jaegertracing-jaeger-agent
+    MEMCACHED_IMAGE: quay.io/app-sre/memcached
     MEMCACHED_EXPORTER_IMAGE: quay.io/prometheus/memcached-exporter
-    MEMCACHED_IMAGE: registry.redhat.io/rhel8/memcached
     OBSERVATORIUM_API_IMAGE: quay.io/observatorium/api
     OPA_AMS_IMAGE: quay.io/observatorium/opa-ams
   targets:
   - namespace:
       $ref: /services/rhobs/observatorium/namespaces/observatorium-stage.yml
-    ref: 5187782a3e38b5e4bf2a84843a08079ce34bcc78
+    ref: e883161d38f58a1d6f1dcc3a3ab270e84279845b
     parameters:
       NAMESPACE: observatorium-stage
       OBSERVATORIUM_METRICS_NAMESPACE: observatorium-metrics-stage
@@ -84,7 +83,7 @@ resourceTemplates:
       JAEGER_COLLECTOR_NAMESPACE: observatorium-stage
   - namespace:
       $ref: /services/rhobs/observatorium/namespaces/observatorium-production.yml
-    ref: 5187782a3e38b5e4bf2a84843a08079ce34bcc78
+    ref: e883161d38f58a1d6f1dcc3a3ab270e84279845b
     parameters:
       NAMESPACE: observatorium-production
       OBSERVATORIUM_METRICS_NAMESPACE: observatorium-metrics-production

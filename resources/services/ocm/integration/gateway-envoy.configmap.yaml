@@ -116,6 +116,21 @@ data:
                     address: assisted-service.assisted-installer-integration.svc
                     port_value: 8090
 
+      # Cluster for the `assisted-image-service` service:
+      - name: assisted-image-service
+        connect_timeout: 2s
+        type: STRICT_DNS
+        lb_policy: ROUND_ROBIN
+        load_assignment:
+          cluster_name: assisted-image-service
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: assisted-image-service.assisted-installer-integration.svc
+                    port_value: 8080
+
       listeners:
 
       # This listener is used to support probes and metrics.
@@ -244,6 +259,16 @@ data:
                       prefix: /api/assisted-install
                     route:
                       cluster: assisted-install
+                      auto_host_rewrite: true
+                      timeout: 180s
+
+                  # Route for the `assisted-image-service` service:
+                  - name: assisted-image-service
+                    match:
+                      prefix: /api/assisted-images/
+                    route:
+                      cluster: assisted-image-service
+                      prefix_rewrite: /
                       auto_host_rewrite: true
                       timeout: 180s
 

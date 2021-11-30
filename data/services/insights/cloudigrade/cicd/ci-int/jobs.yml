@@ -1,0 +1,32 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+labels:
+  service: cloudigrade
+
+name: ci-int-cloudigrade-jobs
+description: cloudigrade ci-int jobs
+
+app:
+  $ref: /services/insights/cloudigrade/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+type: jobs
+
+config:
+- project:
+    name: cloudigrade
+    label: insights
+    node: insights
+    gh_org: cloudigrade
+    gh_repo: cloudigrade
+    quay_org: cloudservices
+    jobs:
+    - "insights-cloudigrade-gh-pr-check":
+        display_name: cloudigrade pr security scan
+        pr_check_script_path: "./deployment/scripts/sonarqube.sh"
+    - "insights-cloudigrade-gh-build-master":
+        display_name: cloudigrade master security scan
+        build_deploy_script_path: "./deployment/scripts/sonarqube.sh"

@@ -74,10 +74,29 @@ config:
       node: managed-services
       gh_org: Apicurio
       gh_repo: apicurio-perf
+      # quay_org: rhoas
       jobs:
-        - 'service-registry-perf-test':
+        # build
+        - 'gh-build-master-srs-projects':
+            display_name: apicurio-perf build main
+            branch: main
+        - 'gh-pr-check':
+            display_name: apicurio-perf pr-check
+        # periodic performance tests - e2e
+        - 'service-registry-periodic-test':
+            component: 'service-registry-perf-stage'
             branch: main
             display_name: 'service-registry performance tests'
             timeout: 3600
             slack_channel_notification: appsre-service-registry-ci-cd
             cron_expression: 'H 7 * * 2-5' # 7am UTC Tuesday to Friday
+            ci_cmd: './perf_test.sh'
+        # periodic performance tests - control plane
+        - 'service-registry-periodic-test':
+            component: 'srs-fleet-manager-perf-stage'
+            branch: main
+            display_name: 'srs-fleet-manager performance tests'
+            timeout: 3600
+            slack_channel_notification: appsre-service-registry-ci-cd
+            cron_expression: 'H 5 * * 2-5' # 5am UTC Tuesday to Friday
+            ci_cmd: './cp_perf_test.sh'

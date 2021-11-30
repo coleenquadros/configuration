@@ -46,15 +46,15 @@ resourceTemplates:
   # Staging:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: 3b0df0706b930766972a91b95734b0c76f1b51bb
+    ref: 373aa543c8761f41fec1cdf31c03794082272154
     parameters:
-      IMAGE_TAG: 3b0df07 # DO NOT UPDATE THIS UNLESS YOU KNOW WHY
+      IMAGE_TAG: 373aa54 # DO NOT UPDATE THIS UNLESS YOU KNOW WHY
   # Production:
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: 3b0df0706b930766972a91b95734b0c76f1b51bb
+    ref: 6c6bc06e6cfc3b21cb675cdd0c9ab8ec44dacd97
     parameters:
-      IMAGE_TAG: 3b0df07 # DO NOT UPDATE THIS UNLESS YOU KNOW WHY
+      IMAGE_TAG: 6c6bc06 # DO NOT UPDATE THIS UNLESS YOU KNOW WHY
 
 - name: koku
   path: /deploy/clowdapp.yaml
@@ -73,7 +73,7 @@ resourceTemplates:
       ENABLE_TRINO_SOURCE_TYPE: 'GCP'
       ENABLE_TRINO_ACCOUNTS: ''
       AUTO_DATA_INGEST: True
-      RETAIN_NUM_MONTHS: 3
+      RETAIN_NUM_MONTHS: 4
       PARQUET_PROCESSING_BATCH_SIZE: "500000"
       TRINO_DATE_STEP: 31
       PRESTO_HOST: trino-coordinator
@@ -108,9 +108,9 @@ resourceTemplates:
   # Staging:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: 4f9370f650d0d90ee4ac21a418d7b295137966f7
+    ref: 373aa543c8761f41fec1cdf31c03794082272154
     parameters:
-      IMAGE_TAG: 4f9370f
+      IMAGE_TAG: 373aa54
       APP_DOMAIN: apps.crcs02ue1.urby.p1.openshiftapps.com
       S3_BUCKET_NAME: hccm-stage-s3
       KOKU_SENTRY_ENV: stage
@@ -207,9 +207,9 @@ resourceTemplates:
   # Production:
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: 7570df94b8947e6ac92d7b76bc93cff65767e2b2
+    ref: dbbe90c0a6298e51ce19d95b9ccb27a929cdd20b
     parameters:
-      IMAGE_TAG: 7570df9
+      IMAGE_TAG: dbbe90c
       APP_DOMAIN: apps.crcp01ue1.o9m8.p1.openshiftapps.com
       S3_BUCKET_NAME: hccm-prod-s3
       KOKU_SENTRY_ENV: prod
@@ -288,7 +288,7 @@ resourceTemplates:
       WORKER_OCP_MEMORY_REQUEST: 200Mi
       WORKER_OCP_MEMORY_LIMIT: 400Mi
       # worker-priority
-      WORKER_PRIORITY_MIN_REPLICAS: 2
+      WORKER_PRIORITY_MIN_REPLICAS: 3
       WORKER_PRIORITY_CPU_REQUEST: 250m
       WORKER_PRIORITY_CPU_LIMIT: 500m
       WORKER_PRIORITY_MEMORY_REQUEST: 2Gi
@@ -380,15 +380,23 @@ resourceTemplates:
       WORKER_REPLICAS: 4
       COORDINATOR_CPU_REQUEST: 1
       COORDINATOR_CPU_LIMIT: 2
-      COORDINATOR_MEMORY_REQUEST: 15Gi
-      COORDINATOR_MEMORY_LIMIT: 20Gi
+      COORDINATOR_MEMORY_REQUEST: 16Gi
+      COORDINATOR_MEMORY_LIMIT: 24Gi
       WORKER_CPU_REQUEST: 1
       WORKER_CPU_LIMIT: 2
-      WORKER_MEMORY_REQUEST: 8Gi
-      WORKER_MEMORY_LIMIT: 16Gi
-      QUERY_MAX_MEMORY: 16GB
-      QUERY_MAX_MEMORY_PER_NODE: 4GB
-      QUERY_MAX_TOTAL_MEMORY_PER_NODE: 8GB
+      WORKER_MEMORY_REQUEST: 16Gi
+      WORKER_MEMORY_LIMIT: 24Gi
+      # QUERY_MAX_MEMORY is the max amount of user memory a query can use across the entire cluster
+      # Setting to WORKER_REPLICAS * QUERY_MAX_MEMORY_PER_NODE
+      QUERY_MAX_MEMORY: 36GB
+      # QUERY_MAX_MEMORY_PER_NODE is the max amount of user memory a query can use on a worker
+      # Default is JVM max memory * 0.1
+      # The JVM uses 75% of the memory limit. Setting this to (WORKER_MEMORY_LIMIT * 0.75 - heap-headroom-per-node (JVM max memory * 0.3)) * 0.5.
+      QUERY_MAX_MEMORY_PER_NODE: 6GB
+      # QUERY_MAX_TOTAL_MEMORY_PER_NODE is the max amount of user and system memory a query can use on a worker
+      # Default is JVM max memory * 0.3
+      # The JVM uses 75% of the memory limit. Setting this to WORKER_MEMORY_LIMIT * 0.75 - heap-headroom-per-node (JVM max memory * 0.3).
+      QUERY_MAX_TOTAL_MEMORY_PER_NODE: 12GB
 
 - name: koku-report-emailer
   path: /deploy/clowdapp.yaml
