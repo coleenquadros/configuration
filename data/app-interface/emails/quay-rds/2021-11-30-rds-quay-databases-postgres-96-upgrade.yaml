@@ -1,0 +1,47 @@
+---
+$schema: /app-interface/app-interface-email-1.yml
+labels: {}
+name: 2021-11-30-rds-quay-databases-postgres-96-upgrade
+subject: '[Action required] Postgres 9.6 End-of-Life, Clair/Apostille databases'
+to:
+  services:
+  - $ref: /services/clair/app.yml
+body: |
+  Hello,
+
+  This email is regarding the end-of-life for Postgres 9.6 on AWS RDS. The
+  following RDS instances are affected by this change:
+
+  - apostille-rds
+  - clair-production
+  - db-apostille-prod-4b8cc2ff-d1f3-497c-bc18-859593c68bdf
+  - db-apostille-staging-926eef16-1496-45ad-bd09-366946b9475a
+
+  Note: apostille-rds is the only database of these four that is managed by
+  app-interface. The notification for the other three is a courtesy. AppSRE
+  will not be directly involved in the upgrade of any databases that aren't
+  managed by app-interface.
+
+  Starting January 18, 2022, any RDS instances still running Postgres 9.6 will
+  be automatically upgraded to Postgres 12 [1]. This will result in a downtime
+  during which the database is taken offline for the upgrade. Additional
+  downtime is possible if your service doesn't support Postgres 12. Action must
+  be taken before January 18th to avoid this automatic upgrade.
+
+  The upgrade options are detailed more in the AWS documentation, but the
+  summary is that you must upgrade to Postgres 10.x or a later supported
+  version to avoid the automatic upgrade [2].
+
+  For now, your team should investigate whether any changes are needed to your
+  service to support a Postgres upgrade, if you have not already done so.
+  The AppSRE team will reach out again to schedule a time to upgrade before the
+  January 18th deadline (only for databases managed by app-interface). Note
+  that this is a major version upgrade, so expect a period of downtime
+  during the upgrade. Please reach out as soon as possible with any questions.
+
+  [1] https://forums.aws.amazon.com/ann.jspa?annID=8499
+  [2] https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.PostgreSQL.html#USER_UpgradeDBInstance.PostgreSQL.MajorVersion
+
+  Sincerely,
+
+  The AppSRE Team.
