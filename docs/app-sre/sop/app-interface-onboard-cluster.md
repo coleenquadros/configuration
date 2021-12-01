@@ -354,7 +354,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
   ```
   **Double check the changes introduced, the destination file could have been modified with manual changes**
 
-4. **IMOPORTANT**: Merge the changes and check that the integrations have ran successfully. Check that `https://<prometheus|alertmanager>.<cluster_name>.devshift.net` have valid ssl certificates by accessing the URLs. If no security warning is given and the connection is secure as notifed by the browser.
+4. **IMPORTANT**: Merge the changes and check that the integrations have ran successfully. Check that `https://<prometheus|alertmanager>.<cluster_name>.devshift.net` have valid ssl certificates by accessing the URLs. If no security warning is given and the connection is secure as notified by the browser.
 
 5. Configure a [deadmanssnitch](https://deadmanssnitch.com/) snitch for the new cluster. The snitch settings should be as follow:
     - Name: prometheus.<cluster_name>.devshift.net
