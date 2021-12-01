@@ -1,0 +1,63 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: Cincinnati
+name: Cincinnati-2021-12-01
+app:
+  $ref: /services/cincinnati/app.yml
+date: '2021-12-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/openshift/cincinnati:
+    - branch: master
+      total: 29
+      success: 27
+  container_vulnerabilities:
+  - cluster: app-sre-prod-04
+    namespace: cincinnati-production
+    vulnerabilities:
+      Medium: 117
+      High: 36
+      Low: 12
+  - cluster: app-sre-stage-01
+    namespace: cincinnati-stage
+    vulnerabilities:
+      Medium: 273
+      High: 84
+      Low: 28
+  post_deploy_jobs: null
+  deployment_validations:
+  - cluster: app-sre-prod-04
+    namespace: cincinnati-production
+    validations:
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 1
+      deployment_validation_operator_default_service_account:
+        Failed: 2
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 2
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 2
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 3
+  - cluster: app-sre-stage-01
+    namespace: cincinnati-stage
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 5
+      deployment_validation_operator_default_service_account:
+        Failed: 4
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 3
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 5
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 4
+  service_slo:
+  - cluster: app-sre-prod-04
+    namespace: cincinnati-production
+    slo_name: policy-engine errors
+    slo_doc_name: cincinnati
+    slo_value: 100.0
+    slo_target: 95.0
