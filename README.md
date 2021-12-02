@@ -1295,7 +1295,7 @@ Add the Vault secret to an `openshiftResources` section in a [shared resources f
 
 #### Manage AWS Certificate via App-Interface (`/openshift/namespace-1.yml`)
 
-[AWS Certificate Manager](https://aws.amazon.com/certificate-manager/) AWS Certificate Manager is a service that lets you easily provision, manage, and deploy public and private Secure Sockets Layer/Transport Layer Security (SSL/TLS) certificates.
+[AWS Certificate Manager](https://aws.amazon.com/certificate-manager/) is a service that lets you easily provision, manage, and deploy public and private Secure Sockets Layer/Transport Layer Security (SSL/TLS) certificates.
 
 In order to import certificates stored in Vault into AWS Certificate Manager, you need to add them to the `terraformResources` field.
 
@@ -1332,7 +1332,7 @@ If `secret` was set above, then these fields will also be included:
 
 #### Manage AWS Secrets Manager via App-Interface (`/openshift/namespace-1.yml`)
 
-[AWS Secrets Manager](https://aws.amazon.com/cn/secrets-manager/) AWS Secrets Manager helps you protect access to your applications, services, and IT resources. You can easily rotate, manage, and retrieve database credentials, API keys, and other secrets throughout their lifecycle.
+[AWS Secrets Manager](https://aws.amazon.com/cn/secrets-manager/) helps you protect access to your applications, services, and IT resources. You can easily rotate, manage, and retrieve database credentials, API keys, and other secrets throughout their lifecycle.
 
 In order to import secrets stored in Vault into AWS Secrets Manager, you need to add them to the `terraformResources` field.
 
@@ -1346,7 +1346,7 @@ In order to import secrets stored in Vault into AWS Secrets Manager, you need to
 - `output_resource_name`: name of Kubernetes Secret to be created.
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
-    - For example, for a resource with `identifier` "my-ssl" and `provider` is set to `acm`, the created Secret will be called `my-ssl-acm`.
+    - For example, for a resource with `identifier` "my-secret" and `provider` is set to `secrets-manager`, the created Secret will be called `my-secret-secrets-manager`.
 - `annotations`: additional annotations to add to the output resource
 
 Once the changes are merged, the secret will be imported into Secrets Manager and a Kubernetes Secret will be created in the same namespace with all relevant details.
