@@ -69,7 +69,7 @@ this repository.
     - [Manage AWS resources via App-Interface (`/openshift/namespace-1.yml`) using Terraform](#manage-aws-resources-via-app-interface-openshiftnamespace-1yml-using-terraform)
       - [Manage shared AWS resources via App-interface (`/openshift/namespace-1.yml`) using Terraform](#manage-shared-aws-resources-via-app-interface-openshiftnamespace-1yml-using-terraform)
       - [Manage AWS Certificate via App-Interface (`/openshift/namespace-1.yml`)](#manage-aws-certificate-via-app-interface-openshiftnamespace-1yml)
-      - [Manage AWS Secrets Manager via App-Interface (`/openshift/namespace-1.yml`)](#manage-aws-secrets-Manager-via-app-interface-openshiftnamespace-1yml)
+      - [Manage AWS Secrets Manager via App-Interface (`/openshift/namespace-1.yml`)](#manage-aws-secrets-manager-via-app-interface-openshiftnamespace-1yml)
       - [Manage ElasticSearch via App-Interface (`/openshift/namespace-1.yml`)](#manage-elasticsearch-via-app-interface-openshiftnamespace-1yml)
       - [Manage RDS databases via App-Interface (`/openshift/namespace-1.yml`)](#manage-rds-databases-via-app-interface-openshiftnamespace-1yml)
         - [Reset RDS database password](#reset-rds-database-password)
