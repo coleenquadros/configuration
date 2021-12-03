@@ -14,12 +14,12 @@ spec:
     rules:
 
     - alert: PatchmanAlert5xx
-      expr: sum(rate(patchman_engine_requests_total{code=~"5.*"}[5m])) by (kubernetes_namespace) > 0
+      expr: sum(rate(patchman_engine_requests_total{code=~"5.*"}[5m])) by (container, code) > 0
       annotations:
         dashboard: 'https://grafana.app-sre.devshift.net/d/patch/patchman-engine'
-        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/patchman-engine-prod/deployments/patchman-manager'
-        message: '5xx responses observed ({{ $value }})'
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/patchman/PatchmanAlert5xx.md"
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/patchman-engine-prod/deployments/{{ $labels.container }}'
+        message: '5xx responses ({{ $labels.code }}) observed in {{ $labels.container }} ({{ $value }})'
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/patchman/PatchmanAlert5xx.md'
       labels:
         severity: info
         service: insights
@@ -28,12 +28,11 @@ spec:
 
     - alert: PatchmanAlertKafkaLag
       expr: sum(kafka_consumergroup_group_topic_sum_lag{group="patchman", topic=~"platform.inventory.events|patchman.evaluator.upload"}) by (topic) > 100000
-      for: 5m
       annotations:
         dashboard: 'https://grafana.app-sre.devshift.net/d/patch/patchman-engine'
         link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/patchman-engine-prod/deployments/patchman-listener'
         message: 'patchman-engine lag > 100000, topic: {{ $labels.topic }}, current lag: {{ $value  }}'
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/patchman/PatchmanAlertKafkaLag.md"
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/patchman/PatchmanAlertKafkaLag.md'
       labels:
         severity: info
         service: insights
@@ -42,12 +41,11 @@ spec:
 
     - alert: PatchmanAlertExternalService
       expr: sum(delta(patchman_engine_manager_dependency_call{ namespace="patchman-engine-prod" }[5m])) by (name, status) > 10
-      for: 5m
       annotations:
         dashboard: 'https://grafana.app-sre.devshift.net/d/patch/patchman-engine'
         link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/patchman-engine-prod/deployments/patchman-manager'
         message: 'External service failing ({{ $labels.name }} - {{ $labels.status }})'
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/patchman/PatchmanAlertExternalService.md"
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/patchman/PatchmanAlertExternalService.md'
       labels:
         severity: info
         service: insights
@@ -60,7 +58,7 @@ spec:
         dashboard: 'https://grafana.app-sre.devshift.net/d/patch/patchman-engine'
         link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/patchman-engine-prod/deployments/patchman-listener'
         message: 'Increasing number of out-of-date systems observed (last1D / last30D = {{ $value }})'
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/patchman/PatchmanAlertOutOfDateSystems.md"
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/patchman/PatchmanAlertOutOfDateSystems.md'
       labels:
         severity: info
         service: insights
@@ -71,9 +69,9 @@ spec:
       expr: sum(increase(kube_pod_container_status_restarts_total{container=~"patchman-.*"}[5m])) by (container) > 0
       annotations:
         dashboard: 'https://grafana.app-sre.devshift.net/d/patch/patchman-engine'
-        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/patchman-engine-prod/deployments/patchman-listener'
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/patchman-engine-prod/deployments/{{ $labels.container }}'
         message: 'Observed pod ({{ $labels.container }}) restart(s) ({{ $value }})'
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/patchman/PatchmanAlertPodRestarting.md"
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/patchman/PatchmanAlertPodRestarting.md'
       labels:
         severity: info
         service: insights
