@@ -13,6 +13,8 @@ app:
 pipelinesProvider:
   $ref: /services/web-rca/pipelines/tekton.web-rca-pipelines.appsrep05ue1.yaml
 
+configurableResources: true
+
 slack: # configure where to send notifications of success/failure of deployments
   workspace:
     $ref: /dependencies/slack/coreos.yml
@@ -46,13 +48,15 @@ resourceTemplates: # a list of configurations of OpenShift templates to deploy
   - namespace:
       $ref: /services/web-rca/namespaces/stage.yml
     ref: main
+    parameters:
+      ENABLE_DELETE: true
     upstream:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: service-web-rca-gl-build-main
   - namespace:
       $ref: /services/web-rca/namespaces/production.yml
-    ref: 6b2ecf75f02900eb74a092dcff4e9e7715dfd2d5
+    ref: 6567c2519e048099c4793c962c6b6b689693df93
     parameters:
       DATABASE_SECRET_NAME: web-rca-production-rds
       OCM_BASE_URL: https://api.openshift.com

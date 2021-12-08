@@ -13,6 +13,8 @@ app:
 pipelinesProvider:
   $ref: /services/managed-services/pipelines/tekton.kas-fleet-manager-pipelines.appsrep05ue1.yaml
 
+configurableResources: true
+
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
@@ -56,7 +58,7 @@ resourceTemplates:
     # - Commits can be found here: https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/commits/main
     # If in doubt, please check with the MK Control Plane team.
     # We are exploring how to automate this in the future.
-    ref: ed11c7fc796dc00f2866aa32277fdf107f63d999
+    ref: e4b3992068e5f766ae33753f97c3d92e30904355
     parameters:
       ISSUER_URL: ${SSO_BASE_URL}
       OBSERVATORIUM_URL: https://observatorium-mst.api.openshift.com/api/metrics/v1/managedkafka
@@ -150,7 +152,7 @@ resourceTemplates:
       # Token Refresher URL
       OBSERVATORIUM_TOKEN_REFRESHER_URL: http://token-refresher.managed-services-stage.svc.cluster.local
       # Release tag within Config Repo to use for pulling index information
-      OBSERVABILITY_CONFIG_TAG: v1.17.1
+      OBSERVABILITY_CONFIG_TAG: v1.18.0
       # Observatorium Red Hat SSO tenant for observability stack
       OBSERVATORIUM_RHSSO_TENANT: managedkafka
       # Red Hat SSO Observability gateway
@@ -265,7 +267,7 @@ resourceTemplates:
     # the very first commit i.e https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/merge_requests/356/commits?commit_id=f0fd63740464c5fa4bda395d5d31f675eff049ac
     # If in doubt, see with the control plane team.
     # We are exploring into using automating this.
-    ref: ed11c7fc796dc00f2866aa32277fdf107f63d999
+    ref: e4b3992068e5f766ae33753f97c3d92e30904355
     parameters:
       DB_SSLMODE: verify-full
       ENVIRONMENT: production
@@ -273,7 +275,7 @@ resourceTemplates:
       QUOTA_TYPE: ams
       # The image tag is the first seven characters of the #ref commit sha parameter.
       # Verify in https://quay.io/repository/rhoas/kas-fleet-manager?tab=tags to see if the tag exists.
-      IMAGE_TAG: ed11c7f
+      IMAGE_TAG: e4b3992
       STRIMZI_OPERATOR_ADDON_ID: managed-kafka
       KAS_FLEETSHARD_ADDON_ID: kas-fleetshard-operator
       SENTRY_URL: sentry.devshift.net
@@ -313,9 +315,9 @@ resourceTemplates:
       # Red Hat SSO Observability auth server url
       OBSERVATORIUM_RHSSO_AUTH_SERVER_URL: https://sso.redhat.com/auth
       # Release tag within Config Repo to use for pulling index information
-      OBSERVABILITY_CONFIG_TAG: v1.17.1
+      OBSERVABILITY_CONFIG_TAG: v1.18.0
       # MAXIMUM NUMBER OF ALLOWED KAFKAs
-      KAFKA_CAPACITY_MAX_CAPACITY: 70
+      KAFKA_CAPACITY_MAX_CAPACITY: 80
       # A list of usernames representing users who do not have access to the service
       DENIED_USERS: []
       # A list of users with read-only permissions for data plane clusters
@@ -419,3 +421,12 @@ resourceTemplates:
           schedulable: true # change this to false if you do not want the cluster to be schedulable
           kafka_instance_limit: 15 # change this to match any value of configuration
           supported_instance_type: standard,eval
+        - name: mk-1201-144802
+          cluster_id: 1oqjq8qup5vhhn4seg03al8k34kdc8lj
+          cloud_provider: aws
+          region: us-east-1
+          multi_az: true
+          schedulable: true # change this to false if you do not want the cluster to be schedulable
+          kafka_instance_limit: 10 # change this to match any value of configuration
+          supported_instance_type: standard,eval
+  

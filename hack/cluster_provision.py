@@ -8,6 +8,7 @@ import click
 import cluster_provision.cso as cso
 import cluster_provision.dvo as dvo
 import cluster_provision.olm as olm
+import cluster_provision.observability as observability
 
 
 def init_logging() -> None:
@@ -49,12 +50,40 @@ def create_dvo_cluster_config(ctx, cluster: str) -> None:
     """ Generates Deployment Validation Operator (DVO) configs for a cluster"""
     dvo.main(ctx.obj['datadir'], cluster)
 
+
 @cli.command()
 @click.argument("cluster")
 @click.pass_context
 def create_cso_cluster_config(ctx, cluster: str) -> None:
     """Generates Container Security Operator (CSO) configs for a cluster"""
     cso.main(ctx.obj['datadir'], cluster)
+
+
+@cli.command()
+@click.argument("cluster")
+@click.pass_context
+def create_obs_dns_records(ctx, cluster: str) -> None:
+    """ Generates Observability DNS records"""
+    observability.create_dns_records(ctx.obj["datadir"], cluster)
+
+
+@cli.command()
+@click.argument("cluster")
+@click.argument("environment")
+@click.pass_context
+def create_obs_customer_monitoring(ctx, cluster: str,
+                                   environment: str) -> None:
+    """Generates APP-SRE observability config for a cluster"""
+    observability.configure_customer_monitoring(ctx.obj['datadir'],
+                                                cluster, environment)
+
+
+@cli.command()
+@click.argument("cluster")
+@click.pass_context
+def create_obs_grafana_datasources(ctx, cluster: str) -> None:
+    """Generates APP-SRE observability config for a cluster"""
+    observability.configure_grafana_datasources(ctx.obj['datadir'], cluster)
 
 
 if __name__ == "__main__":

@@ -195,3 +195,16 @@ spec:
       labels:
         service: uhc-acct-mngr
         severity: medium
+    - alert: OCM cron job too many errors - {{{environment}}}
+      annotations:
+        message: "AMS is seeing too many errors from {{ $labels.jobname }} in namespace {{ $labels.namespace }}."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/uhc/sop/README.md#account-manager-cron-job-error"
+      expr: |
+        sum by (jobname,namespace) (increase(job_results_job_count{namespace="uhc-{{{environment}}}",status!="pass"}[12h]))
+        /
+        sum by (jobname,namespace) (increase(job_results_job_count{namespace="uhc-{{{environment}}}"}[12h])) * 100
+        > 10
+      for: 10m
+      labels:
+        service: uhc-acct-mngr
+        severity: medium

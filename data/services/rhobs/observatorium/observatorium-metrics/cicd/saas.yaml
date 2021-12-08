@@ -13,6 +13,16 @@ app:
 pipelinesProvider:
   $ref: /services/rhobs/observatorium/pipelines/observatorium-pipeline.app-sre-prod-01.yaml
 
+configurableResources: true
+
+deployResources:
+  requests:
+    cpu: 300m
+    memory: 600Mi
+  limits:
+    cpu: 300m
+    memory: 600Mi
+
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
@@ -59,7 +69,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/rhobs/observatorium/observatorium-metrics/namespaces/observatorium-metrics-stage.yml
-    ref: 3d759a0c002913fc0b26d7e2a5ad2c354e3c216c
+    ref: ed6325f69d9ab5bf4efff81c352968ada962a3de
     parameters:
       NAMESPACE: observatorium-metrics-stage
       THANOS_CONFIG_SECRET: thanos-objectstorage
@@ -88,6 +98,7 @@ resourceTemplates:
       THANOS_RECEIVE_CPU_LIMIT: '700m'
       THANOS_RECEIVE_MEMORY_REQUEST: '5Gi'
       THANOS_RECEIVE_MEMORY_LIMIT: '5Gi'
+      THANOS_RECEIVE_PVC_STORAGE: '100Gi'
       THANOS_RECEIVE_LOG_LEVEL: 'debug'
       THANOS_RECEIVE_DEBUG_ENV: '1'
       THANOS_COMPACTOR_REPLICAS: 1
@@ -112,7 +123,7 @@ resourceTemplates:
       SERVICE_ACCOUNT_NAME: observatorium-metrics
   - namespace:
       $ref: /services/rhobs/observatorium/observatorium-metrics/namespaces/observatorium-metrics-production.yml
-    ref: 3d759a0c002913fc0b26d7e2a5ad2c354e3c216c
+    ref: ed6325f69d9ab5bf4efff81c352968ada962a3de
     parameters:
       NAMESPACE: observatorium-metrics-production
       THANOS_CONFIG_SECRET: thanos-objectstorage
@@ -141,6 +152,7 @@ resourceTemplates:
       THANOS_RECEIVE_CPU_LIMIT: '3'
       THANOS_RECEIVE_MEMORY_REQUEST: '40Gi'
       THANOS_RECEIVE_MEMORY_LIMIT: '40Gi'
+      THANOS_RECEIVE_PVC_STORAGE: '100Gi'
       THANOS_QUERIER_CACHE_MEMORY_REQUEST: '2Gi'
       THANOS_QUERIER_CACHE_MEMORY_LIMIT: '2Gi'
       THANOS_COMPACTOR_REPLICAS: 1

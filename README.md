@@ -69,6 +69,7 @@ this repository.
     - [Manage AWS resources via App-Interface (`/openshift/namespace-1.yml`) using Terraform](#manage-aws-resources-via-app-interface-openshiftnamespace-1yml-using-terraform)
       - [Manage shared AWS resources via App-interface (`/openshift/namespace-1.yml`) using Terraform](#manage-shared-aws-resources-via-app-interface-openshiftnamespace-1yml-using-terraform)
       - [Manage AWS Certificate via App-Interface (`/openshift/namespace-1.yml`)](#manage-aws-certificate-via-app-interface-openshiftnamespace-1yml)
+      - [Manage AWS Secrets Manager via App-Interface (`/openshift/namespace-1.yml`)](#manage-aws-secrets-manager-via-app-interface-openshiftnamespace-1yml)
       - [Manage ElasticSearch via App-Interface (`/openshift/namespace-1.yml`)](#manage-elasticsearch-via-app-interface-openshiftnamespace-1yml)
       - [Manage RDS databases via App-Interface (`/openshift/namespace-1.yml`)](#manage-rds-databases-via-app-interface-openshiftnamespace-1yml)
         - [Reset RDS database password](#reset-rds-database-password)
@@ -1294,7 +1295,7 @@ Add the Vault secret to an `openshiftResources` section in a [shared resources f
 
 #### Manage AWS Certificate via App-Interface (`/openshift/namespace-1.yml`)
 
-[AWS Certificate Manager](https://aws.amazon.com/certificate-manager/) AWS Certificate Manager is a service that lets you easily provision, manage, and deploy public and private Secure Sockets Layer/Transport Layer Security (SSL/TLS) certificates.
+[AWS Certificate Manager](https://aws.amazon.com/certificate-manager/) is a service that lets you easily provision, manage, and deploy public and private Secure Sockets Layer/Transport Layer Security (SSL/TLS) certificates.
 
 In order to import certificates stored in Vault into AWS Certificate Manager, you need to add them to the `terraformResources` field.
 
@@ -1328,6 +1329,32 @@ If `secret` was set above, then these fields will also be included:
 - `key` - Certificate private key.
 - `certificate` - Certificate body.
 - `caCertificate` - Certificate chain if provided.
+
+#### Manage AWS Secrets Manager via App-Interface (`/openshift/namespace-1.yml`)
+
+[AWS Secrets Manager](https://aws.amazon.com/cn/secrets-manager/) helps you protect access to your applications, services, and IT resources. You can easily rotate, manage, and retrieve database credentials, API keys, and other secrets throughout their lifecycle.
+
+In order to import secrets stored in Vault into AWS Secrets Manager, you need to add them to the `terraformResources` field.
+
+- `provider`: must be `secrets-manager`
+- `account`: The AWS account you want to import certificates in.
+- `identifier` - name of resource to create (or update)
+- `secret`: secret store in Vault
+  - `path`: vault path
+  - `field`: `all`
+  - `version`: (optional) required for vault kv2
+- `output_resource_name`: name of Kubernetes Secret to be created.
+  - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
+  - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
+    - For example, for a resource with `identifier` "my-secret" and `provider` is set to `secrets-manager`, the created Secret will be called `my-secret-secrets-manager`.
+- `annotations`: additional annotations to add to the output resource
+
+Once the changes are merged, the secret will be imported into Secrets Manager and a Kubernetes Secret will be created in the same namespace with all relevant details.
+
+The Secret will contain the following fields:
+
+- `arn` - Amazon Resource Name (ARN) of the Secret.
+- `version_id` - The unique identifier of the version of the secret.
 
 #### Manage ElasticSearch via App-Interface (`/openshift/namespace-1.yml`)
 
@@ -1570,7 +1597,10 @@ In order to add or update a role, you need to add them to the `terraformResource
 - `provider`: must be `aws-iam-role`
 - `account`: must be one of the AWS account names we manage.
 - `identifier`: name of resource to create (or update)
-- `inline_policy`: an AWS policy to create and attach to the role.
+- `assume_role`: trusted entities can assume this role. Require one of the following.
+  - `AWS`: list ARN of iam users or accounts
+  - `Service`: list of AWS services
+- `inline_policy`: (optional) an AWS policy to create and attach to the role. (requires AWS provider plugin version 3.30.0 or above)
 - `output_resource_name`: name of Kubernetes Secret to be created.
   - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
   - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.

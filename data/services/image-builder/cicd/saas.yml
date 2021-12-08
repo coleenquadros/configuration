@@ -13,6 +13,16 @@ app:
 pipelinesProvider:
   $ref: /services/image-builder/pipelines/tekton.image-builder-pipelines.app-sre-prod-01.yml
 
+configurableResources: true
+
+deployResources:
+  requests:
+    cpu: 300m
+    memory: 600Mi
+  limits:
+    cpu: 300m
+    memory: 600Mi
+
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
@@ -23,9 +33,11 @@ managedResourceTypes:
 - Deployment
 - Service
 - ServiceAccount
+- CronJob
 
 imagePatterns:
 - quay.io/app-sre/composer
+- quay.io/app-sre/composer-maintenance
 
 authentication: {}
 
@@ -48,3 +60,4 @@ resourceTemplates:
       ref: e4d535ea5fdc730d0a8eed310e64efbd4baa4a5c
       parameters:
         PGSSLMODE: "require"
+        PGMAXCONNS: "100"

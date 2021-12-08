@@ -42,6 +42,21 @@
     <<: *gl_build_master
 
 - job-template:
+    id: 'insights-gl-build-cypress-image'
+    name: '{gl_group}-{gl_project}-gl-build-{branch}'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_rh_registry_pull_secret
+        - *quay_secret_push
+        - *quay_api_token
+    <<: *gl_build_master
+
+- job-template:
     id: 'insights-ephemeral-namespace-reconciler'
     name: 'insights-ephemeral-namespace-reconciler'
     wrappers:
@@ -222,6 +237,7 @@
     gl_group: insights-platform
     gl_project: cicd-common
     app_name: ""
+    ui_ref: ""
     component_name: ""
     image: ""
     git_commit: ""
@@ -261,6 +277,10 @@
         name: INCLUDE_UI
         default: {obj:include_ui}
         description: "(optional) if selected, UI will be deployed as well"
+    - string:
+        name: UI_REF
+        default: '{ui_ref}'
+        description: "(optional, default: prod-beta) git ref of the component's UI deployment repo to deploy front-end assets from. Only used if INCLUDE_UI is also true."
     - string:
         name: COMPONENT_NAME
         default: '{component_name}'

@@ -13,6 +13,16 @@ app:
 pipelinesProvider:
   $ref: /services/quayio/pipelines/tekton.quayio-pipelines.app-sre-prod-01.yaml
 
+configurableResources: true
+
+deployResources:
+  requests:
+    cpu: 300m
+    memory: 600Mi
+  limits:
+    cpu: 300m
+    memory: 600Mi
+
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
@@ -120,22 +130,21 @@ resourceTemplates:
   # This is the primary region
   - namespace:
       $ref: /services/quayio/namespaces/quayp05ue1.yml
-    ref: f0d6370f2f9e1f134bbbd86c8b79a9bc07a14802
+    ref: 2819ff82cdea208d7346461b601f61afd7aed83a
     parameters:
       QUAY_APP_DEPLOYMENT_REPLICAS: 33
       QUAY_APP_CONFIG_SECRET: quay-config-secret
-      QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "quay_redis_timeout_conn_2021_10_14_00" # Bounce to fix redis cluster connection
-      IMAGE_TAG: fc84008
+      QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "quay_nss_cve_update_fix_2021_12_07" # Bounce to fix NSS CVE
+
       # Blue deployment
-      IMAGE_TAG_BLUE: fc84008
+      IMAGE_TAG_BLUE: 2819ff8
       QUAY_APP_DEPLOYMENT_REPLICAS_BLUE: 0
       QUAY_APP_CONFIG_SECRET_BLUE: quay-config-secret-blue
   # This is the backup region
   - namespace:
       $ref: /services/quayio/namespaces/quayp04ue2.yml
-    ref: f0d6370f2f9e1f134bbbd86c8b79a9bc07a14802
+    ref: 2819ff82cdea208d7346461b601f61afd7aed83a
     parameters:
       QUAY_APP_DEPLOYMENT_REPLICAS: 30
       QUAY_APP_CONFIG_SECRET: quay-config-secret-readonly
-      QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "quay_redis_cluster_conn_2021_09_30_00" # Bounce to fix redis cluster connection
-      IMAGE_TAG: fc84008
+      QUAY_APP_COMPONENT_ANNOTATIONS_VALUE: "quay_nss_cve_update_fix_2021_12_07" # Bounce to fix NSS CVE
