@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 import sys
-from ruamel import yaml
-
+import yaml
 
 BANNED_STATUSES = {'besteffort'}
 
