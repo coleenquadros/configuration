@@ -19,9 +19,11 @@ def assert_valid_app(filename: str) -> None:
         if is_app(d):
             st = d['onboardingStatus']
             if st.lower() in BANNED_STATUSES:
-                raise ValueError(f"We don't do {st} apps anymore. Please read "
-                                 "https://gitlab.cee.redhat.com/app-sre/contract "
-                                 "for further instructions")
+                raise ValueError(
+                    f"{st} apps are no longer accepted. Please read "
+
+                    "https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/README.md#notes "  # noqa: E501
+                    "for more details")
             else:
                 print("App in valid status: ", st)
         else:
