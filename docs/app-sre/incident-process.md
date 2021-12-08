@@ -67,7 +67,7 @@ As soon as the **Incident Commander** is nominated, which should be 10 minutes a
 * Create a JIRA with type `Task`, with label `type/incident` in the [APPSRE board].
 * Create slack channel for the incident, referencing the JIRA and the bridge ([zti]).
 * Start the RCA, by creating a copy of the [RCA template]. Attach to the JIRA.
-* Post a message to #sd-org with: Service Name, short description of the issue, impact, JIRA and link to bridge ([zti]).
+* Post a message to #sd-incidents-announce with: Service Name, short description of the issue, impact, JIRA and link to bridge ([zti]).
 * Send email to [serviceOwners], [serviceNotifications],
   [sd-org@redhat.com](mailto:sd-org@redhat.com) and to
   [sd-notifications@redhat.com](mailto:sd-notifications@redhat.com). The email
@@ -80,7 +80,7 @@ degraded.
 
 * [Updating status.redhat.com] if relevant.
 * [Updating status.quay.io] if relevant.
-* Update #sd-org channel with current state of the incident, including impact.
+* Update #sd-incidents-announce channel with current state of the incident, including impact.
 * Send update to the email thread created in the first step.
 
 ### Resolution
@@ -88,7 +88,7 @@ degraded.
 Upon resolution, all the surfaces that were used to report the incident should be notified:
 
 * Incident slack channel.
-* #sd-org slack channel.
+* #sd-incidents-announce slack channel.
 * Email thread created in the first step.
 
 ## AppSRE Internal Escalations
