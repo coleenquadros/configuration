@@ -1,0 +1,19 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+name: 2021-12-07-hosts-not-reporting-prod
+labels: {}
+namespace:
+  $ref: /services/insights/compliance/namespaces/compliance-prod.yml
+identifier: compliance-prod
+output: stdout
+query: >-
+  SELECT "t"."ref_id", "t"."account", COUNT("t"."host_id") FROM (
+    SELECT "profiles"."ref_id" AS "ref_id", "accounts"."account_number" AS "account", "policy_hosts"."host_id" AS "host_id" FROM "profiles"
+    INNER JOIN "accounts" ON "accounts"."id" = "profiles"."account_id"
+    INNER JOIN "policy_hosts" ON "profiles"."policy_id" = "policy_hosts"."policy_id"
+    LEFT OUTER JOIN "test_results" ON "profiles"."id" = "test_results"."profile_id" AND "policy_hosts"."host_id" = "test_results"."host_id"
+    GROUP BY "profiles"."ref_id", "accounts"."account_number", "policy_hosts"."host_id"
+    HAVING COUNT("test_results"."id") = 0 ORDER BY "profiles"."ref_id"
+  ) AS t
+  GROUP BY "t"."ref_id", "t"."account"
+  ORDER BY "t"."ref_id", "t"."account";

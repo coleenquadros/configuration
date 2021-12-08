@@ -48,6 +48,13 @@ config:
             junit_results: 'test-results/strimzi-operator/failsafe-reports/*.xml'
             cleanup_script: './build_cleanup.sh'
             release: true
+        - 'managed-services-gl-build-test-branch':
+            branch: mk-release-2.8-0.26.x
+            display_name: mk-strimzi-operator 2.8 0.26.x release
+            archive_artifacts: 'test-results/**'
+            junit_results: 'test-results/strimzi-operator/failsafe-reports/*.xml'
+            cleanup_script: './cicd/build_cleanup.sh'
+            release: true
         - 'managed-services-security-scan':
             display_name: mk-strimzi-operator security-scan
             branch: mk-master
@@ -375,8 +382,7 @@ config:
             display_name: 'managed-kafka-perf-tests-1hr-integration'
             timeout: 3600
             slack_channel_notification: forum-managed-kafka
-            cron_expression: 'H 2 * * 1,4' # At 02:00 on every day-of-week from Monday through Friday
-
+            cron_expression: 'H 2 * * MON' # At 02:00 on every Monday
   - project:
       name: purge-velero-backups
       label: managed-services
@@ -398,20 +404,7 @@ config:
         - 'gl-pr-check':
             display_name: mk-e2e-test-suite pr-check
             pr_check_script_path: './pr_check.sh'
-        - 'managed-services-e2e-test-suite':
-            branch: main
-            profile: default
-            secret: stage
-            display_name: stage managed services e2e tests
-            timeout: 1440                  # 1 Day
-            cron_expression: '5 */1 * * *' # At 5 minute past every 1 hour
-        - 'managed-services-e2e-test-suite':
-            branch: main
-            profile: sandbox
-            secret: sandbox
-            display_name: sandbox managed services e2e tests
-            timeout: 30
-            cron_expression: '35 */6 * * *' # At 35 minute past every 6 hour
+
   - project:
       name: kas-upgrade-configurations
       label: kas-upgrade-configurations
@@ -623,8 +616,8 @@ config:
             cleanup_script: './cicd/cleanup.sh'
             release: true
         - 'managed-services-gl-build-test-branch':
-            display_name: mk-strimzi-canary build mk-release-0.0
-            branch: mk-release-0.0
+            display_name: mk-strimzi-canary build mk-release-0.2
+            branch: mk-release-0.2.x
             build_deploy_script_path: './cicd/build.sh'
             archive_artifacts: 'target/surefire-reports/**'
             junit_results: 'target/surefire-reports/*.xml'

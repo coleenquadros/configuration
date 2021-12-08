@@ -14,6 +14,16 @@ app:
 pipelinesProvider:
   $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
 
+configurableResources: true
+
+deployResources:
+  requests:
+    cpu: 300m
+    memory: 600Mi
+  limits:
+    cpu: 300m
+    memory: 600Mi
+
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
@@ -21,6 +31,8 @@ slack:
 
 managedResourceTypes:
 - ClowdApp
+- ConfigMap
+- CronJob
 
 imagePatterns:
 - quay.io/cloudservices
@@ -47,21 +59,26 @@ resourceTemplates:
     # populated by bonfire
     ref: internal
     parameters:
-      RBAC_AUTHENTICATION_READ_TIMEOUT: 10000
+      DB_NAME: notifications-backend
+      DB_SECRET_HOSTNAME_KEY: hostname
+      DB_SECRET_PASSWORD_KEY: password
+      DB_SECRET_USERNAME_KEY: username
+      RBAC_AUTHENTICATION_READ_TIMEOUT: 30000
 
   # stage
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-backend commit hash that determines the clowdapp-backend.yaml version
-    ref: master
+    ref: 53ead03fcbfdb914d424391e6c144c5f7c935e45
     parameters:
       # quay.io tag that will be deployed
-      IMAGE_TAG: 4ff4381
+      IMAGE_TAG: 53ead03
       CLOUDWATCH_ENABLED: true
       CPU_REQUEST: 200m
       MIN_REPLICAS: 3
       MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_INTERVAL_MS: 1200000
       MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_RECORDS: 100
+      MP_MESSAGING_INCOMING_INGRESS_THROTTLED_UNPROCESSED_RECORD_MAX_AGE_MS: 120000
       NOTIFICATIONS_LOG_LEVEL: DEBUG
       PROCESSOR_EMAIL_NO_REPLY: no-reply-stage@redhat.com
       RBAC_S2S_READ_TIMEOUT: 120000
@@ -73,19 +90,18 @@ resourceTemplates:
   # prod
   - namespace:
       $ref: /services/insights/notifications/namespaces/notifications-prod.yml
-    # app-sre will not deploy this target
-    disable: true
     # notifications-backend commit hash that determines the clowdapp-backend.yaml version
-    ref: master
+    ref: 53ead03fcbfdb914d424391e6c144c5f7c935e45
     parameters:
       # quay.io tag that will be deployed
-      IMAGE_TAG: c049875
+      IMAGE_TAG: 53ead03
       CLOUDWATCH_ENABLED: true
       CPU_LIMIT: 3
       MEMORY_LIMIT: 4Gi
       MIN_REPLICAS: 1
       MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_INTERVAL_MS: 1200000
       MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_RECORDS: 100
+      MP_MESSAGING_INCOMING_INGRESS_THROTTLED_UNPROCESSED_RECORD_MAX_AGE_MS: 120000
       NOTIFICATIONS_LOG_LEVEL: DEBUG
       PROCESSOR_EMAIL_NO_REPLY: no-reply@redhat.com
       RBAC_S2S_READ_TIMEOUT: 120000
@@ -109,10 +125,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-backend commit hash that determines the clowdapp-aggregator.yaml version
-    ref: master
+    ref: 53ead03fcbfdb914d424391e6c144c5f7c935e45
     parameters:
       # quay.io tag that will be deployed
-      IMAGE_TAG: 4ff4381
+      IMAGE_TAG: 53ead03
       CLOUDWATCH_ENABLED: true
       CPU_REQUEST: 200m
       CRONTAB_AGGREGATION_JOB: 0 * * * *
@@ -122,13 +138,11 @@ resourceTemplates:
   # prod
   - namespace:
       $ref: /services/insights/notifications/namespaces/notifications-prod.yml
-    # app-sre will not deploy this target
-    disable: true
     # notifications-backend commit hash that determines the clowdapp-aggregator.yaml version
-    ref: master
+    ref: 53ead03fcbfdb914d424391e6c144c5f7c935e45
     parameters:
       # quay.io tag that will be deployed
-      IMAGE_TAG: c049875
+      IMAGE_TAG: 53ead03
       CLOUDWATCH_ENABLED: true
       NOTIFICATIONS_LOG_LEVEL: DEBUG
       SENTRY_ENABLED: true
@@ -151,10 +165,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-gw commit hash that determines the clowdapp.yaml version
-    ref: main
+    ref: e6bafdc551fece94dcbc89c4d2c5ffc562609992
     parameters:
       # quay.io tag that will be deployed
-      IMAGE_TAG: a8f56d5
+      IMAGE_TAG: e6bafdc
       CLOUDWATCH_ENABLED: true
       CPU_REQUEST: 200m
       MIN_REPLICAS: 3
@@ -164,14 +178,12 @@ resourceTemplates:
   # prod
   - namespace:
       $ref: /services/insights/notifications/namespaces/notifications-prod.yml
-    # app-sre will not deploy this target
-    disable: true
     # notifications-gw commit hash that determines the clowdapp.yaml version
-    ref: main
+    ref: e6bafdc551fece94dcbc89c4d2c5ffc562609992
     parameters:
       # quay.io tag that will be deployed
-      IMAGE_TAG: 9108fc7
+      IMAGE_TAG: e6bafdc
       CLOUDWATCH_ENABLED: true
-      MIN_REPLICAS: 1
+      MIN_REPLICAS: 3
       NOTIFICATIONS_LOG_LEVEL: DEBUG
       SENTRY_ENABLED: true

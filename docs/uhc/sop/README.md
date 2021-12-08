@@ -224,6 +224,29 @@ One or more dependency services is experiencing issues or has been downgraded.
 
 ---
 
+## Account Manager Cron Job Error
+
+### Summary:
+
+The number of errors in the most recent cron job is too high.
+
+### Access required:
+
+- Console access to the cluster that runs account-manager (app-sre)
+- Edit access to the uhc namespaces:
+  - uhc-stage
+  - uhc-production
+
+### Relevant secrets:
+
+- secrets/uhc-acct-mngr
+
+### Steps:
+
+- Contact Service Delivery B team.
+
+---
+
 ## Escalations
 We want a link to app-interface here, but okay to just contacts here for now.
 

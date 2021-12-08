@@ -18,10 +18,10 @@ configurableResources: true
 deployResources:
   requests:
     cpu: 200m
-    memory: 500Mi
+    memory: 700Mi
   limits:
     cpu: 200m
-    memory: 500Mi
+    memory: 700Mi
 
 slack:
   workspace:
@@ -40,6 +40,7 @@ imagePatterns:
 - quay.io/app-sre/assisted-service
 - quay.io/app-sre/assisted-events-scrape
 - quay.io/app-sre/assisted-image-service
+- quay.io/app-sre/kibana-oss
 
 resourceTemplates:
 - name: assisted-events-scrape
@@ -75,6 +76,12 @@ resourceTemplates:
     promotion:
       publish:
       - assisted-image-service-integration-deploy-success-channel
+  - namespace:
+      $ref: /services/assisted-installer/namespaces/assisted-installer-stage.yml
+    ref: a6f4e9968f11ac730523a38fe17bac0661a885ed
+    promotion:
+      publish:
+      - assisted-image-service-stage-deploy-success-channel
 
 - name: assisted-service
   url: https://github.com/openshift/assisted-service
@@ -144,19 +151,18 @@ resourceTemplates:
       IMAGE_SERVICE_BASE_URL: ${OCM_BASE_URL}/api/assisted-images
   - namespace:
       $ref: /services/assisted-installer/namespaces/assisted-installer-stage.yml
-    ref: 39f91788d9ddae295d03988b4a25608e3df1c5ad
+    ref: b9ab5d3c77580ab93c29bb43cb78cc6b02d54e88
     promotion:
       publish:
       - assisted-installer-stage-deploy-success-channel
     parameters:
       INSTALL_RH_CA: true
-      INSTALLER_IMAGE: registry-proxy.engineering.redhat.com/rh-osbs/openshift4-assisted-installer-rhel8:v1.0.0-112
-      CONTROLLER_IMAGE: registry-proxy.engineering.redhat.com/rh-osbs/openshift4-assisted-installer-reporter-rhel8:v1.0.0-145
-      AGENT_DOCKER_IMAGE: registry-proxy.engineering.redhat.com/rh-osbs/openshift4-assisted-installer-agent-rhel8:v1.0.0-76
+      INSTALLER_IMAGE: registry-proxy.engineering.redhat.com/rh-osbs/openshift4-assisted-installer-rhel8:v1.0.0-116
+      CONTROLLER_IMAGE: registry-proxy.engineering.redhat.com/rh-osbs/openshift4-assisted-installer-reporter-rhel8:v1.0.0-151
+      AGENT_DOCKER_IMAGE: registry-proxy.engineering.redhat.com/rh-osbs/openshift4-assisted-installer-agent-rhel8:v1.0.0-82
       OPENSHIFT_INSTALL_RELEASE_IMAGE: ""
       PUBLIC_CONTAINER_REGISTRIES: quay.io,registry-proxy.engineering.redhat.com
-      RELEASE_TAG: v1.0.27.6
-      OPENSHIFT_VERSIONS: ""
+      RELEASE_TAG: v2.0.0
       OS_IMAGES: |
         [
           {
@@ -206,28 +212,28 @@ resourceTemplates:
           {
             "openshift_version": "4.7",
             "cpu_architecture": "x86_64",
-            "url": "quay.io/openshift-release-dev/ocp-release:4.7.36-x86_64",
-            "version": "4.7.36",
+            "url": "quay.io/openshift-release-dev/ocp-release:4.7.37-x86_64",
+            "version": "4.7.37",
             "support_level": "maintenance"
           },
           {
             "openshift_version": "4.8",
             "cpu_architecture": "x86_64",
-            "url": "quay.io/openshift-release-dev/ocp-release:4.8.17-x86_64",
-            "version": "4.8.17"
+            "url": "quay.io/openshift-release-dev/ocp-release:4.8.22-x86_64",
+            "version": "4.8.22"
           },
           {
             "openshift_version": "4.9",
             "cpu_architecture": "x86_64",
-            "url": "quay.io/openshift-release-dev/ocp-release:4.9.4-x86_64",
-            "version": "4.9.4",
+            "url": "quay.io/openshift-release-dev/ocp-release:4.9.9-x86_64",
+            "version": "4.9.9",
             "default": true
           },
           {
             "openshift_version": "4.9",
             "cpu_architecture": "arm64",
-            "url": "quay.io/openshift-release-dev/ocp-release:4.9.4-aarch64",
-            "version": "4.9.4"
+            "url": "quay.io/openshift-release-dev/ocp-release:4.9.9-aarch64",
+            "version": "4.9.9"
           }
         ]
       REGISTRY_CREDS: qa@redhat.com:redhatqa
@@ -236,6 +242,7 @@ resourceTemplates:
       ENABLE_AUTH: true
       ENABLE_AUTO_ASSIGN: false
       ENABLE_DEREGISTER_INACTIVE_GC: 168h
+      IMAGE_SERVICE_BASE_URL: ${OCM_BASE_URL}/api/assisted-images
   - namespace:
       $ref: /services/assisted-installer/namespaces/assisted-installer-production.yml
     ref: cee60b869ee7e4d7259a35bd6a2debf8093cb425

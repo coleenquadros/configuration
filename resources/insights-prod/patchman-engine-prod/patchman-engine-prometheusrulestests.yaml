@@ -1,0 +1,152 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /insights-prod/patchman-engine-prod/patchman-engine-prometheusrules.yaml
+
+evaluation_interval: 5m
+
+tests:
+
+# Tests PatchmanAlert5xx
+- interval: 1m
+  input_series:
+  - series: patchman_engine_requests_total{code="503", container="patchman-manager"}
+    values: 0 0 1 1 1 1 1
+
+  alert_rule_test:
+  # Test the no alert case
+  - eval_time: 1m
+    alertname: PatchmanAlert5xx
+    exp_alerts:
+  
+  # Test 5xx alert
+  - eval_time: 5m
+    alertname: PatchmanAlert5xx
+    exp_alerts:
+    - exp_annotations:
+        dashboard: 'https://grafana.app-sre.devshift.net/d/patch/patchman-engine'
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/patchman-engine-prod/deployments/patchman-manager'
+        message: '5xx responses (503) observed in patchman-manager (0.0033333333333333335)'
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/patchman/PatchmanAlert5xx.md'
+      exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: patch
+        container: patchman-manager
+        code: '503'
+
+# Tests PatchmanAlertKafkaLag
+- interval: 1m
+  input_series:
+  - series: kafka_consumergroup_group_topic_sum_lag{group="patchman", topic="platform.inventory.events"}
+    values: 0 0 0 100001 100001 100001 100001 100001 100001 100001
+  
+  alert_rule_test:
+  # Test the no alert case
+  - eval_time: 1m
+    alertname: PatchmanAlertKafkaLag
+    exp_alerts:
+  
+  # PatchmanAlertKafkaLag
+  - eval_time: 9m
+    alertname: PatchmanAlertKafkaLag
+    exp_alerts:
+    - exp_annotations:
+        dashboard: 'https://grafana.app-sre.devshift.net/d/patch/patchman-engine'
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/patchman-engine-prod/deployments/patchman-listener'
+        message: 'patchman-engine lag > 100000, topic: platform.inventory.events, current lag: 100001'
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/patchman/PatchmanAlertKafkaLag.md'
+      exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: patch
+        topic: platform.inventory.events
+
+# Tests PatchmanAlertExternalService
+- interval: 1m
+  input_series:
+  - series: patchman_engine_manager_dependency_call{namespace="patchman-engine-prod", name="rbac", status="500"}
+    values: 0 0 0 100 100 100 100 100 100 100
+  
+  alert_rule_test:
+  # Test the no alert case
+  - eval_time: 1m
+    alertname: PatchmanAlertExternalService
+    exp_alerts:
+  
+  # PatchmanAlertExternalService
+  - eval_time: 9m
+    alertname: PatchmanAlertExternalService
+    exp_alerts:
+    - exp_annotations:
+        dashboard: 'https://grafana.app-sre.devshift.net/d/patch/patchman-engine'
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/patchman-engine-prod/deployments/patchman-manager'
+        message: 'External service failing (rbac - 500)'
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/patchman/PatchmanAlertExternalService.md'
+      exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: patch
+        name: rbac
+        status: '500'
+
+# Tests PatchmanAlertOutOfDateSystems
+- interval: 1m
+  input_series:
+  - series: patchman_engine_vmaas_sync_systems{last_upload="last1D"}
+    values: 8 8 4 4 4 4 4
+  - series: patchman_engine_vmaas_sync_systems{last_upload="last30D"}
+    values: 8 8 8 8 8 8 8
+
+  alert_rule_test:
+  # Test the no alert case
+  - eval_time: 1m
+    alertname: PatchmanAlertOutOfDateSystems
+    exp_alerts:
+  
+  # PatchmanAlertOutOfDateSystems
+  - eval_time: 5m
+    alertname: PatchmanAlertOutOfDateSystems
+    exp_alerts:
+    - exp_annotations:
+        dashboard: 'https://grafana.app-sre.devshift.net/d/patch/patchman-engine'
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/patchman-engine-prod/deployments/patchman-listener'
+        message: 'Increasing number of out-of-date systems observed (last1D / last30D = 0.5)'
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/patchman/PatchmanAlertOutOfDateSystems.md"
+      exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: patch
+
+# Tests PatchmanAlertPodRestarting
+- interval: 1m
+  input_series:
+  - series: kube_pod_container_status_restarts_total{container="patchman-manager"}
+    values: 0 0 1 1 1 1 1 1 1
+
+  alert_rule_test:
+  # Test the no alert case
+  - eval_time: 1m
+    alertname: PatchmanAlertPodRestarting
+    exp_alerts:
+  
+  # PatchmanAlertPodRestarting
+  - eval_time: 9m
+    alertname: PatchmanAlertPodRestarting
+    exp_alerts:
+    - exp_annotations:
+        dashboard: 'https://grafana.app-sre.devshift.net/d/patch/patchman-engine'
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/patchman-engine-prod/deployments/patchman-manager'
+        message: 'Observed pod (patchman-manager) restart(s) (1)'
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/patchman/PatchmanAlertPodRestarting.md'
+      exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: patch
+        container: patchman-manager
