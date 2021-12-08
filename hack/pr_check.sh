@@ -34,7 +34,7 @@ lintyamls() {
        ) # To keep -o pipefail happy
     if [ -n "$new" ]
     then
-        #xargs -L1 ./hack/oh_noes_besteffort.py <<< "$new"
+        xargs -L1 ./hack/oh_noes_besteffort.py <<< "$new"
         xargs yamllint <<< "$new"
     fi
 
