@@ -3,6 +3,8 @@
 set -exvo pipefail
 CURRENT_DIR=$(dirname "$0")
 
+GIT_DIFF_TREE="git diff-tree --name-status -r remotes/origin/master..HEAD -- *yml *yaml"
+
 # Check EOF newline
 pip install --user binaryornot
 git ls-files | $CURRENT_DIR/eofcheck.py
@@ -26,13 +28,23 @@ fi
 lintyamls() {
     toplevel=$(git rev-parse --show-toplevel)
     # Find new or modified YAML files that are unlikely to be Jinja templates
-    what=$(git diff-tree --name-status -r remotes/origin/master..HEAD -- '*yml' '*yaml' |
-               awk -F'\t' '$1 ~ /M|A/{print $2}' | grep -v ^resources/
-           true
-        ) # This one to keep -o pipefail happy
-    if [ -n "$what" ]
+
+    new=$($GIT_DIFF_TREE | awk -F'\t' '$1 ~/A/{print $2}'|grep -v '^resources/'
+          true
+       ) # To keep -o pipefail happy
+    if [ -n "$new" ]
     then
-        echo "$what" | xargs yamllint
+        xargs -L1 ./hack/oh_noes_besteffort.py <<< "$new"
+        xargs yamllint <<< "$new"
+    fi
+
+    changed=$($GIT_DIFF_TREE|awk -F'\t' '$1 ~ /M/{print $2}' | grep -v ^resources/
+              true
+           ) # This one to keep -o pipefail happy
+
+    if [ -n "$changed" ]
+    then
+        xargs yamllint <<< "$changed"
     fi
 }
 
