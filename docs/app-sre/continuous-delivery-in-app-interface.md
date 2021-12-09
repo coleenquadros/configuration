@@ -40,8 +40,7 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
             - the manifests to be deployed are in a private github repository
         * otherwise, use ci-ext
 * `pipelinesProvider` - (v2 SaaS file) A reference to a Pipelines Provider file created in a Tekton [bootstrap](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/tekton/tekton-howto.md#bootstrap) phase.
-* `configurableResources` - If set to `true` and pipeline provider is Tekton, requests and limits can be configured for this saas files
-* `deployResources` - If `configurableResources` is set to `true`, it sets requests and limits for the `qontract-reconcile` step of the Task deploying the manifests:
+* `deployResources` - For those v2 files handled by a Tekton provider, it sets requests and limits for the `qontract-reconcile` step of the Task deploying the manifests:
    * `requests`: Task step requests
        - `cpu`: cpu requests
        - `memory`: memory requests
@@ -178,7 +177,7 @@ The `tkn` tool provides an intuitive approach for managing Tekton pipelines from
 4. Use the `tkn pipeline start` command to trigger a new pipeline run.
   * For SaaS deploy pipelines, use:
   ```
-  tkn pipeline start openshift-saas-deploy \
+  tkn pipeline start o-openshift-saas-deploy-<saas_file_name> \
     -p saas_file_name=<saas_file_name> \
     -p env_name=<environment> \
     -p tkn_cluster_console_url=<cluster console root url> \
@@ -190,7 +189,7 @@ The `tkn` tool provides an intuitive approach for managing Tekton pipelines from
 
 An example manual pipeline run:
 ```bash
-$ tkn pipeline start openshift-saas-deploy \
+$ tkn pipeline start o-openshift-saas-deploy-rhsm-api-proxy-clowder \
       -p saas_file_name=rhsm-api-proxy-clowder \
       -p env_name=insights-stage \
       -p tkn_cluster_console_url=https://console-openshift-console.apps.app-sre-prod-01.i7w5.p1.openshiftapps.co \
