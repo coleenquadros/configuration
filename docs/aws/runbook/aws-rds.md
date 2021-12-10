@@ -1,5 +1,7 @@
 # Amazon Relational Database Service (RDS)
 
+[TOC]
+
 ## Overview
 
 [Relational Database Service (RDS)](https://aws.amazon.com/rds/) is a managed database offering from AWS. A number of AppSRE customers use this service to avoid the operations associated with managing your own database (backups, patching, high availability, etc.)
