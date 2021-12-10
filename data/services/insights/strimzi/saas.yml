@@ -54,11 +54,13 @@ resourceTemplates:
     ref: master
     parameters:
       BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9093
+      KAFKA_CONNECT_REPLICAS: 0
   - namespace:
       $ref: /services/insights/strimzi/namespaces/platform-mq-prod.yml
     ref: 9fb72603799adc2ef7f114776e68a6a554a8f388
     parameters:
       BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9093
+      KAFKA_CONNECT_REPLICAS: 0
 - name: strimzi
   path: /deploys/openshift/amq-streams.yaml
   url: https://github.com/RedHatInsights/platform-mq
@@ -73,10 +75,11 @@ resourceTemplates:
       KAFKA_CPU_LIMITS: 3
       KAFKA_MEMORY_REQUESTS: 20Gi
       KAFKA_MEMORY_LIMITS: 20Gi
-      KAFKA_NUM_REPLICAS: 3
+      KAFKA_NUM_REPLICAS: 0
       KAFKA_HEAP_OPTS_XMS: 6g
       KAFKA_HEAP_OPTS_XMX: 6g
       KAFKA_VOL_SIZE: 450Gi
+      ZOOKEEPER_NUM_REPLICAS: 0
   - namespace:
       $ref: /services/insights/strimzi/namespaces/platform-mq-prod.yml
     ref: df5223eff2cc2aafdfdf6ec00b1d5b6b4184190a
@@ -85,10 +88,11 @@ resourceTemplates:
       KAFKA_CPU_LIMITS: 4
       KAFKA_MEMORY_REQUESTS: 24Gi
       KAFKA_MEMORY_LIMITS: 24Gi
-      KAFKA_NUM_REPLICAS: 3
+      KAFKA_NUM_REPLICAS: 0
       KAFKA_HEAP_OPTS_XMS: 6g
       KAFKA_HEAP_OPTS_XMX: 6g
       KAFKA_VOL_SIZE: 800Gi
+      ZOOKEEPER_NUM_REPLICAS: 0
 - name: kafka-topics
   path: /deploys/openshift/kafka-topics.yaml
   url: https://github.com/RedHatInsights/platform-mq
@@ -112,6 +116,7 @@ resourceTemplates:
     ref: master
     parameters:
       BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9093
+      REPLICAS: 0
 - name: kafka-metrics
   path: /deploys/openshift/kafka-metrics-configmap.yaml
   url: https://github.com/RedHatInsights/platform-mq
@@ -146,19 +151,20 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/strimzi/namespaces/stage-platform-mq-stage.yml
     ref: master
-- name: prometheus-kafka-consumer-group-exporter
-  hash_length: 7
-  path: /openshift.yaml
-  url: https://github.com/RedHatInsights/prometheus-kafka-consumer-group-exporter
-  targets:
-  - namespace:
-      $ref: /services/insights/strimzi/namespaces/stage-platform-mq-stage.yml
-    ref: master
-    parameters:
-      BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9092
-      AUTO_OFFSET_RESET: latest
-      GROUP_ID: lag_exporter_stage
-      IMAGE: quay.io/app-sre/prometheus-kafka-consumer-group-exporter
+#- name: prometheus-kafka-consumer-group-exporter
+#  hash_length: 7
+#  path: /openshift.yaml
+#  url: https://github.com/RedHatInsights/prometheus-kafka-consumer-group-exporter
+#  targets:
+#  - namespace:
+#      $ref: /services/insights/strimzi/namespaces/stage-platform-mq-stage.yml
+#    ref: master
+#    parameters:
+#      BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9092
+#      AUTO_OFFSET_RESET: latest
+#      GROUP_ID: lag_exporter_stage
+#      IMAGE: quay.io/app-sre/prometheus-kafka-consumer-group-exporter
+#      REPLICAS: 0
 - name: lightbend-lag-exporter
   path: /deploys/openshift/lightbend-lag-exporter.yaml
   url: https://github.com/RedHatInsights/platform-mq
@@ -168,11 +174,13 @@ resourceTemplates:
     ref: master
     parameters:
       APPSRE_ENV: stage
+      REPLICAS: 0
   - namespace:
       $ref: /services/insights/strimzi/namespaces/platform-mq-fedramp-prod.yml
     ref: 89058d7f42fd779a2c6250ba4f27db4d77eae1ca
     parameters:
       APPSRE_ENV: prod
+      REPLICAS: 0
   - namespace:
       $ref: /services/insights/strimzi/namespaces/stage-platform-mq-stage.yml
     ref: master
@@ -194,6 +202,7 @@ resourceTemplates:
       SRC_CLUSTER_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9093
       TGT_CLUSTER_BOOTSTRAP: consoledot-c-akllepav-bt-e--r-a.bf2.kafka.rhcloud.com:443
       MANAGED_KAFKA_CLIENT_ID: srvc-acct-6401d82b-9830-4ad5-a9a8-b9dc6479c4fe
+      MM2_REPLICA_COUNT: 0
 - name: kafka-superuser
   path: /deploys/superuser.yaml
   url: https://github.com/RedHatInsights/platform-mq
