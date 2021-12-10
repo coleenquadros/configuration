@@ -22,7 +22,7 @@ Some endpoints are monitored with blackbox-exporter as defined in `resources/obs
 * Streamline blackbox-exporter and Catchpoint monitoring check declaration
 
 ## Non-objectives
-* While the work proposed by this design document will lay ground work for automated update of status page components, this will not be addressed here
+While the work proposed by this design document will lay ground work for automated update of status page components, this will not be addressed specifically here.
 
 ## Proposal
 
@@ -85,7 +85,7 @@ When the `catchpoint` provider is specified, a Catchpoint check is created via t
 * `catchpoint.module` - the type of test to execute, e.g. `javascript`, `selenium`, `http_2xx`
 * `catchpoint.script` - the script to execute as a test when checkType is `javascript` or `selenium`
 
-The Catchpoint metrics, that describe the results of the monitoring checks, are forwarded to [SignalFX](https://redhat.signalfx.com) and can be accessed with an API. Direct metric access on Catchpoint is not feasible because their API has very restrictive rate limiting. In a [recent spike](https://issues.redhat.com/browse/APPSRE-4163), a Prometheus exporter has been build to make SignalFX metrics scrapable by Prometheus. While this metric data path relies on robust APIs (Catchpoint and SignalFX/Splunk are partners), its length and number of involved components bears a risk. To mitigate the risk, the data path needs to be closely monitored.
+The Catchpoint metrics, that describe the results of the monitoring checks, are forwarded to [SignalFX](https://redhat.signalfx.com) and can be accessed with an API. Direct metric access on Catchpoint is not feasible because their API has very restrictive rate limiting. In a [recent spike](https://issues.redhat.com/browse/APPSRE-4163), a Prometheus exporter has been build to make SignalFX metrics scrapable by Prometheus. While this metric data path relies on robust APIs (Catchpoint and SignalFX/Splunk are partners), its length and number of involved components bears a risk. To mitigate the risk, the data path needs to be closely monitored. The resulting metrics will be available in Prometheus and will have the same labels as defined for blackbox-exporter.
 
 Reading the [AppSRE Catchpoint Guide](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/catchpoint.md) will provide more insights about Catchpoint checks and how they are created.
 
