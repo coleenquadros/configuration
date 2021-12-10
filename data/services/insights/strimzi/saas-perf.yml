@@ -59,7 +59,7 @@ resourceTemplates:
       KAFKA_CPU_LIMITS: 3
       KAFKA_MEMORY_REQUESTS: 24Gi
       KAFKA_MEMORY_LIMITS: 24Gi
-      KAFKA_NUM_REPLICAS: 0
+      KAFKA_NUM_REPLICAS: 3
       KAFKA_HEAP_OPTS_XMS: 6g
       KAFKA_HEAP_OPTS_XMX: 6g
       KAFKA_VOL_SIZE: 450Gi
@@ -87,20 +87,19 @@ resourceTemplates:
       BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9093
       KAFKA_CONNECT_REPLICAS: 0
 
-#- name: prometheus-kafka-consumer-group-exporter
-#  hash_length: 7
-#  path: /openshift.yaml
-#  url: https://github.com/RedHatInsights/prometheus-kafka-consumer-group-exporter
-#  targets:
-#  - namespace:
-#      $ref: /services/insights/strimzi/namespaces/perf-platform-mq-perf.yml
-#    ref: master
-#    parameters:
-#      BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9092
-#      AUTO_OFFSET_RESET: latest
-#      GROUP_ID: lag_exporter_perf
-#      IMAGE: quay.io/app-sre/prometheus-kafka-consumer-group-exporter
-#      REPLICAS: 0
+- name: prometheus-kafka-consumer-group-exporter
+  hash_length: 7
+  path: /openshift.yaml
+  url: https://github.com/RedHatInsights/prometheus-kafka-consumer-group-exporter
+  targets:
+  - namespace:
+      $ref: /services/insights/strimzi/namespaces/perf-platform-mq-perf.yml
+    ref: master
+    parameters:
+      BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9092
+      AUTO_OFFSET_RESET: latest
+      GROUP_ID: lag_exporter_perf
+      IMAGE: quay.io/app-sre/prometheus-kafka-consumer-group-exporter
 
 - name: lightbend-lag-exporter
   path: /deploys/openshift/lightbend-lag-exporter.yaml
@@ -111,4 +110,3 @@ resourceTemplates:
     ref: master
     parameters:
       APPSRE_ENV: perf
-      REPLICAS: 0
