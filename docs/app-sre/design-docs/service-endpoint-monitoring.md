@@ -27,7 +27,9 @@ Some endpoints are monitored with blackbox-exporter as defined in `resources/obs
 ## Proposal
 
 ### General approach
-We will enable tenants to activate service endpoint monitoring on all endpoints defined in `/app-sre/app-1.yml#endPoints`. Those endpoint definitions are not widely used in app-interface right now but [APPSRE-3989](https://issues.redhat.com/browse/APPSRE-3989) tries to make its use mandatory for `Route` based endpoints. At the same time, providing monitoring capabilities on endpoints will make it beneficial for tenants to also declare their non-`Route` based endpoints, e.g. api.openshift/*. Also our processes and documentation will be adapted to consider endpoint monitoring,
+We will enable tenants to activate service endpoint monitoring on all endpoints defined in `/app-sre/app-1.yml#endPoints`. Those endpoint definitions are not widely used in app-interface right now but [APPSRE-3989](https://issues.redhat.com/browse/APPSRE-3989) tries to make its use mandatory for `Route` based endpoints. At the same time, providing monitoring capabilities on endpoints will make it beneficial for tenants to also declare their non-`Route` based endpoints, e.g. api.openshift/*.
+
+Endpoint monitoring must also be consideren during onboarding and SRE checkpoints. Our process definitions and checkpoint templates will be adapted to reflect this.
 
 To enable monitoring on an endpoint, the schema for `/app-sre/app-1.yml#endPoints` will be enhanced to reference a newly created `/dependencies/endpoint-monitoring-provider-1.yml` schema. Such a provider establishes the context to check the URL defined in `/app-sre/app-1.yml#endPoints[*].url`. This context defines the tool to use for monitoring and additional information required to perform the check. For common cases, `/dependencies/endpoint-monitoring-provider-1.yml` objects should be reusable between endpoints (e.g. check the HTTP return code for `/app-sre/app-1.yml#endPoints[*].url`). For special cases, dedicated provider objects need to be created and maintained by the tenants (e.g. parse the JSON in the response body).
 
