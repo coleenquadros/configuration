@@ -1,0 +1,152 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2021-12-08-explain-templates-query
+namespace:
+  $ref: /services/insights/tower-analytics/namespaces/tower-analytics-prod.yml
+identifier: tower-analytics-prod
+output: stdout
+overrides:
+  db_name: tenant_11009103
+queries:
+  - |
+    EXPLAIN ANALYZE SELECT "job".id, "job".value AS name,
+            COALESCE("host_task_skipped_count", 0) AS "host_task_skipped_count" ,
+            COALESCE("failed_host_count", 0) AS "failed_host_count" ,
+            COALESCE("total_cluster_count", 0) AS "total_cluster_count" ,
+            COALESCE("host_task_changed_count", 0) AS "host_task_changed_count" ,
+            COALESCE("total_count", 0) AS "total_count" ,
+            COALESCE("skipped_host_count", 0) AS "skipped_host_count" ,
+            CASE
+                WHEN COALESCE(host_count, 0) <= 0 THEN 0
+                ELSE ROUND(COALESCE("host_task_ok_count", 0)::decimal / host_count, 2)
+            END AS "average_host_task_ok_count_per_host",
+            COALESCE("total_org_count", 0) AS "total_org_count" ,
+            COALESCE("successful_count", 0) AS "successful_count" ,
+            COALESCE("host_task_unreachable_count", 0) AS "host_task_unreachable_count" ,
+            CASE
+                WHEN COALESCE(host_count, 0) <= 0 THEN 0
+                ELSE ROUND(COALESCE("host_task_unreachable_count", 0)::decimal / host_count, 2)
+            END AS "average_host_task_unreachable_count_per_host",
+            COALESCE("host_task_ok_count", 0) AS "host_task_ok_count" ,
+            "most_failed_tasks" ,
+            COALESCE("error_count", 0) AS "error_count" ,
+            CASE
+                WHEN COALESCE(host_count, 0) <= 0 THEN 0
+                ELSE ROUND(COALESCE("host_task_skipped_count", 0)::decimal / host_count, 2)
+            END AS "average_host_task_skipped_count_per_host",
+            CASE
+                WHEN COALESCE(host_count, 0) <= 0 THEN 0
+                ELSE ROUND(COALESCE("host_task_failed_count", 0)::decimal / host_count, 2)
+            END AS "average_host_task_failed_count_per_host",
+            COALESCE("failed_count", 0) AS "failed_count" ,
+            COALESCE("host_task_failed_count", 0) AS "host_task_failed_count" ,
+            COALESCE("elapsed", 0) AS "elapsed" ,
+            COALESCE("changed_host_count", 0) AS "changed_host_count" ,
+            COALESCE("host_task_count", 0) AS "host_task_count" ,
+            COALESCE("host_count", 0) AS "host_count" ,
+            CASE
+                WHEN COALESCE(host_count, 0) <= 0 THEN 0
+                ELSE ROUND(COALESCE("host_task_count", 0)::decimal / host_count, 2)
+            END AS "average_host_task_count_per_host",
+            COALESCE("ok_host_count", 0) AS "ok_host_count" ,
+            COALESCE("unreachable_host_count", 0) AS "unreachable_host_count"
+    FROM (
+        SELECT
+            SUM("host_task_skipped_count")::bigint AS "host_task_skipped_count" ,
+            SUM(new_count + pending_count + waiting_count + running_count) AS unfinished_count,
+            SUM("failed_host_count")::bigint AS "failed_host_count" ,
+            COUNT(DISTINCT cluster_id) AS total_cluster_count,
+            SUM("host_task_changed_count")::bigint AS "host_task_changed_count" ,
+            SUM("total_count")::bigint AS "total_count" ,
+            SUM("skipped_host_count")::bigint AS "skipped_host_count" ,
+            COUNT(DISTINCT org_id) + -- counting also NULL org for workflows, which is +1 if present
+                COALESCE(MAX(CASE WHEN org_id IS NULL THEN 1 ELSE 0 END), 0) AS total_org_count ,
+            SUM("successful_count")::bigint AS "successful_count" ,
+            SUM("host_task_unreachable_count")::bigint AS "host_task_unreachable_count" ,
+            SUM("host_task_ok_count")::bigint AS "host_task_ok_count" ,
+            SUM("error_count")::bigint AS "error_count" ,
+            SUM("failed_count")::bigint AS "failed_count" ,
+            SUM("canceled_count")::bigint AS "canceled_count" ,
+            SUM("host_task_failed_count")::bigint AS "host_task_failed_count" ,
+            ROUND(SUM("elapsed")::numeric, 1) AS "elapsed" ,
+            SUM("changed_host_count")::bigint AS "changed_host_count" ,
+            SUM("host_task_count")::bigint AS "host_task_count" ,
+            SUM("host_count")::bigint AS "host_count" ,
+            SUM("ok_host_count")::bigint AS "ok_host_count" ,
+            SUM("unreachable_host_count")::bigint AS "unreachable_host_count" ,
+               "template_id"
+        FROM "monthly_job_explorer_rollup" q
+        WHERE "q".created_date >= ('2021-07-01'::date)::date
+        AND "q".created_date <= ('2021-12-01'::date)::date
+        GROUP BY "template_id"
+    ) x
+    LEFT JOIN "job" ON "job"."id" = x."template_id"
+        LEFT JOIN LATERAL (
+            -- For each job we want to fetch a list of max 2 most failed tasks
+            SELECT JSON_AGG(json_build_object(
+                       'task_name', task.value,
+                       'module_name', task_action.value,
+                       'passed_host_count', u.host_task_passed_count,
+                       'failed_host_count', u.host_task_failed_count,
+                       'unreachable_host_count', u.host_task_unreachable_count,
+                       'unfinished_count', u.unfinished_count,
+                       'error_count', u.error_count,
+                       'canceled_count', u.canceled_count,
+                       'successful_count', u.successful_count,
+                       'failed_count', u.failed_count,
+                       'total_unfinished_count', x.unfinished_count,
+                       'total_canceled_count', x.canceled_count,
+                       'total_error_count', x.error_count,
+                       'total_successful_count', x.successful_count,
+                       'total_failed_count', x.failed_count,
+                       'total_host_count', x.host_count,
+                       'total_failed_host_count', x.failed_host_count,
+                       'total_unreachable_host_count', x.unreachable_host_count
+                       ) ORDER BY u.failed_count DESC,
+                                  (u.host_task_failed_count + u.host_task_unreachable_count) DESC
+                   ) AS most_failed_tasks
+            FROM (
+                SELECT "template_id",
+                       task_id,
+                       task_action_id,
+                       SUM(error_count) AS error_count,
+                       SUM(canceled_count) AS canceled_count,
+                       -- TODO: failed jobs will go over 100 percent if we'll have more than 1 fatal failure on host
+                       -- that can happen when failing e.g. in always block after failing in rescue block.
+                       -- Maybe we'll still present only the last failure? But then the task failure count
+                       -- will not match Tower.
+                       SUM(failed_count) AS failed_count,
+                       SUM(successful_count) AS successful_count,
+                       SUM(total_count -
+                           successful_count -
+                           failed_count -
+                           canceled_count -
+                           error_count) AS unfinished_count,
+                       -- mark passed count as everything except fatal failures and ignoring retries
+                       SUM(host_task_ok_count +
+                           host_task_skipped_count +
+                           host_task_changed_count +
+                           host_task_ignored_failed_count +
+                           host_task_ignored_unreachable_count +
+                           host_task_rescued_failed_count +
+                           host_task_rescued_unreachable_count) AS host_task_passed_count,
+                       SUM(host_task_failed_count) AS host_task_failed_count,
+                       SUM(host_task_unreachable_count) AS host_task_unreachable_count
+                FROM "monthly_event_explorer_rollup" most_failed_tasks_table
+        WHERE "most_failed_tasks_table".created_date >= ('2021-07-01'::date)::date
+        AND "most_failed_tasks_table".created_date <= ('2021-12-01'::date)::date
+                    AND "template_id" = x."template_id"
+                    -- AND status='failed'
+                    -- AND (host_task_failed_count > 0 OR host_task_unreachable_count > 0)
+                GROUP BY "template_id", task_id, task_action_id
+                HAVING (SUM(host_task_failed_count) + SUM(host_task_unreachable_count)) > 0
+                ORDER BY SUM(failed_count) DESC,
+                         (SUM(host_task_failed_count) + SUM(host_task_unreachable_count)) DESC
+                LIMIT 2
+            ) u
+            JOIN task ON task.id = u.task_id
+            JOIN task_action ON task_action.id = u.task_action_id
+        ) most_failed_tasks ON true
+    ORDER BY "total_count" DESC, TRUE DESC
+    LIMIT 6 OFFSET 0;
