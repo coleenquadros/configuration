@@ -1,0 +1,45 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: app-interface
+
+name: app-interface
+
+namespaces:
+- $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
+
+slos:
+- name: cloudigrade api success
+  SLIType: availability
+  SLISpecification: Percentage of cloudigrade API HTTP requests that are served successfully (status code != 5xx)
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/console.redhat.com/app-sops/cloudigrade/cloudigrade-alert-5xx.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(
+      api_3scale_gateway_api_status{exported_service="cloudigrade", status!="5xx"}[{{window}}]
+    )) / sum(rate(
+      api_3scale_gateway_api_status{exported_service="cloudigrade"}[{{window}}]
+    ))
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /insights-prod/cloudigrade-prod/cloudigrade.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/O6v4rMpizda/cloudigrade
+
+- name: cloudigrade api latency
+  SLIType: latency
+  SLISpecification: Percentage of cloudigrade API HTTP responses served under 4 seconds
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/console.redhat.com/app-sops/cloudigrade/cloudigrade-alert-slow.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(
+      api_3scale_gateway_api_time_bucket{exported_service="cloudigrade", le="4000.0"}[{{window}}]
+    )) / sum(rate(
+      api_3scale_gateway_api_time_bucket{exported_service="cloudigrade", le="+Inf"}[{{window}}]
+    ))
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /insights-prod/cloudigrade-prod/cloudigrade.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/O6v4rMpizda/cloudigrade
