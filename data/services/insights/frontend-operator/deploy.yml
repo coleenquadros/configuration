@@ -1,0 +1,57 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: frontend-operator
+  platform: insights
+
+name: frontend-operator
+description: Deploy frontend-operator resources
+
+app:
+  $ref: /services/insights/frontend-operator/app.yml
+
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
+
+deployResources:
+  requests:
+    cpu: "1"
+    memory: 2000Mi
+  limits:
+    cpu: "1"
+    memory: 2000Mi
+
+clusterAdmin: true
+compare: false
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-consoledot-devprod
+
+managedResourceTypes:
+- CustomResourceDefinition
+- Deployment
+- Service
+- ClusterRole
+- Role
+- ConfigMap
+- ServiceAccount
+- RoleBinding
+- ClusterRoleBinding
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+    version: 3
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+
+imagePatterns:
+- quay.io/cloudservices/frontend-operator
+
+resourceTemplates: []
+
