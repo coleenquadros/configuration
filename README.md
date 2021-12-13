@@ -2003,10 +2003,11 @@ To reset a user's password in an AWS account, submit a MR with a new entry to th
   requestId: <some_unique_value_without_spaces>
 ```
 
-The user's new password should appear GPG encrypted within 30 minutes in app-interface-output: [terraform-users-credentials](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/terraform-users-credentials.md)
+The user's new password should appear GPG encrypted within 30 minutes in app-interface-output: [terraform-users-credentials](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/terraform-users-credentials.md) and also via email.
 
 To decrypt password: `echo <password> | base64 -d | gpg -d - && echo` (you will be asked to provide your passphrase to unlock the secret)
 
+This operation will also reset any existing virtual MFA devices.
 
 Behind the scenes:
 
