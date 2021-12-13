@@ -43,7 +43,6 @@ endPoints:
   monitoring:  <-- new
     provider:
       $ref: reference to a /dependencies/endpoint-monitoring-provider-1.yml
-    url: optional - allows to overwrite the endpoint URL
 ```
 
 ### Providers
@@ -126,7 +125,7 @@ blackboxExporter:
 
 ### HTTP response code from multiple hosts with dedicated URL
 
-In this example the URL to checks is overwritten. This makes sense when there is a more specific status endpoint available for a service. Please note that the provider is the same is in the last example.
+After we activated monitoring for https://yak-shaving.redhat.com in the last example, we decided to implement a dedicated monitoring endpoint. Therefore we add the /status URL as additional endpoint and move the monitoring to it.
 
 ```yaml
 ---
@@ -136,10 +135,12 @@ endPoints:
 - name: yak-shaving-production-endpoint
   description: this is where Yaks get shaved no matter what
   url: https://yak-shaving.redhat.com
+- name: yak-shaving-production-status-endpoint
+  description: monitoring endpoint for yak-shaving service
+  url: https://yak-shaving.redhat.com/status
   monitoring:
     provider:
       $ref: /dependencies/monitoring/blackbox-exporter-status-code.yml
-    url: https://yak-shaving.redhat.com/status
 ```
 
 ### JavaScript check
@@ -150,13 +151,13 @@ In this example a JavaScript based check is used to extract the health informati
 $schema: /app-sre/app-1.yml
 ...
 endPoints:
-- name: yak-shaving-production-endpoint
-  description: this is where Yaks get shaved no matter what
-  url: https://yak-shaving.redhat.com
+...
+- name: yak-shaving-production-status-endpoint
+  description: monitoring endpoint for yak-shaving service
+  url: https://yak-shaving.redhat.com/status
   monitoring:
     provider:
       $ref: /services/yak-shaver/monitoring/yak-mood-monitoring.yml
-    url: https://yak-shaving.redhat.com/status
 ```
 
 ```yaml
