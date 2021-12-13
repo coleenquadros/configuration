@@ -41,7 +41,8 @@ endPoints:
 - name:
   url:
   monitoring:  <-- new
-  - $ref: reference to a /dependencies/endpoint-monitoring-provider-1.yml
+    provider:
+      $ref: reference to a /dependencies/endpoint-monitoring-provider-1.yml
     url: optional - allows to overwrite the endpoint URL
 ```
 
@@ -105,7 +106,8 @@ endPoints:
   description: this is where Yaks get shaved no matter what
   url: https://yak-shaving.redhat.com
   monitoring:
-  - $ref: /dependencies/monitoring/blackbox-exporter-status-code.yml
+    provider:
+      $ref: /dependencies/monitoring/blackbox-exporter-status-code.yml
 ```
 
 In this case, the monitoring provider needs no additional context besides the provided URL, which makes the provider declaration reusable. Since this scenario is quite simple, blackbox-exporter will suffice as a provider and the corresponding provider definition will look like this.
@@ -135,7 +137,8 @@ endPoints:
   description: this is where Yaks get shaved no matter what
   url: https://yak-shaving.redhat.com
   monitoring:
-  - $ref: /dependencies/monitoring/blackbox-exporter-status-code.yml
+    provider:
+      $ref: /dependencies/monitoring/blackbox-exporter-status-code.yml
     url: https://yak-shaving.redhat.com/status
 ```
 
@@ -151,7 +154,8 @@ endPoints:
   description: this is where Yaks get shaved no matter what
   url: https://yak-shaving.redhat.com
   monitoring:
-  - $ref: /services/yak-shaver/monitoring/yak-mood-monitoring.yml
+    provider:
+      $ref: /services/yak-shaver/monitoring/yak-mood-monitoring.yml
     url: https://yak-shaving.redhat.com/status
 ```
 
