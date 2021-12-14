@@ -2394,9 +2394,9 @@ dependencies:
 ```
 
 This will result in a Secret being created in the consuming namespace. The Secret will be called `kafka` and it will contain the following keys:
-- `bootstrapServerHost` - Bootstrap server hostname (host:port)
-- `clientID` - Client ID to use for authentication
-- `clientSecret` - Client Secret to use for authentication
+- `bootstrap_server_host` - Bootstrap server hostname (host:port)
+- `client_id` - Client ID to use for authentication
+- `client_secret` - Client Secret to use for authentication
 
 ### Write and run Prometheus rules tests
 
