@@ -147,8 +147,6 @@ Perform the following actions in a separate MR from the bootstrap MR:
     ```yaml
     pipelinesProvider:
       $ref: /services/<service_name>/pipelines/<service_name>-pipelines.appsrep05ue1.yaml
-
-    configurableResources: true
     ```
 
     * for more information of SaaS files please follow [Continuous Delivery in App-interface](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-delivery-in-app-interface.md).

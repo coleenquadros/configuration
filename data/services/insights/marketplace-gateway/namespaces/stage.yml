@@ -1,0 +1,47 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: insights
+
+name: marketplace-gateway-stage
+description: Namespace where marketplace gateway resources are deployed
+
+cluster:
+  $ref: /openshift/crcs02ue1/cluster.yml
+
+app:
+  $ref: /services/insights/marketplace-gateway/app.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs02ue1.yml
+- $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+
+managedRoles: true
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/insights-stage/marketplace-gateway-stage/rhm-fallback-key
+  version: 1
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-stage
+  identifier: marketplace-gateway-stage
+  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch

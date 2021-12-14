@@ -14,8 +14,6 @@ app:
 pipelinesProvider:
   $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
 
-configurableResources: true
-
 deployResources:
   requests:
     cpu: 300m
@@ -114,13 +112,26 @@ resourceTemplates:
       WORKER_REFRESH_MIN_REPLICAS: 1
       # worker-summary
       WORKER_SUMMARY_MIN_REPLICAS: 1
+      # Change these settings when deploying migrations to Ephemeral
+      # Migrations Image Tag
+      # DBM_IMAGE_TAG: x
+      # Migrations Invocation
+      # DBM_INVOCATION: "00"
+      # Migration directive is optional and should be in the form of:
+      # <app>[:<migration>][,<app>[:<migration>]...]
+      # Ex: "reporting:0200,api:0050"
+      # Ex: "reporting:0200"
+      # Ex: "reporting"
+      # Ex: ""
+      # _MIGRATION_DIRECTIVE: ""
+
 
   # Staging:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: ce5299216601fd22a9a7f03d34252a4fd4b1da5f
+    ref: ab31e9cb9a6b9c1895add3bfa8607aa813b82618
     parameters:
-      IMAGE_TAG: ce52992
+      IMAGE_TAG: ab31e9c
       APP_DOMAIN: apps.crcs02ue1.urby.p1.openshiftapps.com
       S3_BUCKET_NAME: hccm-stage-s3
       KOKU_SENTRY_ENV: stage
@@ -213,6 +224,25 @@ resourceTemplates:
       WORKER_SUMMARY_CPU_LIMIT: 200m
       WORKER_SUMMARY_MEMORY_REQUEST: 200Mi
       WORKER_SUMMARY_MEMORY_LIMIT: 400Mi
+      # worker-hcs 
+      WORKER_HCS_MIN_REPLICAS: 1
+      WORKER_HCS_CPU_REQUEST: 100m
+      WORKER_HCS_CPU_LIMIT: 200m
+      WORKER_HCS_MEMORY_REQUEST: 256Mi
+      WORKER_HCS_MEMORY_LIMIT: 512Mi
+      # Change these settings when deploying migrations to Staging
+      # Migrations Image Tag
+      DBM_IMAGE_TAG: 03c202e
+      # Migrations Invocation
+      # Change this value to re-deploy with same image tag
+      DBM_INVOCATION: "00"
+      # Migration directive is optional and should be in the form of:
+      # <app>[:<migration>][,<app>[:<migration>]...]
+      # Ex: "reporting:0200,api:0050"
+      # Ex: "reporting:0200"
+      # Ex: "reporting"
+      # Ex: ""
+      _MIGRATION_DIRECTIVE: ""
 
   # Production:
   - namespace:
@@ -310,11 +340,23 @@ resourceTemplates:
       WORKER_REFRESH_MEMORY_REQUEST: 200Mi
       WORKER_REFRESH_MEMORY_LIMIT: 400Mi
       # worker-summary
-      WORKER_SUMMARY_MIN_REPLICAS: 3
+      WORKER_SUMMARY_MIN_REPLICAS: 5
       WORKER_SUMMARY_CPU_REQUEST: 100m
       WORKER_SUMMARY_CPU_LIMIT: 200m
       WORKER_SUMMARY_MEMORY_REQUEST: 512Mi
       WORKER_SUMMARY_MEMORY_LIMIT: 1Gi
+      # Change these settings when deploying migrations to Production
+      # Migrations Image Tag
+      # DBM_IMAGE_TAG: x
+      # Migrations Invocation
+      # DBM_INVOCATION: "00"
+      # Migration directive is optional and should be in the form of:
+      # <app>[:<migration>][,<app>[:<migration>]...]
+      # Ex: "reporting:0200,api:0050"
+      # Ex: "reporting:0200"
+      # Ex: "reporting"
+      # Ex: ""
+      # _MIGRATION_DIRECTIVE: ""
 
 - name: hive-metastore
   path: /deploy/clowdapp.yaml
@@ -325,13 +367,13 @@ resourceTemplates:
     disable: true # tells app-sre to not actually run the deploy job for this target
     ref: internal # altered by bonfire
     parameters:
-      IMAGE_TAG: 2.3.3-004
+      IMAGE_TAG: 3.1.2-005
       S3_BUCKET_NAME: hccm-eph-s3
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: d801f7848e6b97a49be2cc0f3f83fe4458572e08
+    ref: f4ee0ba734092212e3cd0d479a48c2e6ef9f484d
     parameters:
-      IMAGE_TAG: 2.3.3-004
+      IMAGE_TAG: 3.1.2-005
       S3_BUCKET_NAME: hccm-stage-s3
       CPU_REQUEST: 200m
       CPU_LIMIT: 500m
@@ -339,9 +381,9 @@ resourceTemplates:
       MEMORY_LIMIT: 2Gi
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: d801f7848e6b97a49be2cc0f3f83fe4458572e08
+    ref: f4ee0ba734092212e3cd0d479a48c2e6ef9f484d
     parameters:
-      IMAGE_TAG: 2.3.3-004
+      IMAGE_TAG: 3.1.2-005
       MIN_REPLICAS: 1
       S3_BUCKET_NAME: hccm-prod-s3
       CPU_REQUEST: 200m

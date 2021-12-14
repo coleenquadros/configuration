@@ -16,7 +16,13 @@ app:
 pipelinesProvider:
   $ref: /services/insights/strimzi/pipelines/strimzi-pipelines.app-sre-prod-01.yml
 
-configurableResources: true
+deployResources:
+  requests:
+    cpu: 200m
+    memory: 2000Mi
+  limits:
+    cpu: 200m
+    memory: 2000Mi
 
 slack:
   workspace:
@@ -58,7 +64,7 @@ resourceTemplates:
       BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9093
   - namespace:
       $ref: /services/insights/strimzi/namespaces/platform-mq-prod.yml
-    ref: 9fb72603799adc2ef7f114776e68a6a554a8f388
+    ref: 657be64b633a027f9b5d19753277fa2044f1f34b
     parameters:
       BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9093
 - name: strimzi
@@ -81,7 +87,7 @@ resourceTemplates:
       KAFKA_VOL_SIZE: 450Gi
   - namespace:
       $ref: /services/insights/strimzi/namespaces/platform-mq-prod.yml
-    ref: df5223eff2cc2aafdfdf6ec00b1d5b6b4184190a
+    ref: 657be64b633a027f9b5d19753277fa2044f1f34b
     parameters:
       KAFKA_CPU_REQUESTS: 2
       KAFKA_CPU_LIMITS: 4
@@ -123,7 +129,7 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/insights/strimzi/namespaces/platform-mq-prod.yml
-    ref: 22ab8cdeaa1b5275731da5512784bf8f43f5939b
+    ref: 657be64b633a027f9b5d19753277fa2044f1f34b
 - name: kafka-connector-warehouse-sink-prod
   path: /deploys/openshift/kafka-connectors.yaml
   url: https://github.com/RedHatInsights/platform-mq
@@ -155,7 +161,8 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/strimzi/namespaces/stage-platform-mq-stage.yml
-    ref: master
+    # New images are broken because Dockerfile tries to pull from docker.io
+    ref: 6a7a8abca447a3576e6da47007a21ad776a1f6e1
     parameters:
       BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9092
       AUTO_OFFSET_RESET: latest

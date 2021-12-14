@@ -1,0 +1,88 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: uhc-acct-mngr-consumer-{{{environment}}}
+spec:
+  groups:
+  - name: uhc-acct-mngr-consumer-{{{environment}}}
+    rules:
+    - alert: UHC account manager consumers DOWN - {{{environment}}}
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/KD5D6LKnz/ocm-consumers"
+        message: "No targets found for any UHC Account Manager Consumer in namespace uhc-{{{environment}}}. Consumers are down."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop/ocm-consumer.md#consumers-down"
+      expr: |
+        absent(up{job="uhc-acct-mngr-consumer-metrics",namespace="uhc-{{{environment}}}"} == 1)
+      for: 5m
+      labels:
+        service: uhc-acct-mngr-consumer
+        severity: high
+        namespace: uhc-{{{environment}}}
+    - alert: UHC account manager consumer Banned Users High - {{{environment}}}
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/KD5D6LKnz/ocm-consumers"
+        message: "UHC Account Manager Consumer has banned {{ $value }} users in 24 hours."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop/ocm-consumer.md#banned-users-high"
+      expr: |
+        sum(floor(increase(consumer_umb_users_banned{namespace="uhc-{{{environment}}}",consumer="user-consumer"}[24h]))) > 25
+      for: 10m
+      labels:
+        service: uhc-acct-mngr-consumer
+        severity: medium
+        namespace: uhc-{{{environment}}}
+    - alert: UHC account manager consumer Unbanned Users High - {{{environment}}}
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/KD5D6LKnz/ocm-consumers"
+        message: "UHC Account Manager Consumer has unbanned {{ $value }} users in 24 hours."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop/ocm-consumer.md#unbanned-users-high"
+      expr: |
+        sum(floor(increase(consumer_umb_users_unbanned{namespace="uhc-{{{environment}}}",consumer="user-consumer"}[24h]))) > 25
+      for: 10m
+      labels:
+        service: uhc-acct-mngr-consumer
+        severity: medium
+        namespace: uhc-{{{environment}}}
+    - alert: UHC account manager consumer Message Age High - {{{environment}}}
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/KD5D6LKnz/ocm-consumers"
+        message: "UHC Account Manager Consumer {{ $labels.consumer }} message age is {{ $value }} seconds."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop/ocm-consumer.md#message-age-high"
+      expr: |
+        sum by(consumer) (consumer_umb_message_age{namespace="uhc-{{{environment}}}"}) > 60
+      for: 5m
+      labels:
+        service: uhc-acct-mngr-consumer
+        severity: medium
+        namespace: uhc-{{{environment}}}
+    - alert: UHC account manager consumer Error Rate High - {{{environment}}}
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/KD5D6LKnz/ocm-consumers"
+        message: "UHC Account Manager Consumer {{ $labels.consumer }} error rate is high: {{ $value | humanize }}%."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop/ocm-consumer.md#error-rate-high"
+      expr: |
+        sum by(consumer) (rate(consumer_umb_total_message_processing_error_count{namespace="uhc-{{{environment}}}"}[1h]))
+        /
+        sum by(consumer) (rate(consumer_umb_messages_received_count{namespace="uhc-{{{environment}}}"}[1h])) * 100 > 5
+      for: 5m
+      labels:
+        service: uhc-acct-mngr-consumer
+        severity: high
+        namespace: uhc-{{{environment}}}
+    - alert: UHC account manager consumer Connection Retry Rate High - {{{environment}}}
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/KD5D6LKnz/ocm-consumers"
+        message: "UHC Account Manager Consumer {{ $labels.consumer }} retry count is high. {{ $value }} retries."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop/ocm-consumer.md#connection-retry-rate-high"
+      expr: |
+        sum by(consumer) (increase(consumer_umb_total_connection_retry_count{namespace="uhc-{{{environment}}}"}[5m]))
+        > 5
+      for: 5m
+      labels:
+        service: uhc-acct-mngr-consumer
+        severity: high
+        namespace: uhc-{{{environment}}}
