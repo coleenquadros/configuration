@@ -112,6 +112,8 @@ resourceTemplates:
       WORKER_REFRESH_MIN_REPLICAS: 1
       # worker-summary
       WORKER_SUMMARY_MIN_REPLICAS: 1
+      # worker-hcs
+      WORKER_HCS_MIN_REPLICAS: 1
       # Change these settings when deploying migrations to Ephemeral
       # Migrations Image Tag
       # DBM_IMAGE_TAG: x
@@ -131,6 +133,20 @@ resourceTemplates:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
     ref: 8f7f7eb289a45a1407f531609de72615c6bfc833
     parameters:
+      ############# MIGRATIONS #############
+      # Change these settings when deploying migrations to Production
+      # Migrations Image Tag
+      DBM_IMAGE_TAG: 03c202e
+      # Migrations Invocation
+      DBM_INVOCATION: "00"
+      # Migration directive is optional and should be in the form of:
+      # <app>[:<migration>][,<app>[:<migration>]...]
+      # Ex: "reporting:0200,api:0050"
+      # Ex: "reporting:0200"
+      # Ex: "reporting"
+      # Ex: ""
+      _MIGRATION_DIRECTIVE: ""
+      ######################################
       IMAGE_TAG: 8f7f7eb
       APP_DOMAIN: apps.crcs02ue1.urby.p1.openshiftapps.com
       S3_BUCKET_NAME: hccm-stage-s3
@@ -230,19 +246,7 @@ resourceTemplates:
       WORKER_HCS_CPU_LIMIT: 200m
       WORKER_HCS_MEMORY_REQUEST: 256Mi
       WORKER_HCS_MEMORY_LIMIT: 512Mi
-      # Change these settings when deploying migrations to Staging
-      # Migrations Image Tag
-      DBM_IMAGE_TAG: 03c202e
-      # Migrations Invocation
-      # Change this value to re-deploy with same image tag
-      DBM_INVOCATION: "00"
-      # Migration directive is optional and should be in the form of:
-      # <app>[:<migration>][,<app>[:<migration>]...]
-      # Ex: "reporting:0200,api:0050"
-      # Ex: "reporting:0200"
-      # Ex: "reporting"
-      # Ex: ""
-      _MIGRATION_DIRECTIVE: ""
+
 
   # Production:
   - namespace:
@@ -376,13 +380,13 @@ resourceTemplates:
     disable: true # tells app-sre to not actually run the deploy job for this target
     ref: internal # altered by bonfire
     parameters:
-      IMAGE_TAG: 3.1.2-005
+      IMAGE_TAG: 3.1.2-metastore-001
       S3_BUCKET_NAME: hccm-eph-s3
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: f4ee0ba734092212e3cd0d479a48c2e6ef9f484d
+    ref: c48bf4b62c8e01e6bdb9729ffbba02de2d9b4872
     parameters:
-      IMAGE_TAG: 3.1.2-005
+      IMAGE_TAG: 3.1.2-metastore-001
       S3_BUCKET_NAME: hccm-stage-s3
       CPU_REQUEST: 200m
       CPU_LIMIT: 500m
