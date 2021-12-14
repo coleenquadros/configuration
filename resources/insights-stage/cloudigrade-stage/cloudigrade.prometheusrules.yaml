@@ -104,3 +104,17 @@ spec:
         link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/cloudigrade-stage/deployments/cloudigrade-worker"
         message: "cloudigrade: no worker pods have been ready for the last 5 minutes in stage environment."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/cloudigrade/cloudigrade-alert-no-worker.md"
+
+    - alert: cloudigrade-stage-frequent-pod-restarting
+      expr: sum(increase(kube_pod_container_status_restarts_total{namespace="cloudigrade-stage", container=~".*igrade-.*"}[10m])) > 10
+      for: 10m
+      labels:
+        severity: critical
+        service: insights
+        env: stage
+        app_team: cloudigrade
+      annotations:
+        dashboard: "https://grafana.stage.devshift.net/d/O6v4rMpizda/cloudigrade?orgId=1&var-datasource=crcs02ue1-prometheus&var-namespace=cloudigrade-stage"
+        link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/cloudigrade-stage/deployments"
+        message: "cloudigrade: pod restart has occurred more than 10x/10 minutes for the last 10 minutes in stage environment."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/cloudigrade/cloudigrade-alert-pod-restarting.md"
