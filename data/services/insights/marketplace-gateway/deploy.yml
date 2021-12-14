@@ -1,0 +1,53 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: marketplace-gateway
+  platform: insights
+
+name: marketplace-gateway
+description: Marketplace Gateway facilitates communication with Red Hat Marketplace
+
+app:
+  $ref: /services/insights/marketplace-gateway/app.yml
+
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+managedResourceTypes:
+- ClowdApp
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+    version: 3
+
+resourceTemplates:
+- name: marketplace-gateway
+  path: /deploy/clowdapp.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/marketplace-gateway
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+    parameters:
+      REPLICAS_API: 1
+  - namespace:
+      $ref: /services/insights/marketplace-gateway/namespaces/stage.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: insights-platform-marketplace-gateway-gl-build-main
+    parameters:
+      RHM_HOST: "https://sandbox.marketplace.redhat.com"

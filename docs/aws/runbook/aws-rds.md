@@ -1,12 +1,31 @@
 # Amazon Relational Database Service (RDS)
 
+[TOC]
+
 ## Overview
 
 [Relational Database Service (RDS)](https://aws.amazon.com/rds/) is a managed database offering from AWS. A number of AppSRE customers use this service to avoid the operations associated with managing your own database (backups, patching, high availability, etc.)
 
 ## SOPs
 
+### Database Engine Upgrades
+
+These SOPs cover database major and minor engine upgrades:
+
+* [PostgreSQL major version upgrade](/docs/dba/postgresql-rds-instance-major-version-upgrade.md)
+* [PostgreSQL minor version upgrade](/docs/aws/sop/postgresql-rds-instance-minor-version-upgrade.md)
+
+### OS Upgrade
+
+See [this doc](/docs/aws/sop/rds-os-upgrade.md) for applying mandatory OS upgrades in RDS, typically associated with security updates. 
+
 ## Troubleshooting
+
+### General Resources
+
+* [Connecting to database](/docs/dba/connect-to-postgres-mysql-database.md)
+* [PostgreSQL handy queries](/docs/dba/Postgres-handy-queries.md)
+* [MySQL handy queries](/docs/dba/MySQL-handy-queries.md)
 
 ## Known issues
 

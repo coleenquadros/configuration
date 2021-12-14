@@ -11,6 +11,35 @@ spec:
   groups:
   - name: automation-analytics-prod
     rules:
+    # TODO: Not compatible with migrations (initContainer is like down)
+#    - alert: AutomationAnalyticsPodDown
+#      expr: |
+#        up{namespace="tower-analytics-prod"} == 0
+#      for: 3m
+#      labels:
+#        severity: high
+#        service: insights
+#        env: prod
+#        app_team: automation-analytics
+#      annotations:
+#        dashboard: "https://grafana.app-sre.devshift.net/d/81Du_aIHdf/automation-analytics?viewPanel=1026&orgId=1&refresh=15m&var-Datasource=crcp01ue1-prometheus&var-DatasourceRDS=app-sre-prod-01-prometheus&var-namespace=tower-analytics-prod&var-granularity=daily&var-granularity=monthly&var-granularity=yearly&var-realtime_rollup_series=ta_rollup_processor_rollup_event_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_host_event_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_host_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_failed_steps_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_jobs_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_workflow_hierarchy_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_workflows_time_bucket&var-granularity_rollups=job_explorer&var-granularity_rollups=event_explorer&var-granularity_rollups=host_explorer&var-processor_tables=analytics_bundle&var-processor_tables=events_table&var-processor_tables=unified_jobs"
+#        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/tower-analytics-prod/deployments"
+#        message: "Automation Analytics Alert. At least one automation analytics pod has been down for two minutes."
+#        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/tower-analytics/AutomationAnalyticsPodDown.rst"
+
+    - alert: AutomationAnalyticsDataExporterServiceAbsent
+      expr: absent(up{service=~"automation-analytics-data-exporter.*", namespace="tower-analytics-prod"})
+      for: 2m
+      labels:
+        severity: medium
+        service: insights
+        env: prod
+        app_team: automation-analytics
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/81Du_aIHdf/automation-analytics?viewPanel=1026&orgId=1&refresh=15m&var-Datasource=crcp01ue1-prometheus&var-DatasourceRDS=app-sre-prod-01-prometheus&var-namespace=tower-analytics-prod&var-granularity=daily&var-granularity=monthly&var-granularity=yearly&var-realtime_rollup_series=ta_rollup_processor_rollup_event_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_host_event_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_host_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_failed_steps_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_jobs_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_workflow_hierarchy_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_workflows_time_bucket&var-granularity_rollups=job_explorer&var-granularity_rollups=event_explorer&var-granularity_rollups=host_explorer&var-processor_tables=analytics_bundle&var-processor_tables=events_table&var-processor_tables=unified_jobs"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/tower-analytics-prod/deployments"
+        message: "Automation Analytics Alert. All Data Exporter pods have been down for two minutes."
+
     - alert: AutomationAnalyticsProcessorServiceAbsent
       expr: absent(up{service=~"automation-analytics-processor.*", namespace="tower-analytics-prod"})
       for: 2m
@@ -20,9 +49,10 @@ spec:
         env: prod
         app_team: automation-analytics
       annotations:
-        dashboard: "https://GRAFANA_URL"
+        dashboard: "https://grafana.app-sre.devshift.net/d/81Du_aIHdf/automation-analytics?viewPanel=1026&orgId=1&refresh=15m&var-Datasource=crcp01ue1-prometheus&var-DatasourceRDS=app-sre-prod-01-prometheus&var-namespace=tower-analytics-prod&var-granularity=daily&var-granularity=monthly&var-granularity=yearly&var-realtime_rollup_series=ta_rollup_processor_rollup_event_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_host_event_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_host_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_failed_steps_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_jobs_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_workflow_hierarchy_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_workflows_time_bucket&var-granularity_rollups=job_explorer&var-granularity_rollups=event_explorer&var-granularity_rollups=host_explorer&var-processor_tables=analytics_bundle&var-processor_tables=events_table&var-processor_tables=unified_jobs"
         link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/tower-analytics-prod/deployments"
         message: "Automation Analytics Alert. All Processor pods have been down for two minutes."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/tower-analytics/AutomationAnalyticsProcessorServiceAbsent.rst"
 
     - alert: AutomationAnalyticsFastAPIServiceAbsent
       expr: absent(up{service=~"automation-analytics-api-fastapi.*", namespace="tower-analytics-prod"})
@@ -33,10 +63,11 @@ spec:
         env: prod
         app_team: automation-analytics
       annotations:
-        dashboard: "https://GRAFANA_URL"
+        dashboard: "https://grafana.app-sre.devshift.net/d/81Du_aIHdf/automation-analytics?viewPanel=1026&orgId=1&refresh=15m&var-Datasource=crcp01ue1-prometheus&var-DatasourceRDS=app-sre-prod-01-prometheus&var-namespace=tower-analytics-prod&var-granularity=daily&var-granularity=monthly&var-granularity=yearly&var-realtime_rollup_series=ta_rollup_processor_rollup_event_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_host_event_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_host_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_failed_steps_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_jobs_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_workflow_hierarchy_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_workflows_time_bucket&var-granularity_rollups=job_explorer&var-granularity_rollups=event_explorer&var-granularity_rollups=host_explorer&var-processor_tables=analytics_bundle&var-processor_tables=events_table&var-processor_tables=unified_jobs"
         link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/tower-analytics-prod/deployments"
         message: "Automation Analytics Alert. All FastAPI pods have been down for two minutes."
-    
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/tower-analytics/AutomationAnalyticsFastAPIServiceAbsent.rst"
+
     - alert: AutomationAnalyticsRollupServiceAbsent
       expr: absent(up{service=~"automation-analytics-rollups.*", namespace="tower-analytics-prod"})
       for: 2m
@@ -46,9 +77,10 @@ spec:
         env: prod
         app_team: automation-analytics
       annotations:
-        dashboard: "https://GRAFANA_URL"
+        dashboard: "https://grafana.app-sre.devshift.net/d/81Du_aIHdf/automation-analytics?viewPanel=1026&orgId=1&refresh=15m&var-Datasource=crcp01ue1-prometheus&var-DatasourceRDS=app-sre-prod-01-prometheus&var-namespace=tower-analytics-prod&var-granularity=daily&var-granularity=monthly&var-granularity=yearly&var-realtime_rollup_series=ta_rollup_processor_rollup_event_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_host_event_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_host_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_failed_steps_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_jobs_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_workflow_hierarchy_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_workflows_time_bucket&var-granularity_rollups=job_explorer&var-granularity_rollups=event_explorer&var-granularity_rollups=host_explorer&var-processor_tables=analytics_bundle&var-processor_tables=events_table&var-processor_tables=unified_jobs"
         link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/tower-analytics-prod/deployments"
         message: "Automation Analytics Alert. All Rollup pods have been down for two minutes."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/tower-analytics/AutomationAnalyticsRollupServiceAbsent.rst"
 
     - alert: AutomationAnalyticsApiResponse5xx
       expr: sum(rate(api_3scale_gateway_api_status{exported_service="tower-analytics",status="5xx"}[5m])) > 0
@@ -59,7 +91,7 @@ spec:
         env: prod
         app_team: automation-analytics
       annotations:
-        dashboard: "https://GRAFANA_URL"
+        dashboard: "https://grafana.app-sre.devshift.net/d/81Du_aIHdf/automation-analytics?orgId=1&refresh=15m&var-Datasource=crcp01ue1-prometheus&var-DatasourceRDS=app-sre-prod-01-prometheus&var-namespace=tower-analytics-prod&var-granularity=daily&var-granularity=monthly&var-granularity=yearly&var-realtime_rollup_series=ta_rollup_processor_rollup_event_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_host_event_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_host_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_failed_steps_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_jobs_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_workflow_hierarchy_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_workflows_time_bucket&var-granularity_rollups=job_explorer&var-granularity_rollups=event_explorer&var-granularity_rollups=host_explorer&var-processor_tables=analytics_bundle&var-processor_tables=events_table&var-processor_tables=unified_jobs&from=now-24h&to=now"
         link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/tower-analytics-prod/deployments"
         message: "Automation Analytics Alert. FastAPI 5xx responses observed in the last 5 minutes."
 
@@ -72,7 +104,7 @@ spec:
         env: prod
         app_team: automation-analytics
       annotations:
-        dashboard: "https://GRAFANA_URL"
+        dashboard: "https://grafana.app-sre.devshift.net/d/81Du_aIHdf/automation-analytics?orgId=1&refresh=15m&var-Datasource=crcp01ue1-prometheus&var-DatasourceRDS=app-sre-prod-01-prometheus&var-namespace=tower-analytics-prod&var-granularity=daily&var-granularity=monthly&var-granularity=yearly&var-realtime_rollup_series=ta_rollup_processor_rollup_event_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_host_event_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_host_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_failed_steps_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_jobs_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_workflow_hierarchy_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_workflows_time_bucket&var-granularity_rollups=job_explorer&var-granularity_rollups=event_explorer&var-granularity_rollups=host_explorer&var-processor_tables=analytics_bundle&var-processor_tables=events_table&var-processor_tables=unified_jobs&from=now-24h&to=now"
         link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/tower-analytics-prod/deployments"
         message: "Automation Analytics Alert. Rollups processing errors observed in the last 5 minutes."
 
@@ -85,7 +117,7 @@ spec:
         env: prod
         app_team: automation-analytics
       annotations:
-        dashboard: "https://GRAFANA_URL"
+        dashboard: "https://grafana.app-sre.devshift.net/d/81Du_aIHdf/automation-analytics?orgId=1&refresh=15m&var-Datasource=crcp01ue1-prometheus&var-DatasourceRDS=app-sre-prod-01-prometheus&var-namespace=tower-analytics-prod&var-granularity=daily&var-granularity=monthly&var-granularity=yearly&var-realtime_rollup_series=ta_rollup_processor_rollup_event_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_host_event_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_host_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_failed_steps_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_jobs_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_workflow_hierarchy_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_workflows_time_bucket&var-granularity_rollups=job_explorer&var-granularity_rollups=event_explorer&var-granularity_rollups=host_explorer&var-processor_tables=analytics_bundle&var-processor_tables=events_table&var-processor_tables=unified_jobs&from=now-24h&to=now"
         link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/tower-analytics-prod/deployments"
         message: "Automation Analytics Alert. More than 10 Processor errors observed in the last hour."
 
@@ -98,7 +130,7 @@ spec:
         env: prod
         app_team: automation-analytics
       annotations:
-        dashboard: "https://GRAFANA_URL"
+        dashboard: "https://grafana.app-sre.devshift.net/d/81Du_aIHdf/automation-analytics?orgId=1&refresh=15m&var-Datasource=crcp01ue1-prometheus&var-DatasourceRDS=app-sre-prod-01-prometheus&var-namespace=tower-analytics-prod&var-granularity=daily&var-granularity=monthly&var-granularity=yearly&var-realtime_rollup_series=ta_rollup_processor_rollup_event_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_host_event_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_host_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_failed_steps_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_jobs_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_workflow_hierarchy_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_workflows_time_bucket&var-granularity_rollups=job_explorer&var-granularity_rollups=event_explorer&var-granularity_rollups=host_explorer&var-processor_tables=analytics_bundle&var-processor_tables=events_table&var-processor_tables=unified_jobs&from=now-24h&to=now"
         link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/tower-analytics-prod/deployments"
         message: "Automation Analytics Alert. Processor has too low processing rate, less than 1 payload was processed for more than past 6 hours"
 
@@ -111,6 +143,6 @@ spec:
         env: prod
         app_team: automation-analytics
       annotations:
-        dashboard: "https://GRAFANA_URL"
+        dashboard: "https://grafana.app-sre.devshift.net/d/81Du_aIHdf/automation-analytics?orgId=1&refresh=15m&var-Datasource=crcp01ue1-prometheus&var-DatasourceRDS=app-sre-prod-01-prometheus&var-namespace=tower-analytics-prod&var-granularity=daily&var-granularity=monthly&var-granularity=yearly&var-realtime_rollup_series=ta_rollup_processor_rollup_event_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_host_event_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_host_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_failed_steps_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_jobs_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_workflow_hierarchy_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_workflows_time_bucket&var-granularity_rollups=job_explorer&var-granularity_rollups=event_explorer&var-granularity_rollups=host_explorer&var-processor_tables=analytics_bundle&var-processor_tables=events_table&var-processor_tables=unified_jobs&from=now-24h&to=now"
         link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/tower-analytics-prod/deployments"
         message: "Automation Analytics Alert. Ingress is refusing payloads from Tower, less than 1 was accepted with code 202 for more than past 6 hours"

@@ -14,7 +14,13 @@ app:
 pipelinesProvider:
   $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
 
-configurableResources: true
+deployResources:
+  requests:
+    cpu: 200m
+    memory: 2000Mi
+  limits:
+    cpu: 200m
+    memory: 2000Mi
 
 slack:
   workspace:
@@ -79,6 +85,7 @@ resourceTemplates:
     ref: master
     parameters:
       BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9093
+      KAFKA_CONNECT_REPLICAS: 0
 
 - name: prometheus-kafka-consumer-group-exporter
   hash_length: 7
@@ -87,7 +94,8 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/strimzi/namespaces/perf-platform-mq-perf.yml
-    ref: master
+    # New images are broken because Dockerfile tries to pull from docker.io
+    ref: 6a7a8abca447a3576e6da47007a21ad776a1f6e1
     parameters:
       BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9092
       AUTO_OFFSET_RESET: latest
