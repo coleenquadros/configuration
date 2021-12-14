@@ -70,9 +70,9 @@ The following additional fields are available in the schema, when `provider` is 
 
 This provider deploys `ServiceMonitor` objects to the specified namespace, which will scrape blackbox-exporter with the provided `module` and the `url` from the endpoint definition. The resulting metrics are available in the Prometheus instance of the cluster referenced by the namespace and will have the following labels:
 
-* `app` - the name of the enclosing `/app-sre/app-1.yml`
-* `instance` -  the url that was probed - `#endPoints.monitoring.url` or `#endPoints.url`
-* `endpoint` - the endpoint url the probed url belongs to - `#endPoints.url`
+* `app` - the name of the enclosing - `/app-sre/app-1.yml#name`
+* `name` - the name of the endpoint - `/app-sre/app-1.yml#endPoints.name`
+* `instance` -  the url that was probed - `/app-sre/app-1.yml#endPoints.url`
 
 #### Catchpoint provider
 [Catchpoint](https://portal.catchpoint.com) is a monitoring tool that should be used as endpoint checks when rich vantage point checks are required, e.g.
