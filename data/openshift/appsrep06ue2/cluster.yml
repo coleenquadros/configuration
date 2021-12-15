@@ -1,0 +1,80 @@
+---
+$schema: /openshift/cluster-1.yml
+
+labels:
+  service: app-sre
+
+name: appsrep06ue2
+description: app-sre OSDv4 production cluster
+consoleUrl: ''
+kibanaUrl: ''
+prometheusUrl: ''
+alertmanagerUrl: ''
+serverUrl: ''
+elbFQDN: ''
+
+auth:
+  service: github-org-team
+  org: app-sre
+  team: appsrep06ue2-cluster
+
+# observabilityNamespace:
+#   $ref: /services/observability/namespaces/openshift-customer-monitoring.appsrep06ue2.yml
+
+ocm:
+  $ref: /dependencies/ocm/production.yml
+
+managedGroups:
+- dedicated-admins
+# - dedicated-readers
+
+# managedClusterRoles: true
+
+spec:
+  id: ''
+  external_id: ''
+  provider: aws
+  region: us-east-2
+  channel: stable
+  version: ''
+  initial_version: 4.9.10
+  multi_az: true
+  nodes: 9
+  instance_type: m5.2xlarge
+  storage: 600
+  load_balancers: 4
+  private: false
+  provision_shard_id: ''
+  disable_user_workload_monitoring: true
+
+upgradePolicy:
+  workloads:
+  - ocm
+  schedule: 0 14 * * 1-5
+  conditions:
+    soakDays: 18
+
+network:
+  vpc: 10.121.0.0/16
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
+
+automationToken:
+  path: app-sre/creds/kube-configs/appsrep06ue2
+  field: token
+
+internal: false
+
+addons:
+- $ref: /dependencies/ocm/addons/cluster-logging-operator.yml
+
+awsInfrastructureAccess:
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: network-mgmt
+- awsGroup:
+    $ref: /aws/app-sre/groups/Log-consumers.yml
+  accessLevel: read-only
