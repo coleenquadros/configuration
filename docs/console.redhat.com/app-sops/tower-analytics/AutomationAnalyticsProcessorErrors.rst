@@ -1,4 +1,4 @@
-AutomationAnalyticsFastAPIServiceAbsent
+AutomationAnalyticsProcessorServiceAbsent
 ===================
 
 Severity: High
@@ -12,14 +12,13 @@ Incident Response Plan
 Impact
 ------
 
-- Ansible Analytics Fast API ensures endpoints for UI in c.rh.c. in Ansible Automation Platform,
-i.e. Job Explorer or Savings Planner
+- Customer data sent from Ansible Towers through Ingress service (S3 bucket) won't be processed.
+- Data are available for 2 days
 
 Summary
 -------
 
-- This alert fires when the Automation Analytics FastAPI pod(s) are down (prometheus cannot scrape metrics).
-- Usually caused by pods going offline or a prometheus problem.
+- This alert fires when the Automation Analytics Processor pod(s) are unable to process payloads (Tower data)
 
 Access required
 ---------------
@@ -41,25 +40,31 @@ Steps
 Additional steps (developers)
 -----------------------------
 - Check logs in `Kibana Error Dashboard`_
+- There are several kind of issues:
+- - Bad tarballs - archive is corrupted - can be ignored (shoudn't invoke this alert)
+- - There is a problem with connection to S3 (Ingress bucket)
+- - Collected data are not compatible with processor.
+- - - In that case, check the version of Tower(Collector), it's either bug or new version
 - Look to the Prometheus (Button 'Query')
-- Check `Grafana`_ (Button 'Dashboard') - mainly Status, API and RDS Database panels
+- Check `Grafana`_ (Button 'Dashboard') - mainly Status, Processor* and RDS Database panels
 - Compare
 - - deployed commit SHA (Button 'Link' - detail of deployment/pod)
 - - expected commit SHA (`app-interface`_)
 - - if there is fix in GitLab, but can't be auto-promoted (`AA Backend's Gitlab`_)
-- In case there has to be implementation change (or any other non-immediate change), create a ticket (Bug) in `Jira`_
+- In case there has to be implementation change (or any other non-immediate change), create a ticket (Bug/Task) in `Jira`_
 
 Escalations
 -----------
 
 - Ping more team members if available
+- In case of S3 problems, ping `@app-sre-ic` team in `CoreOS Slack sd-app-sre`_
 - Ping the engineering team that owns the APP (`CoreOS Slack Forum-consoledot`_)
 - - call `@aa-api-team`
-
 
 .. _AA Backend's Gitlab: https://gitlab.cee.redhat.com/automation-analytics/automation-analytics-backend/-/commits/main.. _Incident Response Doc: https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE
 .. _app-interface: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/insights/tower-analytics/deploy-clowder.yml
 .. _CoreOS Slack Forum-consoledot: https://app.slack.com/client/T027F3GAJ/C022YV4E0NA
+.. _CoreOS Slack sd-app-sre: https://app.slack.com/client/T027F3GAJ/CCRND57FW
 .. _Grafana: https://grafana.app-sre.devshift.net/d/81Du_aIHdf/automation-analytics?orgId=1&refresh=15m&var-Datasource=crcp01ue1-prometheus&var-DatasourceRDS=app-sre-prod-01-prometheus&var-namespace=tower-analytics-prod&var-granularity=daily&var-granularity=monthly&var-granularity=yearly&var-realtime_rollup_series=ta_rollup_processor_rollup_event_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_host_event_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_host_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_failed_steps_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_jobs_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_workflow_hierarchy_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_workflows_time_bucket&var-granularity_rollups=job_explorer&var-granularity_rollups=event_explorer&var-granularity_rollups=host_explorer&var-processor_tables=analytics_bundle&var-processor_tables=events_table&var-processor_tables=unified_jobs
 .. _Incident Response Doc: https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE
 .. _Jira: https://issues.redhat.com/browse/AA

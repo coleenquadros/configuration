@@ -27,6 +27,7 @@ Steps
 
 - This issue is related to Ingress service, indirectly to Automation Analytics
 - Cannot be solved by Automation Analytics
+- Check the Alert's link button in Slack (targeting Kibana logs) for errors
 
 Escalations
 -----------
