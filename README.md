@@ -91,6 +91,7 @@ this repository.
       - [Manage Key Management Service Keys via App-Interface (`/openshift/namespace-1.yml`)](#manage-key-management-service-keys-via-app-interface-openshiftnamespace-1yml)
       - [Manage Kinesis Streams via App-Interface (`/openshift/namespace-1.yml`)](#manage-kinesis-streams-via-app-interface-openshiftnamespace-1yml)
       - [Manage Application Load Balancers via App-Interface (`/openshift/cluster-1.yml`)](#manage-application-load-balancers-via-app-interface-openshiftcluster-1yml)
+      - [Enable deletion of AWS resources in deletion protected accounts](#enable-deletion-of-aws-resources-in-deletion-protected-accounts)
     - [Manage VPC peerings via App-Interface (`/openshift/cluster-1.yml`)](#manage-vpc-peerings-via-app-interface-openshiftcluster-1yml)
     - [Manage Slack User groups via App-Interface](#manage-slack-user-groups-via-app-interface)
     - [Manage Jenkins jobs configurations using jenkins-jobs](#manage-jenkins-jobs-configurations-using-jenkins-jobs)
@@ -1837,6 +1838,22 @@ The Secret will contain the following fields:
 #### Manage Application Load Balancers via App-Interface (`/openshift/cluster-1.yml`)
 
 Please follow the dev-guidelines: https://service.pages.redhat.com/dev-guidelines/docs/appsre/advanced/manage-application-load-balancer
+
+#### Enable deletion of AWS resources in deletion protected accounts
+
+Most AWS accounts managed via app-interface are protected against resource deletions (`enableDeletion: true` or undefined, defaults to true).
+
+In case a resource needs to be deleted from such an account, you can enable the deletion by adding a new entry to a `deletionApprovals` section in an AWS account file. For example:
+  ```yaml
+  deletionApprovals:
+  - type: aws_db_instance
+    name: db-name-to-delete
+    expiration: '2021-12-31' # YYYY-MM-dd
+  ```
+
+Such an entry will enable this specific resource to be deleted even if the account does not have deletion enabled.
+
+When submitting a MR to delete a resource which results in a build failure, look at the logs and find lines such as `['delete', '<account_name>', '<resource_type>', '<resource_name>']`. For each line (will also include an error such as `'delete' action is not enabled.`) - add an entry to the `deletionApprovals` list.
 
 
 ### Manage VPC peerings via App-Interface (`/openshift/cluster-1.yml`)
