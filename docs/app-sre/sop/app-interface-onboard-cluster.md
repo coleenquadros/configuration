@@ -130,7 +130,7 @@ This step should be performed in a single merge request.
       [here](https://docs.google.com/document/d/1OIe4JGbScz57dIGZztThLTvji056OBCfaHSvGAo7Hao)
     * Note: The `id`, `consoleUrl`, `serverUrl`, `external_id` and `elbFQDN` will be added automatically at a later stage. Don't worry about them.
 
-1. Grant `dedicated-admin` and `dedicated-reader` access to App-SRE team
+1. Grant `dedicated-admin` access to App-SRE team
 
     ```yaml
     # /data/teams/app-sre/roles/app-sre.yml
@@ -140,16 +140,6 @@ This step should be performed in a single merge request.
         - cluster:
             $ref: /openshift/<cluster_name>/cluster.yml
         group: dedicated-admins
-    ```
-
-    ```yaml
-    # /data/teams/app-sre/roles/app-sre-dedicated-reader.yml
-    ...
-    access:
-        ...
-        - cluster:
-            $ref: /openshift/<cluster_name>/cluster.yml
-        group: dedicated-readers
     ```
 
 1. Send the MR, wait for the check to pass and merge. The ocm-clusters integration will create your cluster. You can view the progress in OCM. Proceed with the following steps after the cluster's installation is complete.
