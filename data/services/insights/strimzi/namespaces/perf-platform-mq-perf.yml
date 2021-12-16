@@ -5,16 +5,10 @@ labels:
   service: strimzi
 
 name: platform-mq-perf
-description: Insights platform-mq-perf on the Stage cluster under e2e-deploy/ocdeployer management
+description: Insights platform-mq-perf
 
 cluster:
   $ref: /openshift/insights/cluster-insights-perf.yml
-
-# limitRanges:
-#   $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
-
-# quota:
-#   $ref: /services/insights/strimzi/strimzi-quota.yml
 
 app:
   $ref: /services/insights/strimzi/app.yml
@@ -23,13 +17,24 @@ environment:
   $ref: /products/insights/environments/perf.yml
 
 networkPoliciesAllow: []
-# - $ref: /services/insights/engine/namespaces/perf-engine-perf.yml
-# - $ref: /services/insights/host-inventory/namespaces/perf-host-inventory-perf.yml
-# - $ref: /services/insights/patchman/namespaces/perf-patchman-engine-perf.yml
-# - $ref: /services/insights/remediations/namespaces/perf-remediations-perf.yml
-# - $ref: /services/insights/vulnerability/namespaces/perf-vulnerability-engine-perf.yml
-# - $ref: /services/insights/vulnerability/namespaces/perf-vmaas-perf.yml
-# - $ref: /services/insights/xjoin/namespaces/perf-xjoin-perf.yml
+#- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
+#- $ref: /services/insights/advisor/namespaces/advisor-prod.yml
+#- $ref: /services/insights/catalog/namespaces/catalog-prod.yml
+#- $ref: /services/insights/compliance/namespaces/compliance-prod.yml
+#- $ref: /services/insights/engine/namespaces/engine-prod.yml
+#- $ref: /services/insights/host-inventory/namespaces/prod-host-inventory-prod.yml
+#- $ref: /services/insights/ingress/namespaces/ingress-prod.yml
+#- $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
+#- $ref: /services/insights/policies/namespaces/policies-prod.yml
+#- $ref: /services/insights/remediations/namespaces/remediations-prod.yml
+## - $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
+## - $ref: /services/insights/tower-analytics/namespaces/stage-tower-analytics-stage.yml
+## - $ref: /services/insights/vulnerability/namespaces/stage-vulnerability-engine-stage.yml
+#- $ref: /services/insights/vulnerability/namespaces/vmaas-prod.yml
+#- $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
+## - $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
+#- $ref: /services/insights/playbook-dispatcher/namespaces/prod.yml
+#- $ref: /services/insights/turnpike/namespaces/prod-turnpike-prod.yml
 
 managedRoles: true
 
@@ -41,6 +46,11 @@ terraformResources:
 #   identifier: platform-mq-perf
 #   defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
 #   output_resource_name: cloudwatch
+- provider: s3
+  account: insights-perf
+  identifier: perf-mq-egress-data-sink
+  defaults: /terraform/resources/insights/perf/s3/s3-gdpr-14.yml
+  output_resource_name: egress-data-sink-s3
 - provider: s3
   account: insights-perf
   identifier: insights-client-metrics-perf
@@ -59,46 +69,37 @@ terraformResources:
   user_policy:
     {
       "Version": "2012-10-17",
-      "Statement": [{
-        "Effect": "Allow",
-        "Action": [
-          "s3:ListBucket",
-        ],
-        "Resource": [
-          "arn:aws:s3:::insights-client-metrics-perf",
-          "arn:aws:s3:::insights-warehouse-perf",
-        ]
-      },
-                    {
-                      "Effect": "Allow",
-                      "Action": [
-                        "s3:*Object"
-                      ],
-                      "Resource": [
-                        "arn:aws:s3:::insights-client-metrics-perf/*",
-                        "arn:aws:s3:::insights-warehouse-perf/*",
-                      ]
-                    }]
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:ListBucket",
+          ],
+          "Resource": [
+            "arn:aws:s3:::insights-client-metrics-perf",
+            "arn:aws:s3:::insights-warehouse-perf",
+          ]
+        },
+        {
+          "Effect": "Allow",
+          "Action": [
+            "s3:*Object"
+          ],
+          "Resource": [
+            "arn:aws:s3:::insights-client-metrics-perf/*",
+            "arn:aws:s3:::insights-warehouse-perf/*",
+          ]
+        }
+      ]
     }
   output_resource_name: strimzi-bucket-read-write
 
 managedResourceTypes:
-- ServiceAccount
 - Role
 - RoleBinding
+- Secret
 
 openshiftResources:
-- provider: vault-secret
-  path: insights/secrets/global/rh-registry-pull
-  version: 2
-  type: kubernetes.io/dockerconfigjson
-- provider: vault-secret
-  path: insights/quay/quay.io
-  version: 3
-  type: kubernetes.io/dockerconfigjson
-  name: quay-cloudservices-pull
-- provider: resource
-  path: /insights-perf/shared/private-image-puller.serviceaccount.yaml
 - provider: resource
   path: /insights-stage/strimzi/xjoin-jenkins.role.yaml
 - provider: resource
@@ -110,3 +111,9 @@ openshiftResources:
 # - provider: resource-template
 #   type: extracurlyjinja2
 #   path: /insights-stage/platform-mq-stage/kafka-cyndi.secret.yaml
+# - provider: vault-secret
+#   path: insights/secrets/insights-perf/strimzi-perf/mk-oauth-secret
+#   version: 1
+
+#kafkaCluster:
+#  $ref: /kafka/crcp01ue1k/cluster.yml
