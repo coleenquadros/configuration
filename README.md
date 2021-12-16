@@ -90,8 +90,8 @@ this repository.
       - [Manage CloudWatch Log Groups via App-Interface (`/openshift/namespace-1.yml`)](#manage-cloudwatch-log-groups-via-app-interface-openshiftnamespace-1yml)
       - [Manage Key Management Service Keys via App-Interface (`/openshift/namespace-1.yml`)](#manage-key-management-service-keys-via-app-interface-openshiftnamespace-1yml)
       - [Manage Kinesis Streams via App-Interface (`/openshift/namespace-1.yml`)](#manage-kinesis-streams-via-app-interface-openshiftnamespace-1yml)
-      - [Manage VPC peerings via App-Interface (`/openshift/cluster-1.yml`)](#manage-vpc-peerings-via-app-interface-openshiftcluster-1yml)
       - [Manage Application Load Balancers via App-Interface (`/openshift/cluster-1.yml`)](#manage-application-load-balancers-via-app-interface-openshiftcluster-1yml)
+    - [Manage VPC peerings via App-Interface (`/openshift/cluster-1.yml`)](#manage-vpc-peerings-via-app-interface-openshiftcluster-1yml)
     - [Manage Slack User groups via App-Interface](#manage-slack-user-groups-via-app-interface)
     - [Manage Jenkins jobs configurations using jenkins-jobs](#manage-jenkins-jobs-configurations-using-jenkins-jobs)
     - [Delete AWS IAM access keys via App-Interface](#delete-aws-iam-access-keys-via-app-interface)
@@ -1834,7 +1834,12 @@ The Secret will contain the following fields:
 - `aws_access_key_id` - The access key ID.
 - `aws_secret_access_key` - The secret access key.
 
-#### Manage VPC peerings via App-Interface (`/openshift/cluster-1.yml`)
+#### Manage Application Load Balancers via App-Interface (`/openshift/cluster-1.yml`)
+
+Please follow the dev-guidelines: https://service.pages.redhat.com/dev-guidelines/docs/appsre/advanced/manage-application-load-balancer
+
+
+### Manage VPC peerings via App-Interface (`/openshift/cluster-1.yml`)
 
 VPC peerings can be entirely self-services via App-Interface.
 
@@ -1878,10 +1883,6 @@ peering:
     cluster:
       $ref: /openshift/hive-stage-01/cluster.yml
 ```
-
-#### Manage Application Load Balancers via App-Interface (`/openshift/cluster-1.yml`)
-
-Please follow the dev-guidelines: https://service.pages.redhat.com/dev-guidelines/docs/appsre/advanced/manage-application-load-balancer
 
 
 ### Manage Slack User groups via App-Interface
