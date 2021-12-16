@@ -19,9 +19,3 @@ managedRoles: true
 
 sharedResources:
 - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
-
-openshiftServiceAccountTokens:
-# referencing self to put SA tokens in Vault
-- namespace:
-    $ref: /openshift/{cluster}/namespaces/app-sre-observability-per-cluster.yml
-  serviceAccountName: osde2e
