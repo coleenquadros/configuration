@@ -39,6 +39,19 @@ spec:
         env: prod
         app_team: patch
 
+    - alert: PatchmanAlertEvalDelay
+      expr: sum(rate(patchman_engine_evaluator_upload_evaluation_delay_seconds_sum{job="patchman-evaluator-upload"}[5m])) > 3600
+      annotations:
+        dashboard: 'https://grafana.app-sre.devshift.net/d/patch/patchman-engine'
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/patchman-engine-prod/deployments/patchman-evaluator-upload'
+        message: 'Upload evaluation delay increased ({{ $value }}s)'
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/patchman/PatchmanAlertEvalDelay.md'
+      labels:
+        severity: high
+        service: insights
+        env: prod
+        app_team: patch
+
     - alert: PatchmanAlertKafkaLag
       expr: sum(kafka_consumergroup_group_topic_sum_lag{group="patchman", topic=~"platform.inventory.events|patchman.evaluator.upload"}) by (topic) > 100000
       annotations:
