@@ -1,0 +1,68 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: devfile-registry
+
+name: redhat-devfile-registry
+
+namespaces:
+- $ref: /services/devfile-registry/namespaces/devfile-registry-redhat-production.yml
+
+slos:
+- name: devfile registry index latency
+  SLIType: latency
+  SLISpecification: 90% of the succesful requests' latency must be under 0.5 seconds
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/devfile-registry/slos/README.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(index_http_request_duration_seconds_bucket{namespace="devfile-registry-redhat-production", le="0.5"}[{{ window }}])) / sum(rate(index_http_request_duration_seconds_count{namespace="devfile-registry-redhat-production"}[{{ window }}])) < 0.90
+  SLOTarget: 0.90
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/devfile-registry-redhat-production.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/7s_TsTsGx/red-hat-devfile-registry-service?orgId=1
+
+- name: devfile registry oci server latency
+  SLIType: latency
+  SLISpecification: 90% of the succesful requests' latency must be under 2 seconds
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/devfile-registry/slos/README.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(registry_http_request_duration_seconds_bucket{namespace="devfile-registry-redhat-production", le="2"}[{{ window }}])) / sum(rate(registry_http_request_duration_seconds_count{namespace="devfile-registry-redhat-production"}[{{ window }}])) < 0.90
+
+  SLOTarget: 0.90
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/devfile-registry-redhat-production.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/7s_TsTsGx/red-hat-devfile-registry-service?orgId=1
+
+- name: devfile registry index availability
+  SLIType: availability
+  SLISpecification: 90% of the requests should succeed
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/devfile-registry/slos/README.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(haproxy_backend_http_responses_total{route="index-server",namespace="devfile-registry-redhat-production",code=~"5.."}[{{ window }}]))
+    /
+    sum(rate(haproxy_backend_http_responses_total{route="index-server",namespace="devfile-registry-redhat-production"}[{{ window }}]))
+  SLOTarget: 0.90
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/devfile-registry-redhat-production.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/7s_TsTsGx/red-hat-devfile-registry-service?orgId=1
+
+- name: devfile registry oci server availability
+  SLIType: availability
+  SLISpecification: 90% of the requests should succeed
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/devfile-registry/slos/README.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(haproxy_backend_http_responses_total{route="oci-server",namespace="devfile-registry-redhat-production",code=~"5.."}[{{ window }}]))
+    /
+    sum(rate(haproxy_backend_http_responses_total{route="oci-server",namespace="devfile-registry-redhat-production"}[{{ window }}]))
+  SLOTarget: 0.90
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/devfile-registry-redhat-production.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/7s_TsTsGx/red-hat-devfile-registry-service?orgId=1
