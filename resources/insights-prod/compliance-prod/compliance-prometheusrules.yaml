@@ -34,3 +34,42 @@ spec:
         service: insights
         env: prod
         app_team: compliance
+
+    - alert: ComplianceAlertNoTraffic
+      expr: sum(rate(compliance_http_requests_total[5m])) by (container) == 0
+      annotations:
+        dashboard: 'https://grafana.app-sre.devshift.net/d/compliance/compliance'
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/compliance-prod/deployments'
+        message: 'No traffic observed in {{ $labels.container }}'
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/compliance/ComplianceAlertNoTraffic.md'
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: compliance
+
+    - alert: ComplianceAlert5xx
+      expr: sum(rate(compliance_http_requests_total{status=~"5.*"}[5m])) by (container, status) > 0
+      annotations:
+        dashboard: 'https://grafana.app-sre.devshift.net/d/compliance/compliance'
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/compliance-prod/deployments'
+        message: "5xx responses ({{ $labels.status }}) observed in {{ $labels.container }} ({{ $value }})"
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/compliance/ComplianceAlert5xx.md'
+      labels:
+        severity: high
+        service: insights
+        env: prod
+        app_team: compliance
+
+    - alert: ComplianceAlertKafkaLag
+      expr: sum(kafka_consumergroup_group_topic_sum_lag{group="complianceinventory-events-consumer", topic=~"platform.inventory.events"}) by (topic) > 100000
+      annotations:
+        dashboard: 'https://grafana.app-sre.devshift.net/d/compliance/compliance'
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/compliance-prod/deployments'
+        message: 'compliance lag > 100000, topic: {{ $labels.topic }}, current lag: {{ $value  }}'
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/compliance/ComplianceAlertKafkaLag.md'
+      labels:
+        severity: high
+        service: insights
+        env: prod
+        app_team: compliance
