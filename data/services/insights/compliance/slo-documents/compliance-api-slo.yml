@@ -1,0 +1,35 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: compliance
+
+name: compliance
+
+namespaces:
+- $ref: /services/insights/compliance/namespaces/compliance-prod.yml
+
+slos:
+- name: compliance availability
+  SLIType: availability
+  SLISpecification: ratio of HTTP response codes that are not 5xx
+  SLODetails: https://github.com/RedHatInsights/compliance-backend
+  SLOParameters:
+    window: 28d
+  expr: 1.00 - (sum(rate(api_3scale_gateway_api_status{exported_service="compliance", status="5xx"}[{{window}}])) / sum(rate(api_3scale_gateway_api_status{exported_service="compliance"}[{{window}}])))
+  SLOTarget: 0.90
+  SLOTargetUnit: percent_0_1
+  prometheusRules: resources/insights-prod/compliance-prod/compliance-prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/compliance/compliance?orgId=1
+
+- name: compliance latency
+  SLIType: latency
+  SLISpecification: ratio of services request durations under 2 seconds 
+  SLODetails: https://github.com/RedHatInsights/compliance-backend
+  SLOParameters:
+    window: 28d
+  expr: avg_over_time(service:sli:latency_gt_2000:pctl10rate5m{exported_service="compliance"}[{{window}}])
+  SLOTarget: 0.90
+  SLOTargetUnit: percent_0_1
+  prometheusRules: resources/insights-prod/compliance-prod/compliance-prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/compliance/compliance?orgId=1
