@@ -1042,7 +1042,7 @@ JSON schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/depen
 - `name`: A name for the DNS zone
 - `description`: Description for the DNS zone
 - `account`: a `$ref` to the account definition to be used in conjunction with the provider
-- `vpc`: (optional) a `$ref` to a VPC to route traffic within. this will cause the host zone to be considered private
+- `vpc`: (optional) a `$ref` to a VPC to route traffic within. this will cause the hosted zone to be considered private
 - `unmanaged_record_names`: A list of regexes to exclude record names from being managed (literal strings work too, those will be considered to be a full match on the record name)
 - `records`: A list of `record`. The parameters of the `record` match those of Terraform's [aws_route53_record resource](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record). In addition to the terraform fields, we also support special fields which are distinguishable by their name starting with `_` (underscore). The special fields are described below.
 
