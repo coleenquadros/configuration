@@ -13,6 +13,19 @@ spec:
     interval: 1m
     rules:
 
+    - alert: PatchmanAlertNoTraffic
+      expr: sum(rate(patchman_engine_requests_total[5m])) by (container) == 0
+      annotations:
+        dashboard: 'https://grafana.app-sre.devshift.net/d/patch/patchman-engine'
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/patchman-engine-prod/deployments/{{ $labels.container }}'
+        message: 'No traffic observed in {{ $labels.container }}'
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/patchman/PatchmanAlertNoTraffic.md'
+      labels:
+        severity: critical
+        service: insights
+        env: prod
+        app_team: patch
+
     - alert: PatchmanAlert5xx
       expr: sum(rate(patchman_engine_requests_total{code=~"5.*"}[5m])) by (container, code) > 0
       annotations:
