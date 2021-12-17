@@ -13,6 +13,19 @@ spec:
     interval: 1m
     rules:
 
+    - alert: PatchmanAlertNoTraffic
+      expr: sum(rate(patchman_engine_requests_total[5m])) by (container) == 0
+      annotations:
+        dashboard: 'https://grafana.app-sre.devshift.net/d/patch/patchman-engine'
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/patchman-engine-prod/deployments/{{ $labels.container }}'
+        message: 'No traffic observed in {{ $labels.container }}'
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/patchman/PatchmanAlertNoTraffic.md'
+      labels:
+        severity: critical
+        service: insights
+        env: prod
+        app_team: patch
+
     - alert: PatchmanAlert5xx
       expr: sum(rate(patchman_engine_requests_total{code=~"5.*"}[5m])) by (container, code) > 0
       annotations:
@@ -20,6 +33,19 @@ spec:
         link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/patchman-engine-prod/deployments/{{ $labels.container }}'
         message: '5xx responses ({{ $labels.code }}) observed in {{ $labels.container }} ({{ $value }})'
         runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/patchman/PatchmanAlert5xx.md'
+      labels:
+        severity: high
+        service: insights
+        env: prod
+        app_team: patch
+
+    - alert: PatchmanAlertEvalDelay
+      expr: sum(rate(patchman_engine_evaluator_upload_evaluation_delay_seconds_sum{job="patchman-evaluator-upload"}[5m])) > 3600
+      annotations:
+        dashboard: 'https://grafana.app-sre.devshift.net/d/patch/patchman-engine'
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/patchman-engine-prod/deployments/patchman-evaluator-upload'
+        message: 'Upload evaluation delay increased ({{ $value }}s)'
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/patchman/PatchmanAlertEvalDelay.md'
       labels:
         severity: high
         service: insights
@@ -59,19 +85,6 @@ spec:
         link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/patchman-engine-prod/deployments/patchman-listener'
         message: 'Increasing number of out-of-date systems observed (last1D / last30D = {{ $value }})'
         runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/patchman/PatchmanAlertOutOfDateSystems.md'
-      labels:
-        severity: info
-        service: insights
-        env: prod
-        app_team: patch
-
-    - alert: PatchmanAlertPodRestarting
-      expr: sum(increase(kube_pod_container_status_restarts_total{container=~"patchman-.*"}[5m])) by (container) > 0
-      annotations:
-        dashboard: 'https://grafana.app-sre.devshift.net/d/patch/patchman-engine'
-        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/patchman-engine-prod/deployments/{{ $labels.container }}'
-        message: 'Observed pod ({{ $labels.container }}) restart(s) ({{ $value }})'
-        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/patchman/PatchmanAlertPodRestarting.md'
       labels:
         severity: info
         service: insights
