@@ -2,6 +2,9 @@
 
 This SOP describes how to safely delete managed terraform resources.
 
+> Note: This SOP should no longer be used as a result of work done in APPSRE-4186.
+> Instead, follow these instructions: https://gitlab.cee.redhat.com/service/app-interface#enable-deletion-of-aws-resources-in-deletion-protected-accounts
+
 ## Prerequisites
 
 * A MR exists that removes terraformResources from a namespace in app-interface.

@@ -8,6 +8,34 @@ evaluation_interval: 5m
 
 tests:
 
+# Tests PatchmanAlertNoTraffic
+- interval: 1m
+  input_series:
+  - series: patchman_engine_requests_total{code="503", container="patchman-manager"}
+    values: 1 1 0 0 0 0 0
+
+  alert_rule_test:
+  # Test the no alert case
+  - eval_time: 1m
+    alertname: PatchmanAlertNoTraffic
+    exp_alerts:
+
+  # Test 5xx alert
+  - eval_time: 6m
+    alertname: PatchmanAlertNoTraffic
+    exp_alerts:
+    - exp_annotations:
+        dashboard: 'https://grafana.app-sre.devshift.net/d/patch/patchman-engine'
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/patchman-engine-prod/deployments/patchman-manager'
+        message: 'No traffic observed in patchman-manager'
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/patchman/PatchmanAlertNoTraffic.md'
+      exp_labels:
+        severity: critical
+        service: insights
+        env: prod
+        app_team: patch
+        container: patchman-manager
+
 # Tests PatchmanAlert5xx
 - interval: 1m
   input_series:
@@ -36,6 +64,33 @@ tests:
         app_team: patch
         container: patchman-manager
         code: '503'
+
+# Tests PatchmanAlertEvalDelay
+- interval: 1m
+  input_series:
+  - series: patchman_engine_evaluator_upload_evaluation_delay_seconds_sum{job="patchman-evaluator-upload"}
+    values: 100 500000 1000000 1500000 2000000 2500000 3000000 3500000
+
+  alert_rule_test:
+  # Test the no alert case
+  - eval_time: 1m
+    alertname: PatchmanAlertEvalDelay
+    exp_alerts:
+
+  # PatchmanAlertEvalDelay
+  - eval_time: 7m
+    alertname: PatchmanAlertEvalDelay
+    exp_alerts:
+    - exp_annotations:
+        dashboard: 'https://grafana.app-sre.devshift.net/d/patch/patchman-engine'
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/patchman-engine-prod/deployments/patchman-evaluator-upload'
+        message: 'Upload evaluation delay increased (8333s)'
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/patchman/PatchmanAlertEvalDelay.md'
+      exp_labels:
+        severity: high
+        service: insights
+        env: prod
+        app_team: patch
 
 # Tests PatchmanAlertKafkaLag
 - interval: 1m
@@ -122,31 +177,3 @@ tests:
         service: insights
         env: prod
         app_team: patch
-
-# Tests PatchmanAlertPodRestarting
-- interval: 1m
-  input_series:
-  - series: kube_pod_container_status_restarts_total{container="patchman-manager"}
-    values: 0 0 1 1 1 1 1 1 1
-
-  alert_rule_test:
-  # Test the no alert case
-  - eval_time: 1m
-    alertname: PatchmanAlertPodRestarting
-    exp_alerts:
-  
-  # PatchmanAlertPodRestarting
-  - eval_time: 9m
-    alertname: PatchmanAlertPodRestarting
-    exp_alerts:
-    - exp_annotations:
-        dashboard: 'https://grafana.app-sre.devshift.net/d/patch/patchman-engine'
-        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/patchman-engine-prod/deployments/patchman-manager'
-        message: 'Observed pod (patchman-manager) restart(s) (1)'
-        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/patchman/PatchmanAlertPodRestarting.md'
-      exp_labels:
-        severity: info
-        service: insights
-        env: prod
-        app_team: patch
-        container: patchman-manager
