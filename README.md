@@ -867,10 +867,11 @@ openshiftServiceAccountTokens:
 - namespace:
     $ref: /services/<service>/namespaces/<namespace>.yml
   serviceAccountName: <serviceAccountName>
+  name: <name of the output resource to be created> # optional
 ```
 
 The integration will get the token belonging to that ServiceAccount and add it into a Secret called:
-`<clusterName>-<namespaceName>-<ServiceAccountName>`.
+`<clusterName>-<namespaceName>-<ServiceAccountName>`. This is the default name unless `name` is defined.
 The Secret will have a single key called `token`, containing a token of that ServiceAccount.
 
 ### Enable network traffic between Namespaces via App-Interface (`/openshift/namespace-1.yml`)
