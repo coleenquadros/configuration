@@ -126,3 +126,27 @@ terraformResources:
       ]
     }
   output_resource_name: workers-aoc-staging-role
+- provider: asg
+  account: image-builder-stage
+  identifier: imagebuilder-workers-aoc-x86-staging
+  defaults: /terraform/resources/image-builder/stage/asg/asg-1.yml
+  cloudinit_configs:
+  - filename: init.cfg
+    content_type: text/cloud-config
+    content: /terraform/resources/image-builder/stage/asg/worker_aoc.cfg
+  - content_type: text/x-shellscript
+    content: /terraform/resources/image-builder/stage/asg/set_hostname.sh
+  - content_type: text/x-shellscript
+    content: /terraform/resources/image-builder/stage/asg/subscription_manager.sh
+  - content_type: text/x-shellscript
+    content: /terraform/resources/image-builder/stage/asg/worker_external_creds.sh
+  - content_type: text/x-shellscript
+    content: /terraform/resources/image-builder/stage/asg/worker_service.sh
+  - content_type: text/x-shellscript
+    content: /terraform/resources/image-builder/stage/asg/offline_token.sh
+  variables:
+    workspace_name: staging
+    osbuild_commit: f7bf23fabaae6027b1e1147b27870d90d4b1911f
+    composer_commit: c6c311cc3d7c748ce77e697b2f4c8074fcf09019
+    composer_host_aoc: api.openshift.com
+    composer_host_aoc_staging: api.stage.openshift.com
