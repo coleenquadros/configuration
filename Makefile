@@ -50,3 +50,6 @@ server: schemas bundle validate run
 
 qr-promote:
 	@./hack/update-qr-tag.sh
+
+update-schemas:
+	@./hack/update-schemas.sh

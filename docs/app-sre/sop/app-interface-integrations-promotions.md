@@ -6,26 +6,28 @@ App-interface integrations are being executed in multiple locations in multiple 
 
 ## Process
 
-1. If the app-interface changes you are promoting are dependent upon a schema change in [qontract-schemas](https://github.com/app-sre/qontract-schemas), the qontract-schemas version should be promoted first. This should be done by updating app-interface's `.env` file in its own merge request.
+1. If the app-interface changes you are promoting are dependent upon a schema change in [qontract-schemas](https://github.com/app-sre/qontract-schemas),
+   the qontract-schemas version should be promoted first. This should be done by updating app-interface's `.env` file in its own merge request
+   setting the commit sha reference from qontract-schemas repository. This can be done with `make udpate-schemas`
 1. Create a MR in app-interface to promote your changes from staging to
-   production. `make qr-promote` automates getting the latest commit 
+   production. `make qr-promote` automates getting the latest commit
    checksum and updating the necessary files. Running `make qr-promote` will also update the `ref` field within our [saas-qontract-reconcile](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-interface/cicd/ci-ext/saas-qontract-reconcile.yaml) file.  If there is a need to promote to
-   a single environment, or for a better understanding of what `qr-promote` is 
+   a single environment, or for a better understanding of what `qr-promote` is
    doing, see [Updating specific environments](#updating-specific-environments).
-1. Team members should deploy their own changes to production shortly after 
-   merging. In some cases, there might be changes queued up from multiple team 
-   members. **If your promotion will include changes from other team 
+1. Team members should deploy their own changes to production shortly after
+   merging. In some cases, there might be changes queued up from multiple team
+   members. **If your promotion will include changes from other team
    members, it is a courtesy to notify those team members.** Acknowledgements
-   from team members will not block the promotion because merging a change 
+   from team members will not block the promotion because merging a change
    indicates that it is production-ready.
-1. Add a **lgtm** label to the MR via the GitLab website. The change will 
-   be merged as per the standard 
+1. Add a **lgtm** label to the MR via the GitLab website. The change will
+   be merged as per the standard
    [continuous delivery process](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-delivery-in-app-interface.md).
 
 ## Updating specific environments
 
-This section describes which files need to be updated in order to deploy to 
-a certain environment. This also serves as documentation for what 
+This section describes which files need to be updated in order to deploy to
+a certain environment. This also serves as documentation for what
 `make qr-promote` is automating for you.
 
 * To promote integrations running in the app-sre-prod-01 cluster, update `ref` in [saas-qontract-reconcile](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-interface/cicd/ci-ext/saas-qontract-reconcile.yaml).
