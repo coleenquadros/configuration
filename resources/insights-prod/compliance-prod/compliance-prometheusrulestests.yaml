@@ -1,0 +1,94 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /insights-prod/compliance-prod/compliance-prometheusrules.yaml
+
+evaluation_interval: 5m
+
+tests:
+
+# Tests ComplianceAlertNoTraffic
+- interval: 1m
+  input_series:
+  - series: compliance_http_requests_total{status="503", container="compliance-service"}
+    values: 1 1 0 0 0 0 0
+
+  alert_rule_test:
+  # Test the no alert case
+  - eval_time: 1m
+    alertname: ComplianceAlertNoTraffic
+    exp_alerts:
+
+  # Test ComplianceAlertNoTraffic alert
+  - eval_time: 6m
+    alertname: ComplianceAlertNoTraffic
+    exp_alerts:
+    - exp_annotations:
+        dashboard: 'https://grafana.app-sre.devshift.net/d/compliance/compliance'
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/compliance-prod/deployments'
+        message: 'No traffic observed in compliance-service'
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/compliance/ComplianceAlertNoTraffic.md'
+      exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: compliance
+        container: compliance-service
+
+# Tests ComplianceAlert5xxAlert5xx
+- interval: 1m
+  input_series:
+  - series: compliance_http_requests_total{status="503", container="compliance-service"}
+    values: 0 0 1 1 1 1 1
+
+  alert_rule_test:
+  # Test the no alert case
+  - eval_time: 1m
+    alertname: ComplianceAlert5xx
+    exp_alerts:
+  
+  # Test 5xx alert
+  - eval_time: 5m
+    alertname: ComplianceAlert5xx
+    exp_alerts:
+    - exp_annotations:
+        dashboard: 'https://grafana.app-sre.devshift.net/d/compliance/compliance'
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/compliance-prod/deployments'
+        message: '5xx responses (503) observed in compliance-service (0.0033333333333333335)'
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/compliance/ComplianceAlert5xx.md'
+      exp_labels:
+        severity: high
+        service: insights
+        env: prod
+        app_team: compliance
+        container: compliance-service
+        status: '503'
+
+# Tests ComplianceAlertKafkaLag
+- interval: 1m
+  input_series:
+  - series: kafka_consumergroup_group_topic_sum_lag{group="complianceinventory-events-consumer", topic="platform.inventory.events"}
+    values: 0 0 0 100001 100001 100001 100001 100001 100001 100001
+  
+  alert_rule_test:
+  # Test the no alert case
+  - eval_time: 1m
+    alertname: ComplianceAlertKafkaLag
+    exp_alerts:
+  
+  # ComplianceAlertKafkaLag
+  - eval_time: 9m
+    alertname: ComplianceAlertKafkaLag
+    exp_alerts:
+    - exp_annotations:
+        dashboard: 'https://grafana.app-sre.devshift.net/d/compliance/compliance'
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/compliance-prod/deployments'
+        message: 'compliance lag > 100000, topic: platform.inventory.events, current lag: 100001'
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/compliance/ComplianceAlertKafkaLag.md'
+      exp_labels:
+        severity: high
+        service: insights
+        env: prod
+        app_team: compliance
+        topic: platform.inventory.events
