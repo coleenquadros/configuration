@@ -102,19 +102,29 @@ TODO
 
 ### Impact:
 
-TODO
+Unreliable CI service. PR and MR checks fail,
+tenants can't build new images of their applications.
 
 ### Summary:
 
-TODO
+Jenkins controller using too much of RAM, after OOM event service might be unreliable
+We need to restart the service at least
 
 ### Access required:
 
-TODO
+Admin access to Jenkins controller's Web-UI
 
 ### Steps:
 
-TODO
+- Check if it's really a problem - visit https://ci.int.devshift.net/monitoring?part=heaphisto
+Pay attention if bottom line before table shows near to limit usage of RAM
+
+- Check if 'hudson.plugin.git.*' object is present and bigger than a few MegaBytes. 
+- Image for reference showing the problem ![before running script](images/ci-int-memory-histogram-before-script-screenshot.png)
+- If it's big then need to execute [script](https://plugins.jenkins.io/git/#plugin-content-remove-git-plugin-buildsbybranch-builddata-script)
+- Image for reference showing the remediation ![before running script](images/ci-int-memory-histogram-after-script-screenshot.png)
+
+Note: running script also trims down disk usage by removing git revisions' builddata from all builds stored on controller and its backups
 
 ---
 
@@ -135,6 +145,8 @@ TODO
 ### Steps:
 
 TODO
+
+---
 
 # Restarting ci-int
 
