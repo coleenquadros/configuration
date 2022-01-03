@@ -20,7 +20,7 @@ In Route53, click on `Hosted Zones` on the left-hand side.  Filter the routes li
 
 Find the entry for the new route.  It should currently have a weight of 0.  Edit the route and increase the weight for the route to be > 0.  It is usually best to set this value to the same weight as the existing route.
 
-## Decreate the weight for the old route
+## Decrease the weight for the old route
 
 Edit the old (original) route and set the weight to 0.
 
