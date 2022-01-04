@@ -37,7 +37,7 @@ Pick the name of the component you want to change the status of and run
 qontract-cli set statuspage-component-status $COMPONENT_NAME $STATUS
 ```
 
-Supported values for $STATUS are `operational`, `under_maintenance`, `degraded_performance`, `partial_outage`, `major_outage`
+Supported values for `$STATUS` are `operational`, `under_maintenance`, `degraded_performance`, `partial_outage`, `major_outage`
 
 Please note, that qontract-cli does not support statuspage.io incident features right now.
 
