@@ -1,75 +1,51 @@
-# Red Hat status page
+# Red Hat status pages
 
 https://status.redhat.com/
+https://status.quay.io/
 
 IT documentation: https://docs.engineering.redhat.com/display/Communities/Availability+Monitoring+Information+Page
 
 ## Login to statuspage
 
-https://statuspage.io
+Login with the account stored in Vault is currently not working. Setting the state of a component is supported through qontract-cli though - see next chapter
+
+https://manage.statuspage.io
 
 Credentials: https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/status.redhat.com
 
-# New Relic tests
+## Manage statuspage status with qontract-cli
 
-NR tests allow us to automatically display incidents in the status page by configuring periodic checks on the services we run.
+First list all statuspage components managed with app-interface.
 
-## Login to New Relic
+```
+qontract-cli get statuspage-components
 
-Direct login page:
-https://synthetics.newrelic.com/accounts/2409290/monitors
+COMPONENT_NAME             COMPONENT_DISPLAY_NAME                      PAGE
+-------------------------  ------------------------------------------  -----------------
+cincinnati                 OpenShift Update Service                    status-redhat-com
+clair                      Security Scanning                           status-quay-io
+insights-advisor           Insights - Advisor                          status-redhat-com
+insights-compliance        Insights - Compliance                       status-redhat-com
+insights-drift             Insights - Drift                            status-redhat-com
+insights-patch             Insights - Patch                            status-redhat-com
+...
+```
 
-Ensure your account is part of the `RH Cloud Platform Prod` account.
+Pick the name of the component you want to change the status of and run
 
-JF and Jaime currently have admin on the project so access can be requested through them.
+```
+qontract-cli set statuspage-component-status $COMPONENT_NAME $STATUS
+```
 
-## Adding a Monitor
+Supported values for $STATUS are `operational`, `under_maintenance`, `degraded_performance`, `partial_outage`, `major_outage`
 
-### Types
+Please note, that qontract-cli does not support statuspage.io incident features right now.
 
-- Ping (free)
-- Simple Browser
-- Scripter Browser
-- API Test
+## Automate status changes with monitoring probes
 
-### Locations
+Work is in progress to automate the state on statuspage based on Catchpoint and blackbox-exporter monitoring probes.
 
-- Select only 3 locations, all in NA (close to the origin)
-- schedule is 5 mins or larger
+https://issues.redhat.com/browse/APPSRE-3905
+https://issues.redhat.com/browse/APPSRE-4161
 
-### Alert configuration
-
-Make sure alerts are only triggered if more than one geographical region fails. In order to do so:
-Synthethics -> multiple location -> threshold: 2
-
-### Budget concerns
-
-After setting up each alert, make sure the amount of monthly checks it will take up is reasonable. If we ever exhaust these checks we should start a conversation with Vikas Kumar in IT ISO to contribute funds to the New Relic account.
-
-## PagerDuty Integration
-
-In PD:
-
-- Need a new PD "service" per service
-- +New Integration -> New Relic -> Name (prepend with AppSRE) + PD key
-
-In NR:
-
-- Alerts -> Notification channels
-- New notification channel -> Name + PD key
-- Alert Policy -> Add notification channel
-
-## API
-
-As admin you can create a new key:
-
-- push scripts?
-- consume /violations -> prom exporter?
-
-# StatusPage <-> New Relic controller
-
-This component connects a New Relic synthetic test with a statuspage component. No accounts are required, the connection is made using a naming convention between the statuspage and New Relic.
-
-https://github.com/redhataccess/statuspage-controller
-
-You need to request an account from Jared Sprague <jsprague@redhat.com> to access it.
+Until then, instructions to set this up manually can be found [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/catchpoint.md)
