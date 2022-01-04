@@ -6,13 +6,21 @@ labels:
   platform: insights
 
 name: host-inventory-perf
-description: host-inventory app on the Insights Platform
+description: host-inventory app deployed via clowder
 
 app:
   $ref: /services/insights/host-inventory/app.yml
 
 pipelinesProvider:
   $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
+
+deployResources:
+  requests:
+    cpu: 300m
+    memory: 600Mi
+  limits:
+    cpu: 300m
+    memory: 600Mi
 
 slack:
   workspace:
@@ -21,6 +29,7 @@ slack:
 
 managedResourceTypes:
 - ClowdApp
+- ConfigMap
 
 imagePatterns:
 - quay.io/cloudservices
@@ -35,8 +44,15 @@ parameters:
   KAFKA_PRODUCER_RETRIES: '8'
   KAFKA_PRODUCER_RETRY_BACKOFF_MS: '250'
 
-
 resourceTemplates:
+- name: host-inventory-frontend
+  path: /deploy/frontend.yaml
+  url: https://github.com/RedHatInsights/insights-inventory-frontend
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
 - name: host-inventory
   path: /deployment.yaml
   url: https://github.com/RedHatInsights/insights-host-inventory
@@ -44,23 +60,25 @@ resourceTemplates:
     CLOWDER_ENABLED: 'true'
     REPLICAS_P1: 5
     REPLICAS_PMIN: 3
+    CPU_REQUEST: 500m
     CPU_LIMIT: 1
+    MEMORY_REQUEST: 1Gi
     MEMORY_LIMIT: 2Gi
-    RBAC_ENFORCED: 'true'
+    DEDUP_MEMORY_LIMIT: 2Gi
+    MEMORY_REQUEST_REAPER: 256Mi
+    MEMORY_LIMIT_REAPER: 512Mi
     BULK_QUERY_SOURCE: xjoin
     BULK_QUERY_SOURCE_BETA: xjoin
     URLLIB3_LOG_LEVEL: DEBUG
   targets:
   - namespace:
       $ref: /services/insights/host-inventory/namespaces/perf-host-inventory-perf.yml
-    ref: 64c70b41608ba7911dc7d19dfa9bc626a31c07cd
+    ref: master
     # upstream:
     #   instance:
     #     $ref: /dependencies/ci-ext/ci-ext.yml
     #   name: RedHatInsights-insights-host-inventory-gh-build-master
     parameters:
-      IMAGE_TAG: 07f1df9
-      ENV_NAME: perf
       REPLICAS_SVC: 25
       INVENTORY_DB_SSL_MODE: verify-full
       REAPER_SUSPEND: 'false'
