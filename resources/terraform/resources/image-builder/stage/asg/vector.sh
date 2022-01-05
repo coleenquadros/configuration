@@ -15,7 +15,7 @@ type = "aws_cloudwatch_logs"
 inputs = [ "journald" ]
 endpoint = "${CLOUDWATCH_LOGS_ENDPOINT_URL}"
 group_name = "${CLOUDWATCH_LOG_GROUP}"
-stream_name = "worker_syslog_{{ host }}"
+stream_name = "worker-syslog-{{ host }}"
 encoding.codec = "json"
 EOF
 
