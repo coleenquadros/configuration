@@ -1,8 +1,8 @@
-AutomationAnalyticsFastAPIServiceAbsent
-===================
+AutomationAnalyticsRollupServiceAbsent
+======================================
 
-Severity: High
-------------------
+Severity: Medium
+----------------
 
 Incident Response Plan
 ----------------------
@@ -12,13 +12,12 @@ Incident Response Plan
 Impact
 ------
 
-- Ansible Analytics Fast API ensures endpoints for UI in c.rh.c. in Ansible Automation Platform,
-i.e. Job Explorer or Savings Planner
+- Ansible Analytics Data Exporter is an internal AA service now.
 
 Summary
 -------
 
-- This alert fires when the Automation Analytics FastAPI pod(s) are down (prometheus cannot scrape metrics).
+- This alert fires when the Automation Analytics Data Exporter pod(s) are down (prometheus cannot scrape metrics).
 - Usually caused by pods going offline or a prometheus problem.
 
 Access required
@@ -42,7 +41,7 @@ Additional steps (developers)
 -----------------------------
 - Check logs in `Kibana Error Dashboard`_
 - Look to the Prometheus (Button 'Query')
-- Check `Grafana`_ (Button 'Dashboard') - mainly Status, API and RDS Database panels
+- Check `Grafana`_ (Button 'Dashboard') - mainly Status, Data Export and RDS Database panels
 - Compare
 - - deployed commit SHA (Button 'Link' - detail of deployment/pod)
 - - expected commit SHA (`app-interface`_)
@@ -53,9 +52,8 @@ Escalations
 -----------
 
 - Ping more team members if available
-- Ping the engineering team that owns the APP (`CoreOS Slack Forum-consoledot`_)
+- Ping the engineering team that owns the APP (`CoreOS Slack Forum-consoledot`_
 - - call `@aa-api-team`
-
 
 .. _AA Backend's Gitlab: https://gitlab.cee.redhat.com/automation-analytics/automation-analytics-backend/-/commits/main.. _Incident Response Doc: https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE
 .. _app-interface: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/insights/tower-analytics/deploy-clowder.yml

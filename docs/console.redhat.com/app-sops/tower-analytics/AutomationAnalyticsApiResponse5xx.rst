@@ -1,8 +1,8 @@
-AutomationAnalyticsFastAPIServiceAbsent
-===================
+AutomationAnalyticsApiResponse5xx
+=================================
 
-Severity: High
-------------------
+Severity: Medium
+----------------
 
 Incident Response Plan
 ----------------------
@@ -18,7 +18,7 @@ i.e. Job Explorer or Savings Planner
 Summary
 -------
 
-- This alert fires when the Automation Analytics FastAPI pod(s) are down (prometheus cannot scrape metrics).
+- This alert fires when the Automation Analytics Data Exporter pod(s) are down (prometheus cannot scrape metrics).
 - Usually caused by pods going offline or a prometheus problem.
 
 Access required
@@ -35,6 +35,7 @@ Steps
   - Readiness Probe is working (in Events)
   - Other errors/warning are present in the Events
 - Check logs for pods in the tower-analytics-prod namespace and `Kibana Log`_
+- - If there is message/message == "Exception in ASGI application", then look at the end of message/exception
 - Check if there were any recent changes to the CR's in the namespace
 - ``oc rsh`` into one of the containers if available
 
@@ -53,9 +54,8 @@ Escalations
 -----------
 
 - Ping more team members if available
-- Ping the engineering team that owns the APP (`CoreOS Slack Forum-consoledot`_)
+- Ping the engineering team that owns the APP (`CoreOS Slack Forum-consoledot`_
 - - call `@aa-api-team`
-
 
 .. _AA Backend's Gitlab: https://gitlab.cee.redhat.com/automation-analytics/automation-analytics-backend/-/commits/main.. _Incident Response Doc: https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE
 .. _app-interface: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/insights/tower-analytics/deploy-clowder.yml
