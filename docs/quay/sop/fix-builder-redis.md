@@ -26,39 +26,10 @@ If so, its likely Redis is filled with builds that are no longer running, and it
 
 ## Fixing the issue
 
-To fix this issue, all the existing keys within Redis must be flushed via the `FLUSHALL` command.
+To fix this issue, all the existing keys within Redis must be flushed via the `FLUSHALL` command. There is a job that does this. After the flush operation all the quay pods need to be restarted
 
 ### Steps to fix
 
-The Redis we use is an ElasticCache behind the `QuayVPC` VPC, which means it can only be accessed via the QuayVPC bastion host. *Further*, the Redis is run behind TLS termination, which means *redis-cli will not work without a proxy*. For that reason, it is likely easier to fix this problem as follows:
+1. Update the `JOB_NAME` on the flush-redis job in the file `data/services/quayio/saas/quayio-utils.yaml`. [Example MR](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/30875)
 
-1) SSH into the `QuayVPC` bastion host, whose IP can be found in the AWS EC2 console under the name `QuayVPC`
-2) Run a docker container with ubuntu and install the necessary tools:
-
-```sh
-docker run -ti ubuntu
-
-$ apt-get update
-$ apt-get install -y emacs python python-pip
-$ pip install redis
-```
-
-3) Add the following code into a local file, replacing the section `redispasswordhere` with the actual Redis password:
-
-```python
-import redis
-
-args = {
-    "host": "master.quayio-production.qcfv1o.use1.cache.amazonaws.com",
-    "password": "redispasswordhere",
-    "ssl": True,
-}
-redis_client = redis.StrictRedis(**args)
-redis_client.flushall()
-```
-
-4) Run the script to flush all the keys from Redis:
-
-```sh
-python fix-redis.py
-```
+2. Once the above change is merged and the job is complete. Restart the quay pods by updating the `QUAY_APP_COMPONENT_ANNOTATIONS_VALUE` variable [Example MR](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/31014/diffs)
