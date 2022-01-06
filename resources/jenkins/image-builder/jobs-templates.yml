@@ -1,0 +1,18 @@
+- job-template:
+    id: "gh-build-main-packer"
+    name: "{gh_org}-{gh_repo}-gh-build-{branch}-packer"
+    wrappers:
+    - timeout_wrapper:
+        timeout: "{timeout}"
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *aws-account
+    publishers:
+    - slack:
+        room: "{slack_channel_notification}"
+        notify-start: False
+        notify-success: True
+        notify-failure: True
+        notify-repeated-failure: True
+    <<: *gh_build_master
