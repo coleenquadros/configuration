@@ -4,7 +4,7 @@
 
 ## Impact
 
-- Currently there's no impact.
+- The WebRCA UI would be down at https://web-rca.devshift.net/.
 
 ## Summary
 
