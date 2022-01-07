@@ -123,7 +123,7 @@ Every AppSRE/MT-SRE engineer should have access to the following:
     * Email openshift-jira-admin@redhat.com for any issues
     * Jira boards [Sprint Board](https://issues.redhat.com/secure/RapidBoard.jspa?rapidView=5536) & [SD Epics](https://issues.redhat.com/projects/SDE)
 * github.com/openshift
-  * ACCESS: https://source.redhat.com/groups/public/atomicopenshift/atomicopenshift_wiki/openshift_onboarding_checklist_for_github
+  * ACCESS: [here](https://source.redhat.com/groups/public/atomicopenshift/atomicopenshift_wiki/openshift_onboarding_checklist_for_github)
 * Bugzilla
   * ACCESS: Ensure you have access to [bugzilla](https://bugzilla.redhat.com)
     * Login as Red Hat Associate with kerberos credentials
@@ -133,7 +133,7 @@ Every AppSRE/MT-SRE engineer should have access to the following:
   * you can check this [example ticket](https://issues.redhat.com/browse/OHSS-2547), but double check the assignee before commiting.
   * Ensure you are listed with the appropriate contact detail in your Pagerduty profile.
   * The recommended setup includes the Pagerduty app on your mobile phone. From the website you can test notifications to ensure that you have correctly set up the application to override any do not disturb settings.
-  * For notification troubleshooting see: https://support.pagerduty.com/docs/notification-troubleshooting
+  * For notification troubleshooting see [here](https://support.pagerduty.com/docs/notification-troubleshooting).
 * AppSRE shared folders
   * ACCESS: Go to the following folders and request access with your Red Hat Gsuite account
     * [Public Top Level Directory](https://drive.google.com/drive/u/1/folders/1sQGfo57eU7UAKfbBy8LgwxhMdnzXc0KZ) (contains RCAs, etc)
@@ -160,7 +160,7 @@ Every AppSRE engineer should have access to the following:
   * https://gitlab.cee.redhat.com/app-sre
     * Access to all repositories is managed via this group.
     * Obtained via this [role](/data/teams/app-sre/roles/app-sre.yml).
-  * https://gitlab.cee.redhat.com/service/app-interface
+  * https://gitlab.cee.redhat.com/service/app-interface (See general [workflow](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/#workflow) to create a merge request)
 * AppSRE OCM org (https://console.redhat.com/openshift)
   * Access is [configured manually by an org administrator](/docs/app-sre/sop/ocm-appsre-org-access.md)
 * AWS
@@ -189,7 +189,7 @@ Every AppSRE engineer should have access to the following:
   * Nothing to do, granted by `sendgrid_accounts` in the [AppSRE role](data/teams/app-sre/roles/app-sre.yml).
 * Deadman's snitch
   * Ask somebody in the team to invite you to the organization. You'll receive an e-mail with a link to the invite. Create a new account then, it will be added automatically to the organization and you'll see all the heartbeats we have configured. You'll also be able to create even more.
-* app-sre kube-configs: https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/kube-configs/
+* app-sre [kube-configs](https://vault.devshift.net/ui/vault/secrets/app-sre/list/creds/kube-configs/)
 
 #### Returning Red Hat Employee Gotchas
 
@@ -235,8 +235,7 @@ has a very clear mission with regard to knowledge sharing:
 
 #### Training Resources
 
-The AppSRE team will maintains an index of training resources. All AppSRE members must go through those training documents:
-https://source.redhat.com/groups/public/sre-services/sre_services_wiki/appsre_introduction#jive_content_id_AppSRE_Training
+The AppSRE team will maintains an index of training resources. All AppSRE members must go through [those training documents](https://source.redhat.com/groups/public/sre-services/sre_services_wiki/appsre_introduction#jive_content_id_AppSRE_Training).
 
 #### Deep Dive sessions
 
@@ -258,6 +257,7 @@ Every AppSRE member that identifies any knowledge gaps in our documentation / re
 Or: How to become a contributing AppSRE team member
 
 This section guides a new team member in carrying out tasks that are:
+
 - beneficial for the new team member
 - beneficial for the team
 
@@ -276,7 +276,7 @@ The practical training is a really a fancy name for working on tickets. Tickets 
 [AI #3](https://issues.redhat.com/issues/?jql=project%20%3D%20APPSRE%20AND%20status%20%3D%20%22To%20Do%22%20AND%20labels%20%3D%20%22ai%233%22)
 [AI #4](https://issues.redhat.com/issues/?jql=project%20%3D%20APPSRE%20AND%20status%20%3D%20%22To%20Do%22%20AND%20labels%20%3D%20%22ai%234%22)
 
-Some of these tickets may be related to qontract-reconcile, which will require a development environment setup: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/app-sre/sop/app-interface-development-environment-setup.md.
+Some of these tickets may be related to qontract-reconcile, which will require a [development environment setup](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/app-sre/sop/app-interface-development-environment-setup.md).
 
 ## On call
 
@@ -298,13 +298,11 @@ Documented in the [Incident Process](./incident-process.md) SOP.
 
 ## Contract
 
-AppSRE establishes a contract with the tenants. The contract is live here:
-https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/README.md
+AppSRE establishes a contract with the tenants. The contract is live [here](https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/README.md).
 
-All Services must satisfy the list of ACs (Acceptance Criteria): [acs.html](https://app-sre.pages.redhat.com/contract/acs.html) and [acs.txt](https://app-sre.pages.redhat.com/contract/acs.txt)
+All Services must satisfy the list of ACs (Acceptance Criteria): [acs.html](https://app-sre.pages.redhat.com/contract/acs.html) and [acs.txt](https://app-sre.pages.redhat.com/contract/acs.txt).
 
-The process for Service Onboarding is documented here:
-https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/content/service/service_onboarding_flow.md
+The process for Service Onboarding is documented [here](https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/content/service/service_onboarding_flow.md).
 
 ### SRE Checkpoints
 
