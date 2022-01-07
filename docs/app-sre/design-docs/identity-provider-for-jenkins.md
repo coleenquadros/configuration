@@ -173,18 +173,17 @@ return result.plainValue
 ```
 
 ### Robotic accounts being used prior to the migration:
-Those accounts are used to authenticate on the Jenkins API and must be replaced with local ones:
+Those Jenkins automation accounts were found. We're listing them and defining what to do with them here.
 
 - `app-sre-bot`
   - Used for most automations (app-sre integrations, JJB)
-  - defined in [GitHub](https://github.com/orgs/app-sre/people/app-sre-bot)
-  - To be replaced by a Jenkins local bot + token
-    - Then update Vault data for [ci-int](https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-int/jjb-ini) and [ci-ext](https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-ext/jjb-ini)
+  - defined in [GitHub](https://github.com/orgs/app-sre/people/app-sre-bot). ci-int actually uses a local user and not the github one
+  - ci-ext needs a new local token for that user ([APPSRE-4224](https://issues.redhat.com/browse/APPSRE-4224))
 - `iqe-bot`
   - Found in ci-ext with a relatively high `useCounter` in `/var/lib/jenkins/users/iqebot_5597982201466808634/apiTokenStats.xml`
   - ci-ext link: https://ci.ext.devshift.net/user/iqe-bot/
   - Referenced in app-interface in `/data/teams/insights/bots/iqe-sitreps-bot.yml`
-  - :warning: No idea where the token is referenced in Vault nor where it is used
+  - :warning: No idea where the token is referenced in Vault nor where it is used. Andreu is awaiting confirmation that this bot is actually obsolete and can be removed.
 
 Those accounts have also been found but don't seem to be used. To be confirmed !
 - `app-sre-ci-trigger-jobs-bot`
