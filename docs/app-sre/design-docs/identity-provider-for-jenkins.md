@@ -15,7 +15,7 @@
 
 
 ## Author/date
-`Patrick Martin` / `November 2021`
+`Patrick Martin` / `January 2022`
 
 
 ## Tracking JIRA
@@ -98,7 +98,8 @@ Pre-requisites actions:
     - role-based strategy authorization via app-interface
     - robotic access
   - Request ci.int and ci.ext configuration on IAM side, similar to the POC environment.
-    - 
+    - ci.int: [RITM1040558](https://redhat.service-now.com/help?id=rh_ticket&table=sc_req_item&sys_id=ffb8dcac1b888510c57c3224cc4bcb4f)
+    - ci.ext: [RITM1040559](https://redhat.service-now.com/help?id=rh_ticket&table=sc_req_item&sys_id=afc8d4ec1b888510c57c3224cc4bcbe7)
   - Install Jenkins plugins for SAML v2 and Role-Based authorization strategy
 - Todo as of 2022-01-07:
   - Ensure necessary robotic accounts and tokens are accessible (local to Jenkinses) and referenced in Vault
