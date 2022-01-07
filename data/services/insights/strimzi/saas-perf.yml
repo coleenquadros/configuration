@@ -6,13 +6,15 @@ labels:
   platform: insights
 
 name: strimzi-perf
-description: strimzi
+description: strimzi for tekton
+
+compare: false
 
 app:
   $ref: /services/insights/strimzi/app.yml
 
 pipelinesProvider:
-  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
+  $ref: /services/insights/strimzi/pipelines/strimzi-pipelines.app-sre-prod-01.yml
 
 deployResources:
   requests:
@@ -30,10 +32,14 @@ slack:
 managedResourceTypes:
 - Kafka
 - KafkaTopic
-- KafkaConnect
+- KafkaUser
 - ConfigMap
 - Service
 - Deployment
+- DeploymentConfig
+- KafkaConnector
+- KafkaConnect
+- KafkaMirrorMaker2
 
 imagePatterns:
 - quay.io/cloudservices
@@ -45,35 +51,6 @@ authentication:
     field: openshift-saas-deploy
 
 resourceTemplates:
-- name: strimzi
-  path: /deploys/openshift/amq-streams.yaml
-  url: https://github.com/RedHatInsights/platform-mq
-  parameters:
-    ZK_VOL_SIZE: 50Gi
-  targets:
-  - namespace:
-      $ref: /services/insights/strimzi/namespaces/perf-platform-mq-perf.yml
-    ref: master
-    parameters:
-      KAFKA_CPU_REQUESTS: 2
-      KAFKA_CPU_LIMITS: 3
-      KAFKA_MEMORY_REQUESTS: 24Gi
-      KAFKA_MEMORY_LIMITS: 24Gi
-      KAFKA_NUM_REPLICAS: 3
-      KAFKA_HEAP_OPTS_XMS: 6g
-      KAFKA_HEAP_OPTS_XMX: 6g
-      KAFKA_VOL_SIZE: 450Gi
-
-- name: kafka-topics
-  path: /deploys/openshift/kafka-topics.yaml
-  url: https://github.com/RedHatInsights/platform-mq
-  parameters:
-    KAFKA_CLUSTER: platform-mq
-  targets:
-  - namespace:
-      $ref: /services/insights/strimzi/namespaces/perf-platform-mq-perf.yml
-    ref: master
-
 - name: kafka-connect
   path: /deploys/openshift/kafka-connect.yaml
   url: https://github.com/RedHatInsights/platform-mq
@@ -86,7 +63,63 @@ resourceTemplates:
     parameters:
       BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9093
       KAFKA_CONNECT_REPLICAS: 0
-
+- name: strimzi
+  path: /deploys/openshift/amq-streams.yaml
+  url: https://github.com/RedHatInsights/platform-mq
+  parameters:
+    ZK_VOL_SIZE: 50Gi
+  targets:
+  - namespace:
+      $ref: /services/insights/strimzi/namespaces/perf-platform-mq-perf.yml
+    ref: master
+    parameters:
+      KAFKA_CPU_REQUESTS: 2
+      KAFKA_CPU_LIMITS: 4
+      KAFKA_MEMORY_REQUESTS: 24Gi
+      KAFKA_MEMORY_LIMITS: 24Gi
+      KAFKA_NUM_REPLICAS: 3
+      KAFKA_HEAP_OPTS_XMS: 6g
+      KAFKA_HEAP_OPTS_XMX: 6g
+      KAFKA_VOL_SIZE: 800Gi
+- name: kafka-topics
+  path: /deploys/openshift/kafka-topics.yaml
+  url: https://github.com/RedHatInsights/platform-mq
+  parameters:
+    KAFKA_CLUSTER: platform-mq
+  targets:
+  - namespace:
+      $ref: /services/insights/strimzi/namespaces/perf-platform-mq-perf.yml
+    ref: master
+- name: kafka-schema-registry
+  path: /deploys/openshift/schema-registry.yaml
+  url: https://github.com/RedHatInsights/platform-mq
+  parameters:
+    SCHEMA_REGISTRY_IMAGE: quay.io/cloudservices/schema-registry
+  targets:
+  - namespace:
+      $ref: /services/insights/strimzi/namespaces/perf-platform-mq-perf.yml
+    ref: master
+    parameters:
+      BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_HOST}:9093
+- name: kafka-metrics
+  path: /deploys/openshift/kafka-metrics-configmap.yaml
+  url: https://github.com/RedHatInsights/platform-mq
+  targets:
+  - namespace:
+      $ref: /services/insights/strimzi/namespaces/perf-platform-mq-perf.yml
+    ref: master
+#- name: kafka-connector-warehouse-sink-perf
+#  path: /deploys/openshift/kafka-connectors.yaml
+#  url: https://github.com/RedHatInsights/platform-mq
+#  parameters:
+#    S3_SINK_TOPICS: platform.engine.results
+#    S3_SINK_BUCKET_NAME: insights-warehouse-perf
+#    S3_SINK_CONNECTOR_NAME: warehouse-sink-perf
+#    KAFKA_CLUSTER: platform-kafka-connect
+#  targets:
+#  - namespace:
+#      $ref: /services/insights/strimzi/namespaces/perf-platform-mq-perf.yml
+#    ref: master
 - name: prometheus-kafka-consumer-group-exporter
   hash_length: 7
   path: /openshift.yaml
@@ -101,7 +134,6 @@ resourceTemplates:
       AUTO_OFFSET_RESET: latest
       GROUP_ID: lag_exporter_perf
       IMAGE: quay.io/app-sre/prometheus-kafka-consumer-group-exporter
-
 - name: lightbend-lag-exporter
   path: /deploys/openshift/lightbend-lag-exporter.yaml
   url: https://github.com/RedHatInsights/platform-mq
@@ -111,3 +143,21 @@ resourceTemplates:
     ref: master
     parameters:
       APPSRE_ENV: perf
+#- name: kafka-mirrormaker2
+#  path: /deploys/openshift/kafka-mirrormaker2.yaml
+#  url: https://github.com/RedHatInsights/platform-mq
+#  targets:
+#  - namespace:
+#      $ref: /services/insights/strimzi/namespaces/perf-platform-mq-perf.yml
+#    ref: master
+#    parameters:
+#      SRC_CLUSTER_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9093
+#      TGT_CLUSTER_BOOTSTRAP: XYZ
+#      MANAGED_KAFKA_CLIENT_ID: XYZ
+- name: kafka-superuser
+  path: /deploys/superuser.yaml
+  url: https://github.com/RedHatInsights/platform-mq
+  targets:
+  - namespace:
+      $ref: /services/insights/strimzi/namespaces/perf-platform-mq-perf.yml
+    ref: master

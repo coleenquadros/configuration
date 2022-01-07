@@ -7,12 +7,17 @@ name: ocm-stage-shared-resources
 description: shared resources for ocm stage namespaces
 
 openshiftResources:
-# the `telemeter.bearer` key in clusters-service is the telemeter-stage/uhc-prometheus-access SA's token
+- provider: vault-secret
+  path: app-interface/app-sre-stage/uhc-stage/clusters-service
+  version: 20
+  annotations:
+    qontract.recycle: "true"
 - provider: resource-template
   type: extracurlyjinja2
-  path: /services/ocm/stage/clusters-service.secret.yaml
+  path: /services/ocm/provision-shards.secret.yaml
   variables:
-    vault_secret_version: 19
+    aws_base_domain: s1.devshift.org
+    gcp_base_domain: s2.devshift.org
     shards:
     - id: 77d087e6-bf7f-11ea-a6df-8c1645a911be
       status: active
@@ -78,7 +83,8 @@ openshiftResources:
 
 openshiftServiceAccountTokens:
 # telemeter
-- namespace:
+- name: telemeter-bearer
+  namespace:
     $ref: /services/rhobs/telemeter/namespaces/telemeter-stage.yml
   serviceAccountName: uhc-prometheus-access
 # hive-stage-01

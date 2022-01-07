@@ -1,0 +1,14 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+overrides:
+  db_name: quay
+name: cronjob-check-build-queue
+namespace:
+  $ref: /services/quayio/namespaces/quayp05ue1.yml
+identifier: quayio-production-py3
+output: stdout
+schedule: 0 * * * *
+query: |
+  SELECT queue_name,  available_after, available, processing_expires, retries_remaining, state_id
+  FROM queueitem WHERE queue_name LIKE 'dockerfilebuild/%' ORDER BY queue_name;

@@ -27,7 +27,8 @@ for more than 5 minutes.
 Access required
 ---------------
 
-- Console access to the cluster (crcp01ue1) + namespace (tower-analytics-prod) pods are running in
+- Prod: Console access to the `Prod cluster`_ (crcp01ue1) + namespace (tower-analytics-prod) pods are running in
+- Stage: Console access to the `Stage cluster`_ (crcs02ue1) + namespace (tower-analytics-stage) pods are running in
 
 Steps
 -----

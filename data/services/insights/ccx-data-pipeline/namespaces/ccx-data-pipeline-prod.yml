@@ -89,3 +89,27 @@ terraformResources:
   overrides:
     monitoring_interval: 60
   enhanced_monitoring: true
+- provider: aws-iam-service-account
+  account: insights-prod
+  identifier: ccx-data-pipeline-prod-s3-reader
+  variables:
+    bucket: insights-buck-it-openshift
+    region: us-east-1
+    endpoint: s3.us-east-1.amazonaws.com
+  user_policy:
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": ["s3:ListBucket"],
+          "Resource": ["arn:aws:s3:::${bucket}"]
+        },
+        {
+          "Effect": "Allow",
+          "Action": ["s3:GetObject"],
+          "Resource": ["arn:aws:s3:::${bucket}/*"]
+        }
+      ]
+    }
+  output_resource_name: ccx-data-pipeline-prod-s3-reader

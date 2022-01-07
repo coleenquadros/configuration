@@ -214,6 +214,7 @@ Each user with this role can approve MRs by adding a `/lgtm` comment in the MR i
     - `ref`
     - `parameters`
     - `disable`
+    - `deployResources`
 - all tests are passing successfully
 - approving user is an owner of the saas file in a merged version in app-interface (prevent privilege escalation). [Read more](/docs/app-sre/sop/app-interface-integrations-flow-and-failure-scenarios.md)
 

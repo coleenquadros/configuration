@@ -1,0 +1,58 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: quickstarts
+  platform: insights
+
+name: quickstarts
+description: quickstarts app on the Insights Platform
+
+app:
+  $ref: /services/insights/quickstarts/app.yml
+
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-consoledot-experience
+
+managedResourceTypes:
+- ClowdApp
+- ConfigMap
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+    version: 3
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+
+resourceTemplates:
+- name: quickstarts
+  path: /deploy/clowdapp.yml
+  url: https://github.com/RedHatInsights/quickstarts
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+    parameters:
+      MIN_REPLICAS: 1
+  - namespace:
+      $ref: /services/insights/quickstarts/namespaces/quickstarts-stage.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-quickstarts-gh-build-main
+    parameters:
+      ENV_NAME: stage 
+      LOG_LEVEL: debug

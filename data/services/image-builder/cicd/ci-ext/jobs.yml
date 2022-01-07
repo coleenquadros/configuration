@@ -1,0 +1,43 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+labels:
+  service: image-builder
+
+name: ci-ext-image-builder-jobs
+
+description: ''
+
+app:
+  $ref: /services/image-builder/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+type: jobs
+
+config:
+- project:
+    name: composer
+    label: image-builder
+    node: app-sre
+    gh_org: osbuild
+    gh_repo: osbuild-composer
+    quay_org: app-sre
+    build_deploy_script_path: "./tools/appsre-build-deploy.sh"
+    jobs:
+    - gh-build-master:
+        branch: main
+        display_name: composer (image-builder) build-main
+- project:
+    name: worker-packer
+    label: image-builder
+    node: app-sre
+    gh_org: osbuild
+    gh_repo: osbuild-composer
+    build_deploy_script_path: "./tools/appsre-build-worker-packer.sh"
+    jobs:
+    - gh-build-main-packer:
+        branch: main
+        display_name: worker-packer (image-builder) build-main
+        slack_channel_notification: osbuild-image-builder-service

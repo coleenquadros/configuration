@@ -93,11 +93,17 @@ resourceTemplates:
   # Production
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
-    ref: 700a449fdc72d391b98571151565f2d8f8a20b00
+    ref: b55349a90491e82dd78ae3fc968a2909c8cbf54d
     promotion:
       auto: true
       subscribe:
       - cloudigrade-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: cloudigrade-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: cloudigrade-test
+          target_config_hash: 9c6fbe5f24171f01
+          type: parent_saas_config
     parameters:  # all other parameters have default values
       API_REPLICA_COUNT_MAX: '2'
       API_SENTRY_ENVIRONMENT: prod
@@ -155,3 +161,25 @@ resourceTemplates:
       auto: true
       subscribe:
       - postigrade-stage-deploy-success-channel
+      promotion_data:
+      - channel: postigrade-stage-deploy-success-channel
+        data:
+        - parent_saas: cloudigrade-clowder
+          target_config_hash: 9e0d766f33579a2a
+          type: parent_saas_config
+# Grafana dashboards
+- name: cloudigrade-dashboards
+  url: https://github.com/cloudigrade/cloudigrade
+  path: /dashboards
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml
+    ref: master
+  - namespace:
+      $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
+    ref: b55349a90491e82dd78ae3fc968a2909c8cbf54d
+    promotion:
+      auto: true
+      subscribe:
+      - cloudigrade-stage-post-deploy-tests-success-channel

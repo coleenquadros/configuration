@@ -24,9 +24,8 @@ Summary
 Access required
 ---------------
 
-- Console access to the `Prod cluster`_ (crcp01ue1) + namespace (tower-analytics-prod) pods are running in
-
-Note: Links below for stage can be slightly different in case this is an Alert for `Stage cluster`_
+- Prod: Console access to the `Prod cluster`_ (crcp01ue1) + namespace (tower-analytics-prod) pods are running in
+- Stage: Console access to the `Stage cluster`_ (crcs02ue1) + namespace (tower-analytics-stage) pods are running in
 
 Steps
 -----

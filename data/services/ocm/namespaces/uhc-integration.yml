@@ -32,12 +32,17 @@ sharedResources:
 - $ref: /services/ocm/shared-resources/common.yml
 
 openshiftResources:
-# the `telemeter.bearer` key in clusters-service is the telemeter-cache-stage/uhc-telemeter-cache-access SA's token
+- provider: vault-secret
+  path: app-interface/app-sre-stage/uhc-integration/clusters-service
+  version: 6
+  annotations:
+    qontract.recycle: "true"
 - provider: resource-template
   type: extracurlyjinja2
-  path: /services/ocm/integration/clusters-service.secret.yaml
+  path: /services/ocm/provision-shards.secret.yaml
   variables:
-    vault_secret_version: 4
+    aws_base_domain: i1.devshift.org
+    gcp_base_domain: i2.devshift.org
     shards:
     - id: e6bc4f5c-bb10-46e4-99d1-fc92b9f3df91
       status: active
@@ -136,6 +141,8 @@ terraformResources:
 - provider: aws-iam-service-account
   account: osd-privatelink-int
   identifier: ocm-sts-access
+  variables:
+    aws_role_arn: arn:aws:iam::896164604406:role/RH-Managed-OpenShift-Installer
   user_policy:
     {
       "Version": "2012-10-17",
@@ -156,7 +163,8 @@ terraformResources:
 
 openshiftServiceAccountTokens:
 # telemeter
-- namespace:
+- name: telemeter-bearer
+  namespace:
     $ref: /services/rhobs/telemeter/namespaces/telemeter-stage.yml
   serviceAccountName: uhc-prometheus-access
 # hivei01ue1

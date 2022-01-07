@@ -24,5 +24,6 @@ This includes:
 - app-interface build-master jobs
 - app-interface periodic jobs (integrations, saas-deploy triggers, e2e tests)
 - openshift-saas-deploy jobs
+- openshift-saas-deploy Tekton tasks
 
 In addition, disable the quay integrations in Unleash.

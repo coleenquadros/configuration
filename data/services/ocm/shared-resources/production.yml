@@ -7,11 +7,17 @@ name: ocm-production-shared-resources
 description: shared resources for ocm production namespaces
 
 openshiftResources:
+- provider: vault-secret
+  path: app-interface/app-sre/uhc-production/clusters-service
+  version: 25
+  annotations:
+    qontract.recycle: "true"
 - provider: resource-template
   type: extracurlyjinja2
-  path: /services/ocm/production/clusters-service.secret.yaml
+  path: /services/ocm/provision-shards.secret.yaml
   variables:
-    vault_secret_version: 23
+    aws_base_domain: p1.openshiftapps.com
+    gcp_base_domain: p2.openshiftapps.com
     shards:
     - id: 7c2626e2-da06-11ea-8f62-8c1645a911be
       status: active
@@ -96,7 +102,8 @@ openshiftResources:
 
 openshiftServiceAccountTokens:
 # telemeter
-- namespace:
+- name: telemeter-bearer
+  namespace:
     $ref: /services/rhobs/telemeter/namespaces/telemeter-production.yml
   serviceAccountName: uhc-prometheus-access
 # hivep01ue1

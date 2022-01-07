@@ -80,7 +80,7 @@ cat "$CONFIG_TOML" > ${WORK_DIR}/config/config.toml
 run_int gitlab-fork-compliance $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid app-sre && {
 
 ### gitlab-ci-skipper runs first to determine if other integrations should run
-[[ "$(run_int gitlab-ci-skipper $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid)" == "no" ]] && {
+[[ "$(run_int gitlab-ci-skipper $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid)" != "yes" ]] && {
 
 ## Run integrations on production
 ALIAS=saas-file-owners-no-compare run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid --no-compare &

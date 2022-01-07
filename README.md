@@ -90,6 +90,7 @@ this repository.
       - [Manage CloudWatch Log Groups via App-Interface (`/openshift/namespace-1.yml`)](#manage-cloudwatch-log-groups-via-app-interface-openshiftnamespace-1yml)
       - [Manage Key Management Service Keys via App-Interface (`/openshift/namespace-1.yml`)](#manage-key-management-service-keys-via-app-interface-openshiftnamespace-1yml)
       - [Manage Kinesis Streams via App-Interface (`/openshift/namespace-1.yml`)](#manage-kinesis-streams-via-app-interface-openshiftnamespace-1yml)
+      - [Manage AWS Autoscaling Group via App-Interface (`/openshift/namespace-1.yml`)](#manage-aws-autoscaling-group-via-app-interface-openshiftnamespace-1yml)
       - [Manage Application Load Balancers via App-Interface (`/openshift/cluster-1.yml`)](#manage-application-load-balancers-via-app-interface-openshiftcluster-1yml)
       - [Enable deletion of AWS resources in deletion protected accounts](#enable-deletion-of-aws-resources-in-deletion-protected-accounts)
     - [Manage VPC peerings via App-Interface (`/openshift/cluster-1.yml`)](#manage-vpc-peerings-via-app-interface-openshiftcluster-1yml)
@@ -866,10 +867,11 @@ openshiftServiceAccountTokens:
 - namespace:
     $ref: /services/<service>/namespaces/<namespace>.yml
   serviceAccountName: <serviceAccountName>
+  name: <name of the output resource to be created> # optional
 ```
 
 The integration will get the token belonging to that ServiceAccount and add it into a Secret called:
-`<clusterName>-<namespaceName>-<ServiceAccountName>`.
+`<clusterName>-<namespaceName>-<ServiceAccountName>`. This is the default name unless `name` is defined.
 The Secret will have a single key called `token`, containing a token of that ServiceAccount.
 
 ### Enable network traffic between Namespaces via App-Interface (`/openshift/namespace-1.yml`)
@@ -1834,6 +1836,38 @@ The Secret will contain the following fields:
 - `aws_region` - The name of the stream's AWS region.
 - `aws_access_key_id` - The access key ID.
 - `aws_secret_access_key` - The secret access key.
+
+#### Manage AWS Autoscaling Group via App-Interface (`/openshift/namespace-1.yml`)
+
+[AWS Autoscaling Group](https://aws.amazon.com/autoscaling/) monitors your applications and automatically adjusts capacity to maintain steady, predictable performance at the lowest possible cost.
+
+In order to add or update an Autoscaling Group, you need to add them to the `terraformResources` field.
+
+- `provider`: must be `asg`
+- `account`: The AWS account you want to import certificates in.
+- `identifier` - name of asg to create (or update)
+- `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options](https://github.com/app-sre/qontract-schemas/blob/main/schemas/aws/asg-defaults-1.yml)
+- `variables`: list of key-value pairs to use for templating of `cloudinit_configs`.
+- `cloudinit_configs` - List of multiple parts which adds a file to the generated cloud-init configuration.
+  - `filename` - (Optional) A filename to report in the header for the part.
+  - `content_type` - (Optional) A MIME-style content type to report in the header for the part.
+  - `content` - path relative to [resources](/resources) to a file with body content for the part. Supported `extracurlyjinja2` templates (will be replaced with correct values at run time) with following example delimiters: 
+    - `{{{ aws_region }}}`
+    - `{{{ aws_account_id }}}`
+    - `{{{ key from variables }}}`
+    - `{{{ vault(path, key) }}}`
+    - `{{% jinja func %}}`
+- `output_resource_name`: name of Kubernetes Secret to be created.
+  - `output_resource_name` must be unique across a single namespace (a single secret can **NOT** contain multiple outputs).
+  - If `output_resource_name` is not defined, the name of the secret will be `<identifier>-<provider>`.
+    - For example, for a resource with `identifier` "my-app" and `provider` is set to `asg`, the created Secret will be called `my-app-asg`.
+- `annotations`: additional annotations to add to the output resource
+
+Once the changes are merged, the Autoscaling Group will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
+
+The Secret will contain the following fields:
+
+- `template_latest_version` - The latest version of the launch template.
 
 #### Manage Application Load Balancers via App-Interface (`/openshift/cluster-1.yml`)
 
