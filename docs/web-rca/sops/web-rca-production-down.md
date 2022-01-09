@@ -1,10 +1,10 @@
-# Web RCA stage Down
+# Web RCA production Down
 
 ## Severity: Low
 
 ## Impact
 
-- The WebRCA UI stage would be down at https://web-rca.stage.devshift.net/.
+- The WebRCA UI would be down at https://web-rca.devshift.net/.
 
 ## Summary
 
