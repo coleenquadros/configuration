@@ -101,7 +101,7 @@ Pre-requisites actions:
     - ci.int: [RITM1040558](https://redhat.service-now.com/help?id=rh_ticket&table=sc_req_item&sys_id=ffb8dcac1b888510c57c3224cc4bcb4f)
     - ci.ext: [RITM1040559](https://redhat.service-now.com/help?id=rh_ticket&table=sc_req_item&sys_id=afc8d4ec1b888510c57c3224cc4bcbe7)
   - Install Jenkins plugins for SAML v2 and Role-Based authorization strategy
-- Todo as of 2022-01-07:
+- TODO as of 2022-01-07:
   - Ensure necessary robotic accounts and tokens are accessible (local to Jenkinses) and referenced in Vault
     - Backup users
     - Use the [script](#local-users-and-token-handling) to generate a token
@@ -109,7 +109,7 @@ Pre-requisites actions:
     - Update app-interface to reference the new secret version
   - Prepare a MR for each Jenkins ci.int and ci.ext to grant permissions to `org_username` and the bot.
     - ci.ext: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/31129/diffs
-    - ci.int: todo
+    - ci.int: TODO
 
 Each Jenkins migration will follow those steps:
 - Disable the `jenkins-roles` integration
