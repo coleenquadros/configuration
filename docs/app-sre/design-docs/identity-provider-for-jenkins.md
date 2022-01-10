@@ -93,7 +93,7 @@ Permission management could be based on groups from Red Hat SSO. However, the SS
 
 ## Milestones
 Pre-requisites actions:
-- Done as of 2022-01-07:
+- Done as of 2022-01-10:
   - Test on our POC instance `sso-poc.int.devshift.net`
     - authentication
     - role-based strategy authorization via app-interface
@@ -102,12 +102,11 @@ Pre-requisites actions:
     - ci.int: [RITM1040558](https://redhat.service-now.com/help?id=rh_ticket&table=sc_req_item&sys_id=ffb8dcac1b888510c57c3224cc4bcb4f)
     - ci.ext: [RITM1040559](https://redhat.service-now.com/help?id=rh_ticket&table=sc_req_item&sys_id=afc8d4ec1b888510c57c3224cc4bcbe7)
   - Install Jenkins plugins for SAML v2 and Role-Based authorization strategy
-- TODO as of 2022-01-07:
-  - Ensure necessary robotic accounts and tokens are accessible (local to Jenkinses) and referenced in Vault
+  - Ensure necessary robotic accounts and tokens are accessible (local to Jenkinses) and referenced in Vault ([APPSRE-4224](https://issues.redhat.com/browse/APPSRE-4224))
     - Backup users
     - Use the [script](#local-users-and-token-handling) to generate a token
     - Update [Vault](https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-ext/jjb-ini)
-    - Update app-interface to reference the new secret version
+- TODO as of 2022-01-10:
   - Prepare a MR for each Jenkins ci.int and ci.ext to grant permissions to `org_username` and the bot.
     - ci.ext: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/31129/diffs
     - ci.int: TODO
@@ -203,4 +202,4 @@ Those accounts have also been found but don't seem to be used. To be confirmed !
     - Then update Vault data in https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/app-sre-ci-trigger-jobs-bot
 - `&ci_jenkins_token` reference
   - Referenced in `app-interface` in `resources/jenkins/managed-services/secrets.yaml`
-  - May not be for ci-int / ci-ext jenkinses since it's about cpaas in there.
+  - Related to cpaas, **not** to ci-int / ci-ext.
