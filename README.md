@@ -98,6 +98,7 @@ this repository.
     - [Manage Jenkins jobs configurations using jenkins-jobs](#manage-jenkins-jobs-configurations-using-jenkins-jobs)
     - [Delete AWS IAM access keys via App-Interface](#delete-aws-iam-access-keys-via-app-interface)
     - [Reset AWS IAM user passwords via App-Interface](#reset-aws-iam-user-passwords-via-app-interface)
+      - [Behind the scenes](#behind-the-scenes)
     - [AWS garbage collection](#aws-garbage-collection)
     - [GitHub user profile compliance](#github-user-profile-compliance)
     - [Manage GitLab group members](#manage-gitlab-group-members)
@@ -1513,7 +1514,22 @@ In order to add or update an S3 bucket, you need to add them to the `terraformRe
 - `identifier` - name of resource to create (or update)
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options:](/resources/terraform/resources/)
 - `overrides`: list of values from `defaults` you wish to override, with the override values. For example: `acl: public`.
-- `sqs_identifier`: identifier of a existing sqs queue. It will create a s3 notifacation to that sqs queue. This field is optional.
+- `event_notifications`(Optional): a list of configurations to create S3 notification to SQS or SNS. It can contain the following fields:
+  - `destination_type`: can be `sns` or `sqs`.
+  - `destination`: can be either the name of the queue/topic or its arn.
+  - `event_type`: a list of events such as `s3:ObjectCreated:*`. 
+  - `filter_prefix`(Optional): Prefix filter for the target's name.
+  - `filter_suffix`(Optional): Suffix filter for the target's name.
+  
+  Example of `event_notifications`: 
+  ```
+  event_notifications:
+      - destination_type: sns
+        destination: arn:aws:sns:us-east-1:123456789:test-sns-1
+        event_type: 
+          - s3:ObjectCreated:*
+  ```
+- `sqs_identifier`(Deprecating soon, please use `event_notifications`): identifier of a existing sqs queue. It will create a s3 notifacation to that sqs queue. This field is optional.
 - `s3_events`: a listing of the event types for sqs queue.
 - `bucket_policy`: an AWS bucket policy to create and attach to the s3 bucket.
 - `output_resource_name`: name of Kubernetes Secret to be created.
