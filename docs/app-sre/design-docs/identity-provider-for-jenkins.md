@@ -9,6 +9,7 @@
   - [Proposal](#proposal)
   - [Alternatives considered](#alternatives-considered)
   - [Milestones](#milestones)
+    - [Rollback](#rollback)
   - [Additional information](#additional-information)
     - [Local users and token handling](#local-users-and-token-handling)
     - [Robotic accounts being used prior to the migration:](#robotic-accounts-being-used-prior-to-the-migration)
@@ -131,6 +132,13 @@ Post-migration cleanup (To be checked if that can really be done after, or if gi
 - Backup the Jenkins users
 - Remove all GitHub users from the users folder
   - https://gitlab.cee.redhat.com/-/snippets/4635
+
+
+### Rollback
+If we face any issue, we can rollback by following those steps:
+- `systemctl stop jenkins`
+- restore the Jenkins config and users folder from the backup
+- `systemctl start jenkins`
 
 
 ## Additional information
