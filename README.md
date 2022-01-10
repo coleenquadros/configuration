@@ -2056,21 +2056,21 @@ To reset a user's password in an AWS account, submit a MR with a new entry to th
   requestId: <some_unique_value_without_spaces>
 ```
 
-The user's new password should appear GPG encrypted within 30 minutes in app-interface-output: [terraform-users-credentials](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/terraform-users-credentials.md) and also via email.
+The user's new password should appear GPG encrypted within 30 minutes in app-interface-output repository: [terraform-users-credentials](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/terraform-users-credentials.md) and also via email.
 
 To decrypt password: `echo <password> | base64 -d | gpg -d - && echo` (you will be asked to provide your passphrase to unlock the secret)
 
 This operation will also reset any existing virtual MFA devices.
 
-Behind the scenes:
+#### Behind the scenes
 
 Once the MR is merged, an integration called `aws-iam-password-reset` will delete the user's login profile. At this point, the user can not login to the account.
 
 A different integration, called `terraform-users` will realize that the user does not have a login profile and will re-create it. At this point, the user has a new random password.
 
-The curious reader can follow #sd-app-sre-reconcile to see when these two actions have completed.
+The curious reader can follow [#sd-app-sre-reconcile](https://coreos.slack.com/archives/CS0E65QCV) to see when these two actions have completed.
 
-Once the new password is in place, it needs to be picked up by a app-interface-output by a qontract-cli command called `terraform-users-credentials` (the repository is refreshed once every 10 minutes).
+Once the new password is in place, it needs to be picked up by an app-interface-output created by a `qontract-cli` command called `terraform-users-credentials` (the repository is refreshed once every 10 minutes).
 
 ### AWS garbage collection
 
