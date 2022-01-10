@@ -113,8 +113,7 @@ Pre-requisites actions:
 
 Each Jenkins migration will follow those steps:
 - Disable the `jenkins-roles` integration
-- Backup Jenkins configuration and users folder
-  - 
+- Backup/Tar Jenkins configuration and `users` folders from `/var/lib/jenkins`
 - Configure SAMLv2 and Role-based strategy in the UI
 - Ensure the main bot account `app-sre-bot`
   - has a token
