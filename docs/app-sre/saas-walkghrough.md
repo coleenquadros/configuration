@@ -118,11 +118,9 @@ on its manifests and openshift-saas-deploy-configs integration runs the jobs.
 ![Saas workflow](assets/auto_promotion_flow_1.png)
 
 This has an important drawback; We might want to run jobs when a configuration change is introduced in the SAAS target, independently of the REF on the repository.
-E,G updating a PARAM on a target will trigger that target, but the automatic subscribed targets won't be triggered because the REF is not updated.
+e,g: updating a PARAM on a target will trigger that target, but the automatic subscribed targets won't be triggered because the REF is not updated and the autopromotion MR will not have any change.
 
-To solve this problem, the `promotion_data` section has been introduced. The idea is to track the configuration data of the pusblisher target on the subscribed ones. With this approach, the autopromoter
-adds a hash of the publisher target configuration on the subscriber SAAS target. This causes that any change in the publisher target will cause a change in the subscriber target, even if the REF is not updated,
-the configuration hash will differ, and the promotion MR will have changes to promote.
+To solve this problem, the `promotion_data` section has been introduced. The idea is to track the configuration data of the publisher target on the subscribed ones by adding a configuration hash. With this approach, any change introduced in the publisher target will change the subscriber target. Even if the REF is not updated the configuration hash will differ, and the promotion MR will have changes to promote.
 
 ![Saas workflow](assets/auto_promotion_flow_2.png)
 
