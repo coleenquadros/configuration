@@ -67,8 +67,6 @@ detects any changes and will trigger deployments.
 
 Again [state](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/utils/state.py) is used to store previously seen jobs.
 
-
-
 ### Deploying
 When one of the mentioned deployment triggers did it's job, the `openshift-saas-deploy` integration is driving the
 deployment process for a specific sass-file and environment combination.
@@ -96,8 +94,7 @@ This declares the current commit sha as either successful or failed for subscrib
 `openshift-saas-deploy` run (see [validate_promotions](https://github.com/app-sre/qontract-reconcile/blob/5e170ef4b372f158b2c3e1d44afd198f78e0e81f/reconcile/openshift_saas_deploy.py#L131)).
 
 **IMPORTANT NOTE:**
- * `validate_promotions` runs in the pr-check step when a MR is raised for a SAAS file. The MR will be merged only if `validate_promotions` ends successfully, which ensures that the publisher JOB has run successfully
-   for the same REF.
+ * `validate_promotions` runs in the pr-check step when a MR is raised for a SAAS file. The MR will be merged only if `validate_promotions` ends successfully, which ensures that the publisher job has run successfully for the same `ref`.
 
 It is important to understand, that publishing a successful deployment does not trigger a deployment for subscribed
 targets. It just allows such deployments to happen if their `ref` moves to the same sha.
@@ -107,16 +104,14 @@ procedure creates a merge request on the `saas` file of the subscribed `target` 
 commit sha ([see here](https://github.com/app-sre/qontract-reconcile/blob/5e170ef4b372f158b2c3e1d44afd198f78e0e81f/reconcile/utils/mr/auto_promoter.py#L53)).
 
 #### Automated Promotions with configuration changes
-SAAS deployment workflows via promotions are intented to work by updating the REF on its targets.
-Basically, when a change is introduced in a repo (commit C), the flow starts running the jobs with (C) as a REF. Then the subscribed targets are promoted by updating the REF
-on its manifests and openshift-saas-deploy-configs integration runs the jobs.
+Saas deployment workflows via promotions are intented to work by updating the `ref` on its targets. Basically, when a job with an automatic promotion runs, a new merge request is raised updating the `ref` value in the subscribed Saas target. Once the merge request is merged, `openshift-saas-deploy-trigger-configs` will detect a change in the saas file and it will trigger the deployment jobs.
 
 ![Saas workflow](assets/auto_promotion_flow_1.png)
 
-This has an important drawback; We might want to run jobs when a configuration change is introduced in the SAAS target, independently of the REF on the repository.
-e,g: updating a PARAM on a target will trigger that target, but the automatic subscribed targets won't be triggered because the REF is not updated and the autopromotion MR will not have any change.
+This has an important drawback: we might want to run jobs when a configuration change is introduced in the SAAS target, independently of the `ref`.
+e,g: updating a PARAM on a target will trigger that target, but the automatic subscribed targets won't be triggered because the `ref` is not updated and the autopromotion MR will not have any change.
 
-To solve this problem, the `promotion_data` section has been introduced. The idea is to track the configuration data of the publisher target on the subscribed ones by adding a configuration hash. With this approach, any change introduced in the publisher target will change the subscriber target. Even if the REF is not updated the configuration hash will differ, and the promotion MR will have changes to promote.
+To solve this problem, the `promotion_data` section has been introduced. The idea is to track the configuration data of the publisher target on the subscribed ones by adding a configuration hash. With this approach, any change introduced in the publisher target will change the subscriber target. Even if the `ref` is not updated the configuration hash will differ, and the promotion merge request will have changes to promote.
 
 ![Saas workflow](assets/auto_promotion_flow_2.png)
 
