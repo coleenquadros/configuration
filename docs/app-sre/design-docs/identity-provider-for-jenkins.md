@@ -93,7 +93,7 @@ Permission management could be based on groups from Red Hat SSO. However, the SS
 
 ## Milestones
 Pre-requisites actions:
-- Done as of 2022-01-10:
+- Done as of 2022-01-11:
   - Test on our POC instance `sso-poc.int.devshift.net`
     - authentication
     - role-based strategy authorization via app-interface
@@ -106,21 +106,22 @@ Pre-requisites actions:
     - Backup users
     - Use the [script](#local-users-and-token-handling) to generate a token
     - Update [Vault](https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-ext/jjb-ini)
-- TODO as of 2022-01-10:
+  - Create a local user/password `sso-migration` for the time of the migration, with admin privileges: [APPSRE-4243](https://issues.redhat.com/browse/APPSRE-4243)
+- TODO as of 2022-01-11:
   - Prepare a MR for each Jenkins ci.int and ci.ext to grant permissions to `org_username` and the bot.
     - ci.ext: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/31129/diffs
     - ci.int: TODO
 
 Each Jenkins migration will follow those steps:
-- Disable the `jenkins-roles` integration
 - Backup/Tar Jenkins configuration and `users` folders from `/var/lib/jenkins`
 - Configure SAMLv2 and Role-based strategy in the UI
+  - admin permissions to be granted to `app-sre-bot`, `sso-migration` and some SRE users
 - Ensure the main bot account `app-sre-bot`
   - has a token
   - is correctly updated in Vault and referenced in app-interface
   - is granted the admin role
-- Merge the MR to update all permissions
-- Re-enable the `jenkins-roles` integration
+- test login with one of the users set as admin. This should now be using SSO auth
+- /retest and merge the MR to update all permissions
   - This should assign all app-interface users to a role
 
 Verify everything runs fine:
@@ -129,6 +130,7 @@ Verify everything runs fine:
 
 Post-migration cleanup (To be checked if that can really be done after, or if github users need to be cleaned up prior to switching to SAML SSO)
 - Backup the Jenkins users
+- Remove the local user `sso-migration` created previously
 - Remove all GitHub users from the users folder
   - https://gitlab.cee.redhat.com/-/snippets/4635
 
@@ -189,7 +191,7 @@ Those Jenkins automation accounts were found. We're listing them and defining wh
   - Found in ci-ext with a relatively high `useCounter` in `/var/lib/jenkins/users/iqebot_5597982201466808634/apiTokenStats.xml`
   - ci-ext link: https://ci.ext.devshift.net/user/iqe-bot/
   - Referenced in app-interface in `/data/teams/insights/bots/iqe-sitreps-bot.yml`
-  - :warning: No idea where the token is referenced in Vault nor where it is used. Andreu is awaiting confirmation that this bot is actually obsolete and can be removed.
+  - :warning: No idea where the token is referenced in Vault nor where it is used. Andreu was told this is not used anymore, but we see token usage counts increasing in `apiTokenStats.xml`. Andreu will double-check.
 
 Those accounts have also been found but don't seem to be used. To be confirmed !
 - `app-sre-ci-trigger-jobs-bot`
