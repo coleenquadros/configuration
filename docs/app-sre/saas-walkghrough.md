@@ -60,11 +60,7 @@ defined in `target.upstream` and triggers a deployment as a result. For details 
 
 Again [state](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/utils/state.py) is used to store previously seen jobs.
 
-<<<<<<< HEAD
-#### Config change
-=======
 #### Config changes
->>>>>>> 90a3a158a7 (Add Docs on saas auto promotion)
 The `openshift-saas-deploy-trigger-configs` integration is the entrypoint to detect config changes for the saas file, the targets and
 attached namespaces. [This code](https://github.com/app-sre/qontract-reconcile/blob/f1b12fec8797b3f2f5fcaf50acf55841e60d7b6e/reconcile/utils/saasherder.py#L1081-L1128)
 detects any changes and will trigger deployments.
