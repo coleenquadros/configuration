@@ -70,9 +70,10 @@ tests:
     # 30m - 39m   15% too slow, 85% ok  <-- we should see alerts start in here
     # 40m - 59m   0% too slow, 100% ok  <-- we should see alerts stop in here
     - series: 'api_3scale_gateway_api_time_bucket{environment="prod", exported_service="cloudigrade", le="+Inf"}'
+      # Remember that the "+Inf" bucket is a superset of "4000.0", etc. and should always be "100%" of requests.
       # these effectively expand to
-      # (0..0)(0%) (1..10)(1%) (19..100)(9%) (115..250)(15%) (250..250)(0%)
-      values: "0+0x9 1+1x9 19+9x9 115+15x9 250+0x9"
+      # (0..900)(0%) (1000..1900)(100%) (2000..2900)(100%) (3000..3900)(100%) (4000..4900)(100%)
+      values: "0+100x9 1000+100x9 2000+100x9 3000+100x9 4000+100x9"
     - series: 'api_3scale_gateway_api_time_bucket{environment="prod", exported_service="cloudigrade", le="4000.0"}'
       # these effectively expand to
       # (0..900)(100%) (999..1890)(99%) (1981..2800)(91%) (2885..3560)(85%) (3750..4650)(100%)
@@ -108,7 +109,7 @@ tests:
             exp_annotations:
               dashboard: "https://grafana.app-sre.devshift.net/d/O6v4rMpizda/cloudigrade?orgId=1&var-datasource=crcp01ue1-prometheus&var-namespace=cloudigrade-prod"
               link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/cloudigrade-prod/deployments/cloudigrade-api"
-              message: "cloudigrade: slow responses observed; response time > 4 seconds for more than 10% of requests the last 5 minutes in prod environment."
+              message: "cloudigrade: slow responses observed; more than 10% of requests with response time > 4 seconds for the last 5 minutes in prod environment."
               runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/cloudigrade/cloudigrade-alert-slow.md"
       - eval_time: 50m
         alertname: cloudigrade-prod-slow-responses
