@@ -96,7 +96,7 @@ This declares the current commit sha as either successful or failed for subscrib
 `openshift-saas-deploy` run (see [validate_promotions](https://github.com/app-sre/qontract-reconcile/blob/5e170ef4b372f158b2c3e1d44afd198f78e0e81f/reconcile/openshift_saas_deploy.py#L131)).
 
 **IMPORTANT NOTE:**
- * validate_promotions runs in the pr-check step when a MR is raised for a SAAS file. the MR will be merged only if validate_promotions ends sucessfully, which ensures that the pusblisher JOB has run succesfully
+ * `validate_promotions` runs in the pr-check step when a MR is raised for a SAAS file. The MR will be merged only if `validate_promotions` ends successfully, which ensures that the publisher JOB has run successfully
    for the same REF.
 
 It is important to understand, that publishing a successful deployment does not trigger a deployment for subscribed
