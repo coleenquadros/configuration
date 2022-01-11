@@ -60,12 +60,18 @@ defined in `target.upstream` and triggers a deployment as a result. For details 
 
 Again [state](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/utils/state.py) is used to store previously seen jobs.
 
+<<<<<<< HEAD
 #### Config change
+=======
+#### Config changes
+>>>>>>> 90a3a158a7 (Add Docs on saas auto promotion)
 The `openshift-saas-deploy-trigger-configs` integration is the entrypoint to detect config changes for the saas file, the targets and
 attached namespaces. [This code](https://github.com/app-sre/qontract-reconcile/blob/f1b12fec8797b3f2f5fcaf50acf55841e60d7b6e/reconcile/utils/saasherder.py#L1081-L1128)
 detects any changes and will trigger deployments.
 
 Again [state](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/utils/state.py) is used to store previously seen jobs.
+
+
 
 ### Deploying
 When one of the mentioned deployment triggers did it's job, the `openshift-saas-deploy` integration is driving the
@@ -93,12 +99,32 @@ On promotion, the success of the current deployment is stored in the qontract-re
 This declares the current commit sha as either successful or failed for subscribed targets to read during their
 `openshift-saas-deploy` run (see [validate_promotions](https://github.com/app-sre/qontract-reconcile/blob/5e170ef4b372f158b2c3e1d44afd198f78e0e81f/reconcile/openshift_saas_deploy.py#L131)).
 
+**IMPORTANT NOTE:**
+ * validate_promotions runs in the pr-check step when a MR is raised for a SAAS file. the MR will be merged only if validate_promotions ends sucessfully, which ensures that the pusblisher JOB has run succesfully
+   for the same REF.
+
 It is important to understand, that publishing a successful deployment does not trigger a deployment for subscribed
 targets. It just allows such deployments to happen if their `ref` moves to the same sha.
 
 For automated promotion to happen, a target must subscribe with `promotion.auto: true`. In this case the publishing
 procedure creates a merge request on the `saas` file of the subscribed `target` to update the `ref` to the successful
 commit sha ([see here](https://github.com/app-sre/qontract-reconcile/blob/5e170ef4b372f158b2c3e1d44afd198f78e0e81f/reconcile/utils/mr/auto_promoter.py#L53)).
+
+#### Automated Promotions with configuration changes
+SAAS deployment workflows via promotions are intented to work by updating the REF on its targets.
+Basically, when a change is introduced in a repo (commit C), the flow starts running the jobs with (C) as a REF. Then the subscribed targets are promoted by updating the REF
+on its manifests and openshift-saas-deploy-configs integration runs the jobs.
+
+![Saas workflow](assets/auto_promotion_flow_1.png)
+
+This has an important drawback; We might want to run jobs when a configuration change is introduced in the SAAS target, independently of the REF on the repository.
+E,G updating a PARAM on a target will trigger that target, but the automatic subscribed targets won't be triggered because the REF is not updated.
+
+To solve this problem, the `promotion_data` section has been introduced. The idea is to track the configuration data of the pusblisher target on the subscribed ones. With this approach, the autopromoter
+adds a hash of the publisher target configuration on the subscriber SAAS target. This causes that any change in the publisher target will cause a change in the subscriber target, even if the REF is not updated,
+the configuration hash will differ, and the promotion MR will have changes to promote.
+
+![Saas workflow](assets/auto_promotion_flow_2.png)
 
 ## Example delivery pipeline with triggers and promotions
 All the described building blocks can be put together to build high sophisticated CI/CD pipelines. A good example
