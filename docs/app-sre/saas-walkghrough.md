@@ -128,7 +128,7 @@ But since the staging target also defines a reference to a jenkins job, it is th
 finished. The jenkins job itself has been triggered via a webhook event from the merge into master in the Github
 repo ([see this](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/github-mirror/cicd/build.yaml)).
 
-The triggerd `openshift-saas-deploy` integration run tries to figure out if a deployment is required by processing the
+The triggered `openshift-saas-deploy` integration run tries to figure out if a deployment is required by processing the
 [github-mirror template](https://github.com/geoberle/github-mirror/blob/master/openshift/github-mirror.yaml) and comparing
 it to the currently deployed resources in Openshift. Amongst various variables, the template also specified `IMAGE_TAG`
 as a variable in the deployment. This variable is provided based on the first 7 digits of the commit sha. This means,
