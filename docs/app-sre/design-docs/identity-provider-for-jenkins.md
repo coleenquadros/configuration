@@ -82,7 +82,7 @@ Using the Jenkins [role-based strategy](https://plugins.jenkins.io/role-strategy
   - Job / Build
   - Job / Cancel
 
-We will reuse the two existing robotic account app-sre-bot. On ci.int, this is a local Jenkins account, with a token, so nothing needs to be changed. On ci.ext, this account is based on github authentication. We will need to set a local token on this account and update [Vault](https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-ext/jjb-ini) accordingly
+We will reuse the two existing robotic account `app-sre-bot`. On ci.int, this is a local Jenkins account, with a token, so nothing needs to be changed. On ci.ext, this account is based on github authentication. We will need to set a local token on this account and update [Vault](https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-ext/jjb-ini) accordingly
 
 
 ## Alternatives considered
@@ -116,12 +116,13 @@ Each Jenkins migration will follow those steps:
 - Backup/Tar Jenkins configuration and `users` folders from `/var/lib/jenkins`
 - Configure SAMLv2 and Role-based strategy in the UI
   - admin permissions to be granted to `app-sre-bot`, `sso-migration` and some SRE users
+  - grant the `job-control` role to all `authenticated`. This permission will allow everyone to run jobs. This will allow every Red Hatter to control jobs, until we get the permissions set by the integrations, reducing the timeframe during which people loose that access.
 - Ensure the main bot account `app-sre-bot`
   - has a token
   - is correctly updated in Vault and referenced in app-interface
   - is granted the admin role
 - test login with one of the users set as admin. This should now be using SSO auth
-- /retest and merge the MR to update all permissions
+- `/retest` and merge the MR to update all permissions
   - This should assign all app-interface users to a role
 
 Verify everything runs fine:
@@ -130,7 +131,7 @@ Verify everything runs fine:
 
 Post-migration cleanup (To be checked if that can really be done after, or if github users need to be cleaned up prior to switching to SAML SSO)
 - Backup the Jenkins users
-- Remove the local user `sso-migration` created previously
+- Remove the local user `sso-migration` created previously and cleanup the corresponding data in Vault
 - Remove all GitHub users from the users folder
   - https://gitlab.cee.redhat.com/-/snippets/4635
 
