@@ -191,3 +191,55 @@ tests:
         dashboard: "https://grafana.app-sre.devshift.net/d/FRmd1NeWk1/cloud-connector?orgId=1"
         link_url: "https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/goto/65ca3ce87c38e6cb2ef5e806fdb8252c"
         message: "Cloud-Connector Alert.  Inventory message publish failure rate is high."
+
+
+# CloudConnectorInventoryStaleTimestampUpdaterFailure
+- interval: 1m
+  input_series:
+    - series: 'kube_pod_status_phase{phase="Failed", namespace="cloud-connector-prod", pod="cloud-connector-stale-timestamp-updater-pod-2"}'
+      values: '0+0x4 1+0x4 0+0x160'
+  alert_rule_test:
+    - eval_time: 3m
+      alertname: CloudConnectorInventoryStaleTimestampUpdaterFailure
+    - eval_time: 8m
+      alertname: CloudConnectorInventoryStaleTimestampUpdaterFailure
+      exp_alerts:
+        - exp_labels:
+            severity: info
+            service: insights
+            env: prod
+            app_team: data-pipeline
+            namespace: cloud-connector-prod
+            pod: cloud-connector-stale-timestamp-updater-pod-2
+          exp_annotations:
+            dashboard: "https://grafana.app-sre.devshift.net/d/c91dcda039618ded/cloud-connector?orgId=1&var-datasource=crcp01ue1-prometheus"
+            link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/cloud-connector-prod/deployments"
+            message: "cloud-connector-prod Inventory Stale Timestamp Updater Failed | cloud-connector-stale-timestamp-updater-pod-2 failed to run"
+    - eval_time: 120m
+      alertname: CloudConnectorInventoryStaleTimestampUpdaterFailure
+
+
+# CloudConnectorConnectionCountReporterFailure
+- interval: 1m
+  input_series:
+    - series: 'kube_pod_status_phase{phase="Failed", namespace="cloud-connector-prod", pod="cloud-connector-connection-per-account-reporter-pod-47"}'
+      values: '0+0x4 1+0x4 0+0x160'
+  alert_rule_test:
+    - eval_time: 3m
+      alertname:  CloudConnectorConnectionCountReporterFailure
+    - eval_time: 8m
+      alertname:  CloudConnectorConnectionCountReporterFailure
+      exp_alerts:
+        - exp_labels:
+            severity: info
+            service: insights
+            env: prod
+            app_team: data-pipeline
+            namespace: cloud-connector-prod
+            pod: cloud-connector-connection-per-account-reporter-pod-47
+          exp_annotations:
+            dashboard: "https://grafana.app-sre.devshift.net/d/c91dcda039618ded/cloud-connector?orgId=1&var-datasource=crcp01ue1-prometheus"
+            link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/cloud-connector-prod/deployments"
+            message: "cloud-connector-prod Connection Count Reporter Failed | cloud-connector-connection-per-account-reporter-pod-47 failed to run"
+    - eval_time: 120m
+      alertname: CloudConnectorConnectionCountReporterFailure
