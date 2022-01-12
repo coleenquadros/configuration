@@ -109,7 +109,7 @@ Saas deployment workflows via promotions are intented to work by updating the `r
 ![Saas workflow](assets/auto_promotion_flow_1.png)
 
 This has an important drawback: we might want to run jobs when a configuration change is introduced in the SAAS target, independently of the `ref`.
-e,g: updating a PARAM on a target will trigger that target, but the automatic subscribed targets won't be triggered because the `ref` is not updated and the autopromotion MR will not have any change.
+e.g.: updating one of the `parameters` on a target will trigger a deployment on that target, but the automatic subscribed targets won't be triggered because the `ref` is not updated and the autopromotion MR will not have any change.
 
 To solve this problem, the `promotion_data` section has been introduced. The idea is to track the configuration data of the publisher target on the subscribed ones by adding a configuration hash. With this approach, any change introduced in the publisher target will change the subscriber target. Even if the `ref` is not updated the configuration hash will differ, and the promotion merge request will have changes to promote.
 
