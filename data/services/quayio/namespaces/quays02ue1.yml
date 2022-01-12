@@ -228,18 +228,24 @@ terraformResources:
   targets:
   - name: quayio-stage-py2
     default: true
-    weights:
-      read: 0
-      write: 100
     openshift_service: quay-load-balancer-service
   - name: quayio-stage-py3
     default: false
-    weights:
-      read: 100
-      write: 0
     openshift_service: quay-py3-load-balancer-service
-  paths:
-    read:
-    - /v2/*
-    write:
-    - /v2/auth*
+  rules:
+  - condition:
+      path: /v2/auth*
+    action:
+      - target: quayio-stage-py2
+        weight: 100
+      - target: quayio-stage-py3
+        weight: 0
+  - condition:
+      path: /v2/*
+      methods: read
+    action:
+    - target: quayio-stage-py2
+      weight: 0
+    - target: quayio-stage-py3
+      weight: 100
+

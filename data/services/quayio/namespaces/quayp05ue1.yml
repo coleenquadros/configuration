@@ -250,16 +250,16 @@ terraformResources:
   targets:
   - name: quayio-production-py2
     default: true
-    weights:
-      read: 100
-      write: 100
     openshift_service: quay-load-balancer-service
   - name: quayio-production-py3
     default: false
-    weights:
-      read: 0
-      write: 0
     openshift_service: quay-py3-load-balancer-service
-  paths:
-    read:
-    - /v2/*
+  rules:
+  - condition:
+      path: /v2/*
+      methods: read
+    action:
+    - target: quayio-production-py2
+      weight: 100
+    - target: quayio-production-py3
+      weight: 0
