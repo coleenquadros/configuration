@@ -111,9 +111,12 @@ Saas deployment workflows via promotions are intented to work by updating the `r
 This has an important drawback: we might want to run jobs when a configuration change is introduced in the SAAS target, independently of the `ref`.
 e.g.: updating one of the `parameters` on a target will trigger a deployment on that target, but the automatic subscribed targets won't be triggered because the `ref` is not updated and the autopromotion MR will not have any change.
 
-To solve this problem, the `promotion_data` section has been introduced. The idea is to track the configuration data of the publisher target on the subscribed ones by adding a configuration hash. With this approach, any change introduced in the publisher target will change the subscriber target. Even if the `ref` is not updated the configuration hash will differ, and the promotion merge request will have changes to promote.
+To solve this problem, the `promotion_data` section has been introduced. The idea is to track the configuration data of the publisher target on the subscribed targets by adding a computed hash of configuration in the promotion merge request. With this approach, any change introduced in the publisher target will change the subscriber target even if the `ref` is not updated. The configuration hash will differ, and the promotion merge request will have changes to promote.
 
 ![Saas workflow](assets/auto_promotion_flow_2.png)
+
+`promotion_data` is a list of objects grouped by channel. Each channel comes from a single saas file and target, so it identifies which saas file and target is the data relative to.
+Each object in `promotion_data` implements the `PromotionChannelData_v1` interface, by now just exists one implementation to store the `ParentSaasPromotion_v1` case explained before, but it could be extended with other data in the future. Check this qontract-schemas [commit](https://github.com/app-sre/qontract-schemas/commit/30fe5217d4d1c46ffbf1233e8c140702dbb3fac1)to view the full schema definition.
 
 ## Example delivery pipeline with triggers and promotions
 All the described building blocks can be put together to build high sophisticated CI/CD pipelines. A good example

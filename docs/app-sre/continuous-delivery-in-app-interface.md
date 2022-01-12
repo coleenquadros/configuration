@@ -85,7 +85,7 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
         * `promotion` - a section to indicate promotion behavior/validations
             * `publish` - a list of channels to publish the success of the deployment
             * `subscribe` - before deploying, validate that the current commit sha has been successfully deployed and published to the specified channels
-            * `promotion_data` - This section is managed by the integrations. It includes data relative to what triggered a promotion.
+            * `promotion_data` - This section is managed by the integrations. It includes data relative to what triggered a promotion. [more info](/docs/app-sre/saas-walkthrough.md#automated-promotions-with-configuration-changes)
         * `parameters` - (optional) parameters for `oc process` to be used when deploying to the current namespace
         * `upstream` - (optional):
             * use this option in the case a docker image should be built before deployment
