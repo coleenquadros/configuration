@@ -63,7 +63,7 @@ spec:
       labels:
         severity: medium
         service: insights
-        env: prod
+        env: stage
         app_team: inventory
       annotations:
         dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcs02ue1-prometheus
@@ -78,7 +78,7 @@ spec:
         app_team: inventory
       annotations:
         dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcs02ue1-prometheus
-        link_url: https://kibana.apps.crcs02ue1.urby.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-30m,to:now))&_a=(columns:!(_source),filters:!(),index:'43c5fed0-d5ce-11ea-b58c-a7c95afd7a5d',interval:auto,query:(language:kuery,query:'@log_group:%20%22host-inventory-prod%22%20and%20%22NOT%20PRODUCED%22'),sort:!())
+        link_url: https://kibana.apps.crcs02ue1.urby.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-30m,to:now))&_a=(columns:!(_source),filters:!(),index:'43c5fed0-d5ce-11ea-b58c-a7c95afd7a5d',interval:auto,query:(language:kuery,query:'@log_group:%20%22host-inventory-stage%22%20and%20%22NOT%20PRODUCED%22'),sort:!())
         message: 'Stage event producer failed to produce a(n) {{ $labels.event_type }} event'
     - alert: InventoryMqNotProcessing
       expr: sum(increase(inventory_ingress_add_host_successes_total{namespace="host-inventory-stage"}[6h])) by (namespace) < 1
@@ -100,7 +100,7 @@ spec:
         app_team: inventory
       annotations:
         dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcs02ue1-prometheus
-        link_url: https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/host-inventory-stage/deployments/host-inventory-service
+        link_url: https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/host-inventory-stage/pods?orderBy=desc&sortBy=Restarts
         message: '{{ $labels.namespace }} ContainerRestart {{ $labels.container }}'
     - alert: InventoryReaperFailure
       expr: sum(sum_over_time(kube_pod_status_phase{phase="Failed", namespace=~"host-inventory-stage", pod=~"host-inventory-reaper.*"}[30m:5m]) < 3) by (pod, namespace) > 0
