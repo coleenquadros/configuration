@@ -28,4 +28,3 @@ according to 5/7 days a week we get that SLO.
 The following are the multi-window, multi-burn-rate alerts that are associated with this SLO.
 
 - ErrorBudgetBurn
-
