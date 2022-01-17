@@ -8,7 +8,7 @@ Severity: High
 
 ## Impact
 
-cloudigrade inspects images in public clouds to identity RHEL presense and tracks customer use to report on RHEL usage. If cloudigrade is broken, customers will not have accurate data reported via Subscription Watch. If `cloudigrade-listener` specifically is not running, cloudigrade will stop processing new events from `sources-api`, and therefore cloudigrade's customer source metadata will be stale, resulting in new customers not being onboarded and existing customers not getting updated sources.
+cloudigrade inspects images in public clouds to identify RHEL presense and tracks customer use to report on RHEL usage. If cloudigrade is broken, customers will not have accurate data reported via Subscription Watch. If `cloudigrade-listener` specifically is not running, cloudigrade will stop processing new events from `sources-api`, and therefore cloudigrade's customer source metadata will be stale, resulting in new customers not being onboarded and existing customers not getting updated sources.
 
 ## Summary
 

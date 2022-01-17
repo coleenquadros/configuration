@@ -2,7 +2,7 @@
 
 ## Impact
 
-cloudigrade inspects images in public clouds to identity RHEL presense and tracks customer use to report on RHEL usage. If cloudigrade is broken, customers will not have accurate data reported via Subscription Watch.
+cloudigrade inspects images in public clouds to identify RHEL presense and tracks customer use to report on RHEL usage. If cloudigrade is broken, customers will not have accurate data reported via Subscription Watch.
 
 See also [Data Continuity and Disaster Recovery](https://github.com/cloudigrade/cloudigrade/blob/master/docs/architecture.md#data-continuity-and-disaster-recovery) in [cloudigrade Architecture Document](https://github.com/cloudigrade/cloudigrade/blob/master/docs/architecture.md).
 

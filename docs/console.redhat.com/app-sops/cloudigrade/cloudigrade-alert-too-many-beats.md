@@ -8,7 +8,7 @@ Severity: High
 
 ## Impact
 
-cloudigrade inspects images in public clouds to identity RHEL presense and tracks customer use to report on RHEL usage. If cloudigrade is broken, customers will not have accurate data reported via Subscription Watch. If `cloudigrade-beat` specifically has too many instances running, cloudigrade's scheduled periodic tasks will run more frequently than expected, and therefore cloudigrade's data may be calculated incorrectly.
+cloudigrade inspects images in public clouds to identify RHEL presense and tracks customer use to report on RHEL usage. If cloudigrade is broken, customers will not have accurate data reported via Subscription Watch. If `cloudigrade-beat` specifically has too many instances running, cloudigrade's scheduled periodic tasks will run more frequently than expected, and therefore cloudigrade's data may be calculated incorrectly.
 
 ## Summary
 
