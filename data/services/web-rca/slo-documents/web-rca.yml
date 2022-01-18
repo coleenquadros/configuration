@@ -10,16 +10,16 @@ namespaces:
   - $ref: /services/web-rca/namespaces/production.yml
 
 slos:
-  - name: Web-RCA API Latency
+  - name: Web-RCA API Latency 90%
     SLIType: latency
     SLISpecification: Percentage of the requests responded under 1 second.
     SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/web-rca/slos/web-rca-latency.md
     SLOParameters:
       window: 28d
     expr: |
-      (sum(rate(api_inbound_request_duration_bucket{container="service",endpoint="metrics",job="web-rca-metrics",service="web-rca-metrics",namespace="web-rca-production",le="1",code!~"5.."}[{{window}}]))
+      (sum(rate(api_inbound_request_duration_bucket{namespace="web-rca-production",job="web-rca-metrics",le="1",code!~"5.."}[{{window}}]))
       /
-      sum(rate(api_inbound_request_duration_count{container="service",endpoint="metrics",job="web-rca-metrics",service="web-rca-metrics",namespace="web-rca-production",code!~"5.."}[{{window}}])))
+      sum(rate(api_inbound_request_duration_count{namespace="web-rca-production",job="web-rca-metrics",code!~"5.."}[{{window}}])))
     SLOTarget: 0.90
     SLOTargetUnit: percent_0_1
     prometheusRules: /observability/prometheusrules/web-rca-slo-production.prometheusrules.yaml
@@ -33,9 +33,9 @@ slos:
     SLOParameters:
       window: 28d
     expr: |
-      sum(rate(haproxy_backend_http_responses_total{namespace="web-rca-production",code!="5xx"}[{{window}}]))
+      sum(rate(haproxy_backend_http_responses_total{route="web-rca",exported_namespace="web-rca-production",code!="5xx"}[{{window}}]))
       /
-      sum(rate(haproxy_backend_http_responses_total{namespace="web-rca-production"}[{{window}}]))
+      sum(rate(haproxy_backend_http_responses_total{route="web-rca",exported_namespace="web-rca-production"}[{{window}}]))
     SLOTarget: 0.70
     SLOTargetUnit: percent_0_1
     prometheusRules: /observability/prometheusrules/web-rca-slo-production.prometheusrules.yaml

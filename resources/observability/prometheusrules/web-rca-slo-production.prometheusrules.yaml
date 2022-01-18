@@ -9,6 +9,7 @@ metadata:
   name: web-rca-slo-production
 spec:
   groups:
+    # generated from https://promtools.dev/alerts/errors
     - name: SLOs-haproxy_backend_http_responses_total
       rules:
         - alert: ErrorBudgetBurn
@@ -115,3 +116,125 @@ spec:
             exported_namespace: web-rca-production
             route: web-rca
           record: haproxy_backend_http_responses_total:burnrate6h
+
+    # generated from https://promtools.dev/alerts/latency
+    - name: SLOs-api_inbound_request_duration
+      rules:
+        - alert: LatencyBudgetBurn
+          annotations:
+            message: 'High requests latency budget burn for namespace=web-rca-production,job=web-rca-metrics,latency=0.089999999999999997 (current value: {{ $value }})'
+          expr: |
+            (
+              latencytarget:api_inbound_request_duration:rate1h{namespace="web-rca-production",job="web-rca-metrics",latency="0.089999999999999997"} > (14.4*1.000000)
+              and
+              latencytarget:api_inbound_request_duration:rate5m{namespace="web-rca-production",job="web-rca-metrics",latency="0.089999999999999997"} > (14.4*1.000000)
+            )
+            or
+            (
+              latencytarget:api_inbound_request_duration:rate6h{namespace="web-rca-production",job="web-rca-metrics",latency="0.089999999999999997"} > (6*1.000000)
+              and
+              latencytarget:api_inbound_request_duration:rate30m{namespace="web-rca-production",job="web-rca-metrics",latency="0.089999999999999997"} > (6*1.000000)
+            )
+          labels:
+            job: web-rca-metrics
+            latency: "0.089999999999999997"
+            namespace: web-rca-production
+            severity: critical
+        - alert: LatencyBudgetBurn
+          annotations:
+            message: 'High requests latency budget burn for namespace=web-rca-production,job=web-rca-metrics,latency=0.089999999999999997 (current value: {{ $value }})'
+          expr: |
+            (
+              latencytarget:api_inbound_request_duration:rate1d{namespace="web-rca-production",job="web-rca-metrics",latency="0.089999999999999997"} > (3*1.000000)
+              and
+              latencytarget:api_inbound_request_duration:rate2h{namespace="web-rca-production",job="web-rca-metrics",latency="0.089999999999999997"} > (3*1.000000)
+            )
+            or
+            (
+              latencytarget:api_inbound_request_duration:rate3d{namespace="web-rca-production",job="web-rca-metrics",latency="0.089999999999999997"} > (1.000000)
+              and
+              latencytarget:api_inbound_request_duration:rate6h{namespace="web-rca-production",job="web-rca-metrics",latency="0.089999999999999997"} > (1.000000)
+            )
+          labels:
+            job: web-rca-metrics
+            latency: "0.089999999999999997"
+            namespace: web-rca-production
+            severity: warning
+        - expr: |
+            1 - (
+              sum(rate(api_inbound_request_duration_bucket{namespace="web-rca-production",job="web-rca-metrics",le="0.089999999999999997",code!~"5.."}[5m]))
+              /
+              sum(rate(api_inbound_request_duration_count{namespace="web-rca-production",job="web-rca-metrics"}[5m]))
+            )
+          labels:
+            job: web-rca-metrics
+            latency: "0.089999999999999997"
+            namespace: web-rca-production
+          record: latencytarget:api_inbound_request_duration:rate5m
+        - expr: |
+            1 - (
+              sum(rate(api_inbound_request_duration_bucket{namespace="web-rca-production",job="web-rca-metrics",le="0.089999999999999997",code!~"5.."}[30m]))
+              /
+              sum(rate(api_inbound_request_duration_count{namespace="web-rca-production",job="web-rca-metrics"}[30m]))
+            )
+          labels:
+            job: web-rca-metrics
+            latency: "0.089999999999999997"
+            namespace: web-rca-production
+          record: latencytarget:api_inbound_request_duration:rate30m
+        - expr: |
+            1 - (
+              sum(rate(api_inbound_request_duration_bucket{namespace="web-rca-production",job="web-rca-metrics",le="0.089999999999999997",code!~"5.."}[1h]))
+              /
+              sum(rate(api_inbound_request_duration_count{namespace="web-rca-production",job="web-rca-metrics"}[1h]))
+            )
+          labels:
+            job: web-rca-metrics
+            latency: "0.089999999999999997"
+            namespace: web-rca-production
+          record: latencytarget:api_inbound_request_duration:rate1h
+        - expr: |
+            1 - (
+              sum(rate(api_inbound_request_duration_bucket{namespace="web-rca-production",job="web-rca-metrics",le="0.089999999999999997",code!~"5.."}[2h]))
+              /
+              sum(rate(api_inbound_request_duration_count{namespace="web-rca-production",job="web-rca-metrics"}[2h]))
+            )
+          labels:
+            job: web-rca-metrics
+            latency: "0.089999999999999997"
+            namespace: web-rca-production
+          record: latencytarget:api_inbound_request_duration:rate2h
+        - expr: |
+            1 - (
+              sum(rate(api_inbound_request_duration_bucket{namespace="web-rca-production",job="web-rca-metrics",le="0.089999999999999997",code!~"5.."}[6h]))
+              /
+              sum(rate(api_inbound_request_duration_count{namespace="web-rca-production",job="web-rca-metrics"}[6h]))
+            )
+          labels:
+            job: web-rca-metrics
+            latency: "0.089999999999999997"
+            namespace: web-rca-production
+          record: latencytarget:api_inbound_request_duration:rate6h
+        - expr: |
+            1 - (
+              sum(rate(api_inbound_request_duration_bucket{namespace="web-rca-production",job="web-rca-metrics",le="0.089999999999999997",code!~"5.."}[1d]))
+              /
+              sum(rate(api_inbound_request_duration_count{namespace="web-rca-production",job="web-rca-metrics"}[1d]))
+            )
+          labels:
+            job: web-rca-metrics
+            latency: "0.089999999999999997"
+            namespace: web-rca-production
+          record: latencytarget:api_inbound_request_duration:rate1d
+        - expr: |
+            1 - (
+              sum(rate(api_inbound_request_duration_bucket{namespace="web-rca-production",job="web-rca-metrics",le="0.089999999999999997",code!~"5.."}[3d]))
+              /
+              sum(rate(api_inbound_request_duration_count{namespace="web-rca-production",job="web-rca-metrics"}[3d]))
+            )
+          labels:
+            job: web-rca-metrics
+            latency: "0.089999999999999997"
+            namespace: web-rca-production
+          record: latencytarget:api_inbound_request_duration:rate3d
+          
