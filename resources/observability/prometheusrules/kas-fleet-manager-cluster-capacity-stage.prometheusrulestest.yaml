@@ -1,0 +1,112 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+  - /observability/prometheusrules/kas-fleet-manager-cluster-capacity-stage.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+  - interval: 1m
+    input_series:
+      # 0m  - 10m     15 out of 15 available instances
+      # 10m - 20m     5 out of 15 available instances
+      # 20m - 30m     2 out of 15 available instances
+      # 30m - 40m     1 out of 15 available instances - triggering alert condition
+      - series: 'kas_fleet_manager_cluster_status_capacity_available{cluster_id="a", cloud_provider="aws", region="us-east-1", instance_type="standard", namespace="managed-services-stage"}'
+        values: '15x10 5x10 2x10 1x10'
+      - series: 'kas_fleet_manager_cluster_status_capacity_max{cluster_id="a", cloud_provider="aws", region="us-east-1", instance_type="standard", namespace="managed-services-stage"}'
+        values: '15x40'
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: KasFleetManagerOSDClusterCapacity
+        exp_alerts: [ ]
+      - eval_time: 40m
+        alertname: KasFleetManagerOSDClusterCapacity
+        exp_alerts:
+          - exp_labels:
+              alertname: KasFleetManagerOSDClusterCapacity
+              cluster_id: a
+              team: cssre
+              region: us-east-1
+              severity: info
+              service: kas-fleet-manager
+            exp_annotations:
+              dashboard: "https://grafana.stage.devshift.net/d/8d3293310c82b0ac46d4b43117374dfdb59369c6/mk-usage?orgId=1"
+              message: "Cluster with id a in region us-east-1 at or below 10% available capacity"
+              runbook: "https://github.com/bf2fc6cc711aee1a0c2a/kas-sre-sops/blob/main/sops/alerts/cluster_capacity.asciidoc"
+  - interval: 1m
+    input_series:
+      # 0m  - 20m     20 out of 20 available in both regions
+      # 20m - 40m     capacity decreasing in eu-west-1
+      # 40m - 60m     capacity decreasing in both regions
+      # 60m - 80m     capacity decreasing in both regions, eu-west-1 going below 10%
+      - series: 'kas_fleet_manager_cluster_status_capacity_available{cluster_id="a", cloud_provider="aws", region="us-east-1", instance_type="standard", namespace="managed-services-stage"}'
+        values: '20x20  20x20 10x20 5x20'
+      - series: 'kas_fleet_manager_cluster_status_capacity_available{cluster_id="b", cloud_provider="aws", region="eu-west-1", instance_type="standard", namespace="managed-services-stage"}'
+        values: '20x20  10x20 5x20  1x20'
+      - series: 'kas_fleet_manager_cluster_status_capacity_max{cluster_id="a", cloud_provider="aws", region="us-east-1", instance_type="standard", namespace="managed-services-stage"}'
+        values: '20x80'
+      - series: 'kas_fleet_manager_cluster_status_capacity_max{cluster_id="b", cloud_provider="aws", region="eu-west-1", instance_type="standard", namespace="managed-services-stage"}'
+        values: '20x80'
+    alert_rule_test:
+      - eval_time: 60m
+        alertname: KasFleetManagerOSDClusterCapacity
+        exp_alerts: [ ]
+      - eval_time: 80m
+        alertname: KasFleetManagerOSDClusterCapacity
+        exp_alerts:
+          - exp_labels:
+              alertname: KasFleetManagerOSDClusterCapacity
+              cluster_id: b
+              team: cssre
+              region: eu-west-1
+              severity: info
+              service: kas-fleet-manager
+            exp_annotations:
+              dashboard: "https://grafana.stage.devshift.net/d/8d3293310c82b0ac46d4b43117374dfdb59369c6/mk-usage?orgId=1"
+              message: "Cluster with id b in region eu-west-1 at or below 10% available capacity"
+              runbook: "https://github.com/bf2fc6cc711aee1a0c2a/kas-sre-sops/blob/main/sops/alerts/cluster_capacity.asciidoc"
+  - interval: 1m
+    input_series:
+      # 0m  - 20m     20 out of 20 available in both regions
+      # 20m - 40m     capacity decreasing in eu-west-1
+      # 40m - 60m     capacity decreasing in both regions
+      # 60m - 80m     capacity decreasing in both regions, both going below 10%
+      - series: 'kas_fleet_manager_cluster_status_capacity_available{cluster_id="a", cloud_provider="aws", region="us-east-1", instance_type="standard", namespace="managed-services-stage"}'
+        values: '20x20  20x20 10x20 1x20'
+      - series: 'kas_fleet_manager_cluster_status_capacity_available{cluster_id="b", cloud_provider="aws", region="eu-west-1", instance_type="standard", namespace="managed-services-stage"}'
+        values: '20x20  10x20 5x20  1x20'
+      - series: 'kas_fleet_manager_cluster_status_capacity_max{cluster_id="a", cloud_provider="aws", region="us-east-1", instance_type="standard", namespace="managed-services-stage"}'
+        values: '20x80'
+      - series: 'kas_fleet_manager_cluster_status_capacity_max{cluster_id="b", cloud_provider="aws", region="eu-west-1", instance_type="standard", namespace="managed-services-stage"}'
+        values: '20x80'
+    alert_rule_test:
+      - eval_time: 60m
+        alertname: KasFleetManagerOSDClusterCapacity
+        exp_alerts: [ ]
+      - eval_time: 80m
+        alertname: KasFleetManagerOSDClusterCapacity
+        exp_alerts:
+          - exp_labels:
+              alertname: KasFleetManagerOSDClusterCapacity
+              cluster_id: b
+              team: cssre
+              region: eu-west-1
+              severity: info
+              service: kas-fleet-manager
+            exp_annotations:
+              dashboard: "https://grafana.stage.devshift.net/d/8d3293310c82b0ac46d4b43117374dfdb59369c6/mk-usage?orgId=1"
+              message: "Cluster with id b in region eu-west-1 at or below 10% available capacity"
+              runbook: "https://github.com/bf2fc6cc711aee1a0c2a/kas-sre-sops/blob/main/sops/alerts/cluster_capacity.asciidoc"
+          - exp_labels:
+              alertname: KasFleetManagerOSDClusterCapacity
+              cluster_id: a
+              team: cssre
+              region: us-east-1
+              severity: info
+              service: kas-fleet-manager
+            exp_annotations:
+              dashboard: "https://grafana.stage.devshift.net/d/8d3293310c82b0ac46d4b43117374dfdb59369c6/mk-usage?orgId=1"
+              message: "Cluster with id a in region us-east-1 at or below 10% available capacity"
+              runbook: "https://github.com/bf2fc6cc711aee1a0c2a/kas-sre-sops/blob/main/sops/alerts/cluster_capacity.asciidoc"
