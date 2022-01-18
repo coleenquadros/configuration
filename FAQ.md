@@ -37,6 +37,7 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
         - [I didn't receive my invite for the Github organization](#i-didnt-receive-my-invite-for-the-github-organization)
         - [I need to add a package to a jenkins slave](#i-need-to-add-a-package-to-a-jenkins-slave)
         - [My configuration is merged into app-interface but it isn't applied!](#my-configuration-is-merged-into-app-interface-but-it-isnt-applied)
+        - [My tekton deploy PipelineRun is silenty failing for no obvious reason](#my-tekton-deploy-pipelinerun-is-silenty-failing-for-no-obvious-reason)
 
 <!-- markdown-toc end -->
 
@@ -310,3 +311,7 @@ If using a containerized build is not possible, please submit an MR to the [infr
 Check your namespace and your saas file! Is your new configuration's type listed in the `managedResourceTypes` field? For instance, if you have submitted a new `ConfigMap` for a namespace, its namespace file must list `ConfigMap` in its `managedResourceTypes`.
 
 Review #sd-app-sre-reconcile in slack for messages related to your configuration, it should tell you if it is applying it or it is skipping it. See [this ticket](https://issues.redhat.com/browse/APPSRE-3668)
+
+### My tekton deploy PipelineRun is silenty failing for no obvious reason
+
+If the `openshift-saas-deploy` Task of the Pipeline fails to finish successfully and leaves no trace about there's a good chance that the pod responsible to execute the Task's steps are hitting the memory limit getting killed by the kernel OOM. In order to verify this, you can search for pods in the tekton provider's namespace associated your saas file. If you see pods related to your `PipelineRun` (which are named after your saas file) showing `OOMKilled` status, you will need to increase the resources assigned to your deployment pods. In order to do that, just add a [`deployResources`](/docs/app-sre/continuous-delivery-in-app-interface.md#saas-file-structure) section in your saas file or increase the resources associated there. The resulting MR can be approved by the saas file owners.

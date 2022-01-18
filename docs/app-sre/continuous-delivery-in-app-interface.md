@@ -40,7 +40,7 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
             - the manifests to be deployed are in a private github repository
         * otherwise, use ci-ext
 * `pipelinesProvider` - (v2 SaaS file) A reference to a Pipelines Provider file created in a Tekton [bootstrap](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/tekton/tekton-howto.md#bootstrap) phase.
-* `deployResources` - For those v2 files handled by a Tekton provider, it sets requests and limits for the `qontract-reconcile` step of the Task deploying the manifests:
+* `deployResources` - For those v2 files handled by a Tekton provider, it sets requests and limits for the `qontract-reconcile` step of the Task deploying the manifests. This overrides resources set via the saas file associated pipelines provider.
    * `requests`: Task step requests
        - `cpu`: cpu requests
        - `memory`: memory requests
