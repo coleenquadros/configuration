@@ -72,47 +72,24 @@ Perform the following actions in a single MR:
     provider: tekton
     namespace:
       $ref: /services/<service_name>/namespaces/<service_name>-pipelines.appsrep05ue1.yaml
-
-    retention:
-      days: 7 # maximum number of days to retain deployments
-      minimum: 100 # minimum number of deployments to retain
-
-    taskTemplates:
-    - name: openshift-saas-deploy
-      type: onePerSaasFile
-      path: /tekton/openshift-saas-deploy.task.yaml
-      variables:
-        qontract_reconcile_image_tag: latest
-    - name: push-gateway-openshift-saas-deploy-task-status-metric
-      type: onePerNamespace
-      path: /tekton/push-gateway-task-status-metric.task.yaml
-      variables:
-        ubi8_ubi_minimal_image_tag: 8.4-7
-    - name: push-http-splunk-tekton-pipeline-metadata
-      type: onePerNamespace
-      path: /tekton/push-http-splunk-tekton-pipeline-metadata.task.yaml
-      variables:
-        ubi8_ubi_minimal_image_tag: 8.4-7
-
-    pipelineTemplates:
-      openshiftSaasDeploy:
-        name: openshift-saas-deploy
-        type: onePerSaasFile
-        path: /tekton/openshift-saas-deploy.pipeline.yaml
+    defaults:
+      "$ref": /pipelines/tekton-provider-global-defaults.yaml
     ```
 
     * this file should be placed under `data/services/<service_name>/pipelines`.
     * copy the file as is and change only the `service_name` and the namespace reference to match the location of the pipelines namespace file.
-    * The tekton Tasks that will be created by this pipelines' provider will have resources requests and limits added by [default](https://github.com/app-sre/qontract-reconcile/blob/7cf76d53a5d1b09aa8a503eaa2fdbc0041b16e83/reconcile/openshift_tekton_resources.py#L28-L31). If you see OOMs or CPU throttling you can change it by setting a `deployResources` section in the tekton provider (which will affect all its saas files) or at the saas file level, e.g.
+    * The tekton Tasks that will be created by this pipelines' provider will have resources requests and limits added from the defaults. If you see OOMs or CPU throttling you can change it by setting a `deployResources` section in the tekton provider (which will affect all its saas files) or at the saas file level, e.g.
+
     ```yaml
     deployResources:
       requests:
-        cpu: 200m
-        memory: 300Mi
+        cpu: 400m
+        memory: 900Mi
       limits:
-        cpu: 200m
-        memory: 300Mi
+        cpu: 400m
+        memory: 900Mi
     ```
+    * Every property in the defaults file can be overriden from the pipelines provider
 
 3. Create a Role to obtain access to view the pipelines namespace and to trigger deployments:
 
