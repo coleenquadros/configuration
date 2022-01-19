@@ -8,6 +8,62 @@ evaluation_interval: 5m
 
 tests:
 
+# ComplianceNoPodsFound
+- interval: 5m
+  input_series:
+  - series: up{namespace="compliance-prod"}
+    values: 0+0x4
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: ComplianceNoPodsFound
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: compliance
+      exp_annotations:
+        message: "No pods found in the namespace"
+
+- interval: 5m
+  input_series:
+  - series: up{namespace="compliance-prod"}
+    values: 1+1x4
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: ComplianceNoPodsFound
+    exp_alerts: []
+
+# CompliancePodDown
+- interval: 5m
+  input_series:
+  - series: up{namespace="compliance-prod", pod="pod-1"}
+    values: 1+1x4
+  - series: up{namespace="compliance-prod", pod="pod-2"}
+    values: 0+0x4
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: CompliancePodDown
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: compliance
+        pod: pod-2
+      exp_annotations:
+        message: "Pod (pod-2) down!"
+
+- interval: 5m
+  input_series:
+  - series: up{namespace="compliance-prod", pod="pod-1"}
+    values: 1+1x4
+  - series: up{namespace="compliance-prod", pod="pod-2"}
+    values: 1+1x4
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: CompliancePodDown
+
 # Tests ComplianceAlertNoTraffic
 - interval: 1m
   input_series:
