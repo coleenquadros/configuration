@@ -12,7 +12,7 @@ This SOP described the required operations to perform in case Web RCA is down.
 
 ## Access required
 
-- View access to the stage cluster to confirm PODs health.
+- View access to the prod cluster to confirm PODs health.
 
 ## Steps
 
