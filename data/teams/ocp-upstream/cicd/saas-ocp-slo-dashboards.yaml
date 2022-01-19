@@ -1,0 +1,36 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels: {}
+
+name: saas-ocp-slo-dashboards
+description: 'SaaS tracking file for App-interface'
+
+app:
+  $ref: /services/app-sre/app.yml # placeholder until sig-sre has an app file
+
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.app-sre-prod-01.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sig-sre
+
+managedResourceTypes:
+- ConfigMap
+
+imagePatterns: []
+
+resourceTemplates:
+- name: ocp-slo-dashboards
+  url: https://gitlab.cee.redhat.com/service/ocp-slo-dashboards
+  path: /dashboards
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: main
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: e60b764fe4714df881fb997e727ff0b764452bae
