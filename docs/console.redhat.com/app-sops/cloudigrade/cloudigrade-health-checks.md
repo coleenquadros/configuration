@@ -6,21 +6,18 @@ cloudigrade uses standard Kubernetes/OpenShift liveness and readiness probes (`l
 
 ## Manual
 
-If you want to check *manually* that cloudigrade is running, consider trying one of the following:
+If you want to check *manually* that cloudigrade is running, make HTTP requests via the public API (see [How do I reach these APIs](https://github.com/cloudigrade/cloudigrade/wiki/How-do-I-reach-these-APIs) for instructions with examples) or connect directly to a `cloudigrade-api` pod terminal in the `cloudigrade-stage` or `cloudigrade-prod` namespace as appropriate and try:
 
-- HTTP GET `/internal/healthz/`
-    - This route is internal and requires no special authentication.
+- `curl -v 127.0.0.1:8000/internal/healthz/`
     - This route should always respond with `200 OK` and a HTML document to indicate that the service is running and is able to communicate with the backing database.
     - The readiness probe requests this route to verify that the service is running.
-- HTTP GET `/api/cloudigrade/v2/azure-offer-template/`
-    - This route is public and requires no special authentication.
+- `curl -v 127.0.0.1:8000/api/cloudigrade/v2/azure-offer-template/`
     - This route should always respond with `200 OK` and a JSON document.
-- HTTP GET `/api/cloudigrade/v2/sysconfig/`
-    - This route is public but requires HTTP Basic authentication with credentials for any Red Hat customer who has "org admin" set.
-    - If authenticated correctly, this route should respond with `200 OK` and a JSON document.
-    - If not authenticated, this route should respond with `401 Unauthorized` or `403 Forbidden` and an appropriate error message.
+- `curl -v -H "X-RH-IDENTITY:eyJpZGVudGl0eSI6eyJhY2NvdW50X251bWJlciI6IjEyMyIsInVzZXIiOnsiaXNfb3JnX2FkbWluIjp0cnVlfX19Cg==" 127.0.0.1:8000/api/cloudigrade/v2/sysconfig/`
+    - `X-RH-IDENTITY` contains base64-encoded JSON. See [How do I reach these APIs](https://github.com/cloudigrade/cloudigrade/wiki/How-do-I-reach-these-APIs) and [REST API Examples](https://github.com/cloudigrade/cloudigrade/blob/master/docs/rest-api-examples.rst) for further details.
+    - If `X-RH-IDENTITY` is valid, this route should respond with `200 OK` and a JSON document.
+    - If `X-RH-IDENTITY` is not valid, this route should respond with `401 Unauthorized` or `403 Forbidden` and an appropriate error message.
 
-See [How do I reach these APIs](https://github.com/cloudigrade/cloudigrade/wiki/How-do-I-reach-these-APIs) for further instructions and examples for making HTTP requests to cloudigrade.
 
 ## Escalations
 
