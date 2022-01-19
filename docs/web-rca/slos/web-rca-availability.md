@@ -20,8 +20,8 @@ total of all the API requests made. It is measured at the router using the
 
 ## SLO Rationale
 
-Web RCA is expected to be available 70% of the time. There is no one on-call on weekends, therefore, 
-according to 5/7 days a week we get that SLO.
+Web RCA is expected to be available 90% of the time. This can be increased once this availability 
+SLO has been observed with performance tests in production over a longer period of time. 
 
 ## Alerts
 

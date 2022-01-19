@@ -21,7 +21,8 @@ divide it by the total number of all successful requests. It is measured using t
 
 ## SLO Rationale
 
-The target response time for 95 percent of the requests should be less than 1[s].
+The target response time for 99 percent of the requests should be less than 1[s]. This can be changed once this latency 
+SLO has been observed with performance tests in production over a longer period of time.
 
 ## Alerts
 
