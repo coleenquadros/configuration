@@ -44,8 +44,8 @@ Image-builder-composer:
 
   [grafana-stage]: https://grafana.stage.devshift.net/d/image-builder-crc/image-builder-crc?orgId=1&var-datasource=crcs02ue1-prometheus&var-interval=28d&var-stability_slo=0.95&var-compose_latency_slo=0.9&var-noncompose_latency_slo=0.9
   [grafana-prod]: https://grafana.app-sre.devshift.net/d/image-builder-crc/image-builder-crc?orgId=1
-  [grafana-composer-stage]: https://grafana.stage.devshift.net/d/cNGfs4Knz/image-builder-composer?orgId=1&var-datasource=app-sre-stage-01-prometheus&var-interval=28d&var-stability_slo=0.95&var-latency_slo=0.9
-  [grafana-composer-prod]: https://grafana.app-sre.devshift.net/d/cNGfs4Knz/image-builder-composer?orgId=1
+  [grafana-composer-stage]: https://grafana.stage.devshift.net/d/image-builder-composer/image-builder-composer?orgId=1&var-datasource=app-sre-stage-01-prometheus&var-interval=28d&var-stability_slo=0.95&var-latency_slo=0.9
+  [grafana-composer-prod]: https://grafana.app-sre.devshift.net/d/image-builder-composer/image-builder-composer?orgId=1
 
 Steps
 -----
