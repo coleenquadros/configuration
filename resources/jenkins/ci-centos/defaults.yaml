@@ -447,44 +447,6 @@
             send-to-individuals: true
     <<: *job_template_defaults
 
-- job-template:
-    name: '{ci_project}-{git_repo}-fabric8-hdd'
-    disabled: '{obj:disabled}'
-    image_name: 'MISSING_IMAGE_NAME'
-    registry: 'MISSING_REGISTRY_NAME'
-    wrappers:
-      - vault-secrets:
-          <<: *vault_defaults
-          secrets:
-            - *quay-credentials
-            - *registry-devshift-credentials
-      - ansicolor
-    triggers:
-      - github-pull-request:
-          status-context: "ci.centos.org PR build (fabric8-hdd)"
-          org-list:
-            - fabric8-hdd
-          success-comment: "$ghprbPullAuthorLoginMention Your image is available in the registry: `docker pull {registry}/{image_name}:SNAPSHOT-PR-$ghprbPullId`"
-          <<: *github_pull_request_defaults
-    <<: *job_template_defaults
-
-- job-template:
-    name: '{ci_project}-{git_repo}-fabric8-hdd-eslint'
-    disabled: '{obj:disabled}'
-    wrappers:
-        - ansicolor
-    git_organization: fabric8-hdd
-    ci_project: 'devtools'
-    ci_cmd: '/bin/bash cico_run_eslint.sh'
-    timeout: '20m'
-    triggers:
-      - github-pull-request:
-          status-context: "ci.centos.org eslint run (fabric8-hdd)"
-          org-list:
-            - fabric8-hdd
-          <<: *github_pull_request_defaults
-    <<: *job_template_defaults
-
 - job-template: &job_template_build_defaults
     name: 'job_template_build_defaults'
     subdir: ''
