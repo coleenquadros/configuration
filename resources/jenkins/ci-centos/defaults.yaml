@@ -157,20 +157,6 @@
       - env-var: 'REFRESH_TOKEN'
         vault-key: 'token'
 
-- npm-build-deliver-creds-gh-token: &npm-build-deliver-creds-gh-token
-    name: "npm-build-deliver-creds-gh-token"
-    secret-path: 'devtools-osio-ci/npm-build-deliver-creds-gh-token'
-    secret-values:
-      - env-var: 'GH_TOKEN'
-        vault-key: 'token'
-
-- npm-build-deliver-creds-npm-token: &npm-build-deliver-creds-npm-token
-    name: "npm-build-deliver-creds-npm-token"
-    secret-path: 'devtools-osio-ci/npm-build-deliver-creds-npm-token'
-    secret-values:
-      - env-var: 'NPM_TOKEN'
-        vault-key: 'token'
-
 - fabric8-build-dockerio-dockercfg: &fabric8-build-dockerio-dockercfg
     name: "fabric8-build-dockerio-dockercfg"
     secret-path: 'devtools-osio-ci/fabric8-build-dockerio-dockercfg'
@@ -257,13 +243,6 @@
     secret-values:
       - env-var: 'CRW_BOTS_PULL_SECRETS'
         vault-key: 'crw-bots-pull-secret'
-
-- che-bot-npm-auth-token: &che-bot-npm-auth-token
-    name: "che-bot-npm-auth-token"
-    secret-path: "devtools-osio-ci/che-bot-npm-auth-token"
-    secret-values:
-      - env-var: 'CHE_NPM_AUTH_TOKEN'
-        vault-key: 'che-bot-npm-auth-token'
 
 - copr-mercator-api-token: &copr-mercator-api-token
     name: "copr-mercator-api-token"
@@ -1322,43 +1301,6 @@
                 $ssh_cmd -t "cd payload-tests/integration-tests && /bin/bash cico_run_tests.sh"
             fi
 
-    <<: *job_template_build_defaults
-
-- job-template:
-    name: '{ci_project}-{git_repo}-npm-publish-build-{branch}'
-    description: |
-      {jobdescription}
-      If all goes well, npm is published
-    node: "{ci_project}"
-    wrappers:
-        - ansicolor
-        - vault-secrets:
-            <<: *vault_defaults
-            secrets:
-              - *kube-config-dsaas-stg
-              - *npm-build-deliver-creds-gh-token
-              - *npm-build-deliver-creds-npm-token
-              - *fabric8-planner-test-token
-              - *quay-credentials
-              - *registry-devshift-credentials
-    properties:
-        - github:
-            url: https://github.com/{git_organization}/{git_repo}/
-        - inject:
-            properties-content: |
-               JENKINS_URL=https://ci.centos.org
-    scm:
-        - git:
-            url: https://{github_user}@github.com/{git_organization}/{git_repo}.git
-            credentials-id: "c4872223-4024-4cd4-8e09-1bbdc7d6e971"
-            git-tool: ci-git
-            shallow_clone: false
-            skip-tag: True
-            branches:
-                - master
-
-    triggers:
-        - github
     <<: *job_template_build_defaults
 
 - job-template:
