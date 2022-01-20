@@ -827,6 +827,10 @@ Groups should be defined under the `managedGroups` section in the cluster file. 
 
 An example of a role can be found [here](/data/teams/hive/roles/dev.yml).
 
+Notes:
+* The `dedicated-admins` group is managed via OCM using the [ocm-groups](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/ocm_groups.py) integration, whereas all other groups are managed via OC using the [openshift-groups](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/openshift_groups.py) integration.
+* The `cluster-admins` group is managed manually via OCM as part of a [cluster onboarding](/docs/app-sre/sop/app-interface-onboard-cluster.md#step-7-obtain-cluster-admin).
+
 ### Manage OpenShift LimitRanges via App-Interface (`/openshift/limitrange-1.yml`)
 
 This integration allows namespace owners to manage LimitRanges objects on their namespaces
