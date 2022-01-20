@@ -1,0 +1,43 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: status-board
+
+name: status-board
+
+namespaces:
+  - $ref: /services/status-board/namespaces/production.yml
+
+slos:
+  - name: Status-Board API Latency
+    SLIType: latency
+    SLISpecification: Percentage of the requests responded under 1 second.
+    SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/status-board/slos/status-board-latency.md
+    SLOParameters:
+      window: 28d
+    expr: |
+      (sum(rate(api_inbound_request_duration_bucket{namespace="status-board-production",job="status-board-metrics",le="1",code!~"5.."}[{{window}}]))
+      /
+      sum(rate(api_inbound_request_duration_count{namespace="status-board-production",job="status-board-metrics",code!~"5.."}[{{window}}])))
+    SLOTarget: 0.99
+    SLOTargetUnit: percent_0_1
+    prometheusRules: /observability/prometheusrules/status-board-slo-production.prometheusrules.yaml
+    prometheusRulesTests: /to/do
+    dashboard: https://grafana.app-sre.devshift.net/d/statusboard/status-board?orgId=1&var-datasource=app-sre-stage-01-prometheus
+
+  - name: Status-Board API Availability
+    SLIType: availability
+    SLISpecification: Percentage of requests that are served successfully (status code != 5xx)
+    SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/status-board/slos/status-board-availability.md
+    SLOParameters:
+      window: 28d
+    expr: |
+      sum(rate(haproxy_backend_http_responses_total{route="status-board-production",exported_namespace="status-board-production",code!="5xx"}[{{window}}]))
+      /
+      sum(rate(haproxy_backend_http_responses_total{route="status-board-production",exported_namespace="status-board-production"}[{{window}}]))
+    SLOTarget: 0.90
+    SLOTargetUnit: percent_0_1
+    prometheusRules: /observability/prometheusrules/status-board-slo-production.prometheusrules.yaml
+    prometheusRulesTests: /to/do
+    dashboard: https://grafana.app-sre.devshift.net/d/statusboard/status-board?orgId=1&var-datasource=app-sre-stage-01-prometheus
