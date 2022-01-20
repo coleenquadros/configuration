@@ -13,9 +13,7 @@ spec:
     emptyDir: {}
   steps:
   - name: qontract-reconcile-prepare
-    image: quay.io/app-sre/qontract-reconcile:{{ qontract_reconcile_image_tag }}
-    # replace the above line if quay.io is down
-    # image: gcr.io/app-sre/qontract-reconcile:{{ qontract_reconcile_image_tag }}
+    image: {{ qontract_reconcile_image }}:{{ qontract_reconcile_image_tag }}
     command: ["/bin/sh", "-c"]
     args: ['mkdir /shared/artifacts']
     resources:
@@ -29,9 +27,7 @@ spec:
     - mountPath: /shared
       name: shared
   - name: qontract-reconcile-config
-    image: quay.io/app-sre/qontract-reconcile:{{ qontract_reconcile_image_tag }}
-    # replace the above line if quay.io is down
-    # image: gcr.io/app-sre/qontract-reconcile:{{ qontract_reconcile_image_tag }}
+    image: {{ qontract_reconcile_image }}:{{ qontract_reconcile_image_tag }}
     command: ["/bin/sh", "-c"]
     args: ['echo "$(CONFIG_TOML)" | base64 -d > /shared/config.toml']
     resources:
@@ -51,9 +47,7 @@ spec:
     - mountPath: /shared
       name: shared
   - name: qontract-reconcile
-    image: quay.io/app-sre/qontract-reconcile:{{ qontract_reconcile_image_tag }}
-    # replace the above line if quay.io is down
-    # image: gcr.io/app-sre/qontract-reconcile:{{ qontract_reconcile_image_tag }}
+    image: {{ qontract_reconcile_image }}:{{ qontract_reconcile_image_tag }}
     command: ["/bin/sh", "-c"]
     {%- if dry_run is defined and dry_run %}
     args: ['qontract-reconcile --config /shared/config.toml --dry-run openshift-saas-deploy --saas-file-name $(params.saas_file_name) --env-name $(params.env_name) --io-dir /shared/artifacts/']
@@ -85,9 +79,7 @@ spec:
     - mountPath: /shared
       name: shared
   - name: qontract-reconcile-publish
-    image: quay.io/app-sre/qontract-reconcile:{{ qontract_reconcile_image_tag }}
-    # replace the above line if quay.io is down
-    # image: gcr.io/app-sre/qontract-reconcile:{{ qontract_reconcile_image_tag }}
+    image: {{ qontract_reconcile_image }}:{{ qontract_reconcile_image_tag }}
     command: ["/bin/sh", "-c"]
     args: ['for f in $(find /shared/artifacts/ -type f); do echo $f; cat $f; done']
     resources:
