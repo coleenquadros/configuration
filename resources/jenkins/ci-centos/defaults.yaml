@@ -928,34 +928,6 @@
             done
     <<: *job_template_build_defaults
 
-- job-template:
-    name: '{ci_project}-{git_repo}-saasorg-build-{branch}'
-    disabled: '{obj:disabled}'
-    saas_organization: openshiftio
-    parameters:
-        - string:
-            name: SAAS_ORGANIZATION
-            default: '{saas_organization}'
-    saasherder_prepare: |
-        if [ "$SAAS_GIT" != "none" ]; then
-            SAAS_ENV=staging
-            PATH=~/bin/:$PATH:~/.local/bin/
-            CONTEXT=$(echo $SAAS_GIT | sed 's/.*://')
-            SAAS_GIT=$(echo $SAAS_GIT | sed 's/:.*//')
-            if [[ -z "$SAAS_SERVICE_NAME" || "$SAAS_SERVICE_NAME" == "none" ]]; then
-                SAAS_SERVICE_NAME=$GIT_REPO
-            fi
-            if [ "$SUBDIR" != "" ]; then
-                SAAS_SERVICE_NAME=$SAAS_SERVICE_NAME"-"$SUBDIR
-            fi
-            git clone --depth 1 https://github.com/$SAAS_ORGANIZATION/$SAAS_GIT saas.git
-            cd saas.git
-            [ "$CONTEXT" != "$SAAS_GIT" ] && saasherder --context $CONTEXT config get-contexts > /dev/null
-            export DEVSHIFT_TAG_LEN=$(saasherder --environment $SAAS_ENV get hash_length $SAAS_SERVICE_NAME)
-            cd ..
-        fi
-    <<: *job_template_build_master
-
 - fabric8-analytics-tests-template: &fabric8-analytics-tests-template
     name: 'fabric8-analytics-tests-template'
     wrappers:
