@@ -32,17 +32,19 @@ managedResourceTypes:
 - PrometheusRule
 
 imagePatterns:
-- quay.io/hypershift/hypershift-operator
+- quay.io/app-sre/hypershift-operator
 
 resourceTemplates:
 - name: hypershift
   url: https://github.com/geoberle/hypershift
   path: /hack/app-sre/saas_template.yaml
   parameters:
-    REGISTRY_IMG: quay.io/hypershift/hypershift-operator
+    REGISTRY_IMG: quay.io/app-sre/hypershift-operator
   targets:
   - namespace:
       $ref: /services/hypershift/namespaces/hshifti01ue1/hypershift.yml
     ref: app-sre-template
-    parameters:
-      IMAGE_TAG: latest
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: geoberle-hypershift-gh-build-app-sre-template
