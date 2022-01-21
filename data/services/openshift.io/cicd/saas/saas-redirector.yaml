@@ -1,0 +1,60 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels: {}
+
+name: saas-osio-redirector
+description: SaaS tracking file for openshift.io redirectors
+
+app:
+  $ref: /services/openshift.io/app.yml
+
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.app-sre-prod-01.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: dev-null
+
+managedResourceTypes:
+- DeploymentConfig
+- Service
+
+imagePatterns:
+- quay.io/openshiftio/rhel-base-nginx-redirector
+
+authentication:
+  image:
+    path: app-sre/quay/openshiftio-pull
+    field: all
+
+parameters:
+  IMAGE: quay.io/openshiftio/rhel-base-nginx-redirector
+  IMAGE_TAG: latest
+
+resourceTemplates:
+- name: redirector
+  url: https://github.com/openshiftio/saas-openshiftio
+  path: /homeless-templates/redirector.yaml
+  targets:
+  - namespace:
+      $ref: /services/openshift.io/namespaces/dsaas-preview.yml
+    ref: master
+  - namespace:
+      $ref: /services/openshift.io/namespaces/dsaas-production.yml
+    ref: d674f5862e377f198367ed37637ce1d0117b7d7d
+- name: rhche-redirector
+  url: https://github.com/openshiftio/saas-openshiftio
+  path: /homeless-templates/rhche-redirector.yaml
+  targets:
+  - namespace:
+      $ref: /services/openshift.io/namespaces/dsaas-preview.yml
+    ref: master
+    parameters:
+      REPLICAS: 1
+  - namespace:
+      $ref: /services/openshift.io/namespaces/dsaas-production.yml
+    ref: d674f5862e377f198367ed37637ce1d0117b7d7d
+    parameters:
+      REPLICAS: 3

@@ -11,28 +11,58 @@ spec:
   groups:
   - name: system-baseline-prod
     rules:
-    - alert: SystemBaselineProdDown
-      expr: |
-        absent(up{service="system-baseline-backend", namespace="system-baseline-prod"})
-      for: 3m
+    - alert: SystemBaseline5xx
+      expr: >
+        (sum(rate(api_3scale_gateway_api_status{exported_service="system-baseline", status="5xx"}[5m]))
+        /
+        sum(rate(api_3scale_gateway_api_status{exported_service="system-baseline"}[5m]))) * 100 > 10
+      for: 5m
       labels:
-        severity: warning
+        severity: info
         service: insights
         env: prod
         app_team: system-baseline
       annotations:
-        dashboard: "GRAFANA_URL"
-        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/system-baseline-prod/deployments"
-        message: "System Baseline Alert (Prod). system-baseline-backend down in Prod for 3 minutes."
-        runbook: "https://clouddot.pages.redhat.com/docs/dev/developer-references/sop/index.html"
+        dashboard: 'https://grafana.app-sre.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&var-datasource=crcp01ue1-prometheus&var-label=system-baseline&viewPanel=36'
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/system-baseline-prod/deployments/system-baseline-backend-service'
+        message: 'More than 10% requests from system-baselne-prod returned HTTP 5XX in last 5 minutes'
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/system-baseline/SystemBaseline5xx.md'
 
-    - alert: SystemBaselineProdPodDown
+    - alert: SystemBaselineLatency
+      expr: avg_over_time(service:sli:latency_gt_2000:pctl10rate5m{exported_service="system-baseline"}[5m]) < .90
+      for: 5m
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: system-baseline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&var-datasource=crcp01ue1-prometheus&var-label=system-baseline&viewPanel=37"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/system-baseline-prod/deployments/system-baseline-backend-service"
+        message: "{{ $value }} of system-baseline requests are completing within 2 seconds in the last 5 minutes."
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/system-baseline/SystemBaselineLatency.md'
+
+    - alert: SystemBaselineNoPodsFound
+      expr: sum(up{namespace="system-baseline-prod"}) == 0
+      for: 5m
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: system-baseline
+      annotations:
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/system-baseline-prod/deployments"
+        message: "System Baseline Alert (Prod). system-baseline-backend down in Prod for 5 minutes."
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/system-baseline/SystemBaselineNoPodsFound.md'
+
+    - alert: SystemBaselinePodDown
       expr: sum(up{namespace="system-baseline-prod"}) by (pod) == 0
       for: 5m
       annotations:
         message: 'Pod ({{ $labels.pod }}) down!'
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/system-baseline/SystemBaselinePodDown.md'
       labels:
-        severity: warning
+        severity: info
         service: insights
         env: prod
         app_team: system-baseline

@@ -1,0 +1,141 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /insights-prod/historical-system-profiles-prod/historical-system-profiles.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+
+# Tests HistoricalSystemProfiles5xx
+- interval: 1m
+  input_series:
+  - series: api_3scale_gateway_api_status{exported_service="historical-system-profiles", status="5xx"}
+    values: 0+0x4 10+10x9 100+0x4
+  - series: api_3scale_gateway_api_status{exported_service="historical-system-profiles", status="2xx"}
+    values: 20+20x4 110+10x9 220+20x4
+
+  alert_rule_test:
+  # Test the no alert case
+  - eval_time: 1m
+    alertname: HistoricalSystemProfiles5xx
+    exp_alerts: []
+  
+  # Test 5xx alert
+  - eval_time: 15m
+    alertname: HistoricalSystemProfiles5xx
+    exp_alerts:
+    - exp_annotations:
+        dashboard: 'https://grafana.app-sre.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&var-datasource=crcp01ue1-prometheus&var-label=historical-system-profiles&viewPanel=36'
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/historical-system-profiles-prod/deployments/historical-system-profiles-backend-service'
+        message: 'More than 10% requests from historical-system-profiles-prod returned HTTP 5XX in last 5 minutes'
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/historical-system-profiles/HistoricalSystemProfiles5xx.md'
+      exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: historical-system-profiles
+
+# Tests HistoricalSystemProfilesLatency
+- interval: 1m
+  input_series:
+    - series: service:sli:latency_gt_2000:pctl10rate5m{exported_service="historical-system-profiles"}
+      values: 1+0x4 1 1 1 1 0 1 1 1 0 0 0+0x4
+
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: HistoricalSystemProfilesLatency
+    exp_alerts: []
+  - eval_time: 10m
+    alertname: HistoricalSystemProfilesLatency
+    exp_alerts: []
+  - eval_time: 15m
+    alertname: HistoricalSystemProfilesLatency
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: historical-system-profiles
+        exported_service: historical-system-profiles
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&var-datasource=crcp01ue1-prometheus&var-label=historical-system-profiles&viewPanel=37"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/historical-system-profiles-prod/deployments/historical-system-profiles-backend-service"
+        message: "0.5 of historical system profiles requests are completing within 2 seconds in the last 5 minutes."
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/historical-system-profiles/HistoricalSystemProfilesLatency.md'
+  - eval_time: 20m
+    alertname: HistoricalSystemProfilesLatency
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: historical-system-profiles
+        exported_service: historical-system-profiles
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&var-datasource=crcp01ue1-prometheus&var-label=historical-system-profiles&viewPanel=37"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/historical-system-profiles-prod/deployments/historical-system-profiles-backend-service"
+        message: "0 of historical system profiles requests are completing within 2 seconds in the last 5 minutes."
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/historical-system-profiles/HistoricalSystemProfilesLatency.md'
+  
+# Tests HistoricalSystemProfilesNoPodsFound
+- interval: 1m
+  input_series:
+  - series: up{namespace="historical-system-profiles-prod"}
+    values: 0+0x4
+
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: HistoricalSystemProfilesNoPodsFound
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: historical-system-profiles
+      exp_annotations:
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/historical-system-profiles-prod/deployments"
+        message: "Historical System Profiles Alert (Prod). historical-system-profiles-backend down in Prod for 3 minutes."
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/historical-system-profiles/HistoricalSystemProfilesNoPodsFound.md'
+
+- interval: 1m
+  input_series:
+  - series: up{namespace="historical-system-profiles-prod"}
+    values: 1 1 1
+  alert_rule_test:
+  - eval_time: 3m
+    alertname: HistoricalSystemProfilesNoPodsFound
+    exp_alerts: []
+
+# HistoricalSystemProfilesPodDown
+- interval: 1m
+  input_series:
+  - series: up{namespace="historical-system-profiles-prod", pod="pod-1"}
+    values: 1+0x4
+  - series: up{namespace="historical-system-profiles-prod", pod="pod-2"}
+    values: 0+0x4
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: HistoricalSystemProfilesPodDown
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: historical-system-profiles
+        pod: pod-2
+      exp_annotations:
+        message: "Pod (pod-2) down!"
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/historical-system-profiles/HistoricalSystemProfilesPodDown.md'
+
+- interval: 5m
+  input_series:
+  - series: up{namespace="historical-system-profiles-prod", pod="pod-1"}
+    values: 1+0x4
+  - series: up{namespace="historical-system-profiles-prod", pod="pod-2"}
+    values: 1+0x4
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: HistoricalSystemProfilesPodDown
+    exp_alerts: []
