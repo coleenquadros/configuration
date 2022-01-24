@@ -11,6 +11,7 @@
 - [Additional configurations](#additional-configurations)
   - [Selecting a Machine CIDR for VPC peerings](#selecting-a-machine-cidr-for-vpc-peerings)
   - [VPC peering with app-interface](#vpc-peering-with-app-interface)
+  - [Additional steps for clusters for specific services](#additional-steps-for-clusters-for-specific-services)
 - [Offboard an OSDv4 cluster from app-interface](#offboard-an-osdv4-cluster-from-app-interface)
 - [Legacy (v3)](#legacy-v3)
   - [Onboard a new OSDv3 cluster to app-interface](#onboard-a-new-osdv3-cluster-to-app-interface)
@@ -344,9 +345,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
   ```
   **Double check the changes introduced, the destination file could have been modified with manual changes**
 
-4. **IMPORTANT**: Merge the changes and check that the integrations have ran successfully. Check that `https://<prometheus|alertmanager>.<cluster_name>.devshift.net` have valid ssl certificates by accessing the URLs. If no security warning is given and the connection is secure as notified by the browser.
-
-5. Configure a [deadmanssnitch](https://deadmanssnitch.com/) snitch for the new cluster. The snitch settings should be as follow:
+4. Configure a [deadmanssnitch](https://deadmanssnitch.com/) snitch for the new cluster. The snitch settings should be as follow:
     - Name: prometheus.<cluster_name>.devshift.net
     - Alert type: Basic
     - Interval: 15 min
@@ -354,9 +353,11 @@ At this point you should be able to access the cluster via the console / `oc` cl
     - Alert email: sd-app-sre@redhat.com
     - Notes: Runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/prometheus/prometheus-deadmanssnitch.md
 
-6. Add the deadmanssnitch URL to this secret in Vault: https://vault.devshift.net/ui/vault/secrets/app-sre/show/integrations-input/alertmanager-integration
+5. Add the deadmanssnitch URL to this secret in Vault: https://vault.devshift.net/ui/vault/secrets/app-sre/show/integrations-input/alertmanager-integration
     - key: `deadmanssnitch-<cluster_name>-url`
     - value: the `Unique Snitch URL` from deadmanssnitch
+
+6. **IMPORTANT**: Merge the changes and check that the integrations have ran successfully. Check that `https://<prometheus|alertmanager>.<cluster_name>.devshift.net` have valid ssl certificates by accessing the URLs. If no security warning is given and the connection is secure as notified by the browser.
 
 ## Step 4 - Operator Lifecycle Manager
 
