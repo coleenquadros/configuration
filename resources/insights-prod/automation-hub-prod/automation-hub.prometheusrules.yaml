@@ -65,3 +65,31 @@ spec:
         dashboard: "https://GRAFANA_URL"
         link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/automation-hub-prod/deployments"
         message: "Insights Automation Hub Alert. One-time 5xx response observed."
+
+    - alert: App-automation-hub-prod-availability-SLO
+      expr: |
+        sum(rate(api_3scale_gateway_api_status{exported_service="automation-hub", status!="5xx"}[28d])) / sum(rate(api_3scale_gateway_api_status{exported_service="automation-hub"}[28d])) < 0.95
+      for: 2m
+      labels:
+        severity: high
+        service: insights
+        env: prod
+        app_team: automation-hub
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/automation-hub-prod/deployments"
+        message: "Insights Automation Hub Alert. Threshold for availability has dropped below SLO"
+
+    - alert: App-automation-hub-prod-latency-SLO
+      expr: |
+        sum(rate(api_3scale_gateway_api_time_bucket{le="2000.0", exported_service="automation-hub"}[28d])) / sum(rate(api_3scale_gateway_api_time_bucket{le="+Inf", exported_service="automation-hub"}[28d])) < 0.90
+      for: 2m
+      labels:
+        severity: high
+        service: insights
+        env: prod
+        app_team: automation-hub
+      annotations:
+        dashboard: "https://GRAFANA_URL"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/automation-hub-prod/deployments"
+        message: "Insights Automation Hub Alert. Threshold for latency has dropped below SLO"
