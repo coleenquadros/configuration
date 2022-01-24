@@ -28,10 +28,14 @@ openshiftServiceAccountTokens:
     $ref: /services/quayio/namespaces/quay-builder-stage.yml
   serviceAccountName: quay-builder-sa
 
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+
 managedResourceTypes:
 - ConfigMap
 - NetworkPolicy
 - Secret
+- ServiceAccount
 
 openshiftResources:
 - provider: vault-secret
@@ -46,6 +50,11 @@ openshiftResources:
   name: quayio-backup-image-pull-secret
   annotations:
     qontract.ignore_reconcile_time: "true"
+
+- provider: resource-template
+  path: /services/common/serviceaccount.yaml
+  variables:
+    name: quay-db-jobs-sa
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -154,6 +163,12 @@ openshiftResources:
   vault_tls_secret_path: app-interface/quayio-stage/quayio-stage/routes/quay-service-tool
   vault_tls_secret_version: 3
 
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /quayio-stage/quay/quay-db-jobs-config.secret.yaml
+  variables:
+    name: quay-db-jobs-config
+    vault_secret_version: 1
 
 terraformResources:
 - provider: acm
