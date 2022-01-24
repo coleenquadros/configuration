@@ -1,1 +1,0 @@
-- $ref: /teams/sd-sre/permissions/{operator_name}-coreos-slack.yml

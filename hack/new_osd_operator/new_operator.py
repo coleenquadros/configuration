@@ -3,6 +3,7 @@
 import argparse
 import os
 import sys
+import shutil
 
 import git
 from ruamel.yaml import YAML
@@ -185,31 +186,6 @@ def update_saas_approver_yml(operator_name):
     dump_yml(fpath, yml)
 
 
-def update_slack_roles_yml(operator_name):
-    """Idempotently registers the operator's slack permissions file in
-    sre-operator-all-coreos-slack.yml.
-    """
-    fpath = os.path.join(TEAM_DIR, "roles", "sre-operator-all-coreos-slack.yml")
-    yml = load_yml(fpath)
-
-    perms = yml["permissions"]
-
-    # Already there?
-    for perm in perms:
-        if perm.get("$ref", "").endswith("/" + operator_name + "-coreos-slack.yml"):
-            print("Slack permissions entry for " + operator_name + " already exists.")
-            return
-
-    print("Adding slack permissions entry for " + operator_name)
-    refs = load_yml(
-        os.path.join(TPL_DIR, "slack-perm-role.yml.tpl"),
-        subs={"operator_name": operator_name},
-    )
-    seq_inject(perms, refs)
-
-    dump_yml(fpath, yml)
-
-
 def update_slack_user_groups_yml(operator_name):
     """Idempotently registers the operator's slack user group in
     slack/coreos.yml.
@@ -334,12 +310,13 @@ def prerequisites(args, local_folder=None):
     :param local_folder: Path to local folder for test operator. Used only for testing
     """
     config = {}
-    if local_folder:
-        operator_folder = local_folder
-        prod_commit = "fake_commit"  # when testing in local, the latest is irrelevant, and might not be available
-    else:
-        with TemporaryDirectory() as tmp_clone_folder:
-            operator_folder = tmp_clone_folder
+    with TemporaryDirectory() as tmp_clone_folder:
+        operator_folder = tmp_clone_folder
+        if local_folder:
+            # Clone the local folder to the temporary directory
+            shutil.copytree(local_folder, operator_folder, dirs_exist_ok=True)
+            prod_commit = "fake_commit"  # when testing in local, the latest is irrelevant, and might not be available
+        else:
             try:
                 # Clone the operator repo to a temporary directory
                 repo_url = "{}/{}.git".format(GH_OPENSHIFT, args.operator_name)
@@ -348,36 +325,36 @@ def prerequisites(args, local_folder=None):
             except Exception as e:
                 err("Cloning {} failed. Is it public?: ".format(repo_url))
 
-    # Check if operator was created with boilerplate
-    if not os.path.isdir(os.path.join(operator_folder, 'boilerplate')):
-        err("Missing folder {}. The automation only supports operators created with boilerpate"
-            .format(os.path.join(operator_folder, 'boilerplate')))
+        # Check if operator was created with boilerplate
+        if not os.path.isdir(os.path.join(operator_folder, 'boilerplate')):
+            err("Missing folder {}. The automation only supports operators created with boilerpate"
+                .format(os.path.join(operator_folder, 'boilerplate')))
 
-    # ask if the user wants to use a different commit than the latest one for production
-    # we only ask for the commit is the option --prod was passed as parameter of the script
-    if args.prod:
-        config['prod_commit'] = input("Please provide commit to deploy to Hive Production. default [{}]"
-                                      .format(prod_commit)) or prod_commit
-    else:
-        config['prod_commit'] = None
+        # ask if the user wants to use a different commit than the latest one for production
+        # we only ask for the commit is the option --prod was passed as parameter of the script
+        if args.prod:
+            config['prod_commit'] = input("Please provide commit to deploy to Hive Production. default [{}]"
+                                          .format(prod_commit)) or prod_commit
+        else:
+            config['prod_commit'] = None
 
-    # retrieve managedResourceTypes from the hack/olm-registry/olm-artifacts-template.yaml
-    olm_tpl_path = os.path.join(operator_folder, OLM_TPL_FILE)
-    if not os.path.isfile(olm_tpl_path):
-        err("file {} is required for this automation to work".format(OLM_TPL_FILE))
+        # retrieve managedResourceTypes from the hack/olm-registry/olm-artifacts-template.yaml
+        olm_tpl_path = os.path.join(operator_folder, OLM_TPL_FILE)
+        if not os.path.isfile(olm_tpl_path):
+            err("file {} is required for this automation to work".format(OLM_TPL_FILE))
 
-    # using a set guarantees that resources are only declared onces
-    olm_tpl = load_yml(olm_tpl_path, skip_format=True)
-    config['resource_types'] = {item['kind'] for item in olm_tpl['objects']}
+        # using a set guarantees that resources are only declared onces
+        olm_tpl = load_yml(olm_tpl_path, skip_format=True)
+        config['resource_types'] = {item['kind'] for item in olm_tpl['objects']}
 
-    if olm_tpl['metadata']['name'] == 'olm-artifacts-template':
-        print("Found {} in metadata =>  Hive operator".format(olm_tpl['metadata']['name']))
-        config['operator_type'] = 'hive'
-    elif olm_tpl['metadata']['name'] == 'selectorsyncset-template':
-        print("Found {} in metadata => Cluster operator.".format(olm_tpl['metadata']['name']))
-        config['operator_type'] = 'cluster'
-    else:
-        err('Found {} in metadata. Unsupported OLM template.'.format(olm_tpl['metadata']['name']))
+        if olm_tpl['metadata']['name'] == 'olm-artifacts-template':
+            print("Found {} in metadata =>  Hive operator".format(olm_tpl['metadata']['name']))
+            config['operator_type'] = 'hive'
+        elif olm_tpl['metadata']['name'] == 'selectorsyncset-template':
+            print("Found {} in metadata => Cluster operator.".format(olm_tpl['metadata']['name']))
+            config['operator_type'] = 'cluster'
+        else:
+            err('Found {} in metadata. Unsupported OLM template.'.format(olm_tpl['metadata']['name']))
 
     return config
 
@@ -421,9 +398,6 @@ def main():
 
     # Register the saas file
     update_saas_approver_yml(args.operator_name)
-
-    # Register the slack permissions file
-    update_slack_roles_yml(args.operator_name)
 
     # Register the slack user group
     update_slack_user_groups_yml(args.operator_name)
