@@ -60,6 +60,8 @@ this repository.
       - [Manage vault policies (`/vault-config/policy-1.yml`)](#manage-vault-policies-vault-configpolicy-1yml)
       - [Manage vault roles (`/vault-config/role-1.yml`)](#manage-vault-roles-vault-configrole-1yml)
       - [Manage vault secret-engines (`/vault-config/secret-engine-1.yml`)](#manage-vault-secret-engines-vault-configsecret-engine-1yml)
+        - [KV Secrets engine Example](#kv-secrets-engine-example)
+        - [TOTP Secrets engine Example](#totp-secrets-engine-example)
     - [Manage DNS Zones via App-Interface (`/aws/dns-zone-1.yml`) using Terraform](#manage-dns-zones-via-app-interface-awsdns-zone-1yml-using-terraform)
     - [Manage Dyn DNS Traffic Director via App-Interface (`/dependencies/dyn-traffic-director-1.yml`)](#manage-dyn-dns-traffic-director-via-app-interface-dependenciesdyn-traffic-director-1yml)
     - [Manage AWS access via App-Interface (`/aws/group-1.yml`) using Terraform](#manage-aws-access-via-app-interface-awsgroup-1yml-using-terraform)
@@ -1022,7 +1024,16 @@ For more information please see [vault AppRole documentation](https://www.vaultp
 Secrets engines are components which store, generate, or encrypt data. Secrets engines are incredibly flexible, so it is easiest to think about them in terms of their function.
 Secrets engines are provided some set of data, they take some action on that data, and they return a result.
 
-KV Secrets engine Example:
+App-interface currently supports the following secrets engines:
+- KV (v1)
+- KV (v2)
+- TOTP
+
+Documentation for currently supported engines can be found [here](/data/services/vault.devshift.net/config/secret-engines)
+
+For more information please see [vault secrets engines documentation](https://www.vaultproject.io/docs/secrets/index.html)
+
+##### KV Secrets engine Example
 ```yaml
 ---
 $schema: /vault-config/secret-engine-1.yml
@@ -1037,10 +1048,40 @@ options:
   _type: "kv"
   version: "2"
 ```
-Current secrets engines can be found [here](/data/services/vault.devshift.net/config/secret-engines)
 
-For more information please see [vault secrets engines documentation](https://www.vaultproject.io/docs/secrets/index.html)
+##### TOTP Secrets engine Example
+```yaml
+---
+$schema: /vault-config/secret-engine-1.yml
 
+labels:
+  service: vault.devshift.net
+
+_path: "totp/my-team/"
+type: "totp"
+description: "TOTP engine for my-team"
+```
+
+Register a new TOTP key given by a provider:
+- Initiate the 2FA process at the desired provider
+- Most provider will provide the OTP registration info via a QR code
+- Read the QR Code with a QR Code reader app or extension. Android and iOS both have built-in QR code reader capabilities built into the Camera app.
+  - Browser extensions are also available to decode QR codes but at the time of writing this all the ones I've seen are from questionable sources (& not official)
+- Write the OTP info to vault. The URL parameter value is what is encoded in the QR Code
+  ```sh
+  # vault write totp/<my-team>/keys/<the-service> url="otpauth://totp/some-provider-otp:some-user-id?secret=some-secret&issuer=some-issuer&period=30"
+  ```
+
+Request a new TOTP code:
+The TOTP engine cannot be interacted with via the Vault UI. The Vault CLI or API must be used
+- Login to Vault
+  ```sh
+  vault login -method=github -address=https://vault.devshift.net
+  ```
+- Read a TOTP code
+  ```sh
+  vault read totp/<my-team>/code/<some-provider>
+  ```
 
 ### Manage DNS Zones via App-Interface (`/aws/dns-zone-1.yml`) using Terraform
 
