@@ -2391,6 +2391,13 @@ codeComponents:
 ...
 ```
 
+**Every fork of this repo must have @devtools-bot added as a `Maintainer` of
+the project.** If the bot is not added, GitLab will not be updated with the
+status of your builds in the `Pipelines` tab, and the bot will not
+automatically merge your MRs with the proper approvals (described later in this
+section). If you don't know how to add a user to your project, see the
+[GitLab documentation](https://docs.gitlab.com/ee/user/project/members/#add-users-to-a-project).
+
 App Interface has several features that can be enabled for the Gitlab
 repositories:
 - `gitlabRepoOwners`: Value `enabled: true` will enable the
