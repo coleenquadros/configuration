@@ -1,0 +1,30 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: registry-quarkus-redhat
+
+name: registry-quarkus-redhat-stage
+description: Staging namespace for registry.quarkus.redhat.com
+
+cluster:
+  $ref: /openshift/app-sre-stage-01/cluster.yml
+
+app:
+  $ref: /services/quarkus/registry/app.yml
+
+environment:
+  $ref: /products/quarkus/environments/stage-redhat.yml
+
+networkPoliciesAllow:
+  - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+
+managedRoles: true
+
+managedTerraformResources: true
+
+terraformResources:
+  - provider: rds
+    account: app-sre
+    identifier: quarkus-registry-redhat-stage
+    defaults: /terraform/resources/app-sre/staging/rds-1.yml
