@@ -60,7 +60,7 @@ defined in `target.upstream` and triggers a deployment as a result. For details 
 
 Again [state](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/utils/state.py) is used to store previously seen jobs.
 
-#### Config change
+#### Config changes
 The `openshift-saas-deploy-trigger-configs` integration is the entrypoint to detect config changes for the saas file, the targets and
 attached namespaces. [This code](https://github.com/app-sre/qontract-reconcile/blob/f1b12fec8797b3f2f5fcaf50acf55841e60d7b6e/reconcile/utils/saasherder.py#L1081-L1128)
 detects any changes and will trigger deployments.
@@ -93,12 +93,30 @@ On promotion, the success of the current deployment is stored in the qontract-re
 This declares the current commit sha as either successful or failed for subscribed targets to read during their
 `openshift-saas-deploy` run (see [validate_promotions](https://github.com/app-sre/qontract-reconcile/blob/5e170ef4b372f158b2c3e1d44afd198f78e0e81f/reconcile/openshift_saas_deploy.py#L131)).
 
+**IMPORTANT NOTE:**
+ * `validate_promotions` runs in the pr-check step when a MR is raised for a SAAS file. The MR will be merged only if `validate_promotions` ends successfully, which ensures that the publisher job has run successfully for the same `ref`.
+
 It is important to understand, that publishing a successful deployment does not trigger a deployment for subscribed
 targets. It just allows such deployments to happen if their `ref` moves to the same sha.
 
 For automated promotion to happen, a target must subscribe with `promotion.auto: true`. In this case the publishing
 procedure creates a merge request on the `saas` file of the subscribed `target` to update the `ref` to the successful
 commit sha ([see here](https://github.com/app-sre/qontract-reconcile/blob/5e170ef4b372f158b2c3e1d44afd198f78e0e81f/reconcile/utils/mr/auto_promoter.py#L53)).
+
+#### Automated Promotions with configuration changes
+Saas deployment workflows via promotions are intented to work by updating the `ref` on its targets. Basically, when a job with an automatic promotion runs, a new merge request is raised updating the `ref` value in the subscribed Saas target. Once the merge request is merged, `openshift-saas-deploy-trigger-configs` will detect a change in the saas file and it will trigger the deployment jobs.
+
+![Saas workflow](assets/auto_promotion_flow_1.png)
+
+This has an important drawback: we might want to run jobs when a configuration change is introduced in the SAAS target, independently of the `ref`.
+e.g.: updating one of the `parameters` on a target will trigger a deployment on that target, but the automatic subscribed targets won't be triggered because the `ref` is not updated and the autopromotion MR will not have any change.
+
+To solve this problem, the `promotion_data` section has been introduced. The idea is to track the configuration data of the publisher target on the subscribed targets by adding a computed hash of configuration in the promotion merge request. With this approach, any change introduced in the publisher target will change the subscriber target even if the `ref` is not updated. The configuration hash will differ, and the promotion merge request will have changes to promote.
+
+![Saas workflow](assets/auto_promotion_flow_2.png)
+
+`promotion_data` is a list of objects grouped by channel. Each channel comes from a single saas file and target, so it identifies which saas file and target is the data relative to.
+Each object in `promotion_data` implements the `PromotionChannelData_v1` interface, by now just exists one implementation to store the `ParentSaasPromotion_v1` case explained before, but it could be extended with other data in the future. Check this qontract-schemas [commit](https://github.com/app-sre/qontract-schemas/commit/30fe5217d4d1c46ffbf1233e8c140702dbb3fac1)to view the full schema definition.
 
 ## Example delivery pipeline with triggers and promotions
 All the described building blocks can be put together to build high sophisticated CI/CD pipelines. A good example
@@ -113,7 +131,7 @@ But since the staging target also defines a reference to a jenkins job, it is th
 finished. The jenkins job itself has been triggered via a webhook event from the merge into master in the Github
 repo ([see this](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/github-mirror/cicd/build.yaml)).
 
-The triggerd `openshift-saas-deploy` integration run tries to figure out if a deployment is required by processing the
+The triggered `openshift-saas-deploy` integration run tries to figure out if a deployment is required by processing the
 [github-mirror template](https://github.com/geoberle/github-mirror/blob/master/openshift/github-mirror.yaml) and comparing
 it to the currently deployed resources in Openshift. Amongst various variables, the template also specified `IMAGE_TAG`
 as a variable in the deployment. This variable is provided based on the first 7 digits of the commit sha. This means,
