@@ -93,24 +93,23 @@ Permission management could be based on groups from Red Hat SSO. However, the SS
 
 ## Milestones
 Pre-requisites actions:
-- Done as of 2022-01-11:
-  - Test on our POC instance `sso-poc.int.devshift.net`
-    - authentication
-    - role-based strategy authorization via app-interface
-    - robotic access
-  - Request ci.int and ci.ext configuration on IAM side, similar to the POC environment.
-    - ci.int: [RITM1040558](https://redhat.service-now.com/help?id=rh_ticket&table=sc_req_item&sys_id=ffb8dcac1b888510c57c3224cc4bcb4f)
-    - ci.ext: [RITM1040559](https://redhat.service-now.com/help?id=rh_ticket&table=sc_req_item&sys_id=afc8d4ec1b888510c57c3224cc4bcbe7)
-  - Install Jenkins plugins for SAML v2 and Role-Based authorization strategy
-  - Ensure necessary robotic accounts and tokens are accessible (local to Jenkinses) and referenced in Vault ([APPSRE-4224](https://issues.redhat.com/browse/APPSRE-4224))
-    - Backup users
-    - Use the [script](#local-users-and-token-handling) to generate a token
-    - Update [Vault](https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-ext/jjb-ini)
-  - Create a local user/password `sso-migration` for the time of the migration, with admin privileges: [APPSRE-4243](https://issues.redhat.com/browse/APPSRE-4243)
-- TODO as of 2022-01-11:
-  - Prepare a MR for each Jenkins ci.int and ci.ext to grant permissions to `org_username` and the bot.
-    - ci.ext: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/31129/diffs
-    - ci.int: TODO
+- Test on our POC instance `sso-poc.int.devshift.net`
+  - authentication
+  - role-based strategy authorization via app-interface
+  - robotic access
+- Request ci.int and ci.ext configuration on IAM side, similar to the POC environment.
+  - ci.int: [RITM1040558](https://redhat.service-now.com/help?id=rh_ticket&table=sc_req_item&sys_id=ffb8dcac1b888510c57c3224cc4bcb4f)
+  - ci.ext: [RITM1040559](https://redhat.service-now.com/help?id=rh_ticket&table=sc_req_item&sys_id=afc8d4ec1b888510c57c3224cc4bcbe7)
+- Install Jenkins plugins for SAML v2 and Role-Based authorization strategy
+- Ensure necessary robotic accounts and tokens are accessible (local to Jenkinses) and referenced in Vault ([APPSRE-4224](https://issues.redhat.com/browse/APPSRE-4224))
+  - Backup users
+  - Use the [script](#local-users-and-token-handling) to generate a token
+  - Update [Vault](https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-ext/jjb-ini)
+- Create a local user/password `sso-migration` for the time of the migration, with admin privileges: [APPSRE-4243](https://issues.redhat.com/browse/APPSRE-4243)
+- Ensure admin rights are granted to github **and** SSO accounts for the AppSRE team member(s) doing the migration
+- Prepare a MR for each Jenkins ci.int and ci.ext to grant permissions to `org_username` and the bot.
+  - ci.ext: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/31129
+  - ci.int: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/31991
 
 Each Jenkins migration will follow those steps:
 - Backup/Tar Jenkins configuration and `users` folders from `/var/lib/jenkins`
@@ -146,8 +145,6 @@ If we face any issue, we can rollback by following those steps:
 ## Additional information
 
 ### Local users and token handling
-
-*Note to be added in a SOP !*
 
 as an admin, it is possible to create local users and generate tokens for that user. Go at `JENKINS_URL/script` and run the following groovy script (with correct `userName` and `tokenName` values)
 
@@ -194,15 +191,13 @@ Those Jenkins automation accounts were found. We're listing them and defining wh
   - Referenced in app-interface in `/data/teams/insights/bots/iqe-sitreps-bot.yml`
   - :warning: No idea where the token is referenced in Vault nor where it is used. Andreu was told this is not used anymore, but we see token usage counts increasing in `apiTokenStats.xml`. Andreu will double-check.
 
-Those accounts have also been found but don't seem to be used. To be confirmed !
+Those accounts have also been found but are not used.
 - `app-sre-ci-trigger-jobs-bot`
   - Referenced in `app-interface` here: https://gitlab.cee.redhat.com/search?search=app_sre_ci_trigger_jobs_bot&group_id=5301&project_id=13582&scope=&search_code=true&snippets=false&repository_ref=master&nav_source=navbar
   - Referenced in [osde2e](/resources/jenkins/osde2e/job-templates.yaml) (but does not seem used in [the GitHub repo](https://github.com/openshift/osde2e/search?q=JENKINS_TOKEN&type=code)) and [insights](/resources/jenkins/insights/ci-int/job-templates.yaml) (but does not seem to be used in the [Gitlab repo](https://gitlab.cee.redhat.com/insights-platform/cicd-common/-/tree/master)) jobs definitions
   - Defined in [GitHub](https://github.com/orgs/app-sre/people/app-sre-ci-trigger-jobs-bot)
   - Referenced in [Vault](https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/app-sre-ci-trigger-jobs-bot)
     - Bot GitHub account seems 2FA-linked to Jaime's mobile phone. But Jaime does not remember this bot setup.
-  - To be replaced by a Jenkins local bot + token
-    - Then update Vault data in https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/app-sre-ci-trigger-jobs-bot
 - `&ci_jenkins_token` reference
   - Referenced in `app-interface` in `resources/jenkins/managed-services/secrets.yaml`
   - Related to cpaas, **not** to ci-int / ci-ext.
