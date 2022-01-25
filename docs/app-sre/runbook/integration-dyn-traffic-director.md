@@ -29,11 +29,16 @@ Overall runtime performance of the integration can be observed as part of the [A
 
 ### Access
 
-[Dyn Management Portal](manage.dynect.net/)
+[Dyn Management Portal](https://manage.dynect.net/)
 
-Access to the Dyn Management Portal can be found in Vault at https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/dyn
+Credentials to the Dyn Management Portal can be found in Vault at https://vault.devshift.net/ui/vault/secrets/app-sre/show/creds/dyn
 
-As noted in the vault secret, access to the portal is behind mandatory 2FA which is currently tied to jchevret@redhat.com. Please reach out to Jean-Francois Chevrette should you need urgent access to the Dyn Management Portal
+The 2FA TOTP code can be retrieved from Vault under path `totp/app-sre/code/sd-app-sre@dyn`. **However at this time the TOTP secrets engine cannot be viewed via the Vault UI**
+
+```sh
+vault login -method=github -address=https://vault.devshift.net
+vault read totp/app-sre/code/sd-app-sre@dyn
+```
 
 ## SOPs
 
