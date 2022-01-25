@@ -30,7 +30,7 @@ This step should be performed in a single merge request.
 
 1. Click `Subscriptions` and ensure you have enough quota to provision a cluster
     - Must have at least 1 cluster of the desired type
-    - Check that you have enough compute nodes quota for the desired total compute (4 are included in a single-az cluster, 6 in a multi-az)
+    - Check that you have enough compute nodes quota for the desired total compute (4 are included in a single-az cluster, 9 in a multi-az)
     - Note that quota is driven via this [repo](https://gitlab.cee.redhat.com/service/ocm-resources/) and this is our [org file](https://gitlab.cee.redhat.com/service/ocm-resources/blob/master/data/uhc-production/orgs/12147054.yaml) in prod. The `@ocm-resources` Slack alias can also be pinged for any questions or if the change is urgent.
     - Use the [OCM resource cost mappings spreadsheet](https://docs.google.com/spreadsheets/d/1HGvQnahZCxb_zYH2kSnnTFsxy9MM49vywd-P0X_ISLA/edit#gid=315221665) mapping table to find which are correspondences between OCM types and AWS instance types
 
@@ -99,6 +99,8 @@ This step should be performed in a single merge request.
         soakDays: N # number of days a version should run on other clusters with similar workloads before this cluster is upgraded to it
 
     network:
+      # For OVN, use OVNKUbernetes
+      type: OpenshiftSDN
       vpc: (desired machine CIDR. ex: 10.123.0.0/16)
       service: (desired service CIDR. ex: 172.30.0.0/16)
       pod: (desired pod CIDR. ex: 10.128.0.0/14)
