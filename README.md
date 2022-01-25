@@ -1422,6 +1422,8 @@ In order to add or update Amazon Elasticsearch Service, you need to add them to 
     - For example, for a resource with `identifier` "my-service" and `provider` is set to `elasticsearch`, the created Secret will be called `my-service-elasticsearch`.
 - `annotations`: additional annotations to add to the output resource
 
+The `defaults` resource file will have a structure that follows closely the structure of the elasticsearch objects from the [terraform AWS provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticsearch_domain), the only difference being the use of vault to store passwords instead of having them in clear text in app-interface. See the [elasticsearch-defaults-1.yml](https://github.com/app-sre/qontract-schemas/blob/main/schemas/aws/elasticsearch-defaults-1.yml) schema file for details of the exact fields that are supported.
+
 Once the changes are merged, the Amazon Elasticsearch Service will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
 The Secret will contain the following fields:
