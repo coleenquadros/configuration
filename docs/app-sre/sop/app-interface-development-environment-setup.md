@@ -3,6 +3,7 @@
 ## Overview
 
 This SOP explains how to setup a local development environment for app-interface. This environment includes the following components:
+
 1. app-interface - this is the data repository. you can think of it as our database.
 1. qontract-schemas - this is the repository that defines what the data should look like.
 1. qontract-server - this is the component that exposes the data from app-interface.
@@ -50,7 +51,7 @@ Note that when running `make dev` in qontract-server, it will use the schemas in
 This allows local development of schemas and logic (qontract-reconcile).
 
 > Optionally, if you want to specify the path for the qontract-schemas repo on your local filesystem, you can use the parameter:
->*  `SCHEMAS_PATH` - (optional) path to a local qontract-schemas repo (Default: `$PWD/../qontract-schemas`)
+>\*  `SCHEMAS_PATH` - (optional) path to a local qontract-schemas repo (Default: `$PWD/../qontract-schemas`)
 
 ## Setup qontract-server
 
@@ -88,20 +89,29 @@ Your Qontract GraphQL server will be available at `http://localhost:4000/graphql
 1. Sign in to Vault with Github Token. Copy the value of `data_base64` in [ci-int/qontract-reconcile-toml](https://vault.devshift.net/ui/vault/secrets/app-sre/show/ci-int/qontract-reconcile-toml).
 1. Decode the content to create a `config.debug.toml` file in `qontract-reconcile` directory with command `echo <content> | base64 -d > config.debug.toml`
 1. Set graphql server in `config.debug.toml` to `http://localhost:4000/graphql`.
-1. Run an integration:
 
-    ```sh
-    $ cd qontract-reconcile
-    $ qontract-reconcile --config config.debug.toml --dry-run --log-level DEBUG <integration-name>
-    ```
+## Run an integration locally
+
+### Inside your environment
+
+```sh
+$ cd qontract-reconcile
+$ qontract-reconcile --config config.debug.toml --dry-run --log-level DEBUG <integration-name>
+```
+
+### Inside docker
+
+```sh
+make dev-reconcile-loop dev-reconcile-loop INTEGRATION_NAME=<integration-name> DRY_RUN=<--dry-run|--no-dry-run> INTEGRATION_EXTRA_ARGS=<integration-args> SLEEP_DURATION_SECS=<natural number>
+```
 
 ## Using development data
 
 We are trying to move towards using development data when doing development work. This is currently hard because to perform development we need data, which has to be created.
 
-The repository that is being used for development purposes (and in the future for demo/docs purposes) is: https://github.com/app-sre/app-interface.
+The repository that is being used for development purposes (and in the future for demo/docs purposes) is [app-interface](https://github.com/app-sre/app-interface).
 
-It is encouraged that development work is done using this repository and not using the real data in https://gitlab.cee.redhat.com/service/app-interface.
+It is encouraged that development work is done using this repository and not using the [real data](https://gitlab.cee.redhat.com/service/app-interface).
 
 1. To start a development server with the data from the development app-interface, run the following command in the `qontract-server` directory:
 
