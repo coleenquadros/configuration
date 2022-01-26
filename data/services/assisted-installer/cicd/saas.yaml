@@ -49,9 +49,9 @@ resourceTemplates:
   path: /openshift/template.yaml
   provider: openshift-template
   targets:
-  - namespace:
+  - ref: master
+    namespace:
       $ref: /services/assisted-installer/namespaces/assisted-installer-integration.yml
-    ref: master
     upstream:
       instance:
         $ref: /dependencies/ci-ext/ci-ext.yml
@@ -59,8 +59,20 @@ resourceTemplates:
     promotion:
       publish:
         - assisted-events-scrape-integration-deploy-success-channel
-  parameters:
-    ES_INDEX: intagration-cluster-events
+    parameters:
+      ES_INDEX: intagration-cluster-events
+  - ref: master
+    namespace:
+      $ref: /services/assisted-installer/namespaces/assisted-installer-stage.yml
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: openshift-assisted-assisted-events-scrape-gh-build-master
+    promotion:
+      publish:
+        - assisted-events-scrape-stage-deploy-success-channel
+    parameters:
+      ES_INDEX: stage-cluster-events
 
 - name: assisted-image-service
   url: https://github.com/openshift/assisted-image-service
