@@ -67,10 +67,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-backend commit hash that determines the clowdapp-backend.yaml version
-    ref: 89470a6f8eb2c2dd8415c6b2ae3d1e3aee17d06c
+    ref: 58b432da9e1f84176e8620617994c8b226f6f6d1
     parameters:
       # quay.io tag that will be deployed
-      IMAGE_TAG: 89470a6
+      IMAGE_TAG: 58b432d
       CLOUDWATCH_ENABLED: true
       CPU_REQUEST: 200m
       KAFKA_CONSUMED_TOTAL_CHECKER_ENABLED: true
@@ -109,6 +109,67 @@ resourceTemplates:
       RBAC_S2S_READ_TIMEOUT: 120000
       SENTRY_ENABLED: true
 
+# notifications-engine
+- name: notifications-engine
+  path: /.rhcicd/clowdapp-engine.yaml
+  url: https://github.com/RedHatInsights/notifications-backend
+  targets:
+
+  # ephemeral
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    # app-sre will not deploy this target
+    disable: true
+    # populated by bonfire
+    ref: internal
+
+  # stage
+  - namespace:
+      $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
+    # notifications-backend commit hash that determines the clowdapp-engine.yaml version
+    ref: 58b432da9e1f84176e8620617994c8b226f6f6d1
+    # app-sre will not deploy this target, yet
+    disable: true
+    parameters:
+      # quay.io tag that will be deployed
+      IMAGE_TAG: 58b432d
+      CLOUDWATCH_ENABLED: true
+      CPU_REQUEST: 200m
+      KAFKA_CONSUMED_TOTAL_CHECKER_ENABLED: true
+      KAFKA_CONSUMED_TOTAL_CHECKER_INITIAL_DELAY: 60m
+      KAFKA_CONSUMED_TOTAL_CHECKER_PERIOD: 60m
+      MIN_REPLICAS: 3
+      MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_INTERVAL_MS: 1200000
+      MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_RECORDS: 100
+      MP_MESSAGING_INCOMING_INGRESS_THROTTLED_UNPROCESSED_RECORD_MAX_AGE_MS: 120000
+      NOTIFICATIONS_LOG_LEVEL: DEBUG
+      PROCESSOR_EMAIL_NO_REPLY: no-reply-stage@redhat.com
+      RBAC_S2S_READ_TIMEOUT: 120000
+      SENTRY_ENABLED: true
+
+  # prod
+  - namespace:
+      $ref: /services/insights/notifications/namespaces/notifications-prod.yml
+    # notifications-backend commit hash that determines the clowdapp-engine.yaml version
+    ref: 4366a0f78b7554664f511e5eba529ab1fd9c842d
+    # app-sre will not deploy this target, yet
+    disable: true
+    parameters:
+      # quay.io tag that will be deployed
+      IMAGE_TAG: 4366a0f
+      CLOUDWATCH_ENABLED: true
+      CPU_LIMIT: 3
+      MEMORY_LIMIT: 4Gi
+      KAFKA_CONSUMED_TOTAL_CHECKER_ENABLED: true
+      MIN_REPLICAS: 1
+      MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_INTERVAL_MS: 1200001
+      MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_RECORDS: 100
+      MP_MESSAGING_INCOMING_INGRESS_THROTTLED_UNPROCESSED_RECORD_MAX_AGE_MS: 120000
+      NOTIFICATIONS_LOG_LEVEL: DEBUG
+      PROCESSOR_EMAIL_NO_REPLY: no-reply@redhat.com
+      RBAC_S2S_READ_TIMEOUT: 120000
+      SENTRY_ENABLED: true
+
 # notifications-aggregator
 - name: notifications-aggregator
   path: /.rhcicd/clowdapp-aggregator.yaml
@@ -127,10 +188,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-backend commit hash that determines the clowdapp-aggregator.yaml version
-    ref: 89470a6f8eb2c2dd8415c6b2ae3d1e3aee17d06c
+    ref: 58b432da9e1f84176e8620617994c8b226f6f6d1
     parameters:
       # quay.io tag that will be deployed
-      IMAGE_TAG: 89470a6
+      IMAGE_TAG: 58b432d
       CLOUDWATCH_ENABLED: true
       CPU_REQUEST: 200m
       CRONTAB_AGGREGATION_JOB: 0 * * * *
@@ -167,10 +228,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-gw commit hash that determines the clowdapp.yaml version
-    ref: 7da39dc619a646bf7775157a0c05a3a88633a23c
+    ref: 5fa31c86242496fc108e5a3059656c4f0646561d
     parameters:
       # quay.io tag that will be deployed
-      IMAGE_TAG: 7da39dc
+      IMAGE_TAG: 5fa31c8
       CLOUDWATCH_ENABLED: true
       CPU_REQUEST: 200m
       MIN_REPLICAS: 3
