@@ -63,3 +63,7 @@ Some saas-repos are in GitHub. If GitHub is down the rollback will not work as t
 A possible way of working around this is by restoring the saas repo and the upstream repo from the [git-keeper backups](https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/git-keeper-restore.md) and running the deployment manually (easier) or pushing the backed up repo to gitlab and create the corresponding CI/CD jobs in ci-int (the jobs that will usually fail are those that are run by ci-ext).
 
 This will be eventually fixed entirely by https://issues.redhat.com/browse/APPSRE-1276.
+
+### https://vault.devshift.net
+
+see [vault docs](https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/vault.md)
