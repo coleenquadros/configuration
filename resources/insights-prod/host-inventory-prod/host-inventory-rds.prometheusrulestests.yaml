@@ -12,9 +12,9 @@ tests:
 - interval: 10m
   input_series:
   - series: rdsosmetrics_fileSys_usedPercent{mount_point="/rdsdbdata", exported_instance="host-inventory-prod"}
-    values: 0+.05x12
+    values: 0+.05x24
   alert_rule_test:
-  - eval_time: 2h
+  - eval_time: 4h
     alertname: HBIFreeSpaceLow
     exp_alerts:
     - exp_labels:
@@ -47,3 +47,13 @@ tests:
       exp_annotations:
         link_url: "https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=host-inventory-prod;is-cluster=false;tab=monitoring"
         message: "DB instance host-inventory-prod is about to run out of storage within 1 DAY."
+
+# Neither alert should fire
+- interval: 10m
+  input_series:
+  - series: rdsosmetrics_fileSys_usedPercent{mount_point="/rdsdbdata", exported_instance="host-inventory-prod"}
+    values: 0+.01x24
+  alert_rule_test:
+  - eval_time: 4h
+    alertname: HBIFreeSpaceLow
+    exp_alerts: []
