@@ -134,7 +134,7 @@ resourceTemplates:
       MANAGER_POD_CPU_REQUESTS: "1"
       FULL_VALIDATION_ENABLED: "true"
 
-  # Ephemeral cluster
+  # Ephemeral/dev clusters
   # Unlike in stable environments where the operator is deployed in SingleNamespace mode,
   # AllNamespaces (i.e. cluster-wide) mode is used in ephemeral environments
   - namespace:
@@ -179,6 +179,50 @@ resourceTemplates:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: RedHatInsights-xjoin-operator-gh-build-catalog-master-upstream-RedHatInsights-xjoin-operator-gh-build-master
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/xjoin-dev.yml
+    ref: master
+    parameters:
+      LOG_LEVEL: "info"
+      TARGET_NAMESPACE: xjoin
+      SOURCE_NAMESPACE: xjoin
+      # Temporary until https://github.com/RedHatInsights/clowder/pull/390 is merged and released
+      DEBEZIUM_CONNECTOR_CONFIG: '{
+        "tasks.max": "{{.DebeziumTasksMax}}",
+        "database.hostname": "{{.HBIDBHost}}",
+        "database.port": "{{.HBIDBPort}}",
+        "database.user": "{{.HBIDBUser}}",
+        "database.password": "{{.HBIDBPassword}}",
+        "database.dbname": "{{.HBIDBName}}",
+        "database.server.name": "{{.ResourceNamePrefix}}.{{.Version}}",
+        "database.sslmode": "{{.HBIDBSSLMode}}",
+        "database.sslrootcert": "{{.HBIDBSSLRootCert}}",
+        "table.whitelist": "public.hosts",
+        "plugin.name": "pgoutput",
+        "transforms": "unwrap",
+        "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+        "transforms.unwrap.delete.handling.mode": "rewrite",
+        "errors.log.enable": {{.DebeziumErrorsLogEnable}},
+        "errors.log.include.messages": true,
+        "slot.name": "{{.ReplicationSlotName}}",
+        "max.queue.size": {{.DebeziumQueueSize}},
+        "max.batch.size": {{.DebeziumMaxBatchSize}},
+        "poll.interval.ms": {{.DebeziumPollIntervalMS}}
+      }'
+      MANAGER_POD_MEM_LIMIT: "8Gi"
+      MANAGER_POD_CPU_LIMIT: "2"
+      MANAGER_POD_MEM_REQUESTS: "4Gi"
+      MANAGER_POD_CPU_REQUESTS: "1"
+      VALIDATION_INTERVAL_INIT: "30"
+      VALIDATION_ATTEMPTS_THRESHOLD_INIT: "30"
+      VALIDATION_INTERVAL: "30"
+      VALIDATION_ATTEMPTS_THRESHOLD: "10"
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-xjoin-operator-gh-build-catalog-master-upstream-RedHatInsights-xjoin-operator-gh-build-master
+
+
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-operator-fedramp-prod.yml
     ref: 864ea397209ee24a575358efb3b966cac7384bd6
