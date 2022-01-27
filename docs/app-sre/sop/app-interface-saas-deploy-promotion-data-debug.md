@@ -43,7 +43,9 @@ calculated on the parent `target` saas file.
 
 #### Failed parent target PipelineRun with configuration changes
 Take this case as an example:\
+```
 Deploy Target (deploy_target) --> AutoPromotes Test Target (test_target)\
+```
 
 If `deploy_target` configuration is modified and its `PipelineRun` fails, the target's state will have the last configuration, but the subscribed target `test_target` won't contain the last configuration hash of `deploy_target`.  If at this point `test_target` configuration is modified in a manual pr, the pr_check will throw this error because the `target_config_hash` will not match. `test_target` target_config_hash references the configuration of the last successful `deploy_target` run.
 
