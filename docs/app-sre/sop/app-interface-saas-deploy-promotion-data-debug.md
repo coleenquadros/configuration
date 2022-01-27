@@ -41,7 +41,7 @@ Promotion state object was generated with an old configuration of the parent job
 This means that the `target_config_hash` set in the promotion data of the `target` does not match the hash
 calculated on the parent `target` saas file.
 
-#### Failed parent target PipelineRun with a configuration changes
+#### Failed parent target PipelineRun with configuration changes
 Take this case as an example:\
 Deploy Target (deploy_target) --> AutoPromotes Test Target (test_target)\
 
