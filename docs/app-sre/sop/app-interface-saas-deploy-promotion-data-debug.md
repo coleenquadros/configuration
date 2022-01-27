@@ -32,7 +32,7 @@ Parent Target deployment Run: 2 -----> AutoPromote: 2 -----> Merged ---> Subscri
 **SOLUTION:**\
 If it's ok to just run the latest iteration, just close the invalid MR.
 
-### Validate promotions fail at PR_Check
+### Validate promotions fails at PR_Check
 ```
 [2022-01-25 16:38:04] [ERROR] [saasherder.py:validate_promotions:1334] -
 Promotion state object was generated with an old configuration of the parent job
@@ -41,7 +41,7 @@ Promotion state object was generated with an old configuration of the parent job
 This means that the `target_config_hash` set in the promotion data of the `target` does not match the hash
 calculated on the parent `target` saas file.
 
-### Failed parent Job run with a configuration change
+#### Failed parent Job run with a configuration change
 Take this case as an example:\
 Deploy Target (deploy_target) --> AutoPromotes Test Target (test_target)\
 
