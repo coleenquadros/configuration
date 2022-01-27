@@ -42,20 +42,27 @@ This means that the `target_config_hash` set in the promotion data of the `targe
 calculated on the parent `target` saas file.
 
 #### Failed parent target PipelineRun with configuration changes
-Take this case as an example:\
+Take this case as an example:
 ```
-Deploy Target (deploy_target) --> AutoPromotes Test Target (test_target)\
+Deploy Target (deploy_target) --> AutoPromotes Test Target (test_target)
 ```
 
-If `deploy_target` configuration is modified and its `PipelineRun` fails, the target's state will have the last configuration, but the subscribed target `test_target` won't contain the last configuration hash of `deploy_target`.  If at this point `test_target` configuration is modified in a manual pr, the pr_check will throw this error because the `target_config_hash` will not match. `test_target` target_config_hash references the configuration of the last successful `deploy_target` run.
+If `deploy_target` configuration is modified and its `PipelineRun` fails, its state will have the last configuration, but `test_target` target_config_hash won't be updated.  If at this point `test_target` configuration is modified, the pr_check will throw this error because the `target_config_hash` will not match the `deploy_target` configuration hash.
+
+`test_target` target_config_hash references the configuration of the last successful `deploy_target`.
+
 
 **DIAGNOSIS**\
 Check `deploy_target` PipelineRuns to check if there are failed jobs, try to git-history `deploy_target` saas file to see if that failed jobs correlates to a configuration change.
 If all `deploy_target` deployment runs have failed after a configuration change and a `test_target` configuration change is throwing this error in a non-automated MR, you are mostly facing this problem
 
+If the saas pipeline is a multistage pipeline: e.g: `deploy -> test -> release`, all `release` automatic MR will modify both the `ref` and the `target_config_hash`. This happens because test configuration
+contains the `ref` of deploy, so every step in the pipeline will change the configuration. To check if this is the case git-history the release saas file and check if the AutoPromote MRs modify both the `ref` and
+the `target_config_hash`.
+
 **SOLUTION**\
 Ideally, subscribed jobs targets definitions should only be modified after a sucessful parent job run. If the job needs to run no mather what,
-just remove the `promotion_data` section on the `test_target`.
+just remove the `promotion_data` section on the failing target.
 
 ## Useful debug information
 
