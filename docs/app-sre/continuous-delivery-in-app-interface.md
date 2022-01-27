@@ -72,7 +72,7 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
         * `field` - should be `all`.
 * `parameters` - (optional) parameters for `oc process` to be used in all resource templates in this saas file.
 * `resourceTemplates` - a list of configurations of OpenShift templates to deploy
-    * `name` - a descriptive name of the deplyoed resources
+    * `name` - a descriptive name of the deployed resources
     * `url` - git repository URL (https and not SSH)
     * `path` - path to file containing an OpenShift template in the repository
     * `provider` - (optional) specify what is the form of the resources in the specified url and path. options:
@@ -80,6 +80,7 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
         * `directory` - a directory containing raw manifests to be applied (not templated)
     * `targets` - a list of namespaces to deploy resources to
         * `namespace` - a reference to a namespace to deploy to
+          * **Note:** a namespace should never be defined more than once in `targets`. Some users may wish to do this to deploy the same resources, but with different `parameters`, to a particular namespace. The correct approach for this use case is to create a separate entry in `resourceTemplates`, which will have a separate `targets` list.
         * `ref` - git ref to deploy (commit sha or branch name (usually `master`))
             * for deployments to a production namespace, always use a git commit hash
         * `promotion` - a section to indicate promotion behavior/validations
