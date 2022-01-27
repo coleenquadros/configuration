@@ -67,7 +67,7 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
     * `code` - only required for private GitHub repositories
         * `path` - path to secret in Vault containing credentials
         * `field` - secret field (key) to use
-    * `image` - only required for private images
+    * `image` - only required for private images. Additional steps may be required to pull from private repos, [see this doc](/docs/app-sre/sop/make-registry-private.md) for more information.
         * `path` - path to secret in Vault containing credentials (should contain `config.json`, `user` and `token` keys)
         * `field` - should be `all`.
 * `parameters` - (optional) parameters for `oc process` to be used in all resource templates in this saas file.
