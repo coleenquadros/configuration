@@ -57,6 +57,15 @@ surfaces and processes, including incident management.
 
 You have a new, shiny laptop. Now, make sure you comply with [the laptop security guidelines](https://source.redhat.com/departments/it/it-information-security/wiki/laptop_security).
 
+### Declare your github repositories in Rover
+
+Ideally you'd declare your **professional** social media in your
+[Rover profile](https://rover.redhat.com/people/profile/). At the very
+least we want you to declare your Github account there, so that
+InfoSec can [scan for any key
+leaks](https://source.redhat.com/departments/it/it-information-security/wiki/details_about_rover_github_information_security_and_scanning#how-can-i-tell-the-scanner-to-allow-certain-things-in-my-repo-)
+on your **public** repositories.
+
 ### Registering the user in App-Interface
 
 Most of the resources required as an AppSRE will be obtained via a user definition with AppSRE specific roles in App-Interface.
