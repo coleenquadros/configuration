@@ -74,6 +74,31 @@ resourceTemplates:
       MIN_SCHEDULER_REPLICAS: 0
       MIN_REPLICAS: 1
   - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ocm.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-insights-rbac-gh-build-master
+    parameters:
+      ENV_NAME: qaprodauth
+      HABERDASHER_EMITTER: kafka
+      HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
+      HABERDASHER_KAFKA_TOPIC: platform.logging.logs
+      HABERDASHER_LABELS: {"app": "rbac"}
+      HABERDASHER_TAGS: ["rbac"]
+      DISABLE_MIGRATE: "False"
+      EPH_ENV: "True"
+      CLOWDER_ENABLED: "true"
+      PERMISSION_SEEDING_ENABLED: 'True'
+      ROLE_SEEDING_ENABLED: 'True'
+      GROUP_SEEDING_ENABLED: 'True'
+      CELERY_INITIAL_DELAY_SEC: 120
+      CELERY_PERIOD_SEC: 10
+      MIN_WORKER_REPLICAS: 0
+      MIN_SCHEDULER_REPLICAS: 0
+      MIN_REPLICAS: 1
+  - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     ref: internal  # populated by bonfire
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
