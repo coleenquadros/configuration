@@ -70,6 +70,8 @@ resourceTemplates:
       name: RedHatInsights-rhsm-subscriptions-gh-build-main
     parameters:
       SERVER_MAX_HTTP_HEADER_SIZE: '47000'
+      RHSM_RBAC_HOST: ${RBAC_HOST}
+      RHSM_RBAC_PORT: '8080'
 - name: rhsm-subscriptions-capacity-ingress
   path: /templates/rhsm-subscriptions-capacity-ingress.yml
   url: https://github.com/RedHatInsights/rhsm-subscriptions
@@ -81,6 +83,10 @@ resourceTemplates:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: RedHatInsights-rhsm-subscriptions-gh-build-main
+    parameters:
+      SUBSCRIPTION_SYNC_ENABLED: true
+      PRODUCT_URL: https://product.stage.api.redhat.com/svcrest/product/v3
+      SUBSCRIPTION_URL: https://subscription.stage.api.redhat.com/svcrest/subscription/v5
 - name: rhsm-subscriptions-scheduler
   path: /templates/rhsm-subscriptions-scheduler.yml
   url: https://github.com/RedHatInsights/rhsm-subscriptions
@@ -93,6 +99,7 @@ resourceTemplates:
         $ref: /dependencies/ci-int/ci-int.yml
       name: RedHatInsights-rhsm-subscriptions-gh-build-main
     parameters:
+      SUBSCRIPTION_SYNC_ENABLED: true
       OPENSHIFT_ENABLED_ACCOUNT_PROMQL: "group(min_over_time(subscription_labels{ebs_account != '', billing_model='marketplace'}[1h])) by (ebs_account)"
 - name: metrics-worker
   path: /templates/metrics-worker.yml
@@ -106,7 +113,7 @@ resourceTemplates:
         $ref: /dependencies/ci-int/ci-int.yml
       name: RedHatInsights-rhsm-subscriptions-gh-build-main
     parameters:
-      HAWTIO_BASE_PATH: /app/rhsm-metrics/actuator/hawtio
+      HAWTIO_BASE_PATH: /app/rhsm-metrics/hawtio
       SPLUNK_FORWARDER_MEMORY_LIMIT: 256Mi
       USER_HOST: user.stage.api.redhat.com
 - name: rhsm-subscriptions-worker
@@ -123,10 +130,11 @@ resourceTemplates:
     parameters:
       CLOUDIGRADE_ENABLED: true
       CLOUDIGRADE_HOST: cloudigrade-api.cloudigrade-perf.svc.cluster.local
-      CLOUDIGRADE_PORT: 80
+      CLOUDIGRADE_PORT: 8000
       USER_HOST: user.stage.api.redhat.com
-      MEMORY_REQUEST: 2000Mi
-      MEMORY_LIMIT: 2744Mi
+      MEMORY_REQUEST: 3000Mi
+      MEMORY_LIMIT: 3744Mi
+      KAFKA_MESSAGE_THREADS: 12
 - name: system-conduit
   path: /templates/rhsm-conduit.yaml
   url: https://github.com/RedHatInsights/rhsm-subscriptions
@@ -156,7 +164,7 @@ resourceTemplates:
     parameters:
       MARKETPLACE_MANUAL_SUBMISSION_ENABLED: 'true'
       MARKETPLACE_MAX_ATTEMPTS: 2
-      HAWTIO_BASE_PATH: /app/rhsm-marketplace/actuator/hawtio
+      HAWTIO_BASE_PATH: /app/rhsm-marketplace/hawtio
       SPLUNK_FORWARDER_MEMORY_LIMIT: 256Mi
       SUBSCRIPTION_URL: https://subscription.stage.api.redhat.com/svcrest/subscription/v5
       USER_HOST: user.stage.api.redhat.com
@@ -166,7 +174,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/rhsm/namespaces/perf-rhsm-perf.yml
-    ref: d98fcd25cb6f547d4296a9f4ff212814abf3c25c
+    ref: 78df117606a415b6f025a8562c2556a84802c2f3
     parameters:
       RHSM_SERVICE_URL: https://api.rhsm.stage.redhat.com/v1/cloud_access_providers/
       USER_SERVICE_URL: https://user.stage.api.redhat.com/
