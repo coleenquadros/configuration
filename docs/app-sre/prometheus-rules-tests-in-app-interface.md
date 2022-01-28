@@ -25,11 +25,13 @@ The integration running the tests is a wrapper on top of `promtool`. It looks fo
 
 ## When to write tests
 
-In general, new alerts should always come with tests associated to them, but there are exceptions. Let's explain them.
+In general, any alerts that are to be handled by app-sre (`high` and `critical` severity) should always come with tests associated to them, but there are exceptions. Let's explain them.
 
 Tests are completely isolated from the real world. The series used are completely synthetic and defined from the test itself. Since writing Prometheus tests is not a trivial exercise (especially if it is the first time), app-sre will only ask for tests to be created when they have an added value, e.g. testing non-trivial PromQL queries, recorded rules, etc...
 
 If your alert rule contains trivial PromQL (e.g. `up{foo="bar"} > 0`), writing tests is not very useful as it won't really guarantee that rules will actually work as expected in real life. The test is a self-contained artifact, meaning it could be perfectly valid and contain a non-existing label. That's why app-sre won't ask for such alerts to come with a test associated.
+
+Prometheus rules that won't be handled by app-sre will always benefit from tests, but those are not required. If an existing alert that didn't have test is modified in such a way that it reaches app-sre it will need tests if is complex enough to benefit from the effort of writing them.
 
 ## Notes on writing tests
 
