@@ -78,6 +78,16 @@ spec:
       labels:
         service: uhc-acct-mngr
         severity: medium
+    - alert: UHC account manager Advisory Lock Duration High - {{{environment}}}
+      annotations:
+        message: "UHC Account Manager Advisory Lock Duration in namespace uhc-{{{environment}}} 50th percentile latency is greater than 1s. Current value: {{ $value | humanize }}"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop#account-manager-advisory-lock-issues"
+      expr: |
+        histogram_quantile(0.50, sum(rate(advisory_lock_duration_bucket{namespace="uhc-{{{environment}}}",service="uhc-acct-mngr-metrics", type!="migrations"}[1m])) by (le)) > 1
+      for: 10m
+      labels:
+        service: uhc-acct-mngr
+        severity: medium
     - alert: UHC account manager too many banned users - {{{environment}}}
       annotations:
         message: "UHC Account Manager in namespace {{ $labels.namespace }} has banned {{ $value | humanize }} users in 24 hours"
