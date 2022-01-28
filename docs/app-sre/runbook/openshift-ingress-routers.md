@@ -72,3 +72,41 @@ The original discussion with SRE-P can be found in [Slack](https://coreos.slack.
 It is worth knowing that overloaded routers / infra nodes can lead to a situation where multiple tenant services and infrastructure components can become unreachable. In an incident that involved [OCM degradation](https://docs.google.com/document/d/1wxXTiXLK8v7JuwOnm7Jte5-jU50qAhEljFTsIexM6Ho/edit#), not only were OCM services impacted, but team members were also having issues reaching Prometheus and the OCP Console, because that traffic also passes through the default OpenShift ingress routers on the cluster.
 
 This might lead to further discussions about architecture in the future. It isn't good when production services are impacted, but it's even worse when the team is trying to troubleshoot and OCP console/Prometheus access is also affected.
+
+### Incorrect/default certificate returned by the ingress router (ex. *.apps.app-sre-prod-01.i7w5.p1.openshiftapps.com)
+
+#### Problem
+The ingress router can return the default certificate instead of the route-specific certificate during periods of transient network issues. This can result in a certificate mismatch that will prevent the affected clients from successfully calling the endpoint.
+
+With a Python-requests client, the error might look like:
+
+```python
+HTTPSConnectionPool(host='app-interface.stage.devshift.net', port=443): Max retries exceeded with url: / (Caused by SSLError(CertificateError("hostname 'app-interface.stage.devshift.net' doesn't match either of '*.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com', 'api.app-sre-stage-0.k3s7.p1.openshiftapps.com', 'rh-api.app-sre-stage-0.k3s7.p1.openshiftapps.com'",),) 
+```
+
+#### Explanation
+
+The very high-level explanation is that the `inspect-delay` timeout in HAProxy, which is configured via `tlsInspectDelay` in the Ingress Operator, limits the time that HAProxy has to inspect the request and match rules for forwarding the request to a backend. For TLS connections, the TLS handshake needs to make enough progress to specify the hostname (via SNI) that the request should go to. If there are no rule matches from the TLS inspection before the request times out, then the request will go to the default backend (returning the default TLS certificate).
+
+The most likely cause of this issue is transient networking issues between the client and ingress router. These sorts of issues are not rare in AWS, particularly for a single EC2 host, or a single AZ. As seen in APPSRE-1564, we were able to reproduce this issue by simulating packet loss at the client using `tc`. This slowed down the TCP and TLS handshake enough that it doesn't complete within the inspection window (`inspect-delay` timeout).
+
+#### Options for fixing this issue
+
+* `tlsInspectDelay` could be increased on the Ingress Operator, but this could leave us more suspectible to denial of service attacks (the client can send packets very slowly). So, in most cases this should probably be avoided.
+* If we control the clients, we can implement retries on TLS failures
+* Explore other options with #forum-network-edge or investigate other load balancer options that don't suffer from this same issue?
+
+#### Other causes
+
+@goberlec mentioned that he's also seen this issue in OCP as a result of overloaded router pods. This makes sense because in theory the ingress router itself being delayed could still impact the timeout.
+
+From the findings in APPSRE-1564, we don't have any proof that this issue could be caused by HAProxy configuration reloads or that it is impacted by OpenSSL versions.
+
+#### More information
+
+* [RH Customer Portal article](https://access.redhat.com/solutions/5603871)
+  * it states that this only affects Passthrough Routes, but [confirmed with #forum-network-edge that this affects all Routes](https://coreos.slack.com/archives/CCH60A77E/p1642539370035300)
+* Background information: APPSRE-1564
+* [Configuration info for Ingress Operator](https://docs.openshift.com/container-platform/4.9/networking/ingress-operator.html#nw-ingress-controller-configuration-parameters_configuring-ingress) including `tlsInspectDelay`
+* [HAProxy docs](https://cbonte.github.io/haproxy-dconv/1.8/configuration.html#4-tcp-request%20inspect-delay) for `inspect-delay`
+
