@@ -98,7 +98,9 @@ The most likely cause of this issue is transient networking issues between the c
 
 #### Other causes
 
-There are no other known causes of this issue at this time. From the other findings in APPSRE-1564, we don't believe that this issue is being caused by HAProxy configuration reloads or that it is impacted by OpenSSL versions.
+@goberlec mentioned that he's also seen this issue in OCP as a result of overloaded router pods. This makes sense because in theory the ingress router itself being delayed could still impact the timeout.
+
+From the findings in APPSRE-1564, we don't have any proof that this issue could be caused by HAProxy configuration reloads or that it is impacted by OpenSSL versions.
 
 #### More information
 
