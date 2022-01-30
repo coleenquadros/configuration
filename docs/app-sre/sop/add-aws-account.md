@@ -181,43 +181,9 @@ policies:
 - AdministratorAccess
 ```
 
-Create the policy:
-```yaml
-aws/<cluster>/policies/BillingViewAccess.yml
-
----
-$schema: /aws/policy-1.yml
-
-labels: {}
-
-account:
-  $ref: /aws/<aws_account>/account.yml
-
-name: BillingViewAccess
-description: |
-    Allows a user to view AWS billing related data
-
-policy:
-  {
-    "Version": "2012-10-17",
-    "Statement": [
-      {
-        "Action": [
-          "aws-portal:ViewAccount",
-          "aws-portal:ViewBilling",
-          "aws-portal:ViewPaymentMethods",
-          "aws-portal:ViewUsage"
-        ],
-        "Effect": "Allow",
-        "Resource": "*"
-      }
-    ]
-  }
-```
-
 ### Add AppSRE users
 
-Lastly add the created admin group and policy to the [app-sre.yml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/teams/app-sre/roles/app-sre.yml) role.
+Lastly add the created admin group to the [app-sre.yml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/teams/app-sre/roles/app-sre.yml) role.
 
 ### Wait for the e-mails for access to the AWS account
 
