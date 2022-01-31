@@ -29,6 +29,8 @@ this repository.
   - [Entities and relations](#entities-and-relations)
   - [Howto](#howto)
     - [Add or modify a user (`/access/user-1.yml`)](#add-or-modify-a-user-accessuser-1yml)
+      - [Enabling Temporary Roles in App-Interface](#enabling-temporary-roles-in-app-interface)
+        - [Example on how it will look in a role file](#example-on-how-it-will-look-in-a-role-file)
       - [User off-boarding / revalidation loop](#user-off-boarding--revalidation-loop)
     - [Get notified of events involving a service, or its dependencies](#get-notified-of-events-involving-a-service-or-its-dependencies)
     - [Define an escalation policy for a service](#define-an-escalation-policy-for-a-service)
@@ -407,14 +409,14 @@ you want the user to belong to. Roles can be associated with the services:
 `teams/<name>/roles/<rolename>.yml`. Check out the currently defined roles to
 know which one to add.
 
-## Enabling Temporary Roles in App-Interface
+#### Enabling Temporary Roles in App-Interface
 
 One of the cases a tenant will want to modify a role yaml file is if you want to add an `expirationDate` field, in order for tenants to gain temporary access for any debugging purposes.
 
 The [openshift rolebindings](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/openshift_rolebindings.py) and [openshift groups](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/openshift_groups.py) section of our [qontract-reconcile](https://github.com/app-sre/qontract-reconcile) integration will pick up on the change through [app-interface](https://gitlab.cee.redhat.com/service/app-interface) and a check will run to see if the date is valid. The date specified in the `expirationDate` field must be in `YYYY-MM-DD` format and it must not be older than today's date. If the value for the field is not correct, the integration will fail alerting you about the date format and if the `expirationDate` value has past today's date then the access will be removed.
 <br>
 
-### Example on how it will look in a role file.
+##### Example on how it will look in a role file
 
 Schema can be found [here](https://github.com/app-sre/qontract-schemas/blob/main/schemas/access/permission-1.yml).
 
