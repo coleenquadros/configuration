@@ -2,6 +2,7 @@
 
 - [Provisioning the cluster](#provisioning-the-cluster)
 - [Hypershift deployment](#hypershift-deployment)
+- [New Hypershift environment](#new-hypershift-environment)
 
 <!-- /TOC -->
 
@@ -36,5 +37,111 @@ This SOP serves as a step-by-step process on how to provision Hypershift from ze
     group: dedicated-readers
      ```
 
-
 # Hypershift deployment
+
+When a Hypershift management cluster is introduced to an existing environment, follow these steps
+
+1. Add a namespace to `data/services/hypershift/$cluster/hypershift.yml` to host the Hypershift operator.
+
+```yaml
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: hypershift
+description: $environment namespace for hypershift
+
+cluster:
+  $ref: /openshift/$cluster/cluster.yml
+
+app:
+  $ref: /services/hypershift/app.yml
+
+environment:
+  $ref: /products/hypershift/environments/$environment.yml
+
+managedResourceTypes:
+- Secret
+
+openshiftResources:
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/hypershift/$envirionment/hypershift-operator-oidc-provider-s3-credentials.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.$cluster.yml
+
+```
+
+2. To deploy the operator to the namespace, register a new target in `data/services/hypershift/cicd/saas-hypershift.yml`.
+
+3. Create a namespace file under `data/openshift/$cluster/namespaces/kube-public.yml`
+
+```yaml
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: kube-public
+description: $cluster kube-public namespace
+
+cluster:
+  $ref: /openshift/$cluster/cluster.yml
+
+app:
+  $ref: /services/app-sre/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/$environment.yml
+
+managedResourceTypes:
+- ConfigMap
+
+managedResourceNames:
+- resource: ConfigMap
+  resourceNames:
+    - oidc-storage-provider-s3-config
+
+openshiftResources:
+- provider: resource-template
+  path: /services/hypershift/$environment/oidc-storage-provider-s3-config.yml
+
+clusterAdmin: true
+```
+
+4. TODO describe the creation of the `ServiceAccount` for OCM and the registration via the provisioning-shard secret - https://issues.redhat.com/browse/APPSRE-4304
+
+5. TODO describe how integration clusters should manage the special group for the OCM team - https://issues.redhat.com/browse/APPSRE-4335
+
+# New Hypershift environment
+
+When a new Hypershift environment is introduced (in the sense of `/app-sre/environment-1.yml`), some additional steps are required. These evolve mostly around the creation of an S3 bucket and the resource to put the S3 access information to clusters.
+
+Note: a single S3 bucket can serve multiple Hypershift operators, but we decided to introduce dedicated buckets per environment.
+
+1. Create a new `environment-1.yml` in `data/products/hypershift/environments`
+
+2. Create a namespace as described in the "Hypershift deployment" section but make sure to include also the declaration for the S3 bucket. The first cluster of an environment holds the bucket.
+
+```yaml
+managedTerraformResources: true
+
+terraformResources:
+- provider: s3
+  account: app-sre
+  identifier: hypershift-oidc-$environment
+  defaults: /terraform/resources/s3-public-read-1.yml
+  output_resource_name: hypershift-oidc-s3-creds
+```
+
+Make sure the `openshiftResources` section is commented out for now, open an MR and make sure the bucket is created before you continue, otherwise certain integrations will fail.
+
+1. Create resource file at `resources/services/hypershift/$environment/hypershift-operator-oidc-provider-s3-credentials.yml`. Use an example from another environment to get started but make sure to replace the mentioned cluster name in the vault secret references.
+
+1. Create another resource file at `resources/services/hypershift/$environment/oidc-storage-provider-s3-config.yml`. Use an example from another environment to get started but make sure to replace the mentioned cluster name in the vault secret references.
+
+1. Remove the comments from the `openshiftResources` section of the namespace file
+
+1. Continue on the step about saas file target from the "Hypershift deployment" section
