@@ -192,6 +192,7 @@ expressed as json schemas. You can find the supported schemas here:
 - Even if you have rights to merge the PR, please refrain from doing so. If you need it merged urgently, ping @app-sre-ic in #sd-app-sre.
 - If an AppSRE team members adds the `lgtm` label, it will be automerged by a bot.
 - The AppSRE team members will also refrain from manually merging PRs and will use labels instead to allow the bot to automatically merge them. In App-Interface the order of the PRs is important, and if we manually merge, it will affect waiting times for other users.
+- Please follow git [best practices](https://service.pages.redhat.com/dev-guidelines/docs/appsre/git/)
 
 ## Local validation of datafile modifications / contract amendment
 
