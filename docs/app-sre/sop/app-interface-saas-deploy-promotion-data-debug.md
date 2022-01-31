@@ -20,49 +20,38 @@ This SOP is intended to be useful to diagnose problems in automatic saas promoti
 
 ### Branch cannot be rebased by the bot
 
-#### Parent target job running multiple times before the subscribed one.
-Right now the job configuration state is stored just once for the last version of a saas `target` definition.
-If there are multiple runs for the parent `target` before the automatic MR gets validated, it could end up with an invalid parent_config_hash.
+#### Parent target job running multiple times before the promoted one.
+If there are multiple runs for the parent `target` before the automatic MR gets merged, the MR could end up with rebase conflicts.
 
 ```
-Parent Target deployment Run: 1 -----> AutoPromote: 1 --------------> INVALID MR
-Parent Target deployment Run: 2 -----> AutoPromote: 2 -----> Merged ---> Subscribed Target deployment Run
+Parent Target deployment Run: 1 -----> AutoPromote: 1 ---------------> INVALID MR
+Parent Target deployment Run: 2 -----> AutoPromote: 2 -----> Merged -----> Subscribed Target deployment Run
 ```
 
 **SOLUTION:**\
-If it's ok to just run the latest iteration, just close the invalid MR.
+* Just close the invalid MR. The full pipline has run on a newer path.
 
 ### Validate promotions fails at PR_Check
 ```
 [2022-01-25 16:38:04] [ERROR] [saasherder.py:validate_promotions:1334] -
-Promotion state object was generated with an old configuration of the parent job
+Parent saas target has run with a newer configuration and the same commit (ref). Check if other MR exists for this target"
 ```
 
-This means that the `target_config_hash` set in the promotion data of the `target` does not match the hash
-calculated on the parent `target` saas file.
-
-#### Failed parent target PipelineRun with configuration changes
-Take this case as an example:
-```
-Deploy Target (deploy_target) --> AutoPromotes Test Target (test_target)
-```
-
-If `deploy_target` configuration is modified and its `PipelineRun` fails, its state will have the last configuration, but `test_target` `target_config_hash` won't be updated.  If at this point `test_target` configuration is modified, the pr_check will throw this error because the `target_config_hash` will not match the `deploy_target` configuration hash.
-
-`test_target` target_config_hash references the configuration of the last successful `deploy_target`.
+This means that the `target_config_hash` set in the promotion data of the `target` does not match the hash set in the parent `target` promotion state. This could only happen
+if a configuration change has been introduced in the parent `target` and its job has finished before the auto-promote MR showing this error. It shuold exist a newer MR
+with the same `ref` and with the newer `target_config_hash`.
 
 
-**DIAGNOSIS**\
-Check `deploy_target` PipelineRuns to check if there are failed jobs, try to git-history `deploy_target` saas file to see if that failed jobs correlates to a configuration change.
-If all `deploy_target` deployment runs have failed after a configuration change and a `test_target` configuration change is throwing this error in a non-automated MR, you are mostly facing this problem
+**SOLUTION:**\
+* If a new MR exists, just close the problematic one.
 
-If the saas pipeline is a multistage pipeline: e.g: `deploy -> test -> release`, all `release` automatic MRs will modify both the `ref` and the `target_config_hash`. This happens because test configuration
-contains the `ref` of deploy, so every step in the pipeline will change the configuration. To check if this is the case git-history the release saas file and check if the AutoPromote MRs modify both the `ref` and
-the `target_config_hash`.
+### Generic Problem
 
-**SOLUTION**\
-Ideally, subscribed jobs targets definitions should only be modified after a successful parent job run. If the job needs to run no matter what,
-just remove the `promotion_data` section on the failing target.
+`promotion_data` primary objective is to trigger subscribed targets when there are configuration changes others than `ref` in the parent. It's basically introduced to
+generate a change in the saas file to trigger its deployment. If, for whatever reason, the `promotion_data` is failing the validation and the subscribed job needs to run,
+it's safe to just remove the `promotion_data` section to trigger the job. If `promotion_data` is missing, the validate_promotions will only validate the parent target has
+ended succesfully with the same `ref`, without validating the configuration hash.
+`
 
 ## Useful debug information
 
