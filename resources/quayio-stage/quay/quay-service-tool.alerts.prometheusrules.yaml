@@ -1,0 +1,22 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: quay-service-tool-stage-alerts
+spec:
+  groups:
+  - name: quay
+    rules:
+    - alert: Error on Quayio Service Tool
+      expr: |
+        sum(rate(haproxy_backend_http_responses_total{exported_namespace="quayio-service-tool",route="api",code="5xx"}[1d]))
+      for: 15m
+      labels:
+        severity: low
+        service: quayio-service-tool
+      annotations:
+        message: "Reporting error on Quayio Service Tool."
