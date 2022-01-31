@@ -19,4 +19,4 @@ This tool uses database user different from the root user. This database user cr
 
 ## Reporting Errors
 
-In case of any errors on the tool, please reach out to `#team-quay-dev` on [CoreOS](https://app.slack.com/client/T027F3GAJ).
+In case of any errors on the tool, please reach out to `#forum-quay` on [CoreOS](https://app.slack.com/client/T027F3GAJ/C7WH69HCY).
