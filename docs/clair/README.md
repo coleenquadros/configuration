@@ -9,16 +9,9 @@
 - [RDS (Databases)](services/database.md)
 
 
-## Clair Deployment
+## Clair Architecture Doc
 
-### Staging
-
-![](images/clair_v4_stage_arch.png)
-
-### Production
-
-![](images/clair_v4_prod_arch.png)
-
+- [Clair Architecture Doc](clair.md)
 
 ## Clair Configuration
 
