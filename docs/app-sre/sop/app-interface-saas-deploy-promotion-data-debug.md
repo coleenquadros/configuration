@@ -56,7 +56,7 @@ If `deploy_target` configuration is modified and its `PipelineRun` fails, its st
 Check `deploy_target` PipelineRuns to check if there are failed jobs, try to git-history `deploy_target` saas file to see if that failed jobs correlates to a configuration change.
 If all `deploy_target` deployment runs have failed after a configuration change and a `test_target` configuration change is throwing this error in a non-automated MR, you are mostly facing this problem
 
-If the saas pipeline is a multistage pipeline: e.g: `deploy -> test -> release`, all `release` automatic MR will modify both the `ref` and the `target_config_hash`. This happens because test configuration
+If the saas pipeline is a multistage pipeline: e.g: `deploy -> test -> release`, all `release` automatic MRs will modify both the `ref` and the `target_config_hash`. This happens because test configuration
 contains the `ref` of deploy, so every step in the pipeline will change the configuration. To check if this is the case git-history the release saas file and check if the AutoPromote MRs modify both the `ref` and
 the `target_config_hash`.
 
