@@ -47,7 +47,7 @@ Take this case as an example:
 Deploy Target (deploy_target) --> AutoPromotes Test Target (test_target)
 ```
 
-If `deploy_target` configuration is modified and its `PipelineRun` fails, its state will have the last configuration, but `test_target` target_config_hash won't be updated.  If at this point `test_target` configuration is modified, the pr_check will throw this error because the `target_config_hash` will not match the `deploy_target` configuration hash.
+If `deploy_target` configuration is modified and its `PipelineRun` fails, its state will have the last configuration, but `test_target` `target_config_hash` won't be updated.  If at this point `test_target` configuration is modified, the pr_check will throw this error because the `target_config_hash` will not match the `deploy_target` configuration hash.
 
 `test_target` target_config_hash references the configuration of the last successful `deploy_target`.
 
