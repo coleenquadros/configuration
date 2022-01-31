@@ -61,7 +61,7 @@ contains the `ref` of deploy, so every step in the pipeline will change the conf
 the `target_config_hash`.
 
 **SOLUTION**\
-Ideally, subscribed jobs targets definitions should only be modified after a sucessful parent job run. If the job needs to run no mather what,
+Ideally, subscribed jobs targets definitions should only be modified after a successful parent job run. If the job needs to run no matter what,
 just remove the `promotion_data` section on the failing target.
 
 ## Useful debug information
