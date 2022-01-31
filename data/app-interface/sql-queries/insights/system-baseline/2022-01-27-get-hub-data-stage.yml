@@ -1,6 +1,6 @@
 ---
 $schema: /app-interface/app-interface-sql-query-1.yml
-name: 2022-01-27-get-hub-data-stage
+name: get-hub-data-stage-2
 labels: {}
 namespace:
   $ref: /services/insights/system-baseline/namespaces/stage-system-baseline-stage.yml
@@ -8,13 +8,10 @@ identifier: system-baseline-stage
 output: stdout
 queries:
   - SELECT 
-      accounts.account_number, 
-      system_baselines.id, 
-      system_baselines.display_name FROM system_baselines
-      INNER JOIN accounts ON accounts.account_number = system_baselines.account;
+      SB.ACCOUNT AS ACCOUNT_ID, 
+      SB.ID as BASELINE_ID, 
+      SBMS.SYSTEM_ID AS ASSOCIATED_SYSTEM_ID FROM SYSTEM_BASELINES SB 
+      LEFT OUTER JOIN SYSTEM_BASELINE_MAPPED_SYSTEMS SBMS ON SBMS.SYSTEM_BASELINE_ID  = SB.ID;
   - SELECT 
-      accounts.account_number, 
-      system_baseline_mapped_systems.id, 
-      system_baseline_mapped_systems.system_baseline_id, 
-      system_baseline_mapped_systems.system_id FROM system_baseline_mapped_systems 
-      INNER JOIN accounts ON accounts.account_number = system_baseline_mapped_systems.account;
+      INVENTORY.HOSTS.ACCOUNT, 
+      INVENTORY.HOSTS.ID FROM INVENTORY.HOSTS;
