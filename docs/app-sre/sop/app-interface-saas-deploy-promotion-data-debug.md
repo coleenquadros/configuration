@@ -69,4 +69,4 @@ just remove the `promotion_data` section on the failing target.
 * Promotions state S3 Path: s3://app-interface-production/state/openshift-saas-deploy/promotions/<CHANNEL>
 * Saas targets Configurations S3 Path: s3://app-interface-production/state/openshift-saas-deploy-trigger-configs/<SAAS_FILE>
 * Pipeline runs: Check the SAAS file for the `pipelines_provider` section. There is the cluster/namespace where to find the tekton PipelineRuns.
-* Do git-history on saas file to try to understand the ref updates flow. If there are multiple jobs with subscribed targets it's a bit hard to trace what has happened.
+* Do git-history on saas files to try to understand the ref updates flow. If there are multiple jobs with subscribed targets it's a bit hard to trace what has happened.
