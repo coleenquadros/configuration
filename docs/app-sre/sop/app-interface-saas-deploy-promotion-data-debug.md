@@ -29,7 +29,7 @@ Parent Target deployment Run: 2 -----> AutoPromote: 2 -----> Merged -----> Subsc
 ```
 
 **SOLUTION:**\
-* Just close the invalid MR. The full pipline has run on a newer path.
+* Just close the invalid MR. The full pipeline has run on a newer path.
 
 ### Validate promotions fails at PR_Check
 ```
