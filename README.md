@@ -2311,7 +2311,7 @@ query: |
 ...
 query: |
   SELECT /* comment */ id, name
-  FROM table a -- comment
+  FROM a -- comment
   WHERE id = 1;
 ...
 queries:
