@@ -2303,6 +2303,36 @@ query: |
   SELECT id, name, deleted_at from registries;
 ```
 
+**SQL Rules**
+* Only READ sentences (SELECT, EXPLAIN, EXPLAIN ANALYZE SELECT)
+* Specific columns must be specified. `SELECT * ` is not allowed
+
+**SQL Format**
+* We strongly recommend use yaml multiline format keeping the line breaks.
+* Comments are allowed in both possible formats (check the examples below)
+* Queries must end with `;`
+
+```yaml
+query: |
+  SELECT id, name from a;
+...
+query: |
+  SELECT /* comment */ id, name
+  FROM table a -- comment
+  WHERE id = 1;
+...
+queries:
+  - |
+    SELECT id, name FROM a;
+  - |
+    SELECT id, name FROM b /* comment */ order by id;
+  - |
+    SELECT id, name
+    FROM c
+    -- comment: need to order by id
+    ORDER BY id;
+```
+
 When that SQL Query specification is merged, the integration will create a
 Job (or a CronJob if `schedule` is defined) in the namespace provided:
 
