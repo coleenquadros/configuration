@@ -24,3 +24,30 @@ spec:
           dashboard: "https://grafana.stage.devshift.net/d/aqaixAb7k/quickstarts?orgId=1"
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/quickstarts-stage/deployments"
           message: "Metrics for quickstarts in STAGE are absent"
+      - alert: App-quickstarts-service-In-quickstarts-stage-high-error-rate
+        expr: 1-(quickstarts_responses{code="500"} / quickstarts_responses) < .90
+        for: 5m
+        labels:
+          severity: high
+          service: insights
+          env: stage
+          app_team: quickstarts
+        annotations:
+          dashboard: "https://grafana.stage.devshift.net/d/aqaixAb7k/quickstarts?orgId=1"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/quickstarts-stage/deployments"
+          message: "Quickstarts service non-200 responses has exceeded 10% in stage"
+      - alert: App-quickstarts-service-In-quickstarts-stage-high-latency
+        expr: |
+          sum(api_3scale_gateway_api_time_bucket{exported_service="quickstarts",le="+2000"})
+          /
+          sum(api_3scale_gateway_api_time_bucket{exported_service="quickstarts"}) < .90
+        for: 5m
+        labels:
+          severity: high
+          service: insights
+          env: stage
+          app_team: quickstarts
+        annotations:
+          dashboard: "https://grafana.stage.devshift.net/d/aqaixAb7k/quickstarts?orgId=1"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/quickstarts-stage/deployments"
+          message: "Quickstarts service responses with over 2000ms have exceeded 10% in stage"
