@@ -2303,11 +2303,11 @@ query: |
   SELECT id, name, deleted_at from registries;
 ```
 
-**SQL Rules**
+#### SQL Rules
 * Only READ sentences (SELECT, EXPLAIN, EXPLAIN ANALYZE SELECT)
 * Specific columns must be specified. `SELECT * ` is not allowed
 
-**SQL Format**
+#### SQL Format
 * We strongly recommend use yaml multiline format keeping the line breaks.
 * Comments are allowed in both possible formats (check the examples below)
 * Queries must end with `;`
