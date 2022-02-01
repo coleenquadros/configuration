@@ -2260,13 +2260,6 @@ schedule: <if defined the output resource will be a CronJob instead of a Job>
 query: <sql query>
 ```
 
-**Note:** Query files are only executed once unless a `schedule` is defined
-(mentioned later in this section). The query file execution status is tracked
-using the `name` field. If you wish to run an existing query file a second time
-(possibly including modifications to the queries), you must change the `name`
-field. This can be achieved by copying the existing file to a new file with a
-new `name`, or reusing the existing file and changing the query `name`.
-
 If you want to run multiple queries in the same spec, you can define the
 `queries` list instead of the `query` string. Example:
 
@@ -2301,6 +2294,36 @@ identifier: uhc-acct-mngr-staging
 output: filesystem
 query: |
   SELECT id, name, deleted_at from registries;
+```
+
+#### SQL Rules
+* Only READ sentences (`SELECT`, `EXPLAIN`, `EXPLAIN ANALYZE SELECT`)
+* Columns must be specified. `SELECT * ` is not allowed
+
+#### SQL Format
+* We strongly recommend use yaml multiline format keeping the line breaks.
+* Comments are allowed in both possible formats (check the examples below)
+* Queries must end with `;`
+
+```yaml
+query: |
+  SELECT id, name from a;
+...
+query: |
+  SELECT /* comment */ id, name
+  FROM a -- comment
+  WHERE id = 1;
+...
+queries:
+  - |
+    SELECT id, name FROM a;
+  - |
+    SELECT id, name FROM b /* comment */ order by id;
+  - |
+    SELECT id, name
+    FROM c
+    -- comment: need to order by id
+    ORDER BY id;
 ```
 
 When that SQL Query specification is merged, the integration will create a
@@ -2408,8 +2431,14 @@ gpg -d 2020-01-30-account-manager-registries-stage-cjh82-query-result.txt
 
 Running that command locally and decrypt the message with requestor's private key.
 
-
-Each Job will be automatically deleted after 7 days.
+**Important notes**
+* Each Job will be automatically deleted after 7 days.
+* Query files are only executed once unless a `schedule` is defined.
+  The query file execution status is tracked using the `name` field.
+  If you wish to run an existing query file a second time
+  (possibly including modifications to the queries), you must change the `name`
+  field. This can be achieved by copying the existing file to a new file with a
+  new `name`, or reusing the existing file and changing the query `name`.
 
 ### Enable Gitlab Features on an App Interface Controlled Gitlab Repository
 
