@@ -1,0 +1,116 @@
+# Design doc: making upgrades on Jenkins instances non-interactive
+
+## Author/date
+
+Luis Fernando Muñoz Mejías / 2022-02-01
+
+## Tracking JIRA
+
+https://issues.redhat.com/browse/APPSRE-4254
+https://issues.redhat.com/browse/APPSRE-4255
+https://issues.redhat.com/browse/APPSRE-4256
+https://issues.redhat.com/browse/APPSRE-4257
+
+## Problem statement
+
+We need to easily upgrade RPMs in our Jenkins nodes and
+controllers. However, some of these interventions require rebooting
+the node to take full effect (think kernel or libc upgrades).
+
+But we cannot do it blindly. Restarting a Jenkins instance will kill
+any running jobs, decreasing user satisfaction. Additionally, there is
+a small chance that Jenkins won't come back after such a reboot, so we
+need alerting, and ideally, not waking anyone up.
+
+## Goals
+
+Choose a strategy that will help us reboot Jenkins after an upgrade
+without losing jobs and without requiring much human attention, other
+than maybe running an Ansible playbook.
+
+We accept that jobs will be delayded while the system drains and nodes
+reboot.
+
+## Non-goals
+
+* Minimize downtime of each individual reboot process.
+* A worfklow for sharding reboots
+* Define which RPMs we must upgrade and which ones we can leave behind
+
+## Assumptions
+
+We assume rebooting nodes is safe. After all, they don't have any
+daemons that might fail to come back.
+
+We also assume rebooting the controller is unsafe.
+
+If you disagree with these assumptions don't bother reading the rest
+of this document.
+
+## Proposal
+
+Given how Jenkins works, the simplest approach is to reboot **all**
+nodes and controllers if **any of them** needs a reboot. This means
+doing a call to the `/safeExit` endpoint of the REST API and waiting
+for ongoing jobs to finish. After that we can reboot the world.
+
+We will rely on systemd to do all the coordination work for us without
+blocking Ansible.
+
+We will isolate this intervention inside its own `target`, called
+`jenkins-reboot.target`. This way we can trigger the reboot of all
+Jenkins workers without worrying that a manual intervention will have
+unexpected side effects. Inside this target we will have a `service`
+that will reboot all workers once Jenkins exits. Roughly it will be:
+
+``` ini
+# Warning! Pseudo-unit!
+[Unit]
+Description=Reboot workers
+After=jenkins.service
+EnvironmentFile=FILE_WITH_ALL_WORKERS
+Before=reboot.target
+
+[Service]
+Type=oneshot
+ExecStart=sh -c "for w in $WORKERS; do ssh -l rebooter $worker systemctl -f reboot; done"
+
+[Install]
+WantedBy=jenkins-restart.target
+```
+
+We will provide with a different version of the
+[node-upgrade-restart](https://gitlab.cee.redhat.com/app-sre/infra/blob/master/ansible/playbooks/node-upgrade-restart.yml)
+playbook that will enter this target after upgrading any relevant
+RPMs. To avoid coordinhating what needs rebooting and what not, it
+will assume that a reboot is always needed. This will be true if we
+delay its execution long enough. For instance, if we upgrade every 2
+to 4 weeks, we will have a very good security position while being
+very unlikely that none of openssl, openssh, kernel, java or glibc
+have received any updates.
+
+### Security considerations
+
+We will introduce a `rebooter` user that will be allowed to reboot the
+node. This should prevent any user jobs from triggering reboots or
+shutdowns.
+
+### When to run this
+
+We will produce a SOP detailing when and how to trigger this process.
+
+## Alternatives considered
+
+### Making nodes reboot themselves
+
+We could make nodes reboot themselves. However this needs some logic
+in detaching them, and in making them aware of whether there is any
+job about to start. Race conditions are bound to hurt our
+users. Handling the reboot after a `safeExit` is the best guarantee
+for user jobs.
+
+### Do it all in Ansible
+
+This means locking the executor for a while, which is annoying. Also,
+it needs more code than deploying a couple of systemd units. Testing
+it would be also much harder.
