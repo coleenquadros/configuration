@@ -15,7 +15,18 @@ This tool runs behind Redhat's SSO (OIDC) and can be accessed by members part of
 
 ## Database user
 
-This tool uses database user different from the root user. This database user credentials can be found for stage [here](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quayio-stage/quayio-stage/quay-db-jobs) and for production [here](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quayio-prod-us-east-1/quay/quay-db-jobs). This database user has restricted access to the tool based on the tables used in this tool. 
+The service tool does not use the database root user and instead uses a different user with limited access to the database. This database user credentials can be found for stage [here](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quayio-stage/quayio-stage/quay-db-jobs) and for production [here](https://vault.devshift.net/ui/vault/secrets/app-interface/show/quayio-prod-us-east-1/quay/quay-db-jobs). This user's access is limited and is based on the tables used by the tool. The code block that grants the database user access is [here](https://github.com/quay/quay-db-jobs/blob/master/main.py#L392) and is briefed as below:
+
+| Table Name | Access
+| --- | --- |
+| messages | SELECT, INSERT, UPDATE (content, severity), DELETE
+| mediatype | SELECT (id)
+| user | SELECT, UPDATE (username, enabled)
+| repository | SELECT (id)
+| repositorybuild | DELETE
+| repositorybuildtrigger | DELETE
+| repomirrorconfig | DELETE
+| queueitem | DELETE
 
 ## Reporting Errors
 
