@@ -27,6 +27,10 @@ See [this doc](/docs/aws/sop/rds-os-upgrade.md) for applying mandatory OS upgrad
 * [PostgreSQL handy queries](/docs/dba/Postgres-handy-queries.md)
 * [MySQL handy queries](/docs/dba/MySQL-handy-queries.md)
 
+### RDS Documentation
+
+* [RDS Out of Storage (STORAGE_FULL)](https://aws.amazon.com/premiumsupport/knowledge-center/rds-out-of-storage/)
+
 ## Known issues
 
 ### High write latency without depleted burst balance
@@ -67,6 +71,19 @@ At the time that this entry is being added, we haven't heard back from AWS with 
 Internal ticket: [APPSRE-4036](https://issues.redhat.com/browse/APPSRE-4036) \
 Account: insights-prod\
 Case id: 9183343311
+
+### Errors when applying storage updates
+
+When a tenant increases the size of their RDS storage, an error similar to what is seen below might appear:
+
+```
+[terraform-resources-wrapper] [some-aws-account - apply] Error: Error modifying DB Instance some-database: InvalidParameterCombination: Invalid max storage size for engine name postgres and storage type gp2: 6500
+```
+
+This is a fairly vague error, but there are a couple things that you can check:
+
+1. Changes to `allocated_storage` or `max_allocated_storage` [must be >= 10% larger](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.StorageTypes.html#USER_PIOPS.Autoscaling) than the current `allocated_storage` as reported by the AWS API. The `allocated_storage` can grow over time, so the value in app-interface may be out-of-date, which is why you must check the value returned by the AWS API. Alternatively, you may increase the value by 10% of `max_allocated_storage` because that value should always be greater than (or equal to) `allocated_storage`.
+2. Ensure that you have not hit the limits of storage volume sizes in RDS. There are some notable exceptions that have lower limits, usually previous generation instances. See the "DB instance class" section of [this document](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html#Concepts.Storage.GeneralSSD).
 
 ## Support
 
