@@ -41,7 +41,30 @@ This SOP serves as a step-by-step process on how to provision Hypershift from ze
 
 When a Hypershift management cluster is introduced to an existing environment (e.g. integration), follow these steps
 
-1. Add a namespace to `data/services/hypershift/$cluster/hypershift.yml` to host the Hypershift operator.
+1. Create an environment file (note: that is not the same as creating a new environment) at `data/products/hypershift/environments/$environment-$cluster.yml`
+
+```yaml
+---
+$schema: /app-sre/environment-1.yml
+
+
+labels:
+  service: hypershift
+  type: $environment
+
+name: hypershift-$environment-$cluster
+
+description: |
+  The $environment environment for Hypershift
+
+product:
+  $ref: /products/hypershift/product.yml
+
+```
+
+Note: a new environment file is not the same as a new environment. multiple environment files can declare the same environment name.
+
+2. Add a namespace to `data/services/hypershift/$cluster/hypershift.yml` to host the Hypershift operator.
 
 ```yaml
 ---
@@ -59,7 +82,7 @@ app:
   $ref: /services/hypershift/app.yml
 
 environment:
-  $ref: /products/hypershift/environments/$environment.yml
+  $ref: /products/hypershift/environments/$environment-$cluster.yml
 
 managedResourceTypes:
 - Secret
@@ -74,9 +97,9 @@ networkPoliciesAllow:
 
 ```
 
-2. To deploy the operator to the namespace, register a new target in `data/services/hypershift/cicd/saas-hypershift.yml`.
+3. To deploy the operator to the namespace, register a new target in `data/services/hypershift/cicd/saas-hypershift.yml`.
 
-3. Create a namespace file under `data/openshift/$cluster/namespaces/kube-public.yml`
+4. Create a namespace file under `data/openshift/$cluster/namespaces/kube-public.yml`
 
 ```yaml
 ---
@@ -111,19 +134,17 @@ openshiftResources:
 clusterAdmin: true
 ```
 
-4. TODO describe the creation of the `ServiceAccount` for OCM and the registration via the provisioning-shard secret - https://issues.redhat.com/browse/APPSRE-4304
+5. TODO describe the `ServiceAccount` token registration via the provisioning-shard secret - https://issues.redhat.com/browse/APPSRE-4304
 
-5. TODO describe how integration clusters should manage the special group for the OCM team - https://issues.redhat.com/browse/APPSRE-4335
+6. TODO describe how integration clusters should manage the special group for the OCM team - https://issues.redhat.com/browse/APPSRE-4335
 
 # New Hypershift environment
 
-When a new Hypershift environment is introduced (in the sense of `/app-sre/environment-1.yml`), some additional steps are required. These evolve mostly around the creation of an S3 bucket and the resource to put the S3 access information to clusters.
+When a new Hypershift environment is introduced (in the sense of `/app-sre/environment-1.yml#labels.type`), some additional steps are required. These evolve mostly around the creation of an S3 bucket and the resource to put the S3 access information to clusters.
 
 Note: a single S3 bucket can serve multiple Hypershift operators, but we decided to introduce dedicated buckets per environment.
 
-1. Create a new `environment-1.yml` in `data/products/hypershift/environments`
-
-2. Create a namespace as described in the "Hypershift deployment" section but make sure to include also the declaration for the S3 bucket. The first cluster of an environment holds the bucket.
+1. Create a namespace as described in the "Hypershift deployment" section but make sure to include also the declaration for the S3 bucket. The first cluster of an environment holds the bucket.
 
 ```yaml
 managedTerraformResources: true
