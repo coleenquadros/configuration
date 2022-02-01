@@ -2260,13 +2260,6 @@ schedule: <if defined the output resource will be a CronJob instead of a Job>
 query: <sql query>
 ```
 
-**Note:** Query files are only executed once unless a `schedule` is defined
-(mentioned later in this section). The query file execution status is tracked
-using the `name` field. If you wish to run an existing query file a second time
-(possibly including modifications to the queries), you must change the `name`
-field. This can be achieved by copying the existing file to a new file with a
-new `name`, or reusing the existing file and changing the query `name`.
-
 If you want to run multiple queries in the same spec, you can define the
 `queries` list instead of the `query` string. Example:
 
@@ -2438,8 +2431,14 @@ gpg -d 2020-01-30-account-manager-registries-stage-cjh82-query-result.txt
 
 Running that command locally and decrypt the message with requestor's private key.
 
-
 Each Job will be automatically deleted after 7 days.
+
+**Note:** Query files are only executed once unless a `schedule` is defined.
+The query file execution status is tracked using the `name` field.
+If you wish to run an existing query file a second time
+(possibly including modifications to the queries), you must change the `name`
+field. This can be achieved by copying the existing file to a new file with a
+new `name`, or reusing the existing file and changing the query `name`.
 
 ### Enable Gitlab Features on an App Interface Controlled Gitlab Repository
 
