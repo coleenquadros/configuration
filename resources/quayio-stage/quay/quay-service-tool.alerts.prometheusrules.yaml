@@ -14,8 +14,9 @@ spec:
       - alert: Error on Quayio Service Tool
         expr: |
          sum(rate(haproxy_backend_http_responses_total{exported_namespace="quay",route="quayio-service-tool-route",code="5xx"}[6h]))
-          /
-          sum(rate(haproxy_backend_http_responses_total{exported_namespace="quay-service-tool",route="quayio-service-tool-route"}[6h]))
+         /
+         sum(rate(haproxy_backend_http_responses_total{exported_namespace="quay",route="quayio-service-tool-route"}[6h]))
+         > 0.5
         for: 30m
         labels:
           severity: warning
@@ -24,7 +25,7 @@ spec:
         annotations:
           message: "Reporting error on Quayio Service Tool stage."
       - alert: Quayio Service Tool application absent
-        expr: absent(up{service="quayio-service-tool", namespace="quay-service-tool"}) or up{service="quayio-service-tool", namespace="quay-service-tool"} == 0
+        expr: absent(up{service="quayio-service-tool", namespace="quay"}) or up{service="quayio-service-tool", namespace="quay"} == 0
         for: 30m
         labels:
           severity: warning
