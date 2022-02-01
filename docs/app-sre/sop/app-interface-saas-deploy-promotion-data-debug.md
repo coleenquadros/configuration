@@ -38,7 +38,7 @@ Parent saas target has run with a newer configuration and the same commit (ref).
 ```
 
 This means that the `target_config_hash` set in the promotion data of the `target` does not match the hash set in the parent `target` promotion state. This could only happen
-if a configuration change has been introduced in the parent `target` and its job has finished before the auto-promote MR showing this error. It shuold exist a newer MR
+if a configuration change has been introduced in the parent `target` and its job has finished before the auto-promote MR showing this error. It should exist a newer MR
 with the same `ref` and with the newer `target_config_hash`.
 
 
