@@ -2304,7 +2304,7 @@ query: |
 ```
 
 #### SQL Rules
-* Only READ sentences (SELECT, EXPLAIN, EXPLAIN ANALYZE SELECT)
+* Only READ sentences (`SELECT`, `EXPLAIN`, `EXPLAIN ANALYZE SELECT`)
 * Specific columns must be specified. `SELECT * ` is not allowed
 
 #### SQL Format
