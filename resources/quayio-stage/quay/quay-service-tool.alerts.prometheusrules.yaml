@@ -16,10 +16,19 @@ spec:
           sum(rate(haproxy_backend_http_responses_total{exported_namespace="quay-service-tool",route="quayio-service-tool-route",code="5xx"}[6h]))
           /
           sum(rate(haproxy_backend_http_responses_total{exported_namespace="quay-service-tool",route="quayio-service-tool-route"}[6h]))
-        for: 5m
+        for: 30m
         labels:
           severity: warning
           service: quay
           env: stage
         annotations:
           message: "Reporting error on Quayio Service Tool stage."
+      - alert: Quayio Service Tool application absent
+        expr: absent(up{service="quayio-service-tool", namespace="quay-service-tool"}) or up{service="quayio-service-tool", namespace="quay-service-tool"} == 0
+        for: 30m
+        labels:
+          severity: warning
+          service: quay
+          env: stage
+        annotations:
+          message: "Error starting Quayio Service Tool on stage."
