@@ -39,7 +39,7 @@ This SOP serves as a step-by-step process on how to provision Hypershift from ze
 
 # Hypershift deployment
 
-When a Hypershift management cluster is introduced to an existing environment, follow these steps
+When a Hypershift management cluster is introduced to an existing environment (e.g. integration), follow these steps
 
 1. Add a namespace to `data/services/hypershift/$cluster/hypershift.yml` to host the Hypershift operator.
 
@@ -67,7 +67,7 @@ managedResourceTypes:
 openshiftResources:
 - provider: resource-template
   type: extracurlyjinja2
-  path: /services/hypershift/$envirionment/hypershift-operator-oidc-provider-s3-credentials.yml
+  path: /services/hypershift/$environment/hypershift-operator-oidc-provider-s3-credentials.yml
 
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.$cluster.yml
