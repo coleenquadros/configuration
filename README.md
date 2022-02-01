@@ -2298,7 +2298,7 @@ query: |
 
 #### SQL Rules
 * Only READ sentences (`SELECT`, `EXPLAIN`, `EXPLAIN ANALYZE SELECT`)
-* Specific columns must be specified. `SELECT * ` is not allowed
+* Columns must be specified. `SELECT * ` is not allowed
 
 #### SQL Format
 * We strongly recommend use yaml multiline format keeping the line breaks.
