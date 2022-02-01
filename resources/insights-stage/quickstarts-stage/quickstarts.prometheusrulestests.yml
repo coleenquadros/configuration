@@ -40,3 +40,48 @@ tests:
           dashboard: "https://grafana.stage.devshift.net/d/aqaixAb7k/quickstarts?orgId=1"
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/quickstarts-stage/deployments"
           message: "Metrics for quickstarts in STAGE are absent"
+
+- interval: 1m
+  input_series:
+  - series: quickstarts_responses{code="500"}
+    values: '5+0x10'
+  - series: quickstarts_responses{code="200"}
+    values: '4+0x10'
+  alert_rule_test:
+  - eval_time: 1m
+    alertname: App-quickstarts-service-In-quickstarts-stage-high-error-rate
+  - eval_time: 5m
+    alertname: App-quickstarts-service-In-quickstarts-stage-high-error-rate
+    exp_alerts:
+    - exp_labels:
+        severity: high
+        code: 500
+        service: insights
+        env: stage
+        app_team: quickstarts
+      exp_annotations:
+          dashboard: "https://grafana.stage.devshift.net/d/aqaixAb7k/quickstarts?orgId=1"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/quickstarts-stage/deployments"
+          message: "Quickstarts service non-200 responses has exceeded 10% in stage"
+
+- interval: 1m
+  input_series:
+  - series: api_3scale_gateway_api_time_bucket{exported_service="quickstarts",le="+2000"}
+    values: '0 0 0 0 0 1 2 3 4 5'
+  - series: api_3scale_gateway_api_time_bucket{exported_service="quickstarts"}
+    values: '0 1 2 3 4 5 7 8 9 10'
+  alert_rule_test:
+  - eval_time: 1m
+    alertname: App-quickstarts-service-In-quickstarts-stage-high-latency
+  - eval_time: 6m
+    alertname: App-quickstarts-service-In-quickstarts-stage-high-latency
+    exp_alerts:
+    - exp_labels:
+        severity: high
+        service: insights
+        env: stage
+        app_team: quickstarts
+      exp_annotations:
+          dashboard: "https://grafana.stage.devshift.net/d/aqaixAb7k/quickstarts?orgId=1"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/quickstarts-stage/deployments"
+          message: "Quickstarts service responses with over 2000ms have exceeded 10% in stage"
