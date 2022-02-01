@@ -20,7 +20,8 @@ for information about the architecture of the software.
  * [Production Down](./sops/status-board-production-down.md)
  * [Load testing](./sops/load-testing.md)
  * [Disaster recovery](./sops/disaster-recovery.md)
-
+ * [Low Availability](./sops/status-board-availability.md)
+ * [High Latency](./sops/status-board-latency.md)
 
 
 
