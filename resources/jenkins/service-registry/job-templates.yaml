@@ -60,6 +60,38 @@
     <<: *gh_timed
 
 - job-template:
+    id: service-registry-performance-test
+    name: "{component}-performance-test"
+    publishers:
+    - <<: *slack_notify
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - ansicolor
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+          - *service_registry_perf_test_stage
+    <<: *gh_timed
+    parameters:
+    - string:
+        name: TEST_SIMULATION
+        default: 'End2EndSimulation'
+        description: 'gatling class to execute'
+    - string:
+        name: TEST_USERS
+        default: '30'
+        description: 'number of users to simulate'
+    - string:
+        name: TEST_ITERATIONS
+        default: '600'
+        description: 'number of iterations to perform'
+    - string:
+        name: TEST_RAMP_TIME
+        default: '45'
+        description: 'simulation ramp up time'
+
+- job-template:
     id: gh-build-master-srs-projects
     name: "{name}-gh-build-{branch}"
     wrappers:
