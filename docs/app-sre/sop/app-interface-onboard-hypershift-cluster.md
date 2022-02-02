@@ -28,7 +28,7 @@ This SOP serves as a step-by-step process on how to provision Hypershift from ze
     | Internal                   | false         | false         |
     | VPC peering                | none          | none          |
 
-1. For stage `cluster.yml`, add `dedicated-readers` under `managedGroups` and update `data/teams/hypershift/roles/hypershift-dedicated-readers.yml` with a reference to our new cluster:
+2. For stage `cluster.yml`, add `dedicated-readers` under `managedGroups` and update `data/teams/hypershift/roles/hypershift-dedicated-readers.yml` with a reference to our new cluster:
     ```yaml
     access:
     ...
@@ -159,10 +159,10 @@ terraformResources:
 
 Make sure the `openshiftResources` section is commented out for now, open an MR and make sure the bucket is created before you continue, otherwise certain integrations will fail.
 
-1. Create resource file at `resources/services/hypershift/$environment/hypershift-operator-oidc-provider-s3-credentials.yml`. Use an example from another environment to get started but make sure to replace the mentioned cluster name in the vault secret references.
+2. Create resource file at `resources/services/hypershift/$environment/hypershift-operator-oidc-provider-s3-credentials.yml`. Use an example from another environment to get started but make sure to replace the mentioned cluster name in the vault secret references.
 
-1. Create another resource file at `resources/services/hypershift/$environment/oidc-storage-provider-s3-config.yml`. Use an example from another environment to get started but make sure to replace the mentioned cluster name in the vault secret references.
+3. Create another resource file at `resources/services/hypershift/$environment/oidc-storage-provider-s3-config.yml`. Use an example from another environment to get started but make sure to replace the mentioned cluster name in the vault secret references.
 
-1. Remove the comments from the `openshiftResources` section of the namespace file
+4. Remove the comments from the `openshiftResources` section of the namespace file
 
-1. Continue on the step about saas file target from the "Hypershift deployment" section
+5. Continue on the step about saas file target from the "Hypershift deployment" section
