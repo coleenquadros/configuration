@@ -7,9 +7,16 @@ There are 2 Jira projects for AppSRE tasks (both are merged in a single backlog 
   * [ASIC](https://issues.redhat.com/projects/ASIC/summary) should contain only tasks raised by IC and potential follow up items.
   * [AppSRE](https://issues.redhat.com/projects/APPSRE/summary) is the place for all of project work, onboarding tickets, internal improvement work (Toil reduction)
 
+### description
 Every ticket created should contain enough details for:
   * Team lead/Stream leads so they can assess urgency and priority
   * any team member to start working on it
+
+To fulfil this, please focus on the following when creating the description for a ticket:
+  * Write down a clear problem statement first. 
+  * Do not focus on the solution you might envision when creating the description, as you might miss some details.  
+  * Add Acceptence Criterias, so the Assigne can make sure, to fulfill the ticket. 
+
 ### ticket template
 <create and then link a template in jira-cli/jira-sre/templates>
 
