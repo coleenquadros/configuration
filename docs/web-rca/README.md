@@ -20,3 +20,5 @@ for information about the architecture of the software.
  * [Production Down](./sops/web-rca-production-down.md)
  * [Load testing](./sops/load-testing.md)
  * [Disaster recovery](./sops/disaster-recovery.md)
+ * [Low Availability](./sops/web-rca-availability.md)
+ * [High Latency](./sops/web-rca-latency.md)
