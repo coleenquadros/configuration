@@ -90,7 +90,7 @@ managedResourceTypes:
 openshiftResources:
 - provider: resource-template
   type: extracurlyjinja2
-  path: /services/hypershift/$environment/hypershift-operator-oidc-provider-s3-credentials.yml
+  path: /services/hypershift/$environment/oidc-s3-creds.yml
 
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.$cluster.yml
@@ -99,44 +99,9 @@ networkPoliciesAllow:
 
 3. To deploy the operator to the namespace, register a new target in `data/services/hypershift/cicd/saas-hypershift.yml`.
 
-4. Create a namespace file under `data/openshift/$cluster/namespaces/kube-public.yml`
+4. TODO describe the `ServiceAccount` token registration via the provisioning-shard secret - https://issues.redhat.com/browse/APPSRE-4304
 
-```yaml
----
-$schema: /openshift/namespace-1.yml
-
-labels: {}
-
-name: kube-public
-description: $cluster kube-public namespace
-
-cluster:
-  $ref: /openshift/$cluster/cluster.yml
-
-app:
-  $ref: /services/app-sre/app.yml
-
-environment:
-  $ref: /products/app-sre/environments/$environment.yml
-
-managedResourceTypes:
-- ConfigMap
-
-managedResourceNames:
-- resource: ConfigMap
-  resourceNames:
-    - oidc-storage-provider-s3-config
-
-openshiftResources:
-- provider: resource-template
-  path: /services/hypershift/$environment/oidc-storage-provider-s3-config.yml
-
-clusterAdmin: true
-```
-
-5. TODO describe the `ServiceAccount` token registration via the provisioning-shard secret - https://issues.redhat.com/browse/APPSRE-4304
-
-6. TODO describe how integration clusters should manage the special group for the OCM team - https://issues.redhat.com/browse/APPSRE-4335
+5. TODO describe how integration clusters should manage the special group for the OCM team - https://issues.redhat.com/browse/APPSRE-4335
 
 # New Hypershift environment
 
@@ -153,16 +118,15 @@ terraformResources:
 - provider: s3
   account: app-sre
   identifier: hypershift-oidc-$environment
+  region: us-east-1
   defaults: /terraform/resources/s3-public-read-1.yml
   output_resource_name: hypershift-oidc-s3-creds
 ```
 
 Make sure the `openshiftResources` section is commented out for now, open an MR and make sure the bucket is created before you continue, otherwise certain integrations will fail.
 
-2. Create resource file at `resources/services/hypershift/$environment/hypershift-operator-oidc-provider-s3-credentials.yml`. Use an example from another environment to get started but make sure to replace the mentioned cluster name in the vault secret references.
+2. Create resource file at `resources/services/hypershift/$environment/oidc-s3-creds.yml`. Use an example from another environment to get started but make sure to replace the mentioned cluster name in the vault secret references.
 
-3. Create another resource file at `resources/services/hypershift/$environment/oidc-storage-provider-s3-config.yml`. Use an example from another environment to get started but make sure to replace the mentioned cluster name in the vault secret references.
+3. Remove the comments from the `openshiftResources` section of the namespace file
 
-4. Remove the comments from the `openshiftResources` section of the namespace file
-
-5. Continue on the step about saas file target from the "Hypershift deployment" section
+4. Continue on the step about saas file target from the "Hypershift deployment" section
