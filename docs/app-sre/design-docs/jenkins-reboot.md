@@ -54,8 +54,9 @@ nodes and controllers if **any of them** needs a reboot. This means
 doing a call to the `/safeExit` endpoint of the REST API and waiting
 for ongoing jobs to finish. After that we can reboot the world.
 
-We will rely on systemd to do all the coordination work for us without
-blocking Ansible.
+The easiest way to achieve this is letting the controller handle the
+reboot of all nodes.  We will rely on the controller's systemd to do
+all the coordination work for us without blocking Ansible.
 
 We will isolate this intervention inside its own `target`, called
 `jenkins-reboot.target`. This way we can trigger the reboot of all
@@ -73,7 +74,7 @@ Before=reboot.target
 
 [Service]
 Type=oneshot
-ExecStart=sh -c "for w in $WORKERS; do ssh -l rebooter $worker systemctl -f reboot; done"
+ExecStart=sh -c "for w in $WORKERS; do ssh -l rebooter $w systemctl -f reboot; done"
 
 [Install]
 WantedBy=jenkins-restart.target
@@ -82,7 +83,7 @@ WantedBy=jenkins-restart.target
 We will provide with a different version of the
 [node-upgrade-restart](https://gitlab.cee.redhat.com/app-sre/infra/blob/master/ansible/playbooks/node-upgrade-restart.yml)
 playbook that will enter this target after upgrading any relevant
-RPMs. To avoid coordinhating what needs rebooting and what not, it
+RPMs. To avoid coordinating what needs rebooting and what not, it
 will assume that a reboot is always needed. This will be true if we
 delay its execution long enough. For instance, if we upgrade every 2
 to 4 weeks, we will have a very good security position while being
