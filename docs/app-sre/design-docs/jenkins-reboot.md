@@ -80,6 +80,32 @@ ExecStart=sh -c "for w in $WORKERS; do ssh -l rebooter $w systemctl -f reboot; d
 WantedBy=jenkins-restart.target
 ```
 
+In addition to this, we will deliver a Jenkins systemd service
+(**TODO** offer said unit upstream) that will do the `/safeExit` with
+the appropriate credentials and wait for 20 minutes before killing all
+jobs.  This will prevent deadlocked jobs from stalling the reboot.
+
+Its key features would be:
+
+``` ini
+[Unit]
+Description=jenkins
+EnvironmentFile=FILE_WITH_CREDS
+EnvironmentFile=FILE_WITH_TIMEOUTS
+
+[Service]
+ExecStart=...
+ExecStop=# Do safeExit here
+TimeoutStopSec=$TIMEOUT_STOP
+TimeoutStopFailureMode=kill
+
+[Install]
+WantedBy=default.target
+```
+
+(please note that we currently start Jenkins via an init.d script that
+doesn't allow for any safeExit or any configurable timeout)
+
 We will provide with a different version of the
 [node-upgrade-restart](https://gitlab.cee.redhat.com/app-sre/infra/blob/master/ansible/playbooks/node-upgrade-restart.yml)
 playbook that will enter this target after upgrading any relevant
