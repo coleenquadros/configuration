@@ -27,6 +27,10 @@ See [this doc](/docs/aws/sop/rds-os-upgrade.md) for applying mandatory OS upgrad
 * [PostgreSQL handy queries](/docs/dba/Postgres-handy-queries.md)
 * [MySQL handy queries](/docs/dba/MySQL-handy-queries.md)
 
+### RDS Documentation
+
+* [RDS Out of Storage (STORAGE_FULL)](https://aws.amazon.com/premiumsupport/knowledge-center/rds-out-of-storage/)
+
 ## Known issues
 
 ### High write latency without depleted burst balance
@@ -67,6 +71,26 @@ At the time that this entry is being added, we haven't heard back from AWS with 
 Internal ticket: [APPSRE-4036](https://issues.redhat.com/browse/APPSRE-4036) \
 Account: insights-prod\
 Case id: 9183343311
+
+### Errors when applying storage updates
+
+When a tenant increases the size of their RDS storage via the `allocated_storage` setting, an error similar to what is seen below might appear:
+
+```
+[terraform-resources-wrapper] [some-aws-account - apply] Error: Error modifying DB Instance some-database: InvalidParameterCombination: Invalid storage size for engine name postgres and storage type gp2: 6490
+```
+
+Or if the tenant is using storage autoscaling and changed `max_allocated_storage`, you might see this instead:
+
+```
+[terraform-resources-wrapper] [some-aws-account - apply] Error: Error modifying DB Instance some-database: InvalidParameterCombination: Invalid max storage size for engine name postgres and storage type gp2: 6500
+```
+
+These error messages are a bit vague, but there are a few things that you can check:
+
+1. **[If storage autoscaling is disabled]**: Changes to `allocated_storage` [must be >= 10% larger](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.StorageTypes.html#USER_PIOPS.ModifyingExisting) than the current `allocated_storage` in app-interface.
+2. **[If storage autoscaling is enabled]**: Changes to `allocated_storage` should be avoided because they're unnecessary. When changing `max_allocated_storage`, it must be increased by >= 10% of the current `AllocatedStorage` value **as reported by the AWS API**, for example as returned by: `aws --profile ACCOUNT_PROFILE rds describe-db-instances --db-instance-identifier DATABASE_NAME` - note that you cannot rely on the `allocated_storage` setting in app-interface because RDS automatically updates this value when storage autoscaling is enabled. This doesn't cause issues because Terraform ignores changes to `allocated_storage` as per [their documentation](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_instance#storage-autoscaling).
+3. Ensure that you have not hit the limits of storage volume sizes in RDS. There are some notable exceptions that have lower limits, usually previous generation instances. See the "DB instance class" section of [this document](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html#Concepts.Storage.GeneralSSD).
 
 ## Support
 
