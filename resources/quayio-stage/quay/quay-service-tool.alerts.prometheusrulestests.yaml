@@ -1,0 +1,24 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+  - /quayio-stage/quay/quay-service-tool.alerts.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+  - interval: 1m
+    input_series:
+      - series: haproxy_backend_http_responses_total{exported_namespace="quay",route="quayio-service-tool-route",code="5xx"}
+        values: 0+5x20 # http 500 50%
+
+      alert_rule_test:
+        - eval_time: 10m
+          alertname: 5xx-on-Quayio-Service-Tool
+          exp_alerts:
+            - exp_labels:
+                severity: high
+                service: quay
+                env: stage
+              exp_annotations:
+                message: "Reporting error on Quayio Service Tool stage."
