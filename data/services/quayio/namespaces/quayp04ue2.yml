@@ -44,6 +44,22 @@ openshiftResources:
     account_recovery_mode: false
     read_from_rds_replica: false
 
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /quay-p/quay/quay-config.secret.yaml
+  variables:
+    recycle: true
+    name: quay-py3-config-secret-readonly
+    config_vault_secret_version: 36
+    additional_config_vault_secret_version: 2
+    version_label: v36
+    readonly: true
+    standby: true
+    log_producer: kinesis_stream
+    enable_redis_modelcache: false
+    account_recovery_mode: false
+    read_from_rds_replica: false
+
 - provider: vault-secret
   path: app-interface/quayio-prod-us-east-2/quay/quay-extra-ca-certs
   version: 1
@@ -60,6 +76,8 @@ openshiftResources:
     qontract.ignore_reconcile_time: "true"
 - provider: resource
   path: /quay-p/quay/quay.web-allow-external.networkpolicy.yaml
+- provider: resource
+  path: /quay-p/quay/quay-py3.web-allow-external.networkpolicy.yaml
 
 terraformResources:
 - provider: rds
@@ -88,3 +106,4 @@ terraformResources:
   identifier: quay-prod-logentry-stream-backup
   defaults: /terraform/resources/quayio-production/kinesis-2.yml
   output_resource_name: quayio-kinesis
+
