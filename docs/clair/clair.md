@@ -16,7 +16,7 @@ An architectural overview of Clair V4 and specific configuration options are det
 Accepts requests to index a manifest and creates an index_report. Saves index report to its database. Retrieves index_report from its DB. Accepts delete requests for manifests (individual and bulk) and deletes them from its database.
 
 ### Matcher
-Accepts requests for a vulnerability_report, requests the index_report from the Indexer and matches the index_report with the vulnerabilities in its database. Responsible for periodically updating the vulnerabilities in its database. Also responsible for garbage collecting older vulnerabilites from its database.
+Accepts requests for a vulnerability_report, requests the index_report from the Indexer and matches the index_report with the vulnerabilities in its database. Responsible for periodically updating the vulnerabilities in its database. Also responsible for garbage collecting older vulnerabilities from its database.
 
 ### Notifier
 Responsible for generating notifications when new vulnerabilities affecting a previously indexed manifest enters the system. The notifier will send notifications via the configured mechanisms.
@@ -47,7 +47,7 @@ All 3 components (Indexer, Matcher, Notifier) have associated Services and Route
 
 * Clair should be able to service all indexing requests from Quay without any requests being rate-limited.
 * Newly pushed tags should be indexed by Clair in no more than 10 minutes.
-* Clair should be able to respond in a timely manner to vulnerability report requests from Quay allowing for a reponsive UI.
+* Clair should be able to respond in a timely manner to vulnerability report requests from Quay allowing for a responsive UI.
 
 ## State
 ### Database
@@ -104,15 +104,65 @@ Quay will ask for the report by the manifest hash and Clair will initially get t
 Quay and Clair share a PSK that Quay uses to create a JWT to authenticate every request. The PSKs for stage and production are stored in the [AppSRE Vault instance](https://vault.devshift.net/). 
 
 ## Load Testing
-Load testing can be performed by cloning the following project and running with the desired concurrency. LOADTESTENTRY can be "short" or "prolonged". "help" and "shell" entries also exist for debugging.
-```sh
-git clone git@github.com:crozzy/clair-load-test.git
-cd clair-load-test
-# Add a config file for the environment you want to test to /config dir
-podman build . -t clair-load-test
-podman run -v config:/config -e CONCURRENCY=10 -e HOST=https://clair.stage.quay.io -e CLAIR_CONF=/config/config-file.yaml -e LOADTESTENTRY=short -it clair-load-test
-```
 
+### Indexer
+**Estimated workload**
+
+We ran a backfilling process consisting of 4 Quay py3 pods with their security workers enabled submitting manifests to Clair v4 production. The 4 Quay pods submit manifests at a rate of 1 per second (0.25/second/Quay pod). Extrapolating that out to production, 40 Quay pods (currently 33 plus room for scaling) would mean 10 indexing requests / second.
+
+Given the number of production instances (40) is 10x that of Staging (4), the benchmarking seeks to prove that Stage can handle at least 1 indexing request / second.
+
+**Methodology**
+
+[clair-load-tester](https://github.com/quay/clair-load-test) is Quay-independent. It generates manifests for popular images and submits them for indexing (it will also request the vulnerability report and delete manifest). It accepts a `--host` and `--psk` to allow you to load test separate environments as well as allowing you to specify a `--rate` and a `--timeout` for flexibility in testing.
+Running the clair-load-tester pointing at stage with `--rate=1` and `--timeout=30m` and verifying with the [Clair grafana dashboard](https://grafana.app-sre.devshift.net/d/I1JBFlRnz/clair-v4) that indexing requests are being processed at 1 per second and referencing the [DB Grafana indexer dashboard](https://grafana.app-sre.devshift.net/d/AWSRDSdbi/aws-rds?from=now-30m&to=now&orgId=1&var-datasource=AWS+quayio-stage&var-region=default&var-dbinstanceidentifier=clair-indexer-stage) and the [RDS Grafana matcher dashboard](https://grafana.app-sre.devshift.net/d/AWSRDSdbi/aws-rds?from=now-30m&to=now&orgId=1&var-datasource=AWS+quayio-stage&var-region=default&var-dbinstanceidentifier=clair-matcher-stage).
+
+**Results**
+```json
+{
+  "total_index_report_requests": 1799,
+  "total_vulnerability_report_requests": 1799,
+  "total_index_report_latency_milliseconds": 8098653,
+  "total_vulnerability_report_latency_milliseconds": 696237,
+  "latency_per_index_report_request": 4501.752640355753,
+  "latency_per_vulnerability_report_request": 387.0133407448583,
+  "non_2XX_index_report_responses": 0,
+  "non_2XX_vulnerability_report_responses": 0,
+  "max_index_report_request_latency_milliseconds": 27901,
+  "max_vulnerability_report_request_latency_milliseconds": 1583
+}
+```
+![](images/load-test-grafana.png)
+
+**Databases**
+
+DB Dashboards during load test:
+
+_Indexer_
+![](images/indexer-db-loadtest-grafana.png)
+_Matcher_
+![](images/matcher-db-loadtest-grafana.png)
+
+| Component | Max CPU % (out of 2) | Ave CPU % (out of 2) | Min freeable Mem Gb (out of 8Gb) | Ave freeable Mem Gb (out of 8gb) | Max Conns | Ave Conns |
+|-----------|----------------------|----------------------|----------------------------------|----------------------------------|-----------|-----------|
+| Indexer   | 16.6                 | 14.5                 | 4.52                             | 4.63                             | 85        | 64.6      |
+| Matcher   | 8.46                 | 7.13                 | 4.62                             | 4.76                             | 7         | 6.88      |
+
+> Note: The stage DB specs are roughly half the size of production (`db.m6g.large` vs `db.m6g.xlarge`).
+
+**Pods**
+
+Pod metrics during the load test can be seen here:
+
+ _CPU_
+![](images/pod-cpu-loadtest-grafana.png)
+
+ _Memory_
+![](images/pod-mem-loadtest-grafana.png)
+
+> Note: Please see [load-testing SOP](sops/load-testing.md) for instructions on how to re-run load-test.
+
+> Note: More extensive load testing was carried out to determine capacity requirements and the results can be viewed [here](https://docs.google.com/document/d/16nODx4tB1jcCyV0b7zXcXlrFi_lyD1OuPOpy-IOdBFk)
 
 ## Capacity
 ### Current Production
