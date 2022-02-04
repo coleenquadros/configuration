@@ -1,0 +1,43 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: clair-index-report-latency-stage
+spec:
+  groups:
+    - name: clair-index-report-latency-stage.rules
+      rules:
+        - alert: ClairIndexReportGetAPI30mto6hLatencyP95BudgetBurn
+          annotations:
+            message: "High 6h request latency budget burn for Clair Index Report GETting (current value: {{ $value | humanize }})"
+            dashboard: "https://grafana.app-sre.devshift.net/d/I1JBFlRnz/clair-v4"
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/clair/sops/increased-latency-index-report.md"
+          expr: |
+              latencytarget:clair_http_indexerv1_request_duration:rate30m{latency="0.1"} < 0.95
+              and
+              latencytarget:clair_http_indexerv1_request_duration:rate6h{latency="0.1"} < 0.95
+          labels:
+            service: clair
+            latency: "0.1"
+            quantile: "95" 
+            severity: medium
+        - expr: |
+              sum(rate(clair_http_indexerv1_request_duration_seconds_bucket{handler="/indexer/api/v1/index_report/:digest",method="get",code="200",le="0.1"}[30m]))
+              /
+              sum(rate(clair_http_indexerv1_request_duration_seconds_count{handler="/indexer/api/v1/index_report/:digest",method="get",code="200"}[30m]))
+          labels:
+            service: clair
+            latency: "0.1"
+          record: latencytarget:clair_http_indexerv1_request_duration:rate30m
+        - expr: |
+              sum(rate(clair_http_indexerv1_request_duration_seconds_bucket{handler="/indexer/api/v1/index_report/:digest",method="get",code="200",le="0.1"}[6h]))
+              /
+              sum(rate(clair_http_indexerv1_request_duration_seconds_count{handler="/indexer/api/v1/index_report/:digest",method="get",code="200"}[6h]))
+          labels:
+            service: clair
+            latency: "0.1"
+          record: latencytarget:clair_http_indexerv1_request_duration:rate6h
