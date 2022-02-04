@@ -18,6 +18,7 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
         - [I can not access X](#i-can-not-access-x)
         - [I need help with something AWS related](#i-need-help-with-something-aws-related)
         - [I can not access ci-ext](#i-can-not-access-ci-ext)
+        - [I can not access ci-int](#i-can-not-access-ci-int)
         - [I can not access Grafana](#i-can-not-access-grafana)
         - [Tagging options in app-interface](#tagging-options-in-app-interface)
         - [Can you reset my AWS password?](#can-you-reset-my-aws-password)
@@ -91,10 +92,41 @@ Start by following [I can not access X](#i-can-not-access-x)
 
 Problem: I Can not log in to https://ci.ext.devshift.net.
 
-Managed to log in but having issues? Maybe even seeing this error message? `"Access denied: <your-github-username> is missing the Overall/Read permission"`
+Managed to log in but having issues? Maybe even seeing this error message? `"Access denied: <your-red-hat-username> is missing the Overall/Read permission"`
 
-1. Log out and log in again.
-2. Revoke the `jenkins-ci-ext` Authorized OAuth app in [GitHub settings](https://github.com/settings/applications) and log in again.
+Access is managed via app-interface. The role that grants access is [ci-ext-ro-access](/data/dependencies/ci-ext/roles/ci-ext-ro-access.yml).
+
+If you don't have a user file on app-interface:
+
+1. Submit a MR to app-interface adding your user file
+1. Add the [ci-ext-ro-access](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/ci-ext/roles/ci-ext-ro-access.yml) role to your user file in the same MR.
+
+If you already have a user file
+
+1. Make sure that your user has the [ci-ext-ro-access](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/ci-ext/roles/ci-ext-ro-access.yml) role assigned, if it's not the case, submit a MR adding the role to your user file.
+
+*Note that the permission could be granted to your user via a role that has the permission assigned, check if any of the roles assigned to your user have the access to ci-ext*
+
+### I can not access ci-int
+
+Start by following [I can not access X](#i-can-not-access-x)
+
+Problem: I Can not log in to https://ci.int.devshift.net.
+
+Managed to log in but having issues? Maybe even seeing this error message? `"Access denied: <your-red-hat-username> is missing the Overall/Read permission"`
+
+Access is managed via app-interface. The role that grants access is [ci-int-access](/data/dependencies/ci-int/roles/ci-int-access.yml).
+
+If you don't have a user file on app-interface:
+
+1. Submit a MR to app-interface adding your user file
+1. Add the [ci-int-access](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/ci-int/roles/ci-int-access.yml) role to your user file in the same MR.
+
+If you already have a user file
+
+1. Make sure that your user has the [ci-int-access](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/ci-int/roles/ci-int-access.yml) role assigned, if it's not the case, submit a MR adding the role to your user file.
+
+*Note that the permission could be granted to your user via a role that has the permission assigned, check if any of the roles assigned to your user have the access to ci-int*
 
 ### I can not access Grafana
 
