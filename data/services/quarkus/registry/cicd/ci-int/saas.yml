@@ -1,0 +1,58 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: quarkus-registry
+
+name: saas-quarkus-registry
+description: SaaS tracking file for Quarkus Registry
+
+app:
+  $ref: /services/quarkus/registry/app.yml
+
+pipelinesProvider:
+  $ref: /services/quarkus/pipelines/tekton.code-quarkus-pipelines.app-sre-prod-01.yaml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+  - DeploymentConfig
+  - Service
+
+imagePatterns:
+  - quay.io/app-sre/registry-quarkus-redhat-app
+  - quay.io/quarkus/registry-app
+
+# if the code repo or image registry is private, need to add an authentication parameter
+# https://github.com/app-sre/qontract-schemas/blob/main/schemas/app-sre/saas-file-1.yml#L96-102
+
+resourceTemplates:
+  - name: registry-quarkus
+    url: https://github.com/quarkusio/registry.quarkus.redhat.com
+    path: /openshift/template.yaml
+    targets:
+      - namespace:
+          $ref: /services/quarkus/registry/namespaces/registry-quarkus-redhat-stage.yml
+        ref: main
+        upstream:
+          instance:
+            $ref: /dependencies/ci-int/ci-int.yml
+          name: quarkusio-registry.quarkus.redhat.com-gh-build-main
+        parameters:
+          REPLICAS: 3
+          QUARKUS_REGISTRY_ID: registry.quarkus.stage.redhat.com
+          QUARKUS_REGISTRY_GROUPID: com.redhat.stage.quarkus.registry
+          QUARKUS_REGISTRY_MAVEN_REPO_URL: https://registry.quarkus.stage.redhat.com/maven
+          QUARKUS_REGISTRY_QUARKUS_VERSIONS_EXPRESSION: '*-redhat-*'
+          QUARKUS_REGISTRY_QUARKUS_VERSIONS_EXCLUSIVE_PROVIDER: 'false'
+          QUARKUS_REGISTRY_NON_PLATFORM_EXTENSIONS_SUPPORT: 'false'
+          QUARKUS_REGISTRY_CACHE_CRON: '* */5 * * * ?'
+        promotion:
+          publish:
+            - registry-quarkus-redhat-stage-deploy-success-channel
