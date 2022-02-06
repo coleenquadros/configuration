@@ -91,6 +91,7 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
             * use this option in the case a docker image should be built before deployment
                 * or any other script that should run prior to deployment
                 * see [Continuous Integration in App-interface](/docs/app-sre/continuous-integration-in-app-interface.md) for more details
+            * use this option only with a `ref` which is a branch (such as `master` or `main`). using it with a commit sha is not valid.
             - (v1 SaaS file) name of Jenkins job to build after.
                 *  the `instance` should match the one where the upstream job runs.
             - (v2 SaaS file) instance reference and job name to build after:
