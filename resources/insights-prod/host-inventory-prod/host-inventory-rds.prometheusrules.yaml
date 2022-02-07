@@ -13,7 +13,7 @@ spec:
     rules:
     - alert: HBIFreeSpaceLow
       expr: |
-        predict_linear(rdsosmetrics_fileSys_usedPercent{mount_point="/rdsdbdata", exported_instance="host-inventory-prod"}[4d], 3600 * 24 * 14) > 100
+        predict_linear(sum by (exported_instance,mount_point) (rdsosmetrics_fileSys_usedPercent{exported_instance="host-inventory-prod",mount_point="/rdsdbdata"})[4d:30m], 3600 * 24 * 14) > 100
       labels:
         severity: medium
         service: insights
@@ -24,7 +24,7 @@ spec:
         message: "DB instance {{ $labels.exported_instance }} is about to run out of storage within 2 weeks."
     - alert: HBIFreeSpaceVeryLow
       expr: |
-        predict_linear(rdsosmetrics_fileSys_usedPercent{mount_point="/rdsdbdata", exported_instance="host-inventory-prod"}[3h], 3600 * 24) > 100
+        predict_linear(sum by (exported_instance,mount_point) (rdsosmetrics_fileSys_usedPercent{exported_instance="host-inventory-prod",mount_point="/rdsdbdata"})[3h:1m], 3600 * 24) > 100
       labels:
         severity: critical
         service: insights
