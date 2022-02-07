@@ -9,6 +9,7 @@
     - [UHCAccountManager4xxErrorsHigh](#account-manager-4xx)
     - [UHCAccountManagerBannedUsersHigh](#account-manager-banned-users)
     - [UHCAccountManagerAdvisoryLockDurationHigh](#account-manager-advisory-lock-issues)
+    - [UHCAccountManagerClientCertificateExpiring](#account-manager-client-certificate-expiring)
     - [OCM Account Manager Dependencies](#account-manager-dependencies)
     - [Escalations](#escalations)
 
@@ -207,6 +208,29 @@ UHC Account Manager Advisory Lock Duration increased in the last few minutes.
 
 ### Relevant secrets:
 - secrets/uhc-acct-mngr
+
+### Steps:
+
+- Contact Service Delivery B team.
+
+---
+
+## Account Manager Client Certificate Expiring
+
+### Impact:
+
+Partial outages in the stage/prod environments - Account Manager API endpoints would throw 500 errors.
+Account Manager Jobs such as AutoEntitlementReconciler, AccountReconciler would fail.
+Users of the UHC portal UI may be receiving unexpected errors.
+Issues in the stage environment might prevent the developmen team to deploy changes to the Production environment.
+
+### Summary:
+
+Account Manager uses a client certificate to communicate with the RHIT API Services (Users and Subscriptions).
+If the certificate expires, a new certificate should be requested and updated. This alert serves a purpose of giving the development team enough time to act on this matter.
+
+### Relevant secrets:
+- secrets/uhc-acct-mngr/rhsm.crt
 
 ### Steps:
 
