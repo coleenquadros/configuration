@@ -52,6 +52,7 @@ imagePatterns:
 - quay.io/app-sre/memcached
 - quay.io/jpkroehling/all-in-one
 - quay.io/openshift/origin-configmap-reloader
+- quay.io/prometheus/alertmanager
 
 resourceTemplates:
 - name: observatorium-metrics
@@ -63,13 +64,15 @@ resourceTemplates:
     MEMCACHED_IMAGE: quay.io/app-sre/memcached
     MEMCACHED_EXPORTER_IMAGE: quay.io/prometheus/memcached-exporter
     THANOS_IMAGE: quay.io/thanos/thanos
+    THANOS_RULE_SYNCER_IMAGE: quay.io/observatorium/thanos-rule-syncer
     STORAGE_CLASS: "gp2"
   targets:
   - namespace:
       $ref: /services/rhobs/observatorium/observatorium-metrics/namespaces/observatorium-metrics-stage.yml
-    ref: 50cb04286e10e3f9239b83b3efa06d528c79c7a0
+    ref: 477851fc471a816dd4b601e0133c6e091e743a58
     parameters:
       NAMESPACE: observatorium-metrics-stage
+      OBSERVATORIUM_NAMESPACE: observatorium-stage
       THANOS_CONFIG_SECRET: thanos-objectstorage
       THANOS_S3_SECRET: telemeter-thanos-stage-s3
       THANOS_IMAGE_TAG: v0.24.0-rc.1
@@ -83,8 +86,8 @@ resourceTemplates:
       THANOS_QUERY_FRONTEND_REPLICAS: 3
       THANOS_QUERY_FRONTEND_CPU_REQUEST: '100m'
       THANOS_QUERY_FRONTEND_CPU_LIMIT: '1'
-      THANOS_QUERY_FRONTEND_MEMORY_REQUEST: '256Mi'
-      THANOS_QUERY_FRONTEND_MEMORY_LIMIT: '1Gi'
+      THANOS_QUERY_FRONTEND_MEMORY_REQUEST: '1Gi'
+      THANOS_QUERY_FRONTEND_MEMORY_LIMIT: '3Gi'
       THANOS_STORE_LOG_LEVEL: 'debug'
       THANOS_STORE_REPLICAS: 1
       THANOS_STORE_CPU_REQUEST: '50m'
@@ -101,6 +104,7 @@ resourceTemplates:
       THANOS_RECEIVE_DEBUG_ENV: '1'
       THANOS_COMPACTOR_REPLICAS: 1
       THANOS_COMPACTOR_PVC_REQUEST: '50Gi'
+      THANOS_RULE_SYNCER_IMAGE_TAG: main-2022-01-11-1290656
       THANOS_RULER_LOG_LEVEL: 'info'
       THANOS_RULER_REPLICAS: 2
       THANOS_RULER_CPU_REQUEST: '500m'
@@ -139,8 +143,8 @@ resourceTemplates:
       THANOS_QUERY_FRONTEND_REPLICAS: 3
       THANOS_QUERY_FRONTEND_CPU_REQUEST: '100m'
       THANOS_QUERY_FRONTEND_CPU_LIMIT: '1'
-      THANOS_QUERY_FRONTEND_MEMORY_REQUEST: '1Gi'
-      THANOS_QUERY_FRONTEND_MEMORY_LIMIT: '3Gi'
+      THANOS_QUERY_FRONTEND_MEMORY_REQUEST: '3Gi'
+      THANOS_QUERY_FRONTEND_MEMORY_LIMIT: '5Gi'
       THANOS_STORE_CPU_REQUEST: '1'
       THANOS_STORE_CPU_LIMIT: '1'
       THANOS_STORE_MEMORY_REQUEST: '20Gi'

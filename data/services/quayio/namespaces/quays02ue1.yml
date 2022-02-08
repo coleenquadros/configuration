@@ -69,6 +69,7 @@ openshiftResources:
     read_from_rds_replica: true
     enable_builders: false
     enable_clair: false
+    region: us-east-1
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -83,6 +84,7 @@ openshiftResources:
     read_from_rds_replica: false
     enable_builders: false
     enable_clair: false
+    region: us-east-1
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -92,11 +94,12 @@ openshiftResources:
     vault_secret_version: 61
     version_label: v61
     enable_redis_modelcache: true
-    readonly: false
+    readonly: true
     account_recovery_mode: false
     read_from_rds_replica: false
     enable_builders: true
     enable_clair: false
+    region: us-east-1
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -106,11 +109,12 @@ openshiftResources:
     vault_secret_version: 61
     version_label: v61
     enable_redis_modelcache: true
-    readonly: true
+    readonly: false
     account_recovery_mode: false
     read_from_rds_replica: false
     enable_builders: true
-    enable_clair: false
+    enable_clair: true
+    region: us-east-1
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -125,6 +129,7 @@ openshiftResources:
     read_from_rds_replica: false
     enable_builders: true
     enable_clair: false
+    region: us-east-1
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -139,6 +144,7 @@ openshiftResources:
     read_from_rds_replica: false
     enable_builders: true
     enable_clair: false
+    region: us-east-1
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -153,6 +159,7 @@ openshiftResources:
     read_from_rds_replica: false
     enable_builders: false
     enable_clair: false
+    region: us-east-1
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -262,47 +269,10 @@ terraformResources:
   certificate_arn: arn:aws:acm:us-east-1:019044362261:certificate/565164ca-935a-4d65-b92f-fce85cc794ba
   targets:
   - name: quayio-stage-py2
-    default: true
+    default: false
     openshift_service: quay-load-balancer-service
   - name: quayio-stage-py3
-    default: false
+    default: true
     openshift_service: quay-py3-load-balancer-service
-  rules:
-  - condition:
-      path: /v2/auth*
-    action:
-      - target: quayio-stage-py2
-        weight: 100
-      - target: quayio-stage-py3
-        weight: 0
-  - condition:
-      path: /v2/*
-      methods:
-        - HEAD
-    action:
-      - target: quayio-stage-py2
-        weight: 100
-      - target: quayio-stage-py3
-        weight: 0
-  - condition:
-      path: /v2/*
-      methods:
-      - GET
-      - OPTIONS
-    action:
-    - target: quayio-stage-py2
-      weight: 0
-    - target: quayio-stage-py3
-      weight: 100
-  - condition:
-      path: /cnr*
-      methods:
-      - GET
-      - HEAD
-      - OPTIONS
-    action:
-    - target: quayio-stage-py2
-      weight: 0
-    - target: quayio-stage-py3
-      weight: 100
+  rules: []
 

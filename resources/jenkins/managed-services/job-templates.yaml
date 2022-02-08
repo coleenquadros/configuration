@@ -444,6 +444,7 @@
           secrets:
             - *kas_fleet_manager_int_tests
             - *quay_secret_pull
+            - *managed_services_ccit_reportportal
     <<: *gl_timed
 
 - job-template:
@@ -496,6 +497,23 @@
     - archive:
         artifacts: 'reports/**'
         allow-empty: true
+    - <<: *slack_notify
+
+- job-template:
+    id: gl-build-master-kafka-storage-expansions
+    name: gl-build-master-kafka-storage-expansions
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *kas_fleet_manager_admin_staging
+            - *kas_fleet_manager_admin_prod
+            - *gitlab_token
+            - *kafka_storage_expansions
+    <<: *gl_build_master
+    publishers:
     - <<: *slack_notify
 
 - job-template:

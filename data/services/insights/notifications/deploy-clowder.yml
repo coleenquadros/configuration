@@ -67,10 +67,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-backend commit hash that determines the clowdapp-backend.yaml version
-    ref: aa7369e12091e053f50dd0146aa94be8710555d7
+    ref: 71441c9b92cc685e194f6237e5ef04833ca4a1d6
     parameters:
       # quay.io tag that will be deployed
-      IMAGE_TAG: aa7369e
+      IMAGE_TAG: 71441c9
       CLOUDWATCH_ENABLED: true
       CPU_REQUEST: 200m
       KAFKA_CONSUMED_TOTAL_CHECKER_ENABLED: true
@@ -84,6 +84,8 @@ resourceTemplates:
       PROCESSOR_EMAIL_NO_REPLY: no-reply-stage@redhat.com
       RBAC_S2S_READ_TIMEOUT: 120000
       SENTRY_ENABLED: true
+      # The following value will be uncommented when we're ready to delegate the templates processing to notifications-engine
+      #TEMPLATE_ENGINE_URL: ${clowder.endpoints.notifications-engine-service}
     promotion:
       publish:
       - notifications-backend-stage-deploy-success-channel
@@ -108,6 +110,9 @@ resourceTemplates:
       PROCESSOR_EMAIL_NO_REPLY: no-reply@redhat.com
       RBAC_S2S_READ_TIMEOUT: 120000
       SENTRY_ENABLED: true
+    promotion:
+      publish:
+      - notifications-backend-prod-deploy-success-channel
 
 # notifications-engine
 - name: notifications-engine
@@ -127,10 +132,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-backend commit hash that determines the clowdapp-engine.yaml version
-    ref: aa7369e12091e053f50dd0146aa94be8710555d7
+    ref: 71441c9b92cc685e194f6237e5ef04833ca4a1d6
     parameters:
       # quay.io tag that will be deployed
-      IMAGE_TAG: aa7369e
+      IMAGE_TAG: 71441c9
       CLOUDWATCH_ENABLED: true
       CPU_REQUEST: 200m
       KAFKA_CONSUMED_TOTAL_CHECKER_ENABLED: true
@@ -144,6 +149,9 @@ resourceTemplates:
       PROCESSOR_EMAIL_NO_REPLY: no-reply-stage@redhat.com
       RBAC_S2S_READ_TIMEOUT: 120000
       SENTRY_ENABLED: true
+    promotion:
+      publish:
+      - notifications-engine-stage-deploy-success-channel
 
   # prod
   - namespace:
@@ -167,6 +175,9 @@ resourceTemplates:
       PROCESSOR_EMAIL_NO_REPLY: no-reply@redhat.com
       RBAC_S2S_READ_TIMEOUT: 120000
       SENTRY_ENABLED: true
+    promotion:
+      publish:
+      - notifications-engine-prod-deploy-success-channel
 
 # notifications-aggregator
 - name: notifications-aggregator
@@ -186,15 +197,18 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-backend commit hash that determines the clowdapp-aggregator.yaml version
-    ref: aa7369e12091e053f50dd0146aa94be8710555d7
+    ref: 71441c9b92cc685e194f6237e5ef04833ca4a1d6
     parameters:
       # quay.io tag that will be deployed
-      IMAGE_TAG: aa7369e
+      IMAGE_TAG: 71441c9
       CLOUDWATCH_ENABLED: true
       CPU_REQUEST: 200m
       CRONTAB_AGGREGATION_JOB: 0 * * * *
       NOTIFICATIONS_LOG_LEVEL: DEBUG
       SENTRY_ENABLED: true
+    promotion:
+      publish:
+      - notifications-aggregator-stage-deploy-success-channel
 
   # prod
   - namespace:
@@ -207,6 +221,9 @@ resourceTemplates:
       CLOUDWATCH_ENABLED: true
       NOTIFICATIONS_LOG_LEVEL: DEBUG
       SENTRY_ENABLED: true
+    promotion:
+      publish:
+      - notifications-aggregator-prod-deploy-success-channel
 
 # notifications-gw
 - name: notifications-gw
@@ -226,15 +243,18 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-gw commit hash that determines the clowdapp.yaml version
-    ref: 5fa31c86242496fc108e5a3059656c4f0646561d
+    ref: c799bc71e752374a95a6619e0a9b905f74f29918
     parameters:
       # quay.io tag that will be deployed
-      IMAGE_TAG: 5fa31c8
+      IMAGE_TAG: c799bc7
       CLOUDWATCH_ENABLED: true
       CPU_REQUEST: 200m
       MIN_REPLICAS: 3
       NOTIFICATIONS_LOG_LEVEL: DEBUG
       SENTRY_ENABLED: true
+    promotion:
+      publish:
+      - notifications-gw-stage-deploy-success-channel
 
   # prod
   - namespace:
@@ -248,3 +268,6 @@ resourceTemplates:
       MIN_REPLICAS: 3
       NOTIFICATIONS_LOG_LEVEL: DEBUG
       SENTRY_ENABLED: true
+    promotion:
+      publish:
+      - notifications-gw-prod-deploy-success-channel

@@ -1,0 +1,42 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+labels:
+  service: osd-operators
+
+name: ci-int-osd-operators-container-security-operator-catalog-jobs
+
+description: 'container-security operator catalog'
+
+app:
+  $ref: /services/osd-operators/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+type: jobs
+
+config:
+- project:
+    name: container-security-operator-catalog
+    node: osd-operators
+    label: osd-operators
+    gl_group: service
+    gl_project: container-security-operator-catalog
+    quay_org: app-sre
+    build_deploy_script_path: make catalog-build-push
+    jobs:
+    - 'gl-build-master-custom-catalog-source':
+        display_name: container-security-operator-catalog build master branch
+
+- project:
+    name: container-security-operator-catalog-version
+    label: osd-operators
+    node: osd-operators
+    gl_group: service
+    gl_project: container-security-operator-catalog
+    jobs:
+    - 'gl-update-operator-version-custom-catalog-source':
+        display_name: container-security-operator-catalog operator version update
+        ci_cmd: make update-versions-commit
+        cron_expression: '30 1 * * 2' # At 01:30 every Tuesday

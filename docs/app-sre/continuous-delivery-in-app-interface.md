@@ -54,7 +54,6 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
     * `workspace` - a reference to a slack workspace
         * currently only `/dependencies/slack/coreos.yml` is supported.
     * `channel` - channel to send notifications to
-    * not yet supported for v2 SaaS files.
 * `managedResourceTypes` - a list of resource types to deploy (indicates that any other type is filtered out)
 * `takeover` - (optional) if set to true, the specified `managedResourceTypes` will be managed exclusively
 * `compare` - (optional) if set to false, the job does not compare desired to current resource and applies all resources even if they have not changed
@@ -92,12 +91,12 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
             * use this option in the case a docker image should be built before deployment
                 * or any other script that should run prior to deployment
                 * see [Continuous Integration in App-interface](/docs/app-sre/continuous-integration-in-app-interface.md) for more details
+            * use this option only with a `ref` which is a branch (such as `master` or `main`). using it with a commit sha is not valid.
             - (v1 SaaS file) name of Jenkins job to build after.
                 *  the `instance` should match the one where the upstream job runs.
             - (v2 SaaS file) instance reference and job name to build after:
                 * `instance` - reference to Jenkins instance where upstream job exists
                 * `name` - name of the Jenkins job to use as upstream
-            * not yet supported for v2 SaaS files.
         * `disable` - (optional) if set to `true`, target will be skipped during deployment.
         * `delete` - (optional) if set to `true`, resources coming from this target will be deleted.
     * `hash_length` - (optional) if `IMAGE_TAG` should be set according to the referenced target, specify a length to use from the commit hash.

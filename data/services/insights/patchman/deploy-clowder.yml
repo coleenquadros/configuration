@@ -21,6 +21,10 @@ slack:
 
 managedResourceTypes:
 - ClowdApp
+- ConfigMap
+- PersistentVolumeClaim
+- Service
+- Route
 
 imagePatterns:
 - quay.io/cloudservices
@@ -59,7 +63,7 @@ resourceTemplates:
     parameters:
       # Manager
       REPLICAS_MANAGER: '1' # prod: 4
-      IMAGE_TAG_MANAGER: c298429 # 1.18.29
+      IMAGE_TAG_MANAGER: a6ad332  # 1.18.37
       DB_DEBUG_MANAGER: 'true'
       LOG_LEVEL_MANAGER: info
       RES_MEM_MANAGER: 1Gi # prod: 2Gi
@@ -68,12 +72,12 @@ resourceTemplates:
 
       # Listener
       REPLICAS_LISTENER: '1'
-      IMAGE_TAG_LISTENER: c298429 # 1.18.29
+      IMAGE_TAG_LISTENER: a6ad332  # 1.18.37
       LOG_LEVEL_LISTENER: info
 
       # Evaluator - upload
       REPLICAS_EVALUATOR_UPLOAD: '1' # prod: '2'
-      IMAGE_TAG_EVALUATOR_UPLOAD:  pr-893-fd71cdd  # 1.18.29 test
+      IMAGE_TAG_EVALUATOR_UPLOAD: a6ad332  # 1.18.37
       LOG_LEVEL_EVALUATOR_UPLOAD: info
       ENABLE_LAZY_PACKAGE_SAVE_EVALUATOR_UPLOAD: 'true'
       CONSUMER_COUNT_EVALUATOR_UPLOAD: "1"
@@ -83,7 +87,7 @@ resourceTemplates:
 
       # Evaluator - recalc
       REPLICAS_EVALUATOR_RECALC: '1'
-      IMAGE_TAG_EVALUATOR_RECALC: pr-893-fd71cdd  # 1.18.29 test
+      IMAGE_TAG_EVALUATOR_RECALC: a6ad332  # 1.18.37
       LOG_LEVEL_EVALUATOR_RECALC: info
       ENABLE_LAZY_PACKAGE_SAVE_EVALUATOR_RECALC: 'true'
       CONSUMER_COUNT_EVALUATOR_RECALC: "1"
@@ -93,7 +97,7 @@ resourceTemplates:
 
       # VMaaS sync
       REPLICAS_VMAAS_SYNC: '1'
-      IMAGE_TAG_VMAAS_SYNC: pr-893-fd71cdd  # 1.18.29 test
+      IMAGE_TAG_VMAAS_SYNC: a6ad332  # 1.18.37
       LOG_LEVEL_VMAAS_SYNC: info
       PACKAGES_PAGE_SIZE: '500'
       ENABLE_PKG_TREE_SYNC: 'false' # use /pkglist vmaas endpoint
@@ -101,7 +105,7 @@ resourceTemplates:
 
       # Database admin
       REPLICAS_DATABASE_ADMIN: '1'
-      IMAGE_TAG_DATABASE_ADMIN: c298429 # 1.18.29
+      IMAGE_TAG_DATABASE_ADMIN: a6ad332  # 1.18.37
       LOG_LEVEL_DATABASE_ADMIN: info
 
       # Common parameters
@@ -110,17 +114,19 @@ resourceTemplates:
       VMAAS_CALL_MAX_RETRIES: '600' # 1 s period is hardcoded, so restart once per 10min
       VMAAS_CALL_USE_EXP_RETRY: 'false' # use constant retry policy
 
+      # Floorist parameters
+      FLOORIST_IMAGE_TAG: b57a5a8
+      FLOORIST_SUSPEND: 'false'
+      FLOORIST_BUCKET_SECRET_NAME: insights-metrics-export-stage
+      FLOORIST_SCHEDULE: '50 0 * * *'
+
   - namespace: # PRODUCTION
       $ref: /services/insights/patchman/namespaces/patchman-engine-prod.yml
-    ref: b148ecfde18cb193ef292d053f410e6f8bb74550 # 1.18.28
-    upstream:
-      instance:
-        $ref: /dependencies/ci-int/ci-int.yml
-      name: RedHatInsights-patchman-engine-gh-build-master
+    ref: f62df0b741a00fffa1090fe54088c1b3f8a56cb1 # 1.18.35
     parameters:
       # Manager
       REPLICAS_MANAGER: '4'
-      IMAGE_TAG_MANAGER: b148ecf # 1.18.28
+      IMAGE_TAG_MANAGER: f62df0b  # 1.18.35
       LOG_LEVEL_MANAGER: info
       RES_CPU_MANAGER: 1000m
       RES_MEM_MANAGER: 2Gi
@@ -129,13 +135,13 @@ resourceTemplates:
 
       # Listener
       REPLICAS_LISTENER: '1'
-      IMAGE_TAG_LISTENER: b148ecf # 1.18.28
+      IMAGE_TAG_LISTENER: f62df0b  # 1.18.35
       LOG_LEVEL_LISTENER: info
       CONSUMER_COUNT_LISTENER: "1"
 
       # Evaluator - upload
-      REPLICAS_EVALUATOR_UPLOAD: '2'
-      IMAGE_TAG_EVALUATOR_UPLOAD: b148ecf # 1.18.28
+      REPLICAS_EVALUATOR_UPLOAD: '3'
+      IMAGE_TAG_EVALUATOR_UPLOAD: f62df0b  # 1.18.35
       LOG_LEVEL_EVALUATOR_UPLOAD: debug
       ENABLE_LAZY_PACKAGE_SAVE_EVALUATOR_UPLOAD: 'true'
       CONSUMER_COUNT_EVALUATOR_UPLOAD: "1"
@@ -144,8 +150,8 @@ resourceTemplates:
       RES_MEM_EVALUATOR_UPLOAD: 2Gi
 
       # Evaluator - recalc
-      REPLICAS_EVALUATOR_RECALC: '1'
-      IMAGE_TAG_EVALUATOR_RECALC: b148ecf # 1.18.28
+      REPLICAS_EVALUATOR_RECALC: '0' # turn off due to high upload load
+      IMAGE_TAG_EVALUATOR_RECALC: f62df0b  # 1.18.35
       LOG_LEVEL_EVALUATOR_RECALC: info
       ENABLE_LAZY_PACKAGE_SAVE_EVALUATOR_RECALC: 'true'
       CONSUMER_COUNT_EVALUATOR_RECALC: "1"
@@ -155,7 +161,7 @@ resourceTemplates:
 
       # VMaaS sync
       REPLICAS_VMAAS_SYNC: '1'
-      IMAGE_TAG_VMAAS_SYNC: b148ecf # 1.18.28
+      IMAGE_TAG_VMAAS_SYNC: f62df0b  # 1.18.35
       LOG_LEVEL_VMAAS_SYNC: info
       VMAAS_WS_ADDRESS: ws://vmaas-websocket.vmaas-prod.svc.cluster.local:8082 # use it if vmaas is not deployed with clowder
       PACKAGES_PAGE_SIZE: '500'
@@ -167,13 +173,22 @@ resourceTemplates:
 
       # Database admin
       REPLICAS_DATABASE_ADMIN: '1'
-      IMAGE_TAG_DATABASE_ADMIN: b148ecf # 1.18.28
+      IMAGE_TAG_DATABASE_ADMIN: f62df0b  # 1.18.35
       LOG_LEVEL_DATABASE_ADMIN: info
 
       # Common parameters
       VMAAS_ADDRESS: http://vmaas-webapp.vmaas-prod.svc.cluster.local:8080 # use it if vmaas is not deployed with clowder
       KAFKA_READER_MAX_ATTEMPTS: '60'
       KAFKA_WRITER_MAX_ATTEMPTS: '60'
+
+      # Floorist parameters
+      FLOORIST_IMAGE_TAG: b57a5a8
+      FLOORIST_SUSPEND: 'false'
+      FLOORIST_BUCKET_SECRET_NAME: insights-metrics-export-prod
+      FLOORIST_SCHEDULE: '30 18 * * *' # '50 0 * * *'
+      CPU_LIMIT_FLOO: 300m
+      MEMORY_LIMIT_FLOO: 1Gi # preventing OOMKill
+      MEMORY_REQUEST_FLOO: 1Gi # preventing OOMKill
 
   - namespace: # FEDRAMP-STAGE
       $ref: /services/insights/patchman/namespaces/patchman-engine-fedramp-stage.yml
@@ -185,7 +200,7 @@ resourceTemplates:
     parameters:
       # Manager
       REPLICAS_MANAGER: '1'
-      IMAGE_TAG_MANAGER: c298429 # 1.18.29
+      IMAGE_TAG_MANAGER: a6ad332  # 1.18.37
       LOG_LEVEL_MANAGER: info
       RES_CPU_MANAGER: 1000m
       RES_MEM_MANAGER: 1Gi # prod: 2Gi
@@ -194,13 +209,13 @@ resourceTemplates:
 
       # Listener
       REPLICAS_LISTENER: '1'
-      IMAGE_TAG_LISTENER: c298429 # 1.18.29
+      IMAGE_TAG_LISTENER: a6ad332  # 1.18.37
       LOG_LEVEL_LISTENER: info
       CONSUMER_COUNT_LISTENER: "1"
 
       # Evaluator - upload
       REPLICAS_EVALUATOR_UPLOAD: '1'
-      IMAGE_TAG_EVALUATOR_UPLOAD: c298429 # 1.18.29
+      IMAGE_TAG_EVALUATOR_UPLOAD: a6ad332  # 1.18.37
       LOG_LEVEL_EVALUATOR_UPLOAD: debug
       ENABLE_LAZY_PACKAGE_SAVE_EVALUATOR_UPLOAD: 'true'
       CONSUMER_COUNT_EVALUATOR_UPLOAD: "1"
@@ -210,7 +225,7 @@ resourceTemplates:
 
       # Evaluator - recalc
       REPLICAS_EVALUATOR_RECALC: '1'
-      IMAGE_TAG_EVALUATOR_RECALC: c298429 # 1.18.29
+      IMAGE_TAG_EVALUATOR_RECALC: a6ad332  # 1.18.37
       LOG_LEVEL_EVALUATOR_RECALC: info
       ENABLE_LAZY_PACKAGE_SAVE_EVALUATOR_RECALC: 'true'
       CONSUMER_COUNT_EVALUATOR_RECALC: "1"
@@ -220,7 +235,7 @@ resourceTemplates:
 
       # VMaaS sync
       REPLICAS_VMAAS_SYNC: '1'
-      IMAGE_TAG_VMAAS_SYNC: c298429 # 1.18.29
+      IMAGE_TAG_VMAAS_SYNC: a6ad332  # 1.18.37
       LOG_LEVEL_VMAAS_SYNC: info
       DELETE_CULLED_SYSTEMS_LIMIT: "2000"
       ERRATA_PAGE_SIZE: "5000"
@@ -228,7 +243,7 @@ resourceTemplates:
 
       # Database admin
       REPLICAS_DATABASE_ADMIN: '1'
-      IMAGE_TAG_DATABASE_ADMIN: c298429 # 1.18.29
+      IMAGE_TAG_DATABASE_ADMIN: a6ad332  # 1.18.37
       LOG_LEVEL_DATABASE_ADMIN: info
 
       # Common parameters
