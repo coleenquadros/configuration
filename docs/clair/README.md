@@ -42,7 +42,7 @@ More information for how to access the logs is available [here](../../FAQ.md#get
 
 ## Clair AWS Accounts
 
- Sign in via https://950916221866.signin.aws.amazon.com/console and add an alias to the following accounts: [switch roles here](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/ocm-aws-infrastructure-access-switch-role-links.md)
+ Sign in via https://744086762512.signin.aws.amazon.com/console and add an alias to the following accounts: [switch roles here](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/ocm-aws-infrastructure-access-switch-role-links.md)
 
 | Environment | Account |
 | --- | --- |
