@@ -122,7 +122,7 @@ Every AppSRE/MT-SRE engineer should have access to the following:
     * ACCESS: sd-org. Subscribe from UI.
     * ACCESS: sres. Subscribe from UI.
     * ACCESS: it-iam-announce-list. Subscribe from UI.
-    * ACCESS: it-platform-community-list (useful for SSO). Subscribe from UI.
+    * ACCESS: it-user-announce-list (useful for SSO). Subscribe from UI.
   * Optional - Additional information surfaces, subscription not mandatory
     * ACCESS: aos-devel: very high volume (useful to get the latest news about OpenShift development). Subscribe from UI.
 * Sd-org onboarding
