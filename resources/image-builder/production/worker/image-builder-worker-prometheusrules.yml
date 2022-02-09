@@ -16,7 +16,7 @@ spec:
     # for a more detailed explanation and breakdown of the burn rate alerts
     - alert: WorkerBuildSlowResponse_FastBurn
       annotations:
-        message: 'High burn rate: {{ $value | humanizePercentage }} of requests are slower than 30m'
+        message: 'High burn rate: {{ $value | humanizePercentage }} of jobs are slower than 30m'
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/image-builder/ImageBuilderHighLatency.md"
       expr: |
         (
@@ -34,11 +34,11 @@ spec:
         latency: "1792"
         severity: medium
         service: image-builder
-        env:  prod
+        env: prod
         app_team: image-builder
     - alert: WorkerBuildSlowResponse_SlowBurn
       annotations:
-        message: 'Slow burn rate: {{ $value | humanizePercentage }} of requests are slower than 30m'
+        message: 'Slow burn rate: {{ $value | humanizePercentage }} of jobs are slower than 30m'
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/image-builder/ImageBuilderHighLatency.md"
       expr: |
         (
@@ -56,67 +56,67 @@ spec:
         latency: "1792"
         severity: info
         service: image-builder
-        env:  prod
+        env: prod
         app_team: image-builder
     - expr: |
         1 - (
-          sum(rate(image_builder_composer_worker_job_duration_seconds_bucket{le="1792", type=~"osbuild:.*"}[5m]))
+          sum(rate(image_builder_worker_job_duration_seconds_bucket{le="1792", type=~"osbuild:.*", status!="4xx"}[5m]))
           /
-          sum(rate(image_builder_composer_worker_job_duration_seconds_count{type=~"osbuild:.*"}[5m]))
+          sum(rate(image_builder_worker_job_duration_seconds_count{type=~"osbuild:.*", status!="4xx"}[5m]))
         )
       labels:
         latency: "1792"
       record: image_builder_worker_build:latency_rate5m
     - expr: |
         1 - (
-          sum(rate(image_builder_composer_worker_job_duration_seconds_bucket{le="1792", type=~"osbuild:.*"}[30m]))
+          sum(rate(image_builder_worker_job_duration_seconds_bucket{le="1792", type=~"osbuild:.*", status!="4xx"}[30m]))
           /
-          sum(rate(image_builder_composer_worker_job_duration_seconds_count{type=~"osbuild:.*"}[30m]))
+          sum(rate(image_builder_worker_job_duration_seconds_count{type=~"osbuild:.*", status!="4xx"}[30m]))
         )
       labels:
         latency: "1792"
       record: image_builder_worker_build:latency_rate30m
     - expr: |
         1 - (
-          sum(rate(image_builder_composer_worker_job_duration_seconds_bucket{le="1792", type=~"osbuild:.*"}[1h]))
+          sum(rate(image_builder_worker_job_duration_seconds_bucket{le="1792", type=~"osbuild:.*", status!="4xx"}[1h]))
           /
-          sum(rate(image_builder_composer_worker_job_duration_seconds_count{type=~"osbuild:.*"}[1h]))
+          sum(rate(image_builder_worker_job_duration_seconds_count{type=~"osbuild:.*", status!="4xx"}[1h]))
         )
       labels:
         latency: "1792"
       record: image_builder_worker_build:latency_rate1h
     - expr: |
         1 - (
-          sum(rate(image_builder_composer_worker_job_duration_seconds_bucket{le="1792", type=~"osbuild:.*"}[2h]))
+          sum(rate(image_builder_worker_job_duration_seconds_bucket{le="1792", type=~"osbuild:.*", status!="4xx"}[2h]))
           /
-          sum(rate(image_builder_composer_worker_job_duration_seconds_count{type=~"osbuild:.*"}[2h]))
+          sum(rate(image_builder_worker_job_duration_seconds_count{type=~"osbuild:.*", status!="4xx"}[2h]))
         )
       labels:
         latency: "1792"
       record: image_builder_worker_build:latency_rate2h
     - expr: |
         1 - (
-          sum(rate(image_builder_composer_worker_job_duration_seconds_bucket{le="1792", type=~"osbuild:.*"}[6h]))
+          sum(rate(image_builder_worker_job_duration_seconds_bucket{le="1792", type=~"osbuild:.*", status!="4xx"}[6h]))
           /
-          sum(rate(image_builder_composer_worker_job_duration_seconds_count{type=~"osbuild:.*"}[6h]))
+          sum(rate(image_builder_worker_job_duration_seconds_count{type=~"osbuild:.*", status!="4xx"}[6h]))
         )
       labels:
         latency: "1792"
       record: image_builder_worker_build:latency_rate6h
     - expr: |
         1 - (
-          sum(rate(image_builder_composer_worker_job_duration_seconds_bucket{le="1792", type=~"osbuild:.*"}[1d]))
+          sum(rate(image_builder_worker_job_duration_seconds_bucket{le="1792", type=~"osbuild:.*", status!="4xx"}[1d]))
           /
-          sum(rate(image_builder_composer_worker_job_duration_seconds_count{type=~"osbuild:.*"}[1d]))
+          sum(rate(image_builder_worker_job_duration_seconds_count{type=~"osbuild:.*", status!="4xx"}[1d]))
         )
       labels:
         latency: "1792"
       record: image_builder_worker_build:latency_rate1d
     - expr: |
         1 - (
-          sum(rate(image_builder_composer_worker_job_duration_seconds_bucket{le="1792", type=~"osbuild:.*"}[3d]))
+          sum(rate(image_builder_worker_job_duration_seconds_bucket{le="1792", type=~"osbuild:.*", status!="4xx"}[3d]))
           /
-          sum(rate(image_builder_composer_worker_job_duration_seconds_count{type=~"osbuild:.*"}[3d]))
+          sum(rate(image_builder_worker_job_duration_seconds_count{type=~"osbuild:.*", status!="4xx"}[3d]))
         )
       labels:
         latency: "1792"
@@ -125,108 +125,270 @@ spec:
     # for a more detailed explanation and breakdown of the burn rate alerts
     - alert: WorkerDepsolveSlowResponse_FastBurn
       annotations:
-        message: 'High burn rate: {{ $value | humanizePercentage }} of requests are slower than 30s'
+        message: 'High burn rate: {{ $value | humanizePercentage }} of jobs are slower than 30s'
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/image-builder/ImageBuilderHighLatency.md"
       expr: |
         (
-          image_builder_worker_depsolve:latency_rate1h{latency="32"} > (6.72*(1 - 0.95))
+          image_builder_worker_depsolve:latency_rate1h{latency="32"} > (6.72*(1 - 0.9))
           and
-          image_builder_worker_depsolve:latency_rate5m{latency="32"} > (6.72*(1 - 0.95))
+          image_builder_worker_depsolve:latency_rate5m{latency="32"} > (6.72*(1 - 0.9))
         ) 
         or
         (
-          image_builder_worker_depsolve:latency_rate6h{latency="32"} > (5.6*(1 - 0.95))
+          image_builder_worker_depsolve:latency_rate6h{latency="32"} > (5.6*(1 - 0.9))
           and
-          image_builder_worker_depsolve:latency_rate30m{latency="32"} > (5.6*(1 - 0.95))
+          image_builder_worker_depsolve:latency_rate30m{latency="32"} > (5.6*(1 - 0.9))
         )
       labels:
         latency: "32"
         severity: medium
         service: image-builder
-        env:  prod
+        env: prod
         app_team: image-builder
     - alert: WorkerDepsolveSlowResponse_SlowBurn
       annotations:
-        message: 'Slow burn rate: {{ $value | humanizePercentage }} of requests are slower than 30s'
+        message: 'Slow burn rate: {{ $value | humanizePercentage }} of jobs are slower than 30s'
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/image-builder/ImageBuilderHighLatency.md"
       expr: |
         (
-          image_builder_worker_depsolve:latency_rate1d{latency="32"} > (2.8*(1 - 0.95))
+          image_builder_worker_depsolve:latency_rate1d{latency="32"} > (2.8*(1 - 0.9))
           and
-          image_builder_worker_depsolve:latency_rate2h{latency="32"} > (2.8*(1 - 0.95))
+          image_builder_worker_depsolve:latency_rate2h{latency="32"} > (2.8*(1 - 0.9))
         )
         or
         (
-          image_builder_worker_depsolve:latency_rate3d{latency="32"} > (2.8*(1 - 0.95))
+          image_builder_worker_depsolve:latency_rate3d{latency="32"} > (2.8*(1 - 0.9))
           and
-          image_builder_worker_depsolve:latency_rate6h{latency="32"} > (2.8*(1 - 0.95))
+          image_builder_worker_depsolve:latency_rate6h{latency="32"} > (2.8*(1 - 0.9))
         )
       labels:
         latency: "32"
         severity: info
         service: image-builder
-        env:  prod
+        env: prod
         app_team: image-builder
     - expr: |
         1 - (
-          sum(rate(image_builder_composer_worker_job_duration_seconds_bucket{le="32", type="depsolve"}[5m]))
+          sum(rate(image_builder_worker_job_duration_seconds_bucket{le="32", type="depsolve", status!="4xx"}[5m]))
           /
-          sum(rate(image_builder_composer_worker_job_duration_seconds_count[5m]))
+          sum(rate(image_builder_worker_job_duration_seconds_count{type="depsolve", status!="4xx"}[5m]))
         )
       labels:
         latency: "32"
       record: image_builder_worker_depsolve:latency_rate5m
     - expr: |
         1 - (
-          sum(rate(image_builder_composer_worker_job_duration_seconds_bucket{le="32", type="depsolve"}[30m]))
+          sum(rate(image_builder_worker_job_duration_seconds_bucket{le="32", type="depsolve", status!="4xx"}[30m]))
           /
-          sum(rate(image_builder_composer_worker_job_duration_seconds_count{type="depsolve"}[30m]))
+          sum(rate(image_builder_worker_job_duration_seconds_count{type="depsolve", status!="4xx"}[30m]))
         )
       labels:
         latency: "32"
       record: image_builder_worker_depsolve:latency_rate30m
     - expr: |
         1 - (
-          sum(rate(image_builder_composer_worker_job_duration_seconds_bucket{le="32", type="depsolve"}[1h]))
+          sum(rate(image_builder_worker_job_duration_seconds_bucket{le="32", type="depsolve", status!="4xx"}[1h]))
           /
-          sum(rate(image_builder_composer_worker_job_duration_seconds_count{type="depsolve"}[1h]))
+          sum(rate(image_builder_worker_job_duration_seconds_count{type="depsolve", status!="4xx"}[1h]))
         )
       labels:
         latency: "32"
       record: image_builder_worker_depsolve:latency_rate1h
     - expr: |
         1 - (
-          sum(rate(image_builder_composer_worker_job_duration_seconds_bucket{le="32", type="depsolve"}[2h]))
+          sum(rate(image_builder_worker_job_duration_seconds_bucket{le="32", type="depsolve", status!="4xx"}[2h]))
           /
-          sum(rate(image_builder_composer_worker_job_duration_seconds_count{type="depsolve"}[2h]))
+          sum(rate(image_builder_worker_job_duration_seconds_count{type="depsolve", status!="4xx"}[2h]))
         )
       labels:
         latency: "32"
       record: image_builder_worker_depsolve:latency_rate2h
     - expr: |
         1 - (
-          sum(rate(image_builder_composer_worker_job_duration_seconds_bucket{le="32", type="depsolve"}[6h]))
+          sum(rate(image_builder_worker_job_duration_seconds_bucket{le="32", type="depsolve", status!="4xx"}[6h]))
           /
-          sum(rate(image_builder_composer_worker_job_duration_seconds_count{type="depsolve"}[6h]))
+          sum(rate(image_builder_worker_job_duration_seconds_count{type="depsolve", status!="4xx"}[6h]))
         )
       labels:
         latency: "32"
       record: image_builder_worker_depsolve:latency_rate6h
     - expr: |
         1 - (
-          sum(rate(image_builder_composer_worker_job_duration_seconds_bucket{le="32", type="depsolve"}[1d]))
+          sum(rate(image_builder_worker_job_duration_seconds_bucket{le="32", type="depsolve", status!="4xx"}[1d]))
           /
-          sum(rate(image_builder_composer_worker_job_duration_seconds_count{type="depsolve"}[1d]))
+          sum(rate(image_builder_worker_job_duration_seconds_count{type="depsolve", status!="4xx"}[1d]))
         )
       labels:
         latency: "32"
       record: image_builder_worker_depsolve:latency_rate1d
     - expr: |
         1 - (
-          sum(rate(image_builder_composer_worker_job_duration_seconds_bucket{le="32", type="depsolve"}[3d]))
+          sum(rate(image_builder_worker_job_duration_seconds_bucket{le="32", type="depsolve", status!="4xx"}[3d]))
           /
-          sum(rate(image_builder_composer_worker_job_duration_seconds_count{type="depsolve"}[3d]))
+          sum(rate(image_builder_worker_job_duration_seconds_count{type="depsolve", status!="4xx"}[3d]))
         )
       labels:
         latency: "32"
       record: image_builder_worker_depsolve:latency_rate3d
+    - alert: WorkerDepsolveErrors_FastBurn
+      annotations:
+        message: "High burn rate: {{ $value | humanizePercentage }} of depsolve jobs are failing"
+        description: "{{ $value | humanizePercentage }} of depsolve jobs have failed over the past hour"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/image-builder/ImageBuilderInternalErrors.md"
+      expr: |
+        (
+          sum(image_builder_worker_failed_depsolve_jobs:burnrate5m) > (13.44 * (1-0.95))
+          and
+          sum(image_builder_worker_failed_depsolve_jobs:burnrate1h) > (13.44 * (1-0.95))
+        )
+        or
+        (
+          sum(image_builder_worker_failed_depsolve_jobs:burnrate30m) > (5.6 * (1-0.95))
+          and
+          sum(image_builder_worker_failed_depsolve_jobs:burnrate6h) > (5.6 * (1-0.95))
+        )
+      for: 2m
+      labels:
+        severity: high
+        service: image-builder
+        env: prod
+        app_team: image-builder
+    - alert: WorkerDepsolveErrors_SlowBurn
+      annotations:
+        message: "Slow burn rate: {{ $value | humanizePercentage }} of depsolve jobs are failing"
+        description: "{{ $value | humanizePercentage }} of depsolve jobs have failed over the past day"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/image-builder/ImageBuilderInternalErrors.md"
+      expr: |
+        (
+          sum(image_builder_worker_failed_depsolve_jobs:burnrate2h) > (2.8 * (1-0.95))
+          and
+          sum(image_builder_worker_failed_depsolve_jobs:burnrate1d) > (2.8 * (1-0.95))
+        )
+        or
+        (
+          sum(image_builder_worker_failed_depsolve_jobs:burnrate6h) > (1.00 * (1-0.95))
+          and
+          sum(image_builder_worker_failed_depsolve_jobs:burnrate3d) > (1.00 * (1-0.95))
+        )
+      for: 1h
+      labels:
+        severity: info
+        service: image-builder
+        env: prod
+        app_team: image-builder
+    - expr: |
+        sum(rate(image_builder_worker_total_jobs{type="depsolve", status="5xx"}[1d]))
+        /
+        sum(rate(image_builder_worker_total_jobs{type="depsolve"}[1d]))
+      record: image_builder_worker_failed_depsolve_jobs:burnrate1d
+    - expr: |
+        sum(rate(image_builder_worker_total_jobs{type="depsolve", status="5xx"}[1h]))
+        /
+        sum(rate(image_builder_worker_total_jobs{type="depsolve"}[1h]))
+      record: image_builder_worker_failed_depsolve_jobs:burnrate1h
+    - expr: |
+        sum(rate(image_builder_worker_total_jobs{type="depsolve", status="5xx"}[2h]))
+        /
+        sum(rate(image_builder_worker_total_jobs{type="depsolve"}[2h]))
+      record: image_builder_worker_failed_depsolve_jobs:burnrate2h
+    - expr: |
+        sum(rate(image_builder_worker_total_jobs{type="depsolve", status="5xx"}[30m]))
+        /
+        sum(rate(image_builder_worker_total_jobs{type="depsolve"}[30m]))
+      record: image_builder_worker_failed_depsolve_jobs:burnrate30m
+    - expr: |
+        sum(rate(image_builder_worker_total_jobs{type="depsolve", status="5xx"}[3d]))
+        /
+        sum(rate(image_builder_worker_total_jobs{type="depsolve"}[3d]))
+      record: image_builder_worker_failed_depsolve_jobs:burnrate3d
+    - expr: |
+        sum(rate(image_builder_worker_total_jobs{type="depsolve", status="5xx"}[5m]))
+        /
+        sum(rate(image_builder_worker_total_jobs{type="depsolve"}[5m]))
+      record: image_builder_worker_failed_depsolve_jobs:burnrate5m
+    - expr: |
+        sum(rate(image_builder_worker_total_jobs{type="depsolve", status="5xx"}[6h]))
+        /
+        sum(rate(image_builder_worker_total_jobs{type="depsolve"}[6h]))
+      record: image_builder_worker_failed_depsolve_jobs:burnrate6h
+    - alert: WorkerBuildErrors_FastBurn
+      annotations:
+        message: "High burn rate: {{ $value | humanizePercentage }} of build jobs are failing"
+        description: "{{ $value | humanizePercentage }} of build jobs have failed over the past hour"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/image-builder/ImageBuilderInternalErrors.md"
+      expr: |
+        (
+          sum(image_builder_worker_failed_build_jobs:burnrate5m) > (13.44 * (1-0.95))
+          and
+          sum(image_builder_worker_failed_build_jobs:burnrate1h) > (13.44 * (1-0.95))
+        )
+        or
+        (
+          sum(image_builder_worker_failed_build_jobs:burnrate30m) > (5.6 * (1-0.95))
+          and
+          sum(image_builder_worker_failed_build_jobs:burnrate6h) > (5.6 * (1-0.95))
+        )
+      for: 2m
+      labels:
+        severity: high
+        service: image-builder
+        env: prod
+        app_team: image-builder
+    - alert: WorkerBuildErrors_SlowBurn
+      annotations:
+        message: "Slow burn rate: {{ $value | humanizePercentage }} of build jobs are failing"
+        description: "{{ $value | humanizePercentage }} of build jobs have failed over the past day"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/image-builder/ImageBuilderInternalErrors.md"
+      expr: |
+        (
+          sum(image_builder_worker_failed_build_jobs:burnrate2h) > (2.8 * (1-0.95))
+          and
+          sum(image_builder_worker_failed_build_jobs:burnrate1d) > (2.8 * (1-0.95))
+        )
+        or
+        (
+          sum(image_builder_worker_failed_build_jobs:burnrate6h) > (1.00 * (1-0.95))
+          and
+          sum(image_builder_worker_failed_build_jobs:burnrate3d) > (1.00 * (1-0.95))
+        )
+      for: 1h
+      labels:
+        severity: info
+        service: image-builder
+        env: prod
+        app_team: image-builder
+    - expr: |
+        sum(rate(image_builder_worker_total_jobs{type=~"osbuild.*", status="5xx"}[1d]))
+        /
+        sum(rate(image_builder_worker_total_jobs{type=~"osbuild.*"}[1d]))
+      record: image_builder_worker_failed_build_jobs:burnrate1d
+    - expr: |
+        sum(rate(image_builder_worker_total_jobs{type=~"osbuild.*", status="5xx"}[1h]))
+        /
+        sum(rate(image_builder_worker_total_jobs{type=~"osbuild.*"}[1h]))
+      record: image_builder_worker_failed_build_jobs:burnrate1h
+    - expr: |
+        sum(rate(image_builder_worker_total_jobs{type=~"osbuild.*", status="5xx"}[2h]))
+        /
+        sum(rate(image_builder_worker_total_jobs{type=~"osbuild.*"}[2h]))
+      record: image_builder_worker_failed_build_jobs:burnrate2h
+    - expr: |
+        sum(rate(image_builder_worker_total_jobs{type=~"osbuild.*", status="5xx"}[30m]))
+        /
+        sum(rate(image_builder_worker_total_jobs{type=~"osbuild.*"}[30m]))
+      record: image_builder_worker_failed_build_jobs:burnrate30m
+    - expr: |
+        sum(rate(image_builder_worker_total_jobs{type=~"osbuild.*", status="5xx"}[3d]))
+        /
+        sum(rate(image_builder_worker_total_jobs{type=~"osbuild.*"}[3d]))
+      record: image_builder_worker_failed_build_jobs:burnrate3d
+    - expr: |
+        sum(rate(image_builder_worker_total_jobs{type=~"osbuild.*", status="5xx"}[5m]))
+        /
+        sum(rate(image_builder_worker_total_jobs{type=~"osbuild.*"}[5m]))
+      record: image_builder_worker_failed_build_jobs:burnrate5m
+    - expr: |
+        sum(rate(image_builder_worker_total_jobs{type=~"osbuild.*", status="5xx"}[6h]))
+        /
+        sum(rate(image_builder_worker_total_jobs{type=~"osbuild.*"}[6h]))
+      record: image_builder_worker_failed_build_jobs:burnrate6h
