@@ -1,13 +1,13 @@
 <!-- TOC -->
 
 - [Onboard a new OSDv4 cluster to app-interface](#onboard-a-new-osdv4-cluster-to-app-interface)
-  - [Step 1 - Cluster creation and initial access for dedicated-admins](#step-1-cluster-creation-and-initial-access-for-dedicated-admins)
-  - [Step 2 - Bot access and App SRE project template](#step-2-bot-access-and-app-sre-project-template)
-  - [Step 3 - Observability](#step-3-observability)
-  - [Step 4 - Operator Lifecycle Manager](#step-4-operator-lifecycle-manager)
-  - [Step 5 - Container Security Operator](#step-5-container-security-operator)
-  - [Step 6 - Deployment Validation Operator (DVO)](#step-6-deployment-validation-operator-dvo)
-  - [Step 7 - Obtain cluster-admin](#step-7-obtain-cluster-admin)
+  - [Step 1 - Cluster creation and initial access for dedicated-admins](#step-1---cluster-creation-and-initial-access-for-dedicated-admins)
+  - [Step 2 - Bot access and App SRE project template](#step-2---bot-access-and-app-sre-project-template)
+  - [Step 3 - Observability](#step-3---observability)
+  - [Step 4 - Operator Lifecycle Manager](#step-4---operator-lifecycle-manager)
+  - [Step 5 - Container Security Operator](#step-5---container-security-operator)
+  - [Step 6 - Deployment Validation Operator (DVO)](#step-6---deployment-validation-operator-dvo)
+  - [Step 7 - Obtain cluster-admin](#step-7---obtain-cluster-admin)
 - [Additional configurations](#additional-configurations)
   - [Selecting a Machine CIDR for VPC peerings](#selecting-a-machine-cidr-for-vpc-peerings)
   - [VPC peering with app-interface](#vpc-peering-with-app-interface)
@@ -127,6 +127,12 @@ This step should be performed in a single merge request.
     - awsGroup:
         $ref: /aws/<aws account name>/groups/App-SRE-admin.yml
       accessLevel: network-mgmt
+
+    awsInfrastructureManagementAccounts:
+    - account:
+        $ref: /aws/<aws account name>/account.yml
+      accessLevel: network-mgmt
+      default: true
     ```
 
     * Note: Cluster name should follow naming convention
