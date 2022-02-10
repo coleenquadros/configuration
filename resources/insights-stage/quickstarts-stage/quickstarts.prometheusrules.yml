@@ -25,7 +25,7 @@ spec:
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/quickstarts-stage/deployments"
           message: "Metrics for quickstarts in STAGE are absent"
       - alert: App-quickstarts-service-In-quickstarts-stage-high-error-rate
-        expr: 1-(quickstarts_responses{code="500"} / quickstarts_responses) < .90
+        expr: sum(increase(quickstarts_responses{code!~"2.*"}[24h])) / sum(increase(quickstarts_responses[24h])) < .90
         for: 5m
         labels:
           severity: high
@@ -38,9 +38,7 @@ spec:
           message: "Quickstarts service non-200 responses has exceeded 10% in stage"
       - alert: App-quickstarts-service-In-quickstarts-stage-high-latency
         expr: |
-          sum(api_3scale_gateway_api_time_bucket{exported_service="quickstarts",le="+2000"})
-          /
-          sum(api_3scale_gateway_api_time_bucket{exported_service="quickstarts"}) < .90
+          sum(rate(api_3scale_gateway_api_time_bucket{le="2000.0", exported_service="quickstarts"}[24h])) / sum(rate(api_3scale_gateway_api_time_bucket{le="+Inf", exported_service="quickstarts"}[24h])) < .90
         for: 5m
         labels:
           severity: high
