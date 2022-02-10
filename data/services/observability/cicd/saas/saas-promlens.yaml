@@ -13,18 +13,10 @@ app:
 pipelinesProvider:
   $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
 
-deployResources:
-  requests:
-    cpu: "1"
-    memory: 1400Mi
-  limits:
-    cpu: "1"
-    memory: 1400Mi
-
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
-  channel: sd-app-sre-info
+  channel: sd-srep-info
 
 managedResourceTypes:
 - Service
@@ -36,7 +28,8 @@ managedResourceTypes:
 - Route
 
 imagePatterns:
-- quay.io/app-sre
+- quay.io/app-sre/openshift-oauth-proxy
+- quay.io/app-sre/promlens
 
 authentication:
   # required for private images
@@ -57,15 +50,4 @@ resourceTemplates:
       IMAGE_TAG: v1.1.0
       OAUTH_PROXY_IMAGE: quay.io/app-sre/openshift-oauth-proxy
       OAUTH_PROXY_IMAGE_TAG: v1.1.0
-      NAMESPACE: app-sre-observability-stage
       GRAFANA_URL: https://grafana.stage.devshift.net
-  - namespace:
-      $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: dd78a8ce9670f6919a45b05f8fcc853f53f8cb57
-    parameters:
-      IMAGE: quay.io/app-sre/promlens
-      IMAGE_TAG: v1.1.0
-      OAUTH_PROXY_IMAGE: quay.io/app-sre/openshift-oauth-proxy
-      OAUTH_PROXY_IMAGE_TAG: v1.1.0
-      NAMESPACE: app-sre-observability-production
-      GRAFANA_URL: https://grafana.app-sre.devshift.net
