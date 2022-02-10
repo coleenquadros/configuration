@@ -1,0 +1,39 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+labels:
+  service: cna
+
+name: ci-int-cna-jobs
+
+description: 'CNA Jobs'
+
+app:
+  $ref: /services/cna/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+type: jobs
+
+config:
+- project:
+    name: cna
+    label: cna
+    node: rhel8
+    gl_group: service
+    gl_project: cna-management
+    pr_check_script_path: './pr_test.sh'
+    quay_org: app-sre
+    jobs:
+    - 'gl-build-master':
+        display_name: CNA build main
+        branch: main
+    - 'gl-pr-check':
+        display_name: CNA pr-check
+          #    - 'gl-timed':
+          #        branch: main
+          #        display_name: CNA end-to-end test
+          #        cron_expression: 'H/15 * * * *'
+          #        ci_cmd: './end2end-curl.sh'
+          #        slack_channel_notification: sd-ops-services-dev
