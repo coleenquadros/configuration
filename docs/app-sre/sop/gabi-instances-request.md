@@ -83,6 +83,7 @@ Tenant need to add new target namespaces with the following content:
       USERS_CONFIGMAP_NAME: <as the same as gabi instance name>
 ```
 
+Additionally, ensure a gabi-cluster-resource namespace exists for the cluster(s) your namespace(s) you're deploying in [this directory](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/gabi/namespaces). If such a file is missing for a cluster you're deploying Gabi to, please copy one of the existing file (e.g. [this](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/gabi/namespaces/gabi-app-sre-stage-01-cluster-scope.yml)), and rename the file and replace instances of the cluster-name in the file content.
 
 ## Access Gabi Instances
 
