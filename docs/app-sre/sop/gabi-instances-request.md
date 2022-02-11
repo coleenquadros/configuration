@@ -59,6 +59,8 @@ The maximum expiration date of gabi instance shall not exceed 90 days form the d
 
 ## Deploy Gabi Instances
 
+### Step 1: Splunk Access
+
 Gabi uses splunk for audit logs, so it needs a [splunk-creds](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-sre/shared-resources/splunk-creds.yml). 
 
 Tenant need to add it to target namespaces as a shared resource with the following content:
@@ -68,9 +70,11 @@ sharedResources:
 - $ref: /services/app-sre/shared-resources/splunk-creds.yml
 ```
 
+### Step 2: SaaS File
+
 Gabi will be deployed via [saas file](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/gabi/cicd/saas-gabi.yaml).
 
-Tenant need to add new target namespaces with the following content:
+Tenant must add new target namespaces with the following content:
 
 ```yaml
   - namespace:
@@ -83,7 +87,44 @@ Tenant need to add new target namespaces with the following content:
       USERS_CONFIGMAP_NAME: <as the same as gabi instance name>
 ```
 
-Additionally, ensure a gabi-cluster-resource namespace exists for the cluster(s) your namespace(s) you're deploying in [this directory](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/gabi/namespaces). If such a file is missing for a cluster you're deploying Gabi to, please copy one of the existing file (e.g. [this](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/gabi/namespaces/gabi-app-sre-stage-01-cluster-scope.yml)), and rename the file and replace instances of the cluster-name in the file content.
+### Step 3: Cluster-Scoped Gabi Namespace
+
+Additionally, ensure a gabi-cluster-resource namespace exists for the cluster(s) your namespace(s) you're deploying in [this directory](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/gabi/namespaces). 
+
+If such a file already exists, you can move to the next step. Otherwise, if such a file is missing for any cluster you're deploying Gabi to, please create it! 
+
+To create such a file, copy one of the existing file (e.g. [this](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/gabi/namespaces/gabi-app-sre-stage-01-cluster-scope.yml)), and rename the file and replace instances of the cluster-name in the file content.
+
+### Step 4: Cluster-Scoped Resources
+
+Navigate [here](https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/resources/app-sre/gabi).
+
+Check that files exist for each cluster you are deploying gabi to.
+
+If a file is missing for your cluster, please create it! You can copy+paste the following content into it:
+
+```
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: gabi-openshift-oauth-delegate
+subjects:
+  - kind: ServiceAccount
+    name: gabi
+    namespace: <YOUR NAMESPACE HERE>
+roleRef:
+  kind: ClusterRole
+  name: gabi-openshift-oauth-delegate
+  apiGroup: rbac.authorization.k8s.io
+```
+
+If files for your cluster(s) already exist, add a new list item to the `subjects:` array with the following content:
+```
+  - kind: ServiceAccount
+    name: gabi
+    namespace: <YOUR NAMESPACE HERE>
+```
 
 ## Access Gabi Instances
 
