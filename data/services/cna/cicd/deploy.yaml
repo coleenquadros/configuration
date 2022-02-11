@@ -1,0 +1,61 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: cna
+
+name: saas-cna # usually starts with `saas-` and contains the name of the deployed app/service/component
+description: SaaS tracking file for CNA management
+
+app:
+  $ref: /services/cna/app.yml
+
+pipelinesProvider:
+  $ref: /services/cna/pipelines/tekton.cna-pipelines.appsrep05ue1.yaml
+
+slack: # configure where to send notifications of success/failure of deployments
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-ops-services-dev
+
+managedResourceTypes:
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/app-sre/cna
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+resourceTemplates: # a list of configurations of OpenShift templates to deploy
+- name: service-template.yaml
+  path: /templates/service-template.yaml
+  url: https://gitlab.cee.redhat.com/service/cna-management
+  parameters:
+    OCM_BASE_URL: https://api.stage.openshift.com
+    OCM_ENV: production
+    IMAGE_REGISTRY: quay.io
+    IMAGE_REPOSITORY: app-sre/cna
+    SENTRY_ENABLE: false
+    SENTRY_PROJECT: 35
+    SENTRY_URL: https://sentry.stage.devshift.net
+  targets:
+  - namespace:
+      $ref: /services/cna/namespaces/stage.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-cna-gl-build-main
+        #  - namespace:
+        #      $ref: /services/cna/namespaces/production.yml
+        #    ref: FIXME
+        #    parameters:
+        #      DATABASE_SECRET_NAME: cna-production-rds
+        #      OCM_BASE_URL: https://api.openshift.com
+        #      SENTRY_PROJECT: FIXME
+        #      SENTRY_URL: https://sentry.devshift.net
+        #      REPLICAS: 3
