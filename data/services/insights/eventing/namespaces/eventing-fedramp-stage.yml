@@ -4,46 +4,43 @@ $schema: /openshift/namespace-1.yml
 labels:
   service: eventing
 
-name: eventing-stage
-description: Insights eventing-stage on the Stage cluster under e2e-deploy/ocdeployer management
+name: eventing-fedramp-stage
+description: Insights Eventing for FedRAMP on stage
 
 cluster:
-  $ref: /openshift/crcs02ue1/cluster.yml
+  $ref: /openshift/insights/crcgovs02ue1/cluster.yml
 
 limitRanges:
   $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
 
-#quota:
-#  $ref: /services/insights/eventing/eventing-quota.yml
+quota:
+  $ref: /services/insights/default-quota.yml
 
 app:
   $ref: /services/insights/eventing/app.yml
 
 environment:
-  $ref: /products/insights/environments/stage.yml
+  $ref: /products/insights/environments/fedramp-stage.yml
 
 #networkPoliciesAllow:
-#- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs02ue1.yml
-#- $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+#- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcgovs02ue1.yml
+#- $ref: /services/insights/gateway/namespaces/3scale-fedramp-stage.yml
 
 managedRoles: true
 
-managedResourceTypes:
-- ServiceAccount
+sharedResources:
+- $ref: /services/insights/shared-resources/fedramp-stage.yml
 
 openshiftResources:
 - provider: vault-secret
   path: insights/secrets/global/rh-registry-pull
   version: 2
   type: kubernetes.io/dockerconfigjson
-- provider: resource
-  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
 - provider: vault-secret
   path: insights/quay/quay.io
   version: 3
   type: kubernetes.io/dockerconfigjson
   name: quay-cloudservices-pull
-
 
 #managedTerraformResources: true
 
