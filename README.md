@@ -2127,7 +2127,7 @@ External reference:
 - [Jenkins Job Builder](https://docs.openstack.org/infra/jenkins-job-builder/)
 
 Notes:
-- To consume a secret from Vault, a KV v1 secret engine must be used.
+- If the secret is from a Vault KV V2 secret engine (versioned), the secret definition must include `engine-version: 2`. [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/resources/jenkins/mt-sre/secrets.yaml#L4)
 
 
 ### Delete AWS IAM access keys via App-Interface
