@@ -17,8 +17,6 @@ To fulfil this, please focus on the following when creating the description for 
   * Do not focus on the solution you might envision when creating the description, as you might miss some details.  
   * Add Acceptence Criterias, so the Assigne can make sure, to fulfill the ticket. 
 
-### ticket template
-<create and then link a template in jira-cli/jira-sre/templates>
 
 Once created, if there's any sense of urgency, the author might call out the ticket in one of our channels: #sd-app-sre-teamchat, mail to sd-app-sre or within their stream.
 
@@ -37,3 +35,10 @@ Goal is to highlight which of the groomed tickets are the next ones to be picked
 This assessment is performed on a weekly basis by Steam leads and the Team lead. In case anything urgent pops up, any stream lead is empowered to update the priority of a ticket.
 
 If an urgent ticket is becoming at risk, it will be assigned to a stream. Chosen Stream lead becomes responsible for the ticket (as they are for any other project work)
+
+## ticket template
+
+The template for Jira stories is managed by the Jira Admins. To update the template send an e-mail to: [rh-issues@redhat.com](mailto:rh-issues@redhat.com) with following information:
+  * Issue type to set template to
+  * Jira project
+  * Complete template (copy+paste) existing template in.
