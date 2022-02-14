@@ -434,7 +434,7 @@ permissions: []
 access:
 - cluster:
     $ref: /openshift/telemeter-prod-01/cluster.yml
-  group: observatorium-dev
+  group: observatorium-allow-port-forward-group
 ```
 <br>
 
