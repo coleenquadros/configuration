@@ -161,11 +161,9 @@ Update the `automationToken` field to point to the vault secret created earlier 
 
 Access in the AWS account is controlled by the groups and policies definitions held in the `groups` and `policies` directories for that AWS account.
 
-Create the group:
+Create the group under `aws/<cluster>/groups/App-SRE-admin.yml`:
 
 ```yaml
-aws/<cluster>/groups/APP-SRE-admin.yml
-
 ---
 $schema: /aws/group-1.yml
 
@@ -181,12 +179,9 @@ policies:
 - AdministratorAccess
 ```
 
-Create the policy:
+Create the policy under `aws/<account>/policies/ManageOwnMFA.yml`:
 
 ```yaml
-aws/<cluster>/groups/APP-SRE-admin.yml
-
----
 ---
 $schema: /aws/policy-1.yml
 
