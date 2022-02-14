@@ -59,12 +59,19 @@ resourceTemplates:
     parameters:
       REPLICAS: 1
       IMAGE_TAG: '8.2.7'
+      DASHBOARD_DISCOVERY_IMAGE_TAG: '1.15.4'
+    promotion:
+      publish:
+      - grafana-stage-deploy-success-channel
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
     ref: dd78a8ce9670f6919a45b05f8fcc853f53f8cb57
     parameters:
       REPLICAS: 3
       IMAGE_TAG: '8.2.7'
+    promotion:
+      publish:
+      - grafana-production-deploy-success-channel
 # tenant dashboards
 - name: telemeter-dashboards
   url: https://github.com/rhobs/configuration
@@ -73,10 +80,10 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-stage.yml
-    ref: aeb5f8b1b374827a7dc05ef4c07b49755fde74e9
+    ref: cc534fa1d0c7f48ec47ab025bfc381f1ad287b68
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: aeb5f8b1b374827a7dc05ef4c07b49755fde74e9
+    ref: cc534fa1d0c7f48ec47ab025bfc381f1ad287b68
 - name: observatorium-logs-dashboards
   url: https://github.com/rhobs/configuration
   path: /resources/observability/grafana/observatorium-logs/grafana-dashboards-template.yaml
@@ -150,7 +157,7 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: c3da354f0f0e2b95cbda8fc26bf61336bb2f1374
+    ref: c6493a1c2f7aff2bdcd991b0a639f7ab9fc507c5
 - name: automation-analytics-dashboards
   url: https://github.com/RedHatInsights/tower-analytics-saas-templates
   path: /dashboards
@@ -161,7 +168,7 @@ resourceTemplates:
     ref: main
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: d11d1de933b1f989385b94de6129fdae8abe3d6d
+    ref: fbcdcae834663995769c5d6537b1eda5a0c0e88f
 - name: receptor-dashboards
   url: https://github.com/RedHatInsights/platform-receptor-controller
   path: /dashboards
@@ -261,17 +268,6 @@ resourceTemplates:
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
     ref: fcc26621115c2c2a53d9d7141d18a7ac650ed789
-- name: payload-tracker-dashboards
-  url: https://github.com/RedHatInsights/payload-tracker
-  path: /dashboards
-  provider: directory
-  targets:
-  - namespace:
-      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
-    ref: master
-  - namespace:
-      $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: 55b518685d70b7d1cfdf24d7476b2aedefdc9cd6
 - name: insights-storage-broker-dashboards
   url: https://github.com/RedHatInsights/insights-storage-broker
   path: /dashboards
@@ -294,6 +290,17 @@ resourceTemplates:
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
     ref: bb8f9738410976ffd9b706c7b906becccb198bf9
+- name: insights-frontend-operator-dashboards
+  url: https://github.com/RedHatInsights/frontend-operator
+  path: /dashboards
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: main
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: af2c2dd3a09ac66953c6435311c5426241afa885
 - name: insights-advisor-service-dashboards
   url: https://gitlab.cee.redhat.com/insights-platform/advisor-backend
   path: /service/dashboards
@@ -403,7 +410,7 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: 2f1461aae1a6f61f39f92dfe9349b47e6dcd6492
+    ref: e061b8747a36d17d7b314658868e333bce3ef718
 - name: assisted-installer-dashboards
   url: https://github.com/openshift/assisted-service
   path: /dashboards
@@ -415,17 +422,6 @@ resourceTemplates:
     - namespace:
         $ref: /services/observability/namespaces/app-sre-observability-production.yml
       ref: 47726cdc73dd0bbeb45f772990829b6c901955ac
-- name: playbook-dispatcher-dashboards
-  url: https://github.com/RedHatInsights/playbook-dispatcher
-  path: /dashboard
-  provider: directory
-  targets:
-  - namespace:
-      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
-    ref: master
-  - namespace:
-      $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: 5eff76d10617f27f3b698f5e102957ca38553975
 - name: rbac-dashboards
   url: https://github.com/RedHatInsights/insights-rbac
   path: /dashboards
@@ -436,7 +432,7 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: 0bc86acf457c05836c830781b22c57a0c708765c
+    ref: d3543018e408f739b8f6908d9adfdc9f3fda5234
 - name: entitlements-dashboards
   url: https://github.com/RedHatInsights/entitlements-api-go
   path: /dashboards
@@ -447,7 +443,7 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: 69daea6200ed483be58793839ad94f01a430c848
+    ref: aeb9d18e696da8d85dfb68ee439d095b1edf2a65
 - name: insights-policies
   url: https://github.com/RedHatInsights/policies-ui-backend
   path: /.rhcicd/grafana
@@ -459,17 +455,6 @@ resourceTemplates:
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
     ref: 52e0951176525d66a14fb37d7b05a2b6f4c7eb57
-- name: insights-notifications
-  url: https://github.com/RedHatInsights/notifications-backend
-  path: /.rhcicd/grafana
-  provider: directory
-  targets:
-  - namespace:
-      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
-    ref: master
-  - namespace:
-      $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: 079a2835f8921d814ce7bc311fbd5475adb29ac7
 - name: insights-subscription-watch
   url: https://github.com/RedHatInsights/rhsm-subscriptions
   path: /dashboards
@@ -491,7 +476,7 @@ resourceTemplates:
     ref: main
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: 2d68df66d7016f5c15b88a86b5aa0df649609c1f
+    ref: 975e5c1405f68f92465bf456cb9c629aee304816
 - name: image-builder-composer-dashboards
   url: https://github.com/osbuild/osbuild-composer
   path: /templates/dashboards
@@ -502,7 +487,7 @@ resourceTemplates:
     ref: main
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: f19792e041e540452dc035152be173452d2d4031
+    ref: e8d7519c7d8771547d187582450577108d5cd068
 - name: managed-kafka-dashboards
   url: https://gitlab.cee.redhat.com/mk-ci-cd/mk-observability
   path: /grafana/saas-dashboards
@@ -513,7 +498,7 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: 59aeeec245e7767b75c9d34dc5eace6b1afa6932
+    ref: 8d6880663d01336e15f0d397e984663428a1a18c
 - name: config-manager-dashboards
   url: https://github.com/RedHatInsights/config-manager
   path: /dashboards

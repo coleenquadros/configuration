@@ -21,6 +21,7 @@ slack: # configure where to send notifications of success/failure of deployments
 managedResourceTypes:
 - Deployment
 - Service
+- ConfigMap
 
 imagePatterns:
 - quay.io/app-sre/web-rca
@@ -55,13 +56,13 @@ resourceTemplates: # a list of configurations of OpenShift templates to deploy
       name: service-web-rca-gl-build-main
   - namespace:
       $ref: /services/web-rca/namespaces/production.yml
-    ref: 6567c2519e048099c4793c962c6b6b689693df93
+    ref: b3b568de786ca46190e5a7cd32c3f88bd11f5f52
     parameters:
       DATABASE_SECRET_NAME: web-rca-production-rds
       OCM_BASE_URL: https://api.openshift.com
       SENTRY_PROJECT: 1017
       SENTRY_URL: https://sentry.devshift.net
-      REPLICAS: 2
+      REPLICAS: 3
 - name: service-template-ui
   path: /templates/service-template.yaml
   url: https://gitlab.cee.redhat.com/service/web-rca-ui
@@ -82,3 +83,20 @@ resourceTemplates: # a list of configurations of OpenShift templates to deploy
     ref: 4674adcf2e257549a9aea8fae9ff90b21c6a808c
     parameters:
       OCM_BASE_URL: https://api.openshift.com
+- name: web-rca-dashboards
+  url: https://gitlab.cee.redhat.com/service/web-rca
+  path: /dashboards
+  provider: directory
+  targets:
+    - namespace:
+        $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+      ref: main
+      upstream:
+        instance:
+          $ref: /dependencies/ci-int/ci-int.yml
+        name: service-web-rca-gl-build-main
+    - namespace:
+        $ref: /services/observability/namespaces/app-sre-observability-production.yml
+      ref: b7ef1eb1d1b6eaf4335d753214346b3ccbd7d43f
+
+

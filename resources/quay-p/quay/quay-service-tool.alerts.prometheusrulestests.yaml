@@ -1,0 +1,26 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+  - /quay-p/quay/quay-service-tool.alerts.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+  - interval: 1m
+    input_series:
+      - series: 'haproxy_backend_http_responses_total{exported_namespace="quay",route="quayio-service-tool-route",code="5xx"}'
+        values: '0+6x20' # 6 http 500s per min
+      - series: 'haproxy_backend_http_responses_total{exported_namespace="quay",route="quayio-service-tool-route",code="2xx"}'
+        values: '0+10x20'
+
+    alert_rule_test:
+      - eval_time: 31m
+        alertname: 5xx-on-Quayio-Service-Tool
+        exp_alerts:
+          - exp_labels:
+              service: quay
+              severity: high
+            exp_annotations:
+              message: "Quayio Service Tool is reporting more than 50% error rate"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/sop/service-tool-5xx-errors.md"

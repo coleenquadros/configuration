@@ -17,7 +17,7 @@ In order to add a new AWS account to app-interface, you need a few things up fro
 1. terraform CLI version matching the version used by Qontract-Reconcile (check `TERRAFORM_VERSION` [here](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/cli.py)). You can download Terraform from https://www.terraform.io/downloads.html.
 
 Accounts can be created by creating a ticket in the [OHSS Jira project](https://issues.redhat.com/projects/OHSS/).
-
+In a ticket specify that level of support need to be upgraded to Enterprise level. Detailed SOP [here](https://github.com/openshift/ops-sop/blob/master/v4/knowledge_base/aws-developer-accounts.md#requesting-an-account---outside-srep)
 
 ## Encrypted Account Details
 
@@ -29,7 +29,7 @@ The account details will include the following information:
 * access key id
 * secret access key
 
-After decrypting the message, you'll see output similar to the following: 
+After decrypting the message, you'll see output similar to the following:
 
 ```
 # staging
@@ -58,7 +58,7 @@ Follow the [Terraform init via terraform](docs/aws/terraform) instructions to se
 
 ## Capture `terraform` user's credentials
 
-In the same directory as the terraform bootstrap process, run 
+In the same directory as the terraform bootstrap process, run
 
 ```
 terraform show
@@ -78,7 +78,7 @@ Using the aws-cli profile setup in the bootstrap terraform step, run the followi
 AWS_PROFILE=<profile_name_here> aws iam update-user --user-name tpate --new-user-name temp-tpate
 ```
 
-This will retain the root administrator account until no longer needed, and avoid naming collisions that will disrupt reconciliation. 
+This will retain the root administrator account until no longer needed, and avoid naming collisions that will disrupt reconciliation.
 
 ## Create a vault secret with AWS credential information
 
@@ -161,11 +161,9 @@ Update the `automationToken` field to point to the vault secret created earlier 
 
 Access in the AWS account is controlled by the groups and policies definitions held in the `groups` and `policies` directories for that AWS account.
 
-Create the group:
+Create the group under `aws/<cluster>/groups/App-SRE-admin.yml`:
 
 ```yaml
-aws/<cluster>/groups/APP-SRE-admin.yml
-
 ---
 $schema: /aws/group-1.yml
 
@@ -181,10 +179,9 @@ policies:
 - AdministratorAccess
 ```
 
-Create the policy:
-```yaml
-aws/<cluster>/policies/BillingViewAccess.yml
+Create the policy under `aws/<account>/policies/ManageOwnMFA.yml`:
 
+```yaml
 ---
 $schema: /aws/policy-1.yml
 
@@ -193,26 +190,63 @@ labels: {}
 account:
   $ref: /aws/<aws_account>/account.yml
 
-name: BillingViewAccess
+name: manage-own-mfa
 description: |
-    Allows a user to view AWS billing related data
+    Allows a user to manage their own access MFA devices.
+    ${aws:username} will be replaced with the actual user name
 
 policy:
-  {
-    "Version": "2012-10-17",
-    "Statement": [
-      {
-        "Action": [
-          "aws-portal:ViewAccount",
-          "aws-portal:ViewBilling",
-          "aws-portal:ViewPaymentMethods",
-          "aws-portal:ViewUsage"
-        ],
-        "Effect": "Allow",
-        "Resource": "*"
-      }
-    ]
-  }
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Sid": "AllowViewAccountInfo",
+                "Effect": "Allow",
+                "Action": "iam:ListVirtualMFADevices",
+                "Resource": "*"
+            },
+            {
+                "Sid": "AllowManageOwnVirtualMFADevice",
+                "Effect": "Allow",
+                "Action": [
+                    "iam:CreateVirtualMFADevice",
+                    "iam:DeleteVirtualMFADevice"
+                ],
+                "Resource": "arn:aws:iam::*:mfa/${aws:username}"
+            },
+            {
+                "Sid": "AllowManageOwnUserMFA",
+                "Effect": "Allow",
+                "Action": [
+                    "iam:DeactivateMFADevice",
+                    "iam:EnableMFADevice",
+                    "iam:GetUser",
+                    "iam:ListMFADevices",
+                    "iam:ResyncMFADevice"
+                ],
+                "Resource": "arn:aws:iam::*:user/${aws:username}"
+            },
+            {
+                "Sid": "DenyAllExceptListedIfNoMFA",
+                "Effect": "Deny",
+                "NotAction": [
+                    "iam:CreateVirtualMFADevice",
+                    "iam:ChangePassword",
+                    "iam:EnableMFADevice",
+                    "iam:GetUser",
+                    "iam:ListMFADevices",
+                    "iam:ListVirtualMFADevices",
+                    "iam:ResyncMFADevice",
+                    "sts:GetSessionToken"
+                ],
+                "Resource": "*",
+                "Condition": {
+                    "BoolIfExists": {"aws:MultiFactorAuthPresent": "false"}
+                }
+            }
+        ]
+    }
+
 ```
 
 ### Add AppSRE users

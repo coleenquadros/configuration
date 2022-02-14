@@ -21,3 +21,15 @@ In order to define Continuous Testing pipelines in app-interface:
     * Note: The usage of `upstream` to link post-deployment tests to a deployment job should be updated to use automated promotions. For more information: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/19968
 
 A complete example for github-mirror can be found [here](/data/services/github-mirror/cicd/test.yaml).
+
+### Define post-deployment testing for resources behind the Red Hat VPN
+
+There may be use cases where tests need to access resources behind the Red Hat VPN, such as the OCM UI.
+
+In order to run tests behind the VPN:
+
+1. Create a namespace on the `appsres03ue1` cluster. Call the namespace the same as the app's stage namespace, including `-tests`.
+    * Example: if the stage namespace is called `github-mirror-stage`, the internal tests namespace should be called `github-mirror-stage-tests`.
+1. Follow the same process as mentioned above to create a SaaS file and automated promotions.
+    * Note: the `pipelinesProvider` must be a reference to a provider behind the VPN as well (pipelines namespace should be in the `appsrep05ue1` cluster).
+1. It is recommended to split the OpenShift template between tests that will run within the service namespace and tests that will run in the internal tests namespace.

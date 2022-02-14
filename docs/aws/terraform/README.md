@@ -8,9 +8,24 @@ The bootstrapped terraform state will use a local backend for storage, meaning t
 
 ## Prerequisites
 
-1. aws-cli installed locally
-1. terraform CLI version matching the version used by Qontract-Reconcile (check `TERRAFORM_VERSION` [here](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/cli.py)). You can download Terraform from https://www.terraform.io/downloads.html.
-1. decrypted AWS account access credentials + details
+1. aws-cli installed locally (details [here](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html))
+2. terraform CLI version matching the version used by Qontract-Reconcile (check `TERRAFORM_VERSION` [here](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/cli.py)). You can download Terraform from https://www.terraform.io/downloads.html.
+<details>
+<summary>MacOS Example</summary>
+
+  ```shell
+    curl https://releases.hashicorp.com/terraform/0.13.7/terraform_0.13.7_darwin_amd64.zip -o terraform_0.13.7_darwin_amd64.zip
+    # more binaries can be found here https://releases.hashicorp.com/terraform/
+    unzip terraform_0.13.7_darwin_amd64.zip
+    chmod +x terraform
+    sudo mv terraform /usr/local/bin/
+    # Test it
+    terraform --version
+  ```
+
+</details>
+
+3. decrypted AWS account access credentials + details
 
 ## Walkthrough
 
@@ -34,7 +49,7 @@ After saving the changes above, let's apply these changes to the live AWS accoun
 
 * `terraform init`
 * `terraform plan`: the output of this step should show a new user, `terraform`, created in the account, as well as new S3 buckets
-* `terraform apply`: this will reconcile the expected state (as shown in plan) with reality. The result of this operation is a new local state file, `terraform.tfstate`, which contains all details and secrets related to the creation of the new user and S3 bucket. 
+* `terraform apply`: this will reconcile the expected state (as shown in plan) with reality. The result of this operation is a new local state file, `terraform.tfstate`, which contains all details and secrets related to the creation of the new user and S3 bucket.
 
 ### Capture the terraform user's AWS keys for later use
 

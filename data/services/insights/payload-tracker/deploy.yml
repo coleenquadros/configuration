@@ -20,6 +20,7 @@ slack:
   channel: team-clouddot-info
 
 managedResourceTypes:
+- ConfigMap
 - ClowdApp
 - CronJob
 - Deployment
@@ -44,38 +45,20 @@ parameters:
   OAUTH_IMAGE_TAG: 4.4.0
 
 resourceTemplates:
-- name: payload-tracker-go-dev
-  path: /deployments/deploy.yml
-  url: https://github.com/RedHatInsights/payload-tracker-go
-  parameters:
-    CPU_LIMIT: '1'
-    MEMORY_LIMIT: 1Gi
-  targets:
-  - namespace:
-      $ref: /services/insights/payload-tracker/namespaces/dev-payload-tracker-ci.yml
-    ref: 6b8151f18cabe9ff4a00a5dae027ba7bd4a01021
-    parameters:
-      IMAGE: 6b8151f
-      MIN_REPLICAS: 1
-  - namespace:
-      $ref: /services/insights/payload-tracker/namespaces/dev-payload-tracker-qa.yml
-    ref: 6b8151f18cabe9ff4a00a5dae027ba7bd4a01021
-    parameters:
-      IMAGE: 6b8151f
-      MIN_REPLICAS: 1
 - name: payload-tracker-go
   path: /deployments/clowdapp.yml
   url: https://github.com/RedHatInsights/payload-tracker-go
   parameters:
     CPU_LIMIT: '1'
     MEMORY_LIMIT: 1Gi
+    CLEANER_SUSPEND: 'false'
   targets:
   - namespace:
       $ref: /services/insights/payload-tracker/namespaces/payload-tracker-prod.yml
-    ref: e0de65b7903ba8a6c86930f13000cefad407bac5
+    ref: 7befc9d69f425fad14b6bb0747ea3a78a58bdf90 
     parameters:
-      IMAGE_TAG: e0de65b
       API_REPLICAS: 3
+      CONSUMER_REPLICAS: 8
   - namespace:
       $ref: /services/insights/payload-tracker/namespaces/stage-payload-tracker-stage.yml
     ref: master 
@@ -100,46 +83,7 @@ resourceTemplates:
     ref: internal
     parameters:
       API_REPLICAS: 1
-- name: payload-tracker
-  path: /deploy/deploy.yml
-  url: https://github.com/RedHatInsights/payload-tracker
-  parameters:
-    CPU_LIMIT: '1'
-    MEMORY_LIMIT: 1Gi
-    UPDATE_TIMEOUT: 7200
-  targets:
-  - namespace:
-      $ref: /services/insights/payload-tracker/namespaces/stage-payload-tracker-stage.yml
-    ref: master
-    upstream:
-      instance:
-        $ref: /dependencies/ci-int/ci-int.yml
-      name: RedHatInsights-payload-tracker-gh-build-master
-    parameters:
-      IMAGE_TAG: 87db306
-      USE_REDIS: 'true'
-      MAX_REPLICAS: '0'
-      MIN_REPLICAS: '0'
-  - namespace:
-      $ref: /services/insights/payload-tracker/namespaces/payload-tracker-fedramp-stage.yml
-    ref: b43322e99b89b0bb2e1a4c026aebebd4827067a9
-    delete: true
-    parameters:
-      IMAGE_TAG: 87db306
-      USE_REDIS: 'true'
-      KAFKA_SECURITY_PROTOCOL: 'SASL_SSL'
-      KAFKA_SASL_MECHANISM: 'SCRAM-SHA-512'
-  - namespace:
-      $ref: /services/insights/payload-tracker/namespaces/payload-tracker-prod.yml
-    ref: 953bfbcc4449fc885fe7b8d9caa7d25add7b5063
-    parameters:
-      IMAGE_TAG: 7b3597d
-      USE_REDIS: 'false'
-      MAX_REPLICAS: '8'
-      MIN_REPLICAS: '8'
-      MAXIMUM_RUNNING_TASKS: '500'
-      SECONDS_TO_LIVE: '3600'
-      RETENTION_DAYS: '5'
+      CONSUMER_REPLICAS: 1
 - name: payload-tracker-frontend
   path: /deployment/deploy.yml
   url: https://github.com/RedHatInsights/payload-tracker-frontend
@@ -159,3 +103,11 @@ resourceTemplates:
     ref: 6a09cc16790928a33702a59599083df54d08359d 
     parameters:
       IMAGE_TAG: 6a09cc1
+- name: payload-tracker-dashboards
+  url: https://github.com/RedHatInsights/payload-tracker-go
+  path: /dashboards
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: master

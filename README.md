@@ -29,6 +29,8 @@ this repository.
   - [Entities and relations](#entities-and-relations)
   - [Howto](#howto)
     - [Add or modify a user (`/access/user-1.yml`)](#add-or-modify-a-user-accessuser-1yml)
+      - [Enabling Temporary Roles in App-Interface](#enabling-temporary-roles-in-app-interface)
+        - [Example on how it will look in a role file](#example-on-how-it-will-look-in-a-role-file)
       - [User off-boarding / revalidation loop](#user-off-boarding--revalidation-loop)
     - [Get notified of events involving a service, or its dependencies](#get-notified-of-events-involving-a-service-or-its-dependencies)
     - [Define an escalation policy for a service](#define-an-escalation-policy-for-a-service)
@@ -60,6 +62,8 @@ this repository.
       - [Manage vault policies (`/vault-config/policy-1.yml`)](#manage-vault-policies-vault-configpolicy-1yml)
       - [Manage vault roles (`/vault-config/role-1.yml`)](#manage-vault-roles-vault-configrole-1yml)
       - [Manage vault secret-engines (`/vault-config/secret-engine-1.yml`)](#manage-vault-secret-engines-vault-configsecret-engine-1yml)
+        - [KV Secrets engine Example](#kv-secrets-engine-example)
+        - [TOTP Secrets engine Example](#totp-secrets-engine-example)
     - [Manage DNS Zones via App-Interface (`/aws/dns-zone-1.yml`) using Terraform](#manage-dns-zones-via-app-interface-awsdns-zone-1yml-using-terraform)
     - [Manage Dyn DNS Traffic Director via App-Interface (`/dependencies/dyn-traffic-director-1.yml`)](#manage-dyn-dns-traffic-director-via-app-interface-dependenciesdyn-traffic-director-1yml)
     - [Manage AWS access via App-Interface (`/aws/group-1.yml`) using Terraform](#manage-aws-access-via-app-interface-awsgroup-1yml-using-terraform)
@@ -98,6 +102,7 @@ this repository.
     - [Manage Jenkins jobs configurations using jenkins-jobs](#manage-jenkins-jobs-configurations-using-jenkins-jobs)
     - [Delete AWS IAM access keys via App-Interface](#delete-aws-iam-access-keys-via-app-interface)
     - [Reset AWS IAM user passwords via App-Interface](#reset-aws-iam-user-passwords-via-app-interface)
+      - [Behind the scenes](#behind-the-scenes)
     - [AWS garbage collection](#aws-garbage-collection)
     - [GitHub user profile compliance](#github-user-profile-compliance)
     - [Manage GitLab group members](#manage-gitlab-group-members)
@@ -117,13 +122,13 @@ This repository contains of a collection of files under the `data` folder.
 Whatever is present inside that folder constitutes the App-SRE contract.
 
 These files can be `yaml` or `json` files, and they must validate against some
-[well-defined json schemas][https://github.com/app-sre/qontract-schemas].
+[well-defined json schemas](https://github.com/app-sre/qontract-schemas).
 
 The path of the files do not have any effect on the integrations (automation
 components that feed off the contract), but the contents of the files do. They
 will all contain:
 
-- `$schema`: which maps to a well defined schema [schema][https://github.com/app-sre/qontract-schemas].
+- `$schema`: which maps to a well defined [schema](https://github.com/app-sre/qontract-schemas).
 - `labels`: arbitrary labels that can be used to perform queries, etc.
 - Additional data specific to the resource in question.
 
@@ -163,7 +168,7 @@ amendment. Some examples would be:
 
 All contract amendments must be formally defined. Formal definitions are
 expressed as json schemas. You can find the supported schemas here:
-[schemas][https://github.com/app-sre/qontract-schemas].
+https://github.com/app-sre/qontract-schemas.
 
 1. The interested party will:
 
@@ -189,6 +194,7 @@ expressed as json schemas. You can find the supported schemas here:
 - Even if you have rights to merge the PR, please refrain from doing so. If you need it merged urgently, ping @app-sre-ic in #sd-app-sre.
 - If an AppSRE team members adds the `lgtm` label, it will be automerged by a bot.
 - The AppSRE team members will also refrain from manually merging PRs and will use labels instead to allow the bot to automatically merge them. In App-Interface the order of the PRs is important, and if we manually merge, it will affect waiting times for other users.
+- Please follow git [best practices](https://service.pages.redhat.com/dev-guidelines/docs/appsre/git/)
 
 ## Local validation of datafile modifications / contract amendment
 
@@ -402,6 +408,35 @@ you want the user to belong to. Roles can be associated with the services:
 `service/<name>/roles/<rolename>.yml`, or to teams:
 `teams/<name>/roles/<rolename>.yml`. Check out the currently defined roles to
 know which one to add.
+
+#### Enabling Temporary Roles in App-Interface
+
+One of the cases a tenant will want to modify a role yaml file is if you want to add an `expirationDate` field, in order for tenants to gain temporary access for any debugging purposes.
+
+The [openshift rolebindings](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/openshift_rolebindings.py) and [openshift groups](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/openshift_groups.py) section of our [qontract-reconcile](https://github.com/app-sre/qontract-reconcile) integration will pick up on the change through [app-interface](https://gitlab.cee.redhat.com/service/app-interface) and a check will run to see if the date is valid. The date specified in the `expirationDate` field must be in `YYYY-MM-DD` format and it must not be older than today's date. If the value for the field is not correct, the integration will fail alerting you about the date format and if the `expirationDate` value has past today's date then the access will be removed.
+<br>
+
+##### Example on how it will look in a role file
+
+Schema can be found [here](https://github.com/app-sre/qontract-schemas/blob/main/schemas/access/permission-1.yml).
+
+```
+---
+$schema: /access/role-1.yml
+
+labels: {}
+name: prod-debugger
+
+expirationDate: '2023-02-01'
+
+permissions: []
+
+access:
+- cluster:
+    $ref: /openshift/telemeter-prod-01/cluster.yml
+  group: observatorium-dev
+```
+<br>
 
 #### User off-boarding / revalidation loop
 
@@ -826,6 +861,10 @@ Groups should be defined under the `managedGroups` section in the cluster file. 
 
 An example of a role can be found [here](/data/teams/hive/roles/dev.yml).
 
+Notes:
+* The `dedicated-admins` group is managed via OCM using the [ocm-groups](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/ocm_groups.py) integration, whereas all other groups are managed via OC using the [openshift-groups](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/openshift_groups.py) integration.
+* The `cluster-admins` group is managed manually via OCM as part of a [cluster onboarding](/docs/app-sre/sop/app-interface-onboard-cluster.md#step-7-obtain-cluster-admin).
+
 ### Manage OpenShift LimitRanges via App-Interface (`/openshift/limitrange-1.yml`)
 
 This integration allows namespace owners to manage LimitRanges objects on their namespaces
@@ -1017,7 +1056,16 @@ For more information please see [vault AppRole documentation](https://www.vaultp
 Secrets engines are components which store, generate, or encrypt data. Secrets engines are incredibly flexible, so it is easiest to think about them in terms of their function.
 Secrets engines are provided some set of data, they take some action on that data, and they return a result.
 
-KV Secrets engine Example:
+App-interface currently supports the following secrets engines:
+- KV (v1)
+- KV (v2)
+- TOTP
+
+Documentation for currently supported engines can be found [here](/data/services/vault.devshift.net/config/secret-engines)
+
+For more information please see [vault secrets engines documentation](https://www.vaultproject.io/docs/secrets/index.html)
+
+##### KV Secrets engine Example
 ```yaml
 ---
 $schema: /vault-config/secret-engine-1.yml
@@ -1032,10 +1080,40 @@ options:
   _type: "kv"
   version: "2"
 ```
-Current secrets engines can be found [here](/data/services/vault.devshift.net/config/secret-engines)
 
-For more information please see [vault secrets engines documentation](https://www.vaultproject.io/docs/secrets/index.html)
+##### TOTP Secrets engine Example
+```yaml
+---
+$schema: /vault-config/secret-engine-1.yml
 
+labels:
+  service: vault.devshift.net
+
+_path: "totp/my-team/"
+type: "totp"
+description: "TOTP engine for my-team"
+```
+
+Register a new TOTP key given by a provider:
+- Initiate the 2FA process at the desired provider
+- Most provider will provide the OTP registration info via a QR code
+- Read the QR Code with a QR Code reader app or extension. Android and iOS both have built-in QR code reader capabilities built into the Camera app.
+  - Browser extensions are also available to decode QR codes but at the time of writing this all the ones I've seen are from questionable sources (& not official)
+- Write the OTP info to vault. The URL parameter value is what is encoded in the QR Code
+  ```sh
+  # vault write totp/<my-team>/keys/<the-service> url="otpauth://totp/some-provider-otp:some-user-id?secret=some-secret&issuer=some-issuer&period=30"
+  ```
+
+Request a new TOTP code:
+The TOTP engine cannot be interacted with via the Vault UI. The Vault CLI or API must be used
+- Login to Vault
+  ```sh
+  vault login -method=github -address=https://vault.devshift.net
+  ```
+- Read a TOTP code
+  ```sh
+  vault read totp/<my-team>/code/<some-provider>
+  ```
 
 ### Manage DNS Zones via App-Interface (`/aws/dns-zone-1.yml`) using Terraform
 
@@ -1376,6 +1454,8 @@ In order to add or update Amazon Elasticsearch Service, you need to add them to 
     - For example, for a resource with `identifier` "my-service" and `provider` is set to `elasticsearch`, the created Secret will be called `my-service-elasticsearch`.
 - `annotations`: additional annotations to add to the output resource
 
+The `defaults` resource file will have a structure that follows closely the structure of the elasticsearch objects from the [terraform AWS provider](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/elasticsearch_domain), the only difference being the use of vault to store passwords instead of having them in clear text in app-interface. See the [elasticsearch-defaults-1.yml](https://github.com/app-sre/qontract-schemas/blob/main/schemas/aws/elasticsearch-defaults-1.yml) schema file for details of the exact fields that are supported.
+
 Once the changes are merged, the Amazon Elasticsearch Service will be created (or updated) and a Kubernetes Secret will be created in the same namespace with all relevant details.
 
 The Secret will contain the following fields:
@@ -1513,7 +1593,22 @@ In order to add or update an S3 bucket, you need to add them to the `terraformRe
 - `identifier` - name of resource to create (or update)
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options:](/resources/terraform/resources/)
 - `overrides`: list of values from `defaults` you wish to override, with the override values. For example: `acl: public`.
-- `sqs_identifier`: identifier of a existing sqs queue. It will create a s3 notifacation to that sqs queue. This field is optional.
+- `event_notifications`(Optional): a list of configurations to create S3 notification to SQS or SNS. It can contain the following fields:
+  - `destination_type`: can be `sns` or `sqs`.
+  - `destination`: can be either the name of the queue/topic or its arn.
+  - `event_type`: a list of events such as `s3:ObjectCreated:*`. 
+  - `filter_prefix`(Optional): Prefix filter for the target's name.
+  - `filter_suffix`(Optional): Suffix filter for the target's name.
+  
+  Example of `event_notifications`: 
+  ```
+  event_notifications:
+      - destination_type: sns
+        destination: arn:aws:sns:us-east-1:123456789:test-sns-1
+        event_type: 
+          - s3:ObjectCreated:*
+  ```
+- `sqs_identifier`(Deprecating soon, please use `event_notifications`): identifier of a existing sqs queue. It will create a s3 notifacation to that sqs queue. This field is optional.
 - `s3_events`: a listing of the event types for sqs queue.
 - `bucket_policy`: an AWS bucket policy to create and attach to the s3 bucket.
 - `output_resource_name`: name of Kubernetes Secret to be created.
@@ -2032,7 +2127,7 @@ External reference:
 - [Jenkins Job Builder](https://docs.openstack.org/infra/jenkins-job-builder/)
 
 Notes:
-- To consume a secret from Vault, a KV v1 secret engine must be used.
+- If the secret is from a Vault KV V2 secret engine (versioned), the secret definition must include `engine-version: 2`. [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/resources/jenkins/mt-sre/secrets.yaml#L4)
 
 
 ### Delete AWS IAM access keys via App-Interface
@@ -2056,21 +2151,21 @@ To reset a user's password in an AWS account, submit a MR with a new entry to th
   requestId: <some_unique_value_without_spaces>
 ```
 
-The user's new password should appear GPG encrypted within 30 minutes in app-interface-output: [terraform-users-credentials](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/terraform-users-credentials.md) and also via email.
+The user's new password should appear GPG encrypted within 30 minutes in app-interface-output repository: [terraform-users-credentials](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/terraform-users-credentials.md) and also via email.
 
 To decrypt password: `echo <password> | base64 -d | gpg -d - && echo` (you will be asked to provide your passphrase to unlock the secret)
 
 This operation will also reset any existing virtual MFA devices.
 
-Behind the scenes:
+#### Behind the scenes
 
 Once the MR is merged, an integration called `aws-iam-password-reset` will delete the user's login profile. At this point, the user can not login to the account.
 
 A different integration, called `terraform-users` will realize that the user does not have a login profile and will re-create it. At this point, the user has a new random password.
 
-The curious reader can follow #sd-app-sre-reconcile to see when these two actions have completed.
+The curious reader can follow [#sd-app-sre-reconcile](https://coreos.slack.com/archives/CS0E65QCV) to see when these two actions have completed.
 
-Once the new password is in place, it needs to be picked up by a app-interface-output by a qontract-cli command called `terraform-users-credentials` (the repository is refreshed once every 10 minutes).
+Once the new password is in place, it needs to be picked up by an app-interface-output created by a `qontract-cli` command called `terraform-users-credentials` (the repository is refreshed once every 10 minutes).
 
 ### AWS garbage collection
 
@@ -2196,13 +2291,6 @@ schedule: <if defined the output resource will be a CronJob instead of a Job>
 query: <sql query>
 ```
 
-**Note:** Query files are only executed once unless a `schedule` is defined
-(mentioned later in this section). The query file execution status is tracked
-using the `name` field. If you wish to run an existing query file a second time
-(possibly including modifications to the queries), you must change the `name`
-field. This can be achieved by copying the existing file to a new file with a
-new `name`, or reusing the existing file and changing the query `name`.
-
 If you want to run multiple queries in the same spec, you can define the
 `queries` list instead of the `query` string. Example:
 
@@ -2237,6 +2325,36 @@ identifier: uhc-acct-mngr-staging
 output: filesystem
 query: |
   SELECT id, name, deleted_at from registries;
+```
+
+#### SQL Rules
+* Only READ sentences (`SELECT`, `EXPLAIN`, `EXPLAIN ANALYZE SELECT`)
+* Columns must be specified. `SELECT * ` is not allowed
+
+#### SQL Format
+* We strongly recommend use yaml multiline format keeping the line breaks.
+* Comments are allowed in both possible formats (check the examples below)
+* Queries must end with `;`
+
+```yaml
+query: |
+  SELECT id, name from a;
+...
+query: |
+  SELECT /* comment */ id, name
+  FROM a -- comment
+  WHERE id = 1;
+...
+queries:
+  - |
+    SELECT id, name FROM a;
+  - |
+    SELECT id, name FROM b /* comment */ order by id;
+  - |
+    SELECT id, name
+    FROM c
+    -- comment: need to order by id
+    ORDER BY id;
 ```
 
 When that SQL Query specification is merged, the integration will create a
@@ -2344,8 +2462,14 @@ gpg -d 2020-01-30-account-manager-registries-stage-cjh82-query-result.txt
 
 Running that command locally and decrypt the message with requestor's private key.
 
-
-Each Job will be automatically deleted after 7 days.
+**Important notes**
+* Each Job will be automatically deleted after 7 days.
+* Query files are only executed once unless a `schedule` is defined.
+  The query file execution status is tracked using the `name` field.
+  If you wish to run an existing query file a second time
+  (possibly including modifications to the queries), you must change the `name`
+  field. This can be achieved by copying the existing file to a new file with a
+  new `name`, or reusing the existing file and changing the query `name`.
 
 ### Enable Gitlab Features on an App Interface Controlled Gitlab Repository
 
@@ -2370,6 +2494,13 @@ codeComponents:
   url: https://gitlab.cee.redhat.com/service/managed-tenants
 ...
 ```
+
+**Every fork of this repo must have @devtools-bot added as a `Maintainer` of
+the project.** If the bot is not added, GitLab will not be updated with the
+status of your builds in the `Pipelines` tab, and the bot will not
+automatically merge your MRs with the proper approvals (described later in this
+section). If you don't know how to add a user to your project, see the
+[GitLab documentation](https://docs.gitlab.com/ee/user/project/members/#add-users-to-a-project).
 
 App Interface has several features that can be enabled for the Gitlab
 repositories:

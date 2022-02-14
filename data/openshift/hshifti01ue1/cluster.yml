@@ -1,0 +1,106 @@
+---
+$schema: /openshift/cluster-1.yml
+
+labels:
+  service: hypershift
+
+name: hshifti01ue1
+description: hshifti01ue1 cluster
+consoleUrl: https://console-openshift-console.apps.hshifti01ue1.z3pt.p1.openshiftapps.com
+kibanaUrl: ''
+prometheusUrl: https://prometheus.hshifti01ue1.devshift.net
+alertmanagerUrl: https://alertmanager.hshifti01ue1.devshift.net
+serverUrl: https://api.hshifti01ue1.z3pt.p1.openshiftapps.com:6443
+elbFQDN: elb.apps.hshifti01ue1.z3pt.p1.openshiftapps.com
+
+auth:
+  service: github-org-team
+  org: app-sre
+  team: hshifti01ue1-cluster
+
+ocm:
+  $ref: /dependencies/ocm/production.yml
+
+managedGroups:
+- dedicated-admins
+- dedicated-readers
+
+spec:
+  provider: aws
+  region: us-east-1
+  channel: candidate
+  version: 4.10.0-rc.1
+  initial_version: 4.9.15-candidate
+  multi_az: true
+  nodes: 9
+  # autoscale:
+  #   min_replicas: 9
+  #   max_replicas: 12
+  instance_type: m5.xlarge
+  storage: 1600
+  load_balancers: 12
+  private: false
+  # provision_shard_id: (optional) specify hive shard ID to create the cluster in (IDs can be found in the uhc-production namespace file)
+  disable_user_workload_monitoring: true
+
+  id: 1pri98sek0idjn3h4mh3dnhmo0t05oom
+  external_id: 6aca96f4-ce03-4210-b131-087ab6da30f4
+  provision_shard_id: b26159a7-aaef-4303-89a0-6713ad9f1090
+upgradePolicy:
+  workloads: [hypershift]
+  schedule: 0 7 * * 1-5
+  conditions:
+    soakDays: 0
+
+network:
+  type: OVNKubernetes
+  vpc: 10.200.0.0/16
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
+
+automationToken:
+  path: app-sre/creds/kube-configs/hshifti01ue1
+  field: token
+
+clusterAdminAutomationToken:
+  path: app-sre/creds/kube-configs/hshifti01ue1-cluster-admin
+  field: token
+
+# machinePools: # optional, specify additional Machine Pools to be provisioned
+# - id: (machine pool name, should be unique per cluster)
+#   instance_type: (desired instance type. m5.xlarge for example)
+#   replicas: (desired number of instances in the pool)
+#   labels: {}
+
+addons: # enable log forwarding to the cluster's AWS account
+- $ref: /dependencies/ocm/addons/cluster-logging-operator.yml
+
+internal: false
+
+awsInfrastructureAccess:
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: network-mgmt
+managedClusterRoles: true
+observabilityNamespace:
+  $ref: /services/observability/namespaces/openshift-customer-monitoring.hshifti01ue1.yml
+
+disable:
+  integrations:
+  - openshift-groups
+  - openshift-namespaces
+  - openshift-namespace-labels
+  - openshift-resources
+  - openshift-rolebindings
+  - openshift-users
+  - openshift-vault-secrets
+  - openshift-routes
+  - openshift-network-policies
+  - openshift-resourcequotas
+  - openshift-limitranges
+  - openshift-serviceaccount-tokens
+  - terraform-resources
+  - terraform-resources-wrapper

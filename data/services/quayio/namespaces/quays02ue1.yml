@@ -28,10 +28,14 @@ openshiftServiceAccountTokens:
     $ref: /services/quayio/namespaces/quay-builder-stage.yml
   serviceAccountName: quay-builder-sa
 
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+
 managedResourceTypes:
 - ConfigMap
 - NetworkPolicy
 - Secret
+- ServiceAccount
 
 openshiftResources:
 - provider: vault-secret
@@ -48,6 +52,11 @@ openshiftResources:
     qontract.ignore_reconcile_time: "true"
 
 - provider: resource-template
+  path: /services/common/serviceaccount.yaml
+  variables:
+    name: quay-db-jobs-sa
+
+- provider: resource-template
   type: extracurlyjinja2
   path: /quayio-stage/quay/quay-config.secret.yaml
   variables:
@@ -58,6 +67,9 @@ openshiftResources:
     readonly: true
     account_recovery_mode: false
     read_from_rds_replica: true
+    enable_builders: false
+    enable_clair: false
+    region: us-east-1
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -70,6 +82,9 @@ openshiftResources:
     readonly: true
     account_recovery_mode: false
     read_from_rds_replica: false
+    enable_builders: false
+    enable_clair: false
+    region: us-east-1
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -79,9 +94,12 @@ openshiftResources:
     vault_secret_version: 61
     version_label: v61
     enable_redis_modelcache: true
-    readonly: false
+    readonly: true
     account_recovery_mode: false
     read_from_rds_replica: false
+    enable_builders: true
+    enable_clair: false
+    region: us-east-1
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -91,9 +109,12 @@ openshiftResources:
     vault_secret_version: 61
     version_label: v61
     enable_redis_modelcache: true
-    readonly: true
+    readonly: false
     account_recovery_mode: false
     read_from_rds_replica: false
+    enable_builders: true
+    enable_clair: true
+    region: us-east-1
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -106,6 +127,9 @@ openshiftResources:
     readonly: false
     account_recovery_mode: false
     read_from_rds_replica: false
+    enable_builders: true
+    enable_clair: false
+    region: us-east-1
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -118,6 +142,9 @@ openshiftResources:
     readonly: false
     account_recovery_mode: false
     read_from_rds_replica: false
+    enable_builders: true
+    enable_clair: false
+    region: us-east-1
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -130,13 +157,17 @@ openshiftResources:
     enable_redis_modelcache: false
     readonly: false
     read_from_rds_replica: false
+    enable_builders: false
+    enable_clair: false
+    region: us-east-1
 
 - provider: resource-template
   type: extracurlyjinja2
   path: /quayio-stage/quay/quay-service-tool-config.secret.yaml
   variables:
     name: quay-service-tool-config
-    vault_secret_version: 9
+    vault_secret_version: 10
+    db_jobs_vault_secret_version: 1
 - provider: resource
   path: /quayio-stage/quay/quay-envoy-proxy-config.configmap.yaml
 - provider: vault-secret
@@ -154,6 +185,12 @@ openshiftResources:
   vault_tls_secret_path: app-interface/quayio-stage/quayio-stage/routes/quay-service-tool
   vault_tls_secret_version: 3
 
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /quayio-stage/quay/quay-db-jobs-config.secret.yaml
+  variables:
+    name: quay-db-jobs-config
+    vault_secret_version: 1
 
 terraformResources:
 - provider: acm
@@ -183,6 +220,11 @@ terraformResources:
   identifier: quayio-stage
   defaults: /terraform/resources/quayio-stage/elasticache-1.yml
   parameter_group: /terraform/resources/quayio-stage/elasticache-parameter-group-1.yml
+- provider: elasticache
+  account: quayio-stage
+  identifier: quayio-stage-builders
+  defaults: /terraform/resources/quayio-stage/elasticache-builders-1.yml
+  parameter_group: /terraform/resources/quayio-stage/elasticache-builders-parameter-group-1.yml
 - provider: elasticache
   account: quayio-stage
   identifier: quayio-stage-modelcache
@@ -227,19 +269,10 @@ terraformResources:
   certificate_arn: arn:aws:acm:us-east-1:019044362261:certificate/565164ca-935a-4d65-b92f-fce85cc794ba
   targets:
   - name: quayio-stage-py2
-    default: true
-    weights:
-      read: 0
-      write: 100
+    default: false
     openshift_service: quay-load-balancer-service
   - name: quayio-stage-py3
-    default: false
-    weights:
-      read: 100
-      write: 0
+    default: true
     openshift_service: quay-py3-load-balancer-service
-  paths:
-    read:
-    - /v2/*
-    write:
-    - /v2/auth*
+  rules: []
+

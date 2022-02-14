@@ -3,21 +3,34 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: leader-election
 rules:
-  - verbs:
+  - apiGroups:
+    - ''
+    resources:
+    - configmaps
+    verbs:
       - create
-    apiGroups:
+
+  - apiGroups:
       - ''
     resources:
       - configmaps
-  - verbs:
+    verbs:
       - get
       - update
       - delete
-    apiGroups:
-      - ''
     resources:
       - configmaps
     resourceNames:
       - assisted-service-baseiso-helper
       - assisted-service-leader-election-helper
       - assisted-service-migration-helper
+
+  - apiGroups:
+    - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - create
+      - get
+      - update
+      - delete

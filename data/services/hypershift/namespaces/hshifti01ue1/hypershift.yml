@@ -1,0 +1,37 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: hypershift
+description: integration namespace for hypershift
+
+cluster:
+  $ref: /openshift/hshifti01ue1/cluster.yml
+
+app:
+  $ref: /services/hypershift/app.yml
+
+environment:
+  $ref: /products/hypershift/environments/integration-hshifti01ue1.yml
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: s3
+  account: app-sre
+  identifier: hypershift-oidc-integration
+  region: us-east-1
+  defaults: /terraform/resources/s3-public-read-1.yml
+  output_resource_name: hypershift-oidc-s3-creds
+
+managedResourceTypes:
+- Secret
+
+openshiftResources:
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/hypershift/integration/oidc-s3-creds.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.hshifti01ue1.yml

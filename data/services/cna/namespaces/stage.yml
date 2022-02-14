@@ -1,0 +1,48 @@
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: cna
+
+name: cna-stage
+
+description: Staging namespace for the CNA service
+
+cluster:
+  $ref: /openshift/app-sre-stage-01/cluster.yml
+
+app:
+  $ref: /services/cna/app.yml
+
+environment:
+  $ref: /products/cna/environments/stage.yml
+
+managedRoles: true
+
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: app-sre-stage
+  identifier: cna-stage
+  # we start with a small DB
+  defaults: /terraform/resources/app-sre-stage/rds-3-pg13.yml
+- provider: s3
+  account: app-sre-stage
+  # this is the bucket for terraform state
+  identifier: cna-s3-stage
+  defaults: /terraform/resources/s3-private-1.yml
+  output_resource_name: cna-s3
+
+# FIXME: vault secrets and a route to be added later
+#openshiftResources:
+#- provider: vault-secret
+#  path: app-interface/cna/stage/runtime
+#  version: 1
+#- provider: route
+#  path: /cna/stage/cna.route.yaml

@@ -1,0 +1,68 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: image-builder
+
+name: image-builder-worker
+
+namespaces:
+- $ref: /services/image-builder/namespaces/composer-production.yml
+
+slos:
+- name: build job success rate
+  SLIType: availability
+  SLISpecification: 95% of build jobs must succeed
+  SLODetails: https://gitlab.cee.redhat.com/osbuild/internal-guides/-/blob/main/src/image-builder-service/slos/worker/osbuild_job_success_rate.md
+  SLOParameters:
+    window: 28d
+  expr: |
+      sum(rate(image_builder_worker_total_jobs{type=~"osbuild.*", status="2xx"}[{{window}}]))
+      /
+      sum(rate(image_builder_worker_total_jobs{type=~"osbuild.*"}[{{window}}]))
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /image-builder/production/image-builder-worker-prometheusrules.yml
+  dashboard: https://grafana.app-sre.devshift.net/d/image-builder-worker/image-builder-worker?orgId=1
+- name: build job latency
+  SLIType: latency
+  SLISpecification: 95% of the latency of worker build jobs must be under 1792 seconds
+  SLODetails: https://gitlab.cee.redhat.com/osbuild/internal-guides/-/blob/main/src/image-builder-service/slos/worker/build_latency.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(image_builder_worker_job_duration_seconds_bucket{le="1792",type=~"osbuild:.*", status!="4xx"}[{{window}}]))
+    /
+    sum(rate(image_builder_worker_job_duration_seconds_count{type=~"osbuild:.*", status!="4xx"}[{{window}}]))
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /image-builder/production/image-builder-worker-prometheusrules.yml
+  dashboard: https://grafana.app-sre.devshift.net/d/image-builder-worker/image-builder-worker?orgId=1
+- name: depsolve job success rate
+  SLIType: availability
+  SLISpecification: 95% of depsolve jobs must succeed
+  SLODetails: https://gitlab.cee.redhat.com/osbuild/internal-guides/-/blob/main/src/image-builder-service/slos/worker/depsolve_job_success_rate.md
+  SLOParameters:
+    window: 28d
+  expr: |
+      sum(rate(image_builder_worker_total_jobs{type="depsolve", status="2xx"}[{{window}}]))
+      /
+      sum(rate(image_builder_worker_total_jobs{type="depsolve"}[{{window}}]))
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /image-builder/production/image-builder-worker-prometheusrules.yml
+  dashboard: https://grafana.app-sre.devshift.net/d/image-builder-worker/image-builder-worker?orgId=1
+- name: depsolve job latency
+  SLIType: latency
+  SLISpecification: 95% of the latency of worker depsolve jobs must be under 32 seconds
+  SLODetails: https://gitlab.cee.redhat.com/osbuild/internal-guides/-/blob/main/src/image-builder-service/slos/worker/depsolve_latency.md
+  SLOParameters:
+    window: 28d
+  expr: |
+   sum(rate(image_builder_worker_job_duration_seconds_bucket{le="32", type="depsolve", status!="4xx"}[{{window}}]))
+   /
+   sum(rate(image_builder_worker_job_duration_seconds_count{type="depsolve", status!="4xx"}[{{window}}]))
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /image-builder/production/image-builder-composer-prometheusrules.yml
+  dashboard: https://grafana.app-sre.devshift.net/d/image-builder-worker/image-builder-worker?orgId=1

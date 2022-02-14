@@ -1,0 +1,36 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+  - /status-board/production/status-board-rds.prometheusrules.yaml
+
+evaluation_interval: 10m
+
+tests:
+
+  # RDSOutOfStorageSoon
+  - interval: 10m
+    input_series:
+      - series: rdsosmetrics_fileSys_usedPercent{mount_point="/rdsdbdata", exported_instance="status-board-production"}
+        values: 0+3x4 12-1x7
+    alert_rule_test:
+      - eval_time: 2h
+        alertname: RDSOutOfStorageSoon
+
+  - interval: 10m
+    input_series:
+      - series: rdsosmetrics_fileSys_usedPercent{mount_point="/rdsdbdata", exported_instance="status-board-production"}
+        values: 0+3x12
+    alert_rule_test:
+      - eval_time: 2h
+        alertname: RDSOutOfStorageSoon
+        exp_alerts:
+          - exp_labels:
+              severity: info
+              service: status-board
+              env: production
+              exported_instance: status-board-production
+              mount_point: /rdsdbdata
+            exp_annotations:
+              link_url: "https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=status-board-production;is-cluster=false;tab=monitoring"
+              message: "DB instance status-board-production is about to run out of storage within 2 weeks."

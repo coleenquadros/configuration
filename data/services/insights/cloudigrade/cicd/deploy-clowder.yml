@@ -93,7 +93,7 @@ resourceTemplates:
   # Production
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
-    ref: b55349a90491e82dd78ae3fc968a2909c8cbf54d
+    ref: 1630e38d9c204342be63b248f5c3874dbd8f68ca
     promotion:
       auto: true
       subscribe:
@@ -102,7 +102,7 @@ resourceTemplates:
       - channel: cloudigrade-stage-post-deploy-tests-success-channel
         data:
         - parent_saas: cloudigrade-test
-          target_config_hash: 9c6fbe5f24171f01
+          target_config_hash: 1d1f306a1448a43c
           type: parent_saas_config
     parameters:  # all other parameters have default values
       API_REPLICA_COUNT_MAX: '2'
@@ -122,7 +122,6 @@ resourceTemplates:
       LISTENER_GROUP_ID: cloudmeter_prod
       LISTENER_SENTRY_ENVIRONMENT: prod
       POSTIGRADE_HOST: postigrade.cloudigrade-prod.svc.cluster.local
-      SOURCES_ENABLE_DATA_MANAGEMENT_FROM_KAFKA: 'true'
       SOURCES_PSK_SECRET_NAME: cloudigrade-app-secret
       SOURCES_PSK_SECRET_KEY: sources-psk
       WATCHTOWER_MAX_BATCH_COUNT: 10
@@ -154,7 +153,7 @@ resourceTemplates:
   # Production
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
-    ref: bb9901fe2774ea976986d8693d3aa98b1ec08864
+    ref: 196a9ef5695c29fc1db93430c0f448be9d7a12e0
     parameters:
       POSTIGRADE_MIN_REPLICAS: '8'
     promotion:
@@ -174,12 +173,18 @@ resourceTemplates:
   provider: directory
   targets:
   - namespace:
-      $ref: /services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
     ref: master
   - namespace:
-      $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
-    ref: b55349a90491e82dd78ae3fc968a2909c8cbf54d
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: 1630e38d9c204342be63b248f5c3874dbd8f68ca
     promotion:
       auto: true
       subscribe:
       - cloudigrade-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: cloudigrade-stage-post-deploy-tests-success-channel
+        data:
+        - parent_saas: cloudigrade-test
+          target_config_hash: 1d1f306a1448a43c
+          type: parent_saas_config

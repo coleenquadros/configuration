@@ -23,9 +23,13 @@ managedRoles: true
 
 managedTerraformResources: true
 
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+
 managedResourceTypes:
 - NetworkPolicy
 - Secret
+- ServiceAccount
 
 openshiftResources:
 - provider: resource-template
@@ -43,6 +47,13 @@ openshiftResources:
     enable_redis_modelcache: true
     account_recovery_mode: false
     read_from_rds_replica: false
+    enable_clair: true
+    enable_builders: true
+
+- provider: resource-template
+  path: /services/common/serviceaccount.yaml
+  variables:
+    name: quay-db-jobs-sa
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -59,6 +70,8 @@ openshiftResources:
     enable_redis_modelcache: true
     account_recovery_mode: false
     read_from_rds_replica: false
+    enable_clair: true
+    enable_builders: true
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -75,6 +88,8 @@ openshiftResources:
     enable_redis_modelcache: true
     account_recovery_mode: false
     read_from_rds_replica: false
+    enable_clair: true
+    enable_builders: true
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -91,6 +106,8 @@ openshiftResources:
     enable_redis_modelcache: true
     account_recovery_mode: false
     read_from_rds_replica: false
+    enable_clair: true
+    enable_builders: true
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -107,6 +124,8 @@ openshiftResources:
     enable_redis_modelcache: false
     account_recovery_mode: true
     read_from_rds_replica: false
+    enable_clair: false
+    enable_builders: false
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -123,6 +142,8 @@ openshiftResources:
     enable_redis_modelcache: true
     account_recovery_mode: false
     read_from_rds_replica: true
+    enable_clair: true
+    enable_builders: true
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -139,6 +160,17 @@ openshiftResources:
     enable_redis_modelcache: false
     account_recovery_mode: false
     read_from_rds_replica: false
+    enable_clair: true
+    enable_builders: false
+
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /quay-p/quay/quay-service-tool-config.secret.yaml
+  variables:
+    name: quay-service-tool-config
+    vault_secret_version: 1
+    db_jobs_vault_secret_version: 1
+    additional_config_vault_secret_version: 2
 
 - provider: resource-template
   type: extracurlyjinja2
@@ -166,6 +198,19 @@ openshiftResources:
   path: /quay-p/quay/quay.web-allow-external.networkpolicy.yaml
 - provider: resource
   path: /quay-p/quay/quay-recovery.web-allow-external.networkpolicy.yaml
+- provider: resource
+  path: /quay-p/quay/quay-py3.web-allow-external.networkpolicy.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /quay-p/quay/quay-db-jobs-config.secret.yaml
+  variables:
+    name: quay-db-jobs-prod-config
+    vault_secret_version: 1
+- provider: route
+  path: /quay-p/quay/quay-service-tool.route.yaml
+  vault_tls_secret_path: app-interface/quayio-prod-us-east-1/quay/service-tool-config-secret
+  vault_tls_secret_version: 4
+
 
 terraformResources:
 - provider: rds
@@ -182,6 +227,11 @@ terraformResources:
   defaults: /terraform/resources/quayio-production/elasticache-1.yml
   parameter_group: /terraform/resources/quayio-production/elasticache-parameter-group-1.yml
   output_resource_name: quayio-elasticache
+- provider: elasticache
+  account: quayio-prod
+  identifier: quayio-production-builders
+  defaults: /terraform/resources/quayio-production/elasticache-builders-1.yml
+  parameter_group: /terraform/resources/quayio-production/elasticache-builders-parameter-group-1.yml
 - provider: elasticache
   account: quayio-prod
   identifier: quayio-production-modelcache
@@ -250,16 +300,46 @@ terraformResources:
   targets:
   - name: quayio-production-py2
     default: true
-    weights:
-      read: 100
-      write: 100
     openshift_service: quay-load-balancer-service
   - name: quayio-production-py3
     default: false
-    weights:
-      read: 0
-      write: 0
     openshift_service: quay-py3-load-balancer-service
-  paths:
-    read:
-    - /v2/*
+  rules:
+  - condition:
+      path: /v2/auth*
+    action:
+      - target: quayio-production-py2
+        weight: 100
+      - target: quayio-production-py3
+        weight: 0
+  - condition:
+      path: /v2/*
+      methods:
+      - HEAD
+    action:
+    - target: quayio-production-py2
+      weight: 100
+    - target: quayio-production-py3
+      weight: 0
+  - condition:
+      path: /v2/*
+      methods:
+      - GET
+      - OPTIONS
+    action:
+    - target: quayio-production-py2
+      weight: 0
+    - target: quayio-production-py3
+      weight: 100
+  - condition:
+      path: /cnr*
+      methods:
+      - GET
+      - HEAD
+      - OPTIONS
+    action:
+    - target: quayio-production-py2
+      weight: 0
+    - target: quayio-production-py3
+      weight: 100
+

@@ -218,4 +218,4 @@ Resources:
 
 Load test instructions can be found [here](https://gitlab.cee.redhat.com/service/saas-mas-sso/-/blob/master/sop/performance-test.md).
 
-The load test results from the latest run can be found [here](https://drive.google.com/drive/folders/11xQaK_MJimOo_kU9tNllP7pmGc4GWIgJ?usp=sharing)
+The load test results from the latest run can be found [here](https://s3.console.aws.amazon.com/s3/buckets/mas-sso-s3-resource?region=us-east-1&tab=objects)

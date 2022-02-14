@@ -1,0 +1,81 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: managed-connectors-stage
+description: staging namespace for managed-connectors
+
+cluster:
+  $ref: /openshift/app-sre-stage-01/cluster.yml
+
+app:
+  $ref: /services/managed-connectors/app.yaml
+
+environment:
+  $ref: /products/osdv4/environments/stage.yml
+
+networkPoliciesAllow:
+  - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+
+managedRoles: true
+
+managedResourceTypes:
+  - ServiceAccount
+  - ConfigMap
+
+openshiftResources:
+- provider: vault-secret
+  path: managed-services/quay-org-accounts/rhoas/robots/rhoas-pull-docker
+  version: 1
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  name: cos-fleet-manager
+  path:  app-interface/managed-service-api/stage/service/credentials
+  version: 33
+  annotations:
+    qontract.recycle: "true"
+- provider: resource-template
+  path: /services/managed-connectors/serviceaccount.yaml
+  variables:
+    name: cos-fleet-manager
+- provider: route
+  path: /services/managed-connectors/stage/cos-fleet-manager.route.yaml
+- provider: resource
+  path: /services/managed-connectors/stage/cos-fleet-manager-envoy.configmap.yaml
+- provider: resource
+  path: /services/managed-connectors/stage/connector-catalog-camel-aws.configmap.yaml
+- provider: resource
+  path: /services/managed-connectors/stage/connector-catalog-camel-azure.configmap.yaml
+- provider: resource
+  path: /services/managed-connectors/stage/connector-catalog-camel-gcp.configmap.yaml
+- provider: resource
+  path: /services/managed-connectors/stage/connector-catalog-camel-misc.configmap.yaml
+- provider: resource
+  path: /services/managed-connectors/stage/connector-catalog-camel-nosql.configmap.yaml
+- provider: resource
+  path: /services/managed-connectors/stage/connector-catalog-camel-social.configmap.yaml
+- provider: resource
+  path: /services/managed-connectors/stage/connector-catalog-camel-sql.configmap.yaml
+- provider: resource
+  path: /services/managed-connectors/stage/connector-catalog-camel-storage.configmap.yaml
+- provider: resource
+  path: /services/managed-connectors/stage/connector-catalog-debezium-mongodb.configmap.yaml
+- provider: resource
+  path: /services/managed-connectors/stage/connector-catalog-debezium-mysql.configmap.yaml
+- provider: resource
+  path: /services/managed-connectors/stage/connector-catalog-debezium-postgres.configmap.yaml
+
+managedTerraformResources: true
+
+terraformResources:
+  - provider: rds
+    account: app-sre
+    identifier: cos-fleet-manager-staging
+    defaults: /terraform/resources/managed-connectors/staging/rds-2-cloudwatch-enabled.yml
+    parameter_group: /terraform/resources/managed-connectors/staging/managed-connectors-stage-rds-parameter-group-pg12.yml
+    output_resource_name: cos-fleet-manager-rds
+    ca_cert:
+      path: app-interface/global/rds-ca-cert
+      field: us-east-1
+      version: 2

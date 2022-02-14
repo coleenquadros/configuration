@@ -56,6 +56,12 @@ resourceTemplates:
       publish:
       - service-registry-stage-deploy-success-channel
     parameters:
+      #TODO move this to prod when promoting to prod
+      TENANT_MANAGER_REPLICAS: 3
+      TENANT_MANAGER_ENVOY_CONFIG_CM_NAME: srs-tenant-manager-envoy-config
+      TENANT_MANAGER_URL: https://tenant-manager-envoy.service-registry-stage.svc:9001
+      TENANT_MANAGER_CA_BUNDLE: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
+      #stage config
       REGISTRY_LOG_LEVEL: INFO
       REGISTRY_QUARKUS_LOG_LEVEL: INFO
       TENANT_MANAGER_LOG_LEVEL: INFO
@@ -74,9 +80,17 @@ resourceTemplates:
       REGISTRY_AUTH_ADMIN_OVERRIDE_CLAIM_VALUE: "true"
   - namespace:
       $ref: /services/service-registry/namespaces/service-registry-production.yml
-    # this is the SHA256 of the commit that will be deployed, make sure this have been built and there is an image with this tag
-    ref: 0c2c19330363c5e850173e3e7b341dce82b10cb3
+    # This is the SHA256 of the commit that will be deployed,
+    # and which has been used as a *tag* for the image.
+    # Make sure the image from the commit has been built and it is present in quay.io.
+    # Do not confuse it with the SHA256 of the *image* itself.
+    # Service Registry:
+    ref: 0d8beff474822d8049f0daa3fdcce7774f7feb18
     parameters:
+      TENANT_MANAGER_REPLICAS: 3
+      TENANT_MANAGER_ENVOY_CONFIG_CM_NAME: srs-tenant-manager-envoy-config
+      TENANT_MANAGER_URL: http://tenant-manager:8585
+      #TENANT_MANAGER_CA_BUNDLE: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
       REGISTRY_LOG_LEVEL: INFO
       REGISTRY_QUARKUS_LOG_LEVEL: INFO
       TENANT_MANAGER_LOG_LEVEL: INFO
@@ -129,6 +143,7 @@ resourceTemplates:
       LOG_LEVEL: INFO
       SRS_LOG_LEVEL: INFO
       REPLICAS: 3
+      TENANT_MANAGER_CA_BUNDLE: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
       TENANT_MANAGER_AUTH_SERVER_URL: https://identity.api.stage.openshift.com/auth
       TENANT_MANAGER_AUTH_SERVER_REALM: rhoas
       TENANT_MANAGER_AUTH_SECRET_NAME: srs-tenant-manager-credentials
@@ -144,15 +159,21 @@ resourceTemplates:
       REGISTRY_DEPLOYMENTS_LIST:
         - name: registry-stage-1
           registryDeploymentUrl: https://bu98.serviceregistry-stage.rhcloud.com
-          tenantManagerUrl: http://tenant-manager:8585
+          tenantManagerUrl: https://tenant-manager-envoy.service-registry-stage.svc:9001
+      REST_API_DISABLED_PATHS_PATTERNS: "/api/serviceregistry_mgmt/v1/admin/tasks.*,/api/serviceregistry_mgmt/v1/admin/registryDeployments.*"
   - namespace:
       $ref: /services/service-registry/namespaces/service-registry-production.yml
-    # this is the SHA256 of the commit that will be deployed, make sure this has been built and there is an image with this tag
-    ref: ec79bd9870875d86a76ba7bfa12d531f0eb44d35
+    # This is the SHA256 of the commit that will be deployed,
+    # and which has been used as a *tag* for the image.
+    # Make sure the image from the commit has been built and it is present in quay.io.
+    # Do not confuse it with the SHA256 of the *image* itself.
+    # Fleet Manager:
+    ref: 701f131eef5d506e11eeb75f9397524ad0f4ad12
     parameters:
       LOG_LEVEL: INFO
       SRS_LOG_LEVEL: INFO
       REPLICAS: 3
+      #TENANT_MANAGER_CA_BUNDLE: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
       TENANT_MANAGER_AUTH_SERVER_URL: https://identity.api.openshift.com/auth
       TENANT_MANAGER_AUTH_SERVER_REALM: rhoas
       TENANT_MANAGER_AUTH_SECRET_NAME: srs-tenant-manager-credentials
@@ -168,6 +189,7 @@ resourceTemplates:
         - name: registry-prod-1
           registryDeploymentUrl: https://bu98.serviceregistry.rhcloud.com
           tenantManagerUrl: http://tenant-manager:8585
+      REST_API_DISABLED_PATHS_PATTERNS: "/api/serviceregistry_mgmt/v1/admin/tasks.*,/api/serviceregistry_mgmt/v1/admin/registryDeployments.*"
   parameters:
     IMAGE_REPOSITORY: rhoas/srs-fleet-manager
     DATABASE_SECRET_NAME: srs-fleet-manager-rds
@@ -181,7 +203,7 @@ resourceTemplates:
     ENABLE_SENTRY: "true"
     SENTRY_DSN_SECRET_NAME: sentry-dsn-secret
     # AMS - Terms And Conditions
-    AMS_TERMS_EVENT_CODE: "onlineService,register"
+    AMS_TERMS_EVENT_CODE: "register"
     # rds ssl
     DATABASE_SSL_CA_SECRET_NAME: rds-ssl-ca
     CORS_ALLOWED_ORIGINS: /(https?:\/\/localhost(:\\d*)?)|(https:\/\/(qaprodauth\.)?(cloud|console)\.redhat\.com)|(https:\/\/(prod|qa|ci|stage)\.foo\.redhat\.com:1337)/

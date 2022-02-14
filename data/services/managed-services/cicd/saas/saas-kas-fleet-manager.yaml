@@ -64,7 +64,7 @@ resourceTemplates:
     # - Commits can be found here: https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/commits/main
     # If in doubt, please check with the MK Control Plane team.
     # We are exploring how to automate this in the future.
-    ref: 87fd77ab276c828dc3b0e1c1be9d4491541f8b79
+    ref: 829d9d81742cdd2998e60665adc216e3861344eb
     parameters:
       ISSUER_URL: ${SSO_BASE_URL}
       OBSERVATORIUM_URL: https://observatorium-mst.api.openshift.com/api/metrics/v1/managedkafka
@@ -115,7 +115,6 @@ resourceTemplates:
     KAFKA_CAPACITY_INGRESS_THROUGHPUT: "30Mi"
     KAFKA_CAPACITY_TOTAL_MAX_CONNECTIONS: "3000"
     KAFKA_CAPACITY_MAX_DATA_RETENTION_SIZE: "1000Gi"
-    KAFKA_CAPACITY_MAX_PARTITIONS: "500"
     KAFKA_CAPACITY_MAX_DATA_RETENTION_PERIOD: "P14D"
     KAFKA_CAPACITY_MAX_CONNECTION_ATTEMPTS_PER_SEC: "100"
     # Global parameter - Affects Production and Stage
@@ -158,7 +157,7 @@ resourceTemplates:
       # Token Refresher URL
       OBSERVATORIUM_TOKEN_REFRESHER_URL: http://token-refresher.managed-services-stage.svc.cluster.local
       # Release tag within Config Repo to use for pulling index information
-      OBSERVABILITY_CONFIG_TAG: v1.19.0
+      OBSERVABILITY_CONFIG_TAG: v1.23.0
       # Observatorium Red Hat SSO tenant for observability stack
       OBSERVATORIUM_RHSSO_TENANT: managedkafka
       # Red Hat SSO Observability gateway
@@ -168,7 +167,9 @@ resourceTemplates:
       # Red Hat SSO Observability auth server url
       OBSERVATORIUM_RHSSO_AUTH_SERVER_URL: https://sso.redhat.com/auth
       # MAXIMUM NUMBER OF ALLOWED KAFKAs
-      KAFKA_CAPACITY_MAX_CAPACITY: 20
+      KAFKA_CAPACITY_MAX_CAPACITY: 8
+      # Maximum number of partitions per cluster
+      KAFKA_CAPACITY_MAX_PARTITIONS: "1000"
       # Changing this to true will delete all kafkas after their lifespan expired. The default is 48 hours.
       ENABLE_KAFKA_LIFE_SPAN: true
       # This value is the lifespan a kafka will have with the lifespan flag enabled. In hours.
@@ -197,6 +198,7 @@ resourceTemplates:
         - "rshelly"
         - "stobin"
         - "tdavidso"
+        - "tdalton"
         - "kchernou"
         - "dffrench"
         - "jbriones"
@@ -215,7 +217,6 @@ resourceTemplates:
         - "xiwu"
         - "lclarkeh"
         - "sbarker"
-        - "raryan"
         - "rareddy"
         - "medgar"
         - "tcooper"
@@ -229,6 +230,11 @@ resourceTemplates:
         - "jsarnovs"
         - "vbommana"
         - "jcueto"
+        - "swoodman"
+        - "srbiswas"
+        - "vbusch"
+        - "lukchen"
+        - "kstanley"
 
       SUPPORTED_CLOUD_PROVIDERS:
         - name: aws
@@ -236,12 +242,7 @@ resourceTemplates:
           regions:
             - name: us-east-1
               default: true
-              supported_instance_type: 
-                standard: {}
-                eval: {}
-            - name: eu-west-1
-              default: false
-              supported_instance_type: 
+              supported_instance_type:
                 standard: {}
                 eval: {}
 
@@ -256,15 +257,7 @@ resourceTemplates:
           region: us-east-1
           multi_az: true
           schedulable: true
-          kafka_instance_limit: 12
-          supported_instance_type: standard,eval
-        - name: Stage Cluster (In OSD Prod in new OSD region)
-          cluster_id: 1nkc9itgsdg9133r24f7hgjbsc5jbi24
-          cloud_provider: aws
-          region: eu-west-1
-          multi_az: true
-          schedulable: true
-          kafka_instance_limit: 3
+          kafka_instance_limit: 8
           supported_instance_type: standard,eval
 
   - namespace:
@@ -278,7 +271,7 @@ resourceTemplates:
     # the very first commit i.e https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/merge_requests/356/commits?commit_id=f0fd63740464c5fa4bda395d5d31f675eff049ac
     # If in doubt, see with the control plane team.
     # We are exploring into using automating this.
-    ref: 87fd77ab276c828dc3b0e1c1be9d4491541f8b79
+    ref: 829d9d81742cdd2998e60665adc216e3861344eb
     parameters:
       DB_SSLMODE: verify-full
       ENVIRONMENT: production
@@ -286,7 +279,7 @@ resourceTemplates:
       QUOTA_TYPE: ams
       # The image tag is the first seven characters of the #ref commit sha parameter.
       # Verify in https://quay.io/repository/rhoas/kas-fleet-manager?tab=tags to see if the tag exists.
-      IMAGE_TAG: 87fd77a
+      IMAGE_TAG: 829d9d8
       STRIMZI_OPERATOR_ADDON_ID: managed-kafka
       KAS_FLEETSHARD_ADDON_ID: kas-fleetshard-operator
       SENTRY_URL: sentry.devshift.net
@@ -326,9 +319,11 @@ resourceTemplates:
       # Red Hat SSO Observability auth server url
       OBSERVATORIUM_RHSSO_AUTH_SERVER_URL: https://sso.redhat.com/auth
       # Release tag within Config Repo to use for pulling index information
-      OBSERVABILITY_CONFIG_TAG: v1.19.0
+      OBSERVABILITY_CONFIG_TAG: v1.23.0
       # MAXIMUM NUMBER OF ALLOWED KAFKAs
-      KAFKA_CAPACITY_MAX_CAPACITY: 80
+      KAFKA_CAPACITY_MAX_CAPACITY: 61
+      # Maximum number of partitions per cluster
+      KAFKA_CAPACITY_MAX_PARTITIONS: "1000"
       # A list of usernames representing users who do not have access to the service
       DENIED_USERS: []
       # A list of users with read-only permissions for data plane clusters
@@ -357,6 +352,10 @@ resourceTemplates:
         - "lclarkeh"
         - "sbarker"
         - "kchernou"
+        - "srbiswas"
+        - "vbusch"
+        - "lukchen"
+        - "kstanley"
       # CEE Engineers
         - "aboucham"
         - "agagliar"
@@ -409,7 +408,6 @@ resourceTemplates:
               default: false
               supported_instance_type:
                 standard: {}
-                eval: {}
 
       # Changing this to true will delete all kafkas after their lifespan expired. The default is 48 hours.
       ENABLE_KAFKA_LIFE_SPAN: true
@@ -425,22 +423,21 @@ resourceTemplates:
           region: us-east-1
           multi_az: true
           schedulable: true # change this to false if you do not want the cluster to be schedulable
-          kafka_instance_limit: 55 # change this to match any value of configuration
-          supported_instance_type: standard,eval
+          kafka_instance_limit: 28 # change this to match any value of configuration
+          supported_instance_type: standard
         - name: mk-1006-115633
           cluster_id: 1nlj5j786fsg44srlj7f2kep5htakcp7
           cloud_provider: aws
           region: eu-west-1
           multi_az: true
           schedulable: true # change this to false if you do not want the cluster to be schedulable
-          kafka_instance_limit: 15 # change this to match any value of configuration
-          supported_instance_type: standard,eval
+          kafka_instance_limit: 3 # change this to match any value of configuration
+          supported_instance_type: standard
         - name: mk-1201-144802
           cluster_id: 1oqjq8qup5vhhn4seg03al8k34kdc8lj
           cloud_provider: aws
           region: us-east-1
           multi_az: true
           schedulable: true # change this to false if you do not want the cluster to be schedulable
-          kafka_instance_limit: 10 # change this to match any value of configuration
-          supported_instance_type: standard,eval
-  
+          kafka_instance_limit: 30 # change this to match any value of configuration
+          supported_instance_type: eval

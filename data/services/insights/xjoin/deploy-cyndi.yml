@@ -70,6 +70,7 @@ resourceTemplates:
       SSL_MODE: require
       SOURCE_NAMESPACE: xjoin-stage
       TARGET_NAMESPACE: xjoin-stage
+      VALIDATION_ATTEMPTS_THRESHOLD_INIT: "60"
   - namespace:
       $ref: /services/insights/xjoin/namespaces/cyndi-fedramp-stage.yml
     ref: master
@@ -100,11 +101,22 @@ resourceTemplates:
       SOURCE_NAMESPACE: cyndi-perf
       TARGET_NAMESPACE: cyndi-perf
       CONNECT_CLUSTER: cyndi-connect
-  # Ephemeral cluster
+  # Ephemeral/dev clusters
   # Unlike in stable environments where the operator is deployed in SingleNamespace mode,
   # AllNamespaces (i.e. cluster-wide) mode is used in ephemeral environments
   - namespace:
       $ref: /services/insights/xjoin/namespaces/cyndi-ephemeral.yml
+    ref: master
+    parameters:
+      TARGET_NAMESPACE: ""
+      SSL_MODE: disable
+      EPHEMERAL: "true"
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-cyndi-operator-gh-build-catalog-master-upstream-RedHatInsights-cyndi-operator-gh-build-master
+  - namespace:
+      $ref: /services/insights/xjoin/namespaces/cyndi-dev.yml
     ref: master
     parameters:
       TARGET_NAMESPACE: ""

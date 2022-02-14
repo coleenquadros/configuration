@@ -52,12 +52,14 @@ resourceTemplates:
     parameters:
       LOG_LEVEL: debug
       RETURN_URL: https://cert.${PLATFORM_HOSTNAME}/api/ingress/v1/upload
+      TENANT_TRANSLATOR_HOST: apicast.3scale-stage.svc.cluster.local
   - namespace:
       $ref: /services/insights/playbook-dispatcher/namespaces/prod.yml
-    ref: abb0877ddc8a712e936f8ad12637591fa43e4af0
+    ref: 9d54d4d0c6f2d72721cebed69910cfff5d8b07e0
     parameters:
       LOG_LEVEL: info
       RETURN_URL: https://cert.${PLATFORM_HOSTNAME}/api/ingress/v1/upload
+      TENANT_TRANSLATOR_HOST: apicast.3scale-prod.svc.cluster.local
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
@@ -72,6 +74,8 @@ resourceTemplates:
       CLOUD_CONNECTOR_IMPL: mock
       CLOUD_CONNECTOR_HOST: foobar
       PSK_AUTH_TEST: xwKhCUzgJ8
+      TENANT_TRANSLATOR_HOST: mock
+      TENANT_TRANSLATOR_IMPL: mock
 
 - name: playbook-dispatcher-connect
   path: /deploy/connect.yaml
@@ -88,6 +92,18 @@ resourceTemplates:
       CONNECTOR_PAUSE: "false"
   - namespace:
       $ref: /services/insights/playbook-dispatcher/namespaces/prod.yml
-    ref: abb0877ddc8a712e936f8ad12637591fa43e4af0
+    ref: 9d54d4d0c6f2d72721cebed69910cfff5d8b07e0
     parameters:
       EVENT_CONSUMER_REPLICAS: 0
+
+- name: playbook-dispatcher-dashboards
+  url: https://github.com/RedHatInsights/playbook-dispatcher
+  path: /dashboard
+  provider: directory
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: master
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: 9d54d4d0c6f2d72721cebed69910cfff5d8b07e0

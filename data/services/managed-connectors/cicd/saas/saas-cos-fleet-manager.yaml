@@ -1,0 +1,106 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: cos-fleet-manager
+
+name: saas-cos-fleet-manager
+description: 'SaaS tracking file for COS Fleet Manager'
+
+app:
+  $ref: /services/managed-connectors/app.yaml
+
+pipelinesProvider:
+  $ref: /services/managed-connectors/pipelines/tekton.cos-fleet-manager-pipelines.app-sre-prod-01.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: cos-primary
+
+managedResourceTypes:
+- Deployment
+- Service
+- ConfigMap
+
+imagePatterns:
+- quay.io/rhoas/cos-fleet-manager
+- quay.io/centos/centos
+- quay.io/rhoas/envoyproxy
+
+authentication:
+  image:
+    path: managed-services/quay-org-accounts/rhoas/robots/rhoas-pull
+    field: all
+
+resourceTemplates:
+- name: cos-fleet-manager
+  url: https://github.com/bf2fc6cc711aee1a0c2a/cos-fleet-manager
+  path: /templates/service-template.yml
+  parameters:
+    # Global parameter - Affects Production and Stage
+    IMAGE_REGISTRY: quay.io
+    # Global parameter - Affects Production and Stage
+    IMAGE_REPOSITORY: rhoas/cos-fleet-manager
+    # Global parameter - Affects Production and Stage
+    IMAGE_TAG: f15668c
+    # Global parameter - Affects Production and Stage
+    # SSO_BASE_URL is defined at the environment parameters level
+    JWKS_URL: ${SSO_BASE_URL}/protocol/openid-connect/certs
+    # Global parameter - Affects Production and Stage
+    # Change this to false if you want the users to be able to use the service without accepting any terms
+    ENABLE_TERMS_ACCEPTANCE: "true"
+    # Global parameter - Affects Production and Stage
+    # Change this to false if you want to disable the deny list feature feature
+    ENABLE_DENY_LIST: "true"
+    # Global parameter - Affects Production and Stage
+    # Change this to false to disable sentry
+    ENABLE_SENTRY: "false"
+    # Global parameter - Affects Production and Stage
+    # Image to be used by Envoy sidecar container
+    ENVOY_IMAGE: quay.io/rhoas/envoyproxy:v1.16.1
+  targets:
+  - namespace:
+      $ref: /services/managed-connectors/namespaces/managed-connectors-stage.yaml
+    ref: main
+    parameters:
+      DB_SSLMODE: verify-full
+      ENVIRONMENT: stage
+      REPLICAS: 1
+      MAS_SSO_BASE_URL: https://identity.api.stage.openshift.com
+      MAS_SSO_REALM: rhoas
+      OSD_IDP_MAS_SSO_REALM: rhoas-kafka-sre
+      OCM_URL: https://api.openshift.com
+      # Log level
+      GLOG_V: 10
+      # MAXIMUM NUMBER OF ALLOWED KAFKAs
+      KAFKA_CAPACITY_MAX_CAPACITY: 8
+      # Maximum number of partitions per cluster
+      KAFKA_CAPACITY_MAX_PARTITIONS: "1000"
+      # Announces public url to data-plane clients
+      SERVICE_PUBLIC_HOST_URL: "https://wxn4aqqc8bqvxcy6unfe.api.stage.openshift.com/"
+
+      MAS_SSO_ENABLE_AUTH: "true"
+      # Max allowed service accounts created by users
+      MAX_ALLOWED_SERVICE_ACCOUNTS: 50
+      # Max limit for the fetching the clients from mas-sso
+      MAX_LIMIT_FOR_SSO_GET_CLIENTS: 100
+      # A list of usernames representing users who do not have access to the service
+      DENIED_USERS: []
+      # A list of users with read-only permissions for data plane clusters
+      READ_ONLY_USERS: []
+     # A list of kafka-sre users with cluster-admin permissions for data plane clusters
+      KAFKA_SRE_USERS: []
+
+      SUPPORTED_CLOUD_PROVIDERS:
+        - name: aws
+          default: "true"
+          regions:
+            - name: us-east-1
+              default: "true"
+              supported_instance_type: 
+                standard: {}
+                eval: {}
+
+      # cluster list if dataplane cluster scaling type is set to manual
+      CLUSTER_LIST: []

@@ -1,0 +1,36 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+labels:
+  service: ocm
+
+name: ci-int-oms-jobs
+
+description: ''
+
+app:
+  $ref: /services/ocm/ocm-managed-services/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+type: jobs
+
+config:
+- project:
+    name: ocm-managed-services
+    label: sd-uhc
+    node: rhel8
+    gl_group: service
+    gl_project: ocm-managed-services
+    quay_org: app-sre
+    backup_ecr_push_creds_account_region: "app-sre/eu-central-1"
+    jobs:
+    - 'ocm-pr-check':
+        display_name: UHC clusters service check merge request
+        concurrent_build: true
+    - 'gl-build-master':
+        display_name: UHC clusters service build master branch
+    - 'gl-build-master':
+        display_name: UHC clusters service build hotfix branch
+        branch: 'hotfix'

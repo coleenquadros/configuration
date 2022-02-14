@@ -1,0 +1,30 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: dev-steahan
+description: namespace for steahan@ to test RDS upgrades
+
+cluster:
+  $ref: /openshift/app-sre-stage-01/cluster.yml
+
+app:
+  $ref: /services/app-sre/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/stage.yml
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: app-sre
+  identifier: dev-steahan
+  defaults: /terraform/resources/app-sre/staging/rds-1.yml
+  parameter_group: /terraform/resources/app-sre/staging/steahan-param.yml
+  overrides:
+    instance_class: db.t3.small
+    multi_az: true
+    allocated_storage: 50
+    performance_insights_enabled: true

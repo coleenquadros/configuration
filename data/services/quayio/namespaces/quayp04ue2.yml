@@ -43,6 +43,26 @@ openshiftResources:
     enable_redis_modelcache: false
     account_recovery_mode: false
     read_from_rds_replica: false
+    enable_clair: false
+    enable_builders: false
+
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /quay-p/quay/quay-config.secret.yaml
+  variables:
+    recycle: true
+    name: quay-py3-config-secret-readonly
+    config_vault_secret_version: 36
+    additional_config_vault_secret_version: 2
+    version_label: v36
+    readonly: true
+    standby: true
+    log_producer: kinesis_stream
+    enable_redis_modelcache: false
+    account_recovery_mode: false
+    read_from_rds_replica: false
+    enable_clair: false
+    enable_builders: false
 
 - provider: vault-secret
   path: app-interface/quayio-prod-us-east-2/quay/quay-extra-ca-certs
@@ -60,6 +80,8 @@ openshiftResources:
     qontract.ignore_reconcile_time: "true"
 - provider: resource
   path: /quay-p/quay/quay.web-allow-external.networkpolicy.yaml
+- provider: resource
+  path: /quay-p/quay/quay-py3.web-allow-external.networkpolicy.yaml
 
 terraformResources:
 - provider: rds
@@ -88,3 +110,61 @@ terraformResources:
   identifier: quay-prod-logentry-stream-backup
   defaults: /terraform/resources/quayio-production/kinesis-2.yml
   output_resource_name: quayio-kinesis
+- provider: elasticache
+  account: quayio-prod
+  identifier: quayio-production-standby
+  defaults: /terraform/resources/quayio-production/elasticache-standby-1.yml
+  parameter_group: /terraform/resources/quayio-production/elasticache-parameter-group-1.yml
+- provider: alb
+  account: quayio-prod
+  identifier: quayio-production-alb02
+  output_resource_name: quayio-production-alb
+  idle_timeout: 3600
+  vpc:
+    $ref: /aws/quayio-prod/vpcs/QuayVPC.yml
+  certificate_arn: arn:aws:acm:us-east-1:206170669542:certificate/8a4a9a8b-d06b-46f6-a234-e7ef2ec657cf
+  targets:
+  - name: quayio-production-py2
+    default: true
+    openshift_service: quay-load-balancer-service
+  - name: quayio-production-py3
+    default: false
+    openshift_service: quay-py3-load-balancer-service
+  rules:
+  - condition:
+      path: /v2/auth*
+    action:
+      - target: quayio-production-py2
+        weight: 100
+      - target: quayio-production-py3
+        weight: 0
+  - condition:
+      path: /v2/*
+      methods:
+      - HEAD
+    action:
+    - target: quayio-production-py2
+      weight: 100
+    - target: quayio-production-py3
+      weight: 0
+  - condition:
+      path: /v2/*
+      methods:
+      - GET
+      - OPTIONS
+    action:
+    - target: quayio-production-py2
+      weight: 0
+    - target: quayio-production-py3
+      weight: 100
+  - condition:
+      path: /cnr*
+      methods:
+      - GET
+      - HEAD
+      - OPTIONS
+    action:
+    - target: quayio-production-py2
+      weight: 0
+    - target: quayio-production-py3
+      weight: 100

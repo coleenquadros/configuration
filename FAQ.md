@@ -18,6 +18,7 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
         - [I can not access X](#i-can-not-access-x)
         - [I need help with something AWS related](#i-need-help-with-something-aws-related)
         - [I can not access ci-ext](#i-can-not-access-ci-ext)
+        - [I can not access ci-int](#i-can-not-access-ci-int)
         - [I can not access Grafana](#i-can-not-access-grafana)
         - [Tagging options in app-interface](#tagging-options-in-app-interface)
         - [Can you reset my AWS password?](#can-you-reset-my-aws-password)
@@ -37,6 +38,7 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
         - [I didn't receive my invite for the Github organization](#i-didnt-receive-my-invite-for-the-github-organization)
         - [I need to add a package to a jenkins slave](#i-need-to-add-a-package-to-a-jenkins-slave)
         - [My configuration is merged into app-interface but it isn't applied!](#my-configuration-is-merged-into-app-interface-but-it-isnt-applied)
+        - [My tekton deploy PipelineRun is silenty failing for no obvious reason](#my-tekton-deploy-pipelinerun-is-silenty-failing-for-no-obvious-reason)
 
 <!-- markdown-toc end -->
 
@@ -90,10 +92,41 @@ Start by following [I can not access X](#i-can-not-access-x)
 
 Problem: I Can not log in to https://ci.ext.devshift.net.
 
-Managed to log in but having issues? Maybe even seeing this error message? `"Access denied: <your-github-username> is missing the Overall/Read permission"`
+Managed to log in but having issues? Maybe even seeing this error message? `"Access denied: <your-red-hat-username> is missing the Overall/Read permission"`
 
-1. Log out and log in again.
-2. Revoke the `jenkins-ci-ext` Authorized OAuth app in [GitHub settings](https://github.com/settings/applications) and log in again.
+Access is managed via app-interface. The role that grants access is [ci-ext-ro-access](/data/dependencies/ci-ext/roles/ci-ext-ro-access.yml).
+
+If you don't have a user file on app-interface:
+
+1. Submit a MR to app-interface adding your user file
+1. Add the [ci-ext-ro-access](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/ci-ext/roles/ci-ext-ro-access.yml) role to your user file in the same MR.
+
+If you already have a user file
+
+1. Make sure that your user has the [ci-ext-ro-access](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/ci-ext/roles/ci-ext-ro-access.yml) role assigned, if it's not the case, submit a MR adding the role to your user file.
+
+*Note that the permission could be granted to your user via a role that has the permission assigned, check if any of the roles assigned to your user have the access to ci-ext*
+
+### I can not access ci-int
+
+Start by following [I can not access X](#i-can-not-access-x)
+
+Problem: I Can not log in to https://ci.int.devshift.net.
+
+Managed to log in but having issues? Maybe even seeing this error message? `"Access denied: <your-red-hat-username> is missing the Overall/Read permission"`
+
+Access is managed via app-interface. The role that grants access is [ci-int-access](/data/dependencies/ci-int/roles/ci-int-access.yml).
+
+If you don't have a user file on app-interface:
+
+1. Submit a MR to app-interface adding your user file
+1. Add the [ci-int-access](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/ci-int/roles/ci-int-access.yml) role to your user file in the same MR.
+
+If you already have a user file
+
+1. Make sure that your user has the [ci-int-access](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/dependencies/ci-int/roles/ci-int-access.yml) role assigned, if it's not the case, submit a MR adding the role to your user file.
+
+*Note that the permission could be granted to your user via a role that has the permission assigned, check if any of the roles assigned to your user have the access to ci-int*
 
 ### I can not access Grafana
 
@@ -134,9 +167,9 @@ The App SRE team uses the CloudWatch Log Forwarding Addon to forward Application
 
 To get access to CloudWatch on a cluster's AWS account, follow these steps (examples for `app-sre-stage-01`):
 
-1. Submit a MR to app-interface to add the [log-consumer](https://gitlab.cee.redhat.com/service/app-interface/-/blob/f0ca82a2253b4c213c8b438408f68113a662d6c1/data/aws/app-sre/roles/log-consumer.yml) role to your user file. You will also need to [add your public GPG key](https://gitlab.cee.redhat.com/service/app-interface#adding-your-public-gpg-key) (if you havn't already) in the same MR.
-    * For console.redhat.com use the [log-consumer-crc](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre/roles/log-consumer-crc.yml) role.
-1. Once the MR is merged you will get an email invitation to join the AWS account (in this example - the `app-sre` account). Follow the instructions in the email to login to the account.
+1. Submit a MR to app-interface to add the [log-consumer](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre-logs/roles/log-consumer.yml) role to your user file. You will also need to [add your public GPG key](https://gitlab.cee.redhat.com/service/app-interface#adding-your-public-gpg-key) (if you havn't already) in the same MR.
+    * For console.redhat.com use the [log-consumer-crc](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/aws/app-sre-logs/roles/log-consumer-crc.yml) role.
+1. Once the MR is merged you will get an email invitation to join the AWS account (in this example - the `app-sre-logs` account). Follow the instructions in the email to login to the account.
     * Note: in case you did not get an invitation, the login details can be obtained from the [Terraform-users Credentials](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/terraform-users-credentials.md) page.
     * Note: to decrypt the password: `echo <password> | base64 -d | gpg -d - && echo` (you will be asked to provide your passphrase to unlock the secret) 
 1. Once you are logged in, go to [Security Credentials page](https://console.aws.amazon.com/iam/home?#/security_credentials) and enable Multi-factor authentication (MFA).
@@ -310,3 +343,7 @@ If using a containerized build is not possible, please submit an MR to the [infr
 Check your namespace and your saas file! Is your new configuration's type listed in the `managedResourceTypes` field? For instance, if you have submitted a new `ConfigMap` for a namespace, its namespace file must list `ConfigMap` in its `managedResourceTypes`.
 
 Review #sd-app-sre-reconcile in slack for messages related to your configuration, it should tell you if it is applying it or it is skipping it. See [this ticket](https://issues.redhat.com/browse/APPSRE-3668)
+
+### My tekton deploy PipelineRun is silenty failing for no obvious reason
+
+If the `openshift-saas-deploy` Task of the Pipeline fails to finish successfully and leaves no trace about there's a good chance that the pod responsible to execute the Task's steps are hitting the memory limit getting killed by the kernel OOM. In order to verify this, you can search for pods in the tekton provider's namespace associated your saas file. If you see pods related to your `PipelineRun` (which are named after your saas file) showing `OOMKilled` status, you will need to increase the resources assigned to your deployment pods. In order to do that, just add a [`deployResources`](/docs/app-sre/continuous-delivery-in-app-interface.md#saas-file-structure) section in your saas file or increase the resources associated there. The resulting MR can be approved by the saas file owners.

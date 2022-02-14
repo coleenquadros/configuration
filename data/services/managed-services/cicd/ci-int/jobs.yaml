@@ -54,7 +54,7 @@ config:
             display_name: mk-strimzi-operator 2.8 0.26.x release
             archive_artifacts: 'test-results/**'
             junit_results: 'test-results/strimzi-operator/failsafe-reports/*.xml'
-            build_deploy_script_path: './ci-cd/build_deploy.sh'
+            build_deploy_script_path: './cicd/build_deploy.sh'
             cleanup_script: './cicd/build_cleanup.sh'
             release: true
         - 'managed-services-security-scan':
@@ -276,6 +276,20 @@ config:
             cron_expression: 'H 7 * * 2-5' # ~7am UTC Tuesday to Friday
 
   - project:
+      name: kafka-storage-expansions
+      label: kas-fleet-manager
+      node: managed-services
+      gl_group: mk-ci-cd
+      gl_project: kafka-storage-expansions
+      jobs:
+        - 'gl-build-master-kafka-storage-expansions':
+            branch: main
+            display_name: kafka storage upgrade
+            build_deploy_script_path: './run.sh'
+            slack_channel_notification: mk-kas-fleet-manager
+            timeout: 300
+
+  - project:
       name: managed-services-kafka-performance-tests
       label: managed-services
       node: managed-services
@@ -299,9 +313,11 @@ config:
         - 'gl-pr-check':
             display_name: managed-service-ci-tools pr-check
             pr_check_script_path: './hack/pr_check.sh'
+            timeout: 120
         - 'gl-build-master':
             display_name: managed-service-ci-tools build master
             build_deploy_script_path: './hack/build_deploy.sh'
+            timeout: 120
         - 'managed-services-pull-upstream':
             display_name: managed services pull upstream
             ci_cmd: 'make pull/upstream/all'
@@ -316,11 +332,15 @@ config:
             ui: kafka
             display_name: managed-{ui} promote ui components
             repositories: 'https://github.com/RedHatInsights/rhosak-dashboard-build;https://github.com/RedHatInsights/rhoas-guides-build;https://github.com/RedHatInsights/rhosak-control-plane-ui-build;https://github.com/RedHatInsights/rhosak-data-plane-ui-build'
+            reportportal_project: 'RHOSAK'
+            reportportal_launch: 'mk-webui-test-suite-stage'
             timeout: 120
         - 'managed-services-promote-ui':
             ui: sr
             display_name: managed-{ui} promote ui components
             repositories: 'https://github.com/RedHatInsights/sr-ui-build;https://github.com/RedHatInsights/srs-ui-build'
+            reportportal_project: 'RHOSAK'
+            reportportal_launch: 'sr-webui-test-suite-stage'
             timeout: 120
         - 'managed-services-pull-upstream-tag':
             display_name: managed services pull upstream tag
@@ -331,70 +351,6 @@ config:
         - 'managed-services-patch-latest-midstream':
             display_name: managed services patch latest midstream
             ci_cmd: 'make patch/latest/midstream'
-
-  - project:
-      name: managed-kafka-fault-tests-manual
-      label: managed-services
-      node: managed-services
-      gh_org: bf2fc6cc711aee1a0c2a
-      gh_repo: kas-fault-tests
-      jobs:
-        - 'managed-kafka-fault-tests-manual':
-            default_branch: main
-            display_name: 'managed-kafka-fault-tests-manual'
-            timeout: 3600
-            slack_channel_notification: forum-managed-kafka
-
-  - project:
-      name: managed-kafka-fault-tests-nightly
-      label: managed-services
-      node: managed-services
-      gh_org: bf2fc6cc711aee1a0c2a
-      gh_repo: kas-fault-tests
-      jobs:
-        - 'managed-kafka-fault-tests-nightly':
-            default_branch: main
-            display_name: 'managed-kafka-fault-tests-nightly'
-            timeout: 3600
-            slack_channel_notification: forum-managed-kafka
-            cron_expression: 'H 1 * * 1-5' # At 1:00 on every day-of-week from Monday through Friday
-
-  - project:
-      name: managed-services-kafka-perf-tests
-      label: managed-services
-      node: managed-services
-      gl_group: mk-bin-packing
-      gl_project: mk-performance-tests
-      jobs:
-        - 'managed-kafka-perf-tests':
-            default_branch: master
-            display_name: 'managed-kafka-perf-tests'
-            timeout: 3600
-            slack_channel_notification: forum-managed-kafka
-
-  - project:
-      name: managed-services-kafka-perf-1hr-integration
-      label: managed-services
-      node: managed-services
-      gl_group: mk-bin-packing
-      gl_project: mk-performance-tests
-      jobs:
-        - 'managed-kafka-perf-tests-1hr-integration':
-            default_branch: master
-            display_name: 'managed-kafka-perf-tests-1hr-integration'
-            timeout: 3600
-            slack_channel_notification: forum-managed-kafka
-            cron_expression: 'H 2 * * MON' # At 02:00 on every Monday
-  - project:
-      name: purge-velero-backups
-      label: managed-services
-      node: managed-services
-      gl_group: mk-bin-packing
-      gl_project: mk-performance-tests
-      jobs:
-        - 'aws-purge-velero-backup':
-            display_name: 'aws-purge-velero-backup'
-            timeout: 3600
 
   - project:
       name: mk-e2e-test-suite

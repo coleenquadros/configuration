@@ -1,0 +1,65 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: subscriptions
+  platform: insights
+
+name: subscriptions-clowder
+description: subscriptions app deployed via clowder
+
+app:
+  $ref: /services/insights/subscriptions/app.yml
+
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+managedResourceTypes:
+- ClowdApp
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+    version: 3
+
+parameters:
+  LOG_GROUP: platform
+
+resourceTemplates:
+- name: yupana
+  path: /clowdapp.yaml
+  url: https://github.com/quipucords/yupana
+  parameters:
+    CLOWDER_ENABLED: 'True'
+  targets:
+  - namespace:
+      $ref: /services/insights/subscriptions/namespaces/stage-subscriptions-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: quipucords-yupana-gh-build-master
+  - namespace:
+      $ref: /services/insights/subscriptions/namespaces/subscriptions-prod.yml
+    ref: 78781ed834f34ec52aff0fa3eff4bf67523619ef
+    parameters:
+      IMAGE_TAG: 42329d2
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+    parameters:
+      MEMORY_LIMIT: '2Gi'
+

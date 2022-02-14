@@ -1,0 +1,252 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: ingress
+  platform: insights
+
+name: ingress-clowder-int
+description: ingress app on the Insights Platform via clowder
+
+app:
+  $ref: /services/insights/ingress/app.yml
+
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
+
+deployResources:
+  requests:
+    cpu: 300m
+    memory: 600Mi
+  limits:
+    cpu: 300m
+    memory: 600Mi
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+managedResourceTypes:
+- ClowdApp
+- ConfigMap
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+    version: 3
+
+parameters:
+  CLOWDER_ENABLED: "true"
+
+resourceTemplates:
+- name: ingress-sideloader
+  path: /deploy/clowdapp.yml
+  url: https://gitlab.cee.redhat.com/insights-platform/ingress-sideloader
+  targets:
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/stage-ingress-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: insights-platform-ingress-sideloader-gl-build-master
+    parameters:
+      MIN_REPLICAS: 2
+      ENV_NAME: stage
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/ingress-prod.yml
+    ref: 71d3aa9888dbc8782cd3cbf85bffee0a54c26820
+    parameters:
+      MIN_REPLICAS: 3
+      ENV_NAME: prod
+- name: puptoo
+  path: /deployment.yaml
+  url: https://github.com/RedHatInsights/insights-puptoo
+  targets:
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/stage-ingress-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-insights-puptoo-gh-build-master
+    parameters:
+      MIN_REPLICAS: 4
+      ENV_NAME: stage
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/ingress-fedramp-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-insights-puptoo-gh-build-master
+    parameters:
+      MIN_REPLICAS: 4
+      KAFKA_LOGGER: DEBUG
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/ingress-prod.yml
+    ref: f37270e832e8c7659bb3f7816c1bbc5d81c0310b
+    parameters:
+      MIN_REPLICAS: 64
+      ENV_NAME: prod
+      MEMORY_LIMIT: 2Gi
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ocm.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-insights-puptoo-ocm
+    parameters:
+      ENV_NAME: env-ocm
+      MIN_REPLICAS: 4
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/crcd01ue1.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-insights-puptoo-gh-build-master
+    parameters:
+      MIN_REPLICAS: 1
+      ENV_NAME: canary
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+    parameters:
+      MIN_REPLICAS: 1
+- name: ingress
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/insights-ingress-go
+  targets:
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/stage-ingress-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-insights-ingress-go-gh-build-master
+    parameters:
+      ENV_NAME: stage
+      INGRESS_STAGEBUCKET: upload-stage
+      INGRESS_PAYLOADTRACKERURL: http://payload-tracker-api.payload-tracker-stage.svc.cluster.local:8000/api/v1/payloads/
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/crcd01ue1.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-insights-ingress-go-gh-build-master
+    parameters:
+      ENV_NAME: canary
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/ingress-fedramp-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-insights-ingress-go-gh-build-master
+    parameters:
+      INGRESS_STAGEBUCKET: upload-fedramp-stage
+      INGRESS_PAYLOADTRACKERURL: http://payload-tracker-api.payload-tracker-stage.svc.cluster.local:8000/api/v1/payloads/
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/ingress-prod.yml
+    ref: f5f03ce2ed6771840c6d8fc564fce8c4b246ebfe 
+    parameters:
+      ENV_NAME: prod
+      INGRESS_STAGEBUCKET: insights-ingress-prod
+      INGRESS_PAYLOADTRACKERURL: http://payload-tracker-api.payload-tracker-prod.svc.cluster.local:8000/api/v1/payloads/
+      MIN_REPLICAS: 10
+      MEMORY_LIMIT: 1Gi
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ocm.yml
+    ref: master
+    parameters:
+      ENV_NAME: env-ocm
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-insights-ingress-ocm
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+    parameters:
+      MIN_REPLICAS: 1
+      INGRESS_PAYLOADTRACKERURL: http://payload-tracker-api:8000/api/v1/payloads/
+- name: storage-broker
+  path: /deploy/clowdapp.yml
+  url: https://github.com/RedHatInsights/insights-storage-broker
+  targets:
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/stage-ingress-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-insights-storage-broker-gh-build-master
+    parameters:
+      MIN_REPLICAS: 4
+      ENV_NAME: stage
+      OPENSHIFT_BUCKET: insights-buck-it-openshift-stage
+      ANSIBLE_BUCKET: insights-buck-it-ansible-stage
+      PERM_BUCKET: upload-stage
+      REJECT_BUCKET: insights-ingress-rejected-stage
+      BUCKET_MAP_FILE: /var/config.yaml
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/ingress-fedramp-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-insights-storage-broker-gh-build-master
+    parameters:
+      MIN_REPLICAS: 4
+      OPENSHIFT_BUCKET: insights-buck-it-openshift-fedramp-stage
+      ANSIBLE_BUCKET: insights-buck-it-ansible-fedramp-stage
+      PERM_BUCKET: upload-fedramp-stage
+      REJECT_BUCKET: insights-ingress-rejected-fedramp-stage
+      BUCKET_MAP_FILE: /var/config.yaml
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/ingress-prod.yml
+    ref: 1ee3e03d0ea3a00c05aadf308baba2273a9c8937
+    parameters:
+      MIN_REPLICAS: 3
+      ENV_NAME: prod
+      REJECT_BUCKET: insights-ingress-rejected-prod
+      OPENSHIFT_BUCKET: insights-buck-it-openshift-prod
+      ANSIBLE_BUCKET: insights-buck-it-ansible-prod
+      PERM_BUCKET: insights-ingress-prod
+      BUCKET_MAP_FILE: /var/config.yaml
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ocm.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-insights-storage-broker-ocm
+    parameters:
+      ENV_NAME: env-ocm
+      MIN_REPLICAS: 4
+  - namespace:
+      $ref: /services/insights/ingress/namespaces/crcd01ue1.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-insights-storage-broker-gh-build-master
+    parameters:
+      ENV_NAME: env-ocm
+      MIN_REPLICAS: 4
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+    parameters:
+      MIN_REPLICAS: 1

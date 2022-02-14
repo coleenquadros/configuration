@@ -21,9 +21,7 @@ We will start seeing alerts when the SSL cert is close to expiry, or when its al
 - Check the relevant prometheus instance for `probe_success`
 - Get the labels from `probe_success` and list all other metrics
 - Find the metric that's failing the probe
-- For further troubleshooting, blackbox exporter logs the probes at its url, for example:
-    - https://blackbox-exporter.devshift.net/
-    - http://10.0.132.216:9115/ (CentralCI)
+- For further troubleshooting, blackbox exporter logs the probes at its url. See this [SOP for accessing the blackbox-exporter](accessing-blackbox-exporter-and-domain-exporter.md#blackbox-exporter).
 
 ## Escalations
 

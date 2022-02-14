@@ -20,7 +20,7 @@ Available options:
 
 - Cluster:
     * disable `integrations` and/or `e2e-tests`
-    * [schema](https://github.com/app-sre/qontract-schemas/blob/7780755424781d8b88839d2c37e32ccb45fc52da/schemas/openshift/cluster-1.yml#L437-L466)]
+    * [schema](https://github.com/app-sre/qontract-schemas/blob/ad05411b16709ddf94f574cd3356319f3fd7298b/schemas/openshift/cluster-1.yml#L450-L481)]
     * [example](/data/openshift/insights/cluster.yml#L20-27)]
 
 - AWS account:
