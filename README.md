@@ -122,13 +122,13 @@ This repository contains of a collection of files under the `data` folder.
 Whatever is present inside that folder constitutes the App-SRE contract.
 
 These files can be `yaml` or `json` files, and they must validate against some
-[well-defined json schemas][https://github.com/app-sre/qontract-schemas].
+[well-defined json schemas](https://github.com/app-sre/qontract-schemas).
 
 The path of the files do not have any effect on the integrations (automation
 components that feed off the contract), but the contents of the files do. They
 will all contain:
 
-- `$schema`: which maps to a well defined schema [schema][https://github.com/app-sre/qontract-schemas].
+- `$schema`: which maps to a well defined [schema](https://github.com/app-sre/qontract-schemas).
 - `labels`: arbitrary labels that can be used to perform queries, etc.
 - Additional data specific to the resource in question.
 
@@ -168,7 +168,7 @@ amendment. Some examples would be:
 
 All contract amendments must be formally defined. Formal definitions are
 expressed as json schemas. You can find the supported schemas here:
-[schemas][https://github.com/app-sre/qontract-schemas].
+https://github.com/app-sre/qontract-schemas.
 
 1. The interested party will:
 
