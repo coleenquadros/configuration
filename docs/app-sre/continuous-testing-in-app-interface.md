@@ -52,14 +52,6 @@ In order to define Continuous Testing pipelines in app-interface:
 
 A complete example for github-mirror can be found [here](/data/services/github-mirror/cicd/test.yaml).
 
-### Tests Re-runs (tekton)
-Sometimes test stages fail due to flaky tests or by other reasons and rerunning them could improve the overall ci/cd system:
-* It prevents commits/parameters to just trigger pipelines without any change
-* It saves time rebuilding images and/or running unnecessary previous steps
-
-To enable `Job` reruns, the `Job` name must change in every deployment even though there is no image change. If the name does not change, the integration does not detect any change and the job won't trigger because it already exists.
-To ensure the `Job` has a new name on every run, `templates` have an option to generate a random string parameter that can be attached to the `Job` name:
-
 ```
 ### Define post-deployment testing for resources behind the Red Hat VPN
 
