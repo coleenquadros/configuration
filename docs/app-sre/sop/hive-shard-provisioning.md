@@ -82,6 +82,7 @@ Provisioning hive is a multi-step process:
     | `data/teams/hive/roles/dev.yml`              | hive-admins<br>View access to namespace | hive-readers<br>View access to namespace |
     | `data/teams/hive/roles/qe.yml`               | hive-admins                             | hive-readers                             |
     | `data/teams/ocm/roles/dev.yml`               | hive-readers                            | hive-readers                             |
+    | `data/teams/ocm/roles/addons-dev.yml`        | hive-readers                            | hive-readers                             |
     | `data/teams/app-sre/roles/app-sre.yml`       | hive-admins                             | hive-admins                              |
     | `data/teams/sd-sre/roles/sre.yml`            | dedicated-readers                       | dedicated-readers                        |
     | `data/teams/sd-sre/roles/sre-breakglass.yml` | -                                       | hive-frontend                            |

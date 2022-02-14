@@ -1,0 +1,36 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: quay-service-tool-prod
+spec:
+  groups:
+  - name: quickstarts-prod
+    rules:
+      - alert: 5xx-on-Quayio-Service-Tool
+        expr: |
+          (
+          sum(rate(haproxy_backend_http_responses_total{exported_namespace="quay",route="quayio-service-tool-route",code="5xx"}[15m]))
+          /
+          sum(rate(haproxy_backend_http_responses_total{exported_namespace="quay",route="quayio-service-tool-route"}[15m]))
+          ) * 100 > 5
+        for: 30m
+        labels:
+          severity: high
+          service: quay
+        annotations:
+          message: "Quayio Service Tool is reporting more than 50% error rate"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/sop/service-tool-5xx-errors.md"
+      - alert: Quayio Service Tool application absent
+        expr: absent(up{service="quayio-service-tool"} == 1)
+        for: 30m
+        labels:
+          severity: warning
+          service: quay
+        annotations:
+          message: "Error starting Quayio Service Tool"
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/sop/service-tool-down.md"

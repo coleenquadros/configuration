@@ -67,14 +67,66 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-backend commit hash that determines the clowdapp-backend.yaml version
-    ref: 97697a3aad50d237686c816e722c3a10a17d1baf
+    ref: 4e5c3c79021eb90abe826474d554453d5c3d8ce5
     parameters:
       # quay.io tag that will be deployed
-      IMAGE_TAG: 97697a3
+      IMAGE_TAG: 4e5c3c7
       CLOUDWATCH_ENABLED: true
-      CPU_REQUEST: 200m
+      CPU_LIMIT: 300m
+      CPU_REQUEST: 150m
+      MIN_REPLICAS: 3
+      NOTIFICATIONS_LOG_LEVEL: DEBUG
+      SENTRY_ENABLED: true
+    promotion:
+      publish:
+      - notifications-backend-stage-deploy-success-channel
+
+  # prod
+  - namespace:
+      $ref: /services/insights/notifications/namespaces/notifications-prod.yml
+    # notifications-backend commit hash that determines the clowdapp-backend.yaml version
+    ref: e270e074bc6f2b46d257b2160d5751f2e88feb05
+    parameters:
+      # quay.io tag that will be deployed
+      IMAGE_TAG: e270e07
+      CLOUDWATCH_ENABLED: true
+      CPU_LIMIT: 3
+      MEMORY_LIMIT: 4Gi
+      MIN_REPLICAS: 3
+      NOTIFICATIONS_LOG_LEVEL: DEBUG
+      SENTRY_ENABLED: true
+    promotion:
+      publish:
+      - notifications-backend-prod-deploy-success-channel
+
+# notifications-engine
+- name: notifications-engine
+  path: /.rhcicd/clowdapp-engine.yaml
+  url: https://github.com/RedHatInsights/notifications-backend
+  targets:
+
+  # ephemeral
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    # app-sre will not deploy this target
+    disable: true
+    # populated by bonfire
+    ref: internal
+
+  # stage
+  - namespace:
+      $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
+    # notifications-backend commit hash that determines the clowdapp-engine.yaml version
+    ref: 4e5c3c79021eb90abe826474d554453d5c3d8ce5
+    parameters:
+      # quay.io tag that will be deployed
+      IMAGE_TAG: 4e5c3c7
+      CLOUDWATCH_ENABLED: true
+      CPU_LIMIT: 300m
+      CPU_REQUEST: 150m
       KAFKA_CONSUMED_TOTAL_CHECKER_ENABLED: true
-      KAFKA_CONSUMED_TOTAL_CHECKER_MAX_FAILURES: 60
+      KAFKA_CONSUMED_TOTAL_CHECKER_INITIAL_DELAY: 60m
+      KAFKA_CONSUMED_TOTAL_CHECKER_PERIOD: 120m
       MIN_REPLICAS: 3
       MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_INTERVAL_MS: 1200000
       MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_RECORDS: 100
@@ -85,29 +137,31 @@ resourceTemplates:
       SENTRY_ENABLED: true
     promotion:
       publish:
-      - notifications-backend-stage-deploy-success-channel
+      - notifications-engine-stage-deploy-success-channel
 
   # prod
   - namespace:
       $ref: /services/insights/notifications/namespaces/notifications-prod.yml
-    # notifications-backend commit hash that determines the clowdapp-backend.yaml version
-    ref: 83135eeae58db4c8c15081676ef9875ac981030a
+    # notifications-backend commit hash that determines the clowdapp-engine.yaml version
+    ref: 3b2e51c9b9424eb77f338a35aa12b38dc9d4f0f6
     parameters:
       # quay.io tag that will be deployed
-      IMAGE_TAG: 83135ee
+      IMAGE_TAG: e270e07
       CLOUDWATCH_ENABLED: true
       CPU_LIMIT: 3
       MEMORY_LIMIT: 4Gi
       KAFKA_CONSUMED_TOTAL_CHECKER_ENABLED: true
-      KAFKA_CONSUMED_TOTAL_CHECKER_MAX_FAILURES: 5
       MIN_REPLICAS: 1
-      MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_INTERVAL_MS: 1200001
+      MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_INTERVAL_MS: 1200000
       MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_RECORDS: 100
       MP_MESSAGING_INCOMING_INGRESS_THROTTLED_UNPROCESSED_RECORD_MAX_AGE_MS: 120000
       NOTIFICATIONS_LOG_LEVEL: DEBUG
       PROCESSOR_EMAIL_NO_REPLY: no-reply@redhat.com
       RBAC_S2S_READ_TIMEOUT: 120000
       SENTRY_ENABLED: true
+    promotion:
+      publish:
+      - notifications-engine-prod-deploy-success-channel
 
 # notifications-aggregator
 - name: notifications-aggregator
@@ -127,27 +181,33 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-backend commit hash that determines the clowdapp-aggregator.yaml version
-    ref: 97697a3aad50d237686c816e722c3a10a17d1baf
+    ref: 4e5c3c79021eb90abe826474d554453d5c3d8ce5
     parameters:
       # quay.io tag that will be deployed
-      IMAGE_TAG: 97697a3
+      IMAGE_TAG: 4e5c3c7
       CLOUDWATCH_ENABLED: true
       CPU_REQUEST: 200m
       CRONTAB_AGGREGATION_JOB: 0 * * * *
       NOTIFICATIONS_LOG_LEVEL: DEBUG
       SENTRY_ENABLED: true
+    promotion:
+      publish:
+      - notifications-aggregator-stage-deploy-success-channel
 
   # prod
   - namespace:
       $ref: /services/insights/notifications/namespaces/notifications-prod.yml
     # notifications-backend commit hash that determines the clowdapp-aggregator.yaml version
-    ref: 83135eeae58db4c8c15081676ef9875ac981030a
+    ref: e270e074bc6f2b46d257b2160d5751f2e88feb05
     parameters:
       # quay.io tag that will be deployed
-      IMAGE_TAG: 83135ee
+      IMAGE_TAG: e270e07
       CLOUDWATCH_ENABLED: true
       NOTIFICATIONS_LOG_LEVEL: DEBUG
       SENTRY_ENABLED: true
+    promotion:
+      publish:
+      - notifications-aggregator-prod-deploy-success-channel
 
 # notifications-gw
 - name: notifications-gw
@@ -167,25 +227,31 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-gw commit hash that determines the clowdapp.yaml version
-    ref: a79586346d2f7c062af184bf49af1c7e9aa89a21
+    ref: 6c9bc369211da5a6df8bd150afe9a32637999545
     parameters:
       # quay.io tag that will be deployed
-      IMAGE_TAG: a795863
+      IMAGE_TAG: 6c9bc36
       CLOUDWATCH_ENABLED: true
       CPU_REQUEST: 200m
       MIN_REPLICAS: 3
       NOTIFICATIONS_LOG_LEVEL: DEBUG
       SENTRY_ENABLED: true
+    promotion:
+      publish:
+      - notifications-gw-stage-deploy-success-channel
 
   # prod
   - namespace:
       $ref: /services/insights/notifications/namespaces/notifications-prod.yml
     # notifications-gw commit hash that determines the clowdapp.yaml version
-    ref: a79586346d2f7c062af184bf49af1c7e9aa89a21
+    ref: c799bc71e752374a95a6619e0a9b905f74f29918
     parameters:
       # quay.io tag that will be deployed
-      IMAGE_TAG: a795863
+      IMAGE_TAG: c799bc7
       CLOUDWATCH_ENABLED: true
       MIN_REPLICAS: 3
       NOTIFICATIONS_LOG_LEVEL: DEBUG
       SENTRY_ENABLED: true
+    promotion:
+      publish:
+      - notifications-gw-prod-deploy-success-channel

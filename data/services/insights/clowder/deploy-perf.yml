@@ -20,11 +20,17 @@ slack:
   channel: team-clouddot-info
 
 managedResourceTypes:
-- CatalogSource
-- OperatorGroup
-- Subscription
+- CustomResourceDefinition
+- Deployment
 - Service
+- ClusterRole
+- Role
 - ConfigMap
+- ServiceAccount
+- RoleBinding
+- ClusterRoleBinding
+- ValidatingWebhookConfiguration
+- ConsolePlugin
 
 authentication:
   image:
@@ -39,8 +45,8 @@ imagePatterns:
 - quay.io/cloudservices/clowder
 
 resourceTemplates:
-- name: olm
-  path: /bundle/olm-bundle.yml
+- name: clowder-non-olm
+  path: /deploy.yml
   url: https://github.com/RedHatInsights/clowder
   targets:
   - namespace:
@@ -54,3 +60,14 @@ resourceTemplates:
       WATCH_STRIMZI_RESOURCES: "false"
       CREATE_SERVICE_MONITORS: "true"
       TARGET_NAMESPACE: "clowder-system"
+
+deployResources:
+  requests:
+    cpu: "1"
+    memory: 2000Mi
+  limits:
+    cpu: "1"
+    memory: 2000Mi
+
+clusterAdmin: true
+compare: false

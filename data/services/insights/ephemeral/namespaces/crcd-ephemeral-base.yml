@@ -1,0 +1,169 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: insights-ephemeral
+
+name: ephemeral-base
+description: Insights ephemeral base namespace for crcd
+
+cluster:
+  $ref: /openshift/insights/crcd01ue1/cluster.yml
+
+app:
+  $ref: /services/insights/ephemeral/app.yml
+
+environment:
+  $ref: /products/insights/environments/ephemeral.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+- Secret
+
+openshiftResources:
+- provider: resource
+  path: /insights-ephemeral/ephemeral-bot.serviceaccount.yaml
+- provider: resource
+  path: /insights-ephemeral/aap-qe-bot.serviceaccount.yaml
+- provider: resource
+  path: /insights-ephemeral/iqe-mr-check-bot.serviceaccount.yaml
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-common/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
+  path: insights/secrets/global/nachobot
+  version: 1
+  type: kubernetes.io/ssh-auth
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-common/iqe-vault.secret.yaml
+
+# marketplace
+- provider: vault-secret
+  path: insights/secrets/ephemeral/marketplace/marketplace-secret
+  version: 1
+
+# 3scale
+- provider: vault-secret
+  path: insights/secrets/ephemeral/3scale/apicast-configuration-url-secret
+  version: 1
+- provider: vault-secret
+  path: insights/secrets/ephemeral/3scale/apicast-insights-3scale-config
+  version: 16
+- provider: vault-secret
+  path: insights/secrets/ephemeral/3scale/apicast-insights-services-ephemeral-jwt-pub-key
+  version: 2
+- provider: vault-secret
+  path: insights/secrets/ephemeral/3scale/gateway-server
+  version: 2
+- provider: vault-secret
+  path: insights/secrets/backoffice/preprod/3scale-api-gw
+  version: 3
+
+# rhsm
+- provider: vault-secret
+  path: insights/secrets/insights-stage/rhsm-stage/splunk
+  version: 4
+- provider: vault-secret
+  path: insights/secrets/insights-stage/rhsm-stage/ingress
+  version: 4
+- provider: vault-secret
+  path: insights/secrets/insights-stage/rhsm-stage/pinhead
+  version: 4
+- provider: vault-secret
+  path: insights/secrets/insights-stage/rhsm-stage/tls
+  version: 2
+- provider: vault-secret
+  name: rhsm-token-refresher
+  path: insights/secrets/insights-stage/rhsm-stage/token-refresher
+  version: 4
+- provider: vault-secret
+  path: insights/secrets/insights-stage/rhsm-stage/marketplace
+  version: 1
+- provider: vault-secret
+  path: insights/secrets/insights-stage/rhsm-stage/splunk-hec-external
+  version: 1
+
+
+# rhsm-api-proxy
+- provider: vault-secret
+  path: insights/secrets/ephemeral/rhsm-api-proxy/proxy-client-tls
+  name: rhsm-api-proxy-client-tls
+  version: 1
+
+# vulnerability
+- provider: vault-secret
+  path: insights/secrets/insights-stage/vulnerability-engine-stage/github-vulnerability-bot
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/backoffice/preprod/vulnerability
+  name: backoffice
+  version: 2
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/vulnerability-engine-stage/vulnerability-boproxy-token
+  version: 4
+  annotations:
+    qontract.recycle: "true"
+
+# drift
+- provider: vault-secret
+  path: insights/secrets/insights-dev/drift-ci/drift-interpod-comms
+  name: drift-interpod-comms
+  version: 2
+
+# hccm (cost-management)
+- provider: vault-secret
+  path: insights/secrets/ephemeral/hccm/koku-aws
+  version: 2
+  annotations:
+    bonfire.ignore: "true"
+- provider: vault-secret
+  path: insights/secrets/ephemeral/hccm/koku-gcp
+  version: 1
+  annotations:
+    bonfire.ignore: "true"
+
+# cloudigrade
+- provider: vault-secret
+  path: insights/secrets/ephemeral/cloudigrade/cloudigrade-aws
+  version: 1
+  annotations:
+    bonfire.ignore: "true"
+- provider: vault-secret
+  path: insights/secrets/ephemeral/cloudigrade/cloudigrade-azure
+  version: 2
+  annotations:
+    bonfire.ignore: "true"
+
+# notifications
+- provider: vault-secret
+  path: insights/secrets/insights-dev/notifications-ci/backoffice
+  name: notifications-backoffice
+  version: 2
+  annotations:
+    bonfire.ignore: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-dev/notifications-ci/rbac-psks
+  name: notifications-rbac-psks
+  version: 2
+  annotations:
+    bonfire.ignore: "true"
+
+# rbac
+- provider: vault-secret
+  path: insights/secrets/backoffice/preprod/insights-rbac
+  version: 2

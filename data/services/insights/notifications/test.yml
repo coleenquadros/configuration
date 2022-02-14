@@ -17,7 +17,7 @@ pipelinesProvider:
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
-  channel: alerts-clouddot-notifications-preprod
+  channel: alerts-consoledot-notifications-preprod
 
 managedResourceTypes:
 - Job
@@ -41,7 +41,7 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
-    ref: 97697a3aad50d237686c816e722c3a10a17d1baf
+    ref: 4e5c3c79021eb90abe826474d554453d5c3d8ce5
     parameters:
       ENV_NAME: stage
     promotion:
@@ -54,5 +54,26 @@ resourceTemplates:
       - channel: notifications-backend-stage-deploy-success-channel
         data:
         - parent_saas: notifications-clowder
-          target_config_hash: 4aa51397a3b674f7
+          target_config_hash: 4d3b3387d8f03343
+          type: parent_saas_config
+- name: notifications-engine
+  path: /.rhcicd/stage-post-deployment-tests.yaml
+  url: https://github.com/RedHatInsights/notifications-backend
+  targets:
+  - namespace:
+      $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
+    ref: 4e5c3c79021eb90abe826474d554453d5c3d8ce5
+    parameters:
+      ENV_NAME: stage
+    promotion:
+      auto: true
+      subscribe:
+      - notifications-engine-stage-deploy-success-channel
+      publish:
+      - notifications-engine-stage-post-deploy-tests-success-channel
+      promotion_data:
+      - channel: notifications-engine-stage-deploy-success-channel
+        data:
+        - parent_saas: notifications-clowder
+          target_config_hash: c465a343de3a297d
           type: parent_saas_config

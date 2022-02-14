@@ -39,8 +39,8 @@ resourceTemplates:
     CLOWDER_ENABLED: 'True'
     DRIFT_ENABLE_RBAC: 'True'
     ENABLE_SMART_MANAGEMENT_ENTITLEMENT_CHECK: 'False'
-    MAX_REPLIACAS: 2
-    MIN_REPLIACAS: 2
+    MAX_REPLICAS: 3
+    MIN_REPLICAS: 3
   targets:
   - namespace:
       $ref: /services/insights/drift/namespaces/stage-drift-stage.yml
@@ -64,17 +64,14 @@ resourceTemplates:
 
   - namespace:
       $ref: /services/insights/drift/namespaces/drift-prod.yml
-    ref: 81fcea994a21a572c24e36ccc8992a0a8d4477b5
-    upstream:
-      instance:
-        $ref: /dependencies/ci-ext/ci-ext.yml
-      name: RedHatInsights-drift-backend-gh-build-master
+    ref: 3b11755f8eacc37f1e86eb60132b657c93a92449
     parameters:
-      IMAGE_TAG: 81fcea9
+      IMAGE_TAG: 3b11755
       SYSTEM_BASELINE_HOST: system-baseline-backend-service.system-baseline-prod.svc.cluster.local
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
     ref: internal  # populated by bonfire
-    #parameters:
-    #  SYSTEM_BASELINE_HOST: system-baseline-backend.system-baseline-prod.svc.cluster.local
+    parameters:
+      MAX_REPLICAS: 1
+      MIN_REPLICAS: 1

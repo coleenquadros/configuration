@@ -84,3 +84,29 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net/d/FRmd1NeWk1/cloud-connector?orgId=1"
         link_url: "https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/goto/65ca3ce87c38e6cb2ef5e806fdb8252c"
         message: "Cloud-Connector Alert.  Inventory message publish failure rate is high."
+
+
+    - alert: CloudConnectorInventoryStaleTimestampUpdaterFailure
+      expr: sum(sum_over_time(kube_pod_status_phase{namespace=~"cloud-connector-.*", phase="Failed", pod=~"cloud-connector-stale-timestamp-updater-.*"}[30m:5m]) < 3) by (pod, namespace) > 0
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/c91dcda039618ded/cloud-connector?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/cloud-connector-prod/deployments"
+        message: '{{ $labels.namespace }} Inventory Stale Timestamp Updater Failed | {{ $labels.pod }} failed to run'
+
+
+    - alert: CloudConnectorConnectionCountReporterFailure
+      expr: sum(sum_over_time(kube_pod_status_phase{phase="Failed", namespace=~"cloud-connector-.*", pod=~"cloud-connector-connection-per-account-reporter-.*"}[30m:5m]) < 3) by (pod, namespace) > 0
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: data-pipeline
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/c91dcda039618ded/cloud-connector?orgId=1&var-datasource=crcp01ue1-prometheus"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/cloud-connector-prod/deployments"
+        message: '{{ $labels.namespace }} Connection Count Reporter Failed | {{ $labels.pod }} failed to run'

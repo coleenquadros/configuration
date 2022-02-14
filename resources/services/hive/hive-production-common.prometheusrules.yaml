@@ -15,7 +15,7 @@ spec:
     - alert: HiveControllersDown - production - {{{shard_name}}}
       annotations:
         message: "No targets found for hive-controllers in namespace {{ $labels.namespace }}. hive-controllers is down."
-        runbook: "https://github.com/openshift/hive-sops/blob/master/sop"
+        runbook: "https://github.com/openshift/hive-sops/blob/master/sop/HiveControllerDown.md"
         dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
       expr: |
         absent(up{job="hive-controllers"} == 1)
@@ -27,7 +27,7 @@ spec:
     - alert: HiveClusterSyncDown - production - {{{shard_name}}}
       annotations:
         message: "No targets found for hive-clustersync in namespace {{ $labels.namespace }}. hive-clustersync is down."
-        runbook: "https://github.com/openshift/hive-sops/blob/master/sop"
+        runbook: "https://github.com/openshift/hive-sops/blob/master/sop/HiveControllerDown.md"
         dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
       expr: |
         absent(up{job="hive-clustersync"} == 1)
@@ -139,9 +139,9 @@ spec:
       # NoMatchingRoute53Zone
       # GCPInvalidProjectID
       expr: |
-        (max without (instance,pod,cluster_type) (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers",reason!~"AWSAPIRateLimitExceeded|AWSEC2QuotaExceeded|AWSVPCLimitExceeded|S3BucketsLimitExceeded|InvalidCredentials|EIPAddressLimitExceeded|NoWorkerNodes|AWSNATGatewayLimitExceeded|InvalidInstallConfigSubnet|PendingVerification|GCPInstanceTypeNotFound|GCPPreconditionFailed|GCPQuotaSSDTotalGBExceeded|GCPComputeQuotaExceeded|GCPServiceAccountQuotaExceeded|InvalidAWSTags|MissingPublicSubnetForZone|PrivateSubnetInMultipleZones|ErrorDeletingIAMRole|AWSSubnetDoesNotExist|AWSInsufficientPermissions|VcpuLimitExceeded|UserInitiatedShutdown|LoadBalancerLimitExceeded|AWSAccessDeniedSLR"} ) /3600) > 2
+        (max without (instance,pod,cluster_type) (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers",reason!~"AWSAPIRateLimitExceeded|AWSEC2QuotaExceeded|AWSVPCLimitExceeded|S3BucketsLimitExceeded|InvalidCredentials|EIPAddressLimitExceeded|NoWorkerNodes|AWSNATGatewayLimitExceeded|InvalidInstallConfigSubnet|PendingVerification|GCPInstanceTypeNotFound|GCPPreconditionFailed|GCPQuotaSSDTotalGBExceeded|GCPComputeQuotaExceeded|GCPServiceAccountQuotaExceeded|InvalidAWSTags|MissingPublicSubnetForZone|PrivateSubnetInMultipleZones|ErrorDeletingIAMRole|AWSSubnetDoesNotExist|AWSInsufficientPermissions|VcpuLimitExceeded|UserInitiatedShutdown|LoadBalancerLimitExceeded|AWSAccessDeniedSLR|ProxyTimeout|ProxyInvalidCABundle|ErrorCreatingNetworkLoadBalancer|NATGatewayFailed"} ) /3600) > 2
         and
-        (max without (instance,pod,cluster_type) (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers",reason!~"AWSAPIRateLimitExceeded|AWSEC2QuotaExceeded|AWSVPCLimitExceeded|S3BucketsLimitExceeded|InvalidCredentials|EIPAddressLimitExceeded|NoWorkerNodes|AWSNATGatewayLimitExceeded|InvalidInstallConfigSubnet|PendingVerification|GCPInstanceTypeNotFound|GCPPreconditionFailed|GCPQuotaSSDTotalGBExceeded|GCPComputeQuotaExceeded|GCPServiceAccountQuotaExceeded|InvalidAWSTags|MissingPublicSubnetForZone|PrivateSubnetInMultipleZones|ErrorDeletingIAMRole|AWSSubnetDoesNotExist|AWSInsufficientPermissions|VcpuLimitExceeded|UserInitiatedShutdown|LoadBalancerLimitExceeded|AWSAccessDeniedSLR"} ) /3600) < 168
+        (max without (instance,pod,cluster_type) (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers",reason!~"AWSAPIRateLimitExceeded|AWSEC2QuotaExceeded|AWSVPCLimitExceeded|S3BucketsLimitExceeded|InvalidCredentials|EIPAddressLimitExceeded|NoWorkerNodes|AWSNATGatewayLimitExceeded|InvalidInstallConfigSubnet|PendingVerification|GCPInstanceTypeNotFound|GCPPreconditionFailed|GCPQuotaSSDTotalGBExceeded|GCPComputeQuotaExceeded|GCPServiceAccountQuotaExceeded|InvalidAWSTags|MissingPublicSubnetForZone|PrivateSubnetInMultipleZones|ErrorDeletingIAMRole|AWSSubnetDoesNotExist|AWSInsufficientPermissions|VcpuLimitExceeded|UserInitiatedShutdown|LoadBalancerLimitExceeded|AWSAccessDeniedSLR|ProxyTimeout|ProxyInvalidCABundle|ErrorCreatingNetworkLoadBalancer|NATGatewayFailed"} ) /3600) < 168
       for: 10m
       labels:
         service: hive

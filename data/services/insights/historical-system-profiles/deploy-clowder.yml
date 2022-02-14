@@ -36,6 +36,13 @@ resourceTemplates:
 - name: historical-system-profiles
   path: /clowdapp.yaml
   url: https://github.com/RedHatInsights/historical-system-profiles-backend
+  parameters:
+    CLOWDER_ENABLED: 'True'
+    DRIFT_ENABLE_RBAC: 'True'
+    ENABLE_SMART_MANGEMENT_ENTITLEMENT_CHECK: 'False'
+    MAX_REPLICAS: 3
+    MIN_REPLICAS: 3
+
   targets:
   - namespace:
       $ref: /services/insights/historical-system-profiles/namespaces/stage-historical-system-profiles-stage.yml
@@ -62,17 +69,14 @@ resourceTemplates:
 
   - namespace:
       $ref: /services/insights/historical-system-profiles/namespaces/historical-system-profiles-prod.yml
-    ref: 7303d9719c52075a24278af067d1b8f8a87d24bc
-    upstream:
-      instance:
-        $ref: /dependencies/ci-ext/ci-ext.yml
-      name: RedHatInsights-historical-system-profiles-backend-gh-build-master
+    ref: 01bc89b8171047bb6df0a36ed85740bd7e28cd6d
     parameters:
-      IMAGE_TAG: 7303d97
+      IMAGE_TAG: 01bc89b
       SYSTEM_BASELINE_HOST: system-baseline-backend-service.system-baseline-prod.svc.cluster.local
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
     ref: internal  # populated by bonfire
-  #parameters:
-    #      SYSTEM_BASELINE_HOST: system-baseline-backend.system-baseline-prod.svc.cluster.local
+    parameters:
+      MIN_REPLICAS: 1
+      MAX_REPLICAS: 1

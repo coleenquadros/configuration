@@ -44,6 +44,12 @@
         results: 'artifacts/junit-*.xml'
     - archive:
         artifacts: 'artifacts/**/*'
+    - slack:
+        room: '{slack_channel_notification}'
+        notify-start: false
+        notify-success: false
+        notify-failure: true
+        notify-repeated-failure: true
     <<: *gl_timed
 
 - job-template:
@@ -239,9 +245,7 @@
             permit-all: false
             trigger-phrase: '(?ms).*^(\[test\]|\/retest|\/lgtm|\/lgtm cancel|\/hold|\/hold cancel)\s*$.*'
             org-list:
-            - app-sre
-            - openshift
-            - RedHatInsights
+            - '{gh_org}'
             allow-whitelist-orgs-as-admins: true
             status-context: '{status_context}'
             white-list-target-branches:
@@ -267,6 +271,7 @@
     deploy_timeout: ""
     additional_arg: ""
     post_deployment_script: ""
+    verbose: false
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'
@@ -347,6 +352,10 @@
           - "24"
           - "72"
         description: "Number of hours for which the ephemeral namespace is reserved"
+    - bool:
+        name: VERBOSE
+        default: {obj:verbose}
+        description: "(optional) if selected, the job's console output will be verbose"
     builders:
     - shell:
         command: "{ci_cmd}"

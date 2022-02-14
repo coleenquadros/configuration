@@ -373,413 +373,6 @@
     - <<: *slack_notify
 
 - job-template:
-    id: managed-kafka-fault-tests-manual
-    name: "{display_name}"
-    wrappers:
-      - timestamps
-      - timeout_wrapper:
-          timeout: "{timeout}"
-      - ansicolor
-      - vault-secrets:
-          <<: *vault_defaults
-          secrets:
-            - *ci_test_token
-            - *rhosak_tests_tokens
-            - *aws_rhosak_1
-    concurrent: true
-    parameters:
-    - string:
-        name: BRANCH
-        default: '{default_branch}'
-        description: 'The branch of kas-fault-tests repo you want to run the pipeline against. Defaults to main'
-    - string:
-        name: OPENSHIFT_VERSION
-        default: '4.8.15'
-        description: 'The version of openshift to be used when deploying the OSD cluster. Default 4.8.15'
-    - string:
-        name: OCM_CLUSTER_NAME
-        default: ''
-        description: 'OSD cluster name (if not defined, a random name will be set), max name length is 14 characters. If the cluster already exists, it will be used. Otherwise, it will be provisioned'
-    - string:
-          name: KAFKA_INSTANCE_NAME
-          default: 'kafka-instance'
-          description: 'The namespace of an existing Kafka instance you want to run the pipeline against. Not required if the pipeline is installing Kafka using the INSTALL_KAFKA parameter'
-    - string:
-          name: COMPUTE_NODES_COUNT
-          default: '3'
-          description: '[REQUIRED] OSD worker nodes for kafka cluster. If you select multi-az you must have a multiple of 3 for COMPUTE_NODES_COUNT'
-    - choice:
-        name: COMPUTE_MACHINE_TYPE
-        description: '[REQUIRED] node type of cluster compute nodes'
-        choices:
-            - m5.4xlarge
-            - m5.2xlarge
-            - m5.xlarge
-    - choice:
-        name: OCM_CLUSTER_REGION
-        description: '[REQUIRED] AWS region for the OSD cluster. If executing cloud layer tests, ensure that the cluster is in a region where no other clusters are deployed'
-        choices:
-            - us-east-1
-            - us-east-2
-            - us-west-1
-            - us-west-2
-            - ap-south-1
-            - ap-northeast-1
-            - ap-northeast-2
-            - ap-northeast-3
-            - ap-southeast-1
-            - ap-southeast-2
-            - ca-central-1
-            - eu-central-1
-            - eu-west-1
-            - eu-west-2
-            - eu-west-3
-            - eu-north-1
-            - sa-east-1
-    - bool:
-        name: MULTI_AZ
-        default: true
-        description: If true the cluster will be provisioned with multiple AZ, if false for only one AZ
-    - bool:
-        name: DEPROVISION_CLUSTER
-        default: false
-        description: If true the provisioned or provided cluster will be deleted
-    - bool:
-        name: INSTALL_KAFKA
-        default: true
-        description: If true a kafka instance will be installed in the cluster
-    - choice:
-        name: TEST_LAYER
-        description: '[REQUIRED] Select the set of tests to be executed'
-        choices:
-          - all
-          - none
-          - cloud
-          - openshift
-          - kafka
-    branch: '${{BRANCH}}'
-    <<: *gh_checkout
-    builders:
-      - shell: |
-          ./pipeline/fault_pipeline.sh
-    artifacts_path: 'fault-results/**'
-    publishers:
-    - archive:
-        artifacts: '{artifacts_path}'
-        allow-empty: true
-    - <<: *slack_notify
-
-- job-template:
-    id: managed-kafka-fault-tests-nightly
-    name: "{display_name}"
-    wrappers:
-      - timestamps
-      - timeout_wrapper:
-          timeout: "{timeout}"
-      - ansicolor
-      - vault-secrets:
-          <<: *vault_defaults
-          secrets:
-            - *ci_test_token
-            - *rhosak_tests_tokens
-            - *aws_rhosak_1
-    concurrent: true
-    parameters:
-    - string:
-        name: BRANCH
-        default: '{default_branch}'
-        description: 'The branch of kas-fault-tests repo you want to run the pipeline against. Defaults to main'
-    - string:
-        name: OPENSHIFT_VERSION
-        default: '4.8.15'
-        description: 'The version of openshift to be used when deploying the OSD cluster. Default 4.8.15'
-    - string:
-        name: OCM_CLUSTER_NAME
-        default: ''
-        description: 'OSD cluster name (if not defined, a random name will be set), max name length is 14 characters. If the cluster already exists, it will be used. Otherwise, it will be provisioned'
-    - string:
-          name: KAFKA_INSTANCE_NAME
-          default: 'kafka-instance'
-          description: 'The namespace of an existing Kafka instance you want to run the pipeline against. Not required if the pipeline is installing Kafka using the INSTALL_KAFKA parameter'
-    - string:
-          name: COMPUTE_NODES_COUNT
-          default: '3'
-          description: '[REQUIRED] OSD worker nodes for kafka cluster. If you select multi-az you must have a multiple of 3 for COMPUTE_NODES_COUNT'
-    - choice:
-        name: COMPUTE_MACHINE_TYPE
-        description: '[REQUIRED] node type of cluster compute nodes'
-        choices:
-            - m5.4xlarge
-            - m5.2xlarge
-            - m5.xlarge
-    - choice:
-        name: OCM_CLUSTER_REGION
-        description: '[REQUIRED] AWS region for the OSD cluster. If executing cloud layer tests, ensure that the cluster is in a region where no other clusters are deployed'
-        choices:
-            - us-east-2
-            - us-east-1
-            - us-west-1
-            - us-west-2
-            - ap-south-1
-            - ap-northeast-1
-            - ap-northeast-2
-            - ap-northeast-3
-            - ap-southeast-1
-            - ap-southeast-2
-            - ca-central-1
-            - eu-central-1
-            - eu-west-1
-            - eu-west-2
-            - eu-west-3
-            - eu-north-1
-            - sa-east-1
-    - bool:
-        name: MULTI_AZ
-        default: true
-        description: If true the cluster will be provisioned with multiple AZ, if false for only one AZ
-    - bool:
-        name: DEPROVISION_CLUSTER
-        default: true
-        description: If true the provisioned or provided cluster will be deleted
-    - bool:
-        name: INSTALL_KAFKA
-        default: true
-        description: If true a kafka instance will be installed in the cluster
-    - choice:
-        name: TEST_LAYER
-        description: '[REQUIRED] Select the set of tests to be executed'
-        choices:
-          - all
-          - none
-          - cloud
-          - openshift
-          - kafka
-    branch: '${{BRANCH}}'
-    <<: *gh_timed
-    builders:
-      - shell: |
-          ./pipeline/fault_pipeline.sh
-    artifacts_path: 'fault-results/**'
-    publishers:
-    - archive:
-        artifacts: '{artifacts_path}'
-        allow-empty: true
-    - <<: *slack_notify
-
-- job-template:
-    id: managed-kafka-perf-tests
-    name: "managed-kafka-perf-tests"
-    wrappers:
-      - timestamps
-      - timeout_wrapper:
-          timeout: "{timeout}"
-      - ansicolor
-      - vault-secrets:
-          <<: *vault_defaults
-          secrets:
-            - *ci_test_token
-            - *rhosak_tests_tokens
-            - *aws_rhosak_1
-            - *github_token
-    concurrent: true
-    parameters:
-    - string:
-        name: BRANCH
-        default: '{default_branch}'
-        description: 'The branch of mk-performance-tests repo you want to run the pipeline against. Defaults to master'
-    - string:
-        name: OPENSHIFT_VERSION
-        default: ''
-        description: 'The version of openshift to be used when deploying the OSD cluster. Default latest (empty)'
-    - string:
-        name: TESTCASE
-        default: 'io.kafka.performance.KafkaInstanceScalingSmallTestDecoupled#testClusterMaxKafkaValueProdBinPacking'
-        description: 'maven parameter for executing specific tests'
-    - string:
-        name: KAFKA_CLUSTER_NAME
-        default: ''
-        description: 'OSD cluster name (if not defined, a random name will be set), max name length is 14 characters. If the cluster already exists, it will be used. Otherwise, it will be provisioned'
-    - string:
-        name: KAFKA_OSD_CLUSTER_CONFIG
-        default: 'COMPUTE_NODES_COUNT=6,
-         COMPUTE_MACHINE_TYPE=m5.4xlarge,
-         OCM_CLUSTER_REGION=us-east-2,
-         MULTI_AZ=true'
-        description: 'The variables needed to provision an OSD where kafka will be installed'
-    - string:
-        name: OMB_CLUSTER_NAME
-        default: ''
-        description: 'OSD cluster name (if not defined, a random name will be set), max name length is 14 characters. If the cluster already exists, it will be used. Otherwise, it will be provisioned'
-    - string:
-        name: OMB_OSD_CLUSTER_CONFIG
-        default: 'COMPUTE_NODES_COUNT=2,
-         COMPUTE_MACHINE_TYPE=m5.4xlarge,
-         OCM_CLUSTER_REGION=us-east-2,
-         MULTI_AZ=false'
-        description: 'The variables needed to provision an OSD where OMB will be installed'
-    - string:
-        name: NUMBER_OF_KAFKA_INSTANCES
-        default: '1'
-    - string:
-        name: KAFKA_INSTANCE_NAME
-        default: 'instance'
-        description: 'The namespace of an existing Kafka instance you want to run the pipeline against. If there are more than one instace, a random string will be suffixed'
-    - string:
-        name: KAFKA_CAPACITY_CONFIG
-        default: 'INGRESS_THROUGHPUT=30Mi,
-         TOTAL_MAX_CONNECTIONS=500,
-         MAX_DATA_RETENTION_SIZE=1000Gi,
-         MAX_PARTITIONS=500,
-         MAX_DATA_RETENTION_PERIOD=P14D,
-         MAX_CONNECTION_ATTEMPTS_PER_SEC=100'
-        description: 'The variables needed to configure the kafka installation'
-    - string:
-        name: TEST_EXECUTION_CONFIG
-        default: 'OMB_TEST_DURATION=PT15M,
-         TARGET_RATE=15,
-         WORKERS_PER_INSTANCE=2,
-         TOPICS_PER_KAFKA=1,
-         PRODUCERS_PER_TOPIC=1,
-         PAYLOAD_FILE_SIZE=512Ki,
-         PARTITIONS_PER_TOPIC=9,
-         SUBSCRIPTIONS_PER_TOPIC=1,
-         CONSUMER_PER_SUBSCRIPTION=1'
-        description: 'The variables needed to configure the test case to be executed'
-    - bool:
-        name: DEPROVISION_CLUSTER
-        default: true
-        description: If true the provisioned or provided cluster will be deleted
-    branch: '${{BRANCH}}'
-    <<: *gl_checkout
-    builders:
-      - shell: |
-          ./scripts/pipeline_kas_perf_tests.sh
-    artifacts_path: 'target/logs/**, output_charts/**'
-    publishers:
-    - archive:
-        artifacts: '{artifacts_path}'
-        allow-empty: true
-    - <<: *slack_notify
-
-- job-template:
-    id: managed-kafka-perf-tests-1hr-integration
-    name: "managed-kafka-perf-tests-1hr-integration"
-    wrappers:
-      - timestamps
-      - timeout_wrapper:
-          timeout: "{timeout}"
-      - ansicolor
-      - vault-secrets:
-          <<: *vault_defaults
-          secrets:
-            - *ci_test_token
-            - *rhosak_tests_tokens
-            - *aws_rhosak_3
-            - *github_token
-    concurrent: true
-    parameters:
-    - string:
-        name: BRANCH
-        default: '{default_branch}'
-        description: 'The branch of mk-performance-tests repo you want to run the pipeline against. Defaults to master'
-    - string:
-        name: OPENSHIFT_VERSION
-        default: '4.8.15'
-        description: 'The version of openshift to be used when deploying the OSD cluster. Default 4.8.15'
-    - string:
-        name: TESTCASE
-        default: 'io.kafka.performance.KafkaInstanceScalingSmallTestDecoupled#testClusterMaxKafkaValueProdBinPacking'
-        description: 'maven parameter for executing specific tests'
-    - string:
-        name: KAFKA_CLUSTER_NAME
-        default: ''
-        description: 'OSD cluster name (if not defined, a random name will be set), max name length is 14 characters. If the cluster already exists, it will be used. Otherwise, it will be provisioned'
-    - string:
-        name: KAFKA_OSD_CLUSTER_CONFIG
-        default: 'COMPUTE_NODES_COUNT=6,
-         COMPUTE_MACHINE_TYPE=m5.4xlarge,
-         OCM_CLUSTER_REGION=us-east-2,
-         MULTI_AZ=true'
-        description: 'The variables needed to provision an OSD where kafka will be installed'
-    - string:
-        name: OMB_CLUSTER_NAME
-        default: ''
-        description: 'OSD cluster name (if not defined, a random name will be set), max name length is 14 characters. If the cluster already exists, it will be used. Otherwise, it will be provisioned'
-    - string:
-        name: OMB_OSD_CLUSTER_CONFIG
-        default: 'COMPUTE_NODES_COUNT=2,
-         COMPUTE_MACHINE_TYPE=m5.4xlarge,
-         OCM_CLUSTER_REGION=us-east-2,
-         MULTI_AZ=false'
-        description: 'The variables needed to provision an OSD where OMB will be installed'
-    - string:
-        name: NUMBER_OF_KAFKA_INSTANCES
-        default: '1'
-    - string:
-        name: KAFKA_INSTANCE_NAME
-        default: 'instance'
-        description: 'The namespace of an existing Kafka instance you want to run the pipeline against.'
-    - string:
-        name: KAFKA_CAPACITY_CONFIG
-        default: 'INGRESS_THROUGHPUT=30Mi,
-         TOTAL_MAX_CONNECTIONS=500,
-         MAX_DATA_RETENTION_SIZE=1000Gi,
-         MAX_PARTITIONS=500,
-         MAX_DATA_RETENTION_PERIOD=P14D,
-         MAX_CONNECTION_ATTEMPTS_PER_SEC=100'
-        description: 'The variables needed to configure the kafka installation'
-    - string:
-        name: TEST_EXECUTION_CONFIG
-        default: 'OMB_TEST_DURATION=PT60M,
-         TARGET_RATE=15,
-         WORKERS_PER_INSTANCE=2,
-         TOPICS_PER_KAFKA=1,
-         PRODUCERS_PER_TOPIC=1,
-         PAYLOAD_FILE_SIZE=512Ki,
-         PARTITIONS_PER_TOPIC=9,
-         SUBSCRIPTIONS_PER_TOPIC=1,
-         CONSUMER_PER_SUBSCRIPTION=1'
-        description: 'The variables needed to configure the test case to be executed'
-    - bool:
-        name: DEPROVISION_CLUSTER
-        default: true
-        description: If true the provisioned or provided cluster will be deleted
-    branch: '${{BRANCH}}'
-    <<: *gl_checkout
-    <<: *gl_timed
-    builders:
-      - shell: |
-          ./scripts/pipeline_kas_perf_tests.sh
-    artifacts_path: 'target/logs/**, output_charts/**'
-    publishers:
-    - archive:
-        artifacts: '{artifacts_path}'
-        allow-empty: true
-    - <<: *slack_notify
-
-- job-template:
-    id: aws-purge-velero-backup
-    name: "aws-purge-velero-backup"
-    parameters:
-    - string:
-        name: AWS_REGION
-        default: 'us-east-1'
-        description: 'The target AWS region for the velero_backups you want to remove.'
-    wrappers:
-      - timestamps
-      - timeout_wrapper:
-          timeout: "{timeout}"
-      - ansicolor
-      - vault-secrets:
-          <<: *vault_defaults
-          secrets:
-            - *aws_rhosak_3
-    <<: *gl_checkout
-    builders:
-      - shell: |
-          ./scripts/purge_velero_backup.sh
-
-- job-template:
     id: strimzi-operator-test
     name: "strimzi-operator-test"
     wrappers:
@@ -851,6 +444,7 @@
           secrets:
             - *kas_fleet_manager_int_tests
             - *quay_secret_pull
+            - *managed_services_ccit_reportportal
     <<: *gl_timed
 
 - job-template:
@@ -906,6 +500,23 @@
     - <<: *slack_notify
 
 - job-template:
+    id: gl-build-master-kafka-storage-expansions
+    name: gl-build-master-kafka-storage-expansions
+    wrappers:
+      - timeout_wrapper:
+          timeout: "{timeout}"
+      - vault-secrets:
+          <<: *vault_defaults
+          secrets:
+            - *kas_fleet_manager_admin_staging
+            - *kas_fleet_manager_admin_prod
+            - *gitlab_token
+            - *kafka_storage_expansions
+    <<: *gl_build_master
+    publishers:
+    - <<: *slack_notify
+
+- job-template:
     id: gl-pr-check-apache-kafka
     name: "{gl_group}-{gl_project}-gl-pr-check"
     wrappers:
@@ -936,11 +547,13 @@
     - timestamps
     - timeout_wrapper:
         timeout: "{timeout}"
-    - ansicolor
+    - ansicolor:
+        colormap: xterm
     - vault-secrets:
         <<: *vault_defaults
         secrets:
           - *managed_services_github_deploy_key
+          - *managed_services_ccit_reportportal
     parameters:
     - string:
         name: REPOSITORIES
@@ -954,6 +567,14 @@
         name: DRY_RUN
         default: true
         description: If true the changes are not pushed
+    - string:
+        name: REPORTPORTAL_PROJECT
+        default: "{reportportal_project}"
+        description: The name of ReportPortal Project where the Launch is located
+    - string:
+        name: REPORTPORTAL_LAUNCH
+        default: "{reportportal_launch}"
+        description: The name of the ReportPortal Launch that has the gating test results for the repositories
     <<: *gl_checkout
     builders:
     - shell: ./script/promote-ui.sh
@@ -1066,7 +687,7 @@
           secrets:
             - *quay_secret_pull
             - *ci_test_token
-            - *ci_aws_keys
+            - *aws_rhosak_1
             - *ci_kas_abnormal_workloads
     concurrent: true
     parameters:

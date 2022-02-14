@@ -154,6 +154,11 @@ openshiftResources:
 - provider: resource
   path: /observability/prometheusrules/telemeter-slos-stage.prometheusrules.yaml
 ### Observatorium
+#### SLOs
+- provider: resource
+  path: /observability/prometheusrules/rhobs-slos-telemeter-stage.prometheusrules.yaml
+- provider: resource
+  path: /observability/prometheusrules/rhobs-slos-mst-stage.prometheusrules.yaml
 #### Thanos
 - provider: resource
   path: /observability/prometheusrules/observatorium-thanos-stage.prometheusrules.yaml
@@ -199,6 +204,8 @@ openshiftResources:
   path: /observability/prometheusrules/kas-fleet-manager-slos-latency-stage.prometheusrules.yaml
 - provider: resource
   path: /observability/prometheusrules/kas-fleet-manager-stage.prometheusrules.yaml
+- provider: resource
+  path: /observability/prometheusrules/kas-fleet-manager-cluster-capacity-stage.prometheusrules.yaml
 ### Token refresher
 - provider: resource
   path: /observability/prometheusrules/token-refresher-stage.prometheusrules.yaml
@@ -214,11 +221,15 @@ openshiftResources:
   path: /observability/prometheusrules/status-board-stage.prometheusrules.yaml
 - provider: resource
   path: /status-board/stage/status-board-rds.prometheusrules.yaml
+- provider: resource
+  path: /observability/prometheusrules/status-board-slo-stage.prometheusrules.yaml
 #### Web RCA
 - provider: resource
   path: /observability/prometheusrules/web-rca-stage.prometheusrules.yaml
 - provider: resource
   path: /web-rca/stage/web-rca-rds.prometheusrules.yaml
+- provider: resource
+  path: /observability/prometheusrules/web-rca-slo-stage.prometheusrules.yaml
 ### Qontract-reconcile SLOs
 - provider: resource-template
   path: /observability/prometheusrules/qontract-reconcile-time-to-reconcile-slo.prometheusrules.yaml
@@ -244,7 +255,7 @@ openshiftResources:
   type: extracurlyjinja2
   variables:
     namespace: cincinnati-stage
-    route: cincinnati-route-stage
+    route: cincinnati-route-stg
 ### Devfile Registry
 - provider: resource
   path: /observability/prometheusrules/devfile-registry-stage.prometheusrules.yaml
@@ -304,6 +315,15 @@ openshiftResources:
   variables:
     environment: stage
     namespace: app-interface-stage
+
+### Managed Connectors
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/managed-connectors.servicemonitor.yaml
+  variables:
+    environment: stage
+    namespace: managed-connectors-stage
+
 ### Github-Mirror
 - provider: resource-template
   type: jinja2
@@ -611,9 +631,8 @@ openshiftResources:
 ### SRS Tenant Manager
 - provider: resource-template
   type: jinja2
-  path: /observability/servicemonitors/srs-tenant-manager.servicemonitor.yaml
+  path: /observability/servicemonitors/srs-tenant-manager-stage.servicemonitor.yaml
   variables:
-    environment: stage
     namespace: service-registry-stage
 
 ### SRS envoy proxies
@@ -626,6 +645,12 @@ openshiftResources:
 - provider: resource-template
   type: jinja2
   path: /observability/servicemonitors/srs-service-registry-envoy.servicemonitor.yaml
+  variables:
+    environment: stage
+    namespace: service-registry-stage
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/srs-tenant-manager-envoy.servicemonitor.yaml
   variables:
     environment: stage
     namespace: service-registry-stage

@@ -23,4 +23,9 @@ All alerts are multiwindow, multi-burn-rate alerts. The following are the list o
 - `SRSServiceRegistryAPILatency2hto1dor6hto3dP99BudgetBurn`
 - `SRSServiceRegistryAPILatency30mto6hP90BudgetBurn`
 - `SRSServiceRegistryAPILatency2hto1dor6hto3dP90BudgetBurn`
-  
+- `SRSServiceRegistryAPIReadsLatency30mto6hP99BudgetBurn`
+- `SRSServiceRegistryAPIReadsLatency2hto1dor6hto3dP99BudgetBurn`
+- `SRSServiceRegistryAPIWritesLatency30mto6hP99BudgetBurn`
+- `SRSServiceRegistryAPIWritesLatency2hto1dor6hto3dP99BudgetBurn`
+- `SRSServiceRegistryAPISearchLatency30mto6hP99BudgetBurn`
+- `SRSServiceRegistryAPISearchLatency2hto1dor6hto3dP99BudgetBurn`

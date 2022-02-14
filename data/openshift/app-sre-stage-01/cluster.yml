@@ -37,7 +37,7 @@ spec:
   provider: aws
   region: us-east-1
   channel: candidate
-  version: 4.9.13
+  version: 4.9.21
   initial_version: 4.2.7
   multi_az: true
   autoscale:
@@ -71,6 +71,11 @@ peering:
     name: app-sre-stage-01_app-sre
     vpc:
       $ref: /aws/app-sre/vpcs/app-sre-vpc-01.yml
+  - provider: account-vpc
+    name: app-sre-stage-01_app-sre-stage
+    vpc:
+      $ref: /aws/app-sre-stage/vpcs/app-sre-stage-vpc.yml
+    manageRoutes: true
   - provider: cluster-vpc-accepter
     name: app-sre-stage-01_hive-stage-01
     cluster:
@@ -117,10 +122,16 @@ awsInfrastructureAccess:
     $ref: /aws/app-sre/groups/Log-consumers.yml
   accessLevel: read-only
 - awsGroup:
+    $ref: /aws/app-sre-logs/groups/Log-consumers.yml
+  accessLevel: read-only
+- awsGroup:
     $ref: /aws/image-builder-stage/groups/App-SRE-admin.yml
   accessLevel: read-only
 - awsGroup:
     $ref: /aws/quayio-stage/groups/App-SRE-admin.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/app-sre-stage/groups/App-SRE-admin.yml
   accessLevel: read-only
 # This is going to be assigned anyway by the integration and it is
 # currently making the integration to try to add this into the

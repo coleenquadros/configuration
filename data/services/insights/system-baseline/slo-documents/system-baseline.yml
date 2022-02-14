@@ -10,26 +10,26 @@ namespaces:
 - $ref: /services/insights/system-baseline/namespaces/system-baseline-prod.yml
 
 slos:
-- name: hsp availability
+- name: baseline availability
   SLIType: availability
   SLISpecification: ratio of HTTP response codes that are not 5xx
   SLODetails: https://github.com/RedHatInsights/system-baseline-backend
   SLOParameters:
-    window: 28d
+    window: 30d
   expr: 1.00 - (sum(rate(api_3scale_gateway_api_status{exported_service="system-baseline", status="5xx"}[5m])) / sum(rate(api_3scale_gateway_api_status{exported_service="system-baseline"}[5m])))
   SLOTarget: 0.90
   SLOTargetUnit: percent_0_1
-  prometheusRules: resources/insights-prod/system-baseline-prod/system-baseline-prometheusrules.yaml
-  dashboard: https://grafana.app-sre.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&var-datasource=crcp01ue1-prometheus&var-label=system-baseline&viewPanel=36
+  prometheusRules: resources/insights-prod/system-baseline-prod/system-baseline.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&var-datasource=crcp01ue1-prometheus&var-label=system-baseline&viewPanel=30
 
-- name: hsp latency
+- name: baseline latency
   SLIType: latency
   SLISpecification: ratio of services request durations under 2 seconds 
   SLODetails: https://github.com/RedHatInsights/system-baseline-backend
   SLOParameters:
-    window: 28d
+    window: 30d
   expr: sum(rate(api_3scale_gateway_api_time_bucket{le="2000.0", exported_service="system-baseline"}[5m])) > 0
   SLOTarget: 0.90
   SLOTargetUnit: percent_0_1
-  prometheusRules: resources/insights-prod/system-baseline-prod/system-baseline-prometheusrules.yaml
-  dashboard: https://grafana.app-sre.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&var-datasource=crcp01ue1-prometheus&var-label=system-baseline&viewPanel=32
+  prometheusRules: resources/insights-prod/system-baseline-prod/system-baseline.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&var-datasource=crcp01ue1-prometheus&var-label=system-baseline&viewPanel=37

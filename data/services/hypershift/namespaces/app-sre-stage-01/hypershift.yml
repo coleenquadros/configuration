@@ -1,0 +1,33 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: hypershift
+description: staging namespace for hypershift
+
+cluster:
+  $ref: /openshift/app-sre-stage-01/cluster.yml
+
+app:
+  $ref: /services/hypershift/app.yml
+
+environment:
+  $ref: /products/hypershift/environments/stage-app-sre-stage-01.yml
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: s3
+  account: app-sre
+  identifier: hypershift-oidc-staging
+  defaults: /terraform/resources/s3-public-read-1.yml
+  output_resource_name: hypershift-oidc-s3-creds
+
+managedResourceTypes:
+- Secret
+
+openshiftResources:
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/hypershift/staging/oidc-s3-creds.yml

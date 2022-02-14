@@ -15,11 +15,11 @@ pipelinesProvider:
 
 deployResources:
   requests:
-    cpu: 400m
-    memory: 900Mi
+    cpu: 800m
+    memory: 1800Mi
   limits:
-    cpu: 400m
-    memory: 900Mi
+    cpu: 800m
+    memory: 1800Mi
 
 slack:
   workspace:
@@ -55,6 +55,7 @@ imagePatterns:
 - quay.io/jpkroehling/all-in-one
 - quay.io/app-sre/gubernator
 - quay.io/openshift/origin-configmap-reloader
+- quay.io/prometheus/alertmanager
 
 parameters:
   OAUTH_PROXY_IMAGE: quay.io/openshift/origin-oauth-proxy
@@ -72,10 +73,11 @@ resourceTemplates:
     MEMCACHED_IMAGE: quay.io/app-sre/memcached
     MEMCACHED_EXPORTER_IMAGE: quay.io/prometheus/memcached-exporter
     OPA_AMS_IMAGE: quay.io/observatorium/opa-ams
+    RULES_OBJSTORE_IMAGE: quay.io/observatorium/rules-objstore
   targets:
   - namespace:
       $ref: /services/rhobs/observatorium-mst/namespaces/observatorium-mst-stage.yml
-    ref: e883161d38f58a1d6f1dcc3a3ab270e84279845b
+    ref: ff64a8145b993aa8ad391a3aea05b56ecc8391bb
     parameters:
       NAMESPACE: observatorium-mst-stage
       OBSERVATORIUM_METRICS_NAMESPACE: observatorium-mst-stage
@@ -100,7 +102,7 @@ resourceTemplates:
       OBSERVATORIUM_API_CPU_LIMIT: 1
       OBSERVATORIUM_API_CPU_REQUEST: 100m
       OBSERVATORIUM_API_IDENTIFIER: observatorium-observatorium-mst-api
-      OBSERVATORIUM_API_IMAGE_TAG: main-2021-11-12-v0.1.2-103-g008c48f
+      OBSERVATORIUM_API_IMAGE_TAG: main-2022-02-09-v0.1.2-133-gf825141
       OBSERVATORIUM_API_MEMORY_LIMIT: 1Gi
       OBSERVATORIUM_API_MEMORY_REQUEST: 256Mi
       OBSERVATORIUM_API_REPLICAS: 3
@@ -112,6 +114,9 @@ resourceTemplates:
       OPA_AMS_MEMORY_REQUEST: 100Mi
       OSD_ORGANIZATION_ID: 1lneg5EWJaGAK3d7RZpAJM9WujU
       PROMETHEUS_AMS_REMOTE_WRITE_PROXY_TARGET: 'observatorium-thanos-receive'
+      RULES_OBJSTORE_IMAGE_TAG: main-2022-01-31-4a4394f
+      RULES_OBJSTORE_S3_SECRET: observatorium-mst-rules-objstore-stage-s3
+      RULES_OBJSTORE_SECRET: observatorium-mst-rules-objstore-objectstorage
       SERVICE_ACCOUNT_NAME: observatorium-mst
   - namespace:
       $ref: /services/rhobs/observatorium-mst/namespaces/observatorium-mst-production.yml
@@ -137,7 +142,7 @@ resourceTemplates:
       OPA_AMS_MEMORY_LIMIT: 200Mi
       OSD_ORGANIZATION_ID: 1ln3QD58ag2A5fqq5Dh1wa2lX5P
       MANAGEDKAFKA_ORGANIZATION_ID: 1h0TWioN3nZDs6oUI7eT5SowRjo
-      MEMCACHED_IMAGE_TAG: 1.5
+      MEMCACHED_IMAGE_TAG: 1.5-146
       MEMCACHED_MEMORY_LIMIT_MB: 2048Mi
       MEMCACHED_CONNECTION_LIMIT: 3072Mi
       MEMCACHED_CPU_REQUEST: 500m
@@ -151,7 +156,7 @@ resourceTemplates:
       SERVICE_ACCOUNT_NAME: observatorium-mst
       OBSERVATORIUM_API_IDENTIFIER: observatorium-observatorium-mst-api
       OBSERVATORIUM_API_IMAGE: quay.io/observatorium/api
-      OBSERVATORIUM_API_IMAGE_TAG: main-2021-11-12-v0.1.2-103-g008c48f
+      OBSERVATORIUM_API_IMAGE_TAG: main-2022-01-31-v0.1.2-127-g178dc4e
       OPA_AMS_IMAGE_TAG: master-2021-07-14-d517f70
       MEMCACHED_EXPORTER_IMAGE_TAG: v0.6.0
 - name: observatorium-mst-metrics
@@ -165,12 +170,14 @@ resourceTemplates:
     MEMCACHED_EXPORTER_IMAGE: quay.io/prometheus/memcached-exporter
     STORAGE_CLASS: "gp2"
     THANOS_IMAGE: quay.io/thanos/thanos
+    THANOS_RULE_SYNCER_IMAGE: quay.io/observatorium/thanos-rule-syncer
   targets:
   - namespace:
       $ref: /services/rhobs/observatorium-mst/namespaces/observatorium-mst-stage.yml
-    ref: cc95fbab252d0cd4d734a4b737393f44acc87500
+    ref:  dbd5ed667557b0f9eb1bb41ab33ab15ffc822c65
     parameters:
       NAMESPACE: observatorium-mst-stage
+      OBSERVATORIUM_NAMESPACE: observatorium-mst-stage
       OBSERVATORIUM_METRICS_NAMESPACE: observatorium-mst-stage
       OBSERVATORIUM_LOGS_NAMESPACE: observatorium-logs-stage
       JAEGER_AGENT_IMAGE_TAG: 1.22.0
@@ -183,7 +190,7 @@ resourceTemplates:
       MEMCACHED_EXPORTER_IMAGE_TAG: v0.6.0
       MEMCACHED_EXPORTER_MEMORY_LIMIT: 200Mi
       MEMCACHED_EXPORTER_MEMORY_REQUEST: 50Mi
-      MEMCACHED_IMAGE_TAG: 1.5
+      MEMCACHED_IMAGE_TAG: 1.5-146
       MEMCACHED_MEMORY_LIMIT_MB: 2048Mi
       MEMCACHED_MEMORY_LIMIT:  1844Mi
       MEMCACHED_MEMORY_REQUEST: 1329Mi
@@ -217,6 +224,7 @@ resourceTemplates:
       THANOS_RECEIVE_MEMORY_LIMIT: '12Gi'
       THANOS_RECEIVE_MEMORY_REQUEST: '12Gi'
       THANOS_RECEIVE_REPLICAS: 4
+      THANOS_RULE_SYNCER_IMAGE_TAG: main-2022-01-11-1290656
       THANOS_RULER_CPU_LIMIT: '1'
       THANOS_RULER_CPU_REQUEST: '500m'
       THANOS_RULER_LOG_LEVEL: 'info'
@@ -235,7 +243,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/rhobs/observatorium-mst/namespaces/observatorium-mst-production.yml
     # Commit for github.com/rhobs/configuration repo. Keep it pinned, so we know what we can promote to production.
-    ref: cc95fbab252d0cd4d734a4b737393f44acc87500
+    ref: dbd5ed667557b0f9eb1bb41ab33ab15ffc822c65
     parameters:
       NAMESPACE: observatorium-mst-production
       OBSERVATORIUM_METRICS_NAMESPACE: observatorium-mst-production
@@ -244,7 +252,7 @@ resourceTemplates:
       JAEGER_COLLECTOR_NAMESPACE: observatorium-production
       THANOS_CONFIG_SECRET: observatorium-mst-thanos-objectstorage
       THANOS_S3_SECRET: observatorium-mst-thanos-production-s3
-      THANOS_IMAGE_TAG: v0.23.1
+      THANOS_IMAGE_TAG: v0.24.0-rc.1
       THANOS_RECEIVE_CONTROLLER_IMAGE_TAG: master-2020-02-06-b66e0c8
       THANOS_QUERIER_REPLICAS: 4
       THANOS_QUERIER_CPU_REQUEST: '1'

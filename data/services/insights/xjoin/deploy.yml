@@ -14,6 +14,14 @@ app:
 pipelinesProvider:
   $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
 
+deployResources:
+  requests:
+    cpu: 100m
+    memory: 600Mi
+  limits:
+    cpu: 200m
+    memory: 1000Mi
+
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
@@ -56,7 +64,7 @@ resourceTemplates:
     ref: master
     upstream:
       instance:
-        $ref: /dependencies/ci-int/ci-int.yml
+        $ref: /dependencies/ci-ext/ci-ext.yml
       name: RedHatInsights-xjoin-search-gh-build-master
     parameters:
       NUM_REPLICAS: 2
@@ -69,7 +77,7 @@ resourceTemplates:
       HEARTBEAT_SCHEDULE: '@daily'
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-perf.yml
-    ref: 7add93a18d3e2288d9ae110f9a6c76deae922614
+    ref: 1b4d8160cc083c41ccf21ee0748461f3bd4d73dc
     parameters:
       ENV_NAME: perf
       CPU_REQUESTS: 500m
@@ -81,7 +89,7 @@ resourceTemplates:
       HEARTBEAT_SCHEDULE: '@daily'
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
-    ref: 7bf9ddb9836f092a3d0012cd6443606ef7780462
+    ref: 1b4d8160cc083c41ccf21ee0748461f3bd4d73dc
     parameters:
       CPU_REQUESTS: 500m
       CPU_LIMITS: 2
@@ -95,7 +103,7 @@ resourceTemplates:
     ref: master
     upstream:
       instance:
-        $ref: /dependencies/ci-int/ci-int.yml
+        $ref: /dependencies/ci-ext/ci-ext.yml
       name: RedHatInsights-xjoin-stage-fedramp-gh-build-master
     parameters:
       NUM_REPLICAS: 2
@@ -126,25 +134,6 @@ resourceTemplates:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
     ref: internal  # populated by bonfire
-
-- name: xjoin-search-dev
-  path: /deploy/template-dev.yaml
-  url: https://github.com/RedHatInsights/xjoin-search
-  targets:
-  - namespace:
-      $ref: /services/insights/xjoin/namespaces/dev-xjoin-ci.yml
-    ref: master
-    upstream:
-      instance:
-        $ref: /dependencies/ci-int/ci-int.yml
-      name: RedHatInsights-xjoin-search-gh-build-master
-  - namespace:
-      $ref: /services/insights/xjoin/namespaces/dev-xjoin-qa.yml
-    ref: master
-    upstream:
-      instance:
-        $ref: /dependencies/ci-int/ci-int.yml
-      name: RedHatInsights-xjoin-search-gh-build-master
 
 - name: xjoin-es-exporter
   path: /templates/xjoin/xjoin-es-exporter.yaml
@@ -233,16 +222,16 @@ resourceTemplates:
         $ref: /dependencies/ci-int/ci-int.yml
       name: RedHatInsights-xjoin-kafka-connect-gh-build-master
     parameters:
-      CPU_REQUESTS: 250m
+      CPU_REQUESTS: 249m
       NUM_REPLICAS: '7'
       MEMORY_REQUESTS: 8Gi
       MEMORY_LIMITS: 10Gi
   - namespace:
       $ref: /services/insights/xjoin/namespaces/xjoin-prod.yml
-    ref: 347c7728000e8f3edb930e98a0588af53f4ebd99
+    ref: e9e88d6b57f9fa3eeadd5fa6296bef0cade15993
     parameters:
-      IMAGE_TAG: 347c772
-      CPU_REQUESTS: 249m
+      IMAGE_TAG: e9e88d6
+      CPU_REQUESTS: 250m
       NUM_REPLICAS: '17'
       MEMORY_REQUESTS: 8Gi
       MEMORY_LIMITS: 12Gi

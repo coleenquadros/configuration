@@ -54,10 +54,11 @@ resourceTemplates:
     ref: master
     upstream:
       instance:
-        $ref: /dependencies/ci-int/ci-int.yml
+        $ref: /dependencies/ci-ext/ci-ext.yml
       name: RedHatInsights-sources-api-gh-build-master
     parameters:
       KOKU_SOURCES_API_HOST: koku-clowder-sources-client.hccm-stage.svc.cluster.local
+      KOKU_SOURCES_API_PORT: "10000"
       CLOUD_METER_API_HOST: cloudigrade-api.cloudigrade-stage.svc.cluster.local
       LOG_LEVEL: WARN
       CONTAINER_LOG_LEVEL: DEBUG
@@ -66,14 +67,16 @@ resourceTemplates:
       SOURCETYPE_SKIP_LIST: ""
       RBAC_PORT: '8080'
       PROXY_REQUESTS: "true"
+      SKIP_SEEDING: "true"
   - namespace:
       $ref: /services/insights/sources/namespaces/sources-prod.yml
-    ref: d8f4a619101c4d1357920f63fa13432ceaef688c
+    ref: 6d5f1852a28b6a184dcc457cc4e6983695b1a1da
     parameters:
-      IMAGE_TAG: 0e5117a
+      IMAGE_TAG: c4925ef
       MIN_REPLICAS: 3
       SIDEKIQ_REPLICAS: 3
       KOKU_SOURCES_API_HOST: koku-clowder-sources-client.hccm-prod.svc.cluster.local
+      KOKU_SOURCES_API_PORT: "10000"
       CLOUD_METER_API_HOST: cloudigrade-api.cloudigrade-prod.svc.cluster.local
       LOG_LEVEL: WARN
       CONTAINER_LOG_LEVEL: INFO
@@ -94,7 +97,7 @@ resourceTemplates:
     ref: main
     upstream:
       instance:
-        $ref: /dependencies/ci-int/ci-int.yml
+        $ref: /dependencies/ci-ext/ci-ext.yml
       name: RedHatInsights-sources-api-go-gh-build-main
     parameters:
       KOKU_SOURCES_API_HOST: koku-clowder-sources-client.hccm-stage.svc.cluster.local
@@ -115,13 +118,11 @@ resourceTemplates:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: RedHatInsights-sources-monitor-go-gh-build-main
-    parameters:
-      IMAGE_TAG: cc83ab3
   - namespace:
       $ref: /services/insights/sources/namespaces/sources-prod.yml
     ref: d813b5a864585fe3a37da47fa586f89ce77c6e42
     parameters:
-      IMAGE_TAG: cc83ab3
+      IMAGE_TAG: c02a9a0
 - name: sources-superkey-worker
   path: /deploy/clowdapp.yaml
   url: https://github.com/RedHatInsights/sources-superkey-worker
@@ -162,9 +163,8 @@ resourceTemplates:
 #      IMAGE_TAG: xxxxxx
   - namespace:
       $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
-    ref: ed05fa3994c8379f8f9bdf02a4f8bfda7c66b7fb
+    ref: master
     parameters:
-      IMAGE_TAG: 9ada036
       RECEPTOR_CONTROLLER_SECRET_NAME: sources-psk
       RECEPTOR_CONTROLLER_SECRET_KEY_PSK: client-psk
       UPDATE_SOURCES_VIA_API: '1'
@@ -172,7 +172,7 @@ resourceTemplates:
       $ref: /services/insights/sources/namespaces/sources-prod.yml
     ref: ed05fa3994c8379f8f9bdf02a4f8bfda7c66b7fb
     parameters:
-      IMAGE_TAG: 9ada036
+      IMAGE_TAG: fb1c720
       MIN_REPLICAS: 3
       UPDATE_SOURCES_VIA_API: '1'
       RECEPTOR_CONTROLLER_SECRET_NAME: sources-psk

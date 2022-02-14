@@ -1,0 +1,119 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: quayio
+
+name: quay-db-jobs
+description: Various db tasks previously done by directly in DB, such as enabling/disabling users.
+
+app:
+  $ref: /services/quayio/app.yml
+
+pipelinesProvider:
+  $ref: /services/quayio/pipelines/tekton.quayio-pipelines.app-sre-prod-01.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: oncall-quay
+
+managedResourceTypes:
+- Job
+
+imagePatterns:
+- quay.io/app-sre/quay-db-jobs
+
+authentication:
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+parameters:
+  IMAGE: "quay.io/app-sre/quay-db-jobs"
+
+resourceTemplates:
+- name: quay-db-jobs
+  path: /openshift.yml
+  url: https://github.com/quay/quay-db-jobs
+  targets:
+  - namespace:
+      $ref: /services/quayio/namespaces/quays02ue1.yml
+    ref: a20f8b58a4e4f2cfea01cf95c7c7ed33fff0404d
+    parameters:
+      JOB_NAME: "enable-weaveworks-stage-2021-12-06-4"
+      ACTIVE_DEADLINE_SECONDS: "600"
+      DB_HOST_SECRET: "quayio-stage-57-py3-rds"
+      DB_CREDS_SECRET: "quayio-stage-57-py3-rds"
+      SUBCOMMAND: "enable_users"
+      USERS: "weaveworks"
+      NEW_DB_USER_CREDS_SECRET: "quay-db-jobs-config"
+#- name: quay-db-jobs-enable-weaveworks
+#  path: /openshift.yml
+#  url: https://github.com/quay/quay-db-jobs
+#  targets:
+#  - namespace:
+#      $ref: /services/quayio/namespaces/quayp05ue1.yml
+#    ref: 1f8225c897a7f7545e4a93e82bc67c6fee9eb31b
+#    parameters:
+#      JOB_NAME: "enable-weaveworks-prod-2021-12-06"
+#      ACTIVE_DEADLINE_SECONDS: "600"
+#      DB_HOST_SECRET: "quay-db-config-secret"
+#      DB_CREDS_SECRET: "quay-db-config-secret"
+#      SUBCOMMAND: "enable_users"
+#      USERS: "weaveworks"
+- name: quay-db-jobs-create-database-user
+  path: /openshift.yml
+  url: https://github.com/quay/quay-db-jobs
+  targets:
+  - namespace:
+      $ref: /services/quayio/namespaces/quays02ue1.yml
+    ref: d2f71a5a54be22cc580a60bf3d06b966660c9e75
+    parameters:
+      JOB_NAME: "create-database-user-2022-01-26-1"
+      ACTIVE_DEADLINE_SECONDS: "600"
+      DB_HOST_SECRET: "quayio-stage-57-py3-rds"
+      DB_CREDS_SECRET: "quayio-stage-57-py3-rds"
+      SUBCOMMAND: "create_database_user"
+      NEW_DB_USER_CREDS_SECRET: "quay-db-jobs-config"
+- name: grant-user-service-tool-permission
+  path: /openshift.yml
+  url: https://github.com/quay/quay-db-jobs
+  targets:
+  - namespace:
+      $ref: /services/quayio/namespaces/quays02ue1.yml
+    ref: 6dcdb0e0ea839f5cc7fcc3f4e5edd176fb1f6c23
+    parameters:
+      JOB_NAME: "grant-user-service-tool-permission-2022-01-31-1"
+      ACTIVE_DEADLINE_SECONDS: "600"
+      DB_HOST_SECRET: "quayio-stage-57-py3-rds"
+      DB_CREDS_SECRET: "quayio-stage-57-py3-rds"
+      SUBCOMMAND: "grant_user_service_tool_permission"
+      NEW_DB_USER_CREDS_SECRET: "quay-db-jobs-config"
+  - namespace:
+      $ref: /services/quayio/namespaces/quayp05ue1.yml
+    ref: 6dcdb0e0ea839f5cc7fcc3f4e5edd176fb1f6c23
+    parameters:
+      JOB_NAME: "grant-user-service-tool-perms-prod-2022-01-31-1"
+      ACTIVE_DEADLINE_SECONDS: "600"
+      DB_HOST_SECRET: "quay-db-config-secret"
+      DB_CREDS_SECRET: "quayio-production-py3-rds"
+      SUBCOMMAND: "grant_user_service_tool_permission"
+      NEW_DB_USER_CREDS_SECRET: "quay-db-jobs-prod-config"
+- name: quay-db-jobs-prod-create-database-user
+  path: /openshift.yml
+  url: https://github.com/quay/quay-db-jobs
+  targets:
+  - namespace:
+      $ref: /services/quayio/namespaces/quayp05ue1.yml
+    ref: 6dcdb0e0ea839f5cc7fcc3f4e5edd176fb1f6c23
+    parameters:
+      JOB_NAME: "create-prod-database-user-2022-01-31-3"
+      ACTIVE_DEADLINE_SECONDS: "600"
+      DB_HOST_SECRET: "quay-db-config-secret"
+      DB_CREDS_SECRET: "quayio-production-py3-rds"
+      SUBCOMMAND: "create_database_user"
+      NEW_DB_USER_CREDS_SECRET: "quay-db-jobs-prod-config"

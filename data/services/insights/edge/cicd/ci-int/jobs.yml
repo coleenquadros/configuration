@@ -17,18 +17,27 @@ type: jobs
 
 config:
 - project:
-    name: edge
+    name: edge-api
     label: insights
-    node: insights
+    node: rhel8
     gh_org: RedHatInsights
     gh_repo: edge-api
     quay_org: cloudservices
     jobs:
     - "insights-edge-gh-pr-check":
-        display_name: edge-api pr security scan
-        pr_check_script_path: 'make scan_project'
+        display_name: edge-api pr check and security scan
+        pr_check_script_path: 'sh ./pr_check.sh && make scan_project'
         branch: main
+        concurrent_build: true
     - "insights-edge-gh-build-master":
-        display_name: edge-api main security scan
-        build_deploy_script_path: 'make scan_project'
+        display_name: edge-api build main and security scan
+        build_deploy_script_path: 'sh ./build_deploy.sh && make scan_project'
         branch: main
+    - "insights-deploy-ephemeral":
+        display_name: edge ephemeral
+        app_name: edge
+        component_name: edge-api
+        image: "quay.io/cloudservices/edge-api"
+        git_commit: main
+        image_tag: latest
+        include_ui: true

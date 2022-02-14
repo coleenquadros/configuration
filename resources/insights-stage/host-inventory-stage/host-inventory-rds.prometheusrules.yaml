@@ -13,20 +13,18 @@ spec:
     rules:
     - alert: HBIFreeSpaceLow
       expr: |
-        predict_linear(rdsosmetrics_fileSys_usedPercent{mount_point="/rdsdbdata", exported_instance="host-inventory-stage"}[1h], 3600 * 24 * 14) > 100
-      for: 1h
+        predict_linear(sum by (exported_instance,mount_point) (rdsosmetrics_fileSys_usedPercent{exported_instance="host-inventory-stage",mount_point="/rdsdbdata"})[4d:30m], 3600 * 24 * 14) > 100
       labels:
         severity: medium
         service: insights
         env: stage
-        app_team: platform
+        app_team: inventory
       annotations:
         link_url: "https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=host-inventory-stage;is-cluster=false;tab=monitoring"
         message: "DB instance {{ $labels.exported_instance }} is about to run out of storage within 2 weeks."
     - alert: HBIFreeSpaceVeryLow
       expr: |
-        predict_linear(rdsosmetrics_fileSys_usedPercent{mount_point="/rdsdbdata", exported_instance="host-inventory-stage"}[1h], 3600 * 24) > 100
-      for: 1h
+        predict_linear(sum by (exported_instance,mount_point) (rdsosmetrics_fileSys_usedPercent{exported_instance="host-inventory-stage",mount_point="/rdsdbdata"})[3h:1m], 3600 * 24) > 100
       labels:
         severity: high
         service: insights

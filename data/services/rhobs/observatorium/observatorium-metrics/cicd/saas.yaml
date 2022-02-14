@@ -52,6 +52,7 @@ imagePatterns:
 - quay.io/app-sre/memcached
 - quay.io/jpkroehling/all-in-one
 - quay.io/openshift/origin-configmap-reloader
+- quay.io/prometheus/alertmanager
 
 resourceTemplates:
 - name: observatorium-metrics
@@ -63,13 +64,15 @@ resourceTemplates:
     MEMCACHED_IMAGE: quay.io/app-sre/memcached
     MEMCACHED_EXPORTER_IMAGE: quay.io/prometheus/memcached-exporter
     THANOS_IMAGE: quay.io/thanos/thanos
+    THANOS_RULE_SYNCER_IMAGE: quay.io/observatorium/thanos-rule-syncer
     STORAGE_CLASS: "gp2"
   targets:
   - namespace:
       $ref: /services/rhobs/observatorium/observatorium-metrics/namespaces/observatorium-metrics-stage.yml
-    ref: cc95fbab252d0cd4d734a4b737393f44acc87500
+    ref: dbd5ed667557b0f9eb1bb41ab33ab15ffc822c65
     parameters:
       NAMESPACE: observatorium-metrics-stage
+      OBSERVATORIUM_NAMESPACE: observatorium-stage
       THANOS_CONFIG_SECRET: thanos-objectstorage
       THANOS_S3_SECRET: telemeter-thanos-stage-s3
       THANOS_IMAGE_TAG: v0.24.0-rc.1
@@ -83,8 +86,8 @@ resourceTemplates:
       THANOS_QUERY_FRONTEND_REPLICAS: 3
       THANOS_QUERY_FRONTEND_CPU_REQUEST: '100m'
       THANOS_QUERY_FRONTEND_CPU_LIMIT: '1'
-      THANOS_QUERY_FRONTEND_MEMORY_REQUEST: '256Mi'
-      THANOS_QUERY_FRONTEND_MEMORY_LIMIT: '1Gi'
+      THANOS_QUERY_FRONTEND_MEMORY_REQUEST: '1Gi'
+      THANOS_QUERY_FRONTEND_MEMORY_LIMIT: '3Gi'
       THANOS_STORE_LOG_LEVEL: 'debug'
       THANOS_STORE_REPLICAS: 1
       THANOS_STORE_CPU_REQUEST: '50m'
@@ -101,6 +104,7 @@ resourceTemplates:
       THANOS_RECEIVE_DEBUG_ENV: '1'
       THANOS_COMPACTOR_REPLICAS: 1
       THANOS_COMPACTOR_PVC_REQUEST: '50Gi'
+      THANOS_RULE_SYNCER_IMAGE_TAG: main-2022-01-11-1290656
       THANOS_RULER_LOG_LEVEL: 'info'
       THANOS_RULER_REPLICAS: 2
       THANOS_RULER_CPU_REQUEST: '500m'
@@ -112,7 +116,7 @@ resourceTemplates:
       THANOS_STORE_CACHE_MEMORY_LIMIT_MB: 2048
       JAEGER_AGENT_IMAGE_TAG: 1.22.0
       JAEGER_COLLECTOR_NAMESPACE: observatorium-stage
-      MEMCACHED_IMAGE_TAG: 1.5
+      MEMCACHED_IMAGE_TAG: 1.5-146
       MEMCACHED_EXPORTER_IMAGE_TAG: v0.6.0
       THANOS_STORE_INDEX_CACHE_CONNECTION_LIMIT: 5000
       THANOS_STORE_INDEX_CACHE_MEMORY_LIMIT_MB: 3072
@@ -121,12 +125,12 @@ resourceTemplates:
       SERVICE_ACCOUNT_NAME: observatorium-metrics
   - namespace:
       $ref: /services/rhobs/observatorium/observatorium-metrics/namespaces/observatorium-metrics-production.yml
-    ref: cc95fbab252d0cd4d734a4b737393f44acc87500
+    ref: dbd5ed667557b0f9eb1bb41ab33ab15ffc822c65
     parameters:
       NAMESPACE: observatorium-metrics-production
       THANOS_CONFIG_SECRET: thanos-objectstorage
       THANOS_S3_SECRET: telemeter-thanos-production-s3
-      THANOS_IMAGE_TAG: v0.23.1
+      THANOS_IMAGE_TAG: v0.24.0-rc.1
       THANOS_RECEIVE_CONTROLLER_IMAGE_TAG: master-2020-02-06-b66e0c8
       THANOS_QUERIER_REPLICAS: 6
       THANOS_RECEIVE_REPLICAS: 6
@@ -139,8 +143,8 @@ resourceTemplates:
       THANOS_QUERY_FRONTEND_REPLICAS: 3
       THANOS_QUERY_FRONTEND_CPU_REQUEST: '100m'
       THANOS_QUERY_FRONTEND_CPU_LIMIT: '1'
-      THANOS_QUERY_FRONTEND_MEMORY_REQUEST: '1Gi'
-      THANOS_QUERY_FRONTEND_MEMORY_LIMIT: '3Gi'
+      THANOS_QUERY_FRONTEND_MEMORY_REQUEST: '3Gi'
+      THANOS_QUERY_FRONTEND_MEMORY_LIMIT: '5Gi'
       THANOS_STORE_CPU_REQUEST: '1'
       THANOS_STORE_CPU_LIMIT: '1'
       THANOS_STORE_MEMORY_REQUEST: '20Gi'
@@ -206,7 +210,7 @@ resourceTemplates:
       NAMESPACE: observatorium-metrics-production
       THANOS_CONFIG_SECRET: thanos-objectstorage
       THANOS_S3_SECRET: telemeter-thanos-production-s3
-      THANOS_IMAGE_TAG: v0.23.1
+      THANOS_IMAGE_TAG: v0.24.0-rc.1
       THANOS_QUERIER_NAMESPACE: observatorium-mst-production
       THANOS_RULER_LOG_LEVEL: 'debug'
       THANOS_RULER_REPLICAS: 2

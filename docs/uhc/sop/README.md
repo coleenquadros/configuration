@@ -8,6 +8,8 @@
     - [UHCAccountManager5xxErrorsHigh](#account-manager-5xx)
     - [UHCAccountManager4xxErrorsHigh](#account-manager-4xx)
     - [UHCAccountManagerBannedUsersHigh](#account-manager-banned-users)
+    - [UHCAccountManagerAdvisoryLockDurationHigh](#account-manager-advisory-lock-issues)
+    - [UHCAccountManagerClientCertificateExpiring](#account-manager-client-certificate-expiring)
     - [OCM Account Manager Dependencies](#account-manager-dependencies)
     - [Escalations](#escalations)
 
@@ -181,6 +183,58 @@ The number of banned users has abnormally increased during the last 24 hours.
 ### Steps:
 
 - Contact Service Delivery B team, inform the greater service delivery team.
+
+---
+
+## Account Manager Advisory Lock issues
+
+### Impact:
+
+New clusters will be unable to fetch an authorization token.
+Users of the UHC portal UI may be receiving unexpected errors.
+Clusters service will be unable to determine authorization.
+Ability to run database migrations might be impacted.
+
+### Summary:
+
+UHC Account Manager Advisory Lock Duration increased in the last few minutes.
+
+### Access required:
+
+- Console access to the cluster that runs account-manager (app-sre)
+- Edit access to the uhc namespaces:
+  - uhc-stage
+  - uhc-production
+
+### Relevant secrets:
+- secrets/uhc-acct-mngr
+
+### Steps:
+
+- Contact Service Delivery B team.
+
+---
+
+## Account Manager Client Certificate Expiring
+
+### Impact:
+
+Partial outages in the stage/prod environments - Account Manager API endpoints would throw 500 errors.
+Account Manager Jobs such as AutoEntitlementReconciler, AccountReconciler would fail.
+Users of the UHC portal UI may be receiving unexpected errors.
+Issues in the stage environment might prevent the developmen team to deploy changes to the Production environment.
+
+### Summary:
+
+Account Manager uses a client certificate to communicate with the RHIT API Services (Users and Subscriptions).
+If the certificate expires, a new certificate should be requested and updated. This alert serves a purpose of giving the development team enough time to act on this matter.
+
+### Relevant secrets:
+- secrets/uhc-acct-mngr/rhsm.crt
+
+### Steps:
+
+- Contact Service Delivery B team.
 
 ---
 

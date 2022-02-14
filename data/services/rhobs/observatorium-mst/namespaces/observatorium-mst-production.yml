@@ -29,6 +29,7 @@ managedResourceTypes:
 - Role
 - RoleBinding
 - ServiceAccount
+- Secret
 
 managedTerraformResources: true
 
@@ -47,6 +48,8 @@ openshiftResources:
   path: /app-sre/telemeter-production/observatorium-mst-api-production.route.yaml
 - provider: route
   path: /app-sre/telemeter-production/observatorium-mst-thanos-compact.route.yaml
+- provider: route
+  path: /app-sre/telemeter-production/observatorium-mst-alertmanager-production.route.yaml
 - provider: vault-secret
   path: app-interface/app-sre/telemeter-production/observatorium-mst-thanos-objectstorage
   version: 1
@@ -63,10 +66,18 @@ openshiftResources:
   path: app-interface/app-sre/telemeter-production/query-proxy
   version: 1
 - provider: vault-secret
+  path: app-interface/app-sre/telemeter-production/alertmanager-proxy
+  version: 1
+- provider: vault-secret
   path: app-interface/app-sre/telemeter-production/observatorium-observatorium-mst-api
   version: 4
   annotations:
     qontract.recycle: "true"
+
+  # Secret Templates
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /rhobs/production/alertmanager-routes-mst.secret.yaml
 
 # Serviceaccount for Observatorium platform, Cluster role to access OSD tenant namespace
 - provider: resource

@@ -14,9 +14,9 @@ This alert fires when Compliance consumer components aren't able to process inco
 Console access to the cluster+namespace pods are running in.
 
 ## Steps
-1. Check Compliance grafana board "Kafka consumer lag" chart.
+1. Check [Compliance grafana board](https://grafana.app-sre.devshift.net/d/compliance/compliance?orgId=1) "Kafka consumer lag" chart. It should generally stay under 1024 on the chart but sometimes there will be spikes that go above this for a short period of time. Watch for any spikes that do not come back down over a long period of time or any spikes above 100000ms. 
  - Topic `platform.inventory.events` lag means `compliance-inventory` components issues.
-2. Log into the console / namespace and verify if all `compliance-inventory` pods are running and processing incoming messages.
+2. Log into the [console / namespace](https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/compliance-prod/deployments) and verify if all `compliance-inventory` pods are running and processing incoming messages.
 3. Inspect given components pods logs and search for error logs.
 4. Check if any deployments or changes in the application happened closer to the time the error started. 
 5. Escalate the alert with all the information available to the engineering team that is responsible for the app.

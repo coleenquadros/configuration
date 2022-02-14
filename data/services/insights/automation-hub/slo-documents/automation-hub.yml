@@ -1,0 +1,34 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: automation-hub
+
+name: automation-hub
+
+namespaces:
+- $ref: /services/insights/automation-hub/namespaces/automation-hub-prod.yml
+
+slos:
+- name: automation-hub availability
+  dashboard: https://grafana.app-sre.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&var-datasource=crcp01ue1-prometheus&var-label=automation-hub&refresh=1m
+  SLIType: availability
+  SLISpecification: Percentage of successful (non-5xx) HTTP requests made to the API
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  SLOParameters:
+    window: 28d
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/automation-hub/SLO.md
+  expr: sum(rate(api_3scale_gateway_api_status{exported_service="automation-hub", status!="5xx"}[{{window}}])) / sum(rate(api_3scale_gateway_api_status{exported_service="automation-hub"}[{{window}}]))
+  prometheusRules: /insights-prod/automation-hub-prod/automation-hub.prometheusrules.yaml
+- name: automation-hub latency
+  dashboard: https://grafana.app-sre.devshift.net/d/slo-dashboard/slo-dashboard?orgId=1&var-datasource=crcp01ue1-prometheus&var-label=automation-hub&refresh=1m
+  SLIType: latency
+  SLISpecification: Percentage of successful HTTP requests completed under 2000ms
+  SLOTarget: 0.90
+  SLOTargetUnit: percent_0_1
+  SLOParameters:
+    window: 28d
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/automation-hub/SLO.md
+  expr: sum(rate(api_3scale_gateway_api_time_bucket{le="2000.0", exported_service="automation-hub"}[{{window}}])) / sum(rate(api_3scale_gateway_api_time_bucket{le="+Inf", exported_service="automation-hub"}[{{window}}]))
+  prometheusRules: /insights-prod/automation-hub-prod/automation-hub.prometheusrules.yaml
