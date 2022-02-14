@@ -161,11 +161,9 @@ Update the `automationToken` field to point to the vault secret created earlier 
 
 Access in the AWS account is controlled by the groups and policies definitions held in the `groups` and `policies` directories for that AWS account.
 
-Create the group:
+Create the group under `aws/<cluster>/groups/App-SRE-admin.yml`:
 
 ```yaml
-aws/<cluster>/groups/APP-SRE-admin.yml
-
 ---
 $schema: /aws/group-1.yml
 
@@ -181,9 +179,79 @@ policies:
 - AdministratorAccess
 ```
 
+Create the policy under `aws/<account>/policies/ManageOwnMFA.yml`:
+
+```yaml
+---
+$schema: /aws/policy-1.yml
+
+labels: {}
+
+account:
+  $ref: /aws/<aws_account>/account.yml
+
+name: manage-own-mfa
+description: |
+    Allows a user to manage their own access MFA devices.
+    ${aws:username} will be replaced with the actual user name
+
+policy:
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Sid": "AllowViewAccountInfo",
+                "Effect": "Allow",
+                "Action": "iam:ListVirtualMFADevices",
+                "Resource": "*"
+            },
+            {
+                "Sid": "AllowManageOwnVirtualMFADevice",
+                "Effect": "Allow",
+                "Action": [
+                    "iam:CreateVirtualMFADevice",
+                    "iam:DeleteVirtualMFADevice"
+                ],
+                "Resource": "arn:aws:iam::*:mfa/${aws:username}"
+            },
+            {
+                "Sid": "AllowManageOwnUserMFA",
+                "Effect": "Allow",
+                "Action": [
+                    "iam:DeactivateMFADevice",
+                    "iam:EnableMFADevice",
+                    "iam:GetUser",
+                    "iam:ListMFADevices",
+                    "iam:ResyncMFADevice"
+                ],
+                "Resource": "arn:aws:iam::*:user/${aws:username}"
+            },
+            {
+                "Sid": "DenyAllExceptListedIfNoMFA",
+                "Effect": "Deny",
+                "NotAction": [
+                    "iam:CreateVirtualMFADevice",
+                    "iam:ChangePassword",
+                    "iam:EnableMFADevice",
+                    "iam:GetUser",
+                    "iam:ListMFADevices",
+                    "iam:ListVirtualMFADevices",
+                    "iam:ResyncMFADevice",
+                    "sts:GetSessionToken"
+                ],
+                "Resource": "*",
+                "Condition": {
+                    "BoolIfExists": {"aws:MultiFactorAuthPresent": "false"}
+                }
+            }
+        ]
+    }
+
+```
+
 ### Add AppSRE users
 
-Lastly add the created admin group to the [app-sre.yml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/teams/app-sre/roles/app-sre.yml) role.
+Lastly add the created admin group and policy to the [app-sre.yml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/teams/app-sre/roles/app-sre.yml) role.
 
 ### Wait for the e-mails for access to the AWS account
 
