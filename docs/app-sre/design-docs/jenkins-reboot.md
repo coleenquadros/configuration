@@ -82,7 +82,7 @@ WantedBy=jenkins-restart.target
 
 In addition to this, we will deliver a Jenkins systemd service
 (**TODO** offer said unit upstream) that will do the `/safeExit` with
-the appropriate credentials and wait for 20 minutes before killing all
+the credentials of `app-sre-bot` and wait for 20 minutes before killing all
 jobs.  This will prevent deadlocked jobs from stalling the reboot.
 
 Its key features would be:
@@ -98,6 +98,7 @@ ExecStart=...
 ExecStop=# Do safeExit here
 TimeoutStopSec=$TIMEOUT_STOP
 TimeoutStopFailureMode=kill
+User=jenkins
 
 [Install]
 WantedBy=default.target
