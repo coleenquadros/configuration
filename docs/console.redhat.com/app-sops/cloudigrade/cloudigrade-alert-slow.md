@@ -8,7 +8,7 @@ Severity: High
 
 ## Impact
 
-cloudigrade inspects images in public clouds to identity RHEL presense and tracks customer use to report on RHEL usage. If cloudigrade is broken, customers will not have accurate data reported via Subscription Watch. If cloudigrade's responses are slow, other services like Sources and Subscription Watch that depend on cloudigrade's API may be delayed or fail in unexpected ways.
+cloudigrade inspects images in public clouds to identify RHEL presense and tracks customer use to report on RHEL usage. If cloudigrade is broken, customers will not have accurate data reported via Subscription Watch. If cloudigrade's responses are slow, other services like Sources and Subscription Watch that depend on cloudigrade's API may be delayed or fail in unexpected ways.
 
 ## Summary
 

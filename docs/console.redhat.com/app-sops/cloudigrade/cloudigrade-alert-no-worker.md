@@ -8,11 +8,13 @@ Severity: High
 
 ## Impact
 
-cloudigrade inspects images in public clouds to identity RHEL presense and tracks customer use to report on RHEL usage. If cloudigrade is broken, customers will not have accurate data reported via Subscription Watch. If `cloudigrade-worker` specifically is not running, cloudigrade's many asynchronous tasks will not run, and therefore new customers cannot be onboarded and any existing customer data will grow stale.
+cloudigrade inspects images in public clouds to identify RHEL presense and tracks customer use to report on RHEL usage. If cloudigrade is broken, customers will not have accurate data reported via Subscription Watch. If `cloudigrade-worker` specifically is not running, cloudigrade's many asynchronous tasks will not run, and therefore new customers cannot be onboarded and any existing customer data will grow stale.
 
 ## Summary
 
 This alert fires when there has been no `cloudigrade-worker` pod with a ready status for 5 minutes.
+
+At the time of this writing, there are no known causes for `cloudigrade-worker` to be absent, and this should never happen under normal circumstances. It may indicate underlying infrastructure problems (Clowder, OpenShift, etc.).
 
 ## Access required
 

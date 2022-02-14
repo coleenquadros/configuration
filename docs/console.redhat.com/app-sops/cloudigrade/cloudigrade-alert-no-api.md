@@ -8,11 +8,13 @@ Severity: High
 
 ## Impact
 
-cloudigrade inspects images in public clouds to identity RHEL presense and tracks customer use to report on RHEL usage. If cloudigrade is broken, customers will not have accurate data reported via Subscription Watch. If `cloudigrade-beat` specifically is not running, cloudigrade's public and internal HTTP APIs will not be available, and therefore new customers cannot be onboarded and any existing customer data presented via Subscription Watch will not be updated.
+cloudigrade inspects images in public clouds to identify RHEL presense and tracks customer use to report on RHEL usage. If cloudigrade is broken, customers will not have accurate data reported via Subscription Watch. If `cloudigrade-api` specifically is not running, cloudigrade's public and internal HTTP APIs will not be available, and therefore new customers cannot be onboarded and any existing customer data presented via Subscription Watch will not be updated.
 
 ## Summary
 
 This alert fires when there has been no `cloudigrade-api` pod with a ready status for 5 minutes.
+
+At the time of this writing, there are no known causes for `cloudigrade-api` to be absent, and this should never happen under normal circumstances. It may indicate underlying infrastructure problems (Clowder, OpenShift, etc.).
 
 ## Access required
 
