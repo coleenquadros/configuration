@@ -52,7 +52,6 @@ In order to define Continuous Testing pipelines in app-interface:
 
 A complete example for github-mirror can be found [here](/data/services/github-mirror/cicd/test.yaml).
 
-```
 ### Define post-deployment testing for resources behind the Red Hat VPN
 
 There may be use cases where tests need to access resources behind the Red Hat VPN, such as the OCM UI.
