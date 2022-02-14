@@ -7,8 +7,38 @@ Service owners are able to define their post deployment tests using a SaaS file.
 
 This SaaS file should deploy resources of kind `Job` to the same namespace as the application. The deployment of the Jobs should only be carried out after the application was deployed successfully.
 
-The Jobs to deploy should be defined in a separate OpenShift template, and each Job name should end with `-{IMAGE_TAG}` so the jobs will be recreated after every update to the source code. The jobs from the previous round will be deleted automatically.
+## Job definition and naming
+Jobs to deploy should be defined in a separate OpenShift template with one of these naming approaches:
+* `<your-job-id>-${IMAGE_TAG}` will run on every update to the source code where a new container image is built.
+* `<your-job-id>-${IMAGE_TAG}-{JOBID}` same as above + allows job reruns from openshift console (tekton PipelineRuns)
 
+Jobs need to have a new name on every run to be created, if the name does not change, the job is not created, hence, it does not run.
+`{JOBID}` parameter is a tweak to ensure the `Job` name changes even though the `{IMAGE_TAG}` does not. This is useful in testing stages
+ when there could be flaky tests and re-running them is desirable. Maintaining the `IMAGE_TAG` is worh to know the image being tested.
+
+ Example:
+ ```yaml
+---
+parameters:
+[...]
+- name: JOBID
+  generate: expression
+  from: "[0-9a-f]{7}"
+- name: IMAGE_TAG
+  value: ''
+  required: true
+apiVersion: v1
+kind: Template
+metadata:
+  name: myservice-tests-template
+objects:
+- apiVersion: batch/v1
+  kind: Job
+  metadata:
+    name: myservice-tests-${IMAGE_TAG}-${JOBID}
+```
+### Notes:
+* The jobs from the previous round will be deleted automatically
 ## Define post-deployment testing SaaS file
 
 In order to define Continuous Testing pipelines in app-interface:
@@ -22,6 +52,15 @@ In order to define Continuous Testing pipelines in app-interface:
 
 A complete example for github-mirror can be found [here](/data/services/github-mirror/cicd/test.yaml).
 
+### Tests Re-runs (tekton)
+Sometimes test stages fail due to flaky tests or by other reasons and rerunning them could improve the overall ci/cd system:
+* It prevents commits/parameters to just trigger pipelines without any change
+* It saves time rebuilding images and/or running unnecessary previous steps
+
+To enable `Job` reruns, the `Job` name must change in every deployment even though there is no image change. If the name does not change, the integration does not detect any change and the job won't trigger because it already exists.
+To ensure the `Job` has a new name on every run, `templates` have an option to generate a random string parameter that can be attached to the `Job` name:
+
+```
 ### Define post-deployment testing for resources behind the Red Hat VPN
 
 There may be use cases where tests need to access resources behind the Red Hat VPN, such as the OCM UI.
