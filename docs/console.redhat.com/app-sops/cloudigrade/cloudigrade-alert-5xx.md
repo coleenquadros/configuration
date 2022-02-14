@@ -14,6 +14,8 @@ cloudigrade inspects images in public clouds to identify RHEL presense and track
 
 This alert fires when cloudigrade's HTTP API responds with error status code (5xx) too frequently. That means some fatal error appeared in at least one of the `cloudigrade-api` pods.
 
+At the time of this writing, there are no known causes for 5xx error responses, which should never happen under normal circumstances. It may indicate underlying infrastructure problems (Clowder, OpenShift, etc.). The steps below are just instructions for generic troubleshooting and investigation. If or when the dev team finds a recurring pattern of HTTP 5xx errors that cannot promptly be fixed in the backend, we will update the steps below with more details.
+
 ## Access required
 
 Console access to the cluster+namespace pods are running in.

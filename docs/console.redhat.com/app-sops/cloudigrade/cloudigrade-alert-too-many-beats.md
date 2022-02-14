@@ -14,6 +14,8 @@ cloudigrade inspects images in public clouds to identify RHEL presense and track
 
 This alert fires when there has been more than 1 `cloudigrade-beat` pod with a ready status for 5 minutes.
 
+At the time of this writing, there are no known causes for `cloudigrade-beat` to have more than 1 pod, and this should never happen under normal circumstances. It may indicate underlying infrastructure problems (Clowder, OpenShift, etc.).
+
 ## Access required
 
 Console access to the cluster+namespace pods are running in.

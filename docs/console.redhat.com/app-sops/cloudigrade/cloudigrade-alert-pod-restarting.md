@@ -14,6 +14,8 @@ cloudigrade inspects images in public clouds to identify RHEL presense and track
 
 This alert fires when frequent cloudigrade pod restarting is detected.
 
+At the time of this writing, there are no known causes for pods to restart frequently, and this should never happen under normal circumstances. It may indicate underlying infrastructure problems (Clowder, OpenShift, etc.).
+
 ## Access required
 
 Console access to the cluster+namespace pods are running in.
