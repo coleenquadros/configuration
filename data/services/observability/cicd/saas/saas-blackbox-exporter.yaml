@@ -13,6 +13,14 @@ app:
 pipelinesProvider:
   $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
 
+deployResources:
+  requests:
+    cpu: 20m
+    memory: 120Mi
+  limits:
+    cpu: 20m
+    memory: 120Mi
+
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
@@ -41,6 +49,11 @@ resourceTemplates:
     IMAGE: quay.io/prometheus/blackbox-exporter
     IMAGE_TAG: v0.19.0
   targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-devshift.yml
+    ref: 2778350ddf07fae2b3ce79b3c8a7783d944b0156
+    parameters:
+      REPLICAS: 1
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-stage.yml
     ref: master

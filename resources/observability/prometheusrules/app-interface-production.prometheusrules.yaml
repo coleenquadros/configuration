@@ -13,10 +13,11 @@ spec:
     rules:
     - alert: ECRImagePullSecretsKubeJobFailed
       annotations:
-        message: Job {{ $labels.namespace }}/{{ $labels.job_name }} failed to complete in {{ $labels.namespace }}.
+        message: Job qontract-reconcile-aws-ecr-pull-secrets failed to complete in {{ $labels.namespace }}.
       expr: |
-        kube_job_status_failed{job="kube-state-metrics",namespace="app-interface-production",job_name=~"qontract-reconcile-aws-ecr-image-pull-secrets.*"}  > 0
-      for: 5m
+        sum(kube_job_status_failed{job_name=~"qontract-reconcile-aws-ecr-image-pull-secrets.*"}) by (namespace) 
+        - sum(kube_job_status_failed{job_name=~"qontract-reconcile-aws-ecr-image-pull-secrets.*"} offset 5m) by (namespace) 
+        > 0
       labels:
         service: app-interface
         severity: high

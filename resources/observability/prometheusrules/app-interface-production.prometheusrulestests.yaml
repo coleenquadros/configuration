@@ -1,0 +1,88 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /observability/prometheusrules/app-interface-production.prometheusrules.yaml
+
+evaluation_interval: 5m
+
+tests:
+- interval: 5m
+  input_series:
+  - series: kube_job_status_failed{job_name="qontract-reconcile-aws-ecr-image-pull-secrets-1", namespace="app-interface-production"}
+    values: 1 1 1 1 1 1 1 1 1 1 1 1
+  - series: kube_job_status_failed{job_name="qontract-reconcile-aws-ecr-image-pull-secrets-2", namespace="app-interface-production"}
+    values: _ _ _ _ _ 1 1 1 1 1 1 1
+
+  alert_rule_test:
+  # Job keep failing at the 5th interval, alert firing
+  - eval_time: 25m
+    alertname: ECRImagePullSecretsKubeJobFailed
+    exp_alerts:
+    - exp_labels:
+        service: app-interface
+        severity: high
+        namespace: app-interface-production
+      exp_annotations:
+        message: Job qontract-reconcile-aws-ecr-pull-secrets failed to complete in app-interface-production.
+
+- interval: 5m
+  input_series:
+  - series: kube_job_status_failed{job_name="qontract-reconcile-aws-ecr-image-pull-secrets-1", namespace="app-interface-production"}
+    values: 0 0 0 0 0 0 0 0 0 0 0 0
+  - series: kube_job_status_failed{job_name="qontract-reconcile-aws-ecr-image-pull-secrets-2", namespace="app-interface-production"}
+    values: _ _ _ _ _ 0 0 0 0 0 0 0
+
+  alert_rule_test:
+  # Job not failing, alert silent
+  - eval_time: 25m
+    alertname: ECRImagePullSecretsKubeJobFailed 
+    exp_alerts: []
+
+- interval: 5m
+  input_series:
+  - series: kube_job_status_failed{job_name="qontract-reconcile-aws-ecr-image-pull-secrets-1", namespace="app-interface-production"}
+    values: 1 1 1 1 1 1 1 1 1 1 1 1
+  - series: kube_job_status_failed{job_name="qontract-reconcile-aws-ecr-image-pull-secrets-2", namespace="app-interface-production"}
+    values: _ _ _ _ _ 0 0 0 0 0 0 0
+
+  alert_rule_test:
+  # Job recover at 5th interval, alert silent
+  - eval_time: 25m
+    alertname: ECRImagePullSecretsKubeJobFailed 
+    exp_alerts: []
+
+# Currently when a job first gets created fail, the alert won't fire until the second job kicks in and failed too.
+
+# - interval: 5m
+#   input_series:
+#   - series: kube_job_status_failed{job_name="qontract-reconcile-aws-ecr-image-pull-secrets-1", namespace="app-interface-production"}
+#     values: 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+
+#   alert_rule_test:
+#   - eval_time: 0m
+#     alertname: ECRImagePullSecretsKubeJobFailed
+#     exp_alerts:
+#     - exp_labels:
+#         service: app-interface
+#         severity: high
+#         namespace: app-interface-production
+#       exp_annotations:
+#         message: Job qontract-reconcile-aws-ecr-pull-secrets failed to complete in app-interface-production.
+
+# - interval: 5m
+#   input_series:
+#   - series: kube_job_status_failed{job_name="qontract-reconcile-aws-ecr-image-pull-secrets-1", namespace="app-interface-production"}
+#     values: _ _ _ _ _ 1 1 1 1 1 1 1 1 1 1
+
+#   alert_rule_test:
+#   # Job starting to fail at the 5th interval, alert firing
+#   - eval_time: 25m
+#     alertname: ECRImagePullSecretsKubeJobFailed
+#     exp_alerts:
+#     - exp_labels:
+#         service: app-interface
+#         severity: high
+#         namespace: app-interface-production
+#       exp_annotations:
+#         message: Job qontract-reconcile-aws-ecr-pull-secrets failed to complete in app-interface-production.
