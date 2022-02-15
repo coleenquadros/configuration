@@ -124,6 +124,14 @@ If files for your cluster(s) already exist, add a new list item to the `subjects
   - kind: ServiceAccount
     name: gabi
     namespace: <YOUR NAMESPACE HERE>
+
+### Step 5: Update OpenShift-Config
+
+For each cluster you're deploying Gabi to, you will want to ensure that in each cluster's `openshift-config` namespace, that it is managing `dedicated-readers` and `self-provisioners` ([Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/82de8d62d081e98e1b5816a97f232bf050216b82/data/openshift/app-sre-stage-01/namespaces/openshift-config.yaml#L36-39)). If it doesn't already exist there, add the following YAML array item to resource `managedResourceNames`:
+```
+  resourceNames:
+  - dedicated-readers
+  - self-provisioners
 ```
 
 ## Access Gabi Instances
