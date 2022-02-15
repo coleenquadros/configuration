@@ -8,11 +8,13 @@ Severity: High
 
 ## Impact
 
-cloudigrade inspects images in public clouds to identity RHEL presense and tracks customer use to report on RHEL usage. If cloudigrade is broken, customers will not have accurate data reported via Subscription Watch. If cloudigrade's responses have 5xx status, other services like Sources and Subscription Watch that depend on cloudigrade's API may be fail in unexpected ways.
+cloudigrade inspects images in public clouds to identify RHEL presense and tracks customer use to report on RHEL usage. If cloudigrade is broken, customers will not have accurate data reported via Subscription Watch. If cloudigrade's responses have 5xx status, other services like Sources and Subscription Watch that depend on cloudigrade's API may be fail in unexpected ways.
 
 ## Summary
 
 This alert fires when cloudigrade's HTTP API responds with error status code (5xx) too frequently. That means some fatal error appeared in at least one of the `cloudigrade-api` pods.
+
+At the time of this writing, there are no known causes for 5xx error responses, which should never happen under normal circumstances. It may indicate underlying infrastructure problems (Clowder, OpenShift, etc.). The steps below are just instructions for generic troubleshooting and investigation. If or when the dev team finds a recurring pattern of HTTP 5xx errors that cannot promptly be fixed in the backend, we will update the steps below with more details.
 
 ## Access required
 
