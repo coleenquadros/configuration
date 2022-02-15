@@ -1,0 +1,50 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: registry-quarkus-redhat
+
+name: registry-quarkus-redhat-production
+description: Production namespace for registry.quarkus.redhat.com
+
+cluster:
+  $ref: /openshift/app-sre-prod-01/cluster.yml
+
+app:
+  $ref: /services/quarkus/registry/app.yml
+
+environment:
+  $ref: /products/quarkus/environments/production-redhat.yml
+
+networkPoliciesAllow:
+  - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml
+
+managedResourceTypes:
+  - ServiceAccount
+
+openshiftResources:
+  - provider: resource
+    path: /app-sre/registry-quarkus-redhat-production/registry-quarkus-redhat.serviceaccount.yaml
+  - provider: route
+    path: /app-sre/registry-quarkus-redhat-production/registry-quarkus-redhat.route.yml
+  - provider: route
+    path: /app-sre/registry-quarkus-redhat-production/registry-quarkus-redhat.temp.route.yml
+  - provider: vault-secret
+    path: app-interface/app-sre/registry-quarkus-redhat-production/secrets
+    version: 1
+    annotations:
+      qontract.recycle: "true"
+
+managedRoles: true
+
+managedTerraformResources: true
+
+terraformResources:
+  - provider: rds
+    account: app-sre
+    identifier: quarkus-registry-redhat-production
+    defaults: /terraform/resources/app-sre/production/rds-1.yml
+    output_resource_name: registry-db
+
+sharedResources:
+  - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
