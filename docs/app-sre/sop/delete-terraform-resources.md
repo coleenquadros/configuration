@@ -5,6 +5,9 @@ This SOP describes how to safely delete managed terraform resources.
 > Note: This SOP should no longer be used as a result of work done in APPSRE-4186.
 > Instead, follow these instructions: https://gitlab.cee.redhat.com/service/app-interface#enable-deletion-of-aws-resources-in-deletion-protected-accounts
 
+<details>
+  <summary>Previous content</summary>
+
 ## Prerequisites
 
 * A MR exists that removes terraformResources from a namespace in app-interface.
@@ -112,3 +115,5 @@ terraform apply output-plan-file
 Once the deletion step (or the fallback deletion step) have been completed, re-enable the `terraform-resources`,
 `terraform-resources-wrapper`, and `github-housekeeping` integrations in 
 [unleash](https://app-interface.unleash.devshift.net/).
+
+</details>
