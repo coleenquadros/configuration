@@ -1,0 +1,44 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: openshift-config
+description: summit-2022-dev openshift-config namespace
+
+cluster:
+  $ref: /openshift/summit-2022/summit-2022-dev/cluster.yml
+
+app:
+  $ref: /services/app-sre/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/production.yml
+
+managedResourceTypes:
+- Template
+- Project
+- ClusterRoleBinding
+
+# when using `oc`, use the override as the kind instead of the resource
+managedResourceTypeOverrides:
+- resource: Project
+  override: Project.config.openshift.io
+
+managedResourceNames:
+- resource: Template
+  resourceNames:
+    - project-request
+- resource: Project
+  resourceNames:
+    - cluster
+
+openshiftResources:
+- provider: resource
+  path: /setup/project-request.v4.template.yaml
+- provider: resource
+  path: /setup/cluster.project.v4.yaml
+- provider: resource
+  path: /setup/dedicated-readers.clusterrolebinding.yaml
+
+clusterAdmin: true
