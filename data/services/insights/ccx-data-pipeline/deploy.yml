@@ -284,6 +284,30 @@ resourceTemplates:
     parameters:
       MIN_REPLICAS: "1"
 
+- name: ccx-sha-extractor
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/insights-sha-extractor
+  targets:
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
+    # FIXME enable when testing stage deployment CCXDEV-7202
+    disable: true
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-ccx-sha-extractor-gh-build-master
+    parameters:
+      IMAGE: "quay.io/cloudservices/ccx-sha-extractor"
+      MIN_REPLICAS: "1"
+      MAX_REPLICAS: "1"
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true
+    ref: internal
+    parameters:
+      MIN_REPLICAS: "1"
+
 - name: grafana-dashboard-io-gathering-service
   url: https://github.com/RedHatInsights/insights-operator-gathering-conditions-service
   path: /dashboards

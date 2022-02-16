@@ -16,12 +16,13 @@ app:
 environment:
   $ref: /products/insights/environments/perf.yml
 
+networkPoliciesAllow: []
+
 managedRoles: true
 
 managedResourceTypes:
+- ServiceAccount
 - Secret
-
-networkPoliciesAllow: []
 
 openshiftResources:
 #- provider: resource-template
@@ -44,6 +45,14 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
     qontract.ignore_reconcile_time: "true"
+- provider: resource
+  path: /insights-perf/shared/private-image-puller.serviceaccount.yaml
 - provider: vault-secret
   path: insights/secrets/global/rds-client-ca
   version: 1
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-perf/xjoin-perf/compliance-db.secret.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-perf/platform-mq-perf/kafka-cyndi.secret.yaml
