@@ -58,26 +58,26 @@ The easiest way to achieve this is letting the controller handle the
 reboot of all nodes.  We will rely on the controller's systemd to do
 all the coordination work for us without blocking Ansible.
 
-We will isolate this intervention inside its own `target`, called
-`jenkins-reboot.target`. This way we can trigger the reboot of all
-Jenkins workers without worrying that a manual intervention will have
-unexpected side effects. Inside this target we will have a `service`
-that will reboot all workers once Jenkins exits. Roughly it will be:
+We will have a service doing the reboots, called
+`reboot-jenkins-nodes.service`, and it will be called after Jenkins
+finishes via `OnSuccess=`. However, to prevent any Jenkins restart or
+manual intervention from rebooting all nodes, we will let this service
+run only if a certain file has been populated. This way, ansible can
+touch or throw contents to said file and then let Jenkins do all its
+work.
 
 ``` ini
 # Warning! Pseudo-unit!
 [Unit]
 Description=Reboot workers
 After=jenkins.service
-EnvironmentFile=FILE_WITH_ALL_WORKERS
 Before=reboot.target
+ConditionPathExists=/run/something/ansible/can/write/to
 
 [Service]
+EnvironmentFile=FILE_WITH_ALL_WORKERS
 Type=oneshot
 ExecStart=sh -c "for w in $WORKERS; do ssh -l rebooter $w systemctl -f reboot; done"
-
-[Install]
-WantedBy=jenkins-restart.target
 ```
 
 In addition to this, we will deliver a Jenkins systemd service
@@ -90,15 +90,17 @@ Its key features would be:
 ``` ini
 [Unit]
 Description=jenkins
-EnvironmentFile=FILE_WITH_CREDS
-EnvironmentFile=FILE_WITH_TIMEOUTS
+OnSuccess=reboot-jenkins-nodes.service
 
 [Service]
+EnvironmentFile=FILE_WITH_CREDS
+EnvironmentFile=FILE_WITH_TIMEOUTS
 ExecStart=...
 ExecStop=# Do safeExit here
 TimeoutStopSec=$TIMEOUT_STOP
-TimeoutStopFailureMode=kill
 User=jenkins
+Group=jenkins
+
 
 [Install]
 WantedBy=default.target
