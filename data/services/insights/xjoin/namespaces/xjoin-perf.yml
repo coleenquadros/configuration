@@ -23,10 +23,11 @@ networkPoliciesAllow:
 managedRoles: true
 
 managedResourceTypes:
+- ServiceAccount
 - ConfigMap
-- Role
-- RoleBinding
-- Secret
+# - Role
+# - RoleBinding
+# - Secret
 
 openshiftResources:
 - provider: vault-secret
@@ -39,9 +40,6 @@ openshiftResources:
   type: kubernetes.io/dockerconfigjson
   name: quay-cloudservices-pull
 - provider: vault-secret
-  path: insights/secrets/global/rds-client-ca
-  version: 1
-- provider: vault-secret
   # requires access to the host-inventory-db provisioned through the host-inventory namespace
   path: app-sre/integrations-output/terraform-resources/insights-perf/host-inventory-perf/host-inventory-db
   version: 1
@@ -49,6 +47,15 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
     qontract.ignore_reconcile_time: "true"
+- provider: resource
+  path: /insights-perf/shared/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+- provider: resource
+  path: /insights-perf/xjoin/validation.configmap.yml
+- provider: resource
+  path: /insights-perf/xjoin/xjoin-config.configmap.yml
 
 managedTerraformResources: true
 

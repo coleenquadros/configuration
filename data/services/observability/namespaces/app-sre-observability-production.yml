@@ -88,6 +88,12 @@ terraformResources:
   - CloudWatchReadOnlyAccess
   - AmazonRDSReadOnlyAccess
   output_resource_name: aws-rds-exporter-crc
+## Grafana temporary database
+- provider: rds
+  account: app-sre
+  identifier: grafana-production
+  defaults: /terraform/resources/grafana/rds-1.yml
+  output_resource_name: grafana-db
 
 managedResourceTypes:
 - ConfigMap
@@ -105,6 +111,18 @@ openshiftResources:
     host: grafana.app-sre.devshift.net
 - provider: resource
   path: /observability/grafana-via-openshift.route.yaml
+# Promlens
+- provider: vault-secret
+  path: app-interface/app-sre/app-sre-observability-production/grafana/grafana-api-token
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: osd-sre/promlens
+  name: promlens-license
+  version: 1
+  annotations:
+    qontract.recycle: "true"
 ## PushGateway
 - provider: resource-template
   type: jinja2

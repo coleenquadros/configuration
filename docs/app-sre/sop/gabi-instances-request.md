@@ -124,6 +124,7 @@ If files for your cluster(s) already exist, add a new list item to the `subjects
   - kind: ServiceAccount
     name: gabi
     namespace: <YOUR NAMESPACE HERE>
+```
 
 ### Step 5: Update OpenShift-Config
 
