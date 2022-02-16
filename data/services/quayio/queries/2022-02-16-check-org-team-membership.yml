@@ -1,0 +1,15 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+overrides:
+  db_name: quay
+name: 2022-02-16-check-org-team-membership-0
+namespace:
+  $ref: /services/quayio/namespaces/quayp05ue1.yml
+identifier: quayio-production-py3
+output: stdout
+query: |
+  SELECT user.username, t1.team_id, t3.name, teamrole.name AS 'rolename'
+  FROM teammember AS t1 JOIN user ON t1.user_id = user.id
+  LEFT OUTER JOIN team AS t3 ON t1.team_id = t3.id JOIN user AS org ON t3.organization_id = org.id JOIN teamrole ON t3.role_id = teamrole.id
+  WHERE org.username = 'negawatt' AND org.organization = 1;
