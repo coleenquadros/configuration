@@ -76,6 +76,7 @@ this repository.
       - [Manage AWS Secrets Manager via App-Interface (`/openshift/namespace-1.yml`)](#manage-aws-secrets-manager-via-app-interface-openshiftnamespace-1yml)
       - [Manage ElasticSearch via App-Interface (`/openshift/namespace-1.yml`)](#manage-elasticsearch-via-app-interface-openshiftnamespace-1yml)
       - [Manage RDS databases via App-Interface (`/openshift/namespace-1.yml`)](#manage-rds-databases-via-app-interface-openshiftnamespace-1yml)
+        - [Approved RDS versions](#approved-rds-versions)
         - [Reset RDS database password](#reset-rds-database-password)
         - [Create RDS database from Snapshot](#create-rds-database-from-snapshot)
         - [Publishing Database Log Files to CloudWatch](#publishing-database-log-files-to-cloudwatch)
@@ -1505,6 +1506,34 @@ Once the changes are merged, the RDS instance will be created (or updated) and a
 - `db.user` - The master username for the database.
 - `db.password` - Password for the master DB user.
 - `db.ca_cert` - CA certificate for the DB (if `ca_cert` is defined).
+
+##### Approved RDS versions
+
+This section describes the database versions that are currently approved by AppSRE. These are only the minimum versions that are required due to significant security vulnerabilities. It is the responsibility of tenants to ensure that the minor version selected works with their service and does not lead to any regressions. Consider upgrading to more recent minor versions if you would benefit from bug fixes or there are security vulnerabilities that may not be a high risk to the majority of databases, but pose a unique risk due to certain features that you've enabled.
+
+For more information about the versions that RDS supports:
+
+* [PostgreSQL](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_PostgreSQL.html#PostgreSQL.Concepts.General.DBVersions)
+* [MySQL](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_MySQL.html#MySQL.Concepts.VersionMgmt)
+
+**When creating a new database, it is typically suggested that you use the newest minor version possible.**
+
+###### PostgreSQL
+
+| Version      | Minimum minor version | Notes |
+| ----------- | ----------- | ----------- |
+| 14      | no version restrictions      |  |
+| 13      | no version restrictions      |  |
+| 12   | \>= 12.7        | This is the minimum version required for the most recent release of [RDS OS upgrades](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html#Mandatory_OS_Updates) |
+| 11   | \>= 11.12       | This is the minimum version required for the most recent release of [RDS OS upgrades](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html#Mandatory_OS_Updates) |
+| 10   | \>= 10.17       | This is the minimum version required for the most recent release of [RDS OS upgrades](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html#Mandatory_OS_Updates) |
+
+###### MySQL
+
+| Version      | Minor Version | Notes |
+| ----------- | ----------- | ----------- |
+| 8 | \>= 8.0.23 | This is the minimum version required for the most recent release of [RDS OS upgrades](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html#Mandatory_OS_Updates) |
+| 5.7 | \>= 5.7.33 | This is the minimum version required for the most recent release of [RDS OS upgrades](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html#Mandatory_OS_Updates) |
 
 ##### Reset RDS database password
 
