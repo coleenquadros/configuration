@@ -35,8 +35,8 @@ The bootstrapped terraform state will use a local backend for storage, meaning t
 
 ### Edit config.tf
 
-* Edit line 3, changing `<bootstrap_profile_name>` to the new aws cli profile name you created, i.e. `bootstrap-image-builder-stage`
-* Edit line 7, changing `<account_uid>` to the AWS account number, i.e. `123456789`
+* Edit line 11, changing `<bootstrap_profile_name>` to the new aws cli profile name you created, i.e. `bootstrap-image-builder-stage`
+* Edit line 15, changing `<account_uid>` to the AWS account number, i.e. `123456789`
 
 ### Edit terraform-setup.tf
 
