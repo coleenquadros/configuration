@@ -1,0 +1,72 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: clair
+
+name: clair
+
+namespaces:
+- $ref: /services/clair/namespaces/production.yml
+
+slos:
+- name: Index report creation availability
+  SLIType: availability
+  SLISpecification: Percentage of requests that are served successfully (status code != 5xx)
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/clair/slos/index_report_creation_availability.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(haproxy_server_http_responses_total{exported_namespace="clair-production", route="clair-indexer-production", code!="5xx"}[{{window}}]))
+    /
+    sum(rate(haproxy_server_http_responses_total{exported_namespace="clair-production", route="clair-indexer-production"}[{{window}}]))
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/clair-availability-index-report-creation-production.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/I1JBFlRnz/clair-v4?orgId=1&var-rate=1m&var-dbquantile=0.95&var-apiquantile=0.20&var-datasource=clairp01ue1-prometheus
+
+
+- name: Index report creation latency 70%
+  SLIType: latency
+  SLISpecification: Percentage of the successful requests served under 10s
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/clair/slos/index_report_creation_latency.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(clair_http_indexerv1_request_duration_seconds_bucket{handler="/indexer/api/v1/index_report",method="post",code="201",le="10"}[{{window}}]))
+    /
+    sum(rate(clair_http_indexerv1_request_duration_seconds_count{handler="/indexer/api/v1/index_report",method="post",code="201"}[{{window}}]))
+  SLOTarget: 0.70
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/clair-latency-index-report-creation-production.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/I1JBFlRnz/clair-v4?orgId=1&var-rate=1m&var-dbquantile=0.95&var-apiquantile=0.20&var-datasource=clairp01ue1-prometheus
+
+- name: Vulnerability report availability
+  SLIType: availability
+  SLISpecification: Percentage of requests that are served successfully (status code != 5xx)
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/clair/slos/vulnerability_report_availability.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(haproxy_server_http_responses_total{exported_namespace="clair-production", route="clair-matcher-production", code!="5xx"}[{{window}}]))
+    /
+    sum(rate(haproxy_server_http_responses_total{exported_namespace="clair-production", route="clair-matcher-production"}[{{window}}]))
+  SLOTarget: 0.98
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/clair-availability-vulnerability-report-production.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/I1JBFlRnz/clair-v4?orgId=1&var-rate=1m&var-dbquantile=0.95&var-apiquantile=0.20&var-datasource=clairp01ue1-prometheus
+
+- name: Vulnerability report latency 90%
+  SLIType: latency
+  SLISpecification: Percentage of the successful requests served under 2.5s
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/clair/slos/vulnerability_report_latency.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(clair_http_matcher_api_v1_vulnerability_report_request_duration_seconds_bucket{le="2.5",code="200"}[{{window}}]))
+    /
+    sum(rate(clair_http_matcher_api_v1_vulnerability_report_request_duration_seconds_count{code="200"}[{{window}}]))
+  SLOTarget: 0.90
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/clair-latency-vulnerability-report-production.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/I1JBFlRnz/clair-v4?orgId=1&var-rate=1m&var-dbquantile=0.95&var-apiquantile=0.20&var-datasource=clairp01ue1-prometheus
