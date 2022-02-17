@@ -27,6 +27,10 @@ This change indicates that an additional component will be allowed to be deploye
 Action items:
 * verify the existence of a matching SOP for the additional component before merging
 
+### saas-file-update
+
+This means the changes are limited to saas file. And that usually does not need our involvement, i.e. we don't need to add any labels, tenant team can approve and merge among themselves.
+
 ### Insights
 
 Insights MRs should be approved as follows:

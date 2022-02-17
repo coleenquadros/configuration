@@ -7,7 +7,7 @@ IT documentation: https://docs.engineering.redhat.com/display/Communities/Availa
 
 ## Login to statuspage
 
-Login with the account stored in Vault is currently not working. Setting the state of a component is supported through qontract-cli though - see next section
+Updates to statuspage should be made with qontract-cli (see below) wherever possible, but if you need to login directly see the link below:
 
 https://manage.statuspage.io
 

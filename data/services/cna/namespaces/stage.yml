@@ -38,6 +38,26 @@ terraformResources:
   identifier: cna-s3-stage
   defaults: /terraform/resources/s3-private-1.yml
   output_resource_name: cna-s3
+- provider: aws-iam-service-account
+  account: cna-service-stage
+  identifier: cna-service-stage
+  output_resource_name: cna-service-iam
+  user_policy:
+    {
+      "Version": "2012-10-17",
+      "Statement": [{
+        "Action": [
+          "sts:AssumeRole"
+        ],
+        "Effect": "Allow",
+        "Resource": "arn:aws:iam::*:role/RH-CNA"
+      }]
+    }
+- provider: elasticache
+  account: app-sre-stage
+  identifier: cna-redis-stage
+  defaults: /terraform/resources/cna/elasticache-stage.yml
+  output_resource_name: cna-redis
 
 # FIXME: vault secrets and a route to be added later
 #openshiftResources:
