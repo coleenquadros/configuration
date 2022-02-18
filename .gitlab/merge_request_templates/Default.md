@@ -1,4 +1,9 @@
-#### Why
+#### What:
+<!--- Please include bullet points of the purpose of your code. 
+Those points should be concise and describe what you expect to happen. -->
+*
+
+#### Why:
 <!--- Please include the context and background for your change. 
 For example, why are you requesting this permission, any 
 justification or approval you can provide is helpful. -->
@@ -10,12 +15,7 @@ APPSRE-1234
 Closes: APPSRE-4242
 --->
 
-#### What
-<!--- Please include bullet points of the purpose of your code. 
-Those points should be concise and describe what you expect to happen. -->
- *
-
-#### Validation
+#### Validation:
 <!--- Please include any test you ran or other validation you
 did to make sure your code is right. -->
 
