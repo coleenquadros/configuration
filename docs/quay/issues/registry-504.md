@@ -10,7 +10,9 @@ metadata: GET https://quay.io/v2/openshift-release-dev/ocp-release/manifests/4.1
 
 ## Debugging the cause of the 504
 
-- Check the registry monitor status on [Grafana](https://grafana.quay.io). See if there are a number of *delays* or timeouts:
+- Check the registry monitor status on [Monitor endpoint](https://monitor.quay.io/health). 
+
+- Check the [Grafana dashboard](https://grafana.app-sre.devshift.net/d/quay-apis-by-service/quay-apis-by-service?orgId=1&refresh=10s&var-datasource=quayp05ue1-prometheus&var-service=quay-py3-clusterip-service)  See if there are a number of *delays* or timeouts:
 
 ![Monitor displaying slowdowns](../images/monitor-issues.png "Registry monitor displaying slowdowns and timeouts")
 
