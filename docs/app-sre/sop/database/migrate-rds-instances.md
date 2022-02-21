@@ -41,6 +41,7 @@ If you want to keep the old RDS instance alive while ramping the replacement in 
 
 1. Introduce the new RDS instance in `terraformResources` by copying the existing resource entry, but change the `account` field and introduce the override to restore from a snapshot.
 1. Make sure the old RDS instance gets a different `output_resource_name`, e.g. by adding an `-old` suffix to it
+1. Make sure to use a RDS `defaults` file that fits the target AWS account. If you need to create one, make sure `db_subnet_group_name` and `vpc_security_group_ids` are set correctly. Have a look at other default files from the same account or find the subnet group name in https://gitlab.cee.redhat.com/app-sre/infra/-/tree/master/terraform and the security group ID in the AWS console.
 
 
 ```yaml
@@ -57,7 +58,7 @@ terraformResources:
 - provider: rds
   account: <new-aws-account>
   identifier: <rds-indentifier>
-  defaults: <rds-defaults-file>
+  defaults: <rds-defaults-file-for-new-account>
   overrides:
     snapshot_identifier: <snapshot-identifier-to-create-rds-instance-from>
   enhanced_monitoring: true
