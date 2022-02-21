@@ -34,6 +34,10 @@ WIP - just skeleton notes for now that need to be refined
 - inform the service owner about the migration plans and the required downtime
 - inform the AppSRE team #sd-app-sre-teamchat because the service downtime might trigger alerts
 
+### Scale down service
+- scale down the part of the service that accesses the AWS resource, e.g. setting REPLICAS in SAAS file to 0
+- in doubt talk to the service owners
+
 ### Migrate RDS databases
 - follow the procedure at https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/database/migrate-rds-instances.md
 - ...
