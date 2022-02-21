@@ -2,6 +2,11 @@
 
 This SOP documents steps to migrate RDS instance from source AWS account to target AWS account.
 
+## Create Snapshot
+
+1. Make sure the service using the RDS is not running
+1. Create a Snapshot via the AWS console
+
 ## Add the target account to a customer managed key
 
 1. Log in to the source account, and then open the AWS KMS console in the same AWS Region as the DB snapshot.
