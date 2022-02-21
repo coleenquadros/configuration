@@ -1,6 +1,6 @@
 # AWS resource account migration to app-sre-stage
 
-This SOP documents the high level process for AWS resource migration tothe app-sre-stage AWS account.
+This SOP documents the high level process for AWS resource migration to the app-sre-stage AWS account.
 As such, this SOP is only applicable to non-production resources.
 
 Detailed AWS resource specific migration procedures are covered in linked SOPs, so this one can focus on the overall process.
@@ -27,6 +27,7 @@ WIP - just skeleton notes for now that need to be refined
 ### Find out if a resource is actively used
 - is the `output_resource_name` used in a SAAS template or referenced in a SAAS target parameter?
 - is the resource secret in Vault referenced somewhere in an openshift-resource or shared-resource?
+- for RDS additionally look for active connection in the AWS console
 
 ### Declare downtime
 - identify the service owner in the services app file
