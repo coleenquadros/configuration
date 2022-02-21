@@ -35,6 +35,40 @@ Choose the name of your customer managed key, or choose Create key, if you don't
 1. Choose Actions, and then choose Copy Snapshot to copy the snapshot into the same AWS Region and with a KMS key from the target account.
 1. After the DB snapshot is copied, you can use the copy to launch the instance.
 
+## Create RDS Instance from Snapshot while keeping the old RDS around
+
+If you want to keep the old RDS instance alive while ramping the replacement in the new account, apply the following changes
+
+1. Introduce the new RDS instance in `terraformResources` by copying the existing resource entry, but change the `account` field and introduce the override to restore from a snapshot.
+1. Make sure the old RDS instance gets a different `output_resource_name`, e.g. by adding an `-old` suffix to it
+
+
+```yaml
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: <old-aws-account>
+  identifier: <rds-indentifier>
+  defaults: <rds-defaults-file>
+  enhanced_monitoring: true
+  output_resource_name: <OpenShift-Secret-Name>-old
+  parameter_group: <rds-parameter-group>
+- provider: rds
+  account: <new-aws-account>
+  identifier: <rds-indentifier>
+  defaults: <rds-defaults-file>
+  overrides:
+    snapshot_identifier: <snapshot-identifier-to-create-rds-instance-from>
+  enhanced_monitoring: true
+  output_resource_name: <OpenShift-Secret-Name>
+  parameter_group: <rds-parameter-group>
+```
+
+This way the old RDS is still available and the access credentials can be found in `<OpenShift-Secret-Name>-old`.
+This ensures a way back by getting rid the new RDS entry (don't forget about cleanup) and reverting the old
+DBs `output_resource_name`.
+
 ## Create RDS Instance from Snapshot
 
 ```yaml
