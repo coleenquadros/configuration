@@ -22,15 +22,17 @@ WIP - just skeleton notes for now that need to be refined
   - apply the resource specific migration procedure
 
 
-## Find out if a resource is actively used
+## Details
+
+### Find out if a resource is actively used
 - is the `output_resource_name` used in a SAAS template or referenced in a SAAS target parameter?
 - is the resource secret in Vault referenced somewhere in an openshift-resource or shared-resource?
 
-## Declare downtime
+### Declare downtime
 - identify the service owner in the services app file
 - inform the service owner about the migration plans and the required downtime
 - inform the AppSRE team #sd-app-sre-teamchat because the service downtime might trigger alerts
 
-## Migrate RDS databases
+### Migrate RDS databases
 - follow the procedure at https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/database/migrate-rds-instances.md
 - ...
