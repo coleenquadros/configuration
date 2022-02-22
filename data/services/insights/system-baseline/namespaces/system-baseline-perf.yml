@@ -1,0 +1,69 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: system-baseline
+
+name: system-baseline-perf
+description: Insights system-baseline-perf on the perf cluster
+
+cluster:
+  $ref: /openshift/insights/cluster-insights-perf.yml
+
+app:
+  $ref: /services/insights/system-baseline/app.yml
+
+environment:
+  $ref: /products/insights/environments/perf.yml
+
+networkPoliciesAllow:
+- $ref: /services/insights/drift/namespaces/drift-perf.yml
+- $ref: /services/insights/historical-system-profiles/namespaces/historical-system-profiles-perf.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-prod/shared/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/perf/system-baseline-perf/drift-interpod-comms
+  version: 1
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: cloudwatch
+  account: insights-perf
+  identifier: system-baseline-perf
+  defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+- provider: rds
+  account: insights-perf
+  identifier: system-baseline-perf
+  defaults: /terraform/resources/insights/perf/rds/rds-system-baseline-perf.yml
+  overrides:
+    snapshot_identifier: system-baseline-perf-migration
+  parameter_group: /terraform/resources/insights/perf/rds/postgres10-parameter-group-system-baseline-perf.yml
+  output_resource_name: system-baseline-db
+  output_resource_db_name: baselinedb
+  enhanced_monitoring: true
+
+sharedResources:
+- $ref: /services/app-sre/shared-resources/splunk-creds.yml
