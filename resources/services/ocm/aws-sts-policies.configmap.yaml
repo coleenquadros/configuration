@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-sts-policies
+data:
+  {{%- for key in keys %}}
+  {{%- if current_key.update({'name': key}) %}}{{%- endif %}}
+  {{{ key }}}.json: |-
+    {{{ github('openshift/managed-cluster-config', 'resources/sts/{{version}}/{{current_key.name}}.json', '{{ref}}') | indent(4) }}}
+  {{%- endfor %}}
