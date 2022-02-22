@@ -700,6 +700,12 @@ The `resource-template` provider supports using the `Jinja2` template language t
     {{ vault('path/to/secret-with-key-per-namespace', '{{ resource.namespace.name }}') }}
     ```
 
+- Fetch file contents from github:
+
+    ```jinja
+    {{ github('repo-name', 'path-to-file', 'ref') }}
+    ```
+
 - Base64 encode a block of data
 
     ```jinja
