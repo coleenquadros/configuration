@@ -1999,6 +1999,18 @@ The Secret will contain the following fields:
 
 - `template_latest_version` - The latest version of the launch template.
 
+#### Manage External DNS zones via App-Interface (`/openshift/namespace-1.yml`)
+
+DNS zones are a required Cloud Native Asset for some applications, such as Hive. In this use case, the application needs an empty DNS zone, which itself will populate.
+
+In order to add a DNS zone, you need to add them to the `terraformResources` section:
+
+- `provider`: must be `route53-zone`
+- `account`: must be one of the AWS account names we manage.
+- `identifier`: id of the resource to create (example: `dns-example-com`)
+- `name`: name of the resource to create (example: `dns.example.com`)
+- `output_resource_name`: name of Kubernetes Secret to be created.
+
 #### Manage Application Load Balancers via App-Interface (`/openshift/cluster-1.yml`)
 
 Please follow the dev-guidelines: https://service.pages.redhat.com/dev-guidelines/docs/appsre/advanced/manage-application-load-balancer
