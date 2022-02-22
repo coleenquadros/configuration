@@ -8,6 +8,9 @@ Detailed AWS resource specific migration procedures are covered in linked SOPs, 
 WIP - just skeleton notes for now that need to be refined
 
 ## Overall procedure
+
+The overall procedure is layed out like this. Have a look at the details section for more insights.
+
 - find out if a resource is actively used
 - if the resource is actively use
   - declare downtime
@@ -38,6 +41,6 @@ WIP - just skeleton notes for now that need to be refined
 - scale down the part of the service that accesses the AWS resource, e.g. setting REPLICAS in SAAS file to 0
 - in doubt talk to the service owners
 
-### Migrate RDS databases
-- follow the procedure at https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/database/migrate-rds-instances.md
-- ...
+### Resource specific migration procedures
+- for RDS follow [this SOP](migrate-rds-instances.md)
+- for S3 follow [this SOP](migrate-s3-bucket.md)
