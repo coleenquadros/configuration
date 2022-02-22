@@ -80,5 +80,5 @@ Once you verified that the migrated RDS instance works as expected, you can dele
 ```yaml
 - type: aws_db_instance
   name: <rds-indentifier>
-  expiration: 'yyy-mm-dd'
+  expiration: 'yyyy-mm-dd'
 ```

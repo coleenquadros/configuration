@@ -5,13 +5,10 @@ As such, this SOP is only applicable to non-production resources.
 
 Detailed AWS resource specific migration procedures are covered in linked SOPs, so this one can focus on the overall process.
 
-WIP - just skeleton notes for now that need to be refined
-
 ## Overall procedure
 
 The overall procedure is layed out like this. Have a look at the details section for more insights.
 
-- find out if a resource is actively used
 - if the resource is actively use
   - declare downtime
   - take down the service
@@ -24,6 +21,7 @@ The overall procedure is layed out like this. Have a look at the details section
 - if the resource is NOT actively used
   - apply the resource specific migration procedure
 
+Keep in mind that data transfer can take a long time if a lot of data is involved. If supported by the resource type, consider conducting a first data sync from source to target before you shut down the service. This helps to reduce downtime.
 
 ## Details
 
@@ -42,5 +40,5 @@ The overall procedure is layed out like this. Have a look at the details section
 - in doubt talk to the service owners
 
 ### Resource specific migration procedures
-- for RDS follow [this SOP](migrate-rds-instances.md)
+- for RDS follow [this SOP](database/migrate-rds-instances.md)
 - for S3 follow [this SOP](migrate-s3-bucket.md)
