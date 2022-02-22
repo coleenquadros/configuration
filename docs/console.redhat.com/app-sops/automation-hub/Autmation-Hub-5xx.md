@@ -39,9 +39,9 @@ Steps
 
 -   Check the dashboard for a quick status.
 -   Check logs / events for pods in the automation-hub-(prod|stage) namespace.
--   Check where the errors are occuring, either in the galaxy-api, pulp-content-app, or pulp-worker.
--   If a pulp-content-app is experiencing reccuring `Connection reset by peer` errors, restart/delete the pod to resolve the intermittent connectivity issue.
--   Ping the automation-hub team.
+-   Check whether Internal Server Errors (ISE) are occuring, either in the galaxy-api, pulp-content-app, or pulp-worker.
+-   If a pulp-content-app pod is experiencing reccuring ISEs caused by `Connection reset by peer` errors, restart/delete the pod to resolve the intermittent connectivity issue.
+-   Ping the automation-hub team for further investigation to other ISEs.
 
 Escalations
 -----------
