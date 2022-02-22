@@ -54,6 +54,26 @@
     <<: *gl_timed
 
 - job-template:
+    id: 'insights-gl-smoke-test-dev'
+    name: '{gl_group}-{gl_project}-smoke-test-dev-{branch}'
+    wrappers:
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_crcd_oc_login
+        - *app_interface_creds
+        - *insightsdroid_github
+    builders:
+    - shell: './smoke_test.sh'
+    publishers:
+    - junit:
+        results: 'artifacts/junit-*.xml'
+    - archive:
+        artifacts: 'artifacts/**/*'
+    <<: *gl_timed
+
+- job-template:
     id: 'insights-gl-build-master'
     name: '{gl_group}-{gl_project}-gl-build-{branch}'
     wrappers:
