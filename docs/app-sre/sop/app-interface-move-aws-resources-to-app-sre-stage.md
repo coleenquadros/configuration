@@ -21,14 +21,16 @@ The overall procedure is layed out like this. Have a look at the details section
 - if the resource is NOT actively used
   - apply the resource specific migration procedure
 
-Keep in mind that data transfer can take a long time if a lot of data is involved. If supported by the resource type, consider conducting a first data sync from source to target before you shut down the service. This helps to reduce downtime.
+Keep in mind that data transfer can take a long time if a lot of data is involved. If supported by the resource type, consider conducting a first data sync from source to destination before you shut down the service. This helps to reduce downtime.
 
 ## Details
 
 ### Find out if a resource is actively used
 - is the `output_resource_name` used in a SAAS template or referenced in a SAAS target parameter?
 - is the resource secret in Vault referenced somewhere in an openshift-resource or shared-resource?
+  - watch out for `vault()` references in templates
 - for RDS additionally look for active connection in the AWS console
+- for S3 look at bucket activity in Cloudtrail
 
 ### Declare downtime
 - identify the service owner in the services app file

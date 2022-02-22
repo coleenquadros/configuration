@@ -1,6 +1,6 @@
 # Migrate S3 bucket across AWS Accounts
 
-This SOP documents steps to migrate an S3 bucket from source AWS account to target AWS account.
+This SOP documents steps to migrate an S3 bucket from source AWS account to a destination AWS account.
 
 ## Considerations
 The data transfer from bucket to bucket is a repeatable process. Considering the amount of data to be transfered, it will be meaningful to do an initial sync while the service using the bucket is still running. A differential resync after the service shutdown will be a lot faster.
@@ -9,10 +9,11 @@ Also consider data transfer costs. Keeping data transfer within a region reduces
 
 ## Prerequisites
 In order to copy data from one bucket to the other, the AWS CLI can be used. Since we enforce MFA for account access, make sure to have an MFA device attached to your user.
+Also make sure your AWS cli setup allows you to get STS session tokens.
 
 ## Source Bucket
 
-Log into the source AWS account, and attach a bucket policy to the source S3 bucket like this.
+Log into the source AWS account, and attach a bucket policy to the source S3 bucket to grant your $USER in the destination account read permissions on it.
 
 ```yaml
 {
@@ -38,7 +39,7 @@ Log into the source AWS account, and attach a bucket policy to the source S3 buc
 ```
 
 ## Copy process
-Make sure you have valid credentials (session token) for the target AWS account in your shells ENV or as a profile in your AWS credentials file.
+Make sure you have valid credentials (session token) for the destination AWS account in your shells ENV or as a profile in your AWS credentials file.
 
 ```bash
 aws [--profile $your-profile] s3 sync s3://$SOURCE_BUCKET_NAME s3://$DESTINATION_BUCKET_NAME
