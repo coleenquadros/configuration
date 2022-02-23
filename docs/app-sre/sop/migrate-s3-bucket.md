@@ -38,6 +38,8 @@ Log into the source AWS account, and attach a bucket policy to the source S3 buc
 }
 ```
 
+If there is already a bucket policy defined via app-interface, this needs to be added to the `bucket_policy` section of the bucket defintion in `terraformResources`. Otherwise terraform will remove it during the next integration run.
+
 ## Copy process
 Make sure you have valid credentials (session token) for the destination AWS account in your shells ENV or as a profile in your AWS credentials file.
 
