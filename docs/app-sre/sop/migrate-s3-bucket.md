@@ -11,6 +11,9 @@ Also consider data transfer costs. Keeping data transfer within a region reduces
 In order to copy data from one bucket to the other, the AWS CLI can be used. Since we enforce MFA for account access, make sure to have an MFA device attached to your user.
 Also make sure your AWS cli setup allows you to get STS session tokens.
 
+* [How to setup MFA for your AWS user](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_enable_virtual.html#enable-virt-mfa-for-iam-user)
+* [How to get a session token](https://docs.aws.amazon.com/cli/latest/reference/sts/get-session-token.html) and [how to setup the ENV vars or a credentials file profile](https://docs.aws.amazon.com/cli/latest/topic/config-vars.html?highlight=aws_session_token#credentials)
+
 ## Source Bucket
 
 Log into the source AWS account, and attach a bucket policy to the source S3 bucket to grant your $USER in the destination account read permissions on it.
