@@ -1,7 +1,6 @@
-# AWS resource account migration to app-sre-stage
+# AWS resource account migration
 
-This SOP documents the high level process for AWS resource migration to the app-sre-stage AWS account.
-As such, this SOP is only applicable to non-production resources.
+This SOP documents the high level process for AWS resource migration to another AWS account.
 
 Detailed AWS resource specific migration procedures are covered in linked SOPs, so this one can focus on the overall process.
 
