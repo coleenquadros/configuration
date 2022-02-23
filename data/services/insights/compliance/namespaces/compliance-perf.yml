@@ -45,8 +45,6 @@ openshiftResources:
     qontract.recycle: "true"
 - provider: resource
   path: /insights-perf/shared/private-image-puller.serviceaccount.yaml
-- provider: resource
-  path: /app-sre/compliance-perf/datahub-floorist-access.serviceaccount.yaml
 
 managedTerraformResources: true
 
@@ -70,32 +68,3 @@ terraformResources:
   defaults: /terraform/resources/insights/perf/elasticache/elasticache-compliance-2.yml
   parameter_group: /terraform/resources/insights/perf/elasticache/elasticache-compliance-sidekiq-parameter-group.yml
   output_resource_name: in-memory-db
-- provider: s3
-  account: insights-perf
-  identifier: insights-metrics-export-perf
-  defaults: /terraform/resources/s3-all-expires-7-days.yml
-  output_resource_name: insights-metrics-export-perf
-- provider: aws-iam-service-account
-  account: insights-perf
-  identifier: floorist-metrics-exporter-perf-s3-reader
-  variables:
-    bucket: insights-metrics-export-perf
-    region: us-east-1
-    endpoint: s3.us-east-1.amazonaws.com
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [
-        {
-          "Effect": "Allow",
-          "Action": ["s3:ListBucket"],
-          "Resource": ["arn:aws:s3:::${bucket}"]
-        },
-        {
-          "Effect": "Allow",
-          "Action": ["s3:GetObject"],
-          "Resource": ["arn:aws:s3:::${bucket}/*"]
-        }
-      ]
-    }
-  output_resource_name: floorist-metrics-exporter-s3-reader
