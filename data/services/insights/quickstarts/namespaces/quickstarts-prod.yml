@@ -1,0 +1,61 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: quickstarts
+
+name: quickstarts-prod
+
+description: A console.redhat.com microservice to improve new user experience and new feature experience. Acts as persistent storage for UI-guided tours content and user progress. The data is retrieved from an API living in the cloud.redhat.com openshift cluster.
+
+cluster:
+  $ref: /openshift/crcp01ue1/cluster.yml
+
+app:
+  $ref: /services/insights/quickstarts/app.yml
+
+environment:
+  $ref: /products/insights/environments/production.yml
+
+networkPoliciesAllow:
+- $ref: /services/insights/gateway/namespaces/3scale-prod.yml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
+
+managedRoles: true
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-prod
+  identifier: quickstarts-prod
+  defaults: /terraform/resources/insights/production/rds/postgres13-rds-1.yml
+  overrides:
+    username: "insights"
+    name: "quickstarts"
+  parameter_group: /terraform/resources/insights/production/rds/postgres13-parameter-group-quickstarts-prod.yml
+  output_resource_name: quickstarts-db
+  enhanced_monitoring: true
+- provider: cloudwatch
+  account: insights-prod
+  identifier: quickstarts-prod
+  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+  es_identifier: kibana-elasticsearch
+- provider: s3
+  account: insights-prod
+  identifier: rh-quickstarts-tarballs-prod
+  defaults: /terraform/resources/s3-public-read-1.yml
+  output_resource_name: rh-quickstarts-tarballs
+
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
