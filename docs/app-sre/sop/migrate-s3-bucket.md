@@ -55,7 +55,8 @@ Before the source bucket can be cleaned up, make sure that:
 To delete the bucket (and all correlated IAM resources), follow these steps:
 
 1. Remove the old S3 bucket from `terraformResources`
-1. Add a `deletionApprovals` entry to the source AWS account file. Pick an expirationDate that is just a bit in the future (e.g. 2 days)
+1. If the account has deletion enabled in `/aws/account-1.yml#enableDeletion`, the removal from `terraformResources` is sufficient to dispose the S3 bucket
+1. ... if not, add a `deletionApprovals` entry to the source AWS account file. Pick an expirationDate that is just a bit in the future (e.g. 2 days)
 
 ```yaml
 - type: aws_s3_bucket
