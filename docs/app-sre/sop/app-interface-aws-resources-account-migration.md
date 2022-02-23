@@ -25,7 +25,7 @@ Keep in mind that data transfer can take a long time if a lot of data is involve
 ## Details
 
 ### Find out if a resource is actively used
-- is the `output_resource_name` used in a SAAS template or referenced in a SAAS target parameter?
+- is the `output_resource_name` used in a Openshift Template referenced by a SAAS file or referenced in a SAAS parameter?
 - is the resource secret in Vault referenced somewhere in an openshift-resource or shared-resource?
   - watch out for `vault()` references in templates
 - for RDS additionally look for active connection in the AWS console
