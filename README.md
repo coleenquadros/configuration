@@ -77,6 +77,8 @@ this repository.
       - [Manage ElasticSearch via App-Interface (`/openshift/namespace-1.yml`)](#manage-elasticsearch-via-app-interface-openshiftnamespace-1yml)
       - [Manage RDS databases via App-Interface (`/openshift/namespace-1.yml`)](#manage-rds-databases-via-app-interface-openshiftnamespace-1yml)
         - [Approved RDS versions](#approved-rds-versions)
+        - [RDS minor version upgrades](#rds-minor-version-upgrades)
+        - [Maintenance windows for RDS instances](#maintenance-windows-for-rds-instances)
         - [Reset RDS database password](#reset-rds-database-password)
         - [Create RDS database from Snapshot](#create-rds-database-from-snapshot)
         - [Publishing Database Log Files to CloudWatch](#publishing-database-log-files-to-cloudwatch)
@@ -698,6 +700,12 @@ The `resource-template` provider supports using the `Jinja2` template language t
 
     ```jinja
     {{ vault('path/to/secret-with-key-per-namespace', '{{ resource.namespace.name }}') }}
+    ```
+
+- Fetch file contents from github:
+
+    ```jinja
+    {{ github('repo-name', 'path-to-file', 'ref') }}
     ```
 
 - Base64 encode a block of data
@@ -1535,6 +1543,30 @@ For more information about the versions that RDS supports:
 | 8 | \>= 8.0.23 | This is the minimum version required for the most recent release of [RDS OS upgrades](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html#Mandatory_OS_Updates) |
 | 5.7 | \>= 5.7.33 | This is the minimum version required for the most recent release of [RDS OS upgrades](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html#Mandatory_OS_Updates) |
 
+##### RDS minor version upgrades
+
+This section provides guidance related to RDS minor version database engine upgrades. These minor version upgrades are typically required to mitigate security vulnerabilities and to ensure that teams have the latest bug fixes. See the [Approved RDS versions](#approved-rds-versions) section for more information about the minimum versions required by AppSRE. Tenants are responsible for keeping their databases up-to-date, but this section provides guidance on how to do so.
+
+There are a few things to keep in mind before performing a minor version database engine upgrade:
+
+* Minor version upgrades require a downtime - this downtime has been observed to be roughly 5 minutes, but this isn't strictly guaranteed by AWS. Multi-AZ does not reduce the downtime required by minor version upgrades because RDS upgrades the primary and standby instances simultaneously.
+* Always test the upgrade on a stage database first. Minor version upgrades are typically backwards-compatible, but you should always **read the release notes** and test that there aren't any regressions in your service.
+* Ensure that you've set an appropriate maintenance window as per the [Maintenance windows for RDS instances](#maintenance-windows-for-rds-instances) section
+
+The documentation for performing upgrades can be found below:
+
+* [Upgrade Minor Version for PostgreSQL RDS Instance](/docs/aws/sop/postgresql-rds-instance-minor-version-upgrade.md)
+
+##### Maintenance windows for RDS instances
+
+[RDS maintenance windows](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html#Concepts.DBMaintenance) provide a weekly window during which any pending RDS instance changes can occur. This could include pending instance configuration changes, database engine version upgrades, or OS security upgrades.
+
+The maintenance window for your RDS instance should be configured for a time that is determined to be appropriate for your service. You might consider several factors like when the peak load of your service is and the availability of your team in case there is any issue that needs to be escalated to you.
+
+To set your maintenance window, add `maintenance_window` to your `defaults` file or `overrides` section for your resource. Documentation related to the format of the maintenance window string can be found by searching **PreferredMaintenanceWindow** [here](https://docs.aws.amazon.com/AmazonRDS/latest/APIReference/API_ModifyDBInstance.html#API_ModifyDBInstance_RequestParameters).
+
+**Note:** RDS maintenance windows don't guarantee that the maintenance will complete before the window ends, particularly for operations such as major version upgrades. See the RDS maintenance windows documentation for more information.
+
 ##### Reset RDS database password
 
 To reset the password of an RDS instance, add the `reset_password` field to the RDS definition according to the instructions in [Manage RDS databases via App-Interface](#manage-rds-databases-via-app-interface-openshiftnamespace-1yml).
@@ -1992,6 +2024,18 @@ Once the changes are merged, the Autoscaling Group will be created (or updated) 
 The Secret will contain the following fields:
 
 - `template_latest_version` - The latest version of the launch template.
+
+#### Manage External DNS zones via App-Interface (`/openshift/namespace-1.yml`)
+
+DNS zones are a required Cloud Native Asset for some applications, such as Hive. In this use case, the application needs an empty DNS zone, which itself will populate.
+
+In order to add a DNS zone, you need to add them to the `terraformResources` section:
+
+- `provider`: must be `route53-zone`
+- `account`: must be one of the AWS account names we manage.
+- `identifier`: id of the resource to create (example: `dns-example-com`)
+- `name`: name of the resource to create (example: `dns.example.com`)
+- `output_resource_name`: name of Kubernetes Secret to be created.
 
 #### Manage Application Load Balancers via App-Interface (`/openshift/cluster-1.yml`)
 

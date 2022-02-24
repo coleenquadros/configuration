@@ -8,7 +8,7 @@
 
 ## Summary
 
-To monitor internal resources such as https://ci.int.devshift.net, we use a Prometheus instance installed on OpenStack: http://prometheus.centralci.devshift.net:9090/
+To monitor internal resources such as https://ci.int.devshift.net, we use a Prometheus instance appsrep05u1: https://prometheus.appsrep05ue1.devshift.net/
 
 The [InstanceDown](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ansible/hosts/host_vars/prometheus.centralci.devshift.net) monitores various [instances](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/6215bc233827e43bda7974cadfef0eeb6beba106/ansible/hosts/hosts.cfg#L11-66) 
 
