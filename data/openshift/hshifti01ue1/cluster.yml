@@ -42,7 +42,6 @@ spec:
   storage: 1600
   load_balancers: 12
   private: false
-  # provision_shard_id: (optional) specify hive shard ID to create the cluster in (IDs can be found in the uhc-production namespace file)
   disable_user_workload_monitoring: true
 
   id: 1pri98sek0idjn3h4mh3dnhmo0t05oom
@@ -68,12 +67,6 @@ clusterAdminAutomationToken:
   path: app-sre/creds/kube-configs/hshifti01ue1-cluster-admin
   field: token
 
-# machinePools: # optional, specify additional Machine Pools to be provisioned
-# - id: (machine pool name, should be unique per cluster)
-#   instance_type: (desired instance type. m5.xlarge for example)
-#   replicas: (desired number of instances in the pool)
-#   labels: {}
-
 addons: # enable log forwarding to the cluster's AWS account
 - $ref: /dependencies/ocm/addons/cluster-logging-operator.yml
 
@@ -92,6 +85,26 @@ awsInfrastructureAccess:
 - awsGroup:
     $ref: /aws/app-sre/groups/App-SRE-admin.yml
   accessLevel: network-mgmt
+
 managedClusterRoles: true
 observabilityNamespace:
   $ref: /services/observability/namespaces/openshift-customer-monitoring.hshifti01ue1.yml
+
+peering:
+  connections:
+  # peering with ci-ext vpc. Allows ci.ext bastion access
+  - provider: account-vpc
+    name: hshifti01ue1_app-sre-ci-ext
+    vpc:
+      $ref: /aws/app-sre/vpcs/app-sre-vpc-02-ci-ext.yml
+    manageRoutes: true
+
+  # peering with appsrep05ue1, allowing tekton pipelines access from that cluster
+  - provider: cluster-vpc-requester
+    name: hshifti01ue1_appsrep05ue1
+    cluster:
+      $ref: /openshift/appsrep05ue1/cluster.yml
+    manageRoutes: true
+
+  # TODO: add a peering to the regional service cluster once it exists
+  # Or shall we use private links or tgw there..
