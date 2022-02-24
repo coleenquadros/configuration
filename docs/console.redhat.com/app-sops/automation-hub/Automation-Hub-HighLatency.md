@@ -1,5 +1,5 @@
-Automation Hub 5xx Errors
-==========================
+Automation Hub High Latency
+=======================
 
 Severity: Info
 --------------
@@ -7,12 +7,12 @@ Severity: Info
 Impact
 ------
 
--   Automation Hub provides a portal to search for and access Ansible Content Collections supported by Red Hat and Ansible Partners via the Certified Partner Program. If a high rate of requests are failing, the core feature of this service is in bad shape.
+-   Automation Hub provides a portal to search for and access Ansible Content Collections supported by Red Hat and Ansible Partners via the Certified Partner Program. Slow requests just make the user experience less pleasant.
 
 Summary
 -------
 
-This alert fires when the api requests errors out too much.
+This alert fires when the latency of our API calls are too high. We expect less than 2000ms.
 
 Access required
 ---------------
@@ -33,15 +33,13 @@ Automation Hub:
   [grafana-stage]: https://grafana.stage.devshift.net/d/0RsHCnNGz/automation-hub?orgId=1&from=now-24h&to=now&refresh=30s&var-datasource=crcs02ue1-prometheus&var-namespace=automation-hub-stage
   [grafana-prod]: https://grafana.app-sre.devshift.net/d/0RsHCnNGz/automation-hub?orgId=1&from=now-24h&to=now&refresh=30s&var-Datasource=crcp01ue1-prometheus&var-namespace=automation-hub-prod
 
-
 Steps
 -----
 
 -   Check the dashboard for a quick status.
 -   Check logs / events for pods in the automation-hub-(prod|stage) namespace.
--   Check whether Internal Server Errors (ISE) are occuring, either in the galaxy-api, pulp-content-app, or pulp-worker.
--   If a pulp-content-app pod is experiencing reccuring ISEs caused by `Connection reset by peer` errors, restart/delete the pod to resolve the intermittent connectivity issue.
--   Ping the automation-hub team for further investigation to other ISEs.
+-   Check where the errors are occuring, either in the galaxy-api, pulp-content-app, or pulp-worker pods.
+-   If the pulp-worker latency is high, this is most likely due to an insufficient number of workers, ping @automation-hub-team for the workers to be scaled up.
 
 Escalations
 -----------
