@@ -11,7 +11,7 @@ app:
   $ref: /services/managed-connectors/app.yaml
 
 pipelinesProvider:
-  $ref: /services/managed-connectors/pipelines/tekton.cos-fleet-manager-pipelines.app-sre-prod-01.yaml
+  $ref: /services/managed-connectors/pipelines/tekton.cos-fleet-manager-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
@@ -35,15 +35,13 @@ authentication:
 
 resourceTemplates:
 - name: cos-fleet-manager
-  url: https://github.com/bf2fc6cc711aee1a0c2a/cos-fleet-manager
+  url: https://gitlab.cee.redhat.com/mk-ci-cd/cos-fleet-manager
   path: /templates/service-template.yml
   parameters:
     # Global parameter - Affects Production and Stage
     IMAGE_REGISTRY: quay.io
     # Global parameter - Affects Production and Stage
     IMAGE_REPOSITORY: rhoas/cos-fleet-manager
-    # Global parameter - Affects Production and Stage
-    IMAGE_TAG: f15668c
     # Global parameter - Affects Production and Stage
     # SSO_BASE_URL is defined at the environment parameters level
     JWKS_URL: ${SSO_BASE_URL}/protocol/openid-connect/certs
@@ -63,6 +61,10 @@ resourceTemplates:
   - namespace:
       $ref: /services/managed-connectors/namespaces/managed-connectors-stage.yaml
     ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: service-cos-fleet-manager-gl-build-main
     parameters:
       DB_SSLMODE: verify-full
       ENVIRONMENT: stage

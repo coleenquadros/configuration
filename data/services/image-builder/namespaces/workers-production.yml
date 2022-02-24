@@ -1,0 +1,78 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: workers-production
+description: production namespace for image-builder
+
+cluster:
+  $ref: /openshift/app-sre-prod-04/cluster.yml
+
+app:
+  $ref: /services/image-builder/app.yml
+
+environment:
+  $ref: /products/osdv4/environments/production.yml
+
+networkPoliciesAllow:
+  - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-04.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/standard-resource-limits.yml
+
+quota:
+  $ref: /services/insights/default-quota.yml
+
+managedRoles: true
+
+managedResourceTypes: []
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: secrets-manager
+  account: image-builder-prod
+  identifier: aws-account
+  secret:
+    path: app-interface/image-builder/production/aws-account
+    version: 1
+    field: all
+  output_resource_name: aws-account
+- provider: secrets-manager
+  account: image-builder-prod
+  identifier: azure-service-account
+  secret:
+    path: app-interface/image-builder/production/azure-service-account
+    version: 1
+    field: all
+  output_resource_name: azure-service-account
+- provider: secrets-manager
+  account: image-builder-prod
+  identifier: gcp-service-account
+  secret:
+    path: app-interface/image-builder/production/gcp-service-account
+    version: 1
+    field: all
+  output_resource_name: gcp-service-account
+- provider: secrets-manager
+  account: image-builder-prod
+  identifier: offline-token
+  secret:
+    path: app-interface/image-builder/production/offline-token
+    version: 1
+    field: all
+  output_resource_name: offline-token
+- provider: secrets-manager
+  account: image-builder-prod
+  identifier: subscription-manager-command
+  secret:
+    path: app-interface/image-builder/production/subscription-manager-command
+    version: 1
+    field: all
+  output_resource_name: subscription-manager-command
+- provider: cloudwatch
+  account: image-builder-prod
+  identifier: workers-aoc-production
+  defaults: /terraform/resources/image-builder/production/cloudwatch-1.yml
+  output_resource_name: workers-aoc-production

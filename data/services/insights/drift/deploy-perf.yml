@@ -1,0 +1,51 @@
+# Deploy based on the deploy-clowder.yml file
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: drift
+  platform: insights
+
+name: drift-perf
+description: drift app deployed via clowder on Insights perf cluster
+
+app:
+  $ref: /services/insights/drift/app.yml
+
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: proj-perf-insights-cluster
+managedResourceTypes:
+- ClowdApp
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+    version: 3
+
+resourceTemplates:
+- name: drift
+  path: /clowdapp.yaml # might be changed
+  url: https://github.com/RedHatInsights/drift-backend
+  parameters:
+    CLOWDER_ENABLED: 'True'
+    DRIFT_ENABLE_RBAC: 'True'
+    ENABLE_SMART_MANAGEMENT_ENTITLEMENT_CHECK: 'False'
+    MAX_REPLICAS: 3
+    MIN_REPLICAS: 3
+  targets:
+  - namespace:
+      $ref: /services/insights/drift/namespaces/drift-perf.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-drift-backend-gh-build-master

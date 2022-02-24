@@ -1,0 +1,57 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: eventing
+  platform: insights
+
+name: eventing-integrations
+description: eventing app deployed via clowder
+
+app:
+  $ref: /services/insights/eventing/app.yml
+
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-clouddot-info
+
+managedResourceTypes:
+- ClowdApp
+
+imagePatterns:
+- quay.io/cloudservices/eventing-integrations-splunk
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+    version: 3
+
+resourceTemplates:
+- name: eventing-splunk-quarkus
+  path: /splunk-quarkus/clowdapp.yaml
+  url: https://github.com/RedHatInsights/eventing-integrations
+  parameters:
+    CLOWDER_ENABLED: 'True'
+    MAX_REPLICAS: 3
+    MIN_REPLICAS: 3
+  targets:
+  - namespace:
+      $ref: /services/insights/eventing/namespaces/stage-eventing-stage.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-eventing-integrations-gh-build-main
+
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+    parameters:
+      MAX_REPLICAS: 1
+      MIN_REPLICAS: 1
