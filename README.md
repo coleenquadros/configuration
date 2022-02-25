@@ -98,6 +98,7 @@ this repository.
       - [Manage Key Management Service Keys via App-Interface (`/openshift/namespace-1.yml`)](#manage-key-management-service-keys-via-app-interface-openshiftnamespace-1yml)
       - [Manage Kinesis Streams via App-Interface (`/openshift/namespace-1.yml`)](#manage-kinesis-streams-via-app-interface-openshiftnamespace-1yml)
       - [Manage AWS Autoscaling Group via App-Interface (`/openshift/namespace-1.yml`)](#manage-aws-autoscaling-group-via-app-interface-openshiftnamespace-1yml)
+      - [Manage External DNS zones via App-Interface (`/openshift/namespace-1.yml`)](#manage-external-dns-zones-via-app-interface-openshiftnamespace-1yml)
       - [Manage Application Load Balancers via App-Interface (`/openshift/cluster-1.yml`)](#manage-application-load-balancers-via-app-interface-openshiftcluster-1yml)
       - [Enable deletion of AWS resources in deletion protected accounts](#enable-deletion-of-aws-resources-in-deletion-protected-accounts)
     - [Manage VPC peerings via App-Interface (`/openshift/cluster-1.yml`)](#manage-vpc-peerings-via-app-interface-openshiftcluster-1yml)
@@ -197,6 +198,7 @@ https://github.com/app-sre/qontract-schemas.
 - Even if you have rights to merge the PR, please refrain from doing so. If you need it merged urgently, ping @app-sre-ic in #sd-app-sre.
 - If an AppSRE team members adds the `lgtm` label, it will be automerged by a bot.
 - The AppSRE team members will also refrain from manually merging PRs and will use labels instead to allow the bot to automatically merge them. In App-Interface the order of the PRs is important, and if we manually merge, it will affect waiting times for other users.
+- Please remove the comment from the MR description template and fill in the information, this is crucial for MR reviewing. The easier reviewers can understand your intention, the faster your MR will get a response.
 - Please follow git [best practices](https://service.pages.redhat.com/dev-guidelines/docs/appsre/git/)
 
 ## Local validation of datafile modifications / contract amendment
