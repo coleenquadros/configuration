@@ -33,6 +33,8 @@ terraformProviderResources:
     output_resource_name: aws-dns-creds
 ```
 
+Each entry holds a `provider` field, which will indicate the type of the "provisioner" to use (AWS account, GCP project, the CNA service, etc). The `provisioner` field will reference an object that implements an ability to provision resources using terraform. The `resources` section will include all resources to be provisioned in this provisioner.
+
 Such an approach is future compatible with adding new providers. For example, GCP project:
 ```yaml
 terraformProviderResources:
