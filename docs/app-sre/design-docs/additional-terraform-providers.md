@@ -48,6 +48,8 @@ terraformProviderResources:
 
 This approach is backwards compatible, as it will not change the way we handle (AWS) resources managed in `terraformResources` sections.
 
+It also follows the Provider Pattern: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-interface/qontract-reconcile-patterns.md#the-provider-pattern
+
 Side note: This proposal is also adding "grouping" of resources of the same provider. This is instead of having each item define the same section. Most namespaces have multiple resources of the same provider (in our case, same AWS account), and this will reduce a lot of duplication and will add consistency with other areas, such as `quayRepos`.
 
 ## Alternatives considered
