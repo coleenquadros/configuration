@@ -1,0 +1,60 @@
+# Design doc: optimal location for app-interface schemas
+
+## Author/date
+
+Maor Friedman / 2022-02-08
+
+## Tracking JIRA
+
+https://issues.redhat.com/browse/APPSRE-4611
+
+## Problem Statement
+
+By using `terraformResources` we are only able to provision resources in AWS. We need to be able to support provisioning resources in additional providers, such as GCP projects, and in the future - CNA.
+
+## Goals
+
+Enable a way to support additional terraform provisioners. A use case to focus on can be a managed DNS zone via GCP.
+
+## Non-objectives
+
+## Proposal
+
+Introduce a new section in a namespace file which will support additional providers, in addition to AWS:
+```yaml
+terraformProviderResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/example/account.yml
+  resources:
+  - provider: route53-zone
+    identifier: zone1-example-com
+    name: zone1.example.com
+    output_resource_name: aws-dns-creds
+```
+
+Such an approach is future compatible with adding new providers. For example, GCP project:
+```yaml
+terraformProviderResources:
+- provider: gcp-project
+  provisioner:
+    $ref: /gcp/example/project.yml
+  resources:
+  - provider: managed-zone
+    identifier: zone2-example-com
+    name: zone2.example.com
+    output_resource_name: google-dns-creds
+```
+
+This approach is backwards compatible, as it will not change the way we handle (AWS) resources managed in `terraformResources` sections.
+
+Side note: This proposal is also adding "grouping" of resources of the same provider. This is instead of having each item define the same section. Most namespaces have multiple resources of the same provider (in our case, same AWS account), and this will reduce a lot of duplication and will add consistency with other areas, such as `quayRepos`.
+
+## Alternatives considered
+
+Keep using the `terraformResources` section. This will require a thorough change to qontract-reconcile, as we currently hard code the `account` in each entry.
+
+## Milestones
+
+- Perform any required refactors to simplify and prepare for additional providers.
+- Bonus points: Implement managed zone via GCP.
