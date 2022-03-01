@@ -17,8 +17,11 @@ We assist this process with `qontract-cli`. In its most basic form:
 ``` shell
 # Most URLs will be HTTPS so ensure the CAs are reachable from
 # REQUESTS_CA_BUNDLE
-$ export REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem
-$ qontract-cli --config config.toml sre-checkpoint-metadata --app-path=/services/insights/compliance/app.yml --parent-ticket=$parent_ticket
+$ export REQUESTS_CA_BUNDLE=$(python3 -c "import ssl;print(ssl.get_default_verify_paths().openssl_cafile)")
+$ qontract-cli --config config.toml sre-checkpoint-metadata \
+    --app-path=/services/insights/compliance/app.yml \
+    --parent-ticket=$parent_ticket \
+    --dry-run
 ```
 
 This command will look up all the fields we mention above, confirm
@@ -47,4 +50,5 @@ $ qontract-cli --config config.local.toml sre-checkpoint-metadata \
   --parent-ticket=APPSRE-3801 \
   --jiraboard=DRFT \
   --jiradef=/teams/insights/jira/compliance.yaml
+  --dry-run
 ```
