@@ -16,15 +16,11 @@ Describe the process to switch Hive to use a new DNS zone.
 
 In this part, we will prepare and populate the destination DNS zone.
 
-1. Pre-create the destination DNS zone via app-interface: https://gitlab.cee.redhat.com/service/app-interface#manage-external-dns-zones-via-app-interface-openshiftnamespace-1yml. This will result in a Secret with credentials to manage the DNS zone.
-    * Example: https://gitlab.cee.redhat.com/service/app-interface/-/blob/1f590c8ee98845853a2a09a8339ebffdf7ca037a/data/services/hive/namespaces/hive-stage-01/hive-stage.yml#L125-129
+1. Pre-create the destination DNS zone [via app-interface](https://gitlab.cee.redhat.com/service/app-interface#manage-external-dns-zones-via-app-interface-openshiftnamespace-1yml). This will result in a Secret with credentials to manage the DNS zone. See [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/1f590c8ee98845853a2a09a8339ebffdf7ca037a/data/services/hive/namespaces/hive-stage-01/hive-stage.yml#L125-129)
 
 1. For each Hive shard:
-    - If shard is active - Disable cluster provisioning for the shard
-        * https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/hive-shard-provisioning.md#disabling-shards-from-rotation
-        * https://gitlab.cee.redhat.com/service/app-interface/-/blob/2ac0b9ba83d07dc6257ba87dd3cfa93ee37ec49d/data/services/ocm/shared-resources/production.yml#L21-51
-    - Manually update HiveConfig to use the newly created Secret
-        * https://gitlab.cee.redhat.com/service/app-interface/-/blob/1f590c8ee98845853a2a09a8339ebffdf7ca037a/resources/services/hive/stage/hive.hiveconfig.yaml#L50
+    - If shard is active - [Disable cluster provisioning](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/hive-shard-provisioning.md#disabling-shards-from-rotation) for the [shard](https://gitlab.cee.redhat.com/service/app-interface/-/blob/2ac0b9ba83d07dc6257ba87dd3cfa93ee37ec49d/data/services/ocm/shared-resources/production.yml#L21-51)
+    - Manually update [HiveConfig](https://gitlab.cee.redhat.com/service/app-interface/-/blob/1f590c8ee98845853a2a09a8339ebffdf7ca037a/resources/services/hive/stage/hive.hiveconfig.yaml#L50) to use the newly created Secret
     - This will cause Hive controller to restart and populate the destination DNS zone.
     - Our integrations (openshift-resources) will restore HiveConfig to its original values.
     - If shard was active - Enable cluster provisioning for the shard
@@ -34,8 +30,7 @@ In this part, we will prepare and populate the destination DNS zone.
 In this part, we will perform the migration itself. The destination DNS zone should contain most of the existing records as the source DNS zone. This should alleviate any rate limit issues.
 
 1. Submit a MR to update the HiveConfig to use the newly created Secret.
-    * Once this MR is merged, Hive controller pods will be recycled to pick up the new Secret and will start populating the destination DNS zone.
-    * Example: https://gitlab.cee.redhat.com/service/app-interface/-/blob/1f590c8ee98845853a2a09a8339ebffdf7ca037a/resources/services/hive/stage/hive.hiveconfig.yaml#L50
+    * Once this MR is merged, Hive controller pods will be recycled to pick up the new Secret and will start populating the destination DNS zone. See [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/1f590c8ee98845853a2a09a8339ebffdf7ca037a/resources/services/hive/stage/hive.hiveconfig.yaml#L50)
 1. Update the DNS delegation to point at the newly created DNS zone.
 
 ## Impact
