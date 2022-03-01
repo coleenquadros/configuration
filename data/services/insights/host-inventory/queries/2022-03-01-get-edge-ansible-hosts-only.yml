@@ -1,0 +1,16 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2022-03-01-get-edge-ansible-hosts-only
+namespace:
+  $ref: /services/insights/host-inventory/namespaces/prod-host-inventory-prod.yml
+identifier: host-inventory-prod
+output: stdout
+query: |
+  SELECT count(1), created_on, account, system_profile_facts=>'host_type', system_profile_facts=>'ansible', 
+  FROM hosts
+  WHERE 
+    system_profile_facts->>'host_type'  =  'edge' OR 
+    system_profile_facts->>'ansible' IS NOT NULL
+  GROUP BY created_on, account, system_profile_facts=>'host_type', system_profile_facts=>'ansible'
+  ORDER BY count desc;
