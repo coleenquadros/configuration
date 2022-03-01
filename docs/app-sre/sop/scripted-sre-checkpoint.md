@@ -18,7 +18,7 @@ We assist this process with `qontract-cli`. In its most basic form:
 # Most URLs will be HTTPS so ensure the CAs are reachable from
 # REQUESTS_CA_BUNDLE
 $ export REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem
-$ qontract-cli --config config.toml sre-checkpoint-metadata --app-path=/services/insights/compliance/app.yml --parent-tiket=$parent_ticket
+$ qontract-cli --config config.toml sre-checkpoint-metadata --app-path=/services/insights/compliance/app.yml --parent-ticket=$parent_ticket
 ```
 
 This command will look up all the fields we mention above, confirm
@@ -38,9 +38,13 @@ escalation policy in app-interface. In that case, `--jiradef` will
 indicate the path to the escalation of some other application, from it
 we will read the URL to the JIRA instance and the secret holding the
 credentials to said JIRA. Then, we can specify the board for this
-service with the `--jiraboard`. For instance, when reviweing Drift for
+service with the `--jiraboard`. For instance, when reviewing Drift for
 their onboarding I did:
 
 ``` shell
-$ qontract-cli --config config.local.toml sre-checkpoint-metadata --app-path=/services/insights/historical-system-profiles/app.yml --parent-ticket=APPSRE-3801 --jiraboard=DRFT --jiradef=/teams/insights/jira/compliance.yaml
+$ qontract-cli --config config.local.toml sre-checkpoint-metadata \
+  --app-path=/services/insights/historical-system-profiles/app.yml \
+  --parent-ticket=APPSRE-3801 \
+  --jiraboard=DRFT \
+  --jiradef=/teams/insights/jira/compliance.yaml
 ```
