@@ -145,6 +145,32 @@ tests:
     alertname: NotificationsRestartsProd
     exp_alerts:
 
+#StoppedReceivingNotificationsEvents
+- interval: 1h
+  input_series:
+  - series: input_consumed_seconds_count{bundle="bundle", application="application"}
+    values: 1 2 3 4 5 6 7 8 9 10 10x20
+
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: StoppedReceivingNotificationsEvents
+    exp_alerts:
+
+  - eval_time: 12h
+    alertname: StoppedReceivingNotificationsEvents
+    exp_alerts:
+      - exp_labels:
+          severity: medium
+          service: insights
+          env: prod
+          app_team: notifications
+        exp_annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/KQIVyFuMk/notifications-dashboard?orgId=1&refresh=15m&var-datasource=crcp01ue1-prometheus"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/notifications-prod/deployments"
+          message: "Stopped receiving notifications events from: {{ $labels.bundle }}/{{ $labels.application }}"
+          description: "Stopped receiving notifications events from: {{ $labels.bundle }}/{{ $labels.application }} for 2 hours."
+          runbook: "https://core-platform-apps.pages.redhat.com/notifications-docs/dev/runbooks/alerts/StoppedReceivingNotificationsEvents.html"
+
 #NoMessageBeingProcessedProd
 - interval: 1m
   input_series:
