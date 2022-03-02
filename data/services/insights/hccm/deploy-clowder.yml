@@ -54,9 +54,9 @@ resourceTemplates:
   # Staging:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: 66cc0c38f5f918623b833e34a00f7495e103bef0
+    ref: 2b3548762bb0448daae9eae643c94287d30a84f8
     parameters:
-      IMAGE_TAG: 66cc0c3 # DO NOT UPDATE THIS UNLESS YOU KNOW WHY
+      IMAGE_TAG: 2b35487 # DO NOT UPDATE THIS UNLESS YOU KNOW WHY
   # Production:
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
@@ -131,12 +131,12 @@ resourceTemplates:
   # Staging:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: fd6d042624cd4d13ef86239b9cc7809747e0caa6
+    ref: dac947ec3ca9c7c031ff227191f4669a9d567692
     parameters:
       ############# MIGRATIONS #############
       # Change these settings when deploying migrations to Staging
       # Migrations Image Tag
-      DBM_IMAGE_TAG: 3d7c502
+      DBM_IMAGE_TAG: d152435
       # Migrations Invocation
       DBM_INVOCATION: "00"
       # Migration directive is optional and should be in the form of:
@@ -147,7 +147,7 @@ resourceTemplates:
       # Ex: ""
       _MIGRATION_DIRECTIVE: ""
       ######################################
-      IMAGE_TAG: fd6d042
+      IMAGE_TAG: dac947e
       APP_DOMAIN: apps.crcs02ue1.urby.p1.openshiftapps.com
       S3_BUCKET_NAME: hccm-stage-s3
       KOKU_SENTRY_ENV: stage
@@ -254,7 +254,7 @@ resourceTemplates:
   # Production:
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: fd6d042624cd4d13ef86239b9cc7809747e0caa6
+    ref: dac947ec3ca9c7c031ff227191f4669a9d567692
     parameters:
       ############# MIGRATIONS #############
       # Change these settings when deploying migrations to Production
@@ -270,7 +270,7 @@ resourceTemplates:
       # Ex: ""
       _MIGRATION_DIRECTIVE: ""
       ######################################
-      IMAGE_TAG: fd6d042
+      IMAGE_TAG: dac947e
       APP_DOMAIN: apps.crcp01ue1.o9m8.p1.openshiftapps.com
       S3_BUCKET_NAME: hccm-prod-s3
       KOKU_SENTRY_ENV: prod
@@ -292,13 +292,14 @@ resourceTemplates:
       UPDATE_TIMEOUT: 14400
       VACUUM_DATA_DAY_OF_WEEK: 0
       PRESTO_HOST: trino-coordinator
+      GUNICORN_THREADS: False
       # Deployment specific variables:
       # koku-api
       KOKU_MIN_REPLICAS: 10
       KOKU_CPU_REQUEST: 500m
       KOKU_CPU_LIMIT: 1
-      KOKU_MEMORY_REQUEST: 4Gi
-      KOKU_MEMORY_LIMIT: 8Gi
+      KOKU_MEMORY_REQUEST: 10Gi
+      KOKU_MEMORY_LIMIT: 12Gi
       # listener
       LISTENER_MIN_REPLICAS: 3
       LISTENER_CPU_REQUEST: 200m
@@ -420,7 +421,7 @@ resourceTemplates:
     disable: true # tells app-sre to not actually run the deploy job for this target
     ref: internal # altered by bonfire
     parameters:
-      IMAGE_TAG: 368-002
+      IMAGE_TAG: 371-001
       S3_BUCKET_NAME: hccm-eph-s3
       S3_SSE_ENABLED: 'False'
       S3_SELECT_PUSHDOWN_ENABLED: 'False'
@@ -428,9 +429,9 @@ resourceTemplates:
   # Staging
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: 8289c5ca807cefbdda4bede43591f05531dc8085
+    ref: a3842f5e177dffeef7457780c63ea6d7eaa66afd
     parameters:
-      IMAGE_TAG: 368-002
+      IMAGE_TAG: 371-001
       S3_BUCKET_NAME: hccm-stage-s3
       COORDINATOR_REPLICAS: 1
       WORKER_REPLICAS: 3
@@ -444,13 +445,12 @@ resourceTemplates:
       WORKER_MEMORY_LIMIT: 8Gi
       QUERY_MAX_MEMORY: 8GB
       QUERY_MAX_MEMORY_PER_NODE: 2GB
-      QUERY_MAX_TOTAL_MEMORY_PER_NODE: 4GB
   # Production
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: 8289c5ca807cefbdda4bede43591f05531dc8085
+    ref: a3842f5e177dffeef7457780c63ea6d7eaa66afd
     parameters:
-      IMAGE_TAG: 368-002
+      IMAGE_TAG: 371-001
       S3_BUCKET_NAME: hccm-prod-s3
       COORDINATOR_REPLICAS: 1
       WORKER_REPLICAS: 4
@@ -463,16 +463,10 @@ resourceTemplates:
       WORKER_MEMORY_REQUEST: 20Gi
       WORKER_MEMORY_LIMIT: 20Gi
       # QUERY_MAX_MEMORY is the max amount of user memory a query can use across the entire cluster
-      # Setting to WORKER_REPLICAS * QUERY_MAX_MEMORY_PER_NODE
       QUERY_MAX_MEMORY: 36GB
       # QUERY_MAX_MEMORY_PER_NODE is the max amount of user memory a query can use on a worker
-      # Default is JVM max memory * 0.1
-      # The JVM uses 75% of the memory limit. Setting this to (WORKER_MEMORY_LIMIT * 0.75 - heap-headroom-per-node (JVM max memory * 0.3)) * 0.5.
-      QUERY_MAX_MEMORY_PER_NODE: 5GB
-      # QUERY_MAX_TOTAL_MEMORY_PER_NODE is the max amount of user and system memory a query can use on a worker
       # Default is JVM max memory * 0.3
-      # The JVM uses 75% of the memory limit. Setting this to WORKER_MEMORY_LIMIT * 0.75 - heap-headroom-per-node (JVM max memory * 0.3).
-      QUERY_MAX_TOTAL_MEMORY_PER_NODE: 10GB
+      QUERY_MAX_MEMORY_PER_NODE: 5GB
 
 - name: koku-report-emailer
   path: /deploy/clowdapp.yaml

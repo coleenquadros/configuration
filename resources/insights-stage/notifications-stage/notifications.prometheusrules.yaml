@@ -20,11 +20,39 @@ spec:
           env: stage
           app_team: notifications
         annotations:
-          dashboard: "https://grafana.stage.devshift.net/d/KQIVyFuMk/notifications-dashboard"
+          dashboard: "https://grafana.app-sre.devshift.net/d/KQIVyFuMk/notifications-dashboard?orgId=1&refresh=15m&var-datasource=crcs02ue1-prometheus"
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/notifications-stage/deployments"
           message: "Notifications Backend Alert (Stage)"
           description: "Notifications Backend: Down in Stage for 5 minutes."
           runbook: "https://core-platform-apps.pages.redhat.com/notifications-docs/dev/runbooks/alerts/NotificationsBackendDownProd.html"
+      - alert: NotificationsEngineDownStage
+        expr: absent(up{service="notifications-engine-service", namespace="notifications-stage"}) or up{service="notifications-engine-service", namespace="notifications-stage"} == 0
+        for: 5m
+        labels:
+          severity: medium
+          service: insights
+          env: stage
+          app_team: notifications
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/KQIVyFuMk/notifications-dashboard?orgId=1&refresh=15m&var-datasource=crcs02ue1-prometheus"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/notifications-stage/deployments"
+          message: "Notifications Engine Alert (Stage)"
+          description: "Notifications Engine: Down in Stage for 5 minutes."
+          runbook: "https://core-platform-apps.pages.redhat.com/notifications-docs/dev/runbooks/alerts/NotificationsEngineDownProd.html"
+      - alert: NotificationsGWDownStage
+        expr: absent(up{service="notifications-gw-service", namespace="notifications-stage"}) or up{service="notifications-gw-service", namespace="notifications-stage"} == 0
+        for: 5m
+        labels:
+          severity: medium
+          service: insights
+          env: stage
+          app_team: notifications
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/KQIVyFuMk/notifications-dashboard?orgId=1&refresh=15m&var-datasource=crcs02ue1-prometheus"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/notifications-stage/deployments"
+          message: "Notifications gw Alert (Stage)"
+          description: "Notifications GW: Down in Stage for 5 minutes."
+          runbook: "https://core-platform-apps.pages.redhat.com/notifications-docs/dev/runbooks/alerts/NotificationsGWDownProd.html"
       - alert: StoppedReceivingNotificationsEvents
         expr: sum by (bundle,application) (increase(input_consumed_seconds_count[5m])) == 0
         for: 72h
@@ -34,7 +62,7 @@ spec:
           env: stage
           app_team: notifications
         annotations:
-          dashboard: "https://grafana.stage.devshift.net/d/KQIVyFuMk/notifications-dashboard"
+          dashboard: "https://grafana.app-sre.devshift.net/d/KQIVyFuMk/notifications-dashboard?orgId=1&refresh=15m&var-datasource=crcs02ue1-prometheus"
           link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/notifications-stage/deployments"
           message: "Stopped receiving notifications events from: {{ $labels.bundle }}/{{ $labels.application }}"
           description: "Stopped receiving notifications events from: {{ $labels.bundle }}/{{ $labels.application }} for 72 hours."

@@ -22,6 +22,18 @@ Previous work that resulted in this SOP:
 
 ## Process
 
+
+### Adding firewall rules
+
+1. If you need to access additional ports you can create a ticket for internal targets here: https://netsec.corp.redhat.com/
+2. This site also provides a simulation, that let's you verify if a firewall change is required.
+3. In order to create a new rule use the "ACL Ticket Form", you need the application codes:
+   * Main Application Code: OSIO-002
+   * Soure: OSIO-002
+   * Destination: ASRE-001
+4. Example ticket: https://redhat.service-now.com/help?id=rh_ticket&table=sc_req_item&sys_id=7b798c60db71c954c4db45e8139619ca
+
+
 ### VPN setup - one time
 
 1. Open a ServiceNow ticket with IT Operations to be assigned a CIDR block in which OSD clusters will be provisioned.

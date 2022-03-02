@@ -129,11 +129,47 @@ terraformResources:
             "logs:DescribeLogStreams",
             "logs:CreateLogStream",
           ],
-          "Resource": "arn:aws:logs:us-east-1:920877988636:log-group:workers-aoc-staging:*"
+          "Resource": "arn:aws:logs:us-east-1:920877988636:log-group:workers-aoc-staging:*",
+        },
+        {
+          "Sid": "VMImportEC2Policy",
+          "Effect": "Allow",
+          "Action": [
+            "ec2:CopySnapshot",
+            "ec2:Describe*",
+            "ec2:ModifySnapshotAttribute",
+            "ec2:DeleteTags",
+            "ec2:CreateTags",
+            "ec2:RegisterImage",
+            "ec2:ImportSnapshot",
+            "ec2:ModifyImageAttribute",
+            "ec2:DeregisterImage",
+            "ec2:DeleteSnapshot",
+          ],
+          "Resource": "*",
+        },
+        {
+          "Sid": "VMImportS3Policy",
+          "Effect": "Allow",
+          "Action": [
+            "s3:GetBucketLocation",
+            "s3:ListBucket",
+            "s3:GetObject",
+            "s3:PutObject",
+            "s3:DeleteObject",
+          ],
+          "Resource": [
+            "arn:aws:s3:::image-builder-service",
+            "arn:aws:s3:::image-builder-service/*",
+          ]
         }
       ]
     }
   output_resource_name: workers-aoc-staging-role
+- provider: s3
+  account: image-builder-stage
+  identifier: image-builder-service
+  defaults: /terraform/resources/image-builder/stage/s3-1.yml
 - provider: asg
   account: image-builder-stage
   identifier: imagebuilder-workers-aoc-x86-staging
