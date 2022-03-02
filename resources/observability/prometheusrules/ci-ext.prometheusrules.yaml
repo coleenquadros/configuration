@@ -259,3 +259,96 @@ spec:
       annotations:
         summary: "{% raw %}RHEL8 subscription isn't valid (instance {{ $labels.instance }}){% endraw %}"
         message: "{% raw %}RHEL8 subscription has problems, docker builds aren't possible{% endraw %}"
+
+    # Recording Rules
+    - expr: |
+        max by (instance, device) ((node_filesystem_size_bytes{job=~"ci_ext.*",fstype=~"ext[234]|btrfs|xfs|zfs"}
+        - node_filesystem_avail_bytes{job=~"ci_ext.*",fstype=~"ext[234]|btrfs|xfs|zfs"})
+        / node_filesystem_size_bytes{job=~"ci_ext.*",fstype=~"ext[234]|btrfs|xfs|zfs"})
+      record: 'node:node_filesystem_usage:'
+    - expr: |
+        max by (instance, device) (node_filesystem_avail_bytes{job=~"ci_ext.*",fstype=~"ext[234]|btrfs|xfs|zfs"} / node_filesystem_size_bytes{job=~"ci_ext.*",fstype=~"ext[234]|btrfs|xfs|zfs"})
+      record: 'node:node_filesystem_avail:'
+
+    # Alerting rules
+    - alert: InstanceDown
+      expr: up{job=~"ci_ext.*"} == 0
+      for: 5m
+      labels:
+        severity: critical
+        service: ci-ext
+      annotations:
+        message: "{% raw %}{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 5 minutes.{% endraw %}"
+        summary: "{% raw %}Instance {{ $labels.instance }} down{% endraw %}"
+    - alert: CriticalMemoryUsage
+      expr: '(1 - ((node_memory_MemFree_bytes{job=~"ci_ext.*"} + node_memory_Buffers_bytes{job=~"ci_ext.*"} + node_memory_Cached_bytes{job=~"ci_ext.*"} + node_memory_SReclaimable_bytes{job=~"ci_ext.*"}) / node_memory_MemTotal_bytes{job=~"ci_ext.*"})) * 100 > 98'
+      for: 5m
+      labels:
+        severity: critical
+        service: ci-ext
+      annotations:
+        message: "{% raw %}{{ $labels.instance }} has Critical Memory Usage more than 5 minutes.{% endraw %}"
+        summary: "{% raw %}Instance {{ $labels.instance }} has Critical Memory Usage{% endraw %}"
+    - alert: OutOfMemory
+      expr: (node_memory_MemFree_bytes{job=~"ci_ext.*"} + node_memory_Cached_bytes{job=~"ci_ext.*"} + node_memory_Buffers_bytes{job=~"ci_ext.*"} + node_memory_SReclaimable_bytes{job=~"ci_ext.*"}) / node_memory_MemTotal_bytes{job=~"ci_ext.*"} * 100 < 10
+      for: 30m
+      labels:
+        severity: high
+        service: ci-ext
+      annotations:
+        summary: "{% raw %}Out of memory (instance {{ $labels.instance }}){% endraw %}"
+        message: "{% raw %}Node memory is filling up (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}{% endraw %}"
+    - alert: PredictNodeDiskFull
+      annotations:
+        message: "{% raw %}Device {{ $labels.device }} of node {{ $labels.instance }} will be full within the next 2 hours.{% endraw %}"
+      expr: |
+        (node:node_filesystem_usage: > 0.85) and (predict_linear(node:node_filesystem_avail:[30m], 3600 * 2) < 0)
+      for: 10m
+      labels:
+        severity: critical
+        service: ci-ext
+    - alert: PredictNodeDiskFull
+      annotations:
+        message: "{% raw %}Device {{ $labels.device }} of node {{ $labels.instance }} will be full within the next 24 hours.{% endraw %}"
+      expr: |
+        (node:node_filesystem_usage: > 0.85) and (predict_linear(node:node_filesystem_avail:[6h], 3600 * 24) < 0)
+      for: 30m
+      labels:
+        severity: high
+        service: ci-ext
+    - alert: UnusualNetworkThroughputIn
+      expr: sum by (instance) (irate(node_network_receive_bytes_total{job=~"ci_ext.*"}[2m])) / 1024 / 1024 > 100
+      for: 30m
+      labels:
+        severity: high
+        service: ci-ext
+      annotations:
+        summary: "{% raw %}Unusual network throughput in (instance {{ $labels.instance }}){% endraw %}"
+        message: "{% raw %}Host network interfaces are probably receiving too much data (> 100 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}{% endraw %}"
+    - alert: UnusualNetworkThroughputOut
+      expr: sum by (instance) (irate(node_network_transmit_bytes_total{job=~"ci_ext.*"}[2m])) / 1024 / 1024 > 100
+      for: 30m
+      labels:
+        severity: high
+        service: ci-ext
+      annotations:
+        summary: "{% raw %}Unusual network throughput out (instance {{ $labels.instance }}){% endraw %}"
+        message: "{% raw %}Host network interfaces are probably sending too much data (> 100 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}{% endraw %}"
+    - alert: OutOfInodes
+      expr: node_filesystem_files_free{job=~"ci_ext.*",mountpoint ="/"} / node_filesystem_files{job=~"ci_ext.*",mountpoint ="/"} * 100 < 10
+      for: 30m
+      labels:
+        severity: high
+        service: ci-ext
+      annotations:
+        summary: "{% raw %}Out of inodes (instance {{ $labels.instance }}){% endraw %}"
+        message: "{% raw %}Disk is almost running out of available inodes (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}{% endraw %}"
+    - alert: CpuLoad
+      expr: node_load15 / (count without (cpu, mode) (node_cpu_seconds_total{job=~"ci_ext.*",mode="system"})) > 5
+      for: 30m
+      labels:
+        severity: high
+        service: ci-ext
+      annotations:
+        summary: "{% raw %}CPU load (instance {{ $labels.instance }}){% endraw %}"
+        message: "{% raw %}CPU load (15m) is high\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}{% endraw %}"

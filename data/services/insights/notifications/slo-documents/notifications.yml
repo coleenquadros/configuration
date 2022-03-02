@@ -1,0 +1,59 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: notifications
+
+name: notifications
+
+namespaces:
+- $ref: /services/insights/notifications/namespaces/notifications-prod.yml
+
+slos:
+- name: notifications availability
+  SLIType: availability
+  SLISpecification: Availability (measured as the product of errors and latency) has to be met a certain target of the last days
+  SLODetails: https://gitlab.cee.redhat.com/core-platform-apps/notifications-docs/-/blob/master/modules/SLO-document/pages/SLO-definitions.adoc
+  SLOParameters:
+    window: 28d
+  expr: absent(up{namespace="notifications-prod",service="notifications-backend-service"}) or up{namespace="notifications-prod",service="notifications-backend-service"} == 0
+  SLOTarget: 0.99
+  SLOTargetUnit: percent_0_1
+  prometheusRules: resources/insights-prod/notifications-prod/notifications.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/KQIVyFuMk/notifications-dashboard?orgId=1&refresh=15m&var-datasource=crcp01ue1-prometheus
+
+- name: notifications-engine availability
+  SLIType: availability
+  SLISpecification: Availability (measured as the product of errors and latency) has to be met a certain target of the last days
+  SLODetails: https://gitlab.cee.redhat.com/core-platform-apps/notifications-docs/-/blob/master/modules/SLO-document/pages/SLO-definitions.adoc
+  SLOParameters:
+    window: 28d
+  expr: absent(up{namespace="notifications-prod",service="notifications-engine-service"}) or up{namespace="notifications-prod",service="notifications-engine-service"} == 0
+  SLOTarget: 0.99
+  SLOTargetUnit: percent_0_1
+  prometheusRules: resources/insights-prod/notifications-prod/notifications.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/KQIVyFuMk/notifications-dashboard?orgId=1&refresh=15m&var-datasource=crcp01ue1-prometheus
+
+- name: notifications-gw availability
+  SLIType: availability
+  SLISpecification: Availability (measured as the product of errors and latency) has to be met a certain target of the last days
+  SLODetails: https://gitlab.cee.redhat.com/core-platform-apps/notifications-docs/-/blob/master/modules/SLO-document/pages/SLO-definitions.adoc
+  SLOParameters:
+    window: 28d
+  expr: absent(up{namespace="notifications-prod",service="notifications-gw-service"}) or up{namespace="notifications-prod",service="notifications-gw-service"} == 0
+  SLOTarget: 0.99
+  SLOTargetUnit: percent_0_1
+  prometheusRules: resources/insights-prod/notifications-prod/notifications.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/KQIVyFuMk/notifications-dashboard?orgId=1&refresh=15m&var-datasource=crcp01ue1-prometheus
+
+- name: message processing
+  SLIType: correctness
+  SLISpecification: Correctness 
+  SLODetails: https://gitlab.cee.redhat.com/core-platform-apps/notifications-docs/-/blob/master/modules/SLO-document/pages/SLO-definitions.adoc
+  SLOParameters:
+    window: 28d
+  expr: sum(rate(input_consumed_seconds_count{service="notifications-backend-service"}[5m])) == 0
+  SLOTarget: 0.99
+  SLOTargetUnit: percent_0_1
+  prometheusRules: resources/insights-prod/notifications-prod/notifications.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/KQIVyFuMk/notifications-dashboard?orgId=1&refresh=15m&var-datasource=crcp01ue1-prometheus

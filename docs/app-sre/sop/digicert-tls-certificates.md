@@ -20,10 +20,10 @@ Their Google Chat room is `IT Utility & Infra Services (UIS)`
 
 # Single domain 
 COMMON_NAME=mydomain.com
-
-openssl req -new -newkey rsa:2048 -nodes \
- -out star_quay_io.csr \
- -keyout star_quay_io.key \
+# ESSv9 requires secp384r1 curve for TLSv1.2
+openssl req -new -newkey -ec:<(openssl ecparam -name secp384r1) -nodes \
+ -out cert_req_name.csr \
+ -keyout cert_req_name.key \
  -subj "/C=US/ST=North Carolina/L=Raleigh/O=Red Hat, Inc./OU=Service Delivery/CN=$COMMON_NAME"
 ```
 

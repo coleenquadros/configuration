@@ -64,7 +64,7 @@ resourceTemplates:
     # - Commits can be found here: https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/commits/main
     # If in doubt, please check with the MK Control Plane team.
     # We are exploring how to automate this in the future.
-    ref: 4934a20ae2a204b6d33f7b61930f84140804d990
+    ref: 3bb6b78b4ae5254353aec0d92ebf69898cd8e030
     parameters:
       ISSUER_URL: ${SSO_BASE_URL}
       OBSERVATORIUM_URL: https://observatorium-mst.api.openshift.com/api/metrics/v1/managedkafka
@@ -120,6 +120,39 @@ resourceTemplates:
     # Global parameter - Affects Production and Stage
     # Image to be used by Envoy sidecar container
     ENVOY_IMAGE: quay.io/rhoas/envoyproxy:v1.16.1
+    # Global parameter for SUPPORTED_KAFKA_SIZES - affects prod and stage
+    SUPPORTED_KAFKA_SIZES:
+      - id: eval
+        sizes: 
+        -  id: x1
+           ingressThroughputPerSec: "30Mi"
+           egressThroughputPerSec: "30Mi"
+           totalMaxConnections: 3000
+           maxDataRetentionSize: "1000Gi"
+           maxPartitions: 1000
+           maxDataRetentionPeriod: "P14D"
+           maxConnectionAttemptsPerSec: 100
+           cost: 1
+      - id: standard
+        sizes:
+        -  id: x1
+           ingressThroughputPerSec: "50Mi"
+           egressThroughputPerSec: "100Mi"
+           totalMaxConnections: 3000
+           maxDataRetentionSize: "1000Gi"
+           maxPartitions: 1500
+           maxDataRetentionPeriod: "P14D"
+           maxConnectionAttemptsPerSec: 100
+           cost: 1
+        -  id: x2
+           ingressThroughputPerSec: "100Mi"
+           egressThroughputPerSec: "200Mi"
+           totalMaxConnections: 4000
+           maxDataRetentionSize: "2000Gi"
+           maxPartitions: 3000
+           maxDataRetentionPeriod: "P14D"
+           maxConnectionAttemptsPerSec: 200
+           cost: 2
   targets:
   - namespace:
       $ref: /services/managed-services/namespaces/managed-services-stage.yml
@@ -166,8 +199,6 @@ resourceTemplates:
       OBSERVATORIUM_RHSSO_REALM: redhat-external
       # Red Hat SSO Observability auth server url
       OBSERVATORIUM_RHSSO_AUTH_SERVER_URL: https://sso.redhat.com/auth
-      # MAXIMUM NUMBER OF ALLOWED KAFKAs
-      KAFKA_CAPACITY_MAX_CAPACITY: 8
       # Maximum number of partitions per cluster
       KAFKA_CAPACITY_MAX_PARTITIONS: "1000"
       # Changing this to true will delete all kafkas after their lifespan expired. The default is 48 hours.
@@ -188,7 +219,14 @@ resourceTemplates:
       # A list of usernames representing users who do not have access to the service
       DENIED_USERS: []
       # A list of users with read-only permissions for data plane clusters
-      READ_ONLY_USERS: []
+      READ_ONLY_USERS:
+        - "cgorman"   # Managed ACS developer
+        - "ebenshet"  # Managed ACS developer
+        - "jrodrig"   # Managed ACS developer
+        - "sbaumer"   # Managed ACS developer
+        - "schaudhr"  # Managed ACS developer
+        - "shesselm"  # Managed ACS developer
+        - "vwilson"   # Managed ACS developer
      # A list of kafka-sre users with cluster-admin permissions for data plane clusters
       KAFKA_SRE_USERS:
         - "agullon"
@@ -271,7 +309,7 @@ resourceTemplates:
     # the very first commit i.e https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/merge_requests/356/commits?commit_id=f0fd63740464c5fa4bda395d5d31f675eff049ac
     # If in doubt, see with the control plane team.
     # We are exploring into using automating this.
-    ref: 4934a20ae2a204b6d33f7b61930f84140804d990
+    ref: 3bb6b78b4ae5254353aec0d92ebf69898cd8e030
     parameters:
       DB_SSLMODE: verify-full
       ENVIRONMENT: production
@@ -279,7 +317,7 @@ resourceTemplates:
       QUOTA_TYPE: ams
       # The image tag is the first seven characters of the #ref commit sha parameter.
       # Verify in https://quay.io/repository/rhoas/kas-fleet-manager?tab=tags to see if the tag exists.
-      IMAGE_TAG: 4934a20
+      IMAGE_TAG: 3bb6b78
       STRIMZI_OPERATOR_ADDON_ID: managed-kafka
       KAS_FLEETSHARD_ADDON_ID: kas-fleetshard-operator
       SENTRY_URL: sentry.devshift.net
@@ -320,8 +358,6 @@ resourceTemplates:
       OBSERVATORIUM_RHSSO_AUTH_SERVER_URL: https://sso.redhat.com/auth
       # Release tag within Config Repo to use for pulling index information
       OBSERVABILITY_CONFIG_TAG: v1.26.0
-      # MAXIMUM NUMBER OF ALLOWED KAFKAs
-      KAFKA_CAPACITY_MAX_CAPACITY: 61
       # Maximum number of partitions per cluster
       KAFKA_CAPACITY_MAX_PARTITIONS: "1000"
       # A list of usernames representing users who do not have access to the service
@@ -439,5 +475,13 @@ resourceTemplates:
           region: us-east-1
           multi_az: true
           schedulable: true # change this to false if you do not want the cluster to be schedulable
-          kafka_instance_limit: 30 # change this to match any value of configuration
+          kafka_instance_limit: 50 # change this to match any value of configuration
+          supported_instance_type: eval
+        - name: mk-0301-142658
+          cluster_id: 1qltucsh8or2h8kmnkidl0phq3cohlsm
+          cloud_provider: aws
+          region: us-east-1
+          multi_az: true
+          schedulable: true # change this to false if you do not want the cluster to be schedulable
+          kafka_instance_limit: 50 # change this to match any value of configuration
           supported_instance_type: eval
