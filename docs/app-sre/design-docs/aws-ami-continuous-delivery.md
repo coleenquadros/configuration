@@ -59,7 +59,18 @@ With this information, the integration can follow the main branch of the reposit
 1. A new AMI has been built
 1. The new AMI is shared with the account containing the AutoScaling Groups.
 
-Additional information to add to the schema will be similar to saas files: `repo`, `url` and `ref` (or other equivilant names).
+Additional information to add to the schema will be similar to saas files:
+```yaml
+terraformResources
+- provider: asg
+  ...
+  image:
+    ...
+    repo:
+      url: <url of source code repository>
+      ref: <commit or branch name>
+      tag_name: <name of tag to use to correlate AMI ID to commit>
+```
 
 The terraform-resources integration will be enhanced with logic to determine if a new commit has been pushed and if it should use an AMI that corresponds to this commit. In case a new commit has been pushed and the AMI is not yet available, the integration should result to using the previous known commit (indicates usage of a state) to avoid intermittent disruptions to the integration.
 
