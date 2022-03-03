@@ -234,7 +234,7 @@ def _configure_cluster_for_customer_monitoring(
     cluster_data["managedClusterRoles"] = True
     cluster_data["observabilityNamespace"] = {
         "$ref": (
-            "services/observability/namespaces"
+            "/services/observability/namespaces"
             f"/openshift-customer-monitoring.{cluster}.yml"
         )
     }
