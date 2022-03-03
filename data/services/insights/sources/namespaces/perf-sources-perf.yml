@@ -1,0 +1,104 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: sources
+
+name: sources-perf
+description: Insights sources-perf on the perf cluster under e2e-deploy/ocdeployer management
+
+cluster:
+  $ref: /openshift/insights/cluster-insights-perf.yml
+
+#limitRanges:
+#  $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
+#
+#quota:
+#  $ref: /services/insights/default-quota.yml
+
+app:
+  $ref: /services/insights/sources/app.yml
+
+environment:
+  $ref: /products/insights/environments/perf.yml
+
+#networkPoliciesAllow:
+#- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs02ue1.yml
+#- $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+#- $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
+#- $ref: /services/insights/remediations/namespaces/stage-remediations-stage.yml
+#- $ref: /services/insights/approval/namespaces/stage-approval-stage.yml
+#- $ref: /services/insights/catalog/namespaces/stage-catalog-stage.yml
+#- $ref: /services/insights/catalog-inventory/namespaces/stage-catalog-inventory-stage.yml
+#- $ref: /services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml
+#- $ref: /services/insights/rhsm/namespaces/stage-rhsm-stage.yml
+#- $ref: /services/insights/cloud-connector/namespaces/stage.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
+  path: insights/secrets/insights-stage/sources-stage/sources-api-secrets
+  version: 4
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/sources-stage/sources-db-readonly
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/receptor-stage/sources-psk
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/sources-stage/internal-psk
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-perf #Replace stage changes with perf. Follow RBAC
+  identifier: sources-perf
+  defaults: /terraform/resources/insights/perf/rds/postgres10-rds-1.yml
+  overrides:
+    username: "insights"
+    name: "sources_production"
+    instance_class: db.t3.medium
+  parameter_group: /terraform/resources/insights/perf/rds/postgres10-parameter-group-sources-perf.yml
+  output_resource_name: sources-db
+  enhanced_monitoring: true
+- provider: cloudwatch
+  account: insights-perf
+  identifier: sources-perf
+  defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+#  es_identifier: kibana-elasticsearch
+- provider: elasticache
+  account: insights-perf
+  identifier: sources-elasticache
+  defaults: /terraform/resources/insights/perf/elasticache/elasticache-sources-perf.yml
+  output_resource_name: in-memory-db
