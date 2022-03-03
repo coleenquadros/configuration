@@ -2116,11 +2116,11 @@ To manage a User group via App-Interface:
 
   - Edit and use a pre-existing placeholder group
     - There might be a few pre-created placeholder slack groups ready to be converted to new managed slack groups that can be renamed
-    - The placeholder groups should be in the format - `@app-sre-placeholder-<n>` (where n={0, 1, 2...})
+    - The placeholder groups should be in the format - `@app-sre-placeholder-<n>-team` (where n={0, 1, 2...})
     - Edit the `group details` of one of the placeholder groups by changing the name and handle appropriately
     - If there is no placeholder slack group to use, email the slack admins as mentioned below
-  - Request a slack group to be created by email
-    - Follow the instructions in [this mojo document](https://mojo.redhat.com/docs/DOC-1217849#jive_content_id_Requesting_a_Slack_user_group) to send an email to the slack admins
+  - Request a slack group to be created
+    - Follow the instructions in [this mojo document](https://mojo.redhat.com/docs/DOC-1217849#jive_content_id_Requesting_a_Slack_user_group) to self service the creation of a slack user group.
 
 2. **Add a `permission` file with the following details:**
 

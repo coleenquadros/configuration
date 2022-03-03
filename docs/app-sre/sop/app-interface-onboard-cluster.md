@@ -44,6 +44,8 @@ This step should be performed in a single merge request.
 
 1. Place the `client-id` and `client-secret` from the Oauth Client in a secret in [Vault](https://vault.devshift.net/ui/vault/secrets/app-sre/list/integrations-input/ocm-github-idp/github-org-team/app-sre/) named `<cluster_name>-cluster`.
 
+1. Create the slack group `<cluster_name>-cluster`. Follow the first step of [these instructions](/README.md#manage-slack-user-groups-via-app-interface) to do it.
+
 1. Cluster creation in OCM is self-serviced in app-interface. As such cluster.yml file should be added to app-interface at this point
 
     ```yaml
