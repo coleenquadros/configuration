@@ -2128,6 +2128,7 @@ sharing:
   account:
     $ref: /path/to/destination/account.yml
   regex: <filter image by name>
+  region: <region to share AMIs from/to> # optional, will use the default region of the account if not specified
 ```
 
 This will cause all AMIs that match the regex expression to be shared from the source account to the destination account. AMI tags will also be copied to the shared AMI for traceability.
