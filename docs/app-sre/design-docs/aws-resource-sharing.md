@@ -24,7 +24,7 @@ Add an ability to share AMIs between AWS accounts. Since shared AMIs do not cont
 
 ## Proposal
 
-Enahance the AWS account file schema with a new section called `sharing`. This section will be placed in the source AWS account and will contain declarations for AWS accounts to share AMIs with:
+Enhance the AWS account file schema with a new section called `sharing`. This section will be placed in the source AWS account and will contain declarations for AWS accounts to share AMIs with:
 ```yaml
 sharing:
 - provider: ami
