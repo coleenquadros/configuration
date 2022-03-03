@@ -41,7 +41,7 @@ This schema change will be picked up by an integration responsible for sharing t
 
 We will use the [Provider Pattern](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-interface/qontract-reconcile-patterns.md#the-provider-pattern) to support any future sharing related needs. Some examples that come to mind are RDS snapshots, ECR images, CMK keys.
 
-We will use a regex expression to enable a multi-tenant usage of a single AWS source account. For example, this will prevent sharing servica A AMIs with service B AWS account.
+We will use a regex expression for AMI image names to enable a multi-tenant usage of a single AWS source account. For example, this will prevent sharing service A AMIs with service B AWS account.
 
 ## Alternatives considered
 
