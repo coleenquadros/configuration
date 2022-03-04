@@ -1,0 +1,37 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: frontend-operator
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: frontend-operator
+    rules:
+      - alert: FrontendOperatorNoMetrics
+        expr: absent(up{service="frontend-operator-controller-manager-metrics-service-non-auth"}) or sum(up{service="frontend-operator-controller-manager-metrics-service-non-auth"}) == 0
+        for: 5m
+        labels:
+          severity: medium
+          service: insights
+          env: stage
+          app_team: platform
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/GSX6u0bnz/frontend-operator-metrics?orgId=1&var-datasource=crcs02ue1-prometheus"
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/frontend-operator-system/deployments"
+          message: "Frontend Operator metrics are no longer being scraped."
+      - alert: FrontendOperatorContainerRestartCount
+        expr: sum(increase(kube_pod_container_status_restarts_total{namespace="frontend-operator-system", container="manager"}[5m])) > 1
+        for: 5m
+        labels:
+          severity: medium
+          service: insights
+          env: stage
+          app_team: platform
+        annotations:
+          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/frontend-operator-system/deployments"
+          dashboard: "https://grafana.app-sre.devshift.net/d/GSX6u0bnz/frontend-operator-metrics?orgId=1&var-datasource=crcs02ue1-prometheus"
+          message: "Frontend Operator container crashed"
