@@ -54,19 +54,28 @@ resourceTemplates:
   # Staging:
   - namespace:
       $ref: /services/insights/hccm/namespaces/stage-hccm-stage.yml
-    ref: 280a4a83af23f9d7802fd753903556c94171999d
+    ref: b3e0c8d559f6f2b154e35422aca28ec2259dd015
     parameters:
-      IMAGE_TAG: 280a4a8 # DO NOT UPDATE THIS UNLESS YOU KNOW WHY
+      IMAGE_TAG: a79d99c # DO NOT UPDATE THIS UNLESS YOU KNOW WHY
       ENABLE_TRINO_SOURCES: ''
       ENABLE_TRINO_SOURCE_TYPE: 'GCP'
       ENABLE_TRINO_ACCOUNTS: 'acct6193296'
+      CJI_INVOCATION: "01"
+      CJI_TRUNC_TABLES: 'reporting_awscostentrylineitem_daily'
+      CJI_TRUNC_PROVIDER_TYPES: 'AWS,AWS-local'
 
   # Production:
   - namespace:
       $ref: /services/insights/hccm/namespaces/hccm-prod.yml
-    ref: 66cc0c38f5f918623b833e34a00f7495e103bef0
+    ref: b3e0c8d559f6f2b154e35422aca28ec2259dd015
     parameters:
-      IMAGE_TAG: 66cc0c3 # DO NOT UPDATE THIS UNLESS YOU KNOW WHY
+      IMAGE_TAG: a79d99c # DO NOT UPDATE THIS UNLESS YOU KNOW WHY
+      ENABLE_TRINO_SOURCES: 'f71993c9-db47-4dcf-b375-c32d84502b13,118445f0-7304-4311-aa22-ed86b484f48d,79419ac3-cf38-450c-84cf-7d2accc2c293,889668d0-8bdc-4e96-84fe-4311b3514efb,b139babe-9f1a-4519-ae49-bfd4e06807a2,cbf2420e-ab4b-4ab3-b27c-d5a05d578262,d24bd391-fc65-4275-a7bb-174c91e1c9fe,f1eb8998-4984-4ee5-9bfb-f0370cb690a4,cc11e600-9888-4614-be92-634b132c0f44,a84c1928-4891-4ff0-b458-f4fd27a7218a,a6568967-155a-428f-a20c-3c5d46f45ad8,bfad1e15-91eb-478f-a600-ffb3b0ee1042'
+      ENABLE_TRINO_SOURCE_TYPE: 'GCP'
+      ENABLE_TRINO_ACCOUNTS: 'acct7049367'
+      CJI_INVOCATION: '03'
+      CJI_TRUNC_TABLES: 'reporting_ocpusagelineitem,reporting_ocpusagelineitem_daily'
+      CJI_TRUNC_PROVIDER_TYPES: 'OCP'
 
 - name: koku
   path: /deploy/clowdapp.yaml
@@ -140,7 +149,7 @@ resourceTemplates:
       ############# MIGRATIONS #############
       # Change these settings when deploying migrations to Staging
       # Migrations Image Tag
-      DBM_IMAGE_TAG: d152435
+      DBM_IMAGE_TAG: 2447bfa
       # Migrations Invocation
       DBM_INVOCATION: "00"
       # Migration directive is optional and should be in the form of:
@@ -263,7 +272,7 @@ resourceTemplates:
       ############# MIGRATIONS #############
       # Change these settings when deploying migrations to Production
       # Migrations Image Tag
-      DBM_IMAGE_TAG: 3d7c502
+      DBM_IMAGE_TAG: 2447bfa
       # Migrations Invocation
       DBM_INVOCATION: "00"
       # Migration directive is optional and should be in the form of:
@@ -305,7 +314,8 @@ resourceTemplates:
       KOKU_MEMORY_REQUEST: 10Gi
       KOKU_MEMORY_LIMIT: 12Gi
       # listener
-      LISTENER_MIN_REPLICAS: 3
+      # The max number of listeners is limited by the number of Kafka partitions which is currently set to 3
+      LISTENER_MIN_REPLICAS: 3  # 3
       LISTENER_CPU_REQUEST: 200m
       LISTENER_CPU_LIMIT: 1
       LISTENER_MEMORY_REQUEST: 1Gi
@@ -315,7 +325,7 @@ resourceTemplates:
       MASU_MEMORY_REQUEST: 256Mi
       MASU_MEMORY_LIMIT: 512Mi
       # scheduler
-      SCHEDULER_MIN_REPLICAS: 1
+      SCHEDULER_MIN_REPLICAS: 1  # 1
       SCHEDULER_MEMORY_REQUEST: 256Mi
       SCHEDULER_MEMORY_LIMIT: 512Mi
       # sources-client
@@ -333,43 +343,43 @@ resourceTemplates:
       # workers global
       WORKER_PROC_ALIVE_TIMEOUT: 9
       # worker-celery
-      WORKER_CELERY_MIN_REPLICAS: 1
+      WORKER_CELERY_MIN_REPLICAS: 1  # 1
       WORKER_CELERY_CPU_REQUEST: 200m
       WORKER_CELERY_CPU_LIMIT: 1
       WORKER_CELERY_MEMORY_REQUEST: 512Mi
       WORKER_CELERY_MEMORY_LIMIT: 1Gi
       # worker-cost-model
-      WORKER_COST_MODEL_MIN_REPLICAS: 2
+      WORKER_COST_MODEL_MIN_REPLICAS: 2  # 2
       WORKER_COST_MODEL_CPU_REQUEST: 100m
       WORKER_COST_MODEL_CPU_LIMIT: 300m
       WORKER_COST_MODEL_MEMORY_REQUEST: 512Mi
       WORKER_COST_MODEL_MEMORY_LIMIT: 1Gi
       # worker-download
-      WORKER_DOWNLOAD_MIN_REPLICAS: 6
+      WORKER_DOWNLOAD_MIN_REPLICAS: 6  # 6
       WORKER_DOWNLOAD_CPU_REQUEST: 500m
       WORKER_DOWNLOAD_CPU_LIMIT: 1
       WORKER_DOWNLOAD_MEMORY_REQUEST: 5Gi
       WORKER_DOWNLOAD_MEMORY_LIMIT: 8Gi
       # worker-ocp
-      WORKER_OCP_MIN_REPLICAS: 6
+      WORKER_OCP_MIN_REPLICAS: 6  # 6
       WORKER_OCP_CPU_REQUEST: 100m
       WORKER_OCP_CPU_LIMIT: 200m
       WORKER_OCP_MEMORY_REQUEST: 200Mi
       WORKER_OCP_MEMORY_LIMIT: 400Mi
       # worker-priority
-      WORKER_PRIORITY_MIN_REPLICAS: 3
+      WORKER_PRIORITY_MIN_REPLICAS: 3  # 3
       WORKER_PRIORITY_CPU_REQUEST: 250m
       WORKER_PRIORITY_CPU_LIMIT: 500m
       WORKER_PRIORITY_MEMORY_REQUEST: 2Gi
       WORKER_PRIORITY_MEMORY_LIMIT: 4Gi
       # worker-refresh
-      WORKER_REFRESH_MIN_REPLICAS: 1
+      WORKER_REFRESH_MIN_REPLICAS: 1  # 1
       WORKER_REFRESH_CPU_REQUEST: 100m
       WORKER_REFRESH_CPU_LIMIT: 200m
       WORKER_REFRESH_MEMORY_REQUEST: 200Mi
       WORKER_REFRESH_MEMORY_LIMIT: 400Mi
       # worker-summary
-      WORKER_SUMMARY_MIN_REPLICAS: 4
+      WORKER_SUMMARY_MIN_REPLICAS: 4  # 4
       WORKER_SUMMARY_CPU_REQUEST: 100m
       WORKER_SUMMARY_CPU_LIMIT: 200m
       WORKER_SUMMARY_MEMORY_REQUEST: 512Mi

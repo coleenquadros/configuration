@@ -136,17 +136,6 @@ If there is any indication that the incident may have been caused by an OSD infr
   * Join the AppSRE bridge [zti].
   * Continue debugging the issue.
 
-## Post Mortem
-
-Once the issue has been mitigated and resolved, the **Incident Owner** (defaults to **First Responder**) must carry out the following tasks:
-
-* Understanding the course of the incident and its technical details from start to finish.
-* Organizing and driving the PMR meeting in the 5 business days after recovery.
-* Is accountable to ensure that full RCA documentation is written up and making sure it contains all the corrective actions. Impact, detection and mitigation should be documented within 24 hours of the incident.
-* Being the main point of reference for the incident when there are follow-up questions about it.
-* Driving any follow-up activity linked to the incident.
-* Cleaning up after the incident is fully closed, like archiving the slack channel.
-
 ## Technical Incident Checklist
 
 The **Incident Tech Lead** (defaults to **First Responder**) and **Parellel Investigator(s)** are responsible for the investigation, mitigation and resolution of the incident.
@@ -191,3 +180,17 @@ This section aims to give some ideas of possible generic underlying causes.
 [App-Interface docs]: https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs
 [Onboarding Epic]: https://issues.redhat.com/issues/?jql=project%20%3D%20SDE%20AND%20labels%20in%20(OnBoarding%2C%20onboarding)
 
+## Post Mortem
+
+Once the issue has been mitigated and resolved, the **Incident Owner** (defaults to **First Responder**) must carry out the following tasks:
+
+* Understanding the course of the incident and its technical details from start to finish.
+* Organizing and driving the PMR meeting in the 5 business days after recovery.
+* Is accountable to ensure that full RCA documentation is written up and making sure it contains all the corrective actions. Impact, detection and mitigation should be documented within 24 hours of the incident.
+* Being the main point of reference for the incident when there are follow-up questions about it.
+* Driving any follow-up activity linked to the incident.
+* Cleaning up after the incident is fully closed, like archiving the slack channel.
+
+### Tracking action items
+
+It is important to link any Jira tickets (use **is triggering**) that are created as action items for the incident to the AppSRE incident ticket. This makes it easier for AppSRE to track action items from incidents and follow-up on them as part of the checkpoint process.
