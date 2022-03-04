@@ -10,4 +10,4 @@ data:
   datasources.yaml:
     {{{{% b64encode %}}}}
 {datasources}
-    {{{{% endb64encode}}}}
+    {{{{% endb64encode %}}}}

@@ -1,0 +1,39 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: devprod
+
+name: devprod-stage
+description: Insights devprod-stage namespace
+
+cluster:
+  $ref: /openshift/crcs02ue1/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/defaults-only-resource-limits.yml
+
+quota:
+  $ref: /services/insights/devprod/devprod-quota.yml
+
+app:
+  $ref: /services/insights/devprod/app.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+managedRoles: true
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-stage
+  identifier: devprod-stage-db
+  defaults: /terraform/resources/insights/stage/rds/postgres12-rds-1.yml
+  overrides:
+    name: "deployments"
+    allocated_storage: 20
+  parameter_group: /terraform/resources/insights/stage/rds/postgres12-parameter-group-devprod-stage.yml
+  output_resource_name: devprod-db-creds
+  enhanced_monitoring: true
