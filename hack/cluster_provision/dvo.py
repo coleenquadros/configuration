@@ -58,13 +58,8 @@ openshiftResources:
 
 SERVICE_MONITOR = """
 
-### Deployment Validation Operator
-provider: resource-template
-type: jinja2
-path: /observability/servicemonitors/deployment-validation-operator.servicemonitor.yaml
-variables:
-  environment: production
-  namespace: deployment-validation-operator
+sharedResources:
+- $ref: /services/observability/shared-resources/dvo.yml
 """
 
 SAAS_TARGET_TEMPLATE = """
