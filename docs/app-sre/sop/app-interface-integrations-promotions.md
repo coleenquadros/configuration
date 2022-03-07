@@ -11,9 +11,11 @@ App-interface integrations are being executed in multiple locations in multiple 
    setting the commit sha reference from qontract-schemas repository. This can be done with `make update-schemas`
 1. Create a MR in app-interface to promote your changes from staging to
    production. `make qr-promote` automates getting the latest commit
-   checksum and updating the necessary files. Running `make qr-promote` will also update the `ref` field within our [saas-qontract-reconcile](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-interface/cicd/ci-ext/saas-qontract-reconcile.yaml) file.  If there is a need to promote to
+   checksum and updating the necessary files. Running `make qr-promote` will also update the `ref` field within our [saas-qontract-reconcile](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-interface/cicd/ci-ext/saas-qontract-reconcile.yaml) file. If there is a need to promote to
    a single environment, or for a better understanding of what `qr-promote` is
    doing, see [Updating specific environments](#updating-specific-environments).
+   Make sure to not use `mawk` (Ubuntu default), as it does not support explicit number of occurrences,
+   e.g., `[a-f0-9]{7}`.
 1. Team members should deploy their own changes to production shortly after
    merging. In some cases, there might be changes queued up from multiple team
    members. **If your promotion will include changes from other team
