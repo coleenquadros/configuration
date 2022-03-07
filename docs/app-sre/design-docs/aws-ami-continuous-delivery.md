@@ -82,7 +82,16 @@ To improve traceability between the commit and the image in the destination acco
 > Note: This part was generalized and extracted to a seperate design document: [AWS resource sharing](https://issues.redhat.com/browse/APPSRE-4621).
 
 This approach will help us simplify the terraform-resources integration. The added logic should mostly be:
-> New commit and AMI exists? use it. Otherwise, use the last known commit.
+```
+new commit?
+  AMI exists?
+    use it.
+  AMI does not exist?
+    use last known commit.
+    1 hour passed since new commit added?
+      no - log a warning
+      yes - log an error and fail integration
+```
 
 ## Alternatives considered
 
