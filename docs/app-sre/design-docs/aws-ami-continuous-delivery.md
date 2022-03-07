@@ -20,15 +20,15 @@ The high-level process of delivering AMIs is:
 
 ### Build AMI
 
-The process to build an AMI is to construct an EC2 instance and make an AMI out of it.
-> Note: Initially, the EC2 instance constructed as part of the build process was created in the `image-builder-stage` account and shared with the `image-builder-prod` account. To remove the dependency of production on stage, we created a [dedicated AppSRE AWS account](https://issues.redhat.com/browse/APPSRE-4405) called `app-sre-ci` to use to perform the AMI build.
+The process to build an AMI is to launch an EC2 instance and make an AMI out of it.
+> Note: Initially, the EC2 instance launched as part of the build process was created in the `image-builder-stage` account and shared with the `image-builder-prod` account. To remove the dependency of production on stage, we created a [dedicated AppSRE AWS account](https://issues.redhat.com/browse/APPSRE-4405) called `app-sre-ci` to use to perform the AMI build.
 
 As part of this work, we have already created a [job definition](https://gitlab.cee.redhat.com/service/app-interface/-/blob/e006b480c002ed869eb66df04d62ed8ef1218f7e/resources/jenkins/image-builder/jobs-templates.yml) to build these AMIs using packer.
 
 ### Share AMI
 
-The process to consume an AMI built of a different account is to share the AMI from the "source" account (app-sre-ci) with the "destination" accounts (image-builder-stage, image-builder-prod).
-> Note: The build job described in the previous section currently builds the AMI and shares it with the stage and production accounts.
+The process to consume an AMI built on a different account is to share the AMI from the "source" account (app-sre-ci) with the "destination" accounts (image-builder-stage, image-builder-prod).
+> Note: The build job described in the previous section currently builds the AMI and shares it with the image-builder stage and production accounts.
 
 ### Provision and update AutoScaling Groups
 
