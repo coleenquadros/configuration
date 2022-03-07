@@ -40,7 +40,7 @@ spec:
     - alert: JenkinsLastBuildFailed
       expr: "default_jenkins_builds_last_build_result_ordinal{jenkins_job='service-app-interface-gl-build-master',job='jenkins_int'} > 0"
       labels:
-        severity: critical
+        severity: critical-fts
         service: app-interface
       annotations:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/app-interface-build-master-failure.md"
@@ -313,7 +313,7 @@ spec:
     # Alerting on health of Jenkins system
     - alert: JenkinsHealthCheck
       labels:
-        severity: critical
+        severity: critical-fts
         service: ci-int
       expr: jenkins_health_check_score < 1
       for: 5m
@@ -324,7 +324,7 @@ spec:
         link_url: "{% raw %} https://{{ $labels.instance }}/job/{{ $labels.jenkins_job }} {% endraw %}"
     - alert: JenkinsNodeOffline
       labels:
-        severity: critical
+        severity: critical-fts
         service: ci-int
       expr: jenkins_node_offline_value > 1
       for: 5m
@@ -335,7 +335,7 @@ spec:
         link_url: "{% raw %} https://{{ $labels.instance }}/job/{{ $labels.jenkins_job }} {% endraw %}"
     - alert: JenkinsJvmMemoryStarvation
       labels:
-        severity: critical
+        severity: critical-fts
         service: ci-int
       expr: (vm_memory_total_max{job="jenkins_int"} - vm_memory_total_used{job="jenkins_int"}) / vm_memory_total_max{job="jenkins_int"} * 100.0 < 10
       for: 5m
@@ -412,7 +412,7 @@ spec:
         link_url: "{% raw %} https://{{ $labels.instance }}/job/{{ $labels.jenkins_job }} {% endraw %}"
     - alert: JenkinsWebServerError
       labels:
-        severity: critical
+        severity: critical-fts
         service: ci-int
       expr: |
         sum(rate(http_responseCodes_serverError_total{instance="ci.int.devshift.net:443"}[5m]))
@@ -426,7 +426,7 @@ spec:
         link_url: "{% raw %} https://{{ $labels.instance }}/job/{{ $labels.jenkins_job }} {% endraw %}"
     - alert: JenkinsWebServiceUnavailable
       labels:
-        severity: critical
+        severity: critical-fts
         service: ci-int
       expr: |
         sum(rate(http_responseCodes_serviceUnavailable_total{instance="ci.int.devshift.net:443"}[5m]))
@@ -441,7 +441,7 @@ spec:
     # App-sre team gitlab alerts
     - alert: 2xxProbeFailingGitLab
       labels:
-        severity: critical
+        severity: critical-fts
         service: ci-int
       expr: up{job="blackbox_2xx_gitlab"} == 0 or probe_success{job="blackbox_2xx_gitlab"} == 0
       for: 30m
@@ -453,7 +453,7 @@ spec:
     # App-sre team ci-int alerts
     - alert: 2xxProbeFailingCIInt
       labels:
-        severity: critical
+        severity: critical-fts
         service: ci-int
       expr: up{job="blackbox_2xx_ci_int"} == 0 or probe_success{job="blackbox_2xx_ci_int"} == 0
       for: 5m
@@ -475,7 +475,7 @@ spec:
       expr: up{job=~".*jenkins.*"} == 0
       for: 5m
       labels:
-        severity: critical
+        severity: critical-fts
         service: ci-int
       annotations:
         message: "{% raw %}{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 5 minutes.{% endraw %}"
@@ -485,7 +485,7 @@ spec:
       expr: '100 - (avg by (instance) (irate(node_cpu_seconds_total{job="node",mode="idle"}[5m])) * 100) > 96'
       for: 2m
       labels:
-        severity: critical
+        severity: critical-fts
         service: ci-int
       annotations:
         message: "{% raw %}{{ $labels.instance }} of job {{ $labels.job }} has Critical CPU load for more than 2 minutes.{% endraw %}"
@@ -494,7 +494,7 @@ spec:
       expr: '(1 - ((node_memory_MemFree_bytes + node_memory_Buffers_bytes + node_memory_Cached_bytes + node_memory_SReclaimable_bytes) / node_memory_MemTotal_bytes)) * 100 > 98'
       for: 5m
       labels:
-        severity: critical
+        severity: critical-fts
         service: ci-int
       annotations:
         message: "{% raw %}{{ $labels.instance }} has Critical Memory Usage more than 5 minutes.{% endraw %}"
@@ -512,7 +512,7 @@ spec:
       expr: 'node_filesystem_free_bytes{job="node",filesystem!~"^/run(/|$)"} / node_filesystem_size_bytes{job="node"} < 0.1'
       for: 4m
       labels:
-        severity: critical
+        severity: critical-fts
         service: ci-int
       annotations:
         message: "{% raw %}{{ $labels.instance }} of job {{ $labels.job }} has less than 10% space remaining.{% endraw %}"
@@ -524,7 +524,7 @@ spec:
         (node:node_filesystem_usage: > 0.85) and (predict_linear(node:node_filesystem_avail:[30m], 3600 * 2) < 0)
       for: 10m
       labels:
-        severity: critical
+        severity: critical-fts
         service: ci-int
     - alert: PredictNodeDiskFull
       annotations:
