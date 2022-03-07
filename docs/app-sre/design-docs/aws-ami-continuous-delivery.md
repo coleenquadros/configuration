@@ -21,7 +21,7 @@ The high-level process of delivering AMIs is:
 ### Build AMI
 
 The process to build an AMI is to launch an EC2 instance and make an AMI out of it.
-> Note: Initially, the EC2 instance launched as part of the build process was created in the `image-builder-stage` account and shared with the `image-builder-prod` account. To remove the dependency of production on stage, we created a [dedicated AppSRE AWS account](https://issues.redhat.com/browse/APPSRE-4405) called `app-sre-ci` to use to perform the AMI build.
+> Note: Initially, the EC2 instance launched as part of the build process was created in the `image-builder-stage` account and shared with the `image-builder-prod` account. To remove the dependency of production on stage, we created a [dedicated AppSRE AWS account](https://issues.redhat.com/browse/APPSRE-4405) called `app-sre-ci` to be used to perform the AMI build.
 
 As part of this work, we have already created a [job definition](https://gitlab.cee.redhat.com/service/app-interface/-/blob/e006b480c002ed869eb66df04d62ed8ef1218f7e/resources/jenkins/image-builder/jobs-templates.yml) to build these AMIs using packer.
 
