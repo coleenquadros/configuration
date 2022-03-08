@@ -2329,6 +2329,8 @@ Creating a new project in gitlab can be self-serviced via App-Interface.
 
 To request the creation of a new project, submit a PR adding the new project under the desired group [here](/data/dependencies/gitlab/gitlab.yml). The project will be created on merge.
 
+You will also need to add the repository information to the `codeComponents` section in your app file.
+
 To get access to the project, if required, contact the App SRE team.
 
 
