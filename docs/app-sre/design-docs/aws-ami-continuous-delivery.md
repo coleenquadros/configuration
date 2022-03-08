@@ -52,7 +52,7 @@ Provide a continuous experience for the stage environment. This means that every
 
 ## Proposal
 
-Embed the source code repository information within the AutoScaling Group definition in the stage environment.
+Embed the source code repository information within the AutoScaling Group definition so that we can provide a Continuous Deployment workflow to it.
 
 With this information, the integration can follow the main branch of the repository (much like saas files) and automatically promote new changes. This can happen under the following conditions:
 1. A new commit has been pushed to the main branch
@@ -74,14 +74,16 @@ terraformResources
 
 The terraform-resources integration will be enhanced with logic to determine if a new commit has been pushed and if it should use an AMI that corresponds to this commit. In case a new commit has been pushed and the AMI is not yet available, the integration should result to using the previous known commit (indicates usage of a state) to avoid intermittent disruptions to the integration.
 
-The way to correlate an AMI from the source account with one in the destination account is using the image ID. This field is unique. The AMI in the source account will contain tags linking it back to a specific commit. These tags are not available in the destination account.
+The way to correlate an AMI from the source account with one in the destination account is using the image ID. This field is unique. The AMI in the source account will contain tags linking it back to a specific commit. These tags are not available in the destination account (see [documentation](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/sharingamis-explicit.html)).
 
 This creates a dependency between the two accounts, which should be detached. terraform-resources should not require access to the source account, only to determine the correct image ID to use.
 
-To improve traceability between the commit and the image in the destination account, we will create an integration to copy AMI tags to the AMIs in the destination account. To further decouple the entire process, instead of sharing the AMIs as part of the AMI build process, this same integration will be solely responsible for sharing and tagging AMIs from source accounts to destination accounts.
+To remove the dependency we will create an integration to copy AMI tags to the AMIs in the destination account. To further decouple the entire process, instead of sharing the AMIs as part of the AMI build process, this same integration will be solely responsible for sharing and tagging AMIs from source accounts to destination accounts.
 > Note: This part was generalized and extracted to a seperate design document: [AWS resource sharing](https://issues.redhat.com/browse/APPSRE-4621).
 
-This approach will help us simplify the terraform-resources integration. The added logic should mostly be:
+This approach will help us simplify the terraform-resources integration and to improve traceability between the commit and the image in the destination account.
+
+The added logic should mostly be:
 ```
 new commit?
   AMI exists?
@@ -92,6 +94,11 @@ new commit?
       no - log a warning
       yes - log an error and fail integration
 ```
+
+To monitor the process we will need to consider the following things:
+1. The Jenkins job that builds an AMI should be monitored and should alert the tenant in case of failure.
+1. The integration that shares AMIs and copies AMI tags is monitored as a regular integration.
+1. The terraform-resources integration is monitored as a regular integration.
 
 ## Alternatives considered
 
