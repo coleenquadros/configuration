@@ -3,26 +3,26 @@
 <!-- TOC -->
 
 - [AppSRE Incident Process](#appsre-incident-process)
-    - [Introduction to the SD Incident Management Process](#introduction-to-the-sd-incident-management-process)
-    - [Major Incident Definition Criteria](#major-incident-definition-criteria)
-    - [Incident Roles in the AppSRE team](#incident-roles-in-the-appsre-team)
-    - [AppSRE Internal Escalations](#appsre-internal-escalations)
-        - [During working hours](#during-working-hours)
-        - [Outside of working hours](#outside-of-working-hours)
-    - [Specific AppSRE Flow](#specific-appsre-flow)
-    - [Incident Commander Responsibilities](#incident-commander-responsibilities)
-        - [Incident Management](#incident-management)
-        - [Immediate Communication](#immediate-communication)
-        - [Continuous Communication (every 30 minutes)](#continuous-communication-every-30-minutes)
-        - [Resolution](#resolution)
-    - [External Escalations](#external-escalations)
-        - [Service Development Team](#service-development-team)
-        - [SREP Team - OSD infrastructure](#srep-team---osd-infrastructure)
-    - [Post Mortem](#post-mortem)
-    - [Technical Incident Checklist](#technical-incident-checklist)
-        - [Collect Information](#collect-information)
-        - [Service Documention and SOPs](#service-documention-and-sops)
-        - [Common Causes](#common-causes)
+  - [Introduction to the SD Incident Management Process](#introduction-to-the-sd-incident-management-process)
+  - [Major Incident Definition Criteria](#major-incident-definition-criteria)
+  - [Incident Roles in the AppSRE team](#incident-roles-in-the-appsre-team)
+  - [Incident Commander Responsibilities](#incident-commander-responsibilities)
+    - [Incident Management](#incident-management)
+    - [Immediate Communication](#immediate-communication)
+    - [Continuous Communication (every 30 minutes)](#continuous-communication-every-30-minutes)
+    - [Resolution](#resolution)
+  - [AppSRE Internal Escalations](#appsre-internal-escalations)
+    - [During working hours](#during-working-hours)
+    - [Outside of working hours](#outside-of-working-hours)
+  - [External Escalations](#external-escalations)
+    - [Service Development Team](#service-development-team)
+    - [SREP Team - OSD infrastructure](#srep-team---osd-infrastructure)
+  - [Specific AppSRE Flow](#specific-appsre-flow)
+  - [Post Mortem](#post-mortem)
+  - [Technical Incident Checklist](#technical-incident-checklist)
+    - [Collect Information](#collect-information)
+    - [Service Documention and SOPs](#service-documention-and-sops)
+    - [Common Causes](#common-causes)
 
 <!-- /TOC -->
 
@@ -62,7 +62,7 @@ As soon as the **Incident Commander** is nominated, which should be 10 minutes a
 * Escalate to managers.
 * Ensure the incident is actively being investigated, mitigated and resolved.
 
-### Immediate Communication
+### Immediate Communication - Non-Security Incident
 
 * Create a JIRA with type `Task`, with label `type/incident` in the [APPSRE board].
 * Create slack channel for the incident, referencing the JIRA and the bridge ([zti]).
@@ -73,8 +73,13 @@ As soon as the **Incident Commander** is nominated, which should be 10 minutes a
   [sd-notifications@redhat.com](mailto:sd-notifications@redhat.com). The email
   should include: Service Name, short description of the issue, impact and JIRA.
 
-### Continuous Communication (every 30 minutes)
+### Immediate Communication - Security Incident
+* Create a JIRA with type `Task`, with label `type/incident` in the [APPSRE board] and make sure to set the Security Level to `Red Hat Employee (Red Hat Employee and Contractors only)`.
+* Use [sd-app-sre-teamchat](https://mail.google.com/mail/u/0/#chat/space/AAAAQNx6VpQ) Google Chat to triage, i.e create a specific Google Space for the incident.
+* Send an email to [InfoSec team](mailto:infosec@redhat.com) and sd-sre-security@redhat.com explaining the situation. This will automatically creates a SNOW ticket.
+Please note that all security-related discussion should not be happening on Slack.
 
+### Continuous Communication (every 30 minutes)
 This section needs to be carried out every 30 minutes, while the service is
 degraded.
 
