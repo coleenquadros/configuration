@@ -97,6 +97,8 @@ new commit?
       yes - log an error and fail integration
 ```
 
+The "1 hour passed" condition may be replaced with logic checking an upstream Jenkins job instead.
+
 To monitor the process we will need to consider the following things:
 1. The Jenkins job that builds an AMI should be monitored and should alert the tenant in case of failure.
 1. The integration that shares AMIs and copies AMI tags is monitored as a regular integration.
