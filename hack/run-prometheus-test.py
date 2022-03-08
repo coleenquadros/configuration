@@ -11,7 +11,7 @@ import pathlib
 import re
 import argparse
 
-PROMTOOL_VERSION = "2.26.0"
+PROMTOOL_VERSION = "2.33.3"
 
 def parse_equals(string):
     return re.split(',\s*', string.replace('\\"', ''))
