@@ -18,6 +18,8 @@ In this part, we will prepare and populate the destination DNS zone.
 
 1. Pre-create the destination DNS zone [via app-interface](https://gitlab.cee.redhat.com/service/app-interface#manage-external-dns-zones-via-app-interface-openshiftnamespace-1yml). This will result in a Secret with credentials to manage the DNS zone. See [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/1f590c8ee98845853a2a09a8339ebffdf7ca037a/data/services/hive/namespaces/hive-stage-01/hive-stage.yml#L125-129)
 
+1. Record the state of all shards before starting (each shard - is it active or not?)
+
 1. For each Hive shard:
     - If shard is active - [Disable cluster provisioning](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/hive-shard-provisioning.md#disabling-shards-from-rotation) for the [shard](https://gitlab.cee.redhat.com/service/app-interface/-/blob/2ac0b9ba83d07dc6257ba87dd3cfa93ee37ec49d/data/services/ocm/shared-resources/production.yml#L21-51)
     - Manually update [HiveConfig](https://gitlab.cee.redhat.com/service/app-interface/-/blob/1f590c8ee98845853a2a09a8339ebffdf7ca037a/resources/services/hive/stage/hive.hiveconfig.yaml#L50) to use the newly created Secret
