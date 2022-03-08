@@ -27,6 +27,8 @@ In this part, we will prepare and populate the destination DNS zone.
     - Our integrations (openshift-resources) will restore HiveConfig to its original values.
     - If shard was active - Enable cluster provisioning for the shard
 
+1. Reduce TTL for the NS delegation record zone.
+
 ### Migration
 
 In this part, we will perform the migration itself. The destination DNS zone should contain most of the existing records as the source DNS zone. This should alleviate any rate limit issues.
