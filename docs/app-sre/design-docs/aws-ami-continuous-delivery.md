@@ -59,6 +59,8 @@ With this information, the integration can follow the main branch of the reposit
 1. A new AMI has been built
 1. The new AMI is shared with the account containing the AutoScaling Groups.
 
+In addition, we should be able to define a specific commit sha, to create a similar behavior to promoting code changes to production (again, like saas files).
+
 Additional information to add to the schema will be similar to saas files:
 ```yaml
 terraformResources
