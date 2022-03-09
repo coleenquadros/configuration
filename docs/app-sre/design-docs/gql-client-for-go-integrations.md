@@ -97,7 +97,7 @@ On changing the schema, this schema file can be generated in a pipeline and used
 
 ## Alternatives considered
 
-* Creating structs for unmarshalling on our own
+* Creating structs for unmarshalling on our own, like done in [vault-manager](https://github.com/app-sre/vault-manager/)
 * Other code generators listed here https://graphql.org/code/#go/
 
 ## Milestones
