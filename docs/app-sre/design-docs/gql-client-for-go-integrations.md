@@ -95,6 +95,17 @@ These tools will fetch the schema from the API and generate the `schema.graphql`
 
 On changing the schema, this schema file can be generated in a pipeline and used to check if any go integration would break by running the code generator. By this, the blast radius of schema changes can be reduced.
 
+### Schema update process
+
+The `schema.graphql` file is stored in `qontract-schema` repository. There will be a new Makefile target to generate the file from the API. Additionally the PR check of `qontract-schema` will check if the file has been generated if the schema was changed. 
+
+The integration resides in a seperate repository. The `schema.graphql` file is copied over from the `qontract-schema` repository. When copying it over, a header must be added refering to the commit-hash of the `qontract-schema` repository.  The Makefile of the integration is extend with a target, that automates this process.
+
+Integrations should have a job, that checks for scm changes in `graphql-schema/schema.graphql`. This job will have the following steps:
+*  Copy over the schema
+*  Generate the client and execute
+*  Create a PR if there is a diff or tests are failing
+
 ## Alternatives considered
 
 * Creating structs for unmarshalling on our own, like done in [vault-manager](https://github.com/app-sre/vault-manager/)
