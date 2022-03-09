@@ -130,10 +130,29 @@ terraformResources:
             "logs:CreateLogStream",
           ],
           "Resource": "arn:aws:logs:us-east-1:463606842039:log-group:workers-aoc-production:*"
+        },
+        {
+          "Sid": "VMImportS3Policy",
+          "Effect": "Allow",
+          "Action": [
+            "s3:GetBucketLocation",
+            "s3:ListBucket",
+            "s3:GetObject",
+            "s3:PutObject",
+            "s3:DeleteObject",
+          ],
+          "Resource": [
+            "arn:aws:s3:::image-builder-service-production",
+            "arn:aws:s3:::image-builder-service-production/*",
+          ]
         }
       ]
     }
   output_resource_name: workers-aoc-production-role
+- provider: s3
+  account: image-builder-prod
+  identifier: image-builder-service-production
+  defaults: /terraform/resources/image-builder/production/s3-1.yml
 - provider: asg
   account: image-builder-prod
   identifier: imagebuilder-workers-aoc-x86-production
@@ -143,6 +162,7 @@ terraformResources:
   variables:
     workspace_name: production
     composer_host_aoc: api.openshift.com
+    worker_config_aws_bucket: "image-builder-service-production"
   image:
     tag_name: composer_commit
     url: https://github.com/osbuild/osbuild-composer
