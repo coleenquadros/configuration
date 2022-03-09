@@ -22,7 +22,7 @@ Enable a way to support additional terraform provisioners. A use case to focus o
 
 Introduce a new section in a namespace file which will support additional providers, in addition to AWS:
 ```yaml
-terraformProviderResources:
+externalResources:
 - provider: aws
   provisioner:
     $ref: /aws/example/account.yml
@@ -37,7 +37,7 @@ Each entry holds a `provider` field, which will indicate the type of the "provis
 
 Such an approach is future compatible with adding new providers. For example, GCP project:
 ```yaml
-terraformProviderResources:
+externalResources:
 - provider: gcp-project
   provisioner:
     $ref: /gcp/example/project.yml
