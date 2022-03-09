@@ -61,4 +61,5 @@ Keep using the `terraformResources` section. This will require a thorough change
 ## Milestones
 
 - Perform any required refactors to simplify and prepare for additional providers.
+- Create follow up tickets to migrate resources from `terraformResourcse` to `externalResources`.
 - Bonus points: Implement managed zone via GCP.
