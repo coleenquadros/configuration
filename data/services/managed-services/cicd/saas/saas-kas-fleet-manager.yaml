@@ -64,7 +64,7 @@ resourceTemplates:
     # - Commits can be found here: https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/commits/main
     # If in doubt, please check with the MK Control Plane team.
     # We are exploring how to automate this in the future.
-    ref: 3bb6b78b4ae5254353aec0d92ebf69898cd8e030
+    ref: c2e0d76158fe955b227e200491bbaf06b33cd8a9
     parameters:
       ISSUER_URL: ${SSO_BASE_URL}
       OBSERVATORIUM_URL: https://observatorium-mst.api.openshift.com/api/metrics/v1/managedkafka
@@ -120,6 +120,48 @@ resourceTemplates:
     # Global parameter - Affects Production and Stage
     # Image to be used by Envoy sidecar container
     ENVOY_IMAGE: quay.io/rhoas/envoyproxy:v1.16.1
+
+    # Global parameter - Affects Production and Stage
+    # parameters for SUPPORTED_INSTANCE_TYPES
+    SUPPORTED_INSTANCE_TYPES:
+      - id: eval
+        sizes:
+          - id: x1
+            ingressThroughputPerSec: "30Mi"
+            egressThroughputPerSec: "30Mi"
+            totalMaxConnections: 3000
+            maxDataRetentionSize: "1000Gi"
+            maxPartitions: 1000
+            maxDataRetentionPeriod: "P14D"
+            maxConnectionAttemptsPerSec: 100
+            quotaConsumed: 1
+            quotaType: "rhosak"
+            capacityConsumed: 1
+      - id: standard
+        sizes:
+          - id: x1
+            ingressThroughputPerSec: "50Mi"
+            egressThroughputPerSec: "100Mi"
+            totalMaxConnections: 3000
+            maxDataRetentionSize: "1000Gi"
+            maxPartitions: 1500
+            maxDataRetentionPeriod: "P14D"
+            maxConnectionAttemptsPerSec: 100
+            quotaConsumed: 1
+            quotaType: "rhosak"
+            capacityConsumed: 1
+          - id: x2
+            ingressThroughputPerSec: "100Mi"
+            egressThroughputPerSec: "200Mi"
+            totalMaxConnections: 4000
+            maxDataRetentionSize: "2000Gi"
+            maxPartitions: 3000
+            maxDataRetentionPeriod: "P14D"
+            maxConnectionAttemptsPerSec: 200
+            quotaConsumed: 2
+            quotaType: "rhosak"
+            capacityConsumed: 2
+
   targets:
   - namespace:
       $ref: /services/managed-services/namespaces/managed-services-stage.yml
@@ -241,46 +283,6 @@ resourceTemplates:
         - "lukchen"
         - "kstanley"
 
-      # parameters for SUPPORTED_INSTANCE_TYPES - should be moved into prod on next release
-      SUPPORTED_INSTANCE_TYPES:
-      - id: eval
-        sizes:
-        - id: x1
-          ingressThroughputPerSec: "30Mi"
-          egressThroughputPerSec: "30Mi"
-          totalMaxConnections: 3000
-          maxDataRetentionSize: "1000Gi"
-          maxPartitions: 1000
-          maxDataRetentionPeriod: "P14D"
-          maxConnectionAttemptsPerSec: 100
-          quotaConsumed: 1
-          quotaType: "rhosak"
-          capacityConsumed: 1
-      - id: standard
-        sizes:
-        - id: x1
-          ingressThroughputPerSec: "50Mi"
-          egressThroughputPerSec: "100Mi"
-          totalMaxConnections: 3000
-          maxDataRetentionSize: "1000Gi"
-          maxPartitions: 1500
-          maxDataRetentionPeriod: "P14D"
-          maxConnectionAttemptsPerSec: 100
-          quotaConsumed: 1
-          quotaType: "rhosak"
-          capacityConsumed: 1
-        - id: x2
-          ingressThroughputPerSec: "100Mi"
-          egressThroughputPerSec: "200Mi"
-          totalMaxConnections: 4000
-          maxDataRetentionSize: "2000Gi"
-          maxPartitions: 3000
-          maxDataRetentionPeriod: "P14D"
-          maxConnectionAttemptsPerSec: 200
-          quotaConsumed: 2
-          quotaType: "rhosak"
-          capacityConsumed: 2
-
       SUPPORTED_CLOUD_PROVIDERS:
         - name: aws
           default: true
@@ -309,14 +311,13 @@ resourceTemplates:
       $ref: /services/managed-services/namespaces/managed-services-production.yml
     # This commit sha will need to replaced to reference the latest working commit.
     # Make sure that we've a docker image for this before it can be changed.
-    # When change this, make sure to also change the `IMAGE_TAG` to reference the first seven characters of the sha1.
     # Commits can be found here https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/commits/main
     # Inspect the recent merged MR from https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/merge_requests?scope=all&utf8=%E2%9C%93&state=merged to get the latest commit that has a docker image built from it.
     # e.g if we take https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/merge_requests/356/commits, the commit with a docker image in it will be
     # the very first commit i.e https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/merge_requests/356/commits?commit_id=f0fd63740464c5fa4bda395d5d31f675eff049ac
     # If in doubt, see with the control plane team.
     # We are exploring into using automating this.
-    ref: 3bb6b78b4ae5254353aec0d92ebf69898cd8e030
+    ref: c2e0d76158fe955b227e200491bbaf06b33cd8a9
     parameters:
       DB_SSLMODE: verify-full
       ENVIRONMENT: production
