@@ -67,11 +67,9 @@ terraformResources
 - provider: asg
   ...
   image:
-    ...
-    repo:
-      url: <url of source code repository>
-      ref: <commit or branch name>
-      tag_name: <name of tag to use to correlate AMI ID to commit>
+    url: <url of source code repository>
+    ref: <commit or branch name>
+    tag_name: <name of tag to use to correlate AMI ID to commit>
 ```
 
 The terraform-resources integration will be enhanced with logic to determine if a new commit has been pushed and if it should use an AMI that corresponds to this commit. In case a new commit has been pushed and the AMI is not yet available, the integration should result to using the previous known commit (indicates usage of a state) to avoid intermittent disruptions to the integration.
