@@ -11,8 +11,8 @@ justification or approval you can provide is helpful. -->
 #### Tickets:
 <!--- Please link to any related Jira issue here. Use the keyword "Closes: $TICKET" to close them.
 For instance,
-APPSRE-1234
-Closes: APPSRE-4242
+APPSRE-****
+Closes: APPSRE-****
 --->
 
 #### Validation:
