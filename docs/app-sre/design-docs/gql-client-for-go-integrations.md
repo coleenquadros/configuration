@@ -10,7 +10,7 @@ https://issues.redhat.com/browse/APPSRE-4509
 
 ## Problem Statement
 
-One of the biggest advanteges of writing code in Golang is making use of typing. Processing typed data from our qontract-server in Golang requires unmarshalling data into Golang structs. That Requires creating a type, which reflects the data fetched from the API (aka. Query results). 
+One of the biggest advantages of writing code in Golang is making use of typing. Processing typed data from our qontract-server in Golang requires unmarshalling data into Golang structs. That Requires creating a type, which reflects the data fetched from the API (aka. Query results). 
 
 Example for such a custom type:
 
@@ -97,14 +97,14 @@ On changing the schema, this schema file can be generated in a pipeline and used
 
 ### Schema update process
 
-The `schema.graphql` file is stored in `qontract-schema` repository. There will be a new Makefile target to generate the file from the API. Additionally the PR check of `qontract-schema` will check if the file has been generated if the schema was changed. 
+The `schema.graphql` file is stored in `qontract-schema` repository. There will be a new Makefile target to generate the file from the API. Additionally, the PR check of `qontract-schema` will check if the file is generated as required.
 
-The integration resides in a seperate repository. The `schema.graphql` file is copied over from the `qontract-schema` repository. When copying it over, a header must be added refering to the commit-hash of the `qontract-schema` repository.  The Makefile of the integration is extend with a target, that automates this process.
+The integration resides in a separate repository. The file `schema.graphql` must be duplicated from the `qontract-schema` repository. Upon creating the copy, a header must be added, referring to the commit-hash of the `qontract-schema` repository. The Makefile of the integration is extended, with a target that takes over this process.
 
-Integrations should have a job, that checks for scm changes in `graphql-schema/schema.graphql`. This job will have the following steps:
+Integrations should have a Jenkins Job, that checks for SCM changes in `graphql-schema/schema.graphql`. This job will have the following steps:
 *  Copy over the schema
-*  Generate the client and execute
-*  Create a PR if there is a diff or tests are failing
+*  Generate the client and execute tests
+*  Create a PR if there is a diff in the generated client or tests are failing
 
 ## Alternatives considered
 
@@ -113,4 +113,5 @@ Integrations should have a job, that checks for scm changes in `graphql-schema/s
 
 ## Milestones
 
-* tbd
+* Implement tooling for creation of schema.graphql [APPSRE-4678](https://issues.redhat.com/browse/APPSRE-4678)
+* Implement user-validator in Go as "integration-zero" [APPSRE-4680](https://issues.redhat.com/browse/APPSRE-4680)
