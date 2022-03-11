@@ -21,8 +21,24 @@ To add a VPC peering between an OSDv4 cluster and an AWS account managed in app-
         $ref: /aws/app-sre/groups/App-SRE-admin.yml
       accessLevel: network-mgmt
      ```
+    * If you use a `tags` block, make sure your VPC has the matching tags. They are used as a filter:
+    ```
+    peering:
+      connections:
+      - provider: account-vpc-mesh
+        name: appint-ex-01_app-int-example-01_mesh
+        account:
+          $ref: /aws/app-int-example-01/account.yml
+        tags:
+          # Make sure your VPC has this tag -> this is used as a filter!
+          Name: app-interface-development
+        manageRoutes: true
+    ```
 
-A peering connection will be created and accepted automatically.
+3. Make sure your clusters `network` block matches with your OCM clusters network CIDRs!
+Go to the [console](https://console.redhat.com/openshift). In the Network section of your cluster you will find the CIDRs.
+
+A peering connection will be created and accepted automatically by the `terraform-vpc-peerings` integration.
 The requester is the cluster's AWS account and the accepter is the app-interface managed AWS account.
 
 Note: in case a VPC peering connection already exists, it will be taken over by the integration.
