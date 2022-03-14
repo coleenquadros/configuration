@@ -5,8 +5,13 @@ The objective of this document is to help appSRE member to determine which clust
 
 ## Guidelines
 
-- Most services will live under app-sre-[stage|production]-XX or appsre[sp]XX clusters
-- Services for cloud.redhat.com (ak CloudDot, ConsoleDot, CRC) will live under crc[sp]XX.
+
+
+- We try to put most services under api.openshift.com or under console.redhat.com
+    * if a service is a component under api.openshift.com, it should be deployed in app-sre-[stage|production]-XX or appsre[sp]XX
+    * if a service is a component under console.redhat.com, it should be deployed in crcsXXue1
+
+    XX represents a number  01, 02 etc.
 - Services that require dedicated resources will have their own clusters. For e.g telemeter and quay.io have their own dedicated clusters.
 
 
