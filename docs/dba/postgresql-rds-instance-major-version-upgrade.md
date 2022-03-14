@@ -35,28 +35,31 @@ Following documentations are _must_ read for anyone considering a _major engine 
 
 ## Steps for Upgrade at High Level
 
-1. Upgrade will take `3-6` hours and will require someone from AppSRE team to be available.
-2. Confirm the upgrade path. Upgrading a `10.x` to `12.x` may look something like `10.10 => 11.8 => 12.3`.
-3. Identify time window that works for dev team and SRE to upgrade in staging environment.
+This section provides helpful information and an overview of the steps that your team will need to perform to a PostgreSQL major version upgrade.
+
+1. The upgrade duration is based on how large your database is and other factors like whether you have read-replicas. For those services with high availability requirements, a dry-run upgrade may be best to get a better estimate of how long the upgrade will take.
+   * You should be prepared for the upgrade to take up to **6 hours**. Someone from AppSRE team will need to be available for the duration of the upgrade.
+2. Confirm the upgrade path using the [AWS docs](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.PostgreSQL.html#USER_UpgradeDBInstance.PostgreSQL.MajorVersion). Note that you may need to upgrade the minor version of your database engine for a major version upgrade to be available.
+3. Identify a time window that works for the development team and AppSRE to upgrade the stage database.
    1. Open a JIRA ticket in [AppSRE backlog](https://issues.redhat.com/browse/appsre) for AppSRE approval and resource allocation for the upgrade.
-4. Write Step by step instructions from developers for stopping the service before upgrade and starting the service after upgrade. If we do not want to stop the service during the upgrade time, we will need dev teams to monitor the service during upgrade process and document the expected behavior.
-5. Assuming upgrades goes fine in staging, reach out to stakeholders and get approval to upgrade in production.
+4. Write step-by-step instructions from developers for stopping the service before upgrade and starting the service after upgrade. If we do not want to stop the service during the upgrade time, we will need dev teams to monitor the service during upgrade process and document the expected behavior.
+5. After successfully upgrading your stage database, reach out to stakeholders and get approval to upgrade production.
    1. **RDS upgrade will result in downtime for your application. Plan for 6 hour outage for the upgrade.**
-   2. Upgrades should be started early in the morning. AppSRE will not approve upgrades that start after 11am ET.
-6. Identify date and time for production upgrade.
+6. Identify a time window that works for the development team and AppSRE to upgrade the production database.
    1. Open a JIRA ticket in [AppSRE backlog](https://issues.redhat.com/browse/appsre) for AppSRE approval and resource allocation for the upgrade.
-7. Post necessary banners on `Pendo` and `Statuspage`.
+   2. Upgrades should be started early in the morning. AppSRE will not approve upgrades that start after 10am ET.
+7. Notify your customers of the planned outage by posting the necessary banners on `Pendo` and `Statuspage`.
 8. Execute the upgrade in production.
 
-## Note About Upgrading Read-Replicas
+### Note About Upgrading Read-Replicas
 
-Upgrading RDS instances that have read-replicas is bit more complicated for PostgreSQL. AWS recommends that you **delete and recreate read-replicas after the source instance has upgraded to a different major version.**
+Upgrading RDS instances that have read-replicas is a bit more complicated for PostgreSQL. AWS recommends that you **delete and recreate read-replicas after the source instance has upgraded to a different major version.**
 
 ## app-interface changes for upgrading
 
-Make changes in following order.
+This section provides the high-level steps required to perform the major version upgrade using app-interface. This section should be used to create the step-by-step instructions specific to the database that is being upgraded.
 
-### Terminate Read Replicas
+### 1. Terminate Read Replicas
 
 #### Remove Read Replica Dependency
 
@@ -79,7 +82,7 @@ In case the slot can not be dropped with the following error: `ERROR:  replicati
 
 Example MR: [Terminate read-replica](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/9692)
 
-### Create a New Parameter Group and Update Engine Version
+### 2. Create a New Parameter Group and Update Engine Version
 
 Create a copy of your current parameter group and update at least following 2 things:
 
@@ -88,109 +91,57 @@ Create a copy of your current parameter group and update at least following 2 th
 
 At this point the file exists but is not referenced by your RDS instance. This change can be combined with next step.
 
-1. Update the `engine` version for your RDS instance in either the defaults file or add it to overriding section.
-1. Add `allow_major_version_upgrade: true` to your RDS defaults file to allow upgrade. Terraform will fail if this flag is not set.
-1. Update parameter group reference to use the file.
-1. The actual upgrade step will have to executed by AppSRE team member.
+1. Update the `engine_version` for your RDS instance in either the defaults file or add it to overriding section.
+   * **IMPORTANT:** if changing a defaults file, you will upgrade every database that uses that defaults file, so take care in changing this setting. You can grep for the defaults filename to see where it is used and confirm that only the expected databases will be changed in the MR dry-run build.
+2. Add `allow_major_version_upgrade: true` to your RDS defaults file to allow upgrade. Terraform will fail if this flag is not set.
+3. Update `parameter_group` reference to use the new parameter group file.
+4. The MR will be reviewed by the AppSRE team. They will not merge the MR until the upgrade is ready to begin.
 
 Example MRs: [Upgrade RDS Instance from PostgreSQL 10.x to 11.6 & Create PostgreSQL 11 parameter group](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/9698/diffs)
 
-### Scale DOWN the application
+### 3. Scale DOWN the application
 
-Raise MR that set's the deployment's replica count to `0`.
+Raise MR that sets the deployment's replica count to `0`.
 
 Example MR: [Scale down service](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/9695)
 
-### Start Database Upgrade
+### 4. Start Database Upgrade
 
-#### Disable Terraform Resources (tf-r) integration in Production using Unleash
-
-Disable the following integrations in [Unleash](https://app-interface.unleash.devshift.net/#/features):
-- terraform-resources
-- gitlab-housekeeping (to avoid accidental automated merges)
-
-Note: Notify AppSRE IC & team.
-
-#### Run Terraform Resources (tf-r) integration
-
-Pull the latest copy of qontract-reconcile repo from upstream.
-
-Run the Terraform Resources (tf-r) integration with `--dry-run` flag.
-
-Example:
-
-```sh
-qontract-reconcile --config config.prod.toml --log-level INFO --dry-run terraform-resources
-```
-
-Verify that the only changes are to the resources you are modifying.
-
-
-Run the Terraform Resources (tf-r) integration with `--enable-deletion` flag.
-
-Example:
-
-```sh
-qontract-reconcile --config config.prod.toml --log-level INFO terraform-resources --enable-deletion
-```
-
-Note: When you run `tf-r`, it will fail because it won't be able to delete the current parameter group until the upgrade is done. Expect error similar to following:
+Start by merging the MR that was created to upgrade the database. When qontract-reconcile runs next, it may fail if the parameter group is only being used by a single database because qontract-reconcile won't be able to delete the current parameter group until the upgrade is done. Expect an error similar to following:
 
 ```
-[2020-09-23 10:05:23] [INFO] [terraform_client.py:log_plan_diff:176] - ['update', 'insights-prod', 'aws_db_instance', 'advisor-prod']
-[2020-09-23 10:05:23] [INFO] [terraform_client.py:log_plan_diff:159] - ['destroy', 'insights-prod', 'aws_db_parameter_group', 'advisor-prod-pg']
-[2020-09-23 10:05:23] [INFO] [terraform_client.py:log_plan_diff:153] - ['create', 'insights-prod', 'aws_db_parameter_group', 'advisor-prod-pg11']
-[2020-09-23 10:09:32] [WARNING] [__init__.py:cmd:306] - error: b'\nError: Error applying plan:\n\n1 error occurred:\n\t* aws_db_parameter_group.advisor-prod-pg (destroy): 1 error occurred:\n\t* aws_db_parameter_group.advisor-prod-pg: Error deleting DB parameter group: InvalidDBParameterGroupState: One or more database instances are still members of this parameter group advisor-prod-pg, so the group cannot be deleted\n\tstatus code: 400, request id: a4367d47-2398-4134-93f6-3d4f1dfb26c1\n\n\n\n\n\nTerraform does not automatically rollback in the face of errors.\nInstead, your Terraform state file has been partially updated with\nany resources that successfully completed. Please address the error\nabove and apply again to incrementally change your infrastructure.\n\n\n'
-[2020-09-23 10:09:32] [ERROR] [terraform_client.py:check_output:346] - [insights-prod] Error: Error applying plan:
-[2020-09-23 10:09:32] [ERROR] [terraform_client.py:check_output:346] - [insights-prod] 1 error occurred:
-[2020-09-23 10:09:32] [ERROR] [terraform_client.py:check_output:346] - [insights-prod]  * aws_db_parameter_group.advisor-prod-pg (destroy): 1 error occurred:
-[2020-09-23 10:09:32] [ERROR] [terraform_client.py:check_output:346] - [insights-prod]  * aws_db_parameter_group.advisor-prod-pg: Error deleting DB parameter group: InvalidDBParameterGroupState: One or more database instances are still members of this parameter group advisor-prod-pg, so the group cannot be deleted
-[2020-09-23 10:09:32] [ERROR] [terraform_client.py:check_output:346] - [insights-prod]  status code: 400, request id: a4367d47-2398-4134-93f6-3d4f1dfb26c1
-[2020-09-23 10:09:32] [ERROR] [terraform_client.py:check_output:346] - [insights-prod] Terraform does not automatically rollback in the face of errors.
-[2020-09-23 10:09:32] [ERROR] [terraform_client.py:check_output:346] - [insights-prod] Instead, your Terraform state file has been partially updated with
-[2020-09-23 10:09:32] [ERROR] [terraform_client.py:check_output:346] - [insights-prod] any resources that successfully completed. Please address the error
-[2020-09-23 10:09:32] [ERROR] [terraform_client.py:check_output:346] - [insights-prod] above and apply again to incrementally change your infrastructure.
+[terraform-resources-wrapper] error: b'\nError: Error deleting DB parameter group: InvalidDBParameterGroupState: One or more database instances are still members of this parameter group steahan-dev-params, so the group cannot be deleted\n\tstatus code: 400, request id: 417e8bab-3959-40e5-8a7b-39d18b984f8e\n\n\n'
+[terraform-resources-wrapper] [app-sre-stage - apply] Error: Error deleting DB parameter group: InvalidDBParameterGroupState: One or more database instances are still members of this parameter group steahan-dev-params, so the group cannot be deleted
+[terraform-resources-wrapper] [app-sre-stage - apply]     status code: 400, request id: 417e8bab-3959-40e5-8a7b-39d18b984f8e
 ```
 
-In case previous step can't modify instance you can temporary switch instance to use copied version of parameter group:
+**If you see the error above**, switch to the default parameter group for the currently running version of PostgreSQL by running the command below. Wait for the change to take effect and then the errors above should stop, allowing you to proceed with the upgrade.
 
-1. Copy current parameter group and append something to it's name, like '-copy'
-1. Modify RDS instance to use new copied parameter grpup
-1. Wait for 'pending-reboot' status for paremeter group in the configuration tab
-1. Reboot the instance
-1. Re-run terraform-resource integration, this time it should success
-1. Don't forget to delete copied patameter group after execution of actual upgrade
+```
+aws rds modify-db-instance --db-instance-identifier <DATABASE_NAME> --region <REGION> --apply-immediately --db-parameter-group-name default.postgres<VERSION>
 
-#### Apply RDS Modifications
-
-NOTE: Create access key in AWS console and configure your AWS CLI prior to running the following command.
-
-```sh
-aws rds modify-db-instance --db-instance-identifier="RDS_IDENTIFIER" --db-parameter-group-name="NEW_PARAMETER_GROUP_NAME" --apply-immediately
+# Example
+aws rds modify-db-instance --db-instance-identifier my-database --region us-east-1 --apply-immediately --db-parameter-group-name default.postgres10
 ```
 
-Example:
+**To initiate the upgrade**, run the command below so that the pending RDS modifications are applied immediately:
 
-```sh
-aws rds modify-db-instance --db-instance-identifier="advisor-prod" --db-parameter-group-name="advisor-prod-pg12" --apply-immediately
+```
+aws rds modify-db-instance --db-instance-identifier <DATABASE_NAME> --region <REGION> --apply-immediately
 ```
 
-Monitor the upgrade in AWS console. AWS will run a pre upgrade check and upgrade may not proceed if pre upgrade check fails. The AWS docs linked above have troubleshooting steps if you run into errors with pre upgrade checks.
+Monitor the upgrade in AWS console. AWS will run a pre-upgrade check and the upgrade may not proceed if pre-upgrade check fails. The AWS docs linked above have troubleshooting steps if you run into errors with pre-upgrade checks.
 
-### Enable Terraform Resources (tf-r) integration in Production using Unleash
+### 5. Scale UP the application
 
-Enable tf-r in production using unleash once upgrade is complete.
-
-### Scale UP the application
-
-When the RDS instance status changes to `Available`, scale the application back to usual capacity. At this point your application will still not use read-replica as none exists.
+When the RDS instance status changes to `Available`, scale the application back to usual capacity. At this point your application will still not use read-replica as none exist.
 
 Example MR: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/9716
 
-### Create read-replicas
+### 6. Create read-replicas
 
-Now re-create the read-replica instances.
+Now re-create the read-replica instances by adding them back to app-interface.
 
-### Update Application Config Changes to use read replicas
+### 7. Update Application Config Changes to use read replicas
 
 Update your application configuration to use the read replicas.
