@@ -1,0 +1,86 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /insights-prod/quickstarts-prod/quickstarts.prometheusrules.yml
+
+evaluation_interval: 1m
+
+tests:
+- interval: 30s
+  input_series:
+  - series: up{namespace="quickstarts-prod", service="quickstarts"}
+    values: '1+0x5 0+0x10'
+  alert_rule_test:
+  - eval_time: 5m
+    alertname: App-quickstarts-In-quickstarts-prod-Absent
+  - eval_time: 10m
+    alertname: App-quickstarts-In-quickstarts-prod-Absent
+    exp_alerts:
+    - exp_labels:
+        severity: high
+        service: insights
+        env: prod
+        app_team: quickstarts
+        namespace: quickstarts-prod
+      exp_annotations:
+          dashboard: "TBD"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/quickstarts-prod/deployments"
+          message: "Metrics for quickstarts in PROD are absent"
+  - eval_time: 15m
+    alertname: App-quickstarts-In-quickstarts-prod-Absent
+    exp_alerts:
+    - exp_labels:
+        severity: high
+        service: insights
+        env: prod
+        app_team: quickstarts
+        namespace: quickstarts-prod
+      exp_annotations:
+          dashboard: "TBD"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/quickstarts-prod/deployments"
+          message: "Metrics for quickstarts in PROD are absent"
+
+- interval: 1m
+  input_series:
+  - series: quickstarts_responses{code="500"}
+    values: '0 0 0 0 0 1 2 3 4 5'
+  - series: quickstarts_responses{code="200"}
+    values: '1 2 3 4 5 5 5 5 5 5'
+  alert_rule_test:
+  - eval_time: 1m
+    alertname: App-quickstarts-service-In-quickstarts-prod-high-error-rate
+  - eval_time: 8m
+    alertname: App-quickstarts-service-In-quickstarts-prod-high-error-rate
+    exp_alerts:
+    - exp_labels:
+        severity: high
+        service: insights
+        env: prod
+        app_team: quickstarts
+      exp_annotations:
+          dashboard: "TBD"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/quickstarts-prod/deployments"
+          message: "Quickstarts service non-200 responses has exceeded 10% in prod"
+
+- interval: 1m
+  input_series:
+  - series: api_3scale_gateway_api_time_bucket{exported_service="quickstarts",le="2000.0"}
+    values: '0 0 0 0 0 1 2 3 4 5'
+  - series: api_3scale_gateway_api_time_bucket{exported_service="quickstarts", le="+Inf"}
+    values: '0 1 2 3 4 5 7 8 9 10'
+  alert_rule_test:
+  - eval_time: 1m
+    alertname: App-quickstarts-service-In-quickstarts-prod-high-latency
+  - eval_time: 6m
+    alertname: App-quickstarts-service-In-quickstarts-prod-high-latency
+    exp_alerts:
+    - exp_labels:
+        severity: high
+        service: insights
+        env: prod
+        app_team: quickstarts
+      exp_annotations:
+          dashboard: "TBD"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/quickstarts-prod/deployments"
+          message: "Quickstarts service responses with over 2000ms have exceeded 10% in prod"
