@@ -48,7 +48,7 @@ for tracing the Payload through the Platform by using the same *request_id* and 
 Escalations
 -----------
 
--  To reach the Advisor engineering team, ping @Dank, @rbrantle, @fjansen or @theute on CoreOS Slack
+-  To reach the Advisor engineering team, ping @Dank, @rbrantle or @fjansen on CoreOS Slack
 
 .. _Incident Response Doc: https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE
 .. _Advisor dashboard: https://grafana.app-sre.devshift.net/d/s9df5udMk/advisor-service?orgId=1&refresh=5s&from=now-7d&to=now
