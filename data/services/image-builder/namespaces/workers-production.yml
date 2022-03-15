@@ -33,14 +33,6 @@ managedTerraformResources: true
 terraformResources:
 - provider: secrets-manager
   account: image-builder-prod
-  identifier: aws-account
-  secret:
-    path: app-interface/image-builder/production/aws-account
-    version: 1
-    field: all
-  output_resource_name: aws-account
-- provider: secrets-manager
-  account: image-builder-prod
   identifier: azure-service-account
   secret:
     path: app-interface/image-builder/production/azure-service-account
@@ -130,10 +122,85 @@ terraformResources:
             "logs:CreateLogStream",
           ],
           "Resource": "arn:aws:logs:us-east-1:463606842039:log-group:workers-aoc-production:*"
+        },
+        {
+          "Sid": "VMImportEC2Policy",
+          "Effect": "Allow",
+          "Action": [
+            "ec2:CopySnapshot",
+            "ec2:Describe*",
+            "ec2:ModifySnapshotAttribute",
+            "ec2:DeleteTags",
+            "ec2:CreateTags",
+            "ec2:RegisterImage",
+            "ec2:ImportSnapshot",
+            "ec2:ModifyImageAttribute",
+            "ec2:DeregisterImage",
+            "ec2:DeleteSnapshot",
+          ],
+          "Resource": "*",
+        },
+        {
+          "Sid": "VMImportS3Policy",
+          "Effect": "Allow",
+          "Action": [
+            "s3:GetBucketLocation",
+            "s3:ListBucket",
+            "s3:GetObject",
+            "s3:PutObject",
+            "s3:DeleteObject",
+          ],
+          "Resource": [
+            "arn:aws:s3:::image-builder-service-production",
+            "arn:aws:s3:::image-builder-service-production/*",
+          ]
         }
       ]
     }
   output_resource_name: workers-aoc-production-role
+- provider: aws-iam-role
+  account: image-builder-prod
+  identifier: vmimport
+  assume_role:
+    Service:
+    - vmie.amazonaws.com
+  assume_condition:
+    StringEquals:
+      sts:Externalid: vmimport
+  inline_policy:
+    {
+      Version: "2012-10-17",
+      Statement: [
+        {
+          "Sid": "VMImportEC2Policy",
+          "Effect": "Allow",
+          "Action": [
+            "ec2:CopySnapshot",
+            "ec2:Describe*",
+            "ec2:ModifySnapshotAttribute",
+            "ec2:RegisterImage",
+          ],
+          "Resource": "*",
+        },
+        {
+          "Sid": "VMImportS3Policy",
+          "Effect": "Allow",
+          "Action": [
+            "s3:GetBucketLocation",
+            "s3:ListBucket",
+            "s3:GetObject",
+          ],
+          "Resource": [
+            "arn:aws:s3:::image-builder-service-production",
+            "arn:aws:s3:::image-builder-service-production/*",
+          ]
+        }
+      ]
+    }
+- provider: s3
+  account: image-builder-prod
+  identifier: image-builder-service-production
+  defaults: /terraform/resources/image-builder/production/s3-1.yml
 - provider: asg
   account: image-builder-prod
   identifier: imagebuilder-workers-aoc-x86-production
@@ -143,7 +210,8 @@ terraformResources:
   variables:
     workspace_name: production
     composer_host_aoc: api.openshift.com
+    worker_config_aws_bucket: "image-builder-service-production"
   image:
     tag_name: composer_commit
     url: https://github.com/osbuild/osbuild-composer
-    ref: 68e98244b9993aeb443d2170c2d596bfe33315b4
+    ref: 663f1dcbee8d30c1fbe8430f28c7d8a4221b57cb
