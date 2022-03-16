@@ -14,19 +14,19 @@ This SOP serves as a step-by-step process on how to provision Hypershift from ze
 1. Follow the standard [Cluster Onboarding SOP](app-interface-onboard-cluster.md) using the following specs
    *Note*: some of these numbers need to be reviewed in the light of first hypershift usage (storage, load balancers, compute type .. )
 
-    |                            | Staging       | Production    |
-    |----------------------------|---------------|---------------|
-    | Availability               | Multizone     | Multizone     |
-    | Compute type               | m5.xlarge     | m5.xlarge     |
-    | Compute count (autoscale)  | 9 - 12        | 9 - 27        |
-    | Persistent storage         | 1600 GB       | 1600 GB       |
-    | Load balancers             | 12            | 12            |
-    | UpgradePolicy wokloads     | hypershift    | hypershift    |
-    | **Network type**           | OVNKubernetes | OVNKubernetes |
-    | Machine CIRD               | See note      | See note      |
-    | Private                    | false         | false         |
-    | Internal                   | false         | false         |
-    | VPC peering                | none          | none          |
+    |                           | Staging       | Production    |
+    |---------------------------|---------------|---------------|
+    | Availability              | Multizone     | Multizone     |
+    | Compute type              | m5.xlarge     | m5.xlarge     |
+    | Compute count (autoscale) | 9 - 12        | 9 - 27        |
+    | Persistent storage        | 1600 GB       | 1600 GB       |
+    | Load balancers            | 12            | 12            |
+    | UpgradePolicy wokloads    | hypershift    | hypershift    |
+    | **Network type**          | OVNKubernetes | OVNKubernetes |
+    | Machine CIDR              | See note      | See note      |
+    | Private                   | true          | true          |
+    | Internal                  | false         | false         |
+    | VPC peerings              | `ci-ext`, `appsrep05ue1`, `app-sre-prod-01`, service-cluster |
 
 2. For stage `cluster.yml`, add `dedicated-readers` under `managedGroups` and update `data/teams/hypershift/roles/hypershift-dedicated-readers.yml` with a reference to our new cluster:
     ```yaml

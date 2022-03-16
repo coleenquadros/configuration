@@ -1,0 +1,35 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: frontend-operator
+
+name: frontend-operator
+
+namespaces:
+- $ref: /services/insights/frontend-operator/namespaces/stage.yml
+
+slos:
+- name: frontend-operator-availability
+  SLIType: availability
+  SLISpecification: Availability (measured as the product of errors and latency) has to be met a certain target of the last 28 days
+  SLODetails: https://github.com/RedHatInsights/frontend-operator/blob/main/docs/slos/frontend-operator-availability.md
+  SLOParameters:
+    window: 28d
+  expr: kube_deployment_status_replicas_available{namespace="frontend-operator-system"}
+  SLOTarget: 0.99
+  SLOTargetUnit: percent_0_1
+  prometheusRules: resources/insights-stage/frontend-operator/frontend-operator.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/GSX6u0bnz/frontend-operator-metrics?orgId=1&var-datasource=crcs02ue1-prometheus
+
+- name: frontend-operator-reconciliation
+  SLIType: correctness
+  SLISpecification: Correctness 
+  SLODetails: https://github.com/RedHatInsights/frontend-operator/blob/main/docs/slos/frontend-operator-reconciliation.md
+  SLOParameters:
+    window: 28d
+  expr: sum(increase(controller_runtime_reconcile_total{controller=~"frontendenvironment|frontend"}[1m])) by (controller)
+  SLOTarget: 0.99
+  SLOTargetUnit: percent_0_1
+  prometheusRules: resources/insights-stage/frontend-operator/frontend-operator.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/GSX6u0bnz/frontend-operator-metrics?orgId=1&var-datasource=crcs02ue1-prometheus

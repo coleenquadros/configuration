@@ -102,6 +102,7 @@ this repository.
       - [Manage Application Load Balancers via App-Interface (`/openshift/cluster-1.yml`)](#manage-application-load-balancers-via-app-interface-openshiftcluster-1yml)
       - [Enable deletion of AWS resources in deletion protected accounts](#enable-deletion-of-aws-resources-in-deletion-protected-accounts)
     - [Manage VPC peerings via App-Interface (`/openshift/cluster-1.yml`)](#manage-vpc-peerings-via-app-interface-openshiftcluster-1yml)
+    - [Share resources between AWS accounts via App-Interface (`/aws/account-1.yml`)](#share-resources-between-aws-accounts-via-app-interface-awsaccount-1yml)
     - [Manage Slack User groups via App-Interface](#manage-slack-user-groups-via-app-interface)
     - [Manage Jenkins jobs configurations using jenkins-jobs](#manage-jenkins-jobs-configurations-using-jenkins-jobs)
     - [Delete AWS IAM access keys via App-Interface](#delete-aws-iam-access-keys-via-app-interface)
@@ -797,7 +798,6 @@ Instructions:
 
 Notes:
 
-* [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) with fields of type `stringData` are not supported.
 * When creating a new secret in Vault, be sure to set the `Maximum Number of Versions` field to `0` (unlimited).
 * If you want to delete a secret from Vault, please get in contact with the App-SRE team.
 * If you wish to use a different secrets engine, please get in contact with the App-SRE team.
@@ -2106,6 +2106,32 @@ peering:
 ```
 
 
+### Share resources between AWS accounts via App-Interface (`/aws/account-1.yml`)
+
+In some use cases, we may want to share resources between AWS accounts.
+
+This will be done by adding an entry to a `sharing` section of the "source" AWS account file (containing resources to be shared):
+```yaml
+sharing:
+- provider: <type of sharing to use>
+  account:
+    $ref: /path/to/destination/account.yml
+```
+
+#### Share AMIs between AWS accounts
+
+To share AMIs, add the following entry to a `sharing` section of the source AWS account file:
+```yaml
+sharing:
+- provider: ami
+  account:
+    $ref: /path/to/destination/account.yml
+  regex: <filter image by name>
+  region: <region to share AMIs from/to> # optional, will use the default region of the account if not specified
+```
+
+This will cause all AMIs that match the regex expression to be shared from the source account to the destination account. AMI tags will also be copied to the shared AMI for traceability.
+
 ### Manage Slack User groups via App-Interface
 
 Slack User groups can be self-serviced via App-Interface.
@@ -2301,6 +2327,8 @@ Notes:
 Creating a new project in gitlab can be self-serviced via App-Interface.
 
 To request the creation of a new project, submit a PR adding the new project under the desired group [here](/data/dependencies/gitlab/gitlab.yml). The project will be created on merge.
+
+You will also need to add the repository information to the `codeComponents` section in your app file.
 
 To get access to the project, if required, contact the App SRE team.
 

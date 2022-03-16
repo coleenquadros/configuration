@@ -5,7 +5,6 @@ JENKINS_FILE="resources/jenkins/global/defaults.yaml"
 SAAS_FILE="data/services/app-interface/cicd/ci-ext/saas-qontract-reconcile.yaml"
 SAAS_FILE_INT="data/services/app-interface/cicd/ci-int/saas-qontract-reconcile-int.yaml"
 TEKTON_GLOBAL_DEFAULTS="data/pipelines/tekton-provider-global-defaults.yaml"
-APP_INTERFACE_SAAS_FILE_INT="data/services/app-interface/cicd/ci-int/jobs.yaml"
 
 if [ `uname` = "Darwin" ]; then
     SED_OPT=".bk"
@@ -32,11 +31,6 @@ fi
 OLD_COMMIT=$(awk '{gsub("\047", "", $2); if ($1 == "qontract_reconcile_image_tag:" && $2 ~ /^[a-f0-9]{7}$/){print $2}}' $JENKINS_FILE)
 if [ "$NEW_COMMIT" != "$OLD_COMMIT" ]; then
     sed -i$SED_OPT "s/$OLD_COMMIT/$NEW_COMMIT/" $JENKINS_FILE
-fi
-
-OLD_COMMIT=$(awk '{gsub("\047", "", $2); if ($1 == "qontract_reconcile_image_tag:" && $2 ~ /^[a-f0-9]{7}$/){print $2}}' $APP_INTERFACE_SAAS_FILE_INT)
-if [ "$NEW_COMMIT" != "$OLD_COMMIT" ]; then
-    sed -i$SED_OPT "s/$OLD_COMMIT/$NEW_COMMIT/" $APP_INTERFACE_SAAS_FILE_INT
 fi
 
 OLD_COMMIT=$(awk -F "=" '{if ($1 == "export RECONCILE_IMAGE_TAG" && $2 ~ /^[a-f0-9]{7}$/){print $2}}' $ENV_FILE)

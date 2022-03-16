@@ -23,6 +23,8 @@ ocm:
 
 managedGroups:
 - dedicated-admins
+- dedicated-readers
+- ocm-developers
 
 managedClusterRoles: true
 
@@ -30,7 +32,7 @@ spec:
   provider: aws
   region: us-east-1
   channel: candidate
-  version: 4.10.1
+  version: 4.10.5
   initial_version: 4.10.0-rc.6-candidate
   multi_az: false
   nodes: 4
@@ -60,6 +62,10 @@ network:
 
 automationToken:
   path: app-sre/creds/kube-configs/hsservicei01ue1
+  field: token
+
+clusterAdminAutomationToken:
+  path: app-sre/creds/kube-configs/hsservicei01ue1-cluster-admin
   field: token
 
 addons: # enable log forwarding to the cluster's AWS account
@@ -102,6 +108,20 @@ peering:
     name: hsservicei01ue1_app-sre-prod-01
     cluster:
       $ref: /openshift/app-sre-prod-01/cluster.yml
+    manageRoutes: true
+
+  # peering with hshifti01ue1
+  - provider: cluster-vpc-accepter
+    name: hsservicei01ue1_hshifti01ue1
+    cluster:
+      $ref: /openshift/hshifti01ue1/cluster.yml
+    manageRoutes: true
+
+  # peering with appsrep05ue1
+  - provider: cluster-vpc-requester
+    name: hsservicei01ue1_appsrep05ue1
+    cluster:
+      $ref: /openshift/appsrep05ue1/cluster.yml
     manageRoutes: true
 
 jumpHost:

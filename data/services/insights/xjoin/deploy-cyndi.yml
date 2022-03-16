@@ -150,17 +150,10 @@ resourceTemplates:
       name: RedHatInsights-xjoin-kafka-connect-gh-build-master
 
 - name: cyndi-kafka-connect
-  path: /deploy/kafka-connect.yml
+  path: /deploy/kafka-connect-perf.yml
   url: https://github.com/RedHatInsights/xjoin-kafka-connect
   parameters:
     VERSION: '2.7.0'
-    CPU_LIMITS: 3
-    XMX: 1G
-    XMS: 1G
-    CPU_REQUESTS: 250m
-    NUM_REPLICAS: '1'
-    MEMORY_REQUESTS: 1Gi
-    MEMORY_LIMITS: 2Gi
     KAFKA_BOOTSTRAP_PORT: '9092'
     GROUP_ID: cyndi
     STORAGE_TOPIC_PREFIX: cyndi
@@ -170,9 +163,15 @@ resourceTemplates:
   targets:
   - namespace:
       $ref: /services/insights/xjoin/namespaces/cyndi-perf.yml
-    ref: 347c7728000e8f3edb930e98a0588af53f4ebd99
+    ref: master
     parameters:
-      IMAGE_TAG: 347c772
+      CPU_LIMITS: '1'
+      CPU_REQUESTS: '1'
+      MEMORY_LIMITS: '2Gi'
+      MEMORY_REQUESTS: '2Gi'
+      NUM_REPLICAS: '1'
+      XMS: '1G'
+      XMX: '1G'
 
 - name: cyndi-kafka-user
   path: /deploy/kafka-user.yaml
@@ -184,7 +183,7 @@ resourceTemplates:
     upstream:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
-      name: RedHatInsights-xjoin-kafka-connect-gh-build-master
+      name: RedHatInsights-cyndi-operator-gh-build-master
 
 #
 # CyndiPipeline definitions below

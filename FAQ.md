@@ -39,6 +39,7 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
         - [I need to add a package to a jenkins slave](#i-need-to-add-a-package-to-a-jenkins-slave)
         - [My configuration is merged into app-interface but it isn't applied!](#my-configuration-is-merged-into-app-interface-but-it-isnt-applied)
         - [My tekton deploy PipelineRun is silenty failing for no obvious reason](#my-tekton-deploy-pipelinerun-is-silenty-failing-for-no-obvious-reason)
+        - [I can not see metrics from my service in Prometheus](#i-can-not-see-metrics-from-my-service-in-prometheus)
 
 <!-- markdown-toc end -->
 
@@ -347,3 +348,13 @@ Review #sd-app-sre-reconcile in slack for messages related to your configuration
 ### My tekton deploy PipelineRun is silenty failing for no obvious reason
 
 If the `openshift-saas-deploy` Task of the Pipeline fails to finish successfully and leaves no trace about there's a good chance that the pod responsible to execute the Task's steps are hitting the memory limit getting killed by the kernel OOM. In order to verify this, you can search for pods in the tekton provider's namespace associated your saas file. If you see pods related to your `PipelineRun` (which are named after your saas file) showing `OOMKilled` status, you will need to increase the resources assigned to your deployment pods. In order to do that, just add a [`deployResources`](/docs/app-sre/continuous-delivery-in-app-interface.md#saas-file-structure) section in your saas file or increase the resources associated there. The resulting MR can be approved by the saas file owners.
+
+### I can not see metrics from my service in Prometheus
+
+AppSRE uses [openshift-customer-monitoring](./docs/app-sre/osdv4-openshift-customer-monitoring.md) to monitor services.
+
+For Prometheus to be able to monitor a service, two things are required:
+1. a NetworkPolicy allowing traffic from the `openshift-customer-monitoring` namespace to the service namespace. Here is an [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/85cc048cef88f9cccfd4e5dbde5e0d9234390bca/data/services/insights/rbac/namespaces/rbac-prod.yml#L20).
+1. a view RoleBinding in the service namespace for `openshift-customer-monitoring/prometheus-k8s`. Here is an [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/85cc048cef88f9cccfd4e5dbde5e0d9234390bca/data/services/observability/roles/app-sre-osdv4-monitored-namespaces-view.yml#L398-400).
+
+For further instructions, check out the complete [monitoring](./docs/app-sre/monitoring.md) guide.

@@ -64,7 +64,7 @@ resourceTemplates:
     # - Commits can be found here: https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/commits/main
     # If in doubt, please check with the MK Control Plane team.
     # We are exploring how to automate this in the future.
-    ref: 3bb6b78b4ae5254353aec0d92ebf69898cd8e030
+    ref: 5cda24a4b0491ad244c47f7b6107a0d852236478
     parameters:
       ISSUER_URL: ${SSO_BASE_URL}
       OBSERVATORIUM_URL: https://observatorium-mst.api.openshift.com/api/metrics/v1/managedkafka
@@ -120,39 +120,48 @@ resourceTemplates:
     # Global parameter - Affects Production and Stage
     # Image to be used by Envoy sidecar container
     ENVOY_IMAGE: quay.io/rhoas/envoyproxy:v1.16.1
-    # Global parameter for SUPPORTED_KAFKA_SIZES - affects prod and stage
-    SUPPORTED_KAFKA_SIZES:
+
+    # Global parameter - Affects Production and Stage
+    # parameters for SUPPORTED_INSTANCE_TYPES
+    SUPPORTED_INSTANCE_TYPES:
       - id: eval
-        sizes: 
-        -  id: x1
-           ingressThroughputPerSec: "30Mi"
-           egressThroughputPerSec: "30Mi"
-           totalMaxConnections: 3000
-           maxDataRetentionSize: "1000Gi"
-           maxPartitions: 1000
-           maxDataRetentionPeriod: "P14D"
-           maxConnectionAttemptsPerSec: 100
-           cost: 1
+        sizes:
+          - id: x1
+            ingressThroughputPerSec: "30Mi"
+            egressThroughputPerSec: "30Mi"
+            totalMaxConnections: 3000
+            maxDataRetentionSize: "1000Gi"
+            maxPartitions: 1000
+            maxDataRetentionPeriod: "P14D"
+            maxConnectionAttemptsPerSec: 100
+            quotaConsumed: 1
+            quotaType: "rhosak"
+            capacityConsumed: 1
       - id: standard
         sizes:
-        -  id: x1
-           ingressThroughputPerSec: "50Mi"
-           egressThroughputPerSec: "100Mi"
-           totalMaxConnections: 3000
-           maxDataRetentionSize: "1000Gi"
-           maxPartitions: 1500
-           maxDataRetentionPeriod: "P14D"
-           maxConnectionAttemptsPerSec: 100
-           cost: 1
-        -  id: x2
-           ingressThroughputPerSec: "100Mi"
-           egressThroughputPerSec: "200Mi"
-           totalMaxConnections: 4000
-           maxDataRetentionSize: "2000Gi"
-           maxPartitions: 3000
-           maxDataRetentionPeriod: "P14D"
-           maxConnectionAttemptsPerSec: 200
-           cost: 2
+          - id: x1
+            ingressThroughputPerSec: "50Mi"
+            egressThroughputPerSec: "100Mi"
+            totalMaxConnections: 3000
+            maxDataRetentionSize: "1000Gi"
+            maxPartitions: 1500
+            maxDataRetentionPeriod: "P14D"
+            maxConnectionAttemptsPerSec: 100
+            quotaConsumed: 1
+            quotaType: "rhosak"
+            capacityConsumed: 1
+          - id: x2
+            ingressThroughputPerSec: "100Mi"
+            egressThroughputPerSec: "200Mi"
+            totalMaxConnections: 4000
+            maxDataRetentionSize: "2000Gi"
+            maxPartitions: 3000
+            maxDataRetentionPeriod: "P14D"
+            maxConnectionAttemptsPerSec: 200
+            quotaConsumed: 2
+            quotaType: "rhosak"
+            capacityConsumed: 2
+
   targets:
   - namespace:
       $ref: /services/managed-services/namespaces/managed-services-stage.yml
@@ -190,7 +199,7 @@ resourceTemplates:
       # Token Refresher URL
       OBSERVATORIUM_TOKEN_REFRESHER_URL: http://token-refresher.managed-services-stage.svc.cluster.local
       # Release tag within Config Repo to use for pulling index information
-      OBSERVABILITY_CONFIG_TAG: v1.26.0
+      OBSERVABILITY_CONFIG_TAG: v1.27.1
       # Observatorium Red Hat SSO tenant for observability stack
       OBSERVATORIUM_RHSSO_TENANT: managedkafka
       # Red Hat SSO Observability gateway
@@ -302,22 +311,18 @@ resourceTemplates:
       $ref: /services/managed-services/namespaces/managed-services-production.yml
     # This commit sha will need to replaced to reference the latest working commit.
     # Make sure that we've a docker image for this before it can be changed.
-    # When change this, make sure to also change the `IMAGE_TAG` to reference the first seven characters of the sha1.
     # Commits can be found here https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/commits/main
     # Inspect the recent merged MR from https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/merge_requests?scope=all&utf8=%E2%9C%93&state=merged to get the latest commit that has a docker image built from it.
     # e.g if we take https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/merge_requests/356/commits, the commit with a docker image in it will be
     # the very first commit i.e https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/merge_requests/356/commits?commit_id=f0fd63740464c5fa4bda395d5d31f675eff049ac
     # If in doubt, see with the control plane team.
     # We are exploring into using automating this.
-    ref: 3bb6b78b4ae5254353aec0d92ebf69898cd8e030
+    ref: 5cda24a4b0491ad244c47f7b6107a0d852236478
     parameters:
       DB_SSLMODE: verify-full
       ENVIRONMENT: production
       KAFKA_LIFE_SPAN: 48
       QUOTA_TYPE: ams
-      # The image tag is the first seven characters of the #ref commit sha parameter.
-      # Verify in https://quay.io/repository/rhoas/kas-fleet-manager?tab=tags to see if the tag exists.
-      IMAGE_TAG: 3bb6b78
       STRIMZI_OPERATOR_ADDON_ID: managed-kafka
       KAS_FLEETSHARD_ADDON_ID: kas-fleetshard-operator
       SENTRY_URL: sentry.devshift.net
@@ -357,7 +362,7 @@ resourceTemplates:
       # Red Hat SSO Observability auth server url
       OBSERVATORIUM_RHSSO_AUTH_SERVER_URL: https://sso.redhat.com/auth
       # Release tag within Config Repo to use for pulling index information
-      OBSERVABILITY_CONFIG_TAG: v1.26.0
+      OBSERVABILITY_CONFIG_TAG: v1.27.1
       # Maximum number of partitions per cluster
       KAFKA_CAPACITY_MAX_PARTITIONS: "1000"
       # A list of usernames representing users who do not have access to the service
@@ -459,7 +464,7 @@ resourceTemplates:
           region: us-east-1
           multi_az: true
           schedulable: true # change this to false if you do not want the cluster to be schedulable
-          kafka_instance_limit: 28 # change this to match any value of configuration
+          kafka_instance_limit: 24 # change this to match any value of configuration
           supported_instance_type: standard
         - name: mk-1006-115633
           cluster_id: 1nlj5j786fsg44srlj7f2kep5htakcp7
