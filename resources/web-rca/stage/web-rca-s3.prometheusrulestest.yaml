@@ -1,0 +1,75 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /web-rca/stage/web-rca-s3.prometheusrules.yaml
+
+evaluation_interval: 10m
+
+tests:
+
+  # S3HighSpaceUsage
+  - interval: 1m
+    input_series:
+      - series: aws_s3_bucket_size_bytes_average{job="cloudwatch-exporter", bucket_name="web-rca-s3-stage"}
+        values: '536870912+0x119 2147483648+0x59'
+    alert_rule_test:
+      - eval_time: 1h
+        alertname: S3HighSpaceUsage
+      - eval_time: 2h
+        alertname: S3HighSpaceUsage
+      - eval_time: 3h
+        alertname: S3HighSpaceUsage
+        exp_alerts:
+          - exp_labels:
+              severity: info
+              service: web-rca
+              env: stage
+              bucket_name: web-rca-s3-stage
+              job: cloudwatch-exporter
+            exp_annotations:
+              message: 'The current web-rca usage of S3 storage is higher than 1 GB.'
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/web-rca/sops/web-rca-stage-down.md"
+              dashboard: "https://grafana.app-sre.devshift.net/d/_7_Ul_07k/web-rca?orgId=1&var-datasource=app-sre-stage-01-prometheus"
+
+  - interval: 1m
+    input_series:
+      - series: aws_s3_bucket_size_bytes_average{job="cloudwatch-exporter", bucket_name="web-rca-s3-stage"}
+        values: '53687091+0x10 2147483648+0x20'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: S3IncreaseSpaceUsage
+      - eval_time: 30m
+        alertname: S3IncreaseSpaceUsage
+        exp_alerts:
+          - exp_labels:
+              severity: info
+              service: web-rca
+              env: stage
+              bucket_name: web-rca-s3-stage
+              job: cloudwatch-exporter
+            exp_annotations:
+              message: 'The web-rca usage of S3 storage has increased by 200MB in the last day.'
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/web-rca/sops/web-rca-stage-down.md"
+              dashboard: "https://grafana.app-sre.devshift.net/d/_7_Ul_07k/web-rca?orgId=1&var-datasource=app-sre-stage-01-prometheus"
+
+  - interval: 1h
+    input_series:
+      - series: aws_s3_bucket_size_bytes_average{job="cloudwatch-exporter", bucket_name="web-rca-s3-stage"}
+        values: '53687091+0x10 299999999+0x20'
+    alert_rule_test:
+      - eval_time: 10h
+        alertname: S3IncreaseSpaceUsage
+      - eval_time: 20h
+        alertname: S3IncreaseSpaceUsage
+        exp_alerts:
+          - exp_labels:
+              severity: info
+              service: web-rca
+              env: stage
+              bucket_name: web-rca-s3-stage
+              job: cloudwatch-exporter
+            exp_annotations:
+              message: 'The web-rca usage of S3 storage has increased by 200MB in the last day.'
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/web-rca/sops/web-rca-stage-down.md"
+              dashboard: "https://grafana.app-sre.devshift.net/d/_7_Ul_07k/web-rca?orgId=1&var-datasource=app-sre-stage-01-prometheus"
