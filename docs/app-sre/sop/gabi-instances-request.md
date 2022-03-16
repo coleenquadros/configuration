@@ -85,6 +85,7 @@ Tenant must add new target namespaces with the following content:
       NAMESPACE: <target namespace name>
       AWS_RDS_SECRET_NAME: <secret of rds creds, >
       USERS_CONFIGMAP_NAME: <as the same as gabi instance name>
+      DB_DRIVER: <pgx or mysql, default is pgx (postgres)>
 ```
 
 ### Step 3: Cluster-Scoped Gabi Namespace

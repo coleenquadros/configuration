@@ -1,0 +1,54 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: quickstarts-prod
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: quickstarts-prod
+    rules:
+      # pagerduty
+      - alert: App-quickstarts-In-quickstarts-prod-Absent
+        expr: absent(up{service="quickstarts", namespace="quickstarts-prod"}) or up{service="quickstarts", namespace="quickstarts-prod"} == 0
+        for: 5m
+        labels:
+          severity: high
+          service: insights
+          env: prod
+          app_team: quickstarts
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/aqaixAb7k/quickstarts?orgId=1"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/quickstarts-prod/deployments"
+          message: "Metrics for quickstarts in PROD are absent"
+          runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/quickstarts/App-quickstarts-In-quickstarts-prod-Absent.rst
+      - alert: App-quickstarts-service-In-quickstarts-prod-high-error-rate
+        expr: sum(increase(quickstarts_responses{code!~"2.*"}[24h])) / sum(increase(quickstarts_responses[24h])) < .90
+        for: 5m
+        labels:
+          severity: high
+          service: insights
+          env: prod
+          app_team: quickstarts
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/aqaixAb7k/quickstarts?orgId=1"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/quickstarts-prod/deployments"
+          message: "Quickstarts service non-200 responses has exceeded 10% in prod"
+          runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/quickstarts/App-quickstarts-service-In-quickstarts-prod-high-error-rate.rst
+      - alert: App-quickstarts-service-In-quickstarts-prod-high-latency
+        expr: |
+          sum(rate(api_3scale_gateway_api_time_bucket{le="2000.0", exported_service="quickstarts"}[24h])) / sum(rate(api_3scale_gateway_api_time_bucket{le="+Inf", exported_service="quickstarts"}[24h])) < .90
+        for: 5m
+        labels:
+          severity: high
+          service: insights
+          env: prod
+          app_team: quickstarts
+        annotations:
+          dashboard: "https://grafana.app-sre.devshift.net/d/aqaixAb7k/quickstarts?orgId=1"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/quickstarts-prod/deployments"
+          message: "Quickstarts service responses with over 2000ms have exceeded 10% in prod"
+          runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/quickstarts/App-quickstarts-service-In-quickstarts-prod-high-latency.rst

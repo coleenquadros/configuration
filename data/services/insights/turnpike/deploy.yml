@@ -297,6 +297,23 @@ resourceTemplates:
           origin: http://pes-app.pes-app-stage.svc.cluster.local:8080/
           auth:
             saml: "True"
+        - name: advisor-rule-content-preview
+          origin: http://advisor-backend-api.advisor-stage.svc.cluster.local:8000/internal/rule/
+          route: /api/insights/v1/rule/
+          auth:
+            saml: "'insights-rule-dev' in user['Role']"
+        - name: apicast-tests-ping
+          origin: http://apicast-tests.apicast-test-services.svc.cluster.local:9092/ping
+          route: /api/apicast-tests/ping
+          auth:
+            saml: "True"
+            x509: "True"
+        - name: apicast-tests-headers
+          origin: http://apicast-tests.apicast-test-services.svc.cluster.local:9092/headers
+          route: /api/apicast-tests/headers
+          auth:
+            saml: "'clouddot-infrastructure' in user['Role']"
+            x509: "x509['subject_dn'] in ['/DC=com/DC=redhat/OU=users/UID=turnpike/Email=insights-qa@redhat.com/CN=turnpike service account turnpike_qa']"
 
   - namespace:
       $ref: /services/insights/turnpike/namespaces/turnpike-fedramp-stage.yml
@@ -618,6 +635,11 @@ resourceTemplates:
           origin: http://platform-kafka-connect-connect-api.platform-mq-prod.svc.cluster.local:8083/
           auth:
             saml: "'clouddot-infrastructure' in user['Role']"
+        - name: advisor-rule-content-preview
+          origin: http://advisor-backend-api.advisor-prod.svc.cluster.local:8000/internal/rule/
+          route: /api/insights/v1/rule/
+          auth:
+            saml: "'insights-rule-dev' in user['Role']"
 
 - name: nginx-prometheus
   path: /templates/prometheus-nginx.yml

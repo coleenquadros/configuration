@@ -243,216 +243,108 @@ spec:
 
     - alert: ImageBuilderSlowResponse_FastBurn
       annotations:
-        message: 'High burn rate: {{ $value | humanizePercentage }} of non-compose requests are slower than 200ms'
+        message: 'High burn rate: {{ $value | humanizePercentage }} of crc requests are slower than 200ms'
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/image-builder/ImageBuilderHighLatency.md"
       expr: |
         (
-          image_builder_crc_non_compose_requests:latency_rate1h{latency="0.2"} > (6.72*(1 - 0.9))
+          image_builder_crc_requests:latency_rate1h{latency="0.5"} > (6.72*(1 - 0.9))
           and
-          image_builder_crc_non_compose_requests:latency_rate5m{latency="0.2"} > (6.72*(1 - 0.9))
+          image_builder_crc_requests:latency_rate5m{latency="0.5"} > (6.72*(1 - 0.9))
         )
         or
         (
-          image_builder_crc_non_compose_requests:latency_rate6h{latency="0.2"} > (5.6*(1 - 0.9))
+          image_builder_crc_requests:latency_rate6h{latency="0.5"} > (5.6*(1 - 0.9))
           and
-          image_builder_crc_non_compose_requests:latency_rate30m{latency="0.2"} > (5.6*(1 - 0.9))
+          image_builder_crc_requests:latency_rate30m{latency="0.5"} > (5.6*(1 - 0.9))
         )
       labels:
-        latency: "0.2"
+        latency: "0.5"
         severity: medium
         service: insights
         env: stage
         app_team: image-builder
     - alert: ImageBuilderSlowResponse_SlowBurn
       annotations:
-        message: 'High burn rate: {{ $value | humanizePercentage }} of non-compose requests are slower than 200ms'
+        message: 'High burn rate: {{ $value | humanizePercentage }} of crc requests are slower than 200ms'
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/image-builder/ImageBuilderHighLatency.md"
       expr: |
         (
-          image_builder_crc_non_compose_requests:latency_rate1d{latency="0.2"} > (2.8*(1 - 0.9))
+          image_builder_crc_requests:latency_rate1d{latency="0.5"} > (2.8*(1 - 0.9))
           and
-          image_builder_crc_non_compose_requests:latency_rate2h{latency="0.2"} > (2.8*(1 - 0.9))
+          image_builder_crc_requests:latency_rate2h{latency="0.5"} > (2.8*(1 - 0.9))
         )
         or
         (
-          image_builder_crc_non_compose_requests:latency_rate3d{latency="0.2"} > (2.8*(1 - 0.9))
+          image_builder_crc_requests:latency_rate3d{latency="0.5"} > (2.8*(1 - 0.9))
           and
-          image_builder_crc_non_compose_requests:latency_rate6h{latency="0.2"} > (2.8*(1 - 0.9))
+          image_builder_crc_requests:latency_rate6h{latency="0.5"} > (2.8*(1 - 0.9))
         )
       labels:
-        latency: "0.2"
+        latency: "0.5"
         severity: info
         service: insights
         env: stage
         app_team: image-builder
     - expr: |
         1 - (
-          sum(rate(image_builder_crc_http_duration_seconds_bucket{path!~".*compose",le="0.2"}[5m]))
+          sum(rate(image_builder_crc_http_duration_seconds_bucket{le="0.5"}[5m]))
           /
-          sum(rate(image_builder_crc_http_duration_seconds_count{path!~".*compose"}[5m]))
+          sum(rate(image_builder_crc_http_duration_seconds_count[5m]))
         )
       labels:
-        latency: "0.2"
-      record: image_builder_crc_non_compose_requests:latency_rate5m
+        latency: "0.5"
+      record: image_builder_crc_requests:latency_rate5m
     - expr: |
         1 - (
-          sum(rate(image_builder_crc_http_duration_seconds_bucket{path!~".*compose",le="0.2"}[30m]))
+          sum(rate(image_builder_crc_http_duration_seconds_bucket{le="0.5"}[30m]))
           /
-          sum(rate(image_builder_crc_http_duration_seconds_count{path!~".*compose"}[30m]))
+          sum(rate(image_builder_crc_http_duration_seconds_count[30m]))
         )
       labels:
-        latency: "0.2"
-      record: image_builder_crc_non_compose_requests:latency_rate30m
+        latency: "0.5"
+      record: image_builder_crc_requests:latency_rate30m
     - expr: |
         1 - (
-          sum(rate(image_builder_crc_http_duration_seconds_bucket{path!~".*compose",le="0.2"}[1h]))
+          sum(rate(image_builder_crc_http_duration_seconds_bucket{le="0.5"}[1h]))
           /
-          sum(rate(image_builder_crc_http_duration_seconds_count{path!~".*compose"}[1h]))
+          sum(rate(image_builder_crc_http_duration_seconds_count[1h]))
         )
       labels:
-        latency: "0.2"
-      record: image_builder_crc_non_compose_requests:latency_rate1h
+        latency: "0.5"
+      record: image_builder_crc_requests:latency_rate1h
     - expr: |
         1 - (
-          sum(rate(image_builder_crc_http_duration_seconds_bucket{path!~".*compose",le="0.2"}[2h]))
+          sum(rate(image_builder_crc_http_duration_seconds_bucket{le="0.5"}[2h]))
           /
-          sum(rate(image_builder_crc_http_duration_seconds_count{path!~".*compose"}[2h]))
+          sum(rate(image_builder_crc_http_duration_seconds_count[2h]))
         )
       labels:
-        latency: "0.2"
-      record: image_builder_crc_non_compose_requests:latency_rate2h
+        latency: "0.5"
+      record: image_builder_crc_requests:latency_rate2h
     - expr: |
         1 - (
-          sum(rate(image_builder_crc_http_duration_seconds_bucket{path!~".*compose",le="0.2"}[6h]))
+          sum(rate(image_builder_crc_http_duration_seconds_bucket{le="0.5"}[6h]))
           /
-          sum(rate(image_builder_crc_http_duration_seconds_count{path!~".*compose"}[6h]))
+          sum(rate(image_builder_crc_http_duration_seconds_count[6h]))
         )
       labels:
-        latency: "0.2"
-      record: image_builder_crc_non_compose_requests:latency_rate6h
+        latency: "0.5"
+      record: image_builder_crc_requests:latency_rate6h
     - expr: |
         1 - (
-          sum(rate(image_builder_crc_http_duration_seconds_bucket{path!~".*compose",le="0.2"}[1d]))
+          sum(rate(image_builder_crc_http_duration_seconds_bucket{le="0.5"}[1d]))
           /
-          sum(rate(image_builder_crc_http_duration_seconds_count{path!~".*compose"}[1d]))
+          sum(rate(image_builder_crc_http_duration_seconds_count[1d]))
         )
       labels:
-        latency: "0.2"
-      record: image_builder_crc_non_compose_requests:latency_rate1d
+        latency: "0.5"
+      record: image_builder_crc_requests:latency_rate1d
     - expr: |
         1 - (
-          sum by (job) (rate(image_builder_crc_http_duration_seconds_bucket{path!~".*compose",le="0.2"}[3d]))
+          sum by (job) (rate(image_builder_crc_http_duration_seconds_bucket{le="0.5"}[3d]))
           /
-          sum by (job) (rate(image_builder_crc_http_duration_seconds_count{path!~".*compose"}[3d]))
+          sum by (job) (rate(image_builder_crc_http_duration_seconds_count[3d]))
         )
       labels:
-        latency: "0.2"
-      record: image_builder_crc_non_compose_requests:latency_rate3d
-
-    - alert: ImageBuilderSlowComposeResponse_FastBurn
-      annotations:
-        message: 'High burn rate: {{ $value | humanizePercentage }} of compose requests are slower than 12s'
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/image-builder/ImageBuilderHighLatency.md"
-      expr: |
-        (
-          image_builder_crc_compose_requests:latency_rate1h{latency="12"} > (6.72*(1 - 0.9))
-          and
-          image_builder_crc_compose_requests:latency_rate5m{latency="12"} > (6.72*(1 - 0.9))
-        )
-        or
-        (
-          image_builder_crc_compose_requests:latency_rate6h{latency="12"} > (5.6*(1 - 0.9))
-          and
-          image_builder_crc_compose_requests:latency_rate30m{latency="12"} > (5.6*(1 - 0.9))
-        )
-      labels:
-        latency: "12"
-        severity: medium
-        service: insights
-        env: stage
-        app_team: image-builder
-    - alert: ImageBuilderSlowComposeResponse_SlowBurn
-      annotations:
-        message: 'High burn rate: {{ $value | humanizePercentage }} of compose requests are slower than 12s'
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/image-builder/ImageBuilderHighLatency.md"
-      expr: |
-        (
-          image_builder_crc_compose_requests:latency_rate1d{latency="12"} > (2.8*(1 - 0.9))
-          and
-          image_builder_crc_compose_requests:latency_rate2h{latency="12"} > (2.8*(1 - 0.9))
-        )
-        or
-        (
-          image_builder_crc_compose_requests:latency_rate3d{latency="12"} > (2.8*(1 - 0.9))
-          and
-          image_builder_crc_compose_requests:latency_rate6h{latency="12"} > (2.8*(1 - 0.9))
-        )
-      labels:
-        latency: "12"
-        severity: info
-        service: insights
-        env: stage
-        app_team: image-builder
-    - expr: |
-        1 - (
-          sum(rate(image_builder_crc_http_duration_seconds_bucket{path=~".*compose",le="12"}[5m]))
-          /
-          sum(rate(image_builder_crc_http_duration_seconds_count{path=~".*compose"}[5m]))
-        )
-      labels:
-        latency: "12"
-      record: image_builder_crc_compose_requests:latency_rate5m
-    - expr: |
-        1 - (
-          sum(rate(image_builder_crc_http_duration_seconds_bucket{path=~".*compose",le="12"}[30m]))
-          /
-          sum(rate(image_builder_crc_http_duration_seconds_count{path=~".*compose"}[30m]))
-        )
-      labels:
-        latency: "12"
-      record: image_builder_crc_compose_requests:latency_rate30m
-    - expr: |
-        1 - (
-          sum(rate(image_builder_crc_http_duration_seconds_bucket{path=~".*compose",le="12"}[1h]))
-          /
-          sum(rate(image_builder_crc_http_duration_seconds_count{path=~".*compose"}[1h]))
-        )
-      labels:
-        latency: "12"
-      record: image_builder_crc_compose_requests:latency_rate1h
-    - expr: |
-        1 - (
-          sum(rate(image_builder_crc_http_duration_seconds_bucket{path=~".*compose",le="12"}[2h]))
-          /
-          sum(rate(image_builder_crc_http_duration_seconds_count{path=~".*compose"}[2h]))
-        )
-      labels:
-        latency: "12"
-      record: image_builder_crc_compose_requests:latency_rate2h
-    - expr: |
-        1 - (
-          sum(rate(image_builder_crc_http_duration_seconds_bucket{path=~".*compose",le="12"}[6h]))
-          /
-          sum(rate(image_builder_crc_http_duration_seconds_count{path=~".*compose"}[6h]))
-        )
-      labels:
-        latency: "12"
-      record: image_builder_crc_compose_requests:latency_rate6h
-    - expr: |
-        1 - (
-          sum(rate(image_builder_crc_http_duration_seconds_bucket{path=~".*compose",le="12"}[1d]))
-          /
-          sum(rate(image_builder_crc_http_duration_seconds_count{path=~".*compose"}[1d]))
-        )
-      labels:
-        latency: "12"
-      record: image_builder_crc_compose_requests:latency_rate1d
-    - expr: |
-        1 - (
-          sum(rate(image_builder_crc_http_duration_seconds_bucket{path=~".*compose",le="12"}[3d]))
-          /
-          sum(rate(image_builder_crc_http_duration_seconds_count{path=~".*compose"}[3d]))
-        )
-      labels:
-        latency: "12"
-      record: image_builder_crc_compose_requests:latency_rate3d
+        latency: "0.5"
+      record: image_builder_crc_requests:latency_rate3d

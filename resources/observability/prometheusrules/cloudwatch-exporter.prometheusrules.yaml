@@ -46,7 +46,7 @@ spec:
       labels:
         service: app-sre-observability
         severity: warning
-      expr: aws_rds_free_storage_space_average{job=~"cloudwatch-exporter.*"} offset 10m < (1 * 1024^3)
+      expr: aws_rds_free_storage_space_average{job=~"cloudwatch-exporter.*",dbinstance_identifier!~".*-(?:stage|staging|integration).*"} offset 10m < (1 * 1024^3)
       for: 30m
       annotations:
         message: 'The current free storage space of DB instance {{ $labels.dbinstance_identifier }} is under 1 GB.'
@@ -56,7 +56,7 @@ spec:
       labels:
         service: app-sre-observability
         severity: high
-      expr: predict_linear(aws_rds_free_storage_space_average[1h], 3600 * 9) < 0
+      expr: predict_linear(aws_rds_free_storage_space_average{dbinstance_identifier!~".*-(?:stage|staging|integration).*"}[1h], 3600 * 9) < 0
       for: 1h
       annotations:
         message: 'DB instance {{ $labels.dbinstance_identifier }} storage will be full within 8 hours.'
@@ -66,7 +66,7 @@ spec:
       labels:
         service: app-sre-observability
         severity: high
-      expr: predict_linear(aws_rds_burst_balance_average[15m], 3600 * 9) <= 0
+      expr: predict_linear(aws_rds_burst_balance_average{dbinstance_identifier!~".*-(?:stage|staging|integration).*"}[15m], 3600 * 9) <= 0
       for: 1h
       annotations:
         message: "DB instance '{{ $labels.dbinstance_identifier }}' storage will be out of burst balance in 8 hours"
