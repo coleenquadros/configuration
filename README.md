@@ -798,7 +798,6 @@ Instructions:
 
 Notes:
 
-* [Secrets](https://kubernetes.io/docs/concepts/configuration/secret/) with fields of type `stringData` are not supported.
 * When creating a new secret in Vault, be sure to set the `Maximum Number of Versions` field to `0` (unlimited).
 * If you want to delete a secret from Vault, please get in contact with the App-SRE team.
 * If you wish to use a different secrets engine, please get in contact with the App-SRE team.
