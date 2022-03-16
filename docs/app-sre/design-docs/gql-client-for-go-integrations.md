@@ -90,6 +90,7 @@ As of writing this document, our GraphQL API is not using the GraphQL schema lan
 Luckily there are tools to generate this file from a given GraphQL endpoint:
  * https://www.graphql-cli.com/codegen/ 
  * https://github.com/prisma-labs/get-graphql-schema (deprecated, but works)
+ * https://gql.readthedocs.io/en/latest/gql-cli/intro.html#gql-cli
 
 These tools will fetch the schema from the API and generate the `schema.graphql` file. 
 
