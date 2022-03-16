@@ -25,7 +25,7 @@ Access required
 -  Console access to the cluster+namespace pods are running in.
 -  Repo access to koku (https://github.com/project-koku/koku)
 -  Turnpike access to cost-management internal apis (for db-performance endpoints)
-   -  Direct databae access to the cost-management-prod database (if connection action is required)
+    -  Direct databae access to the cost-management-prod database (if connection action is required)
 
 Steps
 -----
