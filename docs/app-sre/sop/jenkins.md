@@ -1,17 +1,6 @@
 # SOP : Jenkins
 
-<!-- TOC depthTo:2 -->
-
-- [SOP : Jenkins](#sop--jenkins)
-- [Alerts](#alerts)
-  - [JenkinsHealthCheck](#jenkinshealthcheck)
-  - [JenkinsNodeOffline](#jenkinsnodeoffline)
-  - [JenkinsExecutorSaturation](#jenkinsexecutorsaturation)
-  - [JenkinsJvmMemoryStarvation](#jenkinsjvmmemorystarvation)
-  - [JenkinsJvmCPUStarvation](#jenkinsjvmcpustarvation)
-- [JenkinsRestart](#Restarting-ci-int)
-
-<!-- /TOC -->
+[TOC]
 
 ---
 
@@ -148,19 +137,46 @@ TODO
 
 ---
 
-# Restarting ci-int
+# Restarting Jenkins
 
-Basicaly there are 3 methods of restarting ci-int, depending on severity of problems with service:
+There are several methods of restarting Jenkins, depending on severity of problems with service:
 
-## Safe reboot via [Jenkins UI](https://ci.int.devshift.net/safeRestart) - use it only for configuration changes and updating plugins, as it's not a full JVM restart
+## Safe restart
 
-## Systemd service restart - use it when you can ssh to instance
+Use systemd as you would with any other service:
 
-1. If ci-int UI is responsive, login to UI and hit [Prepare for Shutdown](https://ci.int.devshift.net/prepareShutdown) then wait several minutes for jobs finishing and cancel remaining
-2. ssh to instance `ssh ci.int.devshift.net`
-3. Restart Jenkins service: `sudo systemctl restart jenkins`
+``` shell
+systemctl restart --no-block jenkins
+```
 
-## OpenStack instance reboot
+This will let all ongoing jobs finish before restarting the
+daemon. Jenkins jobs can take up to 15 minutes. If the restart doesn't
+complete within 20 minutes, systemd will kill Jenkins and any leftover
+jobs (which were stuck in some Java loop anyways).
+
+**NOTE:** If you forget `--no-block` your terminal will be stuck for a
+long time! You can press control+C to get back to the prompt.
+
+## On a hurry
+
+You can kill Jenkins directly:
+
+``` shell
+systemctl kill jenkins -s TERM
+```
+
+Please note, doing this will lose track of any ongoing jobs.
+
+## Rebooting the controller
+
+* `systemctl reboot` will reboot the controller after letting all jobs
+  finish.
+* `systemctl reboot -f` will reboot the controller killing all ongoing
+  jobs.
+* `systemctl reboot -f -f` will perform an unclean shutdown. It is the
+  equivalent of yanking the power cord and connecting it again.
+
+## OpenStack instance reboot (ci-int)
 
 1. Login to [Open Stack](https://rhos-d.infra.prod.upshift.rdu2.redhat.com/dashboard) with your Kerberos credentials
 1. Navigate to [Compute -> Instances](https://rhos-d.infra.prod.upshift.rdu2.redhat.com/dashboard/project/instances/ec831410-8b9f-4d44-97e6-fbfc3d9817f8/)
