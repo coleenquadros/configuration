@@ -69,3 +69,9 @@ Escalations
 -  Ping the engineering team that owns the APP
 
 .. _Incident Response Doc: https://docs.google.com/document/d/1ztiNN7PiAsbr0GUSKjiLiS1_TGVpw7nd_OFWMskWD8w/edit?usp=sharing
+
+
+Documentation
+-------------
+
+The Database Performance Views documentation can be found here: https://docs.google.com/document/d/1C2_gu0pT8u3UWyugmYNHDhA-tvwsbOy2epplq4B9M2k/edit?usp=sharing
