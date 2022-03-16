@@ -94,6 +94,26 @@ terraformResources:
   identifier: grafana-production
   defaults: /terraform/resources/grafana/rds-1.yml
   output_resource_name: grafana-db
+## app-sre-stage-01 cloudwatch exporter
+- provider: aws-iam-service-account
+  account: app-sre-logs
+  identifier: app-sre-stage-01-cloudwatch-exporter
+  user_policy:
+    {
+      "Version": "2012-10-17",
+      "Statement": [{
+        "Action": [
+          "sts:AssumeRole"
+        ],
+        "Effect": "Allow",
+        "Resource": "*" 
+      }]
+    }
+  output_resource_name: app-sre-stage-01-cloudwatch-exporter
+  aws_infrastructure_access:
+    cluster:
+      $ref: /openshift/app-sre-stage-01/cluster.yml
+    access_level: read-only
 
 managedResourceTypes:
 - ConfigMap
