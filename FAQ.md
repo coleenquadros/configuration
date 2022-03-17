@@ -180,6 +180,8 @@ To get access to CloudWatch on a cluster's AWS account, follow these steps (exam
 1. In the Switch Role page, select a name for this role (suggestion: `<cluster_name>-read-only`) and click "Switch Role" (Account and Role should be filled automatically).
 1. You are now logged in to the cluster's AWS account. Go to the [CloudWatch console](https://console.aws.amazon.com/cloudwatch/home?#logsV2:log-groups) and get your logs!
 
+> Note: CloudWatch logs from all accounts are also available in Grafana, using the `<cluster_name>-cloudwatch datasource`. Feel free to [Explore](https://grafana.app-sre.devshift.net/explore?orgId=1&left=%5B%22now-5m%22,%22now%22,%22app-sre-stage-01-cloudwatch%22,%7B%22id%22:%22%22,%22region%22:%22us-east-1%22,%22namespace%22:%22%22,%22refId%22:%22A%22,%22queryMode%22:%22Logs%22,%22logGroupNames%22:%5B%22app-sre-stage-0-ctbn8.application%22%5D,%22expression%22:%22fields%20@message,%20kubernetes.namespace_name%5Cn%7C%20limit%20100%22,%22statsGroups%22:%5B%5D%7D%5D)!
+
 ### User unable to assume IAM role in the AWS Console
 
 If the `Invalid information in one or more fields. Check your information or contact your administrator.` error is displayed when trying to assume a different IAM role, make sure [to enable MFA on your user AWS Account](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_enable_virtual.html). After MFA is enabled, log out and back in. 
