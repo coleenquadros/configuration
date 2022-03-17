@@ -319,6 +319,88 @@ resourceTemplates:
       MIN_REPLICAS: "1"
       MAX_REPLICAS: "1"
 
+### CCX Notification Services
+
+- name: ccx-notification-writer
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/ccx-notification-writer
+  targets:
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
+    # FIXME set replicas to 1: https://issues.redhat.com/browse/CCXDEV-7479
+    ref: master
+    disable: true
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-ccx-notification-writer-gh-build-master
+    parameters:
+      IMAGE: "quay.io/cloudservices/ccx-notification-writer"
+      MIN_REPLICAS: "0"
+      MAX_REPLICAS: "0"
+      DB_REPLICAS: "0"
+      DB_CLEANER_JOB_SCHEDULE: "0 * * * *"
+      SUSPEND_JOB: "true"
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
+    ref: 90c6d71642d27cac8f1ce318b853265979ae75e1
+    # FIXME set replicas to 1: https://issues.redhat.com/browse/CCXDEV-7479
+    disable: true
+    parameters:
+      MIN_REPLICAS: "0"
+      MAX_REPLICAS: "0"
+      DB_REPLICAS: "0"
+      DB_CLEANER_JOB_SCHEDULE: "0 0 * * *"
+      SUSPEND_JOB: "true"
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true
+    # FIXME set replicas to 1: https://issues.redhat.com/browse/CCXDEV-7479
+    ref: internal
+    parameters:
+      MIN_REPLICAS: "0"
+      MAX_REPLICAS: "0"
+      DB_REPLICAS: "0"
+      SUSPEND_JOB: "true"
+
+- name: ccx-notification-service
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/ccx-notification-service
+  targets:
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
+    # FIXME set replicas to 1: https://issues.redhat.com/browse/CCXDEV-7479
+    disable: true
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-ccx-notification-service-gh-build-master
+    parameters:
+      IMAGE: "quay.io/cloudservices/ccx-notification-service"
+      CONTENT_SERVICE_PORT: 10000
+      JOB_SCHEDULE: "*/3 * * * *"
+      NOTIFICATION_RESEND_COOLDOWN: "29m"
+      SUSPEND_JOB: "true"
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
+    # FIXME set replicas to 1: https://issues.redhat.com/browse/CCXDEV-7479
+    disable: true
+    ref: 2c60b45cf5afafbdda4dbeb49d0a165d36bf6a6d
+    parameters:
+      CONTENT_SERVICE_PORT: 10000
+      JOB_SCHEDULE: "*/15 * * * *"
+      SUSPEND_JOB: "true"
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true
+    ref: internal
+    parameters:
+      CONTENT_SERVICE_PORT: 10000
+      JOB_SCHEDULE: "*/3 * * * *"
+      NOTIFICATION_RESEND_COOLDOWN: "29m"
+      SUSPEND_JOB: "true"
+
 
 ### Grafana Dashboards
 
