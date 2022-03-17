@@ -1141,6 +1141,15 @@ JSON schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/depen
 
 Additional special fields:
 - `_target_cluster`: A `$ref` to an OpenShift cluster definition. The value of `elbFQDN` on the cluster definition will be used as a target on the record
+- `_target_namespace_zone`: An object with a `$ref` to a namespace and a name of a zone defined under `terraformResources` in the referenced namespace:
+  ```yaml
+  - name: <subdomain>
+    ...
+    _target_namespace_zone:
+      namespace:
+        $ref: /path/to/namespace.yml
+      name: <subdomain>.example.org # example.com should match the zone this entry is added in
+  ```
 - `_healthcheck`: Allows defining a health check resource that will be assigned to the record. The parameters from Terraform's [aws_route53_health_check resource](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_health_check) are permitted.
 
 **NOTE:** If you need a record under the `api.openshift.com` zone

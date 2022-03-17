@@ -70,6 +70,12 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
         * `path` - path to secret in Vault containing credentials (should contain `config.json`, `user` and `token` keys)
         * `field` - should be `all`.
 * `parameters` - (optional) parameters for `oc process` to be used in all resource templates in this saas file.
+* `secretParameters` - (optional) a list of parameters from secrets in Vault for `oc process` to be used in all resource templates in this saas file.
+    * `name` - name of parameter
+    * `secret` - a description of a secret in Vault to get parameter value from.
+        * `path` - path to secret in Vault containing credentials
+        * `field` - secret field (key) to use
+        * `version` - secret version to use (if this is a KV v2 secret engine)
 * `resourceTemplates` - a list of configurations of OpenShift templates to deploy
     * `name` - a descriptive name of the deployed resources
     * `url` - git repository URL (https and not SSH)
@@ -87,6 +93,7 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
             * `subscribe` - before deploying, validate that the current commit sha has been successfully deployed and published to the specified channels
             * `promotion_data` - This section is managed by the integrations. It includes data relative to what triggered a promotion. [more info](/docs/app-sre/saas-walkthrough.md#automated-promotions-with-configuration-changes)
         * `parameters` - (optional) parameters for `oc process` to be used when deploying to the current namespace
+        * `secretParameters` - (optional) a list of parameters from secrets in Vault for `oc process` to be used in all resource templates in this saas file (description above).
         * `upstream` - (optional):
             * use this option in the case a docker image should be built before deployment
                 * or any other script that should run prior to deployment
@@ -112,6 +119,8 @@ In addition to the parameters defined in the saas file, a deployment to each nam
 Here is an example to parameters defined for the [insights-stage](/data/products/insights/environments/stage.yml) environment.
 
 Environment parameters can be used to template saas file parameters. For example, if `ENV_PARAMETER` is defined in the environment file parameters, it can be reused in a saas file parameters: `SAAS_PARAMETER: ${ENV_PARAMETER}/api/example`.
+
+Environment parameters can also be consumed from secrets in Vault, in the same way as described in the above structure section.
 
 Environment parameters must not be duplicated. If defined in an environment file they cannot be defined again with the same value in a saas file consuming the environment.
 
