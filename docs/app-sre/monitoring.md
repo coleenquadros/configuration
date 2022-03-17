@@ -360,27 +360,9 @@ To add another datasource, edit the `datasources.yaml` file, adding a new JSON o
 
 Next, apply the secret and redeploy grafana.
 
-Currently added datasources:
-
-- `app-sre-stage-01-prometheus`: app-sre managed prometheus for `app-sre-stage-01` cluster
-- `app-sre-stage-01-cluster-prometheus`: cluster prometheus for `app-sre-stage-01` cluster
-- `app-sre-stage-02-prometheus`: app-sre managed prometheus for `app-sre-stage-02` cluster
-- `app-sre-stage-02-cluster-prometheus`: cluster prometheus for `app-sre-stage-02` cluster
-- `app-sre-prod-01-prometheus`: app-sre managed prometheus for `app-sre-prod-01` cluster
-- `app-sre-prod-01-cluster-prometheus`: cluster prometehus for `app-sre-prod-01` cluster
-- `app-sre-prod-03-prometheus`: app-sre managed prometheus for `app-sre-prod-03` cluster
-- `app-sre-prod-03-cluster-prometheus`: cluster prometehus for `app-sre-prod-03` cluster
-- `quayiop04ue2-prometheus`: app-sre managed prometheus for `quayp04ue2` cluster
-- `quayiop05ue1-prometheus`: app-sre managed prometheus for `quayp05ue1` cluster
-- `quays02ue1-prometheus`: app-sre managed prometheus for `quays02ue1` cluster
-- `AWS app-sre`: cloudwatch AWS appsre
-- `dsaas-graphite`: graphite (osd-monitor) on `app-sre-prod-03` cluster
-- `elasticsearch-monitoring`: `.monitoring-es*` database on AWS elasitcsearch
-- `elasticsearch-logstash`: `.monitoring-logstash*` database on AWS elasitcsearch
-
 For those clusters that have a `-prometheus` and `-cluster-prometheus` datasources, app-sre managed services will keep its data on the `-prometheus` ones as the other is managed by OSD and used for cluster internal metrics.
 
-In case of doubt, the [grafana datasources file](/resources/observability/grafana/grafana-datasources.secret.yaml) is the source of truth and the place to get all the details on every datasource.
+In case of doubt, the [grafana datasources file](/resources/observability/grafana/grafana-datasources.secret.yaml) is the source of truth and the place to get all the details on every datasource. This file also includes templating of datasources for clusters managed by AppSRE. the templating information (list of clusters) can be found [here](/data/services/observability/shared-resources/grafana.yml).
 
 #### Adding a Postgres DB as a data source
 
