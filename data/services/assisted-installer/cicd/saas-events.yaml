@@ -1,0 +1,80 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: assisted-installer
+
+name: assisted-installer-events
+description: 'SaaS tracking file for assisted-events-scrape and its ecosystem'
+
+app:
+  $ref: /services/assisted-installer/app.yml
+
+pipelinesProvider:
+  $ref: /services/assisted-installer/pipelines/tekton.assisted-installer-pipelines.app-sre-prod-01.yaml
+
+deployResources:
+  requests:
+    cpu: 200m
+    memory: 700Mi
+  limits:
+    cpu: 200m
+    memory: 700Mi
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: assisted-app-sre-ci
+
+managedResourceTypes:
+- Deployment
+- Service
+- ConfigMap
+- PodDisruptionBudget
+- StatefulSet
+- ServiceAccount
+
+imagePatterns:
+- quay.io/app-sre/assisted-events-scrape
+- quay.io/openshift/origin-oauth-proxy
+
+resourceTemplates:
+- name: assisted-events-scrape
+  url: https://github.com/openshift-assisted/assisted-events-scrape
+  path: /openshift/template.yaml
+  provider: openshift-template
+  targets:
+  - ref: master
+    namespace:
+      $ref: /services/assisted-installer/namespaces/assisted-installer-integration.yml
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: openshift-assisted-assisted-events-scrape-gh-build-master
+    promotion:
+      publish:
+        - assisted-events-scrape-integration-deploy-success-channel
+    parameters:
+      ES_INDEX: assisted-service-events
+  - ref: master
+    namespace:
+      $ref: /services/assisted-installer/namespaces/assisted-installer-stage.yml
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: openshift-assisted-assisted-events-scrape-gh-build-master
+    promotion:
+      publish:
+        - assisted-events-scrape-stage-deploy-success-channel
+    parameters:
+      ES_INDEX: assisted-service-events
+      SENTRY_DSN: https://df9707fcc4064b8d95b75c79703e4a4d@sentry.stage.devshift.net/37
+  - namespace:
+      $ref: /services/assisted-installer/namespaces/assisted-installer-production.yml
+    ref: f02b30acbc11f58a1bad6b86527930657047763b
+    promotion:
+      publish:
+        - assisted-events-scrape-production-deploy-success-channel
+    parameters:
+      SENTRY_DSN: https://e865b3c62cce46619101231a74254525@sentry.devshift.net/1022
+      ES_INDEX: assisted-service-events
