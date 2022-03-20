@@ -26,12 +26,12 @@ match the expectation of the application/services that consumes it.
 ## Proposal
 This schema changes proposal introduces a field `output_resource_template` to
 terraform resources. this field defines the `path` portion of a
-`/openshift/openshift-resource-1.yml` that behaves like a resource with
-`provider: resource-template` and `type: jinja2`. alternatively we could
+`/openshift/openshift-resource-1.yml` That behaves like a resource with
+`provider: resource-template` and `type: jinja2`. Alternatively we could
 reference an actual `/openshift/openshift-resource-1.yml`, but then
 the implementing integration needs to verify `provider` and `type`.
 
-the integration implementing this schema change will need validate that the
+The integration implementing this schema change will need to validate that the
 resulting manifest is of `kind: Secret`.
 
 ### Example
