@@ -273,9 +273,9 @@ Each service has some predefined Service level objectives. In case yours doesn't
 
 #### Availability
 
-Reviewing the availability SLO is different than alerting for availability at any given moment!
+Reviewing the availability SLO is different than alerting for availability at any given moment! In general, we don't recommend setting up SLOs for availability. Whenever possible, prefer error rates (below) instead.
 
-If you have defined an availability target and are measuring it continuosly with the `up` metric (which is 1 if the measured thing is up and 0 if down), you probably have an objective for the portion of those data points that are 1 over the time window. This maps nicely to the `avg_over_time` function. For instance, if your objective is to be available 99% of the time:
+If you have an objective for the portion of the data points you `up` metric sets to 1 over the time window, you should define it with the `avg_over_time` function. For instance, if your objective is to be available 99% of the time:
 
 ``` yaml
 expr: avg_over_time(up{namespace="...", ...})
