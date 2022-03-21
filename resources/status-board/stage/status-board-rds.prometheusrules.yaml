@@ -14,7 +14,7 @@ spec:
     - alert: RDSLowStorageSpace
       expr: |
         aws_rds_free_storage_space_average{container="cloudwatch-exporter", dbinstance_identifier="status-board-stage", namespace="app-sre-observability-stage", service="cloudwatch-exporter"} offset 10m < (1 * 1024^3)
-      for: 1m
+      for: 30m
       labels:
         container: cloudwatch-exporter
         dbinstance_identifier: status-board-stage
@@ -22,7 +22,7 @@ spec:
         service: cloudwatch-exporter
         severity: info
       annotations:
-        message: 'The current free storage space of DB instance {{ $labels.dbinstance_indicator }} is under 1 GB.'
+        message: 'The current free storage space of DB instance {{ $labels.dbinstance_identifier }} is under 1 GB.'
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/aws/aws-rds-resources.md#rdsstoragelow"
         dashboard: "https://grafana.app-sre.devshift.net/d/statusboard/status-board?orgId=1&var-datasource=app-sre-stage-01-prometheus"
     - alert: RDSOutOfStorageSoon
