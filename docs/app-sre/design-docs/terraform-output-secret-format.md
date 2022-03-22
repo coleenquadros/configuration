@@ -122,4 +122,4 @@ The terraform output variables are available as jina2 template variables.
 # Milestones
 The effort to implement this is rather small and there are only a couple of
 cases that need to be migrated to this. So the proposal in this design doc
-can be implemented in one go.
+can be implemented in one go. The mentioned "future enhacement" is not subject for implementation right now.
