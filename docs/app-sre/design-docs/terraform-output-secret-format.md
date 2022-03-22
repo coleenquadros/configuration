@@ -7,7 +7,7 @@ Gerd Oberlechner / March 202
 ## Tracking Jira
 
 ## Problem Statement
-terraform-resource outputs (credentials etc) are placed into their respective
+`terraform-resource` outputs (credentials etc) are placed into their respective
 namespaces as kubernetes `Secrets`. The contents of those secrets are defined
 by the terraform output variables. At times an application/services requires
 a different formatting of those secrets. An existing solution that is sometimes used
@@ -24,12 +24,24 @@ Tenants should be able to influence the format of a terraform output secret to
 match the expectation of the application/services that consumes it.
 
 ## Proposal
-Since both cases motivating this change are basically the same, namely providing different formatting for AWS credentials, we can add a `format` field to the `aws-iam-service-account` provider in the `/openshift/terraform-resource-1.yml` schema. A `format` would be a predefined `provider` specific way of formatting its secrets, e.g.:
 
+Since both cases motivating this change are basically the same, namely providing different formatting for AWS credentials, we can add a `format` section to the `aws-iam-service-account` provider in the `/openshift/terraform-resource-1.yml` schema. A `format` would hold
+configuration data to drive the formatting process.
+
+```yaml
+  terraformResources:
+  - provider: aws-iam-service-account
+    format:
+      provider: accesskey-secretkey-credentials-file
+    ...
+```
+
+e.g. for `aws-iam-service-account`, the following `format.provider` values would solve
+the issues motivated by this design doc:
 * `accesskey-secretkey` - list `aws_access_key_id` and `aws_secret_access_key` in the secret
 * `accesskey-secretkey-credentials-file` - also list `credentials` in the secret containing a full AWS credentials file
 
-The `format` field can be implemented individually for each terraform provider when needed.
+Additional `format.provider`s can be added individually for each terraform provider when needed.
 
 ### Example
 
@@ -41,15 +53,10 @@ Declaring a terraform resource like this ...
   ...
   terraformResources:
   - provider: aws-iam-service-account
-    account: account
-    identifier: log-forwarder-xxx
     output_secret_name: instance
-    format: accesskey-secretkey-credentials-file
-    user_policy:
-      {
-        "Version": "2012-10-17",
-        ...
-      }
+    format:
+      provider: accesskey-secretkey-credentials-file
+    ...
 ```
 
 will result in a secret like this
@@ -70,19 +77,11 @@ will result in a secret like this
 
 ```
 
-## Alternative
-Instead of a `format` field defining implicit static output, introduce a field
-`output_resource_template` on terraform resources. This field defines the `path`
-portion of a `/openshift/openshift-resource-1.yml` that behaves like a resource with
-`provider: resource-template` and `type: jinja2`.
+## Future enhancements
 
-The integration implementing this schema change would need to validate that the
-resulting manifest is of `kind: Secret`.
-
-This alternative would be more flexible but also more complicated
-and errorprone to use. The reason, this was made the alternative
-and not the actual proposal, was the fact that we don't need the flexibility
-right now. Also there is a way forward adding this next to `format` if required.
+The `format.provider` approach also allows for flexible (but more involved) rendering approaches
+like referencing a resource template `/openshift/openshift-resource-1.yml` that behaves
+like a resource with `provider: resource-template` and `type: jinja2`. The integration implementing this schema change would need to validate that the resulting manifest is of `kind: Secret`.
 
 ### Example
 The terraform resource defines `output_resource_template` ...
@@ -93,14 +92,10 @@ The terraform resource defines `output_resource_template` ...
   ...
   terraformResources:
   - provider: aws-iam-service-account
-    account: account
-    identifier: log-forwarder-xxx
-    output_resource_template: /setup/clusterlogging/log-forwarder-iam.secret.yaml
-    user_policy:
-      {
-        "Version": "2012-10-17",
-        ...
-      }
+    format:
+      provider: resource-template
+      template: /setup/clusterlogging/log-forwarder-iam.secret.yaml
+    ...
 ```
 
 ... and a resource file with this content
