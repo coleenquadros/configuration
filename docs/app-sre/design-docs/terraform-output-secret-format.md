@@ -26,7 +26,7 @@ match the expectation of the application/services that consumes it.
 
 ## Proposal
 
-Since both cases motivating this change are basically the same, namely providing different formatting for AWS credentials, we can add a `format` section to the `aws-iam-service-account` provider in the `/openshift/terraform-resource-1.yml` schema. A `format` would hold
+Since both cases motivating this change are basically the same, namely providing different formatting for AWS credentials, we can add a `output_format` section to the `aws-iam-service-account` provider in the `/openshift/terraform-resource-1.yml` schema. `output_format` would hold
 configuration data to drive the formatting process.
 
 ```yaml
@@ -37,12 +37,12 @@ configuration data to drive the formatting process.
     ...
 ```
 
-e.g. for `aws-iam-service-account`, the following `format.provider` values would solve
+e.g. for `aws-iam-service-account`, the following `output_format.provider` values would solve
 the issues motivated by this design doc:
 * `accesskey-secretkey` - list `aws_access_key_id` and `aws_secret_access_key` in the secret
 * `accesskey-secretkey-credentials-file` - also list `credentials` in the secret containing a full AWS credentials file
 
-Additional `format.provider`s can be added individually for each terraform provider when needed.
+Additional `output_format.provider`s can be added individually for each terraform provider when needed.
 
 ### Example
 
@@ -55,7 +55,7 @@ Declaring a terraform resource like this ...
   terraformResources:
   - provider: aws-iam-service-account
     output_secret_name: instance
-    format:
+    output_format:
       provider: accesskey-secretkey-credentials-file
     ...
 ```
@@ -81,11 +81,11 @@ will result in a secret like this
 ## Future enhancements
 
 The `format.provider` approach also allows for flexible (but more involved) rendering approaches
-like referencing a resource template `/openshift/openshift-resource-1.yml` that behaves
+like referencing a resource template that behaves
 like a resource with `provider: resource-template` and `type: jinja2`. The integration implementing this schema change would need to validate that the resulting manifest is of `kind: Secret`.
 
 ### Example
-The terraform resource defines `output_resource_template` ...
+The terraform resource defines `output_format.provider: resource-template` ...
 
 ```yaml
   ---
@@ -93,7 +93,7 @@ The terraform resource defines `output_resource_template` ...
   ...
   terraformResources:
   - provider: aws-iam-service-account
-    format:
+    output_format:
       provider: resource-template
       template: /setup/clusterlogging/log-forwarder-iam.secret.yaml
     ...
