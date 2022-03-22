@@ -2,39 +2,7 @@
 
 ## Table of contents
 
-- [App-SRE Monitoring Guidelines](#app-sre-monitoring-guidelines)
-  - [Table of contents](#table-of-contents)
-  - [Preface](#preface)
-  - [What we monitor](#what-we-monitor)
-    - [White box monitoring](#white-box-monitoring)
-    - [Black box monitoring](#black-box-monitoring)
-  - [How we monitor](#how-we-monitor)
-    - [Prometheus](#prometheus)
-    - [Access](#access)
-  - [Monitoring using Prometheus](#monitoring-using-prometheus)
-    - [Deployment structure](#deployment-structure)
-    - [CentralCI](#centralci)
-    - [Cluster prometheus](#cluster-prometheus)
-    - [App-SRE prometheus](#app-sre-prometheus)
-    - [Adding an application to monitoring](#adding-an-application-to-monitoring)
-  - [Alerting with Alertmanager](#alerting-with-alertmanager)
-    - [Configuring alertmanager](#configuring-alertmanager)
-    - [Supported notification channels](#supported-notification-channels)
-    - [Notification templates](#notification-templates)
-    - [Alerting for your applications](#alerting-for-your-applications)
-    - [Alert Severities](#alert-severities)
-    - [Recommended Alerts](#recommended-alerts)
-    - [Availability](#availability)
-    - [SLO Based](#slo-based)
-  - [Visualization with Grafana](#visualization-with-grafana)
-    - [Configuring grafana](#configuring-grafana)
-    - [Adding datasources](#adding-datasources)
-      - [Adding a Postgres DB as a data source](#adding-a-postgres-db-as-a-data-source)
-    - [Adding dashboards](#adding-dashboards)
-    - [Updating dashboards](#updating-dashboards)
-  - [How-To](#how-to)
-    - [Monitor a persistent volume's filesystem used/available space](#monitor-a-persistent-volumes-filesystem-usedavailable-space)
-  - [Ask a question](#ask-a-question)
+[TOC]
 
 * * *
 
@@ -303,7 +271,26 @@ The App-SRE team also adds default alerts for known Kubernetes failure domains l
 
 Each service has some predefined Service level objectives. In case yours doesn't, it still helps to think of alerting in terms of errors that a customer is seeing.
 
-**Error rates:**
+#### Availability
+
+Reviewing the availability SLO is different than alerting for availability at any given moment! In general, we don't recommend setting up SLOs for availability. Whenever possible, prefer error rates (below) instead.
+
+If you have an objective for the portion of the data points you `up` metric sets to 1 over the time window, you should define it with the `avg_over_time` function. For instance, if your objective is to be available 99% of the time:
+
+``` yaml
+expr: avg_over_time(up{namespace="...", ...})
+SLOTarget: 0.99
+SLOTargetUnit: percent_0_1
+...
+```
+
+(or, if we want a single metric reported back to us:
+
+``` yaml
+expr: group(avg_over_time(up{namespace="...", ...}))
+```
+
+#### Error rates
 
 This is defined as the percent of requests from a client that receive an 'error' response, including but not limited to 4xx and 5xx responses.
 The standard prometheus library for most languages provides an `http_requests_total` metric that's partitioned on the response code, which can be used for this alert.
@@ -318,7 +305,7 @@ sum without(instance, pod, job, code) (rate(http_requests_total{handler="upload"
 
 Alerts when there's more than 10 5xx response on average for a 5 minute window
 
-**Latency:**
+#### Latency
 
 It is also recommended to keep a watch on the latency of responses from your services to clients.
 
@@ -332,7 +319,7 @@ histogram_quantile(0.99, sum(rate(prometheus_http_request_duration_seconds_bucke
 
 The above rule fires if the 99th Percentile response time for the service is greater than 10 seconds. The rule should match closely with what your Service Level Objectives are. Its okay to have a baseline expectation in the beginning and then fine tune it based on the data obtained.
 
-**Service Specific alerts:**
+#### Service Specific alerts
 
 Only a subset of possible alerts can be generalized for all services. As the developer, you are in the best position to know the failure domains of the service. Such cases should be converted in the alerts so that we can provide our customers with a resilient service.
 
