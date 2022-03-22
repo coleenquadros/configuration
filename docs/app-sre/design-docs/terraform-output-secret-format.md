@@ -73,14 +73,14 @@ will result in a secret like this
 ## Alternative
 Instead of a `format` field defining implicit static output, introduce a field
 `output_resource_template` on terraform resources. This field defines the `path`
-portion of a `/openshift/openshift-resource-1.yml` That behaves like a resource with
+portion of a `/openshift/openshift-resource-1.yml` that behaves like a resource with
 `provider: resource-template` and `type: jinja2`.
 
 The integration implementing this schema change would need to validate that the
 resulting manifest is of `kind: Secret`.
 
-This alternative would be more flexible for tenants to use but would also be
-more complicated and errorprone to use. The reason, this was made the alternative
+This alternative would be more flexible but also more complicated
+and errorprone to use. The reason, this was made the alternative
 and not the actual proposal, was the fact that we don't need the flexibility
 right now. Also there is a way forward adding this next to `format` if required.
 
