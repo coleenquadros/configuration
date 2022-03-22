@@ -24,15 +24,65 @@ Tenants should be able to influence the format of a terraform output secret to
 match the expectation of the application/services that consumes it.
 
 ## Proposal
-This schema changes proposal introduces a field `output_resource_template` to
-terraform resources. this field defines the `path` portion of a
-`/openshift/openshift-resource-1.yml` That behaves like a resource with
-`provider: resource-template` and `type: jinja2`. Alternatively we could
-reference an actual `/openshift/openshift-resource-1.yml`, but then
-the implementing integration needs to verify `provider` and `type`.
+Since both cases motivating this change are basically the same, namely providing different formatting for AWS credentials, we can add a `format` field to the `aws-iam-service-account` provider in the `/openshift/terraform-resource-1.yml` schema. A `format` would be a predefined `provider` specific way of formatting its secrets, e.g.:
 
-The integration implementing this schema change will need to validate that the
+* `accesskey-secretkey` - list `aws_access_key_id` and `aws_secret_access_key` in the secret
+* `accesskey-secretkey-credentials-file` - also list `credentials` in the secret containing a full AWS credentials file
+
+The `format` field can be implemented individually for each terraform provider when needed.
+
+### Example
+
+Declaring a terraform resource like this ...
+
+```yaml
+  ---
+  $schema: /openshift/namespace-1.yml
+  ...
+  terraformResources:
+  - provider: aws-iam-service-account
+    account: account
+    identifier: log-forwarder-xxx
+    output_secret_name: instance
+    format: accesskey-secretkey-credentials-file
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        ...
+      }
+```
+
+will result in a secret like this
+
+```yaml
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: instance
+  type: Opaque
+  stringData:
+    aws_access_key_id: {{ aws_access_key_id }}
+    aws_secret_access_key: {{ aws_secret_access_key }}
+    credentials: >-
+      [default]
+      aws_access_key_id = {{ aws_access_key_id }}
+      aws_secret_access_key = {{ aws_secret_access_key }}
+
+```
+
+## Alternative
+Instead of a `format` field defining implicit static output, introduce a field
+`output_resource_template` on terraform resources. This field defines the `path`
+portion of a `/openshift/openshift-resource-1.yml` That behaves like a resource with
+`provider: resource-template` and `type: jinja2`.
+
+The integration implementing this schema change would need to validate that the
 resulting manifest is of `kind: Secret`.
+
+This alternative would be more flexible for tenants to use but would also be
+more complicated and errorprone to use. The reason, this was made the alternative
+and not the actual proposal, was the fact that we don't need the flexibility
+right now. Also there is a way forward adding this next to `format` if required.
 
 ### Example
 The terraform resource defines `output_resource_template` ...
@@ -71,30 +121,9 @@ The terraform resource defines `output_resource_template` ...
 
 ```
 
-the terraform output variables are available as jina2 template variables.
+The terraform output variables are available as jina2 template variables.
 
-## Alternative
-Since both cases motivating this change are basically the same, namely providing different formatting for AWS credentials, we could also add a `format` field to the `aws-iam-service-account` provider in the `/openshift/terraform-resource-1.yml` schema. A `format` would be a predefined `provider` specific way of formatting its secrets, e.g. `format: accesskey-secretkey | credentials-file | accesskey-secretkey-credentials-file`. This would be a more localized solution that is less flexible but also more robust and less errorprone.
-
-### Example
-
-The `accesskey-secretkey-credentials-file` format could be defined like the
-template specified in the proposal. Using it like this, would result in the
-same output secret as in the proposal.
-
-```yaml
-  ---
-  $schema: /openshift/namespace-1.yml
-  ...
-  terraformResources:
-  - provider: aws-iam-service-account
-    account: account
-    identifier: log-forwarder-xxx
-    output_secret_name: instance
-    format: accesskey-secretkey-credentials-file
-    user_policy:
-      {
-        "Version": "2012-10-17",
-        ...
-      }
-```
+# Milestones
+The effort to implement this is rather small and there are only a couple of
+cases that need to be migrated to this. So the proposal in this design doc
+can be implemented in one go.
