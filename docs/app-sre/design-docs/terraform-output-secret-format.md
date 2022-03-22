@@ -2,9 +2,10 @@
 
 ## Author/date
 
-Gerd Oberlechner / March 202
+Gerd Oberlechner / March 2022
 
 ## Tracking Jira
+https://issues.redhat.com/browse/APPSRE-4619
 
 ## Problem Statement
 `terraform-resource` outputs (credentials etc) are placed into their respective
