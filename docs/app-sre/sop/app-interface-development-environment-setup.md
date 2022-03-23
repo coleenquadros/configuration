@@ -11,6 +11,16 @@ This SOP explains how to setup a local development environment for app-interface
 
 This guide assums that you are setting up a development environment to use with the real [app-interface](https://gitlab.cee.redhat.com/service/app-interface) data.
 
+## Install basic tools (MacOs, optional)
+
+If you are running MacOs, you may want to install the GNU version of some common tools like grep, coreutils, find, awk or sed. They are availbale with homebrew, for instance:
+
+``` shell
+brew install findutils
+```
+and perhaps make your brew-installed tools override the default MacOs ones.
+
+
 ## Setup Repo
 
 1. Fork the following repositories:
