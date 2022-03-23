@@ -15,7 +15,7 @@ spec:
     rules:
     - alert: JenkinsDown
       labels:
-        severity: critical
+        severity: critical-fts
         service: ci-ext
       expr: absent(up{job="jenkins_ext"} == 1)
       for: 5m
@@ -29,7 +29,7 @@ spec:
     rules:
     - alert: JenkinsHealthCheck
       labels:
-        severity: critical
+        severity: critical-fts
         service: ci-ext
       expr: jenkins_health_check_score < 1
       for: 5m
@@ -40,7 +40,7 @@ spec:
         link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"
     - alert: JenkinsNodeOffline
       labels:
-        severity: critical
+        severity: critical-fts
         service: ci-ext
       expr: jenkins_node_offline_value > 1
       for: 5m
@@ -51,7 +51,7 @@ spec:
         link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"
     - alert: JenkinsJvmMemoryStarvation
       labels:
-        severity: critical
+        severity: critical-fts
         service: ci-ext
       expr: (vm_memory_total_max{job="jenkins_ext"} - vm_memory_total_used{job="jenkins_ext"}) / vm_memory_total_max{job="jenkins_ext"} * 100.0 < 10
       for: 5m
@@ -108,7 +108,7 @@ spec:
         link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"
     - alert: JenkinsWebServerError
       labels:
-        severity: critical
+        severity: critical-fts
         service: ci-ext
       expr: |
         sum(rate(http_responseCodes_serverError_total{instance="ci.ext.devshift.net:80"}[5m]))
@@ -122,7 +122,7 @@ spec:
         link_url: "http://{{ $labels.instance }}/job/{{ $labels.jenkins_job }}"
     - alert: JenkinsWebServiceUnavailable
       labels:
-        severity: critical
+        severity: critical-fts
         service: ci-ext
       expr: |
         sum(rate(http_responseCodes_serviceUnavailable_total{instance="ci.ext.devshift.net:80"}[5m]))
@@ -275,7 +275,7 @@ spec:
       expr: up{job=~"ci_ext.*"} == 0
       for: 5m
       labels:
-        severity: critical
+        severity: critical-fts
         service: ci-ext
       annotations:
         message: "{% raw %}{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 5 minutes.{% endraw %}"
@@ -284,7 +284,7 @@ spec:
       expr: '(1 - ((node_memory_MemFree_bytes{job=~"ci_ext.*"} + node_memory_Buffers_bytes{job=~"ci_ext.*"} + node_memory_Cached_bytes{job=~"ci_ext.*"} + node_memory_SReclaimable_bytes{job=~"ci_ext.*"}) / node_memory_MemTotal_bytes{job=~"ci_ext.*"})) * 100 > 98'
       for: 5m
       labels:
-        severity: critical
+        severity: critical-fts
         service: ci-ext
       annotations:
         message: "{% raw %}{{ $labels.instance }} has Critical Memory Usage more than 5 minutes.{% endraw %}"
@@ -305,7 +305,7 @@ spec:
         (node:node_filesystem_usage: > 0.85) and (predict_linear(node:node_filesystem_avail:[30m], 3600 * 2) < 0)
       for: 10m
       labels:
-        severity: critical
+        severity: critical-fts
         service: ci-ext
     - alert: PredictNodeDiskFull
       annotations:
