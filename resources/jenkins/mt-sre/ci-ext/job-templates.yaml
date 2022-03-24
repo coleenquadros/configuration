@@ -1,0 +1,22 @@
+- job-template:
+    id: 'gh-build-master-mtsre'
+    name: '{gh_org}-{gh_repo}-gh-build-{branch}'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *backup_ecr_push_creds
+        - *quay_secret_push
+        - *app_sre_bot_push_token
+        - *app_interface_creds
+        - *quay_secret_mtsre_push
+    builders:
+    - shell: |
+        export DOCKER_CONF=$PWD/.docker
+        mkdir -p $DOCKER_CONF
+        echo "$QUAY_DOCKER_CONFIG_JSON" | base64 -d > $DOCKER_CONF/config.json
+
+        ./build_deploy.sh
+    <<: *gh_build_master
