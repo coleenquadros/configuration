@@ -32,7 +32,7 @@ configuration data to drive the formatting process.
 ```yaml
   terraformResources:
   - provider: aws-iam-service-account
-    format:
+    output_format:
       provider: accesskey-secretkey-credentials-file
     ...
 ```
@@ -80,12 +80,7 @@ will result in a secret like this
 
 ## Future enhancements
 
-The `format.provider` approach also allows for flexible (but more involved) rendering approaches
-like referencing a resource template that behaves
-like a resource with `provider: resource-template` and `type: jinja2`. The integration implementing this schema change would need to validate that the resulting manifest is of `kind: Secret`.
-
-### Example
-The terraform resource defines `output_format.provider: resource-template` ...
+Provide generic output format providers that allow templated approaches to rendering. e.g.
 
 ```yaml
   ---
@@ -94,32 +89,26 @@ The terraform resource defines `output_format.provider: resource-template` ...
   terraformResources:
   - provider: aws-iam-service-account
     output_format:
-      provider: resource-template
-      template: /setup/clusterlogging/log-forwarder-iam.secret.yaml
+      provider: generic-secret
+      data:
+        aws_access_key_id: {{ aws_access_key_id }}
+        aws_secret_access_key: {{ aws_secret_access_key }}
+        credentials: >-
+          [default]
+          aws_access_key_id = {{ aws_access_key_id }}
+          aws_secret_access_key = {{ aws_secret_access_key }}
     ...
 ```
 
-... and a resource file with this content
+Making `generic-secret` the default provider if non is declared and defaulting `output_format.data` to the terraform
+output variables, would make all current terraformResources forward compatible, they would render the same without
+any required change.
 
-```yaml
-  apiVersion: v1
-  kind: Secret
-  metadata:
-    name: instance
-  type: Opaque
-  stringData:
-    aws_access_key_id: {{ aws_access_key_id }}
-    aws_secret_access_key: {{ aws_secret_access_key }}
-    credentials: >-
-      [default]
-      aws_access_key_id = {{ aws_access_key_id }}
-      aws_secret_access_key = {{ aws_secret_access_key }}
-
-```
-
-The terraform output variables are available as jina2 template variables.
+For more complex custom formats that are used repeatedly or that are too big to be decalred/repeated inline,
+a `resource-template` provider can be implemented, that allows referncing a resource file with jinja2 contents
+and that leverages explicity or implicitly defined `output_format.data` as template variables.
 
 # Milestones
 The effort to implement this is rather small and there are only a couple of
 cases that need to be migrated to this. So the proposal in this design doc
-can be implemented in one go. The mentioned "future enhacement" is not subject for implementation right now.
+can be implemented in one go.
