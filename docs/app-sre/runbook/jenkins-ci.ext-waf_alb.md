@@ -21,7 +21,7 @@ As we are securing a jenkins controller, which has an adminsitration panel and w
 JJB do POST requests with large xml payloads to manage the job definitions. This could be detected as XSS attack by the WAF if the pertinent rule is not disabled[1]
 
 On the ALB site, HTTPS is managed with the `ci.ext.devshift.net` certificate issued by Digicert. The certificate has been uploaded to Certificate Manager and is referenced in the ALB. **We will need to
-update this certificate in Certificate Manager and in the Jenkins Controller when a new one is issued.**
+update this certificate in Certificate Manager and in the Jenkins Controller when a new one is issued.**. There is a SOP under [Additional Resources](#additional-resources)
 
 [1]. Rules are not disabled in AWS WAF, are set as ONLY_COUNT. This way rules just log the match but does not block the requests.
 
@@ -55,3 +55,7 @@ and do the terraform plan/apply.
 ## IaC Resources
 
 All the components are managed as IaC with terraform [HERE](https://gitlab.cee.redhat.com/app-sre/infra/-/tree/master/terraform/app-sre/ci.ext-alb)
+
+## Additional Resources
+
+- [Digicert Certificates management SOP](https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/digicert-tls-certificates.md)
