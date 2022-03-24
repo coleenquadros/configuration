@@ -128,6 +128,35 @@ run_vault_reconcile_integration() {
   return $status
 }
 
+run_user_validator() {
+  local status
+
+  STARTTIME=$(date +%s)
+  docker run --rm -t \
+    -e QONTRACT_SERVER_URL=${GRAPHQL_SERVER} \
+    -e GRAPHQL_USERNAME=${GRAPHQL_USERNAME} \
+    -e GRAPHQL_PASSWORD=${GRAPHQL_PASSWORD} \
+    -e VAULT_ADDR=https://vault.devshift.net \
+    -e VAULT_AUTHTYPE=approle \
+    -e VAULT_ROLE_ID=${USER_VALIDATOR_ROLE_ID} \
+    -e VAULT_SECRET_ID=${USER_VALIDATOR_SECRET_ID} \
+    ${USER_VALIDATOR_IMAGE}:${USER_VALIDATOR_IMAGE_TAG} validate \
+    2>&1 | tee ${SUCCESS_DIR}/reconcile-user-validator.txt
+
+  status="$?"
+  ENDTIME=$(date +%s)
+
+  # Add integration run durations to a file
+  echo "app_interface_int_execution_duration_seconds{integration=\"user-validator\"} $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
+
+  if [ "$status" != "0" ]; then
+    echo "INTEGRATION FAILED: user-validator" >&2
+    mv ${SUCCESS_DIR}/reconcile-user-validator.txt ${FAIL_DIR}/reconcile-user-validator.txt
+  fi
+
+  return $status
+}
+
 send_log() {
   BUILDTIME=$(date -d "$BUILD_TIMESTAMP" +%s000)
 
