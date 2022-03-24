@@ -100,12 +100,12 @@ Provide generic output format providers that allow templated approaches to rende
     ...
 ```
 
-Making `generic-secret` the default provider if non is declared and defaulting `output_format.data` to the terraform
+Making `generic-secret` the default provider if none is declared and defaulting `output_format.data` to the terraform
 output variables, would make all current terraformResources forward compatible, they would render the same without
 any required change.
 
-For more complex custom formats that are used repeatedly or that are too big to be decalred/repeated inline,
-a `resource-template` provider can be implemented, that allows referncing a resource file with jinja2 contents
+For more complex custom formats that are used repeatedly or that are too big to be declared/repeated inline,
+a `resource-template` provider can be implemented, that allows referencing a resource file with jinja2 contents
 and that leverages explicity or implicitly defined `output_format.data` as template variables.
 
 # Milestones
