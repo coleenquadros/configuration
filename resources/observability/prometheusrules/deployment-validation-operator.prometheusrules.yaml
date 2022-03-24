@@ -1,0 +1,37 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: deployment-validation-operator
+spec:
+  groups:
+  - name: deployment-validation-operator.rules
+    rules:
+    {{%- for namespace in query('/queries/namespace-app-jira.graphql') %}}
+    {{%- if namespace.cluster.name == resource.namespace.cluster.name %}}
+    {{%- if not namespace.name.startswith('openshift-') %}}
+    {{%- for metric in metrics %}}
+    - alert: {{{ metric }}}-{{{ namespace.name }}}
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/dashdotdb/dash-db?orgId=1&var-datasource=dashdotdb-rds&var-cluster={{{ resource.namespace.cluster.name }}}&var-namespace={{{ namespace.name }}}"
+        message: "{{{ metric }}} Validation error for {{{ namespace.app.name }}}: {{ $labels.check_description }}"
+        runbook: "{{ $labels.check_remediation }}"
+      expr: |
+        {{{ metric }}}{exported_namespace="{{{ namespace.name }}}"} > 0
+      for: 1m
+      labels:
+        service: {{{ namespace.app.name }}}
+        severity: medium
+        {{%- if namespace.app.escalationPolicy.channels.jiraBoard %}}
+        jiralert: {{{ namespace.app.escalationPolicy.channels.jiraBoard[0].name }}}
+        {{%- else %}}
+        jiralert: ASIC
+        {{%- endif %}}
+    {{%- endfor %}}
+    {{%- endif %}}
+    {{%- endif %}}
+    {{%- endfor %}}
