@@ -12,20 +12,30 @@ app:
   $ref: /services/insights/ephemeral/app.yml
 
 pipelinesProvider:
-  $ref: /services/insights/pipelines/tekton.crc-poc-pipelines.appsrep05ue1.yaml
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
 
 managedResourceTypes:
+- CustomResourceDefinition
 - Deployment
 - DeploymentConfig
 - Service
+- ClusterRole
+- Role
+- ConfigMap
+- ServiceAccount
+- RoleBinding
+- ClusterRoleBinding
 
 imagePatterns:
 - quay.io/cloudservices
 
+clusterAdmin: true
+compare: false
+
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
-  channel: team-clouddot-info
+  channel: team-consoledot-devprod
 
 authentication:
   code:
@@ -70,4 +80,15 @@ resourceTemplates:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
     disable: true  # do not create an app-sre deploy job for ephemeral namespace
     ref: internal  # populated by bonfire
+- name: ephemeral-namespace-operator
+  path: /deploy.yml
+  url: https://github.com/RedHatInsights/ephemeral-namespace-operator
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/crcd-ns-operator.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-ephemeral-namespace-operator-gh-build-main
 
