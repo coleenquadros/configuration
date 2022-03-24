@@ -17,7 +17,7 @@ The main access to jenkins is through an Application load balancer (ALB) secured
 AWS provides a set of managed rule groups to protect backends against reported vulnerabilities like OWASP's published flaws. These rulesets are updated periodically with new definitions, we will need to check our configuration and update it
 with new rulesets, etc.
 
-As we are securing a jenkins controller, which has an adminsitration panel and we are using integrations to do the configuration, the WAF configuration could be a bit tricky as there are some rules that need to be allowed. As an example,
+As we are securing a Jenkins controller, which has an adminisitration panel and we are using integrations to do the configuration, the WAF configuration could be a bit tricky as there are some rules that need to be allowed. As an example,
 JJB do POST requests with large xml payloads to manage the job definitions. This could be detected as XSS attack by the WAF if the pertinent rule is not disabled[1]
 
 On the ALB site, HTTPS is managed with the `ci.ext.devshift.net` certificate issued by Digicert. The certificate has been uploaded to Certificate Manager and is referenced in the ALB. **We will need to
