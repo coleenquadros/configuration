@@ -24,3 +24,4 @@ To generate per-resource alerts, one would need to use the `query` built-in func
 
 Examples:
 1. [Generate Jiralert related AlertManager configuration](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/36052/diffs?commit_id=40070af0e0ac02b2b9067ce4aa123e55daa7943d)
+1. [Generate DVO alerts which are automatically routed to a tenant's jira board](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/36096/diffs?commit_id=d7ab037ad084fae6a81e9cc8e904388fe5b51a3a)
