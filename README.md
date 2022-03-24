@@ -711,6 +711,14 @@ The `resource-template` provider supports using the `Jinja2` template language t
     {{ github('repo-name', 'path-to-file', 'ref') }}
     ```
 
+- Execute a Graphql query on app-interface data:
+
+    ```jinja
+    {{ query('/queries/file.graphql') }}
+    ```
+
+  This file should be located in the `resources/queries/` directory. See all existing examples [here](/resources/queries/)
+
 - Base64 encode a block of data
 
     ```jinja
