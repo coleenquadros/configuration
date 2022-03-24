@@ -20,6 +20,9 @@ with new rulesets, etc.
 As we are securing a jenkins controller, which has an adminsitration panel and we are using integrations to do the configuration, the WAF configuration could be a bit tricky as there are some rules that need to be allowed. As an example,
 JJB do POST requests with large xml payloads to manage the job definitions. This could be detected as XSS attack by the WAF if the pertinent rule is not disabled[1]
 
+On the ALB site, HTTPS is managed with the `ci.ext.devshift.net` certificate issued by Digicert. The certificate has been uploaded to Certificate Manager and is referenced in the ALB. **We will need to
+update this certificate in Certificate Manager and in the Jenkins Controller when a new one is issued.**
+
 [1]. Rules are not disabled in AWS WAF, are set as ONLY_COUNT. This way rules just log the match but does not block the requests.
 
 ### Logging
