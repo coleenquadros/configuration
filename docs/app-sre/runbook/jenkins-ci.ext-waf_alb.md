@@ -8,7 +8,7 @@ The aim of this document is to expose to up-to-date frontend architecture for Je
 
 ## Architecture
 
-![Ci Ext infra](img/ci.ext-alb_waf.drawio.png "CI Ext Architecture")
+![Ci Ext infra](img/ci.ext-architecture.drawio.png "CI Ext Architecture")
 
 ## Load Balancing & WAF
 
