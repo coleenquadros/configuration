@@ -3,10 +3,10 @@
 $schema: /app-sre/saas-file-2.yml
 
 labels:
-  service: glitchtip
+  service: saas-glichtip
 
 name: saas-glichtip
-description: SaaS tracking file for Glitchtip
+description: SaaS tracking file for Glichtip
 
 app:
   $ref: /services/glitchtip/app.yml
@@ -38,12 +38,14 @@ imagePatterns:
 resourceTemplates:
 - name: glitchtip
   url: https://github.com/rh-cssre/glitchtip-frontend
-  path: /k8s-manifests
-  provider: directory
+  path: /openshift/template.yaml
   parameters:
-    GLITCHTIP_SINGLE_ORGANIZATION: "true"
+    IMAGE_TAG: "a6f74e7"
   targets:
-  # stage
   - namespace:
       $ref: /services/glitchtip/namespaces/glitchtip-stage.yml
-    ref: 8be6e4267c6de3bb9679da8486fc02ed28a2a5fc
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: rh-cssre-glitchtip-frontend-gh-build-master
