@@ -11,8 +11,8 @@ spec:
   groups:
   - name: deployment-validation-operator.rules
     rules:
-    {{%- for namespace in query('/queries/namespace-app-jira.graphql') %}}
-    {{%- if namespace.cluster.name == resource.namespace.cluster.name %}}
+    {{%- for cluster in query('/queries/cluster-namespace-app-jira.graphql', name=resource.namespace.cluster.name) %}}
+    {{%- for namespace in cluster.namespaces %}}
     {{%- if not namespace.name.startswith('openshift-') %}}
     {{%- for metric in metrics %}}
     - alert: {{{ metric }}}-{{{ namespace.name }}}
@@ -33,5 +33,5 @@ spec:
         {{%- endif %}}
     {{%- endfor %}}
     {{%- endif %}}
-    {{%- endif %}}
+    {{%- endfor %}}
     {{%- endfor %}}
