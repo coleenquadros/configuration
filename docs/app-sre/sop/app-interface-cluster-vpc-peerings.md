@@ -1,4 +1,6 @@
-# OSDv4 cluster VPC peerings with existing AWS account
+# OSD Peering
+
+## OSDv4 cluster VPC peerings with existing AWS account
 
 To add a VPC peering between an OSDv4 cluster and an AWS account managed in app-interface, perform the following operations:
 
@@ -11,29 +13,30 @@ To add a VPC peering between an OSDv4 cluster and an AWS account managed in app-
     * Note: the cluster has to be managed by `ocm` (an `ocm` section must exist).
     * The peering name should follow this convention: `<cluster-name>_<aws-account-name>_<vpc-name>`.
     * `managedRoutes` set to `true` will make the integration create the VPC routes in the cluster side.  Routes in the existing AWS account will be created outside app-interface (see below note about additional resources).
-    * Make sure cluster has `awsGroup` that allow management of AWS cluster in `awsInfrastructureAccess` section, e.g. this will make possible for users in the `App-SRE-admin` group from `app-sre` account to assume `read-only` or `network-mgmt` roles in the cluster where this is added (and currently it also makes terraform user in `app-sre` account to be able to switch to network-mgmt in the cluster account).
-    ```
-    awsInfrastructureAccess:
-    - awsGroup:
-        $ref: /aws/app-sre/groups/App-SRE-admin.yml
-      accessLevel: read-only
-    - awsGroup:
-        $ref: /aws/app-sre/groups/App-SRE-admin.yml
-      accessLevel: network-mgmt
-     ```
+    * Make sure to define `awsInfrastructureManagementAccounts` in your cluster.yml. This is required for the `terraform` user to obtain `network-mgmt` permissions in the OSD cluster. Those permissions are required for terraform to do the peering.
+
+      ```yaml
+      awsInfrastructureManagementAccounts:
+      - account:
+          $ref: /aws/cluster/account.yml
+        accessLevel: network-mgmt
+        default: true
+      ```
+
     * If you use a `tags` block, make sure your VPC has the matching tags. They are used as a filter:
-    ```
-    peering:
-      connections:
-      - provider: account-vpc-mesh
-        name: appint-ex-01_app-int-example-01_mesh
-        account:
-          $ref: /aws/app-int-example-01/account.yml
-        tags:
-          # Make sure your VPC has this tag -> this is used as a filter!
-          Name: app-interface-development
-        manageRoutes: true
-    ```
+
+      ```yaml
+      peering:
+        connections:
+        - provider: account-vpc-mesh
+          name: appint-ex-01_app-int-example-01_mesh
+          account:
+            $ref: /aws/app-int-example-01/account.yml
+          tags:
+            # Make sure your VPC has this tag -> this is used as a filter!
+            Name: app-interface-development
+          manageRoutes: true
+      ```
 
 3. Make sure your clusters `network` block matches with your OCM clusters network CIDRs!
 Go to the [console](https://console.redhat.com/openshift). In the Network section of your cluster you will find the CIDRs.
@@ -47,11 +50,12 @@ Additional resources may still be required at this point. We have automated the 
 
 More info on [OSD peering doc](https://docs.openshift.com/dedicated/4/cloud_infrastructure_access/dedicated-aws-peering.html)
 
-# OSDv4 Cluster to Cluster VPN peering
+## OSDv4 Cluster to Cluster VPN peering
 
 To add a VPC peering between two OSDv4 clusters managed in app-interface, perform the following operations:
 
 1. Add a peering connection entry of provider `cluster-vpc-requester` entry to one cluster
+  
     ```yaml
     peering:
       connections:
@@ -62,7 +66,9 @@ To add a VPC peering between two OSDv4 clusters managed in app-interface, perfor
           $ref: /openshift/<other cluster>/cluster.yml
         manageRoutes: true
     ```
+
 2. Add a peering connection entry of provider `cluster-vpc-accepter` entry to the cluster
+   
     ```yaml
     peering:
       connections:
@@ -75,18 +81,20 @@ To add a VPC peering between two OSDv4 clusters managed in app-interface, perfor
     ```
 
     * Make sure the cluster on the accepter side has an account with `default: true` and `accessLevel: network-mgmt` listed in the `awsInfrastructureManagementAccounts` section. This account will be used for terraform activities in both cluster AWS accounts. The default account choice can be overwritten on the `accepter` side by providing an extra `awsInfrastructureManagementAccount` section on the peering connection.
-    ```yaml
-    peering:
-      connections:
-      ...
-      - provider: cluster-vpc-accepter
-        name: <this-cluster_<other-cluster>
-        cluster:
-          $ref: /openshift/<other cluster>/cluster.yml
-        awsInfrastructureManagementAccount:
-          $ref: /aws/<aws account name>/account.yml
-        manageRoutes: true
-    ```
+  
+      ```yaml
+      peering:
+        connections:
+        ...
+        - provider: cluster-vpc-accepter
+          name: <this-cluster_<other-cluster>
+          cluster:
+            $ref: /openshift/<other cluster>/cluster.yml
+          awsInfrastructureManagementAccount:
+            $ref: /aws/<aws account name>/account.yml
+          manageRoutes: true
+      ```
+
     In this case make sure, that this overwrite account it also listed in the `awsInfrastructureManagementAccounts` section of the accepter cluster with `accessLevel: network-mgmt`.
 
     * Right now, the account used for terraform activies, must also be mentioned via an `awsGroup` with `accessLevel: network-mgmt` in `awsInfrastructureAccess` - this will change with APPSRE-4397, when the source of truth for terraform user permissions will become `awsInfrastructureManagementAccounts`

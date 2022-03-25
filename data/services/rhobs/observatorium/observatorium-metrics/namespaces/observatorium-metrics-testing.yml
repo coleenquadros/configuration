@@ -1,0 +1,44 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: observatorium-metrics-testing
+description: Testing namespace for Observatorium Metrics (based on Thanos).
+
+cluster:
+  $ref: /openshift/rhobs-testing/cluster.yml
+
+app:
+  $ref: /services/rhobs/observatorium/observatorium-metrics/app.yml
+
+environment:
+  $ref: /products/osdv4/environments/testing.yml
+
+networkPoliciesAllow:
+- $ref: /services/rhobs/observatorium/namespaces/observatorium-testing.yml
+- $ref: /services/rhobs/telemeter/namespaces/telemeter-testing.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- Secret
+
+managedTerraformResources: true
+
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+
+terraformResources:
+- provider: s3
+  account: rhobs-testing
+  identifier: telemeter-thanos-testing
+  defaults: /terraform/resources/telemeter/s3-private-1.yml
+  output_resource_name: telemeter-thanos-testing-s3
+
+openshiftResources:
+# Secret Templates
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /rhobs/testing/alertmanager-routes.secret.yaml
+  validate_alertmanager_config: true

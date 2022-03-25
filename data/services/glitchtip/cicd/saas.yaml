@@ -1,0 +1,51 @@
+
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: saas-glitchtip
+
+name: saas-glitchtip
+description: SaaS tracking file for Glichtip
+
+app:
+  $ref: /services/glitchtip/app.yml
+
+pipelinesProvider:
+  $ref: /services/glitchtip/pipelines/tekton.glitchtip-pipelines.app-sre-prod-01.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: managed-by-cssre
+
+authentication:
+  image:
+    path: cs-sre/creds/quay/pull
+    field: all
+    version: 3
+
+managedResourceTypes:
+- Deployment
+- Service
+- CronJob
+- ServiceAccount
+- ConfigMap
+
+imagePatterns:
+- quay.io/cs-sre/glitchtip
+
+resourceTemplates:
+- name: glitchtip
+  url: https://github.com/rh-cssre/glitchtip-frontend
+  path: /openshift/template.yaml
+  parameters:
+    IMAGE_TAG: "30fbe77"
+  targets:
+  - namespace:
+      $ref: /services/glitchtip/namespaces/glitchtip-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: rh-cssre-glitchtip-frontend-gh-build-master

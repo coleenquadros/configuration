@@ -15,36 +15,12 @@ slos:
   SLISpecification: Availability (measured as the product of errors and latency) has to be met a certain target of the last days
   SLODetails: https://gitlab.cee.redhat.com/core-platform-apps/notifications-docs/-/blob/master/modules/SLO-document/pages/SLO-definitions.adoc
   SLOParameters:
-    window: 28d
-  expr: absent(up{namespace="notifications-prod",service="notifications-backend-service"}) or up{namespace="notifications-prod",service="notifications-backend-service"} == 0
+    window: 30d
+  expr: avg_over_time(service:sli:status_5xx:pctl5rate5m{exported_service="notifications"}[30d])
   SLOTarget: 0.99
   SLOTargetUnit: percent_0_1
   prometheusRules: resources/insights-prod/notifications-prod/notifications.prometheusrules.yaml
-  dashboard: https://grafana.app-sre.devshift.net/d/KQIVyFuMk/notifications-dashboard?orgId=1&refresh=15m&var-datasource=crcp01ue1-prometheus
-
-- name: notifications-engine availability
-  SLIType: availability
-  SLISpecification: Availability (measured as the product of errors and latency) has to be met a certain target of the last days
-  SLODetails: https://gitlab.cee.redhat.com/core-platform-apps/notifications-docs/-/blob/master/modules/SLO-document/pages/SLO-definitions.adoc
-  SLOParameters:
-    window: 28d
-  expr: absent(up{namespace="notifications-prod",service="notifications-engine-service"}) or up{namespace="notifications-prod",service="notifications-engine-service"} == 0
-  SLOTarget: 0.99
-  SLOTargetUnit: percent_0_1
-  prometheusRules: resources/insights-prod/notifications-prod/notifications.prometheusrules.yaml
-  dashboard: https://grafana.app-sre.devshift.net/d/KQIVyFuMk/notifications-dashboard?orgId=1&refresh=15m&var-datasource=crcp01ue1-prometheus
-
-- name: notifications-gw availability
-  SLIType: availability
-  SLISpecification: Availability (measured as the product of errors and latency) has to be met a certain target of the last days
-  SLODetails: https://gitlab.cee.redhat.com/core-platform-apps/notifications-docs/-/blob/master/modules/SLO-document/pages/SLO-definitions.adoc
-  SLOParameters:
-    window: 28d
-  expr: absent(up{namespace="notifications-prod",service="notifications-gw-service"}) or up{namespace="notifications-prod",service="notifications-gw-service"} == 0
-  SLOTarget: 0.99
-  SLOTargetUnit: percent_0_1
-  prometheusRules: resources/insights-prod/notifications-prod/notifications.prometheusrules.yaml
-  dashboard: https://grafana.app-sre.devshift.net/d/KQIVyFuMk/notifications-dashboard?orgId=1&refresh=15m&var-datasource=crcp01ue1-prometheus
+  dashboard: https://grafana.app-sre.devshift.net/d/KQIVyFuMk/notifications-dashboard?orgId=1&var-datasource=crcp01ue1-prometheus&editPanel=196
 
 - name: message processing
   SLIType: correctness
