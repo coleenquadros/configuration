@@ -26,7 +26,7 @@ update this certificate in Certificate Manager and in the Jenkins Controller whe
 
 ### Logging
 
-WAF Logs are stored in cloudwatch logs under `aws-waf-logs-ci-ext` loggroup. To monitor the BLOCKED requests or activity in general we can leverage `Cloudwatch log insights` to query the full loggroup. As an example, to filter all BLOCKED requests
+WAF Logs are stored in `app-sre` Cloudwatch logs under `aws-waf-logs-ci-ext` loggroup. To monitor the BLOCKED requests or activity in general we can leverage `Cloudwatch log insights` to query the full loggroup. As an example, to filter all BLOCKED requests
 go to `CloudWatchLogs -> Logs Insights`. Select the `aws-wag-logs-ci-ext` loggroup and do this query. Alternatively, the WAF Console have a Tab with the same functionality.
 
 ```text
