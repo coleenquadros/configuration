@@ -27,7 +27,7 @@ Tenants should be able to influence the format of a terraform output secret to m
 
 Provide an `output_format` section to `/openshift/terraform-resource-1.yml`. This section will hold configuration data to drive the formatting process for terraform output data.
 
-To make the process backwards compatible with the current way of exposing secrets, a provider `generic-secret` will be implemented that will take the output variables from a terraform provider as keys for the `data` section of a secret. If a terraformResource has no `output_format.provider` defined, `generic-secret` is assumed as default. This way, the following two terraform resources definitions are considered identical:
+To make the process backwards compatible with the current way of exposing secrets, a provider `generic-secret` will be implemented that will take the output variables from a terraform provider as keys for the `data` section of a secret. If a `terraformResource` has no `output_format.provider` defined, `generic-secret` is assumed as default. This way, the following two terraform resources definitions are considered identical:
 
 ```yaml
   terraformResources:
