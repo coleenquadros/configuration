@@ -12,13 +12,12 @@ The aim of this document is to expose to up-to-date frontend architecture for Je
 
 ## Load Balancing & WAF
 
-The main access to jenkins is through an Application load balancer (ALB) secured by an AWS Web Application Firewall (WAF). This ensures that the Jenkins interface is protected against web application vulnerabilities such as Cross Site Scripting (XSS), SQL injections and others.
-
-AWS provides a set of managed rule groups to protect backends against reported vulnerabilities like OWASP's published flaws. These rulesets are updated periodically with new definitions, we will need to check our configuration and update it
-with new rulesets, etc.
+The main access to jenkins is through an Application load balancer (ALB) secured by an AWS Web Application Firewall (WAF). This ensures that the Jenkins interface is protected against web application vulnerabilities such as Cross Site Scripting (XSS), SQL injections and other kind of attacks.
 
 As we are securing a Jenkins controller, which has an adminisitration panel and we are using integrations to do the configuration, the WAF configuration could be a bit tricky as there are some rules that need to be allowed. As an example,
-JJB do POST requests with large xml payloads to manage the job definitions. This could be detected as XSS attack by the WAF if the pertinent rule is not disabled[1]
+JJB do POST requests with large xml payloads to manage the job definitions. This could be detected as XSS an attack by the WAF if the pertinent rule is not disabled[1].
+
+AWS provides a set of managed rule groups to protect backends against reported vulnerabilities such as OWASP's publications, known bad inputs, etc. Some of these rule groups are updated periodically with new definitions and the WAF will include them as soon as they are rolled out (latest version). This could possibly cause issues in the future if a new rule interfere with jenkins, so if at some point the number of blocked requests increases, it may be caused by a new rule definition.
 
 On the ALB site, HTTPS is managed with the `ci.ext.devshift.net` certificate issued by Digicert. The certificate has been uploaded to Certificate Manager and is referenced in the ALB. **We will need to
 update this certificate in Certificate Manager and in the Jenkins Controller when a new one is issued.**. There is a SOP under [Additional Resources](#additional-resources)
