@@ -58,6 +58,9 @@ The worst thing that could happen is that WAF blocks legit requests for some rea
 both in the logs and in the metrics. To solve that, the affected rule needs to be set as `Count only`. The terraform manifest has a local section with all the rules, uncomment the affected rule to set it as COUNT_ONLY
 and do the terraform plan/apply.
 
+It's important to say that some requests, e.g: AJAX calls, would just render a blank or a missing without no obvius indication of the error. Use the dashboards or the browser developer tools to catch the 403 errors in case
+you need to diagnose problems.
+
 ## IaC Resources
 
 All the components are managed as IaC with terraform [HERE](https://gitlab.cee.redhat.com/app-sre/infra/-/tree/master/terraform/app-sre/ci.ext-alb)
