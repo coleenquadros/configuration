@@ -1,6 +1,6 @@
 # Upgrading the OS in Jenkins
 
-To upgrade RPMs in ci int, ci ext and their nodes, use the
+To upgrade RPMs in ci-int, ci-ext and their nodes, use the
 [`node-upgrade`](https://gitlab.cee.redhat.com/app-sre/infra/blob/master/ansible/playbooks/node-upgrade.yml)
 playbook, like
 
