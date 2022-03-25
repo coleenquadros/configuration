@@ -27,12 +27,16 @@ status:
   <provider specific information>
 ```
 
-If a component has no `status` section or an empty `status` section, the status of the component on the status page will not be managed by app-interface.
+If a component has no `status` section or an empty `status` section, the status of the component on the status page will not be managed by app-interface. The default status value of a component is `Operational`.
+
+Status page components have one of the following status value: `Operational`, `Degraded performance`, `Partial outage`, `Major outage`, `Under maintenance`.
 
 This proposal focuses on two provider strategies that will enable status management based on prometheus alerts or manual status management.
 
 ### Prometheus alert based status management
-The `prometheus-alerts` provider watches for active Prometheus alerts matching `alertSelectors` in `status.prometheusAlerts`. When an active alert matches an `alertSelector`, the respective `componentStatus` is applied to the component. If multiple `alertSelectors` match active alerts, the most severe `componentStatus` gets applied to the status page component.
+The `prometheus-alerts` provider watches for active Prometheus alerts matching the expressions defined in `status.prometheusAlerts.matchers`. When an active alert matches a `matchExpression`, the respective `componentStatus` is applied to the component. If multiple `matchExpressions` match active alerts, the most severe `componentStatus` gets applied to the status page component.
+
+The reference in `status.prometheusAlerts.namespace` points to the namespace that defines the alerts. This way the cluster and Alertmanager instance responsible for alerting can be identified via `/openshift/clusters-1.yml#alertmanagerUrl`.
 
 ```yaml
 ---
@@ -42,19 +46,21 @@ name: yakk-shaving-service
 status:
 - provider: prometheus-alerts
   prometheusAlerts:
-  - alertSelectors:
-      alert: YakkIsInBadMood
-      labels:
-        service: yakk-shaving-service
-        severity: high
-    componentStatus: Degraded performance
-  - alertSelectors:
-      labels:
-        service: yakk-shaving-service
-        severity: critical
-      # note that we don't have an alert name here
-      # anything critical about our Yakk is a Major Outage
-    componentStatus: Major Outage
+    namespace: /services/yakk-shaving/namespaces/yakk-stable.yml
+    matchers:
+    - matchExpression:
+        alert: YakkIsInBadMood
+        labels:
+          service: yakk-shaving-service
+          severity: high
+      componentStatus: Degraded performance
+    - matchExpression:
+        labels:
+          service: yakk-shaving-service
+          severity: critical
+        # note that we don't have an alert name here
+        # anything critical about our Yakk is a Major Outage
+      componentStatus: Major Outage
 ```
 
 ### Manual status management
@@ -90,15 +96,18 @@ name: yakk-shaving-service
 status:
 - provider: manual
   manual:
-    componentStatus: Under Maintenance
     until: timestamp-with-timezone
+    componentStatus: Under Maintenance
 - provider: prometheus-alerts
   prometheusAlerts:
-  - alertSelectors:
-      alert: YakkIsInBadMood
-      labels:
-        severity: high
-    componentStatus: Degraded performance
+    namespace: /services/yakk-shaving/namespaces/yakk-stable.yml
+    matchers:
+    - matchExpression:
+        alert: YakkIsInBadMood
+        labels:
+          service: yakk-shaving-service
+          severity: high
+      componentStatus: Degraded performance
 ```
 
 If none of the listed providers are active (none is yielding a status), the status of the component reverts to `Operational`.
@@ -107,7 +116,7 @@ If none of the listed providers are active (none is yielding a status), the stat
 Merge requests including `/dependencies/status-page-component-1.yml` files can not be self serviced by tenants right now. The reactive nature of the `manual` provider justifies self-servicing merge requests in app-interface, as long as they only add or change a `status.provider: manual` section.
 
 ## Implementation suggestions
-Prometheus offers an [API](https://prometheus.io/docs/prometheus/latest/querying/api/#alerts) to query information about currently active alerts. Using this API allows the implementing qontract-reconcile integration to be stateless and job oriented.
+Alertmanager offers an [API](https://github.com/prometheus/alertmanager/blob/main/api/v2/openapi.yaml) to query information about currently active alerts and silences. Using this API allows the implementing qontract-reconcile integration to be stateless and job oriented.
 
 ## Related work
 
@@ -116,6 +125,9 @@ Prometheus offers an [API](https://prometheus.io/docs/prometheus/latest/querying
 
 ### Maintenance windows
 [APPSRE-3906](https://issues.redhat.com/browse/APPSRE-3906) requests maintenance windows for services listed on status page components. The `status.manual.from` and `status.manual.until` fields of the `manual` provider can be used to set maintenance windows.
+
+## Future enhancements
+When RHOBS starts to gain traction, a dedicated provider similar to the `prometheus-alerts` can be implemented to watch for alerts there.
 
 ## Milestones
 The implementation of both suggested providers will be delivered in one go. Multiple milestones are not required.
