@@ -33,13 +33,14 @@ Host ci-int-jenkins-slave-*
 
 `cd /tmp && rm -rf *`: Use only when it is necessary, this command free up space if disk is still full even after dangling containers and images were pruned.
 
+`docker system prune`: Prune unused containers and images, usually freeing a lot of space.
+
 ## SOPs
 
-[Clean up worker disk space](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/jenkins-vda-storage.md)
-
-[General Jenkins SOP](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/jenkins.md)
-
-[General OpenStack SOP](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/openstack-ci-int.md)
+* [Clean up worker disk space](/docs/app-sre/sop/jenkins-vda-storage.md)
+* [General Jenkins SOP](/docs/app-sre/sop/jenkins.md)
+* [General OpenStack SOP](/docs/app-sre/sop/openstack-ci-int.md)
+* [Upgrading the OS](/docs/app-sre/sop/jenkins-os-upgrade.md)
 
 ## Known Issues
 
@@ -48,5 +49,5 @@ The workers disk space fills up from time to time despite [existing clean-up job
 ## More information
 
 [ci-int and ci-ext nodes Ansible playbooks](https://gitlab.cee.redhat.com/app-sre/infra/-/tree/master/ansible/playbooks)
-
 [ci-ext infrastructure Terraform scripts](https://gitlab.cee.redhat.com/app-sre/infra/-/tree/master/terraform/app-sre/ci.ext)
+[Full details on OS upgrades](jenkins-os-upgrade.md)
