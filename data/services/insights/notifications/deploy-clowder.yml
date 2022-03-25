@@ -57,6 +57,9 @@ resourceTemplates:
     # populated by bonfire
     ref: internal
     parameters:
+      FLOORIST_SUSPEND: 'true'
+      FLOORIST_IMAGE_TAG: b57a5a8
+      FLOORIST_SCHEDULE: 0 6 * * *
       DB_NAME: notifications-backend
       DB_SECRET_HOSTNAME_KEY: hostname
       DB_SECRET_PASSWORD_KEY: password
@@ -67,14 +70,28 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-backend commit hash that determines the clowdapp-backend.yaml version
-    ref: 642904e9ecf08941997533aae57ac79c03295a3f
+    ref: 9ba00523f2cf949ea6f0a04af95edb87da4a5216
     parameters:
+      FLOORIST_SUSPEND: 'false'
+      FLOORIST_IMAGE_TAG: b57a5a8
+      FLOORIST_BUCKET_SECRET_NAME: insights-metrics-export-stage
+      FLOORIST_SCHEDULE: 0 6 * * *
       CLOUDWATCH_ENABLED: true
       CPU_LIMIT: 300m
       CPU_REQUEST: 150m
       MIN_REPLICAS: 3
       NOTIFICATIONS_LOG_LEVEL: DEBUG
       SENTRY_ENABLED: true
+      INTERNAL_RBAC_ENABLED: true
+      OB_ENABLED: true
+      OB_BRIDGE_UUID: 34322cba-b620-48fd-b353-b2b17a244b85
+      OB_KCUSER: event-bridge
+      OB_KCPASS: sescret
+      OB_TOKEN_USER: notification-service-robot-1
+      OB_TOKEN_PASS: d4924cba-79fc-442b-a3b9-5928ec607c24
+      QUARKUS_REST_CLIENT_OB_URL: https://event-bridge-event-bridge-stable.apps.ob-stable.0b9l.p1.openshiftapps.com
+      QUARKUS_REST_CLIENT_KC_URL: https://keycloak-event-bridge-stable.apps.ob-stable.0b9l.p1.openshiftapps.com
+
     promotion:
       publish:
       - notifications-backend-stage-deploy-success-channel
@@ -83,11 +100,14 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/notifications-prod.yml
     # notifications-backend commit hash that determines the clowdapp-backend.yaml version
-    ref: 7e5696bf81a9f026967d4c22c226013115453d8f
+    ref: 9ae4ce347736f221baeab1fb81f7f5f0e87ca6cf
     parameters:
+      FLOORIST_SUSPEND: 'false'
+      FLOORIST_IMAGE_TAG: b57a5a8
+      FLOORIST_BUCKET_SECRET_NAME: insights-metrics-export-prod
+      FLOORIST_SCHEDULE: 0 6 * * *
       CLOUDWATCH_ENABLED: true
-      CPU_LIMIT: 3
-      MEMORY_LIMIT: 4Gi
+      MEMORY_LIMIT: 1Gi
       MIN_REPLICAS: 3
       NOTIFICATIONS_LOG_LEVEL: DEBUG
       SENTRY_ENABLED: true
@@ -113,7 +133,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-backend commit hash that determines the clowdapp-engine.yaml version
-    ref: 642904e9ecf08941997533aae57ac79c03295a3f
+    ref: 9ba00523f2cf949ea6f0a04af95edb87da4a5216
     parameters:
       CLOUDWATCH_ENABLED: true
       CPU_LIMIT: 300m
@@ -124,11 +144,20 @@ resourceTemplates:
       MIN_REPLICAS: 3
       MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_INTERVAL_MS: 1200000
       MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_RECORDS: 100
-      MP_MESSAGING_INCOMING_INGRESS_THROTTLED_UNPROCESSED_RECORD_MAX_AGE_MS: 120000
+      MP_MESSAGING_INCOMING_INGRESS_THROTTLED_UNPROCESSED_RECORD_MAX_AGE_MS: 180000
       NOTIFICATIONS_LOG_LEVEL: DEBUG
+      OB_ENABLED: true
+      OB_BRIDGE_UUID: 34322cba-b620-48fd-b353-b2b17a244b85
+      OB_KCUSER: event-bridge
+      OB_KCPASS: sescret
+      OB_TOKEN_USER: notification-service-robot-11
+      OB_TOKEN_PASS: d4924cba-79fc-442b-a3b9-5928ec607c24
       PROCESSOR_EMAIL_NO_REPLY: no-reply-stage@redhat.com
+      QUARKUS_REST_CLIENT_OB_URL: https://event-bridge-event-bridge-stable.apps.ob-stable.0b9l.p1.openshiftapps.com
+      QUARKUS_REST_CLIENT_KC_URL: https://keycloak-event-bridge-stable.apps.ob-stable.0b9l.p1.openshiftapps.com
       RBAC_S2S_READ_TIMEOUT: 120000
       SENTRY_ENABLED: true
+      RECIPIENT_PROVIDER_USE_IT_IMPL: true
     promotion:
       publish:
       - notifications-engine-stage-deploy-success-channel
@@ -137,16 +166,15 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/notifications-prod.yml
     # notifications-backend commit hash that determines the clowdapp-engine.yaml version
-    ref: 7e5696bf81a9f026967d4c22c226013115453d8f
+    ref: 9ae4ce347736f221baeab1fb81f7f5f0e87ca6cf
     parameters:
       CLOUDWATCH_ENABLED: true
-      CPU_LIMIT: 3
-      MEMORY_LIMIT: 4Gi
+      MEMORY_LIMIT: 2Gi
       KAFKA_CONSUMED_TOTAL_CHECKER_ENABLED: false
-      MIN_REPLICAS: 1
+      MIN_REPLICAS: 3
       MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_INTERVAL_MS: 1200000
       MP_MESSAGING_INCOMING_INGRESS_MAX_POLL_RECORDS: 100
-      MP_MESSAGING_INCOMING_INGRESS_THROTTLED_UNPROCESSED_RECORD_MAX_AGE_MS: 120000
+      MP_MESSAGING_INCOMING_INGRESS_THROTTLED_UNPROCESSED_RECORD_MAX_AGE_MS: 180000
       NOTIFICATIONS_LOG_LEVEL: DEBUG
       PROCESSOR_EMAIL_NO_REPLY: no-reply@redhat.com
       RBAC_S2S_READ_TIMEOUT: 120000
@@ -173,7 +201,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-backend commit hash that determines the clowdapp-aggregator.yaml version
-    ref: 642904e9ecf08941997533aae57ac79c03295a3f
+    ref: 50e25c827104374bdbd2ccdbf54102d1d635c392
     parameters:
       CLOUDWATCH_ENABLED: true
       CPU_REQUEST: 200m
@@ -188,7 +216,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/notifications-prod.yml
     # notifications-backend commit hash that determines the clowdapp-aggregator.yaml version
-    ref: 7e5696bf81a9f026967d4c22c226013115453d8f
+    ref: 9ae4ce347736f221baeab1fb81f7f5f0e87ca6cf
     parameters:
       CLOUDWATCH_ENABLED: true
       NOTIFICATIONS_LOG_LEVEL: DEBUG
@@ -215,7 +243,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/stage-notifications-stage.yml
     # notifications-gw commit hash that determines the clowdapp.yaml version
-    ref: a1f676b41ced1203df2b5dba554676eb004c7407
+    ref: f1a20e3c0e0a98c18d0cb8fa66a93e1134d02689
     parameters:
       CLOUDWATCH_ENABLED: true
       CPU_REQUEST: 200m
@@ -230,7 +258,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/notifications/namespaces/notifications-prod.yml
     # notifications-gw commit hash that determines the clowdapp.yaml version
-    ref: 74ae7d91fbd8b30541b789327b97d077cd90ffc4
+    ref: f1a20e3c0e0a98c18d0cb8fa66a93e1134d02689
     parameters:
       CLOUDWATCH_ENABLED: true
       MIN_REPLICAS: 3

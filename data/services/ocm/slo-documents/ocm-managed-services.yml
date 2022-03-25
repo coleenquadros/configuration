@@ -1,0 +1,47 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: ocm-managed-services
+
+name: ocm-managed-services
+
+namespaces:
+- $ref: /services/ocm/namespaces/uhc-stage.yml
+
+slos:
+- name: latency
+  SLIType: latency
+  SLISpecification: p90 of the latency must be under 2 seconds a certain target of the time in the last days
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/uhc/slos/proposed-slos-based-on-current-performance.md
+  SLOParameters:
+    window: 28d
+  expr: avg_over_time(component:latency:slo_ok_5m{component="ocm-managed-services",namespace="uhc-stage",service="ocm-managed-services"}[{{window}}])
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/ocm-managed-services.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/ocm-managed-services/ocm-managed-services
+
+- name: errors
+  SLIType: availability
+  SLISpecification: Errors ratio should be under a certain percentage in the last days
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/uhc/slos/proposed-slos-based-on-current-performance.md
+  SLOParameters:
+    window: 28d
+  expr: avg_over_time(component:errors:slo_ok_5m{component="ocm-managed-services",route="service-mgmt",service="ocm-managed-services"}[{{window}}])
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/ocm-managed-services.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/ocm-managed-services/ocm-managed-services
+
+- name: availability
+  SLIType: availability
+  SLISpecification: Availability (measured as the product of errors and latency) has to be met a certain percentafe of the time
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/uhc/slos/proposed-slos-based-on-current-performance.md
+  SLOParameters:
+    window: 28d
+  expr: avg_over_time(component:availability:slo_ok_5m{component="ocm-managed-services",namespace="uhc-stage",service="ocm-managed-services"}[{{window}}])
+  SLOTarget: 0.95
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/ocm-managed-services.prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/ocm-managed-services/ocm-managed-services

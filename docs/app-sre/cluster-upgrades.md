@@ -21,6 +21,10 @@ upgradePolicy:
   conditions:
     # number of days this version has been running in clusters with the same workloads
     soakDays: 0
+    # list of mutexes to acquire in order to schedule the upgrade
+    mutexes:
+    - mutex-1
+    - mutex-2
 ```
 
 ## How it works
@@ -30,6 +34,7 @@ For each cluster with an `upgradePolicy`, we check that the following conditions
 - there are available versions to upgrade to.
 - the upgrade schedule is within the next 2 hours.
 - the version has been soaking in other clusters with the same workloads (more than `soakDays`).
+- all the configured mutexes (by default `[]`) can be acquired. Said differently, there is no ongoing cluster upgrades with any of these mutexes.
 
 The versions to upgrade to are iterated over in reverse order, so it is assumed that the latest version that meets the conditions is chosen.
 
@@ -39,6 +44,8 @@ The accounted soak days:
 The more clusters have that version, the faster the number of soaking days is increasing.
 
 Note that clusters also follow different upgrade channels. Clusters following different channels don't get the same version available at the same time.
+
+All the cluster mutexes must be acquired to be able to schedule the upgrade. A single mutex can be held by only one cluster at a time. Once acquired by a cluster, a mutex is held for the whole duration of the upgrade.
 
 ## Version history
 
@@ -104,21 +111,33 @@ OCM runs on 3 clusters with 0 soakdays, getting upgrades from the candidate chan
 
 Then the production cluster app-sre-prod-04 will be upgraded from the stable channel after 18 soakdays. Since soakdays are cumulated with each cluster running the workload, the ocm soakdays number will grow fast: it should get upgraded after 18/3=6 days, provided the version is available in the stable channel. 
 
-### OCM-Quay
-
-The first clusters to be upgraded are the read-only ocm-quay clusters.
-
-The first one is upgraded with every new version. The second after the version has soaked for a day, the third after 2 days.
-
-Once a version has soaked for 7 days, the read-write clsuter will be upgraded.
+OCM and Quay production clusters share a mutex `ocm-quay-critical` which avoids simultaneous upgrades of these clusters:
+- app-sre-prod-04
+- quayp04ue2
+- quayp05ue1
 
 ### Quay
 
 The first cluster to be upgraded is the stage environment cluster quays02ue1, on the candidate channel. It is upgraded with every new version.
 
 Then the 2 production clusters are upgraded after
-- 6 days for quayp04ue2 (stable channel).
-- 11 days for quayp05ue1 (stable channel). This should allow some delay between the two clusters, even if the first one is being done late, on a Monday for example.
+- 6 days for quayp05ue1 (stable channel).
+- 11 days for quayp04ue2 (stable channel). This should allow some delay between the two clusters, even if the first one is being done late, on a Monday for example.
+
+OCM and Quay production clusters share a mutex `ocm-quay-critical` which avoids simultaneous upgrades of these clusters:
+- app-sre-prod-04
+- quayp04ue2
+- quayp05ue1
+
+### OCM-Quay
+
+The first clusters to be upgraded are the read-only ocm-quay clusters.
+
+The first one is upgraded with every new version. The second after the version has soaked for a day, the third after 2 days.
+
+Once a version has soaked for 7 days, the read-write cluster will be upgraded.
+
+All ocmquay production clusters (read-only and read-write) share a mutex `ocmquay-production` to avoid any simultaneous cluster upgrade.
 
 ### Telemeter
 

@@ -37,53 +37,21 @@ managedResourceTypes:
 imagePatterns:
 - quay.io/app-sre/bm-inventory
 - quay.io/app-sre/assisted-service
-- quay.io/app-sre/assisted-events-scrape
 - quay.io/app-sre/assisted-image-service
-- quay.io/app-sre/kibana-oss
-- quay.io/openshift/origin-oauth-proxy
 
 
 resourceTemplates:
-- name: assisted-events-scrape
-  url: https://github.com/openshift-assisted/assisted-events-scrape
-  path: /openshift/template.yaml
-  provider: openshift-template
+- name: assisted-installer-dashboards
+  url: https://github.com/openshift/assisted-service
+  path: /dashboards
+  provider: directory
   targets:
-  - ref: master
-    namespace:
-      $ref: /services/assisted-installer/namespaces/assisted-installer-integration.yml
-    upstream:
-      instance:
-        $ref: /dependencies/ci-ext/ci-ext.yml
-      name: openshift-assisted-assisted-events-scrape-gh-build-master
-    promotion:
-      publish:
-        - assisted-events-scrape-integration-deploy-success-channel
-    parameters:
-      ES_INDEX: assisted-service-events-v3
-  - ref: master
-    namespace:
-      $ref: /services/assisted-installer/namespaces/assisted-installer-stage.yml
-    upstream:
-      instance:
-        $ref: /dependencies/ci-ext/ci-ext.yml
-      name: openshift-assisted-assisted-events-scrape-gh-build-master
-    promotion:
-      publish:
-        - assisted-events-scrape-stage-deploy-success-channel
-    parameters:
-      ES_INDEX: assisted-service-events-v3
-      SENTRY_DSN: https://df9707fcc4064b8d95b75c79703e4a4d@sentry.stage.devshift.net/37
-  - namespace:
-      $ref: /services/assisted-installer/namespaces/assisted-installer-production.yml
-    ref: f02b30acbc11f58a1bad6b86527930657047763b
-    promotion:
-      publish:
-        - assisted-events-scrape-production-deploy-success-channel
-    parameters:
-      SENTRY_DSN: https://e865b3c62cce46619101231a74254525@sentry.devshift.net/1022
-      ES_INDEX: assisted-service-events-v3
-
+    - namespace:
+        $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+      ref: master
+    - namespace:
+        $ref: /services/observability/namespaces/app-sre-observability-production.yml
+      ref: 1d53d8135834d2905407dcfe0edce4719ccd08e7
 - name: assisted-image-service
   url: https://github.com/openshift/assisted-image-service
   path: /deploy/template.yaml
@@ -264,7 +232,7 @@ resourceTemplates:
       IMAGE_SERVICE_BASE_URL: ${OCM_BASE_URL}/api/assisted-images
   - namespace:
       $ref: /services/assisted-installer/namespaces/assisted-installer-stage.yml
-    ref: 9d5fb1afc23fcf9d71ec0132bcaf8d64d52f6c82
+    ref: 61d016497492d448499eb72291b202696eb48b24
     promotion:
       publish:
       - assisted-installer-stage-deploy-success-channel
@@ -275,7 +243,7 @@ resourceTemplates:
       AGENT_DOCKER_IMAGE: registry-proxy.engineering.redhat.com/rh-osbs/openshift4-assisted-installer-agent-rhel8:v1.0.0-89
       OPENSHIFT_INSTALL_RELEASE_IMAGE: ""
       PUBLIC_CONTAINER_REGISTRIES: quay.io,registry-proxy.engineering.redhat.com
-      RELEASE_TAG: v2.1.3
+      RELEASE_TAG: v2.1.4
       OS_IMAGES: |
         [
           {
@@ -400,7 +368,7 @@ resourceTemplates:
       V1_API_ENABLED: false
   - namespace:
       $ref: /services/assisted-installer/namespaces/assisted-installer-production.yml
-    ref: f5c23946da5edd2bb82e15c4841573ce00dd18c9
+    ref: 61d016497492d448499eb72291b202696eb48b24
     promotion:
       publish:
       - assisted-installer-production-deploy-success-channel
@@ -440,7 +408,7 @@ resourceTemplates:
       AGENT_DOCKER_IMAGE: registry.redhat.io/rhai-tech-preview/assisted-installer-agent-rhel8:v1.0.0-89
       OPENSHIFT_INSTALL_RELEASE_IMAGE: ""
       PUBLIC_CONTAINER_REGISTRIES: quay.io
-      RELEASE_TAG: v2.1.2
+      RELEASE_TAG: v2.1.4
       OS_IMAGES: |
         [
           {
