@@ -22,3 +22,16 @@ spec:
             message: 'Web RCA is down in: web-rca-production'
             runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/web-rca/sops/web-rca-production-down.md"
             dashboard: "https://grafana.app-sre.devshift.net/d/_7_Ul_07k/web-rca?orgId=1&var-datasource=app-sre-prod-04-prometheus"
+        - alert: KubePodCrashLooping
+          expr: |
+            rate(kube_pod_container_status_restarts_total{job="kube-state-metrics",namespace="web-rca-production"}[5m]) * 60 * 5 > 0
+          for: 15m
+          labels:
+            service: web-rca
+            severity: info
+          annotations:
+            message: '({{ $labels.cluster }}/{{ $labels.namespace }}) Pod {{ $labels.pod }} ({{ $labels.container}}) is restarting {{ printf "%.2f" $value }} times / 5 minutes.'
+            runbook: https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubePodCrashLooping.md
+            dashboard: "https://grafana.app-sre.devshift.net/d/_7_Ul_07k/web-rca?orgId=1&var-datasource=app-sre-prod-04-prometheus"
+
+
