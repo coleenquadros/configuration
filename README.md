@@ -522,6 +522,9 @@ channels:
   email: 
   - <teamname>@redhat.com
 
+  jiraBoard:
+  - $ref: /teams/<teamname>/jira/<boardname>.yml
+
   pagerduty:
     $ref: /dependencies/pagerduty/<teamname>-oncall.yml
 
