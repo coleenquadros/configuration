@@ -35,6 +35,12 @@ Following documentations are _must_ read for anyone considering a _major engine 
 
 ## Steps for Upgrade at High Level
 
+---
+
+**Teams should not attempt this process without working closely with AppSRE. This is not a self-service process.**
+
+---
+
 This section provides helpful information and an overview of the steps that your team will need to perform to a PostgreSQL major version upgrade.
 
 1. The upgrade duration is based on how large your database is and other factors like whether you have read-replicas. For those services with high availability requirements, a dry-run upgrade may be best to get a better estimate of how long the upgrade will take.
@@ -58,6 +64,13 @@ Upgrading RDS instances that have read-replicas is a bit more complicated for Po
 ## app-interface changes for upgrading
 
 This section provides the high-level steps required to perform the major version upgrade using app-interface. This section should be used to create the step-by-step instructions specific to the database that is being upgraded.
+
+---
+
+**Several of the steps below will require an AppSRE team member to complete them. This is not a self-service process. Do not attempt to perform these steps without having read the earlier sections and having scheduled time with AppSRE.**
+
+---
+
 
 ### 1. Terminate Read Replicas
 
