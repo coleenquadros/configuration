@@ -1,0 +1,63 @@
+family: postgres13
+name: cost-mgmt-pg13-parameters
+description: Parameter Group for PostgreSQL 13
+parameters:
+  # Work memory per worker
+- name: work_mem
+  value: 16384
+  apply_method: immediate
+- name: autovacuum_max_workers
+  value: 4
+  apply_method: pending-reboot
+  # Max number of parallel workers if task can be executed by parallel workers
+- name: max_parallel_workers
+  value: 16
+  apply_method: pending-reboot
+  # Max number of workers for data gathering on any one request
+- name: max_parallel_workers_per_gather
+  value: 4
+  apply_method: pending-reboot
+- name: max_parallel_maintenance_workers
+  value: 4
+  apply_method: pending-reboot
+- name: autovacuum_vacuum_cost_limit
+  value: 2400
+  apply_method: immediate
+  # None for no statement logging by default Can be set to "mod", "ddl", "all"
+- name: log_statement
+  value: none
+  apply_method: immediate
+  # Log statements that error-out
+- name: log_min_error_statement
+  value: error
+  apply_method: immediate
+  # Log statements that run longer than the specified number of milliseconds
+- name: log_min_duration_statement
+  value: 2000
+  apply_method: immediate
+- name: rds.force_ssl
+  value: 0
+  apply_method: immediate
+  # Ensure that these libraries are loaded at engine startup (These are shared libs that cannot be dynamically loaded)
+- name: shared_preload_libraries
+  value: pg_stat_statements
+  apply_method: pending-reboot
+  # Number of statements for which statistics will be held
+- name: pg_stat_statements.max
+  value: 1000
+  apply_method: pending-reboot
+  # This is set to track top-level statements. This will not track statements that are called inside of a procedure/function
+- name: pg_stat_statements.track
+  value: TOP
+  apply_method: immediate
+- name: pg_stat_statements.track_utility
+  value: 0
+  apply_method: immediate
+  # Max characters to capture of a query for activity tracking
+- name: track_activity_query_size
+  value: 2048
+  apply_method: pending-reboot
+  # Max number of locks that can be acquired for a transaction
+- name: max_locks_per_transaction
+  value: 128
+  apply_method: pending-reboot
