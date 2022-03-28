@@ -1,62 +1,83 @@
 ImageBuilderInternalErrors
 ==========================
 
-Severity: Info
---------------
-
 Impact
 ------
 
--   Image Builder is a service used to build images. It acts as an interface for composer. If image
-    builds are failing, the core feature of this service is in bad shape.
+Image Builder is a service which builds images. There's 2 components, image-builder-crc which
+resides in consoledot and image-builder-composer which is a dependency of image-builder-crc.
+
+If image build requests (/compose) are failing, users cannot queue new image builds. If status
+requests (/composes/${id}) are failing, users cannot request the status of their images. Either mean
+the core features of this service are in bad shape.
 
 Summary
 -------
 
-This alert fires when the compose request, the request to build an
-image, errors out too much.
+This alert fires when requests have a high 500 rate.
 
 Access required
 ---------------
 
-Image-builder:
--   Access to the ([Production][openshift-prod]|[Stage][openshift-stage]) Openshift cluster to view the
-    image-builder-(prod|stage) namespace.
--   Access to the ([Production][kibana-prod]|[Stage][kibana-stage]) Kibana instance in order to review logs.
--   Access to the ([Production][grafana-prod]|[Stage][grafana-stage]) Grafana instance to see the current
-    failure rate on the dashboard.
+Image-builder-crc:
+
+- The ([Production][openshift-prod]|[Stage][openshift-stage]) Openshift cluster to view the
+  image-builder-(prod|stage) namespace.
+- The ([Production][kibana-prod]|[Stage][kibana-stage]) Kibana instance in order to review logs.
+- The ([image-builder-crc][grafana-crc]) grafana dashboard.
 
 Image-builder-composer:
--   Access to the ([Production][openshift-composer-prod]|[Stage][openshift-composer-stage]) Openshift cluster to view the
-    image-builder-(prod|stage) namespace.
--   Access to the ([Production][grafana-composer-prod]|[Stage][grafana-composer-stage]) Grafana instance to see the current
-    failure rate on the dashboard.
 
-  [openshift-stage]: https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/
-  [openshift-prod]: https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/
-  [openshift-composer-stage]: https://console-openshift-console.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com/
-  [openshift-composer-prod]: https://console-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/
+- The ([Production][openshift-composer-prod]|[Stage][openshift-composer-stage]) Openshift cluster to
+  view the composer-(production|stage) namespace.
+- The ([image-builder-composer][grafana-composer]) grafana dashboard.
+- The appsre log-consumer role for prod-04 & stage-01.
 
-  [kibana-stage]: https://kibana.apps.crcs02ue1.urby.p1.openshiftapps.com/app/kibana
-  [kibana-prod]: https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/app/kibana
+[openshift-stage]: https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/
+[openshift-prod]: https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/
+[openshift-composer-stage]: https://console-openshift-console.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com/
+[openshift-composer-prod]: https://console-openshift-console.apps.app-sre-prod-04.i5h0.p1.openshiftapps.com/
 
-  [grafana-stage]: https://grafana.stage.devshift.net/d/image-builder-crc/image-builder-crc?orgId=1&var-datasource=crcs02ue1-prometheus&var-interval=28d&var-stability_slo=0.95&var-compose_latency_slo=0.9&var-noncompose_latency_slo=0.9
-  [grafana-prod]: https://grafana.app-sre.devshift.net/d/image-builder-crc/image-builder-crc?orgId=1
-  [grafana-composer-stage]: https://grafana.stage.devshift.net/d/image-builder-composer/image-builder-composer?orgId=1&var-datasource=app-sre-stage-01-prometheus&var-interval=28d&var-stability_slo=0.95&var-latency_slo=0.9
-  [grafana-composer-prod]: https://grafana.app-sre.devshift.net/d/image-builder-composer/image-builder-composer?orgId=1
+[kibana-stage]: https://kibana.apps.crcs02ue1.urby.p1.openshiftapps.com/app/kibana
+[kibana-prod]: https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/app/kibana
+
+[grafana-crc]: https://grafana.app-sre.devshift.net/d/image-builder-crc/image-builder-crc
+[grafana-composer]: https://grafana.app-sre.devshift.net/d/image-builder-composer/image-builder-composer
 
 Steps
 -----
 
--   Check the dashboard for a quick status.
--   Check logs / events for pods in the image-builder-(prod|stage)
-    namespace.
--   Check where the errors are occuring, either in Image Builder or in
-    the Composer service it depends on.
--   Ping the image-builder team
+Check the dashboards for a quick status. If the error rate is bad on both dashboards, the problem is
+most likely image-builder-composer. Otherwise the problem is image-builder-crc.
+
+### Only image-builder-crc is failing at a high rate
+
+- Check the Kibana instances for logs, the following query can be used:
+```
+ @log_group:"image-builder-prod" and levelname:"error"
+```
+- If image-builder-crc is receiving 401s when trying to contact
+  image-builder-composer, check [Red Hat status](https://status.redhat.com/) for SSO outages.
+- Ping the @image-builder-team in #osbuild-image-builder-service.
+
+### Both image-builder-composer and image-builder-crc are failing at a high rate
+
+- Go to cloudwatch for the relevant image-builder-composer cluster.
+- The following query can be used:
+```
+fields message
+| filter (kubernetes.namespace_name = "composer-production")
+| parse message "time=* level=* msg=*" as time, level, innermsg
+| filter (level = "error" or level = "warning")
+| display innermsg, level
+| sort @timestamp desc
+```
+- If the jobqueue DB is full (see [rds
+  dashboard](https://grafana.app-sre.devshift.net/d/AWSRDSdbi/aws-rds?var-datasource=AWS%20app-sre&var-region=default&var-dbinstanceidentifier=image-builder-composer-db-prod)),
+  additional storage can be added to relieve the situation.
+- Ping the @image-builder-team in #osbuild-image-builder-service.
 
 Escalations
 -----------
 
-See
-[https://visual-app-interface.devshift.net/services#/services/insights/image-builder/app.yml](https://visual-app-interface.devshift.net/services#/services/insights/image-builder/app.yml)
+[Escalation policy](data/teams/image-builder/escalation-policies/image-builder.yml).
