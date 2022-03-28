@@ -73,6 +73,39 @@ It is worth knowing that overloaded routers / infra nodes can lead to a situatio
 
 This might lead to further discussions about architecture in the future. It isn't good when production services are impacted, but it's even worse when the team is trying to troubleshoot and OCP console/Prometheus access is also affected.
 
+### Path-based routes with the same hostname return the same certificate
+
+This issue describes the scenario where there are multiple routes with the same hostname (path-based routes), and TLS certificates have been configured for each of them, but despite that only a single certificate is returned for all routes. This was discovered in the past when the certificate that was being used for all of the `Routes` was nearing expiration and there were issues with `openshift-acme`.
+
+One example of this is `api.openshift.com` (stage shown below):
+
+```
+$ oc get route
+NAME             HOST/PORT                 PATH                  SERVICES                     PORT    TERMINATION          WILDCARD
+accounts-mgmt    api.stage.openshift.com   /api/accounts_mgmt    uhc-acct-mngr-envoy          <all>   reencrypt/Redirect   None
+authorizations   api.stage.openshift.com   /api/authorizations   uhc-acct-mngr-envoy          <all>   reencrypt/Redirect   None
+clusters-mgmt    api.stage.openshift.com   /api/clusters_mgmt    clusters-service-envoy       <all>   reencrypt/Redirect   None
+gateway-server   api.stage.openshift.com                         gateway-envoy                <all>   edge/Redirect        None
+job-queue        api.stage.openshift.com   /api/job_queue        job-queue-service            <all>   reencrypt/Redirect   None
+service-logs     api.stage.openshift.com   /api/service_logs     ocm-service-log-envoy        <all>   reencrypt/Redirect   None
+service-mgmt     api.stage.openshift.com   /api/service_mgmt     ocm-managed-services-envoy   <all>   reencrypt/Redirect   None
+```
+
+Each of these `Routes` have their own `spec.tls` configuration. By opening a shell in the ingress router pod, we can see the TLS configurations below:
+
+```
+sh-4.4$ grep ' api.stage.openshift.com' /var/lib/haproxy/conf/cert_config.map 
+/var/lib/haproxy/router/certs/uhc-stage:service-mgmt.pem [alpn h2,http/1.1] api.stage.openshift.com
+/var/lib/haproxy/router/certs/uhc-stage:service-logs.pem [alpn h2,http/1.1] api.stage.openshift.com
+/var/lib/haproxy/router/certs/uhc-stage:job-queue.pem [alpn h2,http/1.1] api.stage.openshift.com
+/var/lib/haproxy/router/certs/uhc-stage:gateway-server.pem [alpn h2,http/1.1] api.stage.openshift.com
+/var/lib/haproxy/router/certs/uhc-stage:clusters-mgmt.pem [alpn h2,http/1.1] api.stage.openshift.com
+/var/lib/haproxy/router/certs/uhc-stage:authorizations.pem [alpn h2,http/1.1] api.stage.openshift.com
+/var/lib/haproxy/router/certs/uhc-stage:accounts-mgmt.pem [alpn h2,http/1.1] api.stage.openshift.com
+```
+
+The first certificate on the list will be the one that is used for all `Routes` that share the same hostname. This behavior is not obvious, which is why it has been documented here. A follow-up with OCP engineering will occur if existing documentation doesn't cover this scenario.
+
 ### Incorrect/default certificate returned by the ingress router (ex. *.apps.app-sre-prod-01.i7w5.p1.openshiftapps.com)
 
 #### Problem
