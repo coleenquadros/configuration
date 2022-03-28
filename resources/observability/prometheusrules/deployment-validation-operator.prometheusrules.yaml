@@ -14,20 +14,19 @@ spec:
     {{%- for cluster in query('/queries/cluster-namespace-app-jira.graphql', name=resource.namespace.cluster.name) %}}
     {{%- for namespace in cluster.namespaces %}}
     {{%- if not namespace.name.startswith('openshift-') %}}
-    {{%- for metric in metrics %}}
-    - alert: {{{ metric }}}-{{{ namespace.name }}}
+    # deployment_validation_operator_default_service_account
+    - alert: deployment_validation_operator_default_service_account-{{{ namespace.name }}}
       annotations:
         dashboard: "https://grafana.app-sre.devshift.net/d/dashdotdb/dash-db?orgId=1&var-datasource=dashdotdb-rds&var-cluster={{{ resource.namespace.cluster.name }}}&var-namespace={{{ namespace.name }}}"
-        message: "{{{ metric }}} Validation error for {{{ namespace.app.name }}}: {{ $labels.check_description }}"
+        message: "deployment_validation_operator_default_service_account Validation error for {{{ namespace.app.name }}}: {{ $labels.check_description }}"
         runbook: "{{ $labels.check_remediation }}"
       expr: |
-        {{{ metric }}}{exported_namespace="{{{ namespace.name }}}"} > 0
+        deployment_validation_operator_default_service_account{exported_namespace="{{{ namespace.name }}}"} > 0
       for: 1m
       labels:
         service: {{{ namespace.app.name }}}
         severity: medium
         jiralert: {{{ namespace.app.escalationPolicy.channels.jiraBoard[0].name }}}
-    {{%- endfor %}}
     {{%- endif %}}
     {{%- endfor %}}
     {{%- endfor %}}
