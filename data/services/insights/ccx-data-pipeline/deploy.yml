@@ -369,6 +369,32 @@ resourceTemplates:
       MAX_REPLICAS: "1"
       SUSPEND_JOB: "true"
 
+- name: ccx-notification-db-cleaner
+  path: /deploy/clowdapp-db-cleaner.yaml
+  url: https://github.com/RedHatInsights/ccx-notification-writer
+  targets:
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
+    ref: master
+    disable: true
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-ccx-notification-writer-gh-build-master
+    parameters:
+      IMAGE: "quay.io/cloudservices/ccx-notification-writer"
+      JOB_SCHEDULE: "0 * * * *"
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
+    ref: eeceb2183f89deba1108b98557537c1eb5a13d60
+    disable: true
+    parameters:
+      JOB_SCHEDULE: "0 0 * * *"
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true
+    ref: internal
+
 - name: ccx-notification-service
   path: /deploy/clowdapp.yaml
   url: https://github.com/RedHatInsights/ccx-notification-service
