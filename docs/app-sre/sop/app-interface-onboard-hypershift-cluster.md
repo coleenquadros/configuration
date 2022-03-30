@@ -46,7 +46,7 @@ Follow the standard [Cluster Onboarding SOP](app-interface-onboard-cluster.md) u
     | Machine CIDR              | See note      | See note      |
     | Private                   | true          | true          |
     | Internal                  | false         | false         |
-    | VPC peerings              | see "Cluster VPC peerings" section |
+    | VPC peerings              | see [Cluster VPC Peerings](#cluster-vpc-peerings) |
 
 ## Cluster VPC peerings
 
