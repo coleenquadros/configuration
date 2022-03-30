@@ -2,6 +2,10 @@
 
 - [Provisioning the OSD clusters](#provisioning-the-osd-clusters)
 - [Cluster VPC peerings](#cluster-vpc-peerings)
+  - [ACM communication](#acm-communication)
+  - [Bastion access](#bastion-access)
+  - [app-interface managability](#app-interface-managability)
+  - [Communication with Cluster Service](#communication-with-cluster-service)
 - [Hypershift service cluster configuration](#hypershift-service-cluster-configuration)
   - [Cluster groups](#cluster-groups)
   - [Environment file](#environment-file)
@@ -39,13 +43,27 @@ Follow the standard [Cluster Onboarding SOP](app-interface-onboard-cluster.md) u
     | Machine CIDR              | See note      | See note      |
     | Private                   | true          | true          |
     | Internal                  | false         | false         |
-    | VPC peerings              | `ci-ext`, `appsrep05ue1`, `app-sre-prod-01`, service-cluster |
+    | VPC peerings              | see "Cluster VPC peerings" section |
 
 # Cluster VPC peerings
 
 This section is about creating the respective peerings so the Hypershift management and service cluster can communicate with each other. This also involves creating VPC peerings to other clusters running services that need to communicate with the service cluster, e.g. OCM Cluster Service
 
-TODO
+## ACM communication
+
+ACM on the Hypershift service cluster must communicate with the API server of the Hypershift management clusters. Therefore create a cluster VPC peering between both.
+
+## Bastion access
+
+Both service and management clusters are currently private clusters, so in order to provide access via the bastion host (for AppSRE and the OCM dev team), add a `account-vpc` peering to the `/aws/app-sre/vpcs/app-sre-vpc-02-ci-ext.yml` VPC.
+
+## app-interface managability
+
+To make bother clusters managable via app-interface, add cluster VPC peerings to `/openshift/app-sre-prod-01/cluster.yml` and `/openshift/appsrep05ue1/cluster.yml`.
+
+## Communication with Cluster Service
+
+Cluster service needs to talk to the API server of the Hypershift service cluster, so create a cluster VPC peering with the cluster where Cluster Service is running, e.g. UHC integration runs on `/openshift/app-sre-stage-01/cluster.yml`
 
 # Hypershift service cluster configuration
 
