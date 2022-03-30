@@ -1,17 +1,30 @@
 <!-- TOC -->
 
-- [Provisioning the cluster](#provisioning-the-cluster)
-- [Hypershift deployment](#hypershift-deployment)
-- [New Hypershift environment](#new-hypershift-environment)
+- [Provisioning the OSD clusters](#provisioning-the-osd-clusters)
+- [Cluster VPC peerings](#cluster-vpc-peerings)
+- [Hypershift service cluster configuration](#hypershift-service-cluster-configuration)
+  - [Cluster groups](#cluster-groups)
+  - [Environment file](#environment-file)
+  - [open-cluster-management](#open-cluster-management)
+  - [ocm](#ocm)
+  - [multicluster-engine](#multicluster-engine)
+- [Hypershift management cluster configuration](#hypershift-management-cluster-configuration)
+  - [Cluster groups](#cluster-groups-1)
+  - [Environment file](#environment-file-1)
+  - [Hypershift operator](#hypershift-operator)
+- [Hypershift service cluster registration with OCM Cluster Service](#hypershift-service-cluster-registration-with-ocm-cluster-service)
+- [Hypershift management cluster registration with service cluster](#hypershift-management-cluster-registration-with-service-cluster)
 
 <!-- /TOC -->
 
-This SOP serves as a step-by-step process on how to provision Hypershift from zero (no cluster) to a fully functioning Hypershift management cluster
+This SOP serves as a step-by-step process on how to provision Hypershift from zero (no cluster) to a fully functioning Hypershift management cluster and Hypershift service cluster.
 
 
-# Provisioning the cluster
+# Provisioning the OSD clusters
 
-1. Follow the standard [Cluster Onboarding SOP](app-interface-onboard-cluster.md) using the following specs
+This section is about to provision the OSD cluters for Hypershift management and service clusters.
+
+Follow the standard [Cluster Onboarding SOP](app-interface-onboard-cluster.md) using the following specs
    *Note*: some of these numbers need to be reviewed in the light of first hypershift usage (storage, load balancers, compute type .. )
 
     |                           | Staging       | Production    |
@@ -28,105 +41,93 @@ This SOP serves as a step-by-step process on how to provision Hypershift from ze
     | Internal                  | false         | false         |
     | VPC peerings              | `ci-ext`, `appsrep05ue1`, `app-sre-prod-01`, service-cluster |
 
-2. For stage `cluster.yml`, add `dedicated-readers` under `managedGroups` and update `data/teams/hypershift/roles/hypershift-dedicated-readers.yml` with a reference to our new cluster:
-    ```yaml
-    access:
-    ...
-    - cluster:
-        $ref: /openshift/<cluster_name>/cluster.yml
-    group: dedicated-readers
-     ```
+# Cluster VPC peerings
 
-# Hypershift deployment
+This section is about creating the respective peerings so the Hypershift management and service cluster can communicate with each other. This also involves creating VPC peerings to other clusters running services that need to communicate with the service cluster, e.g. OCM Cluster Service
 
-When a Hypershift management cluster is introduced to an existing environment (e.g. integration), follow these steps
+TODO
 
-1. Create an environment file (note: that is not the same as creating a new environment) at `data/products/hypershift/environments/$environment-$cluster.yml`
+# Hypershift service cluster configuration
 
-```yaml
----
-$schema: /app-sre/environment-1.yml
+This section describes how to deploy components and configuration to an OSD cluster to make it a Hypershift service cluster. It also covers how such a service cluster is registered with OCM Cluster Service.
 
+## Cluster groups
 
-labels:
-  service: hypershift
-  type: $environment
+For non-production clusters, add the `dedicated-readers` and `ocm-developers` groups to the `managedGroups` list of the `cluster.yml` and update `data/teams/hypershift/roles/hypershift-dedicated-readers.yml` and `data/teams/ocm/roles/dev.yml` with a reference to the service cluster.
 
-name: hypershift-$environment-$cluster
+See the "Hypershift service cluster configuration > Hypershift service cluster registration with OCM Cluster Service" section for more information about the `ocm-developers` group.
 
-description: |
-  The $environment environment for Hypershift
+## Environment file
 
-product:
-  $ref: /products/hypershift/product.yml
+Create an environment file at `data/products/hypershift/environments/$environment-$cluster.yml`, e.g. as defined in `data/products/hypershift/environments/integration-hsservicei01ue1.yml`
 
-```
+## open-cluster-management
 
-Note: a new environment file is not the same as a new environment. multiple environment files can declare the same environment name.
+This is about the installation of the ACM (Advanced Cluster Management) leveraging OLM.
 
-2. Add a namespace to `data/services/hypershift/$cluster/hypershift.yml` to host the Hypershift operator.
+Create a namespace in `data/services/hypershift/namespaces/$clustrer/open-cluster-management.yml`, e.g. as defined in `data/services/hypershift/namespaces/hsservicei01ue1/open-cluster-management.yml`. This prepares the namespace with required network policies and pull secrets for ACM upstream/downstream images from quay.io
 
-```yaml
----
-$schema: /openshift/namespace-1.yml
+TODO deploy ACM via SAAS file
 
-labels: {}
+## ocm
 
-name: hypershift
-description: $environment namespace for hypershift
+This is about providing access to OCM Cluster Service via the service account defined in `/services/hypershift/hypershift-ocm-bot.serviceaccount.yaml`.
+todo: where come the permissions from?
 
-cluster:
-  $ref: /openshift/$cluster/cluster.yml
+Additionally this namespace holds `PlacementDecision` (an ACM CR) information to enable CS to decide what management clusters to place a `HostedCluster` on.
 
-app:
-  $ref: /services/hypershift/app.yml
+Create a namespace in `data/services/hypershift/namespaces/$cluster/ocm.yml`, e.g. as defined in `data/services/hypershift/namespaces/hsservicei01ue1/ocm.yml`.
 
-environment:
-  $ref: /products/hypershift/environments/$environment-$cluster.yml
+## multicluster-engine
 
-managedResourceTypes:
-- Secret
+This namespace is holding the ACM Multicluster Engine (MCE) and the Hypershift Deployment Controller. Those components know how to create `HostedClusters` on Hypershift management clusters based on `HypershiftDeployment` CRs created by OCM Cluster Service.
 
-openshiftResources:
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /services/hypershift/$environment/oidc-s3-creds.yml
+This namespace also owns the S3 bucket used for OIDC. Right now this S3 bucket is shared by all Hypershift management clusers (the Hypershift operator running on them to be specific).
 
-networkPoliciesAllow:
-- $ref: /services/observability/namespaces/openshift-customer-monitoring.$cluster.yml
+To create the namespace and the S3 bucket, create a file in `data/services/hypershift/namespaces/$cluster/multicluster-engine.yml`, e.g. as defined here `data/services/hypershift/namespaces/hsservicei01ue1/multicluster-engine.yml`. Make sure to name define the S3 bucket name and region as required.
 
-```
+Please note: the S3 access information will be available in Vault under XXX which will be necessary to know when configuring the Hypershift management cluster.
 
-3. To deploy the operator to the namespace, register a new target in `data/services/hypershift/cicd/saas-hypershift.yml`.
+# Hypershift management cluster configuration
 
-4. TODO describe the `ServiceAccount` token registration via the provisioning-shard secret - https://issues.redhat.com/browse/APPSRE-4304
+This section describes how to deploy components and configurations to an OSD cluster to make it a Hypershift management cluster.
 
-5. TODO describe how integration clusters should manage the special group for the OCM team - https://issues.redhat.com/browse/APPSRE-4335
+## Cluster groups
 
-# New Hypershift environment
+For non-production clusters, add the `dedicated-readers` groups to the `managedGroups` list of the `cluster.yml` and update `data/teams/hypershift/roles/hypershift-dedicated-readers.yml` with a reference to the service cluster.
 
-When a new Hypershift environment is introduced (in the sense of `/app-sre/environment-1.yml#labels.type`), some additional steps are required. These evolve mostly around the creation of an S3 bucket and the resource to put the S3 access information to clusters.
+## Environment file
 
-Note: a single S3 bucket can serve multiple Hypershift operators, but we decided to introduce dedicated buckets per environment.
+Create an environment file at `data/products/hypershift/environments/$environment-$cluster.yml`, e.g. as defined in `data/products/hypershift/environments/integration-hshifti01ue1.yml`
 
-1. Create a namespace as described in the "Hypershift deployment" section but make sure to include also the declaration for the S3 bucket. The first cluster of an environment holds the bucket.
+## Hypershift operator
 
-```yaml
-managedTerraformResources: true
+The Hypershift operator is the work horse creating hosted control planes running as pods on management clusters out of `HostedClustger` CRs, including also worker nodes in another AWS account based on `NodePool` CRs.
 
-terraformResources:
-- provider: s3
-  account: app-sre
-  identifier: hypershift-oidc-$environment
-  region: us-east-1
-  defaults: /terraform/resources/s3-public-read-1.yml
-  output_resource_name: hypershift-oidc-s3-creds
-```
+Create a namespace for the hypershift operator in `data/services/hypershift/namespaces/$cluster/hypershift.yml`, e.g. as defined in `data/services/hypershift/namespaces/hshifti01ue1/hypershift.yml`
 
-Make sure the `openshiftResources` section is commented out for now, open an MR and make sure the bucket is created before you continue, otherwise certain integrations will fail.
+To deploy the operator to the freshly created namespace, register a new SAAS deployment target in `data/services/hypershift/cicd/saas-hypershift.yml`.
 
-2. Create resource file at `resources/services/hypershift/$environment/oidc-s3-creds.yml`. Use an example from another environment to get started but make sure to replace the mentioned cluster name in the vault secret references.
+Make sure to reference the correct secrets for `OIDC_S3_NAME` and `OIDC_S3_REGION`, belonging to the Hypershift service cluster this management cluster is registered with.
 
-3. Remove the comments from the `openshiftResources` section of the namespace file
+# Hypershift service cluster registration with OCM Cluster Service
 
-4. Continue on the step about saas file target from the "Hypershift deployment" section
+OCM CS needs a namespace to drive leadership election for its internal components on each provisioning shard. A Hypershift service cluster is also considered a provisioning shard. Define a namespace in `data/services/ocm/namespaces/v4/uhc-leadership-$environment-$servicecluster.yml`, e.g. as defined in `data/services/ocm/namespaces/v4/uhc-leadership-integration-hsservicei01ue1.yml`.
+
+The service account provided in the provisioning shard secrets gets its permissions from a template in https://gitlab.cee.redhat.com/service/uhc-clusters-service/-/blob/master/hypershift-permissions-template.yaml that defines a `ClusterRole ocm`. This template is deployed via the saas file `data/services/ocm/cs/cicd/saas-uhc-hypershift-permissions.yml`, so add a new Hypershift servicecluster as a deploy target to that file.
+
+Note: the `ClusterRole ocm` is also granted to the `Group ocm-developers` which is populated with the OCM dev team on non-production clusters only.
+
+To make the Hypershift service cluster known to CS, it needs to be listed in the provisioning-shards secret of a CS environment, e.g. for the integration environment see the `hypershift_shards` section in `data/services/ocm/namespaces/uhc-integration.yml`. This will make the the service cluster known and provides the service account token of the `ocm` SA from the `ocm` namespace to CS.
+
+Note: the `id` of a shard is a randomly generated UUID.
+
+Details: https://issues.redhat.com/browse/APPSRE-4304
+
+# Hypershift management cluster registration with service cluster
+
+This section is about registering a Hypershift management cluster with the service cluster.
+
+To register a Hypershift management cluster, a namespace named after the management cluster is created on the service cluster. Also a `ManagedCluster` CR (belongs to ACM) is created to make the management cluster known to ACM on the service cluster. ACM also needs to get a cluster-admin token for the management cluster to finish the registration process (which includes installing some components there, e.g. manifest-work controller, klusterlet, policy controllers, ...). This access information is placed by `resources/services/hypershift/cluster-registration/cluster-auto-import-secret.yaml` and registration is kicked of by a `Job` defined here `/services/hypershift/shared-resources/acm-cluster-registration-job.yml`
+
+Create a namespace in `data/services/hypershift/namespaces/$service_cluster/$management_cluster.yml`, e.g. as defined in `data/services/hypershift/namespaces/hsservicei01ue1/hshifti01ue1.yml`. Make sure to correctly set the management cluster name for `openshiftResources.variables.cluster`.
