@@ -7,7 +7,96 @@ rule_files:
 evaluation_interval: 1m
 
 tests:
-   # All 500s come from the router, e.g. pods down
+  # Latency high
+  - interval: 1m
+    input_series:
+      - series: api_inbound_request_duration_bucket{le="0.1",namespace="uhc-{{{environment}}}",service="ocm-managed-services-metrics"}
+        values: 0+1x20 # <= 0.1
+      - series: api_inbound_request_duration_bucket{le="1",namespace="uhc-{{{environment}}}",service="ocm-managed-services-metrics"}
+        values: 0+2x20 # <= 1
+      - series: api_inbound_request_duration_bucket{le="2",namespace="uhc-{{{environment}}}",service="ocm-managed-services-metrics"}
+        values: 0+3x20 # <= 2
+      - series: api_inbound_request_duration_bucket{le="5",namespace="uhc-{{{environment}}}",service="ocm-managed-services-metrics"}
+        values: 0+4x20 # <= 5
+      - series: api_inbound_request_duration_bucket{le="10",namespace="uhc-{{{environment}}}",service="ocm-managed-services-metrics"}
+        values: 0+5x20 # <= 10
+      - series: api_inbound_request_duration_bucket{le="30",namespace="uhc-{{{environment}}}",service="ocm-managed-services-metrics"}
+        values: 0+6x20 # <= 30
+      - series: api_inbound_request_duration_bucket{le="+Inf",namespace="uhc-{{{environment}}}",service="ocm-managed-services-metrics"}
+        values: 0+7x20 # <= inf (50% > 2s)
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: OCM Managed Services Latency High - {{{environment}}}
+        exp_alerts:
+      - eval_time: 20m
+        alertname: OCM Managed Services Latency High - {{{environment}}}
+        exp_alerts:
+          - exp_labels:
+              service: ocm-managed-services
+              severity: medium
+            exp_annotations:
+              message: "OCM Managed Services in namespace uhc-{{{environment}}} 50th percentile latency is greater than 2s. Current value: 3.5"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop/ocm-managed-services.md"
+  # 5xx tests
+  # Normal case, traffic comes from both the router and from clusters service
+  - interval: 1m
+    input_series:
+      - series: haproxy_backend_http_responses_total{code="5xx",exported_namespace="uhc-{{{environment}}}",pod="router-default-69c7459f76-6qz58",route="service-mgmt"}
+        values: 0+0x5 0+1x15
+      - series: haproxy_backend_http_responses_total{code="5xx",exported_namespace="uhc-{{{environment}}}",pod="router-default-69c7459f76-bhswd",route="service-mgmt"}
+        values: 0+0x5 0+1x15
+      - series: haproxy_backend_http_responses_total{code="2xx",exported_namespace="uhc-{{{environment}}}",pod="router-default-69c7459f76-6qz58",route="service-mgmt"}
+        values: 0+6x20
+      - series: haproxy_backend_http_responses_total{code="2xx",exported_namespace="uhc-{{{environment}}}",pod="router-default-69c7459f76-bhswd",route="service-mgmt"}
+        values: 0+2x20
+      - series: envoy_cluster_upstream_rq{envoy_cluster_name="ocm-managed-services",envoy_response_code="500",namespace="uhc-{{{environment}}}",service="clusters-service-metrics-envoy"}
+        values: 0+0x5 0+1x15
+      - series: envoy_cluster_upstream_rq{envoy_cluster_name="ocm-managed-services",envoy_response_code="503",namespace="uhc-{{{environment}}}",service="clusters-service-metrics-envoy"}
+        values: 0+0x5 0+1x15
+      - series: envoy_cluster_upstream_rq{envoy_cluster_name="ocm-managed-services",envoy_response_code="204",namespace="uhc-{{{environment}}}",service="clusters-service-metrics-envoy"}
+        values: 0+1x20
+      - series: envoy_cluster_upstream_rq{envoy_cluster_name="ocm-managed-services",envoy_response_code="200",namespace="uhc-{{{environment}}}",service="clusters-service-metrics-envoy"}
+        values: 0+7x20
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: OCM Managed Services 5xx Errors High - {{{environment}}}
+        exp_alerts:
+      - eval_time: 20m
+        alertname: OCM Managed Services 5xx Errors High - {{{environment}}}
+        exp_alerts:
+          - exp_labels:
+              service: ocm-managed-services
+              severity: {{{severity_500_errors}}}
+              namespace: uhc-{{{environment}}}
+            exp_annotations:
+              message: "OCM Managed Services is returning code 5xx for 20% of requests."
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop/ocm-managed-services.md"
+  # All 500s come from the internal traffic
+  - interval: 1m
+    input_series:
+      - series: envoy_cluster_upstream_rq{envoy_cluster_name="ocm-managed-services",envoy_response_code="500",namespace="uhc-{{{environment}}}",service="clusters-service-metrics-envoy"}
+        values: 0+0x5 0+1x15
+      - series: envoy_cluster_upstream_rq{envoy_cluster_name="ocm-managed-services",envoy_response_code="503",namespace="uhc-{{{environment}}}",service="clusters-service-metrics-envoy"}
+        values: 0+0x5 0+1x15
+      - series: envoy_cluster_upstream_rq{envoy_cluster_name="ocm-managed-services",envoy_response_code="204",namespace="uhc-{{{environment}}}",service="clusters-service-metrics-envoy"}
+        values: 0+1x20
+      - series: envoy_cluster_upstream_rq{envoy_cluster_name="ocm-managed-services",envoy_response_code="200",namespace="uhc-{{{environment}}}",service="clusters-service-metrics-envoy"}
+        values: 0+7x20
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: OCM Managed Services 5xx Errors High - {{{environment}}}
+        exp_alerts:
+      - eval_time: 20m
+        alertname: OCM Managed Services 5xx Errors High - {{{environment}}}
+        exp_alerts:
+          - exp_labels:
+              service: ocm-managed-services
+              severity: {{{severity_500_errors}}}
+              namespace: uhc-{{{environment}}}
+            exp_annotations:
+              message: "OCM Managed Services is returning code 5xx for 20% of requests."
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop/ocm-managed-services.md"
+  # All 500s come from the router, e.g. pods down
   - interval: 1m
     input_series:
       - series: haproxy_backend_http_responses_total{code="5xx",exported_namespace="uhc-{{{environment}}}",pod="router-default-69c7459f76-6qz58",route="service-mgmt"}
@@ -20,15 +109,33 @@ tests:
         values: 0+2x20
     alert_rule_test:
       - eval_time: 10m
-        alertname: OCM managed services 5xx Errors High - {{{environment}}}
+        alertname: OCM Managed Services 5xx Errors High - {{{environment}}}
         exp_alerts:
       - eval_time: 20m
-        alertname: OCM managed services 5xx Errors High - {{{environment}}}
+        alertname: OCM Managed Services 5xx Errors High - {{{environment}}}
         exp_alerts:
           - exp_labels:
               service: ocm-managed-services
               severity: {{{severity_500_errors}}}
               namespace: uhc-{{{environment}}}
             exp_annotations:
-              message: "OCM managed services is returning code 5xx for 20% of requests."
+              message: "OCM Managed Services is returning code 5xx for 20% of requests."
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop/ocm-managed-services.md"
+  # Service is down
+  - interval: 1m
+    input_series:
+      - series: up{job="ocm-managed-services-metrics",namespace="uhc-{{{environment}}}",pod="ocm-managed-services-7fccd765b-nscfn"}
+        values: 1 1 1 1 1 0 0 0 0 0 # up for 5min then down
+    alert_rule_test:
+      - eval_time: 4m
+        alertname: OCM Managed Services DOWN - {{{environment}}}
+        exp_alerts:
+      - eval_time: 10m
+        alertname: OCM Managed Services DOWN - {{{environment}}}
+        exp_alerts:
+          - exp_labels:
+              service: ocm-managed-services
+              severity: {{{severity_oms_down}}}
+            exp_annotations:
+              message: "No targets found for OCM Managed Services in namespace uhc-{{{environment}}}. OCM Managed Services service is down."
               runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop/ocm-managed-services.md"

@@ -33,9 +33,19 @@ spec:
       labels:
         service: ocm-managed-services
         namespace: uhc-{{{environment}}}
-    - alert: OCM managed services 5xx Errors High - {{{environment}}}
+    - alert: OCM Managed Services Latency High - {{{environment}}}
       annotations:
-        message: "OCM managed services is returning code 5xx for {{ $value | humanize }}% of requests."
+        message: "OCM Managed Services in namespace uhc-{{{environment}}} 50th percentile latency is greater than 2s. Current value: {{ $value | humanize }}"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop/ocm-managed-services.md"
+      expr: |
+        histogram_quantile(0.50, sum(rate(api_inbound_request_duration_bucket{namespace="uhc-{{{environment}}}",service="ocm-managed-services-metrics"}[1m])) by (le)) > 2
+      for: 10m
+      labels:
+        service:  ocm-managed-services
+        severity: medium
+    - alert: OCM Managed Services 5xx Errors High - {{{environment}}}
+      annotations:
+        message: "OCM Managed Services is returning code 5xx for {{ $value | humanize }}% of requests."
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop/ocm-managed-services.md"
       expr: |
         100 * status_class_5xx:http_requests_total:rate5m{service="ocm-managed-services",namespace="uhc-{{{environment}}}"}
@@ -46,3 +56,14 @@ spec:
       labels:
         service: ocm-managed-services
         severity: {{{severity_500_errors}}}
+        namespace: uhc-{{{environment}}}
+    - alert: OCM Managed Services DOWN - {{{environment}}}
+      annotations:
+        message: "No targets found for OCM Managed Services in namespace uhc-{{{environment}}}. OCM Managed Services service is down."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/uhc/sop/ocm-managed-services.md"
+      expr: |
+        absent(up{job="ocm-managed-services-metrics",namespace="uhc-{{{environment}}}"} == 1)
+      for: 5m
+      labels:
+        service: ocm-managed-services
+        severity: {{{severity_oms_down}}}
