@@ -53,20 +53,6 @@ spec:
           message: "Notifications gw Alert (Stage)"
           description: "Notifications GW: Down in Stage for 5 minutes."
           runbook: "https://core-platform-apps.pages.redhat.com/notifications-docs/dev/runbooks/alerts/NotificationsGWDownProd.html"
-      - alert: StoppedReceivingNotificationsEvents
-        expr: sum by (bundle,application) (increase(input_consumed_seconds_count[5m])) == 0
-        for: 72h
-        labels:
-          severity: medium
-          service: insights
-          env: stage
-          app_team: notifications
-        annotations:
-          dashboard: "https://grafana.app-sre.devshift.net/d/KQIVyFuMk/notifications-dashboard?orgId=1&refresh=15m&var-datasource=crcs02ue1-prometheus"
-          link_url: "https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/notifications-stage/deployments"
-          message: "Stopped receiving notifications events from: {{ $labels.bundle }}/{{ $labels.application }}"
-          description: "Stopped receiving notifications events from: {{ $labels.bundle }}/{{ $labels.application }} for 72 hours."
-          runbook: "https://core-platform-apps.pages.redhat.com/notifications-docs/dev/runbooks/alerts/StoppedReceivingNotificationsEvents.html"
       - alert: NoMessageBeingProcessedStage
         expr: sum(rate(input_consumed_seconds_count{service="notifications-backend-service"}[5m])) == 0
         for: 1h
