@@ -17,11 +17,10 @@ environment:
 
 managedRoles: true
 
-managedResourceTypes: []
-# managedResourceTypes:
-# - Role
-# - RoleBinding
-# - ServiceAccount
+managedResourceTypes:
+  - Role
+  - RoleBinding
+  - ServiceAccount
 
 managedTerraformResources: true
 
@@ -35,3 +34,34 @@ terraformResources:
 sharedResources:
   - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
 
+openshiftResources:
+  # Secrets
+  - provider: vault-secret
+    path: rhobs/testing/observatorium-testing/observatorium-api-proxy
+    version: 1
+  - provider: vault-secret
+    path: rhobs/testing/observatorium-testing/observatorium-observatorium-api
+    version: 1
+    annotations:
+      qontract.recycle: "true"
+  - provider: vault-secret
+    path: rhobs/testing/observatorium-testing/jaeger-proxy
+    version: 1
+  - provider: vault-secret
+    path: rhobs/testing/observatorium-testing/conprof-proxy
+    version: 1
+  - provider: vault-secret
+    path: rhobs/testing/observatorium-testing/rules-objstore-objectstorage
+    version: 1
+  # Routes
+  - provider: route
+    path: /rhobs/testing/observatorium-testing/observatorium-jaeger-testing.route.yaml
+  - provider: route
+    path: /rhobs/testing/observatorium-testing/observatorium-parca.route.yaml
+  - provider: route
+    path: /rhobs/testing/observatorium-testing/observatorium-api-testing.route.yaml
+
+  # observatorium Serviceaccount
+  # Required for authn/authz by openshift-oauth-proxy containers
+  - provider: resource
+    path: /rhobs/testing/observatorium-testing/observatorium.serviceaccount.yaml

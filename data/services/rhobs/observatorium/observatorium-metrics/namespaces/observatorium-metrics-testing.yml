@@ -22,7 +22,10 @@ networkPoliciesAllow:
 managedRoles: true
 
 managedResourceTypes:
-- Secret
+  - Role
+  - RoleBinding
+  - ServiceAccount
+  - Secret
 
 managedTerraformResources: true
 
@@ -37,8 +40,36 @@ terraformResources:
   output_resource_name: telemeter-thanos-testing-s3
 
 openshiftResources:
-# Secret Templates
-- provider: resource-template
-  type: extracurlyjinja2
-  path: /rhobs/testing/alertmanager-routes.secret.yaml
-  validate_alertmanager_config: true
+  - provider: vault-secret
+    path: rhobs/testing/observatorium-metrics-testing/thanos-objectstorage
+    version: 1
+  - provider: vault-secret
+    path: rhobs/testing/observatorium-metrics-testing/query-frontend-proxy
+    version: 1
+  - provider: vault-secret
+    path: rhobs/testing/observatorium-metrics-testing/query-proxy
+    version: 1
+  - provider: vault-secret
+    path: rhobs/testing/observatorium-metrics-testing/compact-proxy
+    version: 1
+  - provider: vault-secret
+    path: rhobs/testing/observatorium-metrics-testing/alertmanager-proxy
+    version: 1
+  # Routes
+  - provider: route
+    path: /rhobs/testing/observatorium-metrics-testing/observatorium-thanos-compact-testing.route.yaml
+
+  # Secret Templates
+  - provider: resource-template
+    type: extracurlyjinja2
+    path: /rhobs/testing/alertmanager-routes.secret.yaml
+    validate_alertmanager_config: true
+
+  # observatorium-metrics Serviceaccount
+  # Required for authn/authz by openshift-oauth-proxy containers
+  - provider: resource
+    path: /rhobs/testing/observatorium-metrics-testing/observatorium-metrics.serviceaccount.yaml
+
+  # Consumer Serviceaccounts:
+  - provider: resource
+    path: /rhobs/testing/observatorium-metrics-testing/uhc-prometheus-access.serviceaccount.yaml

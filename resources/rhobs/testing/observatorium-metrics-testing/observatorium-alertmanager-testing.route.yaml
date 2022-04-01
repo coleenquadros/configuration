@@ -1,0 +1,23 @@
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    haproxy.router.openshift.io/balance: source
+    haproxy.router.openshift.io/timeout: 5m
+  labels:
+    app: observatorium-alertmanager
+  name: observatorium-alertmanager
+spec:
+  host: observatorium-alertmanager.api.stage.openshift.com
+  port:
+    targetPort: https
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: reencrypt
+  to:
+    kind: Service
+    name: observatorium-alertmanager
+    weight: 100
+  wildcardPolicy: None
