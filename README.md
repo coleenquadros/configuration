@@ -1552,8 +1552,8 @@ For more information about the versions that RDS supports:
 
 | Version      | Minimum minor version | Notes |
 | ----------- | ----------- | ----------- |
-| 14      | no version restrictions      |  |
-| 13      | no version restrictions      |  |
+| 14      | \>= 14.1      | Announced as the minimum required version by email from AWS |
+| 13      | \>= 13.3      | Announced as the minimum required version by email from AWS |
 | 12   | \>= 12.7        | This is the minimum version required for the most recent release of [RDS OS upgrades](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html#Mandatory_OS_Updates) |
 | 11   | \>= 11.12       | This is the minimum version required for the most recent release of [RDS OS upgrades](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html#Mandatory_OS_Updates) |
 | 10   | \>= 10.17       | This is the minimum version required for the most recent release of [RDS OS upgrades](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html#Mandatory_OS_Updates) |
