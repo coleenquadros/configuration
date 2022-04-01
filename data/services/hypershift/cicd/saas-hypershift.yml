@@ -49,14 +49,19 @@ resourceTemplates:
   parameters:
     OPERATOR_IMG: quay.io/app-sre/hypershift-operator
     NAMESPACE: hypershift
-    # OPERATOR_REPLICAS
   targets:
   - namespace:
       $ref: /services/hypershift/namespaces/hshifti01ue1/hypershift.yml
     ref: main
-    parameters:
-      OIDC_S3_NAME: hypershift-oidc-int
-      OIDC_S3_REGION: us-east-1
+    secretParameters:
+    - name: OIDC_S3_NAME
+      secret:
+        path: app-sre/integrations-output/terraform-resources/hsservicei01ue1/multicluster-engine/hypershift-oidc-s3-creds
+        field: bucket
+    - name: OIDC_S3_REGION
+      secret:
+        path: app-sre/integrations-output/terraform-resources/hsservicei01ue1/multicluster-engine/hypershift-oidc-s3-creds
+        field: aws_region
     upstream:
       instance:
         $ref: /dependencies/ci-ext/ci-ext.yml
