@@ -1,0 +1,61 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: web-rca
+name: web-rca-2022-04-01
+app:
+  $ref: /services/web-rca/app.yml
+date: '2022-04-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://gitlab.cee.redhat.com/service/web-rca:
+    - branch: master
+      total: 13
+      success: 12
+    https://gitlab.cee.redhat.com/service/web-rca-ui:
+    - branch: master
+      total: 5
+      success: 4
+  container_vulnerabilities: null
+  post_deploy_jobs: null
+  deployment_validations:
+  - cluster: app-sre-stage-01
+    namespace: web-rca-stage
+    validations:
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 11
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 13
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 10
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 11
+      deployment_validation_operator_default_service_account:
+        Failed: 12
+  - cluster: app-sre-prod-04
+    namespace: web-rca-production
+    validations:
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 6
+      deployment_validation_operator_default_service_account:
+        Failed: 6
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 5
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 5
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 5
+  service_slo:
+  - cluster: app-sre-prod-04
+    namespace: web-rca-production
+    slo_name: Web-RCA API Availability
+    slo_doc_name: web-rca
+    slo_value: 100.0
+    slo_target: 90.0
+  - cluster: app-sre-prod-04
+    namespace: web-rca-production
+    slo_name: Web-RCA API Latency
+    slo_doc_name: web-rca
+    slo_value: 100.0
+    slo_target: 99.0

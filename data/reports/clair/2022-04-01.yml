@@ -1,0 +1,69 @@
+$schema: /app-sre/report-1.yml
+labels:
+  app: clair
+name: clair-2022-04-01
+app:
+  $ref: /services/clair/app.yml
+date: '2022-04-01'
+contentFormatVersion: 1.0.0
+content: |
+  promotions: null
+  merge_activities:
+    https://github.com/quay/clair:
+    - branch: master
+      total: 24
+      success: 24
+  container_vulnerabilities: null
+  post_deploy_jobs: null
+  deployment_validations:
+  - cluster: app-sre-stage-01
+    namespace: clair-stage
+    validations:
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 5
+      deployment_validation_operator_default_service_account:
+        Failed: 5
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 4
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 4
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 4
+  - cluster: clairp01ue1
+    namespace: clair-production
+    validations:
+      deployment_validation_operator_default_service_account:
+        Failed: 6
+      deployment_validation_operator_no_anti_affinity:
+        Failed: 6
+      deployment_validation_operator_no_readiness_probe:
+        Failed: 5
+      deployment_validation_operator_no_liveness_probe:
+        Failed: 5
+      deployment_validation_operator_minimum_three_replicas:
+        Failed: 5
+  service_slo:
+  - cluster: clairp01ue1
+    namespace: clair-production
+    slo_name: Vulnerability report latency 90%
+    slo_doc_name: clair
+    slo_value: 95.8182087261698
+    slo_target: 90.0
+  - cluster: clairp01ue1
+    namespace: clair-production
+    slo_name: Vulnerability report availability
+    slo_doc_name: clair
+    slo_value: 99.9993176913201
+    slo_target: 98.0
+  - cluster: clairp01ue1
+    namespace: clair-production
+    slo_name: Index report creation latency 70%
+    slo_doc_name: clair
+    slo_value: 92.1951236692325
+    slo_target: 70.0
+  - cluster: clairp01ue1
+    namespace: clair-production
+    slo_name: Index report creation availability
+    slo_doc_name: clair
+    slo_value: 99.7408260469297
+    slo_target: 95.0
