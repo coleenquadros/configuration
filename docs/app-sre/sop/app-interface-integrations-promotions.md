@@ -9,6 +9,7 @@ App-interface integrations are being executed in multiple locations in multiple 
 1. If the app-interface changes you are promoting are dependent upon a schema change in [qontract-schemas](https://github.com/app-sre/qontract-schemas),
    the qontract-schemas version should be promoted first. This should be done by updating app-interface's `.env` file in its own merge request
    setting the commit sha reference from qontract-schemas repository. This can be done with `make update-schemas`
+1. Ensure the change works by validating logs in `#sd-app-sre-reconcile-stage` slack channel
 1. Create a MR in app-interface to promote your changes from staging to
    production. `make qr-promote` automates getting the latest commit
    checksum and updating the necessary files. Running `make qr-promote` will also update the `ref` field within our [saas-qontract-reconcile](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-interface/cicd/ci-ext/saas-qontract-reconcile.yaml) file. If there is a need to promote to
@@ -16,6 +17,7 @@ App-interface integrations are being executed in multiple locations in multiple 
    doing, see [Updating specific environments](#updating-specific-environments).
    Make sure to not use `mawk` (Ubuntu default), as it does not support explicit number of occurrences,
    e.g., `[a-f0-9]{7}`.
+1. Validate output of each integration in `app-interface JSON validation` within MR build.
 1. Team members should deploy their own changes to production shortly after
    merging. In some cases, there might be changes queued up from multiple team
    members. **If your promotion will include changes from other team
