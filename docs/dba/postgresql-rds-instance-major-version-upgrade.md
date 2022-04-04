@@ -120,7 +120,31 @@ Example MR: [Scale down service](https://gitlab.cee.redhat.com/service/app-inter
 
 ### 4. Start Database Upgrade
 
-Start by merging the MR that was created to upgrade the database. When qontract-reconcile runs next, it may fail if the parameter group is only being used by a single database because qontract-reconcile won't be able to delete the current parameter group until the upgrade is done. Expect an error similar to following:
+Start by merging the MR that was created to upgrade the database. When qontract-reconcile runs next, the upgrade should be scheduled for the next maintenance window.
+
+**When you're ready to begin the upgrade**, run the command below so that the pending RDS modifications are applied immediately:
+
+```
+aws rds modify-db-instance --db-instance-identifier <DATABASE_NAME> --region <REGION> --apply-immediately
+```
+
+---
+
+**Note:** If you don't run the command above, then the upgrade will not happen until the next maintenance window.
+
+---
+
+Monitor the upgrade in AWS console. AWS will run a pre-upgrade check and the upgrade may not proceed if pre-upgrade check fails. The AWS docs linked above have troubleshooting steps if you run into errors with pre-upgrade checks.
+
+---
+
+**If you see errors related to deleting parameter group errors, then see the next section. Otherwise, you can skip to the next step.**
+
+---
+
+#### Parameter group errors
+
+qontract-reconcile may fail in applying the upgrade if the parameter group is only being used by a single database because the current parameter group can't be deleted until the upgrade is done. Expect an error similar to following:
 
 ```
 [terraform-resources-wrapper] error: b'\nError: Error deleting DB parameter group: InvalidDBParameterGroupState: One or more database instances are still members of this parameter group steahan-dev-params, so the group cannot be deleted\n\tstatus code: 400, request id: 417e8bab-3959-40e5-8a7b-39d18b984f8e\n\n\n'
@@ -128,7 +152,21 @@ Start by merging the MR that was created to upgrade the database. When qontract-
 [terraform-resources-wrapper] [app-sre-stage - apply]     status code: 400, request id: 417e8bab-3959-40e5-8a7b-39d18b984f8e
 ```
 
-**If you see the error above**, switch to the default parameter group for the currently running version of PostgreSQL by running the command below. Wait for the change to take effect and then the errors above should stop, allowing you to proceed with the upgrade.
+**If you see the error above**, you have two options, either copy the existing custom parameter group, or use the default parameter group temporarily.
+
+#### Option A: Copy custom parameter group
+
+Copying the existing parameter group is technically the safest path unless the tenant team indicates that using the default parameter group for a short period of time is safe. The steps below will copy the existing parameter group and apply it to the RDS instance so that the old parameter group can be deleted.
+
+```
+# Create a '-copy' version of the parameter group
+aws rds copy-db-parameter-group --source-db-parameter-group-identifier <EXISTING_PARAMETER_GROUP> --target-db-parameter-group-identifier <EXISTING_PARAMETER_GROUP>-copy --target-db-parameter-group-description "Copy of <EXISTING_PARAMETER_GROUP> to be used during major version upgrade"
+
+# Switch to the '-copy' version of the parameter group so that the old parameter group can be deleted
+aws rds modify-db-instance --db-instance-identifier <DATABASE_NAME> --region <REGION> --apply-immediately --db-parameter-group-name <EXISTING_PARAMETER_GROUP>-copy
+```
+
+#### Option B: Use default parameter group
 
 ```
 aws rds modify-db-instance --db-instance-identifier <DATABASE_NAME> --region <REGION> --apply-immediately --db-parameter-group-name default.postgres<VERSION>
@@ -136,14 +174,6 @@ aws rds modify-db-instance --db-instance-identifier <DATABASE_NAME> --region <RE
 # Example
 aws rds modify-db-instance --db-instance-identifier my-database --region us-east-1 --apply-immediately --db-parameter-group-name default.postgres10
 ```
-
-**To initiate the upgrade**, run the command below so that the pending RDS modifications are applied immediately:
-
-```
-aws rds modify-db-instance --db-instance-identifier <DATABASE_NAME> --region <REGION> --apply-immediately
-```
-
-Monitor the upgrade in AWS console. AWS will run a pre-upgrade check and the upgrade may not proceed if pre-upgrade check fails. The AWS docs linked above have troubleshooting steps if you run into errors with pre-upgrade checks.
 
 ### 5. Scale UP the application
 
