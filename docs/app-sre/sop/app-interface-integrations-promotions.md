@@ -17,7 +17,7 @@ App-interface integrations are being executed in multiple locations in multiple 
    doing, see [Updating specific environments](#updating-specific-environments).
    Make sure to not use `mawk` (Ubuntu default), as it does not support explicit number of occurrences,
    e.g., `[a-f0-9]{7}`.
-1. Validate output of each integration in `app-interface JSON validation` within MR build.
+1. Validate output of each integration in `app-interface JSON validation` within MR build. If there are any output logs they should be well explained by the change introduced.
 1. Team members should deploy their own changes to production shortly after
    merging. In some cases, there might be changes queued up from multiple team
    members. **If your promotion will include changes from other team
@@ -26,7 +26,7 @@ App-interface integrations are being executed in multiple locations in multiple 
    indicates that it is production-ready.
 1. Add a **lgtm** label to the MR via the GitLab website. The change will
    be merged as per the standard
-   [continuous delivery process](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-delivery-in-app-interface.md).
+   [continuous delivery process](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/continuous-delivery-in-app-interface.md). Newer team members should get the change reviewed by team members for few times before they are comfortable with the process.
 
 ## Updating specific environments
 
