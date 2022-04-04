@@ -188,3 +188,7 @@ Now re-create the read-replica instances by adding them back to app-interface.
 ### 7. Update Application Config Changes to use read replicas
 
 Update your application configuration to use the read replicas.
+
+### 8. Post-upgrade steps
+
+1. If [parameter group errors](#parameter-group-errors) were detected and a `-copy` parameter group was created, then delete that parameter group.
