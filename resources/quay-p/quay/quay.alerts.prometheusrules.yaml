@@ -43,7 +43,7 @@ spec:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quay/builder.md"
     - alert: CPU Greater Than 40%
       expr: |
-        sum(irate(process_cpu_seconds_total[5m])) by (instance) * 100 > 40 * 13
+        (sum(rate(process_cpu_seconds_total{pod=~"quay-py3-app.+"}[5m])) by (pod) / 13 ) * 100 > 40
       for: 5m
       labels:
         severity: high
@@ -53,7 +53,7 @@ spec:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/quay/issues/cpu-higher-40-percent.md"
     - alert: Memory Greater Than 48GB
       expr: |
-        sum(process_resident_memory_bytes) by (instance) > 1024 * 1024 * 1024 * 48
+        sum(container_memory_working_set_bytes{pod=~".+", pod !~ "prometheus-*"}) by (pod) > 48 * (1024 * 1024 * 1024)
       for: 5m
       labels:
         severity: high
