@@ -1,0 +1,40 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: rds-approved-versions-test
+spec:
+  groups:
+  - name: rds-version-checks
+    rules:
+    # This alert will be for testing purposes only and will never actually trigger due to the dbinstance_identifier check.
+    # When making changes be sure to:
+    #
+    # 1. Update the expr below and make sure that the tests still pass
+    # 2. Use the same expression in the templated version, but replace the dbinstance_identifier value below with a variable "tfr.identifier"
+    #
+    - alert: TEST-RDSCompliantEngineVersionCheck
+      # This expression uses a regex that matches any engine_versions that don't match the approved versions documented here: https://gitlab.cee.redhat.com/service/app-interface#approved-rds-versions
+      # There doesn't appear to be a way to do a string comparison or some other method that doesn't rely on a regex. We should rely on good tests to ensure that this regex isn't broken.
+      expr: |
+        aws_resources_exporter_rds_engineversion{dbinstance_identifier=~"TEST_.+",engine="postgres", engine_version!~"10\\.1[7-9]|10\\.2[0-9]|11\\.1[2-9]|11\\.2[0-9]|12\\.[7-9]|12\\.[1-2][0-9]|13\\.[3-9]|13\\.1[0-9]|13\\.2[0-9]||14\\.[0-9]*"} or aws_resources_exporter_rds_engineversion{dbinstance_identifier=~"TEST_.+",engine="mysql", engine_version!~"5\\.7\\.3[3-9]|5\\.7\\.4[0-9]|8\\.0\\.2[3-9]|8\\.0\\.3[0-9]|8\\.0\\.4[0-9]"}
+      for: 10m
+      labels:
+        service: app-sre-observability
+        severity: info
+    # This is a placeholder alert where the templated version will go after more testing. For now, this is only being used to test the jiralert ticket creation.
+    - alert: RDSCompliantEngineVersionCheck-app-interface-unleash-production
+      annotations:
+        message: "app-interface-unleash-production RDS instance, in app-sre AWS account, is running a non-compliant database engine version."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface#approved-rds-versions"
+      expr: |
+        aws_resources_exporter_rds_engineversion{dbinstance_identifier="app-interface-unleash-production",engine="postgres", engine_version!~"10\\.1[7-9]|10\\.2[0-9]|11\\.1[2-9]|11\\.2[0-9]|12\\.[7-9]|12\\.[1-2][0-9]|13\\.[3-9]|13\\.1[0-9]|13\\.2[0-9]||14\\.[0-9]*"} or aws_resources_exporter_rds_engineversion{dbinstance_identifier="app-interface-unleash-production",engine="mysql", engine_version!~"5\\.7\\.3[3-9]|5\\.7\\.4[0-9]|8\\.0\\.2[3-9]|8\\.0\\.3[0-9]|8\\.0\\.4[0-9]"}
+      for: 10m
+      labels:
+        service: app-sre-observability
+        severity: medium
+        jiralert: ASIC
