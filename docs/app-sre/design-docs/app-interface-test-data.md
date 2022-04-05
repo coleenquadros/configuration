@@ -1,4 +1,4 @@
-# Design doc: optimal location for app-interface schemas
+# Design doc: app-interface test data
 
 ## Author/date
 
