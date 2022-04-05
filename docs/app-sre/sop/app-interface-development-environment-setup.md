@@ -145,7 +145,9 @@ To make the required changes to work with those resources, run the following com
 
 ```sh
 sed -i 's|serverUrl.*|serverUrl: https://api.appint-ex-01.e7t8.p1.openshiftapps.com:6443|g' data/clusters/appint-ex-01/cluster.yml
-sed -i 's|012345678910|249118421612|g' data/aws/app-int-example/account.yml
+sed -i 's|serverUrl.*|serverUrl: https://api.appint-ex-01.e7t8.p1.openshiftapps.com:6443|g' data/clusters/appint-ex-02/cluster.yml
+sed -i 's|1234567890|249118421612|g' data/aws/app-int-example-01/account.yml
+sed -i 's|1234567890|249118421612|g' data/aws/app-int-example-02/account.yml
 ```
 
 ## Creating a new integration
