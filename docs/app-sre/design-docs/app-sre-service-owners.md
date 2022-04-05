@@ -47,3 +47,4 @@ The services we need to define ownership for:
 1. Rate Limiting
 1. Unleash
 1. Vault
+1. Vault Manager
