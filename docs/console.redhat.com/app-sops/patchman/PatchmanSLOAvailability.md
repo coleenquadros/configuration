@@ -1,0 +1,20 @@
+# Patchman SLO Availability alert
+Severity: Pagerduty
+
+## Incident Response Plan
+ [Incident Response Doc](https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE) for console.redhat.com
+
+## Impact
+Customer facing API doesn't work properly so there's a visible outage in the service.
+
+## Summary
+This alert fires when Patchman availability SLO has been breached which means that PatchmanEngine5xx alert has fired numerous times in the window.
+
+## Access required
+Console access to the cluster+namespace pods are running in.
+
+## Steps
+1. Escalate the alert to the engineering team that is responsible for the app. The team is most likely aware of the situation as availability SLO is observed by the engineering team.
+
+## Escalations
+https://visual-app-interface.devshift.net/services#/services/insights/patchman/app.yml

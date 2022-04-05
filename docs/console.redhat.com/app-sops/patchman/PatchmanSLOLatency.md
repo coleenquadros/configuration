@@ -1,0 +1,21 @@
+# Patchman SLO Latency alert
+Severity: Medium
+
+## Incident Response Plan
+ [Incident Response Doc](https://docs.google.com/document/d/1AyEQnL4B11w7zXwum8Boty2IipMIxoFw1ri1UZB6xJE) for console.redhat.com
+
+## Impact
+Customer facing API works slower than expected so there's visible degradation of quality of the service (but not outage).
+
+## Summary
+This alert fires when patchman API responses were slower than expected (>90% requests served within 2 seconds)
+
+## Access required
+Console access to the cluster+namespace pods are running in.
+
+## Steps
+1. Escalate the alert to the engineering team that is responsible for the app. The team is most likely aware of the situation as latency SLO is observed by the engineering team.
+
+## Escalations
+https://visual-app-interface.devshift.net/services#/services/insights/patchman/app.yml
+
