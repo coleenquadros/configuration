@@ -55,6 +55,7 @@ The services we need to define ownership for:
 1. Unleash
 1. Vault
 1. Vault Manager
+1. Jenkins
 
 ## Alternatives considered
 
