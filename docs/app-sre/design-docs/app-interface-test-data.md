@@ -10,7 +10,7 @@ https://issues.redhat.com/browse/APPSRE-4750
 
 ## Problem Statement
 
-As part of our newly gained abilities to dynamically generate configuration, we want to be able to test that templating works as we expect. This essentially means that we want to define a test for a templated resource, specifying what the expected result looks like.
+As part of our newly gained abilities to [dynamically generate configuration based on app-interface data](https://github.com/app-sre/qontract-reconcile/pull/2272), we want to be able to test that templating works as we expect. This essentially means that we want to define a test for a templated resource, specifying what the expected result looks like.
 
 Since templating happens based on data in app-interface, it is difficult to define a static file which represents the expected result.
 
