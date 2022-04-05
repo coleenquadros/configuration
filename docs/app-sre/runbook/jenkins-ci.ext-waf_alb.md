@@ -49,7 +49,7 @@ Access logging can be enabled in the ALB if needed but are disabled by default.
 
 #### AWS
 
-- WAF Rules have a Cloudwatch metric for every rule, in the WAF WebACL console, there is a chart with the WAF activity such as Counted_Requests, BlockedRequests etc per Rule.
+- Each WAF rule has a Cloudwatch metric. In the AWS WAF Console, under the Web ACL, there is a chart with the WAF rules activity, sample requests, logging and more.
 - The ALB has the common load balancing metrics such as number of requests, status codes, etc. In the EC2 Console under Load balancers -> ci.ext
 
 ## Troubleshooting
