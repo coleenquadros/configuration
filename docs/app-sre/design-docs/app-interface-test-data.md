@@ -49,7 +49,8 @@ This approach means that the only updates we will need to make will be in the ap
 
 ## Alternatives considered
 
-- Enhance qontract-validator to bundle test data into the production bundle (not with the actual data, but still within the bundle).
+- Enhance qontract-validator to bundle test data into the production bundle (not with the actual data, but still within the bundle). If we were to enhance qontract-validator to add the test data to the bundle, there is a higher risk of a bug causing an integration to consume the test data instead of the production data. With the test data not even reaching the bundle, it means that there is 0% that integrations will act on the test data.
+
 - Use existing production data as an expected result. This may lead to additional overhead in maintaining the expected test results.
 
 ## Milestones
