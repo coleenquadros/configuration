@@ -18,7 +18,7 @@ The services AppSRE owns should be properly maintained.
 
 Ownership responsibilities might change over time, some services might require more effort to maintain than others. Each responsible stream should establish a review/retro process for service ownership, which will be implemented as a quarterly meeting to review needed/completed work tracked in Jira tickets.
 
-Each stream is also encouraged to present a periodic demo on any service related work performed over that period.
+To avoid creating silos, each stream is also encouraged to present a periodic demo on any service related work performed over that period.
 
 ## Non-objectives
 
