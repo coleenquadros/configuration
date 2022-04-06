@@ -1,6 +1,6 @@
 # Prework
   - Fork the infra repo from [here](https://gitlab.cee.redhat.com/app-sre/infra)
-  - If we need a RHEL slave node, perform the following to make rhel gold images available in the AWS account.
+  - If we need a RHEL worker node, perform the following to make rhel gold images available in the AWS account.
     - Add the aws account against the employee subscription to make sure we get the rhel gold images. \
       This can be done at https://access.redhat.com/management/cloud#cloud_accounts_AWS.
 
@@ -11,9 +11,9 @@
 
 ### Create the configuration needed for setting up jenkins and additional tasks via ansible playbooks
 
-  - Create a host vars file like [this](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ansible/hosts/host_vars/ci-ext-jenkins-slave-08-codeready-analytics)
+  - Create a host vars file like [this](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ansible/hosts/host_vars/ci-ext-jenkins-worker-08-codeready-analytics)
   - Add the new host and group into the host in appropriate places in the [hosts.cfg](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ansible/hosts/hosts.cfg)
-  - Add the new task to the main playbook for jenkins slave for [ci-ext node-ci-ext-jenkins-slave.yml](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ansible/playbooks/node-ci-ext-jenkins-slave.yml)
+  - Add the new task to the main playbook for jenkins worker for [ci-ext node-ci-ext-jenkins-worker.yml](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ansible/playbooks/node-ci-ext-jenkins-worker.yml)
 
 # Submit an MR with the above changes to the Infra repository.
 
@@ -28,14 +28,14 @@
   - Enable optional repos if needed. This was needed for python36-devel. \
       yum-config-manager --enable rhel-7-server-optional-rpms
 
-# Execute ansible playbooks for configuring the jenkins slave node
-  - In the Local host_vars file for the newly built host [example](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ansible/hosts/host_vars/ci-ext-jenkins-slave-08-codeready-analytics), change app-sre-bot to your own login. This is resolve possibly a circular dependancy. (Need to revert back to orignal after the playbook is run)
+# Execute ansible playbooks for configuring the jenkins worker node
+  - In the Local host_vars file for the newly built host [example](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ansible/hosts/host_vars/ci-ext-jenkins-worker-08-codeready-analytics), change app-sre-bot to your own login. This is resolve possibly a circular dependancy. (Need to revert back to orignal after the playbook is run)
   - Run ansible playbook in debug mode to configure the new host for jenkins. \
     example: \
-    ansible-playbook playbooks/node-ci-ext-jenkins-slave.yml --limit ci-ext-jenkins-slave-08-codeready-analytics -u ec2-user -CD
+    ansible-playbook playbooks/node-ci-ext-jenkins-worker.yml --limit ci-ext-jenkins-worker-08-codeready-analytics -u ec2-user -CD
   - Run ansible playbook after confirming the changes in debug mode \
     example: \
-    ansible-playbook playbooks/node-ci-ext-jenkins-slave.yml --limit ci-ext-jenkins-slave-08-codeready-analytics -u ec2-user
+    ansible-playbook playbooks/node-ci-ext-jenkins-worker.yml --limit ci-ext-jenkins-worker-08-codeready-analytics -u ec2-user
 
 # Add the new node in ci.ext.devshift.net
   - login to ci.ext.devshift.net
@@ -47,6 +47,6 @@
 
 # Verify the node is added successfully in the Nodes section.
 
-#### Reference MR for adding ci-ext-jenkins-slave-08-codeready-analytics [here](https://gitlab.cee.redhat.com/app-sre/infra/-/merge_requests/161)
+#### Reference MR for adding ci-ext-jenkins-worker-08-codeready-analytics [here](https://gitlab.cee.redhat.com/app-sre/infra/-/merge_requests/161)
 
 
