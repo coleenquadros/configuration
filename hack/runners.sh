@@ -132,6 +132,9 @@ run_user_validator() {
   local status
 
   STARTTIME=$(date +%s)
+
+  # USER_VALIDATOR_INVALID_USERS is just a workaround. 
+  # Please do not add new paths, but delete invalid keys from now on
   docker run --rm -t \
     -e QONTRACT_SERVER_URL=${GRAPHQL_SERVER} \
     -e GRAPHQL_USERNAME=${GRAPHQL_USERNAME} \
@@ -140,6 +143,7 @@ run_user_validator() {
     -e VAULT_AUTHTYPE=approle \
     -e VAULT_ROLE_ID=${USER_VALIDATOR_ROLE_ID} \
     -e VAULT_SECRET_ID=${USER_VALIDATOR_SECRET_ID} \
+    -e USER_VALIDATOR_INVALID_USERS='/teams/insights/users/abakshi.yml,/teams/sd-ops-dev/users/sreaves.yml,/teams/quay/users/hdonnay.yml,/teams/sd-sre/users/drow.yml,/teams/insights/users/mlahane.yml,/teams/sd-ops-dev/users/mpovolny.yml,/teams/insights/users/ccx/dpensier.yml,/teams/devtools/users/sbryzak.yml,/teams/insights/users/khowell.yml,/teams/che/users/skabashn.yml,/teams/managed-services/users/stian.yml,/teams/insights/users/opacut.yml' \
     ${USER_VALIDATOR_IMAGE}:${USER_VALIDATOR_IMAGE_TAG} validate \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-user-validator.txt
 
