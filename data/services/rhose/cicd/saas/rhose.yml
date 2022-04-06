@@ -1,0 +1,53 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: rhose
+
+name: saas-rhose
+description: SaaS tracking file for Red Hat Openshift Smart Events (RHOSE)
+
+app:
+  $ref: /services/rhose/app.yml
+
+pipelinesProvider:
+  $ref: /services/rhose/pipelines/rhose-pipelines.app-sre-prod-01.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: rhose-team
+  notifications:
+    start: false
+
+managedResourceTypes:
+  - Deployment
+  - Service
+  - ConfigMap
+
+imagePatterns:
+  - quay.io/app-sre/rhose-fleet-manager
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+resourceTemplates:
+  - name: rhose
+    url: https://github.com/5733d9e2be6485d52ffa08870cabdee0/sandbox
+    path: /app-interface/manifests/rhose-fleet-manager.yml
+    targets:
+      - namespace:
+          $ref: /services/rhose/namespaces/stage.yml
+        ref: main
+        upstream:
+          instance:
+            $ref: /dependencies/ci-ext/ci-ext.yml
+          name: 5733d9e2be6485d52ffa08870cabdee0-sandbox-gh-build-main
+    parameters:
+      FLEET_MANAGER_IMAGE: quay.io/app-sre/rhose-fleet-manager
+      FLEET_MANAGER_IMAGE_TAG: latest
+      FLEET_MANAGER_SSO_URL: toReplace
+      FLEET_MANAGER_SSO_CLIENT_ID: toReplace
+      RDS_SECRET_NAME: rhosedb-rds
