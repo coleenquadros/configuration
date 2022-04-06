@@ -34,7 +34,7 @@ This directory will not be bundled together with the production data and will ne
 
 We will follow up by [running specific integrations](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/hack/select-integrations.py) (such that test the test data in some way) against that data.
 
-This data will only be tested by particular integrations. The plan is to start with only validating integrations, specifically the (proposed) integration `templates-tester` (described in !36434). Each integration that we will want to run against this test data will need to be reviewed on a case by case basis. For example, we can't (at this time) test `openshift-resources` (for example) since it needs to interact with external resources, OpenShift clusters in this case.
+This data will only be tested by particular integrations. The plan is to start with only validating integrations, specifically the (proposed) integration `templates-tester` (described in !36434). Each integration that we will want to run against this test data will need to be reviewed on a case by case basis. For example, we can't (at this time) test `openshift-resources` since it needs to interact with external resources, OpenShift clusters in this case. This also means that any "schema-like testing" embedded into integrations can only be tested if an integration is enabled to test the test data. For example, a PrometheusRule using a `service` label with a value from the app-interface settings `alertingServices` can only be validated if `prometheus-rules-tester` is enabled to run on the test data.
 
 Integrations that will need to run against test data will explicitly specify it in the integration file (`/data/integrations`) in the form of:
 ```yaml
