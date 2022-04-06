@@ -29,6 +29,7 @@ slack:
 
 managedResourceTypes:
 - ClowdApp
+- ClowdJobInvocation
 - ConfigMap
 
 imagePatterns:
@@ -55,7 +56,7 @@ resourceTemplates:
     REPLICAS_PMIN: 3
     CPU_REQUEST: 500m
     CPU_LIMIT: 1
-    MEMORY_REQUEST: 1Gi
+    MEMORY_REQUEST: 500Mi
     MEMORY_LIMIT: 2Gi
     DEDUP_MEMORY_LIMIT: 2Gi
     MEMORY_REQUEST_REAPER: 256Mi
@@ -67,15 +68,16 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/host-inventory/namespaces/perf-host-inventory-perf.yml
     ref: master
-    # upstream:
-    #   instance:
-    #     $ref: /dependencies/ci-ext/ci-ext.yml
-    #   name: RedHatInsights-insights-host-inventory-gh-build-master
     parameters:
-      REPLICAS_SVC: 25
+      CJI_RANDOM_SUFFIX: 'mj-3'
+      REPLICAS_P1: 1
+      REPLICAS_SP: 1
+      REPLICAS_PMIN: 1
+      REPLICAS_SVC: 1
       INVENTORY_DB_SSL_MODE: verify-full
-      REAPER_SUSPEND: 'false'
-      SP_VALIDATOR_SUSPEND: 'false'
-      PENDO_SYNCHER_SUSPEND: 'false'
-      PENDO_CRON_SCHEDULE: '@daily'
-      PENDO_SYNC_ACTIVE: 'true'
+      REAPER_SUSPEND: 'true'
+      SP_VALIDATOR_SUSPEND: 'true'
+      FLOORIST_SUSPEND: 'true'
+      FLOORIST_IMAGE_TAG: b57a5a8
+      FLOORIST_BUCKET_SECRET_NAME: insights-metrics-export-perf
+      FLOORIST_SCHEDULE: '20 0 * * *'

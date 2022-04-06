@@ -117,7 +117,7 @@ resourceTemplates:
       IMAGE_TAG: 727e659
       MIN_REPLICAS: "2"
       MAX_REPLICAS: "6"
-      DB_WRITER_REPLICAS: "16"
+      DB_WRITER_REPLICAS: "8"
       HABERDASHER_KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9092
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
@@ -369,6 +369,32 @@ resourceTemplates:
       MAX_REPLICAS: "1"
       SUSPEND_JOB: "true"
 
+- name: ccx-notification-db-cleaner
+  path: /deploy/clowdapp-db-cleaner.yaml
+  url: https://github.com/RedHatInsights/ccx-notification-writer
+  targets:
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
+    ref: master
+    disable: false
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-ccx-notification-writer-gh-build-master
+    parameters:
+      IMAGE: "quay.io/cloudservices/ccx-notification-writer"
+      JOB_SCHEDULE: "0 * * * *"
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
+    ref: eeceb2183f89deba1108b98557537c1eb5a13d60
+    disable: true
+    parameters:
+      JOB_SCHEDULE: "0 0 * * *"
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true
+    ref: internal
+
 - name: ccx-notification-service
   path: /deploy/clowdapp.yaml
   url: https://github.com/RedHatInsights/ccx-notification-service
@@ -376,7 +402,7 @@ resourceTemplates:
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
     # FIXME set replicas to 1: https://issues.redhat.com/browse/CCXDEV-7479
-    disable: true
+    disable: false
     ref: master
     upstream:
       instance:
@@ -387,7 +413,7 @@ resourceTemplates:
       CONTENT_SERVICE_PORT: 10000
       JOB_SCHEDULE: "*/3 * * * *"
       NOTIFICATION_RESEND_COOLDOWN: "29m"
-      SUSPEND_JOB: "true"
+      SUSPEND_JOB: "false"
   - namespace:
       $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
     # FIXME set replicas to 1: https://issues.redhat.com/browse/CCXDEV-7479
@@ -406,6 +432,24 @@ resourceTemplates:
       JOB_SCHEDULE: "*/3 * * * *"
       NOTIFICATION_RESEND_COOLDOWN: "29m"
       SUSPEND_JOB: "true"
+
+
+### CCX Helpers
+
+- name: ccx-kafka-monitor
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/insights-kafka-monitor
+  targets:
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-insights-kafka-monitor-gh-build-master
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/ccx-data-pipeline-prod.yml
+    ref: b139a84cec3af4272803eb0b562ca852d88d0ecc
 
 
 ### Grafana Dashboards

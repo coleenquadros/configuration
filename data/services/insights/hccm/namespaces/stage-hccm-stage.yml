@@ -157,8 +157,29 @@ terraformResources:
 - provider: s3
   account: insights-stage
   identifier: hccm-stage-s3
-  defaults: /terraform/resources/s3-private-1.yml
+  defaults: /terraform/resources/s3-all-expires-465-days.yml
   output_resource_name: hccm-s3
+- provider: aws-iam-service-account
+  account: insights-stage
+  identifier: hccm-hcs-s3-read-stage
+  variables:
+    aws_region: us-east-1
+  user_policy:
+    {
+      "Version": "2012-10-17",
+      "Statement": [{
+        "Effect": "Allow",
+        "Action": [
+          "s3:ListBucket",
+          "s3:GetObject"
+        ],
+        "Resource": [
+          "arn:aws:s3:::hccm-stage-s3",
+          "arn:aws:s3:::hccm-stage-s3/*"
+        ]
+      }]
+    }
+  output_resource_name: hccm-hcs-stage-s3-read
 - provider: elasticache # TODO remove after clowder
   account: insights-stage
   identifier: cost-management-stage-elasticache

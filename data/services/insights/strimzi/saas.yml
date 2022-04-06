@@ -90,7 +90,7 @@ resourceTemplates:
       KAFKA_VERSION: 2.8.0
   - namespace:
       $ref: /services/insights/strimzi/namespaces/platform-mq-prod.yml
-    ref: 7063e1c22e5ff42621b4c705b6a2f9d81181a45f
+    ref: 138799377dce8ec2fd6c1f75db599c61eb6acc40
     parameters:
       KAFKA_CPU_REQUESTS: 2
       KAFKA_CPU_LIMITS: 4
@@ -101,8 +101,8 @@ resourceTemplates:
       KAFKA_HEAP_OPTS_XMX: 6g
       KAFKA_VOL_SIZE: 800Gi
       KAFKA_VERSION: 2.8.0
-      READY_DELAY: 60
-      READY_TIMEOUT: 30
+      READY_DELAY: 300
+      READY_TIMEOUT: 120
 - name: kafka-topics
   path: /deploys/openshift/kafka-topics.yaml
   url: https://github.com/RedHatInsights/platform-mq
@@ -114,7 +114,7 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/insights/strimzi/namespaces/platform-mq-prod.yml
-    ref: 1d246b059177ca61540b7d71a898cf0841e3f460
+    ref: 138799377dce8ec2fd6c1f75db599c61eb6acc40
 - name: kafka-schema-registry
   path: /deploys/openshift/schema-registry.yaml
   url: https://github.com/RedHatInsights/platform-mq
@@ -209,11 +209,14 @@ resourceTemplates:
       TGT_CLUSTER_ALIAS: consoledot-test-stage
   - namespace:
       $ref: /services/insights/strimzi/namespaces/platform-mq-prod.yml
-    ref: 7ee60cd0e9689030ba78628c2636a32b17788ff7
+    ref: ea34568dfbbfec7a9818e670579b8efe4e5a2441
     parameters:
       SRC_CLUSTER_BOOTSTRAP: ${KAFKA_BOOTSTRAP_HOST}:9093
-      TGT_CLUSTER_BOOTSTRAP: consoledot-c-bngi-jicdpbpsq--og.bf2.kafka.rhcloud.com:443
-      MANAGED_KAFKA_CLIENT_ID: srvc-acct-5eb7c544-e3e6-4fa4-b58c-c016296702da
+      BOOTSTRAP_CONFIG_PROVIDER: ${secrets:platform-mq-prod/mk-oauth-secret:bootstrap_server_host}
+      AUTH_CONFIG_PROVIDER_ID: ${secrets:platform-mq-prod/mk-oauth-secret:client_id}
+      AUTH_SECRET_NAME: mk-oauth-secret
+      SRC_CLUSTER_ALIAS: platform-mq-prod
+      TGT_CLUSTER_ALIAS: consoledot-test-prod
 - name: kafka-superuser
   path: /deploys/superuser.yaml
   url: https://github.com/RedHatInsights/platform-mq

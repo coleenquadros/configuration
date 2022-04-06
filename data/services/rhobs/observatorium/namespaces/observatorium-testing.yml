@@ -4,7 +4,7 @@ $schema: /openshift/namespace-1.yml
 labels: {}
 
 name: observatorium-testing
-description: Staging namespace for Observatorium (API and common components).
+description: Testing namespace for Observatorium (API and common components).
 
 cluster:
   $ref: /openshift/rhobs-testing/cluster.yml
@@ -15,13 +15,14 @@ app:
 environment:
   $ref: /products/osdv4/environments/testing.yml
 
+networkPoliciesAllow:
+  - $ref: /services/rhobs/observatorium/observatorium-metrics/namespaces/observatorium-metrics-testing.yml
+  - $ref: /services/rhobs/telemeter/namespaces/telemeter-testing.yml
+
 managedRoles: true
 
-managedResourceTypes: []
-# managedResourceTypes:
-# - Role
-# - RoleBinding
-# - ServiceAccount
+managedResourceTypes:
+  - ServiceAccount
 
 managedTerraformResources: true
 
@@ -31,3 +32,38 @@ terraformResources:
   identifier: telemeter-rules-objstore-testing
   defaults: /terraform/resources/telemeter/s3-private-1.yml
   output_resource_name: telemeter-rules-objstore-testing-s3
+
+sharedResources:
+  - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+
+openshiftResources:
+  # Secrets
+  - provider: vault-secret
+    path: rhobs/testing/observatorium-testing/observatorium-api-proxy
+    version: 1
+  - provider: vault-secret
+    path: rhobs/testing/observatorium-testing/observatorium-observatorium-api
+    version: 1
+    annotations:
+      qontract.recycle: "true"
+  - provider: vault-secret
+    path: rhobs/testing/observatorium-testing/jaeger-proxy
+    version: 1
+  - provider: vault-secret
+    path: rhobs/testing/observatorium-testing/conprof-proxy
+    version: 1
+  - provider: vault-secret
+    path: rhobs/testing/observatorium-testing/rules-objstore-objectstorage
+    version: 1
+  # Routes
+  - provider: route
+    path: /rhobs/testing/observatorium-testing/observatorium-jaeger-testing.route.yaml
+  - provider: route
+    path: /rhobs/testing/observatorium-testing/observatorium-parca.route.yaml
+  - provider: route
+    path: /rhobs/testing/observatorium-testing/observatorium-api-testing.route.yaml
+
+  # observatorium Serviceaccount
+  # Required for authn/authz by openshift-oauth-proxy containers
+  - provider: resource
+    path: /rhobs/testing/observatorium-testing/observatorium.serviceaccount.yaml

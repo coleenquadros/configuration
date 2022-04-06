@@ -51,6 +51,8 @@ component should be placed outside of any groups, check for the reasons.
 
 ## Additional Reviewers
 
+In general when anyone ask for access to tenant's resource, even if it's in lower environments, it's standard procedure to ask approval from the owner of the service.
+
 ### Telemeter access
 
 Access to Telemeter is approved by the telemetry-sme list: telemetry-sme <telemetry-sme@redhat.com> 

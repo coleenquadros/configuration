@@ -130,6 +130,8 @@ Perform the following actions in a separate MR from the bootstrap MR:
 
 ### Monitoring
 
+#### PipelineRun status
+
 For every PipelineRun completed there's a metric that is pushed to Prometheus: `app_sre_tekton_pipelinerun_task_status`. It keeps a translation of the tekton status:
 
 |Tekton Status|Prometheus value|
@@ -177,6 +179,17 @@ The `pipelinerun` label will help you identify the specific pipelinerun associat
 * Since the PushGateway runs in [`app-sre-prod-01`](/data/openshift/app-sre-prod-01/cluster.yml), the PrometheusRule will need to be deployed in that cluster.
 * The pipelines provider associated to your saas file will tell you exactly where to look for details on your pipeline runs.
 * Alternatively, you have the `tkn_cluster_console_url` and the `tkn_namespace_name` labels to have those details. The alert above uses them to build a direct access to the PipelineRun associated to the metric.
+
+#### Pipeline duration
+
+We store two metrics that deal with Pipeline duration:
+
+* `tekton_pipelines_controller_pipelinerun_taskrun_duration_seconds`
+* `tekton_pipelines_controller_pipelinerun_duration_seconds`
+
+They store the values related to the last run. See https://tekton.dev/docs/pipelines/metrics/ for details about these metrics and the [TektonConfig](/resources/tekton/config.tektonconfig.yaml) object to understand exactly what we are storing in terms of Pipeline Duration.
+
+Tekton duration metrics are federated from the internal prometheus OSD instance via additional scrape config in [resources/observability/prometheus](/resources/observability/prometheus).
 
 ### Migration
 

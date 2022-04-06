@@ -90,12 +90,10 @@ new commit?
     use it.
   AMI does not exist?
     use last known commit.
-    1 hour passed since new commit added?
-      no - log a warning
-      yes - log an error and fail integration
+    upstream jenksin job is running?
+      yes - log a warning
+      no - log an error and fail integration
 ```
-
-The "1 hour passed" condition may be replaced with logic checking an upstream Jenkins job instead.
 
 To monitor the process we will need to consider the following things:
 1. The Jenkins job that builds an AMI should be monitored and should alert the tenant in case of failure.

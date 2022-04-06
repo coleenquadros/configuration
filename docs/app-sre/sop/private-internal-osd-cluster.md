@@ -41,7 +41,7 @@ Previous work that resulted in this SOP:
 1. The CIDR block that was assigned for AppSRE is `10.29.80.0/20`. We have broken it up to be able to provision 4 * /22 clusters:
     - 10.29.80.0/22 (10.29.80.0 - 10.29.83.255) - appsres03ue1
     - 10.29.84.0/22 (10.29.84.0 - 10.29.87.255) - appsrep05ue1
-    - 10.29.88.0/22 (10.29.88.0 - 10.29.91.255) - unused
+    - 10.29.88.0/22 (10.29.88.0 - 10.29.91.255) - ci-int (AWS)
     - 10.29.92.0/22 (10.29.92.0 - 10.29.95.255) - unused
 1. Create a Transit Gateway, Customer Gateways, Site-to-site connections and more AWS resources as required.
     * Note: already implemented in https://gitlab.cee.redhat.com/app-sre/infra/-/tree/master/terraform/app-sre/app-sre-ci
