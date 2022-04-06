@@ -9,11 +9,11 @@ evaluation_interval: 1m
 tests:
   - interval: 1m
     input_series:
-      - series: api_inbound_request_duration_bucket{job="status-board-metrics",namespace="status-board-production",le="1000.0",code="200"}
+      - series: api_inbound_request_duration_bucket{job="status-board-metrics",namespace="status-board-production",le="1",code="200"}
         values: '0+85x5 0+200x5 0+0x5' #a a+b a+(2*b) 0 85 170...85 or 15 out of every 100 are above 1 second followed by 200 per min for 5 mins or 0 out of 200 are above 1 second
       - series: api_inbound_request_duration_count{job="status-board-metrics",namespace="status-board-production", code="200"}
         values: '0+100x5 0+200x5 0+0x5' # 0 100 200 300 400... #500 2xx requests for first 5 mins followed by 1000 2xx requests for next 5 mins followed by 0 2xx requests for the final 5 mins as they are all 5xx now
-      - series: api_inbound_request_duration_bucket{job="status-board-metrics",namespace="status-board-production",le="1000.0",code="503"}
+      - series: api_inbound_request_duration_bucket{job="status-board-metrics",namespace="status-board-production",le="1",code="503"}
         values: '0+0x5 0+0x5 0+10x5' #for first ten min no 5xx errors for the next 5 mins all 5xx errors with some that take longer than 1 second. Latency alert should fire after 5 mins then resolve and stop firing even though alot of 500s were taking > 1 second
       - series: api_inbound_request_duration_count{job="status-board-metrics",namespace="status-board-production",code="503"}
         values: '0+100x5 0+200x5 0+0x5' # 0 100 200 300 400... #500 2xx requests for first 5 mins followed by 1000 2xx requests for next 5 mins followed by 0 2xx requests for the final 5 mins as they are all 5xx now
@@ -39,11 +39,11 @@ tests:
 
   - interval: 1m
     input_series:
-      - series: api_inbound_request_duration_bucket{job="status-board-metrics",namespace="status-board-production",le="1000.0",code="200"}
+      - series: api_inbound_request_duration_bucket{job="status-board-metrics",namespace="status-board-production",le="1",code="200"}
         values: '0+93x30 0+2790x30 0+0x30' #a a+b a+(2*b) 0 93 186...93 or 6 out of every 100 are above 1 second followed by 2790 per min for 30 mins or 0 out 2790 are above 1 second
       - series: api_inbound_request_duration_count{job="status-board-metrics",namespace="status-board-production", code="200"}
         values: '0+100x30 0+2790x30 0+0x30' # 0 100 200 300 400...2xx requests for 60 minutes followed 0 2xx requests for the final 30 mins as they are all 5xx now
-      - series: api_inbound_request_duration_bucket{job="status-board-metrics",namespace="status-board-production",le="1000.0",code="503"}
+      - series: api_inbound_request_duration_bucket{job="status-board-metrics",namespace="status-board-production",le="1",code="503"}
         values: '0+0x30 0+0x30 0+93x30' # for first 60 min no 5xx errors followed by some 5xx errors that take longer than 1 second,Latency alert should fire after 30 mins then resolve and stop firing even though alot of 500s were taking > 1 second
       - series: api_inbound_request_duration_count{job="status-board-metrics",namespace="status-board-production",code="503"}
         values: '0+0x30 0+0x30 0+200x30' # 0 5xx requests for 60 mins followed by 6000 5xx requests in the last 30 mins       # Unit test for alerting rules.

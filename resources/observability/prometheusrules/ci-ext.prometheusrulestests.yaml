@@ -1,0 +1,29 @@
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+  - /observability/prometheusrules/ci-ext.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+  # osbuild-osbuild-composer-gh-build-main-packer
+  - interval: 1m
+    input_series:
+      - series: default_jenkins_builds_last_build_result_ordinal{jenkins_job="osbuild-osbuild-composer-gh-build-main-packer",job="jenkins_ext",instance="ci.ext.devshift.net:80"}
+        values: 0 0 0 0 1
+
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: JenkinsLastBuildFailed
+        exp_alerts:
+          - exp_labels:
+              instance: ci.ext.devshift.net:80
+              job: jenkins_ext
+              jenkins_job: osbuild-osbuild-composer-gh-build-main-packer
+              service: image-builder
+              severity: medium
+            exp_annotations:
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/"
+              dashboard: "https://grafana.app-sre.devshift.net"
+              message: "osbuild-osbuild-composer-gh-build-main-packer Jenkins job latest build has failed."
+              link_url: "http://ci.ext.devshift.net:80/job/osbuild-osbuild-composer-gh-build-main-packer"

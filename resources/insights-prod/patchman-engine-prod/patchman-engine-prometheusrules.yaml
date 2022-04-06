@@ -91,3 +91,31 @@ spec:
         service: insights
         env: prod
         app_team: patch
+
+    - alert: PatchmanSLOAvailability
+      expr: sum(rate(api_3scale_gateway_api_status{exported_service="patch", status="5xx"}[28d])) / sum(rate(api_3scale_gateway_api_status{exported_service="patch"}[28d])) > .1
+      for: 28d
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: patch
+      annotations:
+        dashboard: 'https://grafana.app-sre.devshift.net/d/patch/patchman-engine'
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/patchman-engine-prod/deployments/patchman-manager'
+        message: 'patchman-engine-prod availability SLO breached'
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/patchman/PatchmanSLOAvailability.md'
+
+    - alert: PatchmanSLOLatency
+      expr: avg_over_time(service:sli:latency_gt_2000:pctl10rate5m{exported_service="patch"}[28d]) < 0.9
+      for: 28d
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: patch
+      annotations:
+        dashboard: 'https://grafana.app-sre.devshift.net/d/patch/patchman-engine'
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/patchman-engine-prod/deployments/patchman-manager'
+        message: 'patchman-engine-prod latency SLO breached'
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/patchman/PatchmanSLOLatency.md'

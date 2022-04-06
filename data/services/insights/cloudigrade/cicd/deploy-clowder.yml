@@ -1,19 +1,14 @@
 ---
 $schema: /app-sre/saas-file-2.yml
-
 labels:
   service: cloudigrade
   platform: insights
-
 name: cloudigrade-clowder
 description: cloudigrade app on the Insights Platform via clowder
-
 app:
   $ref: /services/insights/cloudigrade/app.yml
-
 pipelinesProvider:
   $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
-
 deployResources:
   requests:
     cpu: 300m
@@ -21,12 +16,10 @@ deployResources:
   limits:
     cpu: 300m
     memory: 600Mi
-
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: cloudigrade-cicd-events
-
 managedResourceTypes:
 - ClowdApp
 - ConfigMap
@@ -40,10 +33,8 @@ authentication:
     path: insights/quay/cloudservices-push
     field: all
     version: 3
-
 parameters:
   CLOWDER_ENABLED: 'true'
-
 resourceTemplates:
 # Cloudigrade
 - name: cloudigrade
@@ -53,11 +44,10 @@ resourceTemplates:
   # Ephemeral
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
-    disable: true  # do not create an app-sre deploy job for ephemeral namespace
-    ref: internal  # populated by bonfire
+    disable: true
+    ref: internal
     parameters:
       REPLICAS: 1
-  # Stage
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml
     ref: master
@@ -72,10 +62,11 @@ resourceTemplates:
       API_REPLICA_COUNT_MAX: '2'
       API_SENTRY_ENVIRONMENT: stage
       CELERY_SENTRY_ENVIRONMENT: stage
-      CELERY_WORKER_REPLICA_COUNT_MAX: '4'
+      CELERY_WORKER_REPLICA_COUNT_MAX: '16'
       CLOUDIGRADE_CW_STREAM_NAME: cloudigrade-stage
       CLOUDIGRADE_ENABLE_CLOUDWATCH: 'true'
       CLOUDIGRADE_ENVIRONMENT: stage
+      ENABLE_SYNTHETIC_DATA_REQUEST_HTTP_API: 'true'
       HOUNDIGRADE_SENTRY_ENVIRONMENT: stage
       LISTENER_GROUP_ID: cloudmeter_stage
       LISTENER_SENTRY_ENVIRONMENT: stage
@@ -86,14 +77,9 @@ resourceTemplates:
       SOURCES_PSK_SECRET_KEY: sources-psk
       VERBOSE_SOURCES_NOTIFICATION_LOGGING: 'true'
       WATCHTOWER_MAX_BATCH_COUNT: 10
-      FLOORIST_SUSPEND: 'false'
-      FLOORIST_IMAGE_TAG: latest
-      FLOORIST_BUCKET_SECRET_NAME: insights-metrics-export-stage
-      FLOORIST_SCHEDULE: 30 11 * * *
-  # Production
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
-    ref: a4fd3c9102e607ca7c404ef790b691e7f02a6f20
+    ref: 22e782ba1ea0e6894ca623df6beb02c477b187f6
     promotion:
       auto: true
       subscribe:
@@ -102,7 +88,7 @@ resourceTemplates:
       - channel: cloudigrade-stage-post-deploy-tests-success-channel
         data:
         - parent_saas: cloudigrade-test
-          target_config_hash: b95b17ba0ffe384d
+          target_config_hash: 368079a8994a4117
           type: parent_saas_config
     parameters:  # all other parameters have default values
       API_REPLICA_COUNT_MAX: '2'
@@ -125,7 +111,6 @@ resourceTemplates:
       SOURCES_PSK_SECRET_NAME: cloudigrade-app-secret
       SOURCES_PSK_SECRET_KEY: sources-psk
       WATCHTOWER_MAX_BATCH_COUNT: 10
-# Postigrade
 - name: postigrade
   path: /deployment/clowdapp.yaml
   url: https://github.com/cloudigrade/postigrade
@@ -133,11 +118,10 @@ resourceTemplates:
   # Ephemeral
   - namespace:
       $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
-    disable: true  # do not create an app-sre deploy job for ephemeral namespace
-    ref: internal  # populated by bonfire
+    disable: true
+    ref: internal
     parameters:
       REPLICAS: 1
-  # Stage
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml
     ref: master
@@ -176,7 +160,7 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: a4fd3c9102e607ca7c404ef790b691e7f02a6f20
+    ref: 22e782ba1ea0e6894ca623df6beb02c477b187f6
     promotion:
       auto: true
       subscribe:
@@ -185,5 +169,5 @@ resourceTemplates:
       - channel: cloudigrade-stage-post-deploy-tests-success-channel
         data:
         - parent_saas: cloudigrade-test
-          target_config_hash: b95b17ba0ffe384d
+          target_config_hash: 368079a8994a4117
           type: parent_saas_config
