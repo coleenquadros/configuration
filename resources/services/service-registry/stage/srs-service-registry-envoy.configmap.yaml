@@ -672,7 +672,7 @@ data:
                     json = load_json()
 
                     function add_default_rate_limit(request_handle)
-                      request_handle:logDebug("Using default rate limit")
+                      request_handle:logInfo("Using default rate limit")
                       request_handle:headers():add("X-Registry-Rate-Limit", "10")
                     end
 
@@ -688,16 +688,19 @@ data:
                         nil,
                         1000)
 
+                      request_handle:logInfo("Body: " .. body)
                       if headers[":status"] == "200" then
                         local data = json.decode(body)
                         local limit = data["maxRequestsPerSecondCount"]
                         if limit ~= nil then
-                          request_handle:logDebug("Using " .. limit .. " req/s rate limit")
+                          request_handle:logInfo("Using " .. limit .. " req/s rate limit")
                           request_handle:headers():add("X-Registry-Rate-Limit", limit)
                         else
+                          request_handle:logInfo("Point 1")
                           add_default_rate_limit(request_handle)
                         end
                       else
+                        request_handle:logInfo("Point 2")
                         add_default_rate_limit(request_handle)
                       end
                     end
@@ -712,7 +715,7 @@ data:
                         elseif index == 1 and item == "t" then
                           tid_delimiter = true
                         elseif index == 2 and tid_delimiter and item ~= "" then
-                          request_handle:logDebug("Extracted tenantId " .. item)
+                          request_handle:logInfo("Extracted tenantId " .. item)
                           request_handle:headers():add("X-Registry-Tenant-Id", item)
                           add_rate_limit(request_handle, item)
                           return
