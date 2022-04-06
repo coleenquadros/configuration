@@ -14,6 +14,22 @@ safely transmitted via slack or email.
 The `-o` switch allows to specify an output file
 instead of printing to stdout.
 
+## Customer Side
+
+Use this `config.customer.toml`:
+
+```
+# You need VPN enabled to use this backend!
+[graphql]
+server = "https://app-interface.apps.appsrep05ue1.zqxk.p1.openshiftapps.com/graphql"
+```
+
+```
+docker run -v $(pwd)/config.customer.toml:/config.customer.toml -v $(pwd)/file-to-share:/file-to-share quay.io/app-sre/qontract-reconcile qontract-cli --config /config.customer.toml gpg-encrypt --file-path /file-to-share --for-user kfischer
+```
+
+## AppSRE
+
 ## Encrypt Secret from Local File
 
 ```bash
