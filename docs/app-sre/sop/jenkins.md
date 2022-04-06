@@ -175,12 +175,4 @@ Please note, doing this will lose track of any ongoing jobs.
   jobs.
 * `systemctl reboot -f -f` will perform an unclean shutdown. It is the
   equivalent of yanking the power cord and connecting it again.
-
-## OpenStack instance reboot (ci-int)
-
-1. Login to [Open Stack](https://rhos-d.infra.prod.upshift.rdu2.redhat.com/dashboard) with your Kerberos credentials (domain parameter is redhat.com)
-1. Navigate to [Compute -> Instances](https://rhos-d.infra.prod.upshift.rdu2.redhat.com/dashboard/project/instances/ec831410-8b9f-4d44-97e6-fbfc3d9817f8/)
-1. Try to 'Soft Rebot Instance'. If it doesnt help try to 'Hard Reboot Instance' and wait several minutes.
-1. If reboot isn't successful add teammates to call or try Stop/Start cycle on instance.
-
 ---
