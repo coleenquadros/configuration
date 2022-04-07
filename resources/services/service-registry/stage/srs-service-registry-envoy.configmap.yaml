@@ -671,9 +671,10 @@ data:
                     end
                     json = load_json()
 
-                    function add_default_rate_limit(request_handle)
-                      request_handle:logInfo("Using default rate limit")
-                      request_handle:headers():add("X-Registry-Rate-Limit", "10")
+                    function add_default_rate_limit(request_handle, tenant_id)
+                      local default_limit = 10
+                      request_handle:logInfo("Using default " .. default_limit .. " req/s rate limit for tenant " .. tenant_id)
+                      request_handle:headers():add("X-Registry-Rate-Limit", default_limit)
                     end
 
                     function add_rate_limit(request_handle, tenant_id)
@@ -688,20 +689,17 @@ data:
                         nil,
                         1000)
 
-                      request_handle:logInfo("Body: " .. body)
                       if headers[":status"] == "200" then
                         local data = json.decode(body)
                         local limit = data["maxRequestsPerSecondCount"]
                         if limit ~= nil then
-                          request_handle:logInfo("Using " .. limit .. " req/s rate limit")
+                          request_handle:logInfo("Using " .. limit .. " req/s rate limit for tenant " .. tenant_id)
                           request_handle:headers():add("X-Registry-Rate-Limit", limit)
                         else
-                          request_handle:logInfo("Point 1")
-                          add_default_rate_limit(request_handle)
+                          add_default_rate_limit(request_handle, tenant_id)
                         end
                       else
-                        request_handle:logInfo("Point 2")
-                        add_default_rate_limit(request_handle)
+                        add_default_rate_limit(request_handle, tenant_id)
                       end
                     end
 
@@ -720,7 +718,7 @@ data:
                           add_rate_limit(request_handle, item)
                           return
                         else
-                          add_default_rate_limit(request_handle)
+                          add_default_rate_limit(request_handle, "unknown")
                           return
                         end
                         index = index + 1
