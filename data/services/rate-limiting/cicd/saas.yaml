@@ -125,36 +125,39 @@ resourceTemplates:
           - path == srs_fleet_manager_v1
           variables:
           - path
-        # # NOTE this is an example configuration for specific limits per tenant in Service Registry Service
-        # # Custom Service Registry per-tenant limits, put the specific limits first, so they are applied over the generic limit
-        # - namespace: stage:srs_service_registry
-        #   max_value: 600000
-        #   seconds: 60
-        #   conditions:
-        #   - component == srs_service_registry
-        #   - tenant_id == PUT-TENANT-ID-HERE
-        #   variables:
-        #   - component
-        #   - tenant_id
-        # Custom Service Registry tenant limit, tenant fabian-stage-test tenantId 40ab01b8-e4d9-47e4-bf2f-df758394b55f , 1 req per 10 seconds
+        # ===== Service Registry API =====
+        # Each value of the `ResourceType.MAX_REQUESTS_PER_SECOND_COUNT` limit
+        # in the Tenant Manager must have a corresponding configration here!
+        # == 1 req/s (testing)
         - namespace: stage:srs_service_registry
           max_value: 1
-          seconds: 10
+          seconds: 1
           conditions:
-          - component == srs_service_registry
-          - tenant_id == 40ab01b8-e4d9-47e4-bf2f-df758394b55f
+            - component == srs_service_registry
+            - rate_limit == 1
           variables:
-          - component
-          - tenant_id
-        # Limit SRS Service Registry API for each tenant to 10 req/s
+            - component
+            - tenant_id
+        # == 10 req/s (default)
+        - namespace: stage:srs_service_registry
+          max_value: 10
+          seconds: 1
+          conditions:
+            - component == srs_service_registry
+            - rate_limit == 10
+          variables:
+            - component
+            - tenant_id
+        # == 100 req/s
         - namespace: stage:srs_service_registry
           max_value: 100
-          seconds: 10
+          seconds: 1
           conditions:
-          - component == srs_service_registry
+            - component == srs_service_registry
+            - rate_limit == 100
           variables:
-          - component
-          - tenant_id
+            - component
+            - tenant_id
   - namespace:
       $ref: /openshift/app-sre-prod-04/namespaces/app-sre-rate-limiting.yml
     ref: ad4fada6d3a76933650f3ab4f21116f1f55df9d3

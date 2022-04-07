@@ -15,6 +15,9 @@ app:
 environment:
   $ref: /products/osdv4/environments/testing.yml
 
+networkPoliciesAllow:
+- $ref: /services/rhobs/observatorium/namespaces/observatorium-testing.yml
+
 managedRoles: true
 
 managedResourceTypes:
@@ -28,3 +31,60 @@ managedTerraformResources: true
 
 sharedResources:
 - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+
+openshiftResources:
+- provider: vault-secret
+  path: rhobs/testing/telemeter-testing/prometheus-telemeter-proxy
+  version: 1
+  labels:
+    k8s-app: prometheus-telemeter
+- provider: vault-secret
+  path: rhobs/testing/telemeter-testing/telemeter-server
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: route
+  path: /rhobs/testing/telemeter-testing/telemeter-server.route.yaml
+- provider: route
+  path: /rhobs/testing/telemeter-testing/telemeter-server-authorize.route.yaml
+- provider: route
+  path: /rhobs/testing/telemeter-testing/telemeter-server-upload.route.yaml
+- provider: route
+  path: /rhobs/testing/telemeter-testing/telemeter-server-metrics-v1-receive.route.yaml
+- provider: route
+  path: /rhobs/testing/telemeter-testing/observatorium-thanos-querier-cache-testing.route.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /rhobs/testing/telemeter-testing/telemeter-token-refresher-oidc.secret.yaml
+  variables:
+    vault_secret_version: 1
+- provider: vault-secret
+  path: rhobs/testing/telemeter-testing/token-refresher-proxy
+  version: 1
+- provider: route
+  path: /rhobs/testing/telemeter-testing/infogw-data.route.yaml
+
+# Telemeter Serviceaccount
+# Required for authn/authz by openshift-oauth-proxy containers
+- provider: resource
+  path: /rhobs/testing/telemeter-testing/telemeter.serviceaccount.yaml
+
+# Consumer Serviceaccounts:
+- provider: resource
+  path: /rhobs/testing/telemeter-testing/uhc-prometheus-access.serviceaccount.yaml
+- provider: resource
+  path: /rhobs/testing/telemeter-testing/telemeter-prometheus-access.serviceaccount.yaml
+- provider: resource
+  path: /rhobs/testing/telemeter-testing/datahub-prometheus-access.serviceaccount.yaml
+
+# Temporary Route as part of https://issues.redhat.com/browse/APPSRE-1491
+- provider: resource
+  path: /rhobs/testing/telemeter-testing/remote-write-proxy.route.yaml
+
+#openshiftServiceAccountTokens:
+#- namespace:
+#    $ref: /services/rhobs/telemeter/namespaces/telemeter-testing.yml
+#  serviceAccountName: telemeter-prometheus-access
+#- namespace:
+#    $ref: /services/rhobs/telemeter/namespaces/telemeter-testing.yml
+#  serviceAccountName: datahub-prometheus-access

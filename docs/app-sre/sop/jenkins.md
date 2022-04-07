@@ -150,7 +150,9 @@ systemctl restart --no-block jenkins
 ```
 
 This will let all ongoing jobs finish before restarting the
-daemon. Jenkins jobs can take up to 15 minutes. If the restart doesn't
+daemon. Any new jobs that are about to be created will be in a
+queue and the queue will resume once the restart is completed.
+Jenkins jobs can take up to 15 minutes. If the restart doesn't
 complete within 20 minutes, systemd will kill Jenkins and any leftover
 jobs (which were stuck in some Java loop anyways).
 
@@ -167,6 +169,12 @@ systemctl kill jenkins -s TERM
 
 Please note, doing this will lose track of any ongoing jobs.
 
+## Trust the key
+
+After you restart Jenkins, you will need to allow the node you are updating
+to trust the key. You can do this through the Jenkins GUI by selecting on the node and on the
+left hand side there will be an option to trust the key. This is a one-time process and the option will go away upon acceptance.
+
 ## Rebooting the controller
 
 * `systemctl reboot` will reboot the controller after letting all jobs
@@ -175,12 +183,4 @@ Please note, doing this will lose track of any ongoing jobs.
   jobs.
 * `systemctl reboot -f -f` will perform an unclean shutdown. It is the
   equivalent of yanking the power cord and connecting it again.
-
-## OpenStack instance reboot (ci-int)
-
-1. Login to [Open Stack](https://rhos-d.infra.prod.upshift.rdu2.redhat.com/dashboard) with your Kerberos credentials (domain parameter is redhat.com)
-1. Navigate to [Compute -> Instances](https://rhos-d.infra.prod.upshift.rdu2.redhat.com/dashboard/project/instances/ec831410-8b9f-4d44-97e6-fbfc3d9817f8/)
-1. Try to 'Soft Rebot Instance'. If it doesnt help try to 'Hard Reboot Instance' and wait several minutes.
-1. If reboot isn't successful add teammates to call or try Stop/Start cycle on instance.
-
 ---

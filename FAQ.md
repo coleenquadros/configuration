@@ -40,6 +40,7 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
         - [My configuration is merged into app-interface but it isn't applied!](#my-configuration-is-merged-into-app-interface-but-it-isnt-applied)
         - [My tekton deploy PipelineRun is silenty failing for no obvious reason](#my-tekton-deploy-pipelinerun-is-silenty-failing-for-no-obvious-reason)
         - [I can not see metrics from my service in Prometheus](#i-can-not-see-metrics-from-my-service-in-prometheus)
+        - [I am having problems accessing a Gabi instance](#i-am-having-problems-accessing-a-gabi-instance)
 
 <!-- markdown-toc end -->
 
@@ -360,3 +361,11 @@ For Prometheus to be able to monitor a service, two things are required:
 1. a view RoleBinding in the service namespace for `openshift-customer-monitoring/prometheus-k8s`. Here is an [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/85cc048cef88f9cccfd4e5dbde5e0d9234390bca/data/services/observability/roles/app-sre-osdv4-monitored-namespaces-view.yml#L398-400).
 
 For further instructions, check out the complete [monitoring](./docs/app-sre/monitoring.md) guide.
+
+### I am having problems accessing a Gabi instance
+
+In order to provide generic db access for tenant‘s service, we provide [gabi](https://github.com/app-sre/gabi) to run SQL queries on protected databases.
+
+In case you have lost access to a gabi instance for your service (an `Unauthorized` message) - the reason is likely the instance expiration. Submit a MR to extend the expiration date.
+
+More information: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/gabi-instances-request.md

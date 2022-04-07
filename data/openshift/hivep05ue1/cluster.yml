@@ -1,9 +1,7 @@
 ---
 $schema: /openshift/cluster-1.yml
-
 labels:
   service: hive
-
 name: hivep05ue1
 description: hivep05ue1 cluster
 consoleUrl: https://console-openshift-console.apps.hivep05ue1.pfj0.p1.openshiftapps.com
@@ -12,18 +10,14 @@ prometheusUrl: https://prometheus.hivep05ue1.devshift.net
 alertmanagerUrl: https://alertmanager.hivep05ue1.devshift.net
 serverUrl: https://api.hivep05ue1.pfj0.p1.openshiftapps.com:6443
 elbFQDN: elb.apps.hivep05ue1.pfj0.p1.openshiftapps.com
-
 observabilityNamespace:
   $ref: /services/observability/namespaces/openshift-customer-monitoring.hivep05ue1.yml
-
 auth:
   service: github-org-team
   org: app-sre
   team: hivep05ue1-cluster
-
 ocm:
   $ref: /dependencies/ocm/production.yml
-
 managedGroups:
 - dedicated-admins
 - dedicated-readers
@@ -41,14 +35,13 @@ managedGroups:
 ###################################################################
 
 managedClusterRoles: true
-
 spec:
   id: 1lovg6qv4k1mathpcauk2tajn7qqaktm
   external_id: 37db3b53-3f89-450e-92ce-1cc793391cdf
   provider: aws
   region: us-east-1
   channel: fast
-  version: 4.9.19
+  version: 4.10.6
   initial_version: 4.7.0-fast
   multi_az: true
   autoscale:
@@ -59,38 +52,31 @@ spec:
   load_balancers: 0
   private: true
   provision_shard_id: 7c2626e2-da06-11ea-8f62-8c1645a911be
-
   disable_user_workload_monitoring: true
 upgradePolicy:
   workloads:
   - hive
-  schedule: 0 14 * * 1
+  schedule: 0 14 * * 1-4
   conditions:
     soakDays: 30
     mutexes:
     - hive-production
 
 machinePools: []
-
 externalConfiguration:
   labels:
     ext-managed.openshift.io/hive-shard: 'true'
-
 network:
   vpc: 10.134.0.0/16
   service: 172.30.0.0/16
   pod: 10.128.0.0/14
-
 internal: false
-
 automationToken:
   path: app-sre/creds/kube-configs/hivep05ue1
   field: token
-
 clusterAdminAutomationToken:
   path: app-sre/creds/kube-configs/hivep05ue1-cluster-admin
   field: token
-
 jumpHost:
   hostname: bastion.ci.ext.devshift.net
   knownHosts: /jump-host/known-hosts/bastion.ci.ext.devshift.net
@@ -99,7 +85,6 @@ jumpHost:
     path: app-sre/ansible/roles/app-sre-bot
     field: identity
     format: base64
-
 awsInfrastructureManagementAccounts:
 - account:
     $ref: /aws/app-sre/account.yml
@@ -111,7 +96,6 @@ awsInfrastructureManagementAccounts:
 - account:
     $ref: /aws/osd-bastion-prod/account.yml
   accessLevel: network-mgmt
-
 awsInfrastructureAccess:
 - awsGroup:
     $ref: /aws/app-sre/groups/App-SRE-admin.yml
@@ -125,7 +109,6 @@ awsInfrastructureAccess:
 - awsGroup:
     $ref: /aws/app-sre-logs/groups/Log-consumers.yml
   accessLevel: read-only
-
 peering:
   connections:
   - provider: account-vpc
@@ -164,6 +147,5 @@ peering:
     cluster:
       $ref: /openshift/appsrep05ue1/cluster.yml
     manageRoutes: true
-
 addons:
 - $ref: /dependencies/ocm/addons/cluster-logging-operator.yml

@@ -55,16 +55,16 @@ resourceTemplates:
     IMAGE_REPOSITORY: app-sre/ocm-managed-services
     JWKS_URL: https://api.openshift.com/.well-known/jwks.json
     REPLICAS: 3
-    ENABLE_TRIGGERS: true
-    RATE_LIMIT: 1000
-    # After openshift upgrade, we're seeing sporadic "http2: server: error reading preface"
-    # errors in log, source IP is openshift router.
-    GODEBUG: http2server=0
-    MEMORY_REQUEST: 200Mi
-    MEMORY_LIMIT: 1Gi
-    CPU_LIMIT: 1
-    CPU_REQUEST: 200m
   targets:
+  - namespace:
+      $ref: /services/ocm/namespaces/uhc-production.yml
+    ref: c616e11be289b413e34a74c7bd5ab164062fcb8e
+    parameters:
+      GLOG_V: 5
+      # TODO: Configure sentry - https://issues.redhat.com/browse/SDA-5666
+      ENABLE_SENTRY: false
+      # SENTRY_URL: sentry.devshift.net
+      # SENTRY_PROJECT: 15
   - namespace:
       $ref: /services/ocm/namespaces/uhc-stage.yml
     ref: main
@@ -74,13 +74,10 @@ resourceTemplates:
       name: service-ocm-managed-services-gl-build-main
     parameters:
       GLOG_V: 5
-      ENABLE_SENTRY: true
-      SENTRY_URL: sentry.stage.devshift.net
-      SENTRY_PROJECT: 15
-      UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_3
-      WEBHOOK_ADDITIONAL_CA_FILE: "/config/service-ca/service-ca.crt"
-      RATE_LIMIT: 1000
-      ENABLE_JQS: true
+      # TODO: Configure sentry - https://issues.redhat.com/browse/SDA-5666
+      ENABLE_SENTRY: false
+      # SENTRY_URL: sentry.stage.devshift.net
+      # SENTRY_PROJECT: 15
   - namespace:
       $ref: /services/ocm/namespaces/uhc-integration.yml
     ref: main
@@ -90,11 +87,8 @@ resourceTemplates:
       name: service-ocm-managed-services-gl-build-main
     parameters:
       GLOG_V: 5
-      UPDATE_DEPLOYMENT_CONFIG_CHANGE: update_3
-      WEBHOOK_ADDITIONAL_CA_FILE: "/config/service-ca/service-ca.crt"
       # Resources are lower in INT env since it does not have to be prod-like and there is significantly lower traffic
       MEMORY_REQUEST: 100Mi
       MEMORY_LIMIT: 512Mi
       CPU_REQUEST: 100m
       CPU_LIMIT: 500m
-      ENABLE_JQS: false

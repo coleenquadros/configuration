@@ -1,0 +1,79 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: ocm-sendgrid
+
+name: sendgrid-services-stage
+description: 'SaaS tracking file for OCM Sengrid Supported Services'
+
+app:
+  $ref: /services/sendgrid/app.yml
+
+pipelinesProvider:
+  $ref: /services/sendgrid/pipelines/tekton.sendgrid-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: rhmi-sendgrid-service
+
+managedResourceTypes:
+- ConfigMap
+
+imagePatterns: []
+
+resourceTemplates:
+- name: ocm-sendgrid-supported-services
+  url: https://gitlab.cee.redhat.com/app-sre/homeless-templates
+  path: /empty.configmap.yaml
+  targets:
+  - namespace:
+      $ref: /services/sendgrid/namespaces/sendgrid-stage.yml
+    ref: ff2c53c1ca6f4f89005c4e7a4f548f5cd8e3e252
+  - namespace:
+      $ref: /services/sendgrid/namespaces/sendgrid-stage-appsres04ue2.yml
+    ref: ff2c53c1ca6f4f89005c4e7a4f548f5cd8e3e252
+
+parameters:
+  NAME: ocm-sendgrid-supported-services
+  RECYCLE: "true"
+  # content moved from resources/app-sre-stage/sendgrid-stage/ocm-sendgrid-service.supportedservices.configmap.yaml
+  DATA:
+    supported-services.yaml: |
+      - name: "RHMI Operator"
+        namespace: "redhat-rhmi-operator"
+        secretName: "redhat-rhmi-smtp"
+      - name: "Red Hat Openshift API Management"
+        namespace: "redhat-rhoam-operator"
+        secretName: "redhat-rhoam-smtp"
+      - name: "Red Hat OpenShift Data Foundation Managed Service (converged, dev)"
+        namespace: "openshift-storage"
+        secretName: "ocs-converged-dev-smtp"
+      - name: "Red Hat OpenShift Data Foundation Managed Service (converged, QE)"
+        namespace: "openshift-storage"
+        secretName: "ocs-converged-qe-smtp"
+      - name: "Red Hat OpenShift Data Foundation Managed Service (converged)"
+        namespace: "openshift-storage"
+        secretName: "ocs-converged-smtp"
+      - name: "Red Hat OpenShift Data Foundation Managed Service"
+        namespace: "openshift-storage"
+        secretName: "ocs-provider-smtp"
+      - name: "Red Hat OpenShift Data Foundation Managed Service (provider-dev)"
+        namespace: "openshift-storage"
+        secretName: "ocs-provider-dev-smtp"
+      - name: "Red Hat OpenShift Data Foundation Managed Service (QE)"
+        namespace: "openshift-storage"
+        secretName: "ocs-provider-qe-smtp"
+      - name: "Red Hat OpenShift Data Foundation Managed Service Consumer"
+        namespace: "openshift-storage"
+        secretName: "ocs-consumer-smtp"
+      - name: "Red Hat OpenShift Data Foundation Managed Service (consumer-dev)"
+        namespace: "openshift-storage"
+        secretName: "ocs-consumer-dev-smtp"
+      - name: "Red Hat OpenShift Data Foundation Managed Service Consumer (QE)"
+        namespace: "openshift-storage"
+        secretName: "ocs-consumer-qe-smtp"
+      - name: "Red Hat OpenShift Data Science"
+        namespace: "redhat-ods-monitoring"
+        secretName: "redhat-rhods-smtp"

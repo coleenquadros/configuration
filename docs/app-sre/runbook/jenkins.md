@@ -16,12 +16,12 @@ Currently we have two Jenkins https://ci.int.devshift.net/ and https://ci.ext.de
 
 Prerequisite: Make sure you can ssh into Jenkins workers by first following all the ssh set up in [AAA doc](https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/AAA.md), then test it by running `ssh ci-int-jenkins-slave-01-app-sre` for example. Note that we use bastion as jump box to access ci-ext worker. A common error is having different username in local than remote, in that case, add `User [yourremoteusername]` in your ssh config file. For example:
 ```
-Host ci-ext-jenkins-slave-*
+Host ci-ext-jenkins-worker-*
     User     yourremoteusername
     ProxyCommand ssh -W %h:%p yourremoteusername@bastion.ci.ext.devshift.net
     # Change if different private key file:
     IdentityFile ~/.ssh/id_rsa
-Host ci-int-jenkins-slave-*
+Host ci-int-aws-jenkins-worker-*
     User     yourremoteusername
     Hostname %h.int.devshift.net
     # Change if different private key file:

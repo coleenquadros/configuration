@@ -1,0 +1,19 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    haproxy.router.openshift.io/timeout: 5m
+    haproxy.router.openshift.io/balance: roundrobin
+    haproxy.router.openshift.io/disable_cookies: "true"
+  name: service-mgmt
+spec:
+  host: api.openshift.com
+  path: "/api/service_mgmt"
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: reencrypt
+  to:
+    kind: Service
+    name: ocm-managed-services-envoy
+    weight: 100

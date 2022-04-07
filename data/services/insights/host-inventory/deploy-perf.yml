@@ -31,6 +31,7 @@ managedResourceTypes:
 - ClowdApp
 - ClowdJobInvocation
 - ConfigMap
+- Frontend
 
 imagePatterns:
 - quay.io/cloudservices
@@ -46,6 +47,16 @@ parameters:
   KAFKA_PRODUCER_RETRY_BACKOFF_MS: '250'
 
 resourceTemplates:
+- name: host-inventory-frontend
+  path: /deploy/frontend.yaml
+  url: https://github.com/RedHatInsights/insights-inventory-frontend
+  targets:
+  - namespace:
+      $ref: /services/insights/host-inventory/namespaces/perf-host-inventory-perf.yml
+    ref: master
+    parameters:
+      ENV_NAME: "env-perf"
+
 - name: host-inventory
   path: /deployment.yaml
   url: https://github.com/RedHatInsights/insights-host-inventory
@@ -81,3 +92,6 @@ resourceTemplates:
       FLOORIST_IMAGE_TAG: b57a5a8
       FLOORIST_BUCKET_SECRET_NAME: insights-metrics-export-perf
       FLOORIST_SCHEDULE: '20 0 * * *'
+      PENDO_SYNCHER_SUSPEND: 'true'
+      PENDO_CRON_SCHEDULE: '@daily'
+      PENDO_SYNC_ACTIVE: 'true'
