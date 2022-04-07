@@ -51,5 +51,8 @@ server: schemas bundle validate run
 qr-promote:
 	@./hack/update-qr-tag.sh
 
+user-validator-promote:
+	@./hack/update-user-validator-tag.sh
+
 update-schemas:
 	@./hack/update-schemas.sh
