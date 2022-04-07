@@ -17,13 +17,13 @@ terraform apply
 
 ```shell
 # apply the baseline role using the centos user - dry run
-ansible-playbook playbooks/node-ci-ext-jenkins-slave.yml --limit <slave_name> -u centos -t baseline -CD
+ansible-playbook playbooks/node-ci-ext-jenkins-slave.yml --limit <worker_name> -u centos -t baseline -CD
 # apply the baseline role using the centos user
-ansible-playbook playbooks/node-ci-ext-jenkins-slave.yml --limit <slave_name> -u centos -t baseline
+ansible-playbook playbooks/node-ci-ext-jenkins-worker.yml --limit <worker_name> -u centos -t baseline
 # apply the playbook using your own user - dry run
-ansible-playbook playbooks/node-ci-ext-jenkins-slave.yml --limit <slave_name> -u <your_kerberos_username> -CD
+ansible-playbook playbooks/node-ci-ext-jenkins-worker.yml --limit <worker_name> -u <your_kerberos_username> -CD
 # apply the playbook using your own user - dry run
-ansible-playbook playbooks/node-ci-ext-jenkins-slave.yml --limit <slave_name> -u <your_kerberos_username>
+ansible-playbook playbooks/node-ci-ext-jenkins-worker.yml --limit <worker_name> -u <your_kerberos_username>
 ```
 
 5. Create the new node in jenkins by copying an existing node and changing the IP: https://ci.ext.devshift.net/computer/new

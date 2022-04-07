@@ -102,8 +102,8 @@ Please reach out to the AppSRE team via Slack #sd-app-sre or email sd-app-sre@re
 The block is implemented by pointing the docker hub registry hostnames to an invalid IP address in `/etc/hosts`
 
 The ansible task for this is defined here:
-- https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ansible/playbooks/node-ci-ext-jenkins-slave.yml#L18
-- https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ansible/playbooks/node-ci-int-jenkins-slave.yml#L13
+- https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ansible/playbooks/node-ci-ext-jenkins-worker.yml#L20
+- https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ansible/playbooks/node-ci-int-aws-jenkins-worker.yml#L16
 - https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ansible/playbooks/roles/docker-block-registries/tasks/main.yml
 
 It is possible to temporarily undo this by commenting out the lines in `/etc/hosts` on the jenkins nodes. The playbooks can also be changed to ensure the entry is `absent` from `/etc/hosts`
