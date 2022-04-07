@@ -150,7 +150,9 @@ systemctl restart --no-block jenkins
 ```
 
 This will let all ongoing jobs finish before restarting the
-daemon. Jenkins jobs can take up to 15 minutes. If the restart doesn't
+daemon. Any new jobs that are about to be created will be in a
+queue and the queue will resume once the restart is completed.
+Jenkins jobs can take up to 15 minutes. If the restart doesn't
 complete within 20 minutes, systemd will kill Jenkins and any leftover
 jobs (which were stuck in some Java loop anyways).
 
@@ -166,6 +168,12 @@ systemctl kill jenkins -s TERM
 ```
 
 Please note, doing this will lose track of any ongoing jobs.
+
+## Trust the key
+
+After you restart Jenkins, you will need to allow the node you are updating
+to trust the key. You can do this through the Jenkins GUI by selecting on the node and on the
+left hand side there will be an option to trust the key. This is a one-time process and the option will go away upon acceptance.
 
 ## Rebooting the controller
 
