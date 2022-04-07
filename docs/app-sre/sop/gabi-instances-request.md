@@ -55,7 +55,7 @@ expirationDate: <YYYY-MM-DD>
 
 One gabi instance can include multiple namesapces for different environment. As a result, a configmap with a list of authorized users will be applied in these namespaces by [integration](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/gabi_authorized_users.py). The configmap name will be as same as gabi instance name.
 
-The maximum expiration date of gabi instance shall not exceed 90 days form the day request, and need to renew when expiration date approach. Otherwise, the configmap will be emptied and all user will lost access to gabi endpoint.
+The maximum expiration date of gabi instance shall not exceed 90 days form the day request, and need to renew when expiration date approach. Otherwise, the configmap will be emptied and all users will lost access to gabi endpoint, resulting in an `Unauthorized` message.
 
 ## Deploy Gabi Instances
 
