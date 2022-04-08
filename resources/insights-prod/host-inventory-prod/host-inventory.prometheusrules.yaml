@@ -162,7 +162,7 @@ spec:
         link_url: https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/host-inventory-prod/deployments/host-inventory-service
         message: '{{ $labels.namespace }} ContainerRestart {{ $labels.container }}'
     - alert: InventoryReaperFailure
-      expr: sum(sum_over_time(kube_pod_status_phase{phase="Failed", namespace=~"host-inventory-.*", pod=~"host-inventory-reaper.*"}[30m:5m]) < 3) by (pod, namespace) > 0
+      expr: sum_over_time(kube_pod_status_phase{namespace=~"host-inventory-.*",phase="Succeeded",pod=~"host-inventory-reaper.*"}[125m:5m]) == 0
       labels:
         severity: medium
         service: insights
@@ -171,4 +171,4 @@ spec:
       annotations:
         dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcp01ue1-prometheus
         link_url: https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/host-inventory-prod/cronjobs/host-inventory-reaper/
-        message: '{{ $labels.namespace }} ReaperFailed | {{ $labels.pod }} failed to run'
+        message: '{{ $labels.namespace }} Inventory Reaper has not succeeded for the last 2 hours'

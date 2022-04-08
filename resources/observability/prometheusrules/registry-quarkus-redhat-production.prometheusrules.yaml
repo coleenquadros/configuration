@@ -1,0 +1,306 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: registry-quarkus-redhat
+
+spec:
+  groups:
+    # generated from https://promtools.dev/alerts/errors
+    - name: SLOs-haproxy_backend_http_responses_total
+      rules:
+        - alert: ErrorBudgetBurn
+          annotations:
+            message: 'High error budget burn for route=registry-quarkus-redhat,exported_namespace=registry-quarkus-redhat-production (current value: {{ $value }})'
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quarkus/registry/sops#registry-quarkus-redhat-low-availability"
+          expr: |
+            sum(haproxy_backend_http_responses_total:burnrate5m{route="registry-quarkus-redhat",exported_namespace="registry-quarkus-redhat-production"}) > (14.40 * (1-0.85000))
+            and
+            sum(haproxy_backend_http_responses_total:burnrate1h{route="registry-quarkus-redhat",exported_namespace="registry-quarkus-redhat-production"}) > (14.40 * (1-0.85000))
+          for: 2m
+          labels:
+            service: registry-quarkus
+            exported_namespace: registry-quarkus-redhat-production
+            route: registry-quarkus-redhat
+            severity: critical
+        - alert: ErrorBudgetBurn
+          annotations:
+            message: 'High error budget burn for route=registry-quarkus-redhat,exported_namespace=registry-quarkus-redhat-production (current value: {{ $value }})'
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quarkus/registry/sops#registry-quarkus-redhat-low-availability"
+          expr: |
+            sum(haproxy_backend_http_responses_total:burnrate30m{route="registry-quarkus-redhat",exported_namespace="registry-quarkus-redhat-production"}) > (6.00 * (1-0.85000))
+            and
+            sum(haproxy_backend_http_responses_total:burnrate6h{route="registry-quarkus-redhat",exported_namespace="registry-quarkus-redhat-production"}) > (6.00 * (1-0.85000))
+          for: 15m
+          labels:
+            service: registry-quarkus
+            exported_namespace: registry-quarkus-redhat-production
+            route: registry-quarkus-redhat
+            severity: critical
+        - alert: ErrorBudgetBurn
+          annotations:
+            message: 'High error budget burn for route=registry-quarkus-redhat,exported_namespace=registry-quarkus-redhat-production (current value: {{ $value }})'
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quarkus/registry/sops#registry-quarkus-redhat-low-availability"
+          expr: |
+            sum(haproxy_backend_http_responses_total:burnrate2h{route="registry-quarkus-redhat",exported_namespace="registry-quarkus-redhat-production"}) > (3.00 * (1-0.85000))
+            and
+            sum(haproxy_backend_http_responses_total:burnrate1d{route="registry-quarkus-redhat",exported_namespace="registry-quarkus-redhat-production"}) > (3.00 * (1-0.85000))
+          for: 1h
+          labels:
+            service: registry-quarkus
+            exported_namespace: registry-quarkus-redhat-production
+            route: registry-quarkus-redhat
+            severity: high
+        - alert: ErrorBudgetBurn
+          annotations:
+            message: 'High error budget burn for route=registry-quarkus-redhat,exported_namespace=registry-quarkus-redhat-production (current value: {{ $value }})'
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quarkus/registry/sops#registry-quarkus-redhat-low-availability"
+          expr: |
+            sum(haproxy_backend_http_responses_total:burnrate6h{route="registry-quarkus-redhat",exported_namespace="registry-quarkus-redhat-production"}) > (1.00 * (1-0.85000))
+            and
+            sum(haproxy_backend_http_responses_total:burnrate3d{route="registry-quarkus-redhat",exported_namespace="registry-quarkus-redhat-production"}) > (1.00 * (1-0.85000))
+          for: 3h
+          labels:
+            service: registry-quarkus
+            exported_namespace: registry-quarkus-redhat-production
+            route: registry-quarkus-redhat
+            severity: high
+        - expr: |
+            sum(rate(haproxy_backend_http_responses_total{route="registry-quarkus-redhat",exported_namespace="registry-quarkus-redhat-production",code="5xx"}[1d]))
+            /
+            sum(rate(haproxy_backend_http_responses_total{route="registry-quarkus-redhat",exported_namespace="registry-quarkus-redhat-production"}[1d]))
+          labels:
+            service: registry-quarkus
+            exported_namespace: registry-quarkus-redhat-production
+            route: registry-quarkus-redhat
+          record: haproxy_backend_http_responses_total:burnrate1d
+        - expr: |
+            sum(rate(haproxy_backend_http_responses_total{route="registry-quarkus-redhat",exported_namespace="registry-quarkus-redhat-production",code="5xx"}[1h]))
+            /
+            sum(rate(haproxy_backend_http_responses_total{route="registry-quarkus-redhat",exported_namespace="registry-quarkus-redhat-production"}[1h]))
+          labels:
+            service: registry-quarkus
+            exported_namespace: registry-quarkus-redhat-production
+            route: registry-quarkus-redhat
+          record: haproxy_backend_http_responses_total:burnrate1h
+        - expr: |
+            sum(rate(haproxy_backend_http_responses_total{route="registry-quarkus-redhat",exported_namespace="registry-quarkus-redhat-production",code="5xx"}[2h]))
+            /
+            sum(rate(haproxy_backend_http_responses_total{route="registry-quarkus-redhat",exported_namespace="registry-quarkus-redhat-production"}[2h]))
+          labels:
+            service: registry-quarkus
+            exported_namespace: registry-quarkus-redhat-production
+            route: registry-quarkus-redhat
+          record: haproxy_backend_http_responses_total:burnrate2h
+        - expr: |
+            sum(rate(haproxy_backend_http_responses_total{route="registry-quarkus-redhat",exported_namespace="registry-quarkus-redhat-production",code="5xx"}[30m]))
+            /
+            sum(rate(haproxy_backend_http_responses_total{route="registry-quarkus-redhat",exported_namespace="registry-quarkus-redhat-production"}[30m]))
+          labels:
+            service: registry-quarkus
+            exported_namespace: registry-quarkus-redhat-production
+            route: registry-quarkus-redhat
+          record: haproxy_backend_http_responses_total:burnrate30m
+        - expr: |
+            sum(rate(haproxy_backend_http_responses_total{route="registry-quarkus-redhat",exported_namespace="registry-quarkus-redhat-production",code="5xx"}[3d]))
+            /
+            sum(rate(haproxy_backend_http_responses_total{route="registry-quarkus-redhat",exported_namespace="registry-quarkus-redhat-production"}[3d]))
+          labels:
+            service: registry-quarkus
+            exported_namespace: registry-quarkus-redhat-production
+            route: registry-quarkus-redhat
+          record: haproxy_backend_http_responses_total:burnrate3d
+        - expr: |
+            sum(rate(haproxy_backend_http_responses_total{route="registry-quarkus-redhat",exported_namespace="registry-quarkus-redhat-production",code="5xx"}[5m]))
+            /
+            sum(rate(haproxy_backend_http_responses_total{route="registry-quarkus-redhat",exported_namespace="registry-quarkus-redhat-production"}[5m]))
+          labels:
+            service: registry-quarkus
+            exported_namespace: registry-quarkus-redhat-production
+            route: registry-quarkus-redhat
+          record: haproxy_backend_http_responses_total:burnrate5m
+        - expr: |
+            sum(rate(haproxy_backend_http_responses_total{route="registry-quarkus-redhat",exported_namespace="registry-quarkus-redhat-production",code="5xx"}[6h]))
+            /
+            sum(rate(haproxy_backend_http_responses_total{route="registry-quarkus-redhat",exported_namespace="registry-quarkus-redhat-production"}[6h]))
+          labels:
+            service: registry-quarkus
+            exported_namespace: registry-quarkus-redhat-production
+            route: registry-quarkus-redhat
+          record: haproxy_backend_http_responses_total:burnrate6h
+    # generated from https://promtools.dev/alerts/latency
+    - name: SLOs-http_request_duration_seconds
+      rules:
+        - alert: LatencyBudgetBurn
+          annotations:
+            message: 'High requests latency budget burn for endpoint=registry-quarkus,namespace=registry-quarkus-redhat-production,latency=1 (current value: {{ $value }})'
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quarkus/registry/sops#registry-quarkus-redhat-high-latency"
+          expr: |
+            (
+              latencytarget:http_request_duration_seconds:rate1h{endpoint="registry-quarkus",namespace="registry-quarkus-redhat-production",latency="1"} > (14.4*0.1)
+              and
+              latencytarget:http_request_duration_seconds:rate5m{endpoint="registry-quarkus",namespace="registry-quarkus-redhat-production",latency="1"} > (14.4*0.1)
+            )
+            or
+            (
+              latencytarget:http_request_duration_seconds:rate6h{endpoint="registry-quarkus",namespace="registry-quarkus-redhat-production",latency="1"} > (6*0.1)
+              and
+              latencytarget:http_request_duration_seconds:rate30m{endpoint="registry-quarkus",namespace="registry-quarkus-redhat-production",latency="1"} > (6*0.1)
+            )
+          labels:
+            service: registry-quarkus
+            latency: "1"
+            namespace: registry-quarkus-redhat-production
+            severity: critical
+        - alert: LatencyBudgetBurn
+          annotations:
+            message: 'High requests latency budget burn for endpoint=registry-quarkus,namespace=registry-quarkus-redhat-production,latency=1 (current value: {{ $value }})'
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quarkus/registry/sops#registry-quarkus-redhat-high-latency"
+          expr: |
+            (
+              latencytarget:http_request_duration_seconds:rate1d{endpoint="registry-quarkus",namespace="registry-quarkus-redhat-production",latency="1"} > (3*0.1)
+              and
+              latencytarget:http_request_duration_seconds:rate2h{endpoint="registry-quarkus",namespace="registry-quarkus-redhat-production",latency="1"} > (3*0.1)
+            )
+            or
+            (
+              latencytarget:http_request_duration_seconds:rate3d{endpoint="registry-quarkus",namespace="registry-quarkus-redhat-production",latency="1"} > (0.1)
+              and
+              latencytarget:http_request_duration_seconds:rate6h{endpoint="registry-quarkus",namespace="registry-quarkus-redhat-production",latency="1"} > (0.1)
+            )
+          labels:
+            service: registry-quarkus
+            latency: "1"
+            namespace: registry-quarkus-redhat-production
+            severity: high
+        - expr: |
+            1 - (
+              sum(rate(http_request_duration_seconds_bucket{endpoint="registry-quarkus",namespace="registry-quarkus-redhat-production",le="1",code!~"5.."}[5m]))
+              /
+              sum(rate(http_request_duration_seconds_count{endpoint="registry-quarkus",namespace="registry-quarkus-redhat-production"}[5m]))
+            )
+          labels:
+            service: registry-quarkus
+            latency: "1"
+            namespace: registry-quarkus-redhat-production
+          record: latencytarget:http_request_duration_seconds:rate5m
+        - expr: |
+            1 - (
+              sum(rate(http_request_duration_seconds_bucket{endpoint="registry-quarkus",namespace="registry-quarkus-redhat-production",le="1",code!~"5.."}[30m]))
+              /
+              sum(rate(http_request_duration_seconds_count{endpoint="registry-quarkus",namespace="registry-quarkus-redhat-production"}[30m]))
+            )
+          labels:
+            service: registry-quarkus
+            latency: "1"
+            namespace: registry-quarkus-redhat-production
+          record: latencytarget:http_request_duration_seconds:rate30m
+        - expr: |
+            1 - (
+              sum(rate(http_request_duration_seconds_bucket{endpoint="registry-quarkus",namespace="registry-quarkus-redhat-production",le="1",code!~"5.."}[1h]))
+              /
+              sum(rate(http_request_duration_seconds_count{endpoint="registry-quarkus",namespace="registry-quarkus-redhat-production"}[1h]))
+            )
+          labels:
+            service: registry-quarkus
+            latency: "1"
+            namespace: registry-quarkus-redhat-production
+          record: latencytarget:http_request_duration_seconds:rate1h
+        - expr: |
+            1 - (
+              sum(rate(http_request_duration_seconds_bucket{endpoint="registry-quarkus",namespace="registry-quarkus-redhat-production",le="1",code!~"5.."}[2h]))
+              /
+              sum(rate(http_request_duration_seconds_count{endpoint="registry-quarkus",namespace="registry-quarkus-redhat-production"}[2h]))
+            )
+          labels:
+            service: registry-quarkus
+            latency: "1"
+            namespace: registry-quarkus-redhat-production
+          record: latencytarget:http_request_duration_seconds:rate2h
+        - expr: |
+            1 - (
+              sum(rate(http_request_duration_seconds_bucket{endpoint="registry-quarkus",namespace="registry-quarkus-redhat-production",le="1",code!~"5.."}[6h]))
+              /
+              sum(rate(http_request_duration_seconds_count{endpoint="registry-quarkus",namespace="registry-quarkus-redhat-production"}[6h]))
+            )
+          labels:
+            service: registry-quarkus
+            latency: "1"
+            namespace: registry-quarkus-redhat-production
+          record: latencytarget:http_request_duration_seconds:rate6h
+        - expr: |
+            1 - (
+              sum(rate(http_request_duration_seconds_bucket{endpoint="registry-quarkus",namespace="registry-quarkus-redhat-production",le="1",code!~"5.."}[1d]))
+              /
+              sum(rate(http_request_duration_seconds_count{endpoint="registry-quarkus",namespace="registry-quarkus-redhat-production"}[1d]))
+            )
+          labels:
+            service: registry-quarkus
+            latency: "1"
+            namespace: registry-quarkus-redhat-production
+          record: latencytarget:http_request_duration_seconds:rate1d
+        - expr: |
+            1 - (
+              sum(rate(http_request_duration_seconds_bucket{endpoint="registry-quarkus",namespace="registry-quarkus-redhat-production",le="1",code!~"5.."}[3d]))
+              /
+              sum(rate(http_request_duration_seconds_count{endpoint="registry-quarkus",namespace="registry-quarkus-redhat-production"}[3d]))
+            )
+          labels:
+            service: registry-quarkus
+            latency: "1"
+            namespace: registry-quarkus-redhat-production
+          record: latencytarget:http_request_duration_seconds:rate3d
+
+
+    - name: registry-quarkus-redhat_alerts
+      rules:
+        - alert: Quarkus Registry - Service Is Down - Production
+          annotations:
+            message: "SERVICE IS DOWN"
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quarkus/registry/sops#registry-quarkus-redhat-service-is-down"
+          expr: absent(up{job="registry-quarkus-redhat",namespace="registry-quarkus-redhat-production"} == 1)
+          for: 5m
+          labels:
+            severity: critical
+            service: registry-quarkus
+        - alert: Quarkus Registry - Version Upgrade Failure - Production
+          annotations:
+            message: "Quarkus Registry service is failing to upgrade its version."
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quarkus/registry/sops#registry-quarkus-redhat-version-upgrade-failed"
+          expr: count(up{job="registry-quarkus-redhat",namespace="registry-quarkus-redhat-production"}) < 3
+          for: 5m
+          labels:
+            severity: info
+            service: registry-quarkus
+        # A short period alter (auto-resolved) to send a message to the AI triage team about a stopped pod.
+        # This event can be a result of an AI upgrade which is a desired behaviour
+        # so if this alter has triggered, the triage team should figure out if this pod has stopped by a bug or by a manual action.
+        - alert: Quarkus Registry - Pod has stopped
+          annotations:
+            message: Quarkus Registry Pod {{ $labels.pod }} on namespace {{ $labels.namespace }} has stopped
+          expr: rate(up{job="registry-quarkus-redhat",namespace="registry-quarkus-redhat-production"}[5m]) unless up{job="registry-quarkus-redhat",namespace="registry-quarkus-redhat-production"}
+          for: 3m
+          labels:
+            severity: info
+            service: registry-quarkus
+        - alert: Quarkus Registry - Memory usage is above 90%
+          annotations:
+            message: Quarkus Registry Pod {{ $labels.pod }} on namespace {{ $labels.namespace }} usages is above 90%({{ $value }})
+          expr: sum(container_memory_working_set_bytes{namespace="registry-quarkus-redhat-production", container="registry-quarkus-redhat"}) by (pod, namespace) / sum(kube_pod_container_resource_limits{namespace="registry-quarkus-redhat-production", container="registry-quarkus-redhat", resource="memory"}) BY (pod, namespace) * 100 > 90
+          for: 1m
+          labels:
+            severity: warning
+            service: registry-quarkus
+        - alert: Quarkus Registry - Memory usage is above 80%
+          annotations:
+            message: Quarkus Registry Pod {{ $labels.pod }} on namespace {{ $labels.namespace }} usages is above 80%({{ $value }})
+          expr: sum(container_memory_working_set_bytes{namespace="registry-quarkus-redhat-production", container="registry-quarkus-redhat"}) by (pod, namespace) / sum(kube_pod_container_resource_limits{namespace="registry-quarkus-redhat-production", container="registry-quarkus-redhat", resource="memory"}) BY (pod, namespace) * 100 > 80
+          for: 1m
+          labels:
+            severity: info
+            service: registry-quarkus
+

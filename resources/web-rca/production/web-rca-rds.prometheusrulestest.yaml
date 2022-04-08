@@ -1,0 +1,35 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /web-rca/production/web-rca-rds.prometheusrules.yaml
+
+evaluation_interval: 10m
+
+tests:
+
+  # RDSOutOfStorageSoon
+  - interval: 10m
+    input_series:
+      - series: rdsosmetrics_fileSys_usedPercent{mount_point="/rdsdbdata", exported_instance="web-rca-production"}
+        values: 0+3x4 12-1x7
+    alert_rule_test:
+      - eval_time: 2h
+        alertname: RDSOutOfStorageSoon
+
+  - interval: 10m
+    input_series:
+      - series: rdsosmetrics_fileSys_usedPercent{mount_point="/rdsdbdata", exported_instance="web-rca-production"}
+        values: 0+3x12
+    alert_rule_test:
+      - eval_time: 2h
+        alertname: RDSOutOfStorageSoon
+        exp_alerts:
+          - exp_labels:
+              severity: info
+              service: web-rca
+              env: production
+              exported_instance: web-rca-production
+              mount_point: /rdsdbdata
+            exp_annotations:
+              message: 'DB instance web-rca-production is about to run out of storage within 2 weeks.'
