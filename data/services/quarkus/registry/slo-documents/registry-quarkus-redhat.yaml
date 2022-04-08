@@ -1,0 +1,42 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: registry-quarkus-redhat
+
+name: registry-quarkus-redhat
+
+namespaces:
+  - $ref: /services/quarkus/registry/namespaces/registry-quarkus-redhat-production.yml
+
+slos:
+  - name: latency
+    SLIType: latency
+    SLISpecification: Ratio of requests responded in less than 1s for 90% of requests
+    SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quarkus/registry/slos/quarkus-registry-latency.md
+    SLOParameters:
+      window: 28d
+    expr: |
+      sum(rate(http_request_duration_seconds_bucket{endpoint="registry-quarkus-svc", namespace="registry-quarkus-redhat-production", le="1", code!~"5.."}[{{ window }}]))
+      /
+      sum(rate(http_request_duration_seconds_count{endpoint="registry-quarkus-svc", namespace="registry-quarkus-redhat-production", code!~"5.."}[{{ window }}]))
+    SLOTarget: 0.90
+    SLOTargetUnit: percent_0_1
+    prometheusRules: /observability/prometheusrules/registry-quarkus-redhat-production.prometheusrules.yaml
+    dashboard: https://grafana.app-sre.devshift.net/dashboards/f/7a2fxwZ7k/registry-quarkus-redhat
+
+  - name: availability
+    SLIType: availability
+    SLISpecification: Ratio of requests responded with status different than 5xx for 85% of requests
+    SLODetails: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/quarkus/registry/slos/quarkus-registry-availability.md
+    SLOParameters:
+      window: 28d
+    expr: |
+      sum(rate(haproxy_backend_http_responses_total{route="registry-quarkus-redhat",exported_namespace="registry-quarkus-redhat-production",code!~"5xx"}[{{ window }}]))
+      /
+      sum(rate(haproxy_backend_http_responses_total{route="registry-quarkus-redhat",exported_namespace="registry-quarkus-redhat-production"}[{{ window }}]))
+    SLOTarget: 0.85
+    SLOTargetUnit: percent_0_1
+    prometheusRules: /observability/prometheusrules/registry-quarkus-redhat-production.prometheusrules.yaml
+    dashboard: https://grafana.app-sre.devshift.net/dashboards/f/7a2fxwZ7k/registry-quarkus-redhat
+
