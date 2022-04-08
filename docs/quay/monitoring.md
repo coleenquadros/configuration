@@ -41,7 +41,7 @@ aggregation:quay_request_duration_seconds_count:rate1m:sum
 
 we can scrape less often `quay_request_duration_seconds_bucket` and save space. See https://issues.redhat.com/browse/ASIC-200 for more details on Prometheus aggregation server data space issues.
 
-Being an intermediate aggregation server with no long term store purpose, the data directory of the Prometheus server is mounted on a memory backed `emptyDir` for performance needs. Any issue with this server with regards to data is solved by restarting it which will scrape all the data and start fresh.
+Being an intermediate aggregation server with no long term store purpose, the data directory of the Prometheus server is mounted on a memory backed `emptyDir` for performance needs. Any issue with this server with regards to data is solved by restarting it which will scrap all the data and start fresh.
 
 The AppSRE Prometheus instance continues to scrape the low cardinality metrics, then uses [Prometheus Federation] to scrape only the aggregated metrics from the additional Prometheus.
 
