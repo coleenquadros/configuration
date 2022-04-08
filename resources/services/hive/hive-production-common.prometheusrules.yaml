@@ -145,7 +145,7 @@ spec:
       for: 10m
       labels:
         service: hive
-        severity: high
+        severity: critical
         team: srep
     - alert: ClusterDeprovisioningDelay - production - {{{shard_name}}}
       annotations:
@@ -156,7 +156,7 @@ spec:
         (hive_cluster_deployment_deprovision_underway_seconds{job="hive-controllers"} / 3600 ) > 6
       for: 10m
       labels:
-        severity: medium
+        severity: critical
         service: hive
         team: srep
     - alert: SelectorSyncsetApplyFailures - production - {{{shard_name}}}
@@ -169,7 +169,7 @@ spec:
       for: 15m
       labels:
         service: hive
-        severity: medium
+        severity: critical
         team: srep
     - alert: SyncsetPausedTooLong - production - {{{shard_name}}}
       annotations:
@@ -181,7 +181,7 @@ spec:
       for: 48h
       labels:
         service: hive
-        severity: medium
+        severity: warning
         team: srep
     - alert: AWSAccountOperator AccountPool Depletion - {{{shard_name}}}
       annotations:
@@ -192,7 +192,7 @@ spec:
         aws_account_operator_available_non_ccs_accounts + aws_account_operator_accounts_progressing < (aws_account_operator_account_pool_size / 10)
       labels:
         service: srep
-        severity: high
+        severity: critical
         team: srep
     - alert: AWSAccountOperator Target Down - production - {{{shard_name}}}
       annotations:
@@ -201,10 +201,11 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
       expr: |
         absent(up{job="aws-account-operator"} == 1)
-      for: 15m
+      for: 10m
       labels:
-        severity: critical
         service: srep
+        severity: critical
+        team: srep
     - alert: CertmanOperator Target Down - production - {{{shard_name}}}
       annotations:
         message: "No targets found for Certman Operator on hive-{{{shard_name}}}"
@@ -212,10 +213,11 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
       expr: |
         absent(up{job="certman-operator"} == 1)
-      for: 15m
+      for: 10m
       labels:
-        severity: critical
         service: srep
+        severity: critical
+        team: srep
     - alert: DeadMansSnitchOperator Target Down - production - {{{shard_name}}}
       annotations:
         message: "No targets found for Dead Mans Snitch Operator on hive-{{{shard_name}}}"
@@ -223,10 +225,11 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
       expr: |
         absent(up{job="deadmanssnitch-operator"} == 1)
-      for: 15m
+      for: 10m
       labels:
-        severity: critical
         service: srep
+        severity: critical
+        team: srep
     - alert: PagerDutyOperator Target Down - production - {{{shard_name}}}
       annotations:
         message: "No targets found for PagerDuty Operator on hive-{{{shard_name}}}"
@@ -234,10 +237,11 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
       expr: |
         absent(up{job="pagerduty-operator"} == 1)
-      for: 15m
+      for: 10m
       labels:
-        severity: critical
         service: srep
+        severity: critical
+        team: srep
     - alert: LetsEncryptIssuanceRateLimit - devshift.org - {{{shard_name}}}
       annotations:
         message: "Certman Operator is about to reach account limit for issued certificate in the last 7 days - devshift.org domain"
@@ -247,7 +251,7 @@ spec:
         certman_operator_certs_in_last_week_devshift_org{job="certman-operator"} > {{{certman_operator_devshift_org_issuance_rate_threshold}}}
       labels:
         service: srep
-        severity: high
+        severity: critical
         team: srep
     - alert: LetsEncryptIssuanceRateLimit - openshiftapps.com - {{{shard_name}}}
       annotations:
@@ -258,7 +262,7 @@ spec:
         certman_operator_certs_in_last_week_openshift_apps_com{job="certman-operator"} > {{{certman_operator_openshift_apps_com_issuance_rate_threshold}}}
       labels:
         service: srep
-        severity: high
+        severity: critical
         team: srep
     - alert: CertmanCertExpires5Days - {{{shard_name}}}
       annotations:
@@ -267,5 +271,6 @@ spec:
       expr: |
         certman_operator_certificate_valid_duration_days <= 5
       labels:
-        severity: critical
         service: srep
+        severity: critical
+        team: srep
