@@ -15,7 +15,7 @@ To take the two examples and solve them as one, let's imagine we have created on
 At this point, we have catch-all alerts, and a human acts on these alerts.
 
 
-An alternative to catch-all alerts is a collection of an alert per resource to be monitored. In the RDS case - an alert per databse. And in the DVO case - an alert per namespace. This is obviously not feasable for a human to create or maintain, but if we have per-resource alerts, we can route them directly to the tenant instead of acting on them ourselves.
+An alternative to catch-all alerts is a collection of an alert per resource to be monitored. In the RDS case - an alert per database. And in the DVO case - an alert per namespace. This is obviously not feasable for a human to create or maintain, but if we have per-resource alerts, we can route them directly to the tenant instead of acting on them ourselves.
 
 The only way to generate per-resource alerts is to do it based on data in app-interface. Taking DVO as an example - (For each cluster) For each namespace, create an alert on DVO metrics that is routed to the tenant's jira board (via jiralert).
 
