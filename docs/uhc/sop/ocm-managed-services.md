@@ -5,12 +5,29 @@ Grafana: https://grafana.app-sre.devshift.net/d/ocm-managed-services/ocm-managed
 <!-- TOC depthTo:2 -->
 
 - [SOP : OCM Managed Services](#sop--uhc)
-    - [ServiceIsDown](#consumers-down)
-    - [DisasterRecovery](#disaster-recovery)
+    - [Base Functionality](#base-functionality)
+    - [Service Is Down](#service-down)
+    - [Disaster Recovery](#disaster-recovery)
     - [OCM Managed Services 5xx](#OCM-Managed-Services-5xx)
     - [Escalations](#escalations)
 
 <!-- /TOC -->
+
+---
+
+## Base Functionality
+
+### Summary:
+
+Basic check to verify the service is running properly
+
+### Access required:
+
+- None
+
+### Steps:
+
+- Ensure `https://api.openshift.org/api/service_mgmt/` is responding with a valid json and no errors.
 
 ---
 
