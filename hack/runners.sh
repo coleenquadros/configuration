@@ -139,6 +139,7 @@ run_user_validator() {
     -e QONTRACT_SERVER_URL=${GRAPHQL_SERVER} \
     -e GRAPHQL_USERNAME=${GRAPHQL_USERNAME} \
     -e GRAPHQL_PASSWORD=${GRAPHQL_PASSWORD} \
+    -e GITHUB_API=${GITHUB_API} \
     -e VAULT_ADDR=https://vault.devshift.net \
     -e VAULT_AUTHTYPE=approle \
     -e VAULT_ROLE_ID=${USER_VALIDATOR_ROLE_ID} \
