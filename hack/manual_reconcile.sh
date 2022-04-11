@@ -66,12 +66,13 @@ source $CURRENT_DIR/runners.sh
 # Run integrations
 
 DRY_RUN=true
+[[ $IS_TEST_DATA == "yes" ]] && REPORTS_DIR=reports-test-data || REPORTS_DIR=reports
 
 ## Create directories for integrations
 mkdir -p ${WORK_DIR}/config
 mkdir -p ${WORK_DIR}/throughput
-SUCCESS_DIR=${WORK_DIR}/reports/reconcile_reports_success
-FAIL_DIR=${WORK_DIR}/reports/reconcile_reports_fail
+SUCCESS_DIR=${WORK_DIR}/${REPORTS_DIR}/reconcile_reports_success
+FAIL_DIR=${WORK_DIR}/${REPORTS_DIR}/reconcile_reports_fail
 rm -rf ${SUCCESS_DIR} ${FAIL_DIR}; mkdir -p ${SUCCESS_DIR} ${FAIL_DIR}
 
 # Prepare to run integrations on production
