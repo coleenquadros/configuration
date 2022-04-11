@@ -3,7 +3,7 @@
 set -o pipefail
 
 usage() {
-    echo "$0 DATAFILES_BUNDLE [CONFIG_TOML]" >&1
+    echo "$0 DATAFILES_BUNDLE CONFIG_TOML [IS_TEST_DATA]" >&1
     exit 1
 }
 
@@ -21,6 +21,9 @@ DATAFILES_BUNDLE="$1"
 
 CONFIG_TOML="$2"
 [ -z "${CONFIG_TOML}" ] && usage
+
+IS_TEST_DATA="$3" # optional
+[ -z "${IS_TEST_DATA}" ] && IS_TEST_DATA="no"
 
 DATAFILES_BUNDLE_BASENAME=$(basename ${DATAFILES_BUNDLE})
 DATAFILES_BUNDLE_DIR=$(dirname $(realpath -s ${DATAFILES_BUNDLE}))
@@ -76,6 +79,7 @@ rm -rf ${SUCCESS_DIR} ${FAIL_DIR}; mkdir -p ${SUCCESS_DIR} ${FAIL_DIR}
 ## Write config.toml for reconcile tools
 cat "$CONFIG_TOML" > ${WORK_DIR}/config/config.toml
 
+[[ "$IS_TEST_DATA" == "no" ]] && {
 # Gatekeeper. If this fails, we skip all the integrations.
 run_int gitlab-fork-compliance $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid app-sre || exit 1
 
@@ -84,6 +88,7 @@ run_int gitlab-fork-compliance $gitlabMergeRequestTargetProjectId $gitlabMergeRe
 
 ## Run integrations on production
 ALIAS=saas-file-owners-no-compare run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid --no-compare
+}
 
 # Prepare to run integrations on local server
 
@@ -109,10 +114,10 @@ cat "$CONFIG_TOML" \
 ## Run integrations on local server
 
 ### saas-file-owners runs first to determine how openshift-saas-deploy-wrappers should run
-VALID_SAAS_FILE_CHANGES_ONLY=$(run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid)
+[[ "$IS_TEST_DATA" == "no" ]] && VALID_SAAS_FILE_CHANGES_ONLY=$(run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid) || VALID_SAAS_FILE_CHANGES_ONLY="no"
 
 # run integrations based on their pr_check definitions
-python $CURRENT_DIR/select-integrations.py ${DATAFILES_BUNDLE} ${VALID_SAAS_FILE_CHANGES_ONLY} > $TEMP_DIR/integrations.sh
+python $CURRENT_DIR/select-integrations.py ${DATAFILES_BUNDLE} ${VALID_SAAS_FILE_CHANGES_ONLY} ${IS_TEST_DATA} > $TEMP_DIR/integrations.sh
 exit_status=$?
 if [ $exit_status != 0 ]; then
   exit $exit_status
