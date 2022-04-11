@@ -51,13 +51,16 @@ lintyamls() {
 lintyamls
 # Setup vars and clean files
 export TEMP_DIR=$(realpath -s temp)
-rm -rf $TEMP_DIR; mkdir -p $TEMP_DIR $TEMP_DIR/reports
-cp ./$CURRENT_DIR/reports-main.css $TEMP_DIR/reports
+rm -rf $TEMP_DIR; mkdir -p $TEMP_DIR
 
 source ./.env
 
 # Real data
 IS_TEST_DATA="no"
+
+# Setup
+mkdir -p $TEMP_DIR/reports
+cp ./$CURRENT_DIR/reports-main.css $TEMP_DIR/reports
 
 # Variables
 RESULTS=$TEMP_DIR/reports/results.json
