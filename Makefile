@@ -1,4 +1,4 @@
-.PHONY: schemas bundle validate run dev server
+.PHONY: schemas bundle validate run dev server qr-promote user-validator-promote promote-all
 
 include .env
 
@@ -50,6 +50,11 @@ server: schemas bundle validate run
 
 qr-promote:
 	@./hack/update-qr-tag.sh
+
+user-validator-promote:
+	@./hack/update-user-validator-tag.sh
+
+promote-all: qr-promote user-validator-promote
 
 update-schemas:
 	@./hack/update-schemas.sh
