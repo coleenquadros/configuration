@@ -77,13 +77,13 @@ rm -rf ${SUCCESS_DIR} ${FAIL_DIR}; mkdir -p ${SUCCESS_DIR} ${FAIL_DIR}
 cat "$CONFIG_TOML" > ${WORK_DIR}/config/config.toml
 
 # Gatekeeper. If this fails, we skip all the integrations.
-run_int gitlab-fork-compliance $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid app-sre && {
+run_int gitlab-fork-compliance $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid app-sre || exit 1
 
 ### gitlab-ci-skipper runs first to determine if other integrations should run
-[[ "$(run_int gitlab-ci-skipper $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid)" != "yes" ]] && {
+[[ "$(run_int gitlab-ci-skipper $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid)" == "yes" ]] && exit 0
 
 ## Run integrations on production
-ALIAS=saas-file-owners-no-compare run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid --no-compare &
+ALIAS=saas-file-owners-no-compare run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid --no-compare
 
 # Prepare to run integrations on local server
 
@@ -99,9 +99,6 @@ if [[ "$DEPLOYED_SHA256" != "$SHA256" ]]; then
   echo "Invalid SHA256" >&2
   exit 1
 fi
-
-## Wait for production integrations to complete
-wait
 
 ## Write config.toml for reconcile tools
 GRAPHQL_SERVER=http://$IP:4000/graphql
@@ -128,8 +125,6 @@ echo "run selected integrations:"
 source $TEMP_DIR/integrations.sh
 
 wait
-}
-}
 
 print_execution_times
 update_pushgateway
