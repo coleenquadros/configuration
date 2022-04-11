@@ -117,9 +117,6 @@ VALID_SAAS_FILE_CHANGES_ONLY=$(run_int saas-file-owners $gitlabMergeRequestTarge
 ### vault integration
 [[ "$VALID_SAAS_FILE_CHANGES_ONLY" == "no" ]] && run_vault_reconcile_integration &
 
-### openshift-saas-deploy only runs if the MR title contains "saas-deploy-full"
-[[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"saas-deploy-full"* ]] && run_int openshift-saas-deploy &
-
 # run integrations based on their pr_check definitions
 python $CURRENT_DIR/select-integrations.py ${DATAFILES_BUNDLE} ${VALID_SAAS_FILE_CHANGES_ONLY} > $TEMP_DIR/integrations.sh
 exit_status=$?
