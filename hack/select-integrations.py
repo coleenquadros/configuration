@@ -97,7 +97,7 @@ def get_integrations_by_schema(integrations, schema):
 
 
 def print_pr_check_cmds(integrations, selected=None, select_all=False,
-                        valid_saas_file_changes=False, is_test_data=False):
+                        valid_saas_file_changes=False):
     if selected is None:
         selected = []
 
@@ -115,9 +115,6 @@ def print_pr_check_cmds(integrations, selected=None, select_all=False,
             continue
 
         cmd = ""
-        if is_test_data:
-            # allow running the same integration for both real data and test data
-            cmd += "ALIAS=" + int_name + "-with-test-data "
         if pr.get('state'):
             cmd += "STATE=true "
         if pr.get('sqs'):
@@ -161,7 +158,7 @@ def main():
 
     if any_modified(lambda p: not re.match(r'^(data|resources|docs|test_data)/', p)):
         # unknow case: we run all integrations
-        print_pr_check_cmds(integrations, select_all=True, is_test_data=is_test_data)
+        print_pr_check_cmds(integrations, select_all=True)
         return
 
     selected = set()
@@ -185,8 +182,7 @@ def main():
         selected.add('openshift-resources')
 
     print_pr_check_cmds(integrations, selected=selected,
-                        valid_saas_file_changes=valid_saas_file_changes_only,
-                        is_test_data=is_test_data)
+                        valid_saas_file_changes=valid_saas_file_changes_only)
 
 
 if __name__ == '__main__':
