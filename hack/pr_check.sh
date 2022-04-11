@@ -51,10 +51,16 @@ lintyamls() {
 lintyamls
 # Setup vars and clean files
 export TEMP_DIR=$(realpath -s temp)
-rm -rf $TEMP_DIR; mkdir -p $TEMP_DIR $TEMP_DIR/reports
-cp ./$CURRENT_DIR/reports-main.css $TEMP_DIR/reports
+rm -rf $TEMP_DIR; mkdir -p $TEMP_DIR
 
 source ./.env
+
+# Real data
+IS_TEST_DATA="no"
+
+# Setup
+mkdir -p $TEMP_DIR/reports
+cp ./$CURRENT_DIR/reports-main.css $TEMP_DIR/reports
 
 # Variables
 RESULTS=$TEMP_DIR/reports/results.json
@@ -78,7 +84,7 @@ echo "Report written to: ${REPORT}"
 # Validation worked, so we are good to run the integrations
 echo "$CONFIG_TOML" | base64 -d > ${TEMP_DIR}/config.toml
 
-./$CURRENT_DIR/manual_reconcile.sh ${TEMP_DIR}/validate/data.json ${TEMP_DIR}/config.toml || exit_status=$?
+./$CURRENT_DIR/manual_reconcile.sh ${TEMP_DIR}/validate/data.json ${TEMP_DIR}/config.toml ${IS_TEST_DATA} || exit_status=$?
 
 # Write report
 python ./$CURRENT_DIR/gen-report.py ${RESULTS} $TEMP_DIR/reports > ${REPORT}
