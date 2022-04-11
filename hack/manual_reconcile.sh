@@ -3,7 +3,7 @@
 set -o pipefail
 
 usage() {
-    echo "$0 DATAFILES_BUNDLE CONFIG_TOML [IS_TEST_DATA]" >&1
+    echo "$0 DATAFILES_BUNDLE CONFIG_TOML IS_TEST_DATA" >&1
     exit 1
 }
 
@@ -22,8 +22,8 @@ DATAFILES_BUNDLE="$1"
 CONFIG_TOML="$2"
 [ -z "${CONFIG_TOML}" ] && usage
 
-IS_TEST_DATA="$3" # optional
-[ -z "${IS_TEST_DATA}" ] && IS_TEST_DATA="no"
+IS_TEST_DATA="$3"
+[ -z "${IS_TEST_DATA}" ] && usage
 
 DATAFILES_BUNDLE_BASENAME=$(basename ${DATAFILES_BUNDLE})
 DATAFILES_BUNDLE_DIR=$(dirname $(realpath -s ${DATAFILES_BUNDLE}))

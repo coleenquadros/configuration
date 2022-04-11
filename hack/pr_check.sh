@@ -56,6 +56,9 @@ cp ./$CURRENT_DIR/reports-main.css $TEMP_DIR/reports
 
 source ./.env
 
+# Real data
+IS_TEST_DATA="no"
+
 # Variables
 RESULTS=$TEMP_DIR/reports/results.json
 REPORT=$TEMP_DIR/reports/index.html
@@ -78,7 +81,7 @@ echo "Report written to: ${REPORT}"
 # Validation worked, so we are good to run the integrations
 echo "$CONFIG_TOML" | base64 -d > ${TEMP_DIR}/config.toml
 
-./$CURRENT_DIR/manual_reconcile.sh ${TEMP_DIR}/validate/data.json ${TEMP_DIR}/config.toml || exit_status=$?
+./$CURRENT_DIR/manual_reconcile.sh ${TEMP_DIR}/validate/data.json ${TEMP_DIR}/config.toml ${IS_TEST_DATA} || exit_status=$?
 
 # Write report
 python ./$CURRENT_DIR/gen-report.py ${RESULTS} $TEMP_DIR/reports > ${REPORT}
