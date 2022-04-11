@@ -114,9 +114,6 @@ cat "$CONFIG_TOML" \
 ### saas-file-owners runs first to determine how openshift-saas-deploy-wrappers should run
 VALID_SAAS_FILE_CHANGES_ONLY=$(run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid)
 
-### vault integration
-[[ "$VALID_SAAS_FILE_CHANGES_ONLY" == "no" ]] && run_vault_reconcile_integration &
-
 # run integrations based on their pr_check definitions
 python $CURRENT_DIR/select-integrations.py ${DATAFILES_BUNDLE} ${VALID_SAAS_FILE_CHANGES_ONLY} > $TEMP_DIR/integrations.sh
 exit_status=$?
