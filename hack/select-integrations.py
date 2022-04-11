@@ -123,6 +123,8 @@ def print_pr_check_cmds(integrations, selected=None, select_all=False,
 
         if int_name == "vault-manager":
             cmd += 'run_vault_reconcile_integration &'
+        elif int_name == "user-validator":
+            cmd += 'run_user_validator &'
         else:
             cmd += "run_int " + pr['cmd'] + ' &'
 
