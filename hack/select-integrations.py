@@ -73,10 +73,11 @@ def get_resource_schema(data, modified_file):
     return schema
 
 
-def get_modified_schemas(data, modified_files):
+def get_modified_schemas(data, modified_files, is_test_data):
+    data_path = "test_data/" if is_test_data else "data/"
     schemas = set()
     for modified_file in modified_files:
-        if modified_file.startswith("data/"):
+        if modified_file.startswith(data_path):
             schemas.add(get_data_schema(data, modified_file))
 
         if modified_file.startswith("resources/"):
@@ -96,7 +97,7 @@ def get_integrations_by_schema(integrations, schema):
 
 
 def print_pr_check_cmds(integrations, selected=None, select_all=False,
-                        valid_saas_file_changes=False):
+                        valid_saas_file_changes=False, is_test_data=False):
     if selected is None:
         selected = []
 
@@ -114,6 +115,9 @@ def print_pr_check_cmds(integrations, selected=None, select_all=False,
             continue
 
         cmd = ""
+        if is_test_data:
+            # allow running the same integration for both real data and test data
+            cmd += "ALIAS=" + int_name + "-with-test-data "
         if pr.get('state'):
             cmd += "STATE=true "
         if pr.get('sqs'):
@@ -140,6 +144,7 @@ def main():
         data = json.load(f)
 
     valid_saas_file_changes_only = True if sys.argv[2] == "yes" else False
+    is_test_data = True if sys.argv[3] == "yes" else False
 
     integrations = get_integrations(data)
     modified_files = get_modified_files()
@@ -154,15 +159,15 @@ def main():
         # only docs: no need to run pr check
         return
 
-    if any_modified(lambda p: not re.match(r'^(data|resources|docs)/', p)):
+    if any_modified(lambda p: not re.match(r'^(data|resources|docs|test_data)/', p)):
         # unknow case: we run all integrations
-        print_pr_check_cmds(integrations, select_all=True)
+        print_pr_check_cmds(integrations, select_all=True, is_test_data=is_test_data)
         return
 
     selected = set()
 
     # list of integrations based on the datafiles that are changed
-    modified_schemas = get_modified_schemas(data, modified_files)
+    modified_schemas = get_modified_schemas(data, modified_files, is_test_data)
     for schema in modified_schemas:
         schema_integrations = get_integrations_by_schema(integrations, schema)
         selected = selected.union(schema_integrations)
@@ -180,7 +185,8 @@ def main():
         selected.add('openshift-resources')
 
     print_pr_check_cmds(integrations, selected=selected,
-                        valid_saas_file_changes=valid_saas_file_changes_only)
+                        valid_saas_file_changes=valid_saas_file_changes_only,
+                        is_test_data=is_test_data)
 
 
 if __name__ == '__main__':
