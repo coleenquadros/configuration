@@ -120,7 +120,11 @@ def print_pr_check_cmds(integrations, selected=None, select_all=False,
             cmd += "SQS_GATEWAY=true "
         if pr.get('no_validate_schemas'):
             cmd += "NO_VALIDATE=true "
-        cmd += "run_int " + pr['cmd'] + ' &'
+
+        if int_name == "vault-manager":
+            cmd += 'run_vault_reconcile_integration &'
+        else:
+            cmd += "run_int " + pr['cmd'] + ' &'
 
         print(cmd)
 
