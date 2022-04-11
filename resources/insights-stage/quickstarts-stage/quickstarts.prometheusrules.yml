@@ -26,7 +26,7 @@ spec:
           message: "Metrics for quickstarts in STAGE are absent"
           runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/quickstarts/App-quickstarts-In-quickstarts-stage-Absent.rst
       - alert: App-quickstarts-service-In-quickstarts-stage-high-error-rate
-        expr: sum(increase(quickstarts_responses{code!~"2.*"}[24h])) / sum(increase(quickstarts_responses[24h])) < .90
+        expr: round(sum(rate(api_3scale_gateway_api_status{exported_service="quickstarts", status=~"[234]xx"}[24h])) / sum(rate(api_3scale_gateway_api_status{exported_service="quickstarts"}[24h])), 0.0001) < 0.90
         for: 5m
         labels:
           severity: high
