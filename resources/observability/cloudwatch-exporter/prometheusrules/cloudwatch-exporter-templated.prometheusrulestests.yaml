@@ -54,23 +54,3 @@ tests:
       exp_annotations:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/sop/rds-burst-balance.md"
         message: "DB instance 'app-sre/dashdotdb-stage' storage will be out of burst balance in 8 hours"
-
-# Test that burst balance alerts aren't triggered for "-stage" or "-staging" resources
-- interval: 1m
-  input_series:
-  - series: aws_rds_burst_balance_average{dbinstance_identifier="someservice-stage"}
-    values: 100-2x45 0x135 # quickly go from 100-0 in under an hour, and then stays at 0 for a couple of hours
-  - series: aws_rds_burst_balance_average{dbinstance_identifier="someservice-staging"}
-    values: 100-2x45 0x135
-  - series: aws_rds_burst_balance_average{dbinstance_identifier="someservice-staging-replica"}
-    values: 100-2x45 0x135
-  - series: aws_rds_burst_balance_average{dbinstance_identifier="someservice-integration"}
-    values: 100-2x45 0x135
-  - series: aws_rds_burst_balance_average{dbinstance_identifier="someservice-integration-replica"}
-    values: 100-2x45 0x135
-
-
-  alert_rule_test:
-  - eval_time: 3h
-    alertname: RDSPredictOutOfBurstBalance
-    exp_alerts:
