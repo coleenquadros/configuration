@@ -14,11 +14,13 @@ To take the two examples and solve them as one, let's imagine we have created on
 
 At this point, we have catch-all alerts, and a human acts on these alerts.
 
+## Catch-all vs. per-resource alerts
 
 An alternative to catch-all alerts is a collection of an alert per resource to be monitored. In the RDS case - an alert per database. And in the DVO case - an alert per namespace. This is obviously not feasable for a human to create or maintain, but if we have per-resource alerts, we can route them directly to the tenant instead of acting on them ourselves.
 
 The only way to generate per-resource alerts is to do it based on data in app-interface. Taking DVO as an example - (For each cluster) For each namespace, create an alert on DVO metrics that is routed to the tenant's jira board (via jiralert).
 
+## Generate per-resource alerts
 
 To generate per-resource alerts, one would need to use the `query` built-in function of openshift-resources (as documented [here](/README.md#manage-openshift-resources-via-app-interface-openshiftnamespace-1yml)) with a custom query. The templating should include logic to decide on the data to use according to the graphql query results.
 
@@ -26,4 +28,14 @@ Examples:
 1. [Generate Jiralert related AlertManager configuration](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/36052/diffs?commit_id=40070af0e0ac02b2b9067ce4aa123e55daa7943d)
 1. [Generate DVO alerts which are automatically routed to a tenant's jira board](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/36096/diffs?commit_id=d7ab037ad084fae6a81e9cc8e904388fe5b51a3a)
 
+## Test templates
+
 To test the templates, we will be using the approach described in the [test data in app-interface](./docs/app-sre/design-docs/app-interface-test-data.md) design document.
+
+For each template used to create per-resource alerts, we will create a template test, which will be tested using the [template-tester integration](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/template_tester.py).
+
+Each template test file should include the following fields:
+- `resourcePath`: path to resource template to be tested
+- `expectedResult`: path to a resource with the exected result of the templating to compare to
+
+Here is an [exmaple](test_data/services/deployment-validation-operator/test/templatetests.yaml) for a template test file for the DVO alerts mentioned in the previous section.
