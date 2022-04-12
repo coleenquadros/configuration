@@ -1,0 +1,43 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: cna
+
+name: cna
+
+namespaces:
+  - $ref: /services/cna/namespaces/production.yml
+
+slos:
+  - name: CNA API Latency
+    SLIType: latency
+    SLISpecification: Percentage of the requests responded under 1 second.
+    SLODetails: #to-do
+    SLOParameters:
+      window: 28d
+    expr: |
+      (sum(rate(api_inbound_request_duration_bucket{namespace="cna-production",job="cna-metrics",le="1",code!~"5.."}[{{window}}]))
+      /
+      sum(rate(api_inbound_request_duration_count{namespace="cna-production",job="cna-metrics",code!~"5.."}[{{window}}])))
+    SLOTarget: 0.99
+    SLOTargetUnit: percent_0_1
+    prometheusRules: /observability/prometheusrules/cna-slo-production.prometheusrules.yaml
+    prometheusRulesTests: /observability/prometheusrules/cna-slo-production.prometheusrulestests.yaml
+    dashboard: #to-do
+
+  - name: CNA API Availability
+    SLIType: availability
+    SLISpecification: Percentage of requests that are served successfully (status code != 5xx)
+    SLODetails: #to-do
+    SLOParameters:
+      window: 28d
+    expr: |
+      sum(rate(haproxy_backend_http_responses_total{route="cna-production",exported_namespace="cna-production",code!="5xx"}[{{window}}]))
+      /
+      sum(rate(haproxy_backend_http_responses_total{route="cna-production",exported_namespace="cna-production"}[{{window}}]))
+    SLOTarget: 0.90
+    SLOTargetUnit: percent_0_1
+    prometheusRules: /observability/prometheusrules/cna-slo-production.prometheusrules.yaml
+    prometheusRulesTests: /observability/prometheusrules/cna-slo-production.prometheusrulestests.yaml
+    dashboard: #to-do
