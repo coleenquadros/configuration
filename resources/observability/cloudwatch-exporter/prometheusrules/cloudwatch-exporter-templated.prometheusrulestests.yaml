@@ -6,12 +6,15 @@ rule_files:
 
 evaluation_interval: 1m
 
+# we use identifiers of DBs that actually exist since we are now dynamically generating per-resource alerts
+# https://issues.redhat.com/browse/APPSRE-4750
+
 tests:
 - interval: 1m
   input_series:
-  - series: aws_rds_burst_balance_average{dbinstance_identifier="sustained-burst"}
+  - series: aws_rds_burst_balance_average{dbinstance_identifier="dashdotdb-stage"}
     values: 100+0x59 100-0.5x119 # 100 during one hour then 100 99.5 99 98.5...
-  - series: aws_rds_burst_balance_average{dbinstance_identifier="spiky-burst"}
+  - series: aws_rds_burst_balance_average{dbinstance_identifier="grafana-stage"}
     values: 100+0x59 100-5x9 50+0.1x109 # 100, then write burst and slow recover
 
   alert_rule_test:
@@ -22,18 +25,20 @@ tests:
     alertname: RDSPredictOutOfBurstBalance
     exp_alerts:
     - exp_labels:
-        dbinstance_identifier: sustained-burst
+        dbinstance_identifier: dashdotdb-stage
+        app: dashdot
+        jiralert: APPSRE
         severity: high
         service: app-sre-observability
       exp_annotations:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/sop/rds-burst-balance.md"
-        message: "DB instance 'sustained-burst' storage will be out of burst balance in 8 hours"
+        message: "DB instance 'app-sre/dashdotdb-stage' storage will be out of burst balance in 8 hours"
 
 # Test that burst balance alerts don't clear when the balance goes to 0%. In the past, these alerts were clearing
 # because the expression was `< 0` instead of `<= 0`.
 - interval: 1m
   input_series:
-  - series: aws_rds_burst_balance_average{dbinstance_identifier="burst-depleted"}
+  - series: aws_rds_burst_balance_average{dbinstance_identifier="dashdotdb-stage"}
     values: 100-2x45 0x135 # quickly go from 100-0 in under an hour, and then stays at 0 for a couple of hours
 
   alert_rule_test:
@@ -41,12 +46,14 @@ tests:
     alertname: RDSPredictOutOfBurstBalance
     exp_alerts:
     - exp_labels:
-        dbinstance_identifier: burst-depleted
+        dbinstance_identifier: dashdotdb-stage
+        app: dashdot
+        jiralert: APPSRE
         severity: high
         service: app-sre-observability
       exp_annotations:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/sop/rds-burst-balance.md"
-        message: "DB instance 'burst-depleted' storage will be out of burst balance in 8 hours"
+        message: "DB instance 'app-sre/dashdotdb-stage' storage will be out of burst balance in 8 hours"
 
 # Test that burst balance alerts aren't triggered for "-stage" or "-staging" resources
 - interval: 1m
