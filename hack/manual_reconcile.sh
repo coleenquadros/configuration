@@ -3,7 +3,7 @@
 set -o pipefail
 
 usage() {
-    echo "$0 DATAFILES_BUNDLE [CONFIG_TOML]" >&1
+    echo "$0 DATAFILES_BUNDLE CONFIG_TOML IS_TEST_DATA" >&1
     exit 1
 }
 
@@ -21,6 +21,9 @@ DATAFILES_BUNDLE="$1"
 
 CONFIG_TOML="$2"
 [ -z "${CONFIG_TOML}" ] && usage
+
+IS_TEST_DATA="$3"
+[ -z "${IS_TEST_DATA}" ] && usage
 
 DATAFILES_BUNDLE_BASENAME=$(basename ${DATAFILES_BUNDLE})
 DATAFILES_BUNDLE_DIR=$(dirname $(realpath -s ${DATAFILES_BUNDLE}))
@@ -63,12 +66,13 @@ source $CURRENT_DIR/runners.sh
 # Run integrations
 
 DRY_RUN=true
+[[ $IS_TEST_DATA == "yes" ]] && REPORTS_DIR=reports-test-data || REPORTS_DIR=reports
 
 ## Create directories for integrations
 mkdir -p ${WORK_DIR}/config
 mkdir -p ${WORK_DIR}/throughput
-SUCCESS_DIR=${WORK_DIR}/reports/reconcile_reports_success
-FAIL_DIR=${WORK_DIR}/reports/reconcile_reports_fail
+SUCCESS_DIR=${WORK_DIR}/${REPORTS_DIR}/reconcile_reports_success
+FAIL_DIR=${WORK_DIR}/${REPORTS_DIR}/reconcile_reports_fail
 rm -rf ${SUCCESS_DIR} ${FAIL_DIR}; mkdir -p ${SUCCESS_DIR} ${FAIL_DIR}
 
 # Prepare to run integrations on production
@@ -76,14 +80,16 @@ rm -rf ${SUCCESS_DIR} ${FAIL_DIR}; mkdir -p ${SUCCESS_DIR} ${FAIL_DIR}
 ## Write config.toml for reconcile tools
 cat "$CONFIG_TOML" > ${WORK_DIR}/config/config.toml
 
+[[ "$IS_TEST_DATA" == "no" ]] && {
 # Gatekeeper. If this fails, we skip all the integrations.
-run_int gitlab-fork-compliance $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid app-sre && {
+run_int gitlab-fork-compliance $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid app-sre || exit 1
 
 ### gitlab-ci-skipper runs first to determine if other integrations should run
-[[ "$(run_int gitlab-ci-skipper $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid)" != "yes" ]] && {
+[[ "$(run_int gitlab-ci-skipper $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid)" == "yes" ]] && exit 0
 
 ## Run integrations on production
-ALIAS=saas-file-owners-no-compare run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid --no-compare &
+ALIAS=saas-file-owners-no-compare run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid --no-compare
+}
 
 # Prepare to run integrations on local server
 
@@ -100,9 +106,6 @@ if [[ "$DEPLOYED_SHA256" != "$SHA256" ]]; then
   exit 1
 fi
 
-## Wait for production integrations to complete
-wait
-
 ## Write config.toml for reconcile tools
 GRAPHQL_SERVER=http://$IP:4000/graphql
 cat "$CONFIG_TOML" \
@@ -112,16 +115,10 @@ cat "$CONFIG_TOML" \
 ## Run integrations on local server
 
 ### saas-file-owners runs first to determine how openshift-saas-deploy-wrappers should run
-VALID_SAAS_FILE_CHANGES_ONLY=$(run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid)
-
-### vault integration
-[[ "$VALID_SAAS_FILE_CHANGES_ONLY" == "no" ]] && run_vault_reconcile_integration &
-
-### openshift-saas-deploy only runs if the MR title contains "saas-deploy-full"
-[[ "$(echo $gitlabMergeRequestTitle | tr '[:upper:]' '[:lower:]')" == *"saas-deploy-full"* ]] && run_int openshift-saas-deploy &
+[[ "$IS_TEST_DATA" == "no" ]] && VALID_SAAS_FILE_CHANGES_ONLY=$(run_int saas-file-owners $gitlabMergeRequestTargetProjectId $gitlabMergeRequestIid) || VALID_SAAS_FILE_CHANGES_ONLY="no"
 
 # run integrations based on their pr_check definitions
-python $CURRENT_DIR/select-integrations.py ${DATAFILES_BUNDLE} ${VALID_SAAS_FILE_CHANGES_ONLY} > $TEMP_DIR/integrations.sh
+python $CURRENT_DIR/select-integrations.py ${DATAFILES_BUNDLE} ${VALID_SAAS_FILE_CHANGES_ONLY} ${IS_TEST_DATA} > $TEMP_DIR/integrations.sh
 exit_status=$?
 if [ $exit_status != 0 ]; then
   exit $exit_status
@@ -134,8 +131,6 @@ echo "run selected integrations:"
 source $TEMP_DIR/integrations.sh
 
 wait
-}
-}
 
 print_execution_times
 update_pushgateway

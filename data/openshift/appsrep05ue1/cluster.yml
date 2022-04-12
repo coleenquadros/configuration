@@ -1,10 +1,8 @@
 ---
 $schema: /openshift/cluster-1.yml
-
 labels:
   service: ci-int
   environment: production
-
 name: appsrep05ue1
 description: AppSRE internal CI production cluster
 consoleUrl: https://console-openshift-console.apps.appsrep05ue1.zqxk.p1.openshiftapps.com
@@ -15,26 +13,22 @@ serverUrl: https://api.appsrep05ue1.zqxk.p1.openshiftapps.com:6443
 elbFQDN: elb.apps.appsrep05ue1.zqxk.p1.openshiftapps.com
 ocm:
   $ref: /dependencies/ocm/production.yml
-
 auth:
   service: github-org-team
   org: app-sre
   team: appsrep05ue1-cluster
-
 observabilityNamespace:
   $ref: /services/observability/namespaces/openshift-customer-monitoring.appsrep05ue1.yml
-
 managedGroups:
 - dedicated-admins
 - dedicated-readers
 
 managedClusterRoles: true
-
 spec:
   provider: aws
   region: us-east-1
   channel: candidate
-  version: 4.10.6
+  version: 4.10.9
   initial_version: 4.7.0-candidate
   multi_az: true
   autoscale:
@@ -47,7 +41,6 @@ spec:
   id: 1kk1b4q1osjiklo0tl6lk1cgfsl2ln57
   external_id: 0c5e83d4-ac7b-47c4-86cb-975579723213
   provision_shard_id: de4b0632-dca7-11ea-b3b9-8c1645a911be
-
   disable_user_workload_monitoring: true
 upgradePolicy:
   workloads:
@@ -55,24 +48,19 @@ upgradePolicy:
   schedule: 0 12 * * 1-5
   conditions:
     soakDays: 7
-
 network:
   vpc: 10.29.84.0/22
   service: 172.30.0.0/16
   pod: 10.128.0.0/14
-
 internal: true
-
 automationToken:
   path: app-sre/creds/kube-configs/appsrep05ue1
   field: token
-
 awsInfrastructureManagementAccounts:
 - account:
     $ref: /aws/app-sre/account.yml
   accessLevel: network-mgmt
   default: true
-
 awsInfrastructureAccess:
 - awsGroup:
     $ref: /aws/app-sre/groups/App-SRE-admin.yml
@@ -80,7 +68,6 @@ awsInfrastructureAccess:
 - awsGroup:
     $ref: /aws/app-sre/groups/App-SRE-admin.yml
   accessLevel: network-mgmt
-
 peering:
   connections:
   - provider: account-tgw
@@ -91,6 +78,13 @@ peering:
       service: ci-int
     manageRoutes: true
     cidrBlock: 10.0.0.0/8
+  - provider: account-vpc-mesh
+    name: appsrep05ue1_app-sre_mesh
+    account:
+      $ref: /aws/app-sre/account.yml
+    tags:
+      Name: app-sre vpc 02 - ci.ext
+    manageRoutes: true
   - provider: cluster-vpc-accepter
     name: appsrep05ue1_hivei01ue1
     cluster:
@@ -161,8 +155,5 @@ peering:
     cluster:
       $ref: /openshift/app-sre-stage-01/cluster.yml
     manageRoutes: true
-
-
-
 addons:
 - $ref: /dependencies/ocm/addons/cluster-logging-operator.yml

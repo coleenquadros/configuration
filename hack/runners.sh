@@ -128,6 +128,40 @@ run_vault_reconcile_integration() {
   return $status
 }
 
+run_user_validator() {
+  local status
+
+  STARTTIME=$(date +%s)
+
+  # USER_VALIDATOR_INVALID_USERS is just a workaround. 
+  # Please do not add new paths, but delete invalid keys from now on
+  docker run --rm -t \
+    -e QONTRACT_SERVER_URL=${GRAPHQL_SERVER} \
+    -e GRAPHQL_USERNAME=${GRAPHQL_USERNAME} \
+    -e GRAPHQL_PASSWORD=${GRAPHQL_PASSWORD} \
+    -e GITHUB_API=${GITHUB_API} \
+    -e VAULT_ADDR=https://vault.devshift.net \
+    -e VAULT_AUTHTYPE=approle \
+    -e VAULT_ROLE_ID=${USER_VALIDATOR_ROLE_ID} \
+    -e VAULT_SECRET_ID=${USER_VALIDATOR_SECRET_ID} \
+    -e USER_VALIDATOR_INVALID_USERS='/teams/insights/users/abakshi.yml,/teams/sd-ops-dev/users/sreaves.yml,/teams/quay/users/hdonnay.yml,/teams/sd-sre/users/drow.yml,/teams/insights/users/mlahane.yml,/teams/sd-ops-dev/users/mpovolny.yml,/teams/insights/users/ccx/dpensier.yml,/teams/devtools/users/sbryzak.yml,/teams/insights/users/khowell.yml,/teams/che/users/skabashn.yml,/teams/managed-services/users/stian.yml,/teams/insights/users/opacut.yml' \
+    ${USER_VALIDATOR_IMAGE}:${USER_VALIDATOR_IMAGE_TAG} validate \
+    2>&1 | tee ${SUCCESS_DIR}/reconcile-user-validator.txt
+
+  status="$?"
+  ENDTIME=$(date +%s)
+
+  # Add integration run durations to a file
+  echo "app_interface_int_execution_duration_seconds{integration=\"user-validator\"} $((ENDTIME - STARTTIME))" >> "${SUCCESS_DIR}/int_execution_duration_seconds.txt"
+
+  if [ "$status" != "0" ]; then
+    echo "INTEGRATION FAILED: user-validator" >&2
+    mv ${SUCCESS_DIR}/reconcile-user-validator.txt ${FAIL_DIR}/reconcile-user-validator.txt
+  fi
+
+  return $status
+}
+
 send_log() {
   BUILDTIME=$(date -d "$BUILD_TIMESTAMP" +%s000)
 

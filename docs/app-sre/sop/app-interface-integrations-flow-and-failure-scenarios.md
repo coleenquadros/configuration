@@ -24,11 +24,6 @@ There are 3 stages when running our integrations:
     * The integrations from the baseline collection phase will run again in a compare mode
         * These integrations will fail in the baseline collection phase was not completed succesfully
 
-## Special Merge Request titles
-
-Some of our integrations shouldn't run in every merge request. The current mechanism to determine if such an integration should run is done by using the MR title:
-- if the title contains "saas-deploy-full" - the openshift-saas-deploy integration is executed for all saas files
-
 ## Failure scenarions
 
 This section describes common failure scenrios for different integrations.

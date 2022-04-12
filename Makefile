@@ -1,4 +1,4 @@
-.PHONY: schemas bundle validate run dev server
+.PHONY: schemas bundle validate run dev server qr-promote user-validator-promote promote-all
 
 include .env
 
@@ -6,6 +6,7 @@ CONTAINER_ENGINE ?= $(shell which podman >/dev/null 2>&1 && echo podman || echo 
 OUTPUT_DIR ?= $(shell pwd)
 OUTPUT_DIR := $(shell realpath $(OUTPUT_DIR))
 BUNDLE_FILENAME ?= data.json
+DATA_DIR ?= data
 PWD := $(shell pwd)
 GIT_COMMIT := $(shell git rev-parse HEAD)
 GIT_COMMIT_TIMESTAMP := $(shell git log -1 --format=%ct $(GIT_COMMIT))
@@ -22,7 +23,7 @@ bundle:
 	@$(CONTAINER_ENGINE) run --rm \
 		-v $(PWD)/schemas:/schemas:z \
 		-v $(PWD)/graphql-schemas:/graphql:z \
-		-v $(PWD)/data:/data:z \
+		-v $(PWD)/$(DATA_DIR):/data:z \
 		-v $(PWD)/resources:/resources:z \
 		$(VALIDATOR_IMAGE):$(VALIDATOR_IMAGE_TAG) \
 		qontract-bundler /schemas /graphql/schema.yml /data /resources $(GIT_COMMIT) $(GIT_COMMIT_TIMESTAMP) > $(OUTPUT_DIR)/$(BUNDLE_FILENAME)
@@ -50,6 +51,11 @@ server: schemas bundle validate run
 
 qr-promote:
 	@./hack/update-qr-tag.sh
+
+user-validator-promote:
+	@./hack/update-user-validator-tag.sh
+
+promote-all: qr-promote user-validator-promote
 
 update-schemas:
 	@./hack/update-schemas.sh
