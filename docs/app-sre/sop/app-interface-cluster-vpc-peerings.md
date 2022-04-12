@@ -98,3 +98,14 @@ To add a VPC peering between two OSDv4 clusters managed in app-interface, perfor
     In this case make sure, that this overwrite account it also listed in the `awsInfrastructureManagementAccounts` section of the accepter cluster with `accessLevel: network-mgmt`.
 
     * Right now, the account used for terraform activies, must also be mentioned via an `awsGroup` with `accessLevel: network-mgmt` in `awsInfrastructureAccess` - this will change with APPSRE-4397, when the source of truth for terraform user permissions will become `awsInfrastructureManagementAccounts`
+
+## Troubleshooting
+
+During reconciliation loop you might see error:
+
+```
+Error: Error finding route after creating it
+```
+
+This might relate to an [older bug](https://github.com/hashicorp/terraform-provider-aws/issues/12073) in the terraform aws provider (We are using 3.22).
+When you see this error, simply delete the affected routes manually from the routing table and wait for reconcile to re-provision the route.
