@@ -24,6 +24,8 @@ The only way to generate per-resource alerts is to do it based on data in app-in
 
 To generate per-resource alerts, one would need to use the `query` built-in function of openshift-resources (as documented [here](/README.md#manage-openshift-resources-via-app-interface-openshiftnamespace-1yml)) with a custom query. The templating should include logic to decide on the data to use according to the graphql query results.
 
+If you are creating an alert that will be routed via Jiralert to a tenant's board, include an `app` label with the app's name as listed in app-interface.
+
 Examples:
 1. [Generate Jiralert related AlertManager configuration](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/36052/diffs?commit_id=40070af0e0ac02b2b9067ce4aa123e55daa7943d)
 1. [Generate DVO alerts which are automatically routed to a tenant's jira board](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/36096/diffs?commit_id=d7ab037ad084fae6a81e9cc8e904388fe5b51a3a)
