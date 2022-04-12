@@ -11,12 +11,28 @@ spec:
   groups:
   - name: cloudwatch-exporter-templated.rules
     rules:
-    - alert: RDSPredictOutOfBurstBalance
+    {{%- for namespace in query('/queries/namespace-terraform-app-jira.graphql') %}}
+    {{%- if namespace.terraformResources %}}
+    {{%- for tfr in namespace.terraformResources %}}
+    {{%- if tfr.account in accounts_with_cloudwatch_exporter %}}
+    {{%- if tfr.provider == 'rds' %}}
+    - alert: RDSPredictOutOfBurstBalance-{{{ tfr.identifier }}}
       labels:
         service: app-sre-observability
+        app: {{{ namespace.app.name }}}
+        {{%- if ((namespace.app.onboardingStatus != 'OnBoarded') or ('stage' in namespace.name) or ('staging' in namespace.name) or ('integration' in namespace.name)) %}}
+        severity: medium
+        {{%- else %}}
         severity: high
-      expr: predict_linear(aws_rds_burst_balance_average{dbinstance_identifier!~".*-(?:stage|staging|integration).*"}[15m], 3600 * 9) <= 0
+        {{%- endif %}}
+        jiralert: {{{ namespace.app.escalationPolicy.channels.jiraBoard[0].name }}}
+      expr: predict_linear(aws_rds_burst_balance_average{dbinstance_identifier="{{{ tfr.identifier }}}"}[15m], 3600 * 9) <= 0
       for: 1h
       annotations:
-        message: "DB instance '{{ $labels.dbinstance_identifier }}' storage will be out of burst balance in 8 hours"
+        message: "DB instance '{{{ tfr.account }}}/{{ $labels.dbinstance_identifier }}' storage will be out of burst balance in 8 hours"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/sop/rds-burst-balance.md"
+    {{%- endif %}}
+    {{%- endif %}}
+    {{%- endfor %}}
+    {{%- endif %}}
+    {{%- endfor %}}
