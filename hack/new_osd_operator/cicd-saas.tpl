@@ -10,11 +10,8 @@ description: SaaS tracking file for {operator_name}
 app:
   $ref: /services/osd-operators/app.yml
 
-# TODO: kfischer
-#pipelinesProvider:
-#  $ref: /services/<service_name>/pipelines/<service_name>-pipelines.appsrep05ue1.yaml
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/osd-operators/pipelines/tekton.osd-operators-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
