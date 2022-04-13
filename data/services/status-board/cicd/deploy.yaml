@@ -22,6 +22,7 @@ managedResourceTypes:
 - Deployment
 - Service
 - ServiceAccount
+- ConfigMap
 
 imagePatterns:
 - quay.io/app-sre/status-board
@@ -60,3 +61,14 @@ resourceTemplates: # a list of configurations of OpenShift templates to deploy
       SENTRY_PROJECT: 1015
       SENTRY_URL: https://sentry.devshift.net
       REPLICAS: 3
+- name: status-board-dashboards
+  url: https://gitlab.cee.redhat.com/service/status-board
+  path: /dashboards
+  provider: directory
+  targets:
+    - namespace:
+        $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+      ref: main
+    - namespace:
+        $ref: /services/observability/namespaces/app-sre-observability-production.yml
+      ref: caecce2edc003043b6b20c8c4e8505863e8b71c2
