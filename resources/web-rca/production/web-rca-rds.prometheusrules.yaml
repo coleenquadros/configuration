@@ -13,15 +13,15 @@ spec:
     rules:
     - alert: RDSLowStorageSpace
       expr: |
-        aws_rds_free_storage_space_average{job=~"cloudwatch-exporter.*"} offset 10m < (1 * 1024^3)
+        aws_rds_free_storage_space_average{container="cloudwatch-exporter", dbinstance_identifier="web-rca-production", namespace="app-sre-observability-stage"} offset 10m < (1 * 1024^3)
       for: 30m
       labels:
         severity: info
         service: web-rca
-        env: production
+        namespace: app-sre-observability-stage
       annotations:
-        message: 'The current free storage space of DB instance {{ $labels.dbinstance_indicator }} is under 1 GB.'
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/web-rca/sops/web-rca-production-down.md"
+        message: 'The current free storage space of DB instance {{ $labels.dbinstance_identifier }} is under 1 GB.'
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/aws/aws-rds-resources.md#rdsstoragelow"
         dashboard: "https://grafana.app-sre.devshift.net/d/_7_Ul_07k/web-rca?orgId=1&var-datasource=app-sre-prod-04-prometheus"
     - alert: RDSOutOfStorageSoon
       expr: |
@@ -33,3 +33,5 @@ spec:
         env: production
       annotations:
         message: "DB instance {{ $labels.exported_instance }} is about to run out of storage within 2 weeks."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/aws/aws-rds-resources.md#rdsstoragelow"
+        dashboard: "https://grafana.app-sre.devshift.net/d/_7_Ul_07k/web-rca?orgId=1&var-datasource=app-sre-prod-04-prometheus"

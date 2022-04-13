@@ -24,3 +24,11 @@ AWS account associated to the instance
 ## Further info
 
 General Purpose EBS volumes are not straight forward to understand. The [storage section](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html) from the AWS RDS documentation is a great starting point. This [RDS blog entry](https://aws.amazon.com/es/blogs/database/understanding-burst-vs-baseline-performance-with-amazon-rds-and-gp2/) offers a lot of insights to get the full picture.
+
+## Notes
+
+This alert is being changed from a catch-all alert to a per-resource alert as part of https://issues.redhat.com/browse/APPSRE-4750:
+
+https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/36114
+
+The alert will cause a Jira ticket to be created on a tenant's board.

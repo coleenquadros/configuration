@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: osd-operators
@@ -10,8 +10,8 @@ description: SaaS tracking file for {operator_name}
 app:
   $ref: /services/osd-operators/app.yml
 
-instance:
-  $ref: /dependencies/ci-int/ci-int.yml
+pipelinesProvider:
+  $ref: /services/osd-operators/pipelines/tekton.osd-operators-pipelines.appsrep05ue1.yaml
 
 slack:
   workspace:
