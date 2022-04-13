@@ -1,5 +1,5 @@
 ---
-$schema: /app-sre/saas-file-1.yml
+$schema: /app-sre/saas-file-2.yml
 
 labels:
   service: osd-operators
@@ -10,6 +10,9 @@ description: SaaS tracking file for {operator_name}
 app:
   $ref: /services/osd-operators/app.yml
 
+# TODO: kfischer
+#pipelinesProvider:
+#  $ref: /services/<service_name>/pipelines/<service_name>-pipelines.appsrep05ue1.yaml
 instance:
   $ref: /dependencies/ci-int/ci-int.yml
 
