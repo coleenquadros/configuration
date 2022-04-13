@@ -31,5 +31,23 @@ spec:
         jiralert: {{{ app.escalationPolicy.channels.jiraBoard[0].name }}}
     {{%- endif %}}
     # end architectureDocument
+    # sopsUrl
+    {{%- if not url(app.sopsUrl) %}}
+    - alert: IncorrectMetadataSOPsUrl
+      annotations:
+        dashboard: ""
+        message: "We have identified that app {{{ app.name }}}, stored in app-interface under {{{ app.path }}} does not have a valid sopsUrl. The value we have found is {{{ app.sopsUrl }}}."
+        runbook: "Please correct this piece of information, which is part of the acceptance criteria for keeping this application supported by app-sre."
+        link_url: "https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/content/service/metadata.md"
+      expr: |
+        1
+      for: 1m
+      labels:
+        service: app-sre-contract
+        app: {{{ app.name }}}
+        severity: medium
+        jiralert: {{{ app.escalationPolicy.channels.jiraBoard[0].name }}}
+    {{%- endif %}}
+    # end sopsUrl
     {{%- endif %}}
     {{%- endfor %}}
