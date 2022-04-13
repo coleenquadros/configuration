@@ -1,0 +1,32 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: cloudwatch-exporter-tests-ns
+description: cloudwatch exporter test namespace
+
+cluster:
+  $ref: /openshift/test-cluster/cluster.yml
+
+app:
+  $ref: /services/cloudwatch-exporter-templates/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/test.yml
+
+openshiftResources:
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /observability/cloudwatch-exporter/prometheusrules/cloudwatch-exporter-templated.prometheusrules.yaml.j2
+  variables:
+    accounts_with_cloudwatch_exporter:
+    - test-account
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: test-account
+  identifier: cloudwatch-exporter-test
+  defaults: /path/to/resources/defaults/rds-1.yml
