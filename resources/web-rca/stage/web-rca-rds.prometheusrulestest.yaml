@@ -8,6 +8,28 @@ evaluation_interval: 10m
 
 tests:
 
+  - interval: 1m
+    input_series:
+      - series: aws_rds_free_storage_space_average{container="cloudwatch-exporter", dbinstance_identifier="web-rca-stage", namespace="app-sre-observability-stage"}
+        values: '2147483648+0x59 536870912+0x119' # 2Gb free for 1 hour then only 0.5 Gb free for next 2 hours
+    alert_rule_test:
+      - eval_time: 1h
+        alertname: RDSLowStorageSpace
+        exp_alerts:
+      - eval_time: 3h
+        alertname: RDSLowStorageSpace
+        exp_alerts:
+          - exp_labels:
+              container: cloudwatch-exporter
+              dbinstance_identifier: web-rca-stage
+              namespace: app-sre-observability-stage
+              service: web-rca
+              severity: info
+            exp_annotations:
+              message: 'The current free storage space of DB instance web-rca-stage is under 1 GB.'
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/aws/aws-rds-resources.md#rdsstoragelow"
+              dashboard: "https://grafana.app-sre.devshift.net/d/_7_Ul_07k/web-rca"
+
   # RDSOutOfStorageSoon
   - interval: 10m
     input_series:
@@ -34,3 +56,5 @@ tests:
             exp_annotations:
               link_url: 'https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=web-rca-stage;is-cluster=false;tab=monitoring'
               message: 'DB instance web-rca-stage is about to run out of storage within 2 weeks.'
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/aws/aws-rds-resources.md#rdsstoragelow"
+              dashboard: "https://grafana.app-sre.devshift.net/d/_7_Ul_07k/web-rca"

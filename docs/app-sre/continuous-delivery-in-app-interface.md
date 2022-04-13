@@ -22,25 +22,14 @@ This structure -
 
 In order to define Continuous Delivery pipelines in app-interface, define a SaaS file with the following structure -
 
-* `$schema` - should be `/app-sre/saas-file-1.yml` (Jenkins provider) or `/app-sre/saas-file-2.yml` (Tekton provider)
+* `$schema` - should be `/app-sre/saas-file-2.yml` (Tekton provider)
 * `labels` - a map of labels (currently not used by automation)
 * `name` - name of saas file (usually starts with `saas-` and contains the name of the deployed app/service/component)
 * `description` - description of the saas file (what is being deployed in this file)
 * `app` - a reference to the application that this deployment is a part of
     * reference an app file, usually located under `/data/services/<service_name>/`
-* `instance` - (v1 SaaS file) Jenkins instance where generated deployment jobs run
-    * options -
-        - /dependencies/ci-ext/ci-ext.yml
-        - /dependencies/ci-int/ci-int.yml
-    * what to choose?
-        * when in doubt, go with ci-int.
-        * use ci-int if -
-            - the deployed version of the service is considered sensitive information
-            - the manifests to be deployed are in a gitlab repository
-            - the manifests to be deployed are in a private github repository
-        * otherwise, use ci-ext
-* `pipelinesProvider` - (v2 SaaS file) A reference to a Pipelines Provider file created in a Tekton [bootstrap](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/tekton/tekton-howto.md#bootstrap) phase.
-* `deployResources` - For those v2 files handled by a Tekton provider, it sets requests and limits for the `qontract-reconcile` step of the Task deploying the manifests. This overrides resources set via the saas file associated pipelines provider.
+* `pipelinesProvider` - A reference to a Pipelines Provider file created in a Tekton [bootstrap](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/tekton/tekton-howto.md#bootstrap) phase.
+* `deployResources` - It sets requests and limits for the `qontract-reconcile` step of the Task deploying the manifests. This overrides resources set via the saas file associated pipelines provider.
    * `requests`: Task step requests
        - `cpu`: cpu requests
        - `memory`: memory requests
@@ -99,9 +88,7 @@ In order to define Continuous Delivery pipelines in app-interface, define a SaaS
                 * or any other script that should run prior to deployment
                 * see [Continuous Integration in App-interface](/docs/app-sre/continuous-integration-in-app-interface.md) for more details
             * use this option only with a `ref` which is a branch (such as `master` or `main`). using it with a commit sha is not valid.
-            - (v1 SaaS file) name of Jenkins job to build after.
-                *  the `instance` should match the one where the upstream job runs.
-            - (v2 SaaS file) instance reference and job name to build after:
+            - instance reference and job name to build after:
                 * `instance` - reference to Jenkins instance where upstream job exists
                 * `name` - name of the Jenkins job to use as upstream
         * `disable` - (optional) if set to `true`, target will be skipped during deployment.
@@ -153,18 +140,6 @@ Every saas file contains a list of resources to deploy, and each resource contai
 For v1 SaaS files, A Jenkins job will be automatically created for each saas file and for each environment.  Each job executes an app-interface integration called `openshift-saas-deploy` for the specific saas file and environment.  The output will be similar to output you see in other app-interface integrations.
 
 For v2 SaaS files, A generic Tekton Pipeline will be automatically created in the pipelines namespace ([bootstrap tekton](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/tekton/tekton-howto.md#bootstrap)). A Tekton PipelineRun will be created (deployment will be triggered) for each saas file and for each environment.  Each run executes an app-interface integration called `openshift-saas-deploy` for the specific saas file and environment.  The output will be similar to output you see in other app-interface integrations.
-
-## Migrating from saas-file-1 (Jenkins provider) to saas-file-2 (Tekton-provider)
-
-Follow the migration instructions in https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/tekton/tekton-howto.md#migration
-
-## Triggering jobs in Jenkins
-
-Whenever changes are detected for an environment, a saas file, a resource template or a target, the corresponding Jenkins job will be triggered automatically.
-
-To trigger a job manually, log in to Jenkins and hit "Build".
-
-Jobs are not being triggered? [follow this SOP](/docs/app-sre/sop/app-interface-saas-deploy-triggers-debug.md)
 
 ## Triggering PipelineRuns in Tekton
 

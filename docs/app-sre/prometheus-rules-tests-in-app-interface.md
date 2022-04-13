@@ -13,7 +13,7 @@
 
 We rely on Prometheus to generate alerts for our service using expressions that are difficult to test in real world as they are dependent on very specific conditions or that don't do what you expect. Luckily Prometheus developers have recognized this and [unit tests](https://prometheus.io/docs/prometheus/latest/configuration/unit_testing_rules/) can be written for Prometheus alert and recording rules.
 
-In app-interface the prometheus rules that have the `/openshift/prometheus-rule-1.yml` schema will be validated using the `promtool check rules` command which will use the tests that have the `/app-interface/prometheus-rule-test-1.yml` schema.  These tests will be run using the `promtool test rules` command. e.g. rules in [cloudwatch-exporter.prometheusrules.yaml](resources/observability/prometheusrules/cloudwatch-exporter.prometheusrules.yaml) are tested in the [cloudwatch-exporter.prometheusrulestests.yaml](resources/observability/prometheusrules/cloudwatch-exporter.prometheusrulestests.yaml) file.
+In app-interface the prometheus rules that have the `/openshift/prometheus-rule-1.yml` schema will be validated using the `promtool check rules` command which will use the tests that have the `/app-interface/prometheus-rule-test-1.yml` schema.  These tests will be run using the `promtool test rules` command. e.g. rules in [cloudwatch-exporter.prometheusrules.yaml](resources/observability/cloudwatch-exporter/prometheusrules/cloudwatch-exporter.prometheusrules.yaml) are tested in the [cloudwatch-exporter.prometheusrulestests.yaml](resources/observability/cloudwatch-exporter/prometheusrules/cloudwatch-exporter.prometheusrulestests.yaml) file.
 
 ## The test runner
 

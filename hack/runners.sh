@@ -140,9 +140,12 @@ run_user_validator() {
     -e GRAPHQL_USERNAME=${GRAPHQL_USERNAME} \
     -e GRAPHQL_PASSWORD=${GRAPHQL_PASSWORD} \
     -e GITHUB_API=${GITHUB_API} \
+    -e RUNNER_USE_FEATURE_TOGGLE=true \
     -e VAULT_ADDR=https://vault.devshift.net \
     -e VAULT_AUTHTYPE=approle \
     -e VAULT_ROLE_ID=${USER_VALIDATOR_ROLE_ID} \
+    -e UNLEASH_API_URL=$UNLEASH_API_URL \
+    -e UNLEASH_CLIENT_ACCESS_TOKEN=$UNLEASH_CLIENT_ACCESS_TOKEN \
     -e VAULT_SECRET_ID=${USER_VALIDATOR_SECRET_ID} \
     -e USER_VALIDATOR_INVALID_USERS='/teams/insights/users/abakshi.yml,/teams/sd-ops-dev/users/sreaves.yml,/teams/quay/users/hdonnay.yml,/teams/sd-sre/users/drow.yml,/teams/insights/users/mlahane.yml,/teams/sd-ops-dev/users/mpovolny.yml,/teams/insights/users/ccx/dpensier.yml,/teams/devtools/users/sbryzak.yml,/teams/insights/users/khowell.yml,/teams/che/users/skabashn.yml,/teams/managed-services/users/stian.yml,/teams/insights/users/opacut.yml' \
     ${USER_VALIDATOR_IMAGE}:${USER_VALIDATOR_IMAGE_TAG} validate \

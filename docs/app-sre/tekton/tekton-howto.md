@@ -190,15 +190,3 @@ We store two metrics that deal with Pipeline duration:
 They store the values related to the last run. See https://tekton.dev/docs/pipelines/metrics/ for details about these metrics and the [TektonConfig](/resources/tekton/config.tektonconfig.yaml) object to understand exactly what we are storing in terms of Pipeline Duration.
 
 Tekton duration metrics are federated from the internal prometheus OSD instance via additional scrape config in [resources/observability/prometheus](/resources/observability/prometheus).
-
-### Migration
-
-Perform the following actions in a separate MR from the bootstrap MR:
-
-1. Change the SaaS file schema from `saas-file-1` to `saas-file-2`.
-2. Replace the `instance` section with a `pipelinesProvider` as described in the Usage section.
-3. Replace every `upstream` field with an `upstream` section:
-    * `instance` - reference to Jenkins instance where upstream job exists
-    * `name` - name of the Jenkins job to use as upstream (deploy upon build success)
-
-Note: to receive Slack notifications, invite @app-sre-bot to the channel specified in the slack section of the SaaS file.
