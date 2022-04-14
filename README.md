@@ -2671,6 +2671,8 @@ This check can be automated by adding an execution of the gitlab-fork-compliance
 
 Here is an example: https://gitlab.cee.redhat.com/mk-ci-cd/kafka-storage-expansions/-/merge_requests/17
 
+Consider creating a gitlab group for your team to use with this feature. No gitlab group? Just use `app-sre` (the bot will be added to the fork, which is the important part)
+
 > Note: If you are using a custom Jenkins job template, you should add the `gitlab_fork_compliance_reconcile_toml` secret. Here is an [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/resources/jenkins/managed-services/job-templates.yaml#L529).
 
 ### Provision and consume Kafka clusters via KAS Fleet Manager
