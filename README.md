@@ -2665,6 +2665,14 @@ codeComponents:
 ...
 ```
 
+The functionality of the gitlab-housekeeping feature depends on the @devtools-bot gitlab user added as a Maintainer to every fork of the repository.
+
+This check can be automated by adding an execution of the gitlab-fork-compliance integration to the repository's pr-check script.
+
+Here is an example: https://gitlab.cee.redhat.com/mk-ci-cd/kafka-storage-expansions/-/merge_requests/17
+
+> Note: If you are using a custom Jenkins job template, you should add the `gitlab_fork_compliance_reconcile_toml` secret. Here is an [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/resources/jenkins/managed-services/job-templates.yaml#L529).
+
 ### Provision and consume Kafka clusters via KAS Fleet Manager
 
 Provisioning Kafka managed clusters through the Kafka Service Fleet Manager can be self-serviced via app-interface.
