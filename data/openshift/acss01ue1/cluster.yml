@@ -1,0 +1,78 @@
+---
+$schema: /openshift/cluster-1.yml
+
+labels:
+  service: acs
+
+name: acss01ue1
+description: acss01ue1 cluster
+consoleUrl: ''
+kibanaUrl: ''
+prometheusUrl: ''
+alertmanagerUrl: ''
+serverUrl: ''
+elbFQDN: ''
+
+auth:
+  service: github-org-team
+  org: app-sre
+  team: acss01ue1-cluster
+
+ocm:
+  $ref: /dependencies/ocm/production.yml
+
+managedGroups:
+- dedicated-admins
+
+spec:
+  provider: aws
+  region: us-east-1
+  channel: fast
+  version: 4.10.9
+  initial_version: 4.10.9-fast
+  multi_az: false
+  nodes: 4
+  # autoscale: # optional. nodes should not be defined if autoscale is defined
+  #   min_replicas: (desired minimal count of compute nodes todal across all AZs)
+  #   max_replicas: (desired maximal count of compute nodes todal across all AZs)
+  instance_type: m5.xlarge
+  storage: 600
+  load_balancers: 0
+  private: false
+  # provision_shard_id: (optional) specify hive shard ID to create the cluster in (IDs can be found in the uhc-production namespace file)
+  disable_user_workload_monitoring: true
+
+upgradePolicy:
+  workloads: [acs]
+  schedule: '0 09 * * 1-5'
+  conditions:
+    soakDays: 0
+
+network:
+  type: OVNKubernetes
+  vpc: 10.21.0.0/16 
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
+
+automationToken:
+  path: app-sre/creds/kube-configs/acss01ue1
+  field: token
+
+addons:
+- $ref: /dependencies/ocm/addons/cluster-logging-operator.yml
+
+internal: false
+
+awsInfrastructureAccess:
+- awsGroup:
+    $ref: /aws/app-sre-stage/groups/App-SRE-admin.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/app-sre-stage/groups/App-SRE-admin.yml
+  accessLevel: network-mgmt
+
+awsInfrastructureManagementAccounts:
+- account:
+    $ref: /aws/app-sre-stage/account.yml
+  accessLevel: network-mgmt
+  default: true
