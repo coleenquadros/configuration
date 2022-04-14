@@ -15,7 +15,7 @@ spec:
     {{%- for namespace in cluster.namespaces %}}
     {{%- if not namespace.name.startswith('openshift-') %}}
     # deployment_validation_operator_default_service_account
-    - alert: deployment_validation_operator_default_service_account-{{{ namespace.name }}}
+    - alert: deployment_validation_operator_default_service_account
       annotations:
         dashboard: "https://grafana.app-sre.devshift.net/d/dashdotdb/dash-db?orgId=1&var-datasource=dashdotdb-rds&var-cluster={{{ resource.namespace.cluster.name }}}&var-namespace={{{ namespace.name }}}"
         message: "deployment_validation_operator_default_service_account Validation error for {{{ namespace.app.name }}}: {{ $labels.check_description }}"
@@ -25,6 +25,7 @@ spec:
       for: 1m
       labels:
         service: deployment-validation-operator
+        app: {{{ namespace.app.name }}}
         severity: medium
         jiralert: {{{ namespace.app.escalationPolicy.channels.jiraBoard[0].name }}}
     {{%- endif %}}
