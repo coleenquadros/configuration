@@ -1,0 +1,60 @@
+---
+$schema: /app-sre/app-1.yml
+
+
+labels:
+  service: app-interface
+
+name: vault-manager
+
+description: |
+  vault-manager is an automation tool for managing HashiCorp Vault configurations based on Vault GO API Client
+
+parentApp:
+  $ref: /services/app-interface/app.yml
+
+architectureDocument: https://TODO
+sopsUrl: https://gitlab.cee.redhat.com/TODO
+grafanaUrls:
+- title: TODOREPLACE
+  url: https://TODO
+onboardingStatus: OnBoarded
+
+escalationPolicy:
+  $ref: /teams/app-sre/escalation-policies/general.yaml
+serviceOwners:
+- name: App-SRE Team
+  email: sd-app-sre@redhat.com
+
+dependencies:
+- $ref: /dependencies/ci-ext/service.yml
+- $ref: /dependencies/github/service.yml
+- $ref: /dependencies/quay/service.yml
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/app-sre.yml
+  items:
+  - name: vault-manager
+    description: 'an automation tool for managing HashiCorp Vault configurations'
+    public: true
+  - name: keycloak-config-cli
+    description: 'Mirror of docker.io/adorsys/keycloak-config-cli for vault-manager integration tests'
+    public: false
+    mirror:
+      $ref: /dependencies/image-mirrors/docker.io/adorsys/keycloak-config-cli.yml
+
+gcrRepos:
+- project:
+    $ref: /dependencies/gcp/app-sre.yml
+  items:
+  - name: vault-manager
+    description: ''
+    public: true
+    mirror:
+      $ref: /dependencies/image-mirrors/quay.io/app-sre/vault-manager.yml
+
+codeComponents:
+- name: vault-manager
+  resource: upstream
+  url: https://github.com/app-sre/vault-manager
