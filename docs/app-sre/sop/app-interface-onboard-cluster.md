@@ -1,13 +1,13 @@
 <!-- TOC -->
 
 - [Onboard a new OSDv4 cluster to app-interface](#onboard-a-new-osdv4-cluster-to-app-interface)
-  - [Step 1 - Cluster creation and initial access for dedicated-admins](#step-1---cluster-creation-and-initial-access-for-dedicated-admins)
-  - [Step 2 - Bot access and App SRE project template](#step-2---bot-access-and-app-sre-project-template)
-  - [Step 3 - Observability](#step-3---observability)
-  - [Step 4 - Operator Lifecycle Manager](#step-4---operator-lifecycle-manager)
-  - [Step 5 - Container Security Operator](#step-5---container-security-operator)
-  - [Step 6 - Deployment Validation Operator (DVO)](#step-6---deployment-validation-operator-dvo)
-  - [Step 7 - Obtain cluster-admin](#step-7---obtain-cluster-admin)
+  - [Step 1 - Cluster creation and initial access for dedicated-admins](#step-1-cluster-creation-and-initial-access-for-dedicated-admins)
+  - [Step 2 - Bot access and App SRE project template](#step-2-bot-access-and-app-sre-project-template)
+  - [Step 3 - Observability](#step-3-observability)
+  - [Step 4 - Operator Lifecycle Manager](#step-4-operator-lifecycle-manager)
+  - [Step 5 - Container Security Operator](#step-5-container-security-operator)
+  - [Step 6 - Deployment Validation Operator (DVO)](#step-6-deployment-validation-operator-dvo)
+  - [Step 7 - Obtain cluster-admin](#step-7-obtain-cluster-admin)
 - [Additional configurations](#additional-configurations)
   - [Selecting a Machine CIDR for VPC peerings](#selecting-a-machine-cidr-for-vpc-peerings)
   - [VPC peering with app-interface](#vpc-peering-with-app-interface)
@@ -326,7 +326,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
     hack/cluster_provision.py create-obs-dns-records <cluster>
     ```
 
-2. Enable `openshift-customer-monitoring`:
+1. Enable `openshift-customer-monitoring`:
     As of OpenShift 4.6.17, UWM (user-workload-monitoring) is enabled by default on OSD, replacing `openshift-customer-monitoring`. App-SRE still uses `openshift-customer-monitoring` and as such we need to disable UWM for us so we can use the current monitoring configs as described below. This is done through the OCM console (Settings -> uncheck "Enable user workload monitoring" -> Save).
 
     **`user-workload-monitoring` is disabled automatically by ocm_clusters integration. If you created the cluster through app-interface it should be already disabled**
@@ -347,15 +347,9 @@ At this point you should be able to access the cluster via the console / `oc` cl
     * If the cluster is not private, it adds the `app-sre-observability-per-cluster` namespace to the target namespaces in [saas-openshift-acme.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-sre/cicd/ci-int/saas-openshift-acme.yaml) to deploy openshift-acme.
         * Note: A private cluster can not use openshift-acme since it is not exposed to the public internet. Routes should still work, but the certificate will be invalid.
 
-3. Add the new grafana datasources for the new cluster:
-  [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/667dde06bb4c2b27656791ca05d5b7ba47b9d432/resources/observability/grafana/grafana-datasources.secret.yaml#L13-42)
-  You can do that with this command:
-  ```bash
-  hack/cluster_provision.py create-obs-grafana-datasources <cluster>
-  ```
   **Double check the changes introduced, the destination file could have been modified with manual changes**
 
-4. Configure a [deadmanssnitch](https://deadmanssnitch.com/) snitch for the new cluster. The snitch settings should be as follow:
+1. Configure a [deadmanssnitch](https://deadmanssnitch.com/) snitch for the new cluster. The snitch settings should be as follow:
     - Name: prometheus.<cluster_name>.devshift.net
     - Alert type: Basic
     - Interval: 15 min
@@ -363,11 +357,11 @@ At this point you should be able to access the cluster via the console / `oc` cl
     - Alert email: sd-app-sre@redhat.com
     - Notes: Runbook: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/prometheus/prometheus-deadmanssnitch.md
 
-5. Add the deadmanssnitch URL to this secret in Vault: https://vault.devshift.net/ui/vault/secrets/app-sre/show/integrations-input/alertmanager-integration
+1. Add the deadmanssnitch URL to this secret in Vault: https://vault.devshift.net/ui/vault/secrets/app-sre/show/integrations-input/alertmanager-integration
     - key: `deadmanssnitch-<cluster_name>-url`
     - value: the `Unique Snitch URL` from deadmanssnitch
 
-6. **IMPORTANT**: Merge the changes and check that the integrations have ran successfully. Check that `https://<prometheus|alertmanager>.<cluster_name>.devshift.net` have valid ssl certificates by accessing the URLs. If no security warning is given and the connection is secure as notified by the browser.
+1. **IMPORTANT**: Merge the changes and check that the integrations have ran successfully. Check that `https://<prometheus|alertmanager>.<cluster_name>.devshift.net` have valid ssl certificates by accessing the URLs. If no security warning is given and the connection is secure as notified by the browser.
 
 ## Step 4 - Operator Lifecycle Manager
 
