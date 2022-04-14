@@ -117,6 +117,7 @@ this repository.
     - [Enable Gitlab Features on an App Interface Controlled Gitlab Repository](#enable-gitlab-features-on-an-app-interface-controlled-gitlab-repository)
     - [Provision and consume Kafka clusters via KAS Fleet Manager](#provision-and-consume-kafka-clusters-via-kas-fleet-manager)
     - [Write and run Prometheus rules tests](#write-and-run-prometheus-rules-tests)
+    - [How to offboard/delete a service](#how-to-offboard-delete-a-service)
   - [Design](#design)
   - [Developer Guide](#developer-guide)
   - [Quay Documentation](#quay-documentation)
@@ -2708,6 +2709,15 @@ This will result in a Secret being created in the consuming namespace. The Secre
 ### Write and run Prometheus rules tests
 
 Please follow [this guide](/docs/app-sre/prometheus-rules-tests-in-app-interface.md) to know to do it.
+
+### How to offboard/delete a service
+
+This process can be done in two ways. 
+* Method one
+  * Open the first MR in app-interface to delete each target in the saas file for your related service. See [Delete target from SaaS file](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/FAQ.md#delete-target-from-saas-file) for a deeper explanation and example.
+  * Once that MR is merged, you can open a second MR in app-interface to add the line `delete: true` within the namespace file.
+* Method two
+  * Open a MR to add the line `delete: true` on the related namespace file and delete the targets from the saas file.
 
 ## Design
 
