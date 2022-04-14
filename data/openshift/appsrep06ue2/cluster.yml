@@ -1,9 +1,7 @@
 ---
 $schema: /openshift/cluster-1.yml
-
 labels:
   service: app-sre
-
 name: appsrep06ue2
 description: app-sre OSDv4 production cluster
 consoleUrl: https://console-openshift-console.apps.appsrep06ue2.ohlz.p1.openshiftapps.com
@@ -12,31 +10,26 @@ serverUrl: https://api.appsrep06ue2.ohlz.p1.openshiftapps.com:6443
 elbFQDN: elb.apps.appsrep06ue2.ohlz.p1.openshiftapps.com
 prometheusUrl: https://prometheus.appsrep06ue2.devshift.net
 alertmanagerUrl: https://alertmanager.appsrep06ue2.devshift.net
-
 auth:
   service: github-org-team
   org: app-sre
   team: appsrep06ue2-cluster
-
 observabilityNamespace:
   $ref: /services/observability/namespaces/openshift-customer-monitoring.appsrep06ue2.yml
-
 ocm:
   $ref: /dependencies/ocm/production.yml
-
 managedGroups:
 - dedicated-admins
 # - dedicated-readers
 
 managedClusterRoles: true
-
 spec:
   id: 1p3kqdl7bohtrc3081o14svr5bclceno
   external_id: e7b30599-7ca0-4da7-bac4-bfbd679700fb
   provider: aws
   region: us-east-2
-  channel: stable
-  version: 4.9.21
+  channel: fast
+  version: 4.10.9
   initial_version: 4.9.10
   multi_az: true
   nodes: 9
@@ -46,38 +39,33 @@ spec:
   private: false
   provision_shard_id: de4b0632-dca7-11ea-b3b9-8c1645a911be
   disable_user_workload_monitoring: true
-
 upgradePolicy:
   workloads:
   - ocm
   schedule: 0 14 * * 1,3
   conditions:
-    soakDays: 18
+    soakDays: 1000
+    mutexes:
+    - ocm-quay-critical
 
 network:
   vpc: 10.121.0.0/16
   service: 172.30.0.0/16
   pod: 10.128.0.0/14
-
 automationToken:
   path: app-sre/creds/kube-configs/appsrep06ue2
   field: token
-
 clusterAdminAutomationToken:
   path: app-sre/creds/kube-configs/appsrep06ue2-cluster-admin
   field: token
-
 internal: false
-
 addons:
 - $ref: /dependencies/ocm/addons/cluster-logging-operator.yml
-
 awsInfrastructureManagementAccounts:
 - account:
     $ref: /aws/app-sre/account.yml
   accessLevel: network-mgmt
   default: true
-
 awsInfrastructureAccess:
 - awsGroup:
     $ref: /aws/app-sre/groups/App-SRE-admin.yml

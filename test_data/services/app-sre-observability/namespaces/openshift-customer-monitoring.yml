@@ -1,0 +1,27 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: openshift-customer-monitoring
+description: App-SRE OpenShift Application monitoring
+
+cluster:
+  $ref: /openshift/aws-resources/cluster.yml
+
+app:
+  $ref: /services/app-sre-observability/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/test.yml
+
+managedResourceTypes:
+- PrometheusRule
+
+openshiftResources:
+  - provider: resource-template
+    type: extracurlyjinja2
+    path: /services/app-sre-observability/rds-approved-versions.prometheusrules.yaml.j2
+    variables:
+      accounts_with_aws_resource_exporter:
+        - test

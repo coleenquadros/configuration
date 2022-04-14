@@ -1,0 +1,56 @@
+---
+$schema: /app-sre/app-1.yml
+
+labels:
+  service: ocm
+
+name: osd-fleet-manager
+
+description: |
+  OSD fleet manager runs alongside AMS/CS and other SD projects.
+  It is responsible for the creation, configuration, and scaling of management and service clusters, including the installation of required add-ons/operators.
+
+parentApp:
+  $ref: /services/ocm/app.yml
+
+architectureDocument: https://docs.google.com/document/d/1c-zVWINCIcDgA9g_ZqncF4CrmhAGLhERRkzFq74e_o4
+sopsUrl: https://TODO
+grafanaUrls:
+- title: OSD Fleet Manager
+  url: https://TODO
+onboardingStatus: InProgress
+
+serviceOwners:
+- name: SDA team
+  email: sda-devel@redhat.com
+
+escalationPolicy:
+  $ref: /teams/ocm/escalation-policies/sda.yaml
+
+dependencies:
+- $ref: /dependencies/aws/service.yml
+- $ref: /dependencies/ci-int/service.yml
+- $ref: /dependencies/gitlab/service.yml
+- $ref: /dependencies/quay/service.yml
+- $ref: /dependencies/openshift/service.yml
+- $ref: /dependencies/sso/service.yml
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/app-sre.yml
+  teams:
+  - permissions:
+    - $ref: /dependencies/quay/permissions/quay-membership-app-sre-uhc.yml
+    - $ref: /dependencies/quay/permissions/quay-membership-app-sre-prodsec.yml
+    role: read
+  items:
+  - name: osd-fleet-manager
+    public: false
+    description: OSD Fleet Manager images
+
+codeComponents:
+- name: osd-fleet-manager
+  resource: upstream
+  url: https://gitlab.cee.redhat.com/service/osd-fleet-manager
+  jira:
+    $ref: /dependencies/jira/issues-redhat-com.yaml
