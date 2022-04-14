@@ -28,6 +28,20 @@ spec:
         app: {{{ namespace.app.name }}}
         severity: medium
         jiralert: {{{ namespace.app.escalationPolicy.channels.jiraBoard[0].name }}}
+    # deployment_validation_operator_drop_net_raw_capability
+    - alert: deployment_validation_operator_drop_net_raw_capability
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/dashdotdb/dash-db?orgId=1&var-datasource=dashdotdb-rds&var-cluster={{{ resource.namespace.cluster.name }}}&var-namespace={{{ namespace.name }}}"
+        message: "deployment_validation_operator_drop_net_raw_capability Validation error for {{{ namespace.app.name }}}: {{ $labels.check_description }}"
+        runbook: "{{ $labels.check_remediation }}"
+      expr: |
+        deployment_validation_operator_drop_net_raw_capability{exported_namespace="{{{ namespace.name }}}"} > 0
+      for: 1m
+      labels:
+        service: deployment-validation-operator
+        app: {{{ namespace.app.name }}}
+        severity: medium
+        jiralert: {{{ namespace.app.escalationPolicy.channels.jiraBoard[0].name }}}
     {{%- endif %}}
     {{%- endfor %}}
     {{%- endfor %}}
