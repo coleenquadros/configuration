@@ -259,6 +259,15 @@ Lastly add the created admin group and policy to the [app-sre.yml](https://gitla
 
 Once the MR is merged with all the above changes, AppSRE members should receive e-mails with credentials to log into the AWS account.  The integration to watch for users to be added is the `terraform-users` integration.
 
+### Deploy aws-resource-exporter, cloudwatch-exporter, and others
+
+There are some metric exporters and alerts that need to be enabled on a per-account basis. Please see the notes below.
+
+* [aws-resource-exporter](/data/services/observability/cicd/saas/saas-aws-resource-exporter.yaml) - if there will be AWS resources that we care about in the account, particularly RDS instances, then add the account to this file
+  * To enable alerts associated with `aws-resource-exporter`, search app-interface for `accounts_with_aws_resource_exporter` and add the account to the list as appropriate 
+* [cloudwatch-exporter](/data/services/observability/cicd/saas/saas-cloudwatch-exporter.yaml) - if there will be AWS resources that we care about having metrics available for alerting, again RDS instances in particular, then add the account to this file
+  * To enable alerts associated with `cloudwatch-exporter`, search app-interface for `accounts_with_cloudwatch_exporter` and add the account to the list as appropriate
+
 ## Delete the original user account
 
 After you have received your automated email, decrypted the contents, logged into the AWS console, and updated your password, you are almost done! (In case you did not receive an invitation email, read [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/aws/aws-management-console.md#how-do-i-sign-into-the-aws-management-console-for-the-first-time)).
