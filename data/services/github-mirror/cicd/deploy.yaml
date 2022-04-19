@@ -1,23 +1,17 @@
 ---
 $schema: /app-sre/saas-file-2.yml
-
 labels:
   service: github-mirror
-
 name: saas-github-mirror
 description: SaaS tracking file for GitHub Mirror
-
 app:
   $ref: /services/github-mirror/app.yml
-
 pipelinesProvider:
   $ref: /services/github-mirror/pipelines/tekton.github-mirror-pipelines.app-sre-prod-01.yaml
-
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
   channel: sd-app-sre-info
-
 managedResourceTypes:
 - Deployment
 - Service
@@ -29,7 +23,6 @@ imagePatterns:
 
 parameters:
   GITHUB_USERS: app-sre-bot:cs-sre-bot:InsightsDroid:sre-platform-bot:app-sre-trigger-bot:app-sre-fedramp-bot
-
 resourceTemplates:
 - name: github-mirror
   url: https://github.com/app-sre/github-mirror
@@ -45,7 +38,6 @@ resourceTemplates:
     parameters:
       GITHUB_MIRROR_URL: https://github-mirror.stage.devshift.net
       EC_SECRET_NAME: ghmirror-elasticache-stage
-      # READER_ENDPOINT: master.ghmirror-redis.huo5rn.use1.cache.amazonaws.com
       REPLICAS: 3
     secretParameters:
     - name: READER_ENDPOINT
@@ -57,7 +49,7 @@ resourceTemplates:
       - github-mirror-stage-deploy-success-channel
   - namespace:
       $ref: /services/github-mirror/namespaces/github-mirror-production.yaml
-    ref: a3e69704c8ede0fa405227ce8da40f5260fa5373
+    ref: 181719873a6baf7a58ba8666b9f4f862b0e0386b
     promotion:
       auto: true
       subscribe:
@@ -66,15 +58,13 @@ resourceTemplates:
       - channel: github-mirror-stage-post-deploy-tests-success-channel
         data:
         - parent_saas: saas-github-mirror-test
-          target_config_hash: 7cf976e1e5649caa
+          target_config_hash: d6dd0bd07c4d33f4
           type: parent_saas_config
     parameters:
       GITHUB_MIRROR_URL: https://github-mirror.devshift.net
       EC_SECRET_NAME: ghmirror-elasticache-production
-      # use dedicated reader endpoint if cluster size > 2
       READER_ENDPOINT: replica.ghmirror-redis-production.huo5rn.use1.cache.amazonaws.com
       REPLICAS: 5
-
 - name: github-mirror-dashboards
   url: https://github.com/app-sre/github-mirror
   path: /dashboards
@@ -89,7 +79,7 @@ resourceTemplates:
       name: app-sre-github-mirror-gh-build-master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: a3e69704c8ede0fa405227ce8da40f5260fa5373
+    ref: 181719873a6baf7a58ba8666b9f4f862b0e0386b
     promotion:
       auto: true
       subscribe:
@@ -98,5 +88,5 @@ resourceTemplates:
       - channel: github-mirror-stage-post-deploy-tests-success-channel
         data:
         - parent_saas: saas-github-mirror-test
-          target_config_hash: 7cf976e1e5649caa
+          target_config_hash: d6dd0bd07c4d33f4
           type: parent_saas_config
