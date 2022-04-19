@@ -117,7 +117,7 @@ this repository.
     - [Enable Gitlab Features on an App Interface Controlled Gitlab Repository](#enable-gitlab-features-on-an-app-interface-controlled-gitlab-repository)
     - [Provision and consume Kafka clusters via KAS Fleet Manager](#provision-and-consume-kafka-clusters-via-kas-fleet-manager)
     - [Write and run Prometheus rules tests](#write-and-run-prometheus-rules-tests)
-    - [How to offboard/delete a service](#how-to-offboard-delete-a-service)
+    - [How to offboard/delete a service](#how-to-offboarddelete-a-service)
   - [Design](#design)
   - [Developer Guide](#developer-guide)
   - [Quay Documentation](#quay-documentation)
