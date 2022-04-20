@@ -30,18 +30,6 @@ Dedicated admins have a restricted set of permissions on the openshift-customer-
 
 The most accurate permissions set can be found in the [OSD role configuration](https://github.com/aditya-konarde/managed-cluster-config/blob/master/deploy/osd-customer-monitoring/05-role.yaml)
 
-Noteworthy limitations:
-
-You can only create secrets named:
-  
-- alertmanager-main
-- alertmanager-main-proxy
-- prometheus-additional-scrape-config
-- prometheus-additional-alertmanager-config
-- alertmanager-instance
-- prometheus-auth-proxy
-- alertmanager-auth-proxy
-
 ### Some pitfalls
 
 - Due to the limitations in RBAC, we can only have a single alertmanager cluster in the namespace, and the alertmanager CR must be named `instance`. We're also only allowed to manage the corresponding configuration secret called `alertmanager-instance` that the Prometheus operator expects

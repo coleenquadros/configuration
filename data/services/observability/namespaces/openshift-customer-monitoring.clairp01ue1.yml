@@ -20,18 +20,6 @@ managedResourceTypes:
 - PrometheusRule
 - ServiceMonitor
 
-managedResourceNames:
-# https://github.com/openshift/managed-cluster-config/blob/master/deploy/osd-customer-monitoring/05-role.yaml#L24-L37
-- resource: Secret
-  resourceNames:
-    - alertmanager-auth-proxy
-    - alertmanager-instance
-    - alertmanager-main
-    - alertmanager-main-proxy
-    - prometheus-additional-alertmanager-config
-    - prometheus-additional-scrape-config
-    - prometheus-auth-proxy
-
 openshiftResources:
 # Observability
 
