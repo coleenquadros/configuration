@@ -241,9 +241,10 @@ data:
                   # specific path.
                   - name: service
                     match:
-                      prefix: /api/service_mgmt/v1/service
+                      prefix: /api/service_mgmt/v1/services
                     route:
                       cluster: backend
+                      timeout: 300s
                       rate_limits:
                       - actions:
                         - generic_key:
@@ -256,6 +257,7 @@ data:
                     match:
                       prefix: /
                     route:
+                      timeout: 300s
                       cluster: backend
 
               http_filters:
@@ -265,7 +267,7 @@ data:
               - name: envoy.filters.http.ratelimit
                 typed_config:
                   "@type": type.googleapis.com/envoy.extensions.filters.http.ratelimit.v3.RateLimit
-                  domain: production:service_mgmt
+                  domain: stage:service_mgmt
                   failure_mode_deny: false
                   timeout: 0.05s
                   rate_limit_service:
@@ -294,9 +296,22 @@ data:
                       kind: "Error"
                       id: "429"
                       href: "/api/service_mgmt/v1/errors/429"
-                      code: "OCM-CA-429"
+                      code: "OCM-MS-429"
                       reason: "Too Many Requests"
-
+                  - filter:
+                    status_code_filter:
+                      comparison:
+                        op: EQ
+                        value:
+                          default_value: 504
+                          runtime_key: none
+                  body_format_override:
+                    json_format:
+                      kind: "Error"
+                      id: "504"
+                      href: "/api/service_mgmt/v1/errors/504"
+                      code: "OCM-MS-504"
+                      reason: "Gateway Timeout"
       # This listener is used to process outbound API requests.
       - name: egress
         address:
@@ -351,4 +366,3 @@ data:
 
               http_filters:
               - name: envoy.filters.http.router
-
