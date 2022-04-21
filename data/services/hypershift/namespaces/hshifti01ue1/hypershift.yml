@@ -27,3 +27,26 @@ openshiftResources:
 
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.hshifti01ue1.yml
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: aws-iam-service-account
+  account: app-sre-stage
+  identifier: hypershift-hshifti01ue1-private-link
+  user_policy:
+    {
+      "Version": "2012-10-17",
+      "Statement": [{
+        "Action": [
+          "sts:AssumeRole"
+        ],
+        "Effect": "Allow",
+        "Resource": "*"
+      }]
+    }
+  output_resource_name: hypershift-private-link-creds
+  aws_infrastructure_access:
+    cluster:
+      $ref: /openshift/hshifti01ue1/cluster.yml
+    access_level: network-mgmt
