@@ -21,7 +21,7 @@ spec:
       # This expression uses a regex that matches any engine_versions that don't match the approved versions documented here: https://gitlab.cee.redhat.com/service/app-interface#approved-rds-versions
       # There doesn't appear to be a way to do a string comparison or some other method that doesn't rely on a regex. We should rely on good tests to ensure that this regex isn't broken.
       expr: |
-        aws_resources_exporter_rds_engineversion{dbinstance_identifier=~"TEST_.+",engine="postgres", engine_version!~"10\\.1[7-9]|10\\.2[0-9]|11\\.1[2-9]|11\\.2[0-9]|12\\.[7-9]|12\\.[1-2][0-9]|13\\.[3-9]|13\\.1[0-9]|13\\.2[0-9]|14\\.[0-9]*"} or aws_resources_exporter_rds_engineversion{dbinstance_identifier=~"TEST_.+",engine="mysql", engine_version!~"5\\.7\\.3[3-9]|5\\.7\\.4[0-9]|8\\.0\\.2[3-9]|8\\.0\\.3[0-9]|8\\.0\\.4[0-9]"}
+        last_over_time(aws_resources_exporter_rds_engineversion{dbinstance_identifier=~"TEST_.+",engine="postgres", engine_version!~"10\\.1[7-9]|10\\.2[0-9]|11\\.1[2-9]|11\\.2[0-9]|12\\.[7-9]|12\\.[1-2][0-9]|13\\.[3-9]|13\\.1[0-9]|13\\.2[0-9]|14\\.[0-9]*"}[1h]) or last_over_time(aws_resources_exporter_rds_engineversion{dbinstance_identifier=~"TEST_.+",engine="mysql", engine_version!~"5\\.7\\.3[3-9]|5\\.7\\.4[0-9]|8\\.0\\.2[3-9]|8\\.0\\.3[0-9]|8\\.0\\.4[0-9]"}[1h])
       for: 10m
       labels:
         service: app-sre-observability
