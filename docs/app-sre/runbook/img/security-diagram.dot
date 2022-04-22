@@ -1,0 +1,40 @@
+digraph G {
+        rankdir=LR;
+        node[color=pink];
+        certmanager[label="Certificate manager"];
+        alb[label="ALB(+WAF)"];
+        bastion[label="bastion"];
+        node[color=green];
+        prometheus[label="Prometheus scraper"];
+        controller[label="Controller"];
+        workers[label="Nodes"];
+        storage[label="Storage"];
+        actor[color=red];
+
+        subgraph cluster_public_subnets {
+                label="Public subnets";
+                controller;
+                bastion;
+                prometheus;
+        }
+
+        subgraph cluster_private_subnet {
+                //labelloc=b;
+                label="Private subnet";
+                workers;
+                storage;
+        }
+
+        subgraph cluster_aws {
+                label="AWS-run services";
+                certmanager;
+                alb;
+        }
+
+        alb -> controller[style=dotted];
+        controller -> workers -> storage[style=solid];
+        certmanager -> alb;
+        bastion -> {controller, workers}[style=solid];
+        actor -> bastion[style=dashed];
+        actor -> alb[style=dotted];
+}
