@@ -1,26 +1,28 @@
 digraph G {
-        rankdir=LR;
+//        rankdir=LR;
         node[color=pink];
         certmanager[label="Certificate manager"];
         alb[label="ALB(+WAF)"];
         bastion[label="bastion"];
         node[color=green];
-        prometheus[label="Prometheus scraper"];
         controller[label="Controller"];
         workers[label="Nodes"];
         storage[label="Storage"];
         actor[color=red];
+        node[color=blue];
+        splunk[label="Splunk"];
+        appsrecl[label="AppSRE Openshift clusters"];
+
 
         subgraph cluster_public_subnets {
                 label="Public subnets";
                 controller;
                 bastion;
-                prometheus;
         }
 
         subgraph cluster_private_subnet {
-                //labelloc=b;
-                label="Private subnet";
+                labelloc=b;
+                label="Private subnets";
                 workers;
                 storage;
         }
@@ -31,10 +33,17 @@ digraph G {
                 alb;
         }
 
+        subgraph cluster_psi {
+                label="Red Hat PSI services";
+                splunk;
+        }
+
         alb -> controller[style=dotted];
         controller -> workers -> storage[style=solid];
         certmanager -> alb;
         bastion -> {controller, workers}[style=solid];
         actor -> bastion[style=dashed];
         actor -> alb[style=dotted];
+        controller -> splunk[style=dotted, label=Logs];
+        appsrecl -> {workers, controller}[style=bold, label="Through VPC peering"];
 }
