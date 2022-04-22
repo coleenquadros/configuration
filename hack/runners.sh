@@ -133,8 +133,7 @@ run_user_validator() {
 
   STARTTIME=$(date +%s)
 
-  # USER_VALIDATOR_INVALID_USERS is just a workaround. 
-  # Please do not add new paths, but delete invalid keys from now on
+  # USER_VALIDATOR_INVALID_USERS is just a workaround. See https://issues.redhat.com/browse/APPSRE-4706
   docker run --rm -t \
     -e QONTRACT_SERVER_URL=${GRAPHQL_SERVER} \
     -e GRAPHQL_USERNAME=${GRAPHQL_USERNAME} \
