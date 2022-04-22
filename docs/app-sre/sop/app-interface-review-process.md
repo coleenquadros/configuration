@@ -35,8 +35,8 @@ This means the changes are limited to saas file. And that usually does not need 
 
 Insights MRs should be approved as follows:
 
-- Onboarded services - AppSRE
-- Not onboarded - @bturner
+- `OnBoarded` services - AppSRE
+- `BestEffort` services - @bturner
 - FedRAMP - @klape
 
 **Note:** the reviewers above are able to add lgtm labels in GitLab
