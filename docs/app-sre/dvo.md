@@ -2,7 +2,7 @@
 
 ## Overview
 
-The [Deployment Validation Operator](https://github.com/app-sre/deployment-validation-operator) (DVO) checks deployments and other resources against a curated collection of best practices. Under the hood, it continuously runs the static analysis tool [kube-linter](https://github.com/stackrox/kube-linter).
+The [Deployment Validation Operator](https://github.com/app-sre/deployment-validation-operator) (DVO) checks deployments and other resources against a curated collection of best practices. Under the hood, it continuously runs the static analysis tool [KubeLinter](https://github.com/stackrox/kube-linter).
 
 This document described the AppSRE usage of DVO and the requirements from tenants on meeting deployment best practices, as may be subject to periodic changes.
 
