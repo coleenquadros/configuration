@@ -231,7 +231,7 @@ Run the actual validator by executing:
 ```sh
 # make sure you are in the top dir of the `app-interface` git repo
 source .env
-make bundle validate # output is data.json
+make schemas bundle validate # output is data.json
 ```
 
 The output will be JSON document, so you can pipe it with `jq`, example:
