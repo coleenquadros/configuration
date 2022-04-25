@@ -2175,6 +2175,7 @@ To manage a User group via App-Interface:
 - `description`: description of the User group (currently not automated)
 - `service`: `slack-usergroup`
 - `handle`: the handle of the User group
+- `skip`: should this user group be skipped (unmanaged)
 - `workspace`: a reference to a file representing the Slack Workspace
 - `pagerduty`: a reference to a file representing a PagerDuty target (Schedule or Escalation Policy).
   * Adding this attribute will add the PagerDuty target as an additional "source of truth", and will add the final schedule user to the Slack user group (in addition to any references from user files).
