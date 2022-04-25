@@ -25,6 +25,7 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
         - [Gating production promotions in app-interface](#gating-production-promotions-in-app-interface)
         - [Get access to cluster logs via Log Forwarding](#get-access-to-cluster-logs-via-log-forwarding)
         - [User unable to assume IAM role in the AWS Console](#user-unable-to-assume-iam-role-in-the-aws-console)
+        - [What environments are supported by AppSRE?](#what-environments-are-supported-by-appsre)
         - [What is the Console or Prometheus URL for a service?](#what-is-the-console-or-prometheus-url-for-a-service)
         - [Can you restart my pods?](#can-you-restart-my-pods)
             - [OnBoarded Services](#onboarded-services)
@@ -186,6 +187,14 @@ To get access to CloudWatch on a cluster's AWS account, follow these steps (exam
 ### User unable to assume IAM role in the AWS Console
 
 If the `Invalid information in one or more fields. Check your information or contact your administrator.` error is displayed when trying to assume a different IAM role, make sure [to enable MFA on your user AWS Account](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa_enable_virtual.html). After MFA is enabled, log out and back in. 
+
+### What environments are supported by AppSRE?
+
+The AppSRE team supports only stage and production environments for onboarded services, as described in the [contract](https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/content/service/environments.md).
+
+The AppSRE team also maintains an OpenShift Dedicated (OSD) integration environment on behalf of Service Delivery (SD) - https://api.integration.openshift.com. This environment is SD-owned, and thus - OSD related services (OSD operators, OCM components) owned by SD teams are allowed to levarage it.
+
+> Note: OSD does not include consoleDot.
 
 ### What is the Console or Prometheus URL for a service?
 
