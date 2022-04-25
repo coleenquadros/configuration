@@ -47,9 +47,13 @@ This list is subject to change from time to time, and tickets will be created au
 
 #### deployment_validation_operator_no_anti_affinity
 
+Excluded resource kinds: CronJob, Job, ReplicaSet
+
 More information: https://github.com/stackrox/kube-linter/blob/main/docs/generated/checks.md#no-anti-affinity
 
 #### deployment_validation_operator_default_service_account
+
+Excluded resource kinds: ReplicaSet
 
 More information: https://github.com/stackrox/kube-linter/blob/main/docs/generated/checks.md#default-service-account
 
@@ -63,6 +67,9 @@ More information: https://github.com/stackrox/kube-linter/blob/main/docs/generat
 
 #### deployment_validation_operator_minimum_three_replicas
 
+Excluded resource kinds: ReplicaSet
+Excluded resource names: openshift-acme, gabi
+
 More information: https://github.com/stackrox/kube-linter/blob/main/docs/generated/checks.md#minimum-three-replicas
 
 #### deployment_validation_operator_privileged_ports
@@ -71,17 +78,27 @@ More information: https://github.com/stackrox/kube-linter/blob/main/docs/generat
 
 #### deployment_validation_operator_no_liveness_probe
 
+Excluded resource kinds: CronJob, Job, ReplicaSet
+Excluded resource names: openshift-acme, gabi
+
 More information: https://github.com/stackrox/kube-linter/blob/main/docs/generated/checks.md#no-liveness-probe
 
 #### deployment_validation_operator_no_readiness_probe
+
+Excluded resource kinds: CronJob, Job, ReplicaSet
+Excluded resource names: openshift-acme, gabi
 
 More information: https://github.com/stackrox/kube-linter/blob/main/docs/generated/checks.md#no-readiness-probe
 
 #### deployment_validation_operator_unset_cpu_requirements
 
+Excluded resource names: gabi
+
 More information: https://github.com/stackrox/kube-linter/blob/main/docs/generated/checks.md#unset-cpu-requirements
 
 #### deployment_validation_operator_unset_memory_requirements
+
+Excluded resource names: gabi
 
 More information: https://github.com/stackrox/kube-linter/blob/main/docs/generated/checks.md#unset-memory-requirements
 
