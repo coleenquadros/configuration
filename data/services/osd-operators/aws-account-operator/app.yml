@@ -1,0 +1,63 @@
+---
+$schema: /app-sre/app-1.yml
+
+labels:
+  service: aws-account-operator
+
+name: aws-account-operator
+
+description: |
+  OpenShift Dedicated managed operators # aws-account-operator
+
+architectureDocument: https://TODO
+sopsUrl: https://github.com/openshift/aws-account-operator/tree/master/docs
+grafanaUrls:
+- title: AWS Account Operator
+  url: https://grafana.app-sre.devshift.net/d/WPRpa7HWz/aws-account-operator
+onboardingStatus: OnBoarded
+
+parentApp:
+  $ref: /services/osd-operators/app.yml
+
+escalationPolicy:
+  $ref: /teams/sd-sre/escalation-policies/aws-account-operator.yaml
+serviceOwners:
+- name: James Harrington
+  email: jaharrin@redhat.com
+- name: Kirk Bater
+  email: kbater@redhat.com
+- name: Taylor Fahlman
+  email: tfahlman@redhat.com
+
+serviceNotifications:
+- name: SRE Mailing list
+  email: sd-sre@redhat.com
+
+dependencies:
+- $ref: /dependencies/ci-ext/service.yml
+- $ref: /dependencies/ci-int/service.yml
+- $ref: /dependencies/github/service.yml
+- $ref: /dependencies/gitlab/service.yml
+- $ref: /dependencies/quay/service.yml
+- $ref: /dependencies/openshift/service.yml
+- $ref: /dependencies/aws/service.yml
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/app-sre.yml
+  items:
+  - name: aws-account-operator
+    description: main aws-account-operator container
+    public: true
+  - name: aws-account-operator-registry
+    description: aws-account-operator-registry for olm catalog
+    public: true
+
+
+codeComponents:
+- name: aws-account-operator
+  resource: upstream
+  url: https://github.com/openshift/aws-account-operator
+- name: aws-account-operatoraws-account-operator-aws-account-operator-bundle
+  resource: bundle
+  url: https://gitlab.cee.redhat.com/service/saas-aws-account-operator-bundle
