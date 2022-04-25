@@ -116,6 +116,6 @@ Follow this [documentation](https://github.com/app-sre/deployment-validation-ope
 
 DVO metrics are [periodically](https://github.com/app-sre/qontract-reconcile/blob/6086b8dde71d507743b5d285b68f32c77bab5d5f/helm/qontract-reconcile/values-internal.yaml#L429-L430) collected by a qontract-reconcile integration called [dashdotdb-dvo](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/dashdotdb_dvo.py) and added to [Dash.DB](https://github.com/app-sre/dashdotdb) for reporting purposes, such as [Grafana dashboards](https://grafana.app-sre.devshift.net/d/dashdotdb/dash-db) or [App reports](./data/reports).
 
-## Histry
+## History
 
 These tickets [used to be created manually](https://gitlab.cee.redhat.com/app-sre/contract/-/merge_requests/88) by AppSRE engineers as part of [SRE Checkpoints](https://gitlab.cee.redhat.com/app-sre/contract/-/blob/master/content/process/sre_checkpoints.md). Before that, workloads used to be validated at deploy time using [Manifest Bouncer](https://github.com/app-sre/manifest-bouncer).
