@@ -49,58 +49,58 @@ This list is subject to change from time to time, and tickets will be created au
 
 Excluded resource kinds: CronJob, Job, ReplicaSet
 
-More information: https://github.com/stackrox/kube-linter/blob/main/docs/generated/checks.md#no-anti-affinity
+More information: https://docs.kubelinter.io/#/generated/checks?id=no-anti-affinity
 
 #### deployment_validation_operator_default_service_account
 
 Excluded resource kinds: ReplicaSet
 
-More information: https://github.com/stackrox/kube-linter/blob/main/docs/generated/checks.md#default-service-account
+More information: https://docs.kubelinter.io/#/generated/checks?id=default-service-account
 
 #### deployment_validation_operator_drop_net_raw_capability
 
-More information: https://github.com/stackrox/kube-linter/blob/main/docs/generated/checks.md#drop-net-raw-capability
+More information: https://docs.kubelinter.io/#/generated/checks?id=drop-net-raw-capability
 
 #### deployment_validation_operator_latest_tag
 
-More information: https://github.com/stackrox/kube-linter/blob/main/docs/generated/checks.md#latest-tag
+More information: https://docs.kubelinter.io/#/generated/checks?id=latest-tag
 
 #### deployment_validation_operator_minimum_three_replicas
 
 Excluded resource kinds: ReplicaSet
 Excluded resource names: openshift-acme, gabi
 
-More information: https://github.com/stackrox/kube-linter/blob/main/docs/generated/checks.md#minimum-three-replicas
+More information: https://docs.kubelinter.io/#/generated/checks?id=minimum-three-replicas
 
 #### deployment_validation_operator_privileged_ports
 
-More information: https://github.com/stackrox/kube-linter/blob/main/docs/generated/checks.md#privileged-ports
+More information: https://docs.kubelinter.io/#/generated/checks?id=privileged-ports
 
 #### deployment_validation_operator_no_liveness_probe
 
 Excluded resource kinds: CronJob, Job, ReplicaSet
 Excluded resource names: openshift-acme, gabi
 
-More information: https://github.com/stackrox/kube-linter/blob/main/docs/generated/checks.md#no-liveness-probe
+More information: https://docs.kubelinter.io/#/generated/checks?id=no-liveness-probe
 
 #### deployment_validation_operator_no_readiness_probe
 
 Excluded resource kinds: CronJob, Job, ReplicaSet
 Excluded resource names: openshift-acme, gabi
 
-More information: https://github.com/stackrox/kube-linter/blob/main/docs/generated/checks.md#no-readiness-probe
+More information: https://docs.kubelinter.io/#/generated/checks?id=no-readiness-probe
 
 #### deployment_validation_operator_unset_cpu_requirements
 
 Excluded resource names: gabi
 
-More information: https://github.com/stackrox/kube-linter/blob/main/docs/generated/checks.md#unset-cpu-requirements
+More information: https://docs.kubelinter.io/#/generated/checks?id=unset-cpu-requirements
 
 #### deployment_validation_operator_unset_memory_requirements
 
 Excluded resource names: gabi
 
-More information: https://github.com/stackrox/kube-linter/blob/main/docs/generated/checks.md#unset-memory-requirements
+More information: https://docs.kubelinter.io/#/generated/checks?id=unset-memory-requirements
 
 ### Exceluded metrics
 
