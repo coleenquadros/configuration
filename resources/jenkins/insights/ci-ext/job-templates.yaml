@@ -95,6 +95,35 @@
     <<: *gh_pr_check
 
 - job-template:
+    id: 'insights-gh-smoke-test'
+    name: '{gh_org}-{gh_repo}-smoke-test-{branch}'
+    wrappers:
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_ephemeral_oc_login
+        - *app_interface_creds
+        - *insights_rh_registry_pull_secret
+        - *insightsdroid_github
+        - *quay_api_token
+        - *quay_secret_push
+    builders:
+    - shell: './smoke_test.sh'
+    publishers:
+    - junit:
+        results: 'artifacts/junit-*.xml'
+    - archive:
+        artifacts: 'artifacts/**/*'
+    - slack:
+        room: '{slack_channel_notification}'
+        notify-start: false
+        notify-success: false
+        notify-failure: true
+        notify-repeated-failure: true
+    <<: *gh_timed
+
+- job-template:
     id: 'insights-gh-build-master'
     name: '{gh_org}-{gh_repo}-gh-build-{branch}'
     wrappers:
