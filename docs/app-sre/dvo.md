@@ -63,6 +63,8 @@ More information: https://docs.kubelinter.io/#/generated/checks?id=drop-net-raw-
 
 #### deployment_validation_operator_latest_tag
 
+Excluded resource kinds: Pod
+
 More information: https://docs.kubelinter.io/#/generated/checks?id=latest-tag
 
 #### deployment_validation_operator_minimum_three_replicas
