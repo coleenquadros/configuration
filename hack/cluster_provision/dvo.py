@@ -57,6 +57,7 @@ SERVICE_MONITOR = """
 
 sharedResources:
 - $ref: /services/observability/shared-resources/dvo.yml
+- $ref: /services/observability/shared-resources/dvo-alerts.yml
 """
 
 SAAS_TARGET_TEMPLATE = """
