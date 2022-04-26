@@ -114,7 +114,17 @@ Some metrics are excluded for various reasons. The complete list can be found in
 
 There are cases where a DVO validation fails, while there are good reasons for the validation not to be met.
 
-Follow this [documentation](https://github.com/app-sre/deployment-validation-operator#disabling-checks) to disable DVO checks.
+Follow this [documentation](https://github.com/app-sre/deployment-validation-operator#disabling-checks) to disable DVO checks for specific workloads.
+
+Specific checks can be disabled for an app by adding the metric name as a label (with any value). For example:
+    ```yaml
+    ---
+    $schema: /app-sre/app-1.yml
+
+
+    labels:
+        deployment_validation_operator_no_anti_affinity: skip
+    ```
 
 ## Reporting
 
