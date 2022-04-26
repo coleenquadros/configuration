@@ -59,6 +59,8 @@ More information: https://docs.kubelinter.io/#/generated/checks?id=default-servi
 
 #### deployment_validation_operator_drop_net_raw_capability
 
+Excluded resource kinds: Pod
+
 More information: https://docs.kubelinter.io/#/generated/checks?id=drop-net-raw-capability
 
 #### deployment_validation_operator_latest_tag
