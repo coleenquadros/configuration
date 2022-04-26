@@ -1,0 +1,52 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: ros-prod
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: ros-prod
+    rules:
+      - alert: App-insights-ros-backend-api-service-In-ros-prod-Absent
+        expr: absent(up{service="ros-backend-api", namespace="ros-prod"}) or up{service="ros-backend-api", namespace="ros-prod"} == 0
+        for: 5m
+        labels:
+          severity: high
+          service: insights
+          env: prod
+          app_team: ros
+        annotations:
+          message: "Metrics for ros-backend-api in PROD are absent"
+          dashboard: "https://GRAFANA_URL"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ros-prod/deployments"
+
+
+      - alert: App-insights-ros-backend-processor-service-In-ros-prod-Absent
+        expr: absent(up{service="ros-backend-processor", namespace="ros-prod"}) or up{service="ros-backend-processor", namespace="ros-prod"} == 0
+        for: 5m
+        labels:
+          severity: high
+          service: insights
+          env: prod
+          app_team: ros
+        annotations:
+          message: "Metrics for ros-backend-processor in PROD are absent"
+          dashboard: "https://GRAFANA_URL"
+          link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/ros-prod/deployments"
+
+      - alert: ROSHttp5xx
+        expr: sum(rate(ros_http_request_total{namespace="ros-prod", service="ros-backend-api", status=~"5[0-9]{2}"}[10m])) by (namespace) / sum(rate(ros_http_request_total{namespace="ros-prod", service="ros-backend-api"}[10m])) by (namespace) * 100 > 5
+        for: 5m
+        labels:
+          severity: medium
+          service: insights
+          env: prod
+          app_team: ros
+        annotations:
+          message: '{{ $labels.namespace }} 5xx responses observed'
+          dashboard: "https://GRAFANA_URL"
+          link_url: "https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_a=(columns:!(_source),filters:!(),index:'43c5fed0-d5ce-11ea-b58c-a7c95afd7a5d',interval:auto,query:(language:kuery,query:'@log_stream:%20%22ros-api%22%20AND%20@message:%20%22ERROR%22'),sort:!(!('@timestamp',desc)))"
