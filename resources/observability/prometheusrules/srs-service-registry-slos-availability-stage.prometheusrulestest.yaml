@@ -7,62 +7,93 @@ rule_files:
 evaluation_interval: 1m
 
 tests:
+  # === All
   - interval: 1m
     input_series:
-      # 0m  - 30m   all good
-      # 30m - 60m   20% error rate
-      # 60m - 100m  50% error rate
+      # CurrentErrorRate * (t / WindowSize) = BurnRate * (1 - SLOGoal)
+      # ErrorRate = BurnRate * (1 - SLOTarget) per the given time period
+      # 0m  - 30m  all good
+      # 30m - 60m  5% burn rate ~> 6 * (1 - 0.99) = 0.06 error rate ~> 60 per 1000 requests, which should be just below the alert threshold
+      # 60m - 90m  10% burn rate ~> 2 * 6 * (1 - 0.99) = 0.12 error rate ~> 120 per 1000 requests, which should trigger the alert
       - series: 'haproxy_backend_http_responses_total{route="service-registry-bu98",exported_namespace="service-registry-stage",code="5xx"}'
-        values: '0+0x30   0+2x30    62+5x40'
+        values: '0+0x30   0+60x30      1800+120x30'
       - series: 'haproxy_backend_http_responses_total{route="service-registry-bu98",exported_namespace="service-registry-stage",code="2xx"}'
-        values: '0+1x30   31+8x30   279+5x40'
+        values: '0+1x30   30+940x30   28230+880x30'
     alert_rule_test:
       - eval_time: 30m
-        alertname: SRSServiceRegistryAPI30mto6hErrorBudgetBurn
+        alertname: SRSServiceRegistryAPIAll30mto6hErrorBudgetBurn
         exp_alerts: [ ]
       - eval_time: 60m
-        alertname: SRSServiceRegistryAPI30mto6hErrorBudgetBurn
+        alertname: SRSServiceRegistryAPIAll30mto6hErrorBudgetBurn
         exp_alerts: [ ]
-      - eval_time: 100m
-        alertname: SRSServiceRegistryAPI30mto6hErrorBudgetBurn
+      - eval_time: 90m
+        alertname: SRSServiceRegistryAPIAll30mto6hErrorBudgetBurn
         exp_alerts:
           - exp_labels:
-              alertname: SRSServiceRegistryAPI30mto6hErrorBudgetBurn
-              exported_namespace: service-registry-stage
-              route: srs-service-registry
+              alertname: SRSServiceRegistryAPIAll30mto6hErrorBudgetBurn
               service: srs-service-registry
+              route: service-registry-bu98
+              exported_namespace: service-registry-stage
               severity: high
             exp_annotations:
               dashboard: "https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage&var-routeName=service-registry-bu98-stage"
-              message: "High 6h error budget burn for Service Registry in the last 6 hours (current value: 500m)"
+              message: "High 6h error budget burn for Service Registry API (all operations) (current value: 115.9m)"
               runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/service-registry/sop#srs-service-registry-availability"
   - interval: 1m
     input_series:
-      # 0m  - 60m   all good
-      # 60m - 90m   10% error rate
-      # 90m - 220m  20% error rate
+      # 0m   - 120m   all good
+      # 120m - 240m  10% burn rate ~> 3 * (1 - 0.99) = 0.03 error rate ~> 30 per 1000 requests, which should be just below the alert threshold
+      # 240m - 360m  20% burn rate ~> 2 * 3 * (1 - 0.99) = 0.06 error rate ~> 60 per 1000 requests, which should trigger the alert
       - series: 'haproxy_backend_http_responses_total{route="service-registry-bu98",exported_namespace="service-registry-stage",code="5xx"}'
-        values: '0+0x60   0+1x30    31+2x130'
+        values: '0+0x120   0+30x120    3600+60x120'
       - series: 'haproxy_backend_http_responses_total{route="service-registry-bu98",exported_namespace="service-registry-stage",code="2xx"}'
-        values: '0+1x60   61+9x30   340+8x130'
+        values: '0+1x120   120+970x120   116520+940x120'
     alert_rule_test:
-      - eval_time: 60m
-        alertname: SRSServiceRegistryAPI2hto1dErrorBudgetBurn
+      - eval_time: 120m
+        alertname: SRSServiceRegistryAPIAll2hto1dErrorBudgetBurn
         exp_alerts: [ ]
-      - eval_time: 90m
-        alertname: SRSServiceRegistryAPI2hto1dErrorBudgetBurn
+      - eval_time: 240m
+        alertname: SRSServiceRegistryAPIAll2hto1dErrorBudgetBurn
         exp_alerts: [ ]
-      - eval_time: 220m
-        alertname: SRSServiceRegistryAPI2hto1dErrorBudgetBurn
+      - eval_time: 360m
+        alertname: SRSServiceRegistryAPIAll2hto1dErrorBudgetBurn
         exp_alerts:
           - exp_labels:
-              alertname: SRSServiceRegistryAPI2hto1dErrorBudgetBurn
-              exported_namespace: service-registry-stage
-              route: srs-service-registry
+              alertname: SRSServiceRegistryAPIAll2hto1dErrorBudgetBurn
               service: srs-service-registry
-              severity: high
+              route: service-registry-bu98
+              exported_namespace: service-registry-stage
+              severity: info
             exp_annotations:
               dashboard: "https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage&var-routeName=service-registry-bu98-stage"
-              message: "High 1d error budget burn for Service Registry (current value: 200m)"
+              message: "High 1d error budget burn for Service Registry API (all operations) (current value: 59.5m)"
               runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/service-registry/sop#srs-service-registry-availability"
-
+  - interval: 1m
+    input_series:
+      # 0m   - 360m   all good
+      # 360m - 720m   10% burn rate ~> 1 * (1 - 0.99) = 0.01 error rate ~> 10 per 1000 requests, which should be just below the alert threshold
+      # 720m - 1080m  20% burn rate ~> 2 * 1 * (1 - 0.99) = 0.02 error rate ~> 20 per 1000 requests, which should trigger the alert
+      - series: 'haproxy_backend_http_responses_total{route="service-registry-bu98",exported_namespace="service-registry-stage",code="5xx"}'
+        values: '0+0x360   0+10x360    7200+20x360'
+      - series: 'haproxy_backend_http_responses_total{route="service-registry-bu98",exported_namespace="service-registry-stage",code="2xx"}'
+        values: '0+1x360   360+990x360   356760+980x360'
+    alert_rule_test:
+      - eval_time: 360m
+        alertname: SRSServiceRegistryAPIAll6hto3dErrorBudgetBurn
+        exp_alerts: [ ]
+      - eval_time: 720m
+        alertname: SRSServiceRegistryAPIAll6hto3dErrorBudgetBurn
+        exp_alerts: [ ]
+      - eval_time: 1080m
+        alertname: SRSServiceRegistryAPIAll6hto3dErrorBudgetBurn
+        exp_alerts:
+          - exp_labels:
+              alertname: SRSServiceRegistryAPIAll6hto3dErrorBudgetBurn
+              service: srs-service-registry
+              route: service-registry-bu98
+              exported_namespace: service-registry-stage
+              severity: info
+            exp_annotations:
+              dashboard: "https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage&var-routeName=service-registry-bu98-stage"
+              message: "High 3d error budget burn for Service Registry API (all operations) (current value: 29.67m)"
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/service-registry/sop#srs-service-registry-availability"
