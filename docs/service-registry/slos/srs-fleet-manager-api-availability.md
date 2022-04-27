@@ -14,9 +14,8 @@ It is measured at the router using the `haproxy_backend_http_responses_total` me
 SRS-fleet-manager is expected to be available 95 percent of the time. This can be increased to 99.9 once this availability SLO has been proven in production over a longer period of time.
 
 ## Alerts
-All alerts are multiwindow, multi-burn-rate alerts. The following are the list of alerts that are associated with this SLO.
+All alerts are multi-window, multi-burn-rate alerts. The following are the list of alerts that are associated with this SLO.
 
 - `SRSFleetManagerAPI30mto6hErrorBudgetBurn`
 - `SRSFleetManagerAPI2hto1dErrorBudgetBurn`
 - `SRSFleetManagerAPI6hto3dErrorBudgetBurn`
-  
