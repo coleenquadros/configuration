@@ -102,3 +102,96 @@ spec:
             route: service-registry-bu98
             exported_namespace: service-registry-production
           record: haproxy_backend_http_responses_total:all:errorrate6h
+    - name: srs-service-registry-availability-read.slo.rules
+      rules:
+        # === Read
+        - alert: SRSServiceRegistryAPIRead30mto6hErrorBudgetBurn
+          annotations:
+            message: "High 6h error budget burn for Service Registry API (read operations) (current value: {{ $value | humanize }})"
+            dashboard: "https://grafana.app-sre.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production&var-routeName=service-registry-bu98"
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/service-registry/sop#srs-service-registry-availability"
+          expr: |
+            sum(rest_requests_count_total:read:errorrate30m{job="apicurio-registry",namespace="service-registry-production"}) > (6.00 * (1-0.99950))
+            and
+            sum(rest_requests_count_total:read:errorrate6h{job="apicurio-registry",namespace="service-registry-production"}) > (6.00 * (1-0.99950))
+          for: 15m
+          labels:
+            service: srs-service-registry
+            namespace: service-registry-production
+            job: apicurio-registry
+            severity: critical
+        - alert: SRSServiceRegistryAPIRead2hto1dErrorBudgetBurn
+          annotations:
+            message: "High 1d error budget burn for Service Registry API (read operations) (current value: {{ $value | humanize }})"
+            dashboard: "https://grafana.app-sre.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production&var-routeName=service-registry-bu98"
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/service-registry/sop#srs-service-registry-availability"
+          expr: |
+            sum(rest_requests_count_total:read:errorrate2h{job="apicurio-registry",namespace="service-registry-production"}) > (3.00 * (1-0.99950))
+            and
+            sum(rest_requests_count_total:read:errorrate1d{job="apicurio-registry",namespace="service-registry-production"}) > (3.00 * (1-0.99950))
+          for: 1h
+          labels:
+            service: srs-service-registry
+            namespace: service-registry-production
+            job: apicurio-registry
+            severity: high
+        - alert: SRSServiceRegistryAPIRead6hto3dErrorBudgetBurn
+          annotations:
+            message: "High 3d error budget burn for Service Registry API (read operations) (current value: {{ $value | humanize }})"
+            dashboard: "https://grafana.app-sre.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production&var-routeName=service-registry-bu98"
+            runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/service-registry/sop#srs-service-registry-availability"
+          expr: |
+            sum(rest_requests_count_total:read:errorrate6h{job="apicurio-registry",namespace="service-registry-production"}) > (1.00 * (1-0.99950))
+            and
+            sum(rest_requests_count_total:read:errorrate3d{job="apicurio-registry",namespace="service-registry-production"}) > (1.00 * (1-0.99950))
+          for: 3h
+          labels:
+            service: srs-service-registry
+            namespace: service-registry-production
+            job: apicurio-registry
+            severity: high
+        - expr: |
+            sum(rate(rest_requests_count_total{job="apicurio-registry",namespace="service-registry-production",status_code_group="5xx",method="GET",path!~".*/search/.*"}[1d]))
+            /
+            sum(rate(rest_requests_count_total{job="apicurio-registry",namespace="service-registry-production",method="GET",path!~".*/search/.*"}[1d]))
+          labels:
+            service: srs-service-registry
+            namespace: service-registry-production
+            job: apicurio-registry
+          record: rest_requests_count_total:read:errorrate1d
+        - expr: |
+            sum(rate(rest_requests_count_total{job="apicurio-registry",namespace="service-registry-production",status_code_group="5xx",method="GET",path!~".*/search/.*"}[2h]))
+            /
+            sum(rate(rest_requests_count_total{job="apicurio-registry",namespace="service-registry-production",method="GET",path!~".*/search/.*"}[2h]))
+          labels:
+            service: srs-service-registry
+            namespace: service-registry-production
+            job: apicurio-registry
+          record: rest_requests_count_total:read:errorrate2h
+        - expr: |
+            sum(rate(rest_requests_count_total{job="apicurio-registry",namespace="service-registry-production",status_code_group="5xx",method="GET",path!~".*/search/.*"}[30m]))
+            /
+            sum(rate(rest_requests_count_total{job="apicurio-registry",namespace="service-registry-production",method="GET",path!~".*/search/.*"}[30m]))
+          labels:
+            service: srs-service-registry
+            namespace: service-registry-production
+            job: apicurio-registry
+          record: rest_requests_count_total:read:errorrate30m
+        - expr: |
+            sum(rate(rest_requests_count_total{job="apicurio-registry",namespace="service-registry-production",status_code_group="5xx",method="GET",path!~".*/search/.*"}[3d]))
+            /
+            sum(rate(rest_requests_count_total{job="apicurio-registry",namespace="service-registry-production",method="GET",path!~".*/search/.*"}[3d]))
+          labels:
+            service: srs-service-registry
+            namespace: service-registry-production
+            job: apicurio-registry
+          record: rest_requests_count_total:read:errorrate3d
+        - expr: |
+            sum(rate(rest_requests_count_total{job="apicurio-registry",namespace="service-registry-production",status_code_group="5xx",method="GET",path!~".*/search/.*"}[6h]))
+            /
+            sum(rate(rest_requests_count_total{job="apicurio-registry",namespace="service-registry-production",method="GET",path!~".*/search/.*"}[6h]))
+          labels:
+            service: srs-service-registry
+            namespace: service-registry-production
+            job: apicurio-registry
+          record: rest_requests_count_total:read:errorrate6h
