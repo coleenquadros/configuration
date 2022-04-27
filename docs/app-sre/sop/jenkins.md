@@ -4,6 +4,18 @@
 
 ---
 
+# Instances
+
+The Jenkins servers (nodes and controllers) are VMs running in
+[AWS](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1#Instances:search=ci.ext;sort=desc:instanceId),
+in the app-sre account. You can check your default credentials in the
+[app-interface output repo](https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/terraform-users-credentials.md).
+
+The configuration is documented in the
+[infa](https://gitlab.cee.redhat.com/app-sre/infra) repo
+[here](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ansible/hosts/host_vars/ci.ext.ssh.devshift.net).
+
+
 # Alerts
 
 ## JenkinsHealthCheck
@@ -38,7 +50,44 @@ Things to check:
   - Duplicity backups cache can fill up in /root/.cache/duplicity
     - Clear old backups with: /backup/backup.sh remove-older-than 3M
 
----
+## JenkinsDown
+
+### Impact:
+
+The jenkins controller isn't responding.
+
+
+### Steps
+
+* Try to ssh into the instance:
+
+```shell
+ssh ci.ext.ssh.devshift.net # ci-ext
+ssh ci.int.devshift.net # ci-int
+```
+
+* Check if jenkins is running:
+  ```shell
+  sudo systemctl status jenkins
+  ```
+  `systemctl` should report `Active: active (running)`.
+
+* If no jenkins processes are running, start them with:
+
+  ```shell
+  sudo systemctl start jenkins
+  ```
+
+* Check logs of the process:
+  ```shell
+  sudo journalctl -u jenkins
+  ```
+
+* If an out-of-memory situation is suspected, it's useful to look for
+  OOM kills:
+  ```shell
+  sudo journalctl -k --since="<5 minutes before the alarm>" --until=now
+  ```
 
 ## JenkinsNodeOffline
 
@@ -171,9 +220,11 @@ Please note, doing this will lose track of any ongoing jobs.
 
 ## Trust the key
 
-After you restart Jenkins, you will need to allow the node you are updating
-to trust the key. You can do this through the Jenkins GUI by selecting on the node and on the
-left hand side there will be an option to trust the key. This is a one-time process and the option will go away upon acceptance.
+After you restart Jenkins, you will need to allow the node you are
+updating to trust the key. You can do this through the Jenkins GUI by
+selecting on the node and on the left hand side there will be an
+option to trust the key. This is a one-time process and the option
+will go away upon acceptance.
 
 ## Rebooting the controller
 
