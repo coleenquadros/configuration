@@ -51,7 +51,7 @@ One shard is devoted to a single environment, but there may be multiple shards f
 
 **Staging** environments (e.g. [hive-stage-01](https://visual-app-interface.devshift.net/clusters#/openshift/hive-stage-01/cluster.yml), [hives02ue1](https://visual-app-interface.devshift.net/clusters#/openshift/hives02ue1/cluster.yml)) are used by SREP to validate functionality and to roll out and test changes to OSD operators.
 
-**Integration** environments (e.g. [hivei01ue1](https://visual-app-interface.devshift.net/clusters#/openshift/hivei01ue1/cluster.yml)) are largely unused. Nobody knows why we keep them around.
+**Integration** environments (e.g. [hivei01ue1](https://visual-app-interface.devshift.net/clusters#/openshift/hivei01ue1/cluster.yml)) are used by OCM.
 
 **Production** environments (`hivep{N}{Region}`, e.g. [hivep01ue1](https://visual-app-interface.devshift.net/clusters#/openshift/hivep01ue1/cluster.yml)) are where customer clusters are managed.
 
