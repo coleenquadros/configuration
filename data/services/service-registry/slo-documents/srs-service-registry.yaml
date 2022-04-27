@@ -11,9 +11,14 @@ namespaces:
 - $ref: /services/service-registry/namespaces/service-registry-production.yml
 
 slos:
-- name: Service Registry API availability
+
+# === Service Registry API
+
+# = Availability
+
+- name: Service Registry API (All) Availability 99%
   SLIType: availability
-  SLISpecification: Percentage of service-registry requests that are served successfully (status code != 5xx)
+  SLISpecification: Percentage of Service Registry API requests that are served successfully (all operations). This currently does not contribute to our customer SLA.
   SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/service-registry/slos/srs-service-registry-api-availability.md
   SLOParameters:
     window: 28d
@@ -21,7 +26,55 @@ slos:
     sum(rate(haproxy_backend_http_responses_total{route="service-registry-bu98",exported_namespace="service-registry-production",code!="5xx"}[{{window}}]))
     /
     sum(rate(haproxy_backend_http_responses_total{route="service-registry-bu98",exported_namespace="service-registry-production"}[{{window}}]))
-  SLOTarget: 0.95
+  SLOTarget: 0.99
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/srs-service-registry-slos-availability-production.prometheusrules.yaml
+  prometheusRulesTests: /observability/prometheusrules/srs-service-registry-slos-availability-production.prometheusrulestest.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production&var-routeName=service-registry-bu98
+
+- name: Service Registry API (Read) Availability 99.95%
+  SLIType: availability
+  SLISpecification: Percentage of Service Registry API requests that are served successfully (read operations).  This best represents our SLA to RHOSR customers of 99.95% availability of the service.
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/service-registry/slos/srs-service-registry-api-availability.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(rest_requests_count_total{job="apicurio-registry",namespace="service-registry-production",status_code_group!="5xx",method="GET",path!~".*/search/.*"}[{{window}}]))
+    /
+    sum(rate(rest_requests_count_total{job="apicurio-registry",namespace="service-registry-production",method="GET",path!~".*/search/.*"}[{{window}}]))
+  SLOTarget: 0.9995
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/srs-service-registry-slos-availability-production.prometheusrules.yaml
+  prometheusRulesTests: /observability/prometheusrules/srs-service-registry-slos-availability-production.prometheusrulestest.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production&var-routeName=service-registry-bu98
+
+- name: Service Registry API (Write) Availability 99%
+  SLIType: availability
+  SLISpecification: Percentage of Service Registry API requests that are served successfully (write operations). This currently does not contribute to our customer SLA.
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/service-registry/slos/srs-service-registry-api-availability.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(rest_requests_count_total{job="apicurio-registry",namespace="service-registry-production",status_code_group!="5xx",method=~"POST|PUT|DELETE",path!~".*/search/.*"}[{{window}}]))
+    /
+    sum(rate(rest_requests_count_total{job="apicurio-registry",namespace="service-registry-production",method=~"POST|PUT|DELETE",path!~".*/search/.*"}[{{window}}]))
+  SLOTarget: 0.99
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/srs-service-registry-slos-availability-production.prometheusrules.yaml
+  prometheusRulesTests: /observability/prometheusrules/srs-service-registry-slos-availability-production.prometheusrulestest.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production&var-routeName=service-registry-bu98
+
+- name: Service Registry API (Search) Availability 99%
+  SLIType: availability
+  SLISpecification: Percentage of Service Registry API requests that are served successfully (search operations). This currently does not contribute to our customer SLA.
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/service-registry/slos/srs-service-registry-api-availability.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(rest_requests_count_total{job="apicurio-registry",namespace="service-registry-production",status_code_group!="5xx",path=~".*/search/.*"}[{{window}}]))
+    /
+    sum(rate(rest_requests_count_total{job="apicurio-registry",namespace="service-registry-production",path=~".*/search/.*"}[{{window}}]))
+  SLOTarget: 0.99
   SLOTargetUnit: percent_0_1
   prometheusRules: /observability/prometheusrules/srs-service-registry-slos-availability-production.prometheusrules.yaml
   prometheusRulesTests: /observability/prometheusrules/srs-service-registry-slos-availability-production.prometheusrulestest.yaml
