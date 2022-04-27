@@ -193,6 +193,29 @@ data:
                 trusted_ca:
                   filename: /etc/ssl/certs/ca-certificates.crt
 
+      # Cluster for the `connectors_mgmt` service:
+      - name: connector_mgmt
+        connect_timeout: 2s
+        type: STRICT_DNS
+        lb_policy: ROUND_ROBIN
+        load_assignment:
+          cluster_name: connector_mgmt
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: wxn4abbc8bqvxcy6unfe.api.openshift.com
+                    port_value: 443
+        transport_socket:
+          name: envoy.transport_sockets.tls
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+            common_tls_context:
+              validation_context:
+                trusted_ca:
+                  filename: /etc/ssl/certs/ca-certificates.crt
+
       # Cluster for the `serviceregistry_mgmt` service:
       - name: serviceregistry_mgmt
         connect_timeout: 2s
@@ -378,6 +401,10 @@ data:
                                 "name": "kafka service fleet manager service"
                               },
                               {
+                                "id": "connector_mgmt",
+                                "name": "connector service fleet manager service"
+                              },
+                              {
                                 "id": "status-board",
                                 "name": "Status Board service"
                               },
@@ -456,6 +483,15 @@ data:
                       auto_host_rewrite: true
                       timeout: 30s
 
+                  # Route for the `connector_mgmt` service:
+                  - name: connector_mgmt
+                    match:
+                      prefix: /api/connector_mgmt
+                    route:
+                      cluster: connector_mgmt
+                      auto_host_rewrite: true
+                      timeout: 30s
+    
                   # Route for the `serviceregistry_mgmt` service:
                   - name: serviceregistry_mgmt
                     match:
