@@ -46,9 +46,9 @@ Steps to privision a `ROSA`cluster. All Steps are subcommands of `ROSA cli`.
 
 2. Launch Cluster Installation.
 
-    Cluster Installation is orchestrated from `OCM`, but the request to install the cluster is implemented
-    with `ROSA cli` too. The cli allows to set all the required parameters and then it requests the cluster
-    creation to `OCM`. `OCM` uses the IAM roles created in the previous step to install the cluster (STS)
+    Cluster Installation is orchestrated from `OCM`. Cluster installation is requested with `ROSA cli` or `OCM`
+    directly. `OCM` is being improved right now to support `ROSA` and the installation support is limited,
+    some steps need to be done with `ROSA cli`.
 
 3. Post Installation Request Steps
 
@@ -84,11 +84,20 @@ enumerates the app-interface allowed cluster updates and if they are supported w
 
 We should consider using a separate AWS account to host our `ROSA` clusters. Splitting workloads into separate
 accounts is a good and recommended practice from a security point of view. Taking into account that we will barely
-need to access cluster infrastructure resources, it makes sense to deploy the clusters in a separate aws account
-other than the AppSre main account.
+need to access cluster infrastructure resources, deploying clusters in a separate aws account other than the AppSre
+main account makes sense.
 
-By default `ROSA` uses 1 `vpc` per cluster. VPC quota can be increased to hundreds of vpcs per aws account,
-so this is not going to be a problem for the public clusters.
+`ROSA` recommendation is to install on cluster per vpc but is possible to install more than one cluster per vpc
+using different subnetworks too. As VPC quota can be increased to hundreds, 1 cluster per vpc is the way to go
+for us.
+
+Even though it's possible, having multiple clusters per account implies a more difficult permissions management of
+AWS resources. For example, tenants access to Cloudwatch in shared accounts will need to be improved to efficiently
+separate accesses to logroups of other tenants. This applies to all the resources a tenant needs to have access to.
+
+For coherence and to continue using the same AppSRE approach, we would use a cluster per account like is done in
+OSD, accounts do not imply additional costs and we would have the resources isolation without the need of
+changing the permissions management.
 
 ## APP Interface management
 
@@ -132,15 +141,14 @@ Our OCM code is very tight to OSD-type clusters. Some changes are needed:
 
 - Cluster Updates: Some updates that do not apply on `ROSA` such as quotas or making the cluster private.
 
-- Cluster Creation: `OSD` clusters are created through `OCM` while `ROSA` are created with `ROSA cli` and
-  is the supported way.
+- Cluster Creation: TBD. `OCM` support for ROSA is happening right now.
 
 - AWSInfrastructureAccess: `ROSA` does not have this option through `OCM` because the aws account is
   fully managed by the customer.
 
-The `OCM` code needs a refactor to allow different cluster types. At first, using an interface instead of
-a single cluster type is the appropiate way to manage this. One cluster implementation will be created for
-each type of cluster we need to support and each cluster could have a completely different implementation.
+The `OCM` code needs to be refactored to allow different cluster types. At first, using an interface instead
+of a single cluster type is the appropiate way to manage this. A cluster implementation will be created for
+each type of cluster we need to support.
 
 The code changes to do this seems located in the `ocm.py` file, the integrations get the `ocm` reference from
 the `OCM_Map` class. This needs a more deep view but at first, seems that with the clusters' initialization
@@ -178,13 +186,15 @@ code as we need OCM for only certain parts of the `ROSA` administration.
 - Update `ocm` code to manage different cluster implementations (OSD and ROSA)
 - Implement `AWS` STS roles management for `ROSA` cluster accounts with the `AWS api`
 - Update SOPS to include `ROSA` type clusters onboarding to app-interface
-- Implement a new integration to leverage `ROSA cli` codebase with a golang operator to manage ROSA
-  cluster creation. **This can be worked on in parallel as we can onboard clusters created by `ROSA cli`.**
-- Create an additional account to host AppSRE `ROSA` clusters
+- ~~Implement a new integration to leverage `ROSA cli` codebase with a golang operator to manage ROSA
+  cluster creation. **This can be worked on in parallel as we can onboard clusters created by `ROSA cli`.**~~
+  `OCM` improvements are being made, this needs to be set on hold.
+- Create an additional account to host AppSRE `ROSA` clusters / if we decide to use an account per cluster, a
+  clear procedure on how to request these needs to be in place.
 
 ### Future work
 
-- Addapt Kafka clusters to a Cluster implementation
+- Adapt Kafka clusters to a Cluster implementation
 
 ### Resources
 
