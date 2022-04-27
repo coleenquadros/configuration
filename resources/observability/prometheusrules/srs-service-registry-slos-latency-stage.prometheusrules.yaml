@@ -312,39 +312,40 @@ spec:
             latency: "1.0"
             namespace: service-registry-stage
           record: rest_requests_seconds_bucket_ratio:write:errorrate3d
-    - name: srs-service-registry-latency-search-ops-p99.slo.rules
+    - name: srs-service-registry-latency-search.slo.rules
       rules:
+        # === Search
         - alert: SRSServiceRegistryAPISearchLatency30mto6hP99BudgetBurn
           annotations:
             message: "High 6h requests latency budget burn for Service Registry API Search ops p99 (current value: {{ $value | humanize }})"
-            dashboard: "https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage&var-routeName=service-registry-bu98"
+            dashboard: "https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage&var-routeName=service-registry-bu98-stage"
             runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/service-registry/sop#srs-service-registry-latency"
           expr: |
-              latencytarget:service_registry_search_ops:rate6h{job="apicurio-registry",namespace="service-registry-stage",latency="1.0"} > (6*(1-0.99000))
-              and
-              latencytarget:service_registry_search_ops:rate30m{job="apicurio-registry",namespace="service-registry-stage",latency="1.0"} > (6*(1-0.99000))
+            rest_requests_seconds_bucket_ratio:search:errorrate6h{job="apicurio-registry",namespace="service-registry-stage",latency="1.0"} > (6.00 * (1-0.99000))
+            and
+            rest_requests_seconds_bucket_ratio:search:errorrate30m{job="apicurio-registry",namespace="service-registry-stage",latency="1.0"} > (6.00 * (1-0.99000))
           labels:
             service: srs-service-registry
             latency: "1.0"
             quantile: "99"
             namespace: service-registry-stage
-            severity: info
+            severity: high
         - alert: SRSServiceRegistryAPISearchLatency2hto1dor6hto3dP99BudgetBurn
           annotations:
             message: "High 1d/3d requests latency budget burn for Service Registry API Search ops p99 (current value: {{ $value | humanize }})"
-            dashboard: "https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage&var-routeName=service-registry-bu98"
+            dashboard: "https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage&var-routeName=service-registry-bu98-stage"
             runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/service-registry/sop#srs-service-registry-latency"
           expr: |
             (
-              latencytarget:service_registry_search_ops:rate1d{job="apicurio-registry",namespace="service-registry-stage",latency="1.0"} > (3*(1-0.99000))
+              rest_requests_seconds_bucket_ratio:search:errorrate1d{job="apicurio-registry",namespace="service-registry-stage",latency="1.0"} > (3.00 * (1-0.99000))
               and
-              latencytarget:service_registry_search_ops:rate2h{job="apicurio-registry",namespace="service-registry-stage",latency="1.0"} > (3*(1-0.99000))
+              rest_requests_seconds_bucket_ratio:search:errorrate2h{job="apicurio-registry",namespace="service-registry-stage",latency="1.0"} > (3.00 * (1-0.99000))
             )
             or
             (
-              latencytarget:service_registry_search_ops:rate3d{job="apicurio-registry",namespace="service-registry-stage",latency="1.0"} > (1*(1-0.99000))
+              rest_requests_seconds_bucket_ratio:search:errorrate3d{job="apicurio-registry",namespace="service-registry-stage",latency="1.0"} > (1.00 * (1-0.99000))
               and
-              latencytarget:service_registry_search_ops:rate6h{job="apicurio-registry",namespace="service-registry-stage",latency="1.0"} > (1*(1-0.99000))
+              rest_requests_seconds_bucket_ratio:search:errorrate6h{job="apicurio-registry",namespace="service-registry-stage",latency="1.0"} > (1.00 * (1-0.99000))
             )
           labels:
             service: srs-service-registry
@@ -354,85 +355,62 @@ spec:
             severity: info
         - expr: |
             1 - (
-              sum(rate(rest_requests_seconds_bucket{job="apicurio-registry",namespace="service-registry-stage",le="1.0",status_code_group!~"5xx", path=~".*/search/.*"}[5m]))
+              sum(rate(rest_requests_seconds_bucket{job="apicurio-registry",namespace="service-registry-stage",le="1.0",status_code_group!~"5xx",path=~".*/search/.*"}[30m]))
               /
-              sum(rate(rest_requests_seconds_count{job="apicurio-registry",namespace="service-registry-stage", path=~".*/search/.*"}[5m]))
+              sum(rate(rest_requests_seconds_count{job="apicurio-registry",namespace="service-registry-stage",path=~".*/search/.*"}[30m]))
             )
           labels:
             service: srs-service-registry
             job: apicurio-registry
             latency: "1.0"
             namespace: service-registry-stage
-          record: latencytarget:service_registry_search_ops:rate5m
+          record: rest_requests_seconds_bucket_ratio:search:errorrate30m
         - expr: |
             1 - (
-              sum(rate(rest_requests_seconds_bucket{job="apicurio-registry",namespace="service-registry-stage",le="1.0",status_code_group!~"5xx", path=~".*/search/.*"}[30m]))
+              sum(rate(rest_requests_seconds_bucket{job="apicurio-registry",namespace="service-registry-stage",le="1.0",status_code_group!~"5xx",path=~".*/search/.*"}[2h]))
               /
-              sum(rate(rest_requests_seconds_count{job="apicurio-registry",namespace="service-registry-stage", path=~".*/search/.*"}[30m]))
+              sum(rate(rest_requests_seconds_count{job="apicurio-registry",namespace="service-registry-stage",path=~".*/search/.*"}[2h]))
             )
           labels:
             service: srs-service-registry
             job: apicurio-registry
             latency: "1.0"
             namespace: service-registry-stage
-          record: latencytarget:service_registry_search_ops:rate30m
+          record: rest_requests_seconds_bucket_ratio:search:errorrate2h
         - expr: |
             1 - (
-              sum(rate(rest_requests_seconds_bucket{job="apicurio-registry",namespace="service-registry-stage",le="1.0",status_code_group!~"5xx", path=~".*/search/.*"}[1h]))
+              sum(rate(rest_requests_seconds_bucket{job="apicurio-registry",namespace="service-registry-stage",le="1.0",status_code_group!~"5xx",path=~".*/search/.*"}[6h]))
               /
-              sum(rate(rest_requests_seconds_count{job="apicurio-registry",namespace="service-registry-stage", path=~".*/search/.*"}[1h]))
+              sum(rate(rest_requests_seconds_count{job="apicurio-registry",namespace="service-registry-stage",path=~".*/search/.*"}[6h]))
             )
           labels:
             service: srs-service-registry
             job: apicurio-registry
             latency: "1.0"
             namespace: service-registry-stage
-          record: latencytarget:service_registry_search_ops:rate1h
+          record: rest_requests_seconds_bucket_ratio:search:errorrate6h
         - expr: |
             1 - (
-              sum(rate(rest_requests_seconds_bucket{job="apicurio-registry",namespace="service-registry-stage",le="1.0",status_code_group!~"5xx", path=~".*/search/.*"}[2h]))
+              sum(rate(rest_requests_seconds_bucket{job="apicurio-registry",namespace="service-registry-stage",le="1.0",status_code_group!~"5xx",path=~".*/search/.*"}[1d]))
               /
-              sum(rate(rest_requests_seconds_count{job="apicurio-registry",namespace="service-registry-stage", path=~".*/search/.*"}[2h]))
+              sum(rate(rest_requests_seconds_count{job="apicurio-registry",namespace="service-registry-stage",path=~".*/search/.*"}[1d]))
             )
           labels:
             service: srs-service-registry
             job: apicurio-registry
             latency: "1.0"
             namespace: service-registry-stage
-          record: latencytarget:service_registry_search_ops:rate2h
+          record: rest_requests_seconds_bucket_ratio:search:errorrate1d
         - expr: |
             1 - (
-              sum(rate(rest_requests_seconds_bucket{job="apicurio-registry",namespace="service-registry-stage",le="1.0",status_code_group!~"5xx", path=~".*/search/.*"}[6h]))
+              sum(rate(rest_requests_seconds_bucket{job="apicurio-registry",namespace="service-registry-stage",le="1.0",status_code_group!~"5xx",path=~".*/search/.*"}[3d]))
               /
-              sum(rate(rest_requests_seconds_count{job="apicurio-registry",namespace="service-registry-stage", path=~".*/search/.*"}[6h]))
+              sum(rate(rest_requests_seconds_count{job="apicurio-registry",namespace="service-registry-stage",path=~".*/search/.*"}[3d]))
             )
           labels:
             service: srs-service-registry
             job: apicurio-registry
             latency: "1.0"
             namespace: service-registry-stage
-          record: latencytarget:service_registry_search_ops:rate6h
-        - expr: |
-            1 - (
-              sum(rate(rest_requests_seconds_bucket{job="apicurio-registry",namespace="service-registry-stage",le="1.0",status_code_group!~"5xx", path=~".*/search/.*"}[1d]))
-              /
-              sum(rate(rest_requests_seconds_count{job="apicurio-registry",namespace="service-registry-stage", path=~".*/search/.*"}[1d]))
-            )
-          labels:
-            service: srs-service-registry
-            job: apicurio-registry
-            latency: "1.0"
-            namespace: service-registry-stage
-          record: latencytarget:service_registry_search_ops:rate1d
-        - expr: |
-            1 - (
-              sum(rate(rest_requests_seconds_bucket{job="apicurio-registry",namespace="service-registry-stage",le="1.0",status_code_group!~"5xx", path=~".*/search/.*"}[3d]))
-              /
-              sum(rate(rest_requests_seconds_count{job="apicurio-registry",namespace="service-registry-stage", path=~".*/search/.*"}[3d]))
-            )
-          labels:
-            service: srs-service-registry
-            job: apicurio-registry
-            latency: "1.0"
-            namespace: service-registry-stage
-          record: latencytarget:service_registry_search_ops:rate3d
+          record: rest_requests_seconds_bucket_ratio:search:errorrate3d
+
