@@ -16,7 +16,7 @@ pipelinesProvider:
 slack:
   workspace:
     $ref: /dependencies/slack/coreos.yml
-  channel: rhoc-primary
+  channel: rhoc-api-alert
 
 managedResourceTypes:
 - Deployment
@@ -52,6 +52,9 @@ resourceTemplates:
   - namespace:
       $ref: /services/managed-connectors/namespaces/managed-connectors-stage.yaml
     ref: main
+  - namespace:
+      $ref: /services/managed-connectors/namespaces/managed-connectors-production.yaml
+    ref: 4112f7d1609d79c36e2aaa737caa6a7a6a57159f
 - name: cos-fleet-catalog-camel
   url: https://gitlab.cee.redhat.com/mk-ci-cd/cos-fleet-manager
   path: /templates/cos-fleet-catalog-camel.yaml
@@ -59,6 +62,9 @@ resourceTemplates:
   - namespace:
       $ref: /services/managed-connectors/namespaces/managed-connectors-stage.yaml
     ref: main
+  - namespace:
+      $ref: /services/managed-connectors/namespaces/managed-connectors-production.yaml
+    ref: 4112f7d1609d79c36e2aaa737caa6a7a6a57159f
 - name: cos-fleet-catalog-debezium
   url: https://gitlab.cee.redhat.com/mk-ci-cd/cos-fleet-manager
   path: /templates/cos-fleet-catalog-debezium.yaml
@@ -66,6 +72,9 @@ resourceTemplates:
   - namespace:
       $ref: /services/managed-connectors/namespaces/managed-connectors-stage.yaml
     ref: main
+  - namespace:
+      $ref: /services/managed-connectors/namespaces/managed-connectors-production.yaml
+    ref: 4112f7d1609d79c36e2aaa737caa6a7a6a57159f
 - name: cos-fleet-manager
   url: https://gitlab.cee.redhat.com/mk-ci-cd/cos-fleet-manager
   path: /templates/service-template.yml
@@ -146,6 +155,64 @@ resourceTemplates:
             - name: us-east-1
               default: "true"
               supported_instance_type: 
+                standard: {}
+                eval: {}
+
+      # cluster list if dataplane cluster scaling type is set to manual
+      CLUSTER_LIST: []
+
+  - namespace:
+      $ref: /services/managed-connectors/namespaces/managed-connectors-production.yaml
+    ref: 4112f7d1609d79c36e2aaa737caa6a7a6a57159f
+    parameters:
+      DB_SSLMODE: verify-full
+      ENVIRONMENT: stage
+      REPLICAS: 6
+      MAS_SSO_BASE_URL: https://identity.api.stage.openshift.com
+      MAS_SSO_REALM: rhoas
+      OSD_IDP_MAS_SSO_REALM: rhoas-kafka-sre
+      OCM_URL: ${OCM_BASE_URL}
+      # Log level
+      GLOG_V: 10
+      # MAXIMUM NUMBER OF ALLOWED KAFKAs
+      KAFKA_CAPACITY_MAX_CAPACITY: 8
+      # Maximum number of partitions per cluster
+      KAFKA_CAPACITY_MAX_PARTITIONS: "1000"
+      # Announces public url to data-plane clients
+      SERVICE_PUBLIC_HOST_URL: "https://wxn4abbc8bqvxcy6unfe.api.openshift.com/"
+
+      MAS_SSO_ENABLE_AUTH: "true"
+      # Max allowed service accounts created by users
+      MAX_ALLOWED_SERVICE_ACCOUNTS: 50
+      # Max limit for the fetching the clients from mas-sso
+      MAX_LIMIT_FOR_SSO_GET_CLIENTS: 100
+      # A list of usernames representing users who do not have access to the service
+      DENIED_USERS: []
+      # A list of users with read-only permissions for data plane clusters
+      READ_ONLY_USERS: []
+      # A list of kafka-sre users with cluster-admin permissions for data plane clusters
+      KAFKA_SRE_USERS: []
+      # The type of vault to use to store secrets
+      VAULT_KIND: "aws"
+
+      # Cluster Organization ID to use for creating evaluation namespaces
+      CONNECTOR_EVAL_ORGANIZATIONS: "13888347"
+      # Enable support for 'unassigned' state for connectors, false for preview release
+      CONNECTOR_ENABLE_UNASSIGNED_CONNECTORS: "false"
+      # Namespace evaluation duration in golang duration format
+      CONNECTOR_EVAL_DURATION: "48h"
+      # Enable connector namespace lifecycle API, disabled for preview release
+      CONNECTOR_NAMESPACE_LIFECYCLE_API: "false"
+      # Connector configuration quota profile name
+      CONNECTORS_EVAL_NAMESPACE_QUOTA_PROFILE: "evaluation-profile"
+
+      SUPPORTED_CLOUD_PROVIDERS:
+        - name: aws
+          default: "true"
+          regions:
+            - name: us-east-1
+              default: "true"
+              supported_instance_type:
                 standard: {}
                 eval: {}
 
