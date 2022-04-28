@@ -27,6 +27,7 @@ imagePatterns:
 - quay.io/cloudservices/frontend-operator
 
 resourceTemplates:
+# Perf is getting the env, bundle, and deploying its own chrome for dev work
 - name: frontend-env
   path: /env.yml
   url: https://gitlab.cee.redhat.com/insights-platform/frontend-environments
@@ -37,12 +38,6 @@ resourceTemplates:
     ref: main
     parameters:
       ENV_NAME: env-perf
-  - namespace:
-      $ref: /services/insights/frontend-operator/namespaces/stage.yml
-    ref: main
-    parameters:
-      ENV_NAME: env-stage
-
 - name: frontend-bundle
   path: /bundle.yml
   url: https://gitlab.cee.redhat.com/insights-platform/frontend-environments
@@ -53,6 +48,13 @@ resourceTemplates:
     ref: main
     parameters:
       ENV_NAME: env-perf
+
+# Stage is going to get the entire bundle, env, and chrome
+# Perf will eventually be added to this target when chrome is onboarded
+- name: frontend-configs
+  path: /deploy/deploy.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/frontend-configs
+  targets:
   - namespace:
       $ref: /services/insights/frontend-operator/namespaces/stage.yml
     ref: main
