@@ -2686,7 +2686,7 @@ To request quota for a new cluster, create a merge request to the [ocm-resources
 
 > Note: each additional unit grants quota for 3 clusters.
 
-Once the merge request is created, send an email to [Duncan Doyle](mailto:ddoyle@redhat.com) (cc [AppSRE](mailto:sd-app-sre+kafka-requests@redhat.com)) with all the information.
+Once the merge request is created, send an email to [Cloud Services BU](mailto:cloud-services-bu@redhat.com) (cc [AppSRE](mailto:sd-app-sre+kafka-requests@redhat.com)) with all the information.
 
 Once approval is granted (preferably as a comment on the merge request), ping @ocm-resources in #service-development-b (CoreOS slack) to get the merge request merged.
 
