@@ -3,6 +3,8 @@ https://vault.devshift.net is deployed on [app-sre](<https://console.app-sre.ope
 [vault openshift template](<https://gitlab.cee.redhat.com/service/vault-devshift-net/blob/master/openshift-vault.yaml>)<br>
 [vault saas repo](<https://gitlab.cee.redhat.com/service/saas-vault-devshift-net>)<br>
 
+It is registered in CMDB as [ASRE05](https://redhat.service-now.com/nav_to.do?uri=%2Fsc_req_item.do%3Fsys_id%3D2fc2cdbedbc30110c31ec7a6059619c7%26sysparm_stack%3Dsc_req_item_list.do%3Fsysparm_query%3Dactive%3Dtrue).
+
 ## vault.devshift.net architecture
 ![vault-architecture](assets/vault-architecture.png)
 
