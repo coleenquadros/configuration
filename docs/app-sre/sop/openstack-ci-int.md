@@ -1,3 +1,8 @@
+# OBSOLETE!!
+
+This document is left for historical purposes only. It will be removed
+soon.
+
 # Provisioning VMs in OpenStack
 
 The OpenStack dashboard is here:
