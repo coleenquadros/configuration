@@ -792,7 +792,7 @@ data:
 Instructions:
 
 1. Create a secret in Vault with the data (key-value pairs) that should be applied to the cluster.
-  * The secret in Vault should be stored in the following path: `app-interface/<cluster>/<namespace>/<secret_name>`
+  * The secret in Vault should be stored in the following path: `app-interface/<service>/<environment>/<secret_name>`, environment being `stage`, `prod`, ...
   * The value of each key in the secret in Vault should **NOT** be base64 encoded.
   * If you wish to have the value base64 encoded in Vault, the field key should be of the form `<key_name>_qb64`.
 2. Add a reference to the secret in Vault under the `openshiftResources` field ([example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/cd9c6062819e2da76ed108f1bf4946ca72e593d6/data/services/cincinnati/namespaces/cincinnati-production.yml#L26-29))with the following attributes:
