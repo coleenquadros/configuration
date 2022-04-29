@@ -10,25 +10,33 @@ namespaces:
 - $ref: /services/insights/image-builder/namespaces/prod-image-builder-prod.yml
 
 slos:
-- name: image-builder compose-latency
-  SLIType: latency
-  SLISpecification: p90 of the latency of compose requests must be under 12 seconds
+- name: image-builder compose success
+  SLIType: availability
+  SLISpecification: 95% of compose requests must succeed
   SLODetails: https://gitlab.cee.redhat.com/osbuild/internal-guides/-/blob/main/src/image-builder-service/architecture/image-builder-crc.md
   SLOParameters:
     window: 28d
-  expr: sum(rate(image_builder_crc_http_duration_seconds_bucket{path=~".*/compose",le="12"}[{{window}}])) / sum(rate(image_builder_crc_http_duration_seconds_count{path=~".*/compose"}[{{window}}]))
-  SLOTarget: 0.90
+  expr: |
+    (
+      (1 - sum by (job) (increase(image_builder_crc_compose_errors[{{window}}])))
+      / 
+      sum by (job) (increase(image_builder_crc_compose_requests_total[{{window}}]))
+    )
+  SLOTarget: 0.95
   SLOTargetUnit: percent_0_1
   prometheusRules: /insights-prod/image-builder-prod/image-builder-prometheusrules.yml
   dashboard: https://grafana.app-sre.devshift.net/d/91_RmVCMk/image-builder
 
 - name: image-builder latency
   SLIType: latency
-  SLISpecification: p95 of the latency of non-compose requests must be under 500 milliseconds
+  SLISpecification: p95 of the latency of all requests must be under 500 milliseconds
   SLODetails: https://gitlab.cee.redhat.com/osbuild/internal-guides/-/blob/main/src/image-builder-service/architecture/image-builder-crc.md
   SLOParameters:
     window: 28d
-  expr: sum(rate(image_builder_crc_http_duration_seconds_bucket{le="0.5"}[{{window}}])) / sum(rate(image_builder_crc_http_duration_seconds_count[{{window}}]))
+  expr: |
+   sum(rate(image_builder_crc_http_duration_seconds_bucket{le="0.5"}[{{window}}])) 
+   / 
+   sum(rate(image_builder_crc_http_duration_seconds_count[{{window}}]))
   SLOTarget: 0.95
   SLOTargetUnit: percent_0_1
   prometheusRules: /insights-prod/image-builder-prod/image-builder-prometheusrules.yml
