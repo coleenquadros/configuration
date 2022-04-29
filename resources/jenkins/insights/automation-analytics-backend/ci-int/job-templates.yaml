@@ -3,7 +3,7 @@
     id: 'insights-automation-analytics-backend-sonarqube-gl-pr-check'
     name: '{gl_group}-{gl_project}-sonarqube-pr-check'
     status_context: "ci.int.devshift.net PR build"
-    branch: "master"
+    branch: "main"
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'
@@ -19,11 +19,24 @@
         - *insightsdroid_github
         - *insights_automation_analytics_backend_sonarqube_token
         - *insights_automation_analytics_backend_rh_it_root_ca
+        - *gitlab_token_iqe_bot
+        - *ibutsu
     publishers:
     - junit:
         results: 'artifacts/junit-*.xml'
     - archive:
         artifacts: 'artifacts/**/*'
+    - gitlab_message:
+        <<: *gitlab_message_defaults
+    - gitlab-notifier:
+        name: '{name}'
+        mark-unstable-as-success: true
+    - slack:
+        room: '{slack_channel_notification}'
+        notify-start: false
+        notify-success: false
+        notify-failure: true
+        notify-repeated-failure: true
     <<: *gl_pr_check
 
 - job-template:
