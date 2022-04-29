@@ -33,6 +33,9 @@ The following outlines 3 different approaches to tackle the typing issue.
 
 Similar to our QR golang integrations, we could rely on a GQL client with code generator functionality for generating schema classes automatically.
 An option might be [sgqlc](https://github.com/profusion/sgqlc), which is also listed as a client option on the official [GQL website](https://graphql.org/code/#python).
+sgqlc allows for query generation - something we also pursue in our golang integrations.
+Sadly, sgqlc lacks static type checking support. However, the maintainer [mentions](https://github.com/profusion/sgqlc/issues/129#issuecomment-885820088) that its a fairly doable task to contribute.
+Currently we are not aware of alternatives, so an upstream contribution might pose a viable option.
 
 **Pros:**
 
