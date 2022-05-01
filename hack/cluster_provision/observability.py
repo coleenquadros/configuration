@@ -331,7 +331,6 @@ def _add_appsre_observability_ns_to_nginx_saas(
         },
         "ref": "master",
         "parameters": {
-            "REPLICAS": 3,
             "ALERTMANAGER_SERVER_NAME": f"alertmanager.{cluster}.devshift.net",
             "PROMETHEUS_SERVER_NAME": f"prometheus.{cluster}.devshift.net"
         }
