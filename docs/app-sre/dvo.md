@@ -54,7 +54,8 @@ More information: https://docs.kubelinter.io/#/generated/checks?id=no-anti-affin
 #### deployment_validation_operator_default_service_account
 
 Excluded resource kinds: ReplicaSet
-Excluded resource names (regex): `[0-9a-f]{63}` (OLM Jobs related to CSVs)
+Excluded resource names (regex):
+- `[0-9a-z]{63}` (OLM Jobs related to CSVs)
 
 More information: https://docs.kubelinter.io/#/generated/checks?id=default-service-account
 
@@ -98,14 +99,16 @@ More information: https://docs.kubelinter.io/#/generated/checks?id=no-readiness-
 #### deployment_validation_operator_unset_cpu_requirements
 
 Excluded resource names: gabi
-Excluded resource names (regex): `[0-9a-f]{63}` (OLM Jobs related to CSVs)
+Excluded resource names (regex):
+- `[0-9a-z]{63}` (OLM Jobs related to CSVs)
 
 More information: https://docs.kubelinter.io/#/generated/checks?id=unset-cpu-requirements
 
 #### deployment_validation_operator_unset_memory_requirements
 
 Excluded resource names: gabi
-Excluded resource names (regex): `[0-9a-f]{63}` (OLM Jobs related to CSVs)
+Excluded resource names (regex):
+- `[0-9a-z]{63}` (OLM Jobs related to CSVs)
 
 More information: https://docs.kubelinter.io/#/generated/checks?id=unset-memory-requirements
 

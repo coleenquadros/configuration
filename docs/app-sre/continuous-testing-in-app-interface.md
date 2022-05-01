@@ -26,7 +26,7 @@ parameters:
 [...]
 - name: JOBID
   generate: expression
-  from: "[0-9a-f]{7}"
+  from: "[0-9a-z]{7}"
 - name: IMAGE_TAG
   value: ''
   required: true
