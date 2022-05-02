@@ -70,6 +70,8 @@ We will extend the `integration-1` schema to add a new field - `operate`. This f
 
 The `environment` section will reference an environment that includes a namespace where the integrations operator runs. This will be the integrations operator's way of knowing where to deploy additional integrations to (right next to itself). The integrations operator will validate that there is no ambiguity as to where to deploy additional integrations. It will do that by having environment awareness information (environment variables) of: what namespace am I running in, what environment am I serving.
 
+We will use the environment as a reference and not the namespace, to provide a way for the integrations operator to get a hold of additional environment parameters that should be used to deploy the integrations.
+
 The spec section will hold information on how to run each integration. It will be identical to the existing sections in each environment's values file.
 
 At this point, integrations operator knows what integrations to deploy, where to deploy them, and what they should look like.
