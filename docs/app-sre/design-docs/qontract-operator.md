@@ -57,8 +57,8 @@ We will extend the `integration-1` schema to add a new field - `operate`. This f
   upstream: https://github.com/app-sre/qontract-reconcile
 
   operate:
-  - environment:
-      $ref: /path/to/environment/file.yml
+  - namespace:
+      $ref: /path/to/namespace/file.yml
     spec:
       resources:
         requests:
@@ -68,9 +68,9 @@ We will extend the `integration-1` schema to add a new field - `operate`. This f
       ...
   ```
 
-The `environment` section will reference an environment that includes a namespace where the integrations operator runs. This will be the integrations operator's way of knowing where to deploy additional integrations to (right next to itself). The integrations operator will validate that there is no ambiguity as to where to deploy additional integrations. It will do that by having environment awareness information (environment variables) of: what namespace am I running in, what environment am I serving.
+The `namespace` section will reference a namespace where the integrations operator runs. This will be the integrations operator's way of knowing where to deploy additional integrations to (right next to itself). To be able to only manage the same environment it is running it, the integrations operaotor will have environment awareness information (in the form of environment variables) of: what environment am I serving. When the environment variable exist, the integration will only manage the given environment. When it is not defined, the integration will manage all environments. The latter is intended for use in app-interface pr-check.
 
-We will use the environment as a reference and not the namespace, to provide a way for the integrations operator to get a hold of additional environment parameters that should be used to deploy the integrations.
+We will use the namespace as a reference, which in turn references an environment. We will use the environment to provide a way for the integrations operator to get a hold of additional environment parameters that should be used to deploy the integrations.
 
 The spec section will hold information on how to run each integration. It will be identical to the existing sections in each environment's values file.
 
