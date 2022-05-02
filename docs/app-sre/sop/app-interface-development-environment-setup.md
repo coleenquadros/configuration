@@ -4,7 +4,8 @@
 
 This SOP explains how to setup a local development environment for app-interface. This environment includes the following components:
 
-1. app-interface - this is the data repository. you can think of it as our database.
+1. app-interface - this is the prod data repository. you can think of it as our database.
+1. app-interface-dev-data - this is data we use for safe development.
 1. qontract-schemas - this is the repository that defines what the data should look like.
 1. qontract-server - this is the component that exposes the data from app-interface.
 1. qontract-reconcile - this is the main component that acts on data from app-interface.
@@ -25,6 +26,7 @@ and perhaps make your brew-installed tools override the default MacOs ones.
 
 1. Fork the following repositories:
     * [app-interface](https://gitlab.cee.redhat.com/service/app-interface)
+    * [app-interface-dev-data](https://gitlab.cee.redhat.com/app-sre/app-interface-dev-data.git)
     * [qontract-server](https://github.com/app-sre/qontract-server)
     * [qontract-reconcile](https://github.com/app-sre/qontract-reconcile)
     * [qontract-schemas](https://github.com/app-sre/qontract-schemas)
@@ -36,6 +38,7 @@ and perhaps make your brew-installed tools override the default MacOs ones.
     $ git clone git@github.com:<github_username>/qontract-reconcile ./app-sre/qontract-reconcile  
     $ git clone git@github.com:<github_username>/qontract-schemas ./app-sre/qontract-schemas  
     $ git clone git@gitlab.cee.redhat.com:<redhat_username>/app-interface ./service/app-interface
+    $ git clone git@gitlab.cee.redhat.com:<redhat_username>/app-interface-dev-data ./service/app-interface-dev-data
     ```
 
 1. Make sure your file directory is the same as following:
@@ -49,6 +52,7 @@ and perhaps make your brew-installed tools override the default MacOs ones.
     │   └── qontract-server
     └── service
         └── app-interface
+        |-- app-interface-dev-data
     6 directories, 0 files
     ```
 
@@ -119,7 +123,9 @@ make dev-reconcile-loop dev-reconcile-loop INTEGRATION_NAME=<integration-name> D
 
 We are trying to move towards using development data when doing development work. This is currently hard because to perform development we need data, which has to be created.
 
-The repository that is being used for development purposes (and in the future for demo/docs purposes) is [app-interface](https://github.com/app-sre/app-interface).
+This [repository](https://gitlab.cee.redhat.com/app-sre/app-interface-dev-data) contains development data that can be used as is for `qontract-server`.
+The repository also has a [sanitization make target](https://gitlab.cee.redhat.com/app-sre/app-interface-dev-data#sanitizing-data-for-public-example-repository) to convert the data for public purposes.
+If you change/add new data in that repository, also make sure to adjust the sanitization method.
 
 It is encouraged that development work is done using this repository and not using the [real data](https://gitlab.cee.redhat.com/service/app-interface).
 
@@ -138,17 +144,6 @@ It is encouraged that development work is done using this repository and not usi
     $ cd qontract-reconcile
     $ qontract-reconcile --config config.dev.toml --dry-run --log-level DEBUG <integration-name>
     ```
-
-The development environment currently has actual resources behind it: an OSD cluster and an AWS account; But we can't commit changes to a public repository with real information.
-
-To make the required changes to work with those resources, run the following commands in the `app-interface` directory:
-
-```sh
-sed -i 's|serverUrl.*|serverUrl: https://api.appint-ex-01.e7t8.p1.openshiftapps.com:6443|g' data/clusters/appint-ex-01/cluster.yml
-sed -i 's|serverUrl.*|serverUrl: https://api.appint-ex-01.e7t8.p1.openshiftapps.com:6443|g' data/clusters/appint-ex-02/cluster.yml
-sed -i 's|1234567890|249118421612|g' data/aws/app-int-example-01/account.yml
-sed -i 's|1234567890|249118421612|g' data/aws/app-int-example-02/account.yml
-```
 
 ## Creating a new integration
 
