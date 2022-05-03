@@ -110,4 +110,7 @@ This was quite the struggle. We chose to go with using the same generation mecha
 Milestone 1: Develop integrations-manager.
 Milestone 2: Deploy a single integration via the manager (email-sender?)
 Milestone 3: Deploy all integrations via the manager
-Milestone 4: Enable dynamic number of shards (based on app-interface data). For example, openshift-resources should run with N shards, N being number of clusters managed in app-interface.
+
+## Future work
+
+Enable dynamic number of shards (based on app-interface data). For example, openshift-resources should run with N shards, N being number of clusters managed in app-interface.
