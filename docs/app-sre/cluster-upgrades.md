@@ -45,6 +45,8 @@ The more clusters have that version, the faster the number of soaking days is in
 
 Note that clusters also follow different upgrade channels. Clusters following different channels don't get the same version available at the same time.
 
+Since the stable channel get X.Y upgrade paths enabled much later than the candidate and fast channels, we don't use it. This avoids clusters lagging behind, not getting any upgrade (not even patch/CVE) while the others are running fine on later X.Y releases. See [APPSRE-5393](https://issues.redhat.com/browse/APPSRE-5393) for more context and discussion.
+
 All the cluster mutexes must be acquired to be able to schedule the upgrade. A single mutex can be held by only one cluster at a time. Once acquired by a cluster, a mutex is held for the whole duration of the upgrade.
 
 ## Version history
@@ -109,10 +111,11 @@ OCM runs on 3 clusters with 0 soakdays, getting upgrades from the candidate chan
 - appsres04ue2
 - ssotest01ue1
 
-Then the production cluster app-sre-prod-04 will be upgraded from the stable channel after 18 soakdays. Since soakdays are cumulated with each cluster running the workload, the ocm soakdays number will grow fast: it should get upgraded after 18/3=6 days, provided the version is available in the stable channel. 
+Then the production clusters app-sre-prod-04 and appsrep06ue2 will be upgraded from the fast channel after 18 soakdays. Since soakdays are cumulated with each cluster running the workload, the ocm soakdays number will grow fast: they should get upgraded after 18/3=6 days, provided the version is available in the fast channel.
 
 OCM and Quay production clusters share a mutex `ocm-quay-critical` which avoids simultaneous upgrades of these clusters:
 - app-sre-prod-04
+- appsrep06ue2
 - quayp04ue2
 - quayp05ue1
 
@@ -121,11 +124,12 @@ OCM and Quay production clusters share a mutex `ocm-quay-critical` which avoids 
 The first cluster to be upgraded is the stage environment cluster quays02ue1, on the candidate channel. It is upgraded with every new version.
 
 Then the 2 production clusters are upgraded after
-- 6 days for quayp05ue1 (stable channel).
-- 11 days for quayp04ue2 (stable channel). This should allow some delay between the two clusters, even if the first one is being done late, on a Monday for example.
+- 6 days for quayp05ue1 (fast channel).
+- 11 days for quayp04ue2 (fast channel). This should allow some delay between the two clusters, even if the first one is being done late, on a Monday for example.
 
 OCM and Quay production clusters share a mutex `ocm-quay-critical` which avoids simultaneous upgrades of these clusters:
 - app-sre-prod-04
+- appsrep06ue2
 - quayp04ue2
 - quayp05ue1
 
