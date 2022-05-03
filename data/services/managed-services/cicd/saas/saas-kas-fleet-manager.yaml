@@ -64,7 +64,7 @@ resourceTemplates:
     # - Commits can be found here: https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/commits/main
     # If in doubt, please check with the MK Control Plane team.
     # We are exploring how to automate this in the future.
-    ref: 00fed8a824b7c35bd7e2f9a483861f6c464c74d1
+    ref: 4d190c52196132a85251fd2a257fc1123f6224f8
     parameters:
       ISSUER_URL: ${SSO_BASE_URL}
       OBSERVATORIUM_URL: https://observatorium-mst.api.openshift.com/api/metrics/v1/managedkafka
@@ -338,7 +338,7 @@ resourceTemplates:
     # the very first commit i.e https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/merge_requests/356/commits?commit_id=f0fd63740464c5fa4bda395d5d31f675eff049ac
     # If in doubt, see with the control plane team.
     # We are exploring into using automating this.
-    ref: 00fed8a824b7c35bd7e2f9a483861f6c464c74d1
+    ref: 4d190c52196132a85251fd2a257fc1123f6224f8
     parameters:
       DB_SSLMODE: verify-full
       ENVIRONMENT: production
@@ -460,45 +460,59 @@ resourceTemplates:
 
       # parameters for SUPPORTED_INSTANCE_TYPES
       SUPPORTED_INSTANCE_TYPES:
-        - id: eval
-          display_name: "Eval"
-          sizes:
-            - id: x1
-              ingressThroughputPerSec: "30Mi"
-              egressThroughputPerSec: "30Mi"
-              totalMaxConnections: 3000
-              maxDataRetentionSize: "1000Gi"
-              maxPartitions: 1000
-              maxDataRetentionPeriod: "P14D"
-              maxConnectionAttemptsPerSec: 100
-              quotaConsumed: 1
-              quotaType: "rhosak"
-              capacityConsumed: 1
-        - id: standard
-          display_name: "Standard"
-          sizes:
-            - id: x1
-              ingressThroughputPerSec: "50Mi"
-              egressThroughputPerSec: "100Mi"
-              totalMaxConnections: 3000
-              maxDataRetentionSize: "1000Gi"
-              maxPartitions: 1500
-              maxDataRetentionPeriod: "P14D"
-              maxConnectionAttemptsPerSec: 100
-              quotaConsumed: 1
-              quotaType: "rhosak"
-              capacityConsumed: 1
-            - id: x2
-              ingressThroughputPerSec: "100Mi"
-              egressThroughputPerSec: "200Mi"
-              totalMaxConnections: 4000
-              maxDataRetentionSize: "2000Gi"
-              maxPartitions: 3000
-              maxDataRetentionPeriod: "P14D"
-              maxConnectionAttemptsPerSec: 200
-              quotaConsumed: 2
-              quotaType: "rhosak"
-              capacityConsumed: 2
+      - id: eval
+        display_name: "Eval"
+        sizes:
+          - id: x1
+            ingressThroughputPerSec: "30Mi"
+            egressThroughputPerSec: "30Mi"
+            totalMaxConnections: 3000
+            maxDataRetentionSize: "1000Gi"
+            maxPartitions: 1000
+            maxDataRetentionPeriod: "P14D"
+            maxConnectionAttemptsPerSec: 100
+            quotaConsumed: 1
+            quotaType: "RHOSAKTrial"
+            capacityConsumed: 1
+      - id: developer
+        display_name: "Trial"
+        sizes:
+          - id: x1
+            ingressThroughputPerSec: "1Mi"
+            egressThroughputPerSec: "1Mi"
+            totalMaxConnections: 100
+            maxDataRetentionSize: "10Gi"
+            maxPartitions: 100
+            maxDataRetentionPeriod: "P14D"
+            maxConnectionAttemptsPerSec: 50
+            quotaConsumed: 1
+            quotaType: "RHOSAKTrial"
+            capacityConsumed: 1
+      - id: standard
+        display_name: "Standard"
+        sizes:
+          - id: x1
+            ingressThroughputPerSec: "50Mi"
+            egressThroughputPerSec: "100Mi"
+            totalMaxConnections: 3000
+            maxDataRetentionSize: "1000Gi"
+            maxPartitions: 1500
+            maxDataRetentionPeriod: "P14D"
+            maxConnectionAttemptsPerSec: 100
+            quotaConsumed: 1
+            quotaType: "RHOSAK"
+            capacityConsumed: 1
+          - id: x2
+            ingressThroughputPerSec: "100Mi"
+            egressThroughputPerSec: "200Mi"
+            totalMaxConnections: 6000
+            maxDataRetentionSize: "2000Gi"
+            maxPartitions: 3000
+            maxDataRetentionPeriod: "P14D"
+            maxConnectionAttemptsPerSec: 200
+            quotaConsumed: 2
+            quotaType: "RHOSAK"
+            capacityConsumed: 2
 
       # Set domain name for Kafka instances
       KAFKA_DOMAIN_NAME: "bf2.kafka.rhcloud.com"
@@ -512,7 +526,7 @@ resourceTemplates:
               default: true
               supported_instance_type:
                 standard: {}
-                eval: {}
+                developer: {}
             - name: eu-west-1
               default: false
               supported_instance_type:
@@ -547,9 +561,17 @@ resourceTemplates:
           cloud_provider: aws
           region: us-east-1
           multi_az: true
-          schedulable: true # change this to false if you do not want the cluster to be schedulable
+          schedulable: false # change this to false if you do not want the cluster to be schedulable
           kafka_instance_limit: 50 # change this to match any value of configuration
           supported_instance_type: eval
+        - name: mk-0503-013202
+          cluster_id: 1rv3g4iu2m4jqsh8agh5lphl9cgqbb0p
+          cloud_provider: aws
+          region: us-east-1
+          multi_az: false
+          schedulable: true # change this to false if you do not want the cluster to be schedulable
+          kafka_instance_limit: 50 # change this to match any value of configuration
+          supported_instance_type: developer
 
       SSO_SPECIAL_MANAGEMENT_ORG_ID: 14410147
 
