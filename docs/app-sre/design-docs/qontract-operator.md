@@ -1,4 +1,4 @@
-# Design doc: Qontract Operator
+# Design doc: Qontract Operator (Integrations Manager)
 
 ## Author/date
 
@@ -34,13 +34,13 @@ To run an integration against an app-interface instance, an integration file mus
 
 This means that the information about what integrations should be enabled in an app-interface instance already exists in the form of integration files. This means the information is queryable, which means we can write an integration to act on that information.
 
-The proposal is to create a new integration to manage (operate) other integrations: `integrations-operator`.
+The proposal is to create a new integration to manage (operate) other integrations: `integrations-manager`.
 
-This integrations operator continuously polls app-interface. In case a new integration file was added, the integrations operator will deploy the required integration.
+This integrations manager continuously polls app-interface. In case a new integration file was added, the integrations manager will deploy the required integration.
 
-Generally speaking, the integrations operator is "just" an integration that manages OpenShift resources, such as `Deployment`, `CronJob` and `StatefulSet`. It collects data from an app-interface instance, constructs OpenShift resources based on that data and applies it to a namespace (or namespaces).
+Generally speaking, the integrations manager is "just" an integration that manages OpenShift resources, such as `Deployment`, `CronJob` and `StatefulSet`. It collects data from an app-interface instance, constructs OpenShift resources based on that data and applies it to a namespace (or namespaces).
 
-The integrations operator will need to be able to do 2 things:
+The integrations manager will need to be able to do 2 things:
 1. Deploy integrations to different environments with different settings ("spec").
 2. Construct OpenShift resources that match the way we currently do (that is the Helm chart).
 
@@ -69,13 +69,13 @@ We will extend the `integration-1` schema to add a new field - `operate`. This f
       ... # additional settings as available in the Helm chart templating
   ```
 
-The `namespace` section will reference a namespace where the integrations operator runs. This will be the integrations operator's way of knowing where to deploy additional integrations to (right next to itself). To be able to only manage the same environment it is running it, the integrations operaotor will have environment awareness information (in the form of environment variables) of: what environment am I serving. When the environment variable exist, the integration will only manage the given environment. When it is not defined, the integration will manage all environments. The latter is intended for use in app-interface pr-check.
+The `namespace` section will reference a namespace where the integrations manager runs. This will be the integrations manager's way of knowing where to deploy additional integrations to (right next to itself). To be able to only manage the same environment it is running it, the integrations operaotor will have environment awareness information (in the form of environment variables) of: what environment am I serving. When the environment variable exist, the integration will only manage the given environment. When it is not defined, the integration will manage all environments. The latter is intended for use in app-interface pr-check.
 
-We will use the namespace as a reference, which in turn references an environment. We will use the environment to provide a way for the integrations operator to get a hold of additional environment parameters that should be used to deploy the integrations.
+We will use the namespace as a reference, which in turn references an environment. We will use the environment to provide a way for the integrations manager to get a hold of additional environment parameters that should be used to deploy the integrations.
 
 The spec section will hold information on how to run each integration. It will be identical to the existing sections in each environment's values file.
 
-At this point, integrations operator knows what integrations to deploy, where to deploy them, and what they should look like.
+At this point, integrations manager knows what integrations to deploy, where to deploy them, and what they should look like.
 
 > Note: This PR was submitted for further illustration: https://github.com/app-sre/qontract-schemas/pull/137
 
@@ -83,13 +83,13 @@ Construction time!
 
 The hardest part of this problem is how to construct OpenShift resources that represent the different integrations. From the qontract-reconcile Helm chart, we learn that every integration has a spec of how it needs to run. We currently use the same spec to generate the OpenShift template which is then committed to the qontract-reconcile repository.
 
-The integrations operator will create a values file on its own, and will use the existing Helm chart to construct the OpenShift template.
+The integrations manager will create a values file on its own, and will use the existing Helm chart to construct the OpenShift template.
 
-Since the integrations operator is an integration, we will still use the Helm chart to generate the OpenShift template to deploy the integrations operator itself. This means that every alternate location or method to store OpenShift templates becomes a duplication.
+Since the integrations manager is an integration, we will still use the Helm chart to generate the OpenShift template to deploy the integrations manager itself. This means that every alternate location or method to store OpenShift templates becomes a duplication.
 
-In addition, wrapping an operator around a Helm chart is not something we invented: https://sdk.operatorframework.io/docs/building-operators/helm/quickstart
+In addition, wrapping an manager around a Helm chart is not something we invented: https://sdk.operatorframework.io/docs/building-operators/helm/
 
-Using the Helm chart is also backwards compatible. It means that integrations can either be operated by integrations operator, or deployed as they were until now. This will allow a very smooth migration for integrations from being "deployed", to being "operated".
+Using the Helm chart is also backwards compatible. It means that integrations can either be operated by integrations manager, or deployed as they were until now. This will allow a very smooth migration for integrations from being "deployed", to being "operated".
 
 ## Alternatives considered
 
@@ -105,7 +105,7 @@ This was quite the struggle. We chose to go with using the same generation mecha
 
 ## Milestones
 
-Milestone 1: Develop integrations-operator.
-Milestone 2: Deploy a single integration via the operator (email-sender?)
-Milestone 3: Deploy all integrations via the operator
+Milestone 1: Develop integrations-manager.
+Milestone 2: Deploy a single integration via the manager (email-sender?)
+Milestone 3: Deploy all integrations via the manager
 Milestone 4: Enable dynamic number of shards (based on app-interface data). For example, openshift-resources should run with N shards, N being number of clusters managed in app-interface.
