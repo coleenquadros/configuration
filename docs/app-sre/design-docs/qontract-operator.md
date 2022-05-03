@@ -65,7 +65,8 @@ We will extend the `integration-1` schema to add a new field - `operate`. This f
         limits:
       logs:
         slack: true
-      ...
+      shards: 1
+      ... # additional settings as available in the Helm chart templating
   ```
 
 The `namespace` section will reference a namespace where the integrations operator runs. This will be the integrations operator's way of knowing where to deploy additional integrations to (right next to itself). To be able to only manage the same environment it is running it, the integrations operaotor will have environment awareness information (in the form of environment variables) of: what environment am I serving. When the environment variable exist, the integration will only manage the given environment. When it is not defined, the integration will manage all environments. The latter is intended for use in app-interface pr-check.
