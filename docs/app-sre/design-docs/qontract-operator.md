@@ -14,6 +14,8 @@ To deploy services, we expect an OpenShift template in the code repository.
 
 Qontract-reconcile integrations have a [generated OpenShift template](https://github.com/app-sre/qontract-reconcile/tree/master/openshift) (using a [Helm chart](https://github.com/app-sre/qontract-reconcile/tree/master/helm) in the repository). This is because an integration can run for different app-interface instances (commercial vs. fedramp for example), or even for the same app-interface instance, but in different environments (external vs. internal for example).
 
+> Note: Environments in the context of this document are the app-interface environment representation, namely an environment file: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-interface/api/entities-and-relations.md#products-environments-namespaces-and-apps.
+
 With this approach, adding an existing integration to a new environment requires a PR to the qontract-reconcile repository to update a (Helm) values file with the `spec` of the integration (resources, slack logs, state, etc). This also means that adding a new environment requires a new values file in qontract-reconcile.
 
 Since integrations are already defined in app-interface instances (usually under `/data/integrations`), this creates a duplication.
@@ -69,7 +71,7 @@ We will extend the `integration-1` schema to add a new field - `operate`. This f
       ... # additional settings as available in the Helm chart templating
   ```
 
-The `namespace` section will reference a namespace where the integrations manager runs. This will be the integrations manager's way of knowing where to deploy additional integrations to (right next to itself). To be able to only manage the same environment it is running it, the integrations operaotor will have environment awareness information (in the form of environment variables) of: what environment am I serving. When the environment variable exist, the integration will only manage the given environment. When it is not defined, the integration will manage all environments. The latter is intended for use in app-interface pr-check.
+The `namespace` section will reference a namespace where an integrations manager instance runs. There will be an integrations manager instance per environment. This will be the integrations manager's way of knowing where to deploy additional integrations to (right next to itself). To be able to only manage the same environment it is running it, the integrations operaotor will have environment awareness information (in the form of environment variables) of: what environment am I serving. When the environment variable exist, the integration will only manage the given environment. When it is not defined, the integration will manage all environments. The latter is intended for use in app-interface pr-check.
 
 We will use the namespace as a reference, which in turn references an environment. We will use the environment to provide a way for the integrations manager to get a hold of additional environment parameters that should be used to deploy the integrations.
 
