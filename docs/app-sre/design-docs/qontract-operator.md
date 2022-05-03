@@ -36,7 +36,7 @@ To run an integration against an app-interface instance, an integration file mus
 
 This means that the information about what integrations should be enabled in an app-interface instance already exists in the form of integration files. This means the information is queryable, which means we can write an integration to act on that information.
 
-The proposal is to create a new integration to manage (operate) other integrations: `integrations-manager`.
+The proposal is to create a new integration to manage other integrations: `integrations-manager`.
 
 This integrations manager continuously polls app-interface. In case a new integration file was added, the integrations manager will deploy the required integration.
 
@@ -48,7 +48,7 @@ The integrations manager will need to be able to do 2 things:
 
 Schema time!
 
-We will extend the `integration-1` schema to add a new field - `operate`. This field will hold information on where to run the integration (environment) and what spec to run it with:
+We will extend the `integration-1` schema to add a new field - `managed`. This field will hold information on where to run the integration (environment) and what spec to run it with:
   ```yaml
   $schema: /app-sre/integration-1.yml
 
@@ -58,7 +58,7 @@ We will extend the `integration-1` schema to add a new field - `operate`. This f
 
   upstream: https://github.com/app-sre/qontract-reconcile
 
-  operate:
+  managed:
   - namespace:
       $ref: /path/to/namespace/file.yml
     spec:
@@ -91,7 +91,7 @@ Since the integrations manager is an integration, we will still use the Helm cha
 
 In addition, wrapping an manager around a Helm chart is not something we invented: https://sdk.operatorframework.io/docs/building-operators/helm/
 
-Using the Helm chart is also backwards compatible. It means that integrations can either be operated by integrations manager, or deployed as they were until now. This will allow a very smooth migration for integrations from being "deployed", to being "operated".
+Using the Helm chart is also backwards compatible. It means that integrations can either be managed by integrations manager, or deployed as they were until now. This will allow a very smooth migration for integrations from being "deployed", to being "managed".
 
 ## Alternatives considered
 
