@@ -29,6 +29,8 @@ managedResourceTypes:
 - RoleBinding
 - ClusterRoleBinding
 - Frontend
+- FrontendEnvironment
+- Bundle
 
 imagePatterns:
 - quay.io/cloudservices
@@ -69,3 +71,24 @@ resourceTemplates:
     parameters:
       ENV_NAME: "env-perf"
       IMAGE: "quay.io/cloudservices/insights-chrome-frontend"
+
+- name: frontend-env
+  path: /env.yml
+  url: https://gitlab.cee.redhat.com/insights-platform/frontend-environments
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/consoledot-frontend-stage.yml
+    ref: main
+    parameters:
+      ENV_NAME: env-stage
+
+# Stage is going to get the entire bundle, env, and chrome
+- name: frontend-configs
+  path: /deploy/deploy.yaml
+  url: https://gitlab.cee.redhat.com/insights-platform/frontend-configs
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/consoledot-frontend-stage.yml
+    ref: main
+    parameters:
+      ENV_NAME: env-stage
