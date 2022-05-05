@@ -77,6 +77,14 @@ data:
                   socket_address:
                     address: gateway-site
                     port_value: 8000
+        transport_socket:
+          name: envoy.transport_sockets.tls
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+            common_tls_context:
+              validation_context:
+                trusted_ca:
+                  filename: /etc/ssl/certs/ca-certificates.crt
 
       # Cluster for the `upgrades_info` service:
       - name: upgrades_info
@@ -180,6 +188,8 @@ data:
               use_remote_address: true
               xff_num_trusted_hops: 1
               stat_prefix: api
+              upgrade_configs:
+                - upgrade_type: websocket
               route_config:
                 name: api
                 virtual_hosts:
