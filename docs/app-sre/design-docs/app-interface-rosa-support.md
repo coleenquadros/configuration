@@ -134,7 +134,6 @@ ROSA works the same way as `OSD`. `cluster-admin` and `dedicated-admin` exist in
   identify the cluster type. We could use the same approach in our cluster specs. This attribute will be used to identify
   the graphql subtypes and to instantiate the right OCM implementation.
 
-
 ### OCM code changes
 
 Our OCM code is very tight to OSD-type clusters. Some changes are needed:
