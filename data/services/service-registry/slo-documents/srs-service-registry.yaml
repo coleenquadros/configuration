@@ -80,64 +80,66 @@ slos:
   prometheusRulesTests: /observability/prometheusrules/srs-service-registry-slos-availability-production.prometheusrulestest.yaml
   dashboard: https://grafana.app-sre.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production&var-routeName=service-registry-bu98
 
-- name: Service Registry API Latency 90%
+# = Latency
+
+- name: Service Registry API (All) Latency 99% < 1000ms
   SLIType: latency
-  SLISpecification: Percentage of the successful service-registry requests served under 100ms
+  SLISpecification: Percentage of the successful Service Registry API requests served under 1000ms (all operations). This currently does not contribute to our customer SLA.
   SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/service-registry/slos/srs-service-registry-api-latency.md
   SLOParameters:
     window: 28d
   expr: |
-    sum(rate(rest_requests_seconds_bucket{job="apicurio-registry",namespace="service-registry-production",le="0.1",status_code_group!~"5xx"}[{{window}}]))
+    sum(rate(rest_requests_seconds_bucket{job="apicurio-registry",namespace="service-registry-production",le="1.0",status_code_group!~"5xx"}[{{window}}]))
     /
     sum(rate(rest_requests_seconds_count{job="apicurio-registry",namespace="service-registry-production"}[{{window}}]))
-  SLOTarget: 0.90
-  SLOTargetUnit: percent_0_1
-  prometheusRules: /observability/prometheusrules/srs-service-registry-slos-latency-production.prometheusrules.yaml
-  prometheusRulesTests: /observability/prometheusrules/srs-service-registry-slos-latency-production.prometheusrulestest.yaml
-  dashboard: https://grafana.app-sre.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production&var-routeName=service-registry-bu98
-
-- name: Service Registry API read operations Latency 99%
-  SLIType: latency
-  SLISpecification: Percentage of sufficiently fast requests for fetching content or meta-data of an artifact or artifact version, served under 100ms. This is one of the most basic SLOs for the product and in some way represents the service SLA for customers.
-  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/service-registry/slos/srs-service-registry-api-latency.md
-  SLOParameters:
-    window: 28d
-  expr: |
-    sum(rate(rest_requests_seconds_bucket{job="apicurio-registry",namespace="service-registry-production",le="0.1",status_code_group!~"5xx", method="GET", path!~".*/search/.*"}[{{window}}]))
-    /
-    sum(rate(rest_requests_seconds_count{job="apicurio-registry",namespace="service-registry-production", method="GET", path!~".*/search/.*"}[{{window}}]))
   SLOTarget: 0.99
   SLOTargetUnit: percent_0_1
   prometheusRules: /observability/prometheusrules/srs-service-registry-slos-latency-production.prometheusrules.yaml
   prometheusRulesTests: /observability/prometheusrules/srs-service-registry-slos-latency-production.prometheusrulestest.yaml
   dashboard: https://grafana.app-sre.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production&var-routeName=service-registry-bu98
 
-- name: Service Registry API search operations Latency 99%
+- name: Service Registry API (Read) Latency 99% < 250ms
   SLIType: latency
-  SLISpecification: Percentage of sufficiently fast requests for searching for or listing artifacts or artifact versions, served under 1s
+  SLISpecification: Percentage of the successful Service Registry API requests served under 250ms (read operations). This currently does not contribute to our customer SLA.
   SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/service-registry/slos/srs-service-registry-api-latency.md
   SLOParameters:
     window: 28d
   expr: |
-    sum(rate(rest_requests_seconds_bucket{job="apicurio-registry",namespace="service-registry-production",le="1.0" ,status_code_group!~"5xx", path=~".*/search/.*"}[{{window}}]))
+    sum(rate(rest_requests_seconds_bucket{job="apicurio-registry",namespace="service-registry-production",le="0.25",status_code_group!~"5xx",method="GET",path!~".*/search/.*"}[{{window}}]))
     /
-    sum(rate(rest_requests_seconds_count{job="apicurio-registry",namespace="service-registry-production", path=~".*/search/.*"}[{{window}}]))
+    sum(rate(rest_requests_seconds_count{job="apicurio-registry",namespace="service-registry-production",method="GET",path!~".*/search/.*"}[{{window}}]))
   SLOTarget: 0.99
   SLOTargetUnit: percent_0_1
   prometheusRules: /observability/prometheusrules/srs-service-registry-slos-latency-production.prometheusrules.yaml
   prometheusRulesTests: /observability/prometheusrules/srs-service-registry-slos-latency-production.prometheusrulestest.yaml
   dashboard: https://grafana.app-sre.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production&var-routeName=service-registry-bu98
 
-- name: Service Registry API write operations Latency 99%
+- name: Service Registry API (Write) Latency 99% < 1000ms
   SLIType: latency
-  SLISpecification: Percentage of sufficiently fast requests for creating, updating, and deleting content for an artifact or artifact version, served under 1s
+  SLISpecification: Percentage of the successful Service Registry API requests served under 1000ms (write operations). This currently does not contribute to our customer SLA.
   SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/service-registry/slos/srs-service-registry-api-latency.md
   SLOParameters:
     window: 28d
   expr: |
-    sum(rate(rest_requests_seconds_bucket{job="apicurio-registry",namespace="service-registry-production",le="1.0" ,status_code_group!~"5xx", method=~"POST|PUT|DELETE", path!~".*/search/.*"}[{{window}}]))
+    sum(rate(rest_requests_seconds_bucket{job="apicurio-registry",namespace="service-registry-production",le="1.0" ,status_code_group!~"5xx",method=~"POST|PUT|DELETE",path!~".*/search/.*"}[{{window}}]))
     /
-    sum(rate(rest_requests_seconds_count{job="apicurio-registry",namespace="service-registry-production", method=~"POST|PUT|DELETE", path!~".*/search/.*"}[{{window}}]))
+    sum(rate(rest_requests_seconds_count{job="apicurio-registry",namespace="service-registry-production",method=~"POST|PUT|DELETE",path!~".*/search/.*"}[{{window}}]))
+  SLOTarget: 0.99
+  SLOTargetUnit: percent_0_1
+  prometheusRules: /observability/prometheusrules/srs-service-registry-slos-latency-production.prometheusrules.yaml
+  prometheusRulesTests: /observability/prometheusrules/srs-service-registry-slos-latency-production.prometheusrulestest.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production&var-routeName=service-registry-bu98
+
+- name: Service Registry API (Search) Latency 99% < 1000ms
+  SLIType: latency
+  SLISpecification: Percentage of the successful Service Registry API requests served under 1000ms (search operations). This currently does not contribute to our customer SLA.
+  SLODetails: https://gitlab.cee.redhat.com/service/app-interface/docs/service-registry/slos/srs-service-registry-api-latency.md
+  SLOParameters:
+    window: 28d
+  expr: |
+    sum(rate(rest_requests_seconds_bucket{job="apicurio-registry",namespace="service-registry-production",le="1.0" ,status_code_group!~"5xx",path=~".*/search/.*"}[{{window}}]))
+    /
+    sum(rate(rest_requests_seconds_count{job="apicurio-registry",namespace="service-registry-production",path=~".*/search/.*"}[{{window}}]))
   SLOTarget: 0.99
   SLOTargetUnit: percent_0_1
   prometheusRules: /observability/prometheusrules/srs-service-registry-slos-latency-production.prometheusrules.yaml
