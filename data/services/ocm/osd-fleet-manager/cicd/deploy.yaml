@@ -33,9 +33,9 @@ authentication:
     field: all
 
 resourceTemplates:
-- name: osd-fleet-manager-region-config
+- name: osd-fleet-manager
   url: https://gitlab.cee.redhat.com/service/osd-fleet-manager
-  path: /templates/provider-configuration-template.yml
+  path: /templates/service-template.yml
   targets:
   - namespace:
       $ref: /services/ocm/osd-fleet-manager/namespaces/integration.yml
@@ -44,3 +44,30 @@ resourceTemplates:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: service-osd-fleet-manager-gl-build-main
+    parameters:
+      ENVIRONMENT: integration
+      REPLICAS: 1
+      SUPPORTED_CLOUD_PROVIDERS: |-
+        - name: aws
+          regions: []
+      CLUSTER_TEMPLATES: |-2
+          # HyperShift Service Cluster
+          hs-sc:
+            name_prefix: "hs-sc-"
+            openshift_version: ""
+            multi_az: false
+            ccs: false
+            compute_machine_type: m5.xlarge
+            compute_autoscale: false
+            compute_nodes: 4
+
+          # HyperShift Management Cluster
+          hs-mc:
+            name_prefix: "hs-mc-"
+            openshift_version: ""
+            multi_az: false
+            ccs: false
+            compute_machine_type: m5.xlarge
+            compute_autoscale: true
+            compute_autoscale_min_replicas: 4
+            compute_autoscale_max_replicas: 8
