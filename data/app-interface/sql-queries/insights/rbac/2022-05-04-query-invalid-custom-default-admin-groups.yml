@@ -1,0 +1,24 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+name: 2022-05-04-query-invalid-custom-default-admin-groups
+labels: {}
+namespace:
+  $ref: /services/insights/rbac/namespaces/rbac-prod.yml
+identifier: rbac-prod
+output: stdout
+queries:
+  - |
+    SELECT name,
+           g.platform_default,
+           g.admin_default,
+           g.system,
+           g.tenant_id,
+           t.tenant_name
+    FROM management_group g
+    INNER JOIN api_tenant t ON t.id = g.tenant_id
+    WHERE g.admin_default = TRUE
+      AND g.system = FALSE
+      AND g.tenant_id NOT IN
+        (SELECT id
+         FROM api_tenant
+         WHERE tenant_name = 'public');
