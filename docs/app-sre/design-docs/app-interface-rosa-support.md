@@ -184,6 +184,7 @@ Such as kafka clusters, managing `ROSA` with additional methods is a viable way.
 code comprehension, maintainability and coherence to just have different types under the cluster meta type with its
 separate implementations. Following this path does not completely fit, because not all `ROSA` required logic is
 implemented or brought by OCM.
+
 ### Current OCM integrations
 
 - ocm_additional_routers: Not supported in ROSA.
@@ -194,9 +195,7 @@ implemented or brought by OCM.
 - ocm_github_idp: Supported. We could use the same approach as in OSD.
 - ocm_groups: Supported. dedicated-admin could be assigned the same way.
 - ocm_machine_pools: Supported
-- ocm_upgrade_scheduler:
-
-
+- ocm_upgrade_scheduler: Needs to be updated to support STS version gates. [REF](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/utils/ocm.py#L856)
 
 ## Decissions made
 
