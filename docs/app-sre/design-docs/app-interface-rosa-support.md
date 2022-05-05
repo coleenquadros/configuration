@@ -1,5 +1,7 @@
 # Design doc: ROSA support in App-Interface
 
+[toc]
+
 ## Author/date
 
 Jordi Piriz / 2022-04-18
@@ -117,8 +119,6 @@ the whole process, we could just hold off and wait until the `OCM` support is co
 
 If we have the urge to provision a lot of clusters we can re-evaluate this approach.
 
-## Cluster Management
-
 ### Roles
 
 ROSA works the same way as `OSD`. `cluster-admin` and `dedicated-admin` exist in the cluster.
@@ -170,6 +170,20 @@ of now.
 
 <img src="../assets/rosa_ocm_diagram.png" width="600"/>
 
+#### Alternatives considered
+
+##### Conditional branching
+
+A possible way is to branch the code with if/else and manage `ROSA` clusters with additional paths. I consider this
+a bad design as all the code would need to be modified if a new cluster type needs to be supported in the future.
+On the contrary, adding separate implementations leads to a clean approach and adds maintainability to the code.
+
+##### Separate methods in the OCM module
+
+Such as kafka clusters, managing `ROSA` with additional methods is a viable way. I think it's better for the sake of
+code comprehension, maintainability and coherence to just have different types under the cluster meta type with its
+separate implementations. Following this path does not completely fit, because not all `ROSA` required logic is
+implemented or brought by OCM.
 ### Current OCM integrations
 
 - ocm_additional_routers: Not supported in ROSA.
@@ -182,22 +196,9 @@ of now.
 - ocm_machine_pools: Supported
 - ocm_upgrade_scheduler:
 
-### Alternatives considered
 
-#### Conditional branching
 
-A possible way is to branch the code with if/else and manage `ROSA` clusters with additional paths. I consider this
-a bad design as all the code would need to be modified if a new cluster type needs to be supported in the future.
-On the contrary, adding separate implementations leads to a clean approach and adds maintainability to the code.
-
-#### Separate methods in the OCM module
-
-Such as kafka clusters, managing `ROSA` with additional methods is a viable way. I think it's better for the sake of
-code comprehension, maintainability and coherence to just have different types under the cluster meta type with its
-separate implementations. Following this path does not completely fit, because not all `ROSA` required logic is
-implemented or brought by OCM.
-
-### Decissions made
+## Decissions made
 
 - Cluster installation logic will be set on hold until the OCM implementation is done.
 - We will use 1 AWS account per cluster like in OSD. This way we will have the clusters isolated.
@@ -207,7 +208,7 @@ implemented or brought by OCM.
 - 1 level of abstraction will be added to the ocm code to support multiple types of clusters.
 - ROSA will have its own clusters integration
 
-### Changes list summary
+## Changes list summary
 
 - Change the `cluster` schema to be an interface. Each cluster type will be identified by the `product` attribute.
   Each cluster definition will only have its necessary attributes.
@@ -218,7 +219,7 @@ implemented or brought by OCM.
 - Create an additional account to host AppSRE `ROSA` clusters.
 - Update SOPS to include `ROSA` type clusters onboarding to app-interface
 
-### Resources
+## Resources
 
 - [OCM API Spec](https://api.openshift.com/#/default/get_api_clusters_mgmt_v1_clusters)
 - [Discussion Meeting](https://drive.google.com/file/d/1gq3R3LyTFihxBScmwXrhYpq-KR0CHNiV/view?usp=sharing)
