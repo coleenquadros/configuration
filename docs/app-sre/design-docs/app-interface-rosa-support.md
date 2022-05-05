@@ -1,4 +1,4 @@
-# Design doc: ROSA support in App-Interface
+# Design doc: ROSA support in App-Interface <! -- omit in toc -->
 
 [toc]
 
