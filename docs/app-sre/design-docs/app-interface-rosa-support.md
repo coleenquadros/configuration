@@ -215,7 +215,6 @@ implemented or brought by OCM.
   support other `ocm` cluster implementations in the future.
 - Split `ocm_clusters` integration into `osd_clusters` and `rosa_clusters`.
 - Implement `AWS` STS roles management for `ROSA` cluster accounts with the `AWS api`
-
 - Create an additional account to host AppSRE `ROSA` clusters.
 - Update SOPS to include `ROSA` type clusters onboarding to app-interface
 
