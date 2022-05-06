@@ -1,0 +1,24 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2022-05-05-prod-get-duplicated-external-tenants
+namespace:
+  $ref: /services/insights/sources/namespaces/sources-prod.yml
+identifier: sources-prod
+output: stdout
+query: |
+  SELECT
+    "t"."id", "t"."name", "t"."description", "t"."external_tenant", "t"."created_at", "t"."updated_at"
+  FROM
+    "tenants" "t"
+  WHERE
+    "t"."external_tenant" IN (
+      SELECT
+        "texten"."external_tenant"
+      FROM
+        "tenants" "texten"
+      GROUP BY
+        "texten"."external_tenant"
+      HAVING
+        count("texten"."external_tenant") > 1
+    );
