@@ -1,0 +1,50 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: configuration-anomaly-detection
+
+name: configuration-anomaly-detection
+description: 'SaaS tracking file for configuration-anomaly-detection'
+
+app:
+  $ref: /services/configuration-anomaly-detection/app.yml
+
+pipelinesProvider:
+  $ref: /services/configuration-anomaly-detection/pipelines/configuration-anomaly-detection-pipelines.app-sre-stage-01.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-sre-platform
+
+managedResourceTypes:
+  - ClusterRole
+  - ClusterRoleBinding
+  - Namespace
+  - Pipeline
+  - Role
+  - RoleBinding
+  - Secret
+  - ServiceAccount
+  - Subscription
+  - Task
+  - Trigger
+  - TriggerBinding
+
+imagePatterns:
+  - quay.io/app-sre/configuration-anomaly-detection
+
+resourceTemplates:
+  - name: configuration-anomaly-detection
+    url: https://github.com/app-sre/configuration-anomaly-detection
+    path: /openshift/template.yaml
+    parameters: {}
+    targets:
+      - namespace:
+          $ref: /services/configuration-anomaly-detection/namespaces/configuration-anomaly-detection-pipelines.app-sre-stage-01.yaml
+        ref: master
+        upstream:
+          instance:
+            $ref: /dependencies/ci-ext/ci-ext.yml
+          name: app-sre-configuration-anomaly-detection-gh-build-master
