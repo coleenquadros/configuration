@@ -1,0 +1,240 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /observability/prometheusrules/cincinnati-production.prometheusrules.yaml
+
+evaluation_interval: 1m
+
+tests:
+  - interval: 1m
+    input_series:
+      # 0m  - 20m Pod not absent
+      # 20m - 40m Pod absent
+      - series: 'up{job="cincinnati-graph-builder", namespace="cincinnati-production"}'
+        values: '1+0x20 0+0x20'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: Cincinnati Graph Builder - No targets found - production
+        exp_alerts:
+      - eval_time: 40m
+        alertname: Cincinnati Graph Builder - No targets found - production
+        exp_alerts:
+          - exp_labels:
+              alertname: Cincinnati Graph Builder - No targets found - production
+              service: cincinnati
+              severity: critical
+            exp_annotations:
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/"
+              dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1&var-datasource=appsrep06ue2-prometheus"
+              message: "No valid targets found for Cincinnati Graph builder. Either no pods are running or Prometheus was not able to scrape them"
+              link_url: "https://console-openshift-console.apps.appsrep06ue2.ohlz.p1.openshiftapps.com/k8s/ns/cincinnati-production/pods"
+  - interval: 1m
+    input_series:
+      # 0m  - 20m Pod not absent
+      # 20m - 40m Pod absent
+      - series: 'up{job="cincinnati-policy-engine", namespace="cincinnati-production"}'
+        values: '1+0x20 0+0x20'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: Cincinnati Policy Engine - No targets found - production
+        exp_alerts:
+      - eval_time: 40m
+        alertname: Cincinnati Policy Engine - No targets found - production
+        exp_alerts:
+          - exp_labels:
+              alertname: Cincinnati Policy Engine - No targets found - production
+              service: cincinnati
+              severity: critical
+            exp_annotations:
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/"
+              dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1&var-datasource=appsrep06ue2-prometheus"
+              message: "No valid targets found for Cincinnati policy-engine. Either no pods are running or Prometheus was not able to scrape them"
+              link_url: "https://console-openshift-console.apps.appsrep06ue2.ohlz.p1.openshiftapps.com/k8s/ns/cincinnati-production/pods"
+  - interval: 1m
+    input_series:
+      - series: 'cincinnati_gb_graph_upstream_scrapes_total{job="cincinnati-graph-builder",namespace="cincinnati-production"}'
+        values: '1+1x20 21+0x20'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: GBUpstreamScrapesHalted
+        exp_alerts:
+      - eval_time: 40m
+        alertname: GBUpstreamScrapesHalted
+        exp_alerts:
+          - exp_labels:
+              alertname: GBUpstreamScrapesHalted
+              service: cincinnati
+              severity: medium
+              job: cincinnati-graph-builder
+              namespace: cincinnati-production
+            exp_annotations:
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/"
+              dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1&var-datasource=appsrep06ue2-prometheus"
+              message: "Cincinnati graph-builder upstream scrapes are not functioning"
+              link_url: "https://console-openshift-console.apps.appsrep06ue2.ohlz.p1.openshiftapps.com/k8s/ns/cincinnati-production/pods"
+  - interval: 1m
+    input_series:
+      - series: 'cincinnati_gb_graph_upstream_errors_total{job="cincinnati-graph-builder",namespace="cincinnati-production"}'
+        values: '0+0x20 1+1x20'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: GBUpstreamScrapeErrors
+        exp_alerts:
+      - eval_time: 40m
+        alertname: GBUpstreamScrapeErrors
+        exp_alerts:
+          - exp_labels:
+              alertname: GBUpstreamScrapeErrors
+              service: cincinnati
+              severity: high
+              job: cincinnati-graph-builder
+              namespace: cincinnati-production
+            exp_annotations:
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/"
+              dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1&var-datasource=appsrep06ue2-prometheus"
+              message: "High error rate for Cincinnati graph-builder scrapes"
+              link_url: "https://console-openshift-console.apps.appsrep06ue2.ohlz.p1.openshiftapps.com/k8s/ns/cincinnati-production/pods"
+  - interval: 1m
+    input_series:
+      - series: 'kube_pod_container_status_restarts_total{namespace="cincinnati-production",container="cincinnati-graph-builder"}'
+        values: '0+0x10 1+1x20 21+0x20'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: GBRestart
+        exp_alerts:
+      - eval_time: 30m
+        alertname: GBRestart
+        exp_alerts:
+          - exp_labels:
+              alertname: GBRestart
+              service: cincinnati
+              severity: warning
+              container: cincinnati-graph-builder
+              namespace: cincinnati-production
+            exp_annotations:
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/"
+              dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1&var-datasource=appsrep06ue2-prometheus"
+              message: "Graph builder container has restarted"
+              link_url: "https://console-openshift-console.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com/k8s/ns/cincinnati-stage/pods"
+      - eval_time: 50m
+        alertname: GBRestart
+        exp_alerts:
+  - interval: 1m
+    input_series:
+      - series: 'cincinnati_pe_graph_incoming_requests_total{job="cincinnati-policy-engine",namespace="cincinnati-production"}'
+        values: '250+10x10 350+0x10 50+10x20'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: PEIncomingRequestsHalted
+        exp_alerts:
+      - eval_time: 20m
+        alertname: PEIncomingRequestsHalted
+        exp_alerts:
+          - exp_labels:
+              alertname: PEIncomingRequestsHalted
+              service: cincinnati
+              severity: high
+              job: cincinnati-policy-engine
+              namespace: cincinnati-production
+            exp_annotations:
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/"
+              dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1&var-datasource=appsrep06ue2-prometheus"
+              message: "Cincinnati policy-engine is not receiving/processing requests"
+              link_url: "https://console-openshift-console.apps.appsrep06ue2.ohlz.p1.openshiftapps.com/k8s/ns/cincinnati-production/pods"
+      - eval_time: 26m
+        alertname: PEIncomingRequestsHalted
+        exp_alerts:
+  - interval: 1m
+    input_series:
+      - series: 'cincinnati_pe_http_upstream_errors_total{job="cincinnati-policy-engine",namespace="cincinnati-production"}'
+        values: '0+0x10 1+1x20'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: PEUpstreamErrors
+        exp_alerts:
+      - eval_time: 17m
+        alertname: PEUpstreamErrors
+        exp_alerts:
+          - exp_labels:
+              alertname: PEUpstreamErrors
+              service: cincinnati
+              severity: medium
+              job: cincinnati-policy-engine
+              namespace: cincinnati-production
+            exp_annotations:
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/"
+              dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1&var-datasource=appsrep06ue2-prometheus"
+              message: "Cincinnati policy-engine is receiving an high error rate from upstream graph-builder"
+              link_url: "https://console-openshift-console.apps.appsrep06ue2.ohlz.p1.openshiftapps.com/k8s/ns/cincinnati-production/pods"
+  - interval: 1m
+    input_series:
+      - series: 'cincinnati_pe_graph_response_errors_total{job="cincinnati-policy-engine",namespace="cincinnati-production", kind="invalid_params"}'
+        values: '0+0x10 10+1x20'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: PEGraphResponseErrors
+        exp_alerts:
+      - eval_time: 30m
+        alertname: PEGraphResponseErrors
+        exp_alerts:
+          - exp_labels:
+              alertname: PEGraphResponseErrors
+              service: cincinnati
+              severity: high
+              job: cincinnati-policy-engine
+              kind: invalid_params
+              namespace: cincinnati-production
+            exp_annotations:
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/"
+              dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1&var-datasource=appsrep06ue2-prometheus"
+              message: "High error rate (kind invalid_params) for Cincinnati policy-engine graph endpoint"
+              link_url: "https://console-openshift-console.apps.appsrep06ue2.ohlz.p1.openshiftapps.com/k8s/ns/cincinnati-production/pods"
+  - interval: 1m
+    input_series:
+      - series: 'cincinnati_pe_graph_response_errors_total{job="cincinnati-policy-engine",namespace="cincinnati-production", kind="invalid_content_type"}'
+        values: '0+0x10 10+1x20'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: PEGraphResponseErrors
+        exp_alerts:
+      - eval_time: 16m
+        alertname: PEGraphResponseErrors
+        exp_alerts:
+          - exp_labels:
+              alertname: PEGraphResponseErrors
+              service: cincinnati
+              severity: high
+              job: cincinnati-policy-engine
+              kind: invalid_content_type
+              namespace: cincinnati-production
+            exp_annotations:
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/"
+              dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1&var-datasource=appsrep06ue2-prometheus"
+              message: "High error rate (kind invalid_content_type) for Cincinnati policy-engine graph endpoint"
+              link_url: "https://console-openshift-console.apps.appsrep06ue2.ohlz.p1.openshiftapps.com/k8s/ns/cincinnati-production/pods"
+  - interval: 1m
+    input_series:
+      - series: 'kube_pod_container_status_restarts_total{namespace="cincinnati-production",container="cincinnati-policy-engine"}'
+        values: '0+0x20 1+1x20 21+0x20'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: PERestart
+        exp_alerts:
+      - eval_time: 40m
+        alertname: PERestart
+        exp_alerts:
+          - exp_labels:
+              alertname: PERestart
+              service: cincinnati
+              severity: warning
+              container: cincinnati-policy-engine
+              namespace: cincinnati-production
+            exp_annotations:
+              runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/"
+              dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1&var-datasource=appsrep06ue2-prometheus"
+              message: "Policy engine container has restarted"
+              link_url: "https://console-openshift-console.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com/k8s/ns/cincinnati-stage/pods"
+      - eval_time: 60m
+        alertname: PERestart
+        exp_alerts:
