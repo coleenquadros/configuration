@@ -6,44 +6,7 @@ For questions unanswered by this document, please ping @app-sre-ic in [#sd-app-s
 
 ## ToC
 
-<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
-
-- [App-Interface Frequently Asked Questions](#app-interface-frequently-asked-questions)
-    - [ToC](#toc)
-    - [Useful links](#useful-links)
-    - [Topics](#topics)
-        - [Can you merge my MR](#can-you-merge-my-mr)
-        - [Contacting AppSRE](#contacting-appsre)
-        - [How can I get access to X?](#how-can-i-get-access-to-x)
-        - [I can not access X](#i-can-not-access-x)
-        - [I need help with something AWS related](#i-need-help-with-something-aws-related)
-        - [I can not access ci-ext](#i-can-not-access-ci-ext)
-        - [I can not access ci-int](#i-can-not-access-ci-int)
-        - [I can not access Grafana](#i-can-not-access-grafana)
-        - [Tagging options in app-interface](#tagging-options-in-app-interface)
-        - [Can you reset my AWS password?](#can-you-reset-my-aws-password)
-        - [Gating production promotions in app-interface](#gating-production-promotions-in-app-interface)
-        - [Get access to cluster logs via Log Forwarding](#get-access-to-cluster-logs-via-log-forwarding)
-        - [User unable to assume IAM role in the AWS Console](#user-unable-to-assume-iam-role-in-the-aws-console)
-        - [What environments are supported by AppSRE?](#what-environments-are-supported-by-appsre)
-        - [What is the Console or Prometheus URL for a service?](#what-is-the-console-or-prometheus-url-for-a-service)
-        - [Can you restart my pods?](#can-you-restart-my-pods)
-            - [OnBoarded Services](#onboarded-services)
-            - [Services not yet OnBoarded](#services-not-yet-onboarded)
-        - [Delete target from SaaS file](#delete-target-from-saas-file)
-        - [Jenkins is going to shutdown](#jenkins-is-going-to-shutdown)
-        - [How can I make my PR check job run concurrently](#how-can-i-make-my-pr-check-job-run-concurrently)
-        - [How can I see who has access to a service](#how-can-i-see-who-has-access-to-a-service)
-        - [Accessing DataHub](#accessing-datahub)
-        - [Jenkins Vault plugin upgrade](#jenkins-vault-plugin-upgrade)
-        - [I didn't receive my invite for the Github organization](#i-didnt-receive-my-invite-for-the-github-organization)
-        - [I need to add a package to a jenkins slave](#i-need-to-add-a-package-to-a-jenkins-slave)
-        - [My configuration is merged into app-interface but it isn't applied!](#my-configuration-is-merged-into-app-interface-but-it-isnt-applied)
-        - [My tekton deploy PipelineRun is silenty failing for no obvious reason](#my-tekton-deploy-pipelinerun-is-silenty-failing-for-no-obvious-reason)
-        - [I can not see metrics from my service in Prometheus](#i-can-not-see-metrics-from-my-service-in-prometheus)
-        - [I am having problems accessing a Gabi instance](#i-am-having-problems-accessing-a-gabi-instance)
-
-<!-- markdown-toc end -->
+[TOC]
 
 ## Useful links
 
@@ -237,6 +200,20 @@ Now that the fire is out, please work towards not having to do this again. The s
 1. A dependency of the pod is not responding (example: Kafka). You may want to consider using Kubernetes health probes. We can highly recommend:
 A liveness probe that checks your container's health thoroughly; on a liveness probe failure, Kubernetes restarts the container. A readiness probe that takes a container out of service if it is not healthy.
 2. A new version of a Secret/ConfigMap has been rolled out. You may use the `qontract.recycle: "true"` annotation to indicate that any pods using these resources should be restarted upon update. More information [here](/README.md#manage-openshift-resources-via-app-interface-openshiftnamespace-1yml).
+
+### Can you run this command or query for me?
+
+It does not scale well to have a team of SREs running ad-hoc commands for recurring needs of many development teams. Additionally, it leads to teams being blocked for standard operations that they can self-service.
+
+If AppSRE is asked to run an ad-hoc command, we will ask for an [ASIC ticket](https://issues.redhat.com/projects/ASIC/issues) to be created with the following information:
+
+1. A justification for why this cannot be performed via some other method:
+   1. `Job` or `CronJob` (see [Continous Delivery in app-interface](docs/app-sre/continuous-delivery-in-app-interface.md)). Note that using this method would also make the operation self-service in many cases.
+   2. For database operations: [Execute a SQL Query on an App Interface controlled RDS instance](README.md#execute-a-sql-query-on-an-app-interface-controlled-rds-instance)
+2. A step-by-step list of what needs to be done for this change
+3. An approval from a team member added to the ticket indicating that the command is safe to run
+
+The exception to above is when there is an active incident or when it is truly a one-time operation. The ASIC ticket helps the AppSRE team to track cases where there are recurring needs that would be better supported by the methods mentioned above.
 
 ### Delete target from SaaS file
 
