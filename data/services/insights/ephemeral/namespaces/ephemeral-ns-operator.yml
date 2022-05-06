@@ -1,0 +1,41 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: insights
+
+name: ephemeral-namespace-operator-system
+description: Namespace in c-rh-eph where ephemeral-namespace-operator resources are deployed
+
+cluster:
+  $ref: /openshift/insights/c-rh-c-eph/cluster.yml
+
+app:
+  $ref: /services/insights/ephemeral/app.yml
+
+environment:
+  $ref: /products/insights/environments/ephemeral.yml
+
+networkPoliciesAllow:
+- $ref: /openshift/insights/c-rh-c-eph/namespaces/openshift-operator-lifecycle-manager.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- NetworkPolicy
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+- provider: resource
+  path: /insights-common/ephemeral-namespace-operator-allow-to-admission-controller.networkpolicy.yaml
