@@ -29,7 +29,7 @@ In this part, we will prepare and populate the destination DNS zone.
     - Submit MR#3 to revert MR#2, to use the original Secret until the migration itself.
     - If shard was active - Submit MR#4 to enable cluster provisioning for the shard.
 
-1. Reduce TTL for the NS delegation record zone.
+1. Reduce TTL for the NS delegation record zone according to the [Hive external DNS SOP](https://github.com/openshift/ops-sop/blob/master/v4/troubleshoot/hive-external-dns.md).
 
 ### Migration
 
