@@ -39,7 +39,7 @@ In case the destination DNS zone is missing more than 20 records (a low number g
 
 1. Submit a MR to update the HiveConfig to use the newly created Secret.
     * Once this MR is merged, Hive controller pods will be recycled to pick up the new Secret and will start populating the destination DNS zone. See [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/1f590c8ee98845853a2a09a8339ebffdf7ca037a/resources/services/hive/stage/hive.hiveconfig.yaml#L50)
-1. Update the DNS delegation to point at the newly created DNS zone.
+1. Update the DNS delegation to point at the newly created DNS zone according to the [Hive external DNS SOP](https://github.com/openshift/ops-sop/blob/master/v4/troubleshoot/hive-external-dns.md).
 
 ## Impact
 
