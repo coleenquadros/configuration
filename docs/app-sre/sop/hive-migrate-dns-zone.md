@@ -23,11 +23,11 @@ In this part, we will prepare and populate the destination DNS zone.
 1. Record the state of all shards before starting (each shard - is it active or not?)
 
 1. For each Hive shard:
-    - If shard is active - [Disable cluster provisioning](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/hive-shard-provisioning.md#disabling-shards-from-rotation) for the [shard](https://gitlab.cee.redhat.com/service/app-interface/-/blob/2ac0b9ba83d07dc6257ba87dd3cfa93ee37ec49d/data/services/ocm/shared-resources/production.yml#L21-51)
-    - Manually update [HiveConfig](https://gitlab.cee.redhat.com/service/app-interface/-/blob/1f590c8ee98845853a2a09a8339ebffdf7ca037a/resources/services/hive/stage/hive.hiveconfig.yaml#L50) to use the newly created Secret
+    - If shard is active - Submit a MR#1 to [disable cluster provisioning](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/hive-shard-provisioning.md#disabling-shards-from-rotation) for the [shard](https://gitlab.cee.redhat.com/service/app-interface/-/blob/2ac0b9ba83d07dc6257ba87dd3cfa93ee37ec49d/data/services/ocm/shared-resources/production.yml#L21-51)
+    - Submit MR#2 to update [HiveConfig](https://gitlab.cee.redhat.com/service/app-interface/-/blob/1f590c8ee98845853a2a09a8339ebffdf7ca037a/resources/services/hive/stage/hive.hiveconfig.yaml#L50) to use the newly created Secret
     - This will cause Hive controller to restart and populate the destination DNS zone. We want to do this to populate the DNS zone ahead of time to avoid rate limiting issues.
-    - Our integrations (openshift-resources) will restore HiveConfig to its original values.
-    - If shard was active - Enable cluster provisioning for the shard
+    - Submit MR#3 to revert MR#2, to use the original Secret until the migration itself.
+    - If shard was active - Submit MR#4 to enable cluster provisioning for the shard.
 
 1. Reduce TTL for the NS delegation record zone.
 
