@@ -91,7 +91,7 @@ The integrations manager will create a values file on its own, and will use the 
 
 Since the integrations manager is an integration, we will still use the Helm chart to generate the OpenShift template to deploy the integrations manager itself. This means that every alternate location or method to store OpenShift templates becomes a duplication.
 
-In addition, wrapping an manager around a Helm chart is not something we invented: https://sdk.operatorframework.io/docs/building-operators/helm/
+In addition, wrapping the manager (an operator) around a Helm chart is not something we invented: https://sdk.operatorframework.io/docs/building-operators/helm/
 
 Using the Helm chart is also backwards compatible. It means that integrations can either be managed by integrations manager, or deployed as they were until now. This will allow a very smooth migration for integrations from being "deployed", to being "managed".
 
