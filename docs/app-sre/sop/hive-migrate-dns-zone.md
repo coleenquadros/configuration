@@ -20,12 +20,13 @@ In this part, we will prepare and populate the destination DNS zone.
 
 1. Add the DNS zone output resource to all Hive shards using a shared resources file. This is for all Hive shards to consume the same DNS zone.
 
+1. Create a temporary [shared resources](https://gitlab.cee.redhat.com/service/app-interface#manage-shared-openshift-resources-via-app-interface-openshiftnamespace-1yml) file with the new HiveConfig Route53 credentials.
+
 1. Record the state of all shards before starting (each shard - is it active or not?)
 
 1. For each Hive shard:
     - If shard is active - Submit a MR#1 to [disable cluster provisioning](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/hive-shard-provisioning.md#disabling-shards-from-rotation) for the [shard](https://gitlab.cee.redhat.com/service/app-interface/-/blob/2ac0b9ba83d07dc6257ba87dd3cfa93ee37ec49d/data/services/ocm/shared-resources/production.yml#L21-51)
-    - Submit MR#2 to update [HiveConfig](https://gitlab.cee.redhat.com/service/app-interface/-/blob/1f590c8ee98845853a2a09a8339ebffdf7ca037a/resources/services/hive/stage/hive.hiveconfig.yaml#L50) to use the newly created Secret
-    - This will cause Hive controller to restart and populate the destination DNS zone. We want to do this to populate the DNS zone ahead of time to avoid rate limiting issues.
+    - Submit MR#2 to update the Hive namespace file to use a temporary shared resources file with a different [HiveConfig](https://gitlab.cee.redhat.com/service/app-interface/-/blob/1f590c8ee98845853a2a09a8339ebffdf7ca037a/resources/services/hive/stage/hive.hiveconfig.yaml#L50) which uses the newly created Secret. This will cause Hive controller to restart and populate the destination DNS zone. We want to do this to populate the DNS zone ahead of time to avoid rate limiting issues.
     - Submit MR#3 to revert MR#2, to use the original Secret until the migration itself.
     - If shard was active - Submit MR#4 to enable cluster provisioning for the shard.
 
