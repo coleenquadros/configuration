@@ -200,8 +200,8 @@ SRS Service Registry (all of the replicas or pods) are down.
   - Search Error/exception events with keywords "Apicurio Registry" and with text "image", "deployment" etc.
 - Investigate the metrics in Grafana for any possible evidences of the crash.
   - Application: Volume, Latency, Error
-      - Stage: https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage&var-routeName=service-registry-bu98-stage
-      - Production: https://grafana.app-sre.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production&var-routeName=service-registry-bu98
+      - Stage: https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage&var-datasouce_aws=AWS%20app-sre&var-DBInstanceIdentifier_aws=srs-service-registry&var-interval=5m
+      - Production: https://grafana.app-sre.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production&var-datasouce_aws=AWS%20app-sre&var-DBInstanceIdentifier_aws=srs-service-registry-production&var-interval=5m
   - CPU, Network, Memory, IO
       - Stage: https://grafana.stage.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage
       - Production: https://grafana.app-sre.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production
@@ -232,8 +232,8 @@ SRS Service Registry is not performing normally and is returning an abnormally h
 
 - Investigate the metrics in Grafana for any possible cause of the issue
   - Application: Volume, Latency, Error
-      - Stage: https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage&var-routeName=service-registry-bu98-stage
-      - Production: https://grafana.app-sre.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production&var-routeName=service-registry-bu98
+      - Stage: https://grafana.stage.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage&var-datasouce_aws=AWS%20app-sre&var-DBInstanceIdentifier_aws=srs-service-registry&var-interval=5m
+      - Production: https://grafana.app-sre.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production&var-datasouce_aws=AWS%20app-sre&var-DBInstanceIdentifier_aws=srs-service-registry-production&var-interval=5m
   - CPU, Network, Memory, IO
       - Stage: https://grafana.stage.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-stage-01-prometheus&var-namespace=service-registry-stage
       - Production: https://grafana.app-sre.devshift.net/d/osdv4-tenant-compute-resources-ns/osdv4-tenant-compute-resources-namespace?orgId=1&var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production

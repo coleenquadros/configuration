@@ -24,7 +24,7 @@ configuration only, but the staging configuration uses the same values.
 - Alerts
     - [Availability](../../../resources/observability/prometheusrules/srs-service-registry-slos-availability-production.prometheusrules.yaml)
     - [Latency](../../../resources/observability/prometheusrules/srs-service-registry-slos-latency-production.prometheusrules.yaml)
-- [Grafana Dashboards](https://grafana.app-sre.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production&var-routeName=service-registry-bu98)
+- [Grafana Dashboards](https://grafana.app-sre.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production&var-datasouce_aws=AWS%20app-sre&var-DBInstanceIdentifier_aws=srs-service-registry-production&var-interval=5m)
 
 | Category | SLI | SLO | Alerts | Contributes to SLA
 |---|---|---|---|---
@@ -43,7 +43,7 @@ configuration only, but the staging configuration uses the same values.
 - Alerts
     - [Availability](../../../resources/observability/prometheusrules/srs-tenant-manager-slos-availability-production.prometheusrules.yaml)
     - [Latency](../../../resources/observability/prometheusrules/srs-tenant-manager-slos-latency-production.prometheusrules.yaml)
-- [Grafana Dashboards](https://grafana.app-sre.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production&var-routeName=service-registry-bu98)
+- [Grafana Dashboards](https://grafana.app-sre.devshift.net/d/VRxU14jZ1/service-registry-data-plane-metrics?var-datasource=app-sre-prod-04-prometheus&var-namespace=service-registry-production&var-datasouce_aws=AWS%20app-sre&var-DBInstanceIdentifier_aws=srs-service-registry-production&var-interval=5m)
 
 | Category | SLI | SLO | Alerts | Contributes to SLA
 |---|---|---|---|---
