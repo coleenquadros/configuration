@@ -1,0 +1,33 @@
+---
+$schema: /openshift/shared-resources-1.yml
+
+labels: {}
+
+name: hive-production-osd-8770-premigration-shared-resources
+description: shared resources for hive production namespaces
+
+openshiftResources:
+# for OSD-8770, this resource is the only one different from data/services/hive/shared-resources/production.yml
+- provider: resource
+  path: /services/hive/production/hive-osd-8770-premigration.hiveconfig.yaml
+- provider: route
+  path: /hive-common/hive/hive-controllers-metrics.route.yaml
+- provider: vault-secret
+  path: osd-sre/hive-production/hive-external-dns/external-dns-route53-admin
+  version: 2
+- provider: vault-secret
+  path: osd-sre/hive-production/hive-lets-encrypt-ca/letsencrypt-ca
+  version: 3
+- provider: vault-secret
+  path: osd-sre/hive-production/hive-external-dns/google-cloud-dns-creds
+  version: 2
+# created with relation to http://github.com/openshift/ops-sop/tree/master/v4/howto/pull-ocp-secret.md
+- provider: vault-secret
+  path: osd-sre/hive-production/hive-ci-global-pull-secret
+  version: 4
+  type: kubernetes.io/dockerconfigjson
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /services/hive/production/aws-service-provider-secret.yaml
+- provider: resource
+  path: /hive-common/hive/hive-additional-regexes.configmap.yaml
