@@ -14,32 +14,41 @@ Their Google Chat room is `IT Utility & Infra Services (UIS)`
 
 1. Generate a CSR/KEY (if a new certificate is requested)
 
-```sh
-# Wildcard cert
-# COMMON_NAME=*.mydomain.com
-
-# Single domain 
-COMMON_NAME=mydomain.com
-# ESSv9 requires secp384r1 curve for TLSv1.2
-openssl req -new -newkey ec:<(openssl ecparam -name secp384r1) -nodes \
- -out cert_req_name.csr \
- -keyout cert_req_name.key \
- -subj "/C=US/ST=North Carolina/L=Raleigh/O=Red Hat, Inc./OU=Service Delivery/CN=$COMMON_NAME"
-```
-
+    ```sh
+    # Wildcard certs are banned!
+    # Single domain 
+    COMMON_NAME=mydomain.com
+    # ESSv9 requires secp384r1 curve for TLSv1.2
+    openssl req -new -newkey ec:<(openssl ecparam -name secp384r1) -nodes \
+     -out cert_req_name.csr \
+     -keyout cert_req_name.key \
+     -subj "/C=US/ST=North Carolina/L=Raleigh/O=Red Hat, Inc./OU=Service Delivery/CN=$COMMON_NAME"
+    ```
 1. Open a General IT SNOW [ticket](https://redhat.service-now.com/help?id=sc_cat_item&sys_id=630e51c22bb23c004c71dc0e59da15bb&sc_catalog=1a98389b4fa25b40220104c85210c7d4&sysparm_category=null)
-
 1. Open a ticket with IT Operations using the [certificate request form](https://redhat.service-now.com/help?id=sc_cat_item&sys_id=e5fc3a19db0898149693cf5e13961975)
-   - Note: Use the [Application Intake Form](https://redhat.service-now.com/help?id=sc_cat_item&sys_id=88c9c7bb137f1340196f7e276144b020) to request a new application to link the certificate to in the previous form
 
-   CA Provider: Digicert
-   Ticket Reference #: `<Ticket created in previous step>`
-   Make CA Selection Digicert
+   *Note*: Use the [Application Intake Form](https://redhat.service-now.com/help?id=sc_cat_item&sys_id=88c9c7bb137f1340196f7e276144b020) to request a new application to link the certificate to in the previous form, providing the following data:
+   * CA Provider: Digicert
+   * Ticket Reference #: `<Ticket created in previous step>`
+   * Make CA Selection Digicert
      - Press the `Add` button
      - Enter the DNS information (Canonical Name is required)
-
-  *NOTE*: Make sure to attach the CSR for this request to the ticket before submitting.
-
-1. The certificate will be attached to the ticket once it is created. Optionally you can request that you want the certificate to be sent via email.
-
+    *NOTE*: Make sure to attach the CSR for this request to the ticket before submitting.
+    
+    [This](https://redhat.service-now.com/help?id=rh_ticket&table=sc_req_item&sys_id=fb1650231bd20114839e32a3cc4bcb50) is an example of the outcome of that form.
+1. The certificate will be attached as a zip file to the ticket once it is created. Optionally you can request that you want the certificate to be sent via email.
 1. (Optionally) If the certificate is to be used for an OpenShift route, it should be added to vault along with the corresponding key. See documentation here: https://gitlab.cee.redhat.com/service/app-interface/#manage-routes-via-app-interface-openshiftnamespace-1yml-using-vault
+
+# 3. Consuming the certificate
+
+The zip file in the ticket will contain instructions on how to use the certificate. **Disregard them**. They are for older versions of Apache.
+
+You will receive both the certificate for your application and the digicert CA certificate. Your service must consume both of them, **concatenated in a single file**. You may store them in separate keys in vault or concatenate them and then uploading the bundle to a single location in vault, like [we do here](https://vault.devshift.net/ui/vault/secrets/app-interface/show//app-sre/uhc-production/routes/api.stage.openshift.com). 
+
+In any case, when the concatenation happens, it **must** have the service's certificate file first and afterwards the CA certificate, like [in this example](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/0e924c191e1ce09f2dced71a404cefa30230a7ac/ansible/playbooks/roles/nginx-reverse-proxy/tasks/main.yml#L27-32). Or, if you store the bundle in a single field in Vault:
+
+``` sh
+cat $application_name.crt DigiCertCA.crt > application_name_bundle.crt
+vault kv patch $path ssl_bundle=@application_name_bundle.crt
+```
+
