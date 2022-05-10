@@ -7,15 +7,16 @@ This document defines a naming scheme for all AppSRE clusters.
 Although a cluster name can be up to 64 characters, only the first 15 are displayed in the URL (a consequence of this [issue](https://issues.redhat.com/browse/SDA-2288) ), which can cause confusion when accessing multiple clusters at one time. The idea is to create a name that is unique and human readable but only 15 chars.
 
 ## Conclusions
-app-sre clusters:
-`app-sre-(prod|stage)-0N`
-tenant clusters:
+The cluster names must have a maximum of 15 characters and the following shape:
+
 `<service>(p|s)NN<region abbreviation>`
 
-Note: To keep the name to 15 chars, limit the service name to 9 chars or fewer. In other words, 9c1c2c3c. For example, “`crcp01ue1`”.
+### Notes
+* When creating a new cluster, please check if a previous one has been created for the same service.
+* `NN` is a counter per service, neither per environment nor per region.
+* To keep the name to 15 chars, limit the service name to 9 chars or fewer. In other words, 9c1c2c3c. For example, “`crcp01ue1`”.
 
 ## Region Abbreviations
-
 Taken from [here](https://docs.aws.amazon.com/general/latest/gr/rande.html).
 
 | Region Name | Code | Abbreviation |
@@ -44,28 +45,6 @@ Taken from [here](https://docs.aws.amazon.com/general/latest/gr/rande.html).
 | Middle East (Bahrain) | me-south-1 | ms1 |
 | South America (São Paulo) | sa-east-1 | se1 |
 
-
-
-## Historical Information
-
-The following is a list of ideas for ensuring that the first 15 characters are meaningful:
-* Eliminate hyphens?
-* Abbreviate “Prod” to “prd”?
-* Abbreviate “stage” to “stg”?
-* Abbreviate the env nomenclature to -p, -s, -i, -d  (prod, stage, integration, dev)
-* Abbreviate “appsre” to “as” or “app” or “sdas”
-
-Would be helpful when multiple clusters up in the webconsole.
-
-Please add your ideas here and we can discuss them at the next coordination meeting.
-
-From Aditya: IETF guidance [here](https://tools.ietf.org/html/rfc1178).
-
 ### Upstream tickets:
 https://issues.redhat.com/browse/SDA-2288
 https://issues.redhat.com/browse/CONSOLE-2217
-
-### Proposal:
-Do not reinstall any new clusters.
-For clusters created in the future,
-Abbreviate the env nomenclature to -p, -s, -i, -d  (prod, stage, integration, dev)
