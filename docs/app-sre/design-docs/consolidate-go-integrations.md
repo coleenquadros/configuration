@@ -32,10 +32,11 @@ Consolidate development of Go based integrations by providing capabilities requi
 * Structured logging
 * Build infrastructure
 
-Make managing dependencies as simple as possible
+Secondary goal is to make managing dependencies between components as simple as possible.
 
 ## Non-objectives
 
+Designing specifics of SDK repository
 
 ## Proposal
 
@@ -44,21 +45,26 @@ Move all Go based integrations into a single repository. The repository will not
 Repository layout:
 
 * cmd: Contains CLI and integration bootstrapping related code
-* internal/<integration_name>: Actual business logic of the concrete integration
-* pkg: Shared capabilities, as per [golang-standards/project-layout](https://github.com/golang-standards/project-layout), this pkg could also be used outside this repository
+* internal/<integration_name>: Actual business logic of the concrete integration and it's unit tests
+* tests/<integration_name>: Any fixtures or test related data
+* openshift, build, hack...: Other build and deploy related directories
+
+Create a second repository containing the SDK. It will contain shared capabilities in a folder called `pgk`, as per [golang-standards/project-layout](https://github.com/golang-standards/project-layout), this pkg could also be used outside this repository
+* pkg
   *  graphql
   *  unleash
   *  reconcile
   *  ...
 
+Code that is shareable between multiple integrations and is not related to bootstrapping the CLI should be contained in the SDK repository,
 
 ## Alternatives considered
 
-Creating a repository per integration makes managing the dependcies quite hard. It's not only the dependency from the Go Integration SDK, but also from the integrations towards qontract-schemas. Using a single repository also ensures integration will undergo maintenance and receive future refactorings in core components.
+Creating a repository per integration makes managing the dependcies quite hard. It's not only the dependency from the Go Integration SDK, but also from the integrations towards qontract-schemas. Using a single repository for all integrations also ensures integration will undergo maintenance and receive future refactorings in the SDK components.
 
 
 ## Milestones
 
-* Rename user-validator repository to go-reconcile
-* Create end to end tests for vault-manager, based on container images
-* Refactor vault-manager into go-reconcile
+* Rename user-validator repository to go-qontract-reconcile
+* Refactor vault-manager into go-reconcile, requires update to go 1.17
+* Move shared capabilities into seperate repository qr-sdk-go
