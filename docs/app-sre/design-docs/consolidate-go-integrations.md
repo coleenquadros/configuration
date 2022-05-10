@@ -36,7 +36,11 @@ Secondary goal is to make managing dependencies between components as simple as 
 
 ## Non-objectives
 
-Designing specifics of SDK repository
+* Designing specifics of SDK repository
+* Advocate usage of Go for all future integrations, using Go should be for specific use cases only, examples for this:
+
+  * Usage of go native libraries, example: vault, terraform or other
+  * Usage of Go's coroutine approach
 
 ## Proposal
 
@@ -49,7 +53,7 @@ Repository layout:
 * tests/<integration_name>: Any fixtures or test related data
 * openshift, build, hack...: Other build and deploy related directories
 
-Create a second repository containing the SDK. It will contain shared capabilities in a folder called `pgk`, as per [golang-standards/project-layout](https://github.com/golang-standards/project-layout), this pkg could also be used outside this repository
+Create a second repository containing the SDK. It will contain shared capabilities in a folder called `pkg`, as per [golang-standards/project-layout](https://github.com/golang-standards/project-layout), this pkg could also be used outside this repository
 * pkg
   *  graphql
   *  unleash
