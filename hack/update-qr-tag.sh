@@ -3,7 +3,9 @@
 ENV_FILE=".env"
 JENKINS_FILE="resources/jenkins/global/defaults.yaml"
 SAAS_FILE="data/services/app-interface/cicd/ci-ext/saas-qontract-reconcile.yaml"
+SAAS_FILE_MANAGER="data/services/app-interface/cicd/ci-ext/saas-qontract-manager.yaml"
 SAAS_FILE_INT="data/services/app-interface/cicd/ci-int/saas-qontract-reconcile-int.yaml"
+SAAS_FILE_MANAGER_INT="data/services/app-interface/cicd/ci-int/saas-qontract-manager-int.yaml"
 TEKTON_GLOBAL_DEFAULTS="data/pipelines/tekton-provider-global-defaults.yaml"
 
 if [ `uname` = "Darwin" ]; then
@@ -43,9 +45,19 @@ if [ "$NEW_SHA" != "$OLD_SHA" ]; then
     sed -i$SED_OPT "s/$OLD_SHA/$NEW_SHA/" $SAAS_FILE
 fi
 
+OLD_SHA=$(awk '{if ($1 == "ref:" && $2 ~ /^[a-f0-9]{40}$/){print $2}}' $SAAS_FILE_MANAGER)
+if [ "$NEW_SHA" != "$OLD_SHA" ]; then
+    sed -i$SED_OPT "s/$OLD_SHA/$NEW_SHA/" $SAAS_FILE_MANAGER
+fi
+
 OLD_SHA=$(awk '{if ($1 == "ref:" && $2 ~ /^[a-f0-9]{40}$/){print $2}}' $SAAS_FILE_INT)
 if [ "$NEW_SHA" != "$OLD_SHA" ]; then
     sed -i$SED_OPT "s/$OLD_SHA/$NEW_SHA/" $SAAS_FILE_INT
+fi
+
+OLD_SHA=$(awk '{if ($1 == "ref:" && $2 ~ /^[a-f0-9]{40}$/){print $2}}' $SAAS_FILE_MANAGER_INT)
+if [ "$NEW_SHA" != "$OLD_SHA" ]; then
+    sed -i$SED_OPT "s/$OLD_SHA/$NEW_SHA/" $SAAS_FILE_MANAGER_INT
 fi
 
 OLD_COMMIT=$(awk '{if ($1 == "qontract_reconcile_image_tag:" && $2 ~ /^[a-f0-9]{7}$/){print $2}}' $TEKTON_GLOBAL_DEFAULTS)
