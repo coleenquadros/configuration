@@ -12,7 +12,7 @@ Their Google Chat room is `IT Utility & Infra Services (UIS)`
 
 # 2. Process
 
-1. Generate a CSR/KEY (if a new certificate is requested)
+1. Generate a CSR/KEY (if a new certificate is requested) and store the key in vault.
 
     ```sh
     # Wildcard certs are banned!
