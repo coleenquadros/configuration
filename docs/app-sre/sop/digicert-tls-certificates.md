@@ -12,7 +12,7 @@ Their Google Chat room is `IT Utility & Infra Services (UIS)`
 
 # 2. Process
 
-1. Generate a CSR/KEY (if a new certificate is requested)
+1. Generate a CSR/KEY (if a new certificate is requested) and store the key in vault.
 
     ```sh
     # Wildcard certs are banned!
@@ -43,7 +43,7 @@ Their Google Chat room is `IT Utility & Infra Services (UIS)`
 
 The zip file in the ticket will contain instructions on how to use the certificate. **Disregard them**. They are for older versions of Apache.
 
-You will receive both the certificate for your application and the digicert CA certificate. Your service must consume both of them, **concatenated in a single file**. You may store them in separate keys in vault or concatenate them and then uploading the bundle to a single location in vault, like [we do here](https://vault.devshift.net/ui/vault/secrets/app-interface/show//app-sre/uhc-production/routes/api.stage.openshift.com). 
+You will receive both the certificate for your application and the digicert CA certificate. Your service must consume both of them, **concatenated in a single file**. You may store them in separate keys in vault or concatenate them and then uploading the bundle to a single location in vault, like [we do here](https://vault.devshift.net/ui/vault/secrets/app-interface/show//app-sre/uhc-production/routes/api.openshift.com). 
 
 In any case, when the concatenation happens, it **must** have the service's certificate file first and afterwards the CA certificate, like [in this example](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/0e924c191e1ce09f2dced71a404cefa30230a7ac/ansible/playbooks/roles/nginx-reverse-proxy/tasks/main.yml#L27-32). Or, if you store the bundle in a single field in Vault:
 
