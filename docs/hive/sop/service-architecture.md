@@ -121,7 +121,7 @@ The only explicit route hive exposes is `hive-controllers-metrics`, the endpoint
 None.
 
 ## Service Diagram
-(TODO)
+![Hive Architecture](Hive_Service_Diagram.png)*Service Delivery Installation Flow*
 
 ## Application Success Criteria
 The following assumes valid configuration of the CRs, appropriate cloud credentials, etc.
