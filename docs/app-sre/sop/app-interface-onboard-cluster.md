@@ -138,7 +138,7 @@ This step should be performed in a single merge request.
     ```
 
     * Note: Cluster name should follow naming convention
-      [here](https://docs.google.com/document/d/1OIe4JGbScz57dIGZztThLTvji056OBCfaHSvGAo7Hao)
+      [here](../cluster-naming-convention.md)
     * Note: The `id`, `consoleUrl`, `serverUrl`, `external_id` and `elbFQDN` will be added automatically at a later stage. Don't worry about them.
 
 1. Grant `dedicated-admin` access to App-SRE team
