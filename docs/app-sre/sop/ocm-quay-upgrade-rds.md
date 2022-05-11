@@ -35,7 +35,8 @@ As with all RDS instances, the replicas must be upgraded first. The procedure be
 4. Create a MR to update the DNS record matching `set_identifier: pull-${db_identifier}`  for `pull.q1w2.quay.rhcloud.com` to set the weight of the cluster associated with the RDS instance being upgraded to `0` so that traffic will not be directed to that ONE cluster ([example](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/38526)) 
 5. Merge the MR above and confirm that `pull.q1w2.quay.rhcloud.com` is no longer sending traffic to the cluster to be upgraded (note DNS is round-robin, so you will need to make several attempts). You can use following snippet to monitor dns routing.
    ```
-   while true; do dig +short pull.q1w2.quay.rhcloud.com @8.8.8.8; sleep 1; done | grep aws.com
+   # Run the command below for a minute to ensure DNS doesn't resolve to the disabled cluster
+   while true; do dig +short pull.q1w2.quay.rhcloud.com @8.8.8.8; sleep 1; done | grep ocmro
    ```
 6. Create a MR to upgrade a SINGLE database (the one associated with the cluster above) to the desired version ensuring that you set `apply_immediately: true` so it doesn't wait for the next maintenance window ([example](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/38345))
 7. Once the database upgrade is complete, verify that the OCM-Quay cluster is working as expected:
