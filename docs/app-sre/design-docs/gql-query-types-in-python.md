@@ -17,13 +17,14 @@ While this approach offers large flexibility and initial development speed, it c
 ## Goals
 
 - Introduction of types for GQL queries of QR Python integrations, which can be statically verified (e.g., with `mypy`)
+- CI should detect if a GQL schema change was not propagated to the queries in QR
 - Long-term migration strategy towards strict types
 
 ## Proposals
 
 ### Code Generation
 
-As of writing there is only 1 GQL code generator for Python actively maintained.
+As of writing there is only 1 GQL code generator for Python actively maintained: [sgqlc](https://github.com/profusion/sgqlc).
 The following outlines 2 options we have.
 
 #### SGQLC
@@ -55,7 +56,7 @@ Code generation for **our use-case** is **no rocket science**. We could easily m
 Similar to sgqcl, the generator takes a `my_query.gql` file and converts it to `my_query.py`.
 The `my_query.py` contains very simple pydantic classes and a `data_to_obj(data: dict[Any, Any])` conversion method.
 
-A PoC for a simple code generator can be found [here](https://github.com/app-sre/qontract-reconcile/pull/2389).
+A PoC for a simple code generator with a usage example can be found [here](https://github.com/app-sre/qontract-reconcile/pull/2389).
 
 **Pros:**
 
