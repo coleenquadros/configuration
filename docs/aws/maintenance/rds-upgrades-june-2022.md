@@ -47,7 +47,8 @@ The timeline below summarizes the actions that need to be taken by each date.
 | ----------- | ----------- |
 | ASAP      | 1. Teams using RDS should check if their databases are running the versions outlined [here](/README.md#approved-rds-versions)<br>2. Start upgrading the minor versions of your affected databases in stage as soon as possible to provide sufficient time for testing       |
 | June 1, 2022   | All stage and production databases should be running [approved versions of the database engine](/README.md#approved-rds-versions)       |
-| June 30, 2022   | RDS instances running PostgreSQL will have an OS upgrade applied to the instance during the next maintenance window after this deadline      |
+| June 2-14, 2022 | AppSRE will schedule OS upgrades during the RDS maintenance window for all PostgreSQL databases running in staging environments |
+| June 30, 2022   | Production RDS instances running PostgreSQL will have an OS upgrade applied to the instance during the next maintenance window after this deadline (AWS will schedule this automatically)      |
 
 ## More questions?
 
