@@ -6,7 +6,7 @@ Karl Fischer / 2022-04-28
 
 ## Tracking JIRA
 
-TBD (Will be adjusted during our discussion/review process)
+[APPSRE-5537](https://issues.redhat.com/browse/APPSRE-5537)
 
 ## Problem Statement
 
@@ -29,8 +29,12 @@ The following outlines 2 options we have.
 #### SGQLC
 
 [sgqlc](https://github.com/profusion/sgqlc) is a GQL client with code generator functionality.
-On top of using the GQL client you can generate classes for your queries. However, the classes
-are very generic and do not work with static type checks. This is a very hard limitation.
+On top of using the GQL client you can generate classes for your queries.
+A query file is written `my_query.gql` from which Python code `my_query.py` is generated.
+That code can be used with the GQL client to obtain data in classes.
+
+That being said, the classes are very generic and do not work with static type checks. This is a very hard limitation.
+Further, the classes are quite complex with a lot of magic.
 
 A PoC can be seen [here](https://github.com/app-sre/qontract-reconcile/pull/2367).
 
@@ -47,6 +51,10 @@ A PoC can be seen [here](https://github.com/app-sre/qontract-reconcile/pull/2367
 #### Custom Implementation
 
 Code generation for **our use-case** is **no rocket science**. We could easily maintain our own code generator.
+
+Similar to sgqcl, the generator takes a `my_query.gql` file and converts it to `my_query.py`.
+The `my_query.py` contains very simple pydantic classes and a `data_to_obj(data: dict[Any, Any])` conversion method.
+
 A PoC for a simple code generator can be found [here](https://github.com/app-sre/qontract-reconcile/pull/2389).
 
 **Pros:**
@@ -77,7 +85,7 @@ long-term replace `queries.py`. The choice of a module offers more code structur
 
 On top of using a separate module, we could leverage proxy classes.
 
-**queries.py**
+**queries.py:**
 
 ```
 class SchemaProxy:
@@ -93,7 +101,7 @@ def get_integrations() -> SchemaProxy
     return SchemaProxy(typed_queries.get_integrations())
 ```
 
-**typed-queries.py**
+**typed-queries.py:**
 
 ```
 
@@ -109,4 +117,3 @@ TBD (Will be adjusted during our discussion/review process)
 ## Milestones
 
 TBD (Will be adjusted during our discussion/review process)
-
