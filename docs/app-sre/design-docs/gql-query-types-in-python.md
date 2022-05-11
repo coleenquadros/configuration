@@ -17,7 +17,7 @@ While this approach offers large flexibility and initial development speed, it c
 ## Goals
 
 - Introduction of types for GQL queries of QR Python integrations, which can be statically verified (e.g., with `mypy`)
-- CI should detect if a GQL schema change was not propagated to the queries in QR
+- CI should detect if a GQL schema change was not properly propagated to the query data structures in QR
 - Long-term migration strategy towards strict types
 
 ## Proposals
@@ -67,6 +67,46 @@ A PoC for a simple code generator with a usage example can be found [here](https
 **Cons:**
 
 - we need to maintain an additional code component
+
+##### Details on Custom Implementation
+
+A query is defined in a `.gql` file. The content of a `.gql` file is a valid query that could be used with curl against a GQL backend.
+All `.gql` files are placed under the `gql_queries` directory.
+
+Running `make generate-queries` will:
+
+1. Run an introspection query against a GQL backend, i.e., fetch the schema
+1. Read all `.gql` files under `gql_queries`
+1. For each `.gql` file, generate the AST and match it with the types from the schema, i.e., generate a typed AST
+1. Generate a corresponding `.py` file for each `.gql` file and place it in the same (sub)directory
+
+In the end the `gql_queries` directory could look like this:
+
+```
+gql_queries/
+├── __init__.py
+└── saas_files
+    ├── __init__.py
+    ├── saas_files_full.gql
+    ├── saas_files_full.py
+    ├── saas_files_small_with_provider.gql
+    └── saas_files_small_with_provider.py
+```
+
+The generated `.py` files can be consumed like:
+
+```python
+from gql_queries.saas_files import saas_files_full
+
+
+with open("gql_queries/saas_files/saas_files_full.gql", "r") as f:
+    query = f.read()
+
+data: dict[Any, Any] = gqlapi.query(query)
+apps: list[saas_files_full.AppV1] = saas_files_full.data_to_obj(data)
+```
+
+More specifics and details can be found in the [PoC](https://github.com/app-sre/qontract-reconcile/pull/2389).
 
 ### Migration Strategy
 
