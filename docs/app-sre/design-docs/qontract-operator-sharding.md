@@ -24,7 +24,7 @@ qontract-reconcile supports sharding integrations for the purpose of parallelizi
 
 ## Proposed solution
 
-Add a field `/app-sre/integration-1.yml#managed.spec.shardingStrategy` that defines how an integration in a specific environment will be shareded.
+Add a field `/app-sre/integration-1.yml#managed.spec.shardingStrategy` that defines how an integration in a specific environment will be sharded.
 
 ### Cluster sharding
 
@@ -39,13 +39,13 @@ managed:
     shardingStrategy: per-cluster
 ```
 
-An integration using that strategy will need to support a flag `--cluster-name`, e.g. `openshift-resource`, `openshift-vault-secrets`, `openshift-routes`, ...
+An integration using that strategy needs to support a flag `--cluster-name`, e.g. `openshift-resource`, `openshift-vault-secrets`, `openshift-routes`, ...
 
 ### AWS account sharding
 
 The `per-aws-account` strategy works exactly like the `per-cluster` strategy but operators on AWS accounts instead.
 
-An integration using that strategy will need to support a flag `--account-name`, e.g. `terraform-resources`
+An integration using that strategy needs to support a flag `--account-name`, e.g. `terraform-resources`
 
 This strategy will enable us to deprecate `terraform-resources-wrapper`
 
