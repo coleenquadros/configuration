@@ -24,6 +24,7 @@ managedGroups:
 
 managedClusterRoles: true
 spec:
+  product: rosa
   id: 1di7llfon8pk6d3k5qscrlsj4tin71kj
   external_id: dc1ba094-8ae1-44e9-a986-8038bdd47cfb
   provider: aws
@@ -39,22 +40,26 @@ spec:
   private: false
   provision_shard_id: b26159a7-aaef-4303-89a0-6713ad9f1090
   disable_user_workload_monitoring: true
+
 upgradePolicy:
   workloads:
   - crda
   schedule: 0 3 * * 1-5
   conditions:
     soakDays: 3
+
 network:
   vpc: 10.118.0.0/16
   service: 10.119.0.0/16
   pod: 10.128.0.0/16
+
 peering:
   connections:
   - provider: account-vpc
     name: app-sre-prod-03_osio
     vpc:
       $ref: /aws/osio/vpcs/osio-prod-vpc.yml
+
 automationToken:
   path: app-sre/creds/kube-configs/app-sre-prod-03
   field: token
@@ -64,6 +69,7 @@ awsInfrastructureManagementAccounts:
     $ref: /aws/osio/account.yml
   accessLevel: network-mgmt
   default: true
+
 awsInfrastructureAccess:
 - awsGroup:
     $ref: /aws/osio/groups/DTSD-admin.yml
@@ -74,5 +80,6 @@ awsInfrastructureAccess:
 - awsGroup:
     $ref: /aws/app-sre-logs/groups/Log-consumers.yml
   accessLevel: read-only
+
 addons:
 - $ref: /dependencies/ocm/addons/cluster-logging-operator.yml
