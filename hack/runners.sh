@@ -24,6 +24,7 @@ run_int() {
     -e REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem \
     $GITLAB_PR_SUBMITTER_QUEUE_URL_ENV \
     $APP_INTERFACE_STATE_ENV \
+    -e RECONCILE_IMAGE_TAG=$RECONCILE_IMAGE_TAG \
     -w / \
     --memory 5g \
     ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
