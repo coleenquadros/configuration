@@ -48,6 +48,6 @@ If a new cluster will be created after the Secret change in the HiveConfig, the 
 
 Assuming the update of the Secret has successfully caused the population of the destination DNS zone, this will mean that the only impact is:
 
-"New clusters may not be reachable for an additional <time between Secret change and DNS delegation update and propogation>".
+"New clusters may not be reachable for an additional [time between Secret change and DNS delegation update and propogation]".
 
 In reality, there will likely be no impact for customers.
