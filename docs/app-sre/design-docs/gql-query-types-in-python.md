@@ -24,6 +24,11 @@ While this approach offers large flexibility and initial development speed, it c
 
 ### Code Generation
 
+We generate classes dedicated to queries, i.e., every query gets its own classes.
+By doing so, we can ensure that fields only get `Optional` if allowed by the schema.
+If we generated a single class for every object in the schema, then we would need to make every field `Optional` to accomodate for custom GQL queries.
+By making every field `Optional` we lose some stability offered through static type checking.
+
 As of writing there is only 1 GQL code generator for Python actively maintained: [sgqlc](https://github.com/profusion/sgqlc).
 The following outlines 2 options we have.
 
@@ -54,7 +59,7 @@ A PoC can be seen [here](https://github.com/app-sre/qontract-reconcile/pull/2367
 Code generation for **our use-case** is **no rocket science**. We could easily maintain our own code generator.
 
 Similar to sgqcl, the generator takes a `my_query.gql` file and converts it to `my_query.py`.
-The `my_query.py` contains very simple pydantic classes and a `data_to_obj(data: dict[Any, Any])` conversion method.
+The `my_query.py` contains very simple pydantic classes. Pydantic handles the mapping of dict to classes.
 
 A PoC for a simple code generator with a usage example can be found [here](https://github.com/app-sre/qontract-reconcile/pull/2389).
 
@@ -67,6 +72,7 @@ A PoC for a simple code generator with a usage example can be found [here](https
 **Cons:**
 
 - we need to maintain an additional code component
+- might be difficult to change something later on if we decide our implementation lacks a feature
 
 ##### Details on Custom Implementation
 
@@ -103,7 +109,7 @@ with open("gql_queries/saas_files/saas_files_full.gql", "r") as f:
     query = f.read()
 
 data: dict[Any, Any] = gqlapi.query(query)
-apps: list[saas_files_full.AppV1] = saas_files_full.data_to_obj(data)
+apps: list[saas_files_full.AppV1] = saas_files_full.SaasFilesFullQuery(**data).apps_v1 or []
 ```
 
 More specifics and details can be found in the [PoC](https://github.com/app-sre/qontract-reconcile/pull/2389).
