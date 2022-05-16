@@ -15,7 +15,9 @@ As a web service, GlitchTip's most interesting event from a monitoring perspecti
 
 The following is the explanation of the SLI query:
 
-    sum(rate(django_http_requests_latency_seconds_by_view_method_bucket{le="0.5"}[5m])) by(job) / sum(rate(django_http_requests_latency_seconds_by_view_method_bucket{le="+Inf"}[5m])) by(job)
+    sum(rate(django_http_requests_latency_seconds_by_view_method_bucket{le="0.5", job="glitchtip-web"}[28d])) by(job)
+    /
+    sum(rate(django_http_requests_latency_seconds_by_view_method_bucket{le="+Inf", job="glitchtip-web"}[28d])) by(job) * 100 >= 90
 
 
 * `django_http_requests_latency_seconds_by_view_method_bucket` - Queries the total number of HTTP requests with latencies

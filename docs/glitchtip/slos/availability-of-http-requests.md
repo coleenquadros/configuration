@@ -5,7 +5,7 @@ We measure the ratio of the total number of successful HTTP requests and the tot
 
 ## SLI Rationale
 
-With respect to monitoring, an HTTP request event is the most important event for the GlitchTip service. This is because the GlitchTip service is primarly providing an HTTP API to its clients. The following are the major source of these client HTTP requests:
+As a web service, GlitchTip's most interesting event from a monitoring perspective is an HTTP request. A successful HTTP request fulfills the following major HTTP request sources;
 
 * API calls initiated from the a GlitchTip component (e.g. UI, worker, etc)
 * API calls initiated by a user's HTTP client (e.g. Application that uses sentry SDK)
