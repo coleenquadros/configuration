@@ -217,6 +217,13 @@ implemented or brought by OCM.
 - Create an additional account to host AppSRE `ROSA` clusters.
 - Update SOPS to include `ROSA` type clusters onboarding to app-interface
 
+## Milestones
+1.- Adapt OCM library and integrations to work with different OCM implementations
+1.1.- Add OSD OCM Implementation
+2.- Add ROSA OCM Implementation. Test all functionalities
+3.- Update OCM documentation, SOPS, etc to include ROSA clusters.
+3.- Add a ROSA Cluster to APP-Interface.
+
 ## Resources
 
 - [OCM API Spec](https://api.openshift.com/#/default/get_api_clusters_mgmt_v1_clusters)
