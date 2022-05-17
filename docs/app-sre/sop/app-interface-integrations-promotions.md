@@ -12,7 +12,7 @@ App-interface integrations are being executed in multiple locations in multiple 
 1. Ensure the change works by validating logs in `#sd-app-sre-reconcile-stage` slack channel. Note that integration runs against production data with dry-run mode so it may be possible the change is not executed.
 1. Create a MR in app-interface to promote your changes from staging to
    production. `make qr-promote` automates getting the latest commit
-   checksum and updating the necessary files. Running `make qr-promote` will also update the `ref` field within our [saas-qontract-reconcile](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-interface/cicd/ci-ext/saas-qontract-reconcile.yaml) file. If there is a need to promote to
+   checksum and updating the necessary files. If there is a need to promote to
    a single environment, or for a better understanding of what `qr-promote` is
    doing, see [Updating specific environments](#updating-specific-environments).
    Make sure to not use `mawk` (Ubuntu default), as it does not support explicit number of occurrences,
@@ -34,9 +34,7 @@ This section describes which files need to be updated in order to deploy to
 a certain environment. This also serves as documentation for what
 `make qr-promote` is automating for you.
 
-* To promote integrations running in the app-sre-prod-01 cluster, update `ref` in [saas-qontract-reconcile](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-interface/cicd/ci-ext/saas-qontract-reconcile.yaml).
 * To promote integrations-manager and managed integrations running in the app-sre-prod-01 cluster, update `ref` in [saas-qontract-manager](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-interface/cicd/ci-ext/saas-qontract-manager.yaml).
-* To promote integrations running in appsrep05ue1 (internal cluster), update `ref` in [saas-qontract-reconcile-internal](data/services/app-interface/cicd/ci-int/saas-qontract-reconcile-int.yaml).
 * To promote integrations running in the app-interface pr-check job running in ci-int, update `RECONCILE_IMAGE_TAG` in [.env](/.env).
 * To promote integrations-manager and managed integrations running in appsrep05ue1 (internal cluster), update `ref` in [saas-qontract-manager-internal](data/services/app-interface/cicd/ci-int/saas-qontract-manager-int.yaml).
 * To promote integrations running in the app-interface pr-check job running in ci-int, update `RECONCILE_IMAGE_TAG` in [.env](/.env).
