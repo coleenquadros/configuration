@@ -1,0 +1,111 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: cos-fleet-manager-slos-availability-stage
+spec:
+  groups:
+    - name: cos-fleet-manager-availability.slo.rules
+      rules:
+        - alert: CosFleetManagerAPI30mto6hErrorBudgetBurn
+          annotations:
+            message: "High 6h error budget burn for COS Fleet Manager in the last 6 hours (current value: {{ $value | humanize }})"
+            dashboard: "https://grafana.stage.devshift.net/d/zbx1Eg0Mz/cos-fleet-manager-slos?orgId=1"
+          expr: |
+            api_inbound_request_count:burnrate30m{service="cos-fleet-manager",exported_namespace="managed-connectors-stage"} > (1-0.95000)
+            and
+            api_inbound_request_count:burnrate6h{service="cos-fleet-manager",exported_namespace="managed-connectors-stage"} > (1-0.95000)
+          for: 15m
+          labels:
+            service: cos-fleet-manager
+            exported_namespace: managed-connectors-stage
+            severity: medium
+            team: managed-connectors
+        - alert: CosFleetManagerAPI2hto1dErrorBudgetBurn
+          annotations:
+            message: "High 1d error budget burn for COS Fleet Manager (current value: {{ $value | humanize }})"
+            dashboard: "https://grafana.stage.devshift.net/d/zbx1Eg0Mz/cos-fleet-manager-slos?orgId=1"
+          expr: |
+            api_inbound_request_count:burnrate2h{service="cos-fleet-manager",exported_namespace="managed-connectors-stage"} > (1-0.95000)
+            and
+            api_inbound_request_count:burnrate1d{service="cos-fleet-manager",exported_namespace="managed-connectors-stage"} > (1-0.95000)
+          for: 1h
+          labels:
+            service: cos-fleet-manager
+            exported_namespace: managed-connectors-stage
+            severity: medium
+            team: managed-connectors
+        - alert: CosFleetManagerAPI6hto3dErrorBudgetBurn
+          annotations:
+            message: "High 3d error budget burn for COS Fleet Manager (current value: {{ $value | humanize }})"
+            dashboard: "https://grafana.stage.devshift.net/d/zbx1Eg0Mz/cos-fleet-manager-slos?orgId=1"
+          expr: |
+            api_inbound_request_count:burnrate6h{service="cos-fleet-manager",exported_namespace="managed-connectors-stage"} > (1-0.95000)
+            and
+            api_inbound_request_count:burnrate3d{service="cos-fleet-manager",exported_namespace="managed-connectors-stage"} > (1-0.95000)
+          for: 3h
+          labels:
+            service: cos-fleet-manager
+            exported_namespace: managed-connectors-stage
+            severity: medium
+            team: managed-connectors
+        - expr: |
+            sum(rate(api_inbound_request_count{namespace="managed-connectors-stage", code=~"5.."}[3d]))
+            /
+            sum(rate(api_inbound_request_count{namespace="managed-connectors-stage"}[3d]))
+          labels:
+            service: cos-fleet-manager
+            exported_namespace: managed-connectors-stage
+          record: api_inbound_request_count:burnrate3d
+        - expr: |
+            sum(rate(api_inbound_request_count{namespace="managed-connectors-stage", code=~"5.."}[1d]))
+            /
+            sum(rate(api_inbound_request_count{namespace="managed-connectors-stage"}[1d]))
+          labels:
+            service: cos-fleet-manager
+            exported_namespace: managed-connectors-stage
+          record: api_inbound_request_count:burnrate1d
+        - expr: |
+            sum(rate(api_inbound_request_count{namespace="managed-connectors-stage", code=~"5.."}[6h]))
+            /
+            sum(rate(api_inbound_request_count{namespace="managed-connectors-stage"}[6h]))
+          labels:
+            service: cos-fleet-manager
+            exported_namespace: managed-connectors-stage
+          record: api_inbound_request_count:burnrate6h
+        - expr: |
+            sum(rate(api_inbound_request_count{namespace="managed-connectors-stage", code=~"5.."}[2h]))
+            /
+            sum(rate(api_inbound_request_count{namespace="managed-connectors-stage"}[2h]))
+          labels:
+            service: cos-fleet-manager
+            exported_namespace: managed-connectors-stage
+          record: api_inbound_request_count:burnrate2h
+        - expr: |
+            sum(rate(api_inbound_request_count{namespace="managed-connectors-stage", code=~"5.."}[1h]))
+            /
+            sum(rate(api_inbound_request_count{namespace="managed-connectors-stage"}[1h]))
+          labels:
+            service: cos-fleet-manager
+            exported_namespace: managed-connectors-stage
+          record: api_inbound_request_count:burnrate1h
+        - expr: |
+            sum(rate(api_inbound_request_count{namespace="managed-connectors-stage", code=~"5.."}[30m]))
+            /
+            sum(rate(api_inbound_request_count{namespace="managed-connectors-stage"}[30m]))
+          labels:
+            service: cos-fleet-manager
+            exported_namespace: managed-connectors-stage
+          record: api_inbound_request_count:burnrate30m
+        - expr: |
+            sum(rate(api_inbound_request_count{namespace="managed-connectors-stage", code=~"5.."}[5m]))
+            /
+            sum(rate(api_inbound_request_count{namespace="managed-connectors-stage"}[5m]))
+          labels:
+            service: cos-fleet-manager
+            exported_namespace: managed-connectors-stage
+          record: api_inbound_request_count:burnrate5m
