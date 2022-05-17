@@ -29,8 +29,11 @@ By doing so, we can ensure that fields only get `Optional` if allowed by the sch
 If we generated a single class for every object in the schema, then we would need to make every field `Optional` to accomodate for custom GQL queries.
 By making every field `Optional` we lose some stability offered through static type checking.
 
-As of writing there is only 1 GQL code generator for Python actively maintained: [sgqlc](https://github.com/profusion/sgqlc).
-The following outlines 2 options we have.
+In the following we discuss 3 options:
+
+- [sgqlc](https://github.com/profusion/sgqlc)
+- [strawberry](https://github.com/strawberry-graphql/strawberry)
+- [custom generator](https://github.com/app-sre/qontract-reconcile/pull/2389)
 
 #### SGQLC
 
@@ -52,13 +55,27 @@ A PoC can be seen [here](https://github.com/app-sre/qontract-reconcile/pull/2367
 **Cons:**
 
 - needs upstream contributions to allow static type checks. See [comment](https://github.com/profusion/sgqlc/issues/129#issuecomment-885820088).
-- rather complex classes -> lots of magic happening
+- rather complex classes -> lots of magic happening, which we likely do not want in our base types
 
-#### Custom Implementation
+#### Strawberry
 
-Code generation for **our use-case** is **no rocket science**. We could easily maintain our own code generator.
+[strawberry](https://github.com/strawberry-graphql/strawberry) is a python library to define schemas as python classes and convert them to GQL.
+Further, it offers a query code generator which converts a given `my_query.gql` into `my_query.py` file with corresponding dataclasses.
+We need a PoC for this option to properly evaluate its capabilities.
 
-Similar to sgqcl, the generator takes a `my_query.gql` file and converts it to `my_query.py`.
+**Pros:**
+
+- we do not need to maintain an extra code component
+
+**Cons:**
+
+- code generation is experimental -> [subject to changes](https://strawberry.rocks/docs/codegen/query-codegen)
+
+#### Custom Generator
+
+Code generation for **our current use-cases** is **no rocket science**. We could easily maintain our own code generator.
+
+Similar to `sgqcl` or `strawberry`, the generator takes a `my_query.gql` file and converts it to `my_query.py`.
 The `my_query.py` contains very simple pydantic classes. Pydantic handles the mapping of dict to classes.
 
 A PoC for a simple code generator with a usage example can be found [here](https://github.com/app-sre/qontract-reconcile/pull/2389).
