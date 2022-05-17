@@ -2,9 +2,7 @@
 
 ENV_FILE=".env"
 JENKINS_FILE="resources/jenkins/global/defaults.yaml"
-SAAS_FILE="data/services/app-interface/cicd/ci-ext/saas-qontract-reconcile.yaml"
 SAAS_FILE_MANAGER="data/services/app-interface/cicd/ci-ext/saas-qontract-manager.yaml"
-SAAS_FILE_INT="data/services/app-interface/cicd/ci-int/saas-qontract-reconcile-int.yaml"
 SAAS_FILE_MANAGER_INT="data/services/app-interface/cicd/ci-int/saas-qontract-manager-int.yaml"
 TEKTON_GLOBAL_DEFAULTS="data/pipelines/tekton-provider-global-defaults.yaml"
 
@@ -40,19 +38,9 @@ if [ "$NEW_COMMIT" != "$OLD_COMMIT" ]; then
     sed -i$SED_OPT "s/$OLD_COMMIT/$NEW_COMMIT/" $ENV_FILE
 fi
 
-OLD_SHA=$(awk '/^- name: / {currentResource=$3} /^    ref: / {if (currentResource == "qontract-reconcile" && $2 ~ /^[a-f0-9]{40}$/){print $2}}' $SAAS_FILE)
-if [ "$NEW_SHA" != "$OLD_SHA" ]; then
-    sed -i$SED_OPT "s/$OLD_SHA/$NEW_SHA/" $SAAS_FILE
-fi
-
-OLD_SHA=$(awk '{if ($1 == "ref:" && $2 ~ /^[a-f0-9]{40}$/){print $2}}' $SAAS_FILE_MANAGER)
+OLD_SHA=$(awk '/^- name: / {currentResource=$3} /^    ref: / {if (currentResource == "qontract-manager" && $2 ~ /^[a-f0-9]{40}$/){print $2}}' $SAAS_FILE_MANAGER)
 if [ "$NEW_SHA" != "$OLD_SHA" ]; then
     sed -i$SED_OPT "s/$OLD_SHA/$NEW_SHA/" $SAAS_FILE_MANAGER
-fi
-
-OLD_SHA=$(awk '{if ($1 == "ref:" && $2 ~ /^[a-f0-9]{40}$/){print $2}}' $SAAS_FILE_INT)
-if [ "$NEW_SHA" != "$OLD_SHA" ]; then
-    sed -i$SED_OPT "s/$OLD_SHA/$NEW_SHA/" $SAAS_FILE_INT
 fi
 
 OLD_SHA=$(awk '{if ($1 == "ref:" && $2 ~ /^[a-f0-9]{40}$/){print $2}}' $SAAS_FILE_MANAGER_INT)
@@ -66,7 +54,7 @@ if [ "$NEW_COMMIT" != "$OLD_COMMIT" ]; then
 fi
 
 if [ -n "$DO_COMMIT" ]; then
-    git add $ENV_FILE $JENKINS_FILE $SAAS_FILE $SAAS_FILE_INT $TEKTON_GLOBAL_DEFAULTS
+    git add $ENV_FILE $JENKINS_FILE $SAAS_FILE_MANAGER $SAAS_FILE_MANAGER_INT $TEKTON_GLOBAL_DEFAULTS
     git commit -m "qontract production promotion ${OLD_COMMIT} to ${NEW_COMMIT}"
     git --no-pager show -U0 HEAD
 fi

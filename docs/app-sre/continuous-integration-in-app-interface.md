@@ -17,13 +17,7 @@ In order to define Continuous Integration pipelines in app-interface, define a J
     * options -
         - /dependencies/ci-ext/ci-ext.yml
         - /dependencies/ci-int/ci-int.yml
-    * what to choose?
-        * when in doubt, go with ci-int.
-        * use ci-int if -
-            - the deployed version of the service is considered sensitive information
-            - the manifests to be deployed are in a gitlab repository
-            - the manifests to be deployed are in a private github repository
-        * otherwise, use ci-ext
+    * what to choose? refer to https://service.pages.redhat.com/dev-guidelines/docs/appsre/onboarding/continuous-integration/#guidelines
 * `type` - usually should be `jobs`.
     * read this for [more information](/README.md#manage-jenkins-jobs-configurations-using-jenkins-jobs).
 * `config` - a list of `project` objects. each project -

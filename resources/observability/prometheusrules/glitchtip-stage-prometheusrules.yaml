@@ -1,0 +1,29 @@
+# resources/observability/prometheusrules/glitchtip-stage-proemetheusrules.yaml
+
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: glitchtip-stage
+spec:
+  groups:
+  - name: glitchtip-stage
+    rules:
+    - alert: PrometheusFailedToScrapeGlitchTipWeb
+      annotations:
+        message: "Prometheus failed to scrape glitchtip-web: pod={{ $labels.pod }}, namespace={{ $labels.namespace }}"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/glitchtip/sops/prometheus-failed-to-scrape-glitchtip-web.md"
+        # TODO: Update Grafana dashboard with SLOs
+        dashboard: "https://grafana.stage.devshift.net/d/gQp-L_w7z/gt-stage?orgId=1"
+      # Fire when prometheus failed to scrape glitchtip-web service. The right side of the and operator
+      # ensures that there is indeed an unscrapable prometheus target so that when up metric is missing
+      # for some reason (e.g. node restart) then we don't get a false-positive alert.
+      expr: |
+                absent(up{job="glitchtip-web"} == 1) and count(up{job="glitchtip-web"} == 0) > 0
+      for: 1m
+      labels:
+        service: glitchtip-web
+        severity: high

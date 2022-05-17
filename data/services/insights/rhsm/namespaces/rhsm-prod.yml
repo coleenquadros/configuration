@@ -38,6 +38,30 @@ terraformResources:
   identifier: rhsm-subscriptions-egress-prod
   defaults: /terraform/resources/insights/stage/s3/s3-gdpr-14.yml
   output_resource_name: egress-s3
+- provider: aws-iam-service-account
+  account: insights-prod
+  identifier: rhsm-subscriptions-egress-prod-s3-reader
+  variables:
+    bucket: rhsm-subscriptions-egress-prod
+    region: us-east-1
+    endpoint: s3.us-east-1.amazonaws.com
+  user_policy:
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": ["s3:ListBucket"],
+          "Resource": ["arn:aws:s3:::${bucket}"]
+        },
+        {
+          "Effect": "Allow",
+          "Action": ["s3:GetObject"],
+          "Resource": ["arn:aws:s3:::${bucket}/*"]
+        }
+      ]
+    }
+  output_resource_name: rhsm-subscriptions-egress-s3-reader
 - provider: rds
   account: insights-prod
   identifier: rhsm-prod

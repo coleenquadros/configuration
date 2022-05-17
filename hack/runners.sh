@@ -24,6 +24,7 @@ run_int() {
     -e REQUESTS_CA_BUNDLE=/etc/pki/tls/cert.pem \
     $GITLAB_PR_SUBMITTER_QUEUE_URL_ENV \
     $APP_INTERFACE_STATE_ENV \
+    -e RECONCILE_IMAGE_TAG=$RECONCILE_IMAGE_TAG \
     -w / \
     --memory 5g \
     ${RECONCILE_IMAGE}:${RECONCILE_IMAGE_TAG} \
@@ -146,7 +147,7 @@ run_user_validator() {
     -e UNLEASH_API_URL=$UNLEASH_API_URL \
     -e UNLEASH_CLIENT_ACCESS_TOKEN=$UNLEASH_CLIENT_ACCESS_TOKEN \
     -e VAULT_SECRET_ID=${USER_VALIDATOR_SECRET_ID} \
-    -e USER_VALIDATOR_INVALID_USERS='/teams/insights/users/abakshi.yml,/teams/sd-ops-dev/users/sreaves.yml,/teams/quay/users/hdonnay.yml,/teams/sd-sre/users/drow.yml,/teams/insights/users/mlahane.yml,/teams/sd-ops-dev/users/mpovolny.yml,/teams/insights/users/ccx/dpensier.yml,/teams/devtools/users/sbryzak.yml,/teams/insights/users/khowell.yml,/teams/che/users/skabashn.yml,/teams/managed-services/users/stian.yml,/teams/insights/users/opacut.yml,/teams/insights/users/cmoore.yml' \
+    -e USER_VALIDATOR_INVALID_USERS='/teams/insights/users/abakshi.yml,/teams/sd-ops-dev/users/sreaves.yml,/teams/quay/users/hdonnay.yml,/teams/sd-sre/users/drow.yml,/teams/insights/users/mlahane.yml,/teams/sd-ops-dev/users/mpovolny.yml,/teams/insights/users/ccx/dpensier.yml,/teams/devtools/users/sbryzak.yml,/teams/insights/users/khowell.yml,/teams/che/users/skabashn.yml,/teams/managed-services/users/stian.yml,/teams/insights/users/opacut.yml,/teams/insights/users/cmoore.yml,/teams/sd-sre/users/rogreen.yml' \
     ${USER_VALIDATOR_IMAGE}:${USER_VALIDATOR_IMAGE_TAG} validate \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-user-validator.txt
 

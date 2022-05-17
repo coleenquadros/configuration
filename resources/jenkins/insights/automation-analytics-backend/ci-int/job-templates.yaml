@@ -1,7 +1,62 @@
+- job-template:
+    id: 'insights-automation-analytics-backend-cypress-gl-pr-check'
+    name: 'AA-{gl_project}-cypress-pr-check'
+    status_context: "ci.int.devshift.net PR build"
+    branch: "main"
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_ephemeral_oc_login
+        - *app_interface_creds
+        - *insights_rh_registry_pull_secret
+        - *quay_secret_push
+        - *quay_api_token
+        - *insightsdroid_github
+        - *insights_automation_analytics_backend_rh_it_root_ca
+        - *gitlab_token_iqe_bot
+        - *ibutsu
+    publishers:
+    - junit:
+        results: 'artifacts/junit-*.xml'
+    - archive:
+        artifacts: 'artifacts/**/*'
+    - gitlab-message:
+        <<: *gitlab_message_defaults
+    - gitlab-notifier:
+        failure-only: true
+        name: '{name}'
+        mark-unstable-as-success: true
+    - slack:
+        room: '{slack_channel_notification}'
+        notify-start: false
+        notify-success: false
+        notify-failure: true
+        notify-repeated-failure: true
+    <<: *gl_pr_check
+
+- job-template:
+    id: 'insights-automation-analytics-backend-cypress-gl-build-master'
+    name: 'AA-{gl_project}-cypress-gl-build-{branch}'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *insights_rh_registry_pull_secret
+        - *quay_secret_push
+        - *quay_api_token
+        - *insights_automation_analytics_backend_rh_it_root_ca
+    <<: *gl_build_master
 
 - job-template:
     id: 'insights-automation-analytics-backend-sonarqube-gl-pr-check'
-    name: '{gl_group}-{gl_project}-sonarqube-pr-check'
+    name: 'AA-{gl_project}-sonarqube-pr-check'
     status_context: "ci.int.devshift.net PR build"
     branch: "main"
     wrappers:
@@ -29,6 +84,7 @@
     - gitlab-message:
         <<: *gitlab_message_defaults
     - gitlab-notifier:
+        failure-only: true
         name: '{name}'
         mark-unstable-as-success: true
     - slack:
@@ -41,7 +97,7 @@
 
 - job-template:
     id: 'insights-automation-analytics-backend-sonarqube-gl-build-master'
-    name: '{gl_group}-{gl_project}-sonarqube-gl-build-{branch}'
+    name: 'AA-{gl_project}-sonarqube-gl-build-{branch}'
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'

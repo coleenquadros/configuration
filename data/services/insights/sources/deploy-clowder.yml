@@ -72,8 +72,8 @@ resourceTemplates:
       $ref: /services/insights/sources/namespaces/sources-prod.yml
     ref: 570311842168f77acd4ed00bf72f412780620352
     parameters:
-      MIN_REPLICAS: 3
-      SIDEKIQ_REPLICAS: 3
+      MIN_REPLICAS: 0
+      SIDEKIQ_REPLICAS: 0
       KOKU_SOURCES_API_HOST: koku-clowder-sources-client.hccm-prod.svc.cluster.local
       KOKU_SOURCES_API_PORT: "10000"
       CLOUD_METER_API_HOST: cloudigrade-api.cloudigrade-prod.svc.cluster.local
@@ -85,9 +85,9 @@ resourceTemplates:
       RBAC_PORT: '8080'
       PROXY_REQUESTS: "false"
       PROXY_GRAPHQL: "false"
-      SKIP_SEEDING: "false"
-      DISABLE_AVAILABILITY_STATUS_LISTENER: "false"
-      DEPLOYMENT_NAME: sources-api
+      SKIP_SEEDING: "true"
+      DISABLE_AVAILABILITY_STATUS_LISTENER: "true"
+      DEPLOYMENT_NAME: sources-api-legacy
 - name: sources-api-go
   path: /deploy/clowdapp.yaml
   url: https://github.com/RedHatInsights/sources-api-go
@@ -109,8 +109,22 @@ resourceTemplates:
       KOKU_SOURCES_API_HOST: koku-clowder-sources-client.hccm-stage.svc.cluster.local
       KOKU_SOURCES_API_PORT: "10000"
       CLOUD_METER_API_HOST: cloudigrade-api.cloudigrade-stage.svc.cluster.local
+      CLOUD_CONNECTOR_CHECK_PATH: /api/cloud-connector/v1/connection_status
       LOG_LEVEL: DEBUG
       RBAC_PORT: "8080"
+  - namespace:
+      $ref: /services/insights/sources/namespaces/sources-prod.yml
+    ref: 95d4ea6ce2bea8dd2b651a44fb3c5ced7ef8c060
+    parameters:
+      SOURCES_ENV: prod
+      MIN_REPLICAS: 3
+      AVAILABILITY_MIN_REPLICAS: 3
+      KOKU_SOURCES_API_HOST: koku-clowder-sources-client.hccm-prod.svc.cluster.local
+      KOKU_SOURCES_API_PORT: "10000"
+      CLOUD_METER_API_HOST: cloudigrade-api.cloudigrade-prod.svc.cluster.local
+      LOG_LEVEL: DEBUG
+      RBAC_PORT: "8080"
+      SOURCETYPE_SKIP_LIST: "ibm"
 - name: sources-monitor-go
   path: /deploy/clowdapp.yaml
   url: https://github.com/RedHatInsights/sources-monitor-go
@@ -155,9 +169,8 @@ resourceTemplates:
       AWS_WAIT_TIME: "20"
   - namespace:
       $ref: /services/insights/sources/namespaces/sources-prod.yml
-    ref: 98e8929b11a6924aec4c5b2db189bb5727f25bed
+    ref: 2b0f5eb4d46cb32d3909e227718aa4e773f241a6
     parameters:
-      IMAGE_TAG: 59d3f7a
       LOG_LEVEL: INFO
       MIN_REPLICAS: 3
       MEMORY_LIMIT: 150Mi

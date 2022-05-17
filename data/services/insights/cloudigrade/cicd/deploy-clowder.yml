@@ -61,6 +61,7 @@ resourceTemplates:
     parameters:
       API_REPLICA_COUNT_MAX: '2'
       API_SENTRY_ENVIRONMENT: stage
+      CELERY_METRICS_REPLICA_COUNT: '1'
       CELERY_SENTRY_ENVIRONMENT: stage
       CELERY_WORKER_REPLICA_COUNT_MAX: '16'
       CLOUDIGRADE_CW_STREAM_NAME: cloudigrade-stage
@@ -79,21 +80,22 @@ resourceTemplates:
       WATCHTOWER_MAX_BATCH_COUNT: 10
   - namespace:
       $ref: /services/insights/cloudigrade/namespaces/cloudigrade-prod.yml
-    ref: f196fca81d32d5905bd85a294acbcac8738a71c2
+    ref: a7f4d7f9b935c6ef7a8f21692e56a1cb70d63ebd
     promotion:
-      auto: false
+      auto: true
       subscribe:
       - cloudigrade-stage-post-deploy-tests-success-channel
       promotion_data:
       - channel: cloudigrade-stage-post-deploy-tests-success-channel
         data:
         - parent_saas: cloudigrade-test
-          target_config_hash: 5560310e537733ed
+          target_config_hash: fa5d682e659bc19a
           type: parent_saas_config
     parameters:  # all other parameters have default values
       API_REPLICA_COUNT_MAX: '3'
       API_SENTRY_ENVIRONMENT: prod
       API_TARGET_AVERAGE_CPU_UTILIZATION: '35'
+      CELERY_METRICS_REPLICA_COUNT: '3'
       CELERY_SENTRY_ENVIRONMENT: prod
       CELERY_SENTRY_SAMPLE_RATE_DEFAULT: '0.01'
       CELERY_WORKER_REPLICA_COUNT: '8'
@@ -141,7 +143,7 @@ resourceTemplates:
     parameters:
       POSTIGRADE_MIN_REPLICAS: '8'
     promotion:
-      auto: false
+      auto: true
       subscribe:
       - postigrade-stage-deploy-success-channel
       promotion_data:
@@ -160,7 +162,7 @@ resourceTemplates:
     ref: master
   - namespace:
       $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: f196fca81d32d5905bd85a294acbcac8738a71c2
+    ref: a7f4d7f9b935c6ef7a8f21692e56a1cb70d63ebd
     promotion:
       auto: true
       subscribe:
@@ -169,5 +171,5 @@ resourceTemplates:
       - channel: cloudigrade-stage-post-deploy-tests-success-channel
         data:
         - parent_saas: cloudigrade-test
-          target_config_hash: 5560310e537733ed
+          target_config_hash: fa5d682e659bc19a
           type: parent_saas_config

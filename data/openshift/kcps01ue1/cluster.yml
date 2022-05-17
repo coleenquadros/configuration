@@ -1,0 +1,60 @@
+---
+$schema: /openshift/cluster-1.yml
+labels:
+  service: kcp
+name: kcps01ue1
+description: KCP OSDv4 staging cluster
+consoleUrl: https://console-openshift-console.apps.kcps01ue1.kt4n.p1.openshiftapps.com
+kibanaUrl: ''
+prometheusUrl: ''
+alertmanagerUrl: ''
+serverUrl: https://api.kcps01ue1.kt4n.p1.openshiftapps.com:6443
+elbFQDN: elb.apps.kcps01ue1.kt4n.p1.openshiftapps.com
+auth:
+  service: github-org-team
+  org: app-sre
+  team: kcps01ue1-cluster
+ocm:
+  $ref: /dependencies/ocm/production.yml
+managedGroups:
+- dedicated-admins
+
+spec:
+  provider: aws
+  region: us-east-1
+  channel: fast
+  version: 4.10.13
+  initial_version: 4.10.11-fast
+  multi_az: true
+  autoscale:
+    min_replicas: 9
+    max_replicas: 9
+  instance_type: m5.xlarge
+  storage: 600
+  load_balancers: 0
+  private: false
+  disable_user_workload_monitoring: true
+  id: 1s587rh2sifatq0t3ntpbqsnnqmjjcan
+  external_id: 95bd7a66-d6a7-4c1d-8db7-f514fd67a150
+  provision_shard_id: 7c2626e2-da06-11ea-8f62-8c1645a911be
+upgradePolicy: # optional, specify an upgrade schedule
+  workloads: [kcp] # workloads running in this cluster
+  schedule: 0 10 * * 4
+  conditions:
+    soakDays: 0
+network:
+  type: OpenShiftSDN
+  vpc: 10.27.0.0/16
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
+automationToken:
+  path: app-sre/creds/kube-configs/kcps01ue1
+  field: token
+addons: # enable log forwarding to the cluster's AWS account
+- $ref: /dependencies/ocm/addons/cluster-logging-operator.yml
+internal: false
+awsInfrastructureManagementAccounts:
+- account:
+    $ref: /aws/app-sre-stage/account.yml
+  accessLevel: network-mgmt
+  default: true

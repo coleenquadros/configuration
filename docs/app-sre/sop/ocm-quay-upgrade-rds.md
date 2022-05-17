@@ -32,8 +32,12 @@ As with all RDS instances, the replicas must be upgraded first. The procedure be
 1. See the [Notifications](#notifications) section above and make sure that you've notified the correct teams
 2. Verify that there aren't any ongoing issues with quay.io (this is a fallback system for OSD use cases if quay.io is down). Don't proceed if there is any hint of issues with quay.io.
 3. Verify that the TTL value for `pull.q1w2.quay.rhcloud.com` is set to a low enough value that clients will pick up changes to DNS records that we will make below (at the time of writing, this is <60s)
-4. Create a MR to update the DNS record for `pull.q1w2.quay.rhcloud.com` to set the weight of the cluster associated with the RDS instance being upgraded to `0` so that traffic will not be directed to that ONE cluster ([example](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/38526))
-5. Merge the MR above and confirm that `pull.q1w2.quay.rhcloud.com` is no longer sending traffic to the cluster to be upgraded (note DNS is round-robin, so you will need to make several attempts)
+4. Create a MR to update the DNS record matching `set_identifier: pull-${db_identifier}`  for `pull.q1w2.quay.rhcloud.com` to set the weight of the cluster associated with the RDS instance being upgraded to `0` so that traffic will not be directed to that ONE cluster ([example](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/38526)) 
+5. Merge the MR above and confirm that `pull.q1w2.quay.rhcloud.com` is no longer sending traffic to the cluster to be upgraded (note DNS is round-robin, so you will need to make several attempts). You can use following snippet to monitor dns routing.
+   ```
+   # Run the command below for a minute to ensure DNS doesn't resolve to the disabled cluster
+   while true; do dig +short pull.q1w2.quay.rhcloud.com @8.8.8.8; sleep 1; done | grep ocmro
+   ```
 6. Create a MR to upgrade a SINGLE database (the one associated with the cluster above) to the desired version ensuring that you set `apply_immediately: true` so it doesn't wait for the next maintenance window ([example](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/38345))
 7. Once the database upgrade is complete, verify that the OCM-Quay cluster is working as expected:
    1. login to the URL specific to the OCM-Quay cluster to verify that Quay is up (ex. ocmro<REPLICA_NUMBER>.q1w2.quay.rhcloud.com)
@@ -48,7 +52,9 @@ Upgrading the primary is simpler because there isn't any modification of DNS rec
 
 1. See the [Notifications](#notifications) section above and make sure that you've notified the correct teams
 2. Verify that there aren't any ongoing issues with quay.io (this is a fallback system for OSD use cases if quay.io is down). Don't proceed if there is any hint of issues with quay.io.
-3. Create a MR to upgrade the database to the desired version ensuring that you set `apply_immediately: true` so it doesn't wait for the next maintenance window ([example](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/38345))
-4. Once the database upgrade is complete, verify that the OCM-Quay cluster is working as expected:
-   1. login to the URL specific to the OCM-Quay cluster to verify that Quay is up (pull.q1w2.quay.rhcloud.com)
+3. Disable the `quay-mirror` and `quay-repos` integrations to avoid transient error messages when the push endpoint isn't available
+4. Create a MR to upgrade the database to the desired version ensuring that you set `apply_immediately: true` so it doesn't wait for the next maintenance window ([example](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/38345))
+5. Once the database upgrade is complete, verify that the OCM-Quay cluster is working as expected:
+   1. login to the URL specific to the OCM-Quay cluster to verify that Quay is up (push.q1w2.quay.rhcloud.com)
    2. confirm that the [mirroring of images from quay.io](/docs/app-sre/ocm-quay-mirroring.md) is working as expected (check logs for qontract-reconcile integration)
+6. Re-enable the `quay-mirror` and `quay-repos` integrations
