@@ -1,6 +1,6 @@
 # Preparing for Private Repositories
 
-Docker's ToS prevents us from mirroring public images in Docker Hub to *public* registries in quay.io.
+Docker's [ToS](https://www.docker.com/legal/docker-terms-service/) prevents us from mirroring public images in Docker Hub to *public* registries in quay.io (see item 2.4 in the linked docker document).
 
 If we arbitrarily make a public quay.io repository private, we may break the service as the ServiceAccount may not have the necessary pull secrets to fetch the now private image.
 
