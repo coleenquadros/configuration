@@ -9,7 +9,7 @@ evaluation_interval: 5m
 tests:
 - interval: 5m
   input_series:
-  - series: sum(kafka_consumergroup_group_lag{topic="platform.upload.buckit",group="ccx_data_pipeline_app"})
+  - series: kafka_consumergroup_group_lag{topic="platform.upload.buckit",group="ccx_data_pipeline_app"}
     values: 10 50 100 200 300 400 500 600
 
   alert_rule_test:
@@ -46,7 +46,7 @@ tests:
 
 - interval: 5m
   input_series:
-  - series: sum(kafka_consumergroup_group_lag{topic="ccx.ocp.results", group="ccx_data_pipeline_app"})
+  - series: kafka_consumergroup_group_lag{topic="ccx.ocp.results", group="ccx_data_pipeline_app"}
     values: 10 50 100 200 300 400 500 600
 
   alert_rule_test:
@@ -83,25 +83,14 @@ tests:
 
 - interval: 5m
   input_series:
-  - series: |
-              (
-                sum(
-                  increase(successful_messages_processing_time_sum{service="ccx-insights-results-db-writer-prometheus-exporter",namespace="ccx-data-pipeline-prod"}[1m])
-                )
-                /
-                sum(
-                  increase(successful_messages_processing_time_count{service="ccx-insights-results-db-writer-prometheus-exporter",namespace="ccx-data-pipeline-prod"}[1m])
-                )
-              ) + (
-                sum(
-                  increase(ccx_process_duration_seconds_count{service="ccx-data-pipeline-prometheus-exporter",namespace="ccx-data-pipeline-prod"}[1m])
-                )
-                /
-                sum(
-                  increase(ccx_process_duration_seconds_count{service="ccx-data-pipeline-prometheus-exporter",namespace="ccx-data-pipeline-prod"}[1m])
-                )
-              )
-    values: 10 50 100 200 300 400 500 600
+  - series: successful_messages_processing_time_sum{service="ccx-insights-results-db-writer-prometheus-exporter",namespace="ccx-data-pipeline-prod"}
+    values: 10 20 30 40 50 500 5000 6000
+  - series: successful_messages_processing_time_sum{service="ccx-data-pipeline-prometheus-exporter",namespace="ccx-data-pipeline-prod"}
+    values: 10 20 30 40 50 500 5000 6000
+  - series: successful_messages_processing_time_count{service="ccx-insights-results-db-writer-prometheus-exporter",namespace="ccx-data-pipeline-prod"}
+    values: 1 2 3 4 5 6 7 8
+  - series: successful_messages_processing_time_count{service="ccx-data-pipeline-prometheus-exporter",namespace="ccx-data-pipeline-prod"}
+    values: 1 2 3 4 5 6 7 8
 
   alert_rule_test:
   # Test the no alert case
@@ -137,25 +126,14 @@ tests:
 
 - interval: 5m
   input_series:
-  - series: |
-              (
-                sum(
-                  increase(successful_messages_processing_time_sum{service="ccx-insights-results-db-writer-prometheus-exporter",namespace="ccx-data-pipeline-stage"}[1m])
-                )
-                /
-                sum(
-                  increase(successful_messages_processing_time_count{service="ccx-insights-results-db-writer-prometheus-exporter",namespace="ccx-data-pipeline-stage"}[1m])
-                )
-              ) + (
-                sum(
-                  increase(ccx_process_duration_seconds_count{service="ccx-data-pipeline-prometheus-exporter",namespace="ccx-data-pipeline-stage"}[1m])
-                )
-                /
-                sum(
-                  increase(ccx_process_duration_seconds_count{service="ccx-data-pipeline-prometheus-exporter",namespace="ccx-data-pipeline-stage"}[1m])
-                )
-              )
-    values: 10 50 100 200 300 400 500 600
+  - series: successful_messages_processing_time_sum{service="ccx-insights-results-db-writer-prometheus-exporter",namespace="ccx-data-pipeline-stage"}
+    values: 10 20 30 40 50 500 5000 6000
+  - series: successful_messages_processing_time_sum{service="ccx-data-pipeline-prometheus-exporter",namespace="ccx-data-pipeline-stage"}
+    values: 10 20 30 40 50 500 5000 6000
+  - series: successful_messages_processing_time_count{service="ccx-insights-results-db-writer-prometheus-exporter",namespace="ccx-data-pipeline-stage"}
+    values: 1 2 3 4 5 6 7 8
+  - series: successful_messages_processing_time_count{service="ccx-data-pipeline-prometheus-exporter",namespace="ccx-data-pipeline-stage"}
+    values: 1 2 3 4 5 6 7 8
 
   alert_rule_test:
   # Test the no alert case
@@ -191,11 +169,10 @@ tests:
 
 - interval: 5m
   input_series:
-  - series: |
-              count ( rate(api_endpoints_response_time_sum{namespace="ccx-data-pipeline-prod", service="ccx-smart-proxy"}[1m]) > 0.5 ) 
-              /
-              sum(rate(api_endpoints_response_time_count{namespace="ccx-data-pipeline-prod", service="ccx-smart-proxy"}[1m]))
-    values: 0.05 0.1 0.5 0.7
+  - series: api_endpoints_response_time_sum{namespace="ccx-data-pipeline-prod", service="ccx-smart-proxy", exported_endpoint="an-endpoint"}
+    values: 0 1 2 4 8
+  - series: api_endpoints_response_time_count{namespace="ccx-data-pipeline-prod", service="ccx-smart-proxy", exported_endpoint="an-endpoint"}
+    values: 0 1 2 3 4
 
   alert_rule_test:
   # Test the no alert case
@@ -211,7 +188,7 @@ tests:
         service: smart-proxy
         severity: critical
       exp_annotations:
-        message: "The response time of smart-proxy ({{ $labels.exported_endpoint }} endpoint) is taking too long in production environment."
+        message: "The response time of smart-proxy (an-endpoint endpoint) is taking too long in production environment."
         runbook: "https://ccx.pages.redhat.com/ccx-docs/customer/sops/rest_api_gt_1_sec.html"
         # TODO: Update the link to the correct dashboard
         dashboard: "https://grafana.app-sre.devshift.net/d/Afpm4ku7k/ccx-processing-slo?orgId=1&viewPanel=8"
@@ -224,18 +201,17 @@ tests:
         service: smart-proxy
         severity: critical
       exp_annotations:
-        message: "The response time of smart-proxy ({{ $labels.exported_endpoint }} endpoint) is taking too long in production environment."
+        message: "The response time of smart-proxy (an-endpoint endpoint) is taking too long in production environment."
         runbook: "https://ccx.pages.redhat.com/ccx-docs/customer/sops/rest_api_gt_1_sec.html"
         # TODO: Update the link to the correct dashboard
         dashboard: "https://grafana.app-sre.devshift.net/d/Afpm4ku7k/ccx-processing-slo?orgId=1&viewPanel=8"
 
 - interval: 5m
   input_series:
-  - series: |
-              count ( rate(api_endpoints_response_time_sum{namespace="ccx-data-pipeline-stage", service="ccx-smart-proxy"}[1m]) > 0.5 ) 
-              /
-              sum(rate(api_endpoints_response_time_count{namespace="ccx-data-pipeline-stage", service="ccx-smart-proxy"}[1m]))
-    values: 0.05 0.1 0.5 0.7
+  - series: api_endpoints_response_time_sum{namespace="ccx-data-pipeline-stage", service="ccx-smart-proxy", exported_endpoint="an-endpoint"}
+    values: 0 1 2 4 8
+  - series: api_endpoints_response_time_count{namespace="ccx-data-pipeline-stage", service="ccx-smart-proxy", exported_endpoint="an-endpoint"}
+    values: 0 1 2 3 4
 
   alert_rule_test:
   # Test the no alert case
@@ -251,7 +227,7 @@ tests:
         service: smart-proxy
         severity: critical
       exp_annotations:
-        message: "The response time of smart-proxy ({{ $labels.exported_endpoint }} endpoint) is taking too long in stage environment."
+        message: "The response time of smart-proxy (an-endpoint endpoint) is taking too long in stage environment."
         runbook: "https://ccx.pages.redhat.com/ccx-docs/customer/sops/rest_api_gt_1_sec.html"
         # TODO: Update the link to the correct dashboard
         dashboard: "https://grafana.app-sre.devshift.net/d/Afpm4ku7k/ccx-processing-slo?orgId=1&viewPanel=8"
@@ -264,18 +240,17 @@ tests:
         service: smart-proxy
         severity: critical
       exp_annotations:
-        message: "The response time of smart-proxy ({{ $labels.exported_endpoint }} endpoint) is taking too long in stage environment."
+        message: "The response time of smart-proxy (an-endpoint endpoint) is taking too long in stage environment."
         runbook: "https://ccx.pages.redhat.com/ccx-docs/customer/sops/rest_api_gt_1_sec.html"
         # TODO: Update the link to the correct dashboard
         dashboard: "https://grafana.app-sre.devshift.net/d/Afpm4ku7k/ccx-processing-slo?orgId=1&viewPanel=8"
 
 - interval: 5m
   input_series:
-  - series: |
-              sum(rate(api_endpoints_status_codes{namespace="ccx-data-pipeline-prod", service="ccx-smart-proxy", status_code="500"}[1m]))
-              /
-              sum(rate(api_endpoints_requests{namespace="ccx-data-pipeline-prod", service="ccx-smart-proxy"}[1m]))
-    values: 0.01 0.05 0.1 0.5
+  - series: api_endpoints_status_codes{namespace="ccx-data-pipeline-prod", service="ccx-smart-proxy", exported_endpoint="an-endpoint"}
+    values: 200 200 500 500
+  - series: api_endpoints_requests{namespace="ccx-data-pipeline-prod", service="ccx-smart-proxy", exported_endpoint="an-endpoint"}
+    values: 1 1 1 1
 
   alert_rule_test:
   # Test the no alert case
@@ -291,7 +266,7 @@ tests:
         service: smart-proxy
         severity: critical
       exp_annotations:
-        message: "The response code in smart-proxy ({{ $labels.exported_endpoint }} endpoint) is 500 too often."
+        message: "The response code in smart-proxy (an-endpoint endpoint) is 500 too often."
         runbook: "https://ccx.pages.redhat.com/ccx-docs/customer/sops/index.html"
         # TODO: Update the link to the correct dashboard
         dashboard: "https://grafana.app-sre.devshift.net/d/Afpm4ku7k/ccx-processing-slo?orgId=1&viewPanel=12"
@@ -304,18 +279,17 @@ tests:
         service: smart-proxy
         severity: critical
       exp_annotations:
-        message: "The response code in smart-proxy ({{ $labels.exported_endpoint }} endpoint) is 500 too often."
+        message: "The response code in smart-proxy (an-endpoint endpoint) is 500 too often."
         runbook: "https://ccx.pages.redhat.com/ccx-docs/customer/sops/index.html"
         # TODO: Update the link to the correct dashboard
         dashboard: "https://grafana.app-sre.devshift.net/d/Afpm4ku7k/ccx-processing-slo?orgId=1&viewPanel=12"
 
 - interval: 5m
   input_series:
-  - series: |
-              sum(rate(api_endpoints_status_codes{namespace="ccx-data-pipeline-stage", service="ccx-smart-proxy", status_code="500"}[1m]))
-              /
-              sum(rate(api_endpoints_requests{namespace="ccx-data-pipeline-stage", service="ccx-smart-proxy"}[1m]))
-    values: 0.01 0.05 0.1 0.5
+  - series: api_endpoints_status_codes{namespace="ccx-data-pipeline-stage", service="ccx-smart-proxy", exported_endpoint="an-endpoint"}
+    values: 200 200 500 500
+  - series: api_endpoints_requests{namespace="ccx-data-pipeline-stage", service="ccx-smart-proxy", exported_endpoint="an-endpoint"}
+    values: 1 1 1 1
 
   alert_rule_test:
   # Test the no alert case
@@ -331,7 +305,7 @@ tests:
         service: smart-proxy
         severity: critical
       exp_annotations:
-        message: "The response code in smart-proxy ({{ $labels.exported_endpoint }} endpoint) is 500 too often."
+        message: "The response code in smart-proxy (an-endpoint endpoint) is 500 too often."
         runbook: "https://ccx.pages.redhat.com/ccx-docs/customer/sops/index.html"
         # TODO: Update the link to the correct dashboard
         dashboard: "https://grafana.app-sre.devshift.net/d/Afpm4ku7k/ccx-processing-slo?orgId=1&viewPanel=12"
@@ -344,7 +318,7 @@ tests:
         service: smart-proxy
         severity: critical
       exp_annotations:
-        message: "The response code in smart-proxy ({{ $labels.exported_endpoint }} endpoint) is 500 too often."
+        message: "The response code in smart-proxy (an-endpoint endpoint) is 500 too often."
         runbook: "https://ccx.pages.redhat.com/ccx-docs/customer/sops/index.html"
         # TODO: Update the link to the correct dashboard
         dashboard: "https://grafana.app-sre.devshift.net/d/Afpm4ku7k/ccx-processing-slo?orgId=1&viewPanel=12"
