@@ -64,7 +64,7 @@ resourceTemplates:
     # - Commits can be found here: https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/commits/main
     # If in doubt, please check with the MK Control Plane team.
     # We are exploring how to automate this in the future.
-    ref: 4d190c52196132a85251fd2a257fc1123f6224f8
+    ref: 5ea97bf63bb65905c1d4f3bfe9d82c1176679183
     parameters:
       ISSUER_URL: ${SSO_BASE_URL}
       OBSERVATORIUM_URL: https://observatorium-mst.api.openshift.com/api/metrics/v1/managedkafka
@@ -347,7 +347,7 @@ resourceTemplates:
     # the very first commit i.e https://gitlab.cee.redhat.com/service/kas-fleet-manager/-/merge_requests/356/commits?commit_id=f0fd63740464c5fa4bda395d5d31f675eff049ac
     # If in doubt, see with the control plane team.
     # We are exploring into using automating this.
-    ref: 4d190c52196132a85251fd2a257fc1123f6224f8
+    ref: 5ea97bf63bb65905c1d4f3bfe9d82c1176679183
     parameters:
       DB_SSLMODE: verify-full
       ENVIRONMENT: production
@@ -473,6 +473,7 @@ resourceTemplates:
         display_name: "Trial"
         sizes:
           - id: x1
+            display_name: "1"
             ingressThroughputPerSec: "1Mi"
             egressThroughputPerSec: "1Mi"
             totalMaxConnections: 100
@@ -480,13 +481,21 @@ resourceTemplates:
             maxPartitions: 100
             maxDataRetentionPeriod: "P14D"
             maxConnectionAttemptsPerSec: 50
+            maxMessageSize: "1Mi"
+            minInSyncReplicas: 1
+            replicationFactor: 1
             quotaConsumed: 1
             quotaType: "RHOSAKTrial"
             capacityConsumed: 1
+            supportedAZModes:
+              - single
+            lifespanSeconds: 172800
+            maturityStatus: preview
       - id: standard
         display_name: "Standard"
         sizes:
           - id: x1
+            display_name: "1"
             ingressThroughputPerSec: "50Mi"
             egressThroughputPerSec: "100Mi"
             totalMaxConnections: 3000
@@ -494,10 +503,17 @@ resourceTemplates:
             maxPartitions: 1500
             maxDataRetentionPeriod: "P14D"
             maxConnectionAttemptsPerSec: 100
+            maxMessageSize: "1Mi"
+            minInSyncReplicas: 2
+            replicationFactor: 3
             quotaConsumed: 1
             quotaType: "RHOSAK"
             capacityConsumed: 1
+            supportedAZModes:
+              - multi
+            maturityStatus: stable
           - id: x2
+            display_name: "2"
             ingressThroughputPerSec: "100Mi"
             egressThroughputPerSec: "200Mi"
             totalMaxConnections: 6000
@@ -505,9 +521,15 @@ resourceTemplates:
             maxPartitions: 3000
             maxDataRetentionPeriod: "P14D"
             maxConnectionAttemptsPerSec: 200
+            maxMessageSize: "1Mi"
+            minInSyncReplicas: 2
+            replicationFactor: 3
             quotaConsumed: 2
             quotaType: "RHOSAK"
             capacityConsumed: 2
+            supportedAZModes:
+              - multi
+            maturityStatus: preview
 
       # Set domain name for Kafka instances
       KAFKA_DOMAIN_NAME: "bf2.kafka.rhcloud.com"
