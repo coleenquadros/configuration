@@ -195,7 +195,7 @@ There are several methods of restarting Jenkins, depending on severity of proble
 Use systemd as you would with any other service:
 
 ``` shell
-systemctl restart --no-block jenkins
+sudo systemctl restart --no-block jenkins
 ```
 
 This will let all ongoing jobs finish before restarting the
@@ -213,7 +213,7 @@ long time! You can press control+C to get back to the prompt.
 You can kill Jenkins directly:
 
 ``` shell
-systemctl kill jenkins -s TERM
+sudo systemctl kill jenkins -s TERM
 ```
 
 Please note, doing this will lose track of any ongoing jobs.
