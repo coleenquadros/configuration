@@ -1,0 +1,77 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: gateway
+
+name: 3scale-ephemeral
+description: Insights 3scale on the Ephemeral cluster under e2e-deploy/ocdeployer management
+
+cluster:
+  $ref: /openshift/insights/c-rh-c-eph/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/standard-resource-limits.yml
+
+quota:
+  $ref: /services/insights/default-quota.yml
+
+app:
+  $ref: /services/insights/gateway/app.yml
+
+environment:
+  $ref: /products/insights/environments/ephemeral.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- Route
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: resource
+  path: insights-ephemeral/3scale-ephemeral/api-gateway-ephemeral.route.yml
+- provider: vault-secret
+  path: insights/secrets/ephemeral/3scale/apicast-configuration-url-secret
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/ephemeral/3scale/apicast-insights-3scale-config
+  version: 16
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/ephemeral/3scale/apicast-insights-services-ephemeral-jwt-pub-key
+  version: 2
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/3scale-stage/gateway-server
+  version: 4
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/backoffice/preprod/3scale-api-gw
+  version: 3
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/ephemeral/3scale/ca-trust-source
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/ephemeral/3scale/cert-bundle
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+
