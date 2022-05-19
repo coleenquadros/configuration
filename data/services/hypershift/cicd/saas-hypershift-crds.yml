@@ -1,0 +1,43 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: hypershift
+
+name: saas-hypershift-crds
+description: |
+  Deploy only Hypershift CRDs on service clusters for ACM/OCM integration.
+  All the other resources in the template will be ignored.
+
+clusterAdmin: true
+
+app:
+  $ref: /services/hypershift/app.yml
+
+pipelinesProvider:
+  $ref: /services/hypershift/pipelines/tekton.hypershift-pipelines.appsrep05ue1.yaml
+
+deployResources:
+  requests:
+    cpu: 300m
+    memory: 1500Mi
+  limits:
+    cpu: 300m
+    memory: 1500Mi
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: project-hypershift-app-ci
+
+managedResourceTypes:
+- CustomResourceDefinition
+
+resourceTemplates:
+- name: hypershift
+  url: https://github.com/openshift/hypershift
+  path: /hack/app-sre/saas_template.yaml
+  targets:
+  - namespace:
+      $ref: /services/hypershift/namespaces/hsservicei01ue1/multicluster-engine.yml
+    ref: main
