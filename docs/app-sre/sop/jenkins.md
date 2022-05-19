@@ -46,7 +46,7 @@ Things to check:
 - Nodes available disk space
   - Verify /tmp (/) 
   - Verify /var/lib/jenkins
-    - Remove heapdumps if any. Take backup on local machine if necessary.
+    - Remove heapdumps if any(look for files with `.hprof` extension). Take backup on local machine if necessary.
   - Verify /var/lib/docker. Clean with `docker system prune -a`.
   - Duplicity backups cache can fill up in /root/.cache/duplicity
     - Clear old backups with: /backup/backup.sh remove-older-than 3M
@@ -163,7 +163,7 @@ Pay attention if bottom line before table shows near to limit usage of RAM
 - Image for reference showing the problem ![before running script](images/ci-int-memory-histogram-before-script-screenshot.png)
 - If it's big then need to execute [script](https://plugins.jenkins.io/git/#plugin-content-remove-git-plugin-buildsbybranch-builddata-script)
 - Image for reference showing the remediation ![before running script](images/ci-int-memory-histogram-after-script-screenshot.png)
-- If necessary perform heapdump to analyze JVM memory usage.
+- If necessary perform [heapdump](jenkins-heapdump.md) to analyze JVM memory usage. 
 
 Note: running script also trims down disk usage by removing git revisions' builddata from all builds stored on controller and its backups
 
