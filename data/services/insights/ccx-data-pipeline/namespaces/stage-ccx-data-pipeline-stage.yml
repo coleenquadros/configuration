@@ -101,3 +101,33 @@ terraformResources:
   identifier: insights-buck-it-openshift-stage
   output_resource_name: insights-kms
   defaults: /terraform/resources/insights/stage/kms-insights-buck-it-openshift-stage.yml
+- provider: s3
+  account: insights-stage
+  identifier: insights-exported-results
+  defaults: /terraform/resources/s3-all-expires-7-days.yml
+  output_resource_name: ccx-results-exporter-s3
+- provider: aws-iam-service-account
+  account: insights-stage
+  identifier: ccx-exporter-s3-stage
+  variables:
+    bucket: ccx-results-exporter-s3-read-write
+    region: us-east-1
+    endpoint: s3.us-east-1.amazonaws.com
+  user_policy:
+    {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Action": ["s3:ListBucket"],
+          "Resource": ["arn:aws:s3:::${bucket}"]
+        },
+        {
+          "Effect": "Allow",
+          "Action": ["s3:*Object"],
+          "Resource": ["arn:aws:s3:::${bucket}/*"]
+        }
+
+      ]
+    }
+  output_resource_name: ccx-exporter-s3-read-write
