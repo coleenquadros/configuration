@@ -1,0 +1,17 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2022-05-19-stage-get-duplicated-applications
+namespace:
+  $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
+identifier: sources-stage
+output: stdout
+query: |
+  SELECT
+    "apps"."tenant_id", "apps"."source_id", "apps"."application_type_id", COUNT("apps"."tenant_id") 
+  FROM
+    "applications" "apps"
+  GROUP BY
+    "apps"."tenant_id", "apps"."source_id", "apps"."application_type_id"
+  HAVING
+    COUNT("apps"."tenant_id") > 1;
