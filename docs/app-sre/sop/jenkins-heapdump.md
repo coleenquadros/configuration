@@ -1,7 +1,7 @@
 # Jenkins and heapdump
 
 Since Jenkins runs as a java process, it is sometime useful to do heapdumps to investigate any memory related issues.
-Taking a heapdump is considered as stop-the-world activity, this means any other jvm threads are paused until heapdump is complete.
+Taking a heapdump is considered a stop-the-world activity, this means any other jvm threads are paused until heapdump is complete.
 Also, the pause duration during heapdump depends upon the allocated heap size and disk I/O.
 
 ## Automatic heapdump
