@@ -61,7 +61,11 @@ A PoC can be seen [here](https://github.com/app-sre/qontract-reconcile/pull/2367
 
 [strawberry](https://github.com/strawberry-graphql/strawberry) is a python library to define schemas as python classes and convert them to GQL.
 Further, it offers a query code generator which converts a given `my_query.gql` into `my_query.py` file with corresponding dataclasses.
-We need a PoC for this option to properly evaluate its capabilities.
+
+As of now strawberry requires the schema to be written into a python module using its library. Based on that module, the code generator can
+generate query data classes.
+
+A PoC is not feasible at this point, because it requires `qontract-schema` and `qontract-server` to be rewritten with strawberry.
 
 **Pros:**
 
@@ -70,13 +74,16 @@ We need a PoC for this option to properly evaluate its capabilities.
 **Cons:**
 
 - code generation is experimental -> [subject to changes](https://strawberry.rocks/docs/codegen/query-codegen)
+- `qontract-server` and `qontract-schema` need to be re-written with strawberry
 
 #### Custom Generator
 
 Code generation for **our current use-cases** is **no rocket science**. We could easily maintain our own code generator.
 
 Similar to `sgqcl` or `strawberry`, the generator takes a `my_query.gql` file and converts it to `my_query.py`.
+The generator only requires an introspection query to a GQL backend to properly interpret the types of a query.
 The `my_query.py` contains very simple pydantic classes. Pydantic handles the mapping of dict to classes.
+To highlight that those classes are basically typed containers for query data, the generated classes are suffixed with `QueryData`.
 
 A PoC for a simple code generator with a usage example can be found [here](https://github.com/app-sre/qontract-reconcile/pull/2389).
 
@@ -126,7 +133,7 @@ with open("gql_queries/saas_files/saas_files_full.gql", "r") as f:
     query = f.read()
 
 data: dict[Any, Any] = gqlapi.query(query)
-apps: list[saas_files_full.AppV1] = saas_files_full.SaasFilesFullQuery(**data).apps_v1 or []
+apps: list[saas_files_full.AppV1QueryData] = saas_files_full.SaasFilesFullQueryData(**data).apps_v1 or []
 ```
 
 More specifics and details can be found in the [PoC](https://github.com/app-sre/qontract-reconcile/pull/2389).
