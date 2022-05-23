@@ -54,6 +54,8 @@ We will create an Initiative.
 
 An initiative is essentially a high level design document that lays down a plan. Each step of that plan will have a design doc of itself, all referencing the initiative. An initiative document will be submitted in the form of a merge request to app-interface (under docs/app-sre/initiative), and will follow the same review guidelines as a design document. The structure of an initiative document will be the same as that of a design doc, except that each Milestone will end up as a design doc.
 
+To better understand the phase each initiative is in, each initiative document will be placed under a directory called "to-do", "in-progress" or "done".
+
 ## Alternatives considered
 
 * Keep doing what we are doing; separate design docs with no higher level understanding of dependencies, design or process. Use jira links between tickets to illustrate order.
