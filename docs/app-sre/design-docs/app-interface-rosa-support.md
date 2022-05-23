@@ -129,7 +129,7 @@ separate implementations.
 1. Adapt OCM library and integrations to work with different OCM implementations
 2. Add ROSA OCM Implementation. Test all functionalities
 3. Update OCM documentation, SOPS, etc to include ROSA clusters.
-3. Add a ROSA Cluster to APP-Interface.
+3. Add a ROSA Cluster to App-Interface.
 
 ## Resources
 
