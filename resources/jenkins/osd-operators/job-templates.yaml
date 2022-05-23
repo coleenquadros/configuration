@@ -39,6 +39,34 @@
     <<: *gl_build_master
 
 - job-template:
+    id: 'gl-pr-check-aws-payer-accounts-terraform'
+    name: 'gl-pr-check-aws-payer-accounts-terraform'
+    pr_check_script_path: ./hack/cicd.sh check
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *srep_aws_payer_accounts_credentials
+    <<: *gl_pr_check
+
+- job-template:
+    id: 'gl-build-master-aws-payer-accounts-terraform'
+    name: 'gl-build-master-aws-payer-accounts-terraform'
+    build_deploy_script_path: ./hack/cicd.sh apply
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - ansicolor
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *srep_aws_payer_accounts_credentials
+    <<: *gl_build_master
+
+- job-template:
     id: 'gl-build-master-osd-backplane-bastion-infra-packer'
     name: 'gl-build-master-osd-backplane-bastion-infra-packer'
     ci_cmd: ./packer/scripts/build.sh
