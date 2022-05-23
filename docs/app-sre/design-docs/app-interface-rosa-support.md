@@ -57,9 +57,9 @@ About the AWSInfrastructureAccess, as the accounts are managed by us, we could m
 `OSD` aws accounts. Creating both `read-only` and `network-mgmt` roles in the destination account and adding
 the IAM policies when new accesses need to be granted. There are 2 things to consider.
 
-1.- Users access to the account. These accesses will be managed by app-interface through aws groups and the
+1. Users access to the account. These accesses will be managed by app-interface through aws groups and the
   terraform-users integration.
-2.- Terrafom integrations will leverage the `assume-role` feature to get the `network-mgmt` role in the account.
+2. Terrafom integrations will leverage the `assume-role` feature to get the `network-mgmt` role in the account.
   This approach has been used in Fedramp.
 
 <img src="../assets/rosa_ocm_diagram.png" width="600"/>
