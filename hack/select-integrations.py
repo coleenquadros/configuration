@@ -180,6 +180,7 @@ def main():
             and not re.match(r'resources/(terraform|jenkins)/', p)):
         selected.add('openshift-routes')
         selected.add('openshift-resources')
+        selected.add('openshift-tekton-resources')
 
     print_pr_check_cmds(integrations, selected=selected,
                         valid_saas_file_changes=valid_saas_file_changes_only)
