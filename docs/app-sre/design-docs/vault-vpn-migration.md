@@ -56,13 +56,17 @@ Pre-requisite actions:
 
 * Setup peerings between affected clusters to ensure correct vault access [APPSRE-4792](https://issues.redhat.com/browse/APPSRE-4792)
 
+* Get Digicert cerficate to use instead of Openshift-ACME that does not work inside the VPN - RITM1177754 & RITM1177748 
+
 Migration steps:
 
 * Deploy new vault instance in `appsres03ue1` cluster
+* Change certificates to use the new digicert certificate
 * Validate read/write operations from Vault stage instance
 * Test stage integrations run with the new Vault instance
 
 * Deploy new vault instance in `appsrep05ue1` cluster
+* Change certificates to use the new digicert certificate
 * Validate read/write operations from Vault prod instance
 * Modify integrations to run with the new Vault instance
 
