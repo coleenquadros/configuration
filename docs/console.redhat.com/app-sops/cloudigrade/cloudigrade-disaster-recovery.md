@@ -16,7 +16,10 @@ Follow these steps to recover from disaster.
     -  cloudigrade pods will fail to start if secrets are missing.
     -  cloudigrade uses `vault-secret` providers much like other services.
     -  See the `openshiftResources` definitions in [stage-cloudigrade-stage.yml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml) and [cloudigrade-prod.yml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/insights/cloudigrade/namespaces/cloudigrade-prod.yml).
--  Otherwise, no cloudigrade specific steps need to be taken.
+- If the RDS database needs to be restored from a backup or recreated, you should simply redeploy cloudigrade and postigrade so that all pods will re-read their configurations and establish new connections to the database.
+    - cloudigrade pods always connect to postigrade for their database connections.
+    - postigrade pods are running [`PgBouncer`](https://www.pgbouncer.org/) and are the only pods that should directly connect to RDS.
+-  Otherwise, no cloudigrade specific steps need to be taken to resume normal operations.
     - Deployments are fully configured in app-interface.
     - DB migrations automatically run during deployment.
     - AWS resources (buckets, queues, etc.) are automatically created and configured during deployment.
