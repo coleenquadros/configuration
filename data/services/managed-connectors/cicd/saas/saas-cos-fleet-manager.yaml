@@ -27,6 +27,8 @@ imagePatterns:
 - quay.io/rhoas/cos-fleet-manager
 - quay.io/centos/centos
 - quay.io/rhoas/envoyproxy
+- quay.io/observatorium/token-refresher
+- quay.io/rhoas/mk-token-refresher
 
 authentication:
   image:
@@ -34,6 +36,18 @@ authentication:
     field: all
 
 resourceTemplates:
+  - name: observatorium-token-refresher
+    url: https://gitlab.cee.redhat.com/mk-ci-cd/cos-fleet-manager
+    path: /templates/observatorium-token-refresher.yml
+    targets:
+      - namespace:
+          $ref: /services/managed-connectors/namespaces/managed-connectors-stage.yaml
+        ref: main
+        parameters:
+          ISSUER_URL: ${SSO_BASE_URL}
+          OBSERVATORIUM_URL: https://observatorium-mst.api.stage.openshift.com/api/metrics/v1/rhoc
+          OBSERVATORIUM_TOKEN_REFRESHER_IMAGE: quay.io/rhoas/mk-token-refresher
+          OBSERVATORIUM_TOKEN_REFRESHER_IMAGE_TAG: 0b54d2e
 - name: cos-fleet-manager-dashboards
   url: https://gitlab.cee.redhat.com/mk-ci-cd/cos-fleet-manager
   path: /dashboards
