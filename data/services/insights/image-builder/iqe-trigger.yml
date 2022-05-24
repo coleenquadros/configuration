@@ -1,0 +1,45 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: image-builder
+
+name: image-builder-iqe-trigger
+description: Trigger for IQE pipelines
+
+app:
+  $ref: /services/image-builder/app.yml
+
+pipelinesProvider:
+  $ref: /services/image-builder/pipelines/tekton.image-builder-pipelines.app-sre-prod-01.yml
+
+managedResourceTypes:
+- Job
+
+publishJobLogs: true
+
+imagePatterns:
+  - quay.io/app-sre
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+resourceTemplates:
+- name: IQE-trigger
+  url: https://github.com/osbuild/image-builder
+  path: /templates/iqe-trigger.yml
+  targets:
+    - namespace:
+        $ref: /services/image-builder/namespaces/composer-stage.yml
+      ref: main
+      promotion:
+        subscribe:
+          - image-builder-stage-deploy-success-channel
+      secretParameters:
+        - name: WEBHOOK_URL
+          secret:
+            path: insights/secrets/qe/stage/image-builder
+            field: webhook_url
+            version: 1
