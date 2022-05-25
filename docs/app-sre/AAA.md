@@ -188,7 +188,7 @@ Every AppSRE engineer should have access to the following:
     * You should request Tier1
 * Pendo:
   * This is necessary to post maintenance and outage messages in https://console.redhat.com/openshift
-  * Access is provided via email to Allie Higgins <ahiggins@redhat.com>.
+  * Access is provided via email to Jacquelene Booker <jbooker@redhat.com>.
   * [Logging](https://app.pendo.io/login) in is done using the full Red Hat email.
 * Unleash:
   * Feature toggle service to enable/disable features in runtime.
