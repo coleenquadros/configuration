@@ -1,0 +1,34 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: deployment-validation-operator-unset-memory-requirements
+spec:
+  groups:
+  - name: deployment-validation-operator-unset_memory_requirements.rules
+    rules:
+    {{%- for cluster in query('/queries/cluster-namespace-app-jira.graphql', name=resource.namespace.cluster.name) %}}
+    {{%- for namespace in cluster.namespaces %}}
+    {{%- if not namespace.name.startswith('openshift-') %}}
+    {{%- if "deployment_validation_operator_unset_memory_requirements" not in namespace.app.labels %}}
+    - alert: deployment_validation_operator_unset_memory_requirements
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/dashdotdb/dash-db?orgId=1&var-datasource=dashdotdb-rds&var-cluster={{{ resource.namespace.cluster.name }}}&var-namespace={{{ namespace.name }}}"
+        message: "deployment_validation_operator_unset_memory_requirements Validation error for {{{ namespace.app.name }}}: {{ $labels.check_description }}"
+        runbook: "{{ $labels.check_remediation }}"
+      expr: |
+        deployment_validation_operator_unset_memory_requirements{exported_namespace="{{{ namespace.name }}}",name!~"(gabi|[0-9a-z]{63}|.*-catalog-[0-9a-z]{5})"} > 0
+      for: 1m
+      labels:
+        service: deployment-validation-operator
+        app: {{{ namespace.app.name }}}
+        severity: medium
+        jiralert: {{{ namespace.app.escalationPolicy.channels.jiraBoard[0].name }}}
+    {{%- endif %}}
+    {{%- endif %}}
+    {{%- endfor %}}
+    {{%- endfor %}}
