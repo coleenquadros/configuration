@@ -141,6 +141,20 @@ For v1 SaaS files, A Jenkins job will be automatically created for each saas fil
 
 For v2 SaaS files, A generic Tekton Pipeline will be automatically created in the pipelines namespace ([bootstrap tekton](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/tekton/tekton-howto.md#bootstrap)). A Tekton PipelineRun will be created (deployment will be triggered) for each saas file and for each environment.  Each run executes an app-interface integration called `openshift-saas-deploy` for the specific saas file and environment.  The output will be similar to output you see in other app-interface integrations.
 
+## What triggered a deployment?
+
+Deployments are triggered due to 2 types of events:
+1. a change in app-interface configuration
+2. a new commit pushed to the main branch of the source code repository
+
+Once a deployment was triggered, in the `YAML` section of a `PipelineRun` you will be able to find the integration that triggered a deployment and the reason it was triggered.
+
+In the case of a configuration change to app-interface that is deemed to may impact how a service is deployed, a deployment will be triggered by an integration called `openshift-saas-deploy-trigger-configs`. In this case the reason will be a link to an app-interface commit.
+
+In the case of a new commit to the source code repository - if there is a Jenkins job defined in the `upstream` section, a deployment will be triggered following a successful build by an integration called `openshift-saas-deploy-trigger-upstream-jobs`. In this case the reason will be a link to a job in Jenkins. If there is no Jenkins job, a deployment will be triggered by an integration called `openshift-saas-deploy-trigger-moving-commits`. In this case, the reason will be a link to a commit in the source code repository.
+
+For more information, please follow [CI/CD - Builds, Triggers, Deployments and Promotions](/docs/app-sre/saas-walkthrough.md).
+
 ## Triggering PipelineRuns in Tekton
 
 Whenever changes are detected for an environment, a saas file, a resource template or a target, the corresponding Tekton Pipeline will be triggered automatically by an automated creation of a PipelineRun resource.
