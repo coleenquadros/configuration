@@ -77,7 +77,7 @@ Perform the following actions in a single MR:
     ```
 
     * this file should be placed under `data/services/<service_name>/pipelines`.
-    * copy the file as is and change only the `service_name` and the namespace reference to match the location of the pipelines namespace file.
+    * copy the file as is and change only the `service_name`, cluster name and the namespace reference to match the location of the pipelines namespace file.
     * The tekton Tasks that will be created by this pipelines' provider will have resources requests and limits added from the defaults. If you see OOMs or CPU throttling you can change it by setting a `deployResources` section in the tekton provider (which will affect all its saas files) or at the saas file level, e.g.
 
     ```yaml
