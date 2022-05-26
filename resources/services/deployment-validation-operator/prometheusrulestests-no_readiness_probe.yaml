@@ -1,0 +1,33 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /services/deployment-validation-operator/prometheusrules-no_readiness_probe.yaml.j2
+
+evaluation_interval: 1m
+
+tests:
+- interval: 1m
+  input_series:
+  - series: deployment_validation_operator_no_readiness_probe{exported_namespace="deployment-validation-operator",check_description="description",check_remediation="remediation"}
+    values: 0 0 0 1 1 1 1 1 1 1
+
+  alert_rule_test:
+  - eval_time: 2m
+    alertname: deployment_validation_operator_no_readiness_probe
+    exp_alerts:
+  - eval_time: 8m
+    alertname: deployment_validation_operator_no_readiness_probe
+    exp_alerts:
+    - exp_labels:
+        exported_namespace: deployment-validation-operator
+        check_description: description
+        check_remediation: remediation
+        service: deployment-validation-operator
+        app: deployment-validation-operator
+        severity: medium
+        jiralert: APPSRE
+      exp_annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/dashdotdb/dash-db?orgId=1&var-datasource=dashdotdb-rds&var-cluster={{{ resource.namespace.cluster.name }}}&var-namespace=deployment-validation-operator"
+        message: "deployment_validation_operator_no_readiness_probe Validation error for deployment-validation-operator: description"
+        runbook: "remediation"

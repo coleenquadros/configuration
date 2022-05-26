@@ -1,0 +1,62 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: deployment-validation-operator-latest-tag
+spec:
+  groups:
+  - name: deployment-validation-operator-latest_tag.rules
+    rules:
+    - alert: deployment_validation_operator_latest_tag
+      annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/dashdotdb/dash-db?orgId=1&var-datasource=dashdotdb-rds&var-cluster=test-cluster&var-namespace=cloudwatch-exporter-tests-ns
+        html_url: https://gitlab.cee.redhat.com/service/app-interface/blob/master/resources/services/deployment-validation-operator/prometheusrules-latest_tag.yaml.j2
+        message: 'deployment_validation_operator_latest_tag Validation error for cloudwatch-exporter-tests:
+          {{ $labels.check_description }}'
+        runbook: '{{ $labels.check_remediation }}'
+      expr: 'deployment_validation_operator_latest_tag{exported_namespace="cloudwatch-exporter-tests-ns",kind!~"Pod"}
+        > 0
+
+        '
+      for: 1m
+      labels:
+        app: cloudwatch-exporter-tests
+        jiralert: TEST
+        service: deployment-validation-operator
+        severity: medium
+    - alert: deployment_validation_operator_latest_tag
+      annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/dashdotdb/dash-db?orgId=1&var-datasource=dashdotdb-rds&var-cluster=test-cluster&var-namespace=app-metadata-tests-ns
+        html_url: https://gitlab.cee.redhat.com/service/app-interface/blob/master/resources/services/deployment-validation-operator/prometheusrules-latest_tag.yaml.j2
+        message: 'deployment_validation_operator_latest_tag Validation error for app-metadata-tests:
+          {{ $labels.check_description }}'
+        runbook: '{{ $labels.check_remediation }}'
+      expr: 'deployment_validation_operator_latest_tag{exported_namespace="app-metadata-tests-ns",kind!~"Pod"}
+        > 0
+
+        '
+      for: 1m
+      labels:
+        app: app-metadata-tests
+        jiralert: TEST
+        service: deployment-validation-operator
+        severity: medium
+    - alert: deployment_validation_operator_latest_tag
+      annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/dashdotdb/dash-db?orgId=1&var-datasource=dashdotdb-rds&var-cluster=test-cluster&var-namespace=dvo-tests-ns
+        html_url: https://gitlab.cee.redhat.com/service/app-interface/blob/master/resources/services/deployment-validation-operator/prometheusrules-latest_tag.yaml.j2
+        message: 'deployment_validation_operator_latest_tag Validation error for dvo-tests:
+          {{ $labels.check_description }}'
+        runbook: '{{ $labels.check_remediation }}'
+      expr: 'deployment_validation_operator_latest_tag{exported_namespace="dvo-tests-ns",kind!~"Pod"}
+        > 0
+
+        '
+      for: 1m
+      labels:
+        app: dvo-tests
+        jiralert: TEST
+        service: deployment-validation-operator
+        severity: medium
