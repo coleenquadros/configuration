@@ -190,6 +190,12 @@ Every AppSRE engineer should have access to the following:
   * This is necessary to post maintenance and outage messages in https://console.redhat.com/openshift
   * Access is provided via email to Jacquelene Booker <jbooker@redhat.com>.
   * [Logging](https://app.pendo.io/login) in is done using the full Red Hat email.
+  * Required permissions at the time of writing are:
+    * Analyst
+    * Guide Publisher
+    * Guide Creator
+    * Guide Content Editor
+    * Viewer
 * Unleash:
   * Feature toggle service to enable/disable features in runtime.
   * AppSRE unleash instance is here: https://app-interface.unleash.devshift.net/
