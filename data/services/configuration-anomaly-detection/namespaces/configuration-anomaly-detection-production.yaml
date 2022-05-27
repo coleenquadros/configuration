@@ -1,0 +1,36 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: configuration-anomaly-detection
+description: production namespace for the configuration-anomaly-detection project
+
+cluster:
+  $ref: /openshift/app-sre-prod-01/cluster.yml
+
+app:
+  $ref: /services/configuration-anomaly-detection/app.yml
+
+environment:
+  $ref: /products/osdv4/environments/production.yml
+
+networkPoliciesAllow: []
+
+managedRoles: true
+
+openshiftResources:
+  - provider: vault-secret
+    path: osd-sre/configuration-anomaly-detection/ocm/ocm-cad-production
+    name: cad-ocm-client-secret
+    version: 1
+  - provider: vault-secret
+    path: osd-sre/configuration-anomaly-detection/aws/rhcontrol
+    name: cad-aws-credentials
+    version: 3
+  - provider: vault-secret
+    path: osd-sre/configuration-anomaly-detection/pd/prod
+    name: cad-pd-token
+    version: 4
+  - provider: route
+    path: /configuration-anomaly-detection/production/configuration-anomaly-detection.route.yaml
