@@ -77,6 +77,7 @@ This step should be performed in a single merge request.
     - dedicated-admins
 
     spec:
+      product: osd
       provider: aws
       region: (desired region. ex: us-east-1)
       channel: (desired channel group. either 'stable' or 'fast', use the latest 'fast' version by default, unless the cluster hosts OSD related workloads. latest fast can be found in https://gitlab.cee.redhat.com/service/clusterimagesets/-/tree/master/prod)
