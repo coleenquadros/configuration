@@ -53,14 +53,14 @@ Repository layout:
 * tests/<integration_name>: Any fixtures or test related data
 * openshift, build, hack...: Other build and deploy related directories
 
-Create a second repository containing the SDK. It will contain shared capabilities in a folder called `pkg`, as per [golang-standards/project-layout](https://github.com/golang-standards/project-layout), this pkg could also be used outside this repository
+The folder `pkg` contains shared capabilities, as per [golang-standards/project-layout](https://github.com/golang-standards/project-layout), this pkg could also be used outside this repository
 * pkg
   *  graphql
   *  unleash
   *  reconcile
   *  ...
 
-Code that is shareable between multiple integrations and is not related to bootstrapping the CLI should be contained in the SDK repository,
+Code that is shareable between multiple integrations and is not related to bootstrapping the CLI should be contained in the PKG repository,
 
 ## Alternatives considered
 
@@ -70,5 +70,8 @@ Creating a repository per integration makes managing the dependcies quite hard. 
 ## Milestones
 
 * Rename user-validator repository to go-qontract-reconcile
-* Refactor vault-manager into go-reconcile, requires update to go 1.17
-* Move shared capabilities into seperate repository qr-sdk-go
+* Refactor vault-manager into go-qontract-reconcile
+  * Requires update to go 1.17
+  * Change structure of integration to align with interfaces in reconcile.go
+  * Use shared libraries of go-contract-reconcile
+  * ...
