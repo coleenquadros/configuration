@@ -16,11 +16,11 @@ In the event of a complete loss of Quay, please see the [disaster recovery guide
 
 ### Staging
 
-![](images/quayio-stage.png)
+![](images/quayio-stage-arch.png)
 
 ### Production
 
-![](images/quayio-prod.png)
+![](images/quayio-prod-arch.png)
 
 ## Quay Configuration
 
