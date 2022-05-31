@@ -688,6 +688,7 @@ Notes:
 * Manual changes to resources will be overridden by App-Interface in each run.
 * If a resource has a `qontract.recycle: "true"` annotation, all pods using that resource will be recycled on every update.
   * Supported resources: Secrets, ConfigMaps
+  * **Recycling pods managed by Clowder is not supported at this time** (see: [APPSRE-4034](https://issues.redhat.com/browse/APPSRE-4034))
 
 OpenShift resources can be entirely self-serviced via App-Interface. A list of supported resource types can be found [here](https://github.com/app-sre/qontract-schemas/blob/main/schemas/openshift/namespace-1.yml#L46).
 
