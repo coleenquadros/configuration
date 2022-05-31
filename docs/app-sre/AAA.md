@@ -158,6 +158,29 @@ Every AppSRE/MT-SRE engineer should have access to the following:
 * ssh access to jenkins related instances
   * Via MR to [app-sre/infra repo](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ansible/hosts/group_vars/all)
     * add username and public part of your ssh key like [here](https://gitlab.cee.redhat.com/app-sre/infra/-/merge_requests/144)
+* CLI installs
+  * Ansible
+    * You can install directly on your local machine or in a virtual environment (recommended)
+      * To install locally:
+        * `brew install ansible`
+      * To install in a virtual environment:
+        * Set up pyenv
+        * Activate the virtual environment and install ansible with `pip install ansible`
+        * For this setup, I currently have `python version 3.9.12`, `ansible version 2.9.27`, `jinja2 version 3.0.3`, and `hvac version 0.10.0`
+          * NOTE: The versions are very finicky so it may take some trial and error
+    * Ensure you have your ssh hosts file configured correctly because the ansible-playbook command assumes you do otherwise it will throw a SSH error
+  * Terraform
+    * To install, go to the [vendor's download site](https://releases.hashicorp.com/terraform/) to find the version you need.
+    * Ensure you have the correct terraform version on your laptop by looking at what [cli.py shows in qontract-reconcile for environment variable TERRAFORM_VERSION](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/cli.py)
+  * AWS
+    * Following the installation steps [here](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
+    * Since enforcing MFA, you will need to follow [these steps](https://aws.amazon.com/premiumsupport/knowledge-center/authenticate-mfa-cli/) in order to use the CLI.
+      * Please note that this will only work for virtual devices.
+  * python
+    * To install: `brew install python`
+    * Because we now require MFA, in order to login you will have to do the following:
+  * pyenv
+    * To install: `brew install pyenv`
 
 Every AppSRE engineer should have access to the following:
 
