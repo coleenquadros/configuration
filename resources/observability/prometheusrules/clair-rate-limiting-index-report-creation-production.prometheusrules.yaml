@@ -13,11 +13,12 @@ spec:
       rules:
         - alert: ClairIndexReportCreationRateLimiting
           annotations:
-            message: "Index Report creation requests are being rate-limited (current value: {{ $value | humanize }})"
+            message: "Index Report creation requests are being rate-limited (current value: {{ $value }})"
             dashboard: "https://grafana.app-sre.devshift.net/d/I1JBFlRnz/clair-v4"
             runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/clair/sops/rate-limiting-index-report-creation-errors.md"
           expr: |
-            sum(rate(clair_http_concurrencylimited_total[15m])) > 0
+            (sum(rate(clair_http_concurrencylimited_total[15m])) /
+            sum(rate(clair_http_indexerv1_request_total{handler="/indexer/api/v1/index_report",method="post"}[15m]))) > 0.01
           for: 15m
           labels:
             service: clair
