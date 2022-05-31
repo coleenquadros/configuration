@@ -47,8 +47,34 @@ The timeline below summarizes the actions that need to be taken by each date.
 | ----------- | ----------- |
 | ASAP      | 1. Teams using RDS should check if their databases are running the versions outlined [here](/README.md#approved-rds-versions)<br>2. Start upgrading the minor versions of your affected databases in stage as soon as possible to provide sufficient time for testing       |
 | June 1, 2022   | All stage and production databases should be running [approved versions of the database engine](/README.md#approved-rds-versions)       |
-| June 2-14, 2022 | AppSRE will schedule OS upgrades during the RDS maintenance window for all PostgreSQL databases running in staging environments |
-| June 30, 2022   | Production RDS instances running PostgreSQL will have an OS upgrade applied to the instance during the next maintenance window after this deadline (AWS will schedule this automatically)      |
+| June 6, 2022 14:00 UTC | AppSRE will schedule OS upgrades for the next RDS maintenance window after this deadline for all PostgreSQL databases running in staging/integration environments |
+| June 30, 2022 14:00 UTC | Production RDS instances running PostgreSQL will have an OS upgrade applied to the instance during the next maintenance window after this deadline     |
+
+## FAQ
+
+### When will the OS upgrades be applied?
+
+OS upgrades, if required, will be scheduled on your RDS instances for the next maintenance window after the [deadlines](#timeline) mentioned above.
+
+As an example, June 30th is a Thursday. If your maintenance window is on Saturdays at 03:00 UTC, then your OS upgrade will be scheduled for July 2nd at 03:00 UTC. See the [How can I check if an OS upgrade is required?](#how-can-i-check-if-an-os-upgrade-is-required) section for additional details about checking the exact apply date, once the deadline has been reached.
+
+### How can I check if an OS upgrade is required?
+
+Anyone with access to the AWS console for the account can refer to the [Viewing pending maintenance](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_UpgradeDBInstance.Maintenance.html#USER_UpgradeDBInstance.Maintenance.Viewing) RDS documentation for viewing maintenance.
+
+For those that don't have AWS console access, or wish to use Prometheus instead, we've exposed a `aws_resources_exporter_rds_pendingmaintenanceactions` metric. A value of "0" indicates that no maintenance is required, while a value of "1" will indicate that maintenance is required. The label **dbinstance_identifier** will allow you to search for your database.
+
+* [app-sre-prod-01 metrics](https://prometheus.app-sre-prod-01.devshift.net/graph?g0.expr=aws_resources_exporter_rds_pendingmaintenanceactions&g0.tab=1&g0.stacked=0&g0.show_exemplars=0&g0.range_input=1h) - metrics for any production accounts (app-sre, insights-prod, etc.)
+* [app-sre-stage-01 metrics](https://prometheus.app-sre-stage-01.devshift.net/graph?g0.expr=aws_resources_exporter_rds_pendingmaintenanceactions&g0.tab=1&g0.stacked=0&g0.show_exemplars=0&g0.range_input=1h) - metrics for any staging accounts (app-sre-stage, insights-stage, etc.)
+
+The **Apply date** in the AWS RDS console and the **current_apply_date** label in Prometheus should be the same. This date will indicate either:
+
+1. The actual upgrade date and time if the pending maintenance action has been applied by AppSRE (after June 6 14:00UTC for staging or after June 30 14:00UTC for production)
+2. The forced upgrade date and time, enforced by AWS, if the pending maintenance action has not yet been applied by AppSRE
+
+### What if I need an extension to complete the upgrades?
+
+Please [contact the AppSRE team](/FAQ.md#contacting-appsre) at least 2 weeks prior to the deadlines.
 
 ## More questions?
 
