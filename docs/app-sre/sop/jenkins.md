@@ -46,6 +46,7 @@ Things to check:
 - Nodes available disk space
   - Verify /tmp (/) 
   - Verify /var/lib/jenkins
+    - Remove heapdumps if any(look for files with `.hprof` extension). Take backup on local machine if necessary.
   - Verify /var/lib/docker. Clean with `docker system prune -a`.
   - Duplicity backups cache can fill up in /root/.cache/duplicity
     - Clear old backups with: /backup/backup.sh remove-older-than 3M
@@ -88,6 +89,7 @@ ssh ci.int.devshift.net # ci-int
   ```shell
   sudo journalctl -k --since="<5 minutes before the alarm>" --until=now
   ```
+* Check if there are any heapdumps in /var/lib/jenkins directory and analyze them for any memory issue.
 
 ## JenkinsNodeOffline
 
@@ -161,6 +163,7 @@ Pay attention if bottom line before table shows near to limit usage of RAM
 - Image for reference showing the problem ![before running script](images/ci-int-memory-histogram-before-script-screenshot.png)
 - If it's big then need to execute [script](https://plugins.jenkins.io/git/#plugin-content-remove-git-plugin-buildsbybranch-builddata-script)
 - Image for reference showing the remediation ![before running script](images/ci-int-memory-histogram-after-script-screenshot.png)
+- If necessary perform [heapdump](jenkins-heapdump.md) to analyze JVM memory usage. 
 
 Note: running script also trims down disk usage by removing git revisions' builddata from all builds stored on controller and its backups
 
@@ -195,7 +198,7 @@ There are several methods of restarting Jenkins, depending on severity of proble
 Use systemd as you would with any other service:
 
 ``` shell
-systemctl restart --no-block jenkins
+sudo systemctl restart --no-block jenkins
 ```
 
 This will let all ongoing jobs finish before restarting the
@@ -213,7 +216,7 @@ long time! You can press control+C to get back to the prompt.
 You can kill Jenkins directly:
 
 ``` shell
-systemctl kill jenkins -s TERM
+sudo systemctl kill jenkins -s TERM
 ```
 
 Please note, doing this will lose track of any ongoing jobs.

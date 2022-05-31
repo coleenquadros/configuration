@@ -42,12 +42,36 @@ In case the destination DNS zone is missing more than 20 records (a low number g
     * Once this MR is merged, Hive controller pods will be recycled to pick up the new Secret and will start populating the destination DNS zone. See [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/1f590c8ee98845853a2a09a8339ebffdf7ca037a/resources/services/hive/stage/hive.hiveconfig.yaml#L50)
 1. Update the DNS delegation to point at the newly created DNS zone according to the [Hive external DNS SOP](https://github.com/openshift/ops-sop/blob/master/v4/troubleshoot/hive-external-dns.md).
 
+### Post Migration
+
+1. Increase TTL for the NS delegation record zone back to the original value according to the [Hive external DNS SOP](https://github.com/openshift/ops-sop/blob/master/v4/troubleshoot/hive-external-dns.md).
+
+#### Estimated time for migration
+
+The migration begins once the MR to update HiveConfig is merged. More precisely, once it is applied to Hive clusters. When the HiveConfig is applied, Hive controllers restart, and starts using the destination DNS zone, while the DNS delegation points at the source DNS zone. Once all Hives are restarted, it would be a matter of seconds before any missing entries are added to the destination DNS zone.
+
+This part will take ~2 minute.
+
+Once it is verified that the number of records in the source and destination zones are equal, the DNS delegation should be updated to point to the destination zone. It will take 60 seconds (TTL) for the delegation to be updated to point to the destination DNS zone.
+
+This part will take ~1 minute.
+
+Adding to that any residual DNS propogation time of ~5-10 minutes.
+
+Total estimated time for the migration is hence between 8-13 minutes.
+
+### Rollback
+
+In case anything goes wrong, the rollback plan is:
+1. Revert DNS delegation update, and point back to the source DNS zone.
+2. Revert HiveConfig update, and point Hive back to use the source DNS zone.
+
 ## Impact
 
 If a new cluster will be created after the Secret change in the HiveConfig, the DNS entry for the cluster will be created in the destination DNS zone, while DNS will still be pointing at the source DNS zone. This means that the cluster will not be reachable until DNS delegation is updated.
 
 Assuming the update of the Secret has successfully caused the population of the destination DNS zone, this will mean that the only impact is:
 
-"New clusters may not be reachable for an additional [time between Secret change and DNS delegation update and propogation]".
+"New clusters may not be reachable for an additional 8-13 minutes".
 
-In reality, there will likely be no impact for customers.
+In reality, since cluster provisioning takes longer, there will likely be no impact for customers.

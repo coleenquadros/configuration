@@ -1,3 +1,4 @@
+---
 $schema: /openshift/prometheus-rule-1.yml
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
@@ -8,16 +9,38 @@ metadata:
   name: web-rca-stage
 spec:
   groups:
-  - name: web-rca-stage
-    rules:
-    - alert: Web RCA stage down
-      annotations:
-        message: "Web RCA is down in: {{ $labels.namespace }}"
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/web-rca/sops/web-rca-stage-down.md"
-        dashboard: "https://grafana.app-sre.devshift.net/d/_7_Ul_07k/web-rca?orgId=1&var-datasource=app-sre-stage-01-prometheus"
-      expr: |
-        absent(up{container="service",endpoint="metrics",job="web-rca-metrics",namespace="web-rca-stage",service="web-rca-metrics"} == 1)
-      for: 5m
-      labels:
-        service: web-rca
-        severity: medium
+    - name: web-rca-stage
+      rules:
+        - alert: Web RCA stage down
+          expr: |
+            absent(up{container="service",endpoint="metrics",job="web-rca-metrics",namespace="web-rca-stage",service="web-rca-metrics"} == 1)
+          for: 5m
+          labels:
+            service: web-rca
+            severity: medium
+          annotations:
+            message: "Web RCA is down in: web-rca-stage"
+            runbook: 'https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/web-rca/sops/web-rca-stage-down.md'
+            dashboard: "https://grafana.app-sre.devshift.net/d/_7_Ul_07k/web-rca?orgId=1&var-datasource=app-sre-stage-01-prometheus"
+        - alert: WebRCAPodCrashLooping
+          expr: |
+            rate(kube_pod_container_status_restarts_total{job="kube-state-metrics",namespace="web-rca-stage",pod=~".*" }[5m]) * 60 * 5 > 0
+          for: 1m
+          labels:
+            service: web-rca
+            severity: info
+          annotations:
+            message: '{{ $labels.namespace }} Pod {{ $labels.pod }} is restarting {{ printf "%.2f" $value }} times / 5 minutes.'
+            runbook: 'https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubePodCrashLooping.md'
+            dashboard: "https://grafana.app-sre.devshift.net/d/_7_Ul_07k/web-rca?orgId=1&var-datasource=app-sre-stage-01-prometheus"
+        - alert: WebRCAInitPodCrashLooping
+          expr: |
+            rate(kube_pod_init_container_status_restarts_total{job="kube-state-metrics",namespace="web-rca-stage",pod=~".*" }[5m]) * 60 * 5 > 0
+          for: 1m
+          labels:
+            service: web-rca
+            severity: info
+          annotations:
+            message: '{{ $labels.namespace }} Pod {{ $labels.pod }} is restarting {{ printf "%.2f" $value }} times / 5 minutes.'
+            runbook: 'https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/kubernetes/KubePodCrashLooping.md'
+            dashboard: "https://grafana.app-sre.devshift.net/d/_7_Ul_07k/web-rca?orgId=1&var-datasource=app-sre-stage-01-prometheus"

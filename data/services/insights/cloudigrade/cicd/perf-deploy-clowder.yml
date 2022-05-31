@@ -1,0 +1,87 @@
+---
+$schema: /app-sre/saas-file-2.yml
+labels:
+  service: cloudigrade
+  platform: insights
+name: cloudigrade-clowder-perf
+description: cloudigrade app on the Insights Platform via clowder
+app:
+  $ref: /services/insights/cloudigrade/app.yml
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.appsrep05ue1.yaml
+deployResources:
+  requests:
+    cpu: 300m
+    memory: 600Mi
+  limits:
+    cpu: 300m
+    memory: 600Mi
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: proj-perf-insights-cluster
+managedResourceTypes:
+- ClowdApp
+- ConfigMap
+- HorizontalPodAutoscaler
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+    version: 3
+parameters:
+  CLOWDER_ENABLED: 'true'
+resourceTemplates:
+# Cloudigrade
+- name: cloudigrade
+  path: /deployment/clowdapp.yaml
+  url: https://github.com/cloudigrade/cloudigrade
+  targets:
+  - namespace:
+      $ref: /services/insights/cloudigrade/namespaces/perf-cloudigrade-perf.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: cloudigrade-cloudigrade-gh-build-master
+    parameters:
+      API_REPLICA_COUNT_MAX: '2'
+      API_SENTRY_ENVIRONMENT: perf
+      CELERY_SENTRY_ENVIRONMENT: perf
+      CELERY_WORKER_REPLICA_COUNT_MAX: '16'
+      CLOUDIGRADE_CW_STREAM_NAME: cloudigrade-perf
+      CLOUDIGRADE_ENABLE_CLOUDWATCH: 'true'
+      CLOUDIGRADE_ENVIRONMENT: perf
+      ENABLE_SYNTHETIC_DATA_REQUEST_HTTP_API: 'true'
+      HOUNDIGRADE_SENTRY_ENVIRONMENT: perf
+      LISTENER_GROUP_ID: cloudmeter_perf
+      LISTENER_SENTRY_ENVIRONMENT: perf
+      SCHEDULE_CONCURRENT_USAGE_CALCULATION_DELAY: '300'
+      SCHEDULE_VERIFY_VERIFY_TASKS_INTERVAL: '300'
+      SOURCES_PSK_SECRET_NAME: cloudigrade-app-secret
+      SOURCES_PSK_SECRET_KEY: sources-psk
+      VERBOSE_SOURCES_NOTIFICATION_LOGGING: 'true'
+      WATCHTOWER_MAX_BATCH_COUNT: 10
+      API_ENABLE_SENTRY: 'false'
+      LISTENER_ENABLE_SENTRY: 'false'
+      CELERY_ENABLE_SENTRY: 'false'
+      HOUNDIGRADE_ENABLE_SENTRY: 'false'
+      SLACK_TOKEN: 'false'
+
+- name: postigrade
+  path: /deployment/clowdapp.yaml
+  url: https://github.com/cloudigrade/postigrade
+  targets:
+  - namespace:
+      $ref: /services/insights/cloudigrade/namespaces/perf-cloudigrade-perf.yml
+    ref: master
+    parameters:
+      POSTIGRADE_MIN_REPLICAS: '2'
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: cloudigrade-postigrade-gh-build-master

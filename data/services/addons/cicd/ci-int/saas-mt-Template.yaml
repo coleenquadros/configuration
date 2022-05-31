@@ -1,0 +1,50 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels: {}
+
+name: saas-mt-temp
+description: SaaS tracking file for managed-tenants
+
+app:
+  $ref: /services/addons/app.yml
+
+pipelinesProvider:
+  $ref: /services/addons/pipelines/tekton.mt-pipelines.appsrep05ue1.yaml
+
+slack:
+  output: events
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-mt-sre-info
+
+managedResourceTypes:
+- SelectorSyncSet
+
+imagePatterns: []
+
+resourceTemplates:
+- name: managed-tenants-stage
+  url: https://gitlab.cee.redhat.com/service/managed-tenants-manifests
+  path: /stage/secrets-template.yaml
+  secretParameters:
+  - name: reference-addon-pull-secret-1
+    secret:
+      path: mt-sre/quay/osd-addons/secrets/reference-addon/pull-secret-1
+      field: data
+      version: 2
+  - name: reference-addon-opaque-secret-1
+    secret:
+      path: mt-sre/quay/osd-addons/secrets/reference-addon/opaque-secret-1
+      field: data
+      version: 1
+  targets:
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hive-stage-01/cluster-scope.yml
+    ref: main
+  - namespace:
+      $ref: /services/osd-operators/namespaces/hives02ue1/cluster-scope.yml
+    ref: main
+  - namespace:
+      $ref: /services/osd-operators/namespaces/ssotest01ue1/cluster-scope.yml
+    ref: main

@@ -264,6 +264,8 @@ The GraphQL internal endpoint is reachable (behind the VPN) here:
 The GraphQL public endpoint is reachable (with authentication) here:
 <https://app-interface.devshift.net/graphql>.
 
+If you are querying app-interface, help us avoid breaking your queries by submitting a `query-validation` to let us know what schemas you are relying on. Here is an [example](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/39455/diffs?commit_id=5964ea57ebefbe8cc309233457ce356f9897d873). We try to make our schemas backwards compatible, but in case of any issues, we expect a response within 1-2 business days.
+
 **IMPORTANT**: in order to use the GraphQL UI you need to click on the Settings
 wheel icon (top-right corner) and replace `omit` with `include` in
 `request.credentials`.
@@ -2699,7 +2701,7 @@ This check can be automated by adding an execution of the gitlab-fork-compliance
 
 Here is an example: https://gitlab.cee.redhat.com/mk-ci-cd/kafka-storage-expansions/-/merge_requests/17
 
-Consider creating a gitlab group for your team to use with this feature. No gitlab group? Just use `app-sre` (the bot will be added to the fork, which is the important part)
+Consider creating a gitlab group for your team to use with this feature. No gitlab group? Just leave out the last argument. The bot will be added to the fork, which is the important part.
 
 > Note: If you are using a custom Jenkins job template, you should add the `gitlab_fork_compliance_reconcile_toml` secret. Here is an [example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/resources/jenkins/managed-services/job-templates.yaml#L529).
 

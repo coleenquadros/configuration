@@ -1,0 +1,47 @@
+---
+$schema: /dependencies/jenkins-config-1.yml
+
+labels:
+  service: insights-ephemeral
+
+name: ci-int-insights-ephemeral-jobs
+
+description: 'Build pipeline for ephemeral env components'
+
+app:
+  $ref: /services/insights/ephemeral/app.yml
+
+instance:
+  $ref: /dependencies/ci-int/ci-int.yml
+
+type: jobs
+
+config:
+- project:
+    name: frontend-build-container
+    label: insights
+    node: insights
+    gl_group: insights-platform
+    gl_project: frontend-build-container
+    quay_org: cloudservices
+    jobs:
+    - insights-gl-pr-check:
+        display_name: frontend-build-container pr-check
+        branch: main
+    - insights-gl-build-master:
+        display_name: frontend-build-container build-master
+        branch: main
+- project:
+    name: frontend-configs
+    label: insights
+    node: insights
+    gl_group: insights-platform
+    gl_project: frontend-configs
+    quay_org: cloudservices
+    jobs:
+    - "insights-gl-pr-check":
+        display_name: frontend-configs pr-check
+    - "insights-gl-build-master":
+        display_name: frontend-configs build-master
+
+

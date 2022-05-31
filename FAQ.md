@@ -213,7 +213,9 @@ If AppSRE is asked to run an ad-hoc command, we will ask for an [ASIC ticket](ht
 2. A step-by-step list of what needs to be done for this change
 3. An approval from a team member added to the ticket indicating that the command is safe to run
 
-The exception to above is when there is an active incident or when it is truly a one-time operation. The ASIC ticket helps the AppSRE team to track cases where there are recurring needs that would be better supported by the methods mentioned above.
+The only exception to above is when there is an active incident.
+
+The ASIC ticket helps the AppSRE team to track cases where there are recurring needs that would be better supported by the methods mentioned above.
 
 ### Delete target from SaaS file
 

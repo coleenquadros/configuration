@@ -27,6 +27,10 @@ networkPoliciesAllow:
 
 managedTerraformResources: true
 
+managedResourceTypes:
+- Role
+- RoleBinding
+
 terraformResources:
 - provider: rds
   account: app-sre
@@ -34,6 +38,9 @@ terraformResources:
   # we start with the same small DB that we have for Status Board
   defaults: /terraform/resources/app-sre/staging/rds-3-pg13.yml
   parameter_group: /web-rca/stage/web-rca-rds.parameter-group.yml
+  overrides:
+    engine_version: '13.3'
+    maintenance_window: 'thu:05:00-thu:06:00'
 - provider: s3
   account: app-sre
   identifier: web-rca-s3-stage
@@ -48,3 +55,7 @@ openshiftResources:
   path: /web-rca/stage/web-rca.route.yaml
 - provider: route
   path: /web-rca/stage/web-rca-ui.route.yaml
+- provider: resource
+  path: /web-rca/stage/sd-ops-dev-allow-rsh.role.yaml
+- provider: resource
+  path: /web-rca/stage/sd-ops-dev-allow-rsh.rolebinding.yaml

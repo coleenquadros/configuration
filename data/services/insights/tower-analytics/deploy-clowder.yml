@@ -53,6 +53,8 @@ resourceTemplates:
       MEMORY_LIMIT_FASTAPI: 1Gi
       MEMORY_REQUEST_PROCESSOR: 1Gi
       MEMORY_LIMIT_PROCESSOR: 2Gi
+      MEMORY_REQUEST_PROCESSOR_CONTROLLER: 1Gi
+      MEMORY_LIMIT_PROCESSOR_CONTROLLER: 2Gi
       MEMORY_REQUEST_RECOVERY: 1Gi
       MEMORY_LIMIT_RECOVERY: 2Gi
       MEMORY_REQUEST_EXPORTER: 1Gi
@@ -69,7 +71,8 @@ resourceTemplates:
       REPLICAS_API: 4
       REPLICAS_ONEVIEW: 2
       REPLICAS_ROLLUP: 3
-      REPLICAS_PROCESSOR: 3
+      REPLICAS_PROCESSOR: 2
+      REPLICAS_PROCESSOR_CONTROLLER: 1
       REPLICAS_EXPORTER: 2
       REPLICAS_DEBUG: 1
       RBAC_ENABLED: 'True'
@@ -95,13 +98,14 @@ resourceTemplates:
       - automation-analytics-stage-deploy-success-channel
   - namespace:
       $ref: /services/insights/tower-analytics/namespaces/tower-analytics-prod.yml
-    ref: 6158e4e80978891325240d8f2d557ed0c4f5a1fa
+    ref: fea3ef4982e1c8c8fa5b31d930cd30dd2fe7a382
     parameters:
       ENV_NAME: prod
       REPLICAS_API: 20
       REPLICAS_ONEVIEW: 2
       REPLICAS_ROLLUP: 3
       REPLICAS_PROCESSOR: 3
+      REPLICAS_PROCESSOR_CONTROLLER: 1
       REPLICAS_EXPORTER: 8
       REPLICAS_DEBUG: 0
       MEMORY_LIMIT_EXPORTER: 4Gi
@@ -120,3 +124,13 @@ resourceTemplates:
       FASTAPI_HOST: automation-analytics-api-fastapi-v2.tower-analytics-prod.svc.cluster.local
       FASTAPI_PORT: 8000
       RBAC_PSKS_SECRET: rbac-psks
+    promotion:
+      auto: true
+      subscribe:
+      - automation-analytics-stage-gating-success-channel
+      promotion_data:
+      - channel: automation-analytics-stage-gating-success-channel
+        data:
+        - parent_saas: tower-analytics-release-checks
+          target_config_hash: 82f932f6ba5b5706
+          type: parent_saas_config

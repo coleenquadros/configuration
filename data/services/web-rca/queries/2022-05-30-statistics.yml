@@ -1,0 +1,45 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: statistics
+namespace:
+  $ref: /services/web-rca/namespaces/stage.yml
+identifier: web-rca-stage
+output: stdout
+# Run every day at 12:00 pm (UTC)
+schedule:  0 12 * * *
+queries:
+  - |
+    select datname, pg_size_pretty(pg_database_size(datname)) from pg_database order by pg_database_size(datname) desc;
+  - |
+    SELECT
+           relname AS "table_name",
+           pg_size_pretty(pg_table_size(C.oid)) AS "table_size"
+    FROM
+           pg_class C
+    LEFT JOIN pg_namespace N ON (N.oid = C.relnamespace)
+    WHERE nspname NOT IN ('pg_catalog', 'information_schema') AND nspname !~ '^pg_toast' AND relkind IN ('r')
+    ORDER BY pg_table_size(C.oid)
+    DESC LIMIT 5;
+  - |
+    select deleted_at is not null as attachments_deleted, count(id) from attachments group by attachments_deleted;
+  - |
+    select deleted_at is not null as escalations_deleted, count(id) from escalations group by escalations_deleted;
+  - |
+    select deleted_at is not null as events_deleted, count(id) from events group by events_deleted;
+  - |
+    select deleted_at is not null as follow_up_changes_deleted, count(id) from follow_up_changes group by follow_up_changes_deleted;
+  - |
+    select deleted_at is not null as follow_ups_deleted, count(id) from follow_ups group by follow_ups_deleted;
+  - |
+    select deleted_at is not null as handoffs_deleted, count(id) from handoffs group by handoffs_deleted;
+  - |
+    select deleted_at is not null as incidents_deleted, count(id) from incidents group by incidents_deleted;
+  - |
+    select deleted_at is not null as notifications_deleted, count(id) from notifications group by notifications_deleted;
+  - |
+    select deleted_at is not null as products_deleted, count(id) from products group by products_deleted;
+  - |
+    select deleted_at is not null as status_changes_deleted, count(id) from status_changes group by status_changes_deleted;
+  - |
+    select deleted_at is not null as users_deleted, count(id) from users group by users_deleted;
