@@ -70,6 +70,7 @@ this repository.
       - [Manage AWS users via App-Interface (`/aws/group-1.yml`) using Terraform](#manage-aws-users-via-app-interface-awsgroup-1yml-using-terraform)
       - [Generating a GPG key](#generating-a-gpg-key)
       - [Adding your public GPG key](#adding-your-public-gpg-key)
+    - [Manage external resources via App-Interface (`/openshift/namespace-1.yml`)](#manage-external-resources-via-app-interface-openshiftnamespace-1yml)
     - [Manage AWS resources via App-Interface (`/openshift/namespace-1.yml`) using Terraform](#manage-aws-resources-via-app-interface-openshiftnamespace-1yml-using-terraform)
       - [Manage shared AWS resources via App-interface (`/openshift/namespace-1.yml`) using Terraform](#manage-shared-aws-resources-via-app-interface-openshiftnamespace-1yml-using-terraform)
       - [Manage AWS Certificate via App-Interface (`/openshift/namespace-1.yml`)](#manage-aws-certificate-via-app-interface-openshiftnamespace-1yml)
@@ -1374,6 +1375,37 @@ cat FILENAME | sed -e 's/\ //g'| base64 -d | gpg
 ```
 
 Example: https://gitlab.cee.redhat.com/service/app-interface/blob/f40e0f27eacf5510a954c034292e937632caecc7/data/teams/app-sre/users/jmelisba.yml#L27
+
+
+### Manage external resources via App-Interface (`/openshift/namespace-1.yml`)
+
+Design document: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/design-docs/additional-terraform-providers.md
+
+[services](/data/services) contains all the services that are being run by the App-SRE team. Inside of those directories, there is a `namespaces` folder that lists all the `namespaces` that are linked to that service.
+
+Namespaces declaration enforce [this JSON schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/openshift/namespace-1.yml). Note that it contains a reference to the cluster in which the namespace exists.
+
+A namespace file may include an `externalResources` section. This section defines external resources required for the service running within the namespace to function. External resources are resources provisioned externally to the cluster, via a specified provisioner. Provisioners are entities in which resources are provisioned.
+
+Supported provisioners:
+- `aws`
+
+In order to provision external resources, you need to add them to the `externalResources` section:
+- `provider`: one of: `aws`.
+- `provisioner`: The entity to provision resources in. The referenced item should be according to the `provider`:
+    - `aws`: The AWS account you want to provision resources in.
+- `resources`: a list of resources to provision. The items should be according to the `provider`:
+    - `aws`: Same as described in the [Manage AWS resources via App-Interface](#manage-aws-resources-via-app-interface-openshiftnamespace-1yml-using-terraform) section, without `account`.
+
+Notes:
+* Manual changes to external resources will be overridden by App-Interface in each run.
+* To be able to use this feature, the `managedExternalResources` field must exist and equal to `true`.
+* Different provisioners may be implemented differently under the hood. For example, the `aws` provisioner is implemented using Terraform.
+
+Future support for additional provisioners:
+- Clouflare (Related to Quay CDN)
+- CNA (Consuming the CNA service)
+- GCP (Related to Hive GCP DNS zones)
 
 
 ### Manage AWS resources via App-Interface (`/openshift/namespace-1.yml`) using Terraform
