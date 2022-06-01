@@ -1,0 +1,53 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: acs-fleet-manager
+
+name: acs-fleet-manager
+description: 'SaaS tracking file for acs-fleet-manager'
+
+app:
+  $ref: /services/acs-fleet-manager/app.yml
+
+pipelinesProvider:
+  $ref: /services/acs-fleet-manager/pipelines/tekton.acs-fleet-manager-pipelines.app-sre-prod-01.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: acs-fleet-manager
+
+managedResourceTypes:
+  - Deployment
+  - Service
+  - ServiceAccount
+  - PodDisruptionBudget
+  - ConfigMap
+
+imagePatterns:
+  - quay.io/app-sre/acs-fleet-manager
+  - quay.io/app-sre/envoyproxy
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+resourceTemplates:
+  - name: acs-fleet-manager
+    url: https://github.com/stackrox/acs-fleet-manager
+    path: /templates/service-template.yml
+    parameters:
+      REGISTRY_IMG: quay.io/app-sre/acs-fleet-manager
+      IMAGE_REGISTRY: quay.io
+      IMAGE_REPOSITORY: app-sre/acs-fleet-manager
+      ENVOY_IMAGE: quay.io/app-sre/envoyproxy:v1.20.2
+    targets:
+      - namespace:
+          $ref: /services/acs-fleet-manager/namespaces/acs-fleet-manager-stage.yml
+        ref: main
+        upstream:
+          instance:
+            $ref: /dependencies/ci-ext/ci-ext.yml
+          name: stackrox-acs-fleet-manager-gh-build-main
