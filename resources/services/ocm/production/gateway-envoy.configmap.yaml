@@ -285,6 +285,29 @@ data:
                 trusted_ca:
                   filename: /etc/ssl/certs/ca-certificates.crt
 
+      # Cluster for the `rhose_mgmt` service:
+      - name: rhose_mgmt
+        connect_timeout: 2s
+        type: STRICT_DNS
+        lb_policy: ROUND_ROBIN
+        load_assignment:
+          cluster_name: rhose_mgmt
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: gjklh2bmbuaio30.api.openshift.com
+                    port_value: 443
+        transport_socket:
+          name: envoy.transport_sockets.tls
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+            common_tls_context:
+              validation_context:
+                trusted_ca:
+                  filename: /etc/ssl/certs/ca-certificates.crt
+
       listeners:
 
       # This listener is used to support probes and metrics.
@@ -424,6 +447,10 @@ data:
                               {
                                 "id": "image-builder-worker",
                                 "name": "Image Builder workers"
+                              },
+                              {
+                                "id": "rhose_mgmt",
+                                "name": "rhose service fleet manager service"
                               }
                             ]
                           }
@@ -491,7 +518,7 @@ data:
                       cluster: connector_mgmt
                       auto_host_rewrite: true
                       timeout: 30s
-    
+
                   # Route for the `serviceregistry_mgmt` service:
                   - name: serviceregistry_mgmt
                     match:
@@ -525,6 +552,15 @@ data:
                       prefix: /
                     route:
                       cluster: site
+
+                  # Route for the `rhose_mgmt` service:
+                  - name: rhose_mgmt
+                    match:
+                      prefix: /api/v1/bridges
+                    route:
+                      cluster: rhose_mgmt
+                      auto_host_rewrite: true
+                      timeout: 30s
 
               http_filters:
 
