@@ -1379,6 +1379,8 @@ Example: https://gitlab.cee.redhat.com/service/app-interface/blob/f40e0f27eacf55
 
 ### Manage external resources via App-Interface (`/openshift/namespace-1.yml`)
 
+Design document: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/design-docs/additional-terraform-providers.md
+
 [services](/data/services) contains all the services that are being run by the App-SRE team. Inside of those directories, there is a `namespaces` folder that lists all the `namespaces` that are linked to that service.
 
 Namespaces declaration enforce [this JSON schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/openshift/namespace-1.yml). Note that it contains a reference to the cluster in which the namespace exists.
