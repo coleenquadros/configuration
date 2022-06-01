@@ -1,0 +1,23 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: assisted-installer-events
+spec:
+  groups:
+  - name: assisted-installer-events_alerts
+    rules:
+    - alert: Assisted Installer Events - Too many restarts - Stage
+      annotations:
+        message: "Too many restarts for assisted-installer-events pod"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/assisted-installer/sop#assisted-installer-events-is-down"
+      expr: increase(kube_pod_container_status_restarts_total{container="assisted-events-scrape"}[15m]) > 0
+      for: 30m
+      labels:
+          severity: info
+          service: assisted-installer
+

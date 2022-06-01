@@ -146,3 +146,23 @@ Assisted-installer based cluster installation fails to complete.
 
 ### Escalations
 - Ping the `@assistedinstaller-team` user on Slack channel #team-assisted-installer-alert)
+
+## Assisted Installer Events Is Down
+
+### Severity: Info
+
+### Impact
+Usage statistics might lagging and not be near-real-time
+
+### Summary
+When the process storing usage statistics fails, it might lead to restarts. Some are controlled restarts (when there are too many errors), other might be non-controlled errors.
+
+### Access required
+
+- Access to the cluster that runs the assisted-events-scrape Pod
+- View access to the namespaces:
+  - assisted-installer
+
+### Steps
+- Check why pod failed
+- Check pod logs for failure that triggered the restarts
