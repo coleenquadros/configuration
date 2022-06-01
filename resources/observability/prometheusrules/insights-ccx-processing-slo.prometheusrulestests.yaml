@@ -64,7 +64,6 @@ tests:
         runbook: "https://ccx.pages.redhat.com/ccx-docs/customer/sops/irdw_kafka_lag_gt_100.html"
         dashboard: "https://grafana.app-sre.devshift.net/d/ccxprocessingslo/ccx-processing-slo?orgId=1&viewPanel=6"
 
-  # TODO: Test the missing metric case will require to use `absent` in the rule
   - eval_time: 15m
     alertname: DB Writer Kafka lag is too high
     exp_alerts:
@@ -80,11 +79,11 @@ tests:
   input_series:
   - series: successful_messages_processing_time_sum{service="ccx-insights-results-db-writer-prometheus-exporter",namespace="ccx-data-pipeline-prod"}
     values: 1000+1000x10
-  - series: successful_messages_processing_time_sum{service="ccx-data-pipeline-prometheus-exporter",namespace="ccx-data-pipeline-prod"}
+  - series: ccx_process_duration_seconds_sum{service="ccx-data-pipeline-prometheus-exporter",namespace="ccx-data-pipeline-prod"}
     values: 1000+1000x10
   - series: successful_messages_processing_time_count{service="ccx-insights-results-db-writer-prometheus-exporter",namespace="ccx-data-pipeline-prod"}
     values: 1+1x10
-  - series: successful_messages_processing_time_count{service="ccx-data-pipeline-prometheus-exporter",namespace="ccx-data-pipeline-prod"}
+  - series: ccx_process_duration_seconds_count{service="ccx-data-pipeline-prometheus-exporter",namespace="ccx-data-pipeline-prod"}
     values: 1+1x10
 
   alert_rule_test:
@@ -93,7 +92,7 @@ tests:
     alertname: "[PROD] Archive processing is taking too long"
     exp_alerts:
 
-  # Test the up < 200 case
+  # Test the up < 300 case
   - eval_time: 10m
     alertname: "[PROD] Archive processing is taking too long"
     exp_alerts:
