@@ -1,0 +1,58 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: unleash-perf
+description: namespace for unleash
+
+cluster:
+  $ref: /openshift/insights/cluster-insights-perf.yml
+
+app:
+  $ref: /services/unleash/app.yml
+
+environment:
+  $ref: /products/insights/environments/perf.yml
+
+#networkPoliciesAllow:
+#- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+#- $ref: /services/app-interface/namespaces/app-interface-stage.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- Route
+
+openshiftResources:
+### Insights Perf
+- provider: vault-secret
+  path: insights/secrets/perf/unleash/insights-perf-config
+  version: 1
+- provider: vault-secret
+  path: insights/secrets/perf/unleash/insights-perf-unleash-token
+  version: 1
+- provider: resource-template
+  type: jinja2
+  path: /services/unleash/unleash.route.yaml
+  variables:
+    identifier: insights-perf
+    host: insights-perf.unleash.devshift.net
+
+managedTerraformResources: true
+
+terraformResources:
+### Insights Perf
+- provider: rds
+  account: app-sre
+  identifier: insights-perf-unleash
+  defaults: /terraform/resources/unleash/rds-1.yml
+  output_resource_name: insights-perf-unleash-rds
+  overrides:
+    engine_version: '12.7'
+    apply_immediately: true
+    backup_retention_period: 0
+    multi_az: false
+    db_subnet_group_name: 'insights-perf-rds-subnet-group'
+    vpc_security_group_ids: ['sg-0b664c00ac2d59db2']
+    deletion_protection: false
