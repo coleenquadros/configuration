@@ -1,4 +1,4 @@
-# ACME certificates with Cert.manager
+# ACME certificates with Cert-manager
 
 [toc]
 
