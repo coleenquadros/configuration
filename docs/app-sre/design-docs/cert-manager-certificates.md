@@ -1,0 +1,166 @@
+# ACME certificates with Cert.manager
+
+[toc]
+
+## Author/date
+
+Jordi Piriz / 2020-06-01
+
+## Tracking JIRA
+
+https://issues.redhat.com/browse/APPSRE-4784
+
+## Problem statement
+
+This design doc is meant to define how openshift-acme is going to be replaced by cert-manager.
+Two problems are going to be solved.
+
+1. openshift-acme is abandoned and we can not rely on it anymore
+2. We need a way to use ACME certificates (lets-encrypt) in our internal clusters. Internal clusters
+   are  not reachable from the internet so the ACME provider can not resolve an HTTP challenge. We will
+   rely on DNS challenges for that.
+
+## Goals
+
+- Define the approach we are going to use with cert-manager
+
+## Non-Goals
+
+- Define which operator/software to use. This was already discussed
+
+## Proposals
+
+At first, we only agreed to switch the `Route` definitions to `Ingress` and leverage the Ingress to Route
+conversion feature that openshift provides. Although this is the prefered path, a second approach using routes is
+proposed.
+
+### Switch to Ingress Objects
+
+Openshift allows routes creation through `Ingress` objects[1]. Basically, the `openshift-controller-manager`
+operator reads the `Ingresses` and creates a Route out of the `Ingress` spec.
+
+Defining Ingress objects instead of routes have a lot of advantages.
+
+- Ingress is a native k8s specification while Route is specific to Openshift.
+- Ingress specs are supported by multiple utility operators such as cert-mananger or external-dns
+- If openshift changes the ingress provider it should comply with the Ingress spec.
+
+As cert-manager fully supports `Ingress`, just adding an annotation to the the manifest is enough to manage the
+certificate associated to the `Ingress` host definitions.
+
+Example of how an Ingress manifest with cert-manager managed certificates looks like.
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: frontend
+  namespace: test-certmanager
+  annotations:
+    route.openshift.io/termination: edge
+    cert-manager.io/cluster-issuer: letsencrypt-http # cert-manager issuer
+    haproxy.router.openshift.io/timeout: 5m # annotations are attached to the route
+spec:
+  rules:
+  - host: jpiriz-test-cert-mgr.devshift.net
+    http:
+      paths:
+        ....
+  tls:
+  - hosts:
+    - example.com
+    secretName: example-com-secret # Secret where the certificate will be stored
+```
+
+On the internal clusters, the spec is the same, but an issuer with a DNS spec shuold be provided. The issuer spec
+defines how the ACME challenges need to be solved. In the case of DNS issuers, cert-manager adds the necessary TXT record
+to the DNS provider to solve the challenge. Issuer example:
+
+```yaml
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: letsencrypt-staging-devshift-net
+  namespace: <namespace-of-the-ingress>
+spec:
+  acme:
+    email: sd-app-sre@redhat.com
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: le-staging-account-key
+    solvers:
+    - selector:
+        dnsNames:
+          - '*.devshift.net'
+      dns01:
+        cnameStrategy: None
+        route53: # Route 53  provider needs AWS ACCESS KEYS to put TXT records on the hostedZone to solve the challenges.
+          region: global
+          accessKeyID: AN_ACCESS_KEY
+          hostedZoneID: HOSTED_ZONE_ID
+          secretAccessKeySecretRef:
+            name: <secret-name-with-aws_secret-access_key>
+            key: aws_secret_access_key
+```
+
+Both resources can be deployed with openshift-resources using the `resource` provider.
+This feature could ne be fully used until 4.12 when the support for `destination-ca-certificates` is rolled out in Openshift.
+This only affects Routes with `reencrypt` and using a custom `CA` in the backend (vault)
+
+### Using App-interface Route spec
+
+We currently offer a `NamespaceOpenshiftResourceRoute_v1` resource in app-interface that is able to create `Route` objects with
+tls certificate data located in Hashicorp Vault. Extending this functionality, we can inject the certificate data from a `Secret`
+located in the same namespace as the target `Route`.
+
+With this in mind, we can then use the `Certificate` CRD of cert-manager to request a certificate and store it in a `Secret`. Then,
+openshift-resources will update the `Route` tls spec with the Secret's data.
+
+A tenant will need to define a `Certificate` object and add the secret name to the `NamespaceOpenshiftResourceRoute_v1` spec.
+
+```yaml
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: test-example-com-certificate
+  namespace: the-namespace
+spec:
+  secretName: test-example-com-cert-secret
+  issuerRef:
+    name: letsencrypt-staging
+    kind: ClusterIssuer
+    group: cert-manager.io
+  dnsNames:
+  - test.example.com
+```
+
+```yaml
+openshiftResources:
+- provider: route
+  path: /services/assisted-installer/kibana-production.route.yaml
+  tls_certificate_secret_name: test-example-com-certificate
+```
+
+This approach feels more safe as the `Route` spec does not need modifications, just the app-interface spec to add the secret name ref.
+The certificate object can be deployed under openshift-resources using the `resource` provider.
+
+### Issuers Configuration
+
+The HTTP issuer could be set cluster wide as the dns is not managed by cert-manager and it does not required additional configuration.
+Once the DNS record is directed to the cluster, the challenge will be solved.
+
+DNS issuers differ for each domain/hosted zone and they need a secret with the credentials of the dns provider in the same namespace where
+the issuer is located. We can consider setting the `devshift.net` issuer or other common domains as cluster wide if they need to be used in
+many namespaces. But specific cases with domains used in just one namespace will need to set the `Issuer` in its own namespace.
+
+## Alternatives Considered
+
+- N/A
+
+## Milestones
+
+- Implement 2nd proposal in app-interface.
+- Roll out changes in App-sre managed routes.
+- Modify documentation to include the 1st Proposal and enhance the docs of the current Routes approach.
+- All certificates used in app-interface are using cert-manager
+  - Send comms to tenants and follow up the progress.
