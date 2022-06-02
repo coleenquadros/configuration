@@ -36,7 +36,7 @@ proposed.
 
 ### Switch to Ingress Objects
 
-Openshift allows routes creation through `Ingress` objects[1]. Basically, the `openshift-controller-manager`
+Openshift allows routes creation through `Ingress` objects [[ref]](https://docs.openshift.com/container-platform/4.10/networking/routes/route-configuration.html#nw-ingress-creating-a-route-via-an-ingress_route-configuration). Basically, the `openshift-controller-manager`
 operator reads the `Ingresses` and creates a Route out of the `Ingress` spec.
 
 Defining Ingress objects instead of routes have a lot of advantages.
