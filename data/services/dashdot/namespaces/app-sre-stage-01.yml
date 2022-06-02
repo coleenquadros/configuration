@@ -35,23 +35,25 @@ openshiftResources:
   path: app-sre/dashdot/auth-proxy-stage
   version: 1
 
-managedTerraformResources: true
+managedExternalResources: true
 
-terraformResources:
-- provider: rds
-  account: app-sre
-  identifier: dashdotdb-stage
-  defaults: /terraform/resources/dashdot/rds-stage-1.yml
-  output_resource_name: dashdotdb-rds
-  reset_password: APPSRE-4733
-  overrides:
-    engine_version: '11.12'
-    apply_immediately: true
-- provider: rds
-  account: app-sre
-  identifier: dashdotdb-stage-replica
-  defaults: /terraform/resources/dashdot/rds-stage-1.yml
-  replica_source: dashdotdb-stage
-  overrides:
-    engine_version: '11.12'
-    apply_immediately: true
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: rds
+    identifier: dashdotdb-stage
+    defaults: /terraform/resources/dashdot/rds-stage-1.yml
+    output_resource_name: dashdotdb-rds
+    reset_password: APPSRE-4733
+    overrides:
+      engine_version: '11.12'
+      apply_immediately: true
+  - provider: rds
+    identifier: dashdotdb-stage-replica
+    defaults: /terraform/resources/dashdot/rds-stage-1.yml
+    replica_source: dashdotdb-stage
+    overrides:
+      engine_version: '11.12'
+      apply_immediately: true
