@@ -14,6 +14,7 @@ This document explains how to vertically scale an RDS instance managed through a
 
 * Storage: DB storage scale ups are seamless in most cases and will not cause an outage or performance degradation. This is documented here: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIOPS.StorageTypes.html
 
+* Before scaling storage in DB in app-interface, it is important to understand that the storage size cannot be decreased later. Once it is scaled there is no way back. Scaling storage should be coordinated with the instance owner team!
 
 ## Process
 
@@ -36,10 +37,44 @@ This document explains how to vertically scale an RDS instance managed through a
 ```
 aws rds modify-db-instance --db-instance-identifier="uhc-acct-mngr-integration" --apply-immediately
 ```  
-This will then put the database into a modifying state and bring it back on-line with the new class.  
+
+This will then put the database into a modifying state and bring it back on-line with the new class.
+
+## Identifying potential issue sources
+
+### Data
+
+Connect to the database server and query the database size e.g.,:
+
+```
+postgres=> SELECT pg_size_pretty( pg_database_size('postgres') );
+ pg_size_pretty 
+----------------
+ 36 MB
+(1 row)
+```
+
+There could be other databases to consider querying. To list all available databases:
+
+```
+postgres=> \l
+```
+
+Note: The commands only work when not being connected to a specific database yet inside the database server.
+
+### Logs
+
+Check the Logs & Events Tab in the RDS instance dashboard. You will see the log sizes there.
+Error and slow query logs are accounted to storage space. I.e. it is possible to see relatively
+empty databases which still consume a lot of storage space due to logs.
+
+Note, that there is no way to delete logs. By default logs have a 3 day retention period.
+Changing the retention period will only affect new logs. It will not have any effect on
+already existing logs.
 
 
 ## References
 
 * [AWS Database blog - Scaling Your Amazon RDS Instance Vertically and Horizontally](https://aws.amazon.com/blogs/database/scaling-your-amazon-rds-instance-vertically-and-horizontally/)
 * [AWS Documentation - Choosing the DB Instance Class - Supported DB Engines for All Available DB Instance Classes](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.DBInstanceClass.html#Concepts.DBInstanceClass.Support)
+* [RDS tackling diskfull error](https://aws.amazon.com/premiumsupport/knowledge-center/diskfull-error-rds-postgresql/)
