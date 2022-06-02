@@ -62,33 +62,40 @@ terraformResources:
         [default]
         role_arn = {{ role_arn }}
         source_profile = source-profile
-- provider: aws-iam-service-account
-  account: app-sre-stage
-  identifier: hypershift-operator-hshifti01ue1-private-link
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [{
-        "Action": [
-          "sts:AssumeRole"
-        ],
-        "Effect": "Allow",
-        "Resource": "*"
-      }]
-    }
-  output_resource_name: aws-credentials
-  aws_infrastructure_access:
-    cluster:
-      $ref: /openshift/hshifti01ue1/cluster.yml
-    access_level: network-mgmt
-  output_format:
-    provider: generic-secret
-    data:
-      credentials: |
-        [profile source-profile]
-        aws_access_key_id = {{ aws_access_key_id }}
-        aws_secret_access_key = {{ aws_secret_access_key }}
 
-        [default]
-        role_arn = {{ role_arn }}
-        source_profile = source-profile
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre-stage/account.yml
+  resources:
+  - provider: aws-iam-service-account
+    identifier: hypershift-operator-hshifti01ue1-private-link
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Action": [
+            "sts:AssumeRole"
+          ],
+          "Effect": "Allow",
+          "Resource": "*"
+        }]
+      }
+    output_resource_name: aws-credentials
+    aws_infrastructure_access:
+      cluster:
+        $ref: /openshift/hshifti01ue1/cluster.yml
+      access_level: network-mgmt
+    output_format:
+      provider: generic-secret
+      data:
+        credentials: |
+          [profile source-profile]
+          aws_access_key_id = {{ aws_access_key_id }}
+          aws_secret_access_key = {{ aws_secret_access_key }}
+
+          [default]
+          role_arn = {{ role_arn }}
+          source_profile = source-profile
