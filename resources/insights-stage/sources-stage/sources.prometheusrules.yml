@@ -119,7 +119,7 @@ spec:
   - name: sources-api-stage
     rules:
       - alert: SourcesApi5xxErrors
-        expr: sum(rate(sources_api_http_requests_total{status!~"^5.*", namespace="sources-stage"}[30m]))/sum(rate(sources_api_http_requests_total{namespace="sources-stage"}[30m])) < .9
+        expr: sum(rate(sources_requests_total{code=~"5.."}[30m])) / sum(rate(sources_requests_total[30m])) > .1
         for: 5m
         labels:
           severity: info
@@ -132,7 +132,7 @@ spec:
           message: "[Stage] Sources API. Error rate > 10% for 5 minutes"
           runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/sources/SourcesApi5xxErrors.rst"
       - alert: SourcesApiRequestDuration
-        expr: avg(rate(sources_api_http_duration_seconds_sum{controller!="status", namespace="sources-stage"}[5m]) / rate(sources_api_http_duration_seconds_count{controller!="status",namespace="sources-stage"}[5m]) > 0) * 100 > 500
+        expr: avg(rate(sources_request_duration_seconds_sum[5m]) / rate(sources_request_duration_seconds_count[5m]) > 0) * 100 > 500
         for: 10m
         labels:
           severity: info
