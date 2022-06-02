@@ -102,6 +102,15 @@ Access is managed via app-interface. The role that grants access is [observabili
 
 If you are a member of the OpenShift GitHub organization, you can use https://grafana.openshift-app-sre.devshift.net instead (does not require a user file).
 
+### My Grafana Dashboard is missing
+
+Grafana dashboards are discovered automatically if you follow this [guide](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/monitoring.md#adding-dashboards).
+
+- Make sure the key, where you store the dashboard is of the following format: `unique_name.json`. If you use other type, like `.yaml` the dashboard might not be discovered.
+- Make sure the uuid in the dashboard json is unique, especially if you copy and paste the dashboard from another one. In doubt just use a uuid.
+
+If still missing, ask AppSRE to check logs of the Discovery and Grafana containers.
+
 ### Tagging options in app-interface
 
 GitLab: Users are not being tagged by default for SaaS file reviews. To be tagged on MRs for SaaS files you own, add `tag_on_merge_requests: true` to your user file.
