@@ -33,7 +33,7 @@ This means the changes are limited to saas file. And that usually does not need 
 
 ### Insights
 
-Insights MRs should be approved as follows:
+Insights MRs should be assigned to the MR and approved as follows:
 
 - `OnBoarded` services - AppSRE
 - `BestEffort` services - @bturner
