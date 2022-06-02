@@ -79,6 +79,7 @@ this repository.
       - [Manage RDS databases via App-Interface (`/openshift/namespace-1.yml`)](#manage-rds-databases-via-app-interface-openshiftnamespace-1yml)
         - [Approved RDS versions](#approved-rds-versions)
         - [RDS minor version upgrades](#rds-minor-version-upgrades)
+        - [RDS major version upgrades](#rds-major-version-upgrades)
         - [Maintenance windows for RDS instances](#maintenance-windows-for-rds-instances)
         - [Reset RDS database password](#reset-rds-database-password)
         - [Create RDS database from Snapshot](#create-rds-database-from-snapshot)
@@ -1615,6 +1616,14 @@ There are a few things to keep in mind before performing a minor version databas
 The documentation for performing upgrades can be found below:
 
 * [Upgrade Minor Version for PostgreSQL RDS Instance](/docs/aws/sop/postgresql-rds-instance-minor-version-upgrade.md)
+
+##### RDS major version upgrades
+
+**Teams should not attempt this process without working closely with AppSRE. This is not a self-service process.**
+
+Major version upgrades are typically quite involved, may include breaking changes, and require proper planning to be successful. It is not unusual to have hours of downtime for a major version upgrade. See the links below for documentation related to your database engine.
+
+* [PostgreSQL major version upgrades](/docs/dba/postgresql-rds-instance-major-version-upgrade.md)
 
 ##### Maintenance windows for RDS instances
 
