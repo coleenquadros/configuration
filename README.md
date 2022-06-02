@@ -1689,9 +1689,16 @@ Additonal details can be found in AWS [documentation](https://docs.aws.amazon.co
 
 AWS does not break down RDS logs for PostgreSQL into `error`, `slowquery`, `audit`, etc. categories for logs. The only log options available for PostgreSQL RDS instances are `postgresql`, and `upgrade`.
 
-To publish slow query logs to cloudwatch, we must first configure logging parameters for the RDS instance. RDS instance must be configured to use a custom parameter group. If this is not the case, we must first attach a custom parameter group to the database. To enable query logging for your PostgreSQL DB instance, set two parameters in the DB parameter group associated with your DB instance: `log_statement` and `log_min_duration_statement`.
+You can publish `postgresql` and `upgrade` logs to CloudWatch for PostgreSQL RDS instances by adding the following to your RDS specification file:
 
-The `log_statement` parameter controls which SQL statements are logged. We recommend that you set this parameter to `all` to log `all` statements when you debug issues in your DB instance. The default value is `none`. To log all data definition language (DDL) statements (CREATE, ALTER, DROP, and so on), set this value to `ddl`. To log all DDL and data modification language (DML) statements (INSERT, UPDATE, DELETE, and so on), set this value to `mod`.
+```yaml
+enabled_cloudwatch_logs_exports: ["postgresql","upgrade"].
+```
+
+
+To publish slow query logs to cloudwatch, we must first configure logging parameters for the RDS instance. RDS instance must be configured to use a custom parameter group. If this is not the case, we must first attach a custom parameter group to the database. To enable query logging for your PostgreSQL DB instance, set one of the two parameters in the DB parameter group associated with your DB instance: `log_statement` or `log_min_duration_statement`.
+
+The `log_statement` parameter controls which SQL statements are logged. We recommend that you set this parameter to `all` to log `all` statements when you debug issues in your DB instance. The default value is `none`. To log all data definition language (DDL) statements (CREATE, ALTER, DROP, and so on), set this value to `ddl`. To log all DDL and data modification language (DML) statements (INSERT, UPDATE, DELETE, and so on), set this value to `mod`. Be aware that this can quickly fill in the storage space of your RDS instance with logs.
 
 The `log_min_duration_statement` parameter sets the limit in milliseconds of a statement to be logged. All SQL statements that run longer than the parameter setting are logged. This parameter is disabled and set to `-1` by default. Enabling this parameter can help you find unoptimized queries.
 
