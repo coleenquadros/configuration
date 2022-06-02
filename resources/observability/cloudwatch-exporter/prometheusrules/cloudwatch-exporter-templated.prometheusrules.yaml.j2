@@ -12,7 +12,8 @@ spec:
   - name: cloudwatch-exporter-templated.rules
     rules:
     {{%- for namespace in query('/queries/namespace-terraform-app-jira.graphql') %}}
-    {{%- if namespace.terraformResources %}}
+    # terraformResources
+    {{%- if (namespace.managedTerraformResources and namespace.terraformResources) %}}
     {{%- for tfr in namespace.terraformResources %}}
     {{%- if tfr.account in accounts_with_cloudwatch_exporter %}}
     {{%- if tfr.provider == 'rds' %}}
@@ -32,6 +33,32 @@ spec:
         message: "DB instance '{{{ tfr.account }}}/{{ $labels.dbinstance_identifier }}' storage will be out of burst balance in 8 hours"
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/sop/rds-burst-balance.md"
     {{%- endif %}}
+    {{%- endif %}}
+    {{%- endfor %}}
+    {{%- endif %}}
+    # externalResources
+    {{%- if (namespace.managedExternalResources and namespace.externalResources) %}}
+    {{%- for er in namespace.externalResources %}}
+    {{%- if (er.provider == 'aws' and er.provisioner.name in accounts_with_cloudwatch_exporter) %}}
+    {{%- for tfr in er.resources %}}
+    {{%- if tfr.provider == 'rds' %}}
+    - alert: RDSPredictOutOfBurstBalance
+      labels:
+        service: app-sre-observability
+        app: {{{ namespace.app.name }}}
+        {{%- if ((namespace.app.onboardingStatus != 'OnBoarded') or ('stage' in namespace.name) or ('staging' in namespace.name) or ('integration' in namespace.name)) %}}
+        severity: medium
+        {{%- else %}}
+        severity: high
+        {{%- endif %}}
+        jiralert: {{{ namespace.app.escalationPolicy.channels.jiraBoard[0].name }}}
+      expr: predict_linear(aws_rds_burst_balance_average{dbinstance_identifier="{{{ tfr.identifier }}}"}[15m], 3600 * 9) <= 0
+      for: 1h
+      annotations:
+        message: "DB instance '{{{ er.provisioner.name }}}/{{ $labels.dbinstance_identifier }}' storage will be out of burst balance in 8 hours"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/app-sre/sop/rds-burst-balance.md"
+    {{%- endif %}}
+    {{%- endfor %}}
     {{%- endif %}}
     {{%- endfor %}}
     {{%- endif %}}
