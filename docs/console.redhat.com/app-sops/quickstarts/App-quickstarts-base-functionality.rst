@@ -14,9 +14,8 @@ Access to console.redhat.com an account with any permissions. Valid JWT token is
 Steps
 -----
 
-- Obtain valid JWT for an console.redhat.com account. Can be achieved via login into the console.redhat.com trough browser.
-- In the browser terminal create a new fetch call to "https://console.redhat.com/api/quickstarts/v1/helptopics". OS terminal can be used as well with tools like curl. The request must contain cookie with valid cs_jwt value. 
-- Mmake sure the API responded with 200 response code and a valid JSON payload
+- Login into console.redhat.com with any account.
+- Paste https://console.redhat.com/api/quickstarts/v1/helptopics into the same browser tab and ensure you get a valid 200 JSON response.
 
 Escalations
 -----------
