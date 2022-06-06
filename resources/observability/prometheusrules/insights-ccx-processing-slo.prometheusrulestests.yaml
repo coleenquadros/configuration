@@ -1,0 +1,239 @@
+---
+$schema: /app-interface/prometheus-rule-test-1.yml
+
+rule_files:
+- /observability/prometheusrules/insights-ccx-processing-slo.prometheusrules.yaml
+
+evaluation_interval: 5m
+
+tests:
+- interval: 5m
+  input_series:
+  - series: kafka_consumergroup_group_lag{topic="platform.upload.buckit",group="ccx_data_pipeline_app"}
+    values: 500x8
+
+  alert_rule_test:
+  # Test the no alert case
+  - eval_time: 2m
+    alertname: Archive Handler Kafka lag is too high
+    exp_alerts:
+
+  # Test the up > 200 case
+  - eval_time: 10m
+    alertname: Archive Handler Kafka lag is too high
+    exp_alerts:
+    - exp_labels:
+        service: ccx-data-pipeline
+        severity: high
+      exp_annotations:
+        message: "The ccx-data-pipeline lag is too high."
+        runbook: "https://ccx.pages.redhat.com/ccx-docs/customer/sops/cdp_kafka_lag_gt_100.html"
+        dashboard: "https://grafana.app-sre.devshift.net/d/ccxprocessingslo/ccx-processing-slo?orgId=1&viewPanel=6"
+
+  - eval_time: 15m
+    alertname: Archive Handler Kafka lag is too high
+    exp_alerts:
+    - exp_labels:
+        service: ccx-data-pipeline
+        severity: high
+      exp_annotations:
+        message: "The ccx-data-pipeline lag is too high."
+        runbook: "https://ccx.pages.redhat.com/ccx-docs/customer/sops/cdp_kafka_lag_gt_100.html"
+        dashboard: "https://grafana.app-sre.devshift.net/d/ccxprocessingslo/ccx-processing-slo?orgId=1&viewPanel=6"
+
+- interval: 5m
+  input_series:
+  - series: kafka_consumergroup_group_lag{topic="ccx.ocp.results", group="ccx_data_pipeline_app"}
+    values: 500x8
+
+  alert_rule_test:
+  # Test the no alert case
+  - eval_time: 2m
+    alertname: DB Writer Kafka lag is too high
+    exp_alerts:
+
+  # Test the up > 200 case
+  - eval_time: 10m
+    alertname: DB Writer Kafka lag is too high
+    exp_alerts:
+    - exp_labels:
+        service: db-writer
+        severity: high
+      exp_annotations:
+        message: "The db-writer lag is too high."
+        runbook: "https://ccx.pages.redhat.com/ccx-docs/customer/sops/irdw_kafka_lag_gt_100.html"
+        dashboard: "https://grafana.app-sre.devshift.net/d/ccxprocessingslo/ccx-processing-slo?orgId=1&viewPanel=6"
+
+  - eval_time: 15m
+    alertname: DB Writer Kafka lag is too high
+    exp_alerts:
+    - exp_labels:
+        service: db-writer
+        severity: high
+      exp_annotations:
+        message: "The db-writer lag is too high."
+        runbook: "https://ccx.pages.redhat.com/ccx-docs/customer/sops/irdw_kafka_lag_gt_100.html"
+        dashboard: "https://grafana.app-sre.devshift.net/d/ccxprocessingslo/ccx-processing-slo?orgId=1&viewPanel=6"
+
+- interval: 1m
+  input_series:
+  - series: successful_messages_processing_time_sum{service="ccx-insights-results-db-writer-prometheus-exporter",namespace="ccx-data-pipeline-prod"}
+    values: 0+1000x20
+  - series: ccx_process_duration_seconds_sum{service="ccx-data-pipeline-prometheus-exporter",namespace="ccx-data-pipeline-prod"}
+    values: 0+1000x20
+  - series: successful_messages_processing_time_count{service="ccx-insights-results-db-writer-prometheus-exporter",namespace="ccx-data-pipeline-prod"}
+    values: 0+1x20
+  - series: ccx_process_duration_seconds_count{service="ccx-data-pipeline-prometheus-exporter",namespace="ccx-data-pipeline-prod"}
+    values: 0+1x20
+
+  alert_rule_test:
+  # Test the no alert case
+  - eval_time: 2m
+    alertname: "[PROD] Archive processing is taking too long"
+    exp_alerts:
+
+  # Test the up < 300 case
+  - eval_time: 10m
+    alertname: "[PROD] Archive processing is taking too long"
+    exp_alerts:
+    - exp_labels:
+        service: ccx-data-pipeline
+        severity: high
+      exp_annotations:
+        message: "The processing time of ccx-data-pipeline and db-writer is taking too long in production environment."
+        runbook: "https://ccx.pages.redhat.com/ccx-docs/customer/sops/archives_are_not_processed.html"
+        dashboard: "https://grafana.app-sre.devshift.net/d/ccxprocessingslo/ccx-processing-slo?orgId=1&viewPanel=14"
+
+- interval: 1m
+  input_series:
+  - series: successful_messages_processing_time_sum{service="ccx-insights-results-db-writer-prometheus-exporter",namespace="ccx-data-pipeline-stage"}
+    values: 0+1000x20
+  - series: ccx_process_duration_seconds_sum{service="ccx-data-pipeline-prometheus-exporter",namespace="ccx-data-pipeline-stage"}
+    values: 0+1000x20
+  - series: successful_messages_processing_time_count{service="ccx-insights-results-db-writer-prometheus-exporter",namespace="ccx-data-pipeline-stage"}
+    values: 0+1x20
+  - series: ccx_process_duration_seconds_count{service="ccx-data-pipeline-prometheus-exporter",namespace="ccx-data-pipeline-stage"}
+    values: 0+1x20
+
+  alert_rule_test:
+  # Test the no alert case
+  - eval_time: 2m
+    alertname: "[STAGE] Archive processing is taking too long"
+    exp_alerts:
+
+  # Test the up < 300 case
+  - eval_time: 10m
+    alertname: "[STAGE] Archive processing is taking too long"
+    exp_alerts:
+    - exp_labels:
+        service: ccx-data-pipeline
+        severity: high
+      exp_annotations:
+        message: "The processing time of ccx-data-pipeline and db-writer is taking too long in stage environment."
+        runbook: "https://ccx.pages.redhat.com/ccx-docs/customer/sops/archives_are_not_processed.html"
+        dashboard: "https://grafana.app-sre.devshift.net/d/ccxprocessingslo/ccx-processing-slo?orgId=1&viewPanel=14"
+
+- interval: 1m
+  input_series:
+  - series: api_endpoints_response_time_sum{namespace="ccx-data-pipeline-prod", service="ccx-smart-proxy", exported_endpoint="an-endpoint"}
+    values: 5+5x10
+  - series: api_endpoints_response_time_count{namespace="ccx-data-pipeline-prod", service="ccx-smart-proxy", exported_endpoint="an-endpoint"}
+    values: 1+1x10
+
+  alert_rule_test:
+  # Test the no alert case
+  - eval_time: 5m
+    alertname: "[PROD] API responses are taking too long"
+    exp_alerts:
+
+  # Test the up < 200 case
+  - eval_time: 10m
+    alertname: "[PROD] API responses are taking too long"
+    exp_alerts:
+    - exp_labels:
+        service: smart-proxy
+        severity: critical
+      exp_annotations:
+        message: "The response time of smart-proxy is taking too long in production environment."
+        runbook: "https://ccx.pages.redhat.com/ccx-docs/customer/sops/rest_api_gt_1_sec.html"
+        dashboard: "https://grafana.app-sre.devshift.net/d/ccxprocessingslo/ccx-processing-slo?orgId=1&viewPanel=8"
+
+- interval: 1m
+  input_series:
+  - series: api_endpoints_response_time_sum{namespace="ccx-data-pipeline-stage", service="ccx-smart-proxy", exported_endpoint="an-endpoint"}
+    values: 5+5x10
+  - series: api_endpoints_response_time_count{namespace="ccx-data-pipeline-stage", service="ccx-smart-proxy", exported_endpoint="an-endpoint"}
+    values: 1+1x10
+
+  alert_rule_test:
+  # Test the no alert case
+  - eval_time: 5m
+    alertname: "[STAGE] API responses are taking too long"
+    exp_alerts:
+
+  # Test the up < 200 case
+  - eval_time: 10m
+    alertname: "[STAGE] API responses are taking too long"
+    exp_alerts:
+    - exp_labels:
+        service: smart-proxy
+        severity: critical
+      exp_annotations:
+        message: "The response time of smart-proxy is taking too long in stage environment."
+        runbook: "https://ccx.pages.redhat.com/ccx-docs/customer/sops/rest_api_gt_1_sec.html"
+        dashboard: "https://grafana.app-sre.devshift.net/d/ccxprocessingslo/ccx-processing-slo?orgId=1&viewPanel=8"
+
+- interval: 1m
+  input_series:
+  - series: api_endpoints_status_codes{namespace="ccx-data-pipeline-prod", service="ccx-smart-proxy", exported_endpoint="an-endpoint", status_code="200"}
+    values: 1+1x20
+  - series: api_endpoints_status_codes{namespace="ccx-data-pipeline-prod", service="ccx-smart-proxy", exported_endpoint="an-endpoint", status_code="500"}
+    values: 0+2x20
+  - series: api_endpoints_requests{namespace="ccx-data-pipeline-prod", service="ccx-smart-proxy", exported_endpoint="an-endpoint"}
+    values: 1+1x40
+
+  alert_rule_test:
+  # Test the no alert case
+  - eval_time: 5m
+    alertname: "[PROD] API 500 responses are too frequent"
+    exp_alerts:
+
+  # Test the up < 200 case
+  - eval_time: 10m
+    alertname: "[PROD] API 500 responses are too frequent"
+    exp_alerts:
+    - exp_labels:
+        service: smart-proxy
+        severity: critical
+      exp_annotations:
+        message: "The response code in smart-proxy is 500 too often."
+        runbook: "https://ccx.pages.redhat.com/ccx-docs/customer/sops/index.html"
+        dashboard: "https://grafana.app-sre.devshift.net/d/ccxprocessingslo/ccx-processing-slo?orgId=1&viewPanel=12"
+
+- interval: 1m
+  input_series:
+  - series: api_endpoints_status_codes{namespace="ccx-data-pipeline-stage", service="ccx-smart-proxy", exported_endpoint="an-endpoint", status_code="200"}
+    values: 1+1x20
+  - series: api_endpoints_status_codes{namespace="ccx-data-pipeline-stage", service="ccx-smart-proxy", exported_endpoint="an-endpoint", status_code="500"}
+    values: 0+2x20
+  - series: api_endpoints_requests{namespace="ccx-data-pipeline-stage", service="ccx-smart-proxy", exported_endpoint="an-endpoint"}
+    values: 1+1x40
+
+  alert_rule_test:
+  # Test the no alert case
+  - eval_time: 5m
+    alertname: "[STAGE] API 500 responses are too frequent"
+    exp_alerts:
+
+  # Test the up < 200 case
+  - eval_time: 10m
+    alertname: "[STAGE] API 500 responses are too frequent"
+    exp_alerts:
+    - exp_labels:
+        service: smart-proxy
+        severity: critical
+      exp_annotations:
+        message: "The response code in smart-proxy is 500 too often."
+        runbook: "https://ccx.pages.redhat.com/ccx-docs/customer/sops/index.html"
+        dashboard: "https://grafana.app-sre.devshift.net/d/ccxprocessingslo/ccx-processing-slo?orgId=1&viewPanel=12"
+
