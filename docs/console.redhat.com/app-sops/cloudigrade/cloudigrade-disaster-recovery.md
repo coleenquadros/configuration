@@ -25,6 +25,7 @@ Follow these steps to recover from disaster.
        - Slack webhook URL
     - After updating or recreating secrets, versions in the aforementioned `openshiftResources` will need to be bumped, and new deployments should roll out with the new secrets.
     - cloudigrade engineering team can be contacted in [Ansible Slack channel #cloudmeter-dev](https://ansible.slack.com/archives/C8VGAPJNN) (preferred) using @here or @channel or via the CoreOS Slack @cloudmeter-dev-team group.
+    - The cloudigrade engineering team may use [cloudigrade credentials rotation](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/cloudigrade/cloudigrade-credentials-rotation.md) as a guide if necessary.
 - If the RDS database needs to be restored from a backup or recreated, you should simply redeploy cloudigrade and postigrade so that all pods will re-read their configurations and establish new connections to the database.
     - cloudigrade pods always connect to postigrade for their database connections.
     - postigrade pods are running [`PgBouncer`](https://www.pgbouncer.org/) and are the only pods that should directly connect to RDS.
