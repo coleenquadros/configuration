@@ -68,10 +68,16 @@ Check the Logs & Events Tab in the RDS instance dashboard. You will see the log 
 Error and slow query logs are accounted to storage space. I.e. it is possible to see relatively
 empty databases which still consume a lot of storage space due to logs.
 
-Note, that there is no way to delete logs. By default logs have a 3 day retention period.
-Changing the retention period will only affect new logs. It will not have any effect on
-already existing logs.
+### Delete Logs
 
+#### PostgreSQL
+
+The only way to delete logs is by reducing the retention period with the `rds.log_retention_period` parameter.
+Once the retention period is reduced, logs older than the retention period value will be deleted at the next
+file rotation. File rotations are configured either with `log_rotation_age` and/or `log_rotation_size`.
+
+This can only be achieved if the instance has available storage. If the instance is already in a `Storage-full`
+state, it's not possible to change parameters, so the storage would need to be increased first.
 
 ## References
 
