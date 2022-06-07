@@ -39,6 +39,7 @@ authentication:
 imagePatterns:
 - quay.io/cloudservices/hac-core-frontend
 - quay.io/cloudservices/hac-dev-frontend
+- quay.io/cloudservices/hac-build-service-frontend
 - quay.io/cloudservices/insights-chrome-frontend
 
 slack:
@@ -77,6 +78,21 @@ resourceTemplates:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
       name: openshift-hac-dev-gh-build-main
+- name: hac-build-service
+  path: /deploy/frontend.yml
+  url: https://github.com/openshift/hac-build-service
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+  - namespace:
+      $ref: /services/insights/hac/namespaces/ephem.yml
+    ref: main
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: openshift-hac-build-service-gh-build-main
 - name: insights-chrome
   path: /frontend.yml
   url: https://github.com/RedHatInsights/insights-chrome
