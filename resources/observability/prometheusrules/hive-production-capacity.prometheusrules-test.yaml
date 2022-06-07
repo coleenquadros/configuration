@@ -9,17 +9,20 @@ evaluation_interval: 1m
 tests:
 - interval: 1m
   input_series:
-  # 3 shards each reporting equal hive_cluster_deployments every minute
-  # From 1m..15m, 399 clusters per shards are reported (just under 80% capacity)
-  # From 16m..30m, 400 clusters per shards are reported (at 80% capacity)
-  # From 31m..45m, 449 clusters per shards are reported (just under 90% capacity)
-  # From 46m..60m, 450 clusters per shards are reported (at 90% capacity)
-  - series: hive_cluster_deployments{age_lt="+Inf",appsre_env="production",instance="fake-shard-A",job="hive-controllers-production"}
+  # 3 active shards each reporting equal hive_cluster_deployments every minute
+  # From 1m..15m, 399 clusters per active shards are reported (just under 80% capacity)
+  # From 16m..30m, 400 clusters per active shards are reported (at 80% capacity)
+  # From 31m..45m, 449 clusters per active shards are reported (just under 90% capacity)
+  # From 46m..60m, 450 clusters per active shards are reported (at 90% capacity)
+  # 1 shard in maintenance, with 10 cluster deployments, not accounted for in the alerting
+  - series: hive_cluster_deployments{age_lt="+Inf",appsre_env="production",instance="fake-shard-A",job="hive-controllers-production",shard_status="active"}
     values: '399+0x15 400+0x15 449+0x15 450+0x15'
-  - series: hive_cluster_deployments{age_lt="+Inf",appsre_env="production",instance="fake-shard-B",job="hive-controllers-production"}
+  - series: hive_cluster_deployments{age_lt="+Inf",appsre_env="production",instance="fake-shard-B",job="hive-controllers-production",shard_status="active"}
     values: '399+0x15 400+0x15 449+0x15 450+0x15'
-  - series: hive_cluster_deployments{age_lt="+Inf",appsre_env="production",instance="fake-shard-C",job="hive-controllers-production"}
+  - series: hive_cluster_deployments{age_lt="+Inf",appsre_env="production",instance="fake-shard-C",job="hive-controllers-production",shard_status="active"}
     values: '399+0x15 400+0x15 449+0x15 450+0x15'
+  - series: hive_cluster_deployments{age_lt="+Inf",appsre_env="production",instance="fake-shard-D",job="hive-controllers-production",shard_status="maintenance"}
+    values: '10+0x15 10+0x15 10+0x15 10+0x15'
 
   alert_rule_test:
   - eval_time: 15m
