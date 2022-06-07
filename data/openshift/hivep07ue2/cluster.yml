@@ -1,0 +1,86 @@
+---
+$schema: /openshift/cluster-1.yml
+
+labels:
+  service: hive
+
+name: hivep07ue2
+description: hivep07ue2 cluster
+consoleUrl: ''
+kibanaUrl: ''
+prometheusUrl: ''
+alertmanagerUrl: ''
+serverUrl: ''
+elbFQDN: ''
+
+auth:
+  service: github-org-team
+  org: app-sre
+  team: hivep07ue2-cluster
+
+ocm:
+  $ref: /dependencies/ocm/production.yml
+
+managedGroups:
+- dedicated-admins
+
+spec:
+  provider: aws
+  region: us-east-2
+  channel: fast
+  version: 4.10.15
+  initial_version: 4.10.15-fast
+  multi_az: true
+  autoscale:
+    min_replicas: 9
+    max_replicas: 27
+  instance_type: m5.xlarge
+  storage: 600
+  load_balancers: 0
+  private: true
+  disable_user_workload_monitoring: true
+
+upgradePolicy:
+  # TBD: use hive2, need to figure upgradepolicy out first
+  workloads: 
+    - hive2
+  schedule: 0 14 * * 1-5
+  conditions:
+    soakDays: 20
+    mutexes:
+    - hive2-production
+
+network:
+  vpc: 10.136.0.0/16
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
+
+automationToken:
+  path: app-sre/creds/kube-configs/hivep07ue2
+  field: token
+
+jumpHost:
+  hostname: bastion.ci.ext.devshift.net
+  knownHosts: /jump-host/known-hosts/bastion.ci.ext.devshift.net
+  user: app-sre-bot
+  identity:
+    path: app-sre/ansible/roles/app-sre-bot
+    field: identity
+    format: base64
+
+addons:
+- $ref: /dependencies/ocm/addons/cluster-logging-operator.yml
+
+internal: false
+
+awsInfrastructureManagementAccounts:
+- account:
+    $ref: /aws/app-sre/account.yml
+  accessLevel: network-mgmt
+  default: true
+- account:
+    $ref: /aws/osd-privatelink-prod/account.yml
+  accessLevel: network-mgmt
+- account:
+    $ref: /aws/osd-bastion-prod/account.yml
+  accessLevel: network-mgmt
