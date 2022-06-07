@@ -8,32 +8,76 @@ evaluation_interval: 1m
 tests:
 - interval: 1m
   input_series:
-  - series: up{pod="pod1", job="assisted-service",namespace="assisted-installer-production"}
-    values: 1 1 1 1 1 1 1 1 1 1
-  - series: up{pod="pod2", job="assisted-service",namespace="assisted-installer-production"}
-    values: 1 1 1 1 0 0 0 0 0 0
-  - series: up{pod="pod3", job="assisted-service",namespace="assisted-installer-production"}
-    values: 1 1 1 1 stale stale stale stale stale stale
-  - series: up{pod="pod4", job="assisted-service",namespace="assisted-installer-production"}
-    values: _ _ _ _ _ 1 1 1 1 1
+  # Pod going "not ready" for 3 minutes
+  - series: kube_pod_status_ready{pod="assisted-image-service-0",namespace="assisted-installer-production",condition="true"}
+    values: 1+0x9 0+0x3 1+0x10
+  - series: kube_pod_status_ready{pod="assisted-image-service-0",namespace="assisted-installer-production",condition="false"}
+    values: 0+0x9 1+0x3 0+0x10
+  - series: kube_pod_status_ready{pod="assisted-image-service-0",namespace="assisted-installer-production",condition="unknown"}
+    values: 0+0x24
+  # Deploy/upgrade simulation, rolling update
+  # pod #1
+  - series: kube_pod_status_ready{pod="assisted-service-8469669b6-85fp6",namespace="assisted-installer-production",condition="true"}
+    values: 1 1 1 0 0 1+0x19
+  - series: kube_pod_status_ready{pod="assisted-service-8469669b6-85fp6",namespace="assisted-installer-production",condition="false"}
+    values: 0 0 0 1 1 0+0x19
+  - series: kube_pod_status_ready{pod="assisted-service-8469669b6-85fp6",namespace="assisted-installer-production",condition="unknown"}
+    values: 0+0x24
+  # pod #2
+  - series: kube_pod_status_ready{pod="assisted-service-8469669b6-rb9xq",namespace="assisted-installer-production",condition="true"}
+    values: 1 1 1 1 1 0 0 1+0x17
+  - series: kube_pod_status_ready{pod="assisted-service-8469669b6-rb9xq",namespace="assisted-installer-production",condition="false"}
+    values: 0 0 0 0 0 1 1 0+0x17
+  - series: kube_pod_status_ready{pod="assisted-service-8469669b6-rb9xq",namespace="assisted-installer-production",condition="unknown"}
+    values: 0+0x24
+  # pod #3
+  - series: kube_pod_status_ready{pod="assisted-service-8469669b6-zbljb",namespace="assisted-installer-production",condition="true"}
+    values: 1 1 1 1 1 1 1 0 0 1+0x15
+  - series: kube_pod_status_ready{pod="assisted-service-8469669b6-zbljb",namespace="assisted-installer-production",condition="false"}
+    values: 0 0 0 0 0 0 0 1 1 0+0x15
+  - series: kube_pod_status_ready{pod="assisted-service-8469669b6-zbljb",namespace="assisted-installer-production",condition="unknown"}
+    values: 0+0x24
+  # Pod going "not ready" for 4 minutes
+  - series: kube_pod_status_ready{pod="assisted-image-service-1",namespace="assisted-installer-production",condition="true"}
+    values: 1+0x19 0 0 0 0 1+0x10
+  - series: kube_pod_status_ready{pod="assisted-image-service-1",namespace="assisted-installer-production",condition="false"}
+    values: 0+0x24
+  - series: kube_pod_status_ready{pod="assisted-image-service-1",namespace="assisted-installer-production",condition="unknown"}
+    values: 0+0x19 1+0x4
 
   alert_rule_test:
-  # Test the no alert case
-  - eval_time: 4m
-    alertname: Assisted Installer - Pod has stopped
+  # Test the no alert when starting deploy
+  - eval_time: 6m
+    alertname: Assisted Installer - Pod not ready
     exp_alerts:
-  # Test pod has stopped and
-  - eval_time: 7m
-    alertname: Assisted Installer - Pod has stopped
+  # Test the no alert when finishing deploy
+  - eval_time: 9m
+    alertname: Assisted Installer - Pod not ready
+    exp_alerts:
+  # Test pod not ready (false ready status)
+  - eval_time: 13m
+    alertname: Assisted Installer - Pod not ready
     exp_alerts:
     - exp_labels:
-        pod: pod3
+        pod: assisted-image-service-0
         service: assisted-installer
         severity: info
-        job: assisted-service
         namespace: assisted-installer-production
       exp_annotations:
-        message: "Assisted Installer Pod pod3 on namespace assisted-installer-production has stopped"
+        message: "Assisted Installer Pod assisted-image-service-0 on namespace assisted-installer-production not ready"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/assisted-installer/sop#assisted-installer-service-is-down"
+  # Test pod has "unknown" ready status
+  - eval_time: 24m
+    alertname: Assisted Installer - Pod not ready
+    exp_alerts:
+    - exp_labels:
+        pod: assisted-image-service-1
+        service: assisted-installer
+        severity: info
+        namespace: assisted-installer-production
+      exp_annotations:
+        message: "Assisted Installer Pod assisted-image-service-1 on namespace assisted-installer-production not ready"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/assisted-installer/sop#assisted-installer-service-is-down"
 - interval: 30s
   input_series:
   - series: container_memory_working_set_bytes{container="assisted-service", pod="pod1", job="assisted-service",namespace="assisted-installer-production"}

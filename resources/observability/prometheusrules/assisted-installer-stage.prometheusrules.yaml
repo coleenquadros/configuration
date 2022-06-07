@@ -279,13 +279,15 @@ spec:
         labels:
           severity: info
           service: assisted-installer
-      # A short period alter (auto-resolved) to send a message to the AI triage team about a stopped pod.
-      # This event can be a result of an AI upgrade which is a desired behaviour
-      # so if this alter has triggered, the triage team should figure out if this pod has stopped by a bug or by a manual action.
-      - alert: Assisted Installer - Pod has stopped
+      # Detects not ready pods. Matches only pods for assisted-service deployment and
+      # assisted-image-service statefulset
+      - alert: Assisted Installer - Pod not ready
         annotations:
-          message: Assisted Installer Pod {{ $labels.pod }} on namespace {{ $labels.namespace }} has stopped
-        expr: rate(up{job="assisted-service",namespace="assisted-installer-stage"}[5m]) unless up{job="assisted-service",namespace="assisted-installer-stage"}
+          message: Assisted Installer Pod {{ $labels.pod }} on namespace {{ $labels.namespace }} not ready
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/assisted-installer/sop#assisted-installer-service-is-down"
+        # get minimum value for time window. This will ensure that we get constantly "not ready" status
+        # when alerting
+        expr: min(kube_pod_status_ready{namespace=~"assisted-installer-(stage|integration)",pod=~"(assisted-image-service-[0-9]+|assisted-service-[0-9a-z]{9}-[0-9a-z]{5})",condition="false"}) by (pod, namespace) + min(kube_pod_status_ready{namespace=~"assisted-installer-(stage|integration)",pod=~"(assisted-image-service-[0-9]+|assisted-service-[0-9a-z]{9}-[0-9a-z]{5})",condition="unknown"}) by (pod, namespace) > 0
         for: 3m
         labels:
           severity: info
