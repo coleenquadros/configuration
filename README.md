@@ -10,120 +10,7 @@ If you are a team looking to run your service with the App SRE team, please foll
 The Application SRE team is responsible of fulfilling the contract defined in
 this repository.
 
-- [App-Interface](#app-interface)
-  - [Overview](#overview)
-  - [Components](#components)
-  - [Workflow](#workflow)
-  - [App-Interface Etiquette](#app-interface-etiquette)
-  - [Local validation of datafile modifications / contract amendment](#local-validation-of-datafile-modifications--contract-amendment)
-    - [JSON schema validation](#json-schema-validation)
-    - [Running integrations locally with `--dry-run`](#running-integrations-locally-with---dry-run)
-  - [Visual App-interface](#visual-app-interface)
-  - [Querying the App-interface](#querying-the-app-interface)
-  - [Features](#features)
-    - [Existing Features](#existing-features)
-    - [Planned Features](#planned-features)
-  - [Integrations](#integrations)
-    - [Existing integrations](#existing-integrations)
-    - [Planned integrations](#planned-integrations)
-  - [Entities and relations](#entities-and-relations)
-  - [Howto](#howto)
-    - [Add or modify a user (`/access/user-1.yml`)](#add-or-modify-a-user-accessuser-1yml)
-      - [Enabling Temporary Roles in App-Interface](#enabling-temporary-roles-in-app-interface)
-        - [Example on how it will look in a role file](#example-on-how-it-will-look-in-a-role-file)
-      - [User off-boarding / revalidation loop](#user-off-boarding--revalidation-loop)
-    - [Get notified of events involving a service, or its dependencies](#get-notified-of-events-involving-a-service-or-its-dependencies)
-    - [Define an escalation policy for a service](#define-an-escalation-policy-for-a-service)
-      - [Prerequisites: The team's slack channel and Pagerduty schedule are defined in app-interface](#prerequisites-the-teams-slack-channel-and-pagerduty-schedule-are-defined-in-app-interface)
-      - [Step 1: Define escalation policies for the team:](#step-1-define-escalation-policies-for-the-team)
-      - [Step 2: Link the service to a team's escalation policy](#step-2-link-the-service-to-a-teams-escalation-policy)
-    - [Create a Quay Repository for an onboarded App (`/app-sre/app-1.yml`)](#create-a-quay-repository-for-an-onboarded-app-app-sreapp-1yml)
-      - [Mirroring Quay Repositories](#mirroring-quay-repositories)
-    - [Create a Sentry Project for an onboarded App (`/app-sre/app-1.yml`)](#create-a-sentry-project-for-an-onboarded-app-app-sreapp-1yml)
-    - [Create a Sentry Team (`/dependencies/sentry-team-1.yml`)](#create-a-sentry-team-dependenciessentry-team-1yml)
-    - [Manage Sentry team membership via App-Interface (`/access/role-1.yml`)](#manage-sentry-team-membership-via-app-interface-accessrole-1yml)
-    - [Manage Openshift resources via App-Interface (`/openshift/namespace-1.yml`)](#manage-openshift-resources-via-app-interface-openshiftnamespace-1yml)
-      - [Manage shared OpenShift resources via App-interface (`/openshift/namespace-1.yml`)](#manage-shared-openshift-resources-via-app-interface-openshiftnamespace-1yml)
-      - [Example: Manage a ConfigMap via App-Interface (`/openshift/namespace-1.yml`)](#example-manage-a-configmap-via-app-interface-openshiftnamespace-1yml)
-      - [Example: Manage a templated ConfigMap via App-Interface (`/openshift/namespace-1.yml`)](#example-manage-a-templated-configmap-via-app-interface-openshiftnamespace-1yml)
-      - [Manage Secrets via App-Interface (`/openshift/namespace-1.yml`) using Vault](#manage-secrets-via-app-interface-openshiftnamespace-1yml-using-vault)
-      - [Manage Routes via App-Interface (`/openshift/namespace-1.yml`) using Vault](#manage-routes-via-app-interface-openshiftnamespace-1yml-using-vault)
-      - [Validate JSON in Secrets and ConfigMaps](#validate-json-in-secrets-and-configmaps)
-      - [Validate AlertManager configuration in Secrets and ConfigMaps](#validate-alertmanager-configuration-in-secrets-and-configmaps)
-    - [Manage openshift-acme deployments via App-Interface](#manage-openshift-acme-deployments-via-app-interface)
-    - [Manage OpenShift Groups association via App-Interface (`/openshift/cluster-1.yml`)](#manage-openshift-groups-association-via-app-interface-openshiftcluster-1yml)
-    - [Manage OpenShift LimitRanges via App-Interface (`/openshift/limitrange-1.yml`)](#manage-openshift-limitranges-via-app-interface-openshiftlimitrange-1yml)
-    - [Manage OpenShift ResourceQuotas via App-Interface (`/openshift/quota-1.yml`)](#manage-openshift-resourcequotas-via-app-interface-openshiftquota-1yml)
-    - [Self-Service OpenShift ServiceAccount tokens via App-Interface (`/openshift/namespace-1.yml`)](#self-service-openshift-serviceaccount-tokens-via-app-interface-openshiftnamespace-1yml)
-    - [Enable network traffic between Namespaces via App-Interface (`/openshift/namespace-1.yml`)](#enable-network-traffic-between-namespaces-via-app-interface-openshiftnamespace-1yml)
-    - [Manage Vault configurations via App-Interface](#manage-vault-configurations-via-app-interface)
-      - [Manage vault audit backends (`/vault-config/audit-1.yml`)](#manage-vault-audit-backends-vault-configaudit-1yml)
-      - [Manage vault auth backends (`/vault-config/auth-1.yml`)](#manage-vault-auth-backends-vault-configauth-1yml)
-      - [Manage vault policies (`/vault-config/policy-1.yml`)](#manage-vault-policies-vault-configpolicy-1yml)
-      - [Manage vault roles (`/vault-config/role-1.yml`)](#manage-vault-roles-vault-configrole-1yml)
-      - [Manage vault secret-engines (`/vault-config/secret-engine-1.yml`)](#manage-vault-secret-engines-vault-configsecret-engine-1yml)
-        - [KV Secrets engine Example](#kv-secrets-engine-example)
-        - [TOTP Secrets engine Example](#totp-secrets-engine-example)
-    - [Manage DNS Zones via App-Interface (`/aws/dns-zone-1.yml`) using Terraform](#manage-dns-zones-via-app-interface-awsdns-zone-1yml-using-terraform)
-    - [Manage Dyn DNS Traffic Director via App-Interface (`/dependencies/dyn-traffic-director-1.yml`)](#manage-dyn-dns-traffic-director-via-app-interface-dependenciesdyn-traffic-director-1yml)
-    - [Manage AWS access via App-Interface (`/aws/group-1.yml`) using Terraform](#manage-aws-access-via-app-interface-awsgroup-1yml-using-terraform)
-      - [Manage AWS users via App-Interface (`/aws/group-1.yml`) using Terraform](#manage-aws-users-via-app-interface-awsgroup-1yml-using-terraform)
-      - [Generating a GPG key](#generating-a-gpg-key)
-      - [Adding your public GPG key](#adding-your-public-gpg-key)
-    - [Manage external resources via App-Interface (`/openshift/namespace-1.yml`)](#manage-external-resources-via-app-interface-openshiftnamespace-1yml)
-    - [Manage AWS resources via App-Interface (`/openshift/namespace-1.yml`) using Terraform](#manage-aws-resources-via-app-interface-openshiftnamespace-1yml-using-terraform)
-      - [Manage shared AWS resources via App-interface (`/openshift/namespace-1.yml`) using Terraform](#manage-shared-aws-resources-via-app-interface-openshiftnamespace-1yml-using-terraform)
-      - [Manage AWS Certificate via App-Interface (`/openshift/namespace-1.yml`)](#manage-aws-certificate-via-app-interface-openshiftnamespace-1yml)
-      - [Manage AWS Secrets Manager via App-Interface (`/openshift/namespace-1.yml`)](#manage-aws-secrets-manager-via-app-interface-openshiftnamespace-1yml)
-      - [Manage ElasticSearch via App-Interface (`/openshift/namespace-1.yml`)](#manage-elasticsearch-via-app-interface-openshiftnamespace-1yml)
-      - [Manage RDS databases via App-Interface (`/openshift/namespace-1.yml`)](#manage-rds-databases-via-app-interface-openshiftnamespace-1yml)
-        - [Approved RDS versions](#approved-rds-versions)
-        - [RDS minor version upgrades](#rds-minor-version-upgrades)
-        - [RDS major version upgrades](#rds-major-version-upgrades)
-        - [Maintenance windows for RDS instances](#maintenance-windows-for-rds-instances)
-        - [Reset RDS database password](#reset-rds-database-password)
-        - [Create RDS database from Snapshot](#create-rds-database-from-snapshot)
-        - [Publishing Database Log Files to CloudWatch](#publishing-database-log-files-to-cloudwatch)
-        - [Publishing MySQL Logs to CloudWatch Logs](#publishing-mysql-logs-to-cloudwatch-logs)
-        - [Publishing PostgreSQL Logs to CloudWatch Logs](#publishing-postgresql-logs-to-cloudwatch-logs)
-        - [Configuring access policies for Performance Insights](#configuring-access-policies-for-performance-insights)
-      - [Manage S3 buckets via App-Interface (`/openshift/namespace-1.yml`)](#manage-s3-buckets-via-app-interface-openshiftnamespace-1yml)
-      - [Manage ElastiCache databases via App-Interface (`/openshift/namespace-1.yml`)](#manage-elasticache-databases-via-app-interface-openshiftnamespace-1yml)
-      - [Manage IAM Service account users via App-Interface (`/openshift/namespace-1.yml`)](#manage-iam-service-account-users-via-app-interface-openshiftnamespace-1yml)
-      - [Manage Secrets Manager Service account users via App-Interface (`/openshift/namespace-1.yml`)](#manage-secrets-manager-service-account-users-via-app-interface-openshiftnamespace-1yml)
-      - [Manage IAM Roles via App-Interface (`/openshift/namespace-1.yml`)](#manage-iam-roles-via-app-interface-openshiftnamespace-1yml)
-      - [Manage SQS queues via App-Interface (`/openshift/namespace-1.yml`)](#manage-sqs-queues-via-app-interface-openshiftnamespace-1yml)
-      - [Manage DynamoDB tables via App-Interface (`/openshift/namespace-1.yml`)](#manage-dynamodb-tables-via-app-interface-openshiftnamespace-1yml)
-      - [Manage ECR repositories via App-Interface (`/openshift/namespace-1.yml`)](#manage-ecr-repositories-via-app-interface-openshiftnamespace-1yml)
-      - [Manage stacks of S3 bucket and CloudFront distribution via App-Interface (`/openshift/namespace-1.yml`)](#manage-stacks-of-s3-bucket-and-cloudfront-distribution-via-app-interface-openshiftnamespace-1yml)
-      - [Manage CloudFront Public Keys via App-Interface (`/openshift/namespace-1.yml`)](#manage-cloudfront-public-keys-via-app-interface-openshiftnamespace-1yml)
-      - [Manage CloudWatch Log Groups via App-Interface (`/openshift/namespace-1.yml`)](#manage-cloudwatch-log-groups-via-app-interface-openshiftnamespace-1yml)
-      - [Manage Key Management Service Keys via App-Interface (`/openshift/namespace-1.yml`)](#manage-key-management-service-keys-via-app-interface-openshiftnamespace-1yml)
-      - [Manage Kinesis Streams via App-Interface (`/openshift/namespace-1.yml`)](#manage-kinesis-streams-via-app-interface-openshiftnamespace-1yml)
-      - [Manage AWS Autoscaling Group via App-Interface (`/openshift/namespace-1.yml`)](#manage-aws-autoscaling-group-via-app-interface-openshiftnamespace-1yml)
-      - [Manage External DNS zones via App-Interface (`/openshift/namespace-1.yml`)](#manage-external-dns-zones-via-app-interface-openshiftnamespace-1yml)
-      - [Manage Application Load Balancers via App-Interface (`/openshift/cluster-1.yml`)](#manage-application-load-balancers-via-app-interface-openshiftcluster-1yml)
-      - [Enable deletion of AWS resources in deletion protected accounts](#enable-deletion-of-aws-resources-in-deletion-protected-accounts)
-    - [Manage VPC peerings via App-Interface (`/openshift/cluster-1.yml`)](#manage-vpc-peerings-via-app-interface-openshiftcluster-1yml)
-    - [Share resources between AWS accounts via App-Interface (`/aws/account-1.yml`)](#share-resources-between-aws-accounts-via-app-interface-awsaccount-1yml)
-    - [Manage Slack User groups via App-Interface](#manage-slack-user-groups-via-app-interface)
-    - [Manage Jenkins jobs configurations using jenkins-jobs](#manage-jenkins-jobs-configurations-using-jenkins-jobs)
-    - [Delete AWS IAM access keys via App-Interface](#delete-aws-iam-access-keys-via-app-interface)
-    - [Reset AWS IAM user passwords via App-Interface](#reset-aws-iam-user-passwords-via-app-interface)
-      - [Behind the scenes](#behind-the-scenes)
-    - [AWS garbage collection](#aws-garbage-collection)
-    - [GitHub user profile compliance](#github-user-profile-compliance)
-    - [Manage GitLab group members](#manage-gitlab-group-members)
-    - [Create GitLab projects](#create-gitlab-projects)
-    - [Add a Grafana Dashboard](#add-a-grafana-dashboard)
-    - [Execute a SQL Query on an App Interface controlled RDS instance](#execute-a-sql-query-on-an-app-interface-controlled-rds-instance)
-    - [Enable Gitlab Features on an App Interface Controlled Gitlab Repository](#enable-gitlab-features-on-an-app-interface-controlled-gitlab-repository)
-    - [Provision and consume Kafka clusters via KAS Fleet Manager](#provision-and-consume-kafka-clusters-via-kas-fleet-manager)
-    - [Write and run Prometheus rules tests](#write-and-run-prometheus-rules-tests)
-    - [How to offboard/delete a service](#how-to-offboarddelete-a-service)
-  - [Design](#design)
-  - [Developer Guide](#developer-guide)
-  - [Quay Documentation](#quay-documentation)
+[TOC]
 
 ## Overview
 
@@ -1643,31 +1530,18 @@ Choose a value that represents a trace to why the password should be recycled (f
 
 Note: You do not need to remove the `reset_password` field from the RDS definition once the password was recycled.
 
-##### Create RDS database from Snapshot
+##### Restoring RDS databases from backups
 
-You can create an RDS instance from a database snapshot by setting `snapshot_identifier` in your `defaults` file. However, most AppSRE tenants tend to use the same defaults file for multiple RDS instance. If you are re-using the defaults file, you can set `snapshot_identifier` in the `overrides`.
+This section covers the different options that are available when a database needs to be restored from backups. This might be required due to data corruption or failed database upgrades.
 
-Here's an example of RDS database created from snapshot:
+There are two high-level options for restoring a RDS database:
 
-```yaml
-terraformResources:
-- provider: rds
-  account: insights-prod
-  identifier: system-baseline-prod
-  defaults: /terraform/resources/insights/production/rds/rds-system-baseline-prod.yml
-  overrides:
-    snapshot_identifier: system-baseline-prod-migration
-  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-system-baseline-prod.yml
-  output_resource_name: system-baseline-db-rds
-  enhanced_monitoring: true
-```
+1. [Create RDS instance from a snapshot](/docs/aws/sop/create-rds-instance-from-snapshot.md) - use this option if you need to restore to a pre-upgrade or manual snapshot, or for other cases where data loss is not a major concern
+2. [Restore RDS instance to a specific point in time](/docs/aws/sop/restore-rds-instance-to-specific-point-in-time.md) - use this option if you don't have a snapshot created right before the time you wish to restore to and want to minimize data loss (AWS ships transaction logs every 5 minutes, so data loss should be minimized)
 
-If you're restoring a large database, please consider adding a timeout larger than the default (40m) to the parameters using the `timeout` option in the `defaults` or in the `overrides`, e.g:
+Note that in both cases, restoring a backup will **result in a new database being created** (in-place restore isn't supported by RDS), but in most cases application-level changes aren't necessary because the `Secret` is updated as part of the process.
 
-```yaml
-timeout:
-  create: 2h
-```
+Merging a restored backup with data that was written after the backup was taken is not in the scope of this documentation. Teams that may have these needs should document application-specific disaster recovery instructions.
 
 ##### Publishing Database Log Files to CloudWatch
 
