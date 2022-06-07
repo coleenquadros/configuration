@@ -33,10 +33,10 @@ This document explains how to vertically scale an RDS instance managed through a
     * `allocated_storage` - increase allocated storage for the instance.
 5. Create a Merge Request to app-interface with these changes.
 6. Verify in the `terraform-resources` integration output that the change that is about to happen is of type `update` and not `replace`.
-7. A modification (but not maintenance) event will be present for a class change. This change will incur some downtime, which varies by the size and load of the database. To trigger the change, use the aws cli as such:  
+7. A modification (but not maintenance) event will be present for a class change. This change will incur some downtime, which varies by the size and load of the database. To trigger the change, use the aws cli as such:
 ```
 aws rds modify-db-instance --db-instance-identifier="uhc-acct-mngr-integration" --apply-immediately
-```  
+```
 
 This will then put the database into a modifying state and bring it back on-line with the new class.
 
@@ -48,7 +48,7 @@ Connect to the database server and query the database size e.g.,:
 
 ```
 postgres=> SELECT pg_size_pretty( pg_database_size('postgres') );
- pg_size_pretty 
+ pg_size_pretty
 ----------------
  36 MB
 (1 row)
