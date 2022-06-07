@@ -33,10 +33,10 @@ This document explains how to vertically scale an RDS instance managed through a
     * `allocated_storage` - increase allocated storage for the instance.
 5. Create a Merge Request to app-interface with these changes.
 6. Verify in the `terraform-resources` integration output that the change that is about to happen is of type `update` and not `replace`.
-7. A modification (but not maintenance) event will be present for a class change. This change will incur some downtime, which varies by the size and load of the database. To trigger the change, use the aws cli as such:  
+7. A modification (but not maintenance) event will be present for a class change. This change will incur some downtime, which varies by the size and load of the database. To trigger the change, use the aws cli as such:
 ```
 aws rds modify-db-instance --db-instance-identifier="uhc-acct-mngr-integration" --apply-immediately
-```  
+```
 
 This will then put the database into a modifying state and bring it back on-line with the new class.
 
@@ -48,7 +48,7 @@ Connect to the database server and query the database size e.g.,:
 
 ```
 postgres=> SELECT pg_size_pretty( pg_database_size('postgres') );
- pg_size_pretty 
+ pg_size_pretty
 ----------------
  36 MB
 (1 row)
@@ -68,10 +68,16 @@ Check the Logs & Events Tab in the RDS instance dashboard. You will see the log 
 Error and slow query logs are accounted to storage space. I.e. it is possible to see relatively
 empty databases which still consume a lot of storage space due to logs.
 
-Note, that there is no way to delete logs. By default logs have a 3 day retention period.
-Changing the retention period will only affect new logs. It will not have any effect on
-already existing logs.
+### Delete Logs
 
+#### PostgreSQL
+
+The only way to delete logs is by reducing the retention period with the `rds.log_retention_period` parameter.
+Once the retention period is reduced, logs older than the retention period value will be deleted at the next
+file rotation. File rotations are configured either with `log_rotation_age` and/or `log_rotation_size`.
+
+This can only be achieved if the instance has available storage. If the instance is already in a `Storage-full`
+state, it's not possible to change parameters, so the storage would need to be increased first.
 
 ## References
 
