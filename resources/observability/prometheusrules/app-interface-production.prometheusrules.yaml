@@ -36,3 +36,15 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net/d/Integrations/integrations"
         message: "Integration: {{ $labels.integration }} (shard {{ $labels.shard_id }}) has failed with exit code {{ $value }}"
         link_url: ""
+    - alert: QontractReconcileIntegrationStuck
+      labels:
+        service: app-interface
+        severity: critical-fts
+        jiralert: ASIC
+      expr: sum(increase(qontract_reconcile_execution_counter_total[2h])) by (integration, shard_id) == 0
+      for: 1m
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/app-interface-integrations-flow-and-failure-scenarios.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/Integrations/integrations"
+        message: "Integration: {{ $labels.integration }} (shard {{ $labels.shard_id }}) has been stuck for 2 hours"
+        link_url: ""

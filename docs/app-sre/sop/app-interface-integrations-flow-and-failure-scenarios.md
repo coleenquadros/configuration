@@ -104,3 +104,11 @@ Terraform managed resources are not deleted during normal reconcile runs. If res
 
 Follow the [How to safely delete terraform managed resources](delete-terraform-resources.md) guide to resolve
 this situation.
+
+### Integrations are stuck
+
+In some cases, integrations will get "stuck" and will cease to execute.
+
+This is being investigated in [APPSRE-4905](https://issues.redhat.com/browse/APPSRE-4905).
+
+The temporary workaround is to restart pods of stuck integrations.
