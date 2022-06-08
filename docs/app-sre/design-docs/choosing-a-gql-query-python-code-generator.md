@@ -26,11 +26,6 @@ While this approach offers large flexibility and initial development speed, it c
 
 ## Proposal
 
-We generate classes dedicated to queries, i.e., every query gets its own classes.
-By doing so, we can ensure that fields only get `Optional` if allowed by the schema.
-If we generated a single class for every object in the schema, then we would need to make every field `Optional` to accomodate for custom GQL queries.
-By making every field `Optional` we lose some stability offered through static type checking.
-
 We have investigated 3 options:
 
 - [sgqlc](https://github.com/profusion/sgqlc)
@@ -100,9 +95,16 @@ data: dict[Any, Any] = gqlapi.query(query)
 apps: list[saas_files_full.AppV1QueryData] = saas_files_full.SaasFilesFullQueryData(**data).apps_v1 or []
 ```
 
+Another discussion evolves around schema vs query generation:
+
+We generate classes dedicated to queries, i.e., every query gets its own classes.
+By doing so, we can ensure that fields only get `Optional` if allowed by the schema.
+If we generated a single class for every object in the schema, then we would need to make every field `Optional` to accomodate for custom GQL queries.
+By making every field `Optional` we lose some stability offered through static type checking.
+
 More specifics and details can be found in the [PoC](https://github.com/app-sre/qontract-reconcile/pull/2389).
 
-Some problems a code generator must consider:
+Some further problems a code generator must consider:
 
 - how do we offer a mechanism for backwards compatibility? --> e.g., we could implement a plugin mechanism like strawberry does
 - how do we handle class name collision? --> e.g., we could prefix classes with parent names
