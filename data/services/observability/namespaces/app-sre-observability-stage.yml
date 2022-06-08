@@ -28,12 +28,6 @@ managedTerraformResources: true
 
 terraformResources:
 - provider: aws-iam-service-account
-  account: app-sre-stage
-  identifier: aws-resource-exporter-stage-01
-  policies:
-  - AmazonRDSReadOnlyAccess
-  output_resource_name: aws-resource-exporter-app-sre
-- provider: aws-iam-service-account
   account: app-sre
   identifier: aws-cloudwatch-exporter-stage-01
   policies:
@@ -109,14 +103,6 @@ terraformResources:
   policies:
   - AmazonRDSReadOnlyAccess
   output_resource_name: aws-resource-exporter-crc
-## Grafana temporary database
-- provider: rds
-  account: app-sre-stage
-  identifier: grafana-stage
-  defaults: /terraform/resources/grafana/rds-stage-1.yml
-  output_resource_name: grafana-db
-  overrides:
-    snapshot_identifier: grafana-stage-20220217
 
 managedResourceTypes:
 - ConfigMap
@@ -437,4 +423,20 @@ openshiftResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre-stage/account.yml
+  resources:
+  - provider: aws-iam-service-account
+    identifier: aws-resource-exporter-stage-01
+    policies:
+    - AmazonRDSReadOnlyAccess
+    output_resource_name: aws-resource-exporter-app-sre
+  ## Grafana temporary database
+  - provider: rds
+    identifier: grafana-stage
+    defaults: /terraform/resources/grafana/rds-stage-1.yml
+    output_resource_name: grafana-db
+    overrides:
+      snapshot_identifier: grafana-stage-20220217

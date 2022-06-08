@@ -71,14 +71,6 @@ terraformResources:
   output_resource_name: ocm-service-log-rds
   overrides:
     engine_version: '12.9'
-- provider: rds
-  account: app-sre-stage
-  identifier: ocm-managed-services-staging
-  defaults: /terraform/resources/app-sre-stage/staging/rds-2-cloudwatch-enabled.yml
-  parameter_group: /terraform/resources/ocm/ocm-stage-rds-parameter-group-pg12.yml
-  output_resource_name: ocm-managed-services-rds
-  overrides:
-    engine_version: '12.9'
 - provider: sqs
   account: app-sre
   identifier: job-queue-service-staging
@@ -120,12 +112,22 @@ terraformResources:
   identifier: rh-oidc-staging
   defaults: /terraform/resources/s3-public-read-1.yml
   output_resource_name: rh-oidc-s3-secret
-- provider: route53-zone
-  account: app-sre-stage
-  identifier: s3-devshift-org
-  name: s3.devshift.org
-  output_resource_name: route53-creds
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: ocm-managed-services-staging
+    defaults: /terraform/resources/app-sre-stage/staging/rds-2-cloudwatch-enabled.yml
+    parameter_group: /terraform/resources/ocm/ocm-stage-rds-parameter-group-pg12.yml
+    output_resource_name: ocm-managed-services-rds
+    overrides:
+      engine_version: '12.9'
+  - provider: route53-zone
+    identifier: s3-devshift-org
+    name: s3.devshift.org
+    output_resource_name: route53-creds
