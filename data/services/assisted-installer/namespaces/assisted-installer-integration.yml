@@ -82,33 +82,6 @@ terraformResources:
   defaults: /terraform/resources/s3-private-1.yml
   output_resource_name: assisted-installer-s3-migration
 - provider: s3
-  account: app-sre-stage
-  identifier: ai-ccx-integration-integration
-  defaults: /terraform/resources/s3-private-1.yml
-  output_resource_name: ai-ccx-integration
-- provider: aws-iam-role
-  account: app-sre-stage
-  identifier: service-account-ai-ccx-integration
-  assume_role:
-    AWS:
-    - arn:aws:iam::192448198553:user/ccx-reporting-pipeline
-  inline_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [{
-        "Effect": "Allow",
-        "Action": [
-          "s3:ListBucket",
-          "s3:GetObject"
-        ],
-        "Resource": [
-          "arn:aws:s3:::ai-ccx-integration-integration",
-          "arn:aws:s3:::ai-ccx-integration-integration/*"
-        ]
-      }]
-    }
-  output_resource_name: service-account-ai-ccx
-- provider: s3
   account: app-sre
   identifier: assisted-installer-integration-v4-public
   defaults: /terraform/resources/s3-public-read-1.yml
@@ -140,4 +113,33 @@ terraformResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre-stage/account.yml
+  resources:
+  - provider: s3
+    identifier: ai-ccx-integration-integration
+    defaults: /terraform/resources/s3-private-1.yml
+    output_resource_name: ai-ccx-integration
+  - provider: aws-iam-role
+    identifier: service-account-ai-ccx-integration
+    assume_role:
+      AWS:
+      - arn:aws:iam::192448198553:user/ccx-reporting-pipeline
+    inline_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Effect": "Allow",
+          "Action": [
+            "s3:ListBucket",
+            "s3:GetObject"
+          ],
+          "Resource": [
+            "arn:aws:s3:::ai-ccx-integration-integration",
+            "arn:aws:s3:::ai-ccx-integration-integration/*"
+          ]
+        }]
+      }
+    output_resource_name: service-account-ai-ccx

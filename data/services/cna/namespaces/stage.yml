@@ -24,20 +24,16 @@ sharedResources:
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
 
+openshiftResources:
+- provider: vault-secret
+  path: app-interface/cna/stage/runtime
+  version: 3
+- provider: route
+  path: /cna/stage/cna.route.yaml
+
 managedTerraformResources: true
 
 terraformResources:
-- provider: rds
-  account: app-sre-stage
-  identifier: cna-stage
-  # we start with a small DB
-  defaults: /terraform/resources/app-sre-stage/rds-3-pg13.yml
-- provider: s3
-  account: app-sre-stage
-  # this is the bucket for terraform state
-  identifier: cna-s3-stage
-  defaults: /terraform/resources/s3-private-1.yml
-  output_resource_name: cna-s3
 - provider: aws-iam-service-account
   account: cna-service-stage
   identifier: cna-service-stage
@@ -62,18 +58,24 @@ terraformResources:
         }
       ]
     }
-- provider: elasticache
-  account: app-sre-stage
-  identifier: cna-redis-stage
-  defaults: /terraform/resources/cna/elasticache-stage.yml
-  output_resource_name: cna-redis
-openshiftResources:
-- provider: vault-secret
-  path: app-interface/cna/stage/runtime
-  version: 3
-- provider: route
-  path: /cna/stage/cna.route.yaml
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: cna-stage
+    # we start with a small DB
+    defaults: /terraform/resources/app-sre-stage/rds-3-pg13.yml
+  - provider: s3
+    # this is the bucket for terraform state
+    identifier: cna-s3-stage
+    defaults: /terraform/resources/s3-private-1.yml
+    output_resource_name: cna-s3
+  - provider: elasticache
+    identifier: cna-redis-stage
+    defaults: /terraform/resources/cna/elasticache-stage.yml
+    output_resource_name: cna-redis

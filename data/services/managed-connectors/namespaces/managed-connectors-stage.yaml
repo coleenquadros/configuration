@@ -68,15 +68,18 @@ terraformResources:
       path: app-interface/global/rds-ca-cert
       field: us-east-1
       version: 2
-  - provider: secrets-manager-service-account
-    account: app-sre-stage
-    identifier: managed-connectors-staging
-    secrets_prefix: managed-connectors
-    output_resource_name: managed-connectors-vault
 
 sharedResources:
 - $ref: /services/app-sre/shared-resources/splunk-creds.yml
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre-stage/account.yml
+  resources:
+  - provider: secrets-manager-service-account
+    identifier: managed-connectors-staging
+    secrets_prefix: managed-connectors
+    output_resource_name: managed-connectors-vault

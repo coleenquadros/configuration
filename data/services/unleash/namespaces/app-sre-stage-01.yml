@@ -94,15 +94,6 @@ openshiftResources:
 managedTerraformResources: true
 
 terraformResources:
-### AppInterface
-- provider: rds
-  account: app-sre-stage
-  identifier: app-interface-unleash-stage
-  defaults: /terraform/resources/unleash/rds-stage-1.yml
-  overrides:
-    snapshot_identifier: unleash-a-i-stage-app-sre-stage
-    apply_immediately: true
-  output_resource_name: app-interface-stage-unleash-rds
 ### OCM Stage
 - provider: rds
   account: app-sre
@@ -142,4 +133,16 @@ terraformResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre-stage/account.yml
+  resources:
+  ### AppInterface
+  - provider: rds
+    identifier: app-interface-unleash-stage
+    defaults: /terraform/resources/unleash/rds-stage-1.yml
+    overrides:
+      snapshot_identifier: unleash-a-i-stage-app-sre-stage
+      apply_immediately: true
+    output_resource_name: app-interface-stage-unleash-rds
