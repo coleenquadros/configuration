@@ -5,10 +5,18 @@
   - [Provisioning Hive](#provisioning-hive)
   - [Provisioning OSD operators](#provisioning-osd-operators)
     - [Resources](#resources)
+      - [operator resources (secrets, configmaps, etc)](#operator-resources-secrets-configmaps-etc)
+      - [saas deploy jobs](#saas-deploy-jobs)
+        - [cloud-ingress-operator](#cloud-ingress-operator)
+        - [aws-account-operator](#aws-account-operator)
     - [Others](#others)
+      - [SelectorSyncSets](#selectorsyncsets)
+      - [ClusterImageSets](#clusterimagesets)
+      - [Managed-tenants](#managed-tenants)
   - [Provisioning backplane](#provisioning-backplane)
   - [Monitoring](#monitoring)
   - [Adding the shard to OCM](#adding-the-shard-to-ocm)
+  - [Adding the shard to support PrivateLink](#adding-the-shard-to-support-privatelink)
   - [Validations](#validations)
     - [Test provisioning an AWS cluster](#test-provisioning-an-aws-cluster)
     - [Test provisioning a GCP cluster](#test-provisioning-a-gcp-cluster)
@@ -16,6 +24,12 @@
   - [Disabling shards from rotation](#disabling-shards-from-rotation)
     - [Verify that at least one round of osde2e tests ran successfully when using the new shard. Dashboards:](#verify-that-at-least-one-round-of-osde2e-tests-ran-successfully-when-using-the-new-shard-dashboards)
   - [OSD operators notes](#osd-operators-notes)
+      - [aws-account-operator](#aws-account-operator-1)
+      - [certman-operator](#certman-operator)
+      - [deadmanssnitch-operator](#deadmanssnitch-operator)
+      - [gcp-project-operator](#gcp-project-operator)
+      - [pagerduty-operator](#pagerduty-operator)
+      - [splunk-forwarder-operator](#splunk-forwarder-operator)
 
 # Info
 
@@ -445,7 +459,7 @@ Once created, there are two further validations
 
 ## Disabling shards from rotation
 
-A shard can be taken out of rotation pick for new clusters, by setting its status to "maintenance".
+A shard can be taken out of rotation pick for new clusters, by setting its status to "maintenance". This status should be set both in the hive [shard configuration](data/services/ocm/shared-resources/production.yml) and in the [scraping configuration](/resources/observability/prometheus/prometheus-app-sre-additional-scrapeconfig.secret.yaml) `shard_status` label.
 
 ### Verify that at least one round of osde2e tests ran successfully when using the new shard. Dashboards:
 
