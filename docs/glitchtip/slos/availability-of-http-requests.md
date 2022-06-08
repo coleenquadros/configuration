@@ -14,8 +14,8 @@ As a web service, GlitchTip's most interesting event from a monitoring perspecti
 
 The following is the explanation of the SLI query.
 
-    sum(rate(django_http_responses_total_by_status_total{job="glitchtip-backend",status!~"5.+"}[1d])) by (job)
-    / sum(rate(django_http_requests_total_by_method_total{job="glitchtip-backend"}[1d])) by (job)
+    sum(rate(django_http_responses_total_by_status_total{job="glitchtip-web",status!~"5.+"}[1d])) by (job)
+    / sum(rate(django_http_requests_total_by_method_total{job="glitchtip-web"}[1d])) by (job)
 
 
 * `django_http_responses_total_by_status_total` - Queries the total number of HTTP responses by HTTP status
