@@ -1,0 +1,42 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: pdf-generator-prod
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+spec:
+  groups:
+  - name: pdf-generator-up-prod
+    rules:
+    - alert: PdfGeneratorDataExporterServiceAbsent
+      expr: absent(up{service=~"pdf-generator-api.*", namespace="pdf-generator-prod"})
+      for: 2m
+      labels:
+        severity: medium
+        service: insights
+        env: prod
+        app_team: pdf-generator
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/81Du_aIHdf/pdf-generator?viewPanel=1026&orgId=1&refresh=15m&var-Datasource=crcp01ue1-prometheus&var-DatasourceRDS=app-sre-prod-01-prometheus&var-namespace=pdf-generator-prod&var-granularity=daily&var-granularity=monthly&var-granularity=yearly&var-realtime_rollup_series=ta_rollup_processor_rollup_event_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_host_event_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_host_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_failed_steps_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_jobs_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_workflow_hierarchy_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_workflows_time_bucket&var-granularity_rollups=job_explorer&var-granularity_rollups=event_explorer&var-granularity_rollups=host_explorer&var-processor_tables=analytics_bundle&var-processor_tables=events_table&var-processor_tables=unified_jobs"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/pdf-generator-prod/deployments/pdf-generator-data-exporter/events"
+        message: "Automation Analytics Alert. All Data Exporter pods have been down for two minutes."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/pdf-generator/PdfGeneratorDataExporterServiceAbsent.rst"
+
+  - name: pdf-generator-restarts-prod
+    rules:
+    - alert: PdfGeneratorFastApiRestarts
+      expr: round(sum(increase(kube_pod_container_status_restarts_total{container="pdf-generator-api", namespace="pdf-generator-prod"}[30m]))) > 5
+      for: 1h
+      labels:
+        severity: info
+        service: insights
+        env: prod
+        app_team: pdf-generator
+      annotations:
+        dashboard: "https://grafana.app-sre.devshift.net/d/81Du_aIHdf/pdf-generator?orgId=1&refresh=15m&var-Datasource=crcp01ue1-prometheus&var-DatasourceRDS=app-sre-prod-01-prometheus&var-namespace=pdf-generator-prod&var-granularity=daily&var-granularity=monthly&var-granularity=yearly&var-realtime_rollup_series=ta_rollup_processor_rollup_event_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_host_event_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_host_explorer_rollup_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_failed_steps_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_jobs_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_workflow_hierarchy_time_bucket&var-realtime_rollup_series=ta_rollup_processor_rollup_job_explorer_rollup_workflows_time_bucket&var-granularity_rollups=job_explorer&var-granularity_rollups=event_explorer&var-granularity_rollups=host_explorer&var-processor_tables=analytics_bundle&var-processor_tables=events_table&var-processor_tables=unified_jobs&from=now-24h&to=now"
+        link_url: "https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/pdf-generator-prod/deployments/pdf-generator-api-fastapi-v2/pods"
+        message: "Automation Analytics Alert. Pod was restarted more than 5 times in 30 minutes for the last 1 hour"
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/pdf-generator/PdfGeneratorRestarts.rst"
