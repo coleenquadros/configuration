@@ -22,6 +22,12 @@ Given the access required, an AppSRE engineer will be required to execute certai
 
 ## Steps
 
+----
+
+**Note:** this is a reminder to consult service-specific disaster recovery procedures before beginning. This steps below assume that applications rely directly on a `Secret` name specified by `output_resource_name`. For use cases that include other mechanisms for determining which database to use, including by not limited to **Clowder**, additional steps may be necessary.
+
+----
+
 1. See [Before restoring a database](/docs/aws/sop/common-database-restore-activities.md#before-restoring-a-database)
 2. Find the snapshot identifier for the snapshot that you'd like to create a new RDS instance for using one of the methods below:
    * [AWS Console](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_RestoreFromSnapshot.html#USER_RestoreFromSnapshot.Restoring)

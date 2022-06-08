@@ -14,6 +14,12 @@ Given the access required, an AppSRE engineer will be required to execute certai
 
 ## Steps
 
+----
+
+**Note:** this is a reminder to consult service-specific disaster recovery procedures before beginning. This steps below assume that applications rely directly on a `Secret` name specified by `output_resource_name`. For use cases that include other mechanisms for determining which database to use, including by not limited to **Clowder**, additional steps may be necessary.
+
+----
+
 The steps below can be followed to recover a database that needs to be restored from a backup to a specific point in time.
 
 1. See [Before restoring a database](/docs/aws/sop/common-database-restore-activities.md#before-restoring-a-database)
