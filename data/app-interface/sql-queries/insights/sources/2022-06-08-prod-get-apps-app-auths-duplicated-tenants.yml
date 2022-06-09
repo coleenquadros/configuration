@@ -1,0 +1,94 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2022-06-08-prod-get-apps-app-auths-duplicated-tenants
+namespace:
+  $ref: /services/insights/sources/namespaces/sources-prod.yml
+identifier: sources-prod
+output: stdout
+queries:
+  - |
+    SELECT
+      "t"."id" AS "t.id",
+      "t"."external_tenant" AS "t.external_tenant",
+      "t"."org_id" AS "t.org_id",
+      "t"."created_at" AS "t.created_at",
+      "t"."updated_at" AS "t.updated_at",
+      "aa"."id" AS "aa.id",
+      "aa"."tenant_id" AS "aa.tenant_id",
+      "aa"."application_id" AS "aa.application_id",
+      "aa"."authentication_id" AS "aa.authentication_id",
+      "aa"."created_at" AS "aa.created_at",
+      "aa"."updated_at" AS "aa.updated_at"
+    FROM
+      "tenants" AS "t"
+    LEFT JOIN
+      "application_authentications" "aa" ON "t"."id" = "aa"."tenant_id"
+    WHERE
+      "t"."external_tenant" IN (
+        SELECT
+          "texten"."external_tenant"
+        FROM
+          "tenants" AS "texten"
+        GROUP BY
+          "texten"."external_tenant"
+        HAVING
+          count("texten"."external_tenant") > 1
+        AND
+          "texten"."external_tenant" != ''
+      )
+    OR
+      "t"."org_id" IN (
+        SELECT
+          "torgid"."org_id"
+        FROM
+          "tenants" AS "torgid"
+        GROUP BY
+          "torgid"."org_id"
+        HAVING
+          count("torgid"."org_id") > 1
+        AND
+          "torgid"."org_id" != ''
+      );
+  - |
+    SELECT
+      "t"."id" AS "t.id",
+      "t"."external_tenant" AS "t.external_tenant",
+      "t"."org_id" AS "t.org_id",
+      "t"."created_at" AS "t.created_at",
+      "t"."updated_at" AS "t.updated_at",
+      "a"."id" AS "a.id",
+      "a"."tenant_id" AS "a.tenant_id",
+      "a"."application_type_id" AS "a.application_type_id",
+      "a"."created_at" AS "a.created_at",
+      "a"."updated_at" AS "a.updated_at"
+    FROM
+      "tenants" AS "t"
+    LEFT JOIN
+      "applications" "a" ON "t"."id" = "a"."tenant_id"
+    WHERE
+      "t"."external_tenant" IN (
+        SELECT
+          "texten"."external_tenant"
+        FROM
+          "tenants" AS "texten"
+        GROUP BY
+          "texten"."external_tenant"
+        HAVING
+          count("texten"."external_tenant") > 1
+        AND
+          "texten"."external_tenant" != ''
+      )
+    OR
+      "t"."org_id" IN (
+        SELECT
+          "torgid"."org_id"
+        FROM
+          "tenants" AS "torgid"
+        GROUP BY
+          "torgid"."org_id"
+        HAVING
+          count("torgid"."org_id") > 1
+        AND
+          "torgid"."org_id" != ''
+      );
