@@ -28,219 +28,210 @@ managedRoles: true
 
 managedResourceTypes: []
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: secrets-manager
-  account: image-builder-stage
-  identifier: azure-service-account
-  secret:
-    path: app-interface/image-builder/stage/azure-service-account
-    version: 1
-    field: all
-  output_resource_name: azure-service-account
-- provider: secrets-manager
-  account: image-builder-stage
-  identifier: gcp-service-account
-  secret:
-    path: app-interface/image-builder/stage/gcp-service-account
-    version: 1
-    field: all
-  output_resource_name: gcp-service-account
-- provider: secrets-manager
-  account: image-builder-stage
-  identifier: image-builder-crc-worker
-  secret:
-    # equivalent of client-credentials in workers-production.yml
-    path: app-interface/image-builder/stage/image-builder-crc-worker
-    version: 1
-    field: all
-  output_resource_name: image-builder-crc-worker
-- provider: secrets-manager
-  account: image-builder-stage
-  identifier: subscription-manager-command
-  secret:
-    path: app-interface/image-builder/stage/subscription-manager-command
-    version: 2
-    field: all
-  output_resource_name: subscription-manager-command
-- provider: cloudwatch
-  account: image-builder-stage
-  identifier: workers-aoc-staging
-  defaults: /terraform/resources/image-builder/stage/cloudwatch-1.yml
-  output_resource_name: workers-aoc-staging
-- provider: aws-iam-role
-  account: image-builder-stage
-  identifier: workers-aoc-staging-role
-  assume_role:
-    Service:
-    - ec2.amazonaws.com
-  inline_policy:
-    {
-      Version: "2012-10-17",
-      Statement: [
-        {
-          "Sid": "WorkerReadSecrets",
-          "Effect": "Allow",
-          "Action": [
-            "secretsmanager:GetResourcePolicy",
-            "secretsmanager:GetSecretValue",
-            "secretsmanager:DescribeSecret",
-            "secretsmanager:ListSecretVersionIds"
-          ],
-          "Resource": [
-            "arn:aws:secretsmanager:us-east-1:920877988636:secret:azure-service-account-IF93Wk",
-            "arn:aws:secretsmanager:us-east-1:920877988636:secret:gcp-service-account-IF93Wk",
-            "arn:aws:secretsmanager:us-east-1:920877988636:secret:image-builder-crc-worker-8EFumn",
-            "arn:aws:secretsmanager:us-east-1:920877988636:secret:subscription-manager-command-xFcPpj"
-          ]
-        },
-        {
-          "Sid": "BasicCloudWatchUsage",
-          "Effect": "Allow",
-          "Action": [
-            "cloudwatch:PutMetricData",
-            "ec2:DescribeVolumes",
-            "ec2:DescribeTags",
-          ],
-          "Resource": "*",
-        },
-        {
-          "Sid": "CloudWatchDescribeLogGroups",
-          "Effect": "Allow",
-          "Action": [
-            "logs:DescribeLogGroups"
-          ],
-          "Resource": "arn:aws:logs:us-east-1:920877988636:log-group:*",
-        },
-        {
-          "Sid": "CloudWatchDescribeLogStreams",
-          "Effect": "Allow",
-          "Action": [
-            "logs:PutLogEvents",
-            "logs:DescribeLogStreams",
-            "logs:CreateLogStream",
-          ],
-          "Resource": "arn:aws:logs:us-east-1:920877988636:log-group:workers-aoc-staging:*",
-        },
-        {
-          "Sid": "VMImportEC2Policy",
-          "Effect": "Allow",
-          "Action": [
-            "ec2:CopySnapshot",
-            "ec2:Describe*",
-            "ec2:ModifySnapshotAttribute",
-            "ec2:DeleteTags",
-            "ec2:CreateTags",
-            "ec2:RegisterImage",
-            "ec2:ImportSnapshot",
-            "ec2:ModifyImageAttribute",
-            "ec2:DeregisterImage",
-            "ec2:DeleteSnapshot",
-          ],
-          "Resource": "*",
-        },
-        {
-          "Sid": "VMImportS3Policy",
-          "Effect": "Allow",
-          "Action": [
-            "s3:GetBucketLocation",
-            "s3:ListBucket",
-            "s3:GetObject",
-            "s3:PutObject",
-            "s3:DeleteObject",
-          ],
-          "Resource": [
-            "arn:aws:s3:::image-builder-service-stage",
-            "arn:aws:s3:::image-builder-service-stage/*",
-          ]
-        },
-        {
-          "Sid": "DescribeAutoScalingInstancesPolicy",
-          "Effect": "Allow",
-          "Action": [
-            "autoscaling:DescribeAutoScalingInstances",
-          ],
-          "Resource": "*"
-        },
-        {
-          "Sid": "SetInstanceProtectionPolicy",
-          "Effect": "Allow",
-          "Action": [
-            "autoscaling:SetInstanceProtection",
-          ],
-          "Resource": [
-            "arn:aws:autoscaling:us-east-1:920877988636:autoScalingGroup:*:autoScalingGroupName/imagebuilder-workers-aoc-x86-staging",
-          ]
-        }
-      ]
-    }
-  output_resource_name: workers-aoc-staging-role
-- provider: aws-iam-role
-  account: image-builder-stage
-  identifier: vmimport
-  assume_role:
-    Service:
-    - vmie.amazonaws.com
-  assume_condition:
-    StringEquals:
-      sts:Externalid: vmimport
-  inline_policy:
-    {
-      Version: "2012-10-17",
-      Statement: [
-        {
-          "Sid": "VMImportEC2Policy",
-          "Effect": "Allow",
-          "Action": [
-            "ec2:CopySnapshot",
-            "ec2:Describe*",
-            "ec2:ModifySnapshotAttribute",
-            "ec2:RegisterImage",
-          ],
-          "Resource": "*",
-        },
-        {
-          "Sid": "VMImportS3Policy",
-          "Effect": "Allow",
-          "Action": [
-            "s3:GetBucketLocation",
-            "s3:ListBucket",
-            "s3:GetObject",
-          ],
-          "Resource": [
-            "arn:aws:s3:::image-builder-service-stage",
-            "arn:aws:s3:::image-builder-service-stage/*",
-          ]
-        }
-      ]
-    }
-- provider: s3
-  account: image-builder-stage
-  identifier: image-builder-service-stage
-  defaults: /terraform/resources/image-builder/stage/s3-1.yml
-- provider: asg
-  account: image-builder-stage
-  identifier: imagebuilder-workers-aoc-x86-staging
-  defaults: /terraform/resources/image-builder/stage/asg/asg-1.yml
-  cloudinit_configs:
-  - content: /terraform/resources/image-builder/stage/asg/worker_aoc.cfg
-  variables:
-    workspace_name: staging
-    osbuild_commit: f7bf23fabaae6027b1e1147b27870d90d4b1911f
-    composer_commit: c6c311cc3d7c748ce77e697b2f4c8074fcf09019
-    composer_host_aoc: api.openshift.com
-    composer_host_aoc_staging: api.stage.openshift.com
-    worker_config_aws_bucket: "image-builder-service-stage"
-  image:
-    tag_name: composer_commit
-    url: https://github.com/osbuild/osbuild-composer
-    ref: 8d5cdfdd5770fa66b89f86071191abbe376fbb95
-    upstream:
-      instance:
-        $ref: /dependencies/ci-ext/ci-ext.yml
-      name: osbuild-osbuild-composer-gh-build-main-packer
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/image-builder-stage/account.yml
+  resources:
+  - provider: secrets-manager
+    identifier: azure-service-account
+    secret:
+      path: app-interface/image-builder/stage/azure-service-account
+      version: 1
+      field: all
+    output_resource_name: azure-service-account
+  - provider: secrets-manager
+    identifier: gcp-service-account
+    secret:
+      path: app-interface/image-builder/stage/gcp-service-account
+      version: 1
+      field: all
+    output_resource_name: gcp-service-account
+  - provider: secrets-manager
+    identifier: image-builder-crc-worker
+    secret:
+      # equivalent of client-credentials in workers-production.yml
+      path: app-interface/image-builder/stage/image-builder-crc-worker
+      version: 1
+      field: all
+    output_resource_name: image-builder-crc-worker
+  - provider: secrets-manager
+    identifier: subscription-manager-command
+    secret:
+      path: app-interface/image-builder/stage/subscription-manager-command
+      version: 2
+      field: all
+    output_resource_name: subscription-manager-command
+  - provider: cloudwatch
+    identifier: workers-aoc-staging
+    defaults: /terraform/resources/image-builder/stage/cloudwatch-1.yml
+    output_resource_name: workers-aoc-staging
+  - provider: aws-iam-role
+    identifier: workers-aoc-staging-role
+    assume_role:
+      Service:
+      - ec2.amazonaws.com
+    inline_policy:
+      {
+        Version: "2012-10-17",
+        Statement: [
+          {
+            "Sid": "WorkerReadSecrets",
+            "Effect": "Allow",
+            "Action": [
+              "secretsmanager:GetResourcePolicy",
+              "secretsmanager:GetSecretValue",
+              "secretsmanager:DescribeSecret",
+              "secretsmanager:ListSecretVersionIds"
+            ],
+            "Resource": [
+              "arn:aws:secretsmanager:us-east-1:920877988636:secret:azure-service-account-IF93Wk",
+              "arn:aws:secretsmanager:us-east-1:920877988636:secret:gcp-service-account-IF93Wk",
+              "arn:aws:secretsmanager:us-east-1:920877988636:secret:image-builder-crc-worker-8EFumn",
+              "arn:aws:secretsmanager:us-east-1:920877988636:secret:subscription-manager-command-xFcPpj"
+            ]
+          },
+          {
+            "Sid": "BasicCloudWatchUsage",
+            "Effect": "Allow",
+            "Action": [
+              "cloudwatch:PutMetricData",
+              "ec2:DescribeVolumes",
+              "ec2:DescribeTags",
+            ],
+            "Resource": "*",
+          },
+          {
+            "Sid": "CloudWatchDescribeLogGroups",
+            "Effect": "Allow",
+            "Action": [
+              "logs:DescribeLogGroups"
+            ],
+            "Resource": "arn:aws:logs:us-east-1:920877988636:log-group:*",
+          },
+          {
+            "Sid": "CloudWatchDescribeLogStreams",
+            "Effect": "Allow",
+            "Action": [
+              "logs:PutLogEvents",
+              "logs:DescribeLogStreams",
+              "logs:CreateLogStream",
+            ],
+            "Resource": "arn:aws:logs:us-east-1:920877988636:log-group:workers-aoc-staging:*",
+          },
+          {
+            "Sid": "VMImportEC2Policy",
+            "Effect": "Allow",
+            "Action": [
+              "ec2:CopySnapshot",
+              "ec2:Describe*",
+              "ec2:ModifySnapshotAttribute",
+              "ec2:DeleteTags",
+              "ec2:CreateTags",
+              "ec2:RegisterImage",
+              "ec2:ImportSnapshot",
+              "ec2:ModifyImageAttribute",
+              "ec2:DeregisterImage",
+              "ec2:DeleteSnapshot",
+            ],
+            "Resource": "*",
+          },
+          {
+            "Sid": "VMImportS3Policy",
+            "Effect": "Allow",
+            "Action": [
+              "s3:GetBucketLocation",
+              "s3:ListBucket",
+              "s3:GetObject",
+              "s3:PutObject",
+              "s3:DeleteObject",
+            ],
+            "Resource": [
+              "arn:aws:s3:::image-builder-service-stage",
+              "arn:aws:s3:::image-builder-service-stage/*",
+            ]
+          },
+          {
+            "Sid": "DescribeAutoScalingInstancesPolicy",
+            "Effect": "Allow",
+            "Action": [
+              "autoscaling:DescribeAutoScalingInstances",
+            ],
+            "Resource": "*"
+          },
+          {
+            "Sid": "SetInstanceProtectionPolicy",
+            "Effect": "Allow",
+            "Action": [
+              "autoscaling:SetInstanceProtection",
+            ],
+            "Resource": [
+              "arn:aws:autoscaling:us-east-1:920877988636:autoScalingGroup:*:autoScalingGroupName/imagebuilder-workers-aoc-x86-staging",
+            ]
+          }
+        ]
+      }
+    output_resource_name: workers-aoc-staging-role
+  - provider: aws-iam-role
+    identifier: vmimport
+    assume_role:
+      Service:
+      - vmie.amazonaws.com
+    assume_condition:
+      StringEquals:
+        sts:Externalid: vmimport
+    inline_policy:
+      {
+        Version: "2012-10-17",
+        Statement: [
+          {
+            "Sid": "VMImportEC2Policy",
+            "Effect": "Allow",
+            "Action": [
+              "ec2:CopySnapshot",
+              "ec2:Describe*",
+              "ec2:ModifySnapshotAttribute",
+              "ec2:RegisterImage",
+            ],
+            "Resource": "*",
+          },
+          {
+            "Sid": "VMImportS3Policy",
+            "Effect": "Allow",
+            "Action": [
+              "s3:GetBucketLocation",
+              "s3:ListBucket",
+              "s3:GetObject",
+            ],
+            "Resource": [
+              "arn:aws:s3:::image-builder-service-stage",
+              "arn:aws:s3:::image-builder-service-stage/*",
+            ]
+          }
+        ]
+      }
+  - provider: s3
+    identifier: image-builder-service-stage
+    defaults: /terraform/resources/image-builder/stage/s3-1.yml
+  - provider: asg
+    identifier: imagebuilder-workers-aoc-x86-staging
+    defaults: /terraform/resources/image-builder/stage/asg/asg-1.yml
+    cloudinit_configs:
+    - content: /terraform/resources/image-builder/stage/asg/worker_aoc.cfg
+    variables:
+      workspace_name: staging
+      osbuild_commit: f7bf23fabaae6027b1e1147b27870d90d4b1911f
+      composer_commit: c6c311cc3d7c748ce77e697b2f4c8074fcf09019
+      composer_host_aoc: api.openshift.com
+      composer_host_aoc_staging: api.stage.openshift.com
+      worker_config_aws_bucket: "image-builder-service-stage"
+    image:
+      tag_name: composer_commit
+      url: https://github.com/osbuild/osbuild-composer
+      ref: 8d5cdfdd5770fa66b89f86071191abbe376fbb95
+      upstream:
+        instance:
+          $ref: /dependencies/ci-ext/ci-ext.yml
+        name: osbuild-osbuild-composer-gh-build-main-packer

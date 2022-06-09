@@ -31,34 +31,6 @@ openshiftResources:
 - provider: route
   path: /cna/stage/cna.route.yaml
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: aws-iam-service-account
-  account: cna-service-stage
-  identifier: cna-service-stage
-  output_resource_name: cna-service-iam
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [
-        {
-          "Action": [
-            "sts:AssumeRole"
-          ],
-          "Effect": "Allow",
-          "Resource": "arn:aws:iam::*:role/RH-CNA"
-        },
-        {
-          "Action": [
-            "sts:AssumeRole"
-          ],
-          "Effect": "Allow",
-          "Resource": "arn:aws:iam::*:role/network-mgmt-*"
-        }
-      ]
-    }
-
 managedExternalResources: true
 
 externalResources:
@@ -79,3 +51,30 @@ externalResources:
     identifier: cna-redis-stage
     defaults: /terraform/resources/cna/elasticache-stage.yml
     output_resource_name: cna-redis
+- provider: aws
+  provisioner:
+    $ref: /aws/cna-service-stage/account.yml
+  resources:
+  - provider: aws-iam-service-account
+    identifier: cna-service-stage
+    output_resource_name: cna-service-iam
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Action": [
+              "sts:AssumeRole"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:iam::*:role/RH-CNA"
+          },
+          {
+            "Action": [
+              "sts:AssumeRole"
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:iam::*:role/network-mgmt-*"
+          }
+        ]
+      }

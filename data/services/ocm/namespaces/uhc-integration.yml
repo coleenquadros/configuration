@@ -167,23 +167,6 @@ terraformResources:
           value: job-queue-service-heartbeat-integration-dlq
         - key: job_queue_osl_integration_dlq
           value: job-queue-osl-integration-dlq
-- provider: aws-iam-service-account
-  account: osd-privatelink-int
-  identifier: ocm-sts-access
-  variables:
-    aws_role_arn: arn:aws:iam::896164604406:role/RH-Managed-OpenShift-Installer
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [{
-        "Action": [
-          "sts:AssumeRole"
-        ],
-        "Effect": "Allow",
-        "Resource": "arn:aws:iam::*:role/RH-Installer-Role"
-      }]
-    }
-  output_resource_name: sts-credentials
 - provider: s3
   account: app-sre
   identifier: rh-oidc-integration
@@ -224,3 +207,23 @@ externalResources:
     identifier: i3-devshift-org
     name: i3.devshift.org
     output_resource_name: route53-creds
+- provider: aws
+  provisioner:
+    $ref: /aws/osd-privatelink-int/account.yml
+  resources:
+  - provider: aws-iam-service-account
+    identifier: ocm-sts-access
+    variables:
+      aws_role_arn: arn:aws:iam::896164604406:role/RH-Managed-OpenShift-Installer
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Action": [
+            "sts:AssumeRole"
+          ],
+          "Effect": "Allow",
+          "Resource": "arn:aws:iam::*:role/RH-Installer-Role"
+        }]
+      }
+    output_resource_name: sts-credentials
