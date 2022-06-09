@@ -15,34 +15,33 @@ app:
 environment:
   $ref: /products/app-sre/environments/stage.yml
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: aws-iam-service-account
-  account: app-sre-logs
-  identifier: log-forwarder-appsres03ue1
-  output_resource_name: instance
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [
-        {
-          "Action": [
-            "logs:CreateLogGroup",
-            "logs:CreateLogStream",
-            "logs:DescribeLogGroups",
-            "logs:DescribeLogStreams",
-            "logs:PutLogEvents",
-            "logs:GetLogEvents",
-            "logs:PutRetentionPolicy",
-            "logs:GetLogRecord",
-          ],
-          "Effect": "Allow",
-          "Resource": "arn:aws:logs:*:*:*"
-        }
-      ]
-    }
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre-logs/account.yml
+  resources:
+  - provider: aws-iam-service-account
+    identifier: log-forwarder-appsres03ue1
+    output_resource_name: instance
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Action": [
+              "logs:CreateLogGroup",
+              "logs:CreateLogStream",
+              "logs:DescribeLogGroups",
+              "logs:DescribeLogStreams",
+              "logs:PutLogEvents",
+              "logs:GetLogEvents",
+              "logs:PutRetentionPolicy",
+              "logs:GetLogRecord",
+            ],
+            "Effect": "Allow",
+            "Resource": "arn:aws:logs:*:*:*"
+          }
+        ]
+      }
