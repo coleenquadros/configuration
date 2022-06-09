@@ -1,0 +1,34 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: hive
+description: production namespace for hive
+
+cluster:
+  $ref: /openshift/hivep07ue2/cluster.yml
+
+app:
+  $ref: /services/hive/app.yml
+
+environment:
+  $ref: /products/osdv4/environments/production-hivep07ue2.yml
+
+networkPoliciesAllow:
+- $ref: /openshift/hivep07ue2/namespaces/openshift-operator-lifecycle-manager.yml
+- $ref: /services/hive/namespaces/hivep07ue2/openshift-kube-apiserver.yaml
+# temporary. related to https://github.com/openshift/cluster-network-operator/pull/702
+- $ref: /services/hive/namespaces/hivep07ue2/default.yaml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.hivep07ue2.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- HiveConfig
+- Secret
+- ConfigMap
+
+sharedResources:
+- $ref: /services/hive/shared-resources/production.yml
+- $ref: /services/hive/shared-resources/production-terraform-output-secrets.yml
