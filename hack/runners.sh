@@ -112,6 +112,7 @@ run_vault_reconcile_integration() {
     -e VAULT_AUTHTYPE=approle \
     -e VAULT_ROLE_ID=${VAULT_MANAGER_ROLE_ID} \
     -e VAULT_SECRET_ID=${VAULT_MANAGER_SECRET_ID} \
+    -e DISABLE_IDENTITY=true \
     ${VAULT_RECONCILE_IMAGE}:${VAULT_RECONCILE_IMAGE_TAG} $DRY_RUN_FLAG \
     2>&1 | tee ${SUCCESS_DIR}/reconcile-vault.txt
 
