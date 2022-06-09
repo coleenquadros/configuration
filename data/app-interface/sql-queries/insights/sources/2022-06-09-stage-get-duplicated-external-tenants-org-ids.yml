@@ -1,0 +1,35 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2022-06-09-stage-get-duplicated-external-tenants-org-ids
+namespace:
+  $ref: /services/insights/sources/namespaces/stage-sources-stage.yml
+identifier: sources-stage
+output: stdout
+query: |
+  SELECT
+    "t"."id", "t"."name", "t"."description", "t"."external_tenant", "t"."org_id", "t"."created_at", "t"."updated_at"
+  FROM
+    "tenants" "t"
+  WHERE
+    "t"."external_tenant" IN (
+      SELECT
+        "texten"."external_tenant"
+      FROM
+        "tenants" "texten"
+      GROUP BY
+        "texten"."external_tenant"
+      HAVING
+        count("texten"."external_tenant") > 1
+    )
+  OR
+    "t"."org_id" IN (
+      SELECT
+        "torgid"."org_id"
+      FROM
+        "tenants" "torgid"
+      GROUP BY
+        "torgid"."org_id"
+      HAVING
+        count("torgid"."external_tenant") > 1
+    );
