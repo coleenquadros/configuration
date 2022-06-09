@@ -11,6 +11,36 @@ upstream: https://github.com/app-sre/qontract-reconcile
 pr_check:
   cmd: terraform-users
 
+managed:
+- namespace:
+    $ref: /services/app-interface/namespaces/app-interface-stage.yml
+  spec:
+    resources:
+      requests:
+        memory: 1500Mi
+        cpu: 200m
+      limits:
+        memory: 2000Mi
+        cpu: 400m
+    extraArgs: --io-dir /tmp/throughput/
+    logs:
+      slack: true
+    shards: 1
+- namespace:
+    $ref: /services/app-interface/namespaces/app-interface-production.yml
+  spec:
+    resources:
+      requests:
+        memory: 1500Mi
+        cpu: 200m
+      limits:
+        memory: 2000Mi
+        cpu: 400m
+    extraArgs: --io-dir /tmp/throughput/
+    logs:
+      slack: true
+    shardingStrategy: per-aws-account
+
 schemas:
 - /access/role-1.yml
 - /access/user-1.yml
