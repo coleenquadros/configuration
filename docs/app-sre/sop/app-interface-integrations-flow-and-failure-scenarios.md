@@ -46,7 +46,7 @@ Solution: `/retest`
 
 When a manual intervention has forced us to change an AWS resource,
 terraform may find a discrepancy between its stored state and
-reality. In such an event, `terraform-resources-wrapper` may show
+reality. In such an event, `terraform-resources` may show
 strange errors about mismatching or missing resources. When that
 happens:
 
