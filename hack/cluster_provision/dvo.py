@@ -54,8 +54,6 @@ sharedResources:
 """
 
 SERVICE_MONITOR = """
-
-sharedResources:
 - $ref: /services/observability/shared-resources/dvo.yml
 - $ref: /services/observability/shared-resources/dvo-alerts.yml
 """
@@ -101,17 +99,24 @@ def add_dvo_service_monitor(data: Mapping) -> bool:
     :return: whether the resource changed or not
     """
     yaml = get_base_yaml()
-    service_monitor = yaml.load(SERVICE_MONITOR)
 
-    openshift_resources = data['openshiftResources']
+    added = False
 
-    if service_monitor in openshift_resources:
-        log.info('No action required, service monitor entry already exists')
-        return False
+    if 'sharedResources' in data:
+        for m in SERVICE_MONITOR:
+            if m not in data['sharedResources']:
+                data['sharedResources'].append(m)
+                added = True
     else:
+        data["sharedResources"] = yaml.load(SERVICE_MONITOR)
+        added = True
+
+    if added:
         log.info('Adding service monitor entry')
-        openshift_resources.append(service_monitor)
-        return True
+    else:
+        log.info('No action required, service monitor entry already exists')
+    
+    return added
 
 
 def add_saas_target(data: Mapping, cluster: str) -> bool:
