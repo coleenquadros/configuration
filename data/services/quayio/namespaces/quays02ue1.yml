@@ -21,8 +21,6 @@ networkPoliciesAllow:
 
 managedRoles: true
 
-managedTerraformResources: true
-
 openshiftServiceAccountTokens:
 - namespace:
     $ref: /services/quayio/namespaces/quay-builder-stage.yml
@@ -193,120 +191,106 @@ openshiftResources:
     name: quay-db-jobs-config
     vault_secret_version: 1
 
-terraformResources:
-- provider: acm
-  account: quayio-stage
-  identifier: wildcard-stage-quay-io
-  domain:
-    domain_name: '*.stage.quay.io'
-    alternate_names:
-    - 'stage.quay.io'
-- provider: rds
-  account: quayio-stage
-  identifier: quayio-stage-57-py3
-  availability_zone: us-east-1a
-  defaults: /terraform/resources/quayio-stage/rds-1.yml
-  parameter_group: /terraform/resources/quayio-stage/rds-parameter-group-readwrite-replica-1.yml
-  overrides:
-    apply_immediately: true
-- provider: rds
-  account: quayio-stage
-  identifier: quayio-stage-57-py3-replica
-  availability_zone: us-east-1a
-  defaults: /terraform/resources/quayio-stage/rds-read-replica-us-east-1.yml
-  replica_source: quayio-stage-57-py3
-  parameter_group: /terraform/resources/quayio-stage/rds-parameter-group-1.yml
-- provider: elasticache
-  account: quayio-stage
-  identifier: quayio-stage
-  defaults: /terraform/resources/quayio-stage/elasticache-1.yml
-  parameter_group: /terraform/resources/quayio-stage/elasticache-parameter-group-1.yml
-- provider: elasticache
-  account: quayio-stage
-  identifier: quayio-stage-builders
-  defaults: /terraform/resources/quayio-stage/elasticache-builders-1.yml
-  parameter_group: /terraform/resources/quayio-stage/elasticache-builders-parameter-group-1.yml
-- provider: elasticache
-  account: quayio-stage
-  identifier: quayio-stage-modelcache
-  defaults: /terraform/resources/quayio-stage/elasticache-modelcache-1.yml
-  parameter_group: /terraform/resources/quayio-stage/elasticache-modelcache-parameter-group-1.yml
-# - provider: rds
-#   account: quayio-stage
-#   identifier: quayio-dev
-#   defaults: /terraform/resources/quayio-stage/rds-2.yml
-# - provider: elasticache
-#   account: quayio-stage
-#   identifier: quayio-dev
-#   defaults: /terraform/resources/quayio-stage/elasticache-2.yml
-#   parameter_group: /terraform/resources/quayio-stage/elasticache-parameter-group-2.yml
-# Quay S3 bucket and CloudFront distribution for us-east-1
-- provider: s3-cloudfront
-  account: quayio-stage
-  identifier: quayio-stage-s3
-  defaults: /terraform/resources/quayio-stage/s3-cloudfront-us-east-1.yml
-  output_resource_name: quayio-s3
-# Quay S3 bucket and CloudFront distribution for us-east-2
-- provider: s3-cloudfront
-  account: quayio-stage
-  identifier: quayio-stage-s3-backup
-  region: us-east-2
-  storage_class: onezone_ia
-  defaults: /terraform/resources/quayio-stage/s3-cloudfront-us-east-2.yml
-  output_resource_name: quayio-s3-backup
-- provider: kms
-  account: quayio-stage
-  identifier: quayio-stage-replica
-  region: us-east-2
-  defaults: /terraform/resources/quayio-stage/kms-1.yml
-  output_resource_name: quayio-kms
-- provider: alb
-  account: quayio-stage
-  identifier: quayio-stage-alb01
-  output_resource_name: quayio-alb
-  idle_timeout: 3600
-  vpc:
-    $ref: /aws/quayio-stage/vpcs/default.yml
-  certificate_arn: arn:aws:acm:us-east-1:019044362261:certificate/565164ca-935a-4d65-b92f-fce85cc794ba
-  targets:
-  - name: quayio-stage-py2
-    default: false
-    openshift_service: quay-load-balancer-service
-  - name: quayio-stage-py3
-    default: true
-    openshift_service: quay-py3-load-balancer-service
-  rules: []
-- provider: s3
-  account: quayio-stage
-  identifier: quayio-stage-cloudfront-logs
-  defaults: /terraform/resources/s3-all-expires-90-days.yml
-  bucket_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [
-        {
-          "Effect": "Allow",
-          "Principal": {
-            "AWS": "arn:aws:iam::942491940283:role/EMR_EC2_DefaultRole"
-          },
-          "Action": [
-            "s3:GetObject",
-          ],
-          "Resource": [
-            "arn:aws:s3:::quayio-stage-cloudfront-logs/*"
-          ]
-        }
-      ]
-    }
-  output_resource_name: quayio-stage-cloudfront-logs
-- provider: cloudwatch
-  account: quayio-stage
-  identifier: quay-service-tool-stage-audit
-  defaults: /terraform/resources/quayio-stage/service-tool-cloudwatch-1.yml
-  output_resource_name: quay-service-tool-stage-audit-cloudwatch
-
-
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/quayio-stage/account.yml
+  resources:
+  - provider: acm
+    identifier: wildcard-stage-quay-io
+    domain:
+      domain_name: '*.stage.quay.io'
+      alternate_names:
+      - 'stage.quay.io'
+  - provider: rds
+    identifier: quayio-stage-57-py3
+    availability_zone: us-east-1a
+    defaults: /terraform/resources/quayio-stage/rds-1.yml
+    parameter_group: /terraform/resources/quayio-stage/rds-parameter-group-readwrite-replica-1.yml
+    overrides:
+      apply_immediately: true
+  - provider: rds
+    identifier: quayio-stage-57-py3-replica
+    availability_zone: us-east-1a
+    defaults: /terraform/resources/quayio-stage/rds-read-replica-us-east-1.yml
+    replica_source: quayio-stage-57-py3
+    parameter_group: /terraform/resources/quayio-stage/rds-parameter-group-1.yml
+  - provider: elasticache
+    identifier: quayio-stage
+    defaults: /terraform/resources/quayio-stage/elasticache-1.yml
+    parameter_group: /terraform/resources/quayio-stage/elasticache-parameter-group-1.yml
+  - provider: elasticache
+    identifier: quayio-stage-builders
+    defaults: /terraform/resources/quayio-stage/elasticache-builders-1.yml
+    parameter_group: /terraform/resources/quayio-stage/elasticache-builders-parameter-group-1.yml
+  - provider: elasticache
+    identifier: quayio-stage-modelcache
+    defaults: /terraform/resources/quayio-stage/elasticache-modelcache-1.yml
+    parameter_group: /terraform/resources/quayio-stage/elasticache-modelcache-parameter-group-1.yml
+  # - provider: rds
+  #   identifier: quayio-dev
+  #   defaults: /terraform/resources/quayio-stage/rds-2.yml
+  # - provider: elasticache
+  #   identifier: quayio-dev
+  #   defaults: /terraform/resources/quayio-stage/elasticache-2.yml
+  #   parameter_group: /terraform/resources/quayio-stage/elasticache-parameter-group-2.yml
+  # Quay S3 bucket and CloudFront distribution for us-east-1
+  - provider: s3-cloudfront
+    identifier: quayio-stage-s3
+    defaults: /terraform/resources/quayio-stage/s3-cloudfront-us-east-1.yml
+    output_resource_name: quayio-s3
+  # Quay S3 bucket and CloudFront distribution for us-east-2
+  - provider: s3-cloudfront
+    identifier: quayio-stage-s3-backup
+    region: us-east-2
+    storage_class: onezone_ia
+    defaults: /terraform/resources/quayio-stage/s3-cloudfront-us-east-2.yml
+    output_resource_name: quayio-s3-backup
+  - provider: kms
+    identifier: quayio-stage-replica
+    region: us-east-2
+    defaults: /terraform/resources/quayio-stage/kms-1.yml
+    output_resource_name: quayio-kms
+  - provider: alb
+    identifier: quayio-stage-alb01
+    output_resource_name: quayio-alb
+    idle_timeout: 3600
+    vpc:
+      $ref: /aws/quayio-stage/vpcs/default.yml
+    certificate_arn: arn:aws:acm:us-east-1:019044362261:certificate/565164ca-935a-4d65-b92f-fce85cc794ba
+    targets:
+    - name: quayio-stage-py2
+      default: false
+      openshift_service: quay-load-balancer-service
+    - name: quayio-stage-py3
+      default: true
+      openshift_service: quay-py3-load-balancer-service
+    rules: []
+  - provider: s3
+    identifier: quayio-stage-cloudfront-logs
+    defaults: /terraform/resources/s3-all-expires-90-days.yml
+    bucket_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Principal": {
+              "AWS": "arn:aws:iam::942491940283:role/EMR_EC2_DefaultRole"
+            },
+            "Action": [
+              "s3:GetObject",
+            ],
+            "Resource": [
+              "arn:aws:s3:::quayio-stage-cloudfront-logs/*"
+            ]
+          }
+        ]
+      }
+    output_resource_name: quayio-stage-cloudfront-logs
+  - provider: cloudwatch
+    identifier: quay-service-tool-stage-audit
+    defaults: /terraform/resources/quayio-stage/service-tool-cloudwatch-1.yml
+    output_resource_name: quay-service-tool-stage-audit-cloudwatch

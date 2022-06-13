@@ -21,8 +21,6 @@ networkPoliciesAllow:
 
 managedRoles: true
 
-managedTerraformResources: true
-
 managedResourceTypes:
   - NetworkPolicy
   - Secret
@@ -33,9 +31,14 @@ sharedResources:
 
 openshiftResources: []
 
-terraformResources:
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/ocm-quay/account.yml
+  resources:
   - provider: rds
-    account: ocm-quay
     identifier: ocmquayrop01uw2
     availability_zone: us-west-2c
     defaults: /terraform/resources/ocm-quay/rds-read-replica-us-west-2.yml
@@ -45,12 +48,7 @@ terraformResources:
       apply_immediately: true
     replica_source: ocm-quay-production
   - provider: kms
-    account: ocm-quay
     identifier: ocmquayrop01uw2
     region: us-west-2
     defaults: /terraform/resources/ocm-quay/kms-1.yml
     output_resource_name: ocm-quay-kms
-
-managedExternalResources: true
-
-externalResources: []

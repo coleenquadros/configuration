@@ -21,8 +21,6 @@ networkPoliciesAllow:
 
 managedRoles: true
 
-managedTerraformResources: true
-
 managedResourceTypes:
 - NetworkPolicy
 - Secret 
@@ -33,23 +31,23 @@ sharedResources:
 
 openshiftResources: []
 
-terraformResources:
-- provider: rds
-  account: ocm-quay
-  identifier: ocmquayrop01ew1
-  availability_zone: eu-west-1a
-  defaults: /terraform/resources/ocm-quay/rds-read-replica-eu-west-1.yml
-  parameter_group: /terraform/resources/ocm-quay/rds-parameter-group-read-replica-1.yml
-  overrides:
-    kms_key_id: ocmquayrop01ew1
-  replica_source: ocm-quay-production
-- provider: kms
-  account: ocm-quay
-  identifier: ocmquayrop01ew1
-  region: eu-west-1
-  defaults: /terraform/resources/ocm-quay/kms-1.yml
-  output_resource_name: ocm-quay-kms
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/ocm-quay/account.yml
+  resources:
+  - provider: rds
+    identifier: ocmquayrop01ew1
+    availability_zone: eu-west-1a
+    defaults: /terraform/resources/ocm-quay/rds-read-replica-eu-west-1.yml
+    parameter_group: /terraform/resources/ocm-quay/rds-parameter-group-read-replica-1.yml
+    overrides:
+      kms_key_id: ocmquayrop01ew1
+    replica_source: ocm-quay-production
+  - provider: kms
+    identifier: ocmquayrop01ew1
+    region: eu-west-1
+    defaults: /terraform/resources/ocm-quay/kms-1.yml
+    output_resource_name: ocm-quay-kms
