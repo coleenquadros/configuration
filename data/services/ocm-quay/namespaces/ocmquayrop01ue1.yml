@@ -21,8 +21,6 @@ networkPoliciesAllow:
 
 managedRoles: true
 
-managedTerraformResources: true
-
 managedResourceTypes:
 - NetworkPolicy
 - Secret
@@ -33,17 +31,18 @@ sharedResources:
 
 openshiftResources: []
 
-terraformResources:
-- provider: rds
-  account: ocm-quay
-  identifier: ocmquayrop01ue1
-  availability_zone: us-east-1a
-  defaults: /terraform/resources/ocm-quay/rds-read-replica-us-east-1.yml
-  parameter_group: /terraform/resources/ocm-quay/rds-parameter-group-read-replica-1.yml
-  replica_source: ocm-quay-production
-  overrides:
-    apply_immediately: true
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/ocm-quay/account.yml
+  resources:
+  - provider: rds
+    identifier: ocmquayrop01ue1
+    availability_zone: us-east-1a
+    defaults: /terraform/resources/ocm-quay/rds-read-replica-us-east-1.yml
+    parameter_group: /terraform/resources/ocm-quay/rds-parameter-group-read-replica-1.yml
+    replica_source: ocm-quay-production
+    overrides:
+      apply_immediately: true

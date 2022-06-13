@@ -21,8 +21,6 @@ networkPoliciesAllow:
 
 managedRoles: true
 
-managedTerraformResources: true
-
 managedResourceTypes:
 - NetworkPolicy
 - Secret
@@ -71,83 +69,55 @@ openshiftResources:
     use_backup: true
     ro_instance: false
 
-terraformResources:
-- provider: rds
-  account: ocm-quay
-  identifier: ocm-quay-production
-  availability_zone: us-east-1a
-  defaults: /terraform/resources/ocm-quay/rds-1.yml
-  parameter_group: /terraform/resources/ocm-quay/rds-parameter-group-1.yml
-  overrides:
-    apply_immediately: true
-- provider: acm
-  account: ocm-quay
-  identifier: ocm-quay
-  domain:
-    domain_name: '*.q1w2.quay.rhcloud.com'
-- provider: s3-cloudfront
-  account: ocm-quay
-  identifier: ocm-quay-production-s3
-  storage_class: intelligent_tiering
-  defaults: /terraform/resources/ocm-quay/s3-cloudfront-us-east-1.yml
-  output_resource_name: ocm-quay-s3
-- provider: s3-cloudfront
-  account: ocm-quay
-  identifier: ocm-quay-production-s3-backup
-  region: us-east-2
-  storage_class: onezone_ia
-  defaults: /terraform/resources/ocm-quay/s3-cloudfront-us-east-2-replication.yml
-  output_resource_name: ocm-quay-s3-backup
-- provider: elasticache
-  account: ocm-quay
-  identifier: ocm-quay-production
-  defaults: /terraform/resources/ocm-quay/elasticache-1.yml
-  parameter_group: /terraform/resources/ocm-quay/elasticache-parameter-group-1.yml
-  output_resource_name: ocm-quay-elasticache
-- provider: aws-iam-service-account
-  account: ocm-quay
-  identifier: syslog-cloudwatch-bridge
-  variables:
-    aws_region: us-east-1
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [
-        {
-          "Effect": "Allow",
-          "Action": [
-            "logs:CreateLogStream",
-            "logs:PutLogEvents"
-          ],
-          "Resource": [
-            "arn:aws:logs:*:*:*"
-          ]
-        }
-      ]
-    }
-# - provider: ecr
-#   account: quayio-prod
-#   region: eu-central-1
-#   identifier: quayio-backup
-#   output_resource_name: quayio-backup
-# - provider: ecr
-#   account: quayio-prod
-#   region: eu-central-1
-#   identifier: syslog-cloudwatch-bridge-backup
-#   output_resource_name: syslog-cloudwatch-bridge-backup
-# - provider: kinesis
-#   account: quayio-prod
-#   identifier: quay-prod-logentry-stream
-#   defaults: /terraform/resources/quayio-production/kinesis-1.yml
-#   output_resource_name: quayio-kinesis
-# # used in the quay-config secret HEALTH_CHECKER
-# - provider: aws-iam-service-account
-#   account: quayio-prod
-#   identifier: quay-db-monitor
-#   policies:
-#   - AmazonRDSReadOnlyAccess
-#   output_resource_name: quay-db-monitor
-
-managedExternalResources: true
-
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/ocm-quay/account.yml
+  resources:
+  - provider: rds
+    identifier: ocm-quay-production
+    availability_zone: us-east-1a
+    defaults: /terraform/resources/ocm-quay/rds-1.yml
+    parameter_group: /terraform/resources/ocm-quay/rds-parameter-group-1.yml
+    overrides:
+      apply_immediately: true
+  - provider: acm
+    identifier: ocm-quay
+    domain:
+      domain_name: '*.q1w2.quay.rhcloud.com'
+  - provider: s3-cloudfront
+    identifier: ocm-quay-production-s3
+    storage_class: intelligent_tiering
+    defaults: /terraform/resources/ocm-quay/s3-cloudfront-us-east-1.yml
+    output_resource_name: ocm-quay-s3
+  - provider: s3-cloudfront
+    identifier: ocm-quay-production-s3-backup
+    region: us-east-2
+    storage_class: onezone_ia
+    defaults: /terraform/resources/ocm-quay/s3-cloudfront-us-east-2-replication.yml
+    output_resource_name: ocm-quay-s3-backup
+  - provider: elasticache
+    identifier: ocm-quay-production
+    defaults: /terraform/resources/ocm-quay/elasticache-1.yml
+    parameter_group: /terraform/resources/ocm-quay/elasticache-parameter-group-1.yml
+    output_resource_name: ocm-quay-elasticache
+  - provider: aws-iam-service-account
+    identifier: syslog-cloudwatch-bridge
+    variables:
+      aws_region: us-east-1
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": [
+              "logs:CreateLogStream",
+              "logs:PutLogEvents"
+            ],
+            "Resource": [
+              "arn:aws:logs:*:*:*"
+            ]
+          }
+        ]
+      }
