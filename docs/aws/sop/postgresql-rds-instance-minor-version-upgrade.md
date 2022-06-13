@@ -4,8 +4,9 @@
 
 This document covers minor version upgrades to PostgreSQL RDS instances. These upgrades are intended to be backwards-compatible, but **you should always review the release notes**. Some things to know about minor versions upgrades in RDS:
 
-1. **RDS downtime is not minimized during minor version upgrades with Multi-AZ**. This is because RDS stops Postgres on both the primary and standby during minor version upgrades. This may result in more downtime than what is expected from other similar operations like OS or instance upgrades that upgrade the standby first and then fail over to the primary.
-2. RDS requires that read replicas be upgraded before the primary database (otherwise known as the `replica_source` in app-interface). This is covered in the sections below, but it is good to be aware of this limitation.
+1. **There isn't a direct rollback procedure for minor version upgrades.** RDS will take a snapshot before the upgrade begins. To revert to the old version, a new RDS instance can be created from this snapshot ([docs](/README.md#restoring-rds-databases-from-backups)).
+2. **RDS downtime is not minimized during minor version upgrades with Multi-AZ**. This is because RDS stops Postgres on both the primary and standby during minor version upgrades. This may result in more downtime than what is expected from other similar operations like OS or instance upgrades that upgrade the standby first and then fail over to the primary.
+3. RDS requires that read replicas be upgraded before the primary database (otherwise known as the `replica_source` in app-interface). This is covered in the sections below, but it is good to be aware of this limitation.
 
 ## Minor version upgrade process
 
