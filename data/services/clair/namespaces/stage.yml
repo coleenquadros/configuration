@@ -25,8 +25,6 @@ managedResourceTypes:
 
 managedRoles: true
 
-managedTerraformResources: true
-
 openshiftResources:
   - provider: resource-template
     type: extracurlyjinja2
@@ -43,20 +41,19 @@ openshiftResources:
   - provider: route
     path: /clair/stage/clair.notifier.route.yaml
 
-terraformResources:
-- provider: rds
-  account: quayio-stage
-  identifier: clair-indexer-stage
-  defaults: /terraform/resources/quayio-stage/clair-indexer-stage-1.yml
-- provider: rds
-  account: quayio-stage
-  identifier: clair-matcher-stage
-  defaults: /terraform/resources/quayio-stage/clair-matcher-stage-1.yml
-- provider: rds
-  account: quayio-stage
-  identifier: clair-notifier-stage
-  defaults: /terraform/resources/quayio-stage/clair-notifier-stage-1.yml
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/quayio-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: clair-indexer-stage
+    defaults: /terraform/resources/quayio-stage/clair-indexer-stage-1.yml
+  - provider: rds
+    identifier: clair-matcher-stage
+    defaults: /terraform/resources/quayio-stage/clair-matcher-stage-1.yml
+  - provider: rds
+    identifier: clair-notifier-stage
+    defaults: /terraform/resources/quayio-stage/clair-notifier-stage-1.yml
