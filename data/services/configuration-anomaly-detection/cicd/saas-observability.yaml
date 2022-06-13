@@ -1,0 +1,34 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: configuration-anomaly-detection
+
+name: configuration-anomaly-detection-slos
+description: 'SaaS tracking file for configuration-anomaly-detection observability'
+
+app:
+  $ref: /services/configuration-anomaly-detection/app.yml
+
+pipelinesProvider:
+  $ref: /services/configuration-anomaly-detection/pipelines/tekton.configuration-anomaly-detection-pipelines.app-sre-prod-01.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-srep-info
+
+managedResourceTypes:
+- ConfigMap
+
+imagePatterns: []
+
+resourceTemplates:
+  - name: configuration-anomaly-detection-dashboards
+    url: https://github.com/openshift/configuration-anomaly-detection
+    path: /dashboards
+    provider: directory
+    targets:
+      - namespace:
+          $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+        ref: main
