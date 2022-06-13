@@ -115,11 +115,14 @@ openshiftResources:
   - provider: resource
     path: /dsaas/dsaas-deploy.serviceaccount.yaml
 
-managedTerraformResources: true
+managedExternalResources: true
 
-terraformResources:
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/osio/account.yml
+  resources:
   - provider: rds
-    account: osio
     identifier: prodbayesian
     defaults: /terraform/resources/osio/rds-6.yml
     overrides:
@@ -127,47 +130,38 @@ terraformResources:
       allocated_storage: 200
     output_resource_name: bayesian-rds
   - provider: s3
-    account: osio
     identifier: gremlin-tarballs
     defaults: /terraform/resources/s3-public-read-1.yml
     output_resource_name: gremlin-tarballs-s3
   - provider: s3
-    account: osio
     identifier: prod-hpf-maven-insights
     defaults: /terraform/resources/s3-private-1.yml
     output_resource_name: hpf-maven-insights-s3
   - provider: s3
-    account: osio
     identifier: prod-hpf-pypi-insights
     defaults: /terraform/resources/s3-private-1.yml
     output_resource_name: hpf-pypi-insights-s3
   - provider: s3
-    account: osio
     identifier: prod-cvae-npm-insights
     defaults: /terraform/resources/s3-private-1.yml
     output_resource_name: cvae-npm-insights-s3
   - provider: s3
-    account: osio
     identifier: prod-developer-analytics-audit-report
     defaults: /terraform/resources/codeready-analytics/s3-private-1.yml
     output_resource_name: developer-analytics-audit-report-s3
   - provider: s3
-    account: osio
     identifier: prod-golang-insights
     defaults: /terraform/resources/s3-private-1.yml
     output_resource_name: golang-insights-s3
   - provider: s3
-    account: osio
     identifier: prod-openshift-probable-vulnerability-models
     defaults: /terraform/resources/s3-private-1.yml
     output_resource_name: openshift-probable-vulnerability-models-s3
   - provider: s3
-    account: osio
     identifier: prod-openshift-probable-vulnerability-inference-result
     defaults: /terraform/resources/s3-private-1.yml
     output_resource_name: openshift-probable-vulnerability-inference-result-s3
   - provider: dynamodb
-    account: osio
     identifier: prod-dynamodb
     output_resource_name: aws-dynamodb
     specs:
@@ -188,7 +182,6 @@ terraformResources:
           - key: system_properties_table_name
             value: prod_system_properties
   - provider: aws-iam-service-account
-    account: osio
     identifier: prod-elastic-map-reduce
     user_policy:
       {
@@ -213,7 +206,6 @@ terraformResources:
       }
     output_resource_name: aws-emr
   - provider: sqs
-    account: osio
     identifier: prod-sqs
     output_resource_name: aws-sqs
     specs:
@@ -477,7 +469,3 @@ terraformResources:
         queues:
           - key: livenessflow
             value: prod_livenessFlow_v0
-
-managedExternalResources: true
-
-externalResources: []

@@ -135,11 +135,14 @@ openshiftResources:
   - provider: resource
     path: /dsaas-stg/dsaas-deploy.serviceaccount.yaml
 
-managedTerraformResources: true
+managedExternalResources: true
 
-terraformResources:
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/osio/account.yml
+  resources:
   - provider: rds
-    account: osio
     identifier: stagebayesian
     defaults: /terraform/resources/osio/rds-3.yml
     overrides:
@@ -147,32 +150,26 @@ terraformResources:
       apply_immediately: true
     output_resource_name: bayesian-rds
   - provider: s3
-    account: osio
     identifier: stage-hpf-maven-insights
     defaults: /terraform/resources/s3-private-1.yml
     output_resource_name: hpf-maven-insights-s3
   - provider: s3
-    account: osio
     identifier: stage-hpf-pypi-insights
     defaults: /terraform/resources/s3-private-1.yml
     output_resource_name: hpf-pypi-insights-s3
   - provider: s3
-    account: osio
     identifier: stage-cvae-npm-insights
     defaults: /terraform/resources/s3-private-1.yml
     output_resource_name: cvae-npm-insights-s3
   - provider: s3
-    account: osio
     identifier: stage-developer-analytics-audit-report
     defaults: /terraform/resources/codeready-analytics/s3-private-1.yml
     output_resource_name: developer-analytics-audit-report-s3
   - provider: s3
-    account: osio
     identifier: stage-golang-insights
     defaults: /terraform/resources/s3-private-1.yml
     output_resource_name: golang-insights-s3
   - provider: s3
-    account: osio
     identifier: public-dynamic-manifests
     defaults: /terraform/resources/s3-public-read-1.yml
     bucket_policy:
@@ -191,17 +188,14 @@ terraformResources:
       }
     output_resource_name: dynamic-manifests-s3
   - provider: s3
-    account: osio
     identifier: stage-openshift-probable-vulnerability-models
     defaults: /terraform/resources/s3-private-1.yml
     output_resource_name: openshift-probable-vulnerability-models-s3
   - provider: s3
-    account: osio
     identifier: stage-openshift-probable-vulnerability-inference-result
     defaults: /terraform/resources/s3-private-1.yml
     output_resource_name: openshift-probable-vulnerability-inference-result-s3
   - provider: dynamodb
-    account: osio
     identifier: stage-dynamodb
     output_resource_name: aws-dynamodb
     specs:
@@ -224,7 +218,6 @@ terraformResources:
           - key: system_properties_table_name
             value: STAGE_system_properties
   - provider: aws-iam-service-account
-    account: osio
     identifier: stage-elastic-map-reduce
     user_policy:
       {
@@ -249,7 +242,6 @@ terraformResources:
       }
     output_resource_name: aws-emr
   - provider: sqs
-    account: osio
     identifier: stage-sqs
     output_resource_name: aws-sqs
     specs:
@@ -511,7 +503,3 @@ terraformResources:
             value: STAGE_api_NewGithubTask_v0
           - key: api_NewVersionGraphImporterTask
             value: STAGE_api_NewVersionGraphImporterTask_v0
-
-managedExternalResources: true
-
-externalResources: []
