@@ -77,13 +77,13 @@ Case id: 9183343311
 When a tenant increases the size of their RDS storage via the `allocated_storage` setting, an error similar to what is seen below might appear:
 
 ```
-[terraform-resources-wrapper] [some-aws-account - apply] Error: Error modifying DB Instance some-database: InvalidParameterCombination: Invalid storage size for engine name postgres and storage type gp2: 6490
+[terraform-resources] [some-aws-account - apply] Error: Error modifying DB Instance some-database: InvalidParameterCombination: Invalid storage size for engine name postgres and storage type gp2: 6490
 ```
 
 Or if the tenant is using storage autoscaling and changed `max_allocated_storage`, you might see this instead:
 
 ```
-[terraform-resources-wrapper] [some-aws-account - apply] Error: Error modifying DB Instance some-database: InvalidParameterCombination: Invalid max storage size for engine name postgres and storage type gp2: 6500
+[terraform-resources] [some-aws-account - apply] Error: Error modifying DB Instance some-database: InvalidParameterCombination: Invalid max storage size for engine name postgres and storage type gp2: 6500
 ```
 
 These error messages are a bit vague, but there are a few things that you can check:

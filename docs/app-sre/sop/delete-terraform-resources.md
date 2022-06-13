@@ -18,14 +18,14 @@ This SOP describes how to safely delete managed terraform resources.
 
 ## Disable integrations in Unleash
 
-Disable `terraform-resources`, `terraform-resources-wrapper`, and `gitlab-housekeeping` integrations
+Disable `terraform-resources` and `gitlab-housekeeping` integrations
 in [unleash](https://app-interface.unleash.devshift.net/) to prevent integration runs that might interfere with the
 resource deletion.
 
 
 > ***NOTE***
 > 
-> While the `terraform-resources` and `terraform-resources-wrapper` integrations are disabled, problematic app-interface
+> While the `terraform-resources` integration is disabled, problematic app-interface
 > changes handled by those integrations are not detected during PR checks and therefore would not prevent a merge.
 > Disabling the `gitlab-housekeeping` integration prevents automatic merges for the time being. Try to finish your
 > changes in a timely manner.
@@ -112,8 +112,7 @@ terraform apply output-plan-file
 
 ## Re-enable integrations
 
-Once the deletion step (or the fallback deletion step) have been completed, re-enable the `terraform-resources`,
-`terraform-resources-wrapper`, and `github-housekeeping` integrations in 
+Once the deletion step (or the fallback deletion step) have been completed, re-enable the `terraform-resources` and `github-housekeeping` integrations in 
 [unleash](https://app-interface.unleash.devshift.net/).
 
 </details>

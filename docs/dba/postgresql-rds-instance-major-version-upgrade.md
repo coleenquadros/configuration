@@ -147,9 +147,9 @@ Monitor the upgrade in AWS console. AWS will run a pre-upgrade check and the upg
 qontract-reconcile may fail in applying the upgrade if the parameter group is only being used by a single database because the current parameter group can't be deleted until the upgrade is done. Expect an error similar to following:
 
 ```
-[terraform-resources-wrapper] error: b'\nError: Error deleting DB parameter group: InvalidDBParameterGroupState: One or more database instances are still members of this parameter group steahan-dev-params, so the group cannot be deleted\n\tstatus code: 400, request id: 417e8bab-3959-40e5-8a7b-39d18b984f8e\n\n\n'
-[terraform-resources-wrapper] [app-sre-stage - apply] Error: Error deleting DB parameter group: InvalidDBParameterGroupState: One or more database instances are still members of this parameter group steahan-dev-params, so the group cannot be deleted
-[terraform-resources-wrapper] [app-sre-stage - apply]     status code: 400, request id: 417e8bab-3959-40e5-8a7b-39d18b984f8e
+[terraform-resources] error: b'\nError: Error deleting DB parameter group: InvalidDBParameterGroupState: One or more database instances are still members of this parameter group steahan-dev-params, so the group cannot be deleted\n\tstatus code: 400, request id: 417e8bab-3959-40e5-8a7b-39d18b984f8e\n\n\n'
+[terraform-resources] [app-sre-stage - apply] Error: Error deleting DB parameter group: InvalidDBParameterGroupState: One or more database instances are still members of this parameter group steahan-dev-params, so the group cannot be deleted
+[terraform-resources] [app-sre-stage - apply]     status code: 400, request id: 417e8bab-3959-40e5-8a7b-39d18b984f8e
 ```
 
 **If you see the error above**, you have two options, either copy the existing custom parameter group, or use the default parameter group temporarily.
