@@ -15,30 +15,3 @@ app:
 environment:
   $ref: /products/app-sre/environments/stage.yml
 
-managedExternalResources: true
-
-externalResources:
-- provider: aws
-  provisioner:
-    $ref: /aws/app-sre-stage/account.yml
-  resources:
-  - provider: rds
-    identifier: dev-steahan
-    defaults: /terraform/resources/app-sre-stage/staging/steahan-rds-defaults.yml
-    output_resource_name: dev-steahan-rds-old
-    overrides:
-      engine_version: '12.8'
-      name: 'postgres'
-
-  - provider: rds
-    identifier: dev-steahan-restore
-    defaults: /terraform/resources/app-sre-stage/staging/steahan-rds-defaults.yml
-    # Replace the secret with the existing name, so no code changes are required
-    output_resource_name: dev-steahan-rds
-    # Reset the password because restoring the database results in the password from the old database being used
-    reset_password: restoring-dev-steahan
-    overrides:
-      engine_version: '12.8'
-      restore_to_point_in_time:
-        restore_time: '2022-06-01T20:43:00Z'
-        source_db_instance_identifier: dev-steahan
