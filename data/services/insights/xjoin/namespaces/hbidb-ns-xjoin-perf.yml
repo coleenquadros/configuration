@@ -1,0 +1,75 @@
+# TODO : restart from here.
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: xjoin
+
+name: xjoin-search-for-hbidb-perf
+description: Insights xjoin-perf on the Performance cluster under app sre
+
+cluster:
+  $ref: /openshift/insights/cluster-insights-perf.yml
+
+app:
+  $ref: /services/insights/xjoin/app.yml
+
+environment:
+  $ref: /products/insights/environments/hbidb-perf-env.yml
+
+networkPoliciesAllow:
+- $ref: /services/insights/host-inventory/namespaces/hbidb-ns-perf.yml
+- $ref: /services/insights/xjoin/namespaces/xjoin-operator-perf.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+- ConfigMap
+# - Role
+# - RoleBinding
+- Secret
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  # requires access to the host-inventory-db provisioned through the host-inventory namespace
+  path: app-sre/integrations-output/terraform-resources/insights-perf/host-inventory-perf/host-inventory-db
+  version: 1
+  name: host-inventory-db
+  annotations:
+    qontract.recycle: "true"
+    qontract.ignore_reconcile_time: "true"
+- provider: resource
+  path: /insights-perf/shared/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+- provider: resource
+  path: /insights-perf/xjoin/validation.configmap.yml
+- provider: resource
+  path: /insights-perf/xjoin/xjoin-config.configmap.yml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /insights-perf/xjoin-perf/compliance-db.secret.yaml
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: elasticsearch
+  account: insights-perf
+  identifier: xjoin-elasticsearch
+  defaults: /terraform/resources/insights/perf/elasticsearch/xjoin.yml
+  output_resource_name: xjoin-elasticsearch
+
+managedExternalResources: true
+
+externalResources: []

@@ -1,0 +1,94 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: host-inventory
+
+name: hbidb-perf
+description: Insights host-inventory-perf on the v4 Perf cluster
+
+cluster:
+  $ref: /openshift/insights/cluster-insights-perf.yml
+
+app:
+  $ref: /services/insights/host-inventory/app.yml
+
+environment:
+  $ref: /products/insights/environments/hbidb-perf-env.yml
+
+networkPoliciesAllow: []
+# TODO:
+# Add a network policy rule in xjoin namespace yml file when xjoin service is deployed.
+# - $ref: /services/insights/remediations/namespaces/perf-remediations-perf.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- Secret
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/host-inventory-stage/dippy-bot
+  version: 1
+- provider: vault-secret
+  path: insights/secrets/insights-stage/host-inventory-stage/kafka-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-stage/host-inventory-stage/pendo-creds
+  version: 1
+
+managedTerraformResources: true
+
+terraformResources:
+- provider: rds
+  account: insights-perf
+  # identifier: host-inventory-perf
+  identifier: hbidb-perf
+  defaults: /terraform/resources/insights/perf/rds/postgres13-rds-1.yml
+  overrides:
+    username: "insights"
+    name: "insights"
+  parameter_group: /terraform/resources/insights/perf/rds/postgres13-parameter-group-host-inventory-perf.yml
+  # output_resource_name: host-inventory-db
+  output_resource_name: hbidb-perf-db
+  enhanced_monitoring: true
+- provider: rds
+  account: insights-perf
+  # identifier: host-inventory-perf-readonly
+  # replica_source: hbidb-perf
+  identifier: host-inventory-perf-readonly
+  replica_source: hbidb-perf
+  availability_zone: us-east-1d
+  defaults: /terraform/resources/insights/perf/rds/postgres13-rds-host-inventory-perf-read-replica.yml
+  overrides:
+    username: "insights"
+    name: "insights"
+  parameter_group: /terraform/resources/insights/perf/rds/postgres13-parameter-group-host-inventory-perf-readonly.yml
+  # output_resource_name: host-inventory-readonly-db
+  output_resource_name: hbidb-perf-readonly-db
+- provider: cloudwatch
+  account: insights-perf
+  # identifier: host-inventory-perf
+  identifier: hbidb-perf
+  defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
+  output_resource_name: cloudwatch
+
+managedExternalResources: true
+
+externalResources: []
