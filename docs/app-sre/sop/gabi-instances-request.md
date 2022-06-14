@@ -12,7 +12,7 @@
 
 In order to provide generic db access for tenant‘s service, we provide [gabi](https://github.com/app-sre/gabi) to run SQL queries on protected databases. Currently, gabi supports MySQL and PostgreSQL. 
 
-For onboarded apps tenant will access only to read-replicas (stage and prod). A read-replica will be deployed if one doesn't exist, and that this will increase costs so management approval will be required.
+For **InProgress or OnBoarded apps, tenants will only be allowed to access read-replicas (for both stage and prod)**. A read-replica will need to be created if one doesn't already exist, and that this will increase costs so **management approval will be required**.
 
 For best-effort apps tenant can access to actual DBs (stage and prod)
 
@@ -42,7 +42,7 @@ users:
 
 instances:
 - account: <RDS resource account defined in the namespace>
-  identifier: <RDS resource identifier defined in the namespace>
+  identifier: <RDS resource identifier defined in the namespace (this should be a read-replica for InProgress/OnBoarded apps)>
   namespace: 
     $ref: /services/<service>/namespaces/<namespace>.yml
 ...
