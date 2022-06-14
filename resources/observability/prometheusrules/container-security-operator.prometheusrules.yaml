@@ -1,0 +1,21 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: container-security-operator
+spec:
+  groups:
+  - name: container-security-operator.rules
+    rules:
+    - alert: ContainerSecurityOperatorPodCount
+      expr: kube_deployment_status_replicas_available{deployment="container-security-operator"} != 1 or absent(kube_deployment_status_replicas_available{deployment="container-security-operator"}) == 1
+      for: 30m
+      labels:
+        severity: high
+        service: container-security-operator
+      annotations:
+        message: "Deployment issue with Container Security Operator. No actionable SOP as of now"
