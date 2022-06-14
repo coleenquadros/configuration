@@ -1,13 +1,13 @@
 <!-- TOC -->
 
 - [Onboard a new OSDv4 cluster to app-interface](#onboard-a-new-osdv4-cluster-to-app-interface)
-  - [Step 1 - Cluster creation and initial access for dedicated-admins](#step-1-cluster-creation-and-initial-access-for-dedicated-admins)
-  - [Step 2 - Bot access and App SRE project template](#step-2-bot-access-and-app-sre-project-template)
-  - [Step 3 - Observability](#step-3-observability)
-  - [Step 4 - Operator Lifecycle Manager](#step-4-operator-lifecycle-manager)
-  - [Step 5 - Container Security Operator](#step-5-container-security-operator)
-  - [Step 6 - Deployment Validation Operator (DVO)](#step-6-deployment-validation-operator-dvo)
-  - [Step 7 - Obtain cluster-admin](#step-7-obtain-cluster-admin)
+  - [Step 1 - Cluster creation and initial access for dedicated-admins](#step-1---cluster-creation-and-initial-access-for-dedicated-admins)
+  - [Step 2 - Bot access and App SRE project template](#step-2---bot-access-and-app-sre-project-template)
+  - [Step 3 - Observability](#step-3---observability)
+  - [Step 4 - Operator Lifecycle Manager](#step-4---operator-lifecycle-manager)
+  - [Step 5 - Container Security Operator](#step-5---container-security-operator)
+  - [Step 6 - Deployment Validation Operator (DVO)](#step-6---deployment-validation-operator-dvo)
+  - [Step 7 - Obtain cluster-admin](#step-7---obtain-cluster-admin)
 - [Additional configurations](#additional-configurations)
   - [Selecting a Machine CIDR for VPC peerings](#selecting-a-machine-cidr-for-vpc-peerings)
   - [VPC peering with app-interface](#vpc-peering-with-app-interface)
@@ -81,8 +81,8 @@ This step should be performed in a single merge request.
       provider: aws
       region: (desired region. ex: us-east-1)
       channel: (desired channel group. either 'stable' or 'fast', use the latest 'fast' version by default, unless the cluster hosts OSD related workloads. latest fast can be found in https://gitlab.cee.redhat.com/service/clusterimagesets/-/tree/master/prod)
-      version: (same as initial_version, this will be automatically updated with cluster upgrades)
-      initial_version: (desired version. ex: 4.4.11)
+      version: (same as initial_version, this will be automatically updated with cluster upgrades. However remove suffix -fast if applicable.)
+      initial_version: (desired version. ex: 4.4.11, use 4.4.11-fast if channel fast.)
       multi_az: true
       nodes: (desired compute nodes todal across all AZs)
       autoscale: # optional. nodes should not be defined if autoscale is defined
