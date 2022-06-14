@@ -1,0 +1,106 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2022-06-14-prod-get-dependent-obj-processed-duplicate-tenants-2
+namespace:
+  $ref: /services/insights/sources/namespaces/sources-prod.yml
+identifier: sources-prod
+output: stdout
+queries:
+# The following queries try to fetch any dependent object to the tenants table,
+# which is related to the processed duplicated tenants.
+  - |
+    SELECT
+      "aa"."id",
+      "aa"."tenant_id",
+      "aa"."created_at",
+      "aa"."updated_at"
+    FROM
+      "application_authentications" AS "aa"
+    INNER JOIN
+      "tenants" AS "t" ON "t"."id" = "aa"."tenant_id"
+    WHERE
+      "t"."external_tenant" LIKE 'processed-duplicate-tenant-of%'
+    OR
+      "t"."org_id" LIKE 'processed-duplicate-tenant-of%';
+  - |
+    SELECT
+      "a"."id",
+      "a"."tenant_id",
+      "a"."created_at",
+      "a"."updated_at"
+    FROM
+      "applications" AS "a"
+    INNER JOIN
+      "tenants" AS "t" ON "t"."id" = "a"."tenant_id"
+    WHERE
+      "t"."external_tenant" LIKE 'processed-duplicate-tenant-of%'
+    OR
+      "t"."org_id" LIKE 'processed-duplicate-tenant-of%';
+  - |
+    SELECT
+      "a"."id",
+      "a"."tenant_id"
+    FROM
+      "authentications" AS "a"
+    INNER JOIN
+      "tenants" AS "t" ON "t"."id" = "a"."tenant_id"
+    WHERE
+      "t"."external_tenant" LIKE 'processed-duplicate-tenant-of%'
+    OR
+      "t"."org_id" LIKE 'processed-duplicate-tenant-of%';
+  - |
+    SELECT
+      "e"."id",
+      "e"."tenant_id",
+      "e"."created_at",
+      "e"."updated_at"
+    FROM
+      "endpoints" AS "e"
+    INNER JOIN
+      "tenants" AS "t" ON "t"."id" = "e"."tenant_id"
+    WHERE
+      "t"."external_tenant" LIKE 'processed-duplicate-tenant-of%'
+    OR
+      "t"."org_id" LIKE 'processed-duplicate-tenant-of%';
+  - |
+    SELECT
+      "s"."id",
+      "s"."tenant_id",
+      "s"."created_at",
+      "s"."updated_at"
+    FROM
+      "sources" AS "s"
+    INNER JOIN
+      "tenants" AS "t" ON "t"."id" = "s"."tenant_id"
+    WHERE
+      "t"."external_tenant" LIKE 'processed-duplicate-tenant-of%'
+    OR
+      "t"."org_id" LIKE 'processed-duplicate-tenant-of%';
+  - |
+    SELECT
+      "src"."source_id",
+      "src"."rhc_connection_id",
+      "src"."tenant_id"
+    FROM
+      "source_rhc_connections" AS "src"
+    INNER JOIN
+      "tenants" AS "t" ON "t"."id" = "src"."tenant_id"
+    WHERE
+      "t"."external_tenant" LIKE 'processed-duplicate-tenant-of%'
+    OR
+      "t"."org_id" LIKE 'processed-duplicate-tenant-of%';
+  - |
+    SELECT
+      "u"."id",
+      "u"."tenant_id",
+      "u"."created_at",
+      "u"."updated_at"
+    FROM
+        "users" AS "u"
+    INNER JOIN
+      "tenants" AS "t" ON "t"."id" = "u"."tenant_id"
+    WHERE
+      "t"."external_tenant" LIKE 'processed-duplicate-tenant-of%'
+    OR
+      "t"."org_id" LIKE 'processed-duplicate-tenant-of%';
