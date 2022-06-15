@@ -7,6 +7,7 @@
     - [Reporting analysis](#reporting-analysis)
     - [Reverting broken versions](#reverting-broken-versions)
     - [GBUpstreamScrapesHalted](#gbupstreamscrapeshalted)
+    - [GBGraphStale](#gbgraphstale)
     - [GBUpstreamScrapeErrors](#gbupstreamscrapeerrors)
     - [PEIncomingRequestsHalted](#peincomingrequestshalted)
     - [PEUpstreamErrors](#peupstreamerrors)
@@ -59,6 +60,33 @@ Updated releases and transition-edges will not be reflected in the update graph.
 
 - Contact Cincinnati team, investigate why graph-builder got blocked.
 - If the scrape failure is preventing [a new release][cincinnati-graph-data] and appears to be due to a recent production deploy, consider [reverting the deploy](#reverting-broken-versions).
+
+---
+
+## GBGraphStale
+
+### Summary:
+
+Graph-builder graph has become stale, this can be due to errors while scraping or scraping halted due to reasons not known.
+
+### Impact:
+
+New releases will not appear in the update graph (the latest cached graph will be kept serving).
+Updated releases and transition-edges will not be reflected in the update graph.
+
+### Access required:
+
+- Access to the clusters that run Cincinnati, namespaces:
+  - cincinnati-stage (app-sre-stage)
+  - cincinnati-production (app-sre)
+
+### Steps:
+
+- Contact Cincinnati team, investigate why graph-builder got blocked.
+- If the scrape failure is preventing [a new release][cincinnati-graph-data] and appears to be due to a recent production deploy, consider [reverting the deploy](#reverting-broken-versions).
+- If there is a manifest-ref SHA mismatch, it might be due to ART adding duplicate releases with same version. 
+  DO NOT revert or replace or delete the POD, it will take down Update Service till the issue is fixed. Check for `mismatched manifest ref for concrete release` 
+  in the graph-builder logs. This should be the last line in graph-builder logs if they're not actively refreshing. 
 
 ---
 

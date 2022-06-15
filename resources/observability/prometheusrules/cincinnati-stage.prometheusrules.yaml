@@ -50,11 +50,21 @@ spec:
         dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1"
         message: "High error rate for Cincinnati graph-builder scrapes"
         link_url: "https://console-openshift-console.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com/k8s/ns/cincinnati-stage/pods"
-      expr: rate(cincinnati_gb_graph_upstream_errors_total{job="cincinnati-graph-builder",namespace="cincinnati-stage"}[5m]) != 0
+      expr: rate(cincinnati_gb_graph_upstream_errors_total{job="cincinnati-graph-builder",namespace="cincinnati-stage"}[15m]) != 0
       for: 15m
       labels:
         service: cincinnati
         severity: medium
+    - alert: GBGraphStale
+      annotations:
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/#gbgraphstale"
+        dashboard: "https://grafana.app-sre.devshift.net/d/cincinnati/cincinnati?orgId=1"
+        message: "Cincinnati graph-builder has a stale graph. Graph not updated since: {{ $value | humanizeDuration }}"
+        link_url: "https://console-openshift-console.apps.app-sre-stage-0.k3s7.p1.openshiftapps.com/k8s/ns/cincinnati-stage/pods"
+      expr: (time()-cincinnati_gb_graph_last_successful_refresh_timestamp{job="cincinnati-graph-builder",namespace="cincinnati-production"}) >= 3600
+      labels:
+        service: cincinnati
+        severity: warning
     - alert: GBRestart
       annotations:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/tree/master/docs/cincinnati/sop/"
