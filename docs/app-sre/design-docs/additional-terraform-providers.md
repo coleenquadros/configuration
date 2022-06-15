@@ -1,4 +1,4 @@
-# Design doc: optimal location for app-interface schemas
+# Design doc: Support for additional provisioning providers
 
 ## Author/date
 
