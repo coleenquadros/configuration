@@ -21,8 +21,6 @@ networkPoliciesAllow:
 
 managedRoles: true
 
-managedTerraformResources: true
-
 managedResourceTypes:
 - NetworkPolicy
 - Secret
@@ -89,60 +87,56 @@ openshiftResources:
 - provider: resource
   path: /quay-p/quay/quay-py3.web-allow-external.networkpolicy.yaml
 
-terraformResources:
-- provider: rds
-  account: quayio-prod
-  identifier: quayio-production-57-py3-replica
-  availability_zone: us-east-2a
-  defaults: /terraform/resources/quayio-production/rds-read-replica-us-east-2.yml
-  parameter_group: /terraform/resources/quayio-production/rds-parameter-group-read-replica-1.yml
-  replica_source: quayio-production-py3
-- provider: s3-cloudfront
-  account: quayio-prod
-  identifier: quayio-production-s3-backup
-  region: us-east-2
-  storage_class: onezone_ia
-  defaults: /terraform/resources/quayio-production/s3-cloudfront-us-east-2-replication.yml
-  output_resource_name: quayio-s3-backup
-- provider: kms
-  account: quayio-prod
-  identifier: quayio-prod-replica
-  region: us-east-2
-  defaults: /terraform/resources/quayio-production/kms-1.yml
-  output_resource_name: quayio-kms
-- provider: kinesis
-  account: quayio-prod
-  region: us-east-2
-  identifier: quay-prod-logentry-stream-backup
-  defaults: /terraform/resources/quayio-production/kinesis-2.yml
-  output_resource_name: quayio-kinesis
-- provider: elasticache
-  account: quayio-prod
-  region: us-east-2
-  identifier: quayio-production-standby
-  defaults: /terraform/resources/quayio-production/elasticache-standby-1.yml
-  parameter_group: /terraform/resources/quayio-production/elasticache-parameter-group-1.yml
-- provider: alb
-  account: quayio-prod
-  identifier: quayio-production-alb02
-  output_resource_name: quayio-production-alb
-  idle_timeout: 3600
-  vpc:
-    $ref: /aws/quayio-prod/vpcs/quayio-prod.yml # VPC in us-east-2
-  certificate_arn: arn:aws:acm:us-east-2:206170669542:certificate/1ccddcb2-62c1-477c-9c3c-fe67ea028a33
-  targets:
-  - name: quayio-production-py2
-    default: false
-    openshift_service: quay-load-balancer-service
-  - name: quayio-production-py3
-    default: true
-    openshift_service: quay-py3-load-balancer-service
-  rules: []
-
 sharedResources:
 - $ref: /services/app-sre/shared-resources/splunk-creds.yml
 
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/quayio-prod/account.yml
+  resources:
+  - provider: rds
+    identifier: quayio-production-57-py3-replica
+    availability_zone: us-east-2a
+    defaults: /terraform/resources/quayio-production/rds-read-replica-us-east-2.yml
+    parameter_group: /terraform/resources/quayio-production/rds-parameter-group-read-replica-1.yml
+    replica_source: quayio-production-py3
+  - provider: s3-cloudfront
+    identifier: quayio-production-s3-backup
+    region: us-east-2
+    storage_class: onezone_ia
+    defaults: /terraform/resources/quayio-production/s3-cloudfront-us-east-2-replication.yml
+    output_resource_name: quayio-s3-backup
+  - provider: kms
+    identifier: quayio-prod-replica
+    region: us-east-2
+    defaults: /terraform/resources/quayio-production/kms-1.yml
+    output_resource_name: quayio-kms
+  - provider: kinesis
+    region: us-east-2
+    identifier: quay-prod-logentry-stream-backup
+    defaults: /terraform/resources/quayio-production/kinesis-2.yml
+    output_resource_name: quayio-kinesis
+  - provider: elasticache
+    region: us-east-2
+    identifier: quayio-production-standby
+    defaults: /terraform/resources/quayio-production/elasticache-standby-1.yml
+    parameter_group: /terraform/resources/quayio-production/elasticache-parameter-group-1.yml
+  - provider: alb
+    identifier: quayio-production-alb02
+    output_resource_name: quayio-production-alb
+    idle_timeout: 3600
+    vpc:
+      $ref: /aws/quayio-prod/vpcs/quayio-prod.yml # VPC in us-east-2
+    certificate_arn: arn:aws:acm:us-east-2:206170669542:certificate/1ccddcb2-62c1-477c-9c3c-fe67ea028a33
+    targets:
+    - name: quayio-production-py2
+      default: false
+      openshift_service: quay-load-balancer-service
+    - name: quayio-production-py3
+      default: true
+      openshift_service: quay-py3-load-balancer-service
+    rules: []
