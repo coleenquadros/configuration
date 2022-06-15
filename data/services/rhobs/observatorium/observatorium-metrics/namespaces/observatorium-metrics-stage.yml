@@ -30,18 +30,9 @@ managedResourceTypes:
 - ServiceAccount
 - Secret
 
-managedTerraformResources: true
-
 sharedResources:
 - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
 - $ref: /services/rhobs/shared-resources/observatorium-allow-port-forward.yml
-
-terraformResources:
-- provider: s3
-  account: app-sre
-  identifier: telemeter-thanos-stage
-  defaults: /terraform/resources/telemeter/s3-private-1.yml
-  output_resource_name: telemeter-thanos-stage-s3
 
 openshiftResources:
 # Secrets
@@ -89,4 +80,12 @@ openshiftResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: s3
+    identifier: telemeter-thanos-stage
+    defaults: /terraform/resources/telemeter/s3-private-1.yml
+    output_resource_name: telemeter-thanos-stage-s3

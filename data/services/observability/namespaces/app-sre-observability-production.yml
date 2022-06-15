@@ -28,24 +28,6 @@ managedTerraformResources: true
 
 terraformResources:
 - provider: aws-iam-service-account
-  account: app-sre
-  identifier: aws-resource-exporter-prod-01
-  policies:
-  - AmazonRDSReadOnlyAccess
-  output_resource_name: aws-resource-exporter-app-sre
-- provider: aws-iam-service-account
-  account: app-sre
-  identifier: aws-cloudwatch-exporter-prod-01
-  policies:
-  - AmazonEC2ReadOnlyAccess
-  - AmazonSQSReadOnlyAccess
-  - AmazonDynamoDBReadOnlyAccess
-  - AmazonS3ReadOnlyAccess
-  - AmazonRDSReadOnlyAccess
-  - AmazonInspectorReadOnlyAccess
-  - CloudWatchReadOnlyAccess
-  output_resource_name: aws-cloudwatch-exporter-app-sre
-- provider: aws-iam-service-account
   account: quayio-prod
   identifier: aws-cloudwatch-exporter-quay-prod-01
   policies:
@@ -78,12 +60,6 @@ terraformResources:
   policies:
   - AmazonRDSReadOnlyAccess
   output_resource_name: aws-resource-exporter-crc
-## Grafana temporary database
-- provider: rds
-  account: app-sre
-  identifier: grafana-production
-  defaults: /terraform/resources/grafana/rds-1.yml
-  output_resource_name: grafana-db
 
 managedResourceTypes:
 - ConfigMap
@@ -346,7 +322,7 @@ openshiftResources:
 - provider: resource
   path: /observability/grafana/grafana-dashboard-sso-mas-monitoring.configmap.yaml
   validate_json: true
-  
+
 # Secrets
 ## Blackbox Exporter
 - provider: resource-template
@@ -1042,3 +1018,29 @@ externalResources:
     policies:
     - AmazonRDSReadOnlyAccess
     output_resource_name: aws-resource-exporter-ocm-quay
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: aws-iam-service-account
+    identifier: aws-resource-exporter-prod-01
+    policies:
+    - AmazonRDSReadOnlyAccess
+    output_resource_name: aws-resource-exporter-app-sre
+  - provider: aws-iam-service-account
+    identifier: aws-cloudwatch-exporter-prod-01
+    policies:
+    - AmazonEC2ReadOnlyAccess
+    - AmazonSQSReadOnlyAccess
+    - AmazonDynamoDBReadOnlyAccess
+    - AmazonS3ReadOnlyAccess
+    - AmazonRDSReadOnlyAccess
+    - AmazonInspectorReadOnlyAccess
+    - CloudWatchReadOnlyAccess
+    output_resource_name: aws-cloudwatch-exporter-app-sre
+  ## Grafana temporary database
+  - provider: rds
+    identifier: grafana-production
+    defaults: /terraform/resources/grafana/rds-1.yml
+    output_resource_name: grafana-db
+

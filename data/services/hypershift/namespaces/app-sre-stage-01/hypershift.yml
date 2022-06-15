@@ -15,15 +15,14 @@ app:
 environment:
   $ref: /products/hypershift/environments/stage-app-sre-stage-01.yml
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: s3
-  account: app-sre
-  identifier: hypershift-oidc-staging
-  defaults: /terraform/resources/s3-public-read-1.yml
-  output_resource_name: hypershift-oidc-s3-creds
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: s3
+    identifier: hypershift-oidc-staging
+    defaults: /terraform/resources/s3-public-read-1.yml
+    output_resource_name: hypershift-oidc-s3-creds

@@ -28,17 +28,8 @@ managedRoles: true
 managedResourceTypes:
 - ServiceAccount
 
-managedTerraformResources: true
-
 sharedResources:
 - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
-
-terraformResources:
-- provider: s3
-  account: app-sre
-  identifier: observatorium-logs-production
-  defaults: /terraform/resources/observatorium-logs/s3-private-expires-14-days.yml
-  output_resource_name: observatorium-logs-production-s3
 
 openshiftResources:
 - provider: resource
@@ -46,4 +37,12 @@ openshiftResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: s3
+    identifier: observatorium-logs-production
+    defaults: /terraform/resources/observatorium-logs/s3-private-expires-14-days.yml
+    output_resource_name: observatorium-logs-production-s3

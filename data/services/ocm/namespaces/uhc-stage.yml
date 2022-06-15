@@ -41,61 +41,6 @@ openshiftResources:
 - provider: resource
   path: /ocm/sda-dev-allow-port-forwarding.rolebinding.yml
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: app-sre
-  identifier: clusters-service-staging
-  defaults: /terraform/resources/app-sre/staging/rds-1.yml
-  parameter_group: /terraform/resources/ocm/clusters-service-stage-rds-parameter-group-pg12.yml
-  output_resource_name: clusters-service-rds
-  overrides:
-    engine_version: '12.9'
-    performance_insights_enabled: true
-- provider: rds
-  account: app-sre
-  identifier: uhc-acct-mngr-staging
-  defaults: /terraform/resources/app-sre/staging/rds-2-cloudwatch-enabled.yml
-  parameter_group: /terraform/resources/ocm/ocm-stage-rds-parameter-group-pg12.yml
-  output_resource_name: uhc-acct-mngr-rds
-  overrides:
-    allocated_storage: 22
-    engine_version: '12.9'
-    performance_insights_enabled: true
-- provider: rds
-  account: app-sre
-  identifier: ocm-service-log-staging
-  defaults: /terraform/resources/app-sre/staging/rds-2-cloudwatch-enabled.yml
-  parameter_group: /terraform/resources/ocm/ocm-stage-rds-parameter-group-pg12.yml
-  output_resource_name: ocm-service-log-rds
-  overrides:
-    engine_version: '12.9'
-- provider: sqs
-  account: app-sre
-  identifier: job-queue-service-staging
-  output_resource_name: job-queue-service-sqs
-  specs:
-    - defaults: /terraform/resources/ocm/job-queue-service-heartbeat-sqs-staging.yml
-      queues:
-        - key: job_queue_service_heartbeat_staging
-          value: job-queue-service-heartbeat-staging
-    - defaults: /terraform/resources/ocm/job-queue-osl-sqs-staging.yml
-      queues:
-        - key: job_queue_osl_staging
-          value: job-queue-osl-staging
-    - defaults: /terraform/resources/ocm/dlq-sqs.yml
-      queues:
-        - key: job_queue_service_heartbeat_staging_dlq
-          value: job-queue-service-heartbeat-staging-dlq
-        - key: job_queue_osl_staging_dlq
-          value: job-queue-osl-staging-dlq
-- provider: s3
-  account: app-sre
-  identifier: rh-oidc-staging
-  defaults: /terraform/resources/s3-public-read-1.yml
-  output_resource_name: rh-oidc-s3-secret
-
 managedExternalResources: true
 
 externalResources:
@@ -134,3 +79,54 @@ externalResources:
         }]
       }
     output_resource_name: sts-credentials
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: rds
+    identifier: clusters-service-staging
+    defaults: /terraform/resources/app-sre/staging/rds-1.yml
+    parameter_group: /terraform/resources/ocm/clusters-service-stage-rds-parameter-group-pg12.yml
+    output_resource_name: clusters-service-rds
+    overrides:
+      engine_version: '12.9'
+      performance_insights_enabled: true
+  - provider: rds
+    identifier: uhc-acct-mngr-staging
+    defaults: /terraform/resources/app-sre/staging/rds-2-cloudwatch-enabled.yml
+    parameter_group: /terraform/resources/ocm/ocm-stage-rds-parameter-group-pg12.yml
+    output_resource_name: uhc-acct-mngr-rds
+    overrides:
+      allocated_storage: 22
+      engine_version: '12.9'
+      performance_insights_enabled: true
+  - provider: rds
+    identifier: ocm-service-log-staging
+    defaults: /terraform/resources/app-sre/staging/rds-2-cloudwatch-enabled.yml
+    parameter_group: /terraform/resources/ocm/ocm-stage-rds-parameter-group-pg12.yml
+    output_resource_name: ocm-service-log-rds
+    overrides:
+      engine_version: '12.9'
+  - provider: sqs
+    identifier: job-queue-service-staging
+    output_resource_name: job-queue-service-sqs
+    specs:
+    - defaults: /terraform/resources/ocm/job-queue-service-heartbeat-sqs-staging.yml
+      queues:
+      - key: job_queue_service_heartbeat_staging
+        value: job-queue-service-heartbeat-staging
+    - defaults: /terraform/resources/ocm/job-queue-osl-sqs-staging.yml
+      queues:
+      - key: job_queue_osl_staging
+        value: job-queue-osl-staging
+    - defaults: /terraform/resources/ocm/dlq-sqs.yml
+      queues:
+      - key: job_queue_service_heartbeat_staging_dlq
+        value: job-queue-service-heartbeat-staging-dlq
+      - key: job_queue_osl_staging_dlq
+        value: job-queue-osl-staging-dlq
+  - provider: s3
+    identifier: rh-oidc-staging
+    defaults: /terraform/resources/s3-public-read-1.yml
+    output_resource_name: rh-oidc-s3-secret
+

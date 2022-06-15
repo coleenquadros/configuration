@@ -35,11 +35,6 @@ sharedResources:
 managedTerraformResources: true
 
 terraformResources:
-- provider: s3
-  account: app-sre
-  identifier: hive-production-storage-01
-  defaults: /terraform/resources/s3-private-1.yml
-  output_resource_name: s3-bucket-creds
 - provider: aws-iam-service-account
   account: osd-privatelink-prod
   identifier: hive-privatelink-production
@@ -71,139 +66,6 @@ terraformResources:
     }
   output_resource_name: hive-privatelink-creds
 - provider: aws-iam-service-account
-  account: app-sre
-  identifier: hive-vpc-hivep01ue1
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [{
-        "Action": [
-          "sts:AssumeRole"
-        ],
-        "Effect": "Allow",
-        "Resource": "*" 
-      }]
-    }
-  output_resource_name: hive-vpc-creds-hivep01ue1
-  aws_infrastructure_access:
-    cluster:
-      $ref: /openshift/hivep01ue1/cluster.yml
-    access_level: network-mgmt
-- provider: aws-iam-service-account
-  account: app-sre
-  identifier: hive-vpc-hivep02ue1
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [{
-        "Action": [
-          "sts:AssumeRole"
-        ],
-        "Effect": "Allow",
-        "Resource": "*" 
-      }]
-    }
-  output_resource_name: hive-vpc-creds-hivep02ue1
-  aws_infrastructure_access:
-    cluster:
-      $ref: /openshift/hivep02ue1/cluster.yml
-    access_level: network-mgmt
-- provider: aws-iam-service-account
-  account: app-sre
-  identifier: hive-vpc-hivep03uw1
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [{
-        "Action": [
-          "sts:AssumeRole"
-        ],
-        "Effect": "Allow",
-        "Resource": "*" 
-      }]
-    }
-  output_resource_name: hive-vpc-creds-hivep03uw1
-  aws_infrastructure_access:
-    cluster:
-      $ref: /openshift/hivep03uw1/cluster.yml
-    access_level: network-mgmt
-- provider: aws-iam-service-account
-  account: app-sre
-  identifier: hive-vpc-hivep04ew2
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [{
-        "Action": [
-          "sts:AssumeRole"
-        ],
-        "Effect": "Allow",
-        "Resource": "*" 
-      }]
-    }
-  output_resource_name: hive-vpc-creds-hivep04ew2
-  aws_infrastructure_access:
-    cluster:
-      $ref: /openshift/hivep04ew2/cluster.yml
-    access_level: network-mgmt
-- provider: aws-iam-service-account
-  account: app-sre
-  identifier: hive-vpc-hivep05ue1
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [{
-        "Action": [
-          "sts:AssumeRole"
-        ],
-        "Effect": "Allow",
-        "Resource": "*" 
-      }]
-    }
-  output_resource_name: hive-vpc-creds-hivep05ue1
-  aws_infrastructure_access:
-    cluster:
-      $ref: /openshift/hivep05ue1/cluster.yml
-    access_level: network-mgmt
-- provider: aws-iam-service-account
-  account: app-sre
-  identifier: hive-vpc-hivep06uw2
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [{
-        "Action": [
-          "sts:AssumeRole"
-        ],
-        "Effect": "Allow",
-        "Resource": "*" 
-      }]
-    }
-  output_resource_name: hive-vpc-creds-hivep06uw2
-  aws_infrastructure_access:
-    cluster:
-      $ref: /openshift/hivep06uw2/cluster.yml
-    access_level: network-mgmt
-- provider: aws-iam-service-account
-  account: app-sre
-  identifier: hive-vpc-hivep07ue2
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [{
-        "Action": [
-          "sts:AssumeRole"
-        ],
-        "Effect": "Allow",
-        "Resource": "*" 
-      }]
-    }
-  output_resource_name: hive-vpc-creds-hivep07ue2
-  aws_infrastructure_access:
-    cluster:
-      $ref: /openshift/hivep07ue2/cluster.yml
-    access_level: network-mgmt
-- provider: aws-iam-service-account
   account: osd-privatelink-prod
   identifier: hive-aws-service-provider-production
   user_policy:
@@ -217,12 +79,146 @@ terraformResources:
         "Resource": "arn:aws:iam::*:role/RH-Managed-OpenShift-Installer" 
       }]
     }
-- provider: route53-zone
-  account: app-sre
-  identifier: p1-openshiftapps-com
-  name: p1.openshiftapps.com
-  output_resource_name: external-dns-route53-creds
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: s3
+    identifier: hive-production-storage-01
+    defaults: /terraform/resources/s3-private-1.yml
+    output_resource_name: s3-bucket-creds
+  - provider: aws-iam-service-account
+    identifier: hive-vpc-hivep01ue1
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Action": [
+            "sts:AssumeRole"
+          ],
+          "Effect": "Allow",
+          "Resource": "*" 
+        }]
+      }
+    output_resource_name: hive-vpc-creds-hivep01ue1
+    aws_infrastructure_access:
+      cluster:
+        $ref: /openshift/hivep01ue1/cluster.yml
+      access_level: network-mgmt
+  - provider: aws-iam-service-account
+    identifier: hive-vpc-hivep02ue1
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Action": [
+            "sts:AssumeRole"
+          ],
+          "Effect": "Allow",
+          "Resource": "*" 
+        }]
+      }
+    output_resource_name: hive-vpc-creds-hivep02ue1
+    aws_infrastructure_access:
+      cluster:
+        $ref: /openshift/hivep02ue1/cluster.yml
+      access_level: network-mgmt
+  - provider: aws-iam-service-account
+    identifier: hive-vpc-hivep03uw1
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Action": [
+            "sts:AssumeRole"
+          ],
+          "Effect": "Allow",
+          "Resource": "*" 
+        }]
+      }
+    output_resource_name: hive-vpc-creds-hivep03uw1
+    aws_infrastructure_access:
+      cluster:
+        $ref: /openshift/hivep03uw1/cluster.yml
+      access_level: network-mgmt
+  - provider: aws-iam-service-account
+    identifier: hive-vpc-hivep04ew2
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Action": [
+            "sts:AssumeRole"
+          ],
+          "Effect": "Allow",
+          "Resource": "*" 
+        }]
+      }
+    output_resource_name: hive-vpc-creds-hivep04ew2
+    aws_infrastructure_access:
+      cluster:
+        $ref: /openshift/hivep04ew2/cluster.yml
+      access_level: network-mgmt
+  - provider: aws-iam-service-account
+    identifier: hive-vpc-hivep05ue1
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Action": [
+            "sts:AssumeRole"
+          ],
+          "Effect": "Allow",
+          "Resource": "*" 
+        }]
+      }
+    output_resource_name: hive-vpc-creds-hivep05ue1
+    aws_infrastructure_access:
+      cluster:
+        $ref: /openshift/hivep05ue1/cluster.yml
+      access_level: network-mgmt
+  - provider: aws-iam-service-account
+    identifier: hive-vpc-hivep06uw2
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Action": [
+            "sts:AssumeRole"
+          ],
+          "Effect": "Allow",
+          "Resource": "*" 
+        }]
+      }
+    output_resource_name: hive-vpc-creds-hivep06uw2
+    aws_infrastructure_access:
+      cluster:
+        $ref: /openshift/hivep06uw2/cluster.yml
+      access_level: network-mgmt
+  - provider: aws-iam-service-account
+    identifier: hive-vpc-hivep07ue2
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Action": [
+            "sts:AssumeRole"
+          ],
+          "Effect": "Allow",
+          "Resource": "*" 
+        }]
+      }
+    output_resource_name: hive-vpc-creds-hivep07ue2
+    aws_infrastructure_access:
+      cluster:
+        $ref: /openshift/hivep07ue2/cluster.yml
+      access_level: network-mgmt
+  - provider: route53-zone
+    identifier: p1-openshiftapps-com
+    name: p1.openshiftapps.com
+    output_resource_name: external-dns-route53-creds
+

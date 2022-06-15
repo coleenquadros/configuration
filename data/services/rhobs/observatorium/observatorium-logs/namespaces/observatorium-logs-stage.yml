@@ -26,21 +26,19 @@ grafanaUrl: https://grafana.app-sre.devshift.net/d/Lg-mH0rizaSJDKSADX/api-logs?o
 managedRoles: true
 
 managedResourceTypes: []
-
-managedTerraformResources: true
-
 sharedResources:
 - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
-
-terraformResources:
-- provider: s3
-  account: app-sre
-  identifier: observatorium-logs-stage
-  defaults: /terraform/resources/observatorium-logs/s3-private-expires-14-days.yml
-  output_resource_name: observatorium-logs-stage-s3
 
 openshiftResources: []
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: s3
+    identifier: observatorium-logs-stage
+    defaults: /terraform/resources/observatorium-logs/s3-private-expires-14-days.yml
+    output_resource_name: observatorium-logs-stage-s3

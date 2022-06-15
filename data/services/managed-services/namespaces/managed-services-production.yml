@@ -16,14 +16,14 @@ environment:
   $ref: /products/osdv4/environments/production.yml
 
 networkPoliciesAllow:
-  - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-04.yml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-04.yml
 
 managedRoles: true
 
 managedResourceTypes:
-  - ServiceAccount
-  - ConfigMap
-  - NetworkPolicy
+- ServiceAccount
+- ConfigMap
+- NetworkPolicy
 
 openshiftResources:
 - provider: route
@@ -72,24 +72,23 @@ openshiftResources:
 - provider: resource
   path: /services/managed-services/production/observatorium-token-refresher.networkpolicy.yaml
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: app-sre
-  identifier: kas-fleet-manager-prod
-  defaults: /terraform/resources/managed-services/production/rds-2-cloudwatch-enabled.yml
-  parameter_group: /terraform/resources/managed-services/production/kas-fleet-manager-prod-rds-parameter-group-pg12.yml
-  output_resource_name: kas-fleet-manager-rds
-  overrides:
-    maintenance_window: wed:14:00-wed:15:00
-    backup_window: 12:00-13:00
-    engine_version: '12.7'
-  ca_cert:
-    path: app-interface/global/rds-ca-cert
-    field: us-east-1
-    version: 2
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: rds
+    identifier: kas-fleet-manager-prod
+    defaults: /terraform/resources/managed-services/production/rds-2-cloudwatch-enabled.yml
+    parameter_group: /terraform/resources/managed-services/production/kas-fleet-manager-prod-rds-parameter-group-pg12.yml
+    output_resource_name: kas-fleet-manager-rds
+    overrides:
+      maintenance_window: wed:14:00-wed:15:00
+      backup_window: 12:00-13:00
+      engine_version: '12.7'
+    ca_cert:
+      path: app-interface/global/rds-ca-cert
+      field: us-east-1
+      version: 2

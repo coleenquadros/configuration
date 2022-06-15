@@ -68,49 +68,6 @@ openshiftResources:
 
 managedRoles: true
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: s3
-  account: app-sre
-  identifier: assisted-installer-integration-v4
-  defaults: /terraform/resources/assisted-installer/s3-backup-1.yml
-  output_resource_name: assisted-installer-s3
-- provider: s3
-  account: app-sre
-  identifier: assisted-installer-elastic-migration-integration
-  defaults: /terraform/resources/s3-private-1.yml
-  output_resource_name: assisted-installer-s3-migration
-- provider: s3
-  account: app-sre
-  identifier: assisted-installer-integration-v4-public
-  defaults: /terraform/resources/s3-public-read-1.yml
-  bucket_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [
-        {
-          "Sid": "PublicRead",
-          "Effect": "Allow",
-          "Principal": "*",
-          "Action": "s3:GetObject",
-          "Resource": "arn:aws:s3:::assisted-installer-integration-v4-public/*"
-        }
-      ]
-    }
-  output_resource_name: assisted-installer-public-s3
-- provider: rds
-  account: app-sre
-  identifier: assisted-installer-integration-v4
-  defaults: /terraform/resources/assisted-installer/rds-1.yml
-  output_resource_name: assisted-installer-rds
-  reset_password: APPSRE-4733
-- provider: elasticsearch
-  account: app-sre
-  identifier: ai-integration-es
-  defaults: /terraform/resources/assisted-installer/elasticsearch-1.yml
-  output_resource_name: assisted-installer-elasticsearch
-
 managedExternalResources: true
 
 externalResources:
@@ -143,3 +100,41 @@ externalResources:
         }]
       }
     output_resource_name: service-account-ai-ccx
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: s3
+    identifier: assisted-installer-integration-v4
+    defaults: /terraform/resources/assisted-installer/s3-backup-1.yml
+    output_resource_name: assisted-installer-s3
+  - provider: s3
+    identifier: assisted-installer-elastic-migration-integration
+    defaults: /terraform/resources/s3-private-1.yml
+    output_resource_name: assisted-installer-s3-migration
+  - provider: s3
+    identifier: assisted-installer-integration-v4-public
+    defaults: /terraform/resources/s3-public-read-1.yml
+    bucket_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "PublicRead",
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::assisted-installer-integration-v4-public/*"
+          }
+        ]
+      }
+    output_resource_name: assisted-installer-public-s3
+  - provider: rds
+    identifier: assisted-installer-integration-v4
+    defaults: /terraform/resources/assisted-installer/rds-1.yml
+    output_resource_name: assisted-installer-rds
+    reset_password: APPSRE-4733
+  - provider: elasticsearch
+    identifier: ai-integration-es
+    defaults: /terraform/resources/assisted-installer/elasticsearch-1.yml
+    output_resource_name: assisted-installer-elasticsearch
