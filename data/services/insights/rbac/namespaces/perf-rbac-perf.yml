@@ -69,28 +69,25 @@ openshiftResources:
   path: insights/secrets/backoffice/preprod/insights-rbac
   version: 3
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-perf
-  identifier: rbac-perf
-  defaults: /terraform/resources/insights/perf/rds/rds-rbac-perf.yml
-  overrides: {}
-  enhanced_monitoring: true
-  output_resource_name: rbac-db
-  parameter_group: /terraform/resources/insights/perf/rds/postgres10-parameter-group-rbac-perf.yml
-- provider: cloudwatch
-  account: insights-perf
-  identifier: rbac-perf
-  defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-- provider: elasticache
-  account: insights-perf
-  identifier: rbac-perf-elasticache
-  defaults: /terraform/resources/insights/perf/elasticache/elasticache-rbac-1.yml
-  output_resource_name: in-memory-db
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-perf/account.yml
+  resources:
+  - provider: rds
+    identifier: rbac-perf
+    defaults: /terraform/resources/insights/perf/rds/rds-rbac-perf.yml
+    overrides: {}
+    enhanced_monitoring: true
+    output_resource_name: rbac-db
+    parameter_group: /terraform/resources/insights/perf/rds/postgres10-parameter-group-rbac-perf.yml
+  - provider: cloudwatch
+    identifier: rbac-perf
+    defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+  - provider: elasticache
+    identifier: rbac-perf-elasticache
+    defaults: /terraform/resources/insights/perf/elasticache/elasticache-rbac-1.yml
+    output_resource_name: in-memory-db

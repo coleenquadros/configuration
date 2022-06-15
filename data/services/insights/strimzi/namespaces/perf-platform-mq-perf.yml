@@ -38,62 +38,6 @@ networkPoliciesAllow: []
 
 managedRoles: true
 
-managedTerraformResources: true
-
-terraformResources:
-# - provider: cloudwatch
-#   account: insights-perf
-#   identifier: platform-mq-perf
-#   defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
-#   output_resource_name: cloudwatch
-- provider: s3
-  account: insights-perf
-  identifier: perf-mq-egress-data-sink
-  defaults: /terraform/resources/insights/perf/s3/s3-gdpr-14.yml
-  output_resource_name: egress-data-sink-s3
-- provider: s3
-  account: insights-perf
-  identifier: insights-client-metrics-perf
-  defaults: /terraform/resources/s3-gdpr-1.yml
-  output_resource_name: insights-client-metrics-strimzi-bucket
-- provider: s3
-  account: insights-perf
-  identifier: insights-warehouse-perf
-  defaults: /terraform/resources/s3-gdpr-1.yml
-  output_resource_name: insights-warehouse-strimzi-bucket
-- provider: aws-iam-service-account
-  account: insights-perf
-  identifier: strimzi-bucket-read-write
-  variables:
-    aws_region: us-east-1
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [
-        {
-          "Effect": "Allow",
-          "Action": [
-            "s3:ListBucket",
-          ],
-          "Resource": [
-            "arn:aws:s3:::insights-client-metrics-perf",
-            "arn:aws:s3:::insights-warehouse-perf",
-          ]
-        },
-        {
-          "Effect": "Allow",
-          "Action": [
-            "s3:*Object"
-          ],
-          "Resource": [
-            "arn:aws:s3:::insights-client-metrics-perf/*",
-            "arn:aws:s3:::insights-warehouse-perf/*",
-          ]
-        }
-      ]
-    }
-  output_resource_name: strimzi-bucket-read-write
-
 managedResourceTypes:
 - ServiceAccount
 - Role
@@ -137,4 +81,51 @@ openshiftResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-perf/account.yml
+  resources:
+  - provider: s3
+    identifier: perf-mq-egress-data-sink
+    defaults: /terraform/resources/insights/perf/s3/s3-gdpr-14.yml
+    output_resource_name: egress-data-sink-s3
+  - provider: s3
+    identifier: insights-client-metrics-perf
+    defaults: /terraform/resources/s3-gdpr-1.yml
+    output_resource_name: insights-client-metrics-strimzi-bucket
+  - provider: s3
+    identifier: insights-warehouse-perf
+    defaults: /terraform/resources/s3-gdpr-1.yml
+    output_resource_name: insights-warehouse-strimzi-bucket
+  - provider: aws-iam-service-account
+    identifier: strimzi-bucket-read-write
+    variables:
+      aws_region: us-east-1
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": [
+              "s3:ListBucket",
+            ],
+            "Resource": [
+              "arn:aws:s3:::insights-client-metrics-perf",
+              "arn:aws:s3:::insights-warehouse-perf",
+            ]
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "s3:*Object"
+            ],
+            "Resource": [
+              "arn:aws:s3:::insights-client-metrics-perf/*",
+              "arn:aws:s3:::insights-warehouse-perf/*",
+            ]
+          }
+        ]
+      }
+    output_resource_name: strimzi-bucket-read-write

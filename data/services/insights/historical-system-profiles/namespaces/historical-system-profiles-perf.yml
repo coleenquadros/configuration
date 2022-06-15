@@ -46,23 +46,21 @@ openshiftResources:
   path: insights/secrets/perf/historical-system-profiles-perf/drift-interpod-comms
   version: 2
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-perf
-  identifier: historical-system-profiles-perf
-  defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-- provider: rds
-  account: insights-perf
-  identifier: historical-system-profiles-perf
-  defaults: /terraform/resources/insights/perf/rds/postgres11-rds-1.yml
-  output_resource_name: historical-system-profiles-db
-  overrides:
-    allocated_storage: 20
-  enhanced_monitoring: true
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-perf/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: historical-system-profiles-perf
+    defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+  - provider: rds
+    identifier: historical-system-profiles-perf
+    defaults: /terraform/resources/insights/perf/rds/postgres11-rds-1.yml
+    output_resource_name: historical-system-profiles-db
+    overrides:
+      allocated_storage: 20
+    enhanced_monitoring: true

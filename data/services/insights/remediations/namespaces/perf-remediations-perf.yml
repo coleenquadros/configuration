@@ -59,26 +59,23 @@ openshiftResources:
   type: kubernetes.io/dockerconfigjson
   name: quay-cloudservices-pull
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-perf
-  identifier: remediations-perf
-  defaults: /terraform/resources/insights/perf/rds/postgres10-rds-1.yml
-  overrides:
-    username: "insights"
-    name: "remediations"
-  parameter_group: /terraform/resources/insights/perf/rds/postgres10-parameter-group-remediations-perf.yml
-  output_resource_name: remediations-db
-  enhanced_monitoring: true
-- provider: cloudwatch
-  account: insights-perf
-  identifier: remediations-perf
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-perf/account.yml
+  resources:
+  - provider: rds
+    identifier: remediations-perf
+    defaults: /terraform/resources/insights/perf/rds/postgres10-rds-1.yml
+    overrides:
+      username: "insights"
+      name: "remediations"
+    parameter_group: /terraform/resources/insights/perf/rds/postgres10-parameter-group-remediations-perf.yml
+    output_resource_name: remediations-db
+    enhanced_monitoring: true
+  - provider: cloudwatch
+    identifier: remediations-perf
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch

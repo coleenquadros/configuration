@@ -46,25 +46,23 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-perf
-  identifier: system-baseline-perf
-  defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-- provider: rds
-  account: insights-perf
-  identifier: system-baseline-perf
-  defaults: /terraform/resources/insights/perf/rds/postgres10-rds-1.yml
-  parameter_group: /terraform/resources/insights/perf/rds/postgres10-parameter-group-system-baseline-perf.yml
-  output_resource_name: system-baseline-db
-  enhanced_monitoring: true
-
 sharedResources:
 - $ref: /services/app-sre/shared-resources/splunk-creds.yml
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-perf/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: system-baseline-perf
+    defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+  - provider: rds
+    identifier: system-baseline-perf
+    defaults: /terraform/resources/insights/perf/rds/postgres10-rds-1.yml
+    parameter_group: /terraform/resources/insights/perf/rds/postgres10-parameter-group-system-baseline-perf.yml
+    output_resource_name: system-baseline-db
+    enhanced_monitoring: true

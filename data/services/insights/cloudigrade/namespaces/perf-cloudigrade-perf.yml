@@ -57,34 +57,31 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-perf
-  identifier: cloudigrade-perf
-  defaults: /terraform/resources/insights/perf/rds/postgres11-rds-1.yml
-  overrides:
-    apply_immediately: true
-    engine_version: "13.6"
-    maintenance_window: Sun:17:00-Sun:18:00
-  output_resource_name: cloudigrade-rds
-  enhanced_monitoring: true
-  annotations:
-    clowder/database: cloudigrade
-- provider: cloudwatch
-  account: insights-perf
-  identifier: cloudigrade-perf
-  defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-- provider: elasticache
-  account: insights-perf
-  identifier: cloudigrade-redis-clowder-perf
-  defaults: /terraform/resources/insights/perf/elasticache/elasticache-cloudigrade-1.yml
-  output_resource_name: in-memory-db
-  overrides:
-    apply_immediately: true
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-perf/account.yml
+  resources:
+  - provider: rds
+    identifier: cloudigrade-perf
+    defaults: /terraform/resources/insights/perf/rds/postgres11-rds-1.yml
+    overrides:
+      apply_immediately: true
+      engine_version: "13.6"
+      maintenance_window: Sun:17:00-Sun:18:00
+    output_resource_name: cloudigrade-rds
+    enhanced_monitoring: true
+    annotations:
+      clowder/database: cloudigrade
+  - provider: cloudwatch
+    identifier: cloudigrade-perf
+    defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+  - provider: elasticache
+    identifier: cloudigrade-redis-clowder-perf
+    defaults: /terraform/resources/insights/perf/elasticache/elasticache-cloudigrade-1.yml
+    output_resource_name: in-memory-db
+    overrides:
+      apply_immediately: true

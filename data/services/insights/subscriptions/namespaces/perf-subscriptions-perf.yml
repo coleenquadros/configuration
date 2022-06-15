@@ -20,25 +20,6 @@ networkPoliciesAllow: []
 
 managedRoles: true
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-perf
-  identifier: subscriptions-perf
-  defaults: /terraform/resources/insights/perf/rds/rds-subscriptions-prod.yml
-  overrides:
-    username: "insights"
-    name: "yupana"
-  parameter_group: /terraform/resources/insights/perf/rds/postgres10-parameter-group-subscriptions-perf.yml
-  enhanced_monitoring: true
-  output_resource_name: yupana-db
-- provider: cloudwatch
-  account: insights-perf
-  identifier: subscriptions-perf
-  defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-
 managedResourceTypes:
 - ConfigMap
 - ServiceAccount
@@ -74,4 +55,21 @@ openshiftResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-perf/account.yml
+  resources:
+  - provider: rds
+    identifier: subscriptions-perf
+    defaults: /terraform/resources/insights/perf/rds/rds-subscriptions-prod.yml
+    overrides:
+      username: "insights"
+      name: "yupana"
+    parameter_group: /terraform/resources/insights/perf/rds/postgres10-parameter-group-subscriptions-perf.yml
+    enhanced_monitoring: true
+    output_resource_name: yupana-db
+  - provider: cloudwatch
+    identifier: subscriptions-perf
+    defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
