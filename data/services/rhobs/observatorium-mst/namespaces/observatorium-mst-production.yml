@@ -31,23 +31,9 @@ managedResourceTypes:
 - ServiceAccount
 - Secret
 
-managedTerraformResources: true
-
 sharedResources:
 - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
 - $ref: /services/rhobs/shared-resources/observatorium-allow-port-forward.yml
-
-terraformResources:
-- provider: s3
-  account: app-sre
-  identifier: observatorium-mst-thanos-production
-  defaults: /terraform/resources/telemeter/s3-private-1.yml
-  output_resource_name: observatorium-mst-thanos-production-s3
-- provider: s3
-  account: app-sre
-  identifier: observatorium-mst-rules-objstore-production
-  defaults: /terraform/resources/telemeter/s3-private-1.yml
-  output_resource_name: observatorium-mst-rules-objstore-production-s3
 
 openshiftResources:
 - provider: route
@@ -99,4 +85,16 @@ openshiftResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: s3
+    identifier: observatorium-mst-thanos-production
+    defaults: /terraform/resources/telemeter/s3-private-1.yml
+    output_resource_name: observatorium-mst-thanos-production-s3
+  - provider: s3
+    identifier: observatorium-mst-rules-objstore-production
+    defaults: /terraform/resources/telemeter/s3-private-1.yml
+    output_resource_name: observatorium-mst-rules-objstore-production-s3

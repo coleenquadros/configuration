@@ -39,20 +39,18 @@ openshiftResources:
   path: app-interface/app-sre-stage-01/github-mirror-stage/acceptance-tests
   version: 2
 
-managedTerraformResources: true
-
-terraformResources:  
-- provider: elasticache
-  account: app-sre
-  identifier: github-mirror-stage
-  defaults: /terraform/resources/github-mirror/elasticache-stage-1.yml
-  output_resource_name: ghmirror-elasticache-stage
-- provider: s3
-  account: app-sre
-  identifier: github-mirror-stage
-  defaults: /terraform/resources/s3-private-1.yml
-  output_resource_name: ghmirror-s3-stage
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: elasticache
+    identifier: github-mirror-stage
+    defaults: /terraform/resources/github-mirror/elasticache-stage-1.yml
+    output_resource_name: ghmirror-elasticache-stage
+  - provider: s3
+    identifier: github-mirror-stage
+    defaults: /terraform/resources/s3-private-1.yml
+    output_resource_name: ghmirror-s3-stage

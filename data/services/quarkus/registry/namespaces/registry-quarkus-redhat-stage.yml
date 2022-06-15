@@ -17,39 +17,38 @@ environment:
   $ref: /products/quarkus/environments/stage-redhat.yml
 
 networkPoliciesAllow:
-  - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
 
 managedResourceTypes:
-  - ServiceAccount
+- ServiceAccount
 
 openshiftResources:
-  - provider: resource
-    path: /app-sre-stage/registry-quarkus-redhat-stage/registry-quarkus-redhat.serviceaccount.yaml
-  - provider: route
-    path: /app-sre-stage/registry-quarkus-redhat-stage/registry-quarkus-redhat.route.yml
-  - provider: vault-secret
-    path: app-interface/app-sre-stage/registry-quarkus-redhat-stage/secrets
-    version: 5
-    annotations:
-      qontract.recycle: "true"
+- provider: resource
+  path: /app-sre-stage/registry-quarkus-redhat-stage/registry-quarkus-redhat.serviceaccount.yaml
+- provider: route
+  path: /app-sre-stage/registry-quarkus-redhat-stage/registry-quarkus-redhat.route.yml
+- provider: vault-secret
+  path: app-interface/app-sre-stage/registry-quarkus-redhat-stage/secrets
+  version: 5
+  annotations:
+    qontract.recycle: "true"
 
 managedRoles: true
 
-managedTerraformResources: true
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
 
-terraformResources:
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
   - provider: rds
-    account: app-sre
     identifier: quarkus-registry-redhat-stage
     defaults: /terraform/resources/app-sre/staging/rds-1.yml
     output_resource_name: registry-db
     overrides:
       engine_version: '12.7'
       apply_immediately: true
-
-sharedResources:
-  - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
-
-managedExternalResources: true
-
-externalResources: []

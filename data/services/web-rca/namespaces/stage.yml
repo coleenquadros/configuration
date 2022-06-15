@@ -25,28 +25,9 @@ sharedResources:
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
 
-managedTerraformResources: true
-
 managedResourceTypes:
 - Role
 - RoleBinding
-
-terraformResources:
-- provider: rds
-  account: app-sre
-  identifier: web-rca-stage
-  # we start with the same small DB that we have for Status Board
-  defaults: /terraform/resources/app-sre/staging/rds-pg14.yml
-  parameter_group: /web-rca/stage/web-rca-rds.parameter-group.yml
-  overrides:
-    apply_immediately: true
-    enabled_cloudwatch_logs_exports: ['postgresql', 'upgrade']
-  enhanced_monitoring: true
-- provider: s3
-  account: app-sre
-  identifier: web-rca-s3-stage
-  defaults: /terraform/resources/s3-private-1.yml
-  output_resource_name: web-rca-s3
 
 openshiftResources:
 - provider: vault-secret
@@ -63,4 +44,21 @@ openshiftResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: rds
+    identifier: web-rca-stage
+    # we start with the same small DB that we have for Status Board
+    defaults: /terraform/resources/app-sre/staging/rds-pg14.yml
+    parameter_group: /web-rca/stage/web-rca-rds.parameter-group.yml
+    overrides:
+      apply_immediately: true
+      enabled_cloudwatch_logs_exports: ['postgresql', 'upgrade']
+    enhanced_monitoring: true
+  - provider: s3
+    identifier: web-rca-s3-stage
+    defaults: /terraform/resources/s3-private-1.yml
+    output_resource_name: web-rca-s3

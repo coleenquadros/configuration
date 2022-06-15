@@ -41,19 +41,16 @@ openshiftResources:
 # This is only a temporary workaround to unblock sendgrid validation/testing in staging.
 # - provider: route
 #   path: /app-sre-stage/sendgrid-stage/ocm-sendgrid-service.route.yaml
-  
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: app-sre
-  identifier: ocm-sendgrid-service-staging
-  defaults: /terraform/resources/app-sre/staging/rds-1.yml
-  output_resource_name: ocm-sendgrid-service-rds
-  overrides:
-    engine_version: '12.7'
-
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: rds
+    identifier: ocm-sendgrid-service-staging
+    defaults: /terraform/resources/app-sre/staging/rds-1.yml
+    output_resource_name: ocm-sendgrid-service-rds
+    overrides:
+      engine_version: '12.7'

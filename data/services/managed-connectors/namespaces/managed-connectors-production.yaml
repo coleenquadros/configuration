@@ -16,39 +16,42 @@ environment:
   $ref: /products/osdv4/environments/production.yml
 
 networkPoliciesAllow:
-  - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-04.yml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-04.yml
 
 managedRoles: true
 
 managedResourceTypes:
-  - ServiceAccount
-  - ConfigMap
+- ServiceAccount
+- ConfigMap
 
 openshiftResources:
-  - provider: vault-secret
-    path: managed-services/quay-org-accounts/rhoas/robots/rhoas-pull-docker
-    version: 1
-    type: kubernetes.io/dockerconfigjson
-  - provider: vault-secret
+- provider: vault-secret
+  path: managed-services/quay-org-accounts/rhoas/robots/rhoas-pull-docker
+  version: 1
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  name: cos-fleet-manager
+  path:  app-interface/managed-connectors-api/production/service/credentials
+  version: 2
+  annotations:
+    qontract.recycle: "true"
+- provider: resource-template
+  path: /services/managed-connectors/serviceaccount.yaml
+  variables:
     name: cos-fleet-manager
-    path:  app-interface/managed-connectors-api/production/service/credentials
-    version: 2
-    annotations:
-      qontract.recycle: "true"
-  - provider: resource-template
-    path: /services/managed-connectors/serviceaccount.yaml
-    variables:
-      name: cos-fleet-manager
-  - provider: route
-    path: /services/managed-connectors/production/cos-fleet-manager.route.yaml
-  - provider: resource
-    path: /services/managed-connectors/production/cos-fleet-manager-envoy.configmap.yaml
+- provider: route
+  path: /services/managed-connectors/production/cos-fleet-manager.route.yaml
+- provider: resource
+  path: /services/managed-connectors/production/cos-fleet-manager-envoy.configmap.yaml
 
-managedTerraformResources: true
+managedExternalResources: true
 
-terraformResources:
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
   - provider: rds
-    account: app-sre
     identifier: cos-fleet-manager-production
     defaults: /terraform/resources/managed-connectors/production/rds-2-cloudwatch-enabled.yml
     parameter_group: /terraform/resources/managed-connectors/production/managed-connectors-stage-rds-parameter-group-pg12.yml
@@ -59,7 +62,3 @@ terraformResources:
       path: app-interface/global/rds-ca-cert
       field: us-east-1
       version: 2
-
-managedExternalResources: true
-
-externalResources: []

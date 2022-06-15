@@ -102,33 +102,6 @@ openshiftResources:
   path: app-sre/integrations-output/terraform-resources/app-sre-stage-01/uhc-stage/route53-creds
   version: 1
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: app-sre
-  identifier: clusters-service-ssotest01ue1
-  defaults: /terraform/resources/app-sre/staging/rds-1.yml
-  output_resource_name: clusters-service-rds
-  overrides:
-    engine_version: '12.9'
-- provider: rds
-  account: app-sre
-  identifier: uhc-acct-mngr-ssotest01ue1
-  defaults: /terraform/resources/app-sre/staging/rds-1.yml
-  output_resource_name: uhc-acct-mngr-rds
-  overrides:
-    engine_version: '12.9'
-    apply_immediately: true
-- provider: rds
-  account: app-sre
-  identifier: ocm-service-log-ssotest01ue1
-  defaults: /terraform/resources/app-sre/staging/rds-1.yml
-  output_resource_name: ocm-service-log-rds
-  overrides:
-    engine_version: '12.9'
-    apply_immediately: true
-
 openshiftServiceAccountTokens:
 # telemeter
 - name: telemeter-bearer
@@ -148,4 +121,28 @@ openshiftServiceAccountTokens:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: rds
+    identifier: clusters-service-ssotest01ue1
+    defaults: /terraform/resources/app-sre/staging/rds-1.yml
+    output_resource_name: clusters-service-rds
+    overrides:
+      engine_version: '12.9'
+  - provider: rds
+    identifier: uhc-acct-mngr-ssotest01ue1
+    defaults: /terraform/resources/app-sre/staging/rds-1.yml
+    output_resource_name: uhc-acct-mngr-rds
+    overrides:
+      engine_version: '12.9'
+      apply_immediately: true
+  - provider: rds
+    identifier: ocm-service-log-ssotest01ue1
+    defaults: /terraform/resources/app-sre/staging/rds-1.yml
+    output_resource_name: ocm-service-log-rds
+    overrides:
+      engine_version: '12.9'
+      apply_immediately: true

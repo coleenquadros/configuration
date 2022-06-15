@@ -31,15 +31,14 @@ openshiftResources:
   variables:
     host: github-mirror.devshift.net
 
-managedTerraformResources: true
-
-terraformResources:  
-- provider: elasticache
-  account: app-sre
-  identifier: github-mirror-production
-  defaults: /terraform/resources/github-mirror/elasticache-prod-2.yml
-  output_resource_name: ghmirror-elasticache-production
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: elasticache
+    identifier: github-mirror-production
+    defaults: /terraform/resources/github-mirror/elasticache-prod-2.yml
+    output_resource_name: ghmirror-elasticache-production

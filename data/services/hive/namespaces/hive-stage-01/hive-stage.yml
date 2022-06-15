@@ -32,53 +32,6 @@ managedResourceTypes:
 sharedResources:
 - $ref: /services/hive/shared-resources/stage.yml
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: s3
-  account: app-sre
-  identifier: hive-stage-storage-01
-  defaults: /terraform/resources/s3-private-1.yml
-  output_resource_name: s3-bucket-creds
-- provider: aws-iam-service-account
-  account: app-sre
-  identifier: hive-vpc-hive-stage-01
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [{
-        "Action": [
-          "sts:AssumeRole"
-        ],
-        "Effect": "Allow",
-        "Resource": "*" 
-      }]
-    }
-  output_resource_name: hive-vpc-creds-hive-stage-01
-  aws_infrastructure_access:
-    cluster:
-      $ref: /openshift/hive-stage-01/cluster.yml
-    access_level: network-mgmt
-- provider: aws-iam-service-account
-  account: app-sre
-  identifier: hive-vpc-hives02ue1
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [{
-        "Action": [
-          "sts:AssumeRole"
-        ],
-        "Effect": "Allow",
-        "Resource": "*" 
-      }]
-    }
-  output_resource_name: hive-vpc-creds-hives02ue1
-  aws_infrastructure_access:
-    cluster:
-      $ref: /openshift/hives02ue1/cluster.yml
-    access_level: network-mgmt
-
 managedExternalResources: true
 
 externalResources:
@@ -136,3 +89,47 @@ externalResources:
           "Resource": "arn:aws:iam::*:role/RH-Managed-OpenShift-Installer" 
         }]
       }
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: s3
+    identifier: hive-stage-storage-01
+    defaults: /terraform/resources/s3-private-1.yml
+    output_resource_name: s3-bucket-creds
+  - provider: aws-iam-service-account
+    identifier: hive-vpc-hive-stage-01
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Action": [
+            "sts:AssumeRole"
+          ],
+          "Effect": "Allow",
+          "Resource": "*" 
+        }]
+      }
+    output_resource_name: hive-vpc-creds-hive-stage-01
+    aws_infrastructure_access:
+      cluster:
+        $ref: /openshift/hive-stage-01/cluster.yml
+      access_level: network-mgmt
+  - provider: aws-iam-service-account
+    identifier: hive-vpc-hives02ue1
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Action": [
+            "sts:AssumeRole"
+          ],
+          "Effect": "Allow",
+          "Resource": "*" 
+        }]
+      }
+    output_resource_name: hive-vpc-creds-hives02ue1
+    aws_infrastructure_access:
+      cluster:
+        $ref: /openshift/hives02ue1/cluster.yml
+      access_level: network-mgmt

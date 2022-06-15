@@ -16,7 +16,7 @@ environment:
   $ref: /products/osdv4/environments/stage.yml
 
 networkPoliciesAllow:
-  - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
 
 limitRanges:
   $ref: /dependencies/openshift/limitranges/standard-resource-limits.yml
@@ -43,23 +43,22 @@ openshiftResources:
   path: app-interface/image-builder/stage/splunk
   version: 1
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: app-sre
-  identifier: image-builder-composer-db-stage
-  defaults: /terraform/resources/app-sre/staging/rds-2-cloudwatch-enabled.yml
-  parameter_group: /terraform/resources/image-builder/stage/rds/postgres12-parameter-group-image-builder-composer-stage.yml
-  output_resource_name: composer-db
-  overrides:
-    allocated_storage: 50
-    engine_version: '12.10'
-    apply_immediately: true
-
 sharedResources:
 - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: rds
+    identifier: image-builder-composer-db-stage
+    defaults: /terraform/resources/app-sre/staging/rds-2-cloudwatch-enabled.yml
+    parameter_group: /terraform/resources/image-builder/stage/rds/postgres12-parameter-group-image-builder-composer-stage.yml
+    output_resource_name: composer-db
+    overrides:
+      allocated_storage: 50
+      engine_version: '12.10'
+      apply_immediately: true

@@ -130,57 +130,6 @@ openshiftResources:
 - provider: resource
   path: /services/ocm/integration/cluster-proxy-service.configmap.yaml
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: app-sre
-  identifier: clusters-service-integration-v4
-  defaults: /terraform/resources/app-sre/integration/rds-1.yml
-  output_resource_name: clusters-service-rds
-  overrides:
-    engine_version: '12.9'
-    performance_insights_enabled: true
-- provider: rds
-  account: app-sre
-  identifier: uhc-acct-mngr-integration-v4
-  defaults: /terraform/resources/app-sre/integration/rds-1.yml
-  output_resource_name: uhc-acct-mngr-rds
-  overrides:
-    engine_version: '12.9'
-    performance_insights_enabled: true
-- provider: rds
-  account: app-sre
-  identifier: ocm-service-log-integration-v4
-  defaults: /terraform/resources/app-sre/integration/rds-1.yml
-  output_resource_name: ocm-service-log-rds
-  overrides:
-    engine_version: '12.9'
-- provider: sqs
-  account: app-sre
-  identifier: job-queue-service-integration
-  output_resource_name: job-queue-service-sqs
-  specs:
-    - defaults: /terraform/resources/ocm/job-queue-service-heartbeat-sqs-integration.yml
-      queues:
-        - key: job_queue_service_heartbeat_integration
-          value: job-queue-service-heartbeat-integration
-    - defaults: /terraform/resources/ocm/job-queue-osl-sqs-integration.yml
-      queues:
-        - key: job_queue_osl_integration
-          value: job-queue-osl-integration
-    - defaults: /terraform/resources/ocm/dlq-sqs.yml
-      queues:
-        - key: job_queue_service_heartbeat_integration_dlq
-          value: job-queue-service-heartbeat-integration-dlq
-        - key: job_queue_osl_integration_dlq
-          value: job-queue-osl-integration-dlq
-- provider: s3
-  account: app-sre
-  identifier: rh-oidc-integration
-  defaults: /terraform/resources/s3-public-read-1.yml
-  output_resource_name: rh-oidc-s3-secret
-
 openshiftServiceAccountTokens:
 # telemeter
 - name: telemeter-bearer
@@ -235,3 +184,49 @@ externalResources:
         }]
       }
     output_resource_name: sts-credentials
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: rds
+    identifier: clusters-service-integration-v4
+    defaults: /terraform/resources/app-sre/integration/rds-1.yml
+    output_resource_name: clusters-service-rds
+    overrides:
+      engine_version: '12.9'
+      performance_insights_enabled: true
+  - provider: rds
+    identifier: uhc-acct-mngr-integration-v4
+    defaults: /terraform/resources/app-sre/integration/rds-1.yml
+    output_resource_name: uhc-acct-mngr-rds
+    overrides:
+      engine_version: '12.9'
+      performance_insights_enabled: true
+  - provider: rds
+    identifier: ocm-service-log-integration-v4
+    defaults: /terraform/resources/app-sre/integration/rds-1.yml
+    output_resource_name: ocm-service-log-rds
+    overrides:
+      engine_version: '12.9'
+  - provider: sqs
+    identifier: job-queue-service-integration
+    output_resource_name: job-queue-service-sqs
+    specs:
+    - defaults: /terraform/resources/ocm/job-queue-service-heartbeat-sqs-integration.yml
+      queues:
+      - key: job_queue_service_heartbeat_integration
+        value: job-queue-service-heartbeat-integration
+    - defaults: /terraform/resources/ocm/job-queue-osl-sqs-integration.yml
+      queues:
+      - key: job_queue_osl_integration
+        value: job-queue-osl-integration
+    - defaults: /terraform/resources/ocm/dlq-sqs.yml
+      queues:
+      - key: job_queue_service_heartbeat_integration_dlq
+        value: job-queue-service-heartbeat-integration-dlq
+      - key: job_queue_osl_integration_dlq
+        value: job-queue-osl-integration-dlq
+  - provider: s3
+    identifier: rh-oidc-integration
+    defaults: /terraform/resources/s3-public-read-1.yml
+    output_resource_name: rh-oidc-s3-secret

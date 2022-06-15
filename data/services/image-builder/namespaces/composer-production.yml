@@ -16,7 +16,7 @@ environment:
   $ref: /products/osdv4/environments/production.yml
 
 networkPoliciesAllow:
-  - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-04.yml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-04.yml
 
 limitRanges:
   $ref: /dependencies/openshift/limitranges/standard-resource-limits.yml
@@ -43,21 +43,20 @@ openshiftResources:
   path: app-interface/image-builder/production/aws-account
   version: 2
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: app-sre
-  identifier: image-builder-composer-db-prod
-  defaults: /terraform/resources/app-sre/production/rds-1.yml
-  output_resource_name: composer-db
-  overrides:
-    engine_version: '12.10'
-    maintenance_window: fri:01:00-fri:02:00
-
 sharedResources:
 - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: rds
+    identifier: image-builder-composer-db-prod
+    defaults: /terraform/resources/app-sre/production/rds-1.yml
+    output_resource_name: composer-db
+    overrides:
+      engine_version: '12.10'
+      maintenance_window: fri:01:00-fri:02:00

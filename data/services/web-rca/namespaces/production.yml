@@ -25,24 +25,6 @@ sharedResources:
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-04.yml
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: app-sre
-  identifier: web-rca-production
-  defaults: /terraform/resources/app-sre/production/rds-pg14.yml
-  parameter_group: /web-rca/stage/web-rca-rds.parameter-group.yml
-  overrides:
-    apply_immediately: true
-    enabled_cloudwatch_logs_exports: ['postgresql', 'upgrade']
-  enhanced_monitoring: true
-- provider: s3
-  account: app-sre
-  identifier: web-rca-s3-prod
-  defaults: /terraform/resources/s3-private-1.yml
-  output_resource_name: web-rca-s3
-
 openshiftResources:
 - provider: vault-secret
   path: app-interface/web-rca/production/runtime
@@ -54,4 +36,20 @@ openshiftResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: rds
+    identifier: web-rca-production
+    defaults: /terraform/resources/app-sre/production/rds-pg14.yml
+    parameter_group: /web-rca/stage/web-rca-rds.parameter-group.yml
+    overrides:
+      apply_immediately: true
+      enabled_cloudwatch_logs_exports: ['postgresql', 'upgrade']
+    enhanced_monitoring: true
+  - provider: s3
+    identifier: web-rca-s3-prod
+    defaults: /terraform/resources/s3-private-1.yml
+    output_resource_name: web-rca-s3

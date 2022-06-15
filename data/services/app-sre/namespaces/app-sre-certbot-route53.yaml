@@ -15,41 +15,40 @@ app:
 environment:
   $ref: /products/app-sre/environments/production.yml
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: aws-iam-service-account
-  account: app-sre
-  identifier: app-sre-certbot-route53
-  variables:
-    aws_region: us-east-1
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [
-        {
-          "Effect": "Allow",
-          "Action": [
-            "route53:ListHostedZones",
-            "route53:GetChange"
-          ],
-          "Resource": [
-            "*"
-          ]
-        },
-        {
-          "Effect": "Allow",
-          "Action": [
-            "route53:ChangeResourceRecordSets"
-          ],
-          "Resource": [
-            "arn:aws:route53:::hostedzone/Z05758033SZ8IESGUOY8E"
-          ]
-        }
-      ]
-    }
-  output_resource_name: app-sre-certbot-route53
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: aws-iam-service-account
+    identifier: app-sre-certbot-route53
+    variables:
+      aws_region: us-east-1
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": [
+              "route53:ListHostedZones",
+              "route53:GetChange"
+            ],
+            "Resource": [
+              "*"
+            ]
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "route53:ChangeResourceRecordSets"
+            ],
+            "Resource": [
+              "arn:aws:route53:::hostedzone/Z05758033SZ8IESGUOY8E"
+            ]
+          }
+        ]
+      }
+    output_resource_name: app-sre-certbot-route53

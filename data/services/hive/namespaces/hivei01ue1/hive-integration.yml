@@ -49,34 +49,6 @@ openshiftResources:
   type: extracurlyjinja2
   path: /services/hive/integration/aws-service-provider-secret.yaml
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: s3
-  account: app-sre
-  identifier: hive-integration-storage-01
-  defaults: /terraform/resources/s3-private-1.yml
-  output_resource_name: s3-bucket-creds
-- provider: aws-iam-service-account
-  account: app-sre
-  identifier: hive-vpc-hivei01ue1
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [{
-        "Action": [
-          "sts:AssumeRole"
-        ],
-        "Effect": "Allow",
-        "Resource": "*" 
-      }]
-    }
-  output_resource_name: hive-vpc-creds-hivei01ue1
-  aws_infrastructure_access:
-    cluster:
-      $ref: /openshift/hivei01ue1/cluster.yml
-    access_level: network-mgmt
-
 managedExternalResources: true
 
 externalResources:
@@ -134,3 +106,30 @@ externalResources:
           "Resource": "arn:aws:iam::*:role/RH-Managed-OpenShift-Installer" 
         }]
       }
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: s3
+    identifier: hive-integration-storage-01
+    defaults: /terraform/resources/s3-private-1.yml
+    output_resource_name: s3-bucket-creds
+  - provider: aws-iam-service-account
+    identifier: hive-vpc-hivei01ue1
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Action": [
+            "sts:AssumeRole"
+          ],
+          "Effect": "Allow",
+          "Resource": "*" 
+        }]
+      }
+    output_resource_name: hive-vpc-creds-hivei01ue1
+    aws_infrastructure_access:
+      cluster:
+        $ref: /openshift/hivei01ue1/cluster.yml
+      access_level: network-mgmt
+

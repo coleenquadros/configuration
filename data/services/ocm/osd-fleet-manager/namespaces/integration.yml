@@ -40,22 +40,21 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: app-sre
-  identifier: osd-fleet-manager-integration
-  defaults: /terraform/resources/app-sre/integration/rds-1.yml
-  output_resource_name: osd-fleet-manager-rds
-  overrides:
-    engine_version: '14.2'
-    auto_minor_version_upgrade: true
-  ca_cert:
-    path: app-interface/global/rds-ca-cert
-    field: us-east-1
-    version: 2
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: rds
+    identifier: osd-fleet-manager-integration
+    defaults: /terraform/resources/app-sre/integration/rds-1.yml
+    output_resource_name: osd-fleet-manager-rds
+    overrides:
+      engine_version: '14.2'
+      auto_minor_version_upgrade: true
+    ca_cert:
+      path: app-interface/global/rds-ca-cert
+      field: us-east-1
+      version: 2

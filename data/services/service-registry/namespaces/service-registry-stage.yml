@@ -9,7 +9,7 @@ name: service-registry-stage
 description: Staging namespace for Service Registry
 
 cluster:
-  $ref: /openshift/app-sre-stage-01/cluster.yml 
+  $ref: /openshift/app-sre-stage-01/cluster.yml
 
 app:
   $ref: /services/service-registry/app.yml
@@ -18,13 +18,13 @@ environment:
   $ref: /products/service-registry/environments/stage.yml
 
 networkPoliciesAllow:
-  - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
 
 managedRoles: true
 
 managedResourceTypes:
-  - ServiceAccount
-  - ConfigMap
+- ServiceAccount
+- ConfigMap
 
 openshiftResources:
 - provider: vault-secret
@@ -78,28 +78,25 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-# Data Plane database
-- provider: rds
-  account: app-sre
-  identifier: srs-service-registry
-  defaults: /terraform/resources/service-registry/staging/rds-2-cloudwatch-enabled.yml
-  parameter_group: /terraform/resources/service-registry/staging/service-registry-stage-rds-parameter-group-pg12.yml
-  output_resource_name: srs-service-registry-rds
-  overrides:
-    apply_immediately: true
-# Control Plane database
-- provider: rds
-  account: app-sre
-  identifier: srs-fleet-manager
-  defaults: /terraform/resources/service-registry/staging/rds-2-cloudwatch-enabled.yml
-  parameter_group: /terraform/resources/service-registry/staging/service-registry-stage-rds-parameter-group-pg12.yml
-  output_resource_name: srs-fleet-manager-rds
-  overrides:
-    apply_immediately: true
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: rds
+    identifier: srs-service-registry
+    defaults: /terraform/resources/service-registry/staging/rds-2-cloudwatch-enabled.yml
+    parameter_group: /terraform/resources/service-registry/staging/service-registry-stage-rds-parameter-group-pg12.yml
+    output_resource_name: srs-service-registry-rds
+    overrides:
+      apply_immediately: true
+# Control Plane database
+  - provider: rds
+    identifier: srs-fleet-manager
+    defaults: /terraform/resources/service-registry/staging/rds-2-cloudwatch-enabled.yml
+    parameter_group: /terraform/resources/service-registry/staging/service-registry-stage-rds-parameter-group-pg12.yml
+    output_resource_name: srs-fleet-manager-rds
+    overrides:
+      apply_immediately: true

@@ -32,24 +32,22 @@ openshiftResources:
   path: /app-sre/sendgrid-production/ocm-sendgrid-service.serviceaccount.yaml
 - provider: vault-secret
   name: ocm-sendgrid-service
-  path:  app-interface/ocm-sendgrid-service/production/service/credentials
+  path: app-interface/ocm-sendgrid-service/production/service/credentials
   version: 5
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: app-sre
-  identifier: ocm-sendgrid-service-prod
-  defaults: /terraform/resources/app-sre/production/rds-1.yml
-  output_resource_name: ocm-sendgrid-service-rds
-  overrides:
-    engine_version: '12.7'
-    maintenance_window: Tue:04:00-Tue:04:30
-
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: rds
+    identifier: ocm-sendgrid-service-prod
+    defaults: /terraform/resources/app-sre/production/rds-1.yml
+    output_resource_name: ocm-sendgrid-service-rds
+    overrides:
+      engine_version: '12.7'
+      maintenance_window: Tue:04:00-Tue:04:30
