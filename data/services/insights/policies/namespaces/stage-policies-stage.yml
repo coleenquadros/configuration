@@ -51,30 +51,29 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-stage
-  identifier: policies-ui-backend-stage
-  defaults: /terraform/resources/insights/stage/rds/postgres11-rds-1.yml
-  overrides:
-    name: policies_ui_backend
-  output_resource_name: policies-ui-backend-db
-  enhanced_monitoring: true
-- provider: cloudwatch
-  account: insights-stage
-  identifier: policies-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-
 kafkaCluster:
   $ref: /kafka/crcs02ue1k/cluster.yml
 
 sharedResources:
-  - $ref: /services/insights/shared-resources/metrics-export-stage.yml
+- $ref: /services/insights/shared-resources/metrics-export-stage.yml
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: policies-ui-backend-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres11-rds-1.yml
+    overrides:
+      name: policies_ui_backend
+    output_resource_name: policies-ui-backend-db
+    enhanced_monitoring: true
+  - provider: cloudwatch
+    identifier: policies-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+

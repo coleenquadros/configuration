@@ -74,36 +74,33 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-stage
-  identifier: automation-hub-stage
-  defaults: /terraform/resources/insights/stage/rds/postgres12-rds-1.yml
-  overrides:
-    engine_version: "12.8"
-  parameter_group: /terraform/resources/insights/stage/rds/postgres12-parameter-group-automation-hub-stage.yml
-  output_resource_name: automation-hub-db
-  enhanced_monitoring: true
-  reset_password: APPSRE-5037
-- provider: s3
-  account: insights-stage
-  identifier: automation-hub-stage-s3
-  defaults: /terraform/resources/s3-private-1.yml
-  output_resource_name: automation-hub-s3
-- provider: cloudwatch
-  account: insights-stage
-  identifier: automation-hub-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: elasticache
-  account: insights-stage
-  identifier: automation-hub-stage-elasticache
-  defaults: /terraform/resources/insights/stage/elasticache/elasticache-automation-hub-1.yml
-  output_resource_name: automation-hub-elasticache-redis
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: automation-hub-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres12-rds-1.yml
+    overrides:
+      engine_version: "12.8"
+    parameter_group: /terraform/resources/insights/stage/rds/postgres12-parameter-group-automation-hub-stage.yml
+    output_resource_name: automation-hub-db
+    enhanced_monitoring: true
+    reset_password: APPSRE-5037
+  - provider: s3
+    identifier: automation-hub-stage-s3
+    defaults: /terraform/resources/s3-private-1.yml
+    output_resource_name: automation-hub-s3
+  - provider: cloudwatch
+    identifier: automation-hub-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: elasticache
+    identifier: automation-hub-stage-elasticache
+    defaults: /terraform/resources/insights/stage/elasticache/elasticache-automation-hub-1.yml
+    output_resource_name: automation-hub-elasticache-redis
+

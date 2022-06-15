@@ -46,55 +46,6 @@ networkPoliciesAllow:
 
 managedRoles: true
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-stage
-  identifier: platform-mq-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: s3
-  account: insights-stage
-  identifier: insights-client-metrics-stage
-  defaults: /terraform/resources/s3-gdpr-1.yml
-  output_resource_name: insights-client-metrics-strimzi-bucket
-- provider: s3
-  account: insights-stage
-  identifier: insights-warehouse-stage
-  defaults: /terraform/resources/s3-gdpr-1.yml
-  output_resource_name: insights-warehouse-strimzi-bucket
-- provider: aws-iam-service-account
-  account: insights-stage
-  identifier: strimzi-bucket-read-write
-  variables:
-    aws_region: us-east-1
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [{
-        "Effect": "Allow",
-        "Action": [
-          "s3:ListBucket",
-        ],
-        "Resource": [
-          "arn:aws:s3:::insights-client-metrics-stage",
-          "arn:aws:s3:::insights-warehouse-stage",
-        ]
-      }, {
-        "Effect": "Allow",
-        "Action": [
-          "s3:*Object"
-        ],
-        "Resource": [
-          "arn:aws:s3:::insights-client-metrics-stage/*",
-          "arn:aws:s3:::insights-warehouse-stage/*",
-        ]
-      }]
-    }
-  output_resource_name: strimzi-bucket-read-write
-
 managedResourceTypes:
 - ServiceAccount
 - Role
@@ -146,4 +97,49 @@ kafkaCluster:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: platform-mq-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: s3
+    identifier: insights-client-metrics-stage
+    defaults: /terraform/resources/s3-gdpr-1.yml
+    output_resource_name: insights-client-metrics-strimzi-bucket
+  - provider: s3
+    identifier: insights-warehouse-stage
+    defaults: /terraform/resources/s3-gdpr-1.yml
+    output_resource_name: insights-warehouse-strimzi-bucket
+  - provider: aws-iam-service-account
+    identifier: strimzi-bucket-read-write
+    variables:
+      aws_region: us-east-1
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Effect": "Allow",
+          "Action": [
+            "s3:ListBucket",
+          ],
+          "Resource": [
+            "arn:aws:s3:::insights-client-metrics-stage",
+            "arn:aws:s3:::insights-warehouse-stage",
+          ]
+        }, {
+          "Effect": "Allow",
+          "Action": [
+            "s3:*Object"
+          ],
+          "Resource": [
+            "arn:aws:s3:::insights-client-metrics-stage/*",
+            "arn:aws:s3:::insights-warehouse-stage/*",
+          ]
+        }]
+      }
+    output_resource_name: strimzi-bucket-read-write

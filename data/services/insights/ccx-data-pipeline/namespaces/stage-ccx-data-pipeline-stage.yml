@@ -61,76 +61,69 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-stage
-  identifier: ccx-data-pipeline-stage
-  defaults: /terraform/resources/insights/stage/rds/postgres11-rds-1.yml
-  output_resource_name: ccx-data-pipeline-db
-  enhanced_monitoring: true
-- provider: rds
-  account: insights-stage
-  identifier: ccx-notification-db-stage
-  defaults: /terraform/resources/insights/stage/rds/postgres11-rds-1.yml
-  output_resource_name: ccx-notification-db
-  enhanced_monitoring: true
-  overrides:
-    allocated_storage: 100
-  annotations:
-    clowder/database: ccx-notification-writer
-- provider: cloudwatch
-  account: insights-stage
-  identifier: ccx-data-pipeline-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: sqs
-  account: insights-stage
-  identifier: insights-buck-it-openshift-stage-sqs
-  output_resource_name: insights-sqs
-  specs:
-  - defaults: /terraform/resources/insights/stage/sqs-insights-buck-it-openshift-stage.yml
-    queues:
-    - key: name
-      value: insights-buck-it-openshift-stage
-- provider: kms
-  account: insights-stage
-  identifier: insights-buck-it-openshift-stage
-  output_resource_name: insights-kms
-  defaults: /terraform/resources/insights/stage/kms-insights-buck-it-openshift-stage.yml
-- provider: s3
-  account: insights-stage
-  identifier: insights-exported-results-stage
-  defaults: /terraform/resources/s3-all-expires-7-days.yml
-  output_resource_name: ccx-results-exporter-s3
-- provider: aws-iam-service-account
-  account: insights-stage
-  identifier: ccx-exporter-s3-stage
-  variables:
-    bucket: insights-exported-results-stage
-    region: us-east-1
-    endpoint: s3.us-east-1.amazonaws.com
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [
-        {
-          "Effect": "Allow",
-          "Action": ["s3:ListBucket"],
-          "Resource": ["arn:aws:s3:::${bucket}"]
-        },
-        {
-          "Effect": "Allow",
-          "Action": ["s3:*Object"],
-          "Resource": ["arn:aws:s3:::${bucket}/*"]
-        }
-
-      ]
-    }
-  output_resource_name: ccx-exporter-s3-read-write
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: ccx-data-pipeline-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres11-rds-1.yml
+    output_resource_name: ccx-data-pipeline-db
+    enhanced_monitoring: true
+  - provider: rds
+    identifier: ccx-notification-db-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres11-rds-1.yml
+    output_resource_name: ccx-notification-db
+    enhanced_monitoring: true
+    overrides:
+      allocated_storage: 100
+    annotations:
+      clowder/database: ccx-notification-writer
+  - provider: cloudwatch
+    identifier: ccx-data-pipeline-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: sqs
+    identifier: insights-buck-it-openshift-stage-sqs
+    output_resource_name: insights-sqs
+    specs:
+    - defaults: /terraform/resources/insights/stage/sqs-insights-buck-it-openshift-stage.yml
+      queues:
+      - key: name
+        value: insights-buck-it-openshift-stage
+  - provider: kms
+    identifier: insights-buck-it-openshift-stage
+    output_resource_name: insights-kms
+    defaults: /terraform/resources/insights/stage/kms-insights-buck-it-openshift-stage.yml
+  - provider: s3
+    identifier: insights-exported-results-stage
+    defaults: /terraform/resources/s3-all-expires-7-days.yml
+    output_resource_name: ccx-results-exporter-s3
+  - provider: aws-iam-service-account
+    identifier: ccx-exporter-s3-stage
+    variables:
+      bucket: insights-exported-results-stage
+      region: us-east-1
+      endpoint: s3.us-east-1.amazonaws.com
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": ["s3:ListBucket"],
+            "Resource": ["arn:aws:s3:::${bucket}"]
+          },
+          {
+            "Effect": "Allow",
+            "Action": ["s3:*Object"],
+            "Resource": ["arn:aws:s3:::${bucket}/*"]
+          }
+        ]
+      }
+    output_resource_name: ccx-exporter-s3-read-write
+

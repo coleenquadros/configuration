@@ -93,28 +93,25 @@ openshiftResources:
   path: insights/secrets/backoffice/preprod/insights-rbac
   version: 3
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-stage
-  identifier: rbac-stage
-  defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
-  parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-rbac-stage.yml
-  output_resource_name: rbac-db
-  enhanced_monitoring: true
-- provider: cloudwatch
-  account: insights-stage
-  identifier: rbac-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: elasticache
-  account: insights-stage
-  identifier: rbac-stage-elasticache
-  defaults: /terraform/resources/insights/stage/elasticache/elasticache-rbac-1.yml
-  output_resource_name: in-memory-db
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: rbac-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
+    parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-rbac-stage.yml
+    output_resource_name: rbac-db
+    enhanced_monitoring: true
+  - provider: cloudwatch
+    identifier: rbac-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: elasticache
+    identifier: rbac-stage-elasticache
+    defaults: /terraform/resources/insights/stage/elasticache/elasticache-rbac-1.yml
+    output_resource_name: in-memory-db

@@ -47,34 +47,31 @@ openshiftResources:
 - provider: resource
   path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-stage
-  identifier: xavier-stage
-  defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
-  overrides:
-    username: "userEN2"
-    name: "migration_analytics"
-  parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-xavier-stage.yml
-  enhanced_monitoring: true
-  output_resource_name: xavier-db
-- provider: s3
-  account: insights-stage
-  identifier: xavier-stage-s3
-  defaults: /terraform/resources/s3-private-1.yml
-  output_resource_name: upload-s3
-- provider: cloudwatch
-  account: insights-stage
-  identifier: xavier-stage-cloudwatch
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-
 kafkaCluster:
   $ref: /kafka/crcs02ue1k/cluster.yml
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: xavier-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
+    overrides:
+      username: "userEN2"
+      name: "migration_analytics"
+    parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-xavier-stage.yml
+    enhanced_monitoring: true
+    output_resource_name: xavier-db
+  - provider: s3
+    identifier: xavier-stage-s3
+    defaults: /terraform/resources/s3-private-1.yml
+    output_resource_name: upload-s3
+  - provider: cloudwatch
+    identifier: xavier-stage-cloudwatch
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch

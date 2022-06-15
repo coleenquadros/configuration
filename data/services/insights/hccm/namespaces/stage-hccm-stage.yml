@@ -138,72 +138,66 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-stage
-  identifier: koku-stage
-  defaults: /terraform/resources/insights/stage/rds/postgres13-rds-cost-management-stage-1.yml
-  overrides:
-    username: "insights"
-    name: "koku"
-  output_resource_name: koku-db
-  enhanced_monitoring: true
-  parameter_group: /terraform/resources/insights/stage/rds/postgres13-parameter-group-cost-management-stage.yml
-  annotations:
-    clowder/database: "koku"
-- provider: cloudwatch
-  account: insights-stage
-  identifier: hccm-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: s3
-  account: insights-stage
-  identifier: hccm-stage-s3
-  defaults: /terraform/resources/s3-all-expires-465-days.yml
-  output_resource_name: hccm-s3
-- provider: aws-iam-service-account
-  account: insights-stage
-  identifier: hccm-hcs-s3-read-stage
-  variables:
-    aws_region: us-east-1
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [{
-        "Effect": "Allow",
-        "Action": [
-          "s3:ListBucket",
-          "s3:GetObject"
-        ],
-        "Resource": [
-          "arn:aws:s3:::hccm-stage-s3",
-          "arn:aws:s3:::hccm-stage-s3/*"
-        ]
-      }]
-    }
-  output_resource_name: hccm-hcs-stage-s3-read
-- provider: elasticache # TODO remove after clowder
-  account: insights-stage
-  identifier: cost-management-stage-elasticache
-  defaults: /terraform/resources/insights/stage/elasticache/elasticache-hccm-1.yml
-  output_resource_name: elasticache-redis
-- provider: elasticache # TODO remove after clowder
-  account: insights-stage
-  identifier: cost-management-stage-elasticache-api
-  defaults: /terraform/resources/insights/stage/elasticache/elasticache-hccm-2.yml
-  output_resource_name: elasticache-redis-api
-- provider: elasticache
-  account: insights-stage
-  identifier: cost-management-redis-clowder
-  defaults: /terraform/resources/insights/stage/elasticache/elasticache-hccm-3.yml
-  output_resource_name: in-memory-db
-
 kafkaCluster:
   $ref: /kafka/crcs02ue1k/cluster.yml
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: koku-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres13-rds-cost-management-stage-1.yml
+    overrides:
+      username: "insights"
+      name: "koku"
+    output_resource_name: koku-db
+    enhanced_monitoring: true
+    parameter_group: /terraform/resources/insights/stage/rds/postgres13-parameter-group-cost-management-stage.yml
+    annotations:
+      clowder/database: "koku"
+  - provider: cloudwatch
+    identifier: hccm-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: s3
+    identifier: hccm-stage-s3
+    defaults: /terraform/resources/s3-all-expires-465-days.yml
+    output_resource_name: hccm-s3
+  - provider: aws-iam-service-account
+    identifier: hccm-hcs-s3-read-stage
+    variables:
+      aws_region: us-east-1
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Effect": "Allow",
+          "Action": [
+            "s3:ListBucket",
+            "s3:GetObject"
+          ],
+          "Resource": [
+            "arn:aws:s3:::hccm-stage-s3",
+            "arn:aws:s3:::hccm-stage-s3/*"
+          ]
+        }]
+      }
+    output_resource_name: hccm-hcs-stage-s3-read
+  - provider: elasticache # TODO remove after clowder
+    identifier: cost-management-stage-elasticache
+    defaults: /terraform/resources/insights/stage/elasticache/elasticache-hccm-1.yml
+    output_resource_name: elasticache-redis
+  - provider: elasticache # TODO remove after clowder
+    identifier: cost-management-stage-elasticache-api
+    defaults: /terraform/resources/insights/stage/elasticache/elasticache-hccm-2.yml
+    output_resource_name: elasticache-redis-api
+  - provider: elasticache
+    identifier: cost-management-redis-clowder
+    defaults: /terraform/resources/insights/stage/elasticache/elasticache-hccm-3.yml
+    output_resource_name: in-memory-db
+

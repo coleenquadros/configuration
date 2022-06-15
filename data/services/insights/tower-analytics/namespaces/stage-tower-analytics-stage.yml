@@ -83,36 +83,32 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-stage
-  identifier: tower-analytics-stage
-  defaults: /terraform/resources/insights/stage/rds/rds-tower-analytics-stage.yml
-  parameter_group: /terraform/resources/insights/stage/rds/postgres13-parameter-group-tower-analytics-stage.yml
-  output_resource_name: automation-analytics-db
-  enhanced_monitoring: true
-- provider: s3
-  account: insights-stage
-  identifier: tower-analytics-dbdumps-stage-s3
-  defaults: /terraform/resources/s3-private-1.yml
-  output_resource_name: tower-analytics-dbdumps
-- provider: s3
-  account: insights-stage
-  identifier: tower-analytics-recovery-stage-s3
-  defaults: /terraform/resources/s3-all-expires-90-days.yml
-  output_resource_name: tower-analytics-recovery
-- provider: cloudwatch
-  account: insights-stage
-  identifier: tower-analytics-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-
 kafkaCluster:
   $ref: /kafka/crcs02ue1k/cluster.yml
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: tower-analytics-stage
+    defaults: /terraform/resources/insights/stage/rds/rds-tower-analytics-stage.yml
+    parameter_group: /terraform/resources/insights/stage/rds/postgres13-parameter-group-tower-analytics-stage.yml
+    output_resource_name: automation-analytics-db
+    enhanced_monitoring: true
+  - provider: s3
+    identifier: tower-analytics-dbdumps-stage-s3
+    defaults: /terraform/resources/s3-private-1.yml
+    output_resource_name: tower-analytics-dbdumps
+  - provider: s3
+    identifier: tower-analytics-recovery-stage-s3
+    defaults: /terraform/resources/s3-all-expires-90-days.yml
+    output_resource_name: tower-analytics-recovery
+  - provider: cloudwatch
+    identifier: tower-analytics-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch

@@ -43,21 +43,19 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-stage
-  identifier: kibana-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: elasticsearch
-  account: insights-stage
-  identifier: kibana-elasticsearch
-  defaults: /terraform/resources/insights/stage/elasticsearch/elasticsearch-1.yml
-  output_resource_name: kibana-elasticsearch
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: kibana-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: elasticsearch
+    identifier: kibana-elasticsearch
+    defaults: /terraform/resources/insights/stage/elasticsearch/elasticsearch-1.yml
+    output_resource_name: kibana-elasticsearch

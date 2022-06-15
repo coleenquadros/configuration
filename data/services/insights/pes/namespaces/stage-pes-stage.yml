@@ -38,23 +38,21 @@ openshiftResources:
   type: kubernetes.io/dockerconfigjson
   name: quay-cloudservices-pull
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-stage
-  identifier: pes-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: rds
-  account: insights-stage
-  identifier: pes-stage
-  defaults: /terraform/resources/insights/stage/rds/postgres11-rds-1.yml
-  parameter_group: /terraform/resources/insights/stage/rds/postgres11-parameter-group-pes-stage.yml
-  output_resource_name: pes-stage-db
-  enhanced_monitoring: true
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: pes-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: rds
+    identifier: pes-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres11-rds-1.yml
+    parameter_group: /terraform/resources/insights/stage/rds/postgres11-parameter-group-pes-stage.yml
+    output_resource_name: pes-stage-db
+    enhanced_monitoring: true

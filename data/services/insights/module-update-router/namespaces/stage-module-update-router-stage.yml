@@ -23,9 +23,9 @@ limitRanges:
   $ref: /dependencies/openshift/limitranges/standard-resource-limits.yml
 
 networkPoliciesAllow:
-  - $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs02ue1.yml
-  - $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
-  - $ref: /services/insights/turnpike/namespaces/stage-turnpike-stage.yml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs02ue1.yml
+- $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+- $ref: /services/insights/turnpike/namespaces/stage-turnpike-stage.yml
 
 managedRoles: true
 
@@ -50,16 +50,15 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-stage
-  identifier: module-update-router-stage
-  defaults: /terraform/resources/insights/stage/rds/rds-module-update-router-stage.yml
-  parameter_group: /terraform/resources/insights/stage/rds/postgres12-parameter-group-module-update-router-stage.yml
-  output_resource_name: module-update-router-db
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: module-update-router-stage
+    defaults: /terraform/resources/insights/stage/rds/rds-module-update-router-stage.yml
+    parameter_group: /terraform/resources/insights/stage/rds/postgres12-parameter-group-module-update-router-stage.yml
+    output_resource_name: module-update-router-db

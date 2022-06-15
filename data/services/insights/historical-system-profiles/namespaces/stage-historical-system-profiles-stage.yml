@@ -54,23 +54,21 @@ openshiftResources:
   path: insights/secrets/insights-stage/historical-system-profiles-stage/drift-interpod-comms
   version: 1
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-stage
-  identifier: historical-system-profiles-stage
-  defaults: /terraform/resources/insights/stage/rds/postgres11-rds-1.yml
-  output_resource_name: historical-system-profiles-db
-  enhanced_monitoring: true
-  reset_password: APPSRE-5037
-- provider: cloudwatch
-  account: insights-stage
-  identifier: historical-system-profiles-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: historical-system-profiles-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres11-rds-1.yml
+    output_resource_name: historical-system-profiles-db
+    enhanced_monitoring: true
+    reset_password: APPSRE-5037
+  - provider: cloudwatch
+    identifier: historical-system-profiles-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch

@@ -30,21 +30,6 @@ networkPoliciesAllow:
 
 managedRoles: true
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-stage
-  identifier: receptor-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: elasticache
-  account: insights-stage
-  identifier: receptor-elasticache
-  defaults: /terraform/resources/insights/stage/elasticache/elasticache-receptor-1.yml
-  output_resource_name: in-memory-db
-
 managedResourceTypes:
 - ServiceAccount
 
@@ -73,4 +58,18 @@ openshiftResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: receptor-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: elasticache
+    identifier: receptor-elasticache
+    defaults: /terraform/resources/insights/stage/elasticache/elasticache-receptor-1.yml
+    output_resource_name: in-memory-db
+

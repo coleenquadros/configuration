@@ -34,7 +34,7 @@ quota:
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs02ue1.yml
 - $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
-- $ref: /services/insights/edge/namespaces/stage-edge-stage.yml 
+- $ref: /services/insights/edge/namespaces/stage-edge-stage.yml
 
 # If true, managedRoles will ensure that users with roles granting permission
 # to this namespace are able to access it.
@@ -75,27 +75,26 @@ openshiftResources:
 
 # app-interface uses Terraform to manage non-OpenShift resources, like AWS
 # resources
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-stage
-  identifier: image-builder-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: image-builder-cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: rds
-  account: insights-stage
-  identifier: image-builder-stage
-  defaults: /terraform/resources/insights/stage/rds/postgres12-rds-1.yml
-  overrides:
-    name: imagebuilder
-    allocated_storage: 100
-    engine_version: '12.10'
-    apply_immediately: true
-  enhanced_monitoring: true
-  output_resource_name: image-builder-db
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: image-builder-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: image-builder-cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: rds
+    identifier: image-builder-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres12-rds-1.yml
+    overrides:
+      name: imagebuilder
+      allocated_storage: 100
+      engine_version: '12.10'
+      apply_immediately: true
+    enhanced_monitoring: true
+    output_resource_name: image-builder-db
+

@@ -54,24 +54,6 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-stage
-  identifier: system-baseline-stage
-  defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
-  parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-system-baseline-stage.yml
-  output_resource_name: system-baseline-db
-  enhanced_monitoring: true
-  reset_password: APPSRE-5037
-- provider: cloudwatch
-  account: insights-stage
-  identifier: system-baseline-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-
 sharedResources:
 - $ref: /services/app-sre/shared-resources/splunk-creds.yml
 - $ref: /services/insights/shared-resources/metrics-export-stage.yml
@@ -79,4 +61,20 @@ sharedResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: system-baseline-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
+    parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-system-baseline-stage.yml
+    output_resource_name: system-baseline-db
+    enhanced_monitoring: true
+    reset_password: APPSRE-5037
+  - provider: cloudwatch
+    identifier: system-baseline-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch

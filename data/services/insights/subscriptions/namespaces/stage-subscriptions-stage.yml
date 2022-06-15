@@ -28,26 +28,6 @@ networkPoliciesAllow:
 
 managedRoles: true
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-stage
-  identifier: subscriptions-stage
-  defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
-  overrides:
-    username: "insights"
-    name: "yupana"
-  parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-subscriptions-stage.yml
-  enhanced_monitoring: true
-  output_resource_name: yupana-db
-- provider: cloudwatch
-  account: insights-stage
-  identifier: subscriptions-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-
 managedResourceTypes:
 - ConfigMap
 - ServiceAccount
@@ -83,4 +63,22 @@ openshiftResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: subscriptions-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
+    overrides:
+      username: "insights"
+      name: "yupana"
+    parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-subscriptions-stage.yml
+    enhanced_monitoring: true
+    output_resource_name: yupana-db
+  - provider: cloudwatch
+    identifier: subscriptions-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch

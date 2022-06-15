@@ -108,31 +108,28 @@ openshiftResources:
 - provider: resource
   path: /insights-stage/xjoin-stage/xjoin-kafka-connect.rolebinding.yml
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-stage
-  identifier: xjoin-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  es_identifier: kibana-elasticsearch
-  output_resource_name: cloudwatch
-- provider: elasticsearch
-  account: insights-stage
-  identifier: xjoin-elasticsearch
-  defaults: /terraform/resources/insights/stage/elasticsearch/xjoin.yml
-  output_resource_name: xjoin-elasticsearch
-- provider: rds
-  account: insights-stage
-  identifier: cyndi-stage
-  defaults: /terraform/resources/insights/stage/rds/rds-cyndi-stage.yml
-  enhanced_monitoring: true
-  output_resource_name: cyndi-db-rds
-  parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-cyndi-stage.yml
-
 kafkaCluster:
   $ref: /kafka/crcs02ue1k/cluster.yml
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: xjoin-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    es_identifier: kibana-elasticsearch
+    output_resource_name: cloudwatch
+  - provider: elasticsearch
+    identifier: xjoin-elasticsearch
+    defaults: /terraform/resources/insights/stage/elasticsearch/xjoin.yml
+    output_resource_name: xjoin-elasticsearch
+  - provider: rds
+    identifier: cyndi-stage
+    defaults: /terraform/resources/insights/stage/rds/rds-cyndi-stage.yml
+    enhanced_monitoring: true
+    output_resource_name: cyndi-db-rds
+    parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-cyndi-stage.yml

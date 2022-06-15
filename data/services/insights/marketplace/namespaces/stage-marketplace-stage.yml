@@ -66,30 +66,27 @@ openshiftResources:
 - provider: resource
   path: /insights-stage/marketplace/marketplace-env.configmap.yaml
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: s3
-  account: insights-stage
-  identifier: open-marketplace-stage
-  defaults: /terraform/resources/s3-gdpr-1.yml
-  output_resource_name: marketplace-s3
-- provider: rds
-  account: insights-stage
-  identifier: marketplace-stage
-  defaults: /terraform/resources/insights/stage/rds/postgres11-rds-1.yml
-  overrides:
-    engine_version: '11.13'
-  parameter_group: /terraform/resources/insights/stage/rds/postgres11-parameter-group-marketplace-stage.yml
-  output_resource_name: marketplace-db
-  enhanced_monitoring: true
-- provider: cloudwatch
-  account: insights-stage
-  identifier: marketplace-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: s3
+    identifier: open-marketplace-stage
+    defaults: /terraform/resources/s3-gdpr-1.yml
+    output_resource_name: marketplace-s3
+  - provider: rds
+    identifier: marketplace-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres11-rds-1.yml
+    overrides:
+      engine_version: '11.13'
+    parameter_group: /terraform/resources/insights/stage/rds/postgres11-parameter-group-marketplace-stage.yml
+    output_resource_name: marketplace-db
+    enhanced_monitoring: true
+  - provider: cloudwatch
+    identifier: marketplace-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
