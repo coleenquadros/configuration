@@ -77,32 +77,29 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-perf #Replace stage changes with perf. Follow RBAC
-  identifier: sources-perf
-  defaults: /terraform/resources/insights/perf/rds/postgres10-rds-1.yml
-  overrides:
-    username: "insights"
-    name: "sources_production"
-    instance_class: db.t3.medium
-  parameter_group: /terraform/resources/insights/perf/rds/postgres10-parameter-group-sources-perf.yml
-  output_resource_name: sources-db
-  enhanced_monitoring: true
-- provider: cloudwatch
-  account: insights-perf
-  identifier: sources-perf
-  defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-#  es_identifier: kibana-elasticsearch
-- provider: elasticache
-  account: insights-perf
-  identifier: sources-elasticache
-  defaults: /terraform/resources/insights/perf/elasticache/elasticache-sources-perf.yml
-  output_resource_name: in-memory-db
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-perf/account.yml
+  resources:
+  - provider: rds
+    identifier: sources-perf
+    defaults: /terraform/resources/insights/perf/rds/postgres10-rds-1.yml
+    overrides:
+      username: "insights"
+      name: "sources_production"
+      instance_class: db.t3.medium
+    parameter_group: /terraform/resources/insights/perf/rds/postgres10-parameter-group-sources-perf.yml
+    output_resource_name: sources-db
+    enhanced_monitoring: true
+  - provider: cloudwatch
+    identifier: sources-perf
+    defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+  #  es_identifier: kibana-elasticsearch
+  - provider: elasticache
+    identifier: sources-elasticache
+    defaults: /terraform/resources/insights/perf/elasticache/elasticache-sources-perf.yml
+    output_resource_name: in-memory-db

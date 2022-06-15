@@ -54,26 +54,24 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-perf
-  identifier: cloud-connector-perf
-  defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-- provider: rds
-  account: insights-perf
-  identifier: cloud-connector-perf
-  defaults: /terraform/resources/insights/perf/rds/postgres12-rds-1.yml
-  overrides:
-    username: insights
-    allocated_storage: 20
-    name: insights
-  parameter_group: /terraform/resources/insights/perf/rds/postgres12-parameter-group-cloud-connector-perf.yml
-  output_resource_name: cloud-connector-db
-  enhanced_monitoring: true
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-perf/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: cloud-connector-perf
+    defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+  - provider: rds
+    identifier: cloud-connector-perf
+    defaults: /terraform/resources/insights/perf/rds/postgres12-rds-1.yml
+    overrides:
+      username: insights
+      allocated_storage: 20
+      name: insights
+    parameter_group: /terraform/resources/insights/perf/rds/postgres12-parameter-group-cloud-connector-perf.yml
+    output_resource_name: cloud-connector-db
+    enhanced_monitoring: true

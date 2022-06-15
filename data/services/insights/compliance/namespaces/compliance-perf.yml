@@ -46,29 +46,26 @@ openshiftResources:
 - provider: resource
   path: /insights-perf/shared/private-image-puller.serviceaccount.yaml
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-perf
-  identifier: compliance-perf
-  defaults: /terraform/resources/insights/perf/rds/rds-compliance-perf.yml
-  enhanced_monitoring: true
-  output_resource_name: compliance-db
-  output_resource_db_name: postgres
-  parameter_group: /terraform/resources/insights/perf/rds/postgres10-parameter-group-compliance-perf.yml
-- provider: cloudwatch
-  account: insights-perf
-  identifier: compliance-perf
-  defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-- provider: elasticache
-  account: insights-perf
-  identifier: compliance-perf-elasticache-clowder
-  defaults: /terraform/resources/insights/perf/elasticache/elasticache-compliance-2.yml
-  parameter_group: /terraform/resources/insights/perf/elasticache/elasticache-compliance-sidekiq-parameter-group.yml
-  output_resource_name: in-memory-db
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-perf/account.yml
+  resources:
+  - provider: rds
+    identifier: compliance-perf
+    defaults: /terraform/resources/insights/perf/rds/rds-compliance-perf.yml
+    enhanced_monitoring: true
+    output_resource_name: compliance-db
+    output_resource_db_name: postgres
+    parameter_group: /terraform/resources/insights/perf/rds/postgres10-parameter-group-compliance-perf.yml
+  - provider: cloudwatch
+    identifier: compliance-perf
+    defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+  - provider: elasticache
+    identifier: compliance-perf-elasticache-clowder
+    defaults: /terraform/resources/insights/perf/elasticache/elasticache-compliance-2.yml
+    parameter_group: /terraform/resources/insights/perf/elasticache/elasticache-compliance-sidekiq-parameter-group.yml
+    output_resource_name: in-memory-db

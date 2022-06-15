@@ -20,27 +20,6 @@ networkPoliciesAllow: []
 
 managedRoles: true
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-perf
-  identifier: rhsm-perf
-  defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-- provider: rds
-  account: insights-perf
-  identifier: rhsm-perf
-  defaults: /terraform/resources/insights/perf/rds/postgres11-rds-1.yml
-  enhanced_monitoring: true
-  output_resource_name: rhsm-db
-  parameter_group: /terraform/resources/insights/perf/rds/postgres11-parameter-group-rhsm-stage.yml
-- provider: s3
-  account: insights-perf
-  identifier: rhsm-subscriptions-egress-perf
-  defaults: /terraform/resources/insights/perf/s3/s3-gdpr-14.yml
-  output_resource_name: egress-s3
-
 managedResourceTypes:
 - Secret
 - ServiceAccount
@@ -108,4 +87,22 @@ openshiftResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-perf/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: rhsm-perf
+    defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+  - provider: rds
+    identifier: rhsm-perf
+    defaults: /terraform/resources/insights/perf/rds/postgres11-rds-1.yml
+    enhanced_monitoring: true
+    output_resource_name: rhsm-db
+    parameter_group: /terraform/resources/insights/perf/rds/postgres11-parameter-group-rhsm-stage.yml
+  - provider: s3
+    identifier: rhsm-subscriptions-egress-perf
+    defaults: /terraform/resources/insights/perf/s3/s3-gdpr-14.yml
+    output_resource_name: egress-s3
