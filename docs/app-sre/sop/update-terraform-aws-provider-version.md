@@ -44,7 +44,7 @@ This will generate a Terraform JSON file with the desired state comming from `ap
 
 ### Run plan with current and new provider
 
-With this local terraform file, we should run a `terraform init` and `terraform plan` to make sure that we don't have any pending changes waiting to apply. Once this is verified, we can manually modify the AWS provider version on the local terraform file and run the `terraform init` and `terraform plan` again.
+With this local Terraform file, we should run a `terraform init` and `terraform plan` to make sure that we don't have any pending changes waiting to apply. Once this is verified, we can manually modify the AWS provider version on the local Terraform file and run the `terraform init` and `terraform plan` again.
 
 ### Check for changes in plan output and update
 
@@ -62,13 +62,13 @@ If there are any changes we need to make sure that this changes are not harmful,
 
 ### Errors and changes that we found so far
 
-**engine_version: Redis versions must match <major>.x whenusing version 6 or higher**
+**engine_version: Redis versions must match <major>.x when using version 6 or higher**
 
 ****
 
-During the past year, AWS changed several times how `engine_version` parameter is specified on the parameter groups for Redis elasticache clusters.
+During the past year, AWS changed several times how `engine_version` parameter is specified on the parameter groups for Redis ElastiCache clusters.
 
-On the last version under major 3, engine version for redis clusters should be specified as `<major>.x` for redis on versions 6 or higher instead of `<major>.<minor>.<bug-fix>` to fix this error on terrafrom the parameter groups for affected redis should be updated to `<major>.x`
+On the last version under major 3, engine version for Redis clusters should be specified as `<major>.x` for redis on versions 6 or higher instead of `<major>.<minor>.<bug-fix>`. To fix this error on Terraform the parameter groups for affected Redis cluster should be updated to `<major>.x`
 
 This change does not affect the underlying resources that will mantain the same version that they had, and can be updated manually using the AWS console, this is covered in [Redis minor version update SOP](#TODO)
 
@@ -86,7 +86,7 @@ Terraform thinks that there are changes pending to apply and it's trying to appl
 
 Couple of issues comenting it: [Issue 1](https://github.com/hashicorp/terraform-provider-aws/issues/18035) and [Issue 2](https://github.com/hashicorp/terraform-provider-aws/issues/593#issuecomment-330948535)
 
-The way that we fixed it for `insights-stage` account was to remove the parameters from the parameter groups of the affected databases with a comment, this won't change anything since the values on AWS stay as the default and terraform don't try to update it as it's no longer defined.
+The way that we fixed it for `insights-stage` account was to remove the parameters from the parameter groups of the affected databases with a comment, this won't change anything since the values on AWS stay as the default and Terraform don't try to update it as it's no longer defined.
 
 [Example MR for insights-stage](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/40620)
 
