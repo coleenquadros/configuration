@@ -44,8 +44,8 @@ https://<application-name>.unleash.devshift.net
 
 ## Github Configuration
 
-Login to Github using the app-sre-bot account then create a new Github OAuth
-application [here](https://github.com/settings/applications/new), filling the
+Login to Github and create a new Github OAuth application
+under the app-sre organization [here](https://github.com/organizations/app-sre/settings/applications), filling the
 details of the new Unleash application. Example:
 
 ![](images/gh_newapp.png)
