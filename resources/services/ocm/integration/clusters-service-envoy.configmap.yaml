@@ -219,6 +219,25 @@ data:
                             descriptor_key: path
                             descriptor_value: register_cluster
 
+                  # This is an example of how to define a rate limit for a path and source ip
+                  - name: list_clusters
+                    match:
+                      path: /api/clusters_mgmt/v1/clusters
+                      headers:
+                      - name: :method
+                        value: GET
+                    route:
+                      cluster: backend
+                      timeout: 300s
+                      rate_limits:
+                      - actions:
+                        - generic_key:
+                            descriptor_key: path
+                            descriptor_value: list_clusters
+                        - request_headers:
+                            descriptor_key: source_ip
+                            header_name: X-Forwarded-For
+
                   # Everything else not matching one of the rules above goes
                   # directly to the backend, without rate limits.
                   - name: default
