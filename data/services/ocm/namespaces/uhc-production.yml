@@ -34,27 +34,6 @@ sharedResources:
 
 openshiftResources: []
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: aws-iam-service-account
-  account: osd-privatelink-prod
-  identifier: ocm-sts-access
-  variables:
-    aws_role_arn: arn:aws:iam::710019948333:role/RH-Managed-OpenShift-Installer
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [{
-        "Action": [
-          "sts:AssumeRole"
-        ],
-        "Effect": "Allow",
-        "Resource": "arn:aws:iam::*:role/RH-Installer-Role"
-      }]
-    }
-  output_resource_name: sts-credentials
-
 managedExternalResources: true
 
 externalResources:
@@ -139,3 +118,23 @@ externalResources:
     identifier: p3-openshiftapps-com
     name: p3.openshiftapps.com
     output_resource_name: route53-creds
+- provider: aws
+  provisioner:
+    $ref: /aws/osd-privatelink-prod/account.yml
+  resources:
+  - provider: aws-iam-service-account
+    identifier: ocm-sts-access
+    variables:
+      aws_role_arn: arn:aws:iam::710019948333:role/RH-Managed-OpenShift-Installer
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Action": [
+            "sts:AssumeRole"
+          ],
+          "Effect": "Allow",
+          "Resource": "arn:aws:iam::*:role/RH-Installer-Role"
+        }]
+      }
+    output_resource_name: sts-credentials
