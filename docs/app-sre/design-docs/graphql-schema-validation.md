@@ -104,10 +104,19 @@ Then we can update `schema.yml` to introduce `$schema` that points to graphql js
 
 ##### qontract-schema
 Introduce graphql json-schema as defined above and update `schema.yml` accordingly. This will result in a new bundle format with change reflected in `graphql` field.
+
+See https://github.com/app-sre/qontract-schemas/pull/167 for reference.
 ##### qontract-validator
-We need to update qontract-validator so that it can perform validation of `schema.yml`. In addition, we also need to ensure validator runs against two different bundles during transition period.
+We need to update qontract-validator so that it can perform validation of `schema.yml`. In addition, we also need to ensure validator only tries to validate the graphql schemas if the schema header is present. This will support a transition period where validator might be faced with schemas with and without explicit schema information. This validation will be added in main method in validator.py on top of existing validation checks.
+
+The qontract-validator will be run as part of PR checks in qontract-schemas repository.
+
+See https://github.com/app-sre/qontract-validator/pull/39/files for reference.
+
 ##### qontract-server
 qontract-server utilizes `graphql` field within bundle to create schema on the server. We need to ensure qontract-server is compatible with different bundle format during transition period.
+
+See https://github.com/app-sre/qontract-server/pull/137 for reference.
 
 ### Alternatives considered
 
