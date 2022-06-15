@@ -46,16 +46,15 @@ openshiftResources:
   path: insights/secrets/insights-fedramp-stage/drift-fedramp-stage/drift-interpod-comms
   version: 1
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-fedramp-stage
-  identifier: drift-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-fedramp-stage/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: drift-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch

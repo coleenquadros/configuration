@@ -35,29 +35,6 @@ managedRoles: true
 sharedResources:
 - $ref: /services/insights/shared-resources/fedramp-stage.yml
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-fedramp-stage
-  identifier: patchman-stage
-  defaults: /terraform/resources/insights/stage/rds/postgres12-rds-1.yml
-  parameter_group: /terraform/resources/insights/stage/rds/postgres12-parameter-group-patchman-stage.yml
-  output_resource_name: patchman-db
-  enhanced_monitoring: true
-- provider: aws-iam-service-account
-  account: insights-fedramp-stage
-  identifier: patchman-aws-stageee
-  policies:
-  - CloudWatchReadOnlyAccess
-  output_resource_name: patchman-aws
-- provider: cloudwatch
-  account: insights-fedramp-stage
-  identifier: patchman-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-
 openshiftResources:
 - provider: vault-secret
   path: insights/secrets/global/rh-registry-pull
@@ -82,4 +59,24 @@ openshiftResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-fedramp-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: patchman-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres12-rds-1.yml
+    parameter_group: /terraform/resources/insights/stage/rds/postgres12-parameter-group-patchman-stage.yml
+    output_resource_name: patchman-db
+    enhanced_monitoring: true
+  - provider: aws-iam-service-account
+    identifier: patchman-aws-stageee
+    policies:
+    - CloudWatchReadOnlyAccess
+    output_resource_name: patchman-aws
+  - provider: cloudwatch
+    identifier: patchman-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch

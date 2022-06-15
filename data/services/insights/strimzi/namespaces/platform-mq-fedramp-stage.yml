@@ -49,16 +49,6 @@ managedRoles: true
 sharedResources:
 - $ref: /services/insights/shared-resources/fedramp-stage.yml
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-fedramp-stage
-  identifier: platform-mq-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-
 managedResourceTypes:
 - Role
 - RoleBinding
@@ -96,4 +86,13 @@ openshiftResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-fedramp-stage/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: platform-mq-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch

@@ -61,32 +61,29 @@ openshiftResources:
 - provider: resource
   path: /insights-stage/payload-tracker-stage/payload-tracker-nginx-conf.configmap.yml
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-fedramp-stage
-  identifier: payload-tracker-stage-db
-  defaults: /terraform/resources/insights/stage/rds/postgres12-rds-1.yml
-  overrides:
-    name: "payloadtracker"
-  parameter_group: /terraform/resources/insights/stage/rds/postgres12-parameter-group-payload-tracker-stage.yml
-  output_resource_name: payload-tracker-db-creds
-  enhanced_monitoring: true
-  annotations:
-    clowder/database: "payload-tracker"
-- provider: cloudwatch
-  account: insights-fedramp-stage
-  identifier: payload-tracker-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: elasticache
-  account: insights-fedramp-stage
-  identifier: payload-tracker-stage-cache
-  defaults: /terraform/resources/insights/fedramp/stage/elasticache/elasticache-payload-tracker-1.yml
-  output_resource_name: payload-tracker-cache-creds
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-fedramp-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: payload-tracker-stage-db
+    defaults: /terraform/resources/insights/stage/rds/postgres12-rds-1.yml
+    overrides:
+      name: "payloadtracker"
+    parameter_group: /terraform/resources/insights/stage/rds/postgres12-parameter-group-payload-tracker-stage.yml
+    output_resource_name: payload-tracker-db-creds
+    enhanced_monitoring: true
+    annotations:
+      clowder/database: "payload-tracker"
+  - provider: cloudwatch
+    identifier: payload-tracker-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: elasticache
+    identifier: payload-tracker-stage-cache
+    defaults: /terraform/resources/insights/fedramp/stage/elasticache/elasticache-payload-tracker-1.yml
+    output_resource_name: payload-tracker-cache-creds

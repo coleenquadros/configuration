@@ -52,23 +52,21 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-fedramp-stage
-  identifier: system-baseline-stage
-  defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
-  parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-system-baseline-stage.yml
-  output_resource_name: system-baseline-db
-  enhanced_monitoring: true
-- provider: cloudwatch
-  account: insights-fedramp-stage
-  identifier: system-baseline-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-fedramp-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: system-baseline-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
+    parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-system-baseline-stage.yml
+    output_resource_name: system-baseline-db
+    enhanced_monitoring: true
+  - provider: cloudwatch
+    identifier: system-baseline-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
