@@ -32,54 +32,6 @@ managedResourceTypes:
 sharedResources:
 - $ref: /services/hive/shared-resources/production.yml
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: aws-iam-service-account
-  account: osd-privatelink-prod
-  identifier: hive-privatelink-production
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [{
-        "Action": [
-          "ec2:DescribeVpcEndpointServices",
-          "ec2:DescribeVpcEndpoints",
-          "ec2:CreateTags",
-          "ec2:CreateVpcEndpoint",
-          "ec2:DeleteVpcEndpoints",
-          "ec2:DescribeVPCs",
-          "route53:CreateHostedZone",
-          "route53:GetHostedZone",
-          "route53:ListHostedZonesByVPC",
-          "route53:ListResourceRecordSets",
-          "route53:ChangeResourceRecordSets",
-          "route53:AssociateVPCWithHostedZone",
-          "route53:DisassociateVPCFromHostedZone",
-          "route53:CreateVPCAssociationAuthorization",
-          "route53:DeleteVPCAssociationAuthorization",
-          "route53:DeleteHostedZone"
-        ],
-        "Effect": "Allow",
-        "Resource": "*" 
-      }]
-    }
-  output_resource_name: hive-privatelink-creds
-- provider: aws-iam-service-account
-  account: osd-privatelink-prod
-  identifier: hive-aws-service-provider-production
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [{
-        "Action": [
-          "sts:AssumeRole"
-        ],
-        "Effect": "Allow",
-        "Resource": "arn:aws:iam::*:role/RH-Managed-OpenShift-Installer" 
-      }]
-    }
-
 managedExternalResources: true
 
 externalResources:
@@ -221,4 +173,49 @@ externalResources:
     identifier: p1-openshiftapps-com
     name: p1.openshiftapps.com
     output_resource_name: external-dns-route53-creds
-
+- provider: aws
+  provisioner:
+    $ref: /aws/osd-privatelink-prod/account.yml
+  resources:
+  - provider: aws-iam-service-account
+    identifier: hive-privatelink-production
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Action": [
+            "ec2:DescribeVpcEndpointServices",
+            "ec2:DescribeVpcEndpoints",
+            "ec2:CreateTags",
+            "ec2:CreateVpcEndpoint",
+            "ec2:DeleteVpcEndpoints",
+            "ec2:DescribeVPCs",
+            "route53:CreateHostedZone",
+            "route53:GetHostedZone",
+            "route53:ListHostedZonesByVPC",
+            "route53:ListResourceRecordSets",
+            "route53:ChangeResourceRecordSets",
+            "route53:AssociateVPCWithHostedZone",
+            "route53:DisassociateVPCFromHostedZone",
+            "route53:CreateVPCAssociationAuthorization",
+            "route53:DeleteVPCAssociationAuthorization",
+            "route53:DeleteHostedZone"
+          ],
+          "Effect": "Allow",
+          "Resource": "*" 
+        }]
+      }
+    output_resource_name: hive-privatelink-creds
+  - provider: aws-iam-service-account
+    identifier: hive-aws-service-provider-production
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Action": [
+            "sts:AssumeRole"
+          ],
+          "Effect": "Allow",
+          "Resource": "arn:aws:iam::*:role/RH-Managed-OpenShift-Installer" 
+        }]
+      }
