@@ -20,24 +20,6 @@ networkPoliciesAllow:
 
 managedRoles: true
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: app-sre
-  identifier: sentry-stage
-  defaults: /terraform/resources/app-sre/staging/rds-1.yml
-  output_resource_name: sentry-rds
-  overrides:
-    instance_class: db.m5.large
-    engine_version: '11.12'
-    apply_immediately: true
-- provider: elasticache
-  account: app-sre
-  identifier: sentry-redis-stage
-  defaults: /terraform/resources/sentry/elasticache-stage-1.yml
-  output_resource_name: sentry-elasticache-stage
-
 sharedResources:
 - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
 
@@ -62,4 +44,20 @@ openshiftResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: rds
+    identifier: sentry-stage
+    defaults: /terraform/resources/app-sre/staging/rds-1.yml
+    output_resource_name: sentry-rds
+    overrides:
+      instance_class: db.m5.large
+      engine_version: '11.12'
+      apply_immediately: true
+  - provider: elasticache
+    identifier: sentry-redis-stage
+    defaults: /terraform/resources/sentry/elasticache-stage-1.yml
+    output_resource_name: sentry-elasticache-stage

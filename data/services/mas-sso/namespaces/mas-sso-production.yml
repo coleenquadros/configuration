@@ -16,14 +16,14 @@ environment:
   $ref: /products/osdv4/environments/production.yml
 
 networkPoliciesAllow:
-  - $ref: /openshift/app-sre-prod-04/namespaces/openshift-operator-lifecycle-manager.yml
-  - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-04.yml
+- $ref: /openshift/app-sre-prod-04/namespaces/openshift-operator-lifecycle-manager.yml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-04.yml
 
 managedRoles: true
 
 managedResourceTypes:
-  - ServiceAccount
-  - Secret
+- ServiceAccount
+- Secret
 
 openshiftResources:
 - provider: vault-secret
@@ -43,23 +43,22 @@ openshiftResources:
   type: extracurlyjinja2
   path: /services/mas-sso/production/mas-sso-credentials-production.secret.yaml
   variables:
-    vault_secret_version: 1  
-
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: app-sre
-  identifier: mas-sso-production
-  # From default: multi_az: true , backup_retention_period: 30 , storage_encrypted: true
-  defaults: /terraform/resources/app-sre/production/rds-1.yml
-  output_resource_name: mas-sso-rds
-  overrides:
-    allocated_storage: 100
-    maintenance_window: wed:14:00-wed:15:00
-    engine_version: '12.7'
-  enhanced_monitoring: true
+    vault_secret_version: 1
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: rds
+    identifier: mas-sso-production
+  # From default: multi_az: true , backup_retention_period: 30 , storage_encrypted: true
+    defaults: /terraform/resources/app-sre/production/rds-1.yml
+    output_resource_name: mas-sso-rds
+    overrides:
+      allocated_storage: 100
+      maintenance_window: wed:14:00-wed:15:00
+      engine_version: '12.7'
+    enhanced_monitoring: true

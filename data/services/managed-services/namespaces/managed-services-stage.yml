@@ -16,14 +16,14 @@ environment:
   $ref: /products/osdv4/environments/stage.yml
 
 networkPoliciesAllow:
-  - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
 
 managedRoles: true
 
 managedResourceTypes:
-  - ServiceAccount
-  - ConfigMap
-  - NetworkPolicy
+- ServiceAccount
+- ConfigMap
+- NetworkPolicy
 
 openshiftResources:
 - provider: vault-secret
@@ -72,27 +72,26 @@ openshiftResources:
 - provider: resource
   path: /services/managed-services/stage/observatorium-token-refresher.networkpolicy.yaml
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: app-sre
-  # This should be  prefixed by "kas-fleet-manager" but we held renaming for now to avoid loosing data.
-  # See https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/14437#note_2097734 for more details.
-  identifier: managed-services-api-staging
-  defaults: /terraform/resources/managed-services/staging/rds-2-cloudwatch-enabled.yml
-  parameter_group: /terraform/resources/managed-services/staging/managed-services-stage-rds-parameter-group-pg12.yml
-  output_resource_name: kas-fleet-manager-rds
-  overrides:
-    maintenance_window: wed:12:00-wed:13:00
-    backup_window: 10:00-12:00
-    engine_version: '12.7'
-    apply_immediately: true
-  ca_cert:
-    path: app-interface/global/rds-ca-cert
-    field: us-east-1
-    version: 2
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: rds
+    # This should be  prefixed by "kas-fleet-manager" but we held renaming for now to avoid loosing data.
+    # See https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/14437#note_2097734 for more details.
+    identifier: managed-services-api-staging
+    defaults: /terraform/resources/managed-services/staging/rds-2-cloudwatch-enabled.yml
+    parameter_group: /terraform/resources/managed-services/staging/managed-services-stage-rds-parameter-group-pg12.yml
+    output_resource_name: kas-fleet-manager-rds
+    overrides:
+      maintenance_window: wed:12:00-wed:13:00
+      backup_window: 10:00-12:00
+      engine_version: '12.7'
+      apply_immediately: true
+    ca_cert:
+      path: app-interface/global/rds-ca-cert
+      field: us-east-1
+      version: 2

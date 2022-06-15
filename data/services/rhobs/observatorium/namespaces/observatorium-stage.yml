@@ -33,15 +33,6 @@ managedResourceTypes:
 - RoleBinding
 - ServiceAccount
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: s3
-  account: app-sre
-  identifier: telemeter-rules-objstore-stage
-  defaults: /terraform/resources/telemeter/s3-private-1.yml
-  output_resource_name: telemeter-rules-objstore-stage-s3
-
 sharedResources:
 - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
 - $ref: /services/rhobs/shared-resources/observatorium-allow-port-forward.yml
@@ -85,4 +76,12 @@ openshiftResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: s3
+    identifier: telemeter-rules-objstore-stage
+    defaults: /terraform/resources/telemeter/s3-private-1.yml
+    output_resource_name: telemeter-rules-objstore-stage-s3

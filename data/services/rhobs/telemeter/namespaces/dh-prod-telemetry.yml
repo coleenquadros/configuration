@@ -15,34 +15,33 @@ app:
 environment:
   $ref: /products/osdv4/environments/production.yml
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: aws-iam-service-account
-  account: app-sre
-  identifier: telemeter-thanos-production-s3-reader
-  variables:
-    bucket: telemeter-thanos-production
-    region: us-east-1
-    endpoint: s3.us-east-1.amazonaws.com
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [
-        {
-          "Effect": "Allow",
-          "Action": ["s3:ListBucket"],
-          "Resource": ["arn:aws:s3:::${bucket}"]
-        },
-        {
-          "Effect": "Allow",
-          "Action": ["s3:GetObject"],
-          "Resource": ["arn:aws:s3:::${bucket}/*"]
-        }
-      ]
-    }
-  output_resource_name: telemeter-thanos-s3-reader
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: aws-iam-service-account
+    identifier: telemeter-thanos-production-s3-reader
+    variables:
+      bucket: telemeter-thanos-production
+      region: us-east-1
+      endpoint: s3.us-east-1.amazonaws.com
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": ["s3:ListBucket"],
+            "Resource": ["arn:aws:s3:::${bucket}"]
+          },
+          {
+            "Effect": "Allow",
+            "Action": ["s3:GetObject"],
+            "Resource": ["arn:aws:s3:::${bucket}/*"]
+          }
+        ]
+      }
+    output_resource_name: telemeter-thanos-s3-reader

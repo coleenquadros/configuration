@@ -37,56 +37,6 @@ openshiftResources: []
 managedTerraformResources: true
 
 terraformResources:
-- provider: rds
-  account: app-sre
-  identifier: clusters-service-production
-  defaults: /terraform/resources/app-sre/production/rds-2-cloudwatch-enabled.yml
-  parameter_group: /terraform/resources/ocm/clusters-service-production-rds-parameter-group-pg12.yml
-  output_resource_name: clusters-service-rds
-  overrides:
-    allocated_storage: 120
-    engine_version: '12.9'
-    performance_insights_enabled: true
-    apply_immediately: true
-- provider: rds
-  account: app-sre
-  identifier: uhc-acct-mngr-production
-  defaults: /terraform/resources/app-sre/production/rds-2-cloudwatch-enabled.yml
-  parameter_group: /terraform/resources/ocm/ocm-production-rds-parameter-group-pg12.yml
-  output_resource_name: uhc-acct-mngr-rds
-  # Storage is increased in prod to handle a continually growing database as well as to give
-  # more IOPs to AMS - https://issues.redhat.com/browse/APPSRE-2770
-  overrides:
-    allocated_storage: 100
-- provider: rds
-  account: app-sre
-  identifier: ocm-service-log-production
-  defaults: /terraform/resources/app-sre/production/rds-2-cloudwatch-enabled.yml
-  parameter_group: /terraform/resources/ocm/ocm-production-rds-parameter-group-pg12.yml
-  output_resource_name: ocm-service-log-rds
-  overrides:
-    engine_version: '12.9'
-- provider: rds
-  account: app-sre
-  identifier: ocm-managed-services-production
-  defaults: /terraform/resources/app-sre/production/rds-2-cloudwatch-enabled.yml
-  parameter_group: /terraform/resources/ocm/ocm-production-rds-parameter-group-pg12.yml
-  output_resource_name: ocm-managed-services-rds
-  overrides:
-    engine_version: '12.9'
-- provider: sqs
-  account: app-sre
-  identifier: job-queue-service
-  output_resource_name: job-queue-service-sqs
-  specs:
-    - defaults: /terraform/resources/ocm/job-queue-service-heartbeat-sqs.yml
-      queues:
-        - key: job_queue_service_heartbeat
-          value: job-queue-service-heartbeat
-    - defaults: /terraform/resources/ocm/dlq-sqs.yml
-      queues:
-        - key: job_queue_service_heartbeat_dlq
-          value: job-queue-service-heartbeat-dlq
 - provider: aws-iam-service-account
   account: osd-privatelink-prod
   identifier: ocm-sts-access
@@ -104,47 +54,88 @@ terraformResources:
       }]
     }
   output_resource_name: sts-credentials
-- provider: ecr
-  account: app-sre
-  region: eu-central-1
-  identifier: uhc-gateway
-  output_resource_name: uhc-gateway-backup
-- provider: ecr
-  account: app-sre
-  region: eu-central-1
-  identifier: uhc-clusters-service
-  output_resource_name: uhc-clusters-service-backup
-- provider: ecr
-  account: app-sre
-  region: eu-central-1
-  identifier: uhc-account-manager
-  output_resource_name: uhc-account-manager-backup
-- provider: ecr
-  account: app-sre
-  region: eu-central-1
-  identifier: uhc-clusters-cleaner
-  output_resource_name: uhc-clusters-cleaner-backup
-- provider: ecr
-  account: app-sre
-  region: eu-central-1
-  identifier: ocm-service-log
-  output_resource_name: ocm-service-log-backup
-- provider: ecr
-  account: app-sre
-  region: eu-central-1
-  identifier: ocm-managed-services
-  output_resource_name: ocm-managed-services-backup
-- provider: s3
-  account: app-sre
-  identifier: rh-oidc
-  defaults: /terraform/resources/s3-public-read-1.yml
-  output_resource_name: rh-oidc-s3-secret
-- provider: route53-zone
-  account: app-sre
-  identifier: p3-openshiftapps-com
-  name: p3.openshiftapps.com
-  output_resource_name: route53-creds
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: rds
+    identifier: clusters-service-production
+    defaults: /terraform/resources/app-sre/production/rds-2-cloudwatch-enabled.yml
+    parameter_group: /terraform/resources/ocm/clusters-service-production-rds-parameter-group-pg12.yml
+    output_resource_name: clusters-service-rds
+    overrides:
+      allocated_storage: 120
+      engine_version: '12.9'
+      performance_insights_enabled: true
+      apply_immediately: true
+  - provider: rds
+    identifier: uhc-acct-mngr-production
+    defaults: /terraform/resources/app-sre/production/rds-2-cloudwatch-enabled.yml
+    parameter_group: /terraform/resources/ocm/ocm-production-rds-parameter-group-pg12.yml
+    output_resource_name: uhc-acct-mngr-rds
+  # Storage is increased in prod to handle a continually growing database as well as to give
+  # more IOPs to AMS - https://issues.redhat.com/browse/APPSRE-2770
+    overrides:
+      allocated_storage: 100
+  - provider: rds
+    identifier: ocm-service-log-production
+    defaults: /terraform/resources/app-sre/production/rds-2-cloudwatch-enabled.yml
+    parameter_group: /terraform/resources/ocm/ocm-production-rds-parameter-group-pg12.yml
+    output_resource_name: ocm-service-log-rds
+    overrides:
+      engine_version: '12.9'
+  - provider: rds
+    identifier: ocm-managed-services-production
+    defaults: /terraform/resources/app-sre/production/rds-2-cloudwatch-enabled.yml
+    parameter_group: /terraform/resources/ocm/ocm-production-rds-parameter-group-pg12.yml
+    output_resource_name: ocm-managed-services-rds
+    overrides:
+      engine_version: '12.9'
+  - provider: sqs
+    identifier: job-queue-service
+    output_resource_name: job-queue-service-sqs
+    specs:
+    - defaults: /terraform/resources/ocm/job-queue-service-heartbeat-sqs.yml
+      queues:
+      - key: job_queue_service_heartbeat
+        value: job-queue-service-heartbeat
+    - defaults: /terraform/resources/ocm/dlq-sqs.yml
+      queues:
+      - key: job_queue_service_heartbeat_dlq
+        value: job-queue-service-heartbeat-dlq
+  - provider: ecr
+    region: eu-central-1
+    identifier: uhc-gateway
+    output_resource_name: uhc-gateway-backup
+  - provider: ecr
+    region: eu-central-1
+    identifier: uhc-clusters-service
+    output_resource_name: uhc-clusters-service-backup
+  - provider: ecr
+    region: eu-central-1
+    identifier: uhc-account-manager
+    output_resource_name: uhc-account-manager-backup
+  - provider: ecr
+    region: eu-central-1
+    identifier: uhc-clusters-cleaner
+    output_resource_name: uhc-clusters-cleaner-backup
+  - provider: ecr
+    region: eu-central-1
+    identifier: ocm-service-log
+    output_resource_name: ocm-service-log-backup
+  - provider: ecr
+    region: eu-central-1
+    identifier: ocm-managed-services
+    output_resource_name: ocm-managed-services-backup
+  - provider: s3
+    identifier: rh-oidc
+    defaults: /terraform/resources/s3-public-read-1.yml
+    output_resource_name: rh-oidc-s3-secret
+  - provider: route53-zone
+    identifier: p3-openshiftapps-com
+    name: p3.openshiftapps.com
+    output_resource_name: route53-creds

@@ -18,13 +18,13 @@ environment:
   $ref: /products/service-registry/environments/production.yml
 
 networkPoliciesAllow:
-  - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-04.yml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-04.yml
 
 managedRoles: true
 
 managedResourceTypes:
-  - ServiceAccount
-  - ConfigMap
+- ServiceAccount
+- ConfigMap
 
 openshiftResources:
 - provider: vault-secret
@@ -70,24 +70,21 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-# Data Plane database
-- provider: rds
-  account: app-sre
-  identifier: srs-service-registry-production
-  defaults: /terraform/resources/service-registry/production/rds-2-cloudwatch-enabled.yml
-  parameter_group: /terraform/resources/service-registry/production/service-registry-production-rds-parameter-group-pg12.yml
-  output_resource_name: srs-service-registry-rds
-# Control Plane database
-- provider: rds
-  account: app-sre
-  identifier: srs-fleet-manager-production
-  defaults: /terraform/resources/service-registry/production/rds-2-cloudwatch-enabled.yml
-  parameter_group: /terraform/resources/service-registry/production/service-registry-production-rds-parameter-group-pg12.yml
-  output_resource_name: srs-fleet-manager-rds
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: rds
+    identifier: srs-service-registry-production
+    defaults: /terraform/resources/service-registry/production/rds-2-cloudwatch-enabled.yml
+    parameter_group: /terraform/resources/service-registry/production/service-registry-production-rds-parameter-group-pg12.yml
+    output_resource_name: srs-service-registry-rds
+# Control Plane database
+  - provider: rds
+    identifier: srs-fleet-manager-production
+    defaults: /terraform/resources/service-registry/production/rds-2-cloudwatch-enabled.yml
+    parameter_group: /terraform/resources/service-registry/production/service-registry-production-rds-parameter-group-pg12.yml
+    output_resource_name: srs-fleet-manager-rds

@@ -17,20 +17,19 @@ environment:
 
 managedRoles: true
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: app-sre
-  identifier: sd-cicd-data
-  defaults: /terraform/resources/sd-cicd/postgres12-group-sd-cicd-engine-prod.yml
-  overrides:
-    snapshot_identifier: cicd-data-1-2021-11-08-app-interface
-  output_resource_name: sd-cicd-data
-  output_resource_db_name: cicd_test_data
-  reset_password: APPSRE-4733
-  enhanced_monitoring: true
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: rds
+    identifier: sd-cicd-data
+    defaults: /terraform/resources/sd-cicd/postgres12-group-sd-cicd-engine-prod.yml
+    overrides:
+      snapshot_identifier: cicd-data-1-2021-11-08-app-interface
+    output_resource_name: sd-cicd-data
+    output_resource_db_name: cicd_test_data
+    reset_password: APPSRE-4733
+    enhanced_monitoring: true

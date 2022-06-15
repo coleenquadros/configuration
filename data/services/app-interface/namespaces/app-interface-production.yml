@@ -74,34 +74,30 @@ openshiftResources:
   version: 1
   name: vault-creds
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: sqs
-  account: app-sre
-  identifier: app-interface-sqs
-  output_resource_name: app-interface-sqs
-  specs:
-  - defaults: /terraform/resources/sqs-1.yml
-    queues:
-    - key: gitlab_pr_submitter_queue_url
-      value: app-interface-gitlab-pr-submitter
-- provider: cloudwatch
-  account: app-sre
-  identifier: app-interface-production-cloudwatch
-  defaults: /terraform/resources/cloudwatch-1.yml
-  output_resource_name: app-interface-cloudwatch
-- provider: ecr
-  account: app-sre
-  region: us-east-1
-  identifier: ocp-release
-  output_resource_name: ocp-release-ecr
-- provider: ecr
-  account: app-sre
-  region: us-east-1
-  identifier: ocp-art-dev
-  output_resource_name: ocp-art-dev-ecr
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: sqs
+    identifier: app-interface-sqs
+    output_resource_name: app-interface-sqs
+    specs:
+    - defaults: /terraform/resources/sqs-1.yml
+      queues:
+      - key: gitlab_pr_submitter_queue_url
+        value: app-interface-gitlab-pr-submitter
+  - provider: cloudwatch
+    identifier: app-interface-production-cloudwatch
+    defaults: /terraform/resources/cloudwatch-1.yml
+    output_resource_name: app-interface-cloudwatch
+  - provider: ecr
+    region: us-east-1
+    identifier: ocp-release
+    output_resource_name: ocp-release-ecr
+  - provider: ecr
+    region: us-east-1
+    identifier: ocp-art-dev
+    output_resource_name: ocp-art-dev-ecr

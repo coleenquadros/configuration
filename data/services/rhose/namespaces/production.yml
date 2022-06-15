@@ -19,25 +19,28 @@ environment:
 managedRoles: true
 
 managedResourceTypes:
-  - ServiceAccount
+- ServiceAccount
 
 sharedResources:
-  - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
 
 openshiftResources:
-  - provider: resource
-    path: /rhose/production/rhose-quay-serviceaccount.yml
-  - provider: route
-    path: /rhose/production/rhose-fleet-manager.route.yml
-  - provider: vault-secret
-    path: app-interface/rhose/production/fleet-manager
-    version: 1
+- provider: resource
+  path: /rhose/production/rhose-quay-serviceaccount.yml
+- provider: route
+  path: /rhose/production/rhose-fleet-manager.route.yml
+- provider: vault-secret
+  path: app-interface/rhose/production/fleet-manager
+  version: 1
 
-managedTerraformResources: true
+managedExternalResources: true
 
-terraformResources:
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
   - provider: rds
-    account: app-sre
     identifier: rhosedb-production
     defaults: /terraform/resources/rhose/rds-production-1.yml
     parameter_group: /terraform/resources/rhose/rhose-production-rds-parameter-group-pg13.yml
@@ -47,7 +50,6 @@ terraformResources:
       field: us-east-1
       version: 2
   - provider: rds
-    account: app-sre
     identifier: rhosedb-production-replica
     defaults: /terraform/resources/rhose/rds-production-1.yml
     parameter_group: /terraform/resources/rhose/rhose-production-rds-parameter-group-pg13.yml
@@ -57,11 +59,6 @@ terraformResources:
       field: us-east-1
       version: 2
   - provider: cloudwatch
-    account: app-sre
     identifier: rhose-production-cloudwatch
     defaults: /terraform/resources/cloudwatch-1.yml
     output_resource_name: rhose-cloudwatch
-
-managedExternalResources: true
-
-externalResources: []
