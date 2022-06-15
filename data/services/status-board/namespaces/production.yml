@@ -25,19 +25,6 @@ sharedResources:
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-04.yml
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: app-sre
-  identifier: status-board-production
-  defaults: /terraform/resources/app-sre/production/rds-pg14.yml
-  parameter_group: /web-rca/stage/web-rca-rds.parameter-group.yml
-  overrides:
-    apply_immediately: true
-    enabled_cloudwatch_logs_exports: ['postgresql', 'upgrade']
-  enhanced_monitoring: true
-
 openshiftResources:
 - provider: vault-secret
   path: app-interface/status-board/production/runtime
@@ -47,4 +34,16 @@ openshiftResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: rds
+    identifier: status-board-production
+    defaults: /terraform/resources/app-sre/production/rds-pg14.yml
+    parameter_group: /web-rca/stage/web-rca-rds.parameter-group.yml
+    overrides:
+      apply_immediately: true
+      enabled_cloudwatch_logs_exports: ['postgresql', 'upgrade']
+    enhanced_monitoring: true

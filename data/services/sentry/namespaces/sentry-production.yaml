@@ -20,25 +20,6 @@ networkPoliciesAllow:
 
 managedRoles: true
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: app-sre
-  identifier: sentry-production
-  defaults: /terraform/resources/app-sre/production/rds-1.yml
-  output_resource_name: sentry-rds
-  overrides:
-    instance_class: db.m5.large
-    allocated_storage: 40
-    engine_version: '11.12'
-    apply_immediately: true
-- provider: elasticache
-  account: app-sre
-  identifier: sentry-redis-production
-  defaults: /terraform/resources/sentry/elasticache-prod-1.yml
-  output_resource_name: sentry-elasticache-production
-
 sharedResources:
 - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
 
@@ -64,4 +45,21 @@ openshiftResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: rds
+    identifier: sentry-production
+    defaults: /terraform/resources/app-sre/production/rds-1.yml
+    output_resource_name: sentry-rds
+    overrides:
+      instance_class: db.m5.large
+      allocated_storage: 40
+      engine_version: '11.12'
+      apply_immediately: true
+  - provider: elasticache
+    identifier: sentry-redis-production
+    defaults: /terraform/resources/sentry/elasticache-prod-1.yml
+    output_resource_name: sentry-elasticache-production

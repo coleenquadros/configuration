@@ -17,41 +17,40 @@ environment:
   $ref: /products/quarkus/environments/production-redhat.yml
 
 networkPoliciesAllow:
-  - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-prod-01.yml
 
 managedResourceTypes:
-  - ServiceAccount
+- ServiceAccount
 
 openshiftResources:
-  - provider: resource
-    path: /app-sre/registry-quarkus-redhat-production/registry-quarkus-redhat.serviceaccount.yaml
-  - provider: route
-    path: /app-sre/registry-quarkus-redhat-production/registry-quarkus-redhat.route.yml
-  - provider: route
-    path: /app-sre/registry-quarkus-redhat-production/registry-quarkus-redhat.temp.route.yml
-  - provider: vault-secret
-    path: app-interface/app-sre/registry-quarkus-redhat-production/secrets
-    version: 1
-    annotations:
-      qontract.recycle: "true"
+- provider: resource
+  path: /app-sre/registry-quarkus-redhat-production/registry-quarkus-redhat.serviceaccount.yaml
+- provider: route
+  path: /app-sre/registry-quarkus-redhat-production/registry-quarkus-redhat.route.yml
+- provider: route
+  path: /app-sre/registry-quarkus-redhat-production/registry-quarkus-redhat.temp.route.yml
+- provider: vault-secret
+  path: app-interface/app-sre/registry-quarkus-redhat-production/secrets
+  version: 1
+  annotations:
+    qontract.recycle: "true"
 
 managedRoles: true
 
-managedTerraformResources: true
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
 
-terraformResources:
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
   - provider: rds
-    account: app-sre
     identifier: quarkus-registry-redhat-production
     defaults: /terraform/resources/app-sre/production/rds-1.yml
     output_resource_name: registry-db
     overrides:
       engine_version: '12.7'
       maintenance_window: Mon:17:00-Mon:18:00
-
-sharedResources:
-  - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
-
-managedExternalResources: true
-
-externalResources: []

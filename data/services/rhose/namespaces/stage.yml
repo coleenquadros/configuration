@@ -19,35 +19,38 @@ environment:
 managedRoles: true
 
 managedResourceTypes:
-  - ServiceAccount
-  - ServiceMonitor
+- ServiceAccount
+- ServiceMonitor
 
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
 
 sharedResources:
-  - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
 
 openshiftResources:
-  - provider: resource
-    path: /rhose/stage/rhose-quay-serviceaccount.yml
-  - provider: vault-secret
-    path: app-interface/rhose/stage/fleet-manager
-    version: 3
-  - provider: route
-    path: /rhose/stage/rhose-fleet-manager.route.yml
-  - provider: resource-template
-    type: jinja2
-    path: /observability/servicemonitors/rhose-services.servicemonitor.yaml
-    variables:
-      environment: stage
-      namespace: rhose-stage
+- provider: resource
+  path: /rhose/stage/rhose-quay-serviceaccount.yml
+- provider: vault-secret
+  path: app-interface/rhose/stage/fleet-manager
+  version: 3
+- provider: route
+  path: /rhose/stage/rhose-fleet-manager.route.yml
+- provider: resource-template
+  type: jinja2
+  path: /observability/servicemonitors/rhose-services.servicemonitor.yaml
+  variables:
+    environment: stage
+    namespace: rhose-stage
 
-managedTerraformResources: true
+managedExternalResources: true
 
-terraformResources:
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
   - provider: rds
-    account: app-sre
     identifier: rhosedb-stage
     defaults: /terraform/resources/rhose/rds-stage-1.yml
     parameter_group: /terraform/resources/rhose/rhose-stage-rds-parameter-group-pg13.yml
@@ -58,7 +61,6 @@ terraformResources:
       field: us-east-1
       version: 2
   - provider: rds
-    account: app-sre
     identifier: rhosedb-stage-replica
     defaults: /terraform/resources/rhose/rds-stage-1.yml
     parameter_group: /terraform/resources/rhose/rhose-stage-rds-parameter-group-pg13.yml
@@ -68,11 +70,6 @@ terraformResources:
       field: us-east-1
       version: 2
   - provider: cloudwatch
-    account: app-sre
     identifier: rhose-stage-cloudwatch
     defaults: /terraform/resources/cloudwatch-1.yml
     output_resource_name: rhose-cloudwatch
-
-managedExternalResources: true
-
-externalResources: []

@@ -16,14 +16,14 @@ environment:
   $ref: /products/osdv4/environments/stage.yml
 
 networkPoliciesAllow:
-  - $ref: /openshift/app-sre-stage-01/namespaces/openshift-operator-lifecycle-manager.yml
-  - $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
+- $ref: /openshift/app-sre-stage-01/namespaces/openshift-operator-lifecycle-manager.yml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.app-sre-stage-01.yml
 
 managedRoles: true
 
 managedResourceTypes:
-  - ServiceAccount
-  - Secret
+- ServiceAccount
+- Secret
 
 openshiftResources:
 - provider: vault-secret
@@ -46,28 +46,26 @@ openshiftResources:
   type: extracurlyjinja2
   path: /services/mas-sso/mas-sso-credentials.secret.yaml
   variables:
-    vault_secret_version: 1    
-
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: app-sre
-  identifier: mas-sso-staging
-  defaults: /terraform/resources/app-sre/staging/rds-1.yml
-  output_resource_name: mas-sso-rds
-  overrides:
-    allocated_storage: 100
-    maintenance_window: wed:05:56-wed:06:26
-    engine_version: '12.7'
-    apply_immediately: true
-  enhanced_monitoring: true
-- provider: s3
-  account: app-sre
-  identifier: mas-sso-s3-resource
-  defaults: /terraform/resources/telemeter/s3-private-1.yml
-  output_resource_name: mas-sso-stage-perf-test-s3-storage
+    vault_secret_version: 1
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: rds
+    identifier: mas-sso-staging
+    defaults: /terraform/resources/app-sre/staging/rds-1.yml
+    output_resource_name: mas-sso-rds
+    overrides:
+      allocated_storage: 100
+      maintenance_window: wed:05:56-wed:06:26
+      engine_version: '12.7'
+      apply_immediately: true
+    enhanced_monitoring: true
+  - provider: s3
+    identifier: mas-sso-s3-resource
+    defaults: /terraform/resources/telemeter/s3-private-1.yml
+    output_resource_name: mas-sso-stage-perf-test-s3-storage
