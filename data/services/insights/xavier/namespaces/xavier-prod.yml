@@ -36,31 +36,28 @@ openshiftResources:
   type: kubernetes.io/dockerconfigjson
   name: quay-cloudservices-pull
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: s3
-  account: insights-prod
-  identifier: xavier-prod-s3
-  defaults: /terraform/resources/s3-private-1.yml
-  output_resource_name: upload-s3
-- provider: cloudwatch
-  account: insights-prod
-  identifier: xavier-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: rds
-  account: insights-prod
-  identifier: xavier-prod
-  defaults: /terraform/resources/insights/production/rds/postgres10-rds-1.yml
-  overrides:
-    username: "userDHN"
-    name: "migration_analytics"
-  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-xavier-prod.yml
-  enhanced_monitoring: true
-  output_resource_name: xavier-db
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: s3
+    identifier: xavier-prod-s3
+    defaults: /terraform/resources/s3-private-1.yml
+    output_resource_name: upload-s3
+  - provider: cloudwatch
+    identifier: xavier-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: rds
+    identifier: xavier-prod
+    defaults: /terraform/resources/insights/production/rds/postgres10-rds-1.yml
+    overrides:
+      username: "userDHN"
+      name: "migration_analytics"
+    parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-xavier-prod.yml
+    enhanced_monitoring: true
+    output_resource_name: xavier-db

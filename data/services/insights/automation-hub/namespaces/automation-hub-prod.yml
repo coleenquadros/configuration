@@ -71,32 +71,29 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-prod
-  identifier: automation-hub-prod-cw
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: rds
-  account: insights-prod
-  identifier: automation-hub-prod
-  defaults: /terraform/resources/insights/production/rds/rds-automation-hub-prod.yml
-  overrides:
-    snapshot_identifier: automation-hub-prod-migration
-  enhanced_monitoring: true
-  output_resource_name: automation-hub-db
-  output_resource_db_name: galaxy_ng
-  parameter_group: /terraform/resources/insights/production/rds/postgres12-parameter-group-automation-hub-prod.yml
-  reset_password: APPSRE-5037
-- provider: elasticache
-  account: insights-prod
-  identifier: automation-hub-prod-elasticache
-  defaults: /terraform/resources/insights/production/elasticache/elasticache-automation-hub-1.yml
-  output_resource_name: automation-hub-elasticache-redis
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: automation-hub-prod-cw
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: rds
+    identifier: automation-hub-prod
+    defaults: /terraform/resources/insights/production/rds/rds-automation-hub-prod.yml
+    overrides:
+      snapshot_identifier: automation-hub-prod-migration
+    enhanced_monitoring: true
+    output_resource_name: automation-hub-db
+    output_resource_db_name: galaxy_ng
+    parameter_group: /terraform/resources/insights/production/rds/postgres12-parameter-group-automation-hub-prod.yml
+    reset_password: APPSRE-5037
+  - provider: elasticache
+    identifier: automation-hub-prod-elasticache
+    defaults: /terraform/resources/insights/production/elasticache/elasticache-automation-hub-1.yml
+    output_resource_name: automation-hub-elasticache-redis

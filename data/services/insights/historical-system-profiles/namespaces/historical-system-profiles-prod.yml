@@ -46,26 +46,24 @@ openshiftResources:
   path: insights/secrets/insights-prod/historical-system-profiles-prod/drift-interpod-comms
   version: 1
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-prod
-  identifier: historical-system-profiles-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: rds
-  account: insights-prod
-  identifier: historical-system-profiles-prod
-  defaults: /terraform/resources/insights/production/rds/postgres11-rds-1.yml
-  output_resource_name: historical-system-profiles-db
-  reset_password: RHCLOUD-10576
-  overrides:
-    allocated_storage: 3072
-    monitoring_interval: 60
-  enhanced_monitoring: true
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: historical-system-profiles-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: rds
+    identifier: historical-system-profiles-prod
+    defaults: /terraform/resources/insights/production/rds/postgres11-rds-1.yml
+    output_resource_name: historical-system-profiles-db
+    reset_password: RHCLOUD-10576
+    overrides:
+      allocated_storage: 3072
+      monitoring_interval: 60
+    enhanced_monitoring: true

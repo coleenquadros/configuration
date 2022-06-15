@@ -48,30 +48,28 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-prod
-  identifier: system-baseline-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: rds
-  account: insights-prod
-  identifier: system-baseline-prod
-  defaults: /terraform/resources/insights/production/rds/rds-system-baseline-prod.yml
-  overrides:
-    snapshot_identifier: system-baseline-prod-migration
-  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-system-baseline-prod.yml
-  output_resource_name: system-baseline-db
-  output_resource_db_name: baselinedb
-  enhanced_monitoring: true
-
 sharedResources:
 - $ref: /services/app-sre/shared-resources/splunk-creds.yml
 - $ref: /services/insights/shared-resources/metrics-export-prod.yml
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: system-baseline-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: rds
+    identifier: system-baseline-prod
+    defaults: /terraform/resources/insights/production/rds/rds-system-baseline-prod.yml
+    overrides:
+      snapshot_identifier: system-baseline-prod-migration
+    parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-system-baseline-prod.yml
+    output_resource_name: system-baseline-db
+    output_resource_db_name: baselinedb
+    enhanced_monitoring: true

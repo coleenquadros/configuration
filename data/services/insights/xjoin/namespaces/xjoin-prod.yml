@@ -82,28 +82,25 @@ openshiftResources:
   type: extracurlyjinja2
   path: /insights-prod/xjoin-prod/malware-detection-db.secret.yaml
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-prod
-  identifier: xjoin-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  es_identifier: kibana-elasticsearch
-  output_resource_name: cloudwatch
-- provider: elasticsearch
-  account: insights-prod
-  identifier: xjoin-elasticsearch
-  defaults: /terraform/resources/insights/production/elasticsearch/xjoin.yml
-  output_resource_name: xjoin-elasticsearch
-- provider: rds
-  account: insights-prod
-  identifier: cyndi-prod
-  defaults: /terraform/resources/insights/production/rds/rds-cyndi-prod.yml
-  enhanced_monitoring: true
-  output_resource_name: cyndi-db-rds
-  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-cyndi-prod.yml
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: xjoin-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+    es_identifier: kibana-elasticsearch
+    output_resource_name: cloudwatch
+  - provider: elasticsearch
+    identifier: xjoin-elasticsearch
+    defaults: /terraform/resources/insights/production/elasticsearch/xjoin.yml
+    output_resource_name: xjoin-elasticsearch
+  - provider: rds
+    identifier: cyndi-prod
+    defaults: /terraform/resources/insights/production/rds/rds-cyndi-prod.yml
+    enhanced_monitoring: true
+    output_resource_name: cyndi-db-rds
+    parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-cyndi-prod.yml

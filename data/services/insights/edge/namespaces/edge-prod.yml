@@ -17,45 +17,48 @@ environment:
   $ref: /products/insights/environments/production.yml
 
 networkPoliciesAllow:
-  - $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
-  - $ref: /services/insights/gateway/namespaces/3scale-prod.yml
-  - $ref: /services/insights/playbook-dispatcher/namespaces/prod.yml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-prod.yml
+- $ref: /services/insights/playbook-dispatcher/namespaces/prod.yml
 
 managedRoles: true
 
 openshiftResources:
-  - provider: vault-secret
-    path: insights/secrets/global/rh-registry-pull
-    version: 2
-    type: kubernetes.io/dockerconfigjson
-  - provider: vault-secret
-    path: insights/quay/quay.io
-    version: 3
-    type: kubernetes.io/dockerconfigjson
-    name: quay-cloudservices-pull
-  - provider: vault-secret
-    path: insights/secrets/global/rds-client-ca
-    version: 1
-    annotations:
-      qontract.recycle: "true"
-  - provider: vault-secret
-    path: insights/secrets/insights-prod/playbook-dispatcher-prod/auth-psk-edge
-    name: psk-playbook-dispatcher
-    version: 1
-  - provider: vault-secret
-    path: insights/secrets/insights-prod/edge-prod/fdo-authorization-secret
-    name: fdo-authorization-secret
-    version: 1
-  - provider: vault-secret
-    path: app-sre/unleash/insights-unleash-token
-    version: 1
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/secrets/insights-prod/playbook-dispatcher-prod/auth-psk-edge
+  name: psk-playbook-dispatcher
+  version: 1
+- provider: vault-secret
+  path: insights/secrets/insights-prod/edge-prod/fdo-authorization-secret
+  name: fdo-authorization-secret
+  version: 1
+- provider: vault-secret
+  path: app-sre/unleash/insights-unleash-token
+  version: 1
 
 
-managedTerraformResources: true
+managedExternalResources: true
 
-terraformResources:
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
   - provider: rds
-    account: insights-prod
     identifier: edge-prod
     defaults: /terraform/resources/insights/production/rds/postgres12-rds-1.yml
     overrides:
@@ -65,17 +68,11 @@ terraformResources:
     output_resource_name: edge-db
     enhanced_monitoring: true
   - provider: cloudwatch
-    account: insights-prod
     identifier: edge-prod
     defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
     output_resource_name: cloudwatch
     es_identifier: kibana-elasticsearch
   - provider: s3
-    account: insights-prod
     identifier: rh-edge-tarballs-prod
     defaults: /terraform/resources/s3-public-read-1.yml
     output_resource_name: rh-edge-tarballs
-
-managedExternalResources: true
-
-externalResources: []

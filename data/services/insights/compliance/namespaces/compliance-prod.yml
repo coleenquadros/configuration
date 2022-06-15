@@ -51,71 +51,65 @@ openshiftResources:
 - provider: resource
   path: /app-sre/compliance-production/datahub-floorist-access.serviceaccount.yaml
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-prod
-  identifier: compliance-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: rds
-  account: insights-prod
-  identifier: compliance-prod
-  defaults: /terraform/resources/insights/production/rds/rds-compliance-prod.yml
-  overrides:
-    snapshot_identifier: compliance-prod-migration
-  enhanced_monitoring: true
-  output_resource_name: compliance-db
-  output_resource_db_name: postgres
-  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-compliance-prod.yml
-- provider: rds
-  account: insights-prod
-  identifier: compliance-prod-readonly
-  replica_source: compliance-prod
-  defaults: /terraform/resources/insights/production/rds/rds-compliance-prod-read-replica.yml
-  output_resource_name: compliance-readonly-db
-  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-compliance-prod-read-replica.yml
-- provider: elasticache
-  account: insights-prod
-  identifier: compliance-prod-elasticache-clowder
-  defaults: /terraform/resources/insights/production/elasticache/elasticache-compliance-2.yml
-  parameter_group: /terraform/resources/insights/production/elasticache/elasticache-compliance-sidekiq-parameter-group.yml
-  output_resource_name: in-memory-db
-- provider: s3
-  account: insights-prod
-  identifier: insights-metrics-export-prod
-  defaults: /terraform/resources/s3-all-expires-7-days.yml
-  output_resource_name: insights-metrics-export-prod
-- provider: aws-iam-service-account
-  account: insights-prod
-  identifier: floorist-metrics-exporter-production-s3-reader
-  variables:
-    bucket: insights-metrics-export-prod
-    region: us-east-1
-    endpoint: s3.us-east-1.amazonaws.com
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [
-        {
-          "Effect": "Allow",
-          "Action": ["s3:ListBucket"],
-          "Resource": ["arn:aws:s3:::${bucket}"]
-        },
-        {
-          "Effect": "Allow",
-          "Action": ["s3:GetObject"],
-          "Resource": ["arn:aws:s3:::${bucket}/*"]
-        }
-      ]
-    }
-  output_resource_name: floorist-metrics-exporter-s3-reader
-
 sharedResources:
 - $ref: /services/app-sre/shared-resources/splunk-creds.yml
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: compliance-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: rds
+    identifier: compliance-prod
+    defaults: /terraform/resources/insights/production/rds/rds-compliance-prod.yml
+    overrides:
+      snapshot_identifier: compliance-prod-migration
+    enhanced_monitoring: true
+    output_resource_name: compliance-db
+    output_resource_db_name: postgres
+    parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-compliance-prod.yml
+  - provider: rds
+    identifier: compliance-prod-readonly
+    replica_source: compliance-prod
+    defaults: /terraform/resources/insights/production/rds/rds-compliance-prod-read-replica.yml
+    output_resource_name: compliance-readonly-db
+    parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-compliance-prod-read-replica.yml
+  - provider: elasticache
+    identifier: compliance-prod-elasticache-clowder
+    defaults: /terraform/resources/insights/production/elasticache/elasticache-compliance-2.yml
+    parameter_group: /terraform/resources/insights/production/elasticache/elasticache-compliance-sidekiq-parameter-group.yml
+    output_resource_name: in-memory-db
+  - provider: s3
+    identifier: insights-metrics-export-prod
+    defaults: /terraform/resources/s3-all-expires-7-days.yml
+    output_resource_name: insights-metrics-export-prod
+  - provider: aws-iam-service-account
+    identifier: floorist-metrics-exporter-production-s3-reader
+    variables:
+      bucket: insights-metrics-export-prod
+      region: us-east-1
+      endpoint: s3.us-east-1.amazonaws.com
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": ["s3:ListBucket"],
+            "Resource": ["arn:aws:s3:::${bucket}"]
+          },
+          {
+            "Effect": "Allow",
+            "Action": ["s3:GetObject"],
+            "Resource": ["arn:aws:s3:::${bucket}/*"]
+          }
+        ]
+      }
+    output_resource_name: floorist-metrics-exporter-s3-reader

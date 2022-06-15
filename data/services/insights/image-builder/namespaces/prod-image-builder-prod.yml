@@ -25,7 +25,7 @@ quota:
 networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
 - $ref: /services/insights/gateway/namespaces/3scale-prod.yml
-- $ref: /services/insights/edge/namespaces/edge-prod.yml 
+- $ref: /services/insights/edge/namespaces/edge-prod.yml
 
 managedRoles: true
 
@@ -48,25 +48,23 @@ openshiftResources:
   validate_json: true
 
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-prod
-  identifier: image-builder-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: image-builder-cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: rds
-  account: insights-prod
-  identifier: image-builder-prod
-  defaults: /terraform/resources/insights/production/rds/postgres12-rds-1.yml
-  overrides:
-    name: imagebuilder
-    engine_version: '12.10'
-  enhanced_monitoring: true
-  output_resource_name: image-builder-db
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: image-builder-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+    output_resource_name: image-builder-cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: rds
+    identifier: image-builder-prod
+    defaults: /terraform/resources/insights/production/rds/postgres12-rds-1.yml
+    overrides:
+      name: imagebuilder
+      engine_version: '12.10'
+    enhanced_monitoring: true
+    output_resource_name: image-builder-db

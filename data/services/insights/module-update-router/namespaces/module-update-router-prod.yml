@@ -17,9 +17,9 @@ environment:
   $ref: /products/insights/environments/production.yml
 
 networkPoliciesAllow:
-  - $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
-  - $ref: /services/insights/gateway/namespaces/3scale-prod.yml
-  - $ref: /services/insights/turnpike/namespaces/prod-turnpike-prod.yml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-prod.yml
+- $ref: /services/insights/turnpike/namespaces/prod-turnpike-prod.yml
 
 managedRoles: true
 
@@ -39,17 +39,16 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-prod
-  identifier: module-update-router-prod
-  defaults: /terraform/resources/insights/production/rds/rds-module-update-router-prod.yml
-  parameter_group: /terraform/resources/insights/production/rds/postgres12-parameter-group-module-update-router-prod.yml
-  output_resource_name: module-update-router-db
-  reset_password: APPSRE-2714
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: rds
+    identifier: module-update-router-prod
+    defaults: /terraform/resources/insights/production/rds/rds-module-update-router-prod.yml
+    parameter_group: /terraform/resources/insights/production/rds/postgres12-parameter-group-module-update-router-prod.yml
+    output_resource_name: module-update-router-db
+    reset_password: APPSRE-2714

@@ -58,39 +58,36 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-prod
-  identifier: cloudigrade-prod-cw
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: rds
-  account: insights-prod
-  identifier: cloudigrade-prod
-  defaults: /terraform/resources/insights/production/rds/postgres11-rds-1.yml
-  overrides:
-    allow_major_version_upgrade: true
-    apply_immediately: false
-    auto_minor_version_upgrade: false
-    backup_retention_period: 7
-    backup_window: 03:00-04:00
-    engine_version: "13.6"
-    instance_class: db.m5.large
-    maintenance_window: Thu:17:00-Thu:18:00
-    monitoring_interval: 60
-  enhanced_monitoring: true
-  output_resource_name: cloudigrade-rds
-  annotations:
-    clowder/database: cloudigrade
-- provider: elasticache
-  account: insights-prod
-  identifier: cloudigrade-prod-redis-clowder
-  defaults: /terraform/resources/insights/production/elasticache/elasticache-cloudigrade-1.yml
-  output_resource_name: in-memory-db
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: cloudigrade-prod-cw
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: rds
+    identifier: cloudigrade-prod
+    defaults: /terraform/resources/insights/production/rds/postgres11-rds-1.yml
+    overrides:
+      allow_major_version_upgrade: true
+      apply_immediately: false
+      auto_minor_version_upgrade: false
+      backup_retention_period: 7
+      backup_window: 03:00-04:00
+      engine_version: "13.6"
+      instance_class: db.m5.large
+      maintenance_window: Thu:17:00-Thu:18:00
+      monitoring_interval: 60
+    enhanced_monitoring: true
+    output_resource_name: cloudigrade-rds
+    annotations:
+      clowder/database: cloudigrade
+  - provider: elasticache
+    identifier: cloudigrade-prod-redis-clowder
+    defaults: /terraform/resources/insights/production/elasticache/elasticache-cloudigrade-1.yml
+    output_resource_name: in-memory-db

@@ -47,27 +47,25 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-prod
-  identifier: config-manager-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: rds
-  account: insights-prod
-  identifier: config-manager-prod
-  defaults: /terraform/resources/insights/production/rds/postgres10-rds-1.yml
-  overrides:
-    username: insights
-    allocated_storage: 300
-    name: insights
-  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-config-manager-prod.yml
-  output_resource_name: config-manager-db
-  enhanced_monitoring: true
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: config-manager-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: rds
+    identifier: config-manager-prod
+    defaults: /terraform/resources/insights/production/rds/postgres10-rds-1.yml
+    overrides:
+      username: insights
+      allocated_storage: 300
+      name: insights
+    parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-config-manager-prod.yml
+    output_resource_name: config-manager-db
+    enhanced_monitoring: true

@@ -51,103 +51,95 @@ openshiftResources:
     qontract.recycle: "true"
 
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-prod
-  identifier: ccx-data-pipeline-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: sqs
-  account: insights-prod
-  identifier: insights-buck-it-openshift-prod-sqs
-  output_resource_name: insights-sqs
-  specs:
-  - defaults: /terraform/resources/insights/production/sqs-insights-buck-it-openshift-prod.yml
-    queues:
-    - key: name
-      value: insights-buck-it-openshift-prod
-- provider: kms
-  account: insights-prod
-  identifier: insights-buck-it-openshift-prod
-  output_resource_name: insights-kms
-  defaults: /terraform/resources/insights/production/kms-insights-buck-it-openshift-prod.yml
-- provider: rds
-  account: insights-prod
-  identifier: ccx-data-pipeline-prod
-  defaults: /terraform/resources/insights/production/rds/postgres11-rds-1.yml
-  overrides:
-    monitoring_interval: 60
-  enhanced_monitoring: true
-  output_resource_name: ccx-data-pipeline-db
-- provider: rds
-  account: insights-prod
-  identifier: ccx-notification-prod
-  defaults: /terraform/resources/insights/production/rds/postgres11-rds-1.yml
-  overrides:
-    monitoring_interval: 60
-    allocated_storage: 200
-  enhanced_monitoring: true
-  output_resource_name: ccx-notification-db
-  annotations:
-    clowder/database: ccx-notification-writer
-- provider: s3
-  account: insights-prod
-  identifier: insights-exported-results-prod
-  defaults: /terraform/resources/s3-all-expires-7-days.yml
-  output_resource_name: ccx-results-exporter-s3
-- provider: aws-iam-service-account
-  account: insights-prod
-  identifier: ccx-data-pipeline-prod-s3-reader
-  variables:
-    bucket: insights-buck-it-openshift
-    region: us-east-1
-    endpoint: s3.us-east-1.amazonaws.com
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [
-        {
-          "Effect": "Allow",
-          "Action": ["s3:ListBucket"],
-          "Resource": ["arn:aws:s3:::${bucket}"]
-        },
-        {
-          "Effect": "Allow",
-          "Action": ["s3:GetObject"],
-          "Resource": ["arn:aws:s3:::${bucket}/*"]
-        }
-      ]
-    }
-  output_resource_name: ccx-data-pipeline-prod-s3-reader
-- provider: aws-iam-service-account
-  account: insights-prod
-  identifier: ccx-exporter-s3-prod
-  variables:
-    bucket: insights-exported-results-prod
-    region: us-east-1
-    endpoint: s3.us-east-1.amazonaws.com
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [
-        {
-          "Effect": "Allow",
-          "Action": ["s3:ListBucket"],
-          "Resource": ["arn:aws:s3:::${bucket}"]
-        },
-        {
-          "Effect": "Allow",
-          "Action": ["s3:*Object"],
-          "Resource": ["arn:aws:s3:::${bucket}/*"]
-        }
-
-      ]
-    }
-  output_resource_name: ccx-exporter-s3-read-write
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: ccx-data-pipeline-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: sqs
+    identifier: insights-buck-it-openshift-prod-sqs
+    output_resource_name: insights-sqs
+    specs:
+    - defaults: /terraform/resources/insights/production/sqs-insights-buck-it-openshift-prod.yml
+      queues:
+      - key: name
+        value: insights-buck-it-openshift-prod
+  - provider: kms
+    identifier: insights-buck-it-openshift-prod
+    output_resource_name: insights-kms
+    defaults: /terraform/resources/insights/production/kms-insights-buck-it-openshift-prod.yml
+  - provider: rds
+    identifier: ccx-data-pipeline-prod
+    defaults: /terraform/resources/insights/production/rds/postgres11-rds-1.yml
+    overrides:
+      monitoring_interval: 60
+    enhanced_monitoring: true
+    output_resource_name: ccx-data-pipeline-db
+  - provider: rds
+    identifier: ccx-notification-prod
+    defaults: /terraform/resources/insights/production/rds/postgres11-rds-1.yml
+    overrides:
+      monitoring_interval: 60
+      allocated_storage: 200
+    enhanced_monitoring: true
+    output_resource_name: ccx-notification-db
+    annotations:
+      clowder/database: ccx-notification-writer
+  - provider: s3
+    identifier: insights-exported-results-prod
+    defaults: /terraform/resources/s3-all-expires-7-days.yml
+    output_resource_name: ccx-results-exporter-s3
+  - provider: aws-iam-service-account
+    identifier: ccx-data-pipeline-prod-s3-reader
+    variables:
+      bucket: insights-buck-it-openshift
+      region: us-east-1
+      endpoint: s3.us-east-1.amazonaws.com
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": ["s3:ListBucket"],
+            "Resource": ["arn:aws:s3:::${bucket}"]
+          },
+          {
+            "Effect": "Allow",
+            "Action": ["s3:GetObject"],
+            "Resource": ["arn:aws:s3:::${bucket}/*"]
+          }
+        ]
+      }
+    output_resource_name: ccx-data-pipeline-prod-s3-reader
+  - provider: aws-iam-service-account
+    identifier: ccx-exporter-s3-prod
+    variables:
+      bucket: insights-exported-results-prod
+      region: us-east-1
+      endpoint: s3.us-east-1.amazonaws.com
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": ["s3:ListBucket"],
+            "Resource": ["arn:aws:s3:::${bucket}"]
+          },
+          {
+            "Effect": "Allow",
+            "Action": ["s3:*Object"],
+            "Resource": ["arn:aws:s3:::${bucket}/*"]
+          }
+
+        ]
+      }
+    output_resource_name: ccx-exporter-s3-read-write

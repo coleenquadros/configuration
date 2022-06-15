@@ -35,24 +35,22 @@ openshiftResources:
   type: kubernetes.io/dockerconfigjson
   name: quay-cloudservices-pull
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-prod
-  identifier: ros-prod
-  defaults:  /terraform/resources/insights/production/rds/rds-ros-prod.yml
-  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-ros-prod.yml
-  output_resource_name: ros-db
-  output_resource_db_name: postgres
-  enhanced_monitoring: true
-- provider: cloudwatch
-  account: insights-prod
-  identifier: ros-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: rds
+    identifier: ros-prod
+    defaults: /terraform/resources/insights/production/rds/rds-ros-prod.yml
+    parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-ros-prod.yml
+    output_resource_name: ros-db
+    output_resource_db_name: postgres
+    enhanced_monitoring: true
+  - provider: cloudwatch
+    identifier: ros-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch

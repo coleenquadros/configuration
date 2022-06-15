@@ -22,26 +22,6 @@ networkPoliciesAllow:
 
 managedRoles: true
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-prod
-  identifier: subscriptions-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: rds
-  account: insights-prod
-  identifier: subscriptions-prod
-  defaults: /terraform/resources/insights/production/rds/rds-subscriptions-prod.yml
-  overrides:
-    snapshot_identifier: subscriptions-prod-migration
-  enhanced_monitoring: true
-  output_resource_name: yupana-db
-  output_resource_db_name: yupana
-  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-subscriptions-prod.yml
-
 managedResourceTypes:
 - ConfigMap
 
@@ -74,4 +54,22 @@ openshiftResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: subscriptions-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: rds
+    identifier: subscriptions-prod
+    defaults: /terraform/resources/insights/production/rds/rds-subscriptions-prod.yml
+    overrides:
+      snapshot_identifier: subscriptions-prod-migration
+    enhanced_monitoring: true
+    output_resource_name: yupana-db
+    output_resource_db_name: yupana
+    parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-subscriptions-prod.yml
