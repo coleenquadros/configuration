@@ -1,0 +1,59 @@
+---
+$schema: /app-sre/app-1.yml
+
+labels:
+  service: provisioning
+  platform: insights
+
+name: provisioning
+
+description: |
+  Provisioning service on console.redhat.com
+  This is used by customer to provision new machines in their hybrid cloud environment.
+  It supports provisioning images build by image builder into AWS, GCE or Azure.
+
+architectureDocument: https://TODO
+sopsUrl: https://TODO
+grafanaUrls:
+- title: Notifications Dashboard
+  url: https://TODO
+onboardingStatus: InProgress
+
+parentApp:
+  $ref: /services/insights/app.yml
+
+# TODO
+# escalationPolicy:
+#   $ref: /teams/insights/escalation-policies/crc-notifications-escalations.yml
+
+serviceOwners:
+- name: Ondrej Ezr (Product owner)
+  email: oezr@redhat.com
+- name: Lukas Zapletal (Architect)
+  email: lzapleta@redhat.com
+
+dependencies:
+- $ref: /dependencies/github/service.yml
+- $ref: /dependencies/quay/service.yml
+- $ref: /dependencies/openshift/service.yml
+- $ref: /dependencies/aws/service.yml
+- $ref: /dependencies/ci-ext/service.yml
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/cloudservices.yml
+  items:
+  - name: provisioning-backend
+    public: true
+    description: Provisioning api service to support the UI
+  - name: provisioning-frontend
+    public: true
+    description: Provisioning service frontend image
+
+codeComponents:
+- name: provisioning-backend
+  resource: upstream
+  url: https://github.com/RHEnVision/provisioning-backend
+- name: provisioning-frontend
+  resource: upstream
+  url: https://github.com/RHEnVision/provisioning-frontend
