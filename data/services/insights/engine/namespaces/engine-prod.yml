@@ -37,21 +37,19 @@ openshiftResources:
   type: kubernetes.io/dockerconfigjson
   name: quay-cloudservices-pull
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-prod
-  identifier: engine-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: elasticache
-  account: insights-prod
-  identifier: engine-elasticache
-  defaults: /terraform/resources/insights/production/elasticache/elasticache-engine-1.yml
-  output_resource_name: in-memory-db
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: engine-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: elasticache
+    identifier: engine-elasticache
+    defaults: /terraform/resources/insights/production/elasticache/elasticache-engine-1.yml
+    output_resource_name: in-memory-db

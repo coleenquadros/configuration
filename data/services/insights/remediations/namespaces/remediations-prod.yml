@@ -57,53 +57,49 @@ openshiftResources:
   name: psk-playbook-dispatcher
   version: 1
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-prod
-  identifier: remediations-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: rds
-  account: insights-prod
-  identifier: remediations-prod
-  defaults: /terraform/resources/insights/production/rds/rds-remediations-prod.yml
-  overrides:
-    snapshot_identifier: remediations-prod-migration
-  enhanced_monitoring: true
-  output_resource_name: remediations-db
-  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-remediations-prod.yml
-- provider: aws-iam-service-account
-  # This service account is used by kusingh for an external application
-  account: insights-prod
-  identifier: cloudwatch-remediations-prod-read-only
-  variables:
-    aws_region: us-east-1
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [{
-        "Effect": "Allow",
-        "Action": [
-          "logs:GetLogEvents",
-          "logs:FilterLogEvents"
-        ],
-        "Resource": "arn:aws:logs:us-east-1:296389277756:log-group:remediations-prod:log-stream:*"
-      }]
-    }
-  output_resource_name: cloudwatch-remediations-prod-read-only
-- provider: elasticache
-  account: insights-prod
-  identifier: remediations-elasticache
-  defaults: /terraform/resources/insights/production/elasticache/elasticache-remediations-1.yml
-  output_resource_name: in-memory-db
-
 sharedResources:
 - $ref: /services/insights/shared-resources/metrics-export-prod.yml
 - $ref: /services/app-sre/shared-resources/splunk-creds.yml
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: remediations-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: rds
+    identifier: remediations-prod
+    defaults: /terraform/resources/insights/production/rds/rds-remediations-prod.yml
+    overrides:
+      snapshot_identifier: remediations-prod-migration
+    enhanced_monitoring: true
+    output_resource_name: remediations-db
+    parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-remediations-prod.yml
+  - provider: aws-iam-service-account
+    # This service account is used by kusingh for an external application
+    identifier: cloudwatch-remediations-prod-read-only
+    variables:
+      aws_region: us-east-1
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Effect": "Allow",
+          "Action": [
+            "logs:GetLogEvents",
+            "logs:FilterLogEvents"
+          ],
+          "Resource": "arn:aws:logs:us-east-1:296389277756:log-group:remediations-prod:log-stream:*"
+        }]
+      }
+    output_resource_name: cloudwatch-remediations-prod-read-only
+  - provider: elasticache
+    identifier: remediations-elasticache
+    defaults: /terraform/resources/insights/production/elasticache/elasticache-remediations-1.yml
+    output_resource_name: in-memory-db

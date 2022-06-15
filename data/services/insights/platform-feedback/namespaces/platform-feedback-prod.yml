@@ -23,39 +23,38 @@ environment:
   $ref: /products/insights/environments/production.yml
 
 networkPoliciesAllow:
-  - $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
-  - $ref: /services/insights/gateway/namespaces/3scale-prod.yml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcp01ue1.yml
+- $ref: /services/insights/gateway/namespaces/3scale-prod.yml
 
 managedRoles: true
 
 managedResourceTypes:
-  - Secret
+- Secret
 
 openshiftResources:
-  - provider: vault-secret
-    path: insights/secrets/insights-prod/platform-feedback-prod/jira-creds
-    version: 3
-    annotations:
-      qontract.recycle: "true"
-  - provider: vault-secret
-    path: insights/quay/quay.io
-    version: 3
-    type: kubernetes.io/dockerconfigjson
-    name: quay-cloudservices-pull
-  - provider: vault-secret
-    path: insights/secrets/global/rds-client-ca
-    version: 1
-
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-prod
-  identifier: platform-feedback-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
+- provider: vault-secret
+  path: insights/secrets/insights-prod/platform-feedback-prod/jira-creds
+  version: 3
+  annotations:
+    qontract.recycle: "true"
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: platform-feedback-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch

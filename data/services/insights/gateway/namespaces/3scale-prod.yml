@@ -71,35 +71,33 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-prod
-  identifier: cw-3scale-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: aws-iam-service-account
-  # This service account is used by kusingh for an external application
-  account: insights-prod
-  identifier: cloudwatch-3scale-prod-read-only
-  variables:
-    aws_region: us-east-1
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [{
-        "Effect": "Allow",
-        "Action": [
-          "logs:GetLogEvents",
-          "logs:FilterLogEvents"
-        ],
-        "Resource": "arn:aws:logs:us-east-1:296389277756:log-group:cw-3scale-prod:log-stream:*"
-      }]
-    }
-  output_resource_name: cloudwatch-3scale-prod-read-only
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: cw-3scale-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: aws-iam-service-account
+    # This service account is used by kusingh for an external application
+    identifier: cloudwatch-3scale-prod-read-only
+    variables:
+      aws_region: us-east-1
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Effect": "Allow",
+          "Action": [
+            "logs:GetLogEvents",
+            "logs:FilterLogEvents"
+          ],
+          "Resource": "arn:aws:logs:us-east-1:296389277756:log-group:cw-3scale-prod:log-stream:*"
+        }]
+      }
+    output_resource_name: cloudwatch-3scale-prod-read-only

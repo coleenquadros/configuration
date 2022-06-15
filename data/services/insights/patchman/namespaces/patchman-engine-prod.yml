@@ -26,29 +26,6 @@ networkPoliciesAllow:
 
 managedRoles: true
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: aws-iam-service-account
-  account: insights-prod
-  identifier: patchman-aws-prod
-  policies:
-  - CloudWatchReadOnlyAccess
-  output_resource_name: patchman-aws
-- provider: cloudwatch
-  account: insights-prod
-  identifier: patchman-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: rds
-  account: insights-prod
-  identifier: patchman-prod
-  parameter_group: /terraform/resources/insights/production/rds/postgres12-parameter-group-patchman-prod.yml
-  defaults: /terraform/resources/insights/production/rds/rds-patchman-engine-prod.yml
-  output_resource_name: patchman-db
-  enhanced_monitoring: true
-
 managedResourceTypes:
 - ServiceAccount
 
@@ -80,4 +57,24 @@ sharedResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: aws-iam-service-account
+    identifier: patchman-aws-prod
+    policies:
+    - CloudWatchReadOnlyAccess
+    output_resource_name: patchman-aws
+  - provider: cloudwatch
+    identifier: patchman-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: rds
+    identifier: patchman-prod
+    parameter_group: /terraform/resources/insights/production/rds/postgres12-parameter-group-patchman-prod.yml
+    defaults: /terraform/resources/insights/production/rds/rds-patchman-engine-prod.yml
+    output_resource_name: patchman-db
+    enhanced_monitoring: true

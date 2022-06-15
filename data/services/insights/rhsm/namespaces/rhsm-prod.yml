@@ -24,55 +24,6 @@ networkPoliciesAllow:
 
 managedRoles: true
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-prod
-  identifier: rhsm-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: s3
-  account: insights-prod
-  identifier: rhsm-subscriptions-egress-prod
-  defaults: /terraform/resources/insights/stage/s3/s3-gdpr-14.yml
-  output_resource_name: egress-s3
-- provider: aws-iam-service-account
-  account: insights-prod
-  identifier: rhsm-subscriptions-egress-prod-s3-reader
-  variables:
-    bucket: rhsm-subscriptions-egress-prod
-    region: us-east-1
-    endpoint: s3.us-east-1.amazonaws.com
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [
-        {
-          "Effect": "Allow",
-          "Action": ["s3:ListBucket"],
-          "Resource": ["arn:aws:s3:::${bucket}"]
-        },
-        {
-          "Effect": "Allow",
-          "Action": ["s3:GetObject"],
-          "Resource": ["arn:aws:s3:::${bucket}/*"]
-        }
-      ]
-    }
-  output_resource_name: rhsm-subscriptions-egress-s3-reader
-- provider: rds
-  account: insights-prod
-  identifier: rhsm-prod
-  defaults: /terraform/resources/insights/production/rds/rds-rhsm-prod.yml
-  overrides:
-    snapshot_identifier: rhsm-prod-migration
-  enhanced_monitoring: true
-  output_resource_name: rhsm-db
-  output_resource_db_name: rhsm-subscriptions
-  parameter_group: /terraform/resources/insights/production/rds/postgres11-parameter-group-rhsm-prod.yml
-
 managedResourceTypes:
 - ServiceAccount
 
@@ -146,4 +97,49 @@ openshiftResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: rhsm-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: s3
+    identifier: rhsm-subscriptions-egress-prod
+    defaults: /terraform/resources/insights/stage/s3/s3-gdpr-14.yml
+    output_resource_name: egress-s3
+  - provider: aws-iam-service-account
+    identifier: rhsm-subscriptions-egress-prod-s3-reader
+    variables:
+      bucket: rhsm-subscriptions-egress-prod
+      region: us-east-1
+      endpoint: s3.us-east-1.amazonaws.com
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": ["s3:ListBucket"],
+            "Resource": ["arn:aws:s3:::${bucket}"]
+          },
+          {
+            "Effect": "Allow",
+            "Action": ["s3:GetObject"],
+            "Resource": ["arn:aws:s3:::${bucket}/*"]
+          }
+        ]
+      }
+    output_resource_name: rhsm-subscriptions-egress-s3-reader
+  - provider: rds
+    identifier: rhsm-prod
+    defaults: /terraform/resources/insights/production/rds/rds-rhsm-prod.yml
+    overrides:
+      snapshot_identifier: rhsm-prod-migration
+    enhanced_monitoring: true
+    output_resource_name: rhsm-db
+    output_resource_db_name: rhsm-subscriptions
+    parameter_group: /terraform/resources/insights/production/rds/postgres11-parameter-group-rhsm-prod.yml

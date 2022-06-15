@@ -47,26 +47,24 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-prod
-  identifier: catalog-inventory-prod
-  defaults: /terraform/resources/insights/production/rds/postgres12-rds-1.yml
-  overrides:
-    username: "insights"
-    name: "catalog_inventory_production"
-  parameter_group: /terraform/resources/insights/production/rds/postgres12-parameter-group-catalog-inventory-prod.yml
-  enhanced_monitoring: true
-  output_resource_name: catalog-inventory-db
-- provider: cloudwatch
-  account: insights-prod
-  identifier: catalog-inventory-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: rds
+    identifier: catalog-inventory-prod
+    defaults: /terraform/resources/insights/production/rds/postgres12-rds-1.yml
+    overrides:
+      username: "insights"
+      name: "catalog_inventory_production"
+    parameter_group: /terraform/resources/insights/production/rds/postgres12-parameter-group-catalog-inventory-prod.yml
+    enhanced_monitoring: true
+    output_resource_name: catalog-inventory-db
+  - provider: cloudwatch
+    identifier: catalog-inventory-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch

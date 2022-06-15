@@ -61,21 +61,19 @@ openshiftResources:
     qontract.recycle: "true"
 
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-prod
-  identifier: turnpike-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: elasticache
-  account: insights-prod
-  identifier: turnpike-prod-elasticache
-  defaults: /terraform/resources/insights/production/elasticache/elasticache-turnpike-1.yml
-  output_resource_name: in-memory-db
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: turnpike-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: elasticache
+    identifier: turnpike-prod-elasticache
+    defaults: /terraform/resources/insights/production/elasticache/elasticache-turnpike-1.yml
+    output_resource_name: in-memory-db

@@ -39,28 +39,6 @@ terraformResources:
   policies:
   - AmazonRDSReadOnlyAccess
   output_resource_name: aws-resource-exporter-quay
-- provider: aws-iam-service-account
-  account: insights-prod
-  identifier: aws-cloudwatch-exporter-crc-prod-01
-  policies:
-  - ReadOnlyAccess
-  output_resource_name: aws-cloudwatch-exporter-crc
-## Insights production rds exporter IAM user
-- provider: aws-iam-service-account
-  account: insights-prod
-  identifier: aws-rds-exporter-crc-prod-01
-  policies:
-  - CloudWatchReadOnlyAccess
-  - AmazonRDSReadOnlyAccess
-  output_resource_name: aws-rds-exporter-crc
-## Insights production aws-resource-exporter IAM user
-- provider: aws-iam-service-account
-  account: insights-prod
-  identifier: aws-resource-exporter-crc-prod-01
-  policies:
-  - AmazonRDSReadOnlyAccess
-  output_resource_name: aws-resource-exporter-crc
-
 managedResourceTypes:
 - ConfigMap
 - Secret
@@ -1043,4 +1021,25 @@ externalResources:
     identifier: grafana-production
     defaults: /terraform/resources/grafana/rds-1.yml
     output_resource_name: grafana-db
-
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: aws-iam-service-account
+    identifier: aws-cloudwatch-exporter-crc-prod-01
+    policies:
+    - ReadOnlyAccess
+    output_resource_name: aws-cloudwatch-exporter-crc
+## Insights production rds exporter IAM user
+  - provider: aws-iam-service-account
+    identifier: aws-rds-exporter-crc-prod-01
+    policies:
+    - CloudWatchReadOnlyAccess
+    - AmazonRDSReadOnlyAccess
+    output_resource_name: aws-rds-exporter-crc
+## Insights production aws-resource-exporter IAM user
+  - provider: aws-iam-service-account
+    identifier: aws-resource-exporter-crc-prod-01
+    policies:
+    - AmazonRDSReadOnlyAccess
+    output_resource_name: aws-resource-exporter-crc

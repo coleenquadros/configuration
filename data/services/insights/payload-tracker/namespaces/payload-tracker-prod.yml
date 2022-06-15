@@ -63,30 +63,27 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-prod
-  identifier: payload-tracker-prod-db
-  defaults: /terraform/resources/insights/production/rds/rds-payload-tracker-prod-12.yml
-  parameter_group: /terraform/resources/insights/production/rds/postgres12-parameter-group-payload-tracker-prod.yml
-  output_resource_name: payload-tracker-db-creds
-  enhanced_monitoring: true
-  annotations:
-    clowder/database: "payload-tracker"
-- provider: cloudwatch
-  account: insights-prod
-  identifier: payload-tracker-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: elasticache
-  account: insights-prod
-  identifier: payload-tracker-prod-cache
-  defaults: /terraform/resources/insights/production/elasticache/elasticache-payload-tracker-1.yml
-  output_resource_name: payload-tracker-cache-creds
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: rds
+    identifier: payload-tracker-prod-db
+    defaults: /terraform/resources/insights/production/rds/rds-payload-tracker-prod-12.yml
+    parameter_group: /terraform/resources/insights/production/rds/postgres12-parameter-group-payload-tracker-prod.yml
+    output_resource_name: payload-tracker-db-creds
+    enhanced_monitoring: true
+    annotations:
+      clowder/database: "payload-tracker"
+  - provider: cloudwatch
+    identifier: payload-tracker-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: elasticache
+    identifier: payload-tracker-prod-cache
+    defaults: /terraform/resources/insights/production/elasticache/elasticache-payload-tracker-1.yml
+    output_resource_name: payload-tracker-cache-creds

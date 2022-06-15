@@ -57,33 +57,30 @@ openshiftResources:
 - provider: resource
   path: /insights-prod/marketplace-prod/marketplace-env.configmap.yaml
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: s3
-  account: insights-prod
-  identifier: open-marketplace-prod
-  defaults: /terraform/resources/s3-gdpr-1.yml
-  output_resource_name: marketplace-s3
-- provider: cloudwatch
-  account: insights-prod
-  identifier: marketplace-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: rds
-  account: insights-prod
-  identifier: marketplace-prod
-  defaults: /terraform/resources/insights/production/rds/rds-marketplace-prod.yml
-  overrides:
-    snapshot_identifier: marketplace-prod-migration
-    engine_version: '11.12'
-  enhanced_monitoring: true
-  output_resource_name: marketplace-db
-  output_resource_db_name: postgres
-  parameter_group: /terraform/resources/insights/production/rds/postgres11-parameter-group-marketplace-prod.yml
-  reset_password: Force_reset_of_RDS_password
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: s3
+    identifier: open-marketplace-prod
+    defaults: /terraform/resources/s3-gdpr-1.yml
+    output_resource_name: marketplace-s3
+  - provider: cloudwatch
+    identifier: marketplace-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: rds
+    identifier: marketplace-prod
+    defaults: /terraform/resources/insights/production/rds/rds-marketplace-prod.yml
+    overrides:
+      snapshot_identifier: marketplace-prod-migration
+      engine_version: '11.12'
+    enhanced_monitoring: true
+    output_resource_name: marketplace-db
+    output_resource_db_name: postgres
+    parameter_group: /terraform/resources/insights/production/rds/postgres11-parameter-group-marketplace-prod.yml
+    reset_password: Force_reset_of_RDS_password

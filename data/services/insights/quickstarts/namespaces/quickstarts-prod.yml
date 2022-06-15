@@ -23,33 +23,6 @@ networkPoliciesAllow:
 
 managedRoles: true
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-prod
-  identifier: quickstarts-prod
-  defaults: /terraform/resources/insights/production/rds/postgres13-rds-1.yml
-  overrides:
-    username: "insights"
-    name: "quickstarts"
-    engine_version: '13.3'
-  parameter_group: /terraform/resources/insights/production/rds/postgres13-parameter-group-quickstarts-prod.yml
-  output_resource_name: quickstarts-db
-  enhanced_monitoring: true
-- provider: cloudwatch
-  account: insights-prod
-  identifier: quickstarts-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: s3
-  account: insights-prod
-  identifier: rh-quickstarts-tarballs-prod
-  defaults: /terraform/resources/s3-public-read-1.yml
-  output_resource_name: rh-quickstarts-tarballs
-
-
 openshiftResources:
 - provider: vault-secret
   path: insights/secrets/global/rh-registry-pull
@@ -63,4 +36,27 @@ openshiftResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: rds
+    identifier: quickstarts-prod
+    defaults: /terraform/resources/insights/production/rds/postgres13-rds-1.yml
+    overrides:
+      username: "insights"
+      name: "quickstarts"
+      engine_version: '13.3'
+    parameter_group: /terraform/resources/insights/production/rds/postgres13-parameter-group-quickstarts-prod.yml
+    output_resource_name: quickstarts-db
+    enhanced_monitoring: true
+  - provider: cloudwatch
+    identifier: quickstarts-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: s3
+    identifier: rh-quickstarts-tarballs-prod
+    defaults: /terraform/resources/s3-public-read-1.yml
+    output_resource_name: rh-quickstarts-tarballs

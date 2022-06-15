@@ -62,26 +62,24 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-prod
-  identifier: approval-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: rds
-  account: insights-prod
-  identifier: approval-prod
-  defaults: /terraform/resources/insights/production/rds/rds-approval-prod.yml
-  overrides:
-    snapshot_identifier: approval-prod-migration
-  enhanced_monitoring: true
-  output_resource_name: approval-db
-  output_resource_db_name: approval_production
-  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-approval-prod.yml
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: approval-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: rds
+    identifier: approval-prod
+    defaults: /terraform/resources/insights/production/rds/rds-approval-prod.yml
+    overrides:
+      snapshot_identifier: approval-prod-migration
+    enhanced_monitoring: true
+    output_resource_name: approval-db
+    output_resource_db_name: approval_production
+    parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-approval-prod.yml

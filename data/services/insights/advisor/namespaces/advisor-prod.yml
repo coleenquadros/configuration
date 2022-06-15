@@ -59,31 +59,29 @@ openshiftResources:
   path: insights/secrets/insights-prod/playbook-dispatcher-prod/auth-psk-tasks
   version: 1
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-prod
-  identifier: advisor-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: rds
-  account: insights-prod
-  identifier: advisor-prod
-  defaults: /terraform/resources/insights/production/rds/rds-advisor-prod.yml
-  overrides:
-    snapshot_identifier: advisor-prod-migration-april9
-    allocated_storage: 750
-    apply_immediately: true
-  enhanced_monitoring: true
-  output_resource_name: advisor-db
-  parameter_group: /terraform/resources/insights/production/rds/postgres12-parameter-group-advisor-prod.yml
-
 sharedResources:
-  - $ref: /services/insights/shared-resources/metrics-export-prod.yml
-  - $ref: /services/app-sre/shared-resources/splunk-creds.yml
+- $ref: /services/insights/shared-resources/metrics-export-prod.yml
+- $ref: /services/app-sre/shared-resources/splunk-creds.yml
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: advisor-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: rds
+    identifier: advisor-prod
+    defaults: /terraform/resources/insights/production/rds/rds-advisor-prod.yml
+    overrides:
+      snapshot_identifier: advisor-prod-migration-april9
+      allocated_storage: 750
+      apply_immediately: true
+    enhanced_monitoring: true
+    output_resource_name: advisor-db
+    parameter_group: /terraform/resources/insights/production/rds/postgres12-parameter-group-advisor-prod.yml

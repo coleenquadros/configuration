@@ -62,30 +62,28 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-prod
-  identifier: cloud-connector-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: rds
-  account: insights-prod
-  identifier: cloud-connector-prod
-  defaults: /terraform/resources/insights/production/rds/postgres12-rds-1.yml
-  overrides:
-    username: insights
-    allocated_storage: 100
-    name: insights
-  parameter_group: /terraform/resources/insights/production/rds/postgres12-parameter-group-cloud-connector-prod.yml
-  output_resource_name: cloud-connector-db
-  enhanced_monitoring: true
-
 sharedResources:
 - $ref: /services/app-sre/shared-resources/splunk-creds.yml
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: cloud-connector-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: rds
+    identifier: cloud-connector-prod
+    defaults: /terraform/resources/insights/production/rds/postgres12-rds-1.yml
+    overrides:
+      username: insights
+      allocated_storage: 100
+      name: insights
+    parameter_group: /terraform/resources/insights/production/rds/postgres12-parameter-group-cloud-connector-prod.yml
+    output_resource_name: cloud-connector-db
+    enhanced_monitoring: true

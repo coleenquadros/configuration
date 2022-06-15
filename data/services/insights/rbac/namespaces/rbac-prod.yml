@@ -84,31 +84,28 @@ openshiftResources:
   path: insights/secrets/backoffice/prod/insights-rbac
   version: 2
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-prod
-  identifier: rbac-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: rds
-  account: insights-prod
-  identifier: rbac-prod
-  defaults: /terraform/resources/insights/production/rds/rds-rbac-prod.yml
-  overrides:
-    snapshot_identifier: rbac-migration-migration-prod
-  enhanced_monitoring: true
-  output_resource_name: rbac-db
-  output_resource_db_name: rbac
-  parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-rbac-prod.yml
-- provider: elasticache
-  account: insights-prod
-  identifier: rbac-prod-elasticache
-  defaults: /terraform/resources/insights/production/elasticache/elasticache-rbac-1.yml
-  output_resource_name: in-memory-db
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: rbac-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: rds
+    identifier: rbac-prod
+    defaults: /terraform/resources/insights/production/rds/rds-rbac-prod.yml
+    overrides:
+      snapshot_identifier: rbac-migration-migration-prod
+    enhanced_monitoring: true
+    output_resource_name: rbac-db
+    output_resource_db_name: rbac
+    parameter_group: /terraform/resources/insights/production/rds/postgres10-parameter-group-rbac-prod.yml
+  - provider: elasticache
+    identifier: rbac-prod-elasticache
+    defaults: /terraform/resources/insights/production/elasticache/elasticache-rbac-1.yml
+    output_resource_name: in-memory-db

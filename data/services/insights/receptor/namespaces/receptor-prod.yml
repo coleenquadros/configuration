@@ -24,21 +24,6 @@ networkPoliciesAllow:
 
 managedRoles: true
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-prod
-  identifier: receptor-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: elasticache
-  account: insights-prod
-  identifier: receptor-elasticache
-  defaults: /terraform/resources/insights/production/elasticache/elasticache-receptor-1.yml
-  output_resource_name: in-memory-db
-
 openshiftResources:
 - provider: vault-secret
   path: insights/secrets/global/rh-registry-pull
@@ -62,4 +47,17 @@ openshiftResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: receptor-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: elasticache
+    identifier: receptor-elasticache
+    defaults: /terraform/resources/insights/production/elasticache/elasticache-receptor-1.yml
+    output_resource_name: in-memory-db

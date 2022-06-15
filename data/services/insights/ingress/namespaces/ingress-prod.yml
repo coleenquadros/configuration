@@ -25,213 +25,6 @@ networkPoliciesAllow:
 
 managedRoles: true
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-prod
-  identifier: ingress-prod
-  defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: sqs
-  account: insights-prod
-  identifier: insights-sideload-prod-sqs
-  output_resource_name: insights-sideload-sqs
-  specs:
-  - defaults: /terraform/resources/insights/production/sqs-insights-sideload-prod.yml
-    queues:
-    - key: name
-      value: insights-sideload-aicoe-prod
-- provider: s3
-  account: insights-prod
-  identifier: insights-ingress-prod
-  defaults: /terraform/resources/insights/production/s3/s3-oneday-1.yml
-  output_resource_name: upload-s3
-- provider: s3
-  account: insights-prod
-  identifier: insights-ingress-archives-prod
-  defaults: /terraform/resources/s3-gdpr-1.yml
-  output_resource_name: insights-ingress-archives
-- provider: s3
-  account: insights-prod
-  identifier: insights-ingress-rejected-prod
-  defaults: /terraform/resources/s3-gdpr-1.yml
-  output_resource_name: insights-ingress-rejected
-- provider: s3
-  account: insights-prod
-  identifier: insights-buck-it-openshift-prod
-  defaults: /terraform/resources/insights/production/s3/s3-twoday-1.yml
-  sqs_identifier: insights-buck-it-openshift-prod
-  s3_events: ["s3:ObjectCreated:*"]
-  output_resource_name: insights-buck-it-openshift
-- provider: s3
-  account: insights-prod
-  identifier: insights-buck-it-ansible-prod
-  defaults: /terraform/resources/s3-gdpr-1.yml
-  output_resource_name: insights-buck-it-ansible
-- provider: s3
-  account: insights-prod
-  identifier: insights-client-metrics-prod
-  defaults: /terraform/resources/s3-gdpr-1.yml
-  output_resource_name: insights-client-metrics-bucket
-- provider: s3
-  account: insights-prod
-  identifier: insights-sideload-aicoe-prod
-  defaults: /terraform/resources/s3-gdpr-1.yml
-  sqs_identifier: insights-sideload-aicoe-prod
-  s3_events: ["s3:ObjectCreated:*"]
-  output_resource_name: insights-sideload-aicoe
-- provider: aws-iam-service-account
-  account: insights-prod
-  identifier: ingress-buckets-read-write-prod
-  variables:
-    aws_region: us-east-1
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [
-        {
-          "Effect": "Allow",
-          "Action": [
-            "s3:ListBucket"
-          ],
-          "Resource": [
-            "arn:aws:s3:::insights-ingress-prod",
-            "arn:aws:s3:::insights-ingress-rejected-prod",
-            "arn:aws:s3:::insights-buck-it-openshift-prod",
-            "arn:aws:s3:::insights-buck-it-ansible-prod",
-            "arn:aws:s3:::insights-ingress-archives-prod"
-          ]
-        },
-        {
-          "Effect": "Allow",
-          "Action": [
-            "s3:*Object"
-          ],
-          "Resource": [
-            "arn:aws:s3:::insights-ingress-prod/*",
-            "arn:aws:s3:::insights-ingress-rejected-prod/*",
-            "arn:aws:s3:::insights-buck-it-openshift-prod/*",
-            "arn:aws:s3:::insights-buck-it-ansible-prod/*",
-            "arn:aws:s3:::insights-ingress-archives-prod/*"
-          ]
-        }
-      ]
-    }
-  output_resource_name: ingress-buckets-read-write
-- provider: aws-iam-service-account
-  account: insights-prod
-  identifier: ingress-buck-it-openshift-read-prod
-  variables:
-    aws_region: us-east-1
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [{
-        "Effect": "Allow",
-        "Action": [
-          "s3:ListBucket",
-          "s3:GetObject"
-        ],
-        "Resource": [
-          "arn:aws:s3:::insights-buck-it-openshift-prod",
-          "arn:aws:s3:::insights-buck-it-openshift-prod/*"
-        ]
-      }]
-    }
-  output_resource_name: ingress-buck-it-openshift-read
-- provider: aws-iam-service-account
-  account: insights-prod
-  identifier: ingress-buck-it-openshift-read-prod-supportshell
-  variables:
-    aws_region: us-east-1
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [{
-        "Effect": "Allow",
-        "Action": [
-          "s3:ListBucket",
-          "s3:GetObject"
-        ],
-        "Resource": [
-          "arn:aws:s3:::insights-buck-it-openshift-prod",
-          "arn:aws:s3:::insights-buck-it-openshift-prod/*"
-        ]
-      }]
-    }
-  output_resource_name: ingress-buck-it-openshift-read-supportshell
-- provider: aws-iam-service-account
-  account: insights-prod
-  identifier: ingress-buck-it-ansible-read-prod
-  variables:
-    aws_region: us-east-1
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [{
-        "Effect": "Allow",
-        "Action": [
-          "s3:ListBucket",
-          "s3:GetObject"
-        ],
-        "Resource": [
-          "arn:aws:s3:::insights-buck-it-ansible-prod",
-          "arn:aws:s3:::insights-buck-it-ansible-prod/*"
-        ]
-      }]
-    }
-  output_resource_name: ingress-buck-it-ansible-read
-- provider: aws-iam-service-account
-  account: insights-prod
-  identifier: ingress-data-hub-read-prod
-  variables:
-    aws_region: us-east-1
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [{
-        "Effect": "Allow",
-        "Action": [
-          "s3:ListBucket",
-          "s3:GetObject"
-        ],
-        "Resource": [
-          "arn:aws:s3:::insights-ingress-prod",
-          "arn:aws:s3:::insights-ingress-prod/*",
-          "arn:aws:s3:::insights-ingress-archives-prod",
-          "arn:aws:s3:::insights-ingress-archives-prod/*",
-          "arn:aws:s3:::insights-warehouse-prod",
-          "arn:aws:s3:::insights-warehouse-prod/*"
-        ]
-      }]
-    }
-  output_resource_name: ingress-data-hub-read
-- provider: aws-iam-service-account
-  account: insights-prod
-  identifier: ingress-archives-read-prod-supportshell
-  variables:
-    aws_region: us-east-1
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [{
-        "Effect": "Allow",
-        "Action": [
-          "s3:ListBucket",
-          "s3:GetObject"
-        ],
-        "Resource": [
-          "arn:aws:s3:::insights-ingress-prod",
-          "arn:aws:s3:::insights-ingress-prod/*",
-          "arn:aws:s3:::insights-ingress-archives-prod",
-          "arn:aws:s3:::insights-ingress-archives-prod/*",
-        ]
-      }]
-    }
-  output_resource_name: ingress-archives-read-supportshell
-
 openshiftResources:
 - provider: vault-secret
   path: insights/secrets/global/rh-registry-pull
@@ -245,4 +38,196 @@ openshiftResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-prod/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: ingress-prod
+    defaults: /terraform/resources/insights/production/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: sqs
+    identifier: insights-sideload-prod-sqs
+    output_resource_name: insights-sideload-sqs
+    specs:
+    - defaults: /terraform/resources/insights/production/sqs-insights-sideload-prod.yml
+      queues:
+      - key: name
+        value: insights-sideload-aicoe-prod
+  - provider: s3
+    identifier: insights-ingress-prod
+    defaults: /terraform/resources/insights/production/s3/s3-oneday-1.yml
+    output_resource_name: upload-s3
+  - provider: s3
+    identifier: insights-ingress-archives-prod
+    defaults: /terraform/resources/s3-gdpr-1.yml
+    output_resource_name: insights-ingress-archives
+  - provider: s3
+    identifier: insights-ingress-rejected-prod
+    defaults: /terraform/resources/s3-gdpr-1.yml
+    output_resource_name: insights-ingress-rejected
+  - provider: s3
+    identifier: insights-buck-it-openshift-prod
+    defaults: /terraform/resources/insights/production/s3/s3-twoday-1.yml
+    sqs_identifier: insights-buck-it-openshift-prod
+    s3_events: ["s3:ObjectCreated:*"]
+    output_resource_name: insights-buck-it-openshift
+  - provider: s3
+    identifier: insights-buck-it-ansible-prod
+    defaults: /terraform/resources/s3-gdpr-1.yml
+    output_resource_name: insights-buck-it-ansible
+  - provider: s3
+    identifier: insights-client-metrics-prod
+    defaults: /terraform/resources/s3-gdpr-1.yml
+    output_resource_name: insights-client-metrics-bucket
+  - provider: s3
+    identifier: insights-sideload-aicoe-prod
+    defaults: /terraform/resources/s3-gdpr-1.yml
+    sqs_identifier: insights-sideload-aicoe-prod
+    s3_events: ["s3:ObjectCreated:*"]
+    output_resource_name: insights-sideload-aicoe
+  - provider: aws-iam-service-account
+    identifier: ingress-buckets-read-write-prod
+    variables:
+      aws_region: us-east-1
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": [
+              "s3:ListBucket"
+            ],
+            "Resource": [
+              "arn:aws:s3:::insights-ingress-prod",
+              "arn:aws:s3:::insights-ingress-rejected-prod",
+              "arn:aws:s3:::insights-buck-it-openshift-prod",
+              "arn:aws:s3:::insights-buck-it-ansible-prod",
+              "arn:aws:s3:::insights-ingress-archives-prod"
+            ]
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "s3:*Object"
+            ],
+            "Resource": [
+              "arn:aws:s3:::insights-ingress-prod/*",
+              "arn:aws:s3:::insights-ingress-rejected-prod/*",
+              "arn:aws:s3:::insights-buck-it-openshift-prod/*",
+              "arn:aws:s3:::insights-buck-it-ansible-prod/*",
+              "arn:aws:s3:::insights-ingress-archives-prod/*"
+            ]
+          }
+        ]
+      }
+    output_resource_name: ingress-buckets-read-write
+  - provider: aws-iam-service-account
+    identifier: ingress-buck-it-openshift-read-prod
+    variables:
+      aws_region: us-east-1
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Effect": "Allow",
+          "Action": [
+            "s3:ListBucket",
+            "s3:GetObject"
+          ],
+          "Resource": [
+            "arn:aws:s3:::insights-buck-it-openshift-prod",
+            "arn:aws:s3:::insights-buck-it-openshift-prod/*"
+          ]
+        }]
+      }
+    output_resource_name: ingress-buck-it-openshift-read
+  - provider: aws-iam-service-account
+    identifier: ingress-buck-it-openshift-read-prod-supportshell
+    variables:
+      aws_region: us-east-1
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Effect": "Allow",
+          "Action": [
+            "s3:ListBucket",
+            "s3:GetObject"
+          ],
+          "Resource": [
+            "arn:aws:s3:::insights-buck-it-openshift-prod",
+            "arn:aws:s3:::insights-buck-it-openshift-prod/*"
+          ]
+        }]
+      }
+    output_resource_name: ingress-buck-it-openshift-read-supportshell
+  - provider: aws-iam-service-account
+    identifier: ingress-buck-it-ansible-read-prod
+    variables:
+      aws_region: us-east-1
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Effect": "Allow",
+          "Action": [
+            "s3:ListBucket",
+            "s3:GetObject"
+          ],
+          "Resource": [
+            "arn:aws:s3:::insights-buck-it-ansible-prod",
+            "arn:aws:s3:::insights-buck-it-ansible-prod/*"
+          ]
+        }]
+      }
+    output_resource_name: ingress-buck-it-ansible-read
+  - provider: aws-iam-service-account
+    identifier: ingress-data-hub-read-prod
+    variables:
+      aws_region: us-east-1
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Effect": "Allow",
+          "Action": [
+            "s3:ListBucket",
+            "s3:GetObject"
+          ],
+          "Resource": [
+            "arn:aws:s3:::insights-ingress-prod",
+            "arn:aws:s3:::insights-ingress-prod/*",
+            "arn:aws:s3:::insights-ingress-archives-prod",
+            "arn:aws:s3:::insights-ingress-archives-prod/*",
+            "arn:aws:s3:::insights-warehouse-prod",
+            "arn:aws:s3:::insights-warehouse-prod/*"
+          ]
+        }]
+      }
+    output_resource_name: ingress-data-hub-read
+  - provider: aws-iam-service-account
+    identifier: ingress-archives-read-prod-supportshell
+    variables:
+      aws_region: us-east-1
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [{
+          "Effect": "Allow",
+          "Action": [
+            "s3:ListBucket",
+            "s3:GetObject"
+          ],
+          "Resource": [
+            "arn:aws:s3:::insights-ingress-prod",
+            "arn:aws:s3:::insights-ingress-prod/*",
+            "arn:aws:s3:::insights-ingress-archives-prod",
+            "arn:aws:s3:::insights-ingress-archives-prod/*",
+          ]
+        }]
+      }
+    output_resource_name: ingress-archives-read-supportshell
