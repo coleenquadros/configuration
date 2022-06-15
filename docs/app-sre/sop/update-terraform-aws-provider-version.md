@@ -60,5 +60,34 @@ The provider upgrade is safe, and we can proceed updating the provider version o
 
 If there are any changes we need to make sure that this changes are not harmful, in case of doubt, do not hesitate to ask in #sd-app-sre channel in slack to get the input from other team members.
 
+### Errors and changes that we found so far
 
+**engine_version: Redis versions must match <major>.x whenusing version 6 or higher**
 
+****
+
+During the past year, AWS changed several times how `engine_version` parameter is specified on the parameter groups for Redis elasticache clusters.
+
+On the last version under major 3, engine version for redis clusters should be specified as `<major>.x` for redis on versions 6 or higher instead of `<major>.<minor>.<bug-fix>` to fix this error on terrafrom the parameter groups for affected redis should be updated to `<major>.x`
+
+This change does not affect the underlying resources that will mantain the same version that they had, and can be updated manually using the AWS console, this is covered in [Redis minor version update SOP](#TODO)
+
+Details of the investigation about the issue can be found on [AWS Provider Update Ticket](https://issues.redhat.com/browse/APPSRE-3598?focusedCommentId=20241853&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-20241853)
+
+[Example MR of TF AWS Provider promotion](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/40981) with engine version errors fixed.
+
+**Terraform integration stuck in loop due to RDS parameter updates**
+
+****
+
+From version `3.55.0` of the TF AWS provider there is an error with parameter groups that have defined the same values as the default for RDS.
+
+Terraform thinks that there are changes pending to apply and it's trying to apply it, but from AWS all is in sync.
+
+Couple of issues comenting it: [Issue 1](https://github.com/hashicorp/terraform-provider-aws/issues/18035) and [Issue 2](https://github.com/hashicorp/terraform-provider-aws/issues/593#issuecomment-330948535)
+
+The way that we fixed it for `insights-stage` account was to remove the parameters from the parameter groups of the affected databases with a comment, this won't change anything since the values on AWS stay as the default and terraform don't try to update it as it's no longer defined.
+
+[Example MR for insights-stage](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/40620)
+
+More context about the problem can be found in this [Slack thread](https://coreos.slack.com/archives/GGC2A0MS8/p1654201187564619?thread_ts=1654083991.496599&cid=GGC2A0MS8)
