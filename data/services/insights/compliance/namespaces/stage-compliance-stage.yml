@@ -57,43 +57,6 @@ openshiftResources:
 - provider: resource
   path: /app-sre-stage/compliance-stage/datahub-floorist-access.serviceaccount.yaml
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-stage
-  identifier: compliance-stage
-  defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
-  parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-compliance-stage.yml
-  output_resource_name: compliance-db
-  enhanced_monitoring: true
-  reset_password: APPSRE-5037
-- provider: rds
-  account: insights-stage
-  identifier: compliance-stage-readonly
-  replica_source: compliance-stage
-  defaults: /terraform/resources/insights/stage/rds/postgres10-rds-read-replica-compliance-1.yml
-  parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-compliance-stage-read-replica.yml
-  output_resource_name: compliance-readonly-db
-  reset_password: APPSRE-5037
-- provider: cloudwatch
-  account: insights-stage
-  identifier: compliance-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: elasticache
-  account: insights-stage
-  identifier: compliance-stage-elasticache-clowder
-  defaults: /terraform/resources/insights/stage/elasticache/elasticache-compliance-2.yml
-  parameter_group: /terraform/resources/insights/stage/elasticache/elasticache-compliance-sidekiq-parameter-group.yml
-  output_resource_name: in-memory-db
-- provider: s3
-  account: insights-stage
-  identifier: insights-metrics-export-stage
-  defaults: /terraform/resources/s3-all-expires-7-days.yml
-  output_resource_name: insights-metrics-export-stage
-
 kafkaCluster:
   $ref: /kafka/crcs02ue1k/cluster.yml
 
@@ -102,4 +65,37 @@ sharedResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: compliance-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
+    parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-compliance-stage.yml
+    output_resource_name: compliance-db
+    enhanced_monitoring: true
+    reset_password: APPSRE-5037
+  - provider: rds
+    identifier: compliance-stage-readonly
+    replica_source: compliance-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres10-rds-read-replica-compliance-1.yml
+    parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-compliance-stage-read-replica.yml
+    output_resource_name: compliance-readonly-db
+    reset_password: APPSRE-5037
+  - provider: cloudwatch
+    identifier: compliance-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: elasticache
+    identifier: compliance-stage-elasticache-clowder
+    defaults: /terraform/resources/insights/stage/elasticache/elasticache-compliance-2.yml
+    parameter_group: /terraform/resources/insights/stage/elasticache/elasticache-compliance-sidekiq-parameter-group.yml
+    output_resource_name: in-memory-db
+  - provider: s3
+    identifier: insights-metrics-export-stage
+    defaults: /terraform/resources/s3-all-expires-7-days.yml
+    output_resource_name: insights-metrics-export-stage
+

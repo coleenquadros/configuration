@@ -28,16 +28,6 @@ networkPoliciesAllow:
 
 managedRoles: true
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-stage
-  identifier: insights-operator-controller-stage
-  defaults: /terraform/resources/insights/stage/rds/postgres11-rds-1.yml
-  output_resource_name: insights-operator-controller-db
-  enhanced_monitoring: true
-
 managedResourceTypes:
 - ServiceAccount
 
@@ -56,4 +46,13 @@ openshiftResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: insights-operator-controller-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres11-rds-1.yml
+    output_resource_name: insights-operator-controller-db
+    enhanced_monitoring: true

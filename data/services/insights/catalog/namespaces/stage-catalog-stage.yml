@@ -52,29 +52,28 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-stage
-  identifier: catalog-stage
-  defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
-  overrides:
-    username: "insights"
-    name: "catalog_production"
-  parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-catalog-stage.yml
-  enhanced_monitoring: true
-  output_resource_name: catalog-db
-- provider: cloudwatch
-  account: insights-stage
-  identifier: catalog-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-
 kafkaCluster:
   $ref: /kafka/crcs02ue1k/cluster.yml
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: catalog-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
+    overrides:
+      username: "insights"
+      name: "catalog_production"
+    parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-catalog-stage.yml
+    enhanced_monitoring: true
+    output_resource_name: catalog-db
+  - provider: cloudwatch
+    identifier: catalog-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+

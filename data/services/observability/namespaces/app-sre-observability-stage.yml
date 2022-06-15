@@ -39,28 +39,6 @@ terraformResources:
   - AmazonInspectorReadOnlyAccess
   - CloudWatchReadOnlyAccess
   output_resource_name: aws-cloudwatch-exporter-app-sre
-## Insights staging cloudwatch exporter IAM user
-- provider: aws-iam-service-account
-  account: insights-stage
-  identifier: aws-cloudwatch-exporter-crc-stage-01
-  policies:
-  - ReadOnlyAccess
-  output_resource_name: aws-cloudwatch-exporter-crc
-## Insights staging rds exporter IAM user
-- provider: aws-iam-service-account
-  account: insights-stage
-  identifier: aws-rds-exporter-crc-stage-01
-  policies:
-  - CloudWatchReadOnlyAccess
-  - AmazonRDSReadOnlyAccess
-  output_resource_name: aws-rds-exporter-crc
-# Insights staging aws-resource-exporter IAM user
-- provider: aws-iam-service-account
-  account: insights-stage
-  identifier: aws-resource-exporter-crc-stage-01
-  policies:
-  - AmazonRDSReadOnlyAccess
-  output_resource_name: aws-resource-exporter-crc
 
 managedResourceTypes:
 - ConfigMap
@@ -321,7 +299,7 @@ openshiftResources:
 - provider: resource
   path: /observability/grafana/grafana-dashboard-sso-mas-monitoring.configmap.yaml
   validate_json: true
-  
+
 # Secrets
 ## Blackbox Exporter
 - provider: resource-template
@@ -443,3 +421,26 @@ externalResources:
     policies:
     - AmazonRDSReadOnlyAccess
     output_resource_name: aws-resource-exporter-ocm-quay
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  ## Insights staging cloudwatch exporter IAM user
+  - provider: aws-iam-service-account
+    identifier: aws-cloudwatch-exporter-crc-stage-01
+    policies:
+    - ReadOnlyAccess
+    output_resource_name: aws-cloudwatch-exporter-crc
+  ## Insights staging rds exporter IAM user
+  - provider: aws-iam-service-account
+    identifier: aws-rds-exporter-crc-stage-01
+    policies:
+    - CloudWatchReadOnlyAccess
+    - AmazonRDSReadOnlyAccess
+    output_resource_name: aws-rds-exporter-crc
+  # Insights staging aws-resource-exporter IAM user
+  - provider: aws-iam-service-account
+    identifier: aws-resource-exporter-crc-stage-01
+    policies:
+    - AmazonRDSReadOnlyAccess
+    output_resource_name: aws-resource-exporter-crc

@@ -30,53 +30,6 @@ networkPoliciesAllow:
 
 managedRoles: true
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-stage
-  identifier: rhsm-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: rds
-  account: insights-stage
-  identifier: rhsm-stage
-  defaults: /terraform/resources/insights/stage/rds/postgres11-rds-1.yml
-  enhanced_monitoring: true
-  output_resource_name: rhsm-db
-  parameter_group: /terraform/resources/insights/stage/rds/postgres11-parameter-group-rhsm-stage.yml
-  reset_password: APPSRE-5037
-- provider: s3
-  account: insights-stage
-  identifier: rhsm-subscriptions-egress-stage
-  defaults: /terraform/resources/insights/stage/s3/s3-gdpr-14.yml
-  output_resource_name: egress-s3
-- provider: aws-iam-service-account
-  account: insights-stage
-  identifier: rhsm-subscriptions-egress-stage-s3-reader
-  variables:
-    bucket: rhsm-subscriptions-egress-stage
-    region: us-east-1
-    endpoint: s3.us-east-1.amazonaws.com
-  user_policy:
-    {
-      "Version": "2012-10-17",
-      "Statement": [
-        {
-          "Effect": "Allow",
-          "Action": ["s3:ListBucket"],
-          "Resource": ["arn:aws:s3:::${bucket}"]
-        },
-        {
-          "Effect": "Allow",
-          "Action": ["s3:GetObject"],
-          "Resource": ["arn:aws:s3:::${bucket}/*"]
-        }
-      ]
-    }
-  output_resource_name: rhsm-subscriptions-egress-s3-reader
-
 managedResourceTypes:
 - ServiceAccount
 
@@ -155,4 +108,48 @@ openshiftResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: rhsm-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: rds
+    identifier: rhsm-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres11-rds-1.yml
+    enhanced_monitoring: true
+    output_resource_name: rhsm-db
+    parameter_group: /terraform/resources/insights/stage/rds/postgres11-parameter-group-rhsm-stage.yml
+    reset_password: APPSRE-5037
+  - provider: s3
+    identifier: rhsm-subscriptions-egress-stage
+    defaults: /terraform/resources/insights/stage/s3/s3-gdpr-14.yml
+    output_resource_name: egress-s3
+  - provider: aws-iam-service-account
+    identifier: rhsm-subscriptions-egress-stage-s3-reader
+    variables:
+      bucket: rhsm-subscriptions-egress-stage
+      region: us-east-1
+      endpoint: s3.us-east-1.amazonaws.com
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": ["s3:ListBucket"],
+            "Resource": ["arn:aws:s3:::${bucket}"]
+          },
+          {
+            "Effect": "Allow",
+            "Action": ["s3:GetObject"],
+            "Resource": ["arn:aws:s3:::${bucket}/*"]
+          }
+        ]
+      }
+    output_resource_name: rhsm-subscriptions-egress-s3-reader
+

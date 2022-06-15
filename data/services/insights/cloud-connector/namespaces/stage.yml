@@ -62,27 +62,6 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-stage
-  identifier: cloud-connector-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: rds
-  account: insights-stage
-  identifier: cloud-connector-stage
-  defaults: /terraform/resources/insights/stage/rds/postgres12-rds-1.yml
-  overrides:
-    username: insights
-    allocated_storage: 20
-    name: insights
-  parameter_group: /terraform/resources/insights/stage/rds/postgres12-parameter-group-cloud-connector-stage.yml
-  output_resource_name: cloud-connector-db
-  enhanced_monitoring: true
-
 kafkaCluster:
   $ref: /kafka/crcs02ue1k/cluster.yml
 
@@ -91,4 +70,24 @@ sharedResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: cloud-connector-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: rds
+    identifier: cloud-connector-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres12-rds-1.yml
+    overrides:
+      username: insights
+      allocated_storage: 20
+      name: insights
+    parameter_group: /terraform/resources/insights/stage/rds/postgres12-parameter-group-cloud-connector-stage.yml
+    output_resource_name: cloud-connector-db
+    enhanced_monitoring: true
+

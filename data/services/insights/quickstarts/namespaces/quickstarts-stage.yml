@@ -23,34 +23,6 @@ networkPoliciesAllow:
 
 managedRoles: true
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-stage
-  identifier: quickstarts-stage
-  defaults: /terraform/resources/insights/stage/rds/postgres13-rds-1.yml
-  overrides:
-    username: "insights"
-    name: "quickstarts"
-    engine_version: '13.4'
-    apply_immediately: true
-  parameter_group: /terraform/resources/insights/stage/rds/postgres13-parameter-group-quickstarts-stage.yml
-  output_resource_name: quickstarts-db
-  enhanced_monitoring: true
-- provider: cloudwatch
-  account: insights-stage
-  identifier: quickstarts-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: s3
-  account: insights-stage
-  identifier: rh-quickstarts-tarballs-stage
-  defaults: /terraform/resources/s3-public-read-1.yml
-  output_resource_name: rh-quickstarts-tarballs
-
-
 openshiftResources:
 - provider: vault-secret
   path: insights/secrets/global/rh-registry-pull
@@ -64,4 +36,28 @@ openshiftResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: quickstarts-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres13-rds-1.yml
+    overrides:
+      username: "insights"
+      name: "quickstarts"
+      engine_version: '13.4'
+      apply_immediately: true
+    parameter_group: /terraform/resources/insights/stage/rds/postgres13-parameter-group-quickstarts-stage.yml
+    output_resource_name: quickstarts-db
+    enhanced_monitoring: true
+  - provider: cloudwatch
+    identifier: quickstarts-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: s3
+    identifier: rh-quickstarts-tarballs-stage
+    defaults: /terraform/resources/s3-public-read-1.yml
+    output_resource_name: rh-quickstarts-tarballs

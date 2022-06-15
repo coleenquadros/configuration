@@ -23,38 +23,37 @@ environment:
   $ref: /products/insights/environments/stage.yml
 
 networkPoliciesAllow:
-  - $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs02ue1.yml
-  - $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs02ue1.yml
+- $ref: /services/insights/rbac/namespaces/stage-rbac-stage.yml
 
 managedRoles: true
 
 managedResourceTypes:
-  - ConfigMap
+- ConfigMap
 
 openshiftResources:
-  - provider: resource
-    path: /insights-stage/platform-logging-stage/logstash-kafka-config.configmap.yml
-  - provider: resource
-    path: /insights-stage/platform-logging-stage/logstash-settings.configmap.yml
-  - provider: vault-secret
-    path: insights/quay/quay.io
-    version: 3
-    type: kubernetes.io/dockerconfigjson
-    name: quay-cloudservices-pull
-  - provider: vault-secret
-    path: insights/secrets/global/rds-client-ca
-    version: 1
-
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-stage
-  identifier: platform-logging-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
+- provider: resource
+  path: /insights-stage/platform-logging-stage/logstash-kafka-config.configmap.yml
+- provider: resource
+  path: /insights-stage/platform-logging-stage/logstash-settings.configmap.yml
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: platform-logging-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
