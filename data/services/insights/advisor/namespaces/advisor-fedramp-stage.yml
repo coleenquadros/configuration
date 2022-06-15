@@ -55,35 +55,25 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-fedramp-stage
-  identifier: advisor-stage
-  defaults: /terraform/resources/insights/stage/rds/postgres12-rds-1.yml
-  overrides:
-    username: "insightsapi"
-    allocated_storage: 500
-    name: "insightsapi"
-  parameter_group: /terraform/resources/insights/stage/rds/postgres12-parameter-group-advisor-stage.yml
-  output_resource_name: advisor-db
-  enhanced_monitoring: true
-# - provider: rds
-#   account: insights-fedramp-stage
-#   identifier: advisor-stage-readonly
-#   replica_source: advisor-stage
-#   availability_zone: us-east-1d
-#   defaults: /terraform/resources/insights/stage/rds/postgres12-rds-read-replica-advisor-stage.yml
-#   parameter_group: /terraform/resources/insights/stage/rds/postgres12-parameter-group-advisor-stage-read-replica.yml
-#   output_resource_name: advisor-readonly-db
-- provider: cloudwatch
-  account: insights-fedramp-stage
-  identifier: advisor-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-fedramp-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: advisor-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres12-rds-1.yml
+    overrides:
+      username: "insightsapi"
+      allocated_storage: 500
+      name: "insightsapi"
+    parameter_group: /terraform/resources/insights/stage/rds/postgres12-parameter-group-advisor-stage.yml
+    output_resource_name: advisor-db
+    enhanced_monitoring: true
+  - provider: cloudwatch
+    identifier: advisor-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch

@@ -53,29 +53,26 @@ openshiftResources:
   annotations:
     qontract.recycle: "true"
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: rds
-  account: insights-fedramp-stage
-  identifier: compliance-stage
-  defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
-  parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-compliance-stage.yml
-  output_resource_name: compliance-db
-  enhanced_monitoring: true
-- provider: cloudwatch
-  account: insights-fedramp-stage
-  identifier: compliance-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: elasticache
-  account: insights-fedramp-stage
-  identifier: compliance-fedramp-stage-elasticache-clowder
-  defaults: /terraform/resources/insights/fedramp/stage/elasticache/elasticache-compliance-2.yml
-  parameter_group: /terraform/resources/insights/fedramp/stage/elasticache/elasticache-compliance-sidekiq-parameter-group.yml
-  output_resource_name: in-memory-db
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-fedramp-stage/account.yml
+  resources:
+  - provider: rds
+    identifier: compliance-stage
+    defaults: /terraform/resources/insights/stage/rds/postgres10-rds-1.yml
+    parameter_group: /terraform/resources/insights/stage/rds/postgres10-parameter-group-compliance-stage.yml
+    output_resource_name: compliance-db
+    enhanced_monitoring: true
+  - provider: cloudwatch
+    identifier: compliance-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: elasticache
+    identifier: compliance-fedramp-stage-elasticache-clowder
+    defaults: /terraform/resources/insights/fedramp/stage/elasticache/elasticache-compliance-2.yml
+    parameter_group: /terraform/resources/insights/fedramp/stage/elasticache/elasticache-compliance-sidekiq-parameter-group.yml
+    output_resource_name: in-memory-db

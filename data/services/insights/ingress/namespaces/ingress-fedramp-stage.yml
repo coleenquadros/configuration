@@ -29,55 +29,6 @@ managedRoles: true
 sharedResources:
 - $ref: /services/insights/shared-resources/fedramp-stage.yml
 
-managedTerraformResources: true
-
-terraformResources:
-- provider: cloudwatch
-  account: insights-fedramp-stage
-  identifier: ingress-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
-- provider: s3
-  account: insights-fedramp-stage
-  identifier: upload-fedramp-stage
-  defaults: /terraform/resources/s3-gdpr-1.yml
-  output_resource_name: upload-s3
-- provider: s3
-  account: insights-fedramp-stage
-  identifier: insights-ingress-archives-fedramp-stage
-  defaults: /terraform/resources/s3-gdpr-1.yml
-  output_resource_name: insights-ingress-archives
-- provider: s3
-  account: insights-fedramp-stage
-  identifier: insights-ingress-rejected-fedramp-stage
-  defaults: /terraform/resources/s3-gdpr-1.yml
-  output_resource_name: insights-ingress-rejected
-- provider: s3
-  account: insights-fedramp-stage
-  identifier: insights-buck-it-openshift-fedramp-stage
-  defaults: /terraform/resources/s3-gdpr-1.yml
-  # sqs_identifier: insights-buck-it-openshift-stage
-  # s3_events: ["s3:ObjectCreated:*"]
-  output_resource_name: insights-buck-it-openshift
-- provider: s3
-  account: insights-fedramp-stage
-  identifier: insights-buck-it-ansible-fedramp-stage
-  defaults: /terraform/resources/s3-gdpr-1.yml
-  output_resource_name: insights-buck-it-ansible
-- provider: s3
-  account: insights-fedramp-stage
-  identifier: insights-client-metrics-fedramp-stage
-  defaults: /terraform/resources/s3-gdpr-1.yml
-  output_resource_name: insights-client-metrics-bucket
-- provider: s3
-  account: insights-fedramp-stage
-  identifier: insights-sideload-aicoe-fedramp-stage
-  defaults: /terraform/resources/s3-gdpr-1.yml
-  # sqs_identifier: insights-sideload-aicoe-stage
-  # s3_events: ["s3:ObjectCreated:*"]
-  output_resource_name: insights-sideload-aicoe
-
 openshiftResources:
 - provider: vault-secret
   path: insights/secrets/global/rh-registry-pull
@@ -91,4 +42,45 @@ openshiftResources:
 
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-fedramp-stage/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: ingress-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
+  - provider: s3
+    identifier: upload-fedramp-stage
+    defaults: /terraform/resources/s3-gdpr-1.yml
+    output_resource_name: upload-s3
+  - provider: s3
+    identifier: insights-ingress-archives-fedramp-stage
+    defaults: /terraform/resources/s3-gdpr-1.yml
+    output_resource_name: insights-ingress-archives
+  - provider: s3
+    identifier: insights-ingress-rejected-fedramp-stage
+    defaults: /terraform/resources/s3-gdpr-1.yml
+    output_resource_name: insights-ingress-rejected
+  - provider: s3
+    identifier: insights-buck-it-openshift-fedramp-stage
+    defaults: /terraform/resources/s3-gdpr-1.yml
+  # sqs_identifier: insights-buck-it-openshift-stage
+  # s3_events: ["s3:ObjectCreated:*"]
+    output_resource_name: insights-buck-it-openshift
+  - provider: s3
+    identifier: insights-buck-it-ansible-fedramp-stage
+    defaults: /terraform/resources/s3-gdpr-1.yml
+    output_resource_name: insights-buck-it-ansible
+  - provider: s3
+    identifier: insights-client-metrics-fedramp-stage
+    defaults: /terraform/resources/s3-gdpr-1.yml
+    output_resource_name: insights-client-metrics-bucket
+  - provider: s3
+    identifier: insights-sideload-aicoe-fedramp-stage
+    defaults: /terraform/resources/s3-gdpr-1.yml
+    # sqs_identifier: insights-sideload-aicoe-stage
+    # s3_events: ["s3:ObjectCreated:*"]
+    output_resource_name: insights-sideload-aicoe
