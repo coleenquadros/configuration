@@ -21,50 +21,46 @@ networkPoliciesAllow:
 - $ref: /services/observability/namespaces/openshift-customer-monitoring.clairp01ue1.yml
 
 managedResourceTypes:
-  - Secret
+- Secret
 
 managedRoles: true
 
-managedTerraformResources: true
-
-  
 openshiftResources:
-  - provider: resource-template
-    type: extracurlyjinja2
-    path: /clair/production/clair-config-secret.yaml
-    variables:
-      recycle: true
-      name: config
-      vault_secret_version: 1
-      version_label: v1
-  - provider: route
-    path: /clair/production/clair.indexer.route.yaml
-  - provider: route
-    path: /clair/production/clair.matcher.route.yaml
-  - provider: route
-    path: /clair/production/clair.notifier.route.yaml
+- provider: resource-template
+  type: extracurlyjinja2
+  path: /clair/production/clair-config-secret.yaml
+  variables:
+    recycle: true
+    name: config
+    vault_secret_version: 1
+    version_label: v1
+- provider: route
+  path: /clair/production/clair.indexer.route.yaml
+- provider: route
+  path: /clair/production/clair.matcher.route.yaml
+- provider: route
+  path: /clair/production/clair.notifier.route.yaml
 
 
-terraformResources:
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/quayio-prod/account.yml
+  resources:
   - provider: rds
-    account: quayio-prod
     identifier: clair-indexer
     defaults: /terraform/resources/quayio-production/clair-indexer-rds-1.yml
     overrides:
       apply_immediately: true
   - provider: rds
-    account: quayio-prod
     identifier: clair-matcher
     defaults: /terraform/resources/quayio-production/clair-matcher-rds-1.yml
     overrides:
       apply_immediately: true
   - provider: rds
-    account: quayio-prod
     identifier: clair-notifier
     defaults: /terraform/resources/quayio-production/clair-notifier-rds-1.yml
     overrides:
       apply_immediately: true
-
-managedExternalResources: true
-
-externalResources: []

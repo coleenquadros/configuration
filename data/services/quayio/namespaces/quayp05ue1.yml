@@ -21,8 +21,6 @@ networkPoliciesAllow:
 
 managedRoles: true
 
-managedTerraformResources: true
-
 sharedResources:
 - $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
 
@@ -210,101 +208,89 @@ openshiftResources:
   vault_tls_secret_version: 4
 
 
-terraformResources:
-- provider: rds
-  account: quayio-prod
-  identifier: quayio-production-py3
-  availability_zone: us-east-1a
-  defaults: /terraform/resources/quayio-production/rds-1.yml
-  parameter_group: /terraform/resources/quayio-production/rds-parameter-group-readwrite-replica-1.yml
-  overrides:
-    apply_immediately: true
-- provider: elasticache
-  account: quayio-prod
-  identifier: quayio-production
-  defaults: /terraform/resources/quayio-production/elasticache-1.yml
-  parameter_group: /terraform/resources/quayio-production/elasticache-parameter-group-1.yml
-  output_resource_name: quayio-elasticache
-- provider: elasticache
-  account: quayio-prod
-  identifier: quayio-production-builders
-  defaults: /terraform/resources/quayio-production/elasticache-builders-1.yml
-  parameter_group: /terraform/resources/quayio-production/elasticache-builders-parameter-group-1.yml
-- provider: elasticache
-  account: quayio-prod
-  identifier: quayio-production-modelcache
-  defaults: /terraform/resources/quayio-production/elasticache-modelcache-1.yml
-  parameter_group: /terraform/resources/quayio-production/elasticache-modelcache-parameter-group-1.yml
-  output_resource_name: quayio-production-modelcache
-- provider: s3-cloudfront
-  account: quayio-prod
-  identifier: quayio-production-s3
-  storage_class: intelligent_tiering
-  defaults: /terraform/resources/quayio-production/s3-cloudfront-us-east-1.yml
-  output_resource_name: quayio-s3
-- provider: ecr
-  account: quayio-prod
-  region: eu-central-1
-  identifier: quayio-backup
-  output_resource_name: quayio-backup
-- provider: ecr
-  account: quayio-prod
-  region: eu-central-1
-  identifier: quayio-py3-backup
-  output_resource_name: quayio-py3-backup
-- provider: ecr
-  account: quayio-prod
-  region: eu-central-1
-  identifier: syslog-cloudwatch-bridge-backup
-  output_resource_name: syslog-cloudwatch-bridge-backup
-- provider: kinesis
-  account: quayio-prod
-  identifier: quay-prod-logentry-stream
-  defaults: /terraform/resources/quayio-production/kinesis-1.yml
-  output_resource_name: quayio-kinesis
-# used in the quay-config secret HEALTH_CHECKER
-- provider: aws-iam-service-account
-  account: quayio-prod
-  identifier: quay-db-monitor
-  policies:
-  - AmazonRDSReadOnlyAccess
-  output_resource_name: quay-db-monitor
-- provider: ecr
-  account: quayio-prod
-  region: eu-central-1
-  identifier: quayio-update-py2-db-backup
-  output_resource_name: quayio-update-py2-db-backup
-- provider: rds
-  account: quayio-prod
-  identifier: clair-backfiller
-  defaults: /terraform/resources/quayio-production/rds-1.yml
-  overrides:
-    snapshot_identifier: rds:quayio-production-py3-2021-11-16-04-13
-    instance_class: db.r4.4xlarge
-    backup_retention_period: 0
-    timeouts:
-      create: 2h
-  parameter_group: /terraform/resources/quayio-production/rds-parameter-group-1.yml
-  output_resource_name: clair-backfiller
-  enhanced_monitoring: true
-- provider: alb
-  account: quayio-prod
-  identifier: quayio-production-alb01
-  output_resource_name: quayio-production-alb
-  idle_timeout: 3600
-  vpc:
-    $ref: /aws/quayio-prod/vpcs/QuayVPC.yml
-  certificate_arn: arn:aws:acm:us-east-1:206170669542:certificate/8a4a9a8b-d06b-46f6-a234-e7ef2ec657cf
-  targets:
-  - name: quayio-production-py2
-    default: false
-    openshift_service: quay-load-balancer-service
-  - name: quayio-production-py3
-    default: true
-    openshift_service: quay-py3-load-balancer-service
-  rules: []
-
-
 managedExternalResources: true
 
-externalResources: []
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/quayio-prod/account.yml
+  resources:
+  - provider: rds
+    identifier: quayio-production-py3
+    availability_zone: us-east-1a
+    defaults: /terraform/resources/quayio-production/rds-1.yml
+    parameter_group: /terraform/resources/quayio-production/rds-parameter-group-readwrite-replica-1.yml
+    overrides:
+      apply_immediately: true
+  - provider: elasticache
+    identifier: quayio-production
+    defaults: /terraform/resources/quayio-production/elasticache-1.yml
+    parameter_group: /terraform/resources/quayio-production/elasticache-parameter-group-1.yml
+    output_resource_name: quayio-elasticache
+  - provider: elasticache
+    identifier: quayio-production-builders
+    defaults: /terraform/resources/quayio-production/elasticache-builders-1.yml
+    parameter_group: /terraform/resources/quayio-production/elasticache-builders-parameter-group-1.yml
+  - provider: elasticache
+    identifier: quayio-production-modelcache
+    defaults: /terraform/resources/quayio-production/elasticache-modelcache-1.yml
+    parameter_group: /terraform/resources/quayio-production/elasticache-modelcache-parameter-group-1.yml
+    output_resource_name: quayio-production-modelcache
+  - provider: s3-cloudfront
+    identifier: quayio-production-s3
+    storage_class: intelligent_tiering
+    defaults: /terraform/resources/quayio-production/s3-cloudfront-us-east-1.yml
+    output_resource_name: quayio-s3
+  - provider: ecr
+    region: eu-central-1
+    identifier: quayio-backup
+    output_resource_name: quayio-backup
+  - provider: ecr
+    region: eu-central-1
+    identifier: quayio-py3-backup
+    output_resource_name: quayio-py3-backup
+  - provider: ecr
+    region: eu-central-1
+    identifier: syslog-cloudwatch-bridge-backup
+    output_resource_name: syslog-cloudwatch-bridge-backup
+  - provider: kinesis
+    identifier: quay-prod-logentry-stream
+    defaults: /terraform/resources/quayio-production/kinesis-1.yml
+    output_resource_name: quayio-kinesis
+# used in the quay-config secret HEALTH_CHECKER
+  - provider: aws-iam-service-account
+    identifier: quay-db-monitor
+    policies:
+    - AmazonRDSReadOnlyAccess
+    output_resource_name: quay-db-monitor
+  - provider: ecr
+    region: eu-central-1
+    identifier: quayio-update-py2-db-backup
+    output_resource_name: quayio-update-py2-db-backup
+  - provider: rds
+    identifier: clair-backfiller
+    defaults: /terraform/resources/quayio-production/rds-1.yml
+    overrides:
+      snapshot_identifier: rds:quayio-production-py3-2021-11-16-04-13
+      instance_class: db.r4.4xlarge
+      backup_retention_period: 0
+      timeouts:
+        create: 2h
+    parameter_group: /terraform/resources/quayio-production/rds-parameter-group-1.yml
+    output_resource_name: clair-backfiller
+    enhanced_monitoring: true
+  - provider: alb
+    identifier: quayio-production-alb01
+    output_resource_name: quayio-production-alb
+    idle_timeout: 3600
+    vpc:
+      $ref: /aws/quayio-prod/vpcs/QuayVPC.yml
+    certificate_arn: arn:aws:acm:us-east-1:206170669542:certificate/8a4a9a8b-d06b-46f6-a234-e7ef2ec657cf
+    targets:
+    - name: quayio-production-py2
+      default: false
+      openshift_service: quay-load-balancer-service
+    - name: quayio-production-py3
+      default: true
+      openshift_service: quay-py3-load-balancer-service
+    rules: []
