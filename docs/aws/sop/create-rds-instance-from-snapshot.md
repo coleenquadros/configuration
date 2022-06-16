@@ -38,14 +38,16 @@ Given the access required, an AppSRE engineer will be required to execute certai
    * **Note:** snapshot identifiers will be prefixed with `rds` for automated snapshots, like `rds:<identifier>-2022-05-26-04-28`, whereas manual snapshots will not have this prefix
 3. Create a new database using the `snapshot_identifier` feature as seen below:
     ```diff
-    terraformResources:
+    externalResources:
+    - provider: aws
+      provisioner:
+        $ref: /aws/<account-name>/account.yml
+      resources:
       - provider: rds
-        account: <account-name>
         identifier: <identifier>
         defaults: <defaults-file>
     +
     + - provider: rds
-    +   account: <account-name>
     +   identifier: <identifier>-restore
     +   defaults: <defaults-file>
     +   overrides:
@@ -57,15 +59,17 @@ Given the access required, an AppSRE engineer will be required to execute certai
 5. Once the new database is available, connect to it manually to ensure that the data is in the expected state.
 6. By now the restored database data should be verified. The remaining step is to update the `Secret` to match the secret of the original database. This prevents the need for changing anything at the application level. An example can be seen below.
     ```diff
-    terraformResources:
+    externalResources:
+    - provider: aws
+      provisioner:
+        $ref: /aws/<account-name>/account.yml
+      resources:
       - provider: rds
-        account: <account-name>
         identifier: <identifier>
         defaults: <defaults-file>
     +   output_resource_name: <identifier>-rds-old
     
       - provider: rds
-        account: <account-name>
         identifier: <identifier>-restore
         defaults: /terraform/resources/app-sre-stage/staging/steahan-rds-defaults.yml
     +   output_resource_name: <identifier>-rds  # Alternatively, if `output_resource_name` was already set on the original database, use that value
