@@ -109,21 +109,6 @@ spec:
         service: hive
         severity: medium
         team: appsre
-    - alert: ClusterProvisioningDelayHive - production - {{{shard_name}}}
-      annotations:
-        message: "cluster {{ $labels.cluster_deployment }} in namespace {{ $labels.exported_namespace }} provisioning taking over 2 hours. Condition/Reason: {{ $labels.condition }} / {{ $labels.reason }}."
-        runbook: "https://github.com/openshift/hive-sops/blob/master/sop/ClusterProvisioningDelay.md"
-        dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
-      # TODO: for hive team we skip alerts if it's been going over 24h, and if a reason has been auto-detected
-      expr: |
-        (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers",reason="Unknown"}/3600) > 2
-        and
-        (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers",reason="Unknown"}/3600) < 24
-      for: 5m
-      labels:
-        service: hive
-        severity: medium
-        team: hive
     # end hive + AppSRE section
 
     # SREP cares about the below alerts
@@ -156,7 +141,7 @@ spec:
         (hive_cluster_deployment_deprovision_underway_seconds{job="hive-controllers"} / 3600 ) > 6
       for: 10m
       labels:
-        severity: warning
+        severity: medium
         service: hive
         team: srep
     - alert: SelectorSyncsetApplyFailures - production - {{{shard_name}}}
