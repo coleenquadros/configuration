@@ -226,6 +226,29 @@ The only exception to above is when there is an active incident.
 
 The ASIC ticket helps the AppSRE team to track cases where there are recurring needs that would be better supported by the methods mentioned above.
 
+### Can you share the AWS access keys associated with an AWS resource with me?
+
+Most AWS resources that are created in app-interface will have an IAM user associated with them. The access keys for this IAM user are typically exposed via a `Secret` in the namespace (`/openshift/namespace-1.yml`) that you've associated the resource with.
+
+These access keys are meant only for programmatic access with your code running in the OpenShift namespace. These access keys will not be shared with you for any other use case. There are several reasons for this including that the access provided by this user may be more than what is needed (read vs. read-write) and an accidental credential leak could also affect your service (leaked access keys are automatically revoked, impacting your service).
+
+There are other options that will depend on whether the use case is **human** or **service** access. Please see the sections below.
+
+#### Human access
+
+We only allow AWS console access for human access (no access keys). The docs for gaining access are covered [here](/README.md#manage-aws-users-via-app-interface-awsgroup-1yml-using-terraform).
+
+#### Service access
+
+Service access covers anything that isn't human access, including another service in Red Hat that needs access to your resource(s). The two options for providing a service with access to the resources are [aws-iam-role](/README.md#manage-iam-roles-via-app-interface-openshiftnamespace-1yml) or [aws-iam-service-account](/README.md#manage-iam-service-account-users-via-app-interface-openshiftnamespace-1yml) with **read-only privileges**.
+
+The general guidance for selecting one or the other is:
+
+* IAM roles are preferred because they don't require sharing of access keys and are therefore more secure. IAM roles allow you to permit some other AWS principal (IAM user, IAM role) to temporarily assume the role you've created and access the required resources. 
+* IAM services accounts should be used only where assuming roles isn't practical, and will require AppSRE to share long-lived access keys with the team that needs to access the resources
+
+In the MR to create the role or user, please provide a detailed explanation of why the access is required and how the data will be used.
+
 ### Delete target from SaaS file
 
 To delete a target from a SaaS file, set `delete: true` in the target you wish to delete. This will cause all associated resources to be deleted in the next deployment. Follow this up with another MR to delete the target from the SaaS file.
