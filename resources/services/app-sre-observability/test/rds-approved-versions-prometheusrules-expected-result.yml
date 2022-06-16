@@ -13,6 +13,28 @@ spec:
       annotations:
         html_url: https://gitlab.cee.redhat.com/service/app-interface/blob/master/resources/services/app-sre-observability/rds-approved-versions.prometheusrules.yaml.j2
         link_url: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/aws/maintenance/rds-upgrades-june-2022.md
+        message: The cloudwatch-exporter-test RDS instance, in AWS account test, is
+          running an unapproved database engine version. Please upgrade your database
+          to use an approved version. See the link_url of this alert for more information
+          about the deadline and the runbook for more information about upgrading
+          the database.
+        runbook: https://gitlab.cee.redhat.com/service/app-interface#rds-minor-version-upgrades
+      expr: 'last_over_time(aws_resources_exporter_rds_engineversion{dbinstance_identifier="cloudwatch-exporter-test",engine="postgres",
+        engine_version!~"10\\.1[7-9]|10\\.2[0-9]|11\\.1[2-9]|11\\.2[0-9]|12\\.[7-9]|12\\.[1-2][0-9]|13\\.[3-9]|13\\.1[0-9]|13\\.2[0-9]|14\\.[0-9]*"}[1h])
+        or last_over_time(aws_resources_exporter_rds_engineversion{dbinstance_identifier="cloudwatch-exporter-test",engine="mysql",
+        engine_version!~"5\\.7\\.3[3-9]|5\\.7\\.4[0-9]|8\\.0\\.2[3-9]|8\\.0\\.3[0-9]|8\\.0\\.4[0-9]"}[1h])
+
+        '
+      for: 10m
+      labels:
+        app: cloudwatch-exporter-tests
+        jiralert: TEST
+        service: rds-approved-versions
+        severity: high
+    - alert: RDSCompliantEngineVersionCheck
+      annotations:
+        html_url: https://gitlab.cee.redhat.com/service/app-interface/blob/master/resources/services/app-sre-observability/rds-approved-versions.prometheusrules.yaml.j2
+        link_url: https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/aws/maintenance/rds-upgrades-june-2022.md
         message: The some-rds-instance-in-test-acct RDS instance, in AWS account test,
           is running an unapproved database engine version. Please upgrade your database
           to use an approved version. See the link_url of this alert for more information
