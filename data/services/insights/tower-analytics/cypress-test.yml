@@ -3,8 +3,8 @@ $schema: /app-sre/saas-file-2.yml
 labels:
   service: tower-analytics
   platform: insights
-name: tower-analytics-release-checks
-description: tower-analytics release gating
+name: tower-analytics-test-cypress
+description: tower-analytics post deployment tests - cypress
 app:
   $ref: /services/insights/tower-analytics/app.yml
 pipelinesProvider:
@@ -27,20 +27,19 @@ authentication:
     version: 3
 resourceTemplates:
 - name: tower-analytics
-  path: /saas-templates/release-gating.yml
+  path: /saas-templates/deploy-acceptance-cypress.yml
   url: https://gitlab.cee.redhat.com/automation-analytics/automation-analytics-backend
   targets:
   - namespace:
-      $ref: /services/insights/tower-analytics/namespaces/stage-tower-analytics-stage.yml
+      $ref: /services/insights/tower-analytics/namespaces/stage-tower-analytics-stage-tests.yml
     ref: 384b2729819750715d207522a1170aadae233df5
     parameters:
       ENV_NAME: stage
       CPU_REQUEST_IQE: 500m
       CPU_LIMIT_IQE: 1000m
-      MANUAL_RELEASE_REF: fea3ef4982e1c8c8fa5b31d930cd30dd2fe7a382
     promotion:
       auto: true
       subscribe:
-      - automation-analytics-stage-post-deploy-cypress-success-channel
+      - automation-analytics-stage-post-deploy-iqe-success-channel
       publish:
-      - automation-analytics-stage-gating-success-channel
+      - automation-analytics-stage-post-deploy-cypress-success-channel
