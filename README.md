@@ -1046,7 +1046,7 @@ JSON schema](https://github.com/app-sre/qontract-schemas/blob/main/schemas/depen
 
 Additional special fields:
 - `_target_cluster`: A `$ref` to an OpenShift cluster definition. The value of `elbFQDN` on the cluster definition will be used as a target on the record
-- `_target_namespace_zone`: An object with a `$ref` to a namespace and a name of a zone defined under `terraformResources` in the referenced namespace:
+- `_target_namespace_zone`: An object with a `$ref` to a namespace and a name of a zone defined under `externalResources` in the referenced namespace:
   ```yaml
   - name: <subdomain>
     ...
@@ -1304,7 +1304,6 @@ Namespaces declaration enforce [this JSON schema](https://github.com/app-sre/qon
 
 Notes:
 * Manual changes to AWS resources will be overridden by App-Interface in each run.
-* To be able to use this feature, the `managedTerraformResources` field must exist and equal to `true`.
 
 #### Manage shared AWS resources via App-interface (`/openshift/namespace-1.yml`) using Terraform
 
@@ -1316,7 +1315,7 @@ To achieve a similar result, we can define a Terraform resource in a single name
 
 Instructions:
 
-1. Submit a MR adding the resource to the `terraformResources` section in one of the namespace files. Once the MR is merged, the output secret will be placed in the namespace AND in Vault.
+1. Submit a MR adding the resource to the `externalResources` section in one of the namespace files. Once the MR is merged, the output secret will be placed in the namespace AND in Vault.
   * The Vault secret has a predefined path: `app-sre/integrations-output/terraform-resources/<cluster_name>/<namespace_name>/<output_resource_name>`
 1. Submit another MR [adding the Vault secret](#manage-secrets-via-app-interface-openshiftnamespace-1yml-using-vault) to the `openshiftResources` section in all other namespace files:
   ```yaml
@@ -1335,10 +1334,9 @@ Add the Vault secret to an `openshiftResources` section in a [shared resources f
 
 [AWS Certificate Manager](https://aws.amazon.com/certificate-manager/) is a service that lets you easily provision, manage, and deploy public and private Secure Sockets Layer/Transport Layer Security (SSL/TLS) certificates.
 
-In order to import certificates stored in Vault into AWS Certificate Manager, you need to add them to the `terraformResources` field.
+In order to import certificates stored in Vault into AWS Certificate Manager, you need to add them to the `externalResources` field.
 
 - `provider`: must be `acm`
-- `account`: The AWS account you want to import certificates in.
 - `identifier` - name of resource to create (or update)
 - `secret`: Certificate store in Vault ([example](https://vault.devshift.net/ui/vault/secrets/app-interface/show/dsaas/routes/_wildcard.api.openshift.io)) (optional)
   - `path`: vault path
@@ -1372,10 +1370,9 @@ If `secret` was set above, then these fields will also be included:
 
 [AWS Secrets Manager](https://aws.amazon.com/cn/secrets-manager/) helps you protect access to your applications, services, and IT resources. You can easily rotate, manage, and retrieve database credentials, API keys, and other secrets throughout their lifecycle.
 
-In order to import secrets stored in Vault into AWS Secrets Manager, you need to add them to the `terraformResources` field.
+In order to import secrets stored in Vault into AWS Secrets Manager, you need to add them to the `externalResources` field.
 
 - `provider`: must be `secrets-manager`
-- `account`: The AWS account you want to import certificates in.
 - `identifier` - name of resource to create (or update)
 - `secret`: secret store in Vault
   - `path`: vault path
@@ -1398,10 +1395,9 @@ The Secret will contain the following fields:
 
 [Amazon Elasticsearch Service](https://aws.amazon.com/elasticsearch-service/) is a fully managed service that makes it easy for you to deploy, secure, and run Elasticsearch cost effectively at scale. Amazon Elasticsearch can be entirely self-serviced via App-Interface.
 
-In order to add or update Amazon Elasticsearch Service, you need to add them to the `terraformResources` field.
+In order to add or update Amazon Elasticsearch Service, you need to add them to the `externalResources` field.
 
 - `provider`: must be `elasticsearch`
-- `account`: The AWS account you want to deploy Amazon Elasticsearch Service in.
 - `identifier` - name of resource to create (or update)
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options](/resources/terraform/resources/)
 - `output_resource_name`: name of Kubernetes Secret to be created.
@@ -1427,10 +1423,9 @@ The Secret will contain the following fields:
 
 RDS instances can be entirely self-serviced via App-Interface.
 
-In order to create or update an RDS database, you need to add them to the `terraformResources` field.
+In order to create or update an RDS database, you need to add them to the `externalResources` field.
 
 - `provider`: must be `rds`
-- `account`: must be one of the AWS account names managed by app-interface. Account values can be found [here](https://gitlab.cee.redhat.com/service/app-interface/-/blob/masterhttps://github.com/app-sre/qontract-schemas/blob/main/schemas/aws/tenant_accounts-1.yml).
 - `identifier` - name of database instance to create (or update). Must be unique across all RDS instances in the AWS account.
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options](/resources/terraform/resources/)
 - `parameter_group`: (optional) path relative to [resources](/resources) to a file with parameter group values. Note that it starts with `/`.
@@ -1596,12 +1591,9 @@ Additional details can be found in AWS [documentation](https://docs.aws.amazon.c
 
 S3 buckets can be entirely self-serviced via App-Interface.
 
-In order to add or update an S3 bucket, you need to add them to the `terraformResources` field.
+In order to add or update an S3 bucket, you need to add them to the `externalResources` field.
 
 - `provider`: must be `s3`
-- `account`: must be one of the AWS account names we manage. Current options:
-  - `app-sre`
-  - `osio`
 - `identifier` - name of resource to create (or update)
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options:](/resources/terraform/resources/)
 - `overrides`: list of values from `defaults` you wish to override, with the override values. For example: `acl: public`.
@@ -1642,12 +1634,9 @@ The Secret will contain the following fields:
 
 ElastiCache (HA) clusters can be entirely self-serviced via App-Interface.
 
-In order to add or update an ElastiCache database, you need to add them to the `terraformResources` field.
+In order to add or update an ElastiCache database, you need to add them to the `externalResources` field.
 
 - `provider`: must be `elasticache`
-- `account`: must be one of the AWS account names we manage. Current options:
-  - `app-sre`
-  - `osio`
 - `identifier` - name of resource to create (or update)
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options](/resources/terraform/resources/)
 - `parameter_group`: (optional) path relative to [resources](/resources) to a file with parameter group values. Note that it starts with `/`.
@@ -1672,10 +1661,9 @@ Notes:
 
 IAM users to be used as service accounts can be entirely self-serviced via App-Interface.
 
-In order to add or update a service account, you need to add them to the `terraformResources` field.
+In order to add or update a service account, you need to add them to the `externalResources` field.
 
 - `provider`: must be `aws-iam-service-account`
-- `account`: must be one of the AWS account names we manage.
 - `identifier`: name of resource to create (or update)
 - `variables`: list of key-value pairs to use for templating of `user_policy`. these pairs will also be added to the output resource.
 - `policies`: list of AWS policies you wish to attach to the service account user.
@@ -1703,12 +1691,11 @@ In addition, any additional key-value pairs defined under `variables` will be ad
 
 IAM users for Secrets Manager to be used as service accounts can be entirely self-serviced via App-Interface.
 
-In order to add or update a service account, you need to add them to the `terraformResources` field.
+In order to add or update a service account, you need to add them to the `externalResources` field.
 
 The IAM user can only create/delete/retrieve secrets with a name beginning with "`secrets_prefix`/", but it will get all secrets in the account for ListSecrets. We suggest add a name filter when using [ListSecrets](https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_ListSecrets.html#API_ListSecrets_RequestSyntax).
 
 - `provider`: must be `secrets-manager-service-account`
-- `account`: must be one of the AWS account names we manage.
 - `identifier`: name of resource to create (or update)
 - `secrets_prefix`: prefix to use before all managed secret names in aws Secrets Manager. the trailing slash is added in the code.
 - `output_resource_name`: name of Kubernetes Secret to be created.
@@ -1729,10 +1716,9 @@ The Secret will contain the following fields:
 
 Roles to be assumed can be entirely self-serviced via App-Interface.
 
-In order to add or update a role, you need to add them to the `terraformResources` field.
+In order to add or update a role, you need to add them to the `externalResources` field.
 
 - `provider`: must be `aws-iam-role`
-- `account`: must be one of the AWS account names we manage.
 - `identifier`: name of resource to create (or update)
 - `assume_role`: trusted entities can assume this role. Require one of the following.
   - `AWS`: list ARN of iam users or accounts
@@ -1753,12 +1739,9 @@ The Secret will contain the following fields:
 
 SQS queues can be entirely self-serviced via App-Interface.
 
-In order to add or update an SQS queue, you need to add them to the `terraformResources` field.
+In order to add or update an SQS queue, you need to add them to the `externalResources` field.
 
 - `provider`: must be `sqs`
-- `account`: must be one of the AWS account names we manage. Current options:
-  - `app-sre`
-  - `osio`
 - `identifier` - a name of the group of resources to create (or update)
   - Does not affect names of queues.
   - Will be used as the name of the IAM user that will be created.
@@ -1786,12 +1769,9 @@ In addition, for each queue defined under `queues`, a key will be created and wi
 
 DynamoDB tables can be entirely self-serviced via App-Interface.
 
-In order to add or update a DynamoDB table, you need to add them to the `terraformResources` field.
+In order to add or update a DynamoDB table, you need to add them to the `externalResources` field.
 
 - `provider`: must be `dynamodb`
-- `account`: must be one of the AWS account names we manage. Current options:
-  - `app-sre`
-  - `osio`
 - `identifier` - a name of the group of resources to create (or update)
   - Does not affect names of tables.
   - Will be used as the name of the IAM user that will be created.
@@ -1820,11 +1800,9 @@ In addition, for each table defined under `tables`, a key will be created and wi
 
 ECR repositories can be entirely self-serviced via App-Interface.
 
-In order to add or update an ECR repository, you need to add them to the `terraformResources` field.
+In order to add or update an ECR repository, you need to add them to the `externalResources` field.
 
 - `provider`: must be `ecr`
-- `account`: must be one of the AWS account names we manage. Current options:
-  - `quayio-stage`
 - `identifier` - name of resource to create (or update)
 - `public`: (optional) - should the repository be public (requires AWS provider plugin version 3.30.0 or above)
 - `output_resource_name`: name of Kubernetes Secret to be created.
@@ -1845,12 +1823,9 @@ The Secret will contain the following fields:
 
 Stacks of an S3 bucket with a CloudFront distribution can be entirely self-serviced via App-Interface.
 
-In order to add or update an S3+CloudFront stack, you need to add them to the `terraformResources` field.
+In order to add or update an S3+CloudFront stack, you need to add them to the `externalResources` field.
 
 - `provider`: must be `s3-cloudfront`
-- `account`: must be one of the AWS account names we manage. Current options:
-  - `quayio-stage`
-  - `quayio-prod`
 - `identifier` - name of resource to create (or update)
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options:](/resources/terraform/resources/)
 - `output_resource_name`: name of Kubernetes Secret to be created.
@@ -1877,7 +1852,6 @@ The Secret will contain the following fields:
 CloudFront Public Keys can be self-serviced via App-Interface.  Once created in AWS, the public key will need to be manually associated with a `Key group` and then that `Key group` manually associated with a CloudFront Distribution to sign URLs or cookies.
 
 - `provider`: must be `s3-cloudfront-public-key`
-- `account`: The AWS account you want to import certificates into.
 - `identifier`: name of resource to create (or update)
 - `secret`: Certificate store in Vault
   - `path`: vault path
@@ -1903,10 +1877,9 @@ The Secret will contain the following fields:
 
 CloudWatch Log Groups can be entirely self-serviced via App-Interface.
 
-In order to add or update an CloudWatch Log Group, you need to add them to the `terraformResources` field.
+In order to add or update an CloudWatch Log Group, you need to add them to the `externalResources` field.
 
 - `provider`: must be `cloudwatch`
-- `account`: must be one of the AWS account names we manage. [Current options](https://github.com/app-sre/qontract-schemas/blob/main/schemas/openshift/namespace-1.yml#L502)
 - `identifier` - name of resource to create (or update)
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options:](/resources/terraform/resources/)
 - `es_identifier`: identifier of a existing elasticsearch. It will create a AWS lambda to stream logs to elasticsearch service. This field is optional.
@@ -1929,10 +1902,9 @@ The Secret will contain the following fields:
 
 Key Management Service keys can be entirely self-serviced via App-Interface.
 
-In order to add or update a Key Management Service key, you need to add them to the `terraformResources` field.
+In order to add or update a Key Management Service key, you need to add them to the `externalResources` field.
 
 - `provider`: must be `kms`
-- `account`: must be one of the AWS account names we manage. [Current options](https://github.com/app-sre/qontract-schemas/blob/main/schemas/openshift/namespace-1.yml#L502)
 - `identifier` - name of resource to create (or update)
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options:](/resources/terraform/resources/)
 - `output_resource_name`: name of Kubernetes Secret to be created.
@@ -1950,10 +1922,9 @@ The Secret will contain the following fields:
 
 Kinesis Streams can be entirely self-services via App-Interface.
 
-In order to add or update a Kinesis Stream, you need to add them to the `terraformResources` field.
+In order to add or update a Kinesis Stream, you need to add them to the `externalResources` field.
 
 - `provider`: must be `kinesis`
-- `account`: must be one of the AWS account names we manage.
 - `identifier` - name of resource to create (or update)
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options](/resources/terraform/resources/)
 - `output_resource_name`: name of Kubernetes Secret to be created.
@@ -1974,10 +1945,9 @@ The Secret will contain the following fields:
 
 [AWS Autoscaling Group](https://aws.amazon.com/autoscaling/) monitors your applications and automatically adjusts capacity to maintain steady, predictable performance at the lowest possible cost.
 
-In order to add or update an Autoscaling Group, you need to add them to the `terraformResources` field.
+In order to add or update an Autoscaling Group, you need to add them to the `externalResources` field.
 
 - `provider`: must be `asg`
-- `account`: The AWS account you want to import certificates in.
 - `identifier` - name of asg to create (or update)
 - `defaults`: path relative to [resources](/resources) to a file with default values. Note that it starts with `/`. [Current options](https://github.com/app-sre/qontract-schemas/blob/main/schemas/aws/asg-defaults-1.yml)
 - `variables`: list of key-value pairs to use for templating of `cloudinit_configs`.
@@ -2006,10 +1976,9 @@ The Secret will contain the following fields:
 
 DNS zones are a required Cloud Native Asset for some applications, such as Hive. In this use case, the application needs an empty DNS zone, which itself will populate.
 
-In order to add a DNS zone, you need to add them to the `terraformResources` section:
+In order to add a DNS zone, you need to add them to the `externalResources` section:
 
 - `provider`: must be `route53-zone`
-- `account`: must be one of the AWS account names we manage.
 - `identifier`: id of the resource to create (example: `dns-example-com`)
 - `name`: name of the resource to create (example: `dns.example.com`)
 - `output_resource_name`: name of Kubernetes Secret to be created.

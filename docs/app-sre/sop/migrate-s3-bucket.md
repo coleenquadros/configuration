@@ -41,7 +41,7 @@ Log into the source AWS account, and attach a bucket policy to the source S3 buc
 }
 ```
 
-If there is already a bucket policy defined via app-interface, this needs to be added to the `bucket_policy` section of the bucket defintion in `terraformResources`. Otherwise terraform will remove it during the next integration run.
+If there is already a bucket policy defined via app-interface, this needs to be added to the `bucket_policy` section of the bucket defintion in `externalResources`. Otherwise terraform will remove it during the next integration run.
 
 ## Copy process
 Make sure you have valid credentials (session token) for the destination AWS account in your shells ENV or as a profile in your AWS credentials file.
@@ -59,8 +59,8 @@ Before the source bucket can be cleaned up, make sure that:
 
 To delete the bucket (and all correlated IAM resources), follow these steps:
 
-1. Remove the old S3 bucket from `terraformResources`
-1. If the account has deletion enabled in `/aws/account-1.yml#enableDeletion`, the removal from `terraformResources` is sufficient to dispose the S3 bucket
+1. Remove the old S3 bucket from `externalResources`
+1. If the account has deletion enabled in `/aws/account-1.yml#enableDeletion`, the removal from `externalResources` is sufficient to dispose the S3 bucket
 1. ... if not, add a `deletionApprovals` entry to the source AWS account file. Pick an expirationDate that is just a bit in the future (e.g. 2 days)
 
 ```yaml

@@ -118,7 +118,7 @@ cluster:
 app:
   $ref: /services/unleash/app.yml
 
-managedTerraformResources: true
+managedExternalResources: true
 ```
 
 Replace `<cluster>` with the directory to the cluster configuration.
@@ -195,13 +195,16 @@ Each instance of Unleash requires an independent PostgreSQL Database. To create
 one, add this section to the Unleash Namespace:
 
 ```yaml
-terraformResources:
+externalResources:
 ...
-- provider: rds
-  account: <aws-account>
-  identifier: <unique-rds-identifier>
-  defaults: /terraform/resources/unleash/rds-1.yml
-  output_resource_name: <application-name>-unleash-rds
+- provider: aws
+  provisioner:
+    $ref: /aws/<aws-account>/account.yml
+  resources:
+  - provider: rds
+    identifier: <unique-rds-identifier>
+    defaults: /terraform/resources/unleash/rds-1.yml
+    output_resource_name: <application-name>-unleash-rds
 ```
 
 ## Route

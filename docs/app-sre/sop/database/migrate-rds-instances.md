@@ -39,31 +39,37 @@ Choose the name of your customer managed key, or choose Create key, if you don't
 
 If you want to keep the old RDS instance alive while ramping the replacement in the new account, apply the following changes
 
-1. Introduce the new RDS instance in `terraformResources` by copying the existing resource entry, but change the `account` field and introduce the override to restore from a snapshot.
+1. Introduce the new RDS instance in `externalResources` by copying the existing resource entry, but under a different provisioner (`account`) item and introduce the override to restore from a snapshot.
 1. Make sure the old RDS instance gets a different `output_resource_name`, e.g. by adding an `-old` suffix to it
 1. Make sure to use a RDS `defaults` file that fits the target AWS account. If you need to create one, make sure `db_subnet_group_name` and `vpc_security_group_ids` are set correctly. Have a look at other default files from the same account or find the subnet group name in https://gitlab.cee.redhat.com/app-sre/infra/-/tree/master/terraform and the security group ID in the AWS console.
 
 
 ```yaml
-managedTerraformResources: true
+managedExternalResources: true
 
-terraformResources:
-- provider: rds
-  account: <old-aws-account>
-  identifier: <rds-indentifier>
-  defaults: <rds-defaults-file>
-  enhanced_monitoring: true
-  output_resource_name: <OpenShift-Secret-Name>-old
-  parameter_group: <rds-parameter-group>
-- provider: rds
-  account: <new-aws-account>
-  identifier: <rds-indentifier>
-  defaults: <rds-defaults-file-for-new-account>
-  overrides:
-    snapshot_identifier: <snapshot-identifier-to-create-rds-instance-from>
-  enhanced_monitoring: true
-  output_resource_name: <OpenShift-Secret-Name>
-  parameter_group: <rds-parameter-group>
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/<old-aws-account>/account.yml
+  resources:
+  - provider: rds
+    identifier: <rds-indentifier>
+    defaults: <rds-defaults-file>
+    enhanced_monitoring: true
+    output_resource_name: <OpenShift-Secret-Name>-old
+    parameter_group: <rds-parameter-group>
+- provider: aws
+  provisioner:
+    $ref: /aws/<new-aws-account>/account.yml
+  resources:
+  - provider: rds
+    identifier: <rds-indentifier>
+    defaults: <rds-defaults-file-for-new-account>
+    overrides:
+      snapshot_identifier: <snapshot-identifier-to-create-rds-instance-from>
+    enhanced_monitoring: true
+    output_resource_name: <OpenShift-Secret-Name>
+    parameter_group: <rds-parameter-group>
 ```
 
 This way the old RDS is still available and the access credentials can be found in `<OpenShift-Secret-Name>-old`.
@@ -74,8 +80,8 @@ DBs `output_resource_name`.
 
 Once you verified that the migrated RDS instance works as expected, you can delete the old one.
 
-1. Remove the old entry from `terraformResources`
-1. If the account has deletion enabled in `/aws/account-1.yml#enableDeletion`, the removal from `terraformResources` is sufficient to dispose the RDS instance
+1. Remove the old entry from `externalResources`
+1. If the account has deletion enabled in `/aws/account-1.yml#enableDeletion`, the removal from `externalResources` is sufficient to dispose the RDS instance
 1. ... if not, add a `deletionApprovals` entry to the source AWS account file. Pick an expirationDate that is just a bit in the future (e.g. 2 days)
 
 ```yaml

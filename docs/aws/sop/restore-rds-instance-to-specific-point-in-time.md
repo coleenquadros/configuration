@@ -32,16 +32,18 @@ The steps below can be followed to recover a database that needs to be restored 
    * Check the `aws_resources_exporter_rds_latestrestorabletime` metric exposed by aws-resource-exporter - [prod accounts](https://prometheus.app-sre-prod-01.devshift.net/graph?g0.expr=aws_resources_exporter_rds_latestrestorabletime&g0.tab=1&g0.stacked=0&g0.show_exemplars=0&g0.range_input=1h) (app-sre, insights-prod, etc.) - [stage accounts](https://prometheus.app-sre-stage-01.devshift.net/graph?g0.expr=aws_resources_exporter_rds_latestrestorabletime&g0.tab=1&g0.stacked=0&g0.show_exemplars=0&g0.range_input=1h) (app-sre-stage, insights-stage)
 3. Create a new database using the point in time recovery feature. See below for an example:
     ```diff
-    terraformResources:
+    externalResources:
+    - provider: aws
+      provisioner:
+        $ref: /aws/<account-name>/account.yml
+      resources:
       - provider: rds
-        account: <account-name>
         identifier: <identifier>
         defaults: <defaults-file>
         overrides:
     +     name: <database_name>  # Remove `name` from defaults file and explicitly set it only on the original database (read more below)
     +
     + - provider: rds
-    +   account: <account-name>
     +   identifier: <identifier>-restore
     +   defaults: <defaults-file>
     +   overrides:
@@ -59,9 +61,12 @@ The steps below can be followed to recover a database that needs to be restored 
    * **You will need to use the password from the Secret of the original database.** This will be fixed in the next steps.
 6. By now the restored database data should be verified. The remaining step is to update the `Secret` to match the secret of the original database. This prevents the need for changing anything at the application level. An example can be seen below.
     ```diff
-    terraformResources:
+    externalResources:
+    - provider: aws
+      provisioner:
+        $ref: /aws/<account-name>/account.yml
+      resources:
       - provider: rds
-        account: <account-name>
         identifier: <identifier>
         defaults: <defaults-file>
     +   output_resource_name: <identifier>-rds-old
@@ -69,7 +74,6 @@ The steps below can be followed to recover a database that needs to be restored 
           name: <database_name>
     
       - provider: rds
-        account: <account-name>
         identifier: <identifier>-restore
         defaults: /terraform/resources/app-sre-stage/staging/steahan-rds-defaults.yml
     +   output_resource_name: <identifier>-rds  # Alternatively, if `output_resource_name` was already set on the original database, use that value
