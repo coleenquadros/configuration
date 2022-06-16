@@ -291,7 +291,7 @@ Message to requester after deployment:
 The <application>'s Unleash instance is ready to be used.
 
 Here's the documentation on how to consume it:
-https://gitlab.cee.redhat.com/service/dev-guidelines/blob/master/unleash.md#consuming-unleash
+https://service.pages.redhat.com/dev-guidelines/docs/appsre/advanced/feature-toggles/#consuming-unleash
 
 The OpenShift Secret containing the CLIENT_ACCESS_TOKEN is called
 <application>-unleash-token and it is already available in the <application>
