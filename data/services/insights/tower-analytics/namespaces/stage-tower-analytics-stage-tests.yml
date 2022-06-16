@@ -1,0 +1,45 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: tower-analytics
+
+name: tower-analytics-stage-tests
+description: Insights tower-analytics-stage-tests for post-deployment tests on the internal Stage cluster under app interface mgmt
+
+cluster:
+  $ref: /openshift/appsres03ue1/cluster.yml
+
+limitRanges:
+  $ref: /dependencies/openshift/limitranges/standard-resource-limits.yml
+
+quota:
+  $ref: /services/insights/default-quota.yml
+
+app:
+  $ref: /services/insights/tower-analytics/app.yml
+
+environment:
+  $ref: /products/insights/environments/stage.yml
+
+managedRoles: true
+
+managedResourceTypes:
+- ServiceAccount
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: resource
+  path: /insights-stage/shared/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+- provider: vault-secret
+  path: insights/secrets/insights-stage/tower-analytics-stage/iqe-testing-config
+  version: 17
+
