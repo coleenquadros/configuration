@@ -107,7 +107,9 @@ spec:
         runbook: "https://github.com/openshift/hive-sops/blob/master/sop/ClusterProvisioningDelay.md"
         dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
       expr: |
-        (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers",cluster_type="managed"}/3600) > 2
+        (max without (instance,pod,cluster_type) (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers",reason!~"AWSAPIRateLimitExceeded|AWSEC2QuotaExceeded|AWSVPCLimitExceeded|S3BucketsLimitExceeded|InvalidCredentials|EIPAddressLimitExceeded|NoWorkerNodes|AWSNATGatewayLimitExceeded|InvalidInstallConfigSubnet|PendingVerification|GCPInstanceTypeNotFound|GCPPreconditionFailed|GCPQuotaSSDTotalGBExceeded|GCPComputeQuotaExceeded|GCPServiceAccountQuotaExceeded|InvalidAWSTags|MissingPublicSubnetForZone|PrivateSubnetInMultipleZones|ErrorDeletingIAMRole|AWSSubnetDoesNotExist|AWSInsufficientPermissions|VcpuLimitExceeded|UserInitiatedShutdown|LoadBalancerLimitExceeded|AWSAccessDeniedSLR|ProxyTimeout|ProxyInvalidCABundle|ErrorCreatingNetworkLoadBalancer|NATGatewayFailed"} ) /3600) > 2
+        and
+        (max without (instance,pod,cluster_type) (hive_cluster_deployment_provision_underway_seconds{job="hive-controllers",reason!~"AWSAPIRateLimitExceeded|AWSEC2QuotaExceeded|AWSVPCLimitExceeded|S3BucketsLimitExceeded|InvalidCredentials|EIPAddressLimitExceeded|NoWorkerNodes|AWSNATGatewayLimitExceeded|InvalidInstallConfigSubnet|PendingVerification|GCPInstanceTypeNotFound|GCPPreconditionFailed|GCPQuotaSSDTotalGBExceeded|GCPComputeQuotaExceeded|GCPServiceAccountQuotaExceeded|InvalidAWSTags|MissingPublicSubnetForZone|PrivateSubnetInMultipleZones|ErrorDeletingIAMRole|AWSSubnetDoesNotExist|AWSInsufficientPermissions|VcpuLimitExceeded|UserInitiatedShutdown|LoadBalancerLimitExceeded|AWSAccessDeniedSLR|ProxyTimeout|ProxyInvalidCABundle|ErrorCreatingNetworkLoadBalancer|NATGatewayFailed"} ) /3600) < 168
       for: 5m
       labels:
         service: hive
