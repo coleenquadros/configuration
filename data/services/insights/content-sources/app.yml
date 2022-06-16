@@ -1,0 +1,57 @@
+---
+$schema: /app-sre/app-1.yml
+
+labels:
+  service: content-sources
+  platform: insights
+
+name: content-sources
+
+description: |
+  Content Sources service on console.redhat.com
+  It is used by customers to define sources of third party yum content.
+  Other services, such as Image Builder, will be able to use those sources in their workflows.
+
+architectureDocument: https://github.com/content-services/content-sources-backend/blob/main/docs/architecture.md 
+sopsUrl: https://TODO
+grafanaUrls:
+- title: Notifications Dashboard
+  url: https://TODO
+onboardingStatus: InProgress
+
+parentApp:
+  $ref: /services/insights/app.yml
+
+escalationPolicy:
+  $ref: /teams/insights/escalation-policies/crc-content-sources-escalations.yml
+
+serviceOwners:
+- name: Justin Sherrill (Product Owner)
+  email: jsherril@redhat.com
+
+dependencies:
+- $ref: /dependencies/github/service.yml
+- $ref: /dependencies/quay/service.yml
+- $ref: /dependencies/openshift/service.yml
+- $ref: /dependencies/aws/service.yml
+- $ref: /dependencies/ci-ext/service.yml
+
+quayRepos:
+- org:
+    $ref: /dependencies/quay/cloudservices.yml
+  items:
+  - name: content-sources-backend
+    public: true
+    description: Content sources api service to support the UI and other services
+  - name: content-sources-frontend
+    public: true
+    description: Content sources service frontend image
+
+codeComponents:
+- name: content-sources-backend
+  resource: upstream
+  url: https://github.com/content-services/content-sources-backend
+- name: content-sources-frontend
+  resource: upstream
+  url: https://github.com/content-services/content-sources-frontend
+
