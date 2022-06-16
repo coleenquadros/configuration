@@ -12,6 +12,7 @@
   - [Selecting a Machine CIDR for VPC peerings](#selecting-a-machine-cidr-for-vpc-peerings)
   - [VPC peering with app-interface](#vpc-peering-with-app-interface)
   - [Additional steps for clusters for specific services](#additional-steps-for-clusters-for-specific-services)
+  - [Adding Datasource to Grafana](#adding-datasource-to-grafana)
 - [Offboard an OSDv4 cluster from app-interface](#offboard-an-osdv4-cluster-from-app-interface)
 - [Legacy (v3)](#legacy-v3)
   - [Onboard a new OSDv3 cluster to app-interface](#onboard-a-new-osdv3-cluster-to-app-interface)
@@ -458,6 +459,14 @@ Note that the host prefix must be set to /23.
 1. If the cluster is a console.redhat.com (crc) cluster, perform the following steps:
   * Deploy [3rd party operators](/data/services/insights/third-party-operators) (includes AMQ streams operator)
   * Deploy [Clowder operator](/data/services/insights/clowder)
+
+## Adding Datasource to Grafana
+
+First create a new cloudwatch secret, add it to [app-sre-observability-production.yml](data/services/observability/namespaces/app-sre-observability-production.yml). Example MR: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/41114
+
+Afterwards add the cluster to [grafana.yaml](/data/services/observability/shared-resources/grafana.yml). Example MR: https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/41110
+
+Datasource should be available afterwards.
 
 # Offboard an OSDv4 cluster from app-interface
 
