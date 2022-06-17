@@ -25,53 +25,12 @@ config:
       gl_project: strimzi-operator
       quay_org: app-sre
       jobs:
-        - 'gl-pr-check-managed-services':
-            display_name: mk-strimzi-operator pr-check
-            pr_check_script_path: './cicd/pr_check.sh'
-        - 'managed-services-gl-build-test-branch':
-            branch: mk-release
-            display_name: mk-strimzi-operator release
-            archive_artifacts: 'test-results/**'
-            junit_results: 'test-results/strimzi-operator/failsafe-reports/*.xml'
-            cleanup_script: './build_cleanup.sh'
-            release: true
-        - 'managed-services-gl-build-test-branch':
-            branch: mk-release-0.23.x
-            display_name: mk-strimzi-operator 0.23.x release
-            archive_artifacts: 'test-results/**'
-            junit_results: 'test-results/strimzi-operator/failsafe-reports/*.xml'
-            cleanup_script: './build_cleanup.sh'
-            release: true
-        - 'managed-services-gl-build-test-branch':
-            branch: mk-release-2.8-0.23.x
-            display_name: mk-strimzi-operator 2.8 0.23.x release
-            archive_artifacts: 'test-results/**'
-            junit_results: 'test-results/strimzi-operator/failsafe-reports/*.xml'
-            cleanup_script: './build_cleanup.sh'
-            release: true
-        - 'managed-services-gl-build-test-branch':
-            branch: mk-release-2.8-0.26.x
-            display_name: mk-strimzi-operator 2.8 0.26.x release
-            archive_artifacts: 'test-results/**'
-            junit_results: 'test-results/strimzi-operator/failsafe-reports/*.xml'
-            build_deploy_script_path: './cicd/build_deploy.sh'
-            cleanup_script: './cicd/build_cleanup.sh'
-            release: true
         - 'managed-services-security-scan':
             display_name: mk-strimzi-operator security-scan
             branch: mk-master
             ci_cmd: 'make scan_project'
             slack_channel_notification: mk-ci-cd
             cron_expression: 'H 6 * * *'
-        # - 'mk-nightly-build-test-branch':
-        #     branch: mk-master
-        #     display_name: mk-strimzi-operator nightly
-        #     archive_artifacts: 'test-results/**'
-        #     junit_results: 'test-results/strimzi-operator/failsafe-reports/*.xml'
-        #     cleanup_script: './build_cleanup.sh'
-        #     ci_cmd: './build_deploy.sh nightly'
-        #     cron_expression: 'H 5 * * 1,2,3,4,5' # mon-fri early morning
-        #     backup_ecr_push_creds_account_region: "quayio-prod/eu-central-1"
 
   - project:
       name: mk-apache-kafka-midstream
@@ -81,15 +40,6 @@ config:
       gl_project: apache-kafka
       quay_org: app-sre
       jobs:
-        - 'gl-pr-check-apache-kafka':
-            display_name: mk-apache-kafka pr-check
-        - 'managed-services-gl-build-test-branch':
-            branch: mk-release
-            display_name: mk-apache-kafka build and test mk-release
-            archive_artifacts: 'test-results/**'
-            junit_results: 'test-results/strimzi-operator/failsafe-reports/*.xml'
-            cleanup_script: './build_cleanup.sh'
-            release: true
         - 'managed-services-security-scan':
             display_name: mk-apache-kafka security-scan
             branch: mk-release
@@ -154,6 +104,7 @@ config:
         - 'gl-build-master-managed-services':
             branch: mk-release
             display_name: kas-ui build-mk-release
+
   - project:
       name: srs-ui-midstream
       label: managed-services
@@ -167,6 +118,7 @@ config:
         - 'gl-build-master-managed-services':
             branch: mk-release
             display_name: srs-ui build-mk-release
+
   - project:
       name: sr-ui-midstream
       label: managed-services
@@ -194,50 +146,6 @@ config:
         - 'gl-build-master-managed-services':
             branch: mk-release
             display_name: application-services-ui build-mk-release
-
-  - project:
-      name: strimzi-operator-bundle
-      label: managed-services
-      node: managed-services
-      gl_group: mk-ci-cd
-      gl_project: strimzi-operator-bundle
-      jobs:
-        - 'gl-pr-check-managed-services':
-            display_name: strimzi-operator-bundle pr-check
-        - 'gl-build-master':
-            branch: staging
-            display_name: strimzi-operator-bundle build staging
-        - 'strimzi-operator-test':
-            display_name: strimzi-operator system-test staging
-            branch: staging
-
-  - project:
-      name: mk-kas-fleetshard-midstream
-      label: managed-services
-      node: managed-services
-      gl_group: mk-ci-cd
-      gl_project: kas-fleetshard
-      quay_org: app-sre
-      jobs:
-        - 'gl-pr-check':
-            display_name: kas-fleetshard pr-check
-            pr_check_script_path: './cicd/pr_check.sh'
-        - 'managed-services-gl-build-test-branch':
-            branch: mk-main
-            display_name: kas-fleetshard build and test mk-main
-            build_deploy_script_path: './cicd/build_deploy.sh'
-            archive_artifacts: 'systemtest/target/logs/**,systemtest/target/failsafe-reports/**'
-            junit_results: 'systemtest/target/failsafe-reports/*.xml'
-            cleanup_script: 'make -C cicd ci/pipeline/cleanup'
-            release: false
-        - 'managed-services-gl-build-test-branch':
-            branch: mk-release
-            display_name: kas-fleetshard build and test mk-release
-            build_deploy_script_path: './cicd/build_deploy.sh'
-            archive_artifacts: 'systemtest/target/logs/**,systemtest/target/failsafe-reports/**'
-            junit_results: 'systemtest/target/failsafe-reports/*.xml'
-            cleanup_script: 'make -C cicd ci/pipeline/cleanup'
-            release: true
 
   - project:
       name: kas-fleet-manager
@@ -578,40 +486,7 @@ config:
             display_name: mk-must-gather build master
             build_deploy_script_path: './ci/build_deploy.sh'
             branch: master
-  - project:
-      name: mk-strimzi-canary
-      label: managed-services
-      node: managed-services
-      gl_group: mk-ci-cd
-      gl_project: strimzi-canary
-      jobs:
-        - 'gl-pr-check':
-            display_name: mk-strimzi-canary pr-check
-            pr_check_script_path: './cicd/pr_check.sh'
-        - 'managed-services-gl-build-test-branch':
-            display_name: mk-strimzi-canary build mk-main
-            branch: mk-main
-            build_deploy_script_path: './cicd/build.sh'
-            archive_artifacts: 'target/surefire-reports/**'
-            junit_results: 'target/surefire-reports/*.xml'
-            cleanup_script: './cicd/cleanup.sh'
-            release: false
-        - 'managed-services-gl-build-test-branch':
-            display_name: mk-strimzi-canary build mk-release-0.1
-            branch: mk-release-0.1.x
-            build_deploy_script_path: './cicd/build.sh'
-            archive_artifacts: 'target/surefire-reports/**'
-            junit_results: 'target/surefire-reports/*.xml'
-            cleanup_script: './cicd/cleanup.sh'
-            release: true
-        - 'managed-services-gl-build-test-branch':
-            display_name: mk-strimzi-canary build mk-release-0.2
-            branch: mk-release-0.2.x
-            build_deploy_script_path: './cicd/build.sh'
-            archive_artifacts: 'target/surefire-reports/**'
-            junit_results: 'target/surefire-reports/*.xml'
-            cleanup_script: './cicd/cleanup.sh'
-            release: true
+
   - project:
       name: cos-ui-midstream
       label: managed-services
@@ -625,24 +500,7 @@ config:
         - 'gl-build-master-managed-services':
             branch: mk-release
             display_name: cos-ui build-mk-release
-  - project:
-      name: kafka-admin-api
-      label: managed-services
-      node: managed-services
-      gl_group: mk-ci-cd
-      gl_project: kafka-admin-api
-      jobs:
-        - 'gl-pr-check':
-            display_name: kafka-admin-api pr-check
-            pr_check_script_path: './cicd/pr_check.sh'
-        - 'managed-services-gl-build-test-branch':
-            display_name: kafka-admin-api build v0.5
-            branch: mk-release-0.5.0
-            build_deploy_script_path: './cicd/build.sh'
-            archive_artifacts: 'target/surefire-reports/**'
-            junit_results: 'target/surefire-reports/*.xml'
-            cleanup_script: './cicd/build.sh cleanup'
-            release: true
+
   - project:
       name: zookeeper
       label: managed-services
