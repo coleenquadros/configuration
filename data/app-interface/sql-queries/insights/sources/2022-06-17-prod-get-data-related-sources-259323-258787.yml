@@ -1,0 +1,106 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2022-06-17-prod-get-data-related-sources-259323-258787
+namespace:
+  $ref: /services/insights/sources/namespaces/sources-prod.yml
+identifier: sources-prod
+output: stdout
+queries:
+# Get the sources "259323" and "258787".
+  - |
+    SELECT
+      "s"."id",
+      "s"."source_type_id",
+      "s"."availability_status",
+      "s"."last_checked_at",
+      "s"."last_available_at",
+      "s"."created_at",
+      "s"."updated_at",
+      "s"."name",
+      "s"."uid",
+      "s"."tenant_id",
+      "s"."version",
+      "s"."imported",
+      "s"."source_ref",
+      "s"."app_creation_workflow",
+      "s"."paused_at",
+      "s"."user_id"
+    FROM
+      "sources" AS "s"
+    WHERE
+      "s"."id" = 259323
+    OR
+      "s"."id" = 258787;
+# Get the endpoints related to the sources "259323" and "258787".
+  - |
+    SELECT
+      "e"."id",
+      "e"."availability_status",
+      "e"."availability_status_error",
+      "e"."last_checked_at",
+      "e"."last_available_at",
+      "e"."created_at",
+      "e"."updated_at",
+      "e"."source_id",
+      "e"."role",
+      "e"."port",
+      "e"."default",
+      "e"."scheme",
+      "e"."host",
+      "e"."path",
+      "e"."tenant_id",
+      "e"."verify_ssl",
+      "e"."certificate_authority",
+      "e"."receptor_node",
+      "e"."paused_at"
+    FROM
+      "endpoints" AS "e"
+    WHERE
+      "e"."source_id" = 259323
+    OR
+      "e"."source_id" = 258787;
+# Get the applications related to the sources "259323" and "258787".
+  - |
+    SELECT
+      "a"."id",
+      "a"."availability_status",
+      "a"."availability_status_error",
+      "a"."last_checked_at",
+      "a"."last_available_at",
+      "a"."created_at",
+      "a"."updated_at",
+      "a"."source_id",
+      "a"."tenant_id",
+      "a"."application_type_id",
+      "a"."extra",
+      "a"."superkey_data",
+      "a"."paused_at",
+      "a"."retry_counter",
+      "a"."user_id"
+    FROM
+      "applications" AS "a"
+    WHERE
+      "a"."source_id" = 259323
+    OR
+      "a"."source_id" = 258787;
+# Get the RHC Connections related to the sources "259323" and "258787".
+  - |
+    SELECT
+      "rhcc"."id",
+      "rhcc"."rhc_id",
+      "rhcc"."availability_status",
+      "rhcc"."availability_status_error",
+      "rhcc"."last_checked_at",
+      "rhcc"."last_available_at",
+      "rhcc"."created_at",
+      "rhcc"."updated_at",
+      "rhcc"."extra"
+    FROM
+      "rhc_connections" AS "rhcc"
+    INNER JOIN
+      "source_rhc_connections" AS "srhcc" ON "srhcc"."rhc_connection_id" = "rhcc"."id"
+    WHERE
+      "srhcc"."source_id" = 259323
+    OR
+      "srhcc"."source_id" = 258787;
