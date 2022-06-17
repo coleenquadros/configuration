@@ -47,7 +47,7 @@ Note that for ci-ext, the internal IP's last field's number minus 9 is the node 
 
 ## Known Issues
 
-The workers disk space fills up from time to time despite [existing clean-up job](https://ci.int.devshift.net/job/jenkins-slaves-cleanup/2545/console). Tracked by [APPSRE-4725](https://issues.redhat.com/browse/APPSRE-4725).
+The workers disk space fills up from time to time despite [existing clean-up job](https://ci.int.devshift.net/job/jenkins-workers-cleanup/2545/console). Tracked by [APPSRE-4725](https://issues.redhat.com/browse/APPSRE-4725).
 
 ## More information
 
