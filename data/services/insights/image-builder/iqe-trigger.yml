@@ -1,59 +1,58 @@
 ---
 $schema: /app-sre/saas-file-2.yml
-
 labels:
   service: image-builder
-
 name: image-builder-iqe-trigger
 description: Trigger for IQE pipelines
-
 app:
   $ref: /services/image-builder/app.yml
-
 pipelinesProvider:
   $ref: /services/image-builder/pipelines/tekton.image-builder-pipelines.app-sre-prod-01.yml
-
 managedResourceTypes:
 - Job
 
 publishJobLogs: true
-
 imagePatterns:
-  - quay.io/app-sre
+- quay.io/app-sre
 
 authentication:
   image:
     path: app-sre/quay/app-sre-pull
     field: all
-
 resourceTemplates:
 - name: IQE-trigger
   url: https://github.com/osbuild/image-builder
   path: /templates/iqe-trigger.yml
   targets:
-    - namespace:
-        $ref: /services/insights/image-builder/namespaces/stage-image-builder-stage.yml
-      ref: e7723ebbeb017e3bec1d713290bda10f4d2b4d71
-      promotion:
-        auto: true
-        subscribe:
-          - image-builder-stage-deploy-success-channel
-      secretParameters:
-        - name: WEBHOOK_URL
-          secret:
-            path: insights/secrets/qe/stage/image-builder
-            field: webhook_url
-            version: 2
-    - namespace:
-        $ref: /services/insights/image-builder/namespaces/prod-image-builder-prod.yml
-      ref: 99a38d1deadce0240d1d1e2e97a0e76acc552445
-      promotion:
-        auto: true
-        subscribe:
-          - image-builder-prod-deploy-success-channel
-      secretParameters:
-        - name: WEBHOOK_URL
-          secret:
-            path: insights/secrets/qe/prod/image-builder
-            field: webhook_url
-            version: 3
+  - namespace:
+      $ref: /services/insights/image-builder/namespaces/stage-image-builder-stage.yml
+    ref: 6bb0ca2e9b017c94f8a0b4aa7a01d7fb84de7ea8
+    promotion:
+      auto: true
+      subscribe:
+      - image-builder-stage-deploy-success-channel
+      promotion_data:
+      - channel: image-builder-stage-deploy-success-channel
+        data:
+        - parent_saas: image-builder
+          target_config_hash: 61939c94dda0b8af
+          type: parent_saas_config
+    secretParameters:
+    - name: WEBHOOK_URL
+      secret:
+        path: insights/secrets/qe/stage/image-builder
+        field: webhook_url
+        version: 2
+  - namespace:
+      $ref: /services/insights/image-builder/namespaces/prod-image-builder-prod.yml
+    ref: 99a38d1deadce0240d1d1e2e97a0e76acc552445
+    promotion:
+      auto: true
+      subscribe:
+      - image-builder-prod-deploy-success-channel
+    secretParameters:
+    - name: WEBHOOK_URL
+      secret:
+        path: insights/secrets/qe/prod/image-builder
+        field: webhook_url
+        version: 3
