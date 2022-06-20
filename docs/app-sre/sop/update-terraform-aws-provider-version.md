@@ -70,7 +70,7 @@ During the past year, AWS changed several times how `engine_version` parameter i
 
 On the last version under major 3, engine version for Redis clusters should be specified as `<major>.x` for redis on versions 6 or higher instead of `<major>.<minor>.<bug-fix>`. To fix this error on Terraform the parameter groups for affected Redis cluster should be updated to `<major>.x`
 
-This change does not affect the underlying resources that will mantain the same version that they had, and can be updated manually using the AWS console, this is covered in [Redis minor version update SOP](#TODO)
+This change does not affect the underlying resources that will mantain the same version that they had, and can be updated manually using the AWS console, this is covered in [Redis minor version update SOP](https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/upgrade-redis-minor-version.md)
 
 Details of the investigation about the issue can be found on [AWS Provider Update Ticket](https://issues.redhat.com/browse/APPSRE-3598?focusedCommentId=20241853&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-20241853)
 
