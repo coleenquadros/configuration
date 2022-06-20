@@ -129,16 +129,8 @@ A plugin based approach like [strawberry](https://strawberry.rocks/docs/codegen/
 certain queries. I.e., a query with specific requirements can use a different code-generator implementation,
 while the other queries stay stable. Feature flags (mentioned in next section) can help here.
 
-The core of the code generator is the typed abstract syntax tree (AST) of the query. Generating that tree
-is simple with the GQL core libraries for Python. The tree consists of wrapped GQL core library node types, e.g.,:
-
-* `ParsedInlineFragmentNode`: A node for inline fragments. We currently use this on interface types.
-* `ParsedOperationDefinitionNode`: A query is an operation. Initially we only allow a single named query per GQL file. This node can be seen as the root of the query tree.
-* `ParsedFieldNode`: Every node can have fields/attributes, which can be seen as children.
-
-The wrapping around those core library classes is required, as the wrapper class will also contain the type as defined by the introspection query.
-
-Plugins implement their own methods for traversing and interpreting the AST. However, the AST is common across all plugins.
+Every plugin implements its own methods of parsing the query into a typed abstract syntax tree (AST) and properly traversing the AST.
+Once we have more than 1 plugin, we might consider shifting the AST into the `core` module which is common to all plugins.
 
 Initially, we will only create a single plugin for Pydantic data classes, which will be explained in a later section.
 
