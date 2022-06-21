@@ -60,7 +60,7 @@ As this not a Redhat product and should be community friendly, we choose a very 
 ### Getting the Schema
 
 ```sh
-qenerate introspection-query http://localhost:4000/graphql > reconcile/gql_queries/schema_introspection.json
+qenerate introspection http://localhost:4000/graphql > reconcile/gql_queries/schema_introspection.json
 ```
 
 The code-generator must map the query to corresponding types. To achieve this an
@@ -74,7 +74,7 @@ be implemented as a dedicated step as shown in the command above.
 ### GQL and Py File Locations
 
 ```sh
-qenerate classes --schema-introspection reconcile/gql_queries/schema_introspection.json reconcile/gql_queries/
+qenerate code --introspection reconcile/gql_queries/schema_introspection.json reconcile/gql_queries/
 ```
 
 The generator is given an introspection query result and a list of paths to walk recursively. Every `*.gql` file
@@ -141,7 +141,7 @@ Further, we might want to use a different code-generator plugin for a specific q
 We use feature toggles in the query, e.g.,:
 
 ```gql
-# qenerate: plugin=PydanticV1
+# qenerate: plugin=pydantic_v1
 # qenerate: smart_union=False
 query Hero {
   hero {
@@ -340,6 +340,39 @@ In fact, any entity with a `height` attribute will be cast to `Droid`
 in this case, because `Droid` is declared first in the `Union` list. Pydantic maps Unions in order of declaration.
 
 It is important to understand that branching based on `instanceof` calls here can lead to undesired behavior.
+I.e., we must be aware that for some queries we should check attributes rather than class types.
+
+#### Handling Python Keywords
+
+If a class field has the name of a python keyword, e.g., `from`, then we must remap it to a different name.
+This is the proposed remapping:
+
+```python
+keyword_remapping = {
+    "global": "q_global",
+    "from": "q_from",
+    "type": "q_type",
+    "id": "q_id",
+    "to": "q_to",
+    "format": "q_format",
+}
+```
+
+#### Mapping Field Names
+
+Field names are converted to snake case.
+
+```
+MyField -> my_field
+```
+
+#### Mapping Class Names
+
+For classes the GQL type name is mapped to camel case.
+
+```
+App_v1 -> AppV1
+```
 
 ### Migration Strategy
 
@@ -384,7 +417,7 @@ A [thread](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/
 
 **queries.py:**
 
-```py
+```python
 class SchemaProxy:
 
     def __init__(self, data: object):
@@ -400,7 +433,7 @@ def get_integrations() -> SchemaProxy
 
 **typed_queries.py:**
 
-```py
+```python
 def get_integrations() -> list[schema.Integration_v1]:
    ...
    return list_saas
