@@ -1,4 +1,4 @@
-# Bootstrap a new ci.ext jenkins slave
+# Bootstrap a new ci.ext jenkins worker
 
 ## Process
 
@@ -17,7 +17,7 @@ terraform apply
 
 ```shell
 # apply the baseline role using the centos user - dry run
-ansible-playbook playbooks/node-ci-ext-jenkins-slave.yml --limit <worker_name> -u centos -t baseline -CD
+ansible-playbook playbooks/node-ci-ext-jenkins-worker.yml --limit <worker_name> -u centos -t baseline -CD
 # apply the baseline role using the centos user
 ansible-playbook playbooks/node-ci-ext-jenkins-worker.yml --limit <worker_name> -u centos -t baseline
 # apply the playbook using your own user - dry run

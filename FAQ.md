@@ -350,9 +350,9 @@ Related Jira ticket: https://issues.redhat.com/browse/APPSRE-947
 
 Check your mailbox! It should be there! If not, ask the IC to review [the AppSRE organization](https://github.com/orgs/app-sre/people) and see if your invite is pending or failed. They can cancel the pending invite and send a new one to you.
 
-### I need to add a package to a jenkins slave
+### I need to add a package to a jenkins worker node
 
-The App SRE team recommends transitioning to using containerized builds over trying to load specific packages onto a jenkins slave.  Containerized builds provide numerous advantageous to our users including:
+The App SRE team recommends transitioning to using containerized builds over trying to load specific packages onto a jenkins worker node.  Containerized builds provide numerous advantageous to our users including:
 
 - Control over the build dependencies
 - Idempotency

@@ -18,7 +18,7 @@ On all the jenkins nodes switch the time synchronization service from ntpd to ch
 
 1. In the [Infra repo](https://gitlab.cee.redhat.com/app-sre/infra/-/tree/master/ansible/playbooks), locate the playbook used to deploy the jenkins nodes. 
 For example for ci-int associated playbooks are
-    node-ci-int-jenkins-slave.yml
+    node-ci-int-aws-jenkins-worker.yml
     node-ci-int.yaml
 2. In the playbooks replace role 
     { role: ntp, tags: ntp }

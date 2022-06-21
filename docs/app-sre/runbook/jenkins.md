@@ -14,7 +14,7 @@ Currently we have two Jenkins https://ci.int.devshift.net/ and https://ci.ext.de
 
 ## Troubleshooting
 
-Prerequisite: Make sure you can ssh into Jenkins workers by first following all the ssh set up in [AAA doc](https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/AAA.md), then test it by running `ssh ci-int-jenkins-slave-01-app-sre` for example. Note that we use bastion as jump box to access ci-ext worker. A common error is having different username in local than remote, in that case, add `User [yourremoteusername]` in your ssh config file. For example:
+Prerequisite: Make sure you can ssh into Jenkins workers by first following all the ssh set up in [AAA doc](https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/AAA.md), then test it by running `ssh ci-int-jenkins-node-01-app-sre` for example. Note that we use bastion as jump box to access ci-ext worker. A common error is having different username in local than remote, in that case, add `User [yourremoteusername]` in your ssh config file. For example:
 ```
 Host ci-ext-jenkins-worker-*
     User     yourremoteusername
@@ -27,7 +27,7 @@ Host ci-int-aws-jenkins-worker-*
     # Change if different private key file:
     IdentityFile ~/.ssh/id_rsa
 ```
-Note that for ci-ext, the internal IP's last field's number minus 9 is the node number. For example, if you see PagerDuty alert `PredictNodeDiskFull app-sre-prod-01 ci-ext (/dev/nvme1n1p1 production 192.168.18.14:9100`, the node is having problem is `14 - 9 = 5`, therefore ci-ext-jenkins-slave-05-app-sre is what you want.
+Note that for ci-ext, the internal IP's last field's number minus 9 is the node number. For example, if you see PagerDuty alert `PredictNodeDiskFull app-sre-prod-01 ci-ext (/dev/nvme1n1p1 production 192.168.18.14:9100`, the node is having problem is `14 - 9 = 5`, therefore ci-ext-jenkins-node-05-app-sre is what you want.
 
 
 ### Useful command lines:
