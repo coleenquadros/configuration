@@ -1,0 +1,41 @@
+---
+$schema: /openshift/prometheus-rule-1.yml
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: eventing
+spec:
+  groups:
+  - name: eventing.insights.openshiftio.rules
+    interval: 1m
+    rules:
+
+    - alert: EventingAlertKafkaLag
+      expr: sum(kafka_consumergroup_group_topic_sum_lag{group="eventing-splunk"}) by (topic) > 1000
+      for: 10m
+      annotations:
+        dashboard: 'https://grafana.app-sre.devshift.net/d/eventing/eventing-integrations'
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/eventing-prod/deployments'
+        message: 'eventing lag > 1000, current lag: the oldest message in the queue is {{ $value }}ms old'
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/eventing/EventingAlertKafkaLag.md'
+      labels:
+        severity: medium
+        service: insights
+        env: prod
+        app_team: eventing
+
+    - alert: EventingAlertHandledSuccess
+      expr: sum(increase(CamelExchangeEventNotifier_seconds_count{namespace=~"eventing-.+",endpointName="direct://return",eventType="ExchangeSentEvent"}[28d]))/sum(increase(CamelExchangeEventNotifier_seconds_count{namespace=~"eventing-.+",endpointName="direct://handler",eventType="ExchangeSentEvent"}[28d]))*100 < 90
+      annotations:
+        dashboard: 'https://grafana.app-sre.devshift.net/d/eventing/eventing-integrations'
+        link_url: 'https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/eventing-prod/deployments'
+        message: 'eventing success rate for events handled is {{ $value }} when the goal is 90%'
+        runbook: 'https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/eventing/EventingAlertHandledSuccess.md'
+      labels:
+        severity: medium
+        service: insights
+        env: prod
+        app_team: eventing
