@@ -19,5 +19,5 @@ mkdir -p validate reports
 # Create data bundle
 OUTPUT_DIR=validate make schemas bundle validate
 
-upload_s3 validate/data.json
+upload_s3 validate/data.json ${git rev-parse HEAD}
 echo "bundle uploaded to $ENVIRONMENT" > reports/report
