@@ -107,42 +107,20 @@ Both resources can be deployed with openshift-resources using the `resource` pro
 This feature could ne be fully used until 4.12 when the support for `destination-ca-certificates` is rolled out in Openshift.
 This only affects Routes with `reencrypt` and using a custom `CA` in the backend (vault)
 
-### Using App-interface Route spec
+### Using plain Routes
 
-We currently offer a `NamespaceOpenshiftResourceRoute_v1` resource in app-interface that is able to create `Route` objects with
-tls certificate data located in Hashicorp Vault. Extending this functionality, we can inject the certificate data from a `Secret`
-located in the same namespace as the target `Route`.
+When a Route deployment happens, from `openshiftResources` or from a `saas file`. The resources process will figure out if the route
+needs to request an ACME certificate by checking if the route contains the `kubernetes.io/tls-acme: "true"` annotation.
 
-With this in mind, we can then use the `Certificate` CRD of cert-manager to request a certificate and store it in a `Secret`. Then,
-openshift-resources will update the `Route` tls spec with the Secret's data.
+If the Route contains the annotation, a `Certificate.cert-manager.io` object with will be injected in the deployment. This Cert-manager will
+request a Certificate to the ACME provider and it will store it a `Secret` in the same namespace where the Route is deployed.
 
-A tenant will need to define a `Certificate` object and add the secret name to the `NamespaceOpenshiftResourceRoute_v1` spec.
+The `cert-utils-operator` will be installed in the clusters to sync the TLS data `Secrets` into `Routes`.
 
-```yaml
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: test-example-com-certificate
-  namespace: the-namespace
-spec:
-  secretName: test-example-com-cert-secret
-  issuerRef:
-    name: letsencrypt-staging
-    kind: ClusterIssuer
-    group: cert-manager.io
-  dnsNames:
-  - test.example.com
-```
+**With this approach, no changes on the manifests are required, just installing both operators and remving openshift-acme is enough to start**
+**managing the certificates with cert-manager**
 
-```yaml
-openshiftResources:
-- provider: route
-  path: /services/assisted-installer/kibana-production.route.yaml
-  tls_certificate_secret_name: test-example-com-certificate
-```
-
-This approach feels more safe as the `Route` spec does not need modifications, just the app-interface spec to add the secret name ref.
-The certificate object can be deployed under openshift-resources using the `resource` provider.
+** This approach has been spiked and is working [HERE](https://github.com/app-sre/qontract-reconcile/pull/2486)
 
 ### Issuers Configuration
 
