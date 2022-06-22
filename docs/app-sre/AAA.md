@@ -162,7 +162,8 @@ Every AppSRE/MT-SRE engineer should have access to the following:
   * Ansible
     * You can install directly on your local machine or in a virtual environment (recommended)
       * To install locally:
-        * `brew install ansible`
+        * (MacOS) `brew install ansible`
+        * (Fedora/RHEL) `dnf install ansible-core`
       * To install in a virtual environment:
         * Set up pyenv
         * Activate the virtual environment and install ansible with `pip install ansible`
@@ -176,11 +177,17 @@ Every AppSRE/MT-SRE engineer should have access to the following:
     * Following the installation steps [here](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
     * Since enforcing MFA, you will need to follow [these steps](https://aws.amazon.com/premiumsupport/knowledge-center/authenticate-mfa-cli/) in order to use the CLI.
       * Please note that this will only work for virtual devices.
-  * python
-    * To install: `brew install python`
+  * Python
+    * (MacOS) To install: `brew install python`
+    * (Fedora/RHEL) should be preinstalled
     * Because we now require MFA, in order to login you will have to do the following:
-  * pyenv
-    * To install: `brew install pyenv`
+  * Alternatively, use pyenv to manage your versions of Python
+    * (MacOS) To install: `brew install pyenv`
+    * (Fedora/RHEL) Check out [pyenv-installer](https://github.com/pyenv/pyenv-installer)
+  * OpenShift Client (oc)
+    * Check out [this download page](https://access.redhat.com/downloads/content/290) or [alternatively this mirror](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/).
+    * Instructions for installing are [here](https://docs.openshift.com/container-platform/4.10/cli_reference/openshift_cli/getting-started-cli.html).
+    * Qontract-reconcile uses a specific version of the oc binary [referenced in cli.py](https://github.com/app-sre/qontract-reconcile/blob/master/reconcile/cli.py#L136)
 
 Every AppSRE engineer should have access to the following:
 
