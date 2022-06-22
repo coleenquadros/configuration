@@ -104,8 +104,9 @@ spec:
 ```
 
 Both resources can be deployed with openshift-resources using the `resource` provider.
-This feature could ne be fully used until 4.12 when the support for `destination-ca-certificates` is rolled out in Openshift.
-This only affects Routes with `reencrypt` and using a custom `CA` in the backend (vault)
+
+Exposed services with `termination: reencrypt` and a custom `destination-ca-certificate` will need to wait
+until Openshift 4.12 when support for `destination-ca-certificates` is rolled out. (Our vault Route uses this approach)
 
 ### Using plain Routes
 
