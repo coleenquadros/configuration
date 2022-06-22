@@ -70,7 +70,7 @@
 
 ## Copy credentials from old server or backup
 
-1. Copy secrets and slaves definitions from old jenkins master (or backup) `tar cvzf <filename>.tgz nodes secrets/hudson.util.Secret secrets/master.key credentials.xml`
+1. Copy secrets and nodes definitions from old jenkins master (or backup) `tar cvzf <filename>.tgz nodes secrets/hudson.util.Secret secrets/master.key credentials.xml`
 2. Stop new jenkins server `systemctl stop jenkins`
 3. Restore files on new jenkins master
 4. Optionally disable nodes if old jenkins master is still running, just add this to each node's `config.xml`

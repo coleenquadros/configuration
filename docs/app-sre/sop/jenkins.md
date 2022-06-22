@@ -20,7 +20,7 @@ The configuration is documented in the
 
 ## JenkinsHealthCheck
 
-This checks the health score `jenkins_health_check_score` of the jenkins instance, which include the state of the nodes/slaves.
+This checks the health score `jenkins_health_check_score` of the jenkins instance, which include the state of the nodes/workers.
 
 A score below 1 do not necessarily mean there is an impact on the normal operations.
 

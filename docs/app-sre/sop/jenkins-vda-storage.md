@@ -8,7 +8,7 @@ Device /dev/vda1 of node 10.0.132.76:9100 will be full within the next 24 hours.
 - (optional) Was pretty sure this was Jenkins, but just to verify vs blindly sshing:
 ```
 $ egrep -l 10.0.132.76 ansible/hosts/host_vars/*
-ci-int-jenkins-slave-02-uhc
+ci-int-jenkins-node-02-uhc
 prometheus.centralci.devshift.net
 ```
 - Be on the RedHat network and ssh into the node
