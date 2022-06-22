@@ -1847,6 +1847,10 @@ The Secret will contain the following fields:
 - `distribution_domain` - The domain name corresponding to the distribution.
 - `origin_access_identity` - The origin access identity in the form of `origin-access-identity/cloudfront/<cloud_front_origin_access_identity_id>`.
 
+CloudFront distribution [logging_config](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_distribution#logging_config) is supported. This allows to store CloudFront logs into an S3 bucket.
+- The S3 bucket used for logging must be created in app-interface. Since [specific ACLs are needed for CloudFront logging](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/AccessLogs.html#AccessLogsBucketAndFileOwnership), the logging S3 bucket configuration should *not* contain any `acl` field (eg, do *not* set `acl: private`). These ACLs will be handled automatically.
+- The `s3-cloufront` configuration must refer to the logging S3 bucket with the [standard terraform logging_config arguments](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_distribution#logging-config-arguments). Note that the `bucket` argument should be the logging S3 bucket *hostname*, in the form `<bucket-identifer>.s3.amazonaws.com`.
+
 #### Manage CloudFront Public Keys via App-Interface (`/openshift/namespace-1.yml`)
 
 CloudFront Public Keys can be self-serviced via App-Interface.  Once created in AWS, the public key will need to be manually associated with a `Key group` and then that `Key group` manually associated with a CloudFront Distribution to sign URLs or cookies.
