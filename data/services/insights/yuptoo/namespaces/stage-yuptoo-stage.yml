@@ -41,12 +41,15 @@ openshiftResources:
   type: kubernetes.io/dockerconfigjson
   name: quay-cloudservices-pull
 
-managedTerraformResources: true
+managedExternalResources: true
 
-terraformResources:
-- provider: cloudwatch
-  account: insights-stage
-  identifier: yuptoo-stage
-  defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
-  output_resource_name: cloudwatch
-  es_identifier: kibana-elasticsearch
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-stage/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: yuptoo-stage
+    defaults: /terraform/resources/insights/stage/cloudwatch/cloudwatch-2.yml
+    output_resource_name: cloudwatch
+    es_identifier: kibana-elasticsearch
