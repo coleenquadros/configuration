@@ -2514,8 +2514,26 @@ gpg -d 2020-01-30-account-manager-registries-stage-cjh82-query-result.txt
 
 Running that command locally and decrypt the message with requestor's private key.
 
+To delete a scheduled query (CronJob), add `delete: true` to your query definition file like so:
+
+```yaml
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2020-01-30-account-manager-registries-stage
+namespace:
+  $ref: /services/ocm/namespaces/uhc-stage.yml
+identifier: uhc-acct-mngr-staging
+output: filesystem
+query: |
+  SELECT id, name, deleted_at from registries;
+delete: true
+```
+Once your change is merged, the CronJob and related resources will be deleted from the cluster. After that point it's safe to delete the query file itself.
+
 **Important notes**
 * Each Job will be automatically deleted after 7 days.
+* CronJobs run indefinitely unless you delete them using the `delete` parameter, removing the file will not delete the CronJob from the cluster.
 * Query files are only executed once unless a `schedule` is defined.
   The query file execution status is tracked using the `name` field.
   If you wish to run an existing query file a second time
