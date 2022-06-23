@@ -1,0 +1,52 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels:
+  service: unleash-proxy
+
+name: unleash-proxy-perf
+description: Insights unleash-proxy-perf on the Stage cluster
+
+cluster:
+  $ref: /openshift/insights/cluster-insights-perf.yml
+
+app:
+  $ref: /services/insights/unleash-proxy/app.yml
+
+environment:
+  $ref: /products/insights/environments/perf.yml
+
+networkPoliciesAllow: []
+# - $ref: /services/observability/namespaces/openshift-customer-monitoring.crcs02ue1.yml
+# - $ref: /services/insights/gateway/namespaces/stage-3scale-stage.yml
+# - $ref: /services/insights/turnpike/namespaces/stage-turnpike-stage.yml
+
+managedRoles: true
+
+managedResourceTypes: []
+
+sharedResources:
+- $ref: /services/unleash/shared-resources/insights-perf.yml
+
+openshiftResources:
+- provider: vault-secret
+  path: insights/secrets/global/rh-registry-pull
+  version: 2
+  type: kubernetes.io/dockerconfigjson
+- provider: vault-secret
+  path: insights/quay/quay.io
+  version: 3
+  type: kubernetes.io/dockerconfigjson
+  name: quay-cloudservices-pull
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/insights-perf/account.yml
+  resources:
+  - provider: cloudwatch
+    identifier: unleash-proxy-perf
+    defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
+    output_resource_name: cloudwatch
