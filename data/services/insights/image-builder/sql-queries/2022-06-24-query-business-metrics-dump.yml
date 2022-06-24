@@ -1,0 +1,18 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2022-06-24-query-business-metrics-dump
+namespace:
+  $ref: /services/insights/image-builder/namespaces/prod-image-builder-prod.yml
+identifier: image-builder-prod
+output: stdout
+queries:
+- |
+  select
+    job_id,created_at,org_id,request->'distribution' as distro,
+    req->'architecture' as arch,req->'image_type' as "type",req->'upload_request'->'type' as target_type,
+    request->'customizations'->'packages' as packages,
+    request->'customizations'->'filesystem' as filesystem,
+    request->'customizations'->'payload_repositories' as custom_repos
+  from
+    composes,json_array_elements(composes.request->'image_requests') as req;
