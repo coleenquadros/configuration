@@ -63,6 +63,8 @@ resourceTemplates:
       MEMORY_LIMIT_USER_METRICS: 800Mi
       MEMORY_REQUEST_ROLLUPS: 400Mi
       MEMORY_LIMIT_ROLLUPS: 800Mi
+      MEMORY_REQUEST_DATA_PRUNING: 400Mi
+      MEMORY_LIMIT_DATA_PRUNING: 800Mi
   - namespace:
       $ref: /services/insights/tower-analytics/namespaces/stage-tower-analytics-stage.yml
     ref: main
@@ -82,6 +84,7 @@ resourceTemplates:
       BUNDLES_SECRET_NAME: upload-s3
       CRON_SCHEDULE_MSG_RECOVERY: 0 11,23 * * *
       CRON_SCHEDULE_USER_METRICS: 0 10 * * *
+      CRON_SCHEDULE_DATA_PRUNING: '0 12 * * 1'
       DATA_EXPORT_BUCKET_NAME: tower-analytics-dbdumps-stage-s3
       DATA_EXPORT_ENABLED: 'True'
       RECOVERY_BUCKET_NAME: tower-analytics-recovery-stage-s3
@@ -89,6 +92,13 @@ resourceTemplates:
       FASTAPI_HOST: automation-analytics-api-fastapi-v2.tower-analytics-stage.svc.cluster.local
       FASTAPI_PORT: 8000
       RBAC_PSKS_SECRET: rbac-psks
+      DATA_PRUNING_ENABLED: "True"
+      DATA_PRUNING_INTERNAL_DATA_ENABLED: "True"
+      DATA_PRUNING_RAW_TABLE_RETENTION_DAYS: "186" # ~ 6 months
+      DATA_PRUNING_DAILY_ROLLUP_RETENTION_DAYS: "366" # ~1 year
+      DATA_PRUNING_MONTHLY_ROLLUP_RETENTION_DAYS: "1098" # ~3 years
+      DATA_PRUNING_YEARLY_ROLLUP_RETENTION_DAYS: "3660" # ~10 years
+
     upstream:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
@@ -116,6 +126,7 @@ resourceTemplates:
       BUNDLES_SECRET_NAME: upload-s3
       CRON_SCHEDULE_MSG_RECOVERY: 0 11,23 * * *
       CRON_SCHEDULE_USER_METRICS: '* 10 * * *'
+      CRON_SCHEDULE_DATA_PRUNING: '0 12 * * 6'
       DATA_EXPORT_BUCKET_NAME: tower-analytics-dbdumps-prod
       DATA_EXPORT_ENABLED: 'True'
       JOBS_LOG_LEVEL: INFO
@@ -124,6 +135,12 @@ resourceTemplates:
       FASTAPI_HOST: automation-analytics-api-fastapi-v2.tower-analytics-prod.svc.cluster.local
       FASTAPI_PORT: 8000
       RBAC_PSKS_SECRET: rbac-psks
+      DATA_PRUNING_ENABLED: "False"
+      DATA_PRUNING_INTERNAL_DATA_ENABLED: "False"
+      DATA_PRUNING_RAW_TABLE_RETENTION_DAYS: "366" # ~ 1 year
+      DATA_PRUNING_DAILY_ROLLUP_RETENTION_DAYS: "3660" # ~10 years
+      DATA_PRUNING_MONTHLY_ROLLUP_RETENTION_DAYS: "3660" # ~10 years
+      DATA_PRUNING_YEARLY_ROLLUP_RETENTION_DAYS: "3660" # ~10 years
     promotion:
       auto: true
       subscribe:
