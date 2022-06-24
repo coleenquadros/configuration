@@ -10,3 +10,4 @@ Full design document can be found [here](/docs/app-sre/design-docs/initiative-pr
 
 | Name | Link | Description | Status |
 |------|------|-------------|--------|
+| Fine grained app-interface review permission model | [fine-grained-permission-model.md](fine-grained-permission-model.md) | Reduce the number of changes to be reviewed by AppSRE by selectively delegating review work to tenants | In Review |
