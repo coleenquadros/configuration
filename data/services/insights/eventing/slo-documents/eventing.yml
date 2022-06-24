@@ -1,0 +1,38 @@
+---
+$schema: /app-sre/slo-document-1.yml
+
+labels:
+  service: eventing
+
+name: eventing
+
+app:
+  $ref: /services/insights/eventing/app.yml
+
+namespaces:
+- $ref: /services/insights/eventing/namespaces/eventing-prod.yml
+
+slos:
+- name: event handling success rate
+  SLIType: throughput
+  SLISpecification: ratio of successfully handled events to all events handled
+  SLODetails: https://gitlab.cee.redhat.com/services/app-interface/-/blob/master/docs/eventing/slos/eventing-latency.md
+  SLOParameters:
+    window: 28d
+  expr: sum(increase(CamelExchangeEventNotifier_seconds_count{namespace=~"eventing-.+",endpointName="direct://return",eventType="ExchangeSentEvent"}[{{window}}]))/sum(increase(CamelExchangeEventNotifier_seconds_count{namespace=~"eventing-.+",endpointName="direct://handler",eventType="ExchangeSentEvent"}[{{window}}]))
+  SLOTarget: 0.90
+  SLOTargetUnit: percent_0_1
+  prometheusRules: resources/insights-prod/eventing-prod/eventing-prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/eventing/eventing-integrations
+
+- name: event kafka lag
+  SLIType: latency
+  SLISpecification: current lag time in ms for events sent
+  SLODetails: https://gitlab.cee.redhat.com/services/app-interface/-/blob/master/docs/eventing/slos/eventing-latency.md
+  SLOParameters:
+    window: 28d
+  expr: max(sum(sum_over_time(kafka_consumergroup_group_lag_seconds{group="eventing-splunk"}[28d])) by (topic, partition)/sum(increase(kafka_consumergroup_group_offset{group="eventing-splunk"}[28d])) by (topic, partition)) < bool 1
+  SLOTarget: 0.90
+  SLOTargetUnit: percent_0_1
+  prometheusRules: resources/insights-prod/eventing-prod/eventing-prometheusrules.yaml
+  dashboard: https://grafana.app-sre.devshift.net/d/eventing/eventing-integrations
