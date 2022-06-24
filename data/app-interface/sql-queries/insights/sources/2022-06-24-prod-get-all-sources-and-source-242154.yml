@@ -1,0 +1,36 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2022-06-24-prod-get-all-sources-and-source-242154
+namespace:
+  $ref: /services/insights/sources/namespaces/sources-prod.yml
+identifier: sources-prod
+output: stdout
+queries:
+# Get all of the sources.
+  - |
+    SELECT 
+      sources.id, 
+      sources.availability_status, 
+      "Tenant".external_tenant,
+      "Tenant"."id" AS "Tenant__id",
+      "Tenant"."external_tenant" AS "Tenant__external_tenant",
+      "Tenant"."org_id" AS "Tenant__org_id",
+      "Tenant"."created_at" AS "Tenant__created_at",
+      "Tenant"."updated_at" AS "Tenant__updated_at" 
+    FROM "sources" 
+    LEFT JOIN "tenants" "Tenant" ON "sources"."tenant_id" = "Tenant"."id";
+# Get only "242154".
+  - |
+    SELECT 
+      sources.id, 
+      sources.availability_status, 
+      "Tenant".external_tenant,"Tenant"."id" AS "Tenant__id",
+      "Tenant"."external_tenant" AS "Tenant__external_tenant",
+      "Tenant"."org_id" AS "Tenant__org_id",
+      "Tenant"."created_at" AS "Tenant__created_at",
+      "Tenant"."updated_at" AS "Tenant__updated_at" 
+    FROM "sources" 
+    LEFT JOIN "tenants" "Tenant" ON "sources"."tenant_id" = "Tenant"."id"
+    WHERE
+      sources.id = 242154;
