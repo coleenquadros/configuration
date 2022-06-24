@@ -377,9 +377,12 @@ App_v1 -> AppV1
 ### Migration Strategy
 
 Our queries currently reside in a single `queries.py` in qontract-reconcile.
-We propose 2 viable migration strategies to adapt towards the new generated classes.
+In the following 2 sub-sections we propose 2 viable migration strategies to adapt towards the new generated classes:
 
-In the end of this discussion we will decide on one strategy.
+- [Dedicated new Module](#dedicated-new-module)
+- [Leverage a Proxy Class](#leverage-a-proxy-class)
+
+In the end of this discussion we will decide on one strategy and move the others into `Alternatives Considered` section.
 
 #### Dedicated new Module
 
