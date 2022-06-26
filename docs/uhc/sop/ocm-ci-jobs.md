@@ -27,17 +27,13 @@ $ grep -RF '<path>sd-uhc/sandbox</path>' jjb
 
 ### hive-frontend, aws-account-operator serviceAccounts and gcp-project-operator tokens
 
-If the `hive-frontend` or `aws-account-operator` SAs are invalidated, they will be cycled automatically for the prod instance, but it must be addressed manually for the hive-int environment otherwise OCM will not be able to communicate with hive.
+If the `hive-frontend`, `aws-account-operator` or `gcp-project-operator` SAs are invalidated, they need to recycled manually for the above listed jobs to keep functioning, otherwise they will not be able to communicate with hive.
 
-- Step 1. [AppSRE team] Copy the secret from `integration-output` to a path that the OCM team has access to:
+Follow these instructions:
 
-```
-AWS_TOKEN=$(vault read -field token app-sre/integrations-output/openshift-serviceaccount-tokens/app-sre-stage-01/uhc-integration/hive-integration-aws-account-operator-aws-account-operator-client)
-HIVE_TOKEN=$(vault read -field token app-sre/integrations-output/openshift-serviceaccount-tokens/app-sre-stage-01/uhc-integration/hive-integration-hive-hive-frontend)
-GCP_TOKEN=$(vault read -field token app-sre/integrations-output/openshift-serviceaccount-tokens/app-sre-stage-01/uhc-integration/hive-integration-gcp-project-operator-gcp-project-operator-client)
-vault write sd-uhc/sandbox-tokens aws-account-operator-client-token=$AWS_TOKEN hive-frontend-token=$HIVE_TOKEN gcp-project-operator-token=$GCP_TOKEN
-```
+- Step 1. [OCM team] Manually update the `config` (base64 encoded) key of the [sandbox](https://vault.devshift.net/ui/vault/secrets/sd-uhc/show/sandbox) secret to include the most recent tokens that are available now in:
+    * `hive-frontend`: https://vault.devshift.net/ui/vault/secrets/app-sre/show/integrations-output/openshift-serviceaccount-tokens/app-sre-stage-01/uhc-integration/hivei01ue1-hive-hive-frontend
+    * `aws-account-operator`: https://vault.devshift.net/ui/vault/secrets/app-sre/show/integrations-output/openshift-serviceaccount-tokens/app-sre-stage-01/uhc-integration/hivei01ue1-aws-account-operator-aws-account-operator-client
+    * `gcp-project-operator`: https://vault.devshift.net/ui/vault/secrets/app-sre/show/integrations-output/openshift-serviceaccount-tokens/app-sre-stage-01/uhc-integration/hivei01ue1-gcp-project-operator-gcp-project-operator-client
 
-- Step 2. [OCM team] Manually update the `config` (base64 encoded) to include the newly generated tokens that are available now in https://vault.devshift.net/ui/vault/secrets/sd-uhc/show/sandbox-tokens
-
-- Step 3. [OCM team] Manually update the `hive_config` (base64 encoded) to include the newly generated tokens that are available now in https://vault.devshift.net/ui/vault/secrets/app-interface/show/app-sre-stage/uhc-integration/clusters-cleaner
+> Note: Access to these secrets in Vault is defined [here](data/services/vault.devshift.net/config/policies/sd-uhc-policy.yml) and they can be viewed by anyone with the [vault-access](data/teams/ocm/roles/vault-access.yml) role associated to their user. Find a list of these users in [Visual app-interface](https://visual-app-interface.devshift.net/roles#/teams/ocm/roles/vault-access.yml).
