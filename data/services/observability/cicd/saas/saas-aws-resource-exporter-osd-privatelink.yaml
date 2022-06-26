@@ -1,0 +1,48 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: app-sre-observability
+
+name: saas-aws-resource-exporter-osd-privatelink
+description: saas file for aws-resource-exporter for osd-privatelink aws accounts
+
+app:
+  $ref: /services/observability/app.yml
+
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.app-sre-prod-01.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-srep-info
+
+managedResourceTypes:
+- ServiceAccount
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/app-sre/aws-resource-exporter
+
+# note: it is currently not possible to deploy a single resourceTemplate
+# to the same target (namespace) more than once.
+# use a separate resourceTemplate list item for each AWS account for consistency.
+resourceTemplates:
+# osd-privatelink-int
+- name: aws-resource-exporter-osd-privatelink-int
+  path: /openshift/aws-resource-exporter.yaml
+  url: https://github.com/app-sre/aws-resource-exporter
+  parameters:
+    NAME: aws-resource-exporter-osd-privatelink-int
+    AWS_REGION: us-east-1
+    SECRET_NAME: aws-resource-exporter-osd-privatelink-int
+  targets:
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: app-sre-aws-resource-exporter-gh-build-master
