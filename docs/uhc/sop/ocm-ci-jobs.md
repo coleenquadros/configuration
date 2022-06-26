@@ -36,4 +36,4 @@ Follow these instructions:
     * `aws-account-operator`: https://vault.devshift.net/ui/vault/secrets/app-sre/show/integrations-output/openshift-serviceaccount-tokens/app-sre-stage-01/uhc-integration/hivei01ue1-aws-account-operator-aws-account-operator-client
     * `gcp-project-operator`: https://vault.devshift.net/ui/vault/secrets/app-sre/show/integrations-output/openshift-serviceaccount-tokens/app-sre-stage-01/uhc-integration/hivei01ue1-gcp-project-operator-gcp-project-operator-client
 
-> Note: access to these secrets in Vault is defined [here](data/services/vault.devshift.net/config/policies/sd-uhc-policy.yml).
+> Note: Access to these secrets in Vault is defined [here](data/services/vault.devshift.net/config/policies/sd-uhc-policy.yml) and they can be viewed by anyone with the [vault-access](data/teams/ocm/roles/vault-access.yml) role associated to their user. Find a list of these users in [Visual app-interface](https://visual-app-interface.devshift.net/roles#/teams/ocm/roles/vault-access.yml).
