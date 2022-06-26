@@ -35,3 +35,5 @@ Follow these instructions:
     * `hive-frontend`: https://vault.devshift.net/ui/vault/secrets/app-sre/show/integrations-output/openshift-serviceaccount-tokens/app-sre-stage-01/uhc-integration/hivei01ue1-hive-hive-frontend
     * `aws-account-operator`: https://vault.devshift.net/ui/vault/secrets/app-sre/show/integrations-output/openshift-serviceaccount-tokens/app-sre-stage-01/uhc-integration/hivei01ue1-aws-account-operator-aws-account-operator-client
     * `gcp-project-operator`: https://vault.devshift.net/ui/vault/secrets/app-sre/show/integrations-output/openshift-serviceaccount-tokens/app-sre-stage-01/uhc-integration/hivei01ue1-gcp-project-operator-gcp-project-operator-client
+
+> Note: access to these secrets in Vault is defined [here](data/services/vault.devshift.net/config/policies/sd-uhc-policy.yml).
