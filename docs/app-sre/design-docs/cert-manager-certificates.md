@@ -31,8 +31,20 @@ Two problems are going to be solved.
 ## Proposals
 
 At first, we only agreed to switch the `Route` definitions to `Ingress` and leverage the Ingress to Route
-conversion feature that openshift provides. Although this is the prefered path, a second approach using routes is
-proposed.
+conversion feature that openshift provides. Although this is the prefered path, a second approach using routes
+is added.
+
+With the `Routes` approach, we can migrate from `openshift-acme` to `cert-manager` almost transparently. We will only
+need to re-deploy `Routes` created through `Saas-files`. `Routes` created through openshift-resources will be automatically
+reconcilled and the Certificates will be created without any additional change. Adding this ability, facilitates the migration
+as we don't really need tenants' actions in the `Route` specs. Also, we will be covered if there are cases that need a `Route`
+spec because missing feature with the `Ingress` spec.
+
+### So, what's the plan?
+
+1. Migrate to cert-manager. Routes created through app-interface will use the second approach to get the certificates.
+2. Change the docs (dev-guidelines and others) to promote the use of Ingress instead of Routes.
+3. Request tenants to update its Routes specs to Ingress. AppSre checkpoints might be good for this.
 
 ### Switch to Ingress Objects
 
@@ -72,7 +84,7 @@ spec:
     secretName: example-com-secret # Secret where the certificate will be stored
 ```
 
-On the internal clusters, the spec is the same, but an issuer with a DNS spec shuold be provided. The issuer spec
+On the internal clusters, the spec is the same, but an issuer with a DNS spec should be provided. The issuer spec
 defines how the ACME challenges need to be solved. In the case of DNS issuers, cert-manager adds the necessary TXT record
 to the DNS provider to solve the challenge. Issuer example:
 
@@ -134,7 +146,7 @@ many namespaces. But specific cases with domains used in just one namespace will
 
 ## Alternatives Considered
 
-- N/A
+- [Discussions](https://docs.google.com/document/d/1Io_f26Ph9Yomqmx4K1AJkwoB-TLsw9gECWxOJRa3D7o/edit#heading=h.4c9twulgg922)
 
 ## Milestones
 
@@ -142,4 +154,3 @@ many namespaces. But specific cases with domains used in just one namespace will
 - Roll out changes in App-sre managed routes.
 - Modify documentation to include the 1st Proposal and enhance the docs of the current Routes approach.
 - All certificates used in app-interface are using cert-manager
-  - Send comms to tenants and follow up the progress.
