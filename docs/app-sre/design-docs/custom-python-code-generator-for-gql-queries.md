@@ -45,7 +45,7 @@ The repository is fully dedicated to the code generator to ease potential public
 #### CI/CD
 
 To stay consistent with other app-interface projects we will use ci-ext.
-Ci-ext will upload official releases to PyPi.
+Further, ci-ext will upload official releases to PyPi.
 
 One big issue with ci-ext is that it requires Red Hat SSO,
 which makes public collaboration more difficult. If we ever reach a point
@@ -100,7 +100,7 @@ The GQL standard allows comments via `#`. This is leveraged for code generator f
 
 The code generator explicitly disallows anonymous queries, e.g.,
 
-```gql
+```graphql
 query {
   heros {
     name
@@ -110,7 +110,7 @@ query {
 
 Instead, queries must always be named:
 
-```gql
+```graphql
 query QueryWithAName {
   heros {
     name
@@ -140,7 +140,7 @@ Lets say for some query we do not want the pydantic `smart_union = True` feature
 Further, we might want to use a different code-generator plugin for a specific query.
 We use feature toggles in the query, e.g.,:
 
-```gql
+```graphql
 # qenerate: plugin=pydantic_v1
 # qenerate: smart_union=False
 query Hero {
@@ -161,7 +161,7 @@ nested dictionaries to classes.
 
 Here is an example of a simple query and its correspondingly generated pydantic model:
 
-```gql
+```graphql
 query HeroForEpisode {
   hero {
     name
@@ -185,7 +185,7 @@ class QueryData(BaseModel):
 GQL has interface types which should be mapped properly.
 Pydantic does a pretty good job in mapping nested dictionaries to classes.
 
-```gql
+```graphql
 query HeroForEpisode {
   hero {
     name
@@ -228,7 +228,7 @@ in case neither `primaryFunction` nor `height` are existant on a returned entity
 
 #### Class name collisions
 
-```gql
+```graphql
 query Hero {
   hero {
     name
@@ -297,7 +297,7 @@ class Cape_Color:
 
 Queries on interfaces might return data that cannot be uniquely mapped to a class.
 
-```gql
+```graphql
 query Hero {
 
   hero {
@@ -376,43 +376,8 @@ App_v1 -> AppV1
 
 ### Migration Strategy
 
-Our queries currently reside in a single `queries.py` in qontract-reconcile.
-In the following 2 sub-sections we propose 2 viable migration strategies to adapt towards the new generated classes:
-
-- [Dedicated new Module](#dedicated-new-module)
-- [Leverage a Proxy Class](#leverage-a-proxy-class)
-
-In the end of this discussion we will decide on one strategy and move the others into `Alternatives Considered` section.
-
-#### Dedicated new Module
-
-We create a new module `typed_queries`. In this module we leverage the custom code generator and `*.gql` files to get typed query data.
-The structure will look like this:
-
-```sh
-typed_queries/
-├── app
-│   ├── all_apps.py
-│   └── __init__.py
-├── code_gen
-│   ├── app
-│   │   ├── all_apps.gql
-│   │   ├── all_apps.py
-│   │   └── __init__.py
-│   ├── __init__.py
-│   └── saas
-│       ├── __init__.py
-│       ├── saas_small.gql
-│       └── saas_small.py
-├── __init__.py
-└── saas
-    ├── __init__.py
-    └── saas_small.py
-```
-
-We will gradually move integrations away from `queries.py` towards the `typed_queries` module.
-One advantage of the module approach is that it allows to split the logic into multiple files,
-reducing average LoC per file.
+Currently, our queries reside in a single `queries.py` in qontract-reconcile.
+We introduce a proxy class to migrate towards the new typed queries.
 
 #### Leverage a Proxy Class
 
@@ -446,9 +411,38 @@ The main advantage with this approach is that it reduces the amount of code chan
 
 ## Alternatives considered
 
-Whether to use a custom code generator has been thoroughly discussed in a [previous design doc](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/38147).
+### Migration: Dedicated new Module
 
-We still need to decide on a migration strategy. Currently 2 options are proposed.
+We create a new module `typed_queries`. In this module we leverage the custom code generator and `*.gql` files to get typed query data.
+The structure will look like this:
+
+```sh
+typed_queries/
+├── app
+│   ├── all_apps.py
+│   └── __init__.py
+├── code_gen
+│   ├── app
+│   │   ├── all_apps.gql
+│   │   ├── all_apps.py
+│   │   └── __init__.py
+│   ├── __init__.py
+│   └── saas
+│       ├── __init__.py
+│       ├── saas_small.gql
+│       └── saas_small.py
+├── __init__.py
+└── saas
+    ├── __init__.py
+    └── saas_small.py
+```
+
+We will gradually move integrations away from `queries.py` towards the `typed_queries` module.
+One advantage of the module approach is that it allows to split the logic into multiple files,
+reducing average LoC per file.
+
+In the end we decided against this approach as it requires more changes than introducing a
+proxy class.
 
 ## Milestones
 
