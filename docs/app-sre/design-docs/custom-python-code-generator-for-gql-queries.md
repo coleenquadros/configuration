@@ -44,12 +44,12 @@ The repository is fully dedicated to the code generator to ease potential public
 
 #### CI/CD
 
-To make collaboration more accessible we try to avoid RedHat internal dependencies as much as possible.
-For that reason we use [Github Actions](https://docs.github.com/en/actions) for CI/CD.
-It is easy to setup/maintain and offers great transparency.
+To stay consistent with other app-interface projects we will use ci-ext.
+Ci-ext will upload official releases to PyPi.
 
-We upload official releases to PyPi. We must clarify whether we are allowed to store PyPi access secrets
-in Github Actions.
+One big issue with ci-ext is that it requires Red Hat SSO,
+which makes public collaboration more difficult. If we ever reach a point
+were people outside of Red Hat want to contribute, we will have to find a solution for this.
 
 #### License
 
