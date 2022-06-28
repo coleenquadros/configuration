@@ -36,15 +36,28 @@ To safely update the provider that the accounts are using we need to make sure t
 
 ### Get desired state from app-interface
 
-To do so, first we will get the desired state using terraform-resources integration with the following command:
+To do so, first we will get the desired state using terraform-resources integration with the following commands:
 
-`qontract-reconcile --config config.toml --dry-run terraform-resources --account-name {AccountName} --print-to-file {PathLocation}`
+```
+mkdir <TerraformFilesDir>
+qontract-reconcile --config config.toml --dry-run terraform-resources --account-name <AccountName> --print-to-file <TerraformFilesDir>/config.tf.json
+```
 
-This will generate a Terraform JSON file with the desired state comming from `app-interface` on the location specified in `PathLocation`.
+This will generate a Terraform JSON file for the current account comming from `app-interface` on the location specified in `<TerraformFilesDir>/config.tf.json`.
+
+NOTE: Make sure you remove the first line in the output JSON file that contains information about the `<AccountName>`
 
 ### Run plan with current and new provider
 
-With this local Terraform file, we should run a `terraform init` and `terraform plan` to make sure that we don't have any pending changes waiting to apply. Once this is verified, we can manually modify the AWS provider version on the local Terraform file and run the `terraform init` and `terraform plan` again.
+With this local Terraform file, we should make sure that we don't have any pending changes waiting to apply:
+
+```
+cd <TerraformFilesDir>
+terraform init
+terraform plan
+```
+
+Once this is verified, we can manually modify the AWS provider version on the local Terraform file and run the `terraform init` and `terraform plan` again.
 
 ### Check for changes in plan output and update
 
