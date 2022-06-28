@@ -239,13 +239,7 @@ At this point you should be able to access the cluster via the console / `oc` cl
     1. Jump host configuration to your `cluster.yml` file:
         ```yaml
         jumpHost:
-          hostname: bastion.ci.ext.devshift.net
-          knownHosts: /jump-host/known-hosts/bastion.ci.ext.devshift.net
-          user: app-sre-bot
-          identity:
-            path: app-sre/ansible/roles/app-sre-bot
-            field: identity
-            format: base64
+          $ref: /openshift/bastion.ci.ext.devshift.net.jumphost.yml
         ```
 
     1. Request vpc peering config to `app-sre-prod-01` to your `cluster.yml` file:
