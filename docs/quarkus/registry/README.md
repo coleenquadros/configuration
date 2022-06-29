@@ -6,7 +6,7 @@ The Quarkus Extension Registry project is hosted in [GitHub](https://github.com/
 
 ## Architectural Summary
 
-Please see [Quarkus Registry Architectural Summary](https://docs.google.com/document/d/173C6l8KDsjC6Kl1V1yPhtpnR7nx6PBCk2JC-ZDuhR-M/edit) document
+Please see [Quarkus Registry Architectural Summary](https://gitlab.cee.redhat.com/docs/quarkus/registry/architecture/architecture.md) document
 
 ## SLO README file
 
