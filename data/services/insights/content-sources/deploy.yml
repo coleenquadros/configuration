@@ -1,0 +1,57 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: content-sources
+  platform: insights
+
+name: content-sources
+description: content-sources app on the Insights Platform
+
+app:
+  $ref: /services/insights/content-sources/app.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: content-services-team
+
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
+
+managedResourceTypes:
+- Deployment
+- DeploymentConfig
+- Service
+- CronJob
+- HorizontalPodAutoscaler
+- ConfigMap
+- Job
+- ClowdApp
+- ClowdJobInvocation
+- Frontend
+
+imagePatterns:
+- quay.io/cloudservices
+
+authentication:
+  image:
+    path: insights/quay/cloudservices-push
+    field: all
+    version: 3
+  code:
+    path: app-sre/creds/github-app-sre-bot
+    field: openshift-saas-deploy
+
+resourceTemplates:
+- name: content-sources-backend
+  path: /deployments/deployment.yaml
+  url: https://github.com/content-services/content-sources-backend
+  parameters:
+    IMAGE: quay.io/cloudservices/content-sources
+  targets:
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true  # do not create an app-sre deploy job for ephemeral namespace
+    ref: internal  # populated by bonfire
+      
