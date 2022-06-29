@@ -1,0 +1,36 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: vault-stage
+description: Internal staging namespace for vault
+
+cluster:
+  $ref: /openshift/appsres03ue1/cluster.yml
+
+app:
+  $ref: /services/vault.devshift.net/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/stage.yml
+
+networkPoliciesAllow:
+- $ref: /services/observability/namespaces/openshift-customer-monitoring.appsres03ue1.yml
+
+managedRoles: true
+
+sharedResources:
+- $ref: /services/app-sre/shared-resources/quayio-pull-secret.yml
+
+openshiftResources:
+- provider: vault-secret
+  path: app-interface/app-sre-stage/vault-stage/vault
+  version: 2
+- provider: vault-secret
+  path: app-interface/app-sre-stage/vault-stage/vault-tls
+  version: 1
+# - provider: route
+#   path: /app-sre-stage/vault-stage/vault.route.yaml
+#   vault_tls_secret_path: app-interface/app-sre-stage/vault-stage/routes/vault-stage
+#   vault_tls_secret_version: 2
