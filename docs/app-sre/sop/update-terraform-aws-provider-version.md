@@ -104,3 +104,42 @@ The way that we fixed it for `insights-stage` account was to remove the paramete
 [Example MR for insights-stage](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/40620)
 
 More context about the problem can be found in this [Slack thread](https://coreos.slack.com/archives/GGC2A0MS8/p1654201187564619?thread_ts=1654083991.496599&cid=GGC2A0MS8)
+
+**Terraform adds tags to Redis Clusters**
+
+****
+
+Part of the global tagging on resources for Elasticache clusters was not supported on earlier versions of the AWS Terraform provider, it's possible that due to the upgrade to newer versions some changes to the current tags are applied:
+
+```json
+      ~ tags                          = {
+          + "app"                    = "app-name"
+            "cluster"                = "cluster-name"
+          + "environment"            = "environment"
+            "managed_by_integration" = "terraform_resources"
+            "namespace"              = "namespace"
+        }
+      ~ tags_all                      = {
+          + "app"                    = "app-name"
+            "cluster"                = "cluster-name"
+          + "environment"            = "environment"
+            "managed_by_integration" = "terraform_resources"
+            "namespace"              = "namespace"
+        }
+```
+
+This changes are completely fine, and account can be upgraded to the last AWS Terraform provider without any problem.
+
+**Deprecation warnings for resources**
+
+****
+
+Due to the provider version upgrade some accounts will show deprecation warnings for some resources. Solving the deprecation warnings is not part of the upgrade of the provider version but we need to be aware of it to be prepared for future upgrades.
+
+Example:
+
+```
+Warning: Argument is deprecated ... Use the aws_s3_bucket_versioning resource instead
+```
+
+For now, just add a note to the account upgrade ticket with the information about the deprecation warning and this will be treated at the end of the account upgrade in a separate ticket.
