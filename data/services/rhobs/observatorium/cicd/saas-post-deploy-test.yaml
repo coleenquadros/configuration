@@ -1,0 +1,51 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: observatorium
+
+name: saas-observatorium-e2e-test
+description: SaaS tracking file for Observatorium post-deploy test
+
+app:
+  $ref: /services/rhobs/observatorium/app.yml
+
+instance:
+  $ref: /dependencies/ci-ext/ci-ext.yml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: team-monitoring-info
+
+managedResourceTypes:
+- Job
+
+publishJobLogs: true
+
+imagePatterns:
+- quay.io/app-sre/rhobs-e2e
+
+authentication:
+  image:
+    path: app-sre/quay/app-sre-pull
+    field: all
+
+resourceTemplates:
+- name: rhobs-e2e-tests-observatorium
+  url: https://github.com/rhobs/configuration
+  path: /tests/integration_tests/post-deploy-job-template.yaml
+  targets:
+  - namespace:
+      $ref: /services/rhobs/observatorium/namespaces/observatorium-stage.yml
+    ref: a05b68f600e048019807de4d696ea790a6081780
+    parameters:
+      IMAGE: quay.io/app-sre/rhobs-e2e
+      IMAGE_TAG: a05b68f
+      SUFFIX: observatorium-tests
+      CREDENTIALS_SECRET: rhobs-tenant-staging
+      API_URL: https://observatorium.api.stage.openshift.com
+    promotion:
+      auto: true
+      subscribe:
+      - observatorium-stage-deploy-success-channel
