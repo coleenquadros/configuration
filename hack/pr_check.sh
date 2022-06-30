@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "WE ARE DEBUGGING SOMETHING, REMOVE THIS LINE ONCE DONE"
+
 set -exvo pipefail
 CURRENT_DIR=$(dirname "$0")
 
