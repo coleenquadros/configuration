@@ -30,11 +30,10 @@ Two problems are going to be solved.
 
 ## Proposals
 
-- Install [cert-manager-operator](https://github.com/openshift/cert-manager-operator) along with the brand new support
-  for openshift-routes through [cert-manager-openshift-routes](https://github.com/cert-manager/openshift-routes)
-- Modify dev-guidelines documentation with the new approach.
-- Notifiy tenants to update the Route specs / Track progress
-- Remove openshift-acme
+- Install [cert-manager-operator](https://github.com/openshift/cert-manager-operator) with the brand new support
+  for openshift-routes [cert-manager-openshift-routes](https://github.com/cert-manager/openshift-routes)
+- Modify dev-guidelines documentation and request tenants to updates their routes
+- Track progress.
 
 ### Issuers Configuration
 
@@ -54,6 +53,7 @@ If a tenant wants to use its own domain in an internal cluster, they will need t
 
 ## Milestones
 
-- Roll out changes in App-sre managed routes.
-- Notify tenants
+- Install operators in all the clusters and roll out changes for App-sre managed routes.
+- Update dev-guidelines and notify tenants
 - All certificates used in app-interface are using cert-manager
+- Uninstall openshift-acme
