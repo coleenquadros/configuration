@@ -13,6 +13,7 @@ spec:
     rules:
     {{%- for app in query('/queries/apps.graphql') %}}
     {{%- if app.onboardingStatus == 'OnBoarded' %}}
+    {{%- if "metadata_architecture_document" not in app.labels %}}
     # architectureDocument
     {{%- if not url(app.architectureDocument) %}}
     - alert: IncorrectMetadataArchitectureDocument
@@ -30,8 +31,10 @@ spec:
         severity: medium
         jiralert: {{{ app.escalationPolicy.channels.jiraBoard[0].name }}}
     {{%- endif %}}
+    {{%- endif %}}
     # end architectureDocument
     # sopsUrl
+    {{%- if "metadata_sops_url" not in app.labels %}}
     {{%- if not url(app.sopsUrl) %}}
     - alert: IncorrectMetadataSOPsUrl
       annotations:
@@ -47,6 +50,7 @@ spec:
         app: {{{ app.name }}}
         severity: medium
         jiralert: {{{ app.escalationPolicy.channels.jiraBoard[0].name }}}
+    {{%- endif %}}
     {{%- endif %}}
     # end sopsUrl
     {{%- endif %}}
