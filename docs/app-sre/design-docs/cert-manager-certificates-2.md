@@ -36,6 +36,16 @@ Two problems are going to be solved.
 - Notifiy tenants to update the Route specs / Track progress
 - Remove openshift-acme
 
+### Issuers Configuration
+
+External clusters will still use an HTTP solver. A Cluster wide `ClusterIsser` will be created and used for all the certificates. HTTP solver
+is more flexible because the tenants just need to point the DNS name the cluster.
+
+Internal clusters will use DNS solvers. DNS solvers configuration require a Secret with the DNS credentials /Api keys to create the TXT records needed
+to  solve the ACME challenge. AppSre managed dns zones (devshift.net) will be set as cluster wide with a selector to act only in the managed domains.
+If a tenant wants to use its own domain in an internal cluster, they will need to create/manage the DNS solver configuration in its own namespace with the
+`Issuer` crd.
+
 ## Alternatives Considered
 
 - [Discussions](https://docs.google.com/document/d/1Io_f26Ph9Yomqmx4K1AJkwoB-TLsw9gECWxOJRa3D7o/edit#heading=h.4c9twulgg922)
