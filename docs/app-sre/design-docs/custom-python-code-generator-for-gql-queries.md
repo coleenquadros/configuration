@@ -53,7 +53,8 @@ were people outside of Red Hat want to contribute, we will have to find a soluti
 
 #### License
 
-As this not a Redhat product and should be community friendly, we choose a very permissive license: MIT.
+Most of our app-sre projects o Github use the Apache License 2.0 License.
+To stay consistent, we will use the same.
 
 ### Implementation
 
