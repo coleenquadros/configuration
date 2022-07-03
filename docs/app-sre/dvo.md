@@ -75,7 +75,7 @@ More information: https://docs.kubelinter.io/#/generated/checks?id=latest-tag
 #### deployment_validation_operator_minimum_three_replicas
 
 Excluded resource kinds: ReplicaSet
-Excluded resource names: openshift-acme, gabi
+Excluded resource names: openshift-acme
 
 More information: https://docs.kubelinter.io/#/generated/checks?id=minimum-three-replicas
 
@@ -86,20 +86,19 @@ More information: https://docs.kubelinter.io/#/generated/checks?id=privileged-po
 #### deployment_validation_operator_no_liveness_probe
 
 Excluded resource kinds: CronJob, Job, ReplicaSet
-Excluded resource names: openshift-acme, gabi
+Excluded resource names: openshift-acme
 
 More information: https://docs.kubelinter.io/#/generated/checks?id=no-liveness-probe
 
 #### deployment_validation_operator_no_readiness_probe
 
 Excluded resource kinds: CronJob, Job, ReplicaSet
-Excluded resource names: openshift-acme, gabi
+Excluded resource names: openshift-acme
 
 More information: https://docs.kubelinter.io/#/generated/checks?id=no-readiness-probe
 
 #### deployment_validation_operator_unset_cpu_requirements
 
-Excluded resource names: gabi
 Excluded resource names (regex):
 - `[0-9a-z]{63}` (OLM Jobs related to CSVs)
 - `.*-catalog-[0-9a-z]{5}` (OLM Catalog Pods)
@@ -108,7 +107,6 @@ More information: https://docs.kubelinter.io/#/generated/checks?id=unset-cpu-req
 
 #### deployment_validation_operator_unset_memory_requirements
 
-Excluded resource names: gabi
 Excluded resource names (regex):
 - `[0-9a-z]{63}` (OLM Jobs related to CSVs)
 - `.*-catalog-[0-9a-z]{5}` (OLM Catalog Pods)
