@@ -11,12 +11,22 @@ A deployment process for a service is defined using a SaaS file. In a SaaS file,
 
 In this context, deploying a resource template will usually consist in processing the Openshift template  via `oc process` and deploy it via `oc apply`. There is a way to deploy raw Openshift manifests, look below for the `provider` option.
 
+### Suggested flow
+
 You would usually define the main branch as the ref to be deployed to stage, and a specific commit SHA as the ref to be deployed to production. This means that a template's location is defined once, and deployed to multiple targets.
 
-This structure -
-- provides a notion of promotion - the same template is promoted across different environments (every targets is a namespace, and every namespace is associated to an environment)
-- adds confidence that what worked in stage will also work in production and
-- prevents inconsistencies between the resources deployed to each environment
+### Alternative flow
+
+It is possible to have a specific commit SHA for all environments (stage, production and others, if applicable). This however might add unnecessary burden, if the deployments and approvals are manual, and should rather be performed by an automated script/ pipeline.
+
+Such automated process would involve creating an MR with configuration change to the commit SHA of the target environment by a bot that is on the list of the approvers (see more in the [approval process section](#approval-process)). The MR description must include `/lgtm` label, which will make the MR auto-approved. The MR should be automatically merged once the CI pipeline build succeeds. 
+
+Example of an automatically approved MR created by a bot can be found [here](https://gitlab.cee.redhat.com/service/app-interface/-/merge_requests/42143)
+
+Both of the flows described above:
+- provide a notion of promotion - the same template is promoted across different environments (every target is a namespace, and every namespace is associated to an environment)
+- add confidence that what worked in stage will also work in production and
+- prevent inconsistencies between the resources deployed to each environment
 
 ## SaaS file structure
 
