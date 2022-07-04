@@ -41,7 +41,7 @@ External clusters will still use an HTTP solver. A Cluster wide `ClusterIsser` w
 is more flexible because the tenants just need to point the DNS name the cluster.
 
 Internal clusters will use DNS solvers. DNS solvers configuration require a Secret with the DNS credentials /Api keys to create the TXT records needed
-to  solve the ACME challenge. AppSre managed dns zones (devshift.net) will be set as cluster wide with a selector to act only in the managed domains.
+to  solve the ACME challenge. AppSRE managed dns zones (`devshift.net`) will be set as cluster wide with a selector to act only in the managed domains.
 If a tenant wants to use its own domain in an internal cluster, they will need to create/manage the DNS solver configuration in its own namespace with the
 `Issuer` crd.
 
