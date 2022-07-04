@@ -19,3 +19,22 @@
 
         ./build_deploy.sh
     <<: *gh_build_master
+
+- job-template:
+    id: 'gh-build-tag-mtsre'
+    name: '{gh_org}-{gh_repo}-gh-build-tag'
+    wrappers:
+    - timeout_wrapper:
+        timeout: '{timeout}'
+    - vault-secrets:
+        <<: *vault_defaults
+        secrets:
+        - *quay_secret_mtsre_push
+    builders:
+    - shell: |
+        export DOCKER_CONF=$PWD/.docker
+        mkdir -p $DOCKER_CONF
+        echo "$QUAY_DOCKER_CONFIG_JSON" | base64 -d > $DOCKER_CONF/config.json
+
+        ./build_tag.sh
+    <<: *gh_build_tag
