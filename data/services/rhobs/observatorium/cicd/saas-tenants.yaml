@@ -100,3 +100,48 @@ resourceTemplates:
             path: app-interface/app-sre-stage/telemeter-stage/observatorium-observatorium-api
             field: client-secret
             version: 22
+    - namespace:
+        $ref: /services/rhobs/observatorium/namespaces/observatorium-production.yml
+      ref: 18b7e373c0b59774773435ba51d091835f3fe91a
+      parameters:
+        SECRET_NAME: observatorium-observatorium-api
+        TENANTS:
+          tenants:
+            - id: 0fc2b00e-201b-4c17-b9f2-19d91adc4fd2
+              name: rhobs
+              oidc:
+                clientID: ${CLIENT_ID}
+                clientSecret: ${CLIENT_SECRET}
+                issuerURL: https://sso.redhat.com/auth/realms/redhat-external
+                redirectURL: https://observatorium.api.stage.openshift.com/oidc/rhobs/callback
+                usernameClaim: preferred_username
+                groupClaim: email
+            - id: FB870BF3-9F3A-44FF-9BF7-D7A047A52F43
+              name: telemeter
+              oidc:
+                clientID: ${CLIENT_ID}
+                clientSecret: ${CLIENT_SECRET}
+                issuerURL: https://sso.redhat.com/auth/realms/redhat-external
+                redirectURL: https://observatorium.api.stage.openshift.com/oidc/telemeter/callback
+                usernameClaim: preferred_username
+            - id: AC879303-C60F-4D0D-A6D5-A485CFD638B8
+              name: dptp
+              oidc:
+                clientID: ${CLIENT_ID}
+                clientSecret: ${CLIENT_SECRET}
+                issuerURL: https://sso.redhat.com/auth/realms/redhat-external
+                redirectURL: https://observatorium.api.stage.openshift.com/oidc/dptp/callback
+                usernameClaim: preferred_username
+              opa:
+                url: http://127.0.0.1:8082/v1/data/observatorium/allow
+      secretParameters:
+        - name: CLIENT_ID
+          secret:
+            path: app-interface/app-sre/telemeter-production/observatorium-observatorium-api
+            field: client-id
+            version: 9
+        - name: CLIENT_SECRET
+          secret:
+            path: app-interface/app-sre/telemeter-production/observatorium-observatorium-api
+            field: client-secret
+            version: 9
