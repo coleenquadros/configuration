@@ -16,6 +16,11 @@ Examples for ci-int, but same steps ca be used for ci-ext by changing hosts.
 
 ![AppSRE Jenkins](img/jenkins.png "App SRE Jenkins Architecture")
 
+## Needed credentials:
+
+1. [Admin credentials](https://gitlab.cee.redhat.com/service/app-interface/-/blob/5a22e57f229648403c4e7882233f559066a9f0bb/data/teams/app-sre/roles/app-sre.yml#L14-15) for accessing jenkins UI
+1. ssh access to controller: [direct](https://gitlab.cee.redhat.com/app-sre/infra/-/blob/master/ansible/hosts/group_vars/all#L5) or [app-sre-bot](https://vault.devshift.net/ui/vault/secrets/app-sre/show/ansible/roles/app-sre-bot) key for running ansible commands
+
 
 ## Steps:
 
@@ -31,7 +36,7 @@ Examples for ci-int, but same steps ca be used for ci-ext by changing hosts.
   - NOTE: you need to stop service before rebooting controller VM. This is critical step. In case of rebooting without *prior* stopping of jenkins service reboot command may kill _ssh_ daemon and wait jenkins controller for graceful stop upto 35 minutes. That may lock instance for that period of time.
 4. Clean /tmp folder on workers nodes: `ansible -u app-sre-bot --key-file app-sre-bot.key --forks=1 -m shell -a 'rm -rf /tmp/*' -b ci-int-aws-jenkins-worker`
 1. Schedule reboot all workers nodes in 1 minute: `ansible -u app-sre-bot --key-file app-sre-bot.key --forks=1 -m shell -a 'shutdown -r 1' -b ci-int-aws-jenkins-worker`
-1. Schedule rebot of controller: `# shutdown -r 1`
+1. Schedule reboot of controller: `# shutdown -r 1`
 1. Announce end of maintenance in #sd-app-sre Slack channel
 
 ## Final check:
