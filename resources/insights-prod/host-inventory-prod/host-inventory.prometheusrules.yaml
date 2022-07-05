@@ -173,3 +173,14 @@ spec:
         dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcp01ue1-prometheus
         link_url: https://console-openshift-console.apps.crcp01ue1.o9m8.p1.openshiftapps.com/k8s/ns/host-inventory-prod/cronjobs/host-inventory-reaper/
         message: '{{ $labels.namespace }} Inventory Reaper has not succeeded for the last 2 hours'
+    - alert: InventoryIngressConsumerLag
+      expr: sum(rate(kafka_consumergroup_group_lag{group='inventory-mq', topic=~'platform.inventory.host-ingress.*'}[95m]) > 5) by (topic) > 0
+      labels:
+        severity: high
+        service: insights
+        env: prod
+        app_team: inventory
+      annotations:
+        dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcp01ue1-prometheus
+        link_url: https://kibana.apps.crcp01ue1.o9m8.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-95m,to:now))&_a=(columns:!(_source),filters:!(),index:'43c5fed0-d5ce-11ea-b58c-a7c95afd7a5d',interval:auto,query:(language:lucene,query:'@log_stream:%20%22host-inventory-mq%22'),sort:!(!('@timestamp',desc)))
+        message: '{{ $labels.namespace }} Ingress consumer lag observed 5 times or more over 1.5 hour period}'
