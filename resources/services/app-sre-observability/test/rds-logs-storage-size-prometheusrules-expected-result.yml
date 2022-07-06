@@ -1,0 +1,23 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: app-sre
+    role: alert-rules
+  name: rds-logs-storage-size
+spec:
+  groups:
+  - name: rds-logs-storage-size
+    rules:
+    - alert: RDSLogsStorageSize
+      annotations:
+        html_url: https://gitlab.cee.redhat.com/service/app-interface/blob/master/resources/services/app-sre-observability/rds-logs-storage-size.prometheusrules.yaml.j2
+        message: "Log files of rds-instance-id RDS instance, in AWS account rds-logs-storage-size-acc are using more than 20% of the allocated storage."
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/sop/rds-logs-storage-size.md"
+      expr: 'round(aws_resources_exporter_rds_logsstorage_size_bytes{dbinstance_identifier="rds-instance-id"} / aws_resources_exporter_rds_allocatedstorage{dbinstance_identifier="rds-instance-id"} *100, 0.01) > 20'
+      for: 10m
+      labels:
+        app: aws-resource-tests
+        jiralert: TEST
+        service: app-sre-observability
+        severity: medium
