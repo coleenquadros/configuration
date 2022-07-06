@@ -1,0 +1,15 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: mas-sso-list-of-orgids-production-dry-run
+namespace:
+  $ref: /services/mas-sso/namespaces/mas-sso-production.yml
+identifier: mas-sso-production
+output: stdout
+queries:
+  - |
+    SELECT value as orgid,COUNT(value)  FROM client_attributes WHERE name = 'rh-org-id' GROUP BY value;
+  - |
+    SELECT value as orgid,COUNT(value)  FROM client_attributes ca WHERE ca.name = 'rh-org-id' AND ca.client_id = (select cl.id from client cl where cl.id=ca.client_id AND cl.client_id LIKE 'srvc-%') GROUP BY value;
+  - |
+    SELECT value as orgid,COUNT(value)  FROM client_attributes ca WHERE ca.name = 'rh-org-id' AND ca.client_id = (select cl.id from client cl where cl.id=ca.client_id AND cl.client_id LIKE 'canary-%') GROUP BY value;
