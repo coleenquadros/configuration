@@ -55,6 +55,7 @@
     id: 'insights-gh-pr-check'
     job_type: ''
     name: '{gh_org}-{gh_repo}-pr-check{job_type}'
+    status_context: "ci.ext.devshift.net PR build"
     wrappers:
     - timeout_wrapper:
         timeout: '{timeout}'
@@ -93,7 +94,21 @@
         clean:
             before: true
         wipe-workspace: true
-    <<: *gh_pr_check
+    triggers:
+        - github-pull-request:
+            cron: '* * * * *'
+            github-hooks: true
+            permit-all: false
+            trigger-phrase: '(?ms).*^(\[test\]|\/retest|\/lgtm|\/lgtm cancel|\/hold|\/hold cancel)\s*$.*'
+            org-list:
+            - '{gh_org}'
+            allow-whitelist-orgs-as-admins: true
+            admin-list:
+            - dependabot[bot]
+            status-context: '{status_context}'
+            white-list-target-branches:
+            - '{white_list_target_branches}'
+    <<: *pr_check_template
 
 - job-template:
     id: 'insights-gh-smoke-test'
