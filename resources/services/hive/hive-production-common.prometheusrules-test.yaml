@@ -76,7 +76,9 @@ tests:
 - interval: 1m
   input_series:
   - series: hive_cluster_deployment_provision_underway_seconds{job="hive-controllers", cluster_type="managed", cluster_deployment="busted-cluster", exported_namespace="uhc-production-something", condition="ProvisionFailed", reason="S3BucketsLimitExceeded"}
-    values: 0+60x240 # install starts at t0, increases 600 seconds every interval (10 mins), should be alerted after 120m
+    values: '0+60x240' # install starts at t0, increases 600 seconds every interval (10 mins), should be alerted after 120m
+  - series: up{job="hive-controllers"}
+    values: '1+0x240'
   alert_rule_test:
   - eval_time: 30m
     alertname: ClusterProvisioningDelay - production
@@ -89,7 +91,9 @@ tests:
 - interval: 1m
   input_series:
   - series: hive_cluster_deployment_provision_underway_seconds{job="hive-controllers", cluster_type="managed", cluster_deployment="busted-cluster", exported_namespace="uhc-production-something", condition="ProvisionFailed", reason="SomeNewReasonThatsNotUnknown"}
-    values: 0+60x240 # install starts at t0, increases 600 seconds every interval (10 mins), should be alerted after 120m
+    values: '0+60x180 0+0x30 12600+60x60' # install starts at t0, increases 600 seconds every interval (10 mins), should be alerted after 120m
+  - series: up{job="hive-controllers"}
+    values: '1+0x180 0+0x30 1+0x180'
   alert_rule_test:
   - eval_time: 30m
     alertname: ClusterProvisioningDelay - production
@@ -110,12 +114,33 @@ tests:
         message: "cluster busted-cluster in namespace uhc-production-something provisioning taking over 2 hours. Condition/Reason: ProvisionFailed / SomeNewReasonThatsNotUnknown. SOP: https://github.com/openshift/ops-sop/blob/master/v4/alerts/ClusterProvisioningFailure.md"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/ClusterProvisioningFailure.md"
         dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
+  - eval_time: 195m # pod producing metric samples is down - Alert is not dismissed
+    alertname: ClusterProvisioningDelay - production
+    exp_alerts:
+    - exp_labels:
+        severity: critical
+        service: hive
+        team: srep
+        job: hive-controllers
+        cluster_deployment: busted-cluster
+        exported_namespace: uhc-production-something
+        condition: ProvisionFailed
+        reason: SomeNewReasonThatsNotUnknown
+      exp_annotations:
+        message: "cluster busted-cluster in namespace uhc-production-something provisioning taking over 2 hours. Condition/Reason: ProvisionFailed / SomeNewReasonThatsNotUnknown. SOP: https://github.com/openshift/ops-sop/blob/master/v4/alerts/ClusterProvisioningFailure.md"
+        runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/ClusterProvisioningFailure.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
+  - eval_time: 290m # alert is dismissed
+    alertname: ClusterProvisioningDelay - production
+    exp_alerts:
 
 # test that an Unknown-by-OCM provisioning failure (i.e. does NOT have a well-known code) alerts after 2 hours
 - interval: 1m
   input_series:
   - series: hive_cluster_deployment_provision_underway_seconds{job="hive-controllers", cluster_type="managed", cluster_deployment="busted-cluster", exported_namespace="uhc-production-something", condition="ProvisionFailed", reason="Unknown"}
-    values: 0+60x240 # install starts at t0, increases 600 seconds every interval (10 mins), should be alerted after 120m
+    values: '0+60x180 0+0x780 57600+60x60' # install starts at t0, increases 600 seconds every interval (10 mins), should be alerted after 120m
+  - series: up{job="hive-controllers"}
+    values: '1+0x180 0+0x780 1+0x180'
   alert_rule_test:
   - eval_time: 30m
     alertname: ClusterProvisioningDelay - production
@@ -136,3 +161,41 @@ tests:
         message: "cluster busted-cluster in namespace uhc-production-something provisioning taking over 2 hours. Condition/Reason: ProvisionFailed / Unknown. SOP: https://github.com/openshift/ops-sop/blob/master/v4/alerts/ClusterProvisioningFailure.md"
         runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/ClusterProvisioningFailure.md"
         dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
+  - eval_time: 890m # pod producing metric samples has been down for less than 12h - Alert is not dismissed
+    alertname: ClusterProvisioningDelay - production
+    exp_alerts:
+    - exp_labels:
+        severity: critical
+        service: hive
+        team: srep
+        job: hive-controllers
+        cluster_deployment: busted-cluster
+        exported_namespace: uhc-production-something
+        condition: ProvisionFailed
+        reason: Unknown
+      exp_annotations:
+        message: "cluster busted-cluster in namespace uhc-production-something provisioning taking over 2 hours. Condition/Reason: ProvisionFailed / Unknown. SOP: https://github.com/openshift/ops-sop/blob/master/v4/alerts/ClusterProvisioningFailure.md"
+        runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/ClusterProvisioningFailure.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
+  - eval_time: 920m # pod producing metric samples has been down for more than 12h - Alert is dismissed
+    alertname: ClusterProvisioningDelay - production
+    exp_alerts:
+  - eval_time: 980m # pod producing metric samples in up again - Alert is re-triggered
+    alertname: ClusterProvisioningDelay - production
+    exp_alerts:
+    - exp_labels:
+        severity: critical
+        service: hive
+        team: srep
+        job: hive-controllers
+        cluster_deployment: busted-cluster
+        exported_namespace: uhc-production-something
+        condition: ProvisionFailed
+        reason: Unknown
+      exp_annotations:
+        message: "cluster busted-cluster in namespace uhc-production-something provisioning taking over 2 hours. Condition/Reason: ProvisionFailed / Unknown. SOP: https://github.com/openshift/ops-sop/blob/master/v4/alerts/ClusterProvisioningFailure.md"
+        runbook: "https://github.com/openshift/ops-sop/blob/master/v4/alerts/ClusterProvisioningFailure.md"
+        dashboard: "https://grafana.app-sre.devshift.net/d/hivemetrics/hive-metrics?orgId=1&var-datasource={{{grafana_datasource}}}&var-instance=hive-controllers-{{{shard_name}}}"
+  - eval_time: 1040m # alert is dismissed
+    alertname: ClusterProvisioningDelay - production
+    exp_alerts:
