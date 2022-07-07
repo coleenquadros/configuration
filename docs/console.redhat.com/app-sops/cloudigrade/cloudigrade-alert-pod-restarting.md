@@ -24,9 +24,11 @@ Console access to the cluster+namespace pods are running in.
 
 1. Check in alert detail which cloudigrade component was restarted.
 2. Log into the console / namespace and verify if all cloudigrade pods are running.
+2. Verify that runtime service dependencies are operating normally. See [cloudigrade-general-troubleshooting](cloudigrade-general-troubleshooting.md) for details.
 3. Inspect given cloudigrade pods logs and search for error logs.
 4. Check if any deployments or changes in the application happened closer to the time the error started.
-5. Escalate the alert with all the information available to the engineering team that is responsible for the app.
+5. Connect to the terminal for a running pod, and attempt to manually run its liveness and readiness probe commands. Search a deployment's definition to find `livenessProbe` and `readinessProbe` or see [cloudigrade-health-checks](cloudigrade-health-checks.md) for details. Record the output, command exit code, and duration of time the command took to complete.
+6. Escalate the alert with all the information available to the engineering team that is responsible for the app.
 
 ## Escalations
 

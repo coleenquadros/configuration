@@ -8,18 +8,51 @@ See also [Data Continuity and Disaster Recovery](https://github.com/cloudigrade/
 
 ## Summary
 
-Follow these steps to recover from disaster.
+Recovery steps for known sitations are described below. If a situation arises for cloudigrade that is not covered by this document and/or requires assistance from the devs, contact the cloudigrade engineering team by:
 
-## Steps
+- preferred: [Ansible Slack channel `#cloudmeter-dev`](https://ansible.slack.com/archives/C8VGAPJNN) using `@here` or `@channel`
+- https://visual-app-interface.devshift.net/services#/services/insights/cloudigrade/app.yml
 
--  If secrets have been lost, reach out to the engineering team to reissue them.
-    -  cloudigrade pods will fail to start if secrets are missing.
-    -  cloudigrade uses `vault-secret` providers much like other services.
-    -  See the `openshiftResources` definitions in [stage-cloudigrade-stage.yml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml) and [cloudigrade-prod.yml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/insights/cloudigrade/namespaces/cloudigrade-prod.yml).
--  Otherwise, no cloudigrade specific steps need to be taken.
-    - Deployments are fully configured in app-interface.
-    - DB migrations automatically run during deployment.
-    - AWS resources (buckets, queues, etc.) are automatically created and configured during deployment.
+cloudigrade and postigrade deployments are controlled by the Clowder operator. If you are not familiar with Clowder, please reference its documentation and SOPs. The cloudigrade team is not responsible for Clowder's general operation and maintenance. See also:
+
+- https://github.com/RedHatInsights/clowder/
+- https://redhatinsights.github.io/clowder/clowder/dev/sop.html
+- https://gitlab.cee.redhat.com/service/app-interface/-/tree/master/docs/console.redhat.com/app-sops/clowder
+
+## Recreating lost secrets
+
+If secrets have been lost from [vault.devshift.net](https://vault.devshift.net), reach out to the engineering team to reissue them. The team will update the relevant `openshiftResources` `version`s and open an app-interface MR that will need SRE's approval to merge. Upon merge, deployments should automatically roll out with the new secrets.
+
+- cloudigrade pods will fail to start if secrets are missing.
+- cloudigrade uses `vault-secret` providers much like other services.
+- See the `openshiftResources` definitions in [stage-cloudigrade-stage.yml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml) and [cloudigrade-prod.yml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/insights/cloudigrade/namespaces/cloudigrade-prod.yml).
+- Secrets kept in vault that are maintained by the cloudigrade dev team include (but are not limited to) the following items:
+  - AWS access keys
+  - Azure IDs and client secrets
+  - Django secret key
+  - PSKs for other internal Red Hat services
+  - Sentry DSNs
+  - Slack webhook URL
+- After updating or recreating secrets, versions in the aforementioned `openshiftResources` will need to be bumped, and new deployments should roll out with the new secrets.
+- The cloudigrade engineering team may use [cloudigrade credentials rotation](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/console.redhat.com/app-sops/cloudigrade/cloudigrade-credentials-rotation.md) as a guide if necessary, but that process is outside the scope of SRE's responsibilities here.
+
+## Database restoration
+
+cloudigrade and postigrade rely on the SRE-managed RDS instances. After performing the standard [AppSRE database restore procedure](https://gitlab.cee.redhat.com/service/app-interface#restoring-rds-databases-from-backups), because cloudigrade uses the Clowder operator, you may also need to apply a `clowder/database` annotation to the appropriate terraform resources definitions. See [How can I migrate to a new database?](https://redhatinsights.github.io/clowder/clowder/dev/faq.html#_how_can_i_migrate_to_a_new_database) ([source](https://github.com/RedHatInsights/clowder/blob/master/docs/antora/modules/ROOT/pages/faq.adoc#how-can-i-migrate-to-a-new-database)) for more details.
+
+cloudigrade's RDS resources are defined at:
+
+- stage: [data/services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml)
+- prod: [data/services/insights/cloudigrade/namespaces/cloudigrade-prod.yml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/insights/cloudigrade/namespaces/cloudigrade-prod.yml)
+
+Redeploying cloudigrade and postigrade will ensure that all pods will re-read their configurations and establish new connections to the database.
+
+- In general, we expect Clowder to automatically redeploy cloudigrade and postigrade when configurations change.
+- See [cloudigrade-general-troubleshooing](cloudigrade-general-troubleshooing.md) for instructions to redeploy manually.
+- cloudigrade and postigrade pods read database configutaion from `$ACG_CONFIG` at startup, which is populated by Clowder.
+- cloudigrade pods always connect to postigrade for their database connections.
+- postigrade pods are running [`PgBouncer`](https://www.pgbouncer.org/) and are the only pods that should directly connect to RDS.
+- DB migrations automatically run in `cloudigrade-api`'s init container.
 
 ## Escalations
 

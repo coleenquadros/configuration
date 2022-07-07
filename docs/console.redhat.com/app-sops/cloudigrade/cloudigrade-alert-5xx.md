@@ -23,9 +23,10 @@ Console access to the cluster+namespace pods are running in.
 ## Steps
 
 1. Log into the console / namespace and verify `cloudigrade-api` pods are running and receiving requests.
-2. Inspect `cloudigrade-api` pods logs and search for error logs.
-3. Check if any deployments or changes in the application happened closer to the time the error started.
-4. Escalate the alert with all the information available to the engineering team that is responsible for the app.
+2. Verify that runtime service dependencies are operating normally. See [cloudigrade-general-troubleshooting](cloudigrade-general-troubleshooting.md) for details.
+3. Inspect `cloudigrade-api` pods logs and search for error logs.
+4. Check if any deployments or changes in the application happened closer to the time the error started.
+5. Escalate the alert with all the information available to the engineering team that is responsible for the app.
 
 ## Escalations
 
