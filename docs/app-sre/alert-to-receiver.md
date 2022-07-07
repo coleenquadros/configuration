@@ -5,9 +5,11 @@ Alertmanager routing tree in app-interface is a large beast and it is sometimes 
 ```
 $ qontract-cli --config config.local.toml alert-to-receiver --help
 Usage: qontract-cli alert-to-receiver [OPTIONS] CLUSTER NAMESPACE RULES_PATH
-                                      ALERT_NAME
 
 Options:
+  -a, --alert-name TEXT           Alert name in RULES_PATH. Receivers for all
+                                  alerts will be returned if not specified.
+
   -c, --alertmanager-secret-path TEXT
                                   Alert manager secret path.
   -n, --alertmanager-namespace TEXT
@@ -151,15 +153,15 @@ With this information, we can run our command:
 
 ```
 $ qontract-cli --config config.local.toml alert-to-receiver \
-  --secret-reader config \
   hivep02ue1 \
-  openshift-customer-monitoring /\
+  openshift-customer-monitoring \
   /services/hive/hive-production-common.prometheusrules.yaml \
-  "HiveControllersDown - production - hivep02ue1"
-pagerduty-app-sre,slack-hive-alerts
+  --alert-name "HiveControllersDown - production - hivep02ue1" \
+  --secret-reader config
+HiveControllersDown - production - hivep02ue1|pagerduty-app-sre,slack-hive-alerts
 ```
 
-### A note on additional labels
+## A note on additional labels
 
 There are two labels that are added to all alerts that are triggered:
 
@@ -172,12 +174,39 @@ With this information, the above example could be written as:
 
 ```
 $ qontract-cli --config config.local.toml alert-to-receiver \
-  --secret-reader config \
+  hivep02ue1 \
+  openshift-customer-monitoring \
+  /services/hive/hive-production-common.prometheusrules.yaml \
+  --alert-name "HiveControllersDown - production - hivep02ue1" \
   --additional-label cluster=hivep02ue1 \
   --additional-label environment=production \
-  hivep02ue1 \
-  openshift-customer-monitoring /\
-  /services/hive/hive-production-common.prometheusrules.yaml \
-  "HiveControllersDown - production - hivep02ue1"
-pagerduty-app-sre,slack-hive-alerts
+  --secret-reader config
+HiveControllersDown - production - hivep02ue1|pagerduty-app-sre,slack-hive-alerts
+```
+
+## Additional labels for testing purposes
+
+Additional labels take precedence over the defined labels in the alert. That could be used to test how an alert routing would be modified if certain label value changed before making the changes in app-interface, restarting the local server, etc... The routing of the following alert:
+
+```
+$ qontract-cli --config config.local.toml alert-to-receiver \
+  clairp01ue1 \
+  openshift-customer-monitoring \
+  /observability/prometheusrules/clair-rate-limiting-index-report-creation-production.prometheusrules.yaml \
+  -a ClairIndexReportCreationRateLimiting \
+  -s config
+ClairIndexReportCreationRateLimiting|pagerduty-app-sre-fts-only,slack-app-sre-alerts,slack-oncall-quay
+```
+
+will change if we change the severity. Let's try via the additional labels:
+
+```
+$ qontract-cli --config config.local.toml alert-to-receiver \
+  clairp01ue1 \
+  openshift-customer-monitoring \
+  /observability/prometheusrules/clair-rate-limiting-index-report-creation-production.prometheusrules.yaml \
+  -a ClairIndexReportCreationRateLimiting \
+  -s config \
+  -l severity=medium
+ClairIndexReportCreationRateLimiting|slack-oncall-quay
 ```
