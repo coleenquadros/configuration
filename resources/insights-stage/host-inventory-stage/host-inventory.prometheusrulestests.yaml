@@ -45,12 +45,12 @@ tests:
         dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcs02ue1-prometheus
         link_url: https://kibana.apps.crcs02ue1.urby.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-30m,to:now))&_a=(columns:!(_source),filters:!(),index:'43c5fed0-d5ce-11ea-b58c-a7c95afd7a5d',interval:auto,query:(language:kuery,query:'@log_group:%20%22host-inventory-stage%22%20and%20%22NOT%20PRODUCED%22'),sort:!())
         message: 'Stage event producer failed to produce a(n) updated event'
-- interval: 95m
+- interval: 1m
   input_series:
-  - series: avg_over_time(inventory_event_producer_failures_total{group="inventory-mq", topic=~"platform.inventory.host-ingress.*"}[95m])
-    values: 0+1x10000
+  - series: kafka_consumergroup_group_lag{group="inventory-mq", topic=~"platform.inventory.host-ingress.*"}
+    values: 0+8000x30
   alert_rule_test:
-  - eval_time: 10m
+  - eval_time: 2h
     alertname: InventoryIngressConsumerLagMedium
     exp_alerts:
     - exp_labels:
@@ -60,5 +60,4 @@ tests:
         app_team: inventory
       exp_annotations:
         dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcs02ue1-prometheus
-        link_url: https://kibana.apps.crcs02ue1.urby.p1.openshiftapps.com/app/kibana#/discover?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-95m,to:now))&_a=(columns:!(_source),filters:!(),index:'6c31b1b0-d854-11ea-9f21-6b7e641a18be',interval:auto,query:(language:lucene,query:'@log_stream:%20%22inventory-mq%22%20'),sort:!(!('@timestamp',desc)))
-        message: 'Ingress consumer lag observed 10,000 times or more over 1.5 hour period'
+        message: 'Ingress consumer lag over the last 1.5 hour period'
