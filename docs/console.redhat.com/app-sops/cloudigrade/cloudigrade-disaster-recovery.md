@@ -38,14 +38,21 @@ If secrets have been lost from [vault.devshift.net](https://vault.devshift.net),
 
 ## Database restoration
 
-cloudigrade and postigrade rely on the SRE-managed RDS instances. After performing the standard [AppSRE database restore procedure](https://gitlab.cee.redhat.com/service/app-interface#restoring-rds-databases-from-backups), Clowder must know the new hostname, port, etc. Clowder management and configuration is beyond the scope of this document.
+cloudigrade and postigrade rely on the SRE-managed RDS instances. After performing the standard [AppSRE database restore procedure](https://gitlab.cee.redhat.com/service/app-interface#restoring-rds-databases-from-backups), because cloudigrade uses the Clowder operator, you may also need to apply a `clowder/database` annotation to the appropriate terraform resources definitions. See [How can I migrate to a new database?](https://redhatinsights.github.io/clowder/clowder/dev/faq.html#_how_can_i_migrate_to_a_new_database) ([source](https://github.com/RedHatInsights/clowder/blob/master/docs/antora/modules/ROOT/pages/faq.adoc#how-can-i-migrate-to-a-new-database)) for more details.
 
-- Redeploying cloudigrade and postigrade will ensure that all pods will re-read their configurations and establish new connections to the database.
-  - See [cloudigrade-general-troubleshooing](cloudigrade-general-troubleshooing.md) for instructions to redeploy.
-  - cloudigrade and postigrade pods read database configutaion from `$ACG_CONFIG` at startup, which is populated by Clowder.
-  - cloudigrade pods always connect to postigrade for their database connections.
-  - postigrade pods are running [`PgBouncer`](https://www.pgbouncer.org/) and are the only pods that should directly connect to RDS.
-  - DB migrations automatically run in `cloudigrade-api`'s init container.
+cloudigrade's RDS resources are defined at:
+
+- stage: [data/services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/insights/cloudigrade/namespaces/stage-cloudigrade-stage.yml)
+- prod: [data/services/insights/cloudigrade/namespaces/cloudigrade-prod.yml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/insights/cloudigrade/namespaces/cloudigrade-prod.yml)
+
+Redeploying cloudigrade and postigrade will ensure that all pods will re-read their configurations and establish new connections to the database.
+
+- In general, we expect Clowder to automatically redeploy cloudigrade and postigrade when configurations change.
+- See [cloudigrade-general-troubleshooing](cloudigrade-general-troubleshooing.md) for instructions to redeploy manually.
+- cloudigrade and postigrade pods read database configutaion from `$ACG_CONFIG` at startup, which is populated by Clowder.
+- cloudigrade pods always connect to postigrade for their database connections.
+- postigrade pods are running [`PgBouncer`](https://www.pgbouncer.org/) and are the only pods that should directly connect to RDS.
+- DB migrations automatically run in `cloudigrade-api`'s init container.
 
 ## Escalations
 
