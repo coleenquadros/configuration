@@ -1,6 +1,9 @@
+
 # Alert to receiver discovery
 
-Alertmanager routing tree in app-interface is a large beast and it is sometimes quite hard to really understand where a certain alert will finally go. The `amtool config routes test` command can be used to test the routing tree against certain alert labels. In order to make it easy to work with app-interface's Alertmanager configuration and the fact that many of the prometheus rules are actually jinja templates, we have created a `qontract-cli` command to conveniently wraps `amtool`:
+[toc]
+
+The Alertmanager routing tree in app-interface is a large beast and it is sometimes quite hard to really understand where a certain alert will finally go. The `amtool config routes test` command can be used to test the routing tree against certain alert labels. In order to make it easy to work with app-interface's Alertmanager configuration and the fact that many of the prometheus rules are actually jinja templates, we have created a `qontract-cli` command that conveniently wraps `amtool`:
 
 ```
 $ qontract-cli --config config.local.toml alert-to-receiver --help
@@ -9,7 +12,6 @@ Usage: qontract-cli alert-to-receiver [OPTIONS] CLUSTER NAMESPACE RULES_PATH
 Options:
   -a, --alert-name TEXT           Alert name in RULES_PATH. Receivers for all
                                   alerts will be returned if not specified.
-
   -c, --alertmanager-secret-path TEXT
                                   Alert manager secret path.
   -n, --alertmanager-namespace TEXT
@@ -22,7 +24,6 @@ Options:
                                   be specified multiple times. If the same
                                   label is defined in the alert, the
                                   additional label will have precedence.
-
   --help                          Show this message and exit.
 ```
 
@@ -50,7 +51,9 @@ $ cd app-interface
 $ make server
 ```
 
-This is also interesting in terms of testing changes locally before sending a MR.
+Note that this runs a foreground process that produces log output, so you may wish to run it in a dedicated terminal window. You can send `SIGINT` to the server process (e.g. via `Ctrl-C`) to shut it down.
+
+This is also interesting in terms of [testing changes locally](#testing-changes-locally) before sending a MR.
 
 ### Secrets Reader
 
@@ -128,7 +131,7 @@ In case an exception such as:
 error processing jinja2 template: error fetching secret: key not found in config file certain/section: 'key'
 ```
 
-a new fake secret value should be added in the configuration. In our example it would be something like
+is encountered, a new fake secret value should be added in the configuration. In our example it would be something like
 ```
 [certain.section]
 key = "a random string value"
@@ -136,18 +139,29 @@ key = "a random string value"
 
 ### An elaborated example
 
-Let's imagine we want to check which receiver is going handle a certain Hive production alert as defined in the [ `/services/hive/hive-production-common.prometheusrules.yaml`](/resources/services/hive/hive-production-common.prometheusrules.yaml). For the sake of the example, we will chose the alert named `HiveControllersDown - production - {{{shard_name}}}` in that file.
+Let's imagine we want to check which receiver is going handle a certain Hive production alert as defined in [ `/services/hive/hive-production-common.prometheusrules.yaml`](/resources/services/hive/hive-production-common.prometheusrules.yaml). For the sake of the example, we will choose the alert named `HiveControllersDown - production - {{{shard_name}}}` in that file.
 
 The command asks for the following mandatory options:
 
 ```
-CLUSTER NAMESPACE RULES_PATH ALERT_NAME
+CLUSTER NAMESPACE RULES_PATH
 ```
 
 * `CLUSTER`: The cluster where the rules are deployed. In our example, we will pick `hivep02ue1`
-* `NAMESPACE`: The namespace in the aforementioned cluster where the rules are deployed. It will usually be `openshift-customer-monitoring`, but it can be other. Just look where in app-interface is the rules path referenced.
-* `RULES_PATH`: The rules path in app-interface (without the leading `resources` string)
-* `ALERT_NAME`: The alert name once the template has been rendered. In our case, we will need to see how `shard_nbame` is resolved by checking the [namespace file](data/services/observability/namespaces/openshift-customer-monitoring.hivep02ue1.yml) used to deploy the resource. After checking it, in our case we have `hivep02ue1`
+* `NAMESPACE`: The namespace in the aforementioned cluster where the rules are deployed. It will usually be `openshift-customer-monitoring`, but it might be something else. Just look where in app-interface the rules path is referenced. For example:
+  ```
+  [app-interface]$ git grep /services/hive/hive-production-common.prometheusrules.yaml | grep namespaces
+  data/services/observability/namespaces/openshift-customer-monitoring.hivep01ue1.yml:  path: /services/hive/hive-production-common.prometheusrules.yaml
+  data/services/observability/namespaces/openshift-customer-monitoring.hivep02ue1.yml:  path: /services/hive/hive-production-common.prometheusrules.yaml
+  data/services/observability/namespaces/openshift-customer-monitoring.hivep03uw1.yml:  path: /services/hive/hive-production-common.prometheusrules.yaml
+  data/services/observability/namespaces/openshift-customer-monitoring.hivep04ew2.yml:  path: /services/hive/hive-production-common.prometheusrules.yaml
+  data/services/observability/namespaces/openshift-customer-monitoring.hivep05ue1.yml:  path: /services/hive/hive-production-common.prometheusrules.yaml
+  data/services/observability/namespaces/openshift-customer-monitoring.hivep06uw2.yml:  path: /services/hive/hive-production-common.prometheusrules.yaml
+  data/services/observability/namespaces/openshift-customer-monitoring.hivep07ue2.yml:  path: /services/hive/hive-production-common.prometheusrules.yaml
+  ```
+* `RULES_PATH`: The path to the rules file in app-interface, without the leading `resources` string. In this example, `/services/hive/hive-production-common.prometheusrules.yaml`
+
+To drill down to a specific alert, we will also use the `--alert-name` option. Its argument is the alert name once the template has been rendered. (Don't forget quotes if the alert name has embedded spaces or other shell special characters!) In our case, we will need to see how `shard_name` is resolved by checking the [namespace file](data/services/observability/namespaces/openshift-customer-monitoring.hivep02ue1.yml) used to deploy the resource. After checking it, in our case we have `hivep02ue1`.
 
 With this information, we can run our command:
 
@@ -168,7 +182,7 @@ There are two labels that are added to all alerts that are triggered:
 * `environment`
 * `cluster`
 
-If your routing tree take those into account, take a look into [`saas-observability-per-cluster.yaml`](/data/services/observability/cicd/saas/saas-observability-per-cluster.yaml) to find the value for your alert (hint: it will usually be either `staging` or `production`, but there are others for special cases).
+If your routing tree takes those into account, take a look into [`saas-observability-per-cluster.yaml`](/data/services/observability/cicd/saas/saas-observability-per-cluster.yaml) to find the value for your alert (hint: it will usually be either `staging` or `production`, but there are others for special cases).
 
 With this information, the above example could be written as:
 
@@ -186,7 +200,7 @@ HiveControllersDown - production - hivep02ue1|pagerduty-app-sre,slack-hive-alert
 
 ## Additional labels for testing purposes
 
-Additional labels take precedence over the defined labels in the alert. That could be used to test how an alert routing would be modified if certain label value changed before making the changes in app-interface, restarting the local server, etc... The routing of the following alert:
+Additional labels take precedence over the labels defined in the alert. This can be used to test how an alert's routing would be modified if a certain label value changed without needing to edit the rules file in app-interface and restart the local server, etc... For example, the routing of the following alert:
 
 ```
 $ qontract-cli --config config.local.toml alert-to-receiver \
@@ -210,3 +224,13 @@ $ qontract-cli --config config.local.toml alert-to-receiver \
   -l severity=medium
 ClairIndexReportCreationRateLimiting|slack-oncall-quay
 ```
+
+## Testing changes locally
+
+If you are preparing a MR to modify routing of one or more alerts, this tool facilitates local testing of the changes.
+
+To begin, make sure you are [running qontract-server locally](#qontract-server).
+
+The local server loads the graph based on the state of the repository when the server is started. Thus, you must *restart* the server to make it reflect any local edits to routing tree or rules files. However, as described [above](#additional-labels-for-testing-purposes), you may be able to iterate more quickly on rule changes by using the `--additional-label` option.
+
+<!-- TODO: examples of local testing for a) routing tree, b) alert -->
