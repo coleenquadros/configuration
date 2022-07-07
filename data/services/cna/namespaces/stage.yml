@@ -42,11 +42,6 @@ externalResources:
     identifier: cna-stage
     # we start with a small DB
     defaults: /terraform/resources/app-sre-stage/rds-3-pg13.yml
-  - provider: s3
-    # this is the bucket for terraform state
-    identifier: cna-s3-stage
-    defaults: /terraform/resources/s3-private-1.yml
-    output_resource_name: cna-s3
   - provider: elasticache
     identifier: cna-redis-stage
     defaults: /terraform/resources/cna/elasticache-stage.yml
@@ -55,6 +50,11 @@ externalResources:
   provisioner:
     $ref: /aws/cna-service-stage/account.yml
   resources:
+  - provider: s3
+    # this is the bucket for terraform state
+    identifier: cna-s3-stage
+    defaults: /terraform/resources/s3-private-1.yml
+    output_resource_name: cna-s3
   - provider: aws-iam-service-account
     identifier: cna-service-stage
     output_resource_name: cna-service-iam
@@ -75,6 +75,15 @@ externalResources:
             ],
             "Effect": "Allow",
             "Resource": "arn:aws:iam::*:role/network-mgmt-*"
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "s3:PutObject",
+              "s3:GetObject",
+              "s3:DeleteObject"
+            ],
+            "Resource": ["arn:aws:s3:::cna-s3/*"]
           }
         ]
       }
