@@ -93,7 +93,7 @@ Your Qontract GraphQL server will be available at `http://localhost:4000/graphql
 3. Install development packages:
 
     ```sh
-    $ python3 setup.py develop
+    $ pip install -e . && pip install -r requirements/requirements-dev.txt
     ```
 
 ## Configure qontract-reconcile
