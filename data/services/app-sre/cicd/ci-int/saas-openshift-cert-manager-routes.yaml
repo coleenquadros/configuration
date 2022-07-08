@@ -1,0 +1,44 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: app-sre
+
+name: saas-openshift-cert-manager-routes
+description: |
+  SaaS to deploy openshift-cert-manager-routes operator. This operator needs to be deployed in the same
+  namespace where cert-manager is located.
+
+app:
+  $ref: /services/app-sre/app.yml
+
+clusterAdmin: true
+
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- ClusterRole
+- ServiceAccount
+- ClusterRoleBinding
+- Deployment
+
+imagePatterns:
+- quay.io/app-sre/openshift-cert-manager-routes
+
+resourceTemplates:
+- name: openshift-cert-manager-routes
+  url: https://github.com/app-sre/openshift-cert-manager-routes-templates
+  path: /openshift/deploy.yaml
+  parameters:
+    IMAGE: quay.io/app-sre/openshift-cert-manager-routes
+    RELEASE: 0.1.2
+  targets:
+  - namespace:
+      $ref: /openshift/app-sre-stage-01/namespaces/openshift-cert-manager.yml
+    ref: main
