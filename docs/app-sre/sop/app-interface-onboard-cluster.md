@@ -104,7 +104,7 @@ This step should be performed in a single merge request.
 
     network:
       # For OVN, use OVNKUbernetes
-      type: OpenshiftSDN
+      type: OpenShiftSDN
       vpc: (desired machine CIDR. ex: 10.123.0.0/16)
       service: (desired service CIDR. ex: 172.30.0.0/16)
       pod: (desired pod CIDR. ex: 10.128.0.0/14)
