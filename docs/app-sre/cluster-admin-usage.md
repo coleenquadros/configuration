@@ -31,7 +31,7 @@ If `cluster-admin` permissions are required, their use must be limited to the fo
 
 ## When not to use cluster-admin
 
-While the previous section explicitely named allowed `cluster-admin` scenarios, the purpose of the following list is to give more insights about what we explicitely don't want to use `cluster-admin` privileges for.
+While the previous section explicitly named allowed `cluster-admin` scenarios, the purpose of the following list is to give more insights about what we explicitly don't want to use `cluster-admin` privileges for.
 
-- We must not use `cluster-admin` permissions to change cluster settings explicitely managed by SREP. If unsure consult SREP or ask AppSRE team members. If a general requirement to manage certains resources arises, they must be discuss with SREP and can lead to changes in `dedicated-admin` permissions via the [managed-cluster-config](https://github.com/openshift/managed-cluster-config) repo.
+- We must not use `cluster-admin` permissions to change cluster settings explicitly managed by SREP. If unsure, consult SREP or ask AppSRE team members. If a general requirement to manage certain resources arises, they must be discussed with SREP and can lead to changes in `dedicated-admin` permissions via the [managed-cluster-config](https://github.com/openshift/managed-cluster-config) repo.
 - We must not use `cluster-admin` permissions for tasks that can be accomplished via OCM, e.g. cluster upgrades, ingress controller settings, etc. If a general functionality not covered by OCM becomes necessary, consult with SDA/SDB.
