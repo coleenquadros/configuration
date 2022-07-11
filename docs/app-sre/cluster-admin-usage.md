@@ -18,7 +18,7 @@ Before starting to use `cluster-admin` carefully consult the sections about when
 
 The placement of resources onto an Openshift cluster via `/openshift/namespace-1.yml#openshiftResources` or via `/app-sre/saas-file-2.yml` leverages the non-privileged `automationToken` by default. Both schemas offer a `clusterAdmin: true` option to switch to the `clusterAdminAutomationToken`.
 
-MRs, enabling `cluster-admin` for a namespace or a SAAS file must be carefully reviewed and must be accompanied with restrictive `managedResourceTypes` and `managedResourceNames` settings.
+MRs, enabling `cluster-admin` for a namespace or a SAAS file must be carefully reviewed and must be accompanied with restrictive `managedResourceTypes` and `managedResourceNames` (only available for `/openshift/namespace-1.yml`) settings.
 
 ## When to use cluster-admin
 
