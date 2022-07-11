@@ -1,0 +1,48 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: floorist
+  platform: insights
+
+name: floorist
+description: Floorist service for Insights Platform applications
+
+app:
+  $ref: /services/insights/floorist/app.yml
+
+pipelinesProvider:
+  $ref: /services/insights/pipelines/tekton.crc-pipelines.app-sre-prod-01.yaml
+
+clusterAdmin: true
+compare: false
+
+# slack:
+#   workspace:
+#     $ref: /dependencies/slack/ansible.yml
+#   channel: floorist
+
+managedResourceTypes:
+- CustomResourceDefinition
+- ServiceAccount
+- Role
+- ClusterRole
+- RoleBinding
+- ClusterRoleBinding
+- ConfigMap
+- Deployment
+- Service
+
+imagePatterns:
+- quay.io/cloudservices/floorist-operator
+
+resourceTemplates:
+- name: floorist-operator
+  path: /deploy_template.yaml
+  url: https://github.com/RedHatInsights/floorist-operator
+  targets:
+  - namespace:
+      $ref: /services/insights/floorist/namespaces/stage-floorist-operator-stage.yml
+    ref: main
+    parameters:
+      FLOORIST_IMAGE_TAG: 'a5d1b1b'
