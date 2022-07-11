@@ -27,7 +27,7 @@ To on-board a new OSDv4 cluster to app-interface, perform the following operatio
 
 This step should be performed in a single merge request.
 
-1. Login to https://console.redhat.com/openshift
+1. Login to https://console.redhat.com/openshift with your APPSRE admin account (e.g. <kerberos_id>+sd-app-sre@redhat.com)
 
 1. Click `Subscriptions` and ensure you have enough quota to provision a cluster
     - Must have at least 1 cluster of the desired type
@@ -85,10 +85,10 @@ This step should be performed in a single merge request.
       version: (same as initial_version, this will be automatically updated with cluster upgrades. However remove suffix -fast if applicable.)
       initial_version: (desired version. ex: 4.4.11, use 4.4.11-fast if channel fast.)
       multi_az: true
-      nodes: (desired compute nodes todal across all AZs)
+      nodes: (desired compute nodes total across all AZs)
       autoscale: # optional. nodes should not be defined if autoscale is defined
-        min_replicas: (desired minimal count of compute nodes todal across all AZs)
-        max_replicas: (desired maximal count of compute nodes todal across all AZs)
+        min_replicas: (desired minimal count of compute nodes total across all AZs)
+        max_replicas: (desired maximal count of compute nodes total across all AZs)
       instance_type: (desired instance type. ex: m5.xlarge)
       storage: (desired storage amount. ex: 600)
       load_balancers: (desired load-balancer count. ex: 0)
@@ -142,6 +142,10 @@ This step should be performed in a single merge request.
     * Note: Cluster name should follow naming convention
       [here](../cluster-naming-convention.md)
     * Note: The `id`, `consoleUrl`, `serverUrl`, `external_id` and `elbFQDN` will be added automatically at a later stage. Don't worry about them.
+    * Note: Network - https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/clusters-network.md
+      * vpc: Define a new one (e.g. 10.X.0.0/16) that isn't already in use
+      * service: 172.30.0.0/16 can be used
+      * pod: 10.128.0.0/14 can be used
 
 1. Grant `dedicated-admin` access to App-SRE team
 
@@ -170,7 +174,7 @@ This step should be performed in a single merge request.
     * `alertmanagerUrl`: `https://alertmanager.<cluster_name>.devshift.net`
     * `prometheusUrl`: `https://prometheus.<cluster_name>.devshift.net`
 
-    *Note*: The `<cluster_name>` and `<base_domain>` of a cluster can be retrieved using the [ocm cli](https://github.com/openshift-online/ocm-cli)
+    *Note*: The `<cluster_name>` and `<base_domain>` of a cluster can be retrieved using the [ocm cli](https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/app-sre/sop/accessing-clusters.md#ocm)
 
     ```shell
     ocm list clusters
