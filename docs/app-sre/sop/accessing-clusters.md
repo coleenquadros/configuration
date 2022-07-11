@@ -18,7 +18,13 @@ This is a quick getting-started guide that is relevant as a pre-requisite to res
 Install OCM CLI, if it's not installed already. Or update it prior to starting on-call shift.
 
 ```
+# Go <= 1.17
 go get -u github.com/openshift-online/ocm-cli/cmd/ocm
+
+# Go >= 1.18 (https://go.dev/doc/go-get-install-deprecation)
+go install github.com/openshift-online/ocm-cli/cmd/ocm@latest
+
+# add $HOME/go/bin to your PATH
 ```
 
 Get your [offline access token](https://console.redhat.com/openshift/token).
