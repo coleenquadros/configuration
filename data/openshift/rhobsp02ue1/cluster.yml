@@ -1,0 +1,79 @@
+---
+$schema: /openshift/cluster-1.yml
+
+labels:
+  service: rhobs
+
+name: rhobsp02ue1
+description: rhobsp02ue1 cluster
+consoleUrl: ''
+kibanaUrl: ''
+prometheusUrl: ''
+alertmanagerUrl: ''
+serverUrl: ''
+elbFQDN: ''
+
+auth:
+  service: github-org-team
+  org: app-sre
+  team: rhobsp02ue1-cluster
+
+ocm:
+  $ref: /dependencies/ocm/production.yml
+
+managedGroups:
+- dedicated-admins
+
+spec:
+  product: osd
+  provider: aws
+  region: us-east-1
+  channel: fast
+  version: 4.10.21
+  initial_version: 4.10.21-fast
+  multi_az: true
+  autoscale:
+    min_replicas: 21
+    max_replicas: 30
+  instance_type: instance_type: r5.8xlarge
+  storage: 4100
+  load_balancers: 0
+  private: false
+  disable_user_workload_monitoring: true
+
+upgradePolicy:
+  workloads:
+  - rhobs
+  schedule: '0 10 * * 1-4'
+  conditions:
+    soakDays: 6
+
+network:
+  # For OVN, use OVNKUbernetes
+  type: OpenshiftSDN
+  vpc: 10.137.0.0/16
+  service: 172.30.0.0/16
+  pod: 10.128.0.0/14
+
+automationToken:
+  path: app-sre/creds/kube-configs/rhobsp02ue1
+  field: token
+
+addons: # enable log forwarding to the cluster's AWS account
+- $ref: /dependencies/ocm/addons/cluster-logging-operator.yml
+
+internal: false
+
+awsInfrastructureAccess:
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: read-only
+- awsGroup:
+    $ref: /aws/app-sre/groups/App-SRE-admin.yml
+  accessLevel: network-mgmt
+
+awsInfrastructureManagementAccounts:
+- account:
+    $ref: /aws/app-sre/account.yml
+  accessLevel: network-mgmt
+  default: true
