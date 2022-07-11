@@ -1,0 +1,66 @@
+---
+$schema: /openshift/namespace-1.yml
+
+labels: {}
+
+name: openshift-cert-manager
+description: openshift-cert-manager namespace. It hosts the cert-manager deployment
+
+cluster:
+  $ref: /openshift/app-sre-stage-01/cluster.yml
+
+app:
+  $ref: /services/app-sre/app.yml
+
+environment:
+  $ref: /products/app-sre/environments/stage.yml
+
+managedResourceTypes:
+- ClusterIssuer.cert-manager.io
+
+managedExternalResources: true
+
+externalResources:
+- provider: aws
+  provisioner:
+    $ref: /aws/app-sre/account.yml
+  resources:
+  - provider: aws-iam-service-account
+    identifier: cert-manager-appsres03ue1-devshift-net
+    variables:
+      aws_region: us-east-1
+    user_policy:
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": [
+              "route53:GetChange",
+            ],
+            "Resource": "arn:aws:route53:::change/*",
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "route53:ChangeResourceRecordSets",
+              "route53:ListResourceRecordSets"
+            ],
+            "Resource": [
+              "arn:aws:route53:::hostedzone/Z05758033SZ8IESGUOY8E"
+            ]
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "route53:ListHostedZonesByName"
+            ],
+            "Resource": "*"
+          }
+        ]
+      }
+    output_resource_name: cert-manager-devshift-net-service-account
+
+#openshiftResources:
+#- provider: resource
+#  path: /cert-manager/letsencrypt-prod-devshiftnet-cluster-issuer.yaml
