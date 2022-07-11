@@ -115,7 +115,8 @@ spec:
         link_url: https://console-openshift-console.apps.crcs02ue1.urby.p1.openshiftapps.com/k8s/ns/host-inventory-stage/cronjobs/host-inventory-reaper/
         message: '{{ $labels.namespace }} Inventory Reaper has not succeeded for the last 2 hours'
     - alert: inventory-ingress-consumer-lag
-      expr: sum(avg_over_time(kafka_consumergroup_group_lag{group='inventory-mq', topic=~'platform.inventory.host-ingress.*'} [95m])) by (topic) > 10000
+      expr: sum(avg_over_time(kafka_consumergroup_group_lag{group='inventory-mq', topic=~'platform.inventory.host-ingress.*'} [10m])) by (topic) > 100
+      for: 95m
       labels:
         severity: medium
         service: insights
@@ -123,4 +124,4 @@ spec:
         app_team: inventory
       annotations:
         dashboard: https://grafana.app-sre.devshift.net/d/EiIhtC0Wa/inventory?orgId=1&var-datasource=crcs02ue1-prometheus
-        message: 'Ingress consumer lag has averaged more than 10,000 messages in the last 1.5 hours'
+        message: 'Ingress consumer lag has averaged more than 100 messages in the last 1.5 hours'
