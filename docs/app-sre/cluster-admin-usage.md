@@ -27,6 +27,7 @@ For almost all resource placement scenarios, `cluster-admin` permissions are not
 If `cluster-admin` permissions are required, their use must be limited to the following scenarios:
 
 - installation of operators with CRDs and cluster RBAC, when OLM can't be used
+- configuration of operators in `openshift-*` namespaces
 
 ## When not to use cluster-admin
 
