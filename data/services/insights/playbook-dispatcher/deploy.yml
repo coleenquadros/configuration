@@ -120,6 +120,46 @@ resourceTemplates:
       XMX: 512m
       XMS: 512m
 
+- name: playbook-dispatcher-connect-rhosak
+  path: /deploy/connect-rhosak.yaml
+  url: https://github.com/RedHatInsights/playbook-dispatcher
+  targets:
+  - namespace:
+      $ref: /services/insights/playbook-dispatcher/namespaces/stage.yml
+    ref: master
+    upstream:
+      instance:
+        $ref: /dependencies/ci-ext/ci-ext.yml
+      name: RedHatInsights-playbook-dispatcher-gh-build-master
+    parameters:
+      CONNECTOR_PAUSE: "false"
+    secretParameters:
+      - name: KAFKA_BOOTSTRAP_HOST
+        secret:
+          path: secrets/insights-stage/strimzi-stage/clowder-oauth
+          field: hostname
+          version: 3
+      - name: KAFKA_BOOTSTRAP_PORT
+        secret:
+          path: secrets/insights-stage/strimzi-stage/clowder-oauth
+          field: port
+          version: 3
+      - name: KAFKA_USERNAME
+        secret:
+          path: secrets/insights-stage/strimzi-stage/clowder-oauth
+          field: username
+          version: 3
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true
+    ref: internal
+    parameters:
+      KAFKA_BOOTSTRAP_HOST: ephemeral-kafka-bootstrap
+      KAFKA_BOOTSTRAP_PORT: 9092
+      KAFKA_REPLICATION_FACTOR: '1'
+      XMX: 512m
+      XMS: 512m
+
 - name: playbook-dispatcher-dashboards
   url: https://github.com/RedHatInsights/playbook-dispatcher
   path: /dashboard
