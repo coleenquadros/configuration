@@ -27,4 +27,3 @@ Prometheus SnitchHeartBeat is an always-firing alert. It's used as an end-to-end
 ## Escalations
 
 - Ping more team members in #sd-app-sre-teamchat
-- If things are completely on fire, page @akonarde
