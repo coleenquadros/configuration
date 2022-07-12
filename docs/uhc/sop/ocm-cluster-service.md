@@ -10,9 +10,4 @@
 
 
 ## Escalations
-
-### Contacts:
-
-- Irit Goihman (igoihman@redhat.com)
-- Zohar Gal-Or (zgalor@redhat.com)
-- Elad Tabak (etabak@redhat.com)
+- data/teams/ocm/escalation-policies/sda.yaml
