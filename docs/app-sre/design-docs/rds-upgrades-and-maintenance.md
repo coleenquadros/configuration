@@ -177,6 +177,63 @@ A full list of notification types can be found [here](https://docs.aws.amazon.co
 
 These event subscriptions can be managed in Terraform with the [aws_db_event_subscription](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/db_event_subscription) resource. A default list of the most common useful notifications should be included for all RDS databases by default. This could be overridden with `event_categories` or `source_ids` parameters for teams that want additional notifications.
 
+#### Implementation:
+There are both implicit and explicit way to implement this.
+##### 1. Implicit 
+This way abstract the creation of SNS topic from tenants and allow them to focus only on the end result. Example schema:
+```
+ - provider: rds
+    identifier: * 
+    defaults: *.yml
+    output_resource_name: * 
+    event_notifications:
+      source_type: db_instance
+      event_categories:
+        - deletion
+        - failover
+        - maintenance
+      email_subscribers:
+       - jane@redhat.com
+```
+##### 2. Explicit
+Here we would ask tenant for two steps: First, define the SNS topic to receive notification from RDS in App Interface. Second, define the event notification they want to receive per RDS instance:
+SNS topic schema example:
+```
+ - provider: sns 
+    identifier: test-sns-1 
+    fifo_topic: true
+    subscriptions:
+    - protocol: email
+      endpoint: jane@redhat.com
+```
+Event notification example:
+```
+ - provider: rds
+    identifier: * 
+    defaults: *.yml
+    output_resource_name: * 
+    event_notifications:
+    - destination: test-sns-1
+      source_type: db_instance
+      event_categories: 
+        - deletion
+        - failover
+        - maintenance
+```
+Advantage of 1, the implicit implementation:
+1. More user-friendly for the tenant because there is less steps, less AWS SNS knowledge needed.
+2. Less work and easier to implement in qontract-reconcile since SNS topic feature will not be part of the work.
+
+Advantage of 2, the explicit way:
+1. By forcing tenant be aware of the SNS topics, we would offload the management responsibility of those SNS topics. 
+2. Avoid creating a different SNS topic every time a event notification is needed for an AWS service.
+3. We can take this chance to come up with a AWS event notification definition pattern in App Interface. 
+4. We would be adding a new feature to App Interface that allow SNS topic management even though would be minimal this point.
+5. By not allow tenant to use existing or not App Interface managed SNS topics, it avoid snowflakes
+
+
+Based on the fact there will be more long-term and more App Interface friendly advantage, 2 the explicit way is preferred. And that means support minimal SNS topic creation with email subscriptions, and the event notification that registers the topic with RDS instances.
+
 ## Risks
 
 The risks below will need to be accounted for during the next phase where we describe the implementation.
@@ -224,4 +281,3 @@ Plans are likely to change, so rather than make a plan that is likely to be wron
 4. Improve tools used to enforce minor version upgrades (escalate to manager, InfoSec?)
 5. Adding reporting tools related to the compliance of databases
 6. Add the automatic creation of minor version upgrade MRs to the `rds-db-minor-version-upgrades` integration in qontract-reconcile
-
