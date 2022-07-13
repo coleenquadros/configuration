@@ -38,6 +38,8 @@ AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
 INIT_BUNDLES=s3://bundle-archive/${MASTER_BRANCH_COMMIT_SHA}.json,fs:///validate/${DATAFILES_BUNDLE_BASENAME}
 EOF
 
+echo "loading master from s3://bundle-archive/${MASTER_BRANCH_COMMIT_SHA}.json"
+
 # start graphql-server locally
 qontract_server=$(
   docker run --rm -d $QONTRACT_SERVER_DOCKER_OPTS \
@@ -99,7 +101,7 @@ ALIAS=saas-file-owners-no-compare run_int saas-file-owners $gitlabMergeRequestTa
 
 ## Wait until the service loads the data
 SHA256=$(sha256sum ${DATAFILES_BUNDLE} | awk '{print $1}')
-while [[ ${count} -lt 20 ]]; do
+while [[ ${count} -lt 60 ]]; do
     docker logs ${qontract_server}
     let count++
     DEPLOYED_SHA256=$(curl -sf http://${CURL_IP}:4000/sha256)
