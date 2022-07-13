@@ -99,7 +99,7 @@ ALIAS=saas-file-owners-no-compare run_int saas-file-owners $gitlabMergeRequestTa
 
 ## Wait until the service loads the data
 SHA256=$(sha256sum ${DATAFILES_BUNDLE} | awk '{print $1}')
-while [[ ${count} -lt 20 ]]; do
+while [[ ${count} -lt 60 ]]; do
     docker logs ${qontract_server}
     let count++
     DEPLOYED_SHA256=$(curl -sf http://${CURL_IP}:4000/sha256)
