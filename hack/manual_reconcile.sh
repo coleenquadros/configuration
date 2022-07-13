@@ -38,6 +38,8 @@ AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
 INIT_BUNDLES=s3://bundle-archive/${MASTER_BRANCH_COMMIT_SHA}.json,fs:///validate/${DATAFILES_BUNDLE_BASENAME}
 EOF
 
+echo "loading master from s3://bundle-archive/${MASTER_BRANCH_COMMIT_SHA}.json"
+
 # start graphql-server locally
 qontract_server=$(
   docker run --rm -d $QONTRACT_SERVER_DOCKER_OPTS \
