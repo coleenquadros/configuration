@@ -64,7 +64,7 @@ tests:
     exp_alerts: []
 
 - interval: 1m
-  ## 5 minutes without 5xx and normal 2xx and then we start seeing 5xx for the next 15 minutes 
+  ## 5 minutes without 5xx and normal 2xx and then we start seeing 5xx for the next 15 minutes
   input_series:
     # series come from the two routers
   - series: haproxy_backend_http_responses_total{backend="https",code="5xx",container="router",endpoint="metrics",exported_namespace="uhc-production",instance="10.128.6.17:1936",job="router-internal-default",namespace="openshift-ingress",pod="router-default-69c7459f76-bhswd",prometheus="openshift-monitoring/k8s",prometheus_replica="prometheus-k8s-1",route="clusters-mgmt",service="router-internal-default"}
@@ -165,3 +165,55 @@ tests:
   - eval_time: 15m
     alertname: OCMClustersMgmtCrashing - production
     exp_alerts: []
+
+- interval: 1m
+  input_series:
+  - series: aws_rds_free_storage_space_average{container="cloudwatch-exporter", dbinstance_identifier="clusters-service-production", namespace="uhc-production"}
+    values: '10737418240+0x59 2147483648+0x119' # 10Gb free for 1 hour then only 2 Gb free for next 2 hours
+
+  alert_rule_test:
+  - eval_time: 1h
+    alertname: ClustersServiceRDSLowStorageSpace
+    exp_alerts:
+  - eval_time: 3h
+    alertname: ClustersServiceRDSLowStorageSpace
+    exp_alerts:
+    - exp_labels:
+        container: cloudwatch-exporter
+        dbinstance_identifier: clusters-service-production
+        namespace: uhc-production
+        service: uhc-clusters-service
+        severity: critical
+      exp_annotations:
+        message: 'The current free storage space of DB instance clusters-service-production is under 5 GB.'
+        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/uhc/sop/ocm-cluster-service.md#ClustersServiceRDSLowStorageSpace"
+        dashboard: "https://grafana.app-sre.devshift.net/d/AWSRDSdbi/aws-rds?orgId=1&var-datasource=AWS%20app-sre&var-region=default&var-dbinstanceidentifier=clusters-service-production&from=now-7d&to=now"
+
+# RDSOutOfStorageSoon
+- interval: 10m
+  input_series:
+  - series: rdsosmetrics_fileSys_usedPercent{mount_point="/rdsdbdata", exported_instance="clusters-service-production"}
+    values: 0+3x4 12-1x7
+  alert_rule_test:
+  - eval_time: 2h
+    alertname: ClustersServiceRDSOutOfStorageSoon
+
+- interval: 10m
+  input_series:
+  - series: rdsosmetrics_fileSys_usedPercent{mount_point="/rdsdbdata", exported_instance="clusters-service-production"}
+    values: 0+3x12
+  alert_rule_test:
+  - eval_time: 2h
+    alertname: ClustersServiceRDSOutOfStorageSoon
+    exp_alerts:
+    - exp_labels:
+        severity: info
+        service: uhc-clusters-service
+        env: production
+        exported_instance: clusters-service-production
+        mount_point: /rdsdbdata
+      exp_annotations:
+          message: "DB instance clusters-service-production is about to run out of storage within 2 weeks."
+          runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/uhc/sop/ocm-cluster-service.md#ClustersServiceRDSOutOfStorageSoon"
+          link_url: "https://console.aws.amazon.com/rds/home?region=us-east-1#database:id=clusters-service-production;is-cluster=false;tab=monitoring"
+          dashboard: "https://grafana.app-sre.devshift.net/d/statusboard/status-board?orgId=1&var-datasource=app-sre-prod-04-prometheus"
