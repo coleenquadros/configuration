@@ -189,29 +189,6 @@ tests:
         runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/uhc/sop/ocm-cluster-service.md#ClustersServiceRDSLowStorageSpace"
         dashboard: "https://grafana.app-sre.devshift.net/d/AWSRDSdbi/aws-rds?orgId=1&var-datasource=AWS%20app-sre&var-region=default&var-dbinstanceidentifier=clusters-service-production&from=now-7d&to=now"
 
-- interval: 1m
-  input_series:
-  - series: aws_rds_free_storage_space_average{container="cloudwatch-exporter", dbinstance_identifier="clusters-service-production", namespace="uhc-production"}
-    values: '2147483648+0x59 536870912+0x119' # 2Gb free for 1 hour then only 0.5 Gb free for next 2 hours
-
-  alert_rule_test:
-  - eval_time: 1h
-    alertname: ClustersServiceRDSLowStorageSpace
-    exp_alerts:
-  - eval_time: 3h
-    alertname: ClustersServiceRDSLowStorageSpace
-    exp_alerts:
-    - exp_labels:
-        container: cloudwatch-exporter
-        dbinstance_identifier: clusters-service-production
-        namespace: uhc-production
-        service: uhc-clusters-service
-        severity: critical
-      exp_annotations:
-        message: 'The current free storage space of DB instance clusters-service-production is under 5 GB.'
-        runbook: "https://gitlab.cee.redhat.com/service/app-interface/blob/master/docs/uhc/sop/ocm-cluster-service.md#ClustersServiceRDSLowStorageSpace"
-        dashboard: "https://grafana.app-sre.devshift.net/d/AWSRDSdbi/aws-rds?orgId=1&var-datasource=AWS%20app-sre&var-region=default&var-dbinstanceidentifier=clusters-service-production&from=now-7d&to=now"
-
 # RDSOutOfStorageSoon
 - interval: 10m
   input_series:
