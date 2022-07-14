@@ -348,6 +348,7 @@ resourceTemplates:
       MEMORY_REQUEST: 5Gi
       MEMORY_LIMIT: 8Gi
       ACTIVE_DEADLINE_SECONDS: "600" # 10 minutes
+      DB_NAME: ccx-data-pipeline
     upstream:
       instance:
         $ref: /dependencies/ci-int/ci-int.yml
@@ -364,6 +365,7 @@ resourceTemplates:
       MEMORY_LIMIT: 16G
       TABLES_TO_IGNORE: "report,consumer_error"
       ACTIVE_DEADLINE_SECONDS: "600" # 10 minutes
+      DB_NAME: ccx-data-pipeline
     promotion:
       publish:
       - insights-aggregator-exporter-prod-ready-channel
@@ -373,6 +375,7 @@ resourceTemplates:
     ref: internal
     parameters:
       OUTPUT: "file"
+      DB_NAME: ccx-data-pipeline
 
 ### CCX Notification Services
 
@@ -465,6 +468,31 @@ resourceTemplates:
       NOTIFICATION_RESEND_COOLDOWN: "29m"
       PLATFORM_UI_HOSTNAME: console.redhat.com
 
+- name: insights-notification-db-exporter
+  path: /deploy/clowdapp.yaml
+  url: https://github.com/RedHatInsights/insights-results-aggregator-exporter
+  targets:
+  - namespace:
+      $ref: /services/insights/ccx-data-pipeline/namespaces/stage-ccx-data-pipeline-stage.yml
+    ref: master
+    parameters:
+      OUTPUT: "S3"
+      MEMORY_REQUEST: 5Gi
+      MEMORY_LIMIT: 8Gi
+      ACTIVE_DEADLINE_SECONDS: "600" # 10 minutes
+      TABLES_TO_IGNORE: "migration_info,notification_types,states"
+      DB_NAME: ccx-notification-db
+    upstream:
+      instance:
+        $ref: /dependencies/ci-int/ci-int.yml
+      name: RedHatInsights-insights-results-aggregator-exporter-gh-build-master
+  - namespace:
+      $ref: /services/insights/ephemeral/namespaces/ephemeral-base.yml
+    disable: true
+    ref: internal
+    parameters:
+      OUTPUT: "file"
+      DB_NAME: ccx-notification-db
 
 ### CCX Helpers
 
