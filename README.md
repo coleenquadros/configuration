@@ -2256,6 +2256,8 @@ To manage a GitLab group via App-Interface:
 - `service`: `gitlab-group-membership`
 - `group`: name of GitLab Group
 - `access`: access level this permission gives (owner/maintainer/developer/reporter/guest)
+- `pagerduty`: (optional) a reference to a file representing a PagerDuty target (Schedule or Escalation Policy).
+  * Adding this attribute will add the PagerDuty target as an additional "source of truth", and will add the final schedule user to the gitlab group (in addition to any references from user files).
 
 2. Add this permission to the desired `roles`, or create a new `role` with this permission only.
 
