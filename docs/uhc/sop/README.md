@@ -11,6 +11,7 @@
     - [UHCAccountManagerAdvisoryLockDurationHigh](#account-manager-advisory-lock-issues)
     - [UHCAccountManagerClientCertificateExpiring](#account-manager-client-certificate-expiring)
     - [OCM Account Manager Dependencies](#account-manager-dependencies)
+    - [OCM cluster hibernate or resume failed](#ocm-cluster-hibernate-or-resume-failed)
     - [Escalations](#escalations)
 
 <!-- /TOC -->
@@ -554,6 +555,23 @@ For each are rejected requests you will see messages like this:
 "79.155.131.35,10.131.8.13" "OCM/0.1.145" "4e7b443e-c039-4339-bd02-a0f2b551aeac" "api.stage.openshift.com" "-"
 ```
 
+Inform Service Development A team on #service-development, sd-mp-devel@redhat.com.
+
+---
+
+## OCM cluster hibernate or resume failed
+
+### Impact:
+
+Some clusters fail to hibernate or resume from hibenration.
+
+### Summary:
+
+Clusters service is reporting that some clusters failed to start or stop due to hibernate and resumption.
+
+### Steps:
+
+Such clusters will be in 'error' state. Query failed clusters.
 Inform Service Development A team on #service-development, sd-mp-devel@redhat.com.
 
 ---
