@@ -9,24 +9,24 @@ specs and generates TLS certificates automatically for `hosts` used in the Ingre
 in `Secrets` in the same namespace where the `Ingress` resides.
 
 Openshift uses `Route` objects to expose services. Routes are translated into `ha-proxy` configurations managed by the
-openshift ingress pods. Openshift also supports `Ingress` to `Route` specs translation, but some `Route` features
-are not achivable using that translation.
+openshift router pods. Openshift also supports `Ingress` to `Route` specs translation, but some `Route` features
+are not achievable using that translation.
 
-Cert-manager has an additionnal `openshift-cert-manager-routes` operator to manage certificates set in `Route` objects.
+Cert-manager has an additional `openshift-cert-manager-routes` operator to manage certificates set in `Route` objects.
 It requires an additional operator because they can't include `Routes` support directly in the main operator.
 
 The App-Interface approach for ACME certificates provisioning is based on `openshift-cert-manager-routes` along with `cert-manager`.
-The configuration on the Routes is the same used for `Ingress` objects with the plain `cert-amanger`. When `cert-manager` annotations
-are set in a `Route`, the operator will manage the certificate lifecycle.
+The configuration on the Routes is the same used for `Ingress` objects with the plain `cert-manager`. When `cert-manager` annotations
+are set in a `Route`, `openshift-cert-manager-routes` will manage the certificate lifecycle.
 
 ## High-Level operator modus-operandi
 
-The operator acts over `Route` objects, it reconciles them continuosly and is informed whenever a `Route` object changes. If a
+`openshift-cert-manager-routes` acts over `Route` objects, it reconciles them continuously and is informed whenever a `Route` object changes. If a
 Route has `cert-manager` annotations, the operator checks the certificate data in the route's `TLS` attribute. If the certificate
 has reached 2/3 of its lifetime or there is no certificate, a new certificate is requested.
 
-`openshift-cert-manager-routes` issues certificates using `CertificateRequest` objects. When a new certificate is needed, the operator
-createsa `CertificateRequest` object with the required data (CSR) and then `cert-manager` requests the certificate to the issuer. Once
+`openshift-cert-manager-routes` requests certificates using `CertificateRequest` objects. When a new certificate is needed, the operator
+creates a `CertificateRequest` object with the required data (CSR) and then `cert-manager` requests the certificate to the issuer. Once
 the request is ready, the operator updates the `Route` with the new certificate data.
 
 ## ACME issuers
@@ -46,37 +46,36 @@ App-interface private clusters are deployed with a `DNS-01` ClusterIssuer **conf
 other domains, they must create an `Issuer` with the required configuration in its namespace and use that issuer on their `Routes`.
 
 An important note with DNS Issuers is that they need to authenticate with the DNS provider, in the Route53 case this can be achieved either by providing
-Access keys to the issuer or by the Metadata Server using IRSA, kube2iam or similars.
+Access keys to the issuer or by the Metadata Server using IRSA, kube2iam or similar tools.
 
 ## How to install and configure cert-manager in an openshift cluster
 
 ### External Cluster
 
-1. (1st MR) Install redhat-cert-manager operator with OLM [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/openshift/app-sre-stage-02/namespaces/openshift-operators.yaml#L22-L23).
+1. 1st MR: Install redhat-cert-manager operator with OLM [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/openshift/app-sre-stage-02/namespaces/openshift-operators.yaml#L22-L23).
     - This will install `cert-manager` in the `openshift-cert-manager` namespace.
 
-2. (2nd MR) Install `openshift-cert-routes` into `openshift-cert-manager` namespace [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/c42c0d0c06cb51efcf9d3b889333d7c3e60f21dc/data/services/app-sre/cicd/ci-int/saas-openshift-cert-manager-routes.yaml#L53-L55)
-    - 1st MR needs to be merged to ensure the namespace is created.
-    - `openshift-cert-routes` operator needs to be deployed into the same namespace as `cert-manager`
-
-3. (2nd MR) Install the HTTP-01 ClusterIssuer [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/c42c0d0c06cb51efcf9d3b889333d7c3e60f21dc/data/openshift/app-sre-stage-02/namespaces/openshift-cert-manager.yml)
-    - 1st MR needs to be merged to ensure the namespace is created.
-    - This is a Cluster resource. Bound to this namespace in A-I for coherence.
+2. 2nd MR:
+    - Install `openshift-cert-routes` into `openshift-cert-manager` namespace [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/c42c0d0c06cb51efcf9d3b889333d7c3e60f21dc/data/services/app-sre/cicd/ci-int/saas-openshift-cert-manager-routes.yaml#L53-L55)
+      - 1st MR needs to be merged to ensure the namespace is created.
+      - `openshift-cert-routes` operator needs to be deployed into the same namespace as `cert-manager`
+    - Install the HTTP-01 ClusterIssuer [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/c42c0d0c06cb51efcf9d3b889333d7c3e60f21dc/data/openshift/app-sre-stage-02/namespaces/openshift-cert-manager.yml)
+      - This is a Cluster resource. Bound to this namespace in A-I for coherence.
 
 ### Private Clusters (Not reachable from Internet)
 
-1. (1st MR) Install redhat-cert-manager operator with OLM [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/c42c0d0c06cb51efcf9d3b889333d7c3e60f21dc/data/services/app-sre/cicd/ci-int/saas-openshift-cert-manager-routes.yaml#L53-L55).
+1. 1st MR: Install redhat-cert-manager operator with OLM [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/c42c0d0c06cb51efcf9d3b889333d7c3e60f21dc/data/services/app-sre/cicd/ci-int/saas-openshift-cert-manager-routes.yaml#L53-L55).
     - This will install `cert-manager` in the `openshift-cert-manager` namespace.
 
-2. (2nd MR) Install `openshift-cert-routes` into `openshift-cert-manager` namespace [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/c42c0d0c06cb51efcf9d3b889333d7c3e60f21dc/data/services/app-sre/cicd/ci-int/saas-openshift-cert-manager-routes.yaml#L53-L55)
+2. 2nd MR: Install `openshift-cert-routes` into `openshift-cert-manager` namespace [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/c42c0d0c06cb51efcf9d3b889333d7c3e60f21dc/data/services/app-sre/cicd/ci-int/saas-openshift-cert-manager-routes.yaml#L53-L55)
     - 1st MR needs to be merged to ensure the namespace is created.
     - `openshift-cert-routes` operator needs to be deployed into the same namespace as `cert-manager`
 
-3. (3nd MR) Create a service account to interact with Route53 [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/c42c0d0c06cb51efcf9d3b889333d7c3e60f21dc/data/openshift/appsres03ue1/namespaces/openshift-cert-manager.yml#L27-L63)
+3. 3rd MR: Create a service account to interact with Route53 [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/c42c0d0c06cb51efcf9d3b889333d7c3e60f21dc/data/openshift/appsres03ue1/namespaces/openshift-cert-manager.yml#L27-L63)
     - Follow the same name structure of the example (identifier and output_resource_name)
     - This step can be made within the 2nd MR, but it's preferable to split these tasks.
 
-4. (4rt MR) Create the DNS-01 ClusterIssuer [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/c42c0d0c06cb51efcf9d3b889333d7c3e60f21dc/data/openshift/appsres03ue1/namespaces/openshift-cert-manager.yml#L65-L76)
+4. 4th MR: Create the DNS-01 `ClusterIssuer` [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/c42c0d0c06cb51efcf9d3b889333d7c3e60f21dc/data/openshift/appsres03ue1/namespaces/openshift-cert-manager.yml#L65-L76)
     - the resource-template reads the Secrets from vault (Secrets populated by the previous MR)
     - the 2nd resource is a configuration required by Route53 to only use recursive name-servers. This validation is made by the operator. Before creating the ACME order
       it checks that the `host` exists in the DNS provider.

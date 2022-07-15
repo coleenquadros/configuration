@@ -102,7 +102,7 @@ This step should be performed in a single merge request.
       conditions:
         soakDays: N # number of days a version should run on other clusters with similar workloads before this cluster is upgraded to it
 
-    network: # cidr list for each cluster can be found here: https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/clusters-network.md 
+    network: # cidr list for each cluster can be found here: https://gitlab.cee.redhat.com/service/app-interface-output/-/blob/master/clusters-network.md
       # For OVN, use OVNKUbernetes
       type: OpenShiftSDN
       vpc: (desired machine CIDR. ex: 10.123.0.0/16)
@@ -344,8 +344,6 @@ At this point you should be able to access the cluster via the console / `oc` cl
     * Creates an `app-sre-observability-per-cluster` namespace file for that specific cluster. [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/openshift/app-sre-prod-01/namespaces/app-sre-observability-per-cluster.yml)
     * Adds the new `app-sre-observability-per-cluster` namespace to list of namespaces in [observability-access-elevated.yml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/roles/observability-access-elevated.yml) under `access`, to allow users with elevated observability access to access all the prometheus.
     * Adds the new `app-sre-observability-per-cluster` namespace to the target namespaces in [saas-nginx-proxy.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/observability/cicd/saas/saas-nginx-proxy.yaml) to deploy nginx-proxy.
-    * If the cluster is not private, it adds the `app-sre-observability-per-cluster` namespace to the target namespaces in [saas-openshift-acme.yaml](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/data/services/app-sre/cicd/ci-int/saas-openshift-acme.yaml) to deploy openshift-acme.
-        * Note: A private cluster can not use openshift-acme since it is not exposed to the public internet. Routes should still work, but the certificate will be invalid.
 
   **Double check the changes introduced, the destination file could have been modified with manual changes**
 
@@ -428,6 +426,10 @@ hack/cluster_provision.py [--datadir=data directory] create-dvo-cluster-config <
       field: token
 
 1. Remove yourself from the cluster-admin group via OCM.
+
+## Step 8 - Install Cert-manager operator
+
+1. Follow the installation instructions in this [Runbook](https://gitlab.cee.redhat.com/service/app-interface/-/blob/master/docs/app-sre/runbook/cert-manager.md)
 
 # Additional configurations
 
