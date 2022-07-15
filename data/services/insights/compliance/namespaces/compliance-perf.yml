@@ -33,18 +33,18 @@ openshiftResources:
   version: 3
   type: kubernetes.io/dockerconfigjson
   name: quay-cloudservices-pull
-- provider: vault-secret
-  path: insights/secrets/global/rds-client-ca
-  version: 1
-  annotations:
-    qontract.recycle: "true"
+- provider: resource
+  path: /insights-perf/shared/private-image-puller.serviceaccount.yaml
 - provider: vault-secret
   path: insights/secrets/perf/compliance-perf/compliance-backend
   version: 2
   annotations:
     qontract.recycle: "true"
-- provider: resource
-  path: /insights-perf/shared/private-image-puller.serviceaccount.yaml
+- provider: vault-secret
+  path: insights/secrets/global/rds-client-ca
+  version: 1
+  annotations:
+    qontract.recycle: "true"
 
 managedExternalResources: true
 
@@ -64,6 +64,10 @@ externalResources:
     identifier: compliance-perf
     defaults: /terraform/resources/insights/perf/cloudwatch/cloudwatch-1.yml
     output_resource_name: cloudwatch
+  - provider: elasticache
+    identifier: compliance-stage-elasticache-rails-cache
+    defaults: /terraform/resources/insights/perf/elasticache/elasticache-compliance-1.yml
+    output_resource_name: compliance-rails-cache
   - provider: elasticache
     identifier: compliance-perf-elasticache-clowder
     defaults: /terraform/resources/insights/perf/elasticache/elasticache-compliance-2.yml
