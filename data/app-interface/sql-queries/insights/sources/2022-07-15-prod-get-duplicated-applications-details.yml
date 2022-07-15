@@ -1,0 +1,107 @@
+---
+$schema: /app-interface/app-interface-sql-query-1.yml
+labels: {}
+name: 2022-07-15-prod-get-duplicated-applications-details
+namespace:
+  $ref: /services/insights/sources/namespaces/sources-prod.yml
+identifier: sources-prod
+output: stdout
+queries:
+# Get duplicates in applications table.
+  - |
+    SELECT
+      applications.tenant_id,
+      applications.source_id,
+      applications.application_type_id,
+      COUNT(applications.tenant_id) 
+    FROM
+      applications
+    GROUP BY
+      applications.tenant_id,
+      applications.source_id,
+      applications.application_type_id
+    HAVING
+      COUNT(applications.tenant_id) > 1;
+# Get details about desired applications.
+  - |
+    SELECT
+      applications.id,
+      applications.tenant_id,
+      applications.source_id,
+      applications.application_type_id,
+      applications.created_at,
+      applications.updated_at,
+      applications.availability_status,
+      applications.availability_status_error,
+      applications.last_checked_at,
+      applications.last_available_at,
+      applications.extra,
+      applications.superkey_data,
+      applications.paused_at,
+      applications.retry_counter
+    FROM applications
+    WHERE applications.source_id IN (90039, 86856);
+# Get details about desired sources.
+  - |
+    SELECT 
+      sources.id,
+      sources.name,
+      sources.uid,
+      sources.created_at, 
+      sources.updated_at,
+      sources.tenant_id,
+      sources.source_type_id,
+      sources.version,
+      sources.availability_status,
+      sources.imported,
+      sources.source_ref,
+      sources.last_checked_at,
+      sources.last_available_at,
+      sources.app_creation_workflow,
+      sources.paused_at
+    FROM sources
+    WHERE sources.id IN (90039, 86856);
+# Get details about desired tenants.
+  - |
+    SELECT 
+      tenants.id,
+      tenants.name,
+      tenants.description,
+      tenants.external_tenant,
+      tenants.created_at,
+      tenants.updated_at,
+      tenants.org_id
+    FROM tenants
+    WHERE id IN (3890, 6);
+# Get details about desired app types.
+  - |
+    SELECT
+      application_types.id,
+      application_types.name,
+      application_types.created_at,
+      application_types.updated_at,
+      application_types.display_name,
+      application_types.dependent_applications,
+      application_types.supported_source_types,
+      application_types.supported_authentication_types,
+      application_types.resource_ownership
+    FROM application_types
+    WHERE id IN (1, 4);
+# Get details about desired source types.
+  - |
+    SELECT 
+      source_types.id,
+      source_types.name,
+      source_types.product_name,
+      source_types.vendor,
+      source_types.created_at,
+      source_types.updated_at,
+      source_types.schema,
+      source_types.icon_url,
+      source_types.category
+    FROM source_types
+    WHERE source_types.id IN ( 
+      SELECT sources.source_type_id 
+      FROM sources 
+      WHERE sources.id IN (90039, 86856)
+      );
