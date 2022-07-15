@@ -2,7 +2,7 @@
 $schema: /app-interface/prometheus-rule-test-1.yml
 
 rule_files:
-- /observability/prometheusrules/observatorium-logs-production.prometheusrules.yaml
+- /observability/prometheusrules/rhobs-logs-mst-production.prometheusrules.yaml
 
 evaluation_interval: 1m
 
@@ -13,7 +13,7 @@ tests:
     # From 1m..15m 10 discarded lines in total (below limit of 100)
     # From 16m..30m 100 discarded lines in total (at the limit of 100)
     # From 31m..90m 1000 disccarded lines in total (above limit of 100)
-  - series: loki_discarded_samples_total{namespace="observatorium-logs-production",tenant="tenant-a",reason="stream_limit"}
+  - series: loki_discarded_samples_total{namespace="observatorium-mst-production",tenant="tenant-a",reason="stream_limit"}
     values: '10+0x15 100+0x15 1000+1000x60'
   alert_rule_test:
   - eval_time: 15m
@@ -31,10 +31,10 @@ tests:
         severity: info
         reason: stream_limit
         tenant: tenant-a
-        namespace: observatorium-logs-production
+        namespace: observatorium-mst-production
       exp_annotations:
         message: |
           tenant-a is experiencing rate limiting for reason 'stream_limit': 482
         runbook: https://github.com/rhobs/configuration/blob/main/docs/sop/observatorium.md#lokitenantratelimitwarning
         dashboard:
-          https://grafana.app-sre.devshift.net/d/f6fe30815b172c9da7e813c15ddfe607/loki_tenant_alerts?orgId=1&refresh=10s&var-metrics=telemeter-prod-01-prometheus&var-namespace=observatorium-logs-production
+          https://grafana.app-sre.devshift.net/d/f6fe30815b172c9da7e813c15ddfe607/loki_tenant_alerts?orgId=1&refresh=10s&var-metrics=telemeter-prod-01-prometheus&var-namespace=observatorium-mst-production
