@@ -28,17 +28,32 @@ IS_TEST_DATA="$3"
 DATAFILES_BUNDLE_BASENAME=$(basename ${DATAFILES_BUNDLE})
 DATAFILES_BUNDLE_DIR=$(dirname $(realpath -s ${DATAFILES_BUNDLE}))
 
-# write .env file
+# download master bundle
 MASTER_BRANCH_COMMIT_SHA=$(git rev-parse remotes/origin/master)
+MASTER_BUNDLE_FILE=${DATAFILES_BUNDLE_DIR}/master.json
+source $CURRENT_DIR/runners.sh
+echo "loading master bundle from s3://${AWS_S3_BUCKET}/bundle-archive/${MASTER_BRANCH_COMMIT_SHA}.json"
+download_s3 "${MASTER_BRANCH_COMMIT_SHA}" "${MASTER_BUNDLE_FILE}"
+if [ $? -ne 0 ]; then
+  export MASTER_BUNDLE_SHA256=""
+  INIT_BUNDLES="fs:///validate/${DATAFILES_BUNDLE_BASENAME}"
+  echo "unable to load master bundle... run qontract-server with only one bundle"
+  echo " * integration early exit dry-run disabled"
+  echo " * granular merge permissions disabled"
+else
+  export MASTER_BUNDLE_SHA256=$(sha256sum ${MASTER_BUNDLE_FILE} | awk '{print $1}')
+  INIT_BUNDLES="fs:///validate/master.json,fs:///validate/${DATAFILES_BUNDLE_BASENAME}"
+  echo "downloaded master branch bundle with SHA256 ${MASTER_BUNDLE_SHA256}"
+fi
+
+# write .env file
 cat <<EOF >${WORK_DIR}/.qontract-server-env
 AWS_S3_BUCKET=${AWS_S3_BUCKET}
 AWS_REGION=${AWS_REGION}
 AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
 AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-INIT_BUNDLES=fs:///validate/${DATAFILES_BUNDLE_BASENAME}
+INIT_BUNDLES=${INIT_BUNDLES}
 EOF
-
-echo "loading master from s3://bundle-archive/${MASTER_BRANCH_COMMIT_SHA}.json"
 
 # start graphql-server locally
 qontract_server=$(
@@ -66,8 +81,6 @@ if [ `uname -s` = 'Darwin' ]; then
 else
   CURL_IP=$IP
 fi
-
-source $CURRENT_DIR/runners.sh
 
 # Run integrations
 
