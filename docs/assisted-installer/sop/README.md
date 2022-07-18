@@ -166,3 +166,24 @@ When the process storing usage statistics fails, it might lead to restarts. Some
 ### Steps
 - Check why pod failed
 - Check pod logs for failure that triggered the restarts
+
+## Assisted Installer Events No CPU activity
+
+### Severity: Info
+
+### Impact
+Usage statistics stop updating
+
+### Summary
+Due to unknown issue(s), the process might "hang" and stop computing.
+We should find out what causes this and ultimately fix the root cause.
+
+### Access required
+
+- Access to the cluster that runs the assisted-events-scrape Pod
+- View access to the namespaces:
+  - assisted-installer
+
+### Steps
+- Check why pod is hanging
+- If unable to understand the reason within a reasonable time, restart the pod
