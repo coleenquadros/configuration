@@ -112,6 +112,24 @@ spec:
   ...
 ```
 
+## How to migrate Routes from openshift-acme to cert-manager-routes
+
+Two steps are required to migrate routes from openshift-acme to cert-manager:
+
+- Change route annotations to remove tls annotation and include cert-manager annotations.
+
+```yaml
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    cert-manager.io/issuer-kind: ClusterIssuer
+    cert-manager.io/issuer-name: letsencrypt-prod-http
+    kubernetes.io/tls-acme: "true" # <-- THIS LINE SHOULD BE REMOVED, IS NOT USED ANYMORE
+```
+
+- Remove openshift-acme deployment from the namespace [Example](https://gitlab.cee.redhat.com/service/app-interface/-/blob/88ca619f5363bc43f730fa5d34c6e50418d33f28/data/services/app-sre/cicd/ci-int/saas-openshift-acme.yaml#L72-L75)
+
 ## Additional Information
 
 - [cert-manager](https://cert-manager.io/)
