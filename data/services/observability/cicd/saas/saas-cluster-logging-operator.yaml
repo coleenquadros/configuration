@@ -1,0 +1,40 @@
+---
+$schema: /app-sre/saas-file-2.yml
+
+labels:
+  service: app-sre-observability
+
+name: saas-cluster-logging-operator
+description: saas-cluster-logging-operator
+
+app:
+  $ref: /services/observability/app.yml
+
+pipelinesProvider:
+  $ref: /services/app-interface/pipelines/tekton.app-sre-pipelines.appsrep05ue1.yaml
+
+slack:
+  workspace:
+    $ref: /dependencies/slack/coreos.yml
+  channel: sd-app-sre-info
+
+managedResourceTypes:
+- Subscription
+- ClusterLogging
+- ClusterLogForwarder
+
+imagePatterns:
+- quay.io/app-sre
+
+resourceTemplates:
+- name: cluster-logging-operator
+  path: /openshift/logging.template.yaml
+  url: https://gitlab.cee.redhat.com/service/app-sre-observability
+  targets:
+  - namespace:
+      $ref: /openshift/appsres04ue2/namespaces/openshift-logging.yaml
+    ref: master
+    parameters:
+      CLUSTER_LABEL: appsres04ue2
+      CLUSTER_AWS_REGION: us-east-2
+      AWS_SECRET_NAME: app-sre-logs-cloudwatch-access
