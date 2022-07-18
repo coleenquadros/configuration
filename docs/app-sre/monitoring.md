@@ -351,14 +351,7 @@ For those clusters that have a `-prometheus` and `-cluster-prometheus` datasourc
 
 In case of doubt, the [grafana datasources file](/resources/observability/grafana/grafana-datasources.secret.yaml) is the source of truth and the place to get all the details on every datasource. This file also includes templating of datasources for clusters managed by AppSRE. the templating information (list of clusters) can be found [here](/data/services/observability/shared-resources/grafana.yml).
 
-#### Adding a Postgres DB as a data source
-
-1. Submit a MR to app-interface to add a read replica for your RDS instance. Example: https://gitlab.cee.redhat.com/service/app-interface/-/blob/6f6e26253356a63853c9b4424a81bb5919f851b8/data/services/assisted-installer/namespaces/assisted-installer-production.yml#L90-98
-1. Once the MR is merged and the read replica is provisioned, submit another MR to add the read replica as a data source to Grafana. Example: https://gitlab.cee.redhat.com/service/app-interface/-/blob/6f6e26253356a63853c9b4424a81bb5919f851b8/resources/observability/grafana/grafana-datasources.secret.yaml#L1182-1198
-
-### Adding dashboards
-
-Setting the correct datasource:
+#### Setting the correct datasource
 
 Make sure you have a variable named `datasource` on each of your dashboards.
 All panels MUST query to this variable ($datasource). You can set this by editing the panel
@@ -378,13 +371,60 @@ Click Add.
 
 Next up, change all your panels to send queries to this datasource
 
-Since the Grafana instance is read-only, there is no 'save' button for the dashboard changes you make. In order to add a new dashboard, you should use the 'Grafana Playground' dashboard. The Grafana Playground dashboard has one instance each for each of the supported panels. You can duplicate the panels as many times as you'd like, and use the query view to add the graphs for desired metrics. Once that's done, export the dashboard as json, and send a pull requests to our dashboards configuration here: [link](https://gitlab.cee.redhat.com/service/app-interface/tree/master/resources/observability/grafana)
+#### Adding a Postgres DB as a data source
 
-Dashboards are injected into grafana as configmaps, to generate a configmap from an existing dashboard, use a command similar to:
+1. Submit a MR to app-interface to add a read replica for your RDS instance. Example: https://gitlab.cee.redhat.com/service/app-interface/-/blob/6f6e26253356a63853c9b4424a81bb5919f851b8/data/services/assisted-installer/namespaces/assisted-installer-production.yml#L90-98
+1. Once the MR is merged and the read replica is provisioned, submit another MR to add the read replica as a data source to Grafana. Example: https://gitlab.cee.redhat.com/service/app-interface/-/blob/6f6e26253356a63853c9b4424a81bb5919f851b8/resources/observability/grafana/grafana-datasources.secret.yaml#L1182-1198
+
+### Adding dashboards
+
+Since the Grafana instance is read-only, there is no 'save' button for the dashboard changes you make. In order to add a new dashboard, you should use the 'Grafana Playground' dashboard. The Grafana Playground dashboard has one instance each for each of the supported panels. You can duplicate the panels as many times as you'd like, and use the query view to add the graphs for desired metrics. Once that's done, export the dashboard as json.
+
+Dashboards are injected into grafana as ConfigMaps, to generate a ConfigMap from an existing dashboard, use a command similar to:
 
 `oc create configmap grafana-dashboard-<name_of_dashboard> --from-file=<dashboard_file.json> -o yaml --dry-run > grafana-dashboard-<name_of_dashboard>.configmap.yaml`
 
-Once the pull request is merged, the app-interface will automatically apply the configmap. No restart of the Grafana server deployment is needed.
+Once you have the dashboard ConfigMap, follow these instructions:
+
+* Add (or update) the dashboard file (a ConfigMap containing the json data) in your service code repository. The dashboards must be in a separate directory, such as `/dashboards`.
+  * Note: Each dashboard ConfigMap should have the following section under `metadata`:
+    ```yaml
+    labels:
+      grafana_dashboard: "true"
+    annotations:
+      grafana-folder: /grafana-dashboard-definitions/<app_name>
+    ```
+    * `app_name` should be defined in the [grafana dashboards ConfigMap](/resources/observability/grafana/grafana-dashboards.configmap.yaml)
+
+  * Note: [additional information](docs/app-sre/monitoring.md#Addingdashboards)
+
+* Add a `resourceTemplate` entry in the a saas file owned by you to deploy your dashboard in staging, e.g.
+  ```yaml
+  - name: your-service-dashboards
+    url: https://gitlab.cee.redhat.com/service-registry/your-service
+    path: /dashboards
+    provider: directory
+    targets:
+    - namespace:
+        $ref: /services/observability/namespaces/app-sre-observability-stage.yml
+      ref: master
+  ```
+  * Note: remember to add `ConfigMap` to the `managedResourceTypes` section.
+  * Note: with this configuration, every time you merge changes in your dashboard it will be deployed in stage. Read [this guide](/docs/app-sre/continuous-delivery-in-app-interface.md) to know more about saas files.
+
+* Once your MR is merged, your dashboard will be deployed to stage and will be accessible in https://grafana.stage.devshift.net. No restart of the Grafana server deployment is needed.
+
+* Add a new target in the above resource template to deploy to prod, e.g.
+  ```yaml
+  targets:
+  (...)
+  - namespace:
+      $ref: /services/observability/namespaces/app-sre-observability-production.yml
+    ref: <your-service-repo-commit-sha>
+  ```
+  * Note: with this configuration, you can promote changes to your dashboards along with the code changes that created them.
+
+
 
 In case you have any questions about adding a new dashboard, the App-SRE team can offer a best-effort support on walking you through the steps, but we hope that the documentation here is enough :)
 
