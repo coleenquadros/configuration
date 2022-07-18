@@ -45,6 +45,7 @@ On the GraphQL side, mixed types within a list need to be implemented with `inte
     strategy: schema
   fields:
   - { name: path, type: string, isRequired: true }
+  - { name: schema, type: string, isRequired: true }
 ```
 
 The `Role_v1` can then reference a list of `PathObjects_v1`.
@@ -66,6 +67,7 @@ This makes the owned resources queryable like this
     owned_resources {
       resource {
         path
+        schema
       }
     }
   }
@@ -81,6 +83,7 @@ Since this interface is fully integrated into the apollo type system at runtime,
     ownedresources {
       resource {
         path
+        schema
         ... on SaasFile_v2 {
           name
         }
