@@ -2286,43 +2286,7 @@ To get access to the project, if required, contact the App SRE team.
 
 ### Add a Grafana Dashboard
 
-* Add (or update) the dashboard file (a ConfigMap containing the json data) in your service code repository. The dashboards must be in a separate directory, such as `/dashboards`.
-  * Note: Each dashboard ConfigMap should have the following section under `metadata`:
-    ```yaml
-    labels:
-      grafana_dashboard: "true"
-    annotations:
-      grafana-folder: /grafana-dashboard-definitions/<app_name>
-    ```
-    * `app_name` should be defined in the [grafana dashboards ConfigMap](/resources/observability/grafana/grafana-dashboards.configmap.yaml)
-
-  * Note: [additional information](docs/app-sre/monitoring.md#Addingdashboards)
-
-* Add a `resourceTemplate` entry in the your service's saas file to deploy your dashboard in staging, e.g.
-  ```yaml
-  - name: your-service-dashboards
-    url: https://gitlab.cee.redhat.com/service-registry/your-service
-    path: /dashboards
-    provider: directory
-    targets:
-    - namespace:
-        $ref: /services/observability/namespaces/app-sre-observability-stage.yml
-      ref: master
-  ```
-  * Note: remember to add `ConfigMap` to the `managedResourceTypes` section.
-  * Note: with this configuration, every time you merge changes in your dashboard it will be deployed in stage. Read [this guide](/docs/app-sre/continuous-delivery-in-app-interface.md) to know more about saas files.
-
-* Once your MR is merged, your dashboard will be deployed to stage and will be accessible in https://grafana.stage.devshift.net.
-
-* Add a new target in the above resource template to deploy to prod, e.g.
-  ```yaml
-  targets:
-  (...)
-  - namespace:
-      $ref: /services/observability/namespaces/app-sre-observability-production.yml
-    ref: <your-service-repo-commit-sha>
-  ```
-  * Note: with this configuration, you can promote changes to your dashboards along with the code changes that created them.
+See [this guide](/docs/app-sre/monitoring.md#visualization-with-grafana) on how to create Grafana dashboards.
 
 
 ### Execute a SQL Query on an App Interface controlled RDS instance
